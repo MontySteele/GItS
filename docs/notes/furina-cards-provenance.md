@@ -1119,3 +1119,15 @@ Added on main 2026-08-31 (EB-258), merged into the diet 2026-09-01:
 ```
 # Promoted at Curtain Call (R85) -- see each card's own comment
 ```
+
+## endless_waltz (EB-412, 2026-09-07)
+
+```
+   # EB-412: the crescendo is printed FIRST so it stands before the two members it fields
+   # perform. Under the reframe a Deploy performs the member it fields at once, and the pair
+   # was joining at the unbumped number while a Companion play a beat later performed at +3.
+   # The replacement multiplier (SALON_REPLACE_NUMERIC_MULT) is a PRE-PLAY closed form in both
+   # engines -- C# `SalonMemberPower.ReplacementDelta` off `WillReplace`, the sim's
+   # `salon_will_replace_this_card` seeded at `resolve_card` start -- so the reorder costs it
+   # nothing and a full stage still doubles the 3.
+```

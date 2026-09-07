@@ -4827,7 +4827,7 @@ SALON_SCALED_VARS = {
 def _salon_calc_target(card: dict) -> tuple[dict, int, str, str] | None:
     """The ONE effect on a salon-deploy card whose printed number the
     replacement rule scales and which can render through a CalculatedVar:
-    (effect, deploys before it, var name, multiplier constant).
+    (effect, the card's deploy count, var name, multiplier constant).
 
     Only one, because `CalculatedDamageVar`, `CalculatedBlockVar` and the
     plain `CalculatedVar` all take their base term from the single
@@ -4837,28 +4837,51 @@ def _salon_calc_target(card: dict) -> tuple[dict, int, str, str] | None:
     keeps under-reporting, which is logged, not silently fixed).
 
     The deploy count must be STATIC: `WillReplace` is a closed form over the
-    pre-play company size plus the deploys this card runs first, so an
-    upgradeable deploy amount (a "PowerAmount" var on the deploy itself)
-    disqualifies the card rather than guessing.
+    pre-play company size plus the deploys this card runs, so an upgradeable
+    deploy amount (a "PowerAmount" var on the deploy itself) disqualifies the
+    card rather than guessing.
+
+    FOR AN x2 NUMERIC THE COUNT IS THE WHOLE CARD'S, not "the deploys
+    textually above this effect" (`EB-412`). `SALON_REPLACE_NUMERIC_MULT`'s
+    rule is "a deploy card's OTHER numerics", and a card that prints its buff
+    BEFORE its deploys -- which is what `EB-412` made Endless Waltz do, so the
+    buff stands before the members it fields perform -- is the same card asking
+    the same question. Reading only the deploys above would charge that
+    ordering a number, and the closed form is pre-play in both engines anyway
+    (C# captures the scaled value at the top of `OnPlay`, the sim seeds
+    `salon_will_replace_this_card` at `resolve_card` start).
+
+    A DAMAGE OR BLOCK NUMBER STILL WANTS A DEPLOY ABOVE IT, deliberately: the
+    x3 multiplier is left exactly where it was so this row moves no card's
+    damage. Curtain Rises prints its damage above its deploy and is not
+    `EB-412`'s card to reprice; `effects.salon_numerics_replaced` draws the
+    same line one engine over.
     """
     if not salon_deploy_card(card):
         return None
     effects = card.get("effects", [])
     deploys = 0
     for eff in effects:
+        if not (eff.get("op") == "apply_power"
+                and eff.get("power") == "salon_member"):
+            continue
+        if eff is power_upgrade_effect(card):
+            return None                  # deploy count is not static
+        amount = eff.get("amount", 1)
+        if not isinstance(amount, int):
+            return None
+        deploys += amount
+    above = 0
+    for eff in effects:
         op = eff.get("op")
         if op == "apply_power" and eff.get("power") == "salon_member":
-            if eff is power_upgrade_effect(card):
-                return None              # deploy count is not static
-            amount = eff.get("amount", 1)
-            if not isinstance(amount, int):
-                return None
-            deploys += amount
+            above += eff.get("amount", 1)
             continue
-        if deploys == 0:
-            continue                     # nothing has bowed yet: not scaled
         if op not in SALON_SCALED_VARS:
             continue
+        if (above == 0
+                and SALON_SCALED_VARS[op][1] == "ReplacementDamageMultiplier"):
+            continue                     # nothing has bowed yet: not scaled
         if op == "damage":
             # self-damage is unscaled; a card carrying its own rider would
             # need a compound multiplier (none exist -- salon cards are
@@ -4903,7 +4926,8 @@ def salon_calc_rider(card: dict, eff: dict) -> tuple[int, int, str, str] | None:
     """Furina Legibility sprint, Track L-A4 (salon half): the effect scaled by
     the Salon replacement rule, rendered through a CalculatedVar so the card
     face shows the bowed-in value instead of the unscaled print.
-    Returns (printed base, deploys before it, var name, multiplier constant).
+    Returns (printed base, the card's deploy count, var name, multiplier
+    constant).
 
     The multiplier calls `SalonMemberPower.ReplacementDelta`, which asks
     `SalonMemberPower.StageIsFull` -- the same predicate `Deploy`'s loop uses.

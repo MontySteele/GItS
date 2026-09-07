@@ -45,7 +45,7 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Waltz"),
-        ("description", "Add 1 [gold]Mademoiselle Crabaletta[/gold] and 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. [gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher."),
+        ("description", "[gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher. Add 1 [gold]Mademoiselle Crabaletta[/gold] and 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -67,9 +67,9 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
     {
         var salonReplacements = 0;
         var salonScaledPowerAmount = ((CalculatedVar)DynamicVars["PowerAmount"]).Calculate(null);
+        await PowerCmd.Apply<SalonDamageUpPower>(choiceContext, Owner.Creature, (int)salonScaledPowerAmount, applier: Owner.Creature, cardSource: this);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Crabaletta);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Usher);
-        await PowerCmd.Apply<SalonDamageUpPower>(choiceContext, Owner.Creature, (int)salonScaledPowerAmount, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

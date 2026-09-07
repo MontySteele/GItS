@@ -195,11 +195,12 @@
    effects: [{op: gain_fanfare_floor, amount: 8},
              {op: apply_power, power: fanfare_delta_block, amount: 1, target: self}]}
 - {id: endless_waltz, name: "Endless Waltz", register: salon, cost: 2, type: power, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [salon], role: payoff,
-   effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
-             {op: apply_power, power: salon_member, amount: 1, target: self, member: usher},
-             {op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: salon_damage_up, amount: 3, target: self},
+             {op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
+             {op: apply_power, power: salon_member, amount: 1, target: self, member: usher}]}
    # Named for her passive. The waltzing pair (hammer + shield, v2) and a standing crescendo — the Salon's rare
    # engine piece. Cost 3->2 at the rework reprice. PROPOSED pending red-pen.
+   # EB-412: the crescendo is printed FIRST (docs/notes/furina-cards-provenance.md).
 - {id: grand_gala, name: "Grand Gala", register: salon, cost: 2, type: skill, rarity: rare, solve: [block, frontload, scaling, sustain, utility, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [salon], role: enabler, exhaust: true, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
