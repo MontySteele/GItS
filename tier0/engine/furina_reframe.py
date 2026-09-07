@@ -134,7 +134,8 @@ OPENING_MEMBER = "crabaletta"     # R260 (`EB-553`): who is already on the
 
 # ----------------------------------------------------------------------
 # THE POOL SEAM (round 2 pick 1 at its default, 2026-09-04; widened by the
-# pool pass, `EB-493`, 2026-09-05). `{shipped id: prototype id}`, read by
+# pool pass, `EB-493`, 2026-09-05, and again by `EB-507` and the 2026-09-06
+# balance review). `{shipped id: prototype id}`, read by
 # `loader._pool_substitutions` under `FURINA_REFRAME` and nowhere else -- the
 # Kurage's Oath shape, one for one and at the SAME rarity, so the offer odds do
 # not move (`rewards.character_pool` refuses a substitution that would change a
@@ -179,6 +180,40 @@ POOL_SUBS: dict[str, str] = {
     "house_call": "proto_fr_curtain_rises",        # a Deploy on an Attack
     "dinner_service": "proto_fr_second_course",    # a priced 2nd performance
     "blocking_notes": "proto_fr_guest_list",       # a generator in the pool
+    # ---- `EB-507`: NO OFFERED FACE PROMISES FANFARE FROM ANYTHING BUT A
+    # PERFORMANCE (2026-09-06, the default this arm was built on and never
+    # applied to the offer surface). A THIRD ARGUMENT AT THE SAME SEAM, and
+    # the plainest of the three: the reframe's meter is minted by performing
+    # and Evoking, and `gain_fanfare_floor` mints it for BEING PLAYED. Three
+    # shipped Rares print that rider, so with the arm on the offer surface
+    # contradicts the arm's one sentence about where Fanfare comes from.
+    #
+    # TWO OF THEM ARE A BODY PLUS THE RIDER, and the arm carries the body:
+    # Rapturous Applause's per-10 Attack scaling (at 2 rather than the shipped
+    # 1, because the copy pays for the floor it no longer mints) and Unheard
+    # Confession's Block-per-change, both otherwise printed as shipped.
+    #
+    # THE THIRD IS NOTHING BUT THE RIDER. `the_sea_is_my_stage` is one
+    # `gain_fanfare_floor 15` and no body at all, so there is no copy to make
+    # -- what it has is a Rare slot, and the arm spends it on its own Rare
+    # DRAIN (`proto_fr_let_the_people_rejoice`, which until now was granted
+    # from a scenario and offered by nothing). Rare for Rare, like the pairs
+    # above it.
+    "rapturous_applause": "proto_fr_rapturous_applause",   # body, no floor
+    "unheard_confession": "proto_fr_unheard_confession",   # body, no floor
+    "the_sea_is_my_stage": "proto_fr_let_the_people_rejoice",  # rider -> drain
+    # ---- THE 2026-09-06 UPGRADE ADJUSTMENTS (the GPT balance review and the
+    # second-wave read of the same day, the main session's D defaults). Neither
+    # moves a base face. Florid Cadenza's copy upgraded by DELETING its gate,
+    # which made a 0-cost draw-3 with nothing asked; it now MOVES the bar
+    # 6 -> 3, so the `+` card still asks the arm's question at a bar an opening
+    # turn can reach -- and the copy EXHAUSTS, because a 0-cost draw whose gate
+    # depletes nothing is the same hold-the-deck loop at 3 as at 6.
+    # Shared Billing's shipped upgrade is `cost: -1`, and a card that refunds
+    # its own Energy at 0 is a free play handed out at every campfire; the arm
+    # copy buys 3 Block instead, which is neither energy nor draw. Both are the
+    # same copy-and-swap shape as the four riders at the top of this map.
+    "shared_billing": "proto_fr_shared_billing",   # +block, not +free
 }
 # ROLLING TIDE WAS WITHDRAWN (`EB-552`, round 13, a D default). The kit's own
 # perform verb on a draftable row was read once at 2 energy and once at 1, by

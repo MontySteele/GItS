@@ -247,11 +247,16 @@ def test_the_count_is_the_drain_and_not_the_meter():
     assert st.player.block == 7
 
 
-def test_the_rare_pays_its_base_plus_one_per_point_drained():
-    """The Rare's own shape: `base 5, per 1`. At 6 held that is 11 to ALL
-    enemies, and at 0 held it is the printed 5 -- the card is never dead, it is
-    only small, which is the whole of "playable at any Fanfare value"."""
-    for held, expect in ((6, 11), (0, 5)):
+def test_the_rare_pays_its_base_plus_two_per_point_drained():
+    """The Rare's own shape: `base 5, per 2` (the slope doubled in the
+    second-wave review of 2026-09-06). At 6 held that is 17 to ALL enemies, and
+    at 0 held it is the printed 5 -- the card is never dead, it is only small,
+    which is the whole of "playable at any Fanfare value".
+
+    THE RAIL, on a literal formula. The same numbers read off the ROW itself
+    are `test_furina_reframe_pool`'s, so a slope that moved on the sheet and
+    not here (or the reverse) fails on one side and not the other."""
+    for held, expect in ((6, 17), (0, 5)):
         enemy = make_enemy(hp=300)
         st = furina_state(enemies=[enemy])
         resources.gain_fanfare(st, held, "fixture")
@@ -259,7 +264,7 @@ def test_the_rare_pays_its_base_plus_one_per_point_drained():
         effects.resolve_card(st, _card([
             {"op": "drain_fanfare"},
             {"op": "damage",
-             "amount_formula": {"base": 5, "per": 1, "count": "fanfare_drained"},
+             "amount_formula": {"base": 5, "per": 2, "count": "fanfare_drained"},
              "target": "all_enemies"},
         ], type="attack"))
 

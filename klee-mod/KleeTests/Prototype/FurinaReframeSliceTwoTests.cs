@@ -10,7 +10,9 @@ using KleeMod.Cards.Prototype.Generated;
 using FurinaGen = KleeMod.Cards.Furina.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
@@ -629,6 +631,48 @@ public class FurinaReframeSliceTwoTests
             new ProtoFrUniversalRevelry().Rarity);
         Assert.Equal(new FurinaGen.FloodOfEmotion().Rarity,
             new ProtoFrFloodOfEmotion().Rarity);
+        // `EB-507`'s three and the balance review's one, on the same claim.
+        // The Sea Is My Stage is the odd pair -- it has no body to copy, so
+        // its Rare slot goes to the arm's own Rare drain -- and it is exactly
+        // the pair a rarity slip would ride in on.
+        Assert.Equal(new FurinaGen.SharedBilling().Rarity,
+            new ProtoFrSharedBilling().Rarity);
+        Assert.Equal(new FurinaGen.RapturousApplause().Rarity,
+            new ProtoFrRapturousApplause().Rarity);
+        Assert.Equal(new FurinaGen.UnheardConfession().Rarity,
+            new ProtoFrUnheardConfession().Rarity);
+        Assert.Equal(new FurinaGen.TheSeaIsMyStage().Rarity,
+            new ProtoFrLetThePeopleRejoice().Rarity);
+    }
+
+    [Fact]
+    public void No_row_the_arm_offers_promises_Fanfare_for_being_played()
+    {
+        // `EB-507`'s acceptance condition in the mod, read off the compiled
+        // bodies: `FurinaResources.GainFanfareFloor` is the mint-for-being-
+        // played the arm does not have, three shipped Rares call it, and none
+        // of the rows this arm puts in their slots may. Structural for this
+        // harness's usual reason -- `ModelDb.Card<T>()` throws until the
+        // game's pool build has run -- and read the SHIPPED side too, so a
+        // green here cannot mean the call simply moved somewhere else.
+        foreach (var type in new[]
+                 {
+                     "ProtoFrRapturousApplause", "ProtoFrUnheardConfession",
+                     "ProtoFrLetThePeopleRejoice", "ProtoFrSharedBilling",
+                 })
+        {
+            Assert.DoesNotContain("FurinaResources.GainFanfareFloor",
+                Il.Calls(Il.Method(type, "OnPlay")));
+        }
+
+        foreach (var type in new[]
+                 {
+                     "RapturousApplause", "UnheardConfession", "TheSeaIsMyStage",
+                 })
+        {
+            Assert.Contains("FurinaResources.GainFanfareFloor",
+                Il.Calls(Il.Method(type, "OnPlay")));
+        }
     }
 
     [Fact]
@@ -649,17 +693,161 @@ public class FurinaReframeSliceTwoTests
             Bar("ProtoFrFloridCadenza"), Bar("ProtoFrDramaticEntrance"),
             Bar("ProtoFrUniversalRevelry"), Bar("ProtoFrFloodOfEmotion"),
         });
+
+        // AND THE ONE BAR THAT MOVES AT THE SMITH (2026-09-06). Florid
+        // Cadenza's copy upgraded by DELETING its gate, which is a 0-cost
+        // draw-3 asking nothing; the `+` card now asks the same question at 3.
+        // Read off the face, like the bars above it: the row prints both
+        // numbers through one {IfUpgraded:show:...} token, so the printed gate
+        // and the upgraded one cannot drift apart in the source either.
+        Assert.Equal("3", Bar("ProtoFrFloridCadenza", upgraded: true));
+        Assert.Equal("6", Bar("ProtoFrFloridCadenza"));
     }
 
-    /// <summary>The Fanfare threshold a row prints: the number after "at
-    /// least" in its emitted description.</summary>
-    private static string Bar(string type)
+    // ---- the second-wave review (2026-09-06), three more re-priced rows --
+
+    [Fact]
+    public void The_cadenza_copy_exhausts_and_the_shipped_row_does_not()
     {
-        var face = string.Join(" ", Il.Strings(
-            Il.Method(type, "get_Localization")));
+        // WHAT THE MOVED BAR DID NOT FIX. A 0-cost draw whose gate does not
+        // DEPLETE anything is a hold-the-rest-of-the-deck loop -- three copies,
+        // a hand cap of 10, the overflow to discard -- and it is the same loop
+        // at 3 as at 6, so the smith-side fix above was only half the answer.
+        // Exhaust makes each copy a one-shot, which is the half that closes it.
+        Assert.Contains(CardKeyword.Exhaust,
+            new ProtoFrFloridCadenza().CanonicalKeywords);
+        Assert.DoesNotContain(CardKeyword.Exhaust,
+            new FurinaGen.FloridCadenza().CanonicalKeywords);
+
+        // AND THE FACE DOES NOT WRITE THE WORD (`EB-293`): the keyword above is
+        // what the game's own rail prints the banner from, so a face that said
+        // it too would print it twice. The sheet's sentence keeps it and the
+        // emitted face drops it.
+        Assert.DoesNotContain("Exhaust", Face("ProtoFrFloridCadenza"));
+    }
+
+    [Fact]
+    public void The_drain_pays_five_plus_two_per_Fanfare_drained()
+    {
+        // The `CalculatedDamageVar` TRIPLE, read off the row: the base is the
+        // floor an empty meter pays, the extra is the per-Fanfare slope, and
+        // the multiplier is the drained count (pinned as a call token by
+        // `The_two_drain_rows_read_the_drain_and_never_the_meter`).
+        //
+        // WHY THE SLOPE IS 2. At 1 the Rare never out-damaged Universal
+        // Revelry's arm copy anywhere in the meter's measured 0-to-15 range,
+        // and it emptied the meter to do it -- so it paid twice and bought
+        // nothing.
+        var vars = Vars(new ProtoFrLetThePeopleRejoice());
+        Assert.Equal(5m, vars.Single(v => v.Name == "CalculationBase").BaseValue);
+        Assert.Equal(2m, vars.Single(v => v.Name == "ExtraDamage").BaseValue);
+        Assert.Contains(vars, v => v.Name == "CalculatedDamage");
+    }
+
+    [Fact]
+    public void Shared_Billings_arm_upgrade_buys_Block_and_never_a_card()
+    {
+        // A Common that already REFUNDS its Energy and then replaces itself is
+        // the same loop piece the shipped `{cost: -1}` was taken off for, so
+        // the first pass's added draw bought back what it had just sold. Block
+        // is neither energy nor draw. Read off the face and off the compiled
+        // body, because the two have to agree: the sentence appears only on the
+        // `+` card and so does the effect.
+        var face = Face("ProtoFrSharedBilling");
+        Assert.Contains("{IfUpgraded:show:Gain 3 [gold]Block[/gold].|}", face);
+        Assert.DoesNotContain("Draw", face);
+
+        var calls = Il.Calls(Il.Method("ProtoFrSharedBilling", "OnPlay"));
+        Assert.Contains("CreatureCmd.GainBlock", calls);
+        Assert.DoesNotContain("CardPileCmd.Draw", calls);
+
+        // `EB-122`: the base card must not CLAIM the Block its upgrade buys --
+        // the eligibility predicates read `GainsBlock`, so an unupgraded copy
+        // saying yes would be a split the moment it shipped.
+        Assert.False(new ProtoFrSharedBilling().GainsBlock);
+        var upgraded = new ProtoFrSharedBilling();
+        Seat.Set(upgraded, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(upgraded, new object?[] { });
+        Assert.True(upgraded.GainsBlock);
+    }
+
+    [Fact]
+    public void The_applause_copy_halves_the_bar_and_keeps_the_slope()
+    {
+        // AN ARM COPY MOVES A THRESHOLD AND NEVER A PAYOUT (2026-09-07). The
+        // first pass paid for the floor `EB-507` removed by doubling the
+        // printed number -- 2 per 10 -- which is twice the shipped card at 20
+        // Fanfare and nothing at all below 10. The mapping every other copy
+        // here uses is the threshold's: the arm's meter runs 0 to 15 where the
+        // shipped one runs 20 to 30, so the bar halves and the slope stands.
+        // Read off the face AND off the compiled body, which have to agree,
+        // and off the shipped row too, so a green cannot mean the clause
+        // simply moved.
+        Assert.Contains("additional damage per 5 [gold]Fanfare[/gold]",
+            Face("ProtoFrRapturousApplause"));
+        Assert.Contains("additional damage per 10 [gold]Fanfare[/gold]",
+            Face("RapturousApplause"));
+
+        // `CallSequence` and not `Calls`: the power applied is the call's TYPE
+        // ARGUMENT, and only the sequence reader names one.
+        Assert.Contains("PowerCmd.Apply<FanfareAttackPer5Power>",
+            Il.CallSequence(Il.Method("ProtoFrRapturousApplause", "OnPlay")));
+        Assert.Contains("PowerCmd.Apply<FanfareAttackPer10Power>",
+            Il.CallSequence(Il.Method("RapturousApplause", "OnPlay")));
+
+        // ... and the payout it applies is the shipped 1.
+        Assert.Equal(1m, Vars(new ProtoFrRapturousApplause())
+            .Single(v => v.Name == "PowerAmount").BaseValue);
+    }
+
+    [Fact]
+    public void The_confession_copy_pays_two_Block_per_change()
+    {
+        // The payout reads a change EVENT and not the points that moved, which
+        // is why the first pass left it at the shipped 1 -- and is also why 1
+        // is not a Rare's payout: a 2-cost Rare Power paying 1 Block per tick
+        // of a meter that ticks a few times a turn is a dead card. The face is
+        // the number, and it is the only place this row states one.
+        Assert.Contains("gain 2 [gold]Block[/gold]",
+            Face("ProtoFrUnheardConfession"));
+        // ... and the shipped Rare is untouched, at its own 1 (R213 B).
+        Assert.Contains("gain 1 [gold]Block[/gold]", Face("UnheardConfession"));
+    }
+
+    /// <summary>A row's emitted face, joined: every string literal in its
+    /// generated `Localization` property, which is where an authored face
+    /// lands (`EB-215`).</summary>
+    private static string Face(string type) =>
+        string.Join(" ", Il.Strings(Il.Method(type, "get_Localization")));
+
+    /// <summary>A card's declared `CanonicalVars`, which is where a
+    /// `Calculated*Var` triple's two numbers are written.</summary>
+    private static IReadOnlyList<DynamicVar> Vars(CardModel card) =>
+        ((IEnumerable<DynamicVar>)typeof(CardModel)
+            .GetProperty("CanonicalVars", HeadlessGame.All)!
+            .GetValue(card)!).ToList();
+
+    /// <summary>The Fanfare threshold a row prints: the number after "at
+    /// least" in its emitted description, on the base card or (with
+    /// <paramref name="upgraded"/>) on the `+` one.
+    ///
+    /// A ROW MAY PRINT BOTH. A bar-moving upgrade renders its two thresholds
+    /// as one {IfUpgraded:show:up|base} token, which is the same string the
+    /// game swaps at runtime -- so both readings come off the same face and
+    /// neither is a number this test carries.</summary>
+    private static string Bar(string type, bool upgraded = false)
+    {
+        var face = Face(type);
         var hit = System.Text.RegularExpressions.Regex.Match(
-            face, @"at least (\d+) \[gold\]Fanfare");
+            face,
+            @"at least (?:\{IfUpgraded:show:(\d+)\|(\d+)\}|(\d+)) \[gold\]Fanfare");
         Assert.True(hit.Success, $"{type} prints no Fanfare bar: {face}");
-        return hit.Groups[1].Value;
+        var swapped = hit.Groups[1].Success;
+        if (!swapped)
+        {
+            return hit.Groups[3].Value;
+        }
+        return upgraded ? hit.Groups[1].Value : hit.Groups[2].Value;
     }
 }

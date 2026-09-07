@@ -1403,6 +1403,69 @@ def predicate_cs(name: str) -> str | None:
     return PREDICATES_CS.get(name)
 
 
+#: A METER BAR, family-blind: `<meter>_at_least_<N>`. The families themselves
+#: are tabled one regex at a time above, because each knows which bank it
+#: reads; this one is used only by the bar-MOVING upgrade, whose rule is that
+#: the two bars agree about the meter -- a question that needs the split and
+#: not the bank.
+_MOVED_BAR = re.compile(r"^(.+)_at_least_(\d+)$")
+#: The tail of a threshold read, so the number can be swapped for a ternary
+#: without this file learning a second spelling of any bank expression.
+_THRESHOLD_TAIL = re.compile(r"^(.*>= )(\d+)$")
+
+
+def moved_bar_predicate_cs(printed: str, upgraded: str) -> str | None:
+    """`bank >= (IsUpgraded ? up : base)` for a bar-moving upgrade, or None.
+
+    ONE COMPARISON AND NOT TWO, which is what keeps the emitted card honest
+    about the rule: the gate is still there on the `+` card, it just asks for
+    less. `condition: unconditional`'s emission is deliberately the other
+    shape (`IsUpgraded || pred`), because that upgrade DELETES the gate.
+
+    Both expressions come out of `predicate_cs`, so a meter's bank is spelled
+    once in this file and neither bar can invent a second reading of it. None
+    when either side is not a threshold read or the two read different banks;
+    the caller turns that into a blocked upgrade.
+    """
+    base_cs = predicate_cs(printed)
+    up_cs = predicate_cs(upgraded)
+    lhs = _THRESHOLD_TAIL.match(base_cs or "")
+    rhs = _THRESHOLD_TAIL.match(up_cs or "")
+    if not lhs or not rhs or lhs.group(1) != rhs.group(1):
+        return None
+    return f"{lhs.group(1)}(IsUpgraded ? {rhs.group(2)} : {lhs.group(2)})"
+
+
+def _bar_swap_text(printed: str | None, upgraded: str | None) -> str | None:
+    """One if-clause printing both bars, or None if they differ by more than
+    the threshold.
+
+    "If you have at least 6 [gold]Fanfare[/gold]" and its 3 twin come out of
+    the same `predicate_text` template, so the difference between them IS the
+    number: the common head and tail are kept and `{IfUpgraded:show:up|base}`
+    is spliced between them. Written as a diff rather than as a per-meter
+    pattern because the templates are not all shaped alike (the exhaust pile's
+    reads "If N or more cards are ..."), and a template this had to restate
+    would be a second place the face is authored.
+    """
+    if not printed or not upgraded or "|" in printed or "|" in upgraded:
+        return None
+    head = 0
+    while (head < min(len(printed), len(upgraded))
+           and printed[head] == upgraded[head]):
+        head += 1
+    tail = 0
+    while (tail < min(len(printed), len(upgraded)) - head
+           and printed[-1 - tail] == upgraded[-1 - tail]):
+        tail += 1
+    base_mid = printed[head:len(printed) - tail]
+    up_mid = upgraded[head:len(upgraded) - tail]
+    if not base_mid.isdigit() or not up_mid.isdigit():
+        return None
+    return (printed[:head] + "{IfUpgraded:show:" + up_mid + "|" + base_mid
+            + "}" + printed[len(printed) - tail:])
+
+
 def predicate_text(name: str) -> str | None:
     """The if-clause the predicate renders on the card face."""
     name = name or ""
@@ -2462,6 +2525,11 @@ APPLY_POWERS = {
         "gain each turn."),
     "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
         "Your Attacks deal {X} additional damage per 10 [gold]Fanfare[/gold]."),
+    # The reframe arm's copy of the row above, at the arm's granularity: a
+    # meter that ranges 0-15 reads the shipped 20-30 meter's clause with its
+    # THRESHOLD halved, so the payout stays 1 and the bar becomes 5.
+    "fanfare_attack_per5": ("FanfareAttackPer5Power", None,
+        "Your Attacks deal {X} additional damage per 5 [gold]Fanfare[/gold]."),
     # B5 (2026-07-28): the face NAMES the member and says nothing else. The
     # member's act, its bow, and the cap rules moved to hover tips
     # (SalonMemberTips) -- eight cards were reprinting one paragraph that
@@ -2770,10 +2838,18 @@ HAND_WRITTEN_ROSTER = {"let_the_people_rejoice", "ceremonial_garment"}
 #                  upgrades.py bumps first damage|block in then; codegen
 #                  expresses the damage form via the ExtraDamage var and
 #                  flags a then-block card as structural)
-#   condition   -> "unconditional" only: tier0 hoists the then-branch out of
-#                  the conditional; C# reads (IsUpgraded || pred) at play and
-#                  swaps the text via {IfUpgraded:show:...|...} (the runtime
-#                  form BaseLib's SimpleLoc generates for upgrade swaps)
+#   condition   -> TWO SPELLINGS, and they differ in what the upgrade does to
+#                  the gate. "unconditional": tier0 hoists the then-branch out
+#                  of the conditional; C# reads (IsUpgraded || pred) at play
+#                  and swaps the text via {IfUpgraded:show:...|...} (the
+#                  runtime form BaseLib's SimpleLoc generates for upgrade
+#                  swaps). A METER BAR (`fanfare_at_least_3`): tier0 rewrites
+#                  the top-level conditional's `if:` to that bar, and C# reads
+#                  `bank >= (IsUpgraded ? up : base)` -- the gate MOVES rather
+#                  than going away, so the upgraded card still asks the
+#                  question at a bar the run can reach earlier. Both bars are
+#                  authored (the printed one on the row, the upgraded one on
+#                  the delta) and must read the same meter.
 #   bombs       -> X-cost bomb count: X_plus_N -> X_plus_(N+val) in tier0;
 #                  codegen renders "X+{Bombs:diff()}" off a Bombs var
 #   conditional_block / conditional_damage -> EB-140. tier0 bumps EVERY
@@ -6106,7 +6182,45 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                     "not print at top level (sheet/card mismatch)")
             continue
         if key == "condition" and value != "unconditional":
-            return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
+            # The bar-moving spelling (2026-09-06). Everything it needs is on
+            # the card: a top-level conditional whose predicate reads the SAME
+            # meter, so the pair renders as one comparison with an IsUpgraded
+            # threshold. Both halves are checked here rather than at emission,
+            # because an upgrade the emitter cannot express must be a blocked
+            # card and never a silently dropped campfire (tier0's applier
+            # raises on the same two conditions).
+            up_bar = _MOVED_BAR.match(str(value))
+            if not up_bar:
+                return {}, (
+                    f"delta 'condition: {value}' (only 'unconditional' or a "
+                    "meter bar predicate is tier0 grammar)")
+            printed = [c for c in non_repeat_conditionals
+                       if _MOVED_BAR.match(str(c.get("if", "")))]
+            if not printed:
+                return {}, (
+                    f"delta 'condition: {value}' on a card that prints no "
+                    "top-level meter bar to move (sheet/card mismatch)")
+            if len(printed) > 1:
+                # ONE BAR, ONE OWNER, the rule every key here keeps. tier0's
+                # applier rewrites the FIRST matching conditional and the
+                # emitter would rewrite every one of them, so a second printed
+                # bar is two engines upgrading different numbers -- reported as
+                # structural rather than half-applied (R24).
+                return {}, (
+                    f"delta 'condition: {value}' on a card printing "
+                    f"{len(printed)} top-level meter bars (structural "
+                    "upgrade: which bar moves is not stated)")
+            base_bar = _MOVED_BAR.match(printed[0]["if"])
+            if base_bar.group(1) != up_bar.group(1):
+                return {}, (
+                    f"delta 'condition: {value}' reads a different meter from "
+                    f"the printed {printed[0]['if']!r} (an upgrade moves a "
+                    "bar; it does not change the question)")
+            if moved_bar_predicate_cs(printed[0]["if"], value) is None:
+                return {}, (
+                    f"delta 'condition: {value}' has no C# comparison to move "
+                    f"(predicate {printed[0]['if']!r} is not a threshold read)")
+            continue
         if key == "remove":
             # Both removable values name a base-card KEYWORD FIELD of the same
             # name, so the presence check is the field lookup. Owned here
@@ -6438,6 +6552,15 @@ def condition_upgrade(card: dict) -> bool:
     runs the then-branch always. C#: predicate reads (IsUpgraded || pred);
     text swaps via {IfUpgraded:show:...|...}."""
     return upgrade_plan(card)[0].get("condition") == "unconditional"
+
+
+def condition_bar_upgrade(card: dict) -> str | None:
+    """Ruled `condition: <meter bar>`, or None: the upgraded card asks the
+    SAME question at a lower bar. Expressibility is gated in `upgrade_plan`,
+    so a non-None answer here is emittable. C#: one comparison whose threshold
+    is `(IsUpgraded ? up : base)` -- see `moved_bar_predicate_cs`."""
+    ruled = upgrade_plan(card)[0].get("condition")
+    return ruled if ruled and ruled != "unconditional" else None
 
 
 def branch_draw_vars(card: dict) -> tuple[str, str]:
@@ -8776,6 +8899,13 @@ def build_body(
                     # condition: unconditional (tier0 hoists the then-branch
                     # on upgrade) -- the upgraded card runs it always.
                     pred = f"IsUpgraded || {pred}"
+                elif condition_bar_upgrade(card) and _MOVED_BAR.match(
+                        str(eff["if"])):
+                    # condition: <meter bar> (tier0 rewrites this `if:` on
+                    # upgrade) -- the gate STAYS and its threshold moves, so
+                    # the emission is one comparison rather than a disjunction.
+                    pred = moved_bar_predicate_cs(
+                        eff["if"], condition_bar_upgrade(card))
                 cb_state = {"pending": conditional_bonus_upgrade(card) > 0}
                 then_lines: list[str] = []
                 for e in then:
@@ -10480,6 +10610,26 @@ def build_description(card: dict, *,
                             "text contains '|' -- cannot nest in "
                             "{IfUpgraded:show:...}.")
                     clause = "{IfUpgraded:show:" + upgraded + "|" + clause + "}"
+                elif condition_bar_upgrade(card) and _MOVED_BAR.match(
+                        str(eff["if"])):
+                    # THE BAR MOVES, SO THE BAR IS THE ONLY THING THAT SWAPS.
+                    # `unconditional` above swaps the WHOLE clause because the
+                    # upgraded card says something else; here it says the same
+                    # sentence with a different number, and swapping the
+                    # sentence would print the gate twice for one changed
+                    # digit. The two if-clauses come out of `predicate_text`
+                    # and differ only where the threshold is, so the swap is
+                    # spliced at that difference rather than searched for by
+                    # a per-meter template this file would have to keep.
+                    swapped = _bar_swap_text(
+                        pred_txt, predicate_text(condition_bar_upgrade(card)))
+                    if swapped is None or "|" in clause:
+                        raise SystemExit(
+                            f"gen_klee_cards: {card['id']}: condition-bar "
+                            "face cannot be spliced -- the two if-clauses "
+                            "differ by more than their threshold, or the "
+                            "clause contains '|'.")
+                    clause = swapped + clause[len(pred_txt):]
                 parts.append(clause)
 
         elif op == "choose_one":
@@ -11066,7 +11216,11 @@ def build_upgrade(card: dict) -> list[str]:
                 else f'DynamicVars["{name}"].UpgradeValueBy({d}m);')
     if "condition" in deltas:
         done.add("condition")
+        moved = condition_bar_upgrade(card)
         lines.append(
+            f"// condition: {moved} -- the printed gate stays and its "
+            "threshold is read at play time as (IsUpgraded ? up : base)."
+            if moved else
             "// condition: unconditional -- expressed at play time as "
             "(IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.")
     if "kit_spark" in deltas:

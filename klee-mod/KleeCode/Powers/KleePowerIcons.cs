@@ -205,6 +205,12 @@ internal static class KleePowerIcons
         HexhunterChimePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         HeraldOfFrostPower => KleePck.Path("klee/powers/oz_summon.png"),
         YueguiPower => KleePck.Path("klee/powers/oz_summon.png"),
+        // THE FURINA REFRAME'S RAPTUROUS APPLAUSE COPY, on the same terms as
+        // every borrow above: the arm copy is the shipped clause at a halved
+        // threshold, so it wears the shipped power's own sigil rather than
+        // asking for art a prototype may not keep.
+        FanfareAttackPer5Power =>
+            KleePck.Path("furina/powers/rising_ovation.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

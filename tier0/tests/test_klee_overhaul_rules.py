@@ -2338,13 +2338,36 @@ def test_bombs_away_hits_and_places_on_every_enemy(overhaul):
     assert sizes(a) == [2] and sizes(b) == [2]
 
 
-# --- Long Fuse: the rising hand cost ---------------------------------------
+# --- The rising hand cost: a synthetic row ---------------------------------
+#
+# NO SHEET ROW CARRIES `rising_cost:` any more. Long Fuse was the one, and the
+# comparison pass of 2026-09-06 took the escalation off it -- three seat
+# readings against "Retain plus an escalating cost", in
+# `review/active/klee-pool-comparison-pass-2026-09-06.md` sec.3 item 1.
+# THE RULE STAYS WIRED in both engines (`klee_overhaul.roll_rising_costs`, the
+# `card_cost` addend, the `_finish_play` clear, `run_fight`'s per-combat
+# zeroing; C#: `IRisingHandCostCard` and `KleeOverhaulRisingCost.RollHand`), so
+# it stays covered -- through a probe built here rather than through a card,
+# which is the honest instrument for machinery no row prints. C# twin:
+# `PoolPassThreeTests.The_fuse_burns_at_the_end_of_klees_turn_and_only_in_hand`,
+# structural for its own reasons.
 
-def test_long_fuse_costs_one_more_for_every_turn_it_is_held(overhaul):
+
+def fuse(cid="proto_ko_fuse_probe", rise=1):
+    """A synthetic rising-cost row: Retained, and dearer per turn held. Nothing
+    loads it through the sheet, exactly like every other `probe`."""
+    card = probe([{"op": "damage", "amount": 6, "target": "enemy"}],
+                 cid=cid, cost=1)
+    card.retain = True
+    card.rising_cost = rise
+    return card
+
+
+def test_a_rising_cost_card_costs_one_more_for_every_turn_it_is_held(overhaul):
     """"Costs 1 more each turn it stays in your hand." NEVER DOWNWARD, and it
     accumulates: the base game's `AddUntilPlayed` in this engine's spelling."""
     state = klee_state([make_enemy(hp=200)])
-    card = load("proto_ko_long_fuse")
+    card = fuse()
     state.player.hand.append(card)
     assert combat.card_cost(state, card) == 1
 
@@ -2354,11 +2377,11 @@ def test_long_fuse_costs_one_more_for_every_turn_it_is_held(overhaul):
     assert combat.card_cost(state, card) == 3
 
 
-def test_long_fuse_burns_only_while_it_is_in_hand(overhaul):
+def test_a_rising_cost_burns_only_while_it_is_in_hand(overhaul):
     """A card in the draw pile is not staying in your hand, so its fuse does
     not burn."""
     state = klee_state([make_enemy(hp=200)])
-    card = load("proto_ko_long_fuse")
+    card = fuse()
     state.player.draw_pile.append(card)
 
     klee_overhaul.turn_end(state)
@@ -2366,12 +2389,12 @@ def test_long_fuse_burns_only_while_it_is_in_hand(overhaul):
     assert card.rising_cost_risen == 0
 
 
-def test_long_fuse_resets_when_it_is_played(overhaul):
+def test_a_rising_cost_resets_when_the_card_is_played(overhaul):
     """The `AfterCardPlayedCleanup` half: "each turn it stays in your hand"
     stops being true the moment it leaves, so the accumulated modifier goes."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
-    card = load("proto_ko_long_fuse")
+    card = fuse()
     state.player.hand.append(card)
     klee_overhaul.turn_end(state)
     klee_overhaul.turn_end(state)
@@ -2385,11 +2408,12 @@ def test_long_fuse_resets_when_it_is_played(overhaul):
     assert combat.card_cost(state, card) == 1
 
 
-def test_long_fuse_two_copies_burn_separately(overhaul):
+def test_two_rising_cost_cards_burn_separately(overhaul):
     """The fuse is the CARD's and not the board's: a copy drawn a turn later is
     a turn behind."""
     state = klee_state([make_enemy(hp=200)])
-    first, second = load("proto_ko_long_fuse"), load("proto_ko_long_fuse")
+    first, second = fuse(cid="proto_ko_fuse_first"), fuse(
+        cid="proto_ko_fuse_second")
     state.player.hand.append(first)
     klee_overhaul.turn_end(state)
     state.player.hand.append(second)
@@ -2399,13 +2423,32 @@ def test_long_fuse_two_copies_burn_separately(overhaul):
     assert combat.card_cost(state, second) == 2
 
 
-def test_long_fuse_is_retained_and_the_fuse_is_why(overhaul):
-    """The row prints Retain on the keyword rail, and `blocked_reason` refuses
-    a rising cost without it: a card discarded at end of turn can never stay in
-    your hand, so the fuse would print a rule that cannot fire."""
+def test_a_card_with_no_fuse_never_burns(overhaul):
+    """`rising_cost <= 0` is the roller's whole filter, and it is what makes
+    the walk free on every hand in the game: the field is 0 on every row on
+    every sheet since the escalation came off Long Fuse."""
+    state = klee_state([make_enemy(hp=200)])
+    plain = probe([], cid="proto_ko_plain_fuse", ctype="skill", cost=1)
+    plain.retain = True
+    state.player.hand.append(plain)
+
+    klee_overhaul.turn_end(state)
+    klee_overhaul.turn_end(state)
+
+    assert plain.rising_cost_risen == 0
+    assert combat.card_cost(state, plain) == 1
+
+
+def test_long_fuse_retains_and_no_longer_escalates(overhaul):
+    """THE ROW, as adjusted on the comparison pass of 2026-09-06: Retain stays
+    -- it is the whole point of the card, and Pocket Match's twin one Energy
+    over -- and the escalation the three seats read as the reason not to keep
+    the card is off. The face is pinned on the C# side
+    (`PoolPassThreeTests.Long_fuse_retains_and_prints_no_escalation`); the sim
+    Card carries no face at all."""
     card = load("proto_ko_long_fuse")
     assert card.retain is True
-    assert card.rising_cost == 1
+    assert card.rising_cost == 0
 
 
 # --- The Vermillion Pact ---------------------------------------------------

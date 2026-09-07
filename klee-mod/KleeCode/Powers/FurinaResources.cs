@@ -1540,6 +1540,47 @@ public sealed class FanfareAttackPer10Power : PowerModel, ILocalizationProvider
     }
 }
 
+#if PROTOTYPE_CARDS
+/// <summary>
+/// THE SAME CLAUSE AT THE REFRAME ARM'S GRANULARITY (2026-09-07), applied by
+/// <c>ProtoFrRapturousApplause</c> and by nothing else.
+///
+/// The arm's Fanfare meter ranges 0 to 15 where the shipped meter ranges 20 to
+/// 30, which is why every arm copy of a shipped rider moves its THRESHOLD and
+/// not its payout: 1 per 5 is the shipped 1 per 10 read on a meter half the
+/// size. The first pass wrote it as 2 per 10, which doubles the payout instead
+/// -- the same total at 10 Fanfare, but twice the shipped card at 20, and a
+/// step that only pays at all on the top third of the arm's range.
+///
+/// Quarantined with the rest of the arm: prototype-only, so a release build
+/// neither compiles it nor can reach a card that applies it.
+/// </summary>
+public sealed class FanfareAttackPer5Power : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Rising Ovation"),
+        ("description",
+            "Your Attacks deal [blue]{Amount}[/blue] additional damage per 5 "
+          + "[gold]Fanfare[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (dealer != Owner || target == Owner) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;
+        if (cardSource is not { Type: CardType.Attack }) return 0m;
+        return Amount * (FurinaResources.ReadableFanfare(Owner) / 5);
+    }
+}
+#endif
+
 /// <summary>
 /// Unheard Confession (A7, RULED 2026-07-28): gain Amount Block whenever
 /// Fanfare CHANGES AMOUNT, in either direction.

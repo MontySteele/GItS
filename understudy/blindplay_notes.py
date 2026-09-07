@@ -985,6 +985,31 @@ ARM_KEYWORDS: dict[str, str] = {
               "Fanfare. It spends 1 Encore, or Evokes at 3/4."),
     "Drain": ("Your Fanfare falls to nothing. What the card does next is "
               "priced off the amount it took."),
+    # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
+    # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
+    # faces, and the two Spotlight buffs on their power rows -- and every one
+    # of them says what a Spotlighted card GAINS while saying nothing about
+    # which card is one. It surfaced through `EB-507`'s arm copy of Shared
+    # Billing, which is the first row on the prototype surface to print it and
+    # so the first the gold-word census could see; the gap is the shipped
+    # kit's and is older than the arm.
+    #
+    # READ, NOT INVENTED. `SpotlightSystem.IsSpotlighted` is the whole rule and
+    # `SpotlightSystem.Designate` its only writer: Ethereal Spotlight lights
+    # cards and nothing else does, the mode chosen decides which class, and the
+    # lighting stands until the Spotlight moves (`FurinaRiderTips`'
+    # SpotlightMove and SpotlightLasts rows say those two halves on the faces
+    # that ask about them).
+    #
+    # THE GUEST CAST HALF ONLY, deliberately: it is the half every face that
+    # prints the word is about ("Spotlighted Companion cards gain ..."), and it
+    # is the half that is true with the reframe on as well as off -- the arm
+    # retires Center Stage (R228 (1)), so a row naming that mode would teach a
+    # rule half the runs cannot reach. There is no C# tip to hold this in step
+    # with, which is `Companion`'s standing one row up and the same finding.
+    "Spotlighted": ("Lit by Ethereal Spotlight, and nothing else lights a "
+                    "card. Its Guest Cast mode lights your Companion cards, "
+                    "and the lighting stands until the Spotlight moves."),
     # `EB-407`. THE WORD PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is named
     # on the Neow screen and on opening-hand faces, and the only surface that
     # stated its rule was the METER LINE -- which needs the meter to be on the
@@ -1157,6 +1182,11 @@ _ARM_KEYWORD_RE = {
     # three rows above once acquired a literal 0x08 in place of a word
     # boundary and matched nothing at all.
     "Encore": re.compile(r"\bEncore\b"),
+    # NO PLURAL AND NO CONJUGATION: the word is an adjective on a card class
+    # ("Spotlighted Companion cards"), and the VERB the kit prints is "moved
+    # the Spotlight", which is `FurinaRiderTips.ForSpotlightMove`'s phrase and
+    # not this row's.
+    "Spotlighted": re.compile(r"\bSpotlighted\b"),
     # `EB-329` MATCHED THE PHRASE `Companion cards?` AND THE FACES HAVE SINCE
     # MOVED. That row's reasoning was that the two cards which PRICE themselves
     # on the word both spell it out; `Chain of Command` now reads "for each

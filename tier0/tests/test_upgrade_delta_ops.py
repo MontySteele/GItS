@@ -151,6 +151,83 @@ def test_external_numeric_and_selection_deltas_apply(monkeypatch):
     assert upgraded.effects[3]["select"] == "chosen"
 
 
+def _bar_card() -> Card:
+    """A threshold reader: draw 1, and 2 more at 6 Fanfare."""
+    return Card(
+        id="synthetic",
+        name="Synthetic",
+        cost=0,
+        type="skill",
+        effects=[
+            {"op": "draw", "amount": 1},
+            {"op": "conditional", "if": "fanfare_at_least_6",
+             "then": [{"op": "draw", "amount": 2}]},
+        ],
+    )
+
+
+def test_a_condition_delta_naming_a_bar_moves_the_gate(monkeypatch):
+    """`condition:`'s second spelling (2026-09-06). `unconditional` HOISTS the
+    branch and the `+` card asks nothing; a bar REWRITES the `if:` and the `+`
+    card asks the same question for less. The codegen's twin emits the pair as
+    one comparison (`gen_klee_cards.moved_bar_predicate_cs`)."""
+    monkeypatch.setattr(
+        upgrades, "_upgrade_index",
+        lambda: {"synthetic": {"condition": "fanfare_at_least_3"}})
+
+    upgraded = upgrades.apply_upgrade(_bar_card())
+
+    assert [fx["op"] for fx in upgraded.effects] == ["draw", "conditional"]
+    assert upgraded.effects[1]["if"] == "fanfare_at_least_3"
+    assert upgraded.effects[1]["then"] == [{"op": "draw", "amount": 2}]
+
+
+def test_the_unconditional_spelling_still_hoists_the_branch(monkeypatch):
+    """The other spelling, unmoved: every card already ruled `unconditional`
+    upgrades exactly as it did."""
+    monkeypatch.setattr(
+        upgrades, "_upgrade_index",
+        lambda: {"synthetic": {"condition": "unconditional"}})
+
+    upgraded = upgrades.apply_upgrade(_bar_card())
+
+    assert upgraded.effects == [{"op": "draw", "amount": 1},
+                                {"op": "draw", "amount": 2}]
+
+
+def test_an_upgraded_bar_on_another_meter_is_refused(monkeypatch):
+    """An upgrade moves a bar; it does not change the question."""
+    monkeypatch.setattr(
+        upgrades, "_upgrade_index",
+        lambda: {"synthetic": {"condition": "charge_at_least_3"}})
+
+    with pytest.raises(ValueError, match="different meter"):
+        upgrades.apply_upgrade(_bar_card())
+
+
+def test_a_condition_value_that_is_neither_is_refused(monkeypatch):
+    """The grammar grew one shape, not a free-text field."""
+    monkeypatch.setattr(
+        upgrades, "_upgrade_index",
+        lambda: {"synthetic": {"condition": "has_spark"}})
+
+    with pytest.raises(ValueError, match="meter bar predicate"):
+        upgrades.apply_upgrade(_bar_card())
+
+
+def test_a_moved_bar_with_no_gate_to_move_is_refused(monkeypatch):
+    """Sheet/card mismatch, and the applier's usual answer to one: a delta
+    that found no matching effect raises rather than upgrading nothing."""
+    monkeypatch.setattr(
+        upgrades, "_upgrade_index",
+        lambda: {"synthetic": {"condition": "fanfare_at_least_3"}})
+    card = Card(id="synthetic", name="Synthetic", cost=0, type="skill",
+                effects=[{"op": "draw", "amount": 1}])
+
+    with pytest.raises(ValueError, match="found no matching effect"):
+        upgrades.apply_upgrade(card)
+
+
 def test_runtime_formula_and_conditional_deltas_apply(monkeypatch):
     delta = {
         "formula_per": 1,

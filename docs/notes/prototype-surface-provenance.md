@@ -2060,6 +2060,31 @@ row inexpressible by name in the emitter ("hand-write it against the KitBurst
 machinery"), and a `requires: burst_energy_full` would put back the threshold
 the reframe took out. The shipped row keeps both and costs 0; this one costs 2.
 
+IT NOW HAS A SLOT (`EB-507`, 2026-09-06). Until this change the row was granted
+from a scenario and offered by nothing -- the arm's own Rare drain, unreachable
+in a run. `EB-507` took the three shipped Fanfare-floor Rares off the arm's
+offer surface, and one of them, `the_sea_is_my_stage`, is NOTHING but the
+floor rider: one `gain_fanfare_floor 15` op and no body. There is no copy to
+make of a card with no body, so what it hands over is its Rare slot, and the
+drain takes it. Rare for Rare, so the offer odds do not move; the row itself is
+unchanged, and the shipped card still exists and is still dealt with the arm
+off (R213 B).
+
+THE SLOPE IS 2 PER DRAINED (the second-wave review of 2026-09-06; a D default).
+At `per: 1` the Rare never out-damaged Universal Revelry's arm copy anywhere in
+the meter's measured 0-to-15 range -- and it emptied the meter to do it, so the
+card paid twice and bought nothing. `{base: 5, per: 2, count: fanfare_drained}`
+is the printed slope; the face renders it through `{ExtraDamage:diff()}`, which
+the emitter reads off `per:` (`fanfare_drained_calc_rider`).
+
+ITS UPGRADE IS `{cost: -1}`, 2 Energy to 1, and it is DERIVED rather than
+authored: the row carries no `upgrade:` key, so
+`upgrades.prototype_default_delta` decides, and every number-moving clause of
+that rule passes over it -- the damage op is formula-scaled and carries no
+literal `amount`, which `_proto_hit` skips by name -- leaving the rule's cost
+clause, "a card of cost 2 or more with no printed number costs 1 less". The
+slope moving 1 to 2 does not change which clause fires.
+
 ## proto_fr_intermission
 
 Face: "Drain your Fanfare. Gain Block equal to the Fanfare drained." `F12` (1):
@@ -2323,39 +2348,44 @@ Ten rows, and the readings that asked for each are in
 BUILD had to decide, per row and per new rule, and it is here rather than on
 the sheet for the reason the file's own header gives.
 
-**`proto_ko_long_fuse` -- the detonator that stays, and gets dearer.**
-Rounds 15 and 16 asked one question from opposite ends. Round 15: every
-drafted detonator discards at end of turn, so "hold the Bomb" meant "throw
-the detonator away" for most of a run, and a 55-gold Steady enchantment on
-Perfect Timing "opened more decision-space than any card I drafted". Round 16
-from the other end: once the pile passes the enemy's HP, Ka-pow! is free and
-Retained, so the last turn is automatic -- "charming twice, likely corrosive
-by the tenth time". A Retained detonator is what the first wants; one that
-gets MORE expensive the longer it waits is what stops it becoming the second.
+**`proto_ko_long_fuse` -- the detonator that stays.** As BUILT (rounds 15 and
+16) it was the Retained detonator that got dearer the longer it waited: round
+15 wanted a detonator that could be held at all, round 16 wanted the free
+Retained Ka-pow! last turn to stop being automatic, and a rising hand cost
+(`rising_cost: 1`, the base game's own `CardEnergyCost.AddUntilPlayed`,
+refused by `blocked_reason` without `retain:`) answered both at once.
 
-THE RULE IS THE BASE GAME'S OWN MODIFIER, which is the whole reason the build
-is four lines. `CardEnergyCost.AddUntilPlayed` accumulates, survives the turn
-boundary, is cleared by `AfterCardPlayedCleanup` when the card is played, and
-is combat-scoped like every other local modifier -- which is the printed rule
-exactly ("each turn it stays in your hand", never downward, gone when the card
-leaves, gone when the fight does). The sim spells the same lifetime with a
-field: `Card.rising_cost_risen`, added by `combat.card_cost`, rolled by
+**THE ESCALATION CAME OFF on the comparison pass of 2026-09-06**
+(`review/active/klee-pool-comparison-pass-2026-09-06.md` §1 and §3 item 1), on
+three seat readings that all landed on the same clause: "never a decision ...
+the Retain is a lie told by the card frame" (r17), passed "because Retain plus
+an escalating cost is a card that punishes the exact hand-holding the rest of
+the kit rewards" (r18 Spray), passed without comment (r22 b). The pass wanted a
+card that stays in hand for hold-or-fire and Pocket Match already delivers that
+at a Spark, so the smallest intervention was the existing card adjusted rather
+than a display fix or a replacement: the row keeps `retain: true`, the frame
+renders the keyword, and the face is now "[gold]Set off[/gold]. Deal 6
+damage." -- **Pocket Match's Energy-priced twin**, and the Energy-priced exit
+the r23 assembled deadlock lacked. Sizzle keeps the reaction line, Countdown
+the draw, Ka-pow! stays the free one.
+
+**THE AUDIT IS STILL OWED AT THE DOOR.** The adjusted row goes through
+`understudy.seat review` on the Codex bridge before any tester sees it, and
+that needs the local machine -- it was not run with this edit. The reading it
+has to answer is the audit's own: Long Fuse FOLLOWED C2 because
+"retaining it once raises its cost from 1 to 2 energy: keeping the detonator
+carries a binding price" (`review/records/card-audit-2026-09-04.md`, §5.3 reply
+1), and Held Tide was WITHDRAWN on C1 because "Retain waits out the dead
+turns".
+
+THE `rising_cost:` MACHINERY STAYS, UNUSED BY ANY ROW. No sheet row carries the
+key now, but both engines keep the rule wired -- `Card.rising_cost` /
+`rising_cost_risen` added by `combat.card_cost`, rolled by
 `klee_overhaul.roll_rising_costs` at turn end, cleared in `_finish_play` and
-zeroed by `run_fight`'s per-combat walk beside `cost_set_this_combat`.
-
-A CARD FIELD AND NOT AN EFFECT, because nothing resolves when the card is
-played: it is what the card costs while it waits. So `rising_cost:` is a row
-key, the generated class declares `IRisingHandCostCard`, and the arm's ONE
-standing listener (`KleeOverhaulSweepHooks`) rolls the hand at end of turn --
-a second `AbstractModel` subscription for one card's rule would be a second
-thing to keep wired. Two Long Fuses in one hand burn separately, because the
-fuse is the card's and not the board's.
-
-`blocked_reason` REFUSES A RISING COST WITHOUT RETAIN. A card discarded at the
-end of the turn it was drawn can never stay in your hand, so the rule could
-never fire and the face would be printing something that cannot happen -- the
-face-that-lies defect, one field over. It also refuses the key on a shipped
-row, because the roller is Compile Remove'd out of a release build.
+zeroed by `run_fight`; `IRisingHandCostCard` read by
+`KleeOverhaulRisingCost.RollHand` off the arm's one standing turn-end
+listener, with the codegen's `retain:` refusal intact. It is covered by a synthetic row in the tests rather
+than through this card.
 
 **`proto_ko_all_of_my_treasures` -- a second pile the size of the first.**
 Careful Arrangement merges; this copies. The pile it is measured against is
@@ -2662,3 +2692,122 @@ A FIELD AND NOT AN UPGRADE DELTA, so both faces carry it: an upgrade is a
 different card, and a player who smiths the placer must not lose the opening
 the ruling gave it.
 
+## proto_fr_florid_cadenza, the arm copy (2026-09-06)
+
+THE `+` CARD MOVES THE BAR INSTEAD OF DELETING IT. The rider copy is the
+shipped Florid Cadenza at the arm's meter -- draw 1, and 2 more at 6 Fanfare
+instead of 12 -- and it inherited the shipped row's `{condition: unconditional}`
+upgrade, which HOISTS the gated clause out. That made the `+` card a 0-cost
+"draw 3" that asks nothing at all: the strongest card in the arm's pool, and
+the one card in it with no relationship to the meter the whole reframe is
+about. The 2026-09-06 GPT balance review read it that way and the main session
+took the D default.
+
+So the delta is `{condition: fanfare_at_least_3}`: the gate STAYS and its
+threshold falls 6 -> 3. The upgraded card still draws 1, still asks the arm's
+question, and asks it at a bar an opening turn can reach -- the same 3 R254's
+starter reader was moved to, and for the same measured reason (the meter an
+early turn actually holds).
+
+THE GRAMMAR IS NEW AND IT IS THE SMALLER OF THE TWO SPELLINGS. `condition:`
+used to accept only `unconditional`. It now also accepts a meter bar naming the
+upgraded threshold: tier0 rewrites the top-level conditional's `if:`
+(`content/upgrades.py`), and the codegen emits ONE comparison whose threshold is
+`(IsUpgraded ? 3 : 6)` with the face printing both numbers through a single
+`{IfUpgraded:show:3|6}` token (`gen_klee_cards.moved_bar_predicate_cs`). Both
+bars are authored on the row; nothing computes a threshold. Both engines refuse
+a bar that reads a different meter from the printed one.
+
+AND THE COPY EXHAUSTS (the second-wave review of 2026-09-06; a D default). A
+0-cost non-Exhaust draw-3 whose bar does not deplete is a
+hold-the-rest-of-the-deck loop -- three copies, a hand cap of 10, the overflow
+to discard -- and it is that at bar 6 exactly as much as at bar 3, so the bar
+move above was never the whole answer. `exhaust: true` makes each copy a
+one-shot and the moved bar stays as it is.
+
+The sheet's sentence keeps the word and the emitted face drops it
+(`_dedupe_printed_exhaust`, `EB-293`): `exhaust: true` puts
+`CardKeyword.Exhaust` on the card and the game's keyword rail prints the
+banner, so a face that also wrote it would print it twice.
+
+Nothing else on the row moves -- same cost, same rarity, same body -- and
+`docs/furina-cards.yaml` and `docs/furina-upgrades.yaml` do not move at all:
+the shipped Florid Cadenza, its shipped `{condition: unconditional}` and the
+absence of Exhaust on it are Balance-stage content (R213 B).
+
+## proto_fr_shared_billing
+
+Face: the shipped Shared Billing's, unchanged -- "Apply Hydro to a random
+enemy. Spotlighted Companion cards gain 25% this turn. Gain 1 Energy." Same
+cost, same rarity, same three effects, same art (`art_of`, R179).
+
+ONLY THE UPGRADE DIFFERS, and that is the whole row (the 2026-09-06 GPT
+balance review; the main session's D default). The shipped delta is
+`{cost: -1}`, which takes a Common that already REFUNDS its Energy down to 0 --
+a card that costs nothing, gives a card's worth of Energy back, and is handed
+out at every campfire.
+
+IT BUYS BLOCK, NOT A CARD (the second-wave review of 2026-09-06; a D default).
+The first pass bought a card, `{add: {op: draw, amount: 1}}`, and a card that
+refunds its own Energy and then replaces itself is the same loop piece the
+shipped `{cost: -1}` was taken off for -- free, repeatable, and net-positive on
+both of the resources a loop needs. Block is neither energy nor draw, so the
+delta is `{add: {op: block, amount: 3}}`: the `+` card buys survival and the
+loop stays shut. Rendered by the emitter as an `IsUpgraded`-gated Block
+appended after the printed body, with `GainsBlock => IsUpgraded` so the base
+card claims none (`EB-122`), and an
+`{IfUpgraded:show:Gain 3 [gold]Block[/gold].|}` clause on the face.
+
+Common for Common at the same seam as the rider copies
+(`furina_reframe.POOL_SUBS`, `FurinaReframeRoster.SwapOfferedRiders`). The
+shipped row and its shipped delta stand (R213 B).
+
+## proto_fr_rapturous_applause
+
+Face: "Your Attacks deal 1 additional damage per 5 Fanfare." The shipped
+Rare's body with its `gain_fanfare_floor 8` rider removed (`EB-507`), read at
+the arm's own granularity.
+
+WHY THE RIDER GOES. The reframe mints Fanfare by PERFORMING -- 2 per trigger, 5
+per Evoke -- and `gain_fanfare_floor` mints it for being played. That is a
+second source the arm neither has nor priced, and with the arm on it is the
+offer surface contradicting the arm's one sentence about where the meter comes
+from. Three shipped Rares print the rider; this is one of the two that have a
+body underneath it.
+
+WHY PER 5 AND NOT THE SHIPPED PER 10. The floor the copy no longer mints was
+also this card's own opening payment -- it arrived with 8 Fanfare already on
+the meter, which is most of the first 10 the shipped clause reads -- and a
+per-10 clause on a meter that runs 0 to 15 pays on the top third of the range
+or not at all. So the copy takes the THRESHOLD mapping every other arm copy in
+`POOL_SUBS` takes: the shipped bars 12, 12, 15 and 20 became 6, 6, 8 and 10
+because the shipped meter's 20-to-30 range maps to the arm's 0-to-15, and this
+row's 10 becomes 5 for the same reason. The upgrade is the shipped
+`{power_amount: +1}`, so the `+` card reads 2 per 5.
+
+THE FIRST READ WAS 2 PER 10, AND THE AUDIT OF 2026-09-07 RULED IT
+REQUIRES_MODIFICATION ON C8. That number pays for the lost floor out of the
+PAYOUT rather than the threshold, which is the one move an arm copy of a
+shipped rider may not make: it is the shipped card at 10 Fanfare, twice the
+shipped card at 20, and nothing at all below 10. 1 per 5 is the same slope --
+one point of damage for every ten points of shipped Fanfare, or every five of
+the arm's -- and the granularity is the only thing that changed, which is what
+puts the copy back on the mapping the other four rows already use.
+
+Rare for Rare, art borrowed from the shipped row (`art_of`, R179), shipped
+sheet unmoved (R213 B).
+
+## proto_fr_unheard_confession
+
+Face: "Whenever your Fanfare changes amount, gain 2 Block." The shipped Rare's
+body with its `gain_fanfare_floor 8` rider removed, for `EB-507`'s reason
+above.
+
+TWO PER CHANGE, NOT THE SHIPPED ONE (the second-wave review of 2026-09-06; a D
+default). The power pays per change EVENT and not per point moved, which is
+what the first pass read as "no number to compensate" -- but it is also the
+reason 1 is not a Rare's payout: a 2-cost Rare Power that pays 1 Block each
+time the meter ticks is a dead card on a meter that ticks a few times a turn.
+2 is the floor that makes the slot worth a Rare. Cost 2 and the shipped
+`{cost: -1}` upgrade are unchanged. Rare for Rare, art borrowed (`art_of`,
+R179), shipped sheet unmoved (R213 B).

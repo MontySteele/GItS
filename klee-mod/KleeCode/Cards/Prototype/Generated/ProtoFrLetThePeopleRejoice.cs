@@ -52,7 +52,7 @@ public sealed class ProtoFrLetThePeopleRejoice : CustomCardModel, ICharacterCard
         new List<DynamicVar>
         {
             new CalculationBaseVar(5m),
-            new ExtraDamageVar(1m),
+            new ExtraDamageVar(2m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaDrain.Amount(card))
         };
 
