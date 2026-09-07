@@ -1075,7 +1075,7 @@ def test_eb533_a_seat_without_the_power_says_nothing(overhaul):
 
 
 def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
-    """`EB-344` (ruled R248): "gain 6 Block AND 1 Spark".
+    """`EB-344` (ruled R248): "gain 4 Block AND 1 Spark" (6 since `EB-622`).
 
     ONE CONDITION, TWO PAYOUTS -- a turn after a detonation grants NEITHER,
     which is what makes the Spark part of the same decision rather than a
@@ -1108,7 +1108,7 @@ def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
 
 
 def test_eb344_the_upgrade_moves_the_block_and_not_the_spark(overhaul):
-    """The number's home. `power_amount: +2` is the BLOCK (6 -> 8); the Spark
+    """The number's home. `power_amount: +2` is the BLOCK (4 -> 6); the Spark
     is the kit's rate and is 1 at both levels."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])

@@ -405,9 +405,9 @@
 - {id: proto_ko_grounded, name: "Grounded", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, if you have a [gold]Bomb[/gold] on the field, gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
+   description: "At the start of your turn, if you have a [gold]Bomb[/gold] on the field, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_grounded, amount: 6, target: self}]}
+   effects: [{op: apply_power, power: ko_grounded, amount: 4, target: self}]}
 
 - {id: proto_ko_sorry_jean, name: "Sorry, Jean...", character: klee,
    authored_by: [claude],
@@ -684,7 +684,8 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill, exhaust: true,
-   description: "Gain 1 [gold]Energy[/gold]. Draw 1 card.",
+   description: "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   upgrade: {draw: +1},
    effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
 
 - {id: proto_mc_bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage (proto)", character: klee,
@@ -707,9 +708,9 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: applier, element: hydro,
    cost: 2, type: skill, exhaust: true,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
-             {op: apply_power, power: mc_omen, amount: 1, target: self}]}
+             {op: apply_power, power: mc_omen, amount: 2, target: self}]}
 
 - {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
    authored_by: [claude], hexerei: true,

@@ -296,7 +296,6 @@ public class CompanionOverhaulTests
     [InlineData(typeof(DandelionBreezePower), CompanionOverhaulLaw.DandelionBreezeBlock)]
     [InlineData(typeof(SolarIsotomaBloomPower), CompanionOverhaulLaw.IsotomaDamage)]
     [InlineData(typeof(RevelationPower), CompanionOverhaulLaw.RevelationBlock)]
-    [InlineData(typeof(StellarisOmenPower), CompanionOverhaulLaw.OmenVulnerable)]
     public void Every_power_face_prints_the_number_it_pays(Type type, int number)
     {
         // FACE FROM BODY, at the power level: the description is built by
@@ -307,6 +306,57 @@ public class CompanionOverhaulTests
         var description = power.Localization!
             .Single(entry => entry.Item1 == "description").Item2;
         Assert.Contains(number.ToString(), description);
+    }
+
+    [Fact]
+    public void The_omens_face_prints_the_stack_it_pays()
+    {
+        // `EB-622`. THE OMEN IS THE ONE FACE THE THEORY ABOVE CANNOT COVER,
+        // because its payout is a PRODUCT: the hook spends
+        // `OmenVulnerable * Amount`, and Mona's row now applies a stack of 2.
+        // A face interpolating the constant would print "apply 1" over a power
+        // that pays 2, which is the exact defect the theory exists to stop --
+        // so the face prints `{Amount}`, and this pin is the reason that is
+        // honest: while the per-stack rate is 1 the stack IS the payout, and a
+        // retune of the rate has to come back through here.
+        Assert.Equal(1, CompanionOverhaulLaw.OmenVulnerable);
+
+        var description = new StellarisOmenPower().Localization!
+            .Single(entry => entry.Item1 == "description").Item2;
+        Assert.Contains("[blue]{Amount}[/blue] [gold]Vulnerable[/gold]",
+                        description);
+
+        // And the CARD hands the power the stack the sheet prints, off its own
+        // dynamic var, so the row's number reaches both the face and the hook.
+        var face = new ProtoMcMonaStellarisPhantasm().Localization!
+            .Single(entry => entry.Item1 == "description").Item2;
+        Assert.Contains("{PowerAmount:diff()} [gold]Vulnerable[/gold]", face);
+    }
+
+    [Fact]
+    public void Sucroses_upgrade_draws_one_more_and_keeps_exhaust()
+    {
+        // `EB-622`. The Prototype-stage DEFAULT for a 0-cost row printing no
+        // upgradable number is "Exhaust comes off", and on this card that is a
+        // repeatable 1-energy-for-1-card cantrip -- [USER] read it as "4 energy
+        // the turn you draw it". The row now carries an explicit
+        // `upgrade: {draw: +1}`, which overrides the rule, so the keyword is
+        // still on the CANONICAL list and `OnUpgrade` moves the Cards var
+        // instead of calling RemoveKeyword.
+        var card = new ProtoMcSucroseCatalystConversion();
+        Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
+
+        var upgrade = typeof(ProtoMcSucroseCatalystConversion)
+            .GetMethod("OnUpgrade", All)!;
+        var calls = Il.Calls(upgrade);
+        Assert.Contains(calls, c => c.Contains("UpgradeValueBy"));
+        Assert.DoesNotContain(calls, c => c.Contains("RemoveKeyword"));
+
+        // And the face carries the draw as a diffable var, so the `+` copy
+        // prints "Draw 2 cards" rather than the base number.
+        var face = card.Localization!
+            .Single(entry => entry.Item1 == "description").Item2;
+        Assert.Contains("Draw {Cards:diff()} card{Cards:plural:|s}.", face);
     }
 
     [Fact]

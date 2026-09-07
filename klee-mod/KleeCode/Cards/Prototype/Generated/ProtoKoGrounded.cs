@@ -48,7 +48,7 @@ public sealed class ProtoKoGrounded : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 6m)
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

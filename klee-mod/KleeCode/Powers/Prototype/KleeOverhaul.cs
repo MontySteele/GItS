@@ -122,7 +122,8 @@ public static class KleeOverhaulLaw
     ///
     /// A CONSTANT AND NOT THE POWER'S AMOUNT, and the upgrade is why: Grounded
     /// upgrades <c>{power_amount: +2}</c>, so <c>GroundedPower.Amount</c> is
-    /// the BLOCK and moves from 6 to 8. The Spark stays 1 at both levels, which
+    /// the BLOCK and moves from 4 to 6 (`EB-622`). The Spark stays 1 at both
+    /// levels, which
     /// makes it the kit's rate rather than the card's number -- the same
     /// footing as <see cref="SparkPerExplosion"/> and
     /// <see cref="OpeningSpark"/>, and the reason all three are compared by

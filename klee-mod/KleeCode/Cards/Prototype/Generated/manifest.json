@@ -852,7 +852,7 @@
       "damage": 3
     },
     "proto_mc_mona_stellaris_phantasm": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_mc_nicole_ladder_of_ascent": {
       "power_amount": 1
@@ -892,7 +892,7 @@
       "remove": "exhaust"
     },
     "proto_mc_sucrose_catalyst_conversion": {
-      "remove": "exhaust"
+      "draw": 1
     },
     "proto_mc_sucrose_mollis_favonius": {
       "power_amount": 1

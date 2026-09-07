@@ -172,9 +172,10 @@ def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
     assert "card prints what it pays." in tips
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    assert "gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
+    # `EB-622`: the payout moved 6 -> 4 (upgrade still `+2`, so 6 upgraded).
+    assert "gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
     # `EB-516`: the sheet row's own condition, held in step with the tip.
-    assert ("if you have a [gold]Bomb[/gold] on the field, gain 6 "
+    assert ("if you have a [gold]Bomb[/gold] on the field, gain 4 "
             "[gold]Block[/gold]") in sheet
 
 
