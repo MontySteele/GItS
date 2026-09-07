@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcSayuSilencersSecret : CustomCardModel, ICompanionCard
+public sealed class ProtoMcSayuSilencersSecret : CustomCardModel, ICompanionCard, IHexereiCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,14 +46,14 @@ public sealed class ProtoMcSayuSilencersSecret : CustomCardModel, ICompanionCard
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForBomb(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sayu_silencers_secret");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Yoohoo Art: Silencer's Secret"),
-        ("description", "[gold]Swirl[/gold] a random enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card."),
+        ("description", "[gold]Hexerei[/gold]. [gold]Swirl[/gold] a random enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

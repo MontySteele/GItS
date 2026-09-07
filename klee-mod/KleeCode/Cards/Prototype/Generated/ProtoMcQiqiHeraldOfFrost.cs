@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard
+public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard, IHexereiCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,14 +49,14 @@ public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_qiqi_herald_of_frost");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Qiqi — Herald of Frost"),
-        ("description", "For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold]."),
+        ("description", "[gold]Hexerei[/gold]. For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

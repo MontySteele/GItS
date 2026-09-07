@@ -199,12 +199,13 @@ public class KleeOverhaulRoundTwentyTests
         Assert.DoesNotContain("Klee's own", fischl);
         Assert.Equal("klee", new ProtoMcFischlSinfulHex().PersonalPool);
 
-        // And a Personal Companion that is NOT in the family says nothing,
-        // because it pays nothing: the printed word is necessary as well as
-        // sufficient.
+        // And so does a coven Personal that carried no family word before
+        // `EB-642`'s follow-up: the coven IS the family, so Noelle prints the
+        // one mark too and the eight rows R265's one-word rule would have cut
+        // the grant from keep it.
         var noelle = Face(new ProtoMcNoelleIGotYourBack());
+        Assert.StartsWith("[gold]Hexerei[/gold].", noelle);
         Assert.DoesNotContain("Klee's own", noelle);
-        Assert.DoesNotContain("[gold]Hexerei[/gold]", noelle);
     }
 
     [Fact]

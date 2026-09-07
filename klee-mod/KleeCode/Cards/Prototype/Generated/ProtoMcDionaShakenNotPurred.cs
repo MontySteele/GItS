@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcDionaShakenNotPurred : CustomCardModel, ICompanionCard
+public sealed class ProtoMcDionaShakenNotPurred : CustomCardModel, ICompanionCard, IHexereiCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,14 +49,14 @@ public sealed class ProtoMcDionaShakenNotPurred : CustomCardModel, ICompanionCar
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this), this);
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false, appliesWithoutHit: true), this), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_diona_icy_paws");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diona — Shaken, Not Purred"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] twice. If a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "[gold]Hexerei[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] twice. If a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

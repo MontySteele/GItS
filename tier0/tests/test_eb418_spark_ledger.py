@@ -168,20 +168,44 @@ def test_a_hexerei_play_is_the_gain_that_had_no_name(overhaul):
     assert not any(e["event"] == "ko_explosion" for e in state.log)
 
 
-def test_an_unmarked_companion_of_klees_pays_nothing_now(overhaul):
-    """The other half of `EB-642`, and the cost of the ruling said out loud.
+def test_a_coven_personal_pays_because_the_coven_is_the_family(overhaul):
+    """`EB-642`'s follow-up D default: the coven IS the family.
 
-    Diona carries `personal_pool: klee` and no family mark, so under the arm
-    she stops granting: the printed word is necessary as well as sufficient,
-    which is what makes the tip's one sentence true.
+    R265's one-word rule would otherwise have cut the grant from the eight
+    coven Personals that printed no word -- a loss the pick did not name -- so
+    those rows carry the mark now and Diona, the card the r11 seat actually
+    played, still pays and now says so on her face.
     """
     diona = loader.get_card("proto_mc_diona_shaken_not_purred")
     assert diona.is_companion and diona.personal_pool == "klee"
+    assert diona.hexerei, "a coven Personal is in the family"
 
     state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
     state.player.hand = [diona]
 
     play_card(state, diona)
+
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
+    assert [row["source"] for row in _gains(state)] == [
+        "companion:personal/play"]
+
+
+def test_a_companion_outside_the_family_pays_nothing(overhaul):
+    """The other half, on a card that is genuinely outside it.
+
+    Gorou's War Banner is an Inazuma Universal with no family mark and no
+    pool, so it prints no word and mints nothing: the printed word is
+    necessary as well as sufficient, which is what makes the tip's one
+    sentence true.
+    """
+    banner = loader.get_card("proto_mi_gorou_war_banner")
+    assert banner.is_companion and banner.personal_pool is None
+    assert not banner.hexerei
+
+    state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
+    state.player.hand = [banner]
+
+    play_card(state, banner)
 
     assert state.player.sparks == 0
     assert not _gains(state)

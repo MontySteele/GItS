@@ -768,20 +768,26 @@ def test_every_hexerei_play_pays_and_an_unmarked_companion_does_not(
     Hexerei card gives Klee a Spark, Universals included.
 
     SO THE PRINTED WORD IS NECESSARY AND SUFFICIENT, which is both halves of
-    this test: Razor the Universal pays, and Noelle -- one of Klee's coven
-    Personals carrying no mark -- does not. A row that pays without saying so
-    is the r20 defect pointing the other way.
+    this test: Razor the Universal pays, and Gorou's War Banner -- an Inazuma
+    Universal outside the family -- does not. A row that pays without saying
+    so is the r20 defect pointing the other way, which is also why Klee's own
+    coven carries the mark now (`EB-642`'s follow-up): a Personal of hers that
+    paid and printed nothing would be the same silence.
     """
     from tier0.engine.combat import play_card
     from tier0.tests.conftest import make_state
 
     universal = loader.get_card("proto_mc_razor_claw_and_thunder")
     personal = loader.get_card("proto_mc_fischl_sinful_hex")
-    unmarked = loader.get_card("proto_mc_noelle_i_got_your_back")
+    unmarked = loader.get_card("proto_mi_gorou_war_banner")
     assert universal.is_companion and personal.is_companion
     assert universal.personal_pool is None
     assert personal.personal_pool == "klee"
-    assert unmarked.is_companion and unmarked.personal_pool == "klee"
+    assert unmarked.is_companion and unmarked.personal_pool is None
+    assert not unmarked.hexerei
+    # ...and a coven Personal, which used to be the negative case here, pays.
+    coven = loader.get_card("proto_mc_noelle_i_got_your_back")
+    assert coven.personal_pool == "klee" and coven.hexerei
 
     state = make_state()
     state.player.character_id = "klee"
@@ -792,6 +798,11 @@ def test_every_hexerei_play_pays_and_an_unmarked_companion_does_not(
     state.player.sparks = 0
     state.player.hand = [personal]
     play_card(state, personal)
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
+
+    state.player.sparks = 0
+    state.player.hand = [coven]
+    play_card(state, coven)
     assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
 
     state.player.sparks = 0
