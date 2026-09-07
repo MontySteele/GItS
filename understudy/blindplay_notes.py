@@ -18,6 +18,7 @@ from typing import Any
 from understudy.blindplay_faces import remember_elements
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
+                                        CASKET_STRIKE,
                                         COMPANION_SPARK, COMPANION_SPARK_MAX,
                                         CRYSTALLIZE_BLOCK, OPENING_SPARK,
                                         SHATTER_DAMAGE,
@@ -885,10 +886,19 @@ ARM_KEYWORDS: dict[str, str] = {
     # clause now says WHEN each side is read.
     "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
              "ALL, Minions too. Your Strength folds in as you write it; the "
-             "enemy's Vulnerable counts at the morning. A carry-out is not a "
+             "enemy's Vulnerable counts next turn. A carry-out is not a "
              "hit: no when-hit power fires."),
     "Mend": ("Mend N: heal N HP, never above the HP you entered the fight "
              "with."),
+    # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
+    # "whenever the Tamakushi Casket strikes" and nothing on the page said
+    # what the Casket is or what makes it strike -- [USER]'s act-1 run read
+    # the card and could not tell. The mod's twin is
+    # `ArmKeywordTips.ForCasket`; this is the same sentence, from the relic's
+    # own face, with the number off the shared constant.
+    "Tamakushi Casket": (
+        f"Your relic. Whenever you apply a debuff to an enemy, it deals "
+        f"{CASKET_STRIKE} Hydro damage to that enemy."),
     # `EB-377` ADDED THESE TWO, and their absence was the same defect one row
     # over rather than a decision: both have had an `ArmKeywordTips` twin since
     # R244, and neither had a page row -- so the mod defined them on a hover
@@ -929,9 +939,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # counts, `companion_hexerei.is_hexerei`). So: the family test is the
     # face; the Spark is a GAIN, bounded per play; and the clause that
     # carried no rule is gone.
+    # `EB-619` DROPPED "it never costs Spark" ([USER]'s act-1 run: "shouldn't
+    # the card's own cost section say that?"). A price a card does not charge
+    # belongs on the cost line or nowhere -- denying it on the keyword page is
+    # what raised the doubt. Held in step with `ArmKeywordTips.ForHexerei`.
     "Hexerei": ("A Companion card whose face prints the word. Playing one "
                 f"marked Klee's own gives Klee {COMPANION_SPARK} Spark, up to "
-                f"{COMPANION_SPARK_MAX} a play; it never costs Spark."),
+                f"{COMPANION_SPARK_MAX} a play."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

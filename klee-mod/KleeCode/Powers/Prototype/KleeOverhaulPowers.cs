@@ -301,7 +301,7 @@ public sealed class BombReactionSparkPower
 
 /// <summary>
 /// Grounded: "At the start of your turn, if you have a Bomb on the field, gain
-/// 6 Block and 1 Spark." The card that pays for the COOKING turn -- the cook
+/// 4 Block and 1 Spark." The card that pays for the COOKING turn -- the cook
 /// half of the contested thing, with Run Away! paying for the loud one.
 ///
 /// `EB-516` REPLACED THE CONDITION (Klee r18, packet sec.4 item 1). It read "if

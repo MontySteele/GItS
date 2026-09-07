@@ -213,7 +213,10 @@ public class KleeOverhaulRoundTwentyTests
         // sentence names it and says ONLY those pay.
         var tip = Printed("ForHexerei");
         Assert.Contains("marked Klee's own gives Klee", tip);
-        Assert.Contains("it never costs", tip);
+        // `EB-619`: and the price-denial clause is gone -- a card's cost line
+        // is where a cost belongs, and the keyword page denying one raised the
+        // doubt it was meant to settle.
+        Assert.DoesNotContain("it never costs", tip);
         Assert.DoesNotContain("Some are Klee's own, some are not.", tip);
     }
 

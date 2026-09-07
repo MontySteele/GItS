@@ -405,9 +405,9 @@
 - {id: proto_ko_grounded, name: "Grounded", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, if you have a [gold]Bomb[/gold] on the field, gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
+   description: "At the start of your turn, if you have a [gold]Bomb[/gold] on the field, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_grounded, amount: 6, target: self}]}
+   effects: [{op: apply_power, power: ko_grounded, amount: 4, target: self}]}
 
 - {id: proto_ko_sorry_jean, name: "Sorry, Jean...", character: klee,
    authored_by: [claude],
@@ -684,7 +684,8 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill, exhaust: true,
-   description: "Gain 1 [gold]Energy[/gold]. Draw 1 card.",
+   description: "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   upgrade: {draw: +1},
    effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
 
 - {id: proto_mc_bennett_fantastic_voyage, name: "Bennett — Fantastic Voyage (proto)", character: klee,
@@ -707,9 +708,9 @@
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 5, rarity: rare, role_c: applier, element: hydro,
    cost: 2, type: skill, exhaust: true,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
-             {op: apply_power, power: mc_omen, amount: 1, target: self}]}
+             {op: apply_power, power: mc_omen, amount: 2, target: self}]}
 
 - {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
    authored_by: [claude], hexerei: true,
@@ -1050,7 +1051,10 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    art_of: proto_kk_coral_bulwark,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 3 [gold]Block[/gold] for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] carries out this morning.",
+   # `EB-623`: "morning" is retired from every printed surface. The clause is
+   # paid out of the same drain as the Plans it counts, and "carried out with
+   # it" says so without a word the base game never taught.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 3 [gold]Block[/gold] for each [gold]Plan[/gold] carried out with it.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_per_plan_this_morning, amount: 3}],
    # R246: 4 and 3, upgrading to 6 and 4.
@@ -1148,7 +1152,8 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    # `EB-441`: one damage op with a rider, not two literal branches.
-   description: "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} if the enemy has a debuff.",
+   # `EB-624`: two printed numbers, both live -- provenance sec. this row.
+   description: "Deal {PlainDamage:diff()} damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead.",
    effects: [{op: damage, amount: 7, target: enemy, bonus_vs_debuff: 3}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {damage: +3}}

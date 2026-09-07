@@ -99,15 +99,19 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # registration, which runs at `ModelDb.Init` before any run exists, and --
     # since `EB-621` -- the Spark counter's teardown.
     #
-    # THE FOURTH WAS A REVIEW QUESTION AND THIS IS THE ANSWER. Its postfix
+    # THE LAST ONE WAS A REVIEW QUESTION AND THIS IS THE ANSWER. The postfix
     # takes the `NCombatUi` Harmony hands it and frees, by name, the one child
-    # node that file added; it reads no run state, no player and no creature,
-    # so there is no seat to resolve and no character to scope to. That is the
-    # STRONGEST form of the rule rather than a hole in it: `NCombatUi.
-    # Deactivate` runs while the next room is still being built, and a teardown
-    # that has to name a seat there is exactly the shape that ended two blind
-    # sessions and minted this lint. The scope lives at the only door that
-    # BUILDS the node (`SparkCounter.Setup`, through `SparkGauge.AppliesTo`).
+    # node its file added; it reads no run state, no player and no creature, so
+    # there is no seat to resolve and no character to scope to. That is the
+    # STRONGEST form of the rule rather than a hole in it: `NCombatUi.Deactivate`
+    # runs while the next room is still being built, and a teardown that has to
+    # name a seat there is exactly the shape that ended two blind sessions and
+    # minted this lint. The scope lives at the only door that BUILDS the node
+    # (`SparkCounter.Setup` through `SparkGauge.AppliesTo`).
+    #
+    # IT WAS FIVE UNTIL 2026-09-07. `EB-628`'s Fanfare badge was the second of
+    # that pair; `EB-627`'s revision folded it into `SalonPanel`, which hangs on
+    # the Salon stage's own door and needs no teardown patch of its own.
     # A FIFTH appearing here is the next review question.
     assert len(markers) == 4, markers
 

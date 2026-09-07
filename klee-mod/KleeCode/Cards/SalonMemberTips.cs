@@ -167,6 +167,27 @@ public static class SalonMemberTips
         // contradicting the Salon rules tip printed directly under it
         // (`SalonRulesBody`, whose own arm branch is `EB-368`'s). Same defect
         // as `EB-383`'s buff, one surface over.
+        //
+        // `EB-629` MOVED THREE CLAUSES DOWN HERE FROM THE RULES PARAGRAPH,
+        // which had grown to about 700 characters carrying seven rules and
+        // which [USER] read, in his own act-1 run, as "still a gigantic wall of
+        // text". All three are facts about A MEMBER ABOUT TO PERFORM -- the
+        // enemy its roll may take (`EB-425`, `EB-451`), the damage class the
+        // performance belongs to (`EB-476`, `EB-548`, one rule: `EB-343`'s
+        // `ValueProp.Unpowered`) and the dry cut (R220 A, `EB-587`) -- so this
+        // is the tip they are read on at the moment they matter, which is what
+        // the rules paragraph never was.
+        //
+        // `EB-632` THEN SPLIT THEM, because appending all three to all three
+        // members moved the wall instead of shrinking it. Two of the clauses
+        // are about DEALING DAMAGE and the Usher deals none, so his tip was
+        // printing an enemy-selection rule that never runs for him and a
+        // Shatter exception he can never be on either side of. Each member now
+        // carries only its own: the damage pair
+        // (<see cref="DamagePerformanceRules"/>) on Crabaletta and
+        // Chevalmarin, and <see cref="DryCut"/> on all three, since all three
+        // can be asked to perform on an empty buffer. Two strings and no
+        // typed copies, which is `SalonConstants`' own argument one level up.
         if (FurinaReframe.ManualLiveFor(owner))
         {
             return member switch
@@ -175,21 +196,88 @@ public static class SalonMemberTips
                     $"Performs for {SalonConstants.CrabalettaTick} Hydro "
                   + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
                   + $"Evokes for {SalonConstants.CrabalettaBow} Hydro damage "
-                  + "and leaves the stage.",
+                  + "and leaves the stage. "
+                  + DamagePerformanceRules + " " + DryCut,
+                // THE USHER GAINS BLOCK AND HITS NOBODY, so neither damage
+                // clause is a fact about him. The dry cut is: his Block is
+                // three-quarters too.
                 SalonMember.Usher =>
                     $"Performs for {SalonConstants.UsherTick} Block, paying "
                   + $"{SalonConstants.TickEncoreCost} Encore. Evokes for "
-                  + $"{SalonConstants.UsherBow} Block and leaves the stage.",
+                  + $"{SalonConstants.UsherBow} Block and leaves the stage. "
+                  + DryCut,
                 _ =>
                     $"Performs for {SalonConstants.ChevalmarinTick} Hydro "
                   + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
                   + "Evokes by applying Hydro to ALL enemies and granting "
-                  + $"{SalonConstants.ChevalmarinBowEncore} Encore.",
+                  + $"{SalonConstants.ChevalmarinBowEncore} Encore. "
+                  + DamagePerformanceRules + " " + DryCut,
             };
         }
 #endif
         return ShippedBodyFor(member);
     }
+
+    /// <summary>
+    /// THE CLAUSES `EB-629` MOVED OFF THE RULES PARAGRAPH, split by `EB-632`
+    /// so that each member's tip carries only its own.
+    ///
+    /// WHAT `EB-632` FOUND (GPT review, 2026-09-07). `EB-629` shrank the Salon
+    /// rules paragraph by moving three clauses onto the member tips, and wrote
+    /// them as ONE shared string appended to all three members. Two of the
+    /// three are facts about DEALING DAMAGE -- which enemy the roll takes, and
+    /// which damage class the hit belongs to -- and the Usher deals none: he
+    /// gains <see cref="SalonConstants.UsherTick"/> Block. So his tip was
+    /// carrying an enemy-selection rule that never runs for him and a Shatter
+    /// exception he can never be on either side of. The wall had moved rather
+    /// than shrunk, one member over.
+    ///
+    /// SO THERE ARE TWO STRINGS AND NOT THREE COPIES.
+    /// <see cref="DamagePerformanceRules"/> is the pair that belongs to a
+    /// member whose performance is a hit; <see cref="DryCut"/> is the one that
+    /// belongs to every member, because every member can be dry. The
+    /// per-member switch below picks between them and no sentence is typed
+    /// twice -- which is `SalonConstants`' own argument one level up: a rule
+    /// restated per member is a rule that goes stale one member at a time.
+    ///
+    /// EACH SENTENCE IS A RULED FINDING AND CARRIES ITS OWN ID, so a reader
+    /// asking why a clause is worded this way has the run to go to:
+    ///
+    ///   * THE AIM. `EB-425` put it in words after the r5 seat's play was
+    ///     refused ("a card that deals damage but takes no target is not
+    ///     something the face warns you about"); `EB-451` limited it after the
+    ///     r7 seat's one PAID performance rolled a 6-HP Eye with Teeth that
+    ///     revives at full. The implementation is `SalonMemberPower.AimPool`,
+    ///     R250's shape one roller over -- and it is reached only from the
+    ///     damage branch, which is the code half of this split.
+    ///   * THE CLASS. `EB-476` and `EB-548`, one rule (`EB-343`): a
+    ///     performance reaches `CreatureCmd.Damage` as `ValueProp.Unpowered`,
+    ///     so every `IsPoweredAttack()` gate -- the Shatter mark, an enemy's
+    ///     on-Attack trigger -- refuses it while `TargetMods` still reads
+    ///     Vulnerable. "Not an Attack" alone is ambiguous, which is why the
+    ///     sentence says which half is which; "no when-hit power fires" is
+    ///     `ArmKeywordTips.ForSetOff`'s own wording.
+    /// </summary>
+    private const string DamagePerformanceRules =
+        "It picks its own enemy, never a [gold]Minion[/gold] while another "
+      + "enemy stands. "
+      + "A performance is not an [gold]Attack[/gold] and not a hit: "
+      + "[gold]Vulnerable[/gold] moves it, but no [gold]Shatter[/gold] and no "
+      + "when-hit power fires.";
+
+    /// <summary>
+    /// THE DRY CUT, and it is on ALL THREE MEMBERS because all three can be
+    /// asked to perform with an empty buffer. R220 A and `EB-587`:
+    /// three-quarters, from <see cref="SalonConstants.DryDamageMultiplier"/>
+    /// in words, because a player pricing a performance needs the reduced
+    /// number's REASON and the strip already prints its size.
+    ///
+    /// `EB-633` is the other half of the same sentence, one surface over: the
+    /// pip row counts FULL-STRENGTH performances, so a row at zero does not
+    /// mean the stage is idle, and this is where the tip says so.
+    /// </summary>
+    private const string DryCut =
+        "With no [gold]Encore[/gold] it performs at three-quarters.";
 
     /// <summary>The shipped upkeep's wording, unmoved and unreachable from the
     /// arm's branch, so a release build's tip is the same expression it has
@@ -240,96 +328,61 @@ public static class SalonMemberTips
           + "with no Encore to spend acts at three-quarters.";
 
 #if PROTOTYPE_CARDS
-        // `EB-368`. THE ARM'S THREE SALON RULES ARE PRINTED NOWHERE, and the
+        // `EB-368`. THE ARM'S SALON RULES ARE PRINTED NOWHERE ELSE, and the
         // act-2 seat played no Salon card across three fights because of it.
-        // Every sentence above is a SHIPPED rule the reframe replaces: members
-        // do not act on their own turn, a deploy performs on the spot, a
-        // deploy onto a full stage EVOKES the front rather than bowing the
-        // oldest out for its payoff, and a Companion play performs the front
-        // member -- the arm's whole engine, and none of it on any face.
+        // Every sentence in the shipped paragraph above is a rule the reframe
+        // replaces -- members do not act on their own turn, a deploy performs
+        // on the spot, a deploy onto a full stage EVOKES the front rather than
+        // bowing the oldest out for its payoff, and a Companion play performs
+        // the front member -- so the arm's whole engine is here, on the tip
+        // both the deploy card and the stage read (D1 sec.4), stated once and
+        // unable to fork.
         //
-        // The branch is here rather than on the two deploy faces because this
-        // is the tip both the deploy card and the stage hover read (D1 §4), so
-        // the rules are stated once and cannot fork. The faces carry their own
-        // clause too; this is the paragraph behind the word.
+        // `EB-629` CUT IT TO THREE SENTENCES, and the reason is the shape it
+        // had grown into rather than any one clause in it. [USER]'s own act-1
+        // run, 2026-09-07: "still a gigantic wall of text" -- about 700
+        // characters carrying seven rules, at the moment a player is deciding
+        // whether to play one card. Seven rules on one tip is not seven rules
+        // read; it is one tip skipped. What stays is the three a player cannot
+        // act without: THE CAP, WHAT PERFORMS, and THE BONUS.
         //
-        // `EB-425` ADDED THE AIM. A deploy card DEALS DAMAGE and TAKES NO
-        // TARGET, and the first place the r5 seat learned that was a refusal:
-        // "the first thing I tried was `play "Salon Debut" on "Corpse Slug
-        // (1)"` and it was refused... the card's own reminder text says the
-        // member `Performs for 6 Hydro damage`, and a card that deals damage
-        // but takes no target is not something the face warns you about. The
-        // Salon picked slug 2 on its own. I never got to choose a member's
-        // target all round." The rule is `SalonPowers.PerformMember`'s, which
-        // draws the body from `Rng.CombatTargets` over `HittableEnemies` and
-        // is the only implementation of a member acting -- so the sentence is
-        // about every performance and not about one card, which is why it is
-        // here and not on Salon Debut's face. In the `Deploy` tip's words: a
-        // member performs, and the enemy it performs on is its own choice.
+        // NOTHING WAS DELETED FROM THE MOD'S TEXT. Each dropped clause moved
+        // to the surface read AT THE MOMENT IT MATTERS, which for all of them
+        // is a member about to perform -- i.e. the member's own tip,
+        // <see cref="BodyFor"/>:
         //
-        // THE `Deploy` KEYWORD TIP COULD NOT TAKE IT. That word is 132 of its
-        // 135-character ceiling carrying `EB-368`'s three rules, and this
-        // clause is 39; the paragraph behind the word has the room, is printed
-        // on the same card, and is where the other four rules already live.
+        //   * THE AIM (`EB-425`, limited by `EB-451`). "A deploy card deals
+        //     damage and takes no target" cost the r5 seat a refused play, and
+        //     "its own choice" then cost the r7 seat the run's one PAID
+        //     performance to a 6-HP Eye with Teeth that revives at full. The
+        //     rule is `SalonMemberPower.PerformMember`'s roll over
+        //     `AimPool`, so it belongs to a MEMBER performing and now reads on
+        //     the member.
+        //   * NOT AN ATTACK AND NOT A HIT (`EB-476`, `EB-548`). One rule,
+        //     `EB-343`'s: a performance goes out through `ElementalHit.Deal`
+        //     as `ValueProp.Unpowered`, so the Shatter mark and every on-Attack
+        //     trigger refuse it while `TargetMods` still reads Vulnerable. The
+        //     r13 seat called it "the most useful thing I learned and
+        //     effectively invisible"; it is now on the tip of the thing that
+        //     does it.
+        //   * THE DRY CUT (R220 A, `EB-587`). A member with no Encore performs
+        //     at three-quarters -- a fact about ONE member's next act, which is
+        //     what its own tip is for.
         //
-        // `EB-451` PUT THE LIMIT ON THE AIM. "Its own choice" was true and
-        // still cost the r7 seat the run's one PAID performance: the roll took
-        // the 6-HP Eye with Teeth, which revives at full, while the body that
-        // mattered stood beside it. The roll now skips a Minion while a
-        // non-Minion stands (`SalonMemberPower.AimPool`, R250's shape one roller
-        // over), and the sentence that describes the aim is the sentence that
-        // says so.
-        //
-        // `EB-548` RENAMED THE CLASS'S SECOND HALF AND ADDED THE WORD
-        // "hit", which is `EB-490`'s finding on Klee's Set off arriving here.
-        // THE FIND (Furina r13 lane 2): "a member performance is not an
-        // Attack" is what let the assembled seat beat four Skittish 6 bodies
-        // -- "Chevalmarin hit C for 2 and C's HP moved by 2 with no Block
-        // gained... the correct line against Skittish is to spend the free
-        // perform first" -- and the seat called it "the most useful thing I
-        // learned and effectively invisible". The sentence was HERE the whole
-        // time and said "on-Attack triggers do not", which reads as something
-        // on the PLAYER's own side of the board; a player looking for the rule
-        // about the thing on the ENEMY's status bar does not find it there.
-        // "No when-hit power fires" is `ArmKeywordTips.ForSetOff`'s wording
-        // and `EB-538`'s, and this is the third surface to take it.
-        //
-        // "AND NOT A HIT" IS THE OTHER HALF, and it is why the clause reads
-        // as one sentence rather than two: `EB-476`'s "not an Attack" is
-        // ambiguous on its own -- Vulnerable moves a performance and Weak
-        // moves a Skill's damage, so "not an Attack" alone invites a reader to
-        // expect nothing on the enemy to answer it. The rule is about being
-        // HIT, and the sentence now says which half is which.
-        //
-        // `EB-476` ADDED THE CLASS THE PERFORMANCE BELONGS TO, and the seat
-        // could only find it by running the experiment twice. "A member
-        // performance is an Attack for Vulnerable but not for Frozen.
-        // Vulnerable 2 turned Crabaletta's 6 into 9... but a Frozen enemy
-        // survived two performances without Shattering. I could not tell
-        // whether a performance is an Attack" (Furina r9 (c) 3). BOTH
-        // observations are the mod's ONE rule, `EB-343`'s: a performance goes
-        // out through `ElementalHit.Deal`, which reaches `CreatureCmd.Damage`
-        // as `ValueProp.Unpowered`, so every gate that asks
-        // `IsPoweredAttack()` -- the Shatter mark, an enemy's on-Attack
-        // trigger -- refuses it, while `SimDamagePipeline.TargetMods` reads
-        // the target's Vulnerable with no such gate. One sentence says both,
-        // and it says them in the order the seat met them.
+        // AND THE FRONT. "The leftmost member is the front" left with no new
+        // home in text, because `EB-627` gave it a better one: chip 0 on the
+        // member strip wears a highlight frame. A rule the player can SEE does
+        // not need a sentence.
         if (FurinaReframe.ManualLiveFor(owner))
         {
             body =
-                $"Your Salon holds {slots} members. Members do NOT act on "
-              + "their own. A [gold]Companion[/gold] card you play performs "
-              + "the front member; a [gold]Deploy[/gold] performs the member "
-              + "it fields at once; deploying onto a full stage "
-              + "[gold]Evokes[/gold] the front member first. The leftmost "
-              + "member is the front. A performing member picks its own "
-              + "enemy, never a [gold]Minion[/gold] while another enemy "
-              + "stands. A performance is not an [gold]Attack[/gold] and "
-              + "not a hit: [gold]Vulnerable[/gold] moves it, but no "
-              + "[gold]Shatter[/gold] and no when-hit power fires. Member "
-              + "numbers gain +1 per "
-              + $"{SalonConstants.FocusPerFanfare} Fanfare you hold, and a "
-              + "member with no Encore to spend performs at three-quarters.";
+                $"Your Salon holds {slots} members. A [gold]Companion[/gold] "
+              + "card you play performs the front member; a "
+              + "[gold]Deploy[/gold] performs the member it adds, and onto a "
+              + "full stage it first [gold]Evokes[/gold] the front one. "
+              + "Member numbers gain +1 per "
+              + $"{SalonConstants.FocusPerFanfare} [gold]Fanfare[/gold] you "
+              + "hold.";
         }
 #endif
 

@@ -662,6 +662,14 @@ ARM_KEYWORDS = (
     # explain a mechanic that is not there.
     ArmKeyword("Mend", ("Mend", "Mends"), "ArmKeywordTips.ForMend"),
     ArmKeyword("Plan", ("Plan", "Plans"), "ArmKeywordTips.ForPlan"),
+    # Kokomi's THIRD, `EB-625`. `Tamakushi Casket` is her relic, and
+    # `Shell Guard` is written against it by name -- "whenever the Tamakushi
+    # Casket strikes" -- with nothing on screen saying what the Casket is or
+    # what makes it strike. `Grounded`'s shape and `Oz`'s: the attach travels
+    # with the printed word, so a second row naming the relic carries the
+    # definition the day it is authored. NO PLURAL: there is one Casket.
+    ArmKeyword("Tamakushi Casket", ("Tamakushi Casket",),
+               "ArmKeywordTips.ForCasket"),
     # The companion arm's one. `Swirl` is the shared Anemo reaction printed as
     # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
     # say nothing over an aura-less board.
@@ -2378,7 +2386,7 @@ APPLY_POWERS = {
         "[gold]Block[/gold] left at the end of your last turn, also gain 2 "
         "[gold]Strength[/gold]."),
     "mc_omen": ("StellarisOmenPower", None,
-        "At the start of your next turn, apply 1 [gold]Vulnerable[/gold] to "
+        "At the start of your next turn, apply {X} [gold]Vulnerable[/gold] to "
         "ALL enemies."),
     "mc_grand_ode": ("GrandOdePower", None,
         "At the end of your turn, [gold]Swirl[/gold] the aura of ALL enemies. "
@@ -5492,6 +5500,19 @@ def build_vars(card: dict) -> list[str]:
                 out.append(
                     f'new {calculated_damage_var(card)}(ValueProp.Move)'
                     f'.WithMultiplier({mult})')
+                # `EB-624`. THE BASE GAME'S CONDITIONAL, BOTH NUMBERS LIVE.
+                # A `bonus_vs_debuff` row prints "Deal A damage. If the enemy
+                # has a debuff, deal B instead." instead of `EB-598`'s
+                # one-number form, so it declares the two numbers it PRINTS
+                # beside the one it DEALS. `FoldedDamageVar` says why they
+                # are named `DamageVar`s and not a second calculated var.
+                if debuff_calc_rider(card, eff) is not None:
+                    out.append(
+                        f'new FoldedDamageVar("PlainDamage", {base}m, '
+                        'ValueProp.Move)')
+                    out.append(
+                        'new FoldedDamageVar("DebuffDamage", '
+                        f'{base + extra}m, ValueProp.Move)')
             elif eff is not damage_var_effect(card):
                 pass          # literal; only the upgraded hit declares a var
             else:
@@ -5773,9 +5794,16 @@ def build_vars(card: dict) -> list[str]:
     # inside the arm's own class, so the pattern skips any dotted prefix and
     # reads the class name -- and the class is named for the var it carries,
     # which is what keeps that derivation honest.
+    #
+    # AND THE NAME MAY BE THE FIRST ARGUMENT OF A TYPED VAR (`EB-624`): the
+    # game's `DamageVar` and `BlockVar` both take a `(string name, ...)`
+    # overload, and `FoldedDamageVar` is the mod's own subclass of the first --
+    # so a quoted first argument on ANY var declaration is the name, whatever
+    # the class is called. Without this the two printed halves of a conditional
+    # hit both read as "FoldedDamage" and collide with each other.
     names = [
         (m.group(1)
-         if (m := re.search(r'(?:DynamicVar|CalculatedVar)\("(\w+)"', decl))
+         if (m := re.search(r'(?:\w+)\(\s*"(\w+)"', decl))
          else re.match(r"new (?:\w+\.)*(\w+?)Var\(", decl).group(1))
         for decl in out
     ]
@@ -11137,6 +11165,14 @@ def build_upgrade(card: dict) -> list[str]:
         else:
             var = var_for[op]
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
+        # `EB-624`: the two PRINTED numbers of a conditional hit carry their
+        # own base values, so a damage delta moves all three or the face
+        # stops agreeing with the hit the first time the card is upgraded.
+        if key == "damage" and debuff_calc_rider(card, eff) is not None:
+            for name in ("PlainDamage", "DebuffDamage"):
+                lines.append(
+                    f'DynamicVars["{name}"]'
+                    f".UpgradeValueBy({int(deltas[key])}m);")
     if "times" in deltas and times_var_effect(card) is not None:
         # Post-loop: the loop keys a damage op to "damage", so a card that
         # upgrades BOTH its per-hit number and its hit count (none today, but
@@ -12102,26 +12138,19 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "KokomiRiderTips.ForChargeRider("
             f"{tips_expr or 'base.ExtraHoverTips'}, this, "
             f"{charge_rider_args})")
-    # `EB-484`. BOTH NUMBERS OF A `bonus_vs_debuff` FOLD, on a screen with no
-    # enemy to resolve it.
+    # `EB-484` WAS A TIP AND IS NOW THE FACE (`EB-624`), which is why no
+    # attach happens here any more.
     #
-    # The fold is `EB-441` working: the face prints what the hovered enemy will
-    # take. On a SHOP shelf there is no hovered enemy, so `Undertow` printed
-    # "Deal 7 damage, already including 3 if the enemy has a debuff" and the
-    # r16 seat "could not determine whether that card deals 4 or 7" ((c) 7).
-    # The face cannot answer it -- a card's `Localization` is read once at
-    # registration and neither description getter is virtual -- so the pair
-    # goes on the tip, whose numbers are handed down from the SAME rider that
-    # emits the vars rather than re-derived.
-    for _eff in card.get("effects", []):
-        _debuff = debuff_calc_rider(card, _eff)
-        if _debuff is not None:
-            _base, _bonus = _debuff
-            tips_expr = (
-                "KokomiRiderTips.ForDebuffRider("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
-                f"{_base}, {_bonus})")
-            break
+    # The r16 seat could not tell on a SHOP shelf whether `Undertow` "deals 4
+    # or 7", because its face printed one number and a clause about a second.
+    # The remedy then was a tip carrying the pair, on the reading that a card
+    # has exactly one face and cannot branch it. It does not have to: the base
+    # game's own conditional prints BOTH numbers on one face ("Deal A damage.
+    # If the enemy has a debuff, deal B instead."), and `build_vars` now
+    # declares a `FoldedDamageVar` for each, so both are live everywhere and
+    # both are the sheet's own off the board. A tip repeating the sheet
+    # numbers beside a face printing the folded ones would be `EB-441`'s
+    # defect coming back on the other surface.
     # `EB-539`. THE SAME SPLIT ONE COUNT OVER: a live MORNING total, whose
     # face cannot say what it is made of.
     #

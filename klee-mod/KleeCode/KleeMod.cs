@@ -364,18 +364,16 @@ public static class KleeMod
                     // "card_keywords.KLEEMOD-MUSTER.title" as the keyword name
                     // on a live shop screen (0.2-634, EB-53 capture session).
                     [Cards.KokomiRiderTips.MusterKey + ".title"] = "Muster",
-                    // `EB-484`: both numbers of a `bonus_vs_debuff` fold, on
-                    // a screen with no enemy to resolve it. Same bargain and
-                    // the same raw-key hazard as every row here.
-                    [Cards.KokomiRiderTips.DebuffRiderKey + ".title"] =
-                        "Against a debuffed enemy",
+                    // `EB-484`'s row is gone: `EB-624` moved the pair onto
+                    // the FACE, where the base game's own conditional puts it,
+                    // so there is no debuff-rider tip left to title.
                     // `EB-539`: the same split one count over. The face prints
                     // the live morning TOTAL and this row titles the tip that
                     // says what the total is made of -- because "Deal 2
                     // damage, already including 3 for each Plan" is a
                     // contradiction on the one board where the fold is zero.
                     [Cards.KokomiRiderTips.MorningDamageKey + ".title"] =
-                        "Damage from the morning",
+                        "Damage from carried-out Plans",
                     // QUARANTINED (R213 E1): the Charge KEYWORD's title. The
                     // BODY is built live in KokomiRiderTips, because it
                     // quotes CHARGE_PER_EXHAUST and reads the current bank --
@@ -448,6 +446,11 @@ public static class KleeMod
                         "Riders survive the merge",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
+                    // `EB-625`: the relic behind Shell Guard's payout, on
+                    // the face that names it. Same raw-key hazard as every
+                    // row here.
+                    [Cards.ArmKeywordTips.CasketKey + ".title"] =
+                        "Tamakushi Casket",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro
                     // arrives with the jellyfish's carry-out rather than with
                     // the play.

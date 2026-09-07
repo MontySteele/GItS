@@ -40,12 +40,30 @@ internal static class KleeSelfCheck
     /// square brackets is almost certainly a DynamicVar written with the wrong
     /// syntax -- "[Block]" collides with the [center] wrapper the card renderer
     /// adds and throws "Found end tag center, expected Block".
+    ///
+    /// `EB-626`: `blue` WAS MISSING AND IS THE BASE GAME'S OWN. [USER]'s run
+    /// of 2026-09-07 logged seven R6b findings -- MasqueRedDeath,
+    /// CeremonialGarment, WarBanner, Soumetsu, SesshouSakura, SanctifyingRing
+    /// and MujiMujiDaruma -- and every one of them was this list being wrong
+    /// rather than the string being wrong. `[blue]` is how the SHIPPED strings
+    /// mark a numeral in a power or a relic: `KleeMod.InjectLocStrings` carries
+    /// two of them verbatim off `SlayTheSpire2.pck` v0.111.0 ("Vulnerable
+    /// creatures take [blue]50%[/blue] more damage from Attacks."), and
+    /// `docs/current/text-conventions.md` rule 12 states it as a measured
+    /// convention of the corpus. The mod prints it in 83 power descriptions and
+    /// in the reaction and keyword tips beside them; the seven were simply the
+    /// registered powers the R8 sweep reaches.
+    ///
+    /// SO THE FIX IS THE TAG SET AND NOTHING SAYS ANYTHING DIFFERENT. Not one
+    /// of the seven strings moved -- see
+    /// `KleeTests/SelfCheckBbcodeTests.cs`, which runs this very check over
+    /// every power in the assembly and asserts nothing is left.
     /// </summary>
     private static readonly HashSet<string> KnownBbcodeTags = new(StringComparer.OrdinalIgnoreCase)
     {
         "center", "left", "right", "b", "i", "u", "s",
         "color", "bgcolor", "fgcolor", "font", "img", "url",
-        "gold", "keyword", "wave", "shake", "p",
+        "gold", "keyword", "wave", "shake", "p", "blue",
     };
 
     private static readonly List<string> Findings = new();

@@ -172,9 +172,10 @@ def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
     assert "card prints what it pays." in tips
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    assert "gain 6 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
+    # `EB-622`: the payout moved 6 -> 4 (upgrade still `+2`, so 6 upgraded).
+    assert "gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
     # `EB-516`: the sheet row's own condition, held in step with the tip.
-    assert ("if you have a [gold]Bomb[/gold] on the field, gain 6 "
+    assert ("if you have a [gold]Bomb[/gold] on the field, gain 4 "
             "[gold]Block[/gold]") in sheet
 
 
@@ -679,7 +680,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # says WHEN each side is read, which is what the old two-item
             # enumeration could not carry.
             "Your [gold]Strength[/gold] folds in as you write it; the ",
-            "enemy's [gold]Vulnerable[/gold] counts at the morning. A ",
+            # `EB-623` retired "morning" from every printed surface.
+            "enemy's [gold]Vulnerable[/gold] counts next turn. A ",
             # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
             # own words -- the same rule at the same call one kit over.
             "carry-out is not a hit: no when-hit power fires.",
@@ -1177,7 +1179,8 @@ def test_the_plan_tip_says_when_each_side_of_the_line_is_read():
     assert "UNPOWERED -- no Strength, no Weak" in plan
     body = blindplay.ARM_KEYWORDS["Plan"]
     assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
-            "counts at the morning.") in body
+            "counts next turn.") in body
+    assert "morning" not in body
 
 
 def test_the_plan_tip_names_the_class_a_carry_out_is_in():
@@ -1214,10 +1217,14 @@ def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
     writing time and nothing of the target's, so a clause about WHICH terms
     count had to become a clause about WHEN each side is read. A seat that
     commits a turn on a number needs to know which half of it can still move.
+
+    `EB-623` TOOK FIVE BACK, for free: "counts at the morning" became "counts
+    next turn", which is the same fact in the base game's own timing words and
+    retires a word no printed surface teaches. The overage stands.
     """
     from tools import lint_text_conventions as lint
 
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert len(body) == 216
+    assert len(body) == 211
     assert "PlanKey" in lint.EXCEPTIONS
     assert "EB-538" in lint.EXCEPTIONS["PlanKey"]

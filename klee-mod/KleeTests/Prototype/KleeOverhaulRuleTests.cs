@@ -567,7 +567,8 @@ public class KleeOverhaulRuleTests
     public void Groundeds_spark_is_the_kits_rate_and_the_upgrade_is_the_block()
     {
         // The number's home. `Amount` is the BLOCK and the row's upgrade moves
-        // it (`{power_amount: +2}`, 6 -> 8); the Spark is 1 at both levels, so
+        // it (`{power_amount: +2}`, 4 -> 6 since `EB-622`); the Spark is 1 at both
+        // levels, so
         // it is a constant mirrored against tier0 rather than a second reading
         // of the stack.
         Assert.Equal(1, KleeOverhaulLaw.GroundedSpark);

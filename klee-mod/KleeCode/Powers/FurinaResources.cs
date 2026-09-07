@@ -370,6 +370,18 @@ public static class FurinaResources
     {
 #if PROTOTYPE_CARDS
         if (FurinaReframe.BurstRetiredFor(creature)) return false;
+        // `EB-628`. THE DISPLAY HALF IS WIDER THAN THE RULES HALF, and the
+        // reason is what [USER] read on screen: "an overhead bar reading
+        // 10/70", which is a value over a ceiling in the shipped Burst
+        // meter's shape. Under the arm no overhead value/max bar is honest --
+        // Fanfare's own cap is a demoted safety rail that F-A5 measured as
+        // never binding, and the Burst engine is retired -- so the whole
+        // overhead slot stands down whenever the MASTER is live, not only
+        // when the Burst LEG is. The rules half (the income funnel, the kit
+        // grant, the sim's `burst_retired`) stays on `BurstRetiredFor`: a
+        // build running the arm with the Burst leg deliberately off is still
+        // a build whose overhead bar would say nothing.
+        if (FurinaReframe.LiveFor(creature)) return false;
 #endif
         return IsFurina(creature);
     }
@@ -892,6 +904,11 @@ public static class FurinaResources
         // dry-state moment, and the stage reads composition + Encore here.
         // The member tooltip's live cap rides the same moment, which is what
         // makes a Casting Call raise visible as soon as the card resolves.
+        //
+        // `EB-628`, folded into this one call rather than hung beside it: the
+        // arm's `SalonPanel` rides this funnel too, so the chips, the Encore
+        // number, the Fanfare and the member bonus all come from ONE read of
+        // the meters and cannot disagree.
         SalonMemberPower.SyncSlotsDisplay(creature);
         Vfx.SalonVisualsBridge.Refresh(creature);
         // Burst's gauge refresh used to ride the badge apply; now it is

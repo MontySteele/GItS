@@ -244,7 +244,12 @@ are in [`workstreams.md`](workstreams.md).
   `review/records/card-audit-2026-09-07.md` row 1); round 25's hypothesis
   (an Energy-priced detonator beside the Spark-priced ones) is drafted in
   the comparison pass §4 from the GPT balance review.
-  [USER]'s act-1 run is due on `0.2.2888+proto`. The round-8 clear is
+  **[USER]'s act-1 run is PLAYED** (2026-09-07, `0.2.2888+proto`,
+  `review/active/klee-user-run-1-2026-09-07.md`): the concept read as
+  sound, the early fragility and the every-turn Block puzzle as the
+  brief's tension; seven notes triaged, `EB-619`-`EB-622` applied as D
+  and E defaults, **two picks** (the Hexerei ownership rule; whether the
+  tag earns its place). The round-8 clear is
   read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
@@ -476,7 +481,14 @@ are in [`workstreams.md`](workstreams.md).
   Evoked on purpose (the reachability question closed by the draft);
   the Spotlight's line is false since Encore refills (`EB-600`); the
   fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
-  `EB-600`-`EB-604`, built on #413. [USER]'s act-1 run is due on `0.2.2888+proto`.
+  `EB-600`-`EB-604`, built on #413. **[USER]'s act-1 run is PLAYED**
+  (2026-09-07, `0.2.2888+proto`, a short run ending at a Corpse Slug,
+  `review/active/furina-user-run-1-2026-09-07.md`): the notes are the
+  interface, not the kit ("still has basic UI legibility issues"; the
+  Encore idea liked, the stage unreadable, the Salon tip a wall);
+  `EB-627`-`EB-629` applied as E defaults (a member strip, Encore pips and
+  a Fanfare badge, the Salon tip in three sentences), **one eyes-on** on
+  the next deploy; no fun verdict recorded.
   **`EB-507` and `EB-616` are BUILT and AUDITED**
   (`review/records/card-audit-2026-09-07.md`, six rows read by GPT, five
   FOLLOWS on the first call): under the arm no offered face grants a Fanfare

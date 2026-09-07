@@ -774,7 +774,7 @@ def turn_start_late(state: CombatState) -> None:
     # reading of "held" to keep in step. Rule 4 mints a Spark per EXPLOSION, so
     # the held turn this card is written for is by construction the one turn
     # that mints none. A flat `C.KLEE_OVERHAUL_GROUNDED_SPARK` and not `n`,
-    # because the upgrade moves the BLOCK (6 -> 8) and leaves the Spark at 1.
+    # because the upgrade moves the BLOCK (4 -> 6) and leaves the Spark at 1.
     #
     # UNPOWERED (`ValueProp.Unpowered` in `CreatureCmd.GainBlock`), so no
     # Dexterity feeds it and no Frail bites it: it is a POWER's Block, not a

@@ -593,21 +593,27 @@ def test_undertow_is_one_hit_with_a_rider_and_not_two_branches(overhaul):
     assert hp - enemy.hp == 10
 
 
-def test_undertows_face_prints_one_folded_number(overhaul):
+def test_undertows_face_prints_two_folded_numbers(overhaul):
     """The C# half, and the reason it is a rider and not a fold of our own:
     `CalculatedDamageVar` is the engine's own var, folded exactly the way
     Strike's `DamageVar` is folded, and `Calculate(target)` at resolution is
-    the same call -- so the face and the hit are one number by construction.
-    The multiplier reads the HOVERED enemy, so the face answers per body the
-    question the branch used to ask in the abstract."""
+    the same call -- so the HIT and the number it is folded from are one by
+    construction.
+
+    `EB-624` PUT BOTH BRANCHES BACK ON THE FACE, in the base game's own shape:
+    the printed halves are two `FoldedDamageVar`s taking the same two folds,
+    and the rider still decides which of them lands. The row's own file is
+    `test_eb624_undertows_two_printed_numbers.py`; this is the pin that used
+    to hold the one-number face and now holds the two."""
     from pathlib import Path
 
     repo = Path(__file__).resolve().parents[2]
     src = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "Generated" / "ProtoKkUndertow.cs").read_text(encoding="utf-8")
 
-    assert ("Deal {CalculatedDamage:diff()} damage, already including "
-            "{ExtraDamage:diff()} if the enemy has a debuff." in src)
+    assert ("Deal {PlainDamage:diff()} damage. If the enemy has a debuff, "
+            "deal {DebuffDamage:diff()} instead." in src)
+    assert "already including" not in src
     assert "IfUpgraded:show:10|7" not in src
     assert "KokomiOverhaulKit.HasDebuff(target) ? 1 : 0" in src
     # ONE hit, the sim's shape: the branch is gone from the play as well as

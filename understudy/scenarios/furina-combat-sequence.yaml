@@ -1,0 +1,50 @@
+# EB-627..638 eyes-on material, the short combat sequence GPT's review of
+# 2026-09-07 asked for: a full stage; a Companion card played (who performs,
+# at what number); a fourth Deploy onto the full stage (who leaves, the Evoke
+# line with the refund, who enters). Each `wait` is a capture window for
+# `understudy.harness frame`. Frames are MATERIAL, never evidence.
+#
+# Encore arithmetic (EB-631, measured 2026-09-07): only Crabaletta's opening
+# arrival is free; a Deploy's performance pays 1, so three Debuts spend the
+# opening 2 and the third performs dry. `set_resource` restores the buffer
+# between beats so each beat is captured paid; a dev write, not a rule.
+
+name: furina-combat-sequence
+character: KLEEMOD-FURINA
+turns: 1
+
+notes: |
+  Full stage, hold; a Companion card performs the front member, hold; a fourth
+  Deploy Evokes the front member, hold.
+
+assumptions:
+  - "Three Salon Debuts and one more are granted to hand, plus Chevreuse -
+     Interdiction Fire as the Companion card, so the sequence does not depend
+     on the draw."
+  - "Energy is set to 6 so every play is affordable; Encore is restored to 2
+     before the Companion play and before the fourth Deploy."
+
+steps:
+  - give: {card: KLEEMOD-CHEVREUSE_INTERDICTION_FIRE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - set_energy: {amount: 6}
+  - play: {card: "Salon Début"}
+  - play: {card: "Salon Début"}
+  - play: {card: "Salon Début"}
+  - expect:
+      power: {who: player, name: "salon member", stacks: 3}
+  # beat 1: the full stage at Encore 0, the reduced-performance note
+  - wait: {seconds: 25}
+  - set_resource: {name: KLEEMOD_ENCORE, amount: 2}
+  # beat 2: a Companion card performs the front member (paid)
+  - play: {card: "Chevreuse — Interdiction Fire", target: first}
+  - wait: {seconds: 25}
+  - set_resource: {name: KLEEMOD_ENCORE, amount: 2}
+  # beat 3: a Deploy onto the full stage Evokes the front member first
+  - play: {card: "Salon Début"}
+  - wait: {seconds: 25}
+  - expect:
+      description_contains: {card: "Salon Début", text: "Deploy"}

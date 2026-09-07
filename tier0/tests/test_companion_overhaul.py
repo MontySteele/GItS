@@ -28,7 +28,7 @@ from pathlib import Path
 import pytest
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine import effects
 from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
@@ -357,6 +357,43 @@ def test_the_omen_is_popped_whole_rather_than_ticked(overhaul):
     effects.companion_overhaul_turn_start(st)
     assert st.enemies[0].powers["vulnerable"] == 2 * C.MC_OMEN_VULNERABLE
     assert "mc_omen" not in st.player.powers
+
+
+def test_eb622_monas_row_promises_two_vulnerable_and_pays_them(overhaul):
+    """`EB-622`. THE ROW IS THE NUMBER, in both engines.
+
+    [USER]'s act-1 run read Mona as a Rare with Exhaust that could do more, so
+    the omen's stack moved 1 -> 2. Nothing in the rule moved: the payout has
+    always been `MC_OMEN_VULNERABLE * stack`, and the stack is what the row
+    prints. Pinned from the SHEET rather than by setting the power by hand,
+    because the defect this guards is a face and a stack drifting apart."""
+    row = {c.id: c for c in loader.prototype_cards()}[
+        "proto_mc_mona_stellaris_phantasm"]
+    omen = next(fx for fx in row.effects if fx.get("power") == "mc_omen")
+    assert omen["amount"] == 2
+
+    st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
+    st.player.powers["mc_omen"] = omen["amount"]
+    effects.companion_overhaul_turn_start(st)
+    assert all(e.powers.get("vulnerable", 0) == 2 for e in st.enemies)
+
+
+def test_eb622_sucroses_upgrade_keeps_exhaust_and_draws_two(overhaul):
+    """`EB-622`. The Prototype-stage default would have taken Exhaust OFF a
+    0-cost cantrip, which reads as "4 energy the turn you draw it". The row now
+    carries an explicit `upgrade:` block, and an authored block WINS over the
+    rule (`upgrades._prototype_upgrade_index`), so the keyword stands and the
+    card draws one more instead."""
+    row = {c.id: c for c in loader.prototype_cards()}[
+        "proto_mc_sucrose_catalyst_conversion"]
+    assert row.upgrade == {"draw": 1}
+
+    upgraded = upgrades.apply_upgrade(row)
+    assert upgraded.exhaust is True, "the upgrade keeps Exhaust"
+    draw = next(fx for fx in upgraded.effects if fx["op"] == "draw")
+    assert draw["amount"] == 2
+    energy = next(fx for fx in upgraded.effects if fx["op"] == "energy")
+    assert energy["amount"] == 1, "the Energy half does not move"
 
 
 def test_glacial_waltz_hits_and_ticks(overhaul):

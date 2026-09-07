@@ -3423,7 +3423,8 @@ def test_an_empty_morning_says_so_rather_than_printing_a_zero():
     state reads as a state. Nothing pending is nothing to say."""
     page = blindplay.render(blindplay.observation(
         plans_combat_state(dict(TWO_PLANS, pending=0, queue=[]))))
-    assert "Nothing is planned. The morning is empty." in page
+    assert ("Nothing is planned. Nothing will be carried out at the start "
+            "of your next turn.") in page
     assert "in this order" not in page
 
 
@@ -3535,7 +3536,7 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
     assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
-            "counts at the morning.") in plan
+            "counts next turn.") in plan
 
 
 def test_a_board_with_no_jellyfish_is_told_no_aim_rule():
@@ -4137,7 +4138,8 @@ def test_an_on_play_firing_prints_under_its_own_heading():
                            "moved": [{"target": "Nibbit", "combat_id": "1",
                                       "amount": 7, "dead": False}]}]))))
     assert "carried these out at the start of this turn" not in page
-    assert "the moment each was written, and not this morning" in page
+    assert ("the moment each was written, and not at the start of the turn"
+            in page)
     assert "- Bake-Kurage: War Council, 5" in page
     assert "- Nibbit lost 7 HP" in page
     # The queue below still says the Plan is waiting for the morning, which
@@ -4793,7 +4795,7 @@ def test_the_plan_word_says_when_each_side_of_the_line_is_read():
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
     assert "Your Strength folds in as you write it" in plan
-    assert "the enemy's Vulnerable counts at the morning" in plan
+    assert "the enemy's Vulnerable counts next turn" in plan
     assert "Weak" not in plan
 
 
@@ -6101,7 +6103,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Vulnerable at the morning.
         "Plan": [", paid now; next turn: front ",
                  " folds in as you write it; the ",
-                 " counts at the morning. A ",
+                 " counts next turn. A ",
                  "carry-out is not a hit: no when-hit power fires."],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
@@ -6115,9 +6117,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # and the rule was on a different screen the whole time.
         # `EB-554`: the ownership clause points at the mark the faces now
         # carry, so a reader can run the test instead of being told one exists.
+        # `EB-619`: the sentence ends at "a play" -- a price the card does
+        # not charge is not the keyword page's to deny.
         "Hexerei": [" card whose face prints the word. Playing ",
                     "one marked Klee's own gives Klee ", ", up to ",
-                    " a play; it never costs "],
+                    " a play."],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -6166,6 +6170,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Encore": ["it absorbs damage before HP. ",
                    "One pool, as each lands: a card pays to ",
                    "resolve, a member spends 1 to perform or acts at 3/4."],
+        # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
+        # own words. The strike number is interpolated on both sides -- the
+        # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
+        # `blindplay_shape.CASKET_STRIKE` -- so what is held in step is the
+        # prose either side of it, the same fold-out the Encore row makes.
+        "Tamakushi Casket": [
+            "Your relic. Whenever you apply a debuff to an enemy, it deals ",
+            " damage to ", "that enemy."],
     }
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the
@@ -7221,14 +7233,16 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
 
     row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
     assert (f"gives Klee {blindplay_notes.COMPANION_SPARK} Spark, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX} a play;") in row
+            f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in row
     # `EB-554`: the clause that answers the seat's OTHER question -- whether
     # Razor is one of Klee's own -- now points at the mark the faces carry
     # instead of telling the reader a split exists that they cannot run.
     # `EB-596`: and the verb is a gain, not a price, because two seats read
     # "pay" the other way round.
     assert "marked Klee's own gives Klee" in row
-    assert "it never costs Spark" in row
+    # `EB-619`: [USER]'s act-1 run read the price denial as belonging on the
+    # card's own cost section, so the clause is gone from both surfaces.
+    assert "never costs" not in row
     assert len(row) <= 135
 
 
@@ -8224,10 +8238,13 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
     template holds exactly one `Calculated*` hole, which is the same invariant
     the generator emits under (`block_calc_rider`: one CalculationBase per
     card)."""
+    # `EB-624`: and a face that prints TWO numbers off two bases of its own
+    # moves both, while the `CalculationBase` that feeds the DEALT number has
+    # no hole to land in and needs none.
     assert qa_packet.upgraded_face(
         "KLEEMOD-PROTO_KK_UNDERTOW",
-        "Deal 7 damage, already including 3 if the enemy has a debuff.") == (
-        "Deal 10 damage, already including 3 if the enemy has a debuff.")
+        "Deal 7 damage. If the enemy has a debuff, deal 10 instead.") == (
+        "Deal 10 damage. If the enemy has a debuff, deal 13 instead.")
     # A plural arm follows the number it is about rather than being copied.
     assert qa_packet.upgraded_face(
         "KLEEMOD-LYNETTE_BOX_TRICK", "Draw 2 cards.") == "Draw 3 cards."
@@ -10361,7 +10378,7 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     del state["player"]["character"]
     assert ("marked Klee's own gives Klee "
             f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX} a play;") in blindplay.observe(state)
+            f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in blindplay.observe(state)
 
 
 def test_every_other_arm_word_is_still_defined_on_every_run():

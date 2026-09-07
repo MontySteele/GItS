@@ -91,9 +91,12 @@ public class Round19Tests
         // nothing of the target's, so the clause is about WHEN each side is
         // read. A seat committing a turn on a number needs to know which half
         // of it can still move.
+        //
+        // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
+        // "counts next turn", the same fact in the base game's timing words.
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(216, rendered.Length);
+        Assert.Equal(211, rendered.Length);
         Assert.EndsWith("A carry-out is not a hit: no when-hit power fires.",
                         rendered);
     }
@@ -156,7 +159,12 @@ public class Round19Tests
         using var _ = new ReframeArm();
         var seat = Seat.Furina().WithCombatState();
 
-        var rules = SalonMemberTips.SalonRulesBody(seat.Creature);
+        // `EB-629` moved the sentence to the member tips; the words are
+        // unchanged. `EB-632` then narrowed WHICH member tip carries it to the
+        // ones that deal damage -- the sentence is about a hit, and the Usher
+        // gains Block -- so the surface read here is Crabaletta's.
+        var rules = SalonMemberTips.BodyFor(SalonMember.Crabaletta,
+                                            seat.Creature);
 
         Assert.Contains("not a hit", rules);
         Assert.Contains("no when-hit power fires", rules);
@@ -179,7 +187,8 @@ public class Round19Tests
                  {
                      Printed(typeof(ArmKeywordTips), "ForSetOff"),
                      PlanTip(),
-                     SalonMemberTips.SalonRulesBody(seat.Creature),
+                     SalonMemberTips.BodyFor(SalonMember.Crabaletta,
+                                             seat.Creature),
                  })
         {
             Assert.Contains("when-hit power", surface);
@@ -526,8 +535,11 @@ public class Round19Tests
         // absence of a typed digit are the pin, not the wording around them.
         // `EB-596` reordered the sentence (who is paid, how much, what the
         // cap counts); the two holes are still the pin.
+        // `EB-619` ended the sentence at "a play": the trailing "it never
+        // costs Spark" was a price denied on the wrong screen.
         Assert.Contains("[blue][/blue] [gold]Spark[/gold], up to [blue][/blue] "
-                      + "a play; it never costs [gold]Spark[/gold].", hexerei);
+                      + "a play.", hexerei);
+        Assert.DoesNotContain("never costs", hexerei);
         Assert.DoesNotContain("Cards of hers pay", hexerei);
         // The clause that answers the seat's OTHER question -- whether Razor is
         // one of Klee's own -- is what paid for the room, and it stays, now
@@ -693,10 +705,12 @@ public class Round19Tests
 
         var body = Printed(typeof(KokomiRiderTips), "MorningDamageBody");
         Assert.Contains(", plus ", body);
+        // `EB-623`: the clause says WHEN in the base game's timing words.
         Assert.Contains("for each [gold]Plan[/gold] the "
-                      + "[gold]Bake-Kurage[/gold] carried out this morning",
+                      + "[gold]Bake-Kurage[/gold] carried out at the start of "
+                      + "this turn",
                         body);
-        Assert.Contains("; this morning: ", body);
+        Assert.Contains("; it carried out ", body);
 
         Assert.Equal("KLEEMOD-MORNING_DAMAGE_RIDER",
                      KokomiRiderTips.MorningDamageKey);
@@ -709,7 +723,7 @@ public class Round19Tests
     public void EB539_off_the_board_the_rule_stands_without_a_count()
     {
         // The `FurinaRiderTips` rule every tip in that file keeps: a shop
-        // shelf and a deck view have no morning, and "this morning: 0" printed
+        // shelf and a deck view have no morning, and "it carried out 0" printed
         // there would be the same false certainty the row was filed on. So the
         // body asks for an owner and a combat before it counts.
         var calls = Il.Calls(typeof(KokomiRiderTips)

@@ -2555,6 +2555,37 @@ worth naming: two would be two aura applications and two reaction rolls.
 `target_has_debuff` predicate already used, so the rider asks the question the
 branch asked.
 
+`EB-624` PUT BOTH BRANCHES BACK ON THE FACE, and this time both are live.
+[USER]'s act-1 run of 2026-09-07 read "Deal 10 damage, already including 3 if
+the enemy has a debuff" as a sentence arguing with itself: 10 cannot already
+include a 3 that the enemy it is aimed at has not earned. Nothing was wrong
+with the number -- it is the paragraph above working exactly as written -- and
+the base game simply never writes a conditional that way. `FLATTEN`'s shape is
+two numbers and a reader who picks, so the face is "Deal {PlainDamage:diff()}
+damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead."
+
+The two printed halves are `FoldedDamageVar`s, one carrying the base and one
+the base plus the bonus. That type is the mod's own subclass of the game's
+`DamageVar` -- Strike's var, whose preview is the same
+`Hook.ModifyDamage(..., ModifyDamageHookType.All)` call `CalculatedDamageVar`
+makes -- with `SimDamagePipeline.TargetMods` added on top, which is exactly the
+pair of folds `FrontFoldedDamageVar` already applies to the number the card
+deals. A second `CalculatedDamageVar` was not available for the job: the game's
+constructor hardcodes the token `CalculatedDamage` and `DynamicVar.Name` is
+get-only, so two of them on one card would be one var, and a face needs two
+tokens.
+
+THE HIT IS UNTOUCHED. `DamageCmd.Attack` is still handed `CalculatedDamage`,
+whose multiplier is still the debuff rider, so it is still ONE hit and the two
+printed halves are display only. The upgrade's +3 moves all three bases, or the
+face would part from the hit on the first forge and only on an upgraded copy.
+
+AND `EB-484`'s HOVER TIP IS GONE rather than reworded. It carried the pair
+because a card has exactly one face and cannot branch it -- true, and it never
+had to branch. With both numbers printed and folded, a tip restating the
+SHEET's 7 and 10 would be `EB-441`'s own defect arriving on the other surface:
+two numbers on one screen computed to two conventions.
+
 ## `proto_kk_well_laid` -- the face is the total, the rule is the tip (`EB-539`)
 
 The row's face carried the rule as well as the number: "Deal

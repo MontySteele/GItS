@@ -1,0 +1,98 @@
+# EB-627/628/633/634/635 eyes-on material, and EB-631's measurement.
+#
+# THE FIRST VERSION OF THIS FILE ASSERTED A RULE THAT DOES NOT EXIST. Its own
+# comment read "under the arm a Deploy's own performance is free (R260), so
+# three Salon Debuts fill the stage at Encore 2", the Spotlight was then refused
+# with BlockedByCardLogic, and `EB-631` was filed against the refusal.
+#
+# WHAT R260 ACTUALLY RULED (`EB-553`, `EB-558`): the stage OPENS with
+# Mademoiselle Crabaletta already on it and HER arrival performance is the free
+# one -- [USER]'s own "one free Osty", carried as a `free` parameter on the one
+# implementation of a member acting. Every other performance pays its
+# `TickEncoreCost`, deploy-performs included; `EB-553` says so in as many words
+# ("so deploy-performs pays 1 of the opening 2"). So three Salon Debuts on the
+# opening 2 Encore leave 0, and Ethereal Spotlight -- which costs 2 -- is
+# CORRECTLY refused by its own price gate (`EB-364`, `EB-406`). Nothing was
+# broken; the assumption was.
+#
+# So the file now MEASURES the Encore after every play rather than assuming it,
+# tops the buffer back up before the Spotlight so the lit frame can still be
+# taken, and reads the three meters off the wire, which is `EB-636`'s other
+# half: the panel replaced their power-row badges and the MODELS have to stay
+# on the wire or every headless read of the Salon goes blind.
+#
+# The two `wait` steps are the capture windows; nothing here is evidence.
+
+name: furina-full-stage-frame
+character: KLEEMOD-FURINA
+turns: 1
+
+notes: |
+  Three Deploys onto the opening stage, holding the Encore read at each; the
+  buffer restored, the Spotlight lit, hold.
+
+assumptions:
+  - "The starting deck's own Salon Debut is not relied on: three copies are
+     granted to hand so the stage fills in one turn regardless of the draw."
+  - "Energy is set to 5 so the three Deploys and the Spotlight all play."
+  - "The opening Encore is FurinaReframeLaw.OpeningEncore = 2 and a
+     performance costs SalonConstants.TickEncoreCost = 1, so the numbers
+     asserted below are 2 -> 1 -> 0 -> 0. A retune of either constant moves
+     them, which is what makes the failure readable."
+  - "R260's free performance is the RELIC's opening arrival only. A deploy a
+     card makes pays, so the third Debut performs dry at three-quarters."
+
+steps:
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: "Ethereal Spotlight", pile: hand, upgraded: false}
+  - set_energy: {amount: 5}
+
+  # The opening, before anything is played: the 2 R258 sized for one move.
+  - expect:
+      resource: {name: KLEEMOD_ENCORE, amount: 2}
+
+  - play: {card: "Salon Début"}
+  - expect:
+      resource: {name: KLEEMOD_ENCORE, amount: 1}
+  - play: {card: "Salon Début"}
+  - expect:
+      resource: {name: KLEEMOD_ENCORE, amount: 0}
+  # The third arrival performs DRY -- there is nothing left to pay it -- and
+  # the panel says so ("Reduced performance", `EB-633`).
+  - play: {card: "Salon Début"}
+  - expect:
+      resource: {name: KLEEMOD_ENCORE, amount: 0}
+
+  # `EB-631`, MEASURED: the Spotlight is refused HERE, and by its own price
+  # gate rather than by anything to do with arrivals. The sentence is the
+  # card's own (`EB-364`, `EB-505`), which is what the enum alone never said.
+  - expect:
+      can_play: {card: "Ethereal Spotlight", value: false}
+
+  # `EB-636`: the three meters draw no power-row badge under the arm, and the
+  # models are still on the wire. This is the assertion of that second half --
+  # if the suppression ever moved to `PowerModel.IsVisibleInternal`, these
+  # three reads would go silently missing rather than fail loudly.
+  - expect:
+      power: {who: player, name: "salon member", stacks: 3}
+  - expect:
+      power: {who: player, name: "fanfare"}
+
+  # The full stage, held for a frame: three chips, chip 0 marked FRONT with its
+  # Evoke line, the resource line at Encore 0 and the reduced-performance note.
+  - wait: {seconds: 30}
+
+  # The buffer restored so the lit-Spotlight frame can still be taken. A dev
+  # write, not a rule: the run is no longer one the generators produced.
+  - set_resource: {name: KLEEMOD_ENCORE, amount: 2}
+  - expect:
+      can_play: {card: "Ethereal Spotlight", value: true}
+  - play: {card: "Ethereal Spotlight"}
+  - expect:
+      resource: {name: KLEEMOD_ENCORE, amount: 0}
+  - wait: {seconds: 30}
+
+  - expect:
+      description_contains: {card: "Salon Début", text: "Deploy"}
