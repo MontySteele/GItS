@@ -1397,10 +1397,25 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // the card, which is the whole of what makes the starter's promise
         // legible: the Mines arrive when the big Bomb finally goes off, not
         // when it was planted.
+        //
+        // `EB-457`: THE CORPSE GUARD, and this sweep was the ONE placement
+        // walk in the file without it -- <see cref="PlaceOnAll"/>,
+        // <see cref="PlaceOnRandom"/>, <see cref="SetOffAll"/> and
+        // <see cref="JumpCharges"/> all filter the dead. A Set off kills, and
+        // this loop runs BETWEEN the explosions of one pile, so a body that
+        // the charge before this one killed is still in `HittableEnemies` when
+        // the rider sweeps it. The Mine that lands there is real -- the
+        // register holds it and `SweepJumps` will walk it to a survivor at the
+        // next beat -- and it prints on no status block in between, which is
+        // exactly the shape the r14 seat reported. `isMine: true` and
+        // `payloadMineAll: 0` are what make the rider's Mine the same charge a
+        // Mine Toss places, so the pile it lands in prints the Mine face and
+        // never the rider one.
         if (charge.PayloadMineAll > 0 && applier.CombatState != null)
         {
             foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
             {
+                if (enemy.IsDead) continue;
                 await Place(choiceContext, enemy, charge.PayloadMineAll,
                             isMine: true, payloadMineAll: 0, applier, cardSource);
             }
