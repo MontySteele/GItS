@@ -10695,7 +10695,9 @@ def test_the_plan_panel_says_the_jellyfish_holds_any_number_of_plans():
                     "kind": "Block", "asked": 10})))
     lines = page.splitlines()
     assert blindplay.PLAN_COUNT_NOTE in lines
-    assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 1 == \
+    # `EB-411` put the Block rule between the two: the count is still the last
+    # of the panel's rules and still sits under the Hydro one.
+    assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 2 == \
         lines.index(blindplay.PLAN_COUNT_NOTE)
 
 
@@ -11184,3 +11186,40 @@ def test_the_same_state_prints_the_same_face_on_every_observe():
     # And the buff does not move the printed face on this side either -- the
     # page prints the feed's own string and does no arithmetic on it.
     assert "Deal 6 damage" in blindplay.observe(combat_state())
+
+
+# --- `EB-411`: WHAT A CARRY-OUT LANDS IN ------------------------------------
+
+
+def test_the_plan_panel_says_a_carry_out_lands_in_standing_block():
+    """`EB-411`. THE PLATING THAT ATE A WHOLE PLAN.
+
+    "Whether to plan *at all* into a `Plating 8` enemy. This one was real and
+    also the least fair, because the reason the answer is no -- the carry-out
+    lands at the start of my turn, before I can strip block -- is nowhere on
+    the card" (Kokomi r10 run 2 (c) 4, fight 4).
+
+    The engine's turn-start order is fixed and pinned one file over
+    (`test_reaction_phase_parity.TURN_START_BROADCAST_ORDER`): the block clear
+    in it is the PLAYER's, and the morning resolves at the last broadcast of
+    the list, before the player has played anything. So the enemy's own Block
+    is standing when the Plan arrives and nothing can strip it first.
+
+    Seen to FAIL: the panel carried the aim rule, the Hydro rule and the count
+    rule and said nothing about Block.
+    """
+    page = blindplay.observe(plans_combat_state(TWO_PLANS))
+    lines = page.splitlines()
+    assert blindplay.PLAN_BLOCK_NOTE in lines
+    # The panel reads in the order a Plan resolves in: which body, what the
+    # hit is, then what is in the way when it gets there.
+    assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 1 == \
+        lines.index(blindplay.PLAN_BLOCK_NOTE)
+    assert lines.index(blindplay.PLAN_BLOCK_NOTE) + 1 == \
+        lines.index(blindplay.PLAN_COUNT_NOTE)
+
+
+def test_a_board_with_no_jellyfish_prints_no_plan_rules():
+    """The panel's own gate, unmoved: the four rules ride the pet's line, so a
+    board with no Plan rule in it prints none of them."""
+    assert blindplay.PLAN_BLOCK_NOTE not in blindplay.observe(combat_state())

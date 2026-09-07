@@ -595,6 +595,32 @@ PLAN_AIM_NOTE = ("- A Plan with one target hits the front enemy and never a "
                  "front one anyway. A Plan whose card says ALL hits every "
                  "living enemy, Minions included.")
 
+# `EB-411`. THE PLATING THAT ATE A WHOLE PLAN.
+#
+# THE FIND (Kokomi r10 run 2 (c) 4, fight 4). "Whether to plan *at all* into a
+# `Plating 8` enemy. This one was real and also the least fair, because the
+# reason the answer is no -- the carry-out lands at the start of my turn,
+# before I can strip block -- is nowhere on the card." The keyword's own clause
+# says WHEN ("at the start of your next turn, before you draw") and nothing
+# about what the hit meets when it gets there.
+#
+# THE ORDER IS THE ENGINE'S, and it is written down: the turn-start broadcast
+# is `BeforeSideTurnStart`, BLOCK CLEAR, `AfterBlockCleared`, ENERGY RESET,
+# HAND DRAW, `AfterPlayerTurnStart` (`ProtoBakeKuragePower`'s header, read off
+# the decompile and pinned by `TURN_START_BROADCAST_ORDER`), and the morning
+# resolves at the last of those. The block clear in that list is YOURS. An
+# enemy's Block falls at ITS turn start, so whatever it raised on its own turn
+# is still standing when the morning arrives -- and the morning arrives before
+# the player has played a card, so there is no move that strips it first.
+#
+# ONE SENTENCE, ON THE PANEL, in the order the engine resolves. The `Plan`
+# keyword is at its 135-character ceiling and cannot carry this
+# (`PLAN_AIM_NOTE`'s argument, whole); the panel has no ceiling, and it is the
+# screen every Plan is written from.
+PLAN_BLOCK_NOTE = ("- A Plan is carried out before you play anything, so it "
+                   "lands in whatever Block the enemy is still standing in "
+                   "from its own turn -- you cannot strip that Block first.")
+
 PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
                    "already there. A Plan that blocks, draws or applies a "

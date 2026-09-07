@@ -38,6 +38,7 @@ from understudy.blindplay_notes import (ATTACK_BUFF_NOTE, AURA_NOTE,
                                         MULTI_INTENT_NOTE,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         PLAN_AIM_NOTE,
+                                        PLAN_BLOCK_NOTE,
                                         PLAN_COUNT_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
@@ -861,6 +862,10 @@ def render(obs: dict[str, Any]) -> str:
                 # asking what a Plan will do asks which body first.
                 out.append(PLAN_AIM_NOTE)
                 out.append(PLAN_HYDRO_NOTE)
+                # `EB-411`: and what the hit meets when it gets there -- the
+                # enemy's own Block, which YOUR turn start does not clear and
+                # which no play of yours can strip before the morning.
+                out.append(PLAN_BLOCK_NOTE)
                 out.append(PLAN_COUNT_NOTE)
                 # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
                 # The form under *What you can say* is gone on such a turn
