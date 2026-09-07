@@ -56,13 +56,13 @@ public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mona — Stellaris Phantasm"),
-        ("description", "[gold]Hexerei[/gold]. Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 1 [gold]Vulnerable[/gold] to ALL enemies."),
+        ("description", "[gold]Hexerei[/gold]. Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply {PowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,11 +78,11 @@ public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCa
         {
             await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
         }
-        await PowerCmd.Apply<StellarisOmenPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<StellarisOmenPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

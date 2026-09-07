@@ -191,8 +191,14 @@ public sealed class RevelationPower : PowerModel, ILocalizationProvider
 /// says next. So this power is a one-shot promise that resolves at the next
 /// player turn start and then removes itself.
 ///
-/// Amount is the number of COPIES, and each pays one Vulnerable -- one turn of
-/// vulnerability apiece, since Vulnerable's stacks are its duration.
+/// Amount is the STACK the row applied, and each stack pays
+/// <c>OmenVulnerable</c> Vulnerable -- one turn of vulnerability apiece, since
+/// Vulnerable's stacks are its duration. `EB-622` moved Mona's row from 1 to
+/// 2, so the badge prints <c>{Amount}</c> rather than the per-stack constant:
+/// a face interpolating the constant would say "apply 1" over a power that
+/// pays 2. At <c>OmenVulnerable == 1</c> the stack IS the payout, and that
+/// identity is pinned rather than assumed
+/// (<c>The_omens_face_prints_the_stack_it_pays</c>).
 /// </summary>
 public sealed class StellarisOmenPower : PowerModel, ILocalizationProvider
 {
@@ -201,7 +207,7 @@ public sealed class StellarisOmenPower : PowerModel, ILocalizationProvider
         ("title", "Stellaris Phantasm"),
         ("description",
             "At the start of your next turn, apply "
-          + $"[blue]{CompanionOverhaulLaw.OmenVulnerable}[/blue] [gold]Vulnerable[/gold] "
+          + "[blue]{Amount}[/blue] [gold]Vulnerable[/gold] "
           + "to ALL enemies."),
     };
 

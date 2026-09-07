@@ -526,8 +526,11 @@ public class Round19Tests
         // absence of a typed digit are the pin, not the wording around them.
         // `EB-596` reordered the sentence (who is paid, how much, what the
         // cap counts); the two holes are still the pin.
+        // `EB-619` ended the sentence at "a play": the trailing "it never
+        // costs Spark" was a price denied on the wrong screen.
         Assert.Contains("[blue][/blue] [gold]Spark[/gold], up to [blue][/blue] "
-                      + "a play; it never costs [gold]Spark[/gold].", hexerei);
+                      + "a play.", hexerei);
+        Assert.DoesNotContain("never costs", hexerei);
         Assert.DoesNotContain("Cards of hers pay", hexerei);
         // The clause that answers the seat's OTHER question -- whether Razor is
         // one of Klee's own -- is what paid for the room, and it stays, now

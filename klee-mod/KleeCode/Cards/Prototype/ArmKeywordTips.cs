@@ -522,6 +522,14 @@ public static class ArmKeywordTips
     /// deliberately not on <see cref="ForCovenSpark"/>, where it would state a
     /// ceiling no single clause reaches; here it is the whole of what a player
     /// asking "how much" needs.
+    ///
+    /// `EB-619` DROPPED THE LAST CLAUSE. "It never costs Spark" was the answer
+    /// to `EB-596`'s surcharge misread, and [USER]'s own act-1 run read it as
+    /// the wrong screen for that answer -- "shouldn't the card's own cost
+    /// section say that?" A price a card does not charge is not a rule the
+    /// keyword page owes: the cost line is where a player looks for what a
+    /// card costs, and a keyword that denies a price no face prints invites
+    /// the doubt it was written to settle. The sentence ends at "a play."
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
@@ -529,7 +537,7 @@ public static class ArmKeywordTips
             "A [gold]Companion[/gold] card whose face prints the word. Playing "
           + "one marked Klee's own gives Klee [blue]" + KleeCompanionSpark.Base
           + "[/blue] [gold]Spark[/gold], up to [blue]" + KleeCompanionSpark.MaxPerPlay
-          + "[/blue] a play; it never costs [gold]Spark[/gold].");
+          + "[/blue] a play.");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.

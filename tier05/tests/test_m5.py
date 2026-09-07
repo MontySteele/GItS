@@ -227,6 +227,37 @@ def test_reward_rarity_odds_and_slot():
     assert counts["rare"] / total == pytest.approx(0.05, abs=0.02)
 
 
+def test_eb620_the_companion_slot_rolls_rarity_and_does_not_draw_the_roster():
+    """`EB-620`. THE ROW'S PREMISE, MEASURED -- and it is false.
+
+    [USER]'s Klee act-1 run read "a LOT of rares" as the fourth reward slot
+    drawing a Companion straight off the roster with no rarity roll, which
+    would surface Rares at the roster's own share. Both engines have always
+    rolled: `roll_rewards` calls `_roll_rarity` on `RARITY_ODDS` and draws
+    inside the rolled tier, and `CompanionSlot.Roll` mirrors it
+    (`klee-mod/KleeTests/CompanionSlotRarityTests.cs`). What was missing was a
+    pin, so this is it -- and it is written as the SEPARATION between the two
+    hypotheses rather than as a band, because the roster share and the odds are
+    four times apart and that is what makes the reading decidable."""
+    roster = [c for cards in rewards.companion_pool().values() for c in cards
+              if c.personal_pool in (None, "klee")]
+    roster_rare_share = (len([c for c in roster if c.rarity == "rare"])
+                         / len(roster))
+
+    rng = random.Random(SEED)
+    counts = {"common": 0, "uncommon": 0, "rare": 0}
+    for _ in range(1500):
+        counts[rewards.roll_rewards(rng, "klee")[-1].rarity] += 1
+    total = sum(counts.values())
+
+    assert counts["rare"] / total == pytest.approx(
+        C.RARITY_ODDS["rare"], abs=0.02)
+    assert counts["common"] / total == pytest.approx(
+        C.RARITY_ODDS["common"], abs=0.04)
+    # And the roster share is the hypothesis this rules out, not a near miss.
+    assert roster_rare_share > 3 * C.RARITY_ODDS["rare"]
+
+
 def test_post_boss_companion_slot_is_rare_only():
     rng = random.Random(SEED)
     for _ in range(100):

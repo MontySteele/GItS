@@ -56,7 +56,7 @@ public sealed class ProtoMcSucroseCatalystConversion : CustomCardModel, ICompani
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Catalyst Conversion"),
-        ("description", "[gold]Hexerei[/gold]. Gain 1 [gold]Energy[/gold]. Draw 1 card."),
+        ("description", "[gold]Hexerei[/gold]. Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -80,6 +80,6 @@ public sealed class ProtoMcSucroseCatalystConversion : CustomCardModel, ICompani
 
     protected override void OnUpgrade()
     {
-        RemoveKeyword(CardKeyword.Exhaust);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

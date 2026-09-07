@@ -6115,9 +6115,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # and the rule was on a different screen the whole time.
         # `EB-554`: the ownership clause points at the mark the faces now
         # carry, so a reader can run the test instead of being told one exists.
+        # `EB-619`: the sentence ends at "a play" -- a price the card does
+        # not charge is not the keyword page's to deny.
         "Hexerei": [" card whose face prints the word. Playing ",
                     "one marked Klee's own gives Klee ", ", up to ",
-                    " a play; it never costs "],
+                    " a play."],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -7221,14 +7223,16 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
 
     row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
     assert (f"gives Klee {blindplay_notes.COMPANION_SPARK} Spark, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX} a play;") in row
+            f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in row
     # `EB-554`: the clause that answers the seat's OTHER question -- whether
     # Razor is one of Klee's own -- now points at the mark the faces carry
     # instead of telling the reader a split exists that they cannot run.
     # `EB-596`: and the verb is a gain, not a price, because two seats read
     # "pay" the other way round.
     assert "marked Klee's own gives Klee" in row
-    assert "it never costs Spark" in row
+    # `EB-619`: [USER]'s act-1 run read the price denial as belonging on the
+    # card's own cost section, so the clause is gone from both surfaces.
+    assert "never costs" not in row
     assert len(row) <= 135
 
 
@@ -10361,7 +10365,7 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     del state["player"]["character"]
     assert ("marked Klee's own gives Klee "
             f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX} a play;") in blindplay.observe(state)
+            f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in blindplay.observe(state)
 
 
 def test_every_other_arm_word_is_still_defined_on_every_run():

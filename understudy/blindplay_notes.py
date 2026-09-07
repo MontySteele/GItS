@@ -929,9 +929,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # counts, `companion_hexerei.is_hexerei`). So: the family test is the
     # face; the Spark is a GAIN, bounded per play; and the clause that
     # carried no rule is gone.
+    # `EB-619` DROPPED "it never costs Spark" ([USER]'s act-1 run: "shouldn't
+    # the card's own cost section say that?"). A price a card does not charge
+    # belongs on the cost line or nowhere -- denying it on the keyword page is
+    # what raised the doubt. Held in step with `ArmKeywordTips.ForHexerei`.
     "Hexerei": ("A Companion card whose face prints the word. Playing one "
                 f"marked Klee's own gives Klee {COMPANION_SPARK} Spark, up to "
-                f"{COMPANION_SPARK_MAX} a play; it never costs Spark."),
+                f"{COMPANION_SPARK_MAX} a play."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
