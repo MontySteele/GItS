@@ -236,7 +236,10 @@ public class FurinaRoundNineTests
         using var _ = new Arm();
         var seat = Seat.Furina().WithCombatState();
 
-        var rules = SalonMemberTips.SalonRulesBody(seat.Creature);
+        // `EB-629` moved the sentence from the rules paragraph to the member
+        // tips, where it is read at the moment a member is about to perform.
+        var rules = SalonMemberTips.BodyFor(SalonMember.Crabaletta,
+                                            seat.Creature);
 
         // `EB-548` renamed the second half and added the word "hit": the
         // rule is about being HIT, and "on-Attack triggers" named it from the

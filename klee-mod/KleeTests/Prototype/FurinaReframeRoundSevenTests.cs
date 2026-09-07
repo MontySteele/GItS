@@ -165,15 +165,24 @@ public class FurinaReframeRoundSevenTests
     // ==================================================================
 
     [Fact]
-    public void The_arms_rules_paragraph_says_the_roll_skips_a_minion()
+    public void The_arms_member_tips_say_the_roll_skips_a_minion()
     {
+        // `EB-629` MOVED THE SENTENCE OFF THE RULES PARAGRAPH and onto the
+        // member's own tip. The paragraph had grown to about 700 characters
+        // carrying seven rules and [USER] read it as a wall of text; the aim is
+        // a fact about A MEMBER ABOUT TO PERFORM, so the tip of the thing that
+        // performs is where it is read at the moment it matters. The words are
+        // unchanged, and every member carries them.
         using var _ = new Arm();
         var seat = Seat.Furina().WithCombatState();
 
-        var rules = SalonMemberTips.SalonRulesBody(seat.Creature);
-
-        Assert.Contains("picks its own enemy, never a [gold]Minion[/gold] "
-                      + "while another enemy stands", rules);
+        foreach (SalonMember member in
+                 System.Enum.GetValues(typeof(SalonMember)))
+        {
+            Assert.Contains("picks its own enemy, never a [gold]Minion[/gold] "
+                          + "while another enemy stands",
+                            SalonMemberTips.BodyFor(member, seat.Creature));
+        }
     }
 
     [Fact]

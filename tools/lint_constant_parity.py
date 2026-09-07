@@ -539,6 +539,65 @@ UNMIRRORED: dict[str, str] = {
         "than collapsing to nothing.",
     "SparkCounter.CountFontSize":
         "presentation: the Spark count's font size.",
+    # The Fanfare badge in the same corner (`EB-628`), on the same terms and
+    # for the same reason: the RECT is read off `%StarCounter` rather than
+    # written down, and what is left is two font sizes and the fallback square.
+    # The number the badge DRAWS is the Fanfare meter and the step it names is
+    # `SALON_FOCUS_PER_FANFARE`; both are rules, both are mirrored elsewhere in
+    # this file, and neither is written down here.
+    "FanfareCounter.FallbackSide":
+        "presentation: the badge's square in pixels when `%StarCounter` "
+        "reports no size yet, so the element still lands somewhere rather "
+        "than collapsing to nothing.",
+    "FanfareCounter.CountFontSize":
+        "presentation: the Fanfare count's font size.",
+    "FanfareCounter.StepFontSize":
+        "presentation: the font size of the threshold line under the count.",
+    # The Salon member strip (`EB-627`, `EB-628`), on the same terms one
+    # element over: every number below is SCREEN GEOMETRY inside Furina's own
+    # 240-wide bounds box, or a font size. What the strip SAYS is rules and
+    # none of it is written here -- the chip count is `SalonMemberPower.SlotsFor`,
+    # the act is `TickValue`, the pip count is Encore over `TickEncoreCost` and
+    # the marked prefix is `SpotlightDesignateEncoreCost`, all mirrored
+    # elsewhere in this file.
+    "SalonMemberStrip.ChipWidth":
+        "presentation: one chip's width in pixels.",
+    "SalonMemberStrip.ChipHeight":
+        "presentation: one chip's height in pixels.",
+    "SalonMemberStrip.FaceHeight":
+        "presentation: how much of a chip the member's face crop occupies.",
+    "SalonMemberStrip.ChipPitchMax":
+        "presentation: the widest gap between chips, the shipped three-slot "
+        "pitch, so a normal Furina's strip does not move when a card could "
+        "have raised her cap.",
+    "SalonMemberStrip.HalfSpan":
+        "presentation: half the horizontal span the row may occupy, bounded by "
+        "the creature's own 240-wide bounds box.",
+    "SalonMemberStrip.MaxChips":
+        "presentation: how many chips the row can draw before it overflows the "
+        "bounds box. Not a cap on the Salon -- `SalonMemberPower.SlotsFor` is "
+        "the rule and is mirrored -- and the excess is logged rather than "
+        "silently invisible, so no rule is hiding here.",
+    "SalonMemberStrip.MaxPips":
+        "presentation: how many Encore pips fit on the row before it prints "
+        "`+N`. Not a cap on Encore, which is uncapped: the overflow is drawn, "
+        "so the sim has nothing to compare.",
+    "SalonMemberStrip.PipWidth":
+        "presentation: one Encore pip's width in pixels.",
+    "SalonMemberStrip.PipHeight":
+        "presentation: one Encore pip's height in pixels.",
+    "SalonMemberStrip.PipGap":
+        "presentation: the gap between pips, in pixels.",
+    "SalonMemberStrip.PipRowY":
+        "presentation: where the pip row sits below the chips, in pixels.",
+    "SalonMemberStrip.NameFontSize":
+        "presentation: the member name's font size.",
+    "SalonMemberStrip.ActFontSize":
+        "presentation: the next-act line's font size.",
+    "SalonMemberStrip.EvokeFontSize":
+        "presentation: the front chip's Evoke line font size.",
+    "SalonMemberStrip.PipFontSize":
+        "presentation: the pip overflow count's font size.",
     # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
     # TIME. They decide how long an animation and a speech bubble occupy the
     # frame and nothing else: no hit is added, removed, resized or reordered by
