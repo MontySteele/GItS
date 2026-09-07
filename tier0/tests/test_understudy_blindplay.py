@@ -6119,12 +6119,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-535`: the last sentence names the PAYMENT now. "Cards of hers
         # pay" was the clause the r19 lane-2 seat could extract nothing from,
         # and the rule was on a different screen the whole time.
-        # `EB-554`: the ownership clause points at the mark the faces now
-        # carry, so a reader can run the test instead of being told one exists.
+        # `EB-554`: the ownership clause pointed at the mark the faces then
+        # carried. `EB-642` retired both -- R265 pick 1 pays every Hexerei
+        # card, so the first sentence's test IS the payer set.
         # `EB-619`: the sentence ends at "a play" -- a price the card does
         # not charge is not the keyword page's to deny.
         "Hexerei": [" card whose face prints the word. Playing ",
-                    "one marked Klee's own gives Klee ", ", up to ",
+                    "one gives Klee ", ", up to ",
                     " a play."],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
@@ -7238,12 +7239,14 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
     row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
     assert (f"gives Klee {blindplay_notes.COMPANION_SPARK} Spark, up to "
             f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in row
-    # `EB-554`: the clause that answers the seat's OTHER question -- whether
-    # Razor is one of Klee's own -- now points at the mark the faces carry
-    # instead of telling the reader a split exists that they cannot run.
+    # `EB-642`: the seat's OTHER question -- whether Razor is one of Klee's
+    # own -- is not a question any more. Every Hexerei card pays, so the
+    # ownership clause is gone from both surfaces and the sentence would be
+    # false with it.
     # `EB-596`: and the verb is a gain, not a price, because two seats read
     # "pay" the other way round.
-    assert "marked Klee's own gives Klee" in row
+    assert "Playing one gives Klee" in row
+    assert "Klee's own" not in row
     # `EB-619`: [USER]'s act-1 run read the price denial as belonging on the
     # card's own cost section, so the clause is gone from both surfaces.
     assert "never costs" not in row
@@ -10369,7 +10372,7 @@ def test_a_klee_run_reads_both_rules_in_full():
     kit the words belong to, nothing about them has changed."""
     page = blindplay.observe(_hexerei_shop_state("Klee"))
     assert ("- **Hexerei** — A Companion card whose face prints the word. "
-            "Playing one marked Klee's own gives Klee") in page
+            "Playing one gives Klee") in page
     assert "- **Oz** — Fischl's raven, out while you hold the Power" in page
 
 
@@ -10380,7 +10383,7 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     the one run that needs it."""
     state = _hexerei_shop_state("Klee")
     del state["player"]["character"]
-    assert ("marked Klee's own gives Klee "
+    assert ("Playing one gives Klee "
             f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
             f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in blindplay.observe(state)
 

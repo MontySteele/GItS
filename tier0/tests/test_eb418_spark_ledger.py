@@ -9,7 +9,7 @@ fight 3 round 1 with no Bomb going off, and could not account for it:
     read off the screen."
 
 IT WAS A RULE AND NOT A DEFECT. The grant was `Little Hexenzirkul`
-(`effects.klee_personal_companion_spark`, C# `KleeCompanionSpark`) -- the kit
+(`effects.klee_companion_spark`, C# `KleeCompanionSpark`) -- the kit
 declaration LAW:145 requires because a Companion card may not print a signature
 resource on its own face -- and the seat had just played Diona, one of Klee's
 coven Personals. The ruled companions packet says so outright: "the kit already
@@ -142,34 +142,79 @@ def test_the_sources_a_klee_fight_mints_are_the_arms_own_rules(overhaul):
 
 # --- the grant the seat could not read --------------------------------------
 
-def test_a_coven_personals_play_is_the_gain_that_had_no_name(overhaul):
+def test_a_hexerei_play_is_the_gain_that_had_no_name(overhaul):
     """The r11 find, reproduced: Spark 1 to 2 with no Bomb going off.
 
-    Diona is the card the seat played, on the turn it played it -- a Personal
-    Companion of Klee's, `Little Hexenzirkul`'s trigger, and nothing on her face
-    or on the Spark tip said a word about it.
+    `EB-642` MOVED THE PAYER SET AND THE READ MOVES WITH IT. The seat played
+    Diona, one of Klee's coven Personals, and R265 pick 1 keyed the grant on the
+    printed word instead -- so the card that reproduces the gain is a Hexerei
+    row, and the ruling's own headline is that a UNIVERSAL one does it too.
+    Razor prints the word, carries no `personal_pool`, and pays.
     """
-    diona = loader.get_card("proto_mc_diona_shaken_not_purred")
-    assert diona.is_companion and diona.personal_pool == "klee"
+    razor = loader.get_card("proto_mc_razor_claw_and_thunder")
+    assert razor.is_companion and razor.personal_pool is None
 
     state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
     state.player.sparks = 1
-    state.player.hand = [diona]
+    state.player.hand = [razor]
 
-    play_card(state, diona)
+    play_card(state, razor)
 
     assert state.player.sparks == 2, "the seat's 1 to 2"
     assert [row["source"] for row in _gains(state)] == [
         "companion:personal/play"]
     # ...and no Bomb went off to pay for it, which is how the seat KNEW the
-    # relic had not: Diona's own unspent buff proved it.
+    # relic had not.
     assert not any(e["event"] == "ko_explosion" for e in state.log)
 
 
+def test_a_coven_personal_pays_because_the_coven_is_the_family(overhaul):
+    """`EB-642`'s follow-up D default: the coven IS the family.
+
+    R265's one-word rule would otherwise have cut the grant from the eight
+    coven Personals that printed no word -- a loss the pick did not name -- so
+    those rows carry the mark now and Diona, the card the r11 seat actually
+    played, still pays and now says so on her face.
+    """
+    diona = loader.get_card("proto_mc_diona_shaken_not_purred")
+    assert diona.is_companion and diona.personal_pool == "klee"
+    assert diona.hexerei, "a coven Personal is in the family"
+
+    state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
+    state.player.hand = [diona]
+
+    play_card(state, diona)
+
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
+    assert [row["source"] for row in _gains(state)] == [
+        "companion:personal/play"]
+
+
+def test_a_companion_outside_the_family_pays_nothing(overhaul):
+    """The other half, on a card that is genuinely outside it.
+
+    Gorou's War Banner is an Inazuma Universal with no family mark and no
+    pool, so it prints no word and mints nothing: the printed word is
+    necessary as well as sufficient, which is what makes the tip's one
+    sentence true.
+    """
+    banner = loader.get_card("proto_mi_gorou_war_banner")
+    assert banner.is_companion and banner.personal_pool is None
+    assert not banner.hexerei
+
+    state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
+    state.player.hand = [banner]
+
+    play_card(state, banner)
+
+    assert state.player.sparks == 0
+    assert not _gains(state)
+
+
 def test_the_name_is_the_rules_and_not_one_companions(overhaul):
-    """`EB-219` moved the grant off Prune's face and keyed it on the POOL, so a
-    ledger row saying "prune" over a Diona play is the same unreadable number
-    one surface further in. Both engines say `companion:personal/play`."""
+    """`EB-219` moved the grant off Prune's face and keyed it on a SET, so a
+    ledger row saying "prune" over another witch's play is the same unreadable
+    number one surface further in. Both engines say `companion:personal/play`."""
     src = (REPO / "klee-mod" / "KleeCode" / "Powers"
            / "KleeCompanionSpark.cs").read_text(encoding="utf-8")
     assert 'source: "companion:personal/play"' in src

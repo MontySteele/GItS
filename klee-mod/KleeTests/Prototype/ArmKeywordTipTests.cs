@@ -388,14 +388,17 @@ public class ArmKeywordTipTests
     public void The_coven_rider_names_all_three_limbs_of_the_kits_spark()
     {
         // `EB-418`. The r11 seat's one unreadable number: Spark 1 to 2 with no
-        // Bomb going off, because `KleeCompanionSpark` mints on any play of one
-        // of Klee's own Personal Companions and LAW:145 keeps that grant off
+        // Bomb going off, because `KleeCompanionSpark` mints on any play of a
+        // Hexerei Companion and LAW:145 keeps that grant off
         // the Companion's own face. All three limbs print -- a sentence saying
         // only "makes a Spark" would leave a reacted upgraded play as
         // unreadable as the plain one was.
         var body = Printed("ForCovenSpark");
-        Assert.Contains("Klee's own", body);
-        Assert.Contains("Companions", body);
+        // `EB-642`: the rider names the MARK, not the pool -- R265 pick 1 made
+        // the printed word the whole rule, so the sentence points at the same
+        // word the face above it prints.
+        Assert.Contains("Hexerei", body);
+        Assert.DoesNotContain("Klee's own", body);
         Assert.Contains("Spark", body);
         Assert.Contains("more if it triggered", body);
         Assert.Contains("Elemental Reaction", body);
@@ -420,9 +423,10 @@ public class ArmKeywordTipTests
     {
         // `EB-418`, the other half: the sentence is only true while the grant
         // is where it says. `Settle` is the mint and `Arm` decides whether it
-        // fires, both keyed on `IsOwnPersonalCompanion` -- the row's own
-        // `PersonalPool` against the player's character, which is the same pair
-        // `gen_klee_cards` reads to decide which faces carry the sentence.
+        // fires, both keyed on `PaysKleesSpark` -- the row's family mark
+        // against the player's character (`EB-642`, `EB-434`), which is the
+        // same read `gen_klee_cards` makes to decide which faces carry the
+        // sentence.
         var settle = typeof(KleeCompanionSpark)
             .GetMethod("Settle", HeadlessGame.All)!;
         Assert.Contains(Il.Calls(settle),
@@ -433,7 +437,7 @@ public class ArmKeywordTipTests
         var arm = typeof(KleeCompanionSpark).GetMethod("Arm", HeadlessGame.All)!;
         Assert.Contains(
             Il.Calls(arm),
-            c => c.EndsWith("KleeCompanionSpark.IsOwnPersonalCompanion",
+            c => c.EndsWith("KleeCompanionSpark.PaysKleesSpark",
                             System.StringComparison.Ordinal));
     }
 

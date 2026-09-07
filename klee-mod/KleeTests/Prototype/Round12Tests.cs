@@ -246,14 +246,15 @@ public class Round12Tests
         // Spark rider's exact phrase, so the two meet under one spelling --
         // and the relation is stated as the OVERLAP it is, five rows carrying
         // both marks and thirteen carrying one.
-        // `EB-554` MADE THE CLAUSE RUNNABLE. The overlap is still what it
-        // describes; what changed is that the faces carry the mark now, so the
-        // sentence points at it instead of telling a reader a split exists.
-        Assert.Contains("marked Klee's own gives Klee", HexereiTip());
-        // ONE SPELLING FOR THE OTHER WORD: the Spark rider says "Klee's own"
-        // too, so a player who has met that rider recognises the set this
-        // sentence is pointing at rather than meeting a fourth phrase.
-        Assert.Contains("Klee's own", string.Concat(Il.Strings(
+        // `EB-554` MADE THE CLAUSE RUNNABLE AND `EB-642` RETIRED IT. R265
+        // pick 1 pays every Hexerei card, so the third word the seat met is
+        // not a set any more and neither surface names it.
+        Assert.Contains("Playing one gives Klee", HexereiTip());
+        Assert.DoesNotContain("Klee's own", HexereiTip());
+        // ONE SPELLING FOR THE ONE WORD: the Spark rider names `Hexerei` too,
+        // so a player who has met that rider recognises the set this sentence
+        // is pointing at rather than meeting a second phrase for it.
+        Assert.Contains("Hexerei", string.Concat(Il.Strings(
             typeof(ArmKeywordTips)
                 .GetMethod("ForCovenSpark", HeadlessGame.All)!)));
     }

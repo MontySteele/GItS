@@ -1165,7 +1165,7 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
     `source` IS REQUIRED, and it is required because the r11 Opus seat could
     not name one: "My Spark went 1 to 2 with no bomb going off... This is the
     one number in the kit I could not read off the screen." The grant was
-    `klee_personal_companion_spark`, which is a real kit rule and was printed
+    `klee_companion_spark`, which is a real kit rule and was printed
     nowhere; the mod prints it now, and this argument is the pin that stops the
     NEXT unnamed income arriving. The C# twin is `SparkPower.Gain`'s own
     `source` parameter, which has carried exactly these strings into
@@ -1186,17 +1186,50 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
     state.emit("gain_spark", amount=n, total=state.player.sparks)
 
 
-def klee_personal_companion_spark(state: CombatState, card: Card) -> None:
-    """"Little Hexenzirkul" -- Klee's kit answering a Personal Companion play.
+def klee_companion_spark(state: CombatState, card: Card) -> None:
+    """"Little Hexenzirkul" -- Klee's kit answering a HEXEREI Companion play.
 
     THE DECLARATION LAW:145 REQUIRES, and the ONLY place a Companion play mints
     Sparks. The clause (countersigned R224, 2026-08-30) reads: "Companion cards
     may not themselves grant signature resources. A character-owned engine may
     respond to a Companion play and generate its resource where that
     character's kit explicitly declares the trigger and bounds the amount
-    generated per Companion play." So the grant is HERE, in Klee's kit, keyed on
-    her PERSONAL Companion pool -- and `prune_witch_hunt`'s face, which used to
-    print two `gain_spark` ops, prints none (EB-219).
+    generated per Companion play." So the grant is HERE, in Klee's kit -- and
+    `prune_witch_hunt`'s face, which used to print two `gain_spark` ops, prints
+    none (EB-219).
+
+    WHAT THE KIT DECLARES IS NOW THE PRINTED WORD (`EB-642`, R265 pick 1).
+    [USER] played act 1 and read the second mark as noise: "the 'Klee's own'
+    text on the Personals is not needed". So the trigger is the FAMILY MARK --
+    one word, one rule -- and a Universal printing `Hexerei` grants exactly as a
+    Personal printing it does. The ownership half leaves the faces in the same
+    commit (`gen_klee_cards._family_tags`), because the mark and the payment
+    have to say the same thing or the r20 defect returns pointing the other way.
+
+    THE CHARACTER GATE IS EXPLICIT NOW, and it is `EB-434`: the old test was
+    "the player's own Personal Companion" with no character in it, so Kokomi
+    playing Gorou banked a Spark she has no surface to read. Sparks are Klee's
+    resource and the tip says "gives Klee"; nobody else is paid.
+
+    THE ARM DECIDES WHICH TEST, and that is R213 B rather than taste: no
+    SHIPPED sheet row carries the family key at all, so a Hexerei-only rule
+    would silently retire the grant `EB-219` moved into the kit at parity. With
+    the arm off the shipped Personal pool answers, exactly as it has since
+    `EB-219`; with the arm on the printed mark answers, which is the world
+    R265 ruled on. The Balance surface does not move for a prototype arm.
+
+    WHAT THE ARM'S PERSONALS LOSE, said out loud: eight prototype coven rows
+    (Barbara, Diona, Noelle, Kaeya, Jean, Sayu, Qiqi, YaoYao) carry
+    `personal_pool: klee` and no family key, so under the arm they stop
+    granting. That is the rule as ruled -- they print no word, so they pay no
+    Spark -- and the fix, if the coven is meant to pay, is to mark those rows
+    as family on the sheet, which is a design call and not this build's.
+
+    WHY `companion_hexerei.is_hexerei` AND NOT THE FIELD DIRECTLY: the readers
+    (Coven Errand, Witches' Circle) ask that function, and Alice's Introduction
+    Magic's this-turn window is part of the family for them. A rule that paid
+    on a narrower "Hexerei" than the readers count would be a second definition
+    of one word, which is what R244 put `is_hexerei` there to prevent.
 
     WHY THE CALL SITE IS WHERE IT IS (`combat._finish_play`, after the FIRST
     resolution of the play):
@@ -1214,13 +1247,18 @@ def klee_personal_companion_spark(state: CombatState, card: Card) -> None:
     four numbers Prune's face paid and the three limbs reproduce them.
     """
     from tier0.content import upgrades          # late import avoids cycle
-    if not card.is_companion or card.personal_pool is None:
+    if not card.is_companion:
         return
-    if card.personal_pool != state.player.character_id:
-        # The pool names its owner, so this is the kit-scoping LAW:145 asks for
-        # rather than a redundancy: a Personal Companion that somehow reached
-        # another character's deck mints nothing, because it is not that
-        # character's kit that declared it.
+    if state.player.character_id != "klee":
+        # `EB-434`. It is KLEE's kit that declared the trigger, and hers is the
+        # only Spark surface in the game; a grant nobody can read is not a
+        # grant. The old spelling of this line asked the card's pool instead of
+        # the player, so Gorou paid Kokomi.
+        return
+    if C.KLEE_OVERHAUL:
+        if not companion_hexerei.is_hexerei(state, card):
+            return
+    elif card.personal_pool != "klee":
         return
     n = C.KLEE_COMPANION_SPARK_BASE
     if state.reactions_this_card > 0:

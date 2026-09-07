@@ -544,10 +544,12 @@ public class Round19Tests
                       + "a play.", hexerei);
         Assert.DoesNotContain("never costs", hexerei);
         Assert.DoesNotContain("Cards of hers pay", hexerei);
-        // The clause that answers the seat's OTHER question -- whether Razor is
-        // one of Klee's own -- is what paid for the room, and it stays, now
-        // naming the mark instead of asserting a split the reader cannot run.
-        Assert.Contains("marked Klee's own gives Klee", hexerei);
+        // The clause that answered the seat's OTHER question -- whether Razor
+        // is one of Klee's own -- is gone with the question: `EB-642` pays
+        // every Hexerei card, so the first sentence's test IS the payer set
+        // and a narrowing clause would be false.
+        Assert.Contains("Playing one gives Klee", hexerei);
+        Assert.DoesNotContain("Klee's own", hexerei);
     }
 
     [Fact]

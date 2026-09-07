@@ -10833,8 +10833,8 @@ def _face_riders(card: dict, text: str) -> str:
 
 
 def _family_tags(card: dict, text: str) -> str:
-    """`EB-392` and `EB-554`: a Companion says what FAMILY it is in, on its own
-    face -- the Hexerei mark, and whether it is one of Klee's own.
+    """`EB-392`: a Companion says what FAMILY it is in, on its own face -- the
+    Hexerei mark, and since `EB-642` that is the whole of it.
 
     THE WORD WAS ON EIGHTEEN ROWS AND PRINTED ON FOUR. `hexerei: true` emitted
     `IHexereiCard` and nothing a player could see, so the family mark was
@@ -10863,55 +10863,32 @@ def _family_tags(card: dict, text: str) -> str:
     IT LEADS, like `_plan_only_line`. What a card IS is read before what it
     does, and a trailing tag reads as a clause of the last effect sentence.
 
-    `EB-554` ADDED THE SECOND MARK, and it is the r12 seat's third word
-    arriving two rounds late. Klee r20 lane 1 played Albedo+ and Razor in one
-    turn -- "both print Hexerei" -- and Spark stayed at 1: "Nothing on either
-    card face distinguishes 'hers' from not-hers, so as a reader I have no way
-    to predict which Companion pays a Spark. This is the clearest thing I could
-    not resolve all round." The rule was right (`KleeCompanionSpark` pays on
-    Klee's own PERSONAL Companions, and Razor is a Universal) and unreadable.
+    `EB-554` ADDED A SECOND MARK AND `EB-642` TOOK IT BACK OFF. The ownership
+    lead ("Klee's own", alone or as the adjective in "Klee's own Hexerei") was
+    the r20 seat's missing discriminator: Albedo+ and Razor were played in one
+    turn, both printing Hexerei, and Spark stayed at 1. It was the right answer
+    to a rule that has since been retired. R265 pick 1 ruled the RULE instead
+    -- every Hexerei card gives Klee a Spark, Universals included -- on
+    [USER]'s own act-1 read: "the 'Klee's own' text on the Personals is not
+    needed". With one payer set there is one mark, and the printed word is
+    necessary and sufficient: a face prints `Hexerei` if and only if playing it
+    pays. The ownership half is not a shorter sentence, it is a distinction the
+    game no longer draws.
 
-    DERIVED FROM THE ROW, from the same field the ENGINES ask: `is_companion`
-    and `personal_pool == "klee"` are exactly
-    `KleeCompanionSpark.IsOwnPersonalCompanion` and
-    `effects.klee_personal_companion_spark`'s two early returns, and the same
-    pair that already decides whether `ArmKeywordTips.ForCovenSpark` rides the
-    face. So the mark and the payment cannot disagree, and a Personal Companion
-    added tomorrow carries it the day its row exists.
-
-    ONE SENTENCE WHERE A ROW CARRIES BOTH, because two lead tags read as
-    stuttering and the ceiling is 120: "Klee's own [gold]Hexerei[/gold]." The
-    ownership is written as the ADJECTIVE rather than as a second clause both
-    because it reads as one fact and because it is a character shorter -- which
-    is not decoration on this sheet: Prune's Hexhunter Chime lands at exactly
-    120 of 120 with it and at 121 without.
-
-    UNGOLDED, because "Klee's own" is not a keyword and a golded token would
-    ask `arm_keyword_tip_calls` for a tooltip the mod does not define. The
-    phrase is the one `ArmKeywordTips.ForCovenSpark` and the Hexerei tip
-    already print, so the three surfaces meet under one spelling.
+    DERIVED FROM THE ROW, from the same field the ENGINES ask: `hexerei` is
+    exactly what `KleeCompanionSpark.PaysKleesSpark` and
+    `effects.klee_companion_spark` test under the arm, and the same key that
+    decides whether `ArmKeywordTips.ForCovenSpark` rides the face. So the mark
+    and the payment cannot disagree, and a row joining the family tomorrow
+    carries both the day its row exists.
     """
     if not is_companion(card):
         return text
-    hexerei = bool(card.get("hexerei")) and "[gold]Hexerei[/gold]" not in text
-    # THE OWNERSHIP MARK IS THE PROTOTYPE SURFACE'S, and the scope is R213 B
-    # rather than taste: a shipped row is Balance-stage content and does not
-    # move for a prototype arm. The Hexerei half needs no such guard -- no
-    # shipped sheet carries the key at all -- and the defect the mark answers
-    # is the arm's own, a Universal and a Personal printing one word and paying
-    # differently. The shipped Prune keeps her printed face; her Spark is the
-    # kit's declaration and always was (`EB-219`).
-    own = (str(card.get("id", "")).startswith(PROTOTYPE_ID_PREFIX)
-           and personal_pool_id(card) == "klee")
-    if hexerei and own:
-        lead = "Klee's own [gold]Hexerei[/gold]. "
-    elif hexerei:
-        lead = "[gold]Hexerei[/gold]. "
-    elif own:
-        lead = "Klee's own. "
-    else:
+    if not card.get("hexerei") or "[gold]Hexerei[/gold]" in text:
+        # ...the guard being the readers: Alice's Introduction Magic carries
+        # the key and prints the word in its body already.
         return text
-    return (lead + text).strip()
+    return ("[gold]Hexerei[/gold]. " + text).strip()
 
 
 def _dedupe_printed_exhaust(card: dict, text: str) -> str:
@@ -12338,22 +12315,23 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # is a fact about THIS card and is read before the definition of a
         # word. DERIVED FROM THE ROW rather than declared per card, and from
         # the two fields the engines ask -- `is_companion` (the sheet's `star`)
-        # and whether the OWNING character is in the row's `personal_pool`.
-        # That pair is exactly `KleeCompanionSpark.IsOwnPersonalCompanion` and
-        # `effects.klee_personal_companion_spark`'s two early returns, so a
-        # Personal Companion added to this sheet tomorrow carries the sentence
-        # the day its row exists -- which is how the rule reached Diona and the
-        # coven stand-ins unannounced in the first place.
+        # and the `hexerei` key. That pair is exactly
+        # `KleeCompanionSpark.PaysKleesSpark` and
+        # `effects.klee_companion_spark`'s test under the arm, so a row joining
+        # the family tomorrow carries the sentence the day its row exists.
         #
-        # KLEE'S, AND SAID SO RATHER THAN LEFT TO THE POOL. The engines' test
-        # is "the player's own Personal Companion" with no character in it, so
-        # Kokomi playing Gorou walks the same branch -- but Sparks are Klee's
-        # resource, she is the only character with a Spark surface to read, and
-        # a sentence about Klee's coven on an Inazuma row of Kokomi's would
-        # print a rule its reader cannot use. The tip is scoped to the kit that
-        # declared it (LAW:145's own words); the wider branch is not this row's.
+        # `EB-642` MOVED IT OFF THE POOL AND ONTO THE MARK, with the rule. It
+        # used to ask `personal_pool == "klee"`, which put the rider on eight
+        # coven rows that print no word and kept it off thirteen Universals
+        # that do; R265 pick 1 made the printed word necessary and sufficient,
+        # so the face that pays is the face that says so.
+        #
+        # KLEE'S, AND SAID SO RATHER THAN LEFT TO THE SHEET. The rider is only
+        # emitted on her profile, and `ArmKeywordTips.ForCovenSpark` asks
+        # `KleesRuleBelongsHere` a second time at runtime -- which it now must,
+        # because a Hexerei Universal is drafted by every character (`EB-504`).
         if (is_companion(card) and profile.character_id == "klee"
-                and personal_pool_id(card) == "klee"):
+                and card.get("hexerei")):
             tips_expr = (
                 "ArmKeywordTips.ForCovenSpark("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")

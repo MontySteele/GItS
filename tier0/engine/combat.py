@@ -743,16 +743,19 @@ def _finish_play(state: CombatState, card: Card,
                 # C# twin: `SalonMemberPower.NoteCompanionReplay`.
                 furina_reframe.companion_replay(state, card)
         if replay_index == 0 and card.is_companion:
-            # "Little Hexenzirkul" (EB-219): Klee's kit answering a PERSONAL
-            # Companion play, which is where LAW:145 puts the grant now that
-            # Prune's face may not carry it. INSIDE the loop but gated to the
+            # "Little Hexenzirkul" (EB-219, retargeted by EB-642): Klee's kit
+            # answering a HEXEREI Companion play, which is where LAW:145 puts
+            # the grant now that Prune's face may not carry it. Which cards
+            # answer is the function's own question, not this line's -- the
+            # printed mark under the arm, the shipped Personal pool off it.
+            # INSIDE the loop but gated to the
             # first pass, for two reasons that pull in opposite directions and
             # meet exactly here: the mint has to be ONCE PER PLAY (a replay is
             # one card resolved twice -- the same argument that put Navia's
             # Cannon Fire Support above this loop), and it has to be able to
             # read `reactions_this_card`, which does not exist until a
             # resolution has run. C# does the same at KleeElementalHooks.
-            effects.klee_personal_companion_spark(state, card)
+            effects.klee_companion_spark(state, card)
     # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
     # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
     # raised floor, cap and current by 5 (rares 8), printed on no card and

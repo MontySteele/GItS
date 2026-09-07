@@ -7,8 +7,16 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// "Little Hexenzirkul" -- Klee's kit answering a PERSONAL Companion play, and
+/// "Little Hexenzirkul" -- Klee's kit answering a HEXEREI Companion play, and
 /// the only place in this assembly where a Companion play mints Sparks.
+///
+/// `EB-642`, R265 pick 1: WHAT THE KIT DECLARES IS THE PRINTED WORD. [USER]
+/// played act 1 and read the second mark as noise -- "the 'Klee's own' text on
+/// the Personals is not needed" -- so a Universal printing <c>Hexerei</c> now
+/// grants exactly as a Personal printing it does, and the ownership mark leaves
+/// the faces in the same commit (<c>gen_klee_cards._family_tags</c>). One word,
+/// one rule: the mark and the payment say the same thing, or the r20 defect
+/// returns pointing the other way.
 ///
 /// LAW:145, countersigned R224 (2026-08-30): "Companion cards may not
 /// themselves grant signature resources. A character-owned engine may respond
@@ -18,7 +26,7 @@ namespace KleeMod.Powers;
 /// <c>PruneWitchHunt</c> -- which used to print two <c>SparkPower.Gain</c>
 /// calls -- prints none (EB-219).
 ///
-/// SIM MIRROR: <c>tier0/engine/effects.py klee_personal_companion_spark</c>,
+/// SIM MIRROR: <c>tier0/engine/effects.py klee_companion_spark</c>,
 /// called from <c>combat._finish_play</c>. Numbers are LAW from tier0
 /// (<c>constants.KLEE_COMPANION_SPARK_*</c>) and are mirrored below, never
 /// re-derived.
@@ -41,7 +49,7 @@ namespace KleeMod.Powers;
 /// </summary>
 public static class KleeCompanionSpark
 {
-    /// <summary>Any Personal Companion play. tier0 KLEE_COMPANION_SPARK_BASE.</summary>
+    /// <summary>Any paying Companion play. tier0 KLEE_COMPANION_SPARK_BASE.</summary>
     public const int Base = 1;
 
     /// <summary>...that triggered a reaction. tier0 KLEE_COMPANION_SPARK_REACTION_BONUS.</summary>
@@ -67,20 +75,38 @@ public static class KleeCompanionSpark
     private static int? _reactionsAtPlayStart;
 
     /// <summary>
-    /// Is this card a Personal Companion of the character playing it?
+    /// Does this Companion play pay Klee a Spark? The kit's own question, and
+    /// the sim asks it in the same three steps
+    /// (<c>effects.klee_companion_spark</c>).
     ///
-    /// Both halves matter. PERSONAL, because the declaration is over the pool
-    /// and a shared companion's Swirl mints nothing. OF THE CHARACTER PLAYING
-    /// IT, because it is Klee's KIT that declared the trigger -- the sim asks
-    /// the identical question (<c>card.personal_pool ==
-    /// state.player.character_id</c>).
+    /// A COMPANION, because the tip says "a [gold]Companion[/gold] card whose
+    /// face prints the word" and the declaration is over Companion plays.
+    ///
+    /// PLAYED BY KLEE (`EB-434`). The old spelling asked the CARD's pool
+    /// against its owner and named no character, so Kokomi playing Gorou banked
+    /// a Spark she has no surface to read. Sparks are Klee's resource and the
+    /// tip says "gives Klee"; nobody else is paid.
+    ///
+    /// AND CARRYING THE MARK (`EB-642`) -- under the arm. The Hexerei family is
+    /// <c>CompanionHexerei.IsHexerei</c>, the readers' own
+    /// question, so the word means one thing on every surface that asks it. OFF
+    /// the arm the shipped Personal pool answers instead, and that is R213 B
+    /// rather than taste: no shipped sheet row carries <c>hexerei:</c> at all,
+    /// so a Hexerei-only rule would silently retire the grant <c>EB-219</c>
+    /// moved into the kit at parity. The Balance surface does not move for a
+    /// prototype arm.
     /// </summary>
-    public static bool IsOwnPersonalCompanion(CardModel? card)
+    public static bool PaysKleesSpark(CardModel? card)
     {
-        if (card is not ICompanionCard comp || comp.PersonalPool is null) return false;
+        if (card is not ICompanionCard comp) return false;
         var owner = card.Owner;
         if (owner == null) return false;
-        return comp.PersonalPool == CompanionPool.CharacterId(owner);
+        if (CompanionPool.CharacterId(owner) != "klee") return false;
+#if PROTOTYPE_CARDS
+        if (KleeOverhaul.Enabled)
+            return CompanionHexerei.IsHexerei(card);
+#endif
+        return comp.PersonalPool == "klee";
     }
 
     /// <summary>
@@ -90,7 +116,7 @@ public static class KleeCompanionSpark
     /// </summary>
     public static void Arm(CardPlay cardPlay)
     {
-        _reactionsAtPlayStart = IsOwnPersonalCompanion(cardPlay.Card)
+        _reactionsAtPlayStart = PaysKleesSpark(cardPlay.Card)
             ? ReactionEffects.TotalResolved
             : null;
     }
@@ -119,11 +145,16 @@ public static class KleeCompanionSpark
         if (amount <= 0) return;
 
         await SparkPower.Gain(choiceContext, creature, amount, cardPlay.Card,
-            // `EB-418`. THE NAME IS THE RULE'S AND NOT PRUNE'S. The grant
-            // moved off her face at `EB-219` and the trigger is keyed on the
-            // POOL, so every coven Personal walks this line -- the r11 seat's
+            // `EB-418`. THE NAME IS THE RULE'S AND NOT ANY CARD'S. The grant
+            // moved off Prune's face at `EB-219` and the trigger is keyed on a
+            // SET, so every card in it walks this line -- the r11 seat's
             // unnamed Spark was Diona's. A ledger row saying "prune" over a
             // Diona play is the same unreadable number one surface in.
+            //
+            // THE KEY DOES NOT MOVE AT `EB-642`, deliberately: it is the
+            // ledger's stable id for the one kit rule that pays here, aggregated
+            // by `MeterLedger` and pinned from the sim side, and the set it
+            // names widened rather than became a different rule.
             source: "companion:personal/play");
     }
 }

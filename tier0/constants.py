@@ -911,7 +911,8 @@ BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 
 # =============================================================================
-# KLEE'S PERSONAL-COMPANION SPARK TRIGGER -- "Little Hexenzirkul" (EB-219).
+# KLEE'S COMPANION SPARK TRIGGER -- "Little Hexenzirkul" (EB-219, retargeted
+# onto the Hexerei mark by EB-642 / R265 pick 1).
 #
 # LAW:145, countersigned R224 (2026-08-30): "Companion cards may not themselves
 # grant signature resources. A character-owned engine may respond to a
@@ -920,8 +921,15 @@ BURST_PER_REACTION = 5        # burst energy per reaction triggered
 # play." THIS BLOCK IS THAT DECLARATION, and it is the only place either engine
 # says what a Companion play is worth in Sparks.
 #
-# THE TRIGGER: Klee plays a card from her PERSONAL Companion pool
-# (`personal_pool: klee`). Not a shared companion, not another character's.
+# THE TRIGGER: Klee plays a Companion card carrying the HEXEREI mark
+# (the sheet's own family key, R265 pick 1) -- one word, one rule,
+# Universals included.
+# Off the overhaul arm no shipped row carries the key, so the shipped Personal
+# pool (`personal_pool: klee`) answers there instead and `EB-219`'s parity
+# stands: a Balance surface does not move for a prototype arm (R213 B).
+# WHO IS PAID: Klee, and nobody else (`EB-434`) -- hers is the only Spark
+# surface in the game, so the character test is written out rather than implied
+# by the pool.
 # THE BOUND: at most MAX_PER_PLAY, once per CARD PLAY -- a Companion resolved a
 # second time by a replay (Study Buddy) is one play, not two. A per-play bound a
 # replay can double is not a bound.
@@ -935,11 +943,12 @@ BURST_PER_REACTION = 5        # burst energy per reaction triggered
 # reaction / upgraded-reaction) and BASE + REACTION + UPGRADED reproduces all
 # four. The cap is the arithmetic ceiling of the three, not a fifth number.
 #
-# REACH: general in form, Prune-only in fact -- exactly one row in the four
-# committed companion sheets carries `personal_pool`. A second Personal
-# Companion authored for Klee later falls under this declaration automatically,
-# which is why the trigger is declared over the POOL and not over one card.
-KLEE_COMPANION_SPARK_BASE = 1              # any Personal Companion play
+# REACH: general in form, and on the shipped sheets Prune-only in fact --
+# exactly one row in the four committed companion sheets carries
+# `personal_pool`. Under the arm the reach is every row printing the word, which
+# is the point of R265: a row joins the family by carrying the key, and the
+# trigger is declared over a SET and never over a list of cards.
+KLEE_COMPANION_SPARK_BASE = 1              # any paying Companion play
 KLEE_COMPANION_SPARK_REACTION_BONUS = 1    # ...that triggered a reaction
 KLEE_COMPANION_SPARK_UPGRADED_BONUS = 1    # ...and/or is upgraded
 KLEE_COMPANION_SPARK_MAX_PER_PLAY = 3      # the bound LAW:145 requires
@@ -3421,7 +3430,7 @@ BANNER_FEATURED_SLOTS = 3
 # `reaction_triggered_by_this` conditional AND `gain_spark 1` unconditionally at
 # top level; both ops are GONE from the sheet, and the grant is now the kit
 # declaration LAW:145 requires (`KLEE_COMPANION_SPARK_*`,
-# `effects.klee_personal_companion_spark`, C# `KleeCompanionSpark`).
+# `effects.klee_companion_spark`, C# `KleeCompanionSpark`).
 #
 # WHY A BUMP AT ALL, GIVEN THE PARITY. The four yields do not move -- 1 / 2 / 2
 # / 3, asserted case by case in `tier0/tests/test_eb219_prune_kit_spark.py` --

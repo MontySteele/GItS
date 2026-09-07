@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
+public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard, IHexereiCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,14 +46,14 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_jean_dandelion_breeze");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Lion's Fang, Fair Protector"),
-        ("description", "Klee's own. At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain {PowerAmount:diff()} [gold]Block[/gold] and draw 1 card."),
+        ("description", "[gold]Hexerei[/gold]. At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain {PowerAmount:diff()} [gold]Block[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
