@@ -561,6 +561,9 @@ internal static class NCombatUi_Activate_GaugeSetup
         // (partner doesn't need to see the queue)."
         KurageMemoryCard.Setup(state);
         KokomiPlanStrip.Setup(state);
+        // `EB-621`, on the same rule: ONE element for the LOCAL seat, built
+        // outside the per-player loop. Klee's Spark bank beside the energy orb.
+        SparkCounter.Setup(state);
 #endif
     }
 }
