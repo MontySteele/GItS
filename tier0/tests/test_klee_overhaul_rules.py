@@ -1358,6 +1358,36 @@ def test_sorry_jean_removes_the_largest_and_blocks_for_its_size(overhaul):
     assert state.player.block == 11
 
 
+def test_bomb_sized_block_takes_dexterity_like_every_other_card_block(overhaul):
+    """`EB-390`. Dexterity 2 raised Dig In 8 to 10 and Barbara's 5 to 7 and
+    left Sorry, Jean... at exactly the Bomb's size, 13 for 13 (Klee r10 run 2
+    act 2, finding 3) -- while the card's face says "gain Block", which is the
+    sentence Dexterity's own face is about.
+
+    ONE RULE FOR BOTH BOMB-SIZED BLOCKS, which is what the row asked for: two
+    cards printing the same verb and disagreeing about Dexterity is the same
+    defect a card later, so Careful Now takes the switch with it. The cap is
+    on the BOMB's size and Dexterity lands on top of it, exactly as a printed
+    Block's does.
+    """
+    enemy = make_enemy(hp=400)
+    state = klee_state([enemy])
+    state.player.powers["dexterity"] = 2
+    klee_overhaul.place(state, enemy, 13)
+
+    effects.resolve_card(state, load("proto_ko_sorry_jean"))
+    assert state.player.block == 15         # 13 + 2, and the charge is spent
+    assert sizes(enemy) == []
+
+    state = klee_state([enemy := make_enemy(hp=400)])
+    state.player.powers["dexterity"] = 2
+    klee_overhaul.place(state, enemy, 13)
+
+    effects.resolve_card(state, load("proto_ko_careful_now"))
+    assert state.player.block == 12         # capped at 10, then + 2
+    assert sizes(enemy) == [13]             # and it spends nothing
+
+
 def test_sorry_jean_on_an_empty_board_is_a_printed_no_op(overhaul):
     state = klee_state([make_enemy()])
     effects.resolve_card(state, load("proto_ko_sorry_jean"))

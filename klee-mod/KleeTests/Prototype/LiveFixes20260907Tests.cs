@@ -156,6 +156,49 @@ public class LiveFixes20260907Tests
         }
     }
 
+    // ==================================================================
+    // `EB-390` -- Bomb-sized Block takes Dexterity like every other Block
+    // ==================================================================
+    //
+    // THE FIND (Klee r10 run 2 act 2, finding 3). Dexterity 2 raised Dig In 8
+    // to 10 and Barbara's 5 to 7 and left Sorry, Jean... at exactly the Bomb's
+    // size, 13 for 13 -- while the card's face says "gain Block", which is the
+    // sentence Dexterity's own face is about ("Block gained from cards").
+    //
+    // THE ROW OFFERED TWO RULES AND STATED NO DEFAULT, so the applied one is
+    // the row's first: the Block goes through the card-Block pipeline. The
+    // other -- print that the size is paid raw -- costs a card its verb to
+    // keep a distinction nothing on the screen draws. `ValueProp.Move` is one
+    // switch and both terms ride it: `DexterityPower.ModifyBlockAdditive` and
+    // `FrailPower`'s multiplicative hook share the predicate
+    // `props.IsPoweredCardOrMonsterMoveBlock()`.
+    //
+    // CAREFUL NOW TAKES IT TOO. Two Bomb-sized Blocks that disagree about
+    // Dexterity is this row's defect one card later. What stays `Unpowered`
+    // is Block no card printed, which is the line the engine's own predicate
+    // draws. Behavioural twin: `test_klee_overhaul_rules.py`'s
+    // `test_bomb_sized_block_takes_dexterity_like_every_other_card_block`.
+
+    [Fact]
+    public void Both_bomb_sized_blocks_gain_through_the_card_block_pipeline()
+    {
+        // STRUCTURAL, and labelled: `CreatureCmd.GainBlock` needs a live
+        // combat. What is read is the ValueProp each site passes, which is the
+        // whole of the decision, and that no Bomb-sized Block still opts out.
+        var source = Source("Powers/Prototype/ProtoBombPower.cs");
+
+        Assert.Contains(
+            "await CreatureCmd.GainBlock(applier, size, ValueProp.Move, null);",
+            source);
+        Assert.Contains(
+            "await CreatureCmd.GainBlock(applier, amount, ValueProp.Move, null);",
+            source);
+        Assert.DoesNotContain("GainBlock(applier, size, ValueProp.Unpowered",
+                              source);
+        Assert.DoesNotContain("GainBlock(applier, amount, ValueProp.Unpowered",
+                              source);
+    }
+
     // ------------------------------------------------------------------
 
     internal static string Source(string relativePath) =>

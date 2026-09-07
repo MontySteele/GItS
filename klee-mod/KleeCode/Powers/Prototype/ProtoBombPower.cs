@@ -1939,13 +1939,33 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <summary>Sorry, Jean..., whole: remove the largest Bomb and gain Block
     /// equal to its size. ONE call, so the number removed and the number gained
     /// are the same number by construction and no printed value can drift from
-    /// either.</summary>
+    /// either.
+    ///
+    /// `EB-390`: <c>ValueProp.Move</c>, WHICH IS THE CARD-BLOCK PIPELINE, and
+    /// the row's own "one rule" default. Under Dexterity 2 the r10 run-2 seat
+    /// watched Dig In go 8 to 10 and Barbara's 5 to 7 while this card paid 13
+    /// for a Bomb 13 -- and its face says "gain Block", which is the sentence
+    /// Dexterity's own face is about ("Block gained from cards"). The other
+    /// reading was available (print that the size is paid raw) and it costs a
+    /// card its verb, so the rule moves instead of the words:
+    /// <c>DexterityPower.ModifyBlockAdditive</c> and <c>FrailPower</c>'s
+    /// multiplicative hook share one predicate,
+    /// <c>props.IsPoweredCardOrMonsterMoveBlock()</c>, so this is one switch
+    /// and both terms arrive with it.
+    ///
+    /// <see cref="BlockForLargestBomb"/> TAKES THE SAME SWITCH, because it is
+    /// the same rule on the other card: two Bomb-sized Blocks that disagree
+    /// about Dexterity is the defect this row is about, one card later. What
+    /// stays <c>Unpowered</c> is Block no card printed -- a power's or a
+    /// relic's -- which is the line the engine's own predicate draws. Sim
+    /// twin: <c>klee_overhaul.remove_largest_for_block</c>, through
+    /// <c>powers.modify_block_gained</c>.</summary>
     public static async Task RemoveLargestForBlockAndGain(
         PlayerChoiceContext choiceContext, Creature applier)
     {
         var size = await RemoveLargestForBlock(choiceContext, applier);
         if (size <= 0) return;
-        await CreatureCmd.GainBlock(applier, size, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(applier, size, ValueProp.Move, null);
     }
 
     /// <summary>
@@ -1970,10 +1990,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// upgrade moves (<c>upgrade: {cap: +3}</c>), and it is what keeps the row
     /// from turning Grounded's cook turn into a stall.
     ///
-    /// UNPOWERED (<c>ValueProp.Unpowered</c>), like every other rule-sourced
-    /// Block on this arm: no Dexterity feeds it and no Frail bites it, because
-    /// it is a RULE's Block and not a card's printed Block. Sim twin:
-    /// <c>klee_overhaul.block_for_largest_bomb</c>.
+    /// `EB-390`: <c>ValueProp.Move</c>, THE CARD-BLOCK PIPELINE, for the
+    /// reason <see cref="RemoveLargestForBlockAndGain"/> gives at length. It
+    /// used to be <c>Unpowered</c> on the reading that a Bomb-sized Block is a
+    /// rule's Block rather than a card's; the row's finding is that a face
+    /// saying "gain Block" is what Dexterity's own face is about, and two
+    /// Bomb-sized Blocks disagreeing about it is the same defect twice. Sim
+    /// twin: <c>klee_overhaul.block_for_largest_bomb</c>, through
+    /// <c>powers.modify_block_gained</c>.
     /// </summary>
     public static async Task<int> BlockForLargestBomb(
         PlayerChoiceContext choiceContext, Creature applier, int cap)
@@ -1989,7 +2013,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         }
         var amount = largest < cap ? largest : cap;
         if (amount <= 0) return 0;
-        await CreatureCmd.GainBlock(applier, amount, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(applier, amount, ValueProp.Move, null);
         return amount;
     }
 
