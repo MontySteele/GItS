@@ -19,7 +19,8 @@ from understudy import authorship, bridge, qa_packet, seat
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, settle_board, _text
-from understudy.blindplay_render import render, sha256, still_in_fight
+from understudy.blindplay_render import (assert_one_page, render,
+                                         sha256, still_in_fight)
 from understudy.blindplay_shape import (BlindPlayError, _is_rate_limited,
                                         LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
                                         SeatBudgetExhausted, SETTLE_DELAY_S,
@@ -428,6 +429,19 @@ class Session:
 
     def _page(self, obs_md: str, feedback: str,
               forecast: list[str] | None = None) -> str:
+        """The body one seat is handed: the forecast, the screen, the feedback.
+
+        `EB-510` GUARDS THE ASSEMBLY AND NOT ONLY THE RENDER. `render` already
+        refuses a page whose sections repeat, at the one place a SCREEN is
+        finished -- and the r11 lane-2 doubling cannot have come from there,
+        because every heading is appended at one `out +=` on one branch. The
+        row's own reading is that the doubling is "between that print and the
+        reader", and this method is the one step left in that gap: it is where
+        a screen stops being a screen and becomes the message. So the same
+        guard runs over the ASSEMBLED body, which is the string the seat
+        actually reads, and a forecast or feedback block that ever carried a
+        second copy of a section is refused here rather than delivered.
+        """
         parts = []
         # `EB-229`. FIRST, and that position is the whole point -- the same
         # one `qa_packet` gives the staged twin. The tester reads top to
@@ -440,7 +454,9 @@ class Session:
         if feedback:
             parts.append(f"## What happened last time\n\n{feedback}")
         parts.append("Answer with ONE command from the grammar.")
-        return "\n\n".join(parts)
+        body = "\n\n".join(parts)
+        assert_one_page(body)
+        return body
 
     def _settle(self, state: dict[str, Any]) -> dict[str, Any]:
         """Ride out a MOMENT rather than reporting it as a screen.
