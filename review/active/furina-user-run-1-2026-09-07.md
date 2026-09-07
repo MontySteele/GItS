@@ -154,6 +154,40 @@ The first frame of the day, before the panel
 (`frame-20260907-154029-furina-strip-t4.png`), is what [USER]'s and GPT's
 notes in §3b were written on.
 
+## 5c. Passes three and four (2026-09-07, evening)
+
+- **Pass three** (`EB-639`/`640`/`641`, Opus, PR #426, `0.2.2958+proto`):
+  `frame-20260907-173119-furina-p3-t05.png` (full stage) and
+  `frame-20260907-173214-furina-p3-t10.png` (after the Companion play).
+  GPT's read on them, relayed by [USER]: readable, but "several widgets
+  assembled together" (the header floating above the chips, the replace
+  text on its own strip, "Reduced performance" hanging under); "+1 at 10"
+  beside Fanfare 13 ambiguous; FRONT names position, not the trigger; no
+  frame showed the replacement. That verdict triggered the rule in §5: the
+  next pass went to a Fable agent, not Opus.
+- **Pass four** (`EB-644`, with `EB-637` hover previews and `EB-638` the
+  tip clause folded in; PR #430, `0.2.2985+proto`): one backing and inset
+  with a hairline per row gap; the width a function of the chip count
+  only, every header and footer string pinned inside the slot row;
+  "Encore 0 · Reduced" on the Encore line and the notice row gone; one
+  footer, the front member's replacement, bright while a Deploy is hovered;
+  PERFORMS / LEAVES / ENTERS on the chips from the game's own hovered-card
+  tracker; the Fanfare hover names the next threshold ("Bonus +2 at 20").
+  Frames on a lane-1 run of the same scenario, the fourth Debut now granted
+  just before beat 3 (five grants over a drawn hand of six overflowed the
+  hand cap and the game dropped one):
+  `frame-20260907-184115-furina-p4b-t01.png` (beat 1: Crabaletta FRONT
+  "5 damage", two Ushers "3 Block", "Encore 0 · Reduced", "Fanfare 13 ·
+  Bonus +1", "Replace: 14 damage"),
+  `frame-20260907-184140-furina-p4b-t03.png` (beat 2: "Encore 1" with one
+  pip, the front Usher "4 Block", "Replace: 9 Block"),
+  `frame-20260907-184206-furina-p4b-t05.png` (beat 3, after the fourth
+  Deploy: Usher FRONT "3 Block", Crabaletta "6 damage", Chevalmarin "3
+  damage", "Encore 0 · Reduced", "Fanfare 22 · Bonus +2"). The hover states
+  are not in any frame; the runner has no hover step. Sent with a one-page
+  brief for GPT's next read; the eyes-on in §5 stays open until [USER]
+  says the panel reads.
+
 ## 6. Defaults applied, disclosed
 
 - **`EB-627`**, **`EB-628`**, **`EB-629`** as above, E defaults, built by
