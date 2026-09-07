@@ -199,6 +199,71 @@ public class LiveFixes20260907Tests
                               source);
     }
 
+    // ==================================================================
+    // `EB-318` -- the log says the rider's Mines were placed
+    // ==================================================================
+    //
+    // THE FIND (round-7 act-1 seat, fight 4). One detonation of Jumpy Dumpty
+    // -- a Spark +1 said one Bomb had gone off -- and the rider's Mines could
+    // be confirmed only by that Spark: the rule is on the card, the result is
+    // on the badges, and nothing joined the two at the moment it happened.
+    //
+    // THE COUNT QUESTION IS ANSWERED FIRST, by running it rather than arguing
+    // it: `test_one_detonation_places_one_rider_mine_per_living_enemy` in
+    // `tier0/tests/test_klee_overhaul_rules.py` shows one Mine per LIVING
+    // enemy per detonation, host included. The seat's two Mine 3s on one body
+    // are not reproducible in either engine, and `EB-457`'s corpse guard is
+    // the only place the two ever disagreed.
+    //
+    // THE DISCLOSURE HALF IS A LINE. A counter nothing reads is dead weight;
+    // what the row asks for is a sentence, so `KleeOverhaulLedger.NoteLine`
+    // writes one at each of the two beats that happen while no card is in
+    // front of the player -- the rider's sweep, with its count, and each
+    // explosion, with its number and its reaction (`EB-450`'s log half) --
+    // and mirrors it to `godot.log`. The page half of both rows is the board
+    // it already reads: the bridge answers a play BEFORE the card resolves.
+
+    [Fact]
+    public void The_arm_log_keeps_its_lines_across_a_turn_and_caps_them()
+    {
+        var klee = Seat.Klee().Creature;
+        KleeOverhaulLedger.ResetAll();
+        var ledger = new KleeOverhaulLedger();
+
+        ledger.NoteLine("Bomb 8 went off on Toadpole A for 12 (Melt)");
+        ledger.NoteLine("Its rider placed Mine 3 on 2 enemies");
+        // A LOG THAT FORGOT LAST TURN could not answer the question either
+        // seat was asking, which was about a beat that had already passed --
+        // so the turn roll leaves it alone, unlike rule 7's two counters.
+        ledger.RollTo(4);
+
+        Assert.Equal(new[] { "Bomb 8 went off on Toadpole A for 12 (Melt)",
+                             "Its rider placed Mine 3 on 2 enemies" },
+                     ledger.Lines.ToArray());
+        Assert.Equal(0, ledger.SetOffThisTurn);
+
+        for (var i = 0; i < 260; i++) ledger.NoteLine("line " + i);
+        Assert.Equal(200, ledger.Lines.Count);
+        Assert.Equal("line 259", ledger.Lines[^1]);   // oldest dropped first
+        Assert.Equal(klee, klee);
+    }
+
+    [Fact]
+    public void Both_unwitnessed_beats_write_a_line()
+    {
+        // STRUCTURAL, and labelled: both sites sit inside async command
+        // bodies. What is read is that each writes, and what it writes with.
+        var source = Source("Powers/Prototype/ProtoBombPower.cs");
+
+        Assert.Contains("ledger.NoteLine(", source);
+        Assert.Contains("Its rider placed Mine ", source);
+        Assert.Contains("charge.IsMine ? ", source);
+        // `EB-450`'s half: the reaction is NAMED, off the same lookup the
+        // badge's own preview makes, taken before the funnel eats the aura.
+        Assert.Contains(
+            "ReactionTable.Lookup(pendingAura.Element, Element.Pyro)", source);
+    }
+
     // ------------------------------------------------------------------
 
     internal static string Source(string relativePath) =>

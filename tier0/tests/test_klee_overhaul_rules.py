@@ -1342,6 +1342,38 @@ def test_chain_fuse_grows_one_enemys_pile_only(overhaul):
     assert sizes(b) == [6]
 
 
+def test_one_detonation_places_one_rider_mine_per_living_enemy(overhaul):
+    """`EB-318`. One detonation of Jumpy Dumpty ("when it goes off, place a
+    Mine 3 on ALL enemies") left two Mine 3s on the one enemy in the round-7
+    act-1 seat's fight 4, and a Spark +1 said only one Bomb had gone off. The
+    row asked which of three shapes the rider has -- per hit, per enemy slot,
+    or a jump doubling it -- and this is the answer, run rather than argued:
+    ONE Mine per living enemy per detonation, the host included, and the log
+    names every one of them.
+
+    THE HOST IS IN THE SWEEP and that is the rule, not an oversight: the card
+    says ALL enemies and the body whose charge just went off is one of them.
+    A CORPSE IS NOT, which is `EB-457`'s fix on the C# side and has always
+    been true here -- the sweep walks `living_enemies`.
+    """
+    a, b = make_enemy(hp=400, name="a"), make_enemy(hp=400, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 8, payload_mine_all=3)
+
+    assert klee_overhaul.set_off(state, a) == 1        # ONE explosion
+
+    assert sizes(a) == [3] and sizes(b) == [3]
+    assert [c.is_mine for c in a.ko_charges] == [True]
+    assert [c.is_mine for c in b.ko_charges] == [True]
+    # THE LOG SAYS IT HAPPENED, which is the disclosure half of the row: the
+    # rider's placements are their own rows, one per body, with the size on
+    # them. `KleeOverhaulLedger.NoteLine` is the C# twin.
+    placed = [row for row in state.log
+              if row["event"] == "ko_bomb_placed" and row["mine"]]
+    assert [(row["target"], row["size"]) for row in placed] == [
+        ("a", 3), ("b", 3)]
+
+
 def test_sorry_jean_removes_the_largest_and_blocks_for_its_size(overhaul):
     """`The_emergency_exit_removes_one_charge_and_reports_its_size`, plus the
     reported default the card text does not state: THE LARGEST, the only

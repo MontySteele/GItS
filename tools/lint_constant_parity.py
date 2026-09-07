@@ -375,6 +375,8 @@ MIRRORED: dict[str, object] = {
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
 UNMIRRORED: dict[str, str] = {
+    "KleeOverhaulLedger.LineCap":
+        "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
     "RosterArt.PortraitWidth":
         "`EB-275`. AN IMAGE SIZE, not balance: the card-art window's authored "
         "pixel width, used to build the flat blank an uncovered row's portrait "

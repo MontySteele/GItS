@@ -1366,6 +1366,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
         var reactionsBefore = ReactionEffects.TotalResolved;
+        // `EB-450`: which reaction this explosion is about to cause, read
+        // before the hit consumes the aura that decides it.
+        var pendingAura = AuraCmd.Find(target);
+        var pending = pendingAura == null
+            ? Elements.Reaction.None
+            : ReactionTable.Lookup(pendingAura.Element, Element.Pyro);
         // `EB-270`: the number the hit LANDED for, straight off the funnel that
         // computed it. Big Badda Boom's second clause reads this through the
         // ledger and its face says "the damage the Bombs dealt", so the two
@@ -1395,6 +1401,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
 
         ledger.NoteExplosion(reacted, dealt);
+        // `EB-450`, the log half. The badge printed 7 and 12 landed, with the
+        // reaction named nowhere, because a Mine fires on the ENEMY's turn
+        // where no card is in front of the player to price it. The reaction is
+        // NAMED rather than flagged: `pending` is the same lookup
+        // `PendingReactionMultiplier` makes for the badge, taken BEFORE the
+        // funnel because the funnel consumes the aura, so the line and the
+        // preview cannot disagree about which reaction this was.
+        ledger.NoteLine(
+            (charge.IsMine ? "Mine " : "Bomb ") + size + " went off on "
+          + NameOf(target) + " for " + dealt
+          + (reacted && pending != Elements.Reaction.None
+                ? " (" + pending + ")"
+                : reacted ? " (a reaction)" : string.Empty));
         // THE VERMILLION PACT (the pool pass, `EB-491`). The Rare's whole rule
         // is that the aura the explosion CONSUMED is still standing when the
         // Attack behind it lands, so the Attack reacts too -- re-applied HERE,
@@ -1431,15 +1450,47 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // never the rider one.
         if (charge.PayloadMineAll > 0 && applier.CombatState != null)
         {
+            var landed = 0;
             foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
             {
                 if (enemy.IsDead) continue;
                 await Place(choiceContext, enemy, charge.PayloadMineAll,
                             isMine: true, payloadMineAll: 0, applier, cardSource);
+                landed++;
+            }
+            // `EB-318`: THE RIDER SAYS IT FIRED. One detonation of Jumpy
+            // Dumpty put a Mine on every enemy and the round-7 seat could
+            // confirm it had happened only by watching a Spark tick over --
+            // the rule is on the card, the result is on the badges, and
+            // nothing joined the two at the moment it happened. The COUNT is
+            // in the line because the count is what the seat was trying to
+            // read: one Mine per living enemy per detonation, said out loud.
+            if (landed > 0)
+            {
+                ledger.NoteLine(
+                    "Its rider placed Mine " + charge.PayloadMineAll + " on "
+                  + landed + (landed == 1 ? " enemy" : " enemies"));
             }
         }
 
         await NotifyExplosionListeners(choiceContext, applier, target, size, reacted);
+    }
+
+    /// <summary>The body a log line names. `Monster.Title` is what the seat's
+    /// own screen calls it, and a `LocString` cannot be resolved outside a
+    /// booted game -- so a headless read falls back to the type's name rather
+    /// than throwing inside a log call.</summary>
+    private static string NameOf(Creature creature)
+    {
+        try
+        {
+            var title = creature.Monster?.Title.GetFormattedText();
+            return string.IsNullOrEmpty(title) ? "the enemy" : title!;
+        }
+        catch (System.Exception)
+        {
+            return "the enemy";
+        }
     }
 
     /// <summary>
