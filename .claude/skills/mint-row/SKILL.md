@@ -5,14 +5,12 @@ description: Mint a BACKLOG or QUEUE row - the derived id, the pipe syntax, the 
 
 # mint-row — one row, minted or read
 
-## Read one row
+## Read one row (never grep `BACKLOG.md` for one)
 ```sh
 python tools/row.py EB-311            # the four fields, unpacked
 python tools/row.py EB-311 --oneline  # id, register:line, section, status
 python tools/row.py M69               # QUEUE too; the register is found
 ```
-
-Never grep `BACKLOG.md` for one row.
 
 ## Mint one row
 
@@ -20,13 +18,14 @@ Never grep `BACKLOG.md` for one row.
 python tools/mint_row.py BACKLOG tools --scope "..." --next-action "..." \
   --gate "none." --acceptance "..." --provenance "R240"      # dry run
 python tools/mint_row.py BACKLOG tools ... --write     # insert + run the lints
-python tools/mint_row.py QUEUE 5 --decision "**CHOOSE** (1) x or (2) y" \
-  --status "OPEN -- gated on the round" --write
+python tools/mint_row.py QUEUE 5 --id "klee-starter-pick 1" \
+  --decision "**CHOOSE** (1) x or (2) y" --status "OPEN -- gated on the round" --write
 ```
 
-The section is a unique prefix (`tools`, `5`). The id is **derived**, so
-**nothing in `lint_register_ids.py` is edited when you mint**. Quote the printed
-id in your commit message.
+The section is a unique prefix (`tools`, `5`). A BACKLOG id is **derived**, so
+**nothing in `lint_register_ids.py` is edited when you mint**; a QUEUE row takes
+**no derived id** (no new `M` after 2026-09-01), so `--id` is the packet section
+carrying the pick (`EB-606`). Quote the printed id in your commit message.
 
 ## The rules the tool cannot keep for you
 

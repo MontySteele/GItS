@@ -216,9 +216,31 @@ are in [`workstreams.md`](workstreams.md).
   moves); the random Set off steers its first iteration only; Careful
   Arrangement on a Mine as printed; Kaeya's face names a Grounded that
   no longer exists (`EB-576`); a D default on offer shape for the Spark
-  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. [USER]'s act-1 run is
-  due on this build. The round-8 clear is read against a control run
-  (below).
+  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. **Round 22 is READ**
+  (`review/active/klee-overhaul-round-22-2026-09-06.md`): three natural
+  lanes on `0.2.2817+proto`, one void on a hard blocker (Hefty Tablet's
+  rare pick on `EB-577`'s canonical model, `EB-594`, fixed the same
+  night); the Spark-priced offer reached the seats and the economy
+  still read as never binding or circular; the starter's single
+  detonator read a third time (five dead-Bomb turns in six fights), to
+  be raised as [USER]'s own pick after the round lands; no pick in the
+  packet; `EB-593`-`EB-596`, `EB-605`. **The starter's detonator is
+  RULED R262** (2026-09-06,
+  `review/ruled/klee-starter-detonator-pick-2026-09-06.md`): hold, R261
+  re-affirmed, the starter at two kit cards with Innate on Jumpy Dumpty
+  alone; the draft is the fix and nothing builds. **Round 23 is
+  READ** (`review/active/klee-overhaul-round-23-2026-09-06.md`): on
+  `0.2.2830+proto` the Spark loop read from both edges, never scarce on
+  the natural lane and deadlocked on a deck of Spark cards (the act-1
+  elite lost to a priced-out detonator, not to damage); Hexerei's three
+  exact questions to `EB-596`; no pick here; `EB-607`-`EB-612`.
+  **Comparison pass one is WRITTEN**
+  (`review/active/klee-pool-comparison-pass-2026-09-06.md`): seven of the
+  ten pool-pass rows earn their place, Long Fuse's escalation goes to the
+  audit door, Fireworks Show and Kindling are held, the pool stays 45, and
+  round 24's hypothesis is the React deck; no pick.
+  [USER]'s act-1 run is due on `0.2.2830+proto`. The round-8 clear is
+  read against a control run (below).
 - **Kokomi** — Rounds 4d and 5 are RULED (R250,
   `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
   six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
@@ -450,6 +472,18 @@ are in [`workstreams.md`](workstreams.md).
   three of seven kit runs. The clears are the kits'; a clear on a 30-row pool
   is consistency as much as strength. The second control (same afternoon,
   §5) died on the same floor to the same Death Blow; no third is queued.
+- **Elements and reactions — RULED R263** (2026-09-06,
+  `review/ruled/elements-reaction-sweep-2026-09-05.md` §6): Dendro's build
+  is deferred out of the rebuild milestone, its boundaries drawn now with
+  Sumeru struck as a prerequisite (`review/ruled/dendro-boundaries-2026-09-06.md`,
+  its four picks RULED R264 at their defaults, Quicken canon-gated); the sweep runs visibility, then a READING of the concrete
+  sequences and companion choices
+  (`review/records/reaction-sequences-2026-09-06.md`), then a change only
+  where that reading shows a weakness; Quicken is additive under the iron
+  rule as read, no amendment. The layer's brief is
+  `review/active/reaction-brief-2026-09-06.md` (no pick, GPT audit owed);
+  the census (`review/records/reaction-census-2026-09-05.md`) is the count
+  the reading corrects. `EB-428` built, `EB-410` the open display half.
 - **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
   rate are noted there from the round-5 and act-1 reads.

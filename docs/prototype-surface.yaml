@@ -288,7 +288,7 @@
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] a random enemy and deal 4 damage to it, twice.",
+   description: "Twice: [gold]Set off[/gold] a random enemy and deal 4 damage to it.",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: random_enemy, damage: 4, times: 2}]}
@@ -313,7 +313,7 @@
 - {id: proto_ko_rapid_fire, name: "Rapid Fire", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] a random enemy and deal 3 damage to it, 4 times.",
+   description: "4 times: [gold]Set off[/gold] a random enemy and deal 3 damage to it.",
    effects: [{op: set_off, target: random_enemy, damage: 3, times: 4}]}
 
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
@@ -493,7 +493,7 @@
 - {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend all your [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 3 per [gold]Spark[/gold] spent.",
+   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 3 per [gold]Spark[/gold] spent.",
    upgrade: {grow: +1},
    effects: [{op: spend_spark, amount: all},
              {op: grow_largest_bomb, per_spark: 3}]}
@@ -751,7 +751,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 9 damage. If the enemy has an aura, apply 1 [gold]Vulnerable[/gold].",
+   description: "Deal 9 damage. If the enemy had an aura before the hit, apply 1 [gold]Vulnerable[/gold].",
    effects: [{op: damage, amount: 9, target: enemy, applies_element: true},
              {op: conditional, if: target_has_aura,
               then: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}]}]}

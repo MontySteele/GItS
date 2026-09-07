@@ -152,13 +152,14 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _reward_option, _SHELF_MEMORY, _shelf_kind, _shop_fingerprint,
     _shop_items, _shop_options, _SPARK_POWER)
 from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
-    ALREADY_UPGRADED, _bundle_cards, _carried_out_row, _combat, deck_titles,
+    ALREADY_UPGRADED, PHASE_FLIP_LINE, _bundle_cards, _carried_out_row, _combat, deck_titles,
     _event_option, _event_options, kokomi_plans, kurage_memory, _map_ahead,
     _map_boss, _option_faces,
     _map_nodes, _map_options, NO_UPGRADE_DEFINED, _omitted_from_upgrade,
     _potion_slots, _preview_cards, _proceed_option, _pulse_phrase,
     _relic_options, _rest_options, _reward_items, _screen_cards,
-    _selected_bundle, UNEXPLAINED_OMISSION, upgrade_deck_floor)
+    _selected_bundle, UNEXPLAINED_OMISSION, map_floor, OPTION_UNNAMED_GRANT,
+    upgrade_deck_floor)
 from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, _BASE_KEYWORD_RE, BASE_KEYWORDS,
     BOSS_ROOM, COMPANION_STAGE_CLAUSE, _elements_on_screen,
@@ -166,7 +167,11 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     HAND_REPEAT_NOTE, keyword_notes, METER_CAPPED_NOTE,
     METER_DEFINED_NOTE,
     METER_NOTE, METER_RULES, MULTI_INTENT_LABEL, MULTI_INTENT_NOTE,
-    PLAN_AIM_NOTE, PLAN_HYDRO_NOTE, POWER_NOTE,
+    PLAN_AIM_NOTE, PLAN_COUNT_NOTE, PLAN_HYDRO_NOTE, POWER_NOTE,
+    EMPTY_SHELVES_NOTE, CLONE_NOTE, BUFF_INTENT_CLAUSE, MAP_FLOOR_LINE,
+    SKIPPED_CARD_REWARD, EVENT_NO_DECLINE_NOTE, AUTO_TURN_NOTE,
+    PER_HIT_NOTE, ONE_USE_DISCOUNT_NOTE, INTENT_SOURCE_NOTE,
+    INTENT_NUMBER_DISAGREES,
     PREVIEW_LOCKED,
     REACTION_KEYWORDS, SPARK_OPENING_RULE, SPREAD_REACTIONS,
     SELECTION_NOTE, TRANSFORM_NOTE, TRANSFORM_UNREADABLE, _wire_keyword_rows)

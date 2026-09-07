@@ -526,10 +526,10 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
-            "A [gold]Companion[/gold] card that prints the word, and Klee "
-          + "herself. Only the ones marked Klee's own pay: [blue]"
-          + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold] a play, up "
-          + "to [blue]" + KleeCompanionSpark.MaxPerPlay + "[/blue].");
+            "A [gold]Companion[/gold] card whose face prints the word. Playing "
+          + "one marked Klee's own gives Klee [blue]" + KleeCompanionSpark.Base
+          + "[/blue] [gold]Spark[/gold], up to [blue]" + KleeCompanionSpark.MaxPerPlay
+          + "[/blue] a play; it never costs [gold]Spark[/gold].");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.

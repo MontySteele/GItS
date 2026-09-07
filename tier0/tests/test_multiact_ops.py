@@ -413,11 +413,12 @@ def test_slow_amps_attack_damage_per_card_played_this_turn():
     st.player.hand = [_attack(10, 0), _attack(10, 1)]
     st.cards_played_this_turn = 0
     combat.play_card(st, st.player.hand[0])
-    # 1st card of the turn counts itself: 10 * 1.1 = 11.
-    assert e.hp == 50 - 11
+    # 1st card of the turn does NOT count itself (`EB-532`, the mod's order
+    # read live under `EB-525`): 10 * 1.0 = 10.
+    assert e.hp == 50 - 10
     combat.play_card(st, st.player.hand[0])
-    # 2nd card: 10 * 1.2 = 12.
-    assert e.hp == 50 - 11 - 12
+    # 2nd card: one card played before it, 10 * 1.1 = 11.
+    assert e.hp == 50 - 10 - 11
 
 
 def test_slow_does_not_amp_skill_damage():

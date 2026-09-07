@@ -175,6 +175,8 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
                 qa_packet.card_key(entry.get("id")))
             or (_int(entry.get("spark_price"))
                 if entry.get("spark_price") is not None else None)),
+        # `EB-445`: whether that price is the whole bank.
+        "spark_all": qa_packet.spends_all_sparks(entry.get("id")),
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
@@ -344,7 +346,8 @@ def _named_option(entry: Any) -> dict[str, Any]:
             break
     spark = (qa_packet.printed_spark_index().get(qa_packet.card_key(card_id))
              if card_id is not None else None)
-    cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark})
+    cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark,
+                                 "spark_all": qa_packet.spends_all_sparks(card_id)})
     # `EB-262`, the other half, AND IT IS NOT OURS TO FIX. A card shelf's
     # name, text and cost all live behind `entry.CreationResult?.Card`, and
     # `MerchantCardEntry.IsStocked` IS `CreationResult != null` -- so the
@@ -600,20 +603,49 @@ def remember_deck(state: dict[str, Any]) -> None:
     for pile in _DECK_PILES:
         for entry in player.get(pile) or []:
             if isinstance(entry, dict) and _text(entry.get("name")):
+                # `EB-609`: the pile entry's flag OR the `+` the game prints
+                # on an upgraded title. The Klee r23 seat's Smith listed its
+                # upgraded cards under "nowhere, and nothing on the feed says
+                # why" because the flag was absent and the title was not read.
                 cards.append({"title": _text(entry.get("name")),
                               "key": qa_packet.card_key(entry.get("id")),
                               "upgraded": bool(entry.get("is_upgraded")
-                                               or entry.get("upgraded"))})
+                                               or entry.get("upgraded")
+                                               or _text(entry.get("name"))
+                                               .rstrip().endswith("+"))})
     if not cards:
         return
     held = _held_deck()
     same_run = _fold(held.get("character")) == _fold(player.get("character"))
+    floor = _int(_blob(state, "run").get("floor"))
     if same_run and _int(_blob(state, "battle").get("round")) != 1:
+        return
+    # `EB-447`. AND THE FIRST ROUND-ONE READ OF A FIGHT IS THE ONLY ONE.
+    #
+    # BOTH DIRECTIONS OF THE r15 ERROR HAPPEN INSIDE ROUND ONE. "After the
+    # Haunted Ship [the map] listed `Dazed x 5`, which are combat-only status
+    # cards and were gone by the next fight. Earlier, after I played Catalytic
+    # Converter as a Power, the same list dropped Catalytic Converter
+    # entirely. Both directions of error, in the one place I go to plan a
+    # draft" (Klee r15 (c)). A Power leaves all four piles the moment it
+    # resolves, and an enemy's Status cards arrive in the draw pile on the
+    # turn they land -- and `end_turn` is asynchronous, so the wire answers a
+    # GET after the enemy has acted with THE ROUND UNCHANGED
+    # (`blindplay_read`, `EB-175`). Every re-read inside round one therefore
+    # replaced the deck with the fight's leavings.
+    #
+    # THE FIRST READ IS THE DECK, which is `remember_deck`'s own argument for
+    # round one taken one step further: at the first observation of a fight
+    # nothing has been played and nothing has been shuffled in. Keyed on the
+    # FLOOR, because a run holds one fight per floor and the floor is on the
+    # feed of every screen; a feed that sends no floor keeps the old rule
+    # rather than a guess.
+    if same_run and floor and _int(held.get("floor")) == floor:
         return
     row = {"cards": cards,
            "character": _text(player.get("character")),
            "act": _int(_blob(state, "run").get("act")),
-           "floor": _int(_blob(state, "run").get("floor"))}
+           "floor": floor}
     _DECK_MEMORY.clear()
     _DECK_MEMORY.update(row)
     try:

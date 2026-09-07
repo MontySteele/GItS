@@ -955,9 +955,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # the base game's `cardSource == null` case.
     dmg = powers.modify_damage_taken(enemy, dmg, from_card=from_card)
     # Slow (§10.9 promotion): +N% damage from Attacks per card played this
-    # turn. cards_played_this_turn increments at play, BEFORE resolution, so
-    # the attacking card counts itself -- the base-game trigger order.
-    slow_mult = (1 + enemy.slow * state.cards_played_this_turn / 100.0
+    # turn BEFORE this one. `EB-532`: the live read (`EB-525`, Furina r12
+    # lane 1) is that the attacking card does not count itself -- "it counts
+    # the cards played BEFORE this one" is the sentence the page now prints
+    # -- and the mod is the base game's Slow, so this engine follows it.
+    # cards_played_this_turn increments at play, before resolution, which
+    # is why the card in flight is subtracted back out here.
+    slow_mult = (1 + enemy.slow * max(0, state.cards_played_this_turn - 1) / 100.0
                  if enemy.slow and source == "attack" else 1.0)
     if slow_mult != 1.0:
         dmg *= slow_mult

@@ -8,6 +8,7 @@ and what each screen is offering. Re-exported from `blindplay.py`, so
 """
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from understudy import qa_packet
@@ -176,6 +177,59 @@ UNEXPLAINED_OMISSION = ("on the screen's list nowhere, and nothing on the feed "
                         "says why")
 
 
+#: `EB-332`. THE GAME PARKS A BOSS ON A SENTINEL WHILE IT CHANGES PHASE. The
+#: Kokomi r4c act-2 seat read `Waterfall Giant -- HP 999999997/999999999` for a
+#: whole turn -- "the single worst thing I saw" -- and could not tell won from
+#: lost. No real body has a hundred million HP, so a max above this line is the
+#: sentinel and not a number, and the render says what the HP bar is doing
+#: instead of quoting it.
+PHASE_FLIP_HP_FLOOR = 100_000_000
+PHASE_FLIP_LINE = "changing phase (its HP is not a number this turn)"
+
+
+def is_phase_flip_hp(hp: int, max_hp: int) -> bool:
+    """Is this HP pair the game's phase-change sentinel rather than a body's?"""
+    return max(hp, max_hp) >= PHASE_FLIP_HP_FLOOR
+
+
+#: `EB-355` / `EB-393`. THE NUMBER AN ENCHANT MOVES, NAMED AT THE PICK. "Sharp
+#: raises the hand number, an upgrade the Plan number, unsaid" (Kokomi r5 run
+#: 2): the branch is irreversible and the page had the word's definition but
+#: not this card's arithmetic. The prompt names the enchant and its amount
+#: ("Choose an Attack to Enchant with Sharp 2."), the picked face carries the
+#: one number the enchant touches, so the line is the two put together.
+_ENCHANT_PROMPT_RE = re.compile(r"\bEnchant with (Sharp|Nimble|Swift)\s*(\d+)")
+_ENCHANT_MOVES = {
+    "Sharp": re.compile(r"\bDeal (\d+) damage"),
+    "Nimble": re.compile(r"\bGain (\d+) Block"),
+}
+
+
+def enchant_in_prompt(prompt: str) -> dict[str, Any] | None:
+    """`{"word", "amount"}` for a selection prompt that names an enchant."""
+    m = _ENCHANT_PROMPT_RE.search(prompt or "")
+    if m is None:
+        return None
+    return {"word": m.group(1), "amount": int(m.group(2))}
+
+
+def enchant_moves_line(enchant: dict[str, Any], title: str, text: str) -> str:
+    """One line: what this enchant does to THIS card's printed number."""
+    word, amount = enchant["word"], enchant["amount"]
+    if word == "Swift":
+        return (f"- {word} {amount} on **{title}**: the first time you play "
+                f"it in a fight, draw {amount}.")
+    m = _ENCHANT_MOVES[word].search(text or "")
+    if m is None:
+        return (f"- {word} {amount} on **{title}**: this face prints no "
+                f"{'damage' if word == 'Sharp' else 'Block'} number for it "
+                "to move.")
+    n = int(m.group(1))
+    unit = "damage" if word == "Sharp" else "Block"
+    return (f"- {word} {amount} on **{title}**: {m.group(0).split(' ')[0]} "
+            f"{n} → {n + amount} {unit}.")
+
+
 def upgrade_deck_floor(state: dict[str, Any]) -> int:
     """The floor the deck behind `_omitted_from_upgrade` was read on. `0` if none."""
     return _int((remembered_deck(state) or {}).get("floor"))
@@ -210,7 +264,9 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
         if isinstance(entry, dict):
             grid.append((_fold(_text(entry.get("name"))),
                          bool(entry.get("is_upgraded")
-                              or entry.get("upgraded"))))
+                              or entry.get("upgraded")
+                              or _text(entry.get("name")).rstrip()
+                              .endswith("+"))))      # `EB-609`
     debt = qa_packet.no_upgrade_index()
     out: list[dict[str, str]] = []
     for card in deck:
@@ -338,6 +394,12 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      "handle": handle,
                      "hp": _int(e.get("hp")),
                      "max_hp": _int(e.get("max_hp", e.get("hp"))),
+                     # `EB-332`: a boss's phase flip parks its HP on a
+                     # sentinel for a turn; the page says so instead of
+                     # printing a billion.
+                     "phase_flip": is_phase_flip_hp(
+                         _int(e.get("hp")),
+                         _int(e.get("max_hp", e.get("hp")))),
                      "block": _int(e.get("block")),
                      # `EB-342`: EVERY component of the telegraph, not the
                      # first. A move that attacks and also puts four Burns in
@@ -997,6 +1059,17 @@ def _map_boss(state: dict[str, Any]) -> str:
     return ", ".join(n for n in (_text(b.get("name")) for b in bosses) if n)
 
 
+def map_floor(state: dict[str, Any]) -> int:
+    """The run's own floor number on THIS screen, or `0` (`EB-323`).
+
+    One field, `run.floor` -- the same one the run-over page prints, so the
+    two screens count in one vocabulary. `0` where the feed sends none, which
+    the callers print nothing at all for rather than a number they cannot
+    stand behind.
+    """
+    return _int(_blob(state, "run").get("floor"))
+
+
 def _bundle_cards(bundle: Any) -> list[dict[str, Any]]:
     """The cards inside one bundle entry, in the order the wire lists them."""
     if not isinstance(bundle, dict):
@@ -1118,6 +1191,33 @@ def _option_faces(entry: Any, skip: str = "") -> list[dict[str, str]]:
     return out
 
 
+# `EB-393`. THE OPTION THAT ADDS A CARD THE FEED DOES NOT CARRY.
+#
+# THE FIND (Klee r10 act 2). The Bugslayer event offered "Learn Extermination
+# Technique -- Add Exterminate to your Deck" and "Learn Squash Technique --
+# Add Squash to your Deck", "with no rules text for either card, no cost, no
+# type... Every other choice screen in the game prints the full card. I picked
+# Exterminate off the name alone."
+#
+# AND THE PAGE CANNOT PRINT WHAT IT WAS NOT SENT. `EB-448` reads both channels
+# a named thing can arrive on -- the category-prefixed face and `opt.HoverTips`
+# -- and this event sends neither, so there is no face here to print and
+# nothing on this side that could invent one without reading a sheet. What is
+# left is `EB-529`'s answer one screen over: say that the face is missing, so
+# a blank is a stated gap rather than a card with no text.
+OPTION_UNNAMED_GRANT = (
+    "this option's own words promise a card and the feed carried no face for "
+    "it -- no rules text, no cost, no type -- so this page can offer it by "
+    "name only")
+
+# `EB-393`: the sentence shape an option uses when it is handing over a card.
+# Deliberately narrow -- the words the game itself writes on these rows ("Add
+# Exterminate to your Deck", "Add a card to your deck") -- so a row that
+# promises gold, HP or a relic is untouched and the note cannot become
+# furniture on every event in the game.
+_GRANTS_A_CARD = re.compile(r"\badd\b[^.]*\bto your deck\b", re.I)
+
+
 def _event_option(entry: Any) -> dict[str, Any]:
     """One event option, plus what it names and whether it has been taken.
 
@@ -1129,6 +1229,11 @@ def _event_option(entry: Any) -> dict[str, Any]:
     option = _named_option(entry)
     option["names"] = _option_faces(entry, skip=option["name"])
     option["taken"] = bool(isinstance(entry, dict) and entry.get("was_chosen"))
+    # `EB-393`: and where the row's own sentence promises a card that neither
+    # channel carried, the gap is stated rather than left as a title with no
+    # face under it (the Bugslayer event, Klee r10 act 2).
+    if not option["names"] and _GRANTS_A_CARD.search(option.get("text") or ""):
+        option["note"] = OPTION_UNNAMED_GRANT
     return option
 
 

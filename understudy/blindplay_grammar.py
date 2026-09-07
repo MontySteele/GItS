@@ -16,12 +16,14 @@ from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _event_options, _map_nodes,
                                         _map_options, _proceed_option,
                                         _relic_options, _rest_options,
-                                        _reward_items, _screen_cards)
+                                        _reward_items, _screen_cards,
+                                        map_floor)
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
                                         _shop_items, _shop_options)
-from understudy.blindplay_notes import PREVIEW_LOCKED
+from understudy.blindplay_notes import (PREVIEW_LOCKED,
+                                        SKIPPED_CARD_REWARD)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import (_blob, _enemies, _entity_id, _fold,
                                        _hand, _int, _number_names, _player,
@@ -1062,8 +1064,17 @@ def _go(state: dict[str, Any], cmd: Command) -> Resolution:
                       key=lambda e: e["n"])
     if idx < 0:
         return _refuse(why)
+    # `EB-323`: the FLOOR on the receipt. The bridge answers this post in
+    # coordinates (`ok Traveling to Ancient at (3,0)`) and the run-over page
+    # counts floors, so the page's own line names the floor being entered --
+    # one up from the one the map printed, the same reading `_map_ahead`
+    # numbers its lookahead from. Nothing where the feed sends no floor.
+    printed: dict[str, Any] = {"node": options[idx]["name"]}
+    here = map_floor(state)
+    if here:
+        printed["text"] = f"floor {here + 1}"
     return Resolution(True, "go", {"action": "choose_map_node", "index": idx},
-                      {"node": options[idx]["name"]})
+                      printed)
 
 
 def _buy(state: dict[str, Any], cmd: Command) -> Resolution:
@@ -1251,7 +1262,17 @@ def _skip(state: dict[str, Any]) -> Resolution:
         blob = _blob(state, "card_reward")
         if blob.get("can_skip") is False:
             return _refuse("this card reward cannot be skipped")
-        return Resolution(True, "skip", {"action": "skip_card_reward"}, {})
+        # `EB-333`: AND IT SAYS WHAT IT DID. "`skip` on a card reward neither
+        # finalises nor says the reward waits until you proceed" (Kokomi r4c
+        # act 2b, finding 11): the verb answered `ok Skipping card reward`,
+        # the run did not move, and nothing on the page connected the two.
+        # What the page can state is what the bridge does --
+        # `ExecuteSkipCardReward` clicks the screen's ALTERNATIVE button and
+        # returns to the screen the reward came from -- and it may not say
+        # that the alternative is a plain skip, which is `EB-374`'s standing
+        # rule and why `CARD_REWARD_ALTERNATIVE_NOTE` exists.
+        return Resolution(True, "skip", {"action": "skip_card_reward"},
+                          {"skipped": SKIPPED_CARD_REWARD})
     if st == "relic_select":
         return Resolution(True, "skip", {"action": "skip_relic_selection"}, {})
     if st in SELECT_SCREENS:
@@ -1283,13 +1304,24 @@ def _proceed(state: dict[str, Any]) -> Resolution:
                                 if o["name"])
             return _refuse("this event has no Proceed to take; choose one of "
                            f"its options: {offered or '(nothing printed)'}")
-        option = _named_option(entries[idx])
+        # `EB-333`: through the SAME namer `choose` uses, so the outcome line
+        # is the same line whichever verb took the option. "This or That?"
+        # granted Red Mask and Clumsy and the page printed `Proceed` and
+        # nothing else (Kokomi r4c act 2b), because this branch built its row
+        # with `_named_option` -- the option's own body and the faces of what
+        # it names were dropped on the one verb that takes a grant.
+        option = _event_option(entries[idx])
         posted = entries[idx].get("index") if isinstance(entries[idx],
                                                          dict) else None
+        printed: dict[str, Any] = {"option": option["name"]}
+        if option.get("text"):
+            printed["text"] = option["text"]
+        if option.get("names"):
+            printed["names"] = option["names"]
         return Resolution(True, "proceed",
                           {"action": "choose_event_option",
                            "index": posted if isinstance(posted, int) else idx},
-                          {"option": option["name"]})
+                          printed)
     if st in ("rewards", "treasure", "shop", "fake_merchant", "rest_site"):
         return Resolution(True, "proceed", {"action": "proceed"}, {})
     return _refuse("there is nothing to leave from this screen")

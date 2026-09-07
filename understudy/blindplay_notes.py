@@ -274,7 +274,145 @@ CARD_REWARD_ALTERNATIVE_NOTE = (
     "relic's own option. The relic's printed words are on your relic row in "
     "the next fight.*")
 
+# `EB-333`. WHAT `skip` DID, SAID BY THE PAGE THAT TOOK IT. The verb answered
+# `ok Skipping card reward`, no card was added, the run stayed where it was and
+# no line joined those three facts up. Worded off the bridge's own handler --
+# `ExecuteSkipCardReward` presses the screen's alternative button and hands the
+# screen behind it back -- and it stops short of calling that button a plain
+# skip, which is `EB-374`'s rule and `CARD_REWARD_ALTERNATIVE_NOTE`'s subject.
+SKIPPED_CARD_REWARD = (
+    "the card reward. No card is added to your deck. This does not leave the "
+    "room: it presses the reward screen's alternative button and hands back "
+    "the screen the reward came from, and `proceed` is the verb that leaves")
+
+# `EB-393`, the decline half. A ROOM WITH NO WAY OUT BUT THROUGH.
+#
+# The same seat: "and no option to decline... I was forced to add *something*."
+# `ExecuteProceed` walks rewards, rest, both merchants and the treasure room
+# and never an event room (`EB-259`), and `_proceed_option` answers -1 where
+# the screen prints no Proceed of its own -- so on such a screen the rows above
+# are the whole of the grammar, and the page says so instead of leaving a
+# reader hunting for the button.
+EVENT_NO_DECLINE_NOTE = (
+    "*This room prints no Proceed and this page has no verb that leaves one: "
+    "the rows above are the whole of what this screen will take. If none of "
+    "them is a decline, this room has none.*")
+
+# `EB-349`. THE TURN SOMEBODY ELSE PLAYED, AND THE PAGE PRINTED NOTHING FOR IT.
+#
+# THE FIND (Kokomi r4d act 3). Whispering Earring -- "Vakuu plays your first
+# turn for you" -- opened six fights, and five of them rendered as an empty
+# hand with no card, no target and no result named: "Vakuu had spent my whole
+# turn before I was shown anything." One of the six left 2 of 4 energy unspent
+# and the seat could not tell that from a bug.
+#
+# THE LEDGER IS NOT ON THE WIRE. `BuildPlayerState` sends the piles, the hand
+# and the board, and nothing anywhere sends a record of a card RESOLVING --
+# there is no combat log on the feed, so the cards Vakuu played, what it aimed
+# them at and what they did cannot be printed by this side at all. That half
+# is the bridge's.
+#
+# WHAT THE PAGE HAS is the relic's own printed sentence, which is on every
+# screen of the run (`EB-238`), and the round number. So it says the turn
+# happened, names the relic that took it, and states the gap -- which is the
+# difference between an empty hand that is a bug and an empty hand that is the
+# price of a relic. Matched on the SENTENCE and not the relic's name: a second
+# relic that does the same thing gets the same line.
+AUTO_TURN_NOTE = (
+    "*{relic} plays a turn of yours for you, and it has already played this "
+    "one. What it played, what it aimed at and what each card did are not on "
+    "this page's data feed -- there is no record of a card resolving on the "
+    "wire at all -- so the board above is the state that turn LEFT and not a "
+    "report of it. An empty hand or unspent energy here is that turn, not a "
+    "fault.*")
+
+# `EB-349`, the second half. A PER-HIT MODIFIER AGAINST A MULTI-HIT ICON.
+#
+# THE FIND (Kokomi r4d act 2, elite 4). "With `Tainted 4` the screen printed
+# `6x3` = 18. I had 7 Block and Tungsten Rod, so 18 - 7 - 3 = 8 expected. I
+# took 15." And the round after, the same debuff against a ONE-hit icon
+# printed 12 = 8 + 4, "which is correct -- Tainted *is* folded into a one-hit
+# intent". So the game's own icon folds a per-hit modifier into one figure and
+# not into the other, and nothing on the feed says which of the two you are
+# looking at.
+#
+# THE PAGE DOES THE ARITHMETIC IT CAN AND CLAIMS NEITHER READING. Both numbers
+# are on this screen already -- the icon's `AxB` and the stack on the player's
+# own status line, whose printed rule says "additional damage from Attacks",
+# which `EB-359` established is per hit. The note nets the modifier per hit and
+# prints both totals, because a reader who is shown 18 and takes 30 has been
+# given the wrong number and a reader shown a range has been given the
+# decision.
+PER_HIT_NOTE = (
+    "*You are carrying {name} {n}, and its own line says that is additional "
+    "damage from each Attack hit. A part whose icon reads `{label}` is {hits} "
+    "hits: {low} in all if the game's figure already counts your {name}, "
+    "{high} if it does not. This page's feed carries no breakdown of an icon "
+    "number, so it cannot say which of the two this is -- both have been "
+    "seen, on one-hit and multi-hit parts of the same fight.*")
+
+# `EB-349`, the third half. A ONE-USE DISCOUNT PRICED ONTO EVERY ROW.
+#
+# THE FIND (Kokomi r4d). Pounce reads "Deal 14 damage. The next Skill you play
+# costs 0", and while it is up EVERY Skill in hand prints the cut price -- the
+# game's own "if played now" preview, right one card at a time and read as a
+# hand-wide sale. `cost_note` explains the cut per card ("the cut is this
+# turn's board and not the card") and says nothing about it being spendable
+# once.
+#
+# READ OFF THE POWER'S OWN SENTENCE, the word `next` included, so a discount
+# that really is hand-wide never takes this line.
+ONE_USE_DISCOUNT_NOTE = (
+    "*{power} pays for ONE card: its own words are \"the next {kind} you "
+    "play\". Every {kind} above is showing the reduced price because the game "
+    "prices each row as if it were the next one played -- only the first one "
+    "you actually play is charged it, and the rest go back to their printed "
+    "cost.*")
+
+# `EB-607`. WHERE THE INTENT NUMBER COMES FROM, WHICH IS THE ROW'S FIRST ASK.
+#
+# THE FIND (Klee r23 lane 1 (c) 3). "Fossil Stalker showed 'the number on its
+# icon is 12' both before and after it gained Strength 3, while Corpse Slug's
+# icon *did* move (3x2 to 7x2 at Strength 4). One of those two is telling me
+# something the other is not; I planned my block around the higher number to
+# be safe."
+#
+# THE READ, and it is one line: there is ONE source and it is the same one for
+# every enemy. `BuildEnemyState` fills a part's `label` from
+# `intent.GetIntentLabel(targets, creature)` -- the game's own call for the
+# figure it draws on that icon, asked per creature per part
+# (`McpMod.StateBuilder.cs:1541-1566`) -- and this page prints that string
+# unchanged. There is no base anywhere on the feed, no modifier list, no
+# second field a different enemy could be read from, and no arithmetic on this
+# side. So the page cannot be the origin of the difference the seat saw, and it
+# cannot resolve it either: both figures are the game's.
+#
+# WHAT THE PAGE OWES IS THEREFORE THE PROVENANCE, printed where a reader is
+# about to plan a block against a number that may or may not have moved.
+INTENT_SOURCE_NOTE = (
+    "*An intent's number is the one figure the game draws on that icon, taken "
+    "off the data feed and printed here unchanged: this page has no second "
+    "source for it and does no arithmetic on it. An enemy carrying Strength "
+    "whose figure does not move is the game's own figure not moving -- the "
+    "feed carries no base, no modifier list and no breakdown, so nothing here "
+    "can say which parts are inside a given number.*")
+
+#: `EB-607`, the fold. An icon figure and the hover sentence under it are two
+#: numbers from two wire fields, and the page printed them side by side with
+#: nothing said about the pair. Where they cannot be the same number, the line
+#: says which is which instead of leaving a reader to pick one.
+INTENT_NUMBER_DISAGREES = ("the icon's figure and this sentence's number are "
+                           "two different fields of the feed and they do not "
+                           "agree here; the icon is the figure the game draws")
+
 PICKED_MARK = "PICKED"
+# `EB-393`. "(Clone)" ON A TITLE READ AS A SECOND COPY. The enchant confirm
+# listed two picked rows, one tagged `(Clone)`, and the Klee r10 seat read them
+# as two cards; the deck held one. Clone is the game's own mark.
+CLONE_NOTE = ("*A title ending in (Clone) is the game's mark for a card that "
+              "can be duplicated at a Rest Site. It is one card, not a copy; "
+              "a row above and its (Clone) row are the same card.*")
+
 PENDING_PICK_NOTE = ("*Already listed above. These rows are the pick this "
                      "screen is holding, printed a second time so you can "
                      "read its face -- each is one of the cards in the list "
@@ -302,6 +440,20 @@ CARRY_OUT_BOARD_NOTE = (
 # screen is ever drawn for. The mod now records its line on the way out
 # (`KokomiPlan.ResolveEntry`'s finally) and the bridge sends the record on a
 # screen with no combat behind it, so the receipt has somewhere to land.
+# `EB-604`. THE SAME RECEIPT ONE ARM OVER: a lethal Evoke or performance ends
+# the fight and the next screen is the reward screen, so the winning beat had
+# no line anywhere (Furina r16 lane 2, r14 lane 1).
+LAST_SALON_NOTE = (
+    "*The fight is over. This is what your Salon did in its last beat -- "
+    "printed here because a performance or an Evoke whose kill ends a fight "
+    "never reaches a battle screen.*")
+
+# `EB-360`. A SHOP THE FEED SENT NOTHING FOR.
+EMPTY_SHELVES_NOTE = (
+    "*The feed returned no shelves for this shop, so nothing is listed. This "
+    "page cannot tell a sold-out shop from a shop the feed did not send; if "
+    "the game shows wares, observe again, and say `proceed` to leave.*")
+
 LAST_MORNING_NOTE = (
     "*The fight is over. This is the last thing the Bake-Kurage carried out "
     "in it -- printed here because a Plan whose kill ends a fight never "
@@ -417,6 +569,15 @@ PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
                    "already there. A Plan that blocks, draws or applies a "
                    "debuff leaves no aura.")
+
+# `EB-563` / `EB-330` / `EB-357`. THE COUNT WAS READ AS A CAPACITY. The buff
+# prints `Plan 1`, the box says "the Plan", and three seats wrote one Plan at
+# a time for fights on end (one for four fights) before trying two; nothing in
+# `KokomiPlan.cs` caps the queue. Said on the panel, beside the two rules a
+# Plan is already read against.
+PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
+                   "out in the order written; the number on its buff is how "
+                   "many are written, not a limit.")
 
 # `EB-567`. THE KIT'S FIRST DECISION, TAUGHT BY REFUSAL ONE ACTION TOO LATE.
 #
@@ -538,6 +699,44 @@ DEFEND_INTENT_CLAUSE = ("this part adds Block to the Block on its line above, "
 #: knows the number belongs to one part of a several-part move. It says what
 #: the number IS and nothing about how often such a part has landed.
 MULTI_INTENT_LABEL = ", one part of this move"
+
+# `EB-323`. THE BUFF THAT NAMED NOBODY.
+#
+# WHAT THE SEAT SAW (Klee r7). `Empower (Buff)` -- a heading, a bracketed kind,
+# no number and no target -- on a board of three bodies. A part that hits the
+# player and a part that strengthens the enemy's own side read as the same
+# line, and the seat could not tell whether to block for it.
+#
+# THE TARGET IS NOT ON THE WIRE, and that half is the bridge's:
+# `BuildEnemyState` sends an intent part as `type`, `label`, `title` and
+# `description` and nothing else (`McpMod.StateBuilder.cs:1541-1566`) --
+# `IntentModel` has the target and the serializer never asks for it. So the
+# page may not name the body.
+#
+# WHAT IT MAY SAY is the side, which is the wire's own `type`: a `Buff` part is
+# the enemy's side gaining something, so it is not damage arriving at the
+# reader. The clause states that and states the gap, in `DEFEND_INTENT_CLAUSE`'s
+# shape one part-kind over -- a consequence attached to a word that had none.
+BUFF_INTENT_CLAUSE = ("this part strengthens the enemy's own side rather than "
+                      "hitting you, and the feed carries no target for an "
+                      "intent part, so this page cannot say which body it "
+                      "lands on")
+
+# `EB-323`, the other half. WHERE THE PAGE IS, IN THE NUMBER THE RUN COUNTS IN.
+#
+# The map named a room by its room type and a path number, the bridge's own
+# answer to `go` names a grid coordinate (`ok Traveling to Ancient at (3,0)`),
+# and the only screen of the run that ever said `floor` was the run-over page.
+# Three vocabularies for one position, and a seat planning a run against
+# "eight floors of act 1" had none of them to count in.
+#
+# `run.floor` IS THE RUN'S OWN NUMBER, the same field the game-over page reads
+# (`EB-333`), and a map option is one floor up -- which is not a guess: it is
+# the same reading `_map_ahead` numbers its whole lookahead from. Absent from
+# a feed that sends no floor, rather than a `0` this page cannot stand behind.
+MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
+                  "{next}. This is the run's own floor number -- the one the "
+                  "run-over page counts in, not a grid coordinate.")
 
 
 # `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.
@@ -726,10 +925,18 @@ ARM_KEYWORDS: dict[str, str] = {
     # predict which Companion pays a Spark". The faces carry the mark now
     # (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked ones
     # pay and names the mark it points at.
-    "Hexerei": ("A Companion card that prints the word, and Klee herself. "
-                "Only the ones marked Klee's own pay: "
-                f"{COMPANION_SPARK} Spark a play, up to "
-                f"{COMPANION_SPARK_MAX}."),
+    # `EB-596` REWROTE IT AS WHO IS PAID, HOW MUCH, AND WHAT THE CAP COUNTS.
+    # The r22 lane-2 and r23 lane-1 seats read "pay" as a SURCHARGE Klee
+    # pays -- Jean at "cost 2" read as 2 Energy and a hidden Spark -- and
+    # could not tell whether "up to 3" capped Sparks, plays or turns; and
+    # "and Klee herself" read as a rule making every Klee card satisfy Coven
+    # Errand, which no engine implements (only a card carrying the mark
+    # counts, `companion_hexerei.is_hexerei`). So: the family test is the
+    # face; the Spark is a GAIN, bounded per play; and the clause that
+    # carried no rule is gone.
+    "Hexerei": ("A Companion card whose face prints the word. Playing one "
+                f"marked Klee's own gives Klee {COMPANION_SPARK} Spark, up to "
+                f"{COMPANION_SPARK_MAX} a play; it never costs Spark."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
@@ -1018,6 +1225,14 @@ GAME_KEYWORDS: dict[str, str] = {
     "Shatter": (f"The first Attack to hit a Frozen enemy before it acts deals "
                 f"{SHATTER_DAMAGE} additional damage and ends the freeze. "
                 "Only a Frozen enemy can be Shattered."),
+    # `EB-359`. THE GAME'S OWN TIP FOR THE WORD IS THE CARD-SIDE REMINDER
+    # ("Gain 2 Tainted when played") and never what Tainted DOES; two seats
+    # spent a card to read their own status line for it. The rule is that
+    # status line's, verbatim from the wire (Kokomi r4d act 2, Klee r8 run 2).
+    "Tainted": ("A debuff on YOU: take N additional damage from Attacks this "
+                "turn, N being the stack, and per hit of a multi-hit intent. "
+                "A card that says Gain 2 Tainted puts 2 on you when played; "
+                "it wears off at the end of your turn."),
 }
 
 _GAME_KEYWORD_RE = {
@@ -1026,6 +1241,7 @@ _GAME_KEYWORD_RE = {
     # power says "Your Shatters", the Salon paragraph says "no Shatter", and
     # the Frozen row says "Shatters for 6".
     "Shatter": re.compile(r"\bShatter(?:s|ed|ing)?\b"),
+    "Tainted": re.compile(r"\bTainted\b"),
 }
 
 
@@ -1289,9 +1505,15 @@ REACTION_KEYWORDS: dict[str, str] = {
     "Superconduct": ("Electro on a Cryo aura, or Cryo on an Electro aura. The "
                      "reacted enemy gains 2 Vulnerable, which applies before "
                      "this hit."),
+    # `EB-357`: AND WHAT IT LOOKS LIKE ON THE PANEL. The dot is the game's own
+    # Poison stack, so it prints as `Poison N`, the stacks add (3, 10, 13 on
+    # one Eel), and it ticks before the enemy acts; the entry said none of
+    # that and the r5 seat could not price a tick from it.
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
                         "aura. The reacted enemy loses 4 HP at the start of "
-                        "its turn, 1 less each turn."),
+                        "its turn, 1 less each turn. On its panel that is the "
+                        "Poison stack: stacks add, and it ticks before the "
+                        "enemy acts."),
     # `EB-366` SPLIT THE BOSS CLAUSE OFF THIS ROW. See `FROZEN_BOSS_CLAUSE`.
     # `EB-517` PUT THE WINDOW ON IT, in the C# and here in one commit: the two
     # clauses read as independent riders and are one, because the freeze ticks

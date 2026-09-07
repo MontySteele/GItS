@@ -2,8 +2,9 @@
 
 WHY THIS EXISTS
 ---------------
-The sweep packet (not yet on `main` when this was written -- retrieved with
-`git show 95b2882a:review/active/elements-reaction-sweep-2026-09-05.md`,
+The sweep packet (now `review/ruled/elements-reaction-sweep-2026-09-05.md`,
+RULED R263; when this was written it was not yet on `main` and was retrieved
+with `git show 95b2882a:review/active/elements-reaction-sweep-2026-09-05.md`,
 CLAUDE.md sec. History retrieval) asks for exactly this in its §4 item 2:
 "A script over the seat records: which reaction fired, what triggered it (a
 kit card, a companion, a Mine, a Plan, a performance), on what turn, and
@@ -375,12 +376,13 @@ def render(mentions: list[Mention], infos: list[RecordInfo],
                  "say fired, and how")
     lines.append("")
     lines.append(
-        f"A keyword census, run 2026-09-05 by `tools/reaction_census.py` "
+        f"A keyword census, run 2026-09-05 and regenerated 2026-09-06 by `tools/reaction_census.py` "
         f"over {n_records} blind-seat record files under `review/qa/` "
         f"(every `klee-round-*`, `kokomi-round-*`, `furina-reframe-round-*` "
         f"and `control-ironclad-*` directory), for the sweep packet's §4 "
-        f"item 2 (`git show 95b2882a:review/active/"
-        f"elements-reaction-sweep-2026-09-05.md`, not yet on `main` when "
+        f"item 2 (`review/ruled/elements-reaction-sweep-2026-09-05.md`, "
+        f"RULED R263; it was `git show 95b2882a:review/active/"
+        f"elements-reaction-sweep-2026-09-05.md` and not yet on `main` when "
         f"this ran). It found {n_mentions} mentions of the eight implemented "
         f"reactions (Dendro's Burning is listed and reads zero -- §3 of "
         f"that packet already says why). Every number below is produced by "

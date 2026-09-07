@@ -166,6 +166,13 @@ _SHEET_COST_RE = re.compile(r"[Ss]heet[^\n]*?\bcost[=:]?\s*(\d+)")
 _SPARK_PRICE_RE = re.compile(
     r"PrintedSparkPrice\s*=>\s*(?:\(IsUpgraded\s*\?\s*\d+\s*:\s*)?"
     r"(\d+)\s*\)?\s*;")
+#: `EB-445`. AN ALL-IN PRICE HAS A GATE OF 1 AND A PRICE OF EVERYTHING. Stoke
+#: the Fuse declares `PrintedSparkPrice => 1` (the gate the playability check
+#: reads) and spends `SparkPower.SparksAtPlay(...)` -- the whole bank -- so a
+#: cost slot that printed the gate said "1 Spark" on a face that says "Spend
+#: all your Sparks". The spend-all call is the mark the generator writes for
+#: exactly that shape, so it is what this reads.
+_SPARK_SPEND_ALL_RE = re.compile(r"SparkPower\.SparksAtPlay\(")
 _CLASS_RE = re.compile(
     r"^\s*(?:public|internal)\s+(?:sealed\s+|abstract\s+|static\s+|partial\s+)*"
     r"class\s+([A-Za-z_][A-Za-z0-9_]*)", re.M)
@@ -230,6 +237,57 @@ def leaks(blob: Any, allow: frozenset[str] | set[str] = frozenset()
                 found.append((rule, m.group(0), s))
                 break
     return found
+
+
+# `EB-393`. WHAT A REDACTION WITHHELD, IN WORDS A TESTER CAN ACT ON.
+#
+# THE FIND (Klee r10 act 2, finding 6). Claiming the reward "Take your stolen
+# card back" answered `(the game answered with something this tool will not
+# repeat)` and the seat "never learned which card came back... Four Strikes
+# appeared in a deck that started with three, so I assume a Strike, but I am
+# guessing." One leaking token cost the whole sentence, including the words
+# around it that leaked nothing.
+#
+# SO THE TOKEN GOES AND THE SENTENCE STAYS. Each rule of `FORBIDDEN` gets a
+# plain-words replacement -- what KIND of thing was taken out -- and the caller
+# gets the count. The redaction patterns below are deliberately WIDER than the
+# detector's: `mod-id-prefix` matches a prefix, and taking only that out would
+# leave the id's body standing, so the redaction eats the whole token. Width is
+# free here and narrowness is not, because the result is checked against
+# `leaks` before it is returned and a string that still leaks is refused.
+_REDACTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"\b(?:EB|S4-G|W)\-?\d+\b"), "[a register id]"),
+    (re.compile(r"\bR\d{1,3}\b"), "[a ruling id]"),
+    (re.compile(r"\bM\d{1,3}\b"), "[a milestone id]"),
+    (re.compile(r"\brole\s*:", re.I), "[a sheet field]"),
+    (re.compile(r"\barchetypes?\b", re.I), "[a sheet field]"),
+    (re.compile(r"\btempo_band\b", re.I), "[a sheet field]"),
+    (re.compile(r"\bsolve\s*:", re.I), "[a sheet field]"),
+    (re.compile(r"\bKLEEMOD[-_][A-Za-z0-9_\-]*", re.I), "[an internal id]"),
+    (re.compile(r"\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b"), "[an internal id]"),
+)
+
+
+def redact(text: str) -> tuple[str, list[str]]:
+    """The sentence with only its leaking words taken out (`EB-393`).
+
+    Returns `(clean, withheld)` -- the text with each leak replaced by a
+    bracketed phrase naming what kind of thing it was, and the list of those
+    phrases in the order they were taken out. Answers `("", [])` where nothing
+    leaked, and where the result STILL leaks after the pass: the caller then
+    drops the whole sentence exactly as it always did, because a redaction
+    this module cannot verify is not a redaction.
+    """
+    if not text or not leaks(text):
+        return "", []
+    withheld: list[str] = []
+    clean = text
+    for pattern, phrase in _REDACTIONS:
+        clean, hits = pattern.subn(phrase, clean)
+        withheld += [phrase] * hits
+    if not clean.strip() or leaks(clean):
+        return "", []
+    return clean, withheld
 
 
 def assert_blind(blob: Any, allow: frozenset[str] | set[str] = frozenset()
@@ -413,6 +471,31 @@ def _printed_spark_index_cached(repo: Path) -> tuple[tuple[str, int], ...]:
         if key:
             index.setdefault(key, int(price.group(1)))
     return tuple(sorted(index.items()))
+
+
+@lru_cache(maxsize=4)
+def _spend_all_spark_index_cached(repo: Path) -> frozenset[str]:
+    """`EB-445`. The card ids whose Spark price is the whole bank."""
+    ids: set[str] = set()
+    root = repo / "klee-mod"
+    if not root.is_dir():
+        return frozenset()
+    for path in sorted(root.glob(_CARD_SOURCE_GLOB)):
+        try:
+            src = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if _SPARK_SPEND_ALL_RE.search(src) and _SPARK_PRICE_RE.search(src):
+            key = _class_key(src)
+            if key:
+                ids.add(key)
+    return frozenset(ids)
+
+
+def spends_all_sparks(card_id: Any, repo: Path | None = None) -> bool:
+    """`EB-445`. Does this card's Spark price take the whole bank?"""
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    return card_key(card_id) in _spend_all_spark_index_cached(root)
 
 
 def printed_spark_index(repo: Path | None = None) -> dict[str, int]:
@@ -704,19 +787,51 @@ def _upgraded_face_index_cached(repo: Path) -> tuple[
     return tuple(sorted(index.items()))
 
 
+#: `EB-609`. THE BASICS ARE THE BASE GAME'S AND HAVE NO SOURCE FILE HERE. Every
+#: Strike and Defend on the Klee r23 Smith read "this page has no written face
+#: for this card", which is true of the index and useless to a reader: the
+#: index is built off the mod's own C#, and the starter's basics are the game's.
+#: Their upgrade is the base game's own idiom -- one number, +3 (Strike 6 to 9,
+#: Defend 5 to 8; tier0 mirrors the same idiom as `PROTOTYPE_DAMAGE_DELTA` and
+#: `PROTOTYPE_BLOCK_DELTA`) -- so the two faces are written here, keyed on the
+#: printed TITLE and matched against the WHOLE printed face, so a mod card that
+#: borrows the word Strike in its name never takes this path.
+_BASE_GAME_BASICS: dict[str, tuple[re.Pattern[str], int]] = {
+    "strike": (re.compile(r"^Deal (\d+) damage\.$"), 3),
+    "defend": (re.compile(r"^Gain (\d+) Block\.$"), 3),
+}
+
+
+def _base_game_basic_face(title: Any, printed: str) -> str:
+    """The upgraded face of a base-game Strike or Defend, or `""`."""
+    key = str(title or "").strip().lower()
+    if key not in _BASE_GAME_BASICS:
+        return ""
+    pattern, delta = _BASE_GAME_BASICS[key]
+    face = strip_markup(printed).strip()
+    m = pattern.match(face)
+    if m is None:
+        return ""
+    value = int(m.group(1)) + delta
+    return face[:m.start(1)] + str(value) + face[m.end(1):]
+
+
 def upgrade_preview(card_id: Any, printed: str,
-                    repo: Path | None = None) -> tuple[str, str]:
+                    repo: Path | None = None,
+                    title: Any = None) -> tuple[str, str]:
     """`(the face this card would print upgraded, why it cannot say)`.
 
     Exactly one of the two is ever non-empty. `printed` is the wire's own
     current description, markup already stripped by the bridge. See the block
     comment above for the whole argument, including why this is the UPGRADE
-    SCREEN's answer and not the hand's.
+    SCREEN's answer and not the hand's. `title` is the printed name, read only
+    when the index has no row (`EB-609`, the base game's basics).
     """
     root = repo if repo is not None else Path(__file__).resolve().parents[1]
     row = dict(_upgraded_face_index_cached(root)).get(card_key(card_id))
     if row is None:
-        return "", NO_PREVIEW_TEMPLATE
+        basic = _base_game_basic_face(title, printed)
+        return (basic, "") if basic else ("", NO_PREVIEW_TEMPLATE)
     template, holes, reason, _keywords = row
     if reason:
         return "", reason
@@ -901,7 +1016,12 @@ def cost_label(card: dict[str, Any]) -> str:
     price = card.get("printed_spark")
     if not isinstance(price, int) or price <= 0:
         return shown
-    sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
+    if card.get("spark_all"):
+        # `EB-445`: the price is the bank, and the gate is what it takes to
+        # be playable at all.
+        sparks = f"all your Sparks ({price} to play)"
+    else:
+        sparks = f"{price} Spark" if price == 1 else f"{price} Sparks"
     return sparks if shown in ("0", "-") else f"{shown} and {sparks}"
 
 

@@ -34,7 +34,10 @@ BACKLOG = "docs/current/BACKLOG.md"
 QUEUE = "docs/current/QUEUE.md"
 REGISTERS = {"BACKLOG": BACKLOG, "QUEUE": QUEUE}
 
-#: Which series each register mints. The id lint refuses the other direction
+#: Which series each register minted. QUEUE's `M` series is CLOSED (no new M id
+#: after 2026-09-01, CLAUDE.md sec.Norms; `EB-606`): the key stays so the lint
+#: can still name the series, but `next_free("QUEUE")` refuses.
+#: The id lint refuses the other direction
 #: (an id defined in both registers), so this is the writing half of that rule.
 SERIES = {"BACKLOG": "EB", "QUEUE": "M"}
 
@@ -163,6 +166,10 @@ def next_free(register: str) -> tuple[str, int]:
     could in principle be minted from either; RETIRED, because a closed row
     has left HEAD and its number must not come back.
     """
+    if register == "QUEUE":
+        raise ValueError("QUEUE mints no derived id: no new M id after "
+                         "2026-09-01. A pick is named by its packet section "
+                         "until ruled (`EB-606`).")
     lint = _lint()
     series = SERIES[register]
     high = max(lint.RETIRED.get(series, frozenset()), default=0)

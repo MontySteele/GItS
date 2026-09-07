@@ -42,7 +42,7 @@ public sealed class ProtoKoStokeTheFuse : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stoke the Fuse"),
-        ("description", "Spend all your [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by {Grow:diff()} per [gold]Spark[/gold] spent."),
+        ("description", "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by {Grow:diff()} per [gold]Spark[/gold] spent."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

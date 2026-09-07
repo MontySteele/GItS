@@ -244,7 +244,7 @@ public class Round12Tests
         // `EB-554` MADE THE CLAUSE RUNNABLE. The overlap is still what it
         // describes; what changed is that the faces carry the mark now, so the
         // sentence points at it instead of telling a reader a split exists.
-        Assert.Contains("Only the ones marked Klee's own pay:", HexereiTip());
+        Assert.Contains("marked Klee's own gives Klee", HexereiTip());
         // ONE SPELLING FOR THE OTHER WORD: the Spark rider says "Klee's own"
         // too, so a player who has met that rider recognises the set this
         // sentence is pointing at rather than meeting a fourth phrase.
