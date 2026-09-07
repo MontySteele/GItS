@@ -225,12 +225,23 @@ public static class SalonMemberStrip
     /// FRONT chip while the stage is full, because that is the one state in
     /// which the next deploy reaches it.
     /// </summary>
+    /// <remarks>
+    /// `EB-630`. CHEVALMARIN'S LINE CARRIES HER REFUND. It read "Hydro to
+    /// ALL" and stopped, which is half her Evoke: she also grants
+    /// <see cref="SalonConstants.ChevalmarinBowEncore"/> Encore, and that is
+    /// the number which makes replacing her a resource decision rather than a
+    /// loss. Her own member tip has printed it since `EB-384`; the chip is the
+    /// surface the deploy is priced on, and it was the surface missing it.
+    /// INTERPOLATED and never typed, on `EB-89`'s rule -- a repricing moves
+    /// the tip and the chip together or neither.
+    /// </remarks>
     public static string EvokeAct(SalonMember member) => member switch
     {
         SalonMember.Crabaletta =>
             $"Evoke {SalonConstants.CrabalettaBow} Hydro",
         SalonMember.Usher => $"Evoke {SalonConstants.UsherBow} Block",
-        _ => "Evoke Hydro to ALL",
+        _ => "Evoke Hydro to ALL, "
+           + $"+{SalonConstants.ChevalmarinBowEncore} Encore",
     };
 
     /// <summary>

@@ -292,8 +292,14 @@ public class SalonMemberStripPinTests
                      SalonMemberStrip.EvokeAct(SalonMember.Crabaletta));
         Assert.Equal($"Evoke {SalonConstants.UsherBow} Block",
                      SalonMemberStrip.EvokeAct(SalonMember.Usher));
-        Assert.Equal("Evoke Hydro to ALL",
-                     SalonMemberStrip.EvokeAct(SalonMember.Chevalmarin));
+        // `EB-630`: and her REFUND rides the same line. "Hydro to ALL" alone
+        // was half her Evoke, and the half it dropped -- the Encore she gives
+        // back -- is the number that makes replacing her a decision rather
+        // than a loss. Interpolated from the constant, like the other two.
+        Assert.Equal(
+            $"Evoke Hydro to ALL, +{SalonConstants.ChevalmarinBowEncore} "
+          + "Encore",
+            SalonMemberStrip.EvokeAct(SalonMember.Chevalmarin));
 
         var source = Source("Vfx/Prototype/SalonMemberStrip.cs")
             .Replace("\r\n", "\n");
