@@ -11279,3 +11279,71 @@ def test_a_run_without_the_relic_reads_the_short_rule():
     page = blindplay.observe(plans_combat_state(TWO_PLANS))
     assert blindplay.PLAN_HYDRO_NOTE in page.splitlines()
     assert "answering strike" not in page
+
+
+# --- `EB-605`: TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE ---------------------
+
+
+def _bomb_board(headline: int, sizes: str, aura: str | None = None) -> dict:
+    """One body wearing a Bomb pile, and optionally an aura.
+
+    The badge's text is `ProtoBombPower.Face`'s own shape -- the headline
+    forecast sentence and the `Bomb sizes here:` clause -- because both halves
+    of the note are matched on those words and never on the power's name.
+    """
+    state = copy.deepcopy(combat_state())
+    rows = [{"title": "Bomb", "name": "Bomb", "amount": headline,
+             "type": "Debuff",
+             "description": (f"Set off here deals {headline} Pyro damage. "
+                             f"Bomb sizes here: {sizes}, growing each turn.")}]
+    if aura:
+        rows.append({"title": f"{aura} Aura", "name": f"{aura} Aura",
+                     "amount": 2, "type": "Buff",
+                     "description": f"This enemy is wearing {aura}."})
+    body = dict(state["battle"]["enemies"][0], status=rows)
+    state["battle"] = dict(state["battle"], enemies=[body])
+    return state
+
+
+def test_a_bomb_badge_whose_two_numbers_disagree_says_which_is_which():
+    """`EB-605`. "`Bomb 6 ... Bomb sizes here: 4`. Two numbers for one bomb in
+    one sentence. I believe the 6 is the Vaporize-adjusted forecast against a
+    Hydro aura, but I inferred that from a Spark counter, not from any printed
+    word" (Klee r22 lane 1 re-run (c) 2).
+
+    The headline is `DisplayAmount`, which is `PredictedSetOffDamage()` -- what
+    setting the pile off would deal into this body now -- and `{Charges}` is
+    the list of sizes before any of that. The badge's own modifier clause names
+    Vulnerable and the cap and never the reaction, which is the whole of the
+    gap. The page claims neither figure and computes neither; it says what each
+    one is, and names the reaction off the same table its glossary uses.
+
+    Seen to FAIL: the two numbers stood in one sentence with nothing said.
+    """
+    page = blindplay.observe(_bomb_board(6, "4", aura="Hydro"))
+    assert "Bomb 6" in page
+    assert "Bomb sizes here: 4" in page
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=6, total=4).rstrip("*") in page
+    assert blindplay.BOMB_REACTION_CLAUSE.format(
+        aura="Hydro", element="Pyro", reaction="Vaporize") in page
+
+
+def test_a_lone_bomb_that_agrees_with_itself_prints_no_note():
+    """The row's own acceptance: a lone Bomb 6 prints 6 everywhere on its line,
+    so there is nothing to explain and no line is added. A pile of several
+    charges that adds up to its headline is the same case."""
+    assert "on this badge is what setting these off" not in blindplay.observe(
+        _bomb_board(6, "6"))
+    assert "on this badge is what setting these off" not in blindplay.observe(
+        _bomb_board(22, "14 / 8"))
+
+
+def test_a_bomb_gap_with_no_reactable_aura_names_no_reaction():
+    """The reaction clause rides an aura the pile's OWN element pairs with. A
+    body wearing nothing, or wearing the pile's own element (which refreshes
+    rather than reacts), gets the first sentence and not the second."""
+    bare = blindplay.observe(_bomb_board(9, "6"))
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=9, total=6) in bare
+    assert "is wearing a" not in bare
+    same = blindplay.observe(_bomb_board(9, "6", aura="Pyro"))
+    assert "and Pyro into Pyro is" not in same

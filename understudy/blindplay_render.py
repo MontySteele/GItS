@@ -14,7 +14,10 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
                                         enchant_moves_line)
-from understudy.blindplay_notes import (ATTACK_BUFF_NOTE, AURA_NOTE,
+from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
+                                        AURA_NOTE, BOMB_FORECAST_NOTE,
+                                        BOMB_REACTION_CLAUSE,
+                                        REACTION_ELEMENTS,
                                         AUTO_TURN_NOTE,
                                         BUFF_INTENT_CLAUSE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
@@ -537,6 +540,51 @@ def _per_hit_note(you: dict[str, Any],
                 label=str(intent["label"]).strip(), hits=hits,
                 low=each * hits, high=(each + hit["stacks"]) * hits)]
     return []
+
+
+# `EB-605`. The two number groups on a Bomb badge, each matched on the badge's
+# own words rather than on the power's name: the headline forecast names the
+# element it would deal, and the list of charge sizes is its own clause.
+_BOMB_FORECAST = re.compile(
+    r"set off here deals[^.]*?(Pyro|Hydro|Electro|Cryo)", re.I)
+_BOMB_SIZES = re.compile(r"bomb sizes here:\s*([0-9/ ]+)", re.I)
+
+
+def _bomb_forecast_note(power: dict[str, Any],
+                        others: list[dict[str, Any]],
+                        indent: str) -> list[str]:
+    """`EB-605`: which of a Bomb badge's two number groups is which.
+
+    ONLY WHERE THEY DISAGREE, which is the row's own acceptance: a lone Bomb 6
+    prints 6 everywhere on its line and has nothing to explain. The page claims
+    neither figure and computes neither -- both are the game's, printed
+    unchanged -- it says what each one is, and where the body is wearing an
+    aura the pile's element reacts with, it names the reaction the seat had to
+    infer from a Spark counter.
+    """
+    text = str(power.get("text") or "")
+    forecast, sizes = _BOMB_FORECAST.search(text), _BOMB_SIZES.search(text)
+    if not forecast or not sizes or not isinstance(power.get("stacks"), int):
+        return []
+    charges = [int(n) for n in _NUMBER.findall(sizes.group(1))]
+    total = sum(charges)
+    if not charges or total == power["stacks"]:
+        return []
+    element = forecast.group(1).capitalize()
+    line = BOMB_FORECAST_NOTE.format(n=power["stacks"], total=total)
+    aura = next((_AURA_NAME_RE.match(str(row.get("name") or "").strip())
+                 for row in others
+                 if str(row.get("kind") or "").strip().lower() == "aura"
+                 and _AURA_NAME_RE.match(str(row.get("name") or "").strip())),
+                None)
+    if aura:
+        pair = frozenset({element, aura.group(1)})
+        named = next((word for word, elements in REACTION_ELEMENTS.items()
+                      if elements == pair), "")
+        if named:
+            line = line.rstrip("*") + BOMB_REACTION_CLAUSE.format(
+                aura=aura.group(1), element=element, reaction=named) + "*"
+    return [indent + line]
 
 
 def _casket_aura_clause(you: dict[str, Any]) -> str:
@@ -1160,6 +1208,9 @@ def render(obs: dict[str, Any]) -> str:
             out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
+                # `EB-605`: and where a Bomb badge's headline and its list of
+                # charge sizes are two different numbers, which is which.
+                out += _bomb_forecast_note(pw, e["powers"], "    ")
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the
         # opposite, which is what sent a seat's Melt into the wrong body.

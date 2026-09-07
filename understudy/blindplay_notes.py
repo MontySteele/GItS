@@ -386,6 +386,40 @@ ATTACK_BUFF_NOTE = (
     "{n} or may not, and this page cannot say which -- both have been seen "
     "under one live buff.*")
 
+# `EB-605`. TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE.
+#
+# THE FIND (Klee r22 lane 1 re-run (c) 2, fight 6 turn 4). "`Bomb 6 ... Bomb
+# sizes here: 4`. Two numbers for one bomb in one sentence. I believe the 6 is
+# the Vaporize-adjusted forecast against a Hydro aura, but I inferred that from
+# a Spark counter, not from any printed word."
+#
+# WHAT THE TWO NUMBERS ARE, read off `ProtoBombPower`: the badge's headline is
+# `DisplayAmount`, which is `PredictedSetOffDamage()` -- what setting the pile
+# off would deal into THIS body right now, through everything standing on it --
+# and `{Charges}` is the list of charge SIZES before any of that. The badge's
+# own `mods.Clause` names two of the modifiers it folds in (Vulnerable, and a
+# cap that clamps) and the REACTION multiplier is not among them, which is
+# exactly the gap the seat fell into: 4 into a Hydro aura is a 1.5x Vaporize
+# and prints as 6 with nothing saying so.
+#
+# THE PAGE DOES NOT DO THE ARITHMETIC AND CLAIMS NO NUMBER. Both figures are
+# the game's and the page prints them unchanged, `INTENT_SOURCE_NOTE`'s rule.
+# What it adds is which is which, and it adds it ONLY where they disagree --
+# the row's own acceptance is that a lone Bomb 6 prints 6 everywhere on its
+# line, and a badge that agrees with itself raises no question to answer.
+BOMB_FORECAST_NOTE = (
+    "*The {n} on this badge is what setting these off would deal into this "
+    "body NOW, through everything standing on it; the sizes in its own "
+    "sentence are the charges themselves, {total} between them. The gap is "
+    "this body's and not the pile's.*")
+
+#: `EB-605`, the half the seat had to infer from a Spark counter. Where the
+#: body is wearing an aura the pile's own element reacts with, the reaction is
+#: named -- off `REACTION_ELEMENTS`, the same table the glossary on this screen
+#: is built from, so the two cannot say different things about one pair.
+BOMB_REACTION_CLAUSE = (" It is wearing a {aura} aura, and {element} into "
+                        "{aura} is {reaction}.")
+
 # `EB-349`, the third half. A ONE-USE DISCOUNT PRICED ONTO EVERY ROW.
 #
 # THE FIND (Kokomi r4d). Pounce reads "Deal 14 damage. The next Skill you play
