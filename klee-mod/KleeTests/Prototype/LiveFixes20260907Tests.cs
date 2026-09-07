@@ -264,6 +264,79 @@ public class LiveFixes20260907Tests
             "ReactionTable.Lookup(pendingAura.Element, Element.Pyro)", source);
     }
 
+    // ==================================================================
+    // `EB-321` -- the prediction folds the reaction and not Klee's Weak
+    // ==================================================================
+    //
+    // THE ROW'S PREMISE IS SUPERSEDED TWICE OVER, and the correction is worth
+    // more than the row's own words. It reads "`PredictedSetOffDamage` folds
+    // Weak in but not the Reaction". Weak left the number entirely at
+    // `EB-343` / R248 -- a Bomb carries the TARGET's modifiers and nothing of
+    // Klee's -- and the pending reaction was folded in at `EB-559`, off the
+    // Klee r20 lane-2 find ("Bomb 25 on a Hydro body still printed 25; the
+    // real number was 39"). What is left to do is to hold the two halves
+    // together, which nothing did.
+    //
+    // ONE MULTIPLIER, READ IN ONE PLACE. The badge's fold and the reaction
+    // preview a card raises (`KleeCardTooltips.AmplifiedBody`, `EB-589` /
+    // `EB-602`) both take it from `ReactionTable.AmplifierMultiplier` and both
+    // land it through `SimDamagePipeline.ResolveOnTarget`, so a card in hand
+    // and the pile under the enemy cannot name two different numbers for one
+    // hit.
+    //
+    // NO SIM TWIN EXISTS TO HOLD IN STEP: tier0 has no badge and no preview
+    // surface at all -- its Bombs resolve, they are never previewed -- so the
+    // engines are in step by having one reading between them, and this is the
+    // engine that reads.
+
+    [Fact]
+    public void The_badge_prints_the_amplified_number_a_foreign_aura_will_pay()
+    {
+        // The row's own board: Cryo under the pile, Melt at 1.75x, and the
+        // first charge is the one that meets the aura (`EB-432`) -- every
+        // charge behind it lands into a bare body, because the reaction
+        // consumed it.
+        var klee = Seat.Klee();
+
+        var bare = Seat.Klee(200);
+        var barePile = ProtoBombs.Place(bare.Creature, klee.Creature,
+            new ProtoBombs.Charge(10));
+        Assert.Equal(10, barePile.PredictedSetOffDamage());
+
+        var chilled = Seat.Klee(200).WithPower<CryoAuraPower>(2);
+        var melting = ProtoBombs.Place(chilled.Creature, klee.Creature,
+            new ProtoBombs.Charge(10));
+        Assert.Equal(17, melting.PredictedSetOffDamage());   // 17.5, truncated
+
+        var stacked = Seat.Klee(200).WithPower<CryoAuraPower>(2);
+        var stack = ProtoBombs.Place(stacked.Creature, klee.Creature,
+            new ProtoBombs.Charge(10), new ProtoBombs.Charge(10));
+        Assert.Equal(27, stack.PredictedSetOffDamage());     // 17 + 10
+    }
+
+    [Fact]
+    public void The_badge_and_the_cards_reaction_preview_read_one_multiplier()
+    {
+        var badge = Il.Calls(
+            Il.Method("ProtoBombPower", "PendingReactionMultiplier"));
+        var tip = Il.Calls(Il.Method("KleeCardTooltips", "AmplifiedBody"));
+
+        Assert.Contains(badge,
+                        c => c.Contains("ReactionTable.AmplifierMultiplier"));
+        Assert.Contains(tip,
+                        c => c.Contains("ReactionTable.AmplifierMultiplier"));
+
+        // AND R248 IS NOT BREACHED BY THE FOLD: nothing of Klee's is in the
+        // prediction. Weak reduces what its OWNER deals and never what its
+        // owner takes, and the charge enters the funnel at its printed size.
+        var predicted = Il.Calls(
+            Il.Method("ProtoBombPower", "PredictedSetOffDamage"));
+        Assert.Contains(predicted,
+                        c => c.Contains("SimDamagePipeline.ResolveOnTarget"));
+        Assert.DoesNotContain(predicted, c => c.Contains("WeakPower"));
+        Assert.DoesNotContain(predicted, c => c.Contains("StrengthPower"));
+    }
+
     // ------------------------------------------------------------------
 
     internal static string Source(string relativePath) =>
