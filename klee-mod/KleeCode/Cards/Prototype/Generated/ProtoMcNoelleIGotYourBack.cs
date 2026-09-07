@@ -46,14 +46,14 @@ public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForMine(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForMine(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_noelle_breastplate");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — I Got Your Back"),
-        ("description", "Klee's own. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

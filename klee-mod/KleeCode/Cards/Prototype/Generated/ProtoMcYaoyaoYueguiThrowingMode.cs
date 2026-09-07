@@ -49,14 +49,14 @@ public sealed class ProtoMcYaoyaoYueguiThrowingMode : CustomCardModel, ICompanio
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForBomb(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_yaoyao_yuegui_throwing_mode");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yaoyao — Yuegui: Throwing Mode"),
-        ("description", "Klee's own. For {PowerAmount:diff()} turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

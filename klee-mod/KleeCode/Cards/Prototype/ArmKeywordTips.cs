@@ -531,12 +531,19 @@ public static class ArmKeywordTips
     /// keyword page owes: the cost line is where a player looks for what a
     /// card costs, and a keyword that denies a price no face prints invites
     /// the doubt it was written to settle. The sentence ends at "a play."
+    ///
+    /// `EB-642` DROPPED THE OWNERSHIP CLAUSE, because R265 pick 1 dropped the
+    /// distinction it pointed at. [USER] read "one marked Klee's own" off his
+    /// own act-1 run as noise, and the rule now pays every Hexerei card,
+    /// Universals included -- so the first sentence's test IS the payer set and
+    /// a second clause narrowing it would be false. One word, one rule: the
+    /// face prints `Hexerei` if and only if playing it pays.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
             "A [gold]Companion[/gold] card whose face prints the word. Playing "
-          + "one marked Klee's own gives Klee [blue]" + KleeCompanionSpark.Base
+          + "one gives Klee [blue]" + KleeCompanionSpark.Base
           + "[/blue] [gold]Spark[/gold], up to [blue]" + KleeCompanionSpark.MaxPerPlay
           + "[/blue] a play.");
 
@@ -643,10 +650,19 @@ public static class ArmKeywordTips
     /// (<see cref="KleeMod.Powers.KleeCompanionSpark.MaxPerPlay"/>), so a
     /// fourth clause would state a bound no reachable play can meet.
     /// </summary>
+    /// `EB-642`: THE RIDER NAMES THE MARK, NOT THE POOL. R265 pick 1 made the
+    /// printed word the whole rule, so this sentence says "a Hexerei card" --
+    /// the same set the face above it prints and the same set
+    /// <see cref="KleeMod.Powers.KleeCompanionSpark.PaysKleesSpark"/> tests.
+    /// AND IT NOW ASKS <see cref="KleesRuleBelongsHere"/>, which it did not
+    /// have to while it rode only Klee's own Personals: a Hexerei Universal is
+    /// drafted by every character, and Klee's rule on a Kokomi shop screen is
+    /// `EB-504` exactly.
     public static IEnumerable<IHoverTip> ForCovenSpark(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
+        !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, CovenSparkKey,
-            "Playing one of Klee's own [gold]Companions[/gold] makes [blue]"
+            "Playing a [gold]Hexerei[/gold] card makes [blue]"
           + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold], [blue]"
           + KleeCompanionSpark.ReactionBonus + "[/blue] more if it triggered "
           + "an [gold]Elemental Reaction[/gold] and [blue]"

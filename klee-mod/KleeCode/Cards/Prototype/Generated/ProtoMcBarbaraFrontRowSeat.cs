@@ -49,14 +49,14 @@ public sealed class ProtoMcBarbaraFrontRowSeat : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this), this), this);
+        ArmKeywordTips.ForBomb(FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_barbara_show_begin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara — Front Row Seat"),
-        ("description", "Klee's own. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice. Whenever a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice. Whenever a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -943,8 +943,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # the card's own cost section say that?"). A price a card does not charge
     # belongs on the cost line or nowhere -- denying it on the keyword page is
     # what raised the doubt. Held in step with `ArmKeywordTips.ForHexerei`.
+    # `EB-642` DROPPED THE OWNERSHIP CLAUSE, because R265 pick 1 dropped the
+    # distinction it pointed at: every Hexerei card gives Klee a Spark now,
+    # Universals included, so the first sentence's test IS the payer set and
+    # "marked Klee's own" would narrow it falsely. The mark leaves the faces in
+    # the same commit -- one word, one rule.
     "Hexerei": ("A Companion card whose face prints the word. Playing one "
-                f"marked Klee's own gives Klee {COMPANION_SPARK} Spark, up to "
+                f"gives Klee {COMPANION_SPARK} Spark, up to "
                 f"{COMPANION_SPARK_MAX} a play."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),

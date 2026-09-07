@@ -49,14 +49,14 @@ public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this);
+        FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_qiqi_herald_of_frost");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Qiqi — Herald of Frost"),
-        ("description", "Klee's own. For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold]."),
+        ("description", "For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

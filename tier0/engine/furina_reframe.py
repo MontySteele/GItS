@@ -519,7 +519,7 @@ def companion_play_trigger(state, card) -> None:
 
     CALLED FROM `combat._finish_play`, gated to the first resolution of the
     play, which is the same seam and the same guard Klee's kit uses
-    (`effects.klee_personal_companion_spark`). The reasons carry over exactly:
+    (`effects.klee_companion_spark`). The reasons carry over exactly:
     `_finish_play` is the shared half of every card play, so "once per
     Companion play" is true by construction rather than by discipline, and a
     replay is one card resolved twice rather than two plays.
