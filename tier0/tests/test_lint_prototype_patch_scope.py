@@ -93,11 +93,12 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     hits, markers, count = lint.scan()
     assert hits == [], hits
     assert count >= 3, "the prototype directories must still hold patches"
-    # Every exemption is visible, and there are FOUR: the pile-screen
+    # Every exemption is visible, and there are FIVE: the pile-screen
     # teardown, the Kokomi Plan strip's teardown (whose character scope is one
     # call in, on the guarded seat resolver), the Kokomi arm's target-type
     # registration, which runs at `ModelDb.Init` before any run exists, and --
-    # since `EB-621` -- the Spark counter's teardown.
+    # since `EB-621` -- the Spark counter's teardown, joined since `EB-640` by
+    # the Salon panel's.
     #
     # THE LAST ONE WAS A REVIEW QUESTION AND THIS IS THE ANSWER. The postfix
     # takes the `NCombatUi` Harmony hands it and frees, by name, the one child
@@ -109,11 +110,17 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # minted this lint. The scope lives at the only door that BUILDS the node
     # (`SparkCounter.Setup` through `SparkGauge.AppliesTo`).
     #
-    # IT WAS FIVE UNTIL 2026-09-07. `EB-628`'s Fanfare badge was the second of
-    # that pair; `EB-627`'s revision folded it into `SalonPanel`, which hangs on
-    # the Salon stage's own door and needs no teardown patch of its own.
-    # A FIFTH appearing here is the next review question.
-    assert len(markers) == 4, markers
+    # IT WENT FIVE -> FOUR -> FIVE ON 2026-09-07, and the round trip is the
+    # record of a wrong answer. `EB-628`'s Fanfare badge was struck when
+    # `EB-627` folded it into `SalonPanel`, and the note here said the panel
+    # "hangs on the Salon stage's own door and needs no teardown patch of its
+    # own". `EB-640` is the frame that refuted it: the stage's door BUILDS the
+    # panel and never closed it, so a lethal Evoke left the whole panel drawn,
+    # dimmed, behind the Loot dialog. The panel's postfix takes the same shape
+    # as the Spark counter's -- it frees, by name, the one node its file added
+    # to the room's vfx container, and resolves no seat.
+    # A SIXTH appearing here is the next review question.
+    assert len(markers) == 5, markers
 
 
 def test_registered_in_the_ci_lane() -> None:
