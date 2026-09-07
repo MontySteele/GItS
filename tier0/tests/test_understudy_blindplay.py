@@ -11388,3 +11388,45 @@ def test_a_filed_arrival_and_a_later_round_print_no_such_line():
     assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(later)
     # And a build with no stage at all prints neither the section nor the line.
     assert blindplay.SALON_ARRIVAL_NOTE not in blindplay.observe(combat_state())
+
+
+# --- `EB-510`: THE GUARD MOVES TO THE MESSAGE, NOT ONLY THE SCREEN ----------
+
+
+def test_the_body_a_seat_is_handed_is_checked_for_doubled_sections(tmp_path):
+    """`EB-510`. "Several observe screens printed `## Your hand` and `## The
+    other side` twice, with card bodies duplicated line-for-line" (Furina r11
+    lane 2, (c) 8; Klee r20 lane 2 saw it again, intermittent).
+
+    THE RENDER CANNOT PRODUCE IT and that has been pinned since the row was
+    filed -- every heading is appended at one `out +=` on one branch. The row's
+    own reading is that the doubling is between that print and the reader, and
+    `Session._page` is the one step in that gap: it is where a screen stops
+    being a screen and becomes the message. So the guard runs over the
+    ASSEMBLED body too, which is the string a seat actually reads.
+
+    Seen to FAIL: `_page` joined its parts and handed them over unchecked, so
+    anything that put a second copy of a section into the forecast or the
+    feedback block reached the seat as two boards.
+    """
+    session = blindplay.Session(
+        blindplay.ScriptedThread([]), wire=blindplay.ScriptedWire([]),
+        session_id="t", log_root=tmp_path)
+    screen = blindplay.observe(combat_state())
+    with pytest.raises(blindplay.BlindPlayError) as raised:
+        session._page(screen, screen)
+    assert "printed a section twice" in str(raised.value)
+    assert "## Your hand" in str(raised.value)
+
+
+def test_a_page_assembled_from_one_screen_is_handed_over_unchanged(tmp_path):
+    """The guard refuses a doubled body and touches nothing else: a real screen
+    with a real feedback block under it is the message it always was."""
+    session = blindplay.Session(
+        blindplay.ScriptedThread([]), wire=blindplay.ScriptedWire([]),
+        session_id="t", log_root=tmp_path)
+    screen = blindplay.observe(combat_state())
+    body = session._page(screen, "ok Playing Coral Guard")
+    assert body.startswith(screen)
+    assert "## What happened last time" in body
+    assert body.count("## Your hand") == 1
