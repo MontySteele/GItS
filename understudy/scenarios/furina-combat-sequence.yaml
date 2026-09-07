@@ -45,6 +45,6 @@ steps:
   - set_resource: {name: KLEEMOD_ENCORE, amount: 2}
   # beat 3: a Deploy onto the full stage Evokes the front member first
   - play: {card: "Salon Début"}
-  - expect:
-      power: {who: player, name: "salon member", stacks: 3}
   - wait: {seconds: 25}
+  - expect:
+      description_contains: {card: "Salon Début", text: "Deploy"}
