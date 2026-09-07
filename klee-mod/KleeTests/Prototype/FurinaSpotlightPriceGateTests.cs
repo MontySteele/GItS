@@ -226,4 +226,70 @@ public class FurinaSpotlightPriceGateTests
         Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(null));
         Assert.True(Playable(new EtherealSpotlight()));
     }
+
+    // ==================================================================
+    // 4. `EB-631`: THE ARITHMETIC THE FRAME SCENARIO GOT WRONG
+    // ==================================================================
+
+    [Fact]
+    public void EB631_three_card_deploys_off_the_opening_leave_it_unpayable()
+    {
+        // WHAT WAS FILED. The lane-1 scenario `furina-full-stage-frame` played
+        // three Salon Debuts on turn one and then met
+        // `BlockedByCardLogic` on Ethereal Spotlight, on the stated premise
+        // that "under the arm a Deploy's own performance is free (R260), so
+        // three Salon Debuts fill the stage at Encore 2".
+        //
+        // THAT PREMISE IS WRONG, and this is the arithmetic. R260's free
+        // performance is the RELIC's opening arrival alone (`EB-553`,
+        // `EB-558`, [USER]'s "one free Osty"); a deploy a CARD makes pays its
+        // `TickEncoreCost` like every other performance, which is what
+        // `EB-553` itself says ("so deploy-performs pays 1 of the opening 2").
+        // Three of them off `OpeningEncore` therefore leave 0, and 0 is short
+        // of the designation's price. The refusal was correct.
+        //
+        // The lane read it out at 2 -> 1 -> 0 -> 0, which is exactly this sum.
+        using var _ = new Arm();
+        var seat = Seat.Furina().WithCombatState();
+        FurinaResources.GainEncore(seat.Creature,
+                                   FurinaReframeLaw.OpeningEncore);
+
+        var spent = 0;
+        for (var i = 0; i < 3; i++)
+        {
+            if (!SalonMemberPower.PerformanceSpends(seat.Creature, free: false))
+            {
+                continue;       // dry: it performs at three-quarters, unbilled
+            }
+
+            FurinaResources.SpendEncore(seat.Creature,
+                                        SalonConstants.TickEncoreCost);
+            spent += SalonConstants.TickEncoreCost;
+        }
+
+        Assert.Equal(FurinaReframeLaw.OpeningEncore, spent);
+        Assert.Equal(0, FurinaResources.Encore(seat.Creature));
+
+        // And THAT is why the card refused -- the price gate, not anything to
+        // do with arrivals.
+        Assert.True(SpotlightSystem.DesignateOneModeIsUnpayable(seat.Creature));
+        Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(seat.Creature));
+        Assert.False(Playable(Card(seat)));
+    }
+
+    [Fact]
+    public void EB631_the_same_stage_with_the_price_banked_plays_it()
+    {
+        // The other half, and the scenario's own repair: restore the price and
+        // the selector takes it. Nothing about the full stage was ever the
+        // obstacle.
+        using var _ = new Arm();
+        var seat = Seat.Furina().WithCombatState();
+        FurinaResources.GainEncore(
+            seat.Creature, FurinaReframeLaw.SpotlightDesignateEncoreCost);
+
+        Assert.False(SpotlightSystem.DesignateOneModeIsUnpayable(seat.Creature));
+        Assert.True(Playable(Card(seat)));
+    }
+
 }
