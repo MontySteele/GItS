@@ -4051,7 +4051,12 @@ def test_the_number_kind_words_are_the_mods_own():
     assert "KokomiRules.QuarterOfMaxHp(kokomi)" in asked
     # Read before the clause resolves, which is the whole reason it is a
     # separate call rather than a read inside `Announce`.
-    entry = plan[plan.index("var wanted = AskedFor(kokomi, clause);"):]
+    # `EB-643` ADDED A FOURTH SCALED KIND, and it is the one that reads the
+    # DRAIN rather than a ledger: nothing on the board says how many Plans are
+    # still to come, so the count is a parameter and the asked-for figure is
+    # the rate times it.
+    assert "Kind.DrawPerPlanAfter => plan.Amount * after" in asked
+    entry = plan[plan.index("var wanted = AskedFor(kokomi, clause, after);"):]
     assert entry.index("await ResolveOne(") < entry.index("kind = NumberKind(")
 
 
@@ -6109,6 +6114,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  " folds in as you write it; the ",
                  " counts next turn. A ",
                  "carry-out is not a hit: no when-hit power fires."],
+        # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
+        # alone: everything else about a Dusk Plan is a Plan and the row above
+        # says all of it. The sentence straddles two `[gold]` spans on the mod
+        # side, so the anchors are the halves that are whole.
+        "Dusk": [": the ", " carries this ",
+                 " out at the end of this turn, before enemies "],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
         # `EB-377` ADDED THESE TWO ROWS to the page, and their absence was the

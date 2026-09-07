@@ -1,0 +1,129 @@
+# Doctrine read: Kokomi pool pass two, eight new prototype rows and one lane rule, against the kit charters
+
+Each numbered card below is ONE ARM. For each arm, in order, give FOLLOWS or
+REQUIRES_MODIFICATION and name the clause (C1 to C7) you ruled against, and
+quote the line of the card and the arithmetic (energy, Block, damage, cards,
+turns) that breaches it, in one sentence. A verdict with no clause named is
+not a verdict. Read adversarially: the author is a different model family and
+the owner wants the row that should not reach a tester named. Do not soften.
+Name clauses, not remedies: a number, a face or a rewritten row you volunteer
+is DISCARDED.
+
+Why these rows exist. The owner's verdict on Kokomi after an act-1 run
+(2026-09-07): the mechanic works, but "the central loop feels too auto-pilot"
+-- a free turn is "play every Plan card", with nothing to sequence. The
+review that followed (yours) kept Plan and named the test: preparation must
+change the value of the decisions that follow it. The ruled path (R265) is
+pool first: rows that make the ORDER of the queue matter and rows that make
+the queue a RESOURCE to spend, a trial of a second landing moment, and the
+two-Plan cap as one lane of the next round rather than the rule. Rule each
+row on the charter; separately, at the end, say in two sentences whether the
+set as a whole answers the auto-pilot complaint or only adds Plans.
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards." A row
+  that removes a losing line the kit is meant to keep, instead of pricing
+  it, is out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. The
+  counterfactual test: there must be a real turn in which the card is worse
+  than a plain card of its cost. Repeatable energy or draw at Uncommon or
+  below is priced by something past the card's own cost.
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (play a Plan now or write it; which order;
+  cancel or keep), not by a number that rises while you watch.
+- **C5 (Kokomi brief section 2 rule 4).** Nothing fires by itself: no
+  automatic free attack, no passive feed; every effect is a card the player
+  played and paid for. (C4 is Klee's and does not apply.)
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a pool row or of a base-game card at the same or lower rarity and
+  cost. Reference points: Adrenaline (Rare, 0: 2 Energy, draw 2, Exhaust),
+  Skim (Uncommon, 1: draw 3), Offering, Battle Trance, Berserk, Double Tap
+  (Uncommon, 1: the next Attack this turn is played twice), Burst (Uncommon
+  Skill, 1: the next Skill this turn is played twice), Seeing Red (Uncommon,
+  1, Exhaust: gain 2 Energy), Blur (Uncommon, 1: 5 Block, Block is not
+  removed at the start of your next turn), Havoc, Hologram.
+- **C7 (Kokomi identity Law 4).** In her pool a Common never increases deck
+  size.
+
+## The engine (Kokomi, prototype arm, draft 6 rule)
+
+The Bake-Kurage (her jellyfish) sits on her side for the whole combat;
+enemies cannot touch it. A card with a Plan line may be played ON the
+jellyfish instead of where it would normally go: its cost is paid now, the
+card goes to the discard, and the Plan is written to a queue. At the START of
+her next turn (after the enemy has acted and after her draw) the jellyfish
+carries every queued Plan out IN THE ORDER WRITTEN and the queue is empty
+afterwards. A planned hit lands on the front enemy (leftmost alive) unless
+the line says ALL. There is no limit on the number of Plans written. Change
+of Plans (Common Skill, 1, Exhaust) carries out the FRONT Plan now.
+"Whenever the Bake-Kurage carries out a Plan" is once per entry (Treatise:
+draw 1 once a turn; Song of Pearls: 3 Block once a turn). Nereid's Ascension
+(Rare Power, 2): every Plan is carried out twice. Energy 3, HP 70. Existing
+comparators in her pool: Read the Field (Common Skill, 1: 5 Block; Plan: 10
+Block); Coral Bulwark (Common, 1: 6 Block; Plan: 8 Block and 1 Weak); Exposed
+Flank (Common, 1: 1 Vulnerable; Plan: 2 Vulnerable to ALL); Feint (Common
+Attack, 1: 6; Plan: 10); Riptide (Common Attack, 2: 9 to ALL; Plan: 13 to
+ALL); Battle Plan (Uncommon, 1: draw 1; Plan: 1 Energy and draw 2); Stolen
+Chapter (Common, 1: draw 2; Plan: draw 4); Ripple (Common, 0: 2 Block; Plan:
+1 Energy and 4 Block); Tide Wall (Uncommon, 1: 4 Block; Plan: 3 Block per
+Plan carried out this morning); Tide Chart (Common, 0: next turn, after the
+Plans, draw 1 per Plan carried out).
+
+Two words the new rows use. **The next Plan** means the Plan carried out
+immediately after this one in the same morning; if none follows, the rider
+does nothing. **Dusk** (trial keyword, two rows): a Dusk Plan is carried out
+at the END of this turn, before enemies act, instead of at the start of the
+next; it is still a Plan (Treatise, Song of Pearls and Change of Plans see
+it), and it is written to the same queue.
+
+## The arms
+
+1. **Opening Gambit** -- Uncommon Skill, 1 energy. Deal 5 damage. Plan: Apply
+   1 Vulnerable to ALL enemies. The next Plan deals double damage. Upgrade:
+   7 damage now. Arithmetic: written before Riptide, the morning deals
+   13 x 2 = 26 to ALL through 1 Vulnerable (39 effective) for 3 energy across
+   two cards; written after Riptide, it deals 0 extra. Compare Double Tap.
+2. **Second Wave** -- Common Skill, 1 energy. Gain 4 Block. Plan: The next
+   Plan is carried out twice. Upgrade: 6 Block. Under Nereid's Ascension the
+   next Plan is carried out three times, not four (the rider adds one).
+   Compare Burst; and Nereid's Ascension, which this makes a Common taste of.
+3. **Scout Ahead** -- Common Skill, 1 energy. Draw 1 card. Plan: Draw 1 card
+   for each Plan carried out after this one. Upgrade: costs 0. Written first
+   on a three-Plan morning it draws 2; written last it draws 0. Compare Skim
+   (draw 3 for 1, no setup) and Stolen Chapter's Plan line (draw 4 for 1).
+4. **Second Thoughts** -- Common Skill, 0 energy, Exhaust. Cancel your last
+   Plan: its card returns to your hand and you regain its cost. Upgrade: also
+   draw 1. The take-back: a Plan written on a turn the board then changed
+   (the enemy it aimed at died; a hit is coming that needs Block now) can be
+   un-written and the card played for real this turn at no net energy.
+   Counterfactual: with no Plan queued it is a dead card.
+5. **Ebb Tide** -- Uncommon Skill, 1 energy, Exhaust. Cancel every Plan you
+   have queued. Gain 1 Energy and draw 1 card for each. Upgrade: costs 0.
+   Arithmetic: three Plans queued (3 energy already spent on them, their
+   effects forfeited) become 3 Energy and 3 cards this turn for 1; one Plan
+   queued is a net 0 for a card. Compare Adrenaline (2 Energy, draw 2, for 0
+   at Rare) and Seeing Red.
+6. **Converging Tide** -- Common Skill, 1 energy, targets an enemy. Gain 4
+   Block. Every queued Plan aims at this enemy instead of the front. The
+   redirect is written on the entries at play; a Plan written after it aims
+   at the front as usual. Compare Read the Field (5 Block, Plan 10) for the
+   Block and the fact that the aim rule (front, always) is the pool's default.
+7. **Breakwater** (Dusk trial) -- Common Skill, 1 energy. Gain 4 Block. Dusk
+   Plan: Gain 7 Block. Upgrade: 5 and 9. The dawn comparator is Read the
+   Field (5 now, 10 at dawn); the Dusk line pays 3 less for landing before
+   the enemy's hit instead of after it. Compare Blur.
+8. **Night Watch** (Dusk trial) -- Common Skill, 1 energy. Gain 3 Block.
+   Dusk Plan: Gain 5 Block and apply 1 Weak. Upgrade: 5 and 7. The Weak
+   lands before the enemy attacks, so it reduces THIS turn's hit; the dawn
+   comparator Coral Bulwark's Weak (8 Block and 1 Weak at dawn) reduces the
+   next one.
+9. **The two-Plan cap (lane rule, not a card)** -- in ONE lane of the next
+   round only: the jellyfish carries out at most two Plans a morning; the
+   rest wait, in order, for the morning after. Rule it as a rule: does a
+   fixed allowance breach C3 (it makes the order a choice) or C1 (it removes
+   the many-small-Plans deck the kit was meant to keep)?
+
+Nine verdicts, each with its clause and its breaching line, then the two
+sentences on the set. Under 800 words.

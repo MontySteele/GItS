@@ -28,11 +28,14 @@
     "proto_kaboom_sink",
     "proto_kk_ambush",
     "proto_kk_battle_plan",
+    "proto_kk_breakwater",
     "proto_kk_chain_of_command",
     "proto_kk_change_of_plans",
     "proto_kk_cleansing_wave",
+    "proto_kk_converging_tide",
     "proto_kk_coral_bulwark",
     "proto_kk_deep_current",
+    "proto_kk_ebb_tide",
     "proto_kk_exposed_flank",
     "proto_kk_feigned_retreat",
     "proto_kk_feint",
@@ -40,6 +43,8 @@
     "proto_kk_kurages_oath",
     "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
+    "proto_kk_night_watch",
+    "proto_kk_opening_gambit",
     "proto_kk_pincer",
     "proto_kk_rally",
     "proto_kk_read_the_field",
@@ -47,7 +52,10 @@
     "proto_kk_riptide",
     "proto_kk_salt_line",
     "proto_kk_sango_isshin",
+    "proto_kk_scout_ahead",
     "proto_kk_sea_salt_prayer",
+    "proto_kk_second_thoughts",
+    "proto_kk_second_wave",
     "proto_kk_shell_guard",
     "proto_kk_slack_water",
     "proto_kk_song_of_pearls",
@@ -225,11 +233,14 @@
     "proto_kaboom_sink": "klee",
     "proto_kk_ambush": "kokomi",
     "proto_kk_battle_plan": "kokomi",
+    "proto_kk_breakwater": "kokomi",
     "proto_kk_chain_of_command": "kokomi",
     "proto_kk_change_of_plans": "kokomi",
     "proto_kk_cleansing_wave": "kokomi",
+    "proto_kk_converging_tide": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_deep_current": "kokomi",
+    "proto_kk_ebb_tide": "kokomi",
     "proto_kk_exposed_flank": "kokomi",
     "proto_kk_feigned_retreat": "kokomi",
     "proto_kk_feint": "kokomi",
@@ -237,6 +248,8 @@
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
+    "proto_kk_night_watch": "kokomi",
+    "proto_kk_opening_gambit": "kokomi",
     "proto_kk_pincer": "kokomi",
     "proto_kk_rally": "kokomi",
     "proto_kk_read_the_field": "kokomi",
@@ -244,7 +257,10 @@
     "proto_kk_riptide": "kokomi",
     "proto_kk_salt_line": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
+    "proto_kk_scout_ahead": "kokomi",
     "proto_kk_sea_salt_prayer": "kokomi",
+    "proto_kk_second_thoughts": "kokomi",
+    "proto_kk_second_wave": "kokomi",
     "proto_kk_shell_guard": "kokomi",
     "proto_kk_slack_water": "kokomi",
     "proto_kk_song_of_pearls": "kokomi",
@@ -482,6 +498,10 @@
     "proto_kk_battle_plan": {
       "plan_draw": 1
     },
+    "proto_kk_breakwater": {
+      "block": 1,
+      "plan_block": 2
+    },
     "proto_kk_chain_of_command": {
       "plan_damage": 2
     },
@@ -492,6 +512,9 @@
       "block": 3,
       "plan_block": 3
     },
+    "proto_kk_converging_tide": {
+      "block": 2
+    },
     "proto_kk_coral_bulwark": {
       "block": 3,
       "plan_block": 3,
@@ -499,6 +522,9 @@
     },
     "proto_kk_deep_current": {
       "damage": 3
+    },
+    "proto_kk_ebb_tide": {
+      "cost": -1
     },
     "proto_kk_exposed_flank": {
       "power_amount": 1,
@@ -526,6 +552,13 @@
     "proto_kk_nereids_ascension": {
       "cost": -1
     },
+    "proto_kk_night_watch": {
+      "block": 2,
+      "plan_block": 2
+    },
+    "proto_kk_opening_gambit": {
+      "damage": 2
+    },
     "proto_kk_pincer": {
       "damage": 1,
       "plan_damage": 1
@@ -550,9 +583,21 @@
     "proto_kk_sango_isshin": {
       "cost": -1
     },
+    "proto_kk_scout_ahead": {
+      "cost": -1
+    },
     "proto_kk_sea_salt_prayer": {
       "block": 3,
       "power_amount": 1
+    },
+    "proto_kk_second_thoughts": {
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
+    },
+    "proto_kk_second_wave": {
+      "block": 2
     },
     "proto_kk_shell_guard": {
       "block": 2,

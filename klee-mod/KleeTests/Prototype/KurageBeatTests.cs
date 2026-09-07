@@ -163,9 +163,13 @@ public class KurageBeatTests
         // drain refreshes it per entry rather than once.
         Assert.Contains("KokomiPlan.Showing",
                         Il.Calls(Il.Method("KokomiPlanStrip", "Paint")));
-        var drain = Il.CallSequence(Il.Method("KokomiPlan", "ResolveAll"));
-        Assert.True(drain.Count(c => c == "KokomiPlanStrip.Refresh") >= 2,
-                    "the strip is redrawn once per Plan, not once per morning");
+        // `EB-643` MOVED THE LOOP INTO `Drain`, which both drains now share,
+        // so the per-entry refresh is read there -- one refresh inside the
+        // loop plus the teardown's in `ResolveAll`.
+        var drain = Il.CallSequence(Il.Method("KokomiPlan", "Drain"));
+        Assert.Contains("KokomiPlanStrip.Refresh", drain);
+        Assert.Contains("KokomiPlanStrip.Refresh",
+                        Il.CallSequence(Il.Method("KokomiPlan", "ResolveAll")));
     }
 
     [Fact]
@@ -263,9 +267,14 @@ public class KurageBeatTests
                         Il.Calls(Il.Method("KokomiPlan", "ResolveFront")));
         Assert.DoesNotContain("KokomiPlan.ResolveNow",
                               Il.Calls(Il.Method("KokomiPlan", "Schedule")));
-        var morning = Il.Calls(Il.Method("KokomiPlan", "ResolveAll"));
+        // `EB-643`: the morning reaches `ResolveEntry` through the shared
+        // `Drain`, so the split is read one call further down the graph --
+        // still readable from the graph, which is the pin's whole point.
+        var morning = Il.Calls(Il.Method("KokomiPlan", "Drain"));
         Assert.Contains("KokomiPlan.ResolveEntry", morning);
         Assert.DoesNotContain("KokomiPlan.ResolveNow", morning);
+        Assert.DoesNotContain("KokomiPlan.ResolveNow",
+                              Il.Calls(Il.Method("KokomiPlan", "ResolveAll")));
         // And the parameter it sets defaults to the morning's reading, so a
         // third caller written tomorrow is not silently filed as on-play.
         var flag = Il.Method("KokomiPlan", "ResolveEntry").GetParameters()

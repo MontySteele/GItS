@@ -522,6 +522,32 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # other draw op declares a hook for it, exactly as the line above says of
     # Block.
     "draw_after_plans": [_hook("private", "kurage", "read")],
+    # POOL PASS TWO (`EB-643`, R265). SIX OPS, ONE CHANNEL: every one of them
+    # is about the jellyfish's own queue, which this vocabulary already carries
+    # as the private `kurage` channel -- so the hooks below say READ where the
+    # op only counts the queue and WRITE where it changes what is in it or what
+    # it will do.
+    #
+    # Scout Ahead READS the drain it sits in (how many carry-outs follow) and
+    # pays CARDS, which is the player's own draw pile and which no draw op
+    # declares a hook for -- `draw_after_plans` one line up states that limit.
+    "draw_per_plan_after": [_hook("private", "kurage", "read")],
+    # The two riders WRITE what the entry that follows them will do. Nothing is
+    # added to or removed from the queue, so a read would be the wrong word:
+    # the next entry behaves differently because this one happened.
+    "next_plan_double_damage": [_hook("private", "kurage", "write")],
+    "next_plan_extra_carry_out": [_hook("private", "kurage", "write")],
+    # Second Thoughts takes an entry OFF the queue and a card out of the
+    # discard pile into the hand -- the one op here that touches a shared pile
+    # as well as the private channel.
+    "cancel_last_plan": [_hook("private", "kurage", "write"),
+                         _hook("shared", "discard_pile", "use")],
+    # Ebb Tide empties the queue and pays Energy and cards, neither of which
+    # this vocabulary carries; the queue write is the whole of its channel.
+    "cancel_all_plans_cash": [_hook("private", "kurage", "write")],
+    # Converging Tide stamps an aim onto entries already written: the queue's
+    # DEPTH does not move and what it will do does, which is a write.
+    "redirect_queued_plans": [_hook("private", "kurage", "write")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

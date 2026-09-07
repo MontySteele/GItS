@@ -1042,6 +1042,23 @@ CO_TENANCY_LEDGER = {
             "(`klee_overhaul.turn_end` -> `roll_rising_costs`), ahead of the "
             "hand flush, which is the one moment \"it stayed in your hand\" "
             "is true of the turn just played",
+        ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
+            "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). DUSK "
+            "(`EB-643`, R265): every dusk entry in the Plan queue is carried "
+            "out here, at the end of her turn, before the enemies act -- which "
+            "is the printed promise and the only clause of the face a card can "
+            "tell apart. THE ORDERING QUESTION, answered: what it READS and "
+            "WRITES is the jellyfish's own queue, and the only other writers "
+            "of that queue are card PLAYS and the morning drain, both outside "
+            "this broadcast. What it PAYS is Block, a Weak and (through a "
+            "carry-out) a Hydro hit; the co-tenants here that also move those "
+            "are the echo above, whose damage belongs to an arm whose pool "
+            "cannot be in a Kokomi deck, and the sequencer's volleys, which "
+            "belong to the SHIPPED Klee kit for the same reason. The two "
+            "kit-grant checks and the pending-draw flush read a meter and a "
+            "draw debt, neither of which a Plan touches. The sim runs it at "
+            "the same site (`combat._player_turn`, `kokomi_plan.resolve_dusk` "
+            "beside `klee_overhaul.turn_end`) and for the same reason",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):

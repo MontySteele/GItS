@@ -108,6 +108,28 @@ public static class KokomiPlan
         // (<see cref="KokomiOverhaulLedger.PlansThisMorning"/>), so a Tide Wall
         // written first, second or last in the queue pays the same number.
         BlockPerPlanThisMorning,
+        // `EB-643`, R265. THE THREE DRAIN-POSITIONAL CLAUSES, and what makes
+        // them one group is that each names a PLACE IN A RUNNING DRAIN rather
+        // than a quantity. They are plan-only on both sides for that reason
+        // (`gen_klee_cards.PLAN_ONLY_OPS`): a now-line spelling would name a
+        // drain that is not running and answer nothing, every time.
+        //
+        // Scout Ahead: "draw 1 card for each Plan carried out after this one."
+        // The count is CARRY-OUTS and not entries, which is `EB-501`'s reading
+        // pointed forwards -- under Nereid's Ascension the two entries behind
+        // this one are four carry-outs.
+        DrawPerPlanAfter,
+        // Opening Gambit: "the next Plan deals double damage." Second Wave:
+        // "the next Plan is carried out twice." A RIDER, written by the entry
+        // that prints it and spent by the entry carried out immediately after
+        // it in the SAME drain; where none follows, the rider does nothing.
+        // <see cref="Drain"/> owns both, and neither is a COUNT: an entry
+        // carried out twice under Nereid's Ascension prints its rider twice,
+        // and "the next Plan is carried out twice" said twice is still twice
+        // -- so the entry it reaches runs <c>CarryOutTimes + 1</c> = 3 and
+        // not 4.
+        NextPlanDoubleDamage,
+        NextPlanExtraCarryOut,
     }
 
     /// <summary>
@@ -176,8 +198,28 @@ public static class KokomiPlan
     /// on the jellyfish -- and for nothing else; the clauses are the whole of
     /// what will happen.
     /// </summary>
+    /// <param name="Dusk">`EB-643`, R265. This Plan is carried out at the END
+    /// of the turn it was written on, before the enemies act
+    /// (<see cref="ResolveDusk"/>), instead of at the start of her next one.
+    /// A property of the WRITING CARD's printed face (`plan_dusk:` on the row)
+    /// and not of its clauses, deliberately: Dusk is WHEN the whole line
+    /// lands, so a card cannot have one dusk clause and one morning clause any
+    /// more than it can be played on two turns -- and <see cref="Kind"/> stays
+    /// closed on what a Plan DOES.</param>
+    /// <param name="AimOverride">`EB-643`. Converging Tide's stamp: the
+    /// <c>CombatId</c> of the body every <see cref="Aim.FrontEnemy"/> clause
+    /// of this entry lands on instead of the front, or null.
+    ///
+    /// AN ID AND NOT A CREATURE, which is <see cref="Planned.Targets"/>'
+    /// discipline verbatim and for its reason: a Plan written last turn must
+    /// not hold a reference to a creature the game has torn down. It is
+    /// resolved against the live board at carry-out and falls back to the
+    /// front where that body is gone (<see cref="Aimed"/>), which is the
+    /// arm's standing rule for a Plan pointed at something it no longer
+    /// finds.</param>
     public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses,
-                              string? Label = null)
+                              string? Label = null, bool Dusk = false,
+                              string? AimOverride = null)
     {
         /// <summary>What the strip prints for this Plan.
         ///
@@ -186,8 +228,23 @@ public static class KokomiPlan
         /// different thing every time it is written, so the strip has to say
         /// which card it caught -- "Crystal Collapse: Gorou &#8212; Juuga",
         /// or "Crystal Collapse: nothing" for a turn with no other Companion
-        /// in it. Every other Plan is its own card's name, unchanged.</summary>
-        public string Title => Label ?? Source?.Title.ToString() ?? "Plan";
+        /// in it. Every other Plan is its own card's name, unchanged.
+        ///
+        /// `EB-643`: A DUSK ENTRY SAYS SO, and it is a prefix on the strip's
+        /// line rather than a second badge or a colour. The queue is ONE
+        /// queue and two of its entries now land at different moments, so a
+        /// player reading the column has to be able to tell which -- and
+        /// "Dusk: Breakwater" is the smallest thing that says it. The
+        /// carry-out lines that <see cref="Announce"/> builds are unchanged:
+        /// by the time one is said the beat has happened, and WHEN it
+        /// happened is what the reader just watched.</summary>
+        public string Title => Dusk ? "Dusk: " + Named : Named;
+
+        /// <summary>The line without the Dusk mark -- `Title`'s old body,
+        /// split out so the prefix above is one word rather than a second
+        /// copy of the fallback chain.</summary>
+        private string Named =>
+            Label ?? Source?.Title.ToString() ?? "Plan";
     }
 
     /// <summary>
@@ -304,6 +361,52 @@ public static class KokomiPlan
     public readonly record struct MovedOn(
         string Target, string CombatId, int Amount, bool Dead, int Absorbed);
 
+    /// <summary>
+    /// THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF
+    /// (`EB-643`, R265). "At most N Plans a morning; the rest wait, in order."
+    ///
+    /// ZERO IS UNLIMITED AND ZERO IS THE DEFAULT, so an unconfigured build
+    /// drains exactly what it drained before -- the trial is a trial, and a
+    /// lane that did not ask for it must not get it.
+    ///
+    /// READ FROM THE ENVIRONMENT, ONCE, AT FIRST ASK, and that is the existing
+    /// per-lane pattern rather than a new one: `GITS_LANE` is how a lane
+    /// declares itself to the harness and `GITS_TELEMETRY_FEED` /
+    /// `GITS_TELEMETRY_INTENT` are how a harness tells THIS MOD what run it is
+    /// driving (<see cref="Diagnostics.PlayTelemetry"/>, whose `Intent()` this
+    /// method is shaped after down to the cache). The seats launch a lane's
+    /// game as a child process, so an exported variable is what a lane already
+    /// has and a rebuild per arm is what the toggle exists to avoid.
+    ///
+    /// READ ONCE PER SESSION, for `Intent()`'s reason word for word: the cap
+    /// is a statement about the run you are about to play, and re-reading it
+    /// mid-session would let one run's mornings disagree with each other about
+    /// what rule they were under. Anything unparseable, negative or absent is
+    /// 0 -- "nobody declared a cap" and "somebody declared nonsense" should
+    /// look the same in a column, and neither is worth a throw inside a turn.
+    ///
+    /// NOT A `lint_constant_parity` MIRROR. `C.KOKOMI_PLAN_CAP` is the sim's
+    /// twin RULE and never the same literal: that one is a module constant a
+    /// test monkeypatches and this one is an environment read a lane sets, so
+    /// comparing the two defaults by value would pin 0 against 0 and say
+    /// nothing about the thing they share.
+    /// </summary>
+    private const string PlanCapEnvVar = "GITS_KOKOMI_PLAN_CAP";
+
+    private static int? _planCap;
+
+    public static int PlanCap
+    {
+        get
+        {
+            if (_planCap is { } cached) return cached;
+            var declared =
+                System.Environment.GetEnvironmentVariable(PlanCapEnvVar);
+            if (!int.TryParse(declared, out var cap) || cap < 0) cap = 0;
+            return (_planCap = cap).Value;
+        }
+    }
+
     private static object? _combat;
     private static readonly Dictionary<Player, List<Entry>> _queues = new();
 
@@ -391,6 +494,9 @@ public static class KokomiPlan
         _showing.Clear();
         _carriedOut.Clear();
         _tideCharts.Clear();
+        // `EB-643`: the cached environment read too, so a test that declares a
+        // cap and one that does not cannot see each other's answer.
+        _planCap = null;
     }
 
     private static void Rebase(Creature kokomi)
@@ -472,9 +578,17 @@ public static class KokomiPlan
     /// happens NOW and is STILL queued for the start of her next turn. Reading
     /// it as "instead" would delete rule 2 rather than break it.
     /// </summary>
+    /// <param name="dusk">`EB-643`, R265. Write this Plan as a DUSK Plan: it
+    /// is carried out at the end of the turn it was written on, before the
+    /// enemies act (<see cref="ResolveDusk"/>), instead of next morning. The
+    /// generated card passes it only where its row declares `plan_dusk:`, so
+    /// every card authored before the field existed emits exactly the call it
+    /// always did. <see cref="ScheduleFromExhaust"/> never passes it: Moon's
+    /// Reflection contributes another card's LINE and not its face, and Dusk
+    /// is a fact about the face.</param>
     public static async Task Schedule(
         PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? source,
-        IReadOnlyList<Planned> clauses)
+        IReadOnlyList<Planned> clauses, bool dusk = false)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var player = kokomi!.Player;
@@ -565,7 +679,7 @@ public static class KokomiPlan
             }
             label = AimedLabel(source, caught);
         }
-        var entry = new Entry(source, body, label);
+        var entry = new Entry(source, body, label, dusk);
         int before = queue.Count;
         queue.Add(entry);
         await Sync(choiceContext, kokomi,
@@ -725,7 +839,24 @@ public static class KokomiPlan
         {
             return;
         }
-        var due = new List<Entry>(queue);
+        // `EB-643`, R265. THE TWO-PLAN CAP, read here and nowhere else: at N
+        // the front N entries are carried out and THE REST STAY QUEUED IN
+        // ORDER for the next morning -- not discarded, not re-sorted, because
+        // the whole trial is about whether queue order becomes a decision. At
+        // 0, which is the default, this is the list it always was.
+        //
+        // DUSK ENTRIES CANNOT BE IN THIS QUEUE. <see cref="ResolveDusk"/>
+        // drains them at the end of the turn they were written on, so by the
+        // next morning the queue holds only entries that waited for one --
+        // which is what makes "dusk carry-outs are not counted against the
+        // morning cap" true by construction rather than by a filter.
+        var cap = PlanCap;
+        var due = cap > 0 && queue.Count > cap
+            ? new List<Entry>(queue.GetRange(0, cap))
+            : new List<Entry>(queue);
+        var held = cap > 0 && queue.Count > cap
+            ? new List<Entry>(queue.GetRange(cap, queue.Count - cap))
+            : null;
         queue.Clear();
         // `EB-335`. THE MORNING'S DEPTH, recorded on the line the queue is
         // drained on and before the first clause runs -- Tide Wall's "for each
@@ -758,23 +889,7 @@ public static class KokomiPlan
 
         try
         {
-            foreach (var entry in due)
-            {
-                var times = CarryOutTimes(kokomi);
-                for (var i = 0; i < times; i++)
-                {
-                    await ResolveEntry(choiceContext, kokomi, entry);
-                }
-                // ONE THUMBNAIL LEAVES, AFTER ITS PLAN HAS HAPPENED. Front
-                // first, so the column shortens from the top in the order the
-                // Plans were written -- the order the page prints.
-                if (_showing.TryGetValue(player, out var shown)
-                    && shown.Count > 0)
-                {
-                    shown.RemoveAt(0);
-                }
-                Vfx.KokomiPlanStrip.Refresh(kokomi);
-            }
+            await Drain(choiceContext, kokomi, due);
         }
         finally
         {
@@ -789,8 +904,299 @@ public static class KokomiPlan
             // A throw inside a Plan must not leave the strip drawing a morning
             // that is over; the display list is torn down on every path.
             _showing.Remove(player);
+            // `EB-643`. WHAT THE CAP HELD BACK GOES BACK ON THE FRONT OF THE
+            // QUEUE, in order, AFTER the drain and not before it -- a Plan
+            // carried out this morning can write another (Moon's Reflection
+            // reaches a card that does), and that new Plan waits for the next
+            // morning like every other. The held entries go in FRONT of it for
+            // the reason they are kept in order at all: they were written
+            // first. On the unwind path too, because a fight that ended
+            // mid-drain does not un-cap the Plans it never reached.
+            if (held is { Count: > 0 })
+            {
+                if (!_queues.TryGetValue(player, out var back))
+                {
+                    back = new List<Entry>();
+                    _queues[player] = back;
+                }
+                back.InsertRange(0, held);
+            }
             Vfx.KokomiPlanStrip.Refresh(kokomi);
         }
+    }
+
+    /// <summary>
+    /// CARRY A LIST OF PLANS OUT, IN ORDER -- the one loop both drains share
+    /// (the morning's, and `EB-643`'s dusk).
+    ///
+    /// THE RIDERS LIVE HERE AND NOWHERE ELSE, which is the whole reason this
+    /// is a method rather than two loops. "The next Plan" means the entry
+    /// carried out immediately after this one IN THIS DRAIN: a rider is
+    /// written by the entry that prints it, applies to the entry that follows,
+    /// and is gone when this list runs out. A rider written by the last Plan
+    /// of a morning does not reach into the evening, and one written at dusk
+    /// does not reach into the next morning -- both fall off the end of a
+    /// LOCAL, which is the shape that cannot leak.
+    ///
+    /// <see cref="ResolveFront"/> (Change of Plans) DOES NOT COME THROUGH HERE
+    /// and so neither sets nor consumes a rider: it carries ONE entry out, and
+    /// there is no "next" for the word to name. `kokomi_plan._drain` is the
+    /// twin, with the same two callers and the same non-caller.
+    ///
+    /// THE THUMBNAIL LEAVES AFTER ITS PLAN HAS HAPPENED, front first, so the
+    /// column shortens from the top in the order the Plans were written --
+    /// the order the page prints. That is the morning's behaviour unchanged;
+    /// a dusk drain simply has no thumbnails of its own to remove, because
+    /// <see cref="Showing"/> is only handed a list by <see cref="ResolveAll"/>.
+    /// </summary>
+    private static async Task Drain(
+        PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due)
+    {
+        var player = kokomi.Player;
+        var doubleNext = false;
+        var extraNext = false;
+        for (var index = 0; index < due.Count; index++)
+        {
+            var entry = due[index];
+            // THE RIDERS THE ENTRY BEFORE THIS ONE WROTE, taken and cleared in
+            // the same breath: a rider is spent by the entry it reaches, so
+            // two Plans in a row that each double cannot both land on a third.
+            var doubleThis = doubleNext;
+            var extraThis = extraNext;
+            doubleNext = extraNext = false;
+            // SCOUT AHEAD'S COUNT: the carry-outs still to come after this
+            // entry -- entries after it times `CarryOutTimes`, which is
+            // `EB-501`'s carry-outs-not-entries reading pointed forwards. It
+            // deliberately does NOT fold in an extra carry-out a LATER entry
+            // may write, because that rider is not on the board yet when this
+            // number is asked. Read per entry, so a Scout Ahead written first
+            // and one written last answer honestly.
+            var after = (due.Count - index - 1) * CarryOutTimes(kokomi);
+            // `CarryOutTimes + 1` UNDER SECOND WAVE, and the rider is a FLAG:
+            // under Nereid's Ascension the entry it reaches is carried out
+            // three times, not four.
+            var times = CarryOutTimes(kokomi) + (extraThis ? 1 : 0);
+            for (var i = 0; i < times; i++)
+            {
+                var (wroteDouble, wroteExtra) = await ResolveEntry(
+                    choiceContext, kokomi, entry, doubleDamage: doubleThis,
+                    after: after);
+                // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
+                // above: an entry doubled by Nereid's prints its rider twice
+                // and twice said twice is still twice.
+                doubleNext = doubleNext || wroteDouble;
+                extraNext = extraNext || wroteExtra;
+            }
+            if (player != null
+                && _showing.TryGetValue(player, out var shown)
+                && shown.Count > 0)
+            {
+                shown.RemoveAt(0);
+            }
+            Vfx.KokomiPlanStrip.Refresh(kokomi);
+        }
+    }
+
+    /// <summary>
+    /// `EB-643` (R265), DUSK: "the Bake-Kurage carries this Plan out at the
+    /// end of this turn, before enemies act."
+    ///
+    /// THE HOOK IS <c>ProtoBakeKuragePower.BeforeSideTurnEnd</c> on the PLAYER
+    /// side, which is the nearest broadcast this mod has to the printed
+    /// sentence and the one the sim mirrors (`combat._player_turn`, beside
+    /// `klee_overhaul.turn_end`). What the point buys is the whole promise:
+    /// the Block is on her before the swing, which is the only clause of the
+    /// face a card can tell apart.
+    ///
+    /// A DUSK CARRY-OUT IS A CARRY-OUT. It goes through
+    /// <see cref="ResolveEntry"/> like every other, so Treatise draws on it,
+    /// Song of Pearls blocks on it and Sango Isshin's condition is met.
+    ///
+    /// IT DOES NOT TOUCH `PlansThisMorning`, and that is the one place the two
+    /// drains differ on purpose: Tide Wall, Well Laid and Tide Chart all print
+    /// "this morning", and an evening is not one.
+    ///
+    /// NOT CAPPED. <see cref="PlanCap"/> is a rule about the MORNING -- "at
+    /// most N Plans a morning, the rest wait" -- and a Dusk Plan has already
+    /// waited for nothing.
+    ///
+    /// THE DUSK ENTRIES LEAVE THE QUEUE AND THE OTHERS STAY, taken before the
+    /// first clause runs for <see cref="ResolveAll"/>'s reason: a Dusk Plan
+    /// whose body writes another Plan must not carry its own child out on the
+    /// same boundary.
+    /// </summary>
+    public static async Task ResolveDusk(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+
+        Rebase(kokomi);
+        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
+        {
+            return;
+        }
+        var due = queue.Where(e => e.Dusk).ToList();
+        if (due.Count == 0) return;
+        queue.RemoveAll(e => e.Dusk);
+        int before = queue.Count + due.Count;
+        await Sync(choiceContext, kokomi, "rule:dusk_drain", before);
+        try
+        {
+            await Drain(choiceContext, kokomi, due);
+        }
+        finally
+        {
+            Vfx.KokomiPlanStrip.Refresh(kokomi);
+        }
+    }
+
+    /// <summary>
+    /// SECOND THOUGHTS (`EB-643`): "cancel your last Plan: its card returns to
+    /// your hand and you regain its cost."
+    ///
+    /// THE LAST ENTRY AND NOT THE FRONT ONE, which is the whole card:
+    /// <see cref="ResolveFront"/> hurries the OLDEST Plan and this takes back
+    /// the NEWEST, so the two tempo cards operate on opposite ends of one
+    /// queue and a player who has just written the wrong Plan has a way back.
+    ///
+    /// THE CARD COMES OUT OF THE DISCARD PILE. <see cref="Entry.Source"/> is
+    /// the card that wrote the Plan and the discard pile is where a played
+    /// card is, on the ordinary path -- so the move is a real pile-to-pile
+    /// move of that instance rather than a new copy.
+    ///
+    /// AND ON THE PATHS THAT ARE NOT ORDINARY, NOTHING RETURNS. A Plan written
+    /// by Moon's Reflection off a card in the EXHAUST pile has a source that
+    /// is not in the discard pile, and an Exhaust row's own card is not there
+    /// either. The Plan is still cancelled and no Energy is paid, because what
+    /// the face promises is the card and the card is not there to promise. It
+    /// is a printed no-op of the kind this arm already has several of, not a
+    /// search of every pile for something that looks similar.
+    ///
+    /// THE ENERGY IS THE RETURNED CARD'S CURRENT COST, read off the card that
+    /// is coming back -- a smithed copy that costs 0 refunds 0, which is what
+    /// "its cost" says. AN EMPTY QUEUE IS A PRINTED NO-OP, the shape
+    /// <see cref="ResolveFront"/> already has. Sim twin:
+    /// `kokomi_plan.cancel_last_plan`.
+    /// </summary>
+    public static async Task CancelLast(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+
+        Rebase(kokomi);
+        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
+        {
+            return;
+        }
+        var last = queue[queue.Count - 1];
+        int before = queue.Count;
+        queue.RemoveAt(queue.Count - 1);
+        await Sync(choiceContext, kokomi, "rule:plan_cancelled", before);
+
+        var card = last.Source;
+        var discard = CardPile.Get(PileType.Discard, player);
+        if (card == null || discard == null || !discard.Cards.Contains(card))
+        {
+            return;
+        }
+        // `CardPileCmd.Add` IS THE MOVE, which is the door <see cref="Replay"/>
+        // one method down already takes a card out of the exhaust pile with:
+        // the game's own pile command removes it from wherever it is. TOP of
+        // the hand, so the card the player just took back is the one they are
+        // looking at.
+        await CardPileCmd.Add(card, PileType.Hand, CardPilePosition.Top);
+        // THE RESOLVED COST, which is the number the player would have to pay
+        // to play the card again -- `EnergyCost.GetResolved()` is the game's
+        // own read and it is what a mid-combat discount or a smith has already
+        // moved. "Its cost" on the face means the cost it has now.
+        var cost = card.EnergyCost.GetResolved();
+        if (cost > 0) await PlayerCmd.GainEnergy(cost, player);
+    }
+
+    /// <summary>
+    /// EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy
+    /// and draw 1 card for each."
+    ///
+    /// PER ENTRY AND NOT PER CARRY-OUT, which is the one reading here and it
+    /// is the face's own word: "for each" counts the Plans she is HOLDING, and
+    /// what she is holding is entries -- the same quantity the pending badge
+    /// shows and <see cref="PlansHeld"/> answers. Nereid's Ascension would
+    /// have doubled them at the morning and did not, which is exactly the
+    /// thing this card gives up.
+    ///
+    /// NO CARD COMES BACK, unlike <see cref="CancelLast"/>, and that is the
+    /// trade rather than an omission: this cancels a whole queue for a
+    /// currency and that one buys a single Plan back at its own price.
+    ///
+    /// THE ENERGY IS PAID BEFORE THE DRAW, in that order, so a drawn card
+    /// meets a hand that can already afford it. Sim twin:
+    /// `kokomi_plan.cancel_all_plans_cash`.
+    /// </summary>
+    public static async Task CancelAllForCash(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+
+        Rebase(kokomi);
+        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
+        {
+            return;
+        }
+        int cancelled = queue.Count;
+        queue.Clear();
+        await Sync(choiceContext, kokomi, "rule:plans_cashed", cancelled);
+        await PlayerCmd.GainEnergy(cancelled, player);
+        await CardPileCmd.Draw(choiceContext, cancelled, player);
+    }
+
+    /// <summary>
+    /// CONVERGING TIDE (`EB-643`): "every queued Plan aims at this enemy
+    /// instead of the front."
+    ///
+    /// IT STAMPS THE ENTRIES THAT ARE ALREADY WRITTEN AND NOTHING ELSE. A Plan
+    /// written after the redirect aims at the front as usual, because the card
+    /// names the queue as it stands -- "every queued Plan" -- and a rule that
+    /// kept re-aiming later writes would be a Power the row does not print.
+    ///
+    /// ONLY THE FRONT AIM MOVES, which is <see cref="Aimed"/>'s half of the
+    /// same rule: <see cref="Aim.AllEnemies"/> does not aim at the front, so
+    /// there is nothing on it for "instead of the front" to be about, and
+    /// Flank's captured set was fixed when its Plan was written for reasons of
+    /// its own (`EB-492`).
+    ///
+    /// THE ID AND NOT THE CREATURE, <see cref="Planned.Targets"/>' discipline
+    /// verbatim: nothing on the queue may hold a body the game can tear down.
+    /// A dead target falls back to the front at carry-out.
+    ///
+    /// IT STAMPS DUSK ENTRIES TOO -- they are in the queue, the face says
+    /// every queued Plan, and the redirect happens on the turn they will land
+    /// on. NOT ASYNC and no <see cref="Sync"/>: the queue's DEPTH does not
+    /// move, so the badge has nothing to say; the strip is refreshed because
+    /// its aim line does. Sim twin: `kokomi_plan.redirect_queued_plans`.
+    /// </summary>
+    public static void Redirect(Creature? kokomi, Creature? target)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null || target == null || target.IsDead) return;
+
+        Rebase(kokomi);
+        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
+        {
+            return;
+        }
+        var id = target.CombatId.ToString();
+        for (var i = 0; i < queue.Count; i++)
+        {
+            queue[i] = queue[i] with { AimOverride = id };
+        }
+        Vfx.KokomiPlanStrip.Refresh(kokomi);
     }
 
     /// <summary>
@@ -968,7 +1374,7 @@ public static class KokomiPlan
     /// <see cref="ResolveEntry"/> straight, so the split is readable from the
     /// call graph.
     /// </summary>
-    private static Task ResolveNow(
+    private static Task<(bool Double, bool Extra)> ResolveNow(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry) =>
         ResolveEntry(choiceContext, kokomi, entry, onPlay: true);
 
@@ -994,10 +1400,22 @@ public static class KokomiPlan
     /// MORNING's Plans were on-play. The caller is the only thing that knows,
     /// so the caller says.
     /// </summary>
-    private static async Task ResolveEntry(
+    /// <param name="doubleDamage">`EB-643`. Opening Gambit's rider, spent on
+    /// THIS entry by the drain that carried the entry before it out.</param>
+    /// <param name="after">`EB-643`. Scout Ahead's count: the carry-outs still
+    /// to come in this drain after this entry.</param>
+    /// <returns>`EB-643`. The riders THIS entry wrote, which the drain spends
+    /// on the entry that follows it. They are handed back rather than stored
+    /// because the clause that writes one is inside the loop below and the
+    /// drain that spends it is outside -- returning them is what keeps "the
+    /// next Plan" a fact about a DRAIN rather than a flag on this class that
+    /// could outlive one.</returns>
+    private static async Task<(bool Double, bool Extra)> ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
-        bool onPlay = false)
+        bool onPlay = false, bool doubleDamage = false, int after = 0)
     {
+        var wroteDouble = false;
+        var wroteExtra = false;
         // `EB-317`, the first half of the beat: THE JELLYFISH ACTS BEFORE THE
         // PLAN LANDS. Awaited, so the clause's damage number arrives after the
         // lunge rather than inside it -- the same argument the casket's strike
@@ -1035,8 +1453,14 @@ public static class KokomiPlan
         {
             foreach (var clause in entry.Clauses)
             {
-                var wanted = AskedFor(kokomi, clause);
-                var produced = await ResolveOne(choiceContext, kokomi, clause);
+                // `EB-643`. THE RIDERS ARE NOTED HERE AND NOWHERE ELSE, before
+                // the switch, because they do nothing when they resolve: what
+                // they do is tell the drain about the entry that follows.
+                if (clause.Kind == Kind.NextPlanDoubleDamage) wroteDouble = true;
+                if (clause.Kind == Kind.NextPlanExtraCarryOut) wroteExtra = true;
+                var wanted = AskedFor(kokomi, clause, after);
+                var produced = await ResolveOne(choiceContext, kokomi, clause,
+                                                entry, doubleDamage, after);
                 if (number == null && produced != null)
                 {
                     number = produced;
@@ -1074,6 +1498,7 @@ public static class KokomiPlan
                 await listener.OnPlanResolved(choiceContext, kokomi);
             }
         }
+        return (wroteDouble, wroteExtra);
     }
 
     /// <summary>
@@ -1271,13 +1696,40 @@ public static class KokomiPlan
     /// <c>ElementalHit.Deal</c> returns its truncated total for exactly this.
     /// </summary>
     private static async Task<int?> ResolveOne(
-        PlayerChoiceContext choiceContext, Creature kokomi, Planned plan)
+        PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
+        Entry? entry = null, bool doubleDamage = false, int after = 0)
     {
         var player = kokomi.Player;
         if (player == null) return null;
 
         switch (plan.Kind)
         {
+            case Kind.DrawPerPlanAfter:
+            {
+                // SCOUT AHEAD (`EB-643`): "draw 1 card for each Plan carried
+                // out after this one." <paramref name="after"/> is the drain's
+                // count -- see <see cref="Drain"/>, which reads it per entry --
+                // and the printed amount is the RATE, the shape Tide Wall's
+                // clause already has. Change of Plans carries ONE entry out, so
+                // a Scout Ahead hurried that way draws nothing: nothing follows
+                // it, which is the face read literally.
+                var cards = plan.Amount * after;
+                if (cards > 0)
+                {
+                    await CardPileCmd.Draw(choiceContext, cards, player);
+                }
+                return cards;
+            }
+
+            case Kind.NextPlanDoubleDamage:
+            case Kind.NextPlanExtraCarryOut:
+                // THE RIDERS DO NOTHING HERE, and that is the whole of them:
+                // <see cref="ResolveEntry"/> noted the clause before the switch
+                // and <see cref="Drain"/> spends it on the entry that follows.
+                // No number, so the beat says the card's name alone -- which is
+                // the honest line for a Plan whose effect is on the NEXT one.
+                return null;
+
             case Kind.Draw:
                 await CardPileCmd.Draw(choiceContext, plan.Amount, player);
                 return plan.Amount;
@@ -1318,11 +1770,13 @@ public static class KokomiPlan
                     choiceContext, kokomi, plan.Amount);
 
             case Kind.Damage:
-                return await Hit(choiceContext, kokomi, plan, plan.Amount);
+                return await Hit(choiceContext, kokomi, plan, plan.Amount,
+                                 entry, doubleDamage);
 
             case Kind.DamageQuarterMaxHp:
                 return await Hit(choiceContext, kokomi, plan,
-                                 KokomiRules.QuarterOfMaxHp(kokomi));
+                                 KokomiRules.QuarterOfMaxHp(kokomi),
+                                 entry, doubleDamage);
 
             case Kind.DamagePerCompanionLastTurn:
                 // Chain of Command. "Last turn" is read at CARRY-OUT: the Plan
@@ -1331,14 +1785,16 @@ public static class KokomiPlan
                 // -- the turn the player was looking at when they wrote it.
                 return await Hit(choiceContext, kokomi, plan,
                                  plan.Amount * KokomiOverhaulLedger.For(kokomi)
-                                                   .CompanionsPlayedLastTurn);
+                                                   .CompanionsPlayedLastTurn,
+                                 entry, doubleDamage);
 
             case Kind.ApplyWeak:
-                await Debuff<WeakPower>(choiceContext, kokomi, plan);
+                await Debuff<WeakPower>(choiceContext, kokomi, plan, entry);
                 return plan.Amount;
 
             case Kind.ApplyVulnerable:
-                await Debuff<VulnerablePower>(choiceContext, kokomi, plan);
+                await Debuff<VulnerablePower>(choiceContext, kokomi, plan,
+                                              entry);
                 return plan.Amount;
 
             case Kind.ReplayExhausted:
@@ -1385,6 +1841,11 @@ public static class KokomiPlan
             or Kind.DamagePerCompanionLastTurn => "damage",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
+        // `EB-643`. Scout Ahead's figure is cards, the same word Draw's is:
+        // the reader is asking what the number IS and not how it was derived,
+        // which is the argument the three damage kinds above make. The two
+        // riders produce no number at all and fall to the default.
+        Kind.DrawPerPlanAfter => "cards drawn",
         _ => null,
     };
 
@@ -1403,9 +1864,15 @@ public static class KokomiPlan
     /// Command last turn's Companions -- so asking afterwards would answer a
     /// different question.
     /// </summary>
-    private static int? AskedFor(Creature kokomi, Planned plan) => plan.Kind
+    private static int? AskedFor(Creature kokomi, Planned plan,
+                                 int after = 0) => plan.Kind
         switch
     {
+        // `EB-643`. A FOURTH SCALED KIND, and it reads the DRAIN rather than a
+        // ledger -- which is why `after` is a parameter here and the other
+        // three are computed from state: nothing on the board says how many
+        // Plans are still to come, so the drain is the only thing that knows.
+        Kind.DrawPerPlanAfter => plan.Amount * after,
         Kind.BlockPerPlanThisMorning =>
             plan.Amount * KokomiOverhaulLedger.For(kokomi).PlansThisMorning,
         Kind.DamagePerCompanionLastTurn =>
@@ -1455,7 +1922,14 @@ public static class KokomiPlan
     /// <c>HittableEnemies</c> and drops out, which is the same "a Plan that
     /// lands on nothing lands on nothing" rule every other aim already keeps.
     /// </summary>
-    private static IEnumerable<Creature> Aimed(Creature kokomi, Planned plan)
+    /// <param name="entry">`EB-643`. The entry the clause belongs to, for its
+    /// <see cref="Entry.AimOverride"/> alone: Converging Tide re-points
+    /// <see cref="Aim.FrontEnemy"/> and nothing else, so the override is read
+    /// on that branch and only while the body it names is still on the board.
+    /// Null is "no entry to ask", which is the honest answer for a caller
+    /// resolving a bare clause.</param>
+    private static IEnumerable<Creature> Aimed(Creature kokomi, Planned plan,
+                                               Entry? entry = null)
     {
         var combat = kokomi.CombatState;
         if (combat == null) yield break;
@@ -1481,6 +1955,24 @@ public static class KokomiPlan
                 yield return enemy;
             }
             yield break;
+        }
+        // `EB-643`, CONVERGING TIDE. The one aim a now-line may re-point:
+        // "every queued Plan aims at this enemy instead of the front". Read
+        // ONLY WHILE THAT BODY IS STILL ON THE BOARD and falling back to the
+        // front otherwise, which is the same "a Plan that lands on nothing
+        // lands on nothing" rule every other aim keeps -- and deliberately not
+        // extended to `AllEnemies` or Flank's captured set: neither of those
+        // aims at the front, so there is nothing on either for "instead of the
+        // front" to be about.
+        if (entry?.AimOverride is { } wanted)
+        {
+            var chosen = combat.HittableEnemies.Where(IsAlive)
+                .FirstOrDefault(e => e.CombatId.ToString() == wanted);
+            if (chosen != null)
+            {
+                yield return chosen;
+                yield break;
+            }
         }
         var front = FrontEnemy(kokomi);
         if (front != null) yield return front;
@@ -1529,16 +2021,31 @@ public static class KokomiPlan
     /// same "leftmost alive" rule read twice rather than a second rule.
     /// `kokomi_plan._hit` loops in the same order.
     /// </remarks>
+    /// <param name="doubleDamage">`EB-643`, Opening Gambit's rider, and it
+    /// lands HERE -- the one funnel every damaging Plan clause goes through,
+    /// so "the next Plan deals double damage" is true of the flat hit, of
+    /// Sango Isshin's quarter and of Chain of Command's per-Companion total
+    /// without three separate readings.
+    ///
+    /// AFTER THE FOLD AND BEFORE THE BOARD, which is what the printed order
+    /// says: her Strength and her enchantment are already inside
+    /// <paramref name="amount"/> (folded at writing time, <see cref="Hers"/>),
+    /// the doubling is applied to that written number, and the target's
+    /// Vulnerable and Block are read after it by <see cref="ElementalHit.Deal"/>
+    /// as they always are. It doubles the SIZE and not the number of passes,
+    /// so Pincer's three hits stay three and each is twice as large -- which
+    /// is the difference that matters against Block.</param>
     private static async Task<int?> Hit(
         PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
-        int amount)
+        int amount, Entry? entry = null, bool doubleDamage = false)
     {
         if (amount <= 0) return null;
+        if (doubleDamage) amount *= 2;
         var times = plan.Times < 1 ? 1 : plan.Times;
         int? first = null;
         for (var pass = 0; pass < times; pass++)
         {
-            foreach (var target in Aimed(kokomi, plan))
+            foreach (var target in Aimed(kokomi, plan, entry))
             {
                 if (target.IsDead) continue;
                 var landed = await ElementalHit.Deal(
@@ -1550,11 +2057,15 @@ public static class KokomiPlan
         return first;
     }
 
+    /// <summary>A planned Weak or Vulnerable. It takes the entry for
+    /// <see cref="Hit"/>'s reason (`EB-643`): a single-target debuff aims at
+    /// the front, and Converging Tide re-points exactly that aim.</summary>
     private static async Task Debuff<T>(
-        PlayerChoiceContext choiceContext, Creature kokomi, Planned plan)
+        PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
+        Entry? entry = null)
         where T : PowerModel
     {
-        foreach (var target in Aimed(kokomi, plan))
+        foreach (var target in Aimed(kokomi, plan, entry))
         {
             if (target.IsDead) continue;
             await PowerCmd.Apply<T>(

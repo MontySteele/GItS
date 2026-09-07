@@ -446,6 +446,11 @@ public static class KleeMod
                         "Riders survive the merge",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
+                    // `EB-643` (R265): the pool pass's one new word, and it is
+                    // a rule about WHEN -- the Bake-Kurage carries a Dusk Plan
+                    // out at the end of the turn it was written on. Same
+                    // raw-key hazard as every row here.
+                    [Cards.ArmKeywordTips.DuskKey + ".title"] = "Dusk",
                     // `EB-625`: the relic behind Shell Guard's payout, on
                     // the face that names it. Same raw-key hazard as every
                     // row here.

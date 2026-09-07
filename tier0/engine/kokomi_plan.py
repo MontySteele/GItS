@@ -50,19 +50,30 @@ from tier0.engine.state import Card, CombatState, Enemy, PlanEntry
 #: is why the debuff table below is separate and closed: the jellyfish carries
 #: out what the card wrote, and "any power" would let a row schedule a BUFF
 #: onto an enemy through a typo.
+#:
+#: `EB-643` (R265) ADDED THREE, and every one of them is about the QUEUE rather
+#: than about a number: two RIDERS on the entry that follows this one in the
+#: same drain (`next_plan_double_damage`, `next_plan_extra_carry_out`) and a
+#: draw that counts the carry-outs still to come (`draw_per_plan_after`). All
+#: three are PLAN-ONLY by construction -- each names a position in a drain, and
+#: a now-line spelling would name a drain that is not running.
 PLAN_KINDS = frozenset((
     "draw", "energy", "block", "mend", "damage", "damage_quarter_max_hp",
     "damage_per_companion_last_turn", "apply_power",
     "play_copy_of_companion", "block_per_plan_this_morning",
+    "draw_per_plan_after", "next_plan_double_damage",
+    "next_plan_extra_carry_out",
 ))
 
-#: The clauses that carry NO `amount`. Both are whole rules rather than
-#: numbers: Sango Isshin's quarter of Max HP is derived at carry-out, and
-#: Crystal Collapse's copy is a CARD rather than a size. Named once because
-#: `plan_shape_reason` asks it twice and `gen_klee_cards.plan_reason` asks the
-#: same question from the other side.
+#: The clauses that carry NO `amount`. Each is a whole rule rather than a
+#: number: Sango Isshin's quarter of Max HP is derived at carry-out, Crystal
+#: Collapse's copy is a CARD rather than a size, and `EB-643`'s two riders are
+#: switches thrown on the next entry -- "double" and "once more" have no size
+#: to print. Named once because `plan_shape_reason` asks it twice and
+#: `gen_klee_cards.plan_reason` asks the same question from the other side.
 PLAN_AMOUNTLESS_OPS = frozenset((
     "damage_quarter_max_hp", "play_copy_of_companion",
+    "next_plan_double_damage", "next_plan_extra_carry_out",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -99,13 +110,47 @@ PLAN_TIMES_OPS = frozenset(("damage",))
 #: handler refuses, which is what makes "plan-only" true rather than intended.
 PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            "play_copy_of_companion",
-                           "block_per_plan_this_morning"))
+                           "block_per_plan_this_morning",
+                           # `EB-643`. The three drain-positional clauses. Each
+                           # one names a place in a running drain -- "the next
+                           # Plan", "after this one" -- so a now-line spelling
+                           # would ask about a drain that is not running and
+                           # answer nothing, every time.
+                           "draw_per_plan_after",
+                           "next_plan_double_damage",
+                           "next_plan_extra_carry_out"))
 
 #: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
 #: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
 #: count it multiplies is a fact about a morning, and a now-line spelling would
 #: read a number that is zero every time it is asked.
 BLOCK_PER_PLAN = "block_per_plan_this_morning"
+
+#: `EB-643`, SCOUT AHEAD: "draw 1 card for each Plan carried out after this
+#: one". The count is CARRY-OUTS AND NOT ENTRIES, which is `EB-501`'s reading
+#: read forward instead of backward -- under Nereid's Ascension the two entries
+#: behind this one are four carry-outs, and every other reader in this arm
+#: already counts that way. `amount` is the RATE per carry-out, the shape
+#: `block_per_plan_this_morning` above already has.
+DRAW_PER_PLAN_AFTER = "draw_per_plan_after"
+
+#: `EB-643`, OPENING GAMBIT: "the next Plan deals double damage", and SECOND
+#: WAVE: "the next Plan is carried out twice".
+#:
+#: THE NEXT PLAN IS THE ENTRY CARRIED OUT IMMEDIATELY AFTER THIS ONE IN THE
+#: SAME DRAIN, and if none follows the rider does nothing. Both are written by
+#: the entry that prints them and consumed by the entry that follows, which is
+#: why they live on the DRAIN (`_drain`) rather than on the state: a rider that
+#: outlived its drain would be a promise about a morning nobody wrote it in.
+#: `Change of Plans` neither sets nor consumes one -- `resolve_front` carries a
+#: single entry out and there is no "next" for it to name.
+#:
+#: A FLAG AND NOT A COUNTER, both of them, and it is the pin: an entry carried
+#: out TWICE under Nereid's Ascension prints its rider twice, and "the next
+#: Plan is carried out twice" said twice is still twice -- so Second Wave under
+#: the Ascension hands the next entry `CarryOutTimes + 1` = 3 rather than 4.
+NEXT_PLAN_DOUBLE_DAMAGE = "next_plan_double_damage"
+NEXT_PLAN_EXTRA_CARRY_OUT = "next_plan_extra_carry_out"
 
 #: The one clause the SHEET cannot spell, minted by Moon's Reflection when the
 #: card it reaches has no Plan line of its own. It never appears in a `plan:`
@@ -280,7 +325,8 @@ def front_enemy(state: CombatState) -> Optional[Enemy]:
     return next((e for e in living if not e.is_minion), living[0])
 
 
-def _aimed(state: CombatState, clause: dict) -> list[Enemy]:
+def _aimed(state: CombatState, clause: dict,
+           entry: Optional[PlanEntry] = None) -> list[Enemy]:
     """The bodies one clause lands on, resolved AT CARRY-OUT. A clause with no
     `target` (a self-facing one) is empty by construction -- it names no target
     at all.
@@ -302,6 +348,17 @@ def _aimed(state: CombatState, clause: dict) -> list[Enemy]:
         caught = clause.get("targets") or []
         return [e for e in caught if e.alive]
     if aim == "front_enemy":
+        # `EB-643`, CONVERGING TIDE. The one aim a now-line may re-point:
+        # "every queued Plan aims at this enemy instead of the front". The
+        # override is read ONLY WHILE THAT BODY IS ALIVE and falls back to the
+        # front otherwise, which is the same "a Plan that lands on nothing
+        # lands on nothing" rule every other aim already keeps -- and it is
+        # deliberately not extended to `all_enemies` or to Flank's captured
+        # set: neither of those aims at the front, so there is nothing on
+        # either for "instead of the front" to be about.
+        if entry is not None and entry.aim_override is not None \
+                and entry.aim_override.alive:
+            return [entry.aim_override]
         front = front_enemy(state)
         return [front] if front is not None else []
     return []
@@ -607,11 +664,21 @@ def schedule(state: CombatState, card: Card,
                 if c.get("target") == "enemies_intending_attack" else c
                 for c in body]
         label = plan_aimed_label(card, caught)
-    entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label)
+    # `EB-643`, DUSK. A property of the WRITING CARD's printed face and not of
+    # its clauses (`plan_dusk:` on the row), so it is read off the card here
+    # and carried on the entry: the queue is one queue, and what a dusk entry
+    # changes is WHEN it is drained (`resolve_dusk`, at the end of this turn,
+    # before the enemies act) and nothing else about it. Moon's Reflection
+    # contributes another card's LINE and not its face, so a replayed line is
+    # never dusk -- the `clauses is not None` test is that sentence.
+    dusk = bool(getattr(card, "plan_dusk", False)) and clauses is None
+    entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label,
+                      dusk=dusk)
     state.kk_plan_queue.append(entry)
     state.emit("plan_written", card=card.id, clauses=len(body),
                queued=len(state.kk_plan_queue),
-               holds=None if held is None else held.id)
+               holds=None if held is None else held.id,
+               dusk=dusk)
 
 
 def schedule_from_exhaust(state: CombatState, card: Card) -> None:
@@ -674,10 +741,31 @@ def resolve_all(state: CombatState) -> None:
     records that as a reading: its own clause is what installs the doubling, so
     asking before each Plan means the Rare does not double itself and every
     Plan written after it in the same morning IS doubled.
+
+    THE TWO-PLAN CAP IS READ HERE (`EB-643`, R265), and it is a LANE RULE
+    BEHIND A RUNTIME TOGGLE rather than a rule of the arm: `C.KOKOMI_PLAN_CAP`
+    is 0 by default and 0 is unlimited, so with it unset this method drains
+    exactly what it drained before. At N the front N entries are carried out
+    and THE REST STAY QUEUED IN ORDER -- they are not discarded and not
+    re-sorted, because the whole trial is about whether queue ORDER becomes a
+    decision. `KokomiPlan.PlanCap` is the twin, read out of the environment on
+    that side for the reason its own header gives.
+
+    DUSK ENTRIES CANNOT BE HERE. `resolve_dusk` drains them at the end of the
+    turn they were written on, so by the next morning the queue holds only
+    entries that waited for one -- which is what makes "dusk entries are not
+    counted against the morning cap" true by construction rather than by a
+    filter.
     """
     if not live(state) or not state.kk_plan_queue:
         return
-    due = list(state.kk_plan_queue)
+    cap = int(getattr(C, "KOKOMI_PLAN_CAP", 0) or 0)
+    if cap > 0:
+        due = list(state.kk_plan_queue[:cap])
+        held = list(state.kk_plan_queue[cap:])
+    else:
+        due = list(state.kk_plan_queue)
+        held = []
     state.kk_plan_queue.clear()
     # `EB-335`. THE MORNING'S DEPTH, recorded on the same line the queue is
     # drained on and BEFORE the first clause runs -- Tide Wall's "for each Plan
@@ -699,13 +787,77 @@ def resolve_all(state: CombatState) -> None:
     # Ascension that ARRIVES mid-morning off a Plan of its own; the loop below
     # would then double the later entries and this number would not know. That
     # is the price of order-independence and it is deliberate.
+    #
+    # THE CAP MOVES THIS NUMBER AND IS MEANT TO (`EB-643`): the depth is what
+    # the jellyfish CARRIES OUT this morning, so a capped morning is a shallow
+    # morning and Tide Wall, Well Laid and Tide Chart all read the smaller
+    # number. The entries that waited pay their reader on the morning they
+    # actually land.
     state.kk_plans_this_morning = len(due) * carry_out_times(state)
     state.emit("plan_resolve_all", plans=len(due))
-    for entry in due:
-        for _ in range(carry_out_times(state)):
+    _drain(state, due, why="turn_start")
+    # `EB-643`. WHAT THE CAP HELD BACK GOES BACK ON THE FRONT OF THE QUEUE, in
+    # order, AFTER the drain -- not before it, because a Plan carried out this
+    # morning can write another one (Moon's Reflection reaches a card that
+    # does), and that new Plan waits for the NEXT morning like every other. It
+    # is put in front of anything written during the drain for the same reason
+    # it is kept in order at all: it was written first.
+    if held:
+        state.kk_plan_queue[:0] = held
+        state.emit("plan_cap_held", plans=len(held), cap=cap)
+
+
+def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
+    """CARRY A LIST OF PLANS OUT, IN ORDER -- the one loop both drains share
+    (the morning's, and `EB-643`'s dusk).
+
+    THE RIDERS LIVE HERE AND NOWHERE ELSE, which is the whole reason this is a
+    function rather than two loops. "The next Plan" means the entry carried out
+    immediately after this one IN THIS DRAIN: a rider is written by the entry
+    that prints it, applies to the entry that follows, and is gone when this
+    list runs out. A rider written by the last entry of a morning does not
+    reach into the evening, and one written at dusk does not reach into the
+    next morning -- both fall off the end of a local, which is the shape that
+    cannot leak.
+
+    `resolve_front` (Change of Plans) DOES NOT COME THROUGH HERE and so neither
+    sets nor consumes a rider: it carries ONE entry out, and there is no "next"
+    for the word to name. `KokomiPlan.Drain` is the twin, with the same two
+    callers and the same non-caller.
+    """
+    double_next = False
+    extra_next = False
+    for index, entry in enumerate(due):
+        if state.over or not state.player.alive:
+            return
+        # `EB-643`, SCOUT AHEAD's count: the carry-outs still to come after
+        # this entry. ENTRIES AFTER IT TIMES `CarryOutTimes`, which is
+        # `EB-501`'s carry-outs-not-entries reading pointed forwards -- and it
+        # deliberately does NOT fold in a `next_plan_extra_carry_out` a later
+        # entry may write, because that rider is not on the board yet when
+        # this number is asked. Read per entry rather than once for the drain,
+        # so a Scout Ahead written first and one written last answer honestly.
+        after = (len(due) - index - 1) * carry_out_times(state)
+        # THE RIDERS THE ENTRY BEFORE THIS ONE WROTE, taken and cleared in the
+        # same breath: a rider is spent by the entry it reaches, so two Plans
+        # in a row that each double cannot both land on a third.
+        double, extra = double_next, extra_next
+        double_next = extra_next = False
+        # `CarryOutTimes + 1` UNDER SECOND WAVE, which is the pin: the rider is
+        # a FLAG and not a count, so under Nereid's Ascension the entry it
+        # reaches is carried out three times and not four.
+        times = carry_out_times(state) + (1 if extra else 0)
+        for _ in range(times):
             if state.over or not state.player.alive:
                 return
-            _resolve_entry(state, entry, why="turn_start")
+            wrote = _resolve_entry(state, entry, why=why,
+                                   double_damage=double, after=after)
+            # THE RIDERS THIS ENTRY WROTE, OR'd across its own carry-outs for
+            # the reason above: an entry doubled by Nereid's prints its rider
+            # twice and "the next Plan is carried out twice" said twice is
+            # still twice.
+            double_next = double_next or wrote[0]
+            extra_next = extra_next or wrote[1]
 
 
 def promise_tide_chart(state: CombatState, per: int, flat: int) -> None:
@@ -772,6 +924,14 @@ def resolve_front(state: CombatState) -> None:
     NOT DOUBLED. `CarryOutTimes` is read inside `ResolveAll`'s drain loop and
     nowhere else, so Nereid's window pays the morning and not this card; that
     is the C#'s shape taken literally rather than a rule invented here.
+
+    IT POPS THE FRONT ENTRY WHETHER OR NOT IT IS DUSK (`EB-643`), and that is
+    a reading rather than an oversight: the card says "your front Plan", the
+    queue is one queue, and a Dusk Plan sitting at the front of it is the front
+    Plan. What Dusk changes is the drain that would otherwise have taken it.
+
+    IT NEITHER SETS NOR CONSUMES A RIDER, for `_drain`'s reason: there is no
+    "next Plan" in a drain of one.
     """
     if not live(state):
         return
@@ -782,6 +942,52 @@ def resolve_front(state: CombatState) -> None:
     _resolve_entry(state, entry, why="change_of_plans")
 
 
+def resolve_dusk(state: CombatState) -> None:
+    """`EB-643`, DUSK: "the Bake-Kurage carries this Plan out at the end of
+    this turn, before enemies act."
+
+    THE HOOK IS `combat._player_turn`'s TURN-END BLOCK, beside
+    `klee_overhaul.turn_end` and after it -- this engine's twin of
+    `BeforeSideTurnEnd` on the player side, which is where
+    `ProtoBakeKuragePower.BeforeSideTurnEnd` runs the same drain. WHY THAT
+    POINT and not one of the others, since a turn end has several:
+
+      * AFTER the hand's own end-of-turn triggers (`player_turn_end_triggers`),
+        so a Dusk Block is the LAST thing on her side of the boundary and
+        nothing later in the turn recomputes it;
+      * BEFORE `_settle_phases`, so a Dusk carry-out that kills settles the
+        board it killed, exactly as Sparks 'n' Splash's turn-end burst does one
+        arm over;
+      * BEFORE the enemies act, which is the printed promise and the only
+        clause of the sentence a card can tell apart -- a Dusk Block that
+        landed after the swing would be a face that lies.
+
+    A DUSK CARRY-OUT IS A CARRY-OUT. It goes through `_resolve_entry` like
+    every other, so Treatise draws on it, Song of Pearls blocks on it, the
+    `plan_carried_out` event fires and Sango Isshin's condition is met.
+
+    IT DOES NOT TOUCH `kk_plans_this_morning`, and that is the one place the
+    two drains differ on purpose: Tide Wall, Well Laid and Tide Chart all print
+    "this morning", and an evening is not one.
+
+    NOT CAPPED. `C.KOKOMI_PLAN_CAP` is a rule about the MORNING -- "at most N
+    Plans a morning, the rest wait" -- and a Dusk Plan has already waited for
+    nothing.
+    """
+    if not live(state):
+        return
+    due = [e for e in state.kk_plan_queue if e.dusk]
+    if not due:
+        return
+    # THE DUSK ENTRIES LEAVE THE QUEUE AND THE OTHERS STAY, in order. Taken
+    # before the first clause runs for `resolve_all`'s reason: a Dusk Plan
+    # whose body writes another Plan must not carry its own child out on the
+    # same boundary.
+    state.kk_plan_queue[:] = [e for e in state.kk_plan_queue if not e.dusk]
+    state.emit("plan_resolve_dusk", plans=len(due))
+    _drain(state, due, why="dusk")
+
+
 def carry_out_times(state: CombatState) -> int:
     """How many times ONE Plan is carried out right now: two while Nereid's
     Ascension is on her, one otherwise. A NAMED READ rather than an inline
@@ -790,18 +996,35 @@ def carry_out_times(state: CombatState) -> int:
     return 2 if state.player.powers.get(NEREIDS_ASCENSION, 0) else 1
 
 
-def _resolve_entry(state: CombatState, entry: PlanEntry, why: str) -> None:
+def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
+                   double_damage: bool = False,
+                   after: int = 0) -> tuple[bool, bool]:
     """ONE PLAN CARRIED OUT -- the unit Treatise and Song of Pearls are priced
     in. "Whenever the jellyfish carries out a Plan" is once per ENTRY, and the
     notify at the bottom is the only place it fires, so Change of Plans' early
-    resolution pays them exactly as the morning's does."""
+    resolution pays them exactly as the morning's does.
+
+    `double_damage` and `after` ARE THE DRAIN'S, and they are parameters rather
+    than reads for `ResolveEntry`'s own reason one file over: nothing about the
+    state this entry sits in says which entry ran before it or how many run
+    after, so the caller is the only thing that knows and the caller says.
+    `resolve_front`'s defaults are the honest answer for a drain of one.
+
+    IT RETURNS THE RIDERS THIS ENTRY WROTE, `(double, extra)`, because the
+    clause that writes one is inside the loop below and the drain that spends
+    it is outside: handing them back is what keeps "the next Plan" a fact about
+    the DRAIN rather than a flag on the state that could outlive it.
+    """
     state.emit("plan_carried_out", card=entry.card_id, why=why,
                clauses=len(entry.clauses))
+    wrote = [False, False]
     for clause in entry.clauses:
         if state.over or not state.player.alive:
             break
-        _resolve_clause(state, entry, clause)
+        _resolve_clause(state, entry, clause, double_damage=double_damage,
+                        after=after, wrote=wrote)
     _note_plan_resolved(state)
+    return wrote[0], wrote[1]
 
 
 def claim_once_per_turn(state: CombatState, key: str) -> bool:
@@ -856,8 +1079,15 @@ def _note_plan_resolved(state: CombatState) -> None:
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,
-                    clause: dict) -> None:
-    """One planned clause. `ResolveOne`'s switch, arm for arm."""
+                    clause: dict, double_damage: bool = False,
+                    after: int = 0,
+                    wrote: Optional[list] = None) -> None:
+    """One planned clause. `ResolveOne`'s switch, arm for arm.
+
+    The last three arguments are `EB-643`'s and they are the drain's, not the
+    clause's -- see `_resolve_entry`. `wrote` is written INTO rather than
+    returned because one entry's clause list may print more than one rider and
+    the switch below has no return value to carry them on."""
     from tier0.engine import effects                # late import: cycle
 
     p = state.player
@@ -902,21 +1132,47 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             state.emit("block", amount=gained)
         state.emit("plan_tide_wall", amount=gained,
                    plans=state.kk_plans_this_morning)
+    elif op == DRAW_PER_PLAN_AFTER:
+        # SCOUT AHEAD (`EB-643`): "draw 1 card for each Plan carried out after
+        # this one". `after` is the drain's count -- see `_drain`, which reads
+        # it per entry -- and the rate is the printed amount, the shape Tide
+        # Wall's clause above already has. Change of Plans carries ONE entry
+        # out, so a Scout Ahead hurried that way draws nothing, which is the
+        # face read literally: nothing follows it.
+        cards = amount * int(after)
+        state.emit("plan_scout_ahead", cards=cards, after=int(after))
+        if cards > 0:
+            state.draw(cards)
+    elif op == NEXT_PLAN_DOUBLE_DAMAGE:
+        # OPENING GAMBIT's rider (`EB-643`). It DOES NOTHING HERE except say
+        # so: the drain spends it on the entry that follows, and a rider
+        # written by the last Plan of a drain falls off the end of a local
+        # rather than waiting for a morning nobody promised it.
+        if wrote is not None:
+            wrote[0] = True
+        state.emit("plan_rider", rider=NEXT_PLAN_DOUBLE_DAMAGE)
+    elif op == NEXT_PLAN_EXTRA_CARRY_OUT:
+        # SECOND WAVE's rider (`EB-643`). Same terms as the one above.
+        if wrote is not None:
+            wrote[1] = True
+        state.emit("plan_rider", rider=NEXT_PLAN_EXTRA_CARRY_OUT)
     elif op == "mend":
         effects.mend(state, amount)
     elif op == "damage":
-        _hit(state, clause, amount)
+        _hit(state, clause, amount, entry=entry, double=double_damage)
     elif op == "damage_quarter_max_hp":
-        _hit(state, clause, quarter_of_max_hp(state))
+        _hit(state, clause, quarter_of_max_hp(state), entry=entry,
+             double=double_damage)
     elif op == "damage_per_companion_last_turn":
         # Chain of Command. "LAST TURN" IS READ AT CARRY-OUT: the Plan was
         # written on turn N and resolves at the top of N+1, and
         # `combat._player_turn` has already rolled the counter by then -- so
         # what this reads is turn N, the turn the player was looking at when
         # they wrote it. `KokomiOverhaulLedger.RollTo` is the same handover.
-        _hit(state, clause, amount * state.companion_plays_last_turn)
+        _hit(state, clause, amount * state.companion_plays_last_turn,
+             entry=entry, double=double_damage)
     elif op == "apply_power":
-        _debuff(state, clause, clause["power"], amount)
+        _debuff(state, clause, clause["power"], amount, entry=entry)
     elif op == REPLAY_EXHAUSTED:
         _replay(state, entry.card)
     elif op == PLAY_COPY_OF_COMPANION:
@@ -936,7 +1192,8 @@ def quarter_of_max_hp(state: CombatState) -> int:
     return state.player.max_hp // QUARTER
 
 
-def _hit(state: CombatState, clause: dict, amount: int) -> None:
+def _hit(state: CombatState, clause: dict, amount: int,
+         entry: Optional[PlanEntry] = None, double: bool = False) -> None:
     """A Plan's damage, and it is HYDRO, dealt BY THE BAKE-KURAGE.
 
     `EB-334`, RULED R246 pick 1 AT ITS DEFAULT: "the Bake-Kurage deals it. The
@@ -980,13 +1237,29 @@ def _hit(state: CombatState, clause: dict, amount: int) -> None:
     hit hands the next one to the enemy behind it, which is "leftmost alive"
     read twice rather than a second rule. `KokomiPlan.Hit` loops in the same
     order.
+
+    `double` IS OPENING GAMBIT'S RIDER (`EB-643`), AND IT LANDS HERE -- the one
+    funnel every damaging Plan clause goes through, so "the next Plan deals
+    double damage" is true of the flat hit, of Sango Isshin's quarter and of
+    Chain of Command's per-Companion total without three separate readings.
+
+    AFTER THE FOLD AND BEFORE THE BOARD, which is what the printed order says:
+    her Strength and her enchantment are already inside `amount` (they were
+    folded at writing time, `hers`), the doubling is applied to that written
+    number, and the target's Vulnerable and Block are read after it by
+    `deal_damage_to_enemy` as they always are. It is a doubling of the SIZE and
+    not of the number of hits, so Pincer's three passes stay three passes and
+    each of them is twice as large -- which is the difference that matters
+    against Block.
     """
     from tier0.engine import effects                # late import: cycle
 
     if amount <= 0:
         return
+    if double:
+        amount *= 2
     for _ in range(max(1, int(clause.get("times", 1)))):
-        for enemy in _aimed(state, clause):
+        for enemy in _aimed(state, clause, entry):
             if not enemy.alive:
                 continue
             effects.deal_damage_to_enemy(state, enemy, amount,
@@ -995,7 +1268,7 @@ def _hit(state: CombatState, clause: dict, amount: int) -> None:
 
 
 def _debuff(state: CombatState, clause: dict, power: str,
-            amount: int) -> None:
+            amount: int, entry: Optional[PlanEntry] = None) -> None:
     """A planned Weak or Vulnerable, applied BY HER -- so the Casket answers it
     and The Clouds Like Waves pays for it, exactly as they do for a debuff off
     a card she played.
@@ -1005,8 +1278,11 @@ def _debuff(state: CombatState, clause: dict, power: str,
     already takes that reading for every aimed power in this engine. The aim
     itself is resolved over the LIVING, so the only corpse this can reach is
     one that died between the aim and the apply.
+
+    IT TAKES THE ENTRY for `_hit`'s reason (`EB-643`): a single-target debuff
+    aims at the front, and Converging Tide re-points exactly that aim.
     """
-    for enemy in _aimed(state, clause):
+    for enemy in _aimed(state, clause, entry):
         powers.apply_power(state, enemy, power, amount,
                            applier=state.player)
 
@@ -1311,6 +1587,127 @@ def has_debuff(enemy: Optional[Enemy]) -> bool:
     if enemy.frozen > 0:
         return True
     return any(enemy.powers.get(n, 0) > 0 for n in ENEMY_DEBUFFS)
+
+
+def cancel_last_plan(state: CombatState) -> None:
+    """SECOND THOUGHTS (`EB-643`): "cancel your last Plan: its card returns to
+    your hand and you regain its cost."
+
+    THE LAST ENTRY AND NOT THE FRONT ONE, which is the whole card: Change of
+    Plans hurries the OLDEST Plan and this takes back the NEWEST, so the two
+    tempo cards operate on opposite ends of the same queue and a player who
+    has just written the wrong Plan has a way back.
+
+    THE CARD COMES OUT OF THE DISCARD PILE, and it is found BY ID rather than
+    held on the entry. The entry keeps `card_id` for exactly this reason
+    (`PlanEntry`'s own header: the writing card is kept for the log, and the
+    C# keeps `Source` for the strip), and a play routes its card to the discard
+    pile at the end of the play -- so the discard pile is where the card that
+    wrote a queued Plan is, on the ordinary path.
+
+    AND ON THE PATHS THAT ARE NOT ORDINARY, NOTHING RETURNS. A Plan written by
+    Moon's Reflection off a card in the EXHAUST pile has a `card_id` that is
+    not in the discard pile, and an Exhaust row's own card is not there either.
+    The Plan is still cancelled and the Energy is still not paid, because what
+    the face promises is the card and the card is not there to promise. It is
+    a printed no-op of the kind this arm already has several of, not a search
+    of every pile for something that looks similar.
+
+    THE ENERGY IS THE RETURNED CARD'S CURRENT COST, read off the card that is
+    coming back -- a smithed copy that cost 0 refunds 0, which is what "its
+    cost" says. Nothing is refunded when no card returns, for the same reason:
+    there is no "its" to read.
+
+    AN EMPTY QUEUE IS A PRINTED NO-OP with a line on the ledger, the shape
+    `resolve_front` already has.
+    """
+    from tier0.engine.state import remove_instance
+
+    if not live(state):
+        return
+    if not state.kk_plan_queue:
+        state.emit("plan_cancel_last_empty")
+        return
+    entry = state.kk_plan_queue.pop()
+    card = next((c for c in state.player.discard_pile
+                 if c.id == entry.card_id), None)
+    if card is None:
+        state.emit("plan_cancel_last", card=entry.card_id, returned=False,
+                   energy=0)
+        return
+    remove_instance(state.player.discard_pile, card)
+    state.player.hand.append(card)
+    refund = max(0, int(card.cost))
+    state.player.energy += refund
+    if refund:
+        state.emit("energy", amount=refund)
+    state.emit("plan_cancel_last", card=entry.card_id, returned=True,
+               energy=refund)
+
+
+def cancel_all_plans_cash(state: CombatState) -> None:
+    """EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy
+    and draw 1 card for each."
+
+    PER ENTRY AND NOT PER CARRY-OUT, which is the one reading here and it is
+    the face's own word: "for each" counts the Plans she is holding, and what
+    she is holding is entries -- the same quantity the pending badge shows and
+    `PlansHeld` answers. Nereid's Ascension would have doubled them at the
+    morning and did not, which is exactly the thing this card gives up.
+
+    NO CARD COMES BACK, unlike Second Thoughts one row up, and that is the
+    trade rather than an omission: this cancels a whole queue for a currency
+    and that one buys a single Plan back at its own price.
+
+    AN EMPTY QUEUE PAYS NOTHING and says so, the shape above.
+
+    THE DRAW IS AFTER THE ENERGY, in one call, so a drawn card meets a hand
+    that can already afford it.
+    """
+    if not live(state):
+        return
+    n = len(state.kk_plan_queue)
+    if not n:
+        state.emit("plan_cancel_all", plans=0, energy=0, cards=0)
+        return
+    state.kk_plan_queue.clear()
+    state.player.energy += n
+    state.emit("energy", amount=n)
+    state.emit("plan_cancel_all", plans=n, energy=n, cards=n)
+    state.draw(n)
+
+
+def redirect_queued_plans(state: CombatState, target: Optional[Enemy]) -> None:
+    """CONVERGING TIDE (`EB-643`): "every queued Plan aims at this enemy
+    instead of the front."
+
+    IT STAMPS THE ENTRIES THAT ARE ALREADY WRITTEN AND NOTHING ELSE. A Plan
+    written after the redirect aims at the front as usual, because the card
+    names the queue as it stands -- "every queued Plan" -- and a rule that
+    kept re-aiming later writes would be a Power the row does not print.
+
+    ONLY THE FRONT AIM MOVES, which is `_aimed`'s half of the same rule: "ALL
+    enemies" does not aim at the front, so there is nothing on it for "instead
+    of the front" to be about, and Flank's captured set was fixed when its Plan
+    was written for reasons of its own (`EB-492`).
+
+    A DEAD TARGET FALLS BACK TO THE FRONT rather than to nothing, read at
+    carry-out (`_aimed`), which is the arm's standing rule for a body a Plan
+    was pointed at and no longer finds.
+
+    IT STAMPS DUSK ENTRIES TOO. They are in the queue, the face says every
+    queued Plan, and the redirect happens on the turn they will land on.
+    """
+    if not live(state):
+        return
+    if target is None or not state.kk_plan_queue:
+        state.emit("plan_redirect", plans=0,
+                   target=None if target is None else target.name)
+        return
+    for entry in state.kk_plan_queue:
+        entry.aim_override = target
+    state.emit("plan_redirect", plans=len(state.kk_plan_queue),
+               target=target.name)
 
 
 def next_companion_discount(state: CombatState) -> None:

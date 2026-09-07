@@ -5782,6 +5782,40 @@ def _op_damage_quarter_max_hp(state: CombatState, fx: dict,
                              else "card")
 
 
+def _op_cancel_last_plan(state: CombatState, fx: dict, card: Card) -> None:
+    """Second Thoughts (`EB-643`). The readings -- which end of the queue, the
+    pile the card comes back from, and what happens when it is in neither --
+    are recorded at `kokomi_plan.cancel_last_plan`."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.cancel_last_plan(state)
+
+
+def _op_cancel_all_plans_cash(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """Ebb Tide (`EB-643`). Per ENTRY and not per carry-out; see
+    `kokomi_plan.cancel_all_plans_cash` for why that is the face's own word."""
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    kokomi_plan.cancel_all_plans_cash(state)
+
+
+def _op_redirect_queued_plans(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """Converging Tide (`EB-643`): the queue as it stands re-aims at the enemy
+    this card was played on.
+
+    THE ROW'S OWN TARGET, through the same `_pick_targets` door every other
+    aimed now-line takes, so "this enemy" is the body the play was aimed at and
+    never a second definition of the front. A play that reaches no living body
+    stamps nothing, which `kokomi_plan.redirect_queued_plans` records.
+    """
+    if not kokomi_plan.live(state):
+        _op_kokomi_overhaul_off(state, fx, card)      # always raises
+    targets = _pick_targets(state, fx.get("target", "enemy"))
+    kokomi_plan.redirect_queued_plans(state, targets[0] if targets else None)
+
+
 def _op_next_companion_discount(state: CombatState, fx: dict,
                                 card: Card) -> None:
     """Rally's grant. One stack, always -- see `kokomi_plan`."""
@@ -5930,6 +5964,22 @@ OPS = {
     # is a fact about a MORNING, so a now-line spelling would print a number
     # that is zero every time it is read.
     "block_per_plan_this_morning": _op_kokomi_plan_only,
+    # SEVEN, and the last three are `EB-643`'s (R265). Same terms as the four
+    # above, and plan-only for one reason they share: each names a POSITION in
+    # a running drain -- "the next Plan", "each Plan carried out after this
+    # one" -- so a now-line spelling would ask about a drain that is not
+    # running and answer nothing every time it was played.
+    "draw_per_plan_after": _op_kokomi_plan_only,
+    "next_plan_double_damage": _op_kokomi_plan_only,
+    "next_plan_extra_carry_out": _op_kokomi_plan_only,
+    # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
+    # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
+    # and re-aim what is already written (Converging Tide). They are the
+    # arm's first verbs that UNWRITE a Plan, which is the pool pass's whole
+    # answer to a queue that empties on a timer.
+    "cancel_last_plan": _op_cancel_last_plan,
+    "cancel_all_plans_cash": _op_cancel_all_plans_cash,
+    "redirect_queued_plans": _op_redirect_queued_plans,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

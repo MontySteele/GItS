@@ -2860,3 +2860,139 @@ so every Companion face of Klee's prints the word and pays it.
 The readers (Coven Errand, Witches' Circle, Venti's stand-in) therefore fire on
 a wider set than R244 wrote them against; that widening is read at the audit
 door in pool pass two, not assumed here.
+
+## Kokomi pool pass two -- the queue as something you operate on (`EB-643`, R265, 2026-09-07)
+
+THE FINDING. Round after round the seats wrote a Plan and then watched it
+play itself: a morning is a thing that is READ, not decided. Everything the arm
+had asked the player to choose happened before the Plan was queued -- which
+card, and whether to plan it at all -- and nothing after. So the pass is eight
+rows that reach INTO the queue, plus one new word and one lane rule.
+
+Doctrine audit at the door: FOLLOWS on all nine arms, prompt and reply at
+`review/qa/kokomi-pass-two-2026-09-07-prompt.txt` and
+`review/qa/kokomi-pass-two-2026-09-07-reply.md`. Prototype numbers, D by the
+ladder; nothing here is quotable (R215 B).
+
+### `proto_kk_opening_gambit` -- the first rider
+
+"The next Plan deals double damage" is the arm's first clause about ANOTHER
+entry. The next Plan is the one carried out immediately after this one in the
+same drain, so Gambit written before Riptide doubles Riptide and Riptide
+before Gambit doubles nothing -- the card makes the ORDER of the queue a
+decision, which is the pass's whole thesis in one line.
+
+The upgrade moves the now-line (5 to 7) and not the Plan half, because the
+Plan half prints no number the upgrade could move: the Vulnerable is the setup
+and the doubling is the payoff, and neither is a size. Against Double Tap
+(Uncommon, 1, repeat the next Attack) the audit reads Gambit as one damage
+worse when the kill must happen this turn, which is the price of the delay.
+
+### `proto_kk_second_wave` -- the second rider
+
+"The next Plan is carried out twice." A FLAG and not a count: an entry carried
+out twice under Nereid's Ascension prints its rider twice, and "carried out
+twice" said twice is still twice -- so the entry it reaches runs
+`CarryOutTimes + 1`, which is 3 under the Ascension and not 4. Both engines
+state that at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT` and at
+`KokomiPlan.Kind.NextPlanExtraCarryOut`, and both pin it.
+
+### `proto_kk_scout_ahead` -- the row whose value is its position
+
+"Draw 1 card for each Plan carried out after this one." First of a three-entry
+morning it draws 2, last it draws 0, and the count is CARRY-OUTS rather than
+entries -- `EB-501`'s reading pointed forwards, so under Nereid's Ascension
+first of three is 4.
+
+THE UPGRADE MOVES THE COST AND NOT THE RATE. The rate is the queue's fact and
+not the card's: an upgrade that raised it to 2 per carry-out would scale with a
+deck the offer screen cannot see, and the card would be a blank in a shallow
+morning and the best draw in the pool in a deep one. `{cost: -1}` moves the
+half the card owns.
+
+### `proto_kk_second_thoughts` -- the newest Plan back
+
+Change of Plans hurries the OLDEST entry; this takes back the NEWEST, so the
+two tempo cards work opposite ends of one queue. The card that wrote the Plan
+comes out of the DISCARD pile and its current cost is refunded -- and on the
+paths where it is not there (an Exhaust row's own card, a Plan written off the
+exhaust pile by Moon's Reflection) the Plan is still cancelled and nothing
+comes back, because what the face promises is the card. It is a printed no-op
+of the kind this arm already has several of, not a search of every pile for
+something that looks similar.
+
+No `plan:` line: a card that unwrites a Plan cannot also be one.
+
+### `proto_kk_ebb_tide` -- the whole queue for a currency
+
+PER ENTRY and not per carry-out. "For each" counts the Plans she is HOLDING,
+which is the number the pending badge shows and `PlansHeld` answers; Nereid's
+Ascension would have doubled them at the morning and did not, which is exactly
+the thing the card gives up. Against Seeing Red the audit reads it as one less
+usable Energy this turn, before the Plans it cancelled are counted.
+
+### `proto_kk_converging_tide` -- re-aiming what is already written
+
+"Every queued Plan aims at this enemy instead of the front." Three readings,
+and all three are stated in both engines:
+
+* ONLY THE FRONT AIM MOVES. An ALL clause does not aim at the front and Flank's
+  captured set was fixed when its Plan was written (`EB-492`), so there is
+  nothing on either for "instead of the front" to be about.
+* A PLAN WRITTEN AFTER THE REDIRECT AIMS AT THE FRONT as usual. The face names
+  the queue as it stands; a rule that kept re-aiming later writes would be a
+  Power the row does not print.
+* A DEAD TARGET FALLS BACK TO THE FRONT, read at carry-out -- the arm's
+  standing rule for a Plan pointed at a body it no longer finds.
+
+The stamp is a `CombatId` in the mod and the `Enemy` object in the sim, which
+is `Planned.Targets`' split verbatim and for its reason.
+
+### `proto_kk_breakwater` and `proto_kk_night_watch` -- DUSK
+
+The new word, and it is a rule about WHEN and nothing else: the Bake-Kurage
+carries a Dusk Plan out at the END of the turn it was written on, before the
+enemies act, instead of next morning. A ROW FLAG (`plan_dusk:`) and not a
+clause, because Dusk is when the whole line lands -- a card cannot have one
+dusk clause and one morning clause any more than it can be played on two
+turns.
+
+Everything else about a Dusk Plan is a Plan: written by playing the card on the
+jellyfish, one entry in one queue, a carry-out for Treatise and Song of Pearls,
+and poppable by Change of Plans whether or not it is dusk. Two things it is
+NOT: it does not touch the morning's depth (`kk_plans_this_morning` /
+`PlansThisMorning` -- Tide Wall, Well Laid and Tide Chart print "this morning",
+and an evening is not one), and it is not counted against the two-Plan cap,
+because a Dusk Plan has already waited for nothing.
+
+The hook is `ProtoBakeKuragePower.BeforeSideTurnEnd` on the player side and, in
+the sim, `combat._player_turn`'s turn-end block beside `klee_overhaul.turn_end`
+-- after the hand's own end-of-turn triggers, before `_settle_phases`, before
+any enemy acts. The last clause is the printed promise and the only one a card
+can tell apart.
+
+PRICING. Breakwater (1: 4 now, 7 at dusk) against Read the Field (1: 5 now,
+Plan 10 next morning): less of both halves, and neither of them a turn away.
+Night Watch (1: 3 now, 5 and 1 Weak at dusk) against Coral Bulwark (1: 6 now,
+Plan 8 Block and 1 Weak): three less Block on both halves, bought with the
+earlier landing -- its Weak cuts the swing it was written for rather than the
+one after it.
+
+### The two-Plan cap -- a lane rule behind a runtime toggle
+
+"At most N Plans a morning; the rest wait, in order." DEFAULT OFF, and 0 means
+unlimited: with it unset both drains are what they were. At N the front N
+entries are carried out and the rest stay queued IN ORDER -- not discarded, not
+re-sorted, because the whole trial is about whether queue order becomes a
+decision.
+
+It is a TRIAL and not a shipped rule, so the toggle is a runtime one on both
+sides and the two are the same rule and never the same literal:
+`C.KOKOMI_PLAN_CAP` is a module constant a test monkeypatches, and
+`KokomiPlan.PlanCap` reads `GITS_KOKOMI_PLAN_CAP` from the environment once at
+first ask. The env-var shape is the existing per-lane pattern (`GITS_LANE`,
+`GITS_TELEMETRY_FEED`, `GITS_TELEMETRY_INTENT`): a lane launches the game as a
+child process, so an exported variable is what a lane already has, and not
+having to rebuild per arm is what the toggle exists for. It is deliberately NOT
+a `lint_constant_parity` row -- comparing the two defaults by value would pin 0
+against 0 and say nothing about the rule they share.

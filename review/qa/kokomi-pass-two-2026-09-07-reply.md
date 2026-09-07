@@ -1,0 +1,19 @@
+1. **Opening Gambit — FOLLOWS, C2/C6:** “The next Plan deals double damage” requires adjacency and survival until dawn; Opening Gambit (Uncommon, 1: 5 damage now) plus Feint (Common, 1: 6 damage) deals 11 this turn, whereas Double Tap (Uncommon, 1: repeat the next Attack) plus Feint deals 12, so Gambit is 1 damage worse when the kill must happen now.
+
+2. **Second Wave — FOLLOWS, C2/C6:** “The next Plan is carried out twice” cannot duplicate an immediate defensive play; Second Wave (Common, 1: 4 Block now) plus Read the Field (Common, 1: 5 Block now; Plan: 10) supplies 9 Block this turn, whereas Burst (Uncommon, 1: repeat the next Skill) plus Read the Field supplies 10, leaving Second Wave 1 Block worse against the current hit despite its broader delayed copying.
+
+3. **Scout Ahead — FOLLOWS, C2/C3/C6:** “Draw 1 card for each Plan carried out after this one” prices repeatable draw through additional paid entries and their order; at Common, 1 energy, first in a three-entry morning it draws 2 versus Skim’s Uncommon, 1-energy immediate 3 and Stolen Chapter’s Common, 1-energy planned 4, so that morning it draws respectively 1 and 2 fewer cards, and moving it last reduces its draw to 0.
+
+4. **Second Thoughts — FOLLOWS, C2:** “Cancel your last Plan: its card returns to your hand and you regain its cost” forfeits that entry and exhausts the cancellation card; with no queued Plan, Second Thoughts (Common, 0, Exhaust) produces 0 Block and no refund against Ripple (Common, 0: 2 Block; Plan: 1 Energy and 4 Block), making it 2 Block worse against this turn’s attack.
+
+5. **Ebb Tide — FOLLOWS, C2/C6:** “Cancel every Plan you have queued” binds its payout to forfeited effects; with one queued Read the Field (1: Plan 10 Block), Ebb Tide (Uncommon, 1, Exhaust: 1 Energy and 1 card per cancellation) yields net 0 Energy and draws 1 while sacrificing 10 dawn Block, versus Seeing Red (Uncommon, 1, Exhaust: gain 2 Energy) yielding net 1 Energy, so Ebb supplies 1 less usable Energy this turn.
+
+6. **Converging Tide — FOLLOWS, C2/C6:** “Gain 4 Block” and “Every queued Plan aims at this enemy” exchange defense for a bounded targeting choice; against a lone enemy, Converging Tide (Common, 1: 4 Block) gains nothing from redirecting and provides 1 less Block this turn than Read the Field (Common, 1: 5 Block; Plan: 10).
+
+7. **Breakwater — FOLLOWS, C2/C6:** “Dusk Plan: Gain 7 Block” changes timing rather than dominating Read the Field (Common, 1: 5 now, 10 dawn), since Breakwater (Common, 1: 4 now, 7 dusk) provides 1 less immediate Block when retaliation must be blocked before turn-end, while its dusk Block supplies 0 next-turn Block after normal removal versus Read the Field’s 10 at dawn.
+
+8. **Night Watch — FOLLOWS, C2/C6:** “Dusk Plan: Gain 5 Block and apply 1 Weak” advances protection but reduces its quantity against Coral Bulwark (Common, 1: 6 now; Plan: 8 Block and 1 Weak); Night Watch (Common, 1: 3 now; Dusk: 5 Block and 1 Weak) provides 3 less immediate Block before turn-end and 3 less Block on its scheduled landing, with its Weak protecting the earlier enemy turn.
+
+9. **Two-Plan cap — FOLLOWS, C1/C3:** “At most two Plans a morning; the rest wait” preserves a losing line and makes ordering consequential: with three queued defensive entries and lethal damage due after the next morning, only two arrive before that attack and the third arrives one morning later, so the allowance neither guarantees survival nor makes queue order irrelevant.
+
+The set answers the auto-pilot complaint through adjacency, cancellation, redirection, and competing landing times. The cap also makes priority consequential, but whether those choices remain meaningful during play still requires the proposed trial.

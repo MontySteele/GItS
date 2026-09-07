@@ -414,6 +414,7 @@ def _validate_card_shape(c: Card) -> None:
     _validate_effect_vocabulary(c.id, sly_riders(c))
     _validate_recall_shape(c)
     _validate_plan_shape(c)
+    _validate_plan_dusk(c)
     _validate_no_upgrade_shape(c)
     # THE STAND-IN SEAM's own two-line schema rule (`replaces:` is prototype
     # surface only, and it needs a `personal_pool:`), stated where the arm's
@@ -575,6 +576,30 @@ def _validate_plan_shape(card: Card) -> None:
     reason = _plan.plan_shape_reason(card.plan)
     if reason:
         raise ValueError(f"card {card.id!r}: {reason}")
+
+
+def _validate_plan_dusk(card: Card) -> None:
+    """`plan_dusk:` says WHEN a Plan line lands, so it needs a line to be
+    about (`EB-643`).
+
+    TWO CLAUSES AND THEY ARE THE WHOLE OF IT: the value is literally `True`
+    (the `innate:` / `retain:` precedent -- only true is a ruling, and `false`
+    would be a second spelling of the default), and the row prints a `plan:`
+    list. A dusk flag on a row with no Plan is a rule about nothing, which is
+    the face-that-lies defect `_validate_plan_shape` refuses one field over.
+    `tools/gen_klee_cards.card_level_reason` refuses the same two from the
+    other side.
+    """
+    if card.plan_dusk is False:
+        return
+    if card.plan_dusk is not True:
+        raise ValueError(
+            f"card {card.id!r}: `plan_dusk:` must be true -- it is a ruling "
+            "and not a switch, the way `innate:` is")
+    if not card.plan:
+        raise ValueError(
+            f"card {card.id!r}: `plan_dusk:` on a row with no `plan:` line -- "
+            "Dusk says WHEN a Plan is carried out, so there has to be one")
 
 
 def _validate_no_upgrade_shape(card: Card) -> None:

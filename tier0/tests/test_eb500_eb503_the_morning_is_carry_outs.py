@@ -121,7 +121,11 @@ def test_the_depth_is_read_once_at_the_drain():
     body = kokomi_plan.resolve_all.__code__.co_names
 
     assert "carry_out_times" in body
-    assert body.index("kk_plans_this_morning") < body.index("_resolve_entry")
+    # `EB-643` MOVED THE LOOP OUT INTO `_drain`, which both drains now share
+    # (the morning's and dusk's), so what this reads is the DRAIN CALL rather
+    # than the entry resolution -- the same assertion one name over: the depth
+    # is written before anything is carried out.
+    assert body.index("kk_plans_this_morning") < body.index("_drain")
 
 
 # ---- EB-501: what Well Laid pays -----------------------------------------
