@@ -29,6 +29,7 @@ from understudy.blindplay_notes import (AURA_NOTE, AUTO_TURN_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
+                                        LAST_SALON_NOTE,
                                         METER_CAPPED_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
@@ -1043,15 +1044,24 @@ def render(obs: dict[str, Any]) -> str:
         if c["hand"]:
             out += _one_use_discount_note(you)
         # `EB-567`. THE WINDOW, BEFORE THE REFUSAL RATHER THAN AFTER IT. Under
-        # the arm the Spotlight's price is the opening Encore exactly, so turn
-        # one is the only turn it can be bought -- and both r14 seats learned
-        # that from a refusal one action too late.
+        # the arm the Spotlight's price is the opening Encore exactly, and
+        # both r14 seats learned that from a refusal one action too late.
+        #
+        # `EB-600` TOOK THE TURN-ONE GATE OFF, because the rule it was built
+        # on is false. The note used to print on round 1 only, on the reading
+        # that "the window is already open or already shut" by round 2; Encore
+        # is REFILLABLE, and both r16 lanes said so. Lane 1: "Aria and Hearts
+        # Swelling grant Encore without performing, and I broke the rule on
+        # turn 1 of the run." Lane 2 lit it after a performance in three
+        # fights off Chevalmarin's grant of 3. A window that reopens has to be
+        # stated on the turn it reopens on, so the note rides the CARD being
+        # in hand and nothing else.
         #
         # GATED ON THE SALON BLOCK, which is the page's own test for "this
         # build plays the reframe": the block is sent only under
         # `FurinaReframe.ManualLiveFor`, and a release build's selector costs
         # no Encore and would make this sentence false.
-        if (c["round"] == 1 and c.get("salon") is not None
+        if (c.get("salon") is not None
                 and any(card["title"] == "Ethereal Spotlight"
                         for card in c["hand"])):
             out += ["", SPOTLIGHT_WINDOW_NOTE]
@@ -1294,8 +1304,11 @@ def render(obs: dict[str, Any]) -> str:
                     LAST_MORNING_NOTE, ""] + _render_carry_out(lm)
             if _board_note_wanted(lm):
                 out += ["", CARRY_OUT_BOARD_NOTE]
-        # `EB-604`: the Salon's last beat, the same way. The Evoke leads, as
-        # it does on a battle screen (`EB-582`).
+        # `EB-604`: the Salon's half of the same receipt, in the combat page's
+        # own order -- the Evoke leads (`EB-582`), then the performances, then
+        # the extra plays. No body is renamed here, because a reward screen
+        # has no enemy list to map a combat id onto; the mod's own title
+        # stands, which is the trade the carry-out block above already makes.
         if obs.get("last_salon"):
             ls = obs["last_salon"]
             out += ["", "## What your Salon did in the fight's last beat", "",

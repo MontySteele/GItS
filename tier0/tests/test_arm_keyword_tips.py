@@ -671,16 +671,18 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # ALL if it says so" paid for both facts.
             "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
             "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. ",
-            # `EB-579` NAMED THE RULE INSTEAD OF THE LIST. "your Weak and
-            # Strength do not" reads as a complete enumeration, and the r21
-            # lane-2 seat had to TEST Shrink ("your Attacks deal 30% less") to
-            # learn it does not bite a carry-out either. The class is what a
-            # reader needs and it is one character shorter than the list was.
-            "Enemy [gold]Vulnerable[/gold] counts; no damage term of ",
+            # `EB-599` REVERSED WHICH SIDE THE CLAUSE NAMES. The Plan line
+            # folds HER Strength at writing time and nothing of the target's,
+            # because a Plan resolves next morning against whatever the body
+            # wears then -- and the r22 lane-2 seat paid for a "Plan: Deal 10"
+            # that arrived as 7 once that Vulnerable had expired. The clause
+            # says WHEN each side is read, which is what the old two-item
+            # enumeration could not carry.
+            "Your [gold]Strength[/gold] folds in as you write it; the ",
+            "enemy's [gold]Vulnerable[/gold] counts at the morning. A ",
             # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
             # own words -- the same rule at the same call one kit over.
-            "yours does. A carry-out is not a hit: no ",
-            "when-hit power fires.",
+            "carry-out is not a hit: no when-hit power fires.",
             "heal N HP, never above the HP you entered ",
             # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
             # staged as slice two. Three words the SHIPPED kit does not have:
@@ -701,7 +703,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # left the Evoke outside the economy every other act on the stage
             # pays into. An Evoke is a performance that also costs the member,
             # so it pays the performance's 1 and takes the performance's cut.
-            "The member performs and leaves. Its [gold]Fanfare[/gold] bonus ",
+            # `EB-601` PUT THE TRIGGER FIRST: "a full stage Evokes the front
+            # member" beside "a Companion card you play performs Crabaletta"
+            # read as a Companion play into a full stage Evoking, and the
+            # misreading cost r16 lane 1 an elite turn.
+            "Only a [gold]Deploy[/gold] onto a full stage ",
+            "[gold]Evokes[/gold]. The member performs and leaves; its ",
             " [gold]Fanfare[/gold]. It spends ",
             " [gold]Encore[/gold], or Evokes at 3/4.",
             "Your [gold]Fanfare[/gold] falls to nothing. What the card does ",
@@ -1155,17 +1162,22 @@ def test_the_plan_tip_matches_the_two_aims_the_resolution_has():
     assert "never a Minion" not in body
 
 
-def test_the_plan_tip_names_strength_among_the_modifiers_that_do_not_reach():
-    """The carry-out is an UNPOWERED `ElementalHit` -- no Strength, no Weak,
-    no attack buff of hers -- while the TARGET's Vulnerable multiplies. The
-    clause named two of the three, which reads as a complete list, and the seat
-    priced `Kurage's Oath+` face 4 under Vajra at Plan 10 expecting Strength to
-    ride it (run 2, act 1, (c) 5)."""
+def test_the_plan_tip_says_when_each_side_of_the_line_is_read():
+    """`EB-599`, and it is what `EB-380`'s clause became.
+
+    The carry-out is still an UNPOWERED `ElementalHit` at the morning, so
+    nothing of hers is read THERE -- and since the r22 default her Strength is
+    folded into the number when the Plan is WRITTEN, which is the moment the
+    player commits the turn. The target's Vulnerable is the other way round:
+    it is read at the morning, against whatever the body wears then, which is
+    why the line cannot preview it. The seat paid for a "Plan: Deal 10" that
+    arrived as 7 once that Vulnerable had expired (r22 lane 2)."""
     plan = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
             / "KokomiPlan.cs").read_text(encoding="utf-8")
     assert "UNPOWERED -- no Strength, no Weak" in plan
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert "Enemy Vulnerable counts; no damage term of yours does." in body
+    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+            "counts at the morning.") in body
 
 
 def test_the_plan_tip_names_the_class_a_carry_out_is_in():
@@ -1196,10 +1208,16 @@ def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
     it does not bite a carry-out either. Naming the CLASS -- "no damage term
     of yours does" -- covers every debuff and buff on that side of the board
     and costs one character less than the two-item list did.
+
+    `EB-599` PUT 31 CHARACTERS BACK, and they buy a rule the class name could
+    not state. The rule itself moved: the Plan line folds HER Strength at
+    writing time and nothing of the target's, so a clause about WHICH terms
+    count had to become a clause about WHEN each side is read. A seat that
+    commits a turn on a number needs to know which half of it can still move.
     """
     from tools import lint_text_conventions as lint
 
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert len(body) == 185
+    assert len(body) == 216
     assert "PlanKey" in lint.EXCEPTIONS
     assert "EB-538" in lint.EXCEPTIONS["PlanKey"]

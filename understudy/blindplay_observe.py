@@ -488,7 +488,16 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # receipt lands here. `None` -- and so printed nowhere -- on every
         # reward screen of a build without the rule.
         obs["last_morning"] = last_morning(state)
-        obs["last_salon"] = last_salon(state)          # `EB-604`
+        # `EB-604`. THE SAME BEAT ONE ARM OVER, and the same screen. A
+        # deliberate Evoke onto a full stage that KILLS ends the fight, the
+        # game shows this screen next, and the combat block does not run for
+        # it -- so r16 lane 2's two Evokes, both taken on purpose and both
+        # lethal, printed nothing at all ("the bridge printed nothing about
+        # either"). `furina_salon` is already emitted outside the combat block
+        # and the ledger rolls at a TURN boundary a fight-end never crosses,
+        # so the acts are still on the wire. `None` -- and so printed nowhere
+        # -- on every reward screen of a build without the reframe.
+        obs["last_salon"] = last_salon(state)
     elif st in ("treasure", "relic_select"):
         obs["screen"] = st
         obs["items"] = [_named_option(r) for r in _relic_options(state)]

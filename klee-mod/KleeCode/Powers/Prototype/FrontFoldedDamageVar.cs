@@ -28,12 +28,23 @@ namespace KleeMod.Powers;
 /// <see cref="KokomiPlan.FrontEnemy"/> itself. That is the convention the
 /// packet took, and this is it on the other kind of face.
 ///
-/// ONLY WHERE THE GAME HANDED NOBODY. With a target the base var's own answer
-/// stands untouched, which keeps this incapable of folding a multiplier twice:
-/// the branch that adds one is the branch where nothing target-side could have
-/// been added. The front enemy is the same choice and the same call
-/// <c>PlanDamageVar</c> makes, so the two lines on Riptide's face now come out
-/// of one convention.
+/// `EB-598`: AND WITH A TARGET TOO, because the base var never folded the
+/// target's side either. This used to return early on a non-null target, on
+/// the reading that "the game's answer stands wherever the game had one to
+/// give"; the r22 lane-1 seat measured otherwise. <i>Undertow</i>'s face read
+/// "Deal 10 damage, already including 3 if the enemy has a debuff" -- so a
+/// target WAS handed in, its Vulnerable satisfied the debuff rider, and the
+/// extra 3 was folded -- and the card then delivered 15. The Vulnerable that
+/// bought the rider was not in the number the rider was added to. So the fold
+/// is about the BODY, whichever way the preview learned of it: the aimed
+/// creature when the game names one, the front enemy when it does not.
+///
+/// STILL INCAPABLE OF FOLDING TWICE, and by the same argument as before,
+/// checked rather than assumed: <c>CalculatedVar.UpdateCardPreview</c> runs
+/// the DEALER's hooks (her Strength, her Weak, the Spotlight, this row's own
+/// multiplier), which is why the face folds four modifiers and was silent
+/// about the fifth (`EB-589`'s finding, one surface over). The target's terms
+/// are added here, once.
 ///
 /// <see cref="SimDamagePipeline.TargetMods"/> AND NOT A SECOND EXPRESSION,
 /// `EB-265`'s rule: it is the call <c>ElementalHit.Deal</c> makes on the same
@@ -54,7 +65,8 @@ namespace KleeMod.Powers;
 /// harness cannot build (KleeTests/README.md, "The headless boundary"), so the
 /// number itself is owed a live read. What IS pinned is the wiring: which type
 /// the generator emits, that it is the game's own var underneath, that the
-/// fold is the shared call, and that it is reached only with a null target.
+/// fold is the shared call, and that the body it folds is the aimed one where
+/// there is one and the front enemy where there is not.
 /// </summary>
 public sealed class FrontFoldedDamageVar : CalculatedDamageVar
 {
@@ -76,14 +88,17 @@ public sealed class FrontFoldedDamageVar : CalculatedDamageVar
         bool runGlobalHooks)
     {
         base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
-        // THE GAME'S ANSWER STANDS wherever the game had one to give: an aimed
-        // drag, and every read off a card that is not in play at all.
-        if (!runGlobalHooks || target != null) return;
+        // OFF A CARD THAT IS NOT IN PLAY the game runs no hooks at all, and
+        // neither does this: a compendium or deck-view read prints its base.
+        if (!runGlobalHooks) return;
         // A canonical (compendium) copy has no owner and the getter ASSERTS
         // rather than returning null -- `PlanDamageVar`'s guard, verbatim.
         if (!card.IsMutable) return;
-        var front = KokomiPlan.FrontEnemy(card.Owner?.Creature);
-        if (front == null) return;
-        PreviewValue = (int)SimDamagePipeline.TargetMods(front, PreviewValue);
+        // `EB-598`: THE AIMED BODY WHERE THE GAME NAMED ONE, the front enemy
+        // where it did not. Both are the same question -- which creature is
+        // this number about -- and the base var answers neither.
+        var body = target ?? KokomiPlan.FrontEnemy(card.Owner?.Creature);
+        if (body == null) return;
+        PreviewValue = (int)SimDamagePipeline.TargetMods(body, PreviewValue);
     }
 }

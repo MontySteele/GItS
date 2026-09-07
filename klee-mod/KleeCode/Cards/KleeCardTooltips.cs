@@ -284,7 +284,16 @@ public static class KleeCardTooltips
         var printed = PrintedDamage(card);
         if (printed <= 0) return null;
 
-        var landed = SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
+        // `EB-602`: THE TARGET'S TERMS ONLY WHERE THE FACE HAS NOT ALREADY
+        // FOLDED THEM. `FrontFoldedDamageVar` (the arm's proto rows) writes
+        // them into `PreviewValue` itself, and `PrintedDamage` now reads that
+        // number, so asking `ResolveOnTarget` for them again would multiply a
+        // Vulnerable twice. Asked by TYPE NAME rather than by type, because
+        // the class lives under `Cards/Prototype/` and a release build
+        // Compile-Removes it -- there it simply never matches.
+        var landed = TargetAlreadyFolded(card)
+            ? Capped(enemy, (int)(printed * mult))
+            : SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
         return $"The triggering hit deals {mult:0.##}x damage and consumes "
              + $"the aura. Into that {aura} aura this card's {printed} lands "
              + $"{landed}.";
@@ -297,8 +306,21 @@ public static class KleeCardTooltips
     /// TWO NAMES AND NOT A TYPE TEST: a generated Attack carries
     /// <c>CalculatedDamage</c> (base, extra and the Spotlight multiplier
     /// composed) and a hand-written one carries <c>Damage</c>, and
-    /// <c>TryGetValue</c> is the game's own way of asking which. The value is
-    /// <c>IntValue</c>, which is the figure the face renders.
+    /// <c>TryGetValue</c> is the game's own way of asking which.
+    ///
+    /// `EB-602`: <c>PreviewValue</c> AND NOT <c>IntValue</c>, and this is the
+    /// row. <c>IntValue</c> is the var's stored BASE -- MEASURED on the
+    /// shipped assembly: setting <c>PreviewValue</c> to 10 on a var built at
+    /// 7 leaves <c>IntValue</c> answering 7 -- while <c>PreviewValue</c> is
+    /// the number <c>{Var:diff()}</c> renders, which is what "the number this
+    /// card's face is printing" means. A lit Chevreuse showed the difference:
+    /// the face read 10 off a base of 7, this tip named Vaporize off the 7,
+    /// and 15 landed (Furina r16 lane 1 (c) 3). The Spotlight, her Weak and
+    /// Passion Overload all live in that gap, and the tip's own claim is that
+    /// it folds the same number the face does.
+    ///
+    /// THE BASE IS THE FALLBACK, for the read where no preview has run: a var
+    /// that has never been previewed answers 0, and 0 is not a face.
     /// </summary>
     private static int PrintedDamage(CardModel card)
     {
@@ -306,11 +328,44 @@ public static class KleeCardTooltips
         {
             if (card.DynamicVars.TryGetValue(name, out var dynamicVar))
             {
-                return dynamicVar.IntValue;
+                var preview = (int)dynamicVar.PreviewValue;
+                return preview > 0 ? preview : dynamicVar.IntValue;
             }
         }
 
         return 0;
+    }
+
+    /// <summary>
+    /// `EB-602`. Has this face already folded the target's own terms into the
+    /// number <see cref="PrintedDamage"/> just read?
+    ///
+    /// ONE TYPE DOES, and it is `EB-522`'s: <c>FrontFoldedDamageVar</c> writes
+    /// <see cref="SimDamagePipeline.TargetMods"/> into its own
+    /// <c>PreviewValue</c>, because a Kokomi face read off a blind page has no
+    /// drag target to be handed one. Every other var stops at the dealer's
+    /// hooks, which is why this tip exists at all.
+    ///
+    /// BY NAME AND NOT BY TYPE, which is a build fact rather than a
+    /// preference: that class sits under <c>Powers/Prototype/</c> and
+    /// <c>KleeCode.csproj</c> Compile-Removes the directory from a release
+    /// build, so a <c>typeof</c> here would not compile there. In a release
+    /// build no var can carry the name and the answer is false, which is also
+    /// the truth about that build.
+    /// </summary>
+    private static bool TargetAlreadyFolded(CardModel card) =>
+        card.DynamicVars.TryGetValue("CalculatedDamage", out var calculated)
+        && calculated.GetType().Name == "FrontFoldedDamageVar";
+
+    /// <summary>
+    /// `EB-602`. <see cref="SimDamagePipeline.ResolveOnTarget"/>'s last step
+    /// on its own -- the per-hit cap the target imposes -- for the one branch
+    /// whose number has already been through that method's other two.
+    /// </summary>
+    private static int Capped(Creature enemy, int landed)
+    {
+        var cap = SimDamagePipeline.TargetCap(enemy);
+        return landed > cap ? (int)cap : landed;
     }
 
     /// <summary>

@@ -292,11 +292,17 @@ public class Round21Tests
         // ONE CALL, TWO READERS -- `EB-265`'s rule, and the whole of why the
         // r21 find was legible as a defect at all: a face that folds and a
         // queue that does not is two numbers for one line.
-        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
+        //
+        // `EB-599` PUT HER STRENGTH ON THE SAME CALL, so the shared reader is
+        // now `Hers` and the enchantment fold is what it opens with. Both
+        // sites still reach `Enchanted`, through one method rather than two.
+        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Hers")),
                         c => c == "KokomiPlan.Enchanted");
+        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
+                        c => c == "KokomiPlan.Hers");
         Assert.Contains(
             Il.Calls(Il.Method("PlanDamageVar", "UpdateCardPreview")),
-            c => c == "KokomiPlan.Enchanted");
+            c => c == "KokomiPlan.Hers");
     }
 
     // ==================================================================

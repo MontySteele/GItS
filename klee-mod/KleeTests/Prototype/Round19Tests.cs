@@ -85,9 +85,15 @@ public class Round19Tests
         // enumeration, and the r21 lane-2 seat had to TEST Shrink to learn it
         // does not bite a carry-out either. The class covers every term on
         // that side of the board and costs less than the two-item list.
+        //
+        // `EB-599` PUT 31 CHARACTERS BACK, and they buy a rule a class name
+        // cannot state: the line folds HER Strength at writing time and
+        // nothing of the target's, so the clause is about WHEN each side is
+        // read. A seat committing a turn on a number needs to know which half
+        // of it can still move.
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(185, rendered.Length);
+        Assert.Equal(216, rendered.Length);
         Assert.EndsWith("A carry-out is not a hit: no when-hit power fires.",
                         rendered);
     }
@@ -518,8 +524,10 @@ public class Round19Tests
         // `EB-554` rewrote the ownership clause to point at the MARK the faces
         // carry, so the payment sentence moved with it -- the holes and the
         // absence of a typed digit are the pin, not the wording around them.
-        Assert.Contains("[blue][/blue] [gold]Spark[/gold] a play, up "
-                      + "to [blue][/blue].", hexerei);
+        // `EB-596` reordered the sentence (who is paid, how much, what the
+        // cap counts); the two holes are still the pin.
+        Assert.Contains("[blue][/blue] [gold]Spark[/gold], up to [blue][/blue] "
+                      + "a play; it never costs [gold]Spark[/gold].", hexerei);
         Assert.DoesNotContain("Cards of hers pay", hexerei);
         // The clause that answers the seat's OTHER question -- whether Razor is
         // one of Klee's own -- is what paid for the room, and it stays, now

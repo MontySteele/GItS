@@ -52,9 +52,10 @@ public class Round12Tests
     public void Rapid_Fires_face_hangs_the_set_off_on_the_enemy_it_rolled()
     {
         var face = Face<ProtoKoRapidFire>();
+        // `EB-612`: the count leads the clause it multiplies.
         Assert.Equal(
-            "[gold]Set off[/gold] a random enemy and deal {Damage:diff()} "
-          + "damage to it, 4 times.", face);
+            "4 times: [gold]Set off[/gold] a random enemy and deal "
+          + "{Damage:diff()} damage to it.", face);
         // The clause the seat priced two turns off is gone: nothing on the
         // face promises a Set off that reaches a body the roll did not pick.
         Assert.DoesNotContain("each enemy hit", face);
@@ -65,8 +66,8 @@ public class Round12Tests
     {
         var face = Face<ProtoKoTinderToss>();
         Assert.Equal(
-            "[gold]Set off[/gold] a random enemy and deal {Damage:diff()} "
-          + "damage to it, twice.", face);
+            "Twice: [gold]Set off[/gold] a random enemy and deal "
+          + "{Damage:diff()} damage to it.", face);
     }
 
     [Fact]
@@ -76,12 +77,14 @@ public class Round12Tests
         // picks the target, then sets that target off, then deals the hit --
         // so "a random enemy" has to be inside the Set off's own clause and
         // not a separate sentence after it, which is how the old faces let a
-        // reader believe the two halves aimed at different things.
+        // reader believe the two halves aimed at different things. `EB-612`
+        // put the repeat count in front of the clause, so the clause is
+        // pinned whole rather than at the start of the face.
         foreach (var face in new[] { Face<ProtoKoRapidFire>(),
                                      Face<ProtoKoTinderToss>() })
         {
-            Assert.StartsWith("[gold]Set off[/gold] a random enemy and deal ",
-                              face);
+            Assert.Contains("[gold]Set off[/gold] a random enemy and deal ",
+                            face);
         }
     }
 
@@ -228,7 +231,8 @@ public class Round12Tests
         // seat "could not tell from any card face whether MY Companion
         // qualified" and found out by counting Bombs on an enemy badge. Every
         // member prints the word now, so the definition can point at it.
-        Assert.Contains("card that prints the word", HexereiTip());
+        // `EB-596` reworded it to "whose face prints the word".
+        Assert.Contains("card whose face prints the word", HexereiTip());
         Assert.DoesNotContain("witches' circle", HexereiTip());
     }
 

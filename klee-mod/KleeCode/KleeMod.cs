@@ -591,6 +591,42 @@ public static class KleeMod
                         "When hit by an attack, deal [blue]{Amount}[/blue] "
                       + "damage back. Every card hit is one, a Skill's too; a "
                       + "potion's is not.",
+
+                    // `EB-597`, AND IT IS THE SAME FINDING A FOURTH TIME.
+                    //
+                    // Kokomi r22 lane 1, fight 2: "Shrink's own text says
+                    // `your Attacks deal 30% less damage`, but Kurage's Oath
+                    // is printed `cost 1, skill` and it still fell 3 to 2.
+                    // Weak's glossary on the same screen goes out of its way
+                    // to say 'a Skill's damage too'; Shrink's does not, and
+                    // Shrink hits Skills anyway. That is a contradiction
+                    // between a debuff's text and its behaviour."
+                    //
+                    // THE ENGINE IS RIGHT AND ONLY THE WORDS ARE WRONG, which
+                    // is `EB-469`'s, `EB-481`'s and `EB-521`'s sentence again.
+                    // MEASURED on the shipped assembly rather than assumed:
+                    // `ShrinkPower.ModifyDamageMultiplicative` gates on
+                    // `ValuePropExtensions.IsPoweredAttack` and on nothing
+                    // else -- the identical gate `WeakPower` uses, which the
+                    // arm's own Weak row already says "a Skill's damage too"
+                    // about. "Attacks" in the game's sentence means attack
+                    // HITS, and every damage clause the generator emits
+                    // carries `ValueProp.Move` whatever `type:` its sheet row
+                    // declares.
+                    //
+                    // THE APPLIER CLAUSE AND THE VARS ARE THE GAME'S OWN.
+                    // `ShrinkPower`'s canonical vars are `DamageDecrease` (30,
+                    // already a percentage) and `ApplierName`, so the two
+                    // holes below are the two the power fills; what changed is
+                    // the noun the sentence is about.
+                    ["SHRINK_POWER.description"] =
+                        "While its applier lives, the wearer deals "
+                      + "[blue]30%[/blue] less damage with every hit it "
+                      + "lands, a Skill's damage too.",
+                    ["SHRINK_POWER.smartDescription"] =
+                        "While {ApplierName} is alive, you deal "
+                      + "[blue]{DamageDecrease}%[/blue] less damage with "
+                      + "every hit you land, a Skill's damage too.",
                 });
 #endif
 
