@@ -58,6 +58,10 @@ in the record's last section.
 If you hit a screen the tool refuses to drive (`TOOL-BLOCKED: <state_type>`),
 say so in the record and stop; do not go looking for another way through.
 
+`TOOL-BLOCKED: lane dead (<reason>)` is the same stop and is final: the lane's
+game has been torn down under you (`EB-691`), so no retry can succeed — write
+the record and stop, with the reason in it.
+
 ### Your budget
 
 - **Actions:** stop at the cap the coordinator gives you (`--max-actions`,

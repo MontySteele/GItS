@@ -55,6 +55,7 @@ public class KokomiPoolPassTwoTests
         // than a silent approximation -- the contract every Kind is under.
         var names = System.Enum.GetNames(typeof(KokomiPlan.Kind));
         Assert.Contains("DrawPerPlanAfter", names);
+        Assert.Contains("DrawPerPlanThisTurn", names);
         Assert.Contains("NextPlanDoubleDamage", names);
         Assert.Contains("NextPlanExtraCarryOut", names);
     }
@@ -132,8 +133,11 @@ public class KokomiPoolPassTwoTests
         // could outlive one -- so a rider written by the last Plan of a
         // morning reaches nothing. Twin:
         // `test_riptide_then_gambit_doubles_nothing`.
+        // A TRIPLE SINCE `EB-718`, and the third slot is the same shape for
+        // the same reason: Scout Ahead's armed rate is noted by the entry and
+        // spent by the drain, so it too dies with the drain that armed it.
         var entry = typeof(KokomiPlan).GetMethod("ResolveEntry", All)!;
-        Assert.Equal("ValueTuple`2", entry.ReturnType.GetGenericArguments()
+        Assert.Equal("ValueTuple`3", entry.ReturnType.GetGenericArguments()
                      .Single().Name);
 
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
@@ -177,11 +181,12 @@ public class KokomiPoolPassTwoTests
     }
 
     // ======================================================================
-    // 3. SCOUT AHEAD -- the row whose value is its position
+    // 3. SCOUT AHEAD -- recounted at `EB-679` and put back on the positional
+    //    count at R267 pick 3: the carry-outs that FOLLOW it
     // ======================================================================
 
     [Fact]
-    public void Scout_ahead_draws_one_now_and_per_carry_out_after()
+    public void Scout_ahead_draws_one_now_and_per_later_carry_out()
     {
         var card = new ProtoKkScoutAhead();
         Assert.Equal(1, card.EnergyCost.Canonical);
@@ -204,18 +209,29 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void The_count_is_the_drains_and_is_read_per_entry()
+    public void The_count_is_the_drains_and_is_paid_per_later_carry_out()
     {
-        // STRUCTURAL. `Drain` computes `after` inside the loop off
-        // `CarryOutTimes`, which is what makes it CARRY-OUTS and not entries
-        // (`EB-501`'s reading pointed forwards) and what makes a Scout Ahead
-        // written first and one written last answer honestly. Twins:
-        // `test_scout_ahead_counts_the_carry_outs_after_it`,
-        // `test_scout_ahead_first_of_three_under_nereids_reads_four`.
+        // STRUCTURAL, `EB-718`. `Drain` ARMS a counter when a Scout Ahead
+        // resolves and pays it at every carry-out that follows, inside that
+        // drain -- which is what makes the count CARRY-OUTS rather than the
+        // entries still queued, and what keeps a Scout Ahead written first and
+        // one written last answering differently. `EB-679`'s whole-drain term
+        // is still computed once above the loop for the kind no row spells.
+        // Twins: `test_scout_ahead_counts_the_plans_that_follow_it`,
+        // `test_scout_ahead_pays_second_waves_doubled_carry_out_twice`.
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
-        Assert.Contains(resolve.GetParameters(), p => p.Name == "after");
+        Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "after");
+        Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
+        var entry = typeof(KokomiPlan).GetMethod("ResolveEntry", All)!;
+        Assert.Contains(entry.GetParameters(), p => p.Name == "scoutDraw");
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
         Assert.Contains("KokomiPlan.CarryOutTimes", Il.Calls(drain));
+        var source = Source("KokomiPlan", power: true);
+        Assert.Contains("var scoutRate = 0;", source);
+        Assert.Contains("scoutRate += armed;", source);
+        // AND NOT A POSITION. Seen to FAIL against the entries-based term the
+        // 2026-09-08 review reproduced.
+        Assert.DoesNotContain("var after = due.Count - index - 1;", source);
     }
 
     // ======================================================================
@@ -285,17 +301,21 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void Converging_tide_aims_at_an_enemy_and_re_points_the_queue()
+    public void Converging_tide_is_off_the_sheet_and_out_of_the_pool()
     {
-        var card = new ProtoKkConvergingTide();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-        // AIMED, because it dereferences the played target: "this enemy" is
-        // the body the play was aimed at and never a second definition of the
-        // front.
-        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.Contains("KokomiPlan.Redirect",
-                        Il.Calls(Il.Method("ProtoKkConvergingTide", "OnPlay")));
+        // `EB-655` (pool pass three): the row re-aimed a queued Plan, and the
+        // pass makes the queue shallower on purpose -- with the cap retired
+        // and Nereid's paying the FIRST Plan, "which body does the morning
+        // land on" stopped being a question worth a card. The class is GONE
+        // with the regen and the resolver STAYS, `EB-649`'s shape exactly.
+        // Twin: `test_converging_tide_is_off_the_sheet_and_out_of_the_pool`.
+        Assert.Null(typeof(ProtoKkSecondWave).Assembly.GetType(
+            "KleeMod.Cards.Prototype.Generated.ProtoKkConvergingTide"));
+        Assert.DoesNotContain(
+            "ProtoKkConvergingTide",
+            string.Join("|", Il.CallSequence(
+                Il.Method("KokomiOverhaulRoster", "Slice"))));
+        Assert.NotNull(typeof(KokomiPlan).GetMethod("Redirect", All));
     }
 
     [Fact]
@@ -323,18 +343,27 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void Breakwater_writes_a_dusk_plan_of_five_block()
+    public void Breakwater_writes_a_dusk_wall_that_reads_the_queue()
     {
         var card = new ProtoKkBreakwater();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardRarity.Common, card.Rarity);
 
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.Block, clause.Kind);
-        // `EB-646` (round 23): 7 until the Dusk trial read the face-up half
-        // dead. Timing is the value, so the Dusk line is priced to the face
-        // -- 4 now, 5 at dusk, and the smith moves each by 1.
-        Assert.Equal(5, clause.Amount);
+        // `EB-679` (pool pass four) made the flat 6 a base AND A RATE: the
+        // wall behind the engine. `EB-685` (pool pass five) fixed its PHASE --
+        // the count is the queue AT DUSK and not the morning already drained,
+        // which a Plan written today can never be part of. The clause pins are
+        // in `KokomiPoolPassFiveTests`; what belongs here is the two-clause
+        // shape pool pass two's Dusk flag carries.
+        Assert.Equal(2, card.PlanClauses.Count);
+        Assert.Equal(KokomiPlan.Kind.Block, card.PlanClauses[0].Kind);
+        Assert.Equal(5, card.PlanClauses[0].Amount);
+        Assert.Equal(KokomiPlan.Kind.BlockPerPlanHeld,
+                     card.PlanClauses[1].Kind);
+        Assert.Equal(3, card.PlanClauses[1].Amount);
+        // THE UPGRADE MOVES THE BASE AND NOT THE RATE (5 -> 7).
+        Assert.Contains(Il.Calls(Il.Method("ProtoKkBreakwater", "OnUpgrade")),
+                        c => c.Contains("UpgradeValueBy"));
         // THE FLAG RIDES THE WRITE, because Dusk is a fact about WHEN this
         // card's line lands and the entry is the only thing that survives the
         // play.
@@ -343,19 +372,18 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void Night_watch_writes_block_and_a_weak_at_dusk()
+    public void The_multi_body_weak_is_slack_waters_morning_plan_half()
     {
-        var card = new ProtoKkNightWatch();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        var clauses = card.PlanClauses;
-        Assert.Equal(2, clauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Block, clauses[0].Kind);
-        // `EB-646`: 5 until round 23. 3 now, 3 and a Weak at dusk -- the Weak
-        // is what the Dusk line is bought for.
-        Assert.Equal(3, clauses[0].Amount);
-        Assert.Equal(KokomiPlan.Kind.ApplyWeak, clauses[1].Kind);
-        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clauses[1].Aim);
-        Assert.Contains("dusk: true", Source("ProtoKkNightWatch"));
+        // R267 PICK 1. Pass five moved this line to Dusk on the way past;
+        // pick 1 put it back in the MORNING, because the brief names the
+        // next-morning Weak as the kit's turn-one decision and a starter card
+        // is [USER]'s. The clause is unchanged -- what moved is when it lands
+        // -- so the row passes NO dusk argument to `Schedule`.
+        var card = new ProtoKkSlackWater();
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal(KokomiPlan.Kind.ApplyWeak, clause.Kind);
+        Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
+        Assert.DoesNotContain("dusk:", Source("ProtoKkSlackWater"));
     }
 
     [Fact]
@@ -471,16 +499,17 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void All_seven_rows_are_offerable_and_none_is_in_the_starter()
+    public void All_five_surviving_rows_are_offerable_and_none_is_in_the_starter()
     {
+        // FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch is retired,
+        // its Dusk Weak having moved onto Slack Water.
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
         foreach (var row in new[]
                  {
                      "ProtoKkOpeningGambit", "ProtoKkSecondWave",
                      "ProtoKkScoutAhead", "ProtoKkSecondThoughts",
-                     "ProtoKkConvergingTide",
-                     "ProtoKkBreakwater", "ProtoKkNightWatch",
+                     "ProtoKkBreakwater",
                  })
         {
             Assert.Contains(slice, c => c.Contains(row));
@@ -514,6 +543,8 @@ public class KokomiPoolPassTwoTests
             "The next [gold]Plan[/gold] carried out with this one deals "
           + "double damage.",
             Face(new ProtoKkOpeningGambit()));
+        // R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a
+        // window on the drain again, and "later" is the position rule printed.
         Assert.EndsWith(
             "Draw 1 card for each later [gold]Plan[/gold] carried out with "
           + "this one.",
@@ -549,10 +580,16 @@ public class KokomiPoolPassTwoTests
         // with nothing printing the rule. It goes on the badge because the
         // `Plan` keyword tip is at its 135-character ceiling. Page twin:
         // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
+        //
+        // `EB-680` TRIMMED THE WORDS AND NOT THE RULE: the Dusk clause was
+        // bought inside the 125-character power ceiling by cutting "on you"
+        // and "the numbers" out of this sentence and "at the start of" out of
+        // the one above it. Both rules still print, on one badge, and the cap
+        // face came back under the ceiling on the same trim.
         var face = new PendingPlansPower().Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.EndsWith(
-            "Later debuffs on you do not change the numbers you wrote.", face);
+        Assert.EndsWith("Later debuffs do not change what you wrote.", face);
+        Assert.Contains("a [gold]Dusk[/gold] Plan at this turn's end", face);
     }
 
     [Fact]

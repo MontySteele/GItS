@@ -82,7 +82,7 @@ public class KleeOverhaulRoundFourTests
         // clause is here and its plural is fixed.
         Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
                         + "Pyro damage, in [blue]{Count}[/blue] "
-                        + "hits for [blue]{Count}[/blue] [gold]Sparks[/gold].",
+                        + "hits, making [blue]{Count}[/blue] [gold]Sparks[/gold].",
                         face);
         // `EB-289`: read off the CHARGE LIST, not `{Amount}` -- see the test
         // below and `ProtoBombPower.Bombs` for why the stack amount could not

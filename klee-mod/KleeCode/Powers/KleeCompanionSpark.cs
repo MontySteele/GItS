@@ -79,8 +79,15 @@ public static class KleeCompanionSpark
     /// the sim asks it in the same three steps
     /// (<c>effects.klee_companion_spark</c>).
     ///
-    /// A COMPANION, because the tip says "a [gold]Companion[/gold] card whose
-    /// face prints the word" and the declaration is over Companion plays.
+    /// A COMPANION ONLY OFF THE ARM (`EB-663`, r24 lane 1). The old test was
+    /// COMPANION *and* Hexerei, so a Klee card carrying the mark -- Alice's
+    /// Introduction Magic itself, or any card her this-turn window marks --
+    /// printed the keyword, fired the family's readers (Coven Errand, Witches'
+    /// Circle) and paid nothing. One word cannot mean two sets on one screen,
+    /// so under the arm the test is exactly
+    /// <c>CompanionHexerei.IsHexerei</c>. Off the arm the Companion gate
+    /// stays, because that is the world LAW:145's clause was countersigned
+    /// over. The character gate below is untouched either way.
     ///
     /// PLAYED BY KLEE (`EB-434`). The old spelling asked the CARD's pool
     /// against its owner and named no character, so Kokomi playing Gorou banked
@@ -98,7 +105,7 @@ public static class KleeCompanionSpark
     /// </summary>
     public static bool PaysKleesSpark(CardModel? card)
     {
-        if (card is not ICompanionCard comp) return false;
+        if (card == null) return false;
         var owner = card.Owner;
         if (owner == null) return false;
         if (CompanionPool.CharacterId(owner) != "klee") return false;
@@ -106,7 +113,7 @@ public static class KleeCompanionSpark
         if (KleeOverhaul.Enabled)
             return CompanionHexerei.IsHexerei(card);
 #endif
-        return comp.PersonalPool == "klee";
+        return card is ICompanionCard comp && comp.PersonalPool == "klee";
     }
 
     /// <summary>

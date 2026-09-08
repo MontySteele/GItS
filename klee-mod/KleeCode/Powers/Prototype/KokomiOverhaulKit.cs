@@ -40,6 +40,25 @@ public static class KokomiOverhaulKit
     }
 
     /// <summary>
+    /// Battle Plan's carry-out (`EB-655`, `EB-668`): "the next Attack you play
+    /// face-up this turn deals 4 additional damage."
+    ///
+    /// ONE STACK, ALWAYS, on <see cref="NextCompanionDiscount"/>'s terms and
+    /// for its reason: the face says "deals 4 additional damage" and not "per Plan",
+    /// so a morning that carries out two Battle Plans buffs one Attack.
+    /// <see cref="NextAttackDamagePower"/> removes itself on the face-up
+    /// Attack that spends it, and at the end of the turn either way.
+    /// </summary>
+    public static async Task NextAttackDamage(
+        PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? cardSource)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Powers.OfType<NextAttackDamagePower>().Any()) return;
+        await PowerCmd.Apply<NextAttackDamagePower>(
+            choiceContext, kokomi, 1, applier: kokomi, cardSource: cardSource);
+    }
+
+    /// <summary>
     /// Cleansing Wave: "Remove a debuff from yourself."
     ///
     /// A READING, recorded because the card says "a debuff" and not "the worst

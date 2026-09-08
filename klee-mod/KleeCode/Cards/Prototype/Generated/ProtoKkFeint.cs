@@ -51,7 +51,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feint"),
-        ("description", "Deal {Damage:diff()} damage. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -66,7 +66,8 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move),
+            new FoldedDamageVar("PlainDamage", 5m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(10m)
         };
 
@@ -84,17 +85,34 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .Execute(choiceContext);
+        if (KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn)
+        {
+            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+            await DamageCmd.Attack((IsUpgraded ? 13m : 10m))
+                .FromCard(this, cardPlay)
+                .Targeting(cardPlay.Target)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .Execute(choiceContext);
+        }
+        else
+        {
+            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+            await DamageCmd.Attack((IsUpgraded ? 7m : 5m))
+                .FromCard(this, cardPlay)
+                .Targeting(cardPlay.Target)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
+        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
+        // and swaps via {IfUpgraded:show:...|...} where it does not.
+        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
+        DynamicVars["PlainDamage"].UpgradeValueBy(2m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
         DynamicVars["PlanDamage"].UpgradeValueBy(3m);
     }
 }

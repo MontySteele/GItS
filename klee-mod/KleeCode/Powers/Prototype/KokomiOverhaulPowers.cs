@@ -276,6 +276,95 @@ public sealed class NextCompanionDiscountPower : PowerModel, ILocalizationProvid
 }
 
 /// <summary>
+/// BATTLE PLAN's carry-out (`EB-655`, reworked by `EB-668`): "the next Attack
+/// you play face-up this turn deals 4 additional damage."
+///
+/// WRITTEN BY A PLAN AND NOT BY A PLAY, which is the difference from
+/// <see cref="NextCompanionDiscountPower"/> beside it: the rider lands at the
+/// morning the draw lands on, so the row's reward and its cards arrive
+/// together. It replaced a `Gain 1 Energy` clause that paid the write back its
+/// own cost -- the shape pool pass three exists to undo -- and is NARROWER on
+/// purpose: an ATTACK, one of them, and one played FACE-UP.
+///
+/// WHY IT IS DAMAGE AND NOT A DISCOUNT (`EB-668`). It was a discount, and a
+/// discount is read at the cost seam: <c>TryModifyEnergyCostInCombat</c> is
+/// handed a card and no <c>CardPlay</c>, so it could not ask
+/// <see cref="KokomiPlan.PlayedOnPet"/> and an Attack DRAGGED ONTO THE
+/// JELLYFISH was charged the discounted price here while the sim charged full.
+/// Damage is applied at RESOLUTION, where the play is known on both sides --
+/// so the face-up clause is now enforced by the rule itself rather than half
+/// enforced and disclosed.
+///
+/// PER HIT, which is what <c>ModifyDamageAdditive</c> is: a two-hit Attack
+/// collects the rider twice, exactly as the shipped
+/// <see cref="NextAttackUpPower"/> does, and <c>effects.flat_attack_bonus</c>
+/// folds tier0's into the same per-hit base.
+///
+/// ONE STACK, ALWAYS: the face says "deals 4 additional damage", not "per Plan".
+///
+/// NO LATCH, and the reason is <see cref="NextAttackUpPower"/>'s: this rider
+/// is applied by a PLAN CARRY-OUT at the top of the morning, so the Attack
+/// that spends it can never be the play that made it. (The three riders in
+/// <c>CompanionOverhaulHooks</c> need one because Mika's rider is applied by
+/// an Attack.)
+/// </summary>
+public sealed class NextAttackDamagePower : PowerModel, ILocalizationProvider
+{
+    /// <summary>How much more the next face-up Attack deals, on each of its
+    /// hits. A rule's number and not a card's, on
+    /// <see cref="NextCompanionDiscountPower"/>'s terms -- mirrored BY VALUE
+    /// from <c>C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS</c>.</summary>
+    public const int Bonus = 4;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Battle Plan"),
+        ("description",
+            "The next Attack you play face-up this turn deals "
+          + "[blue]" + Bonus + "[/blue] additional damage."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (dealer != Owner || target == Owner) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;
+        if (cardSource is not { Type: CardType.Attack }) return 0m;
+        // A WRITE NEVER REACHES HERE -- a card played on the Bake-Kurage
+        // resolves none of its now-line, so it deals no damage to ask about --
+        // and the clause is asked for real in AfterCardPlayed below, which is
+        // handed the CardPlay this hook is not.
+        return Bonus;
+    }
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (cardPlay.Card.Type != CardType.Attack) return;
+        if (cardPlay.Card.Owner?.Creature != Owner) return;
+        // THE FACE-UP CLAUSE. A card dragged onto the Bake-Kurage is a WRITE:
+        // none of its now-line resolves, so it is not "an Attack you played"
+        // in the sense the face means, and the rider waits for one that is.
+        if (KokomiPlan.PlayedOnPet(cardPlay)) return;
+        if (!cardPlay.IsLastInSeries) return;
+        await PowerCmd.Remove(this);
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
 /// SHELL GUARD's window (`EB-335`, R246 pick 2): "Until your next turn,
 /// whenever the Tamakushi Casket strikes, gain 3 Block."
 ///
@@ -348,8 +437,8 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
 
 
 /// <summary>
-/// NEREID'S ASCENSION (Rare Power, 2): "The Bake-Kurage carries out every Plan
-/// twice." `EB-492`.
+/// NEREID'S ASCENSION (Rare Power, 2): "The Bake-Kurage carries out your
+/// first Plan twice." `EB-492`, narrowed by `EB-655`.
 ///
 /// A POWER, AND THAT IS THE WHOLE REDESIGN. The row it replaces was a Plan --
 /// "Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice"
@@ -364,8 +453,8 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
 /// <c>KokomiPlan.CarryOutTimes</c> asks for it at the one moment the question
 /// can be asked -- inside the drain loop, before each entry -- and a hook would
 /// have to reconstruct which Plans were still owed. The stack is a marker, so a
-/// second copy doubles nothing further; "every Plan twice" is what the face
-/// says, and twice is twice.
+/// second copy doubles nothing further; "your first Plan twice" is what the
+/// face says, and twice is twice.
 ///
 /// THE BRIEF'S RULE 3 IS THE ONE THIS BREAKS. "Every Plan is carried out once,
 /// in order" is the arm's law and this Rare is the card the brief allows to
@@ -379,7 +468,7 @@ public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
         ("title", "Nereid's Ascension"),
         ("description",
             "At the start of your turn, the [gold]Bake-Kurage[/gold] "
-          + "carries out every [gold]Plan[/gold] twice."),
+          + "carries out your first [gold]Plan[/gold] twice."),
     };
 
     public override PowerType Type => PowerType.Buff;

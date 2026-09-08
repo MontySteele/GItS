@@ -69,6 +69,9 @@ internal static class ReactionEffects
     public static void MarkTurnStart()
     {
         _turnStartTotal = TotalResolved;
+        // `EB-681`: the seat's reaction log keeps the same window every other
+        // per-turn reaction fact keeps, and is cleared by the same call.
+        ReactionLog.MarkTurnStart();
         // Fully cleared rather than purged: every key is written and read
         // inside a single player turn, so there is nothing to carry over and
         // no way for this map to grow across a run.
@@ -115,6 +118,7 @@ internal static class ReactionEffects
     public static void MarkExtraTurnStart(Creature? extraTurnCreature)
     {
         _turnStartTotal = TotalResolved;
+        ReactionLog.MarkTurnStart();
         if (extraTurnCreature != null)
         {
             DealerReactionsThisTurn.Remove(extraTurnCreature);
@@ -343,6 +347,14 @@ internal static class ReactionEffects
         {
             TotalResolved++;
             RecordResolved(target.CombatState, dealer);
+
+            // `EB-681`. AND ON THE LOG A BLIND SEAT READS, by name. This is
+            // the single site a reaction resolves in the mod -- the sentence
+            // three paragraphs down says so for the Burst credit -- so a row
+            // written here cannot miss a beat or double one, which is the
+            // row's acceptance. Shipped rather than quarantined: every arm
+            // reacts. See `ReactionLog`.
+            ReactionLog.Note(reaction, target, dealer, cardSource);
 
             // Courtroom Drama (R85): the FIRST reaction of the turn puts its
             // target on the stand. Counted PER DEALER -- the sim's

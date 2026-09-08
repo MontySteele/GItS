@@ -313,7 +313,9 @@ public class Round18Tests
         foreach (var key in new[] { "smartDescription", "smartDescriptionMines" })
         {
             var face = rows.First(r => r.Item1 == key).Item2;
-            Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits for "
+            // `EB-666` (r24): "for N Sparks" read as a PRICE, so the clause
+            // says "making" and the direction is printed rather than inferred.
+            Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits, making "
                             + "[blue]{Count}[/blue] [gold]Sparks[/gold].",
                             face);
             // The queue stays where `EB-450` put it: the sizes are a different

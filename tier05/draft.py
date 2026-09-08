@@ -208,6 +208,13 @@ STATIC_PROTOTYPE_CONDITIONS = frozenset({
     # which is the defect this set exists to end, arriving a second time in the
     # same week on the same arm.
     "plan_carried_out_this_turn",
+    # "If the Bake-Kurage is holding a Plan" -- `state.kk_plan_queue`, a fact
+    # about the MOMENT the card resolves, and a reward screen has no queue.
+    # No row prints it today (the Defend that did was withdrawn 2026-09-08
+    # with pool pass seven), and it stays named here because the predicate
+    # stays in both engines: an unpriced branch is exactly what this set
+    # exists to refuse, and it should be refused before a row prints it.
+    "plan_held",
 })
 # Half: the MEAN of the two branches, which is what a share of 0.5 computes in
 # the blend below. The honest share for a predicate nobody has measured -- the
@@ -750,12 +757,19 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "damage_per_companion_last_turn",
     "play_copy_of_companion", "block_per_plan_this_morning",
     "draw_after_plans",
+    # POOL PASS FIVE (`EB-685`). Breakwater's count, with its own branch in
+    # `_op_price` on this set's EB-311 terms.
+    "block_per_plan_held",
     # POOL PASS TWO (`EB-643`, R265). Three now-lines that operate on the
     # QUEUE and three drain-positional plan clauses, each with its own branch
     # in `_op_price` on this set's own EB-311 terms.
     "cancel_last_plan", "cancel_all_plans_cash", "redirect_queued_plans",
-    "draw_per_plan_after", "next_plan_double_damage",
-    "next_plan_extra_carry_out"))
+    "draw_per_plan_after", "draw_per_plan_this_turn",
+    "next_plan_double_damage",
+    "next_plan_extra_carry_out",
+    # POOL PASS THREE (`EB-655`). Battle Plan's rider, a plan clause with its
+    # own branch in `_op_price` on the same terms.
+    "next_attack_damage"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -956,6 +970,14 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # the card's printed one. At face value from there, which is what
         # `block` is priced at inline.
         return _neutral_amount(fx, 0)
+    if op == "block_per_plan_held":
+        # Breakwater (`EB-685`, pool pass five). THE SAME PRICE AS THE LINE
+        # ABOVE, and the equality is the point: `EB-685` moved WHICH Plans the
+        # clause counts -- the queue at dusk rather than the morning just
+        # drained -- and not the refusal to guess how many there will be. ONE
+        # held Plan is the neutral single-unit estimate, since Plan density is
+        # still a deck fact an offer screen cannot read.
+        return _neutral_amount(fx, 0)
     if op == "draw_after_plans":
         # Tide Chart (`EB-478`, R257). ZERO, and it is `draw`'s zero rather
         # than a refusal of its own: every draw op in this file is priced at
@@ -966,15 +988,17 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # of a dead dial the only live one.
         return (int(fx.get("amount", 0)) + int(fx.get("per", 1))) \
             * STATIC_DRAW_VALUE
-    if op == "draw_per_plan_after":
-        # Scout Ahead (`EB-643`). ZERO, and it is `draw_after_plans`' zero one
-        # row up rather than a refusal of its own: every draw op in this file
-        # is priced at STATIC_DRAW_VALUE, which the v3 flat-proxy sweep
-        # measured at 0.0, so a row that draws one card per later carry-out is
-        # worth exactly what a row that draws one card is. ONE later carry-out
-        # is the neutral single-unit estimate this file already takes three
-        # times over -- how deep a morning a deck banks is a deck fact an
-        # offer screen cannot read.
+    if op in ("draw_per_plan_after", "draw_per_plan_this_turn"):
+        # Scout Ahead (`EB-643`, recounted at `EB-679`, back on the positional
+        # count at R267 pick 3 -- both spellings price the same). ZERO, and it is
+        # `draw_after_plans`' zero one row up rather than a refusal of its own:
+        # every draw op in this file is priced at STATIC_DRAW_VALUE, which the
+        # v3 flat-proxy sweep measured at 0.0, so a row that draws one card per
+        # carry-out is worth exactly what a row that draws one card is. ONE
+        # carry-out is the neutral single-unit estimate this file already takes
+        # three times over -- how deep a morning a deck banks is a deck fact an
+        # offer screen cannot read, and `EB-679` moved WHICH carry-outs are
+        # counted without moving that refusal.
         return _neutral_amount(fx, 0) * STATIC_DRAW_VALUE
     if op == "next_plan_double_damage":
         # Opening Gambit's rider (`EB-643`). ZERO, and it is a REFUSAL that
@@ -1056,6 +1080,15 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # that is the answer rather than a gap in it. Deviating here would
         # price one character's energy discount above every other card's.
         return C.KOKOMI_OVERHAUL_RALLY_DISCOUNT * STATIC_ENERGY_VALUE
+    if op == "next_attack_damage":
+        # `EB-668`, Battle Plan's rider. It is `buff_next_attack` wearing a kit
+        # name -- flat damage on the next Attack -- so it takes that op's rule
+        # and that op's dial, and NOT Rally's dead `cost_mod` zero: the clause
+        # stopped being a discount when the mod's cost seam proved unable to
+        # see a write. The `plan:` list it lives in already takes the delay
+        # discount.
+        return (C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS
+                * STATIC_NEXT_ATTACK_SHARE)
     if op == "remove_debuff":
         # Cleansing Wave: one debuff off HER. The mirror of putting one onto an
         # enemy, at the same rate -- `STATIC_DEBUFF_VALUE` is what this table
@@ -1115,7 +1148,20 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
                if fx.get("filter") == "status" else STATIC_EXHAUST_VALUE)
         n = fx.get("amount", 1)
         return (1.0 if n == "all" else _neutral_amount(fx)) * per
-    if op == "scry_discard":
+    if op in ("scry_discard", "scry_bottom"):
+        # `EB-655`. ONE PRICE FOR BOTH VERBS, and the equality is the claim:
+        # each moves exactly one card out of the next N draws however many are
+        # seen, and where it goes -- the discard pile or the bottom of the same
+        # pile -- is a difference this instrument cannot read.
+        return STATIC_SCRY_VALUE
+    if op == "scry_take":
+        # `EB-679` (Read the Field). THE SAME PRICE AGAIN, and the equality is
+        # the same claim read from the other end: the card that comes to hand
+        # is a DRAW, and every draw op in this file is priced at
+        # STATIC_DRAW_VALUE = 0.0, so what is left to pay for is the SELECTION
+        # over the next N -- which is what STATIC_SCRY_VALUE is. Whether the
+        # chosen card lands in the hand or the rest land on the bottom is a
+        # difference this instrument still cannot read.
         return STATIC_SCRY_VALUE
     if op == "recall_to_draw":
         # Source-agnostic on purpose (EB-118); the argument is at the
@@ -2400,10 +2446,16 @@ STATIC_OP_PRICING: dict[str, str] = {
                                    "neutral single-unit estimate, since Plan "
                                    "density is a deck fact an offer screen "
                                    "cannot read",
+    "block_per_plan_held": "its printed Block for ONE held Plan -- the same "
+                           "neutral single-unit estimate, since Plan density "
+                           "is a deck fact an offer screen cannot read",
     "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
                         "is priced on -- one card per Plan carried out, paid "
                         "a turn later, is still draw",
     "draw_per_plan_after": "ZERO: STATIC_DRAW_VALUE on ONE later carry-out -- "
+                           "the same dead dial `draw` is priced on, and the "
+                           "same neutral single-unit estimate",
+    "draw_per_plan_this_turn": "ZERO: STATIC_DRAW_VALUE on ONE carry-out -- "
                            "the same dead dial `draw` is priced on, and the "
                            "same neutral single-unit estimate",
     "next_plan_double_damage": "ZERO, and it is a refusal: what it doubles is "
@@ -2435,6 +2487,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "next_companion_discount": "ZERO: it is a `cost_mod` wearing a kit name, "
                                "so it takes cost_mod's rule and cost_mod's "
                                "measured dead dial (STATIC_ENERGY_VALUE)",
+    "next_attack_damage": "`buff_next_attack`'s price wearing a kit name: "
+                          "flat damage on the next Attack, at "
+                          "STATIC_NEXT_ATTACK_SHARE",
     "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
                      "of putting one onto an enemy, at the same rate",
     # --- the Furina reframe (QUARANTINED, furina_reframe.FURINA_REFRAME) ---
@@ -2499,6 +2554,12 @@ STATIC_OP_PRICING: dict[str, str] = {
     "exhaust_from": "STATIC_STATUS_EXHAUST_VALUE filtered, else "
                     "STATIC_EXHAUST_VALUE",
     "scry_discard": "STATIC_SCRY_VALUE; one card leaves however many are seen",
+    "scry_bottom": "STATIC_SCRY_VALUE, `scry_discard`'s price: one card "
+                   "leaves the next N draws however many are seen, and where "
+                   "it lands is a difference this instrument cannot read",
+    "scry_take": "STATIC_SCRY_VALUE, the scry family's price: the card taken "
+                 "to hand is a draw at the dead dial, so what is paid for is "
+                 "the selection over the N seen",
     "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled, "
                       "source-agnostic (EB-118: `from: exhaust` prices the "
                       "same, PROPOSED at the constant)",

@@ -1,0 +1,17 @@
+1. **REQUIRES_MODIFICATION — C6 (not strictly better):** Feint’s “6 damage; if a Plan was carried out this turn, deal 10 instead,” at Common, 1 Energy, matches [Strike’s printed 1 Energy, 6 damage](https://compendium.spire.moe/) without a carry-out and exceeds it by 4 damage on a carry-out turn, while retaining the optional 10-damage Plan without sacrificing the immediate 6.
+
+2. **FOLLOWS — C2 (binding prices), C6:** Read the Field’s “Gain 5 Block; look at the top 2…put one on the bottom” and Plan 10, for 1 Energy, compares with [Shrug It Off’s Common, 1 Energy, 8 Block and draw 1](https://slaythespire.wiki.gg/wiki/Shrug_It_Off): facing an attack this turn, its immediate half supplies 3 less Block and 1 fewer card in hand, while writing supplies 8 less Block before that attack.
+
+3. **FOLLOWS — C2, C6:** Riptide’s “9 damage to ALL…4 more…with a debuff,” costing 2, versus Whirlwind’s 10 to ALL at 2 Energy, loses 1 damage per clean enemy this turn and gains 3 per debuffed enemy; its Plan 13 instead sacrifices all 10 comparator damage this turn for 3 more next turn.
+
+4. **FOLLOWS — C2, C6:** Battle Plan’s 1-Energy “Draw 1” or “Draw 2 cards; the first Attack…costs 1 less” versus Skim’s Uncommon, 1-Energy draw 3 yields 2 fewer cards immediately when played face-up, or delays the draw a turn and delivers 1 fewer card with no Energy saving on an attackless morning, establishing a price beyond its own cost.
+
+5. **FOLLOWS — C2, C6:** Nereid’s Ascension’s Rare, 2-Energy “first Plan…twice” versus [Echo Form’s Rare, 3-Energy first played card twice](https://slaythespire.wiki.gg/wiki/Echo_Form) saves 1 setup Energy but, on a subsequent turn with no carry-out and an immediate Feint, adds 0 damage where Echo Form adds 6, making its restricted coverage concretely worse.
+
+6. **FOLLOWS — C2, C6:** Breakwater’s Common, 1-Energy “Dusk Plan: Gain 6 Block” and Night Watch’s Common, 1-Energy “Gain 4 Block and apply 1 Weak” versus Blur’s Uncommon, 1-Energy 5 Block kept give respectively 1 more and 1 less Block tonight, but on a nonattacking enemy’s setup turn followed by an attack next turn, both leave 0 of that Block versus Blur’s retained 5, with Night Watch’s single Weak turn spent before the attack.
+
+7. **FOLLOWS — C1:** Holding “Second Thoughts (0, Exhaust: cancel your last Plan…cost refunded)” does not remove a losing line merely by occupying an offer slot: with no queued Plan, an otherwise empty hand, and an incoming lethal attack, it produces 0 Block, 0 damage and no refund, so the losing board remains losing.
+
+8. **FOLLOWS — C1:** “Default off” makes the dormant toggle inert, and uncapped writing still preserves a losing board: with 3 Energy, 10 HP, three Read the Fields and an incoming 10-damage attack, writing all three buys 30 Block next morning but supplies 0 tonight and loses, whereas playing two immediate halves supplies 10 Block and survives.
+
+Arms 1–5 provide competing Energy uses on some safe turns: Feint can deliver its planned 10 immediately after a carry-out, and Riptide can deliver its planned 13 immediately against debuffed enemies. They do not establish competition on every safe turn, and Battle Plan’s “first Attack you play” does not exclude writing an Attack under the supplied engine, so its discount does not establish the claimed barrier to reinvestment.

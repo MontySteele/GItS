@@ -1,0 +1,94 @@
+# Doctrine read: Kokomi pool pass four, the round-26 dead faces, against the kit charters
+
+Each numbered arm below is ONE change. For each, in order, give FOLLOWS or
+REQUIRES_MODIFICATION and name the clause (C1 to C7) you ruled against, and
+quote the line and the arithmetic (energy, Block, damage, cards, turns) that
+breaches it, in one sentence. A verdict with no clause named is not a
+verdict. Read adversarially: the author is a different model family and the
+owner wants the row that should not reach a tester named. Do not soften.
+Name clauses, not remedies: a number, a face or a rewritten row you volunteer
+is DISCARDED.
+
+Why this read exists. Pool pass four (EB-679, 2026-09-08) rebuilt four rows
+that round 26's two seats read as not worth a slot. It was built and played
+(rounds 27 and 28) WITHOUT this read; the owner ruled on 2026-09-08 (R267)
+that it goes to the door now, after the fact. One of its four changes, Scout
+Ahead, has since been REVERSED by the same ruling, so arm 3 below is the
+reversed row as it stands today, not the pass's version. Night Watch (arm 1)
+was later retired by pass five, so arm 1 is read for the record only.
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards." A row
+  that removes a losing line the kit is meant to keep, instead of pricing
+  it, is out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. There
+  must be a real turn in which the card is worse than a plain card of its
+  cost. Repeatable energy or draw at Uncommon or below is priced by
+  something past the card's own cost.
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (play now or write; which order; which
+  half), not by a number that rises while you watch.
+- **C5 (Kokomi brief section 2 rule 4).** Nothing fires by itself; every
+  effect is a card the player played and paid for.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a pool row or a base-game card at the same or lower rarity and cost.
+  Reference points: Skim (Uncommon, 1: draw 3), Seeing Red, Blur (Uncommon,
+  1: 5 Block kept), Flame Barrier, Iron Wave, Shrug It Off, Pommel Strike,
+  Whirlwind, Bludgeon, Sword Boomerang, Echo Form (Rare, 3).
+- **C7 (Kokomi identity Law 4).** In her pool a Common never increases deck
+  size.
+
+## The engine (as it stands today, 2026-09-08)
+
+The Bake-Kurage sits on her side all combat. A card with a Plan line may be
+played ON it: cost paid now, the card to the discard, the Plan written to a
+queue. At the START of her next turn (after the enemy acts, after her draw)
+every queued Plan is carried out in the order written. A Dusk Plan is
+carried out at the END of this turn, before enemies act. No cap (R266).
+Riders: Opening Gambit (the next Plan carried out with it deals double),
+Second Wave (the next is carried out twice). Readers: Well Laid (2 damage
++3 per Plan carried out this turn), Sango Isshin (Rare: if a Plan was
+carried out this turn, a quarter of Max HP to ALL), Treatise (draw 1 once a
+turn on a carry-out), Song of Pearls (3 Block once a turn on a carry-out),
+Feint (Common, 1: 5 damage, 10 if a Plan was carried out this turn; Plan
+10). Nereid's Ascension (Rare Power, 2): the FIRST Plan carried out each
+turn is carried out twice. Change of Plans (Exhaust: carry out your first
+Plan now); Second Thoughts (cancel your last Plan, its card and cost
+return). Starter: four Strike, four Defend, Kurage's Oath (3 to ALL; Plan
+7 to ALL), Slack Water (4 and 1 Weak; Plan 1 Weak to ALL, morning). Energy
+3, HP 80.
+
+## The arms
+
+1. **Night Watch (rework; since retired by pass five)** -- Common Skill, 1.
+   Dusk Plan: Apply 1 Weak to ALL enemies. Upgrade 2 Weak. No face-up half:
+   it can only be written, and lands before enemies act this turn. Was:
+   Dusk Plan: gain 4 Block and apply 1 Weak. Compare Slack Water's written
+   half (1 Weak to ALL, the next morning, on a starter Attack with a
+   face-up half), and a base-game 1-cost multi-Weak.
+2. **Breakwater (rework)** -- Common Skill, 1. Dusk Plan: Gain 5 Block, plus
+   3 for each Plan carried out this turn. Upgrade base 7. No face-up half.
+   Was: Dusk Plan: gain 6 Block. After a three-Plan morning it blocks 14 for
+   1 Energy at end of turn; after an empty morning, 5. Compare Defend (5),
+   Shrug It Off (8 and draw), Blur; and read C3 against a number that scales
+   with a morning already written.
+3. **Scout Ahead (as it stands after R267: the position clause)** -- Common
+   Skill, 1. Draw 1 card. Plan: Draw 1 card for each LATER Plan carried out
+   with this one. Upgrade: cost 0. Written first of three it draws 2 the
+   next morning; written last it draws 0; alone it draws 0. The face-up half
+   is a 1-Energy cantrip. Compare Skim (Uncommon, 1: draw 3) and read C2
+   against a Common whose written half can draw 2 or more for 1 Energy
+   when the player orders the queue well, and C3 for whether the ordering
+   is the player's choice or a free bonus.
+4. **Read the Field (rework)** -- Common Skill, 1. Look at the top 3 cards
+   of your draw pile; put one into your hand and the rest on the bottom.
+   Plan: Gain 10 Block. Upgrade look at 4 / Plan 12. Was: 5 Block and look
+   at 2, bottom one; Plan 10. The face-up half is now a tutor-lite that
+   draws 1 chosen card of 3 for 1 Energy and no Block. Compare a 1-Energy
+   draw-1 Common, Skim, and read C7 (deck size is unchanged) and C6.
+
+Four verdicts, each with its clause and its breaching line, then two
+sentences: does any of arms 2 to 4 make a safe turn's Energy compete with
+writing, or does it pay the writer more for writing more. Under 600 words.

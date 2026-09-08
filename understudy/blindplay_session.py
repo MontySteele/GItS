@@ -825,6 +825,16 @@ def taken_line(res: dict[str, Any]) -> str:
     # egg was a sentence and the card itself turned up two fights later.
     # Appended rather than folded in, because the promise and the thing are
     # two different claims and only the second one is a card now owned.
+    # `EB-690`. THE `on` CLAUSE THAT WAS DROPPED, and why. A card that does
+    # its own aiming used to REFUSE the clause -- a good sentence that cost a
+    # Kokomi r28 seat a whole batched turn -- and the play now goes through
+    # with the clause ignored. The answer has to say so, or a seat learns
+    # nothing and keeps typing it.
+    ignored = _text(printed.get("ignored_target"))
+    if ignored:
+        line += (f' Its `on "{ignored}"` was ignored: this card '
+                 f'{_text(printed.get("aims_itself")) or "does its own aiming"}'
+                 f'.')
     for named in printed.get("names") or []:
         if not isinstance(named, dict) or not _text(named.get("name")):
             continue

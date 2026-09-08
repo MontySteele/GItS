@@ -2344,7 +2344,7 @@ round before [USER] does.
 ## the pool pass, rounds 13 to 16 (`EB-491`, 2026-09-05)
 
 Ten rows, and the readings that asked for each are in
-`review/active/klee-pool-pass-2026-09-05.md` §1. What follows is what the
+`review/records/klee-pool-pass-2026-09-05.md` §1. What follows is what the
 BUILD had to decide, per row and per new rule, and it is here rather than on
 the sheet for the reason the file's own header gives.
 
@@ -2356,7 +2356,7 @@ Retained Ka-pow! last turn to stop being automatic, and a rising hand cost
 refused by `blocked_reason` without `retain:`) answered both at once.
 
 **THE ESCALATION CAME OFF on the comparison pass of 2026-09-06**
-(`review/active/klee-pool-comparison-pass-2026-09-06.md` §1 and §3 item 1), on
+(`review/records/klee-pool-comparison-pass-2026-09-06.md` §1 and §3 item 1), on
 three seat readings that all landed on the same clause: "never a decision ...
 the Retain is a lie told by the card frame" (r17), passed "because Retain plus
 an escalating cost is a card that punishes the exact hand-holding the rest of
@@ -2624,7 +2624,7 @@ silence that rule exists to make impossible.
 ## before proto_fr_curtain_rises
 
 The Furina pool pass, one (`EB-493`); the packet is
-`review/active/furina-pool-pass-2026-09-05.md` and all four rows are FOLLOWS on
+`review/records/furina-pool-pass-2026-09-05.md` and all four rows are FOLLOWS on
 the doctrine read (`review/records/card-audit-2026-09-04.md` sec.5.5).
 
 WHAT THE ROUNDS SAID. Rounds 9 and 10 read the Salon as FURNITURE: one Deploy
@@ -2956,7 +2956,7 @@ with a note naming `EB-649` -- because the rule is the one a re-issue would
 want and deleting a resolver to re-derive it later is how a reading is lost.
 Its pins drive it directly, with no card in the path.
 
-### `proto_kk_converging_tide` -- re-aiming what is already written
+### `proto_kk_converging_tide` -- re-aiming what is already written (RETIRED, pool pass three, `EB-655`)
 
 "Every queued Plan aims at this enemy instead of the front." Three readings,
 and all three are stated in both engines:
@@ -3028,3 +3028,385 @@ child process, so an exported variable is what a lane already has, and not
 having to rebuild per arm is what the toggle exists for. It is deliberately NOT
 a `lint_constant_parity` row -- comparing the two defaults by value would pin 0
 against 0 and say nothing about the rule they share.
+
+## Kokomi pool pass three -- competing faces instead of a cap (`EB-655`, R266, 2026-09-07)
+
+THE FINDING THE PASS ANSWERS. Every two-line row in the arm printed the same
+trade: a small now-line, a bigger Plan. So "write it" was the right answer on
+nearly every safe turn, the queue only ever got deeper, and the rule the r23
+and r24 lanes ran into -- a cap on how many Plans a morning carries out -- was
+an attempt to fix the shape from the outside. [USER] retired the cap as a rule
+(R266, "Agreed, let's retire it"); the toggle stays dormant and no further cap
+lane is owed. What replaces it is nine changes that make the NOW-LINE worth
+something the written half cannot buy, so the choice lives on the face.
+
+THE NINE CHANGES.
+
+1. **Feint** -- "Deal 5 damage. If a Plan was carried out this turn, deal 10
+   damage instead." Plan 10; upgrade 7 / 13 / Plan 13. Sango Isshin's shape at
+   Common: the morning the jellyfish delivers is the morning Feint is worth
+   playing face-up, and the now-line then pays exactly what writing would have.
+   The two printed numbers upgrade by different amounts, which is why
+   `conditional_then_damage` exists (`tools/gen_klee_cards.py`,
+   `tier0/content/upgrades.py`).
+2. **Read the Field** -- "Gain 5 Block. Look at the top 2 cards of your draw
+   pile; put one on the bottom." Plan 10 Block; upgrade 7 / 12. The now-line
+   buys INFORMATION, which the bigger written number does not answer. The op is
+   new on both engines (`scry_bottom`): the mod shows the top two on the game's
+   own selection grid and moves the pick with `CardPileCmd.Add(...,
+   PileType.Draw, CardPilePosition.Bottom)`; the sim has no human and bottoms
+   the highest-cost card of the two, stated at `effects._op_scry_bottom` as the
+   stand-in for choice it is.
+3. **Riptide** -- "Deal 9 damage to ALL enemies, and 4 more to each enemy with
+   a debuff." Plan 13 to ALL; upgrade 12 / 6 more / Plan 17. Undertow's rider
+   widened to `all_enemies`, which cannot FOLD (one printed number would have
+   to stand for a board that takes several), so it prints its two numbers
+   separately and the loop adds the rider per body -- `bonus_vs_aura`'s shape
+   exactly. Against a board her own Weak and Vulnerable have touched the
+   now-line beats the written 13, so the kit's debuff layer decides which half
+   to play.
+4. **Battle Plan** -- the `energy` clause comes OFF. It paid the write back its
+   own cost, so writing was free and the now-line was a strictly smaller card.
+   Now: "Draw 1 card. Plan: Draw 2 cards; the next Attack you play face-up this
+   turn deals 4 additional damage." Upgrade draw 2 / Plan draw 3. The rider is
+   narrow on purpose -- an ATTACK, one of them, and a card WRITTEN on the
+   Bake-Kurage is not a face-up play and does not take it -- so the reward is
+   spent on the board rather than on more writing.
+
+   **`EB-668`: it is damage because a discount could not be made true in both
+   engines.** Pool pass three shipped this clause as "the first Attack you play
+   face-up this turn costs 1 less", read at the cost seam. The mod's seam is
+   `TryModifyEnergyCostInCombat`, which is handed a card and no `CardPlay`: it
+   cannot ask `KokomiPlan.PlayedOnPet`, so an Attack dragged onto the pet was
+   charged the discounted price in the mod while the sim charged full
+   (`combat.card_cost` asks the pure `plan_aimed_at_pet`). A rider applied at
+   RESOLUTION is asked at the one moment both engines know the play's target:
+   `NextAttackDamagePower.ModifyDamageAdditive` there, `flat_attack_bonus`
+   here, spent by `AfterCardPlayed` / `spend_attack_bonus` and gated on the
+   same pet question on both sides. Per HIT, one stack always, lapsing at the
+   end of the turn. `C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS` = 4 mirrors
+   `NextAttackDamagePower.Bonus`; the retired `C.…_DISCOUNT` and
+   `NextAttackDiscountPower` are gone, along with tier0's cost hook. Pins:
+   write an Attack after the rider (no bonus, rider kept), play one face-up
+   (+4 on each hit, rider spent), a non-Attack face-up play leaves it.
+5. **Nereid's Ascension** -- "At the start of your turn, the Bake-Kurage
+   carries out your first Plan twice." Every Plan twice paid for writing MORE,
+   which is the shape this pass undoes, and it made a deep morning the Rare's
+   only line. `carry_out_times` / `CarryOutTimes` are now read for the FIRST
+   entry of each drain -- morning and dusk are two drains on one turn and each
+   pays its own first entry, which is the drain-local reading "the next Plan"
+   already takes. Consequences pinned: Scout Ahead's forward count is entries
+   and no longer entries times two, a three-Plan morning under the Rare is four
+   carry-outs, and Second Wave and the Ascension can no longer meet on one
+   entry at all (Second Wave reaches the entry AFTER itself; no entry is both
+   first and later).
+6. **Breakwater and Night Watch are WRITTEN-ONLY.** `EB-646` priced the face-up
+   half to the Dusk line and the seat still never played it, so the now-line
+   comes off instead: no `effects`, `plan_dusk: true`, Breakwater "Dusk Plan:
+   Gain 6 Block" (upgrade 8) and Night Watch "Dusk Plan: Gain 4 Block and apply
+   1 Weak" (upgrade 6 Block). The existing plan-only shape does the rest --
+   `KokomiTargets.PetOnly` and the face leading with "Play on the Bake-Kurage."
+   (`gen_klee_cards._plan_only_line`), so a play that is not a write is refused
+   with the reason printed.
+7. **Converging Tide is RETIRED.** It re-aimed a queued Plan at a chosen enemy,
+   which is a decision about a queue this pass deliberately makes shallower:
+   with the cap gone and the Rare paying the FIRST Plan, "which body does the
+   morning land on" stopped being a question worth a card. Off the sheet, off
+   `KOKOMI_OVERHAUL_POOL_IDS` (41 -> 40) and off `KokomiOverhaulRoster`;
+   `redirect_queued_plans` stays registered on both engines with nothing
+   spelling it, the way `cancel_all_plans_cash` did at `EB-649`. **Second
+   Thoughts is unchanged.**
+8. **The cap sentence is corrected.** `KokomiPlan.CapSentenceFormat` and the
+   page's count note now read "Carries out at most N at the start of your turn;
+   the rest wait in order." Dusk carry-outs are NOT capped -- a Dusk Plan has
+   waited for nothing -- so "a turn" claimed a limit the rule does not have.
+   The toggle stays, default 0, dormant.
+9. **The faces are regenerated** and every one of them is under the length
+   lint; the Dusk keyword tip is unchanged.
+
+THE AUDIT. Nine arms went to the doctrine door
+(`review/qa/kokomi-pass-three-2026-09-07-prompt.txt` /
+`-reply.md`): eight FOLLOWS and one REQUIRES_MODIFICATION -- Feint at base 6
+matched Strike's printed 1-Energy 6 damage without a carry-out and exceeded it
+by 4 with one. The base is 5, and the re-read at 5
+(`-reread-prompt.txt` / `-reread-reply.md`) is FOLLOWS on C6: "1 damage worse
+without a carry-out and 4 better on a carry-out turn". The record is
+`review/records/kokomi-pass-three-audit-2026-09-07.md`. The reply's closing
+paragraph is kept as filed and is not claimed away: the arms establish
+competing Energy uses on SOME safe turns and not on every one, and Battle
+Plan's grant does not exclude writing an Attack under the engine the
+auditor was given -- which is exactly the mod-side gap item 4 closes at
+`EB-668`.
+
+## Kokomi pool pass four -- the round-26 dead faces (`EB-679`, 2026-09-08)
+
+THE FINDING THE PASS ANSWERS. Round 26's lanes read four rows of the pool and
+none of them was worth a slot, each for a different and nameable reason. The
+pass rebuilds all four; nothing else on the sheet moves, and no rule of the arm
+changes.
+
+THE FOUR CHANGES.
+
+1. **Night Watch** -- "Dusk Plan: Apply 1 Weak to ALL enemies." No Block;
+   upgrade 2 Weak. Both seats called the old face (4 Block, a Weak and the
+   casket's ping for one Energy) a card that asks nothing: it paid a little of
+   everything and never made the player choose. As the multi-body Weak at Dusk
+   it is **Slack Water's pair** -- Slack Water wins at one body, Night Watch at
+   three -- and the Dusk timing is what the Weak is bought for, because it
+   lands before the swing it was written against. The upgrade takes
+   `plan_power_amount` (1 -> 2), the row's one printed number.
+2. **Breakwater** -- "Dusk Plan: Gain 5 Block, plus 3 for each Plan carried out
+   this turn." Upgrade base 7. r26 lane 1 called it Night Watch's worse twin,
+   so it stops being a flat number and becomes **the wall behind the engine**:
+   the deeper the morning it followed, the more of the turn it buys back.
+   NO NEW OP -- the line is a flat `block` clause plus Tide Wall's
+   `block_per_plan_this_morning`, and the count is exactly the one Tide Wall,
+   Well Laid and Tide Chart read (`kk_plans_this_morning` /
+   `KokomiOverhaulLedger.PlansThisMorning`). **"This turn" on a Dusk Plan IS
+   the morning's depth**, and by construction rather than by a filter:
+   `resolve_dusk` / `ResolveDusk` deliberately leave that count alone, so this
+   Dusk entry is never one of the Plans it pays for. A dusk after an empty
+   morning pays the base alone, which is the honest answer to "for each".
+   `plan_block` binds to the FLAT clause first (`upgrades.PLAN_DELTA_OPS`), so
+   the smith raises the wall and never the rate -- a rate that smithed would
+   scale with a deck the offer screen cannot see.
+3. **Scout Ahead** -- "Draw 1 card. Plan: Draw 1 card for each Plan carried out
+   this turn", **itself included**. Face-up half and the cost upgrade
+   unchanged. The old clause counted the carry-outs still to COME, which made
+   the card's whole value its POSITION: 2 written first, 0 written last. r26
+   lane 1 never wrote it, because a slot that pays 0 half the time competes
+   with Plans that always pay. The count is now the whole drain, read ONCE
+   before the first clause runs (`_drain` / `Drain`), so the answer does not
+   move with the card -- alone it draws 1, with two others 3, wherever it sits.
+   Still CARRY-OUTS and not entries (`EB-501`): Nereid's Ascension carries the
+   first entry of a drain out twice, so a drain under the Rare counts one more,
+   the same term `resolve_all` already writes for `kk_plans_this_morning`. A
+   Scout Ahead hurried by Change of Plans is a drain of one and draws 1. The op
+   is RENAMED with the count it now takes, `draw_per_plan_after` ->
+   `draw_per_plan_this_turn` (`Kind.DrawPerPlanThisTurn`), because an op name
+   that says "after" while the rule says "this turn" is the kind of drift that
+   makes two engines agree by accident. The old name is spelled by nothing.
+4. **Read the Field** -- "Look at the top 3 cards of your draw pile; put one
+   into your hand and the rest on the bottom. Plan: Gain 10 Block." Upgrade
+   look at 4 / Plan 12. r26 lane 1 never made a decision off the old
+   look-and-bury -- burying the card you like least is a choice about the card
+   you did not want -- and the 5 Block beside it was a dead slot next to a Dusk
+   Plan. **Selection is what the seats valued**, so the pick comes to hand and
+   everything it was seen beside goes to the bottom. A NEW OP on both engines,
+   `scry_take`: the mod shows the top N on the game's own selection grid, adds
+   the pick with `CardPileCmd.Add(..., PileType.Hand)` and bottoms the rest in
+   the order they were seen; the sim has no human and takes the LOWEST-cost
+   card of the N, stated at `effects._op_scry_take` as the stand-in for choice
+   it is -- `_op_scry_bottom`'s convention read the other way round, because
+   the card wanted now is the one that can be paid for now. Nothing leaves the
+   deck, a short pile is read short and an empty pile is a printed no-op.
+   `scry_bottom` stays registered on both engines with no row spelling it, the
+   way `redirect_queued_plans` did at `EB-655`.
+
+THE ONE NEW UPGRADE KEY. `scry` moves how many cards the look SHOWS, and it
+exists because pool pass four made that number worth moving: "look at 2, bury
+1" is no better for showing 3, and "look at 3, TAKE 1" is. It is its own key
+rather than `draw`, for `tide_draw`'s reason -- the two are different promises
+and one row could print both -- and it walks the whole scry family
+(`scry_take`, `scry_bottom`, `scry_discard`) so a later look-and-bury row needs
+no key of its own. The codegen renders it off a `"Scry"` DynamicVar declared
+only when the upgrade moves it, the Sparks idiom every other number here keeps,
+and the face prints `{Scry:diff()}` so the base card never claims 3 while the
+upgraded one delivers 4.
+
+THE SCREEN. `ScryTake` is a second prompt class beside `ScryBottom` rather than
+a second member on it, on that file's own terms: a selection screen is keyed on
+the VERB, and taking and burying ask the player different questions. One ruled
+string, merged into the base game's `cards` table by `KleeMod.InjectLocStrings`
+and outside the `PROTOTYPE_CARDS` switch, because `scry_take` is a sheet verb
+any character may print rather than a prototype rule.
+
+THE DRAFTER. `scry_take` prices at `STATIC_SCRY_VALUE`, the scry family's own:
+the card taken to hand is a draw and every draw op in `tier05/draft.py` is
+priced at `STATIC_DRAW_VALUE = 0.0`, so what is left to pay for is the
+selection over the N seen. `draw_per_plan_this_turn` keeps its zero unchanged
+-- `EB-679` moved WHICH carry-outs it counts, not the refusal to guess how deep
+a morning a deck banks.
+
+NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
+slate, no stamp and no re-baseline. What the pass owes is a round that draws
+the four rows.
+
+## Kokomi pool pass five -- the phase of the Dusk lines (`EB-685`, 2026-09-08)
+
+THE FINDING THE PASS ANSWERS. Round 27 read pool pass four's own Dusk rows and
+found two of them out of phase with the moment they land on. Breakwater's
+clause counted the morning that had already been drained, which a Plan written
+today can never be part of: both seats counted 0 and were paid 5 on four plays
+out of four. Slack Water's Weak was still a MORNING Plan, so it arrived after
+the swing it was written against -- the complaint every seat has made since
+round 25. Both are timing defects rather than numbers, and the pass fixes them
+by moving WHEN each clause looks, not how much it pays.
+
+THE FOUR CHANGES.
+
+1. **Breakwater** -- "Dusk Plan: Gain 5 Block, plus 3 for each Plan the
+   Bake-Kurage is holding." Upgrade base 7, the shape unchanged. THE COUNT IS
+   THE QUEUE AT DUSK -- the Plans written this turn and still waiting for the
+   next morning -- so the wall rises on the turn the ENGINE IS WRITTEN rather
+   than on the turn after a deep morning. That is the card the r26 reading
+   asked for, one drain over: what it pays for is the queue standing behind
+   it, which is the only thing a Dusk Plan can see that a morning Plan cannot.
+   A NEW OP on both engines, `block_per_plan_held` /
+   `KokomiPlan.Kind.BlockPerPlanHeld`, because the count really is a different
+   fact from Tide Wall's: `kk_plans_this_morning` is the depth of a drain that
+   has finished and `len(state.kk_plan_queue)` is what is still owed. Pass four
+   spelled the clause with Tide Wall's op precisely to avoid minting one, and
+   that economy is what produced the zero.
+   **THE TWO EXCLUSIONS ARE BY CONSTRUCTION AND NOT BY A FILTER**, the
+   discipline `resolve_all` already keeps: `resolve_dusk` / `ResolveDusk` take
+   every dusk entry OFF the queue before the first clause runs, so this entry
+   is never one of the Plans it pays for, and neither is a second Dusk Plan
+   written the same turn -- a Dusk sibling is not "waiting for the next
+   morning" either, which is the sentence the face says. A Plan hurried out by
+   Change of Plans earlier in the turn has already left the queue and does not
+   count, which is the trade the two tempo cards make with each other.
+   THE COUNT IS READ LIVE, at the moment the entry resolves, rather than once
+   at the drain the way `drain_plans` is. Order-independence was pass four's
+   argument for Scout Ahead and it does not apply here: the face says "is
+   holding", a present tense about a queue, and the only thing that can move
+   the number mid-drain is a Dusk Plan that writes another Plan -- which the
+   player watched happen. `plan_block` still binds to the FLAT clause first
+   (`upgrades.PLAN_DELTA_OPS`), so the smith raises the wall and never the
+   rate.
+2. **Slack Water** -- "Deal 4 damage. Apply 1 Weak. Dusk Plan: Apply 1 Weak to
+   ALL enemies." The face-up half is untouched; only the Plan's phase moves.
+   At Dusk the multi-body Weak lands before the enemy acts, which is what the
+   Weak is bought for -- a debuff that arrives the morning after is a debuff
+   the player paid for and did not get to use.
+   **IT IS THE SURFACE'S FIRST ROW WITH BOTH A NOW-LINE AND A DUSK PLAN, AND
+   IT NEEDED NO EXTENSION.** `plan_dusk:` was already a fact about the row's
+   PLAN LINE rather than about its whole face -- `loader._validate_plan_dusk`
+   asks only that there BE a `plan:` list, and `gen_klee_cards` appends
+   `dusk: true` to the one `KokomiPlan.Schedule` call it emits, which for a
+   two-half row sits inside the `PlayedOnPet` branch it already wrote. The
+   generated card picked up `ArmKeywordTips.ForDusk` and
+   `KokomiTargets.PetOrEnemy` on its own. Nothing in either engine was widened;
+   the row is the first one to exercise a seam both sides already had.
+3. **Night Watch** -- RETIRED, and the row leaves the sheet, the pool tuple and
+   `KokomiOverhaulRoster.Slice()` under R213 B's deletion rule. It lost every
+   draft comparison in r27, and Slack Water's Dusk half is now its job: the
+   multi-body Weak before the swing is exactly what pass four rebuilt Night
+   Watch to be, and a pool does not need the same card twice when one of them
+   also hits. It spelled NO op of its own -- its clause was the shared
+   `apply_power` -- so nothing stays registered behind it the way
+   `redirect_queued_plans`, `cancel_all_plans_cash` and `scry_bottom` do. The
+   pool is 39.
+4. **Scout Ahead** -- face wording only, no behaviour: "Plan: Draw 1 card for
+   each Plan carried out this turn, this one included, in any order." Pass four
+   made both of those true and printed neither, and a seat cannot read a count
+   it has to infer. The two added clauses are the two questions the old face
+   left open -- does it count itself, and does its position matter -- answered
+   on the card at 99 characters against the 120 ceiling.
+
+THE DRAFTER. `block_per_plan_held` prices exactly as
+`block_per_plan_this_morning` does, its printed Block for ONE held Plan, and
+the equality is the point: `EB-685` moved WHICH Plans the clause counts and not
+the refusal to guess how many there will be. Plan density is still a deck fact
+an offer screen cannot read.
+
+NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
+slate, no stamp and no re-baseline. What the pass owes is a round that draws
+Breakwater and Slack Water on the same lane.
+
+## Passes six and seven withdrawn -- the starter basics stay the base game's (2026-09-08)
+
+POOL PASS SIX (`EB-703`) AND POOL PASS SEVEN (`EB-711`) GAVE KOKOMI HER OWN
+BASICS: `proto_kk_strike`, a Plan line printed on the Strike so no opening hand
+could be Plan-less, and `proto_kk_defend`, 5 Block plus 2 while the Bake-Kurage
+was holding a Plan, so the last unwritable card asked its question by ordering.
+Both were swapped into her starter in both engines, and at the `EB-351` relic
+seam.
+
+BOTH ARE WITHDRAWN, on the day they landed, under [USER]'s rule: A CHARACTER'S
+STARTER BASICS ARE NEVER CHANGED -- "they are supposed to suck". That is a
+rule about the kit and not a reading of these two rows, so no measurement
+settles it and no later pass reopens it by finding a better basic. Her starter
+is four base Strikes and four base Defends again -- `StrikeSilent` /
+`DefendSilent` in the mod, `strike` / `defend` in the sim -- which is R242's
+text unamended. The findings the two passes answered are unanswered, and the
+answer has to be a card the deck can DRAW rather than one it opens with.
+
+WHAT WAS REMOVED: both sheet rows, `ProtoKkStrike` and `ProtoKkDefend`, the
+starter and `StarterStrike` / `StarterDefend` swaps, `KokomiPoolPassSixTests`
+and `KokomiPoolPassSevenTests`, the tier0 cases for the two rows, and the two
+pieces that existed only for the Defend's face --
+`KokomiPlan.PlanHeldBlockVar` and `gen_klee_cards.plan_held_block_rider`.
+
+WHAT WAS KEPT, because it is general and printed by no row: the `basic_tag:`
+sheet field with its loader and codegen validators, the `applies_element:
+false` codegen path (`CharacterProfile.damage_applies_element` reading a
+declared false, `declares_no_element`, and the mixed-declaration blocker), and
+the `plan_held` predicate in both engines' registries with its
+`_ENGINE_LIVE_PREDICATES` registration -- the `EB-144` pilot fix, which is
+`EB-712`'s standing evidence.
+
+## R267 (2026-09-08): Slack Water's Plan returns to the morning, Scout Ahead's clause returns to its position
+
+Two moves are reversed; each puts a row back to its pre-pass shape.
+
+SLACK WATER'S PLAN HALF IS A MORNING LINE AGAIN. Pool pass five (`EB-685`)
+moved it to Dusk on the reading that the morning Weak arrived after the swing
+it was written against. The Kokomi brief, line 75, names the next-morning Weak
+as the kit's TURN-ONE DECISION -- one Weak on the front enemy now, or one on
+every body tomorrow -- and a starter card is [USER]'s, not a default's. So the
+move was a redesign taken as a D pick and it is reversed: the row is byte-equal
+to its pre-pass-five form, and Breakwater is the surface's only Dusk row again.
+The `plan_dusk` machinery stays exactly as pass five built it.
+
+The pool's before-the-swing multi-body Weak is now A POOL QUESTION WITH NO ROW.
+Night Watch stays retired -- pass five's retirement was on its own merits, it
+lost every draft comparison in r27, and nothing here reopens it -- so if the
+arm wants that line it will be a new card rather than a phase moved onto a
+starter.
+
+SCOUT AHEAD COUNTS THE PLANS THAT FOLLOW IT AGAIN. Pool pass four (`EB-679`)
+replaced the positional clause with a whole-morning count because round 26's
+lane never wrote the card: a row worth 2 written first and 0 written last
+competed for its slot with Plans that always paid. THAT IS ONE SEAT AVOIDING
+THE 0-PAYOUT SLOT, which is the ordering decision working, not a defect in it.
+Round 28's praise for the recounted card -- "always written last" -- rested on
+lane 2 believing position still mattered, so it is not evidence for the recount
+either way. The clause returns in both engines: first of three draws 2, last
+draws 0, alone draws 0, and the face says "later" so a seat can read the rule
+off the card. The next Kokomi seat round reads it.
+
+Two details. NEREID'S ASCENSION ADDS NOTHING to the count, and that follows
+from `EB-655` rather than being chosen here: the Rare carries out the FIRST
+entry of a drain and no other, and an entry is never the first when something
+follows it, so every later entry is exactly one carry-out. A Scout Ahead
+written first is itself carried out twice and pays its 2 each time; the test
+pins both halves. And `draw_per_plan_this_turn`, pass four's whole-drain
+spelling, is KEPT REGISTERED AND RESOLVED on both engines with no row spelling
+it, the standing `scry_bottom` and `redirect_queued_plans` already have -- the
+clause works if a sheet reaches for it, without a build.
+
+## Scout Ahead counts later CARRY-OUTS, paid as they happen (`EB-718`, 2026-09-08)
+
+The 2026-09-08 review queued Scout Ahead, then Second Wave, then Battle Plan,
+and Scout Ahead drew 2. Second Wave carries the Plan behind it out TWICE, so
+what followed was three carry-outs -- Second Wave's own, Battle Plan's two.
+
+The face says "each later Plan CARRIED OUT with this one", and both engines
+counted the ENTRIES still queued (`len(due) - index - 1`) -- the one number a
+rider can move and an entry count cannot see. It contradicted the register too:
+every reader counts carry-outs (`EB-501`), and every per-Plan clause counts a
+doubled carry-out twice (`EB-709`). The R267 comments called the omission
+deliberate, which made a wrong number a documented one; they are gone.
+
+The clause draws nothing at its own carry-out now. It ARMS a counter for the
+rest of THAT drain, and every carry-out that follows draws the armed rate; two
+armed Scout Aheads draw 2 apiece. The counter is a local of the drain loop, so
+a fight that ends mid-morning draws nothing more and a morning's arming never
+reaches the evening. Last of three draws 0, first draws 2, first of {Scout,
+Second Wave, Battle Plan} draws 3, Change of Plans is a drain of one and draws
+0. NEREID'S ASCENSION IS THE CONSEQUENCE and not a second rule: the Rare
+carries the first entry out twice, so a Scout Ahead written first arms twice
+and draws 2 per later carry-out. Both suites pin it. Its own beat prints no
+number -- no honest figure exists at the clause -- and the cards ride the later
+beats by name through `KokomiPlan.NoteRider`.

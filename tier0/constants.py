@@ -391,7 +391,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_stoke_the_fuse",
     # THE POOL PASS (2026-09-05, `EB-491`). Rounds 13 to 16, in the order the
     # packet reads them: Cook, Spray, React, bridge. Why each exists:
-    # review/active/klee-pool-pass-2026-09-05.md sec.2.
+    # review/records/klee-pool-pass-2026-09-05.md sec.2.
     "proto_ko_long_fuse",
     "proto_ko_all_of_my_treasures",
     "proto_ko_fish_blasting",
@@ -775,6 +775,20 @@ KOKOMI_OVERHAUL = False
 # `tools/lint_constant_parity.py` to compare the C# mirror BY VALUE.
 KOKOMI_OVERHAUL_CASKET_STRIKE = 2   # Hydro, per debuff she applies to an enemy
 KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
+# `EB-668` (`EB-655` reopened). Battle Plan's carry-out: "the next Attack you
+# play face-up this turn deals 4 additional damage." A RULE'S number and not a
+# card's, on exactly Rally's terms -- the card prints it, the power carries it,
+# and `NextAttackDamagePower.Bonus` is the C# mirror `lint_constant_parity`
+# compares BY VALUE.
+#
+# IT IS DAMAGE AND NOT A DISCOUNT because a discount could not be made to mean
+# the same thing in both engines: the mod's cost seam
+# (`TryModifyEnergyCostInCombat`) is handed a card and no `CardPlay`, so it
+# cannot ask whether the play was a WRITE onto the Bake-Kurage, while
+# `combat.card_cost` asks the pure `plan_aimed_at_pet` and charges full. A
+# rider applied at RESOLUTION is asked at the one moment both engines know the
+# answer.
+KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS = 4
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one
@@ -863,7 +877,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # `KokomiOverhaulRoster.Slice()` and to the sheet BY ORDER.
     "proto_kk_tide_chart",
     "proto_kk_ripple",
-    # POOL PASS ONE (`EB-492`, review/active/kokomi-pool-pass-2026-09-05.md):
+    # POOL PASS ONE (`EB-492`, review/records/kokomi-pool-pass-2026-09-05.md):
     # Plan density in the OFFER rather than in the starter -- three Attacks
     # with a Plan line, the morning's payoff on a Common Attack, and a Skill
     # that does both halves only when planned. LAST, in the sheet's own order,
@@ -878,23 +892,28 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # than something that empties on a timer -- two riders on the next Plan
     # (Opening Gambit, Second Wave), a draw that reads the entries after it
     # (Scout Ahead), two now-lines that cancel or re-aim what is already
-    # written (Second Thoughts, Converging Tide) and the two DUSK rows whose
-    # Plan lands at the END of the turn it was written on (Breakwater, Night
-    # Watch). LAST, in the sheet's own order, for the reason the pass above is
+    # written (Second Thoughts, Converging Tide) and the DUSK row whose Plan
+    # lands at the END of the turn it was written on (Breakwater). LAST, in
+    # the sheet's own order, for the reason the pass above is
     # last (`tools/lint_arm_pool_parity.py` compares the tuple,
     # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER).
     #
     # EIGHT UNTIL `EB-649` (round 23): Ebb Tide drew three times on the cap
     # lane and was played none of them, so the row left the sheet and this
     # tuple. Its op stays registered with nothing spelling it --
-    # `kokomi_plan.cancel_all_plans_cash` says why.
+    # `kokomi_plan.cancel_all_plans_cash` says why. SIX SINCE POOL PASS THREE
+    # (`EB-655`): Converging Tide re-aimed a queued Plan, a decision about a
+    # queue this pass deliberately makes shallower, and left the sheet the same
+    # way -- `kokomi_plan.redirect_queued_plans` stays registered with nothing
+    # spelling it. FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch lost
+    # every draft comparison in r27 and Slack Water's Plan half moved to Dusk,
+    # which is the job Night Watch was rebuilt for one pass earlier. It spelled
+    # no op of its own, so nothing stays registered behind it.
     "proto_kk_opening_gambit",
     "proto_kk_second_wave",
     "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
-    "proto_kk_converging_tide",
     "proto_kk_breakwater",
-    "proto_kk_night_watch",
 )
 
 # THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF

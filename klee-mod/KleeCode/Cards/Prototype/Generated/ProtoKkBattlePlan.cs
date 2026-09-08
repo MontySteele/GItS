@@ -45,7 +45,7 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Battle Plan"),
-        ("description", "Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards; the next Attack you play face-up this turn deals 4 additional damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,8 +54,8 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 1, KokomiPlan.Aim.Self),
             new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.NextAttackDamage, 0, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -84,6 +84,7 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Cards.UpgradeValueBy(1m);
         DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

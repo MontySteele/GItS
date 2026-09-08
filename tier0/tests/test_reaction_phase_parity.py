@@ -1099,6 +1099,13 @@ CO_TENANCY_LEDGER = {
             "broadcast as CompanionCostThisTurnPower and "
             "ReplayNextCompanionPower below. Removes itself and touches "
             "nothing else",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs",
+         "NextAttackDamagePower"):
+            "QUARANTINED (the Kokomi overhaul, `EB-655`/`EB-668`). Battle "
+            "Plan's rider, beside Rally's grant above and on the same "
+            "same-turn boundary. Removes itself and touches nothing else, so "
+            "it shares no resource with any co-tenant and its order among "
+            "them cannot matter",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):

@@ -441,7 +441,10 @@ public class Round19Tests
         // reader to carry the hit count across a clause; the number carries
         // itself, and the plural is fixed because this face is only ever
         // chosen for two charges or more.
-        Assert.Contains("in [blue]{Count}[/blue] hits for [blue]{Count}[/blue] "
+        // `EB-666` (r24) fixed the DIRECTION on top of that: "for N Sparks"
+        // is how a cost is spelled and both r24 seats priced a Set off off it,
+        // so the clause says "making".
+        Assert.Contains("in [blue]{Count}[/blue] hits, making [blue]{Count}[/blue] "
                       + "[gold]Sparks[/gold].", face);
         Assert.DoesNotContain("as many", face);
         Assert.DoesNotContain("plural", face);

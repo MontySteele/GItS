@@ -260,8 +260,12 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     # exactly as `damage_per_companion_last_turn` is a damage clause wearing
     # one, so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`
-    # spelling wins where a row somehow prints both.
-    "plan_block": ("block", "block_per_plan_this_morning"),
+    # spelling wins where a row somehow prints both -- which is exactly
+    # Breakwater, whose flat 5 the smith raises and whose per-held-Plan RATE it
+    # never touches (`EB-685`): a rate that smithed would scale with a deck the
+    # offer screen cannot see.
+    "plan_block": ("block", "block_per_plan_this_morning",
+                   "block_per_plan_held"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
     "plan_draw": ("draw",),
@@ -289,7 +293,8 @@ def _plan_default_delta(plan: list[dict]) -> dict:
     if any(fx.get("op") == "block" and isinstance(fx.get("amount"), int)
            for fx in plan):
         delta["plan_block"] = PROTOTYPE_BLOCK_DELTA
-    elif any(fx.get("op") == "block_per_plan_this_morning"
+    elif any(fx.get("op") in ("block_per_plan_this_morning",
+                              "block_per_plan_held")
              and isinstance(fx.get("amount"), int) for fx in plan):
         # `EB-335`. PER PLAN, so the per-instance idiom (+1) rather than the
         # flat Block delta -- the same distinction `plan_damage` makes one
@@ -994,6 +999,37 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
+        elif key == "conditional_then_damage":
+            # `EB-655` (Feint). THE THEN-BRANCH ALONE, on top of whatever
+            # `conditional_damage` moved: a card whose two printed numbers
+            # upgrade by DIFFERENT amounts has no other spelling, and Feint is
+            # the first row that needs one (5 -> 7 and 10 -> 13).
+            #
+            # THE FIRST DAMAGE OF EACH `then`, the one-owner rule every other
+            # branch key keeps, so the number this moves is the number the face
+            # prints through `_branch_amount_text`.
+            hits = []
+            for fx in everywhere:
+                if fx.get("op") != "conditional":
+                    continue
+                first = next((e for e in fx.get("then", [])
+                              if e.get("op") == "damage"
+                              and e.get("target") != "self"
+                              and isinstance(e.get("amount"), int)), None)
+                if first is not None:
+                    hits.append(first)
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
+        elif key == "bonus_vs_debuff":
+            # `EB-655` (Riptide). The RIDER's own number, where `damage` moves
+            # the base it rides on: "9 damage to ALL, and 4 more to each enemy
+            # with a debuff" prints two numbers and this pass moves them by
+            # different amounts (+3 and +2). `bonus_vs_aura` has no key for the
+            # same reason it has no row that needs one.
+            ok = _bump_first((fx for fx in everywhere
+                              if isinstance(fx.get("bonus_vs_debuff"), int)),
+                             "bonus_vs_debuff", val)
         elif key == "formula_per":
             hit = next((fx for fx in everywhere
                         if fx.get("op") == "damage"
@@ -1086,6 +1122,23 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                         f"exhaust delta on {base_id!r} raises a RANDOM "
                         "exhaust_from above 1; only the chosen branch is "
                         "expressible in C#")
+        elif key == "scry":
+            # `EB-679` (Read the Field). HOW MANY CARDS THE LOOK SHOWS, which
+            # became an upgradable number the moment the look started handing
+            # one of them over: "look at 2, bury 1" is no better for showing 3,
+            # and "look at 3, TAKE 1" is. A key of its own rather than `draw`,
+            # for `tide_draw`'s reason -- these are different promises and one
+            # row could print both.
+            #
+            # THE WHOLE SCRY FAMILY in one ordered walk, so a look-and-bury row
+            # that later wants the same upgrade needs no key of its own. No row
+            # carries two of these ops.
+            ok = False
+            for scry_op in ("scry_take", "scry_bottom", "scry_discard"):
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == scry_op), "amount", val)
+                if ok:
+                    break
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)
