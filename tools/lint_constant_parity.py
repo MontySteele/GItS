@@ -365,11 +365,11 @@ MIRRORED: dict[str, object] = {
     # whole printed clause), so the number lives on the power and is
     # mirrored like every other rule number.
     "NextCompanionDiscountPower.Discount": C.KOKOMI_OVERHAUL_RALLY_DISCOUNT,
-    # `EB-655`. Battle Plan's carry-out prints "costs 1 less" and the clause
-    # carries no amount, so the number lives on the power -- Rally's case one
-    # card type over, mirrored on the same terms.
-    "NextAttackDiscountPower.Discount":
-        C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT,
+    # `EB-668`. Battle Plan's carry-out prints "deals 4 more damage" and the
+    # clause carries no amount, so the number lives on the power -- Rally's
+    # case one card type over, mirrored on the same terms.
+    "NextAttackDamagePower.Bonus":
+        C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS,
 }
 
 # --------------------------------------------------------------------------

@@ -63,8 +63,8 @@ PLAN_KINDS = frozenset((
     "play_copy_of_companion", "block_per_plan_this_morning",
     "draw_per_plan_after", "next_plan_double_damage",
     "next_plan_extra_carry_out",
-    # `EB-655` (pool pass three), BATTLE PLAN. See `NEXT_ATTACK_DISCOUNT`.
-    "next_attack_discount",
+    # `EB-655` (pool pass three), BATTLE PLAN. See `NEXT_ATTACK_BONUS`.
+    "next_attack_damage",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -76,10 +76,11 @@ PLAN_KINDS = frozenset((
 PLAN_AMOUNTLESS_OPS = frozenset((
     "damage_quarter_max_hp", "play_copy_of_companion",
     "next_plan_double_damage", "next_plan_extra_carry_out",
-    # `EB-655`. Battle Plan prints "costs 1 less"; the number is the RULE's
-    # (`C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT`) and not the clause's, exactly
-    # as Rally's is, so the clause carries no `amount` for a sheet to move.
-    "next_attack_discount",
+    # `EB-655`. Battle Plan prints "deals 4 additional damage"; the number is the
+    # RULE's (`C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS`) and not the clause's,
+    # exactly as Rally's is, so the clause carries no `amount` for a sheet to
+    # move.
+    "next_attack_damage",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -125,11 +126,11 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            "draw_per_plan_after",
                            "next_plan_double_damage",
                            "next_plan_extra_carry_out",
-                           # `EB-655`, BATTLE PLAN. The grant is what the
+                           # `EB-655`, BATTLE PLAN. The rider is what the
                            # carry-out pays: a now-line spelling would be a
-                           # different, unpriced card that discounted an
-                           # Attack on the turn it was played.
-                           "next_attack_discount"))
+                           # different, unpriced card that buffed an Attack on
+                           # the turn it was played.
+                           "next_attack_damage"))
 
 #: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
 #: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
@@ -200,14 +201,18 @@ NEREIDS_ASCENSION = "kk_nereids_ascension"
 #: Rally's grant. ONE STACK, ALWAYS -- the card says "costs 1 less", not
 #: "per Rally" -- and it is consumed by the next Companion play.
 NEXT_COMPANION_DISCOUNT = "kk_next_companion_discount"
-#: `EB-655` (pool pass three), BATTLE PLAN's carry-out: "the first Attack you
-#: play face-up this turn costs 1 less". Rally's grant one card type over, with
-#: two differences that are the whole point of the row: it is written by a PLAN
-#: (so it lands on the morning the draw lands on), and a card WRITTEN on the
-#: Bake-Kurage is not a face-up play, so a write neither takes the discount nor
-#: spends it. That last clause is what stops the reward from paying for more
-#: writing, which is the pass's thesis. `NextAttackDiscountPower` is the twin.
-NEXT_ATTACK_DISCOUNT = "kk_next_attack_discount"
+#: `EB-668` (`EB-655` reopened), BATTLE PLAN's carry-out: "the next Attack you
+#: play face-up this turn deals 4 additional damage". Written by a PLAN, so it lands
+#: on the morning the draw lands on -- and a card WRITTEN on the Bake-Kurage is
+#: not a face-up play, so a write neither takes the bonus nor spends it. That
+#: last clause is what stops the reward from paying for more writing, which is
+#: the pass's thesis.
+#:
+#: A RIDER AND NOT A DISCOUNT, which is the whole of `EB-668`: the grant is now
+#: read where the PLAY is known (`effects.flat_attack_bonus` here,
+#: `ModifyDamageAdditive` there) instead of at a cost seam the mod cannot make
+#: target-aware. `NextAttackDamagePower` is the twin.
+NEXT_ATTACK_BONUS = "kk_battle_plan_rider"
 #: Shell Guard's window (`EB-335`). THE AMOUNT IS THE BLOCK PER STRIKE, not a
 #: number of turns: "until your next turn, whenever the Tamakushi Casket
 #: strikes, gain 3 Block". `close_shell_guard` is the one place it ends, and
@@ -1230,12 +1235,13 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         if wrote is not None:
             wrote[1] = True
         state.emit("plan_rider", rider=NEXT_PLAN_EXTRA_CARRY_OUT)
-    elif op == "next_attack_discount":
-        # BATTLE PLAN's carry-out (`EB-655`). One stack, always, and the same
-        # switch-not-counter reading Rally's grant keeps: the face says "costs
-        # 1 less" and not "per Plan", so a morning that carries out two Battle
-        # Plans still discounts one Attack. See `next_attack_discount`.
-        next_attack_discount(state)
+    elif op == "next_attack_damage":
+        # BATTLE PLAN's carry-out (`EB-655`, `EB-668`). One stack, always, and
+        # the same switch-not-counter reading Rally's grant keeps: the face
+        # says "deals 4 additional damage" and not "per Plan", so a morning that
+        # carries out two Battle Plans still buffs one Attack. See
+        # `next_attack_bonus`.
+        next_attack_bonus(state)
     elif op == "mend":
         effects.mend(state, amount)
     elif op == "damage":
@@ -1799,37 +1805,45 @@ def redirect_queued_plans(state: CombatState, target: Optional[Enemy]) -> None:
                target=target.name)
 
 
-def next_attack_discount(state: CombatState) -> None:
-    """Battle Plan's carry-out: "the first Attack you play face-up this turn
-    costs 1 less".
+def next_attack_bonus(state: CombatState) -> None:
+    """Battle Plan's carry-out: "the next Attack you play face-up this turn
+    deals 4 additional damage".
 
-    ONE STACK, ALWAYS, Rally's reading one card type over: the face says "costs
-    1 less" and not "per Plan", so a morning carrying out two Battle Plans
-    discounts one Attack.
+    ONE STACK, ALWAYS, Rally's reading one card type over: the face says
+    "deals 4 additional damage" and not "per Plan", so a morning carrying out two
+    Battle Plans buffs one Attack.
 
-    A DISCOUNT, NOT A ZEROING -- `combat.card_cost` subtracts it and floors at
-    zero -- and it is spent by the play that takes it
-    (`spend_attack_discount`), which is a FACE-UP Attack: a card written on the
-    Bake-Kurage is not a play of that card's face, so it neither takes the
-    discount nor spends it. `combat.card_cost` asks `plan_aimed_at_pet` for the
-    same reason, and that read is pure.
+    A RIDER ON EACH HIT, folded in by `effects.flat_attack_bonus` where every
+    other flat attack rider is folded in, so a two-hit Attack collects it
+    twice -- the same reading `next_attack_up` has always had, and the one
+    `NextAttackDamagePower.ModifyDamageAdditive` gives on the other side.
+
+    IT IS SPENT AT RESOLUTION (`spend_attack_bonus`), by a FACE-UP Attack: a
+    card written on the Bake-Kurage is not a play of that card's face, so it
+    neither takes the bonus nor spends it. `EB-668` is exactly that clause: a
+    cost hook is handed no play and cannot ask, and damage at resolution can.
     """
     if not live(state):
         return
-    if state.player.powers.get(NEXT_ATTACK_DISCOUNT, 0):
+    if state.player.powers.get(NEXT_ATTACK_BONUS, 0):
         return
-    state.player.powers[NEXT_ATTACK_DISCOUNT] = 1
+    state.player.powers[NEXT_ATTACK_BONUS] = 1
     state.emit("plan_battle_plan",
-               discount=C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT)
+               bonus=C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS)
 
 
-def spend_attack_discount(state: CombatState, card: Card) -> None:
-    """The grant is consumed by the face-up Attack that spends it.
+def spend_attack_bonus(state: CombatState, card: Card) -> None:
+    """The rider is consumed by the face-up Attack that takes it.
+
+    CALLED FROM `effects._resolve_card_bound`, beside `next_attack_up`'s own
+    consuming pop and AFTER `flat_attack_bonus` has read it -- which is the
+    ordering the rider needs and the reason it is not spent at
+    `combat._finish_play` the way the retired discount was.
 
     THE PET CHECK IS THE RULE AND NOT A GUARD. A card written on the jellyfish
     resolves none of its now-line, so it is not "an Attack you played" in the
-    sense the face means -- the discount survives the write and pays the next
-    Attack actually played. `NextAttackDiscountPower.AfterCardPlayed` is the
+    sense the face means -- the rider survives the write and pays the next
+    Attack actually played. `NextAttackDamagePower.AfterCardPlayed` is the
     twin, gated on `KokomiPlan.PlayedOnPet` at the one site that can see the
     play's target.
     """
@@ -1837,7 +1851,7 @@ def spend_attack_discount(state: CombatState, card: Card) -> None:
         return
     if plan_aimed_at_pet(state, card):
         return
-    if state.player.powers.pop(NEXT_ATTACK_DISCOUNT, 0):
+    if state.player.powers.pop(NEXT_ATTACK_BONUS, 0):
         state.emit("plan_battle_plan_spent", card=card.id)
 
 

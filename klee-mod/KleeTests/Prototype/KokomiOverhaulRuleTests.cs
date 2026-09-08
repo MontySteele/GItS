@@ -291,9 +291,11 @@ public class KokomiOverhaulRuleTests
         // prints them.
         //
         // SIXTEEN SINCE `EB-655` (pool pass three, R266): Battle Plan's
-        // `NextAttackDiscount`, the grant that replaced its `Energy` clause.
-        // A GRANT AND NOT A NUMBER -- the size is the rule's -- so it joins
-        // the amountless kinds rather than printing one.
+        // `NextAttackDamage`, the rider that replaced its `Energy` clause --
+        // spelled as a DISCOUNT until `EB-668` moved it to damage, because a
+        // cost seam cannot tell a face-up play from a write. A RIDER AND NOT A
+        // NUMBER -- the size is the rule's -- so it joins the amountless kinds
+        // rather than printing one.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
@@ -301,7 +303,7 @@ public class KokomiOverhaulRuleTests
                     "ReplayExhausted", "PlayCopyOfCompanion",
                     "BlockPerPlanThisMorning", "DrawPerPlanAfter",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
-                    "NextAttackDiscount" },
+                    "NextAttackDamage" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 

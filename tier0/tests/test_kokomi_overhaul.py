@@ -259,13 +259,13 @@ def test_the_arm_carries_exactly_three_rule_numbers():
     `lint_constant_parity` can compare the C# mirrors BY VALUE."""
     assert C.KOKOMI_OVERHAUL_CASKET_STRIKE == 2
     assert C.KOKOMI_OVERHAUL_RALLY_DISCOUNT == 1
-    assert C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT == 1
+    assert C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS == 4
     named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
     assert named == {"KOKOMI_OVERHAUL", "KOKOMI_OVERHAUL_POOL_IDS",
                      "KOKOMI_OVERHAUL_STARTER_IDS",
                      "KOKOMI_OVERHAUL_CASKET_STRIKE",
                      "KOKOMI_OVERHAUL_RALLY_DISCOUNT",
-                     "KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT"}
+                     "KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS"}
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------

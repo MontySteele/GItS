@@ -756,9 +756,9 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "cancel_last_plan", "cancel_all_plans_cash", "redirect_queued_plans",
     "draw_per_plan_after", "next_plan_double_damage",
     "next_plan_extra_carry_out",
-    # POOL PASS THREE (`EB-655`). Battle Plan's grant, a plan clause with its
+    # POOL PASS THREE (`EB-655`). Battle Plan's rider, a plan clause with its
     # own branch in `_op_price` on the same terms.
-    "next_attack_discount"))
+    "next_attack_damage"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1059,12 +1059,15 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # that is the answer rather than a gap in it. Deviating here would
         # price one character's energy discount above every other card's.
         return C.KOKOMI_OVERHAUL_RALLY_DISCOUNT * STATIC_ENERGY_VALUE
-    if op == "next_attack_discount":
-        # `EB-655`, Battle Plan's grant. Rally's price one card type over, and
-        # for Rally's reason: it is a `cost_mod` wearing a kit name, so it
-        # takes `cost_mod`'s rule and `cost_mod`'s measured dead dial. The
-        # `plan:` list it lives in already takes the delay discount.
-        return C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT * STATIC_ENERGY_VALUE
+    if op == "next_attack_damage":
+        # `EB-668`, Battle Plan's rider. It is `buff_next_attack` wearing a kit
+        # name -- flat damage on the next Attack -- so it takes that op's rule
+        # and that op's dial, and NOT Rally's dead `cost_mod` zero: the clause
+        # stopped being a discount when the mod's cost seam proved unable to
+        # see a write. The `plan:` list it lives in already takes the delay
+        # discount.
+        return (C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS
+                * STATIC_NEXT_ATTACK_SHARE)
     if op == "remove_debuff":
         # Cleansing Wave: one debuff off HER. The mirror of putting one onto an
         # enemy, at the same rate -- `STATIC_DEBUFF_VALUE` is what this table
@@ -2448,9 +2451,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "next_companion_discount": "ZERO: it is a `cost_mod` wearing a kit name, "
                                "so it takes cost_mod's rule and cost_mod's "
                                "measured dead dial (STATIC_ENERGY_VALUE)",
-    "next_attack_discount": "ZERO: Rally's price one card type over -- a "
-                            "`cost_mod` wearing a kit name, at cost_mod's "
-                            "measured dead dial (STATIC_ENERGY_VALUE)",
+    "next_attack_damage": "`buff_next_attack`'s price wearing a kit name: "
+                          "flat damage on the next Attack, at "
+                          "STATIC_NEXT_ATTACK_SHARE",
     "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
                      "of putting one onto an enemy, at the same rate",
     # --- the Furina reframe (QUARANTINED, furina_reframe.FURINA_REFRAME) ---

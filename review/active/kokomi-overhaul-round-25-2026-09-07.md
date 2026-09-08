@@ -81,15 +81,16 @@ both records; no seat mentions a limit.
 ## 4. What this says about R266
 
 The turn the cap was written against, every Plan in hand written at once,
-still exists, and both seats found it only on turns where the enemy's intent
-carried no damage, which are free turns for any deck. On every turn with a
-hit printed, the pool's faces priced the choice by themselves, card by card,
-and the seats could say which card and why. That is the answer [USER] asked
-for on 2026-09-07: the constraint was not needed where the faces do the
-work. What the round does not show is a chosen multi-write from a Plan pair
-that does not interact; both seats' chosen ones were Opening Gambit or
-Second Wave into a damage Plan, or a Plan whose immediate half was dead on
-that intent.
+still exists, and it is still common: both seats called it free on the
+boss's no-damage turns, and lane 2 called fight 6 turn 1 free with 12
+incoming that its Block covered. What the round shows is narrower than the
+plan's hypothesis asked: under pressure the faces priced the choice by
+themselves, card by card, and Feint made a prepared turn worth exploiting;
+on a safe turn with three Plan-capable cards, nothing but Block competed
+with writing another Plan in either record. So the cap stays retired, the
+faces do the work where there is pressure, and the safe turn's competition
+is the read the next lane is for: immediate draw, a filter or an attack
+against one more Plan, kept separate from "I need Block now."
 
 ## 5. Defects and defaults
 

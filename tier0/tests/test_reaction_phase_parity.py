@@ -1100,9 +1100,9 @@ CO_TENANCY_LEDGER = {
             "ReplayNextCompanionPower below. Removes itself and touches "
             "nothing else",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
-         "NextAttackDiscountPower"):
-            "QUARANTINED (the Kokomi overhaul, `EB-655`). Battle Plan's "
-            "grant, one card type over from Rally's above and on the same "
+         "NextAttackDamagePower"):
+            "QUARANTINED (the Kokomi overhaul, `EB-655`/`EB-668`). Battle "
+            "Plan's rider, beside Rally's grant above and on the same "
             "same-turn boundary. Removes itself and touches nothing else, so "
             "it shares no resource with any co-tenant and its order among "
             "them cannot matter",

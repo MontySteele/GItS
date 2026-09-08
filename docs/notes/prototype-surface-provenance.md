@@ -3067,18 +3067,28 @@ THE NINE CHANGES.
    to play.
 4. **Battle Plan** -- the `energy` clause comes OFF. It paid the write back its
    own cost, so writing was free and the now-line was a strictly smaller card.
-   Now: "Draw 1 card. Plan: Draw 2 cards; the first Attack you play face-up
-   this turn costs 1 less." Upgrade draw 2 / Plan draw 3. The discount is
+   Now: "Draw 1 card. Plan: Draw 2 cards; the next Attack you play face-up this
+   turn deals 4 additional damage." Upgrade draw 2 / Plan draw 3. The rider is
    narrow on purpose -- an ATTACK, one of them, and a card WRITTEN on the
    Bake-Kurage is not a face-up play and does not take it -- so the reward is
-   spent on the board rather than on more writing. **What the mod cannot see:**
-   `TryModifyEnergyCostInCombat` is handed a card and no `CardPlay`, so it
-   cannot ask `KokomiPlan.PlayedOnPet`; an Attack dragged onto the jellyfish is
-   therefore charged the discounted price in the mod while the sim charges full
-   (`combat.card_cost` asks the pure `plan_aimed_at_pet`). The grant is never
-   SPENT by a write on either side, so the first Attack actually played still
-   gets it. Disclosed rather than papered over; closing it needs a target-aware
-   cost seam the game does not offer.
+   spent on the board rather than on more writing.
+
+   **`EB-668`: it is damage because a discount could not be made true in both
+   engines.** Pool pass three shipped this clause as "the first Attack you play
+   face-up this turn costs 1 less", read at the cost seam. The mod's seam is
+   `TryModifyEnergyCostInCombat`, which is handed a card and no `CardPlay`: it
+   cannot ask `KokomiPlan.PlayedOnPet`, so an Attack dragged onto the pet was
+   charged the discounted price in the mod while the sim charged full
+   (`combat.card_cost` asks the pure `plan_aimed_at_pet`). A rider applied at
+   RESOLUTION is asked at the one moment both engines know the play's target:
+   `NextAttackDamagePower.ModifyDamageAdditive` there, `flat_attack_bonus`
+   here, spent by `AfterCardPlayed` / `spend_attack_bonus` and gated on the
+   same pet question on both sides. Per HIT, one stack always, lapsing at the
+   end of the turn. `C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS` = 4 mirrors
+   `NextAttackDamagePower.Bonus`; the retired `C.…_DISCOUNT` and
+   `NextAttackDiscountPower` are gone, along with tier0's cost hook. Pins:
+   write an Attack after the rider (no bonus, rider kept), play one face-up
+   (+4 on each hit, rider spent), a non-Attack face-up play leaves it.
 5. **Nereid's Ascension** -- "At the start of your turn, the Bake-Kurage
    carries out your first Plan twice." Every Plan twice paid for writing MORE,
    which is the shape this pass undoes, and it made a deep morning the Rare's
@@ -3124,5 +3134,6 @@ without a carry-out and 4 better on a carry-out turn". The record is
 `review/records/kokomi-pass-three-audit-2026-09-07.md`. The reply's closing
 paragraph is kept as filed and is not claimed away: the arms establish
 competing Energy uses on SOME safe turns and not on every one, and Battle
-Plan's discount does not exclude writing an Attack under the engine the
-auditor was given -- which is exactly the mod-side gap item 4 discloses.
+Plan's grant does not exclude writing an Attack under the engine the
+auditor was given -- which is exactly the mod-side gap item 4 closes at
+`EB-668`.

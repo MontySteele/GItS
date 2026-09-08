@@ -191,25 +191,27 @@ public class KokomiPoolPassThreeTests
     }
 
     // ======================================================================
-    // 4. BATTLE PLAN -- the energy clause off, a face-up Attack discount on
+    // 4. BATTLE PLAN -- the energy clause off, a face-up Attack rider on
     // ======================================================================
 
     [Fact]
-    public void Battle_plans_plan_is_a_draw_and_the_discount_and_no_energy()
+    public void Battle_plans_plan_is_a_draw_and_the_rider_and_no_energy()
     {
         // THE ENERGY CLAUSE IS GONE. It paid the write back its own cost, so
-        // writing was free and the now-line was a strictly smaller card.
+        // writing was free and the now-line was a strictly smaller card. What
+        // replaced it is DAMAGE and not a discount (`EB-668`).
         var card = new ProtoKkBattlePlan();
         var clauses = card.PlanClauses;
         Assert.Equal(2, clauses.Count);
         Assert.Equal(KokomiPlan.Kind.Draw, clauses[0].Kind);
         Assert.Equal(2, clauses[0].Amount);
-        Assert.Equal(KokomiPlan.Kind.NextAttackDiscount, clauses[1].Kind);
-        // A GRANT AND NOT A NUMBER: the size is the rule's, so the clause
+        Assert.Equal(KokomiPlan.Kind.NextAttackDamage, clauses[1].Kind);
+        // A RIDER AND NOT A NUMBER: the size is the rule's, so the clause
         // carries none -- `PLAN_AMOUNTLESS_OPS`.
         Assert.Equal(0, clauses[1].Amount);
         Assert.Equal(KokomiPlan.Aim.Self, clauses[1].Aim);
         Assert.DoesNotContain(clauses, c => c.Kind == KokomiPlan.Kind.Energy);
+        Assert.Contains("deals 4 additional damage", Face(card));
     }
 
     [Fact]
@@ -218,7 +220,7 @@ public class KokomiPoolPassThreeTests
         // `gen_klee_cards.PLAN_CLAUSE_KINDS` maps the sheet's spelling onto
         // this member BY NAME, so a rename is a codegen break rather than a
         // silent approximation.
-        Assert.Contains("NextAttackDiscount",
+        Assert.Contains("NextAttackDamage",
                         System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -227,45 +229,60 @@ public class KokomiPoolPassThreeTests
     {
         Assert.Contains(
             Il.Calls(typeof(KokomiPlan).GetMethod("ResolveOne", All)!),
-            c => c.Contains("NextAttackDiscount"));
+            c => c.Contains("NextAttackDamage"));
     }
 
     [Fact]
-    public void The_discount_is_one_stack_a_discount_and_an_attack_only()
+    public void The_rider_is_one_stack_and_flat_damage_on_an_attack_only()
     {
-        // ONE STACK, ALWAYS (the face says "costs 1 less", not "per Plan"),
-        // and a SUBTRACTION floored at zero rather than a zeroing.
-        Assert.Equal(1, NextAttackDiscountPower.Discount);
+        // ONE STACK, ALWAYS (the face says "deals 4 additional damage", not "per
+        // Plan"), and it is ADDITIVE per hit -- `ModifyDamageAdditive` is
+        // asked once per hit, so a two-hit Attack collects it twice, which is
+        // what `effects.flat_attack_bonus` folds into the per-hit base.
+        Assert.Equal(4, NextAttackDamagePower.Bonus);
         var source = Source("KokomiOverhaulPowers", power: true);
-        Assert.Contains("if (card.Type != CardType.Attack) return false;",
-                        source);
-        Assert.Contains("System.Math.Max(0m, originalCost - Discount)",
+        Assert.Contains("if (cardSource is not { Type: CardType.Attack }) "
+                      + "return 0m;", source);
+        Assert.Contains("public override decimal ModifyDamageAdditive(",
                         source);
         // ONE STACK: the kit refuses a second grant outright.
-        Assert.Contains("OfType<NextAttackDiscountPower>().Any()) return;",
+        Assert.Contains("OfType<NextAttackDamagePower>().Any()) return;",
                         Source("KokomiOverhaulKit", power: true));
     }
 
     [Fact]
-    public void A_written_attack_does_not_spend_the_discount()
+    public void The_row_no_longer_touches_the_cost_seam()
     {
-        // THE FACE-UP CLAUSE, enforced where it can be. A card dragged onto
-        // the Bake-Kurage is a WRITE -- none of its now-line resolves -- so it
-        // is not "an Attack you played" in the sense the face means, and the
-        // grant waits for one that is. The COST seam cannot ask the same
-        // question (`TryModifyEnergyCostInCombat` is handed no `CardPlay`),
-        // which is disclosed on the power and in the pass's provenance.
+        // `EB-668` IS THIS ASSERTION. The clause was a discount and the mod
+        // could not mean the same thing by it: `TryModifyEnergyCostInCombat`
+        // is handed a card and no `CardPlay`, so it could not ask
+        // `KokomiPlan.PlayedOnPet` and a written Attack was discounted while
+        // the sim charged full. There is no cost hook left to disagree with.
+        var hook = typeof(NextAttackDamagePower)
+            .GetMethod("TryModifyEnergyCostInCombat", All);
+        // DECLARED, not inherited: `PowerModel` gives every power the hook, so
+        // the question is whether THIS class overrides it, and it does not.
+        Assert.NotEqual(typeof(NextAttackDamagePower), hook?.DeclaringType);
+    }
+
+    [Fact]
+    public void A_written_attack_does_not_spend_the_rider()
+    {
+        // THE FACE-UP CLAUSE, and it is now enforced on BOTH halves rather
+        // than one: a card dragged onto the Bake-Kurage resolves none of its
+        // now-line, so it deals no damage to be buffed AND it does not spend
+        // the rider. The grant waits for an Attack actually played.
         Assert.Contains("KokomiPlan.PlayedOnPet",
-                        Il.Calls(typeof(NextAttackDiscountPower)
+                        Il.Calls(typeof(NextAttackDamagePower)
                             .GetMethod("AfterCardPlayed", All)!));
     }
 
     [Fact]
-    public void The_discount_dies_with_its_turn()
+    public void The_rider_dies_with_its_turn()
     {
         // "This turn" is the ratified same-turn boundary Rally's grant keeps.
         Assert.Contains("PowerCmd.Remove",
-                        Il.Calls(typeof(NextAttackDiscountPower)
+                        Il.Calls(typeof(NextAttackDamagePower)
                             .GetMethod("AfterSideTurnEnd", All)!));
     }
 
