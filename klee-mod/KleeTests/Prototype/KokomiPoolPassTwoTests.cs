@@ -285,17 +285,21 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void Converging_tide_aims_at_an_enemy_and_re_points_the_queue()
+    public void Converging_tide_is_off_the_sheet_and_out_of_the_pool()
     {
-        var card = new ProtoKkConvergingTide();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-        // AIMED, because it dereferences the played target: "this enemy" is
-        // the body the play was aimed at and never a second definition of the
-        // front.
-        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.Contains("KokomiPlan.Redirect",
-                        Il.Calls(Il.Method("ProtoKkConvergingTide", "OnPlay")));
+        // `EB-655` (pool pass three): the row re-aimed a queued Plan, and the
+        // pass makes the queue shallower on purpose -- with the cap retired
+        // and Nereid's paying the FIRST Plan, "which body does the morning
+        // land on" stopped being a question worth a card. The class is GONE
+        // with the regen and the resolver STAYS, `EB-649`'s shape exactly.
+        // Twin: `test_converging_tide_is_off_the_sheet_and_out_of_the_pool`.
+        Assert.Null(typeof(ProtoKkSecondWave).Assembly.GetType(
+            "KleeMod.Cards.Prototype.Generated.ProtoKkConvergingTide"));
+        Assert.DoesNotContain(
+            "ProtoKkConvergingTide",
+            string.Join("|", Il.CallSequence(
+                Il.Method("KokomiOverhaulRoster", "Slice"))));
+        Assert.NotNull(typeof(KokomiPlan).GetMethod("Redirect", All));
     }
 
     [Fact]
@@ -323,7 +327,7 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void Breakwater_writes_a_dusk_plan_of_five_block()
+    public void Breakwater_writes_a_dusk_plan_of_six_block()
     {
         var card = new ProtoKkBreakwater();
         Assert.Equal(1, card.EnergyCost.Canonical);
@@ -331,10 +335,10 @@ public class KokomiPoolPassTwoTests
 
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.Block, clause.Kind);
-        // `EB-646` (round 23): 7 until the Dusk trial read the face-up half
-        // dead. Timing is the value, so the Dusk line is priced to the face
-        // -- 4 now, 5 at dusk, and the smith moves each by 1.
-        Assert.Equal(5, clause.Amount);
+        // `EB-646` (round 23) priced the face-up half to the Dusk line and the
+        // seat still never played it; `EB-655` takes the now-line off instead.
+        // WRITTEN-ONLY at 6, upgrading to 8.
+        Assert.Equal(6, clause.Amount);
         // THE FLAG RIDES THE WRITE, because Dusk is a fact about WHEN this
         // card's line lands and the entry is the only thing that survives the
         // play.
@@ -350,9 +354,10 @@ public class KokomiPoolPassTwoTests
         var clauses = card.PlanClauses;
         Assert.Equal(2, clauses.Count);
         Assert.Equal(KokomiPlan.Kind.Block, clauses[0].Kind);
-        // `EB-646`: 5 until round 23. 3 now, 3 and a Weak at dusk -- the Weak
-        // is what the Dusk line is bought for.
-        Assert.Equal(3, clauses[0].Amount);
+        // `EB-655`: written-only, 4 Block and the Weak -- and the Weak is what
+        // the Dusk line is bought for, because it lands before the swing it
+        // was written against.
+        Assert.Equal(4, clauses[0].Amount);
         Assert.Equal(KokomiPlan.Kind.ApplyWeak, clauses[1].Kind);
         Assert.Equal(KokomiPlan.Aim.FrontEnemy, clauses[1].Aim);
         Assert.Contains("dusk: true", Source("ProtoKkNightWatch"));
@@ -471,7 +476,7 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void All_seven_rows_are_offerable_and_none_is_in_the_starter()
+    public void All_six_surviving_rows_are_offerable_and_none_is_in_the_starter()
     {
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
@@ -479,7 +484,6 @@ public class KokomiPoolPassTwoTests
                  {
                      "ProtoKkOpeningGambit", "ProtoKkSecondWave",
                      "ProtoKkScoutAhead", "ProtoKkSecondThoughts",
-                     "ProtoKkConvergingTide",
                      "ProtoKkBreakwater", "ProtoKkNightWatch",
                  })
         {

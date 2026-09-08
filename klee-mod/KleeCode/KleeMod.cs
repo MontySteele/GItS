@@ -158,6 +158,12 @@ public static class KleeMod
                     Powers.RecallFromDiscard.PromptText,
                 [Powers.RecallFromExhaust.PromptKey] =
                     Powers.RecallFromExhaust.PromptText,
+                // `EB-655`. The `scry_bottom` screen, on the same terms: one
+                // verb, one ruled string, and this dictionary is its only
+                // source. OUTSIDE the compile switch below, because the op is
+                // a sheet verb any character may print and not a prototype
+                // rule.
+                [Powers.ScryBottom.PromptKey] = Powers.ScryBottom.PromptText,
 #if PROTOTYPE_CARDS
                 // QUARANTINED (the Kokomi overhaul, draft 6). Moon's
                 // Reflection's exhaust-pile screen, on exactly the terms the three rows

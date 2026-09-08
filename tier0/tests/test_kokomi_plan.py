@@ -831,12 +831,12 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     from tier0.content import loader
 
     assert "proto_kk_the_moon_overlooks_the_waters"         not in C.KOKOMI_OVERHAUL_POOL_IDS
-    # FORTY-ONE after pool pass two (`EB-643`, R265) and `EB-649`
+    # FORTY after pool pass two (`EB-643`, R265) and `EB-649`
     # (round 23, Ebb Tide retired): seven rows that reach INTO the
     # queue. The count the row was filed against was 34, and what it
     # pins is the withdrawal, not the size -- so it moves with the
     # pool and the absence does not.
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 41
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 40
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -1365,13 +1365,17 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     the pre-draw point the slice's sec.2 prose asks for. There is no broadcast
     between the energy reset and the draw, so a Plan resolved "before the draw"
     resolves before the BLOCK CLEAR and the ENERGY RESET too -- and Read the
-    Field's planned Block, Coral Bulwark's, Cleansing Wave's and Battle Plan's
+    Field's planned Block, Coral Bulwark's, Cleansing Wave's and Ripple's
     planned Energy would all be wiped by the setup that follows them.
+
+    RIPPLE AND NOT BATTLE PLAN SINCE `EB-655`: pool pass three took the
+    `energy` clause off Battle Plan (it paid the write back its own cost), so
+    the Energy half of this claim is read off the row that still prints one.
 
     This is that claim made falsifiable: a Plan written on turn N leaves Block
     and Energy standing when the pilot gets to decide on turn N+1.
     """
-    ids = ["proto_kk_read_the_field"] * 4 + ["proto_kk_battle_plan"] * 4
+    ids = ["proto_kk_read_the_field"] * 4 + ["proto_kk_ripple"] * 4
     player = loader.build_player_from_ids("kokomi", ids)
     seen = {}
 
@@ -1385,7 +1389,7 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     run_fight(player, [make_enemy(hp=400, intents=BLOCKER)], pilot, seed=3)
     # Turn 2 opens with BOTH: the Block turn 1's Read the Field Plans wrote
     # (8 apiece, past a block clear that would have zeroed it) and the Energy
-    # its Battle Plan Plans wrote (1 apiece, past an energy reset that would
+    # its Ripple Plans wrote (1 apiece, past an energy reset that would
     # have overwritten it). Under the pre-draw hook the slice's prose asks for,
     # both of these read exactly the turn's own defaults.
     block, energy = seen[2]
@@ -2082,10 +2086,13 @@ def test_two_riders_on_one_entry_stack_on_the_entry_that_follows(overhaul):
     assert enemy.hp == 200 - 52
 
 
-def test_second_wave_under_nereids_is_three_carry_outs(overhaul):
-    """The rider is a FLAG and not a count: an entry carried out twice prints
-    its rider twice, and carried-out-twice said twice is still twice -- so the
-    entry it reaches runs `carry_out_times` + 1 = 3."""
+def test_second_wave_under_nereids_is_two_carry_outs(overhaul):
+    """`EB-655`. The two rules NO LONGER MEET on one entry, and that is the
+    pass's rule read literally: Nereid's Ascension doubles the FIRST entry of
+    the drain, Second Wave reaches the entry AFTER itself, and no entry is both.
+    So Second Wave written first is carried out twice (it is first), prints its
+    rider twice -- a FLAG, so still once -- and the entry behind it runs
+    1 + 1 = 2."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
     st.player.energy = 0
@@ -2095,7 +2102,7 @@ def test_second_wave_under_nereids_is_three_carry_outs(overhaul):
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
                                        cid="proto_kk_payload"))
     kokomi_plan.resolve_all(st)
-    assert st.player.energy == 3
+    assert st.player.energy == 2
 
 
 def test_change_of_plans_neither_sets_nor_consumes_a_rider(overhaul):
@@ -2129,9 +2136,12 @@ def test_scout_ahead_counts_the_carry_outs_after_it(overhaul, position, cards):
     assert [e["cards"] for e in drew] == [cards]
 
 
-def test_scout_ahead_first_of_three_under_nereids_reads_four(overhaul):
-    """The count is CARRY-OUTS and not entries (`EB-501`'s reading pointed
-    forwards): the two entries behind it are four carry-outs."""
+def test_scout_ahead_first_of_three_under_nereids_reads_two(overhaul):
+    """`EB-655`. The count is still CARRY-OUTS and not entries; there are just
+    fewer of them, because the Rare doubles the FIRST entry alone and the two
+    entries BEHIND this one are therefore two carry-outs, not four. Scout Ahead
+    itself is the first entry, so it is carried out twice and each carry-out
+    reads the same 2."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
     kokomi_plan.schedule(st, plan_card(
@@ -2142,8 +2152,8 @@ def test_scout_ahead_first_of_three_under_nereids_reads_four(overhaul):
                                            cid=f"proto_kk_p{i}"))
     kokomi_plan.resolve_all(st)
     drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    # Carried out twice itself, and each carry-out reads the same 4.
-    assert [e["cards"] for e in drew] == [4, 4]
+    # Carried out twice itself, and each carry-out reads the same 2.
+    assert [e["cards"] for e in drew] == [2, 2]
 
 
 # --- Second Thoughts ------------------------------------------------------
@@ -2363,21 +2373,23 @@ def _faces():
     return {r["id"]: r["description"] for r in rows if "description" in r}
 
 
-def test_the_dusk_lines_are_priced_to_the_face(overhaul):
-    """`EB-646`, round 23. The face-up half of both Dusk rows was dead -- the
-    seat never played either now-line, because the Dusk line was worth twice
-    it for the same Energy. Timing is the value, so the Dusk line is priced to
-    the face: Breakwater 4 now / 5 at dusk, Night Watch 3 / 3 and a Weak."""
+def test_the_dusk_lines_are_written_only(overhaul):
+    """`EB-646` (round 23) priced the face-up half to the Dusk line and the
+    seat still never played it; `EB-655` (pool pass three) takes the now-line
+    off both rows instead. WRITTEN-ONLY: no `effects` at all, so the card's
+    only legal target is the Bake-Kurage (`gen_klee_cards._plan_only_line`,
+    `KokomiTargets.PetOnly`) and its whole face is the Dusk clause, which is
+    what the bigger number is for."""
     breakwater = _row("proto_kk_breakwater")
-    assert breakwater.effects == [{"op": "block", "amount": 4}]
-    assert breakwater.plan == [{"op": "block", "amount": 5}]
-    assert breakwater.upgrade == {"block": 1, "plan_block": 1}
+    assert breakwater.effects == []
+    assert breakwater.plan == [{"op": "block", "amount": 6}]
+    assert breakwater.upgrade == {"plan_block": 2}
 
     watch = _row("proto_kk_night_watch")
-    assert watch.effects == [{"op": "block", "amount": 3}]
-    assert watch.plan[0] == {"op": "block", "amount": 3}
+    assert watch.effects == []
+    assert watch.plan[0] == {"op": "block", "amount": 4}
     assert watch.plan[1]["power"] == "weak" and watch.plan[1]["amount"] == 1
-    assert watch.upgrade == {"block": 2, "plan_block": 2}
+    assert watch.upgrade == {"plan_block": 2}
 
 
 def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
@@ -2487,3 +2499,223 @@ def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
             effects.OPS[op](kokomi_state(), {"op": op},
                             Card(id="proto_kk_x", name="x", cost=1,
                                  type="skill", effects=[]))
+
+
+# =============================================================================
+# POOL PASS THREE (`EB-655`, R266): competing faces instead of a cap.
+#
+# THE FINDING. Every two-line row printed the same trade -- a small now-line, a
+# bigger Plan -- so "write it" was the right answer on nearly every safe turn
+# and the two-Plan cap was an attempt to fix the shape from outside the cards.
+# The cap is retired as a rule; what replaces it is nine changes that give the
+# NOW-LINE something the written half cannot buy. Provenance:
+# docs/notes/prototype-surface-provenance.md, "Kokomi pool pass three".
+# =============================================================================
+
+def test_feint_pays_the_planned_number_after_a_carry_out(overhaul):
+    """Sango Isshin's shape at Common. The branch reads the same
+    `plan_carried_out_this_turn` predicate the Rare's condition does, so "a
+    Plan was carried out this turn" has one definition in the arm.
+    `ProtoKkFeint.OnPlay` is the twin."""
+    row = _row("proto_kk_feint")
+    branch = row.effects[0]
+    assert branch["op"] == "conditional"
+    assert branch["if"] == "plan_carried_out_this_turn"
+    assert branch["then"] == [{"op": "damage", "amount": 10,
+                               "target": "enemy"}]
+    assert branch["else"] == [{"op": "damage", "amount": 5, "target": "enemy"}]
+    assert row.plan == [{"op": "damage", "amount": 10,
+                         "target": "front_enemy"}]
+
+
+def test_feints_two_printed_numbers_upgrade_by_different_amounts(overhaul):
+    """5 -> 7 and 10 -> 13, which is what `conditional_then_damage` exists for:
+    `conditional_damage` moves both branches and the then-branch takes one
+    more. Read off the SMITHED card, so the sheet's two keys and the applier
+    agree."""
+    from tier0.content import upgrades
+
+    row = _row("proto_kk_feint")
+    assert row.upgrade == {"conditional_damage": 2,
+                           "conditional_then_damage": 1, "plan_damage": 3}
+    up = upgrades.apply_upgrade(_row("proto_kk_feint"))
+    branch = up.effects[0]
+    assert branch["then"][0]["amount"] == 13
+    assert branch["else"][0]["amount"] == 7
+    assert up.plan[0]["amount"] == 13
+
+
+def test_read_the_field_bottoms_the_costliest_of_the_top_two(overhaul):
+    """THE PILOT'S CHOICE, STATED. The sim has no human, so `scry_bottom`
+    bottoms the highest-cost card of the N it looked at -- the crude legible
+    version of "the one I can least afford next turn". The mod puts a real
+    selection screen here instead (`ScryBottom.Prompt`)."""
+    st = kokomi_state()
+    cheap = Card(id="cheap", name="cheap", cost=0, type="skill", effects=[])
+    dear = Card(id="dear", name="dear", cost=3, type="skill", effects=[])
+    tail = Card(id="tail", name="tail", cost=1, type="skill", effects=[])
+    st.player.draw_pile = [cheap, dear, tail]
+    effects.OPS["scry_bottom"](st, {"op": "scry_bottom", "amount": 2},
+                               _row("proto_kk_read_the_field"))
+    # The pick LEAVES THE TOP AND STAYS IN THE PILE: nothing is discarded.
+    assert [c.id for c in st.player.draw_pile] == ["cheap", "tail", "dear"]
+    assert any(e["event"] == "scry_bottom" for e in st.log)
+
+
+def test_scry_bottom_on_an_empty_pile_is_a_printed_no_op(overhaul):
+    """A look with nothing to look at is nothing said, and nothing raised."""
+    st = kokomi_state()
+    st.player.draw_pile = []
+    effects.OPS["scry_bottom"](st, {"op": "scry_bottom", "amount": 2},
+                               _row("proto_kk_read_the_field"))
+    assert not [e for e in st.log if e["event"] == "scry_bottom"]
+
+
+def test_riptide_adds_its_rider_per_debuffed_body(overhaul):
+    """The AoE rider CANNOT fold -- one printed number would have to stand for
+    a board that takes several -- so it is added per enemy, and the clean
+    enemy takes the base alone. `ProtoKkRiptide`'s emitted loop is the twin."""
+    clean = make_enemy(hp=200)
+    sick = make_enemy(hp=200)
+    sick.powers["weak"] = 1
+    st = kokomi_state(enemies=[clean, sick])
+    row = _row("proto_kk_riptide")
+    assert row.effects[0]["bonus_vs_debuff"] == 4
+    effects.resolve_card(st, row)
+    assert 200 - clean.hp == 9
+    assert 200 - sick.hp == 13
+
+
+def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
+    """12 / 6 more / Plan 17: the `damage` key moves the base it rides on and
+    `bonus_vs_debuff` moves the rider's own number."""
+    from tier0.content import upgrades
+
+    up = upgrades.apply_upgrade(_row("proto_kk_riptide"))
+    assert up.effects[0]["amount"] == 12
+    assert up.effects[0]["bonus_vs_debuff"] == 6
+    assert up.plan[0]["amount"] == 17
+
+
+def test_battle_plan_writes_a_draw_and_the_discount_and_no_energy(overhaul):
+    """The `energy` clause paid the write back its own cost, so writing was
+    free and the now-line was a strictly smaller card. It is gone."""
+    row = _row("proto_kk_battle_plan")
+    assert row.effects == [{"op": "draw", "amount": 1}]
+    assert row.plan == [{"op": "draw", "amount": 2},
+                        {"op": "next_attack_discount"}]
+    assert not any(fx["op"] == "energy" for fx in row.plan)
+    assert row.upgrade == {"draw": 1, "plan_draw": 1}
+
+
+def test_the_discount_pays_a_face_up_attack_and_not_a_write(overhaul):
+    """THE FACE-UP CLAUSE, which is what stops the reward paying for more
+    writing. `combat.card_cost` asks `plan_aimed_at_pet`, which is pure, so a
+    card that would be WRITTEN is priced at full and one that would be PLAYED
+    is priced at the discount."""
+    from tier0.engine import combat
+
+    enemy = make_enemy(hp=200, intents=ATTACKER)
+    st = kokomi_state(enemies=[enemy])
+    st.player.powers[kokomi_plan.NEXT_ATTACK_DISCOUNT] = 1
+    attack = Card(id="proto_kk_a", name="a", cost=2, type="attack",
+                  effects=[{"op": "damage", "amount": 5, "target": "enemy"}])
+    skill = Card(id="proto_kk_s", name="s", cost=2, type="skill",
+                 effects=[{"op": "block", "amount": 5}])
+    assert combat.card_cost(st, attack) == 1
+    # A SKILL IS NOT AN ATTACK, so the grant does not reach it.
+    assert combat.card_cost(st, skill) == 2
+    # AND A WRITE IS NOT A FACE-UP PLAY: a row with no now-line at all is a
+    # write whatever the board intends, and it pays full price.
+    written = Card(id="proto_kk_w", name="w", cost=2, type="attack",
+                   effects=[],
+                   plan=[{"op": "damage", "amount": 9,
+                          "target": "front_enemy"}])
+    assert kokomi_plan.plan_aimed_at_pet(st, written) is True
+    assert combat.card_cost(st, written) == 2
+
+
+def test_the_discount_is_one_stack_and_is_spent_by_the_play(overhaul):
+    """Rally's two readings one card type over: the face says "costs 1 less",
+    not "per Plan", and the grant is consumed by the play that takes it."""
+    st = kokomi_state()
+    kokomi_plan.next_attack_discount(st)
+    kokomi_plan.next_attack_discount(st)
+    assert st.player.powers[kokomi_plan.NEXT_ATTACK_DISCOUNT] == 1
+    attack = Card(id="proto_kk_a", name="a", cost=1, type="attack", effects=[])
+    kokomi_plan.spend_attack_discount(st, attack)
+    assert kokomi_plan.NEXT_ATTACK_DISCOUNT not in st.player.powers
+
+
+def test_nereids_doubles_only_the_first_plan_of_a_drain(overhaul):
+    """"Every Plan twice" paid for writing MORE, which is the shape this pass
+    undoes. The FIRST entry of each drain is doubled and the rest are not, so
+    three written Plans are four carry-outs."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
+    st.player.energy = 0
+    for i in range(3):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid="proto_kk_p%d" % i))
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 4
+    # AND THE MORNING'S DEPTH IS THE SAME FOUR, which is the number Tide Wall,
+    # Well Laid and Tide Chart all read.
+    assert st.kk_plans_this_morning == 4
+
+
+def test_a_one_plan_morning_under_nereids_is_still_paid(overhaul):
+    """The point of the change: the Rare no longer needs a deep morning to say
+    anything."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
+    st.player.energy = 0
+    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                       cid="proto_kk_one"))
+    kokomi_plan.resolve_all(st)
+    assert st.player.energy == 2
+
+
+def test_the_dusk_drain_pays_its_own_first_entry(overhaul):
+    """"Each turn" is read as "each DRAIN": a morning and a dusk are two drains
+    on one turn and each pays its own first entry, which is the drain-local
+    reading "the next Plan" already takes."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
+    st.player.energy = 0
+    card = plan_card([{"op": "energy", "amount": 1}], cid="proto_kk_dusk")
+    card.plan_dusk = True
+    kokomi_plan.schedule(st, card)
+    kokomi_plan.resolve_dusk(st)
+    assert st.player.energy == 2
+
+
+def test_converging_tide_is_off_the_sheet_and_out_of_the_pool(overhaul):
+    """`EB-655`. The row re-aimed a queued Plan, and this pass makes the queue
+    shallower on purpose. The RESOLVER stays with nothing spelling it, which is
+    `EB-649`'s shape."""
+    assert "proto_kk_converging_tide" not in C.KOKOMI_OVERHAUL_POOL_IDS
+    assert not [c for c in loader.prototype_cards()
+                if c.id == "proto_kk_converging_tide"]
+    assert "redirect_queued_plans" in effects.OPS
+
+
+def test_the_written_only_dusk_rows_can_only_be_written(overhaul):
+    """No now-line at all, so `plan_aimed_at_pet` is True whatever the board
+    intends -- the sim's reading of `KokomiTargets.PetOnly`, whose face leads
+    with "Play on the Bake-Kurage."."""
+    st = kokomi_state(enemies=[make_enemy(hp=200, intents=ATTACKER)])
+    for cid in ("proto_kk_breakwater", "proto_kk_night_watch"):
+        row = _row(cid)
+        assert row.effects == []
+        assert kokomi_plan.plan_aimed_at_pet(st, row) is True
+
+
+def test_battle_plans_grant_is_plan_only_from_a_body(overhaul):
+    """A now-line spelling would be a different, unpriced card."""
+    op = "next_attack_discount"
+    assert op in kokomi_plan.PLAN_ONLY_OPS
+    with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
+        effects.OPS[op](kokomi_state(), {"op": op},
+                        Card(id="proto_kk_x", name="x", cost=1,
+                             type="skill", effects=[]))

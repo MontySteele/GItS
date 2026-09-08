@@ -755,7 +755,10 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # in `_op_price` on this set's own EB-311 terms.
     "cancel_last_plan", "cancel_all_plans_cash", "redirect_queued_plans",
     "draw_per_plan_after", "next_plan_double_damage",
-    "next_plan_extra_carry_out"))
+    "next_plan_extra_carry_out",
+    # POOL PASS THREE (`EB-655`). Battle Plan's grant, a plan clause with its
+    # own branch in `_op_price` on the same terms.
+    "next_attack_discount"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1056,6 +1059,12 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # that is the answer rather than a gap in it. Deviating here would
         # price one character's energy discount above every other card's.
         return C.KOKOMI_OVERHAUL_RALLY_DISCOUNT * STATIC_ENERGY_VALUE
+    if op == "next_attack_discount":
+        # `EB-655`, Battle Plan's grant. Rally's price one card type over, and
+        # for Rally's reason: it is a `cost_mod` wearing a kit name, so it
+        # takes `cost_mod`'s rule and `cost_mod`'s measured dead dial. The
+        # `plan:` list it lives in already takes the delay discount.
+        return C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT * STATIC_ENERGY_VALUE
     if op == "remove_debuff":
         # Cleansing Wave: one debuff off HER. The mirror of putting one onto an
         # enemy, at the same rate -- `STATIC_DEBUFF_VALUE` is what this table
@@ -1115,7 +1124,11 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
                if fx.get("filter") == "status" else STATIC_EXHAUST_VALUE)
         n = fx.get("amount", 1)
         return (1.0 if n == "all" else _neutral_amount(fx)) * per
-    if op == "scry_discard":
+    if op in ("scry_discard", "scry_bottom"):
+        # `EB-655`. ONE PRICE FOR BOTH VERBS, and the equality is the claim:
+        # each moves exactly one card out of the next N draws however many are
+        # seen, and where it goes -- the discard pile or the bottom of the same
+        # pile -- is a difference this instrument cannot read.
         return STATIC_SCRY_VALUE
     if op == "recall_to_draw":
         # Source-agnostic on purpose (EB-118); the argument is at the
@@ -2435,6 +2448,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "next_companion_discount": "ZERO: it is a `cost_mod` wearing a kit name, "
                                "so it takes cost_mod's rule and cost_mod's "
                                "measured dead dial (STATIC_ENERGY_VALUE)",
+    "next_attack_discount": "ZERO: Rally's price one card type over -- a "
+                            "`cost_mod` wearing a kit name, at cost_mod's "
+                            "measured dead dial (STATIC_ENERGY_VALUE)",
     "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
                      "of putting one onto an enemy, at the same rate",
     # --- the Furina reframe (QUARANTINED, furina_reframe.FURINA_REFRAME) ---
@@ -2499,6 +2515,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "exhaust_from": "STATIC_STATUS_EXHAUST_VALUE filtered, else "
                     "STATIC_EXHAUST_VALUE",
     "scry_discard": "STATIC_SCRY_VALUE; one card leaves however many are seen",
+    "scry_bottom": "STATIC_SCRY_VALUE, `scry_discard`'s price: one card "
+                   "leaves the next N draws however many are seen, and where "
+                   "it lands is a difference this instrument cannot read",
     "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled, "
                       "source-agnostic (EB-118: `from: exhaust` prices the "
                       "same, PROPOSED at the constant)",

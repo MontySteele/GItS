@@ -774,10 +774,13 @@ PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
 # written" is true under both rules and is what `EB-563` / `EB-648` put here.
 # What goes under a cap is "not a limit", which is the clause the cap makes
 # false, and what arrives is the cap's own second half.
-PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans a "
-                          "turn; the rest wait in order. The number on the "
-                          "**Plan** badge is how many are written. The "
-                          "Bake-Kurage's own 1 is only its presence.")
+# `EB-650`, R266 (2026-09-07): "a turn" became "at the start of your turn",
+# because a Dusk carry-out is not capped and the old wording claimed it was.
+PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans at "
+                          "the start of your turn; the rest wait in order. "
+                          "The number on the **Plan** badge is how many are "
+                          "written. The Bake-Kurage's own 1 is only its "
+                          "presence.")
 
 # `EB-647`. THE WRITTEN NUMBER IS THE NUMBER, AND NOTHING SAID SO.
 #

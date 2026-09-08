@@ -2956,7 +2956,7 @@ with a note naming `EB-649` -- because the rule is the one a re-issue would
 want and deleting a resolver to re-derive it later is how a reading is lost.
 Its pins drive it directly, with no card in the path.
 
-### `proto_kk_converging_tide` -- re-aiming what is already written
+### `proto_kk_converging_tide` -- re-aiming what is already written (RETIRED, pool pass three, `EB-655`)
 
 "Every queued Plan aims at this enemy instead of the front." Three readings,
 and all three are stated in both engines:
@@ -3028,3 +3028,101 @@ child process, so an exported variable is what a lane already has, and not
 having to rebuild per arm is what the toggle exists for. It is deliberately NOT
 a `lint_constant_parity` row -- comparing the two defaults by value would pin 0
 against 0 and say nothing about the rule they share.
+
+## Kokomi pool pass three -- competing faces instead of a cap (`EB-655`, R266, 2026-09-07)
+
+THE FINDING THE PASS ANSWERS. Every two-line row in the arm printed the same
+trade: a small now-line, a bigger Plan. So "write it" was the right answer on
+nearly every safe turn, the queue only ever got deeper, and the rule the r23
+and r24 lanes ran into -- a cap on how many Plans a morning carries out -- was
+an attempt to fix the shape from the outside. [USER] retired the cap as a rule
+(R266, "Agreed, let's retire it"); the toggle stays dormant and no further cap
+lane is owed. What replaces it is nine changes that make the NOW-LINE worth
+something the written half cannot buy, so the choice lives on the face.
+
+THE NINE CHANGES.
+
+1. **Feint** -- "Deal 5 damage. If a Plan was carried out this turn, deal 10
+   damage instead." Plan 10; upgrade 7 / 13 / Plan 13. Sango Isshin's shape at
+   Common: the morning the jellyfish delivers is the morning Feint is worth
+   playing face-up, and the now-line then pays exactly what writing would have.
+   The two printed numbers upgrade by different amounts, which is why
+   `conditional_then_damage` exists (`tools/gen_klee_cards.py`,
+   `tier0/content/upgrades.py`).
+2. **Read the Field** -- "Gain 5 Block. Look at the top 2 cards of your draw
+   pile; put one on the bottom." Plan 10 Block; upgrade 7 / 12. The now-line
+   buys INFORMATION, which the bigger written number does not answer. The op is
+   new on both engines (`scry_bottom`): the mod shows the top two on the game's
+   own selection grid and moves the pick with `CardPileCmd.Add(...,
+   PileType.Draw, CardPilePosition.Bottom)`; the sim has no human and bottoms
+   the highest-cost card of the two, stated at `effects._op_scry_bottom` as the
+   stand-in for choice it is.
+3. **Riptide** -- "Deal 9 damage to ALL enemies, and 4 more to each enemy with
+   a debuff." Plan 13 to ALL; upgrade 12 / 6 more / Plan 17. Undertow's rider
+   widened to `all_enemies`, which cannot FOLD (one printed number would have
+   to stand for a board that takes several), so it prints its two numbers
+   separately and the loop adds the rider per body -- `bonus_vs_aura`'s shape
+   exactly. Against a board her own Weak and Vulnerable have touched the
+   now-line beats the written 13, so the kit's debuff layer decides which half
+   to play.
+4. **Battle Plan** -- the `energy` clause comes OFF. It paid the write back its
+   own cost, so writing was free and the now-line was a strictly smaller card.
+   Now: "Draw 1 card. Plan: Draw 2 cards; the first Attack you play face-up
+   this turn costs 1 less." Upgrade draw 2 / Plan draw 3. The discount is
+   narrow on purpose -- an ATTACK, one of them, and a card WRITTEN on the
+   Bake-Kurage is not a face-up play and does not take it -- so the reward is
+   spent on the board rather than on more writing. **What the mod cannot see:**
+   `TryModifyEnergyCostInCombat` is handed a card and no `CardPlay`, so it
+   cannot ask `KokomiPlan.PlayedOnPet`; an Attack dragged onto the jellyfish is
+   therefore charged the discounted price in the mod while the sim charges full
+   (`combat.card_cost` asks the pure `plan_aimed_at_pet`). The grant is never
+   SPENT by a write on either side, so the first Attack actually played still
+   gets it. Disclosed rather than papered over; closing it needs a target-aware
+   cost seam the game does not offer.
+5. **Nereid's Ascension** -- "At the start of your turn, the Bake-Kurage
+   carries out your first Plan twice." Every Plan twice paid for writing MORE,
+   which is the shape this pass undoes, and it made a deep morning the Rare's
+   only line. `carry_out_times` / `CarryOutTimes` are now read for the FIRST
+   entry of each drain -- morning and dusk are two drains on one turn and each
+   pays its own first entry, which is the drain-local reading "the next Plan"
+   already takes. Consequences pinned: Scout Ahead's forward count is entries
+   and no longer entries times two, a three-Plan morning under the Rare is four
+   carry-outs, and Second Wave and the Ascension can no longer meet on one
+   entry at all (Second Wave reaches the entry AFTER itself; no entry is both
+   first and later).
+6. **Breakwater and Night Watch are WRITTEN-ONLY.** `EB-646` priced the face-up
+   half to the Dusk line and the seat still never played it, so the now-line
+   comes off instead: no `effects`, `plan_dusk: true`, Breakwater "Dusk Plan:
+   Gain 6 Block" (upgrade 8) and Night Watch "Dusk Plan: Gain 4 Block and apply
+   1 Weak" (upgrade 6 Block). The existing plan-only shape does the rest --
+   `KokomiTargets.PetOnly` and the face leading with "Play on the Bake-Kurage."
+   (`gen_klee_cards._plan_only_line`), so a play that is not a write is refused
+   with the reason printed.
+7. **Converging Tide is RETIRED.** It re-aimed a queued Plan at a chosen enemy,
+   which is a decision about a queue this pass deliberately makes shallower:
+   with the cap gone and the Rare paying the FIRST Plan, "which body does the
+   morning land on" stopped being a question worth a card. Off the sheet, off
+   `KOKOMI_OVERHAUL_POOL_IDS` (41 -> 40) and off `KokomiOverhaulRoster`;
+   `redirect_queued_plans` stays registered on both engines with nothing
+   spelling it, the way `cancel_all_plans_cash` did at `EB-649`. **Second
+   Thoughts is unchanged.**
+8. **The cap sentence is corrected.** `KokomiPlan.CapSentenceFormat` and the
+   page's count note now read "Carries out at most N at the start of your turn;
+   the rest wait in order." Dusk carry-outs are NOT capped -- a Dusk Plan has
+   waited for nothing -- so "a turn" claimed a limit the rule does not have.
+   The toggle stays, default 0, dormant.
+9. **The faces are regenerated** and every one of them is under the length
+   lint; the Dusk keyword tip is unchanged.
+
+THE AUDIT. Nine arms went to the doctrine door
+(`review/qa/kokomi-pass-three-2026-09-07-prompt.txt` /
+`-reply.md`): eight FOLLOWS and one REQUIRES_MODIFICATION -- Feint at base 6
+matched Strike's printed 1-Energy 6 damage without a carry-out and exceeded it
+by 4 with one. The base is 5, and the re-read at 5
+(`-reread-prompt.txt` / `-reread-reply.md`) is FOLLOWS on C6: "1 damage worse
+without a carry-out and 4 better on a carry-out turn". The record is
+`review/records/kokomi-pass-three-audit-2026-09-07.md`. The reply's closing
+paragraph is kept as filed and is not claimed away: the arms establish
+competing Energy uses on SOME safe turns and not on every one, and Battle
+Plan's discount does not exclude writing an Attack under the engine the
+auditor was given -- which is exactly the mod-side gap item 4 discloses.

@@ -946,12 +946,21 @@
 
 # --- the Tactician: Plans, and the cards that pay per Plan (packet sec.4) ---
 
+# POOL PASS THREE (`EB-655`): the now-line PAYS THE PLAN'S OWN NUMBER after a
+# carry-out -- Sango Isshin's shape at Common. Base 5 answers the audit's one
+# REQUIRES_MODIFICATION; the whole of it is in the provenance note.
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 damage. [gold]Plan[/gold]: Deal 10 damage.",
-   effects: [{op: damage, amount: 6, target: enemy}],
-   plan: [{op: damage, amount: 10, target: front_enemy}]}
+   description: "Deal {IfUpgraded:show:7|5} damage. If a [gold]Plan[/gold] was carried out this turn, deal {IfUpgraded:show:13|10} damage instead.",
+   effects: [{op: conditional, if: plan_carried_out_this_turn,
+              then: [{op: damage, amount: 10, target: enemy}],
+              else: [{op: damage, amount: 5, target: enemy}]}],
+   plan: [{op: damage, amount: 10, target: front_enemy}],
+   # 7 / 13 / Plan 13, by two keys: `conditional_damage` moves both branches
+   # and `conditional_then_damage` moves the carry-out branch alone.
+   upgrade: {conditional_damage: 2, conditional_then_damage: 1,
+             plan_damage: 3}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
@@ -963,12 +972,17 @@
    # card a trade, Feint's shape; the now-line does not upgrade.
    upgrade: {plan_damage: 3}}
 
+# POOL PASS THREE (`EB-655`): the now-line buys INFORMATION the written half
+# cannot, which is a second reason to play it face-up.
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 10 [gold]Block[/gold].",
-   effects: [{op: block, amount: 5}],
-   plan: [{op: block, amount: 10}]}
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Look at the top 2 cards of your draw pile; put one on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: block, amount: 5},
+             {op: scry_bottom, amount: 2}],
+   plan: [{op: block, amount: 10}],
+   # 7 / 12. The scry does not upgrade -- one printed number per half.
+   upgrade: {block: 2, plan_block: 2}}
 
 - {id: proto_kk_exposed_flank, name: "Exposed Flank", character: kokomi,
    authored_by: [claude],
@@ -1008,7 +1022,9 @@
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension (proto)", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, the [gold]Bake-Kurage[/gold] carries out every [gold]Plan[/gold] twice.",
+   # POOL PASS THREE (`EB-655`): THE FIRST PLAN, NOT EVERY PLAN. Doubling
+   # every Plan paid for writing MORE, which is the shape the pass undoes.
+   description: "At the start of your turn, the [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] twice.",
    effects: [{op: apply_power, power: kk_nereids_ascension, amount: 1, target: self}],
    # Its price is two energy on a turn that writes no Plan; the upgrade buys
    # that turn back rather than moving a number the card does not print.
@@ -1167,13 +1183,15 @@
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 2 cards.",
+   # POOL PASS THREE (`EB-655`): THE ENERGY CLAUSE COMES OFF -- it paid the
+   # write back its own cost. The discount that replaces it is narrower on
+   # purpose: an Attack, one of them, and never a card written on the pet.
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards; the first Attack you play face-up this turn costs 1 less.",
    effects: [{op: draw, amount: 1}],
-   # R243 card audit pick 1: 1 Energy and 2 cards; the upgrade stays on the draw.
-   # R250 pick 1 (round 4d sec.6, default): now-line added ("Draw 1 card");
-   # the default rule has no now-line key for `draw`, so this stays true.
-   plan: [{op: energy, amount: 1},
-          {op: draw, amount: 2}]}
+   plan: [{op: draw, amount: 2},
+          {op: next_attack_discount}],
+   # draw 2 / Plan draw 3.
+   upgrade: {draw: 1, plan_draw: 1}}
 
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
@@ -1213,13 +1231,15 @@
 - {id: proto_kk_riptide, name: "Riptide", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: common,
-   description: "Deal 9 damage to ALL enemies. [gold]Plan[/gold]: Deal 13 damage to ALL enemies.",
-   effects: [{op: damage, amount: 9, target: all_enemies}],
+   # POOL PASS THREE (`EB-655`): the now-line reads the BOARD instead of
+   # reading smaller -- her own debuff layer decides which half to play.
+   description: "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a debuff. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies.",
+   effects: [{op: damage, amount: 9, target: all_enemies, bonus_vs_debuff: 4}],
    plan: [{op: damage, amount: 13, target: all_enemies}],
-   # Priced off Deep Current (1: 6 to ALL) as the cheaper now-line, with the
-   # brief's usual four-point Plan premium; the first draft at 1 energy was a
-   # strictly better Kurage's Oath and was re-priced at 2.
-   upgrade: {damage: 3, plan_damage: 4}}
+   # Priced off Deep Current (1: 6 to ALL) with the brief's four-point Plan
+   # premium; the 1-energy draft was a strictly better Kurage's Oath.
+   # 12 / 6 more / Plan 17.
+   upgrade: {damage: 3, bonus_vs_debuff: 2, plan_damage: 4}}
 
 - {id: proto_kk_pincer, name: "Pincer", character: kokomi,
    authored_by: [claude],
@@ -1314,41 +1334,33 @@
    effects: [{op: cancel_last_plan}],
    upgrade: {add: {op: draw, amount: 1}}}
 
-- {id: proto_kk_converging_tide, name: "Converging Tide", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. Your queued [gold]Plans[/gold] aim at this enemy instead of the front.",
-   # ONLY THE FRONT AIM MOVES -- an ALL clause does not aim at the front, so
-   # there is nothing on it for "instead of the front" to be about -- and a
-   # dead target falls back to the front at carry-out.
-   effects: [{op: block, amount: 4},
-             {op: redirect_queued_plans, target: enemy}],
-   upgrade: {block: 2}}
+# CONVERGING TIDE IS RETIRED (POOL PASS THREE, `EB-655`); the
+# `redirect_queued_plans` op stays registered with no row spelling it, the way
+# `cancel_all_plans_cash` did at `EB-649`. Provenance carries the argument.
 
 - {id: proto_kk_breakwater, name: "Breakwater", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 5 [gold]Block[/gold].",
-   # DUSK: the line lands at the END of this turn, before the enemies act, so
-   # the Block guards the swing the now-line was too small for. Priced against
-   # Read the Field; the comparison is in the provenance note.
-   effects: [{op: block, amount: 4}],
-   plan: [{op: block, amount: 5}],
+   # POOL PASS THREE (`EB-655`): WRITTEN-ONLY. `EB-646` priced the face-up
+   # half to the Dusk line and the seat still never played it, so the now-line
+   # comes off; the plan-only shape makes the pet the only legal target.
+   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   effects: [],
+   plan: [{op: block, amount: 6}],
    plan_dusk: true,
-   upgrade: {block: 1, plan_block: 1}}
+   upgrade: {plan_block: 2}}
 
 - {id: proto_kk_night_watch, name: "Night Watch", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 3 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 3 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
-   # THE SECOND DUSK ROW, and the one whose Weak is the point: it lands before
-   # the enemies act, so it cuts the swing it was written for rather than the
-   # one after it. Priced against Coral Bulwark in the provenance note.
-   effects: [{op: block, amount: 3}],
-   plan: [{op: block, amount: 3},
+   # POOL PASS THREE (`EB-655`): WRITTEN-ONLY, Breakwater's reasoning with the
+   # Weak on it -- and the Weak lands before the swing it was written against.
+   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
+   effects: [],
+   plan: [{op: block, amount: 4},
           {op: apply_power, power: weak, amount: 1, target: front_enemy}],
    plan_dusk: true,
-   upgrade: {block: 2, plan_block: 2}}
+   upgrade: {plan_block: 2}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

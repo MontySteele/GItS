@@ -949,9 +949,21 @@ def test_every_kokomi_row_declares_the_target_type_the_slice_states():
                 "pet-accepting target type")
             continue
         checked += 1
-        aims_at_enemy = any(
-            fx.get("target") in ("enemy", "front_enemy")
-            for fx in row.get("effects") or [])
+        # `EB-655`. THE AIM IS READ THROUGH A CONDITIONAL, because the
+        # generator reads it through the card's whole body: Feint's now-line is
+        # a `conditional` whose two branches both hit an enemy, and a
+        # derivation that only looked at the top level would call the row
+        # self-aimed and take the pet-or-enemy drag away from an Attack.
+        def _aims(effs):
+            for fx in effs or []:
+                if fx.get("target") in ("enemy", "front_enemy"):
+                    return True
+                if fx.get("op") == "conditional" and (
+                        _aims(fx.get("then")) or _aims(fx.get("else"))):
+                    return True
+            return False
+
+        aims_at_enemy = _aims(row.get("effects"))
         expected = ("KokomiTargets.PetOnly" if not row.get("effects")
                     else "KokomiTargets.PetOrEnemy" if aims_at_enemy
                     else "KokomiTargets.PetOrSelf")

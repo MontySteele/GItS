@@ -130,6 +130,13 @@ public static class KokomiPlan
         // not 4.
         NextPlanDoubleDamage,
         NextPlanExtraCarryOut,
+        // `EB-655`, R266 (pool pass three). BATTLE PLAN: "the first Attack you
+        // play face-up this turn costs 1 less." A GRANT and not a number --
+        // the size is the rule's (<see cref="NextAttackDiscountPower.Discount"/>)
+        // -- so the clause carries no amount, exactly as the two riders above
+        // carry none. It replaced an `Energy` clause that paid the write back
+        // its own cost, which is the shape this pass exists to undo.
+        NextAttackDiscount,
     }
 
     /// <summary>
@@ -436,8 +443,17 @@ public static class KokomiPlan
     /// `blindplay_notes.PLAN_COUNT_CAPPED_NOTE`, which does not re-spell the
     /// rule -- it READS this sentence off the wire (`EB-653`'s other half).
     /// </summary>
+    /// <summary>
+    /// `EB-650`, R266 (2026-09-07). THE SENTENCE SAID "A TURN" AND THE RULE IS
+    /// ABOUT THE MORNING. <see cref="ResolveDusk"/> is not capped -- a Dusk
+    /// Plan has waited for nothing -- so under a declared cap a turn could
+    /// carry out more Plans than the face claimed was its limit, which is the
+    /// r24 defect one word over. "At the start of your turn" is the drain the
+    /// cap binds.
+    /// </summary>
     private const string CapSentenceFormat =
-        " Carries out at most {0} a turn; the rest wait in order.";
+        " Carries out at most {0} at the start of your turn; the rest wait "
+      + "in order.";
 
     /// <summary>The cap's sentence for a face, or empty where no cap was
     /// declared. See <see cref="CapSentenceFormat"/>.</summary>
@@ -1053,8 +1069,11 @@ public static class KokomiPlan
         // That is the price of order-independence and it is deliberate.
         // `kokomi_plan.resolve_all` multiplies by the same term in the same
         // place.
+        // `EB-655`. ONE EXTRA CARRY-OUT AND NOT A DOUBLING: the Rare doubles
+        // the FIRST entry alone, so a three-Plan morning under it is four
+        // carry-outs and not six. `kokomi_plan.resolve_all` counts the same.
         KokomiOverhaulLedger.For(kokomi).NoteMorning(
-            due.Count * CarryOutTimes(kokomi));
+            due.Count + (CarryOutTimes(kokomi) > 1 ? 1 : 0));
         // The display list is handed over BEFORE the sync, because `Sync`
         // refreshes the strip and the strip reads `Showing`: the badge goes
         // away in the same beat the column stays up, which is the true
@@ -1175,11 +1194,24 @@ public static class KokomiPlan
             // may write, because that rider is not on the board yet when this
             // number is asked. Read per entry, so a Scout Ahead written first
             // and one written last answer honestly.
-            var after = (due.Count - index - 1) * CarryOutTimes(kokomi);
+            // `EB-655`. ENTRIES AFTER THIS ONE, ONE CARRY-OUT EACH: Nereid's
+            // Ascension now doubles the FIRST entry of a drain only, and this
+            // entry is never the first when anything follows it. The old term
+            // multiplied by `CarryOutTimes`, honest while the Rare doubled
+            // every Plan; keeping it would have Scout Ahead promise carry-outs
+            // that no longer happen.
+            var after = due.Count - index - 1;
             // `CarryOutTimes + 1` UNDER SECOND WAVE, and the rider is a FLAG:
             // under Nereid's Ascension the entry it reaches is carried out
             // three times, not four.
-            var times = CarryOutTimes(kokomi) + (extraThis ? 1 : 0);
+            // `EB-655`. THE FIRST ENTRY OF THIS DRAIN IS THE ONE NEREID'S
+            // DOUBLES, and "each turn" is read as "each DRAIN": a morning and
+            // a dusk are two drains on one turn and each pays its own first
+            // entry. That is the drain-local reading every other positional
+            // rule in this arm already takes -- "the next Plan" means "in this
+            // drain" -- and it is what lets the Rare pay a one-Plan morning.
+            var times = (index == 0 ? CarryOutTimes(kokomi) : 1)
+                      + (extraThis ? 1 : 0);
             for (var i = 0; i < times; i++)
             {
                 var (wroteDouble, wroteExtra) = await ResolveEntry(
@@ -1552,13 +1584,19 @@ public static class KokomiPlan
     }
 
     /// <summary>
-    /// How many times ONE Plan is carried out right now: two while Nereid's
-    /// Ascension is on her, one otherwise.
+    /// How many times THE FIRST Plan of a drain is carried out right now: two
+    /// while Nereid's Ascension is on her, one otherwise.
+    ///
+    /// `EB-655` (pool pass three) NARROWED THE CALLER AND NOT THIS FUNCTION.
+    /// The Rare used to double every Plan, which paid for writing MORE and
+    /// made a deep morning its only line; keyed to the first entry of each
+    /// drain it pays a one-Plan morning too, and makes queue ORDER the
+    /// decision the card is about. <see cref="Drain"/> is where that is read.
     ///
     /// A NAMED READ rather than an inline predicate, because WHERE it is asked
-    /// is the rule: <see cref="ResolveAll"/> calls it inside the drain loop,
-    /// before each entry, so a Plan written in the same morning the Rare was
-    /// played is doubled too -- the power is on her by then.
+    /// is the rule: <see cref="Drain"/> calls it inside the loop, so a Rare
+    /// played in the same morning is on her by the time the question is
+    /// asked.
     ///
     /// A POWER AND NO LONGER A WINDOW (`EB-492`). The Rare is a Power costing
     /// 2 and lasting the fight; there is nothing to tick down, and "every Plan
@@ -1963,6 +2001,15 @@ public static class KokomiPlan
                 // and <see cref="Drain"/> spends it on the entry that follows.
                 // No number, so the beat says the card's name alone -- which is
                 // the honest line for a Plan whose effect is on the NEXT one.
+                return null;
+
+            case Kind.NextAttackDiscount:
+                // `EB-655`. BATTLE PLAN's grant, applied here and read at the
+                // cost seam. No number on the beat: the size is the rule's and
+                // the line the player wants is "Battle Plan happened", the
+                // same shape the two riders above take.
+                await KokomiOverhaulKit.NextAttackDiscount(
+                    choiceContext, kokomi, null);
                 return null;
 
             case Kind.Draw:

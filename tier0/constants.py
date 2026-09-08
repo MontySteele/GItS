@@ -775,6 +775,12 @@ KOKOMI_OVERHAUL = False
 # `tools/lint_constant_parity.py` to compare the C# mirror BY VALUE.
 KOKOMI_OVERHAUL_CASKET_STRIKE = 2   # Hydro, per debuff she applies to an enemy
 KOKOMI_OVERHAUL_RALLY_DISCOUNT = 1  # Rally: the next Companion costs this less
+# `EB-655` (pool pass three). Battle Plan's carry-out: "the first Attack you
+# play face-up this turn costs 1 less." A RULE'S number and not a card's, on
+# exactly Rally's terms -- the card prints it, the power carries it, and
+# `NextAttackDiscountPower.Discount` is the C# mirror `lint_constant_parity`
+# compares BY VALUE.
+KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT = 1
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one
@@ -887,12 +893,15 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # EIGHT UNTIL `EB-649` (round 23): Ebb Tide drew three times on the cap
     # lane and was played none of them, so the row left the sheet and this
     # tuple. Its op stays registered with nothing spelling it --
-    # `kokomi_plan.cancel_all_plans_cash` says why.
+    # `kokomi_plan.cancel_all_plans_cash` says why. SIX SINCE POOL PASS THREE
+    # (`EB-655`): Converging Tide re-aimed a queued Plan, a decision about a
+    # queue this pass deliberately makes shallower, and left the sheet the same
+    # way -- `kokomi_plan.redirect_queued_plans` stays registered with nothing
+    # spelling it.
     "proto_kk_opening_gambit",
     "proto_kk_second_wave",
     "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
-    "proto_kk_converging_tide",
     "proto_kk_breakwater",
     "proto_kk_night_watch",
 )

@@ -994,6 +994,37 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
+        elif key == "conditional_then_damage":
+            # `EB-655` (Feint). THE THEN-BRANCH ALONE, on top of whatever
+            # `conditional_damage` moved: a card whose two printed numbers
+            # upgrade by DIFFERENT amounts has no other spelling, and Feint is
+            # the first row that needs one (5 -> 7 and 10 -> 13).
+            #
+            # THE FIRST DAMAGE OF EACH `then`, the one-owner rule every other
+            # branch key keeps, so the number this moves is the number the face
+            # prints through `_branch_amount_text`.
+            hits = []
+            for fx in everywhere:
+                if fx.get("op") != "conditional":
+                    continue
+                first = next((e for e in fx.get("then", [])
+                              if e.get("op") == "damage"
+                              and e.get("target") != "self"
+                              and isinstance(e.get("amount"), int)), None)
+                if first is not None:
+                    hits.append(first)
+            for fx in hits:
+                fx["amount"] += val
+            ok = bool(hits)
+        elif key == "bonus_vs_debuff":
+            # `EB-655` (Riptide). The RIDER's own number, where `damage` moves
+            # the base it rides on: "9 damage to ALL, and 4 more to each enemy
+            # with a debuff" prints two numbers and this pass moves them by
+            # different amounts (+3 and +2). `bonus_vs_aura` has no key for the
+            # same reason it has no row that needs one.
+            ok = _bump_first((fx for fx in everywhere
+                              if isinstance(fx.get("bonus_vs_debuff"), int)),
+                             "bonus_vs_debuff", val)
         elif key == "formula_per":
             hit = next((fx for fx in everywhere
                         if fx.get("op") == "damage"
