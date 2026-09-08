@@ -16,10 +16,18 @@ call and shows this process's stderr to Claude**; any other code is a
 non-blocking error. So every deny path here prints ONE line naming the rule
 and the legal alternative, and returns 2.
 
-PORTABILITY. The wiring in `.claude/settings.json` is `python tools/hooks/<x>.py`
-so it runs from Git Bash and from PowerShell alike, and nothing in here shells
-out to a POSIX-only utility. Paths resolve from `__file__`, never from the
-process cwd, because a hook's cwd is not something this repo controls.
+PORTABILITY. The wiring in `.claude/settings.json` is
+`python "$CLAUDE_PROJECT_DIR/tools/hooks/<x>.py"` so it runs from Git Bash and
+from PowerShell alike, and nothing in here shells out to a POSIX-only utility.
+The `$CLAUDE_PROJECT_DIR` is not decoration: a hook command is resolved against
+the SHELL's cwd, so the bare relative spelling this line used to carry made
+every tool call fail -- with `can't open file ... tools/hooks/...` and a
+non-blocking hook error -- for as long as the cwd sat anywhere without a
+`tools/hooks/` under it. Claude Code sets the variable to the session root for
+exactly this. Paths INSIDE these scripts resolve from `__file__`, never from
+the process cwd, because a hook's cwd is not something this repo controls; the
+one thing read off the payload's `cwd` is WHERE a judged command would run,
+which is a different question and the right one.
 
 Usage (every script):
     <script>.py                 # read the hook payload from stdin
