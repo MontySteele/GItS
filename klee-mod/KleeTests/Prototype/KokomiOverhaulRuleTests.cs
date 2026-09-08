@@ -285,12 +285,17 @@ public class KokomiOverhaulRuleTests
         //
         // FIFTEEN SINCE `EB-643` (R265), and the three are one group: each
         // names a PLACE IN A RUNNING DRAIN rather than a quantity, which is
-        // what makes all three plan-only. `DrawPerPlanThisTurn` is Scout
-        // Ahead's count of the drain it is carried out in (`EB-679`: itself
-        // included, so its position stopped mattering), and the two
-        // `NextPlan*` kinds
-        // are riders on the entry carried out immediately after the one that
-        // prints them.
+        // what makes all three plan-only. `DrawPerPlanAfter` is Scout Ahead's
+        // count of the carry-outs that FOLLOW it, and the two `NextPlan*`
+        // kinds are riders on the entry carried out immediately after the one
+        // that prints them.
+        //
+        // EIGHTEEN SINCE R267 PICK 3, and the eighteenth is a kind NO ROW
+        // SPELLS: `DrawPerPlanThisTurn` is `EB-679`'s whole-drain recount of
+        // Scout Ahead, which pick 3 took the card back off. It is KEPT rather
+        // than retired -- the clause still resolves, so a sheet can reach for
+        // it without a build. A retirement, not a keep, would owe this list a
+        // line.
         //
         // SEVENTEEN SINCE `EB-685` (pool pass five): Breakwater's
         // `BlockPerPlanHeld`, the queue read AT DUSK. It is its own kind and
@@ -311,7 +316,7 @@ public class KokomiOverhaulRuleTests
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
                     "BlockPerPlanThisMorning", "BlockPerPlanHeld",
-                    "DrawPerPlanThisTurn",
+                    "DrawPerPlanAfter", "DrawPerPlanThisTurn",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
                     "NextAttackDamage" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));

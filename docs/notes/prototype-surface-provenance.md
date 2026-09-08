@@ -3345,3 +3345,43 @@ declared false, `declares_no_element`, and the mixed-declaration blocker), and
 the `plan_held` predicate in both engines' registries with its
 `_ENGINE_LIVE_PREDICATES` registration -- the `EB-144` pilot fix, which is
 `EB-712`'s standing evidence.
+
+## R267 (2026-09-08): Slack Water's Plan returns to the morning, Scout Ahead's clause returns to its position
+
+Two moves are reversed; each puts a row back to its pre-pass shape.
+
+SLACK WATER'S PLAN HALF IS A MORNING LINE AGAIN. Pool pass five (`EB-685`)
+moved it to Dusk on the reading that the morning Weak arrived after the swing
+it was written against. The Kokomi brief, line 75, names the next-morning Weak
+as the kit's TURN-ONE DECISION -- one Weak on the front enemy now, or one on
+every body tomorrow -- and a starter card is [USER]'s, not a default's. So the
+move was a redesign taken as a D pick and it is reversed: the row is byte-equal
+to its pre-pass-five form, and Breakwater is the surface's only Dusk row again.
+The `plan_dusk` machinery stays exactly as pass five built it.
+
+The pool's before-the-swing multi-body Weak is now A POOL QUESTION WITH NO ROW.
+Night Watch stays retired -- pass five's retirement was on its own merits, it
+lost every draft comparison in r27, and nothing here reopens it -- so if the
+arm wants that line it will be a new card rather than a phase moved onto a
+starter.
+
+SCOUT AHEAD COUNTS THE PLANS THAT FOLLOW IT AGAIN. Pool pass four (`EB-679`)
+replaced the positional clause with a whole-morning count because round 26's
+lane never wrote the card: a row worth 2 written first and 0 written last
+competed for its slot with Plans that always paid. THAT IS ONE SEAT AVOIDING
+THE 0-PAYOUT SLOT, which is the ordering decision working, not a defect in it.
+Round 28's praise for the recounted card -- "always written last" -- rested on
+lane 2 believing position still mattered, so it is not evidence for the recount
+either way. The clause returns in both engines: first of three draws 2, last
+draws 0, alone draws 0, and the face says "later" so a seat can read the rule
+off the card. The next Kokomi seat round reads it.
+
+Two details. NEREID'S ASCENSION ADDS NOTHING to the count, and that follows
+from `EB-655` rather than being chosen here: the Rare carries out the FIRST
+entry of a drain and no other, and an entry is never the first when something
+follows it, so every later entry is exactly one carry-out. A Scout Ahead
+written first is itself carried out twice and pays its 2 each time; the test
+pins both halves. And `draw_per_plan_this_turn`, pass four's whole-drain
+spelling, is KEPT REGISTERED AND RESOLVED on both engines with no row spelling
+it, the standing `scry_bottom` and `redirect_queued_plans` already have -- the
+clause works if a sheet reaches for it, without a build.

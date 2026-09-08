@@ -6064,11 +6064,14 @@ OPS = {
     # spelling would read the queue before the turn's Plans were written and
     # pay for a queue the player has not built yet.
     "block_per_plan_held": _op_kokomi_plan_only,
-    # EIGHT, and three of them are `EB-643`'s (R265). Same terms as the four
+    # NINE, and four of them are `EB-643`'s (R265). Same terms as the four
     # above, and plan-only for one reason they share: each names a POSITION in
     # a running drain -- "the next Plan", "each Plan carried out after this
     # one" -- so a now-line spelling would ask about a drain that is not
     # running and answer nothing every time it was played.
+    # R267 pick 3: Scout Ahead is back on the positional count. Both spellings
+    # stay registered; only `draw_per_plan_after` is on a row today.
+    "draw_per_plan_after": _op_kokomi_plan_only,
     "draw_per_plan_this_turn": _op_kokomi_plan_only,
     "next_plan_double_damage": _op_kokomi_plan_only,
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
