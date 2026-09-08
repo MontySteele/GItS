@@ -42,7 +42,7 @@ import os
 import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePath
 
 REPO = Path(__file__).resolve().parent.parent
 BRIEF = REPO / "docs" / "current" / "operations" / "seat-brief.md"
@@ -108,9 +108,12 @@ BARE_PYTHON = re.compile(r"(?<![-\w./\\])python(?=\s+-m\s+understudy\b)")
 
 
 def interpreter() -> str:
-    """`sys.executable`, quoted if its path carries a space."""
-    py = sys.executable
-    return f'"{py}"' if " " in py else py
+    """`sys.executable` as the brief must print it: forward slashes, double
+    quoted. The seat runs the brief's lines in bash, where the backslashes of
+    a Windows path are escapes and the command is mangled silently; forward
+    slashes are what the Windows interpreter itself accepts either way, and
+    the quotes survive a space in the path and the shell's word splitting."""
+    return f'"{PurePath(sys.executable).as_posix()}"'
 
 
 def brief_text(lane: int, character: str) -> str:
@@ -118,7 +121,8 @@ def brief_text(lane: int, character: str) -> str:
     text = BRIEF.read_text(encoding="utf-8")
     _, _, body = text.partition("## THE BRIEF")
     body = (body or text).replace("<LANE>", str(lane))
-    body = BARE_PYTHON.sub(interpreter().replace("\\", r"\\"), body)
+    py = interpreter()
+    body = BARE_PYTHON.sub(lambda _m: py, body)
     return (f"You are the blind seat for **{character}** on lane {lane}.\n"
             f"{body.rstrip()}\n")
 
