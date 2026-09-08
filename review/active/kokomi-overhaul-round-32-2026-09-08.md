@@ -65,7 +65,7 @@ that is [USER]'s pick, not a default.
 Minted: `EB-713` to `EB-716`; `EB-682` and `EB-673` extended. `EB-703` and
 `EB-711` retired with the revert.
 
-No default is applied here. The next Kokomi step waits on the pick in the
-Plan-less hand packet. [USER]'s act-1 run on the R261 Klee build remains
+No default is applied here. The next Kokomi step waits on the QUEUE row
+`kokomi-plan-less-hand 4.1`, the pick in the Plan-less hand packet. [USER]'s act-1 run on the R261 Klee build remains
 the next hands-on read owed; Furina's five picks on PR #443 are the open
 design line.
