@@ -3,7 +3,7 @@ Status: RECORD
 # Kokomi pool pass three, 2026-09-07: competing faces instead of a cap, eight arms read by GPT before the build
 
 Written 2026-09-07, night. After rounds 23 and 24
-(`review/active/kokomi-overhaul-round-23-2026-09-07.md`, `-round-24-`),
+(`review/records/kokomi-overhaul-round-23-2026-09-07.md`, `-round-24-`),
 [USER] and GPT both preferred no artificial cap on the carry-out: the reason
 "write every Plan" dominates a safe turn is that the pool's immediate faces
 are smaller copies of their Plan lines, and a throughput rule punishes the

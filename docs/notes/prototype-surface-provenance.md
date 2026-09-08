@@ -2344,7 +2344,7 @@ round before [USER] does.
 ## the pool pass, rounds 13 to 16 (`EB-491`, 2026-09-05)
 
 Ten rows, and the readings that asked for each are in
-`review/active/klee-pool-pass-2026-09-05.md` §1. What follows is what the
+`review/records/klee-pool-pass-2026-09-05.md` §1. What follows is what the
 BUILD had to decide, per row and per new rule, and it is here rather than on
 the sheet for the reason the file's own header gives.
 
@@ -2356,7 +2356,7 @@ Retained Ka-pow! last turn to stop being automatic, and a rising hand cost
 refused by `blocked_reason` without `retain:`) answered both at once.
 
 **THE ESCALATION CAME OFF on the comparison pass of 2026-09-06**
-(`review/active/klee-pool-comparison-pass-2026-09-06.md` §1 and §3 item 1), on
+(`review/records/klee-pool-comparison-pass-2026-09-06.md` §1 and §3 item 1), on
 three seat readings that all landed on the same clause: "never a decision ...
 the Retain is a lie told by the card frame" (r17), passed "because Retain plus
 an escalating cost is a card that punishes the exact hand-holding the rest of
@@ -2624,7 +2624,7 @@ silence that rule exists to make impossible.
 ## before proto_fr_curtain_rises
 
 The Furina pool pass, one (`EB-493`); the packet is
-`review/active/furina-pool-pass-2026-09-05.md` and all four rows are FOLLOWS on
+`review/records/furina-pool-pass-2026-09-05.md` and all four rows are FOLLOWS on
 the doctrine read (`review/records/card-audit-2026-09-04.md` sec.5.5).
 
 WHAT THE ROUNDS SAID. Rounds 9 and 10 read the Salon as FURNITURE: one Deploy

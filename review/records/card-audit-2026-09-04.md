@@ -637,7 +637,7 @@ Reply, verbatim:
 
 ## 5.3 The Klee pool pass, ten rows (2026-09-05, morning)
 
-The pass packet (`review/active/klee-pool-pass-2026-09-05.md`) put ten rows
+The pass packet (`review/records/klee-pool-pass-2026-09-05.md`) put ten rows
 through the doctrine role on GPT 6 Astra at low effort, the second read on
 it, with the pool census pasted from the sheet by a script (37 rows) and
 two precedents stated in the prompt: a Rare may break the rule its loop
@@ -793,7 +793,7 @@ Ten verdicts, each with its clause and its line. Under 400 words.
 
 ## 5.4 The Kokomi pool pass, six rows in four reads (2026-09-05, morning)
 
-The pass packet (`review/active/kokomi-pool-pass-2026-09-05.md`) put six
+The pass packet (`review/records/kokomi-pool-pass-2026-09-05.md`) put six
 rows through the doctrine role on GPT 6 Astra at low effort with the pool
 census pasted from the sheet by a script (32 rows). Read one passed Flank,
 Well Laid and Feigned Retreat and ruled Riptide, Pincer and the redesigned
@@ -1304,7 +1304,7 @@ Three verdicts, each with its clause and its line. Under 150 words.
 
 ## 5.5 The Furina pool pass, four arm-only Commons (2026-09-05, morning)
 
-The pass packet (`review/active/furina-pool-pass-2026-09-05.md`) put four
+The pass packet (`review/records/furina-pool-pass-2026-09-05.md`) put four
 arm-only Commons through the doctrine role on GPT 6 Astra at low effort,
 each replacing one shipped Common at the same rarity through the pool seam.
 The census was the shipped sheet's twenty-three Commons rendered from their
@@ -1471,7 +1471,7 @@ Kokomi pass packet are the author's derivations and are labelled so there.
 ## 5.6 Klee round 18: two card adjustments (2026-09-05, morning)
 
 The first read under the amended protocol (a verdict carries its
-comparison). Two arms from `review/active/klee-overhaul-round-18-2026-09-05.md`
+comparison). Two arms from `review/records/klee-overhaul-round-18-2026-09-05.md`
 §4: Grounded's condition moved from "nothing went off" to "a Bomb is on the
 field", and a random Set off preferring a bombed enemy (Tinder Toss, Rapid
 Fire). Both FOLLOWS, each with the standing line, the adjusted line and the
@@ -1614,7 +1614,7 @@ Two verdicts, each with its clause and its comparison. Under 200 words.
 
 ## 5.7 Furina round 12: two card adjustments (2026-09-05, morning)
 
-Two arms from `review/active/furina-reframe-round-12-2026-09-05.md` §4:
+Two arms from `review/records/furina-reframe-round-12-2026-09-05.md` §4:
 Rolling Tide at 1 energy, and Curtain Rises fielding Chevalmarin instead of
 the Usher. Both FOLLOWS with comparisons. The reviewer also caught an error
 in the prompt: the arm said Undercurrent costs 1 energy; the census pasted
@@ -1775,7 +1775,7 @@ Two verdicts, each with its clause and its comparison. Under 200 words.
 
 ## 5.8 Furina round 13: Second Course at a printed price of 1 (2026-09-05, afternoon)
 
-One arm from `review/active/furina-reframe-round-13-2026-09-05.md` §4:
+One arm from `review/records/furina-reframe-round-13-2026-09-05.md` §4:
 Second Course's printed Encore price from 3 to 1 (full value 3 with the
 shipped per-performance drain instead of 5), after three rounds in which
 it was unplayable at the opening Encore of 2. FOLLOWS on C2 and C6 with the
@@ -1930,7 +1930,7 @@ One verdict, its clause and its comparison. Under 120 words.
 
 ## 5.9 Kokomi round 20: The Moon Overlooks the Waters, two readings, withdrawn (2026-09-05, night)
 
-One arm from `review/active/kokomi-overhaul-round-20-2026-09-05.md` §4
+One arm from `review/records/kokomi-overhaul-round-20-2026-09-05.md` §4
 item 1, read at the door twice. First reading: the now-copy at half.
 **REQUIRES_MODIFICATION on C1**, with the Battle Plan counterexample (play
 draws 1; Plan gains 1 Energy and draws 2; at half the now-copy still draws
