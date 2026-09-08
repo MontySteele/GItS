@@ -18,7 +18,7 @@ import os
 import subprocess
 import sys
 import time
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import pytest
 
@@ -427,15 +427,20 @@ def test_seat_opus_brief_names_an_absolute_interpreter():
     """`EB-678`. A bare `python` on this box is the Windows Store alias: it
     opens the store instead of running and the seat's own call never returns.
     The brief is the only place a seat reads a command from, so the two
-    commands it prints name `sys.executable` and never resolve through PATH."""
+    commands it prints name `sys.executable` and never resolve through PATH.
+    And they name it the way bash can read it: forward slashes inside double
+    quotes, because the seat pastes these lines into a shell where a Windows
+    path's backslashes are escapes and vanish."""
     seat = _module("seat")
+    quoted = '"' + PurePath(sys.executable).as_posix() + '"'
     text = seat.brief_text(2, "KLEEMOD-KOKOMI")
     named = [line for line in text.splitlines()
              if "-m understudy.blindplay" in line]
     assert named, "the brief must still print the two allowed commands"
     for line in named:
         assert not seat.BARE_PYTHON.search(line), line
-        assert sys.executable in line, line
+        assert quoted in line, line
+        assert "\\" not in line, line
 
 
 def test_the_seat_brief_page_exists_and_names_both_allowed_commands():
