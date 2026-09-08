@@ -59,108 +59,153 @@ GPT's revised order is right.
 
 ## 3. One hand, one board, three directions
 
-The board: stage Crabaletta (front), Usher, Usher. Encore 2, Fanfare 13
-(bonus +1). Hand: Chevreuse (a Companion, 1), Salon Début (a Deploy, 1),
-Aria of Recompense (1: gain 5 Encore), a Strike. Energy 3. The enemy
-intends 12.
+The numbers below are the mod's, corrected after GPT's read of the first
+draft: a paid performance is the base plus 1 per 10 Fanfare
+(`SalonPowers.Scaled`); an Evoke is the base bow plus 3 per 10 Fanfare, and
+it pays 1 Encore like any performance or resolves at three quarters when the
+pool is dry (`EB-587`); a performance mints 2 Fanfare and an Evoke 5; Aria
+grants 5 Encore and 5 more at 3 Fanfare or above, so 10 on this board.
 
-**A. The rotating ensemble (today's rules).** Chevreuse first: Crabaletta
-performs for 7, pays 1 Encore, rotates to the back; the front is now an
-Usher. Salon Début next onto the full stage: it Evokes that Usher for 9
-Block, deploys a new member, which performs and pays the last Encore. Début
-first instead: Crabaletta is Evoked for 14 damage, and Chevreuse then
-performs the new front for its number. The decision: the order of two cards
-picks which member is Evoked (14 damage or 9 Block). Real, and one turn
-deep. To see it the player holds five rules: the Companion trigger,
-rotation, Evoke on a full stage, the arrival's performance, and the Encore
-price. Aria is a third play that decides whether the second performance is
-dry.
+The board: stage Crabaletta (front), Usher, Usher. Encore 2, Fanfare 13.
+Hand: Chevreuse (a Companion, 1), Salon Début (a Deploy of Crabaletta, 1),
+Aria of Recompense (1), a Strike (1). Energy 3. The enemy intends 12. Encore
+absorbs damage after Block, so a hit of 12 into 5 Block costs 7 Encore
+before it costs HP.
 
-**B. The featured performer (no rotation).** The front stays front until
-it leaves. Chevreuse: Crabaletta performs for 7 and stays. Début: Crabaletta
-is Evoked for 14, the new member arrives behind the Ushers. The decision:
-keep the featured member performing 7 per Companion card, or cash her for
-14 and promote the next. That is Klee's cook-or-cash on a member, and it is
-one rule fewer. What it loses: the two back slots never perform; they wait
-to be featured, so a stage of three is one act and two understudies, and
-"walk the company with Companion plays" (the user's own brief line) is gone.
-Deploy order still decides who is front and who leaves.
+**A. The rotating ensemble (today's rules).** Three lines, each of three
+cards.
 
-**C. The ensemble performs together.** A Companion card makes every member
-perform, once, for its number; the play pays 1 Encore (per act, not per
-member). A Deploy adds a member; onto a full stage it Evokes the front. The
-front matters for one thing only: who is Evoked next, which is deploy
-order. Chevreuse: 7 damage, 3 Block, 3 Block, one Encore. Début: Evoke
-Crabaletta for 14, arrival performs. The decisions: how many members to
-stack before Evoking (three performing per Companion card is the engine;
-Evoking one is the burst), what to put at the front (the next Evoke), and
-how to spend Encore (each Companion play is one act of the whole stage,
-the Spotlight is two). This is the Orb structure exactly: all orbs fire on
-the passive, the front Evokes. The panel is three colours and three
-numbers, and the only word is the cone on the front.
+| line | actions | damage | Block | Encore | Fanfare | stage after |
+|---|---|---|---|---|---|---|
+| Chevreuse, Début, Aria | Crabaletta performs 7 (paid, 2→1), rotates; Début Evokes the front Usher for 12 Block (paid, 1→0), Crabaletta arrives and performs dry 6; Aria +10 | 13 | 12 | 10 | 22 | Usher, Crabaletta, Crabaletta |
+| Aria, Chevreuse, Début | Aria +10 (12); Crabaletta 7 (11), rotates; Evoke Usher 12 Block (10); arrival Crabaletta 8 (9) | 15 | 12 | 9 | 22 | Usher, Crabaletta, Crabaletta |
+| Aria, Début, Chevreuse | Aria +10; Début Evokes Crabaletta for 17 (11); arrival Crabaletta 7 (10); Chevreuse performs the front Usher for 5 Block (9), rotates | 24 | 5 | 9, then 2 after the hit | 22 | Usher, Crabaletta, Crabaletta |
 
-Against the user's brief (R220 §1.1): A is the brief as written. B drops
-"rotating". C keeps "Companion card plays trigger the Salon" and drops
-"a single member": the ensemble is the trigger's object. C also answers the
-brief's other line, "obviously legible to the player", best.
+The decisions on this hand: pay before performing (Aria first turns a dry 6
+into a paid 8), and which member the Début Evokes, set by whether Chevreuse
+goes first (12 Block or 17 damage). Two real choices, one turn deep, and to
+see them the player holds five rules: the Companion trigger, rotation, Evoke
+on a full stage, the arrival's performance, and the Encore price on each of
+them. Line three is 24 damage for 7 Encore lost to the hit; line two is 15
+and nothing lost. Neither is wrong.
 
-Numbers under C need re-pricing, since a Companion play now performs three
-members: Crabaletta's tick would sit nearer 4 than 6, Usher's nearer 2, or
-the Encore price of a play rises. That is a sim question, decided at
-Prototype by play, and it is not what this pick is about.
+**B. The featured performer (no rotation).** The front stays front until it
+leaves. Aria, Chevreuse, Début: Crabaletta performs 7 and stays; the Début
+Evokes her for 17 and the new Crabaletta arrives behind the Ushers and
+performs 8. 32 damage, 0 Block, Encore 9. Or hold the Début: Crabaletta
+performs 7 per Companion card for as long as she is front. The decision is
+keep-or-cash on one member, Klee's cook-or-cash shape, one rule fewer than
+A. What it loses: the two Ushers never perform until Crabaletta leaves, so a
+stage of three is one act and two understudies, and the user's own line
+"walk the company with Companion plays" is gone.
+
+**C. The ensemble performs together.** Stated in full this time, since the
+first draft left the arrival open:
+
+- A Deploy adds a member and nothing performs. Onto a full stage it first
+  Evokes the front member, whose departure payoff is the shipped bow (14
+  damage, 9 Block, or Hydro to ALL and 3 Encore) scaled by the Fanfare term,
+  paid by no Encore: it is the member leaving, not performing.
+- A Companion card activates the whole cast: every member performs once for
+  its number, and the play pays 1 Encore for the act. Fanfare is minted per
+  activation (2) and per Evoke (5), not per member, so a larger cast raises
+  output and not the rate of scaling.
+- The front matters for one thing: who leaves next. That is deploy order.
+
+| line | actions | damage | Block | Encore | Fanfare | stage after |
+|---|---|---|---|---|---|---|
+| Aria, Chevreuse, Strike | Aria +10; the cast performs: 7, 4, 4 (12→11); Strike 6 | 13 | 8 | 11 | 15 | Crabaletta, Usher, Usher (kept) |
+| Aria, Chevreuse, Début | as above, then the Début Evokes Crabaletta for 17 and a new Crabaletta arrives silent | 24 | 8 | 11 | 20 | Usher, Usher, Crabaletta |
+| Aria, Début, Chevreuse | Evoke Crabaletta 17 first (Fanfare 18); then the cast performs 4, 4, 7 | 24 | 8 | 11 | 20 | Usher, Usher, Crabaletta |
+
+Two things show. The order of Chevreuse and Début no longer changes the
+result: under C the order decision of A is gone, and what replaces it is
+keep-or-replace. On this board replacing wins (24 to 13) because the Début
+re-deploys the same member; the cast is unchanged. Change the Deploy to
+Chevalmarin and it reads the other way: the Evoke still pays 17 now, but
+the cast becomes Usher, Usher, Chevalmarin, whose activation is 4, 4, 3
+against 7, 4, 4, and a long single-target fight prefers the cast kept. That
+is the composition decision GPT named, and it is made at the draft and the
+deploy, not on the turn. Against an intended 12, both C lines take 4 into
+Encore (12 minus 8 Block); the hand cannot avoid that, which is the Encore
+question below.
+
+So "the Orb structure exactly" was too strong. C shares the Orb's shape
+(all fire on the passive, the front leaves first) and differs from it in
+three named places: the activation is a card play, the resource that pays
+for it is also the deferred Block, and the departure payoff is free. Each
+has to earn its place in the brief.
 
 ## 4. Encore, on its own
 
-Two jobs by the brief: deferred Block (absorbs after Block, before HP) and
-the currency that directs the stage. The decision it creates today is
-rationing performances: with 2 at the start and 1 per performance, the
-third performance in a fight is dry unless a card refills. Round 16 read
-that as a switch rather than a ration, because the refills are card-sized
-(Aria 5, Chevalmarin 3) and the price is performance-sized. Would the
-decision survive with one fewer rule? Yes, if the dry state goes and Encore
-becomes permission (at 0 the stage does not perform): the ration is the
-same and sharper, and the object has one state. The reframe chose the dry
-cut to avoid dead turns; under C there are fewer performances to pay for
-(one per Companion play), so dead turns are rarer and the dry cut has less
-to do. Under A it stays load-bearing. Recommendation: under C, try Encore
-as permission; under A, keep the dry cut.
+Two jobs by the brief: deferred Block (it absorbs after Block, before HP)
+and the currency that directs the stage. The decision it creates today is
+rationing performances: 2 to open, 1 per performance, and every Evoke pays
+too. Round 16 read that as a switch rather than a ration, because the
+refills are card-sized (Aria 10, Chevalmarin 3) and the price is
+performance-sized.
+
+**The coupling GPT named is real and the first draft skipped it.** Under
+permission, an enemy hit past Block eats the Encore that the next
+activation needs, and the Ushers' Block is inside that activation. The
+cycle: take a hit, lose Encore, lose the cast's Block, take a larger hit.
+The recovery turn at 0 Encore under C, with the hand Chevreuse, Début
+(Chevalmarin), Strike and an intended 12: Chevreuse does its own card
+effect and the cast stays silent; the Début Evokes the front for its
+departure payoff free; if the front is Chevalmarin that is Hydro to ALL and
+3 Encore, and the next Companion card activates the cast again. So the
+designed recovery is a Chevalmarin on the stage or an Encore card in hand,
+and a cast with no Chevalmarin and no Aria has no way back except taking
+the hit on HP. Whether that is a ration or a death spiral is the sim's to
+say (dead-turn rate at act 1 with and without the dry state) and the
+user's to feel, and it is why the brief carries both: permission as the
+default to test, the dry cut as the fallback that the reframe already
+proved avoids dead turns at the cost of the two-state object.
+
+Under A the dry cut stays load-bearing; under C, one activation pays for
+three performances, so there is less to pay for and the dry state has less
+work, but "dead turns are rarer" is a claim for the sim, not a fact.
 
 ## 5. Fanfare, on its own
 
 The Focus: 2 per trigger, 5 per Evoke, 20% decay, +1 on every member
-number per 10. The decision it creates is a pace: keep performing or the
-scaling decays. That is pressure, not a choice, and the per-10 bonus is
-invisible until it is folded into the number. What does create choices is
-its readers (Aria's second half at 3, Universal Revelry's 8, the Rare
-drains): draft decisions, and they read the meter on their own faces. So
-Fanfare survives with one fewer rule shown: folded into the member numbers
-as Focus is, one compact figure on the panel for the readers, thresholds on
-hover. GPT's caveat is right that a card asking you to spend or cross a
-threshold needs the meter visible; the compact figure is that, and the
-card's own face carries the threshold.
+number per 10 and 3 per 10 on an Evoke. The decision it creates is a pace:
+keep performing or the scaling decays. That is pressure, not a choice, and
+the per-10 bonus is invisible until it is folded into the number. What does
+create choices is its readers (Aria's second half at 3, Universal Revelry's
+8, the Rare drains): draft decisions, and they read the meter on their own
+faces. So Fanfare survives with one fewer rule shown: folded into the
+member numbers as Focus is, one compact figure on the panel for the
+readers, thresholds on hover. GPT's caveat holds: a card that asks you to
+spend or cross a threshold needs the meter visible, and the compact figure
+is that; the card's own face carries its threshold. Under C the trigger
+rule is per activation, stated in §3, so the meter's rate does not grow
+with the cast.
 
 ## 6. Pick, for [USER]
 
 **Pick 1, the stage's main verb.** An A pick: a design direction the brief
 cannot settle, since the brief wrote A.
 
-1. **(default) C, the ensemble performs together.** A Companion card
-   performs every member for 1 Encore; Deploys add and, on a full stage,
-   Evoke the front; no rotation. Encore tried as permission. Rewritten as a
-   brief revision first (two pages), then a prototype flag beside today's
-   rules, re-priced by the sim, and played by [USER] at the rule change.
-   The sparse panel (three colours, three numbers, a cone) is built on it,
-   not on A.
-2. A, today's rules, with the sparse panel and hover captures (GPT's
-   first three picks). The rule faults in §2 stay and the panel carries
-   them.
+1. **(default) C, the ensemble performs together, as a brief revision
+   first**: a Deploy assembles and nothing performs on arrival; a Companion
+   card activates the cast for 1 Encore; a replacement pays the departing
+   member's payoff free; no rotation; Fanfare per activation. Encore keeps
+   its deferred-Block job and is tried as permission, with the dry cut as
+   the named fallback, the zero-Encore recovery turn written into the brief
+   and the dead-turn rate measured in the sim before the flag is built.
+   Then a prototype flag beside today's rules, re-priced by the sim, played
+   by [USER] at the rule change. The sparse panel (three colours, three
+   numbers, a cone) is built on it, not on A.
+2. A, today's rules with the sparse panel and GPT's first three picks.
+   The rule faults in §2 stay and the panel carries them.
 3. B, the featured performer: no rotation, the front performs and is
    cashed. One rule fewer than A, two slots idle.
 4. Keep polishing the current panel; no direction change.
 
-Either way, the hover states on the current build have never been seen: a
-hover step goes into the scenario runner and Companion-hover and
-Deploy-hover frames are taken before any new pass, as the baseline.
+Owed either way, and started now: a hover step in the scenario runner and
+Companion-hover and Deploy-hover frames on the current build, as the
+baseline any pass is judged against.
 
 ## 7. What this does not touch
 
