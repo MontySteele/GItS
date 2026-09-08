@@ -142,6 +142,7 @@ DIRECT_ROLE = {
     "energy": "velocity",
     "scry_discard": "velocity",
     "scry_bottom": "velocity",
+    "scry_take": "velocity",
     "discard": "velocity",
     "cost_mod": "velocity",
     "add_card": "velocity",

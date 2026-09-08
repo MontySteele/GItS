@@ -3489,6 +3489,42 @@ def _op_scry_bottom(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("scry_bottom", card=pick.id, seen=len(top))
 
 
+def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
+    """`EB-679` (pool pass four), READ THE FIELD: "look at the top N cards of
+    your draw pile; put one into your hand and the rest on the bottom".
+
+    SELECTION AND NOT A LOOK, which is the whole redesign. `scry_bottom` asked
+    the player to bury one card of two and r26's lane never made a decision off
+    it -- burying the card you like least is a choice about the card you did
+    not want, and the seats valued taking the card they DID. So the pick comes
+    to hand and everything it was seen beside goes to the bottom, which is what
+    makes the number on the face worth moving (3, and 4 upgraded).
+
+    THE PILOT TAKES THE LOWEST-COST CARD, this engine's stand-in for player
+    choice, stated rather than hidden -- `_op_scry_bottom`'s convention read
+    the other way round, because the card wanted now is the one that can be
+    paid for now.  The mod puts a real selection screen here instead
+    (`ScryBottom.TakePrompt`, and `gen_klee_cards`'s emitter).
+
+    THE REST GO TO THE BOTTOM IN THE ORDER THEY WERE SEEN, so nothing leaves
+    the deck and the pile beneath them is untouched. A pile shorter than N is
+    read short rather than refused, and an empty pile is a printed no-op --
+    the shape `_op_scry_bottom` already keeps.
+    """
+    n = fx.get("amount", 1)
+    top = state.player.draw_pile[:n]
+    if not top:
+        return
+    pick = min(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
+    for seen in top:
+        remove_instance(state.player.draw_pile, seen)
+    state.player.hand.append(pick)
+    for seen in top:
+        if seen is not pick:
+            state.player.draw_pile.append(seen)
+    state.emit("scry_take", card=pick.id, seen=len(top))
+
+
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
     fired = _predicate(state, fx["if"])
     # D4 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY, and deliberately
@@ -5914,6 +5950,7 @@ OPS = {
     "exhaust_from": _op_exhaust_from,
     "scry_discard": _op_scry_discard,
     "scry_bottom": _op_scry_bottom,
+    "scry_take": _op_scry_take,
     "conditional": _op_conditional,
     "choose_one": _op_choose_one,                # EB-118 surface, unused
     "repeat_this": _op_repeat_this,
@@ -6009,7 +6046,7 @@ OPS = {
     # a running drain -- "the next Plan", "each Plan carried out after this
     # one" -- so a now-line spelling would ask about a drain that is not
     # running and answer nothing every time it was played.
-    "draw_per_plan_after": _op_kokomi_plan_only,
+    "draw_per_plan_this_turn": _op_kokomi_plan_only,
     "next_plan_double_damage": _op_kokomi_plan_only,
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
     # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.

@@ -45,7 +45,7 @@ public sealed class ProtoKkNightWatch : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Night Watch"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] and apply 1 [gold]Weak[/gold]."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,14 +54,13 @@ public sealed class ProtoKkNightWatch : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Block, DynamicVars["PlanBlock"].IntValue, KokomiPlan.Aim.Self),
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.AllEnemies),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanBlock", 4m)
+            new DynamicVar("PlanPowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,6 +77,6 @@ public sealed class ProtoKkNightWatch : CustomCardModel, ICharacterCard, IPlanne
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanBlock"].UpgradeValueBy(2m);
+        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

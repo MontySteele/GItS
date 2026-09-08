@@ -45,7 +45,7 @@ public sealed class ProtoKkScoutAhead : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Scout Ahead"),
-        ("description", "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each later [gold]Plan[/gold] carried out with this one."),
+        ("description", "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each [gold]Plan[/gold] carried out this turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,7 +54,7 @@ public sealed class ProtoKkScoutAhead : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.DrawPerPlanAfter, 1, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.DrawPerPlanThisTurn, 1, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

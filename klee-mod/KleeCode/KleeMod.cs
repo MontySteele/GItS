@@ -164,6 +164,11 @@ public static class KleeMod
                 // a sheet verb any character may print and not a prototype
                 // rule.
                 [Powers.ScryBottom.PromptKey] = Powers.ScryBottom.PromptText,
+                // `EB-679`. The `scry_take` screen -- the same verb one door
+                // over, with the pick coming to hand instead of going to the
+                // bottom. Outside the compile switch for the row above's
+                // reason: a sheet verb, not a prototype rule.
+                [Powers.ScryTake.PromptKey] = Powers.ScryTake.PromptText,
 #if PROTOTYPE_CARDS
                 // QUARANTINED (the Kokomi overhaul, draft 6). Moon's
                 // Reflection's exhaust-pile screen, on exactly the terms the three rows

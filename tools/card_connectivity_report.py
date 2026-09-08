@@ -316,6 +316,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # pile, it only stops being near the top of it.
     "scry_bottom": [_hook("shared", "draw_pile", "use"),
                     _hook("shared", "draw_pile", "write")],
+    # `EB-679`. TWO PILES, because the chosen card leaves for the hand and the
+    # rest go to the bottom of the one they came from.
+    "scry_take": [_hook("shared", "draw_pile", "use"),
+                  _hook("shared", "draw_pile", "write"),
+                  _hook("shared", "hand_contents", "write")],
     "recall_to_draw": [_hook("shared", "discard_pile", "use"),
                        _hook("shared", "draw_pile", "write")],
     "autoplay_from_exhaust": [_hook("shared", "exhaust_pile", "use"),
@@ -538,7 +543,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Scout Ahead READS the drain it sits in (how many carry-outs follow) and
     # pays CARDS, which is the player's own draw pile and which no draw op
     # declares a hook for -- `draw_after_plans` one line up states that limit.
-    "draw_per_plan_after": [_hook("private", "kurage", "read")],
+    "draw_per_plan_this_turn": [_hook("private", "kurage", "read")],
     # The two riders WRITE what the entry that follows them will do. Nothing is
     # added to or removed from the queue, so a read would be the wrong word:
     # the next entry behaves differently because this one happened.
@@ -567,6 +572,7 @@ CHOICE_OPS: dict[str, str] = {
     "discard_for_sparks": "discard",
     "scry_discard": "pile",
     "scry_bottom": "pile",
+    "scry_take": "pile",
     "recall_to_draw": "queue",
     "remember_card": "pile",
     "grant_sly_this_turn": "pile",

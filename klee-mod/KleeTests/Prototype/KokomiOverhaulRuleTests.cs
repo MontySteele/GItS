@@ -285,8 +285,10 @@ public class KokomiOverhaulRuleTests
         //
         // FIFTEEN SINCE `EB-643` (R265), and the three are one group: each
         // names a PLACE IN A RUNNING DRAIN rather than a quantity, which is
-        // what makes all three plan-only. `DrawPerPlanAfter` is Scout Ahead's
-        // count of the carry-outs still to come, and the two `NextPlan*` kinds
+        // what makes all three plan-only. `DrawPerPlanThisTurn` is Scout
+        // Ahead's count of the drain it is carried out in (`EB-679`: itself
+        // included, so its position stopped mattering), and the two
+        // `NextPlan*` kinds
         // are riders on the entry carried out immediately after the one that
         // prints them.
         //
@@ -301,7 +303,7 @@ public class KokomiOverhaulRuleTests
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
-                    "BlockPerPlanThisMorning", "DrawPerPlanAfter",
+                    "BlockPerPlanThisMorning", "DrawPerPlanThisTurn",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
                     "NextAttackDamage" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
