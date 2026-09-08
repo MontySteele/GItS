@@ -43,12 +43,40 @@ _SPRITE_TAG = re.compile(r"\[([A-Za-z0-9_]+)\.(?:png|jpg|jpeg|svg|webp)\]",
 # unlocalised placeholder and could not tell what it was granting.
 #
 # So a sprite tag whose file name CONTAINS one of these subjects is rendered
-# as that subject and nothing else: `[Energy]`, twice, which is what the
-# screen draws and lets a reader count them. It is a REGISTER, like
-# `HAZARD_EVENTS` -- one row per inline icon the game actually draws in place
-# of a word, and a tag naming none of them keeps the old rendering (its own
-# words, spaced) rather than being guessed at.
+# as that subject and nothing else, twice, which is what the screen draws and
+# lets a reader count them (`EB-651` took the brackets off the subject and kept
+# the count). It is a REGISTER, like `HAZARD_EVENTS` -- one row per inline icon
+# the game actually draws in place of a word, and a tag naming none of them
+# keeps the old rendering (its own words, spaced, in brackets) rather than
+# being guessed at.
 _ICON_SUBJECTS = {"energy": "Energy"}
+
+# `EB-651`. AND THEN THE BRACKETS THEMSELVES READ AS A DEFECT. The r23 attack
+# seat met the Sown enchantment -- "The first time you play this card each
+# combat, gain [Energy]" -- and filed it as "a literal unfilled placeholder...
+# That is a text defect", on the card face and the keyword line, every time.
+# It was neither: `[Energy]` is what `EB-264` deliberately left, the brackets
+# standing in for the pip the screen draws.
+#
+# THE BRACKETS ARE THE PROBLEM AND NOT THE WORD. Every other bracketed token
+# a blind page prints IS unresolved -- a sprite it could not name, an id the
+# leak guard held back -- so a reader who has been taught that brackets mean
+# "the tool could not read this" reads a correctly-rendered pip as a bug. The
+# subject is a WORD in the sentence's own grammar ("gain Energy" is how
+# `tier0/content/enchantments.py` writes the same enchantment), so it is
+# printed as one.
+#
+# A RUN IS COUNTED, NOT REPEATED. Energy Potion draws two pips in a row, and
+# "Gain Energy Energy." is prose no screen says; the number is the count of
+# pips a sighted player is looking at, not a number this module derived from a
+# rule, so a run of N folds to `N Energy` and a lone pip to the bare word.
+#
+# A TAG THE REGISTER DOES NOT KNOW KEEPS ITS BRACKETS, for the reason above
+# read the other way: there the brackets are true. The page could not name the
+# icon, and a bare `boss relic icon` in the middle of a sentence would claim it
+# had.
+_SPRITE_RUN = re.compile(
+    r"(?:\[[A-Za-z0-9_]+\.(?:png|jpg|jpeg|svg|webp)\])+", re.I)
 
 
 def _icon_name(stem: str) -> str:
@@ -60,11 +88,28 @@ def _icon_name(stem: str) -> str:
     return " ".join(words)
 
 
+def _icon_run(run: str) -> str:
+    """One run of adjacent sprite tags, rendered as the screen reads."""
+    names = [_icon_name(m.group(1)) for m in _SPRITE_TAG.finditer(run)]
+    out: list[str] = []
+    i = 0
+    while i < len(names):
+        name = names[i]
+        n = 1
+        while i + n < len(names) and names[i + n] == name:
+            n += 1
+        i += n
+        if name in _ICON_SUBJECTS.values():
+            out.append(name if n == 1 else f"{n} {name}")
+        else:
+            out.append("".join(f"[{name}]" for _ in range(n)))
+    return "".join(out)
+
+
 def _despritify(blob: Any) -> Any:
     """Rewrite every sprite tag in a finished structure. Values only."""
     if isinstance(blob, str):
-        return _SPRITE_TAG.sub(
-            lambda m: "[" + _icon_name(m.group(1)) + "]", blob)
+        return _SPRITE_RUN.sub(lambda m: _icon_run(m.group(0)), blob)
     if isinstance(blob, dict):
         return {k: _despritify(v) for k, v in blob.items()}
     if isinstance(blob, list):
@@ -94,7 +139,7 @@ def _text(value: Any) -> str:
     control run's second seat read `The next Attack you play costs 0
     [ironclad_energy_icon.png]` off the reward it had just claimed, and
     Venerable Tea Set's relic face printed the file name twice, while the same
-    cards printed `[Energy]` in combat one screen later.
+    cards printed the icon's own word in combat one screen later.
 
     THE BOUNDARY PASS STAYS. It is idempotent -- a rewritten tag no longer
     matches -- and it still covers the values that never go through here, a
@@ -133,7 +178,7 @@ def _fold(text: Any) -> str:
 
     `EB-375`: and the sprite tags go with them, for that same reason one row
     on. A tester types back what the page PRINTED, so a name carrying an icon
-    has to fold the way the printed spelling does -- `[Energy]` folds to
+    has to fold the way the printed spelling does -- the pip folds to
     `energy` and the raw `[ironclad_energy_icon.png]` to four words, and a
     matcher reading the wire's spelling would refuse the tester's.
     """

@@ -357,7 +357,13 @@ def test_a_base_game_sprite_tag_renders_instead_of_refusing():
     # icon]" -- a token naming a character who is not in the run, for a pip
     # that is the same on every character's screen. The subject is what the
     # player is looking at; the namespace is a fact about the asset.
-    assert "[Energy]" in page
+    # `EB-651` TOOK THE BRACKETS OFF. The r23 seat read `gain [Energy]` on the
+    # Sown enchantment as an unfilled placeholder and filed it as a text
+    # defect; brackets on this page mean "unresolved" everywhere else, so the
+    # one token that WAS resolved is the one that reads as broken. The subject
+    # is a word in the sentence now.
+    assert "gain Energy." in page
+    assert "[Energy]" not in page
     assert "silent" not in page and ".png" not in page
 
     # A tag naming no icon the register knows keeps the old rendering rather
@@ -1226,7 +1232,10 @@ def test_an_icon_token_names_the_icon_and_not_the_art_set():
                         "[ironclad_energy_icon.png]."}]
     page = blindplay.observe(state)
     assert "ironclad" not in page and ".png" not in page
-    assert "Gain [Energy][Energy]." in page
+    # `EB-651`. A RUN OF PIPS IS COUNTED, not repeated: "Gain Energy Energy."
+    # is prose no screen says, and the 2 is the number of pips a sighted
+    # player is looking at rather than a number this module derived.
+    assert "Gain 2 Energy." in page
 
 
 # --------------- EB-374: the sacrifice this page can and cannot speak about --
@@ -1314,12 +1323,12 @@ def test_the_line_after_a_claim_prints_the_icon_and_not_the_file():
          "printed": {"card": "Unrelenting",
                      "text": "The next Attack you play costs "
                              "0 [ironclad_energy_icon.png]"}})
-    assert "Took: Unrelenting — The next Attack you play costs 0 [Energy]." \
+    assert "Took: Unrelenting — The next Attack you play costs 0 Energy." \
         == took
     answer = blindplay._result_line(
         {"status": "ok", "message": "Venerable Tea Set: gain "
                                     "[ironclad_energy_icon.png]"})
-    assert answer == "ok Venerable Tea Set: gain [Energy]"
+    assert answer == "ok Venerable Tea Set: gain Energy"
 
 
 def test_a_relic_face_folds_the_icon_wherever_it_is_printed():
@@ -1332,7 +1341,7 @@ def test_a_relic_face_folds_the_icon_wherever_it_is_printed():
                         "[ironclad_energy_icon.png][ironclad_energy_icon.png]."
          }]
     page = blindplay.observe(state)
-    assert "gain [Energy][Energy]." in page
+    assert "gain 2 Energy." in page              # `EB-651`
     assert not _BRACKETED_FILE.search(page)
 
 
@@ -3151,6 +3160,32 @@ def test_a_live_enchant_picker_says_it_cannot_mark_the_pick():
     assert "Confirm is available." in page
     assert "## What you have picked" not in page
     assert "Nothing on this screen is picked yet." not in page
+
+
+def test_a_live_face_prints_the_energy_pip_as_a_word_and_not_a_token():
+    """`EB-651`(a), ON THE WIRE'S OWN BYTES.
+
+    THE FINDING. The r23 attack seat met the Sown enchantment -- "The first
+    time you play this card each combat, gain [Energy]" -- and filed it:
+    "a literal unfilled placeholder... square brackets and all, on both the
+    card face and the keyword line, every time. It is 1 energy. That is a
+    text defect."
+
+    IT WAS NOT ONE, AND THAT IS THE PROBLEM. `[Energy]` is what `EB-264`
+    deliberately rendered the base game's `[silent_energy_icon.png]` as. But
+    every OTHER bracketed token this page prints is a thing it could not
+    resolve, so the reader's learned rule -- brackets mean unread -- turned
+    the one resolved token into a bug report. The word goes in the sentence.
+
+    THE LIVE CAPTURE carries the same tag on Booming Conch's face, which is
+    why the pin is here rather than only on a synthetic state: this is a real
+    envelope off a real run, unedited.
+
+    Seen to FAIL: with the bracketed render restored, both halves go.
+    """
+    page = blindplay.observe(live("enchant-fresh"))
+    assert "draw 2 additional cards and gain Energy." in page
+    assert "[Energy]" not in page
 
 
 def test_the_enchant_picker_marks_the_pick_once_the_bridge_carries_it():
@@ -10724,6 +10759,18 @@ def test_the_plan_panel_says_the_jellyfish_holds_any_number_of_plans():
     # of the panel's rules and still sits under the Hydro one.
     assert lines.index(blindplay.PLAN_HYDRO_NOTE) + 2 == \
         lines.index(blindplay.PLAN_COUNT_NOTE)
+    # `EB-648`. THE SENTENCE NAMES THE BADGE THAT COUNTS. "its buff" sent the
+    # r23 cap seat to `ProtoBakeKuragePower`, a presence marker pinned at 1
+    # for the whole fight, and it reported the counter stuck. The note now
+    # names `PendingPlansPower` by its own title -- the `Plan` badge -- and
+    # rules the other 1 out in a clause, because a reader who has already
+    # found the wrong badge needs it named rather than left unmentioned.
+    #
+    # Seen to FAIL: with "the number on its buff" restored, all three go.
+    assert "**Plan** badge" in blindplay.PLAN_COUNT_NOTE
+    assert "its buff" not in blindplay.PLAN_COUNT_NOTE
+    assert "Bake-Kurage's own 1 is only its presence" in \
+        blindplay.PLAN_COUNT_NOTE
 
 
 def test_an_all_in_spark_price_prints_as_all_not_as_its_gate():
