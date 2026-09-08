@@ -90,9 +90,14 @@ internal static class KokomiOverhaulRoster
     /// <c>IElementalCard</c> (it is sealed), so the mod's per-card element read
     /// would have given it none. The catalyst cadence is a fact about the
     /// CHARACTER -- tier0's <c>effects._element_for</c> has always said so --
-    /// and <see cref="CatalystCadence"/> says it on this side too. Her own
-    /// Strike carries <c>Element.Hydro</c> on the row, the way every other
-    /// generated Kokomi Attack does.
+    /// and <see cref="CatalystCadence"/> says it on this side too.
+    ///
+    /// HER OWN STRIKE IS THE ONE ATTACK OF HERS THAT APPLIES NOTHING, and it
+    /// says so on its own row (`applies_element: false`, `EB-703`). A basic is
+    /// supposed to be bad ([USER] 2026-09-02), and the exemption LAW gives the
+    /// base game's basics reaches this one because it IS her basic. WRITING it
+    /// still earns the aura -- a carry-out is the jellyfish's Hydro hit -- so
+    /// that is one more reason to write it, and no new rule.
     ///
     /// THE COMPANION ROLL FINDS NO SLOT, by construction and reported rather
     /// than hidden. <c>KokomiStartingCompanionsPatch</c> matches on the shipped

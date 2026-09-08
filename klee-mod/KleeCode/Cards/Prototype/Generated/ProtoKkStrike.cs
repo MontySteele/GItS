@@ -34,8 +34,11 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKkStrike : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
-    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
-    public Element Element => Element.Hydro;
+    /// <summary>Sheet `applies_element: false` on this row's own
+    /// damage: this hit applies NOTHING, whatever the cadence says.
+    /// Declared rather than omitted -- an omission is what asks the
+    /// character (<see cref="CatalystCadence.PrintedElement"/>).</summary>
+    public Element Element => Element.None;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -44,7 +47,7 @@ public sealed class ProtoKkStrike : CustomCardModel, IElementalCard, ICharacterC
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(KokomiRiderTips.ForGarmentAttack(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_strike");
 

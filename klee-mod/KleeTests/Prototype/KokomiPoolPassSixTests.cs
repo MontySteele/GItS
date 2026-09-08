@@ -43,7 +43,12 @@ namespace KleeMod.Tests.Prototype;
 ///
 /// THE NUMBERS ARE PROTOTYPE NUMBERS (D by the ladder). Nothing here is
 /// quotable (R215 B).
+///
+/// THE COLLECTION IS LOAD-BEARING, <see cref="BaseBasicsTests"/>' reason: the
+/// element case flips `KokomiOverhaul.Enabled`, which is one static for the
+/// whole process.
 /// </summary>
+[Collection(KleeOverhaulArm.Name)]
 public class KokomiPoolPassSixTests
 {
     private const BindingFlags All = HeadlessGame.All;
@@ -89,15 +94,57 @@ public class KokomiPoolPassSixTests
     }
 
     [Fact]
-    public void It_applies_hydro_like_every_other_kokomi_attack()
+    public void The_face_up_hit_applies_nothing_and_the_written_one_is_hydro()
     {
-        // THE CADENCE IS A FACT ABOUT THE CHARACTER, and the reason the swap
-        // does not lose it: a base `StrikeSilent` is sealed and cannot
-        // implement IElementalCard, so `CatalystCadence` had to say it from
-        // outside (`EB-307`). Her own row carries it on the class instead.
-        Assert.Equal(Element.Hydro, new ProtoKkStrike().Element);
+        // A BASIC IS SUPPOSED TO BE BAD ([USER] 2026-09-02, LAW's cadence
+        // line), and the exemption reaches HER OWN basic: four Hydro appliers
+        // in the opening deck is a power change the design note did not ask
+        // for. WRITING the Strike is what earns the aura, and that is a reason
+        // to write it -- a carry-out is the jellyfish's hit, which
+        // `KokomiPlan.ResolveAll` deals as `Element.Hydro` whatever the card.
+        //
+        // DECLARED, NOT OMITTED, and the distinction is
+        // `CatalystCadence.PrintedElement`'s own: a card that says NOTHING is
+        // asked of the CHARACTER, so the row carries `IElementalCard`
+        // returning `Element.None` -- Kirara's shape, which that header names.
+        var klee = KleeOverhaul.Enabled;
+        var kokomi = KokomiOverhaul.Enabled;
+        try
+        {
+            KleeOverhaul.Enabled = true;
+            KokomiOverhaul.Enabled = true;
+
+            Assert.Equal(Element.None, new ProtoKkStrike().Element);
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+                new ProtoKkStrike(), Seat.Kokomi().Creature));
+            // The cadence itself is untouched: her other Attacks still apply.
+            Assert.Equal(Element.Hydro, CatalystCadence.PrintedElement(
+                new ProtoKkRiptide(), Seat.Kokomi().Creature));
+        }
+        finally
+        {
+            KleeOverhaul.Enabled = klee;
+            KokomiOverhaul.Enabled = kokomi;
+        }
+
+        // THE CARRY-OUT IS STILL A HYDRO HIT, read off the resolver rather
+        // than off a live drain: every damaging Plan clause goes through
+        // `ElementalHit.Deal(..., Element.Hydro, ...)`. The sim's twin runs
+        // the arithmetic end to end
+        // (`test_her_strike_is_six_face_up_and_eight_written`).
+        Assert.Contains("Element.Hydro", Source("KokomiPlan", power: true));
+
+        // AND THE FACE SAYS SO. The keyword still declares Hydro -- the gem
+        // and the reaction rule -- and `ForPlanElement` is the sentence that
+        // says WHEN: "Its own hit applies no aura; the Bake-Kurage carries out
+        // the Plan as a Hydro hit, which does." What is GONE is the face-up
+        // Hydro rider (`KleeCardTooltips.ForCard(..., Element.Hydro, ...)`),
+        // which would have promised a reaction the play cannot make.
         Assert.Contains(KleeKeywords.AppliesHydro,
                         new ProtoKkStrike().CanonicalKeywords);
+        var generated = Source("ProtoKkStrike");
+        Assert.Contains("ArmKeywordTips.ForPlanElement", generated);
+        Assert.DoesNotContain("KleeCardTooltips.ForCard", generated);
     }
 
     // ======================================================================
@@ -213,8 +260,8 @@ public class KokomiPoolPassSixTests
     /// <summary>One class's own source, read off disk. A SOURCE READ and not
     /// an IL one, and only for the facts IL cannot carry: a `CanonicalTags`
     /// override is a property initialiser whose absence leaves no call at
-    /// all.</summary>
-    private static string Source(string type)
+    /// all, and a literal enum argument leaves no call either.</summary>
+    private static string Source(string type, bool power = false)
     {
         var root = System.AppContext.BaseDirectory;
         var repo = new System.IO.DirectoryInfo(root);
@@ -224,8 +271,12 @@ public class KokomiPoolPassSixTests
             repo = repo.Parent;
         }
         Assert.NotNull(repo);
-        return System.IO.File.ReadAllText(System.IO.Path.Combine(
-            repo!.FullName, "klee-mod", "KleeCode", "Cards", "Prototype",
-            "Generated", type + ".cs"));
+        var dir = power
+            ? System.IO.Path.Combine(repo!.FullName, "klee-mod", "KleeCode",
+                                     "Powers", "Prototype")
+            : System.IO.Path.Combine(repo!.FullName, "klee-mod", "KleeCode",
+                                     "Cards", "Prototype", "Generated");
+        return System.IO.File.ReadAllText(
+            System.IO.Path.Combine(dir, type + ".cs"));
     }
 }

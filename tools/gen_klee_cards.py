@@ -179,11 +179,30 @@ class CharacterProfile:
         the Mondstadt override) -- and only this side asked the cadence and
         nothing else. So an explicit declaration is honoured here too, which is
         what puts the two engines back on one rule.
+
+        `EB-703`: AND A ROW MAY DECLARE THE OTHER DIRECTION. `EB-462` read a
+        declared `true`; a declared `FALSE` still fell through to the cadence
+        here while the sim honoured it (`_element_for`'s first test is
+        `if "applies_element" in fx`), so `applies_element: false` on a
+        character Attack meant "no aura" in one engine and "Hydro" in the
+        other. Kokomi's own basic Strike is the row that needs it: LAW's
+        cadence line makes the base game's basics apply nothing ("the basic
+        cards are supposed to be bad", 2026-09-02) and her Strike is a basic
+        that happens to be hers, so the FACE-UP half applies nothing and the
+        WRITTEN half still leaves the jellyfish's Hydro
+        (`plan_applies_element`, which reads the `plan:` list this walk does
+        not). ALL-OR-NOTHING on the row, because `IElementalCard` is one
+        answer for the whole card: a row whose damage clauses disagree is a
+        BLOCKER (`blocked_reason`), not a silent majority vote.
         """
-        if any(effect.get("applies_element")
-               for effect in _effects_everywhere(card)
-               if effect.get("op") == "damage"):
+        declared = [effect["applies_element"]
+                    for effect in _effects_everywhere(card)
+                    if effect.get("op") == "damage"
+                    and "applies_element" in effect]
+        if any(value for value in declared):
             return True
+        if declared and not any(declared):
+            return False
         if self.cadence == "catalyst_attack":
             return card.get("type") == "attack"
         if self.cadence == "skill_grade":
@@ -926,6 +945,33 @@ def element_tag_elements_for(card: dict, profile: "CharacterProfile",
     if own in TRIGGER_KEYWORD_BY_ELEMENT and own not in elements:
         elements.insert(0, own)
     return elements
+
+
+def declares_no_element(card: dict, profile: "CharacterProfile") -> bool:
+    """Does this CHARACTER row declare that its own damage applies NOTHING?
+
+    `EB-703`. `damage_applies_element` already answers False for such a row,
+    which drops `IElementalCard` -- and dropping it is exactly what does NOT
+    work here, because `CatalystCadence.PrintedElement`'s whole point is that a
+    card saying nothing falls back to the CHARACTER's element. Its header
+    states the distinction this function exists to spell: "THE PREDICATE IS
+    'SAYS NOTHING ABOUT ELEMENTS', not 'declares None'", and names Kirara --
+    a row that IS an `IElementalCard` returning `Element.None` on purpose, so
+    the first branch answers her and the fallback never runs. This is that
+    shape for a character row: the interface is emitted, and it returns
+    `Element.None`.
+
+    COMPANIONS ARE NOT ASKED, because they are exempt from the cadence in both
+    engines: a companion whose damage is all `applies_element: false` gets no
+    interface and `PrintedElement`'s `ICompanionCard` guard already answers it.
+    """
+    if is_companion(card):
+        return False
+    declared = [effect["applies_element"]
+                for effect in _effects_everywhere(card)
+                if effect.get("op") == "damage"
+                and "applies_element" in effect]
+    return bool(declared) and not any(declared)
 
 
 def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
@@ -3543,6 +3589,21 @@ def blocked_reason(
                    for e in companion_damage_effects(card)}
         if len(applies) > 1:
             return "mixed applies_element damage on one companion card"
+    else:
+        # `EB-703`: THE SAME REFUSAL ONE ROW-KIND OVER, and for the same
+        # reason. A character row's declared `applies_element` now decides
+        # `IElementalCard` in BOTH directions
+        # (`CharacterProfile.damage_applies_element`), and that interface is
+        # one answer for the whole card -- so a row saying `true` on one
+        # damage clause and `false` on another is asking for two, which the
+        # sim would give it per effect and this side cannot. Loud rather than
+        # a silent majority vote.
+        declared = {bool(effect["applies_element"])
+                    for effect in _effects_everywhere(card)
+                    if effect.get("op") == "damage"
+                    and "applies_element" in effect}
+        if len(declared) > 1:
+            return "mixed applies_element damage on one character card"
 
     # X cost (R34 batch): HasEnergyCostX => true + ResolveEnergyXValue()
     # (CapturedXValue through Hook.ModifyXValue -- the game-canonical X
@@ -12158,8 +12219,13 @@ def emit(
         arm_desc = build_description(card, include_burst_rider=False)
         desc_expr = f'FurinaBurstRider.Face("{arm_desc}", "{desc}")'
 
+    # `EB-703`: A ROW THAT DECLARES NO ELEMENT STILL CARRIES THE INTERFACE,
+    # returning `Element.None`. See `declares_no_element` -- without it the
+    # cadence fallback would element the hit the row just refused.
+    declines_element = declares_no_element(card, profile)
+
     interfaces = "CustomCardModel"
-    if elemental:
+    if elemental or declines_element:
         interfaces += ", IElementalCard"
     if is_companion(card):
         interfaces += ", ICompanionCard"
@@ -12456,7 +12522,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         )
 
     element_member = ""
-    if elemental and is_companion(card):
+    if declines_element:
+        # `EB-703`. THE ROW REFUSED THE CADENCE, and the refusal has to be
+        # SAID rather than left unsaid: `CatalystCadence.PrintedElement` reads
+        # a card that says nothing as "ask the character".
+        element_member = (
+            "\n    /// <summary>Sheet `applies_element: false` on this row's own\n"
+            "    /// damage: this hit applies NOTHING, whatever the cadence says.\n"
+            "    /// Declared rather than omitted -- an omission is what asks the\n"
+            "    /// character (<see cref=\"CatalystCadence.PrintedElement\"/>).</summary>\n"
+            "    public Element Element => Element.None;\n"
+        )
+    elif elemental and is_companion(card):
         element_member = (
             "\n    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>\n"
             f"    public Element Element => {element_cs};\n"

@@ -347,12 +347,19 @@ def test_her_strike_is_six_face_up_and_eight_written(overhaul):
     THE WRITTEN HALF AIMS AT THE FRONT AND NOT AT A BODY SHE PICKED, the rule
     every damage Plan follows: the enemy that was there when it was written
     may be dead when it lands, so the back rank below takes nothing.
+
+    AND ONLY THE WRITTEN HALF LEAVES AN AURA. A basic is supposed to be bad
+    ([USER] 2026-09-02, LAW's cadence line), and the exemption reaches her own
+    basic -- declared on the row itself, `applies_element: false`, because the
+    cadence would otherwise element it. A carry-out is the JELLYFISH's hit and
+    `kokomi_plan` deals every damaging clause as `element="hydro"`, so WRITING
+    the Strike is what earns the aura, which is a reason to write it.
     """
     aimed = make_enemy(hp=40, name="aimed")
     st = kokomi_state(enemies=[aimed])
     effects.resolve_card(st, loader.get_card("proto_kk_strike"))
     assert aimed.hp == 34
-    assert aimed.aura == "hydro"
+    assert aimed.aura is None
 
     front2 = make_enemy(hp=40, name="front2")
     back = make_enemy(hp=40, name="back")
@@ -361,7 +368,8 @@ def test_her_strike_is_six_face_up_and_eight_written(overhaul):
     assert front2.hp == 40                             # nothing lands today
     kokomi_plan.resolve_all(st2)
     assert front2.hp == 32
-    assert back.hp == 40
+    assert front2.aura == "hydro"
+    assert back.hp == 40 and back.aura is None
 
     # AND THE SMITH MOVES BOTH HALVES BY THE BASE STRIKE'S +3: 9 and 11.
     up = loader.get_card("proto_kk_strike+")

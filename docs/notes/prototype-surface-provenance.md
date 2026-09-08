@@ -3377,14 +3377,27 @@ THE FOURTH SEAM MOVES WITH IT. `KokomiOverhaulRoster.StarterStrike` now answers
 would drop a shipped basic into a deck whose Strikes all print a Plan line.
 `StarterDefend` is unchanged.
 
-HER STRIKE APPLIES HYDRO AND THE BASE ONE DID NOT, which is a real consequence
-and is reported rather than hidden. LAW's cadence line exempts "the base game's
-own basic cards" ([USER] 2026-09-02, "the basic cards are supposed to be bad"),
-and `CatalystCadence.PrintedElement` returns `Element.None` for a base Strike
-in her deck to this day. `proto_kk_strike` is a kit row, not a base card, so
-the catalyst cadence covers it the way it covers every other Kokomi Attack --
-four Hydro appliers in the opening deck where there were none, felt first as
-reactions in fight 1.
+THE FACE-UP HIT APPLIES NO HYDRO AND THE WRITTEN ONE DOES. LAW's cadence line
+makes the base game's basics apply nothing ("the basic cards are supposed to be
+bad", [USER] 2026-09-02) and the exemption reaches HER basic: four Hydro
+appliers in the opening deck is a power change the design note did not ask for.
+A carry-out is the JELLYFISH's hit, dealt as Hydro by `KokomiPlan.ResolveAll`
+and by `kokomi_plan` whatever the card is, so WRITING the Strike is what earns
+the aura -- one more reason to write it, and no new rule. It is DECLARED on the
+row (`applies_element: false`) and not derived from the rarity, for the reason
+the tag beside it is declared: Slack Water and Kurage's Oath are basics too and
+neither is being moved. The declaration now works in BOTH engines -- the sim
+always honoured it (`_element_for`) and `damage_applies_element` read only a
+declared `true` until this pass -- so the codegen emits `IElementalCard`
+returning `Element.None`, which is Kirara's shape and the one
+`CatalystCadence.PrintedElement`'s header names: its predicate is "says nothing
+about elements", not "declares None", so an omission would have asked the
+character and re-applied the Hydro. The face keeps the Hydro keyword and gains
+`ForPlanElement`'s sentence -- "Its own hit applies no aura; the Bake-Kurage
+carries out the Plan as a Hydro hit, which does" -- and loses the face-up Hydro
+rider, which would have promised a reaction the play cannot make. A character
+row whose damage clauses DISAGREE about this is now a codegen blocker rather
+than a silent majority vote.
 
 THE DRAFTER NEEDED NOTHING. The row is `rarity: basic`, which is the starter's
 mark and keeps it out of `rewards.character_pool` and out of
