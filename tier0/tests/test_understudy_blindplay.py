@@ -6170,9 +6170,15 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # card, so the first sentence's test IS the payer set.
         # `EB-619`: the sentence ends at "a play" -- a price the card does
         # not charge is not the keyword page's to deny.
-        "Hexerei": [" card whose face prints the word. Playing ",
-                    "one gives Klee ", ", up to ",
-                    " a play."],
+        # `EB-663`: the definition is the MEMBERSHIP TEST both engines run --
+        # the printed word, or the hand Alice's Introduction Magic marks --
+        # and the last sentence denies the reading the r24 seat took off the
+        # old opening. The anchors stay inside one C# literal each.
+        "Hexerei": ["one whose face prints ",
+                    "the word, or one Alice's Introduction Magic marks this "
+                    "turn. ",
+                    "Playing one gives Klee ", ", up to ",
+                    " a play. Not every "],
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -7033,7 +7039,12 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # one commit, so the anchor holds both halves of the sentence.
         "Superconduct": ["reacted enemy gains ",
                          "which applies before this hit"],
-        "Electro-Charged": [" HP at the start of its turn, 1 less each turn"],
+        # `EB-665` put the DEBUFF'S NAME on this row, in the C# and here in one
+        # commit: the body prints `Poison 4` and the preview said only "loses
+        # 4 HP", so the anchor holds the name as well as the tick.
+        "Electro-Charged": ["reacted enemy gains ", "Poison",
+                            ", losing that much HP at the start of its turn, "
+                            "1 less each turn"],
         # `EB-517` put the WINDOW on this row, in the C# and here in one
         # commit, so the anchor holds the clause that says when it closes.
         "Frozen": ["ts next action deals half damage, and until it acts the "
@@ -7296,7 +7307,13 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
     # `EB-619`: [USER]'s act-1 run read the price denial as belonging on the
     # card's own cost section, so the clause is gone from both surfaces.
     assert "never costs" not in row
-    assert len(row) <= 135
+    # `EB-663` PUT THE MEMBERSHIP TEST ON IT, in both engines' surfaces in one
+    # commit: the family has two ways in and the old opening named neither
+    # correctly, so the tip carries a length exception of its own now
+    # (`tools/lint_text_conventions.py`, `HexereiKey`) and this page holds the
+    # same words. The ceiling this line pins is the exception's, not 135.
+    assert "counts as Hexerei" in row and "Not every Companion is Hexerei" in row
+    assert len(row) <= 200
 
 
 def _shattering_pressure_reward_state() -> dict:
@@ -10424,8 +10441,9 @@ def test_a_klee_run_reads_both_rules_in_full():
     """The other side, and the reason the rows exist at all: on the run whose
     kit the words belong to, nothing about them has changed."""
     page = blindplay.observe(_hexerei_shop_state("Klee"))
-    assert ("- **Hexerei** — A Companion card whose face prints the word. "
-            "Playing one gives Klee") in page
+    assert ("- **Hexerei** — A card that counts as Hexerei: one whose face "
+            "prints the word, or one Alice's Introduction Magic marks this "
+            "turn. Playing one gives Klee") in page
     assert "- **Oz** — Fischl's raven, out while you hold the Power" in page
 
 
@@ -10635,6 +10653,56 @@ def test_the_smith_prints_the_basics_upgraded_faces():
     page = blindplay.observe(smith)
     assert "    Upgraded: Deal 9 damage." in page
     assert "    Upgraded: Gain 8 Block." in page
+
+
+def test_the_basics_upgrade_through_the_games_appended_sentence():
+    """`EB-667`. `EB-609`'s table matched the WHOLE printed face, and Klee's
+    own basics never print one sentence: the game appends its auto-keyword
+    sentences to a body, so her Strike reads `Deal 6 damage. Applies Pyro.`
+    and all four Strikes and all four Defends on the r24 lane-1 Smith read the
+    no-face line again. The first sentence is the one this table knows; the
+    tail is copied through untouched. Seen to FAIL: both rows below returned
+    the no-face reason."""
+    assert qa_packet.upgrade_preview(
+        "STRIKE", "Deal 6 damage. Applies Pyro.",
+        title="Strike") == ("Deal 9 damage. Applies Pyro.", "")
+    assert qa_packet.upgrade_preview(
+        "DEFEND", "Gain 5 Block. Retain.",
+        title="Defend") == ("Gain 8 Block. Retain.", "")
+    # And a face that is not the basic's sentence at all still says so, which
+    # is the bound the whole-face match was written for.
+    assert qa_packet.upgrade_preview(
+        "STRIKE", "Set off. Deal 6 damage.",
+        title="Strike") == ("", qa_packet.NO_PREVIEW_TEMPLATE)
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": "STRIKE", "name": "Strike", "cost": "1", "type": "Attack",
+         "description": "Deal 6 damage. Applies Pyro."})
+    assert "    Upgraded: Deal 9 damage. Applies Pyro." in blindplay.observe(
+        smith)
+
+
+def test_a_smith_row_prints_one_upgrade_line_and_not_two():
+    """`EB-667`, the other half. Alice's Introduction Magic printed both
+    `Upgraded: not shown -- its upgrade changes nothing this face prints.` and
+    `Upgraded, and gains Retain.` on the r24 lane-1 Smith -- one screen
+    contradicting itself, because the keyword line IS what the upgrade does.
+    The keyword line wins. Seen to FAIL: both lines printed."""
+    smith = live("upgrade-fresh")
+    smith = json.loads(json.dumps(smith.get("state", smith)))
+    smith["card_select"]["cards"].append(
+        {"id": "KLEEMOD-PROTO_KO_ALICES_INTRODUCTION_MAGIC",
+         "name": "Alice's Introduction Magic", "cost": "1", "type": "Skill",
+         "description": "All cards in your hand count as Hexerei cards "
+                        "this turn."})
+    page = blindplay.observe(smith)
+    assert "    Upgraded, and gains Retain." in page
+    assert qa_packet.NO_PREVIEW_NO_NUMBER not in page
+    # A row with no keyword to add still owes the reason, which is the line
+    # `EB-529` put there and this change must not take away.
+    assert qa_packet.upgrade_keywords(
+        "KLEEMOD-PROTO_KO_ALICES_INTRODUCTION_MAGIC") == ("Retain",)
 
 
 def test_the_salons_last_beat_reaches_the_reward_screen():

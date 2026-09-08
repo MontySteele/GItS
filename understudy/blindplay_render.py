@@ -103,9 +103,16 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # `EB-529`: and where it cannot be rendered, the REASON, because "no
     # `Upgraded:` line" and "no upgrade" are the same silence to a reader
     # deciding what to spend a Smith on.
+    # `EB-667`: AND ONLY ONE UPGRADE LINE. Alice's Introduction Magic printed
+    # both `Upgraded: not shown -- its upgrade changes nothing this face
+    # prints.` and `Upgraded, and gains Retain.` on the Klee r24 lane-1 Smith,
+    # which is one screen contradicting itself: the keyword line IS what the
+    # upgrade does, so the note above it is false rather than merely silent.
+    # The note is the "this page cannot tell you what it does" line, and a row
+    # whose schema upgrade is a keyword has already told the reader.
     if c.get("upgraded_face"):
         out.append(f"    Upgraded: {c['upgraded_face']}")
-    elif c.get("upgraded_note"):
+    elif c.get("upgraded_note") and not c.get("upgraded_keywords"):
         out.append(f"    Upgraded: not shown -- {c['upgraded_note']}.")
     # `EB-551`: THE KEYWORD DELTAS, BESIDE THE NUMBER DELTAS. "Aria+ showed
     # only the number change and not Innate, the most load-bearing keyword in

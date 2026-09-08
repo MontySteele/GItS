@@ -1,10 +1,14 @@
+using System.Collections.Generic;
 using System.Linq;
 using BaseLib.Abstracts;
+using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -282,6 +286,104 @@ public class HexereiReaderTests
             Il.Method("CompanionHexerei", "IsHexerei"));
         Assert.Contains(reader, c => c.Contains("IntroductionMagicPower"));
         Assert.Contains("Creature.get_Powers", reader);
+    }
+
+    // ---- `EB-663`: the mark pays, Companion or not -----------------------
+
+    /// <summary>Put an already-constructed power on a seat's creature. The
+    /// harness's own <c>WithPower</c> allocates uninitialised -- correct for a
+    /// <c>CustomPowerModel</c>, wrong here, because this power's window is a
+    /// readonly <c>HashSet</c> its constructor builds.</summary>
+    /// <summary>Hand a card to a seat. <c>CardModel.Owner</c>'s GETTER asserts
+    /// mutability -- the canonical-model guard the game's <c>ToMutable</c>
+    /// lifts -- so the flag goes up first, exactly as <c>Bombs</c> does it.
+    /// </summary>
+    private static T Held<T>(Seat seat) where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        Seat.Force(card, "Owner", seat.Player);
+        return card;
+    }
+
+    private static IntroductionMagicPower Window(Seat seat)
+    {
+        var power = new IntroductionMagicPower();
+        var powers = (List<PowerModel>)typeof(Creature)
+            .GetField("_powers", HeadlessGame.All)!
+            .GetValue(seat.Creature)!;
+        powers.Add(power);
+        return power;
+    }
+
+    [Fact]
+    public void The_mark_pays_the_spark_whether_or_not_the_card_is_a_companion()
+    {
+        // `EB-663` (Klee r24 lane 1). The grant tested COMPANION *and*
+        // Hexerei, so Alice's own spell -- and every card her window marks --
+        // printed the word, fired the two readers above and paid nothing. One
+        // word cannot mean two sets on one screen, so under the arm the
+        // payment asks the readers' own question.
+        //
+        // REAL: `PaysKleesSpark` on real cards against a real Klee seat. The
+        // MINT is `Settle`, which needs a PlayerChoiceContext and is outside
+        // the boundary; what DECIDES is this predicate.
+        var was = KleeOverhaul.Enabled;
+        try
+        {
+            KleeOverhaul.Enabled = true;
+            var seat = Seat.Klee();
+            var window = Window(seat);
+
+            var spell = Held<ProtoKoAlicesIntroductionMagic>(seat);
+            Assert.IsNotAssignableFrom<ICompanionCard>(spell);
+            Assert.True(KleeCompanionSpark.PaysKleesSpark(spell));
+
+            // A card the window marks: no printed word, no Companion tag, and it
+            // pays -- the half the r24 lane lost a coven turn to.
+            var marked = Held<ProtoKoPop>(seat);
+            Assert.IsNotAssignableFrom<ICompanionCard>(marked);
+            Assert.False(KleeCompanionSpark.PaysKleesSpark(marked));
+            Mark(window, marked);
+            Assert.True(KleeCompanionSpark.PaysKleesSpark(marked));
+
+            // ...and an unmarked card of hers still pays nothing, which is the
+            // bound: the rule reads the FAMILY, not her whole deck.
+            var plain = Held<ProtoKoPop>(seat);
+            Assert.False(KleeCompanionSpark.PaysKleesSpark(plain));
+
+            // Nobody else is paid: `EB-434` is untouched by the widening.
+            var kokomi = Seat.Kokomi();
+            var hers = Held<ProtoKoAlicesIntroductionMagic>(kokomi);
+            Assert.False(KleeCompanionSpark.PaysKleesSpark(hers));
+
+            // OFF THE ARM the same spell pays nothing at all, which is R213 B:
+            // the Companion gate is the shipped rule and does not move for a
+            // prototype.
+            KleeOverhaul.Enabled = false;
+            Assert.False(KleeCompanionSpark.PaysKleesSpark(spell));
+            Assert.False(KleeCompanionSpark.PaysKleesSpark(marked));
+        }
+        finally
+        {
+            KleeOverhaul.Enabled = was;
+        }
+    }
+
+    [Fact]
+    public void The_arm_is_the_only_place_the_companion_gate_comes_off()
+    {
+        // `EB-663`'s other half, and R213 B rather than taste: no SHIPPED row
+        // carries `hexerei:` at all, so off the arm the rule stays the
+        // Companion + Personal-pool test `EB-219` moved into the kit at
+        // parity. Structural, because the OFF world is a different build of
+        // this method: the family read is reached only under the flag, and the
+        // Companion test is what remains below it.
+        var body = Il.CallSequence(
+            Il.Method("KleeCompanionSpark", "PaysKleesSpark")).ToList();
+        var overhaul = body.FindIndex(c => c.Contains("KleeOverhaul"));
+        var hexerei = body.FindIndex(c => c.Contains("CompanionHexerei"));
+        Assert.True(overhaul >= 0 && hexerei > overhaul);
     }
 
     // ---- the pool --------------------------------------------------------

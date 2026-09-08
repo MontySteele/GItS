@@ -1188,9 +1188,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # Universals included, so the first sentence's test IS the payer set and
     # "marked Klee's own" would narrow it falsely. The mark leaves the faces in
     # the same commit -- one word, one rule.
-    "Hexerei": ("A Companion card whose face prints the word. Playing one "
-                f"gives Klee {COMPANION_SPARK} Spark, up to "
-                f"{COMPANION_SPARK_MAX} a play."),
+    # `EB-663` TOOK "COMPANION" OUT OF THE TEST. Alice's Introduction Magic
+    # marks a HAND, so a Klee card can count as Hexerei without being a
+    # Companion at all -- and it fires the family's readers and, since
+    # `EB-663`, pays the Spark. The old opening also read to the r24 seat as
+    # "Companion" and "Hexerei" being one set, which the eight coven Personals
+    # that print no word are the counterexample to; the last sentence says so.
+    "Hexerei": ("A card that counts as Hexerei: one whose face prints the "
+                "word, or one Alice's Introduction Magic marks this turn. "
+                f"Playing one gives Klee {COMPANION_SPARK} Spark, up to "
+                f"{COMPANION_SPARK_MAX} a play. Not every Companion is "
+                "Hexerei."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
@@ -1796,9 +1804,14 @@ REACTION_KEYWORDS: dict[str, str] = {
     # Poison stack, so it prints as `Poison N`, the stacks add (3, 10, 13 on
     # one Eel), and it ticks before the enemy acts; the entry said none of
     # that and the r5 seat could not price a tick from it.
+    # `EB-665` PUT THE DEBUFF'S NAME IN THE FIRST CLAUSE, in the C# and here
+    # in one commit. The panel row and the preview named two different things
+    # -- `Poison 4` on the body, "loses 4 HP" on the preview -- and the r24
+    # lane-1 seat could not tell which number was which.
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
-                        "aura. The reacted enemy loses 4 HP at the start of "
-                        "its turn, 1 less each turn. On its panel that is the "
+                        "aura. The reacted enemy gains 4 Poison, losing that "
+                        "much HP at the start of its turn, 1 less each turn. "
+                        "On its panel that is the "
                         "Poison stack: stacks add, and it ticks before the "
                         "enemy acts."),
     # `EB-366` SPLIT THE BOSS CLAUSE OFF THIS ROW. See `FROZEN_BOSS_CLAUSE`.

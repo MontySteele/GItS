@@ -232,8 +232,14 @@ public class Round12Tests
         // seat "could not tell from any card face whether MY Companion
         // qualified" and found out by counting Bombs on an enemy badge. Every
         // member prints the word now, so the definition can point at it.
-        // `EB-596` reworded it to "whose face prints the word".
-        Assert.Contains("card whose face prints the word", HexereiTip());
+        // `EB-596` reworded it to "whose face prints the word", and `EB-663`
+        // made that ONE of the family's two ways in: the tip is the membership
+        // test both engines run, so the printed word is a clause of it rather
+        // than the whole sentence.
+        Assert.Contains("one whose face prints the word", HexereiTip());
+        Assert.Contains("Alice's Introduction Magic marks this turn",
+                        HexereiTip());
+        Assert.Contains("Not every [gold]Companion[/gold] is", HexereiTip());
         Assert.DoesNotContain("witches' circle", HexereiTip());
     }
 

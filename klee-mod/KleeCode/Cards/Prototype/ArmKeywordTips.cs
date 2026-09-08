@@ -553,14 +553,28 @@ public static class ArmKeywordTips
     /// Universals included -- so the first sentence's test IS the payer set and
     /// a second clause narrowing it would be false. One word, one rule: the
     /// face prints `Hexerei` if and only if playing it pays.
+    ///
+    /// `EB-663` (Klee r24 lane 1) TOOK THE WORD "COMPANION" OUT OF THE TEST.
+    /// The sentence opened "A [gold]Companion[/gold] card whose face prints
+    /// the word", and two things were wrong with it at once: Alice's
+    /// Introduction Magic marks a HAND, so a Klee card can count as Hexerei
+    /// without being a Companion at all, and the sentence read to the r24 seat
+    /// as "Companion" and "Hexerei" being one set -- which they are not, since
+    /// eight coven Personals print no word and pay nothing. So the definition
+    /// is the family membership test the readers themselves run
+    /// (<c>CompanionHexerei.IsHexerei</c>, both of its two ways in), and the
+    /// last sentence says out loud the thing the old opening implied the
+    /// opposite of.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
-            "A [gold]Companion[/gold] card whose face prints the word. Playing "
-          + "one gives Klee [blue]" + KleeCompanionSpark.Base
+            "A card that counts as [gold]Hexerei[/gold]: one whose face prints "
+          + "the word, or one Alice's Introduction Magic marks this turn. "
+          + "Playing one gives Klee [blue]" + KleeCompanionSpark.Base
           + "[/blue] [gold]Spark[/gold], up to [blue]" + KleeCompanionSpark.MaxPerPlay
-          + "[/blue] a play.");
+          + "[/blue] a play. Not every [gold]Companion[/gold] is "
+          + "[gold]Hexerei[/gold].");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.

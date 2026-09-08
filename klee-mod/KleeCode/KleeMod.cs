@@ -260,8 +260,18 @@ public static class KleeMod
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.description"] =
                         $"[gold]Electro[/gold] meets [gold]Cryo[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.SuperconductVuln}[/blue] [gold]Vulnerable[/gold], which applies before this hit.",
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.title"] = "Reaction preview: Electro-Charged",
+                    // `EB-665` (Klee r24 lane 1). THE PREVIEW NAMES THE DEBUFF
+                    // THE BODY SHOWS. The dot IS the core's own PoisonPower
+                    // (`ReactionEffects`, the ElectroCharged case), so the
+                    // enemy's panel prints `Poison 4` while this sentence said
+                    // only "loses 4 HP": the seat read a preview and a body
+                    // that named two different things and could not tell which
+                    // number was which. The tick clause stays, because it is
+                    // what the reader is pricing and the glossary keeps it in
+                    // the same words. The comment sits ABOVE the key, for
+                    // `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy loses [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] HP at the start of its turn, 1 less each turn.",
+                        $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] [gold]Poison[/gold], losing that much HP at the start of its turn, 1 less each turn.",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and until it acts the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",

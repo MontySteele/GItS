@@ -1187,7 +1187,7 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
 
 
 def klee_companion_spark(state: CombatState, card: Card) -> None:
-    """"Little Hexenzirkul" -- Klee's kit answering a HEXEREI Companion play.
+    """"Little Hexenzirkul" -- Klee's kit answering a HEXEREI play.
 
     THE DECLARATION LAW:145 REQUIRES, and the ONLY place a Companion play mints
     Sparks. The clause (countersigned R224, 2026-08-30) reads: "Companion cards
@@ -1211,12 +1211,22 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
     playing Gorou banked a Spark she has no surface to read. Sparks are Klee's
     resource and the tip says "gives Klee"; nobody else is paid.
 
+    THE COMPANION GATE IS GONE UNDER THE ARM (`EB-663`, r24 lane 1). The rule
+    tested COMPANION *and* Hexerei, so a Klee card carrying the mark -- Alice's
+    Introduction Magic itself, or any card her this-turn window marks -- printed
+    the keyword, fired the family's readers (Coven Errand, Witches' Circle) and
+    paid nothing. One word cannot mean two sets on one screen. Under the arm the
+    test is exactly "does this card count as Hexerei", which is the readers'
+    own question; the character gate below is untouched.
+
     THE ARM DECIDES WHICH TEST, and that is R213 B rather than taste: no
     SHIPPED sheet row carries the family key at all, so a Hexerei-only rule
     would silently retire the grant `EB-219` moved into the kit at parity. With
-    the arm off the shipped Personal pool answers, exactly as it has since
-    `EB-219`; with the arm on the printed mark answers, which is the world
-    R265 ruled on. The Balance surface does not move for a prototype arm.
+    the arm off the shipped Personal-Companion pool answers, exactly as it has
+    since `EB-219` -- Companion gate included, because that is the world the
+    clause was countersigned over; with the arm on the printed mark answers,
+    which is the world R265 ruled on. The Balance surface does not move for a
+    prototype arm.
 
     WHAT THE ARM'S PERSONALS LOSE, said out loud: eight prototype coven rows
     (Barbara, Diona, Noelle, Kaeya, Jean, Sayu, Qiqi, YaoYao) carry
@@ -1247,8 +1257,6 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
     four numbers Prune's face paid and the three limbs reproduce them.
     """
     from tier0.content import upgrades          # late import avoids cycle
-    if not card.is_companion:
-        return
     if state.player.character_id != "klee":
         # `EB-434`. It is KLEE's kit that declared the trigger, and hers is the
         # only Spark surface in the game; a grant nobody can read is not a
@@ -1256,10 +1264,15 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
         # the player, so Gorou paid Kokomi.
         return
     if C.KLEE_OVERHAUL:
+        # `EB-663`: the mark alone, Companion or not. `is_hexerei` is the
+        # readers' own question and now the payer's too.
         if not companion_hexerei.is_hexerei(state, card):
             return
-    elif card.personal_pool != "klee":
-        return
+    else:
+        if not card.is_companion:
+            return
+        if card.personal_pool != "klee":
+            return
     n = C.KLEE_COMPANION_SPARK_BASE
     if state.reactions_this_card > 0:
         n += C.KLEE_COMPANION_SPARK_REACTION_BONUS
