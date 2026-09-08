@@ -100,7 +100,7 @@ now contradict a roster rule nobody re-read. Pick 2.
 
 **R58, "lowering a threshold is forbidden"**, which R212 item 7 names as a
 one-way door outside Claude's derived-number authority. Furina round 6
-(`review/active/furina-reframe-round-6-2026-09-04.md` §4) moved Aria of
+(`review/records/furina-reframe-round-6-2026-09-04.md` §4) moved Aria of
 Recompense's Fanfare bar from 6 to 3 as a D default, on a quarantined
 prototype row. On a strict reading of R58 that was [USER]'s pick, not
 mine; it is disclosed here rather than left in the round packet's

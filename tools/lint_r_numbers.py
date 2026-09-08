@@ -45,9 +45,6 @@ DOCS = "docs/current"
 # is the direction the ceiling is allowed to run: it bounds what may be CITED,
 # and an unissued number below it is not a finding here. It resolves when the
 # branches meet.
-#
-# 267 is R267 ([USER], 2026-09-08): Slack Water's Plan back to the morning and
-# Scout Ahead's position clause restored.
 R_CEILING = 267
 D_CEILING = 15
 

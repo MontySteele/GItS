@@ -6,17 +6,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python tools/hooks/deny_dangerous_git.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/deny_dangerous_git.py\"",
             "timeout": 20
           },
           {
             "type": "command",
-            "command": "python tools/hooks/deny_deploy_outside_main.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/deny_deploy_outside_main.py\"",
             "timeout": 20
           },
           {
             "type": "command",
-            "command": "python tools/hooks/push_gate.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/push_gate.py\"",
             "timeout": 330
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python tools/hooks/game_ref_backup_reminder.py",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/game_ref_backup_reminder.py\"",
             "timeout": 60
           }
         ]

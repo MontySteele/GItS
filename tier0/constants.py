@@ -391,7 +391,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_stoke_the_fuse",
     # THE POOL PASS (2026-09-05, `EB-491`). Rounds 13 to 16, in the order the
     # packet reads them: Cook, Spray, React, bridge. Why each exists:
-    # review/active/klee-pool-pass-2026-09-05.md sec.2.
+    # review/records/klee-pool-pass-2026-09-05.md sec.2.
     "proto_ko_long_fuse",
     "proto_ko_all_of_my_treasures",
     "proto_ko_fish_blasting",
@@ -877,7 +877,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # `KokomiOverhaulRoster.Slice()` and to the sheet BY ORDER.
     "proto_kk_tide_chart",
     "proto_kk_ripple",
-    # POOL PASS ONE (`EB-492`, review/active/kokomi-pool-pass-2026-09-05.md):
+    # POOL PASS ONE (`EB-492`, review/records/kokomi-pool-pass-2026-09-05.md):
     # Plan density in the OFFER rather than in the starter -- three Attacks
     # with a Plan line, the morning's payoff on a Common Attack, and a Skill
     # that does both halves only when planned. LAST, in the sheet's own order,
