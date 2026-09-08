@@ -90,7 +90,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from understudy import authorship, bridge, qa_packet, report, seat
+from understudy import authorship, bridge, lanewatch, qa_packet, report, seat
 
 # `klee-mod/local.props` is the machine's one statement of where the game is,
 # and this is a DELIBERATE SECOND COPY of the four lines `soak.game_dir()`
@@ -244,8 +244,73 @@ def _load_state(args) -> dict[str, Any]:
     return blob
 
 
+class LaneDead(BlindPlayError):
+    """`EB-691`: this lane's game is gone and the seat must stop.
+
+    A `BlindPlayError` so a caller that already catches the blind family's
+    refusals keeps working; caught by name in the two commands so the line
+    reaches the seat on STDOUT, where it reads every other `TOOL-BLOCKED`.
+    """
+
+
+def _lane_guard(args) -> str:
+    """`EB-691`. The watchdog's line for a LIVE command, or `""`.
+
+    A `--raw-file` resolution touches no game and is deliberately not
+    watched: a fixture is a frame somebody chose, and a lane that is down has
+    nothing to do with whether it renders.
+    """
+    if args.raw_file:
+        return ""
+    return lanewatch.guard()
+
+
+def _live_load(args) -> dict[str, Any]:
+    """`_load_state` with `EB-691`'s watchdog wrapped around the wire call.
+
+    THE THIRD SIGNAL IS ONLY VISIBLE HERE. A state read that TIMES OUT while
+    the bridge's health endpoint goes on answering is the game thread stalled
+    (`hangwatch.STATE_STALL_KIND`), and it has no recovery from this side; the
+    2026-09-08 lane retried sixteen times over fifteen minutes because nothing
+    was counting. Two consecutive timeouts end the lane. A read that succeeds
+    resets the count, and a bridge failure that is NOT a timeout is re-raised
+    untouched -- a refused connection means the process is gone, which is a
+    different failure with a different answer.
+    """
+    if args.raw_file:
+        return _load_state(args)
+    try:
+        state = _load_state(args)
+    except Exception as exc:                                 # noqa: BLE001
+        if not lanewatch.is_timeout(exc):
+            raise
+        try:
+            bridge.health()
+            health = True
+        except Exception:                                    # noqa: BLE001
+            health = False
+        lanewatch.record_state_timeout(health_answers=health)
+        line = lanewatch.guard()
+        if line:
+            raise LaneDead(line) from None
+        raise
+    lanewatch.record_state_ok()
+    return state
+
+
 def cmd_observe(args) -> int:
-    state = _load_state(args)
+    # `EB-691`, BEFORE THE WIRE CALL. A lane in the EB-1 storm answers its
+    # health endpoint and nothing else, so a command that starts by talking to
+    # the bridge learns nothing for twenty seconds and then retries.
+    blocked = _lane_guard(args)
+    if blocked:
+        print(blocked)
+        return lanewatch.EXIT_LANE_DEAD
+    try:
+        state = _live_load(args)
+    except LaneDead as dead:
+        print(dead)
+        return lanewatch.EXIT_LANE_DEAD
     try:
         print(observe(state))
     except qa_packet.PacketLeak as exc:
@@ -273,6 +338,13 @@ def budget_refusal(count: int, cap: int) -> str:
 
 
 def cmd_act(args) -> int:
+    # `EB-691` FIRST, ahead of the budget: a dead lane reported as "budget
+    # reached" is a true sentence about the wrong problem, and the seat's
+    # record would carry the wrong stop.
+    blocked = _lane_guard(args)
+    if blocked:
+        print(blocked)
+        return lanewatch.EXIT_LANE_DEAD
     # `EB-456`. THE CAP IS THE BRIDGE'S, NOT THE SEAT'S ARITHMETIC. Two of
     # three round-13 seats were told to stop at 120 and stopped at 155-165.
     # Charged only on an act that is actually POSTED: a refusal, a `--dry-run`
@@ -289,7 +361,11 @@ def cmd_act(args) -> int:
     # typed `act` on a leaking board saw a Python traceback where `observe`
     # on the same board printed a clean one-line refusal. Same catch, same
     # line, same exit code.
-    state = _load_state(args)
+    try:
+        state = _live_load(args)
+    except LaneDead as dead:
+        print(dead)
+        return lanewatch.EXIT_LANE_DEAD
     try:
         res = act(state, args.command)
     except qa_packet.PacketLeak as exc:

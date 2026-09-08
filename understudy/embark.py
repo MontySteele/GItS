@@ -116,6 +116,12 @@ from understudy import authorship, bridge, instances, report, soak
 # wall runs in. `blindplay` may never import this file; this file may read the
 # blind module's bottom seam, which imports nothing from this package at all.
 from understudy import blindplay_shape
+# `EB-691`: the LANE'S watchdog cursor, armed here for the budget's reason --
+# an embark is a new run, and a cursor left over from the lane's last game
+# would have the first `observe` compare against a `godot.log` that no longer
+# exists. `lanewatch` reads this module's sidecars as JSON and imports it only
+# on the teardown path, so the blind wall still runs one way.
+from understudy import lanewatch
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
 
@@ -391,6 +397,10 @@ def embark(character: str, *, hold: bool = False,
     # the game is up costs a launch and a teardown for nothing.
     build, build_source = check_arms(wanted) if wanted else ("", "")
     budget = blindplay_shape.set_budget(max_actions, lane)
+    # `EB-691`. Zeroed BEFORE the launch, beside the budget and for the same
+    # reason: a launch that fails half way leaves a watch armed on a lane with
+    # no game rather than the last game's cursor.
+    lanewatch.arm(lane)
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
