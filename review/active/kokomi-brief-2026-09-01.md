@@ -1,13 +1,21 @@
-Status: OPEN (draft 6, approved R241 for the Prototype build; the slice is written on it next)
+Status: OPEN (draft 7; the live Paper artefact for the Prototype build, carrying R241, R242, R250, R265, R266 and R267)
 
-# Kokomi overhaul brief, draft 6: the Plan
+# Kokomi overhaul brief, draft 7: the Plan
 
-Draft 6, 2026-09-02. Ruled direction (R240): Plan is Kokomi's key idea and
-goes into the starter deck; reusing Exhausted cards is a payoff card, not
-the chassis; Mend is a thing she can do, not a premise. Everything the
-earlier drafts carried beside the one idea is cut here, and this page says
-where each cut thing went. The fresh audit that led here is
-`review/ruled/kokomi-audit-2026-09-02.md`.
+Draft 7, 2026-09-08, under R267. Draft 6 (2026-09-02, approved R241) is
+retrievable from git; this draft changes no ruled direction and adds the
+rules ruled since: the Kurage's Oath now-line (R250), Dusk and the queue as
+a resource (R265), the cap retired (R266), and Slack Water and Scout Ahead
+restored (R267). The ruled direction (R240) is unchanged: Plan is Kokomi's
+key idea and goes into the starter deck; reusing Exhausted cards is a payoff
+card, not the chassis; Mend is a thing she can do, not a premise.
+
+**The brief is the design record.** A pool pass may move a pool row's
+numbers and shape under the pass-three charter (§8), but a rule in §2, a
+starter card in §4, or the turn-one decision in §4 moves only by a ruling.
+Pass five's move of Slack Water's Plan to Dusk (2026-09-08) was applied as a
+default against this page and is reversed by R267; that is why this
+paragraph exists.
 
 ## 1. The character in one line
 
@@ -23,18 +31,30 @@ the Bake-Kurage carries it out at the start of her next turn.
    does at the start of your next turn, before you draw, if you play the
    card on the jellyfish instead of where it would normally go. The cost is
    paid now either way. A planned card leaves your hand like any played
-   card and nothing takes it back. Her basics are plain cards with no Plan
-   line.
+   card and nothing takes it back. **Her basics are the base game's Strike
+   and Defend and carry no Plan line (R242); they are never changed
+   ([USER], 2026-09-08).**
 3. **The jellyfish acts by the book.** A planned Attack strikes the front
-   enemy (the leftmost one alive). A planned Skill acts on you. Plans are
-   carried out in the order they were written, and your Strength and
-   Dexterity count, since the plans are hers.
+   enemy (the leftmost one alive); a single-target Plan is aimed when
+   written if the engine can carry a second selection (R250). A planned
+   Skill acts on you. Plans are carried out in the order they were written,
+   and your Strength and Dexterity count, since the plans are hers.
 4. **Nothing happens by itself.** No bank, no pulse, no automatic replay.
    If the jellyfish is doing something, a card you played and paid for told
    it to.
+5. **Dusk (R265 trial, still on).** A card whose Plan line says **Dusk**
+   is carried out at the end of this turn, before enemies act, instead of
+   the next morning. It is the kit's only "protect now" written line and
+   is a pool shape, not a starter one.
+6. **The queue is a resource (R265).** Pool rows may read the queue (how
+   many Plans wait, which is first), reorder it, hurry it (Change of Plans
+   carries out the first Plan now) or cancel it (Second Thoughts returns
+   the last Plan's card and cost). No cap on the queue: R266 retired the
+   two-Plan cap as a rule; a free turn is priced by the faces, not by a
+   throughput limit.
 
-One printed keyword: Plan. Mend appears only on Rare Exhaust cards, as the
-healing law already has it (`LAW.md`, card-sheet rules).
+Two printed keywords: Plan and Dusk. Mend appears only on Rare Exhaust
+cards, as the healing law already has it (`LAW.md`, card-sheet rules).
 
 ## 3. The decision, and why the old drafts had none
 
@@ -45,8 +65,12 @@ the reward, and three Plans written on one turn land together the next
 morning before you draw, which is the moment the kit is built around.
 Drafts 2 to 5 had a bank (Tide), a second "later" (the exhaust row), and a
 healing pillar the law forbids, and each took a keyword and gave no
-decision. They are gone. What survives of them: the row's best trick
-becomes one Uncommon or Rare (section 6), and the heal becomes one Rare.
+decision. They are gone.
+
+A hand of basics has no Plan decision in it, and that is by design: the
+kit's question arrives at the first Plan card. Where that is answered, if
+anywhere, is an open A pick (`review/active/kokomi-plan-less-hand-2026-09-08.md`,
+default: nowhere for now); it is not answered by touching the basics.
 
 ## 4. The starter, ten cards, four ids
 
@@ -54,111 +78,96 @@ becomes one Uncommon or Rare (section 6), and the heal becomes one Rare.
 |---|---|---|---|---|
 | Strike | 1 | Attack | Deal 6. | 4 |
 | Defend | 1 | Skill | Gain 5 Block. | 4 |
-| Kurage's Oath | 1 | Skill | Plan: Deal 5 to every enemy. | 1 |
-| Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: every enemy gains 2 Weak. | 1 |
+| Kurage's Oath | 1 | Skill | Deal 3 damage to ALL enemies. Plan: Deal 7 damage to ALL enemies. | 1 |
+| Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies. | 1 |
 
-The basics are the base game's Strike and Defend (R242) and apply no element ([USER], 2026-09-02); her own Attacks apply Hydro the way every catalyst
-character's do, which is what a companion's Pyro, Electro or Cryo card
-reacts with. Kurage's Oath has no now-line: it is the jellyfish's own
-strike and the only way to play it is to plan it. Slack Water is the one
-starter card with both lines, so fight one shows the choice once.
+The basics are the base game's Strike and Defend (R242) and apply no
+element ([USER], 2026-09-02); her own Attacks apply Hydro the way every
+catalyst character's do, which is what a companion's Pyro, Electro or Cryo
+card reacts with. Kurage's Oath gained a now-line under R250 pick 1 (round
+4d), so writing it is a trade rather than the only play; its now-line does
+not upgrade. Slack Water's Plan is a **morning** Plan: the Weak lands the
+next turn, after the swing it was written against, and that delay is the
+point (R267 pick 1). Its numbers are the R243 audit's (Weak 1 now, Weak 1
+to ALL written; upgrade 7 damage and 2 Weak written).
 
-Relic, **Tamakushi Casket** (pick 3): the Bake-Kurage is out from the
-start of every combat, and whenever you apply a debuff to an enemy, it
-strikes that enemy for 2 Hydro damage.
+Relic, **Tamakushi Casket**: the Bake-Kurage is out from the start of every
+combat, and whenever you apply a debuff to an enemy, it strikes that enemy
+for 2 Hydro damage.
 
-Fight one, turn one: three energy, Water's Edge twice, Coral Guard,
-Kurage's Oath, Slack Water; the enemy intends 8. Slack Water on the enemy:
-4, Weak, and the jellyfish's 2, the relic's lesson. Coral Guard, 5 Block
-against a Weakened 6. Kurage's Oath on the jellyfish. Turn two opens with
-the jellyfish hitting every enemy for 5 before you draw. Slack Water was
-the decision: blunt this turn's hit now, or 2 Weak on everyone at dawn
-with the jellyfish striking each of them. That is the whole kit, on turn
-one.
+Fight one, turn one: three energy, Strike twice, Defend, Kurage's Oath,
+Slack Water; the enemy intends 8. Slack Water on the enemy: 4, Weak, and
+the jellyfish's 2, the relic's lesson. Defend, 5 Block against a Weakened
+6. Kurage's Oath on the jellyfish. Turn two opens with the jellyfish
+hitting every enemy for 7 before you draw. Slack Water was the decision:
+blunt this turn's hit now, or Weak on everyone at dawn with the jellyfish
+striking each of them. That is the whole kit, on turn one.
 
 ## 5. The payoff moment
 
-The morning three Plans land at once. The pool pays for it twice over:
-cards that trigger whenever the jellyfish carries out a Plan (draw one,
-gain Block, hit the front enemy), and her Burst, **Nereid's Ascension**
-(Rare Power, 2): the jellyfish carries out every Plan twice. That is the
-Ceremonial Garment as one card, and the one Rare that breaks rule 3's
-"once, in order." (Pool pass one, 2026-09-05: it was a two-turn Exhaust
-Plan and spent the morning it doubled; as a Power it never does.)
+The morning the Plans land. The pool pays for it twice over: cards that
+trigger when the jellyfish carries out a Plan (Treatise draws, Song of
+Pearls blocks, Feint and Sango Isshin hit harder on a carry-out turn), and
+her Burst, **Nereid's Ascension** (Rare Power, 2): the jellyfish carries
+out your **first** Plan each turn twice (pass three; "every Plan twice"
+paid for writing more, which is the shape the pool passes undo). It is the
+one Rare that bends rule 3's "once, in order," and it makes the order of
+the queue the decision.
 
-## 6. Later: the pool, in one line per loop
+## 6. The pool, in one line per loop
 
-- **The Tactician.** Cheap Plans and the cards that pay per Plan carried
-  out. Payoff: the morning.
-- **The Priestess.** Block through the jellyfish; Mend only at Rare and
-  Exhaust (Watatsumi's Blessing: Exhaust. Plan: Mend 12). A thing she can
-  do.
+- **The Tactician.** Plans and the cards that pay per Plan carried out.
+  Payoff: the morning. The order riders (Opening Gambit doubles the next
+  Plan, Second Wave repeats it, Scout Ahead draws one per **later** Plan
+  carried out with it, R267 pick 3) make writing order the puzzle.
+- **The Priestess.** Block through the jellyfish, Dusk for the turn the hit
+  is on; Mend only at Rare and Exhaust. A thing she can do.
 - **The Commander.** Gorou and the Inazuma companions (R236); how a
   companion meets the jellyfish is the slice's question, and no play is
   free.
 - **The replay, demoted.** One Uncommon or Rare, Moon's Reflection:
-  Exhaust. Choose a card in your exhaust pile; Plan: the jellyfish carries
-  out its Plan line. Good design space, never the chassis.
+  Exhaust; choose a card in your Exhaust pile; next turn the jellyfish
+  carries out its Plan line. Good design space, never the chassis.
 
 Rares take constellation names (C1 to C6 are all unused but Sango Isshin
 and The Clouds Like Waves). Cut and not coming back: Tide, Surge, Exert,
-the pulse, Orders, Tactics, Spent, Garment as a keyword, Flawless Strategy.
+the pulse, Orders, Tactics, Spent, Garment as a keyword, Flawless Strategy,
+the two-Plan cap (R266), Night Watch and Converging Tide (retired on the
+pool passes), The Moon Overlooks the Waters (withdrawn at the door, 2026-09-05).
 
-## 7. What the engine has to do
+## 7. What the engine does
 
-1. **The first question, answered in the decompile (2026-09-02): yes.**
-   The engine has pets: a creature spawned on the player's side for the
-   whole combat that enemies structurally cannot target, since their moves
-   only ever aim at players; the Necrobinder's Osty is one. The mod's base
-   library ships the seam already: a pet model with its HP bar hidden, and
-   a Pet target type with the validation, selection and drag-to-target
-   patches in place, so a card can be aimed at the jellyfish unmodified,
-   and its play hands the card the jellyfish as the target creature. The
-   Bake-Kurage becomes such a pet; her Plan cards target "an enemy or the
-   Bake-Kurage" (Attacks) or "you or the Bake-Kurage" (Skills). Effort:
-   small to medium, about two days. The risk is the creature's art and its
-   placement on the field, which is bespoke code per pet.
-2. The typed Plan queue exists (`Powers/Prototype/KokomiPlan.cs`: seven
-   clauses, resolved at the start of her turn before the draw, per player,
-   with a pending-count badge). It gains the starter's four clauses and a
-   "twice" flag for the Burst.
-3. The strip that drew the Memory arm's queue (EB-198) draws the pending
-   Plans face up, in order, on the jellyfish.
+1. The Bake-Kurage is a pet on the player's side (the base library's pet
+   seam), targetable by her Plan cards and by nothing else.
+2. The typed Plan queue (`Powers/Prototype/KokomiPlan.cs`, `tier0/engine/kokomi_plan.py`)
+   holds morning and Dusk entries, resolves each drain in order, and carries
+   the first entry twice under the Ascension.
+3. The strip draws the pending Plans face up, in order, on the jellyfish,
+   and the jellyfish panel prints "No Plan card in hand: the jellyfish
+   waits" on a hand of basics.
 4. Retired under the flag: Tide, Surge, Exert, the pulse, the Garment
    power, Strength to Tide. The shipped 76-card Kokomi is untouched.
-5. The slice, written after you have read this: the ten-card starter and
-   about twenty-four pool cards on the three loops, then the Prototype
-   gate as before: seats first, then one act-one run by you.
 
-## 8. Applied defaults (D/E/F, disclosed, yours to veto)
+## 8. The pool-pass charter (from pass three, 2026-09-07)
 
-Planned Attacks hit the front enemy: readable and positional; "a random
-enemy" is the Memory arm's rule and a one-line change. Slack Water's
-status is Weak, the defensive one; Vulnerable is the one-word swap. Slack
-Water carries a Plan line so fight one shows the choice once; dropping it
-is a one-line change. The relic's 2 is a number play moves. Tamakushi
-Casket replaces the misspelled Tamanooya's. The audit's picks are answered
-by this draft and its file moves to `review/ruled/`.
+A pool row may change on a pass only inside these clauses, and a pass with
+a card change goes to the doctrine door before a tester: C1 no row removes
+a losing line the kit is meant to keep instead of pricing it; C2 a benefit
+carries a binding price; C3 the card's value is decided by a choice the
+player makes; C5 nothing fires by itself; C6 no row is strictly better than
+a pool row or a base-game card at its rarity and cost; C7 a Common never
+increases deck size. Both halves of a two-half card must be worth playing
+on some turn. Passes four and five went to the door on 2026-09-08 under
+R267 (`review/records/kokomi-pass-four-audit-2026-09-08.md`, `-five-`).
 
-## 9. Picks
+## 9. Applied defaults (D/E/F, disclosed, yours to veto)
 
-1. **How a card becomes a Plan.** (1) Play it on the Bake-Kurage, a pet
-   on your side of the field, as you suggested. **Default**; the engine
-   supports it (section 7). (2) Plan is a property of certain cards only;
-   the starter mixes now-cards and Plan-cards and there is no per-card
-   choice. The smaller game, if you would rather not have the choice on
-   every card.
-2. **The jellyfish's body.** (1) Untouchable: no HP, enemies cannot hit
-   it, it is only where a Plan is sent. **Default.** (2) A creature with HP
-   that enemies can hit and you can lose, so a plan can be disrupted. A
-   bigger game and a much bigger build; not for slice one.
-3. **The relic.** (1) Whenever you apply a debuff to an enemy, the
-   jellyfish strikes it for 2 Hydro damage. **Default**: live from turn
-   one through Slack Water, pays the status Plans the pool will carry,
-   and pays reactions too, since Superconduct, Overloaded and Frozen on a
-   boss all apply a debuff; the Hydro hit re-wets the enemy for the next
-   companion card. (2) Whenever you trigger an elemental reaction, the
-   jellyfish strikes that enemy for 3 Hydro damage. The purer reaction
-   reward, and dead in fight one, since the starter carries one element
-   and no companion. (3) Enemies hit by a Plan gain 1 Vulnerable. Keyed to
-   the Plan itself; silent on the turns you spend on basics.
+Planned Attacks hit the front enemy or the aimed one. Slack Water's status
+is Weak, the defensive one. The relic's 2 is a number play moves. Tamakushi
+Casket replaces the misspelled Tamanooya's.
+
+## 10. Picks
+
+None open on this page. Picks 1 to 3 of draft 6 (a card becomes a Plan by
+being played on the pet; the pet is untouchable; the relic strikes on a
+debuff) were ruled R241 at their defaults and are the rules above.
