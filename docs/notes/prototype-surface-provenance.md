@@ -3385,3 +3385,28 @@ pins both halves. And `draw_per_plan_this_turn`, pass four's whole-drain
 spelling, is KEPT REGISTERED AND RESOLVED on both engines with no row spelling
 it, the standing `scry_bottom` and `redirect_queued_plans` already have -- the
 clause works if a sheet reaches for it, without a build.
+
+## Scout Ahead counts later CARRY-OUTS, paid as they happen (`EB-718`, 2026-09-08)
+
+The 2026-09-08 review queued Scout Ahead, then Second Wave, then Battle Plan,
+and Scout Ahead drew 2. Second Wave carries the Plan behind it out TWICE, so
+what followed was three carry-outs -- Second Wave's own, Battle Plan's two.
+
+The face says "each later Plan CARRIED OUT with this one", and both engines
+counted the ENTRIES still queued (`len(due) - index - 1`) -- the one number a
+rider can move and an entry count cannot see. It contradicted the register too:
+every reader counts carry-outs (`EB-501`), and every per-Plan clause counts a
+doubled carry-out twice (`EB-709`). The R267 comments called the omission
+deliberate, which made a wrong number a documented one; they are gone.
+
+The clause draws nothing at its own carry-out now. It ARMS a counter for the
+rest of THAT drain, and every carry-out that follows draws the armed rate; two
+armed Scout Aheads draw 2 apiece. The counter is a local of the drain loop, so
+a fight that ends mid-morning draws nothing more and a morning's arming never
+reaches the evening. Last of three draws 0, first draws 2, first of {Scout,
+Second Wave, Battle Plan} draws 3, Change of Plans is a drain of one and draws
+0. NEREID'S ASCENSION IS THE CONSEQUENCE and not a second rule: the Rare
+carries the first entry out twice, so a Scout Ahead written first arms twice
+and draws 2 per later carry-out. Both suites pin it. Its own beat prints no
+number -- no honest figure exists at the clause -- and the cards ride the later
+beats by name through `KokomiPlan.NoteRider`.

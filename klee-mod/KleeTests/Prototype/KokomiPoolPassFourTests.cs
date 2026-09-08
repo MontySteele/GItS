@@ -80,25 +80,30 @@ public class KokomiPoolPassFourTests
     }
 
     [Fact]
-    public void The_drains_count_is_read_per_entry_again()
+    public void The_drains_count_is_carry_outs_and_is_paid_as_they_happen()
     {
-        // STRUCTURAL, for this file's stated split. R267 pick 3: the count is
-        // read INSIDE the entry loop, which is what lets a Scout Ahead written
-        // first and one written last answer differently -- the decision the
-        // card poses. Pass four's whole-drain term stays computed once above
-        // the loop for `DrawPerPlanThisTurn`, which no row spells. Twin:
-        // `test_scout_ahead_counts_the_plans_that_follow_it`.
+        // STRUCTURAL, for this file's stated split. R267 pick 3 put the
+        // ordering decision back on the card and `EB-718` made the count
+        // honest: the clause ARMS a drain-local counter and every carry-out
+        // that follows draws the rate, which is what lets a Scout Ahead
+        // written first and one written last answer differently AND what makes
+        // Second Wave's doubled follower pay twice. Pass four's whole-drain
+        // term stays computed once above the loop for `DrawPerPlanThisTurn`,
+        // which no row spells. Twins:
+        // `test_scout_ahead_counts_the_plans_that_follow_it`,
+        // `test_scout_ahead_pays_second_waves_doubled_carry_out_twice`.
         var source = Source("KokomiPlan", power: true);
-        Assert.Contains("var after = due.Count - index - 1;", source);
+        Assert.Contains("var scoutRate = 0;", source);
         Assert.Contains("var drainPlans = due.Count", source);
 
-        // CARRY-OUTS AND NOT ENTRIES (`EB-501`), and for the positional count
-        // that means Nereid's adds NOTHING: `EB-655` narrowed the Rare to the
-        // FIRST entry of a drain, and an entry is never the first when
-        // something follows it, so every later entry is one carry-out.
+        // CARRY-OUTS AND NOT ENTRIES (`EB-501`, `EB-709`). Seen to FAIL
+        // against the entries-based term: the 2026-09-08 review queued Scout
+        // Ahead, Second Wave and Battle Plan, and the positional count drew 2
+        // where the face says 3.
+        Assert.DoesNotContain("var after = due.Count - index - 1;", source);
         Assert.Contains("CarryOutTimes(kokomi) > 1", source);
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
-        Assert.Contains(resolve.GetParameters(), p => p.Name == "after");
+        Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "after");
         Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
     }
 
