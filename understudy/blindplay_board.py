@@ -484,6 +484,12 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # than the cost on its face.
     combat["spark_note"] = qa_packet.spark_note(combat["you"]["powers"],
                                                 combat["hand"])
+    # `EB-681`: what reacted this turn, by name, in the order it resolved.
+    # Absent on a build with no log; present and empty on a turn nothing
+    # reacted, which is a fact and not a hole.
+    reactions = reaction_log(p)
+    if reactions is not None:
+        combat["reactions"] = reactions
     memory = kurage_memory(p)
     if memory is not None:
         combat["memory"] = memory
@@ -732,6 +738,32 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
                         for row in (raw.get("summon_hits") or [])
                         if isinstance(row, dict)],
     }
+
+
+def reaction_log(player: dict[str, Any]) -> list[dict[str, str]] | None:
+    """This turn's reactions, by name and source, in order (`EB-681`).
+
+    THE THREE STATES the whole wire keeps, one more time: an ABSENT key is a
+    build with no log (`None` here, and no section on the page); an EMPTY list
+    is the log saying nothing reacted this turn, which is worth printing
+    because the alternative -- silence -- is what the r27 lane-1 seat read as
+    "Gorou+'s Crystallize may or may not have fired"; a populated list is the
+    beats, in the order they resolved.
+
+    A ROW IS THREE PRINTED WORDS AND NO NUMBER. What a reaction delivered is
+    already on the board and on the panel; what no surface carried was that it
+    HAPPENED and off what. `KleeMod.Powers.ReactionLog.Snapshot` is the twin
+    and its keys are the contract.
+    """
+    rows = player.get("reactions")
+    if not isinstance(rows, list):
+        return None
+    return [{"reaction": _text(r.get("reaction")),
+             "source": _text(r.get("source")),
+             "target": _text(r.get("target")),
+             "combat_id": _text(r.get("combat_id"))}
+            for r in rows
+            if isinstance(r, dict) and _text(r.get("reaction"))]
 
 
 def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:

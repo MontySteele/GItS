@@ -45,7 +45,10 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         METER_RULES,
                                         MULTI_INTENT_LABEL,
                                         MULTI_INTENT_NOTE,
+                                        NO_REACTION_THIS_TURN,
                                         PENDING_PICK_NOTE, PICKED_MARK,
+                                        REACTIONS_HEADING, REACTION_ROW,
+                                        REACTION_ROW_NO_SOURCE,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
                                         PLAN_CASKET_AURA_CLAUSE,
@@ -219,16 +222,50 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
         out.append("- These fired at the end of your last turn, before the "
                    "enemies acted:")
         out += _carry_out_rows(pl["summon_hits"])
-    if pl["carried_out"]:
+    # `EB-680`. A DUSK PLAN DID NOT HAPPEN THIS MORNING, so it is not filed
+    # under the morning's heading.
+    #
+    # R265's Dusk lines are carried out at the END of the turn they are written
+    # on, before the enemies act -- so by the time a seat reads this list they
+    # are one turn and one enemy phase old, and the heading said "at the start
+    # of this turn". Kokomi r27 lane 2: one Dusk Plan's timing printed three
+    # ways at once, the card saying the end of this turn, the badge and the
+    # queue saying the start of the next, and this heading saying the start of
+    # THIS one. Two of the three are fixed at their source; this is the third.
+    #
+    # READ OFF THE MOD'S OWN MARK, which is `KokomiPlan.Entry.Title`'s "Dusk: "
+    # prefix -- the same string the strip draws and the same one `Announce`
+    # passes through as the carry-out's `card`. No new wire field, and a build
+    # that predates the prefix files every row under the morning exactly as it
+    # did.
+    dusk = [row for row in pl["carried_out"] if _is_dusk(row)]
+    morning = [row for row in pl["carried_out"] if not _is_dusk(row)]
+    if dusk:
+        out.append(f"- The {pl['pet_name']} carried these out at the END of "
+                   "your last turn, before the enemies acted:")
+        out += _carry_out_rows(dusk)
+    if morning:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
-        out += _carry_out_rows(pl["carried_out"])
+        out += _carry_out_rows(morning)
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not at the start of the "
                    "turn:")
         out += _carry_out_rows(pl["fired_now"])
     return out
+
+
+#: `EB-680`. The mark `KokomiPlan.Entry.Title` puts on a Dusk entry, which is
+#: the only place the wire says which timing an entry has. Case-sensitive and
+#: anchored, because it is a prefix the mod writes and not a word a card face
+#: might happen to use.
+_DUSK_MARK = "Dusk: "
+
+
+def _is_dusk(row: dict[str, Any]) -> bool:
+    """Is this queued or carried-out Plan a DUSK entry? (`EB-680`)"""
+    return str(row.get("card") or row.get("name") or "").startswith(_DUSK_MARK)
 
 
 def _carry_out_rows(rows: list[dict[str, Any]]) -> list[str]:
@@ -1066,11 +1103,19 @@ def render(obs: dict[str, Any]) -> str:
                 out.append("- Nothing is planned. Nothing will be carried "
                            "out at the start of your next turn.")
             else:
+                # `EB-680`: the queue is ONE queue and two of its entries
+                # land at different moments, so the line that says WHEN says
+                # it per entry rather than once for all of them. The Dusk
+                # clause rides the entry's own row, where a reader deciding
+                # whether to write another one is looking.
                 out.append(
                     f"- Planned, and carried out at the start of your next "
                     f"turn in this order ({pl['pending']}):")
                 for i, e in enumerate(pl["queue"], 1):
-                    out.append(f"  {i}. **{e['name']}**")
+                    out.append(f"  {i}. **{e['name']}**"
+                               + (" — Dusk: this one is carried out at the "
+                                  "END of this turn instead, before the "
+                                  "enemies act" if _is_dusk(e) else ""))
                 if pl["twice"]:
                     out.append("- The jellyfish carries out your FIRST Plan "
                                "twice while Nereid's Ascension lasts.")
@@ -1156,6 +1201,18 @@ def render(obs: dict[str, Any]) -> str:
             out += [f"- **{name}** was played an extra time, and the extra "
                     "play performed as well."
                     for name in c["salon"]["replayed"]]
+        # `EB-681`. WHAT REACTED THIS TURN, under the board that reacted and
+        # above the hand -- a receipt for the beat just watched, filed where
+        # the other receipts on this page are (the carry-out block, the
+        # Salon's). Present and empty prints its own line, because "no line"
+        # and "no reaction" were the same page to the r27 lane-1 seat.
+        if c.get("reactions") is not None:
+            out += ["", REACTIONS_HEADING, ""]
+            for row in c["reactions"]:
+                out.append((REACTION_ROW if row["source"]
+                            else REACTION_ROW_NO_SOURCE).format(**row))
+            if not c["reactions"]:
+                out.append(NO_REACTION_THIS_TURN)
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page

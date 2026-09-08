@@ -681,6 +681,30 @@ CHOOSER_CONFIRM_NOTE = (
     "after `choose` to take it, and until you do this chooser stays open and "
     "every other command is refused.*")
 
+# `EB-681`. EVERY REACTION IN A BEAT, BY NAME, IN ORDER.
+#
+# THE FIND (Kokomi r27). Lane 2, fight 4: Slack Water put Hydro on a body,
+# Shinobu's Thundergrust hit it with Electro, and the panel showed Poison 8
+# where the Electro-Charged rule prints 4. The eight was TWO procs -- the
+# Tamakushi Casket answered the Weak with a 2 Hydro ping, which landed on the
+# fresh Electro aura and reacted again -- and the seat reconstructed the whole
+# beat from a doubled number: "I only trusted my reading because it reproduced
+# four times." Lane 1, (c) 2, is the same hole from the other side: "Gorou+'s
+# Crystallize did not visibly fire", with nothing anywhere to settle it.
+#
+# NO NUMBER ON THE ROW. What a reaction delivered is on the board already and
+# on the panel; what no surface carried is that it HAPPENED, how many times,
+# and off what. The heading says the window, because a log with no window
+# reads as the fight's.
+REACTIONS_HEADING = "## What reacted this turn"
+REACTION_ROW = "- **{reaction}** on **{target}**, off {source}."
+REACTION_ROW_NO_SOURCE = "- **{reaction}** on **{target}**."
+#: Printed where the log is present and empty, which is a fact about the turn
+#: and not a hole in the feed -- and it is the sentence that closes lane 1's
+#: reading, since "no line" and "no reaction" were the same page.
+NO_REACTION_THIS_TURN = ("- Nothing reacted this turn. A reaction that "
+                         "happened would be listed here by name.")
+
 ENEMY_HANDLE_NOTE = (
     "*Each enemy keeps its letter and its number for the whole fight: a body "
     "that dies does not renumber or re-letter the ones still standing, and a "
@@ -865,8 +889,25 @@ PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans at "
 # BESIDE `PLAN_COUNT_NOTE`, and the C# half is on the `Plan` badge
 # (`KokomiPlan.PendingPlansPower`): the `Plan` keyword tip is at its
 # 135-character ceiling and cannot carry a word more.
-PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote; a debuff "
-                            "on you afterwards does not change it.")
+#
+# `EB-688`. AND "AFTERWARDS" WAS THE HALF THAT WAS NOT THE RULE. Both r27 and
+# r28 wrote a Plan while ALREADY debuffed and were paid in full -- Riptide 13
+# under Weak, Kurage's Oath 7 under Shrink -- so a seat holding this sentence
+# had to guess: "Either 'a hit you land' excludes the jellyfish's hit ... or
+# Plans are simply immune. The rules text does not say which, and the
+# difference matters" (r28 lane 1, (c) 2).
+#
+# IT IS THE FIRST, and the panel already says the fact it turns on one line
+# up: `PLAN_HYDRO_NOTE`'s "Every planned HIT is the jellyfish's". A debuff
+# that cuts YOUR damage is not on the body that throws a planned hit, whenever
+# it landed -- and the mirror is `EB-659`'s finding, that a planned BLOCK is
+# yours and Frail does cut it. Two clauses, one rule, both predictable from
+# the sentence.
+PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
+                            "planned HIT is the jellyfish's, so Shrink or Weak "
+                            "on you never cuts it, before or after you write "
+                            "it; a planned BLOCK is yours, so Frail does cut "
+                            "it.")
 
 # `EB-567`. THE KIT'S FIRST DECISION, TAUGHT BY REFUSAL ONE ACTION TOO LATE.
 #

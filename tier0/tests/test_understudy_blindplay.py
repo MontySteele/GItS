@@ -3870,6 +3870,112 @@ def two_body_state(plans: dict) -> dict:
     return state
 
 
+def reacted_state(*rows: dict) -> dict:
+    """A combat whose wire carries `player.reactions` (`EB-681`)."""
+    state = copy.deepcopy(combat_state())
+    state["player"]["reactions"] = list(rows)
+    return state
+
+
+def test_two_reactions_in_one_beat_are_two_named_lines():
+    """`EB-681`. THE BEAT THE SEAT REBUILT FROM A DOUBLED NUMBER.
+
+    Kokomi r27 lane 2, fight 4: Slack Water put Hydro on a body, Shinobu's
+    Thundergrust hit it with Electro, and the panel showed Poison 8 where the
+    Electro-Charged rule prints 4. The eight was TWO procs -- the Tamakushi
+    Casket answered the Weak with a 2 Hydro ping, which landed on the fresh
+    Electro aura and reacted again. "The player has to reconstruct a double
+    proc from a number that is simply twice what the keyword says. I only
+    trusted my reading because it reproduced four times."
+
+    Seen to FAIL: no line on any screen named either reaction.
+    """
+    page = blindplay.observe(reacted_state(
+        {"reaction": "Electro-Charged", "source": "Shinobu — Thundergrust",
+         "target": "Damp Cultist", "combat_id": "3"},
+        {"reaction": "Electro-Charged", "source": "Tamakushi Casket",
+         "target": "Damp Cultist", "combat_id": "3"}))
+    assert "## What reacted this turn" in page
+    section = page.split("## What reacted this turn")[1].split("\n\n")[1]
+    assert section.count("**Electro-Charged**") == 2
+    # And the word is now ON the screen, so `EB-537` defines it below -- which
+    # is the whole point of naming the beat rather than printing a number.
+    assert "- **Electro-Charged** — " in page
+    assert "- **Electro-Charged** on **Damp Cultist**, off Shinobu — "            "Thundergrust." in page
+    assert "- **Electro-Charged** on **Damp Cultist**, off Tamakushi "            "Casket." in page
+    # In the order they resolved: the card, then the relic that answered it.
+    assert page.index("Thundergrust.") < page.index("Casket.")
+
+
+def test_a_turn_with_no_reaction_says_so_rather_than_going_quiet():
+    """The other half, and it is lane 1's finding: "Gorou+'s Crystallize did
+    not visibly fire", with no way to settle it. A present-and-empty log is a
+    fact about the turn; silence was what could not be read."""
+    page = blindplay.observe(reacted_state())
+    assert "Nothing reacted this turn" in page
+    # And a build with no log at all prints no section, the wire's own third
+    # state -- which is every board before this row.
+    assert "What reacted this turn" not in blindplay.observe(combat_state())
+
+
+def test_a_reaction_with_no_source_still_prints():
+    """A bomb going off on nobody's turn has neither card nor dealer. The row
+    drops the clause rather than inventing a source."""
+    page = blindplay.observe(reacted_state(
+        {"reaction": "Overloaded", "source": "", "target": "Corpse Slug",
+         "combat_id": "1"}))
+    assert "- **Overloaded** on **Corpse Slug**." in page
+    assert "off ." not in page
+
+
+def test_a_dusk_plan_prints_one_timing_on_every_surface():
+    """`EB-680`. ONE PLAN, THREE TIMINGS, ALL ON ONE RUN.
+
+    R265's Dusk lines are carried out at the END of the turn they are written
+    on, before the enemies act. The Kokomi r27 lane-2 seat met a Dusk Plan
+    whose card said the end of this turn, whose badge and queue line said the
+    start of the next, and whose carry-out heading, one turn later, said the
+    start of THIS turn. The badge is fixed at its source
+    (`ProtoBakeKuragePower`, `PendingPlansPower`); these are the page's two.
+
+    Seen to FAIL: the queue row was silent and the carry-out row filed under
+    the morning's heading.
+    """
+    queued = dict(TWO_PLANS, pending=2, queue=[
+        {"name": "Dusk: Breakwater", "clauses": 1},
+        {"name": "Kurage's Oath", "clauses": 1}])
+    page = blindplay.observe(plans_combat_state(queued))
+    assert "1. **Dusk: Breakwater** — Dusk: this one is carried out at the "            "END of this turn instead, before the enemies act" in page
+    assert "2. **Kurage's Oath**" in page
+    assert page.count("END of this turn instead") == 1
+
+    done = blindplay.observe(plans_combat_state(morning_of(
+        {"card": "Dusk: Breakwater", "number": 5,
+         "line": "Bake-Kurage: Dusk: Breakwater, 5", "kind": "Block",
+         "asked": 5},
+        {"card": "Kurage's Oath", "number": 7,
+         "line": "Bake-Kurage: Kurage's Oath, 7", "kind": "Damage",
+         "asked": 7})))
+    assert "carried these out at the END of your last turn, before the "            "enemies acted:" in done
+    assert "carried these out at the start of this turn, front first:" in done
+    dusk_at = done.index("END of your last turn")
+    morning_at = done.index("start of this turn, front first")
+    assert dusk_at < morning_at, "the earlier moment is filed first"
+    assert done.index("Dusk: Breakwater, 5") < morning_at
+    assert done.index("Kurage's Oath, 7") > morning_at
+
+
+def test_a_morning_with_no_dusk_entry_reads_exactly_as_it_did():
+    """The other half: a build or a turn with no Dusk line prints one heading
+    and no clause, which is every board before R265."""
+    page = blindplay.observe(plans_combat_state(morning_of(
+        {"card": "Kurage's Oath", "number": 7,
+         "line": "Bake-Kurage: Kurage's Oath, 7", "kind": "Damage",
+         "asked": 7})))
+    assert "carried these out at the start of this turn, front first:" in page
+    assert "END of your last turn" not in page
+
+
 def test_a_plan_on_a_vulnerable_target_prints_the_number_the_board_moved():
     """The row's own example, and the sharpest form of the defect.
 
@@ -11150,10 +11256,20 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
                     "line": "Bake-Kurage: Kurage's Oath, 7",
                     "kind": "Damage", "asked": 7})))
     lines = page.splitlines()
-    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE == (
-        "- A Plan carries the numbers you wrote; a debuff on you afterwards "
-        "does not change it.")
+    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE.startswith(
+        "- A Plan carries the numbers you wrote.")
     assert blindplay.PLAN_WRITTEN_NUMBER_NOTE in lines
+    # `EB-688`. AND BOTH CASES ARE PREDICTABLE FROM IT. "afterwards" was the
+    # word that was not the rule: both r27 and r28 wrote a Plan while ALREADY
+    # debuffed and were paid in full. "Either 'a hit you land' excludes the
+    # jellyfish's hit ... or Plans are simply immune. The rules text does not
+    # say which, and the difference matters" (r28 lane 1, (c) 2). It is the
+    # first, and the Block half is `EB-659`'s mirror of it.
+    said = blindplay.PLAN_WRITTEN_NUMBER_NOTE
+    assert "Every planned HIT is the jellyfish's" in said
+    assert "before or after you write it" in said
+    assert "a planned BLOCK is yours, so Frail does cut it" in said
+    assert "afterwards" not in said
     # Beside the count rule, which is the one it qualifies.
     assert lines.index(blindplay.PLAN_COUNT_NOTE) + 1 == \
         lines.index(blindplay.PLAN_WRITTEN_NUMBER_NOTE)
@@ -11167,7 +11283,7 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
 #: is `ProtoBakeKuragePower.Localization` verbatim; the capped half is what a
 #: build launched with `GITS_KOKOMI_PLAN_CAP=2` prints.
 PET_FACE = ("Enemies cannot target it. Lasts all combat. Play a Plan card on "
-            "it: it carries out the Plan at the start of your next turn.")
+            "it: it carries out next turn, or at this turn's end if Dusk.")
 PET_FACE_CAPPED = (PET_FACE
                    + " Carries out at most 2 at the start of your turn;"
                      " the rest wait in order.")

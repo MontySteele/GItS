@@ -1284,6 +1284,25 @@ public static partial class McpMod
             state["furina_salon"] = furinaSalon;
         }
 
+        // GItS LOCAL EDIT (`EB-681`). WHAT REACTED THIS TURN, BY NAME. A
+        // reaction is what several kits are ABOUT and the feed carried no
+        // trace of one: the aura is consumed, the effect lands, and a reader
+        // is left working backwards from a number. Kokomi r27 lane 2
+        // reconstructed TWO Electro-Charged procs in one beat from a Poison
+        // count that was twice what the keyword prints. Emitted beside the
+        // two receipts above and on the same absent/empty/populated
+        // contract. Implementation and its reflection contract:
+        // gits/GitsReactionLog.cs.
+        //
+        // BOARD-GLOBAL AND NOT PER-PLAYER, which is the mod's own scoping for
+        // every shared reaction fact (red-pen R1): a Reaction is a fact about
+        // the board, so both seats of a co-op game are shown the beats both
+        // of them watched.
+        if (GitsReactionLogState() is { } reactions)
+        {
+            state["reactions"] = reactions;
+        }
+
         // Powers (status effects)
         state["status"] = BuildPowersState(creature);
 

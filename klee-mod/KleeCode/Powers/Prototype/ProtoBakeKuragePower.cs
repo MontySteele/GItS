@@ -54,9 +54,18 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         ("title", "Bake-Kurage"),
         ("description",
+            // `EB-680`. THE TIMING, BOTH OF THEM, ON THE BADGE THAT STATES
+            // IT. R265's Dusk lines land at the END of the turn they are
+            // written on, and this face said "at the start of your next turn"
+            // flat -- so a Dusk Plan's timing printed three ways at once (the
+            // card, this badge and the queue) and the r27 lane-2 seat had no
+            // way to tell which was the rule. Bought inside the 125-character
+            // power ceiling by dropping "the [gold]Plan[/gold]" and "at the
+            // start of", which the sentence's own subject already carries:
+            // 124 of 125.
             "Enemies cannot target it. Lasts all combat. Play a "
-          + "[gold]Plan[/gold] card on it: it carries out the "
-          + "[gold]Plan[/gold] at the start of your next turn."
+          + "[gold]Plan[/gold] card on it: it carries out next turn, or at "
+          + "this turn's end if [gold]Dusk[/gold]."
           // `EB-653` (round 24). THE CAP PRINTS WHERE IT BINDS. The r24 cap
           // lane carried out two of four written Plans four mornings running
           // with no surface saying a cap existed, and read the rule as a wall.
