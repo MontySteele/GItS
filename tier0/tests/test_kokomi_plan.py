@@ -2122,13 +2122,25 @@ def test_change_of_plans_neither_sets_nor_consumes_a_rider(overhaul):
 
 # --- Scout Ahead ----------------------------------------------------------
 
+def scout_cards(state):
+    """`EB-718`. WHAT SCOUT AHEAD ACTUALLY DREW in a drain: the card is paid at
+    every later CARRY-OUT rather than once off a count, so the pin is the sum
+    and not one event's figure."""
+    return sum(e["cards"] for e in state.log
+               if e["event"] == "plan_scout_ahead")
+
+
 @pytest.mark.parametrize("position,cards", [(0, 2), (1, 1), (2, 0)])
 def test_scout_ahead_counts_the_plans_that_follow_it(overhaul, position,
                                                      cards):
     """R267 PICK 3. THE POSITION RULE IS THE CARD: in a morning of three,
     Scout Ahead written first draws 2, written second draws 1 and written last
     draws 0. Pool pass four had it count the whole drain wherever it sat,
-    which removed the ordering decision the row exists to pose."""
+    which removed the ordering decision the row exists to pose.
+
+    UNCHANGED BY `EB-718`, which is the point of putting it first: three
+    single carry-outs are three later carry-outs, so the honest count and the
+    old positional one agree wherever nothing is doubled."""
     st = kokomi_state()
     rows = [plan_card([{"op": "energy", "amount": 1}], cid=f"proto_kk_p{i}")
             for i in range(3)]
@@ -2138,8 +2150,31 @@ def test_scout_ahead_counts_the_plans_that_follow_it(overhaul, position,
     for row in rows:
         kokomi_plan.schedule(st, row)
     kokomi_plan.resolve_all(st)
-    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [cards]
+    assert scout_cards(st) == cards
+
+
+def test_scout_ahead_pays_second_waves_doubled_carry_out_twice(overhaul):
+    """`EB-718`, THE DEFECT, reproduced by the 2026-09-08 review and pinned
+    here. Scout Ahead, then Second Wave, then Battle Plan: Second Wave is one
+    carry-out and Battle Plan is TWO, so three Plans are carried out after the
+    Scout Ahead and the face -- "for each later Plan CARRIED OUT with this
+    one" -- says 3. The entries-based count drew 2.
+
+    IT IS `EB-709`'s RULE POINTED FORWARDS: every per-Plan clause counts a
+    doubled carry-out twice, and every reader counts carry-outs (`EB-501`).
+    """
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
+        cid="proto_kk_scout"))
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
+        cid="proto_kk_second_wave"))
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": "next_attack_damage"}],
+        cid="proto_kk_battle_plan"))
+    kokomi_plan.resolve_all(st)
+    assert scout_cards(st) == 3
 
 
 def test_scout_ahead_written_alone_draws_nothing(overhaul):
@@ -2151,13 +2186,14 @@ def test_scout_ahead_written_alone_draws_nothing(overhaul):
         [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
         cid="proto_kk_scout"))
     kokomi_plan.resolve_all(st)
-    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [0]
+    assert scout_cards(st) == 0
 
 
 def test_scout_ahead_hurried_by_change_of_plans_draws_nothing(overhaul):
     """R267 pick 3. Change of Plans carries ONE entry out, so nothing follows
-    the hurried Scout Ahead inside that drain and it draws 0."""
+    the hurried Scout Ahead inside that drain and it draws 0. `EB-718` keeps
+    that true by construction: the counter it arms is a local of a drain that
+    is over the moment the entry is."""
     st = kokomi_state()
     kokomi_plan.schedule(st, plan_card(
         [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
@@ -2165,18 +2201,18 @@ def test_scout_ahead_hurried_by_change_of_plans_draws_nothing(overhaul):
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
                                        cid="proto_kk_p0"))
     kokomi_plan.resolve_front(st)
-    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [0]
+    assert scout_cards(st) == 0
 
 
-def test_scout_ahead_under_nereids_counts_one_carry_out_per_later_entry(
-        overhaul):
-    """R267 PICK 3, THE NEREID'S READING PINNED. The count is CARRY-OUTS and
-    not entries (`EB-501`), and `EB-655` narrowed the Rare to the FIRST entry
-    of a drain only -- an entry is never the first when something follows it,
-    so every entry AFTER this one is exactly ONE carry-out and Nereid's adds
-    nothing to the number. Scout Ahead written first is itself carried out
-    twice under the Rare and pays its 2 each time."""
+def test_scout_ahead_under_nereids_arms_twice_and_pays_twice(overhaul):
+    """`EB-718`, THE NEREID'S CONSEQUENCE PINNED, and it is a consequence
+    rather than a second rule: "carried out twice counts twice" (`EB-709`), so
+    a Scout Ahead written first is carried out twice, ARMS twice, and draws 2
+    at every later carry-out.
+
+    THE ARITHMETIC OF THE MORNING BELOW: Scout, Scout again, p0, p1 is four
+    carry-outs. The second Scout is itself a later carry-out and pays the 1
+    armed by the first; then p0 and p1 pay 2 each. 1 + 2 + 2 = 5."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
     kokomi_plan.schedule(st, plan_card(
@@ -2186,8 +2222,7 @@ def test_scout_ahead_under_nereids_counts_one_carry_out_per_later_entry(
         kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
                                            cid=f"proto_kk_p{i}"))
     kokomi_plan.resolve_all(st)
-    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [2, 2]
+    assert scout_cards(st) == 5
 
 
 def test_the_whole_drain_count_is_kept_resolved_on_no_row(overhaul):

@@ -133,8 +133,11 @@ public class KokomiPoolPassTwoTests
         // could outlive one -- so a rider written by the last Plan of a
         // morning reaches nothing. Twin:
         // `test_riptide_then_gambit_doubles_nothing`.
+        // A TRIPLE SINCE `EB-718`, and the third slot is the same shape for
+        // the same reason: Scout Ahead's armed rate is noted by the entry and
+        // spent by the drain, so it too dies with the drain that armed it.
         var entry = typeof(KokomiPlan).GetMethod("ResolveEntry", All)!;
-        Assert.Equal("ValueTuple`2", entry.ReturnType.GetGenericArguments()
+        Assert.Equal("ValueTuple`3", entry.ReturnType.GetGenericArguments()
                      .Single().Name);
 
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
@@ -206,20 +209,29 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void The_count_is_the_drains_and_is_read_per_entry()
+    public void The_count_is_the_drains_and_is_paid_per_later_carry_out()
     {
-        // STRUCTURAL. R267 pick 3: `Drain` reads Scout Ahead's count INSIDE
-        // the entry loop, because the whole point of the clause is that a
-        // Scout Ahead written first and one written last answer differently.
-        // `EB-679`'s whole-drain term is still computed once above the loop
-        // for the kind no row spells. Twins:
-        // `test_scout_ahead_counts_the_plans_that_follow_it`,
-        // `test_scout_ahead_under_nereids_counts_one_carry_out_per_later_entry`.
+        // STRUCTURAL, `EB-718`. `Drain` ARMS a counter when a Scout Ahead
+        // resolves and pays it at every carry-out that follows, inside that
+        // drain -- which is what makes the count CARRY-OUTS rather than the
+        // entries still queued, and what keeps a Scout Ahead written first and
+        // one written last answering differently. `EB-679`'s whole-drain term
+        // is still computed once above the loop for the kind no row spells.
+        // Twins: `test_scout_ahead_counts_the_plans_that_follow_it`,
+        // `test_scout_ahead_pays_second_waves_doubled_carry_out_twice`.
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
-        Assert.Contains(resolve.GetParameters(), p => p.Name == "after");
+        Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "after");
         Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
+        var entry = typeof(KokomiPlan).GetMethod("ResolveEntry", All)!;
+        Assert.Contains(entry.GetParameters(), p => p.Name == "scoutDraw");
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
         Assert.Contains("KokomiPlan.CarryOutTimes", Il.Calls(drain));
+        var source = Source("KokomiPlan", power: true);
+        Assert.Contains("var scoutRate = 0;", source);
+        Assert.Contains("scoutRate += armed;", source);
+        // AND NOT A POSITION. Seen to FAIL against the entries-based term the
+        // 2026-09-08 review reproduced.
+        Assert.DoesNotContain("var after = due.Count - index - 1;", source);
     }
 
     // ======================================================================

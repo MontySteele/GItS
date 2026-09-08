@@ -4251,15 +4251,18 @@ def test_the_number_kind_words_are_the_mods_own():
     # Read before the clause resolves, which is the whole reason it is a
     # separate call rather than a read inside `Announce`.
     # `EB-643` ADDED A FOURTH SCALED KIND, and it is the one that reads the
-    # DRAIN rather than a ledger: nothing on the board says how many Plans
-    # follow this entry, so the count is a parameter and the asked-for figure
-    # is the rate times it. `EB-679` moved WHICH carry-outs it counts and R267
-    # pick 3 moved it back, without either moving that shape; both spellings
-    # stay resolved, only the first is on a row.
-    assert "Kind.DrawPerPlanAfter => plan.Amount * after" in asked
+    # DRAIN rather than a ledger: nothing on the board says how deep the drain
+    # around this entry is, so the count is a parameter and the asked-for
+    # figure is the rate times it.
     assert "Kind.DrawPerPlanThisTurn => plan.Amount * drainPlans" in asked
+    # `EB-718` TOOK SCOUT AHEAD OFF THIS SWITCH, and the pin is the ABSENCE.
+    # It is paid per later CARRY-OUT as those carry-outs happen, so there is no
+    # figure to ask for at its own clause and NO ENTRIES-BASED ESTIMATE IS
+    # PRINTED ANYWHERE -- the cards ride the later beats by name instead
+    # (`KokomiPlan.NoteRider`), which `_rider_clause` already prints.
+    assert "Kind.DrawPerPlanAfter" not in asked
     entry = plan[plan.index(
-        "var wanted = AskedFor(kokomi, clause, after, drainPlans);"):]
+        "var wanted = AskedFor(kokomi, clause, drainPlans);"):]
     assert entry.index("await ResolveOne(") < entry.index("kind = NumberKind(")
 
 

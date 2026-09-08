@@ -135,14 +135,16 @@ public static class KokomiPlan
         // drain that is not running and answer nothing, every time.
         //
         // Scout Ahead: "draw 1 card for each LATER Plan carried out with this
-        // one" (R267 pick 3, which put back the clause pool pass four removed).
-        // The count is the carry-outs that FOLLOW this entry in the same drain,
-        // which is `EB-501`'s carry-outs-not-entries reading pointed forwards:
-        // first of three draws 2, last draws 0, alone draws 0. NEREID'S
-        // ASCENSION ADDS NOTHING TO IT, and that is `EB-655`'s rule rather than
-        // a choice here -- the Rare carries out the FIRST entry of a drain and
-        // no other, and an entry is never the first when something follows it,
-        // so every entry after this one is exactly one carry-out.
+        // one" (R267 pick 3, counted honestly at `EB-718`). The count is the
+        // CARRY-OUTS that follow this entry in the same drain -- `EB-501`'s
+        // carry-outs-not-entries reading pointed forwards -- and it is PAID AS
+        // THEY HAPPEN: the clause arms a drain-local counter and every later
+        // carry-out draws the rate. First of three draws 2, last draws 0, alone
+        // draws 0; first of {Scout Ahead, Second Wave, Battle Plan} draws 3,
+        // because Second Wave's rider makes Battle Plan two carry-outs.
+        // NEREID'S ASCENSION IS COUNTED THE SAME WAY: the Rare carries out the
+        // FIRST entry of a drain twice, so a Scout Ahead written first arms
+        // twice and draws 2 at every later carry-out.
         DrawPerPlanAfter,
         // `EB-679`'s WHOLE-DRAIN count, "each Plan carried out this turn, this
         // one included": Scout Ahead briefly took it and R267 pick 3 took it
@@ -1227,19 +1229,34 @@ public static class KokomiPlan
         // number is asked, which is the reading the old per-entry term took.
         var drainPlans = due.Count
                        + (due.Count > 0 && CarryOutTimes(kokomi) > 1 ? 1 : 0);
+        // `EB-718`. SCOUT AHEAD'S COUNTER, armed and spent INSIDE THIS DRAIN.
+        // The face says "for each later Plan CARRIED OUT with this one", so the
+        // card is paid PER LATER CARRY-OUT AS IT HAPPENS rather than off a
+        // count of the entries still queued. The 2026-09-08 review reproduced
+        // the gap: Scout Ahead, Second Wave, Battle Plan is THREE later
+        // carry-outs -- Second Wave's own and Battle Plan's two -- and the
+        // positional term drew 2, because it counted entries. Every per-Plan
+        // clause in this arm counts a doubled carry-out twice (`EB-709`) and
+        // every reader counts carry-outs (`EB-501`); this is that rule pointed
+        // forwards.
+        //
+        // A RATE AND NOT A FLAG: <c>scoutRate</c> is the sum of the amounts
+        // armed so far, so two armed Scout Aheads draw 2 at every later
+        // carry-out. It is a LOCAL, which is what scopes it -- a drain that
+        // ends draws nothing more, and a morning's arming never reaches the
+        // evening.
+        //
+        // ARMED WHEN THE ENTRY RESOLVES, so a Scout Ahead carried out twice
+        // under Nereid's Ascension arms twice and pays 2 per later carry-out:
+        // "carried out twice counts twice" taken literally.
+        // <c>scoutSource</c> names the card on the page, the later one when two
+        // are armed, which is how <c>riderSource</c> above already resolves the
+        // same collision. `kokomi_plan._drain` is the twin.
+        var scoutRate = 0;
+        string? scoutSource = null;
         for (var index = 0; index < due.Count; index++)
         {
             var entry = due[index];
-            // R267 PICK 3, SCOUT AHEAD'S COUNT: the carry-outs still to come
-            // after this entry -- ENTRIES AFTER IT, ONE CARRY-OUT EACH, because
-            // Nereid's Ascension doubles the FIRST entry of a drain only and
-            // this entry is never the first when anything follows it
-            // (`EB-655`). It deliberately does NOT fold in an extra carry-out a
-            // LATER entry may write: that rider is not on the board when this
-            // number is asked. Read PER ENTRY, so a Scout Ahead written first
-            // and one written last answer honestly -- the ordering decision the
-            // card exists for, which pool pass four had removed.
-            var after = due.Count - index - 1;
             // THE RIDERS THE ENTRY BEFORE THIS ONE WROTE, taken and cleared in
             // the same breath: a rider is spent by the entry it reaches, so
             // two Plans in a row that each double cannot both land on a third.
@@ -1259,14 +1276,23 @@ public static class KokomiPlan
                       + (extraThis ? 1 : 0);
             for (var i = 0; i < times; i++)
             {
-                var (wroteDouble, wroteExtra) = await ResolveEntry(
+                var (wroteDouble, wroteExtra, armed) = await ResolveEntry(
                     choiceContext, kokomi, entry, doubleDamage: doubleThis,
-                    after: after, drainPlans: drainPlans);
+                    drainPlans: drainPlans, scoutDraw: scoutRate,
+                    scoutSource: scoutSource);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
                 // above: an entry doubled by Nereid's prints its rider twice
                 // and twice said twice is still twice.
                 doubleNext = doubleNext || wroteDouble;
                 extraNext = extraNext || wroteExtra;
+                // `EB-718`. THE COUNTER THIS CARRY-OUT ARMED, added AFTER the
+                // carry-out that armed it has been paid: a Scout Ahead never
+                // draws for itself, only for what follows.
+                if (armed > 0)
+                {
+                    scoutRate += armed;
+                    scoutSource = entry.Title;
+                }
             }
             if (doubleNext || extraNext) riderSource = entry.Title;
             if (player != null
@@ -1692,7 +1718,7 @@ public static class KokomiPlan
     /// <see cref="ResolveEntry"/> straight, so the split is readable from the
     /// call graph.
     /// </summary>
-    private static Task<(bool Double, bool Extra)> ResolveNow(
+    private static Task<(bool Double, bool Extra, int Scout)> ResolveNow(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry) =>
         ResolveEntry(choiceContext, kokomi, entry, onPlay: true);
 
@@ -1720,26 +1746,30 @@ public static class KokomiPlan
     /// </summary>
     /// <param name="doubleDamage">`EB-643`. Opening Gambit's rider, spent on
     /// THIS entry by the drain that carried the entry before it out.</param>
-    /// <param name="after">R267 pick 3. Scout Ahead's count: the carry-outs
-    /// still to come in this drain after this entry. The default is the honest
-    /// answer for a drain of one -- nothing follows
-    /// (<see cref="ResolveFront"/>).</param>
     /// <param name="drainPlans">`EB-679`. The whole-drain count, this entry
     /// included, which no card spells today. The default is the honest answer
     /// for a drain of one (<see cref="ResolveFront"/>).</param>
-    /// <returns>`EB-643`. The riders THIS entry wrote, which the drain spends
-    /// on the entry that follows it. They are handed back rather than stored
-    /// because the clause that writes one is inside the loop below and the
-    /// drain that spends it is outside -- returning them is what keeps "the
-    /// next Plan" a fact about a DRAIN rather than a flag on this class that
-    /// could outlive one.</returns>
-    private static async Task<(bool Double, bool Extra)> ResolveEntry(
+    /// <param name="scoutDraw">`EB-718`. The Scout Ahead rate armed EARLIER in
+    /// this drain, drawn at the top of this carry-out because this carry-out is
+    /// the "later Plan carried out with" it. The default is the honest answer
+    /// for a drain of one -- nothing was armed before it
+    /// (<see cref="ResolveFront"/>).</param>
+    /// <param name="scoutSource">`EB-718`. The card that armed it, so the beat
+    /// can name what the cards came from.</param>
+    /// <returns>`EB-643` and `EB-718`. The riders THIS entry wrote and the
+    /// Scout Ahead rate it armed, which the drain spends on the carry-outs that
+    /// follow it. They are handed back rather than stored because the clause
+    /// that writes one is inside the loop below and the drain that spends it is
+    /// outside -- returning them is what keeps "the next Plan" a fact about a
+    /// DRAIN rather than a flag on this class that could outlive one.</returns>
+    private static async Task<(bool Double, bool Extra, int Scout)> ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
-        bool onPlay = false, bool doubleDamage = false, int after = 0,
-        int drainPlans = 1)
+        bool onPlay = false, bool doubleDamage = false,
+        int drainPlans = 1, int scoutDraw = 0, string? scoutSource = null)
     {
         var wroteDouble = false;
         var wroteExtra = false;
+        var scoutArmed = 0;
         // `EB-317`, the first half of the beat: THE JELLYFISH ACTS BEFORE THE
         // PLAN LANDS. Awaited, so the clause's damage number arrives after the
         // lunge rather than inside it -- the same argument the casket's strike
@@ -1775,6 +1805,15 @@ public static class KokomiPlan
         _riders = riders;
         try
         {
+            // `EB-718`. THE SCOUT AHEAD DRAW IS PAID FIRST, before this
+            // entry's own clauses: the cards are in hand for the beat rather
+            // than after it, and the rider window is already open so the page
+            // can say where they came from.
+            if (scoutDraw > 0 && kokomi.Player != null)
+            {
+                await CardPileCmd.Draw(choiceContext, scoutDraw, kokomi.Player);
+                if (scoutSource != null) NoteRider(scoutSource, scoutDraw);
+            }
             foreach (var clause in entry.Clauses)
             {
                 // `EB-643`. THE RIDERS ARE NOTED HERE AND NOWHERE ELSE, before
@@ -1782,10 +1821,17 @@ public static class KokomiPlan
                 // they do is tell the drain about the entry that follows.
                 if (clause.Kind == Kind.NextPlanDoubleDamage) wroteDouble = true;
                 if (clause.Kind == Kind.NextPlanExtraCarryOut) wroteExtra = true;
-                var wanted = AskedFor(kokomi, clause, after, drainPlans);
+                // `EB-718`. SCOUT AHEAD IS NOTED HERE TOO, and for the same
+                // reason: it does nothing when it resolves -- what it does is
+                // tell the drain about every carry-out that follows.
+                if (clause.Kind == Kind.DrawPerPlanAfter)
+                {
+                    scoutArmed += clause.Amount;
+                }
+                var wanted = AskedFor(kokomi, clause, drainPlans);
                 var produced = await ResolveOne(choiceContext, kokomi, clause,
                                                 entry, doubleDamage,
-                                                after, drainPlans);
+                                                drainPlans);
                 if (number == null && produced != null)
                 {
                     number = produced;
@@ -1823,7 +1869,7 @@ public static class KokomiPlan
                 await listener.OnPlanResolved(choiceContext, kokomi);
             }
         }
-        return (wroteDouble, wroteExtra);
+        return (wroteDouble, wroteExtra, scoutArmed);
     }
 
     /// <summary>
@@ -2022,7 +2068,7 @@ public static class KokomiPlan
     /// </summary>
     private static async Task<int?> ResolveOne(
         PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
-        Entry? entry = null, bool doubleDamage = false, int after = 0,
+        Entry? entry = null, bool doubleDamage = false,
         int drainPlans = 1)
     {
         var player = kokomi.Player;
@@ -2031,21 +2077,22 @@ public static class KokomiPlan
         switch (plan.Kind)
         {
             case Kind.DrawPerPlanAfter:
-            {
-                // SCOUT AHEAD (R267 pick 3): "draw 1 card for each later Plan
-                // carried out with this one." <paramref name="after"/> is the
-                // drain's count -- see <see cref="Drain"/>, which reads it PER
-                // ENTRY -- and the printed amount is the RATE, the shape Tide
-                // Wall's clause already has. Change of Plans carries ONE entry
-                // out, so a Scout Ahead hurried that way draws nothing: nothing
-                // follows it, which is the face read literally.
-                var cards = plan.Amount * after;
-                if (cards > 0)
-                {
-                    await CardPileCmd.Draw(choiceContext, cards, player);
-                }
-                return cards;
-            }
+                // SCOUT AHEAD (`EB-718`): "draw 1 card for each later Plan
+                // carried out with this one." NOTHING IS DRAWN HERE. The
+                // clause ARMS the drain's counter at the printed rate -- noted
+                // in <see cref="ResolveEntry"/> before this switch, exactly as
+                // the two riders are -- and <see cref="Drain"/> pays that rate
+                // at every carry-out that follows. That is what makes the count
+                // CARRY-OUTS rather than the entries still queued: Second Wave
+                // doubling the entry behind it is two later carry-outs and pays
+                // twice. Change of Plans hurries ONE entry, so a Scout Ahead
+                // taken that way arms a drain that is already over and draws
+                // nothing -- the face read literally.
+                //
+                // NO NUMBER, for the riders' reason below: the figure this card
+                // is worth lands on later Plans, so a number here would be an
+                // estimate printed as a receipt.
+                return null;
             case Kind.DrawPerPlanThisTurn:
             {
                 // `EB-679`'s WHOLE-DRAIN count, on no card since R267 pick 3.
@@ -2203,11 +2250,14 @@ public static class KokomiPlan
             or Kind.DamagePerCompanionLastTurn => "damage",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
-        // `EB-643`. Scout Ahead's figure is cards, the same word Draw's is:
-        // the reader is asking what the number IS and not how it was derived,
-        // which is the argument the three damage kinds above make. The two
-        // riders produce no number at all and fall to the default.
-        Kind.DrawPerPlanAfter or Kind.DrawPerPlanThisTurn => "cards drawn",
+        // `EB-643`. The whole-drain draw's figure is cards, the same word
+        // Draw's is: the reader is asking what the number IS and not how it was
+        // derived, which is the argument the three damage kinds above make. The
+        // two riders produce no number at all and fall to the default, and
+        // `EB-718` puts Scout Ahead among them -- what it is worth is drawn at
+        // the LATER carry-outs, where it rides those beats by name
+        // (<see cref="NoteRider"/>).
+        Kind.DrawPerPlanThisTurn => "cards drawn",
         _ => null,
     };
 
@@ -2227,16 +2277,21 @@ public static class KokomiPlan
     /// different question.
     /// </summary>
     private static int? AskedFor(Creature kokomi, Planned plan,
-                                 int after = 0,
                                  int drainPlans = 1) => plan.Kind
         switch
     {
         // `EB-643`. A FOURTH SCALED KIND, and it reads the DRAIN rather than a
-        // ledger -- which is why `after` and `drainPlans` are parameters here
-        // and the other three are computed from state: nothing on the board
-        // says how many Plans are still to come or how deep the drain around
-        // this entry is, so the drain is the only thing that knows.
-        Kind.DrawPerPlanAfter => plan.Amount * after,
+        // ledger -- which is why `drainPlans` is a parameter here and the other
+        // three are computed from state: nothing on the board says how deep the
+        // drain around this entry is, so the drain is the only thing that
+        // knows.
+        //
+        // SCOUT AHEAD IS NOT HERE ANY MORE (`EB-718`). It used to ask for
+        // `Amount * after`, the entries still queued, and that number was
+        // WRONG in the one case the card is for: Second Wave behind it doubles
+        // a carry-out the entry count cannot see. It is paid per later
+        // carry-out now, so there is no figure to ask for at this clause and
+        // nothing prints an entries-based estimate anywhere.
         Kind.DrawPerPlanThisTurn => plan.Amount * drainPlans,
         Kind.BlockPerPlanThisMorning =>
             plan.Amount * KokomiOverhaulLedger.For(kokomi).PlansThisMorning,

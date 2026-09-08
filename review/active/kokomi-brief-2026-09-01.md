@@ -1,4 +1,4 @@
-Status: OPEN (draft 7; the live Paper artefact for the Prototype build, carrying R241, R242, R250, R265, R266 and R267)
+Status: OPEN (draft 7; the live Paper artefact for the Prototype build, carrying R241, R242, R250, R265, R266, R267 and R268)
 
 # Kokomi overhaul brief, draft 7: the Plan
 
@@ -28,16 +28,20 @@ the Bake-Kurage carries it out at the start of her next turn.
    It is not a fighter and enemies cannot touch it. It is where a Plan is
    sent.
 2. **Plan.** Some of her cards carry a **Plan:** line: what the jellyfish
-   does at the start of your next turn, before you draw, if you play the
-   card on the jellyfish instead of where it would normally go. The cost is
-   paid now either way. A planned card leaves your hand like any played
-   card and nothing takes it back. **Her basics are the base game's Strike
-   and Defend and carry no Plan line (R242); they are never changed
-   ([USER], 2026-09-08).**
+   does at the start of your next turn, after your draw and after the
+   turn's Block and Energy reset, if you play the card on the jellyfish
+   instead of where it would normally go. (Both engines resolve after the
+   draw on purpose: a Plan that resolved before the reset would lose its
+   Block and Energy to it.) The cost is paid now either way. A planned card
+   leaves your hand like any played card, and only a card that says so
+   takes it back (Second Thoughts, rule 6). **Her basics are the base
+   game's Strike and Defend and carry no Plan line (R242); they are never
+   changed ([USER], 2026-09-08).**
 3. **The jellyfish acts by the book.** A planned Attack strikes the front
    enemy (the leftmost one alive); a single-target Plan is aimed when
    written if the engine can carry a second selection (R250). A planned
-   Skill acts on you. Plans are carried out in the order they were written,
+   Skill acts on you unless its Plan line names enemies (Kurage's Oath's
+   does). Plans are carried out in the order they were written,
    and your Strength and Dexterity count, since the plans are hers.
 4. **Nothing happens by itself.** No bank, no pulse, no automatic replay.
    If the jellyfish is doing something, a card you played and paid for told
@@ -62,15 +66,17 @@ Every Plan card in hand asks the same question: now, or next turn for
 more. The enemy's intent this turn is the price of waiting, the plain
 basics are what you spend while the plan cooks, what lands next turn is
 the reward, and three Plans written on one turn land together the next
-morning before you draw, which is the moment the kit is built around.
+morning, after you draw, which is the moment the kit is built around.
 Drafts 2 to 5 had a bank (Tide), a second "later" (the exhaust row), and a
 healing pillar the law forbids, and each took a keyword and gave no
 decision. They are gone.
 
 A hand of basics has no Plan decision in it, and that is by design: the
-kit's question arrives at the first Plan card. Where that is answered, if
-anywhere, is an open A pick (`review/ruled/kokomi-plan-less-hand-2026-09-08.md`,
-default: nowhere for now); it is not answered by touching the basics.
+kit's question arrives at the first Plan card. Where that is answered was
+ruled R268 (2026-09-08, `review/ruled/kokomi-plan-less-hand-2026-09-08.md`):
+nowhere for now, and the next seat round reads the depth of the pool's Plan
+interactions before any access card is drafted. It is never answered by
+touching the basics.
 
 ## 4. The starter, ten cards, four ids
 
@@ -99,7 +105,7 @@ Fight one, turn one: three energy, Strike twice, Defend, Kurage's Oath,
 Slack Water; the enemy intends 8. Slack Water on the enemy: 4, Weak, and
 the jellyfish's 2, the relic's lesson. Defend, 5 Block against a Weakened
 6. Kurage's Oath on the jellyfish. Turn two opens with the jellyfish
-hitting every enemy for 7 before you draw. Slack Water was the decision:
+hitting every enemy for 7 once you have drawn. Slack Water was the decision:
 blunt this turn's hit now, or Weak on everyone at dawn with the jellyfish
 striking each of them. That is the whole kit, on turn one.
 
@@ -118,8 +124,8 @@ the queue the decision.
 
 - **The Tactician.** Plans and the cards that pay per Plan carried out.
   Payoff: the morning. The order riders (Opening Gambit doubles the next
-  Plan, Second Wave repeats it, Scout Ahead draws one per **later** Plan
-  carried out with it, R267 pick 3) make writing order the puzzle.
+  Plan, Second Wave repeats it, Scout Ahead draws one per **later** carry-out
+  in the same drain, R267 pick 3) make writing order the puzzle.
 - **The Priestess.** Block through the jellyfish, Dusk for the turn the hit
   is on; Mend only at Rare and Exhaust. A thing she can do.
 - **The Commander.** Gorou and the Inazuma companions (R236); how a
