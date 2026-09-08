@@ -796,19 +796,27 @@ KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS = 4
 # what it printed, and Kurage's Oath is now a Plan-only Skill rather than a
 # Power.
 #
-# `strike` AND `defend` ARE THE BASE GAME's CARDS (R242, same breath as Klee's
-# draft 4): "where a character's basics are a renamed Strike or Defend with the
-# same stat line, the base game's Strike and Defend replace them". Water's Edge
-# and Coral Guard were exactly that -- 6 damage and 5 Block, byte for byte the
-# base line -- so the twins are deleted rather than re-priced. tier0's rows are
-# `content/cards/ironclad_starter.yaml`'s, at the base numbers and with the base
-# +3 deltas; the mod's are `ModelDb.Card<StrikeSilent>()` /
-# `<DefendSilent>()`, whose frame and energy colour Kokomi's pool already
-# borrows. Her Attacks still apply Hydro, because the catalyst cadence reads
-# the CHARACTER and not the card (`effects._element_for`,
-# `CatalystCadence.PrintedElement`), which the build checks on a base Strike.
+# `defend` IS THE BASE GAME's CARD (R242, same breath as Klee's draft 4):
+# "where a character's basics are a renamed Strike or Defend with the same stat
+# line, the base game's Strike and Defend replace them". Coral Guard was exactly
+# that -- 5 Block, byte for byte the base line -- so the twin is deleted rather
+# than re-priced. tier0's row is `content/cards/ironclad_starter.yaml`'s, at the
+# base numbers and with the base +3 delta; the mod's is
+# `ModelDb.Card<DefendSilent>()`, whose frame and energy colour Kokomi's pool
+# already borrows. Her Attacks still apply Hydro, because the catalyst cadence
+# reads the CHARACTER and not the card (`effects._element_for`,
+# `CatalystCadence.PrintedElement`).
+#
+# THE STRIKE IS HERS SINCE POOL PASS SIX (`EB-703`, r26-r30,
+# review/active/kokomi-plan-less-hand-2026-09-08.md). R242's test was "a
+# renamed Strike with the same stat line", and `proto_kk_strike` no longer has
+# one: it prints a Plan line, so every opening hand holds the kit's question
+# instead of roughly one in five holding no decision at all. Defend stays the
+# base game's -- Block a turn late is the dead half every seat rejected, and
+# one card in the hand that cannot be written keeps the question a question.
 KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
-    "strike", "strike", "strike", "strike",
+    "proto_kk_strike", "proto_kk_strike",
+    "proto_kk_strike", "proto_kk_strike",
     "defend", "defend", "defend", "defend",
     "proto_kk_kurages_oath",
     "proto_kk_slack_water",

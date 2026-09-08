@@ -205,6 +205,17 @@ class Card:
     # view, the skill_tag rail) and adding an inert word to a list that four
     # things filter is how an inert word stops being inert.
     hexerei: bool = False
+    # `EB-703` (pool pass six). WHICH BASE-GAME BASIC THIS PROTOTYPE ROW IS:
+    # "strike" or "defend". Read by `gen_klee_cards` alone -- it emits
+    # `CardTag.Strike` / `CardTag.Defend`, which is what base-game content
+    # means by "one of your Strikes" (Neow's Talisman, Strike Dummy,
+    # Perfected Strike). tier 0 models no card tags, so the field is inert
+    # here and carried only so the sheet states the fact once for both
+    # engines. `EB-543`'s rule -- a prototype basic takes NEITHER tag -- held
+    # while every arm dealt the BASE pair; an arm whose Strike is its own card
+    # would otherwise leave "one of your Strikes" with zero answers instead of
+    # one. A field and not a `tags:` entry, for the reason stated above.
+    basic_tag: Optional[str] = None
     # principles v1.9: kit, not loot. Never in the draftable pool or the
     # starting deck; granted to hand when the Burst meter first fills, and
     # returns to the kit (no pile) after play so a refill re-grants it.

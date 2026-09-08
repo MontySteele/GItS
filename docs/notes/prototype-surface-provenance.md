@@ -3313,3 +3313,100 @@ an offer screen cannot read.
 NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
 slate, no stamp and no re-baseline. What the pass owes is a round that draws
 Breakwater and Slack Water on the same lane.
+
+## Kokomi pool pass six -- the Plan-less hand (`EB-703`, 2026-09-08)
+
+THE FINDING THE PASS ANSWERS. Rounds 26 to 30 repeat one thing without a row of
+its own: A HAND WITH NO PLAN CARD IN IT HAS NO DECISION IN IT. Round 30 lane 1
+counted three of its eleven opening turns that way, including the first turn of
+the run; round 27 lane 2 opened fight 1 on "three Strikes and two Defends, the
+unmodified basic deck", and the jellyfish panel printed "No Plan card in hand:
+the jellyfish waits"; round 28 lane 2 named Defend "the only card in the deck
+that cannot be pointed at the jellyfish, so the only card that never poses the
+kit's question." The starter held two Plan cards in ten, so a five-card opening
+hand was Plan-less on roughly a fifth of draws, and the first two turns of a
+fight see the whole deck once. The pool fixes that slowly, one draft at a time;
+the starter is where the turn lives.
+
+THE RULE THAT WOULD HAVE FIXED IT, AND WHY NOT. "If nothing is planned at the
+start of your turn, the Bake-Kurage does X" is a new rule in the loop, which
+[USER] plays, and it papers over the hand rather than giving it a decision --
+the jellyfish acting on its own is exactly the "decoration" round 27 lane 2
+called it before its first Plan. Not taken.
+
+THE CHANGE, and it is one card. **Strike** (Kokomi), cost 1, Attack, basic:
+"Deal 6 damage. [gold]Plan[/gold]: Deal 8 damage", upgrading 9 and 11. Every
+hand now holds the kit's question. The written half is Ambush's shape at a
+basic's premium -- two more damage for a turn's delay, small enough that the
+Plan landing in whatever Block the enemy is standing in, and the enemy's
+intent, decide it: the same two printed things that decided every
+write-or-play turn in the records. Face-up stays the default against a body
+about to die or to Block; written is the tempo trade on a safe turn, and it
+feeds Feint, Treatise, Scout Ahead and Opening Gambit the way any damage Plan
+does.
+
+**DEFEND STAYS THE BASE GAME'S**, and that is design and not an omission.
+Block a turn late is the dead half every seat rejected (Read the Field's Plan,
+round 28 lane 1), a Dusk basic Block would obsolete Breakwater, and one card in
+the hand that cannot be written keeps the question a question.
+
+R242 IS NOT REOPENED, IT IS PASSED. The ruling's test is "where a character's
+basics are a renamed Strike or Defend WITH THE SAME STAT LINE, the base game's
+replace them" -- and this row no longer has one. Water's Edge, deleted under
+that ruling, printed 6 damage and nothing else.
+
+THE TAG TRAVELS WITH THE CARD (`basic_tag: strike`, a new sheet field).
+`EB-543` removed `CardTag.Strike` from every prototype basic because the arm
+DEALT base Strikes and a kit card wearing the tag was a second answer to a
+question with one right one -- Neow's Talisman upgraded Slack Water and left
+four Strikes untouched all run. With her Strike now her own card, an untagged
+row would leave "one of your Strikes" with NO answer in her deck: the same
+relic half broken from the other end, with Strike Dummy and Miniature Cannon
+behind it. The field is DECLARED rather than re-derived, because derivation is
+what over-tagged Slack Water in the first place; the sheet names the one row
+that IS the Strike and every other prototype basic stays untagged
+(`gen_klee_cards`'s tag block, `loader._validate_basic_tag`,
+`Round19Tests.No_prototype_basic_wears_the_strike_or_defend_tag`). It cannot
+reopen the `AllCards` throw either: prototype rows are concatenated LAST into
+the pool, so the shipped basic still wins Large Capsule's `First()` with every
+arm off.
+
+THE FOURTH SEAM MOVES WITH IT. `KokomiOverhaulRoster.StarterStrike` now answers
+`ProtoKkStrike`, which is `EB-351`'s whole point one arm over: Large Capsule's
+"an additional Strike" asks the CHARACTER, and handing back a `StrikeSilent`
+would drop a shipped basic into a deck whose Strikes all print a Plan line.
+`StarterDefend` is unchanged.
+
+THE FACE-UP HIT APPLIES NO HYDRO AND THE WRITTEN ONE DOES. LAW's cadence line
+makes the base game's basics apply nothing ("the basic cards are supposed to be
+bad", [USER] 2026-09-02) and the exemption reaches HER basic: four Hydro
+appliers in the opening deck is a power change the design note did not ask for.
+A carry-out is the JELLYFISH's hit, dealt as Hydro by `KokomiPlan.ResolveAll`
+and by `kokomi_plan` whatever the card is, so WRITING the Strike is what earns
+the aura -- one more reason to write it, and no new rule. It is DECLARED on the
+row (`applies_element: false`) and not derived from the rarity, for the reason
+the tag beside it is declared: Slack Water and Kurage's Oath are basics too and
+neither is being moved. The declaration now works in BOTH engines -- the sim
+always honoured it (`_element_for`) and `damage_applies_element` read only a
+declared `true` until this pass -- so the codegen emits `IElementalCard`
+returning `Element.None`, which is Kirara's shape and the one
+`CatalystCadence.PrintedElement`'s header names: its predicate is "says nothing
+about elements", not "declares None", so an omission would have asked the
+character and re-applied the Hydro. The face keeps the Hydro keyword and gains
+`ForPlanElement`'s sentence -- "Its own hit applies no aura; the Bake-Kurage
+carries out the Plan as a Hydro hit, which does" -- and loses the face-up Hydro
+rider, which would have promised a reaction the play cannot make. A character
+row whose damage clauses DISAGREE about this is now a codegen blocker rather
+than a silent majority vote.
+
+THE DRAFTER NEEDED NOTHING. The row is `rarity: basic`, which is the starter's
+mark and keeps it out of `rewards.character_pool` and out of
+`KokomiOverhaulRoster.Slice()` (the exemption `tools/lint_arm_pool_parity.py`
+already allows), so it is never offered. Its price is the existing two-half
+term -- the now-line plus the Plan line at `PLAN_DELAY_DISCOUNT`, 6 + 8 x 0.75
+= 12 against Ambush's 14 -- and no op is new, so `_op_price`,
+`STATIC_OP_PRICING` and the connectivity report are untouched.
+
+NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
+slate, no stamp and no re-baseline. What the pass owes is a natural round whose
+debrief counts the opening hands with no decision in them.

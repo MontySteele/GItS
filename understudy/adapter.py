@@ -135,8 +135,10 @@ _BLK_RE = re.compile(r"[Gg]ain\s+(\d+)\s+[Bb]lock")
 #: it always was.
 #:
 #: `EB-593`: AND THE SILENT PAIR, for exactly the reason the Ironclad pair is
-#: here. `KOKOMI_OVERHAUL_STARTER_IDS` is four `strike`, four `defend` and two
-#: rows of her own, and the mod's half of that is
+#: here. `KOKOMI_OVERHAUL_STARTER_IDS` was four `strike`, four `defend` and two
+#: rows of her own (`EB-703` has since made the Strike half HER OWN ROW, which
+#: the adapter resolves as any `proto_kk_` id, and left the Defend half here),
+#: and the mod's half of that is
 #: `ModelDb.Card<StrikeSilent>()` / `<DefendSilent>()` -- the constant's own
 #: note says so, and says why: "where a character's basics are a renamed Strike
 #: or Defend with the same stat line, the base game's Strike and Defend replace

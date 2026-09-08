@@ -882,9 +882,14 @@ public static class ArmKeywordTips
     /// a Skill and this row deliberately did not change that.
     ///
     /// ATTACHED ONLY WHERE THE TWO DISAGREE. A row whose own damage already
-    /// carries the element (every Attack of hers) needs no such sentence, so
-    /// `gen_klee_cards.emit` raises this one only where the Plan is the sole
-    /// source.
+    /// carries the element needs no such sentence, so `gen_klee_cards.emit`
+    /// raises this one only where the Plan is the sole source.
+    ///
+    /// `EB-703` GAVE IT A SECOND SHAPE: an ATTACK that declares
+    /// `applies_element: false`. Her basic Strike is one -- a basic is
+    /// supposed to be bad, so its face-up hit applies nothing and writing it
+    /// is what earns the aura -- and it takes the same sentence, because the
+    /// fact the sentence states is the same fact.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlanElement(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

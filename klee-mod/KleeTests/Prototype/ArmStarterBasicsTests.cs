@@ -206,12 +206,16 @@ public class ArmStarterBasicsTests
         // ten ids literally, because that list is R242's ruled artifact and its
         // pin reads it straight off the method; the relic seam states the pair
         // a second time. This pin is what stops the two drifting -- move the
-        // starter to a different base pair without moving the accessors and it
+        // starter to a different pair without moving the accessors and it
         // bites.
+        //
+        // `EB-703`: KOKOMI'S STRIKE IS `ProtoKkStrike` SINCE POOL PASS SIX,
+        // and the pin's shape is unchanged, which is the point -- whatever the
+        // pair IS, the relic and the deck have to name the same two.
         foreach (var (roster, strike, defend) in new[]
                  {
                      ("KleeOverhaulRoster", "StrikeIronclad", "DefendIronclad"),
-                     ("KokomiOverhaulRoster", "StrikeSilent", "DefendSilent"),
+                     ("KokomiOverhaulRoster", "ProtoKkStrike", "DefendSilent"),
                  })
         {
             Assert.Equal(new[] { $"ModelDb.Card<{strike}>" },
@@ -219,8 +223,8 @@ public class ArmStarterBasicsTests
             Assert.Equal(new[] { $"ModelDb.Card<{defend}>" },
                          Cards(roster, "StarterDefend"));
 
-            // And the starter opens with those two base types and no other:
-            // eight of its ten slots, four apiece.
+            // And the starter opens with those two types and no other: eight
+            // of its ten slots, four apiece.
             var starter = Cards(roster, "StartingDeck");
             Assert.Equal(4, starter.Count(c => c == $"ModelDb.Card<{strike}>"));
             Assert.Equal(4, starter.Count(c => c == $"ModelDb.Card<{defend}>"));
