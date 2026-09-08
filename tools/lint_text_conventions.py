@@ -137,6 +137,24 @@ EXCEPTIONS = {
         "a seat's finding: the aim, the ALL exception, and whose modifiers a "
         "carry-out reads (EB-329, R250, EB-380, EB-538). None is droppable to "
         "make room"),
+    "ProtoBakeKuragePower.descriptionCapped": (
+        "`EB-653` (Kokomi r24). The cap lane's face, and it exists only under "
+        "`GITS_KOKOMI_PLAN_CAP` -- a default build prints the row above it, "
+        "at 123 of 125. Under the lane rule the jellyfish carried out two of "
+        "four written Plans four mornings running and NO SURFACE SAID SO, so "
+        "the seat read the rule as a wall for three of the four occurrences "
+        "and then reverse-engineered it off the badge. A rule that binds and "
+        "prints nowhere is not a rule a round can read; every clause above it "
+        "is what the jellyfish IS (untargetable, all combat, what a Plan does "
+        "on it) and none is droppable to make room"),
+    "PendingPlansPower.descriptionCapped": (
+        "`EB-653`'s other half, on the badge that counts. The uncapped face "
+        "is 119 of 125 and prints under every build; this one prints only "
+        "under a declared cap. The badge is the surface a player reads to "
+        "answer 'how many are written', and under the cap that number stops "
+        "being how many will happen -- which is the exact confusion the r24 "
+        "lane derived the rule from. The written-number clause above it is "
+        "`EB-647`, a ruled finding three r23 lanes met, and is not droppable"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.
@@ -427,6 +445,33 @@ def _rider_card_type_clause() -> str:
     return _RIDER_CLAUSE[0]
 
 
+#: `EB-653`. `KokomiPlan.CapSentenceFormat`, read out of the one file that
+#: declares it, for `_rider_card_type_clause`'s reason exactly: two faces
+#: append it and a clause reaching this lint as a bare identifier is one
+#: numeral, which is text no ceiling measures.
+_CAP_SENTENCE: list[str] = []
+
+
+def _plan_cap_sentence() -> str:
+    """`KokomiPlan.CapSentenceFormat`, read to the statement's own `;`.
+
+    NOT THROUGH `_consts`, and the reason is `tip_rows`' own trap one surface
+    over: that pattern runs to the first semicolon ANYWHERE, and this sentence
+    contains one ("at most 2 a turn; the rest wait in order"). It would return
+    half a literal, the clause would measure as nothing, and the capped face
+    would sit outside every ceiling -- the silence `EB-343` was filed on. So
+    the literals are matched as literals and the terminator is the one after
+    them.
+    """
+    if not _CAP_SENTENCE:
+        src = read(MOD / "Powers" / "Prototype" / "KokomiPlan.cs")
+        found = re.search(
+            r"const string CapSentenceFormat =\s*"
+            r'((?:"(?:[^"\\]|\\.)*"\s*\+?\s*)+);', src)
+        _CAP_SENTENCE.append(csharp_text(found.group(1)) if found else "")
+    return _CAP_SENTENCE[0]
+
+
 def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
     rows: list[Row] = []
     for path in paths:
@@ -466,6 +511,18 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
                 # sentence goes on.
                 text = text[:-1] if text.endswith("6") else text
                 text += _rider_card_type_clause()
+            # `EB-653`: the cap's clause, and it is TWO ROWS rather than one.
+            # The sentence prints only where a lane declared
+            # `GITS_KOKOMI_PLAN_CAP`, so the face a default build shows and the
+            # face a cap lane shows are two faces, each measured on its own --
+            # the arrangement `EncoreKey.reframe-off` already takes for a body
+            # decided at runtime.
+            if "CapSentence" in expr:
+                text = text[:-1] if text.endswith("6") else text
+                rows.append(Row(surface, f"{cls}.{key}", text, where))
+                rows.append(Row(surface, f"{cls}.{key}Capped",
+                                text + _plan_cap_sentence(), where))
+                continue
             rows.append(Row(surface, f"{cls}.{key}", text, where))
         if path.name == "ProtoBombPower.cs":
             # `EB-343` widened the second axis. The badge's face used to be two

@@ -754,6 +754,31 @@ PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
                    "badge is how many are written, not a limit. The "
                    "Bake-Kurage's own 1 is only its presence.")
 
+# `EB-653`. AND THE SENTENCE ABOVE IS FALSE UNDER THE CAP LANE.
+#
+# WHAT THE r24 SEAT MET. With `GITS_KOKOMI_PLAN_CAP=2` the jellyfish carried
+# out two of four written Plans, four mornings running, while this panel
+# printed "not a limit". The seat: "either the cap is real and the panel's
+# sentence is false, or the panel is right and the carry-out is dropping
+# Plans." The cap was real. A rule read against a false sentence is not a read
+# of the rule, and three of the four occurrences were read as a WALL.
+#
+# READ OFF THE WIRE, NOT ASSERTED. The page cannot know a lane's environment,
+# and it does not have to: `ProtoBakeKuragePower`'s own description carries
+# `KokomiPlan.CapSentence` when a cap is declared, and the description reaches
+# `you["powers"]` like every other power's text. So the panel prints the note
+# THE BUILD SUPPORTS -- `PLAN_COUNT_NOTE` where the wire says nothing about a
+# cap, this one where it does -- and no third place spells the rule.
+#
+# WHAT SURVIVES EITHER WAY: "the number on the **Plan** badge is how many are
+# written" is true under both rules and is what `EB-563` / `EB-648` put here.
+# What goes under a cap is "not a limit", which is the clause the cap makes
+# false, and what arrives is the cap's own second half.
+PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans a "
+                          "turn; the rest wait in order. The number on the "
+                          "**Plan** badge is how many are written. The "
+                          "Bake-Kurage's own 1 is only its presence.")
+
 # `EB-647`. THE WRITTEN NUMBER IS THE NUMBER, AND NOTHING SAID SO.
 #
 # WHAT THREE r23 LANES MET. Under Shrink the hand reprinted `Kurage's Oath` as

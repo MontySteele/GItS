@@ -10799,6 +10799,92 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
         blindplay.observe(combat_state())
 
 
+#: `EB-653`. The jellyfish's own description as the wire sends it, with and
+#: without the cap clause `KokomiPlan.CapSentence` appends. The uncapped half
+#: is `ProtoBakeKuragePower.Localization` verbatim; the capped half is what a
+#: build launched with `GITS_KOKOMI_PLAN_CAP=2` prints.
+PET_FACE = ("Enemies cannot target it. Lasts all combat. Play a Plan card on "
+            "it: it carries out the Plan at the start of your next turn.")
+PET_FACE_CAPPED = (PET_FACE
+                   + " Carries out at most 2 a turn; the rest wait in order.")
+
+
+def pet_power_state(plans: dict, face: str) -> dict:
+    """A Kokomi board whose Bake-Kurage marker carries `face` on the wire."""
+    state = plans_combat_state(plans)
+    player = dict(state["player"])
+    player["status"] = [{"name": "BAKE_KURAGE", "title": "Bake-Kurage",
+                         "amount": 1, "type": "Buff", "description": face}]
+    state = dict(state)
+    state["player"] = player
+    return state
+
+
+def test_the_count_note_reads_the_cap_off_the_wire_instead_of_denying_it():
+    """`EB-653`. The panel said "not a limit" while the lane's jellyfish
+    carried out two of four written Plans, four mornings running -- so the
+    seat had a screen and a board that could not both be right, and read the
+    rule as a wall for three of the four occurrences.
+
+    THE PAGE DOES NOT KNOW THE LANE'S ENVIRONMENT and does not have to: the
+    mod appends the cap's sentence to the pet power's own description, and a
+    power's description reaches the page as `powers[].text`. So the note is
+    READ off the wire, and the number in it is the mod's.
+
+    Seen to FAIL: with the note asserted as a fixed string, the capped page
+    still prints "not a limit" over a board that has one.
+    """
+    plans = morning_of({"card": "Kurage's Oath", "number": 7,
+                        "line": "Bake-Kurage: Kurage's Oath, 7",
+                        "kind": "damage", "asked": 7})
+    capped = blindplay.observe(pet_power_state(plans, PET_FACE_CAPPED))
+    assert ("- The jellyfish carries out at most 2 Plans a turn; the rest "
+            "wait in order. The number on the **Plan** badge is how many are "
+            "written. The Bake-Kurage's own 1 is only its presence."
+            ) in capped.splitlines()
+    assert "not a limit" not in capped
+    # AND THE UNCAPPED BUILD IS UNTOUCHED, which is the default and every
+    # build but a cap lane's: `EB-563`'s sentence, printed as it was.
+    plain = blindplay.observe(pet_power_state(plans, PET_FACE))
+    assert blindplay.PLAN_COUNT_NOTE in plain.splitlines()
+    assert "at most" not in plain
+    # The two notes differ in exactly the clause the cap makes false, and
+    # agree on the clause `EB-563` / `EB-648` put here.
+    for note in (blindplay.PLAN_COUNT_NOTE,
+                 blindplay.PLAN_COUNT_CAPPED_NOTE):
+        assert "**Plan** badge is how many are written" in note
+
+
+def test_a_summons_hit_is_a_line_on_the_log_the_seats_read():
+    """`EB-654`. "Yae Miko's Sakura took 10 HP off an enemy with no line in
+    the log", on a board where a Plan carry-out prints one and the Tamakushi
+    Casket names itself inside the beat it lands in.
+
+    THE SAME ROW AND THE SAME RENDERER, under its own heading because it is
+    its own moment: a summon fires at the END of the turn, so its hit landed
+    before the enemies acted and after the last page the seat read -- which is
+    exactly why it arrived as an unexplained change in a bar.
+
+    Seen to FAIL: with `summon_hits` dropped from `kokomi_plans`, the line and
+    the heading both go.
+    """
+    plans = dict(morning_of(), summon_hits=[
+        {"card": "Sesshou Sakura", "number": 10,
+         "line": "Sesshou Sakura, 10", "kind": "damage", "on_play": False,
+         "moved": [{"target": "Nibbit", "combat_id": "1", "amount": 10,
+                    "dead": False, "absorbed": 0}]}])
+    page = blindplay.observe(plans_combat_state(plans))
+    assert ("- These fired at the end of your last turn, before the enemies "
+            "acted:") in page
+    assert "  - Sesshou Sakura, 10 — the 10 is damage." in page
+    # And what the board lost under it, the way a carry-out's own rows read.
+    assert "lost 10 HP" in page
+    # A board with no summon log prints neither, which is a bridge older than
+    # the field and the standing absent-is-not-empty rule.
+    assert "These fired at the end of your last turn" not in \
+        blindplay.observe(plans_combat_state(morning_of()))
+
+
 def test_an_all_in_spark_price_prints_as_all_not_as_its_gate():
     """`EB-445`. Stoke the Fuse's gate is 1 and its price is the whole bank;
     the cost slot printed the gate."""

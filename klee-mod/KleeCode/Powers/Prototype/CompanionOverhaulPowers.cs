@@ -587,29 +587,35 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
         {
             if (creature.Player == null) continue;
 
+            // `EB-654`. THE SUMMON LOG OPENS HERE, one beat before this turn's
+            // volleys go out, so what it holds for the whole of the NEXT turn
+            // is what fired at the end of THIS one -- which is the turn
+            // boundary the r24 seat read an unexplained 10 HP across.
+            KokomiPlan.OpenSummonLog(creature);
+
             foreach (var waltz in creature.Powers.OfType<GlacialWaltzPower>().ToList())
             {
-                await waltz.FireVolley(choiceContext);
+                await Act(creature, waltz, () => waltz.FireVolley(choiceContext));
             }
             foreach (var oz in creature.Powers.OfType<MondstadtOzPower>().ToList())
             {
-                await oz.FireVolley(choiceContext);
+                await Act(creature, oz, () => oz.FireVolley(choiceContext));
             }
             foreach (var rose in creature.Powers.OfType<LightningRosePower>().ToList())
             {
-                await rose.FireVolley(choiceContext);
+                await Act(creature, rose, () => rose.FireVolley(choiceContext));
             }
             foreach (var ode in creature.Powers.OfType<GrandOdePower>().ToList())
             {
-                await ode.FireVolley(choiceContext);
+                await Act(creature, ode, () => ode.FireVolley(choiceContext));
             }
             foreach (var breeze in creature.Powers.OfType<DandelionBreezePower>().ToList())
             {
-                await breeze.FireVolley(choiceContext);
+                await Act(creature, breeze, () => breeze.FireVolley(choiceContext));
             }
             foreach (var bloom in creature.Powers.OfType<SolarIsotomaBloomPower>().ToList())
             {
-                await bloom.FireVolley(choiceContext);
+                await Act(creature, bloom, () => bloom.FireVolley(choiceContext));
             }
             // SEVENTH, and the only one of the second wave that joins this
             // walk. Eula's Lightfall Sword is hosted on an ENEMY and it deals
@@ -632,7 +638,7 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
                                  .OfType<LightfallSwordPower>().ToList())
                     {
                         if (blade.Applier != creature) continue;
-                        await blade.Tick(choiceContext);
+                        await Act(creature, blade, () => blade.Tick(choiceContext));
                     }
                 }
             }
@@ -645,31 +651,31 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             // (`effects.inazuma_overhaul_turn_end`).
             foreach (var juuga in creature.Powers.OfType<JuugaPower>().ToList())
             {
-                await juuga.FireVolley(choiceContext);
+                await Act(creature, juuga, () => juuga.FireVolley(choiceContext));
             }
             foreach (var daruma in creature.Powers.OfType<MujiMujiDarumaPower>().ToList())
             {
-                await daruma.FireVolley(choiceContext);
+                await Act(creature, daruma, () => daruma.FireVolley(choiceContext));
             }
             foreach (var ring in creature.Powers.OfType<SanctifyingRingPower>().ToList())
             {
-                await ring.FireVolley(choiceContext);
+                await Act(creature, ring, () => ring.FireVolley(choiceContext));
             }
             foreach (var sakura in creature.Powers.OfType<SesshouSakuraPower>().ToList())
             {
-                await sakura.FireVolley(choiceContext);
+                await Act(creature, sakura, () => sakura.FireVolley(choiceContext));
             }
             foreach (var soumetsu in creature.Powers.OfType<SoumetsuPower>().ToList())
             {
-                await soumetsu.FireVolley(choiceContext);
+                await Act(creature, soumetsu, () => soumetsu.FireVolley(choiceContext));
             }
             foreach (var kyouka in creature.Powers.OfType<KyoukaPower>().ToList())
             {
-                await kyouka.Tick(choiceContext);
+                await Act(creature, kyouka, () => kyouka.Tick(choiceContext));
             }
             foreach (var tamoto in creature.Powers.OfType<TamotoPower>().ToList())
             {
-                await tamoto.FireVolley(choiceContext);
+                await Act(creature, tamoto, () => tamoto.FireVolley(choiceContext));
             }
             // The three clocks that fire nothing here: a tick, a tick that
             // hands back its Dexterity, and a mark on an enemy body. Grouped
@@ -681,7 +687,7 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             }
             foreach (var banner in creature.Powers.OfType<WarBannerPower>().ToList())
             {
-                await banner.Tick(choiceContext);
+                await Act(creature, banner, () => banner.Tick(choiceContext));
             }
             var marked = creature.CombatState?.HittableEnemies.ToList();
             if (marked != null)
@@ -703,12 +709,51 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             // `effects.player_turn_end_triggers` -> `companion_coven.turn_end`.
             foreach (var yuegui in creature.Powers.OfType<YueguiPower>().ToList())
             {
-                await yuegui.FireVolley(choiceContext);
+                await Act(creature, yuegui, () => yuegui.FireVolley(choiceContext));
             }
             foreach (var rev in creature.Powers.OfType<RevelationPower>().ToList())
             {
                 rev.NoteEndOfTurn();
             }
         }
+    }
+
+    /// <summary>
+    /// `EB-654`. ONE END-OF-TURN ACTOR, RUN AND LOGGED.
+    ///
+    /// THE FIND (Kokomi r24). "Yae Miko's Sakura took 10 HP off an enemy with
+    /// no line in the log": every other thing that moves a bar on that board
+    /// names itself -- a Plan carry-out prints its line, the Tamakushi
+    /// Casket's answering strike prints its name inside the beat -- and a
+    /// summon's hit did not.
+    ///
+    /// THE CALL IS WRAPPED, NOT THE VOLLEY. There are sixteen actors in the
+    /// walk above and instrumenting sixteen bodies is sixteen chances to
+    /// forget one; wrapping the call treats every summon's hit alike by
+    /// construction, and an actor added to the walk later joins the log by
+    /// being called through this door. <see cref="KokomiPlan.Summon"/> holds
+    /// the measurement and files a row only where the board actually lost HP,
+    /// so the two clocks that grant Block and the one that hands back
+    /// Dexterity pass through it silently.
+    ///
+    /// THE NAME IS THE POWER'S OWN PRINTED TITLE, read off the same
+    /// <c>Localization</c> the badge shows, so the log says the words a player
+    /// can see on the board and no second spelling of any summon exists here.
+    /// </summary>
+    private static Task Act(
+        Creature owner, PowerModel power, System.Func<Task> act) =>
+        KokomiPlan.Summon(owner, SummonName(power), act);
+
+    /// <summary>The printed title of a power, or empty where it prints
+    /// none.</summary>
+    private static string SummonName(PowerModel power)
+    {
+        var rows = (power as ILocalizationProvider)?.Localization;
+        if (rows == null) return string.Empty;
+        foreach (var row in rows)
+        {
+            if (row.Item1 == "title") return row.Item2 ?? string.Empty;
+        }
+        return string.Empty;
     }
 }

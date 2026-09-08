@@ -119,8 +119,16 @@ steps:
   # drain and nowhere else, so a third Plan goes onto the queue under a cap of
   # 2 exactly as it does without one. A badge of 2 here would mean the cap had
   # been read at the WRITE, which is a different rule from the one on trial.
+  #
+  # AND THE BADGE SAYS WHICH RULE IT IS UNDER (`EB-653`, round 24). The r24
+  # cap lane met the cap four times with nothing on any screen printing it,
+  # read it as a wall for three of them, and derived it off this badge's
+  # number in the end. The clause is `KokomiPlan.CapSentence`, appended to
+  # this face and to the Bake-Kurage's own; a game launched WITHOUT the
+  # variable prints neither, which is what `Round24Tests` holds.
   - expect:
-      power: {who: player, name: "Plan", stacks: 3}
+      power: {who: player, name: "Plan", stacks: 3,
+              text: "at most 2 a turn"}
 
   # ---- the morning: two carried out, one held ----------------------------
   - end_turn: {}

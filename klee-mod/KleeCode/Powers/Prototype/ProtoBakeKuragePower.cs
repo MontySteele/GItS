@@ -56,7 +56,14 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         ("description",
             "Enemies cannot target it. Lasts all combat. Play a "
           + "[gold]Plan[/gold] card on it: it carries out the "
-          + "[gold]Plan[/gold] at the start of your next turn."),
+          + "[gold]Plan[/gold] at the start of your next turn."
+          // `EB-653` (round 24). THE CAP PRINTS WHERE IT BINDS. The r24 cap
+          // lane carried out two of four written Plans four mornings running
+          // with no surface saying a cap existed, and read the rule as a wall.
+          // Empty string on every build that declared no cap, which is every
+          // build but a lane's: `KokomiPlan.CapSentence` holds the sentence and
+          // the reason.
+          + KokomiPlan.CapSentence),
     };
 
     public override PowerType Type => PowerType.Buff;

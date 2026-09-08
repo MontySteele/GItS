@@ -44,6 +44,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
                                         PLAN_CASKET_AURA_CLAUSE,
+                                        PLAN_COUNT_CAPPED_NOTE,
                                         PLAN_COUNT_NOTE,
                                         PLAN_WRITTEN_NUMBER_NOTE,
                                         PLAN_HYDRO_NOTE,
@@ -195,6 +196,17 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
     heading is kept because the door is.
     """
     out: list[str] = []
+    # `EB-654`. WHAT A SUMMON DID, FIRST, BECAUSE IT HAPPENED FIRST: a
+    # Companion summon fires at the END of the player's turn, so its hit
+    # landed before the enemy acted and before this turn's morning -- and it
+    # landed after the last page the seat read, which is the whole reason
+    # "Yae Miko's Sakura took 10 HP off an enemy" arrived on the next screen
+    # as an unexplained change in a bar. Its own heading, because the
+    # Bake-Kurage did not do it: the source names itself on the line.
+    if pl.get("summon_hits"):
+        out.append("- These fired at the end of your last turn, before the "
+                   "enemies acted:")
+        out += _carry_out_rows(pl["summon_hits"])
     if pl["carried_out"]:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
@@ -298,6 +310,39 @@ def _kind_clause(said: dict[str, Any]) -> str:
     return clause + "."
 
 
+#: `EB-653`. The cap's own sentence, as `KokomiPlan.CapSentenceFormat` spells
+#: it. Matched on the SENTENCE rather than on a power's name -- the discipline
+#: `_PLAYS_YOUR_TURN` and `PLAN_CASKET_AURA_CLAUSE` already keep here -- so a
+#: build that moves the clause onto another badge keeps the page honest, and a
+#: build with no cap declared matches nothing and prints the note it always
+#: printed.
+_PLAN_CAP_SENTENCE = re.compile(r"carries out at most (\d+) a turn", re.I)
+
+
+def _plan_count_note(you: dict[str, Any]) -> str:
+    """The count rule the BUILD supports, read off the wire (`EB-653`).
+
+    THE OLD NOTE ASSERTED A RULE THE LANE HAD TURNED OFF. "The number on the
+    Plan badge is how many are written, NOT A LIMIT" was written under
+    `EB-563`, when nothing in `KokomiPlan.cs` capped the queue; `EB-643` (R265)
+    added `GITS_KOKOMI_PLAN_CAP`, and the r24 lane ran with it at 2. Four
+    mornings carried out two of four written Plans while this page said there
+    was no limit -- so the seat had a screen and a board that could not both be
+    right, and read the rule as a wall.
+
+    THE WIRE IS THE AUTHORITY, and it already carries the answer: the mod
+    appends the cap's sentence to `ProtoBakeKuragePower`'s description when a
+    cap is declared, and a power's description reaches the page as
+    `powers[].text`. So this reads the sentence and prints the matching note;
+    the number in the note is the mod's number and is never derived here.
+    """
+    for power in you.get("powers") or []:
+        found = _PLAN_CAP_SENTENCE.search(str(power.get("text") or ""))
+        if found:
+            return PLAN_COUNT_CAPPED_NOTE.format(n=found.group(1))
+    return PLAN_COUNT_NOTE
+
+
 def _board_note_wanted(pl: dict[str, Any]) -> bool:
     """Is a board reading on this screen at all? (`EB-329`)
 
@@ -308,7 +353,8 @@ def _board_note_wanted(pl: dict[str, Any]) -> bool:
     where the indent made it read as a fact about that one card.
     """
     return any(said["board_read"]
-               for said in pl["carried_out"] + pl["fired_now"])
+               for said in pl["carried_out"] + pl["fired_now"]
+               + (pl.get("summon_hits") or []))
 
 
 def _render_performance(row: dict[str, Any]) -> str:
@@ -947,7 +993,10 @@ def render(obs: dict[str, Any]) -> str:
                 # enemy's own Block, which YOUR turn start does not clear and
                 # which no play of yours can strip before the morning.
                 out.append(PLAN_BLOCK_NOTE)
-                out.append(PLAN_COUNT_NOTE)
+                # `EB-653`: the count rule this BUILD is under. Under a
+                # declared cap the wire's own sentence replaces "not a
+                # limit", which the cap makes false.
+                out.append(_plan_count_note(you))
                 # `EB-647`: and that the numbers in that queue are FIXED --
                 # written with her terms folded in, and untouched by anything
                 # that lands on her afterwards.
