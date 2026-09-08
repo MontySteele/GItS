@@ -278,9 +278,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R266 | 2026-09-07 | the two-Plan cap is retired as a rule; the free turn is priced by the faces, not by a throughput limit | `9ea662f` |
 | R267 | 2026-09-08 | (2026-09-08): GPT audit of the Kokomi passes fact-checked; | `0a94db2` |
 
-266 rows over the R1..R267 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 155 from a commit message, 0 unresolved.
+266 rows over the R1..R268 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 155 from a commit message, 0 unresolved.
 
-1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
+2 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28, R268.
 
 Ledger retrieval point: `3907837` (tag `pre-simplification-2026-08-06`); ledger paths `tier0/DECISIONS.md`, `tier0/DECISIONS-archive-R39-R99.md`, `klee-mod/DECISIONS.md`.
 
