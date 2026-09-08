@@ -3314,230 +3314,34 @@ NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
 slate, no stamp and no re-baseline. What the pass owes is a round that draws
 Breakwater and Slack Water on the same lane.
 
-## Kokomi pool pass six -- the Plan-less hand (`EB-703`, 2026-09-08)
+## Passes six and seven withdrawn -- the starter basics stay the base game's (2026-09-08)
 
-THE FINDING THE PASS ANSWERS. Rounds 26 to 30 repeat one thing without a row of
-its own: A HAND WITH NO PLAN CARD IN IT HAS NO DECISION IN IT. Round 30 lane 1
-counted three of its eleven opening turns that way, including the first turn of
-the run; round 27 lane 2 opened fight 1 on "three Strikes and two Defends, the
-unmodified basic deck", and the jellyfish panel printed "No Plan card in hand:
-the jellyfish waits"; round 28 lane 2 named Defend "the only card in the deck
-that cannot be pointed at the jellyfish, so the only card that never poses the
-kit's question." The starter held two Plan cards in ten, so a five-card opening
-hand was Plan-less on roughly a fifth of draws, and the first two turns of a
-fight see the whole deck once. The pool fixes that slowly, one draft at a time;
-the starter is where the turn lives.
+POOL PASS SIX (`EB-703`) AND POOL PASS SEVEN (`EB-711`) GAVE KOKOMI HER OWN
+BASICS: `proto_kk_strike`, a Plan line printed on the Strike so no opening hand
+could be Plan-less, and `proto_kk_defend`, 5 Block plus 2 while the Bake-Kurage
+was holding a Plan, so the last unwritable card asked its question by ordering.
+Both were swapped into her starter in both engines, and at the `EB-351` relic
+seam.
 
-THE RULE THAT WOULD HAVE FIXED IT, AND WHY NOT. "If nothing is planned at the
-start of your turn, the Bake-Kurage does X" is a new rule in the loop, which
-[USER] plays, and it papers over the hand rather than giving it a decision --
-the jellyfish acting on its own is exactly the "decoration" round 27 lane 2
-called it before its first Plan. Not taken.
+BOTH ARE WITHDRAWN, on the day they landed, under [USER]'s rule: A CHARACTER'S
+STARTER BASICS ARE NEVER CHANGED -- "they are supposed to suck". That is a
+rule about the kit and not a reading of these two rows, so no measurement
+settles it and no later pass reopens it by finding a better basic. Her starter
+is four base Strikes and four base Defends again -- `StrikeSilent` /
+`DefendSilent` in the mod, `strike` / `defend` in the sim -- which is R242's
+text unamended. The findings the two passes answered are unanswered, and the
+answer has to be a card the deck can DRAW rather than one it opens with.
 
-THE CHANGE, and it is one card. **Strike** (Kokomi), cost 1, Attack, basic:
-"Deal 6 damage. [gold]Plan[/gold]: Deal 8 damage", upgrading 9 and 11. Every
-hand now holds the kit's question. The written half is Ambush's shape at a
-basic's premium -- two more damage for a turn's delay, small enough that the
-Plan landing in whatever Block the enemy is standing in, and the enemy's
-intent, decide it: the same two printed things that decided every
-write-or-play turn in the records. Face-up stays the default against a body
-about to die or to Block; written is the tempo trade on a safe turn, and it
-feeds Feint, Treatise, Scout Ahead and Opening Gambit the way any damage Plan
-does.
+WHAT WAS REMOVED: both sheet rows, `ProtoKkStrike` and `ProtoKkDefend`, the
+starter and `StarterStrike` / `StarterDefend` swaps, `KokomiPoolPassSixTests`
+and `KokomiPoolPassSevenTests`, the tier0 cases for the two rows, and the two
+pieces that existed only for the Defend's face --
+`KokomiPlan.PlanHeldBlockVar` and `gen_klee_cards.plan_held_block_rider`.
 
-**DEFEND STAYS THE BASE GAME'S**, and that is design and not an omission.
-Block a turn late is the dead half every seat rejected (Read the Field's Plan,
-round 28 lane 1), a Dusk basic Block would obsolete Breakwater, and one card in
-the hand that cannot be written keeps the question a question.
-
-R242 IS NOT REOPENED, IT IS PASSED. The ruling's test is "where a character's
-basics are a renamed Strike or Defend WITH THE SAME STAT LINE, the base game's
-replace them" -- and this row no longer has one. Water's Edge, deleted under
-that ruling, printed 6 damage and nothing else.
-
-THE TAG TRAVELS WITH THE CARD (`basic_tag: strike`, a new sheet field).
-`EB-543` removed `CardTag.Strike` from every prototype basic because the arm
-DEALT base Strikes and a kit card wearing the tag was a second answer to a
-question with one right one -- Neow's Talisman upgraded Slack Water and left
-four Strikes untouched all run. With her Strike now her own card, an untagged
-row would leave "one of your Strikes" with NO answer in her deck: the same
-relic half broken from the other end, with Strike Dummy and Miniature Cannon
-behind it. The field is DECLARED rather than re-derived, because derivation is
-what over-tagged Slack Water in the first place; the sheet names the one row
-that IS the Strike and every other prototype basic stays untagged
-(`gen_klee_cards`'s tag block, `loader._validate_basic_tag`,
-`Round19Tests.No_prototype_basic_wears_the_strike_or_defend_tag`). It cannot
-reopen the `AllCards` throw either: prototype rows are concatenated LAST into
-the pool, so the shipped basic still wins Large Capsule's `First()` with every
-arm off.
-
-THE FOURTH SEAM MOVES WITH IT. `KokomiOverhaulRoster.StarterStrike` now answers
-`ProtoKkStrike`, which is `EB-351`'s whole point one arm over: Large Capsule's
-"an additional Strike" asks the CHARACTER, and handing back a `StrikeSilent`
-would drop a shipped basic into a deck whose Strikes all print a Plan line.
-`StarterDefend` is unchanged.
-
-THE FACE-UP HIT APPLIES NO HYDRO AND THE WRITTEN ONE DOES. LAW's cadence line
-makes the base game's basics apply nothing ("the basic cards are supposed to be
-bad", [USER] 2026-09-02) and the exemption reaches HER basic: four Hydro
-appliers in the opening deck is a power change the design note did not ask for.
-A carry-out is the JELLYFISH's hit, dealt as Hydro by `KokomiPlan.ResolveAll`
-and by `kokomi_plan` whatever the card is, so WRITING the Strike is what earns
-the aura -- one more reason to write it, and no new rule. It is DECLARED on the
-row (`applies_element: false`) and not derived from the rarity, for the reason
-the tag beside it is declared: Slack Water and Kurage's Oath are basics too and
-neither is being moved. The declaration now works in BOTH engines -- the sim
-always honoured it (`_element_for`) and `damage_applies_element` read only a
-declared `true` until this pass -- so the codegen emits `IElementalCard`
-returning `Element.None`, which is Kirara's shape and the one
-`CatalystCadence.PrintedElement`'s header names: its predicate is "says nothing
-about elements", not "declares None", so an omission would have asked the
-character and re-applied the Hydro. The face keeps the Hydro keyword and gains
-`ForPlanElement`'s sentence -- "Its own hit applies no aura; the Bake-Kurage
-carries out the Plan as a Hydro hit, which does" -- and loses the face-up Hydro
-rider, which would have promised a reaction the play cannot make. A character
-row whose damage clauses DISAGREE about this is now a codegen blocker rather
-than a silent majority vote.
-
-THE DRAFTER NEEDED NOTHING. The row is `rarity: basic`, which is the starter's
-mark and keeps it out of `rewards.character_pool` and out of
-`KokomiOverhaulRoster.Slice()` (the exemption `tools/lint_arm_pool_parity.py`
-already allows), so it is never offered. Its price is the existing two-half
-term -- the now-line plus the Plan line at `PLAN_DELAY_DISCOUNT`, 6 + 8 x 0.75
-= 12 against Ambush's 14 -- and no op is new, so `_op_price`,
-`STATIC_OP_PRICING` and the connectivity report are untouched.
-
-NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
-slate, no stamp and no re-baseline. What the pass owes is a natural round whose
-debrief counts the opening hands with no decision in them.
-
-## Kokomi pool pass seven -- the unwritable card (`EB-711`, 2026-09-08)
-
-THE FINDING THE PASS ANSWERS, named by rounds 28 to 31 from two sides. Round 28
-lane 2: Defend is "THE ONLY CARD IN THE DECK THAT CANNOT BE POINTED AT THE
-JELLYFISH, so the only card that never poses the kit's question." Round 31 lane
-2: the one dead turn of a 39-turn run was a hand of two Defends, two Wounds and
-two cards it could not use. Round 31 lane 1 died on the elite to a five-card
-hand with no Block at all against 21 incoming -- "the kit's defence is
-concentrated in three cards, and two of them only pay when the Casket is
-firing." Defend was unwritable, and Block was thin.
-
-THE THREE ANSWERS NOT TAKEN, each for its own reason. NOT A PLAN LINE: Block a
-turn late is the half every seat has rejected (Read the Field's Plan, round 28
-lane 1, "always one turn late"), and a Dusk line on the basic would make
-Breakwater a strictly worse card the day after pool pass five rebuilt it. NOT A
-RULE: "the jellyfish Blocks for you" is the decoration round 27 lane 2 warned
-of before its first Plan, and a rule change is [USER]'s to play. NOT MORE BLOCK
-CARDS IN THE STARTER: lane 1's hand had no Defend because the draw did not
-offer one, and a stronger Defend does not change how often a Defend is drawn.
-
-THE CHANGE, and it is one card. **Defend** (Kokomi), cost 1, Skill, basic:
-"Gain {Block:diff()} [gold]Block[/gold], plus 2 if the [gold]Bake-Kurage[/gold]
-is holding a [gold]Plan[/gold]." 5 and 2, upgrading to 8 and 2 -- the base
-Defend's +3 on the printed number, with the rider fixed. Two points is the size
-of Breakwater's per-Plan clause and of the basic Strike's premium.
-
-"HOLDING" IS THE QUEUE, READ LIVE at the moment the card resolves: a Plan
-written earlier this turn counts, a Dusk entry counts until it resolves, and a
-queue the morning's carry-out emptied does not. So the card asks its question by
-ORDERING, on the turn -- write first and Block for 7, or Block first for 5 and
-keep the energy uncommitted -- which is the same shape the seats already play
-(Opening Gambit before Scout Ahead, Kurage's Oath before Breakwater), and it
-puts the kit's engine under its floor: a turn that writes a Plan is a turn whose
-Defend is a Defend+, and a hand of Defends with nothing to write is, still, a
-hand of Defends.
-
-ONE READER PER ENGINE, and it is the reader that already existed:
-`KokomiPlan.PlansHeld` in the mod (Breakwater's per-Plan count, Tide Chart's
-draw) and `effects._predicate`'s new `plan_held` over `state.kk_plan_queue` in
-the sim. NOT `KokomiOverhaulLedger.PlansThisMorning`, which is the other number
-and the wrong one: it keeps yesterday's value until the next drain, so a Defend
-played after the carry-out would have paid for Plans the jellyfish no longer
-holds.
-
-A THEN/ELSE AND NOT A BASE PLUS A RIDER, which is an engine fact and not a
-style. Two `GainBlock` calls take Dexterity and Frail TWICE (5+D then 2+D)
-while the face folds ONE gain of 7, so the card would print a number it does not
-pay -- `EB-486`'s defect class arriving from the other end. One clause, one
-gain, one var.
-
-THE FACE FOLDS THE RIDER LIVE, so the seat reads 7 before deciding to play.
-`KokomiPlan.PlanHeldBlockVar` is `SpotlightSystem.SpotlitBlockVar`'s
-construction on this arm's question: the game's own `BlockVar` runs first (so
-Dexterity and Frail are the engine's answer), the rider is added, and a
-throwaway `BlockVar` takes the same hook pass the emitted `GainBlock` will make
--- that order and not the reverse, so a percentage cannot compound against the
-wrong base. It subclasses `BlockVar` because `DynamicVarSet.Block` CASTS to one.
-ONE VAR AND NOT FEINT'S PAIR: Feint prints two things the card might do; this
-prints one thing with a rider on it, which is what the sentence says.
-`gen_klee_cards.plan_held_block_rider` is the single derivation the var's
-numbers and the emitted branch literals both come out of.
-
-THE TAG TRAVELS WITH THE CARD (`basic_tag: defend`), which is pool pass six's
-argument one tag over: with her Defend now her own card, an untagged row would
-leave Fasten's picture and every "one of your Defends" with NO answer in her
-deck -- `EB-352` is the row that found that exact throw from the pool side. The
-field is DECLARED and not re-derived; Tide Wall, Shell Guard and Coral Bulwark
-all gain Block and none of them is the Defend.
-
-THE FOURTH SEAM MOVES WITH IT. `KokomiOverhaulRoster.StarterDefend` now answers
-`ProtoKkDefend`, for the reason `StarterStrike` answers `ProtoKkStrike`: Large
-Capsule's "an additional Strike and Defend" asks the CHARACTER, and handing back
-a `DefendSilent` would drop a flat 5 into a deck whose Defends all read the
-queue.
-
-AND THE BORROWED-COLOUR SEAM CLOSES. Pool pass six reported one: her four
-Defends were `DefendSilent`, so the deck screen showed them in the Silent pool's
-`5EBD00` rather than her `6FC8D6`. Neither basic is a base card now.
-
-THE PILOT HAD TO BE TAUGHT THE PREDICATE, and this is disclosed because the
-first read was the instrument's. `EB-144`'s hole is a bare `continue`: a
-predicate `tier0/pilot/policy._active_effects` has never been taught prices the
-WHOLE conditional at zero, so the first before/after pair had her Defend scoring
-0 Block and never being played -- 37.3% down to 28.0%, an artifact entirely.
-`plan_held` is a pure current-state read with no snapshot field and no telemetry
-row, so it joins `_ENGINE_LIVE_PREDICATES` and the pilot asks the engine rather
-than keeping a second copy of the rule. It moves no published number: one
-`proto_` row prints it, under a flag off in every anchor
-(`C.PLAN_DELAY_DISCOUNT`'s own argument). Her Rare's
-`plan_carried_out_this_turn` is still in that hole and is NOT touched here --
-it is a different row's question and this pass has no read that turns on it.
-
-THE SIM READ, AND IT IS A NULL. `tier05` single-act instrument, arm ON, 600
-runs per arm at each of two seeds, realistic loadout, hunter route, `priest`
-plan, `jobs=1`, world RT13/D18/P11/C21. BEFORE is main's starter (four base
-`defend`); AFTER is this row.
-
-| seed | arm | act-1 winrate | dead-run rate |
-| --- | --- | --- | --- |
-| 4242 | before | 37.33% | 62.67% |
-| 4242 | after | 37.33% | 62.67% |
-| 11 | before | 39.67% | 60.33% |
-| 11 | after | 39.33% | 60.67% |
-
-Under this instrument the two rates are COMPLEMENTS -- a single-act run either
-clears the boss or dies -- so the pair is one number reported twice, and it does
-not move. The card does fire: `plan_held` read true on 21% of the reads a
-40-run cohort took, and total Block gained moves by well under a percent. The
-reason is the sim's own: the pilot writes roughly 19 Plans a run and the rider
-needs a Defend played AFTER a write, in the same turn -- a turn ordering the
-sim's pilot has no reason to seek and a human seat does. Round 32 is what
-answers that, and the design note already says what a null means: "if the rate
-does not move, the floor question moves to the pool (a Common face-up Block
-card with a Plan-shaped rider), not to a rule." That is a design call and it is
-not taken here.
-
-THE DRAFTER NEEDED ONE LINE. `rarity: basic` keeps the row out of
-`rewards.character_pool` and out of `KokomiOverhaulRoster.Slice()` by
-construction (tested), so it is never offered; `plan_held` is registered in
-`tier05.draft.STATIC_PROTOTYPE_CONDITIONS` because the price walk reads the
-SHEET and not the offer pool, and an unpriced branch is what that set exists to
-refuse. No new op, so `_op_price`, `STATIC_OP_PRICING` and the connectivity
-report are untouched.
-
-NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
-slate, no stamp and no re-baseline. The table above is a before/after on one
-instrument, reported because the row asked for it, and it is not a world
-number. What the pass owes is a natural round 32 whose debrief counts Defends
-played with a Plan held against those played without, and asks whether the
-order was chosen.
+WHAT WAS KEPT, because it is general and printed by no row: the `basic_tag:`
+sheet field with its loader and codegen validators, the `applies_element:
+false` codegen path (`CharacterProfile.damage_applies_element` reading a
+declared false, `declares_no_element`, and the mixed-declaration blocker), and
+the `plan_held` predicate in both engines' registries with its
+`_ENGINE_LIVE_PREDICATES` registration -- the `EB-144` pilot fix, which is
+`EB-712`'s standing evidence.

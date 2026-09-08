@@ -392,18 +392,18 @@ def test_the_rows_the_finding_names_carry_the_gem():
 
 
 def test_only_the_plan_only_rows_carry_the_when_sentence():
-    """An Attack of hers that elements its own hit owes no explanation; the
-    sentence rides exactly the rows where the Plan is the only source.
+    """An Attack of hers already elements its own hit, so it owes no
+    explanation; the sentence rides exactly the rows where the Plan is the
+    only source.
 
-    "NO ELEMENT OF ITS OWN" IS THE TEST, NOT "NO INTERFACE" (`EB-703`). Those
-    were the same claim while only Skills qualified -- a Skill takes no
-    `IElementalCard` from the codegen -- and they stopped being the same claim
-    when an ATTACK declared `applies_element: false`. Her basic Strike carries
-    the interface RETURNING `Element.None`, because
-    `CatalystCadence.PrintedElement` reads a card that says nothing as "ask the
-    character" and would have re-applied the Hydro the row just refused. What
-    the sentence must never sit beside is a row whose own hit DOES apply, which
-    is what the element-member read below asks.
+    "NO ELEMENT OF ITS OWN" IS THE TEST, NOT "NO INTERFACE". They are the same
+    claim while only Skills qualify -- a Skill takes no `IElementalCard` from
+    the codegen -- and they come apart the moment an ATTACK declares
+    `applies_element: false`, which the generator still supports and no
+    shipped row prints (passes six and seven withdrawn, 2026-09-08). Such a
+    row would carry the interface RETURNING `Element.None`, because
+    `CatalystCadence.PrintedElement` reads a card that says nothing as "ask
+    the character".
     """
     carriers = {p.stem for p in proto.OUT_DIR.glob("*.cs")
                 if "ArmKeywordTips.ForPlanElement(" in p.read_text(
@@ -416,8 +416,6 @@ def test_only_the_plan_only_rows_carry_the_when_sentence():
         assert own in ([], ["public Element Element => Element.None;"]), stem
         assert "KleeKeywords.AppliesHydro" in text, stem
     assert "ProtoKkSangoIsshin" not in carriers
-    # AND THE ONE ATTACK AMONG THEM IS THE ONE THAT REFUSED THE CADENCE.
-    assert "ProtoKkStrike" in carriers
 
 
 def test_a_skill_grade_row_whose_damage_is_branch_gated_is_elemental():

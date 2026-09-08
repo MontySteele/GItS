@@ -79,16 +79,8 @@ public class BaseBasicsTests
     {
         var deck = Cards("KokomiOverhaulRoster", "StartingDeck");
         Assert.Equal(10, deck.Count);
-        // `EB-703` (pool pass six): her four Strikes are HER card, printing a
-        // Plan line, so no opening hand is Plan-less. `EB-711` (pool pass
-        // seven): so are her four Defends, which read the QUEUE rather than
-        // printing a Plan line -- Block a turn late is still the dead half,
-        // and one card in the hand that cannot be WRITTEN keeps the question
-        // a question. Neither basic is a Silent card now.
-        Assert.Equal(4, deck.Count(c => c.Contains("ProtoKkStrike")));
-        Assert.DoesNotContain(deck, c => c.Contains("StrikeSilent"));
-        Assert.Equal(4, deck.Count(c => c.Contains("ProtoKkDefend")));
-        Assert.DoesNotContain(deck, c => c.Contains("DefendSilent"));
+        Assert.Equal(4, deck.Count(c => c.Contains("StrikeSilent")));
+        Assert.Equal(4, deck.Count(c => c.Contains("DefendSilent")));
         Assert.Equal(1, deck.Count(c => c.Contains("ProtoKkKuragesOath")));
         Assert.Equal(1, deck.Count(c => c.Contains("ProtoKkSlackWater")));
         Assert.DoesNotContain(deck, c => c.Contains("WatersEdge"));

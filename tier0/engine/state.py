@@ -205,7 +205,8 @@ class Card:
     # view, the skill_tag rail) and adding an inert word to a list that four
     # things filter is how an inert word stops being inert.
     hexerei: bool = False
-    # `EB-703` (pool pass six). WHICH BASE-GAME BASIC THIS PROTOTYPE ROW IS:
+    # `EB-703`. WHICH BASE-GAME BASIC A PROTOTYPE ROW IS (no row declares one
+    # since passes six and seven were withdrawn, 2026-09-08):
     # "strike" or "defend". Read by `gen_klee_cards` alone -- it emits
     # `CardTag.Strike` / `CardTag.Defend`, which is what base-game content
     # means by "one of your Strikes" (Neow's Talisman, Strike Dummy,

@@ -34,7 +34,6 @@
     "proto_kk_cleansing_wave",
     "proto_kk_coral_bulwark",
     "proto_kk_deep_current",
-    "proto_kk_defend",
     "proto_kk_exposed_flank",
     "proto_kk_feigned_retreat",
     "proto_kk_feint",
@@ -58,7 +57,6 @@
     "proto_kk_slack_water",
     "proto_kk_song_of_pearls",
     "proto_kk_stolen_chapter",
-    "proto_kk_strike",
     "proto_kk_the_clouds_like_waves",
     "proto_kk_the_generals_banner",
     "proto_kk_the_moon_a_ship",
@@ -238,7 +236,6 @@
     "proto_kk_cleansing_wave": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_deep_current": "kokomi",
-    "proto_kk_defend": "kokomi",
     "proto_kk_exposed_flank": "kokomi",
     "proto_kk_feigned_retreat": "kokomi",
     "proto_kk_feint": "kokomi",
@@ -262,7 +259,6 @@
     "proto_kk_slack_water": "kokomi",
     "proto_kk_song_of_pearls": "kokomi",
     "proto_kk_stolen_chapter": "kokomi",
-    "proto_kk_strike": "kokomi",
     "proto_kk_the_clouds_like_waves": "kokomi",
     "proto_kk_the_generals_banner": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
@@ -518,9 +514,6 @@
     "proto_kk_deep_current": {
       "damage": 3
     },
-    "proto_kk_defend": {
-      "conditional_block": 3
-    },
     "proto_kk_exposed_flank": {
       "power_amount": 1,
       "plan_power_amount": 1
@@ -606,10 +599,6 @@
     "proto_kk_stolen_chapter": {
       "draw": 1,
       "plan_draw": 1
-    },
-    "proto_kk_strike": {
-      "damage": 3,
-      "plan_damage": 3
     },
     "proto_kk_the_clouds_like_waves": {
       "power_amount": 1
