@@ -1273,7 +1273,7 @@
 - {id: proto_kk_opening_gambit, name: "Opening Gambit", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] deals double damage.",
+   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] carried out with this one deals double damage.",
    effects: [{op: damage, amount: 5, target: enemy}],
    # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
    # the entry carried out immediately after this one in the same drain.
@@ -1285,7 +1285,7 @@
 - {id: proto_kk_second_wave, name: "Second Wave", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next [gold]Plan[/gold] is carried out twice.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next [gold]Plan[/gold] carried out with this one is carried out twice.",
    effects: [{op: block, amount: 4}],
    # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
    # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
@@ -1296,7 +1296,7 @@
 - {id: proto_kk_scout_ahead, name: "Scout Ahead", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each [gold]Plan[/gold] carried out after this one.",
+   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each later [gold]Plan[/gold] carried out with this one.",
    effects: [{op: draw, amount: 1}],
    # THE ROW WHOSE VALUE IS ITS POSITION: first of a three-entry morning it
    # draws 2, last it draws 0, and the count is CARRY-OUTS. Why the upgrade
@@ -1314,15 +1314,6 @@
    effects: [{op: cancel_last_plan}],
    upgrade: {add: {op: draw, amount: 1}}}
 
-- {id: proto_kk_ebb_tide, name: "Ebb Tide", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Cancel every [gold]Plan[/gold]. Gain 1 [gold]Energy[/gold] and draw 1 card for each.",
-   # PER ENTRY and not per carry-out: "for each" counts the Plans she is
-   # holding, which is what the pending badge shows.
-   effects: [{op: cancel_all_plans_cash}],
-   upgrade: {cost: -1}}
-
 - {id: proto_kk_converging_tide, name: "Converging Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
@@ -1337,24 +1328,24 @@
 - {id: proto_kk_breakwater, name: "Breakwater", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 7 [gold]Block[/gold].",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 5 [gold]Block[/gold].",
    # DUSK: the line lands at the END of this turn, before the enemies act, so
    # the Block guards the swing the now-line was too small for. Priced against
    # Read the Field; the comparison is in the provenance note.
    effects: [{op: block, amount: 4}],
-   plan: [{op: block, amount: 7}],
+   plan: [{op: block, amount: 5}],
    plan_dusk: true,
-   upgrade: {block: 1, plan_block: 2}}
+   upgrade: {block: 1, plan_block: 1}}
 
 - {id: proto_kk_night_watch, name: "Night Watch", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 3 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 5 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
+   description: "Gain 3 [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 3 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
    # THE SECOND DUSK ROW, and the one whose Weak is the point: it lands before
    # the enemies act, so it cuts the swing it was written for rather than the
    # one after it. Priced against Coral Bulwark in the provenance note.
    effects: [{op: block, amount: 3}],
-   plan: [{op: block, amount: 5},
+   plan: [{op: block, amount: 3},
           {op: apply_power, power: weak, amount: 1, target: front_enemy}],
    plan_dusk: true,
    upgrade: {block: 2, plan_block: 2}}

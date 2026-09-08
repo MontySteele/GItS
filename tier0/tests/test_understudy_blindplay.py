@@ -10773,6 +10773,32 @@ def test_the_plan_panel_says_the_jellyfish_holds_any_number_of_plans():
         blindplay.PLAN_COUNT_NOTE
 
 
+def test_the_plan_panel_says_the_written_number_does_not_move():
+    """`EB-647`. Under Shrink the hand reprinted `Kurage's Oath` as 2 and the
+    jellyfish carried it out for 7 -- `kokomi_plan.hers` working as ruled, with
+    nothing printing the rule. Three r23 lanes read it as a defect. The C# half
+    is on the `Plan` badge (`KokomiPlan.PendingPlansPower`); this is the page's.
+
+    Seen to FAIL: the panel carried the aim, Hydro, Block and count rules and
+    said nothing about what happens to a written number afterwards.
+    """
+    page = blindplay.observe(plans_combat_state(
+        morning_of({"card": "Kurage's Oath", "number": 7,
+                    "line": "Bake-Kurage: Kurage's Oath, 7",
+                    "kind": "Damage", "asked": 7})))
+    lines = page.splitlines()
+    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE == (
+        "- A Plan carries the numbers you wrote; a debuff on you afterwards "
+        "does not change it.")
+    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE in lines
+    # Beside the count rule, which is the one it qualifies.
+    assert lines.index(blindplay.PLAN_COUNT_NOTE) + 1 == \
+        lines.index(blindplay.PLAN_WRITTEN_NUMBER_NOTE)
+    # And it rides the pet's line like the other four.
+    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE not in \
+        blindplay.observe(combat_state())
+
+
 def test_an_all_in_spark_price_prints_as_all_not_as_its_gate():
     """`EB-445`. Stoke the Fuse's gate is 1 and its price is the whole bank;
     the cost slot printed the gate."""

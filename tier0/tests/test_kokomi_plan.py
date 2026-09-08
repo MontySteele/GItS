@@ -831,11 +831,12 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     from tier0.content import loader
 
     assert "proto_kk_the_moon_overlooks_the_waters"         not in C.KOKOMI_OVERHAUL_POOL_IDS
-    # FORTY-TWO after pool pass two (`EB-643`, R265): eight rows
-    # that reach INTO the queue. The count the row was filed
-    # against was 34, and what it pins is the withdrawal, not the
-    # size -- so it moves with the pool and the absence does not.
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 42
+    # FORTY-ONE after pool pass two (`EB-643`, R265) and `EB-649`
+    # (round 23, Ebb Tide retired): seven rows that reach INTO the
+    # queue. The count the row was filed against was 34, and what it
+    # pins is the withdrawal, not the size -- so it moves with the
+    # pool and the absence does not.
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 41
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -1985,6 +1986,72 @@ def test_riptide_then_gambit_doubles_nothing(overhaul):
     assert enemy.hp == 200 - 26
 
 
+def test_a_rider_with_no_follower_says_so(overhaul):
+    """`EB-645`. The r23 defence lane wrote Second Wave with no Plan behind it
+    in the same morning; the rider fell off the end of the drain as designed
+    and the page said nothing at all. The drain now finishes the sentence."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
+        cid="proto_kk_second_wave"))
+    kokomi_plan.resolve_all(st)
+    said = [e for e in st.log if e["event"] == "plan_no_follower"]
+    assert len(said) == 1
+    assert said[0]["card"] == "proto_kk_second_wave"
+    assert said[0]["line"] == "proto_kk_second_wave: no Plan followed"
+
+
+def test_a_rider_that_reached_a_follower_says_nothing(overhaul):
+    """The line is about the EMPTY case only: a rider that landed needs no
+    receipt, because the entry it doubled printed one."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}], cid="proto_kk_gambit"))
+    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
+    kokomi_plan.resolve_all(st)
+    assert counts(st)["plan_no_follower"] == 0
+    assert enemy.hp == 200 - 26
+
+
+def test_the_no_follower_line_names_the_card_that_wrote_the_rider(overhaul):
+    """Two entries, and the LAST one is the one still holding a rider: the
+    flags are cleared at the top of every entry, so what is pending at the end
+    of the drain was written by the entry immediately before it."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 0}],
+                                       cid="proto_kk_first"))
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}],
+        cid="proto_kk_opening_gambit"))
+    kokomi_plan.resolve_all(st)
+    said = [e for e in st.log if e["event"] == "plan_no_follower"]
+    assert [e["card"] for e in said] == ["proto_kk_opening_gambit"]
+
+
+def test_a_dusk_rider_with_no_follower_says_so_too(overhaul):
+    """The dusk drain is the same loop, so it finishes the same sentence and
+    marks WHICH drain ran out."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, dusk_card(
+        [{"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
+        cid="proto_kk_dusk_wave"))
+    kokomi_plan.resolve_dusk(st)
+    said = [e for e in st.log if e["event"] == "plan_no_follower"]
+    assert len(said) == 1 and said[0]["why"] == "dusk"
+
+
+def test_change_of_plans_never_says_no_plan_followed(overhaul):
+    """`resolve_front` carries ONE entry out and does not come through the
+    drain, so there is no "next" for the word to name -- and a drain of one
+    that never had a follower to lose says nothing."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}], cid="proto_kk_gambit"))
+    kokomi_plan.resolve_front(st)
+    assert counts(st)["plan_no_follower"] == 0
+
+
 def test_two_riders_in_a_row_reach_two_different_entries(overhaul):
     """Each rider is spent by the entry it reaches, so two in a row cannot
     both land on a third: the doubling rides onto Second Wave, and Second
@@ -2280,6 +2347,64 @@ def test_the_sheets_two_dusk_rows_are_the_only_ones(overhaul):
     assert dusk == ["proto_kk_breakwater", "proto_kk_night_watch"]
 
 
+def _row(cid):
+    return next(c for c in loader.prototype_cards() if c.id == cid)
+
+
+def _faces():
+    """The printed faces, off the SHEET: `description:` is the emitted C#
+    face and the loader does not keep it on a `Card`."""
+    import pathlib
+
+    import yaml
+    repo = pathlib.Path(__file__).resolve().parents[2]
+    rows = yaml.safe_load(
+        (repo / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
+    return {r["id"]: r["description"] for r in rows if "description" in r}
+
+
+def test_the_dusk_lines_are_priced_to_the_face(overhaul):
+    """`EB-646`, round 23. The face-up half of both Dusk rows was dead -- the
+    seat never played either now-line, because the Dusk line was worth twice
+    it for the same Energy. Timing is the value, so the Dusk line is priced to
+    the face: Breakwater 4 now / 5 at dusk, Night Watch 3 / 3 and a Weak."""
+    breakwater = _row("proto_kk_breakwater")
+    assert breakwater.effects == [{"op": "block", "amount": 4}]
+    assert breakwater.plan == [{"op": "block", "amount": 5}]
+    assert breakwater.upgrade == {"block": 1, "plan_block": 1}
+
+    watch = _row("proto_kk_night_watch")
+    assert watch.effects == [{"op": "block", "amount": 3}]
+    assert watch.plan[0] == {"op": "block", "amount": 3}
+    assert watch.plan[1]["power"] == "weak" and watch.plan[1]["amount"] == 1
+    assert watch.upgrade == {"block": 2, "plan_block": 2}
+
+
+def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
+    """`EB-645`. The rider is spent by the entry carried out immediately after
+    this one IN THIS DRAIN, and a face that did not say so read as a promise
+    about the whole fight."""
+    faces = _faces()
+    assert faces["proto_kk_second_wave"] == (
+        "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next "
+        "[gold]Plan[/gold] carried out with this one is carried out twice.")
+    assert faces["proto_kk_opening_gambit"].endswith(
+        "The next [gold]Plan[/gold] carried out with this one deals double "
+        "damage.")
+    assert faces["proto_kk_scout_ahead"].endswith(
+        "Draw 1 card for each later [gold]Plan[/gold] carried out with this "
+        "one.")
+
+
+def test_ebb_tide_is_off_the_sheet_and_out_of_the_pool(overhaul):
+    """`EB-649`, round 23: three draws on the cap lane, never played. The op
+    stays registered with nothing spelling it -- see
+    `kokomi_plan.cancel_all_plans_cash`, whose pins drive it directly."""
+    assert "proto_kk_ebb_tide" not in {c.id for c in loader.prototype_cards()}
+    assert "proto_kk_ebb_tide" not in C.KOKOMI_OVERHAUL_POOL_IDS
+    assert "cancel_all_plans_cash" in effects.OPS
+
+
 # --- the two-Plan cap -----------------------------------------------------
 
 def test_the_cap_carries_out_two_and_holds_the_third(monkeypatch, overhaul):
@@ -2299,6 +2424,26 @@ def test_the_cap_carries_out_two_and_holds_the_third(monkeypatch, overhaul):
     kokomi_plan.resolve_all(st)
     assert st.player.energy == 3
     assert st.kk_plan_queue == []
+
+
+def test_a_capped_morning_reports_what_is_still_held(monkeypatch, overhaul):
+    """Round 23, beside `EB-650`. THE BADGE READ ABSENT WHILE A PLAN WAS HELD:
+    the C# clears the queue, syncs the pending badge at depth 0 -- which
+    REMOVES it -- drains, and puts the held entries back afterwards with no
+    second sync. `KokomiPlan.ResolveAll` re-syncs off the true depth now; this
+    engine has no badge, so its half is the number on the log."""
+    monkeypatch.setattr(C, "KOKOMI_PLAN_CAP", 2)
+    st = kokomi_state()
+    st.player.energy = 0
+    for i in range(3):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_all(st)
+    held = [e for e in st.log if e["event"] == "plan_cap_held"]
+    assert len(held) == 1
+    assert held[0]["plans"] == 1 and held[0]["cap"] == 2
+    # The badge's number: one Plan is still written after the morning.
+    assert held[0]["pending"] == 1 == len(st.kk_plan_queue)
 
 
 def test_the_cap_does_not_count_dusk_carry_outs(monkeypatch, overhaul):

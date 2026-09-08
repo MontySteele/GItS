@@ -49,3 +49,17 @@ The reads: do the three decks want different rewards; is a Plan cancelled,
 converted or accelerated on purpose; does the order written change on a free
 turn; does the natural lane reach any of it. The carry-out rule is decided
 on those reads, not before them. The stage holds at Prototype.
+
+## 4. After round 23
+
+Ebb Tide (row 5) is RETIRED on the round-23 read (`EB-649`): it drew three
+times on the cap lane and was played none of them, because it is "only live
+in the situation you spent the previous turn trying to create". The row left
+the sheet and both engines' pools; its resolver stays with no card spelling
+it, and says why.
+
+The Dusk lines (rows 7 and 8) are RE-PRICED to the face (`EB-646`): the
+face-up half of both was dead, so timing rather than size is what the rows
+sell. Breakwater is 4 Block now / 5 at dusk, Night Watch 3 Block now / 3 and
+1 Weak at dusk. The audit above priced 4/7 and 3/5+Weak; those two lines of
+the table are the ones round 23 moved.

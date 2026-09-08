@@ -19,13 +19,14 @@ namespace KleeMod.Tests.Prototype;
 /// THE FINDING. Round after round the seats wrote a Plan and then watched it
 /// play itself: a morning is a thing that is READ, not decided. Everything the
 /// arm asked the player to choose happened before the Plan was queued -- which
-/// card, and whether to plan it -- and nothing after. So the pass is eight rows
+/// card, and whether to plan it -- and nothing after. So the pass is seven rows
 /// that reach INTO the queue: two riders on the entry that follows (Opening
 /// Gambit, Second Wave), a draw that counts the entries after it (Scout
-/// Ahead), three now-lines that unwrite or re-aim what is already written
-/// (Second Thoughts, Ebb Tide, Converging Tide), and the two DUSK rows whose
-/// Plan lands at the end of the turn it was written on (Breakwater, Night
-/// Watch). Plus one lane rule, the two-Plan cap, behind a runtime toggle.
+/// Ahead), two now-lines that unwrite or re-aim what is already written
+/// (Second Thoughts, Converging Tide), and the two DUSK rows whose Plan lands
+/// at the end of the turn it was written on (Breakwater, Night Watch). Plus
+/// one lane rule, the two-Plan cap, behind a runtime toggle. Ebb Tide was the
+/// eighth row until `EB-649` (round 23) retired it.
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, on <see cref="KokomiPoolPassTests"/>'
 /// split. The card shapes are REAL -- every row is constructed and its face,
@@ -251,13 +252,20 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void Ebb_tide_is_an_uncommon_exhaust_that_cashes_the_queue()
+    public void Ebb_tide_left_the_arm_and_its_op_stayed()
     {
-        var card = new ProtoKkEbbTide();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Contains("KokomiPlan.CancelAllForCash",
-                        Il.Calls(Il.Method("ProtoKkEbbTide", "OnPlay")));
+        // `EB-649` (round 23): three draws on the cap lane and no play, so
+        // the CARD is gone -- from the sheet, from the generated folder and
+        // from the slice -- and the RESOLVER stays, because the rule is the
+        // one a re-issue would want. Twin:
+        // `test_ebb_tide_is_off_the_sheet_and_out_of_the_pool`.
+        Assert.Null(typeof(ProtoKkSecondWave).Assembly
+                        .GetType("KleeMod.Cards.Prototype.Generated.ProtoKkEbbTide"));
+        Assert.DoesNotContain(
+            "ProtoKkEbbTide",
+            string.Join("|", Il.CallSequence(
+                Il.Method("KokomiOverhaulRoster", "Slice"))));
+        Assert.NotNull(typeof(KokomiPlan).GetMethod("CancelAllForCash", All));
     }
 
     [Fact]
@@ -266,7 +274,8 @@ public class KokomiPoolPassTwoTests
         // PER ENTRY and not per carry-out: "for each" counts the Plans she is
         // HOLDING, which is `List.Count` on the queue and not the ledger's
         // morning. Energy first, so a drawn card meets a hand that can afford
-        // it. Twin: `test_ebb_tide_cashes_the_whole_queue_per_entry`.
+        // it. Twin: `test_ebb_tide_cashes_the_whole_queue_per_entry`. No card
+        // spells it since `EB-649`; the resolver and this pin stand.
         var calls = Il.CallSequence(
             typeof(KokomiPlan).GetMethod("CancelAllForCash", All)!).ToList();
         Assert.Contains(calls, c => c.Contains("List`1.get_Count"));
@@ -314,7 +323,7 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void Breakwater_writes_a_dusk_plan_of_seven_block()
+    public void Breakwater_writes_a_dusk_plan_of_five_block()
     {
         var card = new ProtoKkBreakwater();
         Assert.Equal(1, card.EnergyCost.Canonical);
@@ -322,7 +331,10 @@ public class KokomiPoolPassTwoTests
 
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.Block, clause.Kind);
-        Assert.Equal(7, clause.Amount);
+        // `EB-646` (round 23): 7 until the Dusk trial read the face-up half
+        // dead. Timing is the value, so the Dusk line is priced to the face
+        // -- 4 now, 5 at dusk, and the smith moves each by 1.
+        Assert.Equal(5, clause.Amount);
         // THE FLAG RIDES THE WRITE, because Dusk is a fact about WHEN this
         // card's line lands and the entry is the only thing that survives the
         // play.
@@ -338,7 +350,9 @@ public class KokomiPoolPassTwoTests
         var clauses = card.PlanClauses;
         Assert.Equal(2, clauses.Count);
         Assert.Equal(KokomiPlan.Kind.Block, clauses[0].Kind);
-        Assert.Equal(5, clauses[0].Amount);
+        // `EB-646`: 5 until round 23. 3 now, 3 and a Weak at dusk -- the Weak
+        // is what the Dusk line is bought for.
+        Assert.Equal(3, clauses[0].Amount);
         Assert.Equal(KokomiPlan.Kind.ApplyWeak, clauses[1].Kind);
         Assert.Equal(KokomiPlan.Aim.FrontEnemy, clauses[1].Aim);
         Assert.Contains("dusk: true", Source("ProtoKkNightWatch"));
@@ -457,7 +471,7 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void All_eight_rows_are_offerable_and_none_is_in_the_starter()
+    public void All_seven_rows_are_offerable_and_none_is_in_the_starter()
     {
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
@@ -465,7 +479,7 @@ public class KokomiPoolPassTwoTests
                  {
                      "ProtoKkOpeningGambit", "ProtoKkSecondWave",
                      "ProtoKkScoutAhead", "ProtoKkSecondThoughts",
-                     "ProtoKkEbbTide", "ProtoKkConvergingTide",
+                     "ProtoKkConvergingTide",
                      "ProtoKkBreakwater", "ProtoKkNightWatch",
                  })
         {
@@ -477,6 +491,98 @@ public class KokomiPoolPassTwoTests
         var starter = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "StartingDeck")).ToList();
         Assert.DoesNotContain(starter, c => c.Contains("ProtoKkBreakwater"));
+    }
+
+    // ======================================================================
+    // 8. ROUND 23: the window on the faces, and the written number
+    // ======================================================================
+
+    [Fact]
+    public void The_three_rider_faces_print_the_window_the_rider_lives_in()
+    {
+        // `EB-645`. The r23 defence lane wrote Second Wave with no Plan
+        // behind it in the same morning and got nothing, because a rider is
+        // spent by the entry carried out immediately after it IN THE SAME
+        // DRAIN. The faces now say which drain. Twin:
+        // `test_the_three_rider_faces_print_the_window_the_rider_lives_in`.
+        Assert.Equal(
+            "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: The "
+          + "next [gold]Plan[/gold] carried out with this one is carried out "
+          + "twice.",
+            Face(new ProtoKkSecondWave()));
+        Assert.EndsWith(
+            "The next [gold]Plan[/gold] carried out with this one deals "
+          + "double damage.",
+            Face(new ProtoKkOpeningGambit()));
+        Assert.EndsWith(
+            "Draw 1 card for each later [gold]Plan[/gold] carried out with "
+          + "this one.",
+            Face(new ProtoKkScoutAhead()));
+    }
+
+    [Fact]
+    public void A_rider_with_no_follower_is_filed_on_the_carry_out_log()
+    {
+        // `EB-645`. STRUCTURAL, for this file's stated split: a drain needs a
+        // live combat. What is pinned is that `Drain` files the row and what
+        // the row SAYS. Twin: `test_a_rider_with_no_follower_says_so`.
+        var line = typeof(KokomiPlan).GetMethod("NoFollowerLine", All)!
+            .Invoke(null, new object[] { "Second Wave" });
+        Assert.Equal("Second Wave: no Plan followed", line);
+
+        var drain = Il.Method("KokomiPlan", "Drain");
+        Assert.Contains(Il.Calls(drain),
+                        c => c.Contains("NoteNoFollower"));
+        // AND IT REACHES THE PAGE'S OWN LOG, which is the surface the seats
+        // read: the note is filed through the one writer of the carry-out
+        // list.
+        Assert.Contains(
+            Il.Calls(typeof(KokomiPlan).GetMethod("NoteNoFollower", All)!),
+            c => c.Contains("Record"));
+    }
+
+    [Fact]
+    public void The_plan_badge_says_the_written_number_does_not_move()
+    {
+        // `EB-647`. Under Shrink the hand reprinted `Kurage's Oath` as 2 and
+        // the jellyfish carried it out for 7 -- `KokomiPlan.Hers` as ruled,
+        // with nothing printing the rule. It goes on the badge because the
+        // `Plan` keyword tip is at its 135-character ceiling. Page twin:
+        // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
+        var face = new PendingPlansPower().Localization!
+            .First(r => r.Item1 == "description").Item2;
+        Assert.EndsWith(
+            "Later debuffs on you do not change the numbers you wrote.", face);
+    }
+
+    [Fact]
+    public void A_capped_morning_re_syncs_the_badge_off_the_true_depth()
+    {
+        // Round 23, beside `EB-650`. THE BADGE READ ABSENT WHILE A PLAN WAS
+        // HELD. `ResolveAll`'s capped path is: clear the queue, `Sync` at
+        // depth 0 -- which REMOVES `PendingPlansPower` -- drain, then put the
+        // held entries back at the FRONT. There was no second sync, so three
+        // queued under cap 2 ended the morning with one Plan written and no
+        // badge saying so: the one surface that answers "how many are
+        // written" was the one that lied.
+        //
+        // STRUCTURAL, for this file's stated split: the arithmetic needs a
+        // live combat and is the sim twin's
+        // (`test_a_capped_morning_reports_what_is_still_held`). What is
+        // pinned here is that the re-insert is followed by a badge refresh,
+        // and that the refresh is `RefreshBadge` rather than a second `Sync`
+        // -- `R101b` holds the drain to one row on a published instrument
+        // (`KurageBeatTests.The_morning_still_mints_exactly_one_ledger_row`),
+        // so the badge is put back and the meter is not written twice.
+        var calls = Il.CallSequence(
+            Il.Method("KokomiPlan", "ResolveAll")).ToList();
+        var insert = calls.FindIndex(c => c.Contains("InsertRange"));
+        Assert.True(insert >= 0, "the held entries are put back");
+        Assert.Contains(calls.Skip(insert),
+                        c => c.Contains("RefreshBadge"));
+        Assert.DoesNotContain(
+            "MeterLedger",
+            Il.Calls(typeof(KokomiPlan).GetMethod("RefreshBadge", All)!));
     }
 
     // ---- helpers ---------------------------------------------------------

@@ -754,6 +754,23 @@ PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
                    "badge is how many are written, not a limit. The "
                    "Bake-Kurage's own 1 is only its presence.")
 
+# `EB-647`. THE WRITTEN NUMBER IS THE NUMBER, AND NOTHING SAID SO.
+#
+# WHAT THREE r23 LANES MET. Under Shrink the hand reprinted `Kurage's Oath` as
+# 2 and the jellyfish carried it out for 7. That is the ruled behaviour and not
+# a defect: a Plan folds HER terms at WRITING time (`kokomi_plan.hers` -- her
+# Strength and her enchantment) and nothing of the target's, because a Plan
+# resolves next morning against whatever the board wears then. A debuff that
+# lands on Kokomi after the Plan is written therefore does not follow it. No
+# surface printed the rule, so each lane derived it from an arithmetic that
+# looked broken.
+#
+# BESIDE `PLAN_COUNT_NOTE`, and the C# half is on the `Plan` badge
+# (`KokomiPlan.PendingPlansPower`): the `Plan` keyword tip is at its
+# 135-character ceiling and cannot carry a word more.
+PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote; a debuff "
+                            "on you afterwards does not change it.")
+
 # `EB-567`. THE KIT'S FIRST DECISION, TAUGHT BY REFUSAL ONE ACTION TOO LATE.
 #
 # WHAT BOTH r14 SEATS MET. Ethereal Spotlight costs 2 Encore, the fight opens

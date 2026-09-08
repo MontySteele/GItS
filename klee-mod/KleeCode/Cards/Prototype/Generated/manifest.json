@@ -35,7 +35,6 @@
     "proto_kk_converging_tide",
     "proto_kk_coral_bulwark",
     "proto_kk_deep_current",
-    "proto_kk_ebb_tide",
     "proto_kk_exposed_flank",
     "proto_kk_feigned_retreat",
     "proto_kk_feint",
@@ -240,7 +239,6 @@
     "proto_kk_converging_tide": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_deep_current": "kokomi",
-    "proto_kk_ebb_tide": "kokomi",
     "proto_kk_exposed_flank": "kokomi",
     "proto_kk_feigned_retreat": "kokomi",
     "proto_kk_feint": "kokomi",
@@ -500,7 +498,7 @@
     },
     "proto_kk_breakwater": {
       "block": 1,
-      "plan_block": 2
+      "plan_block": 1
     },
     "proto_kk_chain_of_command": {
       "plan_damage": 2
@@ -522,9 +520,6 @@
     },
     "proto_kk_deep_current": {
       "damage": 3
-    },
-    "proto_kk_ebb_tide": {
-      "cost": -1
     },
     "proto_kk_exposed_flank": {
       "power_amount": 1,

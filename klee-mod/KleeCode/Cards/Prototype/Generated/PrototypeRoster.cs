@@ -220,7 +220,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkConvergingTide>(),
             ModelDb.Card<ProtoKkCoralBulwark>(),
             ModelDb.Card<ProtoKkDeepCurrent>(),
-            ModelDb.Card<ProtoKkEbbTide>(),
             ModelDb.Card<ProtoKkExposedFlank>(),
             ModelDb.Card<ProtoKkFeignedRetreat>(),
             ModelDb.Card<ProtoKkFeint>(),

@@ -200,17 +200,21 @@ internal static class KokomiOverhaulRoster
         // POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
         // operates on rather than something that empties on a timer. Two
         // riders on the entry that follows (Opening Gambit, Second Wave), a
-        // draw that counts the entries after it (Scout Ahead), three now-lines
-        // that unwrite or re-aim what is already queued (Second Thoughts, Ebb
-        // Tide, Converging Tide), and the two DUSK rows whose Plan lands at
-        // the end of the turn it was written on (Breakwater, Night Watch).
-        // LAST, in the sheet's own order, for the ordering reason the shelf
-        // above states.
+        // draw that counts the entries after it (Scout Ahead), two now-lines
+        // that unwrite or re-aim what is already queued (Second Thoughts,
+        // Converging Tide), and the two DUSK rows whose Plan lands at the end
+        // of the turn it was written on (Breakwater, Night Watch). LAST, in
+        // the sheet's own order, for the ordering reason the shelf above
+        // states.
+        //
+        // EIGHT UNTIL `EB-649` (round 23): Ebb Tide drew three times on the
+        // cap lane and was played none of them, so the row left the sheet and
+        // this slice with it. <c>KokomiPlan.CancelAllForCash</c> stays and
+        // says why.
         ModelDb.Card<ProtoKkOpeningGambit>(),
         ModelDb.Card<ProtoKkSecondWave>(),
         ModelDb.Card<ProtoKkScoutAhead>(),
         ModelDb.Card<ProtoKkSecondThoughts>(),
-        ModelDb.Card<ProtoKkEbbTide>(),
         ModelDb.Card<ProtoKkConvergingTide>(),
         ModelDb.Card<ProtoKkBreakwater>(),
         ModelDb.Card<ProtoKkNightWatch>(),
