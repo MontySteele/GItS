@@ -1,63 +1,67 @@
-Status: OPEN (no pick; the default in §4 is applied)
+Status: OPEN (one A pick, §4)
 
-# Kokomi, the Plan-less hand: the basic Strike gets a Plan line, so every hand poses the kit's question
+# Kokomi, the Plan-less hand: a hand of basics has no decision, and the starter is not the place to fix it
 
-Written 2026-09-08, afternoon, from rounds 26 to 30. The one finding those
-five rounds repeat without a row is this: a hand with no Plan card in it
-has no decision in it. Round 30 lane 1 counted three of its eleven opening
-turns, including the first turn of the run; round 27 lane 2 opened fight 1
-on "three Strikes and two Defends, the unmodified basic deck", and the
-jellyfish panel printed "No Plan card in hand: the jellyfish waits." Round
-28 lane 2 named Defend "the only card in the deck that cannot be pointed at
-the jellyfish, so the only card that never poses the kit's question."
+Written 2026-09-08 and rewritten the same evening. The first version of this
+note applied a default that was not mine to apply: it gave Kokomi's basic
+Strike a Plan line (pool pass six, PR #458) and then her basic Defend a
+held-Plan rider (pass seven, PR #460). [USER] ruled the same evening that
+the starter basics are never changed, they are supposed to be bad. Both
+passes are withdrawn (`revert-starter-passes-2026-09-08`), the starter is
+the base game's four Strikes and four Defends again, and this note now
+carries the finding and the question, with the starter untouched.
 
-## 1. Where the Plan-less hand comes from
+## 1. The finding, from five rounds
 
-The starter is four Strike, four Defend, Kurage's Oath and Slack Water
-(`KokomiOverhaulRoster.StartingDeck`, `C.KOKOMI_OVERHAUL_STARTER_IDS`). Two
-Plan cards in ten. A five-card opening hand from ten cards holds no Plan
-card on roughly a fifth of draws, and the first two turns of a fight see
-the whole deck once, so one of every fight's first two hands is Plan-less
-often enough that every seat since round 25 has named the turn. The pool
-fixes it slowly, one draft at a time; the starter is where the turn lives.
+Rounds 26 to 30 name the same turn without a row: a hand with no Plan card
+in it has no decision in it. Round 30 lane 1 counted three of its eleven
+opening turns, including the first turn of the run; round 27 lane 2 opened
+fight 1 on "three Strikes and two Defends, the unmodified basic deck," and
+the jellyfish panel printed "No Plan card in hand: the jellyfish waits."
+Round 28 lane 2 called Defend "the only card in the deck that cannot be
+pointed at the jellyfish." The starter holds two Plan cards in ten
+(Kurage's Oath, Slack Water); a five-card hand from ten holds neither on
+about a fifth of draws, and the first two hands of every fight see the
+whole deck once.
 
-## 2. The rule that would fix it, and why not
+## 2. What the two withdrawn passes showed, since they ran
 
-Give the jellyfish something to do on a hand of basics: "if nothing is
-planned at the start of your turn, the Bake-Kurage does X." That is a new
-rule in the loop, which [USER] plays, and it papers over the hand rather
-than giving it a decision: the jellyfish acting on its own is exactly the
-"decoration" round 27 lane 2 called it before its first Plan. Not taken.
+They are useful as a measurement even though they are withdrawn. With a
+Plan line on every Strike (round 31), fifteen of fifteen opening hands held
+one, the Strike was written on 17 turns and played on 23 with every switch
+named against a printed rule, and the no-decision turns became lethals, a
+summon with no legal play, or a hand of Defends. With the Defend rider
+(round 32), both seats played "Plans first, Defend last" on every turn
+where a Plan existed and said it "stopped being a decision after the
+third": a reliably satisfied clause is a silent tax on the intuitive order,
+not a choice. So: giving the basics a Plan line removes the dead hand and
+does not reopen the cap question, and a conditional rider on a basic is not
+a decision. Neither is on the table; both are what the sim and the seats
+now know.
 
-## 3. The card that fixes it
+## 3. Where the answer can live, with the starter fixed
 
-Kokomi's basic Strike becomes her own card, the way Klee's starter Strike is
-Klee's (`KleeOverhaulRoster.StarterStrike`):
-
-- **Strike** (Kokomi), cost 1, Attack, basic: "Deal 6 damage. Plan: Deal 8
-  damage." Upgrade: 9 and 11.
-
-Every hand now holds the kit's question. The written half is Ambush's shape
-at a basic's premium: two more damage for a turn's delay, small enough that
-"a Plan lands in whatever Block the enemy is standing in" and the enemy's
-intent decide it, the same two printed things that decided every
-write-or-play turn in the records. Face-up stays the default against a
-body about to die or to Block; written is the tempo trade on a safe turn,
-and it feeds Feint, Treatise, Scout Ahead and Opening Gambit the way any
-damage Plan does. Four Strikes written on one safe turn is 32 next morning
-for four energy against 24 now, which is the cap question round 26 closed:
-the competition is damage needed now, and nothing here changes that.
-
-Defend stays the base game's. Block a turn late is the dead half every
-seat rejected (Read the Field's Plan, round 28 lane 1), a Dusk basic Block
-would obsolete Breakwater, and one card in the hand that cannot be written
-keeps the question a question.
+- **The pool.** A Common that puts a Plan line where a basic hand needs one
+  without being a basic: cheap, offered early, and drafted or not. Round
+  28's Ripple ("0 cost, Plan: gain 1 energy and 4 Block") is the shape the
+  seats loved; a 0-cost Common Attack with a Plan line, or a Common Skill
+  whose face-up half is Block and whose Plan half is damage, are the two
+  slots. This fixes the hand one draft at a time and leaves fight 1 as it
+  is.
+- **The brief's rules.** A rule that gives the jellyfish something to do on
+  a hand of basics ("if nothing is planned at the start of your turn, the
+  Bake-Kurage ..."). A loop change, which [USER] plays; the earlier note
+  called it decoration and I still think so, but it is the only answer that
+  reaches fight 1 without touching the starter.
+- **Accept it.** Fight 1 of a run has thin hands for every character; the
+  kit's question arrives at the first Plan card and the records say it
+  arrives well. The seats' complaint is about turns, not runs.
 
 ## 4. What is asked
 
-Nothing. Default (E, applied): pool pass six is the one card above, built
-in both engines with the sim's `KOKOMI_OVERHAUL_STARTER_IDS` and the mod's
-`StartingDeck` swapped to it, the draft price set as a written 8 against a
-face-up 6, and a natural round 31 after it whose debrief counts the opening
-hands with no decision in them. If the sim's winrate moves past the
-prototype's own band on the change, the number moves, not the shape.
+1. **Where the Plan-less hand is answered (A).** Default: the pool, two
+   Common slots as in §3, drafted by Fable as ordinary card design and
+   read by a seat round; the starter stays the base game's. 2: the brief,
+   a rule for the jellyfish on an empty morning, which [USER] plays. 3:
+   nowhere; the finding is recorded and the kit's first decision is its
+   first Plan card.
