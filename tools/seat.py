@@ -97,11 +97,28 @@ def _run(argv: list[str], extra: dict[str, str]) -> subprocess.CompletedProcess:
                           cwd=str(REPO), env=env, errors="replace")
 
 
+#: `EB-678`. The interpreter in the brief's own commands, RESOLVED. On this box
+#: a bare `python` is the Windows Store alias: it opens the store rather than
+#: running, the seat's Bash call never returns, and both r26 seats lost time to
+#: it before either had played a card. The brief is the only place a seat reads
+#: a command from, so the brief is where the absolute path belongs --
+#: `sys.executable` is the interpreter `seat.py` is itself running under, which
+#: is by construction the environment the round was launched in.
+BARE_PYTHON = re.compile(r"(?<![-\w./\\])python(?=\s+-m\s+understudy\b)")
+
+
+def interpreter() -> str:
+    """`sys.executable`, quoted if its path carries a space."""
+    py = sys.executable
+    return f'"{py}"' if " " in py else py
+
+
 def brief_text(lane: int, character: str) -> str:
-    """The brief, from `<LANE>` on, with the lane substituted."""
+    """The brief, with the lane and the interpreter filled in."""
     text = BRIEF.read_text(encoding="utf-8")
     _, _, body = text.partition("## THE BRIEF")
     body = (body or text).replace("<LANE>", str(lane))
+    body = BARE_PYTHON.sub(interpreter().replace("\\", r"\\"), body)
     return (f"You are the blind seat for **{character}** on lane {lane}.\n"
             f"{body.rstrip()}\n")
 

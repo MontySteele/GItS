@@ -416,10 +416,26 @@ def test_seat_opus_brief_is_the_committed_page_with_the_lane_filled_in():
     res = _run(["tools/seat.py", "--opus-brief", "--lane", "2",
                 "--character", "KLEEMOD-KLEE"])
     assert res.returncode == 0, res.stdout + res.stderr
-    assert "GITS_LANE=2 python -m understudy.blindplay observe" in res.stdout
+    assert "GITS_LANE=2 " in res.stdout
+    assert "-m understudy.blindplay observe" in res.stdout
     assert "<LANE>" not in res.stdout
     assert "Non-blindness declaration" in res.stdout
     assert "KLEEMOD-KLEE" in res.stdout
+
+
+def test_seat_opus_brief_names_an_absolute_interpreter():
+    """`EB-678`. A bare `python` on this box is the Windows Store alias: it
+    opens the store instead of running and the seat's own call never returns.
+    The brief is the only place a seat reads a command from, so the two
+    commands it prints name `sys.executable` and never resolve through PATH."""
+    seat = _module("seat")
+    text = seat.brief_text(2, "KLEEMOD-KOKOMI")
+    named = [line for line in text.splitlines()
+             if "-m understudy.blindplay" in line]
+    assert named, "the brief must still print the two allowed commands"
+    for line in named:
+        assert not seat.BARE_PYTHON.search(line), line
+        assert sys.executable in line, line
 
 
 def test_the_seat_brief_page_exists_and_names_both_allowed_commands():
