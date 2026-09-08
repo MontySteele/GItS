@@ -412,25 +412,15 @@ def card_cost(state: CombatState, card: Card) -> int:
             and state.player.powers.get(
                 kokomi_plan.NEXT_COMPANION_DISCOUNT, 0)):
         cost = max(0, cost - C.KOKOMI_OVERHAUL_RALLY_DISCOUNT)
-    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-655`, BATTLE PLAN's carry-out: "the
-    # first Attack you play FACE-UP this turn costs 1 less." Rally's block
-    # above with two clauses added, and both are the card:
-    #
-    #   * ATTACKS ONLY, so the Plan's reward is spent on the board;
-    #   * NOT A WRITE. `plan_aimed_at_pet` is this engine's answer to "was this
-    #     play aimed at the jellyfish", and it is PURE -- the same read
-    #     `_resolve_card_bound` makes to decide which half of the face runs --
-    #     so asking it here costs nothing and keeps a written Attack at full
-    #     price. That clause is why the discount cannot pay for more writing,
-    #     which is the whole reason the row's old `energy` clause came off.
-    #
-    # THIS SITE IS PURE, Rally's contract: the grant is consumed by the next
-    # face-up Attack RESOLVING (`_finish_play`), never by being priced.
-    if (C.KOKOMI_OVERHAUL and card.type == "attack"
-            and state.player.powers.get(
-                kokomi_plan.NEXT_ATTACK_DISCOUNT, 0)
-            and not kokomi_plan.plan_aimed_at_pet(state, card)):
-        cost = max(0, cost - C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT)
+    # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
+    # carry-out used to discount the next face-up Attack, and the mod could
+    # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
+    # card and no `CardPlay`, so it cannot ask whether the play is a WRITE
+    # onto the Bake-Kurage, while this site could ask the pure
+    # `plan_aimed_at_pet` and did. The clause is now DAMAGE applied at
+    # resolution (`kokomi_plan.next_attack_bonus`, folded in by
+    # `effects.flat_attack_bonus`), which both engines can ask at the one
+    # moment the play's target is known.
     # Leading Role (card-level texture, kickoff §3.2): the FIRST
     # Spotlighted card each turn costs less. This is a Furina-card power
     # granting economy, not the Spotlight baseline -- §2.2a governs the
@@ -669,9 +659,10 @@ def _finish_play(state: CombatState, card: Card,
     if C.KOKOMI_OVERHAUL:
         kokomi_plan.note_companion_played(state, card)
         kokomi_plan.spend_companion_discount(state, card)
-        # `EB-655`. Battle Plan's grant, spent at the same shared half of a
-        # play and for the same structural reason.
-        kokomi_plan.spend_attack_discount(state, card)
+        # `EB-668`: BATTLE PLAN'S RIDER IS NOT SPENT HERE. It is damage, so it
+        # has to survive until `flat_attack_bonus` has read it --
+        # `effects._resolve_card_bound` spends it one line after that read,
+        # beside `next_attack_up`'s own consuming pop.
     replays = 1
     if card.is_companion:
         # BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same
@@ -1336,10 +1327,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # `NextCompanionDiscountPower.AfterSideTurnEnd`, the same removal on the
     # same side turn end.
     state.player.powers.pop(kokomi_plan.NEXT_COMPANION_DISCOUNT, None)
-    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-655`. BATTLE PLAN'S GRANT DIES WITH
+    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-655`. BATTLE PLAN'S RIDER DIES WITH
     # ITS TURN, beside Rally's and for its reason: the clause says "this turn".
-    # Its C# twin is `NextAttackDiscountPower.AfterSideTurnEnd`.
-    state.player.powers.pop(kokomi_plan.NEXT_ATTACK_DISCOUNT, None)
+    # Its C# twin is `NextAttackDamagePower.AfterSideTurnEnd`.
+    state.player.powers.pop(kokomi_plan.NEXT_ATTACK_BONUS, None)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never

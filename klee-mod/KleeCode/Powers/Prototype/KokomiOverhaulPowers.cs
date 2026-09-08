@@ -276,60 +276,70 @@ public sealed class NextCompanionDiscountPower : PowerModel, ILocalizationProvid
 }
 
 /// <summary>
-/// BATTLE PLAN's carry-out (`EB-655`, pool pass three): "the first Attack you
-/// play face-up this turn costs 1 less."
+/// BATTLE PLAN's carry-out (`EB-655`, reworked by `EB-668`): "the next Attack
+/// you play face-up this turn deals 4 additional damage."
 ///
 /// WRITTEN BY A PLAN AND NOT BY A PLAY, which is the difference from
-/// <see cref="NextCompanionDiscountPower"/> beside it: the grant lands at the
+/// <see cref="NextCompanionDiscountPower"/> beside it: the rider lands at the
 /// morning the draw lands on, so the row's reward and its cards arrive
 /// together. It replaced a `Gain 1 Energy` clause that paid the write back its
 /// own cost -- the shape pool pass three exists to undo -- and is NARROWER on
-/// purpose: an ATTACK, and one played FACE-UP.
+/// purpose: an ATTACK, one of them, and one played FACE-UP.
 ///
-/// A DISCOUNT, NOT A ZEROING, and one stack always, both for the reasons the
-/// Companion power states: the face prints "costs 1 less", not "sets to 0" and
-/// not "per Plan".
+/// WHY IT IS DAMAGE AND NOT A DISCOUNT (`EB-668`). It was a discount, and a
+/// discount is read at the cost seam: <c>TryModifyEnergyCostInCombat</c> is
+/// handed a card and no <c>CardPlay</c>, so it could not ask
+/// <see cref="KokomiPlan.PlayedOnPet"/> and an Attack DRAGGED ONTO THE
+/// JELLYFISH was charged the discounted price here while the sim charged full.
+/// Damage is applied at RESOLUTION, where the play is known on both sides --
+/// so the face-up clause is now enforced by the rule itself rather than half
+/// enforced and disclosed.
 ///
-/// WHAT THE COST HOOK CANNOT SEE, stated because the omission is real.
-/// <c>TryModifyEnergyCostInCombat</c> is handed a card and no
-/// <c>CardPlay</c>, so it cannot ask <c>KokomiPlan.PlayedOnPet</c> and an
-/// Attack DRAGGED ONTO THE JELLYFISH is charged the discounted price here
-/// while the sim charges full (<c>combat.card_cost</c> asks the pure
-/// <c>plan_aimed_at_pet</c>). The rule the face prints is enforced where it
-/// can be: <see cref="AfterCardPlayed"/> spends the grant only on a face-up
-/// Attack, so a write never CONSUMES the discount and the first Attack
-/// actually played still gets it. Disclosed with the pass rather than papered
-/// over; closing it needs a target-aware cost seam the game does not offer.
+/// PER HIT, which is what <c>ModifyDamageAdditive</c> is: a two-hit Attack
+/// collects the rider twice, exactly as the shipped
+/// <see cref="NextAttackUpPower"/> does, and <c>effects.flat_attack_bonus</c>
+/// folds tier0's into the same per-hit base.
+///
+/// ONE STACK, ALWAYS: the face says "deals 4 additional damage", not "per Plan".
+///
+/// NO LATCH, and the reason is <see cref="NextAttackUpPower"/>'s: this rider
+/// is applied by a PLAN CARRY-OUT at the top of the morning, so the Attack
+/// that spends it can never be the play that made it. (The three riders in
+/// <c>CompanionOverhaulHooks</c> need one because Mika's rider is applied by
+/// an Attack.)
 /// </summary>
-public sealed class NextAttackDiscountPower : PowerModel, ILocalizationProvider
+public sealed class NextAttackDamagePower : PowerModel, ILocalizationProvider
 {
-    /// <summary>How much the next face-up Attack is discounted by. A rule's
-    /// number and not a card's, on <see cref="NextCompanionDiscountPower"/>'s
-    /// terms -- mirrored BY VALUE from
-    /// <c>C.KOKOMI_OVERHAUL_BATTLE_PLAN_DISCOUNT</c>.</summary>
-    public const int Discount = 1;
+    /// <summary>How much more the next face-up Attack deals, on each of its
+    /// hits. A rule's number and not a card's, on
+    /// <see cref="NextCompanionDiscountPower"/>'s terms -- mirrored BY VALUE
+    /// from <c>C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS</c>.</summary>
+    public const int Bonus = 4;
 
     public List<(string, string)>? Localization => new()
     {
         ("title", "Battle Plan"),
         ("description",
-            "The first Attack you play face-up this turn costs "
-          + "[blue]" + Discount + "[/blue] less."),
+            "The next Attack you play face-up this turn deals "
+          + "[blue]" + Bonus + "[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override bool TryModifyEnergyCostInCombat(
-        CardModel card, decimal originalCost, out decimal modifiedCost)
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
     {
-        modifiedCost = originalCost;
-        if (card.Type != CardType.Attack) return false;
-        if (card.Owner?.Creature != Owner) return false;
-        if (originalCost <= 0m) return false;
-        modifiedCost = System.Math.Max(0m, originalCost - Discount);
-        return true;
+        if (dealer != Owner || target == Owner) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;
+        if (cardSource is not { Type: CardType.Attack }) return 0m;
+        // A WRITE NEVER REACHES HERE -- a card played on the Bake-Kurage
+        // resolves none of its now-line, so it deals no damage to ask about --
+        // and the clause is asked for real in AfterCardPlayed below, which is
+        // handed the CardPlay this hook is not.
+        return Bonus;
     }
 
     public override async Task AfterCardPlayed(
@@ -339,7 +349,7 @@ public sealed class NextAttackDiscountPower : PowerModel, ILocalizationProvider
         if (cardPlay.Card.Owner?.Creature != Owner) return;
         // THE FACE-UP CLAUSE. A card dragged onto the Bake-Kurage is a WRITE:
         // none of its now-line resolves, so it is not "an Attack you played"
-        // in the sense the face means, and the grant waits for one that is.
+        // in the sense the face means, and the rider waits for one that is.
         if (KokomiPlan.PlayedOnPet(cardPlay)) return;
         if (!cardPlay.IsLastInSeries) return;
         await PowerCmd.Remove(this);

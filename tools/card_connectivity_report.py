@@ -490,8 +490,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "damage_quarter_max_hp": [],
     # A cost change, which is what `cost_mod` is filed under.
     "next_companion_discount": [_hook("shared", "card_identity", "write")],
-    # `EB-655`, Battle Plan's grant: the same cost change one card type over.
-    "next_attack_discount": [_hook("shared", "card_identity", "write")],
+    # `EB-668`, Battle Plan's rider: `buff_next_attack` wearing a kit name --
+    # flat damage on the next Attack -- so it is filed where that op is.
+    "next_attack_damage": [_hook("shared", "card_identity", "write")],
     # Cleansing Wave takes a debuff off HER. The nearest grounded entry is the
     # HP ledger's sibling for statuses, which this vocabulary does not have --
     # so it is EMPTY and disclosed, on `plan`'s own argument below.

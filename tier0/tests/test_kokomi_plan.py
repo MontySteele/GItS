@@ -2597,54 +2597,85 @@ def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
     assert up.plan[0]["amount"] == 17
 
 
-def test_battle_plan_writes_a_draw_and_the_discount_and_no_energy(overhaul):
+def test_battle_plan_writes_a_draw_and_the_rider_and_no_energy(overhaul):
     """The `energy` clause paid the write back its own cost, so writing was
-    free and the now-line was a strictly smaller card. It is gone."""
+    free and the now-line was a strictly smaller card. It is gone, and what
+    replaced it is DAMAGE rather than a discount (`EB-668`)."""
     row = _row("proto_kk_battle_plan")
     assert row.effects == [{"op": "draw", "amount": 1}]
     assert row.plan == [{"op": "draw", "amount": 2},
-                        {"op": "next_attack_discount"}]
+                        {"op": "next_attack_damage"}]
     assert not any(fx["op"] == "energy" for fx in row.plan)
     assert row.upgrade == {"draw": 1, "plan_draw": 1}
 
 
-def test_the_discount_pays_a_face_up_attack_and_not_a_write(overhaul):
+def test_the_rider_pays_a_face_up_attack_and_not_a_write(overhaul):
     """THE FACE-UP CLAUSE, which is what stops the reward paying for more
-    writing. `combat.card_cost` asks `plan_aimed_at_pet`, which is pure, so a
-    card that would be WRITTEN is priced at full and one that would be PLAYED
-    is priced at the discount."""
-    from tier0.engine import combat
-
+    writing -- and `EB-668`'s whole point, since it is now asked where the
+    play is known instead of at a cost seam the mod cannot make target-aware.
+    `flat_attack_bonus` is pure and asks `plan_aimed_at_pet`, so a card that
+    would be WRITTEN reads its printed number and one that would be PLAYED
+    reads the rider."""
     enemy = make_enemy(hp=200, intents=ATTACKER)
     st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.NEXT_ATTACK_DISCOUNT] = 1
+    st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] = 1
     attack = Card(id="proto_kk_a", name="a", cost=2, type="attack",
                   effects=[{"op": "damage", "amount": 5, "target": "enemy"}])
     skill = Card(id="proto_kk_s", name="s", cost=2, type="skill",
                  effects=[{"op": "block", "amount": 5}])
-    assert combat.card_cost(st, attack) == 1
-    # A SKILL IS NOT AN ATTACK, so the grant does not reach it.
-    assert combat.card_cost(st, skill) == 2
+    assert (effects.flat_attack_bonus(st, attack, 2)
+            == C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS)
+    # A SKILL IS NOT AN ATTACK, so the rider does not reach it.
+    assert effects.flat_attack_bonus(st, skill, 2) == 0
     # AND A WRITE IS NOT A FACE-UP PLAY: a row with no now-line at all is a
-    # write whatever the board intends, and it pays full price.
+    # write whatever the board intends, and it reads its printed number.
     written = Card(id="proto_kk_w", name="w", cost=2, type="attack",
                    effects=[],
                    plan=[{"op": "damage", "amount": 9,
                           "target": "front_enemy"}])
     assert kokomi_plan.plan_aimed_at_pet(st, written) is True
-    assert combat.card_cost(st, written) == 2
+    assert effects.flat_attack_bonus(st, written, 2) == 0
+    # AND THE COST SEAM IS GONE: the row moves damage, not price (`EB-668`).
+    from tier0.engine import combat
+    assert combat.card_cost(st, attack) == 2
 
 
-def test_the_discount_is_one_stack_and_is_spent_by_the_play(overhaul):
-    """Rally's two readings one card type over: the face says "costs 1 less",
-    not "per Plan", and the grant is consumed by the play that takes it."""
-    st = kokomi_state()
-    kokomi_plan.next_attack_discount(st)
-    kokomi_plan.next_attack_discount(st)
-    assert st.player.powers[kokomi_plan.NEXT_ATTACK_DISCOUNT] == 1
-    attack = Card(id="proto_kk_a", name="a", cost=1, type="attack", effects=[])
-    kokomi_plan.spend_attack_discount(st, attack)
-    assert kokomi_plan.NEXT_ATTACK_DISCOUNT not in st.player.powers
+def test_the_rider_is_one_stack_and_is_spent_by_the_play(overhaul):
+    """Rally's two readings one card type over: the face says "deals 4 more
+    damage", not "per Plan", and the rider is consumed by the play that takes
+    it. A WRITE keeps it -- the pin `EB-668` was filed on."""
+    st = kokomi_state(enemies=[make_enemy(hp=200, intents=ATTACKER)])
+    kokomi_plan.next_attack_bonus(st)
+    kokomi_plan.next_attack_bonus(st)
+    assert st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] == 1
+    written = Card(id="proto_kk_w", name="w", cost=1, type="attack",
+                   effects=[],
+                   plan=[{"op": "damage", "amount": 9,
+                          "target": "front_enemy"}])
+    kokomi_plan.spend_attack_bonus(st, written)
+    assert st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] == 1
+    skill = Card(id="proto_kk_s", name="s", cost=1, type="skill", effects=[])
+    kokomi_plan.spend_attack_bonus(st, skill)
+    assert st.player.powers[kokomi_plan.NEXT_ATTACK_BONUS] == 1
+    attack = Card(id="proto_kk_a", name="a", cost=1, type="attack",
+                  effects=[{"op": "damage", "amount": 5, "target": "enemy"}])
+    kokomi_plan.spend_attack_bonus(st, attack)
+    assert kokomi_plan.NEXT_ATTACK_BONUS not in st.player.powers
+
+
+def test_the_rider_rides_every_hit_of_the_attack_it_pays(overhaul):
+    """PER HIT, folded in where `next_attack_up` is folded in -- so a two-hit
+    Attack collects it twice, and the play that took it spends it."""
+    enemy = make_enemy(hp=200, intents=[])
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.next_attack_bonus(st)
+    attack = Card(id="proto_kk_a", name="a", cost=0, type="attack",
+                  effects=[{"op": "damage", "amount": 5, "target": "enemy",
+                            "times": 2}])
+    before = enemy.hp
+    effects.resolve_card(st, attack)
+    assert before - enemy.hp == 2 * (5 + C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS)
+    assert kokomi_plan.NEXT_ATTACK_BONUS not in st.player.powers
 
 
 def test_nereids_doubles_only_the_first_plan_of_a_drain(overhaul):
@@ -2711,9 +2742,9 @@ def test_the_written_only_dusk_rows_can_only_be_written(overhaul):
         assert kokomi_plan.plan_aimed_at_pet(st, row) is True
 
 
-def test_battle_plans_grant_is_plan_only_from_a_body(overhaul):
+def test_battle_plans_rider_is_plan_only_from_a_body(overhaul):
     """A now-line spelling would be a different, unpriced card."""
-    op = "next_attack_discount"
+    op = "next_attack_damage"
     assert op in kokomi_plan.PLAN_ONLY_OPS
     with pytest.raises(NotImplementedError, match="PLAN-ONLY"):
         effects.OPS[op](kokomi_state(), {"op": op},

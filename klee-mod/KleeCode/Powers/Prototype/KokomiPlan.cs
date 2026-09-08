@@ -130,13 +130,15 @@ public static class KokomiPlan
         // not 4.
         NextPlanDoubleDamage,
         NextPlanExtraCarryOut,
-        // `EB-655`, R266 (pool pass three). BATTLE PLAN: "the first Attack you
-        // play face-up this turn costs 1 less." A GRANT and not a number --
-        // the size is the rule's (<see cref="NextAttackDiscountPower.Discount"/>)
-        // -- so the clause carries no amount, exactly as the two riders above
-        // carry none. It replaced an `Energy` clause that paid the write back
-        // its own cost, which is the shape this pass exists to undo.
-        NextAttackDiscount,
+        // `EB-655`, R266 (pool pass three), reworked by `EB-668`. BATTLE
+        // PLAN: "the next Attack you play face-up this turn deals 4 more
+        // damage." A RIDER and not a number -- the size is the rule's
+        // (<see cref="NextAttackDamagePower.Bonus"/>) -- so the clause carries
+        // no amount, exactly as the two riders above carry none. It replaced
+        // an `Energy` clause that paid the write back its own cost, which is
+        // the shape this pass exists to undo; `EB-668` then made it DAMAGE,
+        // because a cost seam cannot tell a face-up play from a write.
+        NextAttackDamage,
     }
 
     /// <summary>
@@ -2004,12 +2006,12 @@ public static class KokomiPlan
                 // the honest line for a Plan whose effect is on the NEXT one.
                 return null;
 
-            case Kind.NextAttackDiscount:
-                // `EB-655`. BATTLE PLAN's grant, applied here and read at the
-                // cost seam. No number on the beat: the size is the rule's and
-                // the line the player wants is "Battle Plan happened", the
+            case Kind.NextAttackDamage:
+                // `EB-668`. BATTLE PLAN's rider, applied here and read at the
+                // damage seam. No number on the beat: the size is the rule's
+                // and the line the player wants is "Battle Plan happened", the
                 // same shape the two riders above take.
-                await KokomiOverhaulKit.NextAttackDiscount(
+                await KokomiOverhaulKit.NextAttackDamage(
                     choiceContext, kokomi, null);
                 return null;
 

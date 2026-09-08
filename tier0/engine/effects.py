@@ -6000,7 +6000,7 @@ OPS = {
     "next_plan_double_damage": _op_kokomi_plan_only,
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
     # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
-    "next_attack_discount": _op_kokomi_plan_only,
+    "next_attack_damage": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
     # and re-aim what is already written (Converging Tide). They are the
@@ -6130,6 +6130,14 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     if card.type == "attack":
         p = state.player
         p.powers.pop("next_attack_up", 0)
+        # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-668`. Battle Plan's rider is
+        # consumed HERE and not at `combat._finish_play`, for the reason the
+        # pop above it sits here: the bonus has to be READ before it is spent,
+        # and `flat_attack_bonus` read it one line up. `spend_attack_bonus`
+        # asks `plan_aimed_at_pet` itself, so a write leaves the rider
+        # standing exactly as it leaves the damage unpaid.
+        if C.KOKOMI_OVERHAUL:
+            kokomi_plan.spend_attack_bonus(state, card)
         if p.powers.get("ceremonial_garment", 0) and p.charge:
             KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
                 KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
@@ -6241,6 +6249,23 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # double-count class the AoE-blindness finding warned about.
     bonus = (p.powers.get("next_attack_up", 0)
              + p.powers.get("attack_up_this_turn", 0))
+    if C.KOKOMI_OVERHAUL:
+        # QUARANTINED. `EB-668`, BATTLE PLAN's carry-out: "the next Attack you
+        # play face-up this turn deals 4 additional damage." Folded in exactly where
+        # `next_attack_up` is folded in, because it says the same English --
+        # a second summing site is how two riders come to disagree about
+        # whether Strength lands before or after them.
+        #
+        # THE FACE-UP CLAUSE IS ASKED HERE, and it may be: `plan_aimed_at_pet`
+        # is pure, and it is the same read `_resolve_card_bound` makes one
+        # screen down to decide which half of the face runs. So an Attack that
+        # would be WRITTEN is valued and resolved at its printed number, and
+        # the rider waits -- which is what stops the reward paying for more
+        # writing, and what `EB-668` moved off the cost seam to make true in
+        # the mod as well.
+        if (p.powers.get(kokomi_plan.NEXT_ATTACK_BONUS, 0)
+                and not kokomi_plan.plan_aimed_at_pet(state, card)):
+            bonus += C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS
     if C.COMPANION_OVERHAUL:
         # THE MONDSTADT COMPANION OVERHAUL'S THREE ATTACK RIDERS (QUARANTINED).
         # Flat, and folded in exactly where `next_attack_up` is folded in --

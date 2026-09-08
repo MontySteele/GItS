@@ -1183,13 +1183,13 @@
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # POOL PASS THREE (`EB-655`): THE ENERGY CLAUSE COMES OFF -- it paid the
-   # write back its own cost. The discount that replaces it is narrower on
-   # purpose: an Attack, one of them, and never a card written on the pet.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards; the first Attack you play face-up this turn costs 1 less.",
+   # POOL PASS THREE (`EB-655`), the energy clause off; `EB-668`, the rider
+   # made DAMAGE because a cost seam cannot tell a face-up play from a write.
+   # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards; the next Attack you play face-up this turn deals 4 additional damage.",
    effects: [{op: draw, amount: 1}],
    plan: [{op: draw, amount: 2},
-          {op: next_attack_discount}],
+          {op: next_attack_damage}],
    # draw 2 / Plan draw 3.
    upgrade: {draw: 1, plan_draw: 1}}
 

@@ -435,10 +435,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # spelling would name a drain that is not running.
                   "draw_per_plan_after", "next_plan_double_damage",
                   "next_plan_extra_carry_out",
-                  # `EB-655` (Battle Plan): the carry-out's discount, plan-only
+                  # `EB-655` (Battle Plan): the carry-out's rider, plan-only
                   # for the same reason -- a now-line spelling would be a
                   # different, unpriced card.
-                  "next_attack_discount",
+                  "next_attack_damage",
                   # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
                   # ONE verb, on the same terms as the two blocks above. Gorou's
                   # Inuzaka All-Round Defense prints "Gain Block equal to half
@@ -1973,11 +1973,11 @@ PLAN_CLAUSE_KINDS = {
     "draw_per_plan_after": "DrawPerPlanAfter",
     "next_plan_double_damage": "NextPlanDoubleDamage",
     "next_plan_extra_carry_out": "NextPlanExtraCarryOut",
-    # `EB-655` (pool pass three), BATTLE PLAN: "the first Attack you play
-    # face-up this turn costs 1 less". A grant and not a number -- the size is
-    # the RULE's (`NextAttackDiscountPower.Discount`), so the clause carries no
-    # amount, exactly as the two riders above carry none.
-    "next_attack_discount": "NextAttackDiscount",
+    # `EB-668` (`EB-655` reopened), BATTLE PLAN: "the next Attack you play
+    # face-up this turn deals 4 more damage". A rider and not a number -- the
+    # size is the RULE's (`NextAttackDamagePower.Bonus`), so the clause carries
+    # no amount, exactly as the two riders above carry none.
+    "next_attack_damage": "NextAttackDamage",
     "apply_power": None,
 }
 
@@ -1989,8 +1989,8 @@ PLAN_CLAUSE_KINDS = {
 PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "next_plan_double_damage",
                        "next_plan_extra_carry_out",
-                       # `EB-655`, Battle Plan's grant: the size is the rule's.
-                       "next_attack_discount"}
+                       # `EB-655`, Battle Plan's rider: the size is the rule's.
+                       "next_attack_damage"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2024,8 +2024,8 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
                  "draw_per_plan_after", "next_plan_double_damage",
                  "next_plan_extra_carry_out",
-                 # `EB-655`, Battle Plan's grant.
-                 "next_attack_discount"}
+                 # `EB-655`, Battle Plan's rider.
+                 "next_attack_damage"}
 
 
 def plan_reason(card: dict) -> str | None:
