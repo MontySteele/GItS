@@ -26,6 +26,7 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `probe_block.py` | **Track B, probe B2**: a FIXED SCRIPT (no policy) that fixes the Spotlight answer, plays only cards whose wire text prints Block, and reads `player.block` at every decision point |
 | `trace_replay.py` | **P1.5**: reconstruct a recorded fight and compare two recordings of one seed. It reads nothing but JSONL. Named apart from `replay.py` because the two are different instruments, not two halves of one |
 | `hangwatch.py` | **EB-1**: the log-growth / message-pump watchdog. Tells a game that is alive and SPINNING from a wire that merely did not answer, so the spin stops being filed under a harness-side kind |
+| `lanewatch.py` | **EB-691**: the same defence for a BLIND-PLAY LANE, which has no driver, no session and one process per command. A file-backed cursor per lane, read by `blindplay observe` / `act` BEFORE they touch the wire; past a bar it tears the lane down and prints `TOOL-BLOCKED: lane dead (<reason>)` |
 | `frames.py` | **OFF by default** (`GITS_UNDERSTUDY_CAPTURE=1`): one PNG of the game WINDOW, for [USER]'s art sittings. Material, never evidence — the guardrail rides on every manifest row |
 | `report.py` | the morning report — defects, outliers, curves. No LLM |
 | `analyze.py` | the Phase-0 divergence analysis |
@@ -542,7 +543,8 @@ carries a node's `PointType` and never which event sits on it, so nothing short
 of refusing every `?` node would do it — and that would move every soak number.
 Refusing the event at entry (below) is the only guard that costs nothing.
 
-The soak carries two legs against it, and neither fixes anything:
+The harness carries three legs against it, and none of them fixes anything —
+the first two are the soak's, the third is a blind lane's:
 
 - **The hazard register** (`soak.HAZARD_EVENTS`). `PUNCH_OFF` is refused rather
   than driven: the run stops with a `hazard_event` defect and no verb is posted.
@@ -563,6 +565,21 @@ The soak carries two legs against it, and neither fixes anything:
   signal alone is enough — one machine cannot read the log, another cannot ask
   `tasklist` — but a single not-responding sample is not, because that is also
   what a long room load looks like.
+- **The lane watchdog** (`lanewatch.py`, `EB-691`), for a seat playing by hand
+  through `blindplay observe` / `act`. There is no driver and no session there
+  — each command is a separate process — so the cursor is a JSON file per lane
+  beside the action budget, the probe window is the gap between two commands,
+  and the check runs BEFORE the wire call. Three readings, any one of which
+  ends the lane: `godot.log` growing at **≥ 250 KB/s** (`hangwatch`'s own bar,
+  under a 2 MB / 1 s noise floor so two commands a moment apart cannot divide
+  into a flood); the game process holding **≥ 2.5 GB** (a playing game is
+  ~1 GB, lane 2 was at 3.2 GB); or **2 consecutive** state timeouts while
+  health still answers (the `EB-489` stall pair, which has no recovery from
+  this side). The lane is then torn down through `embark.teardown` — the same
+  undo `--teardown` walks — and the seat is handed `TOOL-BLOCKED: lane dead
+  (<reason>)`, which its brief already tells it to stop on. The pid and the
+  log path come off that lane's own embark sidecar and ledger, never off an
+  image name, because with two games up an image name answers about both.
 
 **`unresponsive_spin` exists because `bridge_unreachable` is a HARNESS-side
 kind.** Filing a spinning game under it makes the instrument blame its own wire
@@ -582,8 +599,10 @@ terminate it, so it reports instead.
 29's lane 2 walked a `?` node at floor 7 and hit it again, with Kokomi: the log
 reached **143M lines / 19 GB** and the process **3.2 GB**, the bridge's health
 endpoint kept answering while `state` timed out, and no watchdog was watching
-because `hangwatch` is wired into `soak_driver` only — a blind-play lane has
-none, which is `EB-691`. Two things the earlier reads did not have:
+because `hangwatch` is wired into `soak_driver` only — a blind-play lane had
+none, which was `EB-691` and is now `lanewatch.py` (the third leg below). The
+seat, correctly per its brief, retried `observe` sixteen times over fifteen
+minutes. Two things the earlier reads did not have:
 
 - **The stack names the event.** 2026-08-13's attribution was by MECHANISM,
   because a `?` node hangs before an event screen can be read. Lane 2's
