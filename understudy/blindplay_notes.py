@@ -739,9 +739,20 @@ PLAN_CASKET_AURA_CLAUSE = (
 # a time for fights on end (one for four fights) before trying two; nothing in
 # `KokomiPlan.cs` caps the queue. Said on the panel, beside the two rules a
 # Plan is already read against.
+#
+# `EB-648`. AND THEN "ITS BUFF" NAMED THE WRONG BUFF. The r23 cap seat read
+# this sentence against the buff the jellyfish itself carries -- and
+# `ProtoBakeKuragePower` is a PRESENCE marker, a 1 that never moves for the
+# whole fight -- so the note that exists to say the number is not a limit was
+# read as "the counter is stuck at 1". Two badges are on that board and only
+# one of them counts: `PendingPlansPower`, whose title is `Plan` and whose
+# stack type is a Counter. So the note names it by that title, and says in one
+# clause what the other 1 is, because a reader who has already found the wrong
+# badge needs it ruled out rather than left unmentioned.
 PLAN_COUNT_NOTE = ("- The jellyfish holds any number of Plans and carries them "
-                   "out in the order written; the number on its buff is how "
-                   "many are written, not a limit.")
+                   "out in the order written; the number on the **Plan** "
+                   "badge is how many are written, not a limit. The "
+                   "Bake-Kurage's own 1 is only its presence.")
 
 # `EB-647`. THE WRITTEN NUMBER IS THE NUMBER, AND NOTHING SAID SO.
 #

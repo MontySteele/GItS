@@ -1,0 +1,83 @@
+# EB-650, the other half: the SAME three Plans with no cap declared.
+#
+# WHY A SECOND FILE AND NOT A SECOND EXPECTATION. `kokomi-plan-cap.yaml` can
+# only fail one way when the environment variable never reached the game --
+# the badge reads 0 where it wanted 1 -- and that is exactly the reading a
+# BROKEN cap would give too. One file cannot tell "the switch was off" from
+# "the switch was on and did nothing", because the two produce the same board.
+#
+# So the pair is the instrument. Run this one on a lane embarked with
+# `GITS_KOKOMI_PLAN_CAP` UNSET and the capped one on a lane embarked with it at
+# 2, and the cap is proved to be a switch only if BOTH pass: the same three
+# Plans, the same morning, and a different queue after it.
+#
+#     ... embark a lane with GITS_KOKOMI_PLAN_CAP unset ...
+#     python -m understudy.scenario run kokomi-plan-cap-off --lane 1
+#
+# The variable is read off the GAME's process and cached on first read
+# (`KokomiPlan.PlanCap`), so "unset" means unset in the environment the game
+# was LAUNCHED from. Unsetting it in the runner's shell after the fact proves
+# nothing, and a lane that has already run the capped file has already cached
+# its answer -- this half needs its own game.
+#
+# WHAT A PASS PROVES, EXACTLY: with no cap declared, three Plans written into
+# one morning are all three carried out and none is held. Nothing about the
+# numbers, nothing about fun.
+
+name: kokomi-plan-cap-off
+character: KLEEMOD-KOKOMI
+turns: 6
+
+prototype: true
+
+notes: |
+  The control arm of the cap read: three Plan cards onto the Bake-Kurage in
+  one turn with GITS_KOKOMI_PLAN_CAP unset, then the turn boundary. The badge
+  goes 1, 2, 3 as they are written and is GONE after the morning -- zero held.
+
+assumptions:
+  - "`PlanCap` is 0 when the variable is unset, and 0 is the branch that skips
+     the split entirely: `due` is the whole queue and `held` is null. An
+     unparseable or negative value reads as 0 too, which is why this file is
+     the control and not the proof -- it passes on a game that never heard of
+     the variable, which is precisely what it is for."
+  - "A Counter power at zero is REMOVED by the game rather than kept at 0, so
+     an empty queue is asserted with `no_power` and not `stacks: 0`. `Sync`
+     removes the badge itself on a zero depth, and both readings agree."
+  - "The other seven assumptions of `kokomi-plan-cap.yaml` hold here unchanged
+     -- the pet's summon, the `Bake-Kurage` selector, the badge's title, the
+     three cards' costs, the write order, the 12 s boundary and the seed's
+     encounter. They are not restated: the two files are read together or not
+     at all."
+
+steps:
+  - clear_hand: {}
+  - give: {card: KLEEMOD-PROTO_KK_READ_THE_FIELD, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_KK_FEINT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_KK_RIPPLE, pile: hand, upgraded: false}
+  - set_energy: {amount: 6}
+
+  - expect:
+      can_play: {card: "Read the Field", value: true}
+
+  - play: {card: "Read the Field", target: "Bake-Kurage"}
+  - wait: 2
+  - expect:
+      power: {who: player, name: "Plan", stacks: 1}
+
+  - play: {card: "Feint", target: "Bake-Kurage"}
+  - wait: 2
+  - expect:
+      power: {who: player, name: "Plan", stacks: 2}
+
+  - play: {card: "Ripple", target: "Bake-Kurage"}
+  - wait: 2
+  - expect:
+      power: {who: player, name: "Plan", stacks: 3}
+
+  # ---- the morning: all three carried out, nothing held ------------------
+  - end_turn: {}
+  - wait: 12
+  - expect:
+      state_type: {value: "monster"}
+      no_power: {who: player, name: "Plan"}

@@ -525,12 +525,39 @@ def meter_ledger() -> dict:
 # `Hook.AfterCardChangedPiles` still fires, because every pile move in the game
 # runs it and there is no route out of hand beneath it. It takes no `who` and
 # no `amount`; `before` is the number of cards it moved.
+
+# EB-652 ADDS `hover` AND `unhover`, THE TWO OPS THAT WRITE NO GAME STATE.
+# Furina's Salon panel says something different while a card is under the
+# cursor -- a Companion turns the front chip's word from FRONT to PERFORMS, a
+# Deploy onto a full stage turns it to LEAVES and lights the footer, a Deploy
+# onto a stage with room writes ENTERS on the seat it will fill, and the
+# Spotlight tints the pips it would spend (`EB-637`). Those four states are
+# framed headlessly off a scenario, and a scenario could set up the BOARD the
+# panel draws but not the HOVER that changes what it says about it.
+#
+# The signal is the game's own: `NPlayerHand` tells
+# `RunManager.Instance.HoveredModelTracker` about every hand hover and every
+# release, which is the pair `SalonPanel` patches, and the op calls those two
+# methods with the same argument. So a panel reacts to this exactly as it
+# reacts to a mouse, and there is no second "debug hover" path to keep in step.
+#
+# NOTHING IN THE RUN, THE DECK, THE BOARD OR A METER MOVES, which does NOT buy
+# the run back its comparability: a hovered card in a combat whose energy and
+# hand were written by hand is still not a run the generators produced. The
+# guardrail rides on these two answers unchanged, for the reason it rides on
+# every other one.
+#
+# `hover` names its card by the wire id or the printed title and takes the
+# FIRST match in hand -- three copies of one Deploy is the ordinary case here
+# and hovering any of them paints the same panel. `unhover` takes no card: the
+# tracker's own release takes none, because the hand reports "nothing is under
+# the cursor" rather than "this card left".
 DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power",
-             "clear_hand")
+             "clear_hand", "hover", "unhover")
 
 
 def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
-                resource: str = "", power: str = "") -> dict:
+                resource: str = "", power: str = "", card: str = "") -> dict:
     """Set one combat number. Returns the endpoint's report.
 
     A `status: "error"` answer comes back as an ordinary dict, not an
@@ -548,7 +575,8 @@ def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
                          "logged with its reason")
     return _request(DEBUG_STATE, {"op": op, "amount": int(amount),
                                   "who": who, "resource": resource,
-                                  "power": power, "why": str(why)})
+                                  "power": power, "card": card,
+                                  "why": str(why)})
 
 
 def debug_state_info() -> dict:
@@ -587,6 +615,33 @@ def set_power(who: str, name: str, amount: int, why: str) -> dict:
     Vulnerable, Weak, Strength); for anything else, play the card.
     """
     return debug_state("set_power", why, amount=amount, who=who, power=name)
+
+
+def hover(card: str, why: str) -> dict:
+    """Put `card` under the cursor, through the game's own hover tracker.
+
+    `card` is the wire id (`KLEEMOD-SALON_DEBUT`) or the exact printed title;
+    the endpoint matches the id first and the title second, and a hand holding
+    more than one copy is not ambiguous -- the first is taken, because the
+    copies are the same card and paint the same panel.
+
+    A DISPLAY SIGNAL AND NOT A BOARD WRITE: nothing in the combat moves, and
+    the answer is synchronous (`queued: false`). What it is for is the half of
+    a panel that only appears while a card is held over the hand, which no
+    headless capture could reach before this op.
+    """
+    return debug_state("hover", why, card=card)
+
+
+def unhover(why: str) -> dict:
+    """Release the hover. Takes no card: the tracker's own release takes none.
+
+    Unconditional, so a scenario may release without knowing what it last
+    hovered -- and `hover A; hover B` with no release between them is a
+    sequence a mouse cannot produce, which is why the endpoint reports the id
+    it last hovered as the `before` of the next one.
+    """
+    return debug_state("unhover", why)
 
 
 def clear_hand(why: str) -> dict:

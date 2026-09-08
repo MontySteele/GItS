@@ -1,0 +1,143 @@
+# EB-650: the two-Plan morning cap, proved to reach the game at all.
+#
+# THE ROUND THAT ASKED FOR THIS. Kokomi r23 ran a "cap lane" under
+# `GITS_KOKOMI_PLAN_CAP=2` and the lane NEVER WROTE THREE PLANS IN A MORNING,
+# so the cap never engaged: the record does not mention it once, and nothing in
+# the lane's log proves the environment variable reached the game's process at
+# all. A trial that cannot say whether its own switch was on is not a trial.
+# This file is the acceptance the cap read is owed BEFORE a second lane is
+# spent on it.
+#
+# HOW TO RUN IT -- THE OPERATOR EXPORTS THE VAR BEFORE THE LANE'S GAME STARTS.
+# `KokomiPlan.PlanCap` reads `GITS_KOKOMI_PLAN_CAP` ONCE and caches it
+# (`_planCap`), off the environment of the GAME process, not of the runner. So
+# the variable has to be set before the game is launched, and setting it in the
+# shell that runs `scenario run` changes nothing on a game that is already up:
+#
+#     $env:GITS_KOKOMI_PLAN_CAP = "2"     # BEFORE the lane's game is embarked
+#     ... embark lane 1 ...
+#     python -m understudy.scenario run kokomi-plan-cap --lane 1
+#
+# A game embarked without it reads the cap as 0, all three Plans are carried
+# out, and this file fails on the badge -- which is the RIGHT failure and the
+# whole reason the row exists: it is the same reading the r23 lane could not
+# take. `kokomi-plan-cap-off.yaml` is the other half, run on a lane with the
+# variable UNSET, and the pair is what says the switch is a switch.
+#
+# WHAT A PASS PROVES, EXACTLY: three Plans written into one morning under a
+# declared cap of 2 leave exactly one of them queued after the drain, and the
+# order is the order written (the front two go). It proves nothing about the
+# numbers those Plans deal (`KokomiOverhaulRuleTests` owns those), nothing
+# about whether a cap is a good rule, and nothing about fun.
+
+name: kokomi-plan-cap
+character: KLEEMOD-KOKOMI
+turns: 6
+
+# Every card here lives on the QUARANTINED prototype surface, so the pack's
+# name lint checks the prefix rather than a sheet row. See eb147's header.
+prototype: true
+
+notes: |
+  Three Plan cards onto the Bake-Kurage in one turn under
+  GITS_KOKOMI_PLAN_CAP=2, then the turn boundary that drains them. The badge
+  goes 1, 2, 3 as they are written and 1 after the morning: two carried out,
+  one held in front of the queue for the next morning.
+
+assumptions:
+  - "THE VARIABLE IS THE GAME'S, NOT THE RUNNER'S. `KokomiPlan.PlanCap` reads
+     `GITS_KOKOMI_PLAN_CAP` through `Environment.GetEnvironmentVariable` and
+     caches the first answer for the process, so it must be exported before the
+     lane's game is launched. Anything unparseable or negative reads as 0,
+     which is 'no cap' -- so a typo in the variable's VALUE looks exactly like
+     not setting it, and that is what the `-off` companion distinguishes."
+  - "The Bake-Kurage is on the field from the first turn of every Kokomi
+     combat: `ProtoBakeKuragePower.Install` summons it from `BeforeCombatStart`
+     (rule 1). If it is not there, the first `play ... on Bake-Kurage` fails
+     with `no enemy 'Bake-Kurage'` -- a different defect, and it says so."
+  - "`Bake-Kurage` resolves through `player.kokomi_plans.pet_entity_id`, the
+     block `KokomiPlan.Snapshot` writes; it is NOT in `battle.enemies` and
+     `find_enemy` cannot see it. `scenario.find_pet` is the reader."
+  - "The pending-Plans badge is a Counter power whose printed title is `Plan`
+     (`PendingPlansPower.Localization`), so `power: {name: Plan}` reads the
+     queue's length. A Counter at zero is REMOVED by the game rather than kept,
+     which is why the `-off` companion asserts `no_power` and not `stacks: 0`."
+  - "THE THREE CARDS ARE THE CAP LANE'S OWN SMALL PLANS, and they are picked
+     for cost rather than for what they do: Read the Field (cost 1), Feint
+     (cost 1) and Ripple (cost 0) total 2, so `set_energy: 6` cannot let an
+     `EnergyCostTooHigh` refusal wear the answer this file is looking for.
+     Their Plan lines are Block, damage and Energy+Block respectively; none of
+     the three is asserted here, because the subject is the COUNT."
+  - "THE ORDER WRITTEN IS THE ORDER CARRIED OUT, and the cap takes the FRONT:
+     `KokomiPlan` splits the queue at `PlanCap` and re-inserts the remainder at
+     the FRONT of the next morning's queue. So the Plan still queued after this
+     drain is Ripple, the one written LAST -- but this file asserts the COUNT
+     and not the identity, because no check in the pack reads a queue entry's
+     name and a count is the whole of what the cap claims."
+  - "THE BADGE AFTER A CAPPED MORNING IS THE ONE THING THIS FILE COULD FIND
+     WRONG FOR A REASON THAT IS NOT THE CAP. Read off `KokomiPlan` as it
+     stands: the drain clears the queue, calls `Sync` (which sees a depth of 0
+     and REMOVES the badge), runs the Plans, and only then puts the held
+     entries back on the front of the queue -- with no second `Sync` after the
+     re-insert. If the badge reads absent here rather than 1, the cap may still
+     have held its Plan and the defect is the badge's refresh, not the rule; the
+     next step distinguishes the two, because writing a fourth Plan re-syncs the
+     badge off the real queue depth."
+  - "12 s covers the turn boundary: the enemy side acts, block clears, energy
+     resets, the hand is dealt and the due Plans are carried out, each with its
+     own visuals. The runner's own 0.7 s settle is sized for one card play."
+  - "The encounter is whatever the run seed deals, so no damage or HP number is
+     asserted anywhere in this file. The fight has to survive one enemy turn;
+     on a first-floor board at 80 max HP that is not in doubt, and a death ends
+     the scenario as `no_progress` rather than as a false pass."
+
+steps:
+  # ---- a hand that is exactly what this file put in it --------------------
+  - clear_hand: {}
+  - give: {card: KLEEMOD-PROTO_KK_READ_THE_FIELD, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_KK_FEINT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_KK_RIPPLE, pile: hand, upgraded: false}
+  - set_energy: {amount: 6}
+
+  - expect:
+      can_play: {card: "Read the Field", value: true}
+
+  # ---- three Plans into ONE morning, which is what the r23 lane never did --
+  - play: {card: "Read the Field", target: "Bake-Kurage"}
+  - wait: 2
+  - expect:
+      power: {who: player, name: "Plan", stacks: 1}
+
+  - play: {card: "Feint", target: "Bake-Kurage"}
+  - wait: 2
+  - expect:
+      power: {who: player, name: "Plan", stacks: 2}
+
+  - play: {card: "Ripple", target: "Bake-Kurage"}
+  - wait: 2
+  # THE WRITE IS NOT CAPPED, only the morning is: `PlanCap` is read at the
+  # drain and nowhere else, so a third Plan goes onto the queue under a cap of
+  # 2 exactly as it does without one. A badge of 2 here would mean the cap had
+  # been read at the WRITE, which is a different rule from the one on trial.
+  - expect:
+      power: {who: player, name: "Plan", stacks: 3}
+
+  # ---- the morning: two carried out, one held ----------------------------
+  - end_turn: {}
+  - wait: 12
+  - expect:
+      state_type: {value: "monster"}
+      power: {who: player, name: "Plan", stacks: 1}
+
+  # ---- and the held one is really in the queue, not just on the badge -----
+  #
+  # A fourth Plan written now re-syncs the badge off the queue's true depth
+  # (`Sync` reads `Pending().Count`), so a 2 here says the morning left one
+  # entry behind and a 1 says it left none. This is the step that tells a
+  # badge-refresh defect from a cap that did not hold.
+  - give: {card: KLEEMOD-PROTO_KK_RIPPLE, pile: hand, upgraded: false}
+  - set_energy: {amount: 6}
+  - play: {card: "Ripple", target: "Bake-Kurage"}
+  - wait: 2
+  - expect:
+      power: {who: player, name: "Plan", stacks: 2}
