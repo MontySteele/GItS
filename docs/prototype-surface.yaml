@@ -349,7 +349,7 @@
 - {id: proto_ko_flame_dance, name: "Flame Dance", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] each enemy whose aura is not [gold]Pyro[/gold]. Deal 5 damage to ALL enemies.",
+   description: "[gold]Set off[/gold] each enemy that has an aura other than [gold]Pyro[/gold]. Deal 5 damage to ALL enemies.",
    effects: [{op: set_off, target: all_enemies, aura: non_pyro},
              {op: damage, amount: 5, target: all_enemies}]}
 

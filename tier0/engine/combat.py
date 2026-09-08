@@ -755,12 +755,14 @@ def _finish_play(state: CombatState, card: Card,
                 # indistinguishable from any other row of the performance list.
                 # C# twin: `SalonMemberPower.NoteCompanionReplay`.
                 furina_reframe.companion_replay(state, card)
-        if replay_index == 0 and card.is_companion:
+        if replay_index == 0 and (card.is_companion or C.KLEE_OVERHAUL):
             # "Little Hexenzirkul" (EB-219, retargeted by EB-642): Klee's kit
-            # answering a HEXEREI Companion play, which is where LAW:145 puts
+            # answering a HEXEREI play, which is where LAW:145 puts
             # the grant now that Prune's face may not carry it. Which cards
             # answer is the function's own question, not this line's -- the
-            # printed mark under the arm, the shipped Personal pool off it.
+            # printed mark under the arm (`EB-663`: Companion or not, because
+            # a Klee card Alice marked prints the word and fires its readers),
+            # the shipped Personal Companion pool off it.
             # INSIDE the loop but gated to the
             # first pass, for two reasons that pull in opposite directions and
             # meet exactly here: the mint has to be ONCE PER PLAY (a replay is

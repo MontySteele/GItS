@@ -811,6 +811,75 @@ def test_every_hexerei_play_pays_and_an_unmarked_companion_does_not(
     assert state.player.sparks == 0
 
 
+def test_the_mark_pays_whether_or_not_the_card_is_a_companion(overhaul):
+    """`EB-663` (Klee r24 lane 1). THE COMPANION GATE MADE ONE WORD TWO SETS.
+
+    The rule tested COMPANION *and* Hexerei, so Alice's Introduction Magic --
+    a Klee skill carrying `hexerei: true` -- printed the keyword, satisfied
+    Coven Errand and Witches' Circle, and paid nothing; so did every card its
+    this-turn window marks. Under the arm the test is now exactly
+    `companion_hexerei.is_hexerei`, which is the readers' own question.
+
+    THE PIN THE ROW ASKS FOR: Alice's, then three marked Klee cards, is FOUR
+    grants of one. Seen to FAIL: one grant, and that one only after the
+    Companion gate came out.
+    """
+    from tier0.engine.combat import play_card
+    from tier0.tests.conftest import make_state
+
+    alices = loader.get_card("proto_ko_alices_introduction_magic")
+    marked = [loader.get_card("proto_ko_careful_now") for _ in range(3)]
+    assert alices.hexerei and not alices.is_companion
+    assert not any(card.hexerei or card.is_companion for card in marked)
+
+    state = make_state()
+    state.player.character_id = "klee"
+    state.player.hand = [alices, *marked]
+    play_card(state, alices)
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
+    # The window is over the INSTANCES that were in hand, which is what makes
+    # the next three plays the ruling's own reading (R244).
+    assert len(state.ko_hexerei_marked) == 3
+
+    for i, card in enumerate(marked, start=2):
+        play_card(state, card)
+        assert state.player.sparks == i * C.KLEE_COMPANION_SPARK_BASE
+    assert state.player.sparks == 4 * C.KLEE_COMPANION_SPARK_BASE
+
+    # AND AN UNMARKED KLEE CARD STILL PAYS NOTHING, which is the bound: the
+    # rule reads the family, not the character's whole deck.
+    state.player.sparks = 0
+    plain = loader.get_card("proto_ko_careful_now")
+    state.player.hand = [plain]
+    play_card(state, plain)
+    assert state.player.sparks == 0
+
+
+def test_the_companion_gate_still_stands_off_the_arm():
+    """`EB-663`'s other half, and R213 B rather than taste: no SHIPPED row
+    carries the family key, so OFF the arm the rule stays the Companion +
+    Personal-pool test `EB-219` moved into the kit at parity. Written against
+    the effect directly, because a prototype row is not loadable with the flag
+    down -- which is the quarantine doing its job."""
+    from tier0.engine import effects
+    from tier0.engine.state import Card
+    from tier0.tests.conftest import make_state
+
+    assert not C.KLEE_OVERHAUL
+    state = make_state()
+    state.player.character_id = "klee"
+    # A marked NON-Companion: pays under the arm, pays nothing without it.
+    marked = Card(id="x_marked", name="Marked", cost=1, type="skill",
+                  hexerei=True)
+    effects.klee_companion_spark(state, marked)
+    assert state.player.sparks == 0
+    # And the shipped rule's own row still pays, untouched.
+    personal = Card(id="x_personal", name="Personal", cost=1, type="skill",
+                    tags=["companion"], personal_pool="klee")
+    effects.klee_companion_spark(state, personal)
+    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
+
+
 def test_only_klee_is_paid_by_her_own_kit(overhaul):
     """`EB-434`, written out at last: the grant names the character.
 

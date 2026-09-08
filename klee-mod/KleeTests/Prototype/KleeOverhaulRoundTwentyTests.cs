@@ -159,7 +159,10 @@ public class KleeOverhaulRoundTwentyTests
             }
             var single = key.StartsWith("smartDescriptionOne",
                                         StringComparison.Ordinal);
-            Assert.Equal(!single, body.Contains("hits for"));
+            // `EB-666` reworded the clause to "in N hits, making N Sparks":
+            // "for N" is how a COST is spelled and both r24 seats priced a
+            // Set off off it. The grid split this pin is about is unchanged.
+            Assert.Equal(!single, body.Contains("hits, making"));
         }
     }
 
