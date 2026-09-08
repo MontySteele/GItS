@@ -43,7 +43,7 @@ band and protocol are drafted fresh when the overhaul reaches Balance.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `kokomi-plan-less-hand 4.1` | **CHOOSE** where the Plan-less hand is answered, the starter untouched: (1, default) the pool, two Common slots drafted by Fable and read by a seat round; (2) the brief, a rule for the jellyfish on an empty morning, which [USER] plays; (3) nowhere. -> review/active/kokomi-plan-less-hand-2026-09-08.md | OPEN (gate: [USER] picks) | r26-r32; passes six/seven withdrawn |
+| `kokomi-plan-less-hand 4.1` | **CHOOSE** where the Plan-less hand is answered, the starter untouched: (3, default) nowhere for now, the finding recorded as no PLAN decision and the next seat round reading the pool's Plan-interaction depth first; (1) the pool, two Commons against the pass-three charter; (2) the brief, a rule for the jellyfish on an empty morning, which [USER] plays. -> review/active/kokomi-plan-less-hand-2026-09-08.md | OPEN (gate: [USER] picks) | r26-r32; passes six/seven withdrawn |
 
 ## 2. Shop, pricing, and money
 
