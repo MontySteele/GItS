@@ -177,9 +177,12 @@ ordinary turn" and "did the payoff feel earned". PR #433's stage-direction
 pick is not asked; this packet replaces it, and its branch closes when
 this one is ruled.
 
-1. **Which concept goes to the brief.** Default: **B, the Arkhe**. 2: A,
-   the Tide. 3: C, the Flood. 4: two of them built behind one flag and
-   played in one round, named.
+1. **Which concept goes to the brief.** Taken by [USER] the same night:
+   **A, the Tide, as the working theory** (GPT's read concurred: B's faces
+   split offense from defence, and its healing summon reopens the same law
+   as A; C is the least hers). The deeper sketch is
+   `review/active/furina-tide-sketch-2026-09-07.md`, and its picks are
+   where this line continues. B is held as the challenger.
 2. **PR #433.** Default: closed unmerged, its packet superseded by this
    one. 2: merged as a record of the stage analysis with its pick marked
    withdrawn.
