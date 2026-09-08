@@ -9821,7 +9821,8 @@ def _new_process() -> None:
     faces._FIGHT_MEMORY.update({"roster": {}, "ordinals": {},
                                 "numbered": set(), "names": {},
                                 "handles": {}, "elements": set(),
-                                "round": None})
+                                "round": None, "hp": {}, "reborn": {},
+                                "replaced": {}})
     faces._FIGHT_LOADED[0] = False
 
 
@@ -9861,7 +9862,7 @@ def test_every_enemy_carries_a_letter_that_a_kill_cannot_move():
     blindplay.observe(_gardener_board(4))
     _new_process()
     page = blindplay.observe(_gardener_board(3, first=2))
-    assert "- **Phantasmal Gardener (2)** [B] — HP 28/28" in page
+    assert "- **Phantasmal Gardener (2)** [B] — FRONT — HP 28/28" in page
     assert "[A]" not in page
     # A summon takes the next free letter rather than the dead body's.
     _new_process()
@@ -9909,7 +9910,7 @@ def test_a_replacement_mints_the_next_letter_and_the_dead_ones_retires():
     split = _gremlin_board([(2, "Sneaky Gremlin", 13),
                             (3, "Fat Gremlin", 14)], round_=2)
     page = blindplay.observe(split)
-    assert "- **Sneaky Gremlin** [B] — HP 13/13" in page
+    assert "- **Sneaky Gremlin** [B] — FRONT — HP 13/13" in page
     assert "- **Fat Gremlin** [C] — HP 14/14" in page
     assert "[A]" not in page, "the dead body's letter retires with it"
 
@@ -9927,7 +9928,7 @@ def test_the_next_fight_still_starts_its_letters_at_a():
     _new_process()
     page = blindplay.observe(_gremlin_board([(7, "Corpse Slug", 27),
                                              (8, "Sewer Clam", 30)], round_=1))
-    assert "- **Corpse Slug** [A] — HP 27/27" in page
+    assert "- **Corpse Slug** [A] — FRONT — HP 27/27" in page
     assert "- **Sewer Clam** [B] — HP 30/30" in page
 
 
@@ -9959,6 +9960,165 @@ def test_the_grammar_aims_at_the_letter_the_replacement_minted():
     assert blindplay._resolve_enemy(split, "C") == ("gremlin_3", "")
     assert blindplay._resolve_enemy(split, "B") == ("gremlin_2", "")
     assert blindplay._resolve_enemy(split, "A")[0] == ""
+
+
+# --- `EB-671`: WHICH LISTED BODY IS THE FRONT -------------------------------
+
+
+def _priest_board(round_: int = 1) -> dict:
+    """The act-1 boss of Kokomi r26 lane 1: a Priest and two Minion Followers.
+
+    The seat wrote a single-target Plan expecting the first listed body and it
+    landed on the third, because the two Followers wear `MinionPower` and
+    `KokomiPlan.FrontEnemy` skips every Minion it can.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_
+    minion = [{"id": "minion", "name": "Minion", "amount": 1, "type": "Buff",
+               "description": "Minions abandon combat without their leader."}]
+    state["battle"]["enemies"] = [
+        {"entity_id": "follower_a", "combat_id": 1, "name": "Follower",
+         "hp": 59, "max_hp": 59, "block": 0, "status": minion,
+         "intents": [{"type": "Attack", "label": "5"}]},
+        {"entity_id": "follower_b", "combat_id": 2, "name": "Kin Follower",
+         "hp": 60, "max_hp": 60, "block": 0, "status": minion,
+         "intents": [{"type": "Attack", "label": "8"}]},
+        {"entity_id": "priest", "combat_id": 3, "name": "Kin Priest",
+         "hp": 190, "max_hp": 190, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "9"}]}]
+    return state
+
+
+def test_the_front_is_the_first_living_body_that_is_not_a_minion():
+    """`EB-671`. THE ONE THE SEAT SAID WOULD MOST CHANGE ITS PLAY.
+
+    Kokomi r26 lane 1, boss round 1: "the bodies printed in the order A, B, C
+    ... the plan went to C, not A. The printed rule says a single-target Plan
+    hits the front enemy; nothing on the page says which of three listed bodies
+    is the front, and the listing order is not it."
+
+    `KokomiPlan.FrontEnemy` is the rule and this is it printed: the first
+    living body that is not a Minion, which on that board is the Priest.
+
+    Seen to FAIL: no line on the page carried the word.
+    """
+    page = blindplay.observe(_priest_board())
+    assert "- **Kin Priest** [C] — FRONT — HP 190/190" in page
+    listed = page.split("## The other side")[1].split("*Each enemy keeps")[0]
+    assert listed.count("FRONT") == 1, "one body is the front"
+    assert "- **Follower** [A] — HP 59/59" in page
+    tail = page.split("## The other side")[1]
+    assert "FRONT marks the body an aim with one target lands on" in tail
+
+
+def test_the_front_falls_back_to_the_first_living_minion():
+    """`FrontEnemy`'s own fallback -- `FirstOrDefault(IsNotMinion) ?? [0]` --
+    so a board of Minions alone still names a body rather than going quiet on
+    the one turn a Plan is hardest to place."""
+    board = _priest_board()
+    board["battle"]["enemies"] = board["battle"]["enemies"][:2]
+    page = blindplay.observe(board)
+    assert "- **Follower** [A] — FRONT — HP 59/59" in page
+
+
+def test_a_dead_body_is_never_the_front():
+    """`IsAlive` is the first filter the mod applies, and a corpse still on
+    the feed would otherwise take the mark off the body the Plan reaches."""
+    board = _priest_board()
+    board["battle"]["enemies"][2]["hp"] = 0
+    page = blindplay.observe(board)
+    assert "- **Follower** [A] — FRONT — HP 59/59" in page
+
+
+def test_one_living_body_is_not_marked_at_all():
+    """The mark answers a question a one-body board does not ask, and printing
+    it there would put a word and a paragraph on most fight screens of a run
+    to restate the list."""
+    page = blindplay.observe(_gardener_board(1))
+    assert "FRONT" not in page
+
+
+# --- `EB-672`: A REPLACEMENT ON A DEAD BODY'S COMBAT ID ---------------------
+
+
+def _fogmog_board(hp: int, round_: int) -> dict:
+    """Kokomi r26 lane 1, fight 7: Fogmog and its Eye with Teeth, whose
+    replacement arrives holding the dead body's `combat_id`."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_
+    state["battle"]["enemies"] = [
+        {"entity_id": "fogmog", "combat_id": 1, "name": "Fogmog",
+         "hp": 40, "max_hp": 40, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "7"}]},
+        {"entity_id": "eye", "combat_id": 2, "name": "Eye with Teeth",
+         "hp": hp, "max_hp": 6, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "3"}]}]
+    return state
+
+
+def test_a_body_whose_hp_rose_mints_a_new_letter_and_says_it_was_replaced():
+    """`EB-672`. THE SUMMON THAT CAME BACK AS THE BODY THE SEAT HAD KILLED.
+
+    Kokomi r26 lane 1, fight 7: "Fogmog summoned a replacement Eye as B, at
+    6/6, with the same intent, on the screen right after I killed B. I spent an
+    act testing whether my own Flank had whiffed. Nothing distinguished a
+    replaced body from a survived one."
+
+    `EB-541`'s minting rule was already right; it never fired, because from the
+    combat id's point of view nothing had been summoned. HP going up is the one
+    signal the wire carries.
+
+    Seen to FAIL: the replacement printed as [B] with no line under it.
+    """
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    blindplay.observe(_fogmog_board(2, round_=2))
+    _new_process()
+    page = blindplay.observe(_fogmog_board(6, round_=3))
+    # The name is numbered because this fight has now seen two bodies wearing
+    # it, which is `_enemy_names`' own rule and the honest reading: the dead
+    # one and the replacement are two creatures.
+    assert "- **Eye with Teeth (2)** [C] — HP 6/6" in page
+    assert "It took the place of [B], which is dead" in page
+    assert "Teeth (2)** [B]" not in page
+
+
+def test_the_replacement_line_survives_into_the_next_process():
+    """The seats read one screen per process, so the letter and the sentence
+    have to come off the lane's store and not off this interpreter."""
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    blindplay.observe(_fogmog_board(2, round_=2))
+    _new_process()
+    blindplay.observe(_fogmog_board(6, round_=3))
+    _new_process()
+    page = blindplay.observe(_fogmog_board(4, round_=4))
+    assert "- **Eye with Teeth (2)** [C] — HP 4/6" in page
+    assert "It took the place of [B]" in page
+
+
+def test_a_body_that_only_loses_hp_keeps_its_letter():
+    """The ordinary fight, which must read exactly as it always did."""
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    page = blindplay.observe(_fogmog_board(1, round_=2))
+    assert "- **Eye with Teeth** [B] — HP 1/6" in page
+    assert "took the place of" not in page
+
+
+def test_a_phase_flip_sentinel_is_not_a_replacement():
+    """`EB-332`'s sentinel rises and falls by a hundred million, and a boss
+    coming back off it is the same creature."""
+    board = _fogmog_board(6, round_=1)
+    blindplay.observe(board)
+    _new_process()
+    flip = _fogmog_board(6, round_=2)
+    flip["battle"]["enemies"][1].update({"hp": 999999997, "max_hp": 999999999})
+    blindplay.observe(flip)
+    _new_process()
+    page = blindplay.observe(_fogmog_board(6, round_=3))
+    assert "- **Eye with Teeth** [B] — HP 6/6" in page
+    assert "took the place of" not in page
 
 
 def test_the_enemy_list_carries_the_handle_rule_and_the_hand_note_does_not():

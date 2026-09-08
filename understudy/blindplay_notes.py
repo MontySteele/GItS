@@ -624,11 +624,35 @@ HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
 # turn". A number only appears where a name repeats; a letter is on every
 # body, is minted once and is never reused, so it is the one word that names
 # the same creature on every screen of the fight.
+# `EB-671`. WHAT THE MARK ON ONE OF THOSE LINES MEANS. The mark itself is
+# `blindplay_board.mark_front`, whose header carries the r26 reading and the
+# rule; this is the sentence under the list, printed once per screen with the
+# handle note it belongs beside. It says what the mark IS -- the body a
+# single-target aim lands on -- and the one thing that moves it, because a
+# reader who cannot predict the move cannot use the mark.
+FRONT_ENEMY_NOTE = (
+    "*FRONT marks the body an aim with one target lands on: the first living "
+    "enemy that is not a Minion, or the first living enemy of any kind when "
+    "every body is a Minion. It moves when that body dies, and it is not the "
+    "order this list happens to print in.*")
+
 ENEMY_HANDLE_NOTE = (
     "*Each enemy keeps its letter and its number for the whole fight: a body "
     "that dies does not renumber or re-letter the ones still standing, and a "
     "summon takes the next free letter. Either handle aims a card -- "
     "`on \"B\"` is the same body as the full name beside it.*")
+
+# `EB-672`. AND THE LINE THAT SAYS A LETTER RETIRED. Kokomi r26 lane 1, fight
+# 7: Fogmog summoned a replacement Eye with Teeth "as B, at 6/6, with the same
+# intent, on the screen right after I killed B. I spent an act testing whether
+# my own Flank had whiffed. Nothing distinguished a replaced body from a
+# survived one." The letter is now minted fresh (`_reborn_keys`); this is the
+# sentence that tells the reader WHY the letter it was aiming at is gone,
+# printed under the new body rather than in a footnote, because the question
+# is asked about that one line.
+ENEMY_REPLACED_LINE = (
+    "    - This is a NEW body. It took the place of [{was}], which is dead; "
+    "it is not the same creature and it carries none of [{was}]'s damage.")
 
 # `EB-294`. AN AURA IS NOT A BUFF, AND THE FEED SAYS BUFF. `AuraPower.Type` is
 # `PowerType.Buff` so that Artifact does not eat an elemental application

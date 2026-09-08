@@ -754,10 +754,16 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 # the same numbers. Sets are stored as sorted lists because JSON has no set;
 # the in-process dict is the working copy and the file is the truth.
 _FIGHT_STORE_DIR = Path(__file__).resolve().parent / "logs"
+#
+# `EB-672` ADDED THE LAST THREE KEYS: `hp` is the HP each live key was last
+# seen at, `reborn` counts how many times a combat id has been handed to a NEW
+# body, and `replaced` is the letter the previous holder of that id retired
+# with. The rule they serve is at `_reborn_keys`.
 _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "numbered": set(), "names": {},
                                  "handles": {}, "elements": set(),
-                                 "round": None}
+                                 "round": None, "hp": {}, "reborn": {},
+                                 "replaced": {}}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -788,7 +794,10 @@ def _load_fight() -> None:
         _FIGHT_MEMORY["roster"] = {
             k: (str(v[0]), int(v[1])) for k, v in roster.items()
             if isinstance(v, (list, tuple)) and len(v) == 2}
-    for key in ("ordinals", "names", "handles"):
+    # `EB-672`: `hp`, `reborn` and `replaced` join them, and each is absent
+    # from a store written before that row -- absent being the same answer an
+    # unread body gives, so an older store simply mints no replacement.
+    for key in ("ordinals", "names", "handles", "hp", "reborn", "replaced"):
         value = held.get(key)
         if isinstance(value, dict):
             _FIGHT_MEMORY[key] = dict(value)
@@ -812,6 +821,9 @@ def _save_fight() -> None:
            "ordinals": dict(_FIGHT_MEMORY["ordinals"]),
            "names": dict(_FIGHT_MEMORY["names"]),
            "handles": dict(_FIGHT_MEMORY["handles"]),
+           "hp": dict(_FIGHT_MEMORY["hp"]),
+           "reborn": dict(_FIGHT_MEMORY["reborn"]),
+           "replaced": dict(_FIGHT_MEMORY["replaced"]),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
            "elements": sorted(_FIGHT_MEMORY["elements"]),
            "round": _FIGHT_MEMORY["round"]}
@@ -831,6 +843,9 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["handles"] = {}
     _FIGHT_MEMORY["elements"] = set()
     _FIGHT_MEMORY["round"] = None
+    _FIGHT_MEMORY["hp"] = {}
+    _FIGHT_MEMORY["reborn"] = {}
+    _FIGHT_MEMORY["replaced"] = {}
     _FIGHT_LOADED[0] = True
     try:
         _fight_store().unlink()
@@ -877,7 +892,10 @@ def remembered_enemy_name(combat_id: Any, title: str) -> str:
     called one thing in the enemy list and another in the receipt above it.
     """
     _load_fight()
-    key = f"c{combat_id}"
+    # `EB-672`: the LIVE generation of that id, so a receipt written after a
+    # replacement names the body that is standing there and not the one whose
+    # letter retired with it.
+    key = _live(f"c{combat_id}")
     name = _FIGHT_MEMORY["names"].get(key)
     if not name:
         return title
@@ -929,6 +947,102 @@ def _enemy_key(entry: dict[str, Any]) -> str:
     return f"c{cid}" if cid is not None else f"e{_entity_id(entry)}"
 
 
+def _base_keys(enemies: list[dict[str, Any]]) -> list[str]:
+    """One key per body on this board, ties broken by slot.
+
+    An id the feed repeats on ONE board cannot identify a creature, and
+    collapsing two bodies onto one key would print one number twice -- the
+    silent-mistarget failure this memory exists to remove, arriving by the
+    other door. `CombatId` is unique per creature so the game cannot produce
+    it; the slot breaks the tie anyway, and those bodies simply keep the old
+    positional behaviour rather than a wrong one.
+    """
+    keys, seen = [], {}
+    for entry in enemies:
+        key = _enemy_key(entry)
+        nth = seen.get(key, 0)
+        seen[key] = nth + 1
+        keys.append(key if nth == 0 else f"{key}#{nth}")
+    return keys
+
+
+def _live(base: str) -> str:
+    """The key the memory is currently filing that combat id under (`EB-672`).
+
+    A generation suffix and not a new id, because the id is the only handle
+    the wire gives and the SAME id is what a replacement arrives holding.
+    Generation 0 is spelt as the bare key, so every store, test and board
+    written before `EB-672` reads back unchanged.
+    """
+    gen = _FIGHT_MEMORY["reborn"].get(base, 0)
+    return base if not gen else f"{base}~{gen}"
+
+
+#: `EB-672`. Above this the HP pair is the game's phase-change sentinel and
+#: not a body's number (`blindplay_board.PHASE_FLIP_HP_FLOOR`, kept as its own
+#: constant here because the board imports this module and not the other way).
+#: A boss parking on the sentinel and coming back off it is an HP that rises
+#: by a hundred million and is not a new creature.
+_PHASE_FLIP_FLOOR = 100_000_000
+
+
+def _reborn_keys(enemies: list[dict[str, Any]], base: list[str],
+                 live: list[str]) -> tuple[list[str], bool]:
+    """A body whose HP ROSE is a NEW body, and takes a new key (`EB-672`).
+
+    Kokomi r26 lane 1, fight 7: Fogmog's Eye with Teeth died and Fogmog summoned
+    a replacement on the very next screen -- same name, same intent, same
+    `combat_id`, `6/6` again -- and the memory, which keys on the id alone,
+    handed it the dead body's letter [B]. "I spent an act testing whether my
+    own Flank had whiffed. Nothing distinguished a replaced body from a
+    survived one." `EB-541`'s minting rule ("a summon takes the next free
+    letter") was already right and simply never fired, because from the id's
+    point of view nothing had been summoned.
+
+    HP GOING UP IS THE SIGNAL, and it is the only one the wire carries: the
+    dead body is off the board between the two screens, so there is no death
+    to observe, and the name and the max HP are the replacement's whole point
+    of being a replacement. The two boards it is NOT allowed to fire on are
+    excluded here -- a phase flip, whose sentinel HP rises and falls by a
+    hundred million (`EB-332`), and a new fight, which is settled by the
+    caller BEFORE this runs and takes the HP memory with it.
+
+    An enemy that HEALS therefore reads as replaced. That is the trade this
+    row takes deliberately: the failure it costs is a spare letter on a body
+    the reader can still see, and the failure it removes is two creatures
+    sharing one handle, which is a mis-aimed card.
+    """
+    out: list[str] = []
+    changed = False
+    seen_hp: dict[str, int] = _FIGHT_MEMORY["hp"]
+    for entry, key, now in zip(enemies, base, live):
+        hp = _int(entry.get("hp"))
+        top = _int(entry.get("max_hp", entry.get("hp")))
+        was = seen_hp.get(now)
+        sentinel = max(hp, top, was or 0) >= _PHASE_FLIP_FLOOR
+        if was is not None and hp > was and not sentinel:
+            gen = _FIGHT_MEMORY["reborn"].get(key, 0) + 1
+            _FIGHT_MEMORY["reborn"][key] = gen
+            retired = now
+            now = f"{key}~{gen}"
+            _FIGHT_MEMORY["replaced"][now] = _FIGHT_MEMORY["handles"].get(
+                retired, "")
+            changed = True
+        out.append(now)
+    return out, changed
+
+
+def enemy_replacements(enemies: list[dict[str, Any]]) -> list[str]:
+    """Per body, the letter the body it REPLACED retired with, or `""`.
+
+    Read out of the memory `_enemy_names` fills and only out of it, the same
+    bargain `_enemy_handles` keeps: a board this fight has never numbered says
+    nothing rather than guessing.
+    """
+    return [_FIGHT_MEMORY["replaced"].get(k, "")
+            for k in [_live(b) for b in _base_keys(enemies)]]
+
+
 def _is_a_new_fight(round_: int | None) -> bool:
     """Is a board that shares no body with the memory a NEW FIGHT (`EB-541`)?
 
@@ -976,26 +1090,25 @@ def _enemy_names(enemies: list[dict[str, Any]],
         return []
     _load_fight()
     names = [_text(e.get("name")) for e in enemies]
-    # An id the feed repeats on ONE board cannot identify a creature, and
-    # collapsing two bodies onto one key would print one number twice -- the
-    # silent-mistarget failure this function exists to remove, arriving by the
-    # other door. `CombatId` is unique per creature so the game cannot produce
-    # it; the slot breaks the tie anyway, and those enemies simply keep the
-    # old positional behaviour rather than a wrong one.
-    keys, seen_key = [], {}
-    for entry in enemies:
-        key = _enemy_key(entry)
-        nth = seen_key.get(key, 0)
-        seen_key[key] = nth + 1
-        keys.append(key if nth == 0 else f"{key}#{nth}")
+    base = _base_keys(enemies)
+    keys = [_live(b) for b in base]
     ident = [(_fold(n), _int(e.get("max_hp", e.get("hp"))))
              for n, e in zip(names, enemies)]
 
     roster: dict[str, tuple[str, int]] = _FIGHT_MEMORY["roster"]
     shared = any(roster.get(k) == i for k, i in zip(keys, ident))
     clash = any(k in roster and roster[k] != i for k, i in zip(keys, ident))
+    reborn = False
     if clash or (not shared and _is_a_new_fight(round_)):
         forget_fight()
+        # `EB-672`: the generations went with the memory, so the board is read
+        # under its bare ids again. `_reborn_keys` is skipped rather than run
+        # against an empty HP memory, which would be the same no-op with one
+        # more way to be wrong: a fight whose ids repeat the last fight's would
+        # otherwise read every full-HP opening body as a replacement.
+        keys = list(base)
+    else:
+        keys, reborn = _reborn_keys(enemies, base, keys)
     roster = _FIGHT_MEMORY["roster"]
     ordinals: dict[str, int] = _FIGHT_MEMORY["ordinals"]
     numbered: set[str] = _FIGHT_MEMORY["numbered"]
@@ -1021,7 +1134,16 @@ def _enemy_names(enemies: list[dict[str, Any]],
     if round_ is not None and _FIGHT_MEMORY["round"] != round_:
         _FIGHT_MEMORY["round"] = round_
         fresh = True
-    if fresh:
+    # `EB-672`: what each body was last seen at, which is what the NEXT board
+    # is read against. Written after the letters so a body minted on this
+    # screen has no previous HP to have risen from.
+    seen_hp: dict[str, int] = _FIGHT_MEMORY["hp"]
+    for key, entry in zip(keys, enemies):
+        hp = _int(entry.get("hp"))
+        if seen_hp.get(key) != hp:
+            seen_hp[key] = hp
+            fresh = True
+    if fresh or reborn:
         _save_fight()
     return [f"{n} ({ordinals[k]})" if _fold(n) in numbered and k in ordinals
             else n for k, n in zip(keys, names)]
@@ -1036,14 +1158,7 @@ def _enemy_handles(enemies: list[dict[str, Any]]) -> list[str]:
     counting this row exists to stop.
     """
     handles: dict[str, str] = _FIGHT_MEMORY["handles"]
-    seen_key: dict[str, int] = {}
-    out: list[str] = []
-    for entry in enemies:
-        key = _enemy_key(entry)
-        nth = seen_key.get(key, 0)
-        seen_key[key] = nth + 1
-        out.append(handles.get(key if nth == 0 else f"{key}#{nth}", ""))
-    return out
+    return [handles.get(_live(b), "") for b in _base_keys(enemies)]
 
 
 # `EB-271`, THE SECOND HANDLE. THE ONE REFUSAL ON THE SCREEN THAT NAMED

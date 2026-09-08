@@ -16,8 +16,9 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
-                                        relic_faces, remember_deck,
-                                        remembered_deck, remembered_enemy_name)
+                                        enemy_replacements, relic_faces,
+                                        remember_deck, remembered_deck,
+                                        remembered_enemy_name)
 from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
@@ -190,6 +191,58 @@ PHASE_FLIP_LINE = "changing phase (its HP is not a number this turn)"
 def is_phase_flip_hp(hp: int, max_hp: int) -> bool:
     """Is this HP pair the game's phase-change sentinel rather than a body's?"""
     return max(hp, max_hp) >= PHASE_FLIP_HP_FLOOR
+
+
+# `EB-671`. WHICH BODY IS THE FRONT, MARKED, ON EVERY COMBAT SCREEN.
+#
+# Kokomi r26 lane 1 at the act-1 boss: "the bodies printed in the order A, B,
+# C ... the plan went to C, not A. The printed rule says a single-target Plan
+# hits the front enemy; nothing on the page says which of three listed bodies
+# is the front, and the listing order is not it. On the very next screen the
+# bodies re-printed in the order B, A, C" -- and the seat's own triage put it
+# first: "this is the one that would most change my play."
+#
+# The listing was not lying and the rule was not either: the two Followers are
+# Minions and the Priest is not, so `KokomiPlan.FrontEnemy` skipped both. What
+# was missing was the page saying so. THE RULE IS THAT METHOD'S, restated in
+# Python off the rows this page already prints: the first LIVING body that is
+# not a Minion, in the feed's own order, and the first living body of any kind
+# where the board is Minions alone.
+#
+# A MINION IS A PRINTED POWER, which is how the mod reads it too
+# (`MinionPower`), and the wire sends the whole status list -- so this is a
+# fact off the board and not a lookup in a sheet.
+#
+# ON EVERY COMBAT SCREEN AND NOT ONLY KOKOMI'S. The front is a fact about the
+# board, several kits aim at it, and a page that printed it only where a Plan
+# was writable would go quiet on the turn the question is asked.
+_MINION_POWER = "minion"
+
+
+def _is_minion(enemy: dict[str, Any]) -> bool:
+    return any(_fold(p.get("name") or "") == _MINION_POWER
+               for p in enemy.get("powers") or [])
+
+
+def _is_alive(enemy: dict[str, Any]) -> bool:
+    """A phase flip counts as alive: its HP is a sentinel, not a body's."""
+    return enemy.get("phase_flip") or _int(enemy.get("hp")) > 0
+
+
+def mark_front(enemies: list[dict[str, Any]]) -> None:
+    """Set `front` on the one body a single-target aim lands on.
+
+    ONLY WHERE THERE IS A CHOICE TO GET WRONG. A board with one living body
+    answers the question by having one row, and marking it would put a word
+    and a paragraph of explanation on the majority of the fight screens in a
+    run to say what the list already said. Two bodies is where the reader's
+    question starts, and it is the whole board the seat lost a Plan on.
+    """
+    alive = [e for e in enemies if _is_alive(e)]
+    if len(alive) < 2:
+        return
+    body = next((e for e in alive if not _is_minion(e)), alive[0])
+    body["front"] = True
 
 
 #: `EB-355` / `EB-393`. THE NUMBER AN ENCHANT MOVES, NAMED AT THE PICK. "Sharp
@@ -405,15 +458,23 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      # first. A move that attacks and also puts four Burns in
                      # hand is two intents on the wire and was one line here.
                      "intents": _intents(e.get("intents") or e.get("intent")),
+                     # `EB-672`: the letter the body this one REPLACED retired
+                     # with, or `""`. A summon holding a dead body's combat id
+                     # is a new creature and the page says which one it is not.
+                     "replaced": replaced,
                      "powers": _powers(e)}
-                    for e, name, handle in zip(
+                    for e, name, handle, replaced in zip(
                         _enemies(state),
                         # `EB-541`: with the round, which is what tells a body
                         # replaced mid-fight from the first board of the next
                         # fight -- the two share nothing with the memory alike.
                         _enemy_names(_enemies(state), _int(battle.get("round"))),
-                        _enemy_handles(_enemies(state)))],
+                        _enemy_handles(_enemies(state)),
+                        enemy_replacements(_enemies(state)))],
     }
+    # `EB-671`: and which of them is the FRONT. Read after the list is built,
+    # off the rows the page is about to print.
+    mark_front(combat["enemies"])
     # `EB-271`: the refusal that named nothing, given the board it is about.
     for face in combat["hand"]:
         face["unplayable_note"] = _hook_note(face, combat["you"]["powers"])

@@ -31,7 +31,9 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
+                                        ENEMY_REPLACED_LINE,
                                         EVENT_NO_DECLINE_NOTE,
+                                        FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         LAST_SALON_NOTE,
@@ -1268,6 +1270,11 @@ def render(obs: dict[str, Any]) -> str:
             line = f"- **{e['name']}**"
             if e.get("handle"):
                 line += f" [{e['handle']}]"
+            # `EB-671`: and the mark, before the numbers, because the question
+            # it answers ("where does a Plan land?") is asked about the body
+            # and not about its HP. `mark_front` holds the rule.
+            if e.get("front"):
+                line += " — FRONT"
             if e.get("phase_flip"):
                 # `EB-332`: the sentinel is not printed, the event is.
                 line += f" — {PHASE_FLIP_LINE}"
@@ -1276,6 +1283,11 @@ def render(obs: dict[str, Any]) -> str:
             if e["block"]:
                 line += f", Block {e['block']}"
             out.append(line)
+            # `EB-672`: and where this body took a dead one's place, the line
+            # saying whose -- under that body, because that is where a reader
+            # aiming by letter meets the question.
+            if e.get("replaced"):
+                out.append(ENEMY_REPLACED_LINE.format(was=e["replaced"]))
             out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
@@ -1287,6 +1299,10 @@ def render(obs: dict[str, Any]) -> str:
         # opposite, which is what sent a seat's Melt into the wrong body.
         if c["enemies"]:
             out += ["", ENEMY_HANDLE_NOTE]
+        # `EB-671`: and what the mark on one of those lines means, beside the
+        # note about the handles on all of them.
+        if any(e.get("front") for e in c["enemies"]):
+            out += ["", FRONT_ENEMY_NOTE]
         # `EB-461`: ONCE PER SCREEN, and only where a telegraph has parts. The
         # note is about a claim the enemy block just made, so it sits with the
         # block's other two notes rather than under the line that made it.
