@@ -578,6 +578,36 @@ something flushes prefs, which a hard kill does not — and a ledger that
 laundered that would cost somebody an evening. `--no-setup` kills nothing: it did not launch the game and may not
 terminate it, so it reports instead.
 
+**Third observation, 2026-09-08 (`EB-692`, retired into this section).** Round
+29's lane 2 walked a `?` node at floor 7 and hit it again, with Kokomi: the log
+reached **143M lines / 19 GB** and the process **3.2 GB**, the bridge's health
+endpoint kept answering while `state` timed out, and no watchdog was watching
+because `hangwatch` is wired into `soak_driver` only — a blind-play lane has
+none, which is `EB-691`. Two things the earlier reads did not have:
+
+- **The stack names the event.** 2026-08-13's attribution was by MECHANISM,
+  because a `?` node hangs before an event screen can be read. Lane 2's
+  backtrace says `MegaCrit.Sts2.Core.Models.Events.PunchOff.PunchEachOther` at
+  frame 1 under `PackedScene.Instantiate_Patch1`, from `AfterEventStarted` →
+  `EventRoom.EnterInternal` → `PreloadManager.LoadRoomEventAssets`. The
+  `_Patch1` suffix is Harmony's, and it is **BaseLib's** — the only patcher
+  loaded beside ours (`klee`, `STS2_MCP`), and our C# patches no `Instantiate`.
+- **The null RID is a CONSEQUENCE, not the cause.** Each loop iteration prints
+  `ERROR: Element limit reached. at: _allocate_rid` FIRST, then
+  `Parameter "mem" is null. at: initialize_rid`, then ~27
+  `Parameter "particles" is null` setter errors — one cycle per ~880 log lines,
+  455 cycles per 400k lines. The particles RID owner is at its element limit
+  and the instantiate is retried without bound.
+
+**It is not a modded-character defect and not a two-instance one.** The same
+storm reproduced SINGLE-INSTANCE with **Klee** — a real combat scene, not
+Kokomi's `combat_model.png` fallback — in soak `20260813-010707` run 1, sixteen
+days before the second lane landed (`EB-202`, 2026-08-29) and before Kokomi was
+in the mod. **There is no way to target it for a repro either:** the scenario
+harness starts at the first fight and `bridge.DEBUG_OPS` sets combat numbers
+only, so nothing here can jump to an event room, and the map on the wire still
+never says which event sits on a `?` node.
+
 ## Chosen seeds (P1.5)
 
 ```
