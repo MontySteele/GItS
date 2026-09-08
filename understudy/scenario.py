@@ -754,7 +754,29 @@ def _check_power(spec, before, after):
     if "stacks" in spec and powers[name] != int(spec["stacks"]):
         return (f"{spec['name']} is {powers[name]}, expected "
                 f"{int(spec['stacks'])}")
+    # `EB-653`: AND WHAT THE BADGE SAYS, where the check is about a printed
+    # RULE rather than a number -- the cap lane's whole finding is that a rule
+    # bound and no surface said so, and a pack that can only assert counts
+    # could not have caught it. A SUBSTRING, because the face around the
+    # clause is the power's own business, and case-folded like every other
+    # name comparison here.
+    if "text" in spec:
+        want = str(spec["text"]).strip()
+        said = _power_text(blob, name)
+        if want.casefold() not in said.casefold():
+            return (f"{spec['name']}'s face does not carry {want!r}; "
+                    f"it reads {said!r}")
     return None
+
+
+def _power_text(blob: dict[str, Any], folded_name: str) -> str:
+    """One power's printed description, keyed exactly as `_powers` keys it."""
+    for s in blob.get("status") or []:
+        if not isinstance(s, dict) or not s.get("name"):
+            continue
+        if str(s["name"]).strip().casefold() == folded_name:
+            return str(s.get("description") or "")
+    return ""
 
 
 def _check_no_power(spec, before, after):

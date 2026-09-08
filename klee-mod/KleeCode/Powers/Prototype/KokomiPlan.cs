@@ -407,6 +407,45 @@ public static class KokomiPlan
         }
     }
 
+    /// <summary>
+    /// `EB-653` (Kokomi r24). THE SENTENCE THE CAP PRINTS, IN ONE PLACE.
+    ///
+    /// THE FIND. Under `GITS_KOKOMI_PLAN_CAP=2` the r24 lane wrote four Plans
+    /// and the jellyfish carried out two, four mornings running, and NO SCREEN
+    /// SAID SO -- while the blind page's own panel printed "the number on the
+    /// Plan badge is how many are written, not a limit". The seat's verdict:
+    /// "either the cap is real and the panel's sentence is false, or the panel
+    /// is right and the carry-out is dropping Plans". The cap is real, so the
+    /// sentence was false, and the rule was read as a WALL for three
+    /// occurrences before it was read as a choice.
+    ///
+    /// A CLAUSE ON TWO FACES AND NOT A THIRD SURFACE. The rule binds where the
+    /// Plans are held, so it prints on the two badges that describe holding
+    /// them -- <c>ProtoBakeKuragePower</c>, which says what the jellyfish does
+    /// with a Plan, and <see cref="PendingPlansPower"/>, which says how many
+    /// are waiting. The `Plan` keyword tip is at its 135-character ceiling
+    /// (`ArmKeywordTips.ForPlan`) and cannot carry a word more.
+    ///
+    /// EMPTY AT 0, WHICH IS THE DEFAULT, so an unconfigured build prints
+    /// exactly the two faces it always printed -- the trial is a trial, and a
+    /// lane that did not ask for the rule must not be told about it.
+    ///
+    /// ONE FORMAT STRING, so the two faces cannot drift and
+    /// `lint_text_conventions` can measure the capped face by reading the
+    /// constant rather than counting an identifier as one numeral. Page twin:
+    /// `blindplay_notes.PLAN_COUNT_CAPPED_NOTE`, which does not re-spell the
+    /// rule -- it READS this sentence off the wire (`EB-653`'s other half).
+    /// </summary>
+    private const string CapSentenceFormat =
+        " Carries out at most {0} a turn; the rest wait in order.";
+
+    /// <summary>The cap's sentence for a face, or empty where no cap was
+    /// declared. See <see cref="CapSentenceFormat"/>.</summary>
+    public static string CapSentence =>
+        PlanCap > 0
+            ? string.Format(CapSentenceFormat, PlanCap)
+            : string.Empty;
+
     private static object? _combat;
     private static readonly Dictionary<Player, List<Entry>> _queues = new();
 
@@ -472,6 +511,32 @@ public static class KokomiPlan
         Dictionary<Player, List<CarriedOutPlan>> _carriedOut = new();
 
     /// <summary>
+    /// `EB-654` (Kokomi r24). WHAT A COMPANION SUMMON DID AT THE END OF THE
+    /// LAST TURN, in the carry-out log's own rows.
+    ///
+    /// THE FIND. "Yae Miko's Sakura took 10 HP off an enemy with no line in
+    /// the log" -- the summon's hit is the one thing on this board that moves
+    /// a bar and names nothing, where a Plan carry-out prints a line and the
+    /// Tamakushi Casket's answering strike prints one inside the beat it
+    /// landed in.
+    ///
+    /// A SECOND LIST AND NOT <see cref="_carriedOut"/>, and the reason is the
+    /// CLOCK. A summon fires at the END of the player's turn and
+    /// <see cref="ResolveAll"/> clears the morning's list at the START of the
+    /// next one -- so a row filed with the carry-outs would be written after
+    /// the last page of one turn and erased before the first page of the next,
+    /// which is a receipt no seat could ever read. This list is cleared where
+    /// the volleys FIRE (<see cref="OpenSummonLog"/>), so it holds exactly the
+    /// last turn-end's hits for the whole of the turn that follows them.
+    ///
+    /// SAME ROW TYPE, SAME WIRE SHAPE, SAME PAGE RENDERER: the seats already
+    /// read <see cref="CarriedOutPlan"/> rows, and a summon's hit is the same
+    /// three facts (who acted, what number, what the board lost).
+    /// </summary>
+    private static readonly
+        Dictionary<Player, List<CarriedOutPlan>> _summonHits = new();
+
+    /// <summary>
     /// TIDE CHART'S PROMISE, per seat (`EB-478`, R257): what the next morning
     /// owes, as a rate per Plan carried out and a flat number beside it.
     ///
@@ -493,6 +558,7 @@ public static class KokomiPlan
         _queues.Clear();
         _showing.Clear();
         _carriedOut.Clear();
+        _summonHits.Clear();
         _tideCharts.Clear();
         // `EB-643`: the cached environment read too, so a test that declares a
         // cap and one that does not cannot see each other's answer.
@@ -507,6 +573,9 @@ public static class KokomiPlan
         _queues.Clear();
         _showing.Clear();
         _carriedOut.Clear();
+        // `EB-654`: and last fight's summon hits, for the same reason -- a
+        // volley that landed in the fight before owes this one no receipt.
+        _summonHits.Clear();
         // A promise is a fact about ONE combat, like the queue above it: a
         // Tide Chart played on the last turn of a fight owes nothing to the
         // next one.
@@ -559,6 +628,112 @@ public static class KokomiPlan
             ? said
             : (IReadOnlyList<CarriedOutPlan>)
               System.Array.Empty<CarriedOutPlan>();
+
+    /// <summary>What the Companion summons did at the end of the last turn
+    /// (`EB-654`). Never null.</summary>
+    public static IReadOnlyList<CarriedOutPlan> SummonHits(Player? player) =>
+        player != null && _summonHits.TryGetValue(player, out var hit)
+            ? hit
+            : (IReadOnlyList<CarriedOutPlan>)
+              System.Array.Empty<CarriedOutPlan>();
+
+    /// <summary>
+    /// `EB-654`. THE LOG OPENS WHERE THE VOLLEYS FIRE, which is what makes the
+    /// rows survive the turn boundary they have to be read across: the list
+    /// filled at the end of turn N is the list a seat reads on turn N+1, and
+    /// it is emptied here, one beat before turn N+1's own volleys go out.
+    ///
+    /// Called once per creature by <c>CompanionOverhaulTurnEnd</c>, before the
+    /// walk. A creature with no seat has no page and files nothing.
+    /// </summary>
+    public static void OpenSummonLog(Creature? owner)
+    {
+        var player = owner?.Player;
+        if (player != null) _summonHits.Remove(player);
+    }
+
+    /// <summary>
+    /// `EB-654`. RUN ONE END-OF-TURN SUMMON AND SAY WHAT IT DID.
+    ///
+    /// THE FIND (Kokomi r24, sec.2 "Smaller"). Yae Miko's Sesshou Sakura took
+    /// 10 HP off an enemy and NOTHING named it: the carry-out log prints a
+    /// line for every Plan the jellyfish resolves and the Tamakushi Casket
+    /// names itself inside the beat it lands in, so a summon's hit was the one
+    /// bar on the board that moved anonymously.
+    ///
+    /// EVERY SUMMON THE SAME WAY, WHICH IS WHY THE SEAM IS HERE. There are
+    /// fifteen end-of-turn actors in <c>CompanionOverhaulTurnEnd</c>'s walk
+    /// and instrumenting fifteen volley bodies would be fifteen chances to
+    /// forget one; wrapping the CALL treats them alike by construction, and a
+    /// summon added later joins the log by being called through this door.
+    ///
+    /// MEASURED, NOT DECLARED. The number is what the BOARD lost across the
+    /// volley (<see cref="Moved"/>, the same measurement a Plan's own receipt
+    /// takes), so a hit into Vulnerable, a reaction it set off and a second
+    /// charge are all inside it -- and a volley that only granted Block, or
+    /// that found no target, files no row at all. That is what keeps this a
+    /// log of HITS rather than a list of powers on the board.
+    ///
+    /// THE VOLLEY RUNS EITHER WAY. The measurement is in a `finally`, and an
+    /// owner with no seat or a combat torn down mid-volley simply files
+    /// nothing: a legibility row must never be able to eat a rule.
+    /// </summary>
+    public static async Task Summon(
+        Creature? owner, string source, System.Func<Task> volley)
+    {
+        if (volley == null) return;
+        if (owner?.Player == null || string.IsNullOrEmpty(source))
+        {
+            await volley();
+            return;
+        }
+        var before = BoardHp(owner);
+        try
+        {
+            await volley();
+        }
+        finally
+        {
+            var moved = Moved(before, owner);
+            var lost = moved?.Sum(row => row.Amount) ?? 0;
+            if (moved != null && lost > 0)
+            {
+                RecordSummon(owner, new CarriedOutPlan(
+                    source, lost, SummonLine(source, lost), moved, false,
+                    // The word the page prints after the figure, and it is
+                    // `NumberKind(Kind.Damage)`'s: what a reader wants to know
+                    // is what the number IS, not how it was derived.
+                    "damage"));
+            }
+        }
+    }
+
+    /// <summary>
+    /// The summon line's format, in ONE place so a pin can read it back
+    /// without a game -- <c>Vfx.KurageBeat.Line</c>'s arrangement, one actor
+    /// over.
+    ///
+    /// NO `Bake-Kurage:` PREFIX, and that is the whole difference: the
+    /// jellyfish did not do this. The source names ITSELF, which is the form
+    /// the seats already read on a rider ("Tamakushi Casket 2") and on a
+    /// carry-out ("Ambush, 12"), so "Sesshou Sakura, 10" needs no new grammar.
+    /// </summary>
+    internal static string SummonLine(string source, int number) =>
+        $"{source}, {number}";
+
+    /// <summary>The one writer of the summon log, <see cref="Record"/>'s twin
+    /// and for its reason: one door, one order.</summary>
+    private static void RecordSummon(Creature owner, CarriedOutPlan row)
+    {
+        var player = owner.Player;
+        if (player == null) return;
+        if (!_summonHits.TryGetValue(player, out var hits))
+        {
+            hits = new List<CarriedOutPlan>();
+            _summonHits[player] = hits;
+        }
+        hits.Add(row);
+    }
 
     /// <summary>
     /// WAS THIS PLAY AIMED AT THE JELLYFISH? The one question the generated
@@ -2322,6 +2497,15 @@ public static class KokomiPlan
         // because the rule is here, and its emptiness is a fact.
         snapshot["carried_out"] =
             CarriedOut(player).Select(CarriedOutRow).ToList();
+        // `EB-654`. WHAT A COMPANION SUMMON DID AT THE END OF THE LAST TURN,
+        // in the same rows and read by the same page code. A separate key
+        // because it is a separate MOMENT: these fired after the last page a
+        // seat saw, which is exactly why they arrived unexplained.
+        //
+        // PRESENT AND EMPTY WHERE NOTHING FIRED, the whole snapshot's
+        // three-state discipline: the key is here because the log is here.
+        snapshot["summon_hits"] =
+            SummonHits(player).Select(CarriedOutRow).ToList();
         return snapshot;
     }
 
@@ -2637,7 +2821,12 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
           // `ProtoBakeKuragePower`'s description, which stands at 122 of the
           // power surface's 125. Page twin:
           // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
-          + "Later debuffs on you do not change the numbers you wrote."),
+          + "Later debuffs on you do not change the numbers you wrote."
+          // `EB-653` (round 24). AND THE CAP, WHERE IT BINDS. Empty on an
+          // unconfigured build, which is every build but a cap lane's; the
+          // sentence is `KokomiPlan.CapSentence`'s, spelled once for both
+          // badges.
+          + KokomiPlan.CapSentence),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -180,10 +180,38 @@ internal static class Il
         var machine =
             method.GetCustomAttribute<AsyncStateMachineAttribute>()?.StateMachineType
             ?? method.GetCustomAttribute<IteratorStateMachineAttribute>()?.StateMachineType;
-        if (machine == null) yield break;
+        if (machine != null)
+        {
+            var moveNext = machine.GetMethod("MoveNext", HeadlessGame.All);
+            if (moveNext != null) yield return moveNext;
+        }
 
-        var moveNext = machine.GetMethod("MoveNext", HeadlessGame.All);
-        if (moveNext != null) yield return moveNext;
+        // `EB-654`. AND THE METHOD'S OWN LAMBDAS, which the compiler moves out
+        // of the body entirely.
+        //
+        // WHY IT IS A SILENCE AND NOT A CHOICE. A capturing lambda compiles to
+        // a method on a `<>c__DisplayClass` nested in the DECLARING type, so
+        // the moment a call site is wrapped in one -- `await Act(creature, x,
+        // () => x.FireVolley(ctx))` -- every pin reading `Calls` on the
+        // containing method stops seeing it and starts passing for the wrong
+        // reason. `CompanionOverhaulTests.The_one_tenant_walks_the_six` is
+        // exactly such a pin, and the walk it guards still names all six.
+        //
+        // NAMED BY THE METHOD THEY CAME FROM. Roslyn spells a lambda body
+        // `<AfterSideTurnEnd>b__0`, so the filter is the containing method's
+        // own name in angle brackets -- another method's lambdas in the same
+        // display class are not this method's calls.
+        var declaring = method.DeclaringType;
+        if (declaring == null) yield break;
+        var mark = "<" + method.Name + ">";
+        foreach (var nested in declaring.GetNestedTypes(HeadlessGame.All))
+        {
+            if (!nested.Name.Contains("<>")) continue;
+            foreach (var lambda in nested.GetMethods(HeadlessGame.All))
+            {
+                if (lambda.Name.Contains(mark)) yield return lambda;
+            }
+        }
     }
 
     internal static MethodBase Method(string typeName, string methodName)

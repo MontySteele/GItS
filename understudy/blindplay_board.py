@@ -660,6 +660,16 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         "queue": queue,
         "carried_out": [row for row in said if not row["on_play"]],
         "fired_now": [row for row in said if row["on_play"]],
+        # `EB-654`: what a Companion SUMMON did at the end of the last turn.
+        # The same rows, read by the same function, under their own key
+        # because they are their own MOMENT -- these fired after the last page
+        # the seat saw, which is why "Yae Miko's Sakura took 10 HP off an
+        # enemy" arrived with nothing on any screen accounting for it. An
+        # absent key is a bridge older than the log and prints nothing, the
+        # standing rule one level up.
+        "summon_hits": [_carried_out_row(row, pet_name)
+                        for row in (raw.get("summon_hits") or [])
+                        if isinstance(row, dict)],
     }
 
 
