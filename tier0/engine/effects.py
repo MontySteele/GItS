@@ -3764,8 +3764,9 @@ PREDICATE_NAMES = frozenset({
     # Plan this turn". Unlike the two above this one IS answered -- draft 6
     # runs in both engines.
     "plan_carried_out_this_turn",
-    # THE SAME ARM'S SECOND, and pool pass seven's whole card (`EB-711`): her
-    # basic Defend's "if the Bake-Kurage is holding a Plan". The QUEUE, read
+    # THE SAME ARM'S SECOND (`EB-711`, pool pass seven -- the row that
+    # printed it was withdrawn 2026-09-08 and the predicate stays): "if the
+    # Bake-Kurage is holding a Plan". The QUEUE, read
     # live at the moment the card resolves -- the same object
     # `_runtime_count`'s `plans_held` measures, and NOT the morning's depth,
     # for the reason `KokomiPlan.PlansHeld` states: a Plan written earlier

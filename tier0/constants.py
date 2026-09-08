@@ -796,32 +796,20 @@ KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS = 4
 # what it printed, and Kurage's Oath is now a Plan-only Skill rather than a
 # Power.
 #
-# R242 (same breath as Klee's draft 4) deleted the renamed twins: "where a
-# character's basics are a renamed Strike or Defend with the same stat line,
-# the base game's Strike and Defend replace them". Coral Guard was exactly that
-# -- 5 Block, byte for byte the base line -- and Water's Edge was 6 damage and
-# nothing else. Both stayed deleted; what came back are two cards that no
-# longer have the base stat line.
-#
-# THE STRIKE IS HERS SINCE POOL PASS SIX (`EB-703`, r26-r30,
-# review/active/kokomi-plan-less-hand-2026-09-08.md): it prints a Plan line, so
-# every opening hand holds the kit's question instead of roughly one in five
-# holding no decision at all.
-#
-# AND THE DEFEND SINCE POOL PASS SEVEN (`EB-711`, r28-r31,
-# review/active/kokomi-defend-2026-09-08.md). Not a Plan line -- Block a turn
-# late is the dead half every seat rejected -- but a rider on the QUEUE: 5
-# Block, plus 2 while the Bake-Kurage is holding a Plan. The card asks its
-# question by ORDERING rather than by delay, so the last unwritable card in the
-# deck finally poses one, and the thin floor r31 lane 1 died on moves with it.
-# Her Attacks still apply Hydro, because the catalyst cadence reads the
-# CHARACTER and not the card (`effects._element_for`,
-# `CatalystCadence.PrintedElement`); a Skill applies nothing either way.
+# `strike` AND `defend` ARE THE BASE GAME's CARDS (R242, same breath as Klee's
+# draft 4): "where a character's basics are a renamed Strike or Defend with the
+# same stat line, the base game's Strike and Defend replace them". Water's Edge
+# and Coral Guard were exactly that -- 6 damage and 5 Block, byte for byte the
+# base line -- so the twins are deleted rather than re-priced. tier0's rows are
+# `content/cards/ironclad_starter.yaml`'s, at the base numbers and with the base
+# +3 deltas; the mod's are `ModelDb.Card<StrikeSilent>()` /
+# `<DefendSilent>()`, whose frame and energy colour Kokomi's pool already
+# borrows. Her Attacks still apply Hydro, because the catalyst cadence reads
+# the CHARACTER and not the card (`effects._element_for`,
+# `CatalystCadence.PrintedElement`), which the build checks on a base Strike.
 KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
-    "proto_kk_strike", "proto_kk_strike",
-    "proto_kk_strike", "proto_kk_strike",
-    "proto_kk_defend", "proto_kk_defend",
-    "proto_kk_defend", "proto_kk_defend",
+    "strike", "strike", "strike", "strike",
+    "defend", "defend", "defend", "defend",
     "proto_kk_kurages_oath",
     "proto_kk_slack_water",
 )

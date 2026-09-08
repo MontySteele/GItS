@@ -208,12 +208,12 @@ STATIC_PROTOTYPE_CONDITIONS = frozenset({
     # which is the defect this set exists to end, arriving a second time in the
     # same week on the same arm.
     "plan_carried_out_this_turn",
-    # Her basic Defend (`proto_kk_defend`), `EB-711`. "If the Bake-Kurage is
-    # holding a Plan" -- `state.kk_plan_queue`, a fact about the MOMENT the
-    # card resolves, and a reward screen has no queue. The row is `basic` and
-    # so never offered; it is named here because the price walk reads the
-    # sheet and not the offer pool, and an unpriced branch is exactly what
-    # this set exists to refuse.
+    # "If the Bake-Kurage is holding a Plan" -- `state.kk_plan_queue`, a fact
+    # about the MOMENT the card resolves, and a reward screen has no queue.
+    # No row prints it today (the Defend that did was withdrawn 2026-09-08
+    # with pool pass seven), and it stays named here because the predicate
+    # stays in both engines: an unpriced branch is exactly what this set
+    # exists to refuse, and it should be refused before a row prints it.
     "plan_held",
 })
 # Half: the MEAN of the two branches, which is what a share of 0.5 computes in

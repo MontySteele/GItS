@@ -109,9 +109,7 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # now-lines that operate on the queue and print none.
     # TWENTY-FIVE after pool pass five (`EB-685`): Night Watch is retired and
     # Slack Water's Plan line, already counted, moved to Dusk.
-    # TWENTY-SIX after pool pass six (`EB-703`): her basic Strike prints one,
-    # so the hand a Plan-less opening deals holds four of them.
-    assert len(planned) == 26
+    assert len(planned) == 25
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -332,49 +330,6 @@ def test_the_oaths_now_line_applies_hydro_like_its_carry_out(overhaul):
     st2 = kokomi_state(enemies=[charged])
     effects.resolve_card(st2, loader.get_card("proto_kk_kurages_oath"))
     assert charged.aura != "electro"
-
-
-def test_her_strike_is_six_face_up_and_eight_written(overhaul):
-    """`EB-703` (pool pass six), the sim half, played off the real row rather
-    than a probe.
-
-    THE FINDING ROUNDS 26 TO 30 REPEATED: a hand with no Plan card in it has
-    no decision in it. Her Strike is her own card now, so both halves of the
-    kit's question are on the basic -- 6 now on the body she points at, or 8
-    next morning on whatever body the jellyfish finds in front. Two more
-    damage for a turn's delay, which is Ambush's trade at a basic's premium.
-
-    THE WRITTEN HALF AIMS AT THE FRONT AND NOT AT A BODY SHE PICKED, the rule
-    every damage Plan follows: the enemy that was there when it was written
-    may be dead when it lands, so the back rank below takes nothing.
-
-    AND ONLY THE WRITTEN HALF LEAVES AN AURA. A basic is supposed to be bad
-    ([USER] 2026-09-02, LAW's cadence line), and the exemption reaches her own
-    basic -- declared on the row itself, `applies_element: false`, because the
-    cadence would otherwise element it. A carry-out is the JELLYFISH's hit and
-    `kokomi_plan` deals every damaging clause as `element="hydro"`, so WRITING
-    the Strike is what earns the aura, which is a reason to write it.
-    """
-    aimed = make_enemy(hp=40, name="aimed")
-    st = kokomi_state(enemies=[aimed])
-    effects.resolve_card(st, loader.get_card("proto_kk_strike"))
-    assert aimed.hp == 34
-    assert aimed.aura is None
-
-    front2 = make_enemy(hp=40, name="front2")
-    back = make_enemy(hp=40, name="back")
-    st2 = kokomi_state(enemies=[front2, back])
-    kokomi_plan.schedule(st2, loader.get_card("proto_kk_strike"))
-    assert front2.hp == 40                             # nothing lands today
-    kokomi_plan.resolve_all(st2)
-    assert front2.hp == 32
-    assert front2.aura == "hydro"
-    assert back.hp == 40 and back.aura is None
-
-    # AND THE SMITH MOVES BOTH HALVES BY THE BASE STRIKE'S +3: 9 and 11.
-    up = loader.get_card("proto_kk_strike+")
-    assert up.effects[0]["amount"] == 9
-    assert up.plan[0]["amount"] == 11
 
 
 def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
@@ -1485,10 +1440,9 @@ def test_every_row_in_her_pool_resolves(overhaul):
                                       make_enemy(hp=200, name="b")])
         state.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
         state.mi_entry_hp = 80
-        # R242 as `EB-703` amended it: her Defend is the BASE GAME's and her
-        # Strike is her own, so the pile a draw-reading row looks at is built
-        # from `proto_kk_strike`.
-        state.player.draw_pile = [loader.get_card("proto_kk_strike")
+        # R242: her basics are the BASE GAME's Strike and Defend, so the pile
+        # a draw-reading row looks at is built from `strike`.
+        state.player.draw_pile = [loader.get_card("strike")
                                   for _ in range(5)]
         state.player.exhaust_pile = [loader.get_card("proto_kk_salt_line")]
         state.kk_plan_queue = []
@@ -3041,139 +2995,3 @@ def test_battle_plans_rider_is_plan_only_from_a_body(overhaul):
         effects.OPS[op](kokomi_state(), {"op": op},
                         Card(id="proto_kk_x", name="x", cost=1,
                              type="skill", effects=[]))
-
-
-# =============================================================================
-# POOL PASS SEVEN (`EB-711`): her basic Defend reads the queue.
-#
-# THE FINDING, rounds 28 to 31. Defend was "the only card in the deck that
-# cannot be pointed at the jellyfish, so the only card that never poses the
-# kit's question" (r28 lane 2), and it was also the thin floor -- r31 lane 1
-# died on the elite to a five-card hand with no Block at all. The answer is
-# NOT a Plan line (Block a turn late is the dead half every seat rejected, and
-# a Dusk basic would make Breakwater strictly worse) but a rider on the QUEUE:
-# 5 Block, plus 2 while the Bake-Kurage is holding a Plan. The card asks its
-# question by ORDERING. Provenance: docs/notes/prototype-surface-provenance.md,
-# "Kokomi pool pass seven".
-# =============================================================================
-
-def _defend(state, upgraded=False):
-    effects.resolve_card(
-        state, loader.get_card("proto_kk_defend+" if upgraded
-                               else "proto_kk_defend"))
-    return state.player.block
-
-
-def test_her_defend_is_five_with_an_empty_queue_and_seven_with_one_held(
-        overhaul):
-    """The row, played off the sheet rather than off a probe: 5 when the
-    jellyfish holds nothing, 7 when it holds a Plan written earlier this turn.
-
-    ONE GAIN EITHER WAY, which is why the row is a then/else and not a base
-    plus a rider -- two gains would take Dexterity and Frail twice, and the
-    face (`KokomiPlan.PlanHeldBlockVar`) folds ONE gain of 7.
-
-    THE PREDICATE IS THE QUEUE, `effects._predicate`'s `plan_held` over
-    `state.kk_plan_queue`, which is the same object `plans_held` counts for
-    Breakwater -- one definition of "holding a Plan" in this engine, and
-    `KokomiPlan.PlansHeld` is the twin in the other."""
-    st = kokomi_state(enemies=[make_enemy(hp=40)])
-    assert not st.kk_plan_queue
-    assert _defend(st) == 5
-
-    st2 = kokomi_state(enemies=[make_enemy(hp=40)])
-    kokomi_plan.schedule(st2, loader.get_card("proto_kk_strike"))
-    assert len(st2.kk_plan_queue) == 1
-    assert _defend(st2) == 7
-
-
-def test_her_defend_counts_a_dusk_entry_until_it_resolves(overhaul):
-    """A Dusk Plan is HELD from the moment it is written to the moment the
-    evening carries it out, so a Defend played before dusk is a 7 and one
-    played after is a 5. `resolve_dusk` is the boundary, and it empties the
-    queue of exactly the Dusk entries -- so this is the same read as the
-    morning's below, taken at the other end of the turn."""
-    st = kokomi_state(enemies=[make_enemy(hp=40)])
-    kokomi_plan.schedule(st, loader.get_card("proto_kk_breakwater"))
-    assert st.kk_plan_queue and st.kk_plan_queue[0].dusk
-    assert _defend(st) == 7
-
-    st2 = kokomi_state(enemies=[make_enemy(hp=40)])
-    kokomi_plan.schedule(st2, loader.get_card("proto_kk_breakwater"))
-    kokomi_plan.resolve_dusk(st2)
-    assert not st2.kk_plan_queue
-    st2.player.block = 0      # Breakwater's OWN Block, not this card's
-    assert _defend(st2) == 5
-
-
-def test_her_defend_is_five_again_after_the_mornings_carry_out(overhaul):
-    """THE QUEUE THE MORNING DRAINED IS NOT HELD, which is the clause the note
-    spells out: "a queue emptied by the morning's carry-out does not" count.
-    The number Tide Wall reads (`kk_plans_this_morning`) keeps yesterday's
-    value across that boundary and this one deliberately does not."""
-    st = kokomi_state(enemies=[make_enemy(hp=40)])
-    kokomi_plan.schedule(st, loader.get_card("proto_kk_strike"))
-    assert _defend(st) == 7
-
-    st.player.block = 0
-    kokomi_plan.resolve_all(st)
-    assert not st.kk_plan_queue
-    assert _defend(st) == 5
-
-
-def test_her_defend_asks_its_question_by_ordering(overhaul):
-    """THE WHOLE CARD, in two turns of the same hand: write then Block is 7,
-    Block then write is 5. Nothing else in the kit changes between them -- one
-    energy each, the same two cards -- so the two Blocks ARE the decision, and
-    they are 2 apart because the rider is read LIVE at resolve time."""
-    written_first = kokomi_state(enemies=[make_enemy(hp=40)])
-    kokomi_plan.schedule(written_first, loader.get_card("proto_kk_strike"))
-    assert _defend(written_first) == 7
-
-    blocked_first = kokomi_state(enemies=[make_enemy(hp=40)])
-    assert _defend(blocked_first) == 5
-    kokomi_plan.schedule(blocked_first, loader.get_card("proto_kk_strike"))
-    assert blocked_first.player.block == 5      # the write does not backfill
-
-
-def test_her_defends_upgrade_moves_the_printed_five_and_not_the_rider(
-        overhaul):
-    """The base Defend's +3 on the printed number, 5 -> 8, with the rider
-    still 2 -- so the `+` card is 8 and 10. Read off the SMITHED row, so the
-    sheet's one key and the applier agree; `ProtoKkDefend.OnUpgrade` bumps the
-    face's var by the same 3."""
-    row = _row("proto_kk_defend")
-    assert row.upgrade == {"conditional_block": 3}
-    branch = row.effects[0]
-    assert branch["op"] == "conditional" and branch["if"] == "plan_held"
-    assert branch["then"] == [{"op": "block", "amount": 7}]
-    assert branch["else"] == [{"op": "block", "amount": 5}]
-
-    st = kokomi_state(enemies=[make_enemy(hp=40)])
-    assert _defend(st, upgraded=True) == 8
-
-    st2 = kokomi_state(enemies=[make_enemy(hp=40)])
-    kokomi_plan.schedule(st2, loader.get_card("proto_kk_strike"))
-    assert _defend(st2, upgraded=True) == 10
-
-
-def test_her_defend_is_the_one_starter_card_that_cannot_be_written(overhaul):
-    """The half pool pass seven did NOT take, pinned so a later pass has to
-    argue with it: the row carries no `plan:` line at all, so the deck still
-    holds a card the jellyfish has no use for and the kit's question stays a
-    question. `plan_aimed_at_pet` is False for the same reason -- there is
-    nothing to aim."""
-    row = _row("proto_kk_defend")
-    assert not row.plan
-    assert row.rarity == "basic" and row.basic_tag == "defend"
-    st = kokomi_state(enemies=[make_enemy(hp=40, intents=ATTACKER)])
-    assert kokomi_plan.plan_aimed_at_pet(st, row) is False
-
-
-def test_her_defend_is_in_the_starter_and_never_offered(overhaul):
-    """`rarity: basic` is the starter's mark, and both halves of what that
-    means: four copies in `KOKOMI_OVERHAUL_STARTER_IDS`, and out of her
-    offerable pool -- the one door every reward surface reads."""
-    assert C.KOKOMI_OVERHAUL_STARTER_IDS.count("proto_kk_defend") == 4
-    assert "proto_kk_defend" not in C.KOKOMI_OVERHAUL_POOL_IDS
-    assert "proto_kk_defend" not in set(rewards.character_pool("kokomi"))

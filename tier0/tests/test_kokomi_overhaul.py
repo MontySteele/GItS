@@ -178,47 +178,23 @@ def test_the_kurage_memory_arm_is_untouched():
 # --- 2. THE ARM'S OWN SHAPE ------------------------------------------------
 
 def test_the_starter_is_the_canonical_ten():
-    """Slice draft 6 sec.3, as R242 amended it and `EB-703` amended it again:
-    her Strike x4, Defend x4, Kurage's Oath, Slack Water.
+    """Slice draft 6 sec.3, as R242 amended it: Strike x4, Defend x4, Kurage's
+    Oath, Slack Water.
 
     "Where a character's basics are a renamed Strike or Defend with the same
     stat line, the base game's Strike and Defend replace them." Water's Edge
     and Coral Guard were exactly that, so they are DELETED rather than
-    re-priced -- which the last loop is what checks.
-
-    POOL PASS SIX (`EB-703`) MOVES THE STRIKE BACK TO HER, and it passes
-    R242's own test rather than reopening it: `proto_kk_strike` prints a Plan
-    line, so it is no longer "a renamed Strike with the same stat line". The
-    finding is rounds 26 to 30's -- a hand with no Plan card in it has no
-    decision in it, and two Plan cards in ten left roughly one opening hand in
-    five posing nothing.
-
-    POOL PASS SEVEN (`EB-711`) MOVES THE DEFEND, on the same test and for
-    rounds 28 to 31's finding: Defend was "the only card in the deck that
-    cannot be pointed at the jellyfish", and r31 lane 1 died to a hand with no
-    Block in it at all. `proto_kk_defend` is 5 Block plus 2 while the queue is
-    non-empty, which is not the base stat line either -- and it is NOT a Plan
-    line, so the deck still holds a card that cannot be WRITTEN and the
-    question stays a question. It asks by ORDERING instead."""
+    re-priced -- which the last loop is what checks."""
     ids = C.KOKOMI_OVERHAUL_STARTER_IDS
     assert len(ids) == 10
-    assert ids.count("proto_kk_strike") == 4
-    assert "strike" not in ids
-    assert ids.count("proto_kk_defend") == 4
-    assert "defend" not in ids
+    assert ids.count("strike") == 4
+    assert ids.count("defend") == 4
     assert ids.count("proto_kk_kurages_oath") == 1
     assert ids.count("proto_kk_slack_water") == 1
-    assert len([i for i in ids if i.startswith("proto_")]) == 10
+    assert len([i for i in ids if i.startswith("proto_")]) == 2
     staged = {c.id for c in loader.prototype_cards()}
     for gone in ("proto_kk_waters_edge", "proto_kk_coral_guard"):
         assert gone not in staged
-    # EVERY OPENING HAND HOLDS THE KIT'S QUESTION, and the Defend is STILL the
-    # one card of the ten that cannot be written -- which is the half pool
-    # pass seven deliberately did not take.
-    rows = {c.id: c for c in loader.prototype_cards()}
-    plans = [cid for cid in ids if rows.get(cid) and rows[cid].plan]
-    assert len(plans) == 6
-    assert set(ids) - set(plans) == {"proto_kk_defend"}
 
 
 def test_the_pool_is_all_thirty_of_the_slices_rows():
@@ -354,24 +330,6 @@ def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
     pool = rewards.character_pool("kokomi")
     ids = {c.id for cards in pool.values() for c in cards}
     assert ids == set(C.KOKOMI_OVERHAUL_POOL_IDS)
-
-
-def test_her_own_strike_is_never_offered(overhaul):
-    """`EB-703`. THE STARTER'S MARK IS `rarity: basic`, and it is what keeps
-    pool pass six out of every offer: the row is a card she opens with, not a
-    card she can be handed a second copy of.
-
-    Stated on its own because the swap made a starter id a PROTOTYPE id for
-    the first time on this arm -- the two lists could not overlap while one of
-    them was `strike` -- and `tools/lint_arm_pool_parity.py`'s C# half exempts
-    exactly this rarity. Every offer surface is behind the one door this reads
-    (`rewards.character_pool`), the drafter included."""
-    ids = {c.id for cards in rewards.character_pool("kokomi").values()
-           for c in cards}
-    assert "proto_kk_strike" not in ids
-    assert loader.get_card("proto_kk_strike").rarity == "basic"
-    assert not set(C.KOKOMI_OVERHAUL_POOL_IDS) & set(
-        C.KOKOMI_OVERHAUL_STARTER_IDS)
 
 
 def test_the_pool_keeps_the_packets_rarity_split(overhaul):
