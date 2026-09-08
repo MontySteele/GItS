@@ -6174,8 +6174,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the printed word, or the hand Alice's Introduction Magic marks --
         # and the last sentence denies the reading the r24 seat took off the
         # old opening. The anchors stay inside one C# literal each.
-        "Hexerei": ["one whose face prints ",
-                    "the word, or one Alice's Introduction Magic marks this "
+        "Hexerei": ["Printed on a card's face, or marked by Alice's this "
                     "turn. ",
                     "Playing one gives Klee ", ", up to ",
                     " a play. Not every "],
@@ -7309,11 +7308,12 @@ def test_the_hexerei_line_names_the_payment_the_kit_declares():
     assert "never costs" not in row
     # `EB-663` PUT THE MEMBERSHIP TEST ON IT, in both engines' surfaces in one
     # commit: the family has two ways in and the old opening named neither
-    # correctly, so the tip carries a length exception of its own now
-    # (`tools/lint_text_conventions.py`, `HexereiKey`) and this page holds the
-    # same words. The ceiling this line pins is the exception's, not 135.
-    assert "counts as Hexerei" in row and "Not every Companion is Hexerei" in row
-    assert len(row) <= 200
+    # correctly. Both are said INSIDE the ceiling -- 133 of 135, no length
+    # exception -- because a keyword page that needs one to state its own
+    # membership test is a page saying it twice.
+    assert "marked by Alice's this turn" in row
+    assert "Not every Companion has it" in row
+    assert len(row) <= 135
 
 
 def _shattering_pressure_reward_state() -> dict:
@@ -10441,9 +10441,8 @@ def test_a_klee_run_reads_both_rules_in_full():
     """The other side, and the reason the rows exist at all: on the run whose
     kit the words belong to, nothing about them has changed."""
     page = blindplay.observe(_hexerei_shop_state("Klee"))
-    assert ("- **Hexerei** — A card that counts as Hexerei: one whose face "
-            "prints the word, or one Alice's Introduction Magic marks this "
-            "turn. Playing one gives Klee") in page
+    assert ("- **Hexerei** — Printed on a card's face, or marked by Alice's "
+            "this turn. Playing one gives Klee") in page
     assert "- **Oz** — Fischl's raven, out while you hold the Power" in page
 
 

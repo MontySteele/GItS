@@ -1194,11 +1194,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # `EB-663`, pays the Spark. The old opening also read to the r24 seat as
     # "Companion" and "Hexerei" being one set, which the eight coven Personals
     # that print no word are the counterexample to; the last sentence says so.
-    "Hexerei": ("A card that counts as Hexerei: one whose face prints the "
-                "word, or one Alice's Introduction Magic marks this turn. "
+    # SAID IN 133 OF 135, so the word carries no length exception: the two ways
+    # in share one subject, the spell is named by its owner, and the denial is
+    # four words. Held in step with `ArmKeywordTips.ForHexerei`.
+    "Hexerei": ("Printed on a card's face, or marked by Alice's this turn. "
                 f"Playing one gives Klee {COMPANION_SPARK} Spark, up to "
-                f"{COMPANION_SPARK_MAX} a play. Not every Companion is "
-                "Hexerei."),
+                f"{COMPANION_SPARK_MAX} a play. Not every Companion has it."),
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`

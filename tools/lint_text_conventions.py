@@ -127,18 +127,6 @@ EXCEPTIONS = {
         "-- when it goes off, what the hit does to the attack, and which two "
         "terms move it (EB-436, EB-373) -- and none is droppable to make "
         "room"),
-    "HexereiKey": (
-        "`EB-663` (Klee r24 lane 1) made the definition the MEMBERSHIP TEST "
-        "both engines run, and it takes two clauses because the family has "
-        "two ways in: the printed word, and the hand Alice's Introduction "
-        "Magic marks for a turn. The old opening -- 'A Companion card whose "
-        "face prints the word', 91 of 135 -- was wrong in both directions at "
-        "once: a marked Klee card counts and is no Companion, and the eight "
-        "coven Personals are Companions that print no word and pay nothing, "
-        "which is the reading the seat took off it. The last sentence says "
-        "that out loud because it is the rule the seat acted on, and the "
-        "payment clause between them is `EB-596`'s: a reader who cannot say "
-        "how much is back at the defect this tip was written for"),
     "PlanKey": (
         "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
         "135 of 135. Skittish gave no Block to a body hit by two carry-outs "

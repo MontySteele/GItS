@@ -235,11 +235,12 @@ public class Round12Tests
         // `EB-596` reworded it to "whose face prints the word", and `EB-663`
         // made that ONE of the family's two ways in: the tip is the membership
         // test both engines run, so the printed word is a clause of it rather
-        // than the whole sentence.
-        Assert.Contains("one whose face prints the word", HexereiTip());
-        Assert.Contains("Alice's Introduction Magic marks this turn",
+        // than the whole sentence -- and both clauses fit under the ceiling,
+        // which is why this word carries no length exception.
+        Assert.Contains("Printed on a card's face", HexereiTip());
+        Assert.Contains("marked by Alice's this turn", HexereiTip());
+        Assert.Contains("Not every [gold]Companion[/gold] has it",
                         HexereiTip());
-        Assert.Contains("Not every [gold]Companion[/gold] is", HexereiTip());
         Assert.DoesNotContain("witches' circle", HexereiTip());
     }
 

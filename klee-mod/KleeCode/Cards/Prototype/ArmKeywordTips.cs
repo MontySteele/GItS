@@ -565,16 +565,21 @@ public static class ArmKeywordTips
     /// (<c>CompanionHexerei.IsHexerei</c>, both of its two ways in), and the
     /// last sentence says out loud the thing the old opening implied the
     /// opposite of.
+    ///
+    /// AND IT FITS, at 133 of 135. The first draft said the same three things
+    /// in 193 characters and carried a length exception for them; the two ways
+    /// in are a subject the word already has ("Printed... or marked on by"),
+    /// the spell is the one Alice a Klee run holds, and the denial is four
+    /// words. A keyword page that needs an exception to state its own
+    /// membership test is a page saying it twice.
     public static IEnumerable<IHoverTip> ForHexerei(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, HexereiKey,
-            "A card that counts as [gold]Hexerei[/gold]: one whose face prints "
-          + "the word, or one Alice's Introduction Magic marks this turn. "
+            "Printed on a card's face, or marked by Alice's this turn. "
           + "Playing one gives Klee [blue]" + KleeCompanionSpark.Base
           + "[/blue] [gold]Spark[/gold], up to [blue]" + KleeCompanionSpark.MaxPerPlay
-          + "[/blue] a play. Not every [gold]Companion[/gold] is "
-          + "[gold]Hexerei[/gold].");
+          + "[/blue] a play. Not every [gold]Companion[/gold] has it.");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
