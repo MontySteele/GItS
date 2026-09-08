@@ -917,9 +917,23 @@
 # `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. The `plan:`
 # key, the targets and every row: docs/notes/prototype-surface-provenance.md.
 
-# --- the starter (packet sec.3, R242, amended by POOL PASS SIX `EB-703`):
-# Defend x4 is still the BASE GAME's card. Her Strike is HERS since r26-r30 --
-# a hand with no Plan card in it has no decision in it. ---
+# --- the starter (packet sec.3, R242, amended by POOL PASS SIX `EB-703` and
+# POOL PASS SEVEN `EB-711`): BOTH basics are hers now, the Strike for the
+# Plan-less hand and the Defend for the unwritable one. ---
+
+- {id: proto_kk_defend, name: "Defend", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic, basic_tag: defend,
+   description: "Gain {Block:diff()} [gold]Block[/gold], plus 2 if the [gold]Bake-Kurage[/gold] is holding a [gold]Plan[/gold].",
+   # ONE Block gain either way, which is why this is a then/else and not a
+   # base plus a rider: two gains would take Dexterity and Frail twice and the
+   # face would print a number the card does not pay.
+   effects: [{op: conditional, if: plan_held,
+              then: [{op: block, amount: 7}],
+              else: [{op: block, amount: 5}]}],
+   # The base Defend's +3, on the printed 5; the rider stays 2, so the `+`
+   # card is 8 and 10.
+   upgrade: {conditional_block: 3}}
 
 - {id: proto_kk_strike, name: "Strike", character: kokomi,
    authored_by: [claude],

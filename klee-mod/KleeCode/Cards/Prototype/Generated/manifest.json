@@ -34,6 +34,7 @@
     "proto_kk_cleansing_wave",
     "proto_kk_coral_bulwark",
     "proto_kk_deep_current",
+    "proto_kk_defend",
     "proto_kk_exposed_flank",
     "proto_kk_feigned_retreat",
     "proto_kk_feint",
@@ -237,6 +238,7 @@
     "proto_kk_cleansing_wave": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_deep_current": "kokomi",
+    "proto_kk_defend": "kokomi",
     "proto_kk_exposed_flank": "kokomi",
     "proto_kk_feigned_retreat": "kokomi",
     "proto_kk_feint": "kokomi",
@@ -515,6 +517,9 @@
     },
     "proto_kk_deep_current": {
       "damage": 3
+    },
+    "proto_kk_defend": {
+      "conditional_block": 3
     },
     "proto_kk_exposed_flank": {
       "power_amount": 1,

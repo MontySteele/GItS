@@ -2860,6 +2860,84 @@ public static class KokomiPlan
             PreviewValue = Hers(kokomi, card, (int)BaseValue);
         }
     }
+
+    /// <summary>
+    /// `EB-711`. HER BASIC DEFEND'S ONE PRINTED NUMBER: the printed Block,
+    /// plus its rider while the Bake-Kurage is holding a Plan, folded LIVE so
+    /// the seat reads 7 before deciding to play it.
+    ///
+    /// THE CARD IS AN ORDERING QUESTION AND NOTHING ELSE -- write first and
+    /// Block for 7, or Block first for 5 and keep the energy uncommitted --
+    /// so the face has to answer it BEFORE the play, or the question is
+    /// invisible and the rider is a surprise. That is the whole reason this
+    /// var exists rather than a plain <c>BlockVar</c>.
+    ///
+    /// ONE NUMBER, NOT <c>FoldedDamageVar</c>'S PAIR. Feint prints two things
+    /// the card might do; this prints one thing with a rider on it, which is
+    /// what "Gain 5 Block, plus 2 if..." says. The row's two arms
+    /// (<c>gen_klee_cards.plan_held_block_rider</c>) are the SAME clause at
+    /// two values, so they take one var, and the emitted branches read their
+    /// literals out of that same function -- the face and the play cannot
+    /// drift because one derivation feeds both.
+    ///
+    /// <c>PlansHeld</c> AND NOT A SECOND SPELLING of "holding a Plan": the
+    /// preview asks exactly the reader the emitted predicate asks
+    /// (<c>KokomiPlan.PlansHeld(Owner.Creature) &gt; 0</c>), whose sim twin is
+    /// <c>effects._predicate</c>'s <c>plan_held</c> over
+    /// <c>state.kk_plan_queue</c>.
+    ///
+    /// IT SUBCLASSES <c>BlockVar</c>, WHICH IS NOT DECORATION:
+    /// <c>DynamicVarSet.Block</c> CASTS to <c>BlockVar</c>, so a plain
+    /// <see cref="DynamicVar"/> under this token throws an
+    /// <c>InvalidCastException</c> the first time anything reads it
+    /// (<c>SpotlightSystem.SpotlitBlockVar</c>'s pin, verbatim).
+    ///
+    /// AND THE HOOKS STILL RUN, over the ridden number and in the play's own
+    /// order: the fold adds the rider first and then asks a throwaway
+    /// <c>BlockVar</c> for the same Dexterity/Frail pass the ONE emitted
+    /// <c>GainBlock</c> will make -- which is why the row is a then/else and
+    /// not a base plus a second gain. Two gains would take Dexterity twice
+    /// and this preview would print a number the card does not pay.
+    ///
+    /// OFF THE HAND IT PRINTS ITS BASE. A compendium or reward copy has no
+    /// owner and <c>runGlobalHooks</c> is false, so every such read falls
+    /// through exactly as a plain var would.
+    /// </summary>
+    public sealed class PlanHeldBlockVar : BlockVar
+    {
+        public const string Token = "Block";
+
+        private readonly decimal _rider;
+
+        public PlanHeldBlockVar(decimal amount, decimal rider)
+            : base(amount, ValueProp.Move)
+        {
+            _rider = rider;
+        }
+
+        /// <summary>The printed "plus N" -- read by the tests, and by the
+        /// fold below.</summary>
+        public decimal Rider => _rider;
+
+        public override void UpdateCardPreview(
+            CardModel card, CardPreviewMode previewMode, Creature? target,
+            bool runGlobalHooks)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            if (!runGlobalHooks) return;
+            // A canonical (compendium) copy has no owner and the getter
+            // ASSERTS rather than returning null, which is why this guard is
+            // the shape `PlanDamageVar` uses.
+            if (!card.IsMutable) return;
+            var kokomi = card.Owner?.Creature;
+            if (kokomi == null) return;
+            if (PlansHeld(kokomi) <= 0) return;
+            var folded = new BlockVar(BaseValue + _rider, ValueProp.Move);
+            folded.UpdateCardPreview(
+                card, previewMode, target, runGlobalHooks);
+            PreviewValue = folded.PreviewValue;
+        }
+    }
 }
 
 /// <summary>

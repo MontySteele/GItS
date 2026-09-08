@@ -3764,6 +3764,14 @@ PREDICATE_NAMES = frozenset({
     # Plan this turn". Unlike the two above this one IS answered -- draft 6
     # runs in both engines.
     "plan_carried_out_this_turn",
+    # THE SAME ARM'S SECOND, and pool pass seven's whole card (`EB-711`): her
+    # basic Defend's "if the Bake-Kurage is holding a Plan". The QUEUE, read
+    # live at the moment the card resolves -- the same object
+    # `_runtime_count`'s `plans_held` measures, and NOT the morning's depth,
+    # for the reason `KokomiPlan.PlansHeld` states: a Plan written earlier
+    # this turn is held, a Dusk entry is held until it resolves, and a queue
+    # the morning drained is not.
+    "plan_held",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -4043,6 +4051,14 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Overlooks the Waters' play-time one all count -- they all carry a
         # Plan out, which is the phrase the card prints.
         return state.kk_plan_carried_out_this_turn
+    if name == "plan_held":
+        # HER BASIC DEFEND's condition (`EB-711`, QUARANTINED). The QUEUE, and
+        # the same one `_runtime_count`'s `plans_held` counts -- one definition
+        # of "holding a Plan" per engine, so the card's rider and Breakwater's
+        # per-Plan clause cannot disagree. Read LIVE, which is what makes the
+        # card ask its question by ordering: written-then-Defend holds one and
+        # Defend-then-written holds none.
+        return bool(state.kk_plan_queue)
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "drew_skill_this_card":

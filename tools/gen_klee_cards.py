@@ -1377,6 +1377,15 @@ PREDICATES_CS = {
     # a Plan out.
     "plan_carried_out_this_turn":
         "KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn",
+    # Her basic Defend's rider (`EB-711`). The QUEUE and not the ledger, which
+    # is the difference the card's whole question turns on: `PlansHeld` is what
+    # has been WRITTEN and not yet carried out, so a Plan written earlier this
+    # turn counts, a Dusk entry counts until it resolves, and a queue the
+    # morning drained does not. One reader, the same one Breakwater's per-Plan
+    # clause and Tide Chart's draw took, so "holding a Plan" has one definition
+    # in this engine and one in the sim (`effects._predicate`'s `plan_held`,
+    # `state.kk_plan_queue`).
+    "plan_held": "KokomiPlan.PlansHeld(Owner.Creature) > 0",
 }
 
 # The if-clause each predicate renders on the card.
@@ -1402,6 +1411,8 @@ PREDICATE_TEXT = {
     "plan_carried_out_this_turn":
         "If the [gold]Bake-Kurage[/gold] carried out a [gold]Plan[/gold] "
         "this turn",
+    "plan_held":
+        "If the [gold]Bake-Kurage[/gold] is holding a [gold]Plan[/gold]",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -5982,6 +5993,14 @@ def build_vars(card: dict) -> list[str]:
                 out.append(
                     f'new FoldedDamageVar("{name}", {amount}m, '
                     'ValueProp.Move)')
+            # `EB-711`. THE ONE PRINTED NUMBER of a Block conditional on the
+            # queue, folded live -- see `plan_held_block_rider` for why this
+            # is one var and not `folded_branch_damage`'s pair.
+            held_block = plan_held_block_rider(card)
+            if held_block is not None:
+                base, rider, _up = held_block
+                out.append(
+                    f'new KokomiPlan.PlanHeldBlockVar({base}m, {rider}m)')
             cb = conditional_bonus_upgrade(card)
             bd = branch_draw_upgrade(card)
             then_var, else_var = branch_draw_vars(card)
@@ -6921,6 +6940,56 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int]]:
              if _is_then_first_damage(card, then) else 0)
     return [("PlainDamage", int(els["amount"]), both),
             ("BranchDamage", int(then["amount"]), both + extra)]
+
+
+def plan_held_block_rider(card: dict) -> tuple[int, int, int] | None:
+    """`EB-711`. THE ONE PRINTED NUMBER of a two-armed Block conditional on
+    `plan_held`: `(base, rider, upgrade delta)`, or None.
+
+    THE CARD is her basic Defend -- "Gain 5 Block, plus 2 if the Bake-Kurage
+    is holding a Plan" -- and its face prints ONE number, not Feint's pair,
+    because the two arms are the same clause with a rider on it rather than
+    two different things the card might do. So it takes one var, `Block`, and
+    that var folds the rider LIVE: a seat looking at the card while a Plan is
+    written sees 7 before playing it, which is the whole of the ordering
+    question the row exists to ask.
+
+    WHY THE ROW IS A THEN/ELSE AND NOT A BASE PLUS A RIDER. A second
+    `CreatureCmd.GainBlock` would take Dexterity and Frail a second time (5+D
+    then 2+D), and the folded face -- which folds ONE gain of 7 -- would print
+    a number the card does not pay. One clause, one gain, one var.
+
+    THE NUMBERS COME OFF THE SHEET AND NOWHERE ELSE, in the one function both
+    the var and the emitted branches read, so the face and the play cannot
+    drift: `base` is the else arm, `rider` is the then arm minus it, and the
+    delta is `conditional_block`, which `_branch_amount` puts on BOTH arms --
+    which is what keeps the rider at 2 on the `+` card.
+
+    `proto_` ONLY, and one conditional: the var lives under
+    `Powers/Prototype/`, which a release build Compile-Removes.
+    """
+    if not str(card.get("id") or "").startswith("proto_"):
+        return None
+    conds = [e for e in card.get("effects", [])
+             if e.get("op") == "conditional"]
+    if len(conds) != 1 or len(card.get("effects", [])) != 1:
+        return None
+    eff = conds[0]
+    if eff.get("if") != "plan_held":
+        return None
+
+    def _one_block(branch: list | None) -> int | None:
+        if not branch or len(branch) != 1:
+            return None
+        clause = branch[0]
+        return (int(clause["amount"]) if clause.get("op") == "block"
+                and isinstance(clause.get("amount"), int) else None)
+
+    then = _one_block(eff.get("then"))
+    els = _one_block(eff.get("else"))
+    if then is None or els is None or then <= els:
+        return None
+    return els, then - els, conditional_block_upgrade(card)
 
 
 def _is_then_first_damage(card: dict, eff: dict) -> bool:
@@ -11750,8 +11819,12 @@ def build_upgrade(card: dict) -> list[str]:
             # swap -- the vars bumped below are what re-render.
             folded = any(folded_branch_damage(card, eff)
                          for eff in card.get("effects", []))
+            # `EB-711`: and the Block twin, which prints ONE folded number
+            # rather than a pair -- the same reason the text does not swap.
+            held = (plan_held_block_rider(card) is not None
+                    and ckey == "conditional_block")
             how_printed = ("the face prints them live (`EB-657`)."
-                           if folded and ckey == "conditional_damage"
+                           if (folded and ckey == "conditional_damage") or held
                            else "the text swaps via {IfUpgraded:show:...|...}.")
             lines.append(
                 f"// {ckey}: {how_many} on an IsUpgraded read at play time; "
@@ -11768,6 +11841,15 @@ def build_upgrade(card: dict) -> list[str]:
                 if delta:
                     lines.append(
                         f'DynamicVars["{name}"].UpgradeValueBy({delta}m);')
+    # `EB-711`, the same rule one op over: the ONE printed number of a Block
+    # conditional on the queue carries its own base, so `conditional_block`
+    # moves the var beside the play-time literals it moves. The RIDER does not
+    # move -- both arms take the same delta -- which is what keeps the `+`
+    # card's face at "8, plus 2".
+    held_block = plan_held_block_rider(card)
+    if held_block is not None and held_block[2]:
+        lines.append(
+            f"DynamicVars.Block.UpgradeValueBy({held_block[2]}m);")
     if branch_draw_upgrade(card):
         # tier0 draw deltas bump ALL draw ops, branches included. Only the
         # BRANCH vars are emitted here: when the card also draws at top level
