@@ -188,6 +188,24 @@ notes in §3b were written on.
   brief for GPT's next read; the eyes-on in §5 stays open until [USER]
   says the panel reads.
 
+## 5d. The hover baseline (2026-09-07, night, `0.2.3002+proto`)
+
+The scenario runner gained a `hover` step (`EB-652`, PR #436: a debug op on
+the mod's own route that calls the game's hovered-card tracker, the pair the
+panel's patches listen to), and `understudy/scenarios/furina-hover-states.yaml`
+was run on lane 1 with captures alongside. Frames:
+`frame-20260907-210218-furina-hover-t01.png` (Chevreuse hovered: the front
+Crabaletta chip reads PERFORMS in a lit frame),
+`frame-20260907-210244-furina-hover-t03.png` (a Salon Début hovered on the
+full stage: the front chip reads LEAVES and the footer "Replace: 14 damage"
+brightens; measured, the footer text averages 172/167/159 against 118/130/152
+at rest), `frame-20260907-210309-furina-hover-t05.png` (Ethereal Spotlight
+hovered at Encore 0: no pips to tint, so the resting FRONT state; the tint
+needs a board with Encore 2). ENTERS (a Deploy onto a stage with room) needs a
+different board and is not framed. This is the baseline GPT asked for; the
+direction pick (`review/active/furina-stage-direction-2026-09-07.md`) decides
+what is built on it.
+
 ## 6. Defaults applied, disclosed
 
 - **`EB-627`**, **`EB-628`**, **`EB-629`** as above, E defaults, built by
