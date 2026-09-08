@@ -37,7 +37,12 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The installed build is **`0.2.1786+proto.dirty`** (2026-08-30), a dev package
+The installed build is **`0.2.3069+proto`** (2026-09-08, after #461), the dev
+package [USER]'s Klee act-1 run and the current Kokomi rounds are played on.
+
+The paragraph below describes the package that held this slot until then,
+**`0.2.1786+proto.dirty`** (2026-08-30), and the live acceptances taken on it;
+it is kept because those acceptances cite it by name. It was a dev package
 built from `live-acceptance-2026-08-30` off `main` `cc6f323c`, deployed for the
 live-acceptance window below and left installed. It carries BOTH prototype
 arms — Kokomi's Kurage-memory base kit and Klee's Spark alternative-cost rows —
@@ -670,6 +675,453 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
+
+The bullets below are the per-workstream narrative, carried here from
+`STATE.md` on 2026-09-08 under R267 pick 4 so that the snapshot can go back to
+one line each. Nothing is rewritten; the round lines at the end of a bullet
+name a packet that neither file had cited.
+
+- **Klee** — Rounds 8 and 9 are RULED (R250, R252, narrowed by R253;
+  `review/ruled/klee-overhaul-round-8-2026-09-04.md`, `...round-9-2026-09-04.md`):
+  the Splash pays the largest Bomb, and the pool's defence shelf is three
+  conditional rows (Dodoco Cover, Careful Now, Barbara — Front Row Seat);
+  Fire Safety and Safety Lesson were withdrawn on the charter audit
+  (R253, `review/records/card-audit-2026-09-04.md`). Round 10 is READ
+  (`review/ruled/klee-overhaul-round-10-2026-09-04.md`): six runs on
+  `0.2.2401+proto`, six act-1 clears, none past act 2; Dodoco Cover played
+  every fight, Careful Now split the seats along cook-or-cash, Front Row
+  Seat unseen; no pick, `EB-390`-`EB-400`. **Round 11 is READ**
+  (`review/records/klee-overhaul-round-11-2026-09-04.md`): two seats on
+  `0.2.2476+proto` with Countdown in the pool (undrawn), floors 5 and 10,
+  both budget-out; the loan against the clock priced on the nose, a Spark
+  gain nothing prints (`EB-418`), random Set off and one-charge reaction
+  rules unprinted (`EB-431`, `EB-432`); no pick. **Round 12 is READ**
+  (`review/records/klee-overhaul-round-12-2026-09-04.md`): two seats on
+  `0.2.2501+proto`, floors 10 and 8, ordering read as the puzzle, the Mine
+  tip read as mitigation (`EB-436`), Block and Skittish learned by experiment
+  (`EB-443`), Countdown undrawn in five runs; no pick. **Round 13 is READ**
+  (`review/records/klee-overhaul-round-13-2026-09-04.md`): one seat on
+  `0.2.2547+proto`, floor 14 at a declared budget overrun, eight of eight
+  fights, "don't use your big spell" read as the kit's best decision, the
+  Bomb queue and the enemy-turn Melt invisible (`EB-450`), events unnamed
+  (`EB-448`); no pick. **Round 14 is READ**
+  (`review/records/klee-overhaul-round-14-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 8 at the bridge's cap, six of six fights, the
+  Spark economy read as the kit's engine, an invisible Mine (`EB-457`), the
+  enemy block printed twice (`EB-458`); no pick. **Round 15 is READ, targeted**
+  (`review/records/klee-overhaul-round-15-2026-09-04.md`): two runs, Countdown and
+  Stoke the Fuse granted then Grounded and Sparks 'n' Splash; Stoke played
+  five times with a real ordering rule, Countdown quiet, Sparks 'n' Splash
+  never played in four fights of its own kit, the intent hedge and the map's deck list wrong
+  (`EB-461`, `EB-447` reopened); no pick. **Round 16 is READ**
+  (`review/records/klee-overhaul-round-16-2026-09-04.md`): one seat on
+  `0.2.2614+proto`, floor 11, five of five with the Gardener elite; the
+  ordering decisions read as real and good, Skittish silently unfired by a
+  Bomb (`EB-490`), the last turn of every fight automatic; no pick.
+  **Pool pass one is BUILT** (`review/records/klee-pool-pass-2026-09-05.md`,
+  `EB-491`, PR #395): ten rows, all FOLLOWS on the doctrine read, two of
+  them the Retained detonators the Retain-density reading asked for (Long
+  Fuse, Pocket Match) and eight archetype rows the comparison pass of
+  round 17 on has to justify (stage-gate, *The loop inside Prototype*);
+  the pool is 45. **Round 17 is READ, the first under the Prototype loop**
+  (`review/ruled/klee-overhaul-round-17-2026-09-05.md`): an assembled Cook
+  deck and a natural run on `0.2.2674+proto`, floors 12 and 11, eleven of
+  eleven fights; the hypothesis (preserve one large Bomb) partly supported,
+  the Sparks paid by Mines rather than by holding; the payoff cards blank
+  without a second placer, turn one generic a seventh time; **one pick**
+  (the starter's second placer, default Pop! for a Strike, PR #398);
+  `EB-496`-`EB-498`. **Round 18 is READ**
+  (`review/records/klee-overhaul-round-18-2026-09-05.md`): a Cook deck and
+  a Spray deck on `0.2.2696+proto`, Sparks logged every turn, both to floor
+  12 with different reward wants; the relic hypothesis confirmed (Spray
+  paid by count, Cook by Mines, Grounded fired once in five fights); two
+  adjustments FOLLOWS (Grounded pays with a Bomb on the field; a random
+  Set off prefers a bombed body, `EB-516`); no pick; `EB-512`-`EB-515`.
+  **Round 19 is READ** (`review/records/klee-overhaul-round-19-2026-09-05.md`):
+  the adjusted Grounded on `0.2.2729+proto` read as a decision (paid three
+  times, failed twice after a full detonation, the brief's Grounded-versus-
+  Run Away! tension played on the elite); the Spark bank outran its sinks a
+  fourth time (access); Careful Arrangement a cut candidate (`EB-534`); no
+  pick; `EB-533`-`EB-537`. **Round 20 is READ**
+  (`review/records/klee-overhaul-round-20-2026-09-05.md`): on
+  `0.2.2753+proto` both seats found the printed numbers "trustworthy to the
+  digit" and named cash-or-cook as the decision; the hallway read and
+  Careful Arrangement's Mine clause carried; the Set off preview does not
+  fold a pending reaction (`EB-559`); no pick; `EB-554`-`EB-560`.
+  **The round-17 pick is RULED R261** (2026-09-05,
+  `review/ruled/klee-overhaul-round-17-2026-09-05.md`): Jumpy Dumpty
+  alone gains Innate, the starter otherwise untouched; built under
+  `EB-557`. **Round 21 is READ**
+  (`review/records/klee-overhaul-round-21-2026-09-06.md`): on
+  `0.2.2789+proto` the Innate placer opened all eleven fights and the
+  placement is "a ritual"; the natural lane named the starter's one
+  detonator as the wait (held for a second reading, [USER]'s call if it
+  moves); the random Set off steers its first iteration only; Careful
+  Arrangement on a Mine as printed; Kaeya's face names a Grounded that
+  no longer exists (`EB-576`); a D default on offer shape for the Spark
+  sinks (`EB-577`); no pick; `EB-573`-`EB-577`. **Round 22 is READ**
+  (`review/records/klee-overhaul-round-22-2026-09-06.md`): three natural
+  lanes on `0.2.2817+proto`, one void on a hard blocker (Hefty Tablet's
+  rare pick on `EB-577`'s canonical model, `EB-594`, fixed the same
+  night); the Spark-priced offer reached the seats and the economy
+  still read as never binding or circular; the starter's single
+  detonator read a third time (five dead-Bomb turns in six fights), to
+  be raised as [USER]'s own pick after the round lands; no pick in the
+  packet; `EB-593`-`EB-596`, `EB-605`. **The starter's detonator is
+  RULED R262** (2026-09-06,
+  `review/ruled/klee-starter-detonator-pick-2026-09-06.md`): hold, R261
+  re-affirmed, the starter at two kit cards with Innate on Jumpy Dumpty
+  alone; the draft is the fix and nothing builds. **Round 23 is
+  READ** (`review/records/klee-overhaul-round-23-2026-09-06.md`): on
+  `0.2.2830+proto` the Spark loop read from both edges, never scarce on
+  the natural lane and deadlocked on a deck of Spark cards (the act-1
+  elite lost to a priced-out detonator, not to damage); Hexerei's three
+  exact questions to `EB-596`; no pick here; `EB-607`-`EB-612`.
+  **Comparison pass one is WRITTEN**
+  (`review/records/klee-pool-comparison-pass-2026-09-06.md`): seven of the
+  ten pool-pass rows earn their place, Long Fuse's escalation goes to the
+  audit door, Fireworks Show and Kindling are held, the pool stays 45, and
+  round 24's hypothesis is the React deck; no pick.
+  **Long Fuse's escalation is OFF** (`EB-617`, built 2026-09-06, audited
+  FOLLOWS 2026-09-07 on C2 and C6,
+  `review/records/card-audit-2026-09-07.md` row 1); round 25's hypothesis
+  (an Energy-priced detonator beside the Spark-priced ones) is drafted in
+  the comparison pass §4 from the GPT balance review.
+  **[USER]'s act-1 run is PLAYED** (2026-09-07, `0.2.2888+proto`,
+  `review/ruled/klee-user-run-1-2026-09-07.md`): the concept read as
+  sound, the early fragility and the every-turn Block puzzle as the
+  brief's tension; seven notes triaged, `EB-619`-`EB-622` applied as D
+  and E defaults; **both picks RULED R265** (2026-09-07, packet now in
+  `review/ruled/`): every Hexerei card gives a Spark and "Klee's own" leaves
+  the faces (`EB-642`, a rule change [USER] plays once built); the tag stays
+  and round 24 or 25 carries a deliberate Hexerei lane before any reader is
+  added. The round-8 clear is
+  read against a control run (below).
+  Round 24 is READ (`review/records/klee-overhaul-round-24-2026-09-07.md`):
+  Klee round 24: the coven lane; both seats state the Hexerei rule and get it
+  right, and the one card that breaks it is Klee's own.
+
+- **Kokomi** — Rounds 4d and 5 are RULED (R250,
+  `review/ruled/kokomi-overhaul-round-4d-2026-09-03.md`, `...round-5-2026-09-04.md`):
+  six Plan-only cards gain a weaker now-line, and a single-target Plan is aimed
+  when written if the engine can carry a second selection, else lands on the
+  front enemy that is not a Minion. Round 9 is READ
+  (`review/ruled/kokomi-overhaul-round-9-2026-09-04.md`): both rules read
+  true, run 2 cleared acts 1 and 2 and died on act-3 floor 39 after a misread
+  of The Moon's face; the pool's empty shelf is tempo (no energy, no Retain),
+  one pick, `EB-376`-`EB-381`. **Round 10 is BUILT** — the TEMPO SHELF, round 9
+  pick 1 at its default AS AUDITED (R253,
+  `review/ruled/kokomi-overhaul-round-9-2026-09-04.md`): Tide Chart and
+  Ripple, on a new `plans_held` count in both engines, the pool 30 rows;
+  Held Tide and Tidal Rhythm were withdrawn on the charter audit and are
+  not on the surface. **Round 10 is READ**
+  (`review/ruled/kokomi-overhaul-round-10-2026-09-04.md`): two seats on
+  `0.2.2446+proto`, floors 6 and 11, both budget-out, neither drew Tide
+  Chart; the Plan's Shrink line read true again, the jellyfish stood empty
+  on most turns, one pick (starter Plan density), `EB-402`-`EB-403`,
+  `EB-408`-`EB-411`; RULED R254, starter density stands. **Round 11 is READ**
+  (`review/records/kokomi-overhaul-round-11-2026-09-04.md`): two seats on
+  `0.2.2476+proto`, floors 10 and 10, both budget-out; the six round-10
+  fixes read true, the Plan read as the kit's decision and as autopilot in
+  one run, `EB-426`-`EB-428`, `EB-433`; no pick. **Round 12 is READ**
+  (`review/records/kokomi-overhaul-round-12-2026-09-04.md`): one seat on
+  `0.2.2501+proto`, floor 11; a carry-out into Block prints nothing, an
+  Attack face not Weak-folded, the Plan tip's aim sentence unread
+  (`EB-440`-`EB-442`); no pick. **Round 13 is READ**
+  (`review/records/kokomi-overhaul-round-13-2026-09-04.md`): one seat on
+  `0.2.2547+proto`, the act-1 boss reached at a declared budget overrun,
+  eight of eight fights, War Council read as four different correct calls,
+  a targeted potion vanishing untargeted (`EB-452`), the carry-out panel
+  omitting a Plan (`EB-453`), Change of Plans dead until it says why
+  (`EB-455`), the bridge to count actions (`EB-456`); Tide Chart undrawn a
+  seventh time; no pick. **Round 14 is READ**
+  (`review/records/kokomi-overhaul-round-14-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 12 at the cap with the elite dying, Arcane
+  Scroll gave no card (`EB-459`), dual-intent attack numbers never land
+  (`EB-461`), Kurage's Oath's tag contradicts its rider (`EB-462`); Tide
+  Chart undrawn an eighth time; no pick. **Round 15 is READ, targeted**
+  (`review/ruled/kokomi-overhaul-round-15-2026-09-04.md`, RULED R257):
+  Tide Chart granted and dead as printed (zero draws on three of four
+  plays), which fired R254's re-ask trigger; **R257 took the default**: Tide
+  Chart redesigned to pay after the carry-outs (`EB-478`, GPT-audited before
+  a tester), the starter stays two kit cards; `EB-467`-`EB-469`. **Round 16 is READ**
+  (`review/records/kokomi-overhaul-round-16-2026-09-04.md`): one seat on
+  `0.2.2614+proto`, floor 8 at the cap with the elite dead on the last
+  action; a non-Plan card on the Bake-Kurage silently accepted (`EB-480`),
+  Vulnerable's two texts (`EB-481`), the reaction preview a turn late
+  (`EB-482`); the redesigned Tide Chart undrawn, so the next round grants
+  it; no pick. **Pool pass one is BUILT**
+  (`review/records/kokomi-pool-pass-2026-09-05.md`, `EB-492`, PR #394):
+  Plan lines on three Attacks, a 0-cost payoff that reads the morning, a
+  Block-and-hit Plan, and Nereid's Ascension as a Rare Power (every Plan
+  twice, no Exhaust, no Plan slot) replacing its two-turn Plan row; six
+  FOLLOWS after three were re-priced off shipped cards; the pool is 35.
+  **Round 17 is READ** (`review/records/kokomi-overhaul-round-17-2026-09-05.md`):
+  an assembled deck (Tide Chart, Nereid's, The Moon, Battle Plan, Stolen
+  Chapter, Well Laid granted) and a natural run on `0.2.2674+proto`; the
+  doubler read as the deck's spine, Plan density paid, turn one presented
+  a decision on both lanes; three payoffs unreadable (Tide Chart silent,
+  Well Laid's face and count, Nereid's and The Moon not composing on the
+  face); the assembled seat died on an elite after a refusal listed no
+  form for an all-enemies card; no pick; `EB-499`-`EB-504`, `EB-481`
+  reopened, `EB-410` widened. **Round 18 is READ**
+  (`review/records/kokomi-overhaul-round-18-2026-09-05.md`): an assembled
+  deck (Tide Chart, Well Laid, Nereid's, Riptide, Pincer) and a natural run
+  on `0.2.2696+proto`; the morning trustworthy on every predicted carry-out,
+  Nereid's the spine, Tide Chart and Well Laid read as reader rows; the
+  letter handle fuzzy-matched the Bake-Kurage on both lanes (`EB-519`),
+  Frozen's face against its rule (`EB-517`); no pick; `EB-517`-`EB-523`,
+  `EB-504` reopened. **Round 19 is READ**
+  (`review/records/kokomi-overhaul-round-19-2026-09-05.md`): on
+  `0.2.2729+proto` with the letter handle fixed, the assembled seat reached
+  2 HP and stated the brief's weakness back ("a tempo loan, richest when
+  ahead and unusable when behind"); a carry-out is not a hit for on-hit
+  powers and the tip owes the sentence (`EB-538`); a spawned replacement
+  reused a dead body's letter (`EB-541`); no pick; `EB-538`-`EB-545`.
+  **Round 20 is READ** (`review/records/kokomi-overhaul-round-20-2026-09-05.md`):
+  two natural seats on `0.2.2753+proto`; no reader row drafted (the one
+  offer of two was passed for raw damage); The Moon Overlooks the Waters
+  read as deleting the kit's question once it lands, to be read at the
+  door before it moves; the Byrdonis elite beaten with zero Plans written;
+  no pick; `EB-561`-`EB-563`. **The Moon is WITHDRAWN** (2026-09-05,
+  `EB-570`, card-audit ledger 5.9: two door reads, REQUIRES_MODIFICATION
+  on C1 both). **Round 21 is READ**
+  (`review/records/kokomi-overhaul-round-21-2026-09-06.md`): on
+  `0.2.2800+proto` the assembled lane found Nereid's Ascension doubling a
+  Battle Plan morning from turn one and Well Laid reading 0 on half its
+  draws; the natural lane wrote Plans on nine of eighteen turns and
+  declined four readers; every number reconciled on both lanes; the
+  coordinator granted the Kurage Memory Oath by mistake (`EB-581`); a
+  D default folds a card's enchantment into its Plan line (`EB-580`);
+  no pick; `EB-578`-`EB-581`. **Round 22 is READ**
+  (`review/records/kokomi-overhaul-round-22-2026-09-06.md`): on
+  `0.2.2817+proto` both lanes read the Plan trade as two-sided off the
+  face (Shrink makes writing win, Vulnerable makes playing win); the
+  Plan line previews the target's expiring debuff and the morning paid
+  7 on a printed 10 (`EB-599`, D default: the Plan line folds hers and
+  nothing of the target's); Shrink reduced a Skill against its gloss
+  (`EB-597`); the jellyfish's first turn now prints; no pick;
+  `EB-597`-`EB-599`, built on #413. **[USER]'s act-1 run is PLAYED**
+  (2026-09-07, `0.2.2888+proto`,
+  `review/ruled/kokomi-user-run-1-2026-09-07.md`): "not bad, better than
+  before, but the central loop feels too auto-pilot"; an off-turn is
+  "play all my Plan cards" with nothing to sequence; **RULED R265**
+  (2026-09-07, packet in `review/ruled/`): pool first, order riders and the
+  queue as a resource, a dusk/dawn trial, the two-Plan cap as one lane of the
+  next round, the rule decided on its reads (`EB-643`); `EB-623`-`EB-626`. The Kurage
+  memory is base kit behind `C.KURAGE_MEMORY` (`EB-198`, `EB-234`).
+  **The next assembled round's hypothesis is drafted** (r22 packet §5, from
+  the GPT balance review of 2026-09-06): Nereid's over Tide Wall, Ripple and
+  Battle Plan pays 50 Block, 4 Energy and 6 cards for 2 Energy the morning
+  before, since the reader counts carry-outs (`EB-501`); a test, not a nerf.
+  Round 23 is READ (`review/records/kokomi-overhaul-round-23-2026-09-07.md`):
+  Kokomi round twenty-three: the order written is a decision, two of the eight
+  are dead, and the cap was never reached.
+  Round 24 is READ (`review/ruled/kokomi-overhaul-round-24-2026-09-07.md`):
+  Kokomi round twenty-four, one lane: the cap engaged, was never printed, and
+  read as a wall until it read as a choice.
+  Round 25 is READ (`review/records/kokomi-overhaul-round-25-2026-09-07.md`):
+  Kokomi round 25: two natural drafts without the cap; the enemy's printed
+  intent is what decides whether writing everything is free or chosen.
+  Round 26 is READ (`review/records/kokomi-overhaul-round-26-2026-09-08.md`):
+  Kokomi round 26: on a safe turn the competition is a face-up attack or the
+  same card's own timing, never draw or filter; the decision that lives there
+  is which two Plans, in which order.
+  Round 27 is READ (`review/records/kokomi-overhaul-round-27-2026-09-08.md`):
+  Kokomi round 27: two of the four rebuilt faces never appeared, Breakwater's
+  clause paid zero four times because it counts the wrong turn, and Night
+  Watch lost every draft it was in.
+  Round 28 is READ (`review/records/kokomi-overhaul-round-28-2026-09-08.md`):
+  Kokomi round 28: both granted faces reached the hand; Scout Ahead counts and
+  pays exactly and is always written last; Read the Field's look wants energy
+  left and its Block is a boss card.
+  Round 29 is READ (`review/records/kokomi-overhaul-round-29-2026-09-08.md`):
+  Kokomi round 29: Slack Water's two halves split by body count as built;
+  Breakwater's held-count was never separable above its base; one lane lost to
+  a renderer storm in the Punch Off event.
+  Round 30 is READ (`review/records/kokomi-overhaul-round-30-2026-09-08.md`):
+  Kokomi round 30: the fixed screen read as built; what a seat still
+  reconstructs is a relic's unnamed hit, a folded number's base, and turn
+  order; Slack Water's Dusk half went unwritten in both lanes.
+  Round 31 is READ (`review/records/kokomi-overhaul-round-31-2026-09-08.md`):
+  Kokomi round 31: every opening hand held a Plan line; the basic Strike was
+  written on 17 turns and played on 23, each switch decided by a printed
+  telegraph, lethal or Block; the no-decision turn is now a lethal or a hand
+  of Defends.
+  Pool pass seven is READ (`review/records/kokomi-defend-2026-09-08.md`):
+  Kokomi, the Defend: the last unwritable card is worth more while the
+  jellyfish holds a Plan.
+
+- **Furina** — the reframe is countersigned (R220 A); slice 1 is built in the
+  sim and, since PR #298, in the C# behind `FURINA_REFRAME`, both OFF. **Slice
+  2's five `proto_fr_` rows are built** (2026-09-02; nine with round 4's
+  riders): the named deploy, two
+  Evokes and the drain pair, on a new `drain_fanfare` op and the
+  `Deploy`/`Evoke`/`Drain` tips. R250 (2026-09-04) LIFTS the R220 B sequence: the arm is on in the
+  installed dev build, soaked, and **round one is read**
+  and RULED (R251, `review/ruled/furina-reframe-round-1-2026-09-04.md`): one
+  Sonnet seat cleared act 1 at 8 of 78, the reframe's rules read true, the
+  shipped Burst won the boss fight. **Round two is BUILT**: the shipped Burst
+  retires under the arm alone — no draw, no feed, no kit card, behind
+  `FURINA_REFRAME_BURST` in both engines, the shared retirement still
+  `EB-199` / `EB-200`'s (`EB-365` closed) — with `EB-364`, `EB-366`, `EB-367`
+  and `EB-368`. Round 2 is RULED (R253,
+  `review/ruled/furina-reframe-round-2-2026-09-04.md`): the riders re-priced
+  arm-only and Encore absorption kept and printed. **Round 4 is BUILT** — round 2 pick 1 at its default, the four copies
+  passed the charter audit: four
+  arm-only `proto_fr_` copies of the shipped Fanfare riders at the arm's own
+  scale (12/12/15/20 down to 6/6/8/10), swapped in for the shipped ids at the
+  same rarity by `loader._pool_substitutions` and
+  `FurinaReframeRoster.SwapOfferedRiders`, so the shipped sheet stands and an
+  arm-off run is offered the shipped card. **Round 4 is READ**
+  (`review/ruled/furina-reframe-round-4-2026-09-04.md`): two seats on
+  `0.2.2446+proto`, floors 4 and 8, both budget-out, no rider copy drawn,
+  Fanfare decorative below the bars; four real decisions named, one pick
+  (a reader in every deck), `EB-404`-`EB-407`, `EB-412`-`EB-414`; RULED R254:
+  Aria of Recompense reads Fanfare under the arm (5 more Encore at 3 since
+  round 6, from 6), the
+  starter stays two kit cards, **BUILT** as `proto_fr_aria_of_recompense`.
+  **Round 5 is READ**
+  (`review/ruled/furina-reframe-round-5-2026-09-04.md`): two seats on
+  `0.2.2476+proto`, floors 10 and 10, both budget-out; the turn one with no
+  Encore in every fight, the reader carried at Fanfare 3 and its line never
+  paid, nine rows (`EB-419`-`EB-425`, `EB-429`, `EB-430`); the Encore
+  opening pick is **RULED R258** (2026-09-04): Furina starts each combat
+  with 2 Encore under the arm (`EB-479`), the packet is in `review/ruled/`. **Rounds 6 and 7 are READ**
+  (`review/records/furina-reframe-round-6-2026-09-04.md`, `-round-7-`): one
+  seat each on `0.2.2501+proto` and `0.2.2547+proto`, floors 11 and 10, the
+  reader's bar moved to 3 (round 6 default), a member's roll spent the paid
+  performance on a reviving Minion (`EB-451`, skips Minions as R250's shape),
+  the retired Burst's tip still taught at a reward (`EB-449`); the Encore
+  opening read the same a third time. **Round 8 is READ**
+  (`review/records/furina-reframe-round-8-2026-09-04.md`): one seat on
+  `0.2.2564+proto`, floor 10 at the cap, six of six fights with the elite,
+  Guest Cast skipping Chiori's hit (`EB-463`), a Replay performing no member
+  (`EB-464`), five faces feeding a Burst no screen shows (`EB-449`), the
+  Encore opening read the same a fourth time. **Round 9 is READ**
+  (`review/records/furina-reframe-round-9-2026-09-04.md`): one seat on
+  `0.2.2577+proto`, floor 11 at the cap, six of six with the elite at zero
+  HP; enemy Block never printed (`EB-474`), three undefined terms
+  (`EB-475`), a performance takes Vulnerable and does not Shatter
+  (`EB-476`), an empty stage halves a Companion card silently (`EB-477`);
+  turn one read as a real choice, dry by construction. **Round 10 is READ**
+  (`review/records/furina-reframe-round-10-2026-09-04.md`): one seat on
+  `0.2.2614+proto` with the 2-Encore opening, floor 12, four of four with
+  the Gardener elite, stopped at 98 actions by a bridge hang on an Unknown
+  room (`EB-489`); the Spotlight relic reads as permanent (`EB-485`),
+  Backstroke's Block outside the fold (`EB-486`), Encore and Fanfare rows
+  vanish at 0 (`EB-487`); the Salon was furniture with one Deploy in the
+  deck. **Pool pass one is BUILT**
+  (`review/records/furina-pool-pass-2026-09-05.md`, `EB-493`, PR #393):
+  four arm-only Commons swapped in for shipped ones at the same rarity
+  (a deploy on an Attack, a second performance bought with Encore, the
+  kit's own perform verb, An Invitation's verb in the pool), four
+  FOLLOWS; Second Course's full price is five Encore, the printed three
+  plus one per performance by the shipped Salon rule, and the packet says
+  so. Still owed from the reframe, ruled and not re-asked: the fourth,
+  scaling member (F1 option 2) and the named Spotlight (`EB-466`).
+  **Round 11 is READ** (`review/ruled/furina-reframe-round-11-2026-09-05.md`):
+  an assembled deck (the four Commons granted) and a natural run on
+  `0.2.2674+proto`, ten of ten fights including two elites, one for zero
+  HP; the stage occupied and performing from turn two in every fight,
+  Second Course landing at its five-Encore price, Rolling Tide never
+  played; turn one empty by construction (zero empty turns when Salon
+  Début was in the opening hand); what read as a lost amplifier was the
+  performance log filing pre-damage numbers (`EB-511`, built the same
+  day); **one pick** (the stage on turn one,
+  default Salon Début Innate, PR #398); `EB-505`-`EB-511`, `EB-449`
+  reopened, `EB-504` widened. **Round 12 is READ**
+  (`review/records/furina-reframe-round-12-2026-09-05.md`): an assembled deck
+  (the four Commons) and a natural run on `0.2.2696+proto`, ten of ten
+  fights; Rolling Tide's price answered by three seats (1 energy) and
+  Curtain Rises fielding a Block member at the front, both adjustments
+  FOLLOWS (`EB-530`); the empty first turn read a third time (the round-11
+  pick, waiting); no pick; `EB-524`-`EB-529`. **Round 13 is READ**
+  (`review/records/furina-reframe-round-13-2026-09-05.md`): on
+  `0.2.2729+proto`, Rolling Tide at 1 energy still the weakest card in the
+  deck and WITHDRAWN from the arm's offer (three rounds, four seats);
+  Second Course never playable at the opening Encore for a third round, its
+  printed price to 1 (FOLLOWS, `EB-552`); Aria+'s Innate defeated its own
+  Fanfare reader and the upgrade drops it (`EB-550`); the stage draw-gated
+  on one card, the round-11 pick's fourth reading; no pick;
+  `EB-546`-`EB-552`. **Round 14 is READ**
+  (`review/records/furina-reframe-round-14-2026-09-05.md`): two seats on
+  `0.2.2753+proto`, four of four and six of six fights with both elites;
+  Rolling Tide not missed, Second Course playable once in five (Encore
+  at 0 on most turns, the price stands), Aria+ pays without Innate;
+  the faces fold Dexterity before a seat reads them (`EB-566`, not a
+  defect), the Evoke
+  prints no line (`EB-564`), the Spotlight's turn-one window unprinted
+  (`EB-567`), Rapturous Applause's face hides a floor (`EB-568`), Amber
+  outside the Spotlight fold (`EB-565`); the empty stage read a fifth
+  time, answered by R260 and read next on its build; no pick;
+  `EB-564`-`EB-568`. **Round 15 is READ**
+  (`review/records/furina-reframe-round-15-2026-09-06.md`): on
+  `0.2.2800+proto` R260 held on all twelve fights (the stage never
+  empty, the turn-one Companion card always performing); Second Course
+  playable beside a generator; the Evoke reached by the assembled deck
+  only, paying nothing when dry (`EB-587`, D default: it pays) and
+  printing out of order (`EB-582`); Weak cut a performance (`EB-588`,
+  built); the Skittish read was a killing hit, not a defect (`EB-592`);
+  no pick; `EB-582`-`EB-592`. **Round 16 is READ**
+  (`review/records/furina-reframe-round-16-2026-09-06.md`): on
+  `0.2.2817+proto` the hit rules read as built (Skittish and Thorns on
+  card hits, never on performances; Weak off performances), the Evoke
+  pays dry and prints first, and a natural deck with three Deploys
+  Evoked on purpose (the reachability question closed by the draft);
+  the Spotlight's line is false since Encore refills (`EB-600`); the
+  fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
+  `EB-600`-`EB-604`, built on #413. **[USER]'s act-1 run is PLAYED**
+  (2026-09-07, `0.2.2888+proto`, a short run ending at a Corpse Slug,
+  `review/active/furina-user-run-1-2026-09-07.md`): the notes are the
+  interface, not the kit ("still has basic UI legibility issues"; the
+  Encore idea liked, the stage unreadable, the Salon tip a wall);
+  `EB-627`-`EB-629` applied as E defaults (a member strip, Encore pips and
+  a Fanfare badge, the Salon tip in three sentences), **one eyes-on** on
+  the next deploy; no fun verdict recorded.
+  **`EB-507` and `EB-616` are BUILT and AUDITED**
+  (`review/records/card-audit-2026-09-07.md`, six rows read by GPT, five
+  FOLLOWS on the first call): under the arm no offered face grants a Fanfare
+  floor (Rapturous Applause and Unheard Confession as arm copies without it,
+  The Sea Is My Stage's Rare slot to Let the People Rejoice, the arm's own
+  drain at 2 per Fanfare drained), the Cadenza copy Exhausts and its upgrade
+  moves the bar 6 to 3, Shared Billing's upgrade gains 3 Block, Unheard pays
+  2 per change. Rapturous Applause REQUIRED MODIFICATION on C8 (a doubled
+  payout, not a threshold) and takes the threshold mapping, 1 per 5 Fanfare
+  (`fanfare_attack_per5`), FOLLOWS on the re-read. Round 17's hypothesis is
+  in the r16 packet §5.
+  No stamp moves, nothing measured.
+  Round 7 is READ (`review/records/furina-reframe-round-7-2026-09-04.md`):
+  Furina round seven: the paid performance the RNG spent, and a meter the kit
+  no longer has.
+
+- **Control run** — R250 pick 4, RUN 2026-09-04
+  (`review/records/control-ironclad-2026-09-04.md`): the same Opus seat family
+  playing base Ironclad at Ascension 0 died on the act-1 boss, floor 17, where
+  the arm pools (33 Klee / 30 Kokomi rows
+  against 79 / 76 shipped) cleared
+  three of seven kit runs. The clears are the kits'; a clear on a 30-row pool
+  is consistency as much as strength. The second control (same afternoon,
+  §5) died on the same floor to the same Death Blow; no third is queued.
+
+- **Elements and reactions — RULED R263** (2026-09-06,
+  `review/ruled/elements-reaction-sweep-2026-09-05.md` §6): Dendro's build
+  is deferred out of the rebuild milestone, its boundaries drawn now with
+  Sumeru struck as a prerequisite (`review/ruled/dendro-boundaries-2026-09-06.md`,
+  its four picks RULED R264 at their defaults, Quicken canon-gated); the sweep runs visibility, then a READING of the concrete
+  sequences and companion choices
+  (`review/records/reaction-sequences-2026-09-06.md`), then a change only
+  where that reading shows a weakness; Quicken is additive under the iron
+  rule as read, no amendment. The layer's brief is
+  `review/active/reaction-brief-2026-09-06.md` (no pick, GPT audit owed);
+  the census (`review/records/reaction-census-2026-09-05.md`) is the count
+  the reading corrects. `EB-428` built, `EB-410` the open display half.
+
+- **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
+  parallel; `EB-249` / `EB-250` / `EB-251` are what it owes; Itto and Gorou's
+  rate are noted there from the round-5 and act-1 reads.
+
+
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —
   Track A / Track E logs.
