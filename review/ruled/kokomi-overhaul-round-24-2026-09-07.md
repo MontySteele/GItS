@@ -1,4 +1,4 @@
-Status: OPEN (no pick; the defaults in §5 are applied)
+Status: RULED R266 2026-09-07 (the cap retired as a rule)
 
 # Kokomi round twenty-four, one lane: the cap engaged, was never printed, and read as a wall until it read as a choice
 
@@ -89,3 +89,11 @@ and the re-ask trigger is the cap lane in §4 item 3 on a build that prints
 it. That is a D default under R265 pick 1 and is applied without a pick.
 Items 1 and 2 are E defaults (a printed rule, a log line). No shipped
 number moves.
+
+## 6. Ruled
+
+**R266 (2026-09-07, night).** [USER]: "Agreed, let's retire it." The
+two-Plan cap is retired as a rule; the toggle stays dormant in the engine as
+a fallback and no further cap lanes are scheduled. The free turn is priced
+by the faces instead (pool pass three, `EB-655`, audited the same night).
+§5's D default is superseded by the ruling.
