@@ -219,6 +219,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkCleansingWave>(),
             ModelDb.Card<ProtoKkCoralBulwark>(),
             ModelDb.Card<ProtoKkDeepCurrent>(),
+            ModelDb.Card<ProtoKkDefend>(),
             ModelDb.Card<ProtoKkExposedFlank>(),
             ModelDb.Card<ProtoKkFeignedRetreat>(),
             ModelDb.Card<ProtoKkFeint>(),

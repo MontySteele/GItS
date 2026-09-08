@@ -3410,3 +3410,134 @@ term -- the now-line plus the Plan line at `PLAN_DELAY_DISCOUNT`, 6 + 8 x 0.75
 NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
 slate, no stamp and no re-baseline. What the pass owes is a natural round whose
 debrief counts the opening hands with no decision in them.
+
+## Kokomi pool pass seven -- the unwritable card (`EB-711`, 2026-09-08)
+
+THE FINDING THE PASS ANSWERS, named by rounds 28 to 31 from two sides. Round 28
+lane 2: Defend is "THE ONLY CARD IN THE DECK THAT CANNOT BE POINTED AT THE
+JELLYFISH, so the only card that never poses the kit's question." Round 31 lane
+2: the one dead turn of a 39-turn run was a hand of two Defends, two Wounds and
+two cards it could not use. Round 31 lane 1 died on the elite to a five-card
+hand with no Block at all against 21 incoming -- "the kit's defence is
+concentrated in three cards, and two of them only pay when the Casket is
+firing." Defend was unwritable, and Block was thin.
+
+THE THREE ANSWERS NOT TAKEN, each for its own reason. NOT A PLAN LINE: Block a
+turn late is the half every seat has rejected (Read the Field's Plan, round 28
+lane 1, "always one turn late"), and a Dusk line on the basic would make
+Breakwater a strictly worse card the day after pool pass five rebuilt it. NOT A
+RULE: "the jellyfish Blocks for you" is the decoration round 27 lane 2 warned
+of before its first Plan, and a rule change is [USER]'s to play. NOT MORE BLOCK
+CARDS IN THE STARTER: lane 1's hand had no Defend because the draw did not
+offer one, and a stronger Defend does not change how often a Defend is drawn.
+
+THE CHANGE, and it is one card. **Defend** (Kokomi), cost 1, Skill, basic:
+"Gain {Block:diff()} [gold]Block[/gold], plus 2 if the [gold]Bake-Kurage[/gold]
+is holding a [gold]Plan[/gold]." 5 and 2, upgrading to 8 and 2 -- the base
+Defend's +3 on the printed number, with the rider fixed. Two points is the size
+of Breakwater's per-Plan clause and of the basic Strike's premium.
+
+"HOLDING" IS THE QUEUE, READ LIVE at the moment the card resolves: a Plan
+written earlier this turn counts, a Dusk entry counts until it resolves, and a
+queue the morning's carry-out emptied does not. So the card asks its question by
+ORDERING, on the turn -- write first and Block for 7, or Block first for 5 and
+keep the energy uncommitted -- which is the same shape the seats already play
+(Opening Gambit before Scout Ahead, Kurage's Oath before Breakwater), and it
+puts the kit's engine under its floor: a turn that writes a Plan is a turn whose
+Defend is a Defend+, and a hand of Defends with nothing to write is, still, a
+hand of Defends.
+
+ONE READER PER ENGINE, and it is the reader that already existed:
+`KokomiPlan.PlansHeld` in the mod (Breakwater's per-Plan count, Tide Chart's
+draw) and `effects._predicate`'s new `plan_held` over `state.kk_plan_queue` in
+the sim. NOT `KokomiOverhaulLedger.PlansThisMorning`, which is the other number
+and the wrong one: it keeps yesterday's value until the next drain, so a Defend
+played after the carry-out would have paid for Plans the jellyfish no longer
+holds.
+
+A THEN/ELSE AND NOT A BASE PLUS A RIDER, which is an engine fact and not a
+style. Two `GainBlock` calls take Dexterity and Frail TWICE (5+D then 2+D)
+while the face folds ONE gain of 7, so the card would print a number it does not
+pay -- `EB-486`'s defect class arriving from the other end. One clause, one
+gain, one var.
+
+THE FACE FOLDS THE RIDER LIVE, so the seat reads 7 before deciding to play.
+`KokomiPlan.PlanHeldBlockVar` is `SpotlightSystem.SpotlitBlockVar`'s
+construction on this arm's question: the game's own `BlockVar` runs first (so
+Dexterity and Frail are the engine's answer), the rider is added, and a
+throwaway `BlockVar` takes the same hook pass the emitted `GainBlock` will make
+-- that order and not the reverse, so a percentage cannot compound against the
+wrong base. It subclasses `BlockVar` because `DynamicVarSet.Block` CASTS to one.
+ONE VAR AND NOT FEINT'S PAIR: Feint prints two things the card might do; this
+prints one thing with a rider on it, which is what the sentence says.
+`gen_klee_cards.plan_held_block_rider` is the single derivation the var's
+numbers and the emitted branch literals both come out of.
+
+THE TAG TRAVELS WITH THE CARD (`basic_tag: defend`), which is pool pass six's
+argument one tag over: with her Defend now her own card, an untagged row would
+leave Fasten's picture and every "one of your Defends" with NO answer in her
+deck -- `EB-352` is the row that found that exact throw from the pool side. The
+field is DECLARED and not re-derived; Tide Wall, Shell Guard and Coral Bulwark
+all gain Block and none of them is the Defend.
+
+THE FOURTH SEAM MOVES WITH IT. `KokomiOverhaulRoster.StarterDefend` now answers
+`ProtoKkDefend`, for the reason `StarterStrike` answers `ProtoKkStrike`: Large
+Capsule's "an additional Strike and Defend" asks the CHARACTER, and handing back
+a `DefendSilent` would drop a flat 5 into a deck whose Defends all read the
+queue.
+
+AND THE BORROWED-COLOUR SEAM CLOSES. Pool pass six reported one: her four
+Defends were `DefendSilent`, so the deck screen showed them in the Silent pool's
+`5EBD00` rather than her `6FC8D6`. Neither basic is a base card now.
+
+THE PILOT HAD TO BE TAUGHT THE PREDICATE, and this is disclosed because the
+first read was the instrument's. `EB-144`'s hole is a bare `continue`: a
+predicate `tier0/pilot/policy._active_effects` has never been taught prices the
+WHOLE conditional at zero, so the first before/after pair had her Defend scoring
+0 Block and never being played -- 37.3% down to 28.0%, an artifact entirely.
+`plan_held` is a pure current-state read with no snapshot field and no telemetry
+row, so it joins `_ENGINE_LIVE_PREDICATES` and the pilot asks the engine rather
+than keeping a second copy of the rule. It moves no published number: one
+`proto_` row prints it, under a flag off in every anchor
+(`C.PLAN_DELAY_DISCOUNT`'s own argument). Her Rare's
+`plan_carried_out_this_turn` is still in that hole and is NOT touched here --
+it is a different row's question and this pass has no read that turns on it.
+
+THE SIM READ, AND IT IS A NULL. `tier05` single-act instrument, arm ON, 600
+runs per arm at each of two seeds, realistic loadout, hunter route, `priest`
+plan, `jobs=1`, world RT13/D18/P11/C21. BEFORE is main's starter (four base
+`defend`); AFTER is this row.
+
+| seed | arm | act-1 winrate | dead-run rate |
+| --- | --- | --- | --- |
+| 4242 | before | 37.33% | 62.67% |
+| 4242 | after | 37.33% | 62.67% |
+| 11 | before | 39.67% | 60.33% |
+| 11 | after | 39.33% | 60.67% |
+
+Under this instrument the two rates are COMPLEMENTS -- a single-act run either
+clears the boss or dies -- so the pair is one number reported twice, and it does
+not move. The card does fire: `plan_held` read true on 21% of the reads a
+40-run cohort took, and total Block gained moves by well under a percent. The
+reason is the sim's own: the pilot writes roughly 19 Plans a run and the rider
+needs a Defend played AFTER a write, in the same turn -- a turn ordering the
+sim's pilot has no reason to seek and a human seat does. Round 32 is what
+answers that, and the design note already says what a null means: "if the rate
+does not move, the floor question moves to the pool (a Common face-up Block
+card with a Plan-shaped rider), not to a rule." That is a design call and it is
+not taken here.
+
+THE DRAFTER NEEDED ONE LINE. `rarity: basic` keeps the row out of
+`rewards.character_pool` and out of `KokomiOverhaulRoster.Slice()` by
+construction (tested), so it is never offered; `plan_held` is registered in
+`tier05.draft.STATIC_PROTOTYPE_CONDITIONS` because the price walk reads the
+SHEET and not the offer pool, and an unpriced branch is what that set exists to
+refuse. No new op, so `_op_price`, `STATIC_OP_PRICING` and the connectivity
+report are untouched.
+
+NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
+slate, no stamp and no re-baseline. The table above is a before/after on one
+instrument, reported because the row asked for it, and it is not a world
+number. What the pass owes is a natural round 32 whose debrief counts Defends
+played with a Plan held against those played without, and asks whether the
+order was chosen.

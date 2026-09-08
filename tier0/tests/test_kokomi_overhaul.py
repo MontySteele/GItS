@@ -191,25 +191,34 @@ def test_the_starter_is_the_canonical_ten():
     line, so it is no longer "a renamed Strike with the same stat line". The
     finding is rounds 26 to 30's -- a hand with no Plan card in it has no
     decision in it, and two Plan cards in ten left roughly one opening hand in
-    five posing nothing. Defend is still the base game's, on purpose."""
+    five posing nothing.
+
+    POOL PASS SEVEN (`EB-711`) MOVES THE DEFEND, on the same test and for
+    rounds 28 to 31's finding: Defend was "the only card in the deck that
+    cannot be pointed at the jellyfish", and r31 lane 1 died to a hand with no
+    Block in it at all. `proto_kk_defend` is 5 Block plus 2 while the queue is
+    non-empty, which is not the base stat line either -- and it is NOT a Plan
+    line, so the deck still holds a card that cannot be WRITTEN and the
+    question stays a question. It asks by ORDERING instead."""
     ids = C.KOKOMI_OVERHAUL_STARTER_IDS
     assert len(ids) == 10
     assert ids.count("proto_kk_strike") == 4
     assert "strike" not in ids
-    assert ids.count("defend") == 4
+    assert ids.count("proto_kk_defend") == 4
+    assert "defend" not in ids
     assert ids.count("proto_kk_kurages_oath") == 1
     assert ids.count("proto_kk_slack_water") == 1
-    assert len([i for i in ids if i.startswith("proto_")]) == 6
+    assert len([i for i in ids if i.startswith("proto_")]) == 10
     staged = {c.id for c in loader.prototype_cards()}
     for gone in ("proto_kk_waters_edge", "proto_kk_coral_guard"):
         assert gone not in staged
-    # EVERY OPENING HAND HOLDS THE KIT'S QUESTION, which is the pass's whole
-    # acceptance: nine of the ten print a `plan:` line, and the tenth is the
-    # Defend that deliberately does not.
+    # EVERY OPENING HAND HOLDS THE KIT'S QUESTION, and the Defend is STILL the
+    # one card of the ten that cannot be written -- which is the half pool
+    # pass seven deliberately did not take.
     rows = {c.id: c for c in loader.prototype_cards()}
     plans = [cid for cid in ids if rows.get(cid) and rows[cid].plan]
     assert len(plans) == 6
-    assert set(ids) - set(plans) == {"defend"}
+    assert set(ids) - set(plans) == {"proto_kk_defend"}
 
 
 def test_the_pool_is_all_thirty_of_the_slices_rows():

@@ -210,12 +210,14 @@ public class ArmStarterBasicsTests
         // bites.
         //
         // `EB-703`: KOKOMI'S STRIKE IS `ProtoKkStrike` SINCE POOL PASS SIX,
-        // and the pin's shape is unchanged, which is the point -- whatever the
-        // pair IS, the relic and the deck have to name the same two.
+        // and `EB-711`: HER DEFEND IS `ProtoKkDefend` SINCE POOL PASS SEVEN.
+        // The pin's shape is unchanged through both, which is the point --
+        // whatever the pair IS, the relic and the deck have to name the same
+        // two.
         foreach (var (roster, strike, defend) in new[]
                  {
                      ("KleeOverhaulRoster", "StrikeIronclad", "DefendIronclad"),
-                     ("KokomiOverhaulRoster", "ProtoKkStrike", "DefendSilent"),
+                     ("KokomiOverhaulRoster", "ProtoKkStrike", "ProtoKkDefend"),
                  })
         {
             Assert.Equal(new[] { $"ModelDb.Card<{strike}>" },

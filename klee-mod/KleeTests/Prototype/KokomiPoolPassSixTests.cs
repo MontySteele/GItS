@@ -204,9 +204,10 @@ public class KokomiPoolPassSixTests
         Assert.Equal(4, deck.Count(c => c == "ModelDb.Card<ProtoKkStrike>"));
         Assert.DoesNotContain(deck, c => c.Contains("StrikeSilent"));
         Assert.DoesNotContain(deck, c => c.Contains("StrikeIronclad"));
-        // The Defend half is untouched, and that is the design and not an
-        // omission.
-        Assert.Equal(4, deck.Count(c => c == "ModelDb.Card<DefendSilent>"));
+        // The Defend half was untouched BY THIS PASS, and stayed the base
+        // game's card for two more rounds; pool pass seven (`EB-711`) moved
+        // it, and `KokomiPoolPassSevenTests` owns that half now.
+        Assert.Equal(4, deck.Count(c => c == "ModelDb.Card<ProtoKkDefend>"));
     }
 
     [Fact]
@@ -220,7 +221,9 @@ public class KokomiPoolPassSixTests
         // arm over.
         Assert.Equal(new[] { "ModelDb.Card<ProtoKkStrike>" },
                      Cards("KokomiOverhaulRoster", "StarterStrike"));
-        Assert.Equal(new[] { "ModelDb.Card<DefendSilent>" },
+        // And the Defend half followed it one pass later, for the same
+        // reason (`EB-711`).
+        Assert.Equal(new[] { "ModelDb.Card<ProtoKkDefend>" },
                      Cards("KokomiOverhaulRoster", "StarterDefend"));
     }
 

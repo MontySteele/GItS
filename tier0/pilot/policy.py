@@ -161,6 +161,23 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
     "has_salon_members",
     "spotlight_moved_this_turn",
+    # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). Her basic Defend's "if the
+    # Bake-Kurage is holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure
+    # current-state read with no snapshot field and no telemetry row, which is
+    # exactly this collection's test.
+    #
+    # AND IT HAD TO BE DECLARED OR THE MEASUREMENT WOULD HAVE BEEN THE
+    # INSTRUMENT'S. `EB-144`'s hole is the bare `continue` below: a predicate
+    # the pilot has never been taught prices the WHOLE conditional at zero, so
+    # a Defend played every turn of every fight would have scored 0 Block and
+    # never been played. The before/after read on the row itself
+    # (`docs/notes/prototype-surface-provenance.md`, "Kokomi pool pass seven")
+    # was taken with this line in.
+    #
+    # IT MOVES NO PUBLISHED NUMBER: `plan_held` is printed by ONE `proto_` row,
+    # under a flag that is off in every anchor and every shipped arm, so no
+    # stamp moves -- `C.PLAN_DELAY_DISCOUNT`'s own argument, verbatim.
+    "plan_held",
 })
 _ENGINE_LIVE_PREFIXES = ("charge_at_least_",)
 
