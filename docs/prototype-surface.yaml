@@ -937,14 +937,13 @@
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: basic,
-   # POOL PASS FIVE (`EB-685`): THE PLAN HALF GOES TO DUSK. Every seat since
-   # round 25 said the morning Weak arrived after the swing it was written
-   # against; at Dusk it lands before the enemy acts. The face-up half stands.
-   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   # R267 PICK 1: THE PLAN HALF IS BACK IN THE MORNING. Pass five moved it to
+   # Dusk; the brief names the next-morning Weak as the kit's turn-one
+   # decision, and a starter card is [USER]'s.
+   description: "Deal 4 damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 4, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
-   plan_dusk: true,
    # R243 card audit pick 2: 4 and Weak 1 / Plan Weak 1 to ALL; upgrade 7 / Plan Weak 2.
    upgrade: {damage: 3, plan_power_amount: 1}}
 
@@ -1320,12 +1319,12 @@
 - {id: proto_kk_scout_ahead, name: "Scout Ahead", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each [gold]Plan[/gold] carried out this turn, this one included, in any order.",
+   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each later [gold]Plan[/gold] carried out with this one.",
    effects: [{op: draw, amount: 1}],
-   # POOL PASS FOUR (`EB-679`): the count INCLUDES THIS ONE and the position
-   # stops mattering -- alone it draws 1, in a three-Plan morning 3, wherever
-   # it sits. POOL PASS FIVE (`EB-685`) prints both of those on the face.
-   plan: [{op: draw_per_plan_this_turn, amount: 1}],
+   # R267 PICK 3: THE POSITION CLAUSE IS BACK. Pass four's whole-morning count
+   # removed the ordering decision; the card counts the carry-outs that FOLLOW
+   # it in the same drain again -- first of three draws 2, last draws 0.
+   plan: [{op: draw_per_plan_after, amount: 1}],
    upgrade: {cost: -1}}
 
 - {id: proto_kk_second_thoughts, name: "Second Thoughts", character: kokomi,

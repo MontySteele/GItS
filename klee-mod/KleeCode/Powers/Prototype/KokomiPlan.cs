@@ -128,20 +128,27 @@ public static class KokomiPlan
         // hurried out by Change of Plans has already left the queue and does
         // not count. Sim twin: `kokomi_plan.BLOCK_PER_PLAN_HELD`.
         BlockPerPlanHeld,
-        // `EB-643`, R265. THE THREE DRAIN-POSITIONAL CLAUSES, and what makes
-        // them one group is that each names a PLACE IN A RUNNING DRAIN rather
-        // than a quantity. They are plan-only on both sides for that reason
+        // `EB-643`, R265. THE DRAIN-POSITIONAL CLAUSES, and what makes them one
+        // group is that each names a PLACE IN A RUNNING DRAIN rather than a
+        // quantity. They are plan-only on both sides for that reason
         // (`gen_klee_cards.PLAN_ONLY_OPS`): a now-line spelling would name a
         // drain that is not running and answer nothing, every time.
         //
-        // Scout Ahead: "draw 1 card for each Plan carried out this turn",
-        // ITSELF INCLUDED (`EB-679`, pool pass four). It used to count the
-        // carry-outs still to COME, which made the card's whole value its
-        // position in the queue -- worth 2 written first and 0 written last --
-        // and r26's lane never spent a slot on it. The count is now the whole
-        // drain, so the answer does not move with the card: alone it draws 1,
-        // with two others it draws 3. Still CARRY-OUTS and not entries
-        // (`EB-501`), so Nereid's Ascension adds one.
+        // Scout Ahead: "draw 1 card for each LATER Plan carried out with this
+        // one" (R267 pick 3, which put back the clause pool pass four removed).
+        // The count is the carry-outs that FOLLOW this entry in the same drain,
+        // which is `EB-501`'s carry-outs-not-entries reading pointed forwards:
+        // first of three draws 2, last draws 0, alone draws 0. NEREID'S
+        // ASCENSION ADDS NOTHING TO IT, and that is `EB-655`'s rule rather than
+        // a choice here -- the Rare carries out the FIRST entry of a drain and
+        // no other, and an entry is never the first when something follows it,
+        // so every entry after this one is exactly one carry-out.
+        DrawPerPlanAfter,
+        // `EB-679`'s WHOLE-DRAIN count, "each Plan carried out this turn, this
+        // one included": Scout Ahead briefly took it and R267 pick 3 took it
+        // back off. NO CARD SPELLS IT TODAY -- it is kept resolved the way the
+        // arm keeps other unrowed clauses, so a sheet can reach for it without
+        // a build. Still carry-outs and not entries, so Nereid's adds one.
         DrawPerPlanThisTurn,
         // Opening Gambit: "the next Plan deals double damage." Second Wave:
         // "the next Plan is carried out twice." A RIDER, written by the entry
@@ -1223,6 +1230,16 @@ public static class KokomiPlan
         for (var index = 0; index < due.Count; index++)
         {
             var entry = due[index];
+            // R267 PICK 3, SCOUT AHEAD'S COUNT: the carry-outs still to come
+            // after this entry -- ENTRIES AFTER IT, ONE CARRY-OUT EACH, because
+            // Nereid's Ascension doubles the FIRST entry of a drain only and
+            // this entry is never the first when anything follows it
+            // (`EB-655`). It deliberately does NOT fold in an extra carry-out a
+            // LATER entry may write: that rider is not on the board when this
+            // number is asked. Read PER ENTRY, so a Scout Ahead written first
+            // and one written last answer honestly -- the ordering decision the
+            // card exists for, which pool pass four had removed.
+            var after = due.Count - index - 1;
             // THE RIDERS THE ENTRY BEFORE THIS ONE WROTE, taken and cleared in
             // the same breath: a rider is spent by the entry it reaches, so
             // two Plans in a row that each double cannot both land on a third.
@@ -1244,7 +1261,7 @@ public static class KokomiPlan
             {
                 var (wroteDouble, wroteExtra) = await ResolveEntry(
                     choiceContext, kokomi, entry, doubleDamage: doubleThis,
-                    drainPlans: drainPlans);
+                    after: after, drainPlans: drainPlans);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
                 // above: an entry doubled by Nereid's prints its rider twice
                 // and twice said twice is still twice.
@@ -1703,9 +1720,13 @@ public static class KokomiPlan
     /// </summary>
     /// <param name="doubleDamage">`EB-643`. Opening Gambit's rider, spent on
     /// THIS entry by the drain that carried the entry before it out.</param>
-    /// <param name="drainPlans">`EB-679`. Scout Ahead's count: how many Plans
-    /// this drain carries out in all, this entry included. The default is the
-    /// honest answer for a drain of one (<see cref="ResolveFront"/>).</param>
+    /// <param name="after">R267 pick 3. Scout Ahead's count: the carry-outs
+    /// still to come in this drain after this entry. The default is the honest
+    /// answer for a drain of one -- nothing follows
+    /// (<see cref="ResolveFront"/>).</param>
+    /// <param name="drainPlans">`EB-679`. The whole-drain count, this entry
+    /// included, which no card spells today. The default is the honest answer
+    /// for a drain of one (<see cref="ResolveFront"/>).</param>
     /// <returns>`EB-643`. The riders THIS entry wrote, which the drain spends
     /// on the entry that follows it. They are handed back rather than stored
     /// because the clause that writes one is inside the loop below and the
@@ -1714,7 +1735,8 @@ public static class KokomiPlan
     /// could outlive one.</returns>
     private static async Task<(bool Double, bool Extra)> ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
-        bool onPlay = false, bool doubleDamage = false, int drainPlans = 1)
+        bool onPlay = false, bool doubleDamage = false, int after = 0,
+        int drainPlans = 1)
     {
         var wroteDouble = false;
         var wroteExtra = false;
@@ -1760,10 +1782,10 @@ public static class KokomiPlan
                 // they do is tell the drain about the entry that follows.
                 if (clause.Kind == Kind.NextPlanDoubleDamage) wroteDouble = true;
                 if (clause.Kind == Kind.NextPlanExtraCarryOut) wroteExtra = true;
-                var wanted = AskedFor(kokomi, clause, drainPlans);
+                var wanted = AskedFor(kokomi, clause, after, drainPlans);
                 var produced = await ResolveOne(choiceContext, kokomi, clause,
                                                 entry, doubleDamage,
-                                                drainPlans);
+                                                after, drainPlans);
                 if (number == null && produced != null)
                 {
                     number = produced;
@@ -2000,23 +2022,36 @@ public static class KokomiPlan
     /// </summary>
     private static async Task<int?> ResolveOne(
         PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
-        Entry? entry = null, bool doubleDamage = false, int drainPlans = 1)
+        Entry? entry = null, bool doubleDamage = false, int after = 0,
+        int drainPlans = 1)
     {
         var player = kokomi.Player;
         if (player == null) return null;
 
         switch (plan.Kind)
         {
+            case Kind.DrawPerPlanAfter:
+            {
+                // SCOUT AHEAD (R267 pick 3): "draw 1 card for each later Plan
+                // carried out with this one." <paramref name="after"/> is the
+                // drain's count -- see <see cref="Drain"/>, which reads it PER
+                // ENTRY -- and the printed amount is the RATE, the shape Tide
+                // Wall's clause already has. Change of Plans carries ONE entry
+                // out, so a Scout Ahead hurried that way draws nothing: nothing
+                // follows it, which is the face read literally.
+                var cards = plan.Amount * after;
+                if (cards > 0)
+                {
+                    await CardPileCmd.Draw(choiceContext, cards, player);
+                }
+                return cards;
+            }
             case Kind.DrawPerPlanThisTurn:
             {
-                // SCOUT AHEAD (`EB-679`): "draw 1 card for each Plan carried
-                // out this turn", itself included.
-                // <paramref name="drainPlans"/> is the whole drain's count --
-                // see <see cref="Drain"/>, which reads it once -- and the
-                // printed amount is the RATE, the shape Tide Wall's clause
-                // already has. Change of Plans carries ONE entry out and pays
-                // 1: this Plan was carried out, which is the face read
-                // literally.
+                // `EB-679`'s WHOLE-DRAIN count, on no card since R267 pick 3.
+                // <paramref name="drainPlans"/> is read once for the drain --
+                // see <see cref="Drain"/> -- and the printed amount is the
+                // RATE. Change of Plans carries ONE entry out and pays 1.
                 var cards = plan.Amount * drainPlans;
                 if (cards > 0)
                 {
@@ -2172,7 +2207,7 @@ public static class KokomiPlan
         // the reader is asking what the number IS and not how it was derived,
         // which is the argument the three damage kinds above make. The two
         // riders produce no number at all and fall to the default.
-        Kind.DrawPerPlanThisTurn => "cards drawn",
+        Kind.DrawPerPlanAfter or Kind.DrawPerPlanThisTurn => "cards drawn",
         _ => null,
     };
 
@@ -2192,14 +2227,16 @@ public static class KokomiPlan
     /// different question.
     /// </summary>
     private static int? AskedFor(Creature kokomi, Planned plan,
+                                 int after = 0,
                                  int drainPlans = 1) => plan.Kind
         switch
     {
         // `EB-643`. A FOURTH SCALED KIND, and it reads the DRAIN rather than a
-        // ledger -- which is why `drainPlans` is a parameter here and the
-        // other three are computed from state: nothing on the board says how
-        // deep the drain around this entry is, so the drain is the only thing
-        // that knows.
+        // ledger -- which is why `after` and `drainPlans` are parameters here
+        // and the other three are computed from state: nothing on the board
+        // says how many Plans are still to come or how deep the drain around
+        // this entry is, so the drain is the only thing that knows.
+        Kind.DrawPerPlanAfter => plan.Amount * after,
         Kind.DrawPerPlanThisTurn => plan.Amount * drainPlans,
         Kind.BlockPerPlanThisMorning =>
             plan.Amount * KokomiOverhaulLedger.For(kokomi).PlansThisMorning,

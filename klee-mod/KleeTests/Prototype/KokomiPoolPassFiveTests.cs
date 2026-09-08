@@ -122,18 +122,21 @@ public class KokomiPoolPassFiveTests
     }
 
     // ======================================================================
-    // 2. SLACK WATER -- a now-line and a Dusk Plan on one card
+    // 2. SLACK WATER -- R267 pick 1 reversed this pass's phase move
     // ======================================================================
 
     [Fact]
-    public void Slack_water_keeps_its_now_line_and_writes_at_dusk()
+    public void Slack_water_keeps_its_now_line_and_writes_for_the_morning()
     {
         var card = new ProtoKkSlackWater();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardRarity.Basic, card.Rarity);
 
-        // THE FACE-UP HALF IS UNTOUCHED: 4 damage and a single Weak. Only the
-        // written half's PHASE moves, which is the whole change.
+        // R267 PICK 1. Pass five moved the written half to Dusk; the brief
+        // names the next-morning Weak as the kit's turn-one decision and a
+        // starter card is [USER]'s, so the row is back to its pre-pass form.
+        // The face-up half was never touched by either move: 4 damage and a
+        // single Weak.
         var source = Source("ProtoKkSlackWater");
         Assert.Contains("DamageCmd.Attack(DynamicVars.Damage.BaseValue)",
                         source);
@@ -142,25 +145,29 @@ public class KokomiPoolPassFiveTests
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.ApplyWeak, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
-        Assert.Contains("[gold]Dusk[/gold] [gold]Plan[/gold]", Face(card));
+        Assert.DoesNotContain("[gold]Dusk[/gold]", Face(card));
+        Assert.Contains("[gold]Plan[/gold]", Face(card));
     }
 
     [Fact]
-    public void The_first_two_half_dusk_row_needed_no_new_seam()
+    public void The_two_half_row_carries_no_dusk_argument_or_tip()
     {
-        // `plan_dusk:` was ALREADY a fact about the row's PLAN LINE rather
-        // than about its whole face, so the codegen appends `dusk: true` to
-        // the one `Schedule` call it emits -- which for a two-half row sits
-        // inside the `PlayedOnPet` branch it already wrote. The card is still
-        // playable on an enemy (`KokomiTargets.PetOrEnemy`) and it picked up
-        // the Dusk tip on its own. Nothing in either engine was widened.
+        // R267 pick 1, the other half of the reversal: `plan_dusk:` is a fact
+        // about the row's PLAN LINE, so taking it off the row takes `dusk:`
+        // off the one `Schedule` call the codegen emits and the Dusk tip off
+        // the card. THE MACHINERY IS UNTOUCHED -- pass five widened nothing to
+        // add it and nothing narrows to remove it. The card is still playable
+        // on an enemy (`KokomiTargets.PetOrEnemy`), which is a two-half row's
+        // own shape and not the phase's.
         var source = Source("ProtoKkSlackWater");
         Assert.Contains("if (KokomiPlan.PlayedOnPet(cardPlay))", source);
-        Assert.Contains("this, PlanClauses, dusk: true);", source);
+        Assert.DoesNotContain("dusk:", source);
+        Assert.DoesNotContain("ArmKeywordTips.ForDusk", source);
         Assert.Contains("KokomiTargets.PetOrEnemy", source);
-        Assert.Contains("ArmKeywordTips.ForDusk", source);
-        // The Dusk row that IS written-only still is: the two shapes coexist.
+        // The Dusk row that IS written-only still is, tip and all.
         Assert.Contains("KokomiTargets.PetOnly", Source("ProtoKkBreakwater"));
+        Assert.Contains("this, PlanClauses, dusk: true);",
+                        Source("ProtoKkBreakwater"));
     }
 
     // ======================================================================

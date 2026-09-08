@@ -44,14 +44,14 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForDusk(ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this), this), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_slack_water");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Slack Water"),
-        ("description", "Deal {Damage:diff()} damage. Apply 1 [gold]Weak[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -81,7 +81,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");

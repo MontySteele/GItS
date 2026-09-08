@@ -2122,60 +2122,84 @@ def test_change_of_plans_neither_sets_nor_consumes_a_rider(overhaul):
 
 # --- Scout Ahead ----------------------------------------------------------
 
-@pytest.mark.parametrize("position", [0, 1, 2])
-def test_scout_ahead_counts_the_whole_drain_wherever_it_sits(overhaul,
-                                                             position):
-    """`EB-679`. THE COUNT INCLUDES ITSELF AND IGNORES POSITION: three entries
-    in one morning is 3, whether Scout Ahead was written first, second or
-    last. That is the redesign -- the old clause paid 2 at the front and 0 at
-    the back, which made the card's whole value its place in the queue."""
+@pytest.mark.parametrize("position,cards", [(0, 2), (1, 1), (2, 0)])
+def test_scout_ahead_counts_the_plans_that_follow_it(overhaul, position,
+                                                     cards):
+    """R267 PICK 3. THE POSITION RULE IS THE CARD: in a morning of three,
+    Scout Ahead written first draws 2, written second draws 1 and written last
+    draws 0. Pool pass four had it count the whole drain wherever it sat,
+    which removed the ordering decision the row exists to pose."""
     st = kokomi_state()
     rows = [plan_card([{"op": "energy", "amount": 1}], cid=f"proto_kk_p{i}")
             for i in range(3)]
     rows[position] = plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_THIS_TURN, "amount": 1}],
+        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
         cid="proto_kk_scout")
     for row in rows:
         kokomi_plan.schedule(st, row)
     kokomi_plan.resolve_all(st)
     drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [3]
+    assert [e["cards"] for e in drew] == [cards]
 
 
-def test_scout_ahead_written_alone_draws_one(overhaul):
-    """`EB-679`. ITSELF IS A CARRY-OUT, so the floor is 1 rather than 0 -- the
-    old clause drew nothing at all when it was the only Plan of the morning,
-    which is the shape a seat declines to write."""
+def test_scout_ahead_written_alone_draws_nothing(overhaul):
+    """R267 pick 3. NOTHING FOLLOWS IT, so the count is 0 -- the face read
+    literally. The Plan half is the whole of the ask; the now-line's 1 card is
+    what a morning of one pays."""
     st = kokomi_state()
     kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_THIS_TURN, "amount": 1}],
+        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
         cid="proto_kk_scout"))
     kokomi_plan.resolve_all(st)
     drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [1]
+    assert [e["cards"] for e in drew] == [0]
 
 
-def test_scout_ahead_hurried_by_change_of_plans_draws_one(overhaul):
-    """`EB-679`. A drain of ONE is one carry-out, which is the face read
-    literally: this Plan was carried out this turn."""
+def test_scout_ahead_hurried_by_change_of_plans_draws_nothing(overhaul):
+    """R267 pick 3. Change of Plans carries ONE entry out, so nothing follows
+    the hurried Scout Ahead inside that drain and it draws 0."""
     st = kokomi_state()
     kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_THIS_TURN, "amount": 1}],
+        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
         cid="proto_kk_scout"))
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
                                        cid="proto_kk_p0"))
     kokomi_plan.resolve_front(st)
     drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [1]
+    assert [e["cards"] for e in drew] == [0]
 
 
-def test_scout_ahead_under_nereids_counts_the_extra_carry_out(overhaul):
-    """`EB-679`. The count is CARRY-OUTS and not entries (`EB-501`), so the
-    Rare's second run at the FIRST entry of the drain is one more Plan carried
-    out: three entries read 4. Scout Ahead written first is itself carried out
-    twice, and both carry-outs read the same 4 -- the number is the drain's."""
+def test_scout_ahead_under_nereids_counts_one_carry_out_per_later_entry(
+        overhaul):
+    """R267 PICK 3, THE NEREID'S READING PINNED. The count is CARRY-OUTS and
+    not entries (`EB-501`), and `EB-655` narrowed the Rare to the FIRST entry
+    of a drain only -- an entry is never the first when something follows it,
+    so every entry AFTER this one is exactly ONE carry-out and Nereid's adds
+    nothing to the number. Scout Ahead written first is itself carried out
+    twice under the Rare and pays its 2 each time."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.DRAW_PER_PLAN_AFTER, "amount": 1}],
+        cid="proto_kk_scout"))
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_all(st)
+    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
+    assert [e["cards"] for e in drew] == [2, 2]
+
+
+def test_the_whole_drain_count_is_kept_resolved_on_no_row(overhaul):
+    """R267 pick 3. `draw_per_plan_this_turn` is `EB-679`'s spelling and no
+    row spells it now. It stays REGISTERED and RESOLVED the way `scry_bottom`
+    and `redirect_queued_plans` are, so a sheet can reach for it without a
+    build: three entries, itself included, is 3."""
+    assert kokomi_plan.DRAW_PER_PLAN_THIS_TURN in kokomi_plan.PLAN_KINDS
+    assert not [c for c in loader.prototype_cards()
+                if any(cl.get("op") == kokomi_plan.DRAW_PER_PLAN_THIS_TURN
+                       for cl in (c.plan or []))]
+    st = kokomi_state()
     kokomi_plan.schedule(st, plan_card(
         [{"op": kokomi_plan.DRAW_PER_PLAN_THIS_TURN, "amount": 1}],
         cid="proto_kk_scout"))
@@ -2184,7 +2208,7 @@ def test_scout_ahead_under_nereids_counts_the_extra_carry_out(overhaul):
                                            cid=f"proto_kk_p{i}"))
     kokomi_plan.resolve_all(st)
     drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [4, 4]
+    assert [e["cards"] for e in drew] == [3]
 
 
 # --- Second Thoughts ------------------------------------------------------
@@ -2382,17 +2406,17 @@ def test_a_dusk_rider_reaches_only_the_dusk_drain(overhaul):
     assert enemy.hp == 200 - 13
 
 
-def test_the_sheets_two_dusk_rows_are_the_only_ones(overhaul):
+def test_the_sheets_one_dusk_row_is_the_only_one(overhaul):
     """`plan_dusk:` is a ROW flag and the sheet is where it is declared.
 
-    `EB-685` (pool pass five) MOVED THE PAIR: Night Watch is retired and Slack
-    Water's Plan half takes its place at Dusk. It is the first row on the
-    surface with BOTH a face-up half and a Dusk Plan, and it needed no schema
-    of its own -- `plan_dusk:` is a fact about the row's Plan LINE and
-    `loader._validate_plan_dusk` asks only that there be one."""
+    R267 PICK 1 TOOK SLACK WATER BACK OFF IT. Pool pass five had moved the
+    starter's Plan half to Dusk; the brief names the next-morning Weak as the
+    kit's turn-one decision and a starter card is [USER]'s, so Breakwater is
+    the surface's only Dusk row again. The machinery is untouched --
+    `plan_dusk:` is still a fact about a row's Plan LINE and
+    `loader._validate_plan_dusk` still asks only that there be one."""
     dusk = [c.id for c in loader.prototype_cards() if c.plan_dusk]
-    assert dusk == ["proto_kk_slack_water", "proto_kk_breakwater"]
-    assert _row("proto_kk_slack_water").effects != []
+    assert dusk == ["proto_kk_breakwater"]
 
 
 def _row(cid):
@@ -2509,15 +2533,14 @@ def test_breakwaters_count_is_not_the_mornings_depth(overhaul):
     assert st.player.block == 5
 
 
-def test_slack_waters_plan_half_is_a_dusk_line(overhaul):
-    """`EB-685`. THE ROW IS THE SURFACE'S FIRST NOW-LINE-PLUS-DUSK CARD, and
-    it needed no schema of its own: the face-up half stands unchanged (4
-    damage and a single Weak) and `plan_dusk:` says WHEN the written half
-    lands. `ProtoKkSlackWater.OnPlay` passes `dusk: true` inside the
-    played-on-the-pet branch, which is the one call the codegen already
-    emitted for a row with both halves."""
+def test_slack_waters_plan_half_is_a_morning_line(overhaul):
+    """R267 PICK 1. The starter is back to exactly its pre-pass-five form: 4
+    damage and a single Weak now, the multi-body Weak next morning. The Plan
+    half is what makes turn one a choice -- one Weak on the front enemy today
+    or one on every body tomorrow -- which is the brief's turn-one decision,
+    and `ProtoKkSlackWater.OnPlay` schedules with no `dusk:` argument."""
     row = _row("proto_kk_slack_water")
-    assert row.plan_dusk is True
+    assert row.plan_dusk is False
     assert row.effects == [
         {"op": "damage", "amount": 4, "target": "enemy"},
         {"op": "apply_power", "power": "weak", "amount": 1,
@@ -2527,13 +2550,12 @@ def test_slack_waters_plan_half_is_a_dusk_line(overhaul):
                          "target": "all_enemies"}]
 
 
-def test_slack_waters_weak_lands_before_the_enemy_acts(overhaul):
-    """`EB-685`. Every seat since round 25 said the morning Weak arrived after
-    the swing it was written against. Written at Dusk it lands inside the
-    player's own turn -- `combat._player_turn` runs `resolve_dusk` at this
-    engine's `BeforeSideTurnEnd`, before anything on the enemy side -- so the
-    debuff is on every body while the intents it was written against resolve.
-    That is Night Watch's job, which is why Night Watch left the pool."""
+def test_slack_waters_weak_waits_for_the_next_morning(overhaul):
+    """R267 PICK 1. The multi-body Weak is a MORNING line again, so writing it
+    on turn one buys the whole board a debuff a turn later rather than now --
+    the trade the brief names as the kit's turn-one decision. The Plan is
+    still on the queue when the player's turn ends, and it lands when the next
+    morning drains."""
     from tier0.engine import combat
 
     front = make_enemy(hp=80, name="front", intents=ATTACKER)
@@ -2544,11 +2566,14 @@ def test_slack_waters_weak_lands_before_the_enemy_acts(overhaul):
         kokomi_plan.schedule(state, _row("proto_kk_slack_water"))
 
     combat._player_turn(st, write_it)
-    # THE PLAYER'S TURN IS OVER AND THE ENEMIES HAVE NOT MOVED, which is the
-    # window the face names.
+    # NOTHING LANDED THIS TURN: the Plan is held, which is what makes writing
+    # it a bet on the turn after.
+    assert front.powers.get("weak") is None
+    assert back.powers.get("weak") is None
+    assert len(st.kk_plan_queue) == 1
+    kokomi_plan.resolve_all(st)
     assert front.powers.get("weak") == 1
     assert back.powers.get("weak") == 1
-    assert front.hp == 80 and back.hp == 80
     assert st.kk_plan_queue == []
 
 
@@ -2563,13 +2588,12 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     assert faces["proto_kk_opening_gambit"].endswith(
         "The next [gold]Plan[/gold] carried out with this one deals double "
         "damage.")
-    # `EB-679` took Scout Ahead OUT of this family: its count is no longer a
-    # window on the drain but the whole of it, so the face states the turn.
-    # `EB-685` prints both halves of that count on the face: itself included,
-    # and the order it was written in does not move the answer.
+    # R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a window
+    # on the drain again, and "later" is the position rule printed -- the one
+    # word a seat needs to read the ordering decision off the face.
     assert faces["proto_kk_scout_ahead"].endswith(
-        "Draw 1 card for each [gold]Plan[/gold] carried out this turn, "
-        "this one included, in any order.")
+        "Draw 1 card for each later [gold]Plan[/gold] carried out with this "
+        "one.")
 
 
 def test_ebb_tide_is_off_the_sheet_and_out_of_the_pool(overhaul):

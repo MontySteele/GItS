@@ -54,6 +54,7 @@ public class KokomiPoolPassTwoTests
         // these members BY NAME, so a rename here is a codegen break rather
         // than a silent approximation -- the contract every Kind is under.
         var names = System.Enum.GetNames(typeof(KokomiPlan.Kind));
+        Assert.Contains("DrawPerPlanAfter", names);
         Assert.Contains("DrawPerPlanThisTurn", names);
         Assert.Contains("NextPlanDoubleDamage", names);
         Assert.Contains("NextPlanExtraCarryOut", names);
@@ -177,19 +178,19 @@ public class KokomiPoolPassTwoTests
     }
 
     // ======================================================================
-    // 3. SCOUT AHEAD -- recounted at `EB-679`: the whole drain, itself
-    //    included, so the row's value is no longer its position
+    // 3. SCOUT AHEAD -- recounted at `EB-679` and put back on the positional
+    //    count at R267 pick 3: the carry-outs that FOLLOW it
     // ======================================================================
 
     [Fact]
-    public void Scout_ahead_draws_one_now_and_per_carry_out_this_turn()
+    public void Scout_ahead_draws_one_now_and_per_later_carry_out()
     {
         var card = new ProtoKkScoutAhead();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardRarity.Common, card.Rarity);
 
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.DrawPerPlanThisTurn, clause.Kind);
+        Assert.Equal(KokomiPlan.Kind.DrawPerPlanAfter, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
         // THE AMOUNT IS THE RATE, the shape Tide Wall's clause already has.
         Assert.Equal(1, clause.Amount);
@@ -205,16 +206,17 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void The_count_is_the_drains_and_is_read_once()
+    public void The_count_is_the_drains_and_is_read_per_entry()
     {
-        // STRUCTURAL. `EB-679`: `Drain` computes `drainPlans` ONCE, before the
-        // loop, off `CarryOutTimes` -- once because the count must not depend
-        // on where in the queue the reader sits, and off `CarryOutTimes`
-        // because every reader in this arm counts CARRY-OUTS and not entries
-        // (`EB-501`). Twins:
-        // `test_scout_ahead_counts_the_whole_drain_wherever_it_sits`,
-        // `test_scout_ahead_under_nereids_counts_the_extra_carry_out`.
+        // STRUCTURAL. R267 pick 3: `Drain` reads Scout Ahead's count INSIDE
+        // the entry loop, because the whole point of the clause is that a
+        // Scout Ahead written first and one written last answer differently.
+        // `EB-679`'s whole-drain term is still computed once above the loop
+        // for the kind no row spells. Twins:
+        // `test_scout_ahead_counts_the_plans_that_follow_it`,
+        // `test_scout_ahead_under_nereids_counts_one_carry_out_per_later_entry`.
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
+        Assert.Contains(resolve.GetParameters(), p => p.Name == "after");
         Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
         Assert.Contains("KokomiPlan.CarryOutTimes", Il.Calls(drain));
@@ -358,18 +360,18 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void The_multi_body_weak_at_dusk_is_slack_waters_plan_half()
+    public void The_multi_body_weak_is_slack_waters_morning_plan_half()
     {
-        // `EB-685` (pool pass five). Night Watch carried this line for one
-        // pass and lost every draft comparison in r27; the line moved onto
-        // Slack Water, which already hits, and Night Watch left the pool. The
-        // row is pinned whole in KokomiPoolPassFiveTests -- what belongs HERE
-        // is that pool pass two's Dusk flag is what carries it.
+        // R267 PICK 1. Pass five moved this line to Dusk on the way past;
+        // pick 1 put it back in the MORNING, because the brief names the
+        // next-morning Weak as the kit's turn-one decision and a starter card
+        // is [USER]'s. The clause is unchanged -- what moved is when it lands
+        // -- so the row passes NO dusk argument to `Schedule`.
         var card = new ProtoKkSlackWater();
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.ApplyWeak, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
-        Assert.Contains("dusk: true", Source("ProtoKkSlackWater"));
+        Assert.DoesNotContain("dusk:", Source("ProtoKkSlackWater"));
     }
 
     [Fact]
@@ -529,12 +531,11 @@ public class KokomiPoolPassTwoTests
             "The next [gold]Plan[/gold] carried out with this one deals "
           + "double damage.",
             Face(new ProtoKkOpeningGambit()));
-        // `EB-679` took Scout Ahead OUT of this family: its count is the
-        // whole drain rather than a window on it, so the face states the turn
-        // -- and `EB-685` prints the two things that made it true.
+        // R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a
+        // window on the drain again, and "later" is the position rule printed.
         Assert.EndsWith(
-            "Draw 1 card for each [gold]Plan[/gold] carried out this turn, "
-          + "this one included, in any order.",
+            "Draw 1 card for each later [gold]Plan[/gold] carried out with "
+          + "this one.",
             Face(new ProtoKkScoutAhead()));
     }
 
