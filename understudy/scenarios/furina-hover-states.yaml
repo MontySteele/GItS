@@ -1,0 +1,113 @@
+# EB-652 eyes-on material: the four things the Salon panel says only while a
+# card is under the cursor (`EB-637`, `KleeCode/Vfx/Prototype/SalonPanel.cs`).
+#
+# WHY THIS FILE IS SEPARATE FROM `furina-full-stage-frame.yaml`. That one fills
+# the stage and holds the STANDING panel -- three chips, the front one marked
+# FRONT, the Encore line, the reduced-performance note. Everything on it is
+# what the panel says with nothing held over the hand. This file fills the
+# stage the same way and then holds the panel with a card under the cursor,
+# which is a different set of words on the same pixels:
+#
+#   * a COMPANION in hand      -> the front chip's word FRONT becomes PERFORMS
+#   * a DEPLOY on a FULL stage -> the front chip's word becomes LEAVES, and the
+#                                 footer (the front member's replacement price)
+#                                 goes from dim to bright
+#   * the SPOTLIGHT            -> the pips it would spend are tinted
+#
+# (The fourth hover state, ENTERS on the seat a Deploy would fill, needs a
+# stage with ROOM and so needs a different board than this one; it is not
+# framed here. Stated rather than left to be noticed.)
+#
+# NOTHING HERE IS EVIDENCE, and less of it than usual: the board was set by
+# hand (`bridge.GRANT_GUARDRAIL`), and a hover is a DISPLAY signal -- the four
+# `wait` steps are capture windows and the panel's look is [USER]'s call on the
+# frames, never this file's. What the file itself asserts is only the board the
+# frames are taken against: three members on the stage, and each hovered card
+# actually in hand at the moment it is hovered (a `hover` step fails by name,
+# with the hand printed, when it is not).
+#
+# THE HAND CAP IS WHY THE FOURTH DEBUT IS GRANTED LATE. `CardPile` holds ten;
+# the game deals its own opening hand of five, so four grants up front is nine
+# and a fifth would be at the cap before a card is played. The fourth Debut and
+# the Spotlight go in AFTER the three plays, when the hand is back down.
+
+name: furina-hover-states
+character: KLEEMOD-FURINA
+turns: 1
+
+notes: |
+  The stage filled to three, then held under the cursor three times: a
+  Companion (PERFORMS), a Deploy onto a full stage (LEAVES, bright footer) and
+  the Spotlight (tinted pips). Four capture windows; no reading is taken.
+
+assumptions:
+  - "Three Salon Debuts are granted to hand rather than drawn, so the stage
+     fills in one turn regardless of what the seed dealt."
+  - "The opening Encore is FurinaReframeLaw.OpeningEncore = 2 and a
+     performance costs SalonConstants.TickEncoreCost = 1, so the third arrival
+     performs dry -- the same numbers furina-full-stage-frame.yaml asserts, and
+     they are not re-asserted here."
+  - "Energy is set to 6 so all three Deploys play out of one turn; the
+     Spotlight is hovered and never played, so its own price gate is not
+     reached and does not matter to this file."
+  - "The stage seats three (SalonConstants), so after three Deploys it is FULL
+     -- which is the condition that makes the fourth Debut's hover read LEAVES
+     rather than ENTERS."
+  - "Chevreuse - Interdiction Fire is a Companion, so its hover turns the front
+     chip's word to PERFORMS. Any Companion would do; this one is granted
+     because it is a Fontaine common and costs 1."
+
+steps:
+  # The hand, up front and under the cap: one Companion and three Deploys on
+  # top of the dealt five is nine.
+  - give: {card: KLEEMOD-CHEVREUSE_INTERDICTION_FIRE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - set_energy: {amount: 6}
+
+  # Fill the stage. The Encore ladder these three walk down is
+  # furina-full-stage-frame.yaml's assertion, not this file's; what is asserted
+  # here is only the board the frames are taken against.
+  - play: {card: "Salon Début"}
+  - play: {card: "Salon Début"}
+  - play: {card: "Salon Début"}
+  - expect:
+      power: {who: player, name: "salon member", stacks: 3}
+
+  # CAPTURE WINDOW 1 -- the standing panel, nothing hovered. The baseline every
+  # frame below is read against: three chips, chip 0 marked FRONT.
+  - wait: {seconds: 20}
+
+  # The two cards the last two hovers need, granted now the hand is back down.
+  - give: {card: KLEEMOD-SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: "Ethereal Spotlight", pile: hand, upgraded: false}
+
+  # A COMPANION UNDER THE CURSOR. The front chip's word turns FRONT ->
+  # PERFORMS: the trigger is shown by the card that pulls it.
+  - hover: {card: KLEEMOD-CHEVREUSE_INTERDICTION_FIRE}
+  # CAPTURE WINDOW 2 -- PERFORMS on the front chip.
+  - wait: {seconds: 25}
+  - unhover: {}
+
+  # A DEPLOY ONTO A FULL STAGE. The front chip's word turns to LEAVES and the
+  # footer -- the front member's replacement price, always a row and dim by
+  # default -- goes bright.
+  - hover: {card: "Salon Début"}
+  # CAPTURE WINDOW 3 -- LEAVES on the front chip, bright footer.
+  - wait: {seconds: 25}
+  - unhover: {}
+
+  # THE SPOTLIGHT. Its price in pips is tinted on the strip. It is HOVERED and
+  # not played: this file frames what the panel says about a card the player is
+  # considering, and playing it would spend the Encore the tint is about.
+  - hover: {card: "Ethereal Spotlight"}
+  # CAPTURE WINDOW 4 -- the tinted pips.
+  - wait: {seconds: 20}
+  - unhover: {}
+
+  # The board is where the first `expect` left it, which is the whole claim a
+  # hover makes: it is a display signal and moves nothing. A regression that
+  # made `hover` write through the panel to the ledger fails HERE.
+  - expect:
+      power: {who: player, name: "salon member", stacks: 3}
