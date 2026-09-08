@@ -626,20 +626,7 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     if idx < 0:
         return _refuse(why)
     entry = hand[idx]
-    # `EB-319`, and it is refused HERE rather than by the game. The card aims
-    # itself; naming an enemy is the tester's only mistake, and the command
-    # that works is the same one without the `on` clause. Posting it would
-    # spend the action and come back `Card 'Rapid Fire' cannot be played on
-    # 'Fossil Stalker'`, which is what happened.
     aim = str(entry.get("target_type") or "").lower()
-    if (cmd.target and aim in UNAIMED_TARGETS
-            and not entry.get("can_target_pet")):
-        return _refuse(
-            f"{titles[idx]!r} "
-            + ("is played on you, not on an enemy" if aim in SELF_TARGETS
-               else "does its own aiming")
-            + f', so it takes no `on "{cmd.target}"`',
-            f'play "{titles[idx]}"')
     if entry.get("can_play") is False:
         # `EB-264`: the same translation the page uses, so a refusal and the
         # card's own line cannot disagree about why.
@@ -690,6 +677,41 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
         post["target"] = pet
         printed["target"] = (_combat(state)["plans"]["pet_name"])
         return Resolution(True, "play", post, printed)
+    # `EB-690`. AND WHERE THE CARD AIMS ITSELF, THE `on` IS DROPPED RATHER
+    # THAN REFUSED.
+    #
+    # `EB-319` and `EB-499` below built the two refusals that catch this, and
+    # both of them are good sentences: they name the card, say it aims itself
+    # and print the form that works. It was still the wrong answer. Kokomi r28
+    # lane 2, fight 2 turn 2: "I asked for `play "Riptide" on "A"` ... I had
+    # batched the turn's commands, so the refusal ate the Riptide and I ended
+    # the turn having played only a Defend", and the seat's own reading is why
+    # a better sentence would not have helped -- "Riptide prints 'Deal 9 damage
+    # to ALL enemies' and every other damage card in the kit takes
+    # `on "<enemy>"`, so the one card that refuses a target is the one whose
+    # text does not say it aims itself."
+    #
+    # THE MISTAKE HAS NO CONSEQUENCE, which is the test `_use_potion` already
+    # applies to a self-aimed potion aimed at the player: the card resolves the
+    # same way with the clause and without it, so the play goes through and the
+    # answer says the clause was dropped and why. A turn is not worth a
+    # grammar lesson the game itself does not need.
+    #
+    # THE PET IS NOT THIS CASE and is resolved ABOVE, deliberately: `on
+    # "<the jellyfish>"` asks for a different thing to happen -- a Plan
+    # instead of a play now -- so it is still answered on its own terms and
+    # `EB-480`'s refusal stands.
+    #
+    # AN ENEMY NAME THAT MATCHES NOTHING IS STILL DROPPED, because the card
+    # would have ignored it either way; the answer prints the words that were
+    # dropped, so a typo is visible rather than silent.
+    if cmd.target and (aim in UNAIMED_TARGETS
+                       or entry.get("can_target_enemy") is False):
+        printed["ignored_target"] = cmd.target
+        printed["aims_itself"] = (
+            "is played on you, not on an enemy" if aim in SELF_TARGETS
+            else "does its own aiming")
+        return Resolution(True, "play", post, printed)
     # `EB-499`. THE SAME REFUSAL AS `EB-319`, FOR THE CARDS WHOSE SPELLING IS A
     # NUMBER -- and it is HERE, under the pet, because by this line the tester
     # has not named the jellyfish and the only body left to mean is an enemy.
@@ -713,12 +735,6 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     # ONLY AN EXPLICIT `false`, `EB-402`'s and `EB-480`'s shared rule: an
     # ABSENT field is a bridge that predates it and keeps the behaviour that
     # build has.
-    if (cmd.target and aim not in AIMED_TARGETS
-            and entry.get("can_target_enemy") is False):
-        return _refuse(
-            f'{titles[idx]!r} does its own aiming, so it takes no '
-            f'`on "{cmd.target}"`',
-            f'play "{titles[idx]}"')
     needs_target = _aims_at_an_enemy(entry)
     if cmd.target or needs_target:
         eid, why = _resolve_enemy(state, cmd.target)

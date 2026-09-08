@@ -567,10 +567,16 @@ public class KokomiPoolPassTwoTests
         // with nothing printing the rule. It goes on the badge because the
         // `Plan` keyword tip is at its 135-character ceiling. Page twin:
         // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
+        //
+        // `EB-680` TRIMMED THE WORDS AND NOT THE RULE: the Dusk clause was
+        // bought inside the 125-character power ceiling by cutting "on you"
+        // and "the numbers" out of this sentence and "at the start of" out of
+        // the one above it. Both rules still print, on one badge, and the cap
+        // face came back under the ceiling on the same trim.
         var face = new PendingPlansPower().Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.EndsWith(
-            "Later debuffs on you do not change the numbers you wrote.", face);
+        Assert.EndsWith("Later debuffs do not change what you wrote.", face);
+        Assert.Contains("a [gold]Dusk[/gold] Plan at this turn's end", face);
     }
 
     [Fact]

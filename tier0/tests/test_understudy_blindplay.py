@@ -1172,6 +1172,32 @@ def test_confirm_is_offered_only_where_the_wire_says_it_works():
     assert blindplay.act(ready, "confirm")["ok"]
 
 
+def test_a_chooser_prints_the_confirm_that_must_follow_the_choose():
+    """`EB-674`. THE VERB THE SEAT LEARNED FROM A REFUSAL.
+
+    Kokomi r26 lane 1, fight 5 turn 3: a potion opened a card chooser,
+    `choose "Strike"` toggled the selection "but left the chooser open, and my
+    next two commands were both refused ... The refusal listed `confirm`, and
+    `confirm` worked. The chooser's own screen prints `choose "<card title>"`
+    and does not print that a `confirm` follows."
+
+    The verb is still not OFFERED before the wire says the button is live
+    (`EB-259`); what the page owes is the shape of the screen, and that is a
+    sentence.
+
+    Seen to FAIL: nothing on the page named `confirm` before a pick.
+    """
+    page = blindplay.observe(card_select_state())
+    assert "Say `confirm` after `choose`" in page
+    assert "does not close the screen" in page
+    assert "- `confirm`" not in page, "EB-259: the verb is not offered yet"
+
+    ready = card_select_state()
+    ready["card_select"]["can_confirm"] = True
+    page = blindplay.observe(ready)
+    assert "Say `confirm` after `choose`" in page, "and on the armed screen too"
+
+
 # ------------------------------- EB-264: no wire tokens on a player's page --
 
 def test_the_unplayable_enums_never_reach_the_page():
@@ -3162,6 +3188,38 @@ def test_a_live_enchant_picker_says_it_cannot_mark_the_pick():
     assert "Nothing on this screen is picked yet." not in page
 
 
+def test_a_pip_between_a_number_and_a_word_keeps_its_space():
+    """`EB-683`. THE SPACE THE PICTURE WAS STANDING IN FOR.
+
+    Very Hot Cocoa is written `gain an additional 4[..._energy_icon.png]` --
+    the number, then the pip, no space, because on a screen a pip is a
+    picture. Rendered as a word it needs one, and the Kokomi r27 lane-1 seat
+    read "an additional 4Energy" off the single biggest item of its run.
+
+    Seen to FAIL: the digit and the word came out glued.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["relics"] = [
+        {"id": "very_hot_cocoa", "name": "Very Hot Cocoa",
+         "description": "At the start of each combat, gain an additional "
+                        "4[ironclad_energy_icon.png]."},
+        {"id": "glued_both_sides", "name": "Kettle",
+         "description": "Gain 2[ironclad_energy_icon.png]now."}]
+    page = blindplay.observe(state)
+    assert "gain an additional 4 Energy." in page
+    assert "4Energy" not in page
+    assert "Gain 2 Energy now." in page
+
+    # The bracketed rendering an unnamed icon keeps is NOT re-spaced: a
+    # bracket beside a letter is already legible, and moving it would be this
+    # page editing the game's punctuation rather than restoring a picture.
+    unknown = copy.deepcopy(combat_state())
+    unknown["player"]["relics"] = [
+        {"id": "odd", "name": "Odd Relic",
+         "description": "Gain 2[boss_relic_icon.png]."}]
+    assert "Gain 2[boss relic icon]." in blindplay.observe(unknown)
+
+
 def test_a_live_face_prints_the_energy_pip_as_a_word_and_not_a_token():
     """`EB-651`(a), ON THE WIRE'S OWN BYTES.
 
@@ -3810,6 +3868,112 @@ def two_body_state(plans: dict) -> dict:
     twin["entity_id"] = "NIBBIT_1"
     state["battle"] = dict(state["battle"], enemies=[enemies[0], twin])
     return state
+
+
+def reacted_state(*rows: dict) -> dict:
+    """A combat whose wire carries `player.reactions` (`EB-681`)."""
+    state = copy.deepcopy(combat_state())
+    state["player"]["reactions"] = list(rows)
+    return state
+
+
+def test_two_reactions_in_one_beat_are_two_named_lines():
+    """`EB-681`. THE BEAT THE SEAT REBUILT FROM A DOUBLED NUMBER.
+
+    Kokomi r27 lane 2, fight 4: Slack Water put Hydro on a body, Shinobu's
+    Thundergrust hit it with Electro, and the panel showed Poison 8 where the
+    Electro-Charged rule prints 4. The eight was TWO procs -- the Tamakushi
+    Casket answered the Weak with a 2 Hydro ping, which landed on the fresh
+    Electro aura and reacted again. "The player has to reconstruct a double
+    proc from a number that is simply twice what the keyword says. I only
+    trusted my reading because it reproduced four times."
+
+    Seen to FAIL: no line on any screen named either reaction.
+    """
+    page = blindplay.observe(reacted_state(
+        {"reaction": "Electro-Charged", "source": "Shinobu — Thundergrust",
+         "target": "Damp Cultist", "combat_id": "3"},
+        {"reaction": "Electro-Charged", "source": "Tamakushi Casket",
+         "target": "Damp Cultist", "combat_id": "3"}))
+    assert "## What reacted this turn" in page
+    section = page.split("## What reacted this turn")[1].split("\n\n")[1]
+    assert section.count("**Electro-Charged**") == 2
+    # And the word is now ON the screen, so `EB-537` defines it below -- which
+    # is the whole point of naming the beat rather than printing a number.
+    assert "- **Electro-Charged** — " in page
+    assert "- **Electro-Charged** on **Damp Cultist**, off Shinobu — "            "Thundergrust." in page
+    assert "- **Electro-Charged** on **Damp Cultist**, off Tamakushi "            "Casket." in page
+    # In the order they resolved: the card, then the relic that answered it.
+    assert page.index("Thundergrust.") < page.index("Casket.")
+
+
+def test_a_turn_with_no_reaction_says_so_rather_than_going_quiet():
+    """The other half, and it is lane 1's finding: "Gorou+'s Crystallize did
+    not visibly fire", with no way to settle it. A present-and-empty log is a
+    fact about the turn; silence was what could not be read."""
+    page = blindplay.observe(reacted_state())
+    assert "Nothing reacted this turn" in page
+    # And a build with no log at all prints no section, the wire's own third
+    # state -- which is every board before this row.
+    assert "What reacted this turn" not in blindplay.observe(combat_state())
+
+
+def test_a_reaction_with_no_source_still_prints():
+    """A bomb going off on nobody's turn has neither card nor dealer. The row
+    drops the clause rather than inventing a source."""
+    page = blindplay.observe(reacted_state(
+        {"reaction": "Overloaded", "source": "", "target": "Corpse Slug",
+         "combat_id": "1"}))
+    assert "- **Overloaded** on **Corpse Slug**." in page
+    assert "off ." not in page
+
+
+def test_a_dusk_plan_prints_one_timing_on_every_surface():
+    """`EB-680`. ONE PLAN, THREE TIMINGS, ALL ON ONE RUN.
+
+    R265's Dusk lines are carried out at the END of the turn they are written
+    on, before the enemies act. The Kokomi r27 lane-2 seat met a Dusk Plan
+    whose card said the end of this turn, whose badge and queue line said the
+    start of the next, and whose carry-out heading, one turn later, said the
+    start of THIS turn. The badge is fixed at its source
+    (`ProtoBakeKuragePower`, `PendingPlansPower`); these are the page's two.
+
+    Seen to FAIL: the queue row was silent and the carry-out row filed under
+    the morning's heading.
+    """
+    queued = dict(TWO_PLANS, pending=2, queue=[
+        {"name": "Dusk: Breakwater", "clauses": 1},
+        {"name": "Kurage's Oath", "clauses": 1}])
+    page = blindplay.observe(plans_combat_state(queued))
+    assert "1. **Dusk: Breakwater** — Dusk: this one is carried out at the "            "END of this turn instead, before the enemies act" in page
+    assert "2. **Kurage's Oath**" in page
+    assert page.count("END of this turn instead") == 1
+
+    done = blindplay.observe(plans_combat_state(morning_of(
+        {"card": "Dusk: Breakwater", "number": 5,
+         "line": "Bake-Kurage: Dusk: Breakwater, 5", "kind": "Block",
+         "asked": 5},
+        {"card": "Kurage's Oath", "number": 7,
+         "line": "Bake-Kurage: Kurage's Oath, 7", "kind": "Damage",
+         "asked": 7})))
+    assert "carried these out at the END of your last turn, before the "            "enemies acted:" in done
+    assert "carried these out at the start of this turn, front first:" in done
+    dusk_at = done.index("END of your last turn")
+    morning_at = done.index("start of this turn, front first")
+    assert dusk_at < morning_at, "the earlier moment is filed first"
+    assert done.index("Dusk: Breakwater, 5") < morning_at
+    assert done.index("Kurage's Oath, 7") > morning_at
+
+
+def test_a_morning_with_no_dusk_entry_reads_exactly_as_it_did():
+    """The other half: a build or a turn with no Dusk line prints one heading
+    and no clause, which is every board before R265."""
+    page = blindplay.observe(plans_combat_state(morning_of(
+        {"card": "Kurage's Oath", "number": 7,
+         "line": "Bake-Kurage: Kurage's Oath, 7", "kind": "Damage",
+         "asked": 7})))
+    assert "carried these out at the start of this turn, front first:" in page
+    assert "END of your last turn" not in page
 
 
 def test_a_plan_on_a_vulnerable_target_prints_the_number_the_board_moved():
@@ -4980,34 +5144,39 @@ def random_target_combat_state() -> dict:
     return state
 
 
-def test_a_card_that_aims_itself_is_refused_with_the_form_that_works():
-    """`EB-319`, and the round it cost.
+def test_a_card_that_aims_itself_drops_the_on_clause_and_plays():
+    """`EB-319`, and then `EB-690` on top of it.
 
-    `play "Rapid Fire" on "Seapunk"` was answered *Rapid Fire is random-target
-    and takes no target*: true, and it named no way to play the card. The seat
-    had chained `end turn` behind it, so an Attack Potion's 12 free damage
-    went with the turn -- "the message had the information and withheld it"
-    (round-7 act-1 seat, Fight 5).
+    `play "Rapid Fire" on "Seapunk"` was once answered *Rapid Fire is
+    random-target and takes no target*: true, and it named no way to play the
+    card. `EB-319` made that refusal name the working form. `EB-690` took the
+    refusal away: the clause has no consequence -- the card resolves the same
+    way with it and without it -- and the Kokomi r28 lane-2 seat lost a whole
+    batched turn to a refusal that was, in its own words, "excellent".
 
-    Two halves, and the second is the row: the play is refused HERE instead of
-    being posted and refused by the bridge, and the refusal ends in the
-    command that resolves.
+    The play goes through WITHOUT a target, and the answer says the clause was
+    dropped and why.
     """
     state = random_target_combat_state()
     res = blindplay.act(state, 'play "Rapid Fire" on "Nibbit"')
-    assert not res["ok"]
-    assert res["post"] is None            # never posted, so nothing is spent
-    assert 'play "Rapid Fire"' in res["refusal"]
-    # ...and that form really is the one that works.
+    assert res["ok"], res["refusal"]
+    assert "target" not in res["post"]    # the game aims it, not the tester
+    assert res["printed"]["ignored_target"] == "Nibbit"
+    line = blindplay.taken_line(res)
+    assert 'Its `on "Nibbit"` was ignored' in line
+    assert "does its own aiming" in line
+    # And the bare form is unchanged.
     ok = blindplay.act(state, 'play "Rapid Fire"')
     assert ok["ok"] and "target" not in ok["post"]
+    assert "ignored_target" not in ok["printed"]
 
 
-def test_a_card_played_on_the_player_is_refused_the_same_way():
-    """The same rule for the other spelling the bridge refuses: a `Self` card
-    handed an enemy reaches `IsValidTarget` and comes back a wasted action."""
+def test_a_card_played_on_the_player_drops_the_clause_the_same_way():
+    """The other spelling, and the sentence still says the card is played on
+    YOU rather than on the body that was named."""
     res = blindplay.act(combat_state(), 'play "Coral Guard" on "Nibbit"')
-    assert not res["ok"] and 'play "Coral Guard"' in res["refusal"]
+    assert res["ok"] and "target" not in res["post"]
+    assert "is played on you, not on an enemy" in blindplay.taken_line(res)
     assert blindplay.act(combat_state(), 'play "Coral Guard"')["ok"]
 
 
@@ -6803,13 +6972,41 @@ def test_a_mono_element_deck_is_told_no_reaction_is_reachable():
     for word in ("Melt", "Vaporize", "Overloaded", "Frozen", "Superconduct",
                  "Electro-Charged"):
         assert f"- **{word}** — " not in page, word
-    # The umbrella row stays, because it is the AURA rule and this is the deck
-    # that needs it most -- and it carries the one line saying why the six are
-    # gone, naming the element it has so a reader knows what to draft.
+    # The umbrella row stays -- the word is on the screen and this page does
+    # not print a name with nothing after it -- and it carries the one line
+    # saying why the six are gone, naming the element it has so a reader knows
+    # what to draft. `EB-675` cut its RULES: see the test below.
     assert "- **Elemental Reaction** — " in page
     assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in page
     assert "Pyro meeting a Pyro aura refreshes it rather than reacting" in page
-    assert "defined again on the first screen that reaches a second" in page
+    assert "print in full on the first screen that reaches a second" in page
+
+
+def test_an_unreachable_reaction_row_is_one_line_and_not_the_rules():
+    """`EB-675`. THE PARAGRAPH ABOVE THE SENTENCE SAYING IT CANNOT HAPPEN.
+
+    `EB-428` stopped the six printing at a mono-element deck; the umbrella's
+    eight sentences of aura rules stayed, above the clause saying none of them
+    can happen here. Kokomi r26 lane 1, (c) 10: "In nine fights I never saw
+    one, never had a way to cause one, and read ~15 lines about them on every
+    single screen."
+
+    Seen to FAIL: the Hydro-only board printed the whole umbrella.
+    """
+    page = blindplay.observe(elemental_hand_state(elements=("Hydro",)))
+    row = [ln for ln in page.splitlines()
+           if ln.startswith("- **Elemental Reaction**")]
+    assert len(row) == 1, page
+    assert "A hit of a different element than the aura" in row[0]
+    assert "NO REACTION IS REACHABLE HERE" in row[0]
+    # The rules that are NOT printed, each a sentence of the full umbrella.
+    for gone in ("THAT LAST RULE CAN HIDE THE FIRST",
+                 "the aura is consumed and RE-APPLIED inside the same beat",
+                 "An element comes from a CARD that prints one"):
+        assert gone not in page, gone
+    # And they all come back the moment a pair is in reach.
+    both = blindplay.observe(elemental_hand_state(elements=("Hydro", "Cryo")))
+    assert "THAT LAST RULE CAN HIDE THE FIRST" in both
 
 
 def test_a_second_element_brings_back_its_pair_and_only_its_pair():
@@ -9821,7 +10018,8 @@ def _new_process() -> None:
     faces._FIGHT_MEMORY.update({"roster": {}, "ordinals": {},
                                 "numbered": set(), "names": {},
                                 "handles": {}, "elements": set(),
-                                "round": None})
+                                "round": None, "hp": {}, "reborn": {},
+                                "replaced": {}})
     faces._FIGHT_LOADED[0] = False
 
 
@@ -9861,7 +10059,7 @@ def test_every_enemy_carries_a_letter_that_a_kill_cannot_move():
     blindplay.observe(_gardener_board(4))
     _new_process()
     page = blindplay.observe(_gardener_board(3, first=2))
-    assert "- **Phantasmal Gardener (2)** [B] — HP 28/28" in page
+    assert "- **Phantasmal Gardener (2)** [B] — FRONT — HP 28/28" in page
     assert "[A]" not in page
     # A summon takes the next free letter rather than the dead body's.
     _new_process()
@@ -9909,7 +10107,7 @@ def test_a_replacement_mints_the_next_letter_and_the_dead_ones_retires():
     split = _gremlin_board([(2, "Sneaky Gremlin", 13),
                             (3, "Fat Gremlin", 14)], round_=2)
     page = blindplay.observe(split)
-    assert "- **Sneaky Gremlin** [B] — HP 13/13" in page
+    assert "- **Sneaky Gremlin** [B] — FRONT — HP 13/13" in page
     assert "- **Fat Gremlin** [C] — HP 14/14" in page
     assert "[A]" not in page, "the dead body's letter retires with it"
 
@@ -9927,7 +10125,7 @@ def test_the_next_fight_still_starts_its_letters_at_a():
     _new_process()
     page = blindplay.observe(_gremlin_board([(7, "Corpse Slug", 27),
                                              (8, "Sewer Clam", 30)], round_=1))
-    assert "- **Corpse Slug** [A] — HP 27/27" in page
+    assert "- **Corpse Slug** [A] — FRONT — HP 27/27" in page
     assert "- **Sewer Clam** [B] — HP 30/30" in page
 
 
@@ -9959,6 +10157,165 @@ def test_the_grammar_aims_at_the_letter_the_replacement_minted():
     assert blindplay._resolve_enemy(split, "C") == ("gremlin_3", "")
     assert blindplay._resolve_enemy(split, "B") == ("gremlin_2", "")
     assert blindplay._resolve_enemy(split, "A")[0] == ""
+
+
+# --- `EB-671`: WHICH LISTED BODY IS THE FRONT -------------------------------
+
+
+def _priest_board(round_: int = 1) -> dict:
+    """The act-1 boss of Kokomi r26 lane 1: a Priest and two Minion Followers.
+
+    The seat wrote a single-target Plan expecting the first listed body and it
+    landed on the third, because the two Followers wear `MinionPower` and
+    `KokomiPlan.FrontEnemy` skips every Minion it can.
+    """
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_
+    minion = [{"id": "minion", "name": "Minion", "amount": 1, "type": "Buff",
+               "description": "Minions abandon combat without their leader."}]
+    state["battle"]["enemies"] = [
+        {"entity_id": "follower_a", "combat_id": 1, "name": "Follower",
+         "hp": 59, "max_hp": 59, "block": 0, "status": minion,
+         "intents": [{"type": "Attack", "label": "5"}]},
+        {"entity_id": "follower_b", "combat_id": 2, "name": "Kin Follower",
+         "hp": 60, "max_hp": 60, "block": 0, "status": minion,
+         "intents": [{"type": "Attack", "label": "8"}]},
+        {"entity_id": "priest", "combat_id": 3, "name": "Kin Priest",
+         "hp": 190, "max_hp": 190, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "9"}]}]
+    return state
+
+
+def test_the_front_is_the_first_living_body_that_is_not_a_minion():
+    """`EB-671`. THE ONE THE SEAT SAID WOULD MOST CHANGE ITS PLAY.
+
+    Kokomi r26 lane 1, boss round 1: "the bodies printed in the order A, B, C
+    ... the plan went to C, not A. The printed rule says a single-target Plan
+    hits the front enemy; nothing on the page says which of three listed bodies
+    is the front, and the listing order is not it."
+
+    `KokomiPlan.FrontEnemy` is the rule and this is it printed: the first
+    living body that is not a Minion, which on that board is the Priest.
+
+    Seen to FAIL: no line on the page carried the word.
+    """
+    page = blindplay.observe(_priest_board())
+    assert "- **Kin Priest** [C] — FRONT — HP 190/190" in page
+    listed = page.split("## The other side")[1].split("*Each enemy keeps")[0]
+    assert listed.count("FRONT") == 1, "one body is the front"
+    assert "- **Follower** [A] — HP 59/59" in page
+    tail = page.split("## The other side")[1]
+    assert "FRONT marks the body an aim with one target lands on" in tail
+
+
+def test_the_front_falls_back_to_the_first_living_minion():
+    """`FrontEnemy`'s own fallback -- `FirstOrDefault(IsNotMinion) ?? [0]` --
+    so a board of Minions alone still names a body rather than going quiet on
+    the one turn a Plan is hardest to place."""
+    board = _priest_board()
+    board["battle"]["enemies"] = board["battle"]["enemies"][:2]
+    page = blindplay.observe(board)
+    assert "- **Follower** [A] — FRONT — HP 59/59" in page
+
+
+def test_a_dead_body_is_never_the_front():
+    """`IsAlive` is the first filter the mod applies, and a corpse still on
+    the feed would otherwise take the mark off the body the Plan reaches."""
+    board = _priest_board()
+    board["battle"]["enemies"][2]["hp"] = 0
+    page = blindplay.observe(board)
+    assert "- **Follower** [A] — FRONT — HP 59/59" in page
+
+
+def test_one_living_body_is_not_marked_at_all():
+    """The mark answers a question a one-body board does not ask, and printing
+    it there would put a word and a paragraph on most fight screens of a run
+    to restate the list."""
+    page = blindplay.observe(_gardener_board(1))
+    assert "FRONT" not in page
+
+
+# --- `EB-672`: A REPLACEMENT ON A DEAD BODY'S COMBAT ID ---------------------
+
+
+def _fogmog_board(hp: int, round_: int) -> dict:
+    """Kokomi r26 lane 1, fight 7: Fogmog and its Eye with Teeth, whose
+    replacement arrives holding the dead body's `combat_id`."""
+    state = json.loads(json.dumps(combat_state()))
+    state["battle"]["round"] = round_
+    state["battle"]["enemies"] = [
+        {"entity_id": "fogmog", "combat_id": 1, "name": "Fogmog",
+         "hp": 40, "max_hp": 40, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "7"}]},
+        {"entity_id": "eye", "combat_id": 2, "name": "Eye with Teeth",
+         "hp": hp, "max_hp": 6, "block": 0, "status": [],
+         "intents": [{"type": "Attack", "label": "3"}]}]
+    return state
+
+
+def test_a_body_whose_hp_rose_mints_a_new_letter_and_says_it_was_replaced():
+    """`EB-672`. THE SUMMON THAT CAME BACK AS THE BODY THE SEAT HAD KILLED.
+
+    Kokomi r26 lane 1, fight 7: "Fogmog summoned a replacement Eye as B, at
+    6/6, with the same intent, on the screen right after I killed B. I spent an
+    act testing whether my own Flank had whiffed. Nothing distinguished a
+    replaced body from a survived one."
+
+    `EB-541`'s minting rule was already right; it never fired, because from the
+    combat id's point of view nothing had been summoned. HP going up is the one
+    signal the wire carries.
+
+    Seen to FAIL: the replacement printed as [B] with no line under it.
+    """
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    blindplay.observe(_fogmog_board(2, round_=2))
+    _new_process()
+    page = blindplay.observe(_fogmog_board(6, round_=3))
+    # The name is numbered because this fight has now seen two bodies wearing
+    # it, which is `_enemy_names`' own rule and the honest reading: the dead
+    # one and the replacement are two creatures.
+    assert "- **Eye with Teeth (2)** [C] — HP 6/6" in page
+    assert "It took the place of [B], which is dead" in page
+    assert "Teeth (2)** [B]" not in page
+
+
+def test_the_replacement_line_survives_into_the_next_process():
+    """The seats read one screen per process, so the letter and the sentence
+    have to come off the lane's store and not off this interpreter."""
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    blindplay.observe(_fogmog_board(2, round_=2))
+    _new_process()
+    blindplay.observe(_fogmog_board(6, round_=3))
+    _new_process()
+    page = blindplay.observe(_fogmog_board(4, round_=4))
+    assert "- **Eye with Teeth (2)** [C] — HP 4/6" in page
+    assert "It took the place of [B]" in page
+
+
+def test_a_body_that_only_loses_hp_keeps_its_letter():
+    """The ordinary fight, which must read exactly as it always did."""
+    blindplay.observe(_fogmog_board(6, round_=1))
+    _new_process()
+    page = blindplay.observe(_fogmog_board(1, round_=2))
+    assert "- **Eye with Teeth** [B] — HP 1/6" in page
+    assert "took the place of" not in page
+
+
+def test_a_phase_flip_sentinel_is_not_a_replacement():
+    """`EB-332`'s sentinel rises and falls by a hundred million, and a boss
+    coming back off it is the same creature."""
+    board = _fogmog_board(6, round_=1)
+    blindplay.observe(board)
+    _new_process()
+    flip = _fogmog_board(6, round_=2)
+    flip["battle"]["enemies"][1].update({"hp": 999999997, "max_hp": 999999999})
+    blindplay.observe(flip)
+    _new_process()
+    page = blindplay.observe(_fogmog_board(6, round_=3))
+    assert "- **Eye with Teeth** [B] — HP 6/6" in page
+    assert "took the place of" not in page
 
 
 def test_the_enemy_list_carries_the_handle_rule_and_the_hand_note_does_not():
@@ -10158,23 +10515,24 @@ def test_an_all_enemies_card_aimed_at_a_body_is_told_the_bare_form():
     planned["player"]["kokomi_plans"] = TWO_PLANS
     assert blindplay.act(planned, 'play "Riptide" on "Bake-Kurage"')["ok"]
 
+    # `EB-690`: the guard still FIRES -- the target is dropped rather than
+    # posted, so the bridge never sees `Riptide on Byrdonis` -- and what
+    # changed is the answer: the play resolves and says the clause went.
     res = blindplay.act(state, 'play "Riptide" on "Nibbit"')
-    assert not res["ok"]
-    assert res["post"] is None                # never posted, so nothing spent
-    assert 'play "Riptide"' in res["refusal"]
-    assert "does its own aiming" in res["refusal"]
+    assert res["ok"], res["refusal"]
+    assert "target" not in res["post"]
+    assert "does its own aiming" in blindplay.taken_line(res)
     ok = blindplay.act(state, 'play "Riptide"')
     assert ok["ok"] and "target" not in ok["post"]
 
 
-def test_a_self_card_aimed_at_a_body_is_told_the_bare_form_too():
-    """The row's second test. A `Self` card has always been refused on its
+def test_a_self_card_aimed_at_a_body_drops_the_clause_too():
+    """The row's second test. A `Self` card has always been caught on its
     spelling (`EB-319`); this pins that the widened guard did not lose it, and
     that the sentence still says the card is played on YOU."""
     res = blindplay.act(combat_state(), 'play "Coral Guard" on "Nibbit"')
-    assert not res["ok"] and res["post"] is None
-    assert "is played on you, not on an enemy" in res["refusal"]
-    assert 'play "Coral Guard"' in res["refusal"]
+    assert res["ok"] and "target" not in res["post"]
+    assert "is played on you, not on an enemy" in blindplay.taken_line(res)
 
 
 def test_a_feed_that_never_answered_the_question_still_posts():
@@ -10242,9 +10600,12 @@ def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
     assert 'play "Lynette — Magic Trick" on "Phantasmal Gardener (1)"'         in res["refusal"]
 
 
-def test_the_face_that_aims_itself_still_names_the_bare_form():
-    """`EB-499`'s half, unmoved: the twin sentence is the point, so the two
-    refusals a seat meets a turn apart each name the form that works."""
+def test_the_face_that_aims_itself_drops_the_clause_and_says_so():
+    """`EB-499`'s half, under `EB-690`: the twin sentence is still the point,
+    and the two answers a seat meets a turn apart still say opposite things
+    about one printed word -- but only one of them costs an action now. The
+    face that is AIMED is refused (it needs a body); the face that aims itself
+    plays, with the clause dropped."""
     state = _two_all_faces_state()
     _new_process()
     blindplay.observe(state)
@@ -10252,9 +10613,9 @@ def test_the_face_that_aims_itself_still_names_the_bare_form():
     res = blindplay.act(
         state, 'play "Chevreuse — Ring of Bursting Grenades" on "A"')
 
-    assert not res["ok"] and res["post"] is None
-    assert "does its own aiming" in res["refusal"]
-    assert 'play "Chevreuse — Ring of Bursting Grenades"' in res["refusal"]
+    assert res["ok"], res["refusal"]
+    assert "target" not in res["post"]
+    assert "does its own aiming" in blindplay.taken_line(res)
 
 
 def test_an_aimed_all_face_plays_on_the_body_it_was_given():
@@ -10573,6 +10934,45 @@ def test_every_section_of_a_page_prints_once():
         assert len(headings) == len(set(headings)), build.__name__
 
 
+def test_a_body_the_feed_sent_twice_prints_once():
+    """`EB-694`. THE BLOCK THAT PRINTED TWICE IN BOTH r29 LANES.
+
+    Lane 1: "the observe page duplicated whole blocks (every enemy line
+    printed twice) on several screens." Lane 2 proved where it was not: "the
+    duplication is in the bridge's own output, since an unpiped `observe` on
+    that screen printed it twice as well."
+
+    The render cannot double a HEADING (`EB-510`, the test above), so a
+    doubled block under one heading is a doubled LIST -- a feed that sent the
+    same record twice. The dedupe is exact: same ids AND an equal record.
+
+    Seen to FAIL: two identical bodies printed two lines.
+    """
+    state = copy.deepcopy(combat_state())
+    bodies = state["battle"]["enemies"]
+    state["battle"]["enemies"] = bodies + copy.deepcopy(bodies)
+    page = blindplay.observe(state)
+    for line in page.splitlines():
+        if line.startswith("- **") and " HP " in line:
+            assert page.count(line) == 1, line
+    headings = [ln for ln in page.splitlines() if ln.startswith("#")]
+    assert len(headings) == len(set(headings))
+
+
+def test_two_bodies_that_differ_are_both_kept():
+    """The other half, and the reason the test is equality and not the id: a
+    board really can field two bodies of one name, and `_enemy_names`' own
+    `#n` tie-break exists to survive a feed that repeats an id across two
+    creatures. A dedupe that merged them would be the mis-target this whole
+    memory was built to stop."""
+    state = copy.deepcopy(combat_state())
+    twin = copy.deepcopy(state["battle"]["enemies"][0])
+    twin["hp"] = max(1, twin.get("hp", 10) - 1)
+    state["battle"]["enemies"] = state["battle"]["enemies"] + [twin]
+    kept = blindplay.observation(state)["combat"]["enemies"]
+    assert len(kept) == len(state["battle"]["enemies"])
+
+
 def test_a_doubled_page_is_refused_rather_than_handed_over():
     """The guard itself, driven: a page that carries a section twice raises
     instead of reaching a seat, and the refusal names the heading so whoever
@@ -10856,10 +11256,20 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
                     "line": "Bake-Kurage: Kurage's Oath, 7",
                     "kind": "Damage", "asked": 7})))
     lines = page.splitlines()
-    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE == (
-        "- A Plan carries the numbers you wrote; a debuff on you afterwards "
-        "does not change it.")
+    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE.startswith(
+        "- A Plan carries the numbers you wrote.")
     assert blindplay.PLAN_WRITTEN_NUMBER_NOTE in lines
+    # `EB-688`. AND BOTH CASES ARE PREDICTABLE FROM IT. "afterwards" was the
+    # word that was not the rule: both r27 and r28 wrote a Plan while ALREADY
+    # debuffed and were paid in full. "Either 'a hit you land' excludes the
+    # jellyfish's hit ... or Plans are simply immune. The rules text does not
+    # say which, and the difference matters" (r28 lane 1, (c) 2). It is the
+    # first, and the Block half is `EB-659`'s mirror of it.
+    said = blindplay.PLAN_WRITTEN_NUMBER_NOTE
+    assert "Every planned HIT is the jellyfish's" in said
+    assert "before or after you write it" in said
+    assert "a planned BLOCK is yours, so Frail does cut it" in said
+    assert "afterwards" not in said
     # Beside the count rule, which is the one it qualifies.
     assert lines.index(blindplay.PLAN_COUNT_NOTE) + 1 == \
         lines.index(blindplay.PLAN_WRITTEN_NUMBER_NOTE)
@@ -10873,7 +11283,7 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
 #: is `ProtoBakeKuragePower.Localization` verbatim; the capped half is what a
 #: build launched with `GITS_KOKOMI_PLAN_CAP=2` prints.
 PET_FACE = ("Enemies cannot target it. Lasts all combat. Play a Plan card on "
-            "it: it carries out the Plan at the start of your next turn.")
+            "it: it carries out next turn, or at this turn's end if Dusk.")
 PET_FACE_CAPPED = (PET_FACE
                    + " Carries out at most 2 at the start of your turn;"
                      " the rest wait in order.")
@@ -11240,6 +11650,39 @@ def test_a_one_use_discount_says_it_pays_for_one_card():
     assert 'its own words are "the next Skill you play"' in page
     assert "only the first one you actually play is charged it" in page
     assert "pays for ONE card" not in blindplay.observe(combat_state())
+
+
+def test_a_one_use_rider_that_is_not_a_price_says_it_pays_for_one_card():
+    """`EB-669`. THE NUMBER BOTH r26 SEATS COUNTED TWICE.
+
+    Battle Plan's carry-out leaves "The next Attack you play face-up this turn
+    deals 4 additional damage" and every Attack in hand redraws with the +4
+    folded in. Lane 2: "both attacks printed the rider though only the first
+    can consume it ... same over-display shape as the Battle Plan rider" (of
+    Mika's cost cut). Lane 1 named the pair it is easy to confuse: "Kyouka's
+    +4 shows on every Attack in hand and really does apply to every one, where
+    Battle Plan's +4 shows on every Attack and applies to one."
+
+    Seen to FAIL: only the PRICE shape took a note.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["status"] = [
+        {"title": "Battle Plan", "name": "Battle Plan", "amount": 1,
+         "type": "Buff",
+         "description": "The next Attack you play face-up this turn deals "
+                        "4 additional damage."}]
+    page = blindplay.observe(state)
+    assert "**Battle Plan** pays for ONE card" in page
+    assert 'its own words are "the next Attack you play"' in page
+    assert "only the first one you actually play gets it" in page
+    assert page.count("pays for ONE card") == 1, "one line for the hand"
+    # A hand-wide buff worded the other way takes no line at all: that is the
+    # pair lane 1 named, and a note on both would be the same over-count.
+    wide = copy.deepcopy(combat_state())
+    wide["player"]["status"] = [
+        {"title": "Kyouka", "name": "Kyouka", "amount": 4, "type": "Buff",
+         "description": "Your Attacks deal 4 additional damage."}]
+    assert "pays for ONE card" not in blindplay.observe(wide)
 
 
 def test_the_last_copy_of_a_pair_keeps_the_number_it_was_given():

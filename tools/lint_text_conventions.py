@@ -140,21 +140,18 @@ EXCEPTIONS = {
     "ProtoBakeKuragePower.descriptionCapped": (
         "`EB-653` (Kokomi r24). The cap lane's face, and it exists only under "
         "`GITS_KOKOMI_PLAN_CAP` -- a default build prints the row above it, "
-        "at 123 of 125. Under the lane rule the jellyfish carried out two of "
+        "at 124 of 125. Under the lane rule the jellyfish carried out two of "
         "four written Plans four mornings running and NO SURFACE SAID SO, so "
         "the seat read the rule as a wall for three of the four occurrences "
         "and then reverse-engineered it off the badge. A rule that binds and "
         "prints nowhere is not a rule a round can read; every clause above it "
         "is what the jellyfish IS (untargetable, all combat, what a Plan does "
         "on it) and none is droppable to make room"),
-    "PendingPlansPower.descriptionCapped": (
-        "`EB-653`'s other half, on the badge that counts. The uncapped face "
-        "is 119 of 125 and prints under every build; this one prints only "
-        "under a declared cap. The badge is the surface a player reads to "
-        "answer 'how many are written', and under the cap that number stops "
-        "being how many will happen -- which is the exact confusion the r24 "
-        "lane derived the rule from. The written-number clause above it is "
-        "`EB-647`, a ruled finding three r23 lanes met, and is not droppable"),
+    # `PendingPlansPower.descriptionCapped` left this list with `EB-680`: the
+    # Dusk clause was bought by cutting "at the start of" and "on you ... the
+    # numbers" out of the two sentences above it, and the cap face came back
+    # under the ceiling on the same trim. An exception that no longer names a
+    # string over its ceiling is rot, and this gate says so.
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.

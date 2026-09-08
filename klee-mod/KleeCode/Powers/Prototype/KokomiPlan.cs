@@ -2906,9 +2906,13 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
     {
         ("title", "Plan"),
         ("description",
+            // `EB-680`: AND WHICH TURN'S END. A Dusk Plan lands at the end
+            // of the turn it is written on (R265), and this badge counted it
+            // into "the start of your next turn" with the rest -- the second
+            // of the three timings one Dusk Plan printed at once. 115 of 125.
             "Carries out [blue]{Amount}[/blue] "
-          + "[gold]Plan{Amount:plural:|s}[/gold] at the start of your next "
-          + "turn, in order. "
+          + "[gold]Plan{Amount:plural:|s}[/gold] in order next turn; a "
+          + "[gold]Dusk[/gold] Plan at this turn's end. "
           // `EB-647` (round 23). THE NUMBER IS FIXED WHEN THE PLAN IS
           // WRITTEN. Three r23 lanes met it from the wrong side: under Shrink
           // the hand reprinted `Kurage's Oath` as 2 and the jellyfish carried
@@ -2920,7 +2924,7 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
           // `ProtoBakeKuragePower`'s description, which stands at 122 of the
           // power surface's 125. Page twin:
           // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
-          + "Later debuffs on you do not change the numbers you wrote."
+          + "Later debuffs do not change what you wrote."
           // `EB-653` (round 24). AND THE CAP, WHERE IT BINDS. Empty on an
           // unconfigured build, which is every build but a cap lane's; the
           // sentence is `KokomiPlan.CapSentence`'s, spelled once for both
