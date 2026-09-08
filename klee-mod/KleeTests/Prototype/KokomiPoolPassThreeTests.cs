@@ -61,12 +61,25 @@ public class KokomiPoolPassThreeTests
         // THE TWO PRINTED NUMBERS UPGRADE BY DIFFERENT AMOUNTS, which is the
         // whole reason `conditional_then_damage` exists: `conditional_damage`
         // moves both branches by 2 and the then-branch takes 1 more.
+        //
+        // `EB-657`: THEY ARE PRINTED LIVE. The face used to carry the two
+        // `{IfUpgraded:show:}` literals, so it folded neither Shrink nor
+        // Vulnerable while the Strike beside it did -- 5 printed, 7 dealt. The
+        // numbers are a `FoldedDamageVar` each now (`EB-624`'s pair, one card
+        // over), carrying the same 5 and 10 and each taking its own delta.
         var face = Face(new ProtoKkFeint());
-        Assert.Contains("{IfUpgraded:show:7|5}", face);
-        Assert.Contains("{IfUpgraded:show:13|10}", face);
-        // The branch amounts are literals that swap at play time, so the swap
-        // is in the BODY and not in a var -- the shape `_branch_amount` emits.
+        Assert.Contains("{PlainDamage:diff()}", face);
+        Assert.Contains("{BranchDamage:diff()}", face);
+        Assert.DoesNotContain("{IfUpgraded:show:", face);
         var source = Source("ProtoKkFeint");
+        Assert.Contains("new FoldedDamageVar(\"PlainDamage\", 5m, ValueProp.Move)",
+                        source);
+        Assert.Contains("new FoldedDamageVar(\"BranchDamage\", 10m, ValueProp.Move)",
+                        source);
+        Assert.Contains("DynamicVars[\"PlainDamage\"].UpgradeValueBy(2m);", source);
+        Assert.Contains("DynamicVars[\"BranchDamage\"].UpgradeValueBy(3m);", source);
+        // THE HIT IS UNTOUCHED and stays the play-time literal swap, so the
+        // printed pair can print no number the card does not deal.
         Assert.Contains("(IsUpgraded ? 7m : 5m)", source);
         Assert.Contains("(IsUpgraded ? 13m : 10m)", source);
     }

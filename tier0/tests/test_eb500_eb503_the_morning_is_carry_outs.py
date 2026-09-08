@@ -258,4 +258,4 @@ def test_the_face_and_the_power_tip_both_name_the_morning():
 
     assert face.startswith("At the start of your turn, ")
     assert ('"At the start of your turn, the [gold]Bake-Kurage[/gold] "\n'
-            '        "carries out every [gold]Plan[/gold] twice."') in gen
+            '        "carries out your first [gold]Plan[/gold] twice."') in gen

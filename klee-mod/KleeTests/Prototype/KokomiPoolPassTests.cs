@@ -335,7 +335,7 @@ public class KokomiPoolPassTests
     [Fact]
     public void The_ascension_buys_its_turn_back_at_the_smith()
     {
-        // The row prints no number the rule may move -- "every Plan twice" is
+        // The row prints no number the rule may move -- "your first Plan twice" is
         // a rule, not an amount -- so the upgrade takes the COST clause: its
         // price is two energy on a turn that writes no Plan, and the `+` card
         // buys that turn back.

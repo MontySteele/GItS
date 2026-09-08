@@ -2339,7 +2339,7 @@ APPLY_POWERS = {
     # reads only whether it is worn.
     "kk_nereids_ascension": ("NereidsAscensionPower", None,
         "At the start of your turn, the [gold]Bake-Kurage[/gold] "
-        "carries out every [gold]Plan[/gold] twice."),
+        "carries out your first [gold]Plan[/gold] twice."),
     "kk_clouds_like_waves": ("CloudsLikeWavesPower", None,
         "Whenever you apply a debuff to an enemy, gain {X} Block."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
@@ -5872,6 +5872,13 @@ def build_vars(card: dict) -> list[str]:
             # carry no numbers of their own.
             if any(e.get("op") == "repeat_this" for e in eff.get("then", [])):
                 continue
+            # `EB-657`. THE TWO PRINTED NUMBERS OF A TWO-ARMED AIMED HIT, live
+            # -- `EB-624`'s pair one card over. Declared FIRST and in print
+            # order, because the face reads the else arm before the then arm.
+            for name, amount, _delta in folded_branch_damage(card, eff):
+                out.append(
+                    f'new FoldedDamageVar("{name}", {amount}m, '
+                    'ValueProp.Move)')
             cb = conditional_bonus_upgrade(card)
             bd = branch_draw_upgrade(card)
             then_var, else_var = branch_draw_vars(card)
@@ -6757,6 +6764,57 @@ def conditional_then_damage_upgrade(card: dict) -> int:
     two-number conditional face can upgrade its halves by different amounts.
     """
     return int(upgrade_plan(card)[0].get("conditional_then_damage", 0))
+
+
+def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int]]:
+    """`EB-657`. The two PRINTED numbers of a two-armed aimed conditional hit:
+    `[(token, base amount, upgrade delta), ...]` in the order the face prints
+    them, or `[]` when the row is not that shape.
+
+    THE FIND (Kokomi r25 lane 2, (c) 2). Feint printed "Deal 5 damage ... deal
+    10 instead" beside a Strike printed at 4, played into the same Shrink, and
+    dealt 7. Both branch amounts are LITERALS by construction
+    (`_branch_amount`), so nothing folded them -- which is `EB-441`'s defect on
+    Undertow, one card over, and `EB-624`'s answer is the one taken here: two
+    `FoldedDamageVar`s, one per arm, printed and nothing else. The HIT is
+    untouched and stays the play-time `IsUpgraded` swap, so this moves no rule
+    and can print no number the card does not deal.
+
+    THE TWO ARMS UPGRADE BY DIFFERENT AMOUNTS, which is what
+    `conditional_then_damage` exists for: the else arm moves by
+    `conditional_damage` alone and the then arm takes the extra on top -- the
+    same sum `_branch_amount` puts in the body, read here so the face and the
+    hit cannot disagree the first time the card is upgraded.
+
+    AIMED, TWO-ARMED AND `proto_` ONLY. A `FoldedDamageVar` folds the aimed
+    body's terms, so an `all_enemies` arm would print one number for a board
+    that takes several (`debuff_calc_rider`'s rule); a single-armed row keeps
+    its literal because there is no second number to disagree with; and the var
+    lives under `Powers/Prototype/`, which a release build Compile-Removes
+    (`calculated_damage_var`'s quarantine, verbatim).
+    """
+    if eff.get("op") != "conditional":
+        return []
+    if not str(card.get("id") or "").startswith("proto_"):
+        return []
+
+    def _one_aimed_hit(branch: list | None) -> dict | None:
+        if not branch or len(branch) != 1:
+            return None
+        clause = branch[0]
+        return (clause if clause.get("op") == "damage"
+                and clause.get("target") == "enemy"
+                and isinstance(clause.get("amount"), int) else None)
+
+    then = _one_aimed_hit(eff.get("then"))
+    els = _one_aimed_hit(eff.get("else"))
+    if then is None or els is None:
+        return []
+    both = conditional_damage_upgrade(card)
+    extra = (conditional_then_damage_upgrade(card)
+             if _is_then_first_damage(card, then) else 0)
+    return [("PlainDamage", int(els["amount"]), both),
+            ("BranchDamage", int(then["amount"]), both + extra)]
 
 
 def _is_then_first_damage(card: dict, eff: dict) -> bool:
@@ -11493,7 +11551,10 @@ def build_upgrade(card: dict) -> list[str]:
             "// conditional_then_damage: the then-branch amount swaps on an "
             "IsUpgraded read at play time;")
         lines.append(
-            "// the text swaps via {IfUpgraded:show:...|...}.")
+            "// the FACE prints it live (`EB-657`, the folded pair below) "
+            "where the row has one,")
+        lines.append(
+            "// and swaps via {IfUpgraded:show:...|...} where it does not.")
     for ckey in ("conditional_block", "conditional_damage"):
         # EB-140. tier0 bumps EVERY matching op, branches included, so the
         # delta is emitted in two places and this is only one of them: the
@@ -11524,9 +11585,28 @@ def build_upgrade(card: dict) -> list[str]:
         if branch:
             how_many = ("the branch amount swaps" if len(branch) == 1
                         else f"all {len(branch)} branch amounts swap")
+            # `EB-657`: where the row prints the pair live, the text does NOT
+            # swap -- the vars bumped below are what re-render.
+            folded = any(folded_branch_damage(card, eff)
+                         for eff in card.get("effects", []))
+            how_printed = ("the face prints them live (`EB-657`)."
+                           if folded and ckey == "conditional_damage"
+                           else "the text swaps via {IfUpgraded:show:...|...}.")
             lines.append(
                 f"// {ckey}: {how_many} on an IsUpgraded read at play time; "
-                "the text swaps via {IfUpgraded:show:...|...}.")
+                + how_printed)
+    # `EB-657`. THE TWO PRINTED BRANCH NUMBERS CARRY THEIR OWN BASE VALUES,
+    # so a branch delta moves the vars as well as the play-time literal --
+    # `EB-624`'s rule on Undertow, and for its reason: the face stops agreeing
+    # with the hit the first time the card is upgraded otherwise. Each arm
+    # takes its OWN delta (the else arm `conditional_damage`, the then arm
+    # that plus `conditional_then_damage`), which is what the two keys are for.
+    if "conditional_damage" in deltas or "conditional_then_damage" in deltas:
+        for eff in card.get("effects", []):
+            for name, _base, delta in folded_branch_damage(card, eff):
+                if delta:
+                    lines.append(
+                        f'DynamicVars["{name}"].UpgradeValueBy({delta}m);')
     if branch_draw_upgrade(card):
         # tier0 draw deltas bump ALL draw ops, branches included. Only the
         # BRANCH vars are emitted here: when the card also draws at top level

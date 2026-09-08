@@ -1655,8 +1655,8 @@ def test_the_morning_plays_a_free_copy_and_keeps_the_original(overhaul):
 
 
 def test_the_copy_is_doubled_by_nereids_ascension(overhaul):
-    """Nereid's Ascension carries out every Plan twice, and this Plan is not
-    special: two carry-outs, two copies, two hits."""
+    """Nereid's Ascension carries out the drain's first Plan twice, and this
+    Plan is not special: two carry-outs, two copies, two hits."""
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
     caught = a_companion("proto_mi_b", "Gorou — Juuga")

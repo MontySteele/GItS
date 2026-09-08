@@ -388,7 +388,7 @@ public class Round17Tests
 
         Assert.StartsWith("At the start of your turn, ", face);
         Assert.StartsWith("At the start of your turn, ", badge);
-        Assert.Contains("carries out every [gold]Plan[/gold] twice.", badge);
+        Assert.Contains("carries out your first [gold]Plan[/gold] twice.", badge);
     }
 
     [Fact]
