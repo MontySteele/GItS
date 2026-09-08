@@ -277,8 +277,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R265 | 2026-09-07 | the three run picks at their defaults (Klee: every Hexerei card gives a Spark, the tag tested before readers are added; Kokomi: pool first, the cap as one lane) | `507973c` |
 | R266 | 2026-09-07 | the two-Plan cap is retired as a rule; the free turn is priced by the faces, not by a throughput limit | `9ea662f` |
 | R267 | 2026-09-08 | (2026-09-08): GPT audit of the Kokomi passes fact-checked; | `0a94db2` |
+| R268 | 2026-09-08 | (2026-09-08): the Plan-less hand is answered nowhere for now; the next Kokomi round reads the pool's Plan depth before any access card | `d4e707e` |
 
-266 rows over the R1..R267 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 155 from a commit message, 0 unresolved.
+267 rows over the R1..R268 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 156 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
