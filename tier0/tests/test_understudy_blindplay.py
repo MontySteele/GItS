@@ -3188,6 +3188,38 @@ def test_a_live_enchant_picker_says_it_cannot_mark_the_pick():
     assert "Nothing on this screen is picked yet." not in page
 
 
+def test_a_pip_between_a_number_and_a_word_keeps_its_space():
+    """`EB-683`. THE SPACE THE PICTURE WAS STANDING IN FOR.
+
+    Very Hot Cocoa is written `gain an additional 4[..._energy_icon.png]` --
+    the number, then the pip, no space, because on a screen a pip is a
+    picture. Rendered as a word it needs one, and the Kokomi r27 lane-1 seat
+    read "an additional 4Energy" off the single biggest item of its run.
+
+    Seen to FAIL: the digit and the word came out glued.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["relics"] = [
+        {"id": "very_hot_cocoa", "name": "Very Hot Cocoa",
+         "description": "At the start of each combat, gain an additional "
+                        "4[ironclad_energy_icon.png]."},
+        {"id": "glued_both_sides", "name": "Kettle",
+         "description": "Gain 2[ironclad_energy_icon.png]now."}]
+    page = blindplay.observe(state)
+    assert "gain an additional 4 Energy." in page
+    assert "4Energy" not in page
+    assert "Gain 2 Energy now." in page
+
+    # The bracketed rendering an unnamed icon keeps is NOT re-spaced: a
+    # bracket beside a letter is already legible, and moving it would be this
+    # page editing the game's punctuation rather than restoring a picture.
+    unknown = copy.deepcopy(combat_state())
+    unknown["player"]["relics"] = [
+        {"id": "odd", "name": "Odd Relic",
+         "description": "Gain 2[boss_relic_icon.png]."}]
+    assert "Gain 2[boss relic icon]." in blindplay.observe(unknown)
+
+
 def test_a_live_face_prints_the_energy_pip_as_a_word_and_not_a_token():
     """`EB-651`(a), ON THE WIRE'S OWN BYTES.
 
@@ -5006,34 +5038,39 @@ def random_target_combat_state() -> dict:
     return state
 
 
-def test_a_card_that_aims_itself_is_refused_with_the_form_that_works():
-    """`EB-319`, and the round it cost.
+def test_a_card_that_aims_itself_drops_the_on_clause_and_plays():
+    """`EB-319`, and then `EB-690` on top of it.
 
-    `play "Rapid Fire" on "Seapunk"` was answered *Rapid Fire is random-target
-    and takes no target*: true, and it named no way to play the card. The seat
-    had chained `end turn` behind it, so an Attack Potion's 12 free damage
-    went with the turn -- "the message had the information and withheld it"
-    (round-7 act-1 seat, Fight 5).
+    `play "Rapid Fire" on "Seapunk"` was once answered *Rapid Fire is
+    random-target and takes no target*: true, and it named no way to play the
+    card. `EB-319` made that refusal name the working form. `EB-690` took the
+    refusal away: the clause has no consequence -- the card resolves the same
+    way with it and without it -- and the Kokomi r28 lane-2 seat lost a whole
+    batched turn to a refusal that was, in its own words, "excellent".
 
-    Two halves, and the second is the row: the play is refused HERE instead of
-    being posted and refused by the bridge, and the refusal ends in the
-    command that resolves.
+    The play goes through WITHOUT a target, and the answer says the clause was
+    dropped and why.
     """
     state = random_target_combat_state()
     res = blindplay.act(state, 'play "Rapid Fire" on "Nibbit"')
-    assert not res["ok"]
-    assert res["post"] is None            # never posted, so nothing is spent
-    assert 'play "Rapid Fire"' in res["refusal"]
-    # ...and that form really is the one that works.
+    assert res["ok"], res["refusal"]
+    assert "target" not in res["post"]    # the game aims it, not the tester
+    assert res["printed"]["ignored_target"] == "Nibbit"
+    line = blindplay.taken_line(res)
+    assert 'Its `on "Nibbit"` was ignored' in line
+    assert "does its own aiming" in line
+    # And the bare form is unchanged.
     ok = blindplay.act(state, 'play "Rapid Fire"')
     assert ok["ok"] and "target" not in ok["post"]
+    assert "ignored_target" not in ok["printed"]
 
 
-def test_a_card_played_on_the_player_is_refused_the_same_way():
-    """The same rule for the other spelling the bridge refuses: a `Self` card
-    handed an enemy reaches `IsValidTarget` and comes back a wasted action."""
+def test_a_card_played_on_the_player_drops_the_clause_the_same_way():
+    """The other spelling, and the sentence still says the card is played on
+    YOU rather than on the body that was named."""
     res = blindplay.act(combat_state(), 'play "Coral Guard" on "Nibbit"')
-    assert not res["ok"] and 'play "Coral Guard"' in res["refusal"]
+    assert res["ok"] and "target" not in res["post"]
+    assert "is played on you, not on an enemy" in blindplay.taken_line(res)
     assert blindplay.act(combat_state(), 'play "Coral Guard"')["ok"]
 
 
@@ -10372,23 +10409,24 @@ def test_an_all_enemies_card_aimed_at_a_body_is_told_the_bare_form():
     planned["player"]["kokomi_plans"] = TWO_PLANS
     assert blindplay.act(planned, 'play "Riptide" on "Bake-Kurage"')["ok"]
 
+    # `EB-690`: the guard still FIRES -- the target is dropped rather than
+    # posted, so the bridge never sees `Riptide on Byrdonis` -- and what
+    # changed is the answer: the play resolves and says the clause went.
     res = blindplay.act(state, 'play "Riptide" on "Nibbit"')
-    assert not res["ok"]
-    assert res["post"] is None                # never posted, so nothing spent
-    assert 'play "Riptide"' in res["refusal"]
-    assert "does its own aiming" in res["refusal"]
+    assert res["ok"], res["refusal"]
+    assert "target" not in res["post"]
+    assert "does its own aiming" in blindplay.taken_line(res)
     ok = blindplay.act(state, 'play "Riptide"')
     assert ok["ok"] and "target" not in ok["post"]
 
 
-def test_a_self_card_aimed_at_a_body_is_told_the_bare_form_too():
-    """The row's second test. A `Self` card has always been refused on its
+def test_a_self_card_aimed_at_a_body_drops_the_clause_too():
+    """The row's second test. A `Self` card has always been caught on its
     spelling (`EB-319`); this pins that the widened guard did not lose it, and
     that the sentence still says the card is played on YOU."""
     res = blindplay.act(combat_state(), 'play "Coral Guard" on "Nibbit"')
-    assert not res["ok"] and res["post"] is None
-    assert "is played on you, not on an enemy" in res["refusal"]
-    assert 'play "Coral Guard"' in res["refusal"]
+    assert res["ok"] and "target" not in res["post"]
+    assert "is played on you, not on an enemy" in blindplay.taken_line(res)
 
 
 def test_a_feed_that_never_answered_the_question_still_posts():
@@ -10456,9 +10494,12 @@ def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
     assert 'play "Lynette — Magic Trick" on "Phantasmal Gardener (1)"'         in res["refusal"]
 
 
-def test_the_face_that_aims_itself_still_names_the_bare_form():
-    """`EB-499`'s half, unmoved: the twin sentence is the point, so the two
-    refusals a seat meets a turn apart each name the form that works."""
+def test_the_face_that_aims_itself_drops_the_clause_and_says_so():
+    """`EB-499`'s half, under `EB-690`: the twin sentence is still the point,
+    and the two answers a seat meets a turn apart still say opposite things
+    about one printed word -- but only one of them costs an action now. The
+    face that is AIMED is refused (it needs a body); the face that aims itself
+    plays, with the clause dropped."""
     state = _two_all_faces_state()
     _new_process()
     blindplay.observe(state)
@@ -10466,9 +10507,9 @@ def test_the_face_that_aims_itself_still_names_the_bare_form():
     res = blindplay.act(
         state, 'play "Chevreuse — Ring of Bursting Grenades" on "A"')
 
-    assert not res["ok"] and res["post"] is None
-    assert "does its own aiming" in res["refusal"]
-    assert 'play "Chevreuse — Ring of Bursting Grenades"' in res["refusal"]
+    assert res["ok"], res["refusal"]
+    assert "target" not in res["post"]
+    assert "does its own aiming" in blindplay.taken_line(res)
 
 
 def test_an_aimed_all_face_plays_on_the_body_it_was_given():
@@ -10785,6 +10826,45 @@ def test_every_section_of_a_page_prints_once():
         headings = [ln for ln in page.splitlines()
                     if ln.startswith("# ") or ln.startswith("## ")]
         assert len(headings) == len(set(headings)), build.__name__
+
+
+def test_a_body_the_feed_sent_twice_prints_once():
+    """`EB-694`. THE BLOCK THAT PRINTED TWICE IN BOTH r29 LANES.
+
+    Lane 1: "the observe page duplicated whole blocks (every enemy line
+    printed twice) on several screens." Lane 2 proved where it was not: "the
+    duplication is in the bridge's own output, since an unpiped `observe` on
+    that screen printed it twice as well."
+
+    The render cannot double a HEADING (`EB-510`, the test above), so a
+    doubled block under one heading is a doubled LIST -- a feed that sent the
+    same record twice. The dedupe is exact: same ids AND an equal record.
+
+    Seen to FAIL: two identical bodies printed two lines.
+    """
+    state = copy.deepcopy(combat_state())
+    bodies = state["battle"]["enemies"]
+    state["battle"]["enemies"] = bodies + copy.deepcopy(bodies)
+    page = blindplay.observe(state)
+    for line in page.splitlines():
+        if line.startswith("- **") and " HP " in line:
+            assert page.count(line) == 1, line
+    headings = [ln for ln in page.splitlines() if ln.startswith("#")]
+    assert len(headings) == len(set(headings))
+
+
+def test_two_bodies_that_differ_are_both_kept():
+    """The other half, and the reason the test is equality and not the id: a
+    board really can field two bodies of one name, and `_enemy_names`' own
+    `#n` tie-break exists to survive a feed that repeats an id across two
+    creatures. A dedupe that merged them would be the mis-target this whole
+    memory was built to stop."""
+    state = copy.deepcopy(combat_state())
+    twin = copy.deepcopy(state["battle"]["enemies"][0])
+    twin["hp"] = max(1, twin.get("hp", 10) - 1)
+    state["battle"]["enemies"] = state["battle"]["enemies"] + [twin]
+    kept = blindplay.observation(state)["combat"]["enemies"]
+    assert len(kept) == len(state["battle"]["enemies"])
 
 
 def test_a_doubled_page_is_refused_rather_than_handed_over():

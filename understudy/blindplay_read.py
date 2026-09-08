@@ -106,10 +106,39 @@ def _icon_run(run: str) -> str:
     return "".join(out)
 
 
+def _spaced(text: str) -> str:
+    """`EB-683`. THE SPACE THE PIP WAS STANDING IN FOR.
+
+    Very Hot Cocoa's face is written `gain an additional 4[..._energy_icon.png]`
+    -- the number, then the pip, and no space between them, because on a screen
+    a pip is a picture and needs none. Rendered as a WORD it needs one, and
+    without it the Kokomi r27 lane-1 seat read `an additional 4Energy` off the
+    single biggest item of its run.
+
+    BOTH SIDES, AND ONLY WHERE THE RENDERING IS A WORD. A run that kept its
+    brackets (`_icon_run`'s answer for an icon the register cannot name) opens
+    and closes on a bracket, and a bracket beside a letter is already legible;
+    inserting a space there would be this module editing the game's punctuation
+    rather than restoring what the picture occupied.
+    """
+    def one(m: "re.Match[str]") -> str:
+        rendered = _icon_run(m.group(0))
+        if not rendered:
+            return rendered
+        before = text[m.start() - 1] if m.start() else ""
+        after = text[m.end()] if m.end() < len(text) else ""
+        if rendered[0].isalnum() and before.isalnum():
+            rendered = " " + rendered
+        if rendered[-1].isalnum() and after.isalnum():
+            rendered += " "
+        return rendered
+    return _SPRITE_RUN.sub(one, text)
+
+
 def _despritify(blob: Any) -> Any:
     """Rewrite every sprite tag in a finished structure. Values only."""
     if isinstance(blob, str):
-        return _SPRITE_RUN.sub(lambda m: _icon_run(m.group(0)), blob)
+        return _spaced(blob)
     if isinstance(blob, dict):
         return {k: _despritify(v) for k, v in blob.items()}
     if isinstance(blob, list):
@@ -425,12 +454,44 @@ def _player(state: dict[str, Any]) -> dict[str, Any]:
 
 
 def _enemies(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """The bodies on this board, each of them ONCE (`EB-694`).
+
+    THE FIND. Both r29 lanes met combat screens where the enemy block printed
+    twice -- "every enemy line printed twice" (lane 1), "both slugs, both
+    intents, both Ravenous lines" (lane 2) -- and lane 2 proved where it was
+    not: "the duplication is in the bridge's own output, since an unpiped
+    `observe` on that screen printed it twice as well."
+
+    IT IS NOT THE RENDER, and `EB-510` had already established that: every
+    heading is appended once on one branch and `assert_one_page` refuses a page
+    that carries a section twice, so a doubled BLOCK under a single heading is
+    a doubled LIST, and a doubled list is a feed that sent the same record
+    twice. `EB-651`(b) closed on the same reading with no sighting; the r29
+    lanes are the sighting.
+
+    THE DEDUPE IS EXACT AND NOT A MERGE. A blob is dropped only where the same
+    `(entity_id, combat_id)` has already been taken AND the record is equal to
+    it field for field -- so this can remove a repeated RECORD and can never
+    collapse two creatures, which is the failure `_enemy_names`' own `#n`
+    tie-break exists to survive. Two genuinely distinct bodies differ in at
+    least their ids, and two bodies that differ in nothing at all are one body
+    sent twice.
+    """
     battle = state.get("battle")
     if isinstance(battle, dict) and isinstance(battle.get("enemies"), list):
         blobs = battle["enemies"]
     else:
         blobs = state.get("enemies") or []
-    return [e for e in blobs if isinstance(e, dict)]
+    out: list[dict[str, Any]] = []
+    for e in blobs:
+        if not isinstance(e, dict):
+            continue
+        key = (_entity_id(e), e.get("combat_id"))
+        if any(key == (_entity_id(seen), seen.get("combat_id")) and seen == e
+               for seen in out):
+            continue
+        out.append(e)
+    return out
 
 
 def _entity_id(e: dict[str, Any]) -> str:
