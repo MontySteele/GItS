@@ -3231,3 +3231,85 @@ a morning a deck banks.
 NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
 slate, no stamp and no re-baseline. What the pass owes is a round that draws
 the four rows.
+
+## Kokomi pool pass five -- the phase of the Dusk lines (`EB-685`, 2026-09-08)
+
+THE FINDING THE PASS ANSWERS. Round 27 read pool pass four's own Dusk rows and
+found two of them out of phase with the moment they land on. Breakwater's
+clause counted the morning that had already been drained, which a Plan written
+today can never be part of: both seats counted 0 and were paid 5 on four plays
+out of four. Slack Water's Weak was still a MORNING Plan, so it arrived after
+the swing it was written against -- the complaint every seat has made since
+round 25. Both are timing defects rather than numbers, and the pass fixes them
+by moving WHEN each clause looks, not how much it pays.
+
+THE FOUR CHANGES.
+
+1. **Breakwater** -- "Dusk Plan: Gain 5 Block, plus 3 for each Plan the
+   Bake-Kurage is holding." Upgrade base 7, the shape unchanged. THE COUNT IS
+   THE QUEUE AT DUSK -- the Plans written this turn and still waiting for the
+   next morning -- so the wall rises on the turn the ENGINE IS WRITTEN rather
+   than on the turn after a deep morning. That is the card the r26 reading
+   asked for, one drain over: what it pays for is the queue standing behind
+   it, which is the only thing a Dusk Plan can see that a morning Plan cannot.
+   A NEW OP on both engines, `block_per_plan_held` /
+   `KokomiPlan.Kind.BlockPerPlanHeld`, because the count really is a different
+   fact from Tide Wall's: `kk_plans_this_morning` is the depth of a drain that
+   has finished and `len(state.kk_plan_queue)` is what is still owed. Pass four
+   spelled the clause with Tide Wall's op precisely to avoid minting one, and
+   that economy is what produced the zero.
+   **THE TWO EXCLUSIONS ARE BY CONSTRUCTION AND NOT BY A FILTER**, the
+   discipline `resolve_all` already keeps: `resolve_dusk` / `ResolveDusk` take
+   every dusk entry OFF the queue before the first clause runs, so this entry
+   is never one of the Plans it pays for, and neither is a second Dusk Plan
+   written the same turn -- a Dusk sibling is not "waiting for the next
+   morning" either, which is the sentence the face says. A Plan hurried out by
+   Change of Plans earlier in the turn has already left the queue and does not
+   count, which is the trade the two tempo cards make with each other.
+   THE COUNT IS READ LIVE, at the moment the entry resolves, rather than once
+   at the drain the way `drain_plans` is. Order-independence was pass four's
+   argument for Scout Ahead and it does not apply here: the face says "is
+   holding", a present tense about a queue, and the only thing that can move
+   the number mid-drain is a Dusk Plan that writes another Plan -- which the
+   player watched happen. `plan_block` still binds to the FLAT clause first
+   (`upgrades.PLAN_DELTA_OPS`), so the smith raises the wall and never the
+   rate.
+2. **Slack Water** -- "Deal 4 damage. Apply 1 Weak. Dusk Plan: Apply 1 Weak to
+   ALL enemies." The face-up half is untouched; only the Plan's phase moves.
+   At Dusk the multi-body Weak lands before the enemy acts, which is what the
+   Weak is bought for -- a debuff that arrives the morning after is a debuff
+   the player paid for and did not get to use.
+   **IT IS THE SURFACE'S FIRST ROW WITH BOTH A NOW-LINE AND A DUSK PLAN, AND
+   IT NEEDED NO EXTENSION.** `plan_dusk:` was already a fact about the row's
+   PLAN LINE rather than about its whole face -- `loader._validate_plan_dusk`
+   asks only that there BE a `plan:` list, and `gen_klee_cards` appends
+   `dusk: true` to the one `KokomiPlan.Schedule` call it emits, which for a
+   two-half row sits inside the `PlayedOnPet` branch it already wrote. The
+   generated card picked up `ArmKeywordTips.ForDusk` and
+   `KokomiTargets.PetOrEnemy` on its own. Nothing in either engine was widened;
+   the row is the first one to exercise a seam both sides already had.
+3. **Night Watch** -- RETIRED, and the row leaves the sheet, the pool tuple and
+   `KokomiOverhaulRoster.Slice()` under R213 B's deletion rule. It lost every
+   draft comparison in r27, and Slack Water's Dusk half is now its job: the
+   multi-body Weak before the swing is exactly what pass four rebuilt Night
+   Watch to be, and a pool does not need the same card twice when one of them
+   also hits. It spelled NO op of its own -- its clause was the shared
+   `apply_power` -- so nothing stays registered behind it the way
+   `redirect_queued_plans`, `cancel_all_plans_cash` and `scry_bottom` do. The
+   pool is 39.
+4. **Scout Ahead** -- face wording only, no behaviour: "Plan: Draw 1 card for
+   each Plan carried out this turn, this one included, in any order." Pass four
+   made both of those true and printed neither, and a seat cannot read a count
+   it has to infer. The two added clauses are the two questions the old face
+   left open -- does it count itself, and does its position matter -- answered
+   on the card at 99 characters against the 120 ceiling.
+
+THE DRAFTER. `block_per_plan_held` prices exactly as
+`block_per_plan_this_morning` does, its printed Block for ONE held Plan, and
+the equality is the point: `EB-685` moved WHICH Plans the clause counts and not
+the refusal to guess how many there will be. Plan density is still a deck fact
+an offer screen cannot read.
+
+NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
+slate, no stamp and no re-baseline. What the pass owes is a round that draws
+Breakwater and Slack Water on the same lane.

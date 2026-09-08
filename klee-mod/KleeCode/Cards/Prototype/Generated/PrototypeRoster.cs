@@ -226,7 +226,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkKuragesOath>(),
             ModelDb.Card<ProtoKkMoonsReflection>(),
             ModelDb.Card<ProtoKkNereidsAscension>(),
-            ModelDb.Card<ProtoKkNightWatch>(),
             ModelDb.Card<ProtoKkOpeningGambit>(),
             ModelDb.Card<ProtoKkPincer>(),
             ModelDb.Card<ProtoKkRally>(),

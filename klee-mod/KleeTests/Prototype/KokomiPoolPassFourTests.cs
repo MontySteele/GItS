@@ -28,6 +28,15 @@ namespace KleeMod.Tests.Prototype;
 /// Field TAKES a card instead of burying one, and the count it shows is a
 /// number the smith moves.
 ///
+/// TWO OF THE FOUR MOVED AGAIN AT POOL PASS FIVE (`EB-685`, 2026-09-08) and
+/// their pins moved with them, to <see cref="KokomiPoolPassFiveTests"/>: round
+/// 27 read both Dusk rows out of PHASE with the moment they land on. Night
+/// Watch is retired -- Slack Water's Plan half became the Dusk Weak and a pool
+/// does not need the card twice -- and Breakwater counts the queue at dusk
+/// rather than the morning it followed, which a Plan written today can never
+/// be part of. What is still pass four's, and pinned below, is Scout Ahead's
+/// recount and Read the Field's take.
+///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, on
 /// <see cref="KokomiPoolPassThreeTests"/>' split. The card shapes are REAL --
 /// every row is constructed and its face, cost, rarity, plan clauses and
@@ -44,73 +53,9 @@ public class KokomiPoolPassFourTests
     private const BindingFlags All = HeadlessGame.All;
 
     // ======================================================================
-    // 1. NIGHT WATCH -- the multi-body Weak at Dusk
+    // 1 and 2. NIGHT WATCH and BREAKWATER moved to pool pass five (`EB-685`);
+    // their pins are in KokomiPoolPassFiveTests, and the class doc says why.
     // ======================================================================
-
-    [Fact]
-    public void Night_watch_is_one_weak_on_every_body_and_no_block()
-    {
-        var card = new ProtoKkNightWatch();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-
-        // ONE CLAUSE. The Block came off because the old face asked nothing:
-        // it paid a little of everything for one energy and never made the
-        // player choose. Slack Water wins at one body; this wins at three.
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.ApplyWeak, clause.Kind);
-        Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
-        Assert.Equal(1, clause.Amount);
-        Assert.DoesNotContain("CreatureCmd.GainBlock",
-                              Source("ProtoKkNightWatch"));
-    }
-
-    [Fact]
-    public void Night_watchs_smith_moves_the_weak_and_nothing_else()
-    {
-        // 1 -> 2 Weak, on the plan line's own var: the row prints one number
-        // and the upgrade moves it.
-        var source = Source("ProtoKkNightWatch");
-        Assert.Contains("PlanPowerAmount\"].UpgradeValueBy(1m)", source);
-        Assert.Contains("{PlanPowerAmount:diff()}", Face(new ProtoKkNightWatch()));
-    }
-
-    // ======================================================================
-    // 2. BREAKWATER -- the wall behind the engine
-    // ======================================================================
-
-    [Fact]
-    public void Breakwater_pays_a_base_and_a_rate_off_the_morning()
-    {
-        var card = new ProtoKkBreakwater();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-
-        Assert.Equal(2, card.PlanClauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Block, card.PlanClauses[0].Kind);
-        Assert.Equal(5, card.PlanClauses[0].Amount);
-        // THE SAME COUNT TIDE WALL READS, deliberately: "carried out this
-        // turn" on a Dusk Plan IS the morning's depth, because
-        // <c>ResolveDusk</c> leaves <c>PlansThisMorning</c> alone -- so the
-        // Dusk entry is never one of the Plans it pays for.
-        Assert.Equal(KokomiPlan.Kind.BlockPerPlanThisMorning,
-                     card.PlanClauses[1].Kind);
-        Assert.Equal(3, card.PlanClauses[1].Amount);
-    }
-
-    [Fact]
-    public void Breakwaters_smith_moves_the_base_and_not_the_rate()
-    {
-        // `upgrades.PLAN_DELTA_OPS` binds `plan_block` to the FLAT clause
-        // first, so the wall gets taller and the morning it reads stays
-        // priced the same. A rate that smithed would scale with a deck the
-        // offer screen cannot see.
-        var source = Source("ProtoKkBreakwater");
-        Assert.Contains("PlanBlock\"].UpgradeValueBy(2m)", source);
-        Assert.Contains("new KokomiPlan.Planned("
-                        + "KokomiPlan.Kind.BlockPerPlanThisMorning, 3,",
-                        source);
-    }
 
     // ======================================================================
     // 3. SCOUT AHEAD -- the count that stopped depending on position
@@ -123,8 +68,12 @@ public class KokomiPoolPassFourTests
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.DrawPerPlanThisTurn, clause.Kind);
         Assert.Equal(1, clause.Amount);
+        // `EB-685` PRINTS THE COUNT PASS FOUR MADE TRUE and changes nothing
+        // else about it: itself included, and the order it was written in
+        // does not move the answer.
         Assert.EndsWith(
-            "Draw 1 card for each [gold]Plan[/gold] carried out this turn.",
+            "Draw 1 card for each [gold]Plan[/gold] carried out this turn, "
+            + "this one included, in any order.",
             Face(card));
     }
 

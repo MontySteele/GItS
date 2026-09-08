@@ -45,7 +45,7 @@ public sealed class ProtoKkScoutAhead : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Scout Ahead"),
-        ("description", "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each [gold]Plan[/gold] carried out this turn."),
+        ("description", "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each [gold]Plan[/gold] carried out this turn, this one included, in any order."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

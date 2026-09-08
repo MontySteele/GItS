@@ -230,10 +230,15 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     FORTY SINCE POOL PASS THREE (`EB-655`, R266), which retired Converging
     Tide: with the cap retired as a rule and Nereid's Ascension paying the
     FIRST Plan of each drain, re-aiming a queued Plan stopped being a question
-    worth a card."""
+    worth a card.
+
+    THIRTY-NINE SINCE POOL PASS FIVE (`EB-685`), which retired Night Watch: it
+    lost every draft comparison in r27, and Slack Water's Plan half moved to
+    Dusk in the same pass -- the multi-body Weak before the swing is the job
+    Night Watch had been rebuilt for one pass earlier."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 40
-    assert len(set(ids)) == 40
+    assert len(ids) == 39
+    assert len(set(ids)) == 39
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_tide_chart", "proto_kk_ripple"} <= set(ids)
@@ -243,7 +248,10 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     assert "proto_kk_tidal_rhythm" not in ids
     assert {"proto_kk_opening_gambit", "proto_kk_second_wave",
             "proto_kk_scout_ahead", "proto_kk_second_thoughts",
-            "proto_kk_breakwater", "proto_kk_night_watch"} <= set(ids)
+            "proto_kk_breakwater"} <= set(ids)
+    # `EB-685` (pool pass five): Night Watch lost every draft comparison in
+    # r27 and Slack Water's Plan half moved to Dusk, which is its job.
+    assert "proto_kk_night_watch" not in ids
     # `EB-655` (pool pass three): Converging Tide left with the pass, the way
     # Ebb Tide left with `EB-649`.
     assert "proto_kk_converging_tide" not in ids
@@ -347,10 +355,11 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     Tide the third until `EB-655` (pool pass three) did.
 
     A COMMON LEAVING MOVES THE ODDS ON EVERY OTHER COMMON, which is why the
-    retirement is visible here as well as in the count."""
+    retirement is visible here as well as in the count -- and pool pass five
+    (`EB-685`) is the third such leaving, Night Watch."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 24, "uncommon": 12, "rare": 4}
+        "common": 23, "uncommon": 12, "rare": 4}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

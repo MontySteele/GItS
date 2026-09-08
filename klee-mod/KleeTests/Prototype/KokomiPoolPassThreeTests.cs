@@ -337,10 +337,12 @@ public class KokomiPoolPassThreeTests
         // shape does the rest: `KokomiTargets.PetOnly`, and the face LEADS
         // with the instruction (`gen_klee_cards._plan_only_line`), so a play
         // that is not a write is refused with the reason printed.
+        // ONE ROW SINCE POOL PASS FIVE (`EB-685`): Night Watch is retired
+        // and Slack Water carries the Dusk Weak with its now-line intact, so
+        // it is not written-only and is pinned in KokomiPoolPassFiveTests.
         foreach (var (card, name) in new (CardModel, string)[]
                  {
                      (new ProtoKkBreakwater(), "ProtoKkBreakwater"),
-                     (new ProtoKkNightWatch(), "ProtoKkNightWatch"),
                  })
         {
             Assert.Contains("KokomiTargets.PetOnly", Source(name));
@@ -355,11 +357,10 @@ public class KokomiPoolPassThreeTests
     [Fact]
     public void The_written_only_rows_still_write_a_dusk_plan()
     {
-        // THE SHAPE, which pool pass four kept: both rows write a Dusk entry
-        // and neither has a now-line. The CLAUSES moved at `EB-679` and are
-        // pinned in `KokomiPoolPassFourTests`.
+        // THE SHAPE, which pool pass four kept: the row writes a Dusk entry
+        // and has no now-line. The CLAUSES moved at `EB-679` and again at
+        // `EB-685`, and are pinned in `KokomiPoolPassFiveTests`.
         Assert.Contains("dusk: true", Source("ProtoKkBreakwater"));
-        Assert.Contains("dusk: true", Source("ProtoKkNightWatch"));
     }
 
     // ======================================================================

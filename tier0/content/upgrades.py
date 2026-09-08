@@ -260,8 +260,12 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     # exactly as `damage_per_companion_last_turn` is a damage clause wearing
     # one, so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`
-    # spelling wins where a row somehow prints both.
-    "plan_block": ("block", "block_per_plan_this_morning"),
+    # spelling wins where a row somehow prints both -- which is exactly
+    # Breakwater, whose flat 5 the smith raises and whose per-held-Plan RATE it
+    # never touches (`EB-685`): a rate that smithed would scale with a deck the
+    # offer screen cannot see.
+    "plan_block": ("block", "block_per_plan_this_morning",
+                   "block_per_plan_held"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
     "plan_draw": ("draw",),
@@ -289,7 +293,8 @@ def _plan_default_delta(plan: list[dict]) -> dict:
     if any(fx.get("op") == "block" and isinstance(fx.get("amount"), int)
            for fx in plan):
         delta["plan_block"] = PROTOTYPE_BLOCK_DELTA
-    elif any(fx.get("op") == "block_per_plan_this_morning"
+    elif any(fx.get("op") in ("block_per_plan_this_morning",
+                              "block_per_plan_held")
              and isinstance(fx.get("amount"), int) for fx in plan):
         # `EB-335`. PER PLAN, so the per-instance idiom (+1) rather than the
         # flat Block delta -- the same distinction `plan_damage` makes one

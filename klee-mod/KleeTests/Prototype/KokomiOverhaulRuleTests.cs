@@ -292,6 +292,13 @@ public class KokomiOverhaulRuleTests
         // are riders on the entry carried out immediately after the one that
         // prints them.
         //
+        // SEVENTEEN SINCE `EB-685` (pool pass five): Breakwater's
+        // `BlockPerPlanHeld`, the queue read AT DUSK. It is its own kind and
+        // not `BlockPerPlanThisMorning` because the two are different facts --
+        // a drain that has finished against one that is still owed -- and pass
+        // four's economy in spelling it with Tide Wall's kind is what paid the
+        // card 0 on every play r27 saw.
+        //
         // SIXTEEN SINCE `EB-655` (pool pass three, R266): Battle Plan's
         // `NextAttackDamage`, the rider that replaced its `Energy` clause --
         // spelled as a DISCOUNT until `EB-668` moved it to damage, because a
@@ -303,7 +310,8 @@ public class KokomiOverhaulRuleTests
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
-                    "BlockPerPlanThisMorning", "DrawPerPlanThisTurn",
+                    "BlockPerPlanThisMorning", "BlockPerPlanHeld",
+                    "DrawPerPlanThisTurn",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
                     "NextAttackDamage" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
@@ -803,7 +811,7 @@ public class KokomiOverhaulRuleTests
     // ---- the roster ------------------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_the_pool_is_forty_one()
+    public void The_starter_is_ten_cards_and_the_pool_is_thirty_nine()
     {
         // Read off the IL rather than by building the models, which needs
         // ModelDb: `ModelDb.Card<T>()` throws until the game's pool build has
@@ -832,8 +840,12 @@ public class KokomiOverhaulRuleTests
         // since `EB-655` (pool pass three, R266) retired Converging Tide: with
         // the cap retired as a rule and Nereid's paying the FIRST Plan of each
         // drain, re-aiming a queued Plan stopped being a question worth a card.
+        // THIRTY-NINE since `EB-685` (pool pass five) retired Night Watch: it
+        // lost every draft comparison in r27 and Slack Water's Plan half moved
+        // to Dusk, which is the multi-body Weak Night Watch had been rebuilt
+        // for one pass earlier.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(40, Il.CallSequence(slice)
+        Assert.Equal(39, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

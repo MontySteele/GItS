@@ -108,6 +108,26 @@ public static class KokomiPlan
         // (<see cref="KokomiOverhaulLedger.PlansThisMorning"/>), so a Tide Wall
         // written first, second or last in the queue pays the same number.
         BlockPerPlanThisMorning,
+        // `EB-685`, POOL PASS FIVE. Breakwater: "Dusk Plan: Gain 5 Block,
+        // plus 3 for each Plan the Bake-Kurage is HOLDING."
+        //
+        // WHY IT IS NOT THE LINE ABOVE, which is the count pool pass four gave
+        // it: <see cref="BlockPerPlanThisMorning"/> is the MORNING's depth,
+        // and a Dusk Plan lands on the evening of the turn it was written on
+        // -- so a Breakwater written after an empty morning read 0 and paid
+        // its base, which is what r27's two seats saw on four plays out of
+        // four. The wall now rises on the turn the engine is WRITTEN.
+        //
+        // THE COUNT IS <see cref="PlansHeld"/> READ LIVE, at the moment this
+        // entry resolves, and the two exclusions the face needs are true BY
+        // CONSTRUCTION rather than by a filter: <see cref="ResolveDusk"/>
+        // takes every dusk entry off the queue before the first clause runs,
+        // so this entry is never one of the Plans it pays for and neither is a
+        // second Dusk Plan written the same turn. What is left is exactly
+        // "written this turn and still waiting for the next morning". A Plan
+        // hurried out by Change of Plans has already left the queue and does
+        // not count. Sim twin: `kokomi_plan.BLOCK_PER_PLAN_HELD`.
+        BlockPerPlanHeld,
         // `EB-643`, R265. THE THREE DRAIN-POSITIONAL CLAUSES, and what makes
         // them one group is that each names a PLACE IN A RUNNING DRAIN rather
         // than a quantity. They are plan-only on both sides for that reason
@@ -2056,6 +2076,19 @@ public static class KokomiPlan
                                       .PlansThisMorning,
                     ValueProp.Move, null);
 
+            case Kind.BlockPerPlanHeld:
+                // BREAKWATER (`EB-685`). POWERED, the flat planned Block's
+                // funnel exactly and for the reason Tide Wall's branch above
+                // states. The count is the QUEUE AS IT STANDS RIGHT NOW --
+                // <see cref="PlansHeld"/>, read live rather than once at the
+                // drain -- and <see cref="Kind.BlockPerPlanHeld"/> carries the
+                // whole argument for why. An empty queue pays nothing, a
+                // printed no-op: a Breakwater with no Plan standing behind it
+                // is the base alone.
+                return (int)await CreatureCmd.GainBlock(
+                    kokomi, plan.Amount * PlansHeld(kokomi),
+                    ValueProp.Move, null);
+
             case Kind.Mend:
                 // Mend returns the HP that actually landed, which is the
                 // honest number: "Mend 10" into 4 points of room says 4.
@@ -2128,7 +2161,8 @@ public static class KokomiPlan
     {
         Kind.Draw => "cards drawn",
         Kind.Energy => "Energy",
-        Kind.Block or Kind.BlockPerPlanThisMorning => "Block",
+        Kind.Block or Kind.BlockPerPlanThisMorning
+            or Kind.BlockPerPlanHeld => "Block",
         Kind.Mend => "HP healed",
         Kind.Damage or Kind.DamageQuarterMaxHp
             or Kind.DamagePerCompanionLastTurn => "damage",
@@ -2169,6 +2203,12 @@ public static class KokomiPlan
         Kind.DrawPerPlanThisTurn => plan.Amount * drainPlans,
         Kind.BlockPerPlanThisMorning =>
             plan.Amount * KokomiOverhaulLedger.For(kokomi).PlansThisMorning,
+        // `EB-685`. A FIFTH SCALED KIND, and it reads the QUEUE rather than a
+        // ledger -- asked here BEFORE the clause runs, which for this one is
+        // the same moment the clause itself asks: `ResolveDusk` has already
+        // emptied the dusk entries out, and nothing between here and the
+        // `GainBlock` touches the queue.
+        Kind.BlockPerPlanHeld => plan.Amount * PlansHeld(kokomi),
         Kind.DamagePerCompanionLastTurn =>
             plan.Amount * KokomiOverhaulLedger.For(kokomi)
                               .CompanionsPlayedLastTurn,
