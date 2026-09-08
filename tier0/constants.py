@@ -874,20 +874,24 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_well_laid",
     "proto_kk_feigned_retreat",
     # POOL PASS TWO (`EB-643`, R265): the answer to "the Plan plays itself".
-    # Eight rows that make the QUEUE something the player operates on rather
+    # Seven rows that make the QUEUE something the player operates on rather
     # than something that empties on a timer -- two riders on the next Plan
     # (Opening Gambit, Second Wave), a draw that reads the entries after it
-    # (Scout Ahead), three now-lines that cancel or re-aim what is already
-    # written (Second Thoughts, Ebb Tide, Converging Tide) and the two DUSK
-    # rows whose Plan lands at the END of the turn it was written on
-    # (Breakwater, Night Watch). LAST, in the sheet's own order, for the reason
-    # the pass above is last (`tools/lint_arm_pool_parity.py` compares the
-    # tuple, `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER).
+    # (Scout Ahead), two now-lines that cancel or re-aim what is already
+    # written (Second Thoughts, Converging Tide) and the two DUSK rows whose
+    # Plan lands at the END of the turn it was written on (Breakwater, Night
+    # Watch). LAST, in the sheet's own order, for the reason the pass above is
+    # last (`tools/lint_arm_pool_parity.py` compares the tuple,
+    # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER).
+    #
+    # EIGHT UNTIL `EB-649` (round 23): Ebb Tide drew three times on the cap
+    # lane and was played none of them, so the row left the sheet and this
+    # tuple. Its op stays registered with nothing spelling it --
+    # `kokomi_plan.cancel_all_plans_cash` says why.
     "proto_kk_opening_gambit",
     "proto_kk_second_wave",
     "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
-    "proto_kk_ebb_tide",
     "proto_kk_converging_tide",
     "proto_kk_breakwater",
     "proto_kk_night_watch",

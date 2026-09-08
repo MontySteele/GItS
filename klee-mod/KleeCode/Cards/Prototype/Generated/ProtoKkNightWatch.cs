@@ -62,7 +62,7 @@ public sealed class ProtoKkNightWatch : CustomCardModel, ICharacterCard, IPlanne
         new List<DynamicVar>
         {
             new BlockVar(3m, ValueProp.Move),
-            new DynamicVar("PlanBlock", 5m)
+            new DynamicVar("PlanBlock", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

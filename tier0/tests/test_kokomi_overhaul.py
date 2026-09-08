@@ -217,15 +217,18 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     surface under R213 B's deletion rule, exactly as Rolling Tide's did one
     arm over (`EB-552`).
 
-    FORTY-TWO SINCE POOL PASS TWO (`EB-643`, R265), which put the QUEUE in the
+    FORTY-ONE SINCE POOL PASS TWO (`EB-643`, R265), which put the QUEUE in the
     player's hands: two riders on the entry that follows (Opening Gambit,
-    Second Wave), a draw that counts the entries after it (Scout Ahead), three
+    Second Wave), a draw that counts the entries after it (Scout Ahead), two
     now-lines that unwrite or re-aim what is already queued (Second Thoughts,
-    Ebb Tide, Converging Tide) and the two DUSK rows whose Plan lands at the
-    end of the turn it was written on (Breakwater, Night Watch)."""
+    Converging Tide) and the two DUSK rows whose Plan lands at the end of the
+    turn it was written on (Breakwater, Night Watch).
+
+    FORTY-TWO UNTIL `EB-649` (round 23): Ebb Tide drew three times on the cap
+    lane and was played none of them, so it left the sheet and this tuple."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 42
-    assert len(set(ids)) == 42
+    assert len(ids) == 41
+    assert len(set(ids)) == 41
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_tide_chart", "proto_kk_ripple"} <= set(ids)
@@ -235,8 +238,9 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     assert "proto_kk_tidal_rhythm" not in ids
     assert {"proto_kk_opening_gambit", "proto_kk_second_wave",
             "proto_kk_scout_ahead", "proto_kk_second_thoughts",
-            "proto_kk_ebb_tide", "proto_kk_converging_tide",
+            "proto_kk_converging_tide",
             "proto_kk_breakwater", "proto_kk_night_watch"} <= set(ids)
+    assert "proto_kk_ebb_tide" not in ids
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
 
 
@@ -325,15 +329,15 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     and the withdrawal is visible HERE rather than only in the count: a Rare
     leaving moves the odds on every other Rare in the tier.
 
-    POOL PASS TWO (`EB-643`) ADDS SIX COMMONS AND TWO UNCOMMONS and NO Rare,
+    POOL PASS TWO (`EB-643`) ADDS SIX COMMONS AND ONE UNCOMMON and NO Rare,
     which is where the pass belongs for `EB-492`'s reason one line up: the
     offer's Commons are what a seat actually sees, and a rule the pass exists
-    to test cannot be tested from a tier a run mostly does not reach. The two
-    Uncommons are the rows that reach furthest -- Opening Gambit's doubling and
-    Ebb Tide's whole-queue cash-in."""
+    to test cannot be tested from a tier a run mostly does not reach. The one
+    Uncommon is the row that reaches furthest, Opening Gambit's doubling; Ebb
+    Tide was the second until `EB-649` (round 23) retired it."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 25, "uncommon": 13, "rare": 4}
+        "common": 25, "uncommon": 12, "rare": 4}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

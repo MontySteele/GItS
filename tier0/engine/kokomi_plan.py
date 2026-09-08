@@ -804,7 +804,15 @@ def resolve_all(state: CombatState) -> None:
     # it is kept in order at all: it was written first.
     if held:
         state.kk_plan_queue[:0] = held
-        state.emit("plan_cap_held", plans=len(held), cap=cap)
+        # `pending` IS THE TRUE DEPTH AFTER THE RE-INSERT (round 23, beside
+        # `EB-650`), and it is the sim's half of the badge fix one file over:
+        # `KokomiPlan.ResolveAll` syncs the pending badge at depth 0 before
+        # the drain and left it there, so a capped morning ended with Plans
+        # held and no badge saying so. This engine has no badge, and the
+        # honest mirror is the number: a reader of the log sees what the
+        # player is still holding rather than only what was put back.
+        state.emit("plan_cap_held", plans=len(held), cap=cap,
+                   pending=len(state.kk_plan_queue))
 
 
 def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
@@ -824,9 +832,27 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
     sets nor consumes a rider: it carries ONE entry out, and there is no "next"
     for the word to name. `KokomiPlan.Drain` is the twin, with the same two
     callers and the same non-caller.
+
+    A RIDER THAT REACHED NOTHING SAYS SO (`EB-645`, round 23). The defence
+    lane wrote Second Wave with no Plan behind it in the same morning, the
+    rider fell off the end of this local exactly as designed, and the page
+    said nothing at all -- the seat read "no enemy lost HP" off a Plan that
+    had in fact done its whole job and found no follower. So the drain emits
+    `plan_no_follower` carrying the finished sentence, `"<card>: no Plan
+    followed"`, and the faces now print the window the rider lives in.
+    `KokomiPlan.Drain` is the twin and records the same sentence on the
+    carry-out log the seats read.
+
+    ONLY ON A DRAIN THAT RAN OUT, and not on one the fight cut short: the
+    two early returns below leave a fight that is over, where "no Plan
+    followed" would be a receipt about a morning nobody is playing any more.
     """
     double_next = False
     extra_next = False
+    #: `EB-645`. WHO WROTE THE PENDING RIDER, so the line can name the card.
+    #: One slot for both riders: an entry printing both is one card, and two
+    #: entries in a row each writing one leave only the later card pending.
+    rider_source: Optional[str] = None
     for index, entry in enumerate(due):
         if state.over or not state.player.alive:
             return
@@ -858,6 +884,12 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
             # still twice.
             double_next = double_next or wrote[0]
             extra_next = extra_next or wrote[1]
+        if double_next or extra_next:
+            rider_source = entry.card_id
+    # `EB-645`. THE DRAIN RAN OUT WITH A RIDER STILL IN HAND.
+    if (double_next or extra_next) and rider_source:
+        state.emit("plan_no_follower", card=rider_source, why=why,
+                   line=f"{rider_source}: no Plan followed")
 
 
 def promise_tide_chart(state: CombatState, per: int, flat: int) -> None:
@@ -1648,6 +1680,15 @@ def cancel_last_plan(state: CombatState) -> None:
 def cancel_all_plans_cash(state: CombatState) -> None:
     """EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy
     and draw 1 card for each."
+
+    NO ROW SPELLS IT SINCE `EB-649` (round 23). Ebb Tide drew three times on
+    the cap lane and was played none of them -- it is "only live in the
+    situation you spent the previous turn trying to create" -- so the row left
+    the sheet and both pools. THE OP STAYS REGISTERED, here and in
+    `effects.OPS`: the rule is the one a re-issue would want, deleting a
+    resolver to re-derive it later is how a reading is lost, and the pins
+    below still drive it directly. `KokomiPlan.CancelAllForCash` is the twin
+    and carries the same note.
 
     PER ENTRY AND NOT PER CARRY-OUT, which is the one reading here and it is
     the face's own word: "for each" counts the Plans she is holding, and what

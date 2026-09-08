@@ -920,6 +920,15 @@ public static class KokomiPlan
                     _queues[player] = back;
                 }
                 back.InsertRange(0, held);
+                // AND THE BADGE IS PUT BACK WITH THEM (round 23, beside
+                // `EB-650`). The sync above ran at depth 0 and REMOVED the
+                // badge; without this the morning ends with Plans written and
+                // nothing on screen saying how many. `RefreshBadge` counts
+                // `Pending` itself, so the number cannot disagree with the
+                // queue -- and it deliberately does NOT note the meter, which
+                // its own header explains (`R101b`: one row per drain).
+                await RefreshBadge(choiceContext, kokomi,
+                                   Pending(player).Count);
             }
             Vfx.KokomiPlanStrip.Refresh(kokomi);
         }
@@ -948,6 +957,21 @@ public static class KokomiPlan
     /// the order the page prints. That is the morning's behaviour unchanged;
     /// a dusk drain simply has no thumbnails of its own to remove, because
     /// <see cref="Showing"/> is only handed a list by <see cref="ResolveAll"/>.
+    ///
+    /// A RIDER THAT REACHED NOTHING SAYS SO (`EB-645`, round 23). The r23
+    /// defence lane wrote Second Wave with no Plan behind it in the same
+    /// morning; the rider fell off the end of this local exactly as designed,
+    /// and the page carried nothing at all -- the seat read "no enemy lost HP"
+    /// off a Plan that had done its whole job and found no follower. So the
+    /// drain files one more row on the carry-out log the seats read,
+    /// `"&lt;card&gt;: no Plan followed"`, and the three rider faces now print
+    /// the window the rider lives in. `kokomi_plan._drain` emits the same
+    /// sentence as `plan_no_follower`.
+    ///
+    /// ONLY ON A DRAIN THAT RAN OUT. A fight that ends inside a carry-out
+    /// unwinds this loop and files nothing, which is <see cref="NoteUnfinished"/>'s
+    /// own reading: "no Plan followed" would be a receipt about a morning
+    /// nobody is playing any more.
     /// </summary>
     private static async Task Drain(
         PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due)
@@ -955,6 +979,11 @@ public static class KokomiPlan
         var player = kokomi.Player;
         var doubleNext = false;
         var extraNext = false;
+        // `EB-645`. WHO WROTE THE PENDING RIDER, so the line can name the
+        // card. ONE SLOT for both riders, and that is exact rather than
+        // approximate: both flags are cleared at the top of every entry, so
+        // whatever is pending was written by the entry immediately before.
+        string? riderSource = null;
         for (var index = 0; index < due.Count; index++)
         {
             var entry = due[index];
@@ -987,6 +1016,7 @@ public static class KokomiPlan
                 doubleNext = doubleNext || wroteDouble;
                 extraNext = extraNext || wroteExtra;
             }
+            if (doubleNext || extraNext) riderSource = entry.Title;
             if (player != null
                 && _showing.TryGetValue(player, out var shown)
                 && shown.Count > 0)
@@ -995,7 +1025,28 @@ public static class KokomiPlan
             }
             Vfx.KokomiPlanStrip.Refresh(kokomi);
         }
+        // `EB-645`. THE DRAIN RAN OUT WITH A RIDER STILL IN HAND.
+        if ((doubleNext || extraNext) && riderSource != null)
+        {
+            NoteNoFollower(kokomi, riderSource);
+        }
     }
+
+    /// <summary>
+    /// `EB-645`. A RIDER THAT REACHED NO FOLLOWER, on the carry-out log the
+    /// seats read. NO BUBBLE, for <see cref="NoteUnfinished"/>'s reason:
+    /// nothing was said over the pet, this is a page row about the shape of
+    /// the morning. `Number` and `Moved` are null because no board was
+    /// measured across a Plan that never ran.
+    /// </summary>
+    private static void NoteNoFollower(Creature kokomi, string card) =>
+        Record(kokomi, new CarriedOutPlan(
+            card, null, NoFollowerLine(card), null, false));
+
+    /// <summary>The sentence, in ONE place so a pin can read it back without a
+    /// game. `kokomi_plan._drain` emits the same string.</summary>
+    internal static string NoFollowerLine(string card) =>
+        card + ": no Plan followed";
 
     /// <summary>
     /// `EB-643` (R265), DUSK: "the Bake-Kurage carries this Plan out at the
@@ -1120,6 +1171,15 @@ public static class KokomiPlan
     /// <summary>
     /// EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy
     /// and draw 1 card for each."
+    ///
+    /// NO CARD SPELLS IT SINCE `EB-649` (round 23), AND THE OP STAYS. Ebb Tide
+    /// drew three times on the r23 cap lane and was played none of them -- it
+    /// is "only live in the situation you spent the previous turn trying to
+    /// create" -- so <c>ProtoKkEbbTide</c> left the sheet and the generated
+    /// roster with it. This method is kept because the RULE is the one a
+    /// re-issue would want and deleting a resolver to re-derive it later is
+    /// how a reading is lost; its pins drive it by reflection, with no card in
+    /// the path. `kokomi_plan.cancel_all_plans_cash` carries the same note.
     ///
     /// PER ENTRY AND NOT PER CARRY-OUT, which is the one reading here and it
     /// is the face's own word: "for each" counts the Plans she is HOLDING, and
@@ -2294,6 +2354,32 @@ public static class KokomiPlan
         var count = Pending(kokomi.Player).Count;
         Diagnostics.MeterLedger.Note(
             Diagnostics.MeterLedger.Plan, source, count - before, before);
+        await RefreshBadge(choiceContext, kokomi, count);
+    }
+
+    /// <summary>
+    /// THE BADGE ALONE, OFF THE TRUE QUEUE DEPTH -- <see cref="Sync"/>'s
+    /// second half, split out in round 23 (beside `EB-650`).
+    ///
+    /// WHY IT IS SEPARATE. <see cref="ResolveAll"/>'s capped path clears the
+    /// queue, syncs at depth 0 -- which REMOVES the badge -- drains, and only
+    /// then puts the held entries back at the front. It had no second sync, so
+    /// a capped morning left the player holding Plans with no badge saying so:
+    /// the one surface that answers "how many are written" read absent while
+    /// the queue was not empty.
+    ///
+    /// AND IT DOES NOT NOTE THE METER, which is the whole reason it is not
+    /// simply a second <see cref="Sync"/>. `R101b` and
+    /// <c>KurageBeatTests.The_morning_still_mints_exactly_one_ledger_row</c>
+    /// hold the drain to ONE row on a published instrument: the display list
+    /// exists precisely so the strip can shorten per entry without the ledger
+    /// moving per entry, and a second row here would be a second row on a
+    /// record that has already been published. The badge is the PLAYER's
+    /// surface and the meter is the instrument; only the first was wrong.
+    /// </summary>
+    private static async Task RefreshBadge(
+        PlayerChoiceContext choiceContext, Creature kokomi, int count)
+    {
         var badge = kokomi.Powers.OfType<PendingPlansPower>().FirstOrDefault();
         if (count == 0)
         {
@@ -2539,7 +2625,19 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
         ("description",
             "Carries out [blue]{Amount}[/blue] "
           + "[gold]Plan{Amount:plural:|s}[/gold] at the start of your next "
-          + "turn, in order."),
+          + "turn, in order. "
+          // `EB-647` (round 23). THE NUMBER IS FIXED WHEN THE PLAN IS
+          // WRITTEN. Three r23 lanes met it from the wrong side: under Shrink
+          // the hand reprinted `Kurage's Oath` as 2 and the jellyfish carried
+          // it out for 7, which is `Hers` working exactly as ruled -- her
+          // Strength and her enchantment fold at WRITING time and nothing
+          // that lands on her afterwards follows. Nothing printed it. It goes
+          // on THIS badge rather than the `Plan` keyword tip, which is at its
+          // 135-character ceiling (`ArmKeywordTips.ForPlan`), and rather than
+          // `ProtoBakeKuragePower`'s description, which stands at 122 of the
+          // power surface's 125. Page twin:
+          // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
+          + "Later debuffs on you do not change the numbers you wrote."),
     };
 
     public override PowerType Type => PowerType.Buff;

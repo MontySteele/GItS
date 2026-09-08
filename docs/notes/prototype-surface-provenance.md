@@ -2876,9 +2876,9 @@ ladder; nothing here is quotable (R215 B).
 
 ### `proto_kk_opening_gambit` -- the first rider
 
-"The next Plan deals double damage" is the arm's first clause about ANOTHER
-entry. The next Plan is the one carried out immediately after this one in the
-same drain, so Gambit written before Riptide doubles Riptide and Riptide
+"The next Plan carried out with this one deals double damage" is the arm's
+first clause about ANOTHER entry. The next Plan is the one carried out immediately after
+this one in the same drain, so Gambit written before Riptide doubles Riptide and Riptide
 before Gambit doubles nothing -- the card makes the ORDER of the queue a
 decision, which is the pass's whole thesis in one line.
 
@@ -2890,17 +2890,36 @@ worse when the kill must happen this turn, which is the price of the delay.
 
 ### `proto_kk_second_wave` -- the second rider
 
-"The next Plan is carried out twice." A FLAG and not a count: an entry carried
+"The next Plan carried out with this one is carried out twice." A FLAG and
+not a count: an entry carried
 out twice under Nereid's Ascension prints its rider twice, and "carried out
 twice" said twice is still twice -- so the entry it reaches runs
 `CarryOutTimes + 1`, which is 3 under the Ascension and not 4. Both engines
 state that at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT` and at
 `KokomiPlan.Kind.NextPlanExtraCarryOut`, and both pin it.
 
+### THE WINDOW ON ALL THREE FACES, AND THE LINE WHEN IT CLOSES (`EB-645`, r23)
+
+The rider lives in ONE DRAIN by construction, and none of the three faces said
+so. The r23 defence lane wrote Second Wave with no Plan behind it in the same
+morning, got nothing, and read "no enemy lost HP" off a Plan that had done its
+whole job. So all three faces now name the window in `EB-623`'s own
+vocabulary, which retired the printed word "morning" and replaced it with
+Tide Wall's "carried out with it": "the next Plan carried out with this one"
+on Opening Gambit and Second Wave, "each later Plan carried out with this
+one" on Scout Ahead. And a drain that runs out with a rider in hand files one
+more row on the
+carry-out log the seats read: `<card>: no Plan followed`
+(`KokomiPlan.NoFollowerLine`, `kokomi_plan._drain`'s `plan_no_follower`).
+
+ONLY ON A DRAIN THAT RAN OUT, and not on one a kill cut short: that is
+`NoteUnfinished`'s own reading, and "no Plan followed" about a morning nobody
+is playing any more would be a fabricated receipt.
+
 ### `proto_kk_scout_ahead` -- the row whose value is its position
 
-"Draw 1 card for each Plan carried out after this one." First of a three-entry
-morning it draws 2, last it draws 0, and the count is CARRY-OUTS rather than
+"Draw 1 card for each later Plan carried out with this one." First of a
+three-entry morning it draws 2, last it draws 0, and the count is CARRY-OUTS rather than
 entries -- `EB-501`'s reading pointed forwards, so under Nereid's Ascension
 first of three is 4.
 
@@ -2923,13 +2942,19 @@ something that looks similar.
 
 No `plan:` line: a card that unwrites a Plan cannot also be one.
 
-### `proto_kk_ebb_tide` -- the whole queue for a currency
+### `proto_kk_ebb_tide` -- RETIRED, round 23 (`EB-649`)
 
-PER ENTRY and not per carry-out. "For each" counts the Plans she is HOLDING,
-which is the number the pending badge shows and `PlansHeld` answers; Nereid's
-Ascension would have doubled them at the morning and did not, which is exactly
-the thing the card gives up. Against Seeing Red the audit reads it as one less
-usable Energy this turn, before the Plans it cancelled are counted.
+The row cashed the whole queue in for Energy and cards, per ENTRY. It drew
+three times on the r23 cap lane and was played none of them: it is "only live
+in the situation you spent the previous turn trying to create", which is a
+card that asks the player to build the position it then throws away. So the
+row left the sheet, `KOKOMI_OVERHAUL_POOL_IDS` and `KokomiOverhaulRoster`.
+
+The RESOLVER stays on both sides with no row spelling it --
+`kokomi_plan.cancel_all_plans_cash` and `KokomiPlan.CancelAllForCash`, each
+with a note naming `EB-649` -- because the rule is the one a re-issue would
+want and deleting a resolver to re-derive it later is how a reading is lost.
+Its pins drive it directly, with no card in the path.
 
 ### `proto_kk_converging_tide` -- re-aiming what is already written
 
@@ -2971,12 +2996,19 @@ the sim, `combat._player_turn`'s turn-end block beside `klee_overhaul.turn_end`
 any enemy acts. The last clause is the printed promise and the only one a card
 can tell apart.
 
-PRICING. Breakwater (1: 4 now, 7 at dusk) against Read the Field (1: 5 now,
-Plan 10 next morning): less of both halves, and neither of them a turn away.
-Night Watch (1: 3 now, 5 and 1 Weak at dusk) against Coral Bulwark (1: 6 now,
-Plan 8 Block and 1 Weak): three less Block on both halves, bought with the
-earlier landing -- its Weak cuts the swing it was written for rather than the
-one after it.
+PRICING, RE-READ AT ROUND 23 (`EB-646`). The first pricing was Breakwater 4
+now / 7 at dusk and Night Watch 3 now / 5 and a Weak, priced against Read the
+Field and Coral Bulwark. The Dusk trial found the FACE-UP HALF OF BOTH ROWS
+DEAD: the seat never played either now-line, because the Dusk line was worth
+nearly twice it for the same Energy and landed on the same swing. A choice
+where one branch is never taken is not a choice.
+
+So the Dusk line is priced to the face and TIMING is what the card sells:
+Breakwater 4 now / 5 at dusk (smith 5 / 6), Night Watch 3 now / 3 and 1 Weak
+at dusk (smith 5 / 5 and 1 Weak). Night Watch's Weak is untouched because it
+is the whole reason to wait -- it cuts the swing it was written for rather
+than the one after it -- and Breakwater's dusk half keeps one Block over its
+now half for the same reason and no more.
 
 ### The two-Plan cap -- a lane rule behind a runtime toggle
 

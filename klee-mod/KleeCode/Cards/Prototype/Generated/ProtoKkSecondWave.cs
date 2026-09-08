@@ -45,7 +45,7 @@ public sealed class ProtoKkSecondWave : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Second Wave"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: The next [gold]Plan[/gold] is carried out twice."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: The next [gold]Plan[/gold] carried out with this one is carried out twice."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

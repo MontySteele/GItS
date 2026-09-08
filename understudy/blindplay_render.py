@@ -45,6 +45,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_BLOCK_NOTE,
                                         PLAN_CASKET_AURA_CLAUSE,
                                         PLAN_COUNT_NOTE,
+                                        PLAN_WRITTEN_NUMBER_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
@@ -947,6 +948,10 @@ def render(obs: dict[str, Any]) -> str:
                 # which no play of yours can strip before the morning.
                 out.append(PLAN_BLOCK_NOTE)
                 out.append(PLAN_COUNT_NOTE)
+                # `EB-647`: and that the numbers in that queue are FIXED --
+                # written with her terms folded in, and untouched by anything
+                # that lands on her afterwards.
+                out.append(PLAN_WRITTEN_NUMBER_NOTE)
                 # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
                 # The form under *What you can say* is gone on such a turn
                 # (`blindplay_observe`), and a form that disappears with no

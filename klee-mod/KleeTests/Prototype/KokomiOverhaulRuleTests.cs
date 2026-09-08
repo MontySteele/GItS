@@ -793,7 +793,7 @@ public class KokomiOverhaulRuleTests
     // ---- the roster ------------------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_the_pool_is_thirty_five()
+    public void The_starter_is_ten_cards_and_the_pool_is_forty_one()
     {
         // Read off the IL rather than by building the models, which needs
         // ModelDb: `ModelDb.Card<T>()` throws until the game's pool build has
@@ -816,9 +816,11 @@ public class KokomiOverhaulRuleTests
         // pass two (`EB-643`, R265), which put the QUEUE in the player's
         // hands: two riders on the entry that follows, a draw that counts the
         // entries after it, three now-lines that unwrite or re-aim what is
-        // already queued, and the two DUSK rows.
+        // already queued, and the two DUSK rows. FORTY-ONE since `EB-649`
+        // (round 23) retired Ebb Tide: three draws on the cap lane and no
+        // play, and the count moving by one is what the withdrawal is.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(42, Il.CallSequence(slice)
+        Assert.Equal(41, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 
