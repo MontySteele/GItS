@@ -69,7 +69,7 @@ decision. They are gone.
 
 A hand of basics has no Plan decision in it, and that is by design: the
 kit's question arrives at the first Plan card. Where that is answered, if
-anywhere, is an open A pick (`review/active/kokomi-plan-less-hand-2026-09-08.md`,
+anywhere, is an open A pick (`review/ruled/kokomi-plan-less-hand-2026-09-08.md`,
 default: nowhere for now); it is not answered by touching the basics.
 
 ## 4. The starter, ten cards, four ids

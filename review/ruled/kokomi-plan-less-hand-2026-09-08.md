@@ -1,4 +1,4 @@
-Status: OPEN (one A pick, §4)
+Status: RULED R268 2026-09-08
 
 # Kokomi, the Plan-less hand: a hand of basics has no Plan decision, and the starter is not the place to fix it
 
@@ -80,3 +80,11 @@ table.
    is drafted. 1: the pool, two Common slots designed against the pass-three
    charter and read by a seat round. 2: the brief, a rule for the jellyfish
    on an empty morning, which [USER] plays.
+
+## 5. Ruled (R268, 2026-09-08)
+
+Option 3, the default: the Plan-less hand is answered nowhere for now. The
+finding stands at the size of §1, the starter stays the base game's, and the
+next Kokomi seat round reads the depth of the current pool's Plan
+interactions (§3, first bullet) before any access card is drafted. [USER]:
+"Agreed on taking option 3."

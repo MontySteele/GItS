@@ -1,4 +1,4 @@
-Status: RECORD (was OPEN, no pick here; the pick is `review/active/kokomi-plan-less-hand-2026-09-08.md`; moved 2026-09-08 under R267)
+Status: RECORD (was OPEN, no pick here; the pick is `review/ruled/kokomi-plan-less-hand-2026-09-08.md`; moved 2026-09-08 under R267)
 
 # Kokomi round 32: the Defend rider paid on 23 of 30 plays and was never a decision; both starter passes are withdrawn under [USER]'s rule that the basics stay bad
 
