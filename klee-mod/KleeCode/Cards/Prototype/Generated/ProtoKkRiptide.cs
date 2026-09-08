@@ -51,7 +51,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a debuff. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -67,6 +67,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
         new List<DynamicVar>
         {
             new DamageVar(9m, ValueProp.Move),
+            new ExtraDamageVar(4m),
             new KokomiPlan.PlanDamageVar(13m)
         };
 
@@ -84,17 +85,20 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .SpawningHitVfxOnEachCreature()
-            .Execute(choiceContext);
+        foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
+        {
+            await DamageCmd.Attack(DynamicVars.Damage.BaseValue + (KokomiOverhaulKit.HasDebuff(auraTarget) ? DynamicVars.ExtraDamage.BaseValue : 0))
+                .FromCard(this, cardPlay)
+                .Targeting(auraTarget)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
         DynamicVars["PlanDamage"].UpgradeValueBy(4m);
     }
 }

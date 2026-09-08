@@ -45,7 +45,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Field"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Look at the top 2 cards of your draw pile; put one on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -79,11 +79,24 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
             return;
         }
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        {
+            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take(2).ToList();
+            if (top != null && top.Count > 0)
+            {
+                var bottomPick = (await CardSelectCmd.FromSimpleGrid(
+                    choiceContext, top, Owner,
+                    new CardSelectorPrefs(ScryBottom.Prompt, 1))).ToList();
+                foreach (var bottomed in bottomPick)
+                {
+                    await CardPileCmd.Add(bottomed, PileType.Draw, CardPilePosition.Bottom);
+                }
+            }
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(3m);
-        DynamicVars["PlanBlock"].UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars["PlanBlock"].UpgradeValueBy(2m);
     }
 }

@@ -217,7 +217,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkChainOfCommand>(),
             ModelDb.Card<ProtoKkChangeOfPlans>(),
             ModelDb.Card<ProtoKkCleansingWave>(),
-            ModelDb.Card<ProtoKkConvergingTide>(),
             ModelDb.Card<ProtoKkCoralBulwark>(),
             ModelDb.Card<ProtoKkDeepCurrent>(),
             ModelDb.Card<ProtoKkExposedFlank>(),

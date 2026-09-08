@@ -316,7 +316,8 @@ def _kind_clause(said: dict[str, Any]) -> str:
 #: build that moves the clause onto another badge keeps the page honest, and a
 #: build with no cap declared matches nothing and prints the note it always
 #: printed.
-_PLAN_CAP_SENTENCE = re.compile(r"carries out at most (\d+) a turn", re.I)
+_PLAN_CAP_SENTENCE = re.compile(
+    r"carries out at most (\d+) at the start of your turn", re.I)
 
 
 def _plan_count_note(you: dict[str, Any]) -> str:

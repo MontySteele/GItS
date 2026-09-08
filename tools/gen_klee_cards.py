@@ -328,7 +328,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "apply_power", "discard", "discard_for_sparks",
                   "detonate", "move_bombs", "modify_bombs",
                   "chance_bomb_per_detonation", "conditional",
-                  "energy", "scry_discard", "add_card", "exhaust_from",
+                  "energy", "scry_discard",
+                  # `EB-655` (Read the Field): look at the top N and put ONE
+                  # of them on the BOTTOM. `scry_discard`'s verb one door
+                  # over -- the card leaves the top of the pile without
+                  # leaving the pile.
+                  "scry_bottom", "add_card", "exhaust_from",
                   "apply_aura", "swirl", "buff_next_attack", "block_next_turn",
                   "cost_mod", "copy_companion_in_hand",
                   # Curtain Call consolidation ("Take a Bow"): grow_damage is
@@ -430,6 +435,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # spelling would name a drain that is not running.
                   "draw_per_plan_after", "next_plan_double_damage",
                   "next_plan_extra_carry_out",
+                  # `EB-655` (Battle Plan): the carry-out's discount, plan-only
+                  # for the same reason -- a now-line spelling would be a
+                  # different, unpriced card.
+                  "next_attack_discount",
                   # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
                   # ONE verb, on the same terms as the two blocks above. Gorou's
                   # Inuzaka All-Round Defense prints "Gain Block equal to half
@@ -1964,6 +1973,11 @@ PLAN_CLAUSE_KINDS = {
     "draw_per_plan_after": "DrawPerPlanAfter",
     "next_plan_double_damage": "NextPlanDoubleDamage",
     "next_plan_extra_carry_out": "NextPlanExtraCarryOut",
+    # `EB-655` (pool pass three), BATTLE PLAN: "the first Attack you play
+    # face-up this turn costs 1 less". A grant and not a number -- the size is
+    # the RULE's (`NextAttackDiscountPower.Discount`), so the clause carries no
+    # amount, exactly as the two riders above carry none.
+    "next_attack_discount": "NextAttackDiscount",
     "apply_power": None,
 }
 
@@ -1974,7 +1988,9 @@ PLAN_CLAUSE_KINDS = {
 #: `kokomi_plan.PLAN_AMOUNTLESS_OPS`.
 PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "next_plan_double_damage",
-                       "next_plan_extra_carry_out"}
+                       "next_plan_extra_carry_out",
+                       # `EB-655`, Battle Plan's grant: the size is the rule's.
+                       "next_attack_discount"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2007,7 +2023,9 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  # `PLAN_CLAUSE_KINDS` above for the one reason all three are
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
                  "draw_per_plan_after", "next_plan_double_damage",
-                 "next_plan_extra_carry_out"}
+                 "next_plan_extra_carry_out",
+                 # `EB-655`, Battle Plan's grant.
+                 "next_attack_discount"}
 
 
 def plan_reason(card: dict) -> str | None:
@@ -2961,6 +2979,16 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # header note above: expressibility is decided per card
                        # by _conditional_delta_targets, not by the key alone.
                        "conditional_block", "conditional_damage",
+                       # `EB-655` (Feint). The THEN branch alone, on top of
+                       # whatever `conditional_damage` moved -- the only
+                       # spelling for a two-number face whose halves upgrade
+                       # by different amounts. Emitted the same way the two
+                       # keys above are: an `(IsUpgraded ? up : base)` swap
+                       # with `{IfUpgraded:show:up|base}` beside it.
+                       "conditional_then_damage",
+                       # `EB-655` (Riptide). The `bonus_vs_debuff` RIDER's own
+                       # number, where `damage` moves the base it rides on.
+                       "bonus_vs_debuff",
                        "bonus_per_detonation", "bonus_slope",
                        # Fanfare rework Track C.2 (2026-07-28): the
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
@@ -3590,16 +3618,22 @@ def blocked_reason(
                         "bonus_vs_aura requires enemy damage and "
                         "a literal int")
             if "bonus_vs_debuff" in eff:
-                # `EB-441`. AIMED ONLY, and narrower than the aura rider on
-                # purpose: `debuff_calc_rider` renders this through
-                # `CalculatedDamageVar`, whose multiplier is resolved ONCE
-                # against the hovered or aimed creature. An all-enemies form
-                # would collapse a per-enemy decision into one flat value,
-                # which is the reason `aura_calc_rider` refuses AoE.
-                if eff.get("target") != "enemy" or not isinstance(
-                        eff["bonus_vs_debuff"], int):
-                    return ("bonus_vs_debuff requires aimed enemy damage "
-                            "and a literal int")
+                # `EB-441`. TWO SHAPES, AND THE FOLD IS THE AIMED ONE'S ALONE.
+                # An AIMED rider renders through `CalculatedDamageVar`, whose
+                # multiplier is resolved once against the hovered creature, so
+                # the face's two numbers are the folded numbers the hit will
+                # deal (`debuff_calc_rider`).
+                #
+                # `EB-655` ADDED THE AoE SHAPE (Riptide), on exactly
+                # `bonus_vs_aura`'s terms: an all-enemies rider CANNOT fold,
+                # because one printed number would have to stand for a board
+                # that takes several, so it prints its two numbers separately
+                # -- "Deal 9 to ALL, and 4 more to each enemy with a debuff" --
+                # and the loop adds the rider per body. No other target is
+                # legal, and neither shape may carry a non-literal.
+                if eff.get("target") not in {"enemy", "all_enemies"}                         or not isinstance(eff["bonus_vs_debuff"], int):
+                    return ("bonus_vs_debuff requires enemy or all-enemies "
+                            "damage and a literal int")
             # `times` is checked by _times_reason at the top of this loop
             # (EB-132) -- it is not a damage-only field.
         if op == "place_bomb":
@@ -4090,12 +4124,12 @@ def blocked_reason(
                 return f"energy field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("amount"), int):
                 return "energy amount must be a literal int"
-        if op == "scry_discard":
+        if op in ("scry_discard", "scry_bottom"):
             unknown = set(eff) - SCRY_FIELDS
             if unknown:
-                return f"scry_discard field(s) {sorted(unknown)} not understood"
+                return f"{op} field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("amount"), int):
-                return "scry_discard amount must be a literal int"
+                return f"{op} amount must be a literal int"
         if op == "exhaust_from":
             unknown = set(eff) - EXHAUST_FROM_FIELDS
             if unknown:
@@ -5623,6 +5657,16 @@ def build_vars(card: dict) -> list[str]:
                 pass          # literal; only the upgraded hit declares a var
             else:
                 out.append(f'new DamageVar({eff["amount"]}m, ValueProp.Move)')
+                # `EB-655`, the AoE `bonus_vs_debuff` rider (Riptide). It
+                # CANNOT fold -- one number would have to stand for a board
+                # that takes several -- so the rider gets a var of its own and
+                # the face prints both. `ExtraDamage` is the same slot the
+                # per-term of a formula uses, and no card carries both: a calc
+                # rider takes the branch above and never reaches here.
+                if ("bonus_vs_debuff" in eff
+                        and eff["target"] == "all_enemies"):
+                    out.append(
+                        f'new ExtraDamageVar({eff["bonus_vs_debuff"]}m)')
                 if "bonus_formula" in eff and bonus_per_upgrade(card):
                     n = int(eff["bonus_formula"].partition("_per_")[0])
                     out.append(f'new DynamicVar("BonusPer", {n}m)')
@@ -6031,6 +6075,18 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # somewhere to render.
         "conditional_block": cond_reason.get("conditional_block") is None,
         "conditional_damage": cond_reason.get("conditional_damage") is None,
+        # `EB-655` (Feint). The THEN branch's first damage, which is the one
+        # number `conditional_then_damage` moves on top of whatever
+        # `conditional_damage` moved. Bound to the op that PRINTS it, the
+        # one-owner rule every key here keeps.
+        "conditional_then_damage": any(
+            _then_first_damage(c) is not None
+            for c in non_repeat_conditionals),
+        # `EB-655` (Riptide). The AoE rider's own number; it renders through
+        # the ExtraDamage var the AoE emitter reads.
+        "bonus_vs_debuff": any(
+            "bonus_vs_debuff" in e and e.get("target") == "all_enemies"
+            for e in effects),
         "condition": bool(non_repeat_conditionals),
         # bombs: tier0 rewrites X_plus_N -> X_plus_(N+val).
         "bombs": any(e["op"] == "place_bomb"
@@ -6679,6 +6735,39 @@ def conditional_block_upgrade(card: dict) -> int:
 def conditional_damage_upgrade(card: dict) -> int:
     """Ruled `conditional_damage: +N`, or 0. Gated the same way."""
     return int(upgrade_plan(card)[0].get("conditional_damage", 0))
+
+
+def _then_first_damage(cond: dict) -> dict | None:
+    """The one damage clause a `conditional_then_damage` delta claims inside
+    one conditional: the FIRST literal-int non-self `damage` of its `then`
+    list, or None. `upgrades.apply`'s key of the same name binds exactly
+    here."""
+    return next((e for e in (cond.get("then") or [])
+                 if e.get("op") == "damage"
+                 and e.get("target") != "self"
+                 and isinstance(e.get("amount"), int)), None)
+
+
+def conditional_then_damage_upgrade(card: dict) -> int:
+    """Ruled `conditional_then_damage: +N`, or 0.
+
+    `EB-655` (Feint). It rides ON TOP of `conditional_damage`, so the
+    then-branch's printed number moves by the sum of the two and the else
+    branch moves by `conditional_damage` alone -- which is the only way a
+    two-number conditional face can upgrade its halves by different amounts.
+    """
+    return int(upgrade_plan(card)[0].get("conditional_then_damage", 0))
+
+
+def _is_then_first_damage(card: dict, eff: dict) -> bool:
+    """Is this the clause `conditional_then_damage` claims? Identity, not
+    equality: two branches printing the same number are two clauses."""
+    for cond in card.get("effects", []):
+        if cond.get("op") != "conditional":
+            continue
+        if _then_first_damage(cond) is eff:
+            return True
+    return False
 
 
 def condition_upgrade(card: dict) -> bool:
@@ -7392,6 +7481,10 @@ def _branch_amount(card: dict, eff: dict, key: str) -> str:
     base = int(eff["amount"])
     delta = (conditional_block_upgrade(card) if key == "conditional_block"
              else conditional_damage_upgrade(card))
+    # `EB-655`. The then-branch's own extra, on top -- see
+    # `conditional_then_damage_upgrade`.
+    if key == "conditional_damage" and _is_then_first_damage(card, eff):
+        delta += conditional_then_damage_upgrade(card)
     if not delta or not _CONDITIONAL_DELTA_OPS[key](eff):
         return f"{base}m"
     return f"(IsUpgraded ? {base + delta}m : {base}m)"
@@ -7877,6 +7970,13 @@ def build_body(
                 amount_expr += (
                     f" + (AuraCmd.Find({aura_target}) != null ? "
                     f"{int(eff['bonus_vs_aura'])} : 0)")
+            # `EB-655`. THE AoE DEBUFF RIDER, per body, read at the same place
+            # the aura rider above is read. The aimed shape never gets here --
+            # `calc_rider` has already claimed it and emitted the folded var.
+            if "bonus_vs_debuff" in eff and eff["target"] == "all_enemies":
+                amount_expr += (
+                    " + (KokomiOverhaulKit.HasDebuff(auraTarget) ? "
+                    "DynamicVars.ExtraDamage.BaseValue : 0)")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
@@ -7907,7 +8007,9 @@ def build_body(
             if spotlight_capable:
                 amount_expr = (
                     f"SpotlightSystem.PrintedDamage(this, {amount_expr})")
-            if "bonus_vs_aura" in eff and eff["target"] == "all_enemies":
+            if (eff["target"] == "all_enemies"
+                    and ("bonus_vs_aura" in eff
+                         or "bonus_vs_debuff" in eff)):
                 lines.append(
                     "foreach (var auraTarget in "
                     "CombatState!.HittableEnemies.ToList())\n"
@@ -8887,6 +8989,36 @@ def build_body(
                 "        }"
             )
 
+        elif op == "scry_bottom":
+            # `EB-655` (Read the Field). `scry_discard`'s screen with a
+            # different destination: the player is shown the top N and the
+            # card they pick goes to the BOTTOM of the same pile, so nothing
+            # leaves the deck. Top of pile is index 0 (`MoveToTopInternal`
+            # inserts at 0), so `Take(N)` is the sim's `draw_pile[:n]`, and
+            # `CardPileCmd.Add(card, PileType.Draw, CardPilePosition.Bottom)`
+            # is the move -- the same call `KokomiPlan` makes to put a card
+            # back in hand, one pile and one end over.
+            #
+            # THE SIM HAS NO SCREEN and bottoms the highest-cost card of the
+            # N (`effects._op_scry_bottom`), which is stated there as the
+            # stand-in for player choice it is.
+            n = int(eff["amount"])
+            lines.append(
+                "{" + "\n" +
+                f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();" + "\n" +
+                "            if (top != null && top.Count > 0)" + "\n" +
+                "            {" + "\n" +
+                "                var bottomPick = (await CardSelectCmd.FromSimpleGrid(" + "\n" +
+                "                    choiceContext, top, Owner," + "\n" +
+                "                    new CardSelectorPrefs(ScryBottom.Prompt, 1))).ToList();" + "\n" +
+                "                foreach (var bottomed in bottomPick)" + "\n" +
+                "                {" + "\n" +
+                "                    await CardPileCmd.Add(bottomed, PileType.Draw, CardPilePosition.Bottom);" + "\n" +
+                "                }" + "\n" +
+                "            }" + "\n" +
+                "        }"
+            )
+
         elif op == "exhaust_from" and eff.get("select") == "chosen":
             # Kokomi: the player chooses. Kit cards stay exempt (v1.9 -- the
             # Burst is never fodder), the same filter the discard ops ride.
@@ -9071,16 +9203,27 @@ def build_body(
                     pred = moved_bar_predicate_cs(
                         eff["if"], condition_bar_upgrade(card))
                 cb_state = {"pending": conditional_bonus_upgrade(card) > 0}
+                # `EB-655`. THE TARGET GUARD IS PER BRANCH, because only one
+                # branch RUNS: a `ThrowIfNull` emitted inside the `then` arm
+                # tells the compiler nothing about the `else` arm, and Feint --
+                # the first row whose two branches both hit an enemy -- warned
+                # CS8604 on the half that had not thrown. The `thrown` flag is
+                # saved and restored around each arm so each emits its own, and
+                # the outer body counts as guarded only if BOTH did.
+                outer_thrown = ctx["thrown"]
                 then_lines: list[str] = []
                 for e in then:
                     _emit_branch_op(
                         card, e, then_lines, ctx, True, cb_state,
                         spotlight_capable)
+                then_thrown = ctx["thrown"]
+                ctx["thrown"] = outer_thrown
                 else_lines: list[str] = []
                 for e in eff.get("else", []):
                     _emit_branch_op(
                         card, e, else_lines, ctx, False, cb_state,
                         spotlight_capable)
+                ctx["thrown"] = then_thrown and ctx["thrown"]
                 lines.append(_conditional_block(pred, then_lines, else_lines))
 
         elif op == "choose_one":
@@ -9317,6 +9460,8 @@ def _branch_amount_text(card: dict, eff: dict, key: str) -> str:
     base = int(eff["amount"])
     delta = (conditional_block_upgrade(card) if key == "conditional_block"
              else conditional_damage_upgrade(card))
+    if key == "conditional_damage" and _is_then_first_damage(card, eff):
+        delta += conditional_then_damage_upgrade(card)
     if not delta or not _CONDITIONAL_DELTA_OPS[key](eff):
         return str(base)
     return f"{{IfUpgraded:show:{base + delta}|{base}}}"
@@ -10206,6 +10351,14 @@ def build_description(card: dict, *,
                     step, _, stat = rest.partition("_")
                     parts.append(
                         f"+{n} damage per {step} [gold]{stat.title()}[/gold].")
+            if "bonus_vs_debuff" in eff and eff["target"] == "all_enemies":
+                # `EB-655`. ONE SENTENCE, because the rider is part of the
+                # same hit: "Deal 9 damage to ALL enemies, and 4 more to each
+                # enemy with a debuff." Both numbers are vars, so both upgrade
+                # in green and neither can drift from the loop above.
+                parts[dmg_idx] = parts[dmg_idx].rstrip(".") + (
+                    ", and {ExtraDamage:diff()} more to each enemy with "
+                    "a debuff.")
             if "bonus_vs_aura" in eff:
                 if rehomed:
                     # Case (1) again, with the condition kept: the multiplier
@@ -10621,6 +10774,15 @@ def build_description(card: dict, *,
                 "Look at the top card of your draw pile; discard it."
                 if n == 1 else
                 f"Look at the top {n} cards of your draw pile; discard one.")
+
+        elif op == "scry_bottom":
+            n = int(eff["amount"])
+            parts.append(
+                "Look at the top card of your draw pile; put it on the "
+                "bottom."
+                if n == 1 else
+                f"Look at the top {n} cards of your draw pile; put one on "
+                "the bottom.")
 
         elif op == "exhaust_from" and eff.get("select") == "chosen":
             n = ("{Exhausts:diff()}" if exhaust_upgrade(card)
@@ -11308,12 +11470,30 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("formula_base")
         lines.append(
             f'DynamicVars.CalculationBase.UpgradeValueBy({int(deltas["formula_base"])}m);')
+    if "bonus_vs_debuff" in deltas:
+        # `EB-655` (Riptide). The AoE rider's own number lives in ExtraDamage;
+        # the base it rides on is moved by the plain `damage` key above.
+        done.add("bonus_vs_debuff")
+        lines.append(
+            "DynamicVars.ExtraDamage.UpgradeValueBy("
+            f'{int(deltas["bonus_vs_debuff"])}m);')
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
         # expressibility gated in upgrade_plan/conditional_bonus_upgrade).
         done.add("conditional_bonus")
         lines.append(
             f'DynamicVars.ExtraDamage.UpgradeValueBy({int(deltas["conditional_bonus"])}m);')
+    if "conditional_then_damage" in deltas:
+        # `EB-655`. A BRANCH-ONLY KEY: the number it moves is a literal that
+        # swaps on an `IsUpgraded` read at play time (`_branch_amount`), so
+        # there is no var to bump here and a comment is the whole statement --
+        # the shape `encore` leaves on curtain_cue.
+        done.add("conditional_then_damage")
+        lines.append(
+            "// conditional_then_damage: the then-branch amount swaps on an "
+            "IsUpgraded read at play time;")
+        lines.append(
+            "// the text swaps via {IfUpgraded:show:...|...}.")
     for ckey in ("conditional_block", "conditional_damage"):
         # EB-140. tier0 bumps EVERY matching op, branches included, so the
         # delta is emitted in two places and this is only one of them: the

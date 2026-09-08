@@ -110,6 +110,11 @@ internal static class KleePowerIcons
         GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
         NextCompanionDiscountPower =>
             KleePck.Path("klee/powers/friendly_visit.png"),
+        // `EB-655`. Battle Plan's grant is Rally's one card type over, so it
+        // borrows the same icon: both mean "the next card of a kind costs
+        // less", and art is commissioned when a slice is ACCEPTED.
+        NextAttackDiscountPower =>
+            KleePck.Path("klee/powers/friendly_visit.png"),
         // `EB-335`. Shell Guard is a Block window, so it borrows the shipped
         // Kokomi power that already means "the jellyfish is protecting you".
         ShellGuardPower => KleePck.Path("kokomi/powers/kurages_oath.png"),

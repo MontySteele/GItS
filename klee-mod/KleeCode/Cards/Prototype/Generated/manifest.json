@@ -32,7 +32,6 @@
     "proto_kk_chain_of_command",
     "proto_kk_change_of_plans",
     "proto_kk_cleansing_wave",
-    "proto_kk_converging_tide",
     "proto_kk_coral_bulwark",
     "proto_kk_deep_current",
     "proto_kk_exposed_flank",
@@ -236,7 +235,6 @@
     "proto_kk_chain_of_command": "kokomi",
     "proto_kk_change_of_plans": "kokomi",
     "proto_kk_cleansing_wave": "kokomi",
-    "proto_kk_converging_tide": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_deep_current": "kokomi",
     "proto_kk_exposed_flank": "kokomi",
@@ -494,11 +492,11 @@
       "plan_damage": 3
     },
     "proto_kk_battle_plan": {
+      "draw": 1,
       "plan_draw": 1
     },
     "proto_kk_breakwater": {
-      "block": 1,
-      "plan_block": 1
+      "plan_block": 2
     },
     "proto_kk_chain_of_command": {
       "plan_damage": 2
@@ -509,9 +507,6 @@
     "proto_kk_cleansing_wave": {
       "block": 3,
       "plan_block": 3
-    },
-    "proto_kk_converging_tide": {
-      "block": 2
     },
     "proto_kk_coral_bulwark": {
       "block": 3,
@@ -531,7 +526,8 @@
       "plan_damage": 2
     },
     "proto_kk_feint": {
-      "damage": 3,
+      "conditional_damage": 2,
+      "conditional_then_damage": 1,
       "plan_damage": 3
     },
     "proto_kk_flank": {
@@ -548,7 +544,6 @@
       "cost": -1
     },
     "proto_kk_night_watch": {
-      "block": 2,
       "plan_block": 2
     },
     "proto_kk_opening_gambit": {
@@ -562,14 +557,15 @@
       "power_amount": 1
     },
     "proto_kk_read_the_field": {
-      "block": 3,
-      "plan_block": 3
+      "block": 2,
+      "plan_block": 2
     },
     "proto_kk_ripple": {
       "plan_block": 3
     },
     "proto_kk_riptide": {
       "damage": 3,
+      "bonus_vs_debuff": 2,
       "plan_damage": 4
     },
     "proto_kk_salt_line": {

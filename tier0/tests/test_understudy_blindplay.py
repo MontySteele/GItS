@@ -10806,7 +10806,8 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
 PET_FACE = ("Enemies cannot target it. Lasts all combat. Play a Plan card on "
             "it: it carries out the Plan at the start of your next turn.")
 PET_FACE_CAPPED = (PET_FACE
-                   + " Carries out at most 2 a turn; the rest wait in order.")
+                   + " Carries out at most 2 at the start of your turn;"
+                     " the rest wait in order.")
 
 
 def pet_power_state(plans: dict, face: str) -> dict:
@@ -10838,9 +10839,10 @@ def test_the_count_note_reads_the_cap_off_the_wire_instead_of_denying_it():
                         "line": "Bake-Kurage: Kurage's Oath, 7",
                         "kind": "damage", "asked": 7})
     capped = blindplay.observe(pet_power_state(plans, PET_FACE_CAPPED))
-    assert ("- The jellyfish carries out at most 2 Plans a turn; the rest "
-            "wait in order. The number on the **Plan** badge is how many are "
-            "written. The Bake-Kurage's own 1 is only its presence."
+    assert ("- The jellyfish carries out at most 2 Plans at the start of "
+            "your turn; the rest wait in order. The number on the **Plan** "
+            "badge is how many are written. The Bake-Kurage's own 1 is only "
+            "its presence."
             ) in capped.splitlines()
     assert "not a limit" not in capped
     # AND THE UNCAPPED BUILD IS UNTOUCHED, which is the default and every

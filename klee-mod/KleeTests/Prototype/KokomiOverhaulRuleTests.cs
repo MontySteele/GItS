@@ -289,13 +289,19 @@ public class KokomiOverhaulRuleTests
         // count of the carry-outs still to come, and the two `NextPlan*` kinds
         // are riders on the entry carried out immediately after the one that
         // prints them.
+        //
+        // SIXTEEN SINCE `EB-655` (pool pass three, R266): Battle Plan's
+        // `NextAttackDiscount`, the grant that replaced its `Energy` clause.
+        // A GRANT AND NOT A NUMBER -- the size is the rule's -- so it joins
+        // the amountless kinds rather than printing one.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
                     "BlockPerPlanThisMorning", "DrawPerPlanAfter",
-                    "NextPlanDoubleDamage", "NextPlanExtraCarryOut" },
+                    "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
+                    "NextAttackDiscount" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -818,9 +824,12 @@ public class KokomiOverhaulRuleTests
         // entries after it, three now-lines that unwrite or re-aim what is
         // already queued, and the two DUSK rows. FORTY-ONE since `EB-649`
         // (round 23) retired Ebb Tide: three draws on the cap lane and no
-        // play, and the count moving by one is what the withdrawal is.
+        // play, and the count moving by one is what the withdrawal is. FORTY
+        // since `EB-655` (pool pass three, R266) retired Converging Tide: with
+        // the cap retired as a rule and Nereid's paying the FIRST Plan of each
+        // drain, re-aiming a queued Plan stopped being a question worth a card.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(41, Il.CallSequence(slice)
+        Assert.Equal(40, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

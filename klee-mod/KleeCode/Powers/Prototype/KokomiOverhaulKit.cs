@@ -40,6 +40,25 @@ public static class KokomiOverhaulKit
     }
 
     /// <summary>
+    /// Battle Plan's carry-out (`EB-655`): "the first Attack you play face-up
+    /// this turn costs 1 less."
+    ///
+    /// ONE STACK, ALWAYS, on <see cref="NextCompanionDiscount"/>'s terms and
+    /// for its reason: the face says "costs 1 less" and not "per Plan", so a
+    /// morning that carries out two Battle Plans discounts one Attack.
+    /// <see cref="NextAttackDiscountPower"/> removes itself on the face-up
+    /// Attack that spends it, and at the end of the turn either way.
+    /// </summary>
+    public static async Task NextAttackDiscount(
+        PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? cardSource)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Powers.OfType<NextAttackDiscountPower>().Any()) return;
+        await PowerCmd.Apply<NextAttackDiscountPower>(
+            choiceContext, kokomi, 1, applier: kokomi, cardSource: cardSource);
+    }
+
+    /// <summary>
     /// Cleansing Wave: "Remove a debuff from yourself."
     ///
     /// A READING, recorded because the card says "a debuff" and not "the worst

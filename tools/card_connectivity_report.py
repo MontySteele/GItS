@@ -312,6 +312,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                      _hook("shared", "exhaust_pile", "write")],
     "scry_discard": [_hook("shared", "draw_pile", "use"),
                      _hook("shared", "discard_pile", "write")],
+    # `EB-655`. One pile, read and written: the pick never leaves the draw
+    # pile, it only stops being near the top of it.
+    "scry_bottom": [_hook("shared", "draw_pile", "use"),
+                    _hook("shared", "draw_pile", "write")],
     "recall_to_draw": [_hook("shared", "discard_pile", "use"),
                        _hook("shared", "draw_pile", "write")],
     "autoplay_from_exhaust": [_hook("shared", "exhaust_pile", "use"),
@@ -486,6 +490,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "damage_quarter_max_hp": [],
     # A cost change, which is what `cost_mod` is filed under.
     "next_companion_discount": [_hook("shared", "card_identity", "write")],
+    # `EB-655`, Battle Plan's grant: the same cost change one card type over.
+    "next_attack_discount": [_hook("shared", "card_identity", "write")],
     # Cleansing Wave takes a debuff off HER. The nearest grounded entry is the
     # HP ledger's sibling for statuses, which this vocabulary does not have --
     # so it is EMPTY and disclosed, on `plan`'s own argument below.
@@ -559,6 +565,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
 CHOICE_OPS: dict[str, str] = {
     "discard_for_sparks": "discard",
     "scry_discard": "pile",
+    "scry_bottom": "pile",
     "recall_to_draw": "queue",
     "remember_card": "pile",
     "grant_sly_this_turn": "pile",

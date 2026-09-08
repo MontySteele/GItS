@@ -45,7 +45,7 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Breakwater"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,30 +60,23 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard, IPlanne
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move),
-            new DynamicVar("PlanBlock", 5m)
+            new DynamicVar("PlanBlock", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkBreakwater()
-        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrSelf, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOnly, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true);
-            return;
-        }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(1m);
-        DynamicVars["PlanBlock"].UpgradeValueBy(1m);
+        DynamicVars["PlanBlock"].UpgradeValueBy(2m);
     }
 }

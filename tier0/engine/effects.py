@@ -3450,6 +3450,32 @@ def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("scry_discard", card=worst.id)
 
 
+def _op_scry_bottom(state: CombatState, fx: dict, card: Card) -> None:
+    """`EB-655`, READ THE FIELD: "look at the top N cards of your draw pile and
+    put one of them on the bottom".
+
+    THE PILOT BOTTOMS THE HIGHEST-COST CARD, which is this engine's stand-in
+    for player choice and is stated rather than hidden: the sim has no human,
+    a look-and-bottom is only worth anything if somebody chooses, and "the one
+    I can least afford next turn" is the crude legible version of the
+    judgement. `_worst_card`'s precedent (`scry_discard`) is the same shape one
+    verb over, and the mod puts a real selection screen here instead
+    (`gen_klee_cards`'s emitter, `ScryBottom.Prompt`).
+
+    THE CARD IS MOVED WITHIN THE DRAW PILE, not discarded: an empty or shorter
+    pile is a printed no-op, and a pile of one card puts that card back where
+    it already was, which is the honest answer to a look with no choice in it.
+    """
+    n = fx.get("amount", 1)
+    top = state.player.draw_pile[:n]
+    if not top:
+        return
+    pick = max(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
+    remove_instance(state.player.draw_pile, pick)
+    state.player.draw_pile.append(pick)
+    state.emit("scry_bottom", card=pick.id, seen=len(top))
+
+
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
     fired = _predicate(state, fx["if"])
     # D4 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY, and deliberately
@@ -5874,6 +5900,7 @@ OPS = {
     "discard_for_sparks": _op_discard_for_sparks,
     "exhaust_from": _op_exhaust_from,
     "scry_discard": _op_scry_discard,
+    "scry_bottom": _op_scry_bottom,
     "conditional": _op_conditional,
     "choose_one": _op_choose_one,                # EB-118 surface, unused
     "repeat_this": _op_repeat_this,
@@ -5972,6 +5999,8 @@ OPS = {
     "draw_per_plan_after": _op_kokomi_plan_only,
     "next_plan_double_damage": _op_kokomi_plan_only,
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
+    # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
+    "next_attack_discount": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
     # and re-aim what is already written (Converging Tide). They are the

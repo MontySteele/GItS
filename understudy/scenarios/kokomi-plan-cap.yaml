@@ -128,7 +128,7 @@ steps:
   # variable prints neither, which is what `Round24Tests` holds.
   - expect:
       power: {who: player, name: "Plan", stacks: 3,
-              text: "at most 2 a turn"}
+              text: "at most 2 at the start of your turn"}
 
   # ---- the morning: two carried out, one held ----------------------------
   - end_turn: {}

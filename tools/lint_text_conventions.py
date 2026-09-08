@@ -457,8 +457,9 @@ def _plan_cap_sentence() -> str:
 
     NOT THROUGH `_consts`, and the reason is `tip_rows`' own trap one surface
     over: that pattern runs to the first semicolon ANYWHERE, and this sentence
-    contains one ("at most 2 a turn; the rest wait in order"). It would return
-    half a literal, the clause would measure as nothing, and the capped face
+    contains one ("at most 2 at the start of your turn; the rest wait in
+    order"). It would return half a literal, the clause would measure as
+    nothing, and the capped face
     would sit outside every ceiling -- the silence `EB-343` was filed on. So
     the literals are matched as literals and the terminator is the one after
     them.
