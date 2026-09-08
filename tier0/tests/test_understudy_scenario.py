@@ -65,9 +65,10 @@ class FakeWire:
         return dict(self.grant)
 
     def debug_state(self, op, why, amount=0, who="player", resource="",
-                    power=""):
+                    power="", card=""):
         self.debugs.append({"op": op, "why": why, "amount": amount,
-                            "who": who, "resource": resource, "power": power})
+                            "who": who, "resource": resource, "power": power,
+                            "card": card})
         return dict(self.debug)
 
 
@@ -193,11 +194,19 @@ def test_the_setup_verbs_and_the_bridge_ops_are_one_list():
     # else in the list is a debug_state op. Stated as a subtraction rather than
     # a `set_` prefix test since EB-165, whose op moves cards and is named for
     # what it does.
-    verbs = set(scenario.SETUP_STEPS) - {"give"}
+    # EB-652: the CURSOR verbs are on the same endpoint and so belong in the
+    # same equality, but they are not setup verbs -- they write no game state
+    # -- which is why they are their own tuple rather than an eighth entry in
+    # SETUP_STEPS. The list that has to stay in step with the bridge is both.
+    verbs = (set(scenario.SETUP_STEPS) | set(scenario.CURSOR_STEPS)) - {"give"}
     assert verbs == set(bridge.DEBUG_OPS)
-    assert set(scenario.CREATURE_SETUP_STEPS)         | set(scenario.PLAYER_ONLY_SETUP_STEPS) == verbs
+    setup = set(scenario.SETUP_STEPS) - {"give"}
+    assert set(scenario.CREATURE_SETUP_STEPS)         | set(scenario.PLAYER_ONLY_SETUP_STEPS) == setup
     # Every verb takes an amount except the ones that say they do not.
-    assert set(scenario.AMOUNTLESS_SETUP_STEPS) <= verbs
+    assert set(scenario.AMOUNTLESS_SETUP_STEPS) <= setup
+    # And no verb is in both groups: a cursor verb that also claimed to set up
+    # a board would be a verb whose no-write claim nothing enforces.
+    assert not set(scenario.CURSOR_STEPS) & set(scenario.SETUP_STEPS)
 
 
 @pytest.mark.parametrize("raw,want", [
@@ -392,7 +401,8 @@ def test_the_stated_reason_travels_onto_every_board_write():
     _, _, wire, _ = run_scenario(
         [{"set_energy": 3}, {"expect": {"player_block": 0}}], [combat()])
     assert wire.debugs == [{"op": "set_energy", "why": "a test", "amount": 3,
-                            "who": "player", "resource": "", "power": ""}]
+                            "who": "player", "resource": "", "power": "",
+                            "card": ""}]
 
 
 def test_a_play_resolves_the_card_at_the_state_it_is_about_to_post_into():
@@ -539,7 +549,8 @@ def test_clear_hand_posts_the_op_with_no_who_and_no_amount():
         [{"clear_hand": None}, {"expect": {"player_block": 0}}],
         [combat(hand=[card()]), combat()])
     assert wire.debugs == [{"op": "clear_hand", "why": "a test", "amount": 0,
-                            "who": "player", "resource": "", "power": ""}]
+                            "who": "player", "resource": "", "power": "",
+                            "card": ""}]
 
 
 def test_clear_hand_refuses_an_amount():
@@ -570,7 +581,105 @@ def test_a_set_power_step_posts_the_power_id_beside_the_resolved_creature():
          {"expect": {"player_block": 0}}], [st])
     assert wire.debugs[0] == {"op": "set_power", "why": "a test", "amount": 2,
                               "who": "JAW_WORM_0", "resource": "",
-                              "power": "VULNERABLE_POWER"}
+                              "power": "VULNERABLE_POWER", "card": ""}
+
+
+# ------------------------------------------------------------- the cursor --
+#
+# EB-652. The Salon panel says something different while a card is under the
+# cursor, and a scenario had no way to put one there -- so half of what the
+# panel says could only be reviewed by somebody at the machine with a mouse.
+# These pin the parse and the request shape; the panel's reaction is the game's
+# own `HoveredModelTracker` and is not testable here.
+
+def test_a_hover_posts_the_wire_id_of_the_card_it_resolved_in_hand():
+    """The POST carries the id the WIRE printed, not the file's spelling, for
+    `_resolve_who`'s reason: a log read back later has to say which card was
+    hovered without re-deriving the fold against a hand it no longer has."""
+    st = combat(hand=[card(name="Salon Debut", cid="KLEEMOD-SALON_DEBUT")])
+    _, _, wire, _ = run_scenario(
+        [{"hover": {"card": "salon_debut"}},
+         {"expect": {"player_block": 0}}], [st])
+    assert wire.debugs == [{"op": "hover", "why": "a test", "amount": 0,
+                            "who": "player", "resource": "", "power": "",
+                            "card": "KLEEMOD-SALON_DEBUT"}]
+
+
+def test_a_hover_resolves_its_card_against_the_hand_it_is_about_to_post_into():
+    """`play`'s rule, and for `play`'s reason: the hand one frame ago is a
+    different hand. A file may name the card as the sheet, the wire or the
+    printed title spells it."""
+    st = combat(hand=[card(name="Kaboom!", cid="KLEEMOD-KABOOM"),
+                      card(name="Ethereal Spotlight",
+                           cid="KLEEMOD-ETHEREAL_SPOTLIGHT")])
+    _, _, wire, _ = run_scenario(
+        [{"hover": {"card": "Ethereal Spotlight"}},
+         {"expect": {"player_block": 0}}], [st])
+    assert wire.debugs[0]["card"] == "KLEEMOD-ETHEREAL_SPOTLIGHT"
+
+
+def test_a_hover_on_a_card_that_is_not_in_hand_fails_with_the_hand_printed():
+    """It fails HERE, naming the hand, rather than on the far side with a
+    message about a route -- `_do_play`'s refusal, one verb over."""
+    ok, r, wire, _ = run_scenario(
+        [{"hover": {"card": "Salon Debut"}},
+         {"expect": {"player_block": 0}}], [combat(hand=[card()])])
+    assert not ok
+    assert r.failures[0]["check"] == "hover"
+    assert "Kaboom!" in r.failures[0]["detail"]
+    assert wire.debugs == []          # nothing was posted
+
+
+def test_an_unhover_posts_no_card_at_all():
+    """The tracker's own release takes no argument: the hand reports that
+    nothing is under the cursor, not which card left."""
+    _, _, wire, _ = run_scenario(
+        [{"unhover": {}}, {"expect": {"player_block": 0}}], [combat()])
+    assert wire.debugs == [{"op": "unhover", "why": "a test", "amount": 0,
+                            "who": "player", "resource": "", "power": "",
+                            "card": ""}]
+
+
+def test_an_unhover_that_names_a_card_is_refused_at_parse_time():
+    """Refused rather than ignored, `clear_hand`'s rule: `unhover: {card: X}`
+    reads as "release X" and would be "release whatever is held"."""
+    with pytest.raises(scenario.ScenarioError) as e:
+        scenario.parse({"name": "t", "character": "c",
+                        "steps": [{"unhover": {"card": "X"}},
+                                  {"expect": {"player_block": 0}}]})
+    assert "takes no fields" in str(e.value)
+
+
+def test_a_hover_needs_a_card():
+    with pytest.raises(scenario.ScenarioError) as e:
+        scenario.parse({"name": "t", "character": "c",
+                        "steps": [{"hover": {}},
+                                  {"expect": {"player_block": 0}}]})
+    assert "needs 'card'" in str(e.value)
+
+
+def test_the_bare_string_shorthand_is_the_card():
+    s = scenario.parse({"name": "t", "character": "c",
+                        "steps": [{"hover": "Salon Debut"},
+                                  {"expect": {"player_block": 0}}]})
+    assert s.steps[0] == ("hover", {"card": "Salon Debut"})
+
+
+def test_a_card_a_hover_names_is_covered_by_the_name_lint():
+    """A hover names a card that has to be in hand when the step runs, so a
+    typo is a live session's wasted minute unless `cards_named` sees it."""
+    s = scenario.parse({"name": "t", "character": "c",
+                        "steps": [{"hover": {"card": "Salon Debut"}},
+                                  {"expect": {"player_block": 0}}]})
+    assert "Salon Debut" in s.cards_named()
+
+
+def test_the_pack_exercises_the_hover_door():
+    """`test_the_pack_exercises_the_set_power_door`'s rule for EB-652: an
+    instrument nothing points at is not an instrument."""
+    verbs = {v for p in scenario.all_scenarios()
+             for v, _ in scenario.load(p).steps}
+    assert {"hover", "unhover"} <= verbs
 
 
 def test_a_queued_write_is_settled_before_the_next_assertion_reads_it():

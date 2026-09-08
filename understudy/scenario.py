@@ -111,6 +111,21 @@ player's own combat state and ignores the field, so naming a creature there
 would set the player's number under an enemy's name; the parser refuses it
 rather than letting it read as an enemy write that silently was not one.
 
+`hover` AND `unhover` PUT A CARD UNDER THE CURSOR, AND WRITE NOTHING (EB-652).
+Furina's Salon panel says something different while a card is held over the
+hand -- a Companion turns the front chip's word from FRONT to PERFORMS, a
+Deploy onto a full stage turns it to LEAVES and lights the footer, a Deploy
+onto a stage with room writes ENTERS on the seat it will fill, and the
+Spotlight tints the pips it would spend (`EB-637`). A scenario could set up the
+BOARD that panel draws and not the HOVER that changes what it says about it, so
+half of the panel's words could only be reviewed by somebody at the machine
+with a mouse. `- hover: {card: "Salon Debut"}` (or the bare `- hover: "Salon
+Debut"`) resolves the card against the hand it is about to act on, exactly as
+`play` does, and posts the game's OWN hover signal; `- unhover: {}` releases
+it and takes no fields, because the tracker's release takes none. Neither moves
+the run, the deck, the board or a meter -- an `expect` on either side of a
+hover reads the same combat.
+
 `ASSUMPTIONS` IS PART OF THE FORMAT AND IS PRINTED WITH THE RESULT. An exact
 expected number usually depends on something the scenario did not set -- the
 enemy's Block, a Vulnerable stack, which enemy the encounter rolled. A file
@@ -181,8 +196,16 @@ TOKEN_CARDS = {
 ACTION_STEPS = ("play", "select", "confirm", "end_turn")
 SETUP_STEPS = ("give", "set_resource", "set_energy", "set_hp", "set_block",
                "set_power", "clear_hand")
+# EB-652. The cursor, and it is its own group rather than a setup verb: these
+# two write no game state at all. A `hover` puts a card under the cursor
+# through the game's own `HoveredModelTracker` -- the pair `SalonPanel` patches
+# -- so the panel says what it says to a mouse, and `unhover` releases it.
+# Nothing in the run, the deck, the board or a meter moves, which is why a
+# scenario may hover between two assertions without changing what the second
+# one reads.
+CURSOR_STEPS = ("hover", "unhover")
 OTHER_STEPS = ("expect", "read", "mark", "wait")
-STEP_VERBS = ACTION_STEPS + SETUP_STEPS + OTHER_STEPS
+STEP_VERBS = ACTION_STEPS + SETUP_STEPS + CURSOR_STEPS + OTHER_STEPS
 
 # The setup verbs that address a CREATURE, and so take the `play` target's
 # selector vocabulary; and the two that address the player and take no `who` at
@@ -259,7 +282,11 @@ class Scenario:
         """
         out: list[str] = []
         for verb, body in self.steps:
-            if verb in ("give", "play"):
+            if verb in ("give", "play", "hover"):
+                # `hover` is in the list for `play`'s reason exactly: it names
+                # a card that has to be IN HAND when the step runs, so a typo
+                # is a live session's wasted minute rather than a red test
+                # unless this lint sees it.
                 out.append(str(body.get("card") or ""))
             elif verb == "select":
                 out.extend(str(c) for c in (body.get("cards") or []))
@@ -280,6 +307,10 @@ def _as_body(verb: str, raw: Any) -> dict[str, Any]:
     """
     if raw is None:
         return {}
+    if verb == "hover" and isinstance(raw, str):
+        # `- hover: "Salon Debut"` reads better than the mapping and is
+        # unambiguous: the verb takes exactly one field.
+        return {"card": raw}
     if isinstance(raw, dict):
         return dict(raw)
     if verb in ("set_energy",) and isinstance(raw, int):
@@ -344,7 +375,7 @@ def _validate(i: int, verb: str, body: dict[str, Any]) -> None:
             if body.get(k) in (None, ""):
                 raise ScenarioError(f"step {i} ('{verb}'): needs '{k}'")
 
-    if verb in ("give", "play"):
+    if verb in ("give", "play", "hover"):
         need("card")
     elif verb in ("set_resource", "set_power"):
         # `name` is the resource id for one and the power id (or printed title)
@@ -399,6 +430,17 @@ def _validate(i: int, verb: str, body: dict[str, Any]) -> None:
             f"the PLAYER's combat state and ignores the field, so naming "
             f"{body['who']!r} here would set the player's number under that "
             f"creature's name")
+    if verb == "unhover" and body:
+        # Refused rather than ignored, `clear_hand`'s rule one verb over: the
+        # tracker's own release takes no argument, so ANY key here would be a
+        # field the endpoint dropped on the floor -- and a file that wrote
+        # `unhover: {card: X}` would read as "release X" and be "release
+        # whatever is held".
+        raise ScenarioError(
+            f"step {i} ('unhover'): takes no fields -- the release is "
+            f"unconditional (the hand reports that nothing is under the "
+            f"cursor, not which card left), so {sorted(body)} would be "
+            f"ignored")
     if verb in AMOUNTLESS_SETUP_STEPS and "amount" in body:
         # Checked AFTER the `who` rule, so a file that wrote both is told
         # about the target first -- naming the wrong creature is the worse of
@@ -1151,6 +1193,41 @@ class Runner:
         self._debug("set_power", "set_power", selector=selector,
                     amount=int(body["amount"]), power=str(body["name"]),
                     who=self._resolve_who("set_power", selector))
+
+    # the cursor -----------------------------------------------------------
+    def _do_hover(self, body: dict[str, Any]) -> None:
+        """EB-652. Put one card in hand under the cursor.
+
+        RESOLVED THE WAY `_do_play` RESOLVES ITS CARD, against a fresh read and
+        through `find_card` -- so a file may spell the card as the sheet, the
+        wire or the printed title does, and a card that is not in hand fails
+        HERE, naming the hand, instead of on the far side with a message about
+        a route. The endpoint resolves an id or a title itself; what it cannot
+        do is fold `salon_debut` onto `Salon Debut`, which is the vocabulary a
+        scenario file is written in.
+
+        The POST carries the WIRE'S OWN id off the resolved entry rather than
+        the file's spelling, for `_resolve_who`'s reason: the log has to say
+        which card was hovered without re-deriving the fold against a hand it
+        no longer has.
+        """
+        self.read()
+        name = str(body["card"])
+        index = find_card(_hand(self.state), name)
+        if index is None:
+            raise ExpectFailed(
+                "hover", f"{name!r} is not in hand; hand: "
+                         f"{[c.get('name') for c in _hand(self.state)]}",
+                self.state, self.state)
+        entry = _hand(self.state)[index]
+        self._debug("hover", "hover",
+                    card=str(entry.get("id") or entry.get("name") or name))
+
+    def _do_unhover(self, body: dict[str, Any]) -> None:
+        """Release the cursor. No card and no read: the tracker's own release
+        takes no argument, and there is nothing on the board to resolve it
+        against."""
+        self._debug("unhover", "unhover")
 
     # action verbs ---------------------------------------------------------
     def _do_play(self, body: dict[str, Any]) -> None:

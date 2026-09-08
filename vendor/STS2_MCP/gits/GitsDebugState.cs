@@ -38,6 +38,10 @@
 //                                    CardPilePosition.Bottom)   (EB-165)
 //                    THE BOTTOM OF THE DRAW PILE, AND THE CHOICE IS THE WHOLE
 //                    POINT OF THE OP -- see the EB-165 block below.
+//   hover         -> HoveredModelTracker.OnLocalCardHovered(card)   (EB-652)
+//   unhover       -> HoveredModelTracker.OnLocalCardUnhovered()
+//                    THE ONLY TWO OPS HERE THAT WRITE NO GAME STATE -- see
+//                    the EB-652 block below.
 //   set_power     -> PowerCmd.Apply / PowerCmd.ModifyAmount / PowerCmd.Remove
 //                    (EB-146) -- the three commands every card in the game
 //                    applies, stacks and clears a power with. Which one runs
@@ -137,6 +141,51 @@
 // for. An empty hand is refused too -- as `queued: false`, not an error,
 // because "the hand is already empty" is the state the caller asked for.
 //
+// EB-652: WHY hover / unhover EXIST, AND WHY A DISPLAY SIGNAL IS ON A BOARD
+// ROUTE. Furina's Salon panel changes what it says while a card is under the
+// cursor: a Companion in hand turns the front chip's word from FRONT to
+// PERFORMS, a Deploy onto a full stage turns it to LEAVES and lights the
+// footer, a Deploy onto a stage with room writes ENTERS on the seat it will
+// fill, and the Spotlight tints the pips it would spend (`EB-637`,
+// `KleeCode/Vfx/Prototype/SalonPanel.cs`). Four states no headless capture
+// could reach: the frames are taken off a scenario, and a scenario had no way
+// to put a card under the cursor. It could set up the BOARD the panel draws
+// and not the HOVER that changes what the panel says about it, so half of the
+// panel's words were unreviewable except by somebody sitting at the machine
+// with a mouse -- the shape `EB-142` was filed against one layer down.
+//
+// THE SIGNAL IS THE GAME'S OWN AND THE ROUTE ADDS NOTHING TO IT.
+// `NPlayerHand` tells `RunManager.Instance.HoveredModelTracker` about every
+// hover (`OnHolderFocused` / `OnHolderUnfocused`) and every pick-up and
+// release, which is why the panel patches those methods rather than the hand
+// node. This op calls the same two methods with the same argument, so a panel
+// reacts to it exactly as it reacts to a mouse, and a listener written later
+// is reached without this file being told about it. There is no separate
+// "debug hover" path to keep in step with the real one, which is this file's
+// standing rule -- every write goes through the game's OWN mutator -- applied
+// to a signal rather than to a number.
+//
+// IT MOVES NO GAME STATE, AND THAT IS THE ONE PLACE THESE TWO DIFFER FROM THE
+// SIX ABOVE. Nothing in the run, the deck, the board or a meter changes, and a
+// scenario that hovers and releases leaves the combat where it found it. That
+// does NOT buy the run back its comparability -- a hovered card in a run whose
+// energy and hand were written by hand is still a run the generators did not
+// produce -- so the guardrail rides on these two responses unchanged, for the
+// reason it rides on every other: a caveat that appears on only some rows of a
+// record is a caveat a reader learns to skip.
+//
+// `unhover` TAKES NO `card` AND THE RELEASE IS UNCONDITIONAL, because the
+// tracker's own method takes none: the hand reports "nothing is under the
+// cursor", not "this card left". A `card` on an unhover could only be a field
+// the endpoint ignored, which is the silent-ignored-argument shape `clear_hand`
+// refuses a `who` for.
+//
+// A DUPLICATE IN HAND IS NOT AMBIGUOUS, which is where the card lookup parts
+// company with the power lookup one screen up. A hand holding three copies of
+// one Deploy is the ordinary case for this op; the three are the same card and
+// hovering any of them paints the identical panel, so the first match wins
+// rather than a refusal that would refuse the scenario the op exists for.
+//
 // WHAT IS DELIBERATELY *NOT* HERE, and it is a follow-up rather than an
 // oversight:
 //   * enemy spawning -- the encounter is generated content and choosing one
@@ -174,6 +223,8 @@
 //                             resource to move, and a silent no-op wearing an
 //                             `ok` is the failure give_card's combat-pile
 //                             refusal already names.
+//   * unknown card in hand  -- refused with the hand printed back, for the
+//                             unknown-creature refusal's reason below.
 //   * unknown creature      -- refused with the name echoed and the living
 //                             entity ids listed, because the id the caller
 //                             wants is the one the WIRE just handed it.
@@ -218,6 +269,13 @@
 //        { "op": "set_power", "who": "player", "power": "SPARK_POWER",
 //          "amount": 2, "why": "EB-146 set-power-sparks scenario" }
 //        { "op": "clear_hand", "why": "EB-165 exact hand" }
+//        { "op": "hover", "card": "Salon Debut"|"KLEEMOD-SALON_DEBUT",
+//          "why": "EB-652 salon hover frame" }
+//        { "op": "unhover", "why": "EB-652 release" }
+//          (`hover` carries one extra key, `card`, naming the id it resolved
+//           in hand; `before` and `after` are the id THIS ROUTE last hovered
+//           and the one it hovered now -- see `GitsDebugHovered` for why that
+//           is the route's own record and not a read of the tracker.)
 //          (no `who`, no `amount`: it empties the LOCAL PLAYER's hand, and
 //           `before` is the card count it moved)
 //        -> { status, message, guardrail, op, who, before, after, why }
@@ -270,6 +328,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Multiplayer.Game.PeerInput;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace STS2_MCP;
@@ -288,7 +347,23 @@ public static partial class McpMod
 
     private static readonly string[] GitsDebugStateOps =
         { "set_resource", "set_energy", "set_hp", "set_block", "set_power",
-          "clear_hand" };
+          "clear_hand", "hover", "unhover" };
+
+    /// <summary>
+    /// The card id this route last hovered, or the empty string -- THIS
+    /// ROUTE'S OWN RECORD and not a read of the tracker.
+    ///
+    /// <c>HoveredModelTracker</c> is used here for the two notify methods the
+    /// game's own hand calls and for nothing else, so "what is hovered right
+    /// now" is not a question this file asks. What it CAN report honestly is
+    /// what it itself last asked for, which is what `before` carries on a
+    /// hover response and is enough for the one thing a log needs it for:
+    /// telling `hover A; hover B` (no release between them -- a sequence a
+    /// mouse cannot produce) from `hover A; unhover; hover B`. A real mouse
+    /// hover does not move it, so a stale value means exactly "the last card
+    /// this ROUTE hovered", which is what it says.
+    /// </summary>
+    private static string GitsDebugHovered = "";
 
     // ------------------------------------------------------- resources ----
 
@@ -509,6 +584,43 @@ public static partial class McpMod
         }
     }
 
+    // ----------------------------------------------------------- hover ----
+
+    /// <summary>
+    /// The card in `hand` that `name` names, or null, resolved the way
+    /// <see cref="GitsDebugFindPower"/> resolves a power and
+    /// <see cref="GitsDebugResolve"/> a creature: by the WIRE's own id
+    /// (`card.Id.Entry`, which is what `McpMod.StateBuilder` writes onto every
+    /// hand row) first, and by the printed Title second -- an id is the thing
+    /// itself, a title is loc data a wording pass moves.
+    ///
+    /// FIRST MATCH WINS AND A DUPLICATE IS NOT AMBIGUOUS, which is the one
+    /// place this differs from the power lookup, and deliberately: a hand
+    /// holding three copies of one Deploy is the ordinary case for this op,
+    /// the three are the same card, and hovering any of them paints the
+    /// identical panel. A refusal there would refuse the scenario this op
+    /// exists for.
+    /// </summary>
+    private static CardModel? GitsDebugFindHandCard(
+        IReadOnlyList<CardModel> hand, string name)
+    {
+        var key = (name ?? "").Trim();
+        if (key.Length == 0) return null;
+        foreach (var card in hand)
+        {
+            if (string.Equals(SafeGetText(() => card.Id.Entry), key,
+                              StringComparison.OrdinalIgnoreCase))
+                return card;
+        }
+        foreach (var card in hand)
+        {
+            if (string.Equals(SafeGetText(() => card.Title), key,
+                              StringComparison.OrdinalIgnoreCase))
+                return card;
+        }
+        return null;
+    }
+
     // ------------------------------------------------------- creatures ----
 
     /// <summary>
@@ -574,8 +686,8 @@ public static partial class McpMod
     // ------------------------------------------------------------ apply ---
 
     private static Dictionary<string, object?> GitsDebugStateApply(
-        string op, string who, string resourceId, string powerId, int amount,
-        string why)
+        string op, string who, string resourceId, string powerId,
+        string cardName, int amount, string why)
     {
         if (!RunManager.Instance.IsInProgress)
             return Error("No run in progress; there is no player to write to.");
@@ -606,6 +718,10 @@ public static partial class McpMod
         // Non-null for `set_power` only, and added to the response only there:
         // adding a key is free, repurposing `who` to mean two things is not.
         string? powerEntry = null;
+        // The same shape one op over: non-null for `hover` only, naming the id
+        // it resolved -- so a caller that spelled a TITLE can see which card
+        // in hand it actually reached.
+        string? cardEntry = null;
 
         switch (op)
         {
@@ -763,6 +879,68 @@ public static partial class McpMod
                 break;
             }
 
+            case "hover":
+            case "unhover":
+            {
+                // THE GAME'S OWN HOVER SIGNAL AND NOTHING ELSE. `NPlayerHand`
+                // tells `RunManager.Instance.HoveredModelTracker` about every
+                // hand hover and every release, and it is the one place both
+                // signals pass with the card MODEL in hand -- which is why
+                // `Vfx/Prototype/SalonPanel.cs` patches those four methods
+                // rather than the hand node. This op calls the identical two
+                // methods, so a panel reacts here EXACTLY as it reacts to a
+                // mouse, and any listener that appears later is reached
+                // without this file learning about it.
+                //
+                // IT MOVES NO GAME STATE, and that is the whole difference
+                // between this op and the six above it. A hover is a DISPLAY
+                // signal: nothing in the run, the deck, the board or the
+                // meters changes, and a scenario that hovers and releases
+                // leaves the combat exactly where it found it. The guardrail
+                // still rides on the response, because the run it is being
+                // asked of is a run whose board these other ops set.
+                var tracker = RunManager.Instance.HoveredModelTracker;
+                if (tracker == null)
+                    return Error("No HoveredModelTracker on this run; there "
+                                 + "is nothing to tell about a hover.");
+                target = "hand";
+                before = GitsDebugHovered;
+                if (op == "unhover")
+                {
+                    // NO `card`, and the release is unconditional: the
+                    // tracker's own unhover takes no argument (the hand
+                    // reports "nothing is under the cursor", not "this card
+                    // left"), so a `card` here could only be a field the
+                    // endpoint ignored.
+                    tracker.OnLocalCardUnhovered();
+                    GitsDebugHovered = "";
+                    after = "";
+                    break;
+                }
+                if (string.IsNullOrWhiteSpace(cardName))
+                    return Error("hover needs a 'card': the wire id or the "
+                                 + "printed title of a card IN HAND.");
+                var handPile = CardPile.Get(PileType.Hand, player);
+                var handCards = handPile == null
+                    ? new List<CardModel>() : handPile.Cards.ToList();
+                var hovered = GitsDebugFindHandCard(handCards, cardName);
+                if (hovered == null)
+                    // The hand printed back, for `GitsDebugUnknownCreature`'s
+                    // reason: the spelling the caller wants is the one the
+                    // last GET handed it, so the refusal carries it rather
+                    // than describing it.
+                    return Error($"No card '{cardName}' in hand. The hand "
+                                 + "holds: "
+                                 + string.Join(", ", handCards.Select(
+                                       c => SafeGetText(() => c.Id.Entry)))
+                                 + ".");
+                cardEntry = SafeGetText(() => hovered.Id.Entry) ?? "";
+                tracker.OnLocalCardHovered(hovered);
+                GitsDebugHovered = cardEntry;
+                after = cardEntry;
+                break;
+            }
+
             default:
                 return Error($"Unknown op '{op}'. One of: "
                              + string.Join(", ", GitsDebugStateOps) + ".");
@@ -771,7 +949,8 @@ public static partial class McpMod
         // EVERY WRITE IS LOGGED WITH ITS REASON, the same shape give_card logs
         // a grant. A board change with no stated reason is a change nobody can
         // account for when the log is read back.
-        var label = powerEntry == null ? target : $"{target} {powerEntry}";
+        var label = powerEntry ?? cardEntry ?? "";
+        label = label.Length == 0 ? target : $"{target} {label}";
         GD.Print($"[STS2 MCP][GItS] debug_state: {op} {label} "
                  + $"{before} -> {after}{(queued ? " (queued)" : "")} "
                  + $"| why: {why}");
@@ -791,6 +970,7 @@ public static partial class McpMod
             ["why"] = why
         };
         if (powerEntry != null) report["power"] = powerEntry;
+        if (cardEntry != null) report["card"] = cardEntry;
         return report;
     }
 
@@ -847,7 +1027,8 @@ public static partial class McpMod
         return new Dictionary<string, object?>
         {
             ["status"] = "ok",
-            ["message"] = "POST { op, amount, why, who?, resource?, power? } "
+            ["message"] = "POST { op, amount, why, who?, resource?, power?, "
+                          + "card? } "
                           + "to set up a board through the game's own mutators. "
                           + "Ops: " + string.Join(", ", GitsDebugStateOps) + ".",
             ["guardrail"] = GitsDebugStateGuardrail,
@@ -931,11 +1112,12 @@ public static partial class McpMod
             string who = GitsDebugStr(parsed, "who") ?? "player";
             string resource = GitsDebugStr(parsed, "resource") ?? "";
             string power = GitsDebugStr(parsed, "power") ?? "";
+            string card = GitsDebugStr(parsed, "card") ?? "";
 
             var applyTask = RunOnMainThread(
                 () => GitsDebugStateApply(op!.Trim(), who.Trim(),
                                           resource.Trim(), power.Trim(),
-                                          amount, why!.Trim()));
+                                          card.Trim(), amount, why!.Trim()));
             SendJson(response, applyTask.GetAwaiter().GetResult());
         }
         catch (Exception ex)
