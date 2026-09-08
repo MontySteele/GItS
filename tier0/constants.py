@@ -892,9 +892,9 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # than something that empties on a timer -- two riders on the next Plan
     # (Opening Gambit, Second Wave), a draw that reads the entries after it
     # (Scout Ahead), two now-lines that cancel or re-aim what is already
-    # written (Second Thoughts, Converging Tide) and the two DUSK rows whose
-    # Plan lands at the END of the turn it was written on (Breakwater, Night
-    # Watch). LAST, in the sheet's own order, for the reason the pass above is
+    # written (Second Thoughts, Converging Tide) and the DUSK row whose Plan
+    # lands at the END of the turn it was written on (Breakwater). LAST, in
+    # the sheet's own order, for the reason the pass above is
     # last (`tools/lint_arm_pool_parity.py` compares the tuple,
     # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER).
     #
@@ -905,13 +905,15 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # (`EB-655`): Converging Tide re-aimed a queued Plan, a decision about a
     # queue this pass deliberately makes shallower, and left the sheet the same
     # way -- `kokomi_plan.redirect_queued_plans` stays registered with nothing
-    # spelling it.
+    # spelling it. FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch lost
+    # every draft comparison in r27 and Slack Water's Plan half moved to Dusk,
+    # which is the job Night Watch was rebuilt for one pass earlier. It spelled
+    # no op of its own, so nothing stays registered behind it.
     "proto_kk_opening_gambit",
     "proto_kk_second_wave",
     "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
     "proto_kk_breakwater",
-    "proto_kk_night_watch",
 )
 
 # THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF

@@ -528,6 +528,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # vocabulary carries as a private write nowhere; Block is the player's own
     # pool and no other Block op declares a hook for it.
     "block_per_plan_this_morning": [_hook("private", "kurage", "read")],
+    # Breakwater (`EB-685`) reads the same jellyfish one drain over -- the
+    # queue as it STANDS at dusk rather than the morning just drained -- and
+    # pays Block, so it declares the line above's one hook for the line
+    # above's reason.
+    "block_per_plan_held": [_hook("private", "kurage", "read")],
     # Tide Chart (`EB-478`, R257) reads the same morning's depth Tide Wall
     # reads, one turn after the card that promised the draw was played, and
     # pays CARDS rather than Block -- the draw pile is the player's own and no

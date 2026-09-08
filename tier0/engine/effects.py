@@ -6041,7 +6041,13 @@ OPS = {
     # is a fact about a MORNING, so a now-line spelling would print a number
     # that is zero every time it is read.
     "block_per_plan_this_morning": _op_kokomi_plan_only,
-    # SEVEN, and the last three are `EB-643`'s (R265). Same terms as the four
+    # FIVE, and the fifth is Breakwater's (`EB-685`, pool pass five): "plus N
+    # Block for each Plan the Bake-Kurage is HOLDING". Same terms, and
+    # plan-only for the line above's reason one count over -- a now-line
+    # spelling would read the queue before the turn's Plans were written and
+    # pay for a queue the player has not built yet.
+    "block_per_plan_held": _op_kokomi_plan_only,
+    # EIGHT, and three of them are `EB-643`'s (R265). Same terms as the four
     # above, and plan-only for one reason they share: each names a POSITION in
     # a running drain -- "the next Plan", "each Plan carried out after this
     # one" -- so a now-line spelling would ask about a drain that is not

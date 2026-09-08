@@ -329,21 +329,22 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void Breakwater_writes_a_dusk_wall_that_reads_the_morning()
+    public void Breakwater_writes_a_dusk_wall_that_reads_the_queue()
     {
         var card = new ProtoKkBreakwater();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardRarity.Common, card.Rarity);
 
-        // `EB-679` (pool pass four). r26 lane 1 called this Night Watch's
-        // worse twin, so the flat 6 becomes 5 AND A RATE: the wall behind the
-        // engine, taller the deeper the morning it followed. The count is
-        // `PlansThisMorning`, which `ResolveDusk` deliberately leaves alone --
-        // this Dusk entry is not one of the Plans it reads.
+        // `EB-679` (pool pass four) made the flat 6 a base AND A RATE: the
+        // wall behind the engine. `EB-685` (pool pass five) fixed its PHASE --
+        // the count is the queue AT DUSK and not the morning already drained,
+        // which a Plan written today can never be part of. The clause pins are
+        // in `KokomiPoolPassFiveTests`; what belongs here is the two-clause
+        // shape pool pass two's Dusk flag carries.
         Assert.Equal(2, card.PlanClauses.Count);
         Assert.Equal(KokomiPlan.Kind.Block, card.PlanClauses[0].Kind);
         Assert.Equal(5, card.PlanClauses[0].Amount);
-        Assert.Equal(KokomiPlan.Kind.BlockPerPlanThisMorning,
+        Assert.Equal(KokomiPlan.Kind.BlockPerPlanHeld,
                      card.PlanClauses[1].Kind);
         Assert.Equal(3, card.PlanClauses[1].Amount);
         // THE UPGRADE MOVES THE BASE AND NOT THE RATE (5 -> 7).
@@ -357,19 +358,18 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void Night_watch_writes_a_weak_on_every_body_at_dusk()
+    public void The_multi_body_weak_at_dusk_is_slack_waters_plan_half()
     {
-        var card = new ProtoKkNightWatch();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        // `EB-679` (pool pass four). Both seats read the old face -- Block AND
-        // a Weak AND the casket's ping for one energy -- as a card that asks
-        // nothing, so the Block comes off and the Weak goes wide. Slack
-        // Water's pair: Slack Water wins at one body, this one at three.
+        // `EB-685` (pool pass five). Night Watch carried this line for one
+        // pass and lost every draft comparison in r27; the line moved onto
+        // Slack Water, which already hits, and Night Watch left the pool. The
+        // row is pinned whole in KokomiPoolPassFiveTests -- what belongs HERE
+        // is that pool pass two's Dusk flag is what carries it.
+        var card = new ProtoKkSlackWater();
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.ApplyWeak, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
-        Assert.Equal(1, clause.Amount);
-        Assert.Contains("dusk: true", Source("ProtoKkNightWatch"));
+        Assert.Contains("dusk: true", Source("ProtoKkSlackWater"));
     }
 
     [Fact]
@@ -485,15 +485,17 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void All_six_surviving_rows_are_offerable_and_none_is_in_the_starter()
+    public void All_five_surviving_rows_are_offerable_and_none_is_in_the_starter()
     {
+        // FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch is retired,
+        // its Dusk Weak having moved onto Slack Water.
         var slice = Il.CallSequence(
             Il.Method("KokomiOverhaulRoster", "Slice")).ToList();
         foreach (var row in new[]
                  {
                      "ProtoKkOpeningGambit", "ProtoKkSecondWave",
                      "ProtoKkScoutAhead", "ProtoKkSecondThoughts",
-                     "ProtoKkBreakwater", "ProtoKkNightWatch",
+                     "ProtoKkBreakwater",
                  })
         {
             Assert.Contains(slice, c => c.Contains(row));
@@ -528,9 +530,11 @@ public class KokomiPoolPassTwoTests
           + "double damage.",
             Face(new ProtoKkOpeningGambit()));
         // `EB-679` took Scout Ahead OUT of this family: its count is the
-        // whole drain rather than a window on it, so the face states the turn.
+        // whole drain rather than a window on it, so the face states the turn
+        // -- and `EB-685` prints the two things that made it true.
         Assert.EndsWith(
-            "Draw 1 card for each [gold]Plan[/gold] carried out this turn.",
+            "Draw 1 card for each [gold]Plan[/gold] carried out this turn, "
+          + "this one included, in any order.",
             Face(new ProtoKkScoutAhead()));
     }
 

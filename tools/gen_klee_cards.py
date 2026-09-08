@@ -434,6 +434,11 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # a reason of its own -- the count it multiplies is a fact
                   # about a MORNING.
                   "block_per_plan_this_morning",
+                  # `EB-685`: Breakwater's per-held-Plan Block scaler, and
+                  # plan-only one count over -- "the Plans the jellyfish is
+                  # HOLDING" read on a now-line is the queue before the turn's
+                  # Plans were written.
+                  "block_per_plan_held",
                   # `EB-643`: the three DRAIN-POSITIONAL clauses, plan-only
                   # for a reason they share -- each names a place in a running
                   # drain ("the next Plan", "after this one"), so a now-line
@@ -1969,6 +1974,9 @@ PLAN_CLAUSE_KINDS = {
     "damage_per_companion_last_turn": "DamagePerCompanionLastTurn",
     "play_copy_of_companion": "PlayCopyOfCompanion",
     "block_per_plan_this_morning": "BlockPerPlanThisMorning",
+    # `EB-685` (pool pass five), BREAKWATER's count: the queue as it stands at
+    # dusk, never this entry itself. See `KokomiPlan.Kind.BlockPerPlanHeld`.
+    "block_per_plan_held": "BlockPerPlanHeld",
     # `EB-643` (R265), THE THREE DRAIN-POSITIONAL CLAUSES. Scout Ahead counts
     # the drain it is carried out in (`EB-679`, itself included), and Opening
     # Gambit and Second Wave write a RIDER on the entry that follows them in
@@ -2024,6 +2032,8 @@ PLAN_TIMES_OPS = {"damage"}
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
 PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "play_copy_of_companion", "block_per_plan_this_morning",
+                 # `EB-685`, Breakwater's count. See `PLAN_CLAUSE_KINDS`.
+                 "block_per_plan_held",
                  # `EB-643`. The three drain-positional clauses -- see
                  # `PLAN_CLAUSE_KINDS` above for the one reason all three are
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.

@@ -750,6 +750,9 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "damage_per_companion_last_turn",
     "play_copy_of_companion", "block_per_plan_this_morning",
     "draw_after_plans",
+    # POOL PASS FIVE (`EB-685`). Breakwater's count, with its own branch in
+    # `_op_price` on this set's EB-311 terms.
+    "block_per_plan_held",
     # POOL PASS TWO (`EB-643`, R265). Three now-lines that operate on the
     # QUEUE and three drain-positional plan clauses, each with its own branch
     # in `_op_price` on this set's own EB-311 terms.
@@ -958,6 +961,14 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # read, and guessing three would price the built deck's best morning as
         # the card's printed one. At face value from there, which is what
         # `block` is priced at inline.
+        return _neutral_amount(fx, 0)
+    if op == "block_per_plan_held":
+        # Breakwater (`EB-685`, pool pass five). THE SAME PRICE AS THE LINE
+        # ABOVE, and the equality is the point: `EB-685` moved WHICH Plans the
+        # clause counts -- the queue at dusk rather than the morning just
+        # drained -- and not the refusal to guess how many there will be. ONE
+        # held Plan is the neutral single-unit estimate, since Plan density is
+        # still a deck fact an offer screen cannot read.
         return _neutral_amount(fx, 0)
     if op == "draw_after_plans":
         # Tide Chart (`EB-478`, R257). ZERO, and it is `draw`'s zero rather
@@ -2426,6 +2437,9 @@ STATIC_OP_PRICING: dict[str, str] = {
                                    "neutral single-unit estimate, since Plan "
                                    "density is a deck fact an offer screen "
                                    "cannot read",
+    "block_per_plan_held": "its printed Block for ONE held Plan -- the same "
+                           "neutral single-unit estimate, since Plan density "
+                           "is a deck fact an offer screen cannot read",
     "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
                         "is priced on -- one card per Plan carried out, paid "
                         "a turn later, is still draw",

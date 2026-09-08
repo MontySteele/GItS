@@ -45,7 +45,7 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Breakwater"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each [gold]Plan[/gold] carried out this turn."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] is holding."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -55,7 +55,7 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard, IPlanne
         new[]
         {
             new KokomiPlan.Planned(KokomiPlan.Kind.Block, DynamicVars["PlanBlock"].IntValue, KokomiPlan.Aim.Self),
-            new KokomiPlan.Planned(KokomiPlan.Kind.BlockPerPlanThisMorning, 3, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.BlockPerPlanHeld, 3, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

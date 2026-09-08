@@ -62,6 +62,8 @@ PLAN_KINDS = frozenset((
     "draw", "energy", "block", "mend", "damage", "damage_quarter_max_hp",
     "damage_per_companion_last_turn", "apply_power",
     "play_copy_of_companion", "block_per_plan_this_morning",
+    # `EB-685` (pool pass five), BREAKWATER's count. See `BLOCK_PER_PLAN_HELD`.
+    "block_per_plan_held",
     "draw_per_plan_this_turn", "next_plan_double_damage",
     "next_plan_extra_carry_out",
     # `EB-655` (pool pass three), BATTLE PLAN. See `NEXT_ATTACK_BONUS`.
@@ -119,6 +121,13 @@ PLAN_TIMES_OPS = frozenset(("damage",))
 PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            "play_copy_of_companion",
                            "block_per_plan_this_morning",
+                           # `EB-685`. Breakwater's count. PLAN-ONLY for the
+                           # line above's reason one word over: "the Plans the
+                           # jellyfish is HOLDING" is a number a now-line would
+                           # read before the turn's Plans were written, so a
+                           # face-up spelling would pay for the queue the
+                           # player has not built yet.
+                           "block_per_plan_held",
                            # `EB-643`. The three drain-positional clauses. Each
                            # one names a place in a running drain -- "the next
                            # Plan", "after this one" -- so a now-line spelling
@@ -138,6 +147,30 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
 #: count it multiplies is a fact about a morning, and a now-line spelling would
 #: read a number that is zero every time it is asked.
 BLOCK_PER_PLAN = "block_per_plan_this_morning"
+
+#: `EB-685` (pool pass five), BREAKWATER: "Gain 5 Block, plus 3 for each Plan
+#: the Bake-Kurage is HOLDING."
+#:
+#: WHY IT IS NOT TIDE WALL'S COUNT, which is what pool pass four gave it. That
+#: count is the MORNING's carry-outs, and a Dusk Plan lands on the evening of
+#: the turn it was written on -- so a Breakwater written on a turn whose own
+#: morning was empty read 0 and paid the base, every time. r27's two seats
+#: counted 0 on four plays out of four and were paid 5. The wall now rises on
+#: the turn the ENGINE IS WRITTEN: what it pays for is the queue standing
+#: behind it.
+#:
+#: THE COUNT IS `len(state.kk_plan_queue)` READ LIVE, at the moment this entry
+#: resolves, and the two exclusions it needs are both true BY CONSTRUCTION
+#: rather than by a filter -- which is `resolve_all`'s discipline one drain
+#: over. `resolve_dusk` takes every dusk entry OFF the queue before the first
+#: clause runs, so (a) this entry is never one of the Plans it pays for and
+#: (b) neither is a second Dusk Plan written the same turn: what is left in the
+#: queue is exactly "written this turn and still waiting for the next morning",
+#: which is the sentence the face says. A Plan hurried out by Change of Plans
+#: earlier in the turn has already left the queue and does not count.
+#:
+#: `amount` is the RATE per held Plan, `BLOCK_PER_PLAN`'s shape above.
+BLOCK_PER_PLAN_HELD = "block_per_plan_held"
 
 #: `EB-679` (pool pass four), SCOUT AHEAD: "draw 1 card for each Plan carried
 #: out this turn", ITSELF INCLUDED. It used to count the carry-outs still to
@@ -1223,6 +1256,28 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             state.emit("block", amount=gained)
         state.emit("plan_tide_wall", amount=gained,
                    plans=state.kk_plans_this_morning)
+    elif op == BLOCK_PER_PLAN_HELD:
+        # BREAKWATER (`EB-685`): "plus N Block for each Plan the Bake-Kurage is
+        # holding." The count is the QUEUE AS IT STANDS RIGHT NOW, read live
+        # rather than once at the drain -- `BLOCK_PER_PLAN_HELD`'s header has
+        # the whole argument, and the two exclusions the face needs (this
+        # entry, and a second Dusk Plan of the same turn) are already true
+        # because `resolve_dusk` empties the dusk entries out of the queue
+        # before the first clause runs.
+        #
+        # POWERED, the flat `block` clause's funnel exactly, for the reason
+        # Tide Wall's branch above states: two Block clauses of one card
+        # scaling differently is what `SongOfPearlsPower`'s header refuses.
+        #
+        # AN EMPTY QUEUE PAYS NOTHING, a printed no-op and not a failure: a
+        # Breakwater written on a turn with no other Plan behind it is the
+        # base 5 alone, which is the honest answer to "for each".
+        held = len(state.kk_plan_queue)
+        gained = powers.modify_block_gained(p, amount * held)
+        if gained:
+            p.block += gained
+            state.emit("block", amount=gained)
+        state.emit("plan_breakwater", amount=gained, plans=held)
     elif op == DRAW_PER_PLAN_THIS_TURN:
         # SCOUT AHEAD (`EB-679`): "draw 1 card for each Plan carried out this
         # turn", itself included. `drain_plans` is the whole drain's count --

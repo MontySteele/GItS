@@ -107,7 +107,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # Second Wave, Scout Ahead and the two DUSK rows print a Plan
     # line; Second Thoughts, Ebb Tide and Converging Tide are
     # now-lines that operate on the queue and print none.
-    assert len(planned) == 26
+    # TWENTY-FIVE after pool pass five (`EB-685`): Night Watch is retired and
+    # Slack Water's Plan line, already counted, moved to Dusk.
+    assert len(planned) == 25
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -836,7 +838,7 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # queue. The count the row was filed against was 34, and what it
     # pins is the withdrawal, not the size -- so it moves with the
     # pool and the absence does not.
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 40
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 39
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
@@ -2381,9 +2383,16 @@ def test_a_dusk_rider_reaches_only_the_dusk_drain(overhaul):
 
 
 def test_the_sheets_two_dusk_rows_are_the_only_ones(overhaul):
-    """`plan_dusk:` is a ROW flag and the sheet is where it is declared."""
+    """`plan_dusk:` is a ROW flag and the sheet is where it is declared.
+
+    `EB-685` (pool pass five) MOVED THE PAIR: Night Watch is retired and Slack
+    Water's Plan half takes its place at Dusk. It is the first row on the
+    surface with BOTH a face-up half and a Dusk Plan, and it needed no schema
+    of its own -- `plan_dusk:` is a fact about the row's Plan LINE and
+    `loader._validate_plan_dusk` asks only that there be one."""
     dusk = [c.id for c in loader.prototype_cards() if c.plan_dusk]
-    assert dusk == ["proto_kk_breakwater", "proto_kk_night_watch"]
+    assert dusk == ["proto_kk_slack_water", "proto_kk_breakwater"]
+    assert _row("proto_kk_slack_water").effects != []
 
 
 def _row(cid):
@@ -2409,57 +2418,138 @@ def test_the_dusk_lines_are_written_only(overhaul):
     only legal target is the Bake-Kurage (`gen_klee_cards._plan_only_line`,
     `KokomiTargets.PetOnly`) and its whole face is the Dusk clause.
 
-    `EB-679` (pool pass four) KEPT THE SHAPE AND CHANGED BOTH LINES: Breakwater
-    reads the morning it followed and Night Watch drops its Block for a Weak on
-    every body. Written-only is what the pass did not touch."""
+    `EB-685` (pool pass five) LEAVES BREAKWATER THE ONLY ONE: Night Watch is
+    retired and Slack Water carries the Dusk Weak with its now-line intact.
+    What the pass moved on this row is the COUNT and not the shape."""
     breakwater = _row("proto_kk_breakwater")
     assert breakwater.effects == []
     assert breakwater.plan == [
         {"op": "block", "amount": 5},
-        {"op": "block_per_plan_this_morning", "amount": 3},
+        {"op": "block_per_plan_held", "amount": 3},
     ]
     assert breakwater.upgrade == {"plan_block": 2}
 
-    watch = _row("proto_kk_night_watch")
-    assert watch.effects == []
-    assert watch.plan == [{"op": "apply_power", "power": "weak", "amount": 1,
-                           "target": "all_enemies"}]
-    assert watch.upgrade == {"plan_power_amount": 1}
+
+def _breakwater(st):
+    """Write the sheet's own Breakwater line onto the queue."""
+    kokomi_plan.schedule(st, dusk_card(
+        [{"op": "block", "amount": 5},
+         {"op": kokomi_plan.BLOCK_PER_PLAN_HELD, "amount": 3}],
+        cid="proto_kk_breakwater"))
 
 
-def test_breakwater_reads_the_mornings_carry_outs_and_not_its_own(overhaul):
-    """`EB-679`. THE COUNT IS THE MORNING'S, which is what makes the card the
-    wall behind the engine: a turn that carried out two Plans at dawn pays
-    5 + 3 x 2 at dusk, and the Dusk entry itself is not one of the two --
-    `resolve_dusk` deliberately leaves `kk_plans_this_morning` alone."""
+def test_breakwater_pays_for_the_plans_the_jellyfish_is_holding(overhaul):
+    """`EB-685`. THE WALL RISES ON THE TURN THE ENGINE IS WRITTEN: two Plans
+    written this turn and still waiting for the next morning pay 5 + 3 x 2 at
+    dusk. Pass four read the morning just drained, which a Plan written today
+    can never be in -- r27's two seats counted 0 on four plays out of four."""
+    st = kokomi_state()
+    _breakwater(st)
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    kokomi_plan.resolve_dusk(st)
+    assert st.player.block == 5 + 3 * 2
+    # AND THE TWO IT COUNTED ARE STILL THERE: it paid for the queue, it did
+    # not spend it.
+    assert len(st.kk_plan_queue) == 2
+
+
+def test_breakwater_holding_nothing_pays_its_base_alone(overhaul):
+    """`EB-685`. Zero times three is the honest answer to "for each", so a
+    Breakwater with no Plan standing behind it is a plain 5 Block."""
+    st = kokomi_state()
+    _breakwater(st)
+    kokomi_plan.resolve_dusk(st)
+    assert st.player.block == 5
+
+
+def test_breakwater_never_counts_itself_or_a_second_dusk_plan(overhaul):
+    """`EB-685`. BY CONSTRUCTION AND NOT BY A FILTER: `resolve_dusk` takes
+    every dusk entry off the queue before the first clause runs, so the count
+    excludes this entry and any Dusk Plan written beside it -- neither is
+    waiting for the next morning, which is what the face says."""
+    st = kokomi_state()
+    _breakwater(st)
+    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 1}],
+                                       cid="proto_kk_other_dusk"))
+    kokomi_plan.resolve_dusk(st)
+    assert st.player.block == 5 + 1
+
+
+def test_a_plan_hurried_out_before_dusk_is_no_longer_held(overhaul):
+    """`EB-685`. Change of Plans carries the front Plan out and it LEAVES the
+    queue, so the wall behind the engine is one Plan shorter -- which is the
+    trade the two cards make with each other."""
     st = kokomi_state()
     for i in range(2):
         kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
                                            cid=f"proto_kk_p{i}"))
-    kokomi_plan.resolve_all(st)
-    # WRITTEN AFTER THE MORNING, which is the only order a Dusk Plan can be
-    # written in: `resolve_all` drains the queue it finds, so an entry that
-    # waits for a dusk was played on the turn the dusk ends.
-    kokomi_plan.schedule(st, dusk_card(
-        [{"op": "block", "amount": 5},
-         {"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}],
-        cid="proto_kk_breakwater"))
+    _breakwater(st)
+    kokomi_plan.resolve_front(st)      # hurries proto_kk_p0 out of the queue
+    st.player.energy = 0
     st.player.block = 0
     kokomi_plan.resolve_dusk(st)
-    assert st.player.block == 5 + 3 * 2
+    assert st.player.block == 5 + 3 * 1
 
 
-def test_breakwater_after_an_empty_morning_pays_its_base_alone(overhaul):
-    """`EB-679`. Zero times three is the honest answer to "for each Plan
-    carried out this turn", so a Dusk Plan written on a morning that drained
-    nothing is a plain 5 Block."""
+def test_breakwaters_count_is_not_the_mornings_depth(overhaul):
+    """`EB-685`. The two counts part here, which is the whole pass: a deep
+    morning already drained buys nothing, and the queue written after it
+    buys the wall."""
     st = kokomi_state()
-    kokomi_plan.schedule(st, dusk_card(
-        [{"op": "block", "amount": 5},
-         {"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}],
-        cid="proto_kk_breakwater"))
+    for i in range(3):
+        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
+                                           cid=f"proto_kk_m{i}"))
+    kokomi_plan.resolve_all(st)
+    assert st.kk_plans_this_morning == 3
+    _breakwater(st)
+    st.player.block = 0
     kokomi_plan.resolve_dusk(st)
     assert st.player.block == 5
+
+
+def test_slack_waters_plan_half_is_a_dusk_line(overhaul):
+    """`EB-685`. THE ROW IS THE SURFACE'S FIRST NOW-LINE-PLUS-DUSK CARD, and
+    it needed no schema of its own: the face-up half stands unchanged (4
+    damage and a single Weak) and `plan_dusk:` says WHEN the written half
+    lands. `ProtoKkSlackWater.OnPlay` passes `dusk: true` inside the
+    played-on-the-pet branch, which is the one call the codegen already
+    emitted for a row with both halves."""
+    row = _row("proto_kk_slack_water")
+    assert row.plan_dusk is True
+    assert row.effects == [
+        {"op": "damage", "amount": 4, "target": "enemy"},
+        {"op": "apply_power", "power": "weak", "amount": 1,
+         "target": "enemy"},
+    ]
+    assert row.plan == [{"op": "apply_power", "power": "weak", "amount": 1,
+                         "target": "all_enemies"}]
+
+
+def test_slack_waters_weak_lands_before_the_enemy_acts(overhaul):
+    """`EB-685`. Every seat since round 25 said the morning Weak arrived after
+    the swing it was written against. Written at Dusk it lands inside the
+    player's own turn -- `combat._player_turn` runs `resolve_dusk` at this
+    engine's `BeforeSideTurnEnd`, before anything on the enemy side -- so the
+    debuff is on every body while the intents it was written against resolve.
+    That is Night Watch's job, which is why Night Watch left the pool."""
+    from tier0.engine import combat
+
+    front = make_enemy(hp=80, name="front", intents=ATTACKER)
+    back = make_enemy(hp=80, name="back", intents=ATTACKER)
+    st = kokomi_state(enemies=[front, back])
+
+    def write_it(state):
+        kokomi_plan.schedule(state, _row("proto_kk_slack_water"))
+
+    combat._player_turn(st, write_it)
+    # THE PLAYER'S TURN IS OVER AND THE ENEMIES HAVE NOT MOVED, which is the
+    # window the face names.
+    assert front.powers.get("weak") == 1
+    assert back.powers.get("weak") == 1
+    assert front.hp == 80 and back.hp == 80
+    assert st.kk_plan_queue == []
 
 
 def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
@@ -2475,8 +2565,11 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
         "damage.")
     # `EB-679` took Scout Ahead OUT of this family: its count is no longer a
     # window on the drain but the whole of it, so the face states the turn.
+    # `EB-685` prints both halves of that count on the face: itself included,
+    # and the order it was written in does not move the answer.
     assert faces["proto_kk_scout_ahead"].endswith(
-        "Draw 1 card for each [gold]Plan[/gold] carried out this turn.")
+        "Draw 1 card for each [gold]Plan[/gold] carried out this turn, "
+        "this one included, in any order.")
 
 
 def test_ebb_tide_is_off_the_sheet_and_out_of_the_pool(overhaul):
@@ -2703,14 +2796,14 @@ def test_read_the_field_is_a_selection_and_a_planned_wall(overhaul):
     assert up.plan[0]["amount"] == 12
 
 
-def test_night_watch_upgrades_to_two_weak_on_every_body(overhaul):
-    """`EB-679`. Slack Water's pair: one body or three, the Dusk Weak lands
-    before the swing it was written against."""
-    from tier0.content import upgrades
-
-    up = upgrades.apply_upgrade(_row("proto_kk_night_watch"))
-    assert up.plan == [{"op": "apply_power", "power": "weak", "amount": 2,
-                        "target": "all_enemies"}]
+def test_night_watch_is_off_the_sheet_and_out_of_the_pool(overhaul):
+    """`EB-685`, pool pass five: it lost every draft comparison in r27 and
+    Slack Water's Dusk half is its job. It spelled no op of its own, so
+    nothing stays registered behind it the way `cancel_all_plans_cash` and
+    `redirect_queued_plans` do."""
+    assert "proto_kk_night_watch" not in {
+        c.id for c in loader.prototype_cards()}
+    assert "proto_kk_night_watch" not in C.KOKOMI_OVERHAUL_POOL_IDS
 
 
 def test_breakwaters_upgrade_moves_the_base_and_not_the_rate(overhaul):
@@ -2721,7 +2814,7 @@ def test_breakwaters_upgrade_moves_the_base_and_not_the_rate(overhaul):
 
     up = upgrades.apply_upgrade(_row("proto_kk_breakwater"))
     assert up.plan == [{"op": "block", "amount": 7},
-                       {"op": "block_per_plan_this_morning", "amount": 3}]
+                       {"op": "block_per_plan_held", "amount": 3}]
 
 
 def test_riptide_adds_its_rider_per_debuffed_body(overhaul):
@@ -2889,10 +2982,9 @@ def test_the_written_only_dusk_rows_can_only_be_written(overhaul):
     intends -- the sim's reading of `KokomiTargets.PetOnly`, whose face leads
     with "Play on the Bake-Kurage."."""
     st = kokomi_state(enemies=[make_enemy(hp=200, intents=ATTACKER)])
-    for cid in ("proto_kk_breakwater", "proto_kk_night_watch"):
-        row = _row(cid)
-        assert row.effects == []
-        assert kokomi_plan.plan_aimed_at_pet(st, row) is True
+    row = _row("proto_kk_breakwater")
+    assert row.effects == []
+    assert kokomi_plan.plan_aimed_at_pet(st, row) is True
 
 
 def test_battle_plans_rider_is_plan_only_from_a_body(overhaul):

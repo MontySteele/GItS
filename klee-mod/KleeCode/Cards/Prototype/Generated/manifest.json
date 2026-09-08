@@ -41,7 +41,6 @@
     "proto_kk_kurages_oath",
     "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
-    "proto_kk_night_watch",
     "proto_kk_opening_gambit",
     "proto_kk_pincer",
     "proto_kk_rally",
@@ -244,7 +243,6 @@
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
-    "proto_kk_night_watch": "kokomi",
     "proto_kk_opening_gambit": "kokomi",
     "proto_kk_pincer": "kokomi",
     "proto_kk_rally": "kokomi",
@@ -542,9 +540,6 @@
     },
     "proto_kk_nereids_ascension": {
       "cost": -1
-    },
-    "proto_kk_night_watch": {
-      "plan_power_amount": 1
     },
     "proto_kk_opening_gambit": {
       "damage": 2

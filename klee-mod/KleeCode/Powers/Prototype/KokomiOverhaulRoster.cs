@@ -202,9 +202,9 @@ internal static class KokomiOverhaulRoster
         // riders on the entry that follows (Opening Gambit, Second Wave), a
         // draw that counts the entries after it (Scout Ahead), two now-lines
         // that unwrite what is already queued (Second Thoughts),
-        // and the two DUSK rows whose Plan lands at the end of the turn it
-        // was written on (Breakwater, Night Watch). LAST, in the sheet's own
-        // order, for the ordering reason the shelf above states.
+        // and the DUSK row whose Plan lands at the end of the turn it was
+        // written on (Breakwater). LAST, in the sheet's own order, for the
+        // ordering reason the shelf above states.
         //
         // EIGHT UNTIL `EB-649` (round 23): Ebb Tide drew three times on the
         // cap lane and was played none of them, so the row left the sheet and
@@ -212,13 +212,15 @@ internal static class KokomiOverhaulRoster
         // says why. SIX SINCE POOL PASS THREE (`EB-655`): Converging Tide
         // re-aimed a queued Plan, and this pass makes the queue shallower on
         // purpose -- <c>KokomiPlan.RedirectQueued</c> stays with nothing
-        // spelling it.
+        // spelling it. FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch
+        // lost every draft comparison in r27, and Slack Water's Plan half
+        // moved to Dusk -- the job Night Watch was rebuilt for one pass
+        // earlier. It spelled no rule of its own, so nothing stays behind it.
         ModelDb.Card<ProtoKkOpeningGambit>(),
         ModelDb.Card<ProtoKkSecondWave>(),
         ModelDb.Card<ProtoKkScoutAhead>(),
         ModelDb.Card<ProtoKkSecondThoughts>(),
         ModelDb.Card<ProtoKkBreakwater>(),
-        ModelDb.Card<ProtoKkNightWatch>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the
