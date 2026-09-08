@@ -1,4 +1,4 @@
-Status: RULED R266 2026-09-07 (the cap retired as a rule)
+Status: RULED R266 2026-09-07
 
 # Kokomi round twenty-four, one lane: the cap engaged, was never printed, and read as a wall until it read as a choice
 
