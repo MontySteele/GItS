@@ -36,7 +36,7 @@ namespace KleeMod.Powers;
 ///
 /// ONE ENTRY IS ONE PLAN, and that is the unit everything downstream counts in:
 /// the pending badge, the strip on the jellyfish, Change of Plans' "your front
-/// Plan", Nereid's Ascension's "carries out every Plan twice" and the
+/// Plan", Nereid's Ascension's "carries out your first Plan twice" and the
 /// whenever-a-Plan-is-carried-out payoffs (Treatise, Song of Pearls). War
 /// Council prints two clauses and is ONE Plan, which is what its face says --
 /// "Deal 4 damage to every enemy AND apply 1 Weak to each" is one sentence.
@@ -1011,7 +1011,8 @@ public static class KokomiPlan
     /// drain are doubled and the ones already carried out are not. Reading the
     /// power once for the morning would have to pick one of those answers in
     /// advance; reading it per entry says what is true when each Plan happens,
-    /// which is what "the jellyfish carries out every Plan twice" says.
+    /// which is what "the jellyfish carries out your first Plan twice" says --
+/// the first entry OF THE DRAIN being carried out, whichever card wrote it.
     /// </summary>
     public static async Task ResolveAll(
         PlayerChoiceContext choiceContext, Creature? kokomi)

@@ -1097,7 +1097,7 @@ class PlanEntry:
 
     THE TWIN OF `KokomiPlan.Entry`, and the unit everything downstream counts
     in: the pending badge, Change of Plans' "your front Plan", Nereid's
-    Ascension's "carries out every Plan twice" and the
+    Ascension's "carries out your first Plan twice" and the
     whenever-a-Plan-is-carried-out payoffs (Treatise, Song of Pearls). War
     Council prints two clauses and is ONE Plan, which is what its face says.
 

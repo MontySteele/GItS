@@ -427,8 +427,8 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
 
 
 /// <summary>
-/// NEREID'S ASCENSION (Rare Power, 2): "The Bake-Kurage carries out every Plan
-/// twice." `EB-492`.
+/// NEREID'S ASCENSION (Rare Power, 2): "The Bake-Kurage carries out your
+/// first Plan twice." `EB-492`, narrowed by `EB-655`.
 ///
 /// A POWER, AND THAT IS THE WHOLE REDESIGN. The row it replaces was a Plan --
 /// "Exhaust. Plan: for 2 turns, the Bake-Kurage carries out every Plan twice"
@@ -443,8 +443,8 @@ public sealed class ShellGuardPower : PowerModel, ILocalizationProvider
 /// <c>KokomiPlan.CarryOutTimes</c> asks for it at the one moment the question
 /// can be asked -- inside the drain loop, before each entry -- and a hook would
 /// have to reconstruct which Plans were still owed. The stack is a marker, so a
-/// second copy doubles nothing further; "every Plan twice" is what the face
-/// says, and twice is twice.
+/// second copy doubles nothing further; "your first Plan twice" is what the
+/// face says, and twice is twice.
 ///
 /// THE BRIEF'S RULE 3 IS THE ONE THIS BREAKS. "Every Plan is carried out once,
 /// in order" is the arm's law and this Rare is the card the brief allows to
@@ -458,7 +458,7 @@ public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
         ("title", "Nereid's Ascension"),
         ("description",
             "At the start of your turn, the [gold]Bake-Kurage[/gold] "
-          + "carries out every [gold]Plan[/gold] twice."),
+          + "carries out your first [gold]Plan[/gold] twice."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -1039,8 +1039,8 @@ def render(obs: dict[str, Any]) -> str:
                 for i, e in enumerate(pl["queue"], 1):
                     out.append(f"  {i}. **{e['name']}**")
                 if pl["twice"]:
-                    out.append("- The jellyfish carries out EVERY Plan twice "
-                               "while Nereid's Ascension lasts.")
+                    out.append("- The jellyfish carries out your FIRST Plan "
+                               "twice while Nereid's Ascension lasts.")
             # `EB-329`: which of the two numbers under a Plan is which, once,
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):

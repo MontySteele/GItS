@@ -952,7 +952,7 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {IfUpgraded:show:7|5} damage. If a [gold]Plan[/gold] was carried out this turn, deal {IfUpgraded:show:13|10} damage instead.",
+   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead.",
    effects: [{op: conditional, if: plan_carried_out_this_turn,
               then: [{op: damage, amount: 10, target: enemy}],
               else: [{op: damage, amount: 5, target: enemy}]}],
@@ -1255,7 +1255,7 @@
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 damage. [gold]Plan[/gold]: Deal 8 damage to each enemy that intends to attack.",
+   description: "Deal 8 damage. [gold]Plan[/gold]: Deal 8 damage to each enemy that intended to attack when you wrote this.",
    effects: [{op: damage, amount: 8, target: enemy}],
    # `EB-492`, the intent-keyed aim. THE SET IS FIXED WHEN THE PLAN IS
    # WRITTEN -- R250's rule for an aimed Plan, applied to a set.

@@ -3473,7 +3473,7 @@ def test_the_rare_that_changes_what_the_queue_means_is_printed():
     which this pins by sending it."""
     page = blindplay.render(blindplay.observation(
         plans_combat_state(dict(TWO_PLANS, twice=True, also_now=True))))
-    assert "carries out EVERY Plan twice" in page
+    assert "carries out your FIRST Plan twice" in page
     assert "also happen NOW" not in page
 
 
