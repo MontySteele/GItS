@@ -2405,7 +2405,7 @@ def test_bombs_away_hits_and_places_on_every_enemy(overhaul):
 # NO SHEET ROW CARRIES `rising_cost:` any more. Long Fuse was the one, and the
 # comparison pass of 2026-09-06 took the escalation off it -- three seat
 # readings against "Retain plus an escalating cost", in
-# `review/active/klee-pool-comparison-pass-2026-09-06.md` sec.3 item 1.
+# `review/records/klee-pool-comparison-pass-2026-09-06.md` sec.3 item 1.
 # THE RULE STAYS WIRED in both engines (`klee_overhaul.roll_rising_costs`, the
 # `card_cost` addend, the `_finish_play` clear, `run_fight`'s per-combat
 # zeroing; C#: `IRisingHandCostCard` and `KleeOverhaulRisingCost.RollHand`), so

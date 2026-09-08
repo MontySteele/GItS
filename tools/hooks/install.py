@@ -73,21 +73,33 @@ SHIM = f"""#!/bin/sh
 top=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 [ -n "$top" ] || exit 0
 
+# The main worktree: the directory holding the shared .git this hook was
+# installed into. Both the venv search and the gate fallback want it.
+common=$(git rev-parse --git-common-dir 2>/dev/null)
+case "$common" in
+  /*|[A-Za-z]:*) ;;
+  "") common="$top/.git" ;;
+  *) common="$top/$common" ;;
+esac
+maintop=$(dirname "$common")
+
+# THE INTERPRETER IS THIS REPO'S VENV WHEN THERE IS ONE. `python` on PATH is a
+# different interpreter with different packages -- on this machine it is the
+# system 3.14, under which four of the gate's own tests fail that pass in the
+# venv, so a bare `PY=python` refused every push until PATH was overridden by
+# hand. A linked worktree carries no .venv of its own, so the main worktree's
+# is the second place looked; PATH is the fallback, never the preference.
 PY=python
 command -v python >/dev/null 2>&1 || PY=python3
+for cand in "$top/.venv/Scripts/python.exe" "$top/.venv/bin/python"             "$maintop/.venv/Scripts/python.exe" "$maintop/.venv/bin/python"; do
+  if [ -x "$cand" ]; then PY="$cand"; break; fi
+done
 
 # (1) the tree being pushed.
 gate="$top/tools/hooks/pre_push_gate.py"
 if [ ! -f "$gate" ]; then
-  # (2) the main worktree, which is the directory holding the shared .git this
-  #     hook was installed into.
-  common=$(git rev-parse --git-common-dir 2>/dev/null)
-  case "$common" in
-    /*|[A-Za-z]:*) ;;
-    "") common="$top/.git" ;;
-    *) common="$top/$common" ;;
-  esac
-  gate=$(dirname "$common")/tools/hooks/pre_push_gate.py
+  # (2) the main worktree's copy, as up to date as this hook is.
+  gate="$maintop/tools/hooks/pre_push_gate.py"
 fi
 
 cd "$top" || exit 1
@@ -316,6 +328,19 @@ def self_test() -> int:
     if "--git-common-dir" not in SHIM:
         failures.append("self-test FAIL [fallback]: the shim no longer looks "
                         "for the main worktree's copy of the gate")
+    # THE INTERPRETER. `python` on PATH is not this repo's venv, and the gate's
+    # own tests fail under the system interpreter -- a shim that hard-codes
+    # `PY=python` refuses every push on such a machine.
+    cases += 1
+    if ".venv/Scripts/python.exe" not in SHIM or ".venv/bin/python" not in SHIM:
+        failures.append("self-test FAIL [venv]: the shim does not prefer this "
+                        "repo's venv interpreter, so the gate runs under "
+                        "whatever python PATH happens to name")
+    cases += 1
+    if "$maintop/.venv" not in SHIM:
+        failures.append("self-test FAIL [venv]: the shim looks for a venv only "
+                        "in the pushing worktree, which never has one -- the "
+                        "main worktree's is the one that exists")
     # THE SCRUB. git exports GIT_DIR to its hooks; the checks make their own
     # temporary repositories, and with GIT_DIR still set they write to THIS
     # one -- six fixture commits onto a live branch and a bare re-init, on the

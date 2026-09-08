@@ -1,7 +1,7 @@
 """FURINA POOL PASS ONE (`EB-493`) -- the four arm-only Commons, both sides of
 the flag.
 
-The design is `review/active/furina-pool-pass-2026-09-05.md` sec.2, four FOLLOWS
+The design is `review/records/furina-pool-pass-2026-09-05.md` sec.2, four FOLLOWS
 off the doctrine read (`review/records/card-audit-2026-09-04.md` sec.5.5).
 Rounds 9 and 10 read the Salon as furniture -- one Deploy in the whole deck,
 most Companion plays printing "No member on stage: performs nobody", and no

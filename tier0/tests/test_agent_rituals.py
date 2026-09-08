@@ -526,7 +526,13 @@ def test_the_deploy_hook_is_registered_in_settings():
     commands = [h["command"]
                 for group in settings["hooks"]["PreToolUse"]
                 for h in group["hooks"]]
-    assert "python tools/hooks/deny_deploy_outside_main.py" in commands
+    # Every hook command names its script through $CLAUDE_PROJECT_DIR: a hook
+    # command is resolved against the SHELL's cwd, so the bare relative
+    # spelling refused every tool call whenever the cwd held no tools/hooks/.
+    assert ('python "$CLAUDE_PROJECT_DIR/tools/hooks/'
+            'deny_deploy_outside_main.py"') in commands
+    for command in commands:
+        assert "$CLAUDE_PROJECT_DIR/tools/hooks/" in command, command
     matchers = [g["matcher"] for g in settings["hooks"]["PreToolUse"]]
     assert "Bash|PowerShell" in matchers
 

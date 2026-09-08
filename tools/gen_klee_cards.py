@@ -4416,7 +4416,7 @@ def blocked_reason(
             # *Guest List* moves it deliberately: the Furina pool pass buys An
             # Invitation's verb back at a price, an Energy and no Exhaust and
             # three Block short of a Stage Presence
-            # (`review/active/furina-pool-pass-2026-09-05.md` sec.2 item 4),
+            # (`review/records/furina-pool-pass-2026-09-05.md` sec.2 item 4),
             # because the arm's Companion trigger is starved between draws of
             # the reward slot. The exemption is the PREFIX and nothing else, so
             # it is exactly as wide as the quarantine: a `docs/*-cards.yaml`

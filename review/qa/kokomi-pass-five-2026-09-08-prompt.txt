@@ -1,0 +1,99 @@
+# Doctrine read: Kokomi pool pass five, the phase of the Dusk lines, against the kit charters
+
+Each numbered arm below is ONE change. For each, in order, give FOLLOWS or
+REQUIRES_MODIFICATION and name the clause (C1 to C7) you ruled against, and
+quote the line and the arithmetic (energy, Block, damage, cards, turns) that
+breaches it, in one sentence. A verdict with no clause named is not a
+verdict. Read adversarially: the author is a different model family and the
+owner wants the row that should not reach a tester named. Do not soften.
+Name clauses, not remedies: a number, a face or a rewritten row you volunteer
+is DISCARDED.
+
+Why this read exists. Pool pass five (EB-685, 2026-09-08) changed WHEN two
+Dusk clauses look, retired Night Watch, and reworded Scout Ahead. It was
+built and played (rounds 29 to 32) WITHOUT this read; the owner ruled on
+2026-09-08 (R267) that it goes to the door now, after the fact. Two of its
+four changes have since been REVERSED by that ruling: Slack Water's Plan is
+a morning Plan again (the brief names the delayed Weak as the turn-one
+decision, and a starter card moves only by ruling), and Scout Ahead's face
+went back with its position clause. Arms 2 and 4 below are therefore read
+for the record: say whether the pass's version breached a clause, and
+separately whether the restored version does.
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards." A row
+  that removes a losing line the kit is meant to keep, instead of pricing
+  it, is out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. There
+  must be a real turn in which the card is worse than a plain card of its
+  cost. Repeatable energy or draw at Uncommon or below is priced by
+  something past the card's own cost.
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (play now or write; which order; which
+  half), not by a number that rises while you watch.
+- **C5 (Kokomi brief section 2 rule 4).** Nothing fires by itself; every
+  effect is a card the player played and paid for.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a pool row or a base-game card at the same or lower rarity and cost.
+  Reference points: Skim (Uncommon, 1: draw 3), Seeing Red, Blur (Uncommon,
+  1: 5 Block kept), Flame Barrier, Iron Wave, Shrug It Off, Pommel Strike,
+  Whirlwind, Bludgeon, Sword Boomerang, Echo Form (Rare, 3).
+- **C7 (Kokomi identity Law 4).** In her pool a Common never increases deck
+  size.
+
+## The engine (as it stands today, 2026-09-08)
+
+The Bake-Kurage sits on her side all combat. A card with a Plan line may be
+played ON it: cost paid now, the card to the discard, the Plan written to a
+queue. At the START of her next turn (after the enemy acts, after her draw)
+every queued Plan is carried out in the order written. A Dusk Plan is
+carried out at the END of this turn, before enemies act. No cap (R266).
+Riders: Opening Gambit (the next Plan carried out with it deals double),
+Second Wave (the next is carried out twice), Scout Ahead (draw 1 per LATER
+Plan carried out with it). Readers: Well Laid, Sango Isshin, Treatise, Song
+of Pearls, Feint (5, or 10 after a carry-out; Plan 10). Nereid's Ascension
+(Rare Power, 2): the FIRST Plan carried out each turn is carried out twice.
+Starter: four Strike, four Defend, Kurage's Oath (3 to ALL; Plan 7 to
+ALL), Slack Water (4 and 1 Weak; Plan 1 Weak to ALL, morning). Energy 3,
+HP 80. The relic Tamakushi Casket strikes an enemy for 2 whenever you apply
+a debuff to it.
+
+## The arms
+
+1. **Breakwater (the count moves to the queue at Dusk)** -- Common Skill,
+   1. Dusk Plan: Gain 5 Block, plus 3 for each Plan the Bake-Kurage is
+   HOLDING (written this turn and still waiting for the morning). Upgrade
+   base 7. Was (pass four): plus 3 for each Plan carried out this turn,
+   which counted a morning already drained and paid 5 on every play. Now
+   the wall scales with what was written today: three Plans written and
+   Breakwater last, 14 Block at end of turn for 1 Energy. Read C2 and C6
+   against Defend and Shrug It Off, and C3 for whether "write more, block
+   more" is a choice or a bonus for the play the kit already wants.
+2. **Slack Water (the pass's version, since reversed)** -- Starter Attack,
+   1. Deal 4 damage. Apply 1 Weak. DUSK Plan: Apply 1 Weak to ALL enemies.
+   The written Weak lands this turn before the swing instead of the next
+   morning. The restored version (today): the same face with a MORNING
+   Plan, the Weak arriving the turn after. Rule on both: did moving the
+   starter's only written Weak to Dusk remove the "protect now versus
+   prepare later" losing line the brief keeps (C1), and does the restored
+   morning Weak carry a binding price (C2) on turn one against an 8 intent.
+3. **Night Watch RETIRED** -- the multi-body Weak before the swing was
+   Slack Water's Dusk half after arm 2, so the pool did not need it twice.
+   With arm 2 reversed, the pool now holds NO written Weak that lands
+   before the enemy acts. Rule on whether that gap breaches any clause
+   (it is a pool question and not a starter one), or whether it is simply
+   a hole a later pass may fill.
+4. **Scout Ahead (face wording, since reversed)** -- the pass's face:
+   "Plan: Draw 1 card for each Plan carried out this turn, this one
+   included, in any order." The restored face: "Plan: Draw 1 card for each
+   later Plan carried out with this one." Rule on the restored rule only:
+   a Common, 1 Energy (upgrade 0), draw 1 face-up, or written first of
+   three draws 2 the next morning, last draws 0. C2 (a repeatable draw at
+   Common priced by position and by the Energy spent on the other Plans),
+   C3 (the order is the player's), C6 against Skim.
+
+Four verdicts, each with its clause and its breaching line, then two
+sentences: with Slack Water back on the morning and Night Watch gone, is
+the kit's "protect now" line priced or absent. Under 600 words.
