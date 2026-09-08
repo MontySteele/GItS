@@ -58,43 +58,47 @@ public class KokomiPoolPassFourTests
     // ======================================================================
 
     // ======================================================================
-    // 3. SCOUT AHEAD -- the count that stopped depending on position
+    // 3. SCOUT AHEAD -- the count pass four took off its position, and R267
+    //    pick 3 put back on it
     // ======================================================================
 
     [Fact]
-    public void Scout_ahead_counts_the_whole_drain_itself_included()
+    public void Scout_ahead_counts_the_plans_that_follow_it()
     {
+        // R267 PICK 3 REVERSED THIS PASS'S RECOUNT. Pass four removed an
+        // ordering decision because one seat avoided the 0-payout slot; the
+        // clause is back, and the face says "later" so a seat can read the
+        // rule off it.
         var card = new ProtoKkScoutAhead();
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.DrawPerPlanThisTurn, clause.Kind);
+        Assert.Equal(KokomiPlan.Kind.DrawPerPlanAfter, clause.Kind);
         Assert.Equal(1, clause.Amount);
-        // `EB-685` PRINTS THE COUNT PASS FOUR MADE TRUE and changes nothing
-        // else about it: itself included, and the order it was written in
-        // does not move the answer.
         Assert.EndsWith(
-            "Draw 1 card for each [gold]Plan[/gold] carried out this turn, "
-            + "this one included, in any order.",
+            "Draw 1 card for each later [gold]Plan[/gold] carried out with "
+            + "this one.",
             Face(card));
     }
 
     [Fact]
-    public void The_drains_count_is_read_once_before_the_loop()
+    public void The_drains_count_is_read_per_entry_again()
     {
-        // STRUCTURAL, for this file's stated split. ORDER-INDEPENDENCE IS THE
-        // POINT: a reader whose number depends on where in the queue it sits
-        // is a card whose value is its position, which is what round 26's lane
-        // would not spend a slot on. So the count is computed once, before the
-        // loop, and every entry of the drain is handed the same number. Twin:
-        // `test_scout_ahead_counts_the_whole_drain_wherever_it_sits`.
+        // STRUCTURAL, for this file's stated split. R267 pick 3: the count is
+        // read INSIDE the entry loop, which is what lets a Scout Ahead written
+        // first and one written last answer differently -- the decision the
+        // card poses. Pass four's whole-drain term stays computed once above
+        // the loop for `DrawPerPlanThisTurn`, which no row spells. Twin:
+        // `test_scout_ahead_counts_the_plans_that_follow_it`.
         var source = Source("KokomiPlan", power: true);
+        Assert.Contains("var after = due.Count - index - 1;", source);
         Assert.Contains("var drainPlans = due.Count", source);
-        Assert.DoesNotContain("var after = due.Count - index - 1;", source);
 
-        // STILL CARRY-OUTS AND NOT ENTRIES (`EB-501`): Nereid's Ascension
-        // carries the first entry of a drain out twice, so a drain under the
-        // Rare counts one more.
+        // CARRY-OUTS AND NOT ENTRIES (`EB-501`), and for the positional count
+        // that means Nereid's adds NOTHING: `EB-655` narrowed the Rare to the
+        // FIRST entry of a drain, and an entry is never the first when
+        // something follows it, so every later entry is one carry-out.
         Assert.Contains("CarryOutTimes(kokomi) > 1", source);
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
+        Assert.Contains(resolve.GetParameters(), p => p.Name == "after");
         Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
     }
 

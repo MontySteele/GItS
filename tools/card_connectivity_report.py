@@ -548,6 +548,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Scout Ahead READS the drain it sits in (how many carry-outs follow) and
     # pays CARDS, which is the player's own draw pile and which no draw op
     # declares a hook for -- `draw_after_plans` one line up states that limit.
+    "draw_per_plan_after": [_hook("private", "kurage", "read")],
     "draw_per_plan_this_turn": [_hook("private", "kurage", "read")],
     # The two riders WRITE what the entry that follows them will do. Nothing is
     # added to or removed from the queue, so a read would be the wrong word:

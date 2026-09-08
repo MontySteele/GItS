@@ -462,7 +462,8 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # for a reason they share -- each names a place in a running
                   # drain ("the next Plan", "after this one"), so a now-line
                   # spelling would name a drain that is not running.
-                  "draw_per_plan_this_turn", "next_plan_double_damage",
+                  "draw_per_plan_after", "draw_per_plan_this_turn",
+                  "next_plan_double_damage",
                   "next_plan_extra_carry_out",
                   # `EB-655` (Battle Plan): the carry-out's rider, plan-only
                   # for the same reason -- a now-line spelling would be a
@@ -2034,12 +2035,14 @@ PLAN_CLAUSE_KINDS = {
     # `EB-685` (pool pass five), BREAKWATER's count: the queue as it stands at
     # dusk, never this entry itself. See `KokomiPlan.Kind.BlockPerPlanHeld`.
     "block_per_plan_held": "BlockPerPlanHeld",
-    # `EB-643` (R265), THE THREE DRAIN-POSITIONAL CLAUSES. Scout Ahead counts
-    # the drain it is carried out in (`EB-679`, itself included), and Opening
-    # Gambit and Second Wave write a RIDER on the entry that follows them in
-    # the same drain. All three are PLAN-ONLY below for one reason they share:
-    # each names a place in a running drain, and a now-line spelling would name
-    # a drain that is not running.
+    # `EB-643` (R265), THE DRAIN-POSITIONAL CLAUSES. Scout Ahead counts the
+    # carry-outs that FOLLOW it (R267 pick 3; `EB-679`'s whole-drain spelling
+    # stays registered beside it, on no row), and Opening Gambit and Second
+    # Wave write a RIDER on the entry that follows them in the same drain. All
+    # of them are PLAN-ONLY below for one reason they share: each names a place
+    # in a running drain, and a now-line spelling would name a drain that is
+    # not running.
+    "draw_per_plan_after": "DrawPerPlanAfter",
     "draw_per_plan_this_turn": "DrawPerPlanThisTurn",
     "next_plan_double_damage": "NextPlanDoubleDamage",
     "next_plan_extra_carry_out": "NextPlanExtraCarryOut",
@@ -2091,10 +2094,11 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "play_copy_of_companion", "block_per_plan_this_morning",
                  # `EB-685`, Breakwater's count. See `PLAN_CLAUSE_KINDS`.
                  "block_per_plan_held",
-                 # `EB-643`. The three drain-positional clauses -- see
-                 # `PLAN_CLAUSE_KINDS` above for the one reason all three are
+                 # `EB-643`. The drain-positional clauses -- see
+                 # `PLAN_CLAUSE_KINDS` above for the one reason all of them are
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
-                 "draw_per_plan_this_turn", "next_plan_double_damage",
+                 "draw_per_plan_after", "draw_per_plan_this_turn",
+                 "next_plan_double_damage",
                  "next_plan_extra_carry_out",
                  # `EB-655`, Battle Plan's rider.
                  "next_attack_damage"}
