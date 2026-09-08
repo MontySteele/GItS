@@ -99,7 +99,8 @@ every arm ships OFF in a release package). **Last RELEASE package:
 
 - **Klee.** 24 seat rounds read and one [USER] act-1 run
   (`review/ruled/klee-user-run-1-2026-09-07.md`, R265). The starter is
-  R242's basics plus Jumpy Dumpty (Innate, R261) and Sparks 'n' Splash,
+  R242's basics plus Jumpy Dumpty (Innate, R261) and Ka-pow!, the
+  0-cost Retained detonator,
   held twice (R262). Every Hexerei card gives a Spark (R265 pick 1,
   `EB-642`) and the mark pays on any card carrying it (`EB-663`, round 24).
   **No pick open.** Owed: [USER]'s act-1 run on `0.2.3069+proto`, since the
@@ -117,11 +118,11 @@ every arm ships OFF in a release package). **Last RELEASE package:
   basics) were **withdrawn** the day they landed under [USER]'s rule that
   starter basics are never changed (#461). **R267 (2026-09-08)** restored
   Slack Water's morning Plan and Scout Ahead's position clause and sent
-  passes four and five to the audit door. **One pick open, [USER]'s:** where
-  the Plan-less hand is answered, default nowhere for now (PR #462,
-  `review/active/kokomi-plan-less-hand-2026-09-08.md`). Next round: the
-  depth of the current pool's Plan interactions, with Scout Ahead and Slack
-  Water on the lane.
+  passes four and five to the audit door. **R268 (2026-09-08)** answered
+  the Plan-less hand nowhere for now
+  (`review/ruled/kokomi-plan-less-hand-2026-09-08.md`). **No pick open.**
+  Next round: the depth of the current pool's Plan interactions, with Scout
+  Ahead and Slack Water on the lane, before any access card is drafted.
 - **Furina.** The reframe (R220 A) ran 16 seat rounds on the arm and one
   [USER] act-1 run whose notes were all interface (`EB-627`–`EB-629` built,
   one eyes-on owed on the next deploy). On 2026-09-07 [USER] reset the kit
@@ -150,7 +151,6 @@ every arm ships OFF in a release package). **Last RELEASE package:
 
 [`QUEUE.md`](QUEUE.md) holds the eyes-on rows (Furina's rebuilt board, the
 Curtain Call faces, three running-game looks, the end-of-turn docket). The
-picks on branches are the Plan-less hand (PR #462) and Furina's identity
-(PR #443); the older open packets in `review/active/` are the companion
+picks on branches are Furina's identity (PR #443); the older open packets in `review/active/` are the companion
 P5a pick, `eb74`'s staged lever and the P2 thresholds. The six blessed
 mechanisms are in [`watch-register.md`](watch-register.md), all dormant.
