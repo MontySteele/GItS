@@ -119,7 +119,7 @@ every arm ships OFF in a release package). **Last RELEASE package:
   Slack Water's morning Plan and Scout Ahead's position clause and sent
   passes four and five to the audit door. **One pick open, [USER]'s:** where
   the Plan-less hand is answered, default nowhere for now (PR #462,
-  `review/active/kokomi-plan-less-hand-2026-09-08.md`). Next round: the
+  `review/ruled/kokomi-plan-less-hand-2026-09-08.md`). Next round: the
   depth of the current pool's Plan interactions, with Scout Ahead and Slack
   Water on the lane.
 - **Furina.** The reframe (R220 A) ran 16 seat rounds on the arm and one

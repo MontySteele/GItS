@@ -41,7 +41,7 @@ already restored under R267. The closing sentence is the thing to carry:
 two of the four rows pay the writer more for writing more, which is the
 shape the pass-three charter set out to price rather than reward. That is
 the reading the next Kokomi seat round is asked for (the depth of the
-current pool's Plan interactions, `review/active/kokomi-plan-less-hand-2026-09-08.md`
+current pool's Plan interactions, `review/ruled/kokomi-plan-less-hand-2026-09-08.md`
 §3), and it is a reading, not a change.
 
 Process: a pool pass with a card change goes to the door BEFORE a tester
