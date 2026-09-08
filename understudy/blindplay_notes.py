@@ -485,6 +485,31 @@ ONE_USE_DISCOUNT_NOTE = (
     "you actually play is charged it, and the rest go back to their printed "
     "cost.*")
 
+# `EB-669`. THE SAME SHAPE ON A RIDER THAT IS NOT A PRICE.
+#
+# Battle Plan's carry-out leaves "The next Attack you play face-up this turn
+# deals 4 additional damage", and every Attack in hand redraws with the +4
+# folded in -- the game's own "if played now" preview, right one card at a time
+# and read as a hand-wide buff. BOTH r26 seats counted it twice before catching
+# it. Lane 2: "both attacks printed the rider though only the first can consume
+# it ... same over-display shape as the Battle Plan rider" (of Mika's cost cut,
+# which is `ONE_USE_DISCOUNT_NOTE` above). Lane 1 put the pair side by side:
+# "Kyouka's +4 shows on every Attack in hand and really does apply to every one,
+# where Battle Plan's +4 shows on every Attack and applies to one."
+#
+# SO IT IS MIKA'S FOOTNOTE, GENERALISED, and it is read off the power's own
+# sentence exactly as that one is -- the words "the next X you play", the
+# `next` included, so a rider that really is hand-wide never takes this line.
+# The two notes are separate strings because the thing being over-shown is
+# different: a price goes back UP on the rest of the hand and a rider simply is
+# not on them.
+ONE_USE_RIDER_NOTE = (
+    "*{power} pays for ONE card: its own words are \"the next {kind} you "
+    "play\". Every {kind} above is showing it folded in because the game "
+    "previews each row as if it were the next one played -- only the first "
+    "one you actually play gets it, and the rest do what their printed "
+    "numbers say without it.*")
+
 # `EB-607`. WHERE THE INTENT NUMBER COMES FROM, WHICH IS THE ROW'S FIRST ASK.
 #
 # THE FIND (Klee r23 lane 1 (c) 3). "Fossil Stalker showed 'the number on its
@@ -635,6 +660,26 @@ FRONT_ENEMY_NOTE = (
     "enemy that is not a Minion, or the first living enemy of any kind when "
     "every body is a Minion. It moves when that body dies, and it is not the "
     "order this list happens to print in.*")
+
+# `EB-674`. THE SECOND HALF OF THE VERB, ON THE SCREEN AND NOT IN A REFUSAL.
+#
+# Kokomi r26 lane 1, fight 5 turn 3: `use potion "Touch of Insanity"` opened a
+# card chooser, `choose "Strike"` toggled the selection "but left the chooser
+# open, and my next two commands were both refused ... The refusal listed
+# `confirm`, and `confirm` worked. The chooser's own screen prints
+# `choose "<card title>"` and does not print that a `confirm` follows; I
+# learned that only from the refusal."
+#
+# NOT BY OFFERING THE VERB, which is `EB-259`'s rule and still binds: the
+# commands list is what the WIRE says will work this instant, and `confirm`
+# before a pick is a button that is not there. What the page owes is the
+# SHAPE of the screen -- that a pick here is two commands and the screen stays
+# up between them -- and that is a sentence, printed whether or not the button
+# is live yet.
+CHOOSER_CONFIRM_NOTE = (
+    "*Choosing here arms a pick; it does not close the screen. Say `confirm` "
+    "after `choose` to take it, and until you do this chooser stays open and "
+    "every other command is refused.*")
 
 ENEMY_HANDLE_NOTE = (
     "*Each enemy keeps its letter and its number for the whole fight: a body "
@@ -1902,6 +1947,12 @@ REACTION_ELEMENTS: dict[str, frozenset[str]] = {
 # fight's memory of every element seen; a trigger element is about what is on
 # the board this instant, because a Swirl with nothing to spread does nothing
 # and the keyword's own last clause says so.
+#: `EB-675`. The umbrella row on a screen that can reach no reaction: what the
+#: word means and nothing else. The eight sentences it replaces are the aura
+#: rules, every one of them about a beat this board cannot produce.
+REACTION_UNREACHABLE_ROW = (
+    "A hit of a different element than the aura an enemy is already wearing.")
+
 SPREAD_REACTIONS: dict[str, str] = {"Swirl": "Anemo", "Crystallize": "Geo"}
 
 # `EB-537`. THE REACTION WORDS AS THEY ARE PRINTED, so a screen that NAMES one
@@ -2160,8 +2211,8 @@ def _no_reaction_clause(reach: set[str], aura: bool = False) -> str:
     Where the hand reaches Anemo or Geo and no body wears an aura, the clause
     says so beside the pair half, because the two are different shopping lists.
     """
-    tail = (" Each of the six is defined again on the first screen that "
-            "reaches a second element.")
+    tail = (" The rules above and the six reactions print in full on the "
+            "first screen that reaches a second element.")
     pairs = sorted(reach & set(_ELEMENTS))
     spread = sorted(reach & set(_SPREAD_ELEMENTS))
     reasons: list[str] = []
@@ -2301,9 +2352,25 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
         if aura:
             live += [word for word, element in SPREAD_REACTIONS.items()
                      if element in reach]
+        # `EB-675`. AND WHERE NOTHING IS REACHABLE, THE ONE LINE ALONE.
+        #
+        # `EB-428` already stopped the six from printing at a mono-element
+        # deck; what stayed was the UMBRELLA -- eight sentences of aura rules
+        # -- printed above the clause saying none of it can happen here. "In
+        # nine fights I never saw one, never had a way to cause one, and read
+        # ~15 lines about them on every single screen" (Kokomi r26 lane 1,
+        # (c) 10). Same complaint four seats made about the six, same answer:
+        # the rules for a mechanic this board cannot reach sit above the words
+        # a reader does need.
+        #
+        # THE ONE LINE IS STILL A DEFINITION, because the word is on the
+        # screen and this page does not print a name with nothing after it
+        # (`EB-583`); what it is not is the full rules, and the clause's tail
+        # says where those come back.
         rows.append({"name": "Elemental Reaction",
-                     "text": REACTION_KEYWORDS["Elemental Reaction"]
-                     + ("" if live else _no_reaction_clause(reach, aura))})
+                     "text": REACTION_KEYWORDS["Elemental Reaction"] if live
+                     else (REACTION_UNREACHABLE_ROW
+                           + _no_reaction_clause(reach, aura))})
         # A word an arm row already defined is not defined twice: `Swirl` is
         # printed as a verb by ten Universals and carries an `ARM_KEYWORDS` row
         # of its own, which is this row's sentence.

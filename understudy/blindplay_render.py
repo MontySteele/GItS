@@ -24,11 +24,14 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
                                         INTENT_NUMBER_DISAGREES,
                                         INTENT_SOURCE_NOTE,
-                                        ONE_USE_DISCOUNT_NOTE, PER_HIT_NOTE,
+                                        ONE_USE_DISCOUNT_NOTE,
+                                        ONE_USE_RIDER_NOTE,
+                                        PER_HIT_NOTE,
                                         LAST_SALON_NOTE,
                                         MAP_FLOOR_LINE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
+                                        CHOOSER_CONFIRM_NOTE,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
                                         ENEMY_REPLACED_LINE,
@@ -549,6 +552,10 @@ _ATTACK_DAMAGE_BUFF = re.compile(
     r"your attacks deal[^.]*additional damage", re.I)
 _MULTI_HIT_LABEL = re.compile(r"^\s*(\d+)\s*[x×]\s*(\d+)\s*$")
 _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
+# `EB-669`. The same sentence with any other consequence -- Battle Plan's "the
+# next Attack you play face-up this turn deals 4 additional damage". Asked
+# SECOND, so a price keeps the note written for a price.
+_ONE_USE_RIDER = re.compile(r"the next (\w+) you play\b", re.I)
 # `EB-433`. A relic that answers a debuff with an elemental hit, which is what
 # makes the panel's "leaves no aura" clause false for a debuff Plan. The
 # Tamakushi Casket's own sentence, with the element left open: the clause is
@@ -668,11 +675,28 @@ def _casket_aura_clause(you: dict[str, Any]) -> str:
 
 
 def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
-    """`EB-349`: a discount the game prices onto every row and pays once."""
+    """A rider the game folds into every row and pays out once.
+
+    `EB-349` filed the PRICE half (Mika: "the next Skill you play costs 0")
+    and `EB-669` the other one (Battle Plan: "the next Attack you play ...
+    deals 4 additional damage"). One sentence shape, two consequences -- a
+    price goes back up on the rest of the hand, a rider is simply not on them
+    -- so the price is asked first and keeps its own words, and every other
+    one-use rider takes the general note.
+
+    ONE LINE FOR THE HAND, never a line per card, which is `_attack_buff_note`'s
+    rule beside it: the fact is about the power and the hand is where it is
+    being misread.
+    """
     for power in you.get("powers") or []:
-        found = _ONE_USE_DISCOUNT.search(str(power.get("text") or ""))
+        text = str(power.get("text") or "")
+        found = _ONE_USE_DISCOUNT.search(text)
         if found:
             return ["", ONE_USE_DISCOUNT_NOTE.format(
+                power=f"**{power['name']}**", kind=found.group(1))]
+        found = _ONE_USE_RIDER.search(text)
+        if found:
+            return ["", ONE_USE_RIDER_NOTE.format(
                 power=f"**{power['name']}**", kind=found.group(1))]
     return []
 
@@ -1413,6 +1437,11 @@ def render(obs: dict[str, Any]) -> str:
                         + (f" (floor {floor})" if floor else "")
                         + ", minus the cards the screen is offering. Anything "
                           "you have picked up since is in neither list.*"]
+            # `EB-674`: what the verb after `choose` is, before the refusal
+            # that would otherwise teach it. Above the button's own state,
+            # because the sentence is about the screen and the line below is
+            # about this instant.
+            out += ["", CHOOSER_CONFIRM_NOTE]
             out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
         # `EB-314`: over an open preview `skip` does not leave the screen --
         # it cancels the pick and puts the grid back (`ExecuteCancelSelection`

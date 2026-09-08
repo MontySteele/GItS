@@ -1172,6 +1172,32 @@ def test_confirm_is_offered_only_where_the_wire_says_it_works():
     assert blindplay.act(ready, "confirm")["ok"]
 
 
+def test_a_chooser_prints_the_confirm_that_must_follow_the_choose():
+    """`EB-674`. THE VERB THE SEAT LEARNED FROM A REFUSAL.
+
+    Kokomi r26 lane 1, fight 5 turn 3: a potion opened a card chooser,
+    `choose "Strike"` toggled the selection "but left the chooser open, and my
+    next two commands were both refused ... The refusal listed `confirm`, and
+    `confirm` worked. The chooser's own screen prints `choose "<card title>"`
+    and does not print that a `confirm` follows."
+
+    The verb is still not OFFERED before the wire says the button is live
+    (`EB-259`); what the page owes is the shape of the screen, and that is a
+    sentence.
+
+    Seen to FAIL: nothing on the page named `confirm` before a pick.
+    """
+    page = blindplay.observe(card_select_state())
+    assert "Say `confirm` after `choose`" in page
+    assert "does not close the screen" in page
+    assert "- `confirm`" not in page, "EB-259: the verb is not offered yet"
+
+    ready = card_select_state()
+    ready["card_select"]["can_confirm"] = True
+    page = blindplay.observe(ready)
+    assert "Say `confirm` after `choose`" in page, "and on the armed screen too"
+
+
 # ------------------------------- EB-264: no wire tokens on a player's page --
 
 def test_the_unplayable_enums_never_reach_the_page():
@@ -6803,13 +6829,41 @@ def test_a_mono_element_deck_is_told_no_reaction_is_reachable():
     for word in ("Melt", "Vaporize", "Overloaded", "Frozen", "Superconduct",
                  "Electro-Charged"):
         assert f"- **{word}** — " not in page, word
-    # The umbrella row stays, because it is the AURA rule and this is the deck
-    # that needs it most -- and it carries the one line saying why the six are
-    # gone, naming the element it has so a reader knows what to draft.
+    # The umbrella row stays -- the word is on the screen and this page does
+    # not print a name with nothing after it -- and it carries the one line
+    # saying why the six are gone, naming the element it has so a reader knows
+    # what to draft. `EB-675` cut its RULES: see the test below.
     assert "- **Elemental Reaction** — " in page
     assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in page
     assert "Pyro meeting a Pyro aura refreshes it rather than reacting" in page
-    assert "defined again on the first screen that reaches a second" in page
+    assert "print in full on the first screen that reaches a second" in page
+
+
+def test_an_unreachable_reaction_row_is_one_line_and_not_the_rules():
+    """`EB-675`. THE PARAGRAPH ABOVE THE SENTENCE SAYING IT CANNOT HAPPEN.
+
+    `EB-428` stopped the six printing at a mono-element deck; the umbrella's
+    eight sentences of aura rules stayed, above the clause saying none of them
+    can happen here. Kokomi r26 lane 1, (c) 10: "In nine fights I never saw
+    one, never had a way to cause one, and read ~15 lines about them on every
+    single screen."
+
+    Seen to FAIL: the Hydro-only board printed the whole umbrella.
+    """
+    page = blindplay.observe(elemental_hand_state(elements=("Hydro",)))
+    row = [ln for ln in page.splitlines()
+           if ln.startswith("- **Elemental Reaction**")]
+    assert len(row) == 1, page
+    assert "A hit of a different element than the aura" in row[0]
+    assert "NO REACTION IS REACHABLE HERE" in row[0]
+    # The rules that are NOT printed, each a sentence of the full umbrella.
+    for gone in ("THAT LAST RULE CAN HIDE THE FIRST",
+                 "the aura is consumed and RE-APPLIED inside the same beat",
+                 "An element comes from a CARD that prints one"):
+        assert gone not in page, gone
+    # And they all come back the moment a pair is in reach.
+    both = blindplay.observe(elemental_hand_state(elements=("Hydro", "Cryo")))
+    assert "THAT LAST RULE CAN HIDE THE FIRST" in both
 
 
 def test_a_second_element_brings_back_its_pair_and_only_its_pair():
@@ -11400,6 +11454,39 @@ def test_a_one_use_discount_says_it_pays_for_one_card():
     assert 'its own words are "the next Skill you play"' in page
     assert "only the first one you actually play is charged it" in page
     assert "pays for ONE card" not in blindplay.observe(combat_state())
+
+
+def test_a_one_use_rider_that_is_not_a_price_says_it_pays_for_one_card():
+    """`EB-669`. THE NUMBER BOTH r26 SEATS COUNTED TWICE.
+
+    Battle Plan's carry-out leaves "The next Attack you play face-up this turn
+    deals 4 additional damage" and every Attack in hand redraws with the +4
+    folded in. Lane 2: "both attacks printed the rider though only the first
+    can consume it ... same over-display shape as the Battle Plan rider" (of
+    Mika's cost cut). Lane 1 named the pair it is easy to confuse: "Kyouka's
+    +4 shows on every Attack in hand and really does apply to every one, where
+    Battle Plan's +4 shows on every Attack and applies to one."
+
+    Seen to FAIL: only the PRICE shape took a note.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["status"] = [
+        {"title": "Battle Plan", "name": "Battle Plan", "amount": 1,
+         "type": "Buff",
+         "description": "The next Attack you play face-up this turn deals "
+                        "4 additional damage."}]
+    page = blindplay.observe(state)
+    assert "**Battle Plan** pays for ONE card" in page
+    assert 'its own words are "the next Attack you play"' in page
+    assert "only the first one you actually play gets it" in page
+    assert page.count("pays for ONE card") == 1, "one line for the hand"
+    # A hand-wide buff worded the other way takes no line at all: that is the
+    # pair lane 1 named, and a note on both would be the same over-count.
+    wide = copy.deepcopy(combat_state())
+    wide["player"]["status"] = [
+        {"title": "Kyouka", "name": "Kyouka", "amount": 4, "type": "Buff",
+         "description": "Your Attacks deal 4 additional damage."}]
+    assert "pays for ONE card" not in blindplay.observe(wide)
 
 
 def test_the_last_copy_of_a_pair_keeps_the_number_it_was_given():
