@@ -811,16 +811,24 @@ public class Round19Tests
     // every hand, all run. This also cost me Miniature Cannon value later."
     //
     // THE ANSWER TO THE ROW'S QUESTION IS YES AND THE DEFECT IS THE OTHER WAY
-    // ROUND. The kit's Strike IS the base game's -- `ArmStarterBasics` hands
-    // `StrikeSilent` to every sweep site and the arm's starting deck deals four
-    // of them -- so it has carried the tag all along. What it did not have was
+    // ROUND. The kit's Strike WAS the base game's -- `ArmStarterBasics` handed
+    // `StrikeSilent` to every sweep site and the arm's starting deck dealt four
+    // of them -- so it had carried the tag all along. What it did not have was
     // exclusivity: the codegen tagged EVERY basic attack, so `Slack Water`
     // wore `CardTag.Strike` too and won the deck scan. That is `EB-409`'s
     // family exactly (Strike Dummy paying on Slack Water), and the fix is the
-    // one that row named: a prototype basic takes neither tag.
+    // one that row named: a prototype basic takes neither tag BY DERIVATION.
+    //
+    // `EB-703` (pool pass six) MOVES THE ANSWER AND NOT THE RULE. Kokomi's
+    // Strike is now her own row, so the exclusive answer is a DECLARED tag
+    // (`basic_tag: strike`) on that one row -- without it her deck would
+    // answer "one of your Strikes" with nothing, which is this same relic half
+    // broken the other way. Every other prototype basic is still untagged, and
+    // the Theory below is what says so.
 
     [Theory]
     [InlineData(typeof(ProtoKkSlackWater))]
+    [InlineData(typeof(ProtoKkKuragesOath))]
     [InlineData(typeof(ProtoKaboomSink))]
     public void No_prototype_basic_wears_the_strike_or_defend_tag(Type row)
     {
@@ -835,15 +843,17 @@ public class Round19Tests
     public void And_the_card_the_relic_should_find_is_the_one_the_arm_deals()
     {
         // THE OTHER HALF, and it is what makes the removal safe rather than
-        // just narrower: both arms deal the BASE pair, which carries the tag
-        // by construction, so "one of your Strikes" has exactly one answer in
-        // an arm deck instead of two.
+        // just narrower: the card each arm DEALS carries the tag, so "one of
+        // your Strikes" has exactly one answer in an arm deck instead of two
+        // -- Klee's from the base pair, Kokomi's from her own declared row
+        // (`EB-703`).
         var seams = Il.Calls(Il.Method("ArmStarterBasics", "StrikeFor"));
         Assert.Contains("KleeOverhaulRoster.StarterStrike", seams);
         Assert.Contains("KokomiOverhaulRoster.StarterStrike", seams);
 
         Assert.Contains(CardTag.Strike, new BaseGame.StrikeSilent().Tags);
         Assert.Contains(CardTag.Strike, new BaseGame.StrikeIronclad().Tags);
+        Assert.Contains(CardTag.Strike, new ProtoKkStrike().Tags);
     }
 
     // ==================================================================

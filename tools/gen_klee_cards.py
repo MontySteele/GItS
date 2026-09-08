@@ -3176,6 +3176,12 @@ CARD_FIELDS = {
     # context the Plan will not have when it resolves. Prototype surface only,
     # like `description:`: a shipped sheet has no Plan rule to print.
     "plan",
+    # `EB-703` (pool pass six): WHICH BASE-GAME BASIC THIS PROTOTYPE ROW IS,
+    # "strike" or "defend", emitted as `CardTag.Strike` / `CardTag.Defend`.
+    # The tag block in `emit_card` states why a prototype basic otherwise
+    # takes neither, and why an arm whose Strike is its OWN card must say so.
+    # `loader._validate_basic_tag` refuses the same two from the other side.
+    "basic_tag",
     # `EB-643` (R265), DUSK: this row's Plan line is carried out at the END of
     # the turn it was written on, before the enemies act, instead of next
     # morning.
@@ -3315,6 +3321,18 @@ def card_level_reason(
     if card.get("plan") is not None and profile.character_id != "kokomi":
         return (f"`plan:` on a {profile.character_id} row -- the Plan is the "
                 "Kokomi overhaul's rule and only her rows may print it")
+    # `EB-703`. THE TAG ANSWERS "one of your Strikes", which is a question
+    # about the STARTER: one of two words, and only on a `basic` row.
+    # `loader._validate_basic_tag` is the twin.
+    basic_tag = card.get("basic_tag")
+    if basic_tag is not None:
+        if basic_tag not in ("strike", "defend"):
+            return ("basic_tag must be 'strike' or 'defend' -- those are the "
+                    "two tags base-game content asks a deck for")
+        if card.get("rarity") != "basic":
+            return (f"basic_tag on a {card.get('rarity')!r} row -- the tag "
+                    "answers \"one of your Strikes\", which is the starter's "
+                    "question and not an offer's")
     # `EB-643`. DUSK SAYS WHEN A PLAN LANDS, so it needs a Plan to be about,
     # and the value is literally `True` -- the `innate:` / `retain:`
     # precedent, where only true is a ruling and `false` would be a second
@@ -12907,25 +12925,37 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # 2026-07-23). Mirror the hand-written Kaboom/DuckAndCover pair: the
     # basic attack is the character's Strike, the basic blocker its Defend.
     #
-    # `EB-543` (and `EB-409`'s family): A PROTOTYPE BASIC TAKES NEITHER TAG.
-    # The tag is what base-game content means by "one of your Strikes", and
-    # under an overhaul arm the character's Strike and Defend are the BASE
-    # game's own pair -- `ArmStarterBasics` hands `StrikeIronclad` /
-    # `StrikeSilent` to every sweep site, and the arm's own starting deck deals
-    # four of them. A kit card also wearing the tag is a second answer to a
-    # question with one right answer, and it wins by being earlier in a deck
-    # scan: Neow's Talisman upgraded `Slack Water` and left four Strikes
-    # untouched all run (Kokomi r19 lane 1), and Strike Dummy paid on it before
-    # that (`EB-409`).
+    # `EB-543` (and `EB-409`'s family): A PROTOTYPE BASIC TAKES NEITHER TAG
+    # BY DERIVATION. The tag is what base-game content means by "one of your
+    # Strikes", and a kit card also wearing it is a second answer to a
+    # question with one right answer -- it wins by being earlier in a deck
+    # scan, which is how Neow's Talisman upgraded `Slack Water` and left four
+    # Strikes untouched all run (Kokomi r19 lane 1), and how Strike Dummy paid
+    # on it before that (`EB-409`).
+    #
+    # `EB-703` (pool pass six): AND THE ARM'S OWN STRIKE SAYS SO ON THE ROW.
+    # `EB-543`'s rule held while every arm dealt the BASE pair, so the deck's
+    # one right answer was always a base card. Kokomi's Strike is now her own
+    # card (`proto_kk_strike`, a Plan line on the basic), and with no tag on
+    # it her deck would answer "one of your Strikes" with NOTHING -- the same
+    # relic half broken the other way round. `basic_tag:` is DECLARED rather
+    # than re-derived because derivation is what over-tagged Slack Water: the
+    # sheet names the one row that IS the Strike, and every other prototype
+    # basic beside it stays untagged.
     #
     # THE THROW THIS RULE WAS WRITTEN AGAINST DOES NOT COME BACK. R11's
     # predicate reads the pool's whole DECLARED membership, which no arm
     # touches, so the SHIPPED basics keep it satisfied -- `Kaboom` and
     # `Water's Edge` are hand-written or off the shipped sheets and are not
     # touched here -- and the three unguarded `First()` sites are patched under
-    # the arm anyway (`ArmStarterBasics`, and its own sweep note).
+    # the arm anyway (`ArmStarterBasics`, and its own sweep note). A declared
+    # tag cannot reopen it from the other end either: prototype rows are
+    # CONCATENATED LAST into `AllCards` (`KokomiOffPoolCards`), so the shipped
+    # basic still wins that `First()` with every arm off.
     tag = None
-    if card["rarity"] == "basic" and not str(card["id"]).startswith("proto_"):
+    if card.get("basic_tag"):
+        tag = card["basic_tag"].capitalize()
+    elif card["rarity"] == "basic" and not str(card["id"]).startswith("proto_"):
         if card["type"] == "attack" and any(
                 e.get("op") == "damage" and e.get("target") != "self"
                 for e in card["effects"]):

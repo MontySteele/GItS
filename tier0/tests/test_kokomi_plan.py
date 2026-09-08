@@ -109,7 +109,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # now-lines that operate on the queue and print none.
     # TWENTY-FIVE after pool pass five (`EB-685`): Night Watch is retired and
     # Slack Water's Plan line, already counted, moved to Dusk.
-    assert len(planned) == 25
+    # TWENTY-SIX after pool pass six (`EB-703`): her basic Strike prints one,
+    # so the hand a Plan-less opening deals holds four of them.
+    assert len(planned) == 26
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -330,6 +332,41 @@ def test_the_oaths_now_line_applies_hydro_like_its_carry_out(overhaul):
     st2 = kokomi_state(enemies=[charged])
     effects.resolve_card(st2, loader.get_card("proto_kk_kurages_oath"))
     assert charged.aura != "electro"
+
+
+def test_her_strike_is_six_face_up_and_eight_written(overhaul):
+    """`EB-703` (pool pass six), the sim half, played off the real row rather
+    than a probe.
+
+    THE FINDING ROUNDS 26 TO 30 REPEATED: a hand with no Plan card in it has
+    no decision in it. Her Strike is her own card now, so both halves of the
+    kit's question are on the basic -- 6 now on the body she points at, or 8
+    next morning on whatever body the jellyfish finds in front. Two more
+    damage for a turn's delay, which is Ambush's trade at a basic's premium.
+
+    THE WRITTEN HALF AIMS AT THE FRONT AND NOT AT A BODY SHE PICKED, the rule
+    every damage Plan follows: the enemy that was there when it was written
+    may be dead when it lands, so the back rank below takes nothing.
+    """
+    aimed = make_enemy(hp=40, name="aimed")
+    st = kokomi_state(enemies=[aimed])
+    effects.resolve_card(st, loader.get_card("proto_kk_strike"))
+    assert aimed.hp == 34
+    assert aimed.aura == "hydro"
+
+    front2 = make_enemy(hp=40, name="front2")
+    back = make_enemy(hp=40, name="back")
+    st2 = kokomi_state(enemies=[front2, back])
+    kokomi_plan.schedule(st2, loader.get_card("proto_kk_strike"))
+    assert front2.hp == 40                             # nothing lands today
+    kokomi_plan.resolve_all(st2)
+    assert front2.hp == 32
+    assert back.hp == 40
+
+    # AND THE SMITH MOVES BOTH HALVES BY THE BASE STRIKE'S +3: 9 and 11.
+    up = loader.get_card("proto_kk_strike+")
+    assert up.effects[0]["amount"] == 9
+    assert up.plan[0]["amount"] == 11
 
 
 def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
@@ -1440,9 +1477,10 @@ def test_every_row_in_her_pool_resolves(overhaul):
                                       make_enemy(hp=200, name="b")])
         state.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
         state.mi_entry_hp = 80
-        # R242: her basics are the BASE GAME's Strike and Defend, so the pile
-        # a draw-reading row looks at is built from `strike`.
-        state.player.draw_pile = [loader.get_card("strike")
+        # R242 as `EB-703` amended it: her Defend is the BASE GAME's and her
+        # Strike is her own, so the pile a draw-reading row looks at is built
+        # from `proto_kk_strike`.
+        state.player.draw_pile = [loader.get_card("proto_kk_strike")
                                   for _ in range(5)]
         state.player.exhaust_pile = [loader.get_card("proto_kk_salt_line")]
         state.kk_plan_queue = []

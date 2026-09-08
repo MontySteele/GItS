@@ -97,8 +97,13 @@ namespace KleeMod.Powers;
 /// `LeafyPoultice`, `NutritiousSoup`, `SoldiersStew`, `PerfectedStrike`) or
 /// asks a single card about itself (`StrikeDummy`, `FakeStrikeDummy`,
 /// `GhostSeed`, `Spiral`, `Goopy`, `HellraiserPower`, `FastenPower`), and both
-/// of those are safe by construction: an arm run's deck DOES hold four base
-/// Defends, and a per-card test cannot be empty. The list is a pin --
+/// of those are safe by construction: an arm run's deck DOES hold four
+/// Defend-tagged and four Strike-tagged basics, and a per-card test cannot be
+/// empty. THE STRIKE HALF OF THAT IS NO LONGER FREE (`EB-703`): Kokomi's four
+/// Strikes are her own `ProtoKkStrike` since pool pass six, so the tag they
+/// carry is DECLARED on the sheet (`basic_tag: strike`) rather than inherited
+/// from a base card, and `gen_klee_cards`'s tag block is where that is stated.
+/// The list is a pin --
 /// `ArmStarterBasicsTests.The_swept_pool_lookups_are_the_three_this_seam_covers`
 /// -- so a fourth site after a Steam move is an addition somebody has to write.
 ///
