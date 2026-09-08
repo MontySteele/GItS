@@ -917,35 +917,9 @@
 # `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. The `plan:`
 # key, the targets and every row: docs/notes/prototype-surface-provenance.md.
 
-# --- the starter (packet sec.3, R242, amended by POOL PASS SIX `EB-703` and
-# POOL PASS SEVEN `EB-711`): BOTH basics are hers now, the Strike for the
-# Plan-less hand and the Defend for the unwritable one. ---
-
-- {id: proto_kk_defend, name: "Defend", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: basic, basic_tag: defend,
-   description: "Gain {Block:diff()} [gold]Block[/gold], plus 2 if the [gold]Bake-Kurage[/gold] is holding a [gold]Plan[/gold].",
-   # ONE Block gain either way, which is why this is a then/else and not a
-   # base plus a rider: two gains would take Dexterity and Frail twice and the
-   # face would print a number the card does not pay.
-   effects: [{op: conditional, if: plan_held,
-              then: [{op: block, amount: 7}],
-              else: [{op: block, amount: 5}]}],
-   # The base Defend's +3, on the printed 5; the rider stays 2, so the `+`
-   # card is 8 and 10.
-   upgrade: {conditional_block: 3}}
-
-- {id: proto_kk_strike, name: "Strike", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: basic, basic_tag: strike,
-   description: "Deal {Damage:diff()} damage. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.",
-   # A basic is supposed to be bad (2026-09-02): the face-up hit applies NO
-   # Hydro, and writing it is what earns the aura -- a carry-out is the
-   # jellyfish's hit, which is a Hydro hit by the panel's own rule.
-   effects: [{op: damage, amount: 6, target: enemy, applies_element: false}],
-   plan: [{op: damage, amount: 8, target: front_enemy}],
-   # The base Strike's +3 on both halves: 9 face-up, Plan 11.
-   upgrade: {damage: 3, plan_damage: 3}}
+# --- the starter (packet sec.3, R242): Strike x4 + Defend x4 are the BASE
+# GAME's cards and have no row here. The renamed twins Water's Edge and Coral
+# Guard printed the base stat line and left the sheet with the ruling. ---
 
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],

@@ -58,50 +58,30 @@ internal static class KokomiOverhaulRoster
     /// Kokomi's ten opening cards under the arm: Strike x4, Defend x4,
     /// Kurage's Oath, Slack Water (slice sec.3, in its order).
     ///
-    /// R242 (ruled in the same breath as Klee's draft-4 starter) DELETED the
-    /// renamed twins: "where a character's basics are a renamed Strike or
+    /// THE BASICS ARE THE BASE GAME's (R242, ruled in the same breath as Klee's
+    /// draft-4 starter): "where a character's basics are a renamed Strike or
     /// Defend with the same stat line, the base game's Strike and Defend
-    /// replace them." Coral Guard was exactly that -- 1 energy for 5 Block,
-    /// byte for byte the base line -- so <c>ProtoKkCoralGuard</c> stays
-    /// DELETED from the surface (R213 B). What came back are two rows that no
-    /// longer have the base stat line.
+    /// replace them." Water's Edge and Coral Guard were exactly that -- 1
+    /// energy for 6 damage and 1 energy for 5 Block, byte for byte the base
+    /// line -- so <c>ProtoKkWatersEdge</c> and <c>ProtoKkCoralGuard</c> are
+    /// DELETED from the surface rather than re-priced (R213 B).
     ///
-    /// THE STRIKE IS HERS SINCE POOL PASS SIX (`EB-703`, rounds 26 to 30,
-    /// review/active/kokomi-plan-less-hand-2026-09-08.md). R242's test is "the
-    /// same stat line", and <c>ProtoKkStrike</c> no longer has one: it prints
-    /// a Plan line (6 face-up, 8 written; 9 and 11 upgraded), so every opening
-    /// hand holds the kit's question instead of roughly one in five holding no
-    /// decision at all.
-    ///
-    /// AND THE DEFEND SINCE POOL PASS SEVEN (`EB-711`, rounds 28 to 31,
-    /// review/active/kokomi-defend-2026-09-08.md), which passes R242 the same
-    /// way. NOT a Plan line -- Block a turn late is the dead half every seat
-    /// rejected, and a Dusk basic would make Breakwater strictly worse -- but
-    /// a rider on the QUEUE: <c>ProtoKkDefend</c> gains 5 Block, plus 2 while
-    /// the Bake-Kurage is holding a Plan (8 and 10 upgraded). The last
-    /// unwritable card in the deck now asks its question by ORDERING, on the
-    /// turn: write first and Block for 7, or Block first for 5 and keep the
-    /// energy uncommitted.
-    ///
-    /// SO NEITHER BASIC IS A SILENT CARD ANY MORE, and the deck screen's one
-    /// borrowed-colour seam closes with the second of them. Until pool pass
-    /// seven her Defend was <c>DefendSilent</c>, which rendered in the Silent
-    /// pool's <c>5EBD00</c> rather than her <c>6FC8D6</c> because a card's
-    /// visual identity comes from <c>CardModel.Pool</c>; both rows are now
-    /// prototype rows in her own pool and carry her own frame.
+    /// THE SILENT PAIR, not the Ironclad one. The base game ships one Strike
+    /// and one Defend PER CHARACTER (five of each, all <c>public sealed</c>,
+    /// all 6 damage / 5 Block with <c>OnUpgrade</c> +3), and the only
+    /// difference between them is portrait, attack vfx and colour. A card's
+    /// visual identity comes from <c>CardModel.Pool</c>, which resolves by
+    /// scanning <c>ModelDb.AllCardPools</c> -- so a Silent basic renders with
+    /// <c>card_frame_green</c> and the <c>silent</c> energy colour, which is
+    /// exactly what <c>KokomiCardPool</c> already borrows. Her deck screen
+    /// shows them in the Silent pool's <c>5EBD00</c> rather than her
+    /// <c>6FC8D6</c>; that is the one seam and it is reported, not hidden.
     ///
     /// HER ATTACKS STILL APPLY HYDRO. A base Strike cannot implement
     /// <c>IElementalCard</c> (it is sealed), so the mod's per-card element read
     /// would have given it none. The catalyst cadence is a fact about the
     /// CHARACTER -- tier0's <c>effects._element_for</c> has always said so --
-    /// and <see cref="CatalystCadence"/> says it on this side too.
-    ///
-    /// HER OWN STRIKE IS THE ONE ATTACK OF HERS THAT APPLIES NOTHING, and it
-    /// says so on its own row (`applies_element: false`, `EB-703`). A basic is
-    /// supposed to be bad ([USER] 2026-09-02), and the exemption LAW gives the
-    /// base game's basics reaches this one because it IS her basic. WRITING it
-    /// still earns the aura -- a carry-out is the jellyfish's Hydro hit -- so
-    /// that is one more reason to write it, and no new rule.
+    /// and <see cref="CatalystCadence"/> now says it on this side too.
     ///
     /// THE COMPANION ROLL FINDS NO SLOT, by construction and reported rather
     /// than hidden. <c>KokomiStartingCompanionsPatch</c> matches on the shipped
@@ -113,14 +93,14 @@ internal static class KokomiOverhaulRoster
     /// </summary>
     internal static IEnumerable<CardModel> StartingDeck() => new CardModel[]
     {
-        ModelDb.Card<ProtoKkStrike>(),
-        ModelDb.Card<ProtoKkStrike>(),
-        ModelDb.Card<ProtoKkStrike>(),
-        ModelDb.Card<ProtoKkStrike>(),
-        ModelDb.Card<ProtoKkDefend>(),
-        ModelDb.Card<ProtoKkDefend>(),
-        ModelDb.Card<ProtoKkDefend>(),
-        ModelDb.Card<ProtoKkDefend>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<StrikeSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
+        ModelDb.Card<DefendSilent>(),
         ModelDb.Card<ProtoKkKuragesOath>(),
         ModelDb.Card<ProtoKkSlackWater>(),
     };
@@ -131,23 +111,11 @@ internal static class KokomiOverhaulRoster
     /// why the pair is stated a second time instead of being factored out of
     /// <see cref="StartingDeck"/>; the seam itself is
     /// <see cref="ArmStarterBasics"/>.
-    ///
-    /// AND IT IS WHY THE SEAM EXISTS (`EB-703`). Until pool pass six both arms
-    /// answered this with a base card, so Large Capsule's wrong answer was
-    /// only a rarity mismatch; now "an additional Strike" for Kokomi is a card
-    /// with a Plan line, and handing her a <c>StrikeSilent</c> would put a
-    /// shipped basic into a deck whose Strikes all ask the kit's question --
-    /// `EB-351`'s original defect exactly, one arm over.
     /// </summary>
-    internal static CardModel StarterStrike() => ModelDb.Card<ProtoKkStrike>();
+    internal static CardModel StarterStrike() => ModelDb.Card<StrikeSilent>();
 
-    /// <summary>
-    /// The Defend half of <see cref="StarterStrike"/>'s pair, and HERS since
-    /// pool pass seven (`EB-711`) for the reason the Strike is: "an additional
-    /// Defend" asks the CHARACTER, and handing back a <c>DefendSilent</c>
-    /// would drop a flat 5 into a deck whose Defends all read the queue.
-    /// </summary>
-    internal static CardModel StarterDefend() => ModelDb.Card<ProtoKkDefend>();
+    /// <summary>The Defend half of <see cref="StarterStrike"/>'s pair.</summary>
+    internal static CardModel StarterDefend() => ModelDb.Card<DefendSilent>();
 
     /// <summary>
     /// Kokomi's WHOLE offerable pool under the arm: the slice's 30 rows and
