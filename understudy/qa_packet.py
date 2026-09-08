@@ -357,8 +357,8 @@ def localization_index(repo: Path) -> dict[str, str]:
 # 1. The shape: a bracketed run of lowercase word characters with an optional
 #    `=value`, and nothing else. `[silent_energy_icon.png]` carries a dot and is
 #    NOT matched -- that tag names an icon the player is looking at and
-#    `blindplay._despritify` renders it as `[Energy]`, which has a capital and
-#    is not matched either.
+#    `blindplay._despritify` renders it as the bare word `Energy` (`EB-651`),
+#    which carries no brackets at all and is not matched either.
 #
 # 2. IT MUST BE CLOSED. An opening tag comes out only where the same string
 #    also carries its `[/tag]`, and that is not tidiness -- it is what keeps
