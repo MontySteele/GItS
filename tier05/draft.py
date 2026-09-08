@@ -754,7 +754,7 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # QUEUE and three drain-positional plan clauses, each with its own branch
     # in `_op_price` on this set's own EB-311 terms.
     "cancel_last_plan", "cancel_all_plans_cash", "redirect_queued_plans",
-    "draw_per_plan_after", "next_plan_double_damage",
+    "draw_per_plan_this_turn", "next_plan_double_damage",
     "next_plan_extra_carry_out",
     # POOL PASS THREE (`EB-655`). Battle Plan's rider, a plan clause with its
     # own branch in `_op_price` on the same terms.
@@ -969,15 +969,16 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # of a dead dial the only live one.
         return (int(fx.get("amount", 0)) + int(fx.get("per", 1))) \
             * STATIC_DRAW_VALUE
-    if op == "draw_per_plan_after":
-        # Scout Ahead (`EB-643`). ZERO, and it is `draw_after_plans`' zero one
-        # row up rather than a refusal of its own: every draw op in this file
-        # is priced at STATIC_DRAW_VALUE, which the v3 flat-proxy sweep
-        # measured at 0.0, so a row that draws one card per later carry-out is
-        # worth exactly what a row that draws one card is. ONE later carry-out
-        # is the neutral single-unit estimate this file already takes three
-        # times over -- how deep a morning a deck banks is a deck fact an
-        # offer screen cannot read.
+    if op == "draw_per_plan_this_turn":
+        # Scout Ahead (`EB-643`, recounted at `EB-679`). ZERO, and it is
+        # `draw_after_plans`' zero one row up rather than a refusal of its own:
+        # every draw op in this file is priced at STATIC_DRAW_VALUE, which the
+        # v3 flat-proxy sweep measured at 0.0, so a row that draws one card per
+        # carry-out is worth exactly what a row that draws one card is. ONE
+        # carry-out is the neutral single-unit estimate this file already takes
+        # three times over -- how deep a morning a deck banks is a deck fact an
+        # offer screen cannot read, and `EB-679` moved WHICH carry-outs are
+        # counted without moving that refusal.
         return _neutral_amount(fx, 0) * STATIC_DRAW_VALUE
     if op == "next_plan_double_damage":
         # Opening Gambit's rider (`EB-643`). ZERO, and it is a REFUSAL that
@@ -1132,6 +1133,15 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # each moves exactly one card out of the next N draws however many are
         # seen, and where it goes -- the discard pile or the bottom of the same
         # pile -- is a difference this instrument cannot read.
+        return STATIC_SCRY_VALUE
+    if op == "scry_take":
+        # `EB-679` (Read the Field). THE SAME PRICE AGAIN, and the equality is
+        # the same claim read from the other end: the card that comes to hand
+        # is a DRAW, and every draw op in this file is priced at
+        # STATIC_DRAW_VALUE = 0.0, so what is left to pay for is the SELECTION
+        # over the next N -- which is what STATIC_SCRY_VALUE is. Whether the
+        # chosen card lands in the hand or the rest land on the bottom is a
+        # difference this instrument still cannot read.
         return STATIC_SCRY_VALUE
     if op == "recall_to_draw":
         # Source-agnostic on purpose (EB-118); the argument is at the
@@ -2419,7 +2429,7 @@ STATIC_OP_PRICING: dict[str, str] = {
     "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
                         "is priced on -- one card per Plan carried out, paid "
                         "a turn later, is still draw",
-    "draw_per_plan_after": "ZERO: STATIC_DRAW_VALUE on ONE later carry-out -- "
+    "draw_per_plan_this_turn": "ZERO: STATIC_DRAW_VALUE on ONE later carry-out -- "
                            "the same dead dial `draw` is priced on, and the "
                            "same neutral single-unit estimate",
     "next_plan_double_damage": "ZERO, and it is a refusal: what it doubles is "
@@ -2521,6 +2531,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "scry_bottom": "STATIC_SCRY_VALUE, `scry_discard`'s price: one card "
                    "leaves the next N draws however many are seen, and where "
                    "it lands is a difference this instrument cannot read",
+    "scry_take": "STATIC_SCRY_VALUE, the scry family's price: the card taken "
+                 "to hand is a draw at the dead dial, so what is paid for is "
+                 "the selection over the N seen",
     "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled, "
                       "source-agnostic (EB-118: `from: exhaust` prices the "
                       "same, PROPOSED at the constant)",

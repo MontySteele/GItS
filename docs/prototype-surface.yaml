@@ -972,17 +972,17 @@
    # card a trade, Feint's shape; the now-line does not upgrade.
    upgrade: {plan_damage: 3}}
 
-# POOL PASS THREE (`EB-655`): the now-line buys INFORMATION the written half
-# cannot, which is a second reason to play it face-up.
+# POOL PASS FOUR (`EB-679`): the now-line is SELECTION and the 5 Block is
+# gone. r26's lane made no decision off the look-and-bury and the Block was a
+# dead slot beside a Dusk Plan; taking a card is the half the seats valued.
 - {id: proto_kk_read_the_field, name: "Read the Field", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Look at the top 2 cards of your draw pile; put one on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
-   effects: [{op: block, amount: 5},
-             {op: scry_bottom, amount: 2}],
+   description: "Look at the top {Scry:diff()} cards of your draw pile; put one into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: scry_take, amount: 3}],
    plan: [{op: block, amount: 10}],
-   # 7 / 12. The scry does not upgrade -- one printed number per half.
-   upgrade: {block: 2, plan_block: 2}}
+   # 4 seen / Plan 12: both halves move, one number each.
+   upgrade: {scry: 1, plan_block: 2}}
 
 - {id: proto_kk_exposed_flank, name: "Exposed Flank", character: kokomi,
    authored_by: [claude],
@@ -1316,12 +1316,12 @@
 - {id: proto_kk_scout_ahead, name: "Scout Ahead", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each later [gold]Plan[/gold] carried out with this one.",
+   description: "Draw 1 card. [gold]Plan[/gold]: Draw 1 card for each [gold]Plan[/gold] carried out this turn.",
    effects: [{op: draw, amount: 1}],
-   # THE ROW WHOSE VALUE IS ITS POSITION: first of a three-entry morning it
-   # draws 2, last it draws 0, and the count is CARRY-OUTS. Why the upgrade
-   # moves the cost and not the rate: the provenance note.
-   plan: [{op: draw_per_plan_after, amount: 1}],
+   # POOL PASS FOUR (`EB-679`): the count INCLUDES THIS ONE and the position
+   # stops mattering -- alone it draws 1, in a three-Plan morning 3, wherever
+   # it sits. Why the upgrade moves the cost and not the rate: provenance.
+   plan: [{op: draw_per_plan_this_turn, amount: 1}],
    upgrade: {cost: -1}}
 
 - {id: proto_kk_second_thoughts, name: "Second Thoughts", character: kokomi,
@@ -1341,26 +1341,27 @@
 - {id: proto_kk_breakwater, name: "Breakwater", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # POOL PASS THREE (`EB-655`): WRITTEN-ONLY. `EB-646` priced the face-up
-   # half to the Dusk line and the seat still never played it, so the now-line
-   # comes off; the plan-only shape makes the pet the only legal target.
-   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   # POOL PASS FOUR (`EB-679`): THE WALL BEHIND THE ENGINE, reading the
+   # morning it followed. The count is the MORNING's carry-outs and never
+   # this Dusk entry itself; the argument is in the provenance note.
+   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each [gold]Plan[/gold] carried out this turn.",
    effects: [],
-   plan: [{op: block, amount: 6}],
+   plan: [{op: block, amount: 5},
+          {op: block_per_plan_this_morning, amount: 3}],
    plan_dusk: true,
    upgrade: {plan_block: 2}}
 
 - {id: proto_kk_night_watch, name: "Night Watch", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # POOL PASS THREE (`EB-655`): WRITTEN-ONLY, Breakwater's reasoning with the
-   # Weak on it -- and the Weak lands before the swing it was written against.
-   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
+   # POOL PASS FOUR (`EB-679`): NO BLOCK, the Weak on ALL. r26 read the old
+   # face as a card that asks nothing; as the multi-body Weak at Dusk it is
+   # Slack Water's pair -- Slack Water wins at one body, this at three.
+   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies.",
    effects: [],
-   plan: [{op: block, amount: 4},
-          {op: apply_power, power: weak, amount: 1, target: front_enemy}],
+   plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
    plan_dusk: true,
-   upgrade: {plan_block: 2}}
+   upgrade: {plan_power_amount: 1}}
 
 # THE INAZUMA COMPANION OVERHAUL, on the SAME flag as the Mondstadt block:
 # under `C.COMPANION_OVERHAUL` these ARE Inazuma's Universal companion pool.

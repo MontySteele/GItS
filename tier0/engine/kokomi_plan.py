@@ -54,14 +54,15 @@ from tier0.engine.state import Card, CombatState, Enemy, PlanEntry
 #: `EB-643` (R265) ADDED THREE, and every one of them is about the QUEUE rather
 #: than about a number: two RIDERS on the entry that follows this one in the
 #: same drain (`next_plan_double_damage`, `next_plan_extra_carry_out`) and a
-#: draw that counts the carry-outs still to come (`draw_per_plan_after`). All
-#: three are PLAN-ONLY by construction -- each names a position in a drain, and
-#: a now-line spelling would name a drain that is not running.
+#: draw that counts the drain it is carried out in
+#: (`draw_per_plan_this_turn`, `EB-679`). All three are PLAN-ONLY by
+#: construction -- each names a drain, and a now-line spelling would name a
+#: drain that is not running.
 PLAN_KINDS = frozenset((
     "draw", "energy", "block", "mend", "damage", "damage_quarter_max_hp",
     "damage_per_companion_last_turn", "apply_power",
     "play_copy_of_companion", "block_per_plan_this_morning",
-    "draw_per_plan_after", "next_plan_double_damage",
+    "draw_per_plan_this_turn", "next_plan_double_damage",
     "next_plan_extra_carry_out",
     # `EB-655` (pool pass three), BATTLE PLAN. See `NEXT_ATTACK_BONUS`.
     "next_attack_damage",
@@ -123,7 +124,7 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            # Plan", "after this one" -- so a now-line spelling
                            # would ask about a drain that is not running and
                            # answer nothing, every time.
-                           "draw_per_plan_after",
+                           "draw_per_plan_this_turn",
                            "next_plan_double_damage",
                            "next_plan_extra_carry_out",
                            # `EB-655`, BATTLE PLAN. The rider is what the
@@ -138,13 +139,20 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
 #: read a number that is zero every time it is asked.
 BLOCK_PER_PLAN = "block_per_plan_this_morning"
 
-#: `EB-643`, SCOUT AHEAD: "draw 1 card for each Plan carried out after this
-#: one". The count is CARRY-OUTS AND NOT ENTRIES, which is `EB-501`'s reading
-#: read forward instead of backward -- under Nereid's Ascension the two entries
-#: behind this one are four carry-outs, and every other reader in this arm
-#: already counts that way. `amount` is the RATE per carry-out, the shape
-#: `block_per_plan_this_morning` above already has.
-DRAW_PER_PLAN_AFTER = "draw_per_plan_after"
+#: `EB-679` (pool pass four), SCOUT AHEAD: "draw 1 card for each Plan carried
+#: out this turn", ITSELF INCLUDED. It used to count the carry-outs still to
+#: come, which made the card's whole value its POSITION in the queue -- r26's
+#: lane never wrote it, because a row worth 2 written first and 0 written last
+#: competed for its slot with Plans that always paid. The count is now the
+#: WHOLE DRAIN, so the card answers the same number wherever it sits: written
+#: alone it draws 1, written with two others it draws 3.
+#:
+#: THE DRAIN AND NOT THE TURN, read literally: a morning and a dusk are two
+#: drains and each counts its own, which is `_drain`'s reading of "the next
+#: Plan" applied to a count. Change of Plans carries one entry out and pays 1.
+#: `amount` is the RATE per carry-out, the shape `block_per_plan_this_morning`
+#: above already has.
+DRAW_PER_PLAN_THIS_TURN = "draw_per_plan_this_turn"
 
 #: `EB-643`, OPENING GAMBIT: "the next Plan deals double damage", and SECOND
 #: WAVE: "the next Plan is carried out twice".
@@ -881,23 +889,25 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
     #: One slot for both riders: an entry printing both is one card, and two
     #: entries in a row each writing one leave only the later card pending.
     rider_source: Optional[str] = None
+    # `EB-679`, SCOUT AHEAD's count: THE WHOLE DRAIN, itself included, read
+    # ONCE before the first clause runs. Order-independence is the point of
+    # the redesign -- a reader whose number depends on where in the queue it
+    # sits is a card whose value is its position, which is what r26's lane
+    # would not spend a slot on -- so this is computed here rather than per
+    # entry, the discipline `resolve_all` already keeps for
+    # `kk_plans_this_morning`.
+    #
+    # ONE EXTRA FOR NEREID'S ASCENSION, the same term `resolve_all` writes and
+    # for the same reason: the Rare carries the FIRST entry of a drain out
+    # twice, and every reader in this arm counts CARRY-OUTS (`EB-501`). It
+    # deliberately does NOT fold in a `next_plan_extra_carry_out` written
+    # inside this drain -- that rider is not on the board when the number is
+    # asked, which is the reading the old per-entry term already took.
+    drain_plans = len(due) + (
+        1 if due and carry_out_times(state) > 1 else 0)
     for index, entry in enumerate(due):
         if state.over or not state.player.alive:
             return
-        # `EB-643`, SCOUT AHEAD's count: the carry-outs still to come after
-        # this entry. ENTRIES AFTER IT TIMES `CarryOutTimes`, which is
-        # `EB-501`'s carry-outs-not-entries reading pointed forwards -- and it
-        # deliberately does NOT fold in a `next_plan_extra_carry_out` a later
-        # entry may write, because that rider is not on the board yet when
-        # this number is asked. Read per entry rather than once for the drain,
-        # so a Scout Ahead written first and one written last answer honestly.
-        # `EB-655` (pool pass three). ENTRIES AFTER THIS ONE, ONE CARRY-OUT
-        # EACH, because Nereid's Ascension now doubles only the FIRST entry of
-        # a drain and this entry is never the first when anything follows it.
-        # The old term multiplied by `carry_out_times`, which was honest while
-        # the Rare doubled every Plan; keeping it would have Scout Ahead
-        # promise carry-outs that no longer happen.
-        after = len(due) - index - 1
         # THE RIDERS THE ENTRY BEFORE THIS ONE WROTE, taken and cleared in the
         # same breath: a rider is spent by the entry it reaches, so two Plans
         # in a row that each double cannot both land on a third.
@@ -918,7 +928,8 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
             if state.over or not state.player.alive:
                 return
             wrote = _resolve_entry(state, entry, why=why,
-                                   double_damage=double, after=after)
+                                   double_damage=double,
+                                   drain_plans=drain_plans)
             # THE RIDERS THIS ENTRY WROTE, OR'd across its own carry-outs for
             # the reason above: an entry doubled by Nereid's prints its rider
             # twice and "the next Plan is carried out twice" said twice is
@@ -1077,17 +1088,18 @@ def carry_out_times(state: CombatState) -> int:
 
 def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
                    double_damage: bool = False,
-                   after: int = 0) -> tuple[bool, bool]:
+                   drain_plans: int = 1) -> tuple[bool, bool]:
     """ONE PLAN CARRIED OUT -- the unit Treatise and Song of Pearls are priced
     in. "Whenever the jellyfish carries out a Plan" is once per ENTRY, and the
     notify at the bottom is the only place it fires, so Change of Plans' early
     resolution pays them exactly as the morning's does.
 
-    `double_damage` and `after` ARE THE DRAIN'S, and they are parameters rather
-    than reads for `ResolveEntry`'s own reason one file over: nothing about the
-    state this entry sits in says which entry ran before it or how many run
-    after, so the caller is the only thing that knows and the caller says.
-    `resolve_front`'s defaults are the honest answer for a drain of one.
+    `double_damage` and `drain_plans` ARE THE DRAIN'S, and they are parameters
+    rather than reads for `ResolveEntry`'s own reason one file over: nothing
+    about the state this entry sits in says which entry ran before it or how
+    deep the drain around it is, so the caller is the only thing that knows and
+    the caller says. `resolve_front`'s defaults are the honest answer for a
+    drain of one -- no rider was doubled, and one Plan was carried out.
 
     IT RETURNS THE RIDERS THIS ENTRY WROTE, `(double, extra)`, because the
     clause that writes one is inside the loop below and the drain that spends
@@ -1101,7 +1113,7 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
         if state.over or not state.player.alive:
             break
         _resolve_clause(state, entry, clause, double_damage=double_damage,
-                        after=after, wrote=wrote)
+                        drain_plans=drain_plans, wrote=wrote)
     _note_plan_resolved(state)
     return wrote[0], wrote[1]
 
@@ -1159,7 +1171,7 @@ def _note_plan_resolved(state: CombatState) -> None:
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,
                     clause: dict, double_damage: bool = False,
-                    after: int = 0,
+                    drain_plans: int = 1,
                     wrote: Optional[list] = None) -> None:
     """One planned clause. `ResolveOne`'s switch, arm for arm.
 
@@ -1211,15 +1223,15 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             state.emit("block", amount=gained)
         state.emit("plan_tide_wall", amount=gained,
                    plans=state.kk_plans_this_morning)
-    elif op == DRAW_PER_PLAN_AFTER:
-        # SCOUT AHEAD (`EB-643`): "draw 1 card for each Plan carried out after
-        # this one". `after` is the drain's count -- see `_drain`, which reads
-        # it per entry -- and the rate is the printed amount, the shape Tide
-        # Wall's clause above already has. Change of Plans carries ONE entry
-        # out, so a Scout Ahead hurried that way draws nothing, which is the
-        # face read literally: nothing follows it.
-        cards = amount * int(after)
-        state.emit("plan_scout_ahead", cards=cards, after=int(after))
+    elif op == DRAW_PER_PLAN_THIS_TURN:
+        # SCOUT AHEAD (`EB-679`): "draw 1 card for each Plan carried out this
+        # turn", itself included. `drain_plans` is the whole drain's count --
+        # see `_drain`, which reads it once -- and the rate is the printed
+        # amount, the shape Tide Wall's clause above already has. Change of
+        # Plans carries ONE entry out and pays 1, which is the face read
+        # literally: this Plan was carried out.
+        cards = amount * int(drain_plans)
+        state.emit("plan_scout_ahead", cards=cards, plans=int(drain_plans))
         if cards > 0:
             state.draw(cards)
     elif op == NEXT_PLAN_DOUBLE_DAMAGE:

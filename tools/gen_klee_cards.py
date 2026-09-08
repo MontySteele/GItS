@@ -333,7 +333,12 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # of them on the BOTTOM. `scry_discard`'s verb one door
                   # over -- the card leaves the top of the pile without
                   # leaving the pile.
-                  "scry_bottom", "add_card", "exhaust_from",
+                  "scry_bottom",
+                  # `EB-679` (Read the Field, pool pass four): look at the
+                  # top N, TAKE one into hand and bottom the rest. The verb
+                  # one door further on again -- a look that hands a card
+                  # over is the half the seats made decisions with.
+                  "scry_take", "add_card", "exhaust_from",
                   "apply_aura", "swirl", "buff_next_attack", "block_next_turn",
                   "cost_mod", "copy_companion_in_hand",
                   # Curtain Call consolidation ("Take a Bow"): grow_damage is
@@ -433,7 +438,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # for a reason they share -- each names a place in a running
                   # drain ("the next Plan", "after this one"), so a now-line
                   # spelling would name a drain that is not running.
-                  "draw_per_plan_after", "next_plan_double_damage",
+                  "draw_per_plan_this_turn", "next_plan_double_damage",
                   "next_plan_extra_carry_out",
                   # `EB-655` (Battle Plan): the carry-out's rider, plan-only
                   # for the same reason -- a now-line spelling would be a
@@ -1965,12 +1970,12 @@ PLAN_CLAUSE_KINDS = {
     "play_copy_of_companion": "PlayCopyOfCompanion",
     "block_per_plan_this_morning": "BlockPerPlanThisMorning",
     # `EB-643` (R265), THE THREE DRAIN-POSITIONAL CLAUSES. Scout Ahead counts
-    # the carry-outs still to come, and Opening Gambit and Second Wave write a
-    # RIDER on the entry that follows them in the same drain. All three are
-    # PLAN-ONLY below for one reason they share: each names a place in a
-    # running drain, and a now-line spelling would name a drain that is not
-    # running.
-    "draw_per_plan_after": "DrawPerPlanAfter",
+    # the drain it is carried out in (`EB-679`, itself included), and Opening
+    # Gambit and Second Wave write a RIDER on the entry that follows them in
+    # the same drain. All three are PLAN-ONLY below for one reason they share:
+    # each names a place in a running drain, and a now-line spelling would name
+    # a drain that is not running.
+    "draw_per_plan_this_turn": "DrawPerPlanThisTurn",
     "next_plan_double_damage": "NextPlanDoubleDamage",
     "next_plan_extra_carry_out": "NextPlanExtraCarryOut",
     # `EB-668` (`EB-655` reopened), BATTLE PLAN: "the next Attack you play
@@ -2022,7 +2027,7 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  # `EB-643`. The three drain-positional clauses -- see
                  # `PLAN_CLAUSE_KINDS` above for the one reason all three are
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
-                 "draw_per_plan_after", "next_plan_double_damage",
+                 "draw_per_plan_this_turn", "next_plan_double_damage",
                  "next_plan_extra_carry_out",
                  # `EB-655`, Battle Plan's rider.
                  "next_attack_damage"}
@@ -2994,6 +2999,10 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
                        # digs), so the delta is normally negative.
                        "floor_drop",
+                       # `EB-679` (Read the Field). How many cards the look
+                       # shows, rendered off the "Scry" DynamicVar the op
+                       # emits -- the Sparks idiom, one more time.
+                       "scry",
                        "cards", "remove",
                        "copy_cost_override", "add",
                        # EB-122: `add`'s POSITION. The emitter appended, full
@@ -4124,7 +4133,7 @@ def blocked_reason(
                 return f"energy field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("amount"), int):
                 return "energy amount must be a literal int"
-        if op in ("scry_discard", "scry_bottom"):
+        if op in ("scry_discard", "scry_bottom", "scry_take"):
             unknown = set(eff) - SCRY_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
@@ -5795,6 +5804,11 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
         elif op == "energy" and energy_upgrade(card):
             out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
+        elif op == "scry_take" and scry_upgrade(card):
+            # `EB-679`. The Sparks idiom again -- a var ONLY when the upgrade
+            # has to render, so a look-and-take row whose upgrade moves
+            # something else emits the plain literal it always did.
+            out.append(f'new DynamicVar("Scry", {int(eff["amount"])}m)')
         elif op == "block_next_turn" and (block_next_turn_upgrade(card)
                                           or spotlight_folds(card)):
             # `EB-438`. A SECOND VAR RULE ON THE SAME OP, and the two reasons
@@ -6119,6 +6133,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "generate_cost_override": any(
             e["op"] == "generate_guest_star" for e in effects),
         "spark": any(e["op"] == "gain_spark" for e in effects),
+        # `EB-679`: tier0 bumps the scry op's own amount, and the value renders
+        # off the "Scry" var this generator declares beside it.
+        "scry": any(e["op"] == "scry_take" for e in effects),
         "encore": any(e["op"] == "gain_encore" for e in everywhere),
         "encore_cost": int(card.get("encore_cost", 0)) > 0,
         "fanfare_cost": int(card.get("fanfare_cost", 0)) > 0,
@@ -7305,6 +7322,12 @@ def _split_growth_expr(card: dict, eff: dict) -> str:
 def energy_upgrade(card: dict) -> int:
     """Ruled energy delta: `energy: +N` in kokomi-upgrades.yaml."""
     return int(upgrade_plan(card)[0].get("energy", 0))
+
+
+def scry_upgrade(card: dict) -> int:
+    """`EB-679`. Ruled scry delta: `scry: +N` -- how many more cards the look
+    shows. Read the Field is the first carrier (3 seen, 4 upgraded)."""
+    return int(upgrade_plan(card)[0].get("scry", 0))
 
 
 def block_next_turn_upgrade(card: dict) -> int:
@@ -9077,6 +9100,42 @@ def build_body(
                 "        }"
             )
 
+        elif op == "scry_take":
+            # `EB-679` (Read the Field, pool pass four). `scry_bottom`'s screen
+            # with the pick going the OTHER way: the player is shown the top N,
+            # the one they choose is added to the HAND and everything else they
+            # were shown goes to the bottom of the draw pile. Nothing leaves the
+            # deck, which is `scry_bottom`'s promise kept one verb over.
+            #
+            # THE UNPICKED ARE BOTTOMED IN THE ORDER THEY WERE SEEN, so the
+            # pile under them is untouched and both engines agree about what
+            # the next draw is (`effects._op_scry_take`).
+            #
+            # THE SIM HAS NO SCREEN and takes the lowest-cost card of the N,
+            # stated there as the stand-in for player choice it is.
+            n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
+                 else int(eff["amount"]))
+            lines.append(
+                "{" + "\n" +
+                f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();" + "\n" +
+                "            if (top != null && top.Count > 0)" + "\n" +
+                "            {" + "\n" +
+                "                var takePick = (await CardSelectCmd.FromSimpleGrid(" + "\n" +
+                "                    choiceContext, top, Owner," + "\n" +
+                "                    new CardSelectorPrefs(ScryTake.Prompt, 1))).ToList();" + "\n" +
+                "                foreach (var taken in takePick)" + "\n" +
+                "                {" + "\n" +
+                "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
+                "                }" + "\n" +
+                "                foreach (var seen in top)" + "\n" +
+                "                {" + "\n" +
+                "                    if (takePick.Contains(seen)) continue;" + "\n" +
+                "                    await CardPileCmd.Add(seen, PileType.Draw, CardPilePosition.Bottom);" + "\n" +
+                "                }" + "\n" +
+                "            }" + "\n" +
+                "        }"
+            )
+
         elif op == "exhaust_from" and eff.get("select") == "chosen":
             # Kokomi: the player chooses. Kit cards stay exempt (v1.9 -- the
             # Burst is never fodder), the same filter the discard ops ride.
@@ -10842,6 +10901,16 @@ def build_description(card: dict, *,
                 f"Look at the top {n} cards of your draw pile; put one on "
                 "the bottom.")
 
+        elif op == "scry_take":
+            # `EB-679`. An upgradeable count renders the var, the rule every
+            # printed number on a generated face keeps: the base card would
+            # otherwise print "top 3" forever while the upgraded one showed 4.
+            n = ("{Scry:diff()}" if scry_upgrade(card)
+                 else str(int(eff["amount"])))
+            parts.append(
+                f"Look at the top {n} cards of your draw pile; put one into "
+                "your hand and the rest on the bottom.")
+
         elif op == "exhaust_from" and eff.get("select") == "chosen":
             n = ("{Exhausts:diff()}" if exhaust_upgrade(card)
                  else str(int(eff.get("amount", 1))))
@@ -11403,6 +11472,8 @@ def build_upgrade(card: dict) -> list[str]:
                "mend": "mend",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
+               # `EB-679`, Read the Field's look count.
+               "scry_take": "scry",
                "exhaust_from": "exhaust"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "grow_bombs": 'DynamicVars["Grow"]',
@@ -11418,6 +11489,7 @@ def build_upgrade(card: dict) -> list[str]:
                "energy": 'DynamicVars["Energy"]',
                "block_next_turn": 'DynamicVars["BlockNextTurn"]',
                "discard": 'DynamicVars["Discards"]',
+               "scry_take": 'DynamicVars["Scry"]',
                "exhaust_from": 'DynamicVars["Exhausts"]'}
     lines, done = [], set()
     for eff in card["effects"]:

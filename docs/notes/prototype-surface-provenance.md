@@ -3137,3 +3137,97 @@ competing Energy uses on SOME safe turns and not on every one, and Battle
 Plan's grant does not exclude writing an Attack under the engine the
 auditor was given -- which is exactly the mod-side gap item 4 closes at
 `EB-668`.
+
+## Kokomi pool pass four -- the round-26 dead faces (`EB-679`, 2026-09-08)
+
+THE FINDING THE PASS ANSWERS. Round 26's lanes read four rows of the pool and
+none of them was worth a slot, each for a different and nameable reason. The
+pass rebuilds all four; nothing else on the sheet moves, and no rule of the arm
+changes.
+
+THE FOUR CHANGES.
+
+1. **Night Watch** -- "Dusk Plan: Apply 1 Weak to ALL enemies." No Block;
+   upgrade 2 Weak. Both seats called the old face (4 Block, a Weak and the
+   casket's ping for one Energy) a card that asks nothing: it paid a little of
+   everything and never made the player choose. As the multi-body Weak at Dusk
+   it is **Slack Water's pair** -- Slack Water wins at one body, Night Watch at
+   three -- and the Dusk timing is what the Weak is bought for, because it
+   lands before the swing it was written against. The upgrade takes
+   `plan_power_amount` (1 -> 2), the row's one printed number.
+2. **Breakwater** -- "Dusk Plan: Gain 5 Block, plus 3 for each Plan carried out
+   this turn." Upgrade base 7. r26 lane 1 called it Night Watch's worse twin,
+   so it stops being a flat number and becomes **the wall behind the engine**:
+   the deeper the morning it followed, the more of the turn it buys back.
+   NO NEW OP -- the line is a flat `block` clause plus Tide Wall's
+   `block_per_plan_this_morning`, and the count is exactly the one Tide Wall,
+   Well Laid and Tide Chart read (`kk_plans_this_morning` /
+   `KokomiOverhaulLedger.PlansThisMorning`). **"This turn" on a Dusk Plan IS
+   the morning's depth**, and by construction rather than by a filter:
+   `resolve_dusk` / `ResolveDusk` deliberately leave that count alone, so this
+   Dusk entry is never one of the Plans it pays for. A dusk after an empty
+   morning pays the base alone, which is the honest answer to "for each".
+   `plan_block` binds to the FLAT clause first (`upgrades.PLAN_DELTA_OPS`), so
+   the smith raises the wall and never the rate -- a rate that smithed would
+   scale with a deck the offer screen cannot see.
+3. **Scout Ahead** -- "Draw 1 card. Plan: Draw 1 card for each Plan carried out
+   this turn", **itself included**. Face-up half and the cost upgrade
+   unchanged. The old clause counted the carry-outs still to COME, which made
+   the card's whole value its POSITION: 2 written first, 0 written last. r26
+   lane 1 never wrote it, because a slot that pays 0 half the time competes
+   with Plans that always pay. The count is now the whole drain, read ONCE
+   before the first clause runs (`_drain` / `Drain`), so the answer does not
+   move with the card -- alone it draws 1, with two others 3, wherever it sits.
+   Still CARRY-OUTS and not entries (`EB-501`): Nereid's Ascension carries the
+   first entry of a drain out twice, so a drain under the Rare counts one more,
+   the same term `resolve_all` already writes for `kk_plans_this_morning`. A
+   Scout Ahead hurried by Change of Plans is a drain of one and draws 1. The op
+   is RENAMED with the count it now takes, `draw_per_plan_after` ->
+   `draw_per_plan_this_turn` (`Kind.DrawPerPlanThisTurn`), because an op name
+   that says "after" while the rule says "this turn" is the kind of drift that
+   makes two engines agree by accident. The old name is spelled by nothing.
+4. **Read the Field** -- "Look at the top 3 cards of your draw pile; put one
+   into your hand and the rest on the bottom. Plan: Gain 10 Block." Upgrade
+   look at 4 / Plan 12. r26 lane 1 never made a decision off the old
+   look-and-bury -- burying the card you like least is a choice about the card
+   you did not want -- and the 5 Block beside it was a dead slot next to a Dusk
+   Plan. **Selection is what the seats valued**, so the pick comes to hand and
+   everything it was seen beside goes to the bottom. A NEW OP on both engines,
+   `scry_take`: the mod shows the top N on the game's own selection grid, adds
+   the pick with `CardPileCmd.Add(..., PileType.Hand)` and bottoms the rest in
+   the order they were seen; the sim has no human and takes the LOWEST-cost
+   card of the N, stated at `effects._op_scry_take` as the stand-in for choice
+   it is -- `_op_scry_bottom`'s convention read the other way round, because
+   the card wanted now is the one that can be paid for now. Nothing leaves the
+   deck, a short pile is read short and an empty pile is a printed no-op.
+   `scry_bottom` stays registered on both engines with no row spelling it, the
+   way `redirect_queued_plans` did at `EB-655`.
+
+THE ONE NEW UPGRADE KEY. `scry` moves how many cards the look SHOWS, and it
+exists because pool pass four made that number worth moving: "look at 2, bury
+1" is no better for showing 3, and "look at 3, TAKE 1" is. It is its own key
+rather than `draw`, for `tide_draw`'s reason -- the two are different promises
+and one row could print both -- and it walks the whole scry family
+(`scry_take`, `scry_bottom`, `scry_discard`) so a later look-and-bury row needs
+no key of its own. The codegen renders it off a `"Scry"` DynamicVar declared
+only when the upgrade moves it, the Sparks idiom every other number here keeps,
+and the face prints `{Scry:diff()}` so the base card never claims 3 while the
+upgraded one delivers 4.
+
+THE SCREEN. `ScryTake` is a second prompt class beside `ScryBottom` rather than
+a second member on it, on that file's own terms: a selection screen is keyed on
+the VERB, and taking and burying ask the player different questions. One ruled
+string, merged into the base game's `cards` table by `KleeMod.InjectLocStrings`
+and outside the `PROTOTYPE_CARDS` switch, because `scry_take` is a sheet verb
+any character may print rather than a prototype rule.
+
+THE DRAFTER. `scry_take` prices at `STATIC_SCRY_VALUE`, the scry family's own:
+the card taken to hand is a draw and every draw op in `tier05/draft.py` is
+priced at `STATIC_DRAW_VALUE = 0.0`, so what is left to pay for is the
+selection over the N seen. `draw_per_plan_this_turn` keeps its zero unchanged
+-- `EB-679` moved WHICH carry-outs it counts, not the refusal to guess how deep
+a morning a deck banks.
+
+NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B): no
+slate, no stamp and no re-baseline. What the pass owes is a round that draws
+the four rows.

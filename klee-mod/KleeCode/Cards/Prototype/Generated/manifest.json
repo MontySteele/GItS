@@ -544,7 +544,7 @@
       "cost": -1
     },
     "proto_kk_night_watch": {
-      "plan_block": 2
+      "plan_power_amount": 1
     },
     "proto_kk_opening_gambit": {
       "damage": 2
@@ -557,7 +557,7 @@
       "power_amount": 1
     },
     "proto_kk_read_the_field": {
-      "block": 2,
+      "scry": 1,
       "plan_block": 2
     },
     "proto_kk_ripple": {

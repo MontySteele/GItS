@@ -1117,6 +1117,23 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                         f"exhaust delta on {base_id!r} raises a RANDOM "
                         "exhaust_from above 1; only the chosen branch is "
                         "expressible in C#")
+        elif key == "scry":
+            # `EB-679` (Read the Field). HOW MANY CARDS THE LOOK SHOWS, which
+            # became an upgradable number the moment the look started handing
+            # one of them over: "look at 2, bury 1" is no better for showing 3,
+            # and "look at 3, TAKE 1" is. A key of its own rather than `draw`,
+            # for `tide_draw`'s reason -- these are different promises and one
+            # row could print both.
+            #
+            # THE WHOLE SCRY FAMILY in one ordered walk, so a look-and-bury row
+            # that later wants the same upgrade needs no key of its own. No row
+            # carries two of these ops.
+            ok = False
+            for scry_op in ("scry_take", "scry_bottom", "scry_discard"):
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == scry_op), "amount", val)
+                if ok:
+                    break
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)

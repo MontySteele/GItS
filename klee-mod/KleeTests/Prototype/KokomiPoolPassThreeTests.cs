@@ -112,19 +112,16 @@ public class KokomiPoolPassThreeTests
     // ======================================================================
 
     [Fact]
-    public void Read_the_field_shows_the_top_two_and_bottoms_the_pick()
+    public void Read_the_field_still_buys_information_face_up()
     {
-        // The screen is the game's own selection grid over the top N, and the
-        // move never leaves the draw pile: `CardPileCmd.Add(..., PileType.Draw,
-        // CardPilePosition.Bottom)`. Twin: `effects._op_scry_bottom`, which
-        // bottoms the highest-cost card because the sim has no human.
+        // WHAT SURVIVED POOL PASS FOUR. The now-line is still the half that
+        // buys what the written half cannot -- a screen over the top of the
+        // draw pile -- and `EB-679` only changed what the screen DOES with the
+        // pick. The verb, the count and the take are pinned in
+        // `KokomiPoolPassFourTests`.
         var play = Il.Calls(Il.Method("ProtoKkReadTheField", "OnPlay")).ToList();
         Assert.Contains(play, c => c.Contains("CardSelectCmd.FromSimpleGrid"));
         Assert.Contains(play, c => c.Contains("CardPileCmd.Add"));
-        var source = Source("ProtoKkReadTheField");
-        Assert.Contains("Cards.Take(2)", source);
-        Assert.Contains("CardPilePosition.Bottom", source);
-        Assert.Contains("ScryBottom.Prompt", source);
     }
 
     [Fact]
@@ -139,18 +136,17 @@ public class KokomiPoolPassThreeTests
     }
 
     [Fact]
-    public void Read_the_field_upgrades_both_block_numbers_and_not_the_scry()
+    public void Read_the_fields_planned_wall_is_ten_and_smiths_to_twelve()
     {
+        // WHAT SURVIVED POOL PASS FOUR: the Plan half, unchanged. The now-line
+        // half moved (`EB-679` took the 5 Block off and made the look a take),
+        // and its numbers are pinned in `KokomiPoolPassFourTests`.
         var card = new ProtoKkReadTheField();
         Assert.Equal(1, card.EnergyCost.Canonical);
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(10, clause.Amount);
-        var source = Source("ProtoKkReadTheField");
-        Assert.Contains("DynamicVars.Block.UpgradeValueBy(2m)", source);
-        Assert.Contains("PlanBlock\"].UpgradeValueBy(2m)", source);
-        // ONE PRINTED NUMBER PER HALF: the "2" the scry looks at is a rule of
-        // the card and not a number the smith moves.
-        Assert.DoesNotContain("Cards.Take(3)", source);
+        Assert.Contains("PlanBlock\"].UpgradeValueBy(2m)",
+                        Source("ProtoKkReadTheField"));
     }
 
     // ======================================================================
@@ -319,12 +315,13 @@ public class KokomiPoolPassThreeTests
     }
 
     [Fact]
-    public void Scout_aheads_forward_count_is_entries_now()
+    public void Scout_aheads_count_is_the_drains_and_not_the_entrys()
     {
-        // Entries after this one, one carry-out each: the Rare doubles the
-        // first entry alone and this entry is never the first when anything
-        // follows it.
-        Assert.Contains("var after = due.Count - index - 1;",
+        // `EB-655` narrowed the count to entries; `EB-679` then made it the
+        // WHOLE DRAIN, itself included, read once before the loop. What both
+        // passes share is that the number comes off the drain and not off the
+        // board, which is what this pins.
+        Assert.Contains("var drainPlans = due.Count",
                         Source("KokomiPlan", power: true));
     }
 
@@ -358,10 +355,11 @@ public class KokomiPoolPassThreeTests
     [Fact]
     public void The_written_only_rows_still_write_a_dusk_plan()
     {
+        // THE SHAPE, which pool pass four kept: both rows write a Dusk entry
+        // and neither has a now-line. The CLAUSES moved at `EB-679` and are
+        // pinned in `KokomiPoolPassFourTests`.
         Assert.Contains("dusk: true", Source("ProtoKkBreakwater"));
         Assert.Contains("dusk: true", Source("ProtoKkNightWatch"));
-        Assert.Equal(6, Assert.Single(new ProtoKkBreakwater().PlanClauses).Amount);
-        Assert.Equal(4, new ProtoKkNightWatch().PlanClauses[0].Amount);
     }
 
     // ======================================================================
