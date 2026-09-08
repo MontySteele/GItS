@@ -170,6 +170,10 @@ RETIRED: dict[str, frozenset[int]] = {
         (270, 272), (276, 286), (288, 291), (293, 295), (297, 299),
         (301, 315), (319, 320), 322, 327, 343, 354, 358, 362, (364, 368),
         (376, 386), 458, 526, 566, 692, 703, 711,
+        # EB-713..EB-716 minted 2026-09-08 on kokomi-round-32-2026-09-08 (PR #462,
+        # [USER]'s); this branch took EB-717 past them. The four leave this
+        # set when #462 lands, since its rows define them (rule 4).
+        (713, 716),
     ),
     "M": _spans((1, 12), (14, 25), (27, 69)),
 }
