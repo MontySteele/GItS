@@ -475,7 +475,16 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # board.
                     "KLEEMOD-ARM_EMPTY_FIELD",
                     # `EB-573`: what a merge keeps besides the Mine.
-                    "KLEEMOD-ARM_MERGE_RIDERS"}
+                    "KLEEMOD-ARM_MERGE_RIDERS",
+                    # `EB-719`: `Encore` became the SIXTH of these when the
+                    # reframe's rows left. Nothing on the prototype surface
+                    # prints the word any more, so it is no longer an arm
+                    # keyword -- but the word is shipped machinery, it is
+                    # printed on the Neow screen and on opening-hand faces
+                    # before the meter exists, and every Furina row the Stage
+                    # does not swap still carries it. `EB-407`'s finding is
+                    # unchanged; only the door it comes through is.
+                    "KLEEMOD-ARM_ENCORE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -695,35 +704,28 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # own words -- the same rule at the same call one kit over.
             "carry-out is not a hit: no when-hit power fires.",
             "heal N HP, never above the HP you entered ",
-            # Furina, furina-reframe-2026-08-29.md sec.4.2 / sec.4.4 / sec.4.6,
-            # staged as slice two. Three words the SHIPPED kit does not have:
-            # its deploy performs nobody, its bow neither triples the Fanfare
-            # bonus nor mints, and it has no drain at all.
-            #
-            # `EB-368` REWROTE Deploy's sentence rather than extending it: the
-            # act-2 seat played no Salon card in three fights because the word
-            # never said what makes a member act AFTER the deploy, and three
-            # rules appended to the old two sentences ran 50 characters over
-            # the keyword-tip ceiling. Same call R248 made for the Bomb.
-            "A member joins and performs at once; a full stage ",
-            "[gold]Evokes[/gold] the front member first. Afterwards only a ",
-            "[gold]Companion[/gold] play performs a member.",
-            # `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE. "The card's
-            # Encore price pays for it" is false on Curtain Rises, which Evokes
-            # by deploying onto a full stage and prints no Encore price, and it
-            # left the Evoke outside the economy every other act on the stage
-            # pays into. An Evoke is a performance that also costs the member,
-            # so it pays the performance's 1 and takes the performance's cut.
-            # `EB-601` PUT THE TRIGGER FIRST: "a full stage Evokes the front
-            # member" beside "a Companion card you play performs Crabaletta"
-            # read as a Companion play into a full stage Evoking, and the
-            # misreading cost r16 lane 1 an elite turn.
-            "Only a [gold]Deploy[/gold] onto a full stage ",
-            "[gold]Evokes[/gold]. The member performs and leaves; its ",
-            " [gold]Fanfare[/gold]. It spends ",
-            " [gold]Encore[/gold], or Evokes at 3/4.",
-            "Your [gold]Fanfare[/gold] falls to nothing. What the card does ",
-            "next is priced off the amount it took.",
+            # Furina, THE STAGE (`EB-719`; the brief's sec.12 names the
+            # seven words and sec.3 states each rule). The reframe's four --
+            # Deploy, Evoke, Drain, Encore -- left this list with the eleven
+            # `proto_fr_` rows that printed them, under R213 B's deletion rule:
+            # a ruled sentence for a word no row prints is a rule nobody can
+            # meet. What is here instead is the SEVEN, and each carries the
+            # half of its rule a player cannot infer -- rule 8's "fires in full
+            # even if the bar is short", rule 6's damage order, rule 5's "with
+            # one performer that is the lead", rules 7-and-9's difference
+            # between a bow and a death, and rotation's refusal of both.
+            "Pays from the [gold]lead performer[/gold]. It fires in full even ",
+            "if the bar is short; an emptied performer takes a ",
+            "A performer's own bar. Attacks hit your [gold]Block[/gold], then ",
+            "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.",
+            "Adds [gold]Fanfare[/gold] to the [gold]back performer[/gold]. ",
+            "With one performer on stage, that is the lead.",
+            "A departure effect, earned by [gold]Spend[/gold] only. Usher: ",
+            "The front seat: the one attacks reach and the only one that ",
+            "The back seat, and the reserve: nothing hits it. With one ",
+            "performer on stage it is also the lead.",
+            "Seats change order and every bar comes with them. Nobody leaves ",
+            "and nobody takes a [gold]Bow[/gold].",
     ):
         assert clause in tips, clause
 
@@ -747,11 +749,14 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "KleeOverhaulLaw.BombGrowth" in tips
     assert "KleeOverhaulLaw.SparkPerExplosion" in tips
-    # The Furina reframe's Evoke sentence carries TWO numbers -- the Focus
-    # multiplier and the mint -- and both are prototype SEEDS (R215 B), which
-    # makes a retune likelier here than anywhere else on this list.
-    assert "FurinaReframeLaw.EvokeFocusMult" in tips
-    assert "FurinaReframeLaw.FanfarePerEvoke" in tips
+    # THE STAGE's Bow and lead sentences carry three numbers -- the two bows
+    # that have one and the lead's regen -- and all three are prototype SEEDS
+    # (R215 B, the brief's sec.10 default 3), which makes a retune likelier
+    # here than anywhere else on this list. `EB-719` replaced the reframe's
+    # Evoke pair, which left with that arm's rows.
+    assert "FurinaStageLaw.BowUsherBlock" in tips
+    assert "FurinaStageLaw.BowCrabalettaDamage" in tips
+    assert "FurinaStageLaw.LeadRegen" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
     # The arm's one number lives on the relic, whose face interpolates it

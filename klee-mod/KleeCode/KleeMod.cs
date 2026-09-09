@@ -97,6 +97,18 @@ public static class KleeMod
                     // nothing. See KleeOverhaulSweep.cs for why AfterDeath is
                     // trustworthy where the enemy's own hooks are not.
                     .Concat(Powers.KleeOverhaulSweepHooks.Subscribe(combatState))
+                    // THE FURINA STAGE'S TWO CLOCKS, on the same argument as
+                    // the four lines above: the lead's regen at her turn start
+                    // and the performers' acts at her turn end are BROADCAST
+                    // moments, and the stage is a ledger rather than a power,
+                    // so nothing on the board can hear them for it. LAST in
+                    // the concat, which is the ordering: the shipped
+                    // end-of-turn tenants are what her docket accounts for,
+                    // and an act resolving before them would move a number the
+                    // docket had already drawn. Not compiled in a release
+                    // build, and inert with the arm off -- every method's
+                    // first line is `FurinaStage.LiveFor`.
+                    .Concat(Powers.FurinaStageHooks.Subscribe(combatState))
 #endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
@@ -483,22 +495,28 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.PlanElementKey + ".title"] =
                         "Hydro on the carry-out",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
-                    // The Furina reframe's three (slice two). `Deploy`
-                    // is the one word here a shipped Furina card also
-                    // uses in prose, and it is the same correctness as
-                    // `Bomb` above: the shipped deploy performs nobody,
-                    // the arm's does, and no single face raises both.
-                    [Cards.ArmKeywordTips.DeployKey + ".title"] = "Deploy",
-                    [Cards.ArmKeywordTips.EvokeKey + ".title"] = "Evoke",
-                    [Cards.ArmKeywordTips.DrainKey + ".title"] = "Drain",
-                    // `EB-407`. The one word in this block the arm did not
-                    // invent: Encore is shipped machinery, and its only
-                    // statement of itself is `EncoreMeterPower`'s badge, which
-                    // renders once the meter is on the board -- while the word
-                    // is printed on the Neow screen and on opening-hand faces
-                    // before that. No collision: the shipped meter power
-                    // titles itself and hangs no keyword tip.
+                    // The Furina reframe's four title rows went
+                    // with its keywords (`EB-719`); see
+                    // `ArmKeywordTips`'s Furina section.
                     [Cards.ArmKeywordTips.EncoreKey + ".title"] = "Encore",
+                    // THE FURINA STAGE'S SEVEN (`EB-719`, R269). The brief's
+                    // sec.12 names them; each is a rule the SHIPPED engine
+                    // does not have, so none collides with a shipped keyword.
+                    // `Fanfare` is the sharpest case and the reason each takes
+                    // its own key: the shipped word titles a METER and this one
+                    // a performer's own bar, and the two sentences contradict
+                    // each other -- but no single face can raise both, because
+                    // the arm swaps a shipped row out at every door it enters.
+                    [Cards.ArmKeywordTips.SpendKey + ".title"] = "Spend",
+                    [Cards.ArmKeywordTips.FanfareKey + ".title"] =
+                        "Fanfare",
+                    [Cards.ArmKeywordTips.RaiseKey + ".title"] = "Raise",
+                    [Cards.ArmKeywordTips.BowKey + ".title"] = "Bow",
+                    [Cards.ArmKeywordTips.LeadPerformerKey + ".title"] =
+                        "Lead performer",
+                    [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
+                        "Back performer",
+                    [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
                     // `EB-553` (R260). The third rider here that titles no
                     // keyword: the reframe's starting relic fields the stage
                     // at combat start, and the relic's own face has no room

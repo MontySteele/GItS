@@ -151,6 +151,45 @@
   <PropertyGroup Condition="'$(FurinaReframe)' == 'true'">
     <DefineConstants>$(DefineConstants);FURINA_REFRAME</DefineConstants>
   </PropertyGroup>
+
+  <!-- THE FURINA STAGE ARM (the brief
+       review/active/furina-stage-brief-2026-09-08.md: sec.3 the rules, sec.10
+       the defaults it discloses).
+
+           dotnet build ... -p:PrototypeCards=true -p:FurinaStage=true
+
+       A SIXTH property, on exactly the terms the second through fifth have and
+       for the same reason: it gates an ARM and not a compilation unit.
+       Everything the arm owns lives under Powers/Prototype/**,
+       Cards/Prototype/** and Vfx/Prototype/**, which the block below removes
+       from a release build (the one exception is Relics/SalonSolitaire.cs,
+       whose whole file is #if PROTOTYPE_CARDS for lint_unique_names' sake), so
+       this property compiles nothing new and cannot reach a release build even
+       if somebody passes it alone. All it moves is ONE default,
+       FurinaStage.Enabled, which the wiring seams read at runtime: her
+       starting deck, her starting relic, the damage-order branch in
+       FurinaResourceHooks.ModifyHpLostBeforeOsty, and the arm's own turn
+       hooks. The rules compile either way on purpose: the headless pins must
+       exercise the rules AND assert the flag-off wiring in ONE build.
+
+       ONE FLAG WHERE THE REFRAME HAS FIVE, and the difference is the shape of
+       what is switched. The reframe is four independent edits to a shipped
+       engine, so each leg has to be settable alone to pin "this rule moved and
+       the other three did not". The stage is not an edit to anything: with the
+       flag off there is no stage, no performer, no relic and no card, and
+       every seam is one early return. A per-leg flag would describe a state no
+       board can be in.
+
+       IT REPLACES THE REFRAME IN THE DESIGN AND NOT YET IN THE TREE. The
+       brief's sec.2 retires FURINA_REFRAME; the brief is OPEN (its sec.11
+       picks are unruled) and the reframe's surface is a sim engine module,
+       twenty-odd sheet rows and some five thousand lines of pins. So the two
+       switches stand side by side, independent, both shipping OFF, and a build
+       carrying both is a configuration of the compiler rather than of the
+       design. -->
+  <PropertyGroup Condition="'$(FurinaStage)' == 'true'">
+    <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition="'$(PrototypeCards)' != 'true'">
     <Compile Remove="Cards/Prototype/**/*.cs" />
     <!-- The same quarantine, for a RULE rather than a card. Two arms use it and

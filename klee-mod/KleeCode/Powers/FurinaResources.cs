@@ -1274,6 +1274,17 @@ public sealed class FurinaResourceHooks : AbstractModel
         // sim does, where the grant lands mid-resolution and the hit that
         // caused it has already been paid for.
         await FurinaResources.FlushFanfareDeltaBlock(choiceContext, target);
+#if PROTOTYPE_CARDS
+        // QUARANTINED: the stage's own settle, on the line above's argument
+        // taken whole. `ModifyHpLostBeforeOsty` moved the LEDGER synchronously
+        // because the engine wanted a number back; this is where the bodies
+        // catch up -- a lead emptied by that hit leaves, the survivors re-flow
+        // and the strip redraws -- and it fires per damage instance, so the
+        // board is settled before the NEXT hit of the same flurry. Nothing is
+        // paid out: a performer emptied by a hit takes no bow (rule 7).
+        await FurinaStage.Flush(target);
+        Vfx.FurinaStageStrip.Refresh(target);
+#endif
         await FurinaResources.SyncMeters(
             choiceContext, target, cardSource);
         await FurinaKitGrant.GrantIfCharged(
@@ -1289,6 +1300,31 @@ public sealed class FurinaResourceHooks : AbstractModel
         {
             return amount;
         }
+#if PROTOTYPE_CARDS
+        // QUARANTINED (R213 B): THE STAGE'S DAMAGE ORDER, brief sec.3 rule 6.
+        // "Furina's Block, then the lead performer's Fanfare, then Furina."
+        //
+        // THIS IS THE SEAM AND THERE IS NO OTHER. The hook fires PER DAMAGE
+        // INSTANCE with Block already spent -- which is what the shipped
+        // Encore buffer below it has always used, and it is the same two
+        // properties rule 6 needs: after Block, and once per attack. "Never
+        // runs on to the middle seat" is not enforced anywhere, it is simply
+        // what a method that does not loop does.
+        //
+        // BEFORE THE ENCORE BUFFER AND RETURNING EARLY, because under this arm
+        // Encore is retired (brief sec.2) and a board that fell through would
+        // charge one hit to two buffers. Inert with the arm off -- one flag
+        // read -- and absent from a release build.
+        //
+        // CEILING, matching `AbsorbDamage`'s own cast one method below: a
+        // fractional remainder costs the lead a whole point, the way it costs
+        // the shipped buffer one.
+        if (FurinaStage.LiveFor(target))
+        {
+            var incoming = (int)System.Math.Ceiling(amount);
+            return FurinaStageLedger.For(target).Absorb(incoming).ReachedFurina;
+        }
+#endif
         return FurinaResources.AbsorbDamage(target, amount);
     }
 

@@ -133,20 +133,12 @@ public class Round21Tests
             source);
     }
 
-    [Fact]
-    public void The_evoke_word_prints_the_price_and_not_the_old_promise()
-    {
-        // The numerals are INTERPOLATED from the constants they quote
-        // (`EB-89`), so the IL literals hold the prose either side of them --
-        // the same fold-out `test_understudy_blindplay`'s glossary table
-        // already makes for this word.
-        var word = Printed(typeof(ArmKeywordTips), "ForEvoke");
-
-        Assert.Contains("It spends ", word);
-        Assert.Contains(" [gold]Encore[/gold], or Evokes at 3/4.", word);
-        // The retired sentence, by name: it was false on Curtain Rises.
-        Assert.DoesNotContain("price pays", word);
-    }
+    // `EB-719` RETIRED THIS PIN WITH ITS WORD. `EB-587` put the Evoke's price
+    // on `ArmKeywordTips.ForEvoke`, and the word left the mod with the
+    // reframe's eleven `proto_fr_` rows under R213 B's deletion rule -- a
+    // tooltip for a rule no row prints is a definition of a mechanic that is
+    // not there. The PRICE it was about is `SalonPowers`' own and is pinned by
+    // `The_dry_cut_has_one_site_and_both_acts_read_it` directly above.
 
     // ==================================================================
     // `EB-591` -- Courtroom Drama's clause order is on its face

@@ -57,45 +57,89 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
     public override PotionPoolModel PotionPool =>
         ModelDb.PotionPool<SilentPotionPool>();
 
-    public override IEnumerable<CardModel> StartingDeck => new CardModel[]
+    public override IEnumerable<CardModel> StartingDeck
     {
-        ModelDb.Card<SoloistsSolicitation>(),
-        ModelDb.Card<SoloistsSolicitation>(),
-        ModelDb.Card<SoloistsSolicitation>(),
-        ModelDb.Card<StagePresence>(),
-        ModelDb.Card<StagePresence>(),
-        ModelDb.Card<StagePresence>(),
-        ModelDb.Card<RegalBearing>(),
-#if PROTOTYPE_CARDS
-        // QUARANTINED, THE FURINA REFRAME'S TWO STARTER SLOTS -- her two kit
-        // cards, and no others. With the arm on this slot is the reframe copy
-        // of Aria of Recompense (R254, round 4 pick 1) -- the same 5 Encore,
-        // plus 5 more at 6 Fanfare -- and with it off it is the shipped card,
-        // byte for byte. The sheet does not move; only these slots do, and
-        // only under the flag. The reasoning, the two lifted numbers and the
-        // sim twin (`loader._starter_ids`) are on
-        // FurinaReframeRoster.StarterAria.
-        Powers.FurinaReframeRoster.StarterAria(),
-#else
-        ModelDb.Card<AriaOfRecompense>(),
-#endif
-#if PROTOTYPE_CARDS
-        // And the other kit card, `EB-416`: under the arm the deploy NAMES its
-        // member (packet sec.5) instead of rolling one, which matters because
-        // the front member is the one a Companion play makes perform. See
-        // FurinaReframeRoster.StarterSalonDebut.
-        Powers.FurinaReframeRoster.StarterSalonDebut(),
-#else
-        ModelDb.Card<SalonDebut>(),
-#endif
-        ModelDb.Card<AnInvitation>(),
-    };
-
-    public override IReadOnlyList<RelicModel> StartingRelics =>
-        new RelicModel[]
+        get
         {
-            ModelDb.Relic<Relics.EtherealSpotlightRelic>(),
-        };
+#if PROTOTYPE_CARDS
+            // QUARANTINED, THE STAGE ARM'S WHOLE STARTER. It replaces the deck
+            // rather than a slot in it, because the arm's starter is a
+            // different SHAPE -- three kit cards where the shipped Furina
+            // carries two (brief sec.7) -- and a slot-for-slot swap cannot
+            // express that. The base game's seven basics are copied unmoved:
+            // a starter change is an A pick, never an E default. See
+            // FurinaStageRoster.StartingDeck.
+            //
+            // INLINE AND NOT DELEGATED, which is a pin's requirement rather
+            // than a style: `FurinaReframeStarterTests` reads the IL CALL
+            // SEQUENCE of THIS getter to assert that each reframe kit slot is
+            // swapped at exactly one seam and that the deck is still ten
+            // slots. Hoisting the shipped array into a helper property would
+            // empty the sequence and take those pins with it, so the branch
+            // returns from inside the getter and the shipped list stays where
+            // it has always been.
+            if (FurinaStage.Enabled)
+            {
+                return Powers.FurinaStageRoster.StartingDeck();
+            }
+#endif
+            return new CardModel[]
+            {
+            ModelDb.Card<SoloistsSolicitation>(),
+            ModelDb.Card<SoloistsSolicitation>(),
+            ModelDb.Card<SoloistsSolicitation>(),
+            ModelDb.Card<StagePresence>(),
+            ModelDb.Card<StagePresence>(),
+            ModelDb.Card<StagePresence>(),
+            ModelDb.Card<RegalBearing>(),
+#if PROTOTYPE_CARDS
+            // QUARANTINED, THE FURINA REFRAME'S TWO STARTER SLOTS -- her two kit
+            // cards, and no others. With the arm on this slot is the reframe copy
+            // of Aria of Recompense (R254, round 4 pick 1) -- the same 5 Encore,
+            // plus 5 more at 6 Fanfare -- and with it off it is the shipped card,
+            // byte for byte. The sheet does not move; only these slots do, and
+            // only under the flag. The reasoning, the two lifted numbers and the
+            // sim twin (`loader._starter_ids`) are on
+            // FurinaReframeRoster.StarterAria.
+            Powers.FurinaReframeRoster.StarterAria(),
+#else
+            ModelDb.Card<AriaOfRecompense>(),
+#endif
+#if PROTOTYPE_CARDS
+            // And the other kit card, `EB-416`: under the arm the deploy NAMES its
+            // member (packet sec.5) instead of rolling one, which matters because
+            // the front member is the one a Companion play makes perform. See
+            // FurinaReframeRoster.StarterSalonDebut.
+            Powers.FurinaReframeRoster.StarterSalonDebut(),
+#else
+            ModelDb.Card<SalonDebut>(),
+#endif
+                ModelDb.Card<AnInvitation>(),
+            };
+        }
+    }
+
+    public override IReadOnlyList<RelicModel> StartingRelics
+    {
+        get
+        {
+#if PROTOTYPE_CARDS
+            // QUARANTINED: under the stage arm the starting relic is Salon
+            // Solitaire, which opens every combat with the Usher in the front
+            // seat (brief sec.3 rule 2). A replacement and not an addition --
+            // the Spotlight in both modes is retired by that brief, so a run
+            // carrying it would print a rule the arm has turned off.
+            if (FurinaStage.Enabled)
+            {
+                return Powers.FurinaStageRoster.StartingRelics();
+            }
+#endif
+            return new RelicModel[]
+            {
+                ModelDb.Relic<Relics.EtherealSpotlightRelic>(),
+            };
+        }
+    }
 
     // Temporary playtest visuals live under a Furina namespace even while the
     // PCK builder fills missing files from Klee. Distinct scene paths are

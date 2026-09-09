@@ -76,10 +76,28 @@ public static class ArmKeywordTips
     public const string DuskKey = "KLEEMOD-ARM_DUSK";
     public const string CasketKey = "KLEEMOD-ARM_CASKET";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
-    public const string DeployKey = "KLEEMOD-ARM_DEPLOY";
-    public const string EvokeKey = "KLEEMOD-ARM_EVOKE";
-    public const string DrainKey = "KLEEMOD-ARM_DRAIN";
+    // THE FURINA STAGE'S SEVEN (`EB-719`, R269). The brief's sec.12 names
+    // them: "Spend, Fanfare (the bar), Raise, Bow, the lead, the back
+    // performer, Rotate". `Fanfare` collides with the reframe's word by
+    // spelling and not by meaning -- there it is a meter, here it is a
+    // performer's own bar -- so it takes its own key rather than reusing one
+    // that would render the retired arm's sentence.
+    // `EB-407`, and it SURVIVED the reframe's retirement (`EB-719`) while
+    // `Deploy`, `Evoke` and `Drain` did not. Those three named rules that
+    // left with their rows; Encore is SHIPPED machinery whose only
+    // statement of itself is a badge that needs the meter on the board, and
+    // every Furina row the Stage does not swap still prints the word. It
+    // titles no ARM KEYWORD any more -- no prototype face prints it -- so it
+    // is a rider like `PlanElementKey`, reached by the blind-play page
+    // rather than by a card's golded span.
     public const string EncoreKey = "KLEEMOD-ARM_ENCORE";
+    public const string SpendKey = "KLEEMOD-ARM_STAGE_SPEND";
+    public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
+    public const string RaiseKey = "KLEEMOD-ARM_STAGE_RAISE";
+    public const string BowKey = "KLEEMOD-ARM_STAGE_BOW";
+    public const string LeadPerformerKey = "KLEEMOD-ARM_STAGE_LEAD";
+    public const string BackPerformerKey = "KLEEMOD-ARM_STAGE_BACK";
+    public const string RotateKey = "KLEEMOD-ARM_STAGE_ROTATE";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -1048,126 +1066,15 @@ public static class ArmKeywordTips
 
     // ---------------------------------------------------- Furina ----------
     //
-    // Her THREE, and the reframe packet is what makes it three: sec.4.2 gives
-    // the deploy its perform clause, sec.4.4 renames the bow and prices it,
-    // sec.4.6 adds the drain. Each names a rule the SHIPPED engine does not
-    // have, which is why all three live here rather than in
-    // <see cref="SalonMemberTips"/> beside the member table: a release build
-    // deploys without performing, bows without tripling or minting, and has
-    // no drain at all, so the shipped tips are RIGHT about the shipped rules
-    // and these would contradict them on every Furina face in the game.
-
-    /// <summary>
-    /// SEC.4.2, and the second sentence is the half a player cannot infer.
-    /// Deploying onto a full stage has always displaced the oldest member;
-    /// what the arm adds is that the displacement is an <i>Evoke</i> -- the
-    /// free one, the reward for filling the stage -- so the word the card
-    /// prints has to say where the other word comes from.
-    ///
-    /// `EB-368` ADDED THE THIRD SENTENCE. The act-2 seat played no Salon card
-    /// across three fights, and the reason is the rule this word did not
-    /// carry: a member on stage does NOTHING on its own, and what makes it act
-    /// afterwards is a Companion card. A player who reads only "joins the
-    /// stage and performs at once" prices a deploy as a one-shot, and a
-    /// one-shot at that price is never worth the card.
-    ///
-    /// THE WORD WAS REWRITTEN RATHER THAN EXTENDED, the Bomb's precedent
-    /// (`EB-343`, R248): three rules appended to the old two sentences ran 50
-    /// characters over the tip ceiling, and the ceiling is the base game's own
-    /// longest mechanic tip. All three are here in two sentences, and the tip
-    /// takes no length exception. "[gold]Salon[/gold]" goes with them: this tip
-    /// only ever renders beside the member tips, which name the stage.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForDeploy(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, DeployKey,
-            "A member joins and performs at once; a full stage "
-          + "[gold]Evokes[/gold] the front member first. Afterwards only a "
-          + "[gold]Companion[/gold] play performs a member.");
-
-    /// <summary>
-    /// SEC.4.4, all three clauses, and the numerals are interpolated from
-    /// <see cref="FurinaReframeLaw"/> for `EB-89`'s reason: a retune of the
-    /// multiplier or the mint must not be able to leave this sentence quoting
-    /// a retired number.
-    ///
-    /// `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE. The old sentence --
-    /// "the card's Encore price pays for it", `F7` (1) -- was two claims at
-    /// once and both failed. It is FALSE on Curtain Rises, which Evokes by
-    /// deploying onto a full stage and prints no Encore price at all; and it
-    /// left the Evoke outside the economy every other act on the stage pays
-    /// into, which the r15 lane-1 seat read off its own board: at 0 Encore
-    /// three performances resolved dry at three-quarters while the Evoke on
-    /// the same turn delivered its full 14. An Evoke IS a performance -- one
-    /// that also costs the member -- so it pays the performance's 1 and takes
-    /// the performance's dry cut, and the word now says so in the words the
-    /// Salon paragraph and the member tips already use.
-    ///
-    /// `EB-601` PUT THE TRIGGER FIRST, and it is one clause bought with the
-    /// word "The". THE FIND (Furina r16 lane 1 (c)): "a full stage Evokes the
-    /// front member" -- <see cref="ForDeploy"/>'s sentence -- read beside "a
-    /// Companion card you play performs Crabaletta" says, to a reader meeting
-    /// both on one screen, that playing a Companion card into a full stage
-    /// Evokes. It does not; only a Deploy does, and the misreading cost the
-    /// lane an elite turn. The Deploy word states the rule from its own side
-    /// and cannot state it from this one, because a player reading THIS word
-    /// is asking what makes an Evoke happen.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForEvoke(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, EvokeKey,
-            "Only a [gold]Deploy[/gold] onto a full stage "
-          + "[gold]Evokes[/gold]. The member performs and leaves; its "
-          + "[gold]Fanfare[/gold] bonus "
-          + "counts " + FurinaReframeLaw.EvokeFocusMult + " times and it "
-          + "prints " + FurinaReframeLaw.FanfarePerEvoke
-          + " [gold]Fanfare[/gold]. It spends "
-          + SalonConstants.TickEncoreCost
-          + " [gold]Encore[/gold], or Evokes at 3/4.");
-
-    /// <summary>
-    /// SEC.4.6. TWO SENTENCES BECAUSE IT IS TWO FACTS, and the second is the
-    /// one the meter cannot show: after the drain the bar reads 0 whether it
-    /// held twelve or nothing, so what the card pays out has to be tied to
-    /// what it TOOK in words as well as in code
-    /// (<see cref="KleeMod.Powers.FurinaDrain"/>).
-    ///
-    /// NO THRESHOLD IS MENTIONED because there is none: both drain rows are
-    /// playable at any value, including zero, which is the wasted play the
-    /// packet deliberately leaves available.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForDrain(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, DrainKey,
-            "Your [gold]Fanfare[/gold] falls to nothing. What the card does "
-          + "next is priced off the amount it took.");
-
-    /// <summary>
-    /// `EB-407`. THE WORD IS PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is
-    /// named on the Neow screen and on opening-hand faces, and the shipped
-    /// surface that states its rule is `EncoreMeterPower`'s badge -- which
-    /// only ever renders once the meter is on the board. The Furina round-4
-    /// seat made the run's first decision without the word (run 1, (c) 5).
-    ///
-    /// THREE FACTS, EACH READ OFF ITS OWN SITE, no fourth invented:
-    ///   * the buffer, <see cref="KleeMod.Powers.FurinaResources.AbsorbDamage"/>
-    ///     -- damage remaining after Block consumes Encore before HP;
-    ///   * a card's price, <c>FurinaResourceHooks.BeforeCardPlayed</c> --
-    ///     spent immediately after the energy debit and BEFORE resolution;
-    ///   * a member's 1, <see cref="KleeMod.Powers.SalonMemberPower"/>'s
-    ///     <c>PerformMember</c> -- it pays <c>TickEncoreCost</c> if it can and
-    ///     performs at <c>DryDamageMultiplier</c> (3/4) if it cannot.
-    ///
-    /// AND THE ORDER, WHICH IS THE HALF NOTHING PRINTED. All three draw on one
-    /// amount, in the order the events reach it: there is no reservation and
-    /// no priority anywhere in those three sites, so a hit that lands first
-    /// leaves a member performing dry, and a member that performs first leaves
-    /// less buffer for the hit. "One pool, as each lands" is that, in the
-    /// space the 135-character tip ceiling leaves.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForEncore(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, EncoreKey, EncoreBody());
+    // THE REFRAME'S FOUR ARE GONE (`EB-719`, R269). `Deploy`, `Evoke`, `Drain`
+    // and `Encore` left this class with the eleven `proto_fr_` rows that
+    // printed them: the Stage brief's sec.2 retires that arm by name, R213 B's
+    // deletion rule took its rows off `docs/prototype-surface.yaml`, and a
+    // tooltip for a word no row prints is a definition of a mechanic that is
+    // not there (draft 6's precedent, one character over). The rest of the
+    // reframe's C# stands until the branch that owns both halves takes it.
+    //
+    // WHAT REPLACED THEM is the STAGE's seven, at the foot of this class.
 
     /// <summary>
     /// `EB-553` (R260): the reframe's stage is never unlit, and the relic that
@@ -1316,4 +1223,131 @@ public static class ArmKeywordTips
             return null;
         }
     }
+
+    // ------------------------------------------- Furina, the Stage --------
+    //
+    // Her SEVEN, and the Stage brief's sec.12 is what makes it seven: the
+    // faces print `Spend`, `Fanfare`, `Raise`, `Bow`, `lead performer`, `back
+    // performer` and `Rotate`, and every one of them names a rule the SHIPPED
+    // engine does not have. A shipped Fanfare is a METER on the player; here
+    // it is a performer's own bar, and the two sentences contradict each other
+    // on every face -- which is exactly why these live here, behind
+    // `PrototypeCards`, and not in <see cref="SalonMemberTips"/>.
+    //
+    // THE NUMERALS ARE INTERPOLATED FROM <see cref="FurinaStageLaw"/> (`EB-89`),
+    // so a retune cannot leave one of these sentences quoting a retired number.
+
+    /// <summary>
+    /// Brief sec.3 rule 8, both sentences, because the second is the half a
+    /// player cannot infer and the one the whole Expend deck is built on: a
+    /// rider fires IN FULL whatever the bar holds, so a performer at 1 buys
+    /// the same big number a performer at 8 does and takes a bow for it. The
+    /// only refusal is an empty stage.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSpend(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, SpendKey,
+            "Pays from the [gold]lead performer[/gold]. It fires in full even "
+          + "if the bar is short; an emptied performer takes a "
+          + "[gold]Bow[/gold]. No stage, no rider.");
+
+    /// <summary>
+    /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter
+    /// beside it." TWO SENTENCES BECAUSE IT IS TWO FACTS, and the second is
+    /// the damage order (rule 6), which is the reason a player cares what the
+    /// bar is at all.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForFanfare(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, FanfareKey,
+            "A performer's own bar. Attacks hit your [gold]Block[/gold], then "
+          + "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.");
+
+    /// <summary>
+    /// Brief sec.3 rule 5. The second sentence is the rule a face cannot say
+    /// in its own space: with one performer on stage the back seat IS the
+    /// lead, so a Raise on a lone Usher lands where the hits do.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForRaise(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, RaiseKey,
+            "Adds [gold]Fanfare[/gold] to the [gold]back performer[/gold]. "
+          + "With one performer on stage, that is the lead.");
+
+    /// <summary>
+    /// Brief sec.3 rules 7 and 9 together, because the word only means
+    /// anything against its opposite: a performer emptied by a
+    /// <i>Spend</i> bows, and one emptied by a HIT just leaves. That
+    /// difference is the whole of turn one's wager (sec.7, line B against
+    /// line C) and it is stated nowhere else on the screen.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForBow(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, BowKey,
+            "A departure effect, earned by [gold]Spend[/gold] only. Usher: "
+          + FurinaStageLaw.BowUsherBlock + " [gold]Block[/gold]. Chevalmarin: "
+          + "Hydro on all. Crabaletta: " + FurinaStageLaw.BowCrabalettaDamage
+          + " damage.");
+
+    /// <summary>
+    /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates
+    /// and the one that is hit, and both facts are about the same seat, which
+    /// is why one sentence can carry them.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForLeadPerformer(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, LeadPerformerKey,
+            "The front seat: the one attacks reach and the only one that "
+          + "regains " + FurinaStageLaw.LeadRegen + " [gold]Fanfare[/gold] "
+          + "each turn.");
+
+    /// <summary>
+    /// Brief sec.3 rules 5 and 6, from the other end. The back seat is the
+    /// reserve: nothing hits it, so what is banked there survives until
+    /// rotation or a summon brings it forward.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForBackPerformer(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, BackPerformerKey,
+            "The back seat, and the reserve: nothing hits it. With one "
+          + "performer on stage it is also the lead.");
+
+    /// <summary>
+    /// Brief sec.3 rule 3 and sec.5.2. THE SECOND SENTENCE IS THE REFUSAL,
+    /// and GPT's read of draft 1 is why it is here: a card called "Take a Bow"
+    /// would have taught a bow that rotation does not grant, so the card was
+    /// renamed and the word has to say what it does not do.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForRotate(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, RotateKey,
+            "Seats change order and every bar comes with them. Nobody leaves "
+          + "and nobody takes a [gold]Bow[/gold].");
+
+    /// <summary>
+    /// `EB-407`. THE WORD IS PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is
+    /// named on the Neow screen and on opening-hand faces, and the shipped
+    /// surface that states its rule is `EncoreMeterPower`'s badge -- which
+    /// only ever renders once the meter is on the board. The Furina round-4
+    /// seat made the run's first decision without the word (run 1, (c) 5).
+    ///
+    /// THREE FACTS, EACH READ OFF ITS OWN SITE, no fourth invented:
+    ///   * the buffer, <see cref="KleeMod.Powers.FurinaResources.AbsorbDamage"/>
+    ///     -- damage remaining after Block consumes Encore before HP;
+    ///   * a card's price, <c>FurinaResourceHooks.BeforeCardPlayed</c> --
+    ///     spent immediately after the energy debit and BEFORE resolution;
+    ///   * a member's 1, <see cref="KleeMod.Powers.SalonMemberPower"/>'s
+    ///     <c>PerformMember</c> -- it pays <c>TickEncoreCost</c> if it can and
+    ///     performs at <c>DryDamageMultiplier</c> (3/4) if it cannot.
+    ///
+    /// AND THE ORDER, WHICH IS THE HALF NOTHING PRINTED. All three draw on one
+    /// amount, in the order the events reach it: there is no reservation and
+    /// no priority anywhere in those three sites, so a hit that lands first
+    /// leaves a member performing dry, and a member that performs first leaves
+    /// less buffer for the hit. "One pool, as each lands" is that, in the
+    /// space the 135-character tip ceiling leaves.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForEncore(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, EncoreKey, EncoreBody());
 }
