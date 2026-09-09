@@ -37,17 +37,37 @@ namespace KleeMod.Powers;
 /// 0: a performer at 0 has LEFT, and <see cref="FurinaStagePets"/> removes the
 /// body in the same reconcile.
 ///
-/// THE ART IS OWED AND THE FALLBACK IS OSTY, deliberately and on the
-/// jellyfish's own terms. Art is commissioned when a slice is ACCEPTED, not
-/// before; a performer scene wants a <c>pck-src</c> pass and a
-/// <c>build_pck</c>, which is refused from a worktree. So
+/// EACH WEARS ITS OWN SILHOUETTE, and the three scenes are authored rather
+/// than borrowed: <c>klee-mod/pck-src/furina/model/{usher,chevalmarin,
+/// crabaletta}.tscn</c>, cut from the Kurage's minimal
+/// <c>NCreatureVisualsFactory</c> scene -- <c>%Visuals/Rig/Body</c>, a
+/// <c>Bounds</c> box, and the four-state animation pair the shared
+/// <see cref="KleeMod.Vfx.CreatureAnimationRouter"/> travels to. They point at
+/// the Salon strip's own member sprites
+/// (<c>res://furina/salon/member_*.png</c>), which the pack already carries:
+/// ONE PRODUCER PER OUT-PATH (art_lint L11) is why the art is reused where it
+/// stands rather than copied to a second path.
+///
+/// THEY STAND, WHERE THE JELLYFISH FLOATS, and that is the one number that is
+/// theirs rather than inherited. A <c>Sprite2D</c> centres on its origin, so a
+/// 144-tall performer whose feet are on the ground line has its Rig at -72;
+/// the Kurage's is -80 under a 128-tall sprite, which floats it 16px clear --
+/// right for a jellyfish and wrong for a person on a stage. The idle bob is a
+/// third of the jellyfish's and the sway a half, for the same reason.
+///
+/// <c>Bounds</c> IS THE PLACEMENT DIAL and is cut to each sprite's real width
+/// (121 / 129 / 120): <c>NCombatRoom</c> spaces a player's pets by the OWNER's
+/// box and then offsets each by its OWN half-width, so a box wider than the
+/// art would space the line by a margin nobody can see.
+///
+/// THE FALLBACK IS STILL OSTY and stays, on the jellyfish's own terms:
 /// <see cref="CustomVisualPath"/> asks the pack for this performer's scene and
-/// falls through to the base game's Osty rig while the pack has none -- the
-/// same null-answering <c>KleePck.Path</c> funnel every asset in this mod
-/// goes through, and the same pre-repack failure mode the jellyfish already
-/// documents. Three identical rigs is sec.8's "Three Ostys" failure mode
-/// LITERALLY on screen, so this is a build-order fact worth reading twice: the
-/// arm is not eyes-on ready until the three scenes exist.
+/// falls through to the base game's rig when the pack has none -- the same
+/// null-answering <c>KleePck.Path</c> funnel every asset in this mod goes
+/// through. It is a PRE-REPACK failure mode now rather than the standing
+/// state, and it is worth keeping named: three identical rigs is sec.8's
+/// "Three Ostys" literally on screen, so a build whose pck predates these
+/// scenes reads as that failure rather than as the design.
 /// </summary>
 public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvider
 {

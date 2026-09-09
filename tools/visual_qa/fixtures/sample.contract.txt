@@ -1,10 +1,16 @@
 contract=roster-pck-v3
 sha256=0000000000000000000000000000000000000000000000000000000000000000
+resource=res://furina/model/chevalmarin.tscn
 resource=res://furina/model/combat.tscn
+resource=res://furina/model/crabaletta.tscn
 resource=res://furina/model/layers/furina_combat_body.png
 resource=res://furina/model/layers/furina_combat_coat_back.png
 resource=res://furina/model/layers/furina_combat_hat.png
 resource=res://furina/model/layers/furina_combat_sword.png
+resource=res://furina/model/usher.tscn
+resource=res://furina/salon/member_chevalmarin.png
+resource=res://furina/salon/member_crabaletta.png
+resource=res://furina/salon/member_usher.png
 resource=res://furina/ui/char_icon.png
 resource=res://furina/ui/energy_counter.tscn
 resource=res://furina/ui/energy_orb/layer1_backglow.png

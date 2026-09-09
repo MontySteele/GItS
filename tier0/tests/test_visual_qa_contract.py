@@ -65,11 +65,16 @@ def test_the_sample_contract_is_well_formed():
     assert parsed.version == "roster-pck-v3"
     # 22 until EB-40, then +6: furina/ui/energy_counter.tscn and the five
     # energy_orb layers it references. Then +2 for the Bake-Kurage pet's
-    # creature scene and the summon sprite it draws. Asserted as a number
+    # creature scene and the summon sprite it draws. Then +6 for the Furina
+    # stage's three performers (`EB-721`): a creature scene each, and the three
+    # SALON member sprites they draw -- which the pack already carried (the
+    # salon copy block) but the fixture did not, because until these scenes
+    # nothing referenced them from a scene and the universe is what
+    # `scene-deps` resolves an ext_resource against. Asserted as a number
     # rather than derived, so a scene that gains a texture nobody added to the
     # fixture universe fails HERE, beside the file, and not only in the
     # scene-deps gate downstream that resolves against it.
-    assert len(parsed.resources) == 30
+    assert len(parsed.resources) == 36
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -169,5 +174,5 @@ def test_end_to_end_on_a_staged_package(tmp_path):
                                         payload), payload)
     report = contract.run(None, ROOT, package_dir=package, pck_src=PCK_SRC)
     assert report.errors == [], report.render(verbose=True)
-    assert report.checked["contract_resources"] == 30   # +6 at EB-40, +2 for the pet
+    assert report.checked["contract_resources"] == 36   # +6 at EB-40, +2 for the pet, +6 for the stage
     assert report.checked["package_files"] == 3
