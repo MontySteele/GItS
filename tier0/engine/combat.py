@@ -792,7 +792,7 @@ def _finish_play(state: CombatState, card: Card,
         # all 11 of Ironclad's Power cards (recon BUG 1).
         dest = "exhaust" if force_exhaust else refpowers.result_pile(state,
                                                                      card)
-        # QUARANTINED (C.KLEE_OVERHAUL, `EB-731`). BLAST SHIELD, and this is
+        # QUARANTINED (C.KLEE_OVERHAUL, `EB-732`). BLAST SHIELD, and this is
         # the ONE line of it: the card the arm's `return_to_hand` op raised the
         # flag for goes back to the HAND instead of the pile the rule above
         # picked. Read and lowered here, at the routing, because that is the
@@ -877,7 +877,7 @@ _FREE_PLAY_CONTEXT = (
     # exhausts mid-resolution opens its own list, and the restore below hands
     # the outer card back the one it was reading.
     "exhaust_selection",
-    # QUARANTINED (C.KLEE_OVERHAUL, `EB-731`). Blast Shield's per-play flag,
+    # QUARANTINED (C.KLEE_OVERHAUL, `EB-732`). Blast Shield's per-play flag,
     # saved for its neighbours' reason: a free play resolved inside an outer
     # card must not hand the OUTER card its answer about where to land. The
     # inner `_finish_play` lowers the flag it raised, and this restores
@@ -1114,7 +1114,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # same order.
     furina_reframe.field_opening_member(state)
 
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`). THE STAGE, at the
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE STAGE, at the
     # same site and for the same reason as the two lines above: her starting
     # relic Salon Solitaire puts Usher in the front seat at 3 on turn one
     # (brief sec.3 rule 2), and the LEAD's regen (rule 4) runs at the start of
@@ -1268,7 +1268,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # promise and the only clause of the sentence a card can tell apart.
     # `kokomi_plan.resolve_dusk` carries the rest of the argument.
     kokomi_plan.resolve_dusk(state)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`). THE ACTS (brief
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE ACTS (brief
     # sec.3 rule 10): "Each performer performs at the end of Furina's turn,
     # from any seat, a flat act that does not read its bar."
     #
@@ -1385,7 +1385,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # A turn that ended by killing the last enemy or by the player dying never
     # reaches here, and metrics records -1 there rather than inventing a zero.
     state.emit("turn_close", block=p.block)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`), INSTRUMENT ONLY.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`), INSTRUMENT ONLY.
     # Brief sec.13's third report: "Turns with one, two and three performers on
     # stage." One sample per completed player turn, taken beside `turn_close`
     # and carrying that event's own declared blind spot -- a turn that ended by
@@ -1540,7 +1540,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # because `blocked` exists nowhere else.
             effects.companion_overhaul_block_absorbed(
                 state, enemy, blocked, block_before)
-            # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`). THE DAMAGE
+            # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE DAMAGE
             # ORDER (brief sec.3 rule 6): "Furina's Block, then the lead
             # performer's Fanfare, then Furina", PER ATTACK. This is that
             # site -- inside the per-hit loop, after Block is spent and before

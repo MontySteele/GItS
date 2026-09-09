@@ -13,7 +13,7 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// POOL PASS TWO -- six rows (2026-09-08, <c>EB-731</c>), in three pairs: the
+/// POOL PASS TWO -- six rows (2026-09-08, <c>EB-732</c>), in three pairs: the
 /// defence shelf's two (Blast Shield, Return to Sender), the Spark sinks' two
 /// beside Stoke the Fuse (Bottomless Bag, Once More!) and the Energy engines'
 /// two (Sparkling Burst, Blazing Delight).

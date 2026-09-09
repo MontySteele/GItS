@@ -578,7 +578,7 @@
    upgrade: {split_grow: +2},
    effects: [{op: split_largest_bomb, growth: 0}]}
 
-# THE POOL PASS, ROUND TWO (`EB-731`, 2026-09-08). Six rows in three pairs:
+# THE POOL PASS, ROUND TWO (`EB-732`, 2026-09-08). Six rows in three pairs:
 # the defence shelf's two, the Spark sinks' two, the Energy engines' two.
 # Why each exists: docs/notes/prototype-surface-provenance.md.
 

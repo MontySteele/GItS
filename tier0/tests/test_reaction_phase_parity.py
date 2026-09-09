@@ -823,7 +823,7 @@ CO_TENANCY_LEDGER = {
             "explosion, both of which are strictly later than this broadcast, "
             "so no co-tenant can move the number it reads",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "ReturnToSenderPower"):
-            "QUARANTINED (the Klee overhaul, `EB-731`). The BLOCK-MARK "
+            "QUARANTINED (the Klee overhaul, `EB-732`). The BLOCK-MARK "
             "housekeeping half, IcyPawsPower's construction and its answer: "
             "it removes itself when no Block stands behind the mark. THE "
             "ORDERING QUESTION, answered: it reads Owner.Block and writes "
@@ -836,7 +836,7 @@ CO_TENANCY_LEDGER = {
             "broadcast applies the mark, only a card play does, and a card "
             "play is strictly later",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BlazingDelightPower"):
-            "QUARANTINED (the Klee overhaul, `EB-731`). Per-turn Energy plus "
+            "QUARANTINED (the Klee overhaul, `EB-732`). Per-turn Energy plus "
             "one draw per stack. THE ORDERING QUESTION, answered: it reads "
             "nothing but its own Amount, so no co-tenant can move an input it "
             "does not have. It WRITES energy and the hand -- the energy reset "

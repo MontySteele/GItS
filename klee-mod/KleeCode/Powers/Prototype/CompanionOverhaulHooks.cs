@@ -1313,7 +1313,7 @@ public sealed class CompanionOverhaulIncomingHit : AbstractModel
         if (dealer == null || dealer.Player != null) return;   // by an enemy
         if (!props.IsPoweredAttack()) return;
 
-        // THE KLEE ARM'S ONE INCOMING READER (QUARANTINED, `EB-731`), FIRST
+        // THE KLEE ARM'S ONE INCOMING READER (QUARANTINED, `EB-732`), FIRST
         // and behind its own flag. Return to Sender is the paws' construction
         // with a Bomb on the attacker instead of an aura, and it rides this
         // listener rather than a fifth `AbstractModel` subscription for the

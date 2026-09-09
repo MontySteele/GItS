@@ -68,7 +68,7 @@ internal static class KleePowerIcons
         VermillionPactPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
-        // POOL PASS TWO's two (`EB-731`), on the block above's terms verbatim.
+        // POOL PASS TWO's two (`EB-732`), on the block above's terms verbatim.
         // Return to Sender borrows the BOMB-PER-TRIGGER badge, because that is
         // what it is -- a Bomb placed off an event, one trigger along from
         // Chained Reactions' explosion. Blazing Delight borrows Grounded's,

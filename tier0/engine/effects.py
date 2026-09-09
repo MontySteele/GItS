@@ -400,7 +400,7 @@ def _runtime_count(state: CombatState, token: str,
         # nothing every time. Written by `_op_drain_fanfare`, cleared per card
         # play beside `discards_this_card` and its neighbours.
         return state.fanfare_drained_this_card
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`) -- the STAGE's three.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`) -- the STAGE's three.
     #
     # `stage_spent` is the reframe token's argument one arm over: what THIS
     # play took off the bars, read back by the effect after it, because by the
@@ -3793,7 +3793,7 @@ PREDICATE_NAMES = frozenset({
     # this turn is held, a Dusk entry is held until it resolves, and a queue
     # the morning drained is not.
     "plan_held",
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`). THE ONE THING A
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE ONE THING A
     # SPEND RIDER ASKS. Brief sec.3 rule 8: "With no performer on stage the
     # rider cannot fire and the card plays at its base number" -- so the
     # question is OCCUPANCY and never size, because a bar of any size pays the
@@ -3883,7 +3883,7 @@ def is_known_predicate(name: str) -> bool:
 # would make the validator reject valid content; a token here the chain
 # ignores documents a spelling nothing reads.
 RUNTIME_COUNT_NAMES = frozenset({
-    # QUARANTINED USE ONLY (`EB-731`) -- the FURINA STAGE's three. Registered
+    # QUARANTINED USE ONLY (`EB-732`) -- the FURINA STAGE's three. Registered
     # here as well as resolved in `_runtime_count` for this registry's own
     # reason: the loader validates every count token at LOAD off this set, so a
     # token only the resolver knows is a card that raises the first time it is
@@ -5577,7 +5577,7 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    # ONCE MORE!'s NOTE (`EB-731`), taken HERE and above every branch below:
+    # ONCE MORE!'s NOTE (`EB-732`), taken HERE and above every branch below:
     # "the last Set off card you played this combat" is a fact about the CARD,
     # not about a charge, so a Set off played into an empty board still counts.
     # C# twin: the same note at the head of `ProtoBombPower.SetOffAimed`,
@@ -5828,7 +5828,7 @@ def _op_hexerei_mark_hand(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_return_to_hand(state: CombatState, fx: dict, card: Card) -> None:
-    """Blast Shield (`EB-731`): "Return this card to your hand."
+    """Blast Shield (`EB-732`): "Return this card to your hand."
 
     ONE call into the arm, which raises the per-play flag `combat._finish_play`
     reads at its routing line -- see `klee_overhaul.mark_return_to_hand` for
@@ -5841,7 +5841,7 @@ def _op_return_to_hand(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_return_last_set_off(state: CombatState, fx: dict, card: Card) -> None:
-    """Once More! (`EB-731`): the last Set off card played this combat comes
+    """Once More! (`EB-732`): the last Set off card played this combat comes
     back out of the discard pile.
 
     ONE call into the arm, so "the last Set off card" has one answer: the note
@@ -5997,7 +5997,7 @@ def _op_remove_debuff(state: CombatState, fx: dict, card: Card) -> None:
 
 
 # ----------------------------------------------------------------------
-# THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, `EB-731`).
+# THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, `EB-732`).
 #
 # EIGHT VERBS AND NO MORE. The brief's seventeen faces (sec.12) are written in
 # these plus `damage`, `block`, `draw` and `conditional`, which is the shape
@@ -6146,7 +6146,7 @@ OPS = {
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`): the Stage's eight.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`): the Stage's eight.
     "stage_summon": _op_stage_summon,
     "stage_raise": _op_stage_raise,
     "stage_scene_change": _op_stage_scene_change,
@@ -6223,7 +6223,7 @@ OPS = {
     # is still the arm's, because the cards that READ the Hexerei family are
     # Klee's -- see `_op_hexerei_mark_hand`.
     "hexerei_mark_hand": _op_hexerei_mark_hand,
-    # POOL PASS TWO's two (`EB-731`), and both are about a CARD rather than a
+    # POOL PASS TWO's two (`EB-732`), and both are about a CARD rather than a
     # charge: Blast Shield routes its own play to the hand, Once More! takes
     # the last Set off card back out of the discard pile.
     "return_to_hand": _op_return_to_hand,
@@ -7820,7 +7820,7 @@ def companion_overhaul_block_absorbed(state: CombatState, enemy: Enemy,
     this Block absorbs damage" says: it is a trigger on the absorption, not on
     the card and not on the turn.
     THE KLEE ARM'S ONE READER OF THE SAME EVENT (QUARANTINED,
-    `C.KLEE_OVERHAUL`, `EB-731`) IS FIRST AND HAS ITS OWN FLAG. Return to
+    `C.KLEE_OVERHAUL`, `EB-732`) IS FIRST AND HAS ITS OWN FLAG. Return to
     Sender is the paws' construction with a Bomb on the attacker instead of an
     aura, and it rides this function rather than a fourth call site because
     `blocked` exists nowhere else in this engine -- the same argument that put

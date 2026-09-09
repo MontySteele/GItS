@@ -414,7 +414,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # (Split Charge).
                   "plant_bomb_copy_largest", "grow_bombs_off_aura",
                   "split_largest_bomb",
-                  # POOL PASS TWO's two (`EB-731`), and neither touches a Bomb.
+                  # POOL PASS TWO's two (`EB-732`), and neither touches a Bomb.
                   # `return_to_hand` (Blast Shield) is emitted NOT as a
                   # statement but as a `GetResultLocationForCardPlay` override
                   # -- the game's own seam for "where does this card go when it
@@ -2035,7 +2035,7 @@ GROW_BOMBS_OFF_AURA_FIELDS = {"op", "amount", "floor"}
 #: Bomb's own, and `growth` is what the upgrade buys on top of each. NO
 #: `target` -- "your largest Bomb" is board-wide and the halves land at random.
 SPLIT_LARGEST_BOMB_FIELDS = {"op", "growth"}
-#: POOL PASS TWO's two (`EB-731`), same discipline and both bare: neither
+#: POOL PASS TWO's two (`EB-732`), same discipline and both bare: neither
 #: prints a number and neither aims. Blast Shield's return is a fact about the
 #: card that was played, and Once More!'s is a fact about a card that already
 #: was -- there is nothing on either for a field to carry.
@@ -2408,7 +2408,7 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], the Attack that set it off "
         "triggers one too."),
-    # POOL PASS TWO's two (`EB-731`). Return to Sender is a MARK on the Block
+    # POOL PASS TWO's two (`EB-732`). Return to Sender is a MARK on the Block
     # pool and takes `BlockMark`'s whole construction, so its {X} is the Block
     # the card marked and never a duration; Blazing Delight's {X} is a RATE,
     # read twice by one clause, so a second copy pays 2 and 2.
@@ -3496,7 +3496,7 @@ def card_level_reason(
             return ("`rising_cost:` needs `retain: true` -- a card discarded "
                     "at end of turn can never stay in your hand, so the fuse "
                     "would print a rule that cannot fire")
-    # `EB-731` (Blast Shield). `return_to_hand` IS A FACT ABOUT THE WHOLE PLAY
+    # `EB-732` (Blast Shield). `return_to_hand` IS A FACT ABOUT THE WHOLE PLAY
     # and not a line in the body: the C# spells it as a
     # `GetResultLocationForCardPlay` override, which the game asks once and
     # unconditionally, so a copy of the op inside a conditional or a mode body
@@ -4012,7 +4012,7 @@ def blocked_reason(
             if not isinstance(growth, int) or isinstance(growth, bool) \
                     or growth < 0:
                 return "split_largest_bomb growth must be a literal int >= 0"
-        # POOL PASS TWO's two (`EB-731`), same UNPARSEABLE discipline.
+        # POOL PASS TWO's two (`EB-732`), same UNPARSEABLE discipline.
         if op == "return_to_hand":
             unknown = set(eff) - RETURN_TO_HAND_FIELDS
             if unknown:
@@ -8960,7 +8960,7 @@ def build_body(
                 f"{_split_growth_expr(card, eff)});")
 
         elif op == "return_to_hand":
-            # BLAST SHIELD (`EB-731`), and it emits NO STATEMENT here on
+            # BLAST SHIELD (`EB-732`), and it emits NO STATEMENT here on
             # purpose. Where a played card lands is not something the body can
             # do -- the card is in no pile while it resolves -- so the rule is
             # a `GetResultLocationForCardPlay` override on the class
@@ -8971,7 +8971,7 @@ def build_body(
             pass
 
         elif op == "return_last_set_off":
-            # ONCE MORE! (`EB-731`). ONE call into the ledger, which is where
+            # ONCE MORE! (`EB-732`). ONE call into the ledger, which is where
             # "the last Set off card you played this combat" is written, so the
             # card cannot express a second reading of it. Deterministic and
             # silent: nothing is prompted, and a card that is not in the
@@ -13513,7 +13513,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         f"    public int HandCostRise => {rising};"
         if rising else "")
 
-    # `EB-731` (Blast Shield): "Return this card to your hand."
+    # `EB-732` (Blast Shield): "Return this card to your hand."
     #
     # `GetResultLocationForCardPlay` IS THE SEAM, and it is the game's own:
     # `CardModel.Play` switches on the returned `CardLocation`'s pile, which is
@@ -13532,7 +13532,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # like any other, and replaying it costs its Spark price again -- which is
     # the whole card.
     return_to_hand_member = (
-        "\n\n    // `EB-731`, Blast Shield: the played card goes back to the"
+        "\n\n    // `EB-732`, Blast Shield: the played card goes back to the"
         " HAND\n"
         "    // instead of the discard pile."
         " `GetResultLocationForCardPlay` is\n"

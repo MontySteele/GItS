@@ -177,7 +177,7 @@ RETIRED: dict[str, frozenset[int]] = {
         (647, 650), (653, 658), (663, 666), (668, 669), (671, 672), (674, 675),
         (678, 680), 683, 685, 688, (690, 692), 694, 703, 711,
         # 730 is minted on PR #469 (the flaky local-tester pin); parked so
-        # pool pass two (EB-731) mints past it. Remove when #469 lands.
+        # pool pass two (EB-732) mints past it. Remove when #469 lands.
         730,
     ),
     "M": _spans((1, 12), (14, 25), (27, 69)),

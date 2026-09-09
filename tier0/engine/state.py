@@ -872,7 +872,7 @@ class Player(Fighter):
     # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
     # every count read (has_salon_members, pilot, instruments) still works.
     salon: list[str] = field(default_factory=list)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`). THE STAGE: the three
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE STAGE: the three
     # seats, front first, each an `[member, fanfare]` pair. SOURCE OF TRUTH for
     # the arm and the only state it adds -- the brief's sec.2 is explicit that
     # "Fanfare is the performer's bar itself ... no counter beside it", so
@@ -1279,7 +1279,7 @@ class CombatState:
     # actually happened; every reader of the replacement rule asks
     # `effects.salon_numerics_replaced`, which is the OR of the two.
     salon_will_replace_this_card: bool = False
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-731`). What THIS card play
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). What THIS card play
     # took off the stage's bars, read back by the effects after it through
     # `amount_formula: {count: stage_spent}`. Per-card and not a bar read: by
     # the time *Final Bow*'s Block or the Rare's damage resolves, the bar it is
@@ -1512,7 +1512,7 @@ class CombatState:
     # that wrote it on a card sitting in the discard pile. Empty on every tree
     # with the arm off; the twin is `IntroductionMagicPower.Marked`.
     ko_hexerei_marked: list["Card"] = field(default_factory=list)
-    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-731`). Blast Shield's whole rule, as
+    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-732`). Blast Shield's whole rule, as
     # a fact about THIS play rather than about the card: the `return_to_hand`
     # op raises it while the card resolves and `combat._finish_play` reads it
     # ONCE, at the routing line, and lowers it again. A per-play flag and not a
@@ -1520,7 +1520,7 @@ class CombatState:
     # (`GetResultLocationForCardPlay`), and the one thing both engines have to
     # agree on is where THIS play's card lands.
     ko_return_to_hand: bool = False
-    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-731`). Once More!'s whole read: the
+    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-732`). Once More!'s whole read: the
     # last card this combat whose `set_off` op resolved. The INSTANCE and not
     # the id, because the card the player takes back has to be the one that
     # went to the discard pile -- two copies of Ka-pow! are two cards and only
