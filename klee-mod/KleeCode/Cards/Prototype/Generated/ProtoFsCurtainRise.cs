@@ -45,13 +45,14 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Curtain Rise"),
-        ("description", "Deal {IfUpgraded:show:10|7} damage. [gold]Spend[/gold] 3: deal {IfUpgraded:show:16|13} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -86,6 +87,8 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
+        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
+        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
     }
 }

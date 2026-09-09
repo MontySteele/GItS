@@ -34,10 +34,6 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard
 {
-    /// <summary>Block arrives from a conditional row, so this card declares no
-    /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
-    public override bool GainsBlock => true;
-
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
@@ -49,13 +45,14 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Interposition"),
-        ("description", "Gain {IfUpgraded:show:8|5} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain {IfUpgraded:show:13|10} instead."),
+        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new BlockVar("PlainBlock", 5m, ValueProp.Move),
+            new BlockVar("BranchBlock", 10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,6 +77,8 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // conditional_block: all 2 branch amounts swap on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
+        // conditional_block: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
+        DynamicVars["PlainBlock"].UpgradeValueBy(3m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
     }
 }

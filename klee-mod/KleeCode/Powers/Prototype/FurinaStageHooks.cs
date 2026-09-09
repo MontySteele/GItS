@@ -76,6 +76,16 @@ public sealed class FurinaStageHooks : AbstractModel
         foreach (var creature in participants.ToList())
         {
             if (!FurinaStage.LiveFor(creature)) continue;
+            // `EB-735`. THE LOG'S TURN BOUNDARY, and it is HERE rather than at
+            // her turn start on purpose. The window a seat cannot watch is the
+            // TURN BREAK -- this sweep, and then what the enemies' attacks
+            // take off the lead -- so a clear at turn start would wipe both a
+            // moment before the only screen that could print them. That is
+            // `SALON_ARRIVAL_NOTE`'s defect one arm over, where an arrival
+            // that had performed reached the page as an empty list. Cleared
+            // immediately BEFORE the sweep, so the log the next screen carries
+            // opens with the sweep it is about.
+            FurinaStageLedger.For(creature).ClearBeats();
             await FurinaStage.EndOfTurnActs(choiceContext, creature);
             Vfx.FurinaStageStrip.Refresh(creature);
         }

@@ -1268,7 +1268,7 @@ def _starter_ids(spec: dict) -> list[str]:
     # one difference worth naming: this arm swaps all THREE of her kit
     # starters, not one. The brief's opening ten is "three Soloist's
     # Solicitation, three Stage Presence, Regal Bearing, all the base game's
-    # basics and untouched; plus Salon Début, Curtain Rise, Standing Ovation",
+    # basics and untouched; plus Salon Début, Curtain Rise, Rising Applause",
     # so the seven basics stay exactly as printed and the three kit slots take
     # the arm's own cards.
     #

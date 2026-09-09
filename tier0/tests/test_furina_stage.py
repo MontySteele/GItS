@@ -11,8 +11,8 @@ WHAT IS PINNED, in the order the rules are numbered:
   * the arm is OFF and the engine is byte-for-byte the shipped engine (first,
     because every other pin here is worthless without it);
   * the relic opens the stage at 3 and the lead regenerates from turn TWO;
-  * a summon fills the back-most empty seat at 1, performs at once, and
-    rotates the front out WITH ITS BAR on a full stage;
+  * a summon fills the back-most empty seat at 1, does NOT act on arrival
+    (`EB-738`), and rotates the front out WITH ITS BAR on a full stage;
   * the damage order, per attack, and that it never runs on to the middle seat;
   * Spend fires in full off a short bar and the payer bows; a hit earns none;
   * the acts, the bows, and that Furina's own HP is touched by nothing;
@@ -162,12 +162,28 @@ def test_a_summon_fills_the_back_most_empty_seat_at_one(arm):
     assert st.player.stage[-1][1] == FS.SUMMON_FANFARE
 
 
-def test_a_newcomer_performs_its_act_the_same_turn(arm):
-    """Sec.3 rule 3, as GPT's read of draft 1 corrected it (sec.14): Usher
-    arriving gives Furina his 3 Block at once."""
+def test_a_newcomer_does_not_act_on_arrival(arm):
+    """Sec.3 rule 3 as round one reworded it (`EB-738`, packet sec.5): "A
+    newcomer performs with the others at the end of that turn, never on
+    arrival." Summoning Usher changes no number on the board; the sweep is
+    what pays his 3 Block, and it pays it once."""
     st = _state()
+    before = st.player.block
     FS.summon(st, "usher")
-    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.player.block == before
+    assert not [e for e in st.log if e["event"] == "stage_act"]
+    FS.end_of_turn_acts(st)
+    assert st.player.block == before + FS.ACT_USHER_BLOCK
+
+
+def test_a_summon_changes_no_enemy_number_on_play(arm):
+    """`EB-738`'s acceptance, on the performer whose act is damage: three round-
+    one seats watched every summon deal damage and apply Hydro with nothing on
+    its face."""
+    st = _state(enemies=[_enemy(hp=40)])
+    FS.summon(st, "crabaletta")
+    assert st.enemies[0].hp == 40
+    assert st.enemies[0].aura is None
 
 
 def test_a_full_stage_rotates_and_the_newcomer_inherits_the_leavers_bar(arm):
@@ -182,9 +198,10 @@ def test_a_full_stage_rotates_and_the_newcomer_inherits_the_leavers_bar(arm):
         "chevalmarin", "crabaletta", "usher"]
     assert st.player.stage[-1][1] == 7          # the leaver's bar, carried
     assert sum(f for _m, f in st.player.stage) == 10   # nothing lost
-    # No bow: the departing Usher's 4 Block never lands. The 3 that does is his
-    # replacement's ARRIVAL act, which rule 3 grants.
-    assert st.player.block == before + FS.ACT_USHER_BLOCK
+    # No bow, and no arrival act either (`EB-738`): nothing lands on her Block
+    # at all. The departing Usher's 4 is unearned (rule 7) and his
+    # replacement's 3 waits for the end-of-turn sweep.
+    assert st.player.block == before
     assert not [e for e in st.log if e["event"] == "stage_bow"]
 
 
@@ -600,12 +617,12 @@ def _open_fight_one():
 
 
 def test_fight_one_turn_one_line_a_is_the_briefs_row(arm):
-    """Sec.7's line A, the BUILD: Presence, Standing Ovation (Usher 3 to 8),
+    """Sec.7's line A, the BUILD: Presence, Rising Applause (Usher 3 to 8),
     Solicitation; Usher performs Block 3. Block 9, damage 6, Nibbit at 38,
     Usher takes the 3 that survives her Block and sits at 5, Furina at 78."""
     st = _open_fight_one()
     st.player.block += 6                                   # Stage Presence
-    FS.raise_fanfare(st, FS.REFILL_AMOUNT)                 # Standing Ovation
+    FS.raise_fanfare(st, FS.REFILL_AMOUNT)                 # Rising Applause
     effects.deal_damage_to_enemy(st, st.enemies[0], 6)     # Solicitation
     FS.end_of_turn_acts(st)                                # Usher: Block 3
 
@@ -680,11 +697,15 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_damage_line(arm):
     FS.turn_start_regen(st)                                # Usher 5 -> 6
     assert FS.lead_fanfare(st.player) == 6
     st.player.block += 3                                   # Regal Bearing
-    FS.summon(st, "crabaletta")                            # arrives at 1, acts
+    # `EB-738`: she arrives at 1 and does NOT act on arrival, so the board is
+    # sec.7's own -- "Solicitation 6 (38 to 32) ... Performances: Usher Block 3
+    # (wasted), Crabaletta 5 (32 to 27)".
+    FS.summon(st, "crabaletta")
+    assert st.enemies[0].hp == 38
     effects.deal_damage_to_enemy(st, st.enemies[0], 6)     # Solicitation
-    assert st.enemies[0].hp == 32 - FS.ACT_CRABALETTA_DAMAGE
+    assert st.enemies[0].hp == 32
     FS.end_of_turn_acts(st)                                # Usher 3, Crab 5
-    assert st.enemies[0].hp == 22
+    assert st.enemies[0].hp == 27
     combat._enemy_turn(st, st.enemies[0])                # Hiss: +2 Strength
     assert st.enemies[0].powers.get("strength") == 2
 
@@ -698,10 +719,10 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_damage_line(arm):
     effects.deal_damage_to_enemy(st, st.enemies[0], 6)     # Solicitation
     FS.end_of_turn_acts(st)                                # Usher 3, Crab 5
     assert st.player.block == 9
-    # 22, less the turn's 19, less Crabaletta's 5 -- the curtain, one turn
-    # earlier than sec.7's own line, because sec.7 spends turn three's third
-    # card on a Refill and this line spends it on a Solicitation.
-    assert st.enemies[0].hp == -2
+    # 27, less the turn's 19, less Crabaletta's 5: sec.7's damage line, "with
+    # Crabaletta's 5, Nibbit is at 3", and sec.7's turn four kills it with two
+    # Solicitations.
+    assert st.enemies[0].hp == 3
     assert FS.lead_fanfare(st.player) == 4
 
 

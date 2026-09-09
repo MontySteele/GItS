@@ -45,13 +45,14 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Entrance"),
-        ("description", "Deal {IfUpgraded:show:14|10} damage. [gold]Spend[/gold] 5: deal {IfUpgraded:show:24|20} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new FoldedDamageVar("PlainDamage", 10m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 20m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -86,6 +87,8 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
+        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
+        DynamicVars["PlainDamage"].UpgradeValueBy(4m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
     }
 }

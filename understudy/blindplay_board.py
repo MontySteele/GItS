@@ -132,6 +132,45 @@ FANFARE_PARTS: dict[str, str] = {
 }
 
 
+# `EB-736`. THE THREE METER LINES THE STAGE RETIRED, hidden while the arm is
+# on.
+#
+# THE FIND (round one, sec.2). "The page's combat header still prints the
+# shipped Fanfare meter, the shipped Burst meter and `Encore: 0`, beside a
+# glossary that calls Fanfare the bar. One word, two resources, the shown one
+# dead." Every one of the three is a SHIPPED resource the brief's sec.2
+# retires: Encore, the Fanfare counter and the Burst bar. The mod still
+# registers all three -- `GitsResources` walks BaseLib's registry and knows
+# nothing about who is playing -- so they arrive on the wire whatever the arm
+# is, and `ZERO_METERS` was printing two of them AT ZERO on purpose, because
+# under the REFRAME they were the two numbers every turn was priced against.
+#
+# ASKED OF THE ARM AND NOT OF THE BOARD, `ZERO_METERS`' own question and its
+# answer: the wire's `furina_stage` block is the arm saying it is live, so a
+# board that carries it hides these three and every other board is untouched.
+# That block is also the one that PRINTS the bar the word now means, so the
+# hiding and the replacing are decided by one fact.
+#
+# KEYED BY THE PRINTED NAME, `ZERO_METERS`' convention: these are the rows the
+# render would otherwise print. `Burst` and `Furina Burst` are both entered
+# because `qa_packet.label` renders the wire's id and the mod has spelled it
+# both ways.
+STAGE_HIDDEN_METERS = frozenset({
+    "Encore", "Fanfare", "Burst", "Furina Burst",
+})
+
+
+def _stage_live(player: dict[str, Any]) -> bool:
+    """Is the Furina Stage arm live on this board (`EB-736`)?
+
+    THE POPULATED STATE ONLY, which is the wire's own three-way split: an
+    absent key is a build with no Stage and an empty map is a seat not playing
+    it, and on either of those the shipped meters are the truth and stay
+    printed."""
+    raw = player.get("furina_stage")
+    return isinstance(raw, dict) and bool(raw)
+
+
 def _zero_meters(player: dict[str, Any]) -> frozenset[str]:
     """The meter names this board prints at 0. Empty for every other arm."""
     return ZERO_METERS.get(_fold(_text(player.get("character"))),
@@ -148,13 +187,16 @@ def _meters(player: dict[str, Any], resources: Any) -> dict[str, int]:
     `INTERNAL_METERS`. `EB-487`: except the arm's own two, which print their
     zero -- see `ZERO_METERS` for why the ARM is asked and not the board.
     `EB-568`: and never the two parts of the Fanfare row, see
-    `FANFARE_PARTS`.
+    `FANFARE_PARTS`. `EB-736`: and never the three the Stage retired while the
+    Stage is live, see `STAGE_HIDDEN_METERS`.
     """
     if not isinstance(resources, dict):
         return {}
+    hidden = STAGE_HIDDEN_METERS if _stage_live(player) else frozenset()
     return {_label(k): _int(v) for k, v in resources.items()
             if k not in INTERNAL_METERS
             and _label(k) not in FANFARE_PARTS
+            and _label(k) not in hidden
             and (_int(v) or _label(k) in _zero_meters(player))}
 
 
@@ -501,6 +543,9 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # in the Bake-Kurage's receipt as in the enemy list four lines down.
         name_moved_rows(plans, _enemies(state), combat["enemies"])
         combat["plans"] = plans
+    stage = furina_stage(p)
+    if stage is not None:
+        combat["stage"] = stage
     salon = furina_salon(p)
     if salon is not None:
         # `EB-405`, and it is `EB-329`'s rule one arm over: the mod names the
@@ -510,6 +555,128 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         name_performances(salon, _enemies(state), combat["enemies"])
         combat["salon"] = salon
     return combat
+
+
+#: The seats, in damage order, under the words the brief and the tips use.
+#: Front first, and the LIST's order is the damage order (rule 6): an attack
+#: reaches `lead`, a Raise lands on the back-most, and the middle seat is
+#: reached by neither.
+STAGE_SEAT_NAMES = ("lead", "middle", "back")
+
+#: A performer's SHORT name -- the word the brief, the glossary rows and the
+#: Bow tip all use ("Usher: 4 Block. Chevalmarin: Hydro on all."). The wire
+#: carries the long one too (`Gentilhomme Usher`, which is what the body's
+#: health bar is labelled with in game); the page prints the short one, because
+#: three long names on one line is the line nobody reads.
+STAGE_SHORT_NAMES = {
+    "usher": "Usher",
+    "chevalmarin": "Chevalmarin",
+    "crabaletta": "Crabaletta",
+}
+
+
+#: Why a performer left, in the words rules 7 and 9 use. A bow is earned by
+#: Spend and by nothing else, so the reason is not decoration: it is the
+#: difference between turn one's line B and line C (brief sec.7), which is the
+#: wager round one asked its seats to name.
+#:
+#: TRANSLATED HERE AND NOT IN THE RENDER, which is `qa_packet.assert_blind`'s
+#: rule rather than a preference: the wire spells a departure `final_bow`, and
+#: a snake_case token reaching a blind packet is an ID, refused by name. The
+#: observation carries the SENTENCE, so nothing downstream holds the token.
+STAGE_LEAVE_REASONS = {
+    "hit": "emptied by a hit, so no Bow",
+    "spend": "emptied by a Spend, so it takes a Bow",
+    "rotated": "rotated off the front to make room, so no Bow",
+    "final_bow": "took its Bow and left",
+}
+STAGE_LEFT_UNSAID = "left the stage"
+
+
+def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
+    """The Stage as the observed board sees it (`EB-735`).
+
+    THE DEFECT, in three seats' words (round one, sec.2): "Nothing on the
+    blind-play page names a performer, a seat or a bar ... in some 550 actions
+    no seat ever knew who was on stage or what a bar held." Each learned the
+    roster from one glossary line and inferred bars by firing readers and
+    reading the result backwards; all three read the cast as "one anonymous
+    pool with three names".
+
+    THE ABSENT / EMPTY / POPULATED SPLIT is `kokomi_plans`', with one more
+    state that matters here: an ABSENT key is "no Stage rule in this build", an
+    EMPTY map is "the rule is here and this seat is not playing it", and a
+    POPULATED map with NO SEATS is "the stage is empty" -- which is a fact and
+    not a hole, because rule 8 makes an empty stage the one board on which a
+    Spend rider cannot fire at all. `None` keeps the section off the page in
+    the first two cases; the third prints "the stage is empty".
+
+    Emitted by `vendor/STS2_MCP/gits/GitsFurinaStage.cs`, which lifts it by
+    reflection from `KleeMod.Powers.FurinaStageLedger.Snapshot`. Every field
+    name below is that method's, and the two together are the contract:
+
+      seats -- front first, one row per occupied seat: the `member` id, the
+        long `name`, the `seat` index (front = 0), the `fanfare` on the bar and
+        the body's `entity_id`.
+      log -- what the stage has done since she last ended a turn, in order.
+        Each row is an `event` (`arrive`, `act`, `bow`, `leave`, `rotate`), the
+        performer, the seat it happened in, the bar afterwards, what the board
+        `moved`, and for a departure the `reason` it left by -- which is the
+        whole of rules 7 and 9, since a bow is earned by Spend and by nothing
+        else.
+
+    THE NUMBER ON A LOG ROW IS WHAT THE BOARD DID, measured by the mod across
+    the beat, and never the clause's own printed figure (`EB-511`'s lesson one
+    kit over). So an act into a Vulnerable says what the enemy actually lost.
+    """
+    raw = player.get("furina_stage")
+    if not isinstance(raw, dict) or not raw:
+        return None
+    seats = []
+    for row in (raw.get("seats") or []):
+        if not isinstance(row, dict):
+            continue
+        member = _text(row.get("member"))
+        seats.append({
+            "member": member,
+            "name": STAGE_SHORT_NAMES.get(member, _text(row.get("name"))),
+            "long_name": _text(row.get("name")),
+            "seat": _int(row.get("seat")),
+            "fanfare": _int(row.get("fanfare")),
+            "entity_id": (None if row.get("entity_id") is None
+                          else _text(row.get("entity_id"))),
+        })
+    log = []
+    for row in (raw.get("log") or []):
+        if not isinstance(row, dict):
+            continue
+        member = _text(row.get("member"))
+        log.append({
+            "event": _text(row.get("event")),
+            "member": member,
+            "name": STAGE_SHORT_NAMES.get(member, _text(row.get("name"))),
+            "seat": _int(row.get("seat")),
+            "fanfare": _int(row.get("fanfare")),
+            "moved": _int(row.get("moved")),
+            "why": STAGE_LEAVE_REASONS.get(_text(row.get("reason")),
+                                           STAGE_LEFT_UNSAID),
+        })
+    return {"seats": seats, "log": log}
+
+
+def stage_seat_name(index: int, occupied: int) -> str:
+    """What to call the seat at `index` on a stage of `occupied` performers.
+
+    THE BACK IS THE BACK-MOST OCCUPIED SEAT and not the third chair, which is
+    rule 5's second sentence: "with one performer on stage, that is the lead".
+    A page that called a lone Usher "lead" and then sent a Raise to a "back"
+    nobody was standing in would print the rule's exception as a contradiction.
+    """
+    if occupied <= 1 or index <= 0:
+        return STAGE_SEAT_NAMES[0]
+    if index >= occupied - 1:
+        return STAGE_SEAT_NAMES[2]
+    return STAGE_SEAT_NAMES[1]
 
 
 def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:

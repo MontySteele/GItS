@@ -249,10 +249,18 @@ def summon(state, member: str) -> None:
     a bow, the other two step forward, and the newcomer takes the back seat
     WITH THE LEAVER'S FANFARE -- "pools are never lost to rotation".
 
-    AND THE NEWCOMER PERFORMS ITS ACT THE SAME TURN (rule 3, as GPT's read of
-    draft 1 corrected it, sec.14). That is `perform` below, called here, so a
-    summon is one call at every site rather than a pair somebody has to
-    remember.
+    AND THE NEWCOMER DOES NOT ACT ON ARRIVAL (`EB-738`, round one's one E
+    default, packet sec.5). Rule 3 reads "a newcomer performs with the others
+    at the end of that turn, never on arrival", and this engine had read the
+    draft's older wording as an act on play: three seats watched every summon
+    deal damage and apply Hydro with nothing on its face, and a summon turn
+    performed twice.
+
+    THERE IS NO CODE FOR THE RULE AND THAT ABSENCE IS THE RULE.
+    `end_of_turn_acts` walks whoever is on stage when it fires (rule 10), so a
+    performer summoned during the turn is standing there when the sweep runs
+    and performs exactly once. Stated here because "the rule needs no code" and
+    "the rule was dropped" look identical in a diff.
     """
     p = state.player
     if not active(p):
@@ -273,7 +281,6 @@ def summon(state, member: str) -> None:
                    arriving=member)
         state.emit("stage_summon", member=member, fanfare=carried,
                    seats=len(seats), rotated=True)
-    perform(state, member)
 
 
 def rotate(state) -> None:
@@ -520,8 +527,10 @@ def absorb(state, incoming: int) -> int:
 def perform(state, member: str) -> None:
     """Rule 10: one performer's flat act, from any seat, reading no bar.
 
-    ONE implementation, three callers -- the end-of-turn sweep, a newcomer's
-    arrival (rule 3) and *Bis!* (sec.12) -- so an act cannot mean three things.
+    ONE implementation, two callers -- the end-of-turn sweep and *Bis!*
+    (sec.12) -- so an act cannot mean two things. A newcomer's arrival was the
+    third until `EB-738` removed it: a summon performs at the END of the turn,
+    with the others, and reaches this function through the sweep.
     """
     from tier0.engine import effects, reactions       # late: avoids the cycle
     p = state.player
