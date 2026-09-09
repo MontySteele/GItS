@@ -234,7 +234,7 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
-          + " a turn, goes off only when [gold]Set off[/gold], or as a "
+          + " a turn, and goes off when [gold]Set off[/gold] or as a "
           + "[gold]Mine[/gold]. "
           // `EB-400`: BLOCK, NAMED. "Not an Attack: only Vulnerable and a
           // cap move it" is a true sentence that reads as a false one -- a
@@ -245,11 +245,9 @@ public static class ArmKeywordTips
           // anything else, and the `Set off` tip has said so since `EB-443`
           // in these same three words. The exclusion the sentence is really
           // about is the ATTACK-keyed debuff, and it still says that.
-          + "Not an Attack, but [gold]Block[/gold] stops it: only "
-          + "[gold]Vulnerable[/gold] and a cap on the "
-          + "enemy's HP loss move it. "
-          + "If this enemy dies with it still on, it moves to a survivor. "
-          + "Your deck opens with a placer.");
+          + "[gold]Block[/gold] stops it. Only "
+          + "[gold]Vulnerable[/gold] and the HP cap move it. "
+          + "If the enemy dies with it on, it moves to a survivor.");
 
     /// <summary>
     /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
@@ -378,7 +376,7 @@ public static class ArmKeywordTips
         // the sentence that fixes it belongs beside the one that was already
         // there rather than on a relic the player may not have read.
         return word + "Start each combat with " + KleeOverhaulLaw.OpeningSpark
-             + ". Pounding Surprise grants more. " + shared;
+             + ". " + shared;
     }
 
     /// <summary>
@@ -440,21 +438,39 @@ public static class ArmKeywordTips
     /// filed on: the seat met "a kill moves them to a survivor" on the badge of
     /// the body its Mine was about to kill and read it as a promise about that
     /// Mine. A Mine kills more often than a plain Bomb does, so the tip that
-    /// says "unless the Mine kills" is exactly where the other reading has to
-    /// be closed. Same sentence as `ForBomb` and as the badge, word for word,
-    /// so no two of the three can be read against each other; `MineKey` is
-    /// carried in `tools/lint_text_conventions.py` by name for the room.
+    /// says the hit still lands is exactly where the other reading has to be
+    /// closed. Same sentence as `ForBomb` and as the badge, word for word --
+    /// the badge says it of a pile, so its copy is the same claim in the
+    /// plural -- so no two of the three can be read against each other;
+    /// `MineKey` is carried in `tools/lint_text_conventions.py` by name for
+    /// the room.
+    ///
+    /// TRIMMED 2026-09-08 ([USER]'s run 2, an E default: "a lot of
+    /// unnecessary tooltip text that could be trimmed"), and the badge was
+    /// trimmed with it in the same commit so the three surfaces still agree
+    /// word for word. Every rule above is still printed: "just before"
+    /// carries the order the subordinate clause used to spend a phrase on,
+    /// "The hit still lands." is `EB-436`'s finding in four words, and the
+    /// last two sentences are `ForBomb`'s exactly. Full stops and not
+    /// semicolons, which is text-conventions rule 14.
+    ///
+    /// AND FOUR SENTENCES, WHICH IS THE OTHER CEILING. `MAX_SENTENCES` is 4
+    /// -- the base game's longest card -- and it takes NO exception, unlike
+    /// the length; so "the hit still lands" rides the trigger sentence on a
+    /// comma rather than standing alone, which is where the fifth sentence
+    /// would have been. The two facts `EB-436` asked for are both still
+    /// printed and neither is a subordinate clause any more.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
-          + "which lands in full unless the Mine kills. Their "
+            "A [gold]Bomb[/gold] that also goes off just before its enemy's "
+          + "hit, and the hit still lands. "
           // `EB-400`, the same three words on the same clause: a Mine IS a
           // Bomb, so a tip that lists what moves the hit and leaves Block out
           // reads as Block immunity here for the same reason.
-          + "[gold]Block[/gold] stops it, and only their "
-          + "[gold]Vulnerable[/gold] and a cap move it. "
-          + "If this enemy dies with it still on, it moves to a survivor.");
+          + "[gold]Block[/gold] stops it. Only "
+          + "[gold]Vulnerable[/gold] and the HP cap move it. "
+          + "If the enemy dies with it on, it moves to a survivor.");
 
     /// <summary>
     /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`

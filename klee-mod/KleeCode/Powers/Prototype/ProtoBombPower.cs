@@ -113,15 +113,25 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                 // `tools/lint_text_conventions.py` reads these literals out of
                 // the SOURCE with a regex that stops at one, so a semicolon
                 // makes a player-facing string invisible to its own ceiling.
+                // TRIMMED 2026-09-08 with the two keyword tips ([USER]'s
+                // run 2, an E default). The third sentence is the WORD's own
+                // two sentences now, so the canonical badge copy and
+                // `ArmKeywordTips.ForBomb` say the modifier rule in the same
+                // words; what left is the "not an Attack" negative, which two
+                // seats misread as Block immunity, and the enumeration behind
+                // it. The live faces still NAME the fold R248 asks for --
+                // that is `FoldedMods.Clause`, one clause per term, and it is
+                // untouched. ONE SENTENCE AND NOT THE WORD'S TWO: this
+                // face already spends two sentences on rules 1 and 2 and a
+                // fourth on the Mine, and `MAX_SENTENCES` is 4 with no
+                // exception, so the word's two are joined on a comma here.
+                // Same words, same rule, one full stop fewer.
                 ("description",
                     "A charge on this enemy that grows at the start of your "
                   + "turn. Every [gold]Bomb[/gold] here goes off as Pyro "
-                  + "damage when [gold]Set off[/gold], never by itself. The "
-                  + "hit is not an Attack, but their [gold]Block[/gold] "
-                  + "absorbs it, and only this enemy's "
-                  + "[gold]Vulnerable[/gold] and a damage cap move the "
-                  + "number, never a debuff that answers Attacks and never "
-                  + "anything of yours."
+                  + "damage when [gold]Set off[/gold], never by itself. "
+                  + "[gold]Block[/gold] stops it, and only "
+                  + "[gold]Vulnerable[/gold] and the HP cap move it."
                   + MineClause),
             };
             // EB-260, EB-287 and `EB-343`. ROWS, not one row with conditionals
@@ -179,9 +189,19 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// rule, <see cref="Preempted"/> -- so the badge says that and stops.
     /// Same sentence, same two surfaces the clause has had since
     /// <c>EB-260</c>.</summary>
+    /// <summary>TRIMMED 2026-09-08 with the two keyword tips ([USER]'s run
+    /// 2, an E default: "a lot of unnecessary tooltip text that could be
+    /// trimmed"). Both of `EB-436`'s facts survive -- when it goes off, and
+    /// that the attack lands anyway -- in one short sentence rather than one
+    /// with a subordinate clause. ONE and not two, because every face this
+    /// clause rides already spends three sentences of the four
+    /// `MAX_SENTENCES` allows and that cap takes no exception. The words are
+    /// <see cref="KleeMod.Cards.ArmKeywordTips.ForMine"/>'s own, so the badge
+    /// and the word cannot be read against each other. "This enemy" is the
+    /// one difference and it is the badge's whole subject.</summary>
     private const string MineClause =
-        " A [gold]Mine[/gold] also goes off before this enemy's hit, which "
-      + "lands in full unless the Mine kills.";
+        " A [gold]Mine[/gold] also goes off just before this enemy's hit, "
+      + "and the hit still lands.";
 
     // `EB-343`'s sentence is written INTO the static description above rather
     // than pulled out as a constant beside `MineClause`, and the reason is the
@@ -197,11 +217,18 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     // 46, and a Flutter 5 enemy took a 27 Bomb whole while a printed 8 Attack
     // landed 4. Both of those say "from Attacks" on their own faces, and the
     // reason they miss is the one both surfaces now lead with -- the hit is not
-    // an Attack. The keyword tip says it in its own shorter words ("Not an
-    // Attack: only their Vulnerable and a cap move it",
-    // `ArmKeywordTips.ForBomb`), while this face, read on the enemy where the
-    // modifiers actually are, names the cap and both exclusions outright. Same
-    // rule, two surfaces, the arrangement `MineClause` already has.
+    // an Attack.
+    //
+    // TRIMMED 2026-09-08 ([USER]'s run 2, an E default), and the sentence is
+    // now `ArmKeywordTips.ForBomb`'s own two: "Block stops it. Only
+    // Vulnerable and the HP cap move it." The negative it led with went with
+    // the same negative on the word -- two seats read "not an Attack" as
+    // Block immunity, which is what `EB-400` had to name Block beside -- and
+    // the enumeration behind it went with the trim. THE FOLD IS STILL NAMED
+    // WHERE R248 ASKS FOR IT: `FoldedMods.Clause` prints one clause per term
+    // on the LIVE face, beside the number the term moved, and it is
+    // untouched. Same rule, same words, two surfaces, the arrangement
+    // `MineClause` already has.
 
     /// <summary>
     /// The face the wire prints (<c>PowerModel.HoverTips</c> uses the SMART
@@ -481,7 +508,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// `ForMine`, so no two of the three can be read against each
     /// other.</summary>
     private const string JumpSentence =
-        " If this enemy dies with them still on, they move to a survivor.";
+        " If the enemy dies with them on, they move to a survivor.";
 
     /// <summary>Rule 7 on a pile with no Mine in it. A pile holding a Mine
     /// prints <see cref="MineClause"/> INSTEAD, because "none goes off by

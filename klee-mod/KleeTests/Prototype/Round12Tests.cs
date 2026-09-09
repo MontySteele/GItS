@@ -185,7 +185,10 @@ public class Round12Tests
         // mitigation, and the r12 act-1 seat played a turn on that read:
         // three Mines left armed against an elite, five went off, "every hit
         // landed in full, 36 to 18 HP".
-        Assert.Contains("which lands in full unless the Mine kills", MineTip());
+        // TRIMMED 2026-09-08 ([USER]'s run 2, an E default): the same
+        // finding in four words, and it is a sentence of its own now rather
+        // than a subordinate clause hanging off the trigger.
+        Assert.Contains("the hit still lands", MineTip());
         Assert.DoesNotContain("before the hit lands", MineTip());
     }
 
@@ -195,8 +198,9 @@ public class Round12Tests
         // "Read the badge:" is what paid for the new clause; the clause it
         // introduced is untouched, so R248's rule survives whole.
         // `EB-400` renamed the opener to name Block; both terms survive.
-        Assert.Contains("[gold]Block[/gold] stops it, and only their ", MineTip());
-        Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", MineTip());
+        Assert.Contains("[gold]Block[/gold] stops it. Only ", MineTip());
+        Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
+                        MineTip());
         Assert.DoesNotContain("Read the badge", MineTip());
     }
 
@@ -213,8 +217,8 @@ public class Round12Tests
         foreach (var key in new[] { "description", "smartDescriptionMines" })
         {
             Assert.Contains(
-                "goes off before this enemy's hit, which lands in full "
-              + "unless the Mine kills.",
+                "goes off just before this enemy's hit, and the hit still "
+              + "lands.",
                 rows.First(r => r.Item1 == key).Item2);
         }
     }

@@ -99,7 +99,7 @@ public class KleeOverhaulRoundFourTests
         // the body the pile is about to kill, which is exactly where "a kill
         // moves them to a survivor" reads as a promise about THESE charges.
         Assert.EndsWith(" growing each turn. None goes off by itself."
-                        + " If this enemy dies with them still on, they move "
+                        + " If the enemy dies with them on, they move "
                         + "to a survivor.", face);
     }
 
