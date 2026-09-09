@@ -714,10 +714,15 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.",
             "Adds [gold]Fanfare[/gold] to the [gold]back performer[/gold]. ",
             "With one performer on stage, that is the lead.",
-            "A departure effect, earned by [gold]Spend[/gold] only. Usher: ",
+            # `EB-744`: the "only" was false on the faces printing it --
+            # Final Bow's whole card is a bow bought with a card and an
+            # Exhaust -- so the row states the CONTRAST instead.
+            "A departure effect a [gold]Spend[/gold] earns and a hit does ",
             "The front seat: the one attacks reach and the only one that ",
-            "The back seat, and the reserve: nothing hits it. With one ",
-            "performer on stage it is also the lead.",
+            # `EB-744`: rule 6 is per ATTACK, so a flurry reaches the
+            # reserve once the front seat empties.
+            "The back seat, the reserve: no single attack reaches it. It ",
+            "leads once the front seat empties. Alone on ",
             "Seats change order and every bar comes with them. Nobody leaves ",
             "and nobody takes a [gold]Bow[/gold].",
     ):
