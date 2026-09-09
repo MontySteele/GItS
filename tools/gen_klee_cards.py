@@ -5072,21 +5072,50 @@ STAGE_COUNT_CS = {
 }
 
 
-def _stage_spends_before(card: dict, eff: dict) -> bool:
-    """Does this card take something off the bars BEFORE `eff` resolves?
+def _stage_spender_before(card: dict, eff: dict) -> str | None:
+    """WHICH op takes something off the bars before `eff` resolves, or None.
 
     `_drain_before`'s question one arm over and structural for its reason: two
     effects on one row can be equal dicts, and what is being asked is about a
     POSITION in the emitted `OnPlay` body. A row that read `stage_spent` before
     it had spent anything would print a number it cannot pay.
+
+    `EB-747` made it return the OP rather than a boolean, because the C# side
+    now needs to know which spend is coming: <i>Final Bow</i> forecasts the
+    LEAD's bar and <i>Let the People Rejoice</i> the whole stage's, and the op
+    standing in front of the payoff is what says which.
     """
     for other in card.get("effects") or []:
         if other is eff:
-            return False
+            return None
         if other.get("op") in {"stage_spend", "stage_spend_all",
                                "stage_final_bow"}:
-            return True
-    return False
+            return str(other["op"])
+    return None
+
+
+def _stage_spends_before(card: dict, eff: dict) -> bool:
+    """The boolean half of `_stage_spender_before`, for the two riders' gate."""
+    return _stage_spender_before(card, eff) is not None
+
+
+def stage_spent_cs(card: dict, eff: dict) -> str:
+    """`EB-747`. The C# multiplier a `stage_spent` payoff reads.
+
+    A CalculatedVar's whole job is that the PREVIEWED number and the RESOLVED
+    number are one expression, and `FurinaStage.Spent` is 0 until the card has
+    already emptied the bar -- so <i>Final Bow</i> and the Rare printed a rule
+    ("Block equal to its Fanfare") where a number was on the board, which is
+    the round-two finding. The forecast readers answer at both moments; which
+    one a row gets is decided by the spend standing in front of it, so no sheet
+    key is invented for a fact the body already states.
+    """
+    spender = _stage_spender_before(card, eff)
+    if spender == "stage_final_bow":
+        return "static (card, _) => FurinaStage.SpentOrLeadFanfare(card)"
+    if spender == "stage_spend_all":
+        return "static (card, _) => FurinaStage.SpentOrTotalFanfare(card)"
+    return STAGE_COUNT_CS["stage_spent"]
 
 
 def stage_count_calc_rider(card: dict,
@@ -5108,8 +5137,9 @@ def stage_count_calc_rider(card: dict,
         return None
     if token == "stage_spent" and not _stage_spends_before(card, eff):
         return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            STAGE_COUNT_CS[token])
+    expr = (stage_spent_cs(card, eff) if token == "stage_spent"
+            else STAGE_COUNT_CS[token])
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)), expr)
 
 
 def stage_count_block_rider(card: dict,
@@ -5130,8 +5160,9 @@ def stage_count_block_rider(card: dict,
         return None
     if token == "stage_spent" and not _stage_spends_before(card, eff):
         return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            STAGE_COUNT_CS[token])
+    expr = (stage_spent_cs(card, eff) if token == "stage_spent"
+            else STAGE_COUNT_CS[token])
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)), expr)
 
 
 def fanfare_drained_calc_rider(card: dict,

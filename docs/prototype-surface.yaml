@@ -1840,7 +1840,7 @@
    replaces: crescendo,
    register: salon, cost: 1, type: attack, rarity: uncommon,
    art_of: crescendo,
-   description: "Deal damage equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].",
+   description: "Deal {CalculatedDamage:diff()} damage, the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].",
    effects: [{op: damage,
               amount_formula: {base: 0, per: 1, count: stage_lead_fanfare},
               target: enemy}]}
@@ -1851,7 +1851,7 @@
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
    art_of: many_waters_melody,
-   description: "Gain [gold]Block[/gold] equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold].",
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold], the [gold]back performer[/gold]'s [gold]Fanfare[/gold].",
    effects: [{op: block,
               amount_formula: {base: 0, per: 1, count: stage_back_fanfare}}]}
 
@@ -1870,7 +1870,7 @@
    replaces: take_your_bow,
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
    art_of: take_your_bow,
-   description: "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold]. Exhaust.",
+   description: "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain {CalculatedBlock:diff()} [gold]Block[/gold], its [gold]Fanfare[/gold]. Exhaust.",
    effects: [{op: stage_final_bow},
              {op: block,
               amount_formula: {base: 0, per: 1, count: stage_spent}}]}
@@ -1883,7 +1883,7 @@
    replaces: universal_revelry,
    register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
    art_of: let_the_people_rejoice,
-   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1. Exhaust.",
+   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal {CalculatedDamage:diff()} damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1. Exhaust.",
    effects: [{op: stage_spend_all},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},

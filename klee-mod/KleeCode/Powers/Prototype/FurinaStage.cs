@@ -199,6 +199,56 @@ public static class FurinaStage
             ? FurinaStageLedger.For(owner).SpentThisPlay
             : 0;
 
+    /// <summary>The whole company's bars added up -- <i>Let the People
+    /// Rejoice</i>'s number, before it takes it.</summary>
+    public static int TotalFanfare(Creature? owner)
+    {
+        var total = 0;
+        foreach (var seat in Of(owner)) total += seat.Fanfare;
+        return total;
+    }
+
+    /// <summary>
+    /// `EB-747`. WHAT <i>FINAL BOW</i> PRINTS, IN PREVIEW AND AT RESOLUTION.
+    ///
+    /// THE FIND (round two, sec.4). "<i>Ousia Surge</i> dealt 0 on an empty
+    /// stage at full cost with no refusal ... the readers print a rule where a
+    /// number is known." Two of the four readers could not print one at all,
+    /// because <see cref="Spent"/> is a per-PLAY record and is 0 until the
+    /// card has already emptied the bar it is measuring -- the very reason
+    /// that record exists (<c>FurinaStageLedger.SpentThisPlay</c>).
+    ///
+    /// SO THE READER ANSWERS THE SAME QUESTION AT TWO MOMENTS. Before the
+    /// play, nothing has been spent and the number the card is ABOUT to take
+    /// is the lead's live bar; during the play, the bar is gone and what the
+    /// card took is the record. One expression, so the previewed number and
+    /// the resolved number cannot differ -- which is what a CalculatedVar is
+    /// for.
+    ///
+    /// IT NEEDS <see cref="BeginPlay"/> TO BE CALLED, and until this row it
+    /// was not: the record was written by each spending op and never reset, so
+    /// a stale amount from an earlier card would have been previewed as this
+    /// card's forecast. `FurinaStageHooks.BeforeCardPlayed` clears it now,
+    /// which is `FurinaDrain.BeginPlay`'s site one arm over.
+    ///
+    /// 0 ON AN EMPTY STAGE, in both moments, which is the row's own
+    /// acceptance.
+    /// </summary>
+    public static int SpentOrLeadFanfare(CardModel? card)
+    {
+        var spent = Spent(card);
+        return spent > 0 ? spent : LeadFanfare(card);
+    }
+
+    /// <summary>`EB-747`, <i>Let the People Rejoice</i>'s half of the same
+    /// rule: the whole stage's bars before the card takes them, and what it
+    /// took after.</summary>
+    public static int SpentOrTotalFanfare(CardModel? card)
+    {
+        var spent = Spent(card);
+        return spent > 0 ? spent : TotalFanfare(card?.Owner?.Creature);
+    }
+
     /// <summary>Rule 2, the relic's opening. Idempotent on a lit stage.
     /// </summary>
     public static async Task OpenCombat(Creature? owner)
