@@ -794,6 +794,7 @@ EB-608/EB-609, EB-612, EB-616/EB-617, EB-619..EB-630, EB-632..EB-636,
 EB-638..EB-641, EB-645, EB-647..EB-650, EB-653..EB-658, EB-663..EB-666,
 EB-668/EB-669, EB-671/EB-672, EB-674/EB-675, EB-678..EB-680, EB-683,
 EB-685, EB-688, EB-690/EB-691, EB-694.
+EB-642 RETIRED 2026-09-08: [USER] played the Hexerei rule change (every Hexerei card gives a Spark, R265 pick 1) on 0.2.3069+proto, act 1 through mid act 2; the rule read as intended and the record is review/records/klee-user-run-2-2026-09-08.md.
 ```
 
 ## Retirement notes (from the `OPEN_IDS` block)
