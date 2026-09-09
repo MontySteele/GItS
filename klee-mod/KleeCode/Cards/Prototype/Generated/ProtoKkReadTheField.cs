@@ -45,7 +45,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Field"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Look at the top {Scry:diff()} cards of your draw pile; put one into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
+            new DynamicVar("Scry", 3m),
             new DynamicVar("PlanBlock", 10m)
         };
 
@@ -78,12 +78,29 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        {
+            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take(DynamicVars["Scry"].IntValue).ToList();
+            if (top != null && top.Count > 0)
+            {
+                var takePick = (await CardSelectCmd.FromSimpleGrid(
+                    choiceContext, top, Owner,
+                    new CardSelectorPrefs(ScryTake.Prompt, 1))).ToList();
+                foreach (var taken in takePick)
+                {
+                    await CardPileCmd.Add(taken, PileType.Hand);
+                }
+                foreach (var seen in top)
+                {
+                    if (takePick.Contains(seen)) continue;
+                    await CardPileCmd.Add(seen, PileType.Draw, CardPilePosition.Bottom);
+                }
+            }
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(3m);
-        DynamicVars["PlanBlock"].UpgradeValueBy(3m);
+        DynamicVars["Scry"].UpgradeValueBy(1m);
+        DynamicVars["PlanBlock"].UpgradeValueBy(2m);
     }
 }

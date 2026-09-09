@@ -1,0 +1,118 @@
+# Doctrine read: Kokomi pool pass three, competing faces instead of a cap, against the kit charters
+
+Each numbered arm below is ONE change. For each, in order, give FOLLOWS or
+REQUIRES_MODIFICATION and name the clause (C1 to C7) you ruled against, and
+quote the line and the arithmetic (energy, Block, damage, cards, turns) that
+breaches it, in one sentence. A verdict with no clause named is not a
+verdict. Read adversarially: the author is a different model family and the
+owner wants the row that should not reach a tester named. Do not soften.
+Name clauses, not remedies: a number, a face or a rewritten row you volunteer
+is DISCARDED.
+
+Why these changes exist. Rounds 23 and 24 (2026-09-07) read pool pass two:
+the order riders (Opening Gambit, Second Wave, Scout Ahead) made a free turn
+a sequencing puzzle, twice named by seats as the fight's decision; the
+queue-spending rows were never played; the Dusk rows' face-up halves were
+dead; the two-Plan cap engaged in one lane, was never printed, and read as a
+wall until inferred. The owner's original reason for the cap was to stop
+"write every Plan card" from being the dominant free-turn play. The owner
+and the reviewer now prefer no artificial cap: the immediate halves of the
+pool are consolation prizes ("X now, or more X later"), so on a safe turn
+nothing competes with writing. This pass makes a representative group of
+faces compete, on the principle that both halves must be worth playing on
+some turn, and retires the cap to a fallback toggle. The read that matters
+next round: does the player inspect the hand and choose to prepare
+everything, or recognise an off-turn and stop inspecting?
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards." A row
+  that removes a losing line the kit is meant to keep, instead of pricing
+  it, is out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. There
+  must be a real turn in which the card is worse than a plain card of its
+  cost. Repeatable energy or draw at Uncommon or below is priced by
+  something past the card's own cost.
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (play now or write; which order; which
+  half), not by a number that rises while you watch.
+- **C5 (Kokomi brief section 2 rule 4).** Nothing fires by itself; every
+  effect is a card the player played and paid for.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a pool row or a base-game card at the same or lower rarity and cost.
+  Reference points: Skim (Uncommon, 1: draw 3), Seeing Red, Blur (Uncommon,
+  1: 5 Block kept), Flame Barrier, Iron Wave, Shrug It Off, Pommel Strike,
+  Whirlwind, Bludgeon, Sword Boomerang, Echo Form (Rare, 3).
+- **C7 (Kokomi identity Law 4).** In her pool a Common never increases deck
+  size.
+
+## The engine (unchanged from pass two, cap off)
+
+The Bake-Kurage sits on her side all combat. A card with a Plan line may be
+played ON it: cost paid now, the card to the discard, the Plan written to a
+queue. At the START of her next turn (after the enemy acts, after her draw)
+every queued Plan is carried out in the order written. A Dusk Plan is
+carried out at the END of this turn, before enemies act. No cap. Riders:
+Opening Gambit (the next Plan carried out with it deals double), Second
+Wave (the next is carried out twice), Scout Ahead (draw 1 per later Plan
+carried out with it). Readers: Well Laid (2 damage +3 per Plan carried out
+this turn), Sango Isshin (Rare: if a Plan was carried out this turn, a
+quarter of Max HP to ALL), Treatise (draw 1 once a turn on a carry-out),
+Song of Pearls (3 Block once a turn on a carry-out). Nereid's Ascension
+(Rare Power, 2) today: every Plan is carried out twice. Energy 3, HP 80.
+
+## The arms
+
+1. **Feint (rework)** -- Common Attack, 1. Now: Deal 6 damage; if a Plan
+   was carried out this turn, deal 10 instead. Plan: Deal 10 damage. Was: 6
+   now / Plan 10. The immediate half now exploits a morning of Plans (play
+   it after they land) and the written half is the same 10 a turn later;
+   on a turn with no carry-out the now-half is the old 6. Compare Pommel
+   Strike, Sword Boomerang.
+2. **Read the Field (rework)** -- Common Skill, 1. Now: Gain 5 Block. Look
+   at the top 2 cards of your draw pile; put one on the bottom. Plan: Gain
+   10 Block. Was: 5 now / Plan 10. The now-half scouts the turn the Plans
+   land on, a different benefit from more Block later.
+3. **Riptide (rework)** -- Common Attack, 2. Now: Deal 9 damage to ALL
+   enemies, and 4 more to each enemy with a debuff. Plan: Deal 13 damage to
+   ALL enemies. Was: 9 now / 13 planned. The now-half exploits debuffs the
+   Plans applied (Exposed Flank, Slack Water, War Council); against clean
+   enemies it is the old 9. Compare Whirlwind at 2 energy (10 to ALL).
+4. **Battle Plan (rework)** -- Uncommon Skill, 1. Now: Draw 1 card. Plan:
+   Draw 2 cards; the first Attack you play this turn costs 1 less. Was:
+   Plan: gain 1 Energy and draw 2. The reviewer's concern: Energy on a Plan
+   line finances more planning; the reworked Plan pays only into the turn's
+   attack, so the morning is spent, not re-invested.
+5. **Nereid's Ascension (rework)** -- Rare Power, 2. The first Plan carried
+   out each turn is carried out twice. Was: every Plan carried out twice.
+   Favours one prepared Plan (put the payoff first) over volume; the Rare
+   still doubles the morning's headline but not the resources behind it.
+6. **Dusk rows become written-only** -- Breakwater (Common, 1): Dusk Plan:
+   Gain 6 Block. Night Watch (Common, 1): Dusk Plan: Gain 4 Block and apply
+   1 Weak. No face-up half; the card can only be written, and lands before
+   enemies act. Was: a face-up half that no seat ever chose. The keyword's
+   purpose, stated: defend this turn while a Plan is carried out (Treatise,
+   Song of Pearls, Well Laid count it). Compare Blur and Flame Barrier at
+   Uncommon; a written-only Common that blocks 6 for 1 at end of turn is
+   Defend plus one point plus the carry-out trigger, and cannot be played
+   face-up in a pinch.
+7. **Converging Tide retired; Second Thoughts held one more round** --
+   Converging Tide (4 Block, queued Plans aim at this enemy) never played on
+   its lane: the front-enemy rule is the pool's default and a redirect was
+   redundant. Second Thoughts (0, Exhaust: cancel your last Plan, its card
+   returns, its cost refunded) never played on its lane either, but is live
+   when a target dies before the morning; it is held, not defended. Rule on
+   whether holding an unplayed Common breaches C1 or C6 by occupying an
+   offer slot.
+8. **The two-Plan cap retired to a fallback toggle** -- the lane rule stays
+   in the code, default off, and no further cap lanes are scheduled; the
+   printed sentence under the toggle is corrected to "at the start of your
+   turn" (Dusk carry-outs were never capped). The question for you: does
+   leaving a dormant toggle in the engine breach any clause, and does
+   retiring the cap re-open C1 (the losing line the cap was meant to keep,
+   "write everything on a free turn", now priced only by the faces above)?
+
+Eight verdicts, each with its clause and its breaching line, then two
+sentences: do arms 1 to 5 give a safe turn a competing use for Energy, or
+only a different consolation prize. Under 800 words.

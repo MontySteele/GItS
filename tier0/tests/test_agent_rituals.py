@@ -18,7 +18,7 @@ import os
 import subprocess
 import sys
 import time
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import pytest
 
@@ -416,10 +416,31 @@ def test_seat_opus_brief_is_the_committed_page_with_the_lane_filled_in():
     res = _run(["tools/seat.py", "--opus-brief", "--lane", "2",
                 "--character", "KLEEMOD-KLEE"])
     assert res.returncode == 0, res.stdout + res.stderr
-    assert "GITS_LANE=2 python -m understudy.blindplay observe" in res.stdout
+    assert "GITS_LANE=2 " in res.stdout
+    assert "-m understudy.blindplay observe" in res.stdout
     assert "<LANE>" not in res.stdout
     assert "Non-blindness declaration" in res.stdout
     assert "KLEEMOD-KLEE" in res.stdout
+
+
+def test_seat_opus_brief_names_an_absolute_interpreter():
+    """`EB-678`. A bare `python` on this box is the Windows Store alias: it
+    opens the store instead of running and the seat's own call never returns.
+    The brief is the only place a seat reads a command from, so the two
+    commands it prints name `sys.executable` and never resolve through PATH.
+    And they name it the way bash can read it: forward slashes inside double
+    quotes, because the seat pastes these lines into a shell where a Windows
+    path's backslashes are escapes and vanish."""
+    seat = _module("seat")
+    quoted = '"' + PurePath(sys.executable).as_posix() + '"'
+    text = seat.brief_text(2, "KLEEMOD-KOKOMI")
+    named = [line for line in text.splitlines()
+             if "-m understudy.blindplay" in line]
+    assert named, "the brief must still print the two allowed commands"
+    for line in named:
+        assert not seat.BARE_PYTHON.search(line), line
+        assert quoted in line, line
+        assert "\\" not in line, line
 
 
 def test_the_seat_brief_page_exists_and_names_both_allowed_commands():
@@ -505,7 +526,13 @@ def test_the_deploy_hook_is_registered_in_settings():
     commands = [h["command"]
                 for group in settings["hooks"]["PreToolUse"]
                 for h in group["hooks"]]
-    assert "python tools/hooks/deny_deploy_outside_main.py" in commands
+    # Every hook command names its script through $CLAUDE_PROJECT_DIR: a hook
+    # command is resolved against the SHELL's cwd, so the bare relative
+    # spelling refused every tool call whenever the cwd held no tools/hooks/.
+    assert ('python "$CLAUDE_PROJECT_DIR/tools/hooks/'
+            'deny_deploy_outside_main.py"') in commands
+    for command in commands:
+        assert "$CLAUDE_PROJECT_DIR/tools/hooks/" in command, command
     matchers = [g["matcher"] for g in settings["hooks"]["PreToolUse"]]
     assert "Bash|PowerShell" in matchers
 

@@ -312,6 +312,15 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                      _hook("shared", "exhaust_pile", "write")],
     "scry_discard": [_hook("shared", "draw_pile", "use"),
                      _hook("shared", "discard_pile", "write")],
+    # `EB-655`. One pile, read and written: the pick never leaves the draw
+    # pile, it only stops being near the top of it.
+    "scry_bottom": [_hook("shared", "draw_pile", "use"),
+                    _hook("shared", "draw_pile", "write")],
+    # `EB-679`. TWO PILES, because the chosen card leaves for the hand and the
+    # rest go to the bottom of the one they came from.
+    "scry_take": [_hook("shared", "draw_pile", "use"),
+                  _hook("shared", "draw_pile", "write"),
+                  _hook("shared", "hand_contents", "write")],
     "recall_to_draw": [_hook("shared", "discard_pile", "use"),
                        _hook("shared", "draw_pile", "write")],
     "autoplay_from_exhaust": [_hook("shared", "exhaust_pile", "use"),
@@ -486,6 +495,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "damage_quarter_max_hp": [],
     # A cost change, which is what `cost_mod` is filed under.
     "next_companion_discount": [_hook("shared", "card_identity", "write")],
+    # `EB-668`, Battle Plan's rider: `buff_next_attack` wearing a kit name --
+    # flat damage on the next Attack -- so it is filed where that op is.
+    "next_attack_damage": [_hook("shared", "card_identity", "write")],
     # Cleansing Wave takes a debuff off HER. The nearest grounded entry is the
     # HP ledger's sibling for statuses, which this vocabulary does not have --
     # so it is EMPTY and disclosed, on `plan`'s own argument below.
@@ -516,6 +528,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # vocabulary carries as a private write nowhere; Block is the player's own
     # pool and no other Block op declares a hook for it.
     "block_per_plan_this_morning": [_hook("private", "kurage", "read")],
+    # Breakwater (`EB-685`) reads the same jellyfish one drain over -- the
+    # queue as it STANDS at dusk rather than the morning just drained -- and
+    # pays Block, so it declares the line above's one hook for the line
+    # above's reason.
+    "block_per_plan_held": [_hook("private", "kurage", "read")],
     # Tide Chart (`EB-478`, R257) reads the same morning's depth Tide Wall
     # reads, one turn after the card that promised the draw was played, and
     # pays CARDS rather than Block -- the draw pile is the player's own and no
@@ -532,6 +549,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # pays CARDS, which is the player's own draw pile and which no draw op
     # declares a hook for -- `draw_after_plans` one line up states that limit.
     "draw_per_plan_after": [_hook("private", "kurage", "read")],
+    "draw_per_plan_this_turn": [_hook("private", "kurage", "read")],
     # The two riders WRITE what the entry that follows them will do. Nothing is
     # added to or removed from the queue, so a read would be the wrong word:
     # the next entry behaves differently because this one happened.
@@ -559,6 +577,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
 CHOICE_OPS: dict[str, str] = {
     "discard_for_sparks": "discard",
     "scry_discard": "pile",
+    "scry_bottom": "pile",
+    "scry_take": "pile",
     "recall_to_draw": "queue",
     "remember_card": "pile",
     "grant_sly_this_turn": "pile",

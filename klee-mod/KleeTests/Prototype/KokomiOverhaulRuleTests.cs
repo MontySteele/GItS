@@ -286,16 +286,39 @@ public class KokomiOverhaulRuleTests
         // FIFTEEN SINCE `EB-643` (R265), and the three are one group: each
         // names a PLACE IN A RUNNING DRAIN rather than a quantity, which is
         // what makes all three plan-only. `DrawPerPlanAfter` is Scout Ahead's
-        // count of the carry-outs still to come, and the two `NextPlan*` kinds
-        // are riders on the entry carried out immediately after the one that
-        // prints them.
+        // count of the carry-outs that FOLLOW it, and the two `NextPlan*`
+        // kinds are riders on the entry carried out immediately after the one
+        // that prints them.
+        //
+        // EIGHTEEN SINCE R267 PICK 3, and the eighteenth is a kind NO ROW
+        // SPELLS: `DrawPerPlanThisTurn` is `EB-679`'s whole-drain recount of
+        // Scout Ahead, which pick 3 took the card back off. It is KEPT rather
+        // than retired -- the clause still resolves, so a sheet can reach for
+        // it without a build. A retirement, not a keep, would owe this list a
+        // line.
+        //
+        // SEVENTEEN SINCE `EB-685` (pool pass five): Breakwater's
+        // `BlockPerPlanHeld`, the queue read AT DUSK. It is its own kind and
+        // not `BlockPerPlanThisMorning` because the two are different facts --
+        // a drain that has finished against one that is still owed -- and pass
+        // four's economy in spelling it with Tide Wall's kind is what paid the
+        // card 0 on every play r27 saw.
+        //
+        // SIXTEEN SINCE `EB-655` (pool pass three, R266): Battle Plan's
+        // `NextAttackDamage`, the rider that replaced its `Energy` clause --
+        // spelled as a DISCOUNT until `EB-668` moved it to damage, because a
+        // cost seam cannot tell a face-up play from a write. A RIDER AND NOT A
+        // NUMBER -- the size is the rule's -- so it joins the amountless kinds
+        // rather than printing one.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
-                    "BlockPerPlanThisMorning", "DrawPerPlanAfter",
-                    "NextPlanDoubleDamage", "NextPlanExtraCarryOut" },
+                    "BlockPerPlanThisMorning", "BlockPerPlanHeld",
+                    "DrawPerPlanAfter", "DrawPerPlanThisTurn",
+                    "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
+                    "NextAttackDamage" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -793,7 +816,7 @@ public class KokomiOverhaulRuleTests
     // ---- the roster ------------------------------------------------------
 
     [Fact]
-    public void The_starter_is_ten_cards_and_the_pool_is_forty_one()
+    public void The_starter_is_ten_cards_and_the_pool_is_thirty_nine()
     {
         // Read off the IL rather than by building the models, which needs
         // ModelDb: `ModelDb.Card<T>()` throws until the game's pool build has
@@ -818,9 +841,16 @@ public class KokomiOverhaulRuleTests
         // entries after it, three now-lines that unwrite or re-aim what is
         // already queued, and the two DUSK rows. FORTY-ONE since `EB-649`
         // (round 23) retired Ebb Tide: three draws on the cap lane and no
-        // play, and the count moving by one is what the withdrawal is.
+        // play, and the count moving by one is what the withdrawal is. FORTY
+        // since `EB-655` (pool pass three, R266) retired Converging Tide: with
+        // the cap retired as a rule and Nereid's paying the FIRST Plan of each
+        // drain, re-aiming a queued Plan stopped being a question worth a card.
+        // THIRTY-NINE since `EB-685` (pool pass five) retired Night Watch: it
+        // lost every draft comparison in r27 and Slack Water's Plan half moved
+        // to Dusk, which is the multi-body Weak Night Watch had been rebuilt
+        // for one pass earlier.
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(41, Il.CallSequence(slice)
+        Assert.Equal(39, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

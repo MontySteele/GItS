@@ -225,10 +225,20 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     turn it was written on (Breakwater, Night Watch).
 
     FORTY-TWO UNTIL `EB-649` (round 23): Ebb Tide drew three times on the cap
-    lane and was played none of them, so it left the sheet and this tuple."""
+    lane and was played none of them, so it left the sheet and this tuple.
+
+    FORTY SINCE POOL PASS THREE (`EB-655`, R266), which retired Converging
+    Tide: with the cap retired as a rule and Nereid's Ascension paying the
+    FIRST Plan of each drain, re-aiming a queued Plan stopped being a question
+    worth a card.
+
+    THIRTY-NINE SINCE POOL PASS FIVE (`EB-685`), which retired Night Watch: it
+    lost every draft comparison in r27, and Slack Water's Plan half moved to
+    Dusk in the same pass -- the multi-body Weak before the swing is the job
+    Night Watch had been rebuilt for one pass earlier."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 41
-    assert len(set(ids)) == 41
+    assert len(ids) == 39
+    assert len(set(ids)) == 39
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
     assert {"proto_kk_tide_chart", "proto_kk_ripple"} <= set(ids)
@@ -238,25 +248,32 @@ def test_the_pool_is_all_thirty_of_the_slices_rows():
     assert "proto_kk_tidal_rhythm" not in ids
     assert {"proto_kk_opening_gambit", "proto_kk_second_wave",
             "proto_kk_scout_ahead", "proto_kk_second_thoughts",
-            "proto_kk_converging_tide",
-            "proto_kk_breakwater", "proto_kk_night_watch"} <= set(ids)
+            "proto_kk_breakwater"} <= set(ids)
+    # `EB-685` (pool pass five): Night Watch lost every draft comparison in
+    # r27 and Slack Water's Plan half moved to Dusk, which is its job.
+    assert "proto_kk_night_watch" not in ids
+    # `EB-655` (pool pass three): Converging Tide left with the pass, the way
+    # Ebb Tide left with `EB-649`.
+    assert "proto_kk_converging_tide" not in ids
     assert "proto_kk_ebb_tide" not in ids
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
 
 
-def test_the_arm_carries_exactly_two_rule_numbers():
+def test_the_arm_carries_exactly_three_rule_numbers():
     """Draft 6's rules are STRUCTURAL -- where a card lands and when -- so
-    almost every figure is a card's and stays on its row. Two are not: the
-    relic's strike and Rally's discount, both printed on a face with no
-    `amount` field behind them. They are named so `lint_constant_parity` can
-    compare the C# mirrors BY VALUE."""
+    almost every figure is a card's and stays on its row. Three are not: the
+    relic's strike, Rally's discount and (since `EB-655`) Battle Plan's, each
+    printed on a face with no `amount` field behind it. They are named so
+    `lint_constant_parity` can compare the C# mirrors BY VALUE."""
     assert C.KOKOMI_OVERHAUL_CASKET_STRIKE == 2
     assert C.KOKOMI_OVERHAUL_RALLY_DISCOUNT == 1
+    assert C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS == 4
     named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
     assert named == {"KOKOMI_OVERHAUL", "KOKOMI_OVERHAUL_POOL_IDS",
                      "KOKOMI_OVERHAUL_STARTER_IDS",
                      "KOKOMI_OVERHAUL_CASKET_STRIKE",
-                     "KOKOMI_OVERHAUL_RALLY_DISCOUNT"}
+                     "KOKOMI_OVERHAUL_RALLY_DISCOUNT",
+                     "KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS"}
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------
@@ -334,10 +351,15 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     offer's Commons are what a seat actually sees, and a rule the pass exists
     to test cannot be tested from a tier a run mostly does not reach. The one
     Uncommon is the row that reaches furthest, Opening Gambit's doubling; Ebb
-    Tide was the second until `EB-649` (round 23) retired it."""
+    Tide was the second until `EB-649` (round 23) retired it, and Converging
+    Tide the third until `EB-655` (pool pass three) did.
+
+    A COMMON LEAVING MOVES THE ODDS ON EVERY OTHER COMMON, which is why the
+    retirement is visible here as well as in the count -- and pool pass five
+    (`EB-685`) is the third such leaving, Night Watch."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 25, "uncommon": 12, "rare": 4}
+        "common": 23, "uncommon": 12, "rare": 4}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

@@ -46,7 +46,8 @@ public class Round24Tests
         WithCap("2", () =>
         {
             const string sentence =
-                "Carries out at most 2 a turn; the rest wait in order.";
+                "Carries out at most 2 at the start of your turn; the rest "
+              + "wait in order.";
             Assert.Contains(sentence, Description<ProtoBakeKuragePower>());
             Assert.Contains(sentence, Description<PendingPlansPower>());
         });
@@ -73,7 +74,8 @@ public class Round24Tests
         // The number in the sentence is `PlanCap`'s, so a lane that declares
         // 3 is told 3 -- the whole point of a rule that prints where it binds.
         WithCap("3", () =>
-            Assert.Contains("at most 3 a turn", KokomiPlan.CapSentence));
+            Assert.Contains("at most 3 at the start of your turn",
+                            KokomiPlan.CapSentence));
     }
 
     [Fact]

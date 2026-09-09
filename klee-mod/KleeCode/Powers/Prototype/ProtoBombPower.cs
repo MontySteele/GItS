@@ -273,8 +273,15 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// STACK, it appears only on a stack, and it names the Spark count instead
     /// of pointing back at the hit count. The plural goes with it: this face
     /// is only ever chosen for two charges or more.
+    ///
+    /// `EB-666` (Klee r24, both lanes): "FOR N SPARKS" READ AS A PRICE. "For
+    /// N" is how a cost is spelled, so both seats priced a Set off as COSTING
+    /// Sparks off this clause, when the rule is the opposite one
+    /// (`SPARK_PER_EXPLOSION`): each explosion MAKES a Spark. One word carries
+    /// the whole difference, so the clause says "making" and the direction is
+    /// no longer inferred from a preposition. No rule moved.
     private const string HitCount =
-        ", in [blue]{Count}[/blue] hits for [blue]{Count}[/blue] "
+        ", in [blue]{Count}[/blue] hits, making [blue]{Count}[/blue] "
       + "[gold]Sparks[/gold]";
 
     /// <summary>The total, with no full stop: a modifier clause may follow it.

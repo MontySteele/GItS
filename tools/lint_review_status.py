@@ -12,6 +12,9 @@ which:
     review/ruled/    a decision packet, all picks answered
                                                        Status: RULED R### DATE
     review/records/  a published measurement or log     Status: RECORD
+                     (an optional parenthetical may say where it came
+                     from, e.g. a packet moved here when its defaults
+                     were applied)
 
 plus `Status: SUPERSEDED by <path>` anywhere, for a packet a later one
 replaced.
@@ -60,7 +63,7 @@ ACTIVE_WARN = 10
 OPEN = re.compile(r"^Status: OPEN \(.+\)$")
 RULED_RE = re.compile(r"^Status: RULED (R\d+ \d{4}-\d{2}-\d{2}"
                       r"|\(see RULINGS\.md\))$")
-RECORD = re.compile(r"^Status: RECORD$")
+RECORD = re.compile(r"^Status: RECORD( \(.+\))?$")
 SUPERSEDED = re.compile(r"^Status: SUPERSEDED by \S+$")
 
 # Where a citation of a review path is a live pointer rather than history.

@@ -24,14 +24,19 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
                                         INTENT_NUMBER_DISAGREES,
                                         INTENT_SOURCE_NOTE,
-                                        ONE_USE_DISCOUNT_NOTE, PER_HIT_NOTE,
+                                        ONE_USE_DISCOUNT_NOTE,
+                                        ONE_USE_RIDER_NOTE,
+                                        PER_HIT_NOTE,
                                         LAST_SALON_NOTE,
                                         MAP_FLOOR_LINE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
+                                        CHOOSER_CONFIRM_NOTE,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
+                                        ENEMY_REPLACED_LINE,
                                         EVENT_NO_DECLINE_NOTE,
+                                        FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
                                         LAST_SALON_NOTE,
@@ -40,7 +45,10 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         METER_RULES,
                                         MULTI_INTENT_LABEL,
                                         MULTI_INTENT_NOTE,
+                                        NO_REACTION_THIS_TURN,
                                         PENDING_PICK_NOTE, PICKED_MARK,
+                                        REACTIONS_HEADING, REACTION_ROW,
+                                        REACTION_ROW_NO_SOURCE,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
                                         PLAN_CASKET_AURA_CLAUSE,
@@ -103,9 +111,16 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # `EB-529`: and where it cannot be rendered, the REASON, because "no
     # `Upgraded:` line" and "no upgrade" are the same silence to a reader
     # deciding what to spend a Smith on.
+    # `EB-667`: AND ONLY ONE UPGRADE LINE. Alice's Introduction Magic printed
+    # both `Upgraded: not shown -- its upgrade changes nothing this face
+    # prints.` and `Upgraded, and gains Retain.` on the Klee r24 lane-1 Smith,
+    # which is one screen contradicting itself: the keyword line IS what the
+    # upgrade does, so the note above it is false rather than merely silent.
+    # The note is the "this page cannot tell you what it does" line, and a row
+    # whose schema upgrade is a keyword has already told the reader.
     if c.get("upgraded_face"):
         out.append(f"    Upgraded: {c['upgraded_face']}")
-    elif c.get("upgraded_note"):
+    elif c.get("upgraded_note") and not c.get("upgraded_keywords"):
         out.append(f"    Upgraded: not shown -- {c['upgraded_note']}.")
     # `EB-551`: THE KEYWORD DELTAS, BESIDE THE NUMBER DELTAS. "Aria+ showed
     # only the number change and not Innate, the most load-bearing keyword in
@@ -207,16 +222,50 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
         out.append("- These fired at the end of your last turn, before the "
                    "enemies acted:")
         out += _carry_out_rows(pl["summon_hits"])
-    if pl["carried_out"]:
+    # `EB-680`. A DUSK PLAN DID NOT HAPPEN THIS MORNING, so it is not filed
+    # under the morning's heading.
+    #
+    # R265's Dusk lines are carried out at the END of the turn they are written
+    # on, before the enemies act -- so by the time a seat reads this list they
+    # are one turn and one enemy phase old, and the heading said "at the start
+    # of this turn". Kokomi r27 lane 2: one Dusk Plan's timing printed three
+    # ways at once, the card saying the end of this turn, the badge and the
+    # queue saying the start of the next, and this heading saying the start of
+    # THIS one. Two of the three are fixed at their source; this is the third.
+    #
+    # READ OFF THE MOD'S OWN MARK, which is `KokomiPlan.Entry.Title`'s "Dusk: "
+    # prefix -- the same string the strip draws and the same one `Announce`
+    # passes through as the carry-out's `card`. No new wire field, and a build
+    # that predates the prefix files every row under the morning exactly as it
+    # did.
+    dusk = [row for row in pl["carried_out"] if _is_dusk(row)]
+    morning = [row for row in pl["carried_out"] if not _is_dusk(row)]
+    if dusk:
+        out.append(f"- The {pl['pet_name']} carried these out at the END of "
+                   "your last turn, before the enemies acted:")
+        out += _carry_out_rows(dusk)
+    if morning:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
-        out += _carry_out_rows(pl["carried_out"])
+        out += _carry_out_rows(morning)
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not at the start of the "
                    "turn:")
         out += _carry_out_rows(pl["fired_now"])
     return out
+
+
+#: `EB-680`. The mark `KokomiPlan.Entry.Title` puts on a Dusk entry, which is
+#: the only place the wire says which timing an entry has. Case-sensitive and
+#: anchored, because it is a prefix the mod writes and not a word a card face
+#: might happen to use.
+_DUSK_MARK = "Dusk: "
+
+
+def _is_dusk(row: dict[str, Any]) -> bool:
+    """Is this queued or carried-out Plan a DUSK entry? (`EB-680`)"""
+    return str(row.get("card") or row.get("name") or "").startswith(_DUSK_MARK)
 
 
 def _carry_out_rows(rows: list[dict[str, Any]]) -> list[str]:
@@ -316,7 +365,8 @@ def _kind_clause(said: dict[str, Any]) -> str:
 #: build that moves the clause onto another badge keeps the page honest, and a
 #: build with no cap declared matches nothing and prints the note it always
 #: printed.
-_PLAN_CAP_SENTENCE = re.compile(r"carries out at most (\d+) a turn", re.I)
+_PLAN_CAP_SENTENCE = re.compile(
+    r"carries out at most (\d+) at the start of your turn", re.I)
 
 
 def _plan_count_note(you: dict[str, Any]) -> str:
@@ -539,6 +589,10 @@ _ATTACK_DAMAGE_BUFF = re.compile(
     r"your attacks deal[^.]*additional damage", re.I)
 _MULTI_HIT_LABEL = re.compile(r"^\s*(\d+)\s*[x×]\s*(\d+)\s*$")
 _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
+# `EB-669`. The same sentence with any other consequence -- Battle Plan's "the
+# next Attack you play face-up this turn deals 4 additional damage". Asked
+# SECOND, so a price keeps the note written for a price.
+_ONE_USE_RIDER = re.compile(r"the next (\w+) you play\b", re.I)
 # `EB-433`. A relic that answers a debuff with an elemental hit, which is what
 # makes the panel's "leaves no aura" clause false for a debuff Plan. The
 # Tamakushi Casket's own sentence, with the element left open: the clause is
@@ -658,11 +712,28 @@ def _casket_aura_clause(you: dict[str, Any]) -> str:
 
 
 def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
-    """`EB-349`: a discount the game prices onto every row and pays once."""
+    """A rider the game folds into every row and pays out once.
+
+    `EB-349` filed the PRICE half (Mika: "the next Skill you play costs 0")
+    and `EB-669` the other one (Battle Plan: "the next Attack you play ...
+    deals 4 additional damage"). One sentence shape, two consequences -- a
+    price goes back up on the rest of the hand, a rider is simply not on them
+    -- so the price is asked first and keeps its own words, and every other
+    one-use rider takes the general note.
+
+    ONE LINE FOR THE HAND, never a line per card, which is `_attack_buff_note`'s
+    rule beside it: the fact is about the power and the hand is where it is
+    being misread.
+    """
     for power in you.get("powers") or []:
-        found = _ONE_USE_DISCOUNT.search(str(power.get("text") or ""))
+        text = str(power.get("text") or "")
+        found = _ONE_USE_DISCOUNT.search(text)
         if found:
             return ["", ONE_USE_DISCOUNT_NOTE.format(
+                power=f"**{power['name']}**", kind=found.group(1))]
+        found = _ONE_USE_RIDER.search(text)
+        if found:
+            return ["", ONE_USE_RIDER_NOTE.format(
                 power=f"**{power['name']}**", kind=found.group(1))]
     return []
 
@@ -1032,14 +1103,22 @@ def render(obs: dict[str, Any]) -> str:
                 out.append("- Nothing is planned. Nothing will be carried "
                            "out at the start of your next turn.")
             else:
+                # `EB-680`: the queue is ONE queue and two of its entries
+                # land at different moments, so the line that says WHEN says
+                # it per entry rather than once for all of them. The Dusk
+                # clause rides the entry's own row, where a reader deciding
+                # whether to write another one is looking.
                 out.append(
                     f"- Planned, and carried out at the start of your next "
                     f"turn in this order ({pl['pending']}):")
                 for i, e in enumerate(pl["queue"], 1):
-                    out.append(f"  {i}. **{e['name']}**")
+                    out.append(f"  {i}. **{e['name']}**"
+                               + (" — Dusk: this one is carried out at the "
+                                  "END of this turn instead, before the "
+                                  "enemies act" if _is_dusk(e) else ""))
                 if pl["twice"]:
-                    out.append("- The jellyfish carries out EVERY Plan twice "
-                               "while Nereid's Ascension lasts.")
+                    out.append("- The jellyfish carries out your FIRST Plan "
+                               "twice while Nereid's Ascension lasts.")
             # `EB-329`: which of the two numbers under a Plan is which, once,
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
@@ -1122,6 +1201,18 @@ def render(obs: dict[str, Any]) -> str:
             out += [f"- **{name}** was played an extra time, and the extra "
                     "play performed as well."
                     for name in c["salon"]["replayed"]]
+        # `EB-681`. WHAT REACTED THIS TURN, under the board that reacted and
+        # above the hand -- a receipt for the beat just watched, filed where
+        # the other receipts on this page are (the carry-out block, the
+        # Salon's). Present and empty prints its own line, because "no line"
+        # and "no reaction" were the same page to the r27 lane-1 seat.
+        if c.get("reactions") is not None:
+            out += ["", REACTIONS_HEADING, ""]
+            for row in c["reactions"]:
+                out.append((REACTION_ROW if row["source"]
+                            else REACTION_ROW_NO_SOURCE).format(**row))
+            if not c["reactions"]:
+                out.append(NO_REACTION_THIS_TURN)
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
@@ -1260,6 +1351,11 @@ def render(obs: dict[str, Any]) -> str:
             line = f"- **{e['name']}**"
             if e.get("handle"):
                 line += f" [{e['handle']}]"
+            # `EB-671`: and the mark, before the numbers, because the question
+            # it answers ("where does a Plan land?") is asked about the body
+            # and not about its HP. `mark_front` holds the rule.
+            if e.get("front"):
+                line += " — FRONT"
             if e.get("phase_flip"):
                 # `EB-332`: the sentinel is not printed, the event is.
                 line += f" — {PHASE_FLIP_LINE}"
@@ -1268,6 +1364,11 @@ def render(obs: dict[str, Any]) -> str:
             if e["block"]:
                 line += f", Block {e['block']}"
             out.append(line)
+            # `EB-672`: and where this body took a dead one's place, the line
+            # saying whose -- under that body, because that is where a reader
+            # aiming by letter meets the question.
+            if e.get("replaced"):
+                out.append(ENEMY_REPLACED_LINE.format(was=e["replaced"]))
             out += _render_intents(e["intents"])
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
@@ -1279,6 +1380,10 @@ def render(obs: dict[str, Any]) -> str:
         # opposite, which is what sent a seat's Melt into the wrong body.
         if c["enemies"]:
             out += ["", ENEMY_HANDLE_NOTE]
+        # `EB-671`: and what the mark on one of those lines means, beside the
+        # note about the handles on all of them.
+        if any(e.get("front") for e in c["enemies"]):
+            out += ["", FRONT_ENEMY_NOTE]
         # `EB-461`: ONCE PER SCREEN, and only where a telegraph has parts. The
         # note is about a claim the enemy block just made, so it sits with the
         # block's other two notes rather than under the line that made it.
@@ -1389,6 +1494,11 @@ def render(obs: dict[str, Any]) -> str:
                         + (f" (floor {floor})" if floor else "")
                         + ", minus the cards the screen is offering. Anything "
                           "you have picked up since is in neither list.*"]
+            # `EB-674`: what the verb after `choose` is, before the refusal
+            # that would otherwise teach it. Above the button's own state,
+            # because the sentence is about the screen and the line below is
+            # about this instant.
+            out += ["", CHOOSER_CONFIRM_NOTE]
             out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
         # `EB-314`: over an open preview `skip` does not leave the screen --
         # it cancels the pick and puts the grid back (`ExecuteCancelSelection`

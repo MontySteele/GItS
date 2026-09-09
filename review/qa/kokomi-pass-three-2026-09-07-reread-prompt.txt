@@ -1,0 +1,25 @@
+# Doctrine re-read: one arm from Kokomi pool pass three, after REQUIRES_MODIFICATION on C6
+
+Give FOLLOWS or REQUIRES_MODIFICATION and name the clause (C1 to C7) you
+ruled against, quoting the line and the arithmetic in one sentence. Name
+clauses, not remedies. The charter and engine are those of the pass-three
+read of the same date (C2 binding prices; C3 player-controlled leverage; C6
+not strictly better than a pool row or a base-game card at the same or lower
+rarity and cost; the Plan engine with no cap, a Plan carried out at the start
+of the next turn).
+
+The earlier verdict on this arm: "REQUIRES_MODIFICATION, C6: Feint's '6
+damage; if a Plan was carried out this turn, deal 10 instead', at Common, 1
+Energy, matches Strike's 1 Energy, 6 damage without a carry-out and exceeds
+it by 4 on a carry-out turn, while retaining the optional 10-damage Plan
+without sacrificing the immediate 6." The author's change is to the base
+number only.
+
+1. **Feint (rework, re-read)** -- Common Attack, 1. Now: Deal 5 damage; if a
+   Plan was carried out this turn, deal 10 instead. Plan: Deal 10 damage.
+   On a turn with no carry-out the now-half is 1 under Strike; on a
+   carry-out turn it is 10, the same number the written half pays a turn
+   later. Rule on the row as it now reads and say whether the earlier
+   reasoning still holds.
+
+One verdict, under 120 words.

@@ -806,11 +806,22 @@ def _upgraded_face_index_cached(repo: Path) -> tuple[
 #: Their upgrade is the base game's own idiom -- one number, +3 (Strike 6 to 9,
 #: Defend 5 to 8; tier0 mirrors the same idiom as `PROTOTYPE_DAMAGE_DELTA` and
 #: `PROTOTYPE_BLOCK_DELTA`) -- so the two faces are written here, keyed on the
-#: printed TITLE and matched against the WHOLE printed face, so a mod card that
-#: borrows the word Strike in its name never takes this path.
+#: printed TITLE and matched against the printed face FROM ITS FIRST
+#: CHARACTER, so a mod card that borrows the word Strike in its name never
+#: takes this path.
+#:
+#: `EB-667` DROPPED THE `$` AND KEPT THE TAIL. The whole-face match is what
+#: `EB-609` wrote, and on Klee's own run it matched nothing: the game APPENDS
+#: its auto-keyword sentences to a body, so her Strike prints `Deal 6 damage.
+#: Applies Pyro.` and every Strike and Defend on the r24 lane-1 Smith read "no
+#: written face for this card" again. The sentence this table knows is the
+#: FIRST one; whatever the game added after it is copied through untouched,
+#: which is the same bargain `upgrade_preview`'s own template path makes one
+#: function down (`re.search`, "the template is the middle of the printed face
+#: rather than the whole of it").
 _BASE_GAME_BASICS: dict[str, tuple[re.Pattern[str], int]] = {
-    "strike": (re.compile(r"^Deal (\d+) damage\.$"), 3),
-    "defend": (re.compile(r"^Gain (\d+) Block\.$"), 3),
+    "strike": (re.compile(r"^Deal (\d+) damage\."), 3),
+    "defend": (re.compile(r"^Gain (\d+) Block\."), 3),
 }
 
 

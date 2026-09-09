@@ -235,9 +235,13 @@ def test_a_plan_only_row_is_no_longer_worth_nothing():
 
 
 def test_both_halves_of_a_printed_face_are_counted():
-    """Feint: a damage line now, a bigger one planned, cost 1. The SUM, not the
-    max -- the argument for crediting the CHOICE is at the call site."""
-    card = _proto("proto_kk_feint")
+    """Ambush: a damage line now, a bigger one planned, cost 1. The SUM, not
+    the max -- the argument for crediting the CHOICE is at the call site.
+
+    AMBUSH AND NO LONGER FEINT SINCE `EB-655`: pool pass three made Feint's
+    now-line a `conditional`, which this claim is not about. Ambush is the same
+    shape the row used to have, unchanged."""
+    card = _proto("proto_kk_ambush")
     now = card.effects[0]["amount"]
     planned = card.plan[0]["amount"]
     assert card.cost == 1 and planned > now

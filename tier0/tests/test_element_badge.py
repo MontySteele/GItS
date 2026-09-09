@@ -343,6 +343,45 @@ def test_a_plan_is_not_a_furina_rule():
     assert gen.plan_applies_element(row, gen.FURINA_PROFILE) is False
 
 
+def test_a_character_attack_may_declare_that_it_applies_nothing():
+    """`EB-703`, the generator's half, driven both ways.
+
+    The cadence is a default about a whole kit; a row may overrule it in
+    EITHER direction, and until this pass only `true` was read on this side
+    while the sim read both (`effects._element_for`). Her basic Strike is the
+    row that needs `false`: a basic is supposed to be bad. The interface is
+    still emitted, returning `Element.None`, because an omission is what asks
+    the character (`CatalystCadence.PrintedElement`).
+    """
+    row = {"id": "proto_kk_probe", "type": "attack", "rarity": "basic",
+           "effects": [{"op": "damage", "amount": 6, "target": "enemy",
+                        "applies_element": False}]}
+    assert gen.KOKOMI_PROFILE.damage_applies_element(row) is False
+    assert gen.declares_no_element(row, gen.KOKOMI_PROFILE) is True
+
+    # THE CADENCE IS UNMOVED where a row says nothing, which is every other
+    # Attack of hers.
+    silent = dict(row, effects=[{"op": "damage", "amount": 6,
+                                 "target": "enemy"}])
+    assert gen.KOKOMI_PROFILE.damage_applies_element(silent) is True
+    assert gen.declares_no_element(silent, gen.KOKOMI_PROFILE) is False
+
+
+def test_a_character_row_may_not_declare_both_ways_at_once():
+    """One `IElementalCard`, one answer. The sim would give a mixed row one
+    element per effect and this side cannot, so it is a BLOCKER rather than a
+    silent majority vote -- the refusal companions have carried since their
+    own card-level interface landed."""
+    row = {"id": "proto_kk_probe", "type": "attack", "rarity": "common",
+           "name": "probe", "cost": 1,
+           "effects": [{"op": "damage", "amount": 6, "target": "enemy",
+                        "applies_element": True},
+                       {"op": "damage", "amount": 3, "target": "enemy",
+                        "applies_element": False}]}
+    assert gen.blocked_reason(row, gen.KOKOMI_PROFILE) == (
+        "mixed applies_element damage on one character card")
+
+
 def test_the_rows_the_finding_names_carry_the_gem():
     """`Kurage's Oath` and `Sango Isshin` by name, beside the three the seat
     read as correct."""
@@ -355,14 +394,26 @@ def test_the_rows_the_finding_names_carry_the_gem():
 def test_only_the_plan_only_rows_carry_the_when_sentence():
     """An Attack of hers already elements its own hit, so it owes no
     explanation; the sentence rides exactly the rows where the Plan is the
-    only source."""
+    only source.
+
+    "NO ELEMENT OF ITS OWN" IS THE TEST, NOT "NO INTERFACE". They are the same
+    claim while only Skills qualify -- a Skill takes no `IElementalCard` from
+    the codegen -- and they come apart the moment an ATTACK declares
+    `applies_element: false`, which the generator still supports and no
+    shipped row prints (passes six and seven withdrawn, 2026-09-08). Such a
+    row would carry the interface RETURNING `Element.None`, because
+    `CatalystCadence.PrintedElement` reads a card that says nothing as "ask
+    the character".
+    """
     carriers = {p.stem for p in proto.OUT_DIR.glob("*.cs")
                 if "ArmKeywordTips.ForPlanElement(" in p.read_text(
                     encoding="utf-8")}
     assert carriers, "no row carries the sentence"
     for stem in carriers:
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
-        assert "IElementalCard" not in text, stem
+        own = [line.strip() for line in text.splitlines()
+               if line.strip().startswith("public Element Element =>")]
+        assert own in ([], ["public Element Element => Element.None;"]), stem
         assert "KleeKeywords.AppliesHydro" in text, stem
     assert "ProtoKkSangoIsshin" not in carriers
 

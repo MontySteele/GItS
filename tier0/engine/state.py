@@ -205,6 +205,18 @@ class Card:
     # view, the skill_tag rail) and adding an inert word to a list that four
     # things filter is how an inert word stops being inert.
     hexerei: bool = False
+    # `EB-703`. WHICH BASE-GAME BASIC A PROTOTYPE ROW IS (no row declares one
+    # since passes six and seven were withdrawn, 2026-09-08):
+    # "strike" or "defend". Read by `gen_klee_cards` alone -- it emits
+    # `CardTag.Strike` / `CardTag.Defend`, which is what base-game content
+    # means by "one of your Strikes" (Neow's Talisman, Strike Dummy,
+    # Perfected Strike). tier 0 models no card tags, so the field is inert
+    # here and carried only so the sheet states the fact once for both
+    # engines. `EB-543`'s rule -- a prototype basic takes NEITHER tag -- held
+    # while every arm dealt the BASE pair; an arm whose Strike is its own card
+    # would otherwise leave "one of your Strikes" with zero answers instead of
+    # one. A field and not a `tags:` entry, for the reason stated above.
+    basic_tag: Optional[str] = None
     # principles v1.9: kit, not loot. Never in the draftable pool or the
     # starting deck; granted to hand when the Burst meter first fills, and
     # returns to the kit (no pile) after play so a refill re-grants it.
@@ -1097,7 +1109,7 @@ class PlanEntry:
 
     THE TWIN OF `KokomiPlan.Entry`, and the unit everything downstream counts
     in: the pending badge, Change of Plans' "your front Plan", Nereid's
-    Ascension's "carries out every Plan twice" and the
+    Ascension's "carries out your first Plan twice" and the
     whenever-a-Plan-is-carried-out payoffs (Treatise, Song of Pearls). War
     Council prints two clauses and is ONE Plan, which is what its face says.
 

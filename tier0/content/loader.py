@@ -415,6 +415,7 @@ def _validate_card_shape(c: Card) -> None:
     _validate_recall_shape(c)
     _validate_plan_shape(c)
     _validate_plan_dusk(c)
+    _validate_basic_tag(c)
     _validate_no_upgrade_shape(c)
     # THE STAND-IN SEAM's own two-line schema rule (`replaces:` is prototype
     # surface only, and it needs a `personal_pool:`), stated where the arm's
@@ -600,6 +601,29 @@ def _validate_plan_dusk(card: Card) -> None:
         raise ValueError(
             f"card {card.id!r}: `plan_dusk:` on a row with no `plan:` line -- "
             "Dusk says WHEN a Plan is carried out, so there has to be one")
+
+
+def _validate_basic_tag(card: Card) -> None:
+    """`basic_tag:` names which base-game basic a row IS (`EB-703`).
+
+    TWO CLAUSES, the shape `_validate_plan_dusk` above uses. The value is one
+    of the two words the base game has tags for, and the row is `basic` --
+    "one of your Strikes" is a question about the starter, and a Common
+    wearing the tag is the exclusivity defect `EB-543` closed, arriving from
+    the sheet instead of from the codegen. `gen_klee_cards.card_level_reason`
+    refuses the same two from the other side.
+    """
+    if card.basic_tag is None:
+        return
+    if card.basic_tag not in ("strike", "defend"):
+        raise ValueError(
+            f"card {card.id!r}: `basic_tag:` must be 'strike' or 'defend' -- "
+            "those are the two tags base-game content asks a deck for")
+    if card.rarity != "basic":
+        raise ValueError(
+            f"card {card.id!r}: `basic_tag:` on a {card.rarity!r} row -- the "
+            "tag answers \"one of your Strikes\", which is the starter's "
+            "question and not an offer's")
 
 
 def _validate_no_upgrade_shape(card: Card) -> None:

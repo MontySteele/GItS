@@ -412,6 +412,15 @@ def card_cost(state: CombatState, card: Card) -> int:
             and state.player.powers.get(
                 kokomi_plan.NEXT_COMPANION_DISCOUNT, 0)):
         cost = max(0, cost - C.KOKOMI_OVERHAUL_RALLY_DISCOUNT)
+    # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
+    # carry-out used to discount the next face-up Attack, and the mod could
+    # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
+    # card and no `CardPlay`, so it cannot ask whether the play is a WRITE
+    # onto the Bake-Kurage, while this site could ask the pure
+    # `plan_aimed_at_pet` and did. The clause is now DAMAGE applied at
+    # resolution (`kokomi_plan.next_attack_bonus`, folded in by
+    # `effects.flat_attack_bonus`), which both engines can ask at the one
+    # moment the play's target is known.
     # Leading Role (card-level texture, kickoff §3.2): the FIRST
     # Spotlighted card each turn costs less. This is a Furina-card power
     # granting economy, not the Spotlight baseline -- §2.2a governs the
@@ -650,6 +659,10 @@ def _finish_play(state: CombatState, card: Card,
     if C.KOKOMI_OVERHAUL:
         kokomi_plan.note_companion_played(state, card)
         kokomi_plan.spend_companion_discount(state, card)
+        # `EB-668`: BATTLE PLAN'S RIDER IS NOT SPENT HERE. It is damage, so it
+        # has to survive until `flat_attack_bonus` has read it --
+        # `effects._resolve_card_bound` spends it one line after that read,
+        # beside `next_attack_up`'s own consuming pop.
     replays = 1
     if card.is_companion:
         # BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same
@@ -742,12 +755,14 @@ def _finish_play(state: CombatState, card: Card,
                 # indistinguishable from any other row of the performance list.
                 # C# twin: `SalonMemberPower.NoteCompanionReplay`.
                 furina_reframe.companion_replay(state, card)
-        if replay_index == 0 and card.is_companion:
+        if replay_index == 0 and (card.is_companion or C.KLEE_OVERHAUL):
             # "Little Hexenzirkul" (EB-219, retargeted by EB-642): Klee's kit
-            # answering a HEXEREI Companion play, which is where LAW:145 puts
+            # answering a HEXEREI play, which is where LAW:145 puts
             # the grant now that Prune's face may not carry it. Which cards
             # answer is the function's own question, not this line's -- the
-            # printed mark under the arm, the shipped Personal pool off it.
+            # printed mark under the arm (`EB-663`: Companion or not, because
+            # a Klee card Alice marked prints the word and fires its readers),
+            # the shipped Personal Companion pool off it.
             # INSIDE the loop but gated to the
             # first pass, for two reasons that pull in opposite directions and
             # meet exactly here: the mint has to be ONCE PER PLAY (a replay is
@@ -1314,6 +1329,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # `NextCompanionDiscountPower.AfterSideTurnEnd`, the same removal on the
     # same side turn end.
     state.player.powers.pop(kokomi_plan.NEXT_COMPANION_DISCOUNT, None)
+    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-655`. BATTLE PLAN'S RIDER DIES WITH
+    # ITS TURN, beside Rally's and for its reason: the clause says "this turn".
+    # Its C# twin is `NextAttackDamagePower.AfterSideTurnEnd`.
+    state.player.powers.pop(kokomi_plan.NEXT_ATTACK_BONUS, None)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never

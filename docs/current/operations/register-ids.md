@@ -766,6 +766,34 @@ row needing a path or a `no_upgrade:` reason). Its EYES-ON -- a smithed
 Plan row at a rest site -- is owed on the next dev build and was CARRIED
 INTO `EB-283`, which is the same upgrade machinery one layer down and was
 already owed an eyes-on at the next deploy.
+257 ROWS RETIRED 2026-09-08 under R267 pick 4 -- the closed rows leaving
+HEAD. Every row in docs/current/BACKLOG.md that was BUILT or CLOSED with
+no next action ("Next action: none", or done) was moved verbatim,
+grouped under its section heading, into
+docs/current/BACKLOG-archive-2026-09-08.md, committed, tagged and then
+deleted from HEAD in the next commit. The register went from 413 EB rows
+to 156. Retrieve the whole archive with `git show
+backlog-archive-2026-09-08:docs/current/BACKLOG-archive-2026-09-08.md`;
+each row's own history is in the commits that carried it. FIVE rows
+whose next action also reads none were deliberately KEPT, each ratified
+as retained by HEAD itself: EB-12, EB-15, EB-70 and EB-80, the DORMANT /
+NO-SPEND class the BACKLOG header lists by id, whose next action is none
+only until a named wake trigger fires; and EB-74, which the still-OPEN
+review/active/eb74-lever2-options-2026-08-13.md names as its own
+register row, merging the staged branch being the pull. The ids retired:
+EB-83, EB-199/EB-200, EB-251, EB-264, EB-273, EB-318, EB-321, EB-329,
+EB-332/EB-333, EB-340..EB-342, EB-344..EB-346, EB-351..EB-353,
+EB-355..EB-357, EB-359, EB-369..EB-373, EB-375, EB-390, EB-392/EB-393,
+EB-397, EB-400..EB-408, EB-412/EB-413, EB-416..EB-423, EB-425,
+EB-427..EB-429, EB-431..EB-434, EB-436..EB-440, EB-442/EB-443, EB-446,
+EB-448..EB-457, EB-461, EB-463, EB-467..EB-469, EB-471..EB-477,
+EB-480..EB-488, EB-490, EB-492, EB-496/EB-497, EB-499..EB-509,
+EB-511..EB-521, EB-523..EB-525, EB-527..EB-545, EB-547..EB-560,
+EB-564/EB-565, EB-567..EB-581, EB-583/EB-584, EB-586..EB-604, EB-606,
+EB-608/EB-609, EB-612, EB-616/EB-617, EB-619..EB-630, EB-632..EB-636,
+EB-638..EB-641, EB-645, EB-647..EB-650, EB-653..EB-658, EB-663..EB-666,
+EB-668/EB-669, EB-671/EB-672, EB-674/EB-675, EB-678..EB-680, EB-683,
+EB-685, EB-688, EB-690/EB-691, EB-694.
 ```
 
 ## Retirement notes (from the `OPEN_IDS` block)
@@ -1518,3 +1546,6 @@ EB-183 RETIRED 2026-09-04 under R256 (pick 1): R213 E1's second reading, Muster'
 EB-458 RETIRED 2026-09-04 as not a defect: render emits the enemy block once on all 41 recorded screens; both r14 seats piped observe through overlapping sed ranges, the r10 seat's own diagnosis; a pin keeps it single.
 EB-526 RETIRED 2026-09-05 as not a defect: a generated Companion IS lit -- `SpotlightSystem.IsSpotlighted` asks the owner's live mode and the card's class and reads no membership snapshot, so a card made after the lighting answers the same test. Charlotte and Shinobu are printed 4 on their sheets and Guest Cast is x1.5, so the 6 the seat read on each WAS the lit number; the seat compared it against a base of 6. Pinned both ways in Round12Tests. What stands is that a face gives no way to tell a lit number from a base one, which is EB-438's family and not this row.
 EB-566 RETIRED 2026-09-06 as not a defect (read 2026-09-05): every Block number the Furina r14 seat read was the row's base plus the Dexterity, and the delivered Block matched the face because the face already folds it (`BlockVar` carries `ValueProp.Move`; pinned in `test_furina_pool_pass.py`).
+EB-692 RETIRED 2026-09-08 as not ours: the Punch Off renderer storm on round-29 lane 2 is `EB-1`, whose durable record is `understudy/README.md` §Surviving EB-1. Neither hypothesis in the row held — the same storm reproduced SINGLE-INSTANCE with Klee, who has a real combat scene, in soak `20260813-010707` run 1 (2026-08-13), sixteen days before a second lane existed and before Kokomi was in the mod at all, so it is neither Kokomi's static fallback visuals nor two-instance renderer exhaustion. The lane-2 stack (`godot.log` 1421-1461) names `MegaCrit.Sts2.Core.Models.Events.PunchOff.PunchEachOther` outright, which is the attribution EB-1's 2026-08-13 observation could only make by mechanism. The harness gap it exposed — no watchdog on a blindplay lane — is `EB-691`.
+EB-703 RETIRED 2026-09-08, WITHDRAWN: pool pass six gave Kokomi her own basic Strike (`proto_kk_strike`, a Plan line on the basic). [USER] ruled the same day that a character's starter basics are never changed -- "they are supposed to suck" -- so the row, its generated class and its tests were removed and her starter went back to four base Strikes (`StrikeSilent` / the sim's `strike`). The general machinery the pass built stays: the `basic_tag:` sheet field and its two validators, and the `applies_element: false` codegen path (`declares_no_element`, the mixed-declaration blocker).
+EB-711 RETIRED 2026-09-08, WITHDRAWN: pool pass seven's twin, `proto_kk_defend` -- 5 Block plus 2 while the Bake-Kurage held a Plan -- withdrawn under the same rule, with her starter back to four base Defends (`DefendSilent` / the sim's `defend`). Kept: the `plan_held` predicate in both engines' registries, its `_ENGINE_LIVE_PREDICATES` registration (the `EB-144` pilot fix) and its `STATIC_PROTOTYPE_CONDITIONS` entry. Removed with the row: `KokomiPlan.PlanHeldBlockVar` and `gen_klee_cards.plan_held_block_rider`. `EB-712`, the pilot's untaught-predicate hole, stands.

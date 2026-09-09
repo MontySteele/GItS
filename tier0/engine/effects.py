@@ -1187,7 +1187,7 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
 
 
 def klee_companion_spark(state: CombatState, card: Card) -> None:
-    """"Little Hexenzirkul" -- Klee's kit answering a HEXEREI Companion play.
+    """"Little Hexenzirkul" -- Klee's kit answering a HEXEREI play.
 
     THE DECLARATION LAW:145 REQUIRES, and the ONLY place a Companion play mints
     Sparks. The clause (countersigned R224, 2026-08-30) reads: "Companion cards
@@ -1211,12 +1211,22 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
     playing Gorou banked a Spark she has no surface to read. Sparks are Klee's
     resource and the tip says "gives Klee"; nobody else is paid.
 
+    THE COMPANION GATE IS GONE UNDER THE ARM (`EB-663`, r24 lane 1). The rule
+    tested COMPANION *and* Hexerei, so a Klee card carrying the mark -- Alice's
+    Introduction Magic itself, or any card her this-turn window marks -- printed
+    the keyword, fired the family's readers (Coven Errand, Witches' Circle) and
+    paid nothing. One word cannot mean two sets on one screen. Under the arm the
+    test is exactly "does this card count as Hexerei", which is the readers'
+    own question; the character gate below is untouched.
+
     THE ARM DECIDES WHICH TEST, and that is R213 B rather than taste: no
     SHIPPED sheet row carries the family key at all, so a Hexerei-only rule
     would silently retire the grant `EB-219` moved into the kit at parity. With
-    the arm off the shipped Personal pool answers, exactly as it has since
-    `EB-219`; with the arm on the printed mark answers, which is the world
-    R265 ruled on. The Balance surface does not move for a prototype arm.
+    the arm off the shipped Personal-Companion pool answers, exactly as it has
+    since `EB-219` -- Companion gate included, because that is the world the
+    clause was countersigned over; with the arm on the printed mark answers,
+    which is the world R265 ruled on. The Balance surface does not move for a
+    prototype arm.
 
     WHAT THE ARM'S PERSONALS LOSE, said out loud: eight prototype coven rows
     (Barbara, Diona, Noelle, Kaeya, Jean, Sayu, Qiqi, YaoYao) carry
@@ -1247,8 +1257,6 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
     four numbers Prune's face paid and the three limbs reproduce them.
     """
     from tier0.content import upgrades          # late import avoids cycle
-    if not card.is_companion:
-        return
     if state.player.character_id != "klee":
         # `EB-434`. It is KLEE's kit that declared the trigger, and hers is the
         # only Spark surface in the game; a grant nobody can read is not a
@@ -1256,10 +1264,15 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
         # the player, so Gorou paid Kokomi.
         return
     if C.KLEE_OVERHAUL:
+        # `EB-663`: the mark alone, Companion or not. `is_hexerei` is the
+        # readers' own question and now the payer's too.
         if not companion_hexerei.is_hexerei(state, card):
             return
-    elif card.personal_pool != "klee":
-        return
+    else:
+        if not card.is_companion:
+            return
+        if card.personal_pool != "klee":
+            return
     n = C.KLEE_COMPANION_SPARK_BASE
     if state.reactions_this_card > 0:
         n += C.KLEE_COMPANION_SPARK_REACTION_BONUS
@@ -3450,6 +3463,68 @@ def _op_scry_discard(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("scry_discard", card=worst.id)
 
 
+def _op_scry_bottom(state: CombatState, fx: dict, card: Card) -> None:
+    """`EB-655`, READ THE FIELD: "look at the top N cards of your draw pile and
+    put one of them on the bottom".
+
+    THE PILOT BOTTOMS THE HIGHEST-COST CARD, which is this engine's stand-in
+    for player choice and is stated rather than hidden: the sim has no human,
+    a look-and-bottom is only worth anything if somebody chooses, and "the one
+    I can least afford next turn" is the crude legible version of the
+    judgement. `_worst_card`'s precedent (`scry_discard`) is the same shape one
+    verb over, and the mod puts a real selection screen here instead
+    (`gen_klee_cards`'s emitter, `ScryBottom.Prompt`).
+
+    THE CARD IS MOVED WITHIN THE DRAW PILE, not discarded: an empty or shorter
+    pile is a printed no-op, and a pile of one card puts that card back where
+    it already was, which is the honest answer to a look with no choice in it.
+    """
+    n = fx.get("amount", 1)
+    top = state.player.draw_pile[:n]
+    if not top:
+        return
+    pick = max(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
+    remove_instance(state.player.draw_pile, pick)
+    state.player.draw_pile.append(pick)
+    state.emit("scry_bottom", card=pick.id, seen=len(top))
+
+
+def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
+    """`EB-679` (pool pass four), READ THE FIELD: "look at the top N cards of
+    your draw pile; put one into your hand and the rest on the bottom".
+
+    SELECTION AND NOT A LOOK, which is the whole redesign. `scry_bottom` asked
+    the player to bury one card of two and r26's lane never made a decision off
+    it -- burying the card you like least is a choice about the card you did
+    not want, and the seats valued taking the card they DID. So the pick comes
+    to hand and everything it was seen beside goes to the bottom, which is what
+    makes the number on the face worth moving (3, and 4 upgraded).
+
+    THE PILOT TAKES THE LOWEST-COST CARD, this engine's stand-in for player
+    choice, stated rather than hidden -- `_op_scry_bottom`'s convention read
+    the other way round, because the card wanted now is the one that can be
+    paid for now.  The mod puts a real selection screen here instead
+    (`ScryBottom.TakePrompt`, and `gen_klee_cards`'s emitter).
+
+    THE REST GO TO THE BOTTOM IN THE ORDER THEY WERE SEEN, so nothing leaves
+    the deck and the pile beneath them is untouched. A pile shorter than N is
+    read short rather than refused, and an empty pile is a printed no-op --
+    the shape `_op_scry_bottom` already keeps.
+    """
+    n = fx.get("amount", 1)
+    top = state.player.draw_pile[:n]
+    if not top:
+        return
+    pick = min(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
+    for seen in top:
+        remove_instance(state.player.draw_pile, seen)
+    state.player.hand.append(pick)
+    for seen in top:
+        if seen is not pick:
+            state.player.draw_pile.append(seen)
+    state.emit("scry_take", card=pick.id, seen=len(top))
+
+
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
     fired = _predicate(state, fx["if"])
     # D4 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY, and deliberately
@@ -3689,6 +3764,15 @@ PREDICATE_NAMES = frozenset({
     # Plan this turn". Unlike the two above this one IS answered -- draft 6
     # runs in both engines.
     "plan_carried_out_this_turn",
+    # THE SAME ARM'S SECOND (`EB-711`, pool pass seven -- the row that
+    # printed it was withdrawn 2026-09-08 and the predicate stays): "if the
+    # Bake-Kurage is holding a Plan". The QUEUE, read
+    # live at the moment the card resolves -- the same object
+    # `_runtime_count`'s `plans_held` measures, and NOT the morning's depth,
+    # for the reason `KokomiPlan.PlansHeld` states: a Plan written earlier
+    # this turn is held, a Dusk entry is held until it resolves, and a queue
+    # the morning drained is not.
+    "plan_held",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3968,6 +4052,14 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Overlooks the Waters' play-time one all count -- they all carry a
         # Plan out, which is the phrase the card prints.
         return state.kk_plan_carried_out_this_turn
+    if name == "plan_held":
+        # HER BASIC DEFEND's condition (`EB-711`, QUARANTINED). The QUEUE, and
+        # the same one `_runtime_count`'s `plans_held` counts -- one definition
+        # of "holding a Plan" per engine, so the card's rider and Breakwater's
+        # per-Plan clause cannot disagree. Read LIVE, which is what makes the
+        # card ask its question by ordering: written-then-Defend holds one and
+        # Defend-then-written holds none.
+        return bool(state.kk_plan_queue)
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "drew_skill_this_card":
@@ -5874,6 +5966,8 @@ OPS = {
     "discard_for_sparks": _op_discard_for_sparks,
     "exhaust_from": _op_exhaust_from,
     "scry_discard": _op_scry_discard,
+    "scry_bottom": _op_scry_bottom,
+    "scry_take": _op_scry_take,
     "conditional": _op_conditional,
     "choose_one": _op_choose_one,                # EB-118 surface, unused
     "repeat_this": _op_repeat_this,
@@ -5964,14 +6058,25 @@ OPS = {
     # is a fact about a MORNING, so a now-line spelling would print a number
     # that is zero every time it is read.
     "block_per_plan_this_morning": _op_kokomi_plan_only,
-    # SEVEN, and the last three are `EB-643`'s (R265). Same terms as the four
+    # FIVE, and the fifth is Breakwater's (`EB-685`, pool pass five): "plus N
+    # Block for each Plan the Bake-Kurage is HOLDING". Same terms, and
+    # plan-only for the line above's reason one count over -- a now-line
+    # spelling would read the queue before the turn's Plans were written and
+    # pay for a queue the player has not built yet.
+    "block_per_plan_held": _op_kokomi_plan_only,
+    # NINE, and four of them are `EB-643`'s (R265). Same terms as the four
     # above, and plan-only for one reason they share: each names a POSITION in
     # a running drain -- "the next Plan", "each Plan carried out after this
     # one" -- so a now-line spelling would ask about a drain that is not
     # running and answer nothing every time it was played.
+    # R267 pick 3: Scout Ahead is back on the positional count. Both spellings
+    # stay registered; only `draw_per_plan_after` is on a row today.
     "draw_per_plan_after": _op_kokomi_plan_only,
+    "draw_per_plan_this_turn": _op_kokomi_plan_only,
     "next_plan_double_damage": _op_kokomi_plan_only,
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
+    # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
+    "next_attack_damage": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
     # and re-aim what is already written (Converging Tide). They are the
@@ -6101,6 +6206,14 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     if card.type == "attack":
         p = state.player
         p.powers.pop("next_attack_up", 0)
+        # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-668`. Battle Plan's rider is
+        # consumed HERE and not at `combat._finish_play`, for the reason the
+        # pop above it sits here: the bonus has to be READ before it is spent,
+        # and `flat_attack_bonus` read it one line up. `spend_attack_bonus`
+        # asks `plan_aimed_at_pet` itself, so a write leaves the rider
+        # standing exactly as it leaves the damage unpaid.
+        if C.KOKOMI_OVERHAUL:
+            kokomi_plan.spend_attack_bonus(state, card)
         if p.powers.get("ceremonial_garment", 0) and p.charge:
             KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
                 KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
@@ -6212,6 +6325,23 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # double-count class the AoE-blindness finding warned about.
     bonus = (p.powers.get("next_attack_up", 0)
              + p.powers.get("attack_up_this_turn", 0))
+    if C.KOKOMI_OVERHAUL:
+        # QUARANTINED. `EB-668`, BATTLE PLAN's carry-out: "the next Attack you
+        # play face-up this turn deals 4 additional damage." Folded in exactly where
+        # `next_attack_up` is folded in, because it says the same English --
+        # a second summing site is how two riders come to disagree about
+        # whether Strength lands before or after them.
+        #
+        # THE FACE-UP CLAUSE IS ASKED HERE, and it may be: `plan_aimed_at_pet`
+        # is pure, and it is the same read `_resolve_card_bound` makes one
+        # screen down to decide which half of the face runs. So an Attack that
+        # would be WRITTEN is valued and resolved at its printed number, and
+        # the rider waits -- which is what stops the reward paying for more
+        # writing, and what `EB-668` moved off the cost seam to make true in
+        # the mod as well.
+        if (p.powers.get(kokomi_plan.NEXT_ATTACK_BONUS, 0)
+                and not kokomi_plan.plan_aimed_at_pet(state, card)):
+            bonus += C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS
     if C.COMPANION_OVERHAUL:
         # THE MONDSTADT COMPANION OVERHAUL'S THREE ATTACK RIDERS (QUARANTINED).
         # Flat, and folded in exactly where `next_attack_up` is folded in --
