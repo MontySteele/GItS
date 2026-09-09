@@ -97,6 +97,18 @@ public static class KleeMod
                     // nothing. See KleeOverhaulSweep.cs for why AfterDeath is
                     // trustworthy where the enemy's own hooks are not.
                     .Concat(Powers.KleeOverhaulSweepHooks.Subscribe(combatState))
+                    // THE FURINA STAGE'S TWO CLOCKS, on the same argument as
+                    // the four lines above: the lead's regen at her turn start
+                    // and the performers' acts at her turn end are BROADCAST
+                    // moments, and the stage is a ledger rather than a power,
+                    // so nothing on the board can hear them for it. LAST in
+                    // the concat, which is the ordering: the shipped
+                    // end-of-turn tenants are what her docket accounts for,
+                    // and an act resolving before them would move a number the
+                    // docket had already drawn. Not compiled in a release
+                    // build, and inert with the arm off -- every method's
+                    // first line is `FurinaStage.LiveFor`.
+                    .Concat(Powers.FurinaStageHooks.Subscribe(combatState))
 #endif
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
@@ -484,6 +496,25 @@ public static class KleeMod
                     // left for the sentence.
                     [Cards.ArmKeywordTips.OpeningStageKey + ".title"] =
                         "Opening stage",
+                    // THE STAGE ARM'S SEVEN, plus Summon. Every one of them is
+                    // a word the brief's sec.3 invented for this kit, and NOT
+                    // ONE of them collides with a shipped title: `Fanfare`
+                    // shipped as a METER and titles itself off
+                    // `FanfareMeterPower`'s badge, which is retired under this
+                    // arm and replaced by a performer's own bar -- a different
+                    // rule wearing the same word, which is exactly the
+                    // `KLEEMOD-ARM_` prefix's job. `Spend` is a shipped
+                    // Kokomi VERB on a card face and never a titled keyword.
+                    [Cards.ArmKeywordTips.StageSpendKey + ".title"] = "Spend",
+                    [Cards.ArmKeywordTips.StageFanfareKey + ".title"] =
+                        "Fanfare",
+                    [Cards.ArmKeywordTips.StageRaiseKey + ".title"] = "Raise",
+                    [Cards.ArmKeywordTips.StageBowKey + ".title"] = "Bow",
+                    [Cards.ArmKeywordTips.StageLeadKey + ".title"] = "Lead",
+                    [Cards.ArmKeywordTips.StageBackKey + ".title"] =
+                        "Back performer",
+                    [Cards.ArmKeywordTips.StageRotateKey + ".title"] = "Rotate",
+                    [Cards.ArmKeywordTips.StageSummonKey + ".title"] = "Summon",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in
