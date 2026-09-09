@@ -3410,3 +3410,53 @@ carries the first entry out twice, so a Scout Ahead written first arms twice
 and draws 2 per later carry-out. Both suites pin it. Its own beat prints no
 number -- no honest figure exists at the clause -- and the cards ride the later
 beats by name through `KokomiPlan.NoteRider`.
+
+## Pool pass two: six Spark sinks on Regent's ladder (`EB-724`, R270, 2026-09-08)
+
+R270 ruled the round-25 pick at option 1: Spark is a currency, its income
+stays, and the pool gets things to buy with it, Regent's Stars the comparison
+(`docs/current/research/regent-stars-economy.md`). The record is
+`review/records/klee-pool-pass-two-2026-09-08.md`; the doctrine reply is
+`review/qa/klee-pass-two-2026-09-08-reply.md` (six FOLLOWS; Blast Goggles, an
+on-spend Block Power, withdrawn on C5 because a payoff spends nothing).
+
+THE ROWS. Blast Shield (Uncommon, 0 Energy, 2 Sparks: 6 Block, returns to
+hand; upgrade 8); Return to Sender (Uncommon, 1 Energy, 2 Sparks: 8 Block, and
+this turn the damage that Block absorbs is placed on the attacker as a Bomb;
+upgrade 11); Bottomless Bag (Common, 0 Energy, 2 Sparks: draw 2; upgrade 3);
+Once More! (Uncommon, 0 Energy, 3 Sparks: the last Set off card you played
+returns from the discard to your hand; upgrade 2 Sparks); Sparkling Burst
+(Uncommon, 0 Energy, 3 Sparks: 1 Energy, 1 more if a Bomb went off this turn,
+not Exhaust; upgrade 2 Sparks); Blazing Delight (Rare Power, 2 Energy, 5
+Sparks: at the start of your turn gain 1 Energy and draw 1 card; upgrade 4
+Sparks). Prices are Regent's tiers: 2 for the Commons and the repeatable
+Uncommon, 3 for the median Uncommons, 5 for the Rare. No income figure moved.
+
+THE SEAMS. Two new ops, `return_to_hand` and `return_last_set_off`, in
+`klee_overhaul.OVERHAUL_OPS`, `effects.OPS`, the drafter's standing zero and
+`gen_klee_cards`' op tables; `return_to_hand` is emitted as a class member
+(the card's own result-pile override, `PileType.Hand`), not a statement, and
+the codegen refuses it nested or repeated. Two new powers, `ko_return_to_sender`
+/ `ReturnToSenderPower` and `ko_blazing_delight` / `BlazingDelightPower`.
+Return to Sender rides the block-absorbed seam Diona's Icy Paws and Thoma's
+Blazing Barrier already use (`effects.companion_overhaul_block_absorbed` gained
+a Klee leg gated on `C.KLEE_OVERHAUL`; `CompanionOverhaulIncomingHit` the same
+reader gated on `KleeOverhaul.Enabled`); the Bomb it places is an ordinary
+plant and mints nothing. Once More! reads a per-combat `last Set off card`
+noted where the `set_off` op RESOLVES (`effects._op_set_off`; the three C#
+doors), which for every row on the surface is the card that was played. Blazing
+Delight pays in the `AfterPlayerTurnStart` co-tenancy Grounded uses, after the
+draw and the Energy reset. Bottomless Bag's face is spelled with Countdown's
+`{Cards:diff()}` variable so the upgrade shows on the card (`EB-283`).
+
+THE COUNT. The pool is 51: 22 Commons, 20 Uncommons, 9 Rares. THE NINTH RARE
+is one past the brief's sec.7.4 count of eight and is recorded rather than
+absorbed: a combat-long Energy engine is not an Uncommon, the brief's table
+now says nine under R270, and `test_the_pool_keeps_the_packets_rarity_split`
+pins 22 / 20 / 9 with the overrun in its docstring. Both engines pin every row
+(`tier0/tests/test_klee_overhaul.py`; `KleeOverhaulPoolPassTwoTests`, 19
+cases). Both new powers borrow an existing icon; art is owed at acceptance.
+
+NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B). What
+the pass owes is round 26: a natural lane that meets the rows at the draft and
+an assembled lane built on them, read against round 25's figures.

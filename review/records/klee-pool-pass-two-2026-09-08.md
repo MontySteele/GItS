@@ -157,6 +157,14 @@ round 25's figures.
   priced version can return through a later pass with its own read.
 - **E:** the brief's §4 sentence on stinginess and §5.5's "Energy only at
   Rare" line are amended in place under R270 (draft 4 amendments, §18).
+- **E, from the build:** Blazing Delight is the pool's ninth Rare, one past
+  the brief's §7.4 count of eight; a combat-long Energy engine is not an
+  Uncommon, so the count moves and the brief's table says so. Its upgrade
+  lowers the Spark price to 4 (the other two Spark-priced Uncommons'
+  rail), not the Energy. Bottomless Bag's face is spelled with Countdown's
+  draw variable so the upgrade shows on the card (`EB-283`). Once More!
+  remembers the last card whose Set off resolved, which for every row on
+  the surface is the last Set off card played.
 - No number moved on an existing row; nothing measured; no stamp moves.
 
 No pick.

@@ -486,7 +486,7 @@ band:
 
 | Layer | Count | What it is | What it costs |
 |---|---|---|---|
-| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 8 Rares including the three rule-breakers | authoring, art |
+| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 9 Rares including the three rule-breakers (8 until R270 added Blazing Delight) | authoring, art |
 | Personals | 4, up to 5 | The coven, one card each; an imaginary friend as the fifth | reward-slot share, art |
 | Caretaker stand-ins | 4 to 6 | Klee-only cards standing in for Diona, Kaeya, Barbara, Albedo today; Noelle and Jean once they have a Universal | authoring only |
 | Hexerei stand-ins | as many as earn one, 6 to 10 | Family-generic cards standing in for Fischl, Sucrose, Albedo, Durin, Nicole today, and Razor, Mona, Venti, Varka once they have Universals; inherited by future Hexerei characters | authoring only |
