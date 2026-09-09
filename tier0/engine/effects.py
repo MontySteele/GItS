@@ -14,7 +14,7 @@ from typing import Optional, Sequence
 
 from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei,
-                          companion_standins, furina_reframe,
+                          companion_standins, furina_reframe, furina_stage,
                           klee_overhaul, kokomi_plan, powers, reactions,
                           resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
@@ -400,6 +400,26 @@ def _runtime_count(state: CombatState, token: str,
         # nothing every time. Written by `_op_drain_fanfare`, cleared per card
         # play beside `discards_this_card` and its neighbours.
         return state.fanfare_drained_this_card
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`) -- the STAGE's three.
+    #
+    # `stage_spent` is the reframe token's argument one arm over: what THIS
+    # play took off the bars, read back by the effect after it, because by the
+    # time *Final Bow*'s Block or the Rare's damage resolves the bar it is
+    # measuring is gone. Written by `_op_stage_spend`, `_op_stage_spend_all`
+    # and `_op_stage_final_bow`; cleared per card play beside
+    # `fanfare_drained_this_card`.
+    #
+    # The other two are LIVE BAR READS and not per-card memory, which is the
+    # difference between *Ousia Surge* ("damage equal to the lead performer's
+    # Fanfare", brief sec.12) and the Rare: those two cards read a bar they do
+    # not spend. Both are 0 on an empty stage and both are 0 with the flag off,
+    # so a shipped row that ever named one would print zero rather than raise.
+    if token == "stage_spent":
+        return state.stage_spent_this_card
+    if token == "stage_lead_fanfare":
+        return furina_stage.lead_fanfare(p)
+    if token == "stage_back_fanfare":
+        return furina_stage.back_fanfare(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -3773,6 +3793,14 @@ PREDICATE_NAMES = frozenset({
     # this turn is held, a Dusk entry is held until it resolves, and a queue
     # the morning drained is not.
     "plan_held",
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`). THE ONE THING A
+    # SPEND RIDER ASKS. Brief sec.3 rule 8: "With no performer on stage the
+    # rider cannot fire and the card plays at its base number" -- so the
+    # question is OCCUPANCY and never size, because a bar of any size pays the
+    # whole rider (sec.4: "a small bar is the cheapest Spend"). There is
+    # deliberately no `stage_fanfare_at_least_N` beside it: a row that asked
+    # one would be printing a rule this kit does not have.
+    "stage_occupied",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3855,6 +3883,14 @@ def is_known_predicate(name: str) -> bool:
 # would make the validator reject valid content; a token here the chain
 # ignores documents a spelling nothing reads.
 RUNTIME_COUNT_NAMES = frozenset({
+    # QUARANTINED USE ONLY (`EB-720`) -- the FURINA STAGE's three. Registered
+    # here as well as resolved in `_runtime_count` for this registry's own
+    # reason: the loader validates every count token at LOAD off this set, so a
+    # token only the resolver knows is a card that raises the first time it is
+    # played.
+    "stage_spent",
+    "stage_lead_fanfare",
+    "stage_back_fanfare",
     "exhaust_pile",
     "player_block",
     "attacks_in_hand",
@@ -4142,6 +4178,9 @@ def _predicate(state: CombatState, name: str) -> bool:
         want = name[len("leftmost_salon_member_"):]
         salon = state.player.salon
         return bool(salon) and salon[0] == want
+    # --- the Furina STAGE's one (QUARANTINED, `furina_stage.FURINA_STAGE`) ---
+    if name == "stage_occupied":
+        return furina_stage.can_spend(state.player)
     if name == "spotlight_set":
         return state.player.spotlight is not None
     if name == "spotlight_moved_this_turn":
@@ -5924,6 +5963,131 @@ def _op_remove_debuff(state: CombatState, fx: dict, card: Card) -> None:
     kokomi_plan.remove_one_debuff(state)
 
 
+
+# ----------------------------------------------------------------------
+# THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, `EB-720`).
+#
+# EIGHT VERBS AND NO MORE. The brief's seventeen faces (sec.12) are written in
+# these plus `damage`, `block`, `draw` and `conditional`, which is the shape
+# every arm before this one took: a kit whose rules need a new op per card is a
+# kit nobody can draft a row for. Each verb below delegates to
+# `tier0.engine.furina_stage`, which is the ONE implementation of every rule --
+# these functions unpack a row and nothing else, so a rule cannot mean one
+# thing at the end-of-turn sweep and another on a card.
+#
+# EVERY ONE OF THEM IS INERT WITH THE FLAG OFF, because every reader in that
+# module is, so a shipped run that somehow held one of these rows would play it
+# as an empty card rather than raise.
+# ----------------------------------------------------------------------
+def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
+    """Brief sec.3 rule 3 and sec.12's four summons.
+
+    `member:` names one of the three; `member: random` (the default, and what
+    *Salon Début* and *Understudy* print) rolls one who is NOT ON STAGE, which
+    is sec.10 default 2. A roll with every performer already seated summons
+    nobody and says so -- there is no "random including duplicates" reading of
+    the printed text.
+
+    `if_present_raise: N` is the named summons' second clause: "Summon Usher.
+    If he is already on stage, Raise 3 on him instead" (sec.10 default 2, E:
+    "so it is never a dead draw"). The Raise lands ON HIM, wherever he is
+    sitting -- which is the one place in the kit a Raise does not go to the
+    back seat, and it is written on the face.
+    """
+    p = state.player
+    if not furina_stage.active(p):
+        return
+    named = fx.get("member", "random")
+    if named == "random":
+        seated = {m for m, _f in furina_stage.stage(p)}
+        options = [m for m in furina_stage.PERFORMERS if m not in seated]
+        if not options:
+            state.emit("stage_summon_whiffed", reason="full_cast")
+            return
+        named = state.rng.choice(options)
+    else:
+        bump = int(fx.get("if_present_raise", 0) or 0)
+        for pair in furina_stage.stage(p):
+            if pair[0] == named:
+                if bump:
+                    pair[1] += bump
+                    state.emit("stage_raise", member=named, amount=bump,
+                               seat="named", fanfare=pair[1])
+                else:
+                    state.emit("stage_summon_whiffed", reason="already_on")
+                return
+    furina_stage.summon(state, named)
+
+
+def _op_stage_raise(state: CombatState, fx: dict, card: Card) -> None:
+    """Brief sec.3 rule 5: "Raise N Fanfare on the back performer", which is
+    the lead when it is alone. `seat: lead` is the other spelling, for a face
+    that names the lead instead; nothing in batch one prints it, and it is here
+    because the rule is stated per SEAT and a verb that could only reach one of
+    them would make the next such face a new op."""
+    furina_stage.raise_fanfare(state, _amount(state, fx.get("amount", 1)),
+                               fx.get("seat", furina_stage.SEAT_BACK))
+
+
+def _op_stage_scene_change(state: CombatState, fx: dict, card: Card) -> None:
+    """*Scene Change* (sec.12): "Rotate the cast: the front performer moves to
+    the back seat." No bow, no act, nothing lost (sec.5.2)."""
+    furina_stage.rotate(state)
+
+
+def _op_stage_perform_lead(state: CombatState, fx: dict, card: Card) -> None:
+    """*Bis!* (sec.12): the lead performer performs its act now."""
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        furina_stage.perform_lead(state)
+
+
+def _op_stage_spend(state: CombatState, fx: dict, card: Card) -> None:
+    """Brief sec.3 rule 8, the Spend rider's payment leg.
+
+    THE CALLER HAS ALREADY DECIDED THE RIDER FIRES. Every Spend face is written
+    as `conditional {if: stage_occupied, then: [stage_spend, <the big
+    number>], else: [<the base number>]}`, which is rule 8's two sentences
+    printed as two branches: with a performer on stage the rider fires IN FULL
+    and the lead pays what it has (bowing if that empties it), and with none it
+    cannot fire at all.
+
+    WHAT IS RECORDED IS WHAT WAS PAID, not what was asked, because sec.13's
+    first report buckets on "the lead's bar at the moment of Spend" and the
+    difference between the two is exactly the Expend deck's whole argument.
+    """
+    paid = furina_stage.spend(state, _amount(state, fx.get("amount", 1)))
+    state.stage_spent_this_card = paid
+
+
+def _op_stage_spend_all(state: CombatState, fx: dict, card: Card) -> None:
+    """*Let the People Rejoice* (sec.5.3), first clause: "Spend all Fanfare on
+    stage."
+
+    THE BOWS ARE A SECOND OP (`stage_curtain_call`) AND THAT IS THE PRINTED
+    ORDER, not a convenience: the face reads "Spend all Fanfare on stage. Deal
+    that much damage to every enemy. Every performer takes a bow, then returns
+    at 1", so Crabaletta's bow-8 must land AFTER the card's own area damage and
+    on the board that damage left. Three sentences, three ops, in the order
+    they are printed.
+    """
+    state.stage_spent_this_card = furina_stage.collect_all(state)
+
+
+def _op_stage_curtain_call(state: CombatState, fx: dict, card: Card) -> None:
+    """*Let the People Rejoice*, third clause: "Every performer takes a bow,
+    then returns at 1." Pairs with `stage_spend_all` above and reads the
+    company that op recorded, so the pair cannot disagree about who was on
+    stage."""
+    furina_stage.bow_and_return(state)
+
+
+def _op_stage_final_bow(state: CombatState, fx: dict, card: Card) -> None:
+    """*Final Bow* (sec.12): "The lead performer takes a bow and leaves." The
+    Block the card then gains is `amount_formula: {count: stage_spent}`, the
+    same token every other spend writes, so the face's second sentence is an
+    ordinary `block` op reading an ordinary count."""
+    state.stage_spent_this_card = furina_stage.final_bow(state)
+
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
@@ -5950,6 +6114,15 @@ OPS = {
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`): the Stage's eight.
+    "stage_summon": _op_stage_summon,
+    "stage_raise": _op_stage_raise,
+    "stage_scene_change": _op_stage_scene_change,
+    "stage_perform_lead": _op_stage_perform_lead,
+    "stage_spend": _op_stage_spend,
+    "stage_spend_all": _op_stage_spend_all,
+    "stage_curtain_call": _op_stage_curtain_call,
+    "stage_final_bow": _op_stage_final_bow,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,
@@ -6170,6 +6343,10 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # QUARANTINED (R213 B), on the same line and for the same scoping reason:
     # the card after a drain must not read the drain's number.
     state.fanfare_drained_this_card = 0
+    # QUARANTINED (`furina_stage.FURINA_STAGE`), on the same line as the drain
+    # above and for its reason: the card after a Spend must not read the
+    # Spend's number.
+    state.stage_spent_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0
     # `EB-412`: the pre-play half of the replacement rule, seeded HERE because
