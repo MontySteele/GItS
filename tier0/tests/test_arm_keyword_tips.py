@@ -475,7 +475,25 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # board.
                     "KLEEMOD-ARM_EMPTY_FIELD",
                     # `EB-573`: what a merge keeps besides the Mine.
-                    "KLEEMOD-ARM_MERGE_RIDERS"}
+                    "KLEEMOD-ARM_MERGE_RIDERS",
+                    # THE FURINA STAGE'S EIGHT. They title real keywords --
+                    # every one is a word printed on a face -- but they are
+                    # named HERE rather than in `gen.ARM_KEYWORDS` because
+                    # that table drives the CODEGEN's derived attach, and the
+                    # stage's three starter cards are hand-written while the
+                    # `proto_fs_` sheet is authored on `stage-sim`. A row in
+                    # the table with no generated row to attach to would make
+                    # this file's other pins vacuous in the direction they
+                    # exist to catch. The eight MOVE to the table with the
+                    # sheet, and that migration is the arm's, not a tidy.
+                    "KLEEMOD-ARM_STAGE_SPEND",
+                    "KLEEMOD-ARM_STAGE_FANFARE",
+                    "KLEEMOD-ARM_STAGE_RAISE",
+                    "KLEEMOD-ARM_STAGE_BOW",
+                    "KLEEMOD-ARM_STAGE_LEAD",
+                    "KLEEMOD-ARM_STAGE_BACK",
+                    "KLEEMOD-ARM_STAGE_ROTATE",
+                    "KLEEMOD-ARM_STAGE_SUMMON"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():

@@ -522,7 +522,26 @@ public class ArmKeywordTipTests
         // Plan out at the end of the turn it was written on, before the
         // enemies act. A word of its own rather than a sixth clause on the
         // Plan tip, which is at its ceiling and carries five seats' findings.
-        Assert.Equal(21, attaches.Count);
+        //
+        // THE TWENTY-SECOND TO THE TWENTY-NINTH ARE THE FURINA STAGE'S, and
+        // they arrive as a set because the arm arrives as a set: `Spend`,
+        // `Fanfare`, `Raise`, `Bow`, `Lead`, `Back performer`, `Rotate` and
+        // `Summon` are brief sec.3's whole vocabulary, and a kit whose damage
+        // order runs through a creature the player does not own cannot leave
+        // any of the eight to be inferred. Two of them wear a shipped word
+        // with a DIFFERENT rule under it -- `Fanfare` shipped as a meter of
+        // HERS and is now a performer's own bar, `Spend` is a Kokomi verb on
+        // a face -- which is what the `KLEEMOD-ARM_` prefix on every key in
+        // this file exists for.
+        Assert.Equal(29, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForSpend");
+        Assert.Contains(attaches, m => m.Name == "ForFanfare");
+        Assert.Contains(attaches, m => m.Name == "ForRaise");
+        Assert.Contains(attaches, m => m.Name == "ForBow");
+        Assert.Contains(attaches, m => m.Name == "ForLead");
+        Assert.Contains(attaches, m => m.Name == "ForBackPerformer");
+        Assert.Contains(attaches, m => m.Name == "ForRotate");
+        Assert.Contains(attaches, m => m.Name == "ForSummon");
         Assert.Contains(attaches, m => m.Name == "ForDusk");
         Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");

@@ -374,6 +374,24 @@ MIRRORED: dict[str, object] = {
 # relics, Ancients and the run layer are game-side content. What is not
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
+
+# One reason, eleven rows: the Furina stage arm's rule numbers. Written once
+# because it is one argument about one arm's build order, and repeating it
+# eleven times would invite eleven copies to drift. The block that uses it
+# carries the argument in full.
+_STAGE = (
+    "THE FURINA STAGE ARM, and the reason is the BUILD ORDER rather than the "
+    "number: `docs/current/operations/prototype.md` rules **C# FIRST, sim at "
+    "Balance**, so this arm's rules are implemented in the mod and nowhere "
+    "else until they survive the Prototype gate. There is no tier0 stage, no "
+    "performer and no bar of this kind, so there is nothing to mirror against "
+    "and nothing that can drift -- no sim run can be measured on a number the "
+    "mod chose alone. The eleven MOVE to MIRRORED the day the sim twin lands, "
+    "which is the arm's own acceptance and not an optional tidy. Spec: "
+    "review/active/furina-stage-brief-2026-09-08.md sec.3, disclosed as the "
+    "sim's numbers to settle by its sec.10 default 3."
+)
+
 UNMIRRORED: dict[str, str] = {
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
@@ -435,6 +453,55 @@ UNMIRRORED: dict[str, str] = {
         "the card is found by matching the flight's own start and end; the "
         "walk is bounded because it runs on a frame the engine is already "
         "struggling with. The sim has no scene tree.",
+    # THE FURINA STAGE ARM (QUARANTINED -- the C# lives under
+    # klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of a
+    # release build). ELEVEN numbers, and every one of them is a RULE of the
+    # brief's sec.3 rather than an instrument bound -- which is normally
+    # exactly what this table refuses to file UNMIRRORED.
+    #
+    # THE REASON IS THE BUILD ORDER, and it is the repo's own, written down in
+    # `docs/current/operations/prototype.md`: **C# FIRST, sim at Balance** --
+    # "a new kit rule is implemented in the C# mod behind the prototype switch
+    # and nowhere else, and the Python sim (tier0 / tier0.5) is brought up only
+    # once the rule survives the Prototype gate". The four arms above are
+    # mirrored because R220 B sequenced their C# legs LAST; this one is the
+    # first built the other way round, so there is no sim module to mirror
+    # against and a MIRRORED row would have to invent one.
+    #
+    # WHAT THIS COSTS AND WHAT IT DOES NOT. The pair cannot drift, because
+    # there is no pair: tier0 has no stage, no performer and no Fanfare bar of
+    # this kind, so no sim run can be measured on a number the mod chose alone.
+    # The day the sim twin lands -- the arm reaching Balance, or `stage-sim`
+    # growing an engine -- these eleven MOVE to MIRRORED and this block is
+    # deleted. That migration is the arm's own acceptance and not an optional
+    # tidy.
+    #
+    # `review/active/furina-stage-brief-2026-09-08.md` sec.3 is the spec, and
+    # its sec.10 default 3 discloses these as the sim's numbers to settle.
+    "FurinaStageLaw.SeatCount": _STAGE,
+    "FurinaStageLaw.OpeningFanfare": _STAGE,
+    "FurinaStageLaw.SummonFanfare": _STAGE,
+    "FurinaStageLaw.LeadRegen": _STAGE,
+    "FurinaStageLaw.RegenFromTurn": _STAGE,
+    "FurinaStageLaw.RefillAmount": _STAGE,
+    "FurinaStageLaw.UsherActBlock": _STAGE,
+    "FurinaStageLaw.ChevalmarinActDamage": _STAGE,
+    "FurinaStageLaw.CrabalettaActDamage": _STAGE,
+    "FurinaStageLaw.UsherBowBlock": _STAGE,
+    "FurinaStageLaw.CrabalettaBowDamage": _STAGE,
+    # The placement pass's two, which are a different kind of number entirely:
+    # they are the BASE GAME's own offsets, lifted out of
+    # `NCombatRoom.AddCreature`'s pet layout (`owner.X - 20`, `owner.Y + 10`)
+    # so the arm's seat-ordered re-flow puts a body exactly where the engine's
+    # own layout would have. The sim draws nothing.
+    "FurinaStagePlacement.OwnerXOffset":
+        "A SCENE OFFSET, not balance: the base game's own pet placement "
+        "constant, lifted from `NCombatRoom.AddCreature` so the stage's "
+        "seat-ordered re-flow lands a performer where the engine's own layout "
+        "would have. The sim has no scene tree.",
+    "FurinaStagePlacement.OwnerYOffset":
+        "A SCENE OFFSET, not balance: the second half of the base game's own "
+        "pet placement constant, lifted for the reason directly above.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "
