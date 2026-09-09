@@ -1273,9 +1273,16 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SpendKey,
-            "Pays from the [gold]lead performer[/gold]. It fires in full even "
-          + "if the bar is short; an emptied performer takes a "
-          + "[gold]Bow[/gold]. No stage, no rider.");
+            // `EB-746`: SPEND IS A CHOICE ON PLAY. Four of six round-two
+            // seats said the card spent for them -- "no verb to decline",
+            // "the card decided" -- so the wager brief sec.4 describes never
+            // happened at play time. The old last clause goes with the
+            // rider: an empty stage does not refuse a Spend now, it simply
+            // does not OFFER the mode, which the player meets on the
+            // choose-a-card screen rather than in a tip.
+            "Chosen on play, never automatic. Pays the lead performer, "
+          + "fires in full even if the bar is short, and an emptied "
+          + "performer takes a [gold]Bow[/gold].");
 
     /// <summary>
     /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter

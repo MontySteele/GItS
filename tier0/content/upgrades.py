@@ -615,11 +615,24 @@ def has_upgrade(card_id: str, *, shipped_only: bool = False) -> bool:
 
 
 def _iter_effects(effects: list[dict]):
+    """Every effect a delta with the `everywhere` scope can land on.
+
+    `EB-746`: AND A MODE BODY IS ONE. "Everywhere" is top level plus both arms
+    of every conditional, and it stopped there while no modal row carried a
+    scoped delta -- `deep_breath`, the one shipped modal, upgrades on cost. The
+    Stage's four Spend rows became `choose_one` faces under this row and kept
+    their `conditional_damage` / `conditional_block` deltas, which land on a
+    mode body exactly as they landed on a branch. Codegen's twin is
+    `gen_klee_cards._conditional_delta_targets`, walked the same way.
+    """
     for fx in effects:
         yield fx
         for branch in ("then", "else"):
             if isinstance(fx.get(branch), list):
                 yield from _iter_effects(fx[branch])
+        for mode in fx.get("modes") or []:
+            if isinstance(mode, dict) and isinstance(mode.get("effects"), list):
+                yield from _iter_effects(mode["effects"])
 
 
 #: A METER BAR, split into the meter and the number it asks for

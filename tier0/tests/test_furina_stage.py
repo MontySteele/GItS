@@ -444,32 +444,102 @@ def test_nothing_in_the_kit_touches_her_own_bar(arm):
 # THE OPS, as the seventeen faces spell them.
 # ---------------------------------------------------------------------------
 
-def test_the_spend_rider_is_a_conditional_on_stage_occupied(arm):
-    """Sec.3 rule 8 printed as two branches, which is how every Spend face on
-    the surface is written."""
+#: `EB-746`. THE SPEND FACE, as every Spend row on the surface is now written:
+#: a `choose_one` with the base mode first and the Spend mode second, the
+#: payment at the HEAD of the second body (which is what makes it the Spend
+#: one, `furina_stage.spend_mode_amount`).
+def _curtain_rise():
+    return _card(type="attack", effects=[{"op": "choose_one", "modes": [
+        {"label": "Deal 7 damage",
+         "effects": [{"op": "damage", "amount": 7, "target": "enemy"}]},
+        {"label": "Spend 3: deal 13 instead",
+         "effects": [{"op": "stage_spend", "amount": 3},
+                     {"op": "damage", "amount": 13, "target": "enemy"}]}]}])
+
+
+def test_the_spend_face_is_a_choice_and_the_spend_mode_pays_and_hits(arm):
+    """Sec.3 rule 8 as `EB-746` rewrote it: "Spend N is a CHOICE on her cards,
+    made when the card is played". Taking the Spend mode pays the lead and
+    deals the bigger number."""
     st = _state(enemies=[_enemy(hp=60)])
     st.player.stage = [["usher", 8]]
-    card = _card(effects=[{"op": "conditional", "if": "stage_occupied",
-                           "then": [{"op": "stage_spend", "amount": 3},
-                                    {"op": "damage", "amount": 13,
-                                     "target": "enemy"}],
-                           "else": [{"op": "damage", "amount": 7,
-                                     "target": "enemy"}]}])
-    effects.resolve_card(st, card)
+    effects.resolve_card(st, _curtain_rise())
     assert st.enemies[0].hp == 47
     assert st.player.stage == [["usher", 5]]
+    assert [e for e in st.log
+            if e["event"] == "mode_chosen" and e["index"] == 1]
+
+
+def test_the_same_card_played_the_other_way_keeps_the_bar(arm, monkeypatch):
+    """The verb four of six round-two seats asked for: the same board, the
+    same card, the base number and a lead still standing at 8."""
+    monkeypatch.setattr(FS, "spend_mode_index", lambda state, modes: 0)
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [["usher", 8]]
+    effects.resolve_card(st, _curtain_rise())
+    assert st.enemies[0].hp == 53
+    assert st.player.stage == [["usher", 8]]
 
 
 def test_the_same_card_on_an_empty_stage_plays_at_its_base_number(arm):
+    """Rule 8's refusal, as a CHOICE: the Spend mode is not OFFERED at all on
+    an empty stage, so the card plays at its base number and the refusal names
+    the rule rather than a bank."""
     st = _state(enemies=[_enemy(hp=60)])
-    card = _card(effects=[{"op": "conditional", "if": "stage_occupied",
-                           "then": [{"op": "stage_spend", "amount": 3},
-                                    {"op": "damage", "amount": 13,
-                                     "target": "enemy"}],
-                           "else": [{"op": "damage", "amount": 7,
-                                     "target": "enemy"}]}])
+    card = _curtain_rise()
+    modes = card.effects[0]["modes"]
+    assert effects.offered_modes(st, modes) == [0]
+    assert effects.mode_refusal(st, modes[0]) is None
+    assert "needs a performer on stage" in effects.mode_refusal(st, modes[1])
     effects.resolve_card(st, card)
     assert st.enemies[0].hp == 53
+
+
+def test_a_bar_of_any_size_is_still_offered_the_spend_mode(arm):
+    """`can_spend`'s whole sentence, one layer up: the question is OCCUPANCY
+    and never size, so a lead at 1 is offered a Spend asking for 3 and rule
+    8's second clause resolves it -- which is the entire Expend deck."""
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [["usher", 1]]
+    modes = _curtain_rise().effects[0]["modes"]
+    assert effects.offered_modes(st, modes) == [0, 1]
+
+
+# ---------------------------------------------------------------------------
+# `EB-746`. THE PILOT'S SPEND POLICY, written out in
+# `furina_stage.spend_mode_index`: spend when the lead survives the payment,
+# or when the payment kills; otherwise keep.
+# ---------------------------------------------------------------------------
+
+def test_the_pilot_spends_when_the_lead_survives_the_payment(arm):
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [["usher", 8]]
+    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) == 1
+
+
+def test_the_pilot_keeps_when_the_payment_would_empty_the_lead(arm):
+    """Brief sec.7's line A against line B: the whole turn-one wager is
+    whether the Usher survives, and this pilot does not trade a body for a
+    number."""
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [["usher", 3]]
+    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) == 0
+
+
+def test_the_pilot_spends_a_dying_bar_to_finish_the_fight(arm):
+    """Sec.4: "every point unspent when the last enemy falls is gone", so a
+    bar kept past the last body is worth nothing."""
+    st = _state(enemies=[_enemy(hp=12)])
+    st.player.stage = [["usher", 3]]
+    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) == 1
+
+
+def test_the_policy_answers_nothing_with_the_arm_off():
+    """QUARANTINED: `POLICY_VERSION` is untouched because the chooser is not
+    reached on any board the arm is off on."""
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [["usher", 8]]
+    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) is None
 
 
 def test_a_named_summon_raises_the_performer_it_finds_already_on_stage(arm):
@@ -636,14 +706,21 @@ def test_fight_one_turn_one_line_a_is_the_briefs_row(arm):
     assert st.player.hp == 78
 
 
-def test_fight_one_turn_one_line_b_is_the_wager(arm):
+def test_fight_one_turn_one_line_b_is_the_wager(arm, monkeypatch):
     """Line B: Presence, Curtain Rise with Spend 3 (Usher 3 to 0, bows for
     Block 4), Solicitation. Block 10, damage 19, Nibbit at 25, the stage empty,
-    Furina at 76 -- the 2 HP the wager costs."""
+    Furina at 76 -- the 2 HP the wager costs.
+
+    `EB-746`: THE CARD IS PLAYED AND THE MODE IS THE SCRIPT'S. Spend is a
+    choice now, so a replay of the brief's own table has to make the brief's
+    own choice: line B is the WAGER, which is the Spend mode, and the pilot's
+    policy would keep here (the Usher does not survive the payment and 13 does
+    not finish a 44-HP Nibbit) -- which is the finding sec.7 is describing, not
+    a disagreement with it."""
+    monkeypatch.setattr(FS, "spend_mode_index", lambda state, modes: 1)
     st = _open_fight_one()
     st.player.block += 6                                   # Stage Presence
-    assert FS.spend(st, 3) == 3                            # Curtain Rise
-    effects.deal_damage_to_enemy(st, st.enemies[0], 13)
+    effects.resolve_card(st, _curtain_rise())              # Curtain Rise
     effects.deal_damage_to_enemy(st, st.enemies[0], 6)     # Solicitation
 
     assert st.player.block == 10                           # 6 + the bow's 4
@@ -656,16 +733,29 @@ def test_fight_one_turn_one_line_b_is_the_wager(arm):
 
 def test_fight_one_turn_one_line_c_loses_usher_for_nothing(arm):
     """Line C, the line sec.7 says a player takes who has not yet seen that
-    Usher dies either way: Curtain Rise unspent for 13, Usher performs, and the
-    3 that survives her Block empties him with no bow to show for it."""
+    Usher dies either way: Curtain Rise UNSPENT for 7, Usher performs, and the
+    3 that survives her Block empties him with no bow to show for it.
+
+    `EB-746` FIXED A NUMBER HERE, and it is a defect this row exposed rather
+    than a rule it moved. While Spend was a rider the engine fired, the card
+    had no unspent line to play at all -- so this pin dealt 13, the SPENT
+    number, and asserted Nibbit at 25. The brief's own table (sec.7) says line
+    C deals 13 for the TURN, which is Curtain Rise at 7 plus Solicitation at
+    6, and leaves Nibbit at 31. Playing the card at its base mode is what the
+    line is, and 31 is the brief's own figure.
+    """
     st = _open_fight_one()
     st.player.block += 6
-    effects.deal_damage_to_enemy(st, st.enemies[0], 13)    # unspent
+    # `EB-746`: line C is the BASE mode, chosen, which is what the pilot's own
+    # policy takes on this board -- the Usher does not survive a Spend 3 from a
+    # bar of 3, and 13 does not finish a 44-HP Nibbit.
+    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) == 0
+    effects.resolve_card(st, _curtain_rise())              # unspent
     effects.deal_damage_to_enemy(st, st.enemies[0], 6)
     FS.end_of_turn_acts(st)
 
     assert st.player.block == 9
-    assert st.enemies[0].hp == 25
+    assert st.enemies[0].hp == 31
     combat._enemy_turn(st, st.enemies[0])
     assert FS.stage(st.player) == []
     assert st.player.hp == 78
@@ -714,8 +804,10 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_damage_line(arm):
     st.player.block = 0
     FS.turn_start_regen(st)                                # Usher 6 -> 7
     st.player.block += 6                                   # Stage Presence
-    assert FS.spend(st, 3) == 3                            # Curtain Rise
-    effects.deal_damage_to_enemy(st, st.enemies[0], 13)
+    # `EB-746`: the DAMAGE line takes the Spend mode, and here the pilot's own
+    # policy takes it unprompted -- the Usher is at 7 and survives the 3.
+    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) == 1
+    effects.resolve_card(st, _curtain_rise())              # Curtain Rise
     effects.deal_damage_to_enemy(st, st.enemies[0], 6)     # Solicitation
     FS.end_of_turn_acts(st)                                # Usher 3, Crab 5
     assert st.player.block == 9

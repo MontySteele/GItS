@@ -6265,6 +6265,15 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("Chance", {int(round(float(eff["chance"]) * 100))}m)')
         elif op == "add_card" and stash_upgrade(card):
             out.append(f'new DynamicVar("Stash", {int(eff.get("amount", 1))}m)')
+        elif op == "choose_one":
+            # `EB-746`. THE FOLDED PAIR, ONE SHAPE OVER. A Spend face is a
+            # CHOICE now and its two printed numbers are its two modes, so the
+            # same two vars are declared here that a two-armed conditional
+            # declares below -- in print order, else-arm first, which for a
+            # modal is mode 0. `folded_branch_damage` reads both shapes.
+            for name, amount, _delta, cls in folded_branch_damage(card, eff):
+                out.append(
+                    f'new {cls}("{name}", {amount}m, ValueProp.Move)')
         elif op == "conditional":
             # Branch amounts are literals unless a ruled delta targets them:
             # conditional_bonus -> then-first damage (ExtraDamage), draw ->
@@ -7100,10 +7109,23 @@ def _conditional_delta_targets(card: dict, key: str) -> tuple[list, list]:
     top = [e for e in effects if match(e)]
     branch = []
     for eff in effects:
-        if eff.get("op") != "conditional":
-            continue
-        for arm in ("then", "else"):
-            branch.extend(e for e in (eff.get(arm) or []) if match(e))
+        if eff.get("op") == "conditional":
+            for arm in ("then", "else"):
+                branch.extend(e for e in (eff.get(arm) or []) if match(e))
+        elif eff.get("op") == "choose_one":
+            # `EB-746`. A MODE BODY IS A BRANCH BODY, and the tier0 applier
+            # already treats it as one -- `upgrades._iter_effects` walks a
+            # `choose_one`'s modes with the two `conditional` arms, because
+            # "everywhere" means everywhere. Codegen emits a mode body through
+            # the same `_emit_branch_op` resolvers a conditional arm goes
+            # through, so the `IsUpgraded` swap `_branch_amount` puts on the
+            # number is emitted identically; what was missing was this walk,
+            # and the four Furina Spend rows -- which became `choose_one` faces
+            # under this row -- reported "no literal-int damage op on this
+            # card" the moment they stopped being conditionals.
+            for mode in eff.get("modes") or []:
+                branch.extend(e for e in (mode.get("effects") or [])
+                              if match(e))
     return top, branch
 
 
@@ -7241,10 +7263,28 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
     them can stand on one face. There is no `conditional_then_block` key, so
     both block arms move by `conditional_block` alone.
     """
-    if eff.get("op") != "conditional":
+    if eff.get("op") not in ("conditional", "choose_one"):
         return []
     if not str(card.get("id") or "").startswith("proto_"):
         return []
+    if eff.get("op") == "choose_one":
+        # `EB-746`. THE SAME TWO PRINTED NUMBERS, ONE SHAPE OVER. A Spend face
+        # is a CHOICE now -- "Deal 7" or "Spend 3: deal 13 instead" -- and the
+        # two arms it prints are the two modes rather than the two branches of
+        # a conditional. Nothing else about the fold changes: mode 0 is the
+        # base number and mode 1 the branch one, in the order the face prints
+        # them, and a Spend at the head of mode 1 is a PRICE exactly as it was
+        # at the head of a then-branch (`BRANCH_PRICE_OPS`).
+        #
+        # TWO MODES ONLY, because a third arm has no token to print into and
+        # `MAX_MODES` is 3: a row that grows one keeps its literals rather
+        # than folding two of three numbers and leaving the third bare.
+        modes = eff.get("modes") or []
+        if len(modes) != 2:
+            return []
+        eff = {"op": "conditional",
+               "else": list(modes[0].get("effects") or []),
+               "then": list(modes[1].get("effects") or [])}
 
     def _one_printed(branch: list | None, op: str) -> dict | None:
         """The single `op` clause a branch prints, or None. Clauses in
@@ -7295,6 +7335,12 @@ def _is_then_first_damage(card: dict, eff: dict) -> bool:
     """Is this the clause `conditional_then_damage` claims? Identity, not
     equality: two branches printing the same number are two clauses."""
     for cond in card.get("effects", []):
+        if cond.get("op") == "choose_one":
+            # `EB-746`: a Spend MODE is the then-arm of the same claim.
+            for mode in (cond.get("modes") or [])[1:]:
+                if _then_first_damage({"then": mode.get("effects")}) is eff:
+                    return True
+            continue
         if cond.get("op") != "conditional":
             continue
         if _then_first_damage(cond) is eff:
@@ -8250,6 +8296,39 @@ def mode_prices(card: dict) -> list[tuple[str, int] | None] | None:
         else:
             prices.append(None)
     return prices if any(p is not None for p in prices) else None
+
+
+#: `EB-746`. THE OPS WHOSE PRESENCE AT THE HEAD OF A MODE BODY IS A RULE GATE
+#: rather than a price: `{C# predicate: the rule, in the words the refusal
+#: prints}`. One entry, and it is the Stage's Spend.
+#:
+#: WHY NOT A PRICE (`MODE_PRICE_OPS`). Rule 8 fires the rider IN FULL out of a
+#: bar of any size and cannot fire at all on an empty stage, so the question is
+#: OCCUPANCY and the amount never enters it -- a price of N would refuse the
+#: mode on exactly the boards rule 8's second clause exists for. Sim twin:
+#: `furina_stage.mode_offered`.
+MODE_RULE_OPS = {
+    "stage_spend": ("FurinaStage.Occupied(Owner.Creature)",
+                    "needs a performer on stage, the stage is empty"),
+}
+
+
+def mode_requirements(card: dict) -> list[tuple[str, str] | None] | None:
+    """Per-mode RULE gates for a modal card, or None where none apply.
+
+    None -- not a list of Nones -- for every card the rule does not reach, so
+    codegen emits exactly what it emitted before this row for all of them and
+    the regen stays a byte comparison.
+    """
+    eff = modal_effect(card)
+    if eff is None:
+        return None
+    rules: list[tuple[str, str] | None] = []
+    for mode in eff["modes"]:
+        body = mode.get("effects") or []
+        head = body[0] if body else {}
+        rules.append(MODE_RULE_OPS.get(head.get("op")))
+    return rules if any(r is not None for r in rules) else None
 
 
 def mode_is_priced(card: dict, index: int) -> bool:
@@ -9853,12 +9932,34 @@ def build_body(
             # EB-182: a priced card asks the selection that FILTERS, and
             # the index it returns is still the sheet's, so the ladder below
             # is untouched. An unpriced card emits the call it always emitted.
-            lines.append(
-                "var modeIndex = await ModalChoice.SelectAffordableMode("
-                "choiceContext, Owner, modeOptions, ModePrices);"
-                if mode_prices(card) is not None else
-                "var modeIndex = await ModalChoice.SelectMode("
-                "choiceContext, Owner, modeOptions);")
+            # `EB-746`: and the RULE gates, which are computed at play time
+            # (the board moves between two plays of the same card) rather than
+            # declared as static data the way a price is.
+            rules = mode_requirements(card)
+            if rules is not None:
+                rows = ",\n".join(
+                    "            null" if r is None
+                    else ("            new ModeRequirement(" + r[0]
+                          + ',\n                                "' + r[1]
+                          + '")')
+                    for r in rules)
+                lines.append(
+                    "var modeRules = new ModeRequirement?[]\n        {\n"
+                    + rows + ",\n        };")
+            prices_arg = ("ModePrices" if mode_prices(card) is not None
+                          else "System.Array.Empty<ModePrice?>()")
+            if rules is not None:
+                lines.append(
+                    "var modeIndex = await ModalChoice.SelectAffordableMode("
+                    f"choiceContext, Owner, modeOptions, {prices_arg}, "
+                    "modeRules);")
+            else:
+                lines.append(
+                    "var modeIndex = await ModalChoice.SelectAffordableMode("
+                    "choiceContext, Owner, modeOptions, ModePrices);"
+                    if mode_prices(card) is not None else
+                    "var modeIndex = await ModalChoice.SelectMode("
+                    "choiceContext, Owner, modeOptions);")
             labels = ", ".join(f'"{cs_escape(m["label"])}"' for m in modes)
             lines.append("ModalChoice.RecordChoice(this, modeIndex, "
                          f"new[] {{ {labels} }}[modeIndex]);")

@@ -6378,8 +6378,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the regen, so what is held in step is the prose either side. The
         # clauses that straddle a `[gold]` span are anchored by the halves
         # that are whole.
-        "Spend": ["Pays from the ",
-                  "if the bar is short; an emptied performer takes a "],
+        # `EB-746`: the word names a MODE the player chooses, not a rider the
+        # engine fires.
+        "Spend": ["Chosen on play, never automatic. Pays the lead ",
+                  "if the bar is short, and an emptied "],
         "Fanfare": ["A performer's own bar. Attacks hit your ",
                     "'s Fanfare, then you. No cap."],
         "Raise": ["With one performer on stage, that is the lead."],
@@ -6609,12 +6611,17 @@ def test_the_spend_row_says_a_short_bar_still_pays_in_full():
     every row in that table is under.
     """
     page = blindplay.observe(keyword_hand_state([
-        "Deal 7 damage. Spend 3: deal 13 instead."]))
+        "Choose one: Deal 7 damage | Spend 3: deal 13 instead."]))
     assert "- **Spend** — " in page
-    for clause in ("Pays from the lead performer",
+    # `EB-746`: and the first clause is the CHOICE, because four of six
+    # round-two seats said the card spent for them. "No stage, no rider" left
+    # the row with the rider: an empty stage does not refuse a Spend now, it
+    # does not offer the mode, and the page says that in its own last sentence.
+    for clause in ("Chosen on play, never automatic",
+                   "Pays the lead performer",
                    "fires in full even if the bar is short",
                    "an emptied performer takes a Bow",
-                   "No stage, no rider"):
+                   "the Spend mode is not offered at all"):
         assert clause in page, clause
         assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
 
@@ -6622,9 +6629,10 @@ def test_the_spend_row_says_a_short_bar_still_pays_in_full():
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     # The tip's own [gold] spans split the sentence across concatenated
     # literals, so the anchors are the runs that do not straddle a `+`.
-    for phrase in ("Pays from the ",
-                   "if the bar is short; an emptied performer takes a ",
-                   ". No stage, no rider."):
+    for phrase in ("Chosen on play, never automatic. Pays the lead "
+                   "performer, ",
+                   "fires in full even if the bar is short, and an emptied ",
+                   "performer takes a "):
         assert phrase in src, phrase
 
 
@@ -8552,8 +8560,10 @@ _R12_SMITH = (
     # with their arm, and the Stage's own two take the same two slots -- one
     # whose upgrade moves a printed number, and one whose upgrade moves the
     # COST, which the body prints nowhere.
+    # `EB-746`: Spend is a CHOICE on play, so the row's face is the modal
+    # one -- two modes, both printing their own number, both folded.
     ("KLEEMOD-PROTO_FS_CURTAIN_RISE",
-     "Deal 7 damage. Spend 3: deal 13 instead."),
+     "Choose one: Deal 7 damage | Spend 3: deal 13 instead."),
     ("KLEEMOD-PROTO_FS_SALON_DEBUT",
      "Summon a random performer who is not on stage."),
     ("KLEEMOD-AN_INVITATION",
@@ -8576,7 +8586,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     """Three of the four, and no arithmetic in any of them: the pattern reads
     the UNUPGRADED arm off the printed face and the render writes the other."""
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
-        "Deal 10 damage. Spend 3: deal 16 instead.")
+        "Choose one: Deal 10 damage | Spend 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
         "Add 1 random Common Companion card to your hand, free this turn.")
     # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game

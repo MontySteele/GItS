@@ -140,15 +140,16 @@ public static class ModalChoice
     /// </summary>
     public static async Task<int> SelectAffordableMode(
         PlayerChoiceContext choiceContext, Player owner,
-        IReadOnlyList<CardModel> options, IReadOnlyList<ModePrice?> prices)
+        IReadOnlyList<CardModel> options, IReadOnlyList<ModePrice?> prices,
+        IReadOnlyList<ModeRequirement?>? requirements = null)
     {
-        var offered = Offered(owner, prices);
+        var offered = Offered(owner, prices, requirements);
         if (offered.Count == 0)
         {
-            Log.Warn($"[{KleeMod.ModId}] modal choice: no mode is affordable "
+            Log.Warn($"[{KleeMod.ModId}] modal choice: no mode is offered "
                    + "on a card that was played anyway -- "
-                   + $"{Refusals(owner, options, prices)}; offering every "
-                   + "mode.");
+                   + $"{Refusals(owner, options, prices, requirements)}; "
+                   + "offering every mode.");
             return await SelectMode(choiceContext, owner, options);
         }
         if (offered.Count == options.Count)
@@ -173,18 +174,41 @@ public static class ModalChoice
     /// </summary>
     public static string Refusals(
         Player owner, IReadOnlyList<CardModel> options,
-        IReadOnlyList<ModePrice?> prices)
+        IReadOnlyList<ModePrice?> prices,
+        IReadOnlyList<ModeRequirement?>? requirements = null)
     {
         var parts = new List<string>();
-        for (var i = 0; i < prices.Count; i++)
+        for (var i = 0; i < ModeCount(prices, requirements); i++)
         {
-            ModePrice? price = prices[i];
-            if (price == null || price.Value.Affordable(owner)) continue;
             string label = i < options.Count
                 ? options[i].Id.ToString() : $"mode {i}";
-            parts.Add(price.Value.Refusal(owner, label));
+            if (i < prices.Count && prices[i] is { } price
+                && !price.Affordable(owner))
+            {
+                parts.Add(price.Refusal(owner, label));
+            }
+            if (requirements != null && i < requirements.Count
+                && requirements[i] is { } rule && !rule.Met)
+            {
+                parts.Add(rule.Refusal(label));
+            }
         }
         return string.Join("; ", parts);
+    }
+
+    /// <summary>How many modes the two declarations between them describe.
+    /// A card may declare prices, requirements or both, and the lists are
+    /// per-mode and parallel.</summary>
+    private static int ModeCount(
+        IReadOnlyList<ModePrice?> prices,
+        IReadOnlyList<ModeRequirement?>? requirements)
+    {
+        var count = prices.Count;
+        if (requirements != null && requirements.Count > count)
+        {
+            count = requirements.Count;
+        }
+        return count;
     }
 
     /// <summary>
@@ -192,16 +216,23 @@ public static class ModalChoice
     /// an UNPRICED mode and is always offered.
     /// </summary>
     public static List<int> Offered(
-        Player owner, IReadOnlyList<ModePrice?> prices)
+        Player owner, IReadOnlyList<ModePrice?> prices,
+        IReadOnlyList<ModeRequirement?>? requirements = null)
     {
         var offered = new List<int>();
-        for (var i = 0; i < prices.Count; i++)
+        for (var i = 0; i < ModeCount(prices, requirements); i++)
         {
-            ModePrice? price = prices[i];
-            if (price == null || price.Value.Affordable(owner))
+            if (i < prices.Count && prices[i] is { } price
+                && !price.Affordable(owner))
             {
-                offered.Add(i);
+                continue;
             }
+            if (requirements != null && i < requirements.Count
+                && requirements[i] is { } rule && !rule.Met)
+            {
+                continue;
+            }
+            offered.Add(i);
         }
         return offered;
     }
@@ -212,8 +243,9 @@ public static class ModalChoice
     /// <c>combat.modal_refusal</c> reached through <c>card_playable</c>.
     /// </summary>
     public static bool AnyAffordable(
-        Player? owner, IReadOnlyList<ModePrice?> prices) =>
-        owner == null || Offered(owner, prices).Count > 0;
+        Player? owner, IReadOnlyList<ModePrice?> prices,
+        IReadOnlyList<ModeRequirement?>? requirements = null) =>
+        owner == null || Offered(owner, prices, requirements).Count > 0;
 
     /// <summary>
     /// The emit-stream row, formatted so a log line and a tier0 event carry the
@@ -314,6 +346,49 @@ public readonly struct ModePrice
     public string Refusal(Player owner, string label) =>
         $"'{label}' needs {Amount} {Meter}, bank holds "
       + $"{MeterCost.BankOf(owner.Creature, Meter)}";
+}
+
+/// <summary>
+/// `EB-746`: A MODE THE BOARD REFUSES, where <see cref="ModePrice"/> is a mode
+/// the BANK refuses.
+///
+/// THE TWO ARE DIFFERENT QUESTIONS AND THAT IS WHY THIS TYPE EXISTS. A price
+/// is a number compared against a meter, and the mode is offered when the
+/// meter is big enough. Furina's Spend is not that: brief sec.3 rule 8 says
+/// the rider fires IN FULL out of a bar of any size and cannot fire at all on
+/// an empty stage, so the question is OCCUPANCY and the amount never enters
+/// it. Modelling it as a price of 1 would offer the mode on the boards it
+/// refuses and refuse it on boards it allows.
+///
+/// A BOOLEAN AND A SENTENCE, computed by the generated card at play time
+/// rather than by a delegate or an enum here. `ModePrice` moved AWAY from
+/// generated lambdas under `EB-220` because a price and the BADGE painted on
+/// the mode's face had to read one literal; a rule gate paints no badge, and
+/// the rule it asks lives in a Compile-Removed prototype file this assembly's
+/// shared code must not name. So the card, which may name it, answers it.
+///
+/// Sim twin: <c>tier0.engine.furina_stage.mode_offered</c> /
+/// <c>mode_refusal</c>, reached through <c>effects.mode_affordable</c>.
+/// </summary>
+public readonly struct ModeRequirement
+{
+    public ModeRequirement(bool met, string refusal)
+    {
+        Met = met;
+        Rule = refusal;
+    }
+
+    /// <summary>Does the board admit this mode right now?</summary>
+    public bool Met { get; }
+
+    /// <summary>The rule that refused it, without the mode's own name.
+    /// </summary>
+    public string Rule { get; }
+
+    /// <summary>Why this mode is not offered, naming the mode and the rule --
+    /// the shape <see cref="ModePrice.Refusal"/> prints, so a log line reads
+    /// the same whichever gate closed.</summary>
+    public string Refusal(string label) => $"'{label}' {Rule}";
 }
 
 /// <summary>

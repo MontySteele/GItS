@@ -1387,9 +1387,14 @@ ARM_KEYWORDS: dict[str, str] = {
     # that is the reason a bar matters at all. `Bow` is stated against its
     # opposite -- a Spend earns one and a hit does not -- because that
     # difference IS turn one's wager (sec.7, line B against line C).
-    "Spend": ("Pays from the lead performer. It fires in full even if the bar "
-              "is short; an emptied performer takes a Bow. No stage, no "
-              "rider."),
+    # `EB-746`: the word names a MODE now, not a rider. The page adds the
+    # sentence the 135-character tip has no room for, which is what the
+    # choose-a-card screen shows a player and a blind seat has to be told: an
+    # empty stage offers the base mode alone.
+    "Spend": ("Chosen on play, never automatic. Pays the lead performer, "
+              "fires in full even if the bar is short, and an emptied "
+              "performer takes a Bow. On an empty stage the Spend mode is "
+              "not offered at all."),
     "Fanfare": ("A performer's own bar. Attacks hit your Block, then the lead "
                 "performer's Fanfare, then you. No cap."),
     "Raise": ("Adds Fanfare to the back performer. With one performer on "

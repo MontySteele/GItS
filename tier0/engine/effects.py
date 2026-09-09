@@ -3639,7 +3639,17 @@ def mode_price(state: CombatState, mode: dict):
 
 
 def mode_affordable(state: CombatState, mode: dict) -> bool:
-    """Can the bank pay this mode's price? True for an unpriced mode."""
+    """Is this mode OFFERED? True for an unpriced, unrefused mode.
+
+    Two gates, and they are two rules. EB-182's PRICE asks whether the bank can
+    pay; `EB-746`'s RULE asks whether the board admits the mode at all -- the
+    Stage's Spend, where rule 8 refuses the rider on an empty stage and admits
+    it at a bar of any size, so occupancy is the question and the amount is
+    not. A mode neither reaches is offered, which keeps every unpriced fixture
+    byte-identical.
+    """
+    if furina_stage.mode_offered(state.player, mode) is False:
+        return False
     price = mode_price(state, mode)
     if price is None:
         return True
@@ -3655,6 +3665,9 @@ def mode_refusal(state: CombatState, mode: dict) -> Optional[str]:
     through `combat.modal_refusal`, so a refused line can say what was short
     instead of merely not appearing.
     """
+    rule = furina_stage.mode_refusal(state.player, mode)   # `EB-746`
+    if rule is not None:
+        return rule
     price = mode_price(state, mode)
     if price is None:
         return None
@@ -3710,6 +3723,16 @@ def _chosen_mode(state: CombatState, modes: list[dict], card: Card) -> int:
         # nothing: the paying ops still refuse at resolution, which is the
         # loud half of the same rule.
         offered = list(range(len(modes)))
+    # `EB-746`, QUARANTINED (`furina_stage.FURINA_STAGE`) AND FIRST. The Stage's
+    # Spend is a choice on play now, and a pilot with no opinion about it takes
+    # index 0 forever -- a Furina who never spends, which is a different
+    # character from the one the seats play. The arm's own policy is written
+    # out in `furina_stage.spend_mode_index`; it answers None on every board
+    # the rule does not reach, including every board with the arm off, so
+    # nothing below it moves and `POLICY_VERSION` is untouched.
+    stage_pick = furina_stage.spend_mode_index(state, modes)
+    if stage_pick is not None and stage_pick in offered:
+        return stage_pick
     pol = _mode_chooser()
     if pol is None:
         return offered[0]

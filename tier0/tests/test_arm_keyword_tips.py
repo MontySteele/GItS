@@ -708,8 +708,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # even if the bar is short", rule 6's damage order, rule 5's "with
             # one performer that is the lead", rules 7-and-9's difference
             # between a bow and a death, and rotation's refusal of both.
-            "Pays from the [gold]lead performer[/gold]. It fires in full even ",
-            "if the bar is short; an emptied performer takes a ",
+            # `EB-746`: a mode the player chooses, not a rider the engine
+            # fires whenever a lead stands.
+            "Chosen on play, never automatic. Pays the lead performer, ",
+            "fires in full even if the bar is short, and an emptied ",
             "A performer's own bar. Attacks hit your [gold]Block[/gold], then ",
             "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.",
             "Adds [gold]Fanfare[/gold] to the [gold]back performer[/gold]. ",

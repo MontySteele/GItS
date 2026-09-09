@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard
+public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IModalCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
@@ -45,8 +45,20 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Interposition"),
-        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead."),
+        ("description", "Choose one: Gain {PlainBlock:diff()} [gold]Block[/gold] | [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead."),
     };
+
+    // EB-184: what each mode does about AIMING, in sheet order.
+    // The card's own TargetType is fixed before a mode is chosen (the
+    // game aims first), so it answers for the card and not for the
+    // play -- an Attack-typed modal declares AnyEnemy for the mode
+    // that aims, and the bridge then demanded a target on the mode
+    // that attacks nothing. These two rows are what it reads instead.
+    public IReadOnlyList<string> ModeLabels =>
+        new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 2: gain 10 instead" };
+
+    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
+        new[] { false, false };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -64,14 +76,27 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (FurinaStage.Occupied(Owner.Creature))
+        var modeOptions = new List<CardModel>
         {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 2);
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 13m : 10m), ValueProp.Move), cardPlay);
+            ModalChoice.CreateOption<ProtoFsInterpositionModeA>(Owner),
+            ModalChoice.CreateOption<ProtoFsInterpositionModeB>(Owner),
+        };
+        var modeRules = new ModeRequirement?[]
+        {
+            null,
+            new ModeRequirement(FurinaStage.Occupied(Owner.Creature),
+                                "needs a performer on stage, the stage is empty"),
+        };
+        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 2: gain 10 instead" }[modeIndex]);
+        if (modeIndex == 0)
+        {
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 8m : 5m), ValueProp.Move), cardPlay);
         }
         else
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 8m : 5m), ValueProp.Move), cardPlay);
+            await FurinaStage.Spend(choiceContext, Owner.Creature, 2);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 13m : 10m), ValueProp.Move), cardPlay);
         }
     }
 
@@ -81,4 +106,32 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard
         DynamicVars["PlainBlock"].UpgradeValueBy(3m);
         DynamicVars["BranchBlock"].UpgradeValueBy(3m);
     }
+}
+
+/// <summary>Mode 0 of proto_fs_interposition. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsInterpositionModeA : ModalOptionCard
+{
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Gain 5 [gold]Block[/gold]"),
+        ("description", "Gain 5 [gold]Block[/gold]"),
+    };
+}
+
+/// <summary>Mode 1 of proto_fs_interposition. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsInterpositionModeB : ModalOptionCard
+{
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "[gold]Spend[/gold] 2: gain 10 instead"),
+        ("description", "[gold]Spend[/gold] 2: gain 10 instead"),
+    };
 }
