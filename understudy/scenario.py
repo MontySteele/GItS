@@ -188,6 +188,29 @@ TOKEN_CARDS = {
         "(Cards/Furina/Generated/DeepBreath.cs, DeepBreathModeA)",
     "Spend 3 Encore: draw 3":
         "mode 1 of the same card (DeepBreathModeB)",
+    # `EB-721`. THE FURINA STAGE ARM'S THREE KIT CARDS, and they are here for
+    # a reason no other row in this table has: they are HAND-WRITTEN under
+    # `#if PROTOTYPE_CARDS` while the batch-one `proto_fs_` faces are authored
+    # on `stage-sim`, so they are on no shipped sheet AND on no prototype
+    # sheet either -- which is the one hole between this table and
+    # `loader.prototype_cards()`. They are reachable without a draft because
+    # `FurinaStageRoster.StartingDeck` deals all three, exactly as the
+    # Spotlight rows above are reachable off a relic.
+    #
+    # THEY LEAVE THIS TABLE WITH THE SHEET. Once the `proto_fs_` rows land the
+    # generated twins are on the prototype surface, the scenario becomes a
+    # `prototype: true` file checked against that surface, and these six lines
+    # are deleted with the hand-written classes.
+    "KLEEMOD-STAGE_SALON_DEBUT":
+        "dealt by the stage arm's starter (Powers/Prototype/FurinaStageRoster.cs); "
+        "hand-written until the proto_fs_ sheet lands",
+    "Salon Début": "the printed title of the above",
+    "KLEEMOD-STAGE_CURTAIN_RISE":
+        "the arm's Spend card, dealt by the same starter",
+    "Curtain Rise": "the printed title of the above",
+    "KLEEMOD-STAGE_STANDING_OVATION":
+        "the arm's Raise card, dealt by the same starter",
+    "Standing Ovation": "the printed title of the above",
 }
 
 # Every verb a step may name. Kept as data so the parser can refuse an unknown
