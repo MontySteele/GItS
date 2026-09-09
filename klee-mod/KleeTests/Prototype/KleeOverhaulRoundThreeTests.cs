@@ -76,8 +76,11 @@ public class KleeOverhaulRoundThreeTests
         // FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`): TEN rows off
         // the readings of rounds 13 to 16 -- three for Cook, three for Spray,
         // three for React and one bridge.
+        // FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-732`): SIX rows in
+        // three pairs -- the defence shelf's two, the Spark sinks' two and the
+        // Energy engines' two.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(45, slice.Count);
+        Assert.Equal(51, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
@@ -362,8 +365,19 @@ public class KleeOverhaulRoundThreeTests
         // less", so a row of cost 2 or more ALWAYS has an answer -- either a
         // number to bump or that clause. Every row without an upgrade must
         // therefore be a 0- or 1-cost row with nothing printed to move.
+        //
+        // A SPARK-PRICE CUT IS AN ANSWER AND HAS NO BODY (`EB-732`, Blazing
+        // Delight). `spark_price` is a play-time `IsUpgraded` read at
+        // `PrintedSparkPrice` and the `SparkPower.Spend` beside it, so
+        // `OnUpgrade` is honestly empty and `HasUpgradeBody` cannot see it --
+        // the same fifth channel `EB-491` had to teach the upgrade-visibility
+        // gate about, which this pin never learned because every earlier row
+        // taking the rail cost 0 energy and was outside the clause. Read off
+        // the compiled property, not off a name list, so the next such row is
+        // covered without anyone remembering it.
         var expensiveAndUnupgraded = rows
-            .Where(t => !HasUpgradeBody(t) && CanonicalCost(t) >= 2)
+            .Where(t => !HasUpgradeBody(t) && !MovesSparkPrice(t)
+                        && CanonicalCost(t) >= 2)
             .Select(t => t.Name)
             .ToList();
         Assert.Empty(expensiveAndUnupgraded);
@@ -445,6 +459,25 @@ public class KleeOverhaulRoundThreeTests
         // An empty `OnUpgrade` compiles to `ret` alone (or `nop; ret` in a
         // debug build), so anything longer is a delta being applied.
         return body != null && body.Length > 2;
+    }
+
+    /// <summary>
+    /// Does this row's upgrade cut its SPARK PRICE? (`EB-732`.)
+    ///
+    /// The declared price is one expression read by the badge and the gate
+    /// alike, so an upgrade that moves it shows on the card without moving a
+    /// var -- and therefore without an `OnUpgrade` body. What is read is the
+    /// compiled `PrintedSparkPrice`: a row whose price is a literal returns a
+    /// constant, and one whose upgrade cuts it branches on `IsUpgraded`.
+    /// </summary>
+    private static bool MovesSparkPrice(Type card)
+    {
+        var price = card.GetProperty("PrintedSparkPrice", HeadlessGame.All);
+        if (price?.GetMethod == null) return false;
+        // `Il.Calls` names a property read by its accessor -- `get_IsUpgraded`
+        // -- so the match is on the NAME and not on an exact member spelling.
+        return Il.Calls(price.GetMethod)
+            .Any(c => c.Contains("IsUpgraded", StringComparison.Ordinal));
     }
 
     private static void Upgrade(CardModel card)

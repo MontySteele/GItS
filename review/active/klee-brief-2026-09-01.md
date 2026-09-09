@@ -152,8 +152,12 @@ fight.
 Sparks are the second contest. A Spark buys a free *Set off* Attack now
 (tempo, more explosions, more Sparks) or a Spark-priced Skill that plants,
 grows, or defends (setup). Generation only comes from explosions, so she
-cannot bank Sparks without collecting bombs. Lean in and it flows; otherwise
-it is stingy, the Regent's Stars governor by scarcity and not by cap.
+cannot bank Sparks without collecting bombs. Lean in and it flows. Five
+reads (rounds 23 to 25 and [USER]'s runs) found it never stingy: income
+outran every price on the pool. R270 (2026-09-08) keeps the income and makes
+the contest one between sinks: Spark buys Block, cards or Energy at Regent's
+prices (cheapest 1, median 3, a Rare at 5), so the bank goes to the thing
+the turn is short of, and the decision is which.
 
 ## 5. The three loops
 
@@ -250,9 +254,12 @@ on the *first* one, which is why Careful Arrangement is a React card.
 - **Bombs → cards:** Ammo Scavenging (Common): plant a Bomb 4, then draw a
   card for each Bomb that went off this turn.
 - **Sparks → Attacks** (Fwoosh! and friends, Common), **→ setup and defence**
-  (Dig In, Powder Charge, Uncommon), **→ energy only at Rare:** Sugar Rush (2
-  Sparks, exhaust: 2 energy and a card). Below Rare, Sparks never become
-  energy, or they are a second energy pool.
+  (Dig In, Powder Charge; Blast Shield and Return to Sender, pass two),
+  **→ cards** (Bottomless Bag; Once More!, a Set off card back), **→ energy**
+  (Sparkling Burst, Uncommon, 3 Sparks; Sugar Rush, Rare; Blazing Delight,
+  Rare Power, 5 Sparks). R270 lifted draft 4's "energy only at Rare" line:
+  Regent sells Energy for Stars at Uncommon, and what keeps Sparks from
+  being a second energy pool is the price, three explosions per Energy.
 - **Reactions → Sparks:** Catalytic Converter. React feeds Spray.
 - **Not exploding → Block** (Grounded); **exploding → Block** (Run Away!).
 
@@ -479,7 +486,7 @@ band:
 
 | Layer | Count | What it is | What it costs |
 |---|---|---|---|
-| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 8 Rares including the three rule-breakers | authoring, art |
+| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 9 Rares including the three rule-breakers (8 until R270 added Blazing Delight) | authoring, art |
 | Personals | 4, up to 5 | The coven, one card each; an imaginary friend as the fifth | reward-slot share, art |
 | Caretaker stand-ins | 4 to 6 | Klee-only cards standing in for Diona, Kaeya, Barbara, Albedo today; Noelle and Jean once they have a Universal | authoring only |
 | Hexerei stand-ins | as many as earn one, 6 to 10 | Family-generic cards standing in for Fischl, Sucrose, Albedo, Durin, Nicole today, and Razor, Mona, Venti, Varka once they have Universals; inherited by future Hexerei characters | authoring only |
@@ -847,3 +854,13 @@ name only.
 - **R234 P5 reading recorded:** stand-ins take no reward-slot share, so
   they do not count toward "three to five". Pick 6 ruled at the default
   with the naming rule.
+
+## 18. R270 (2026-09-08): what Spark is for
+
+Five reads said Spark never binds; the round-25 packet asked what it is for
+and [USER] ruled option 1: a currency whose income stays, with interesting
+things to buy, Regent's Stars the comparison. §4 and §5.5 are amended above.
+Rule 4 is unchanged. Pool pass two
+(`review/records/klee-pool-pass-two-2026-09-08.md`) is the ruling's work:
+six Spark-priced rows paying Block, cards and Energy on Regent's price
+ladder, read at the doctrine door first.

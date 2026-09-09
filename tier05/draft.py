@@ -739,7 +739,11 @@ KLEE_OVERHAUL_OPS = frozenset((
     "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand",
     # THE POOL PASS's three (`EB-491`): All of My Treasures!, Kindling and
     # Split Charge. Same pricing decision as the eleven above.
-    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb"))
+    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
+    # POOL PASS TWO's two (`EB-732`): Blast Shield's `return_to_hand` and Once
+    # More!'s `return_last_set_off`. Same pricing decision as the fourteen
+    # above -- both are the arm's, and neither resolves off it.
+    "return_to_hand", "return_last_set_off"))
 
 #: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
 #: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
@@ -899,7 +903,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # with and without this branch and DRAFTER_VERSION does not move. The
         # same terms `block_half_damage` took.
         return 0.0
-    # -- the FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, EB-724) --
+    # -- the FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, EB-732) --
     if op in FURINA_STAGE_OPS:
         # ZERO, all eight, and it is `drain_fanfare`'s argument one arm over
         # rather than a shrug. The Stage's verbs are about a BOARD -- who is on
@@ -2464,7 +2468,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "multiply_set_off", "draw_per_set_off",
                   "hexerei_mark_hand",
                   "plant_bomb_copy_largest", "grow_bombs_off_aura",
-                  "split_largest_bomb")},
+                  "split_largest_bomb",
+                  "return_to_hand", "return_last_set_off")},
     # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----
     # EB-311: the blanket ZERO these eight rows used to share is gone. One
     # rationale apiece now, each derived from a dial already in this table, and
@@ -2540,7 +2545,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                      "moves, so the priced-op set grows without a "
                      "DRAFTER_VERSION bump (the same terms as "
                      "`block_half_damage` below)",
-    # --- the FURINA STAGE (QUARANTINED, furina_stage.FURINA_STAGE, EB-724) --
+    # --- the FURINA STAGE (QUARANTINED, furina_stage.FURINA_STAGE, EB-732) --
     "stage_summon": _STAGE_ZERO,
     "stage_raise": _STAGE_ZERO,
     "stage_scene_change": _STAGE_ZERO,

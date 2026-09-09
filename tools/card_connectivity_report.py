@@ -418,6 +418,15 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # rather than the op.
     "hexerei_mark_hand": [_hook("shared", "hand_contents", "read"),
                           _hook("shared", "card_identity", "write")],
+    # POOL PASS TWO's two (`EB-732`), and neither touches a Bomb. Blast Shield
+    # sends its own play to the hand instead of the discard pile, which is a
+    # WRITE of the hand and nothing else; Once More! reads the discard pile for
+    # one named card and writes it into the hand. Filed by what they move --
+    # cards between piles -- rather than by the Set off they name, for the
+    # reason `hexerei_mark_hand` above is filed by the mark and not the payoff.
+    "return_to_hand": [_hook("shared", "hand_contents", "write")],
+    "return_last_set_off": [_hook("shared", "discard_pile", "use"),
+                            _hook("shared", "hand_contents", "write")],
     "gain_spark": [_hook("private", "sparks", "write")],
     # A competing use for the bank, mirroring spend_encore: the Sparks paid
     # here are Sparks the threshold cash-out no longer reaches (packet 4.5).
@@ -434,7 +443,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # nothing. What follows it on the card reads the amount taken,
     # which is a per-play number and not a state in this vocabulary.
     "drain_fanfare": [_hook("private", "fanfare", "use")],
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`) -- THE STAGE's eight.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`) -- THE STAGE's eight.
     # ONE PRIVATE STATE, `stage`, and it is a new one rather than `salon`
     # reused: the shipped Salon is a queue of names with no bars, and every
     # verb below is about a BAR. A row written against one cannot be played

@@ -1313,6 +1313,25 @@ public sealed class CompanionOverhaulIncomingHit : AbstractModel
         if (dealer == null || dealer.Player != null) return;   // by an enemy
         if (!props.IsPoweredAttack()) return;
 
+        // THE KLEE ARM'S ONE INCOMING READER (QUARANTINED, `EB-732`), FIRST
+        // and behind its own flag. Return to Sender is the paws' construction
+        // with a Bomb on the attacker instead of an aura, and it rides this
+        // listener rather than a fifth `AbstractModel` subscription for the
+        // reason the four below it do: `amount` and the standing Block exist
+        // together only here. FIRST, so the charge is planted before any mark
+        // below it moves; none of the readers can change what another sees,
+        // because the marks are separate powers and `Owner.Block` is the one
+        // number all of them read and none of them moves. Sim twin: the
+        // `klee_overhaul.block_absorbed` call at the head of
+        // `effects.companion_overhaul_block_absorbed`.
+        if (KleeOverhaul.Enabled)
+        {
+            foreach (var sender in
+                     target.Powers.OfType<ReturnToSenderPower>().ToList())
+            {
+                await sender.Bounce(choiceContext, dealer, amount);
+            }
+        }
         foreach (var shower in target.Powers.OfType<SacramentalShowerPower>().ToList())
         {
             await shower.Spring(choiceContext, dealer);

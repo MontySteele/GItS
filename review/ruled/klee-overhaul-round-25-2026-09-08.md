@@ -1,4 +1,4 @@
-Status: OPEN (one A pick, §5; the defaults in §6 are applied)
+Status: RULED R270 2026-09-08
 
 # Klee round 25: Spark is a currency with almost nothing to buy; the Spark defence fails on detonator draw and Energy, never on Sparks
 
@@ -151,5 +151,12 @@ display); `EB-722` the buff-strip number for a placer Power (OPEN, display).
 
 Defaults applied (E): the three face and tip fixes follow the rule each
 engine already runs and move no number. Nothing measured; no stamp moves.
-Round 26's hypothesis is written from the ruling on §5 (QUEUE row
-`klee-spark-purpose 5.1`); nothing is scheduled before it.
+Round 26's hypothesis is written from the ruling on §5.
+
+## 7. Ruled (R270, 2026-09-08)
+
+Option 1. Spark's income stays as it is, and the pool gets Spark-priced rows
+that pay Block, cards and Energy, priced on Regent's Stars ladder
+(`docs/current/research/regent-stars-economy.md`: cheapest sink 1, median 3,
+a Rare at 5) and read at the doctrine door before they are built:
+`review/records/klee-pool-pass-two-2026-09-08.md`. Round 26 reads the pass.

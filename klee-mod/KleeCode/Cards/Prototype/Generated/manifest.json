@@ -74,7 +74,10 @@
     "proto_ko_ammo_scavenging",
     "proto_ko_bang_bang",
     "proto_ko_big_badda_boom",
+    "proto_ko_blast_shield",
+    "proto_ko_blazing_delight",
     "proto_ko_bombs_away",
+    "proto_ko_bottomless_bag",
     "proto_ko_careful_arrangement",
     "proto_ko_careful_now",
     "proto_ko_catalytic_converter",
@@ -97,6 +100,7 @@
     "proto_ko_kindling",
     "proto_ko_long_fuse",
     "proto_ko_mine_toss",
+    "proto_ko_once_more",
     "proto_ko_perfect_timing",
     "proto_ko_pocket_fireworks",
     "proto_ko_pocket_match",
@@ -104,9 +108,11 @@
     "proto_ko_powder_charge",
     "proto_ko_quick_fuse",
     "proto_ko_rapid_fire",
+    "proto_ko_return_to_sender",
     "proto_ko_run_away",
     "proto_ko_sizzle",
     "proto_ko_sorry_jean",
+    "proto_ko_sparkling_burst",
     "proto_ko_sparks_n_splash",
     "proto_ko_split_charge",
     "proto_ko_stoke_the_fuse",
@@ -277,7 +283,10 @@
     "proto_ko_ammo_scavenging": "klee",
     "proto_ko_bang_bang": "klee",
     "proto_ko_big_badda_boom": "klee",
+    "proto_ko_blast_shield": "klee",
+    "proto_ko_blazing_delight": "klee",
     "proto_ko_bombs_away": "klee",
+    "proto_ko_bottomless_bag": "klee",
     "proto_ko_careful_arrangement": "klee",
     "proto_ko_careful_now": "klee",
     "proto_ko_catalytic_converter": "klee",
@@ -300,6 +309,7 @@
     "proto_ko_kindling": "klee",
     "proto_ko_long_fuse": "klee",
     "proto_ko_mine_toss": "klee",
+    "proto_ko_once_more": "klee",
     "proto_ko_perfect_timing": "klee",
     "proto_ko_pocket_fireworks": "klee",
     "proto_ko_pocket_match": "klee",
@@ -307,9 +317,11 @@
     "proto_ko_powder_charge": "klee",
     "proto_ko_quick_fuse": "klee",
     "proto_ko_rapid_fire": "klee",
+    "proto_ko_return_to_sender": "klee",
     "proto_ko_run_away": "klee",
     "proto_ko_sizzle": "klee",
     "proto_ko_sorry_jean": "klee",
+    "proto_ko_sparkling_burst": "klee",
     "proto_ko_sparks_n_splash": "klee",
     "proto_ko_split_charge": "klee",
     "proto_ko_stoke_the_fuse": "klee",
@@ -654,8 +666,17 @@
     "proto_ko_big_badda_boom": {
       "damage": 4
     },
+    "proto_ko_blast_shield": {
+      "block": 2
+    },
+    "proto_ko_blazing_delight": {
+      "spark_price": -1
+    },
     "proto_ko_bombs_away": {
       "bomb_size": 2
+    },
+    "proto_ko_bottomless_bag": {
+      "draw": 1
     },
     "proto_ko_careful_arrangement": {
       "grow": 3
@@ -727,6 +748,9 @@
     "proto_ko_mine_toss": {
       "bomb_size": 3
     },
+    "proto_ko_once_more": {
+      "spark_price": -1
+    },
     "proto_ko_perfect_timing": {
       "damage": 3
     },
@@ -748,6 +772,10 @@
     "proto_ko_rapid_fire": {
       "damage": 1
     },
+    "proto_ko_return_to_sender": {
+      "block": 3,
+      "power_amount": 3
+    },
     "proto_ko_run_away": {
       "block": 3
     },
@@ -756,6 +784,9 @@
     },
     "proto_ko_sorry_jean": {
       "retain": true
+    },
+    "proto_ko_sparkling_burst": {
+      "spark_price": -1
     },
     "proto_ko_sparks_n_splash": {
       "cost": -1

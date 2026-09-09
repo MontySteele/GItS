@@ -414,6 +414,16 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # (Split Charge).
                   "plant_bomb_copy_largest", "grow_bombs_off_aura",
                   "split_largest_bomb",
+                  # POOL PASS TWO's two (`EB-732`), and neither touches a Bomb.
+                  # `return_to_hand` (Blast Shield) is emitted NOT as a
+                  # statement but as a `GetResultLocationForCardPlay` override
+                  # -- the game's own seam for "where does this card go when it
+                  # is played", verified on `SparksNSplash`'s kit rule -- and
+                  # `return_last_set_off` (Once More!) is one call into
+                  # `KleeOverhaulLedger.ReturnLastSetOff`, whose move is
+                  # `CardPileCmd.Add(card, PileType.Hand, ...)`, the same
+                  # verified door `KokomiPlan.Replay` takes.
+                  "return_to_hand", "return_last_set_off",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -2025,6 +2035,12 @@ GROW_BOMBS_OFF_AURA_FIELDS = {"op", "amount", "floor"}
 #: Bomb's own, and `growth` is what the upgrade buys on top of each. NO
 #: `target` -- "your largest Bomb" is board-wide and the halves land at random.
 SPLIT_LARGEST_BOMB_FIELDS = {"op", "growth"}
+#: POOL PASS TWO's two (`EB-732`), same discipline and both bare: neither
+#: prints a number and neither aims. Blast Shield's return is a fact about the
+#: card that was played, and Once More!'s is a fact about a card that already
+#: was -- there is nothing on either for a field to carry.
+RETURN_TO_HAND_FIELDS = {"op"}
+RETURN_LAST_SET_OFF_FIELDS = {"op"}
 #: The one non-literal a `spend_spark` price may be spelled with: X, "spend
 #: all your Sparks". tier0's twin is `effects.SPEND_ALL`, and the two engines
 #: charge the same gate price for it (1) through their own readers.
@@ -2392,6 +2408,16 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] triggers an "
         "[gold]Elemental Reaction[/gold], the Attack that set it off "
         "triggers one too."),
+    # POOL PASS TWO's two (`EB-732`). Return to Sender is a MARK on the Block
+    # pool and takes `BlockMark`'s whole construction, so its {X} is the Block
+    # the card marked and never a duration; Blazing Delight's {X} is a RATE,
+    # read twice by one clause, so a second copy pays 2 and 2.
+    "ko_return_to_sender": ("ReturnToSenderPower", None,
+        "Marks {X} of your [gold]Block[/gold]. Damage it absorbs is placed on "
+        "the attacker as a [gold]Bomb[/gold]."),
+    "ko_blazing_delight": ("BlazingDelightPower", None,
+        "At the start of your turn, gain {X} [gold]Energy[/gold] and draw "
+        "that many cards."),
     # THE COMPANION STAND-INS' FOUR (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs and is
     # compiled only under `-p:PrototypeCards=true`, so the only rows that may
@@ -3470,6 +3496,23 @@ def card_level_reason(
             return ("`rising_cost:` needs `retain: true` -- a card discarded "
                     "at end of turn can never stay in your hand, so the fuse "
                     "would print a rule that cannot fire")
+    # `EB-732` (Blast Shield). `return_to_hand` IS A FACT ABOUT THE WHOLE PLAY
+    # and not a line in the body: the C# spells it as a
+    # `GetResultLocationForCardPlay` override, which the game asks once and
+    # unconditionally, so a copy of the op inside a conditional or a mode body
+    # would be a rule the sheet prints and the mod cannot honour. Refused here
+    # rather than silently flattened. AT MOST ONE, for the same reason -- there
+    # is one override and two of them could not disagree usefully.
+    returns = [fx for fx in iter_effects(card.get("effects") or [])
+               if fx.get("op") == "return_to_hand"]
+    if returns:
+        top = [fx for fx in (card.get("effects") or [])
+               if fx.get("op") == "return_to_hand"]
+        if len(returns) != len(top) or len(top) != 1:
+            return ("`return_to_hand` must appear exactly once and at the TOP "
+                    "level -- it is emitted as a whole-play "
+                    "`GetResultLocationForCardPlay` override, which cannot be "
+                    "made conditional")
     return plan_reason(card)
 
 
@@ -3969,6 +4012,15 @@ def blocked_reason(
             if not isinstance(growth, int) or isinstance(growth, bool) \
                     or growth < 0:
                 return "split_largest_bomb growth must be a literal int >= 0"
+        # POOL PASS TWO's two (`EB-732`), same UNPARSEABLE discipline.
+        if op == "return_to_hand":
+            unknown = set(eff) - RETURN_TO_HAND_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "return_last_set_off":
+            unknown = set(eff) - RETURN_LAST_SET_OFF_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
         # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL).
         # Same UNPARSEABLE discipline as the Klee arm's eight above: a field
         # the emitter does not understand encodes a mechanic, and every number
@@ -8907,6 +8959,27 @@ def build_body(
                 "choiceContext, Owner.Creature, this, "
                 f"{_split_growth_expr(card, eff)});")
 
+        elif op == "return_to_hand":
+            # BLAST SHIELD (`EB-732`), and it emits NO STATEMENT here on
+            # purpose. Where a played card lands is not something the body can
+            # do -- the card is in no pile while it resolves -- so the rule is
+            # a `GetResultLocationForCardPlay` override on the class
+            # (`return_to_hand_member` in emit()), the game's own seam for the
+            # question and the one `SparksNSplash` already takes for the kit
+            # rule. tier0 answers it at the same layer: a per-play flag read at
+            # `combat._finish_play`'s routing line.
+            pass
+
+        elif op == "return_last_set_off":
+            # ONCE MORE! (`EB-732`). ONE call into the ledger, which is where
+            # "the last Set off card you played this combat" is written, so the
+            # card cannot express a second reading of it. Deterministic and
+            # silent: nothing is prompted, and a card that is not in the
+            # discard pile is simply not moved.
+            lines.append(
+                "await KleeOverhaulLedger.ReturnLastSetOff("
+                "Owner);")
+
         elif op == "hexerei_mark_hand":
             # R244 (Alice's Introduction Magic). ONE awaited call into
             # `CompanionHexerei`, which is where the family mark lives -- the
@@ -13440,6 +13513,45 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         f"    public int HandCostRise => {rising};"
         if rising else "")
 
+    # `EB-732` (Blast Shield): "Return this card to your hand."
+    #
+    # `GetResultLocationForCardPlay` IS THE SEAM, and it is the game's own:
+    # `CardModel.Play` switches on the returned `CardLocation`'s pile, which is
+    # how a played Power reaches `PileType.None` on the base implementation's
+    # dupe-or-Power branch. `SparksNSplash` already takes this override for the
+    # kit rule and its own note carries the v0.111.0 port. TOP of the hand, so
+    # the card the player just got back is the one they are looking at --
+    # `KokomiPlan.Replay`'s position, for its reason.
+    #
+    # A MEMBER AND NOT A STATEMENT, because a card is in no pile while it
+    # resolves: a body that "moved" it would be putting it somewhere the
+    # routing line is about to overrule. tier0 answers at the same layer, with
+    # a per-play flag read at `combat._finish_play`'s routing line.
+    #
+    # NOTHING GRANTS RETAIN. The card is in hand and discards at end of turn
+    # like any other, and replaying it costs its Spark price again -- which is
+    # the whole card.
+    return_to_hand_member = (
+        "\n\n    // `EB-732`, Blast Shield: the played card goes back to the"
+        " HAND\n"
+        "    // instead of the discard pile."
+        " `GetResultLocationForCardPlay` is\n"
+        "    // the game's own seam for where a played card lands (see\n"
+        "    // `SparksNSplash` for the kit rule and the v0.111.0 port),"
+        " and the\n"
+        "    // TOP is `KokomiPlan.Replay`'s position: the card handed"
+        " back is\n"
+        "    // the one the player is looking at. It gains no Retain, so"
+        " it\n"
+        "    // discards at end of turn like any card in hand. tier0 twin:\n"
+        "    // `klee_overhaul.mark_return_to_hand` read at"
+        " `_finish_play`.\n"
+        "    protected override CardLocation GetResultLocationForCardPlay() =>\n"
+        "        new CardLocation(Owner, PileType.Hand,"
+        " CardPilePosition.Top);"
+        if any(eff.get("op") == "return_to_hand"
+               for eff in card["effects"]) else "")
+
     prices = mode_prices(card)
     modal_gate_member = ""
     modal_prices_member = ""
@@ -13584,7 +13696,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{rising_cost_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{rising_cost_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

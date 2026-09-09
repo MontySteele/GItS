@@ -101,9 +101,9 @@ in `review/ruled/`.
 Each row points at the packet section that carries the options in full; the
 packet is the argument and this is the register.
 
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `klee-spark-purpose 5.1` | **CHOOSE** what Spark is for, five reads calling it a currency with nothing to buy: (1, default) a lubricant for the scarce things, income untouched, a pool pass of Spark-priced Block/draw/Energy rows read at the door; (2) a scarce second currency, Pounding Surprise per detonation and less opening Spark, [USER] plays; (3) as it is. -> review/active/klee-overhaul-round-25-2026-09-08.md | OPEN (gate: [USER] picks) | Klee r23, r25; user-run-2 |
+**R270 (2026-09-08) ruled `klee-spark-purpose 5.1` at option (1):** Spark is a
+currency, its income stays, and pool pass two gives it Block, cards and Energy
+to buy, priced against Regent's Stars. The packet is in `review/ruled/`.
 
 → **`review/ruled/sitting-2026-08-30.md` is CLOSED by R224 (2026-08-30).**
 Every row it covered has left this register — `M47`, `M49`, `M50`, `M52`,

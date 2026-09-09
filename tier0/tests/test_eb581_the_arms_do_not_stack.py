@@ -20,6 +20,7 @@ NOTHING MEASURED HERE IS QUOTABLE (R215 B).
 
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -98,7 +99,14 @@ def test_the_title_lint_is_green_and_saw_the_rows():
 
     assert res.returncode == 0, res.stdout + res.stderr
     assert "prototype titles unique" in res.stdout
-    assert "0 title(s)" not in res.stdout
+    # THE COUNT, READ AS A NUMBER (`EB-732`). This was a substring test for
+    # "0 title(s)", which is a substring of a healthy "200 title(s)" too -- so
+    # the gate meant to catch a dead scan went red the first time the prototype
+    # surface reached a round hundred. The claim was always "the lint saw
+    # rows", and it is asserted as that now.
+    seen = re.search(r"unique: (\d+) title", res.stdout)
+    assert seen is not None, res.stdout
+    assert int(seen.group(1)) > 0, res.stdout
     # And the pair `EB-581` was filed on is the exemption doing work, not an
     # empty branch.
     assert "pair(s) exempt" in res.stdout

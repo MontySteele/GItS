@@ -1,0 +1,15 @@
+1. **Blast Shield — FOLLOWS; C2, C5, C6:** “2 Sparks: gain 6 Block; return to hand” versus Dig In’s “1 Spark: 8 Block” gives 2 less Block for 1 more Spark on a single-use defence turn, while a measured bank of 3 permits only one activation before reserving the last Spark for Fwoosh!, and an enemy’s nonattacking turn makes declining all activations correct.
+
+2. **Return to Sender — FOLLOWS; C2, C3, C6:** “1 Energy, 2 Sparks: 8 Block; damage this Block absorbs becomes a Bomb” versus Dodoco Cover’s “1 Energy: Bomb 4, 5 Block” produces 3 more Block but 4 less Bomb on a nonattacking turn, despite spending 2 additional Sparks, while choosing an incoming 12 instead yields Bomb 8 and prevents 8 damage without automatically detonating anything.
+
+3. **Bottomless Bag — FOLLOWS; C2, C5, C6:** “0 Energy, 2 Sparks: draw 2,” upgraded to 3, versus Skim’s “1 Energy: draw 3” saves 1 Energy but draws 1 fewer card unupgraded; with bank 3, an incoming 8, Dig In and Fwoosh! in hand, and no playable defence among the next three cards, buying either version leaves only 1 Spark and forces a choice between Dig In’s 8 Block and Fwoosh!’s Set off plus 6 damage.
+
+4. **Once More! — FOLLOWS; C2, C4, C5, C6:** “0 Energy, 3 Sparks: return the last Set off,” upgraded to 2 Sparks, versus Uncommon [Meditate’s](https://slaythespire.wiki.gg/wiki/Meditate) “1 Energy: return 1 card, retain it, enter Calm, end your turn” returns 0 rather than 1 card when a Defend is discarded but no Set off has been played, and even when live buys retrieval rather than a free explosion.
+
+5. **Sparkling Burst — FOLLOWS; C1, C2, C5, C6:** “3 Sparks: gain 1 Energy, 1 more after an explosion,” upgraded to 2 Sparks, versus Sugar Rush’s “2 Sparks: 2 Energy, draw 1, Exhaust” gives 1 less Energy and 1 fewer card before detonation, costing another Spark unupgraded; on a two-charge detonation turn its Spark balance is +2−3=−1, or +2−2=0 upgraded, but consumes both charges and does not itself return a detonator or replace either Bomb.
+
+6. **Blast Goggles — REQUIRES_MODIFICATION; C5:** “1 Energy: whenever you spend Sparks, gain 2 Block per Spark,” upgraded to 3, spends no Sparks itself: on a board with bank 3, an incoming 8, Fwoosh! and a charged enemy, playing Goggles leaves all 3 Sparks available and makes the subsequent 1-Spark Fwoosh! provide its Set off and 6 damage plus 2 Block, so this proposed sink never competes for the bank at all.
+
+7. **Blazing Delight — FOLLOWS; C1, C2, C5:** “2 Energy, 5 Sparks: next turns gain 1 Energy and draw 1” yields nothing on its purchase turn; with 3 Energy, bank 5, an incoming lethal 15, three Defends and Pocket Match in hand, buying it leaves only one Defend’s 5 Block, whereas declining it permits 15 Block and preserves Pocket Match’s 1-Spark Set off plus 5 damage.
+
+Two sinks can compete: with bank 3 and no further income this turn, Blast Shield’s 2-Spark purchase and Bottomless Bag’s 2-Spark purchase cannot both be funded. The old pool’s unspent balances do not establish that income outruns these prices.

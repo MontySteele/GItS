@@ -262,10 +262,18 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     its place is the shape it did NOT take: no row here re-prices Sparks 'n'
     Splash, Countdown or Catalytic Converter, which the packet's sec.1 leaves
     as built.
+
+    FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-732`), and the SIX that
+    arrived are three pairs: the defence shelf's two (Blast Shield, Return to
+    Sender), the sinks' two beside Stoke the Fuse (Bottomless Bag, Once More!)
+    and the engines' two, both paying Energy (Sparkling Burst, Blazing
+    Delight). Named below for the reason every block above names its own: the
+    pass's scope statement is "six", and a seventh arriving without a ruling is
+    what this count catches.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 45
-    assert len(set(ids)) == 45
+    assert len(ids) == 51
+    assert len(set(ids)) == 51
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
     # R244's three, and only three: `Hex and Wick` is the packet's sec.3
@@ -296,6 +304,11 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
             "proto_ko_bombs_away", "proto_ko_fireworks_show",
             "proto_ko_kindling", "proto_ko_flash_point",
             "proto_ko_vermillion_pact", "proto_ko_split_charge"} <= set(ids)
+    # POOL PASS TWO's six (`EB-732`), by name and for the same reason.
+    assert {"proto_ko_blast_shield", "proto_ko_return_to_sender",
+            "proto_ko_bottomless_bag", "proto_ko_once_more",
+            "proto_ko_sparkling_burst",
+            "proto_ko_blazing_delight"} <= set(ids)
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -409,10 +422,18 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     packet's sec.2 states outright ("Rares 8, the brief's count"), and it is
     pinned here rather than described because the brief's Rare budget is a
     scope statement: a ninth Rare arriving without a ruling is what this
-    catches."""
+    catches.
+
+    POOL PASS TWO (`EB-732`) adds ONE Common (Bottomless Bag), FOUR Uncommons
+    (Blast Shield, Return to Sender, Once More!, Sparkling Burst) and ONE Rare
+    (Blazing Delight), which is where 22 / 20 / 9 comes from. THE RARE IS A
+    NINTH, one past the brief's sec.2 budget of eight, and it is recorded here
+    rather than absorbed: the count above says in as many words that a ninth
+    Rare arriving without a ruling is what this test catches, so the pass is
+    the ruling and the number moves with it."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 21, "uncommon": 16, "rare": 8}
+        "common": 22, "uncommon": 20, "rare": 9}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -929,3 +950,317 @@ def test_the_face_prints_the_family_word_and_nothing_about_ownership(overhaul):
     assert gen._family_tags(dict(id="prune_witch_hunt", star=4,
                                  personal_pool="klee"), "Deal 8 damage.") == (
         "Deal 8 damage.")
+
+
+# ---------------------------------------------------------------------------
+# 8. POOL PASS TWO (`EB-732`) -- one case per row, both new ops and both new
+#    powers. C# twin: `klee-mod/KleeTests/Prototype/KleeOverhaulPoolPassTwoTests.cs`,
+#    case for case.
+# ---------------------------------------------------------------------------
+
+def _pass_two_state(enemies=None, hp=62):
+    """A Klee seat with the arm live, `test_klee_overhaul_rules.klee_state`'s
+    shape: `klee_overhaul.live` reads the flag AND the character, so both
+    halves have to be true before anything in the arm runs."""
+    from tier0.tests.conftest import make_enemy, make_state
+
+    st = make_state(enemies=enemies or [make_enemy(hp=200)], hp=hp)
+    st.player.character_id = "klee"
+    st.player.element = "pyro"
+    st.player.cadence = "catalyst"
+    st.in_player_turn = True
+    st.player.energy = 3
+    return st
+
+
+def test_blast_shield_comes_back_to_hand_and_can_be_played_again(overhaul):
+    """ROW 1. "Gain 6 Block. Return this card to your hand."
+
+    THE ROUTING IS THE RULE. The card is in no pile while it resolves, so the
+    `return_to_hand` op raises a per-play flag and `_finish_play` reads it at
+    the one line that decides where a played card lands -- the same layer the
+    mod answers at, with `GetResultLocationForCardPlay` returning
+    `PileType.Hand`. So the assertion is about the PILES and not about a log.
+
+    AND IT REALLY IS PLAYABLE AGAIN, for another 2 Sparks: a second play is a
+    second Block and a second price, which is the whole card.
+    """
+    from tier0.engine.combat import play_card
+
+    state = _pass_two_state()
+    card = loader.get_card("proto_ko_blast_shield")
+    state.player.sparks = 5
+    state.player.hand = [card]
+
+    play_card(state, card)
+    assert state.player.block == 6
+    assert state.player.sparks == 3
+    assert card in state.player.hand, "the card came back"
+    assert card not in state.player.discard_pile
+
+    play_card(state, card)
+    assert state.player.block == 12, "played twice, paid twice"
+    assert state.player.sparks == 1
+    assert card in state.player.hand
+
+    # AND THE UPGRADE MOVES THE BLOCK AND NOTHING ELSE.
+    up = loader.get_card("proto_ko_blast_shield+")
+    state2 = _pass_two_state()
+    state2.player.sparks = 2
+    state2.player.hand = [up]
+    play_card(state2, up)
+    assert state2.player.block == 8
+    assert up in state2.player.hand
+
+
+def test_return_to_sender_plants_what_the_block_absorbed_and_only_now(overhaul):
+    """ROW 2. "Gain 8 Block. This turn, damage this Block absorbs is placed on
+    the attacker as a Bomb."
+
+    THE CHARGE IS THE ABSORBED AMOUNT, not the mark that was spent: the face
+    says "damage this Block absorbs", and the mark only answers whether the
+    rider is live. It rides the ONE site that can say "this Block absorbed
+    damage" (`companion_overhaul_block_absorbed`, called from `_enemy_turn`
+    right after Block is spent) and is FIRST in it.
+
+    "THIS TURN" IS THE MARK'S OWN LIFETIME and needs no timer: Block is cleared
+    at the start of Klee's next turn and `turn_start_late` deletes a mark with
+    nothing behind it. C# twin: `BlockMark.Absorb` / `ClearIfSpent`.
+    """
+    from tier0.engine import klee_overhaul
+    from tier0.engine.combat import play_card
+
+    state = _pass_two_state()
+    enemy = state.enemies[0]
+    card = loader.get_card("proto_ko_return_to_sender")
+    state.player.sparks = 2
+    state.player.hand = [card]
+    play_card(state, card)
+
+    assert state.player.block == 8
+    assert state.player.powers[klee_overhaul.RETURN_TO_SENDER] == 8
+
+    # ONE ABSORPTION of 5: a Bomb 5 on the attacker, and the mark is down to 3.
+    effects.companion_overhaul_block_absorbed(state, enemy, 5, 8)
+    assert [c.size for c in enemy.ko_charges] == [5]
+    assert state.player.powers[klee_overhaul.RETURN_TO_SENDER] == 3
+
+    # A SECOND ABSORPTION fires again while the mark stands -- "whenever" --
+    # and the mark is gone after it.
+    effects.companion_overhaul_block_absorbed(state, enemy, 3, 3)
+    assert [c.size for c in enemy.ko_charges] == [5, 3]
+    assert klee_overhaul.RETURN_TO_SENDER not in state.player.powers
+
+    # A MARK WITH NO BLOCK BEHIND IT IS GONE AT TURN START, which is the whole
+    # of "this turn".
+    state2 = _pass_two_state()
+    state2.player.sparks = 2
+    card2 = loader.get_card("proto_ko_return_to_sender")
+    state2.player.hand = [card2]
+    play_card(state2, card2)
+    state2.player.block = 0                      # the turn tick
+    klee_overhaul.roll_to(state2, 2)
+    klee_overhaul.turn_start_late(state2)
+    assert klee_overhaul.RETURN_TO_SENDER not in state2.player.powers
+    effects.companion_overhaul_block_absorbed(state2, state2.enemies[0], 4, 4)
+    assert state2.enemies[0].ko_charges == [], "expired: nothing is planted"
+
+    # AND THE UPGRADE MOVES BOTH NUMBERS TOGETHER, so the Block and the mark
+    # cannot drift.
+    state3 = _pass_two_state()
+    up = loader.get_card("proto_ko_return_to_sender+")
+    state3.player.sparks = 2
+    state3.player.hand = [up]
+    play_card(state3, up)
+    assert state3.player.block == 11
+    assert state3.player.powers[klee_overhaul.RETURN_TO_SENDER] == 11
+
+
+def test_bottomless_bag_draws_two_and_three_upgraded(overhaul):
+    """ROW 3. "Draw 2 cards." The arm's Spark sink that buys CARDS, and the
+    upgrade takes Countdown's own `draw` key so both rows move one number."""
+    from tier0.engine.combat import play_card
+    from tier0.engine.state import Card
+
+    def fodder(n):
+        return [Card(id=f"strike{i}", name="Strike", cost=1, type="attack",
+                     effects=[{"op": "damage", "amount": 6, "target": "enemy"}])
+                for i in range(n)]
+
+    state = _pass_two_state()
+    card = loader.get_card("proto_ko_bottomless_bag")
+    state.player.sparks = 2
+    state.player.draw_pile = fodder(5)
+    state.player.hand = [card]
+    play_card(state, card)
+    assert len(state.player.hand) == 2
+    assert state.player.sparks == 0
+
+    state2 = _pass_two_state()
+    up = loader.get_card("proto_ko_bottomless_bag+")
+    state2.player.sparks = 2
+    state2.player.draw_pile = fodder(5)
+    state2.player.hand = [up]
+    play_card(state2, up)
+    assert len(state2.player.hand) == 3
+
+
+def test_once_more_takes_the_last_set_off_card_out_of_the_discard(overhaul):
+    """ROW 4. "Return the last Set off card you played this combat to your
+    hand."
+
+    THE NOTE IS TAKEN AT THE OP SITE, so a Set off played into an empty board
+    still counts -- which is what "the last Set off card you PLAYED" says. By
+    INSTANCE, so two copies of one detonator are two cards.
+
+    NOTHING HAPPENS AND THE SPARKS ARE STILL SPENT when the card is not in the
+    discard pile: the price is a cost line and a cost line is paid before the
+    body runs. That is the same bargain every Spark-priced row makes.
+    """
+    from tier0.engine import klee_overhaul
+    from tier0.engine.combat import play_card
+
+    state = _pass_two_state()
+    enemy = state.enemies[0]
+    klee_overhaul.place(state, enemy, 4)
+
+    detonator = loader.get_card("proto_ko_countdown")
+    state.player.sparks = 6
+    state.player.hand = [detonator]
+    play_card(state, detonator)
+    assert detonator in state.player.discard_pile
+    assert state.ko_last_set_off_card is detonator
+
+    once = loader.get_card("proto_ko_once_more")
+    state.player.hand.append(once)
+    play_card(state, once)
+
+    assert detonator in state.player.hand
+    assert detonator not in state.player.discard_pile
+    assert state.player.sparks == 3, "3 Sparks paid"
+
+    # PLAYED AGAIN WITH NOTHING IN THE DISCARD: the detonator is in HAND now,
+    # so the row moves nothing and the Sparks are still gone.
+    once2 = loader.get_card("proto_ko_once_more")
+    state.player.hand.append(once2)
+    play_card(state, once2)
+    assert detonator in state.player.hand
+    assert state.player.sparks == 0
+
+    # AND NONE PLAYED AT ALL is the same silence, on a fresh combat.
+    fresh = _pass_two_state()
+    fresh.player.sparks = 3
+    solo = loader.get_card("proto_ko_once_more")
+    fresh.player.hand = [solo]
+    play_card(fresh, solo)
+    assert fresh.player.hand == []
+    assert fresh.ko_last_set_off_card is None
+    assert fresh.player.sparks == 0
+
+
+def test_sparkling_burst_pays_one_energy_or_two_by_the_predicate(overhaul):
+    """ROW 5. "Gain 1 Energy. If a Bomb went off this turn, gain 1 more."
+
+    RUN AWAY!'s PREDICATE EXACTLY (`bomb_went_off_this_turn`), so the two rows
+    read one counter and cannot disagree about what a turn's explosion is.
+    """
+    from tier0.engine import klee_overhaul
+    from tier0.engine.combat import play_card
+
+    state = _pass_two_state()
+    card = loader.get_card("proto_ko_sparkling_burst")
+    state.player.sparks = 3
+    state.player.energy = 0
+    state.player.hand = [card]
+    play_card(state, card)
+    assert state.player.energy == 1, "nothing went off: the flat line only"
+    assert card in state.player.discard_pile, "not Exhaust"
+
+    state2 = _pass_two_state()
+    enemy = state2.enemies[0]
+    klee_overhaul.place(state2, enemy, 4)
+    klee_overhaul.set_off(state2, enemy)
+    card2 = loader.get_card("proto_ko_sparkling_burst")
+    state2.player.sparks = 3
+    state2.player.energy = 0
+    state2.player.hand = [card2]
+    play_card(state2, card2)
+    assert state2.player.energy == 2
+
+    # THE UPGRADE MOVES THE SPARK PRICE and nothing on the face.
+    state3 = _pass_two_state()
+    up = loader.get_card("proto_ko_sparkling_burst+")
+    state3.player.sparks = 2
+    state3.player.energy = 0
+    state3.player.hand = [up]
+    play_card(state3, up)
+    assert state3.player.energy == 1
+    assert state3.player.sparks == 0
+
+
+def test_blazing_delight_pays_energy_and_a_card_at_turn_start(overhaul):
+    """ROW 6. "At the start of your turn, gain 1 Energy and draw 1 card."
+
+    THE SITE IS `turn_start_late`, Grounded's, and that is the rule: the energy
+    reset and the turn's opening draw have already happened there, so the
+    Energy survives and the card is drawn on top of the opening hand.
+
+    STACKS ADD, both halves off one number: two copies pay 2 and 2.
+    """
+    from tier0.engine import klee_overhaul
+    from tier0.engine.combat import play_card
+    from tier0.engine.state import Card
+
+    def fodder(n):
+        return [Card(id=f"strike{i}", name="Strike", cost=1, type="attack",
+                     effects=[{"op": "damage", "amount": 6, "target": "enemy"}])
+                for i in range(n)]
+
+    state = _pass_two_state()
+    card = loader.get_card("proto_ko_blazing_delight")
+    state.player.sparks = 5
+    state.player.draw_pile = fodder(6)
+    state.player.hand = [card]
+    play_card(state, card)
+    assert state.player.powers[klee_overhaul.BLAZING_DELIGHT] == 1
+
+    state.player.energy = 3
+    klee_overhaul.roll_to(state, 2)
+    klee_overhaul.turn_start_late(state)
+    assert state.player.energy == 4
+    assert len(state.player.hand) == 1
+
+    # A SECOND COPY PAYS TWICE, on one number read twice.
+    state.player.powers[klee_overhaul.BLAZING_DELIGHT] = 2
+    state.player.energy = 3
+    state.player.hand = []
+    klee_overhaul.roll_to(state, 3)
+    klee_overhaul.turn_start_late(state)
+    assert state.player.energy == 5
+    assert len(state.player.hand) == 2
+
+    # THE UPGRADE CUTS THE SPARK PRICE, Once More!'s and Sparkling Burst's
+    # rail: the `+` card is the SAME body for 4 Sparks and the same 2 Energy.
+    # Authored on the row rather than left to the Prototype rule, which would
+    # have fallen through to its cost clause and sold a 1-energy Rare instead
+    # (`amount: 1` on a Power reads as "this row prints no power number").
+    up = loader.get_card("proto_ko_blazing_delight+")
+    assert up.cost == 2
+    assert [fx for fx in up.effects
+            if fx["op"] == "spend_spark"][0]["amount"] == 4
+    state4 = _pass_two_state()
+    state4.player.sparks = 4
+    state4.player.draw_pile = fodder(3)
+    state4.player.hand = [up]
+    play_card(state4, up)
+    assert state4.player.sparks == 0
+    assert state4.player.powers[klee_overhaul.BLAZING_DELIGHT] == 1
+
+    # AND A SEAT WITHOUT THE POWER PAYS NOTHING.
+    bare = _pass_two_state()
+    bare.player.energy = 3
+    bare.player.draw_pile = fodder(3)
+    klee_overhaul.roll_to(bare, 2)
+    klee_overhaul.turn_start_late(bare)
+    assert bare.player.energy == 3
+    assert bare.player.hand == []

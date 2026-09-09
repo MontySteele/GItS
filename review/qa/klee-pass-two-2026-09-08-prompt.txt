@@ -1,0 +1,157 @@
+# Doctrine read: Klee pool pass two, seven Spark sinks, against the kit charter and Regent's Stars
+
+Each numbered arm below is ONE new card. For each, in order, give FOLLOWS or
+REQUIRES_MODIFICATION and name the clause (C1 to C6) you ruled against, and
+quote the line and the arithmetic (energy, Sparks, Block, damage, cards,
+turns) that breaches it, in one sentence. A verdict with no clause named is
+not a verdict. Read adversarially: the author is a different model family and
+the owner wants the row that should not reach a tester named. Do not soften.
+Name clauses, not remedies: a number, a face or a rewritten row you volunteer
+is DISCARDED.
+
+Why this read exists. Five seat reads and the owner's own run (rounds 23, 24,
+25 and the run of 2026-09-08) agree that Spark never binds: a natural deck
+ends fights on 3 to 5 Sparks having spent none, and a deck built to spend it
+peaked at 8 while taking damage. The owner ruled on 2026-09-08 (R270): Spark
+is a currency, income stays as it is, and the pool gets interesting things to
+buy with it, "the relevant comparison here is Regent." This pass is those
+things. It goes to this door BEFORE it is built.
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards." A row
+  that removes a losing line the kit is meant to keep, instead of pricing
+  it, is out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. There
+  must be a real turn in which the card is worse than a plain card of its
+  cost. Repeatable Energy or draw at Uncommon or below is priced by
+  something past the card's own Energy cost. A Spark price counts as a price
+  only if the bank it draws on is one the deck can run short of: read it
+  against the income figures below, not against an empty bank.
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (spend now or bank; which turn; which hit to
+  block into), not by a number that rises while you watch.
+- **C4 (Klee brief section 3 rule 7).** Nothing fires by itself: no
+  start-of-turn detonation, no automatic free attack, no "at 3 Sparks".
+  Every explosion is a Set off card the player played, a Mine answering an
+  attack on her, or her Rare.
+- **C5 (Klee brief section 9, "the second energy pool", as reframed by
+  R270).** Sparks that only buy more Attacks are the named failure. A sink
+  in this pass must be one the player sometimes declines: it competes with
+  the other sinks for the same bank, and there is a turn on which holding
+  the Sparks for a Set off is right. A row that is always played the moment
+  it is affordable is out of charter.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a pool row or a base-game card at the same or lower rarity and cost.
+  Reference points, base game: Defend (1: 5 Block), Shrug It Off (1: 8
+  Block, draw 1), Blur (Uncommon, 1: 5 Block kept), Skim (Uncommon, 1: draw
+  3), Adrenaline (Rare, 0: 2 Energy, draw 2, Exhaust), Seeing Red, Echo
+  Form (Rare, 3). Reference points, Regent's Stars (decompile, v0.111.0):
+  Cloak of Stars (Common, 0 Energy, 1 Star: 7 Block), Particle Wall
+  (Uncommon, 0 Energy, 2 Stars: Block, returns to hand), Reflect (Uncommon,
+  1 Energy, 3 Stars: Block, blocked damage reflected this turn), Alignment
+  (Uncommon, 0 Energy, 2 Stars: gain Energy), Guiding Star (Common, 1
+  Energy, 1 Star: 12 damage, draw 1 next turn), Child of the Stars (Power:
+  whenever you spend Stars, gain Block for each Star spent), Neutron Aegis
+  (Rare Power, 1 Energy, 5 Stars: Plating). Regent's cheapest sink is 1
+  Star, its median printed price 3, and its starter income is 3 Stars per
+  fight plus 2 per Venerate play.
+
+## The engine (as it stands today, 2026-09-08)
+
+A Bomb is a numbered charge on an enemy; every Bomb grows by 4 at the start
+of Klee's turn and never goes off on its own. Only a card that says Set off
+makes Bombs go off, each a Pyro hit for its own size. A Mine is a Bomb that
+also goes off when its enemy attacks her, before the hit. Spark: each Bomb
+that goes off gives 1 Spark; she starts every combat with 1; every Hexerei
+companion card played gives 1 (1 more on a reaction, 1 more if upgraded, 3
+at most from one play); no cap; lost after combat. A card with a Spark
+price spends Sparks instead of Energy, and the price is a badge, not a line
+of rules text. Energy 3, HP 62. Starter: four Strike, four Defend, Jumpy
+Dumpty (1 Energy, Innate: Bomb 8; when it goes off, a Mine 3 on ALL
+enemies), Ka-pow! (0 Energy, Retain: Set off, 4 damage). Relic: Pounding
+Surprise (the Spark-per-explosion rule).
+
+Income, measured on the seats. Round 23 natural lane: fights ended at 3, 2,
+3, 5, 3, 3 Sparks, two spent all run. Round 25 lane 1 (natural): ended on
+3, 5, 5, none spent. Round 25 lane 2 (built to spend, three sinks): the bank
+ran 1 to 8 across seven fights and never failed a price. A single Set off on
+a two-charge board mints 2.
+
+Spenders on the pool today (45 rows), price in Sparks: Fwoosh! (Common, 0
+Energy, 1: Set off, 6 damage), Pocket Match (Common, 0, 1, Retain: Set off,
+5), Tinder Toss (Common, 0, 1: twice, Set off a random enemy and 4 damage),
+Quick Fuse (Common, 0, 1: Bombs on the enemy grow 3, Set off), Dig In
+(Common, 0, 1: 8 Block), Powder Charge (Uncommon, 0, 1: Bomb 6), Bang Bang!
+(Uncommon, 0, 2: Set off, 8, Bomb 4), Fireworks Show (Uncommon, 0, 2: Set
+off ALL), Sugar Rush (Rare, 0, 2, Exhaust: 2 Energy, draw 1), Stoke the
+Fuse (Uncommon, 0, X: largest Bomb grows 3 per Spark). Ten of 45; nine of
+them are Attacks or Bomb setup, one is Block, one Energy at Rare. Generators
+beyond the relic: Grounded (Uncommon Power: 4 Block and 1 Spark a turn while
+a Bomb is out), Catalytic Converter (Uncommon Power: 1 more Spark when a
+Bomb reacts), Flash Point (Uncommon Attack: 1 Spark and a card on a
+reaction), and every Hexerei companion card.
+
+Block on the pool today: Dig In (above), Careful Now (Uncommon, 1: Block
+equal to your largest Bomb, up to 10), Sorry, Jean... (Common, 0: remove a
+Bomb, Block equal to its size), Run Away! (Common, 0: 3 Block, 7 if a Bomb
+went off this turn), Dodoco Cover (Common, 1: Bomb 4, 5 Block), Grounded.
+Round 25's finding on the defence: on the four turns it failed, the missing
+thing was the Block card in hand or the Energy, never the Spark or the Bomb.
+
+## The arms
+
+1. **Blast Shield** -- Uncommon Skill, 0 Energy, 2 Sparks. Gain 6 Block.
+   Return this card to your hand. Upgrade 8 Block. Particle Wall's shape:
+   playable again in the same turn for 2 more Sparks, so a bank of 8 is 24
+   Block on the turn it is needed, and 0 when the bank is 1. Compare Dig In
+   (1 Spark: 8, once), Defend, Blur. Read C5 against a card that is always in
+   hand once drawn, and C2 against 3 Block per Spark with no ceiling but
+   the bank.
+2. **Return to Sender** -- Uncommon Skill, 1 Energy, 2 Sparks. Gain 8
+   Block. This turn, damage this Block absorbs is placed on the attacker as
+   a Bomb. Upgrade 11 Block. Reflect's shape with Klee's verb: blocking a
+   12 with it puts a Bomb 8 on the attacker, which grows 4 at dawn. Compare
+   Jumpy Dumpty (1 Energy: Bomb 8, no Block), Dodoco Cover (1: Bomb 4 and 5
+   Block), Shrug It Off. Read C3 for whether choosing which hit to block
+   into is the player's, and C6 against Dodoco Cover at the same Energy.
+3. **Bottomless Bag** -- Common Skill, 0 Energy, 2 Sparks. Draw 2 cards.
+   Upgrade draw 3. A plain sink at Regent's Quasar price. Compare Skim
+   (Uncommon, 1 Energy: draw 3) and read C2 against 0 Energy for 2 cards
+   when the bank is 5, and C5 against whether 2 Sparks is ever better held
+   for two Fwoosh! plays.
+4. **Once More!** -- Uncommon Skill, 0 Energy, 3 Sparks. Return the last
+   Set off card you played this combat to your hand. Upgrade 2 Sparks.
+   The detonator-draw answer: the scarce thing round 25 named is a Set off
+   card in hand, and Sparks are the surplus, so the surplus buys the
+   detonator back. Dead on a turn with no Set off played yet; Ka-pow! is
+   Retained so it is rarely the one returned. Compare a base-game
+   recursion at Uncommon and read C4 (it returns a card; it fires
+   nothing) and C5 (3 Sparks is three Fwoosh! plays).
+5. **Sparkling Burst** -- Uncommon Skill, 0 Energy, 3 Sparks. Gain 1
+   Energy. If a Bomb went off this turn, gain 1 more. Upgrade 2 Sparks. Not
+   Exhaust. Alignment's shape with an ordering rider: played after the
+   detonation it is 2 Energy for 3 Sparks, and the detonation is what
+   minted them. Compare Sugar Rush (Rare, 2 Sparks, Exhaust: 2 Energy, draw
+   1) and read C2 and C5 against a repeatable Energy card at Uncommon,
+   and C1 against the loop "Set off, mint 2, Sparkling Burst, 2 Energy,
+   Set off again".
+6. **Blast Goggles** -- Uncommon Power, 1 Energy. Whenever you spend
+   Sparks, gain 2 Block for each Spark spent. Upgrade 3. Child of the
+   Stars. With it, Fwoosh! is Set off, 6 damage and 2 Block; Stoke the
+   Fuse on a bank of 6 is 18 Bomb growth and 12 Block. Read C1 and C6
+   against Child of the Stars and against the existing spenders becoming
+   defence cards for free, and C3 for whether the Block follows a choice.
+7. **Blazing Delight** -- Rare Power, 2 Energy, 5 Sparks. At the start of
+   your turn, gain 1 Energy and draw 1 card. The top of the price ladder:
+   5 Sparks is a fight's income for a natural deck, and Sparks do not carry
+   between fights, so it is bought mid-fight off this fight's explosions or
+   not at all. Compare Echo Form, Demon Form and Neutron Aegis, and read
+   C1 against a combat-long Energy engine and C5 for whether holding 5
+   Sparks through two turns of Set off offers is a decision.
+
+Seven verdicts, each with its clause and its breaching line, then two
+sentences: after this pass, is there a turn on which two Spark sinks in hand
+compete for one bank, or does income still outrun every price on the pool.
+Under 700 words.
