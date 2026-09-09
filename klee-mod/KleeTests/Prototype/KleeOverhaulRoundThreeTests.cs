@@ -76,8 +76,11 @@ public class KleeOverhaulRoundThreeTests
         // FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`): TEN rows off
         // the readings of rounds 13 to 16 -- three for Cook, three for Spray,
         // three for React and one bridge.
+        // FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-724`): SIX rows in
+        // three pairs -- the defence shelf's two, the Spark sinks' two and the
+        // Energy engines' two.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(45, slice.Count);
+        Assert.Equal(51, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.

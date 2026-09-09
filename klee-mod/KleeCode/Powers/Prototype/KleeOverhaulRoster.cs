@@ -287,5 +287,20 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoFlashPoint>(),
         ModelDb.Card<ProtoKoVermillionPact>(),
         ModelDb.Card<ProtoKoSplitCharge>(),
+        // POOL PASS TWO (2026-09-08, `EB-724`). SIX rows in three pairs, in
+        // `C.KLEE_OVERHAUL_POOL_IDS`'s order, which is the sheet's: the
+        // defence shelf's two (a Block the hand keeps, and the shelf's first
+        // row that pays the Bomb rules back by putting what the wall ate onto
+        // the body that swung), the sinks' two beside Stoke the Fuse (a bank
+        // spent on CARDS, and a bank spent buying back the detonator that
+        // minted it), and the engines' two, both paying ENERGY (the turn's
+        // explosion read for tempo, and the arm's first standing Energy
+        // Power).
+        ModelDb.Card<ProtoKoBlastShield>(),
+        ModelDb.Card<ProtoKoReturnToSender>(),
+        ModelDb.Card<ProtoKoBottomlessBag>(),
+        ModelDb.Card<ProtoKoOnceMore>(),
+        ModelDb.Card<ProtoKoSparklingBurst>(),
+        ModelDb.Card<ProtoKoBlazingDelight>(),
     };
 }

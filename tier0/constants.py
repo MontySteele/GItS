@@ -402,6 +402,27 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_flash_point",
     "proto_ko_vermillion_pact",
     "proto_ko_split_charge",
+    # POOL PASS TWO (2026-09-08, `EB-724`). Six rows in three pairs, and the
+    # pairs are the shelves they extend rather than a new archetype:
+    #
+    #   * THE DEFENCE SHELF's two. Blast Shield is a Block the hand keeps --
+    #     the same card twice in a turn for a second Spark price -- and Return
+    #     to Sender is the shelf's first row that PAYS the Bomb rules back,
+    #     turning what the wall ate into a charge on the body that swung.
+    #   * THE SINKS' two, beside Stoke the Fuse. Bottomless Bag buys CARDS with
+    #     the bank instead of charges; Once More! buys back the detonator the
+    #     bank was minted by, which is the sink a Cook deck's own loop asks for.
+    #   * THE ENGINES' two, and both pay ENERGY. Sparkling Burst reads the
+    #     turn's explosion the way Run Away! does and pays tempo for it;
+    #     Blazing Delight is the arm's first standing Energy Power.
+    #
+    # Their own block at the end of the tuple, like the slices above it.
+    "proto_ko_blast_shield",
+    "proto_ko_return_to_sender",
+    "proto_ko_bottomless_bag",
+    "proto_ko_once_more",
+    "proto_ko_sparkling_burst",
+    "proto_ko_blazing_delight",
 )
 
 # =============================================================================

@@ -807,6 +807,29 @@ CO_TENANCY_LEDGER = {
             "in the mod writes that ledger outside a card play or an "
             "explosion, both of which are strictly later than this broadcast, "
             "so no co-tenant can move the number it reads",
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "ReturnToSenderPower"):
+            "QUARANTINED (the Klee overhaul, `EB-724`). The BLOCK-MARK "
+            "housekeeping half, IcyPawsPower's construction and its answer: "
+            "it removes itself when no Block stands behind the mark. THE "
+            "ORDERING QUESTION, answered: it reads Owner.Block and writes "
+            "only its own removal. Two co-tenants of this broadcast GRANT "
+            "Block (SignatureMixPower, RevelationPower), so a clamp alone "
+            "would depend on iteration order -- which is why the printed "
+            "number and the rider both read BlockMark.Left LIVE and this "
+            "override is housekeeping rather than the rule. Removing early "
+            "and being re-granted later cannot happen: nothing at this "
+            "broadcast applies the mark, only a card play does, and a card "
+            "play is strictly later",
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "BlazingDelightPower"):
+            "QUARANTINED (the Klee overhaul, `EB-724`). Per-turn Energy plus "
+            "one draw per stack. THE ORDERING QUESTION, answered: it reads "
+            "nothing but its own Amount, so no co-tenant can move an input it "
+            "does not have. It WRITES energy and the hand -- the energy reset "
+            "is at the strictly earlier side-turn-start site (which is why "
+            "this power is here and not there), no co-tenant of this "
+            "broadcast writes energy, and the draw is the write NaptimePower "
+            "and LionsFangPower already make here on the same terms: no "
+            "co-tenant reads the hand's contents",
         ("Powers/CompanionPowers.cs", "CelestialGiftPower"):
             "per-turn Strength + Block mint; its body notes the sim's "
             "Strength-then-Block order is bookkeeping, not a dependency",

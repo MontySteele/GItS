@@ -601,13 +601,29 @@ def test_the_incoming_hit_order_is_the_one_the_mod_walks():
     walk = cs.split("public override async Task BeforeDamageReceived(")[1]
     walk = walk.split("\n    }")[0]         # the method body, not the file
     cs_order = re.findall(r"OfType<(\w+Power)>", walk)
-    assert cs_order == ["SacramentalShowerPower", "BaronBunnyPower",
-                        "IcyPawsPower",
-                        # THE INAZUMA ARM'S ONE INCOMING READER, last: Thoma's
-                        # Blazing Barrier is the paws' construction with a Block
-                        # payout, and it reads the absorption everything above
-                        # it has already re-priced.
-                        "BlazingBarrierPower"], cs_order
+    assert cs_order == [
+        # THE KLEE ARM'S ONE INCOMING READER, first and behind its own flag
+        # (`EB-724`). Return to Sender is the paws' construction with a Bomb on
+        # the attacker instead of an aura; it plants before any mark below it
+        # moves, and it can change nothing any of them sees because the marks
+        # are separate powers and `Owner.Block` is the one number all of them
+        # read and none of them moves.
+        "ReturnToSenderPower",
+        "SacramentalShowerPower", "BaronBunnyPower",
+        "IcyPawsPower",
+        # THE INAZUMA ARM'S ONE INCOMING READER, last: Thoma's
+        # Blazing Barrier is the paws' construction with a Block
+        # payout, and it reads the absorption everything above
+        # it has already re-priced.
+        "BlazingBarrierPower"], cs_order
+
+    # AND THE SIM'S SAME ORDER, one function over: the Klee leg is the first
+    # line of `companion_overhaul_block_absorbed`, ahead of both Block marks,
+    # which is what the C# walk above says.
+    absorbed = src.split("def companion_overhaul_block_absorbed(")[1]
+    absorbed = absorbed.split("\ndef ")[0]
+    assert absorbed.index("klee_overhaul.block_absorbed") < absorbed.index(
+        '"mc_icy_paws"') < absorbed.index('"mi_blazing_barrier"')
 
 
 def test_the_element_override_order_is_the_one_the_mod_walks():
