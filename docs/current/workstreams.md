@@ -1073,7 +1073,7 @@ name a packet that neither file had cited.
   fight-end screen swallows the lethal beat's log (`EB-604`); no pick;
   `EB-600`-`EB-604`, built on #413. **[USER]'s act-1 run is PLAYED**
   (2026-09-07, `0.2.2888+proto`, a short run ending at a Corpse Slug,
-  `review/active/furina-user-run-1-2026-09-07.md`): the notes are the
+  `review/ruled/furina-user-run-1-2026-09-07.md`): the notes are the
   interface, not the kit ("still has basic UI legibility issues"; the
   Encore idea liked, the stage unreadable, the Salon tip a wall);
   `EB-627`-`EB-629` applied as E defaults (a member strip, Encore pips and
