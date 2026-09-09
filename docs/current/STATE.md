@@ -158,7 +158,16 @@ every arm ships OFF in a release package). **Last RELEASE package:
   old words. `EB-743`-`EB-748` are BUILT: Spend is a choice on play (E
   default), the event lines name their effect, the glossary is the
   Stage's, the shipped meters are never granted, readers print the live
-  number, a refusal names its power. Round three next.
+  number, a refusal names its power. **Round three is READ**
+  (`review/active/furina-stage-round-3-2026-09-09.md`): no seat died and
+  every seat beat the elite; the choice on play works ("spend the bar or
+  keep it" stays live); three rounds converge on the reserve being the
+  engine and the lead's bar being what hits delete, and the over-sized
+  Spend is now a dominant loophole (six of nine seats). **Two picks open,
+  [USER]'s:** the over-sized Spend (`furina-stage-round-2 5.1`, default
+  moved to the full price) and where Spend and the readers take their
+  Fanfare (`furina-stage-round-3 5.2`, default the reserve). `EB-749`-
+  `EB-754` minted. Round four after both picks are built.
 - **Control run** — R250 pick 4: the same Opus seat family playing base
   Ironclad died on the act-1 boss twice (`review/records/control-ironclad-2026-09-04.md`);
   a kit clear on a 30-row pool is consistency as much as strength.
