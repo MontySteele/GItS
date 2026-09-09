@@ -1171,10 +1171,17 @@ def _enemy_handles(enemies: list[dict[str, Any]]) -> list[str]:
 # and `qa_packet.UNPLAYABLE_REASONS` renders as *"something else on the board
 # is stopping you right now"* -- true, and a sentence a tester cannot act on.
 #
-# `CardModel.CanPlay` reports the flag and has no slot for WHICH model
-# refused, so the sentence cannot come off the wire and this page must not
-# invent one. What it can do is stop being vague with facts it is already
-# printing:
+# `EB-748` MOVED THE FIRST HALF OF THAT UPSTREAM, and this comment is amended
+# rather than kept: `CardModel.CanPlay`'s SECOND out parameter is what refused,
+# the bridge was discarding it at both call sites, and it now names the
+# preventer in words (`vendor/STS2_MCP/gits/GitsRefusalSource.cs`). A refusal
+# that arrives with `unplayable_reason_text` therefore never reaches this
+# function at all -- `_card_face` prefers the sentence, and the fold below
+# only matches the bare enum.
+#
+# THE NOTE BELOW IS WHAT IS LEFT: a build with an older bridge, or a preventer
+# with no readable name. This page still must not invent a cause. What it can
+# do is stop being vague with facts it is already printing:
 #
 #   * an ARM GATE, and this is the one the row names. A Spark-priced card
 #     refuses through `SparkAttackCostPower.ShouldPlay`, a hook, so a shortfall

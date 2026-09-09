@@ -1442,7 +1442,14 @@ public static partial class McpMod
 
     private static Dictionary<string, object?> BuildCardState(CardModel card, int index)
     {
-        card.CanPlay(out var unplayableReason, out _);
+        // GItS LOCAL EDIT (`EB-748`). The second out parameter is WHAT
+        // REFUSED, and both of this bridge's `CanPlay` calls used to discard
+        // it -- which is why a Smoggy refusal reached the blind page as
+        // "something else on the board is stopping you". Boxed to `object?`
+        // deliberately: nothing in `gits/GitsRefusalSource.cs` names a game
+        // type, so this edit cannot break on a signature it does not own.
+        card.CanPlay(out var unplayableReason, out var refusedBy);
+        object? gitsRefusedBy = refusedBy;
 
         var state = BuildCardInfo(card);
         state["index"] = index;
@@ -1489,10 +1496,20 @@ public static partial class McpMod
         // so an ABSENT key means "no sentence available" and the enum beside it
         // is unchanged for every reader that already asserts on it.
         // Implementation and its reflection contract: gits/GitsSparkPrice.cs.
-        if (unplayableReason != UnplayableReason.None
-            && GitsUnplayableReasonText(card) is { } unplayableText)
+        // `EB-748`: and where the mod has nothing to say, the GAME's own
+        // preventer is named instead. The mod's sentence wins where it exists
+        // -- it knows the price and the bank, which a class name cannot --
+        // and this is the fallback under it, so the general case ("a power on
+        // the board refused this") stops being the one refusal that names
+        // nothing.
+        if (unplayableReason != UnplayableReason.None)
         {
-            state["unplayable_reason_text"] = unplayableText;
+            var unplayableText = GitsUnplayableReasonText(card)
+                                 ?? GitsRefusalSource(gitsRefusedBy);
+            if (unplayableText != null)
+            {
+                state["unplayable_reason_text"] = unplayableText;
+            }
         }
 
         return state;
