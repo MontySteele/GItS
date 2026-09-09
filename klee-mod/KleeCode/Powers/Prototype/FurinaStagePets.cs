@@ -123,11 +123,17 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
 
 /// <summary>Gentilhomme Usher. Acts for Block, bows for Block (rules 9, 10).
 /// </summary>
+/// <remarks>THE NAME IS THE LEDGER'S, not a literal here, and that is
+/// `EB-735`: the blind-play page names a performer off
+/// <c>FurinaStageLedger.Snapshot</c> while the game names it off this model,
+/// and a seat reading one and a player watching the other must not be shown
+/// two names for one creature.</remarks>
 public sealed class UsherMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Usher;
 
-    public override string DisplayName => "Gentilhomme Usher";
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
 }
 
 /// <summary>Surintendante Chevalmarin. The Guest Cast plan's performer: her
@@ -136,7 +142,8 @@ public sealed class ChevalmarinMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Chevalmarin;
 
-    public override string DisplayName => "Surintendante Chevalmarin";
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
 }
 
 /// <summary>Mademoiselle Crabaletta. The damage act and the damage bow.
@@ -145,7 +152,8 @@ public sealed class CrabalettaMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Crabaletta;
 
-    public override string DisplayName => "Mademoiselle Crabaletta";
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
 }
 
 /// <summary>

@@ -2,21 +2,25 @@
 # about which of them a machine checks and which are eyes-on, because the wire
 # cannot see a pet at all.
 #
-# WHAT THE WIRE CARRIES AND WHAT IT DOES NOT. `understudy/scenario.digest` is
-# the whole vocabulary a check reads, and it is `player`, `hand`, `enemies` and
-# `prompt`. There is no ally, no pet and no gauge in it: the ONE pet the
-# harness can name today is the Bake-Kurage, through
-# `scenario.find_pet`, which reads `player.kokomi_plans.pet_entity_id` -- an
-# arm-specific block written by a different kit. So a performer's bar and the
-# three-bar strip are NOT machine-assertable from this file, and pretending
-# otherwise would be the `furina-full-stage-frame` mistake in a new place:
-# that file's first version asserted a rule that did not exist.
+# WHAT THE WIRE CARRIES AND WHAT IT DOES NOT -- REWRITTEN 2026-09-09 BY
+# `EB-735`. The paragraph here used to say a performer's bar was not
+# machine-assertable, and it was right at the time: `scenario.digest` read
+# `player`, `hand`, `enemies` and `prompt`, and the only pet the harness could
+# name was the Bake-Kurage through an arm-specific block a different kit wrote.
 #
-# THE ANSWER IS THE ONE THAT FILE REACHED TOO -- assert what the wire really
-# holds, and hold a FRAME for what only an eye can settle. Every `expect` below
-# reads Furina's own HP, her Block or an enemy's HP, all of which the wire
-# carries; the two `wait` steps are the capture windows for the bars and the
-# strip and are evidence of nothing on their own.
+# Round one is why that changed. Three blind seats played some 550 actions
+# without ever knowing who was on stage or what a bar held, because the page
+# had no renderer for her performers. `EB-735` built one, off a `furina_stage`
+# block the ledger now publishes, and gave this file two checks that read the
+# PAGE -- `page_contains` and `page_lacks` -- so the surface the row is about
+# is the surface a scenario asserts. The three bars in seat order and the bow
+# line below are those checks.
+#
+# WHAT IS STILL EYES-ON is the strip and the three bodies THEMSELVES: whether
+# the line re-flows after a departure, and whether the three read as three on
+# screen, are questions about pixels and the `wait` steps are their capture
+# windows. Those are evidence of nothing on their own, which is what
+# `furina-full-stage-frame` learned the hard way.
 #
 # THE BUILD THIS RUNS ON: `deploy_proto.ps1` with `-p:FurinaStage=true` (the
 # arm ships OFF, and with it off every assertion below is false by
@@ -36,8 +40,10 @@ turns: 2
 notes: |
   The damage order proved from Furina's side of it: a fat lead and her Block
   answer a hallway intent whole, a Spend rider fires in full out of a lead that
-  cannot pay it, and a bow lands its Block. Two frames held for the three bars
-  and the strip.
+  cannot pay it, and a bow lands its Block. `EB-735` adds the PAGE: three named
+  bars in seat order and the bow line, asserted rather than eyeballed, with the
+  three retired meter lines asserted gone (`EB-736`). Two frames held for the
+  bodies themselves and the strip.
 
 assumptions:
   - "The build carries `-p:PrototypeCards=true -p:FurinaStage=true`. With the
@@ -47,7 +53,8 @@ assumptions:
      front seat at FurinaStageLaw.OpeningFanfare = 3 (brief sec.3 rule 2).
      This is the one board fact the file assumes rather than reads, because
      the wire carries no pet."
-  - "Standing Ovation raises FurinaStageLaw.RefillAmount = 5 on the BACK
+  - "Rising Applause (`proto_fs_standing_ovation`, renamed under `EB-739`)
+     raises FurinaStageLaw.RefillAmount = 5 on the BACK
      performer, which with one performer on stage is the lead (rule 5). So the
      lead stands at 8 for the enemy turn below."
   - "Energy is set to 5 so the three kit cards all play in one turn."
@@ -78,7 +85,7 @@ steps:
   # ------------------------------------------------- the reserve, and RULE 5
   # Raise 5 on the back performer. Alone on stage, the Usher IS the back, so
   # the lead stands at 3 + 5 = 8 for the enemy turn.
-  - play: {card: "Standing Ovation"}
+  - play: {card: "Rising Applause"}
 
   # ------------------------------------------------- three bars, and RULE 3 -
   # Two summons fill the middle and back seats at 1 each. EYES-ON: three
@@ -120,6 +127,40 @@ steps:
   # not fired yet -- what is being pinned is that a bow PAID, which is the
   # difference between rule 7's two departures.
   - read: {what: player}
+
+  # ------------------------------------------------- THE PAGE, and `EB-735` -
+  # The row's own acceptance, asserted rather than eyeballed: the blind-play
+  # page prints the stage in DAMAGE ORDER, with three named bars in seat order
+  # and a line for the bow that just happened.
+  #
+  # THE BARS ARE NOT ASSERTED BY VALUE and that is deliberate. What round one
+  # could not see was WHO and WHERE, not how much; the numbers move with the
+  # intent this hallway happened to roll, and a scenario pinning them would be
+  # asserting the fight rather than the page. So each line is checked for the
+  # performer and the seat word it stands under.
+  - expect:
+      page_contains: {text: "## Your stage"}
+  - expect:
+      page_contains: {text: "lead: Chevalmarin"}
+  - expect:
+      page_contains: {text: "back: Crabaletta"}
+  - expect:
+      page_contains: {text: "took a [gold]Bow[/gold]"}
+  - expect:
+      page_contains: {text: "**Usher** left the stage: emptied by a Spend"}
+
+  # ------------------------------------------------ THE HEADER, and `EB-736` -
+  # The three shipped meter lines the brief retires are gone from the header
+  # while the arm is on. All three were on the page in round one, beside a
+  # glossary calling Fanfare the bar -- one word, two resources, the shown one
+  # dead.
+  - expect:
+      page_lacks: {text: "- Encore:"}
+  - expect:
+      page_lacks: {text: "- Fanfare:"}
+  - expect:
+      page_lacks: {text: "- Furina Burst:"}
+
   - wait: {seconds: 20}
 
   # ---------------------------------------------- the empty-stage fallback --

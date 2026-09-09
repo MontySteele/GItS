@@ -390,6 +390,11 @@ public static class FurinaStage
                                      Creature? owner, string member)
     {
         if (!LiveFor(owner)) return;
+        // `EB-735`, and `EB-511`'s lesson: the beat files WHAT THE BOARD LOST,
+        // measured across the act, and never the clause's own printed figure.
+        // Crabaletta prints 5 and a Vulnerable makes it 7; a receipt quoting
+        // the 5 sends a reader looking for two damage nothing accounts for.
+        var before = Ledger(owner);
         switch (Parse(member))
         {
             case StagePerformer.Usher:
@@ -416,6 +421,7 @@ public static class FurinaStage
                 }
                 break;
         }
+        NoteBeat(owner!, "act", Parse(member), before);
     }
 
     /// <summary><i>Bis!</i>: the lead performer performs its act now.
@@ -455,6 +461,7 @@ public static class FurinaStage
                                  Creature owner, StageExit exit)
     {
         if (!exit.Bows || !LiveFor(owner)) return;
+        var before = Ledger(owner);
         switch (exit.Who)
         {
             case StagePerformer.Usher:
@@ -479,6 +486,39 @@ public static class FurinaStage
                 }
                 break;
         }
+        NoteBeat(owner, "bow", exit.Who, before);
+    }
+
+    /// <summary>Furina's Block and the board's total HP, as one pair, taken
+    /// either side of an act or a bow. The DIFFERENCE is what the beat files
+    /// (`EB-735`): a payout that gains Block files the Block, one that deals
+    /// damage files the HP the board actually lost, and one that does neither
+    /// -- Chevalmarin's bow, which only leaves an aura -- files 0 and the page
+    /// prints no number for it.</summary>
+    private static (int Block, int EnemyHp) Ledger(Creature? owner)
+    {
+        if (owner == null) return (0, 0);
+        var hp = Enemies(owner).Sum(e => e.CurrentHp);
+        return (owner.Block, hp);
+    }
+
+    /// <summary>File one act or bow, with what the board actually did.
+    /// The LEDGER is the one writer of the log, exactly as it is the one
+    /// writer of a bar; this is the door for the two beats whose number lives
+    /// on the board rather than in it.</summary>
+    private static void NoteBeat(Creature owner, string what,
+                                 StagePerformer who,
+                                 (int Block, int EnemyHp) before)
+    {
+        var after = Ledger(owner);
+        var moved = (after.Block - before.Block)
+                    + (before.EnemyHp - after.EnemyHp);
+        var ledger = FurinaStageLedger.For(owner);
+        var seat = ledger.SeatIndexOf(who);
+        ledger.Note(new StageBeat(
+            what, who, seat,
+            seat >= 0 ? ledger.Seats[seat].Fanfare : 0,
+            moved < 0 ? 0 : moved, ""));
     }
 
     /// <summary>Rule 6's flush: the ledger moved synchronously inside

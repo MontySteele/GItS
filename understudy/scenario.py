@@ -868,6 +868,62 @@ def _check_description_contains(spec, before, after):
         f"description {got!r} does not contain {want!r}"
 
 
+def _page(state: dict[str, Any]) -> str:
+    """The blind-play page this state renders to, as a seat would read it.
+
+    `EB-735`. THE ONE SURFACE NO CHECK COULD REACH. Every check above reads the
+    WIRE, which is right for a rule -- what a card DID is a fact about the
+    board -- and useless for the row that closed round one, whose whole defect
+    was that a true board reached the page and the page printed nothing about
+    it. Three seats played some 550 actions never knowing who was on stage,
+    with a wire that had been carrying the pets all along.
+
+    So this check reads the RENDERER, not a second copy of it: the import is
+    `understudy.blindplay`, the same module the seat runs, so a scenario
+    asserting a line asserts the line the seat will be handed. It stays inside
+    the "never a sheet, never tier0" rule at the head of this section -- the
+    page is downstream of the wire and nothing else.
+
+    LATE, because `understudy.scenario` is imported by tests that never render
+    a page and `blindplay` pulls the whole board/notes/render stack behind it.
+    """
+    from understudy import blindplay
+    return blindplay.observe(state)
+
+
+def _check_page_contains(spec, before, after):
+    """The page a seat would be handed prints this line (`EB-735`).
+
+    WHITESPACE-FOLDED AND CASE-FOLDED, `description_contains`' own rule: a
+    scenario names the sentence, not the wrapping, and a page whose line broke
+    differently is the same page.
+    """
+    want = " ".join(str(spec if isinstance(spec, str)
+                        else spec["text"]).split())
+    try:
+        got = " ".join(_page(after).split())
+    except Exception as e:                       # a render must not mask a run
+        return f"the page could not be rendered ({e})"
+    return None if want.casefold() in got.casefold() else         f"the page does not contain {want!r}"
+
+
+def _check_page_lacks(spec, before, after):
+    """And this one it does NOT print (`EB-736`).
+
+    The twin, and it is the half round one's second finding needs: the header
+    kept printing `Encore: 0`, the shipped Fanfare meter and the Burst bar
+    beside a glossary calling Fanfare the bar, and "the line is gone" is not
+    something a `contains` check can say.
+    """
+    want = " ".join(str(spec if isinstance(spec, str)
+                        else spec["text"]).split())
+    try:
+        got = " ".join(_page(after).split())
+    except Exception as e:
+        return f"the page could not be rendered ({e})"
+    return None if want.casefold() not in got.casefold() else         f"the page still contains {want!r}"
+
+
 class _LogWindow:
     """Where in `godot.log` this scenario's own output starts.
 
@@ -976,6 +1032,11 @@ CHECKS: dict[str, Callable[..., str | None]] = {
     "can_play": _check_can_play,
     "unplayable_reason": _check_unplayable_reason,
     "description_contains": _check_description_contains,
+    # `EB-735` / `EB-736`: the PAGE, which is the surface those two rows are
+    # about. Everything above asserts the board; these two assert what a blind
+    # seat is handed of it.
+    "page_contains": _check_page_contains,
+    "page_lacks": _check_page_lacks,
 }
 
 

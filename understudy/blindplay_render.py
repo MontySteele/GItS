@@ -13,7 +13,7 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
-                                        enchant_moves_line)
+                                        enchant_moves_line, stage_seat_name)
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
                                         BOMB_REACTION_CLAUSE,
@@ -932,6 +932,101 @@ def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]
     return out
 
 
+#: `EB-735`. The window the stage log covers, said once at the head of the
+#: section rather than implied by its rows. The clear is at her turn END
+#: (`FurinaStageHooks.BeforeSideTurnEnd`), so what a seat opening a turn reads
+#: here is the sweep it could not watch and the enemy turn that followed it --
+#: which is exactly the half of the fight the bars move most in.
+STAGE_LOG_HEADING = ("- Since you ended your last turn, in order (the "
+                     "end-of-turn acts, the enemies' turn, then what you have "
+                     "played this turn):")
+
+STAGE_EMPTY_LINE = ("- The stage is empty. A [gold]Spend[/gold] rider cannot "
+                    "fire at all, so those cards play at their base number.")
+
+
+def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
+    """The stage, in DAMAGE ORDER, on one line, plus the reserve on the next.
+
+    `EB-735`. Round one's first finding was that the page named no performer,
+    no seat and no bar, and its second was that the three read as "one
+    anonymous pool with three names". Both are answered by printing them, and
+    printing them in the order the damage takes: brief sec.8's last failure
+    mode asks for exactly this -- "the strip must show the lead's bar beside
+    her Block, in the damage order".
+
+    SO THE FIRST LINE IS THE DAMAGE ORDER AND NOTHING ELSE. Block, then the
+    lead's bar, then her HP: the three numbers one attack meets, in the order
+    it meets them, which is the one sentence rule 6 is. The reserve goes on its
+    own line because nothing reaches it, and a seat that read the two as one
+    line would be reading four bars where an attack sees two.
+    """
+    seats = stage["seats"]
+    lead = seats[0] if seats else None
+    head = [f"Block {you['block']}"]
+    if lead is not None:
+        head.append(f"lead: {lead['name']} {lead['fanfare']}")
+    head.append(f"Furina {you['hp']}/{you['max_hp']}")
+    out = ["- " + " · ".join(head)]
+    # The seats nothing reaches, named the way rule 5 names them -- and with
+    # `stage_seat_name` deciding, so a lone performer is never called a back
+    # performer a Raise would then be sent to.
+    reserve = [f"{stage_seat_name(i, len(seats))}: {row['name']} "
+               f"{row['fanfare']}"
+               for i, row in enumerate(seats) if i > 0]
+    if reserve:
+        out.append("- " + " · ".join(reserve))
+    if not seats:
+        out.append(STAGE_EMPTY_LINE)
+    return out
+
+
+def _stage_moved(row: dict[str, Any]) -> str:
+    """What the board did under one beat, or nothing.
+
+    THE MEASURED NUMBER, never the clause's (`EB-511`): the mod files what the
+    enemies' HP actually fell by and what Block she actually gained, so an act
+    into a Vulnerable reads the number the seat can check against the bodies
+    four lines down. A beat that moved nothing -- Chevalmarin's bow, which only
+    leaves an aura -- says nothing rather than saying 0.
+    """
+    return f" It moved {row['moved']}." if row["moved"] else ""
+
+
+def _render_stage_log(stage: dict[str, Any]) -> list[str]:
+    """One line per arrival, act, bow, departure and rotation."""
+    out: list[str] = []
+    standing = len(stage["seats"])
+    for row in stage["log"]:
+        who = f"**{row['name']}**"
+        seat = row["seat"]
+        # WHICH SEAT, where the beat happened in one. A departed performer is
+        # in no seat and the line names none. The cast size is TODAY'S, floored
+        # at the index the beat recorded: rule 5 makes "back" mean the
+        # back-most OCCUPIED seat, so a lone performer must not be called a
+        # middle one, and a beat from a fuller stage must not be told there
+        # were fewer seats than it stood in.
+        where = (f" the {stage_seat_name(seat, max(standing, seat + 1))} seat"
+                 if seat >= 0 else "")
+        if row["event"] == "arrive":
+            out.append(f"  - {who} took{where} at {row['fanfare']} "
+                       f"[gold]Fanfare[/gold].")
+        elif row["event"] == "act":
+            seat_clause = f" from{where}" if where else ""
+            out.append(f"  - {who} performed{seat_clause}."
+                       f"{_stage_moved(row)}")
+        elif row["event"] == "bow":
+            out.append(f"  - {who} took a [gold]Bow[/gold]."
+                       f"{_stage_moved(row)}")
+        elif row["event"] == "leave":
+            out.append(f"  - {who} left the stage: {row['why']}.")
+        elif row["event"] == "rotate":
+            out.append(f"  - {who} moved from the front seat to the back, "
+                       f"bar and all. Nobody left and nobody took a "
+                       f"[gold]Bow[/gold].")
+    return out
+
+
 def render(obs: dict[str, Any]) -> str:
     """The observation as the page the tester is handed. Same content."""
     st = obs["state_type"]
@@ -1123,6 +1218,20 @@ def render(obs: dict[str, Any]) -> str:
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):
                 out += ["", CARRY_OUT_BOARD_NOTE]
+        # `EB-735`. THE STAGE, ABOVE EVERYTHING IT DECIDES. Three round-one
+        # seats played some 550 actions without ever knowing who was on stage
+        # or what a bar held, because the page had no renderer for her
+        # performers; the block below is that renderer, and it goes here --
+        # under the header and above the hand -- because rule 6 makes the
+        # lead's bar part of the damage order the header's Block line opens,
+        # and rule 8 makes the same bar the price of half the cards in the
+        # hand underneath.
+        if c.get("stage") is not None:
+            out += ["", "## Your stage", ""]
+            out += _render_stage(c["stage"], you)
+            if c["stage"]["log"]:
+                out.append(STAGE_LOG_HEADING)
+                out += _render_stage_log(c["stage"])
         # `EB-506`. WHO IS AT THE FRONT, printed as a LIST IN ORDER with the
         # front marked, and refreshed off the live company on every screen.
         #

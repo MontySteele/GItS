@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 
 namespace KleeMod.Powers;
 
@@ -129,6 +130,43 @@ public sealed class StageSeat
 }
 
 /// <summary>
+/// ONE THING THE STAGE DID, for the page (`EB-735`).
+///
+/// THE FIND (round one, sec.2). Nothing on the blind-play page named a
+/// performer, a seat or a bar, so in some 550 actions no seat ever knew who was
+/// on stage; each learned the roster from one glossary line and inferred bars
+/// by firing readers and reading the result backwards. The BOARD half of that
+/// row is the seats and their bars, which the ledger already holds. This is
+/// the other half: what happened to them, in the order it happened, because a
+/// bar that moved between two screens is a fact no snapshot of the bars can
+/// carry.
+///
+/// THE NUMBER IS WHAT THE BOARD LOST, not what the rule printed -- `EB-511`'s
+/// lesson one kit over, where a receipt quoting a clause's own figure sent a
+/// seat looking for four damage a Vulnerable had made six. Crabaletta's act
+/// prints 5 and files what the enemy's HP actually fell by; the Usher's files
+/// the Block Furina actually gained. A beat with no number files 0 and the
+/// page prints none.
+/// </summary>
+/// <param name="Event">`arrive`, `act`, `bow`, `leave` or `rotate` -- the
+/// five moments the row names, in the page's own vocabulary rather than in
+/// this file's method names.</param>
+/// <param name="Who">The performer. `Name` is the sheet name; the page prints
+/// the display name it gets from the seat list.</param>
+/// <param name="Seat">The seat this happened in, front = 0, or -1 where the
+/// performer is no longer standing in one.</param>
+/// <param name="Fanfare">The bar AFTER the beat -- what the seat would read if
+/// it looked now.</param>
+/// <param name="Moved">What the board lost or gained, measured; 0 where the
+/// beat moved no number.</param>
+/// <param name="Reason">Why a `leave` happened: `hit`, `spend`, `rotated` or
+/// `final_bow`. Empty on every other event.</param>
+public readonly record struct StageBeat(
+    string Event, StagePerformer Who, int Seat, int Fanfare, int Moved,
+    string Reason);
+
+
+/// <summary>
 /// THE STAGE ITSELF: three seats, front first, and every rule in brief sec.3
 /// that is arithmetic rather than an engine command.
 ///
@@ -194,6 +232,45 @@ public sealed class FurinaStageLedger
         _byFurina.Clear();
     }
 
+    // ---- the performance log (`EB-735`) ------------------------------
+
+    private readonly List<StageBeat> _beats = new();
+
+    /// <summary>
+    /// What the stage has done since she last ended a turn, in order.
+    ///
+    /// THE WINDOW IS THE TURN BREAK AND NOT THE TURN, deliberately, and the
+    /// page says so in one line. A turn's own plays are watched as they happen
+    /// -- every card resolves on a screen the seat asked for -- and the two
+    /// things a seat CANNOT watch both land in the break: the end-of-turn
+    /// sweep (rule 10) and what the enemies' attacks took off the lead
+    /// (rule 6). Clearing at the start of her turn would wipe both a moment
+    /// before the only screen that could have printed them, which is
+    /// `SALON_ARRIVAL_NOTE`'s defect one arm over. So the clear is at
+    /// <c>BeforeSideTurnEnd</c>, immediately before the sweep it is about.
+    /// </summary>
+    public IReadOnlyList<StageBeat> Beats => _beats;
+
+    /// <summary>File one beat. THE ONE WRITER is this method, and the callers
+    /// are this class's own moves plus <see cref="FurinaStage"/>'s two payout
+    /// sites -- the acts and the bows, which are the only beats whose NUMBER
+    /// lives on the board rather than in this file.</summary>
+    public void Note(StageBeat beat) => _beats.Add(beat);
+
+    /// <summary>The turn boundary, and the only one this log has.</summary>
+    public void ClearBeats() => _beats.Clear();
+
+    /// <summary>The seat this performer is standing in, front = 0, or -1.
+    /// </summary>
+    public int SeatIndexOf(StagePerformer who)
+    {
+        for (var i = 0; i < _seats.Count; i++)
+        {
+            if (_seats[i].Who == who) return i;
+        }
+        return -1;
+    }
+
     /// <summary>The stage, FRONT FIRST. The head of the list is the lead, and
     /// that is the whole of the seat order: rule 6 reads
     /// <c>[0]</c>, rule 5 reads the last, and rule 3 moves the head off and
@@ -240,12 +317,21 @@ public sealed class FurinaStageLedger
         if (!IsFull)
         {
             _seats.Add(new StageSeat(who, FurinaStageLaw.SummonFanfare));
+            Note(new StageBeat("arrive", who, _seats.Count - 1,
+                               FurinaStageLaw.SummonFanfare, 0, ""));
             return new StageSummon(who, FurinaStageLaw.SummonFanfare, null);
         }
 
         var leaver = _seats[0];
         _seats.RemoveAt(0);
         _seats.Add(new StageSeat(who, leaver.Fanfare));
+        // TWO BEATS AND NOT ONE, because a rotation is two things happening to
+        // two performers: the front leaves with no bow (rule 3) and the
+        // newcomer takes its bar. A page printing one line for the pair would
+        // be the sentence the seat had to reverse-engineer.
+        Note(new StageBeat("leave", leaver.Who, -1, 0, 0, "rotated"));
+        Note(new StageBeat("arrive", who, _seats.Count - 1, leaver.Fanfare,
+                           0, ""));
         return new StageSummon(
             who, leaver.Fanfare,
             new StageExit(leaver.Who, StageDeparture.Rotated));
@@ -299,6 +385,7 @@ public sealed class FurinaStageLedger
         if (lead.Fanfare > 0) return new StageSpend(true, paid, null);
 
         _seats.RemoveAt(0);
+        Note(new StageBeat("leave", lead.Who, -1, 0, paid, "spend"));
         return new StageSpend(
             true, paid, new StageExit(lead.Who, StageDeparture.Spent));
     }
@@ -337,6 +424,7 @@ public sealed class FurinaStageLedger
         if (lead.Fanfare > 0) return new StageAbsorb(absorbed, reached, null);
 
         _seats.RemoveAt(0);
+        Note(new StageBeat("leave", lead.Who, -1, 0, absorbed, "hit"));
         return new StageAbsorb(
             absorbed, reached,
             new StageExit(lead.Who, StageDeparture.Struck));
@@ -383,6 +471,8 @@ public sealed class FurinaStageLedger
         if (!IsEmpty) return null;
         var seat = new StageSeat(who, FurinaStageLaw.OpeningFanfare);
         _seats.Add(seat);
+        Note(new StageBeat("arrive", who, 0, FurinaStageLaw.OpeningFanfare,
+                           0, ""));
         return seat;
     }
 
@@ -424,6 +514,8 @@ public sealed class FurinaStageLedger
         var front = _seats[0];
         _seats.RemoveAt(0);
         _seats.Add(front);
+        Note(new StageBeat("rotate", front.Who, _seats.Count - 1,
+                           front.Fanfare, 0, ""));
     }
 
     // ---- the per-play spend record -----------------------------------
@@ -451,6 +543,11 @@ public sealed class FurinaStageLedger
     {
         var total = _seats.Sum(s => s.Fanfare);
         _pendingCurtainCall = _seats.Select(s => s.Who).ToList();
+        foreach (var seat in _seats)
+        {
+            Note(new StageBeat("leave", seat.Who, -1, 0, seat.Fanfare,
+                               "spend"));
+        }
         _seats.Clear();
         SpentThisPlay = total;
         return total;
@@ -481,6 +578,7 @@ public sealed class FurinaStageLedger
         bar = lead.Fanfare;
         _seats.RemoveAt(0);
         SpentThisPlay = bar;
+        Note(new StageBeat("leave", lead.Who, -1, 0, bar, "final_bow"));
         return new StageExit(lead.Who, StageDeparture.Spent);
     }
 
@@ -491,6 +589,87 @@ public sealed class FurinaStageLedger
     {
         _seats.Clear();
         _pendingCurtainCall.Clear();
+        _beats.Clear();
         SpentThisPlay = 0;
     }
+
+    /// <summary>
+    /// `EB-735`. THE WIRE'S VIEW OF THE STAGE.
+    ///
+    /// WHAT THE SEATS SAW, which was nothing (round one, sec.2): "one
+    /// anonymous pool with three names". The bridge publishes pets and the
+    /// page draws Kokomi's one; Furina's three had no renderer, so three seats
+    /// played some 550 actions without ever knowing who was on stage or what a
+    /// bar held, and every finding in that round is read through the hole.
+    ///
+    /// A PLAIN DICTIONARY OF PRIMITIVES, and the shape is
+    /// <see cref="FurinaReframeLedger.Snapshot"/>'s for the reason that one is:
+    /// the bridge (<c>vendor/STS2_MCP/gits/GitsFurinaStage.cs</c>) reaches it
+    /// by REFLECTION, because this file is Compile Remove'd from a release
+    /// build and a compile-time reference would make the bridge refuse to load
+    /// without it. The field names here ARE the contract, and
+    /// <c>understudy/blindplay_board.furina_stage</c> reads them.
+    ///
+    /// THREE STATES, NOT TWO, the same split every other GItS block on this
+    /// wire makes: an ABSENT key is "no Stage in this build", an EMPTY map is
+    /// "the rule is here and this seat is not playing it" (a Klee, a Kokomi, a
+    /// flag-off Furina), and a populated map is her stage -- populated even
+    /// with nobody standing, because "the stage is empty" is the fact a seat
+    /// spending a rider most needs and the one an absent key cannot state.
+    ///
+    /// THE SEAT INDEX IS EMITTED rather than left to the list's order, even
+    /// though the list IS in seat order. The page prints the lead by name and
+    /// the row's own acceptance is "three named bars in seat order"; a reader
+    /// reconstructing the seat from an array index has to be told, somewhere,
+    /// that the array is ordered -- and this is that somewhere, said once, in
+    /// the data.
+    /// </summary>
+    public static Dictionary<string, object?> Snapshot(Player? player)
+    {
+        var snapshot = new Dictionary<string, object?>();
+        var creature = player?.Creature;
+        if (creature == null || !FurinaStage.LiveFor(creature))
+        {
+            return snapshot;
+        }
+        var ledger = For(creature);
+        snapshot["live"] = true;
+        snapshot["seats"] = ledger.Seats
+            .Select((seat, index) => (object?)new Dictionary<string, object?>
+            {
+                ["member"] = FurinaStage.Name(seat.Who),
+                ["name"] = DisplayName(seat.Who),
+                ["seat"] = index,
+                ["fanfare"] = seat.Fanfare,
+                // The body's combat id, so the page's block and the `pets`
+                // list on the same wire name one creature rather than two
+                // things that happen to agree.
+                ["entity_id"] = seat.Pet?.CombatId.ToString(),
+            })
+            .ToList();
+        snapshot["log"] = ledger.Beats
+            .Select(beat => (object?)new Dictionary<string, object?>
+            {
+                ["event"] = beat.Event,
+                ["member"] = FurinaStage.Name(beat.Who),
+                ["name"] = DisplayName(beat.Who),
+                ["seat"] = beat.Seat,
+                ["fanfare"] = beat.Fanfare,
+                ["moved"] = beat.Moved,
+                ["reason"] = beat.Reason,
+            })
+            .ToList();
+        return snapshot;
+    }
+
+    /// <summary>The name a performer prints, off the body's own model rather
+    /// than a second table: <c>UsherMonster.DisplayName</c> is what the pet's
+    /// health bar is labelled with in game, and the page must not name the
+    /// same creature differently.</summary>
+    public static string DisplayName(StagePerformer who) => who switch
+    {
+        StagePerformer.Chevalmarin => "Surintendante Chevalmarin",
+        StagePerformer.Crabaletta => "Mademoiselle Crabaletta",
+        _ => "Gentilhomme Usher",
+    };
 }

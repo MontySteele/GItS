@@ -1284,6 +1284,22 @@ public static partial class McpMod
             state["furina_salon"] = furinaSalon;
         }
 
+        // GItS LOCAL EDIT (`EB-735`). THE STAGE, and it is the block above one
+        // arm over: three performers stand in three SEATS, and the seat is the
+        // whole kit -- attacks reach the front one, Spend pays from the front
+        // one, Raise lands on the back one. The pets already reach the wire;
+        // the ORDER they stand in does not, because `Pets` is in the order the
+        // bodies were fielded and a rotation breaks it. Emitted beside the two
+        // receipts above and on the same absent/empty/populated contract, with
+        // one further state: a populated block with no seats is "the stage is
+        // empty", which is the fact a seat about to spend a rider needs and
+        // the one an absent key cannot state. Implementation and its
+        // reflection contract: gits/GitsFurinaStage.cs.
+        if (GitsFurinaStageState(player) is { } furinaStage)
+        {
+            state["furina_stage"] = furinaStage;
+        }
+
         // GItS LOCAL EDIT (`EB-681`). WHAT REACTED THIS TURN, BY NAME. A
         // reaction is what several kits are ABOUT and the feed carried no
         // trace of one: the aura is consumed, the effect lands, and a reader
@@ -2660,19 +2676,36 @@ public static partial class McpMod
         // through `ICombatState.GetCreature`, so a pet is aimed at through
         // exactly the door an enemy is aimed at through. Osty keeps every
         // field it had and gains this one.
+        // GItS LOCAL EDIT (`EB-735`). WHICH SEAT A PERFORMER IS STANDING IN.
+        // A Furina Stage performer is a pet whose HP IS its Fanfare bar, and
+        // the one fact a pet row cannot carry is its SEAT -- this list is in
+        // the order the bodies were fielded, which a rotation and a departure
+        // both break, while every rule in that kit is written against front
+        // and back. Read off the arm's own ledger through the same snapshot
+        // `state["furina_stage"]` is built from, so the two surfaces cannot
+        // come to disagree; an empty map on every other board, which is every
+        // board in a release build.
+        var stageSeats = GitsFurinaStageSeats(player);
         foreach (var pet in combatState.Pets)
         {
-            pets.Add(new Dictionary<string, object?>
+            var petId = pet.CombatId.ToString() ?? string.Empty;
+            var row = new Dictionary<string, object?>
             {
                 ["id"] = pet.Monster?.Id.Entry ?? "PET",
-                ["entity_id"] = pet.CombatId.ToString(),
+                ["entity_id"] = petId,
                 ["name"] = SafeGetText(() => pet.Monster?.Title) ?? "Pet",
                 ["alive"] = pet.IsAlive,
                 ["hp"] = pet.CurrentHp,
                 ["max_hp"] = pet.MaxHp,
                 ["block"] = pet.Block,
                 ["status"] = BuildPowersState(pet)
-            });
+            };
+            if (stageSeats.TryGetValue(petId, out var seat))
+            {
+                row["stage_member"] = seat.Member;
+                row["stage_seat"] = seat.Seat;
+            }
+            pets.Add(row);
         }
 
         return pets;

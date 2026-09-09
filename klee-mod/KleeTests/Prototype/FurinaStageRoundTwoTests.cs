@@ -1,9 +1,11 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -208,6 +210,189 @@ public class FurinaStageRoundTwoTests
         Assert.Contains("(\"title\", \"Rising Applause\")", source);
         Assert.Contains("id=proto_fs_standing_ovation", source);
         Assert.DoesNotContain("\"Standing Ovation\"", source);
+    }
+
+    // ==================================================================
+    // `EB-736`. THE OFFER IS STAGE-ONLY.
+    // ==================================================================
+
+    [Fact]
+    public void The_filter_finds_the_retired_rows_by_text_and_not_by_a_list()
+    {
+        // ROUND ONE'S SECOND FINDING. Batch one swaps fourteen rows and no
+        // more, so the draft was mixed by construction: seats were offered
+        // Encore cards they could never pay, a Fortissimo Guard that never
+        // fired on a summon, and a Casting Call whose gloss describes the old
+        // three-member Salon. The filter asks every SHIPPED row the question a
+        // seat asks of its face -- does it print a word this kit retired --
+        // rather than carrying a copy of the sheet that goes stale.
+        Assert.True(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Furina.Generated.FortissimoGuard()));
+        Assert.True(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Furina.Generated.CastingCall()));
+        Assert.True(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Furina.Generated.StandingOvation()));
+        Assert.True(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Furina.Generated.HouseCall()));
+
+        // A plain row survives: nothing about "Deal 6 damage" reads a system
+        // this kit does not have.
+        Assert.False(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Furina.Generated.SoloistsSolicitation()));
+        Assert.False(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Furina.Generated.StagePresence()));
+    }
+
+    [Fact]
+    public void The_arms_own_rows_are_never_asked()
+    {
+        // EVERY `proto_fs_` FACE PRINTS `Fanfare` -- it is the bar's name
+        // (rule 1) -- so a filter that asked them the same question would
+        // empty the arm's own offer. The namespace is the whole test, and a
+        // release build compiles none of those types at all.
+        Assert.False(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Prototype.Generated.ProtoFsStandingOvation()));
+        Assert.False(FurinaStageRoster.ReadsARetiredSystem(
+            new global::KleeMod.Cards.Prototype.Generated.ProtoFsCurtainRise()));
+    }
+
+    [Fact]
+    public void With_the_arm_off_the_offer_is_byte_for_byte_the_shipped_offer()
+    {
+        // The acceptance condition the whole quarantine rests on. Nothing in
+        // this row may reach a board that did not ask for the arm.
+        using var _ = new StageArm();
+        FurinaStage.Enabled = false;
+        var shipped = new CardModel[]
+        {
+            new global::KleeMod.Cards.Furina.Generated.FortissimoGuard(),
+            new global::KleeMod.Cards.Furina.Generated.SoloistsSolicitation(),
+        };
+
+        Assert.Equal(shipped,
+                     FurinaStageRoster.SwapOfferedRows(shipped).ToArray());
+    }
+
+    [Fact]
+    public void With_the_arm_on_the_retired_rows_leave_and_the_count_is_kept()
+    {
+        using var _ = new StageArm();
+        var offered = new CardModel[]
+        {
+            new global::KleeMod.Cards.Furina.Generated.FortissimoGuard(),
+            new global::KleeMod.Cards.Furina.Generated.CastingCall(),
+            new global::KleeMod.Cards.Furina.Generated.SoloistsSolicitation(),
+        };
+
+        // `DropRetiredRows` AND NOT `SwapOfferedRows`, and it is the headless
+        // boundary rather than a narrower claim: the outer method reaches
+        // `ModelDb` for the fourteen rows it concatenates on, and this harness
+        // registers no models (KleeTests/README.md). What the filter DROPS is
+        // the whole of this row.
+        var result = FurinaStageRoster.DropRetiredRows(offered).ToList();
+
+        Assert.Equal(2, FurinaStageRoster.LastRetiredCount);
+        Assert.DoesNotContain(
+            result,
+            card => card is global::KleeMod.Cards.Furina.Generated
+                        .FortissimoGuard
+                        or global::KleeMod.Cards.Furina.Generated.CastingCall);
+        Assert.Contains(
+            result,
+            card => card is global::KleeMod.Cards.Furina.Generated
+                .SoloistsSolicitation);
+    }
+
+    // ==================================================================
+    // `EB-735`. THE STAGE ON THE WIRE.
+    // ==================================================================
+
+    [Fact]
+    public void The_snapshot_carries_every_seat_with_its_index_and_its_bar()
+    {
+        using var _ = new StageArm();
+        var seat = Seat.Furina().WithCombatState();
+        var stage = FurinaStageLedger.For(seat.Creature);
+        stage.Clear();
+        stage.Summon(StagePerformer.Usher);
+        stage.Summon(StagePerformer.Chevalmarin);
+        stage.Summon(StagePerformer.Crabaletta);
+        stage.Raise(5);                       // the BACK seat, rule 5
+
+        var snapshot = FurinaStageLedger.Snapshot(seat.Player);
+        var seats = ((IEnumerable<object?>)snapshot["seats"]!)
+            .Cast<Dictionary<string, object?>>().ToList();
+
+        Assert.Equal(true, snapshot["live"]);
+        Assert.Equal(new object?[] { 0, 1, 2 },
+                     seats.Select(row => row["seat"]).ToArray());
+        Assert.Equal(new object?[] { "usher", "chevalmarin", "crabaletta" },
+                     seats.Select(row => row["member"]).ToArray());
+        Assert.Equal("Gentilhomme Usher", seats[0]["name"]);
+        // The Raise landed on the back-most and nowhere else.
+        Assert.Equal(FurinaStageLaw.SummonFanfare, seats[0]["fanfare"]);
+        Assert.Equal(FurinaStageLaw.SummonFanfare + 5, seats[2]["fanfare"]);
+    }
+
+    [Fact]
+    public void A_klee_gets_the_empty_map_and_an_empty_stage_a_full_one()
+    {
+        // THE THREE-STATE CONTRACT. An empty map is "the rule is here and this
+        // seat is not playing it"; a populated map with no seats is "the stage
+        // is empty", which is the fact a seat about to spend a rider most
+        // needs and the one an absent key cannot state.
+        using var _ = new StageArm();
+        Assert.Empty(FurinaStageLedger.Snapshot(
+            Seat.Klee().WithCombatState().Player));
+
+        var furina = Seat.Furina().WithCombatState();
+        FurinaStageLedger.For(furina.Creature).Clear();
+        var snapshot = FurinaStageLedger.Snapshot(furina.Player);
+
+        Assert.Equal(true, snapshot["live"]);
+        Assert.Empty((IEnumerable<object?>)snapshot["seats"]!);
+    }
+
+    [Fact]
+    public void The_log_files_one_beat_per_arrival_departure_and_rotation()
+    {
+        using var _ = new StageArm();
+        var seat = Seat.Furina().WithCombatState();
+        var stage = FurinaStageLedger.For(seat.Creature);
+        stage.Clear();
+        stage.OpenWith(StagePerformer.Usher);        // the relic's arrival
+        stage.SceneChange();                         // a pure reorder
+        stage.Summon(StagePerformer.Chevalmarin);
+        stage.Spend(99);                             // empties the lead: a bow
+
+        var log = FurinaStageLedger.Snapshot(seat.Player)["log"];
+        var rows = ((IEnumerable<object?>)log!)
+            .Cast<Dictionary<string, object?>>().ToList();
+
+        Assert.Equal(new object?[] { "arrive", "rotate", "arrive", "leave" },
+                     rows.Select(row => row["event"]).ToArray());
+        // A DEPARTURE SAYS WHY, because that is the whole of rules 7 and 9: a
+        // bow is earned by Spend and by nothing else, and the page prints the
+        // difference.
+        Assert.Equal("spend", rows[^1]["reason"]);
+        Assert.Equal("usher", rows[^1]["member"]);
+    }
+
+    [Fact]
+    public void The_log_clears_on_a_turn_boundary_and_the_stage_does_not()
+    {
+        using var _ = new StageArm();
+        var seat = Seat.Furina().WithCombatState();
+        var stage = FurinaStageLedger.For(seat.Creature);
+        stage.Clear();
+        stage.Summon(StagePerformer.Usher);
+        Assert.NotEmpty(stage.Beats);
+
+        stage.ClearBeats();
+
+        Assert.Empty(stage.Beats);
+        // And the stage itself is untouched: the log is a receipt, not state.
+        Assert.Single(stage.Seats);
     }
 
     private static string Between(string source, string from, string to)
