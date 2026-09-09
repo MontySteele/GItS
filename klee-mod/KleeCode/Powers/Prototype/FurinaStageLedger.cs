@@ -161,9 +161,19 @@ public sealed class StageSeat
 /// beat moved no number.</param>
 /// <param name="Reason">Why a `leave` happened: `hit`, `spend`, `rotated` or
 /// `final_bow`. Empty on every other event.</param>
+/// <param name="Target">`EB-743`. WHOSE BODY, for the one act and the one bow
+/// that pick one: Crabaletta's. The game's printed title, empty on every beat
+/// that aims at nobody or at everybody -- the page's line for Chevalmarin
+/// says "every enemy" out of the performer's identity and needs no field for
+/// it.</param>
+/// <param name="TargetId">The same body's `Creature.CombatId`. THE ID IS THE
+/// HANDLE AND THE TITLE IS THE FALLBACK, `KokomiPlan.MovedOn`'s split
+/// verbatim: the page names a live body with its own numbered name and one
+/// this beat KILLED with the title recorded here, since a dead body is off
+/// the next board entirely.</param>
 public readonly record struct StageBeat(
     string Event, StagePerformer Who, int Seat, int Fanfare, int Moved,
-    string Reason);
+    string Reason, string Target = "", string TargetId = "");
 
 
 /// <summary>
@@ -657,6 +667,11 @@ public sealed class FurinaStageLedger
                 ["fanfare"] = beat.Fanfare,
                 ["moved"] = beat.Moved,
                 ["reason"] = beat.Reason,
+                // `EB-743`: who a Crabaletta act or bow landed on. Empty
+                // strings on every other beat, which the page reads as "this
+                // beat named no body".
+                ["target"] = beat.Target,
+                ["target_id"] = beat.TargetId,
             })
             .ToList();
         return snapshot;

@@ -53,6 +53,14 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoFsTidalFlourish>(),
             ModelDb.Card<ProtoFsUnderstudy>(),
             ModelDb.Card<ProtoFsWarmReception>(),
+            ModelDb.Card<ProtoFsCurtainRiseModeA>(),
+            ModelDb.Card<ProtoFsCurtainRiseModeB>(),
+            ModelDb.Card<ProtoFsGrandEntranceModeA>(),
+            ModelDb.Card<ProtoFsGrandEntranceModeB>(),
+            ModelDb.Card<ProtoFsInterpositionModeA>(),
+            ModelDb.Card<ProtoFsInterpositionModeB>(),
+            ModelDb.Card<ProtoFsTidalFlourishModeA>(),
+            ModelDb.Card<ProtoFsTidalFlourishModeB>(),
         };
 
     private static List<CardModel> BuildKlee() =>

@@ -382,6 +382,131 @@ def can_spend(player) -> bool:
     return active(player) and bool(stage(player))
 
 
+#: `EB-746`. THE HEAD OP OF A SPEND MODE, which is what makes a `choose_one`
+#: mode the Spend one. Read the way `effects.MODE_PRICE_OPS` reads a priced
+#: mode: the mode's body OPENS with the payment, the colon in "Spend 3: deal 13
+#: instead" is that boundary, and everything after it is what the payment buys.
+SPEND_MODE_OP = "stage_spend"
+
+
+def spend_mode_amount(mode: dict):
+    """`N` when this mode is a Spend mode, else None."""
+    body = mode.get("effects") or []
+    if not body:
+        return None
+    head = body[0]
+    if head.get("op") != SPEND_MODE_OP:
+        return None
+    amount = head.get("amount", 1)
+    return int(amount) if isinstance(amount, int) else None
+
+
+def mode_offered(player, mode: dict) -> bool:
+    """Rule 8's refusal, per MODE (`EB-746`).
+
+    "With no performer on stage the rider cannot fire and the card plays at its
+    base number." As a `conditional` that was a branch the engine took for the
+    player; as a CHOICE it is a mode that must not be offered, because offering
+    "Spend 3: deal 13 instead" on an empty stage offers a line the rule refuses.
+
+    A BAR OF ANY SIZE STILL PAYS, which is `can_spend`'s whole sentence and the
+    reason this is not a price: the question is OCCUPANCY and never size, so a
+    lead at 1 is offered the Spend on a card asking for 5 and rule 8's second
+    clause resolves it. C# twin: `FurinaStage.Occupied` through the generated
+    `ModeRequirements`.
+    """
+    return spend_mode_amount(mode) is None or can_spend(player)
+
+
+def mode_refusal(player, mode: dict):
+    """Why this mode is not offered, in the words `effects.mode_refusal` uses
+    for a priced one: the rule, then the board."""
+    if mode_offered(player, mode):
+        return None
+    label = mode.get("label") or "(unlabelled mode)"
+    return f"{label!r} needs a performer on stage, the stage is empty"
+
+
+# ----------------------------------------------------------------------
+# THE PILOT'S SPEND POLICY (`EB-746`).
+# ----------------------------------------------------------------------
+#
+# WHY THE PILOT NEEDS ONE AT ALL. Spend was a rider the engine fired whenever a
+# lead stood, so the sim never chose; four of six round-two seats said the card
+# spent for them ("no verb to decline"), and the fix makes it a mode. A mode
+# nobody chooses defaults to index 0 -- `effects._chosen_mode`'s tie-break --
+# so without a policy the sim would model a Furina who never spends at all,
+# which is a different character from the one the seats play.
+#
+# THE POLICY, IN ONE SENTENCE, and it is deliberately the simplest rule that
+# reproduces the brief's own turn-one wager: SPEND WHEN THE LEAD SURVIVES THE
+# PAYMENT, OR WHEN THE PAYMENT KILLS. Written out:
+#
+#   * the lead's bar stays above 0 after paying -- the performer keeps
+#     standing, so the extra damage costs a number and not a body (brief
+#     sec.7's line A against line B, where the whole wager is whether the
+#     Usher survives the turn);
+#   * or the mode's biggest hit is at least the smallest living enemy's HP --
+#     the fight ends, and rule 4's "every point unspent when the last enemy
+#     falls is gone" makes a bar kept past the last body worth nothing;
+#   * otherwise KEEP, which is the Preserve read: a bar that would be emptied
+#     for a number is a body traded for a number, and this policy does not
+#     make that trade.
+#
+# WHAT IT IS NOT. It is not the Expend deck (brief sec.4), which spends a
+# 1-bar body ON PURPOSE for the full rider and the bow, and it is not a
+# measurement of which deck is better -- that is sec.13's question and the
+# seats'. A pilot that always kept and a pilot that always spent are both
+# worse models of a played run than this one, and the ROW that decides the
+# over-sized Spend (`furina-stage-round-2` 5.1) is [USER]'s and still open, so
+# the policy deliberately does not lean on the answer.
+#
+# INSIDE THE ARM, NOT IN `pilot/policy.py`, and it is `EB-118` 2C's boundary
+# kept: `policy.choose_mode` is a shipped valuation behind its own
+# POLICY_VERSION window, and a Stage rule that moved it would renumber every
+# tier0.5 read taken with a modal card in the pool. This is quarantined
+# machinery and returns None the moment the arm is off.
+def spend_mode_index(state, modes: list):
+    """Which mode this arm's pilot takes, or None where the rule does not
+    reach -- the arm is off, no mode is a Spend, or the stage is empty."""
+    if not active(state.player):
+        return None
+    spends = [(i, spend_mode_amount(mode)) for i, mode in enumerate(modes)]
+    spends = [(i, n) for i, n in spends if n is not None]
+    if len(spends) != 1:
+        # Two Spend modes on one face is a shape no row on the surface has,
+        # and picking between them is a rule nobody has written. Fall through
+        # to the engine's own chooser rather than inventing one here.
+        return None
+    index, amount = spends[0]
+    keep = next((i for i in range(len(modes)) if i != index), 0)
+    if not can_spend(state.player):
+        return keep                       # rule 8's refusal, as a choice
+    if lead_fanfare(state.player) - amount > 0:
+        return index
+    return index if _mode_kills(state, modes[index]) else keep
+
+
+def _mode_kills(state, mode: dict) -> bool:
+    """Would this mode's biggest printed hit finish the smallest body standing?
+
+    A FORECAST OFF PRINTED NUMBERS and not a simulation: the pilot is choosing
+    before anything resolves, and what it can read is the face. Block, powers
+    and reactions all move the real number, so this is a floor on "the fight
+    can end here" rather than a promise that it does -- which is the honest
+    shape for a tie-breaker whose other arm is "keep the body".
+    """
+    living = [e for e in state.living_enemies if getattr(e, "hp", 0) > 0]
+    if not living:
+        return False
+    weakest = min(e.hp for e in living)
+    biggest = 0
+    for fx in mode.get("effects") or []:
+        if fx.get("op") == "damage" and isinstance(fx.get("amount"), int):
+            biggest = max(biggest, int(fx["amount"]))
+    return biggest >= weakest
+
+
 def spend(state, amount: int) -> int:
     """Rule 8. Pay N from the LEAD's bar for a rider that has already been
     decided to fire. "If the lead has less than N, the rider STILL fires in

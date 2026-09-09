@@ -1273,9 +1273,16 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SpendKey,
-            "Pays from the [gold]lead performer[/gold]. It fires in full even "
-          + "if the bar is short; an emptied performer takes a "
-          + "[gold]Bow[/gold]. No stage, no rider.");
+            // `EB-746`: SPEND IS A CHOICE ON PLAY. Four of six round-two
+            // seats said the card spent for them -- "no verb to decline",
+            // "the card decided" -- so the wager brief sec.4 describes never
+            // happened at play time. The old last clause goes with the
+            // rider: an empty stage does not refuse a Spend now, it simply
+            // does not OFFER the mode, which the player meets on the
+            // choose-a-card screen rather than in a tip.
+            "Chosen on play, never automatic. Pays the lead performer, "
+          + "fires in full even if the bar is short, and an emptied "
+          + "performer takes a [gold]Bow[/gold].");
 
     /// <summary>
     /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter
@@ -1310,9 +1317,15 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForBow(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BowKey,
-            "A departure effect, earned by [gold]Spend[/gold] only. Usher: "
-          + FurinaStageLaw.BowUsherBlock + " [gold]Block[/gold]. Chevalmarin: "
-          + "Hydro on all. Crabaletta: " + FurinaStageLaw.BowCrabalettaDamage
+            // `EB-744`: "earned by Spend only" was FALSE ON THE FACES
+            // PRINTING IT -- <i>Final Bow</i>'s whole card is a bow bought
+            // with a card and an Exhaust, and the Rare grants three. The rule
+            // is the CONTRAST, which is turn one's wager (brief sec.7, line B
+            // against line C): a Spend earns one and a hit does not.
+            "A departure effect a [gold]Spend[/gold] earns and a hit does "
+          + "not. Usher: " + FurinaStageLaw.BowUsherBlock
+          + " [gold]Block[/gold]. Chevalmarin: Hydro on all. "
+          + "Crabaletta: " + FurinaStageLaw.BowCrabalettaDamage
           + " damage.");
 
     /// <summary>
@@ -1335,8 +1348,14 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForBackPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BackPerformerKey,
-            "The back seat, and the reserve: nothing hits it. With one "
-          + "performer on stage it is also the lead.");
+            // `EB-744`: "nothing hits it" WHERE A FLURRY DOES. Rule 6 is
+            // per ATTACK -- the lead absorbs one hit up to its bar and leaves
+            // at 0, so the next attack of the same turn meets whoever stepped
+            // forward. Round two's seats read the old sentence as a promise
+            // the reserve was safe for the turn.
+            "The back seat, the reserve: no single attack reaches it. It "
+          + "leads once the front seat empties. Alone on stage it is the "
+          + "lead.");
 
     /// <summary>
     /// Brief sec.3 rule 3 and sec.5.2. THE SECOND SENTENCE IS THE REFUSAL,

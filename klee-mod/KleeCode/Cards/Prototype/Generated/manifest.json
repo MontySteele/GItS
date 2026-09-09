@@ -424,6 +424,22 @@
     "proto_true_spark_knight": "klee"
   },
   "mode_faces": {
+    "proto_fs_curtain_rise": [
+      "ProtoFsCurtainRiseModeA",
+      "ProtoFsCurtainRiseModeB"
+    ],
+    "proto_fs_grand_entrance": [
+      "ProtoFsGrandEntranceModeA",
+      "ProtoFsGrandEntranceModeB"
+    ],
+    "proto_fs_interposition": [
+      "ProtoFsInterpositionModeA",
+      "ProtoFsInterpositionModeB"
+    ],
+    "proto_fs_tidal_flourish": [
+      "ProtoFsTidalFlourishModeA",
+      "ProtoFsTidalFlourishModeB"
+    ],
     "proto_itto_superlative_superstrength_either": [
       "ProtoIttoSuperlativeSuperstrengthEitherModeA",
       "ProtoIttoSuperlativeSuperstrengthEitherModeB"

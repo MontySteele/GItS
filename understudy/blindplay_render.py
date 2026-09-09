@@ -945,6 +945,65 @@ STAGE_EMPTY_LINE = ("- The stage is empty. A [gold]Spend[/gold] rider cannot "
                     "fire at all, so those cards play at their base number.")
 
 
+# `EB-743`. THE ACTS, IN THE PAGE'S OWN WORDS.
+#
+# THE FIND (round two, sec.4). Every act, bow and arrival printed the same
+# sentence -- "Usher performed from the lead seat. It moved 3" -- which covered
+# 3 Block, 5 damage and a Hydro aura alike, so a seat could not tell which of
+# the three had happened without knowing the kit by heart. Two seats' Block
+# arithmetic did not close for the whole run, and the numbers reconcile the
+# moment the act is named: 8 into Block 3 plus a 5-bar is 0 through, 16 into 3
+# plus 8 is 5.
+#
+# THE NUMBER IS STILL THE MEASURED ONE (`EB-511`): the mod files what the
+# enemies' HP actually fell by and what Block she actually gained, and these
+# templates say WHAT the beat did and take that figure off the beat, so an
+# act into a Vulnerable prints what the enemy actually lost rather than the 5
+# on the performer's rulebook line. `{n}` is that figure and `{who}` the body
+# it landed on, both filled from the log row.
+#
+# CHEVALMARIN NAMES NO BODY because it aims at all of them, which is why the
+# wire carries a target for one performer and not for three.
+STAGE_ACT_EFFECTS = {
+    "usher": "Furina gains {n} [gold]Block[/gold]",
+    "chevalmarin": "{n} across every enemy, and [gold]Hydro[/gold] on each",
+    "crabaletta": "{n} to {who}",
+}
+
+#: The bows, rule 9. Chevalmarin's leaves an aura and moves no number at all,
+#: so it is the one row with no `{n}` in it -- the beat files 0 and a line
+#: reading "0 to every enemy" would be describing a hit that did not happen.
+STAGE_BOW_EFFECTS = {
+    "usher": "Furina gains {n} [gold]Block[/gold]",
+    "chevalmarin": "[gold]Hydro[/gold] on every enemy",
+    "crabaletta": "{n} to {who}",
+}
+
+#: What an act says when the board moved nothing -- a Chevalmarin sweep into a
+#: dead board, a Crabaletta hit a Block ate whole. Saying "0" would be a claim
+#: about a number; this is a claim about the beat.
+STAGE_NOTHING_LANDED = "nothing landed"
+
+#: A body the log named and this page could not: the id is the handle and the
+#: title is the fallback (`blindplay_board.name_stage_targets`), and where both
+#: are empty the line says this rather than leaving a gap.
+STAGE_UNNAMED_TARGET = "an enemy"
+
+#: `EB-743`, second half. THE BLOCK LINE REFLECTS THE SWEEP.
+#:
+#: The Usher's act is 3 Block AT THE END OF HER TURN, so the Block on the strip
+#: while she is deciding is always the Block BEFORE the acts -- and the seat
+#: that subtracts an intent from it is subtracting from the wrong number.
+#: Round two: "the Usher's 3 Block landed invisibly every turn and no seat's
+#: arithmetic closed."
+#:
+#: DERIVED FROM THE SEATS AND NOT FROM A WIRE FIELD, because it is a forecast
+#: rather than a reading: the acts have not fired. Only the Usher's act pays
+#: Block (rule 10) and it is FLAT -- it does not read the bar -- so the sum is
+#: 3 for every Usher standing, and a stage with none prints no clause at all.
+STAGE_ACT_BLOCK = {"usher": 3}
+
+
 def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     """The stage, in DAMAGE ORDER, on one line, plus the reserve on the next.
 
@@ -964,6 +1023,10 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     seats = stage["seats"]
     lead = seats[0] if seats else None
     head = [f"Block {you['block']}"]
+    # `EB-743`: and what it will be once the acts fire, where an act pays any.
+    after = sum(STAGE_ACT_BLOCK.get(row["member"], 0) for row in seats)
+    if after:
+        head.append(f"after the acts: Block {you['block'] + after}")
     if lead is not None:
         head.append(f"lead: {lead['name']} {lead['fanfare']}")
     head.append(f"Furina {you['hp']}/{you['max_hp']}")
@@ -981,43 +1044,59 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     return out
 
 
-def _stage_moved(row: dict[str, Any]) -> str:
-    """What the board did under one beat, or nothing.
+def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
+    """What one act or bow DID, in words, with the measured number in it.
 
-    THE MEASURED NUMBER, never the clause's (`EB-511`): the mod files what the
-    enemies' HP actually fell by and what Block she actually gained, so an act
-    into a Vulnerable reads the number the seat can check against the bodies
-    four lines down. A beat that moved nothing -- Chevalmarin's bow, which only
-    leaves an aura -- says nothing rather than saying 0.
+    `EB-743`. The templates are `STAGE_ACT_EFFECTS` / `STAGE_BOW_EFFECTS` and
+    the figure is the beat's own MEASURED one: a performer whose act moved
+    nothing says so rather than printing a 0, and a row whose template
+    carries no `{n}` -- Chevalmarin's bow, which only leaves an aura -- prints
+    its sentence whatever the board did.
     """
-    return f" It moved {row['moved']}." if row["moved"] else ""
+    text = table.get(row["member"])
+    if not text:
+        return ""
+    if "{n}" in text and not row["moved"]:
+        return STAGE_NOTHING_LANDED
+    return text.format(n=row["moved"],
+                       who=row["target"] or STAGE_UNNAMED_TARGET)
 
 
 def _render_stage_log(stage: dict[str, Any]) -> list[str]:
     """One line per arrival, act, bow, departure and rotation."""
     out: list[str] = []
-    standing = len(stage["seats"])
+    seats = stage["seats"]
+    standing = len(seats)
+    # `EB-743`. THE SEAT IS READ OFF THE BLOCK AT PRINT TIME, never off the
+    # beat. A beat carries the seat it happened in and the page was naming it
+    # against TODAY'S cast size, so a performer that arrived in the middle of a
+    # full stage printed as the back one the moment somebody left -- "a
+    # performer was logged in the back seat while the block showed it middle".
+    # Where a performer is standing NOW is the one answer the two lines can
+    # share, and a performer that has left stands nowhere and is named none.
+    #
+    # FIRST OCCURRENCE, because duplicates are legal (two Crabalettas may stand
+    # at once, `StageSeat.Pet`'s note) and a beat carries no body id. A
+    # duplicate cast can therefore attribute a beat to its twin's seat, which
+    # is a smaller error than the one this replaces and is stated rather than
+    # hidden.
+    where_now: dict[str, str] = {}
+    for i, seat_row in enumerate(seats):
+        where_now.setdefault(seat_row["name"], stage_seat_name(i, standing))
     for row in stage["log"]:
         who = f"**{row['name']}**"
-        seat = row["seat"]
-        # WHICH SEAT, where the beat happened in one. A departed performer is
-        # in no seat and the line names none. The cast size is TODAY'S, floored
-        # at the index the beat recorded: rule 5 makes "back" mean the
-        # back-most OCCUPIED seat, so a lone performer must not be called a
-        # middle one, and a beat from a fuller stage must not be told there
-        # were fewer seats than it stood in.
-        where = (f" the {stage_seat_name(seat, max(standing, seat + 1))} seat"
-                 if seat >= 0 else "")
+        seat = where_now.get(row["name"], "")
+        where = f" the {seat} seat" if seat else ""
         if row["event"] == "arrive":
-            out.append(f"  - {who} took{where} at {row['fanfare']} "
-                       f"[gold]Fanfare[/gold].")
+            out.append(f"  - {who} joined the stage at {row['fanfare']} "
+                       f"[gold]Fanfare[/gold]"
+                       + (f", and stands in{where}." if where else "."))
         elif row["event"] == "act":
-            seat_clause = f" from{where}" if where else ""
-            out.append(f"  - {who} performed{seat_clause}."
-                       f"{_stage_moved(row)}")
+            out.append(f"  - {who} performed: "
+                       f"{_stage_effect(row, STAGE_ACT_EFFECTS)}.")
         elif row["event"] == "bow":
-            out.append(f"  - {who} took a [gold]Bow[/gold]."
-                       f"{_stage_moved(row)}")
+            out.append(f"  - {who} took a [gold]Bow[/gold]: "
+                       f"{_stage_effect(row, STAGE_BOW_EFFECTS)}.")
         elif row["event"] == "leave":
             out.append(f"  - {who} left the stage: {row['why']}.")
         elif row["event"] == "rotate":

@@ -545,6 +545,9 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         combat["plans"] = plans
     stage = furina_stage(p)
     if stage is not None:
+        # `EB-743`, and it is `EB-329`'s rule a third arm over: the mod names
+        # the body a performer hit by combat id and THE PAGE OWNS THE NAMES.
+        name_stage_targets(stage, _enemies(state), combat["enemies"])
         combat["stage"] = stage
     salon = furina_salon(p)
     if salon is not None:
@@ -660,8 +663,36 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             "moved": _int(row.get("moved")),
             "why": STAGE_LEAVE_REASONS.get(_text(row.get("reason")),
                                            STAGE_LEFT_UNSAID),
+            # `EB-743`: the body a Crabaletta act or bow picked. Empty on
+            # every beat that names none, and renamed to the page's own
+            # numbered name by `name_stage_targets` below.
+            "target": _text(row.get("target")),
+            "combat_id": _text(row.get("target_id")),
         })
     return {"seats": seats, "log": log}
+
+
+def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],
+                       printed: list[dict[str, Any]]) -> None:
+    """Resolve each beat's target combat id to the name this page uses.
+
+    `EB-743`, and it is `name_performances` verbatim one arm over: THE ID IS
+    THE HANDLE AND THE NAME IS THE FALLBACK. Crabaletta picks its own body, and
+    an act of that size is the most likely beat in the fight to have KILLED
+    what it hit -- a body that is off the next board entirely and keeps the
+    title the mod recorded, which is why the mod sends a title at all. A body
+    still standing takes the fight's own numbered name, so `Slug (2)` in an act
+    line means the same body as `Slug (2)` in the enemy list under it.
+    """
+    by_id = {_text(raw.get("combat_id")): face["name"]
+             for raw, face in zip(wire, printed)
+             if _text(raw.get("combat_id"))}
+    for row in stage["log"]:
+        if not row["combat_id"]:
+            continue
+        row["target"] = (by_id.get(row["combat_id"])
+                         or remembered_enemy_name(row["combat_id"],
+                                                  row["target"]))
 
 
 def stage_seat_name(index: int, occupied: int) -> str:

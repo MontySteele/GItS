@@ -1104,6 +1104,29 @@ MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
 # the screen's own tip where the screen has one and from `BOMB_GROWTH`
 # otherwise. It is the ONE row with a hole in it, and the hole is a number the
 # card face already prints.
+#: `EB-744`. THE REWARD SLOT, in the mod's own words -- and they are the mod's
+#: own NEW words. "Card rewards after a fight offer a fourth, Companion,
+#: choice" is `EB-620`'s 5 percent roll stated as a rule, on this page and on
+#: the Mods screen (`klee-mod/Klee/manifest.json`) alike, so a seat pricing a
+#: run around a fourth slot it will meet once in twenty fights was told
+#: something false by the two surfaces whose job is the opposite. Quoted
+#: verbatim from the manifest and pinned to it, `EB-329`'s rule unchanged.
+COMPANION_SLOT_SENTENCE = (
+    "About one card reward in twenty offers a fourth, Companion, choice.")
+
+#: `EB-744`. WHAT AN ACT IS, in one sentence, shared by the two seat rows.
+#:
+#: Rule 10: each performer performs a FLAT act at the end of her turn, from any
+#: seat, and the act does not read the bar. Round two found that the reserve
+#: performs and that nothing printed said so, and that "the three read as three
+#: at the exit and one at the table, because every card speaks in seats and the
+#: acts are not documented". The numerals are `FurinaStageLaw`'s, written out
+#: for `ARM_KEYWORDS`' standing reason: this page has no access to the mod's
+#: constants and a seat needs the number rather than the name of the constant.
+STAGE_ACTS = ("Every performer acts at the end of your turn, from any seat: "
+              "Usher gives you 3 Block, Chevalmarin deals 2 to every enemy "
+              "and applies Hydro, Crabaletta deals 5 to a random enemy.")
+
 ARM_KEYWORDS: dict[str, str] = {
     # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
     # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
@@ -1364,19 +1387,41 @@ ARM_KEYWORDS: dict[str, str] = {
     # that is the reason a bar matters at all. `Bow` is stated against its
     # opposite -- a Spend earns one and a hit does not -- because that
     # difference IS turn one's wager (sec.7, line B against line C).
-    "Spend": ("Pays from the lead performer. It fires in full even if the bar "
-              "is short; an emptied performer takes a Bow. No stage, no "
-              "rider."),
+    # `EB-746`: the word names a MODE now, not a rider. The page adds the
+    # sentence the 135-character tip has no room for, which is what the
+    # choose-a-card screen shows a player and a blind seat has to be told: an
+    # empty stage offers the base mode alone.
+    "Spend": ("Chosen on play, never automatic. Pays the lead performer, "
+              "fires in full even if the bar is short, and an emptied "
+              "performer takes a Bow. On an empty stage the Spend mode is "
+              "not offered at all."),
     "Fanfare": ("A performer's own bar. Attacks hit your Block, then the lead "
                 "performer's Fanfare, then you. No cap."),
     "Raise": ("Adds Fanfare to the back performer. With one performer on "
               "stage, that is the lead."),
-    "Bow": ("A departure effect, earned by Spend only. Usher: 4 Block. "
-            "Chevalmarin: Hydro on all. Crabaletta: 8 damage."),
+    # `EB-744`. "EARNED BY SPEND ONLY" WAS NOT TRUE ON THE SCREEN PRINTING IT.
+    # The clause was rule 9 read off sec.3 and it sat beside `Final Bow`, whose
+    # whole face is a bow bought with a card and an Exhaust, and beside `Let
+    # the People Rejoice`, which grants three. What the rule actually says is
+    # the CONTRAST that turn one's wager is (sec.7, line B against line C): a
+    # Spend earns one and a hit does not.
+    "Bow": ("A departure effect a Spend earns and a hit does not. Usher: 4 "
+            "Block. Chevalmarin: Hydro on all. Crabaletta: 8 damage."),
+    # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. Two round-two seats found
+    # that the reserve performs -- "Crabaletta performed from the back seat.
+    # It moved 11" was more damage than any card in the hand -- and a third
+    # wanted no second performer at all; both reads were right, and both were
+    # legibility. The acts go on BOTH seat rows because a seat may meet either
+    # word alone, and a reader who has met one has met the rule.
     "lead performer": ("The front seat: the one attacks reach and the only "
-                       "one that regains 1 Fanfare each turn."),
-    "back performer": ("The back seat, and the reserve: nothing hits it. With "
-                       "one performer on stage it is also the lead."),
+                       "one that regains 1 Fanfare each turn. " + STAGE_ACTS),
+    # `EB-744`. "NOTHING HITS IT" WHERE A FLURRY DOES. The lead absorbs one
+    # attack up to its bar and then leaves at 0, so the next attack of the same
+    # turn meets whoever stepped forward -- which is the reserve. The rule is
+    # per ATTACK, and the sentence now says so.
+    "back performer": ("The back seat, the reserve: no single attack reaches "
+                       "it. It leads once the front seat empties. Alone on "
+                       "stage it is the lead. " + STAGE_ACTS),
     "Rotate": ("Seats change order and every bar comes with them. Nobody "
                "leaves and nobody takes a Bow."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
@@ -1456,9 +1501,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # perform flatly would be teaching a Klee a rule her board does not have.
     # The qualifier is what lets the two clauses ride the ONE row a reader
     # meets on a reward screen, which is where the seat needed them.
+    # `EB-744`, second half: the fourth slot is a ROLL and the row read as a
+    # promise. See `COMPANION_SLOT_SENTENCE`.
     "Companion": ("A card titled with a character's name, a dash, then its "
-                  "own. Card rewards after a fight offer a fourth, "
-                  "Companion, choice."),
+                  "own. " + COMPANION_SLOT_SENTENCE),
 }
 
 # `EB-460`. THE QUALIFIER WAS NOT ENOUGH, AND THE ROW SAID SO ITSELF.
@@ -1481,10 +1527,49 @@ COMPANION_STAGE_CLAUSE = (
     "to the back; an empty stage performs nobody. The member picks its own "
     "enemy at random, never the card's target.")
 
+# `EB-744`. AND UNDER THE STAGE THAT SENTENCE IS FALSE, which is the row's
+# first find: the round-two Preserve seat played Companion cards for a run
+# believing they rotate the cast. They do not. The Stage retires the shipped
+# Salon outright (brief sec.2's table, R269) -- a Companion card is the shared
+# action pool and nothing else -- and the one touchpoint the brief names is
+# Chevalmarin's Hydro, which the Fontaine bench reacts off. So the arm gets its
+# own clause rather than the shipped one, and it says what a reader can use.
+COMPANION_STAGE_ARM_CLAUSE = (
+    " It does nothing to your stage: no performer acts, rotates or leaves for "
+    "one. Chevalmarin's Hydro is the touchpoint -- a Pyro or Cryo Companion "
+    "played into it reacts.")
+
 #: Whose stage it is. Matched the way `understudy/adapter.py` matches it -- on
 #: the character's printed Title, case-folded -- because that is the field the
 #: wire sends and a Title is not an id.
 _STAGE_CHARACTER = "furina"
+
+
+# `EB-744`. IS THE STAGE ARM LIVE ON THIS SCREEN?
+#
+# THE FIND (round two, sec.4): "the glossary still carries the old words". An
+# Encore row on a page whose kit has no Encore, the Companion row's shipped
+# Salon sentence -- which the Preserve seat played Companion cards for a run
+# believing -- and "Bow: earned by Spend only" beside a Final Bow that grants
+# one. Every one of them is a rule the ARM retires, so the arm has to be
+# askable.
+#
+# THE COMBAT BLOCK IS THE ANSWER AND ITS LIMIT IS STATED. `blindplay_board`
+# builds `combat.stage` from the wire's own `furina_stage` map, which is the
+# mod saying the rule is live for this seat -- the same fact `_stage_live`
+# hides the retired meters on. It exists only in COMBAT: outside one there is
+# no creature and the mod's snapshot is empty by construction, so a reward or a
+# shop screen under the arm still reads as a shipped Furina and keeps her
+# shipped rows. That is a known gap rather than a silent one, and it is the
+# narrower error: a rule stated where it is true, and the shipped rule left
+# standing where the page cannot tell.
+_STAGE_RETIRED_KEYWORDS = frozenset({"Encore"})
+
+
+def _stage_arm(obs: dict[str, object]) -> bool:
+    """Does this screen carry the Stage's own block (`EB-744`)?"""
+    combat = obs.get("combat")
+    return isinstance(combat, dict) and combat.get("stage") is not None
 
 # `EB-504`. TWO ROWS WHOSE RULE IS ABOUT A CHARACTER WHO IS NOT IN THE RUN.
 #
@@ -2158,6 +2243,39 @@ def _every_string(blob: Any):
 _TITLE_KEYS = frozenset({"title"})
 
 
+def _creature_names(obs: dict[str, Any]) -> list[str]:
+    """Every body the page NAMES on this screen, yours and theirs."""
+    combat = obs.get("combat") or {}
+    rows = list((combat.get("enemies") or []))
+    rows += list((combat.get("pets") or []))
+    return [str(row.get("name") or "") for row in rows
+            if isinstance(row, dict) and row.get("name")]
+
+
+def _bomb_hay(word: str, hay: str, obs: dict[str, Any]) -> str:
+    """The haystack ONE arm word is matched against (`EB-744`).
+
+    THE FIND (round two, sec.4): "a Bomb row beside a Gas Bomb". `Gas Bomb` is
+    a base-game ENEMY, and a creature's `name` is in the glossary's haystack on
+    purpose -- `_TITLE_KEYS` keeps a power's badge in, because `Bomb 6` on a
+    body means there is a Bomb on the board. A monster called one means nothing
+    of the kind, and a Furina seat with no Bomb in the game read Klee's whole
+    charge rule on every screen the Gas Bomb stood on.
+
+    SO THE WORD IS KEYED OFF THE BOARD AND THE FACES, not off a body's name:
+    the names this screen prints are struck out of the haystack before the
+    match, which leaves a Bomb POWER's badge, a card that places one and an
+    enemy rule that mentions one all still raising the row. Every other word is
+    matched against the haystack unchanged -- this is one word's defect and not
+    a new rule for the table.
+    """
+    if word != "Bomb":
+        return hay
+    for name in _creature_names(obs):
+        hay = hay.replace(name, " ")
+    return hay
+
+
 def _body_strings(blob: Any):
     """Every printed string of an observation that is a RULE, not a title."""
     if isinstance(blob, str):
@@ -2385,6 +2503,10 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     # every other arm gets the definition and the reward slot, which are true
     # on all of them.
     stage = _fold(obs.get("character")) == _STAGE_CHARACTER
+    # `EB-744`: and which of Furina's two kits is on the board, because the
+    # shipped Salon sentence is false under the Stage and the Encore row is a
+    # rule for a meter the arm never grants.
+    arm = _stage_arm(obs)
     # `EB-504`: and two rows are the ARM's outright. A word whose rule belongs
     # to a character this run is not playing prints its name and no rule.
     who = _fold(obs.get("character"))
@@ -2396,9 +2518,16 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
              if (who and _ARM_KEYWORD_CHARACTER.get(word, who) != who) else
              ARM_KEYWORDS[word].format(
                  growth=int(growth.group(1)) if growth else BOMB_GROWTH)
-             + (COMPANION_STAGE_CLAUSE
+             + ((COMPANION_STAGE_ARM_CLAUSE if arm
+                 else COMPANION_STAGE_CLAUSE)
                 if stage and word == "Companion" else "")}
-            for word, pattern in _ARM_KEYWORD_RE.items() if pattern.search(hay)]
+            for word, pattern in _ARM_KEYWORD_RE.items()
+            # `EB-744`: a word the ARM retires is not defined on an arm page.
+            # The Encore row is the one -- Encore has no job under the Stage
+            # (brief sec.2, R269) and since `EB-745` nothing grants it -- and a
+            # rule for a meter that cannot move is the noise round two filed.
+            if not (arm and word in _STAGE_RETIRED_KEYWORDS)
+            and pattern.search(_bomb_hay(word, hay, obs))]
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()
              if pattern.search(hay)]

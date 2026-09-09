@@ -101,6 +101,24 @@ public sealed class FurinaStageHooks : AbstractModel
     /// drawn behind the loot dialog) was about a Control that outlived its
     /// room, and it does not reach a gauge.
     /// </summary>
+    /// <summary>
+    /// `EB-747`. A FRESH PER-PLAY SPEND RECORD, and the site is
+    /// <c>FurinaResourceHooks.BeforeCardPlayed</c>'s
+    /// (<c>FurinaDrain.BeginPlay</c>) one arm over.
+    ///
+    /// <c>FurinaStage.BeginPlay</c> existed and NOTHING CALLED IT, which was
+    /// invisible while the readers printed a rule instead of a number: each
+    /// spending op writes <c>SpentThisPlay</c> itself, so the record was right
+    /// during a play and stale between two. It is a forecast now
+    /// (<see cref="FurinaStage.SpentOrLeadFanfare"/>), and a forecast read off
+    /// a record the last card left is the wrong number on the face.
+    /// </summary>
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        FurinaStage.BeginPlay(cardPlay.Card?.Owner?.Creature);
+        return Task.CompletedTask;
+    }
+
     public override Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {

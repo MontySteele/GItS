@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard
+public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModalCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
@@ -45,8 +45,20 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Curtain Rise"),
-        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead."),
+        ("description", "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead."),
     };
+
+    // EB-184: what each mode does about AIMING, in sheet order.
+    // The card's own TargetType is fixed before a mode is chosen (the
+    // game aims first), so it answers for the card and not for the
+    // play -- an Attack-typed modal declares AnyEnemy for the mode
+    // that aims, and the bridge then demanded a target on the mode
+    // that attacks nothing. These two rows are what it reads instead.
+    public IReadOnlyList<string> ModeLabels =>
+        new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 13 instead" };
+
+    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
+        new[] { true, true };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -64,11 +76,23 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (FurinaStage.Occupied(Owner.Creature))
+        var modeOptions = new List<CardModel>
         {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
+            ModalChoice.CreateOption<ProtoFsCurtainRiseModeA>(Owner),
+            ModalChoice.CreateOption<ProtoFsCurtainRiseModeB>(Owner),
+        };
+        var modeRules = new ModeRequirement?[]
+        {
+            null,
+            new ModeRequirement(FurinaStage.Occupied(Owner.Creature),
+                                "needs a performer on stage, the stage is empty"),
+        };
+        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 13 instead" }[modeIndex]);
+        if (modeIndex == 0)
+        {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 16m : 13m))
+            await DamageCmd.Attack((IsUpgraded ? 10m : 7m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -76,8 +100,8 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard
         }
         else
         {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 10m : 7m))
+            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
+            await DamageCmd.Attack((IsUpgraded ? 16m : 13m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -91,4 +115,32 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
         DynamicVars["BranchDamage"].UpgradeValueBy(3m);
     }
+}
+
+/// <summary>Mode 0 of proto_fs_curtain_rise. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsCurtainRiseModeA : ModalOptionCard
+{
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Deal 7 damage"),
+        ("description", "Deal 7 damage"),
+    };
+}
+
+/// <summary>Mode 1 of proto_fs_curtain_rise. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
+{
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "[gold]Spend[/gold] 3: deal 13 instead"),
+        ("description", "[gold]Spend[/gold] 3: deal 13 instead"),
+    };
 }
