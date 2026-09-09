@@ -123,7 +123,7 @@ public class KleeOverhaulRoundTwentyTests
         // `EB-400` added Block to this clause; the cap half is untouched.
         Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
                         Printed("ForMine"));
-        Assert.Contains("[gold]Block[/gold] stops it; only ",
+        Assert.Contains("[gold]Block[/gold] stops it. Only ",
                         Printed("ForMine"));
     }
 

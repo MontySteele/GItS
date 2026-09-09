@@ -6283,7 +6283,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Attack" negative, "the enemy's HP loss" and the starter line left
         # the word; every rule the anchors below hold is still on it.
         "Bomb": ["A charge on an enemy", "and goes off when",
-                 " or as a ", " stops it; only ",
+                 " or as a ", " stops it. Only ",
                  " and the HP cap move it",
                  "If the enemy dies with it on, it moves to a survivor"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
@@ -6301,7 +6301,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
         "Mine": ["that also goes off just before its enemy's ",
-                 "hit; the hit still lands. "],
+                 "hit, and the hit still lands. "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -7455,8 +7455,8 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     clause and `EB-361` added a rule, and both of this test's claims survive
     all three. [USER] held the in-game word to its 135-character ceiling, so
     the tip reads "A charge on an enemy: grows 4 a turn, and goes off when
-    Set off or as a Mine. Block stops it; only Vulnerable and the HP cap move
-    it." The glossary keeps "each" on top of the first sentence, because the
+    Set off or as a Mine. Block stops it. Only Vulnerable and the HP cap
+    move it." The glossary keeps "each" on top of the first sentence, because the
     fact that growth is PER BOMB lives on the badge in game and the seat page
     has no badge.
     """
@@ -9920,16 +9920,14 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
 #: `ProtoBombPower.Title` selected. The body is the arm's own, quoted, so the
 #: page half of this pin cannot pass on a sentence the game does not print.
 _MINE_FACE = ("Set off here deals 4 Pyro damage. Bombs here: 1, including 1 "
-              "Mine, growing at your turn's start. A Mine also goes off "
-              "before this enemy's hit, which lands in full unless the Mine "
-              "kills. A "
+              "Mine, growing at your turn's start. A Mine also goes off just "
+              "before this enemy's hit, and the hit still lands. A "
               "kill moves them to a "
               "survivor.")
 
 _MIXED_FACE = ("Set off here deals 12 Pyro damage. Bombs here: 2, including 1 "
-               "Mine, growing at your turn's start. A Mine also goes off "
-               "before this enemy's hit, which lands in full unless the Mine "
-               "kills. A "
+               "Mine, growing at your turn's start. A Mine also goes off just "
+               "before this enemy's hit, and the hit still lands. A "
                "kill moves them to a "
                "survivor.")
 
@@ -9956,7 +9954,7 @@ def test_a_pile_that_is_all_mines_reads_as_a_mine_on_the_page():
 
     assert badge.strip().startswith("Mine 4")
     assert "Bomb 4" not in badge
-    assert "goes off before this enemy's hit" in badge
+    assert "goes off just before this enemy's hit" in badge
 
 
 def test_a_pile_holding_one_plain_bomb_is_still_a_bomb_on_the_page():
@@ -9970,7 +9968,7 @@ def test_a_pile_holding_one_plain_bomb_is_still_a_bomb_on_the_page():
     assert badge.strip().startswith("Bomb 12")
     assert "Mine 12" not in badge
     assert "including 1 Mine" in badge
-    assert "goes off before this enemy's hit" in badge
+    assert "goes off just before this enemy's hit" in badge
 
 
 def test_the_badge_owns_both_names_and_chooses_between_them_live():

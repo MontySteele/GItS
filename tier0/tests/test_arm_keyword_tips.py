@@ -568,7 +568,7 @@ def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():
     # The badge speaks of a PILE, so the same claim in the plural.
     badge = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
              / "ProtoBombPower.cs").read_text(encoding="utf-8")
-    assert (' " If this enemy dies with them still on, they move to a '
+    assert (' " If the enemy dies with them on, they move to a '
             'survivor.";') in badge
     # And the old wording is gone from every one of the three.
     assert "Kills move it on" not in tips["BombKey"]
@@ -611,7 +611,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # `EB-555` defined the cap inside the clause that names it.
             # `EB-400`: Block, named in the clause that read as a list of
             # the only two things that touch the hit.
-            "[gold]Block[/gold] stops it; only ",
+            "[gold]Block[/gold] stops it. Only ",
             "[gold]Vulnerable[/gold] and the HP cap move it. ",
             # `EB-574` SPELT RULE 3 OUT, in the same words on both tips and
             # the badge: "kills move it on" read as a promise about the charge
@@ -644,7 +644,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # and a seat read mitigation into it. A Mine blunts nothing; the
             # only thing it can do to the hit is stop it happening.
             "that also goes off just before its enemy's ",
-            "hit; the hit still lands. ",
+            "hit, and the hit still lands. ",
             # The Mine's last two sentences are `ForBomb`'s WORD FOR WORD
             # after the 2026-09-08 trim -- `EB-373`'s two terms, `EB-400`'s
             # Block and `EB-574`'s rule 3 -- so they are pinned once above

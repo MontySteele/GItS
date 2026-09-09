@@ -147,7 +147,7 @@ public class LiveBurn20260902Tests
         // introduced are still named, which is what R248 asked for.
         // `EB-400` moved the clause's opener onto Block and left the two
         // folded terms where they were.
-        Assert.Contains("[gold]Block[/gold] stops it; only ", body);
+        Assert.Contains("[gold]Block[/gold] stops it. Only ", body);
         Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
                         body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
@@ -191,7 +191,7 @@ public class LiveBurn20260902Tests
         // `EB-555` then defined the second of them where it stands.
         // `EB-400`: and Block, which the sentence used to leave out.
         // TRIMMED 2026-09-08: the negative went, both folded terms stayed.
-        Assert.Contains("[gold]Block[/gold] stops it; only "
+        Assert.Contains("[gold]Block[/gold] stops it. Only "
                       + "[gold]Vulnerable[/gold] and the HP cap move it.",
                         body);
     }

@@ -1151,9 +1151,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # about the deck rather than the word. Held in step with
     # `ArmKeywordTips.ForBomb`.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, and goes off "
-             "when Set off or as a Mine. Block stops it; only Vulnerable and "
-             "the HP cap move it. If the enemy dies with it on, it moves to "
-             "a survivor."),
+             "when Set off or as a Mine. Block stops it. Only Vulnerable "
+             "and the HP cap move it. If the enemy dies with it on, it moves "
+             "to a survivor."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11
@@ -1204,8 +1204,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # "the hit still lands" is `EB-436`'s finding in four words, and the last
     # two sentences are `ForBomb`'s word for word so no two rows of one screen
     # can be read against each other. Held in step with `ArmKeywordTips.ForMine`.
-    "Mine": ("A Bomb that also goes off just before its enemy's hit; the hit "
-             "still lands. Block stops it; only Vulnerable and the HP cap "
+    "Mine": ("A Bomb that also goes off just before its enemy's hit, and the "
+             "hit still lands. Block stops it. Only Vulnerable and the HP cap "
              "move it. If the enemy dies with it on, it moves to a survivor."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a

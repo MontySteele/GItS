@@ -268,7 +268,7 @@ public class ArmKeywordTipTests
         // The 2026-09-08 trim dropped the "Not an Attack" negative, which
         // two seats misread anyway, and says "the HP cap" where the clause
         // used to spend a phrase on whose HP it is.
-        Assert.Contains("[gold]Block[/gold] stops it; only "
+        Assert.Contains("[gold]Block[/gold] stops it. Only "
                       + "[gold]Vulnerable[/gold] and the HP cap move it.",
                         printed);
         Assert.DoesNotContain("Not an Attack", printed);
