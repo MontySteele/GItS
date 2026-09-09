@@ -47,7 +47,7 @@ namespace KleeMod.Powers;
 ///   * <c>Furina.StartingRelics</c> -- Salon Solitaire replaces the Ethereal
 ///     Spotlight (brief sec.3 rule 2).
 ///   * <c>Furina.StartingDeck</c> -- the two kit slots become three: Salon
-///     Debut, Curtain Rise, Standing Ovation (sec.7's named starter).
+///     Debut, Curtain Rise, Rising Applause (sec.7's named starter).
 ///   * <c>FurinaResourceHooks.ModifyHpLostBeforeOsty</c> -- the damage order,
 ///     sec.3 rule 6. The one seam that touches a SHIPPED file's behaviour, and
 ///     it returns the shipped number with the arm off.
@@ -225,8 +225,15 @@ public static class FurinaStage
     /// <para><paramref name="member"/> of <c>"random"</c> rolls one who is not
     /// on stage; with all three seated it summons nobody.</para>
     ///
-    /// <para>AND THE NEWCOMER PERFORMS AT ONCE, which is why this is awaited.
-    /// </para>
+    /// <para>AND THE NEWCOMER DOES NOT ACT ON ARRIVAL (`EB-738`, round one's
+    /// one E default). Rule 3 reads "a newcomer performs with the others at
+    /// the end of that turn, never on arrival", and this side had read the
+    /// draft's older wording as an act on play: three seats watched every
+    /// summon deal damage and apply Hydro with nothing on its face, and a
+    /// summon turn performed twice. There is no code for the rule and that
+    /// absence IS the rule -- <see cref="EndOfTurnActs"/> walks whoever is on
+    /// stage when it fires, so a performer summoned during the turn is
+    /// standing there once. It stays awaited because the bodies are.</para>
     /// </summary>
     public static async Task Summon(PlayerChoiceContext choiceContext,
                                     Creature? owner, string member,
@@ -263,7 +270,6 @@ public static class FurinaStage
         ledger.Summon(who);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
-        await Perform(choiceContext, owner, Name(who));
     }
 
     /// <summary><i>Scene Change</i>: the front performer moves to the back
@@ -377,9 +383,9 @@ public static class FurinaStage
     }
 
     /// <summary>Rule 10: one performer's flat act, from any seat, reading no
-    /// bar. ONE implementation and three callers -- the end-of-turn sweep, a
-    /// newcomer's arrival and <i>Bis!</i> -- so an act cannot mean three
-    /// things.</summary>
+    /// bar. ONE implementation and two callers -- the end-of-turn sweep and
+    /// <i>Bis!</i> -- so an act cannot mean two things. A newcomer's arrival
+    /// was the third until `EB-738` removed it.</summary>
     public static async Task Perform(PlayerChoiceContext choiceContext,
                                      Creature? owner, string member)
     {

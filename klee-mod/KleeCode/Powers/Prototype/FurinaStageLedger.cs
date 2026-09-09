@@ -228,11 +228,12 @@ public sealed class FurinaStageLedger
     /// and not a punishment: a three-seat stage carrying 8 on the front hands
     /// that 8 to whoever arrives. The bar moves, the performer does not.
     ///
-    /// THE NEWCOMER PERFORMS THE SAME TURN and there is no code for it, which
-    /// is the point: the acts fire at the END of her turn over whoever is on
-    /// stage then (rule 10), so a performer summoned during the turn is
-    /// standing there when they fire. Pinned rather than commented, because
-    /// "the rule needs no code" and "the rule is missing" look identical.
+    /// THE NEWCOMER PERFORMS AT THE END OF THE TURN AND NOT ON ARRIVAL
+    /// (`EB-738`), and there is no code for it, which is the point: the acts
+    /// fire at the END of her turn over whoever is on stage then (rule 10), so
+    /// a performer summoned during the turn is standing there when they fire,
+    /// exactly once. Pinned rather than commented, because "the rule needs no
+    /// code" and "the rule is missing" look identical.
     /// </summary>
     public StageSummon Summon(StagePerformer who)
     {
