@@ -1185,7 +1185,7 @@ def place_copy_of_largest(state: CombatState,
 
 
 def grow_bombs_off_aura(state: CombatState, amount: int, floor: int) -> int:
-    """Kindling: "Each Bomb on an enemy whose aura is not Pyro grows by
+    """Kindling: "Each Bomb on an enemy with an aura other than Pyro grows by
     `amount`. If there is none, your largest Bomb grows by `floor`." Returns
     the total growth applied. `ProtoBombPower.GrowOffAura`'s twin.
 
@@ -1193,7 +1193,8 @@ def grow_bombs_off_aura(state: CombatState, amount: int, floor: int) -> int:
     DEAD CARD. It still buys `floor` growth when no applier went first, and
     `amount` per Bomb on every foreign aura when one did.
 
-    "AURA IS NOT PYRO" IS THE ENEMY'S CARRIED AURA, and NO AURA DOES NOT COUNT
+    "AN AURA OTHER THAN PYRO" IS THE ENEMY'S CARRIED AURA, and NO AURA DOES NOT
+    COUNT
     -- `_op_set_off`'s `non_pyro` filter (Flame Dance), read the same way for
     the same reason: the two rows must not disagree about which enemies are
     off-element.

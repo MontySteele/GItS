@@ -1345,7 +1345,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # never learned what the word meant. Held in step with
     # `ArmKeywordTips.ForOz`.
     "Oz": ("Fischl's raven, out while you hold the Power Oz, at Your Side. "
-           "He hits at the end of your turn while he is out."),
+           "He makes an Electro hit at the end of your turn while he is "
+           "out."),
     # The Furina reframe's three (slice two, R220 A). The same sentences
     # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
     # numerals the C# interpolates from `FurinaReframeLaw` written out: this

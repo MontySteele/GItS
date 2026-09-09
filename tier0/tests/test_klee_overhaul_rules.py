@@ -2141,7 +2141,8 @@ def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
 # --- Kindling: an aura-keyed grow with a floor -----------------------------
 
 def test_kindling_grows_every_bomb_on_a_foreign_aura(overhaul):
-    """"Each Bomb on an enemy whose aura is not Pyro grows by 4." EVERY charge
+    """"Each Bomb on an enemy with an aura other than Pyro grows by 4." EVERY
+    charge
     on EVERY such enemy: `grow_bombs`'s spread over Flame Dance's filter."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
@@ -2157,7 +2158,8 @@ def test_kindling_grows_every_bomb_on_a_foreign_aura(overhaul):
 
 
 def test_kindling_skips_pyro_and_aura_less_enemies(overhaul):
-    """"Not Pyro" is the enemy's CARRIED aura and no aura does not count --
+    """"An aura other than Pyro" is the enemy's CARRIED aura and no aura does
+    not count --
     `_op_set_off`'s `non_pyro` filter, read the same way. With no match at all
     the floor pays instead."""
     pyro, bare = make_enemy(hp=200, name="p"), make_enemy(hp=200, name="q")
@@ -2199,6 +2201,21 @@ def test_kindling_takes_the_floor_when_the_aura_holds_no_bomb(overhaul):
 
     assert sizes(aura) == []
     assert sizes(bombed) == [8 + 2]
+
+
+def test_kindling_on_a_bare_enemy_takes_the_floor_alone(overhaul):
+    """A BARE ENEMY IS NOT A MATCH, which is the case the round-25 seat read
+    the face against: no aura at all is not "an aura other than Pyro", so two
+    Bombs on one bare enemy grow by the floor on the LARGEST and nothing
+    else."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    klee_overhaul.place(state, enemy, 5)
+    klee_overhaul.place(state, enemy, 9)
+
+    effects.resolve_card(state, load("proto_ko_kindling"))
+
+    assert sizes(enemy) == [5, 9 + 2]
 
 
 def test_kindling_upgraded_moves_both_numbers(overhaul):

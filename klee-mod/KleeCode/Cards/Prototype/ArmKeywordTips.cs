@@ -639,7 +639,8 @@ public static class ArmKeywordTips
             // the title is quoted WITHOUT its `Fischl --` prefix because the
             // conventions ban a dash of any kind in player text.
             "Fischl's raven, out while you hold the Power Oz, at Your Side. "
-          + "He hits at the end of your turn while he is out.");
+          + "He makes an [gold]Electro[/gold]"
+          + " hit at the end of your turn while he is out.");
 
     /// <summary>
     /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE

@@ -2226,9 +2226,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Kindling (the pool pass, `EB-491`): "Each Bomb on an enemy whose aura is
-    /// not Pyro grows by <paramref name="amount"/>. If there is none, your
-    /// largest Bomb grows by <paramref name="floor"/>."
+    /// Kindling (the pool pass, `EB-491`): "Each Bomb on an enemy with an aura
+    /// other than Pyro grows by <paramref name="amount"/>. If there is none,
+    /// your largest Bomb grows by <paramref name="floor"/>."
     ///
     /// THE FLOOR IS WHAT MAKES IT A REACT ROW WITH A LOSING LINE RATHER THAN A
     /// DEAD CARD. Catalytic Converter is dead in a mono-Pyro deck by its own
@@ -2236,7 +2236,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// when no applier went first, and buys 4 per Bomb on every foreign aura
     /// when one did.
     ///
-    /// "AURA IS NOT PYRO" IS THE ENEMY'S CARRIED AURA and no aura does not
+    /// "AN AURA OTHER THAN PYRO" IS THE ENEMY'S CARRIED AURA and no aura does not
     /// count -- <see cref="SetOffAll"/>'s <c>nonPyroAuraOnly</c> filter, read
     /// the same way for the same reason (Flame Dance and this row must not
     /// disagree about which enemies are "off-element"). The board is read as it

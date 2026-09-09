@@ -48,7 +48,8 @@ public class PoolPassThreeTests
     [Fact]
     public void Kindling_grows_every_bomb_on_a_foreign_aura()
     {
-        // REAL. "Each Bomb on an enemy whose aura is not Pyro grows by 4" --
+        // REAL. "Each Bomb on an enemy with an aura other than Pyro grows by
+        // 4" --
         // EVERY charge on EVERY such enemy, which is `GrowOn`'s spread over
         // Flame Dance's filter. Twin:
         // `test_kindling_grows_every_bomb_on_a_foreign_aura`.

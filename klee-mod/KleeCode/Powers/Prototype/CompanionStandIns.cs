@@ -260,8 +260,8 @@ internal sealed class StandInLedger
 }
 
 /// <summary>
-/// Diona, Shaken, Not Purred: "Gain 6 Block. Apply Cryo twice. If a Bomb goes
-/// off this turn, gain 5 Block."
+/// Diona, Shaken, Not Purred: "Gain 6 Block. Apply Cryo twice to an enemy. If
+/// a Bomb goes off this turn, gain 5 Block."
 ///
 /// ONE-SHOT, and the stack is the BLOCK it pays -- the row's own printed
 /// number, so the Prototype-stage upgrade rule moves it like any other.

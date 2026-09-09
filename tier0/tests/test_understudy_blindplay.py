@@ -6361,9 +6361,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-446`, Klee's seventh: a name Fischl -- Nightrider is written
         # against and a DIFFERENT companion card grants, so the face that
         # prints it carries the definition.
+        # `EB-720`: the hit names its element, so the anchors are the halves
+        # either side of the `[gold]Electro[/gold]` span.
         "Oz": ["Fischl's raven, out while you hold the Power Oz, at Your "
                "Side. ",
-               "He hits at the end of your turn while he is out."],
+               "He makes an ",
+               " hit at the end of your turn while he is out."],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
         # sentence's two numerals are interpolated from `FurinaReframeLaw` on
         # the mod side and written out on this one, so its anchors are the
