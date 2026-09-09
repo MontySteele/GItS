@@ -6368,7 +6368,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Oz": ["Fischl's raven, out while you hold the Power Oz, at Your "
                "Side. ",
                "He hits at the end of your turn while he is out."],
-        # FURINA, THE STAGE (`EB-719`, R269). The reframe's four -- Deploy,
+        # FURINA, THE STAGE (`EB-723`, R269). The reframe's four -- Deploy,
         # Evoke, Drain and Encore -- left this table with the `proto_fr_` rows
         # that printed them, under R213 B's deletion rule.
         #
@@ -6393,7 +6393,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                            "performer on stage it is also the lead."],
         "Rotate": ["Seats change order and every bar comes with them. Nobody "
                    "leaves "],
-        # `EB-407`, and it OUTLIVED the reframe (`EB-719`): the meter is
+        # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is
         # shipped machinery and every Furina row the Stage does not swap
         # still prints the word. It titles no arm KEYWORD any more -- no
         # prototype face prints it -- but the sentence is still the mod's,
@@ -6590,7 +6590,7 @@ def test_the_glossary_carries_no_markup_and_no_id():
 
 
 def test_the_spend_row_says_a_short_bar_still_pays_in_full():
-    """`EB-719`. THE HALF THE WHOLE EXPEND DECK IS BUILT ON.
+    """`EB-723`. THE HALF THE WHOLE EXPEND DECK IS BUILT ON.
 
     `EB-368`'s Deploy row retired with the reframe; this is that row's
     discipline one arm over, on the word the Stage's own findings turn on.
@@ -8543,7 +8543,7 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
 
 #: The four, with the face each printed on the seat's own Smith screen.
 _R12_SMITH = (
-    # `EB-719`: the two reframe rows this pin was written on left the surface
+    # `EB-723`: the two reframe rows this pin was written on left the surface
     # with their arm, and the Stage's own two take the same two slots -- one
     # whose upgrade moves a printed number, and one whose upgrade moves the
     # COST, which the body prints nowhere.
@@ -8599,7 +8599,7 @@ def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
     built, why = qa_packet.upgrade_preview(*_R12_SMITH[1])
 
     assert built == ""
-    # `EB-719`: the Stage's Début upgrades its COST, which the body prints
+    # `EB-723`: the Stage's Début upgrades its COST, which the body prints
     # nowhere, so the branch this row lands in is the no-number one. The rule
     # the test is about is unchanged and is the LAST assertion: the reason is
     # a fact about the CARD, never a bare silence.
@@ -9283,7 +9283,7 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
     # ("cards read it and none spends it") because no glossary row held the
     # word.
     #
-    # `EB-719` GAVE THE WORD A GLOSSARY ROW, so it now takes the SAME
+    # `EB-723` GAVE THE WORD A GLOSSARY ROW, so it now takes the SAME
     # deferral Encore does one line up -- which is this test's rule working,
     # not an exception to it: one definition per screen, and where the
     # glossary carries the word the meter line points at it.

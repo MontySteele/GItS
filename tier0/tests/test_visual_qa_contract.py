@@ -66,7 +66,7 @@ def test_the_sample_contract_is_well_formed():
     # 22 until EB-40, then +6: furina/ui/energy_counter.tscn and the five
     # energy_orb layers it references. Then +2 for the Bake-Kurage pet's
     # creature scene and the summon sprite it draws. Then +6 for the Furina
-    # stage's three performers (`EB-721`): a creature scene each, and the three
+    # stage's three performers (`EB-725`): a creature scene each, and the three
     # SALON member sprites they draw -- which the pack already carried (the
     # salon copy block) but the fixture did not, because until these scenes
     # nothing referenced them from a scene and the universe is what

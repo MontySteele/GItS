@@ -872,7 +872,7 @@ class Player(Fighter):
     # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
     # every count read (has_salon_members, pilot, instruments) still works.
     salon: list[str] = field(default_factory=list)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`). THE STAGE: the three
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`). THE STAGE: the three
     # seats, front first, each an `[member, fanfare]` pair. SOURCE OF TRUTH for
     # the arm and the only state it adds -- the brief's sec.2 is explicit that
     # "Fanfare is the performer's bar itself ... no counter beside it", so
@@ -1279,7 +1279,7 @@ class CombatState:
     # actually happened; every reader of the replacement rule asks
     # `effects.salon_numerics_replaced`, which is the OR of the two.
     salon_will_replace_this_card: bool = False
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`). What THIS card play
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`). What THIS card play
     # took off the stage's bars, read back by the effects after it through
     # `amount_formula: {count: stage_spent}`. Per-card and not a bar read: by
     # the time *Final Bow*'s Block or the Rare's damage resolves, the bar it is

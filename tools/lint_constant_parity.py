@@ -375,13 +375,13 @@ MIRRORED: dict[str, object] = {
     # UNMIRRORED as "not balance" would be true and useless. The classification
     # this table asks for is where the number came from.
     "FurinaReframe.EvokeTargetAbsent": _reframe("EVOKE_TARGET_ABSENT"),
-    # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-719` /
-    # `EB-720` / `EB-721`, R269). Same terms as every arm above and for the
+    # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
+    # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These TEN numbers ARE the
     # brief's sec.3 rules: the seat count, the relic's opening bar, what a
     # summon arrives at, the lead's regen, the starter Refill, the three acts
     # and the two bows that carry a number. The sim declared every one of them
-    # first (`EB-720` is the sim engine and `EB-721` the C#), and the C# side
+    # first (`EB-724` is the sim engine and `EB-725` the C#), and the C# side
     # reads them for its keyword tips, so a pair that drifted would print a
     # retired number under a card the seat is grading.
     "FurinaStageLaw.Seats": _stage("SEATS"),
@@ -475,7 +475,7 @@ UNMIRRORED: dict[str, str] = {
         "walk is bounded because it runs on a frame the engine is already "
         "struggling with. The sim has no scene tree.",
     # THE FURINA STAGE ARM'S ELEVEN ARE NOT HERE, and their absence is the
-    # `EB-719` / `EB-721` reconciliation. This branch declared them UNMIRRORED
+    # `EB-723` / `EB-725` reconciliation. This branch declared them UNMIRRORED
     # on the reading that the arm was C#-first; the sim leg had in fact
     # declared them FIRST, in `tier0/engine/furina_stage.py`, and ships the
     # mirrored `FurinaStageLaw.cs` beside it. So the C# copy was deleted rather

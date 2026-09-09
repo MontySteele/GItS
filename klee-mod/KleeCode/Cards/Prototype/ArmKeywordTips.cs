@@ -76,13 +76,13 @@ public static class ArmKeywordTips
     public const string DuskKey = "KLEEMOD-ARM_DUSK";
     public const string CasketKey = "KLEEMOD-ARM_CASKET";
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
-    // THE FURINA STAGE'S SEVEN (`EB-719`, R269). The brief's sec.12 names
+    // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's sec.12 names
     // them: "Spend, Fanfare (the bar), Raise, Bow, the lead, the back
     // performer, Rotate". `Fanfare` collides with the reframe's word by
     // spelling and not by meaning -- there it is a meter, here it is a
     // performer's own bar -- so it takes its own key rather than reusing one
     // that would render the retired arm's sentence.
-    // `EB-407`, and it SURVIVED the reframe's retirement (`EB-719`) while
+    // `EB-407`, and it SURVIVED the reframe's retirement (`EB-723`) while
     // `Deploy`, `Evoke` and `Drain` did not. Those three named rules that
     // left with their rows; Encore is SHIPPED machinery whose only
     // statement of itself is a badge that needs the meter on the board, and
@@ -1066,7 +1066,7 @@ public static class ArmKeywordTips
 
     // ---------------------------------------------------- Furina ----------
     //
-    // THE REFRAME'S FOUR ARE GONE (`EB-719`, R269). `Deploy`, `Evoke`, `Drain`
+    // THE REFRAME'S FOUR ARE GONE (`EB-723`, R269). `Deploy`, `Evoke`, `Drain`
     // and `Encore` left this class with the eleven `proto_fr_` rows that
     // printed them: the Stage brief's sec.2 retires that arm by name, R213 B's
     // deletion rule took its rows off `docs/prototype-surface.yaml`, and a

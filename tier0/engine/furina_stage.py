@@ -1,4 +1,4 @@
-"""Furina, THE STAGE -- the quarantined prototype engine (`EB-720`).
+"""Furina, THE STAGE -- the quarantined prototype engine (`EB-724`).
 
 `review/active/furina-stage-brief-2026-09-08.md` is the design, ruled R269
 (2026-09-08, sec.11): "build it". Sections 3, 10, 12 and 13 are the rules, the
@@ -89,7 +89,7 @@ SEAT_LEAD = "lead"
 
 
 # ----------------------------------------------------------------------
-# THE STARTER SEAM (`EB-719`). `{shipped id: prototype id}`, read by
+# THE STARTER SEAM (`EB-723`). `{shipped id: prototype id}`, read by
 # `loader._starter_ids` under `FURINA_STAGE` and nowhere else -- the reframe's
 # slot shape inherited, one card for one card, so the printed ten stays ten and
 # this is a substitution rather than a starter rework.
@@ -109,7 +109,7 @@ STARTER_SUBS: dict[str, str] = {
 
 
 # ----------------------------------------------------------------------
-# THE POOL SEAM (`EB-719`). `{shipped id: prototype id}`, read by
+# THE POOL SEAM (`EB-723`). `{shipped id: prototype id}`, read by
 # `loader._pool_substitutions` under `FURINA_STAGE` and nowhere else. Fourteen
 # rows -- the brief's sec.12 batch one minus the three starters above -- each
 # swapped ONE FOR ONE AT THE SAME RARITY, so the offer odds do not move

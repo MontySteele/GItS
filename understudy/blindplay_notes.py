@@ -1331,7 +1331,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # `ArmKeywordTips.ForOz`.
     "Oz": ("Fischl's raven, out while you hold the Power Oz, at Your Side. "
            "He hits at the end of your turn while he is out."),
-    # FURINA, THE STAGE (`EB-719`, R269). The reframe's three -- Deploy, Evoke
+    # FURINA, THE STAGE (`EB-723`, R269). The reframe's three -- Deploy, Evoke
     # and Drain -- left this table with the eleven `proto_fr_` rows that
     # printed them: R213 B's deletion rule took the rows off the surface, and a
     # glossary row for a word no card prints is a rule nobody can meet. What
@@ -1548,7 +1548,7 @@ _ARM_KEYWORD_RE = {
     # every screen a reader can meet the word on, whether or not the run holds
     # the Power, which is the state the r7 seat was in for five plays.
     "Oz": re.compile(r"\bOz\b"),
-    # FURINA, THE STAGE (`EB-719`). The reframe's four -- `Deploy`, `Evoke`,
+    # FURINA, THE STAGE (`EB-723`). The reframe's four -- `Deploy`, `Evoke`,
     # `Drain` and `Encore` -- left this table with the rows that printed them.
     #
     # THE SEVEN, and each pattern says what the word is on a face. `Spend`,
@@ -1568,7 +1568,7 @@ _ARM_KEYWORD_RE = {
     "lead performer": re.compile(r"\blead performer\b"),
     "back performer": re.compile(r"\bback performer\b"),
     "Rotate": re.compile(r"\bRotates?\b"),
-    # `EB-407`, and it OUTLIVED the reframe (`EB-719`): the meter is shipped
+    # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
     # faces before the meter exists, and every Furina row the Stage does not
     # swap still carries it. NO PLURAL: a meter is never printed as one.

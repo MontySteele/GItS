@@ -154,7 +154,7 @@ param(
     #
     # IT IS THE REFRAME'S SUCCESSOR AND NOT ITS SIBLING, which is the one way
     # this switch differs from the four above it. The brief's sec.2 retires
-    # FurinaReframe by name; the two stand side by side only until EB-722
+    # FurinaReframe by name; the two stand side by side only until EB-726
     # finishes that retirement, and passing BOTH is a configuration of the
     # compiler rather than of the design -- it gives one Furina two engines.
     # Pass one. The banner below says so in red if both are set.

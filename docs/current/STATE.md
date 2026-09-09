@@ -133,8 +133,8 @@ every arm ships OFF in a release package). **Last RELEASE package:
   read). **R269 (2026-09-08)** ruled its three picks: build it, the healing
   law gets the pet clause (`LAW.md`), the concepts packet and #433 close.
   Encore, the Spotlight, the Fanfare counter and the reframe arm retire
-  under it. **No pick open.** Building: `EB-720` (engine), `EB-721` (C#),
-  `EB-719` (batch-one pool), then seat round one on the brief's questions.
+  under it. **No pick open.** Building: `EB-724` (engine), `EB-725` (C#),
+  `EB-723` (batch-one pool), then seat round one on the brief's questions.
 - **Control run** — R250 pick 4: the same Opus seat family playing base
   Ironclad died on the act-1 boss twice (`review/records/control-ironclad-2026-09-04.md`);
   a kit clear on a 30-row pool is consistency as much as strength.

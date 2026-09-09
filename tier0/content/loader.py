@@ -1263,7 +1263,7 @@ def _starter_ids(spec: dict) -> list[str]:
                     f"so the {add!r} substitution has nothing to replace")
             ids[ids.index(drop)] = add      # ONE copy: `.index` is the first
 
-    # FURINA, THE STAGE (`EB-719`, brief sec.7 and sec.12), THREE
+    # FURINA, THE STAGE (`EB-723`, brief sec.7 and sec.12), THREE
     # substitutions, and they are the reframe branch above one arm over with
     # one difference worth naming: this arm swaps all THREE of her kit
     # starters, not one. The brief's opening ten is "three Soloist's
@@ -1386,7 +1386,7 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
         # `furina_reframe`'s own header gives -- a reframe flag is quarantined
         # machinery and must not reach the constant census.
         return dict(furina_reframe.POOL_SUBS)
-    # THE FOURTH ARM (`EB-719`), and the Stage WINS where both Furina flags are
+    # THE FOURTH ARM (`EB-723`), and the Stage WINS where both Furina flags are
     # somehow on, for the reason `_starter_ids` gives at the same seam: the two
     # are alternatives and not layers. Tested after the reframe so that
     # ordering is stated by the code rather than assumed.

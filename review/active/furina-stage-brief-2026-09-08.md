@@ -284,7 +284,7 @@ coding / playtesting, we take the LAW amendment, and we close alternatives.
 This seems to be the most promising idea thus far."
 
 1. **The direction (A):** build it. Draft 2 goes to a `+proto` build
-   (`EB-720` engine, `EB-721` C#, `EB-719` pool) and a seat round on §13's
+   (`EB-724` engine, `EB-725` C#, `EB-723` pool) and a seat round on §13's
    questions.
 2. **The healing law's reach (C):** the sentence is in `LAW.md`: the
    Rare-and-Exhaust rule binds the player's own bar; a pet's bar may be

@@ -434,7 +434,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # nothing. What follows it on the card reads the amount taken,
     # which is a per-play number and not a state in this vocabulary.
     "drain_fanfare": [_hook("private", "fanfare", "use")],
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`) -- THE STAGE's eight.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`) -- THE STAGE's eight.
     # ONE PRIVATE STATE, `stage`, and it is a new one rather than `salon`
     # reused: the shipped Salon is a queue of names with no bars, and every
     # verb below is about a BAR. A row written against one cannot be played

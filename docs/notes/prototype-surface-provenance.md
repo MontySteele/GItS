@@ -3411,7 +3411,7 @@ and draws 2 per later carry-out. Both suites pin it. Its own beat prints no
 number -- no honest figure exists at the clause -- and the cards ride the later
 beats by name through `KokomiPlan.NoteRider`.
 
-## Furina, the Stage — batch one (`EB-719`, R269 2026-09-08)
+## Furina, the Stage — batch one (`EB-723`, R269 2026-09-08)
 
 The design is `review/active/furina-stage-brief-2026-09-08.md`, whose sec.12
 prints the seventeen faces and whose sec.3 states the rules they play by. The

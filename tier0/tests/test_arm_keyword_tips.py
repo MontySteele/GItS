@@ -476,7 +476,7 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     "KLEEMOD-ARM_EMPTY_FIELD",
                     # `EB-573`: what a merge keeps besides the Mine.
                     "KLEEMOD-ARM_MERGE_RIDERS",
-                    # `EB-719`: `Encore` became the SIXTH of these when the
+                    # `EB-723`: `Encore` became the SIXTH of these when the
                     # reframe's rows left. Nothing on the prototype surface
                     # prints the word any more, so it is no longer an arm
                     # keyword -- but the word is shipped machinery, it is
@@ -704,7 +704,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # own words -- the same rule at the same call one kit over.
             "carry-out is not a hit: no when-hit power fires.",
             "heal N HP, never above the HP you entered ",
-            # Furina, THE STAGE (`EB-719`; the brief's sec.12 names the
+            # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
             # Deploy, Evoke, Drain, Encore -- left this list with the eleven
             # `proto_fr_` rows that printed them, under R213 B's deletion rule:
@@ -752,7 +752,7 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     # THE STAGE's Bow and lead sentences carry three numbers -- the two bows
     # that have one and the lead's regen -- and all three are prototype SEEDS
     # (R215 B, the brief's sec.10 default 3), which makes a retune likelier
-    # here than anywhere else on this list. `EB-719` replaced the reframe's
+    # here than anywhere else on this list. `EB-723` replaced the reframe's
     # Evoke pair, which left with that arm's rows.
     assert "FurinaStageLaw.BowUsherBlock" in tips
     assert "FurinaStageLaw.BowCrabalettaDamage" in tips

@@ -341,7 +341,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # single call into SalonMemberPower, the salon_bow
                   # shape, so they carry no locals and no new grammar.
                   "salon_rotate", "salon_perform",
-                  # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-719`): THE
+                  # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-723`): THE
                   # STAGE's eight. Every one is a single call into
                   # `FurinaStage` with no locals -- the `salon_bow` shape
                   # again -- and what the two spends BUY is the effect after
@@ -742,7 +742,7 @@ ARM_KEYWORDS = (
     # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
     # say nothing over an aura-less board.
     ArmKeyword("Swirl", ("Swirl", "Swirls"), "ArmKeywordTips.ForSwirl"),
-    # THE FURINA REFRAME'S FOUR ARE GONE (`EB-719`, R269). `Deploy`, `Evoke`,
+    # THE FURINA REFRAME'S FOUR ARE GONE (`EB-723`, R269). `Deploy`, `Evoke`,
     # `Drain` and `Encore` left this table with the eleven `proto_fr_` rows
     # that printed them: draft 6's precedent one character over ("a table row
     # for a word no rule has is a tooltip waiting to explain a mechanic that is
@@ -751,7 +751,7 @@ ARM_KEYWORDS = (
     # Their `ArmKeywordTips.For*` methods and title rows survive one more
     # commit, with the reframe's C# they belong to.
     #
-    # THE FURINA STAGE'S SEVEN (`EB-719`; the brief's sec.12 closes with the
+    # THE FURINA STAGE'S SEVEN (`EB-723`; the brief's sec.12 closes with the
     # list in as many words: "Tips the faces need: Spend, Fanfare (the bar),
     # Raise, Bow, the lead, the back performer, Rotate"). Every one names a
     # rule the shipped engine does not have -- a shipped Fanfare is a meter
@@ -1339,7 +1339,7 @@ PREDICATES_CS = {
     # the bar is authored per card and moves at red-pen, so a literal map
     # turned every new threshold into a codegen KeyError.
     "has_salon_members": "SalonMemberPower.Count(Owner.Creature) > 0",
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-719`). THE STAGE's one
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-723`). THE STAGE's one
     # predicate, and it is deliberately the only one: brief sec.3 rule 8 makes
     # a Spend rider ask about OCCUPANCY and never about size, because a bar of
     # any size pays the whole rider. A `stage_fanfare_at_least_N` beside it
@@ -1426,7 +1426,7 @@ PREDICATE_TEXT = {
     "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
     "has_salon_members": "If you have a [gold]Salon Member[/gold]",
-    # QUARANTINED (`EB-719`). The FALLBACK wording only: every Spend row states
+    # QUARANTINED (`EB-723`). The FALLBACK wording only: every Spend row states
     # its own face with `description:`, because rule 8's rider is printed as
     # "Spend N: <the big number> instead" and no generic clause can say that.
     "stage_occupied": "If a performer is on stage",
@@ -1733,7 +1733,7 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # "if the leftmost member is X, do Y" -- see the
               # leftmost_salon_member_ predicate below.
               "salon_rotate", "salon_perform",
-              # QUARANTINED (`EB-719`). The Spend rider is a BRANCH by
+              # QUARANTINED (`EB-723`). The Spend rider is a BRANCH by
               # construction: rule 8's two sentences are printed as
               # `conditional {if: stage_occupied, then: [stage_spend, <big>],
               # else: [<base>]}`, so this op only ever appears inside one. A
@@ -1822,7 +1822,7 @@ BRANCH_FIELDS = {
     # natural units -- so the two validators cannot disagree.
     "salon_rotate": {"op", "amount"},
     "salon_perform": {"op", "amount"},
-    # QUARANTINED (`EB-719`). `amount` is the printed N and is REQUIRED here,
+    # QUARANTINED (`EB-723`). `amount` is the printed N and is REQUIRED here,
     # unlike the two salon verbs above: a Spend with no number is not a rider
     # any face could print.
     "stage_spend": {"op", "amount"},
@@ -3698,7 +3698,7 @@ def blocked_reason(
                 and swirls_turn_calc_rider(card, effect) is None
                 and fanfare_drained_calc_rider(card, effect) is None
                 and fanfare_drained_block_rider(card, effect) is None
-                # QUARANTINED (`EB-719`): the Stage's three counts, on the
+                # QUARANTINED (`EB-723`): the Stage's three counts, on the
                 # same rail and refused on the same terms.
                 and stage_count_calc_rider(card, effect) is None
                 and stage_count_block_rider(card, effect) is None):
@@ -4942,7 +4942,7 @@ def _drain_before(card: dict, eff: dict) -> bool:
 FANFARE_DRAINED_CS = "static (card, _) => FurinaDrain.Amount(card)"
 
 
-#: THE STAGE's own member names, as the C# verb spells them (`EB-719`). A
+#: THE STAGE's own member names, as the C# verb spells them (`EB-723`). A
 #: closed set, checked at emit rather than passed through, for
 #: `salon_member_aim`'s reason: a typo that degraded quietly into "somebody"
 #: is the one failure a named summon could hide for a whole round.
@@ -5040,7 +5040,7 @@ def _stage_spends_before(card: dict, eff: dict) -> bool:
 def stage_count_calc_rider(card: dict,
                            eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: stage_*}` on a DAMAGE op --
-    QUARANTINED (`EB-719`), *Ousia Surge* and *Let the People Rejoice*.
+    QUARANTINED (`EB-723`), *Ousia Surge* and *Let the People Rejoice*.
 
     The same CalculatedDamageVar triple as every rider on this rail. Only the
     COUNT differs, and `stage_spent` differs twice over: it is not a live board
@@ -5696,7 +5696,7 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     # plumbing and has no card yet". Resolved here rather than in its own
     # branch so it inherits every guard below -- one CalculationBase per card
     # is the invariant this function exists to keep.
-    # QUARANTINED (`EB-719`): the Stage's counts on the block rail, tried
+    # QUARANTINED (`EB-723`): the Stage's counts on the block rail, tried
     # FIRST because they are refused on a card that carries any other
     # conversion and so cannot mask one.
     staged = stage_count_block_rider(card, eff)
@@ -5822,7 +5822,7 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         return swirls_turn
     # QUARANTINED USE ONLY (R213 B), and the one count on this rail that is
     # NOT a live board read -- see `fanfare_drained_calc_rider`.
-    # QUARANTINED (`EB-719`): the Stage's counts on the damage rail.
+    # QUARANTINED (`EB-723`): the Stage's counts on the damage rail.
     staged = stage_count_calc_rider(card, eff)
     if staged is not None:
         return staged
@@ -6558,7 +6558,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or plans_carried_out_morning_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
-            # QUARANTINED (`EB-719`): the Stage's counts join the same two
+            # QUARANTINED (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
             # same CalculatedDamageVar / CalculatedBlockVar triple, so a `per`
             # or `base` delta lands in the same slot whichever count the rider
@@ -6579,7 +6579,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or plans_carried_out_morning_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
-            # QUARANTINED (`EB-719`): the Stage's counts join the same two
+            # QUARANTINED (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
             # same CalculatedDamageVar / CalculatedBlockVar triple, so a `per`
             # or `base` delta lands in the same slot whichever count the rider
@@ -7985,7 +7985,7 @@ def _emit_branch_op(
             "await KokomiRules.Mend(choiceContext, Owner.Creature, "
             f'{int(eff["amount"])});')
     elif op in STAGE_STMT_OPS:
-        # QUARANTINED (`EB-719` / `EB-721`, R269). The Spend rider is a BRANCH
+        # QUARANTINED (`EB-723` / `EB-725`, R269). The Spend rider is a BRANCH
         # by construction -- rule 8's two sentences are printed as
         # `conditional {if: stage_occupied, then: [stage_spend, <big>], else:
         # [<base>]}` -- so `stage_spend` reaches emit HERE and not through
@@ -8546,7 +8546,7 @@ def build_body(
             lines.append("FurinaDrain.Drain(Owner.Creature);")
 
         elif op in STAGE_STMT_OPS:
-            # QUARANTINED (`EB-719` / `EB-721`, R269): THE STAGE's eight, each
+            # QUARANTINED (`EB-723` / `EB-725`, R269): THE STAGE's eight, each
             # a single call into `FurinaStage` with no locals -- the
             # `salon_bow` shape above it -- and what the two SPENDS buy is the
             # effect AFTER them, through the ordinary `amount_formula` grammar

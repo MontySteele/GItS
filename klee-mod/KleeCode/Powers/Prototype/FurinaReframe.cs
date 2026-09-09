@@ -491,7 +491,7 @@ public static class FurinaReframeRoster
     public static IEnumerable<CardModel> SwapOfferedRiders(
         IEnumerable<CardModel> offered)
     {
-        // THE SWAP IS EMPTY, AND THAT IS THE RETIREMENT (`EB-719`, R269). The
+        // THE SWAP IS EMPTY, AND THAT IS THE RETIREMENT (`EB-723`, R269). The
         // Stage brief's sec.2 retires this arm by name, so its eleven
         // `proto_fr_` rows LEFT `docs/prototype-surface.yaml` under R213 B's
         // deletion rule and their generated classes went with them. There is
@@ -540,7 +540,7 @@ public static class FurinaReframeRoster
     /// a RULE, so [USER] plays the first build that carries it.
     /// </summary>
     public static CardModel StarterAria() =>
-        // `EB-719`: the copy left the surface with the rest of the arm, so
+        // `EB-723`: the copy left the surface with the rest of the arm, so
         // this slot is the shipped card whatever the flag says. See
         // `SwapOfferedRiders` above for the retirement and what survives it.
         ModelDb.Card<FurinaGen.AriaOfRecompense>();
@@ -566,7 +566,7 @@ public static class FurinaReframeRoster
     /// and <c>docs/furina-cards.yaml</c> does not move.
     /// </summary>
     public static CardModel StarterSalonDebut() =>
-        // `EB-719`, and `StarterAria` above's note: the named Début left the
+        // `EB-723`, and `StarterAria` above's note: the named Début left the
         // surface with the arm, so this slot is the shipped card.
         ModelDb.Card<FurinaGen.SalonDebut>();
 }

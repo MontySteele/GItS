@@ -161,7 +161,7 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
     "has_salon_members",
-    # `EB-720` (QUARANTINED, `furina_stage.FURINA_STAGE`). "If a performer is
+    # `EB-724` (QUARANTINED, `furina_stage.FURINA_STAGE`). "If a performer is
     # on stage" -- `len(player.stage) > 0`, a pure current-state read with no
     # snapshot field, which is exactly this collection's test. It is the ONE
     # predicate every Spend face is written against (brief sec.3 rule 8), so a
@@ -701,7 +701,7 @@ def _estimated_exhausts(state: CombatState, card: Card) -> int:
 
 
 def _stage_defence(state: CombatState, card: Card) -> float:
-    """QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`). What a Stage verb
+    """QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`). What a Stage verb
     is worth to the DEFENCE this turn, in the units `_raw_block` counts.
 
     THE ARM'S WHOLE PROMISE IS DEFENSIVE (brief sec.2: "enemies hit her Block,

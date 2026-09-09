@@ -1,8 +1,8 @@
 namespace KleeMod.Powers;
 
 /// <summary>
-/// FURINA, THE STAGE -- the arm's numbers, and nothing else (`EB-719`,
-/// `EB-720`, `EB-721`; R269, 2026-09-08).
+/// FURINA, THE STAGE -- the arm's numbers, and nothing else (`EB-723`,
+/// `EB-724`, `EB-725`; R269, 2026-09-08).
 ///
 /// <para>THE DESIGN is
 /// <c>review/active/furina-stage-brief-2026-09-08.md</c>. Its sec.3 states
@@ -15,8 +15,8 @@ namespace KleeMod.Powers;
 /// that true rather than intended.</para>
 ///
 /// <para>THE SIM DECLARED THEM FIRST and this file mirrors it, which is the
-/// reverse of the reframe's order and deliberate: `EB-720` is the sim engine
-/// (<c>tier0/engine/furina_stage.py</c>) and `EB-721` the C# one, so every
+/// reverse of the reframe's order and deliberate: `EB-724` is the sim engine
+/// (<c>tier0/engine/furina_stage.py</c>) and `EB-725` the C# one, so every
 /// value here names the module constant it copies.</para>
 ///
 /// <para>WHY A LAW CLASS AND NOT <c>constants.py</c>'s twin: the sim keeps

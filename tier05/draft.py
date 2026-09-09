@@ -899,7 +899,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # with and without this branch and DRAFTER_VERSION does not move. The
         # same terms `block_half_damage` took.
         return 0.0
-    # -- the FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, EB-720) --
+    # -- the FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, EB-724) --
     if op in FURINA_STAGE_OPS:
         # ZERO, all eight, and it is `drain_fanfare`'s argument one arm over
         # rather than a shrug. The Stage's verbs are about a BOARD -- who is on
@@ -2540,7 +2540,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                      "moves, so the priced-op set grows without a "
                      "DRAFTER_VERSION bump (the same terms as "
                      "`block_half_damage` below)",
-    # --- the FURINA STAGE (QUARANTINED, furina_stage.FURINA_STAGE, EB-720) --
+    # --- the FURINA STAGE (QUARANTINED, furina_stage.FURINA_STAGE, EB-724) --
     "stage_summon": _STAGE_ZERO,
     "stage_raise": _STAGE_ZERO,
     "stage_scene_change": _STAGE_ZERO,

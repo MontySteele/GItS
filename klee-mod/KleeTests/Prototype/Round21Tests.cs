@@ -133,7 +133,7 @@ public class Round21Tests
             source);
     }
 
-    // `EB-719` RETIRED THIS PIN WITH ITS WORD. `EB-587` put the Evoke's price
+    // `EB-723` RETIRED THIS PIN WITH ITS WORD. `EB-587` put the Evoke's price
     // on `ArmKeywordTips.ForEvoke`, and the word left the mod with the
     // reframe's eleven `proto_fr_` rows under R213 B's deletion rule -- a
     // tooltip for a rule no row prints is a definition of a mechanic that is

@@ -297,7 +297,7 @@ public class Round12Tests
                         body);
     }
 
-    // `EB-719` RETIRED THE SECOND HALF OF THIS PAIR. It asserted that
+    // `EB-723` RETIRED THE SECOND HALF OF THIS PAIR. It asserted that
     // `ArmKeywordTips.ForDeploy` was at its ceiling and so could not have
     // carried the aim clause -- and the `Deploy` word left the mod with the
     // reframe's eleven `proto_fr_` rows under R213 B's deletion rule, so the

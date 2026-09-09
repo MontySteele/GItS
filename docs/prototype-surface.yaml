@@ -1644,7 +1644,7 @@
    description: "Whenever you play a [gold]Hexerei[/gold] card, deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
 
-# FURINA, THE STAGE -- BATCH ONE (`EB-719`, R269 2026-09-08). The seventeen
+# FURINA, THE STAGE -- BATCH ONE (`EB-723`, R269 2026-09-08). The seventeen
 # faces of review/active/furina-stage-brief-2026-09-08.md sec.12. Which
 # shipped row each replaced, and why: docs/notes/prototype-surface-provenance.md.
 

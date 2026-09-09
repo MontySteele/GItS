@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The FURINA STAGE's reports (`EB-720`; the brief's sec.13, in order).
+"""The FURINA STAGE's reports (`EB-724`; the brief's sec.13, in order).
 
     .venv/Scripts/python.exe -m tools.furina_stage_report
     .venv/Scripts/python.exe -m tools.furina_stage_report --fights 400 --seed 11

@@ -1,4 +1,4 @@
-"""FURINA, THE STAGE -- the sim engine's pins (`EB-720`).
+"""FURINA, THE STAGE -- the sim engine's pins (`EB-724`).
 
 The design is `review/active/furina-stage-brief-2026-09-08.md`, ruled R269. Its
 sec.3 is the eleven rules and its sec.7 is the fight-one script this file

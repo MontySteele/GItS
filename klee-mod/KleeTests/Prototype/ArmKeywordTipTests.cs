@@ -523,7 +523,7 @@ public class ArmKeywordTipTests
         // enemies act. A word of its own rather than a sixth clause on the
         // Plan tip, which is at its ceiling and carries five seats' findings.
         //
-        // THE TWENTY-SECOND TO THE TWENTY-EIGHTH ARE `EB-719`'s, and they
+        // THE TWENTY-SECOND TO THE TWENTY-EIGHTH ARE `EB-723`'s, and they
         // arrive as a set because the Stage brief's sec.12 names them as one:
         // "Tips the faces need: Spend, Fanfare (the bar), Raise, Bow, the
         // lead, the back performer, Rotate". Each is a rule the SHIPPED engine
@@ -534,7 +534,7 @@ public class ArmKeywordTipTests
         // about WHICH SEAT, and a tip on the bare word "lead" would fire on
         // prose that meant something else.
         //
-        // TWENTY-FIVE SINCE `EB-719`, and it was twenty-one. THREE LEFT and
+        // TWENTY-FIVE SINCE `EB-723`, and it was twenty-one. THREE LEFT and
         // SEVEN ARRIVED. `ForDeploy`, `ForEvoke` and `ForDrain` went with the
         // reframe's eleven `proto_fr_` rows under R213 B's deletion rule -- a
         // tooltip for a rule no row prints is a definition of a mechanic that

@@ -564,7 +564,7 @@ public class FurinaStageRuleTests
         // file -- and that file is the SIM LEG's `FurinaStageLaw`, mirrored by
         // value against `tier0/engine/furina_stage.py`
         // (`tools/lint_constant_parity.py`). This branch's own copy of the
-        // eleven was deleted in the `EB-719` reconciliation: two declarations
+        // eleven was deleted in the `EB-723` reconciliation: two declarations
         // of one number is the drift that gate refuses.
         //
         // TEN AND NOT ELEVEN. "From her SECOND turn on" left with the copy,

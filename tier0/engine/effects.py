@@ -400,7 +400,7 @@ def _runtime_count(state: CombatState, token: str,
         # nothing every time. Written by `_op_drain_fanfare`, cleared per card
         # play beside `discards_this_card` and its neighbours.
         return state.fanfare_drained_this_card
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`) -- the STAGE's three.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`) -- the STAGE's three.
     #
     # `stage_spent` is the reframe token's argument one arm over: what THIS
     # play took off the bars, read back by the effect after it, because by the
@@ -3793,7 +3793,7 @@ PREDICATE_NAMES = frozenset({
     # this turn is held, a Dusk entry is held until it resolves, and a queue
     # the morning drained is not.
     "plan_held",
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`). THE ONE THING A
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`). THE ONE THING A
     # SPEND RIDER ASKS. Brief sec.3 rule 8: "With no performer on stage the
     # rider cannot fire and the card plays at its base number" -- so the
     # question is OCCUPANCY and never size, because a bar of any size pays the
@@ -3883,7 +3883,7 @@ def is_known_predicate(name: str) -> bool:
 # would make the validator reject valid content; a token here the chain
 # ignores documents a spelling nothing reads.
 RUNTIME_COUNT_NAMES = frozenset({
-    # QUARANTINED USE ONLY (`EB-720`) -- the FURINA STAGE's three. Registered
+    # QUARANTINED USE ONLY (`EB-724`) -- the FURINA STAGE's three. Registered
     # here as well as resolved in `_runtime_count` for this registry's own
     # reason: the loader validates every count token at LOAD off this set, so a
     # token only the resolver knows is a card that raises the first time it is
@@ -5965,7 +5965,7 @@ def _op_remove_debuff(state: CombatState, fx: dict, card: Card) -> None:
 
 
 # ----------------------------------------------------------------------
-# THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, `EB-720`).
+# THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, `EB-724`).
 #
 # EIGHT VERBS AND NO MORE. The brief's seventeen faces (sec.12) are written in
 # these plus `damage`, `block`, `draw` and `conditional`, which is the shape
@@ -6114,7 +6114,7 @@ OPS = {
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`): the Stage's eight.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`): the Stage's eight.
     "stage_summon": _op_stage_summon,
     "stage_raise": _op_stage_raise,
     "stage_scene_change": _op_stage_scene_change,

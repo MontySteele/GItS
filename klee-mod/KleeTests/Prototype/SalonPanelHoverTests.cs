@@ -116,7 +116,7 @@ public class SalonPanelHoverTests
             }
         }
 
-        // NINE SINCE `EB-719`, and it was twelve. The Furina reframe's
+        // NINE SINCE `EB-723`, and it was twelve. The Furina reframe's
         // three deploy rows left `docs/prototype-surface.yaml` with the
         // rest of that arm under R213 B's deletion rule, so the floor
         // follows the shipped sheet's nine. It is a FLOOR and not an

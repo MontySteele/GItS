@@ -61,7 +61,7 @@ namespace KleeMod.Powers;
 /// that are not hers.
 ///
 /// AND IT IS ALSO THE VERB SURFACE THE GENERATED CARDS CALL, which is the
-/// `EB-719` / `EB-721` reconciliation. The sim's leg wrote a <c>FurinaStage</c>
+/// `EB-723` / `EB-725` reconciliation. The sim's leg wrote a <c>FurinaStage</c>
 /// of its own -- a seat list plus the card verbs, "written so the generated
 /// cards compile", with no pet, no damage-order hook and no strip -- and its
 /// own header said to absorb or replace it. This is that absorption: the SEATS

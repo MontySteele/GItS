@@ -133,7 +133,7 @@ OPENING_MEMBER = "crabaletta"     # R260 (`EB-553`): who is already on the
 
 
 # ----------------------------------------------------------------------
-# THE TWO SEAMS ARE EMPTY, AND THAT IS THE RETIREMENT (`EB-719`, R269).
+# THE TWO SEAMS ARE EMPTY, AND THAT IS THE RETIREMENT (`EB-723`, R269).
 #
 # The Stage brief (`review/active/furina-stage-brief-2026-09-08.md` sec.2)
 # retires this arm by name -- "the reframe's `proto_fr_` arm and
