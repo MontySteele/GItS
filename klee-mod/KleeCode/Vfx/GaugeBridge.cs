@@ -208,6 +208,42 @@ public static class GaugeBridge
             ReadValue = SparkGauge.Read,
             ShouldFlash = static (_, _) => false,
         },
+        // FURINA'S STAGE STRIP, under the stage arm only. It takes the SECOND
+        // ROW rather than the overhead slot, and that is a reading of the C1
+        // convention rather than a breach: the overhead slot means "this
+        // creature's primary meter", and the stage is not a meter of hers at
+        // all -- it is three bars that are NOT hers, standing in front of her.
+        //
+        // BAR-LESS, on `klee_spark`'s argument verbatim: a performer's bar has
+        // no cap (brief sec.3 rule 4), so there is no ceiling to draw against
+        // and a bar would invent a target. What renders is the LABEL, which is
+        // the damage order in three terms -- see `FurinaStageStrip.Label` for
+        // why that is the whole design.
+        //
+        // NO FLASH, for `klee_spark`'s reason: the shared scene's flash
+        // overlay is a bar-shaped ColorRect sized to a track this gauge does
+        // not draw.
+        new()
+        {
+            Key = "furina_stage",
+            Skin = new GaugeSkin
+            {
+                // Neither rect is drawn while VisualSpan is null. The colours
+                // are Furina's hydro family, one step paler than the Burst
+                // ribbon, so a future ceiling does not have to invent a
+                // palette at the same time.
+                FillColor = new Color(0.55f, 0.85f, 1.0f),
+                TrackColor = new Color(0.06f, 0.13f, 0.20f, 0.0f),
+                RibbonColor = new Color(0.11f, 0.24f, 0.36f, 0.9f),
+            },
+            AnchorOffset = SecondRowAnchor,
+            VisualSpan = null,
+            LabelMax = null,
+            AppliesTo = FurinaStageStrip.AppliesTo,
+            ReadValue = FurinaStageStrip.Read,
+            LabelText = FurinaStageStrip.Label,
+            ShouldFlash = static (_, _) => false,
+        },
 #endif
         // Furina's Burst, at the SAME overhead slot. Skin: hydro ribbon —
         // a banner plate with swallow-tail ends, deliberately sharing its

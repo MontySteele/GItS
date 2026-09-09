@@ -1219,6 +1219,96 @@ public static class ArmKeywordTips
              + "at 3/4.";
     }
 
+    // ------------------------------------------------- Furina, the stage ---
+    //
+    // The stage arm's seven words, from the brief's sec.3 rules. They live in
+    // THIS file rather than beside the arm's cards for the reason the file
+    // exists at all: `tools/lint_text_conventions.py` measures hover tips out
+    // of this one path, so a definition written anywhere else is a
+    // player-facing string nothing holds to a ceiling -- which is `EB-343`'s
+    // silence, not a style preference.
+    //
+    // EVERY NUMERAL IS INTERPOLATED from `FurinaStageLaw` (`EB-89`), so a
+    // retune cannot leave one of these sentences quoting a retired number.
+
+    public const string StageSpendKey = "KLEEMOD-ARM_STAGE_SPEND";
+    public const string StageFanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
+    public const string StageRaiseKey = "KLEEMOD-ARM_STAGE_RAISE";
+    public const string StageBowKey = "KLEEMOD-ARM_STAGE_BOW";
+    public const string StageLeadKey = "KLEEMOD-ARM_STAGE_LEAD";
+    public const string StageBackKey = "KLEEMOD-ARM_STAGE_BACK";
+    public const string StageRotateKey = "KLEEMOD-ARM_STAGE_ROTATE";
+    public const string StageSummonKey = "KLEEMOD-ARM_STAGE_SUMMON";
+
+    /// <summary>Rule 8, and its second clause is the whole reason the word
+    /// needs a tip: the rider does NOT scale down when the lead is short.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSpend(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageSpendKey,
+            "Pays the lead's [gold]Fanfare[/gold]. It fires in full even if "
+          + "the lead has less; that empties the lead, which then "
+          + "[gold]Bows[/gold].");
+
+    /// <summary>Rule 1 and rule 4's last sentence. The bar IS the performer,
+    /// which is the fact a player reading an HP bar on an ally will not
+    /// assume.</summary>
+    public static IEnumerable<IHoverTip> ForFanfare(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageFanfareKey,
+            "A performer's own bar, with no cap. Hits and "
+          + "[gold]Spend[/gold] lower it, and a performer at 0 leaves the "
+          + "stage.");
+
+    /// <summary>Rule 5.</summary>
+    public static IEnumerable<IHoverTip> ForRaise(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageRaiseKey,
+            "Adds [gold]Fanfare[/gold] to the back performer. It is never "
+          + "the lead unless the lead is alone on stage.");
+
+    /// <summary>Rule 9, and the sentence that separates the two ways a
+    /// performer can leave.</summary>
+    public static IEnumerable<IHoverTip> ForBow(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageBowKey,
+            "A performer emptied by [gold]Spend[/gold] does one departure "
+          + "effect. One emptied by a hit just leaves.");
+
+    /// <summary>Rule 6 and rule 4 in one sentence, because the lead is the
+    /// creature both are about.</summary>
+    public static IEnumerable<IHoverTip> ForLead(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageLeadKey,
+            "The front performer. It absorbs what one attack puts past your "
+          + "[gold]Block[/gold], [gold]Spend[/gold] pays from it, and it "
+          + "regains "
+          + FurinaStageLaw.LeadRegen + " each turn.");
+
+    /// <summary>Rule 5's second sentence, said from the other side.</summary>
+    public static IEnumerable<IHoverTip> ForBackPerformer(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageBackKey,
+            "The performer in the back seat, which is the lead when only one "
+          + "is on stage.");
+
+    /// <summary>Rule 3's second half.</summary>
+    public static IEnumerable<IHoverTip> ForRotate(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageRotateKey,
+            "A [gold]Summon[/gold] onto a full stage. The front leaves with "
+          + "no [gold]Bow[/gold], the rest step up, and the newcomer takes "
+          + "its bar.");
+
+    /// <summary>Rule 3's first half, plus the clause the acts make true.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSummon(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, StageSummonKey,
+            "Fills the back-most empty seat at " + FurinaStageLaw.SummonFanfare
+          + " [gold]Fanfare[/gold]. A full stage [gold]Rotates[/gold]. A "
+          + "newcomer acts this turn.");
+
     /// <summary>
     /// One tip, appended after whatever the card already carries.
     ///

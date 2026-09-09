@@ -102,6 +102,23 @@ public static class FurinaOffPoolCards
         // GetUnlockedCards must not see it or a reward roll could offer a
         // card nobody ruled. See KleeMod.PrototypeCards.
         cards.AddRange(PrototypeCards.For("furina"));
+#if PROTOTYPE_CARDS
+        // THE STAGE ARM'S THREE HAND-WRITTEN KIT CARDS, on exactly the terms
+        // the generated rows above are on and for the same reason: Pool must
+        // resolve or the card throws "You monster!" on draw, and
+        // GetUnlockedCards must not see it or a reward roll could offer a row
+        // nobody ruled. They are hand-written only until the `proto_fs_` sheet
+        // lands (see Cards/Prototype/FurinaStageCards.cs), and this line goes
+        // with them when it does.
+        // The three ids are spelled HERE rather than behind a helper because
+        // `tools/lint_pool_membership.py` reads `ModelDb.Card<T>()` sites out
+        // of the membership files by name, and a helper's calls are invisible
+        // to it -- which is a pool the lint cannot see, on cards that throw
+        // "You monster!" when it is wrong.
+        cards.Add(ModelDb.Card<Cards.Prototype.StageSalonDebut>());
+        cards.Add(ModelDb.Card<Cards.Prototype.StageCurtainRise>());
+        cards.Add(ModelDb.Card<Cards.Prototype.StageStandingOvation>());
+#endif
         return cards;
     }
 }
