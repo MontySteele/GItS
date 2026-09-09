@@ -54,7 +54,7 @@ public sealed class ProtoKoBlazingDelight : CustomCardModel, ISparkPricedCard
     // that already prints a price is unaffected by the strict Rare
     // Power, which is why PriceOf returns this number unchanged
     // here (tier0 twin: combat.spark_price, sub-pick (a)).
-    public int PrintedSparkPrice => 5;
+    public int PrintedSparkPrice => (IsUpgraded ? 4 : 5);
 
     protected override bool IsPlayable =>
         SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
@@ -74,12 +74,13 @@ public sealed class ProtoKoBlazingDelight : CustomCardModel, ISparkPricedCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await SparkPower.Spend(choiceContext, Owner.Creature, 5, this);
+        await SparkPower.Spend(choiceContext, Owner.Creature, (IsUpgraded ? 4 : 5), this);
         await PowerCmd.Apply<BlazingDelightPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // spark_price: read at play time off IsUpgraded, at
+        // PrintedSparkPrice and the SparkPower.Spend beside it; tier0 twin: upgrades.apply key 'spark_price', which bumps the `spend_spark` amount both engines gate on.
     }
 }

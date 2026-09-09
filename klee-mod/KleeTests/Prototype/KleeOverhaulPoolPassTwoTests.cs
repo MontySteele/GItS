@@ -418,13 +418,24 @@ public class KleeOverhaulPoolPassTwoTests
         Assert.Contains(play, c => c.Contains("SparkPower.Spend"));
         Assert.Contains(play, c => c.Contains("PowerCmd.Apply"));
 
-        // THE UPGRADE IS THE SHEET'S DEFAULT, and what it moves is the ENERGY
-        // cost: `amount: 1` on a Power reads as "this row prints no power
-        // number" (`upgrades._proto_power`'s `> 1` test), so the Prototype rule
-        // falls through to its cost clause. The `+` card is a 1-energy Rare.
+        // THE UPGRADE CUTS THE SPARK PRICE, Once More!'s and Sparkling Burst's
+        // rail: the `+` card is the SAME 2-energy body for 4 Sparks. It is
+        // authored on the row rather than left to the Prototype rule, which
+        // would have fallen through to its cost clause and sold a 1-energy Rare
+        // instead -- `amount: 1` on a Power reads as "this row prints no power
+        // number" (`upgrades._proto_power`'s `> 1` test).
+        //
+        // THE FACE PRINTS NOTHING FOR IT, because a Spark price sits in the
+        // cost slot; what the player sees move is the BADGE, which renders
+        // `PrintedSparkPrice`, and the gate reads that same property back
+        // through `SparkCost.PriceOf` -- so the price shown, the price gated on
+        // and the price charged are one expression.
         var source = Printed(
             "Cards/Prototype/Generated/ProtoKoBlazingDelight.cs");
-        Assert.Contains("EnergyCost.UpgradeBy(-1);", source);
+        Assert.DoesNotContain("EnergyCost.UpgradeBy", source);
+        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 4 : 5)", source);
+        Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
+                        + "(IsUpgraded ? 4 : 5), this)", source);
     }
 
     // ---- The six are offered, and the roster says so ----------------------

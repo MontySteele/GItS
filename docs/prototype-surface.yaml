@@ -631,6 +631,7 @@
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
    description: "At the start of your turn, gain 1 [gold]Energy[/gold] and draw 1 card.",
+   upgrade: {spark_price: -1},
    effects: [{op: spend_spark, amount: 5},
              {op: apply_power, power: ko_blazing_delight, amount: 1,
               target: self}]}

@@ -1239,6 +1239,23 @@ def test_blazing_delight_pays_energy_and_a_card_at_turn_start(overhaul):
     assert state.player.energy == 5
     assert len(state.player.hand) == 2
 
+    # THE UPGRADE CUTS THE SPARK PRICE, Once More!'s and Sparkling Burst's
+    # rail: the `+` card is the SAME body for 4 Sparks and the same 2 Energy.
+    # Authored on the row rather than left to the Prototype rule, which would
+    # have fallen through to its cost clause and sold a 1-energy Rare instead
+    # (`amount: 1` on a Power reads as "this row prints no power number").
+    up = loader.get_card("proto_ko_blazing_delight+")
+    assert up.cost == 2
+    assert [fx for fx in up.effects
+            if fx["op"] == "spend_spark"][0]["amount"] == 4
+    state4 = _pass_two_state()
+    state4.player.sparks = 4
+    state4.player.draw_pile = fodder(3)
+    state4.player.hand = [up]
+    play_card(state4, up)
+    assert state4.player.sparks == 0
+    assert state4.player.powers[klee_overhaul.BLAZING_DELIGHT] == 1
+
     # AND A SEAT WITHOUT THE POWER PAYS NOTHING.
     bare = _pass_two_state()
     bare.player.energy = 3
