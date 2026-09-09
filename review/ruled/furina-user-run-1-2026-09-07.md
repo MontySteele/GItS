@@ -1,4 +1,4 @@
-Status: CLOSED R269 2026-09-08 (the eyes-on lapses: the Salon panel it asked about retires under the Stage brief)
+Status: RULED R269 2026-09-08
 
 # Furina, [USER]'s first act-1 run under the reframe: the UI is still not legible; the Encore idea is liked, the stage is not readable
 

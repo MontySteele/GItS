@@ -1,4 +1,4 @@
-Status: STANDING (R269, 2026-09-08: picks 1-3 ruled; the live Paper artefact through the Prototype build)
+Status: OPEN (picks 1-3 ruled R269; the live Paper artefact through the Prototype build)
 
 # Furina — character brief, the Stage: draft 2
 

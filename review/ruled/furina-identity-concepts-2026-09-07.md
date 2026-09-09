@@ -1,4 +1,4 @@
-Status: RULED R269 2026-09-08 (the working theory gave way to the Stage brief, review/active/furina-stage-brief-2026-09-08.md; PR #433 closed with it)
+Status: RULED R269 2026-09-08
 
 # Furina, back to the identity: three concepts, none of them the stage
 
