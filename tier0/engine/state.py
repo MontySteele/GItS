@@ -1490,6 +1490,23 @@ class CombatState:
     # that wrote it on a card sitting in the discard pile. Empty on every tree
     # with the arm off; the twin is `IntroductionMagicPower.Marked`.
     ko_hexerei_marked: list["Card"] = field(default_factory=list)
+    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-724`). Blast Shield's whole rule, as
+    # a fact about THIS play rather than about the card: the `return_to_hand`
+    # op raises it while the card resolves and `combat._finish_play` reads it
+    # ONCE, at the routing line, and lowers it again. A per-play flag and not a
+    # `Card` field because the C# twin is a per-CLASS override
+    # (`GetResultLocationForCardPlay`), and the one thing both engines have to
+    # agree on is where THIS play's card lands.
+    ko_return_to_hand: bool = False
+    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-724`). Once More!'s whole read: the
+    # last card this combat whose `set_off` op resolved. The INSTANCE and not
+    # the id, because the card the player takes back has to be the one that
+    # went to the discard pile -- two copies of Ka-pow! are two cards and only
+    # one of them was played. PER COMBAT and deliberately not rolled by
+    # `roll_to`: the face says "this combat". Written at the one site a Set off
+    # resolves off a card (`effects._op_set_off`); the twin is
+    # `KleeOverhaulLedger.LastSetOffCard`.
+    ko_last_set_off_card: "Card | None" = None
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.

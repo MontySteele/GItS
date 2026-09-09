@@ -84,7 +84,15 @@ OVERHAUL_OPS = frozenset((
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
     "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand",
-    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb"))
+    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
+    #: POOL PASS TWO's two (`EB-724`), and both are about a CARD rather than a
+    #: charge -- which is why they are the arm's first two verbs that touch no
+    #: Bomb since `hexerei_mark_hand`. `return_to_hand` (Blast Shield) routes
+    #: the played card to the hand instead of the discard; `return_last_set_off`
+    #: (Once More!) takes the last Set off card back out of the discard pile.
+    #: They are the arm's anyway, for `hexerei_mark_hand`'s reason: the rule
+    #: "the last SET OFF card" is a fact about her vocabulary and nobody else's.
+    "return_to_hand", "return_last_set_off"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
@@ -108,6 +116,26 @@ WITCHES_CIRCLE = "ko_witches_circle"
 #: nowhere else. Stacks are a copy count and nothing more -- the rule is a fact
 #: about the board, not a number.
 VERMILLION_PACT = "ko_vermillion_pact"
+#: POOL PASS TWO's rider (`EB-724`, Return to Sender): "This turn, damage this
+#: Block absorbs is placed on the attacker as a Bomb."
+#:
+#: A MARK ON THE BLOCK POOL, exactly as `mc_icy_paws` and `mi_blazing_barrier`
+#: are and for their reason: the engine has ONE Block pool, so "this Block"
+#: cannot be a separate pile -- the stack records how much of the standing
+#: Block this card put there, marked-Block-eaten-FIRST, and the mark is clamped
+#: to the standing Block on the way in. That is also what makes "this turn"
+#: true without a second timer: Block is cleared at the start of Klee's next
+#: turn and `turn_start_late` deletes a mark with no Block behind it.
+#:
+#: THE BOMB IS THE WHOLE ABSORBED AMOUNT and not the mark spent. The face says
+#: "damage this Block absorbs", which is what the hit took off the pool; the
+#: mark decides WHETHER the rider fires, never how big the charge is.
+RETURN_TO_SENDER = "ko_return_to_sender"
+#: POOL PASS TWO's Rare Power (`EB-724`, Blazing Delight): "At the start of
+#: your turn, gain 1 Energy and draw 1 card." Stacks ADD -- two copies pay 2
+#: and 2 -- so the stack is the RATE, which is what the upgrade moves. Read at
+#: exactly one place, `turn_start_late`, beside Grounded and on the same hook.
+BLAZING_DELIGHT = "ko_blazing_delight"
 
 #: Pounding Surprise, in this engine's spelling. THE RELIC IS RULE 4 (the brief
 #: sec.8), and tier 0 already carries the relic as a hook name on the player --
@@ -750,6 +778,42 @@ def turn_start_late(state: CombatState) -> None:
         effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK),
                             source="kit:opening_spark")
 
+    # RETURN TO SENDER's HOUSEKEEPING (`EB-724`), and it is the whole of what
+    # makes its face's "this turn" true. The mark carries no Block of its own,
+    # so a mark with nothing behind it is gone -- written as a CLAMP rather
+    # than as a clear beside the block reset so it stays correct under
+    # Barricade, which suppresses the reset. The twin of
+    # `companion_overhaul_turn_start`'s two identical lines and of
+    # `BlockMark.ClearIfSpent`. This hook runs AFTER the block clear
+    # (`KleeOverhaulOpening`'s note establishes the site), which is what lets
+    # the clamp read the pool the rider will actually be paid on.
+    mark = state.player.powers.get(RETURN_TO_SENDER, 0)
+    if mark:
+        left = min(mark, state.player.block)
+        if left > 0:
+            state.player.powers[RETURN_TO_SENDER] = left
+        else:
+            state.player.powers.pop(RETURN_TO_SENDER, None)
+
+    # BLAZING DELIGHT (`EB-724`): "At the start of your turn, gain 1 Energy and
+    # draw 1 card."
+    #
+    # HERE AND NOT AT `turn_start`, for Grounded's reason one power down: the
+    # energy reset and the turn's first draw have already happened at this
+    # site, so an Energy granted here survives and a card drawn here is drawn
+    # ON TOP of the opening hand. At `turn_start` the reset would eat it.
+    #
+    # THE STACK IS THE RATE and both halves read it, so two copies pay 2 and 2
+    # and the upgrade's +1 moves both -- which is the face's own arithmetic and
+    # not a second rule. UNCONDITIONAL: it is a 2-energy Rare that cost 5
+    # Sparks to land, and rule 7 is about nothing going OFF by itself, not
+    # about a Power paying.
+    n = state.player.powers.get(BLAZING_DELIGHT, 0)
+    if n:
+        state.player.energy += n
+        state.emit("ko_blazing_delight", energy=n, cards=n)
+        state.draw(n)
+
     # GROUNDED: "if you have a Bomb on the field, gain N Block and 1 Spark."
     #
     # `EB-516` REPLACED THE CONDITION (Klee r18, packet sec.4 item 1). It used
@@ -955,6 +1019,135 @@ def mark_hand_hexerei(state: CombatState) -> int:
     from tier0.engine import companion_hexerei      # late import: cycle
 
     return companion_hexerei.mark_hand(state)
+
+
+# ---------------------------------------------------------------------------
+# POOL PASS TWO's TWO CARD VERBS (`EB-724`) -- the piles, not the pile
+# ---------------------------------------------------------------------------
+
+def mark_return_to_hand(state: CombatState) -> None:
+    """Blast Shield: "Return this card to your hand."
+
+    A FLAG AND NOT A MOVE, and the difference matters: the card is not in any
+    pile while it resolves (`combat.play_card` takes it out of the hand before
+    `_finish_play` runs), so a move here would be putting a card back that the
+    routing line below is about to place somewhere else. The flag is read at
+    that routing line and lowered there.
+
+    THE C# DOES IT ONE LAYER UP, as a per-class `GetResultLocationForCardPlay`
+    override returning `PileType.Hand` -- the game's own documented seam for
+    "where does this card go when it is played", and the same one
+    `SparksNSplash` uses for the kit rule. Both engines therefore answer the
+    question at the ROUTING, which is the only place either engine can.
+
+    IT DISCARDS AT END OF TURN LIKE ANY CARD. Nothing here grants Retain, so a
+    card returned to hand and not replayed leaves with the rest of the hand;
+    replaying it costs its Spark price again, which is the whole card.
+    """
+    if not live(state):
+        return
+    state.ko_return_to_hand = True
+    state.emit("ko_return_to_hand")
+
+
+def note_set_off_card(state: CombatState, card: Optional[Card]) -> None:
+    """Remember the card whose `set_off` just resolved -- Once More!'s read.
+
+    THE OP SITE AND NOT THE PILE. `set_off` above returns early on an empty
+    board, and a Set off card played into an empty board is still "the last Set
+    off card you played"; so the note is taken where the OP resolves
+    (`effects._op_set_off`) rather than where a charge goes off. The C# takes
+    it at the same place -- the three card-facing entry points
+    `ProtoBombPower.SetOffAimed` / `SetOffAll` / `SetOffRandom`, above their own
+    early returns -- so neither engine can disagree about which card it was.
+
+    A MINE PASSES `None` and is declined here: a Mine answers an intent and is
+    no card, so there is nothing for the player to take back.
+    """
+    if not live(state) or card is None:
+        return
+    state.ko_last_set_off_card = card
+
+
+def return_last_set_off(state: CombatState) -> Optional[Card]:
+    """Once More!: "Return the last Set off card you played this combat to your
+    hand." Returns the card moved, or None.
+
+    DETERMINISTIC AND SILENT, with no prompt: there is one answer and the
+    player already knows it. NOTHING HAPPENS AND THE SPARKS ARE STILL SPENT
+    when the card is not in the discard pile -- exhausted, still in hand, or
+    never played -- because the price is a cost line and a cost line is paid
+    before the body runs (`spend_spark` is the row's first effect). That is the
+    same bargain every Spark-priced row makes and it is not a defect: the card
+    is a Spark SINK for a deck that cashes its detonators.
+
+    BY INSTANCE. Two copies of Ka-pow! are two cards and only one of them was
+    played; an id match would hand back whichever copy the discard pile happens
+    to hold first.
+    """
+    if not live(state):
+        return None
+    card = state.ko_last_set_off_card
+    if card is None:
+        return None
+    pile = state.player.discard_pile
+    for index, held in enumerate(pile):
+        if held is card:
+            pile.pop(index)
+            state.player.hand.append(card)
+            state.emit("ko_once_more", card=card.id)
+            return card
+    return None
+
+
+def block_absorbed(state: CombatState, enemy: Enemy, blocked: int,
+                   block_before: int) -> None:
+    """Return to Sender (`EB-724`): "This turn, damage this Block absorbs is
+    placed on the attacker as a Bomb."
+
+    THE KLEE ARM'S LEG of the one site in this engine that can say "this Block
+    absorbed damage" (`effects.companion_overhaul_block_absorbed`, called from
+    `combat._enemy_turn` immediately after Block is spent). It rides that
+    function rather than a second call site for Diona's and Thoma's reason:
+    `blocked` exists nowhere else, and three readers of one event must read one
+    definition of it.
+
+    THE CONSTRUCTION IS `mc_icy_paws`'s, DOWN TO THE MARKED-FIRST SPEND. One
+    Block pool, so "this Block" is a mark on it, clamped to the standing Block
+    on the way in and spent by whatever the hit absorbed. Marked-first is the
+    conservative reading (R212's one-way rule): the rider fires on FEWER hits
+    than marked-last would, and a single pool cannot say which coin was spent.
+
+    THE CHARGE IS `blocked`, THE WHOLE ABSORBED AMOUNT, and NOT the mark. The
+    face says "damage this Block absorbs"; the mark answers whether the rider
+    is live, and the ruled row does not cap the Bomb at the Block the card
+    granted. An 8-mark eating a 20 therefore plants a 20 and the mark is gone.
+
+    NO PAYOUT BACK UNDER THE MARK, unlike Thoma's: the payout is a charge on the
+    enemy, not Block, so the mark shrinks with every absorption exactly as the
+    paws' does and a multi-hit attack plants one Bomb per absorption while it
+    lasts. THE BOMB IS AN ORDINARY PLANT (`place`) and mints nothing by itself:
+    rule 4 mints a Spark per EXPLOSION, and nothing has gone off here.
+
+    "THIS TURN" NEEDS NO TIMER. The mark is clamped to standing Block, Block is
+    cleared at the start of Klee's next turn, and `turn_start_late` deletes a
+    mark with nothing behind it -- so the rider lives exactly one enemy turn per
+    play. `BlockMark.Absorb` / `ClearIfSpent` is the C# twin of both halves.
+    """
+    if not live(state) or blocked <= 0:
+        return
+    p = state.player
+    mark = min(p.powers.get(RETURN_TO_SENDER, 0), block_before)
+    if mark <= 0:
+        return
+    if enemy.alive:
+        state.emit("ko_return_to_sender", target=enemy.name, size=int(blocked))
+        place(state, enemy, int(blocked))
+    left = mark - blocked
+    if left > 0:
+        p.powers[RETURN_TO_SENDER] = left
+    else:
+        p.powers.pop(RETURN_TO_SENDER, None)
 
 
 # ---------------------------------------------------------------------------

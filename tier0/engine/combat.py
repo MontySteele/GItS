@@ -791,7 +791,23 @@ def _finish_play(state: CombatState, card: Card,
         # all 11 of Ironclad's Power cards (recon BUG 1).
         dest = "exhaust" if force_exhaust else refpowers.result_pile(state,
                                                                      card)
-        if dest == "exhaust":
+        # QUARANTINED (C.KLEE_OVERHAUL, `EB-724`). BLAST SHIELD, and this is
+        # the ONE line of it: the card the arm's `return_to_hand` op raised the
+        # flag for goes back to the HAND instead of the pile the rule above
+        # picked. Read and lowered here, at the routing, because that is the
+        # only place either engine can answer "where does this card go when it
+        # is played" -- the C# twin is a `GetResultLocationForCardPlay`
+        # override returning `PileType.Hand`, the game's own seam for the same
+        # question. A FORCED EXHAUST STILL WINS: an outside effect that
+        # exhausts the card has taken it out of the combat, which is a stronger
+        # claim than the card's own about where it would rather be.
+        if state.ko_return_to_hand:
+            state.ko_return_to_hand = False
+            if dest != "exhaust":
+                dest = "hand"
+        if dest == "hand":
+            p.hand.append(card)
+        elif dest == "exhaust":
             refpowers.exhaust_card(state, card)
         elif dest == "discard":
             p.discard_pile.append(card)
@@ -856,6 +872,12 @@ _FREE_PLAY_CONTEXT = (
     # exhausts mid-resolution opens its own list, and the restore below hands
     # the outer card back the one it was reading.
     "exhaust_selection",
+    # QUARANTINED (C.KLEE_OVERHAUL, `EB-724`). Blast Shield's per-play flag,
+    # saved for its neighbours' reason: a free play resolved inside an outer
+    # card must not hand the OUTER card its answer about where to land. The
+    # inner `_finish_play` lowers the flag it raised, and this restores
+    # whatever the outer play had.
+    "ko_return_to_hand",
     # EB-136 / R210: the play's bound `cardPlay.Target`. A free play is a
     # SECOND `CardPlay` constructed inside the first, with its own target, and
     # `resolve_card`'s `finally` clears the pair on the way out -- so without

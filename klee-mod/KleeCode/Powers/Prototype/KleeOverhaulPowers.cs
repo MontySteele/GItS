@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -541,5 +542,160 @@ public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
         if (AuraCmd.Find(target) != null) return;
         await AuraCmd.Apply(choiceContext, target, aura, applier,
                             cardSource: null);
+    }
+}
+
+/// <summary>
+/// POOL PASS TWO (`EB-724`). Return to Sender: "Gain 8 Block. This turn,
+/// damage this Block absorbs is placed on the attacker as a Bomb."
+///
+/// AMOUNT IS A MARK ON THE BLOCK POOL, and this class is
+/// <see cref="IcyPawsPower"/>'s construction with a charge on the attacker
+/// instead of an aura. The engine has ONE Block pool, so "this Block" cannot be
+/// a separate pile: the power records how much of the standing Block the card
+/// put there, a hit that spends Block spends the mark with it, and the mark is
+/// clamped to the standing Block on the way in. Marked-Block-eaten-FIRST, which
+/// is the conservative reading (R212's one-way rule) -- the rider fires on
+/// FEWER hits than marked-last would, and a single pool cannot say which coin
+/// was spent.
+///
+/// THE CHARGE IS THE WHOLE ABSORBED AMOUNT and NOT the mark that was spent.
+/// The face says "damage this Block absorbs", which is what the hit took off
+/// the pool; the mark answers WHETHER the rider is live and never how big the
+/// Bomb is. The ruled row states no cap, so an 8-mark eating a 20 plants a 20.
+///
+/// "THIS TURN" NEEDS NO TIMER, and that is the point of riding the mark: Block
+/// is cleared at the start of Klee's next turn and
+/// <see cref="AfterPlayerTurnStart"/> removes a mark with nothing behind it, so
+/// the rider lives exactly one enemy turn per play.
+///
+/// THE BOMB IS AN ORDINARY PLANT and mints nothing by itself. Rule 4 mints a
+/// Spark per EXPLOSION and nothing has gone off here; the charge grows, jumps
+/// and is Set off exactly as any other of hers does.
+///
+/// FIRED BY <see cref="CompanionOverhaulIncomingHit"/>, not by a broadcast of
+/// its own -- the three incoming readers already share one listener, and
+/// `blocked` exists nowhere else. Sim twin: <c>klee_overhaul.block_absorbed</c>,
+/// called from <c>effects.companion_overhaul_block_absorbed</c>.
+/// </summary>
+public sealed class ReturnToSenderPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Return to Sender"),
+        // THE STATIC (compendium) ROW CARRIES NO VAR TOKEN -- `EB-353`'s
+        // finding on Thoma's twin, and this power is that construction:
+        // `PowerModel.HoverTips` binds `DynamicVars` on the SMART branch alone,
+        // so a token written here would reach the screen as a placeholder.
+        ("description",
+            "Marks your [gold]Block[/gold]. Damage it absorbs is placed on "
+          + "the attacker as a [gold]Bomb[/gold]."),
+        ("smartDescription",
+            "[blue]{Left}[/blue] [gold]Block[/gold] left. Damage it absorbs "
+          + "is placed on the attacker as a [gold]Bomb[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new BlockMarkVar() };
+
+    /// <summary>The badge is the number the face prints (`EB-337`), which is
+    /// the one the rider pays on.</summary>
+    public override int DisplayAmount => BlockMark.Left(this);
+
+    /// <summary>The housekeeping half, and the whole of the card's "this
+    /// turn": <c>AfterPlayerTurnStart</c> runs after the block clear, so a mark
+    /// with no Block behind it is gone before the player's first decision.
+    /// Sim twin: the clamp at the head of
+    /// <c>klee_overhaul.turn_start_late</c>.</summary>
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner) return;
+        await BlockMark.ClearIfSpent(this);
+    }
+
+    /// <summary>The hit is about to be absorbed. The caller owns the order;
+    /// this owns the arithmetic.</summary>
+    internal async Task Bounce(PlayerChoiceContext choiceContext,
+                               Creature attacker, decimal amount)
+    {
+        // Block is NOT yet spent at BeforeDamageReceived (the Vigil's note in
+        // KuragePowers.cs establishes it), so `Owner.Block` is the standing
+        // Block and `min(Block, amount)` is exactly what will be absorbed --
+        // the sim's `blocked = min(player.block, dmg)`.
+        //
+        // `payout: 0`, the paws' spelling: what this rider pays is a charge on
+        // the attacker and not Block, so there is nothing to put back under the
+        // mark and the spend is the marked-first one it always was.
+        var standing = (int)Owner.Block;
+        var absorbed = System.Math.Min(standing, (int)amount);
+        var left = BlockMark.Absorb((int)Amount, standing, (int)amount,
+                                    payout: 0);
+        if (left == null) return;
+        if (!attacker.IsDead && absorbed > 0)
+        {
+            await ProtoBombPower.Place(
+                choiceContext, attacker, absorbed, isMine: false,
+                payloadMineAll: 0, applier: Owner, cardSource: null);
+        }
+        if (left.Value > 0)
+        {
+            await PowerCmd.ModifyAmount(
+                choiceContext, this, left.Value - (int)Amount,
+                applier: Owner, cardSource: null, silent: true);
+        }
+        else
+        {
+            await PowerCmd.Remove(this);
+        }
+    }
+}
+
+/// <summary>
+/// POOL PASS TWO (`EB-724`). Blazing Delight: "At the start of your turn, gain
+/// 1 Energy and draw 1 card." The arm's first standing ENERGY engine.
+///
+/// THE SITE IS <c>AfterPlayerTurnStart</c>, which is <see cref="GroundedPower"/>
+/// 's and for its reason: the energy reset and the turn's opening draw have
+/// already happened there, so an Energy granted here survives the turn and a
+/// card drawn here is drawn on TOP of the opening hand. At
+/// <c>BeforeSideTurnStart</c> the reset would eat it.
+///
+/// AMOUNT IS A RATE, READ BY BOTH HALVES, so two copies pay 2 and 2 and the
+/// upgrade's +1 moves both -- the face's own arithmetic and not a second rule.
+/// A Counter, like every stacking Power in this arm.
+///
+/// UNCONDITIONAL, and rule 7 is not violated by it: rule 7 says nothing GOES
+/// OFF by itself, which is about charges. A 2-energy Rare that cost 5 Sparks to
+/// land pays every turn, and what it pays is tempo rather than an explosion.
+///
+/// Sim twin: the <c>BLAZING_DELIGHT</c> block in
+/// <c>klee_overhaul.turn_start_late</c>, beside Grounded's.
+/// </summary>
+public sealed class BlazingDelightPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Blazing Delight"),
+        ("description",
+            "At the start of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Energy[/gold] and draw that many cards."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (Owner == null || player.Creature != Owner) return;
+        var n = (int)Amount;
+        if (n <= 0) return;
+        await PlayerCmd.GainEnergy(n, player);
+        await CardPileCmd.Draw(choiceContext, n, player);
     }
 }

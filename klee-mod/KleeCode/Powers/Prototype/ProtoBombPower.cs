@@ -1186,6 +1186,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
         CardModel cardSource, CardPlay cardPlay, decimal damage)
     {
+        // ONCE MORE!'s NOTE (`EB-724`), taken HERE and above every early
+        // return below: "the last Set off card you played this combat" is a
+        // fact about the CARD, so a Set off played into an empty board still
+        // counts. The three card-facing entry points take it and
+        // <see cref="SetOff"/> itself does not, because a Mine reaches that
+        // one with no card at all. Sim twin: `klee_overhaul.note_set_off_card`
+        // at the head of `effects._op_set_off`.
+        KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
         if (target == null) return;
         await SetOff(choiceContext, target, applier, cardSource);
         await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
@@ -1204,6 +1212,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         CardModel cardSource, CardPlay cardPlay, decimal damage,
         bool nonPyroAuraOnly)
     {
+        // ONCE MORE!'s NOTE (`EB-724`), taken HERE and above every early
+        // return below: "the last Set off card you played this combat" is a
+        // fact about the CARD, so a Set off played into an empty board still
+        // counts. The three card-facing entry points take it and
+        // <see cref="SetOff"/> itself does not, because a Mine reaches that
+        // one with no card at all. Sim twin: `klee_overhaul.note_set_off_card`
+        // at the head of `effects._op_set_off`.
+        KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
         var combat = applier.CombatState;
         if (combat == null) return;
 
@@ -1246,6 +1262,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature applier,
         CardModel cardSource, CardPlay cardPlay, decimal damage, int times)
     {
+        // ONCE MORE!'s NOTE (`EB-724`), taken HERE and above every early
+        // return below: "the last Set off card you played this combat" is a
+        // fact about the CARD, so a Set off played into an empty board still
+        // counts. The three card-facing entry points take it and
+        // <see cref="SetOff"/> itself does not, because a Mine reaches that
+        // one with no card at all. Sim twin: `klee_overhaul.note_set_off_card`
+        // at the head of `effects._op_set_off`.
+        KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
         var combat = applier.CombatState;
         if (combat == null) return;
 

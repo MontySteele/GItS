@@ -739,7 +739,11 @@ KLEE_OVERHAUL_OPS = frozenset((
     "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand",
     # THE POOL PASS's three (`EB-491`): All of My Treasures!, Kindling and
     # Split Charge. Same pricing decision as the eleven above.
-    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb"))
+    "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
+    # POOL PASS TWO's two (`EB-724`): Blast Shield's `return_to_hand` and Once
+    # More!'s `return_last_set_off`. Same pricing decision as the fourteen
+    # above -- both are the arm's, and neither resolves off it.
+    "return_to_hand", "return_last_set_off"))
 
 #: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
 #: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
@@ -2426,7 +2430,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "multiply_set_off", "draw_per_set_off",
                   "hexerei_mark_hand",
                   "plant_bomb_copy_largest", "grow_bombs_off_aura",
-                  "split_largest_bomb")},
+                  "split_largest_bomb",
+                  "return_to_hand", "return_last_set_off")},
     # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----
     # EB-311: the blanket ZERO these eight rows used to share is gone. One
     # rationale apiece now, each derived from a dial already in this table, and

@@ -5538,6 +5538,12 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
+    # ONCE MORE!'s NOTE (`EB-724`), taken HERE and above every branch below:
+    # "the last Set off card you played this combat" is a fact about the CARD,
+    # not about a charge, so a Set off played into an empty board still counts.
+    # C# twin: the same note at the head of `ProtoBombPower.SetOffAimed`,
+    # `SetOffAll` and `SetOffRandom`, the three card-facing entry points.
+    klee_overhaul.note_set_off_card(state, card)
     damage = int(fx.get("damage", 0) or 0)
     spec = fx.get("target", "enemy")
 
@@ -5782,6 +5788,32 @@ def _op_hexerei_mark_hand(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.mark_hand_hexerei(state)
 
 
+def _op_return_to_hand(state: CombatState, fx: dict, card: Card) -> None:
+    """Blast Shield (`EB-724`): "Return this card to your hand."
+
+    ONE call into the arm, which raises the per-play flag `combat._finish_play`
+    reads at its routing line -- see `klee_overhaul.mark_return_to_hand` for
+    why the move cannot be made here and for the C# seam that answers the same
+    question one layer up.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.mark_return_to_hand(state)
+
+
+def _op_return_last_set_off(state: CombatState, fx: dict, card: Card) -> None:
+    """Once More! (`EB-724`): the last Set off card played this combat comes
+    back out of the discard pile.
+
+    ONE call into the arm, so "the last Set off card" has one answer: the note
+    is taken in `_op_set_off` above and read here, and the writer and the
+    reader cannot spell the rule differently.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.return_last_set_off(state)
+
+
 # --- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---------
 #
 # THE ARM IS BUILT NOW. It used to refuse the way the Klee arm above still
@@ -6018,6 +6050,11 @@ OPS = {
     # is still the arm's, because the cards that READ the Hexerei family are
     # Klee's -- see `_op_hexerei_mark_hand`.
     "hexerei_mark_hand": _op_hexerei_mark_hand,
+    # POOL PASS TWO's two (`EB-724`), and both are about a CARD rather than a
+    # charge: Blast Shield routes its own play to the hand, Once More! takes
+    # the last Set off card back out of the discard pile.
+    "return_to_hand": _op_return_to_hand,
+    "return_last_set_off": _op_return_last_set_off,
     # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.
@@ -7605,7 +7642,18 @@ def companion_overhaul_block_absorbed(state: CombatState, enemy: Enemy,
     Fires ONCE PER ABSORBING HIT while the mark stands, which is what "when
     this Block absorbs damage" says: it is a trigger on the absorption, not on
     the card and not on the turn.
+    THE KLEE ARM'S ONE READER OF THE SAME EVENT (QUARANTINED,
+    `C.KLEE_OVERHAUL`, `EB-724`) IS FIRST AND HAS ITS OWN FLAG. Return to
+    Sender is the paws' construction with a Bomb on the attacker instead of an
+    aura, and it rides this function rather than a fourth call site because
+    `blocked` exists nowhere else in this engine -- the same argument that put
+    Thoma's barrier here. FIRST, so a board carrying both plants the charge
+    before any mark below it moves; none of the three can change what another
+    sees, because the marks are separate keys and `block_before` is the one
+    number all of them read. The C# listener walks them in this order for the
+    same reason.
     """
+    klee_overhaul.block_absorbed(state, enemy, blocked, block_before)
     if not C.COMPANION_OVERHAUL:
         return
     p = state.player
