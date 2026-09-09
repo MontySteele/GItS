@@ -571,13 +571,13 @@ def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():
     sys.path.insert(0, str(REPO))
     from tools import lint_text_conventions as ltc
     tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
-    sentence = "If this enemy dies with it still on, it moves to a survivor."
+    sentence = "If the enemy dies with it on, it moves to a survivor."
     assert sentence in tips["BombKey"]
     assert sentence in tips["MineKey"]
     # The badge speaks of a PILE, so the same claim in the plural.
     badge = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
              / "ProtoBombPower.cs").read_text(encoding="utf-8")
-    assert (' " If this enemy dies with them still on, they move to a '
+    assert (' " If the enemy dies with them on, they move to a '
             'survivor.";') in badge
     # And the old wording is gone from every one of the three.
     assert "Kills move it on" not in tips["BombKey"]
@@ -615,19 +615,18 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # `EB-536`: the Mine joins the sentence, because the Mine tip
             # printed under it says a Mine also goes off before its enemy's
             # hit and the two contradicted each other on one screen.
-            " a turn, goes off only when [gold]Set off[/gold], or as a ",
+            " a turn, and goes off when [gold]Set off[/gold] or as a ",
             "[gold]Mine[/gold]. ",
             # `EB-555` defined the cap inside the clause that names it.
             # `EB-400`: Block, named in the clause that read as a list of
             # the only two things that touch the hit.
-            "Not an Attack, but [gold]Block[/gold] stops it: only ",
-            "[gold]Vulnerable[/gold] and a cap on the ",
-            "enemy's HP loss move it. ",
+            "[gold]Block[/gold] stops it. Only ",
+            "[gold]Vulnerable[/gold] and the HP cap move it. ",
             # `EB-574` SPELT RULE 3 OUT, in the same words on both tips and
             # the badge: "kills move it on" read as a promise about the charge
             # doing the killing, and the r21 lane-1 seat set off Mine 11,
             # killed Toadpole B and saw nothing arrive on A.
-            "If this enemy dies with it still on, it moves to a survivor.",
+            "If the enemy dies with it on, it moves to a survivor.",
             # `EB-432` named the order INSIDE the pile: `SetOff` walks the
             # charges in placement order and the first one meets the aura,
             # because a reaction consumes it. "Oldest first" carries "one at a
@@ -649,21 +648,16 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "enemy first.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
-            ". Pounding Surprise grants more. ",
             "Gone after combat.",
             # `EB-436`: the clause said WHEN and nothing about the attack,
             # and a seat read mitigation into it. A Mine blunts nothing; the
             # only thing it can do to the hit is stop it happening.
-            "that also goes off before its enemy's hit, ",
-            "which lands in full unless the Mine kills.",
-            # `EB-373`: a Mine IS a Bomb, so the same two terms move it and
-            # the two tips say so in the same words.
-            # `EB-400`: the same three words on the same clause.
-            "[gold]Block[/gold] stops it, and only their ",
-            # `EB-574`: and the Mine tip carries rule 3 too -- a Mine kills
-            # more often than a plain Bomb, so this is the tip the row was
-            # filed on.
-            "[gold]Vulnerable[/gold] and a cap move it. ",
+            "that also goes off just before its enemy's ",
+            "hit, and the hit still lands unless the Mine kills. ",
+            # The Mine's last two sentences are `ForBomb`'s WORD FOR WORD
+            # after the 2026-09-08 trim -- `EB-373`'s two terms, `EB-400`'s
+            # Block and `EB-574`'s rule 3 -- so they are pinned once above
+            # and a Mine reader and a Bomb reader cannot be told two things.
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.

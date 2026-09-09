@@ -42,7 +42,7 @@ public sealed class ProtoKoKindling : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kindling"),
-        ("description", "Each [gold]Bomb[/gold] on an enemy whose aura is not [gold]Pyro[/gold] grows by {Grow:diff()}. If there is none, your largest [gold]Bomb[/gold] grows by {IfUpgraded:show:3|2}."),
+        ("description", "Each [gold]Bomb[/gold] on an enemy with an aura other than [gold]Pyro[/gold] grows by {Grow:diff()}. If there is none, your largest [gold]Bomb[/gold] grows by {IfUpgraded:show:3|2}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

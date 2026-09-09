@@ -109,12 +109,14 @@ EXCEPTIONS = {
         "about the charge doing the killing: the r21 lane-1 seat set off Mine "
         "11, killed Toadpole B, saw nothing arrive on A and filed the screen "
         "as contradicting itself. A Mine kills more often than a plain Bomb "
-        "does, so the tip that already says 'unless the Mine kills' is where "
-        "the other reading has to be closed, and it is closed in the same "
-        "words on all three surfaces. Every other clause is a ruled finding "
-        "-- when it goes off, what the hit does to the attack, and which two "
-        "terms move it (EB-436, EB-373) -- and none is droppable to make "
-        "room"),
+        "does, so the tip that says the hit still lands is where the other "
+        "reading has to be closed, and it is closed in the same words on all "
+        "three surfaces. Every other clause is a ruled finding -- when it "
+        "goes off, what the hit does to the attack, and which two terms move "
+        "it (EB-436, EB-373) -- and none is droppable to make room. The "
+        "2026-09-08 trim ([USER]'s run 2, an E default) took the prose "
+        "around those findings off this tip and off the badge together, and "
+        "every one of them is still on the word"),
     "PlanKey": (
         "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
         "135 of 135. Skittish gave no Block to a body hit by two carry-outs "

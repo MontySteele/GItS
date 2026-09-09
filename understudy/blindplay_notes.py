@@ -1142,11 +1142,18 @@ ARM_KEYWORDS: dict[str, str] = {
     # priced a Set off as unblockable and was wrong (12 into 20 HP behind
     # Block 5 left 13). The `Set off` row two entries down has said "Block
     # stops them" since `EB-443`, so two rows of one glossary disagreed.
-    "Bomb": ("A charge on an enemy: each grows {growth} a turn, goes off "
-             "only when Set off, or as a Mine. Not an Attack, but Block "
-             "stops it: only Vulnerable and a cap on the enemy's HP loss "
-             "move it. If this enemy dies with it still on, it moves to a "
-             "survivor. Your deck opens with a placer."),
+    # TRIMMED 2026-09-08 ([USER]'s run 2, an E default: "a lot of unnecessary
+    # tooltip text that could be trimmed"). Every rule above is still here --
+    # the growth, when it goes off, what stops it, what moves it, the jump to
+    # a survivor -- and what left is the prose around them: the "Not an
+    # Attack" negative the r10/r12 seats misread anyway, "the enemy's HP loss"
+    # where "the HP cap" says the same thing, and the starter line, which is
+    # about the deck rather than the word. Held in step with
+    # `ArmKeywordTips.ForBomb`.
+    "Bomb": ("A charge on an enemy: each grows {growth} a turn, and goes off "
+             "when Set off or as a Mine. Block stops it. Only Vulnerable "
+             "and the HP cap move it. If the enemy dies with it on, it moves "
+             "to a survivor."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
     # walks the charges in placement order and the first one through the
     # funnel meets the aura, because every reaction consumes it -- the r11
@@ -1192,10 +1199,18 @@ ARM_KEYWORDS: dict[str, str] = {
     # body that dies to something else. Same words on both tips and the badge.
     # `EB-400`: the same three words on the same clause, in step with
     # `ArmKeywordTips.ForMine`. A Mine IS a Bomb.
-    "Mine": ("A Bomb that also goes off before its enemy's hit, which lands "
-             "in full unless the Mine kills. Their Block stops it, and only "
-             "their Vulnerable and a cap move it. If this enemy dies with it "
-             "still on, it moves to a survivor."),
+    # TRIMMED 2026-09-08 with the Bomb row, same E default and same rules kept:
+    # "just before" carries the order the old clause spent a subordinate on,
+    # "the hit still lands" is `EB-436`'s finding in four words, and the last
+    # two sentences are `ForBomb`'s word for word so no two rows of one screen
+    # can be read against each other. Held in step with `ArmKeywordTips.ForMine`.
+    # RESTORED 2026-09-08: the trim had dropped "unless the Mine kills" and
+    # Klee r25 lane 1 (c) 1 read the flat sentence as a promise the hit comes
+    # even when the Mine kills, and gambled 9 HP on it twice.
+    "Mine": ("A Bomb that also goes off just before its enemy's hit, and the "
+             "hit still lands unless the Mine kills. Block stops it. Only "
+             "Vulnerable and the HP cap move it. If the enemy dies with it "
+             "on, it moves to a survivor."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
     # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5
@@ -1330,7 +1345,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # never learned what the word meant. Held in step with
     # `ArmKeywordTips.ForOz`.
     "Oz": ("Fischl's raven, out while you hold the Power Oz, at Your Side. "
-           "He hits at the end of your turn while he is out."),
+           "He makes an Electro hit at the end of your turn while he is "
+           "out."),
     # FURINA, THE STAGE (`EB-723`, R269). The reframe's three -- Deploy, Evoke
     # and Drain -- left this table with the eleven `proto_fr_` rows that
     # printed them: R213 B's deletion rule took the rows off the surface, and a

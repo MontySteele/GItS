@@ -56,7 +56,7 @@ public sealed class ProtoMcDionaShakenNotPurred : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diona — Shaken, Not Purred"),
-        ("description", "[gold]Hexerei[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] twice. If a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "[gold]Hexerei[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] twice to an enemy. If a [gold]Bomb[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

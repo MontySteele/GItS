@@ -83,9 +83,9 @@ public class KleeOverhaulRoundOneFixTests
         Assert.EndsWith(".smartDescriptionMines", LocKey(pile));
 
         var face = Row(pile, "smartDescriptionMines");
-        Assert.Contains("[gold]Mine[/gold] also goes off before this enemy's "
-                        + "hit, which lands in full unless the Mine kills.",
-                        face);
+        Assert.Contains("[gold]Mine[/gold] also goes off just before this "
+                        + "enemy's hit, and the hit still lands unless the "
+                        + "Mine kills.", face);
     }
 
     [Fact]
@@ -119,15 +119,16 @@ public class KleeOverhaulRoundOneFixTests
             mined.Replace(", including [blue]{Mines}[/blue] "
                           + "[gold]Mine{Mines:plural:|s}[/gold]", string.Empty)
                  .Replace("growing at your turn's start.", "growing each turn.")
-                 .Replace(" A [gold]Mine[/gold] also goes off before this enemy's "
-                          + "hit, which lands in full unless the Mine kills.",
+                 .Replace(" A [gold]Mine[/gold] also goes off just before "
+                          + "this enemy's hit, and the hit still lands unless "
+                          + "the Mine kills.",
                           " None goes off by itself."));
         // And the static tooltip carries the identical sentence -- one clause,
         // two surfaces, which is what stopped them disagreeing in the first
         // place.
         Assert.EndsWith(
-            "[gold]Mine[/gold] also goes off before this enemy's hit, which "
-            + "lands in full unless the Mine kills.",
+            "[gold]Mine[/gold] also goes off just before this enemy's hit, "
+            + "and the hit still lands unless the Mine kills.",
             Row(pile, "description"));
     }
 

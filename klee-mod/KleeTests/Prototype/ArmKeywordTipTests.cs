@@ -75,9 +75,14 @@ public class ArmKeywordTipTests
             // Pounding Surprise, and the tip names the relic instead of
             // restating it: two statements of one income is what the r4 seat
             // double-counted (`EB-291`).
+            // TRIMMED 2026-09-08 ([USER]'s run 2, an E default): the
+            // relic pointer left the word. The relic's own face is where the
+            // per-explosion rate has always been stated, so nothing about the
+            // income stopped being printed -- the tip stopped pointing at it.
             Assert.Contains(
                 "Start each combat with " + KleeOverhaulLaw.OpeningSpark
-                + ". Pounding Surprise grants more.", body);
+                + ". Gone after combat.", body);
+            Assert.DoesNotContain("Pounding Surprise", body);
             Assert.DoesNotContain("whenever a [gold]Bomb[/gold] goes off",
                                   body);
             Assert.Contains("Gone after combat.", body);
@@ -243,7 +248,11 @@ public class ArmKeywordTipTests
         // The tip goes over its ceiling for it and `BombKey` is carried in
         // `tools/lint_text_conventions.py` by name with that reason.
         Assert.Contains("A charge on an enemy: grows ", printed);
-        Assert.Contains(" a turn, goes off only when [gold]Set off[/gold], "
+        //
+        // TRIMMED 2026-09-08 ([USER]'s run 2, an E default: "a lot of
+        // unnecessary tooltip text that could be trimmed"). Every rule read
+        // back here is still on the word; what left is the prose around them.
+        Assert.Contains(" a turn, and goes off when [gold]Set off[/gold] "
                       + "or as a [gold]Mine[/gold]. ", printed);
         // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
         // and it reads two things off the target -- Vulnerable, and whichever
@@ -256,15 +265,19 @@ public class ArmKeywordTipTests
         // printed on two tips of one screen and defined on neither.
         // `EB-400` NAMED BLOCK in the same clause: the list read as the only
         // two things that touch the hit, and Block was outside it.
-        Assert.Contains("Not an Attack, but [gold]Block[/gold] stops it: only "
-                      + "[gold]Vulnerable[/gold] and a cap on the ", printed);
-        Assert.Contains("enemy's HP loss move it.", printed);
+        // The 2026-09-08 trim dropped the "Not an Attack" negative, which
+        // two seats misread anyway, and says "the HP cap" where the clause
+        // used to spend a phrase on whose HP it is.
+        Assert.Contains("[gold]Block[/gold] stops it. Only "
+                      + "[gold]Vulnerable[/gold] and the HP cap move it.",
+                        printed);
+        Assert.DoesNotContain("Not an Attack", printed);
         // `EB-574` SPELT RULE 3 OUT. "Kills move it on" read as a promise
         // about the charge doing the killing: the r21 lane-1 seat set off
         // Mine 11, killed Toadpole B and saw nothing arrive on A. Same words
         // here, on the Mine tip and on the badge, so no two can be read
         // against each other.
-        Assert.Contains("If this enemy dies with it still on, it moves to a "
+        Assert.Contains("If the enemy dies with it on, it moves to a "
                       + "survivor.", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a
