@@ -105,6 +105,10 @@ packet is the argument and this is the register.
 currency, its income stays, and pool pass two gives it Block, cards and Energy
 to buy, priced against Regent's Stars. The packet is in `review/ruled/`.
 
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `klee-opening-bank 5.1` | **CHOOSE** the opening Spark bank, round 26 finding the pass's Regent prices bind only on turn one where the bank is 1: (1, default) open every combat at 3 Sparks (Regent's Divine Right), rule 4 changes, [USER] plays; (2) reprice the six sinks to Klee's bank (1/1/1+1/2/2/4), rule 4 untouched; (3) as it is, one more lane. -> review/active/klee-overhaul-round-26-2026-09-08.md | OPEN (gate: [USER] picks) | Klee r26; pass two; R270 |
+
 → **`review/ruled/sitting-2026-08-30.md` is CLOSED by R224 (2026-08-30).**
 Every row it covered has left this register — `M47`, `M49`, `M50`, `M52`,
 `M54`, `M55`, `M56`, `M57`, `M59`, `M60`, `M64` — along with the Klee round-2
