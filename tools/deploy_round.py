@@ -22,9 +22,14 @@ Two of those steps have a decision in them that gets taken wrong:
 
 THE ARMS are `deploy_proto.ps1`'s own switches, named here in lower case:
 `klee` -> `-KleeOverhaul`, `companion` -> `-CompanionOverhaul`, `kokomi` ->
-`-KokomiOverhaul`, `furina` -> `-FurinaReframe`. They are independent and the
-supported dev build carries all of them; a dev build always carries the
+`-KokomiOverhaul`, `furina` -> `-FurinaReframe`, `furina-stage` ->
+`-FurinaStage`. They are independent and a dev build always carries the
 prototype surface, because that is what `deploy_proto.ps1` IS.
+
+THE TWO FURINA ARMS ARE THE ONE PAIR THAT IS NOT INDEPENDENT. `furina-stage`
+is `furina`'s SUCCESSOR (the Stage brief sec.2 retires the reframe, R269), so
+passing both gives one Furina two engines -- the script says so in red and
+`EB-722` is what ends the pairing. Pass one.
 
 IT REFUSES WHILE THE GAME IS UP, by image name and for the same reason the
 script does: one install means ONE deployed build for every lane, so a second
@@ -48,6 +53,7 @@ ARMS = {
     "companion": "-CompanionOverhaul",
     "kokomi": "-KokomiOverhaul",
     "furina": "-FurinaReframe",
+    "furina-stage": "-FurinaStage",
 }
 
 PCK = "klee-mod/assets/klee.pck"
