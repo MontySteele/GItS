@@ -460,11 +460,20 @@ public static class ArmKeywordTips
     /// comma rather than standing alone, which is where the fifth sentence
     /// would have been. The two facts `EB-436` asked for are both still
     /// printed and neither is a subordinate clause any more.
+    ///
+    /// AND THE EXCEPTION CAME BACK 2026-09-08. The trim above dropped
+    /// `EB-436`'s other half -- the hit lands in full UNLESS THE MINE KILLS,
+    /// which is `EB-336`'s `Preempted` -- and left a flat "the hit still
+    /// lands". Klee r25 lane 1 (c) 1 read that as a promise the attack comes
+    /// even when the Mine kills and gambled 9 HP on the other reading; the
+    /// Mine killed twice and no hit landed. The four words are back on the
+    /// same clause, so the sentence count is unchanged and the length rides
+    /// the `MineKey` exception it already had.
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off just before its enemy's "
-          + "hit, and the hit still lands. "
+          + "hit, and the hit still lands unless the Mine kills. "
           // `EB-400`, the same three words on the same clause: a Mine IS a
           // Bomb, so a tip that lists what moves the hit and leaves Block out
           // reads as Block immunity here for the same reason.

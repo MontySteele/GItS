@@ -188,7 +188,12 @@ public class Round12Tests
         // TRIMMED 2026-09-08 ([USER]'s run 2, an E default): the same
         // finding in four words, and it is a sentence of its own now rather
         // than a subordinate clause hanging off the trigger.
-        Assert.Contains("the hit still lands", MineTip());
+        // AND THE EXCEPTION IS HALF THE FINDING (`EB-719`). The trim left
+        // "the hit still lands" flat, and Klee r25 lane 1 (c) 1 read that as
+        // a promise the attack comes even when the Mine kills -- it does not
+        // (`EB-336`, `Preempted`) -- and gambled 9 HP on it twice.
+        Assert.Contains("the hit still lands unless the Mine kills",
+                        MineTip());
         Assert.DoesNotContain("before the hit lands", MineTip());
     }
 
@@ -218,7 +223,7 @@ public class Round12Tests
         {
             Assert.Contains(
                 "goes off just before this enemy's hit, and the hit still "
-              + "lands.",
+              + "lands unless the Mine kills.",
                 rows.First(r => r.Item1 == key).Item2);
         }
     }

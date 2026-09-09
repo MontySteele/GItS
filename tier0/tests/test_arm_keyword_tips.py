@@ -644,7 +644,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # and a seat read mitigation into it. A Mine blunts nothing; the
             # only thing it can do to the hit is stop it happening.
             "that also goes off just before its enemy's ",
-            "hit, and the hit still lands. ",
+            "hit, and the hit still lands unless the Mine kills. ",
             # The Mine's last two sentences are `ForBomb`'s WORD FOR WORD
             # after the 2026-09-08 trim -- `EB-373`'s two terms, `EB-400`'s
             # Block and `EB-574`'s rule 3 -- so they are pinned once above

@@ -199,9 +199,15 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <see cref="KleeMod.Cards.ArmKeywordTips.ForMine"/>'s own, so the badge
     /// and the word cannot be read against each other. "This enemy" is the
     /// one difference and it is the badge's whole subject.</summary>
+    /// <summary>THE EXCEPTION RESTORED 2026-09-08. The trim had dropped
+    /// `EB-436`'s "unless the Mine kills" (`EB-336`'s <see cref="Preempted"/>)
+    /// and Klee r25 lane 1 (c) 1 read the flat sentence as a promise the hit
+    /// comes even on a kill. Held word for word with
+    /// <see cref="KleeMod.Cards.ArmKeywordTips.ForMine"/>, still one
+    /// sentence.</summary>
     private const string MineClause =
         " A [gold]Mine[/gold] also goes off just before this enemy's hit, "
-      + "and the hit still lands.";
+      + "and the hit still lands unless the Mine kills.";
 
     // `EB-343`'s sentence is written INTO the static description above rather
     // than pulled out as a constant beside `MineClause`, and the reason is the
