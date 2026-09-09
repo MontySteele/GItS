@@ -133,13 +133,17 @@ every arm ships OFF in a release package). **Last RELEASE package:
   Next round: the depth of the current pool's Plan interactions, with Scout
   Ahead and Slack Water on the lane, before any access card is drafted.
 - **Furina.** The reframe (R220 A) ran 16 seat rounds on the arm and one
-  [USER] act-1 run whose notes were all interface (`EB-627`–`EB-629` built,
-  one eyes-on owed on the next deploy). On 2026-09-07 [USER] reset the kit
-  to its identity: three concepts (A the Tide, B the Arkhe, C the Flood),
-  **A taken as the working theory** the same night; the deeper sketch under
-  A carries **five picks, [USER]'s**, one of them a C pick on the healing
-  exception (PR #443; #433 is superseded by it and closes on its pick 2).
-  No build until the picks.
+  [USER] act-1 run whose notes were all interface. On 2026-09-07 [USER]
+  reset the kit to its identity, and on 2026-09-08 the design sitting
+  re-founded it as **the Stage**: three performers as pets with visible
+  bars, Fanfare IS the bar, damage order Block / lead / Furina per attack,
+  Spend from the lead, a bow on Spend only, no Burst bar
+  (`review/active/furina-stage-brief-2026-09-08.md`, draft 2 after GPT's
+  read). **R269 (2026-09-08)** ruled its three picks: build it, the healing
+  law gets the pet clause (`LAW.md`), the concepts packet and #433 close.
+  Encore, the Spotlight, the Fanfare counter and the reframe arm retire
+  under it. **No pick open.** Building: `EB-724` (engine), `EB-725` (C#),
+  `EB-723` (batch-one pool), then seat round one on the brief's questions.
 - **Control run** — R250 pick 4: the same Opus seat family playing base
   Ironclad died on the act-1 boss twice (`review/records/control-ironclad-2026-09-04.md`);
   a kit clear on a 30-row pool is consistency as much as strength.

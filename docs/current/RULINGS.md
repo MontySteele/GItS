@@ -278,11 +278,11 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R266 | 2026-09-07 | the two-Plan cap is retired as a rule; the free turn is priced by the faces, not by a throughput limit | `9ea662f` |
 | R267 | 2026-09-08 | (2026-09-08): GPT audit of the Kokomi passes fact-checked; | `0a94db2` |
 | R268 | 2026-09-08 | (2026-09-08): the Plan-less hand is answered nowhere for now; the next Kokomi round reads the pool's Plan depth before any access card | `d4e707e` |
-| R270 | 2026-09-08 | (2026-09-08): what Spark is for, option 1; Spark is a currency, its income stays, and pool pass two gives it things to buy, Regent's Stars the comparison | `add2d4f` |
+| R269 | 2026-09-08 | (2026-09-08): Furina is the Stage; build it, the healing law gets the pet clause, the Tide and the concepts close | `a051eaf` |
 
-268 rows over the R1..R270 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 157 from a commit message, 0 unresolved.
+268 rows over the R1..R269 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 157 from a commit message, 0 unresolved.
 
-2 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28, R269.
+1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
 Ledger retrieval point: `3907837` (tag `pre-simplification-2026-08-06`); ledger paths `tier0/DECISIONS.md`, `tier0/DECISIONS-archive-R39-R99.md`, `klee-mod/DECISIONS.md`.
 

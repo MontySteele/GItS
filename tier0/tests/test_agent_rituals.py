@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import os
 import subprocess
 import sys
@@ -488,6 +489,21 @@ def test_deploy_round_maps_the_arms_to_the_scripts_own_switches():
         encoding="utf-8")
     for arm, switch in deploy.ARMS.items():
         assert f"[switch]${switch[1:]}" in script, (arm, switch)
+        # AND THE SWITCH IS ACTUALLY PASSED, which the name alone does not
+        # say: a parameter the script declares and never puts on `$buildArgs`
+        # is an arm the round can ask for and cannot get.
+        assert f"$buildArgs += '-p:{switch[1:]}=true'" in script, (arm, switch)
+
+    # THE DENOMINATOR, the other way round: every arm switch the script
+    # declares has a name a round can pass. A switch with no entry in `ARMS`
+    # is an arm nobody can reach from the one wrapper that drives a deploy.
+    declared = set(re.findall(r"\[switch\]\$(\w+)", script))
+    # `-Package` and the pck/test flags are not arms; the arms are exactly the
+    # ones whose name ends in an arm word.
+    arms_in_script = {d for d in declared
+                      if d.endswith(("Overhaul", "Reframe", "Stage"))}
+    assert arms_in_script == {s[1:] for s in deploy.ARMS.values()}, (
+        sorted(arms_in_script), sorted(deploy.ARMS.values()))
 
 
 def test_deploy_round_refuses_from_a_worktree_or_names_the_main_checkout():

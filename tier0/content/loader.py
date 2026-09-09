@@ -18,7 +18,7 @@ from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.engine import companion_standins
-from tier0.engine import furina_reframe
+from tier0.engine import furina_reframe, furina_stage
 from tier0.engine import state as state_mod
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
@@ -1262,6 +1262,45 @@ def _starter_ids(spec: dict) -> list[str]:
                     f"furina reframe: {drop!r} is not in the printed starter, "
                     f"so the {add!r} substitution has nothing to replace")
             ids[ids.index(drop)] = add      # ONE copy: `.index` is the first
+
+    # FURINA, THE STAGE (`EB-723`, brief sec.7 and sec.12), THREE
+    # substitutions, and they are the reframe branch above one arm over with
+    # one difference worth naming: this arm swaps all THREE of her kit
+    # starters, not one. The brief's opening ten is "three Soloist's
+    # Solicitation, three Stage Presence, Regal Bearing, all the base game's
+    # basics and untouched; plus Salon Début, Curtain Rise, Standing Ovation",
+    # so the seven basics stay exactly as printed and the three kit slots take
+    # the arm's own cards.
+    #
+    # THE SEVEN BASICS ARE NEVER TOUCHED, and that is a standing rule rather
+    # than this map's discretion: a starter basic changes only on an A pick,
+    # never on an arm's default. The map is on `furina_stage.STARTER_SUBS`;
+    # the flag is that module's rather than `constants.py`'s, for the reason
+    # its own header gives. The raise is the branch above's raise: a swap with
+    # nothing to replace is a silent no-op nobody would notice until a smoke
+    # ran.
+    #
+    # AND THE TWO FURINA ARMS DO NOT STACK. They are alternatives, not layers
+    # -- the Stage retires the Fanfare meter the reframe's Aria reads and the
+    # Salon its named Début deploys -- so this branch is written to run AFTER
+    # the reframe's and its own substitutions win where both flags are somehow
+    # on, which is the shape `_starter_ids` already uses for Klee's two and
+    # Kokomi's two. `salon_debut` is named by BOTH maps, so the raise below
+    # would fire on the second pass; it is looked up by VALUE-independent
+    # membership for that reason.
+    if (character == furina_stage.CHARACTER
+            and furina_stage.FURINA_STAGE):
+        for drop, add in furina_stage.STARTER_SUBS.items():
+            if drop in ids:
+                ids[ids.index(drop)] = add   # ONE copy: `.index` is the first
+            elif furina_reframe.STARTER_SUBS.get(drop) in ids:
+                # The reframe branch above already swapped this slot out.
+                # Take it back: the Stage's starter is the printed one.
+                ids[ids.index(furina_reframe.STARTER_SUBS[drop])] = add
+            else:
+                raise ValueError(
+                    f"furina stage: {drop!r} is not in the printed starter, "
+                    f"so the {add!r} substitution has nothing to replace")
     return ids
 
 
@@ -1347,6 +1386,13 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
         # `furina_reframe`'s own header gives -- a reframe flag is quarantined
         # machinery and must not reach the constant census.
         return dict(furina_reframe.POOL_SUBS)
+    # THE FOURTH ARM (`EB-723`), and the Stage WINS where both Furina flags are
+    # somehow on, for the reason `_starter_ids` gives at the same seam: the two
+    # are alternatives and not layers. Tested after the reframe so that
+    # ordering is stated by the code rather than assumed.
+    if (character == furina_stage.CHARACTER
+            and furina_stage.FURINA_STAGE):
+        return dict(furina_stage.POOL_SUBS)
     return {}
 
 
@@ -1367,6 +1413,7 @@ def declared_pool_substitutions() -> dict[str, str]:
     subs: dict[str, str] = dict(C.SPARK_ALT_POOL_SUBS)
     subs[C.KURAGE_MEMORY_POOL_DROP] = C.KURAGE_MEMORY_POOL_ADD
     subs.update(furina_reframe.POOL_SUBS)
+    subs.update(furina_stage.POOL_SUBS)
     return subs
 
 
@@ -1392,6 +1439,7 @@ def declared_starter_substitutions() -> dict[str, str]:
     subs: dict[str, str] = dict(C.SPARK_ALT_STARTER_SUBS)
     subs[C.KURAGE_MEMORY_STARTER_DROP] = C.KURAGE_MEMORY_STARTER_ADD
     subs.update(furina_reframe.STARTER_SUBS)
+    subs.update(furina_stage.STARTER_SUBS)
     return subs
 
 

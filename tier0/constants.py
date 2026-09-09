@@ -402,7 +402,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_flash_point",
     "proto_ko_vermillion_pact",
     "proto_ko_split_charge",
-    # POOL PASS TWO (2026-09-08, `EB-724`). Six rows in three pairs, and the
+    # POOL PASS TWO (2026-09-08, `EB-730`). Six rows in three pairs, and the
     # pairs are the shelves they extend rather than a new archetype:
     #
     #   * THE DEFENCE SHELF's two. Blast Shield is a Block the hand keeps --

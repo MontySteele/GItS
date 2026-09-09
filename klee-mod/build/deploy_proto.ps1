@@ -142,7 +142,23 @@ param(
     # nations' companion pools, the Kokomi arm replaces her starter, relic and
     # pool, and this one changes FURINA's engine. The four sets do not
     # intersect.
-    [switch]$FurinaReframe
+    [switch]$FurinaReframe,
+    # THE FURINA STAGE ARM (the brief
+    # review/active/furina-stage-brief-2026-09-08.md, R269: sec.3 the rules,
+    # sec.12 the seventeen faces). Adds -p:FurinaStage=true to the build
+    # below, which is the ONLY thing that turns the arm on: without it a dev
+    # build compiles the arm's types and never reaches them, and Furina's
+    # starter, her starting relic, her offerable pool and her damage pipeline
+    # are exactly what they ship. Sim twin: tier0/engine/furina_stage.py's
+    # FURINA_STAGE, which ships False.
+    #
+    # IT IS THE REFRAME'S SUCCESSOR AND NOT ITS SIBLING, which is the one way
+    # this switch differs from the four above it. The brief's sec.2 retires
+    # FurinaReframe by name; the two stand side by side only until EB-726
+    # finishes that retirement, and passing BOTH is a configuration of the
+    # compiler rather than of the design -- it gives one Furina two engines.
+    # Pass one. The banner below says so in red if both are set.
+    [switch]$FurinaStage
 )
 
 $ErrorActionPreference = 'Stop'
@@ -226,6 +242,7 @@ if ($KleeOverhaul) { $arms += 'the Klee overhaul arm' }
 if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
 if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
 if ($FurinaReframe) { $arms += 'the Furina reframe arm' }
+if ($FurinaStage) { $arms += 'the Furina stage arm' }
 $armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
 
 # EB-161, on deploy.ps1's terms exactly: computed BEFORE the build because the
@@ -244,6 +261,7 @@ if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
 if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
 if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
 if ($FurinaReframe) { $buildArgs += '-p:FurinaReframe=true' }
+if ($FurinaStage) { $buildArgs += '-p:FurinaStage=true' }
 $buildArgs += $stamp.BuildArgs
 & dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
@@ -310,6 +328,29 @@ if ($FurinaReframe) {
     Write-Host "  Encore spent, Encore absorbed and Center Stage all pay 0." -ForegroundColor Magenta
     Write-Host "  Center Stage retires; the selector aims Guest Cast for" -ForegroundColor Magenta
     Write-Host "  Encore. Her sheet is UNCHANGED -- this arm is engine only." -ForegroundColor Magenta
+}
+
+if ($FurinaStage) {
+    Write-Host ""
+    Write-Host "*** FURINA STAGE ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  Three performers stand in front of her as PETS with their" -ForegroundColor Magenta
+    Write-Host "  own visible bars, front/middle/back. Salon Solitaire opens" -ForegroundColor Magenta
+    Write-Host "  every combat with the Usher in front at 3 Fanfare." -ForegroundColor Magenta
+    Write-Host "  DAMAGE ORDER, per attack: her Block, then the LEAD's bar," -ForegroundColor Magenta
+    Write-Host "  then her. It never runs on to the middle seat, so one big" -ForegroundColor Magenta
+    Write-Host "  hit and a flurry are answered differently." -ForegroundColor Magenta
+    Write-Host "  Spend pays the lead and fires IN FULL even when the lead" -ForegroundColor Magenta
+    Write-Host "  cannot afford it; that empties the lead and it Bows." -ForegroundColor Magenta
+    Write-Host "  Her starter is three kit cards and fourteen pool rows are" -ForegroundColor Magenta
+    Write-Host "  swapped one for one. The REST of her pool still prints" -ForegroundColor Magenta
+    Write-Host "  Encore and the shipped Salon, so a run drafts a MIXED sheet" -ForegroundColor Magenta
+    Write-Host "  by construction -- batch one, brief sec.12." -ForegroundColor Magenta
+    if ($FurinaReframe) {
+        Write-Host "  *** BOTH FURINA ARMS ARE ON, and that is not a supported" -ForegroundColor Red
+        Write-Host "      configuration of the design: the Stage brief sec.2" -ForegroundColor Red
+        Write-Host "      retires the reframe, so this build has given one" -ForegroundColor Red
+        Write-Host "      Furina two engines. Pass one." -ForegroundColor Red
+    }
 }
 
 if ($version.IsDirty) {

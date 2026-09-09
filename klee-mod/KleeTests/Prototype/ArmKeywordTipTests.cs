@@ -535,7 +535,36 @@ public class ArmKeywordTipTests
         // Plan out at the end of the turn it was written on, before the
         // enemies act. A word of its own rather than a sixth clause on the
         // Plan tip, which is at its ceiling and carries five seats' findings.
-        Assert.Equal(21, attaches.Count);
+        //
+        // THE TWENTY-SECOND TO THE TWENTY-EIGHTH ARE `EB-723`'s, and they
+        // arrive as a set because the Stage brief's sec.12 names them as one:
+        // "Tips the faces need: Spend, Fanfare (the bar), Raise, Bow, the
+        // lead, the back performer, Rotate". Each is a rule the SHIPPED engine
+        // does not have -- a shipped Fanfare is a METER and this one is a
+        // performer's own bar -- so all seven belong on this quarantined
+        // surface and none is a shipped keyword. Two of them are two words on
+        // purpose: what `lead performer` and `back performer` carry is a rule
+        // about WHICH SEAT, and a tip on the bare word "lead" would fire on
+        // prose that meant something else.
+        //
+        // TWENTY-FIVE SINCE `EB-723`, and it was twenty-one. THREE LEFT and
+        // SEVEN ARRIVED. `ForDeploy`, `ForEvoke` and `ForDrain` went with the
+        // reframe's eleven `proto_fr_` rows under R213 B's deletion rule -- a
+        // tooltip for a rule no row prints is a definition of a mechanic that
+        // is not there. The seven are the Stage brief's own list (sec.12):
+        // `Spend`, `Fanfare`, `Raise`, `Bow`, `lead performer`, `back
+        // performer` and `Rotate`, each naming a rule the shipped engine does
+        // not have. `ForEncore` survived the cut and became the SIXTH attach
+        // here that titles no keyword: no prototype face prints the word any
+        // more, and every Furina row the Stage does not swap still does.
+        Assert.Equal(25, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForSpend");
+        Assert.Contains(attaches, m => m.Name == "ForFanfare");
+        Assert.Contains(attaches, m => m.Name == "ForRaise");
+        Assert.Contains(attaches, m => m.Name == "ForBow");
+        Assert.Contains(attaches, m => m.Name == "ForLeadPerformer");
+        Assert.Contains(attaches, m => m.Name == "ForBackPerformer");
+        Assert.Contains(attaches, m => m.Name == "ForRotate");
         Assert.Contains(attaches, m => m.Name == "ForDusk");
         Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");

@@ -45,7 +45,7 @@ public sealed class ProtoKoBlastShield : CustomCardModel, ISparkPricedCard
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. Return this card to your hand."),
     };
 
-    // `EB-724`, Blast Shield: the played card goes back to the HAND
+    // `EB-730`, Blast Shield: the played card goes back to the HAND
     // instead of the discard pile. `GetResultLocationForCardPlay` is
     // the game's own seam for where a played card lands (see
     // `SparksNSplash` for the kit rule and the v0.111.0 port), and the

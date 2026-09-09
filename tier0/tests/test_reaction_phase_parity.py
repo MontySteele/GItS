@@ -779,6 +779,21 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
+        ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
+            "QUARANTINED (the Furina stage, FURINA_STAGE). RULE 4: the LEAD "
+            "performer regains 1 Fanfare, from her second turn on. THE "
+            "ORDERING QUESTION, answered: the only thing it WRITES is the "
+            "front seat's bar in `FurinaStageLedger`, a per-Furina per-combat "
+            "table whose only other writers are a card play, a summon and the "
+            "damage hook -- none of which is a co-tenant of this broadcast -- "
+            "and no co-tenant reads that table at all. What it READS is the "
+            "seat's own `PlayerCombatState.TurnNumber`, which the engine sets "
+            "before any tenant runs and which nothing in the mod writes. It "
+            "deals no damage, grants no Block and touches no element, so it "
+            "shares no resource with `KleeElementalHooks` (the opening Spark "
+            "and Encore) or with the Companion powers beside it. NO SIM TWIN "
+            "ORDERS IT, because the arm is C# FIRST by "
+            "`docs/current/operations/prototype.md` and tier0 has no stage",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
             "resolution point: the Plans she wrote last turn happen here, in "
@@ -808,7 +823,7 @@ CO_TENANCY_LEDGER = {
             "explosion, both of which are strictly later than this broadcast, "
             "so no co-tenant can move the number it reads",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "ReturnToSenderPower"):
-            "QUARANTINED (the Klee overhaul, `EB-724`). The BLOCK-MARK "
+            "QUARANTINED (the Klee overhaul, `EB-730`). The BLOCK-MARK "
             "housekeeping half, IcyPawsPower's construction and its answer: "
             "it removes itself when no Block stands behind the mark. THE "
             "ORDERING QUESTION, answered: it reads Owner.Block and writes "
@@ -821,7 +836,7 @@ CO_TENANCY_LEDGER = {
             "broadcast applies the mark, only a card play does, and a card "
             "play is strictly later",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BlazingDelightPower"):
-            "QUARANTINED (the Klee overhaul, `EB-724`). Per-turn Energy plus "
+            "QUARANTINED (the Klee overhaul, `EB-730`). Per-turn Energy plus "
             "one draw per stack. THE ORDERING QUESTION, answered: it reads "
             "nothing but its own Amount, so no co-tenant can move an input it "
             "does not have. It WRITES energy and the hand -- the energy reset "
@@ -1033,6 +1048,29 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
+        ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
+            "QUARANTINED (the Furina stage, FURINA_STAGE). RULE 10: each "
+            "performer on the stage performs a FLAT act -- Usher 3 Block to "
+            "Furina, Chevalmarin 2 to every enemy plus Hydro, Crabaletta 5 to "
+            "a random enemy -- front to back. THE ORDERING QUESTION, answered "
+            "rather than assumed, because unlike the two tenants below it this "
+            "one both grants Block and deals damage. What it READS is the "
+            "stage ledger, which no co-tenant of this broadcast reads or "
+            "writes. What it WRITES is Furina's Block and Hydro hits, and the "
+            "co-tenant that also writes those is `TurnEndSequencer`, whose "
+            "four sources are the SHIPPED Furina kit (the Salon volley, the "
+            "Curtain Call powers) -- and under this arm none of them can be on "
+            "the board: the arm's starter carries no Deploy, her starting "
+            "relic is Salon Solitaire rather than the Spotlight, and the "
+            "shipped Salon powers are applied by cards the arm does not deal. "
+            "Klee's two quarantined tenants below belong to a different "
+            "character and cannot share a seat with this one. If a future pool "
+            "ever put a shipped Salon card back in an arm deck, the "
+            "interaction is additive Block and an enemy dying out of a "
+            "candidate list this hook re-reads per act. AFTER the sequencer in "
+            "`KleeMod`'s concat, deliberately, so an act cannot move a number "
+            "the shipped end-of-turn docket has already drawn. NO SIM TWIN "
+            "ORDERS IT: the arm is C# FIRST and tier0 has no stage",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
             "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, and it is "
             "[USER]'s own 2026-09-02 design: one random BOMBED enemy takes "

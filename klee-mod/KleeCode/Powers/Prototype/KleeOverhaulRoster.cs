@@ -287,7 +287,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoFlashPoint>(),
         ModelDb.Card<ProtoKoVermillionPact>(),
         ModelDb.Card<ProtoKoSplitCharge>(),
-        // POOL PASS TWO (2026-09-08, `EB-724`). SIX rows in three pairs, in
+        // POOL PASS TWO (2026-09-08, `EB-730`). SIX rows in three pairs, in
         // `C.KLEE_OVERHAUL_POOL_IDS`'s order, which is the sheet's: the
         // defence shelf's two (a Block the hand keeps, and the shelf's first
         // row that pays the Bomb rules back by putting what the wall ate onto

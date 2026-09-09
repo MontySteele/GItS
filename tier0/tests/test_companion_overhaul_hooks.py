@@ -603,7 +603,7 @@ def test_the_incoming_hit_order_is_the_one_the_mod_walks():
     cs_order = re.findall(r"OfType<(\w+Power)>", walk)
     assert cs_order == [
         # THE KLEE ARM'S ONE INCOMING READER, first and behind its own flag
-        # (`EB-724`). Return to Sender is the paws' construction with a Bomb on
+        # (`EB-730`). Return to Sender is the paws' construction with a Bomb on
         # the attacker instead of an aura; it plants before any mark below it
         # moves, and it can change nothing any of them sees because the marks
         # are separate powers and `Owner.Block` is the one number all of them

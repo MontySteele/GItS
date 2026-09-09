@@ -142,10 +142,14 @@ def test_combat_scenes_carry_the_four_router_states():
         for states, _ in scene.state_machines().values():
             trees += 1
             assert set(scene_deps.CREATURE_STATES) <= states, path
-    assert trees == 3, (
-        "klee's and furina's combat scenes drive a state machine, and so does "
-        "the Bake-Kurage pet's (kokomi/model/bake_kurage.tscn) -- one router, "
-        "one four-state contract, no per-creature code")
+    assert trees == 6, (
+        "klee's and furina's combat scenes drive a state machine, and so do "
+        "the Bake-Kurage pet's (kokomi/model/bake_kurage.tscn) and the Furina "
+        "stage's three performers (furina/model/{usher,chevalmarin,"
+        "crabaletta}.tscn, `EB-725`) -- one router, one four-state contract, "
+        "no per-creature code. THE COUNT IS THE POINT: a new creature scene "
+        "that skipped a state would pass the loop above by carrying no state "
+        "machine at all, and this is what notices")
 
 
 def test_empty_tree_fails_rather_than_passing(tmp_path):

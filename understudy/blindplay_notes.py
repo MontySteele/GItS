@@ -1347,38 +1347,38 @@ ARM_KEYWORDS: dict[str, str] = {
     "Oz": ("Fischl's raven, out while you hold the Power Oz, at Your Side. "
            "He makes an Electro hit at the end of your turn while he is "
            "out."),
-    # The Furina reframe's three (slice two, R220 A). The same sentences
-    # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
-    # numerals the C# interpolates from `FurinaReframeLaw` written out: this
-    # page has no access to the mod's constants, and a seat reading it needs
-    # the number rather than the name of the constant that holds it.
-    # `EB-368` REWROTE THIS ROW, in step with `ArmKeywordTips.ForDeploy` and
-    # for the reason the row gives: the act-2 seat played no Salon card in
-    # three fights, because "joins the stage and performs at once" prices a
-    # deploy as a one-shot and never says what makes a member act again. Three
-    # rules in two sentences, the Bomb's shape, because the tip ceiling binds
-    # on the C# side and the two copies must not fork.
-    "Deploy": ("A member joins and performs at once; a full stage Evokes the "
-               "front member first. Afterwards only a Companion play performs "
-               "a member."),
-    # `EB-587` REPLACED THE PRICE CLAUSE WITH THE PRICE, in step with
-    # `ArmKeywordTips.ForEvoke`: "the card's Encore price pays for it" is
-    # false on Curtain Rises, which Evokes by deploying onto a full stage and
-    # prints no Encore price, and it left the Evoke outside the economy every
-    # other act on the stage pays into. An Evoke is a performance that also
-    # costs the member, and it is priced like one.
-    # `EB-601` PUT THE TRIGGER FIRST, in step with `ArmKeywordTips.ForEvoke`.
-    # "A full stage Evokes the front member" -- the Deploy row's sentence --
-    # read beside "a Companion card you play performs Crabaletta" says, to a
-    # reader meeting both on one screen, that playing a Companion card into a
-    # full stage Evokes. Only a Deploy does, and the misreading cost r16 lane
-    # 1 an elite turn. A player reading THIS word is asking what makes an
-    # Evoke happen, so that is the clause it opens with.
-    "Evoke": ("Only a Deploy onto a full stage Evokes. The member performs "
-              "and leaves; its Fanfare bonus counts 3 times and it prints 5 "
-              "Fanfare. It spends 1 Encore, or Evokes at 3/4."),
-    "Drain": ("Your Fanfare falls to nothing. What the card does next is "
-              "priced off the amount it took."),
+    # FURINA, THE STAGE (`EB-723`, R269). The reframe's three -- Deploy, Evoke
+    # and Drain -- left this table with the eleven `proto_fr_` rows that
+    # printed them: R213 B's deletion rule took the rows off the surface, and a
+    # glossary row for a word no card prints is a rule nobody can meet. What
+    # replaced them is the SEVEN the brief's sec.12 names, in the same words
+    # `ArmKeywordTips.ForSpend` and its six neighbours print, with the numerals
+    # the C# interpolates from `FurinaStageLaw` written out: this page has no
+    # access to the mod's constants, and a seat reading it needs the number
+    # rather than the name of the constant that holds it.
+    #
+    # EACH ROW CARRIES THE HALF A PLAYER CANNOT INFER, which is what the whole
+    # table is for. `Spend` carries "fires in full even if the bar is short",
+    # because a rider that pays one point for the full number is the entire
+    # Expend deck (brief sec.4). `Fanfare` carries the damage ORDER, because
+    # that is the reason a bar matters at all. `Bow` is stated against its
+    # opposite -- a Spend earns one and a hit does not -- because that
+    # difference IS turn one's wager (sec.7, line B against line C).
+    "Spend": ("Pays from the lead performer. It fires in full even if the bar "
+              "is short; an emptied performer takes a Bow. No stage, no "
+              "rider."),
+    "Fanfare": ("A performer's own bar. Attacks hit your Block, then the lead "
+                "performer's Fanfare, then you. No cap."),
+    "Raise": ("Adds Fanfare to the back performer. With one performer on "
+              "stage, that is the lead."),
+    "Bow": ("A departure effect, earned by Spend only. Usher: 4 Block. "
+            "Chevalmarin: Hydro on all. Crabaletta: 8 damage."),
+    "lead performer": ("The front seat: the one attacks reach and the only "
+                       "one that regains 1 Fanfare each turn."),
+    "back performer": ("The back seat, and the reserve: nothing hits it. With "
+                       "one performer on stage it is also the lead."),
+    "Rotate": ("Seats change order and every bar comes with them. Nobody "
+               "leaves and nobody takes a Bow."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1564,20 +1564,30 @@ _ARM_KEYWORD_RE = {
     # every screen a reader can meet the word on, whether or not the run holds
     # the Power, which is the state the r7 seat was in for five plays.
     "Oz": re.compile(r"\bOz\b"),
-    # THE THREE FURINA WORDS CARRIED A LITERAL BACKSPACE, not a word
-    # boundary: `\b` inside these three patterns was the CHARACTER 0x08 and
-    # not the escape, so `Deploy`, `Evoke` and `Drain` could never match any
-    # screen and the reframe's glossary rows were unreachable. Nothing shipped
-    # noticed because slice two is flag-off, and no pin exercised the three.
-    # Hygiene, fixed in passing with `EB-329`; the pattern is now the same
-    # shape as every row above it.
-    "Deploy": re.compile(r"\bDeploys?\b"),
-    "Evoke": re.compile(r"\bEvokes?\b"),
-    "Drain": re.compile(r"\bDrains?\b"),
-    # `EB-407`. NO PLURAL: the meter is never printed as one. And the pattern
-    # is written with an editor rather than a shell heredoc, which is how the
-    # three rows above once acquired a literal 0x08 in place of a word
-    # boundary and matched nothing at all.
+    # FURINA, THE STAGE (`EB-723`). The reframe's four -- `Deploy`, `Evoke`,
+    # `Drain` and `Encore` -- left this table with the rows that printed them.
+    #
+    # THE SEVEN, and each pattern says what the word is on a face. `Spend`,
+    # `Raise` and `Rotate` are printed as VERBS and conjugate the way `Mend`
+    # does. `Fanfare` and `Bow` take no plural: a bar is never printed as one
+    # and a curtain call is one act. The two SEAT words are two words on
+    # purpose -- what they carry is a rule about WHICH SEAT, and a pattern on
+    # the bare word "lead" would fire on ordinary prose.
+    #
+    # AND THEY ARE WRITTEN WITH AN EDITOR rather than a shell heredoc, which
+    # is how the reframe's three once acquired a literal 0x08 in place of a
+    # word boundary and matched nothing at all.
+    "Spend": re.compile(r"\bSpends?\b"),
+    "Fanfare": re.compile(r"\bFanfare\b"),
+    "Raise": re.compile(r"\bRaises?\b"),
+    "Bow": re.compile(r"\bBow\b"),
+    "lead performer": re.compile(r"\blead performer\b"),
+    "back performer": re.compile(r"\bback performer\b"),
+    "Rotate": re.compile(r"\bRotates?\b"),
+    # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
+    # machinery, the word is printed on the Neow screen and on opening-hand
+    # faces before the meter exists, and every Furina row the Stage does not
+    # swap still carries it. NO PLURAL: a meter is never printed as one.
     "Encore": re.compile(r"\bEncore\b"),
     # NO PLURAL AND NO CONJUGATION: the word is an adjective on a card class
     # ("Spotlighted Companion cards"), and the VERB the kit prints is "moved

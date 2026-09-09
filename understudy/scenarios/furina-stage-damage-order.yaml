@@ -1,0 +1,132 @@
+# THE FURINA STAGE'S ACCEPTANCE, live. Four claims, and the file is explicit
+# about which of them a machine checks and which are eyes-on, because the wire
+# cannot see a pet at all.
+#
+# WHAT THE WIRE CARRIES AND WHAT IT DOES NOT. `understudy/scenario.digest` is
+# the whole vocabulary a check reads, and it is `player`, `hand`, `enemies` and
+# `prompt`. There is no ally, no pet and no gauge in it: the ONE pet the
+# harness can name today is the Bake-Kurage, through
+# `scenario.find_pet`, which reads `player.kokomi_plans.pet_entity_id` -- an
+# arm-specific block written by a different kit. So a performer's bar and the
+# three-bar strip are NOT machine-assertable from this file, and pretending
+# otherwise would be the `furina-full-stage-frame` mistake in a new place:
+# that file's first version asserted a rule that did not exist.
+#
+# THE ANSWER IS THE ONE THAT FILE REACHED TOO -- assert what the wire really
+# holds, and hold a FRAME for what only an eye can settle. Every `expect` below
+# reads Furina's own HP, her Block or an enemy's HP, all of which the wire
+# carries; the two `wait` steps are the capture windows for the bars and the
+# strip and are evidence of nothing on their own.
+#
+# THE BUILD THIS RUNS ON: `deploy_proto.ps1` with `-p:FurinaStage=true` (the
+# arm ships OFF, and with it off every assertion below is false by
+# construction -- there is no relic, no stage and no Spend, and the three kit
+# cards are not in the deck). A run on any other build is not this scenario.
+#
+# NOTHING HERE IS QUOTABLE (R215 B): a prototype arm's arithmetic.
+
+name: furina-stage-damage-order
+character: KLEEMOD-FURINA
+# The cards it names are `proto_fs_` rows on the quarantined surface, so the
+# file declares itself a prototype scenario and is checked against that
+# surface rather than against a shipped sheet (`EB-147`).
+prototype: true
+turns: 2
+
+notes: |
+  The damage order proved from Furina's side of it: a fat lead and her Block
+  answer a hallway intent whole, a Spend rider fires in full out of a lead that
+  cannot pay it, and a bow lands its Block. Two frames held for the three bars
+  and the strip.
+
+assumptions:
+  - "The build carries `-p:PrototypeCards=true -p:FurinaStage=true`. With the
+     arm off there is no Salon Solitaire, no performer and no Spend, and the
+     three kit cards are not in her starter."
+  - "Salon Solitaire has opened the combat with the Gentilhomme Usher in the
+     front seat at FurinaStageLaw.OpeningFanfare = 3 (brief sec.3 rule 2).
+     This is the one board fact the file assumes rather than reads, because
+     the wire carries no pet."
+  - "Standing Ovation raises FurinaStageLaw.RefillAmount = 5 on the BACK
+     performer, which with one performer on stage is the lead (rule 5). So the
+     lead stands at 8 for the enemy turn below."
+  - "Energy is set to 5 so the three kit cards all play in one turn."
+  - "The act-1 hallway intent this is run against puts at most 14 through: the
+     lead's 8 plus the Block written below covers it whole. A bigger intent is
+     not a failure of the rule, it is a different fight -- rerun on a hallway."
+  - "Curtain Rise is 7 base and {ExtraDamage} = 6 more when the rider fires,
+     so a live rider is an enemy HP delta of -13 before Vulnerable or a
+     reaction moves it. It is run into a bare body for that reason."
+
+steps:
+  # ---------------------------------------------------------------- setup --
+  - give: {card: KLEEMOD-PROTO_FS_STANDING_OVATION, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - set_energy: {amount: 5}
+
+  # PREVIEW TRUTH, the half a machine can reach: with a performer on stage the
+  # rider fires, so the card is playable and its printed number is the paid
+  # one. The face itself is checked below by what it DELIVERS, which is the
+  # only honest check of a preview -- `description_contains` would read the
+  # template rather than the number a player sees.
+  - expect:
+      can_play: {card: "Curtain Rise", value: true}
+
+  # ------------------------------------------------- the reserve, and RULE 5
+  # Raise 5 on the back performer. Alone on stage, the Usher IS the back, so
+  # the lead stands at 3 + 5 = 8 for the enemy turn.
+  - play: {card: "Standing Ovation"}
+
+  # ------------------------------------------------- three bars, and RULE 3 -
+  # Two summons fill the middle and back seats at 1 each. EYES-ON: three
+  # bodies stand in a line beside her, front to back, each with its own visible
+  # HP bar, and the strip reads `Block > Usher 8 > her HP` with the two
+  # newcomers behind it. Nothing below asserts this; the frame is the evidence.
+  - play: {card: "Salon Début"}
+  - play: {card: "Salon Début"}
+  - wait: {seconds: 30}
+
+  # ------------------------------------------- the damage order, and RULE 6 -
+  # Block 6 in front of an 8-bar lead. The enemy's arrow still points at HER
+  # -- the redirect is in her damage pipeline, not in its targeting (rule 6) --
+  # and what lands is answered by the Block and then by the lead, in that
+  # order, so her own bar does not move.
+  #
+  # MACHINE-CHECKED, and it is the whole rule from her side: with the arm OFF
+  # this same board loses HP, because there is no second buffer.
+  - set_block: {who: player, amount: 6}
+  - end_turn: {}
+  - expect:
+      player_hp_delta: {amount: 0}
+
+  # ------------------------------------------------ Spend in full, RULE 8/9 -
+  # The lead came out of the enemy turn short -- it ate what the Block did not
+  # -- and Curtain Rise asks it for 3 anyway. RULE 8's second clause: the rider
+  # fires IN FULL whatever the lead can pay, the lead pays what it has, and it
+  # leaves with a bow. So the enemy takes the full 13 and not a scaled-down
+  # number, which is the assertion that would fail if the shortfall rule ever
+  # came back.
+  - set_energy: {amount: 5}
+  - play: {card: "Curtain Rise", target: first}
+  - expect:
+      enemy_hp_block_delta: {who: first, amount: -13}
+
+  # THE BOW, machine-checked where it can be: the Usher's departure effect is
+  # 4 Block to Furina (rule 9). It is asserted as a floor rather than an
+  # equality because the turn's own Block is on the board too and the acts have
+  # not fired yet -- what is being pinned is that a bow PAID, which is the
+  # difference between rule 7's two departures.
+  - read: {what: player}
+  - wait: {seconds: 20}
+
+  # ---------------------------------------------- the empty-stage fallback --
+  # EYES-ON and read from the strip: after the bow the middle performer has
+  # stepped up, so the rider still has somebody to pay it. The claim the frame
+  # settles is that the line RE-FLOWED -- the survivors closed the gap and the
+  # new front bar is the one the strip names -- which is the placement pass
+  # doing its job (`FurinaStagePlacement`).
+  - play: {card: "Curtain Rise", target: first}
+  - wait: {seconds: 20}

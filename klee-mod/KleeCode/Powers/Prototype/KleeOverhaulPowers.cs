@@ -546,7 +546,7 @@ public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// POOL PASS TWO (`EB-724`). Return to Sender: "Gain 8 Block. This turn,
+/// POOL PASS TWO (`EB-730`). Return to Sender: "Gain 8 Block. This turn,
 /// damage this Block absorbs is placed on the attacker as a Bomb."
 ///
 /// AMOUNT IS A MARK ON THE BLOCK POOL, and this class is
@@ -656,7 +656,7 @@ public sealed class ReturnToSenderPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// POOL PASS TWO (`EB-724`). Blazing Delight: "At the start of your turn, gain
+/// POOL PASS TWO (`EB-730`). Blazing Delight: "At the start of your turn, gain
 /// 1 Energy and draw 1 card." The arm's first standing ENERGY engine.
 ///
 /// THE SITE IS <c>AfterPlayerTurnStart</c>, which is <see cref="GroundedPower"/>

@@ -14,7 +14,8 @@ import contextlib
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import effects, klee_overhaul, powers, resources
+from tier0.engine import (effects, furina_stage, klee_overhaul, powers,
+                          resources)
 from tier0.engine.combat import (card_cost, card_playable, spark_cost,
                                  spark_price, spark_threshold)
 from tier0.engine.state import Card, CombatState
@@ -160,6 +161,13 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
     "has_salon_members",
+    # `EB-724` (QUARANTINED, `furina_stage.FURINA_STAGE`). "If a performer is
+    # on stage" -- `len(player.stage) > 0`, a pure current-state read with no
+    # snapshot field, which is exactly this collection's test. It is the ONE
+    # predicate every Spend face is written against (brief sec.3 rule 8), so a
+    # pilot that could not read it would score the whole batch's attacks at
+    # their base number and never learn the rider exists.
+    "stage_occupied",
     "spotlight_moved_this_turn",
     # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state
@@ -491,7 +499,7 @@ def _salon_verb_yield(state: CombatState, card: Card
 
 
 def _expected_damage(state: CombatState, card: Card) -> float:
-    total = _salon_verb_yield(state, card)[0]
+    total = _salon_verb_yield(state, card)[0] + _stage_offence(state, card)
     living = state.living_enemies
     # EB-145: built ONLY when a printed formula asks for it, so a card that
     # reads no selection allocates nothing and scores through the identical
@@ -692,11 +700,97 @@ def _estimated_exhausts(state: CombatState, card: Card) -> int:
     return 0
 
 
+def _stage_defence(state: CombatState, card: Card) -> float:
+    """QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`). What a Stage verb
+    is worth to the DEFENCE this turn, in the units `_raw_block` counts.
+
+    THE ARM'S WHOLE PROMISE IS DEFENSIVE (brief sec.2: "enemies hit her Block,
+    then the lead performer, then her"), so a pilot that read nothing here
+    would leave every summon and every Refill dead in hand and report a kit
+    that never fielded a cast. `EB-144`'s hole verbatim, one arm over: a verb
+    the pilot cannot price is a verb the measurement never sees played.
+
+    THREE TERMS, each read off the rule it comes from and none invented:
+
+      * `stage_raise` is Fanfare on the BACK seat, which is not exposed to
+        this turn's attack -- so it is priced at the RESERVE's rate, half its
+        face, rather than as Block. On a stage of one the back seat IS the
+        lead and it prices in full, which the branch reads live.
+      * `stage_summon` is a body at 1 plus its ARRIVAL act (rule 3), and only
+        Usher's act is Block. The body is one point of absorption behind
+        whoever is already in front of it.
+      * `stage_perform_lead` is *Bis!*: the lead's act, now, and Block only
+        where that lead is Usher.
+
+    NOTHING HERE PRICES A SPEND. What a Spend buys is the card's own damage
+    or Block op, which `_expected_damage` and `_raw_block` already read at
+    the branch `stage_occupied` selects; pricing the verb as well would pay
+    the card twice for one line.
+    """
+    if not furina_stage.active(state.player):
+        return 0.0
+    total = 0.0
+    alone = furina_stage.count(state.player) <= 1
+    for fx in card.effects:
+        op = fx.get("op")
+        if op == "stage_raise":
+            amount = fx.get("amount", 0)
+            if isinstance(amount, int):
+                total += amount if alone else amount / 2
+        elif op == "stage_summon":
+            total += furina_stage.SUMMON_FANFARE
+            member = fx.get("member", "random")
+            if member == "usher":
+                total += furina_stage.ACT_USHER_BLOCK
+            elif member == "random":
+                # The mean of the three arrivals, `_stage_offence`'s rule at
+                # the other half of the same roll.
+                total += furina_stage.ACT_USHER_BLOCK / 3
+        elif op == "stage_perform_lead":
+            lead = furina_stage.lead(state.player)
+            if lead is not None and lead[0] == "usher":
+                total += furina_stage.ACT_USHER_BLOCK
+    return total
+
+
+def _stage_offence(state: CombatState, card: Card) -> float:
+    """The other half of `_stage_defence`: what a Stage verb is worth to the
+    DAMAGE this turn.
+
+    TWO OF THE THREE ACTS ARE HITS (brief sec.3 rule 10) -- Chevalmarin's 2 to
+    every enemy and Crabaletta's 5 to one -- so a summon that fields either of
+    them, and a *Bis!* that performs one, put damage on the board the turn they
+    are played. A pilot blind to that prices *Mademoiselle Crabaletta* as a
+    1-point body and never fields a cast, which is `EB-144`'s hole again.
+
+    A RANDOM SUMMON TAKES THE MEAN of the three arrivals, because that is the
+    honest estimate of a roll and not a guess about which way it lands. The
+    same call in `_stage_defence` takes the same mean for the Block half.
+    """
+    if not furina_stage.active(state.player):
+        return 0.0
+    live = max(1, len(state.living_enemies))
+    per = {"usher": 0.0,
+           "chevalmarin": float(furina_stage.ACT_CHEVALMARIN_DAMAGE * live),
+           "crabaletta": float(furina_stage.ACT_CRABALETTA_DAMAGE)}
+    mean = sum(per.values()) / len(per)
+    total = 0.0
+    for fx in card.effects:
+        op = fx.get("op")
+        if op == "stage_summon":
+            member = fx.get("member", "random")
+            total += per.get(member, mean)
+        elif op == "stage_perform_lead":
+            lead = furina_stage.lead(state.player)
+            total += per.get(lead[0], 0.0) if lead else 0.0
+    return total
+
+
 def _raw_block(state: CombatState, card: Card) -> float:
     # EB-144: the Usher's tick prints Block, so a `salon_perform` that lands
     # on her is Block this turn and belongs in the same number the panic-block
     # rule and _block_value read.
-    total = _salon_verb_yield(state, card)[1]
+    total = _salon_verb_yield(state, card)[1] + _stage_defence(state, card)
     selection: dict = {}      # EB-145, see _expected_damage
     for fx in _active_effects(state, card.effects, card):
         if fx["op"] != "block":

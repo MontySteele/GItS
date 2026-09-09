@@ -1,4 +1,4 @@
-Status: OPEN (one eyes-on, §5; three E defaults applied, §6)
+Status: RULED R269 2026-09-08
 
 # Furina, [USER]'s first act-1 run under the reframe: the UI is still not legible; the Encore idea is liked, the stage is not readable
 

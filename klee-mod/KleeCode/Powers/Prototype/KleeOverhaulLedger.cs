@@ -216,7 +216,7 @@ public sealed class KleeOverhaulLedger
     public int PeekMultiplier() => _setOffMultiplier;
 
     /// <summary>
-    /// ONCE MORE!'s WHOLE READ (`EB-724`): the last card this combat whose
+    /// ONCE MORE!'s WHOLE READ (`EB-730`): the last card this combat whose
     /// <i>Set off</i> resolved.
     ///
     /// PER COMBAT AND DELIBERATELY NOT ROLLED by <see cref="RollTo"/>, unlike

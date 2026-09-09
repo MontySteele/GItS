@@ -578,7 +578,7 @@
    upgrade: {split_grow: +2},
    effects: [{op: split_largest_bomb, growth: 0}]}
 
-# THE POOL PASS, ROUND TWO (`EB-724`, 2026-09-08). Six rows in three pairs:
+# THE POOL PASS, ROUND TWO (`EB-730`, 2026-09-08). Six rows in three pairs:
 # the defence shelf's two, the Spark sinks' two, the Energy engines' two.
 # Why each exists: docs/notes/prototype-surface-provenance.md.
 
@@ -1702,173 +1702,190 @@
    description: "Whenever you play a [gold]Hexerei[/gold] card, deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
 
-# THE FURINA REFRAME, SLICE TWO (R220 A; the countersigned packet's sec.6.2
-# row list). Five rows, flag-off and UNRUN. Why each exists, and the three
-# words they print: docs/notes/prototype-surface-provenance.md.
-- {id: proto_fr_salon_debut_named, name: "Salon Début", character: furina,
+# FURINA, THE STAGE -- BATCH ONE (`EB-723`, R269 2026-09-08). The seventeen
+# faces of review/active/furina-stage-brief-2026-09-08.md sec.12. Which
+# shipped row each replaced, and why: docs/notes/prototype-surface-provenance.md.
+
+# --- the starter's three kit cards (sec.12), `basic` so no offer door can
+# reach them: they arrive through `loader._starter_ids` alone. ---
+
+- {id: proto_fs_salon_debut, name: "Salon Début", character: furina,
+   upgrade: {cost: -1},
    authored_by: [claude],
    replaces: salon_debut,
    register: salon, cost: 1, type: skill, rarity: basic,
    art_of: salon_debut,
-   upgrade: {add: {op: gain_encore, amount: 2}},
-   description: "[gold]Deploy[/gold] Mademoiselle Crabaletta.",
-   effects: [{op: apply_power, power: salon_member, amount: 1, target: self,
-              member: crabaletta}]}
+   description: "Summon a random performer who is not on stage.",
+   effects: [{op: stage_summon, member: random}]}
 
-- {id: proto_fr_curtain_call, name: "Curtain Call", character: furina,
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: common, encore_cost: 2,
-   art_of: take_your_bow,
-   upgrade: {encore_cost: -1},
-   description: "[gold]Evoke[/gold] the front [gold]Salon[/gold] member.",
-   effects: [{op: salon_bow, amount: 1}]}
-
-- {id: proto_fr_exit_stage_left, name: "Exit Stage Left", character: furina,
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon, encore_cost: 1,
-   art_of: surintendante_chevalmarin,
-   upgrade: {encore_cost: -1},
-   description: "[gold]Evoke[/gold] Surintendante Chevalmarin, or the front member if she is not on stage.",
-   effects: [{op: salon_bow, amount: 1, member: chevalmarin}]}
-
-- {id: proto_fr_let_the_people_rejoice, name: "Let the People Rejoice", character: furina,
-   authored_by: [claude],
-   replaces: the_sea_is_my_stage,
-   register: archon, cost: 2, type: attack, rarity: rare,
-   art_of: let_the_people_rejoice,
-   description: "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} per [gold]Fanfare[/gold] drained.",
-   effects: [{op: drain_fanfare},
-             {op: damage, amount_formula: {base: 5, per: 2, count: fanfare_drained},
-              target: all_enemies}]}
-
-- {id: proto_fr_intermission, name: "Intermission", character: furina,
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: rare,
-   art_of: stage_presence,
-   upgrade: {retain: true},
-   description: "[gold]Drain[/gold] your [gold]Fanfare[/gold]. Gain [gold]Block[/gold] equal to the [gold]Fanfare[/gold] drained.",
-   effects: [{op: drain_fanfare},
-             {op: block, amount_formula: {base: 0, per: 1, count: fanfare_drained}}]}
-# --- the shipped Fanfare riders under the Furina arm (round 2 pick 1,
-# default applied 2026-09-04): arm-only copies at the arm's Fanfare scale,
-# swapped in at the same rarity by the pool seam. The shipped sheet stands. ---
-
-- {id: proto_fr_florid_cadenza, name: "Florid Cadenza (proto)", character: furina,
-   authored_by: [claude],
-   replaces: florid_cadenza,
-   cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   upgrade: {condition: fanfare_at_least_3},
-   description: "Draw 1 card. If you have at least {IfUpgraded:show:3|6} [gold]Fanfare[/gold], draw 2 more. Exhaust.",
-   effects: [{op: draw, amount: 1},
-             {op: conditional, if: fanfare_at_least_6, then: [{op: draw, amount: 2}]}]}
-
-- {id: proto_fr_dramatic_entrance, name: "Dramatic Entrance (proto)", character: furina,
-   authored_by: [claude],
-   replaces: dramatic_entrance,
-   cost: 1, type: attack, rarity: uncommon,
-   upgrade: {damage: +3},
-   description: "Deal {IfUpgraded:show:10|7} damage. If you have at least 6 [gold]Fanfare[/gold], deal 7 damage to ALL enemies.",
-   effects: [{op: damage, amount: 7, target: enemy},
-             {op: conditional, if: fanfare_at_least_6,
-              then: [{op: damage, amount: 7, target: all_enemies}]}]}
-
-- {id: proto_fr_universal_revelry, name: "Universal Revelry (proto)", character: furina,
-   authored_by: [claude],
-   replaces: universal_revelry,
-   cost: 2, type: attack, rarity: rare,
-   upgrade: {damage: +3},
-   description: "Deal {IfUpgraded:show:12|9} damage to ALL enemies, plus 1 per 2 [gold]Fanfare[/gold]. If you have at least 8 [gold]Fanfare[/gold], deal 6 more to ALL enemies.",
-   effects: [{op: damage, amount: 9, target: all_enemies, bonus_formula: 1_per_2_fanfare},
-             {op: conditional, if: fanfare_at_least_8, then: [{op: damage, amount: 6, target: all_enemies}]}]}
-
-- {id: proto_fr_flood_of_emotion, name: "Flood of Emotion (proto)", character: furina,
-   authored_by: [claude],
-   replaces: flood_of_emotion,
-   cost: 1, type: skill, rarity: rare,
-   upgrade: {damage: +3},
-   description: "Deal {IfUpgraded:show:17|14} damage. If you have at least 10 [gold]Fanfare[/gold], deal 14 more.",
-   effects: [{op: damage, amount: 14, target: enemy},
-             {op: conditional, if: fanfare_at_least_10, then: [{op: damage, amount: 14, target: enemy}]}]}
-# --- the starter's reader (R254, round 4 pick 1): one of Furina's two kit
-# starters reads Fanfare under the arm. Same copy-and-swap shape as the four
-# riders above, at the STARTER seam rather than the offer one. ---
-
-- {id: proto_fr_aria_of_recompense, name: "Aria of Recompense (proto)", character: furina,
+- {id: proto_fs_curtain_rise, name: "Curtain Rise", character: furina,
+   upgrade: {conditional_damage: +3},
    authored_by: [claude],
    replaces: aria_of_recompense,
-   cost: 1, type: skill, rarity: basic,
+   register: salon, cost: 1, type: attack, rarity: basic,
    art_of: aria_of_recompense,
-   upgrade: {encore: +3},
-   description: "Gain {IfUpgraded:show:8|5} [gold]Encore[/gold]. If you have at least 3 [gold]Fanfare[/gold], gain {IfUpgraded:show:8|5} more.",
-   effects: [{op: gain_encore, amount: 5},
-             {op: conditional, if: fanfare_at_least_3, then: [{op: gain_encore, amount: 5}]}]}
-# --- POOL PASS ONE (`EB-493`), three of its four: Rolling Tide was withdrawn
-# in round 13 (`EB-552`). Why each exists, and why that one left:
-# docs/notes/prototype-surface-provenance.md. ---
+   description: "Deal {IfUpgraded:show:10|7} damage. [gold]Spend[/gold] 3: deal 13 instead.",
+   effects: [{op: conditional, if: stage_occupied,
+              then: [{op: stage_spend, amount: 3},
+                     {op: damage, amount: 13, target: enemy}],
+              else: [{op: damage, amount: 7, target: enemy}]}]}
 
-- {id: proto_fr_curtain_rises, name: "Curtain Rises", character: furina,
+- {id: proto_fs_standing_ovation, name: "Standing Ovation", character: furina,
+   upgrade: {cost: -1},
    authored_by: [claude],
-   replaces: house_call,
-   register: salon, cost: 1, type: attack, rarity: common,
-   art_of: house_call,
-   upgrade: {damage: +3},
-   description: "Deal 6 damage. [gold]Deploy[/gold] Surintendante Chevalmarin.",
-   effects: [{op: damage, amount: 6, target: enemy},
-             {op: apply_power, power: salon_member, amount: 1, target: self,
-              member: chevalmarin}]}
+   replaces: an_invitation,
+   register: salon, cost: 1, type: skill, rarity: basic,
+   art_of: an_invitation,
+   description: "[gold]Raise[/gold] 5 [gold]Fanfare[/gold] on the [gold]back performer[/gold].",
+   effects: [{op: stage_raise, amount: 5}]}
 
-- {id: proto_fr_second_course, name: "Second Course", character: furina,
+# --- the Commons (eight) ---
+
+- {id: proto_fs_gentilhomme_usher, name: "Gentilhomme Usher", character: furina,
+   upgrade: {cost: -1},
    authored_by: [claude],
-   replaces: dinner_service,
-   register: salon, cost: 1, type: skill, rarity: common, encore_cost: 1,
-   art_of: dinner_service,
-   upgrade: {encore_cost: -1},
-   description: "[gold]Deploy[/gold] Mademoiselle Crabaletta. She performs once more.",
-   effects: [{op: apply_power, power: salon_member, amount: 1, target: self,
-              member: crabaletta},
-             {op: salon_perform, member: crabaletta}]}
+   replaces: gentilhomme_usher,
+   register: salon, cost: 1, type: skill, rarity: common,
+   art_of: gentilhomme_usher,
+   description: "Summon Usher. If he is already on stage, [gold]Raise[/gold] 3 on him instead.",
+   effects: [{op: stage_summon, member: usher, if_present_raise: 3}]}
 
-- {id: proto_fr_guest_list, name: "Guest List", character: furina,
+- {id: proto_fs_surintendante_chevalmarin, name: "Surintendante Chevalmarin",
+   upgrade: {cost: -1},
+   character: furina, authored_by: [claude],
+   replaces: surintendante_chevalmarin,
+   register: salon, cost: 1, type: skill, rarity: common,
+   art_of: surintendante_chevalmarin,
+   description: "Summon Chevalmarin. If she is already on stage, [gold]Raise[/gold] 3 on her instead.",
+   effects: [{op: stage_summon, member: chevalmarin, if_present_raise: 3}]}
+
+- {id: proto_fs_mademoiselle_crabaletta, name: "Mademoiselle Crabaletta",
+   upgrade: {cost: -1},
+   character: furina, authored_by: [claude],
+   replaces: mademoiselle_crabaletta,
+   register: salon, cost: 1, type: skill, rarity: common,
+   art_of: mademoiselle_crabaletta,
+   description: "Summon Crabaletta. If she is already on stage, [gold]Raise[/gold] 3 on her instead.",
+   effects: [{op: stage_summon, member: crabaletta, if_present_raise: 3}]}
+
+- {id: proto_fs_understudy, name: "Understudy", character: furina,
+   upgrade: {remove: exhaust},
+   authored_by: [claude],
+   replaces: suffering_for_art,
+   register: salon, cost: 0, type: skill, rarity: common, exhaust: true,
+   art_of: suffering_for_art,
+   description: "Summon a random performer who is not on stage. Exhaust.",
+   effects: [{op: stage_summon, member: random}]}
+
+- {id: proto_fs_warm_reception, name: "Warm Reception", character: furina,
+   upgrade: {draw: +1},
    authored_by: [claude],
    replaces: blocking_notes,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: blocking_notes,
-   upgrade: {block: +2},
-   description: "Gain 3 [gold]Block[/gold]. Add a random Common [gold]Companion[/gold] card to your hand.",
-   effects: [{op: block, amount: 3},
-             {op: generate_guest_star, rarity: common, amount: 1}]}
+   description: "[gold]Raise[/gold] 3 [gold]Fanfare[/gold] on the [gold]back performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: stage_raise, amount: 3},
+             {op: draw, amount: 1}]}
 
-# --- SHARED BILLING'S ARM COPY: the shipped body, and a `+` that buys 3 Block
-# rather than going free (2026-09-06). Why: provenance. ---
-
-- {id: proto_fr_shared_billing, name: "Shared Billing", character: furina,
+- {id: proto_fs_tidal_flourish, name: "Tidal Flourish", character: furina,
+   upgrade: {conditional_damage: +3},
    authored_by: [claude],
-   replaces: shared_billing,
+   replaces: usher_the_waves,
+   register: salon, cost: 1, type: attack, rarity: common,
+   art_of: usher_the_waves,
+   description: "Deal {IfUpgraded:show:8|5} damage to ALL enemies. [gold]Spend[/gold] 2: deal 9 instead.",
+   effects: [{op: conditional, if: stage_occupied,
+              then: [{op: stage_spend, amount: 2},
+                     {op: damage, amount: 9, target: all_enemies}],
+              else: [{op: damage, amount: 5, target: all_enemies}]}]}
+
+- {id: proto_fs_interposition, name: "Interposition", character: furina,
+   upgrade: {conditional_block: +3},
+   authored_by: [claude],
+   replaces: stage_lights,
    register: salon, cost: 1, type: skill, rarity: common,
-   art_of: shared_billing,
-   upgrade: {add: {op: block, amount: 3}},
-   description: "Apply [gold]Hydro[/gold] to a random enemy. [gold]Spotlighted[/gold] Companion cards gain 25% this turn. Gain 1 [gold]Energy[/gold].",
-   effects: [{op: apply_aura, element: hydro, target: random_enemy},
-             {op: apply_power, power: spotlight_mult_bonus_turn, amount: 25, target: self},
-             {op: energy, amount: 1}]}
-# --- `EB-507`: under the arm no offered face promises Fanfare for being
-# played. Two shipped Rares, carried without their `gain_fanfare_floor` rider;
-# the third is only the rider, and its slot went to the drain above. ---
+   art_of: stage_lights,
+   description: "Gain {IfUpgraded:show:8|5} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain 10 instead.",
+   effects: [{op: conditional, if: stage_occupied,
+              then: [{op: stage_spend, amount: 2},
+                     {op: block, amount: 10}],
+              else: [{op: block, amount: 5}]}]}
 
-- {id: proto_fr_rapturous_applause, name: "Rapturous Applause", character: furina,
+- {id: proto_fs_scene_change, name: "Scene Change", character: furina,
+   upgrade: {add: {op: draw, amount: 1}},
    authored_by: [claude],
-   replaces: rapturous_applause,
-   register: archon, cost: 1, type: power, rarity: rare,
-   art_of: rapturous_applause,
-   upgrade: {power_amount: +1},
-   description: "Your Attacks deal {PowerAmount:diff()} additional damage per 5 [gold]Fanfare[/gold].",
-   effects: [{op: apply_power, power: fanfare_attack_per5, amount: 1, target: self}]}
+   replaces: held_breath,
+   register: salon, cost: 0, type: skill, rarity: common,
+   art_of: held_breath,
+   description: "[gold]Rotate[/gold] the cast: the front performer moves to the back seat.",
+   effects: [{op: stage_scene_change}]}
 
-- {id: proto_fr_unheard_confession, name: "Unheard Confession", character: furina,
+# --- the Uncommons (five) ---
+
+- {id: proto_fs_grand_entrance, name: "Grand Entrance", character: furina,
+   upgrade: {conditional_damage: +4},
    authored_by: [claude],
-   replaces: unheard_confession,
-   register: archon, cost: 2, type: power, rarity: rare,
-   art_of: unheard_confession,
+   replaces: torrential_turn,
+   register: salon, cost: 2, type: attack, rarity: uncommon,
+   art_of: torrential_turn,
+   description: "Deal {IfUpgraded:show:14|10} damage. [gold]Spend[/gold] 5: deal 20 instead.",
+   effects: [{op: conditional, if: stage_occupied,
+              then: [{op: stage_spend, amount: 5},
+                     {op: damage, amount: 20, target: enemy}],
+              else: [{op: damage, amount: 10, target: enemy}]}]}
+
+- {id: proto_fs_ousia_surge, name: "Ousia Surge", character: furina,
    upgrade: {cost: -1},
-   description: "Whenever your [gold]Fanfare[/gold] changes amount, gain 2 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: fanfare_delta_block, amount: 2, target: self}]}
+   authored_by: [claude],
+   replaces: crescendo,
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   art_of: crescendo,
+   description: "Deal damage equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].",
+   effects: [{op: damage,
+              amount_formula: {base: 0, per: 1, count: stage_lead_fanfare},
+              target: enemy}]}
+
+- {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: many_waters_melody,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   art_of: many_waters_melody,
+   description: "Gain [gold]Block[/gold] equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold].",
+   effects: [{op: block,
+              amount_formula: {base: 0, per: 1, count: stage_back_fanfare}}]}
+
+- {id: proto_fs_bis, name: "Bis!", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: change_the_bill,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   art_of: change_the_bill,
+   description: "The [gold]lead performer[/gold] performs its act now.",
+   effects: [{op: stage_perform_lead}]}
+
+- {id: proto_fs_final_bow, name: "Final Bow", character: furina,
+   upgrade: {remove: exhaust},
+   authored_by: [claude],
+   replaces: take_your_bow,
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   art_of: take_your_bow,
+   description: "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold]. Exhaust.",
+   effects: [{op: stage_final_bow},
+             {op: block,
+              amount_formula: {base: 0, per: 1, count: stage_spent}}]}
+
+# --- the Rare (one) ---
+
+- {id: proto_fs_let_the_people_rejoice, name: "Let the People Rejoice",
+   upgrade: {cost: -1},
+   character: furina, authored_by: [claude],
+   replaces: universal_revelry,
+   register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
+   art_of: let_the_people_rejoice,
+   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1. Exhaust.",
+   effects: [{op: stage_spend_all},
+             {op: damage,
+              amount_formula: {base: 0, per: 1, count: stage_spent},
+              target: all_enemies},
+             {op: stage_curtain_call}]}

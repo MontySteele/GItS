@@ -73,6 +73,20 @@ def _reframe(name: str):
     return getattr(_fr, name)
 
 
+def _stage(name: str):
+    """A number out of the Furina STAGE's quarantined engine module.
+
+    `_reframe` above's argument one arm over and unchanged: the sim keeps these
+    in `tier0/engine/furina_stage.py` rather than in `constants.py`, so that a
+    prototype moves neither the constant census nor the world stamp. Mirroring
+    is a different question from stamping -- the C# arm PLAYS these numbers and
+    its keyword tips PRINT them -- and reading them from where the sim keeps
+    them is what lets both facts be true at once.
+    """
+    from tier0.engine import furina_stage as _fs
+    return getattr(_fs, name)
+
+
 # --------------------------------------------------------------------------
 # MIRRORED: C# constant -> the tier0 value it copies.
 #
@@ -361,6 +375,25 @@ MIRRORED: dict[str, object] = {
     # UNMIRRORED as "not balance" would be true and useless. The classification
     # this table asks for is where the number came from.
     "FurinaReframe.EvokeTargetAbsent": _reframe("EVOKE_TARGET_ABSENT"),
+    # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
+    # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
+    # same reason -- quarantined is not exempt. These TEN numbers ARE the
+    # brief's sec.3 rules: the seat count, the relic's opening bar, what a
+    # summon arrives at, the lead's regen, the starter Refill, the three acts
+    # and the two bows that carry a number. The sim declared every one of them
+    # first (`EB-724` is the sim engine and `EB-725` the C#), and the C# side
+    # reads them for its keyword tips, so a pair that drifted would print a
+    # retired number under a card the seat is grading.
+    "FurinaStageLaw.Seats": _stage("SEATS"),
+    "FurinaStageLaw.OpeningFanfare": _stage("OPENING_FANFARE"),
+    "FurinaStageLaw.SummonFanfare": _stage("SUMMON_FANFARE"),
+    "FurinaStageLaw.LeadRegen": _stage("LEAD_REGEN"),
+    "FurinaStageLaw.RefillAmount": _stage("REFILL_AMOUNT"),
+    "FurinaStageLaw.ActUsherBlock": _stage("ACT_USHER_BLOCK"),
+    "FurinaStageLaw.ActChevalmarinDamage": _stage("ACT_CHEVALMARIN_DAMAGE"),
+    "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
+    "FurinaStageLaw.BowUsherBlock": _stage("BOW_USHER_BLOCK"),
+    "FurinaStageLaw.BowCrabalettaDamage": _stage("BOW_CRABALETTA_DAMAGE"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one
     # whole printed clause), so the number lives on the power and is
     # mirrored like every other rule number.
@@ -379,6 +412,7 @@ MIRRORED: dict[str, object] = {
 # relics, Ancients and the run layer are game-side content. What is not
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
+
 UNMIRRORED: dict[str, str] = {
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
@@ -440,6 +474,27 @@ UNMIRRORED: dict[str, str] = {
         "the card is found by matching the flight's own start and end; the "
         "walk is bounded because it runs on a frame the engine is already "
         "struggling with. The sim has no scene tree.",
+    # THE FURINA STAGE ARM'S ELEVEN ARE NOT HERE, and their absence is the
+    # `EB-723` / `EB-725` reconciliation. This branch declared them UNMIRRORED
+    # on the reading that the arm was C#-first; the sim leg had in fact
+    # declared them FIRST, in `tier0/engine/furina_stage.py`, and ships the
+    # mirrored `FurinaStageLaw.cs` beside it. So the C# copy was deleted rather
+    # than reconciled -- two declarations of one number is exactly the drift
+    # this gate exists to refuse -- and the MIRRORED table above carries the
+    # pairs.
+    # The placement pass's two, which are a different kind of number entirely:
+    # they are the BASE GAME's own offsets, lifted out of
+    # `NCombatRoom.AddCreature`'s pet layout (`owner.X - 20`, `owner.Y + 10`)
+    # so the arm's seat-ordered re-flow puts a body exactly where the engine's
+    # own layout would have. The sim draws nothing.
+    "FurinaStagePlacement.OwnerXOffset":
+        "A SCENE OFFSET, not balance: the base game's own pet placement "
+        "constant, lifted from `NCombatRoom.AddCreature` so the stage's "
+        "seat-ordered re-flow lands a performer where the engine's own layout "
+        "would have. The sim has no scene tree.",
+    "FurinaStagePlacement.OwnerYOffset":
+        "A SCENE OFFSET, not balance: the second half of the base game's own "
+        "pet placement constant, lifted for the reason directly above.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "

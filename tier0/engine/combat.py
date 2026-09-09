@@ -15,7 +15,8 @@ from typing import Callable
 
 from tier0 import constants as C
 from tier0.engine import (companion_hexerei, companion_standins, effects,
-                          furina_reframe, klee_overhaul, kokomi_plan,
+                          furina_reframe, furina_stage, klee_overhaul,
+                          kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
                           resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
@@ -791,7 +792,7 @@ def _finish_play(state: CombatState, card: Card,
         # all 11 of Ironclad's Power cards (recon BUG 1).
         dest = "exhaust" if force_exhaust else refpowers.result_pile(state,
                                                                      card)
-        # QUARANTINED (C.KLEE_OVERHAUL, `EB-724`). BLAST SHIELD, and this is
+        # QUARANTINED (C.KLEE_OVERHAUL, `EB-730`). BLAST SHIELD, and this is
         # the ONE line of it: the card the arm's `return_to_hand` op raised the
         # flag for goes back to the HAND instead of the pile the rule above
         # picked. Read and lowered here, at the routing, because that is the
@@ -863,6 +864,10 @@ _FREE_PLAY_CONTEXT = (
     # saved for its neighbours' reason: a free play that drained inside
     # an outer card would otherwise hand the outer card its number.
     "fanfare_drained_this_card",
+    # QUARANTINED (`furina_stage.FURINA_STAGE`). The Stage's per-play spend
+    # total, saved for its neighbour's reason exactly: a free play that spent
+    # inside an outer card would otherwise hand the outer card its number.
+    "stage_spent_this_card",
     # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's per-play damage total, saved
     # for the reason its three neighbours are: an auto-play that dealt damage
     # inside an outer card would otherwise hand the outer card its number.
@@ -872,7 +877,7 @@ _FREE_PLAY_CONTEXT = (
     # exhausts mid-resolution opens its own list, and the restore below hands
     # the outer card back the one it was reading.
     "exhaust_selection",
-    # QUARANTINED (C.KLEE_OVERHAUL, `EB-724`). Blast Shield's per-play flag,
+    # QUARANTINED (C.KLEE_OVERHAUL, `EB-730`). Blast Shield's per-play flag,
     # saved for its neighbours' reason: a free play resolved inside an outer
     # card must not hand the OUTER card its answer about where to land. The
     # inner `_finish_play` lowers the flag it raised, and this restores
@@ -1109,6 +1114,16 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # same order.
     furina_reframe.field_opening_member(state)
 
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-730`). THE STAGE, at the
+    # same site and for the same reason as the two lines above: her starting
+    # relic Salon Solitaire puts Usher in the front seat at 3 on turn one
+    # (brief sec.3 rule 2), and the LEAD's regen (rule 4) runs at the start of
+    # every turn from her second on. Both are one call each, in this order,
+    # because a stage that regenerated before it existed would pay turn one a
+    # point the brief spends a paragraph refusing it ("the first hand sees 3").
+    furina_stage.open_combat(state)
+    furina_stage.turn_start_regen(state)
+
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
     #
@@ -1253,6 +1268,16 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # promise and the only clause of the sentence a card can tell apart.
     # `kokomi_plan.resolve_dusk` carries the rest of the argument.
     kokomi_plan.resolve_dusk(state)
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-730`). THE ACTS (brief
+    # sec.3 rule 10): "Each performer performs at the end of Furina's turn,
+    # from any seat, a flat act that does not read its bar."
+    #
+    # HERE, beside the two arms above and at the same `BeforeSideTurnEnd`:
+    # after the hand's own end-of-turn triggers, before `_settle_phases`, so an
+    # act that kills settles the board it killed, and before any enemy acts --
+    # which is what makes fight one's turn-one line A add Usher's 3 Block to
+    # the 9 she already has before Nibbit's Butt lands.
+    furina_stage.end_of_turn_acts(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
@@ -1360,6 +1385,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # A turn that ended by killing the last enemy or by the player dying never
     # reaches here, and metrics records -1 there rather than inventing a zero.
     state.emit("turn_close", block=p.block)
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-730`), INSTRUMENT ONLY.
+    # Brief sec.13's third report: "Turns with one, two and three performers on
+    # stage." One sample per completed player turn, taken beside `turn_close`
+    # and carrying that event's own declared blind spot -- a turn that ended by
+    # killing the last enemy or by the player dying never reaches this line.
+    furina_stage.note_turn_census(state)
     # INSTRUMENT ONLY (EB-78 (2), the reads-per-turn distribution R188 ruled
     # a watch trigger would need). One sample per completed player turn, taken
     # HERE because the Kurage pulse fires inside player_turn_end_triggers
@@ -1509,6 +1540,22 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # because `blocked` exists nowhere else.
             effects.companion_overhaul_block_absorbed(
                 state, enemy, blocked, block_before)
+            # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-730`). THE DAMAGE
+            # ORDER (brief sec.3 rule 6): "Furina's Block, then the lead
+            # performer's Fanfare, then Furina", PER ATTACK. This is that
+            # site -- inside the per-hit loop, after Block is spent and before
+            # anything can reach her HP -- so a multi-hit intent resolves hit
+            # by hit and a flurry can empty the lead between hits, which is
+            # exactly the difference sec.3 rule 6 draws between a flurry and a
+            # big single hit. IT NEVER RUNS ON TO THE MIDDLE SEAT: `absorb`
+            # reads the lead and only the lead.
+            #
+            # BEFORE THE KOKOMI WARD AND BEFORE ENCORE, which costs nothing to
+            # decide -- the arm swaps her whole starter and pool, so a run
+            # under it holds no card that grants either -- and is written this
+            # way round because the brief's order names Block and then the
+            # cast, with nothing between them.
+            absorbed = furina_stage.absorb(state, dmg - blocked)
             # Kokomi's prevention ward (kickoff §2.4): after Block, before
             # anything reaches HP — the first unblocked hit each round is
             # prevented up to the ward's stacks, priced as one random
@@ -1517,12 +1564,13 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # power. Its event stream is REPORTED SEPARATELY, not folded
             # into `blocked` and not credited to any axis yet — A4 credit
             # is a metric ruling ask (Encore precedent), not a default.
-            prevented = effects.prevent_damage_exhaust(state, dmg - blocked)
+            prevented = effects.prevent_damage_exhaust(
+                state, dmg - blocked - absorbed)
             # Encore absorbs after Block, before HP (kickoff §4). Its own
             # event stream credits A4 sustain -- NEVER folded into
             # `blocked` (§2 harness note, Tier 0 binding).
             hp_loss = resources.absorb_into_encore(
-                state, dmg - blocked - prevented, "enemy_hit")
+                state, dmg - blocked - absorbed - prevented, "enemy_hit")
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
             # Combat-side relic on_first_hp_loss_draw (dead branch on the

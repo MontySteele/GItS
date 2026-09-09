@@ -76,7 +76,7 @@ public class KleeOverhaulRoundThreeTests
         // FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`): TEN rows off
         // the readings of rounds 13 to 16 -- three for Cook, three for Spray,
         // three for React and one bridge.
-        // FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-724`): SIX rows in
+        // FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-730`): SIX rows in
         // three pairs -- the defence shelf's two, the Spark sinks' two and the
         // Energy engines' two.
         var slice = Cards("KleeOverhaulRoster", "Slice");
@@ -366,7 +366,7 @@ public class KleeOverhaulRoundThreeTests
         // number to bump or that clause. Every row without an upgrade must
         // therefore be a 0- or 1-cost row with nothing printed to move.
         //
-        // A SPARK-PRICE CUT IS AN ANSWER AND HAS NO BODY (`EB-724`, Blazing
+        // A SPARK-PRICE CUT IS AN ANSWER AND HAS NO BODY (`EB-730`, Blazing
         // Delight). `spark_price` is a play-time `IsUpgraded` read at
         // `PrintedSparkPrice` and the `SparkPower.Spend` beside it, so
         // `OnUpgrade` is honestly empty and `HasUpgradeBody` cannot see it --
@@ -462,7 +462,7 @@ public class KleeOverhaulRoundThreeTests
     }
 
     /// <summary>
-    /// Does this row's upgrade cut its SPARK PRICE? (`EB-724`.)
+    /// Does this row's upgrade cut its SPARK PRICE? (`EB-730`.)
     ///
     /// The declared price is one expression read by the badge and the gate
     /// alike, so an upgrade that moves it shows on the card without moving a

@@ -51,6 +51,17 @@ public sealed class FurinaCardPool : CardPoolModel
         // With `FurinaReframe.Enabled` off this returns `offered` unchanged,
         // which the method checks itself rather than leaving to this call.
         offered = Powers.FurinaReframeRoster.SwapOfferedRiders(offered);
+        // AND THE STAGE ARM'S OWN, at the same door and for the same reason
+        // (`EB-725`, R269). Fourteen shipped rows leave the offer and the
+        // arm's fourteen `proto_fs_` rows take their slots, one for one at the
+        // same rarity, so the offer odds do not move. Sim twin:
+        // `furina_stage.POOL_SUBS`, read at the one door
+        // `tier05.rewards.character_pool` already reads.
+        //
+        // With `FurinaStage.Enabled` off this returns `offered` unchanged,
+        // which the method checks itself rather than leaving to this call --
+        // the shape the line above it already takes.
+        offered = Powers.FurinaStageRoster.SwapOfferedRows(offered);
 #endif
         return offered;
     }
