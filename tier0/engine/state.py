@@ -872,6 +872,19 @@ class Player(Fighter):
     # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
     # every count read (has_salon_members, pilot, instruments) still works.
     salon: list[str] = field(default_factory=list)
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`). THE STAGE: the three
+    # seats, front first, each an `[member, fanfare]` pair. SOURCE OF TRUTH for
+    # the arm and the only state it adds -- the brief's sec.2 is explicit that
+    # "Fanfare is the performer's bar itself ... no counter beside it", so
+    # there is deliberately no meter mirroring this the way
+    # `powers["salon_member"]` mirrors `salon` above.
+    #
+    # A LIST OF LISTS AND NOT OF TUPLES, because a bar is written in place
+    # (regen, Raise, Spend, absorb) and a seat that had to be rebuilt to change
+    # its number is a seat two callers can disagree about. Empty on every
+    # shipped run, for every character, forever: `furina_stage.stage` returns
+    # `[]` with the flag off whatever is in here.
+    stage: list[list] = field(default_factory=list)
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The
@@ -1266,6 +1279,15 @@ class CombatState:
     # actually happened; every reader of the replacement rule asks
     # `effects.salon_numerics_replaced`, which is the OR of the two.
     salon_will_replace_this_card: bool = False
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`). What THIS card play
+    # took off the stage's bars, read back by the effects after it through
+    # `amount_formula: {count: stage_spent}`. Per-card and not a bar read: by
+    # the time *Final Bow*'s Block or the Rare's damage resolves, the bar it is
+    # measuring is gone. ONE counter for three writers -- `stage_spend`,
+    # `stage_spend_all` and `stage_final_bow` -- because all three answer the
+    # same question ("how much did this play take?") and a card that had to
+    # pick among three tokens is a card two rows can spell differently.
+    stage_spent_this_card: int = 0
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
     # CARDS THAT REACHED THE EXHAUST PILE THIS PLAYER TURN, counted AT THE
     # APPEND rather than at the AfterCardExhausted hook -- which is what makes

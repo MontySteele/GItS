@@ -200,6 +200,31 @@ public static class FurinaStagePets
     }
 
     /// <summary>
+    /// The BARS ONLY -- no arrival, no departure, no re-flow.
+    ///
+    /// A SECOND ENTRY POINT AND NOT A FLAG, because the two are different
+    /// events and one of them is far the commoner: a Raise or a regen moves a
+    /// number on a body already standing where it belongs, and running the
+    /// full reconcile for it would walk the pet list, ask the room for its
+    /// nodes and re-lay out a line that has not changed -- every turn, and on
+    /// every Raise. Nothing here can add or remove a body, which is the
+    /// property that makes it safe on those two hot paths.
+    /// </summary>
+    public static void SyncBars(Creature? furina)
+    {
+        if (!FurinaStage.LiveFor(furina)) return;
+        foreach (var seat in FurinaStageLedger.For(furina!).Seats)
+        {
+            if (seat.Pet == null || seat.Pet.IsDead) continue;
+            // Fire-and-forget is deliberate HERE and nowhere else: this call
+            // adds no creature and removes none, so nothing later in the frame
+            // can read a half-built board. Every arrival and departure goes
+            // through the awaited `Sync` above.
+            _ = CreatureCmd.SetMaxAndCurrentHp(seat.Pet, seat.Fanfare);
+        }
+    }
+
+    /// <summary>
     /// One body onto the board.
     ///
     /// THE MODEL IS INJECTED ON FIRST USE rather than registered at boot, for

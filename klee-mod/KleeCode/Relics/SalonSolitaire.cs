@@ -70,7 +70,7 @@ public sealed class SalonSolitaire : CustomRelicModel
     /// fielded before the first turn rather than on it, because the stage is
     /// what the first intent is posted against and a body that arrived after
     /// the intent would be a buffer the player could not have planned around.
-    /// <c>FurinaStageRules.Open</c> is idempotent on a non-empty stage, so a
+    /// <c>FurinaStage.OpenCombat</c> is idempotent on a lit stage, so a
     /// future kit install that makes the same sentence true costs one list
     /// check.
     /// </summary>
@@ -78,7 +78,7 @@ public sealed class SalonSolitaire : CustomRelicModel
     {
         var furina = Owner?.Creature;
         if (!FurinaStage.LiveFor(furina)) return;
-        await FurinaStageRules.Open(furina, StagePerformer.Usher);
+        await FurinaStage.OpenCombat(furina);
     }
 
     /// <summary>

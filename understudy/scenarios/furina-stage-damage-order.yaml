@@ -27,6 +27,10 @@
 
 name: furina-stage-damage-order
 character: KLEEMOD-FURINA
+# The cards it names are `proto_fs_` rows on the quarantined surface, so the
+# file declares itself a prototype scenario and is checked against that
+# surface rather than against a shipped sheet (`EB-147`).
+prototype: true
 turns: 2
 
 notes: |
@@ -56,11 +60,11 @@ assumptions:
 
 steps:
   # ---------------------------------------------------------------- setup --
-  - give: {card: KLEEMOD-STAGE_STANDING_OVATION, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-STAGE_SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-STAGE_SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-STAGE_CURTAIN_RISE, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-STAGE_CURTAIN_RISE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_STANDING_OVATION, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
   - set_energy: {amount: 5}
 
   # PREVIEW TRUTH, the half a machine can reach: with a performer on stage the

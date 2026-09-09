@@ -6,22 +6,23 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
-    "proto_fr_aria_of_recompense",
-    "proto_fr_curtain_call",
-    "proto_fr_curtain_rises",
-    "proto_fr_dramatic_entrance",
-    "proto_fr_exit_stage_left",
-    "proto_fr_flood_of_emotion",
-    "proto_fr_florid_cadenza",
-    "proto_fr_guest_list",
-    "proto_fr_intermission",
-    "proto_fr_let_the_people_rejoice",
-    "proto_fr_rapturous_applause",
-    "proto_fr_salon_debut_named",
-    "proto_fr_second_course",
-    "proto_fr_shared_billing",
-    "proto_fr_unheard_confession",
-    "proto_fr_universal_revelry",
+    "proto_fs_bis",
+    "proto_fs_curtain_rise",
+    "proto_fs_final_bow",
+    "proto_fs_gentilhomme_usher",
+    "proto_fs_grand_entrance",
+    "proto_fs_interposition",
+    "proto_fs_let_the_people_rejoice",
+    "proto_fs_mademoiselle_crabaletta",
+    "proto_fs_ousia_surge",
+    "proto_fs_pneuma_refrain",
+    "proto_fs_salon_debut",
+    "proto_fs_scene_change",
+    "proto_fs_standing_ovation",
+    "proto_fs_surintendante_chevalmarin",
+    "proto_fs_tidal_flourish",
+    "proto_fs_understudy",
+    "proto_fs_warm_reception",
     "proto_hold_the_line_spark",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
@@ -208,22 +209,23 @@
     "proto_true_spark_knight"
   ],
   "owners": {
-    "proto_fr_aria_of_recompense": "furina",
-    "proto_fr_curtain_call": "furina",
-    "proto_fr_curtain_rises": "furina",
-    "proto_fr_dramatic_entrance": "furina",
-    "proto_fr_exit_stage_left": "furina",
-    "proto_fr_flood_of_emotion": "furina",
-    "proto_fr_florid_cadenza": "furina",
-    "proto_fr_guest_list": "furina",
-    "proto_fr_intermission": "furina",
-    "proto_fr_let_the_people_rejoice": "furina",
-    "proto_fr_rapturous_applause": "furina",
-    "proto_fr_salon_debut_named": "furina",
-    "proto_fr_second_course": "furina",
-    "proto_fr_shared_billing": "furina",
-    "proto_fr_unheard_confession": "furina",
-    "proto_fr_universal_revelry": "furina",
+    "proto_fs_bis": "furina",
+    "proto_fs_curtain_rise": "furina",
+    "proto_fs_final_bow": "furina",
+    "proto_fs_gentilhomme_usher": "furina",
+    "proto_fs_grand_entrance": "furina",
+    "proto_fs_interposition": "furina",
+    "proto_fs_let_the_people_rejoice": "furina",
+    "proto_fs_mademoiselle_crabaletta": "furina",
+    "proto_fs_ousia_surge": "furina",
+    "proto_fs_pneuma_refrain": "furina",
+    "proto_fs_salon_debut": "furina",
+    "proto_fs_scene_change": "furina",
+    "proto_fs_standing_ovation": "furina",
+    "proto_fs_surintendante_chevalmarin": "furina",
+    "proto_fs_tidal_flourish": "furina",
+    "proto_fs_understudy": "furina",
+    "proto_fs_warm_reception": "furina",
     "proto_hold_the_line_spark": "klee",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
@@ -432,59 +434,59 @@
     ]
   },
   "upgrades": {
-    "proto_fr_aria_of_recompense": {
-      "encore": 3
-    },
-    "proto_fr_curtain_call": {
-      "encore_cost": -1
-    },
-    "proto_fr_curtain_rises": {
-      "damage": 3
-    },
-    "proto_fr_dramatic_entrance": {
-      "damage": 3
-    },
-    "proto_fr_exit_stage_left": {
-      "encore_cost": -1
-    },
-    "proto_fr_flood_of_emotion": {
-      "damage": 3
-    },
-    "proto_fr_florid_cadenza": {
-      "condition": "fanfare_at_least_3"
-    },
-    "proto_fr_guest_list": {
-      "block": 2
-    },
-    "proto_fr_intermission": {
-      "retain": true
-    },
-    "proto_fr_let_the_people_rejoice": {
+    "proto_fs_bis": {
       "cost": -1
     },
-    "proto_fr_rapturous_applause": {
-      "power_amount": 1
+    "proto_fs_curtain_rise": {
+      "conditional_damage": 3
     },
-    "proto_fr_salon_debut_named": {
-      "add": {
-        "op": "gain_encore",
-        "amount": 2
-      }
+    "proto_fs_final_bow": {
+      "remove": "exhaust"
     },
-    "proto_fr_second_course": {
-      "encore_cost": -1
-    },
-    "proto_fr_shared_billing": {
-      "add": {
-        "op": "block",
-        "amount": 3
-      }
-    },
-    "proto_fr_unheard_confession": {
+    "proto_fs_gentilhomme_usher": {
       "cost": -1
     },
-    "proto_fr_universal_revelry": {
-      "damage": 3
+    "proto_fs_grand_entrance": {
+      "conditional_damage": 4
+    },
+    "proto_fs_interposition": {
+      "conditional_block": 3
+    },
+    "proto_fs_let_the_people_rejoice": {
+      "cost": -1
+    },
+    "proto_fs_mademoiselle_crabaletta": {
+      "cost": -1
+    },
+    "proto_fs_ousia_surge": {
+      "cost": -1
+    },
+    "proto_fs_pneuma_refrain": {
+      "cost": -1
+    },
+    "proto_fs_salon_debut": {
+      "cost": -1
+    },
+    "proto_fs_scene_change": {
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
+    },
+    "proto_fs_standing_ovation": {
+      "cost": -1
+    },
+    "proto_fs_surintendante_chevalmarin": {
+      "cost": -1
+    },
+    "proto_fs_tidal_flourish": {
+      "conditional_damage": 3
+    },
+    "proto_fs_understudy": {
+      "remove": "exhaust"
+    },
+    "proto_fs_warm_reception": {
+      "draw": 1
     },
     "proto_kk_ambush": {
       "plan_damage": 3

@@ -528,12 +528,13 @@ public class FurinaStageRuleTests
         // different file and a different creature.
         var verbs = new[]
         {
-            "Open", "Summon", "Raise", "Spend", "Bow", "PerformActs", "Regen",
-            "Flush",
+            "OpenCombat", "Summon", "Raise", "Spend", "Bow", "EndOfTurnActs",
+            "RegenLead", "Flush", "SceneChange", "CollectAll", "CurtainCall",
+            "FinalBow", "Perform", "PerformLead",
         };
         foreach (var verb in verbs)
         {
-            var calls = Il.Calls(Il.Method("FurinaStageRules", verb));
+            var calls = Il.Calls(Il.Method("FurinaStage", verb));
             Assert.DoesNotContain(calls, c => c.Contains("CreatureCmd.Heal"));
             Assert.DoesNotContain(calls, c => c.Contains("CreatureCmd.SetCurrentHp"));
             Assert.DoesNotContain(calls, c => c.Contains("CreatureCmd.GainMaxHp"));
@@ -552,86 +553,34 @@ public class FurinaStageRuleTests
         // cards, never in the performer". An act that read a bar would delete
         // sec.5.2's whole card slot, so the pin is that the three payouts are
         // the LAW's constants and nothing computed from a seat.
-        var strings = Il.Calls(Il.Method("FurinaStageRules", "PerformActs"));
+        var strings = Il.Calls(Il.Method("FurinaStage", "Perform"));
         Assert.DoesNotContain(strings, c => c.Contains("StageSeat.get_Fanfare"));
     }
 
     [Fact]
     public void The_law_is_the_briefs_numbers()
     {
-        // Sec.3 and sec.10 default 3, in one place so a retune moves one file.
-        Assert.Equal(3, FurinaStageLaw.SeatCount);
+        // Sec.3 and sec.10 default 3, in one place so a retune moves one
+        // file -- and that file is the SIM LEG's `FurinaStageLaw`, mirrored by
+        // value against `tier0/engine/furina_stage.py`
+        // (`tools/lint_constant_parity.py`). This branch's own copy of the
+        // eleven was deleted in the `EB-719` reconciliation: two declarations
+        // of one number is the drift that gate refuses.
+        //
+        // TEN AND NOT ELEVEN. "From her SECOND turn on" left with the copy,
+        // because the sim states it as a RULE and not a constant
+        // (`turn_start_regen`: `state.turn < 2`), and a `RegenFromTurn` here
+        // would be a number this side of the wire invented.
+        Assert.Equal(3, FurinaStageLaw.Seats);
         Assert.Equal(3, FurinaStageLaw.OpeningFanfare);
         Assert.Equal(1, FurinaStageLaw.SummonFanfare);
         Assert.Equal(1, FurinaStageLaw.LeadRegen);
-        Assert.Equal(2, FurinaStageLaw.RegenFromTurn);
         Assert.Equal(5, FurinaStageLaw.RefillAmount);
-        Assert.Equal(3, FurinaStageLaw.UsherActBlock);
-        Assert.Equal(2, FurinaStageLaw.ChevalmarinActDamage);
-        Assert.Equal(5, FurinaStageLaw.CrabalettaActDamage);
-        Assert.Equal(4, FurinaStageLaw.UsherBowBlock);
-        Assert.Equal(8, FurinaStageLaw.CrabalettaBowDamage);
-    }
-
-    // ==================================================================
-    // 8b. THE THREE FACES ARE SECTION 12'S, WORD FOR WORD.
-    // ==================================================================
-
-    /// <summary>
-    /// `EB-721` (R269). The brief's sec.12 table is the authored face of every
-    /// batch-one row, and these three are its starter. They are HAND-WRITTEN
-    /// here only until the `proto_fs_` sheet lands, which is exactly the
-    /// window in which a face can drift from its own spec unnoticed: a
-    /// generated row's face is derived from the sheet and cannot, a
-    /// hand-written one is typed.
-    ///
-    /// THE INTERESTING ONE IS CURTAIN RISE, and it is the reason this pin
-    /// exists rather than a spot check. Its second clause prints the PAID
-    /// TOTAL -- "deal 13 instead" -- and not the delta a `ModifyDamageAdditive`
-    /// rider naturally spells ("deal 6 more", which is what it said before
-    /// this). Both are true of the same card; only one is sec.12's, and the
-    /// difference is what a player weighs a Spend against.
-    /// </summary>
-    [Theory]
-    [InlineData("StageSalonDebut",
-                "[gold]Summon[/gold] a random performer who is not on stage.")]
-    [InlineData("StageCurtainRise",
-                "Deal {Damage:diff()}. [gold]Spend[/gold] {SpendCost}: deal "
-                + "{SpendDamage:diff()} instead.")]
-    [InlineData("StageStandingOvation",
-                "[gold]Raise[/gold] {Amount:diff()} [gold]Fanfare[/gold] on "
-                + "the back performer.")]
-    public void The_starter_faces_are_the_briefs(string cls, string face)
-    {
-        // OFF THE COMPILED `Localization` GETTER rather than off the source
-        // file: adjacent string constants are folded by the compiler, so one
-        // `ldstr` IS the face and the assertion cannot be defeated by a line
-        // break moving. It is the same read `ArmKeywordTipTests.Printed`
-        // makes of a tip.
-        var printed = Il.Strings(Il.Method(cls, "get_Localization"));
-        Assert.Contains(face, printed);
-    }
-
-    /// <summary>
-    /// AND THE TWO PRINTED NUMBERS ARE THE ONES THAT LAND. Curtain Rise's
-    /// rider is the DIFFERENCE of its own two vars rather than a third number,
-    /// so "deal 7" and "deal 13 instead" cannot come apart from what the
-    /// pipeline adds -- which is the preview-truth rule
-    /// (`klee-mod-runtime.md` sec.3) held at the one place this card could
-    /// break it.
-    /// </summary>
-    [Fact]
-    public void Curtain_rises_rider_is_the_difference_of_its_printed_numbers()
-    {
-        var calls = Il.Calls(
-            Il.Method("StageCurtainRise", "ModifyDamageAdditive"));
-        Assert.Contains(calls, c => c.EndsWith("FurinaStageLedger.get_IsEmpty",
-                                               StringComparison.Ordinal));
-        Assert.Contains(calls, c => c.EndsWith("FurinaStage.LiveFor",
-                                               StringComparison.Ordinal));
-        var strings = Il.Strings(
-            Il.Method("StageCurtainRise", "ModifyDamageAdditive"));
-        Assert.Contains("SpendDamage", strings);
+        Assert.Equal(3, FurinaStageLaw.ActUsherBlock);
+        Assert.Equal(2, FurinaStageLaw.ActChevalmarinDamage);
+        Assert.Equal(5, FurinaStageLaw.ActCrabalettaDamage);
+        Assert.Equal(4, FurinaStageLaw.BowUsherBlock);
+        Assert.Equal(8, FurinaStageLaw.BowCrabalettaDamage);
     }
 
     // ==================================================================

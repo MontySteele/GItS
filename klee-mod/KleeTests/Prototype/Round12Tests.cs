@@ -297,20 +297,12 @@ public class Round12Tests
                         body);
     }
 
-    [Fact]
-    public void The_deploy_word_could_not_have_carried_it()
-    {
-        // Said rather than assumed: the keyword is at its ceiling with
-        // `EB-368`'s three rules, which is why the clause went to the
-        // paragraph behind the word.
-        var deploy = string.Concat(Il.Strings(typeof(ArmKeywordTips)
-            .GetMethod("ForDeploy", HeadlessGame.All)!));
-        var rendered = deploy.Replace("KLEEMOD-ARM_DEPLOY", string.Empty)
-            .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-
-        Assert.True(rendered.Length > 130, rendered.Length.ToString());
-        Assert.DoesNotContain("picks its own", deploy);
-    }
+    // `EB-719` RETIRED THE SECOND HALF OF THIS PAIR. It asserted that
+    // `ArmKeywordTips.ForDeploy` was at its ceiling and so could not have
+    // carried the aim clause -- and the `Deploy` word left the mod with the
+    // reframe's eleven `proto_fr_` rows under R213 B's deletion rule, so the
+    // pin has no subject. The clause it was about is still where it went, and
+    // the test above is what holds it there.
 
     // ---- EB-437: two nouns that read as one ------------------------------
 

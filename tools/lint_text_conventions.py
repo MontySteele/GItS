@@ -102,18 +102,6 @@ EXCEPTIONS = {
         "never necessarily the detonator. The keyword rail states that about "
         "one CARD, on the card; what a reader of the WORD needs is the fact "
         "about the DECK, which no other surface carries"),
-    "EvokeKey": (
-        "`EB-601` put the TRIGGER on a tip that was at 152 and already "
-        "carried a length exception's worth of ruled findings. 'A full stage "
-        "Evokes the front member' -- the Deploy word's own sentence -- read "
-        "beside 'a Companion card you play performs Crabaletta' says, to a "
-        "reader meeting both on one screen, that a Companion play into a full "
-        "stage Evokes; only a Deploy does, and the misreading cost Furina r16 "
-        "lane 1 an elite turn. Every other clause is a ruled finding -- the "
-        "bow, the Fanfare multiplier and mint, and the price and the dry cut "
-        "(R220 A, EB-587) -- and none is droppable to make room, because a "
-        "word a player meets while pricing an Evoke has to answer both 'what "
-        "makes one happen' and 'what does one cost'"),
     "MineKey": (
         "`EB-574` put rule 3 on this tip, at 133 of 135. The jump sentence "
         "was printed on the BADGE of the body the pile was about to kill and "

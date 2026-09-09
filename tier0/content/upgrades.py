@@ -104,7 +104,7 @@ SUFFIX = "+"
 # hands the card back, which is `EB-277` verbatim, and inventing five
 # per-row deltas here would be a Balance-stage ruling written by a build.
 PROTOTYPE_DEFAULT_PREFIXES = ("proto_ko_", "proto_kk_", "proto_mc_",
-                              "proto_mi_", "proto_fr_")
+                              "proto_mi_", "proto_fr_", "proto_fs_")
 
 #: The rule, as the `EB-283` row states it, named rather than buried in the
 #: walk below.

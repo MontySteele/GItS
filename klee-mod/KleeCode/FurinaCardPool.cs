@@ -51,6 +51,17 @@ public sealed class FurinaCardPool : CardPoolModel
         // With `FurinaReframe.Enabled` off this returns `offered` unchanged,
         // which the method checks itself rather than leaving to this call.
         offered = Powers.FurinaReframeRoster.SwapOfferedRiders(offered);
+        // AND THE STAGE ARM'S OWN, at the same door and for the same reason
+        // (`EB-721`, R269). Fourteen shipped rows leave the offer and the
+        // arm's fourteen `proto_fs_` rows take their slots, one for one at the
+        // same rarity, so the offer odds do not move. Sim twin:
+        // `furina_stage.POOL_SUBS`, read at the one door
+        // `tier05.rewards.character_pool` already reads.
+        //
+        // With `FurinaStage.Enabled` off this returns `offered` unchanged,
+        // which the method checks itself rather than leaving to this call --
+        // the shape the line above it already takes.
+        offered = Powers.FurinaStageRoster.SwapOfferedRows(offered);
 #endif
         return offered;
     }
@@ -102,23 +113,6 @@ public static class FurinaOffPoolCards
         // GetUnlockedCards must not see it or a reward roll could offer a
         // card nobody ruled. See KleeMod.PrototypeCards.
         cards.AddRange(PrototypeCards.For("furina"));
-#if PROTOTYPE_CARDS
-        // THE STAGE ARM'S THREE HAND-WRITTEN KIT CARDS, on exactly the terms
-        // the generated rows above are on and for the same reason: Pool must
-        // resolve or the card throws "You monster!" on draw, and
-        // GetUnlockedCards must not see it or a reward roll could offer a row
-        // nobody ruled. They are hand-written only until the `proto_fs_` sheet
-        // lands (see Cards/Prototype/FurinaStageCards.cs), and this line goes
-        // with them when it does.
-        // The three ids are spelled HERE rather than behind a helper because
-        // `tools/lint_pool_membership.py` reads `ModelDb.Card<T>()` sites out
-        // of the membership files by name, and a helper's calls are invisible
-        // to it -- which is a pool the lint cannot see, on cards that throw
-        // "You monster!" when it is wrong.
-        cards.Add(ModelDb.Card<Cards.Prototype.StageSalonDebut>());
-        cards.Add(ModelDb.Card<Cards.Prototype.StageCurtainRise>());
-        cards.Add(ModelDb.Card<Cards.Prototype.StageStandingOvation>());
-#endif
         return cards;
     }
 }

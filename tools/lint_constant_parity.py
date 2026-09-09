@@ -73,6 +73,20 @@ def _reframe(name: str):
     return getattr(_fr, name)
 
 
+def _stage(name: str):
+    """A number out of the Furina STAGE's quarantined engine module.
+
+    `_reframe` above's argument one arm over and unchanged: the sim keeps these
+    in `tier0/engine/furina_stage.py` rather than in `constants.py`, so that a
+    prototype moves neither the constant census nor the world stamp. Mirroring
+    is a different question from stamping -- the C# arm PLAYS these numbers and
+    its keyword tips PRINT them -- and reading them from where the sim keeps
+    them is what lets both facts be true at once.
+    """
+    from tier0.engine import furina_stage as _fs
+    return getattr(_fs, name)
+
+
 # --------------------------------------------------------------------------
 # MIRRORED: C# constant -> the tier0 value it copies.
 #
@@ -361,6 +375,25 @@ MIRRORED: dict[str, object] = {
     # UNMIRRORED as "not balance" would be true and useless. The classification
     # this table asks for is where the number came from.
     "FurinaReframe.EvokeTargetAbsent": _reframe("EVOKE_TARGET_ABSENT"),
+    # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-719` /
+    # `EB-720` / `EB-721`, R269). Same terms as every arm above and for the
+    # same reason -- quarantined is not exempt. These TEN numbers ARE the
+    # brief's sec.3 rules: the seat count, the relic's opening bar, what a
+    # summon arrives at, the lead's regen, the starter Refill, the three acts
+    # and the two bows that carry a number. The sim declared every one of them
+    # first (`EB-720` is the sim engine and `EB-721` the C#), and the C# side
+    # reads them for its keyword tips, so a pair that drifted would print a
+    # retired number under a card the seat is grading.
+    "FurinaStageLaw.Seats": _stage("SEATS"),
+    "FurinaStageLaw.OpeningFanfare": _stage("OPENING_FANFARE"),
+    "FurinaStageLaw.SummonFanfare": _stage("SUMMON_FANFARE"),
+    "FurinaStageLaw.LeadRegen": _stage("LEAD_REGEN"),
+    "FurinaStageLaw.RefillAmount": _stage("REFILL_AMOUNT"),
+    "FurinaStageLaw.ActUsherBlock": _stage("ACT_USHER_BLOCK"),
+    "FurinaStageLaw.ActChevalmarinDamage": _stage("ACT_CHEVALMARIN_DAMAGE"),
+    "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
+    "FurinaStageLaw.BowUsherBlock": _stage("BOW_USHER_BLOCK"),
+    "FurinaStageLaw.BowCrabalettaDamage": _stage("BOW_CRABALETTA_DAMAGE"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one
     # whole printed clause), so the number lives on the power and is
     # mirrored like every other rule number.
@@ -379,23 +412,6 @@ MIRRORED: dict[str, object] = {
 # relics, Ancients and the run layer are game-side content. What is not
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
-
-# One reason, eleven rows: the Furina stage arm's rule numbers. Written once
-# because it is one argument about one arm's build order, and repeating it
-# eleven times would invite eleven copies to drift. The block that uses it
-# carries the argument in full.
-_STAGE = (
-    "THE FURINA STAGE ARM, and the reason is the BUILD ORDER rather than the "
-    "number: `docs/current/operations/prototype.md` rules **C# FIRST, sim at "
-    "Balance**, so this arm's rules are implemented in the mod and nowhere "
-    "else until they survive the Prototype gate. There is no tier0 stage, no "
-    "performer and no bar of this kind, so there is nothing to mirror against "
-    "and nothing that can drift -- no sim run can be measured on a number the "
-    "mod chose alone. The eleven MOVE to MIRRORED the day the sim twin lands, "
-    "which is the arm's own acceptance and not an optional tidy. Spec: "
-    "review/active/furina-stage-brief-2026-09-08.md sec.3, disclosed as the "
-    "sim's numbers to settle by its sec.10 default 3."
-)
 
 UNMIRRORED: dict[str, str] = {
     "KleeOverhaulLedger.LineCap":
@@ -458,42 +474,14 @@ UNMIRRORED: dict[str, str] = {
         "the card is found by matching the flight's own start and end; the "
         "walk is bounded because it runs on a frame the engine is already "
         "struggling with. The sim has no scene tree.",
-    # THE FURINA STAGE ARM (QUARANTINED -- the C# lives under
-    # klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of a
-    # release build). ELEVEN numbers, and every one of them is a RULE of the
-    # brief's sec.3 rather than an instrument bound -- which is normally
-    # exactly what this table refuses to file UNMIRRORED.
-    #
-    # THE REASON IS THE BUILD ORDER, and it is the repo's own, written down in
-    # `docs/current/operations/prototype.md`: **C# FIRST, sim at Balance** --
-    # "a new kit rule is implemented in the C# mod behind the prototype switch
-    # and nowhere else, and the Python sim (tier0 / tier0.5) is brought up only
-    # once the rule survives the Prototype gate". The four arms above are
-    # mirrored because R220 B sequenced their C# legs LAST; this one is the
-    # first built the other way round, so there is no sim module to mirror
-    # against and a MIRRORED row would have to invent one.
-    #
-    # WHAT THIS COSTS AND WHAT IT DOES NOT. The pair cannot drift, because
-    # there is no pair: tier0 has no stage, no performer and no Fanfare bar of
-    # this kind, so no sim run can be measured on a number the mod chose alone.
-    # The day the sim twin lands -- the arm reaching Balance, or `stage-sim`
-    # growing an engine -- these eleven MOVE to MIRRORED and this block is
-    # deleted. That migration is the arm's own acceptance and not an optional
-    # tidy.
-    #
-    # `review/active/furina-stage-brief-2026-09-08.md` sec.3 is the spec, and
-    # its sec.10 default 3 discloses these as the sim's numbers to settle.
-    "FurinaStageLaw.SeatCount": _STAGE,
-    "FurinaStageLaw.OpeningFanfare": _STAGE,
-    "FurinaStageLaw.SummonFanfare": _STAGE,
-    "FurinaStageLaw.LeadRegen": _STAGE,
-    "FurinaStageLaw.RegenFromTurn": _STAGE,
-    "FurinaStageLaw.RefillAmount": _STAGE,
-    "FurinaStageLaw.UsherActBlock": _STAGE,
-    "FurinaStageLaw.ChevalmarinActDamage": _STAGE,
-    "FurinaStageLaw.CrabalettaActDamage": _STAGE,
-    "FurinaStageLaw.UsherBowBlock": _STAGE,
-    "FurinaStageLaw.CrabalettaBowDamage": _STAGE,
+    # THE FURINA STAGE ARM'S ELEVEN ARE NOT HERE, and their absence is the
+    # `EB-719` / `EB-721` reconciliation. This branch declared them UNMIRRORED
+    # on the reading that the arm was C#-first; the sim leg had in fact
+    # declared them FIRST, in `tier0/engine/furina_stage.py`, and ships the
+    # mirrored `FurinaStageLaw.cs` beside it. So the C# copy was deleted rather
+    # than reconciled -- two declarations of one number is exactly the drift
+    # this gate exists to refuse -- and the MIRRORED table above carries the
+    # pairs.
     # The placement pass's two, which are a different kind of number entirely:
     # they are the BASE GAME's own offsets, lifted out of
     # `NCombatRoom.AddCreature`'s pet layout (`owner.X - 20`, `owner.Y + 10`)

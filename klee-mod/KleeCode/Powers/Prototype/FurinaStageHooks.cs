@@ -57,7 +57,7 @@ public sealed class FurinaStageHooks : AbstractModel
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
-        await FurinaStageRules.Regen(player.Creature);
+        await FurinaStage.RegenLead(player.Creature);
         Vfx.FurinaStageStrip.Refresh(player.Creature);
     }
 
@@ -76,7 +76,7 @@ public sealed class FurinaStageHooks : AbstractModel
         foreach (var creature in participants.ToList())
         {
             if (!FurinaStage.LiveFor(creature)) continue;
-            await FurinaStageRules.PerformActs(choiceContext, creature);
+            await FurinaStage.EndOfTurnActs(choiceContext, creature);
             Vfx.FurinaStageStrip.Refresh(creature);
         }
     }

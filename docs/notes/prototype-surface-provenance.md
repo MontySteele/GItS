@@ -3410,3 +3410,67 @@ carries the first entry out twice, so a Scout Ahead written first arms twice
 and draws 2 per later carry-out. Both suites pin it. Its own beat prints no
 number -- no honest figure exists at the clause -- and the cards ride the later
 beats by name through `KokomiPlan.NoteRider`.
+
+## Furina, the Stage — batch one (`EB-719`, R269 2026-09-08)
+
+The design is `review/active/furina-stage-brief-2026-09-08.md`, whose sec.12
+prints the seventeen faces and whose sec.3 states the rules they play by. The
+faces below are the brief's, word for word; nothing here is a design act, and
+the names are provisional and cosmetic (sec.10 default 7, R179).
+
+**What left first.** The reframe's eleven `proto_fr_` rows are gone, under
+R213 B's deletion rule: the brief's sec.2 retires that arm by name, so its rows
+left rather than sitting commented out. Four keyword tips went with them
+(`Deploy`, `Evoke`, `Drain`), the `drain_fanfare` machinery stayed one more
+commit with the arm's C#, and `furina_reframe.POOL_SUBS` and `STARTER_SUBS` are
+empty maps rather than maps naming ids no sheet defines. `Encore` survived the
+cut and is now a rider rather than an arm keyword: the meter is shipped
+machinery, the word is printed on the Neow screen before a meter exists, and
+every Furina row the Stage does not swap still carries it (`EB-407` stands).
+
+**The three starters** swap in at `loader._starter_ids` for her three KIT
+starters — `aria_of_recompense`, `salon_debut` and `an_invitation`. The seven
+basics do not move and never will: three Soloist's Solicitation, three Stage
+Presence and Regal Bearing are the base game's, and an arm does not touch a
+basic. They are `basic` rarity, so `rewards.character_pool` cannot offer one
+whatever any map says.
+
+**The fourteen offerable rows** swap in at `loader._pool_substitutions`, one
+for one at the same rarity, so the offer odds do not move. Which shipped row
+each replaced is a D default disclosed on `furina_stage.POOL_SUBS`: the same
+rarity always, the same type and cost where her sheet had one to spare, and
+otherwise the nearest plain row of that rarity. The three named summons land on
+the three shipped rows of the SAME NAME, which is the cleanest swap on the
+sheet.
+
+**Two titles collide with a shipped Furina card on purpose.** *Standing
+Ovation* and *Let the People Rejoice* are cards this kit is a rewrite of, and
+the arm swaps a shipped row out at the same door, so no run can hold both. The
+reframe's own Rare took the same liberty for the same reason.
+
+**Why the two-branch faces carry two `{IfUpgraded:show:…}` holes.** Every Spend
+rider is printed as `conditional {if: stage_occupied, then: [stage_spend,
+<big>], else: [<base>]}`, which is rule 8's two sentences as two branches. A
+`conditional_damage` / `conditional_block` delta moves BOTH branches, and the
+emitter only rewrites the literal it finds in the `then` arm — so a face
+written with a bare base number would print 7 while the upgraded card dealt 10.
+The base number carries its own hole, authored on the row. **This is a codegen
+limitation worth a row of its own:** the emitter should hole every branch a
+whole-card delta moves, and today it holes one.
+
+**The three upgrades that are not numbers.** *Understudy* and *Final Bow* drop
+their Exhaust; *Salon Début*, the three named summons, *Standing Ovation*,
+*Ousia Surge*, *Pneuma Refrain*, *Bis!* and the Rare take a cost. Neither shows
+in the body, which is why the blind-play Smith preview answers those rows with
+"its upgrade changes nothing this face prints" rather than a rendered face —
+the reason is a fact about the card, which is what `EB-551` asked of it.
+
+**The seven keyword tips** are the brief's own list: `Spend`, `Fanfare`,
+`Raise`, `Bow`, `lead performer`, `back performer`, `Rotate`. Each carries the
+half of its rule a player cannot infer — rule 8's "fires in full even if the
+bar is short" (the whole Expend deck), rule 6's damage order (the reason a bar
+matters), rule 5's "with one performer that is the lead", and the difference
+between a bow and a death, which is turn one's wager. Two are two words because
+what they carry is a rule about WHICH SEAT. `Fanfare` collides by spelling with
+the shipped meter and not by meaning; nothing on the blind-play page can tell
+them apart today, and the round packet owes that finding.

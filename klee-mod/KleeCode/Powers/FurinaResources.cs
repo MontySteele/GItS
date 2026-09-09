@@ -1282,7 +1282,7 @@ public sealed class FurinaResourceHooks : AbstractModel
         // and the strip redraws -- and it fires per damage instance, so the
         // board is settled before the NEXT hit of the same flurry. Nothing is
         // paid out: a performer emptied by a hit takes no bow (rule 7).
-        await FurinaStageRules.Flush(target);
+        await FurinaStage.Flush(target);
         Vfx.FurinaStageStrip.Refresh(target);
 #endif
         await FurinaResources.SyncMeters(

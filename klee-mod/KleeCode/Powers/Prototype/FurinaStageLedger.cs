@@ -212,7 +212,7 @@ public sealed class FurinaStageLedger
 
     public bool IsEmpty => _seats.Count == 0;
 
-    public bool IsFull => _seats.Count >= FurinaStageLaw.SeatCount;
+    public bool IsFull => _seats.Count >= FurinaStageLaw.Seats;
 
     /// <summary>Every performer on stage, front to back. What the acts walk
     /// (rule 10, "from any seat") and what the strip draws.</summary>
@@ -291,6 +291,10 @@ public sealed class FurinaStageLedger
 
         var paid = lead.Fanfare < amount ? lead.Fanfare : amount;
         lead.Fanfare -= paid;
+        // The per-play record, written where the payment happens rather than
+        // by the caller: `stage_spent` is what a payoff on the SAME card
+        // multiplies, and by the time it resolves the bar is gone.
+        SpentThisPlay = paid;
         if (lead.Fanfare > 0) return new StageSpend(true, paid, null);
 
         _seats.RemoveAt(0);
@@ -353,7 +357,13 @@ public sealed class FurinaStageLedger
     /// </summary>
     public int Regen(int turnNumber)
     {
-        if (turnNumber < FurinaStageLaw.RegenFromTurn) return 0;
+        // "FROM HER SECOND TURN ON" IS A RULE AND NOT A CONSTANT, which is how
+        // the sim states it too (`furina_stage.turn_start_regen`: `if not
+        // active(p) or state.turn < 2`). There is no `REGEN_FROM_TURN` in
+        // `furina_stage`, so a constant here would be a number this side of
+        // the wire invented -- exactly what `lint_constant_parity` exists to
+        // refuse -- and the two engines would state one rule two ways.
+        if (turnNumber < 2) return 0;
         if (Lead is not { } lead) return 0;
         lead.Fanfare += FurinaStageLaw.LeadRegen;
         return FurinaStageLaw.LeadRegen;
@@ -375,8 +385,111 @@ public sealed class FurinaStageLedger
         return seat;
     }
 
+    /// <summary>The seat this performer is sitting in, or null. What the three
+    /// NAMED summon Commons ask before fielding a second copy: "Summon Usher.
+    /// If he is already on stage, Raise 3 on him instead."</summary>
+    public StageSeat? SeatOf(StagePerformer who) =>
+        _seats.FirstOrDefault(s => s.Who == who);
+
+    /// <summary>
+    /// The named summons' second clause, and the ONE Raise in the kit that
+    /// does not go to the back seat -- it raises HIM, wherever he is sitting,
+    /// which is why the face says so.
+    ///
+    /// A METHOD HERE rather than a caller writing <c>seat.Fanfare += n</c>,
+    /// because the ledger is the only writer of a bar: that is what makes the
+    /// pet mirror safe (this class's header) and what keeps every bar move
+    /// inside one file a pin can read.
+    /// </summary>
+    public int RaiseSeat(StageSeat seat, int amount)
+    {
+        if (amount <= 0) return 0;
+        seat.Fanfare += amount;
+        return amount;
+    }
+
+    /// <summary>
+    /// <i>Scene Change</i> (sec.12): the front performer moves to the back
+    /// seat, bar and all.
+    ///
+    /// A PURE REORDER, and the difference from rule 3's rotation is the whole
+    /// card: a rotation happens because somebody ARRIVED and the front had to
+    /// go, so a body leaves; this moves the same bodies around the same seats.
+    /// No bow, no act, nothing lost, nobody summoned.
+    /// </summary>
+    public void SceneChange()
+    {
+        if (_seats.Count == 0) return;
+        var front = _seats[0];
+        _seats.RemoveAt(0);
+        _seats.Add(front);
+    }
+
+    // ---- the per-play spend record -----------------------------------
+    //
+    // WHY A RECORD AND NOT A LIVE READ: by the time <i>Final Bow</i>'s Block
+    // or <i>Let the People Rejoice</i>'s damage resolves, the bar it is
+    // measuring is GONE -- the card emptied it a statement earlier. So what
+    // the payoff multiplies is what this play TOOK, written here as it is
+    // taken. `FurinaDrain.Amount` is the same shape one arm over.
+
+    /// <summary>What this play has taken off the bars so far.</summary>
+    public int SpentThisPlay { get; private set; }
+
+    /// <summary>A fresh, empty record for one card play.</summary>
+    public void BeginPlay() => SpentThisPlay = 0;
+
+    /// <summary>
+    /// <i>Let the People Rejoice</i>, first clause: "Spend all Fanfare on
+    /// stage." Empties every bar and REMEMBERS who was standing, because the
+    /// same card's third clause brings them back -- and the printed order puts
+    /// the card's own area damage between the two, so the bows cannot happen
+    /// here (<see cref="TakePendingCurtainCall"/>).
+    /// </summary>
+    public int CollectAll()
+    {
+        var total = _seats.Sum(s => s.Fanfare);
+        _pendingCurtainCall = _seats.Select(s => s.Who).ToList();
+        _seats.Clear();
+        SpentThisPlay = total;
+        return total;
+    }
+
+    /// <summary>Who <see cref="CollectAll"/> left waiting, taken once. Empty
+    /// at every moment no card is mid-Rejoice.</summary>
+    public IReadOnlyList<StagePerformer> TakePendingCurtainCall()
+    {
+        var company = _pendingCurtainCall;
+        _pendingCurtainCall = new List<StagePerformer>();
+        return company;
+    }
+
+    private List<StagePerformer> _pendingCurtainCall = new();
+
+    /// <summary>
+    /// <i>Final Bow</i>: the lead leaves AND BOWS, with no Spend to earn it.
+    /// The one card that grants a bow outright -- rule 9 buys a bow with a
+    /// Spend, and this face pays for it with a card and an Exhaust instead.
+    /// <paramref name="bar"/> is what it left with, which is the Block the
+    /// card gains.
+    /// </summary>
+    public StageExit? FinalBow(out int bar)
+    {
+        bar = 0;
+        if (Lead is not { } lead) return null;
+        bar = lead.Fanfare;
+        _seats.RemoveAt(0);
+        SpentThisPlay = bar;
+        return new StageExit(lead.Who, StageDeparture.Spent);
+    }
+
     /// <summary>Test and teardown seam: the stage is empty at the end of a
     /// combat because pets live one combat (rule 1). The combat-identity check
     /// in <see cref="For"/> is what does this in a real run.</summary>
-    public void Clear() => _seats.Clear();
+    public void Clear()
+    {
+        _seats.Clear();
+        _pendingCurtainCall.Clear();
+        SpentThisPlay = 0;
+    }
 }

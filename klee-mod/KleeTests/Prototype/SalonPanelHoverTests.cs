@@ -116,7 +116,14 @@ public class SalonPanelHoverTests
             }
         }
 
-        Assert.True(deploys >= 12, $"only {deploys} deploy rows are marked");
+        // NINE SINCE `EB-719`, and it was twelve. The Furina reframe's
+        // three deploy rows left `docs/prototype-surface.yaml` with the
+        // rest of that arm under R213 B's deletion rule, so the floor
+        // follows the shipped sheet's nine. It is a FLOOR and not an
+        // equality for its original reason: the pin is that the mark
+        // and the call cannot come apart, which the loop above checks
+        // per file, and this line only refuses a run that found none.
+        Assert.True(deploys >= 9, $"only {deploys} deploy rows are marked");
     }
 
     // === 2. the word on every seat ======================================

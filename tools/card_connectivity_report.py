@@ -434,6 +434,26 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # nothing. What follows it on the card reads the amount taken,
     # which is a per-play number and not a state in this vocabulary.
     "drain_fanfare": [_hook("private", "fanfare", "use")],
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-720`) -- THE STAGE's eight.
+    # ONE PRIVATE STATE, `stage`, and it is a new one rather than `salon`
+    # reused: the shipped Salon is a queue of names with no bars, and every
+    # verb below is about a BAR. A row written against one cannot be played
+    # against the other, so counting them as competing uses of a single state
+    # would report a contention two cards can never actually have.
+    #
+    # The classification is the same three-way one the rest of the table uses.
+    # A summon, a Raise and a rotate WRITE the board. The four spends USE it --
+    # they take bars away, so a second spend in one turn finds less, which is
+    # exactly the contention this vocabulary exists to count. `Bis!` is a
+    # `use` too: an act is a resource the turn only has once per performer.
+    "stage_summon": [_hook("private", "stage", "write")],
+    "stage_raise": [_hook("private", "stage", "write")],
+    "stage_scene_change": [_hook("private", "stage", "write")],
+    "stage_perform_lead": [_hook("private", "stage", "use")],
+    "stage_spend": [_hook("private", "stage", "use")],
+    "stage_spend_all": [_hook("private", "stage", "use")],
+    "stage_curtain_call": [_hook("private", "stage", "write")],
+    "stage_final_bow": [_hook("private", "stage", "use")],
     "salon_bow": [_hook("private", "salon", "use")],
     # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a
     # write to the private board (which performer the FIFO end offers next)

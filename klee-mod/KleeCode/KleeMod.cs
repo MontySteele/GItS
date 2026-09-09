@@ -495,47 +495,34 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.PlanElementKey + ".title"] =
                         "Hydro on the carry-out",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
-                    // The Furina reframe's three (slice two). `Deploy`
-                    // is the one word here a shipped Furina card also
-                    // uses in prose, and it is the same correctness as
-                    // `Bomb` above: the shipped deploy performs nobody,
-                    // the arm's does, and no single face raises both.
-                    [Cards.ArmKeywordTips.DeployKey + ".title"] = "Deploy",
-                    [Cards.ArmKeywordTips.EvokeKey + ".title"] = "Evoke",
-                    [Cards.ArmKeywordTips.DrainKey + ".title"] = "Drain",
-                    // `EB-407`. The one word in this block the arm did not
-                    // invent: Encore is shipped machinery, and its only
-                    // statement of itself is `EncoreMeterPower`'s badge, which
-                    // renders once the meter is on the board -- while the word
-                    // is printed on the Neow screen and on opening-hand faces
-                    // before that. No collision: the shipped meter power
-                    // titles itself and hangs no keyword tip.
+                    // The Furina reframe's four title rows went
+                    // with its keywords (`EB-719`); see
+                    // `ArmKeywordTips`'s Furina section.
                     [Cards.ArmKeywordTips.EncoreKey + ".title"] = "Encore",
+                    // THE FURINA STAGE'S SEVEN (`EB-719`, R269). The brief's
+                    // sec.12 names them; each is a rule the SHIPPED engine
+                    // does not have, so none collides with a shipped keyword.
+                    // `Fanfare` is the sharpest case and the reason each takes
+                    // its own key: the shipped word titles a METER and this one
+                    // a performer's own bar, and the two sentences contradict
+                    // each other -- but no single face can raise both, because
+                    // the arm swaps a shipped row out at every door it enters.
+                    [Cards.ArmKeywordTips.SpendKey + ".title"] = "Spend",
+                    [Cards.ArmKeywordTips.FanfareKey + ".title"] =
+                        "Fanfare",
+                    [Cards.ArmKeywordTips.RaiseKey + ".title"] = "Raise",
+                    [Cards.ArmKeywordTips.BowKey + ".title"] = "Bow",
+                    [Cards.ArmKeywordTips.LeadPerformerKey + ".title"] =
+                        "Lead performer",
+                    [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
+                        "Back performer",
+                    [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
                     // `EB-553` (R260). The third rider here that titles no
                     // keyword: the reframe's starting relic fields the stage
                     // at combat start, and the relic's own face has no room
                     // left for the sentence.
                     [Cards.ArmKeywordTips.OpeningStageKey + ".title"] =
                         "Opening stage",
-                    // THE STAGE ARM'S SEVEN, plus Summon. Every one of them is
-                    // a word the brief's sec.3 invented for this kit, and NOT
-                    // ONE of them collides with a shipped title: `Fanfare`
-                    // shipped as a METER and titles itself off
-                    // `FanfareMeterPower`'s badge, which is retired under this
-                    // arm and replaced by a performer's own bar -- a different
-                    // rule wearing the same word, which is exactly the
-                    // `KLEEMOD-ARM_` prefix's job. `Spend` is a shipped
-                    // Kokomi VERB on a card face and never a titled keyword.
-                    [Cards.ArmKeywordTips.StageSpendKey + ".title"] = "Spend",
-                    [Cards.ArmKeywordTips.StageFanfareKey + ".title"] =
-                        "Fanfare",
-                    [Cards.ArmKeywordTips.StageRaiseKey + ".title"] = "Raise",
-                    [Cards.ArmKeywordTips.StageBowKey + ".title"] = "Bow",
-                    [Cards.ArmKeywordTips.StageLeadKey + ".title"] = "Lead",
-                    [Cards.ArmKeywordTips.StageBackKey + ".title"] =
-                        "Back performer",
-                    [Cards.ArmKeywordTips.StageRotateKey + ".title"] = "Rotate",
-                    [Cards.ArmKeywordTips.StageSummonKey + ".title"] = "Summon",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in
