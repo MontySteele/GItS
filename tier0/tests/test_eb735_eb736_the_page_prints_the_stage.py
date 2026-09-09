@@ -45,12 +45,17 @@ THREE_SEATS = [
 ]
 
 
-def _beat(event, member, name, seat=0, bar=0, moved=0, reason=""):
+def _beat(event, member, name, seat=0, bar=0, moved=0, reason="",
+          target="", combat_id=""):
     return {"event": event, "member": member, "name": name, "seat": seat,
-            "fanfare": bar, "moved": moved, "reason": reason}
+            "fanfare": bar, "moved": moved, "reason": reason,
+            # `EB-743`: the body a Crabaletta act or bow picked, already
+            # renamed by `blindplay_board.name_stage_targets`.
+            "target": target, "combat_id": combat_id}
 
 
-def _state(stage=None, resources=None):
+def _state(stage=None, resources=None, hand=None,
+           enemy="Nibbit"):
     """A combat screen the page will render, with whatever stage block is
     handed in. Deliberately minimal: what is being asserted is one section, and
     a fixture carrying a hand and a map would put four other sections between
@@ -60,7 +65,7 @@ def _state(stage=None, resources=None):
         "hp": 62, "max_hp": 78, "block": 9,
         "energy": 3, "max_energy": 3,
         "gold": 0,
-        "hand": [],
+        "hand": list(hand or []),
         "draw_pile_count": 5, "discard_pile_count": 2, "exhaust_pile_count": 0,
         "draw_pile": [], "discard_pile": [], "exhaust_pile": [],
         "relics": [], "potions": [], "status": [],
@@ -79,7 +84,7 @@ def _state(stage=None, resources=None):
         "floor": 3,
         "battle": {"round": 3},
         "player": player,
-        "enemies": [{"name": "Nibbit", "hp": 20, "max_hp": 44, "block": 0,
+        "enemies": [{"name": enemy, "hp": 20, "max_hp": 44, "block": 0,
                      "intents": [{"kind": "attack", "amount": 12}],
                      "status": []}],
     }
@@ -92,8 +97,14 @@ def _fresh_fight():
     blindplay.forget_fight()
 
 
-def _page(stage=None, resources=None):
-    return blindplay.observe(_state(stage, resources))
+def _page(stage=None, resources=None, hand=None, enemy="Nibbit"):
+    return blindplay.observe(_state(stage, resources, hand, enemy))
+
+
+def _card(text, name="Some Card"):
+    """One hand entry, enough for the glossary to read its body off."""
+    return {"id": "x", "name": name, "description": text, "cost": "1",
+            "can_play": True, "target_type": "Self"}
 
 
 # ---------------------------------------------------------------------------
@@ -139,8 +150,24 @@ def test_the_first_line_is_the_damage_order_and_the_second_is_the_reserve():
     page = _page({"live": True, "seats": THREE_SEATS, "log": []})
     lines = [ln for ln in page.splitlines() if ln.startswith("- ")]
 
-    assert "- Block 9 · lead: Usher 5 · Furina 62/78" in lines
+    assert ("- Block 9 · after the acts: Block 12 · lead: Usher 5 · "
+            "Furina 62/78") in lines
     assert "- middle: Chevalmarin 1 · back: Crabaletta 6" in lines
+
+
+def test_the_block_line_says_what_the_sweep_will_add():
+    """`EB-743`, second half. The Usher's act is 3 Block at the END of her
+    turn, so the Block on the strip while she is deciding is the Block BEFORE
+    the acts -- and a seat subtracting an intent from it is subtracting from
+    the wrong number ("the Usher's 3 Block landed invisibly every turn and no
+    seat's arithmetic closed"). Two Ushers pay twice; a stage with none says
+    nothing, because there is nothing to forecast."""
+    two = [_seat("usher", "Gentilhomme Usher", 0, 5, "7"),
+           _seat("usher", "Gentilhomme Usher", 1, 2, "8")]
+    assert "after the acts: Block 15" in _page(
+        {"live": True, "seats": two, "log": []})
+    assert "after the acts" not in _page(
+        {"live": True, "seats": THREE_SEATS[1:], "log": []})
 
 
 def test_three_named_bars_stand_in_seat_order():
@@ -188,16 +215,46 @@ def test_one_line_per_arrival_act_bow_departure_and_rotation():
     ]
     page = _page({"live": True, "seats": THREE_SEATS, "log": log})
 
-    # The seat word is TODAY'S cast size, floored at the index the beat
-    # recorded: Chevalmarin arrived in the back-most empty seat and a third
-    # performer has stood behind her since, so the seat she is in now is the
-    # middle one and that is the seat the reader is looking at.
-    assert "**Chevalmarin** took the middle seat at 1" in page
-    assert "**Usher** performed from the lead seat. It moved 3." in page
+    # `EB-743`: THE SEAT IS READ OFF THE BLOCK AT PRINT TIME. Chevalmarin
+    # stands in the middle seat now, and that is the seat the reader is looking
+    # at three lines up -- not the back one she arrived in.
+    assert ("**Chevalmarin** joined the stage at 1 [gold]Fanfare[/gold], and "
+            "stands in the middle seat.") in page
+    # And every act NAMES ITS EFFECT, with the measured number in it.
+    assert "**Usher** performed: Furina gains 3 [gold]Block[/gold]." in page
     assert "**Usher** left the stage: emptied by a Spend, so it takes a Bow." \
         in page
-    assert "**Usher** took a [gold]Bow[/gold]. It moved 4." in page
+    assert "**Usher** took a [gold]Bow[/gold]: Furina gains 4 " \
+        "[gold]Block[/gold]." in page
     assert "**Crabaletta** moved from the front seat to the back" in page
+
+
+def test_each_performers_act_says_what_it_did():
+    """`EB-743`. "It moved N" covered 3 Block, 5 damage and an aura alike, so
+    no seat's arithmetic closed for a whole run. Each act names its own effect,
+    and Crabaletta names the body it picked -- by the page's own numbered name,
+    since it picks its own."""
+    def line(member, name, moved, target=""):
+        return _page({"live": True, "seats": THREE_SEATS,
+                      "log": [_beat("act", member, name, moved=moved,
+                                    target=target, combat_id="4")]})
+
+    assert "performed: Furina gains 3 [gold]Block[/gold]." in line(
+        "usher", "Gentilhomme Usher", 3)
+    assert ("performed: 4 across every enemy, and [gold]Hydro[/gold] on "
+            "each.") in line("chevalmarin", "Surintendante Chevalmarin", 4)
+    assert "performed: 5 to Corpse Slug (2)." in line(
+        "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
+
+
+def test_an_act_that_landed_nothing_says_so_and_prints_no_zero():
+    """A Crabaletta hit a Block ate whole. "0 to Corpse Slug" is a claim about
+    a number the beat did not make."""
+    page = _page({"live": True, "seats": THREE_SEATS,
+                  "log": [_beat("act", "crabaletta",
+                                "Mademoiselle Crabaletta", moved=0)]})
+    assert "**Crabaletta** performed: nothing landed." in page
+    assert "performed: 0" not in page
 
 
 def test_a_departure_says_why_because_that_is_rules_seven_and_nine():
@@ -223,7 +280,8 @@ def test_a_beat_that_moved_nothing_prints_no_number():
     page = _page({"live": True, "seats": THREE_SEATS,
                   "log": [_beat("bow", "chevalmarin",
                                 "Surintendante Chevalmarin", seat=-1)]})
-    assert "**Chevalmarin** took a [gold]Bow[/gold]." in page
+    assert ("**Chevalmarin** took a [gold]Bow[/gold]: [gold]Hydro[/gold] on "
+            "every enemy.") in page
     assert "It moved" not in page
 
 
@@ -353,3 +411,67 @@ def test_the_stage_scenario_asserts_the_block_and_parses():
     assert "lead: Chevalmarin" in body
     assert "back: Crabaletta" in body
     assert "took a [gold]Bow[/gold]" in body
+
+
+# ---------------------------------------------------------------------------
+# `EB-744`. UNDER THE ARM THE GLOSSARY IS THE STAGE'S.
+# ---------------------------------------------------------------------------
+
+def test_the_encore_row_is_gone_from_an_arm_page():
+    """Round two, sec.4: "the glossary still carries the old words: an Encore
+    row". Encore has no job under the Stage (brief sec.2, R269) and since
+    `EB-745` nothing grants it, so a rule for a meter that cannot move is noise
+    -- even where a shipped row the arm did not swap still prints the word."""
+    face = [_card("Spend 2 [gold]Encore[/gold]: draw 2 cards.")]
+    arm = _page({"live": True, "seats": THREE_SEATS, "log": []}, hand=face)
+    assert "**Encore**" not in arm
+    # And with no stage block the page is the shipped Furina's, untouched.
+    assert "**Encore**" in _page(None, hand=face)
+
+
+def test_the_companion_row_says_what_a_companion_does_under_the_arm():
+    """The round-two Preserve seat played Companion cards for a run believing
+    they rotate the stage, which is the SHIPPED Salon's rule. The Stage retires
+    that outright; the one touchpoint the brief names is Chevalmarin's Hydro."""
+    face = [_card("Deal 4 damage for each Companion you played last turn.")]
+    arm = _page({"live": True, "seats": THREE_SEATS, "log": []}, hand=face)
+    assert "It does nothing to your stage" in arm
+    assert "performs the front member" not in arm
+    shipped = _page(None, hand=face)
+    assert "performs the front member" in shipped
+
+
+def test_a_monster_called_a_bomb_does_not_raise_the_bomb_row():
+    """Round two, sec.4: "a Bomb row beside a Gas Bomb". A creature's name is
+    in the glossary's haystack on purpose -- a power's badge is a printed rule
+    -- but a monster called one is not a charge on the board, and a Furina seat
+    with no Bomb in the game read Klee's whole charge rule on every screen it
+    stood on."""
+    page = _page({"live": True, "seats": THREE_SEATS, "log": []},
+                 enemy="Gas Bomb")
+    assert "**Bomb**" not in page
+    # A card that PLACES one still raises it: the word is keyed off the board
+    # and the faces, not struck from the page.
+    assert "**Bomb**" in _page(
+        {"live": True, "seats": THREE_SEATS, "log": []}, enemy="Gas Bomb",
+        hand=[_card("Place 1 [gold]Bomb[/gold] dealing 5.")])
+
+
+def test_the_seat_rows_say_what_a_performers_act_is():
+    """Round two, sec.2: the reserve PERFORMS, and nothing printed said so --
+    "the three read as three at the exit and one at the table, because every
+    card speaks in seats and the acts are not documented"."""
+    for word in ("lead performer", "back performer"):
+        page = _page({"live": True, "seats": THREE_SEATS, "log": []},
+                     hand=[_card(f"Deal damage equal to the {word}'s bar.")])
+        assert "Every performer acts at the end of your turn" in page
+        assert "Crabaletta deals 5 to a random enemy" in page
+
+
+def test_the_back_performer_row_says_no_single_attack_rather_than_nothing():
+    """Rule 6 is per ATTACK: the lead absorbs one hit up to its bar and leaves
+    at 0, so the next attack of the same turn meets whoever stepped forward."""
+    page = _page({"live": True, "seats": THREE_SEATS, "log": []},
+                 hand=[_card("Gain Block equal to the back performer's bar.")])
+    assert "no single attack reaches it" in page
+    assert "nothing hits it" not in page

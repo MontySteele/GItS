@@ -445,6 +445,7 @@ public static class FurinaStage
         // Crabaletta prints 5 and a Vulnerable makes it 7; a receipt quoting
         // the 5 sends a reader looking for two damage nothing accounts for.
         var before = Ledger(owner);
+        Creature? hit = null;
         switch (Parse(member))
         {
             case StagePerformer.Usher:
@@ -464,6 +465,11 @@ public static class FurinaStage
             case StagePerformer.Crabaletta:
                 if (RandomEnemy(owner!) is { } target)
                 {
+                    // `EB-743`: WHICH body, because Crabaletta picks its own.
+                    // Held before the hit lands so a killing act still names
+                    // what it killed -- `FurinaReframeLedger`'s rule one arm
+                    // over, and the reason the mod sends a title at all.
+                    hit = target;
                     await ElementalHit.Deal(
                         choiceContext, target, Elements.Element.Hydro,
                         FurinaStageLaw.ActCrabalettaDamage, owner,
@@ -471,7 +477,7 @@ public static class FurinaStage
                 }
                 break;
         }
-        NoteBeat(owner!, "act", Parse(member), before);
+        NoteBeat(owner!, "act", Parse(member), before, hit);
     }
 
     /// <summary><i>Bis!</i>: the lead performer performs its act now.
@@ -512,6 +518,7 @@ public static class FurinaStage
     {
         if (!exit.Bows || !LiveFor(owner)) return;
         var before = Ledger(owner);
+        Creature? hit = null;
         switch (exit.Who)
         {
             case StagePerformer.Usher:
@@ -529,6 +536,7 @@ public static class FurinaStage
             case StagePerformer.Crabaletta:
                 if (RandomEnemy(owner) is { } target)
                 {
+                    hit = target;                        // `EB-743`
                     await ElementalHit.Deal(
                         choiceContext, target, Elements.Element.Hydro,
                         FurinaStageLaw.BowCrabalettaDamage, owner,
@@ -536,7 +544,7 @@ public static class FurinaStage
                 }
                 break;
         }
-        NoteBeat(owner, "bow", exit.Who, before);
+        NoteBeat(owner, "bow", exit.Who, before, hit);
     }
 
     /// <summary>Furina's Block and the board's total HP, as one pair, taken
@@ -558,7 +566,8 @@ public static class FurinaStage
     /// on the board rather than in it.</summary>
     private static void NoteBeat(Creature owner, string what,
                                  StagePerformer who,
-                                 (int Block, int EnemyHp) before)
+                                 (int Block, int EnemyHp) before,
+                                 Creature? hit = null)
     {
         var after = Ledger(owner);
         var moved = (after.Block - before.Block)
@@ -568,7 +577,14 @@ public static class FurinaStage
         ledger.Note(new StageBeat(
             what, who, seat,
             seat >= 0 ? ledger.Seats[seat].Fanfare : 0,
-            moved < 0 ? 0 : moved, ""));
+            moved < 0 ? 0 : moved, "",
+            // `EB-743`. WHO IT LANDED ON, for the one act and the one bow that
+            // pick a body. Title AND combat id, `FurinaReframeLedger`'s pair
+            // one arm over: the id is the handle the page names a live body
+            // by, and the title is the fallback for one this beat KILLED,
+            // which is off the next board entirely.
+            hit?.Monster?.Title.ToString() ?? "",
+            hit?.CombatId.ToString() ?? ""));
     }
 
     /// <summary>Rule 6's flush: the ledger moved synchronously inside
