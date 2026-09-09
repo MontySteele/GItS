@@ -491,31 +491,20 @@ public static class FurinaReframeRoster
     public static IEnumerable<CardModel> SwapOfferedRiders(
         IEnumerable<CardModel> offered)
     {
-        if (!FurinaReframe.Enabled) return offered;
-        return offered
-            .Where(card => card is not FurinaGen.FloridCadenza
-                        && card is not FurinaGen.DramaticEntrance
-                        && card is not FurinaGen.UniversalRevelry
-                        && card is not FurinaGen.FloodOfEmotion
-                        && card is not FurinaGen.HouseCall
-                        && card is not FurinaGen.DinnerService
-                        && card is not FurinaGen.BlockingNotes
-                        && card is not FurinaGen.SharedBilling
-                        && card is not FurinaGen.RapturousApplause
-                        && card is not FurinaGen.UnheardConfession
-                        && card is not FurinaGen.TheSeaIsMyStage)
-            .Concat(PrototypeCards.For("furina")
-                        .Where(card => card is ProtoFrFloridCadenza
-                                            or ProtoFrDramaticEntrance
-                                            or ProtoFrUniversalRevelry
-                                            or ProtoFrFloodOfEmotion
-                                            or ProtoFrCurtainRises
-                                            or ProtoFrSecondCourse
-                                            or ProtoFrGuestList
-                                            or ProtoFrSharedBilling
-                                            or ProtoFrRapturousApplause
-                                            or ProtoFrUnheardConfession
-                                            or ProtoFrLetThePeopleRejoice));
+        // THE SWAP IS EMPTY, AND THAT IS THE RETIREMENT (`EB-719`, R269). The
+        // Stage brief's sec.2 retires this arm by name, so its eleven
+        // `proto_fr_` rows LEFT `docs/prototype-surface.yaml` under R213 B's
+        // deletion rule and their generated classes went with them. There is
+        // nothing left to swap in, so this returns what it was handed --
+        // exactly what it does with the flag off, which is now the only
+        // behaviour it has. Sim twin: `furina_reframe.POOL_SUBS`, `{}`.
+        //
+        // THE METHOD SURVIVES ITS ROWS on purpose, for one commit: the arm's
+        // powers, its law constants (mirrored by
+        // `tools/lint_constant_parity.py`) and its call sites are the C# half
+        // of a retirement the Stage branch is not the one to finish. It goes
+        // with them.
+        return offered;
     }
 
     /// <summary>
@@ -551,9 +540,10 @@ public static class FurinaReframeRoster
     /// a RULE, so [USER] plays the first build that carries it.
     /// </summary>
     public static CardModel StarterAria() =>
-        FurinaReframe.Enabled
-            ? ModelDb.Card<ProtoFrAriaOfRecompense>()
-            : ModelDb.Card<FurinaGen.AriaOfRecompense>();
+        // `EB-719`: the copy left the surface with the rest of the arm, so
+        // this slot is the shipped card whatever the flag says. See
+        // `SwapOfferedRiders` above for the retirement and what survives it.
+        ModelDb.Card<FurinaGen.AriaOfRecompense>();
 
     /// <summary>
     /// THE ARM'S OTHER STARTER SLOT (<c>EB-416</c>). Slot 9 of
@@ -576,7 +566,7 @@ public static class FurinaReframeRoster
     /// and <c>docs/furina-cards.yaml</c> does not move.
     /// </summary>
     public static CardModel StarterSalonDebut() =>
-        FurinaReframe.Enabled
-            ? ModelDb.Card<ProtoFrSalonDebutNamed>()
-            : ModelDb.Card<FurinaGen.SalonDebut>();
+        // `EB-719`, and `StarterAria` above's note: the named Début left the
+        // surface with the arm, so this slot is the shipped card.
+        ModelDb.Card<FurinaGen.SalonDebut>();
 }
