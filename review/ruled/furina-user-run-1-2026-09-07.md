@@ -1,8 +1,5 @@
 Status: RULED R269 2026-09-08
 
-The eyes-on lapses: the Salon panel it asked about retires under the
-Stage brief.
-
 # Furina, [USER]'s first act-1 run under the reframe: the UI is still not legible; the Encore idea is liked, the stage is not readable
 
 Written 2026-09-07. [USER] played Furina's act 1 on `0.2.2888+proto` (main
