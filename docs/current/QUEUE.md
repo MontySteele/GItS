@@ -96,7 +96,7 @@ in `review/ruled/`.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `furina-stage-round-2 5.1` | **CHOOSE** how a Spend larger than the lead's bar resolves (rule 8; six seats split 3:3 play/loophole, one conjured a 1-bar body to kill it). (1) DEFAULT keep: fires in full, the lead bows; (2) fires in full, a bow only when the payment empties the lead exactly; (3) the rider needs the full price, a short lead plays at base. | OPEN -- gated on round three, after EB-746 reads | - |
+| `furina-stage-round-2 5.1` | **CHOOSE** how a Spend larger than the lead's bar resolves (rule 8). Round two split 3:3 play/loophole; round three's Preserve seat won the elite on it and called the honest line strictly worse. (1) keep: fires in full, the lead bows; (2) fires in full, a bow only when the payment empties the lead exactly; (3) DEFAULT (moved in round three): the rider needs the full price, a short lead cannot choose it; a bow on an exact emptying. | OPEN -- gated on round three's packet | furina-stage-round-2-2026-09-09; round-3 packet |
 
 
 ## 6. Prototype slices (R213) — held arms, re-authored kits, and the rules under them
