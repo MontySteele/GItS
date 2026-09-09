@@ -94,7 +94,10 @@ items that survives returns through the reframe's own round packets.
 Hexerei ownership and tag; Kokomi's queue, pool first), and the packets are
 in `review/ruled/`.
 
-**Nothing is open in this section.**
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `furina-stage-round-3 5.2` | **CHOOSE** where Spend and the readers take their Fanfare (rules 5 and 8; three rounds say the reserve is the engine and the lead's bar is what hits delete). (1) keep: Raise loads the back, Spend and readers take the lead, Scene Change bridges; (2) Raise targets a chosen performer; (3) DEFAULT: Spend and the readers take the back-most performer, the lead is the shield; alone, it is both. | OPEN -- gated on a build of both picks, then round four | - |
+
 
 ## 6. Prototype slices (R213) — held arms, re-authored kits, and the rules under them
 
