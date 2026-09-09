@@ -80,7 +80,7 @@ public sealed class StageSalonDebut : CustomCardModel, ICharacterCard
     {
         ("title", "Salon Début"),
         ("description",
-            "[gold]Summon[/gold] a random performer that is not on stage."),
+            "[gold]Summon[/gold] a random performer who is not on stage."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
@@ -145,8 +145,8 @@ public sealed class StageCurtainRise : CustomCardModel, ICharacterCard
     {
         ("title", "Curtain Rise"),
         ("description",
-            "Deal {Damage:diff()} damage. [gold]Spend[/gold] "
-          + "{SpendCost}: deal {ExtraDamage} more."),
+            "Deal {Damage:diff()}. [gold]Spend[/gold] {SpendCost}: deal "
+          + "{SpendDamage:diff()} instead."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
@@ -159,7 +159,13 @@ public sealed class StageCurtainRise : CustomCardModel, ICharacterCard
         new List<DynamicVar>
         {
             new DamageVar(7m, ValueProp.Move),
-            new ExtraDamageVar(6m),
+            // THE PAID TOTAL AND NOT THE DELTA, because that is the face
+            // sec.12 prints: "deal 13 instead", not "deal 6 more". The delta
+            // is DERIVED from the pair below rather than carried as a third
+            // number, so the printed 7, the printed 13 and the damage that
+            // actually lands cannot drift apart -- an upgrade moves one var
+            // and the modifier follows.
+            new DynamicVar("SpendDamage", 13m),
             new DynamicVar("SpendCost", 3m),
         };
 
@@ -181,7 +187,8 @@ public sealed class StageCurtainRise : CustomCardModel, ICharacterCard
         if (!FurinaStage.LiveFor(furina)) return 0m;
         return FurinaStageLedger.For(furina!).IsEmpty
             ? 0m
-            : DynamicVars.ExtraDamage.BaseValue;
+            : DynamicVars["SpendDamage"].BaseValue
+              - DynamicVars.Damage.BaseValue;
     }
 
     /// <summary>
@@ -223,8 +230,9 @@ public sealed class StageCurtainRise : CustomCardModel, ICharacterCard
     {
         // The upgrade moves the PAID number and leaves the base and the price
         // alone: the card's question is whether to spend, and an upgrade that
-        // moved the base would answer it.
-        DynamicVars.ExtraDamage.UpgradeValueBy(3m);
+        // moved the base would answer it. The rider follows by construction,
+        // because the modifier is the difference of the two printed numbers.
+        DynamicVars["SpendDamage"].UpgradeValueBy(3m);
     }
 }
 

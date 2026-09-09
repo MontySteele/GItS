@@ -574,6 +574,67 @@ public class FurinaStageRuleTests
     }
 
     // ==================================================================
+    // 8b. THE THREE FACES ARE SECTION 12'S, WORD FOR WORD.
+    // ==================================================================
+
+    /// <summary>
+    /// `EB-721` (R269). The brief's sec.12 table is the authored face of every
+    /// batch-one row, and these three are its starter. They are HAND-WRITTEN
+    /// here only until the `proto_fs_` sheet lands, which is exactly the
+    /// window in which a face can drift from its own spec unnoticed: a
+    /// generated row's face is derived from the sheet and cannot, a
+    /// hand-written one is typed.
+    ///
+    /// THE INTERESTING ONE IS CURTAIN RISE, and it is the reason this pin
+    /// exists rather than a spot check. Its second clause prints the PAID
+    /// TOTAL -- "deal 13 instead" -- and not the delta a `ModifyDamageAdditive`
+    /// rider naturally spells ("deal 6 more", which is what it said before
+    /// this). Both are true of the same card; only one is sec.12's, and the
+    /// difference is what a player weighs a Spend against.
+    /// </summary>
+    [Theory]
+    [InlineData("StageSalonDebut",
+                "[gold]Summon[/gold] a random performer who is not on stage.")]
+    [InlineData("StageCurtainRise",
+                "Deal {Damage:diff()}. [gold]Spend[/gold] {SpendCost}: deal "
+                + "{SpendDamage:diff()} instead.")]
+    [InlineData("StageStandingOvation",
+                "[gold]Raise[/gold] {Amount:diff()} [gold]Fanfare[/gold] on "
+                + "the back performer.")]
+    public void The_starter_faces_are_the_briefs(string cls, string face)
+    {
+        // OFF THE COMPILED `Localization` GETTER rather than off the source
+        // file: adjacent string constants are folded by the compiler, so one
+        // `ldstr` IS the face and the assertion cannot be defeated by a line
+        // break moving. It is the same read `ArmKeywordTipTests.Printed`
+        // makes of a tip.
+        var printed = Il.Strings(Il.Method(cls, "get_Localization"));
+        Assert.Contains(face, printed);
+    }
+
+    /// <summary>
+    /// AND THE TWO PRINTED NUMBERS ARE THE ONES THAT LAND. Curtain Rise's
+    /// rider is the DIFFERENCE of its own two vars rather than a third number,
+    /// so "deal 7" and "deal 13 instead" cannot come apart from what the
+    /// pipeline adds -- which is the preview-truth rule
+    /// (`klee-mod-runtime.md` sec.3) held at the one place this card could
+    /// break it.
+    /// </summary>
+    [Fact]
+    public void Curtain_rises_rider_is_the_difference_of_its_printed_numbers()
+    {
+        var calls = Il.Calls(
+            Il.Method("StageCurtainRise", "ModifyDamageAdditive"));
+        Assert.Contains(calls, c => c.EndsWith("FurinaStageLedger.get_IsEmpty",
+                                               StringComparison.Ordinal));
+        Assert.Contains(calls, c => c.EndsWith("FurinaStage.LiveFor",
+                                               StringComparison.Ordinal));
+        var strings = Il.Strings(
+            Il.Method("StageCurtainRise", "ModifyDamageAdditive"));
+        Assert.Contains("SpendDamage", strings);
+    }
+
+    // ==================================================================
     // 9. THE STRIP -- the damage order, in three terms.
     // ==================================================================
 
