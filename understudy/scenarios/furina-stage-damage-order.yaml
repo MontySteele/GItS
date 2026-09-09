@@ -36,6 +36,14 @@ character: KLEEMOD-FURINA
 # surface rather than against a shipped sheet (`EB-147`).
 prototype: true
 turns: 2
+# PINNED, because this file asserts PRINTED damage numbers and an act-1
+# hallway is not one fight. An unpinned run rolled a Shrinker Beetle whose
+# debuff took every printed 13 down to a landed 9 -- three times, consistently
+# -- and another rolled a 7-HP Twig Slime in the front seat that a 13 could
+# only overkill. Neither says anything about rule 8; both are the encounter.
+# This seed opens on a single Fuzzy Wurm Crawler with room to absorb three
+# Spends and a base mode, which is the bare body the assumptions below name.
+seed: YVKF7957EUFG
 
 notes: |
   The damage order proved from Furina's side of it: a fat lead and her Block
@@ -61,26 +69,48 @@ assumptions:
      performer, which with one performer on stage is the lead (rule 5). So the
      lead stands at 8 for the enemy turn below."
   - "Energy is set to 5 so the three kit cards all play in one turn."
-  - "The act-1 hallway intent this is run against puts at most 14 through: the
-     lead's 8 plus the Block written below covers it whole. A bigger intent is
-     not a failure of the rule, it is a different fight -- rerun on a hallway."
+  - "The two performers are summoned BY NAME (`proto_fs_surintendante_
+     chevalmarin`, `proto_fs_mademoiselle_crabaletta`, 1 energy each) rather
+     than by Salon Début, whose summon is random: the page checks below name
+     the lead and the back seat, and a random cast asserts the roll."
+  - "The act-1 hallway intent this is run against puts at most 8 through: the
+     Block written below is 6 and the lead carries 8 with a regen of 1, so a
+     hallway that small leaves the lead at 7 or more coming into round two,
+     which is what the two unasserted drains are sized against. A bigger
+     intent is not a failure of the rule, it is a different fight -- rerun on
+     a hallway."
   - "Curtain Rise is a CHOOSE-ONE face since `EB-746`: mode 0 deals 7 and mode
      1 pays the lead 3 for 13. Both are run into a bare body, so the deltas
      below are the printed numbers before Vulnerable or a reaction moves
      them."
+  - "Both plays take `highest_hp` and NOT `first`. A delta is only readable off
+     a body that survives the hit: the 0.2.3181 run put 13 into a 7-HP Twig
+     Slime in the front slot and read -7, which says nothing about the rule.
+     The fattest body in the fight absorbs 13 and then 7 and is still the
+     fattest, so the same creature is resolved for both."
   - "The modes are answered BY LABEL, `deep-breath-modal-choice.yaml`'s rule:
      the generator emits each label into the option card's title and its
      description, so a label edit on the sheet is an edit to this file too. On
      an empty stage the Spend mode is NOT OFFERED at all (rule 8, as a choice),
      so a play there opens no screen -- which is why both plays below stand on
      an occupied stage."
+  - "A hand does not survive `end_turn`. Both plays are in round two, so each
+     is of its OWN copy, granted in the step above it; the setup copy is the
+     round-one preview's subject and is discarded unplayed."
 
 steps:
   # ---------------------------------------------------------------- setup --
   - give: {card: KLEEMOD-PROTO_FS_STANDING_OVATION, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  # NAMED summons and not two Salon Débuts. `proto_fs_salon_debut` summons "a
+  # random performer who is not on stage", so which of the two fills the
+  # middle seat is a roll -- and the page checks below assert Chevalmarin in
+  # the lead and Crabaletta in the back BY NAME. Summoning each by its own
+  # card fixes the seat order without weakening one assertion.
+  - give: {card: KLEEMOD-PROTO_FS_SURINTENDANTE_CHEVALMARIN, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_MADEMOISELLE_CRABALETTA, pile: hand, upgraded: false}
+  # One copy here, and one before each of the two plays in round two. This
+  # copy is the round-one PREVIEW's subject and nothing else -- it is
+  # discarded by the `end_turn` below, so it is never played.
   - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
   - set_energy: {amount: 5}
 
@@ -104,12 +134,13 @@ steps:
   - play: {card: "Rising Applause"}
 
   # ------------------------------------------------- three bars, and RULE 3 -
-  # Two summons fill the middle and back seats at 1 each. EYES-ON: three
-  # bodies stand in a line beside her, front to back, each with its own visible
-  # HP bar, and the strip reads `Block > Usher 8 > her HP` with the two
+  # Two summons fill the middle and back seats. Chevalmarin first so she is
+  # the one who steps up when the Usher bows, Crabaletta behind her. EYES-ON:
+  # three bodies stand in a line beside her, front to back, each with its own
+  # visible HP bar, and the strip reads `Block > Usher 8 > her HP` with the two
   # newcomers behind it. Nothing below asserts this; the frame is the evidence.
-  - play: {card: "Salon Début"}
-  - play: {card: "Salon Début"}
+  - play: {card: "Surintendante Chevalmarin"}
+  - play: {card: "Mademoiselle Crabaletta"}
   - wait: {seconds: 30}
 
   # ------------------------------------------- the damage order, and RULE 6 -
@@ -126,19 +157,42 @@ steps:
       player_hp_delta: {amount: 0}
 
   # ------------------------------------------------ Spend in full, RULE 8/9 -
-  # The lead came out of the enemy turn short -- it ate what the Block did not
-  # -- and Curtain Rise asks it for 3 anyway. RULE 8's second clause: the rider
-  # fires IN FULL whatever the lead can pay, the lead pays what it has, and it
-  # leaves with a bow. So the enemy takes the full 13 and not a scaled-down
-  # number, which is the assertion that would fail if the shortfall rule ever
-  # came back.
+  # Curtain Rise asks the lead for 3 and the lead has less than that. RULE 8's
+  # second clause: the rider fires IN FULL whatever the lead can pay, the lead
+  # pays what it has, and it leaves with a bow. So the enemy takes the full 13
+  # and not a scaled-down number, which is the assertion that would fail if
+  # the shortfall rule ever came back.
   - set_energy: {amount: 5}
-  - play: {card: "Curtain Rise", target: first}
+  # A COPY PER PLAY, and why a `give` stands before each. `end_turn` above
+  # discarded the whole hand and the setup copies with it, so a play written
+  # against the round-one hand finds nothing -- which is exactly what the
+  # 0.2.3181 run reported (`'Curtain Rise' is not in hand`). Every play below
+  # is of its OWN copy, so each opens its own choice screen from the board
+  # this turn actually produced rather than from a survivor of the last one.
+  #
+  # TWO DRAINS FIRST, and they are the only reason this file reads the same on
+  # every hallway. The prose used to have the ENEMY TURN leave the lead short,
+  # which is true only for an intent between 12 and 14: the 0.2.3181-era runs
+  # rolled a slime hallway, the Block ate the whole intent, and the lead came
+  # into this turn at 9 -- fat enough to pay 3 in full, so no bow, so no
+  # rotation and none of the page lines below. Two unasserted Spends take the
+  # bar down by 6, which leaves the asserted play a lead holding between 1 and
+  # 3. Nothing is asserted about these two: they are board setup written in
+  # the card's own verbs.
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
+  - select: {cards: ["Spend 3: deal 13 instead"]}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
+  - select: {cards: ["Spend 3: deal 13 instead"]}
+  - set_energy: {amount: 5}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
   - expect:
       prompt_contains: "Choose"
   - select: {cards: ["Spend 3: deal 13 instead"]}
   - expect:
-      enemy_hp_block_delta: {who: first, amount: -13}
+      enemy_hp_block_delta: {who: highest_hp, amount: -13}
 
   # THE BOW, machine-checked where it can be: the Usher's departure effect is
   # 4 Block to Furina (rule 9). It is asserted as a floor rather than an
@@ -219,10 +273,11 @@ steps:
   # same card, which is the row's own acceptance. The base mode deals 7 and
   # leaves every bar where it stood -- the verb to decline that round two's
   # seats could not find.
-  - play: {card: "Curtain Rise", target: first}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
   - expect:
       prompt_contains: "Choose"
   - select: {cards: ["Deal 7 damage"]}
   - expect:
-      enemy_hp_block_delta: {who: first, amount: -7}
+      enemy_hp_block_delta: {who: highest_hp, amount: -7}
   - wait: {seconds: 20}
