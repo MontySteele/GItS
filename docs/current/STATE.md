@@ -107,15 +107,14 @@ every arm ships OFF in a release package). **Last RELEASE package:
   `0.2.3069+proto`, `review/records/klee-user-run-2-2026-09-08.md`): act 1
   cleared, died mid act 2 to the Entomancer; the concept and the
   attack-or-Block tension confirmed, a Spark-centric defence fun but
-  inconsistent, three tips trimmed. **Round 25 is READ**
-  (`review/active/klee-overhaul-round-25-2026-09-08.md`): on
-  `0.2.3105+proto` a natural lane with Countdown and an assembled
-  Spark-defence lane, floors 11 and the act-1 elite; Spark never bound on
-  either (peaked at 8 while taking damage), the defence failed on
-  detonator draw and Energy, never on Sparks or Bombs, and lane 1 declined
-  every Spark-priced card; **one pick open, [USER]'s:** what Spark is for
-  (QUEUE `klee-spark-purpose 5.1`, default: a lubricant that buys the
-  scarce things). Round 26 waits on it.
+  inconsistent, three tips trimmed. **Round 25 is RULED** (R270,
+  `review/ruled/klee-overhaul-round-25-2026-09-08.md`): on `0.2.3105+proto`
+  Spark never bound on either lane and the defence failed on detonator draw
+  and Energy, never on Sparks; [USER] ruled Spark a currency whose income
+  stays, with Regent's Stars as the comparison. **Pool pass two** is the
+  ruling's work (`review/records/klee-pool-pass-two-2026-09-08.md`): seven
+  Spark-priced rows paying Block, cards and Energy, read at the doctrine
+  door, then built and read by round 26. No pick open.
   **Open question, not closed by round 24:** whether spending Sparks is
   interesting: round 23 found the bank never scarce on a natural lane and
   deadlocked on a Spark deck, and no round 24 seat named a Set off the
