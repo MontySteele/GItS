@@ -3459,7 +3459,7 @@ limitation worth a row of its own:** the emitter should hole every branch a
 whole-card delta moves, and today it holes one.
 
 **The three upgrades that are not numbers.** *Understudy* and *Final Bow* drop
-their Exhaust; *Salon Début*, the three named summons, *Standing Ovation*,
+their Exhaust; *Salon Début*, the three named summons, *Rising Applause*,
 *Ousia Surge*, *Pneuma Refrain*, *Bis!* and the Rare take a cost. Neither shows
 in the body, which is why the blind-play Smith preview answers those rows with
 "its upgrade changes nothing this face prints" rather than a rendered face —
