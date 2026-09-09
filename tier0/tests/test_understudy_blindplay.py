@@ -6367,37 +6367,38 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                "Side. ",
                "He makes an ",
                " hit at the end of your turn while he is out."],
-        # The Furina reframe's three (slice two, 2026-09-02). The Evoke
-        # sentence's two numerals are interpolated from `FurinaReframeLaw` on
-        # the mod side and written out on this one, so its anchors are the
-        # clauses AROUND them -- the same fold-out this table already does for
-        # the Bomb's growth and the Spark's opening bank.
-        # `EB-368` rewrote Deploy's sentence rather than extending it (the
-        # keyword-tip ceiling; see `test_the_deploy_row_says_what_makes_a_
-        # member_act_again` for the finding).
-        "Deploy": ["A member joins and performs at once; a full stage ",
-                   " the front member first. Afterwards only a ",
-                   " play performs a member."],
-        # `EB-587` replaced the price clause with the price, and the anchor
-        # moved with it: the Evoke spends a performance's Encore, or resolves
-        # at three-quarters when the pool is dry.
-        # `EB-601`: the trigger leads the word. The clause straddles two
-        # `[gold]` spans, so the anchors are the halves that are whole.
-        "Evoke": [" onto a full stage ",
-                  ". The member performs and leaves; its ",
-                  ", or Evokes at 3/4."],
-        "Drain": [" falls to nothing. What the card does ",
-                  "next is priced off the amount it took"],
-        # `EB-407`. The arm's fourth Furina word and the one it did not
-        # invent. The clauses straddle the `[gold]Block[/gold]` span, so the
-        # anchors are the literals either side of it.
+        # FURINA, THE STAGE (`EB-723`, R269). The reframe's four -- Deploy,
+        # Evoke, Drain and Encore -- left this table with the `proto_fr_` rows
+        # that printed them, under R213 B's deletion rule.
         #
-        # THE OFF BRANCH, since `EB-479` (R258) gave this tip a second one:
-        # under the reframe it also says "Start each combat with N", which is
-        # the opening bank the Spark row's own arm branch carries and which
-        # this table folds out for the same reason -- an interpolated law
-        # number has no place in a hand-written glossary row, so what is held
-        # in step is the sentence that is true either way.
+        # THE SEVEN the brief's sec.12 names, and the anchors are the clauses
+        # AROUND the interpolated numerals, the same fold-out this table
+        # already makes for the Bomb's growth and the Spark's opening bank:
+        # `Bow` quotes two of `FurinaStageLaw`'s numbers and `lead performer`
+        # the regen, so what is held in step is the prose either side. The
+        # clauses that straddle a `[gold]` span are anchored by the halves
+        # that are whole.
+        "Spend": ["Pays from the ",
+                  "if the bar is short; an emptied performer takes a "],
+        "Fanfare": ["A performer's own bar. Attacks hit your ",
+                    "'s Fanfare, then you. No cap."],
+        "Raise": ["With one performer on stage, that is the lead."],
+        "Bow": ["A departure effect, earned by ",
+                "Hydro on all. Crabaletta: "],
+        "lead performer": ["The front seat: the one attacks reach and the "
+                           "only one that "],
+        "back performer": ["The back seat, and the reserve: nothing hits it. "
+                           "With one ",
+                           "performer on stage it is also the lead."],
+        "Rotate": ["Seats change order and every bar comes with them. Nobody "
+                   "leaves "],
+        # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is
+        # shipped machinery and every Furina row the Stage does not swap
+        # still prints the word. It titles no arm KEYWORD any more -- no
+        # prototype face prints it -- but the sentence is still the mod's,
+        # so it is still held in step from this side. The clauses straddle
+        # the `[gold]Block[/gold]` span, so the anchors are the literals
+        # either side of it.
         "Encore": ["it absorbs damage before HP. ",
                    "One pool, as each lands: a card pays to ",
                    "resolve, a member spends 1 to perform or acts at 3/4."],
@@ -6423,8 +6424,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     assert (set(anchors) | {"Companion", "Spotlighted"}
             == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
-                "PlanKey", "DeployKey", "EvokeKey", "DrainKey", "HexereiKey",
-                "SwirlKey", "GroundedKey"):
+                "PlanKey", "SpendKey", "FanfareKey", "BowKey", "RaiseKey",
+                "RotateKey", "LeadPerformerKey", "BackPerformerKey",
+                "HexereiKey", "SwirlKey", "GroundedKey"):
         assert f"public const string {key}" in src
     assert "CompanionKey" not in src
     for word, phrases in anchors.items():
@@ -6586,36 +6588,37 @@ def test_the_glossary_carries_no_markup_and_no_id():
             assert not qa_packet.leaks(body), word
 
 
-def test_the_deploy_row_says_what_makes_a_member_act_again():
-    """`EB-368`. THE ACT-2 SEAT PLAYED NO SALON CARD IN THREE FIGHTS.
+def test_the_spend_row_says_a_short_bar_still_pays_in_full():
+    """`EB-723`. THE HALF THE WHOLE EXPEND DECK IS BUILT ON.
 
-    Under the arm a member on stage does NOTHING on its own: what performs it
-    afterwards is a Companion card. The word said only "joins the stage and
-    performs at once", which prices a deploy as a one-shot -- and a one-shot at
-    that price is never worth the card.
+    `EB-368`'s Deploy row retired with the reframe; this is that row's
+    discipline one arm over, on the word the Stage's own findings turn on.
+    Brief sec.3 rule 8: a Spend rider fires IN FULL whatever the lead's bar
+    holds, the lead pays what it has and leaves with a bow -- so a performer
+    at 1 buys the same big number a performer at 8 does, which sec.4 calls
+    "the cheapest Spend there is, and that is intended". A word that said only
+    "pays N from the lead" would price the rider as a cost and hide the deck.
 
-    Held in step with `ArmKeywordTips.ForDeploy` from this side, the discipline
-    every row in this table is under. The word was REWRITTEN rather than
-    extended -- three rules appended to the old two sentences ran 50 characters
-    over the keyword-tip ceiling -- so this asserts all three rules and not the
-    old wording.
+    Held in step with `ArmKeywordTips.ForSpend` from this side, the discipline
+    every row in that table is under.
     """
     page = blindplay.observe(keyword_hand_state([
-        "Deploy Mademoiselle Crabaletta."]))
-    assert "- **Deploy** — " in page
-    for clause in ("joins and performs at once",
-                   "a full stage Evokes the front member first",
-                   "only a Companion play performs a member"):
+        "Deal 7 damage. Spend 3: deal 13 instead."]))
+    assert "- **Spend** — " in page
+    for clause in ("Pays from the lead performer",
+                   "fires in full even if the bar is short",
+                   "an emptied performer takes a Bow",
+                   "No stage, no rider"):
         assert clause in page, clause
-        assert clause in blindplay.ARM_KEYWORDS["Deploy"], clause
+        assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     # The tip's own [gold] spans split the sentence across concatenated
     # literals, so the anchors are the runs that do not straddle a `+`.
-    for phrase in ("A member joins and performs at once; a full stage ",
-                   " the front member first. Afterwards only a ",
-                   " play performs a member."):
+    for phrase in ("Pays from the ",
+                   "if the bar is short; an emptied performer takes a ",
+                   ". No stage, no rider."):
         assert phrase in src, phrase
 
 
@@ -8539,9 +8542,14 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
 
 #: The four, with the face each printed on the seat's own Smith screen.
 _R12_SMITH = (
-    ("KLEEMOD-PROTO_FR_ARIA_OF_RECOMPENSE",
-     "Gain 5 Encore. If you have at least 3 Fanfare, gain 5 more."),
-    ("KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED", "Deploy Mademoiselle Crabaletta."),
+    # `EB-723`: the two reframe rows this pin was written on left the surface
+    # with their arm, and the Stage's own two take the same two slots -- one
+    # whose upgrade moves a printed number, and one whose upgrade moves the
+    # COST, which the body prints nowhere.
+    ("KLEEMOD-PROTO_FS_CURTAIN_RISE",
+     "Deal 7 damage. Spend 3: deal 13 instead."),
+    ("KLEEMOD-PROTO_FS_SALON_DEBUT",
+     "Summon a random performer who is not on stage."),
     ("KLEEMOD-AN_INVITATION",
      "Add 1 random Common Companion card to your hand."),
     ("KLEEMOD-PROTO_MC_FISCHL_OZ",
@@ -8562,7 +8570,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     """Three of the four, and no arithmetic in any of them: the pattern reads
     the UNUPGRADED arm off the printed face and the render writes the other."""
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
-        "Gain 8 Encore. If you have at least 3 Fanfare, gain 8 more.")
+        "Deal 10 damage. Spend 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
         "Add 1 random Common Companion card to your hand, free this turn.")
     # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game
@@ -8590,8 +8598,12 @@ def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
     built, why = qa_packet.upgrade_preview(*_R12_SMITH[1])
 
     assert built == ""
-    assert why == qa_packet.NO_PREVIEW_APPENDS
-    assert "adds a clause" in why
+    # `EB-723`: the Stage's Début upgrades its COST, which the body prints
+    # nowhere, so the branch this row lands in is the no-number one. The rule
+    # the test is about is unchanged and is the LAST assertion: the reason is
+    # a fact about the CARD, never a bare silence.
+    assert why == qa_packet.NO_PREVIEW_NO_NUMBER
+    assert "changes nothing this face prints" in why
     assert "rewrites" not in why
     assert not qa_packet.leaks(why)
 
@@ -8658,13 +8670,13 @@ def test_the_reason_prints_on_the_smith_under_the_face_it_is_about():
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED", "name": "Salon Début",
+        {"id": "KLEEMOD-PROTO_FS_SALON_DEBUT", "name": "Salon Début",
          "cost": "1", "type": "Skill",
-         "description": "Deploy Mademoiselle Crabaletta."})
+         "description": "Summon a random performer who is not on stage."})
     page = blindplay.observe(smith)
 
-    assert ("    Upgraded: not shown -- its upgrade adds a clause, and this "
-            "page has no unupgraded copy of the number in it.") in page
+    assert ("    Upgraded: not shown -- its upgrade changes nothing this "
+            "face prints.") in page
     # The rows that CAN be rendered are untouched by the new line.
     assert "    Upgraded: Gain 11 Block." in page
 
@@ -9168,9 +9180,9 @@ def test_the_same_word_in_the_body_still_raises_it():
     """The other direction, so the fix cannot pass by defining nothing: the
     identical card whose BODY carries the word is glossed exactly as before."""
     page = blindplay.observe(
-        titled_hand_state("Freminet - Pers, Deploy!",
-                          "Deploy Freminet. Deal 6 damage."))
-    assert "- **Deploy** " in page
+        titled_hand_state("Curtain Rise",
+                          "Deal 7 damage. Spend 3: deal 13 instead."))
+    assert "- **Spend** " in page
 
 
 def test_no_class_of_keyword_row_is_raised_by_a_title_alone():
@@ -9266,10 +9278,24 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
     assert "- Encore: 4 — defined under *Words on this screen*" in page
     assert "- **Encore** — After Block it absorbs damage before HP." in page
     assert page.count("absorbs damage before HP") == 1
-    # `EB-437`: Fanfare has a row of its own now, and it is the second half of
-    # the same discipline -- the meter line carries the MOD's spend rule
-    # rather than the generic gap, because the mod declares one.
-    assert "- Fanfare: 6 — cards read it and none spends it" in page
+    # `EB-437`: Fanfare's meter line used to carry the MOD's spend rule
+    # ("cards read it and none spends it") because no glossary row held the
+    # word.
+    #
+    # `EB-723` GAVE THE WORD A GLOSSARY ROW, so it now takes the SAME
+    # deferral Encore does one line up -- which is this test's rule working,
+    # not an exception to it: one definition per screen, and where the
+    # glossary carries the word the meter line points at it.
+    #
+    # AND THE TWO MEANINGS ARE A KNOWN COLLISION, recorded here because this
+    # is where a reader meets it. Under the Stage the word names a
+    # PERFORMER'S OWN BAR (brief sec.2, "no counter beside it") and the
+    # shipped meter is what the arm replaces; on a run with the arm off, the
+    # same word still names the shipped meter and the glossary row is the
+    # arm's sentence. Nothing on the page can tell them apart today, and the
+    # round packet owes the finding rather than this pin owing a branch.
+    assert "- Fanfare: 6 — defined under *Words on this screen*" in page
+    assert "cards read it and none spends it" not in page
     assert "no rule for how it is spent" not in page
 
 

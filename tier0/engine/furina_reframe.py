@@ -133,152 +133,26 @@ OPENING_MEMBER = "crabaletta"     # R260 (`EB-553`): who is already on the
 
 
 # ----------------------------------------------------------------------
-# THE POOL SEAM (round 2 pick 1 at its default, 2026-09-04; widened by the
-# pool pass, `EB-493`, 2026-09-05, and again by `EB-507` and the 2026-09-06
-# balance review). `{shipped id: prototype id}`, read by
-# `loader._pool_substitutions` under `FURINA_REFRAME` and nowhere else -- the
-# Kurage's Oath shape, one for one and at the SAME rarity, so the offer odds do
-# not move (`rewards.character_pool` refuses a substitution that would change a
-# card's tier).
+# THE TWO SEAMS ARE EMPTY, AND THAT IS THE RETIREMENT (`EB-723`, R269).
 #
-# WHY THE FIRST FOUR AND WHY A SWAP RATHER THAN A SHEET EDIT. The arm mints
-# Fanfare by performance only, 2 per trigger and 5 per Evoke, and across three
-# rounds the meter ranged 0 to 15 -- while the four shipped riders that GATE on
-# it ask 12, 12, 15 and 20. Two of them can essentially never pay under the arm.
-# The shipped sheet is Balance-stage content and does not move for a prototype
-# arm (R213 B), so the copies are prototype rows and the arm swaps them in at
-# the one offer door. WITH THE FLAG OFF this map is unread, `_pool_substitutions`
-# returns `{}` for Furina exactly as before, and no surface can see a
-# `proto_fr_` id -- which is the acceptance condition, pinned by test.
+# The Stage brief (`review/active/furina-stage-brief-2026-09-08.md` sec.2)
+# retires this arm by name -- "the reframe's `proto_fr_` arm and
+# `FURINA_REFRAME` switch" -- so under R213 B's deletion rule its rows LEFT the
+# prototype surface rather than being commented out, and the two maps that
+# named them are empty rather than holding ids no sheet defines. An arm whose
+# maps are empty swaps nothing at either door, so `FURINA_REFRAME` on is now
+# the shipped starter and the shipped pool.
 #
-# THE MAP MIRRORS THE SHEET'S OWN `replaces:` KEY, and
-# `tier0/tests/test_furina_reframe_pool.py` compares the two in both
-# directions -- against this map UNIONED WITH `STARTER_SUBS` below, since a
-# `replaces:` row is one seam's or the other's -- so a copy on the surface that
-# nobody named in either is a red test rather than a row nothing ever deals.
+# WHAT IS STILL HERE AND WHY. The flags, the seeds and the engine branches
+# below survive this commit because `tools/lint_constant_parity.py` mirrors six
+# of these numbers against `FurinaReframeLaw` in the mod, and the mod's half of
+# the arm is not this branch's to delete (the Stage's C# is being built on
+# `stage-cs`). They are dead in the sim: every flag is False, no row prints an
+# op only this arm resolves, and no map hands anything out. The module goes
+# when its C# twin does, and that is one commit on the branch that owns both.
 # ----------------------------------------------------------------------
-POOL_SUBS: dict[str, str] = {
-    "florid_cadenza": "proto_fr_florid_cadenza",        # 12 -> 6,  uncommon
-    "dramatic_entrance": "proto_fr_dramatic_entrance",  # 12 -> 6,  uncommon
-    "universal_revelry": "proto_fr_universal_revelry",  # 15 -> 8,  rare
-    "flood_of_emotion": "proto_fr_flood_of_emotion",    # 20 -> 10, rare
-    # ---- POOL PASS ONE (`EB-493`, `review/active/furina-pool-pass-2026-09-05
-    # .md` sec.2; four FOLLOWS off the doctrine read, record 5.5, one of them
-    # since withdrawn). A DIFFERENT ARGUMENT AT THE SAME SEAM, and it is worth
-    # naming because this map now carries two. The four rows above are COPIES
-    # -- the same card at a bar this arm's meter can reach. The three below are
-    # NEW ROWS wearing a shipped Common's slot and its art, because rounds 9
-    # and 10 read the Salon as
-    # FURNITURE: one Deploy in the whole deck, most Companion plays printing
-    # "No member on stage: performs nobody", and no card of her own that asks a
-    # member to act. Each row answers one of those readings.
-    #
-    # ALL OF THEM ARE COMMON FOR COMMON, so the offer odds do not move here,
-    # and each replaced row was chosen because it is a plain number card of the
-    # same type and cost as its replacement (the packet's sec.5 D default; it
-    # moves on the seats' word).
-    "house_call": "proto_fr_curtain_rises",        # a Deploy on an Attack
-    "dinner_service": "proto_fr_second_course",    # a priced 2nd performance
-    "blocking_notes": "proto_fr_guest_list",       # a generator in the pool
-    # ---- `EB-507`: NO OFFERED FACE PROMISES FANFARE FROM ANYTHING BUT A
-    # PERFORMANCE (2026-09-06, the default this arm was built on and never
-    # applied to the offer surface). A THIRD ARGUMENT AT THE SAME SEAM, and
-    # the plainest of the three: the reframe's meter is minted by performing
-    # and Evoking, and `gain_fanfare_floor` mints it for BEING PLAYED. Three
-    # shipped Rares print that rider, so with the arm on the offer surface
-    # contradicts the arm's one sentence about where Fanfare comes from.
-    #
-    # TWO OF THEM ARE A BODY PLUS THE RIDER, and the arm carries the body:
-    # Rapturous Applause's per-10 Attack scaling (at 2 rather than the shipped
-    # 1, because the copy pays for the floor it no longer mints) and Unheard
-    # Confession's Block-per-change, both otherwise printed as shipped.
-    #
-    # THE THIRD IS NOTHING BUT THE RIDER. `the_sea_is_my_stage` is one
-    # `gain_fanfare_floor 15` and no body at all, so there is no copy to make
-    # -- what it has is a Rare slot, and the arm spends it on its own Rare
-    # DRAIN (`proto_fr_let_the_people_rejoice`, which until now was granted
-    # from a scenario and offered by nothing). Rare for Rare, like the pairs
-    # above it.
-    "rapturous_applause": "proto_fr_rapturous_applause",   # body, no floor
-    "unheard_confession": "proto_fr_unheard_confession",   # body, no floor
-    "the_sea_is_my_stage": "proto_fr_let_the_people_rejoice",  # rider -> drain
-    # ---- THE 2026-09-06 UPGRADE ADJUSTMENTS (the GPT balance review and the
-    # second-wave read of the same day, the main session's D defaults). Neither
-    # moves a base face. Florid Cadenza's copy upgraded by DELETING its gate,
-    # which made a 0-cost draw-3 with nothing asked; it now MOVES the bar
-    # 6 -> 3, so the `+` card still asks the arm's question at a bar an opening
-    # turn can reach -- and the copy EXHAUSTS, because a 0-cost draw whose gate
-    # depletes nothing is the same hold-the-deck loop at 3 as at 6.
-    # Shared Billing's shipped upgrade is `cost: -1`, and a card that refunds
-    # its own Energy at 0 is a free play handed out at every campfire; the arm
-    # copy buys 3 Block instead, which is neither energy nor draw. Both are the
-    # same copy-and-swap shape as the four riders at the top of this map.
-    "shared_billing": "proto_fr_shared_billing",   # +block, not +free
-}
-# ROLLING TIDE WAS WITHDRAWN (`EB-552`, round 13, a D default). The kit's own
-# perform verb on a draftable row was read once at 2 energy and once at 1, by
-# four seats over three rounds, and the answer never moved: "4 damage into one
-# body; zero against Plating 8; actively harmful against four Skittish bodies".
-# The price was not the reason, so the row left rather than moving again -- the
-# loop's first cut. `undercurrent` is absent from this map, which is the whole
-# of the change on this side: the shipped Undercurrent is offered again at that
-# seam, and the row and its pins left the surface under R213 B's deletion rule.
-
-
-# ----------------------------------------------------------------------
-# THE STARTER SEAM (R254, round 4 pick 1, 2026-09-04). `{shipped id: prototype
-# id}`, read by `loader._starter_ids` under `FURINA_REFRAME` and nowhere else
-# -- the Kurage's slot-eleven shape, ONE CARD FOR ONE CARD, so the printed ten
-# stays ten and this is a substitution rather than a starter rework.
-#
-# WHY, and it is [USER]'s ruling rather than a number picked here (R254,
-# `review/ruled/furina-reframe-round-4-2026-09-04.md` sec.6): "maybe a reader
-# in the starter deck? I still want to leave it at just 2 'good' cards, but
-# they can be stronger." So the starter keeps its two kit cards -- Salon Début
-# and Aria of Recompense -- and ONE of them reads Fanfare. The reader goes on
-# Aria, the card the seats had already weighed on three axes. Both numbers are
-# LIFTED and neither is new: the 5 is Aria's own printed Encore, the 3 is the
-# Fanfare the seat records show on an Aria turn. The loop it closes is the
-# arm's own (a stage that performs mints Fanfare, Fanfare pays Encore, Encore
-# pays performances) and the shipped Encore decay is its brake.
-#
-# THE BAR MOVED 6 -> 3 (round 6 sec.4, 2026-09-04, a D default). It was built
-# at the rider copies' bar in `POOL_SUBS` above and three seat runs never once
-# paid the second line: Aria is played BEFORE the stage performs, so the meter
-# it reads is the one an Aria turn actually has. The OFFERED rider copies keep
-# their own bars, which are read later in the turn.
-#
-# THE SHIPPED SHEET STANDS, for `POOL_SUBS`'s reason verbatim: Balance-stage
-# content does not move for a prototype arm (R213 B), so the arm carries a copy
-# and swaps it in at the one seam. WITH THE FLAG OFF this map is unread and the
-# printed Aria is dealt -- the acceptance condition, pinned by
-# `tier0/tests/test_furina_reframe_starter.py` rather than intended.
-#
-# A STARTER MAP AND NOT A POOL ONE, kept apart because they are read at
-# different doors and one of them cannot express this pair: a `basic` row is
-# unofferable by construction, so naming Aria in `POOL_SUBS` would declare a
-# swap `rewards.character_pool` can never make. `loader.declared_starter_
-# substitutions` is the flag-blind union the sheet's `replaces:` key is checked
-# against here, exactly as `declared_pool_substitutions` is for the other.
-#
-# THE ALTERNATIVE READER IS HELD, not withdrawn: Salon Début performing its
-# member again at 6 Fanfare is the packet's own re-ask if Aria's does not read.
-#
-# THE SECOND PAIR IS `EB-416`, and it is a wiring defect rather than a new
-# decision. The reframe packet's sec.5 ruled the starter deploy NAMES its
-# member -- the shipped Salon Début deploys a RANDOM one, which under the
-# manual arm decides for the player which member their first Companion play
-# will make perform -- and slice 2 built the row for it
-# (`proto_fr_salon_debut_named`, "Deploy Mademoiselle Crabaletta"). It had a
-# generated class and pins and was wired into NO starter in either engine, so
-# the arm went on dealing the random Début; the R254 Aria build found it while
-# opening this very seam. The row is unchanged: what is new is that something
-# now hands it out.
-# ----------------------------------------------------------------------
-STARTER_SUBS: dict[str, str] = {
-    "aria_of_recompense": "proto_fr_aria_of_recompense",   # 5 Encore, 10 at 3
-    "salon_debut": "proto_fr_salon_debut_named",           # names Crabaletta
-}
+POOL_SUBS: dict[str, str] = {}
+STARTER_SUBS: dict[str, str] = {}
 
 
 # ----------------------------------------------------------------------

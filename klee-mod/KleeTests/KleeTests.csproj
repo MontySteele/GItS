@@ -80,6 +80,15 @@
     <DefineConstants>$(DefineConstants);FURINA_REFRAME</DefineConstants>
   </PropertyGroup>
 
+  <!-- The Furina stage arm, mirrored here on exactly the terms above and for
+       the same reason. Its pins do not need the property: FurinaStage.Enabled
+       is settable, so one build asserts both sides of the switch, including
+       the flag-off acceptance condition: that her starter deck, her starting
+       relic and her damage pipeline are the shipped ones, unchanged. -->
+  <PropertyGroup Condition="'$(FurinaStage)' == 'true'">
+    <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
+  </PropertyGroup>
+
   <!-- THE BRIDGE'S PORT RESOLVER, compiled into this assembly rather than
        referenced. `vendor/STS2_MCP/gits/GitsPort.cs` is deliberately free of
        Godot, Harmony and game types precisely so the one decision that must
