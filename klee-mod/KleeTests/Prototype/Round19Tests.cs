@@ -476,9 +476,9 @@ public class Round19Tests
 
         // The Bomb tip names the second door, so the Mine tip is not a
         // correction to it any more.
-        Assert.Contains("goes off only when [gold]Set off[/gold], or as a "
+        Assert.Contains("and goes off when [gold]Set off[/gold] or as a "
                       + "[gold]Mine[/gold].", bomb);
-        Assert.Contains("also goes off before its enemy's hit", mine);
+        Assert.Contains("also goes off just before its enemy's hit", mine);
     }
 
     /// <summary>The reframe's MANUAL leg on for one test, every flag back

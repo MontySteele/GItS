@@ -79,12 +79,17 @@ public class KleeOverhaulRoundTwentyTests
     }
 
     [Fact]
-    public void The_bomb_tip_says_the_deck_opens_with_a_placer()
+    public void The_bomb_tip_no_longer_carries_the_starter_line()
     {
-        // The rail states Innate about ONE CARD, on the card, to a player
-        // already holding it. What a reader who meets the WORD needs is the
-        // fact about the DECK: the first thing you can always do is plant.
-        Assert.Contains("Your deck opens with a placer.", Printed("ForBomb"));
+        // `EB-557` (R261) put "Your deck opens with a placer." on the word,
+        // and [USER]'s run 2 took it off again 2026-09-08 as an E default
+        // ("a lot of unnecessary tooltip text that could be trimmed"): it is
+        // the one sentence on the tip that is about the DECK rather than
+        // about the charge, and the keyword rail's own Innate banner already
+        // says it on the card the player is holding. The Innate itself is
+        // untouched -- the test above still reads it off `Jumpy Dumpty`.
+        Assert.DoesNotContain("Your deck opens with a placer.",
+                              Printed("ForBomb"));
     }
 
     // ---- `EB-555`: the cap is defined where it is used -------------------
@@ -101,9 +106,12 @@ public class KleeOverhaulRoundTwentyTests
         // a cap limits the HP the ENEMY can lose, which is what `FoldedMods`
         // reads off the target, and saying so also rules out the reading that
         // a cap might be something of Klee's.
+        //
+        // TRIMMED 2026-09-08: "the HP cap" is the same definition in fewer
+        // words -- it is still the ENEMY's HP the term is about, because the
+        // sentence's whole subject is what moves the charge on that enemy.
         var bomb = Printed("ForBomb");
-        Assert.Contains("and a cap on the ", bomb);
-        Assert.Contains("enemy's HP loss move it.", bomb);
+        Assert.Contains("and the HP cap move it.", bomb);
     }
 
     [Fact]
@@ -113,9 +121,9 @@ public class KleeOverhaulRoundTwentyTests
         // of its 135-character ceiling and prints directly under the Bomb tip;
         // a Mine IS a Bomb, so the term is defined on the screen either way.
         // `EB-400` added Block to this clause; the cap half is untouched.
-        Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.",
+        Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
                         Printed("ForMine"));
-        Assert.Contains("[gold]Block[/gold] stops it, and only their ",
+        Assert.Contains("[gold]Block[/gold] stops it; only ",
                         Printed("ForMine"));
     }
 

@@ -234,7 +234,7 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
-          + " a turn, goes off only when [gold]Set off[/gold], or as a "
+          + " a turn, and goes off when [gold]Set off[/gold] or as a "
           + "[gold]Mine[/gold]. "
           // `EB-400`: BLOCK, NAMED. "Not an Attack: only Vulnerable and a
           // cap move it" is a true sentence that reads as a false one -- a
@@ -245,11 +245,9 @@ public static class ArmKeywordTips
           // anything else, and the `Set off` tip has said so since `EB-443`
           // in these same three words. The exclusion the sentence is really
           // about is the ATTACK-keyed debuff, and it still says that.
-          + "Not an Attack, but [gold]Block[/gold] stops it: only "
-          + "[gold]Vulnerable[/gold] and a cap on the "
-          + "enemy's HP loss move it. "
-          + "If this enemy dies with it still on, it moves to a survivor. "
-          + "Your deck opens with a placer.");
+          + "[gold]Block[/gold] stops it; only "
+          + "[gold]Vulnerable[/gold] and the HP cap move it. "
+          + "If the enemy dies with it on, it moves to a survivor.");
 
     /// <summary>
     /// Rule 2, and the one [USER] named ("Set Off has no tooltip text"). The
@@ -378,7 +376,7 @@ public static class ArmKeywordTips
         // the sentence that fixes it belongs beside the one that was already
         // there rather than on a relic the player may not have read.
         return word + "Start each combat with " + KleeOverhaulLaw.OpeningSpark
-             + ". Pounding Surprise grants more. " + shared;
+             + ". " + shared;
     }
 
     /// <summary>
@@ -447,14 +445,14 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off before its enemy's hit, "
-          + "which lands in full unless the Mine kills. Their "
+            "A [gold]Bomb[/gold] that also goes off just before its enemy's "
+          + "hit; the hit still lands. "
           // `EB-400`, the same three words on the same clause: a Mine IS a
           // Bomb, so a tip that lists what moves the hit and leaves Block out
           // reads as Block immunity here for the same reason.
-          + "[gold]Block[/gold] stops it, and only their "
-          + "[gold]Vulnerable[/gold] and a cap move it. "
-          + "If this enemy dies with it still on, it moves to a survivor.");
+          + "[gold]Block[/gold] stops it; only "
+          + "[gold]Vulnerable[/gold] and the HP cap move it. "
+          + "If the enemy dies with it on, it moves to a survivor.");
 
     /// <summary>
     /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`

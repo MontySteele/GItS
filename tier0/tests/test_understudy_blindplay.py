@@ -6277,18 +6277,15 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the in-game tip (the `Set off` row below states it in full).
         # `EB-536`: and the Mine, because the Mine row printed under this one
         # says a Mine also goes off before its enemy's hit.
-        # `EB-557` (R261): the starter line. Jumpy Dumpty is Innate under the
-        # arm and Ka-pow! is not, so the opening hand always holds a placer.
-        # The keyword rail states that about one CARD, on the card; what a
-        # reader of the WORD needs is the fact about the deck.
         # `EB-574`: rule 3 says which kill it means, in the same words on
         # both tips and the badge.
-        "Bomb": ["A charge on an enemy", "goes off only when",
-                 ", or as a ", "Not an Attack, but ",
-                 " stops it: only ",
-                 " and a cap on the ", "enemy's HP loss move it",
-                 "If this enemy dies with it still on, it moves to a "
-                 "survivor", "Your deck opens with a placer"],
+        # TRIMMED 2026-09-08 ([USER]'s run 2, an E default): the "Not an
+        # Attack" negative, "the enemy's HP loss" and the starter line left
+        # the word; every rule the anchors below hold is still on it.
+        "Bomb": ["A charge on an enemy", "and goes off when",
+                 " or as a ", " stops it; only ",
+                 " and the HP cap move it",
+                 "If the enemy dies with it on, it moves to a survivor"],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block
@@ -6300,12 +6297,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                     "fires, the first takes the aura. A random one picks a ",
                     "enemy first."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
-        # `EB-436`: the hit is in the sentence now.
-        "Mine": ["that also goes off before its enemy's hit, ",
-                 "which lands in full unless the Mine kills. Their ",
-                 # `EB-400`: the Block clause straddles a [gold] span,
-                 # so the anchor is the half that is whole.
-                 " stops it, and only their "],
+        # `EB-436`: the hit is in the sentence now. Trimmed 2026-09-08 with
+        # the Bomb row, and its last two sentences are the Bomb's word for
+        # word, so the anchors above hold them for both.
+        "Mine": ["that also goes off just before its enemy's ",
+                 "hit; the hit still lands. "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -7458,9 +7454,9 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     `EB-343` (R248) REWROTE THE TIP THIS SCRAPES, `EB-373` rewrote its last
     clause and `EB-361` added a rule, and both of this test's claims survive
     all three. [USER] held the in-game word to its 135-character ceiling, so
-    the tip reads "A charge on an enemy: grows 4 a turn, goes off only when
-    Set off. Not an Attack, but Block stops it: only Vulnerable and a cap
-    on." The glossary keeps "each" on top of the first sentence, because the
+    the tip reads "A charge on an enemy: grows 4 a turn, and goes off when
+    Set off or as a Mine. Block stops it; only Vulnerable and the HP cap move
+    it." The glossary keeps "each" on top of the first sentence, because the
     fact that growth is PER BOMB lives on the badge in game and the seat page
     has no badge.
     """
@@ -7471,7 +7467,7 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     # what the glossary prints -- the fallback is for a screen that prints the
     # WORD with no tip on it, which is an enemy's badge and a reward row.
     live_tip = blindplay.observe(elemental_hand_state(
-        bomb_tip="A charge on an enemy: grows 9 a turn, goes off only when "
+        bomb_tip="A charge on an enemy: grows 9 a turn, and goes off when "
                  "Set off."))
     assert "each grows 9 a turn" in live_tip
 

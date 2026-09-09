@@ -147,17 +147,21 @@ public class LiveBurn20260902Tests
         // introduced are still named, which is what R248 asked for.
         // `EB-400` moved the clause's opener onto Block and left the two
         // folded terms where they were.
-        Assert.Contains("[gold]Block[/gold] stops it, and only their ", body);
-        Assert.Contains("[gold]Vulnerable[/gold] and a cap move it.", body);
+        Assert.Contains("[gold]Block[/gold] stops it; only ", body);
+        Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
+                        body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
 
-        // AND IT IS MEASURED NOW. The sentence used to carry a semicolon, and
-        // `tools/lint_text_conventions.py` reads these bodies out of the
+        // AND IT IS MEASURED NOW. The sentence used to carry a semicolon,
+        // and `tools/lint_text_conventions.py` read these bodies out of the
         // source with a regex that stopped at one -- so this whole tip sat
-        // outside the census in both of its wordings and was never held to the
-        // tip ceiling. The regex is fixed in the same change; the assertion
-        // here is the prose half of it.
-        Assert.DoesNotContain(";", body);
+        // outside the census in both of its wordings and was never held to
+        // the tip ceiling. The regex was fixed in that change and the prose
+        // ban rode along with it as a belt. The 2026-09-08 trim spends two
+        // semicolons on purpose, so the belt is GONE and the census is the
+        // guard on its own: `tier0/tests/test_arm_keyword_tips.py`'s rule-3
+        // test reads `MineKey` out of `ltc.tip_rows()` and goes red if the
+        // pattern ever drops it again.
     }
 
     [Fact]
@@ -186,9 +190,10 @@ public class LiveBurn20260902Tests
         // `EB-373`: the same clause, narrowed to the two terms the fold reads.
         // `EB-555` then defined the second of them where it stands.
         // `EB-400`: and Block, which the sentence used to leave out.
-        Assert.Contains("Not an Attack, but [gold]Block[/gold] stops it: only "
-                      + "[gold]Vulnerable[/gold] and a cap on the ", body);
-        Assert.Contains("enemy's HP loss move it.", body);
+        // TRIMMED 2026-09-08: the negative went, both folded terms stayed.
+        Assert.Contains("[gold]Block[/gold] stops it; only "
+                      + "[gold]Vulnerable[/gold] and the HP cap move it.",
+                        body);
     }
 
     // ---- EB-293: the Plan keyword covers the plan-only case ---------------
