@@ -98,8 +98,16 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
     /// <summary>This performer's scene inside the pack, or null while the pack
     /// has none. STATIC, so the scene-conversion registration can ask for the
     /// path without first building a model to ask.</summary>
-    internal static string? ModVisualsPathFor(StagePerformer who) =>
-        KleePck.Path($"furina/model/{who.ToString().ToLowerInvariant()}.tscn");
+    internal static string? ModVisualsPathFor(StagePerformer who) => who switch
+    {
+        // Three LITERAL paths, not one interpolated one: the deploy's S12
+        // check reads every `KleePck.Path("...")` literal and refuses a
+        // reference it cannot find in the staged pack, and an interpolated
+        // path is a reference it cannot read at all.
+        StagePerformer.Chevalmarin => KleePck.Path("furina/model/chevalmarin.tscn"),
+        StagePerformer.Crabaletta => KleePck.Path("furina/model/crabaletta.tscn"),
+        _ => KleePck.Path("furina/model/usher.tscn"),
+    };
 
     /// <inheritdoc cref="StagePerformerMonster"/>
     public override string? CustomVisualPath =>
