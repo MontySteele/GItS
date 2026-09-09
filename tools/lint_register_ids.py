@@ -176,6 +176,10 @@ RETIRED: dict[str, frozenset[int]] = {
         (608, 609), 612, (616, 617), (619, 630), (632, 636), (638, 642), 645,
         (647, 650), (653, 658), (663, 666), (668, 669), (671, 672), (674, 675),
         (678, 680), 683, 685, 688, (690, 692), 694, 703, 711,
+        # 723 is minted on the Furina branch (PR #443, EB-723 IsFurina null
+        # guard); parked here so pool pass two mints past it. Remove when
+        # #443 lands and its row defines the number.
+        723,
     ),
     "M": _spans((1, 12), (14, 25), (27, 69)),
 }
