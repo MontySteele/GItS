@@ -6301,7 +6301,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
         "Mine": ["that also goes off just before its enemy's ",
-                 "hit, and the hit still lands. "],
+                 "hit, and the hit still lands unless the Mine kills. "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -6361,9 +6361,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-446`, Klee's seventh: a name Fischl -- Nightrider is written
         # against and a DIFFERENT companion card grants, so the face that
         # prints it carries the definition.
+        # `EB-720`: the hit names its element, so the anchors are the halves
+        # either side of the `[gold]Electro[/gold]` span.
         "Oz": ["Fischl's raven, out while you hold the Power Oz, at Your "
                "Side. ",
-               "He hits at the end of your turn while he is out."],
+               "He makes an ",
+               " hit at the end of your turn while he is out."],
         # The Furina reframe's three (slice two, 2026-09-02). The Evoke
         # sentence's two numerals are interpolated from `FurinaReframeLaw` on
         # the mod side and written out on this one, so its anchors are the
@@ -9921,13 +9924,15 @@ def test_the_target_and_the_aura_are_recorded_where_they_are_decided():
 #: page half of this pin cannot pass on a sentence the game does not print.
 _MINE_FACE = ("Set off here deals 4 Pyro damage. Bombs here: 1, including 1 "
               "Mine, growing at your turn's start. A Mine also goes off just "
-              "before this enemy's hit, and the hit still lands. A "
+              "before this enemy's hit, and the hit still lands unless the "
+              "Mine kills. A "
               "kill moves them to a "
               "survivor.")
 
 _MIXED_FACE = ("Set off here deals 12 Pyro damage. Bombs here: 2, including 1 "
                "Mine, growing at your turn's start. A Mine also goes off just "
-               "before this enemy's hit, and the hit still lands. A "
+               "before this enemy's hit, and the hit still lands unless the "
+               "Mine kills. A "
                "kill moves them to a "
                "survivor.")
 

@@ -1204,9 +1204,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # "the hit still lands" is `EB-436`'s finding in four words, and the last
     # two sentences are `ForBomb`'s word for word so no two rows of one screen
     # can be read against each other. Held in step with `ArmKeywordTips.ForMine`.
+    # RESTORED 2026-09-08: the trim had dropped "unless the Mine kills" and
+    # Klee r25 lane 1 (c) 1 read the flat sentence as a promise the hit comes
+    # even when the Mine kills, and gambled 9 HP on it twice.
     "Mine": ("A Bomb that also goes off just before its enemy's hit, and the "
-             "hit still lands. Block stops it. Only Vulnerable and the HP cap "
-             "move it. If the enemy dies with it on, it moves to a survivor."),
+             "hit still lands unless the Mine kills. Block stops it. Only "
+             "Vulnerable and the HP cap move it. If the enemy dies with it "
+             "on, it moves to a survivor."),
     # `EB-329`. "OR ALL IF IT SAYS SO" IS THE HALF THE OLD SENTENCE GOT
     # WRONG, and it was reprinted on every battle screen of every run: a
     # starter, Kurage's Oath, deals its Plan to ALL enemies, and the round-5
@@ -1341,7 +1345,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # never learned what the word meant. Held in step with
     # `ArmKeywordTips.ForOz`.
     "Oz": ("Fischl's raven, out while you hold the Power Oz, at Your Side. "
-           "He hits at the end of your turn while he is out."),
+           "He makes an Electro hit at the end of your turn while he is "
+           "out."),
     # The Furina reframe's three (slice two, R220 A). The same sentences
     # `ArmKeywordTips.ForDeploy` / `ForEvoke` / `ForDrain` print, with the two
     # numerals the C# interpolates from `FurinaReframeLaw` written out: this

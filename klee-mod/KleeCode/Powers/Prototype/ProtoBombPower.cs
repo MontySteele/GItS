@@ -199,9 +199,15 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <see cref="KleeMod.Cards.ArmKeywordTips.ForMine"/>'s own, so the badge
     /// and the word cannot be read against each other. "This enemy" is the
     /// one difference and it is the badge's whole subject.</summary>
+    /// <summary>THE EXCEPTION RESTORED 2026-09-08. The trim had dropped
+    /// `EB-436`'s "unless the Mine kills" (`EB-336`'s <see cref="Preempted"/>)
+    /// and Klee r25 lane 1 (c) 1 read the flat sentence as a promise the hit
+    /// comes even on a kill. Held word for word with
+    /// <see cref="KleeMod.Cards.ArmKeywordTips.ForMine"/>, still one
+    /// sentence.</summary>
     private const string MineClause =
         " A [gold]Mine[/gold] also goes off just before this enemy's hit, "
-      + "and the hit still lands.";
+      + "and the hit still lands unless the Mine kills.";
 
     // `EB-343`'s sentence is written INTO the static description above rather
     // than pulled out as a constant beside `MineClause`, and the reason is the
@@ -2220,9 +2226,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Kindling (the pool pass, `EB-491`): "Each Bomb on an enemy whose aura is
-    /// not Pyro grows by <paramref name="amount"/>. If there is none, your
-    /// largest Bomb grows by <paramref name="floor"/>."
+    /// Kindling (the pool pass, `EB-491`): "Each Bomb on an enemy with an aura
+    /// other than Pyro grows by <paramref name="amount"/>. If there is none,
+    /// your largest Bomb grows by <paramref name="floor"/>."
     ///
     /// THE FLOOR IS WHAT MAKES IT A REACT ROW WITH A LOSING LINE RATHER THAN A
     /// DEAD CARD. Catalytic Converter is dead in a mono-Pyro deck by its own
@@ -2230,7 +2236,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// when no applier went first, and buys 4 per Bomb on every foreign aura
     /// when one did.
     ///
-    /// "AURA IS NOT PYRO" IS THE ENEMY'S CARRIED AURA and no aura does not
+    /// "AN AURA OTHER THAN PYRO" IS THE ENEMY'S CARRIED AURA and no aura does not
     /// count -- <see cref="SetOffAll"/>'s <c>nonPyroAuraOnly</c> filter, read
     /// the same way for the same reason (Flame Dance and this row must not
     /// disagree about which enemies are "off-element"). The board is read as it
