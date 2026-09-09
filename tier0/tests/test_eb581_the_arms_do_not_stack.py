@@ -99,7 +99,7 @@ def test_the_title_lint_is_green_and_saw_the_rows():
 
     assert res.returncode == 0, res.stdout + res.stderr
     assert "prototype titles unique" in res.stdout
-    # THE COUNT, READ AS A NUMBER (`EB-730`). This was a substring test for
+    # THE COUNT, READ AS A NUMBER (`EB-731`). This was a substring test for
     # "0 title(s)", which is a substring of a healthy "200 title(s)" too -- so
     # the gate meant to catch a dead scan went red the first time the prototype
     # surface reached a round hundred. The claim was always "the lint saw

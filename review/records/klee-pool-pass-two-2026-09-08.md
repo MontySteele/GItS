@@ -11,7 +11,7 @@ Regent decompile note (`docs/current/research/regent-stars-economy.md`) and
 the pool as it stands (`docs/prototype-surface.yaml`, 45 `proto_ko_` rows).
 Prototype stage: no slate, no stamp, no number here is quotable. Every row
 went through the doctrine door before it was built (§4). Register row
-`EB-730`.
+`EB-731`.
 
 ## 1. What the reads said, and what Regent does
 

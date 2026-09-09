@@ -85,7 +85,7 @@ OVERHAUL_OPS = frozenset((
     "damage_set_off_total",
     "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand",
     "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
-    #: POOL PASS TWO's two (`EB-730`), and both are about a CARD rather than a
+    #: POOL PASS TWO's two (`EB-731`), and both are about a CARD rather than a
     #: charge -- which is why they are the arm's first two verbs that touch no
     #: Bomb since `hexerei_mark_hand`. `return_to_hand` (Blast Shield) routes
     #: the played card to the hand instead of the discard; `return_last_set_off`
@@ -116,7 +116,7 @@ WITCHES_CIRCLE = "ko_witches_circle"
 #: nowhere else. Stacks are a copy count and nothing more -- the rule is a fact
 #: about the board, not a number.
 VERMILLION_PACT = "ko_vermillion_pact"
-#: POOL PASS TWO's rider (`EB-730`, Return to Sender): "This turn, damage this
+#: POOL PASS TWO's rider (`EB-731`, Return to Sender): "This turn, damage this
 #: Block absorbs is placed on the attacker as a Bomb."
 #:
 #: A MARK ON THE BLOCK POOL, exactly as `mc_icy_paws` and `mi_blazing_barrier`
@@ -131,7 +131,7 @@ VERMILLION_PACT = "ko_vermillion_pact"
 #: "damage this Block absorbs", which is what the hit took off the pool; the
 #: mark decides WHETHER the rider fires, never how big the charge is.
 RETURN_TO_SENDER = "ko_return_to_sender"
-#: POOL PASS TWO's Rare Power (`EB-730`, Blazing Delight): "At the start of
+#: POOL PASS TWO's Rare Power (`EB-731`, Blazing Delight): "At the start of
 #: your turn, gain 1 Energy and draw 1 card." Stacks ADD -- two copies pay 2
 #: and 2 -- so the stack is the RATE, which is what the upgrade moves. Read at
 #: exactly one place, `turn_start_late`, beside Grounded and on the same hook.
@@ -778,7 +778,7 @@ def turn_start_late(state: CombatState) -> None:
         effects.gain_sparks(state, int(C.KLEE_OVERHAUL_OPENING_SPARK),
                             source="kit:opening_spark")
 
-    # RETURN TO SENDER's HOUSEKEEPING (`EB-730`), and it is the whole of what
+    # RETURN TO SENDER's HOUSEKEEPING (`EB-731`), and it is the whole of what
     # makes its face's "this turn" true. The mark carries no Block of its own,
     # so a mark with nothing behind it is gone -- written as a CLAMP rather
     # than as a clear beside the block reset so it stays correct under
@@ -795,7 +795,7 @@ def turn_start_late(state: CombatState) -> None:
         else:
             state.player.powers.pop(RETURN_TO_SENDER, None)
 
-    # BLAZING DELIGHT (`EB-730`): "At the start of your turn, gain 1 Energy and
+    # BLAZING DELIGHT (`EB-731`): "At the start of your turn, gain 1 Energy and
     # draw 1 card."
     #
     # HERE AND NOT AT `turn_start`, for Grounded's reason one power down: the
@@ -1022,7 +1022,7 @@ def mark_hand_hexerei(state: CombatState) -> int:
 
 
 # ---------------------------------------------------------------------------
-# POOL PASS TWO's TWO CARD VERBS (`EB-730`) -- the piles, not the pile
+# POOL PASS TWO's TWO CARD VERBS (`EB-731`) -- the piles, not the pile
 # ---------------------------------------------------------------------------
 
 def mark_return_to_hand(state: CombatState) -> None:
@@ -1102,7 +1102,7 @@ def return_last_set_off(state: CombatState) -> Optional[Card]:
 
 def block_absorbed(state: CombatState, enemy: Enemy, blocked: int,
                    block_before: int) -> None:
-    """Return to Sender (`EB-730`): "This turn, damage this Block absorbs is
+    """Return to Sender (`EB-731`): "This turn, damage this Block absorbs is
     placed on the attacker as a Bomb."
 
     THE KLEE ARM'S LEG of the one site in this engine that can say "this Block

@@ -1186,7 +1186,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
         CardModel cardSource, CardPlay cardPlay, decimal damage)
     {
-        // ONCE MORE!'s NOTE (`EB-730`), taken HERE and above every early
+        // ONCE MORE!'s NOTE (`EB-731`), taken HERE and above every early
         // return below: "the last Set off card you played this combat" is a
         // fact about the CARD, so a Set off played into an empty board still
         // counts. The three card-facing entry points take it and
@@ -1212,7 +1212,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         CardModel cardSource, CardPlay cardPlay, decimal damage,
         bool nonPyroAuraOnly)
     {
-        // ONCE MORE!'s NOTE (`EB-730`), taken HERE and above every early
+        // ONCE MORE!'s NOTE (`EB-731`), taken HERE and above every early
         // return below: "the last Set off card you played this combat" is a
         // fact about the CARD, so a Set off played into an empty board still
         // counts. The three card-facing entry points take it and
@@ -1262,7 +1262,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature applier,
         CardModel cardSource, CardPlay cardPlay, decimal damage, int times)
     {
-        // ONCE MORE!'s NOTE (`EB-730`), taken HERE and above every early
+        // ONCE MORE!'s NOTE (`EB-731`), taken HERE and above every early
         // return below: "the last Set off card you played this combat" is a
         // fact about the CARD, so a Set off played into an empty board still
         // counts. The three card-facing entry points take it and

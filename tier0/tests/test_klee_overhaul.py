@@ -263,7 +263,7 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     Splash, Countdown or Catalytic Converter, which the packet's sec.1 leaves
     as built.
 
-    FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-730`), and the SIX that
+    FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-731`), and the SIX that
     arrived are three pairs: the defence shelf's two (Blast Shield, Return to
     Sender), the sinks' two beside Stoke the Fuse (Bottomless Bag, Once More!)
     and the engines' two, both paying Energy (Sparkling Burst, Blazing
@@ -304,7 +304,7 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
             "proto_ko_bombs_away", "proto_ko_fireworks_show",
             "proto_ko_kindling", "proto_ko_flash_point",
             "proto_ko_vermillion_pact", "proto_ko_split_charge"} <= set(ids)
-    # POOL PASS TWO's six (`EB-730`), by name and for the same reason.
+    # POOL PASS TWO's six (`EB-731`), by name and for the same reason.
     assert {"proto_ko_blast_shield", "proto_ko_return_to_sender",
             "proto_ko_bottomless_bag", "proto_ko_once_more",
             "proto_ko_sparkling_burst",
@@ -424,7 +424,7 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     scope statement: a ninth Rare arriving without a ruling is what this
     catches.
 
-    POOL PASS TWO (`EB-730`) adds ONE Common (Bottomless Bag), FOUR Uncommons
+    POOL PASS TWO (`EB-731`) adds ONE Common (Bottomless Bag), FOUR Uncommons
     (Blast Shield, Return to Sender, Once More!, Sparkling Burst) and ONE Rare
     (Blazing Delight), which is where 22 / 20 / 9 comes from. THE RARE IS A
     NINTH, one past the brief's sec.2 budget of eight, and it is recorded here
@@ -953,7 +953,7 @@ def test_the_face_prints_the_family_word_and_nothing_about_ownership(overhaul):
 
 
 # ---------------------------------------------------------------------------
-# 8. POOL PASS TWO (`EB-730`) -- one case per row, both new ops and both new
+# 8. POOL PASS TWO (`EB-731`) -- one case per row, both new ops and both new
 #    powers. C# twin: `klee-mod/KleeTests/Prototype/KleeOverhaulPoolPassTwoTests.cs`,
 #    case for case.
 # ---------------------------------------------------------------------------

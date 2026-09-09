@@ -3475,7 +3475,7 @@ what they carry is a rule about WHICH SEAT. `Fanfare` collides by spelling with
 the shipped meter and not by meaning; nothing on the blind-play page can tell
 them apart today, and the round packet owes that finding.
 
-## Pool pass two: six Spark sinks on Regent's ladder (`EB-730`, R270, 2026-09-08)
+## Pool pass two: six Spark sinks on Regent's ladder (`EB-731`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income
 stays, and the pool gets things to buy with it, Regent's Stars the comparison
