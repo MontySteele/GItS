@@ -201,7 +201,9 @@ brief, with no amendment ceremony.
   below Rare, sustain routes through Block or buffer pools; no 4-star companion
   true-heals (potions and relic-scale trickles exempt). A rider otherwise banned
   is legal only conjunctively — dropping one half is not a "simplification."
-  (principles Guardrail 6; R8; R79/B4)
+  **The rule binds the player's own bar (R269, 2026-09-08): a pet's bar may be
+  restored at any rarity, priced as damage prevention wherever the pet stands
+  between the player and the enemy.** (principles Guardrail 6; R8; R79/B4; R269)
 - **Ancient carve-out (R127, 2026-08-07):** an Ancient-rarity card — Dusty
   Tome's single acquisition door, one visible Ancient per roster character —
   may grant per-turn accrual that its owner's resource laws otherwise ban
