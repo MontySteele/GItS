@@ -63,7 +63,9 @@ performers with their own bars, and Fanfare is that bar.**
    1 Fanfare. On a full stage it rotates the cast: the front performer
    leaves without a bow, the other two step forward, and the newcomer takes
    the back seat with the leaver's Fanfare. Pools are never lost to
-   rotation, and a newcomer performs its act that same turn.
+   rotation. A newcomer performs with the others at the end of that turn,
+   never on arrival (round one, `EB-738`: both engines had read this
+   sentence as an act on play).
 4. **The lead performer regains 1 Fanfare at the start of Furina's turn**,
    from her second turn on. Only the lead. Bars have no cap.
 5. **Refill lands on the back-most performer.** "Raise 5 Fanfare on the
@@ -134,7 +136,7 @@ performer; the lever if it does is the bow's size, not rule 8.
 
 Summon, defend, spend the lead. Wants Block in hand on the big-intent turns
 and a Spend card when the enemy can die. Its cards: the three named
-summons, Curtain Rise and its siblings, Standing Ovation and the Refills,
+summons, Curtain Rise and its siblings, Rising Applause and the Refills,
 and Understudy for the Expend line.
 
 ### 5.2 The Ovation (the payoff plan)
@@ -174,16 +176,16 @@ Nibbit at 44 HP (`tier05/content/act1_pool.yaml`: Butt 12, Hesitant Slice
 The starter: three Soloist's Solicitation (6), three Stage Presence (Block
 6), Regal Bearing (Block 3, Weak 1), all the base game's basics and
 untouched; plus Salon Début (summon a random performer not on stage),
-Curtain Rise (Deal 7. Spend 3: deal 13 instead), Standing Ovation (Raise 5
+Curtain Rise (Deal 7. Spend 3: deal 13 instead), Rising Applause (Raise 5
 Fanfare on the back performer). Usher is in front at 3 from the relic.
 Nibbit's script here: Butt, Hiss, Slice, Butt.
 
 **Turn 1.** Hand: Solicitation, Solicitation, Presence, Curtain Rise,
-Standing Ovation. Intent Butt 12.
+Rising Applause. Intent Butt 12.
 
 | line | play | Block | damage | enemy after | stage after enemy | Furina |
 |---|---|---|---|---|---|---|
-| A, build | Presence, Standing Ovation (Usher 3 to 8), Solicitation; Usher performs Block 3 | 9 | 6 | 38 | Usher 8, takes 3, at 5 | 78 |
+| A, build | Presence, Rising Applause (Usher 3 to 8), Solicitation; Usher performs Block 3 | 9 | 6 | 38 | Usher 8, takes 3, at 5 | 78 |
 | B, wager | Presence, Curtain Rise with Spend 3 (Usher 3 to 0, bows: Block 4), Solicitation | 10 | 19 | 25 | empty | 76 |
 | C, plain | Presence, Curtain Rise unspent, Solicitation; Usher performs Block 3 | 9 | 13 | 31 | Usher 3, takes 3, dies, no bow | 78 |
 
@@ -205,7 +207,7 @@ Regal Bearing for the Weak on next turn's hit. Performances: Usher Block 3
 Ovation, Solicitation. Intent Slice, 6 plus 2 Strength, Weak makes it 6,
 with 5 Block for Nibbit on its turn. Usher 7. Two lines:
 
-- **Refill:** Presence, Standing Ovation (Crabaletta 1 to 6), Curtain Rise
+- **Refill:** Presence, Rising Applause (Crabaletta 1 to 6), Curtain Rise
   with Spend 3 (Usher 7 to 4) for 13. With Crabaletta's 5, Nibbit is at 9.
   Block 9 against 6, nothing through.
 - **Damage:** Presence, Curtain Rise with Spend 3, Solicitation: 19, and
@@ -306,7 +308,7 @@ performer unless the face names another. Names are provisional.
 |---|---|---|---|
 | Salon Début | 1 | Skill | Summon a random performer who is not on stage. |
 | Curtain Rise | 1 | Attack | Deal 7. Spend 3: deal 13 instead. |
-| Standing Ovation | 1 | Skill | Raise 5 Fanfare on the back performer. |
+| Rising Applause | 1 | Skill | Raise 5 Fanfare on the back performer. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
 
 **Commons (eight)**
 

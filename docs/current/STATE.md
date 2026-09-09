@@ -142,8 +142,15 @@ every arm ships OFF in a release package). **Last RELEASE package:
   read). **R269 (2026-09-08)** ruled its three picks: build it, the healing
   law gets the pet clause (`LAW.md`), the concepts packet and #433 close.
   Encore, the Spotlight, the Fanfare counter and the reframe arm retire
-  under it. **No pick open.** Building: `EB-724` (engine), `EB-725` (C#),
-  `EB-723` (batch-one pool), then seat round one on the brief's questions.
+  under it. Batch one is BUILT in both engines (`EB-723`-`EB-725`, #443,
+  #469) and **round one is READ**
+  (`review/active/furina-stage-round-1-2026-09-08.md`): three seats on one
+  seed; turn one was a wager two seats named, all three wanted a second
+  performer, and none ever saw the stage, because the blind-play page has
+  no renderer for Furina's pets (`EB-735`) and the mixed offer still
+  printed the shipped meters (`EB-736`). Rule 3 clarified (`EB-738`), the
+  Refill renamed (`EB-739`). **No pick open.** Round two after
+  `EB-735`/`EB-736`/`EB-738` deploy.
 - **Control run** — R250 pick 4: the same Opus seat family playing base
   Ironclad died on the act-1 boss twice (`review/records/control-ironclad-2026-09-04.md`);
   a kit clear on a 30-row pool is consistency as much as strength.
