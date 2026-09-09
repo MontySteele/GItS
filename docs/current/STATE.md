@@ -149,16 +149,16 @@ every arm ships OFF in a release package). **Last RELEASE package:
   performer, and none ever saw the stage, because the blind-play page has
   no renderer for Furina's pets (`EB-735`) and the mixed offer still
   printed the shipped meters (`EB-736`). Rule 3 clarified (`EB-738`), the
-  Refill renamed (`EB-739`), all built (#472). **Round two is READ**
-  (`review/active/furina-stage-round-2-2026-09-09.md`): with the stage
-  printed, turn one was a real decision about the bar in all three seats,
-  the reserve read as a second damage source, and the three read as three
-  at the exit and one at the table; the Spend fires without a choice (four
-  of six seats), the shipped Fanfare buff still runs under the arm, and the
-  glossary still carries the old words (`EB-743`-`EB-748`; Spend becomes a
-  choice on play as an E default). **One pick open, [USER]'s:** how an
-  over-sized Spend resolves (`furina-stage-round-2 5.1`, default keep).
-  Round three after `EB-743`-`EB-746` deploy.
+  Refill renamed (`EB-739`), all built (#472). **Round two is READ** (packet on PR #473,
+  [USER]'s, with one pick): with the stage printed, turn one was a real
+  decision about the bar in all three seats, the reserve read as a second
+  damage source, and the three read as three at the exit and one at the
+  table; the Spend fired without a choice (four of six seats), the shipped
+  Fanfare buff still ran under the arm, and the glossary still carried the
+  old words. `EB-743`-`EB-748` are BUILT: Spend is a choice on play (E
+  default), the event lines name their effect, the glossary is the
+  Stage's, the shipped meters are never granted, readers print the live
+  number, a refusal names its power. Round three next.
 - **Control run** — R250 pick 4: the same Opus seat family playing base
   Ironclad died on the act-1 boss twice (`review/records/control-ironclad-2026-09-04.md`);
   a kit clear on a 30-row pool is consistency as much as strength.
