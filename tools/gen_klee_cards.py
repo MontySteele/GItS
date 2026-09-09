@@ -6244,10 +6244,9 @@ def build_vars(card: dict) -> list[str]:
             # `EB-657`. THE TWO PRINTED NUMBERS OF A TWO-ARMED AIMED HIT, live
             # -- `EB-624`'s pair one card over. Declared FIRST and in print
             # order, because the face reads the else arm before the then arm.
-            for name, amount, _delta in folded_branch_damage(card, eff):
+            for name, amount, _delta, cls in folded_branch_damage(card, eff):
                 out.append(
-                    f'new FoldedDamageVar("{name}", {amount}m, '
-                    'ValueProp.Move)')
+                    f'new {cls}("{name}", {amount}m, ValueProp.Move)')
             cb = conditional_bonus_upgrade(card)
             bd = branch_draw_upgrade(card)
             then_var, else_var = branch_draw_vars(card)
@@ -7158,10 +7157,23 @@ def conditional_then_damage_upgrade(card: dict) -> int:
     return int(upgrade_plan(card)[0].get("conditional_then_damage", 0))
 
 
-def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int]]:
-    """`EB-657`. The two PRINTED numbers of a two-armed aimed conditional hit:
-    `[(token, base amount, upgrade delta), ...]` in the order the face prints
-    them, or `[]` when the row is not that shape.
+#: `EB-737`. THE CLAUSES A BRANCH MAY CARRY BESIDE THE NUMBER IT PRINTS.
+#:
+#: A Furina Stage Spend rider is "Deal 7. Spend 3: deal 13 instead", and its
+#: then-branch is TWO clauses -- the payment and the hit -- so the one-clause
+#: test below refused it and both numbers stayed literals. The payment is a
+#: PRICE and not a printed number: `stage_spend` moves a performer's bar and
+#: puts nothing on the face, so a branch carrying one prints exactly the same
+#: single number a bare branch does. Every other op stays refused, because a
+#: branch with two printed numbers has no one number for a var to be.
+BRANCH_PRICE_OPS = frozenset({"stage_spend"})
+
+
+def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
+                                                              str]]:
+    """`EB-657`. The two PRINTED numbers of a two-armed conditional clause:
+    `[(token, base amount, upgrade delta, C# var class), ...]` in the order the
+    face prints them, or `[]` when the row is not that shape.
 
     THE FIND (Kokomi r25 lane 2, (c) 2). Feint printed "Deal 5 damage ... deal
     10 instead" beside a Strike printed at 4, played into the same Shrink, and
@@ -7178,35 +7190,74 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int]]:
     same sum `_branch_amount` puts in the body, read here so the face and the
     hit cannot disagree the first time the card is upgraded.
 
-    AIMED, TWO-ARMED AND `proto_` ONLY. A `FoldedDamageVar` folds the aimed
-    body's terms, so an `all_enemies` arm would print one number for a board
-    that takes several (`debuff_calc_rider`'s rule); a single-armed row keeps
-    its literal because there is no second number to disagree with; and the var
-    lives under `Powers/Prototype/`, which a release build Compile-Removes
-    (`calculated_damage_var`'s quarantine, verbatim).
+    TWO-ARMED AND `proto_` ONLY, and the var class says which fold each arm
+    gets. A `FoldedDamageVar` adds the AIMED body's terms on top of the
+    dealer's, so it is right for a `target: enemy` arm and wrong for an
+    `all_enemies` one, which would print one number for a board that takes
+    several (`debuff_calc_rider`'s rule): an area arm takes a plain named
+    `DamageVar`, whose preview is the dealer's own
+    `Hook.ModifyDamage(..., All)` -- Strength and Weak -- and nobody else's.
+    A single-armed row keeps its literal because there is no second number to
+    disagree with, and both prototype vars live under `Powers/Prototype/`,
+    which a release build Compile-Removes (`calculated_damage_var`'s
+    quarantine, verbatim).
+
+    `EB-737`: AND THE BLOCK ARM OF ONE, on the same terms. Round one's seats
+    met <i>Interposition</i> printing "5/10" while it gained 3 under Frail, and
+    a Spend face that prints a number the card does not gain is the same defect
+    on the other clause. A named `BlockVar` is the block twin: the game's own
+    var, whose preview runs the block hooks, under a token of its own so two of
+    them can stand on one face. There is no `conditional_then_block` key, so
+    both block arms move by `conditional_block` alone.
     """
     if eff.get("op") != "conditional":
         return []
     if not str(card.get("id") or "").startswith("proto_"):
         return []
 
-    def _one_aimed_hit(branch: list | None) -> dict | None:
-        if not branch or len(branch) != 1:
+    def _one_printed(branch: list | None, op: str) -> dict | None:
+        """The single `op` clause a branch prints, or None. Clauses in
+        `BRANCH_PRICE_OPS` beside it are prices and are ignored; anything else
+        means the branch prints more than one number."""
+        if not branch:
             return None
-        clause = branch[0]
-        return (clause if clause.get("op") == "damage"
-                and clause.get("target") == "enemy"
-                and isinstance(clause.get("amount"), int) else None)
+        printed = [c for c in branch if c.get("op") == op]
+        if len(printed) != 1:
+            return None
+        clause = printed[0]
+        if not isinstance(clause.get("amount"), int):
+            return None
+        if any(c.get("op") not in BRANCH_PRICE_OPS
+               for c in branch if c is not clause):
+            return None
+        return clause
 
-    then = _one_aimed_hit(eff.get("then"))
-    els = _one_aimed_hit(eff.get("else"))
+    then = _one_printed(eff.get("then"), "damage")
+    els = _one_printed(eff.get("else"), "damage")
+    if then is not None and els is not None:
+        aimed = {then.get("target"), els.get("target")}
+        if aimed == {"enemy"}:
+            cls = "FoldedDamageVar"
+        elif aimed == {"all_enemies"}:
+            cls = "DamageVar"
+        else:
+            # Two arms hitting two different shapes of board is not one face's
+            # pair of numbers; the row keeps its literals rather than printing
+            # a comparison that is not one.
+            return []
+        both = conditional_damage_upgrade(card)
+        extra = (conditional_then_damage_upgrade(card)
+                 if _is_then_first_damage(card, then) else 0)
+        return [("PlainDamage", int(els["amount"]), both, cls),
+                ("BranchDamage", int(then["amount"]), both + extra, cls)]
+
+    then = _one_printed(eff.get("then"), "block")
+    els = _one_printed(eff.get("else"), "block")
     if then is None or els is None:
         return []
-    both = conditional_damage_upgrade(card)
-    extra = (conditional_then_damage_upgrade(card)
-             if _is_then_first_damage(card, then) else 0)
-    return [("PlainDamage", int(els["amount"]), both),
-            ("BranchDamage", int(then["amount"]), both + extra)]
+    both = conditional_block_upgrade(card)
+    return [("PlainBlock", int(els["amount"]), both, "BlockVar"),
+            ("BranchBlock", int(then["amount"]), both, "BlockVar")]
 
 
 def _is_then_first_damage(card: dict, eff: dict) -> bool:
@@ -12077,9 +12128,11 @@ def build_upgrade(card: dict) -> list[str]:
             # swap -- the vars bumped below are what re-render.
             folded = any(folded_branch_damage(card, eff)
                          for eff in card.get("effects", []))
-            how_printed = ("the face prints them live (`EB-657`)."
-                           if folded and ckey == "conditional_damage"
-                           else "the text swaps via {IfUpgraded:show:...|...}.")
+            how_printed = (
+                "the face prints them live (`EB-657`)."
+                if folded and ckey in ("conditional_damage",
+                                       "conditional_block")
+                else "the text swaps via {IfUpgraded:show:...|...}.")
             lines.append(
                 f"// {ckey}: {how_many} on an IsUpgraded read at play time; "
                 + how_printed)
@@ -12089,9 +12142,10 @@ def build_upgrade(card: dict) -> list[str]:
     # with the hit the first time the card is upgraded otherwise. Each arm
     # takes its OWN delta (the else arm `conditional_damage`, the then arm
     # that plus `conditional_then_damage`), which is what the two keys are for.
-    if "conditional_damage" in deltas or "conditional_then_damage" in deltas:
+    if ("conditional_damage" in deltas or "conditional_then_damage" in deltas
+            or "conditional_block" in deltas):
         for eff in card.get("effects", []):
-            for name, _base, delta in folded_branch_damage(card, eff):
+            for name, _base, delta, _cls in folded_branch_damage(card, eff):
                 if delta:
                     lines.append(
                         f'DynamicVars["{name}"].UpgradeValueBy({delta}m);')

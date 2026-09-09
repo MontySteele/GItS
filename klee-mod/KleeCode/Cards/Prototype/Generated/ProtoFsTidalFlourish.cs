@@ -45,13 +45,14 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Flourish"),
-        ("description", "Deal {IfUpgraded:show:8|5} damage to ALL enemies. [gold]Spend[/gold] 2: deal {IfUpgraded:show:12|9} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DamageVar("PlainDamage", 5m, ValueProp.Move),
+            new DamageVar("BranchDamage", 9m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -86,6 +87,8 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
+        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
+        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
     }
 }
