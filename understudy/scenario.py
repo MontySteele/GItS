@@ -1103,6 +1103,30 @@ class Runner:
         self.sleep(self.settle_s)
         return self.read()
 
+    def _move_baseline(self) -> None:
+        """Move the delta baseline to the state this action posts from --
+        UNLESS that state is a chooser overlay with no board on it.
+
+        `EB-245`'s rule, applied to the bracket instead of to the fight record.
+        The wire's `card_select` -- a *Choose one* mode, an Exhaust chooser --
+        publishes an EMPTY `enemies` list while the fight is still standing
+        behind it (`blindplay_shape.FIGHT_OVERLAYS` says the same thing from
+        the other side). A baseline moved onto that screen is a baseline with
+        no board, so an enemy check resolves `who` against nothing and the step
+        fails with "no enemy 'first' in the before-state" rather than with a
+        number -- which is exactly how `furina-stage-damage-order` failed on
+        the round-three build, on both of its `play` + `select` brackets.
+
+        HELD, the bracket around `play` + `select` is the ONE card play it
+        actually was, and that is the reading the file is written for: the mode
+        is chosen mid-play and no enemy moves until it is. The condition trades
+        nothing away -- a state that carries a board still moves the baseline,
+        and a scenario out of combat (no board on either side) still moves it
+        too, so only the board-for-no-board trade is refused.
+        """
+        if adapter.enemy_blobs(self.state) or not adapter.enemy_blobs(self.before):
+            self.before = self.state
+
     def _post(self, action: dict[str, Any], label: str) -> dict[str, Any]:
         """POST one action, with its NAMES resolved at this state (R93 #7)."""
         names = naming.describe(self.state, action)
@@ -1110,7 +1134,7 @@ class Runner:
         row = {"step": label, "action": action, "names": names,
                "status": result.get("status"),
                "message": result.get("message") or result.get("error")}
-        self.before = self.state
+        self._move_baseline()
         self._settle()
         row["after"] = digest(self.state)
         self.emit(row)

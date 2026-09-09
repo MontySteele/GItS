@@ -465,6 +465,59 @@ def test_a_confirm_on_a_screen_that_already_closed_is_recorded_not_failed():
     assert any("skipped" in row for row in rows)
 
 
+def _mode_flow(overlay):
+    """`play` a chooser card, answer the chooser, assert what the play dealt.
+
+    The state script is one entry per `get_state`: the run's opening read, the
+    play's own read, the settle onto the chooser, the `expect`'s read, the
+    select's read, and the settle back onto the board. The last entry repeats.
+    """
+    return run_scenario(
+        [{"play": {"card": "Kaboom!", "target": "first"}},
+         {"expect": {"prompt_contains": "Choose"}},
+         {"select": {"cards": ["Spend 3: deal 13 instead"]}},
+         {"expect": {"enemy_hp_block_delta": {"who": "first", "amount": -13}}}],
+        [combat(hand=[card()], enemies=[enemy("SEAPUNK_0", hp=37)]),
+         combat(hand=[card()], enemies=[enemy("SEAPUNK_0", hp=37)]),
+         overlay, overlay, overlay,
+         combat(hand=[card()], enemies=[enemy("SEAPUNK_0", hp=24)])])
+
+
+def test_a_boardless_chooser_overlay_does_not_move_the_delta_baseline():
+    """`EB-245` from the bracket's side, and the live failure that found it.
+
+    The wire's `card_select` publishes an EMPTY enemy list while the fight is
+    still standing behind it. A baseline moved onto that screen has no board,
+    so `who: first` resolves against nothing --
+    `furina-stage-damage-order` failed on the round-three build with "no enemy
+    'first' in the before-state" on both of its `play` + `select` brackets,
+    with the enemy visibly at 37 before the play and 24 after the mode.
+    """
+    overlay = combat(select=("card_select",
+                             {"prompt": "Choose a card.",
+                              "cards": [card(name="Spend 3: deal 13 instead")]}))
+    assert overlay["battle"]["enemies"] == []      # the shape being handled
+    ok, r, _, _ = _mode_flow(overlay)
+    assert ok, r.failures
+    assert scenario.adapter.enemy_id(
+        scenario.find_enemy(r.before, "first")) == "SEAPUNK_0"
+
+
+def test_an_overlay_that_carries_the_board_still_moves_the_baseline():
+    """The condition is the board-for-no-board trade and nothing wider: an
+    overlay the wire DID publish enemies on brackets from itself, so the
+    reading stays as tight as it can be. Here the board moved to 30 under the
+    chooser, so the honest delta off the overlay is -6 and the check written
+    for -13 must fail."""
+    overlay = combat(enemies=[enemy("SEAPUNK_0", hp=30)],
+                     select=("card_select",
+                             {"prompt": "Choose a card.",
+                              "cards": [card(name="Spend 3: deal 13 instead")]}))
+    ok, r, _, _ = _mode_flow(overlay)
+    assert not ok
+    assert "moved -6" in r.failures[-1]["detail"]
+
+
 def test_a_bridge_refusal_stops_the_scenario_rather_than_rolling_on():
     ok, r, _, _ = run_scenario(
         [{"end_turn": {}}, {"expect": {"player_block": 99}}],
