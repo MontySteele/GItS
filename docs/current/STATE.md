@@ -73,10 +73,11 @@ hand-written kit machinery.
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.5.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**. Deploy stamps
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3069+proto`**
-(2026-09-08, main after #461, all four arms on: the prototype rows behind
-`-p:PrototypeCards=true`, the Furina arm behind `-p:FurinaReframe=true`;
-every arm ships OFF in a release package). **Last RELEASE package:
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3159+proto`**
+(2026-09-08, main after #468, arms `klee,companion,kokomi,furina-stage`:
+the prototype rows behind `-p:PrototypeCards=true`, the Stage behind
+`-p:FurinaStage=true`; `furina` is the retired reframe arm; every arm ships
+OFF in a release package). **Last RELEASE package:
 `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
 ## Systems
@@ -112,9 +113,15 @@ every arm ships OFF in a release package). **Last RELEASE package:
   Spark never bound on either lane and the defence failed on detonator draw
   and Energy, never on Sparks; [USER] ruled Spark a currency whose income
   stays, with Regent's Stars as the comparison. **Pool pass two** is the
-  ruling's work (`review/records/klee-pool-pass-two-2026-09-08.md`): seven
-  Spark-priced rows paying Block, cards and Energy, read at the doctrine
-  door, then built and read by round 26. No pick open.
+  ruling's work (`review/records/klee-pool-pass-two-2026-09-08.md`, `EB-732`):
+  six Spark-priced rows paying Block, cards and Energy, read at the doctrine
+  door, built, deployed on `0.2.3159+proto`. **Round 26 is READ**
+  (`review/active/klee-overhaul-round-26-2026-09-08.md`): the sinks made
+  turns when the bank could pay (Return to Sender's Bomb 32 killed the
+  elite), and the bank cannot pay on turn one, where it is 1 by rule 4 and
+  the cheapest sink is 2; Regent's prices were taken without Regent's
+  opening 3. **One pick open, [USER]'s:** the opening bank (QUEUE
+  `klee-opening-bank 5.1`, default: open at 3, a rule change [USER] plays).
   **Open question, not closed by round 24:** whether spending Sparks is
   interesting: round 23 found the bank never scarce on a natural lane and
   deadlocked on a Spark deck, and no round 24 seat named a Set off the

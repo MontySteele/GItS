@@ -176,10 +176,6 @@ RETIRED: dict[str, frozenset[int]] = {
         (608, 609), 612, (616, 617), (619, 630), (632, 636), (638, 642), 645,
         (647, 650), (653, 658), (663, 666), (668, 669), (671, 672), (674, 675),
         (678, 680), 683, 685, 688, (690, 692), 694, 703, 711,
-        # 733-734 are PARKED, not retired: the Klee session minted them on PR
-        # #470 (unmerged) while this branch minted 735+; whoever lands second
-        # removes this line and keeps the lint hole-free (2026-09-09).
-        (733, 734),
     ),
     "M": _spans((1, 12), (14, 25), (27, 69)),
 }
