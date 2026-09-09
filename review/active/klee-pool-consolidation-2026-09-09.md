@@ -1,4 +1,4 @@
-Status: OPEN — six A picks (§8). Paper only: no row moves until ruled.
+Status: OPEN (six A picks, §8; paper only, no row moves until ruled)
 
 # Klee pool consolidation: what to cut, what the space is for, and whether Spark is a problem yet
 
@@ -80,7 +80,7 @@ So the order [USER] proposed is the right one: consolidate, add what is
 missing, read it, and only then return to the opening bank. Pick 6 holds
 PR #470's pick where it is.
 
-## 4. The cuts: ten rows that add nothing a neighbour does not
+## 4. The cuts: nine rows that add nothing a neighbour does not, and one redesign
 
 Each line is the card, its nearest neighbour, and the evidence.
 
@@ -122,7 +122,7 @@ praised card in the pool), Dig In beside Blast Shield (once against a bank
 dump), Countdown (the plain Energy detonator; the sixth check allows plain),
 Pocket Fireworks (pressure that leaves Bombs alone), Fish Blasting (§2).
 
-After the cuts: 41 draftable rows and 2 basics. Cook 12, Spray 8, React 4,
+After the cuts: 42 draftable rows and 2 basics. Cook 12, Spray 9, React 4,
 defence 8, cards and Energy 6, Hexerei 3.
 
 ## 5. Four rows adjusted
@@ -189,7 +189,7 @@ Rare is added; the three rule-breakers stand.
 
 ## 8. Picks
 
-1. **The cuts (§4).** (1) *All ten* [default]. (2) All but Fwoosh!, Quick
+1. **The cuts (§4).** (1) *All nine, and the Powder Charge redesign* [default]. (2) All but Fwoosh!, Quick
    Fuse and Explosives Workshop, held for one more natural read. (3) Your
    own list.
 2. **Grounded's condition (§5.1).** (1) *"if you played no Set off card
