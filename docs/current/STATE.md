@@ -120,7 +120,11 @@ OFF in a release package). **Last RELEASE package:
   six rows shelved as lower value, and the slices in the order Mines,
   finding and overflow, React's route, Spark-supported Cook, mischief. Its
   §8 staging is the next build: stage one (cuts, redesign, repairs) read by
-  round 27, stage two (the Mines batch) by round 28.
+  round 27, stage two (the Mines batch) by round 28. **The fun calibration**
+  (`review/records/klee-fun-calibration-2026-09-14.md`) rides the next three
+  builds: seats and [USER] answer three fixed lines on one seed, and the
+  score decides whether seats can read for [USER]; Klee's done gate is in
+  `operations/stage-gate.md`.
 - **Kokomi.** 32 seat rounds and one [USER] act-1 run ("better than before,
   but the central loop feels too auto-pilot", R265). The brief is at draft 7
   (`review/active/kokomi-brief-2026-09-01.md`), carrying Dusk and the queue

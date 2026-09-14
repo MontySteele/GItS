@@ -108,7 +108,14 @@ this order:
    - **(d)** The card you never wanted to play, and the one you were happiest
      to draw.
    - **(e)** Did the first turn of the first fight already present a decision?
-4. **`## Non-blindness declaration`** — every command you ran outside the two
+4. **`## Three lines`** — exactly three lines, in this shape, no more words
+   than the shape asks for ("none" is an answer; name cards by printed title):
+   - `MOST WANTED TURN: fight N turn N -- <why, one clause>`
+   - `NOTHING TURN: fight N turn N -- <why, one clause>` (the turn that felt
+     like nothing)
+   - `NEVER AGAIN: <card title> -- <why, one clause>` (the card you would
+     never draft again)
+5. **`## Non-blindness declaration`** — every command you ran outside the two
    allowed ones, every tool you used, and the sentence **"Repo files read:
    none."** if that is true. If it is not true, say exactly what you read; a
    declared look is a caveat on the round, an undeclared one is a void round.

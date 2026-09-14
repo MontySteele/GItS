@@ -44,6 +44,18 @@ structural fault: the starter does not present the central choice, the
 relic is dead in a deck the kit is meant to support, or its incentive makes
 one strategy the default winner.
 
+### Done, for a kit in Prototype (2026-09-14)
+
+A kit's Prototype has no finish line unless one is written, so every round
+is one more finding. **Klee's is this:** on two consecutive builds, [USER]'s
+three calibration lines (`review/records/klee-fun-calibration-2026-09-14.md`
+§2) answer `NOTHING TURN: none`, and the `MOST WANTED TURN` names a
+different play on each. A kit that clears it moves to Balance and its pool
+may grow; until then no row is added without the decision it adds stated in
+one line, and the build carries only the rows the next reading can judge.
+The same calibration tests whether the seats can carry the three lines in
+[USER]'s place; its §4 says what each result licenses.
+
 **Balance, gated by measurement.** Accepted rows are re-authored onto the
 character's real sheet under a `CONSTANTS_VERSION` bump and deleted from the
 prototype surface in the same commit; `EXPERIMENTS.md` binds in full from here
