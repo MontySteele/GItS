@@ -173,12 +173,14 @@ TIMEOUT_S = 600
 
 # `-m` is passed ALWAYS and never left implicit, so the ledger's grader id
 # names a model rather than "whatever codex defaulted to that month".
-# 2026-09-04 ([USER]): GPT 6 Astra at its light setting replaces 5.6 Sol as
-# the reviewer and playtester -- the same verdict quality for far fewer
-# tokens. Smoked on codex-cli 0.153.4: the model id answers at
-# `model_reasoning_effort="low"`; "light" is not an effort the CLI accepts,
-# and 0.150.x refuses the model outright ("requires a newer version").
-DEFAULT_MODEL = "gpt-6-astra"
+# 2026-09-04 ([USER]): GPT 6 Astra at its light setting replaced 5.6 Sol as
+# the reviewer and playtester. 2026-09-14 ([USER]): REVERTED to 5.6 Sol --
+# "Astra eats far too much usage to be practical as a seat": one blind run
+# of 107 acts on Astra exhausted the ChatGPT usage window mid-round
+# (calibration build one, `review/qa/blindplay/20260914-233423/`). The
+# `model_reasoning_effort="low"` override stays: it is a CLI config key, not
+# a model flag, and the first Sol seat of build two smokes it.
+DEFAULT_MODEL = "gpt-5.6-sol"
 DEFAULT_REASONING = "low"
 
 
