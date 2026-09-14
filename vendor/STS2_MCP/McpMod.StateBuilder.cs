@@ -1284,6 +1284,22 @@ public static partial class McpMod
             state["furina_salon"] = furinaSalon;
         }
 
+        // GItS LOCAL EDIT (`EB-735`). THE STAGE, and it is the block above one
+        // arm over: three performers stand in three SEATS, and the seat is the
+        // whole kit -- attacks reach the front one, Spend pays from the front
+        // one, Raise lands on the back one. The pets already reach the wire;
+        // the ORDER they stand in does not, because `Pets` is in the order the
+        // bodies were fielded and a rotation breaks it. Emitted beside the two
+        // receipts above and on the same absent/empty/populated contract, with
+        // one further state: a populated block with no seats is "the stage is
+        // empty", which is the fact a seat about to spend a rider needs and
+        // the one an absent key cannot state. Implementation and its
+        // reflection contract: gits/GitsFurinaStage.cs.
+        if (GitsFurinaStageState(player) is { } furinaStage)
+        {
+            state["furina_stage"] = furinaStage;
+        }
+
         // GItS LOCAL EDIT (`EB-681`). WHAT REACTED THIS TURN, BY NAME. A
         // reaction is what several kits are ABOUT and the feed carried no
         // trace of one: the aura is consumed, the effect lands, and a reader
@@ -1426,7 +1442,14 @@ public static partial class McpMod
 
     private static Dictionary<string, object?> BuildCardState(CardModel card, int index)
     {
-        card.CanPlay(out var unplayableReason, out _);
+        // GItS LOCAL EDIT (`EB-748`). The second out parameter is WHAT
+        // REFUSED, and both of this bridge's `CanPlay` calls used to discard
+        // it -- which is why a Smoggy refusal reached the blind page as
+        // "something else on the board is stopping you". Boxed to `object?`
+        // deliberately: nothing in `gits/GitsRefusalSource.cs` names a game
+        // type, so this edit cannot break on a signature it does not own.
+        card.CanPlay(out var unplayableReason, out var refusedBy);
+        object? gitsRefusedBy = refusedBy;
 
         var state = BuildCardInfo(card);
         state["index"] = index;
@@ -1473,10 +1496,20 @@ public static partial class McpMod
         // so an ABSENT key means "no sentence available" and the enum beside it
         // is unchanged for every reader that already asserts on it.
         // Implementation and its reflection contract: gits/GitsSparkPrice.cs.
-        if (unplayableReason != UnplayableReason.None
-            && GitsUnplayableReasonText(card) is { } unplayableText)
+        // `EB-748`: and where the mod has nothing to say, the GAME's own
+        // preventer is named instead. The mod's sentence wins where it exists
+        // -- it knows the price and the bank, which a class name cannot --
+        // and this is the fallback under it, so the general case ("a power on
+        // the board refused this") stops being the one refusal that names
+        // nothing.
+        if (unplayableReason != UnplayableReason.None)
         {
-            state["unplayable_reason_text"] = unplayableText;
+            var unplayableText = GitsUnplayableReasonText(card)
+                                 ?? GitsRefusalSource(gitsRefusedBy);
+            if (unplayableText != null)
+            {
+                state["unplayable_reason_text"] = unplayableText;
+            }
         }
 
         return state;
@@ -2660,19 +2693,36 @@ public static partial class McpMod
         // through `ICombatState.GetCreature`, so a pet is aimed at through
         // exactly the door an enemy is aimed at through. Osty keeps every
         // field it had and gains this one.
+        // GItS LOCAL EDIT (`EB-735`). WHICH SEAT A PERFORMER IS STANDING IN.
+        // A Furina Stage performer is a pet whose HP IS its Fanfare bar, and
+        // the one fact a pet row cannot carry is its SEAT -- this list is in
+        // the order the bodies were fielded, which a rotation and a departure
+        // both break, while every rule in that kit is written against front
+        // and back. Read off the arm's own ledger through the same snapshot
+        // `state["furina_stage"]` is built from, so the two surfaces cannot
+        // come to disagree; an empty map on every other board, which is every
+        // board in a release build.
+        var stageSeats = GitsFurinaStageSeats(player);
         foreach (var pet in combatState.Pets)
         {
-            pets.Add(new Dictionary<string, object?>
+            var petId = pet.CombatId.ToString() ?? string.Empty;
+            var row = new Dictionary<string, object?>
             {
                 ["id"] = pet.Monster?.Id.Entry ?? "PET",
-                ["entity_id"] = pet.CombatId.ToString(),
+                ["entity_id"] = petId,
                 ["name"] = SafeGetText(() => pet.Monster?.Title) ?? "Pet",
                 ["alive"] = pet.IsAlive,
                 ["hp"] = pet.CurrentHp,
                 ["max_hp"] = pet.MaxHp,
                 ["block"] = pet.Block,
                 ["status"] = BuildPowersState(pet)
-            });
+            };
+            if (stageSeats.TryGetValue(petId, out var seat))
+            {
+                row["stage_member"] = seat.Member;
+                row["stage_seat"] = seat.Seat;
+            }
+            pets.Add(row);
         }
 
         return pets;

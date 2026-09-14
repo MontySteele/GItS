@@ -98,34 +98,29 @@ OFF in a release package). **Last RELEASE package:
 
 ## Workstreams, today (2026-09-08)
 
-- **Klee.** 24 seat rounds read and one [USER] act-1 run
-  (`review/ruled/klee-user-run-1-2026-09-07.md`, R265). The starter is
-  R242's basics plus Jumpy Dumpty (Innate, R261) and Ka-pow!, the
-  0-cost Retained detonator,
-  held twice (R262). Every Hexerei card gives a Spark (R265 pick 1,
-  `EB-642`) and the mark pays on any card carrying it (`EB-663`, round 24).
-  **No pick open.** [USER]'s second run is PLAYED (2026-09-08,
-  `0.2.3069+proto`, `review/records/klee-user-run-2-2026-09-08.md`): act 1
-  cleared, died mid act 2 to the Entomancer; the concept and the
-  attack-or-Block tension confirmed, a Spark-centric defence fun but
-  inconsistent, three tips trimmed. **Round 25 is RULED** (R270,
-  `review/ruled/klee-overhaul-round-25-2026-09-08.md`): on `0.2.3105+proto`
-  Spark never bound on either lane and the defence failed on detonator draw
-  and Energy, never on Sparks; [USER] ruled Spark a currency whose income
-  stays, with Regent's Stars as the comparison. **Pool pass two** is the
-  ruling's work (`review/records/klee-pool-pass-two-2026-09-08.md`, `EB-732`):
-  six Spark-priced rows paying Block, cards and Energy, read at the doctrine
-  door, built, deployed on `0.2.3159+proto`. **Round 26 is READ**
-  (`review/active/klee-overhaul-round-26-2026-09-08.md`): the sinks made
-  turns when the bank could pay (Return to Sender's Bomb 32 killed the
-  elite), and the bank cannot pay on turn one, where it is 1 by rule 4 and
-  the cheapest sink is 2; Regent's prices were taken without Regent's
-  opening 3. **One pick open, [USER]'s:** the opening bank (QUEUE
-  `klee-opening-bank 5.1`, default: open at 3, a rule change [USER] plays).
-  **Open question, not closed by round 24:** whether spending Sparks is
-  interesting: round 23 found the bank never scarce on a natural lane and
-  deadlocked on a Spark deck, and no round 24 seat named a Set off the
-  Companion Spark alone bought.
+- **Klee.** 26 seat rounds read and two [USER] act-1 runs
+  (`review/ruled/klee-user-run-1-2026-09-07.md`, R265;
+  `review/records/klee-user-run-2-2026-09-08.md`: act 1 cleared, died mid
+  act 2, the attack-or-Block tension confirmed, a Spark-centric defence fun
+  but inconsistent). The starter is R242's basics plus Jumpy Dumpty (Innate,
+  R261) and Ka-pow!, the 0-cost Retained detonator, held twice (R262). Every
+  Hexerei card gives a Spark (R265 pick 1, `EB-642`) and the mark pays on
+  any card carrying it (`EB-663`). **R270** ruled Spark a currency whose
+  income stays, Regent's Stars the comparison; **pool pass two** (`EB-732`,
+  `review/records/klee-pool-pass-two-2026-09-08.md`) gave it six sinks
+  paying Block, cards and Energy, built on `0.2.3159+proto`. **Round 26 is
+  READ** (`review/active/klee-overhaul-round-26-2026-09-08.md`): the sinks
+  made turns when the bank could pay, and the bank cannot pay on turn one,
+  where rule 4 gives 1 and the cheapest sink costs 2; its opening-bank pick
+  is **HELD** behind the consolidated read. **R271 (2026-09-14)** ruled the
+  pool consolidation at its four defaults
+  (`review/ruled/klee-pool-consolidation-2026-09-09.md`): Fwoosh! and
+  Fireworks Show cut, Powder Charge redesigned as Booby Trap, Grounded on
+  "no Set off card last turn", Return to Sender capped at its own Block,
+  six rows shelved as lower value, and the slices in the order Mines,
+  finding and overflow, React's route, Spark-supported Cook, mischief. Its
+  §8 staging is the next build: stage one (cuts, redesign, repairs) read by
+  round 27, stage two (the Mines batch) by round 28.
 - **Kokomi.** 32 seat rounds and one [USER] act-1 run ("better than before,
   but the central loop feels too auto-pilot", R265). The brief is at draft 7
   (`review/active/kokomi-brief-2026-09-01.md`), carrying Dusk and the queue
@@ -156,8 +151,16 @@ OFF in a release package). **Last RELEASE package:
   performer, and none ever saw the stage, because the blind-play page has
   no renderer for Furina's pets (`EB-735`) and the mixed offer still
   printed the shipped meters (`EB-736`). Rule 3 clarified (`EB-738`), the
-  Refill renamed (`EB-739`). **No pick open.** Round two after
-  `EB-735`/`EB-736`/`EB-738` deploy.
+  Refill renamed (`EB-739`), all built (#472). **Round two is READ** (packet on PR #473,
+  [USER]'s, with one pick): with the stage printed, turn one was a real
+  decision about the bar in all three seats, the reserve read as a second
+  damage source, and the three read as three at the exit and one at the
+  table; the Spend fired without a choice (four of six seats), the shipped
+  Fanfare buff still ran under the arm, and the glossary still carried the
+  old words. `EB-743`-`EB-748` are BUILT: Spend is a choice on play (E
+  default), the event lines name their effect, the glossary is the
+  Stage's, the shipped meters are never granted, readers print the live
+  number, a refusal names its power. Round three next.
 - **Control run** — R250 pick 4: the same Opus seat family playing base
   Ironclad died on the act-1 boss twice (`review/records/control-ironclad-2026-09-04.md`);
   a kit clear on a 30-row pool is consistency as much as strength.

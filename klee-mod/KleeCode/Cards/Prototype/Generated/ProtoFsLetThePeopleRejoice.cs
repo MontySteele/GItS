@@ -48,7 +48,7 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Let the People Rejoice"),
-        ("description", "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1."),
+        ("description", "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal {CalculatedDamage:diff()} damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -56,7 +56,7 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.Spent(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrTotalFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -45,7 +45,7 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pneuma Refrain"),
-        ("description", "Gain [gold]Block[/gold] equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold], the [gold]back performer[/gold]'s [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

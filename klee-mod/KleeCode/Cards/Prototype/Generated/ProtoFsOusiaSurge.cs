@@ -45,7 +45,7 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ousia Surge"),
-        ("description", "Deal damage equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, the [gold]lead performer[/gold]'s [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

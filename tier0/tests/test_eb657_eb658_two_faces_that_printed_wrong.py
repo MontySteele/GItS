@@ -83,8 +83,12 @@ def test_the_pair_is_a_shape_and_not_a_card_special_case():
     shipped row is outside the arm's quarantine (`calculated_damage_var`)."""
     feint = _sheet_row("proto_kk_feint")
     both = feint["effects"][0]
-    assert [n for n, _b, _d in folded_branch_damage(feint, both)] == [
-        "PlainDamage", "BranchDamage"]
+    # `EB-737` widened the shape to the Stage's Spend riders and gave every
+    # row a var CLASS, so the tuple is four wide; an aimed pair still folds
+    # through `FoldedDamageVar` and still prints under these two tokens.
+    assert [(n, c) for n, _b, _d, c in folded_branch_damage(feint, both)] == [
+        ("PlainDamage", "FoldedDamageVar"),
+        ("BranchDamage", "FoldedDamageVar")]
 
     single = _sheet_row("proto_ko_sizzle")
     for eff in single["effects"]:

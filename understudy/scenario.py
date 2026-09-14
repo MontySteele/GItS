@@ -868,6 +868,62 @@ def _check_description_contains(spec, before, after):
         f"description {got!r} does not contain {want!r}"
 
 
+def _page(state: dict[str, Any]) -> str:
+    """The blind-play page this state renders to, as a seat would read it.
+
+    `EB-735`. THE ONE SURFACE NO CHECK COULD REACH. Every check above reads the
+    WIRE, which is right for a rule -- what a card DID is a fact about the
+    board -- and useless for the row that closed round one, whose whole defect
+    was that a true board reached the page and the page printed nothing about
+    it. Three seats played some 550 actions never knowing who was on stage,
+    with a wire that had been carrying the pets all along.
+
+    So this check reads the RENDERER, not a second copy of it: the import is
+    `understudy.blindplay`, the same module the seat runs, so a scenario
+    asserting a line asserts the line the seat will be handed. It stays inside
+    the "never a sheet, never tier0" rule at the head of this section -- the
+    page is downstream of the wire and nothing else.
+
+    LATE, because `understudy.scenario` is imported by tests that never render
+    a page and `blindplay` pulls the whole board/notes/render stack behind it.
+    """
+    from understudy import blindplay
+    return blindplay.observe(state)
+
+
+def _check_page_contains(spec, before, after):
+    """The page a seat would be handed prints this line (`EB-735`).
+
+    WHITESPACE-FOLDED AND CASE-FOLDED, `description_contains`' own rule: a
+    scenario names the sentence, not the wrapping, and a page whose line broke
+    differently is the same page.
+    """
+    want = " ".join(str(spec if isinstance(spec, str)
+                        else spec["text"]).split())
+    try:
+        got = " ".join(_page(after).split())
+    except Exception as e:                       # a render must not mask a run
+        return f"the page could not be rendered ({e})"
+    return None if want.casefold() in got.casefold() else         f"the page does not contain {want!r}"
+
+
+def _check_page_lacks(spec, before, after):
+    """And this one it does NOT print (`EB-736`).
+
+    The twin, and it is the half round one's second finding needs: the header
+    kept printing `Encore: 0`, the shipped Fanfare meter and the Burst bar
+    beside a glossary calling Fanfare the bar, and "the line is gone" is not
+    something a `contains` check can say.
+    """
+    want = " ".join(str(spec if isinstance(spec, str)
+                        else spec["text"]).split())
+    try:
+        got = " ".join(_page(after).split())
+    except Exception as e:
+        return f"the page could not be rendered ({e})"
+    return None if want.casefold() not in got.casefold() else         f"the page still contains {want!r}"
+
+
 class _LogWindow:
     """Where in `godot.log` this scenario's own output starts.
 
@@ -976,6 +1032,11 @@ CHECKS: dict[str, Callable[..., str | None]] = {
     "can_play": _check_can_play,
     "unplayable_reason": _check_unplayable_reason,
     "description_contains": _check_description_contains,
+    # `EB-735` / `EB-736`: the PAGE, which is the surface those two rows are
+    # about. Everything above asserts the board; these two assert what a blind
+    # seat is handed of it.
+    "page_contains": _check_page_contains,
+    "page_lacks": _check_page_lacks,
 }
 
 
@@ -1042,6 +1103,30 @@ class Runner:
         self.sleep(self.settle_s)
         return self.read()
 
+    def _move_baseline(self) -> None:
+        """Move the delta baseline to the state this action posts from --
+        UNLESS that state is a chooser overlay with no board on it.
+
+        `EB-245`'s rule, applied to the bracket instead of to the fight record.
+        The wire's `card_select` -- a *Choose one* mode, an Exhaust chooser --
+        publishes an EMPTY `enemies` list while the fight is still standing
+        behind it (`blindplay_shape.FIGHT_OVERLAYS` says the same thing from
+        the other side). A baseline moved onto that screen is a baseline with
+        no board, so an enemy check resolves `who` against nothing and the step
+        fails with "no enemy 'first' in the before-state" rather than with a
+        number -- which is exactly how `furina-stage-damage-order` failed on
+        the round-three build, on both of its `play` + `select` brackets.
+
+        HELD, the bracket around `play` + `select` is the ONE card play it
+        actually was, and that is the reading the file is written for: the mode
+        is chosen mid-play and no enemy moves until it is. The condition trades
+        nothing away -- a state that carries a board still moves the baseline,
+        and a scenario out of combat (no board on either side) still moves it
+        too, so only the board-for-no-board trade is refused.
+        """
+        if adapter.enemy_blobs(self.state) or not adapter.enemy_blobs(self.before):
+            self.before = self.state
+
     def _post(self, action: dict[str, Any], label: str) -> dict[str, Any]:
         """POST one action, with its NAMES resolved at this state (R93 #7)."""
         names = naming.describe(self.state, action)
@@ -1049,7 +1134,7 @@ class Runner:
         row = {"step": label, "action": action, "names": names,
                "status": result.get("status"),
                "message": result.get("message") or result.get("error")}
-        self.before = self.state
+        self._move_baseline()
         self._settle()
         row["after"] = digest(self.state)
         self.emit(row)

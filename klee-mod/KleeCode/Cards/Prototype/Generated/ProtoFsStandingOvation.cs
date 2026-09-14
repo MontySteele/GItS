@@ -44,7 +44,7 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Standing Ovation"),
+        ("title", "Rising Applause"),
         ("description", "[gold]Raise[/gold] 5 [gold]Fanfare[/gold] on the [gold]back performer[/gold]."),
     };
 

@@ -1,0 +1,89 @@
+# `EB-748` scenario: a refused play NAMES THE POWER THAT REFUSED IT.
+#
+# THE FIND (Furina, the Stage, round two, sec.4). A card refused under Smoggy
+# reached the blind-play page as *"something else on the board is stopping you
+# right now"* -- `understudy/qa_packet.UNPLAYABLE_REASONS`' rendering of the
+# bare enum `BlockedByHook`. Two seats flagged it and the second one GUESSED,
+# correctly, off the `Smoggy 1` badge in its own status list. That is luck and
+# not a reading, and every other refusal on the same screen names its cause
+# ("you have no Spark, and this costs 1", "no enemy is holding a Bomb", "you do
+# not have enough energy").
+#
+# WHY THE FIX IS IN THE BRIDGE AND NOT ON THE PAGE.
+# `understudy/blindplay_faces._hook_note` said the sentence could not come off
+# the wire, because "CanPlay reports the flag and has no slot for WHICH model
+# refused". That is true of the FLAG and false of the CALL: `CardModel.CanPlay`
+# takes a second out parameter, `Hook.ShouldPlay` walks every model in the
+# combat with the first refusal winning, and the bridge was discarding that
+# answer at both of its call sites. `gits/GitsRefusalSource.cs` reads it and
+# names it.
+#
+# WHY SMOGGY. It is the BASE GAME's own hook -- nothing in this mod applies it
+# -- so it is the general case rather than the mod's own gate, which
+# `KleeUnplayableReason` already answers in words and which
+# `spark-gate-refusal.yaml` already walks. Smoggy allows one SKILL per turn, so
+# the second Skill of a turn is the refusal, and the assertion is that the page
+# prints the monster's name where it used to print "something else".
+#
+# THE BUILD THIS RUNS ON: any `deploy_proto.ps1` build. Nothing here is
+# arm-gated: the two Skills are the base game's own basics, and a Furina is
+# used only because she is the character these rounds are being read on.
+#
+# NOTHING HERE IS QUOTABLE (R215 B).
+
+name: eb748-a-refusal-names-its-power
+character: KLEEMOD-FURINA
+turns: 2
+
+notes: |
+  Smoggy 1 on the player, two Skills in hand, five energy. The first Skill
+  plays; the second is refused, and the page prints the name of the power that
+  refused it instead of "something else on the board is stopping you".
+
+assumptions:
+  - "`SMOGGY` is the base game's Smoggy `ModelId` (`ModelDb.GetEntry` =
+     `StringHelper.Slugify(type.Name)`), and it is the string the wire prints
+     on a status row (`tier0/tests/test_understudy_blindplay.py` reads it that
+     way). If the spelling ever moves, the `set_power` step fails with the
+     endpoint's own refusal, which lists what the creature carries and points
+     at the registry."
+  - "Smoggy's rule is one SKILL per turn (`KleeTests/Prototype/
+     PoolPassThreeTests.cs` reads it the same way for the Klee arm's placers),
+     so the second Skill of the turn is the refused play and the FIRST one
+     must actually resolve for the refusal to be Smoggy's."
+  - "Energy is set to 5 first, so no refusal in this file can be
+     EnergyCostTooHigh wearing the answer the scenario is looking for."
+  - "The refusal SENTENCE is the bridge's (`unplayable_reason_text`), and
+     `qa_packet.unplayable_reason` keeps anything carrying a space verbatim --
+     so what the page prints is what the bridge wrote. The enum beside it is
+     unchanged and is asserted too, because this row adds a sentence and moves
+     no flag."
+  - "The name the bridge finds is the game's own: a readable Title,
+     DisplayName or Name off the preventing model, else its type name as words
+     (`SmoggyPower` -> `Smoggy`). The assertion below is on the word `Smoggy`
+     alone for that reason -- which of the three answered it is the game's
+     business and not this file's."
+
+steps:
+  - give: {card: KLEEMOD-STAGE_PRESENCE, pile: hand, upgraded: false, count: 2}
+  - set_energy: {amount: 5}
+
+  # ---- cold: no Smoggy, and both Skills are playable ----------------------
+  - expect:
+      no_power: {who: player, name: "Smoggy"}
+      can_play: {card: "Stage Presence", value: true}
+
+  # ---- Smoggy 1, one Skill spent, and the second is refused ---------------
+  - set_power: {who: player, name: SMOGGY, amount: 1}
+  - expect:
+      power: {who: player, name: "Smoggy", stacks: 1}
+  - play: {card: "Stage Presence"}
+  - expect:
+      can_play: {card: "Stage Presence", value: false}
+      unplayable_reason: {card: "Stage Presence", value: "BlockedByHook"}
+
+  # ---- THE ROW ITSELF: the page names the power --------------------------
+  - expect:
+      page_contains: {text: "Smoggy is stopping you right now"}
+  - expect:
+      page_lacks: {text: "something else on the board is stopping you"}

@@ -1,4 +1,4 @@
-Status: OPEN (one A pick, §5; the defaults in §6 are applied)
+Status: OPEN (one A pick, §5, HELD behind the consolidated read R271 §3 orders; the defaults in §6 are applied)
 
 # Klee round 26: the sinks work when the bank can pay, and the bank cannot pay on turn one
 
@@ -138,6 +138,9 @@ Minted: `EB-733` the reaction preview on a Set-off-first card; `EB-734` the
 enchantment chooser's missing tags. Evidence appended in place to `EB-710`
 (the empty reaction log) and `EB-704` (the confirm note on choosers);
 `EB-721` cited. Defaults applied (E): nothing built, nothing measured, no
-number moved; the two new rows are display and bridge work. Round 27's
-hypothesis is written from the ruling on §5 (QUEUE `klee-opening-bank
-5.1`); nothing is scheduled before it.
+number moved; the two new rows are display and bridge work. **The pick is HELD (R271, 2026-09-14):** the consolidation ruled from this
+round's finding (`review/ruled/klee-pool-consolidation-2026-09-09.md` §3)
+orders one read of the consolidated pool first, then one round comparing an
+opening bank of 1 against 3 on the same decks with the prices unchanged. The
+pick returns with that round's packet, evidence attached, and the QUEUE row
+`klee-opening-bank 5.1` waits on it.

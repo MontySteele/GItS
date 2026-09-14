@@ -2,21 +2,25 @@
 # about which of them a machine checks and which are eyes-on, because the wire
 # cannot see a pet at all.
 #
-# WHAT THE WIRE CARRIES AND WHAT IT DOES NOT. `understudy/scenario.digest` is
-# the whole vocabulary a check reads, and it is `player`, `hand`, `enemies` and
-# `prompt`. There is no ally, no pet and no gauge in it: the ONE pet the
-# harness can name today is the Bake-Kurage, through
-# `scenario.find_pet`, which reads `player.kokomi_plans.pet_entity_id` -- an
-# arm-specific block written by a different kit. So a performer's bar and the
-# three-bar strip are NOT machine-assertable from this file, and pretending
-# otherwise would be the `furina-full-stage-frame` mistake in a new place:
-# that file's first version asserted a rule that did not exist.
+# WHAT THE WIRE CARRIES AND WHAT IT DOES NOT -- REWRITTEN 2026-09-09 BY
+# `EB-735`. The paragraph here used to say a performer's bar was not
+# machine-assertable, and it was right at the time: `scenario.digest` read
+# `player`, `hand`, `enemies` and `prompt`, and the only pet the harness could
+# name was the Bake-Kurage through an arm-specific block a different kit wrote.
 #
-# THE ANSWER IS THE ONE THAT FILE REACHED TOO -- assert what the wire really
-# holds, and hold a FRAME for what only an eye can settle. Every `expect` below
-# reads Furina's own HP, her Block or an enemy's HP, all of which the wire
-# carries; the two `wait` steps are the capture windows for the bars and the
-# strip and are evidence of nothing on their own.
+# Round one is why that changed. Three blind seats played some 550 actions
+# without ever knowing who was on stage or what a bar held, because the page
+# had no renderer for her performers. `EB-735` built one, off a `furina_stage`
+# block the ledger now publishes, and gave this file two checks that read the
+# PAGE -- `page_contains` and `page_lacks` -- so the surface the row is about
+# is the surface a scenario asserts. The three bars in seat order and the bow
+# line below are those checks.
+#
+# WHAT IS STILL EYES-ON is the strip and the three bodies THEMSELVES: whether
+# the line re-flows after a departure, and whether the three read as three on
+# screen, are questions about pixels and the `wait` steps are their capture
+# windows. Those are evidence of nothing on their own, which is what
+# `furina-full-stage-frame` learned the hard way.
 #
 # THE BUILD THIS RUNS ON: `deploy_proto.ps1` with `-p:FurinaStage=true` (the
 # arm ships OFF, and with it off every assertion below is false by
@@ -32,12 +36,25 @@ character: KLEEMOD-FURINA
 # surface rather than against a shipped sheet (`EB-147`).
 prototype: true
 turns: 2
+# PINNED, because this file asserts PRINTED damage numbers and an act-1
+# hallway is not one fight. An unpinned run rolled a Shrinker Beetle whose
+# debuff took every printed 13 down to a landed 9 -- three times, consistently
+# -- and another rolled a 7-HP Twig Slime in the front seat that a 13 could
+# only overkill. Neither says anything about rule 8; both are the encounter.
+# This seed opens on a single Fuzzy Wurm Crawler with room to absorb three
+# Spends and a base mode, which is the bare body the assumptions below name.
+seed: YVKF7957EUFG
 
 notes: |
   The damage order proved from Furina's side of it: a fat lead and her Block
   answer a hallway intent whole, a Spend rider fires in full out of a lead that
-  cannot pay it, and a bow lands its Block. Two frames held for the three bars
-  and the strip.
+  cannot pay it, and a bow lands its Block. `EB-735` adds the PAGE: three named
+  bars in seat order and the bow line, asserted rather than eyeballed, with the
+  three retired meter lines asserted gone (`EB-736`). Round two adds four more:
+  Curtain Rise played BOTH WAYS from one board (`EB-746`), an act line that
+  names its effect (`EB-743`), no Encore row in the glossary (`EB-744`) and no
+  shipped Fanfare buff on the board (`EB-745`). Two frames held for the bodies
+  themselves and the strip.
 
 assumptions:
   - "The build carries `-p:PrototypeCards=true -p:FurinaStage=true`. With the
@@ -47,23 +64,53 @@ assumptions:
      front seat at FurinaStageLaw.OpeningFanfare = 3 (brief sec.3 rule 2).
      This is the one board fact the file assumes rather than reads, because
      the wire carries no pet."
-  - "Standing Ovation raises FurinaStageLaw.RefillAmount = 5 on the BACK
+  - "Rising Applause (`proto_fs_standing_ovation`, renamed under `EB-739`)
+     raises FurinaStageLaw.RefillAmount = 5 on the BACK
      performer, which with one performer on stage is the lead (rule 5). So the
      lead stands at 8 for the enemy turn below."
   - "Energy is set to 5 so the three kit cards all play in one turn."
-  - "The act-1 hallway intent this is run against puts at most 14 through: the
-     lead's 8 plus the Block written below covers it whole. A bigger intent is
-     not a failure of the rule, it is a different fight -- rerun on a hallway."
-  - "Curtain Rise is 7 base and {ExtraDamage} = 6 more when the rider fires,
-     so a live rider is an enemy HP delta of -13 before Vulnerable or a
-     reaction moves it. It is run into a bare body for that reason."
+  - "The two performers are summoned BY NAME (`proto_fs_surintendante_
+     chevalmarin`, `proto_fs_mademoiselle_crabaletta`, 1 energy each) rather
+     than by Salon Début, whose summon is random: the page checks below name
+     the lead and the back seat, and a random cast asserts the roll."
+  - "The act-1 hallway intent this is run against puts at most 8 through: the
+     Block written below is 6 and the lead carries 8 with a regen of 1, so a
+     hallway that small leaves the lead at 7 or more coming into round two,
+     which is what the two unasserted drains are sized against. A bigger
+     intent is not a failure of the rule, it is a different fight -- rerun on
+     a hallway."
+  - "Curtain Rise is a CHOOSE-ONE face since `EB-746`: mode 0 deals 7 and mode
+     1 pays the lead 3 for 13. Both are run into a bare body, so the deltas
+     below are the printed numbers before Vulnerable or a reaction moves
+     them."
+  - "Both plays take `highest_hp` and NOT `first`. A delta is only readable off
+     a body that survives the hit: the 0.2.3181 run put 13 into a 7-HP Twig
+     Slime in the front slot and read -7, which says nothing about the rule.
+     The fattest body in the fight absorbs 13 and then 7 and is still the
+     fattest, so the same creature is resolved for both."
+  - "The modes are answered BY LABEL, `deep-breath-modal-choice.yaml`'s rule:
+     the generator emits each label into the option card's title and its
+     description, so a label edit on the sheet is an edit to this file too. On
+     an empty stage the Spend mode is NOT OFFERED at all (rule 8, as a choice),
+     so a play there opens no screen -- which is why both plays below stand on
+     an occupied stage."
+  - "A hand does not survive `end_turn`. Both plays are in round two, so each
+     is of its OWN copy, granted in the step above it; the setup copy is the
+     round-one preview's subject and is discarded unplayed."
 
 steps:
   # ---------------------------------------------------------------- setup --
   - give: {card: KLEEMOD-PROTO_FS_STANDING_OVATION, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-PROTO_FS_SALON_DEBUT, pile: hand, upgraded: false}
-  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  # NAMED summons and not two Salon Débuts. `proto_fs_salon_debut` summons "a
+  # random performer who is not on stage", so which of the two fills the
+  # middle seat is a roll -- and the page checks below assert Chevalmarin in
+  # the lead and Crabaletta in the back BY NAME. Summoning each by its own
+  # card fixes the seat order without weakening one assertion.
+  - give: {card: KLEEMOD-PROTO_FS_SURINTENDANTE_CHEVALMARIN, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_FS_MADEMOISELLE_CRABALETTA, pile: hand, upgraded: false}
+  # One copy here, and one before each of the two plays in round two. This
+  # copy is the round-one PREVIEW's subject and nothing else -- it is
+  # discarded by the `end_turn` below, so it is never played.
   - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
   - set_energy: {amount: 5}
 
@@ -75,18 +122,25 @@ steps:
   - expect:
       can_play: {card: "Curtain Rise", value: true}
 
+  # `EB-746`: AND THE FACE OFFERS BOTH MODES. Spend is a CHOICE on play now --
+  # four of six round-two seats said the card spent for them, "no verb to
+  # decline" -- so the printed face is the choice and not a rider.
+  - expect:
+      description_contains: {card: "Curtain Rise", text: "Choose one"}
+
   # ------------------------------------------------- the reserve, and RULE 5
   # Raise 5 on the back performer. Alone on stage, the Usher IS the back, so
   # the lead stands at 3 + 5 = 8 for the enemy turn.
-  - play: {card: "Standing Ovation"}
+  - play: {card: "Rising Applause"}
 
   # ------------------------------------------------- three bars, and RULE 3 -
-  # Two summons fill the middle and back seats at 1 each. EYES-ON: three
-  # bodies stand in a line beside her, front to back, each with its own visible
-  # HP bar, and the strip reads `Block > Usher 8 > her HP` with the two
+  # Two summons fill the middle and back seats. Chevalmarin first so she is
+  # the one who steps up when the Usher bows, Crabaletta behind her. EYES-ON:
+  # three bodies stand in a line beside her, front to back, each with its own
+  # visible HP bar, and the strip reads `Block > Usher 8 > her HP` with the two
   # newcomers behind it. Nothing below asserts this; the frame is the evidence.
-  - play: {card: "Salon Début"}
-  - play: {card: "Salon Début"}
+  - play: {card: "Surintendante Chevalmarin"}
+  - play: {card: "Mademoiselle Crabaletta"}
   - wait: {seconds: 30}
 
   # ------------------------------------------- the damage order, and RULE 6 -
@@ -103,16 +157,42 @@ steps:
       player_hp_delta: {amount: 0}
 
   # ------------------------------------------------ Spend in full, RULE 8/9 -
-  # The lead came out of the enemy turn short -- it ate what the Block did not
-  # -- and Curtain Rise asks it for 3 anyway. RULE 8's second clause: the rider
-  # fires IN FULL whatever the lead can pay, the lead pays what it has, and it
-  # leaves with a bow. So the enemy takes the full 13 and not a scaled-down
-  # number, which is the assertion that would fail if the shortfall rule ever
-  # came back.
+  # Curtain Rise asks the lead for 3 and the lead has less than that. RULE 8's
+  # second clause: the rider fires IN FULL whatever the lead can pay, the lead
+  # pays what it has, and it leaves with a bow. So the enemy takes the full 13
+  # and not a scaled-down number, which is the assertion that would fail if
+  # the shortfall rule ever came back.
   - set_energy: {amount: 5}
-  - play: {card: "Curtain Rise", target: first}
+  # A COPY PER PLAY, and why a `give` stands before each. `end_turn` above
+  # discarded the whole hand and the setup copies with it, so a play written
+  # against the round-one hand finds nothing -- which is exactly what the
+  # 0.2.3181 run reported (`'Curtain Rise' is not in hand`). Every play below
+  # is of its OWN copy, so each opens its own choice screen from the board
+  # this turn actually produced rather than from a survivor of the last one.
+  #
+  # TWO DRAINS FIRST, and they are the only reason this file reads the same on
+  # every hallway. The prose used to have the ENEMY TURN leave the lead short,
+  # which is true only for an intent between 12 and 14: the 0.2.3181-era runs
+  # rolled a slime hallway, the Block ate the whole intent, and the lead came
+  # into this turn at 9 -- fat enough to pay 3 in full, so no bow, so no
+  # rotation and none of the page lines below. Two unasserted Spends take the
+  # bar down by 6, which leaves the asserted play a lead holding between 1 and
+  # 3. Nothing is asserted about these two: they are board setup written in
+  # the card's own verbs.
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
+  - select: {cards: ["Spend 3: deal 13 instead"]}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
+  - select: {cards: ["Spend 3: deal 13 instead"]}
+  - set_energy: {amount: 5}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
   - expect:
-      enemy_hp_block_delta: {who: first, amount: -13}
+      prompt_contains: "Choose"
+  - select: {cards: ["Spend 3: deal 13 instead"]}
+  - expect:
+      enemy_hp_block_delta: {who: highest_hp, amount: -13}
 
   # THE BOW, machine-checked where it can be: the Usher's departure effect is
   # 4 Block to Furina (rule 9). It is asserted as a floor rather than an
@@ -120,6 +200,66 @@ steps:
   # not fired yet -- what is being pinned is that a bow PAID, which is the
   # difference between rule 7's two departures.
   - read: {what: player}
+
+  # ------------------------------------------------- THE PAGE, and `EB-735` -
+  # The row's own acceptance, asserted rather than eyeballed: the blind-play
+  # page prints the stage in DAMAGE ORDER, with three named bars in seat order
+  # and a line for the bow that just happened.
+  #
+  # THE BARS ARE NOT ASSERTED BY VALUE and that is deliberate. What round one
+  # could not see was WHO and WHERE, not how much; the numbers move with the
+  # intent this hallway happened to roll, and a scenario pinning them would be
+  # asserting the fight rather than the page. So each line is checked for the
+  # performer and the seat word it stands under.
+  - expect:
+      page_contains: {text: "## Your stage"}
+  - expect:
+      page_contains: {text: "lead: Chevalmarin"}
+  - expect:
+      page_contains: {text: "back: Crabaletta"}
+  - expect:
+      page_contains: {text: "took a [gold]Bow[/gold]"}
+  - expect:
+      page_contains: {text: "**Usher** left the stage: emptied by a Spend"}
+
+  # ------------------------------------------------ THE HEADER, and `EB-736` -
+  # The three shipped meter lines the brief retires are gone from the header
+  # while the arm is on. All three were on the page in round one, beside a
+  # glossary calling Fanfare the bar -- one word, two resources, the shown one
+  # dead.
+  - expect:
+      page_lacks: {text: "- Encore:"}
+  - expect:
+      page_lacks: {text: "- Fanfare:"}
+  - expect:
+      page_lacks: {text: "- Furina Burst:"}
+
+  # ------------------------------------------- THE GLOSSARY, and `EB-744` ---
+  # The Encore ROW is gone too, not only the meter line. Round two read a rule
+  # for a meter the arm never grants, beside the bar of the same name; since
+  # `EB-745` nothing can grant it, and a rule for a number that cannot move is
+  # what the seats filed.
+  - expect:
+      page_lacks: {text: "**Encore**"}
+
+  # ------------------------------------------------ THE BUFF, and `EB-745` --
+  # And the shipped FanfarePower is not on the board at all. "Fanfare 30
+  # (buff), generated by losing HP, nothing spends it" sat in every round-two
+  # seat's status list; the sentence below is `FanfareMeterPower`'s own, so
+  # its absence is the absence of the badge rather than of a word.
+  - expect:
+      page_lacks: {text: "nothing spends it"}
+
+  # ------------------------------------------------- THE ACTS, and `EB-743` -
+  # An act line NAMES ITS EFFECT. "It moved 3" covered 3 Block, 5 damage and a
+  # Hydro aura alike, and two seats' Block arithmetic did not close for the
+  # whole run. The Usher is the act asserted because its effect is the one the
+  # sweep adds to a number the page also prints.
+  - expect:
+      page_contains: {text: "**Usher** performed: Furina gains"}
+  - expect:
+      page_contains: {text: "[gold]Block[/gold]."}
+
   - wait: {seconds: 20}
 
   # ---------------------------------------------- the empty-stage fallback --
@@ -128,5 +268,16 @@ steps:
   # settles is that the line RE-FLOWED -- the survivors closed the gap and the
   # new front bar is the one the strip names -- which is the placement pass
   # doing its job (`FurinaStagePlacement`).
-  - play: {card: "Curtain Rise", target: first}
+  #
+  # `EB-746`: AND THIS PLAY TAKES THE OTHER MODE, from the same board and the
+  # same card, which is the row's own acceptance. The base mode deals 7 and
+  # leaves every bar where it stood -- the verb to decline that round two's
+  # seats could not find.
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
+  - expect:
+      prompt_contains: "Choose"
+  - select: {cards: ["Deal 7 damage"]}
+  - expect:
+      enemy_hp_block_delta: {who: highest_hp, amount: -7}
   - wait: {seconds: 20}

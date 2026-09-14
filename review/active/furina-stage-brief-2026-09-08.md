@@ -78,8 +78,10 @@ performers with their own bars, and Fanfare is that bar.**
    answered differently and the intent shows which is coming.
 7. **A performer at 0 Fanfare leaves the stage.** By a hit: it just leaves.
    By Spend: it takes a bow (rule 9).
-8. **Spend N** is a rider on her cards: "Deal 7. Spend 3: deal 13 instead."
-   It pays N from the lead performer's bar. If the lead has less than N,
+8. **Spend N** is a choice on her cards, made when the card is played:
+   "Deal 7" or "Spend 3: deal 13 instead" (round two, `EB-746`: both engines
+   had fired the rider whenever a lead stood, and four seats asked for the
+   verb). It pays N from the lead performer's bar. If the lead has less than N,
    the rider still fires in full, the lead pays what it has and leaves
    with a bow. With no performer on stage the rider cannot fire and the
    card plays at its base number. So a performer at 1 is the cheapest

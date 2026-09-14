@@ -51,7 +51,7 @@ public static class FurinaStageLaw
     public const int LeadRegen = 1;
 
     /// <summary>What the starter's Refill raises on the back performer
-    /// (sec.3 rule 5, sec.12 <i>Standing Ovation</i>). Mirrors
+    /// (sec.3 rule 5, sec.12 <i>Rising Applause</i>). Mirrors
     /// <c>furina_stage.REFILL_AMOUNT</c>.</summary>
     public const int RefillAmount = 5;
 

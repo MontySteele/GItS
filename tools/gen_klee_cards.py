@@ -5072,21 +5072,50 @@ STAGE_COUNT_CS = {
 }
 
 
-def _stage_spends_before(card: dict, eff: dict) -> bool:
-    """Does this card take something off the bars BEFORE `eff` resolves?
+def _stage_spender_before(card: dict, eff: dict) -> str | None:
+    """WHICH op takes something off the bars before `eff` resolves, or None.
 
     `_drain_before`'s question one arm over and structural for its reason: two
     effects on one row can be equal dicts, and what is being asked is about a
     POSITION in the emitted `OnPlay` body. A row that read `stage_spent` before
     it had spent anything would print a number it cannot pay.
+
+    `EB-747` made it return the OP rather than a boolean, because the C# side
+    now needs to know which spend is coming: <i>Final Bow</i> forecasts the
+    LEAD's bar and <i>Let the People Rejoice</i> the whole stage's, and the op
+    standing in front of the payoff is what says which.
     """
     for other in card.get("effects") or []:
         if other is eff:
-            return False
+            return None
         if other.get("op") in {"stage_spend", "stage_spend_all",
                                "stage_final_bow"}:
-            return True
-    return False
+            return str(other["op"])
+    return None
+
+
+def _stage_spends_before(card: dict, eff: dict) -> bool:
+    """The boolean half of `_stage_spender_before`, for the two riders' gate."""
+    return _stage_spender_before(card, eff) is not None
+
+
+def stage_spent_cs(card: dict, eff: dict) -> str:
+    """`EB-747`. The C# multiplier a `stage_spent` payoff reads.
+
+    A CalculatedVar's whole job is that the PREVIEWED number and the RESOLVED
+    number are one expression, and `FurinaStage.Spent` is 0 until the card has
+    already emptied the bar -- so <i>Final Bow</i> and the Rare printed a rule
+    ("Block equal to its Fanfare") where a number was on the board, which is
+    the round-two finding. The forecast readers answer at both moments; which
+    one a row gets is decided by the spend standing in front of it, so no sheet
+    key is invented for a fact the body already states.
+    """
+    spender = _stage_spender_before(card, eff)
+    if spender == "stage_final_bow":
+        return "static (card, _) => FurinaStage.SpentOrLeadFanfare(card)"
+    if spender == "stage_spend_all":
+        return "static (card, _) => FurinaStage.SpentOrTotalFanfare(card)"
+    return STAGE_COUNT_CS["stage_spent"]
 
 
 def stage_count_calc_rider(card: dict,
@@ -5108,8 +5137,9 @@ def stage_count_calc_rider(card: dict,
         return None
     if token == "stage_spent" and not _stage_spends_before(card, eff):
         return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            STAGE_COUNT_CS[token])
+    expr = (stage_spent_cs(card, eff) if token == "stage_spent"
+            else STAGE_COUNT_CS[token])
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)), expr)
 
 
 def stage_count_block_rider(card: dict,
@@ -5130,8 +5160,9 @@ def stage_count_block_rider(card: dict,
         return None
     if token == "stage_spent" and not _stage_spends_before(card, eff):
         return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            STAGE_COUNT_CS[token])
+    expr = (stage_spent_cs(card, eff) if token == "stage_spent"
+            else STAGE_COUNT_CS[token])
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)), expr)
 
 
 def fanfare_drained_calc_rider(card: dict,
@@ -6234,6 +6265,15 @@ def build_vars(card: dict) -> list[str]:
                 f'new DynamicVar("Chance", {int(round(float(eff["chance"]) * 100))}m)')
         elif op == "add_card" and stash_upgrade(card):
             out.append(f'new DynamicVar("Stash", {int(eff.get("amount", 1))}m)')
+        elif op == "choose_one":
+            # `EB-746`. THE FOLDED PAIR, ONE SHAPE OVER. A Spend face is a
+            # CHOICE now and its two printed numbers are its two modes, so the
+            # same two vars are declared here that a two-armed conditional
+            # declares below -- in print order, else-arm first, which for a
+            # modal is mode 0. `folded_branch_damage` reads both shapes.
+            for name, amount, _delta, cls in folded_branch_damage(card, eff):
+                out.append(
+                    f'new {cls}("{name}", {amount}m, ValueProp.Move)')
         elif op == "conditional":
             # Branch amounts are literals unless a ruled delta targets them:
             # conditional_bonus -> then-first damage (ExtraDamage), draw ->
@@ -6244,10 +6284,9 @@ def build_vars(card: dict) -> list[str]:
             # `EB-657`. THE TWO PRINTED NUMBERS OF A TWO-ARMED AIMED HIT, live
             # -- `EB-624`'s pair one card over. Declared FIRST and in print
             # order, because the face reads the else arm before the then arm.
-            for name, amount, _delta in folded_branch_damage(card, eff):
+            for name, amount, _delta, cls in folded_branch_damage(card, eff):
                 out.append(
-                    f'new FoldedDamageVar("{name}", {amount}m, '
-                    'ValueProp.Move)')
+                    f'new {cls}("{name}", {amount}m, ValueProp.Move)')
             cb = conditional_bonus_upgrade(card)
             bd = branch_draw_upgrade(card)
             then_var, else_var = branch_draw_vars(card)
@@ -7070,10 +7109,23 @@ def _conditional_delta_targets(card: dict, key: str) -> tuple[list, list]:
     top = [e for e in effects if match(e)]
     branch = []
     for eff in effects:
-        if eff.get("op") != "conditional":
-            continue
-        for arm in ("then", "else"):
-            branch.extend(e for e in (eff.get(arm) or []) if match(e))
+        if eff.get("op") == "conditional":
+            for arm in ("then", "else"):
+                branch.extend(e for e in (eff.get(arm) or []) if match(e))
+        elif eff.get("op") == "choose_one":
+            # `EB-746`. A MODE BODY IS A BRANCH BODY, and the tier0 applier
+            # already treats it as one -- `upgrades._iter_effects` walks a
+            # `choose_one`'s modes with the two `conditional` arms, because
+            # "everywhere" means everywhere. Codegen emits a mode body through
+            # the same `_emit_branch_op` resolvers a conditional arm goes
+            # through, so the `IsUpgraded` swap `_branch_amount` puts on the
+            # number is emitted identically; what was missing was this walk,
+            # and the four Furina Spend rows -- which became `choose_one` faces
+            # under this row -- reported "no literal-int damage op on this
+            # card" the moment they stopped being conditionals.
+            for mode in eff.get("modes") or []:
+                branch.extend(e for e in (mode.get("effects") or [])
+                              if match(e))
     return top, branch
 
 
@@ -7158,10 +7210,23 @@ def conditional_then_damage_upgrade(card: dict) -> int:
     return int(upgrade_plan(card)[0].get("conditional_then_damage", 0))
 
 
-def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int]]:
-    """`EB-657`. The two PRINTED numbers of a two-armed aimed conditional hit:
-    `[(token, base amount, upgrade delta), ...]` in the order the face prints
-    them, or `[]` when the row is not that shape.
+#: `EB-737`. THE CLAUSES A BRANCH MAY CARRY BESIDE THE NUMBER IT PRINTS.
+#:
+#: A Furina Stage Spend rider is "Deal 7. Spend 3: deal 13 instead", and its
+#: then-branch is TWO clauses -- the payment and the hit -- so the one-clause
+#: test below refused it and both numbers stayed literals. The payment is a
+#: PRICE and not a printed number: `stage_spend` moves a performer's bar and
+#: puts nothing on the face, so a branch carrying one prints exactly the same
+#: single number a bare branch does. Every other op stays refused, because a
+#: branch with two printed numbers has no one number for a var to be.
+BRANCH_PRICE_OPS = frozenset({"stage_spend"})
+
+
+def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
+                                                              str]]:
+    """`EB-657`. The two PRINTED numbers of a two-armed conditional clause:
+    `[(token, base amount, upgrade delta, C# var class), ...]` in the order the
+    face prints them, or `[]` when the row is not that shape.
 
     THE FIND (Kokomi r25 lane 2, (c) 2). Feint printed "Deal 5 damage ... deal
     10 instead" beside a Strike printed at 4, played into the same Shrink, and
@@ -7178,41 +7243,104 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int]]:
     same sum `_branch_amount` puts in the body, read here so the face and the
     hit cannot disagree the first time the card is upgraded.
 
-    AIMED, TWO-ARMED AND `proto_` ONLY. A `FoldedDamageVar` folds the aimed
-    body's terms, so an `all_enemies` arm would print one number for a board
-    that takes several (`debuff_calc_rider`'s rule); a single-armed row keeps
-    its literal because there is no second number to disagree with; and the var
-    lives under `Powers/Prototype/`, which a release build Compile-Removes
-    (`calculated_damage_var`'s quarantine, verbatim).
+    TWO-ARMED AND `proto_` ONLY, and the var class says which fold each arm
+    gets. A `FoldedDamageVar` adds the AIMED body's terms on top of the
+    dealer's, so it is right for a `target: enemy` arm and wrong for an
+    `all_enemies` one, which would print one number for a board that takes
+    several (`debuff_calc_rider`'s rule): an area arm takes a plain named
+    `DamageVar`, whose preview is the dealer's own
+    `Hook.ModifyDamage(..., All)` -- Strength and Weak -- and nobody else's.
+    A single-armed row keeps its literal because there is no second number to
+    disagree with, and both prototype vars live under `Powers/Prototype/`,
+    which a release build Compile-Removes (`calculated_damage_var`'s
+    quarantine, verbatim).
+
+    `EB-737`: AND THE BLOCK ARM OF ONE, on the same terms. Round one's seats
+    met <i>Interposition</i> printing "5/10" while it gained 3 under Frail, and
+    a Spend face that prints a number the card does not gain is the same defect
+    on the other clause. A named `BlockVar` is the block twin: the game's own
+    var, whose preview runs the block hooks, under a token of its own so two of
+    them can stand on one face. There is no `conditional_then_block` key, so
+    both block arms move by `conditional_block` alone.
     """
-    if eff.get("op") != "conditional":
+    if eff.get("op") not in ("conditional", "choose_one"):
         return []
     if not str(card.get("id") or "").startswith("proto_"):
         return []
+    if eff.get("op") == "choose_one":
+        # `EB-746`. THE SAME TWO PRINTED NUMBERS, ONE SHAPE OVER. A Spend face
+        # is a CHOICE now -- "Deal 7" or "Spend 3: deal 13 instead" -- and the
+        # two arms it prints are the two modes rather than the two branches of
+        # a conditional. Nothing else about the fold changes: mode 0 is the
+        # base number and mode 1 the branch one, in the order the face prints
+        # them, and a Spend at the head of mode 1 is a PRICE exactly as it was
+        # at the head of a then-branch (`BRANCH_PRICE_OPS`).
+        #
+        # TWO MODES ONLY, because a third arm has no token to print into and
+        # `MAX_MODES` is 3: a row that grows one keeps its literals rather
+        # than folding two of three numbers and leaving the third bare.
+        modes = eff.get("modes") or []
+        if len(modes) != 2:
+            return []
+        eff = {"op": "conditional",
+               "else": list(modes[0].get("effects") or []),
+               "then": list(modes[1].get("effects") or [])}
 
-    def _one_aimed_hit(branch: list | None) -> dict | None:
-        if not branch or len(branch) != 1:
+    def _one_printed(branch: list | None, op: str) -> dict | None:
+        """The single `op` clause a branch prints, or None. Clauses in
+        `BRANCH_PRICE_OPS` beside it are prices and are ignored; anything else
+        means the branch prints more than one number."""
+        if not branch:
             return None
-        clause = branch[0]
-        return (clause if clause.get("op") == "damage"
-                and clause.get("target") == "enemy"
-                and isinstance(clause.get("amount"), int) else None)
+        printed = [c for c in branch if c.get("op") == op]
+        if len(printed) != 1:
+            return None
+        clause = printed[0]
+        if not isinstance(clause.get("amount"), int):
+            return None
+        if any(c.get("op") not in BRANCH_PRICE_OPS
+               for c in branch if c is not clause):
+            return None
+        return clause
 
-    then = _one_aimed_hit(eff.get("then"))
-    els = _one_aimed_hit(eff.get("else"))
+    then = _one_printed(eff.get("then"), "damage")
+    els = _one_printed(eff.get("else"), "damage")
+    if then is not None and els is not None:
+        aimed = {then.get("target"), els.get("target")}
+        if aimed == {"enemy"}:
+            cls = "FoldedDamageVar"
+        elif aimed == {"all_enemies"}:
+            cls = "DamageVar"
+        else:
+            # Two arms hitting two different shapes of board is not one face's
+            # pair of numbers; the row keeps its literals rather than printing
+            # a comparison that is not one.
+            return []
+        both = conditional_damage_upgrade(card)
+        extra = (conditional_then_damage_upgrade(card)
+                 if _is_then_first_damage(card, then) else 0)
+        return [("PlainDamage", int(els["amount"]), both, cls),
+                ("BranchDamage", int(then["amount"]), both + extra, cls)]
+
+    then = _one_printed(eff.get("then"), "block")
+    els = _one_printed(eff.get("else"), "block")
     if then is None or els is None:
         return []
-    both = conditional_damage_upgrade(card)
-    extra = (conditional_then_damage_upgrade(card)
-             if _is_then_first_damage(card, then) else 0)
-    return [("PlainDamage", int(els["amount"]), both),
-            ("BranchDamage", int(then["amount"]), both + extra)]
+    both = conditional_block_upgrade(card)
+    return [("PlainBlock", int(els["amount"]), both, "BlockVar"),
+            ("BranchBlock", int(then["amount"]), both, "BlockVar")]
 
 
 def _is_then_first_damage(card: dict, eff: dict) -> bool:
     """Is this the clause `conditional_then_damage` claims? Identity, not
     equality: two branches printing the same number are two clauses."""
     for cond in card.get("effects", []):
+        if cond.get("op") == "choose_one":
+            # `EB-746`: a Spend MODE is the then-arm of the same claim.
+            for mode in (cond.get("modes") or [])[1:]:
+                if _then_first_damage({"then": mode.get("effects")}) is eff:
+                    return True
+            continue
         if cond.get("op") != "conditional":
             continue
         if _then_first_damage(cond) is eff:
@@ -8168,6 +8296,39 @@ def mode_prices(card: dict) -> list[tuple[str, int] | None] | None:
         else:
             prices.append(None)
     return prices if any(p is not None for p in prices) else None
+
+
+#: `EB-746`. THE OPS WHOSE PRESENCE AT THE HEAD OF A MODE BODY IS A RULE GATE
+#: rather than a price: `{C# predicate: the rule, in the words the refusal
+#: prints}`. One entry, and it is the Stage's Spend.
+#:
+#: WHY NOT A PRICE (`MODE_PRICE_OPS`). Rule 8 fires the rider IN FULL out of a
+#: bar of any size and cannot fire at all on an empty stage, so the question is
+#: OCCUPANCY and the amount never enters it -- a price of N would refuse the
+#: mode on exactly the boards rule 8's second clause exists for. Sim twin:
+#: `furina_stage.mode_offered`.
+MODE_RULE_OPS = {
+    "stage_spend": ("FurinaStage.Occupied(Owner.Creature)",
+                    "needs a performer on stage, the stage is empty"),
+}
+
+
+def mode_requirements(card: dict) -> list[tuple[str, str] | None] | None:
+    """Per-mode RULE gates for a modal card, or None where none apply.
+
+    None -- not a list of Nones -- for every card the rule does not reach, so
+    codegen emits exactly what it emitted before this row for all of them and
+    the regen stays a byte comparison.
+    """
+    eff = modal_effect(card)
+    if eff is None:
+        return None
+    rules: list[tuple[str, str] | None] = []
+    for mode in eff["modes"]:
+        body = mode.get("effects") or []
+        head = body[0] if body else {}
+        rules.append(MODE_RULE_OPS.get(head.get("op")))
+    return rules if any(r is not None for r in rules) else None
 
 
 def mode_is_priced(card: dict, index: int) -> bool:
@@ -9771,12 +9932,34 @@ def build_body(
             # EB-182: a priced card asks the selection that FILTERS, and
             # the index it returns is still the sheet's, so the ladder below
             # is untouched. An unpriced card emits the call it always emitted.
-            lines.append(
-                "var modeIndex = await ModalChoice.SelectAffordableMode("
-                "choiceContext, Owner, modeOptions, ModePrices);"
-                if mode_prices(card) is not None else
-                "var modeIndex = await ModalChoice.SelectMode("
-                "choiceContext, Owner, modeOptions);")
+            # `EB-746`: and the RULE gates, which are computed at play time
+            # (the board moves between two plays of the same card) rather than
+            # declared as static data the way a price is.
+            rules = mode_requirements(card)
+            if rules is not None:
+                rows = ",\n".join(
+                    "            null" if r is None
+                    else ("            new ModeRequirement(" + r[0]
+                          + ',\n                                "' + r[1]
+                          + '")')
+                    for r in rules)
+                lines.append(
+                    "var modeRules = new ModeRequirement?[]\n        {\n"
+                    + rows + ",\n        };")
+            prices_arg = ("ModePrices" if mode_prices(card) is not None
+                          else "System.Array.Empty<ModePrice?>()")
+            if rules is not None:
+                lines.append(
+                    "var modeIndex = await ModalChoice.SelectAffordableMode("
+                    f"choiceContext, Owner, modeOptions, {prices_arg}, "
+                    "modeRules);")
+            else:
+                lines.append(
+                    "var modeIndex = await ModalChoice.SelectAffordableMode("
+                    "choiceContext, Owner, modeOptions, ModePrices);"
+                    if mode_prices(card) is not None else
+                    "var modeIndex = await ModalChoice.SelectMode("
+                    "choiceContext, Owner, modeOptions);")
             labels = ", ".join(f'"{cs_escape(m["label"])}"' for m in modes)
             lines.append("ModalChoice.RecordChoice(this, modeIndex, "
                          f"new[] {{ {labels} }}[modeIndex]);")
@@ -12077,9 +12260,11 @@ def build_upgrade(card: dict) -> list[str]:
             # swap -- the vars bumped below are what re-render.
             folded = any(folded_branch_damage(card, eff)
                          for eff in card.get("effects", []))
-            how_printed = ("the face prints them live (`EB-657`)."
-                           if folded and ckey == "conditional_damage"
-                           else "the text swaps via {IfUpgraded:show:...|...}.")
+            how_printed = (
+                "the face prints them live (`EB-657`)."
+                if folded and ckey in ("conditional_damage",
+                                       "conditional_block")
+                else "the text swaps via {IfUpgraded:show:...|...}.")
             lines.append(
                 f"// {ckey}: {how_many} on an IsUpgraded read at play time; "
                 + how_printed)
@@ -12089,9 +12274,10 @@ def build_upgrade(card: dict) -> list[str]:
     # with the hit the first time the card is upgraded otherwise. Each arm
     # takes its OWN delta (the else arm `conditional_damage`, the then arm
     # that plus `conditional_then_damage`), which is what the two keys are for.
-    if "conditional_damage" in deltas or "conditional_then_damage" in deltas:
+    if ("conditional_damage" in deltas or "conditional_then_damage" in deltas
+            or "conditional_block" in deltas):
         for eff in card.get("effects", []):
-            for name, _base, delta in folded_branch_damage(card, eff):
+            for name, _base, delta, _cls in folded_branch_damage(card, eff):
                 if delta:
                     lines.append(
                         f'DynamicVars["{name}"].UpgradeValueBy({delta}m);')

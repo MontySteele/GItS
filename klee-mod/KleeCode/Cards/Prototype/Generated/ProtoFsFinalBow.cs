@@ -48,7 +48,7 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Final Bow"),
-        ("description", "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold]."),
+        ("description", "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain {CalculatedBlock:diff()} [gold]Block[/gold], its [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -56,7 +56,7 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.Spent(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrLeadFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
