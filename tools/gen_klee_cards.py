@@ -2438,7 +2438,7 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] goes off this turn, gain {X} "
         "Block."),
     "mc_cold_blooded": ("ColdBloodedPower", None,
-        "This turn, Grounded counts a Bomb as on the field."),
+        "Next turn, Grounded pays even if you played a Set off card."),
     "mc_lions_fang": ("LionsFangPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block and draw 1 card."),

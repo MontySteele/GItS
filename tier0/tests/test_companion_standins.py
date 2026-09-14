@@ -360,30 +360,50 @@ def test_kaeya_pays_grounded_on_the_turn_after_a_set_off_card(arms):
     assert state.player.block == before
 
 
-def test_kaeyas_face_is_stale_and_left_standing(arms):
-    """`EB-576` pinned two printed texts that had to agree; `EB-749` broke the
-    agreement ON PURPOSE and this test records that rather than hiding it.
+def test_kaeyas_face_names_the_rule_grounded_has(arms):
+    """`EB-576` pinned two printed texts that had to agree, and `EB-749` keeps
+    that pin by moving BOTH: R271 sec.5.1 changed Grounded's condition and the
+    stand-in's clause was corrected with it, as TEXT and not as a rule.
 
-    R271 sec.5.1 rules Klee's Grounded and says nothing about this companion
-    row, so the stand-in's force-pay behaviour stands, its clause is NOT
-    redesigned here, and the mismatch is named in the `EB-749` packet. What is
-    pinned is therefore both halves as they actually read: the card still says
-    "counts a Bomb as on the field", and Grounded no longer has that condition.
-    A ruling that repairs the companion face is what should edit this test.
+    THE SENTENCE AND THE FORCE-PAY ARE ASSERTED TOGETHER, which is the whole
+    point of the file the test is in: the words are only true while the buff
+    still makes Grounded pay through its refusal, so the behaviour is exercised
+    here beside the two printed texts rather than left to a source grep.
+
+    BOTH SUPERSEDED CLAUSES ARE PINNED ABSENT. Each was true of an engine this
+    one no longer is, and a face that came back would be a promise the code
+    stopped keeping.
     """
     from pathlib import Path
+
+    # THE BEHAVIOUR THE SENTENCE DESCRIBES: a Set off card last turn, and
+    # Grounded pays anyway because the marker is standing.
+    state = _klee_state()
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+    state.player.powers[standins.COLD_BLOODED] = 1
+    _played_a_set_off_card(state)
+    state.turn = 2
+    klee_overhaul.roll_to(state, state.turn)
+    standins.roll_turn(state)
+    assert state.ko_set_off_cards_last_turn == 1
+    before = state.player.block
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == before + 6, "the force-pay still fires"
+
     repo = Path(__file__).resolve().parents[2]
     sheet = (repo / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    assert ("This turn, [gold]Grounded[/gold] counts a Bomb as on the field."
-            in sheet)
+    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "[gold]Set off[/gold] card." in sheet)
     assert "counts nothing as having gone off" not in sheet
+    assert "counts a Bomb as on the field" not in sheet
     assert ("if you played no [gold]Set off[/gold] card last turn" in sheet)
     assert "if you have a [gold]Bomb[/gold] on the field" not in sheet
     card = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
             / "Generated" / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
         encoding="utf-8")
-    assert "[gold]Grounded[/gold] counts a Bomb as on the field." in card
+    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "[gold]Set off[/gold] card." in card)
 
 
 def test_kaeya_does_not_pay_jean(arms):

@@ -3557,12 +3557,15 @@ a Mine answering an attack passes no card there, and Sparks 'n' Splash is a
 Power's end-of-turn hit that never reaches it. So a Cook deck's Mines no longer
 switch Grounded off, and a turn on which only Splash fired is still paid.
 
-KAEYA'S COLD-BLOODED STRIKE IS NOW STALE AND IS LEFT STANDING. That companion
-stand-in prints "This turn, Grounded counts a Bomb as on the field", a
-condition Grounded no longer has, and its power still forces the payout. R271
-rules Klee's face and says nothing about that row, so `EB-749` moved the wiring
-nowhere and redesigned nothing; the face is named here instead, for whoever
-rules the companion pool next.
+KAEYA'S COLD-BLOODED STRIKE IS RE-WORDED, AS TEXT AND NOT AS A RULE. That
+companion stand-in printed "This turn, Grounded counts a Bomb as on the field",
+a condition Grounded no longer has; it now prints "Next turn, Grounded pays
+even if you played a Set off card." Nothing in the effect moved -- the buff is
+applied when the card resolves and spent at the next `AfterPlayerTurnStart`,
+where it forces the payout whatever Grounded's condition says -- so the
+sentence is the words catching up with the code for the second time (`EB-576`
+did it for `EB-516`). It also stops saying "this turn" about a turn boundary
+that has not arrived yet, which was true of the old wording too.
 
 **`proto_ko_return_to_sender` -- the cap the face already claimed.**
 The conversion of absorbed damage into a Bomb on the attacker is capped at the

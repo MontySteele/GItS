@@ -1494,7 +1494,7 @@ class CombatState:
     ko_set_off_cards_this_turn: int = 0
     ko_set_off_cards_last_turn: int = 0
     # QUARANTINED (`C.COMPANION_OVERHAUL`). Kaeya's stand-in, Cold-Blooded
-    # Strike: "This turn, Grounded counts a Bomb as on the field." A
+    # Strike: "Next turn, Grounded pays even if you played a Set off card." A
     # SECOND field rather than a write to `ko_set_off_last_turn`, because the
     # card names Grounded and the counter is read by more than Grounded --
     # zeroing it would silently pay Jean's stand-in too. Armed as a marker

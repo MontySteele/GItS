@@ -665,8 +665,9 @@ public static class ArmKeywordTips
     /// PLAYER MAY NEVER HAVE OWNED.
     ///
     /// THE GAP. `Grounded` is a Power of Klee's, and Kaeya's Cold-Blooded
-    /// Strike is written against it -- "This turn, Grounded counts a Bomb as
-    /// on the field" (`EB-576`) -- as is the buff that card leaves behind
+    /// Strike is written against it -- "Next turn, Grounded pays even if you
+    /// played a Set off card" (`EB-749`) -- as is the buff that card leaves
+    /// behind
     /// (<see cref="KleeMod.Powers.ColdBloodedPower"/>). A player who drafted
     /// Kaeya without ever drafting Grounded meets the word on a card face with
     /// nothing anywhere on the screen saying what it is, and the r9 seat read
@@ -684,11 +685,10 @@ public static class ArmKeywordTips
     /// moves with its upgrade, so the tip defers to it rather than quoting a
     /// number that a second card would contradict.
     ///
-    /// KAEYA'S OWN CLAUSE IS NOW STALE and is deliberately left standing:
-    /// "counts a Bomb as on the field" names a condition Grounded no longer
-    /// has. R271 rules Klee's face and says nothing about that companion row,
-    /// so the force-pay behaviour stands, the face is not redesigned here, and
-    /// the mismatch is NAMED in the `EB-749` packet instead.
+    /// KAEYA'S OWN CLAUSE MOVED WITH IT, as a TEXT correction and not a rule
+    /// change: the force-pay it describes is untouched, and the sentence now
+    /// says what that force-pay does against the condition Grounded actually
+    /// has.
     /// </summary>
     /// ONE METHOD WITH AN OPTIONAL CARD, and not an overload: a POWER raises
     /// this tip too -- the buff Kaeya's card leaves behind prints the word for

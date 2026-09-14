@@ -862,12 +862,10 @@ def turn_start_late(state: CombatState) -> None:
     # Cold-Blooded Strike's stand-in makes Grounded pay this turn whatever its
     # condition says, so the cover story is read HERE and not by zeroing the
     # explosion counter, which Jean's stand-in also reads. `grounded_blind` is
-    # False on every tree with the companion arm off. `EB-749` LEFT THIS WIRING
-    # WHERE IT WAS and did not rewrite the stand-in's printed clause with it:
-    # that face still says "counts a Bomb as on the field", a condition
-    # Grounded no longer has. R271 rules Klee's face and says nothing about
-    # that companion row, so the force-pay stands and the stale face is NAMED
-    # in the `EB-749` packet rather than redesigned here.
+    # False on every tree with the companion arm off. THE WIRING NEVER MOVES --
+    # not for `EB-516` and not for `EB-749` -- and what moves with the
+    # condition is the stand-in's printed clause, which now reads "Next turn,
+    # Grounded pays even if you played a Set off card."
     from tier0.engine import companion_standins    # late import: cycle
 
     # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the

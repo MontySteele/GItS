@@ -433,11 +433,10 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         // Sparks 'n' Splash's end-of-turn hit are both silent here.
         // KAEYA'S COVER STORY, the only line the companion stand-in seam adds
         // to this arm: Cold-Blooded Strike forces Grounded to pay this turn
-        // whatever its condition says. The wiring is LEFT WHERE IT WAS by
-        // `EB-749` and the stand-in's printed clause is not rewritten with it,
-        // which is a deliberate scope line: R271 rules Klee's face and says
-        // nothing about that companion row, so the force-pay stands and the
-        // face is named in the packet rather than redesigned here. False on
+        // whatever its condition says. The WIRING never moves -- it did not
+        // move for `EB-516` and it did not move for `EB-749` -- and what moves
+        // instead is the stand-in's printed clause, which now reads "Next
+        // turn, Grounded pays even if you played a Set off card." False on
         // every build with the companion arm off.
         if (ledger.SetOffCardsLastTurn > 0
             && !CompanionStandIns.GroundedBlind(Owner))

@@ -116,7 +116,8 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
 # ------------------------------------------- EB-372: Grounded travels too --
 #
 # THE FINDING. `Grounded` is a Power card of Klee's, and Kaeya's Cold-Blooded
-# Strike is written against it by name -- "This turn, Grounded counts a Bomb
+# Strike is written against it by name -- "Next turn, Grounded pays even if
+# you played a Set off card"
 # as on the field" (`EB-576`) -- as is the buff that card leaves behind.
 # A seat that drafted Kaeya and never drafted Grounded met the word on a card
 # face with nothing on the screen saying what it is, and read it as noise in
@@ -128,9 +129,15 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
 
 
 def test_the_grounded_word_owes_its_definition_wherever_it_is_printed():
+    # TWO WORDS SINCE `EB-749`, and that is the table working rather than a
+    # widened claim: the corrected clause names `Set off` as well as
+    # `Grounded`, so the face that prints both owes both definitions. A reader
+    # meeting Kaeya without Klee's kit needs the second sentence exactly as
+    # much as the first.
     assert gen.arm_keyword_tip_calls(
-        "This turn, [gold]Grounded[/gold] counts a Bomb as on the "
-        "field.") == ["ArmKeywordTips.ForGrounded"]
+        "Next turn, [gold]Grounded[/gold] pays even if you played a "
+        "[gold]Set off[/gold] card.") == ["ArmKeywordTips.ForSetOff",
+                                          "ArmKeywordTips.ForGrounded"]
     # The bare word in prose is not the keyword, the rule every row here is
     # under: the span has to be golded.
     assert gen.arm_keyword_tip_calls("This turn, Grounded counts nothing.")         == []
@@ -145,7 +152,8 @@ def test_kaeyas_face_carries_the_grounded_tip_in_the_shipped_generation():
     """
     card = (PROTOTYPE_DIR / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
         encoding="utf-8")
-    assert "[gold]Grounded[/gold] counts a Bomb as on the field." in card
+    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "[gold]Set off[/gold] card.") in card
     assert "ArmKeywordTips.ForGrounded(" in card
 
 
@@ -158,7 +166,7 @@ def test_the_buff_kaeyas_card_leaves_behind_carries_it_too():
     body = power[head:power.index("class LionsFangPower")]
     # The face's literal is split across two lines by the concatenation, so
     # the clause is asserted the way the source spells it.
-    assert "This turn, [gold]Grounded[/gold] counts a Bomb as on the "         in body
+    assert "Next turn, [gold]Grounded[/gold] pays even if you played a "         in body
     assert "ArmKeywordTips.ForGrounded(base.ExtraHoverTips)" in body
 
 
