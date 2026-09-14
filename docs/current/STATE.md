@@ -179,7 +179,12 @@ OFF in a release package). **Last RELEASE package:
   `review/records/`, hooks resolved from the project dir. Older open
   packets: `eb74-lever2-options` (a staged lever, C), `p2-hard-state-thresholds`
   (picks 1–4).
-- **Deferred content families** — `Win10` and `Win11`, FROZEN by R213.
+- **The Teyvat run frame (R272, 2026-09-14)** — the non-mechanical layer
+  reopened beside the kits: two nations per act (act 1 Mondstadt or Liyue),
+  events, text, portraits, act theming and locally packaged music; enemy
+  intents, boss behaviour, relic and potion mechanics stay frozen. Kickoff
+  `review/active/teyvat-run-frame-2026-09-14.md`; a second Fable session
+  runs it. The measurement windows `Win10` and `Win11` stay FROZEN (R213).
 
 ## Open [USER] pile
 
