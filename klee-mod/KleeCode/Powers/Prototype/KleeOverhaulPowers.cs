@@ -301,27 +301,38 @@ public sealed class BombReactionSparkPower
 }
 
 /// <summary>
-/// Grounded: "At the start of your turn, if you have a Bomb on the field, gain
-/// 4 Block and 1 Spark." The card that pays for the COOKING turn -- the cook
-/// half of the contested thing, with Run Away! paying for the loud one.
+/// Grounded: "At the start of your turn, if you played no Set off card last
+/// turn, gain 4 Block and 1 Spark." The card that pays for the QUIET turn --
+/// the cook half of the contested thing, with Run Away! paying for the loud
+/// one.
 ///
-/// `EB-516` REPLACED THE CONDITION (Klee r18, packet sec.4 item 1). It read "if
-/// none of your Bombs went off last turn" until now, and two seats in two
-/// rounds read that as paying for skipping the loop; the r18 ledgers say why,
-/// since under this relic something goes off on most turns even in a Cook deck
-/// (Mines fire on the enemy's beat), so the card paid ONCE in five fights and
-/// the seat called it "a trap in its own deck". Keying the payout to cooking
-/// rather than to not cashing keeps the card conditional (brief sec.6, C4) and
-/// makes the Cook half payable.
+/// `EB-749` (R271 sec.5.1) IS THE CONDITION IT HAS NOW, and it is the brief's
+/// quiet-turn rule with the round-18 trap taken out. The history is two moves,
+/// not one. It first read "if NONE OF YOUR BOMBS WENT OFF last turn", and two
+/// seats in two rounds read that as a trap in its own deck: under this relic
+/// something goes off on most turns even in a Cook deck, because Mines fire on
+/// the ENEMY's beat, so the card paid once in five fights. `EB-516` answered
+/// that by keying the payout to COOKING instead ("if you have a Bomb on the
+/// field"), which was payable but paid a deck for a board state it was holding
+/// anyway. R271 keys it to the PLAYER'S OWN ACT instead, and the two
+/// interactions that made the first version a trap are excepted BY
+/// CONSTRUCTION rather than by a clause:
 ///
-/// "A BOMB ON THE FIELD" IS <see cref="ProtoBombPower.AnyPlacedBy"/>: any Bomb
-/// or Mine of HERS on any living enemy. A Mine alone pays -- a Mine is a Bomb
-/// (`EB-373`) -- and a turn on which one Bomb went off while another is still
-/// cooking pays, which is the reading the old counter could not express.
+///   * A MINE going off because its enemy attacked is not a Set off CARD, so
+///     Cook's Mines no longer switch Grounded off.
+///   * SPARKS 'N' SPLASH is not a Set off card either, so a turn on which only
+///     it fired is still paid next turn -- the pairing the brief calls either
+///     an enjoyable Rare engine or "watch it rise".
+///
+/// THE READ IS <see cref="KleeOverhaulLedger.SetOffCardsLastTurn"/>, whose one
+/// write site is <c>NoteSetOffCardPlayed</c> -- the three card-facing Set off
+/// entry points, which a Mine reaches with a null card and which a Power's
+/// end-of-turn hit never reaches at all. So neither exception is a special
+/// case here and neither can drift from Once More!'s reading of the same act.
 ///
 /// BEFORE GROWTH IS IMMATERIAL, and it is said rather than relied on: the
-/// growth hook GROWS and neither places nor removes a charge (rule 7), so the
-/// set of enemies holding one is the same either side of it.
+/// growth hook GROWS and neither places nor removes a charge (rule 7), and
+/// nothing between the two hooks plays a card.
 ///
 /// THE SPARK IS `EB-344` (ruled R248). Rule 4 mints a Spark per EXPLOSION, so
 /// the turn this card is written for -- the one where nothing went off -- is by
@@ -338,8 +349,8 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
     {
         ("title", "Grounded"),
         ("description",
-            "At the start of your turn, if you have a [gold]Bomb[/gold] on the "
-          + "field, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
+            "At the start of your turn, if you played no [gold]Set off[/gold] "
+          + "card last turn, gain [blue]{Amount}[/blue] [gold]Block[/gold] "
           + "and [blue]" + KleeOverhaulLaw.GroundedSpark + "[/blue] "
           + "[gold]Spark[/gold]."),
         // `EB-533`. THE ANSWER, EITHER WAY, AND IT IS A ROW PER ANSWER for
@@ -353,12 +364,12 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         // written as `(PaidKey, ...)` is a player-facing string invisible to
         // its own ceiling -- the same silence `EB-343` found on `MineKey`.
         ("smartDescriptionPaid",
-            "This turn a [gold]Bomb[/gold] was on the field: paid "
+            "You played no [gold]Set off[/gold] card last turn: paid "
           + "[blue]{Amount}[/blue] [gold]Block[/gold] and [blue]"
           + KleeOverhaulLaw.GroundedSpark + "[/blue] [gold]Spark[/gold]."),
         ("smartDescriptionUnpaid",
-            "No [gold]Bomb[/gold] on the field this turn, so nothing was "
-          + "paid. It pays at the start of the next turn one is standing."),
+            "You played a [gold]Set off[/gold] card last turn, so nothing was "
+          + "paid. It pays at the start of the turn after a quiet one."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -415,18 +426,19 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (Owner == null || player.Creature != Owner) return;
-        // `EB-516`: the BOARD, not the ledger. `AnyPlacedBy` is R205-scoped --
-        // her own charges only -- and skips a dead body, so a Bomb that outlived
-        // its enemy pays nothing.
-        // KAEYA'S COVER STORY, and the only line the companion stand-in seam
-        // adds to this arm: Cold-Blooded Strike makes Grounded pay this turn
-        // whatever its condition says, so the blind is read HERE rather than
-        // written into the explosion counter, which Jean's stand-in also reads.
-        // False on every build with the companion arm off. `EB-516` moved the
-        // condition beside it and left the read where it was; `EB-576` brought
-        // the stand-in's PRINTED words the rest of the way, to "counts a Bomb
-        // as on the field", which is what this OR has always meant.
-        if (!ProtoBombPower.AnyPlacedBy(Owner)
+        var ledger = KleeOverhaulLedger.For(Owner);
+        // `EB-749`: the LEDGER, not the board. `SetOffCardsLastTurn` counts
+        // CARDS the player played whose Set off resolved, which is exactly what
+        // R271 sec.5.1 asks for -- and it is why a Mine answering an attack and
+        // Sparks 'n' Splash's end-of-turn hit are both silent here.
+        // KAEYA'S COVER STORY, the only line the companion stand-in seam adds
+        // to this arm: Cold-Blooded Strike forces Grounded to pay this turn
+        // whatever its condition says. The WIRING never moves -- it did not
+        // move for `EB-516` and it did not move for `EB-749` -- and what moves
+        // instead is the stand-in's printed clause, which now reads "Next
+        // turn, Grounded pays even if you played a Set off card." False on
+        // every build with the companion arm off.
+        if (ledger.SetOffCardsLastTurn > 0
             && !CompanionStandIns.GroundedBlind(Owner))
         {
             // `EB-533`: the answer is recorded BEFORE the return, which is the
@@ -559,10 +571,13 @@ public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
 /// FEWER hits than marked-last would, and a single pool cannot say which coin
 /// was spent.
 ///
-/// THE CHARGE IS THE WHOLE ABSORBED AMOUNT and NOT the mark that was spent.
-/// The face says "damage this Block absorbs", which is what the hit took off
-/// the pool; the mark answers WHETHER the rider is live and never how big the
-/// Bomb is. The ruled row states no cap, so an 8-mark eating a 20 plants a 20.
+/// THE CHARGE IS CAPPED AT THE ALLOWANCE (`EB-749`, R271 sec.5.2), and the
+/// allowance is the Block THIS CARD granted -- 8, or 11 upgraded, and whatever
+/// a Block modifier made of that grant. It is ONE allowance spent across every
+/// hit of the turn and never an independent cap per hit: an 8-mark eating a 20
+/// plants 8 and is spent, and two hits of 6 into the same 8-mark plant 6 and
+/// then 2. The face keeps "this Block" and is now true, which is the whole of
+/// what the repair is for.
 ///
 /// "THIS TURN" NEEDS NO TIMER, and that is the point of riding the mark: Block
 /// is cleared at the start of Klee's next turn and
@@ -636,10 +651,23 @@ public sealed class ReturnToSenderPower : PowerModel, ILocalizationProvider
         var left = BlockMark.Absorb((int)Amount, standing, (int)amount,
                                     payout: 0);
         if (left == null) return;
-        if (!attacker.IsDead && absorbed > 0)
+        // `EB-749` (R271 sec.5.2). THE CHARGE IS CAPPED AT THE ALLOWANCE, and
+        // the allowance is ONE, spent across every hit of the turn. The mark
+        // already carried it -- `BlockMark.Absorb` shrinks it by whatever each
+        // hit absorbed -- so the cap is the plant reading the mark instead of
+        // the raw absorption: an 8-mark eating a 20 plants 8 and is spent, and
+        // two hits of 6 into the same 8-mark plant 6 and then 2. The face's
+        // "this Block" is now true, which is the repair the ruling names.
+        //
+        // `marked` AND NOT `Amount`: the mark is clamped to standing Block on
+        // the way in (Block cleared under it leaves nothing to pay on), which
+        // is `Absorb`'s own first line and the sim's `min(mark, block_before)`.
+        var marked = System.Math.Min((int)Amount, standing);
+        var charge = System.Math.Min(absorbed, marked);
+        if (!attacker.IsDead && charge > 0)
         {
             await ProtoBombPower.Place(
-                choiceContext, attacker, absorbed, isMine: false,
+                choiceContext, attacker, charge, isMine: false,
                 payloadMineAll: 0, applier: Owner, cardSource: null);
         }
         if (left.Value > 0)

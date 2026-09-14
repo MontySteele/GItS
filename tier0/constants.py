@@ -342,11 +342,10 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_big_badda_boom",
     "proto_ko_the_big_one",
     "proto_ko_alices_recipe",
-    # Spray (9 -- Pop! is the packet sec.4 table's first Spray row and it
-    # OFFERS from draft 4, R242)
+    # Spray (8 -- Pop! is the packet sec.4 table's first Spray row and it
+    # OFFERS from draft 4, R242; Fwoosh! was cut by R271 sec.4)
     "proto_ko_pop",
     "proto_ko_mine_toss",
-    "proto_ko_fwoosh",
     "proto_ko_tinder_toss",
     "proto_ko_quick_fuse",
     "proto_ko_bang_bang",
@@ -360,7 +359,11 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_catalytic_converter",
     # Currencies and defence (7 of 7; Dig In is back in the pool at draft 4)
     "proto_ko_ammo_scavenging",
-    "proto_ko_powder_charge",
+    # R271 sec.4 item 3: Powder Charge's SHAPE kept and its body redesigned --
+    # this is BOOBY TRAP, the pool's only single-target Mine (sec.7 batch one,
+    # row 1). It keeps Powder Charge's slot here rather than moving to Spray,
+    # because it is still the 0-Energy placer bought from the bank.
+    "proto_ko_booby_trap",
     "proto_ko_dig_in",
     "proto_ko_sugar_rush",
     "proto_ko_run_away",
@@ -397,7 +400,9 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_fish_blasting",
     "proto_ko_pocket_match",
     "proto_ko_bombs_away",
-    "proto_ko_fireworks_show",
+    # `proto_ko_fireworks_show` was CUT by R271 sec.4 item 2 and MERGED into
+    # Tinder Toss, which now prints "Set off ALL enemies. Deal 3 damage to ALL
+    # enemies." at 1 Spark.
     "proto_ko_kindling",
     "proto_ko_flash_point",
     "proto_ko_vermillion_pact",

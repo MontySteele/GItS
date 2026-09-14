@@ -150,7 +150,8 @@ def test_jeans_printed_condition_is_its_own(arms):
 def test_kaeyas_printed_condition_is_the_rule_the_engine_has(arms):
     face = _row(KAEYA)["description"]
 
-    assert "counts a Bomb as on the field" in face
+    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "[gold]Set off[/gold] card.") in face
     assert "counts nothing as having gone off" not in face
 
 
@@ -183,13 +184,14 @@ def test_lions_fang_reads_the_ledger_and_never_the_blind():
 
 
 def test_the_grounded_tip_and_the_glossary_still_say_the_same_thing():
-    """`EB-516` moved the condition and both printers moved with it; the row
-    is only closed while they still agree."""
+    """`EB-516` moved the condition and both printers moved with it; `EB-749`
+    (R271 sec.5.1) moved it again, onto the CARDS the player played. The row is
+    only closed while they still agree."""
     from understudy import blindplay_notes
 
     tip = _source("Cards/Prototype/ArmKeywordTips.cs")
     glossary = blindplay_notes.ARM_KEYWORDS["Grounded"]
 
-    assert "only if you have a Bomb on the field" in glossary
-    assert "only if you have a [gold]Bomb[/gold] on the field" in (
+    assert "only if you played no Set off card last turn" in glossary
+    assert "only if you played no [gold]Set off[/gold] card last turn" in (
         tip.replace("\"\n          + \"", "").replace("\" + \"", ""))

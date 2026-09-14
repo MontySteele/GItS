@@ -270,10 +270,21 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     Delight). Named below for the reason every block above names its own: the
     pass's scope statement is "six", and a seventh arriving without a ruling is
     what this count catches.
+
+    FORTY-NINE SINCE R271 STAGE ONE (`EB-749`, 2026-09-14), and the fall of two
+    is a CONSOLIDATION rather than a pass: the ruled packet's sec.4 CUT
+    `proto_ko_fwoosh` (Pocket Match is the same card at 5 with Retain) and
+    `proto_ko_fireworks_show` (merged into Tinder Toss, which now prints "Set
+    off ALL enemies. Deal 3 damage to ALL enemies." at 1 Spark), and REDESIGNED
+    `proto_ko_powder_charge` into `proto_ko_booby_trap` -- the same 0-Energy,
+    1-Spark placer bought from the bank, now the pool's only single-target
+    Mine. Three names go and one arrives. The two cut ids are pinned ABSENT
+    below for the reason Fire Safety's absence is: a cut row staged as a live
+    card would be a face nobody ruled.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 51
-    assert len(set(ids)) == 51
+    assert len(ids) == 49
+    assert len(set(ids)) == 49
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
     # R244's three, and only three: `Hex and Wick` is the packet's sec.3
@@ -301,9 +312,16 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # arriving without one is what this catches.
     assert {"proto_ko_long_fuse", "proto_ko_all_of_my_treasures",
             "proto_ko_fish_blasting", "proto_ko_pocket_match",
-            "proto_ko_bombs_away", "proto_ko_fireworks_show",
+            "proto_ko_bombs_away",
             "proto_ko_kindling", "proto_ko_flash_point",
             "proto_ko_vermillion_pact", "proto_ko_split_charge"} <= set(ids)
+    # R271 STAGE ONE's two cuts and its one redesign (`EB-749`), pinned both
+    # ways: the cut ids are on no surface, and Booby Trap stands in Powder
+    # Charge's slot.
+    assert "proto_ko_fwoosh" not in ids
+    assert "proto_ko_fireworks_show" not in ids
+    assert "proto_ko_powder_charge" not in ids
+    assert "proto_ko_booby_trap" in ids
     # POOL PASS TWO's six (`EB-732`), by name and for the same reason.
     assert {"proto_ko_blast_shield", "proto_ko_return_to_sender",
             "proto_ko_bottomless_bag", "proto_ko_once_more",
@@ -430,10 +448,17 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     NINTH, one past the brief's sec.2 budget of eight, and it is recorded here
     rather than absorbed: the count above says in as many words that a ninth
     Rare arriving without a ruling is what this test catches, so the pass is
-    the ruling and the number moves with it."""
+    the ruling and the number moves with it.
+
+    R271 STAGE ONE (`EB-749`) takes it to 22 / 18 / 9. It cuts ONE Common
+    (Fwoosh!) and TWO Uncommons (Fireworks Show, Powder Charge) and adds ONE
+    Common (Booby Trap, Powder Charge's shape at Common because the ruled row
+    says Common Skill). The Common count is therefore unmoved and the Uncommon
+    count falls by two, which is what a consolidation looks like in this
+    table."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 22, "uncommon": 20, "rare": 9}
+        "common": 22, "uncommon": 18, "rare": 9}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -1017,11 +1042,13 @@ def test_return_to_sender_plants_what_the_block_absorbed_and_only_now(overhaul):
     """ROW 2. "Gain 8 Block. This turn, damage this Block absorbs is placed on
     the attacker as a Bomb."
 
-    THE CHARGE IS THE ABSORBED AMOUNT, not the mark that was spent: the face
-    says "damage this Block absorbs", and the mark only answers whether the
-    rider is live. It rides the ONE site that can say "this Block absorbed
-    damage" (`companion_overhaul_block_absorbed`, called from `_enemy_turn`
-    right after Block is spent) and is FIRST in it.
+    THE CHARGE IS THE ABSORBED AMOUNT, CAPPED AT THE ALLOWANCE (`EB-749`,
+    R271 sec.5.2): both hits below are inside an 8-mark, so what each plants is
+    what it absorbed. The cap itself is
+    `test_eb749_return_to_sender_is_capped_at_one_allowance_a_turn`. It rides
+    the ONE site that can say "this Block absorbed damage"
+    (`companion_overhaul_block_absorbed`, called from `_enemy_turn` right after
+    Block is spent) and is FIRST in it.
 
     "THIS TURN" IS THE MARK'S OWN LIFETIME and needs no timer: Block is cleared
     at the start of Klee's next turn and `turn_start_late` deletes a mark with
@@ -1074,6 +1101,50 @@ def test_return_to_sender_plants_what_the_block_absorbed_and_only_now(overhaul):
     play_card(state3, up)
     assert state3.player.block == 11
     assert state3.player.powers[klee_overhaul.RETURN_TO_SENDER] == 11
+
+
+def test_eb749_return_to_sender_is_capped_at_one_allowance_a_turn(overhaul):
+    """R271 sec.5.2 (`EB-749`). The conversion is CAPPED at the Block the card
+    granted, as ONE allowance spent across every hit of the turn -- never an
+    independent cap per hit.
+
+    TWO HITS THAT TOGETHER EXCEED IT is the case the ruling is about: 6 and 6
+    against an 8-mark plant 6 and then 2, and not 6 and 6. One huge hit is the
+    same rule from the other side: an 8-mark eating a 20 plants 8 and is spent,
+    where the row planted a 20 before this.
+    """
+    from tier0.engine import klee_overhaul
+    from tier0.engine.combat import play_card
+
+    state = _pass_two_state()
+    enemy = state.enemies[0]
+    card = loader.get_card("proto_ko_return_to_sender")
+    state.player.sparks = 2
+    state.player.hand = [card]
+    play_card(state, card)
+    state.player.block = 20                  # a wall the mark is only part of
+    assert state.player.powers[klee_overhaul.RETURN_TO_SENDER] == 8
+
+    effects.companion_overhaul_block_absorbed(state, enemy, 6, 20)
+    effects.companion_overhaul_block_absorbed(state, enemy, 6, 14)
+
+    assert [c.size for c in enemy.ko_charges] == [6, 2]
+    assert sum(c.size for c in enemy.ko_charges) == 8, "one allowance, not two"
+    assert klee_overhaul.RETURN_TO_SENDER not in state.player.powers
+
+    # ONE HIT PAST THE ALLOWANCE, the same rule read the other way.
+    state2 = _pass_two_state()
+    other = state2.enemies[0]
+    card2 = loader.get_card("proto_ko_return_to_sender")
+    state2.player.sparks = 2
+    state2.player.hand = [card2]
+    play_card(state2, card2)
+    state2.player.block = 20
+
+    effects.companion_overhaul_block_absorbed(state2, other, 20, 20)
+
+    assert [c.size for c in other.ko_charges] == [8]
+    assert klee_overhaul.RETURN_TO_SENDER not in state2.player.powers
 
 
 def test_bottomless_bag_draws_two_and_three_upgraded(overhaul):

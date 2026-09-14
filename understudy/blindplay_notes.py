@@ -1352,14 +1352,17 @@ ARM_KEYWORDS: dict[str, str] = {
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
     # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
-    # against it by name ("This turn, Grounded counts a Bomb as on the
-    # field", `EB-576`), as is the Cold-Blooded buff it leaves behind. The r9 seat
+    # against it by name ("Next turn, Grounded pays even if you played a
+    # Set off card", `EB-749`), as is the Cold-Blooded buff it leaves behind. The r9 seat
     # met the word in both acts, held neither the Power nor a screen that
     # defined it, and read it as noise. Held in step with
     # `ArmKeywordTips.ForGrounded`.
-    # `EB-516` moved the condition to the board and the tip moved with it.
+    # `EB-516` moved the condition to the board and the tip moved with it;
+    # `EB-749` (R271 sec.5.1) moved it again, onto the CARDS the player played.
+    # Kaeya's clause above is stale as a result and is left standing by that
+    # ruling's scope -- it rules Klee's face and not the companion row.
     "Grounded": ("A Power that pays at the start of your turn, but only if "
-                 "you have a Bomb on the field. Its card prints what "
+                 "you played no Set off card last turn. Its card prints what "
                  "it pays."),
     # `EB-446`. THE NAME ONE CARD IS WRITTEN AGAINST AND ANOTHER GRANTS.
     # `Fischl -- Nightrider` prints "If Oz is out, he deals 5 Electro damage"

@@ -62,12 +62,17 @@ public class Round12Tests
     }
 
     [Fact]
-    public void Tinder_Toss_reads_the_same_way_because_it_is_the_same_call()
+    public void Tinder_Toss_no_longer_rolls_a_target_at_all()
     {
+        // `EB-749` (R271 sec.5.3) ENDED the random-target complaint on this
+        // row rather than re-wording it: the card took Fireworks Show's slot
+        // and aims at everything, so there is no roll for a face to name.
+        // Rapid Fire keeps the repeated-Set-off line and its pin above.
         var face = Face<ProtoKoTinderToss>();
         Assert.Equal(
-            "Twice: [gold]Set off[/gold] a random enemy and deal "
-          + "{Damage:diff()} damage to it.", face);
+            "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} damage "
+          + "to ALL enemies.", face);
+        Assert.DoesNotContain("random", face);
     }
 
     [Fact]
@@ -80,8 +85,8 @@ public class Round12Tests
         // reader believe the two halves aimed at different things. `EB-612`
         // put the repeat count in front of the clause, so the clause is
         // pinned whole rather than at the start of the face.
-        foreach (var face in new[] { Face<ProtoKoRapidFire>(),
-                                     Face<ProtoKoTinderToss>() })
+        // ONE FACE SINCE `EB-749`, which cut the roll off Tinder Toss.
+        foreach (var face in new[] { Face<ProtoKoRapidFire>() })
         {
             Assert.Contains("[gold]Set off[/gold] a random enemy and deal ",
                             face);

@@ -1346,7 +1346,7 @@ def test_the_printed_spark_index_reads_the_shipped_face():
     """
     from tier0.content import loader
     index = qa_packet.printed_spark_index(REPO)
-    assert index["PROTO_KO_FWOOSH"] == 1
+    assert index["PROTO_KO_POCKET_MATCH"] == 1   # `EB-749`: was Fwoosh!
     assert index["PROTO_KO_BANG_BANG"] == 2
     # A card with no Spark price has NO row -- silence, never a zero.
     assert "KABOOM" not in index
@@ -1424,9 +1424,9 @@ def test_eb339_the_rendered_page_carries_the_spark_discount_sentence():
     the card and found nothing."""
     state = banked_state(0)
     state["player"]["hand"] = [
-        {"id": "KLEEMOD-PROTO_KO_POWDER_CHARGE", "name": "Powder Charge",
+        {"id": "KLEEMOD-PROTO_KO_BOOBY_TRAP", "name": "Booby Trap",
          "type": "Skill", "cost": "0", "can_play": True, "is_upgraded": False,
-         "description": "Place a Bomb 6."},
+         "description": "Place a Mine 5."},
     ]
     page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
     assert "- Cost: 1 Spark" in page
@@ -1438,9 +1438,10 @@ def test_the_rendered_page_shows_a_spark_priced_card_at_its_price():
     energy, and before this it read as free."""
     state = banked_state(0)
     state["player"]["hand"] = [
-        {"id": "KLEEMOD-PROTO_KO_FWOOSH", "name": "Fwoosh!", "type": "Attack",
-         "cost": "0", "can_play": True, "is_upgraded": False,
-         "description": "Set off and deal 5 damage to a random enemy."},
+        {"id": "KLEEMOD-PROTO_KO_POCKET_MATCH", "name": "Pocket Match",
+         "type": "Attack", "cost": "0", "can_play": True,
+         "is_upgraded": False,
+         "description": "Set off. Deal 5 damage."},
     ]
     page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
     assert "- Cost: 1 Spark" in page

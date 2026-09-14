@@ -140,13 +140,20 @@ public class KleeOverhaulPoolPassTwoTests
         Assert.DoesNotContain(bounce, c => c.Contains("SparkPower.Gain"));
         Assert.DoesNotContain(bounce, c => c.Contains("ElementalHit.Deal"));
 
-        // THE SIZE IS THE ABSORBED AMOUNT and not the mark that was spent --
-        // the face says "damage this Block absorbs" -- so the source computes
-        // `Math.Min(standing, amount)` and hands THAT to `Place`.
+        // THE SIZE IS THE ABSORBED AMOUNT, CAPPED AT THE ALLOWANCE
+        // (`EB-749`, R271 sec.5.2): the face says "damage this Block absorbs"
+        // and the Block it means is the one this card granted, so the source
+        // computes `Math.Min(standing, amount)`, clamps the mark to standing
+        // Block, and hands the SMALLER of the two to `Place`. One allowance
+        // across the turn, never a cap per hit.
         var source = Printed("Powers/Prototype/KleeOverhaulPowers.cs");
         Assert.Contains(
             "var absorbed = System.Math.Min(standing, (int)amount);", source);
-        Assert.Contains("choiceContext, attacker, absorbed, isMine: false",
+        Assert.Contains(
+            "var marked = System.Math.Min((int)Amount, standing);", source);
+        Assert.Contains(
+            "var charge = System.Math.Min(absorbed, marked);", source);
+        Assert.Contains("choiceContext, attacker, charge, isMine: false",
                         source);
     }
 

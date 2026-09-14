@@ -299,23 +299,29 @@ def test_every_watcher_closes_at_the_turn_boundary(arms):
     assert standins.FRONT_ROW_SEAT not in state.player.powers
 
 
+def _played_a_set_off_card(state):
+    """A Set off CARD resolved this turn -- Grounded's read since `EB-749`.
+    Taken through the one write site, so this helper cannot drift from what
+    the rule counts."""
+    klee_overhaul.note_set_off_card(state, loader.get_card("proto_ko_kapow"))
+
+
 def test_kaeya_blinds_grounded_for_exactly_one_turn(arms):
     state = _klee_state()
     state.player.powers[klee_overhaul.GROUNDED] = 6
     state.player.powers[standins.COLD_BLOODED] = 1
-    klee_overhaul.place(state, state.enemies[0], 6)
-    klee_overhaul.set_off(state, state.enemies[0])          # a noisy turn
-    # The next turn: the counter says one went off, and Grounded pays anyway.
+    _played_a_set_off_card(state)                           # a noisy turn
+    # The next turn: the counter says a Set off card was played, and Grounded
+    # pays anyway.
     state.turn = 2
     klee_overhaul.roll_to(state, state.turn)
     standins.roll_turn(state)
-    assert state.ko_set_off_last_turn == 1
+    assert state.ko_set_off_cards_last_turn == 1
     before = state.player.block
     klee_overhaul.turn_start_late(state)
     assert state.player.block == before + 6
     # And the marker is spent: a second noisy turn is not blinded.
-    klee_overhaul.place(state, state.enemies[0], 6)
-    klee_overhaul.set_off(state, state.enemies[0])
+    _played_a_set_off_card(state)
     state.turn = 3
     klee_overhaul.roll_to(state, state.turn)
     standins.roll_turn(state)
@@ -324,25 +330,28 @@ def test_kaeya_blinds_grounded_for_exactly_one_turn(arms):
     assert state.player.block == before
 
 
-def test_kaeya_pays_grounded_on_an_empty_field(arms):
-    """`EB-576`'s acceptance, and the pin the reworded face is about.
+def test_kaeya_pays_grounded_on_the_turn_after_a_set_off_card(arms):
+    """`EB-576`'s acceptance, re-pointed by `EB-749` at the condition Grounded
+    HAS.
 
-    Grounded's condition since `EB-516` is "if you have a Bomb on the field",
-    so the state its cover story has to cover is the EMPTY board -- not the
-    noisy turn the old wording named. Kaeya, then nothing placed, and Grounded
-    pays on the next turn all the same.
+    The state the cover story has to cover is whichever one Grounded refuses,
+    and R271 sec.5.1 moved that from the empty board back to the LOUD turn:
+    the card forces the payout on the turn after a Set off card was played.
+    The card's own printed clause still names the `EB-516` condition and is
+    now stale -- see `test_kaeyas_face_is_stale_and_left_standing`.
     """
     state = _klee_state()
     state.player.powers[klee_overhaul.GROUNDED] = 6
     state.player.powers[standins.COLD_BLOODED] = 1
-    assert not klee_overhaul.any_bomb_placed(state)      # a bare board
+    _played_a_set_off_card(state)
     state.turn = 2
     klee_overhaul.roll_to(state, state.turn)
     standins.roll_turn(state)
     before = state.player.block
     klee_overhaul.turn_start_late(state)
     assert state.player.block == before + 6
-    # The marker is spent, so the next bare turn is refused.
+    # The marker is spent, so the next loud turn is refused.
+    _played_a_set_off_card(state)
     state.turn = 3
     klee_overhaul.roll_to(state, state.turn)
     standins.roll_turn(state)
@@ -352,20 +361,49 @@ def test_kaeya_pays_grounded_on_an_empty_field(arms):
 
 
 def test_kaeyas_face_names_the_rule_grounded_has(arms):
-    """`EB-576`: two printed texts that could not both be true. The card's
-    clause and Grounded's own condition are read off the sheet together."""
+    """`EB-576` pinned two printed texts that had to agree, and `EB-749` keeps
+    that pin by moving BOTH: R271 sec.5.1 changed Grounded's condition and the
+    stand-in's clause was corrected with it, as TEXT and not as a rule.
+
+    THE SENTENCE AND THE FORCE-PAY ARE ASSERTED TOGETHER, which is the whole
+    point of the file the test is in: the words are only true while the buff
+    still makes Grounded pay through its refusal, so the behaviour is exercised
+    here beside the two printed texts rather than left to a source grep.
+
+    BOTH SUPERSEDED CLAUSES ARE PINNED ABSENT. Each was true of an engine this
+    one no longer is, and a face that came back would be a promise the code
+    stopped keeping.
+    """
     from pathlib import Path
+
+    # THE BEHAVIOUR THE SENTENCE DESCRIBES: a Set off card last turn, and
+    # Grounded pays anyway because the marker is standing.
+    state = _klee_state()
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+    state.player.powers[standins.COLD_BLOODED] = 1
+    _played_a_set_off_card(state)
+    state.turn = 2
+    klee_overhaul.roll_to(state, state.turn)
+    standins.roll_turn(state)
+    assert state.ko_set_off_cards_last_turn == 1
+    before = state.player.block
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == before + 6, "the force-pay still fires"
+
     repo = Path(__file__).resolve().parents[2]
     sheet = (repo / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    assert ("This turn, [gold]Grounded[/gold] counts a Bomb as on the field."
-            in sheet)
+    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "[gold]Set off[/gold] card." in sheet)
     assert "counts nothing as having gone off" not in sheet
-    assert "if you have a [gold]Bomb[/gold] on the field" in sheet
+    assert "counts a Bomb as on the field" not in sheet
+    assert ("if you played no [gold]Set off[/gold] card last turn" in sheet)
+    assert "if you have a [gold]Bomb[/gold] on the field" not in sheet
     card = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
             / "Generated" / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
         encoding="utf-8")
-    assert "[gold]Grounded[/gold] counts a Bomb as on the field." in card
+    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "[gold]Set off[/gold] card." in card)
 
 
 def test_kaeya_does_not_pay_jean(arms):

@@ -79,8 +79,11 @@ public class KleeOverhaulRoundThreeTests
         // FIFTY-ONE SINCE POOL PASS TWO (2026-09-08, `EB-732`): SIX rows in
         // three pairs -- the defence shelf's two, the Spark sinks' two and the
         // Energy engines' two.
+        // FORTY-NINE SINCE R271 STAGE ONE (`EB-749`, 2026-09-14): the
+        // consolidation CUT Fwoosh! and Fireworks Show and turned Powder
+        // Charge into Booby Trap -- three names out, one in.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(51, slice.Count);
+        Assert.Equal(49, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
@@ -154,9 +157,12 @@ public class KleeOverhaulRoundThreeTests
         // above drops it -- a card with no number has no number to print.
         // NINE UNTIL THE POOL PASS (2026-09-05, `EB-491`), whose three new
         // detonators each print a hit of their own: Long Fuse, Pocket Match
-        // and Flash Point. Fireworks Show is OUT for The Big One's reason --
-        // its whole body is a Set off and it deals nothing itself.
-        Assert.Equal(12, carriers.Count);
+        // and Flash Point. Fireworks Show was OUT for The Big One's reason --
+        // its whole body was a Set off and it dealt nothing itself.
+        // ELEVEN SINCE `EB-749`, which CUT Fwoosh! (a Damage carrier) and
+        // Fireworks Show (never one), and turned Powder Charge into Booby
+        // Trap, a placer that carries a BombSize var and no Damage.
+        Assert.Equal(11, carriers.Count);
         foreach (var card in carriers)
         {
             Assert.Contains("{Damage:diff()}", Face(card));
@@ -190,9 +196,9 @@ public class KleeOverhaulRoundThreeTests
         // blind page's cost slot.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoKoFwoosh(), new ProtoKoTinderToss(),
+                     new ProtoKoPocketMatch(), new ProtoKoTinderToss(),
                      new ProtoKoQuickFuse(), new ProtoKoBangBang(),
-                     new ProtoKoPowderCharge(), new ProtoKoDigIn(),
+                     new ProtoKoBoobyTrap(), new ProtoKoDigIn(),
                      new ProtoKoSugarRush(),
                  })
         {
@@ -400,7 +406,9 @@ public class KleeOverhaulRoundThreeTests
         // default rule. Fwoosh! prints the same clause beside it: aimed and
         // 6 since R243's card-audit ruling ("default looks good").
         AssertUpgradeMoves<ProtoKoKapow>("Damage", 4m, 7m);
-        AssertUpgradeMoves<ProtoKoFwoosh>("Damage", 6m, 9m);
+        // `EB-749` cut Fwoosh!; Pocket Match is the same shape and its
+        // delta is the one the Prototype-stage rule gives a `damage` row.
+        AssertUpgradeMoves<ProtoKoPocketMatch>("Damage", 5m, 7m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
         // Chain Fuse grows by 6 since the 2026-09-02 balance pass. Its
         // upgrade is the row's OWN `grow: +3` (the Klee card audit of the

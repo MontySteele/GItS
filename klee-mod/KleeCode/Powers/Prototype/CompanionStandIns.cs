@@ -184,8 +184,9 @@ public static class CompanionStandIns
     }
 
     /// <summary>
-    /// Does Grounded see nothing this turn? Kaeya's Cold-Blooded Strike, read
-    /// by <c>GroundedPower</c> and by nothing else -- the card names Grounded,
+    /// Does Grounded pay whatever its condition says? Kaeya's Cold-Blooded
+    /// Strike, read by <c>GroundedPower</c> and by nothing else -- the card
+    /// names Grounded,
     /// so the blind is a READ here rather than a write to the explosion
     /// counter, which Jean's stand-in also reads.
     /// </summary>
@@ -412,16 +413,23 @@ public sealed class FrontRowSeatPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Kaeya, Cold-Blooded Strike: "Deal 8 damage. Apply Cryo. This turn, Grounded
-/// counts a Bomb as on the field."
+/// Kaeya, Cold-Blooded Strike: "Deal 8 damage. Apply Cryo. Next turn,
+/// Grounded pays even if you played a Set off card."
 ///
-/// `EB-576`: THE FACE NAMES THE RULE THE ENGINE HAS. It printed the pre-r18
-/// Grounded ("counts nothing as having gone off") for as long as `EB-516` had
-/// been in, which put two printed texts on one screen that could not both be
-/// true. Nothing in the effect moved: the blind was always read as an OR
+/// THE FACE NAMES THE RULE THE ENGINE HAS, and it has been rewritten twice for
+/// that reason without the effect moving once. The blind is read as an OR
 /// beside Grounded's own condition (<c>GroundedPower.AfterPlayerTurnStart</c>),
-/// which is exactly "counts a Bomb as on the field", so this row is the words
-/// catching up with the code.
+/// so what the clause has to say is "Grounded pays whatever its condition
+/// says" -- and the condition it overrides has changed under it. `EB-576`
+/// caught the words up with `EB-516`'s board read ("counts a Bomb as on the
+/// field"); `EB-749` catches them up with R271 sec.5.1's read of the CARDS the
+/// player played. Each time the code stood still and the sentence moved.
+///
+/// AND IT SAYS "NEXT TURN" RATHER THAN "THIS TURN", which is the second thing
+/// the rewrite fixes. The marker is applied while Kaeya's card resolves and is
+/// spent at the NEXT <c>AfterPlayerTurnStart</c> -- the turn boundary Grounded
+/// itself pays on -- so the turn the player is looking at is never the turn
+/// this buff changes.
 ///
 /// A MARKER, and its stack is a flag rather than a number -- which is why the
 /// sheet row states its own upgrade instead of letting the Prototype-stage
@@ -441,8 +449,8 @@ public sealed class ColdBloodedPower : PowerModel, ILocalizationProvider
     {
         ("title", "Cold-Blooded"),
         ("description",
-            "This turn, [gold]Grounded[/gold] counts a Bomb as on the "
-          + "field."),
+            "Next turn, [gold]Grounded[/gold] pays even if you played a "
+          + "[gold]Set off[/gold] card."),
     };
 
     /// <summary>

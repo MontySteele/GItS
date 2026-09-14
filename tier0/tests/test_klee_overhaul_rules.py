@@ -563,7 +563,7 @@ def test_rule4_a_spark_priced_row_spends_sparks_and_not_energy(overhaul):
     enemy = make_enemy(hp=100)
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 6)
-    card = load("proto_ko_fwoosh")
+    card = load("proto_ko_pocket_match")
     assert combat.spark_cost(card) == 1
     assert combat.card_cost(state, card) == 0
 
@@ -976,14 +976,13 @@ def test_rule7_a_skipped_round_reports_an_honest_zero(overhaul):
     assert state.ko_set_off_last_turn == 0
 
 
-def test_eb516_grounded_pays_while_a_bomb_is_cooking(overhaul):
-    """`EB-516`. Grounded's condition, end to end, in its new shape: "if you
-    have a Bomb on the field".
+def test_eb749_grounded_pays_after_a_turn_with_no_set_off_card(overhaul):
+    """`EB-749` (R271 sec.5.1). Grounded's condition, end to end, in the shape
+    the consolidation ruled: "if you played no Set off card last turn".
 
-    THE PINS THE ROW NAMES. An empty field pays nothing; a Mine alone pays,
-    because a Mine IS a Bomb; and a turn on which one Bomb went off while
-    another is still cooking pays -- the reading the old counter could not
-    express, and the one the r18 ledgers showed was the common case.
+    THE PINS THE RULING NAMES. A quiet turn pays; the turn after a Set off card
+    resolved pays nothing; and the turn after THAT pays again, because the
+    counter is per turn and rolls.
 
     UNPOWERED, the mod's `ValueProp.Unpowered`: it is a POWER's Block, so Frail
     does not bite it."""
@@ -994,28 +993,65 @@ def test_eb516_grounded_pays_while_a_bomb_is_cooking(overhaul):
 
     klee_overhaul.roll_to(state, 1)
     klee_overhaul.turn_start_late(state)
-    assert state.player.block == 0, "an empty field pays nothing"
+    assert state.player.block == 6, "a quiet turn pays, and Frail does not bite"
 
-    # A MINE ALONE PAYS: a Mine is a Bomb.
-    klee_overhaul.place(state, enemy, 4, is_mine=True)
+    # A SET OFF CARD RESOLVES, and the next turn is refused.
+    state.player.block = 0
+    state.player.sparks = 3
+    klee_overhaul.place(state, enemy, 5)
+    effects.resolve_card(state, load("proto_ko_pocket_match"))
+    assert state.ko_set_off_cards_this_turn == 1
     klee_overhaul.roll_to(state, 2)
     klee_overhaul.turn_start_late(state)
-    assert state.player.block == 6, "a Mine pays, and Frail does not bite it"
+    assert state.player.block == 0, "a Set off card last turn pays nothing"
 
-    # ONE WENT OFF, ANOTHER IS STILL COOKING.
-    state.player.block = 0
-    klee_overhaul.place(state, enemy, 5)
-    klee_overhaul.note_explosion(state, reacted=False, damage_dealt=4)
+    # AND THE TURN AFTER THAT PAYS AGAIN: the counter is per turn.
     klee_overhaul.roll_to(state, 3)
     klee_overhaul.turn_start_late(state)
-    assert state.player.block == 6, "a Bomb still on the field pays"
+    assert state.player.block == 6, "one loud turn costs exactly one payout"
 
-    # AND AN EMPTY FIELD AFTER THE CASH-OUT PAYS NOTHING.
+
+def test_eb749_a_mine_answering_an_attack_is_not_a_set_off_card(overhaul):
+    """R271 sec.5.1's FIRST stated interaction, and the one the round-18 trap
+    was made of: Cook's Mines fire on the ENEMY's beat, and that is not a card
+    the player played. So a Mine going off does not switch Grounded off."""
+    enemy = make_enemy(hp=200, name="attacker", intents=ATTACKER)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.place(state, enemy, 9, is_mine=True)
+
+    combat._enemy_turn(state, enemy)
+
+    assert state.ko_set_off_this_turn == 1, "the Mine really did go off"
+    assert state.ko_set_off_cards_this_turn == 0, "and it was no card"
+
     state.player.block = 0
-    klee_overhaul.set_off(state, enemy)
-    klee_overhaul.roll_to(state, 4)
+    klee_overhaul.roll_to(state, 2)
     klee_overhaul.turn_start_late(state)
-    assert state.player.block == 0, "nothing cooking, nothing paid"
+    assert state.player.block == 6, "the Mine did not switch Grounded off"
+
+
+def test_eb749_sparks_n_splash_is_not_a_set_off_card(overhaul):
+    """R271 sec.5.1's SECOND stated interaction: the Rare's end-of-turn hit is
+    a POWER's, not a card the player played, so a turn on which only it fired
+    is still paid next turn. That pairing is the brief's "watch it rise"."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.GROUNDED] = 6
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    klee_overhaul.roll_to(state, 1)
+    klee_overhaul.place(state, enemy, 7)
+
+    klee_overhaul.turn_end(state)
+
+    assert enemy.hp < 200, "the echo really did fire"
+    assert state.ko_set_off_cards_this_turn == 0, "and it was no card"
+
+    state.player.block = 0
+    klee_overhaul.roll_to(state, 2)
+    klee_overhaul.turn_start_late(state)
+    assert state.player.block == 6, "Splash did not switch Grounded off"
 
 
 def test_eb533_grounded_says_its_answer_either_way(overhaul):
@@ -1039,8 +1075,13 @@ def test_eb533_grounded_says_its_answer_either_way(overhaul):
     state = klee_state([enemy])
     state.player.powers[klee_overhaul.GROUNDED] = 6
 
-    # THE FAILING TURN, and it is the seat's own: an empty field.
+    # THE FAILING TURN, and it is the seat's own: `EB-749` moved WHICH turn
+    # that is -- the turn after a Set off card resolved, not the empty field.
+    state.player.sparks = 3
     klee_overhaul.roll_to(state, 1)
+    klee_overhaul.place(state, enemy, 5)
+    effects.resolve_card(state, load("proto_ko_pocket_match"))
+    klee_overhaul.roll_to(state, 2)
     klee_overhaul.turn_start_late(state)
 
     said = [ev for ev in state.log if ev["event"] == "ko_grounded"]
@@ -1050,8 +1091,7 @@ def test_eb533_grounded_says_its_answer_either_way(overhaul):
     assert state.player.block == 0
 
     # AND THE PAYING TURN SAYS THE SAME THING THE OTHER WAY.
-    klee_overhaul.place(state, enemy, 5)
-    klee_overhaul.roll_to(state, 2)
+    klee_overhaul.roll_to(state, 3)
     klee_overhaul.turn_start_late(state)
 
     said = [ev for ev in state.log if ev["event"] == "ko_grounded"]
@@ -1087,8 +1127,7 @@ def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
     state.player.powers[klee_overhaul.GROUNDED] = 6
     sparks_before = state.player.sparks
 
-    # `EB-516`: the paying turn is the one with something cooking.
-    klee_overhaul.place(state, enemy, 5)
+    # `EB-749`: the paying turn is the one after a turn with no Set off card.
     klee_overhaul.roll_to(state, 1)
     klee_overhaul.turn_start_late(state)
     assert state.player.block == 6
@@ -1096,12 +1135,14 @@ def test_eb344_the_held_turn_also_grants_one_spark(overhaul):
 
     banked = state.player.sparks
     state.player.block = 0
-    klee_overhaul.set_off(state, enemy)          # the field empties
+    state.player.sparks += 3
+    klee_overhaul.place(state, enemy, 5)
+    effects.resolve_card(state, load("proto_ko_pocket_match"))   # a loud turn
     sparks_after_explosions = state.player.sparks
     klee_overhaul.roll_to(state, 2)
     klee_overhaul.turn_start_late(state)
 
-    assert state.player.block == 0, "no Block on an empty field"
+    assert state.player.block == 0, "no Block after a Set off card"
     assert state.player.sparks == sparks_after_explosions, \
         "and no Spark either: one condition, both halves"
     assert banked <= sparks_after_explosions      # the explosion paid its own
@@ -2323,51 +2364,69 @@ def test_split_charge_upgraded_grows_each_half(overhaul):
     assert sorted(sizes(enemy)) == [7, 7]
 
 
-# --- Fireworks Show: Set off ALL, and a Spark price the upgrade cuts -------
+# --- Tinder Toss: Set off ALL, then 3 to ALL (R271 sec.5.3, `EB-749`) ------
+#
+# It took Fireworks Show's slot in the same ruling that cut that row, so its
+# three tests are re-pointed here: the board-wide Set off, the ORDER the ruling
+# states, and the bare board the merged row no longer refuses.
 
-def test_fireworks_show_sets_off_every_enemy(overhaul):
-    """`set_off` with `target: all_enemies` and NO aura filter: Flame Dance's
-    spelling with the filter off and no hit of its own."""
+def test_tinder_toss_sets_off_every_enemy_then_hits_every_enemy(overhaul):
+    """`set_off` with `target: all_enemies` and NO aura filter, then a plain
+    `damage` to all. THE ORDER IS THE RULE: Set off resolves on every enemy
+    FIRST, and only then does the 3 land."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
-    state.player.sparks = 2
+    state.player.sparks = 1
     klee_overhaul.place(state, a, 7)
     klee_overhaul.place(state, b, 5)
 
-    effects.resolve_card(state, load("proto_ko_fireworks_show"))
+    effects.resolve_card(state, load("proto_ko_tinder_toss"))
 
-    assert (a.hp, b.hp) == (193, 195)
+    # 7 + 3 and 5 + 3: the charge, then the card's own line.
+    assert (a.hp, b.hp) == (190, 192)
     assert sizes(a) == [] and sizes(b) == []
 
 
-def test_fireworks_show_upgraded_charges_one_spark(overhaul):
-    """`upgrade: {spark_price: -1}` -- the first delta on any sheet that moves
-    a Spark price. The gate and the payment are one number, so both move."""
-    base = load("proto_ko_fireworks_show")
-    up = load("proto_ko_fireworks_show+")
-    assert effects.spend_spark_price(base.effects[0]) == 2
-    assert effects.spend_spark_price(up.effects[0]) == 1
+def test_tinder_toss_upgraded_hits_for_two_more(overhaul):
+    """`upgrade: {damage: +2}` moves the card's own line and NOT the charges,
+    which carry their own sizes."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    state.player.sparks = 1
+    klee_overhaul.place(state, a, 7)
 
+    effects.resolve_card(state, load("proto_ko_tinder_toss+"))
+
+    assert (a.hp, b.hp) == (188, 195)
+
+
+def test_tinder_toss_is_playable_on_a_bomb_less_board(overhaul):
+    """The merged row is NOT `set_off_only` -- it has a printed line of its
+    own -- so the `EB-261` refusal Fireworks Show carried does not apply. A
+    Spark buys 3 to every enemy on a bare board, which is what the ruling's
+    "Deal 3 damage to ALL enemies" promises."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.sparks = 1
-    klee_overhaul.place(state, enemy, 6)
+    card = load("proto_ko_tinder_toss")
+
+    assert klee_overhaul.set_off_only(card) is False
+    assert combat.card_playable(state, card) is True
+
+
+def test_once_more_upgraded_charges_one_spark_less(overhaul):
+    """`upgrade: {spark_price: -1}` -- the delta that moves a Spark PRICE. The
+    gate and the payment are one number, so both move. It rode Fireworks Show
+    until `EB-749` cut that row; three rows still spell it and this is one."""
+    base = load("proto_ko_once_more")
+    up = load("proto_ko_once_more+")
+    assert effects.spend_spark_price(base.effects[0]) == 3
+    assert effects.spend_spark_price(up.effects[0]) == 2
+
+    state = klee_state([make_enemy(hp=200)])
+    state.player.sparks = 2
     assert combat.card_playable(state, base) is False
     assert combat.card_playable(state, up) is True
-
-
-def test_fireworks_show_refuses_a_bomb_less_board(overhaul):
-    """`EB-261`: its whole body is a damage-less Set off, so it would pay two
-    Sparks and resolve to nothing unless something is holding a charge."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.player.sparks = 3
-    card = load("proto_ko_fireworks_show")
-
-    assert klee_overhaul.set_off_only(card) is True
-    assert combat.card_playable(state, card) is False
-    klee_overhaul.place(state, enemy, 4)
-    assert combat.card_playable(state, card) is True
 
 
 # --- Fish Blasting: the draw-pile zone -------------------------------------

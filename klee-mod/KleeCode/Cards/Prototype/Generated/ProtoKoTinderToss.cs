@@ -48,7 +48,7 @@ public sealed class ProtoKoTinderToss : CustomCardModel, IElementalCard, ISparkP
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tinder Toss"),
-        ("description", "Twice: [gold]Set off[/gold] a random enemy and deal {Damage:diff()} damage to it."),
+        ("description", "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} damage to ALL enemies."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -68,20 +68,26 @@ public sealed class ProtoKoTinderToss : CustomCardModel, IElementalCard, ISparkP
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new DamageVar(3m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoTinderToss()
-        : base(0, CardType.Attack, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(0, CardType.Attack, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
-        await ProtoBombPower.SetOffRandom(choiceContext, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue, 2);
+        await ProtoBombPower.SetOffAll(choiceContext, Owner.Creature, this, cardPlay, 0, nonPyroAuraOnly: false);
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .TargetingAllOpponents(CombatState!)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()

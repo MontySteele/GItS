@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoGrounded : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_grounded");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grounded"),
-        ("description", "At the start of your turn, if you have a [gold]Bomb[/gold] on the field, gain {PowerAmount:diff()} [gold]Block[/gold] and 1 [gold]Spark[/gold]."),
+        ("description", "At the start of your turn, if you played no [gold]Set off[/gold] card last turn, gain {PowerAmount:diff()} [gold]Block[/gold] and 1 [gold]Spark[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

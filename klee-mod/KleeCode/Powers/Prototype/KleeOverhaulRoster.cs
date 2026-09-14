@@ -217,11 +217,11 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoBigBaddaBoom>(),
         ModelDb.Card<ProtoKoTheBigOne>(),
         ModelDb.Card<ProtoKoAlicesRecipe>(),
-        // Spray (9 -- Pop! is the packet sec.4 table's first Spray row and it
-        // OFFERS from draft 4)
+        // Spray (8 -- Pop! is the packet sec.4 table's first Spray row and it
+        // OFFERS from draft 4; Fwoosh! was CUT by R271 sec.4 item 1, because
+        // Pocket Match is the same card at 5 with Retain)
         ModelDb.Card<ProtoKoPop>(),
         ModelDb.Card<ProtoKoMineToss>(),
-        ModelDb.Card<ProtoKoFwoosh>(),
         ModelDb.Card<ProtoKoTinderToss>(),
         ModelDb.Card<ProtoKoQuickFuse>(),
         ModelDb.Card<ProtoKoBangBang>(),
@@ -235,7 +235,11 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoCatalyticConverter>(),
         // Currencies and defence (7 of 7; Dig In is back in the pool at draft 4)
         ModelDb.Card<ProtoKoAmmoScavenging>(),
-        ModelDb.Card<ProtoKoPowderCharge>(),
+        // R271 sec.4 item 3: Powder Charge's SHAPE kept and its body
+        // redesigned -- this is BOOBY TRAP, the pool's only single-target
+        // Mine, in Powder Charge's slot because it is still the 0-Energy
+        // placer bought from the bank.
+        ModelDb.Card<ProtoKoBoobyTrap>(),
         ModelDb.Card<ProtoKoDigIn>(),
         ModelDb.Card<ProtoKoSugarRush>(),
         ModelDb.Card<ProtoKoRunAway>(),
@@ -282,7 +286,8 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoFishBlasting>(),
         ModelDb.Card<ProtoKoPocketMatch>(),
         ModelDb.Card<ProtoKoBombsAway>(),
-        ModelDb.Card<ProtoKoFireworksShow>(),
+        // `ProtoKoFireworksShow` was CUT by R271 sec.4 item 2 and MERGED into
+        // Tinder Toss, which prints its line at 1 Spark with 3 damage behind.
         ModelDb.Card<ProtoKoKindling>(),
         ModelDb.Card<ProtoKoFlashPoint>(),
         ModelDb.Card<ProtoKoVermillionPact>(),

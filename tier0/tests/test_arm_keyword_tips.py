@@ -116,7 +116,8 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
 # ------------------------------------------- EB-372: Grounded travels too --
 #
 # THE FINDING. `Grounded` is a Power card of Klee's, and Kaeya's Cold-Blooded
-# Strike is written against it by name -- "This turn, Grounded counts a Bomb
+# Strike is written against it by name -- "Next turn, Grounded pays even if
+# you played a Set off card"
 # as on the field" (`EB-576`) -- as is the buff that card leaves behind.
 # A seat that drafted Kaeya and never drafted Grounded met the word on a card
 # face with nothing on the screen saying what it is, and read it as noise in
@@ -128,9 +129,15 @@ def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
 
 
 def test_the_grounded_word_owes_its_definition_wherever_it_is_printed():
+    # TWO WORDS SINCE `EB-749`, and that is the table working rather than a
+    # widened claim: the corrected clause names `Set off` as well as
+    # `Grounded`, so the face that prints both owes both definitions. A reader
+    # meeting Kaeya without Klee's kit needs the second sentence exactly as
+    # much as the first.
     assert gen.arm_keyword_tip_calls(
-        "This turn, [gold]Grounded[/gold] counts a Bomb as on the "
-        "field.") == ["ArmKeywordTips.ForGrounded"]
+        "Next turn, [gold]Grounded[/gold] pays even if you played a "
+        "[gold]Set off[/gold] card.") == ["ArmKeywordTips.ForSetOff",
+                                          "ArmKeywordTips.ForGrounded"]
     # The bare word in prose is not the keyword, the rule every row here is
     # under: the span has to be golded.
     assert gen.arm_keyword_tip_calls("This turn, Grounded counts nothing.")         == []
@@ -145,7 +152,8 @@ def test_kaeyas_face_carries_the_grounded_tip_in_the_shipped_generation():
     """
     card = (PROTOTYPE_DIR / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
         encoding="utf-8")
-    assert "[gold]Grounded[/gold] counts a Bomb as on the field." in card
+    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+            "[gold]Set off[/gold] card.") in card
     assert "ArmKeywordTips.ForGrounded(" in card
 
 
@@ -158,7 +166,7 @@ def test_the_buff_kaeyas_card_leaves_behind_carries_it_too():
     body = power[head:power.index("class LionsFangPower")]
     # The face's literal is split across two lines by the concatenation, so
     # the clause is asserted the way the source spells it.
-    assert "This turn, [gold]Grounded[/gold] counts a Bomb as on the "         in body
+    assert "Next turn, [gold]Grounded[/gold] pays even if you played a "         in body
     assert "ArmKeywordTips.ForGrounded(base.ExtraHoverTips)" in body
 
 
@@ -168,14 +176,16 @@ def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
     the tip must not quote a number a second card would contradict."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "that pays at the start of your turn, but " in tips
-    assert "only if you have a [gold]Bomb[/gold] on the field. Its "         in tips
+    assert ("only if you played no [gold]Set off[/gold] card last turn. "
+            "Its ") in tips
     assert "card prints what it pays." in tips
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
     # `EB-622`: the payout moved 6 -> 4 (upgrade still `+2`, so 6 upgraded).
     assert "gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
-    # `EB-516`: the sheet row's own condition, held in step with the tip.
-    assert ("if you have a [gold]Bomb[/gold] on the field, gain 4 "
+    # `EB-749` (R271 sec.5.1): the sheet row's own condition, held in step
+    # with the tip.
+    assert ("if you played no [gold]Set off[/gold] card last turn, gain 4 "
             "[gold]Block[/gold]") in sheet
 
 
@@ -403,8 +413,11 @@ def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
     face PRINTS the word", so all seven silently lost the definition of the
     word they charge in. A price shown as a badge is still the keyword on the
     card, so the row's own `spend_spark` raises the tip instead."""
-    for stem in ("ProtoKoFwoosh", "ProtoKoTinderToss", "ProtoKoQuickFuse",
-                 "ProtoKoBangBang", "ProtoKoPowderCharge", "ProtoKoDigIn",
+    # `EB-749` re-pointed two of the seven: Fwoosh! was cut and Powder Charge
+    # became Booby Trap. Pocket Match is the same Spark-priced Set off shape
+    # Fwoosh! was, so the rule is still asked of seven rows.
+    for stem in ("ProtoKoPocketMatch", "ProtoKoTinderToss", "ProtoKoQuickFuse",
+                 "ProtoKoBangBang", "ProtoKoBoobyTrap", "ProtoKoDigIn",
                  "ProtoKoSugarRush"):
         text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         # The FACE, not the file: `SparkPower.CanSpend` is in every one of
@@ -528,7 +541,8 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     derived from the row's own effects.
 
     THE FIND (Klee r21 lane 1, (c) 2 and (c) 3). Careful Arrangement on a bare
-    board and Fwoosh! on another were ACCEPTED: the Energy went, the Spark
+    board and Fwoosh! on another were ACCEPTED (`EB-749` has since cut Fwoosh!;
+    Pocket Match below is the same Spark-priced Set off shape): the Energy went, the Spark
     went, nothing resolved. On the same screen a Spark-priced card the bank was
     short for printed CANNOT BE PLAYED and named the price and the bank.
 
@@ -539,19 +553,21 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     # EVERY SET OFF AND THE MERGE, and nothing else.
     readers = {rid for rid, row in rows.items() if gen.reads_the_field(row)}
     assert "proto_ko_careful_arrangement" in readers
-    assert "proto_ko_fwoosh" in readers
+    assert "proto_ko_pocket_match" in readers
     assert "proto_ko_jumpy_dumpty" not in readers      # a placer reads nothing
     # THE TWO SENTENCES. A row with a line of its own still does that line; a
     # row that is nothing but the Bomb work does nothing whatever.
     blanks = {rid for rid in readers if not gen.empty_field_tip_arg(rows[rid])}
+    # `EB-749`: Fireworks Show was CUT and merged into Tinder Toss, which has a
+    # damage line of its own and is therefore not blank.
     assert blanks == {"proto_ko_careful_arrangement", "proto_ko_the_big_one",
-                      "proto_ko_quick_fuse", "proto_ko_fireworks_show"}
+                      "proto_ko_quick_fuse"}
     # AND THE ATTACH REACHED THE EMITTED C#, with the derived argument on it.
     merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
         encoding="utf-8")
     assert "ArmKeywordTips.ForEmptyField(" in merge and ", this, false)" in merge
-    fwoosh = (PROTOTYPE_DIR / "ProtoKoFwoosh.cs").read_text(encoding="utf-8")
-    assert "ArmKeywordTips.ForEmptyField(" in fwoosh and ", this, true)" in fwoosh
+    match = (PROTOTYPE_DIR / "ProtoKoPocketMatch.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForEmptyField(" in match and ", this, true)" in match
 
 
 def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():

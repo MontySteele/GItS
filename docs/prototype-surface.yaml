@@ -278,20 +278,20 @@
    upgrade: {bomb_size: +3},
    effects: [{op: plant_bomb, target: all_enemies, size: 4, mine: true}]}
 
-- {id: proto_ko_fwoosh, name: "Fwoosh!", character: klee,
-   authored_by: [claude],
-   cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold]. Deal 6 damage.",
-   effects: [{op: spend_spark, amount: 1},
-             {op: set_off, target: enemy, damage: 6}]}
+# R271 sec.4, item 1: Fwoosh! is CUT. Pocket Match is the same card at 5 with
+# Retain, and Retain is what the seats drafted it for.
 
+# R271 sec.5.3: Tinder Toss takes the brief's shape and Fireworks Show's slot.
+# Set off resolves on EVERY enemy first, then the 3 lands on all of them, which
+# is the order the two ops are written in.
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "Twice: [gold]Set off[/gold] a random enemy and deal 4 damage to it.",
+   description: "[gold]Set off[/gold] ALL enemies. Deal 3 damage to ALL enemies.",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: 1},
-             {op: set_off, target: random_enemy, damage: 4, times: 2}]}
+             {op: set_off, target: all_enemies},
+             {op: damage, amount: 3, target: all_enemies}]}
 
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
@@ -370,13 +370,16 @@
    effects: [{op: plant_bomb, target: enemy, size: 4},
              {op: draw_per_set_off}]}
 
-- {id: proto_ko_powder_charge, name: "Powder Charge", character: klee,
+# R271 sec.4 item 3 and sec.7 batch one, row 1: Powder Charge's shape, a Mine
+# in its body. It reuses Mine Toss's machinery with a single target and invents
+# nothing. See docs/notes/prototype-surface-provenance.md.
+- {id: proto_ko_booby_trap, name: "Booby Trap", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   description: "Place a [gold]Bomb[/gold] 6.",
+   cost: 0, type: skill, rarity: common,
+   description: "Place a [gold]Mine[/gold] 5.",
    upgrade: {bomb_size: +3},
    effects: [{op: spend_spark, amount: 1},
-             {op: plant_bomb, target: enemy, size: 6}]}
+             {op: plant_bomb, target: enemy, size: 5, mine: true}]}
 
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
    authored_by: [claude],
@@ -405,7 +408,7 @@
 - {id: proto_ko_grounded, name: "Grounded", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, if you have a [gold]Bomb[/gold] on the field, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
+   description: "At the start of your turn, if you played no [gold]Set off[/gold] card last turn, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_grounded, amount: 4, target: self}]}
 
@@ -539,13 +542,8 @@
    effects: [{op: damage, amount: 3, target: all_enemies},
              {op: plant_bomb, target: all_enemies, size: 2}]}
 
-- {id: proto_ko_fireworks_show, name: "Fireworks Show", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   description: "[gold]Set off[/gold] ALL enemies.",
-   upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 2},
-             {op: set_off, target: all_enemies}]}
+# R271 sec.4 item 2: Fireworks Show is CUT and MERGED into Tinder Toss, which
+# now prints "Set off ALL enemies. Deal 3 damage to ALL enemies." at 1 Spark.
 
 - {id: proto_ko_kindling, name: "Kindling", character: klee,
    authored_by: [claude],
@@ -957,7 +955,7 @@
    cost: 1, type: attack,
    personal_pool: [klee],
    replaces: proto_mc_kaeya_frostgnaw, art_of: proto_mc_kaeya_frostgnaw,
-   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. This turn, [gold]Grounded[/gold] counts a Bomb as on the field.",
+   description: "Deal 8 damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] pays even if you played a [gold]Set off[/gold] card.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}

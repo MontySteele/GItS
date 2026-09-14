@@ -72,16 +72,22 @@ public class Round18Tests
     public void Groundeds_face_prints_the_condition_it_now_runs()
     {
         // The Power badge and the card row say the same thing, which is the
-        // half of `EB-516` a player can see.
+        // half of the condition a player can see. `EB-749` (R271 sec.5.1)
+        // moved it on from `EB-516`'s board read to the CARDS the player
+        // played, and both printers moved with it.
         var badge = new GroundedPower().Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("if you have a [gold]Bomb[/gold] on the field", badge);
+        Assert.Contains("if you played no [gold]Set off[/gold] card last turn",
+                        badge);
         Assert.DoesNotContain("went off last turn", badge);
+        Assert.DoesNotContain("on the field", badge);
 
         var card = new ProtoKoGrounded().Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("if you have a [gold]Bomb[/gold] on the field", card);
+        Assert.Contains("if you played no [gold]Set off[/gold] card last turn",
+                        card);
         Assert.DoesNotContain("went off last turn", card);
+        Assert.DoesNotContain("on the field", card);
     }
 
     // ==================================================================

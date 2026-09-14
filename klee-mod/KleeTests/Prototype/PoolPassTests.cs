@@ -69,7 +69,7 @@ public class PoolPassTests
         Assert.False(typeof(ISparkPricedCard)
                          .IsAssignableFrom(typeof(ProtoKoCountdown)));
         Assert.True(typeof(ISparkPricedCard)
-                        .IsAssignableFrom(typeof(ProtoKoFwoosh)),
+                        .IsAssignableFrom(typeof(ProtoKoPocketMatch)),
                     "the comparison is only worth making if the twin has one");
         Assert.Equal(CardRarity.Common, card.Rarity);
     }
