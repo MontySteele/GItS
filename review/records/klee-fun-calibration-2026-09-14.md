@@ -103,7 +103,32 @@ reading. **Attempt two** runs on `0.2.3218+proto.dirty` (main `b670f540`,
 `EB-751` fixed on #485), after a two-fight soak on lane 1 logged zero
 error lines; same seed, same three seats, natural.
 
-_Seats' three lines: (copied and committed before [USER] plays)._
+**Seats' three lines, attempt two** (copied verbatim, committed before
+[USER] plays; the commit hash is the seal):
+
+- **Opus, lane 1, natural** (floor 12, five fights won, 111 of 120 acts;
+  `review/qa/klee-round-27-2026-09-14/opus-lane1-natural.md`):
+  - `MOST WANTED TURN: fight 5 turn 2 -- Block stops bombs, so Amber had to strip 10 block before Chain Fuse and Perfect Timing dumped 41 into a bare body.`
+  - `NOTHING TURN: fight 5 turn 1 -- no incoming damage and no detonator in hand, so the turn was "play both bomb cards and a Strike" with nothing rejected.`
+  - `NEVER AGAIN: Defend -- 5 block (3 under Frail) is never the best use of an energy in a deck whose bombs want one more turn.`
+- **Opus, lane 2, natural** (floor 14, mid second elite, 120 of 120 acts;
+  `opus-lane2-natural.md`):
+  - `MOST WANTED TURN: fight 3 turn 3 -- Tinder Toss set off both bodies for a double kill on Sparks alone, with all 3 Energy unspent.`
+  - `NOTHING TURN: fight 4 turn 3 -- drew four Defends and a Strike against a 20-per-turn damage cap, so no card I held could change anything.`
+  - `NEVER AGAIN: Strike -- 6 damage for 1 Energy does nothing a Bomb, a Spark or a detonator does not do better.`
+- **Codex (gpt-6-astra), lane 1, natural: VOID on the usage cap.** It played
+  107 acts through four fights (`review/qa/blindplay/20260914-233423/`,
+  four fight records kept), then the ChatGPT usage limit refused the
+  fight-five record and the run record, so its three lines were never
+  asked. A first attempt the same evening refused itself on a rollout line
+  kind codex-cli 0.153.4 added (`token_usage_record`, allowlisted in this
+  branch). **Build one is scored on the two Opus seats** (both must agree;
+  disclosed E default); the Codex seat rejoins on build two, launched at
+  the top of a fresh usage window, since a blind run costs the window most
+  of its 5 hours.
+
+The fights the two seats name are on the same seed, so [USER]'s fight
+numbers line up with theirs where the route matches.
 _[USER]'s three lines: (verbatim)._
 _Agreement: (three marks per seat)._
 
