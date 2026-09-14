@@ -58,7 +58,9 @@ and whether anything on the screen was confusing to read.
 
 At the end of the run — how you think the character works; which tension came
 up again and again; which cards defined the run; where play started to feel
-repetitive; and what you would avoid drafting next time.
+repetitive; and what you would avoid drafting next time. Then three lines in
+a fixed shape: the turn you most wanted to play, the turn that felt like
+nothing, and the card you would never draft again, each with one clause of why.
 
 Say what you actually thought, including where you were bored, confused or
 guessing. **None of this is a judgement of whether the game is fun or good that

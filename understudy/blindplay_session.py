@@ -358,7 +358,19 @@ language:
 2. Which tension came up again and again?
 3. Which cards defined the run?
 4. Where did play start to feel repetitive?
-5. What would you avoid drafting next time, and why?"""
+5. What would you avoid drafting next time, and why?
+
+Then three lines, one each, in exactly this shape (fight number, turn number,
+then one clause of why; a card by its printed title; "none" is an answer):
+6. MOST WANTED TURN: fight N turn N -- why.
+7. NOTHING TURN: fight N turn N -- why. (The turn that felt like nothing.)
+8. NEVER AGAIN: <card title> -- why. (The card you would never draft again.)"""
+
+# `klee-fun-calibration-2026-09-14`: items 6-8 are the calibration's three
+# fixed lines, answered in the same shape by every seat and by [USER], so a
+# seat's answer can be set beside the human's. They are opinion, recorded
+# under the disclaimer below like the rest; the calibration record is where
+# agreement is scored, never here.
 
 RECORD_DISCLAIMER = (
     "None of this is a judgement of whether the game is fun or good that "
