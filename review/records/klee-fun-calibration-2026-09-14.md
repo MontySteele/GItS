@@ -86,10 +86,21 @@ number on any prototype row is quotable off this record (R215 B).
 
 **Seed: `KLEECALIB001`**, written 2026-09-14 before any seat played, on the
 build that landed with PR #481 (main `584d63b1`); the installed `+proto`
-version is recorded with the seats' lines below. The three calibration
+version is `0.2.3214+proto.dirty` (deployed 2026-09-14, main `a3a2ba31`,
+all four arms). The game normalises the letter I in a seed to the digit 1,
+so the seed as the game reads it back is **`KLEECAL1B001`**; typing either
+spelling lands on the same run. The three calibration
 seats play NATURAL (no grant), as [USER] will; round 27's Cook lane
 (Grounded, Return to Sender, Sparks 'n' Splash granted) is a fourth read
 and is not scored here.
+**Attempt one (2026-09-14, `0.2.3214+proto.dirty`) was void:** both blind
+Opus lanes died on Neow's card-removal grid after one action each, on
+BaseLib 3.4.7's per-card cost display loading our resources' empty
+`TexturePath` (`EB-751`; records
+`review/qa/klee-round-27-2026-09-14/opus-lane*-natural-attempt1-dead-lane.md`,
+three lines all "none"). No combat turn was reached, so nothing here is a
+reading. The seats re-run on the fixed build, same seed.
+
 _Seats' three lines: (copied and committed before [USER] plays)._
 _[USER]'s three lines: (verbatim)._
 _Agreement: (three marks per seat)._
