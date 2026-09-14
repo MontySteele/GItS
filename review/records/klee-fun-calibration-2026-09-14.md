@@ -84,7 +84,12 @@ number on any prototype row is quotable off this record (R215 B).
 
 ### Build one — `EB-749`, stage one of R271 §8
 
-_Seed: (written before any seat plays)._
+**Seed: `KLEECALIB001`**, written 2026-09-14 before any seat played, on the
+build that landed with PR #481 (main `584d63b1`); the installed `+proto`
+version is recorded with the seats' lines below. The three calibration
+seats play NATURAL (no grant), as [USER] will; round 27's Cook lane
+(Grounded, Return to Sender, Sparks 'n' Splash granted) is a fourth read
+and is not scored here.
 _Seats' three lines: (copied and committed before [USER] plays)._
 _[USER]'s three lines: (verbatim)._
 _Agreement: (three marks per seat)._
