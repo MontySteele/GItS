@@ -139,8 +139,10 @@ def test_the_manifest_and_STATE_name_one_release():
 
 def test_the_pin_is_the_version_this_repo_says_it_builds_against():
     """Belt and braces on the number itself, so a future edit that moves BOTH
-    records together still has to be deliberate. 3.4.5 is what PIN.json in the
-    assembly vault, the installed Workshop item and the compiler all report."""
+    records together still has to be deliberate. 3.4.7 is what the installed Workshop item and the compiler report
+    since Steam moved the item on or before 2026-09-14 (re-pinned from 3.4.5
+    under R70 and R218: latest is not a version, and a Steam update may not
+    stop the build; the C# suite compiled and passed against 3.4.7)."""
     assert _release(_manifest_pin()) == (3, 4, 7)
 
 
