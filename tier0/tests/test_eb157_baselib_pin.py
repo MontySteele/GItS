@@ -141,7 +141,7 @@ def test_the_pin_is_the_version_this_repo_says_it_builds_against():
     """Belt and braces on the number itself, so a future edit that moves BOTH
     records together still has to be deliberate. 3.4.5 is what PIN.json in the
     assembly vault, the installed Workshop item and the compiler all report."""
-    assert _release(_manifest_pin()) == (3, 4, 5)
+    assert _release(_manifest_pin()) == (3, 4, 7)
 
 
 def test_the_manifest_still_declares_a_baselib_dependency_at_all():

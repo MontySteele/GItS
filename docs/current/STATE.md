@@ -71,7 +71,7 @@ hand-written kit machinery.
 ## Mod build environment (pinned)
 
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
-`public-beta`), MegaDot v4.5.1, BaseLib **3.4.5.0**, .NET SDK 9.0.316, PCK
+`public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**. Deploy stamps
 **`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3159+proto`**
 (2026-09-08, main after #468, arms `klee,companion,kokomi,furina-stage`:
