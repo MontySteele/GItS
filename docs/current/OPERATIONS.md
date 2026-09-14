@@ -17,6 +17,7 @@ the one your task reaches; never all of them. Depth for any subsystem is in
 | move a kit Paper to Prototype to Balance | `operations/stage-gate.md` |
 | add, try or delete a quarantined prototype row | `operations/prototype.md` |
 | fetch, process or lint art | `operations/art.md` |
+| place or package music and portraits | `operations/media.md` |
 | build the pck and deploy into the game | `operations/build-deploy.md` |
 | run a scenario, a staged round, a seat or blind play | `operations/understudy-seats.md` |
 | brief an agent, or work out what it should read | `operations/briefing.md` |
