@@ -109,7 +109,7 @@ OFF in a release package). **Last RELEASE package:
   income stays, Regent's Stars the comparison; **pool pass two** (`EB-732`,
   `review/records/klee-pool-pass-two-2026-09-08.md`) gave it six sinks
   paying Block, cards and Energy, built on `0.2.3159+proto`. **Round 26 is
-  READ** (`review/active/klee-overhaul-round-26-2026-09-08.md`): the sinks
+  READ** (its packet lands with PR #470): the sinks
   made turns when the bank could pay, and the bank cannot pay on turn one,
   where rule 4 gives 1 and the cheapest sink costs 2; its opening-bank pick
   is **HELD** behind the consolidated read. **R271 (2026-09-14)** ruled the
