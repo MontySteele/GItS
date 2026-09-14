@@ -1,0 +1,140 @@
+# Doctrine read: Klee stage one of the pool consolidation (R271), four changed faces, against the kit charter
+
+Each numbered arm below is ONE changed or new card, built on branch
+`klee-stage-one-2026-09-14` (EB-749) and read here BEFORE it reaches a
+tester. For each, in order, give FOLLOWS or REQUIRES_MODIFICATION and name
+the clause (C1 to C6) you ruled against, and quote the line and the
+arithmetic (energy, Sparks, Block, damage, cards, turns) that breaches it,
+in one sentence. A verdict with no clause named is not a verdict. Read
+adversarially: the author is a different model family and the owner wants
+the row that should not reach a tester named. Do not soften. Name clauses,
+not remedies: a number, a face or a rewritten row you volunteer is
+DISCARDED.
+
+Why this read exists. Round 26 and the owner's consolidation (R271,
+2026-09-14) cut Fwoosh! and Fireworks Show, redesigned Powder Charge as
+Booby Trap, repaired Grounded (its old condition "if you have a Bomb on the
+field" was nearly always true once Jumpy Dumpty is Innate, so it paid every
+turn for nothing), capped Return to Sender, and gave Tinder Toss the slot
+Fireworks Show held. These four are what changed.
+
+## The charter
+
+- **C1 (owner, 2026-09-04).** "I don't want us to end up gaming the metric
+  of 'can an agent beat the game' by printing overly strong cards." A row
+  that removes a losing line the kit is meant to keep, instead of pricing
+  it, is out of charter.
+- **C2 (LAW D3, binding prices).** A benefit carries a binding price. There
+  must be a real turn in which the card is worse than a plain card of its
+  cost. A Spark price counts as a price only if the bank it draws on is one
+  the deck can run short of: read it against the income figures below.
+- **C3 (LAW D2, player-controlled leverage).** The card's value is decided
+  by a choice the player makes (which enemy; spend now or bank; which turn;
+  which hit to block into), not by a number that rises while you watch.
+- **C4 (Klee brief section 3 rule 7).** Nothing fires by itself: no
+  start-of-turn detonation, no automatic free attack, no "at 3 Sparks".
+  Every explosion is a Set off card the player played, a Mine answering an
+  attack on her, or her Rare.
+- **C5 (Klee brief section 9, as reframed by R270).** Sparks that only buy
+  more Attacks are the named failure. A Spark-priced row must be one the
+  player sometimes declines: it competes with the other sinks for the same
+  bank, and there is a turn on which holding the Sparks is right.
+- **C6 (not strictly better).** A row may not be a strictly better version
+  of a pool row or a base-game card at the same or lower rarity and cost.
+  Base-game reference points: Defend (1: 5 Block), Shrug It Off (1: 8
+  Block, draw 1), Cleave (Common, 1: 8 to ALL), Whirlwind (Uncommon, X: 5
+  to ALL per Energy), Metallicize (Uncommon Power, 1: 3 Block at end of
+  turn), Regent's Cloak of Stars (Common, 0 Energy, 1 Star: 7 Block),
+  Regent's Reflect (Uncommon, 1 Energy, 3 Stars: Block, blocked damage
+  reflected this turn).
+
+## The engine (as it stands on this branch, 2026-09-14)
+
+A Bomb is a numbered charge on an enemy; every Bomb grows by 4 at the start
+of Klee's turn and never goes off on its own. Only a card that says Set off
+makes Bombs go off, each a Pyro hit for its own size. A Mine is a Bomb that
+also goes off when its enemy attacks her, before the hit. Spark: each Bomb
+that goes off gives 1 Spark; she starts every combat with 1; every Hexerei
+companion card played gives 1; no cap; lost after combat. A Spark price
+spends Sparks instead of Energy. Energy 3, HP 62. Starter: four Strike,
+four Defend, Jumpy Dumpty (1 Energy, Innate: Bomb 8; when it goes off, a
+Mine 3 on ALL enemies), Ka-pow! (0 Energy, Retain: Set off, 4 damage).
+Relic: Pounding Surprise (the Spark-per-explosion rule).
+
+Income, measured on the seats: a natural lane ends fights at 3 to 5 Sparks;
+a lane built to spend ran 1 to 8; the bank is 1 on turn one by rule and the
+cheapest existing sinks cost 1 (Set off cards, Dig In) or 2 (Blast Shield,
+Return to Sender, Bottomless Bag).
+
+Pool rows these are read against (pasted from the sheet):
+- Pop! (Common Skill, 0 Energy: Place a Bomb 5).
+- Mine Toss (Common Skill, 1 Energy: Place a Mine 4 on ALL enemies).
+- Jumpy Dumpty (basic, above).
+- Pocket Match (Common Attack, 0 Energy, 1 Spark, Retain: Set off, 5 damage).
+- Quick Fuse (Common Skill, 0 Energy, 1 Spark: Bombs on the enemy grow 3,
+  Set off).
+- Rapid Fire (Uncommon Attack, 2 Energy: 4 times, Set off a random enemy
+  and deal 3 to it).
+- Flame Dance (Uncommon Attack, 1 Energy: Set off each enemy with a
+  non-Pyro aura, 5 damage to ALL).
+- Bombs Away! (Common Attack, 1 Energy: 3 to ALL, Bomb 2 on ALL).
+- Dig In (Common Skill, 0 Energy, 1 Spark: 8 Block).
+- Dodoco Cover (Common Skill, 1 Energy: Bomb 4, 5 Block).
+- Run Away! (Common Skill, 0 Energy: 3 Block, 7 if a Bomb went off this
+  turn).
+- Careful Now (Uncommon Skill, 1 Energy: Block equal to your largest Bomb,
+  up to 10).
+- Explosives Workshop (Uncommon Power, 1 Energy: Bombs grow by 1 more each
+  turn).
+- Witches' Circle (Uncommon Power, 1 Energy: whenever you play a Hexerei
+  card, Bomb 3 on a random enemy).
+- Sparks 'n' Splash (Rare Power, 2 Energy: at end of turn, Pyro damage to a
+  random enemy equal to its largest Bomb, without consuming it).
+
+## The arms
+
+1. **Booby Trap** -- Common Skill, 0 Energy, 1 Spark. Place a Mine 5 on a
+   chosen enemy. Upgrade Mine 8. Replaces Powder Charge (Uncommon, 0
+   Energy, 1 Spark: Bomb 6). The only single-target Mine on the pool; the
+   decision is which enemy is about to swing. Compare Pop! (0 Energy, no
+   Spark: Bomb 5) and Mine Toss (1 Energy: Mine 4 on ALL). Read C3 for
+   whether choosing the enemy is a real choice on a one-enemy board, C5
+   for whether 1 Spark is ever held rather than spent on this, and C6
+   against Pop! at the same rarity and Energy.
+2. **Tinder Toss** -- Common Attack, 0 Energy, 1 Spark. Set off ALL
+   enemies, then deal 3 damage to ALL enemies. Upgrade 5 damage. Replaces
+   its own old body (twice: Set off a random enemy and 4) and Fireworks
+   Show (Uncommon, 2 Sparks: Set off ALL). Compare Cleave, Bombs Away!,
+   Flame Dance, Rapid Fire. Read C6 against Fireworks Show's price (this
+   is Set off ALL plus damage for 1 Spark less), C5 for whether a 1-Spark
+   Set off ALL is ever declined on a multi-enemy board, and C2 for the
+   single-enemy turn on which it is a 3-damage Ka-pow! that costs a Spark.
+3. **Grounded** -- Uncommon Power, 1 Energy. At the start of your turn, if
+   you played no Set off card last turn, gain 4 Block and 1 Spark. Upgrade
+   6 Block. Two rulings are part of the card: a Mine going off because its
+   enemy attacked is not a Set off card played, so a Mine deck keeps
+   Grounded on; Sparks 'n' Splash is not a Set off card, so a deck holding
+   both is paid every turn for not cashing by hand. Compare Metallicize
+   (3 Block a turn, no condition) and Explosives Workshop at the same
+   rarity and cost. Read C4 (the Block and Spark arrive by themselves; is
+   the condition a choice the player makes each turn, or a switch that is
+   simply on in a Cook deck), C3 for whether "cook or cash" is now priced
+   by this card, and C1 against the Splash pairing: a deck that never plays
+   a Set off card and gets 4 Block, 1 Spark and a free Splash hit every
+   turn.
+4. **Return to Sender** -- Uncommon Skill, 1 Energy, 2 Sparks. Gain 8
+   Block. This turn, damage this Block absorbs is placed on the attacker as
+   a Bomb. Upgrade 11 Block. Face unchanged; the rule is now that the
+   conversion is capped at the Block the card granted, as one allowance
+   spent across every hit that turn (blocking a 12 with it puts a Bomb 8 on
+   the attacker, and two hits of 6 and 6 put 8, not 12). Round 26 read the
+   uncapped version absorbing 18 of an elite's hits into a Bomb 32. Compare
+   Dodoco Cover (1 Energy: Bomb 4 and 5 Block) and Regent's Reflect. Read
+   C6 against Dodoco Cover at the same Energy (3 more Block and up to 4
+   more Bomb for 2 Sparks), and C2 for whether 2 Sparks binds on the turn
+   an elite attacks.
+
+Four verdicts, each with its clause and its breaching line, then two
+sentences: after these four, does the pool still hold a Common that is a
+strictly better Pop!, and is there a turn on which a Cook deck holding
+Grounded ever chooses to play a Set off card. Under 600 words.
