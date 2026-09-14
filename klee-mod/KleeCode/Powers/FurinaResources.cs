@@ -139,6 +139,19 @@ public sealed class EncoreResource : BasicCustomResource
     {
     }
 
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Encore IS a card cost, so this is a price a player reads off
+    /// a face.
+    ///
+    /// The meter's own glyph, drawn for the cost badge by
+    /// <c>tools/gen_meter_glyphs.py</c> and packed from
+    /// <c>ImageGen/images/furina/powers/encore.png</c>. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/encore.png";
+
     /// <summary>A gate the buffer has to satisfy, not energy. See
     /// <see cref="FanfareResource.ApplySharedModification"/> -- card_playable
     /// compares against the printed encore_cost, so a "free" effect must not
@@ -182,6 +195,18 @@ public sealed class FanfareResource : BasicCustomResource
     }
 
     /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Fanfare is read-only -- nothing spends it -- so this glyph is
+    /// never rendered as a price; it only has to LOAD.
+    ///
+    /// The shipped Fanfare power icon
+    /// (<c>ImageGen/images/furina/powers/fanfare.png</c>). See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/fanfare.png";
+
+    /// <summary>
     /// A meter the audience fills, not energy: a "this card is free" effect
     /// must not waive the applause. Retained after the spend retirement
     /// because BaseLib's SetToFree forwarding is about the RESOURCE, not
@@ -222,6 +247,18 @@ public sealed class FanfareCapBonusResource : BasicCustomResource
     public FanfareCapBonusResource() : base("KLEEMOD_FANFARE_CAP_BONUS")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Internal bookkeeping: no card costs the cap bonus, so this
+    /// glyph is never rendered as a price.
+    ///
+    /// It shares the Fanfare icon it is a property OF rather than minting art
+    /// for a field. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/fanfare.png";
 }
 
 /// <summary>
@@ -252,6 +289,17 @@ public sealed class FanfareFloorResource : BasicCustomResource
     public FanfareFloorResource() : base("KLEEMOD_FANFARE_FLOOR")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Internal bookkeeping: no card costs the floor, so this glyph
+    /// is never rendered as a price.
+    ///
+    /// It shares the Fanfare icon it is a property OF. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/fanfare.png";
 }
 
 /// <summary>
@@ -263,6 +311,19 @@ public sealed class FurinaBurstResource : BasicCustomResource
     public FurinaBurstResource() : base("KLEEMOD_FURINA_BURST")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Her kit card costs the full meter, so this is a price a
+    /// player reads.
+    ///
+    /// The Burst icon is mod-wide and ships once, in Klee's namespace
+    /// (<c>ImageGen/images/powers/burst.png</c>); there is no per-character
+    /// Burst art today and this change commissions none. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://klee/powers/burst.png";
 
     /// <summary>
     /// The meter's ceiling, on the wire (`EB-181`). The bridge's resource

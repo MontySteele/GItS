@@ -90,6 +90,39 @@ public sealed class KleeBurstResource : BasicCustomResource
     }
 
     /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751), and the reason every one of our twelve resources now declares
+    /// one.
+    ///
+    /// BaseLib 3.4.5 -> 3.4.7 (Steam moved the Workshop item; re-pinned in
+    /// #483) changed <c>BasicCustomResource.RegisterResourceVisuals</c>: it
+    /// now registers, through <c>ExtraCardUi.RegisterCreateCardUiElement</c>,
+    /// a <c>new NAdditionalCostDisplay(Id, TexturePath, MainColor)</c> for
+    /// EVERY card node, and that constructor calls
+    /// <c>ResourceLoader.Load&lt;Texture2D&gt;(imagePath, ...)</c>
+    /// UNCONDITIONALLY -- there is no empty-path arm.
+    ///
+    /// The base declaration is <c>public virtual string TexturePath =&gt;
+    /// "";</c>, so a subclass that does not override it hands the loader
+    /// <c>res://</c> and the engine answers <c>ERROR: No loader found for
+    /// resource: res:// (expected type: unknown)</c> ONCE PER RESOURCE PER
+    /// CARD. Twelve resources against a ten-card grid -- Neow's removal grid,
+    /// a hand, a reward -- is 120 error lines, and the understudy's
+    /// error-storm guard tears the lane down on them.
+    ///
+    /// So the fix is one line per class and nothing else: a path to a texture
+    /// the mod ALREADY SHIPS in klee.pck. No new art, no new pck entry, and no
+    /// change to what any badge draws -- our own cost badge is <see
+    /// cref="KleeMod.Vfx.MeterCostBadge"/>, which is untouched.
+    /// <c>KleeResourceTexturePathTests</c> pins all twelve.
+    ///
+    /// Klee's Burst meter wears the shipped Burst icon
+    /// (<c>ImageGen/images/powers/burst.png</c>, packed at
+    /// <c>res://klee/powers/burst.png</c>).
+    /// </summary>
+    public override string TexturePath => "res://klee/powers/burst.png";
+
+    /// <summary>
     /// The meter's ceiling, on the wire (`EB-181`). The bridge's resource
     /// snapshot is an id and an amount, so a meter reached a blind page with
     /// no maximum and the render had to say so on every meter row it printed.
