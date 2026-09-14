@@ -1,4 +1,4 @@
-Status: OPEN (four A picks, §9; paper only, no row moves until ruled)
+Status: RULED R271 2026-09-14
 
 # Klee pool consolidation: two cuts, three repairs, a shelf, and the slices the space is for
 
