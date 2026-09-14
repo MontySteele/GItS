@@ -281,8 +281,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R269 | 2026-09-08 | (2026-09-08): Furina is the Stage; build it, the healing law gets the pet clause, the Tide and the concepts close | `a051eaf` |
 | R270 | 2026-09-08 | (2026-09-08): what Spark is for, option 1; Spark is a currency, its income stays, and pool pass two gives it things to buy, Regent's Stars the comparison | `add2d4f` |
 | R271 | 2026-09-14 | (2026-09-14): the Klee pool consolidation at its four defaults; two cuts, Booby Trap, Grounded on no Set off, Return to Sender capped, the shelf, Mines first | `d3739dd` |
+| R272 | 2026-09-14 | (2026-09-14): the Teyvat run frame; the freeze lifts for the non-mechanical layer, two nations per act with act 1 Mondstadt or Liyue, music as locally… | `40afdc6` |
 
-270 rows over the R1..R271 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 159 from a commit message, 0 unresolved.
+271 rows over the R1..R272 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 160 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
