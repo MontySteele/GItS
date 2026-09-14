@@ -107,7 +107,7 @@ to buy, priced against Regent's Stars. The packet is in `review/ruled/`.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `klee-opening-bank 5.1` | **CHOOSE** the opening Spark bank, round 26 finding the pass's Regent prices bind only on turn one where the bank is 1: (1, default) open every combat at 3 Sparks (Regent's Divine Right), rule 4 changes, [USER] plays; (2) reprice the six sinks to Klee's bank (1/1/1+1/2/2/4), rule 4 untouched; (3) as it is, one more lane. -> review/active/klee-overhaul-round-26-2026-09-08.md | HELD (R271 §3): returns with the first read of the consolidated pool, evidence attached | Klee r26; pass two; R270; R271 |
+| `klee-opening-bank 5.1` | **CHOOSE** the opening Spark bank, round 26 finding the pass's Regent prices bind only on turn one where the bank is 1: (1, default) open every combat at 3 Sparks (Regent's Divine Right), rule 4 changes, [USER] plays; (2) reprice the six sinks to Klee's bank (1/1/1+1/2/2/4), rule 4 untouched; (3) as it is, one more lane. -> review/active/klee-overhaul-round-26-2026-09-08.md | HELD (R271 §3) until the consolidated pool is read | Klee r26; R270; R271 |
 
 → **`review/ruled/sitting-2026-08-30.md` is CLOSED by R224 (2026-08-30).**
 Every row it covered has left this register — `M47`, `M49`, `M50`, `M52`,
