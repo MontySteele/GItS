@@ -37,6 +37,14 @@ art/g12_captures/
 # review/active/livegame-captures-2026-08-08.md.
 art/eb52_captures/
 
+# Tier F media for the Teyvat run frame (operations/media.md): the official
+# music tracks and enemy/NPC still portraits [USER] supplies by hand, plus the
+# processed copies the packager reads. Same rule and the same reason as the art
+# above — only the ledgers (media/MUSIC.tsv, media/PORTRAITS.tsv, which carry
+# each file's provenance for the pre-public copyright pass) are tracked.
+media/raw/
+media/out/
+
 # Raw art asset zips are shared out-of-band and dropped in the repo root on
 # purpose. They must never be committed (same §9 reasoning as above).
 *.zip
