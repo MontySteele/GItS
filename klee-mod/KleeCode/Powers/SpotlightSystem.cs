@@ -29,6 +29,19 @@ public sealed class SpotlightModeResource : BasicCustomResource
     public SpotlightModeResource() : base("KLEEMOD_SPOTLIGHT_MODE")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Spotlight bookkeeping: no card costs it, so this glyph is
+    /// never rendered as a price; it only has to LOAD.
+    ///
+    /// All four Spotlight fields share the shipped Limelight power icon
+    /// (<c>ImageGen/images/furina/powers/limelight.png</c>), which is the
+    /// Spotlight's own iconography. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/limelight.png";
 }
 
 public sealed class SpotlightMovedResource : BasicCustomResource
@@ -36,6 +49,19 @@ public sealed class SpotlightMovedResource : BasicCustomResource
     public SpotlightMovedResource() : base("KLEEMOD_SPOTLIGHT_MOVED")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Spotlight bookkeeping: no card costs it, so this glyph is
+    /// never rendered as a price; it only has to LOAD.
+    ///
+    /// All four Spotlight fields share the shipped Limelight power icon
+    /// (<c>ImageGen/images/furina/powers/limelight.png</c>), which is the
+    /// Spotlight's own iconography. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/limelight.png";
 }
 
 public sealed class SpotlightPlaysResource : BasicCustomResource
@@ -43,6 +69,19 @@ public sealed class SpotlightPlaysResource : BasicCustomResource
     public SpotlightPlaysResource() : base("KLEEMOD_SPOTLIGHT_PLAYS")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Spotlight bookkeeping: no card costs it, so this glyph is
+    /// never rendered as a price; it only has to LOAD.
+    ///
+    /// All four Spotlight fields share the shipped Limelight power icon
+    /// (<c>ImageGen/images/furina/powers/limelight.png</c>), which is the
+    /// Spotlight's own iconography. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/limelight.png";
 }
 
 public sealed class SpotlightSpendBoostResource : BasicCustomResource
@@ -50,6 +89,19 @@ public sealed class SpotlightSpendBoostResource : BasicCustomResource
     public SpotlightSpendBoostResource() : base("KLEEMOD_SPOTLIGHT_SPEND_BOOST")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Spotlight bookkeeping: no card costs it, so this glyph is
+    /// never rendered as a price; it only has to LOAD.
+    ///
+    /// All four Spotlight fields share the shipped Limelight power icon
+    /// (<c>ImageGen/images/furina/powers/limelight.png</c>), which is the
+    /// Spotlight's own iconography. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://furina/powers/limelight.png";
 }
 
 /// <summary>

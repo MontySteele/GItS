@@ -140,6 +140,19 @@ public sealed class ChargeResource : BasicCustomResource
     }
 
     /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Charge IS a card cost, so this is a price a player reads off
+    /// a face.
+    ///
+    /// The meter's own glyph, drawn for the cost badge by
+    /// <c>tools/gen_meter_glyphs.py</c> and packed from
+    /// <c>ImageGen/images/kokomi/powers/charge.png</c>. See <see
+    /// cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why every one
+    /// of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://kokomi/powers/charge.png";
+
+    /// <summary>
     /// No card has a Charge cost, so there is no shared cost modification to
     /// apply. False keeps cost-reduction effects from pretending otherwise.
     /// </summary>
@@ -978,6 +991,17 @@ public sealed class KokomiBurstResource : BasicCustomResource
     public KokomiBurstResource() : base("KLEEMOD_KOKOMI_BURST")
     {
     }
+
+    /// <summary>
+    /// The glyph BaseLib 3.4.7 loads for this resource's per-card cost display
+    /// (EB-751). Her kit card costs the full meter, so this is a price a
+    /// player reads.
+    ///
+    /// The Burst icon is mod-wide and ships once, in Klee's namespace. See
+    /// <see cref="KleeMod.Powers.KleeBurstResource.TexturePath"/> for why
+    /// every one of our resources declares one.
+    /// </summary>
+    public override string TexturePath => "res://klee/powers/burst.png";
 
     /// <summary>
     /// The meter's ceiling, on the wire (`EB-181`). The bridge's resource
