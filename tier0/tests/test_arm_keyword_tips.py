@@ -168,14 +168,16 @@ def test_the_grounded_tip_states_the_condition_and_defers_on_the_payout():
     the tip must not quote a number a second card would contradict."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "that pays at the start of your turn, but " in tips
-    assert "only if you have a [gold]Bomb[/gold] on the field. Its "         in tips
+    assert ("only if you played no [gold]Set off[/gold] card last turn. "
+            "Its ") in tips
     assert "card prints what it pays." in tips
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
     # `EB-622`: the payout moved 6 -> 4 (upgrade still `+2`, so 6 upgraded).
     assert "gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
-    # `EB-516`: the sheet row's own condition, held in step with the tip.
-    assert ("if you have a [gold]Bomb[/gold] on the field, gain 4 "
+    # `EB-749` (R271 sec.5.1): the sheet row's own condition, held in step
+    # with the tip.
+    assert ("if you played no [gold]Set off[/gold] card last turn, gain 4 "
             "[gold]Block[/gold]") in sheet
 
 
@@ -403,8 +405,11 @@ def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
     face PRINTS the word", so all seven silently lost the definition of the
     word they charge in. A price shown as a badge is still the keyword on the
     card, so the row's own `spend_spark` raises the tip instead."""
-    for stem in ("ProtoKoFwoosh", "ProtoKoTinderToss", "ProtoKoQuickFuse",
-                 "ProtoKoBangBang", "ProtoKoPowderCharge", "ProtoKoDigIn",
+    # `EB-749` re-pointed two of the seven: Fwoosh! was cut and Powder Charge
+    # became Booby Trap. Pocket Match is the same Spark-priced Set off shape
+    # Fwoosh! was, so the rule is still asked of seven rows.
+    for stem in ("ProtoKoPocketMatch", "ProtoKoTinderToss", "ProtoKoQuickFuse",
+                 "ProtoKoBangBang", "ProtoKoBoobyTrap", "ProtoKoDigIn",
                  "ProtoKoSugarRush"):
         text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         # The FACE, not the file: `SparkPower.CanSpend` is in every one of
@@ -528,7 +533,8 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     derived from the row's own effects.
 
     THE FIND (Klee r21 lane 1, (c) 2 and (c) 3). Careful Arrangement on a bare
-    board and Fwoosh! on another were ACCEPTED: the Energy went, the Spark
+    board and Fwoosh! on another were ACCEPTED (`EB-749` has since cut Fwoosh!;
+    Pocket Match below is the same Spark-priced Set off shape): the Energy went, the Spark
     went, nothing resolved. On the same screen a Spark-priced card the bank was
     short for printed CANNOT BE PLAYED and named the price and the bank.
 
@@ -539,19 +545,21 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     # EVERY SET OFF AND THE MERGE, and nothing else.
     readers = {rid for rid, row in rows.items() if gen.reads_the_field(row)}
     assert "proto_ko_careful_arrangement" in readers
-    assert "proto_ko_fwoosh" in readers
+    assert "proto_ko_pocket_match" in readers
     assert "proto_ko_jumpy_dumpty" not in readers      # a placer reads nothing
     # THE TWO SENTENCES. A row with a line of its own still does that line; a
     # row that is nothing but the Bomb work does nothing whatever.
     blanks = {rid for rid in readers if not gen.empty_field_tip_arg(rows[rid])}
+    # `EB-749`: Fireworks Show was CUT and merged into Tinder Toss, which has a
+    # damage line of its own and is therefore not blank.
     assert blanks == {"proto_ko_careful_arrangement", "proto_ko_the_big_one",
-                      "proto_ko_quick_fuse", "proto_ko_fireworks_show"}
+                      "proto_ko_quick_fuse"}
     # AND THE ATTACH REACHED THE EMITTED C#, with the derived argument on it.
     merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
         encoding="utf-8")
     assert "ArmKeywordTips.ForEmptyField(" in merge and ", this, false)" in merge
-    fwoosh = (PROTOTYPE_DIR / "ProtoKoFwoosh.cs").read_text(encoding="utf-8")
-    assert "ArmKeywordTips.ForEmptyField(" in fwoosh and ", this, true)" in fwoosh
+    match = (PROTOTYPE_DIR / "ProtoKoPocketMatch.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForEmptyField(" in match and ", this, true)" in match
 
 
 def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():

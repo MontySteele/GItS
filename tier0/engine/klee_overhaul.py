@@ -342,6 +342,12 @@ def roll_to(state: CombatState, round_: int) -> None:
         return
     state.ko_set_off_last_turn = (state.ko_set_off_this_turn
                                   if round_ == state.ko_round + 1 else 0)
+    # `EB-749`, on the same stamp and for the same reason: a skipped round
+    # reports an honest zero rather than a stale count, so Grounded cannot be
+    # switched off by a turn Klee never took.
+    state.ko_set_off_cards_last_turn = (state.ko_set_off_cards_this_turn
+                                        if round_ == state.ko_round + 1 else 0)
+    state.ko_set_off_cards_this_turn = 0
     state.ko_set_off_this_turn = 0
     state.ko_reacted_this_turn = 0
     state.ko_hexerei_this_turn = 0
@@ -814,25 +820,33 @@ def turn_start_late(state: CombatState) -> None:
         state.emit("ko_blazing_delight", energy=n, cards=n)
         state.draw(n)
 
-    # GROUNDED: "if you have a Bomb on the field, gain N Block and 1 Spark."
+    # GROUNDED: "if you played no Set off CARD last turn, gain N Block and 1
+    # Spark."
     #
-    # `EB-516` REPLACED THE CONDITION (Klee r18, packet sec.4 item 1). It used
-    # to read "if none of your Bombs went off last turn", and two seats in two
-    # rounds read that as paying for skipping the loop; the r18 ledgers say
-    # why, since under this relic something goes off on most turns even in a
-    # Cook deck (Mines fire on the enemy's beat), so the card paid ONCE in five
-    # fights. The new condition keys the payout to COOKING rather than to not
-    # cashing, and leaves the card conditional (brief sec.6, C4).
+    # `EB-749` (R271 sec.5.1) IS THE CONDITION IT HAS NOW, and the history is
+    # two moves rather than one. It first read "if none of your BOMBS WENT OFF
+    # last turn", and two seats in two rounds called that a trap in its own
+    # deck: under this relic something goes off on most turns even in a Cook
+    # deck, because Mines fire on the ENEMY's beat, so the card paid once in
+    # five fights. `EB-516` answered that by keying the payout to COOKING
+    # instead ("if you have a Bomb on the field"), which was payable but paid a
+    # deck for a board state it was holding anyway. R271 keys it to the
+    # PLAYER'S OWN ACT, and the two interactions that made the first version a
+    # trap are excepted BY CONSTRUCTION rather than by a clause:
     #
-    # "A BOMB ON THE FIELD" IS `any_bomb_placed`: any Bomb or Mine of hers on
-    # any LIVING enemy. A Mine alone pays -- a Mine IS a Bomb (`EB-373`) -- and
-    # a turn on which one Bomb went off while another is still cooking pays,
-    # which is the reading the old counter could not express.
+    #   * a MINE going off because its enemy attacked is not a Set off CARD, so
+    #     Cook's Mines no longer switch Grounded off;
+    #   * SPARKS 'N' SPLASH is not a Set off card either, so a turn on which
+    #     only it fired is still paid next turn.
+    #
+    # THE READ IS `ko_set_off_cards_last_turn`, whose one write site is
+    # `note_set_off_card` -- called from `effects._op_set_off`, which a Mine
+    # reaches with `card=None` and which a Power's end-of-turn hit never
+    # reaches at all. So neither exception is a special case here.
     #
     # BEFORE GROWTH IS IMMATERIAL, and it is said rather than relied on: this
-    # hook runs after `turn_start`, and that hook GROWS and neither places nor
-    # removes a charge (rule 7), so the set of enemies holding one is the same
-    # either side of it.
+    # hook runs after `turn_start`, that hook GROWS and neither places nor
+    # removes a charge (rule 7), and nothing between the two plays a card.
     #
     # THE SPARK IS `EB-344` (ruled R248) AND IT RIDES THE SAME CONDITION, so a
     # turn that grants no Block grants no Spark either and there is no second
@@ -848,10 +862,12 @@ def turn_start_late(state: CombatState) -> None:
     # Cold-Blooded Strike's stand-in makes Grounded pay this turn whatever its
     # condition says, so the cover story is read HERE and not by zeroing the
     # explosion counter, which Jean's stand-in also reads. `grounded_blind` is
-    # False on every tree with the companion arm off. `EB-516` left the read
-    # where it was and moved only the condition beside it, and `EB-576` brought
-    # the stand-in's PRINTED words the rest of the way: the face now reads
-    # "counts a Bomb as on the field", which is what this OR has always done.
+    # False on every tree with the companion arm off. `EB-749` LEFT THIS WIRING
+    # WHERE IT WAS and did not rewrite the stand-in's printed clause with it:
+    # that face still says "counts a Bomb as on the field", a condition
+    # Grounded no longer has. R271 rules Klee's face and says nothing about
+    # that companion row, so the force-pay stands and the stale face is NAMED
+    # in the `EB-749` packet rather than redesigned here.
     from tier0.engine import companion_standins    # late import: cycle
 
     # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the
@@ -863,7 +879,7 @@ def turn_start_late(state: CombatState) -> None:
     n = state.player.powers.get(GROUNDED, 0)
     if not n:
         return
-    paid = bool(any_bomb_placed(state)
+    paid = bool(state.ko_set_off_cards_last_turn == 0
                 or companion_standins.grounded_blind(state))
     if not paid:
         state.emit("ko_grounded", amount=0, spark=0, paid=False)
@@ -1063,10 +1079,19 @@ def note_set_off_card(state: CombatState, card: Optional[Card]) -> None:
 
     A MINE PASSES `None` and is declined here: a Mine answers an intent and is
     no card, so there is nothing for the player to take back.
+
+    GROUNDED'S COUNTER RIDES THE SAME SITE (`EB-749`, R271 sec.5.1). "You
+    played no Set off CARD last turn" and "the last Set off card you played"
+    are two readings of ONE act, so they are counted in one place and cannot
+    disagree: the Mine declined above is the ruling's first stated exception,
+    and Sparks 'n' Splash -- a Power's end-of-turn hit, which never reaches
+    `_op_set_off` -- is its second, excepted by construction rather than by a
+    clause here. Twin: `KleeOverhaulLedger.NoteSetOffCardPlayed`.
     """
     if not live(state) or card is None:
         return
     state.ko_last_set_off_card = card
+    state.ko_set_off_cards_this_turn += 1
 
 
 def return_last_set_off(state: CombatState) -> Optional[Card]:
@@ -1118,10 +1143,13 @@ def block_absorbed(state: CombatState, enemy: Enemy, blocked: int,
     conservative reading (R212's one-way rule): the rider fires on FEWER hits
     than marked-last would, and a single pool cannot say which coin was spent.
 
-    THE CHARGE IS `blocked`, THE WHOLE ABSORBED AMOUNT, and NOT the mark. The
-    face says "damage this Block absorbs"; the mark answers whether the rider
-    is live, and the ruled row does not cap the Bomb at the Block the card
-    granted. An 8-mark eating a 20 therefore plants a 20 and the mark is gone.
+    THE CHARGE IS CAPPED AT THE ALLOWANCE (`EB-749`, R271 sec.5.2), and the
+    allowance is the Block THIS CARD granted -- 8, or 11 upgraded, and whatever
+    a Block modifier made of that grant. It is ONE allowance spent across every
+    hit of the turn and never an independent cap per hit: an 8-mark eating a 20
+    plants 8 and is spent, and two hits of 6 into the same 8-mark plant 6 and
+    then 2. The face keeps "this Block" and is now true, which is the whole of
+    what the repair is for.
 
     NO PAYOUT BACK UNDER THE MARK, unlike Thoma's: the payout is a charge on the
     enemy, not Block, so the mark shrinks with every absorption exactly as the
@@ -1140,9 +1168,15 @@ def block_absorbed(state: CombatState, enemy: Enemy, blocked: int,
     mark = min(p.powers.get(RETURN_TO_SENDER, 0), block_before)
     if mark <= 0:
         return
-    if enemy.alive:
-        state.emit("ko_return_to_sender", target=enemy.name, size=int(blocked))
-        place(state, enemy, int(blocked))
+    # `EB-749`: the charge is `min(blocked, mark)` and not `blocked`. The mark
+    # is already the one allowance -- it is clamped to standing Block above and
+    # shrunk by whatever each hit absorbed below -- so capping the plant to it
+    # is the whole of the repair, and the second hit of a turn is paid out of
+    # what the first left.
+    charge = min(int(blocked), int(mark))
+    if enemy.alive and charge > 0:
+        state.emit("ko_return_to_sender", target=enemy.name, size=charge)
+        place(state, enemy, charge)
     left = mark - blocked
     if left > 0:
         p.powers[RETURN_TO_SENDER] = left

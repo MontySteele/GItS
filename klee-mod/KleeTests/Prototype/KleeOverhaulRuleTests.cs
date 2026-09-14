@@ -540,27 +540,28 @@ public class KleeOverhaulRuleTests
         // therefore grants NEITHER, because there is one place to return from
         // and it is above both.
         //
-        // `EB-516` MOVED WHAT THE GUARD READS and left the shape: it asked the
-        // explosion ledger and now asks the BOARD, so the pin asks for
-        // `ProtoBombPower.AnyPlacedBy` where it asked for the ledger, and adds
-        // the ledger's ABSENCE -- reading both would be two conditions.
+        // `EB-749` MOVED WHAT THE GUARD READS and left the shape: `EB-516`
+        // had it asking the BOARD, and R271 sec.5.1 has it asking the LEDGER's
+        // count of Set off CARDS played last turn. So the pin asks for
+        // `KleeOverhaulLedger.For` where it asked for the board, and adds the
+        // board's ABSENCE -- reading both would be two conditions.
         var hook = typeof(GroundedPower)
             .GetMethod("AfterPlayerTurnStart", HeadlessGame.All)!;
         var sequence = Il.CallSequence(hook).ToList();
 
-        var boardAt = sequence.FindIndex(c => c == "ProtoBombPower.AnyPlacedBy");
+        var ledgerAt = sequence.FindIndex(c => c == "KleeOverhaulLedger.For");
         var blockAt = sequence.FindIndex(c => c == "CreatureCmd.GainBlock");
         var sparkAt = sequence.FindIndex(c => c == "SparkPower.Gain");
 
-        Assert.True(boardAt >= 0, "the guard reads the board");
-        Assert.True(blockAt > boardAt, "the Block is behind the guard");
+        Assert.True(ledgerAt >= 0, "the guard reads the ledger");
+        Assert.True(blockAt > ledgerAt, "the Block is behind the guard");
         Assert.True(sparkAt > blockAt, "the Spark is behind the same guard");
 
-        // And the board is consulted ONCE, so there is no second reading of
-        // "cooking" for the two halves to drift apart on -- and the explosion
-        // ledger is not consulted at all.
-        Assert.Single(sequence, c => c == "ProtoBombPower.AnyPlacedBy");
-        Assert.DoesNotContain("KleeOverhaulLedger.For", sequence);
+        // And the ledger is consulted ONCE, so there is no second reading of
+        // "quiet" for the two halves to drift apart on -- and the board is not
+        // consulted at all.
+        Assert.Single(sequence, c => c == "KleeOverhaulLedger.For");
+        Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", sequence);
     }
 
     [Fact]

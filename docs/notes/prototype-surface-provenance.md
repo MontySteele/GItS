@@ -2412,8 +2412,10 @@ plain pressure, which is what separates it from every detonator beside it.
 **`proto_ko_pocket_match` -- the Spark-paid detonator that stays.**
 Round 16's turn one is what it is for: Bang Bang! unplayable at 1 Spark with
 no Set off in hand. The opening Spark pays this, and Retain means it is still
-there on the turn the pile is worth cashing. Fwoosh! with Retain and one less
-damage; no new rule.
+there on the turn the pile is worth cashing. It was Fwoosh! with Retain and
+one less damage; no new rule. R271 sec.4 item 1 then CUT Fwoosh! on exactly
+that reading -- Retain is what the seats drafted the pair for, and one point of
+damage is not a decision -- so this row is the whole of that shape now.
 
 **`proto_ko_bombs_away` -- the placer that is not a Skill.**
 Round 13's Smoggy reading: one Skill per turn against a kit whose placers are
@@ -2421,24 +2423,14 @@ Skills by rule. Fish-Flavored Bait and Bang Bang! are already Attacks that
 place; this is the wide one. Against Mine Toss (1 energy, Skill, Mine 4 on
 ALL): a hit now and half the charge, and no Mine. No new rule.
 
-**`proto_ko_fireworks_show` -- Set off ALL, and the first Spark price an
-upgrade moves.** `set_off` already had `target: all_enemies` (Flame Dance);
-this is that spelling with the aura filter off and no hit of its own, which is
-what puts it behind the `EB-261` gate -- its whole body is a damage-less Set
-off, so it refuses a Bomb-less board rather than eating two Sparks for
-nothing.
-
-THE UPGRADE IS THE NEW PART. No delta on any sheet had ever moved a Spark
-price, and this one cuts it to 1. It is `spark_price: -1`, it bumps the op's
-own `amount` in tier0 (so `combat.spark_price`'s gate and `spend_sparks`'
-payment move together by construction), and in C# it is a play-time
-`IsUpgraded` read used by BOTH `PrintedSparkPrice` and the `SparkPower.Spend`
-beside it -- one expression, so the badge, the gate and the payment cannot
-drift. THE FACE PRINTS NOTHING FOR IT, and that is `text-conventions`' own
-rule: a Spark price sits in the cost slot and the body does not restate it. So
-the fifth channel an upgrade can show through is the Spark BADGE, and
-`gen_prototype_cards`' upgrade-visibility gate learned to read it -- without
-that it would have called a real, visible upgrade invisible.
+**`proto_ko_fireworks_show` -- CUT by R271 sec.4 item 2 (`EB-749`).** It was
+Set off ALL with no hit of its own, at 2 Sparks with a `spark_price: -1`
+upgrade. Round 22 read it as "a strictly worse Tinder Toss" and the
+consolidation's comparison pass named the merge: Tinder Toss now carries the
+line at 1 Spark with 3 damage behind it, and this row is off the surface. The
+Spark-price delta it introduced is not orphaned -- three `proto_spark_*` rows
+still spell `spark_price: -1`, and `gen_prototype_cards`' upgrade-visibility
+gate still reads the Spark badge as an upgrade channel.
 
 **`proto_ko_kindling` -- the React shelf's floor.**
 Round 13 read Catalytic Converter as dead in a mono-Pyro deck by its own
@@ -3524,3 +3516,60 @@ cases). Both new powers borrow an existing icon; art is owed at acceptance.
 NOT MEASURED, NOT QUOTABLE. Prototype numbers, D by the ladder (R215 B). What
 the pass owes is round 26: a natural lane that meets the rows at the draft and
 an assembled lane built on them, read against round 25's figures.
+
+
+## R271 stage one (`EB-749`, 2026-09-14)
+
+The ruled consolidation's first build: two cuts, one redesign and three
+repairs. `review/ruled/klee-pool-consolidation-2026-09-09.md` sec.4, sec.5 and
+sec.8 are the spec and every number on a face below is its stated D default.
+
+**`proto_ko_booby_trap` -- Powder Charge's shape, a Mine in its body.**
+Powder Charge was Pop! with a price, and the SHAPE the seats praised was the
+0-Energy placer bought from the bank. That shape stays and the body becomes the
+pool's only single-target Mine: Common Skill, 0 Energy, 1 Spark, "Place a Mine
+5", upgrade `bomb_size: +3` -- Powder Charge's own delta, unchanged. No new
+rule and no second Mine implementation: a Mine is a Bomb that also goes off
+when its own enemy attacks Klee, before the hit, and this row is Mine Toss's
+`plant_bomb ... mine: true` with `target: enemy` instead of `all_enemies`. The
+decision it asks is which enemy is about to swing.
+
+**`proto_ko_tinder_toss` -- the merge, and the end of the random target.**
+"Set off ALL enemies. Deal 3 damage to ALL enemies.", Common Attack, 0 Energy,
+1 Spark, upgrade `damage: +2`. It takes the brief's shape and Fireworks Show's
+slot. The ORDER is the two ops' order and is part of the rule: `set_off` on
+every enemy resolves first, then the 3 lands on all of them. The price is a D
+default at 1 Spark because the row replaces the pool's 1-Spark multi-target
+card; Rapid Fire keeps the repeated-Set-off line, and the random-target
+complaint round 11 raised through `EB-595` is gone.
+
+**`proto_ko_grounded` -- the quiet-turn rule, third condition.**
+"At the start of your turn, if you played no Set off card last turn, gain 4
+Block and 1 Spark." The card has now had three conditions and the history is
+the point: "none of your Bombs went off last turn" was a trap, because Mines
+fire on the ENEMY's beat and the card paid once in five fights; `EB-516`'s "if
+you have a Bomb on the field" was payable but paid a Cook deck for a board it
+was holding anyway. R271 keys it to the player's own ACT. The two interactions
+the ruling states are excepted BY CONSTRUCTION and not by a clause, because
+"Set off card" is counted at the one site a card-facing Set off resolves
+(`klee_overhaul.note_set_off_card`, `KleeOverhaulLedger.NoteSetOffCardPlayed`):
+a Mine answering an attack passes no card there, and Sparks 'n' Splash is a
+Power's end-of-turn hit that never reaches it. So a Cook deck's Mines no longer
+switch Grounded off, and a turn on which only Splash fired is still paid.
+
+KAEYA'S COLD-BLOODED STRIKE IS NOW STALE AND IS LEFT STANDING. That companion
+stand-in prints "This turn, Grounded counts a Bomb as on the field", a
+condition Grounded no longer has, and its power still forces the payout. R271
+rules Klee's face and says nothing about that row, so `EB-749` moved the wiring
+nowhere and redesigned nothing; the face is named here instead, for whoever
+rules the companion pool next.
+
+**`proto_ko_return_to_sender` -- the cap the face already claimed.**
+The conversion of absorbed damage into a Bomb on the attacker is capped at the
+Block the card granted -- 8, or 11 upgraded, and whatever a Block modifier made
+of that grant -- as ONE allowance spent across every hit of the turn, never an
+independent cap per hit. The mark already carried the allowance (it is clamped
+to standing Block on the way in and shrunk by whatever each hit absorbed), so
+the repair is the PLANT reading the mark: `min(blocked, mark)` in both engines.
+An 8-mark eating a 20 plants 8 and is spent; two hits of 6 into the same
+8-mark plant 6 and then 2. The face keeps "this Block" and is now true.

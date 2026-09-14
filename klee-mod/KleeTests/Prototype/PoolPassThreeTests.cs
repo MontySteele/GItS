@@ -239,39 +239,48 @@ public class PoolPassThreeTests
     // ---- Fireworks Show: Set off ALL, at a price the upgrade cuts ----------
 
     [Fact]
-    public void Fireworks_show_declares_a_price_the_upgrade_cuts()
+    public void A_spark_price_an_upgrade_cuts_still_has_a_row()
     {
-        // THE FIRST UPGRADE ON ANY SHEET THAT MOVES A SPARK PRICE. The face
-        // prints nothing for it -- a Spark price sits in the cost slot and the
-        // body does not restate it -- so what the player sees move is the
-        // BADGE, which renders `PrintedSparkPrice`. The gate reads the same
-        // property back through `SparkCost.PriceOf`, so the price shown, the
-        // price gated on and the price charged are one expression. Twin:
-        // `test_fireworks_show_upgraded_charges_one_spark`.
-        var card = new ProtoKoFireworksShow();
-        Assert.Equal(2, card.PrintedSparkPrice);
-        Assert.Equal(2, SparkCost.PriceOf(card));
+        // THE ONLY UPGRADE KIND THAT MOVES A SPARK PRICE. The face prints
+        // nothing for it -- a Spark price sits in the cost slot and the body
+        // does not restate it -- so what the player sees move is the BADGE,
+        // which renders `PrintedSparkPrice`. The gate reads the same property
+        // back through `SparkCost.PriceOf`, so the price shown, the price
+        // gated on and the price charged are one expression. It rode Fireworks
+        // Show until `EB-749` cut that row; Once More! spells the same delta.
+        // Twin: `test_once_more_upgraded_charges_one_spark_less`.
+        var card = new ProtoKoOnceMore();
+        Assert.Equal(3, card.PrintedSparkPrice);
+        Assert.Equal(3, SparkCost.PriceOf(card));
 
-        var source = Printed("Cards/Prototype/Generated/ProtoKoFireworksShow.cs");
-        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 1 : 2)", source);
+        var source = Printed("Cards/Prototype/Generated/ProtoKoOnceMore.cs");
+        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 2 : 3)", source);
         Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
-                        + "(IsUpgraded ? 1 : 2), this)", source);
+                        + "(IsUpgraded ? 2 : 3), this)", source);
     }
 
     [Fact]
-    public void Fireworks_show_sets_off_all_enemies_and_deals_nothing_itself()
+    public void Tinder_toss_sets_off_all_enemies_and_then_hits_them_all()
     {
-        // `SetOffAll` with the aura filter OFF and a literal 0 for the card's
-        // own hit -- Flame Dance's spelling, twice as expensive, on every
-        // enemy and with no damage of its own. That absence is what makes the
-        // row refuse a Bomb-less board (`EB-261`) rather than fizzle.
-        var source = Printed("Cards/Prototype/Generated/ProtoKoFireworksShow.cs");
-        Assert.Contains("ProtoBombPower.SetOffAll(choiceContext, "
-                        + "Owner.Creature, this, cardPlay, 0, "
-                        + "nonPyroAuraOnly: false)", source);
-        Assert.Contains("no enemy is holding a Bomb", source);
-        Assert.True(typeof(IUnplayableReasonCard)
-                        .IsAssignableFrom(typeof(ProtoKoFireworksShow)));
+        // `EB-749` (R271 sec.5.3): Tinder Toss took Fireworks Show's slot in
+        // the ruling that cut that row. `SetOffAll` with the aura filter OFF
+        // and a literal 0 for the card's own hit -- Flame Dance's spelling on
+        // every enemy -- and then the printed 3 to all, IN THAT ORDER, which
+        // is the rule and not an implementation detail. Because it HAS a line
+        // of its own it is not `EB-261`-gated and does not refuse a bare
+        // board.
+        var source = Printed("Cards/Prototype/Generated/ProtoKoTinderToss.cs");
+        var setOff = source.IndexOf("ProtoBombPower.SetOffAll(choiceContext, "
+                                    + "Owner.Creature, this, cardPlay, 0, "
+                                    + "nonPyroAuraOnly: false)",
+                                    System.StringComparison.Ordinal);
+        var hit = source.IndexOf("TargetingAllOpponents",
+                                 System.StringComparison.Ordinal);
+        Assert.True(setOff >= 0 && hit > setOff,
+                    "Set off resolves on every enemy before the 3 lands");
+        Assert.DoesNotContain("no enemy is holding a Bomb", source);
+        Assert.False(typeof(IUnplayableReasonCard)
+                         .IsAssignableFrom(typeof(ProtoKoTinderToss)));
     }
 
     // ---- Long Fuse, and the rising hand cost no row prints ----------------
@@ -401,7 +410,7 @@ public class PoolPassThreeTests
                  {
                      "ProtoKoLongFuse", "ProtoKoAllOfMyTreasures",
                      "ProtoKoFishBlasting", "ProtoKoPocketMatch",
-                     "ProtoKoBombsAway", "ProtoKoFireworksShow",
+                     "ProtoKoBombsAway",
                      "ProtoKoKindling", "ProtoKoFlashPoint",
                      "ProtoKoVermillionPact", "ProtoKoSplitCharge",
                  })

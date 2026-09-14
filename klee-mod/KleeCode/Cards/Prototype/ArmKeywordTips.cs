@@ -678,11 +678,17 @@ public static class ArmKeywordTips
     /// not the run holds Grounded, which is the state the seat was actually in.
     ///
     /// WHAT IT SAYS AND WHAT IT LEAVES TO THE CARD. The CONDITION is the whole
-    /// rule and it is what a Kaeya reader needs: `EB-516` moved it to "you have
-    /// a Bomb on the field" and the tip moved with it. What Grounded pays for
-    /// that is the Power card's own printed line and moves with its upgrade, so
-    /// the tip defers to it rather than quoting a number that a second card
-    /// would contradict.
+    /// rule and it is what a Kaeya reader needs: `EB-749` (R271 sec.5.1) moved
+    /// it to "you played no Set off card last turn" and the tip moved with it.
+    /// What Grounded pays for that is the Power card's own printed line and
+    /// moves with its upgrade, so the tip defers to it rather than quoting a
+    /// number that a second card would contradict.
+    ///
+    /// KAEYA'S OWN CLAUSE IS NOW STALE and is deliberately left standing:
+    /// "counts a Bomb as on the field" names a condition Grounded no longer
+    /// has. R271 rules Klee's face and says nothing about that companion row,
+    /// so the force-pay behaviour stands, the face is not redesigned here, and
+    /// the mismatch is NAMED in the `EB-749` packet instead.
     /// </summary>
     /// ONE METHOD WITH AN OPTIONAL CARD, and not an overload: a POWER raises
     /// this tip too -- the buff Kaeya's card leaves behind prints the word for
@@ -696,7 +702,7 @@ public static class ArmKeywordTips
             // A card TYPE is a plain word, never golded
             // (`docs/current/text-conventions.md`, and the lint bites).
             "A Power that pays at the start of your turn, but "
-          + "only if you have a [gold]Bomb[/gold] on the field. Its "
+          + "only if you played no [gold]Set off[/gold] card last turn. Its "
           + "card prints what it pays.");
 
     /// <summary>
@@ -1062,9 +1068,10 @@ public static class ArmKeywordTips
     /// answer and answers null out of combat, which is the case this guard
     /// exists for: a reward screen or a deck view has no field to be empty.
     ///
-    /// `AnyPlacedBy` IS THE SAME READ Grounded's condition makes and the Set
-    /// off rows' playability gate makes (R205-scoped: her own charges, on a
-    /// living body), so the sentence cannot disagree with the card it rides.
+    /// `AnyPlacedBy` IS THE SAME READ the Set off rows' playability gate makes
+    /// (R205-scoped: her own charges, on a living body), so the sentence cannot
+    /// disagree with the card it rides. It was Grounded's read too until
+    /// `EB-749` moved that condition onto the CARDS the player played.
     /// </summary>
     public static bool FieldIsEmptyFor(CardModel? card)
     {

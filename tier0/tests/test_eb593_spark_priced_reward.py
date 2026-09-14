@@ -35,6 +35,14 @@ approximation. Two consequences, both real:
 
 Both are `adapter.resolve_card`'s, and `EB-572` widened the same function one
 step earlier for the same reason.
+
+THE SPECIMEN MOVED, AND THE FIND DID NOT (`EB-749`, 2026-09-14). R271 sec.4
+CUT Fwoosh!, so the soak's own first offer no longer resolves to a row and the
+replay below reads POCKET MATCH in its place -- the same shape and the same
+trap: 0 Energy on the wire, 1 Spark on the row, a Set off with a printed hit
+behind it. What is pinned is the RULE ("a Spark price is not Energy 0"), not
+the cut card, and the header above is left as the record of where it was
+found.
 """
 
 from __future__ import annotations
@@ -47,10 +55,12 @@ from tier0.content import loader
 from understudy import adapter, policy_v1
 
 #: The three offers, verbatim from the soak's `defect` record `state_dump`.
-FWOOSH = {"id": "KLEEMOD-PROTO_KO_FWOOSH", "name": "Fwoosh!", "type": "Attack",
-          "cost": "0", "star_cost": None, "rarity": "Common",
-          "is_upgraded": False, "index": 0,
-          "description": "Set off. Deal 6 damage."}
+#: `EB-749` re-pointed the first offer off the cut Fwoosh! and onto Pocket
+#: Match, which is the same Spark-priced Set off shape at 5 with Retain.
+SPARK_ROW = {"id": "KLEEMOD-PROTO_KO_POCKET_MATCH", "name": "Pocket Match",
+             "type": "Attack", "cost": "0", "star_cost": None,
+             "rarity": "Common", "is_upgraded": False, "index": 0,
+             "description": "Set off. Deal 5 damage."}
 RUN_AWAY = {"id": "KLEEMOD-PROTO_KO_RUN_AWAY", "name": "Run Away!",
             "type": "Skill", "cost": "0", "star_cost": None,
             "rarity": "Common", "is_upgraded": False, "index": 1,
@@ -64,7 +74,7 @@ FLAME_DANCE = {"id": "KLEEMOD-PROTO_KO_FLAME_DANCE", "name": "Flame Dance",
 
 REWARD = {
     "state_type": "card_reward",
-    "card_reward": {"cards": [FWOOSH, RUN_AWAY, FLAME_DANCE],
+    "card_reward": {"cards": [SPARK_ROW, RUN_AWAY, FLAME_DANCE],
                     "can_skip": True},
     "run": {"act": 1, "floor": 2, "ascension": 0},
     "player": {"character": "Klee", "hp": 56, "max_hp": 62, "block": 0,
@@ -100,7 +110,7 @@ def _select_screen(cards, screen_type, prompt=""):
 # --- 1. THE ROWS RESOLVE, AND A SPARK PRICE IS NOT ENERGY 0 ----------------
 
 def test_every_offer_on_that_screen_resolves_to_its_sheet_row_exactly():
-    for entry, sid in ((FWOOSH, "proto_ko_fwoosh"),
+    for entry, sid in ((SPARK_ROW, "proto_ko_pocket_match"),
                        (RUN_AWAY, "proto_ko_run_away"),
                        (FLAME_DANCE, "proto_ko_flame_dance")):
         card, approx = adapter.resolve_card(entry)
@@ -113,7 +123,7 @@ def test_every_offer_on_that_screen_resolves_to_its_sheet_row_exactly():
 def test_the_spark_price_is_an_effect_and_the_energy_cost_really_is_zero():
     """Which is the whole confusion the row is named for. The wire prints
     `"cost": "0"` because Sparks are not Energy; the price is on the row."""
-    card, _ = adapter.resolve_card(FWOOSH)
+    card, _ = adapter.resolve_card(SPARK_ROW)
     assert card.cost == 0
     assert any(e.get("op") == "spend_spark" for e in card.effects)
 
@@ -156,10 +166,11 @@ def test_the_same_screen_twice_is_the_same_action():
 
 def test_read_exactly_the_spark_row_is_not_the_best_card_on_the_screen():
     """Not a taste claim -- a claim about WHICH ROW WAS SCORED. Approximated,
-    Fwoosh! was a free 6-damage Attack and won the screen at 2.8. Its real row
-    spends a Spark the deck cannot yet make."""
+    Fwoosh! was a free 6-damage Attack and won the screen at 2.8, and Pocket
+    Match below is the same reading. Its real row spends a Spark the deck
+    cannot yet make."""
     decision = policy_v1.decide(copy.deepcopy(REWARD))
-    assert "Fwoosh!" in decision.rationale
+    assert "Pocket Match" in decision.rationale
     assert decision.action != {"action": "select_card_reward", "card_index": 0}
 
 
@@ -169,7 +180,7 @@ def test_with_the_surface_unreachable_it_is_the_soaks_own_reading(monkeypatch):
     monkeypatch.setattr(loader, "_prototype_index", lambda: {})
     decision = policy_v1.decide(copy.deepcopy(REWARD))
     assert sorted((decision.notes or {}).get("approximate_offers") or []) == [
-        "Flame Dance", "Fwoosh!", "Run Away!"]
+        "Flame Dance", "Pocket Match", "Run Away!"]
 
 
 # --- 3. KOKOMI'S THREE FORCED DEFAULTS -------------------------------------

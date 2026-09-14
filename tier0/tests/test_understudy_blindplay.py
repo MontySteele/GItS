@@ -3025,9 +3025,23 @@ def test_a_live_shop_prints_every_card_cost_beside_the_gold():
     page = blindplay.observe(live("shop-stocked"))
     assert "**Pocket Fireworks** — cost 1, card (attack), 25 gold" in page
     assert "**Mine Toss** — cost 1, card (skill), 51 gold" in page
+    # `EB-749`: the shelf's Spark row was `proto_ko_powder_charge`, which R271
+    # sec.4 CUT. The live record is read UNEDITED, so its fourth shelf now
+    # prints an id with no row behind it -- an honest energy 0.
+    assert "**Powder Charge** — cost 0, card (skill), 77 gold" in page
     # `EB-286` reaches the shelves too: a Spark-priced card charges no energy,
-    # so its shelf would otherwise have printed a price of nothing at all.
-    assert "**Powder Charge** — cost 1 Spark, card (skill), 77 gold" in page
+    # so its shelf would otherwise have printed a price of nothing at all. The
+    # rule is asked of a row that still exists, on the same record with one
+    # shelf re-stocked -- the pin is about the PRINTER, not about which card
+    # the r3 seat happened to be shown.
+    restocked = live("shop-stocked")
+    shelf = dict(restocked["shop"]["items"][3])
+    shelf["card_id"] = "KLEEMOD-PROTO_KO_BOOBY_TRAP"
+    shelf["card_name"] = "Booby Trap"
+    shelf["card_description"] = "Place a Mine 5."
+    restocked["shop"]["items"][3] = shelf
+    assert ("**Booby Trap** — cost 1 Spark, card (skill), 77 gold"
+            in blindplay.observe(restocked))
     # A relic and a potion have no card cost and read exactly as before.
     assert "**Bag of Preparation** — relic, 192 gold" in page
 
@@ -6354,9 +6368,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
         # Strike is written against by name, met by a seat holding neither.
-        # `EB-516` moved the condition to the board.
+        # `EB-516` moved the condition to the board and `EB-749` moved it on
+        # again, to the CARDS the player played (R271 sec.5.1).
         "Grounded": ["that pays at the start of your turn, but ",
-                     "on the field. Its ",
+                     "card last turn. Its ",
                      "card prints what it pays."],
         # `EB-446`, Klee's seventh: a name Fischl -- Nightrider is written
         # against and a DIFFERENT companion card grants, so the face that
@@ -6458,7 +6473,7 @@ def test_the_grounded_word_is_defined_wherever_a_face_names_it():
         ["Deal 8 damage. Apply Cryo. This turn, Grounded counts a Bomb as "
          "on the field."]))
     assert "- **Grounded** — A Power that pays at the start of your turn"         in page
-    assert "you have a Bomb on the field" in page      # `EB-516`
+    assert "played no Set off card last turn" in page  # `EB-749`
 
     # WHETHER OR NOT THE DECK HOLDS IT, which is the state the seat was in:
     # the trigger is the printed word and nothing else. The buff the card

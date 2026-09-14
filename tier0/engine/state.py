@@ -1478,7 +1478,21 @@ class CombatState:
     ko_round: int = -1
     ko_set_off_this_turn: int = 0        # Run Away!, Ammo Scavenging
     ko_reacted_this_turn: int = 0        # Sizzle, Perfect Timing
-    ko_set_off_last_turn: int = 0        # Grounded, and only Grounded
+    # `EB-749`: Jean's stand-in, and only that. It was Grounded's read until
+    # R271 sec.5.1 moved the condition off explosions and onto CARDS.
+    ko_set_off_last_turn: int = 0
+    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-749`). GROUNDED'S WHOLE READ since
+    # R271 sec.5.1: how many Set off CARDS the player played, this turn and
+    # last. A count of CARDS and not of explosions, which is the whole of why
+    # it is not `ko_set_off_this_turn` -- the two interactions the ruling
+    # excepts by name fall out of the write site rather than out of a clause. A
+    # MINE going off because its enemy attacked passes no card (the same None
+    # Once More! declines), and SPARKS 'N' SPLASH is a Power's end-of-turn hit
+    # that never reaches the `set_off` op at all. Written by
+    # `klee_overhaul.note_set_off_card`, rolled by `roll_to`; the twins are
+    # `KleeOverhaulLedger.SetOffCardsThisTurn` / `SetOffCardsLastTurn`.
+    ko_set_off_cards_this_turn: int = 0
+    ko_set_off_cards_last_turn: int = 0
     # QUARANTINED (`C.COMPANION_OVERHAUL`). Kaeya's stand-in, Cold-Blooded
     # Strike: "This turn, Grounded counts a Bomb as on the field." A
     # SECOND field rather than a write to `ko_set_off_last_turn`, because the

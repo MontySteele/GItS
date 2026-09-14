@@ -634,8 +634,11 @@ public class ArmKeywordTipTests
     {
         // THE ATTACH IS THE GENERATOR'S and it is derived from the row's
         // effects, so the pin is that the two faces the seat played carry it.
-        foreach (var card in new[] { "ProtoKoCarefulArrangement", "ProtoKoFwoosh",
-                                     "ProtoKoTheBigOne", "ProtoKoFireworksShow" })
+        // `EB-749` cut Fwoosh! and Fireworks Show; Pocket Match is the same
+        // Spark-priced Set off shape, and Tinder Toss carries Fireworks Show's
+        // board-wide line.
+        foreach (var card in new[] { "ProtoKoCarefulArrangement", "ProtoKoPocketMatch",
+                                     "ProtoKoTheBigOne", "ProtoKoTinderToss" })
         {
             Assert.Contains(Il.Calls(Il.Method(card, "get_ExtraHoverTips")),
                             c => c.Contains("ForEmptyField"));
@@ -646,15 +649,15 @@ public class ArmKeywordTipTests
     public void EB575_the_rider_prints_on_a_bare_board_and_not_on_a_cooked_one()
     {
         // A REAL BOARD, and the whole question this rider asks:
-        // `ProtoBombPower.AnyPlacedBy`, which is the same read Grounded's
-        // condition and Set off's playability gate make.
+        // `ProtoBombPower.AnyPlacedBy`, which is the same read Set off's
+        // playability gate makes (it was Grounded's too until `EB-749`).
         ProtoBombPower.Register.Rebase(null);
         var klee = Seat.Klee();
         var enemy = Seat.Klee(30).Creature;
         ProtoBombs.Board(klee.Creature, enemy);
 
         var merge = Owned<ProtoKoCarefulArrangement>(klee);
-        var setOff = Owned<ProtoKoFwoosh>(klee);
+        var setOff = Owned<ProtoKoPocketMatch>(klee);
         var none = System.Linq.Enumerable.Empty<IHoverTip>();
 
         // THE PREDICATE AND NOT THE MATERIALISED TIP, `EB-504`'s rule one test
@@ -677,7 +680,7 @@ public class ArmKeywordTipTests
 
         // AND OFF A BOARD ENTIRELY -- a reward, a shop, a deck view -- there is
         // no field to be empty and the rider says nothing.
-        Assert.False(ArmKeywordTips.FieldIsEmptyFor(new ProtoKoFwoosh()));
+        Assert.False(ArmKeywordTips.FieldIsEmptyFor(new ProtoKoPocketMatch()));
         ProtoBombPower.Register.Rebase(null);
     }
 
@@ -685,10 +688,10 @@ public class ArmKeywordTipTests
     public void EB575_the_two_sentences_are_the_ruled_ones()
     {
         var body = Printed("ForEmptyField");
-        // A ROW WITH A LINE OF ITS OWN still does that line (Fwoosh!'s 6,
-        // Countdown's draw), and a row that is nothing but the Bomb work does
-        // nothing whatever (Careful Arrangement, The Big One, Quick Fuse,
-        // Fireworks Show). Saying either sentence on the other row would be
+        // A ROW WITH A LINE OF ITS OWN still does that line (Pocket Match's
+        // 5, Countdown's draw), and a row that is nothing but the Bomb work
+        // does nothing whatever (Careful Arrangement, The Big One, Quick
+        // Fuse). Saying either sentence on the other row would be
         // false, so both are printed and the generator picks.
         Assert.Contains("No [gold]Bomb[/gold] on the field: this card is only "
                       + "its own line.", body);

@@ -77,6 +77,7 @@
     "proto_ko_blast_shield",
     "proto_ko_blazing_delight",
     "proto_ko_bombs_away",
+    "proto_ko_booby_trap",
     "proto_ko_bottomless_bag",
     "proto_ko_careful_arrangement",
     "proto_ko_careful_now",
@@ -88,12 +89,10 @@
     "proto_ko_dig_in",
     "proto_ko_dodoco_cover",
     "proto_ko_explosives_workshop",
-    "proto_ko_fireworks_show",
     "proto_ko_fish_blasting",
     "proto_ko_fish_flavored_bait",
     "proto_ko_flame_dance",
     "proto_ko_flash_point",
-    "proto_ko_fwoosh",
     "proto_ko_grounded",
     "proto_ko_jumpy_dumpty",
     "proto_ko_kapow",
@@ -105,7 +104,6 @@
     "proto_ko_pocket_fireworks",
     "proto_ko_pocket_match",
     "proto_ko_pop",
-    "proto_ko_powder_charge",
     "proto_ko_quick_fuse",
     "proto_ko_rapid_fire",
     "proto_ko_return_to_sender",
@@ -286,6 +284,7 @@
     "proto_ko_blast_shield": "klee",
     "proto_ko_blazing_delight": "klee",
     "proto_ko_bombs_away": "klee",
+    "proto_ko_booby_trap": "klee",
     "proto_ko_bottomless_bag": "klee",
     "proto_ko_careful_arrangement": "klee",
     "proto_ko_careful_now": "klee",
@@ -297,12 +296,10 @@
     "proto_ko_dig_in": "klee",
     "proto_ko_dodoco_cover": "klee",
     "proto_ko_explosives_workshop": "klee",
-    "proto_ko_fireworks_show": "klee",
     "proto_ko_fish_blasting": "klee",
     "proto_ko_fish_flavored_bait": "klee",
     "proto_ko_flame_dance": "klee",
     "proto_ko_flash_point": "klee",
-    "proto_ko_fwoosh": "klee",
     "proto_ko_grounded": "klee",
     "proto_ko_jumpy_dumpty": "klee",
     "proto_ko_kapow": "klee",
@@ -314,7 +311,6 @@
     "proto_ko_pocket_fireworks": "klee",
     "proto_ko_pocket_match": "klee",
     "proto_ko_pop": "klee",
-    "proto_ko_powder_charge": "klee",
     "proto_ko_quick_fuse": "klee",
     "proto_ko_rapid_fire": "klee",
     "proto_ko_return_to_sender": "klee",
@@ -691,6 +687,9 @@
     "proto_ko_bombs_away": {
       "bomb_size": 2
     },
+    "proto_ko_booby_trap": {
+      "bomb_size": 3
+    },
     "proto_ko_bottomless_bag": {
       "draw": 1
     },
@@ -725,9 +724,6 @@
     "proto_ko_explosives_workshop": {
       "power_amount": 1
     },
-    "proto_ko_fireworks_show": {
-      "spark_price": -1
-    },
     "proto_ko_fish_blasting": {
       "damage": 3
     },
@@ -739,9 +735,6 @@
       "damage": 3
     },
     "proto_ko_flash_point": {
-      "damage": 3
-    },
-    "proto_ko_fwoosh": {
       "damage": 3
     },
     "proto_ko_grounded": {
@@ -778,9 +771,6 @@
     },
     "proto_ko_pop": {
       "bomb_size": 2
-    },
-    "proto_ko_powder_charge": {
-      "bomb_size": 3
     },
     "proto_ko_quick_fuse": {
       "grow": 3

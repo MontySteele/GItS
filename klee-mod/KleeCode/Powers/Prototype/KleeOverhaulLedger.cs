@@ -238,11 +238,33 @@ public sealed class KleeOverhaulLedger
     /// </summary>
     public CardModel? LastSetOffCard { get; private set; }
 
+    /// <summary>
+    /// `EB-749` (R271 sec.5.1). GROUNDED'S WHOLE READ: did a <i>Set off</i>
+    /// CARD resolve this turn.
+    ///
+    /// A COUNT OF CARDS AND NOT OF EXPLOSIONS, which is the whole of why it is
+    /// not <see cref="SetOffThisTurn"/>. The ruled condition excepts two things
+    /// by name and both fall out of this site rather than out of a special
+    /// case: a MINE answering an enemy attack passes no card (the same
+    /// <c>null</c> Once More! declines), and SPARKS 'N' SPLASH is a Power's
+    /// end-of-turn hit that never reaches a Set off entry point at all. Neither
+    /// switches Grounded off.
+    /// </summary>
+    public int SetOffCardsThisTurn { get; private set; }
+
+    /// <summary><see cref="SetOffCardsThisTurn"/> as it stood at the end of
+    /// last turn -- the number Grounded's condition actually asks for. Rolled
+    /// on the same round stamp as every counter above, so a SKIPPED round
+    /// reports an honest zero rather than a stale count.</summary>
+    public int SetOffCardsLastTurn { get; private set; }
+
     /// <summary>The ONE write site, for <see cref="NoteExplosion"/>'s
     /// reason.</summary>
     public void NoteSetOffCardPlayed(CardModel? card)
     {
-        if (card != null) LastSetOffCard = card;
+        if (card == null) return;
+        LastSetOffCard = card;
+        SetOffCardsThisTurn++;
     }
 
     /// <summary>
@@ -280,6 +302,9 @@ public sealed class KleeOverhaulLedger
     {
         if (round == _round) return;
         SetOffLastTurn = round == _round + 1 ? SetOffThisTurn : 0;
+        SetOffCardsLastTurn =
+            round == _round + 1 ? SetOffCardsThisTurn : 0;
+        SetOffCardsThisTurn = 0;
         SetOffThisTurn = 0;
         ReactedThisTurn = 0;
         HexereiPlayedThisTurn = 0;

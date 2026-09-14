@@ -234,7 +234,9 @@ public class Round19Tests
             .ToDictionary(r => r.Item1, r => r.Item2);
 
         Assert.Contains("nothing was paid", rows["smartDescriptionUnpaid"]);
-        Assert.Contains("[gold]Bomb[/gold]", rows["smartDescriptionUnpaid"]);
+        // `EB-749`: the answer names the CARD the player played, not a board.
+        Assert.Contains("[gold]Set off[/gold]",
+                        rows["smartDescriptionUnpaid"]);
         Assert.Contains("paid", rows["smartDescriptionPaid"]);
         Assert.Contains("[gold]Spark[/gold]", rows["smartDescriptionPaid"]);
 
