@@ -240,6 +240,21 @@ def test_a_tool_response_item_refuses_the_seat(ptype):
     assert offenders == [ptype]
 
 
+def test_a_token_usage_record_line_is_a_cost_and_not_a_tool():
+    """codex-cli 0.153.4 writes `token_usage_record` per turn (2026-09-14): ids
+    and counters only. It must not refuse a seat -- the first Codex seat of
+    the calibration lost its run to exactly that line."""
+    rollout = CLEAN_ROLLOUT + [
+        {"ordinal": 8, "type": "token_usage_record",
+         "payload": {"thread_id": "abc", "turn_id": "t1",
+                     "usage": {"input_tokens": 17405, "output_tokens": 58}}}]
+    reason, offenders, counts = seat.guard(
+        _events("reasoning", "agent_message"), rollout, "")
+    assert reason == ""
+    assert offenders == []
+    assert counts["rollout:token_usage_record"] == 1
+
+
 def test_an_unknown_rollout_line_type_refuses_the_seat():
     rollout = CLEAN_ROLLOUT + [{"ordinal": 9, "type": "shadow_realm",
                                 "payload": {}}]

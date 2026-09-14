@@ -99,7 +99,9 @@ BaseLib 3.4.7's per-card cost display loading our resources' empty
 `TexturePath` (`EB-751`; records
 `review/qa/klee-round-27-2026-09-14/opus-lane*-natural-attempt1-dead-lane.md`,
 three lines all "none"). No combat turn was reached, so nothing here is a
-reading. The seats re-run on the fixed build, same seed.
+reading. **Attempt two** runs on `0.2.3218+proto.dirty` (main `b670f540`,
+`EB-751` fixed on #485), after a two-fight soak on lane 1 logged zero
+error lines; same seed, same three seats, natural.
 
 _Seats' three lines: (copied and committed before [USER] plays)._
 _[USER]'s three lines: (verbatim)._

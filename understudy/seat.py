@@ -207,9 +207,13 @@ ALLOWED_ITEMS = frozenset({"agent_message", "reasoning"})
 # action but a record OF one's surroundings. It is allowlisted and then read
 # again below, because it is where `agents_md` is, and `agents_md` is the
 # single best positive evidence that no project instruction reached the seat.
+# `token_usage_record` arrived with codex-cli 0.153.4 (observed live
+# 2026-09-14, calibration build one): a per-turn token-accounting line whose
+# payload is thread, turn and response ids plus `usage` counters, carrying no
+# model content and no tool. Allowlisted as the record of a cost, not an act.
 ALLOWED_ROLLOUT_TYPES = frozenset({
     "session_meta", "turn_context", "response_item", "event_msg",
-    "world_state", "compacted",
+    "world_state", "compacted", "token_usage_record",
 })
 # ...the model-facing items inside a `response_item`. `custom_tool_call`,
 # `custom_tool_call_output`, `function_call`, `function_call_output`,
