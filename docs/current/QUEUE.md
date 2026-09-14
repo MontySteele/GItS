@@ -138,6 +138,12 @@ true of the work as a sequencing fact.
 
 **Nothing is open in this section.**
 
+## 7. The Teyvat run frame (R272)
+
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `teyvat-nation-mapping 6` | **CHOOSE** the act-2 and act-3 nation pairs. Pick 1, act 2: (1, default) Sumeru + Natlan; (2) Sumeru + Inazuma; (3) Natlan + Inazuma, Sumeru to act 3. Pick 2, act 3: (1, default) Fontaine + the Abyss; (2) Fontaine + Sumeru, only with pick 1 at (3); (3) Fontaine + Inazuma. Act 1 is confirmed, no pick. -> review/active/teyvat-nation-mapping-2026-09-14.md | OPEN -- spike build half runs on act 1 meanwhile | R272; review/records/teyvat-spike-zone-read-2026-09-14.md |
+
 ---
 
 ## Not carried here
