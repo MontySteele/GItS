@@ -119,11 +119,13 @@ Gang and Mecha Knight readings where Inazuma is not on Glory.
 
 ## 5. Carried, not decided
 
-- **Nod-Krai and Snezhnaya are later faces,** one atlas pass each
-  (`BACKLOG.md`, the atlas row) and then a scoring against both zones' tables
-  by the §7.1 rule. Nod-Krai's Fatui machines and the Mechanized Fortress
-  hint at Glory; that is a hint, not a score. A third face is content only
-  (§1) and asks no new engineering.
+- **Nod-Krai and Snezhnaya are later faces,** atlased and scored as
+  native columns (act-2 table §7, act-3 table §7, 2026-09-15): both carry
+  nation in the enemy column only, so neither outranks a ruled pair. The
+  default carried into any third-face pick is Nod-Krai on Glory (strong on
+  both bosses) and Snezhnaya on the Hive (nine enemy slots, the only
+  Reattach candidate). A third face is content only (§1) and asks no new
+  engineering.
 - **The Abyss** is the act-4 face (§3).
 - Tanx, the act-3 Ancient, has no candidate in any of the six nations, and
   Queen, Glory's third boss, has no candidate in any family and ships

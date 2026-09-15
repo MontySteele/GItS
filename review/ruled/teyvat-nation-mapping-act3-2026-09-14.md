@@ -200,3 +200,45 @@ flagged ⚑ scale-mismatch and not part of Act 3's own pool).
   Harbinger stature and the mandatory deceased/memory framing
   (`candidates.md:488-507`) — recorded as Snezhnaya's strongest available
   slot, not endorsed as clean.
+
+## 7. Nod-Krai and Snezhnaya as NATIVE columns (EB-757, scored 2026-09-15)
+
+The "Snezhnaya" column in §2 was scored before either nation had an atlas
+and is Fatui-bodied (Operatives, La Signora): under the §7.1 rule those are
+pan-national and score zero. This section scores the two nations on their
+nation-exclusive families only, from
+`docs/current/dossiers/remap/atlas-nod-krai.md` and `atlas-snezhnaya.md`
+(re-verified 2026-09-15; qualitative, no statlines). A Glory slot not
+listed scored nothing for either nation.
+
+| Slot | Nod-Krai (native) | Snezhnaya (native) |
+|---|---|---|
+| Devoted Sculptor | — | Glaciomancer (P; a caster, kit unfetched) |
+| Living Shield + Turret | — | Volkodlak Basher + Sharpshooter (S; the tank-plus-gunner squad the line ships in) |
+| Axebot | Wilderness Hunter (S; Dual-Axe Spinning Slash on an axe body, fixed three-beat combo) | Volkodlak Basher (P) |
+| Fabricator (+bots) | Knuckle Duckle + Stamping Devices (S; a construct whose fight is its summoned sub-bodies) | — |
+| Frog Knight | Radiant Lunapod (P; amphibian silhouette) | Winged Halberd-Knight (P) |
+| Slimed Berserker | — | Fanged Zealot (P; name only) |
+| Knight Gang | Wasteland Wild Hunt pair (P) | Winged Soarer-Knight + Halberd-Knight + Glacial Warden (S; armored fae knights, literal) |
+| Mecha Knight | Frostnight Scion (P; Gloomveiled ↔ Windup +Block +Str) | Chimeric Winged Lion (S; Thundercall/Galeforce ↔ Windup/Charge, both alternate two empowered states) |
+| Test Subject (boss A) | Wilderness Hunter, boss-scaled (S; Grief-Stricken ↔ Adaptable, the downed window pre-sizes the next phase) | Unbound Remnant (P; self-reassembling ↔ revives into the next phase, kit unfetched) |
+| Aeonglass (boss B) | Radiant Moonfly (S; a party-wide drain aura managed by sustained play ↔ Withering Presence) | — |
+| Queen + Amalgam (ships dropped) | Knuckle Duckle (S; the closest match in either atlas, recorded in case the slot returns; does not score) | — |
+| Ancients (Nonupeipe, Vakuu, Darv, Tanx) | — | — |
+| Events (17) | 0 | 0 |
+
+**Totals:** Nod-Krai 5 enemy slots (2 S, 3 P), 2 boss (both S), 0 Ancient,
+0 events. Snezhnaya 7 enemy slots (3 S, 4 P), 1 boss (P), 0 Ancient, 0
+events.
+
+**Reading.** Neither native column can outrank the ruled pair (R273:
+Fontaine+Sumeru) under §7.1. As a THIRD Glory face, Nod-Krai is the better
+fit of the two: it is the only nation in either table with strong readings
+on BOTH Glory bosses, and the mapping packet's hint that Nod-Krai's
+machines point at Glory holds for its native families too (Duckle on
+Fabricator, the Wild Hunt on Axebot). Snezhnaya's three strong Glory slots
+are all elite-tier bodies, and its boss reading rests on a kit nobody has
+fetched. Default carried into any later third-face pick: **Nod-Krai as the
+third Glory face, Snezhnaya as the third Hive face** (act 2 §7), so the
+two nations do not compete for one zone. No pick is posed until a third
+face is scheduled.
