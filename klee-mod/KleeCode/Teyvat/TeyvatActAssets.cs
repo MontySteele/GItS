@@ -30,11 +30,13 @@ namespace KleeMod.Teyvat;
 /// `InvalidOperationException` on a missing `layers` directory AND on a layer
 /// file matching neither `_bg_NN` nor `_fg_`; the map PNGs and the rest-site
 /// scene have no fallback at all. So a HALF-landed set must still take the
-/// alias rather than half of each -- which is why the probe below asks three
-/// questions and ands them, and why it asks the questions a broken set fails:
-/// the first LAYER scene (the file `BackgroundAssets` scans for), the
-/// background ROOT (the scene `NCombatBackground.Create` casts) and the REST
-/// SITE (the scene `CreateRestSiteBackground` instantiates).
+/// alias rather than half of each -- which is why the probe below ands its
+/// questions, and why it asks the questions a broken set fails: the first
+/// LAYER scene (the file `BackgroundAssets` scans for), the background ROOT
+/// (the scene `NCombatBackground.Create` casts), the REST SITE (the scene
+/// `CreateRestSiteBackground` instantiates), and -- as a belt, see
+/// <see cref="FirstLayerRemapPath"/> -- that the pack carries no `.tscn.remap`
+/// stub where that first layer should be.
 ///
 /// WHY NOT THE LAYERS DIRECTORY ITSELF. `ResourceLoader.Exists` answers for
 /// RESOURCES, not directories -- `res://scenes/backgrounds/mondstadt/layers`
@@ -65,6 +67,35 @@ public static class TeyvatActAssets
         $"res://scenes/rest_site/{id}_rest_site.tscn";
 
     /// <summary>
+    /// THE REMAP STUB, whose PRESENCE is a disqualification.
+    ///
+    /// A Godot export with `editor/export/convert_text_resources_to_binary`
+    /// left at its default packs each `.tscn` as a binary `.scn` plus a
+    /// `<name>.tscn.remap` stub at the original path. `ResourceLoader.Exists`
+    /// and `ResourceLoader.Load` both follow a remap transparently, so every
+    /// question <see cref="HasDressedAssets"/> asks answers TRUE on such a
+    /// pack -- and the set is still unusable, because `Rooms/BackgroundAssets`
+    /// does not ask `ResourceLoader` anything. It `DirAccess.Open`s the layers
+    /// directory and takes each `GetNext()` filename VERBATIM, so it builds
+    /// `.../{id}_bg_00_a.tscn.remap`, a path with no loader. The preload marks
+    /// it failed (`AssetLoadingSession.cs:235`) and
+    /// `NCombatBackground.AddLayer`'s `GetScene` throws inside
+    /// `CombatManager.SetUpCombat` -- combat never starts, which is a worse
+    /// outcome than any missing picture. That is the blocking defect of
+    /// `git show ecfa839d:review/records/teyvat-proofs-3-2026-09-15.md`.
+    ///
+    /// `tools/build_pck.ps1` now sets that project setting to false, matching
+    /// the base game's own pack (173 raw `scenes/backgrounds/*/layers/*.tscn`
+    /// entries, zero `.tscn.remap`), so on a correctly built pack this probe is
+    /// false and costs one `Exists` call per dressing per session. It is kept
+    /// as the BELT: if the export ever regains remaps, the dressing falls back
+    /// to the base zone's art and the run is playable, instead of aborting on
+    /// its first combat. Same safe direction as the null-predicate case above.
+    /// </summary>
+    public static string FirstLayerRemapPath(string id) =>
+        FirstLayerPath(id) + ".remap";
+
+    /// <summary>
     /// THE DECISION, as a pure function over a predicate so it can be pinned
     /// headlessly. `exists` is `ResourceLoader.Exists` in the game and a
     /// dictionary in the tests; `dressing` is the `Id.Entry` (`MONDSTADT`),
@@ -74,7 +105,8 @@ public static class TeyvatActAssets
     /// and "the set is not there" both mean keep the alias, which is the safe
     /// direction -- the alias points at a tree that is certainly present.
     /// </summary>
-    public static bool HasDressedAssets(string dressing, Func<string, bool>? exists)
+    public static bool HasDressedAssets(string dressing, Func<string, bool>? exists,
+                                        Func<string, bool>? fileExists = null)
     {
         if (dressing == null || exists == null)
         {
@@ -82,6 +114,25 @@ public static class TeyvatActAssets
         }
 
         var id = dressing.ToLowerInvariant();
+
+        // ASKED WITH FileAccess, NOT ResourceLoader, and that is not a style
+        // choice. `ResourceLoader.Exists` answers only for paths some loader
+        // RECOGNIZES, and nothing recognizes `.remap` -- that is the engine's
+        // own "No loader found for resource: ...tscn.remap (expected type:
+        // unknown)". So the resource predicate would answer false for a stub
+        // that is plainly in the pack. `FileAccess.FileExists` consults the
+        // packed filesystem by literal path, which is the same view
+        // `BackgroundAssets`'s `DirAccess` scan gets.
+        //
+        // A null `fileExists` means NOT ASKED rather than "no remap": the
+        // remap stub is a belt against a mis-built pack, not part of the
+        // completeness question, so a caller asking only about completeness
+        // gets the answer it asked for. Every runtime caller supplies it.
+        if (fileExists != null && fileExists(FirstLayerRemapPath(id)))
+        {
+            return false;
+        }
+
         return exists(FirstLayerPath(id))
             && exists(BackgroundScenePath(id))
             && exists(RestSiteScenePath(id));
@@ -97,7 +148,8 @@ public static class TeyvatActAssets
     /// `[ModInitializer]` runs, so the answer cannot change inside a session.
     /// </summary>
     public static bool HasDressedAssetsCached(string dressing) =>
-        _cache.GetOrAdd(dressing, d => HasDressedAssets(d, p => ResourceLoader.Exists(p)));
+        _cache.GetOrAdd(dressing, d => HasDressedAssets(
+            d, p => ResourceLoader.Exists(p), p => FileAccess.FileExists(p)));
 
     private static readonly ConcurrentDictionary<string, bool> _cache = new();
 

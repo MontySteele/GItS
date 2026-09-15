@@ -101,6 +101,62 @@ so the plate is authored at half that on exact aspect. The map screen's three
 (KEEP_ASPECT_CENTERED), so **aspect** is what must be right and the plate
 matches the base game's own 2035 × 1440 exactly.
 
+### The layer scenes must ship as `.tscn`, not as `.tscn.remap`
+
+`tools/build_pck.ps1`'s generated `project.godot` carries
+
+```
+[editor]
+
+export/convert_text_resources_to_binary=false
+```
+
+and that line is load-bearing. It is a **project setting**, not an export-preset
+option, and it defaults to **true** — with it on, Godot packs every `.tscn` as a
+binary `.scn` under `.godot/imported/` plus a `<name>.tscn.remap` stub at the
+original path.
+
+`ResourceLoader` follows a remap transparently, so anything reached **by name**
+loads either way: the background root
+(`SceneHelper.GetScenePath("backgrounds/<id>/<id>_background")`), the rest site,
+the still portraits. The **layers** are not reached by name.
+`Rooms/BackgroundAssets`'s constructor `DirAccess.Open`s
+`res://scenes/backgrounds/<id>/layers` and takes each `GetNext()` filename
+**verbatim** (`text + "/" + next`), so on a remapped pack it builds
+`.../<id>_bg_00_a.tscn.remap` — a path no loader recognizes. The preload marks
+it failed (`AssetLoadingSession.cs:235` → `AssetCache.MarkAssetFailed`), and
+`NCombatBackground.AddLayer`'s `GetScene` then throws
+`AssetLoadException: Asset previously failed to load` **inside**
+`CombatManager.SetUpCombat`: combat never starts and the run is stuck on floor
+1. That is the blocking defect of
+`git show ecfa839d:review/records/teyvat-proofs-3-2026-09-15.md`, and it only surfaced once the
+placeholder sets were complete enough for the alias to stand down and the real
+layer paths to be used for the first time.
+
+The base game settles what correct looks like. `SlayTheSpire2.pck` carries 173
+raw `scenes/backgrounds/*/layers/*.tscn` entries and **not one** `.tscn.remap`;
+its only 56 remaps are `.gd.remap`, and this pack ships no scripts at all
+(`script_export_mode=2`). So the setting is not a workaround — it is matching
+the packaging the engine's own code was written against.
+
+It also re-aligns the pack with its own contract, which is derived from the
+export **work directory** and so has always listed
+`...liyue_bg_00_a.tscn` while the shipped pack held
+`...liyue_bg_00_a.tscn.remap`. Nothing compares the contract's rows to the
+pack's actual entries, which is why that divergence was silent.
+
+Two things guard it now: `tier0/tests/test_act_placeholder_plan.py` pins the
+line inside that heredoc, and `TeyvatActAssets.HasDressedAssets` asks
+`FileAccess.FileExists` — **not** `ResourceLoader.Exists`, which answers only
+for paths a loader recognizes and so cannot see a `.remap` at all — whether a
+stub sits where the first layer should be. If one does, the dressing keeps the
+alias and draws the base zone's art: a picture we did not choose, rather than a
+run that cannot be played.
+
+One consequence to know: `AssetCache`'s failed-asset set is never cleared for
+the process lifetime, so a client that has already hit this must be
+**restarted**, not merely re-deployed into.
+
 ### Real art later: the raw/out rule
 
 A real act asset is a media-ledger item, not a code change.
@@ -120,7 +176,9 @@ path, the ledger names the file.
 so a dressing wears the base zone's clothes. With this set landed it **stands
 down for every dressing**: `TeyvatActAssets.HasDressedAssetsCached` asks
 `ResourceLoader.Exists` for the first layer scene, the background root and the
-rest-site scene, and the postfix returns untouched when all three are there.
+rest-site scene — and `FileAccess.FileExists` that no `.tscn.remap` stub stands
+where that first layer should be (the section above) — and the postfix returns
+untouched when all four answers agree.
 It still fires — and must — for a dressing with no set of its own and for a
 build whose pck predates one, because the set is **all-or-nothing**: there is
 no engine state in which two of the three files are used and the third falls

@@ -1213,6 +1213,65 @@ public class TeyvatFrameTests : IDisposable
     }
 
     /// <summary>
+    /// A REMAPPED PACK IS NOT A COMPLETE SET, however complete it looks.
+    ///
+    /// This is the blocking defect of
+    /// `git show ecfa839d:review/records/teyvat-proofs-3-2026-09-15.md`, asked
+    /// headlessly. A
+    /// Godot export with `editor/export/convert_text_resources_to_binary` left
+    /// at its default packs every `.tscn` as a binary `.scn` plus a
+    /// `&lt;name&gt;.tscn.remap` stub. `ResourceLoader` follows the stub, so all
+    /// three completeness questions answer TRUE and the alias stands down --
+    /// and then `Rooms/BackgroundAssets` scans the layers directory with
+    /// `DirAccess`, reads the literal name `..._bg_00_a.tscn.remap`, and
+    /// `NCombatBackground.AddLayer`'s `GetScene` throws inside
+    /// `CombatManager.SetUpCombat`. Combat never starts.
+    ///
+    /// `tools/build_pck.ps1` sets that project setting to false now, matching
+    /// the base game's own pack, so this state should not recur. The pin is
+    /// that if it does, the dressing falls back to the base zone's art -- a
+    /// picture we did not choose, rather than a run that cannot be played.
+    /// </summary>
+    [Fact]
+    public void A_remap_stub_where_the_first_layer_should_be_keeps_the_alias()
+    {
+        var resources = new HashSet<string>(StringComparer.Ordinal)
+        {
+            TeyvatActAssets.FirstLayerPath("mondstadt"),
+            TeyvatActAssets.BackgroundScenePath("mondstadt"),
+            TeyvatActAssets.RestSiteScenePath("mondstadt"),
+        };
+
+        // The stub is the `.tscn` path plus the suffix, and nothing else.
+        Assert.Equal(TeyvatActAssets.FirstLayerPath("mondstadt") + ".remap",
+                     TeyvatActAssets.FirstLayerRemapPath("mondstadt"));
+        Assert.Equal(
+            "res://scenes/backgrounds/liyue/layers/liyue_bg_00_a.tscn.remap",
+            TeyvatActAssets.FirstLayerRemapPath("liyue"));
+
+        // A remapped pack: ResourceLoader says yes to all three, and the
+        // packed filesystem shows the stub. The alias must stay.
+        Assert.False(TeyvatActAssets.HasDressedAssets(
+            TeyvatFrame.Mondstadt,
+            resources.Contains,
+            p => p == TeyvatActAssets.FirstLayerRemapPath("mondstadt")));
+
+        // A correctly built pack: the same resources, no stub anywhere.
+        Assert.True(TeyvatActAssets.HasDressedAssets(
+            TeyvatFrame.Mondstadt, resources.Contains, _ => false));
+
+        // NOT ASKED is not the same as "no remap": a caller supplying only the
+        // resource predicate is asking the completeness question and gets it.
+        // Every runtime caller supplies both.
+        Assert.True(TeyvatActAssets.HasDressedAssets(
+            TeyvatFrame.Mondstadt, resources.Contains));
+
+        // The belt does not rescue an incomplete set: absence still wins.
+        Assert.False(TeyvatActAssets.HasDressedAssets(
+            TeyvatFrame.Mondstadt, _ => false, _ => false));
+    }
+
+    /// <summary>
     /// The paths are `ActModel`'s own, spelled out because the postfix runs
     /// INSIDE the getter that would otherwise build them. `FilePathIdentifier`
     /// is `Id.Entry.ToLowerInvariant()`, so the lowercasing is part of the
