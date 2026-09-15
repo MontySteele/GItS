@@ -73,11 +73,13 @@ hand-written kit machinery.
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**. Deploy stamps
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3159+proto`**
-(2026-09-08, main after #468, arms `klee,companion,kokomi,furina-stage`:
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3248+proto`**
+(2026-09-15, main after #493, arms `klee,companion,kokomi,furina-stage,teyvat`:
 the prototype rows behind `-p:PrototypeCards=true`, the Stage behind
-`-p:FurinaStage=true`; `furina` is the retired reframe arm; every arm ships
-OFF in a release package). **Last RELEASE package:
+`-p:FurinaStage=true`, the Teyvat frame behind `-p:TeyvatFrame=true` and ON
+for the spike proofs, OFF again on the next calibration deploy; `furina` is
+the retired reframe arm; every arm ships OFF in a release package).
+**Last RELEASE package:
 `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
 ## Systems
