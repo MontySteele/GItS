@@ -620,9 +620,165 @@ public class TeyvatFrameTests : IDisposable
     }
 
     // ---------------------------------------------------------------
+    // The dressed asset set, and the alias that now stands down for it.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// THE ALIAS DECISION, BOTH DIRECTIONS, over a predicate rather than over
+    /// a real `ResourceLoader` -- which is the only reason it is answerable in
+    /// a headless process at all.
+    ///
+    /// The direction that matters is the FALSE one. A dressing whose set is
+    /// half-landed must take the alias whole: `BackgroundAssets`'s constructor
+    /// throws on a missing `layers` directory AND on a layer file matching
+    /// neither prefix, and the map PNGs and the rest-site scene have no
+    /// fallback, so "use the two files that did arrive" is not a state the
+    /// engine has.
+    /// </summary>
+    [Fact]
+    public void A_dressing_takes_its_own_assets_only_when_the_whole_set_is_there()
+    {
+        var complete = new HashSet<string>(StringComparer.Ordinal)
+        {
+            TeyvatActAssets.FirstLayerPath("mondstadt"),
+            TeyvatActAssets.BackgroundScenePath("mondstadt"),
+            TeyvatActAssets.RestSiteScenePath("mondstadt"),
+        };
+
+        Assert.True(TeyvatActAssets.HasDressedAssets(
+            TeyvatFrame.Mondstadt, complete.Contains));
+
+        // Any ONE of the three missing puts the dressing back on the alias.
+        foreach (var path in complete.ToArray())
+        {
+            var partial = new HashSet<string>(complete, StringComparer.Ordinal);
+            partial.Remove(path);
+            Assert.False(TeyvatActAssets.HasDressedAssets(
+                TeyvatFrame.Mondstadt, partial.Contains), path);
+        }
+
+        // Nothing at all -- a build whose pck predates the set.
+        Assert.False(TeyvatActAssets.HasDressedAssets(TeyvatFrame.Mondstadt, _ => false));
+
+        // And "we could not ask" answers the same as "it is not there",
+        // because the alias points at a tree that is certainly present.
+        Assert.False(TeyvatActAssets.HasDressedAssets(TeyvatFrame.Mondstadt, null));
+    }
+
+    /// <summary>
+    /// The paths are `ActModel`'s own, spelled out because the postfix runs
+    /// INSIDE the getter that would otherwise build them. `FilePathIdentifier`
+    /// is `Id.Entry.ToLowerInvariant()`, so the lowercasing is part of the
+    /// contract and not a convenience.
+    /// </summary>
+    [Fact]
+    public void The_dressed_paths_are_the_engines_own_spelling()
+    {
+        Assert.Equal("res://scenes/backgrounds/liyue/liyue_background.tscn",
+                     TeyvatActAssets.BackgroundScenePath("liyue"));
+        Assert.Equal("res://scenes/backgrounds/liyue/layers/liyue_bg_00_a.tscn",
+                     TeyvatActAssets.FirstLayerPath("liyue"));
+        Assert.Equal("res://scenes/rest_site/liyue_rest_site.tscn",
+                     TeyvatActAssets.RestSiteScenePath("liyue"));
+
+        foreach (var dressing in TeyvatFrame.AssetAlias.Keys)
+        {
+            Assert.Contains(dressing.ToLowerInvariant(),
+                            TeyvatActAssets.BackgroundScenePath(dressing.ToLowerInvariant()));
+        }
+    }
+
+    /// <summary>
+    /// The alias postfix ASKS. Structural, through `Il`, because the getter it
+    /// postfixes cannot be invoked without an `ActModel` -- and the thing that
+    /// would go wrong silently is the check being DROPPED, not being wrong.
+    /// </summary>
+    [Fact]
+    public void The_alias_postfix_stands_down_when_the_set_is_present()
+    {
+        // Reached by name through the assembly rather than by `typeof`: the
+        // patch class is `internal`, like every other file in `Teyvat/Patches`
+        // except the one whose helper the loc merge calls, and an
+        // `InternalsVisibleTo` for one pin is a bigger change than this line.
+        var calls = Il.Calls(StaticMethod(
+            InArm("KleeMod.Teyvat.Patches.ActModel_FilePathIdentifier_TeyvatAlias_Patch"),
+            "Postfix"));
+
+        Assert.Contains("TeyvatActAssets.HasDressedAssetsCached", calls);
+        // The alias table is still consulted first -- a base zone reached
+        // while the flag is on has no row and the postfix must not ask the
+        // pack about `overgrowth`. (`AssetAlias` itself is an `ldsfld`, not a
+        // call, so the lookup through it is what the IL can show.)
+        Assert.Contains(calls, c => c.EndsWith("TryGetValue", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// The background root is converted, and by a factory that exists.
+    /// BaseLib ships six and none is for `NCombatBackground`, so registration
+    /// alone would log "no factory exists for that type" and fall through to
+    /// the same failed cast EB-760 diagnosed for the still portrait.
+    /// </summary>
+    [Fact]
+    public void Act_backgrounds_are_registered_with_a_factory_that_exists()
+    {
+        var calls = Il.Calls(StaticMethod(typeof(TeyvatActAssets),
+                                          nameof(TeyvatActAssets.RegisterActBackgrounds)));
+
+        Assert.Contains("NCombatBackgroundFactory.Ensure", calls);
+        Assert.Contains(calls,
+                        c => c.EndsWith("RegisterSceneForConversion", StringComparison.Ordinal));
+
+        Assert.Contains("TeyvatActAssets.RegisterActBackgrounds",
+                        Il.Calls(StaticMethod(typeof(KleeMod), nameof(KleeMod.Initialize))));
+    }
+
+    /// <summary>
+    /// The slots the factory declares are the slots the generator writes into
+    /// the background scene, and they are `AddLayer`'s own names
+    /// (`$"Layer_{i:D2}"`, then `"Foreground"`). A drift here is an
+    /// `InvalidOperationException` on the first frame of the first combat of a
+    /// dressed run.
+    /// </summary>
+    [Fact]
+    public void The_factorys_layer_slots_match_AddLayers_naming()
+    {
+        var slots = InArm("KleeMod.Teyvat.NCombatBackgroundFactory")
+            .GetField("LayerSlots", BindingFlags.NonPublic | BindingFlags.Static)!
+            .GetValue(null) as string[];
+
+        Assert.NotNull(slots);
+        Assert.Equal(new[] { "Layer_00", "Layer_01", "Layer_02", "Layer_03", "Layer_04",
+                             "Foreground" }, slots!);
+    }
+
+    [Fact]
+    public void With_the_arm_off_the_act_background_registration_touches_nothing()
+    {
+        TeyvatFrame.Enabled = false;
+
+        // The flag is the method's first line, as everywhere in the arm: this
+        // one runs outside a run entirely, so it cannot key off the current
+        // act, and it must not reach Godot or BaseLib in a process with no
+        // runtime behind either.
+        TeyvatActAssets.RegisterActBackgrounds();
+    }
+
+    // ---------------------------------------------------------------
     // Reflection helpers. Public/protected members are reached by name so a
     // rename is a compile error here rather than a silent skip.
     // ---------------------------------------------------------------
+
+    /// <summary>
+    /// A type in the mod assembly by full name, for the arm's `internal`
+    /// classes. Asserting rather than returning null so a rename reads as a
+    /// named failure instead of an NRE three lines later.
+    /// </summary>
+    private static Type InArm(string fullName)
+    {
+        var type = typeof(TeyvatFrame).Assembly.GetType(fullName, throwOnError: false);
+        Assert.NotNull(type);
+        return type!;
+    }
 
     /// <summary>The outermost non-compiler-generated type enclosing
     /// <paramref name="type"/>.</summary>

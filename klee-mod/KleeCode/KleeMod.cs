@@ -54,6 +54,15 @@ public static class KleeMod
         // correct. Teyvat/TeyvatVisuals.cs carries the argument in full.
         Teyvat.TeyvatVisuals.RegisterStillPortraits();
 
+        // The same mechanism, a second type: the two act-1 dressings' own
+        // combat-background ROOTS. `NCombatBackground.Create` casts the
+        // instantiated scene, our root is a script-less Control, and BaseLib
+        // ships no factory for that type — so this builds the missing factory
+        // and registers the two scenes. It also logs, per dressing, whether the
+        // dressed asset set reached the pck, which is the one thing that
+        // decides whether the get_FilePathIdentifier alias still fires.
+        Teyvat.TeyvatActAssets.RegisterActBackgrounds();
+
         // Convention-scene + build-id telemetry (animation sprint 1, A3 —
         // permanent). One line per shipped scene: path, found/missing, root
         // node type. A missing scene falls back quietly at the use site, so
