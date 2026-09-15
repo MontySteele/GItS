@@ -20,6 +20,8 @@ using MegaCrit.Sts2.Core.Nodes.Vfx;
 using MegaCrit.Sts2.Core.Nodes.Vfx.Utilities;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Runs;
+using MegaCrit.Sts2.Core.Saves;
+using MegaCrit.Sts2.Core.Settings;
 
 namespace KleeMod.Teyvat.Events.Mirrors;
 
@@ -49,6 +51,15 @@ namespace KleeMod.Teyvat.Events.Mirrors;
 /// private, so the mirror reads it as the base event does and no
 /// `TeyvatEventMirror` accessor or reverse patch is needed.
 ///
+/// THE ONE DEVIATION FROM THE BASE EVENT IS `EB-769`, AND IT IS NOT
+/// MECHANICAL: the decorative `NHitSparkVfx` node each swing adds is skipped
+/// under `FastModeType.Instant` and capped at `MaxHitSparksPerVisit`
+/// otherwise. The base event spawns one per swing paced only by
+/// `Cmd.Wait(1.2f)`, which is fine at the game's own speed and is an
+/// unbounded allocation when a harness collapses the wait. Nothing else
+/// moves: the same anims, the same `vfx_attack_blunt`, the same waits, the
+/// same options, the same rewards.
+///
 /// THE ENCOUNTER AND THE CURSE ARE THE BASE GAME'S. `PunchOffEventEncounter`
 /// and `Injury` carry global rows; the constructs' NAMES are dressed through
 /// `Patches/MonsterNamePatch`, which is the seam every dressed monster name
@@ -58,6 +69,83 @@ public abstract class PunchOffMirror : TeyvatEventMirror
 {
     /// <summary>The base event's cancel handle for the punching loop.</summary>
     private CancellationTokenSource _punchCts;
+
+    /// <summary>
+    /// `EB-769`. HOW MANY HIT SPARKS ONE VISIT MAY SPAWN.
+    ///
+    /// THE LOOP IS PACED BY A WAIT, NOT BY A BUDGET. Each swing adds an
+    /// `NHitSparkVfx` node to the combat VFX container and then waits 1.2 s,
+    /// so at the game's own speed a player sees under one spark a second and
+    /// the engine reclaims them as fast as they arrive. Under the harness's
+    /// `FastMode = Instant` with `Engine.TimeScale = 3` the waits collapse and
+    /// the spawn rate is bounded by nothing at all: proofs-5 measured 34,501
+    /// `Element limit reached. at: _allocate_rid` and 613,190
+    /// `Parameter "particles" is null`, every one of them under
+    /// `NHitSparkVfx.Create` called from this loop, with the process
+    /// unresponsive and a 2.56 GB `godot.log` (the 2026-09-15 deploy proofs,
+    /// item 2: `git show
+    /// d47d9fcc:review/records/teyvat-proofs-5-2026-09-15.md`).
+    ///
+    /// 24 IS HALF A MINUTE OF THE INTENDED PACING and far short of the
+    /// allocator's ceiling. Past it the punching CONTINUES -- the anims and
+    /// `vfx_attack_blunt` are the event's mechanics and its picture, and
+    /// nothing here touches either -- but the extra spark node is not spawned.
+    /// </summary>
+    internal const int MaxHitSparksPerVisit = 24;
+
+    /// <summary>Hit sparks spawned by THIS visit's loop.</summary>
+    private int _hitSparks;
+
+    /// <summary>
+    /// `EB-769`. May this swing spawn its hit spark?
+    ///
+    /// Pure and `internal` so the judgment is pinned off a headless test:
+    /// `SaveManager` and `Engine.TimeScale` are outside that boundary, this
+    /// decision is not.
+    ///
+    /// TWO GUARDS, AND THE FIRST IS THE ONE THAT MATTERS. `FastModeType.Instant`
+    /// is exactly what the soak harness sets --
+    /// `vendor/STS2_MCP/gits/GitsSpeed.cs` assigns
+    /// `SaveManager.Instance.PrefsSave.FastMode = FastModeType.Instant`
+    /// alongside `Engine.TimeScale` -- so under the harness no spark is
+    /// spawned at all and the room stays drivable. The count is the backstop
+    /// for any other way a machine can outrun a 1.2 s wait.
+    /// </summary>
+    internal static bool ShouldSpawnHitSpark(FastModeType fastMode, int spawned)
+        => fastMode != FastModeType.Instant && spawned < MaxHitSparksPerVisit;
+
+    /// <summary>
+    /// The player's animation-pacing setting, or `Normal` when it cannot be
+    /// read. NEVER THROWS: this is consulted inside a background loop in a
+    /// room the player is standing in, and an exception here would leave the
+    /// constructs frozen mid-swing.
+    /// </summary>
+    private static FastModeType CurrentFastMode()
+    {
+        try
+        {
+            return SaveManager.Instance?.PrefsSave?.FastMode ?? FastModeType.Normal;
+        }
+        catch
+        {
+            return FastModeType.Normal;
+        }
+    }
+
+    /// <summary>
+    /// `EB-769`. One swing's hit spark, spawned only when the budget and the
+    /// speed setting both allow it.
+    /// </summary>
+    private void SpawnHitSpark(Control vfxContainer, Creature target)
+    {
+        if (!ShouldSpawnHitSpark(CurrentFastMode(), _hitSparks))
+        {
+            return;
+        }
+
+        _hitSparks++;
+        vfxContainer?.AddChildSafely(NHitSparkVfx.Create(target, requireInteractable: false));
+    }
 
     /// <summary>The base event's own: this event draws the combat room.</summary>
     public override EventLayoutType LayoutType => EventLayoutType.Combat;
@@ -91,6 +179,10 @@ public abstract class PunchOffMirror : TeyvatEventMirror
     public override Task AfterEventStarted()
     {
         RunManager.Instance.RoomExited += OnRoomExited;
+        // `EB-769`: the spark budget is PER VISIT, so it is zeroed where the
+        // visit starts rather than where the model is constructed -- an event
+        // model outlives the room it was shown in.
+        _hitSparks = 0;
         _punchCts = new CancellationTokenSource();
         TaskHelper.RunSafely(PunchEachOther());
         return Task.CompletedTask;
@@ -123,7 +215,7 @@ public abstract class PunchOffMirror : TeyvatEventMirror
             await CreatureCmd.TriggerAnim(leftEnemy, "Attack", 0f);
             await Cmd.Wait(0.1f);
             VfxCmd.PlayOnCreatureCenter(rightEnemy, "vfx/vfx_attack_blunt");
-            vfxContainer?.AddChildSafely(NHitSparkVfx.Create(rightEnemy, requireInteractable: false));
+            SpawnHitSpark(vfxContainer, rightEnemy);
             await CreatureCmd.TriggerAnim(rightEnemy, "Hit", 0f);
             await Cmd.Wait(1.2f);
 
@@ -135,7 +227,7 @@ public abstract class PunchOffMirror : TeyvatEventMirror
             await CreatureCmd.TriggerAnim(rightEnemy, "Attack", 0f);
             await Cmd.Wait(0.1f);
             VfxCmd.PlayOnCreatureCenter(leftEnemy, "vfx/vfx_attack_blunt");
-            vfxContainer?.AddChildSafely(NHitSparkVfx.Create(leftEnemy, requireInteractable: false));
+            SpawnHitSpark(vfxContainer, leftEnemy);
             await CreatureCmd.TriggerAnim(leftEnemy, "Hit", 0f);
             await Cmd.Wait(1.2f);
         }

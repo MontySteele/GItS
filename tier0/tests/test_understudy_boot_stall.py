@@ -29,16 +29,26 @@ def test_a_boot_inside_the_fuse_is_never_a_stall():
     watchdog that fired inside that window would be killing games that were
     about to come up."""
     assert not boot_stall_verdict(
-        elapsed_s=BOOT_STALL_AFTER_S - 0.1, health_ok=True, ever_state=False,
+        elapsed_s=BOOT_STALL_AFTER_S - 0.1, health_ok=True, state_recent=False,
         marker_seen=False, log_quiet_s=999)
 
 
-def test_a_state_endpoint_that_has_answered_once_is_not_this_defect():
+def test_a_state_endpoint_that_is_still_answering_is_not_this_defect():
     """The stall is the game thread wedged behind `/api/v1/singleplayer`
-    (EB-489's shape). A state endpoint that has ANSWERED is a game that is
-    merely still booting, and a relaunch would throw away its progress."""
+    (EB-489's shape). A state endpoint that is STILL ANSWERING is a game that
+    is merely still booting, and a relaunch would throw away its progress."""
     assert not boot_stall_verdict(
-        elapsed_s=600, health_ok=True, ever_state=True, marker_seen=False,
+        elapsed_s=600, health_ok=True, state_recent=True, marker_seen=False,
+        log_quiet_s=999)
+
+
+def test_a_state_endpoint_that_answered_once_and_went_quiet_is_a_stall():
+    """The 2026-09-15 miss, at the verdict. `state_recent` used to be
+    `ever_state`, a latch -- and `wait_for_menu` documents the pre-menu answer
+    that closes it at ~20 s, before the 45 s fuse is ever consulted. So the
+    fuse could not fire on the one shape it was written for."""
+    assert boot_stall_verdict(
+        elapsed_s=600, health_ok=True, state_recent=False, marker_seen=False,
         log_quiet_s=999)
 
 
@@ -47,7 +57,7 @@ def test_a_silent_root_endpoint_is_a_different_failure_and_gets_no_relaunch():
     its silence means the process or the wire is gone -- not that the game
     thread is wedged. Relaunching on that reading would paper over a crash."""
     assert not boot_stall_verdict(
-        elapsed_s=600, health_ok=False, ever_state=False, marker_seen=False,
+        elapsed_s=600, health_ok=False, state_recent=False, marker_seen=False,
         log_quiet_s=999)
 
 
@@ -56,7 +66,7 @@ def test_the_marker_absent_at_the_fuse_is_a_stall_even_with_a_growing_log():
     rewritten the whole run-history store. Past the fuse with a live root
     endpoint, a dead state endpoint and no marker, the boot is wedged."""
     assert boot_stall_verdict(
-        elapsed_s=BOOT_STALL_AFTER_S, health_ok=True, ever_state=False,
+        elapsed_s=BOOT_STALL_AFTER_S, health_ok=True, state_recent=False,
         marker_seen=False, log_quiet_s=0.0)
 
 
@@ -64,7 +74,7 @@ def test_a_marker_reached_and_a_log_gone_quiet_is_a_stall():
     """The other half of the OR: the profile came up and then everything
     stopped, which is what the lost boots looked like on the wire."""
     assert boot_stall_verdict(
-        elapsed_s=BOOT_STALL_AFTER_S, health_ok=True, ever_state=False,
+        elapsed_s=BOOT_STALL_AFTER_S, health_ok=True, state_recent=False,
         marker_seen=True, log_quiet_s=BOOT_STALL_LOG_QUIET_S)
 
 
@@ -72,7 +82,7 @@ def test_a_marker_reached_and_a_log_still_growing_is_only_slow():
     """A boot that is still writing store lines is still working, and the
     EB-763 budget -- not a kill -- is what it is owed."""
     assert not boot_stall_verdict(
-        elapsed_s=BOOT_STALL_AFTER_S, health_ok=True, ever_state=False,
+        elapsed_s=BOOT_STALL_AFTER_S, health_ok=True, state_recent=False,
         marker_seen=True, log_quiet_s=BOOT_STALL_LOG_QUIET_S - 0.1)
 
 
@@ -138,6 +148,15 @@ MENU = {"state_type": "menu", "menu_screen": "main", "options": ["Embark"]}
 def clock(monkeypatch):
     c = FakeClock()
     monkeypatch.setattr(soak_session, "time", c)
+    # THE DEAD-GAP CLOCK IS ZEROED WITH THE CLOCK ITSELF, and that is an
+    # order-dependence fix rather than tidiness: `_last_kill_at` is a
+    # process-wide monotonic reading, and `test_eb231_teardown_pid.py` drives
+    # the real `Session._kill` -- which sets it to a REAL monotonic reading
+    # some hours larger than this fake clock's 1000.0. A dead-gap test that
+    # ran after that file read a kill in its own future and slept. Sorted
+    # before this module by filename, so the whole suite saw it and this
+    # module alone did not.
+    monkeypatch.setattr(soak_session, "_last_kill_at", None, raising=False)
     return c
 
 
@@ -299,6 +318,136 @@ def test_the_marker_scan_is_bounded_and_still_finds_the_line(tmp_path):
     assert not soak_session._log_has_marker(tmp_path / "absent.log")
 
 
+# ------------------------------------------- the 2026-09-15 stall, twice ---
+
+class Proofs5Wire(FakeWire):
+    """LAUNCH 6 OF THE 2026-09-15 DEPLOY PROOFS, on the wire (`git show
+    d47d9fcc:review/records/teyvat-proofs-5-2026-09-15.md`).
+
+    `GET /` answers (the root endpoint is served off the ThreadPool worker
+    that took the request, so it survives a wedged game thread), and
+    `/api/v1/singleplayer` answers ONCE, early, the way every boot's pre-menu
+    read does -- `{"state_type": "loading"}`, no options -- and then never
+    again. That one answer is the whole defect: it used to latch `ever_state`
+    and disarm the fuse for the life of the watch, and the launch spent all
+    444 s of its budget in silence.
+    """
+
+    def __init__(self):
+        super().__init__(states=[{"state_type": "loading",
+                                  "menu_screen": None}],
+                         healthy=True,
+                         error=("bridge connection failed at "
+                                "http://localhost:15526/api/v1/singleplayer: "
+                                "TimeoutError: timed out"))
+
+
+def test_the_proofs_5_signal_pattern_is_a_stall_and_fires_at_the_fuse(
+        session, clock, monkeypatch, capsys):
+    """The exact four signals launch 6 showed, from the entry point EMBARK
+    uses -- `Session.setup()`, not `wait_for_menu` reached by hand: health ok,
+    the state endpoint silent after one early pre-menu answer, the profile
+    marker ABSENT, and a log frozen at 21,753 bytes. The fuse must fire at
+    45 s and the relaunch path must be taken."""
+    wire = Proofs5Wire()
+    monkeypatch.setattr(soak, "bridge", wire)
+    monkeypatch.setattr(soak_session, "GODOT_LOG_ARCHIVE",
+                        session.dir.parent / "archive")
+    monkeypatch.setattr(soak_session.keepawake, "acquire", lambda why: False)
+    # THE LOG IS FROZEN, at the size the record read off the archived copy,
+    # and it never reaches `Profile-scoped data path initialized`.
+    session._test_log.write_bytes(
+        b"[INFO] Wrote 20621 bytes to modded/profile1/saves/history/"
+        b"1786232408.run in steam remote store\n" * 229)
+    assert 21_000 < session._test_log.stat().st_size < 23_000
+    assert not soak_session._log_has_marker(session._test_log)
+
+    session.do_setup = True
+    killed, launched = [], []
+    session._steam_appid = lambda: None
+    session._deploy_bridge = lambda: None
+    session._menu_budget = lambda: 444.0
+    session._speed_on = lambda: None
+    session._kill = lambda: killed.append(clock.now)
+
+    def _launch():
+        launched.append(clock.now)
+        if len(launched) > 1:            # the relaunched game comes up
+            wire.states = [MENU]
+    session._launch = _launch
+
+    session.setup()
+
+    assert len(launched) == 2, "the stall was relaunched, once"
+    assert len(killed) == 1
+    stalled_for = killed[0] - launched[0]
+    assert stalled_for >= BOOT_STALL_AFTER_S, "the fuse is 45 s"
+    assert stalled_for < 2 * BOOT_STALL_AFTER_S, "and not 444"
+    assert wire.health_calls >= 1, "the root endpoint was asked"
+    out = capsys.readouterr().out
+    assert "boot looks STALLED" in out
+    assert "marker is ABSENT" in out
+    # And the evidence was copied aside before the relaunch rotated it.
+    assert (session.dir.parent / "archive").glob("*-stall1.log")
+
+
+def test_an_http_error_body_is_not_a_state_answer(session, clock, monkeypatch):
+    """`bridge._request` returns the JSON of an HTTP 500 rather than raising,
+    and `McpMod.HandleGetState` answers 500 with `{"error", "stack_trace"}`
+    when the main-thread hop throws. A watch that read that as "the state
+    endpoint is alive" would be reading the wedge as health."""
+    wire = FakeWire(states=[{"error": "Failed to read game state: ...",
+                             "exception_type": "System.NullReferenceException",
+                             "stack_trace": "..."}] * 40)
+    monkeypatch.setattr(soak, "bridge", wire)
+    killed = []
+    session._kill = lambda: killed.append(clock.now)
+    session._launch = lambda: setattr(wire, "states", [MENU])
+    assert session.wait_for_menu(444.0) is MENU
+    assert len(killed) == 1, "the error bodies did not disarm the fuse"
+
+
+def test_a_state_endpoint_answering_every_poll_keeps_its_whole_budget(
+        session, clock, monkeypatch):
+    """The other direction, and the reason the signal is recency rather than
+    silence-since-launch: a slow boot whose bridge answers each poll is still
+    booting, and killing it would throw the progress away."""
+    wire = FakeWire(states=[{"state_type": "loading", "menu_screen": None}]
+                    * 500)
+    monkeypatch.setattr(soak, "bridge", wire)
+    session._kill = lambda: pytest.fail("a live state endpoint is not a stall")
+    session._launch = lambda: pytest.fail("nor is it relaunched")
+    with pytest.raises(SystemExit):
+        session.wait_for_menu(90.0)
+
+
+def test_the_fuse_says_which_guard_refused_when_it_does_not_fire(
+        session, clock, monkeypatch, capsys):
+    """The record's own ask: 444 s of silence is what made launch 6 expensive
+    to diagnose. Past the deadline with no stall called, one DIAG line names
+    every signal the verdict saw."""
+    wire = FakeWire(states=[], healthy=False)
+    monkeypatch.setattr(soak, "bridge", wire)
+    session._kill = lambda: None
+    session._launch = lambda: None
+    with pytest.raises(SystemExit):
+        session.wait_for_menu(120.0)
+    out = capsys.readouterr().out
+    assert out.count("boot fuse deadline") == 1, "once, not every poll"
+    assert "health_ok=False" in out and "state_recent=False" in out
+
+
+def test_embark_reaches_the_menu_only_through_session_setup():
+    """Structural, and the reason the stall test above drives `setup()`: the
+    fuse has to be on the path EMBARK takes, not only on the one `soak.py`
+    takes. `understudy/embark.py` must not grow a second menu wait."""
+    src = open(soak_session.__file__.replace("soak_session.py", "embark.py"),
+               encoding="utf-8").read()
+    assert "session.setup()" in src
+    assert "wait_for_menu" not in src, \
+        "embark waits for the menu through setup(), and nowhere else"
+
+
 # --------------------------------------------------------- the dead gap ---
 
 def test_the_first_launch_of_a_process_waits_for_nothing(clock):
@@ -352,6 +501,51 @@ def test_teardown_copies_the_log_and_never_moves_it(session, clock,
     assert session._test_log.is_file(), "the game's own log is left alone"
     assert dest.read_text(encoding="utf-8") == session._test_log.read_text(
         encoding="utf-8")
+
+
+def test_an_oversized_log_is_archived_head_and_tail_with_a_marker(
+        session, clock, monkeypatch, capsys):
+    """`EB-766`. The Punch-Off VFX spin wrote a 2.56 GB `godot.log` in about
+    two minutes and this method copied every byte of it. Past the cap the head
+    and the tail are kept, the middle is dropped, and one line says so. The
+    dials are moved down here so the test writes kilobytes rather than
+    megabytes; the arithmetic is the same."""
+    monkeypatch.setattr(soak_session, "GODOT_LOG_ARCHIVE",
+                        session.dir.parent / "archive")
+    monkeypatch.setattr(soak_session, "ARCHIVE_LOG_MAX_BYTES", 800)
+    monkeypatch.setattr(soak_session, "ARCHIVE_LOG_HEAD_BYTES", 100)
+    monkeypatch.setattr(soak_session, "ARCHIVE_LOG_TAIL_BYTES", 400)
+    head = b"H" * 100
+    middle = b'ERROR: Parameter "particles" is null\n' * 400
+    tail = b"T" * 400
+    session._test_log.write_bytes(head + middle + tail)
+    size = session._test_log.stat().st_size
+
+    dest = session.archive_log()
+
+    assert dest is not None
+    body = dest.read_bytes()
+    assert body.startswith(head)
+    assert body.endswith(tail)
+    assert len(body) < size, "the archive is smaller than the log"
+    assert b"omitted by the archiver" in body
+    assert str(size - 500).encode() in body, "it names the bytes dropped"
+    assert middle not in body, "the repeated spin lines are gone"
+    assert session._test_log.stat().st_size == size, "the game's log is whole"
+    out = capsys.readouterr().out
+    assert "archived TRUNCATED" in out and str(size) in out
+
+
+def test_a_log_inside_the_cap_is_still_copied_byte_for_byte(
+        session, clock, monkeypatch, capsys):
+    """The cap is a ceiling, not a policy: an ordinary 400 KB boot log is
+    archived exactly as it always was, and nothing is printed about it."""
+    monkeypatch.setattr(soak_session, "GODOT_LOG_ARCHIVE",
+                        session.dir.parent / "archive")
+    session._test_log.write_bytes(b"[INFO] boot\n" * 1000)
+    dest = session.archive_log()
+    assert dest.read_bytes() == session._test_log.read_bytes()
+    assert "TRUNCATED" not in capsys.readouterr().out
 
 
 def test_a_missing_log_is_not_an_error(session, clock, monkeypatch):
