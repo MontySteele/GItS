@@ -173,12 +173,14 @@ TIMEOUT_S = 600
 
 # `-m` is passed ALWAYS and never left implicit, so the ledger's grader id
 # names a model rather than "whatever codex defaulted to that month".
-# 2026-09-04 ([USER]): GPT 6 Astra at its light setting replaces 5.6 Sol as
-# the reviewer and playtester -- the same verdict quality for far fewer
-# tokens. Smoked on codex-cli 0.153.4: the model id answers at
-# `model_reasoning_effort="low"`; "light" is not an effort the CLI accepts,
-# and 0.150.x refuses the model outright ("requires a newer version").
-DEFAULT_MODEL = "gpt-6-astra"
+# 2026-09-04 ([USER]): GPT 6 Astra at its light setting replaced 5.6 Sol as
+# the reviewer and playtester. 2026-09-14 ([USER]): REVERTED to 5.6 Sol --
+# "Astra eats far too much usage to be practical as a seat": one blind run
+# of 107 acts on Astra exhausted the ChatGPT usage window mid-round
+# (calibration build one, `review/qa/blindplay/20260914-233423/`). The
+# `model_reasoning_effort="low"` override stays: it is a CLI config key, not
+# a model flag, and the first Sol seat of build two smokes it.
+DEFAULT_MODEL = "gpt-5.6-sol"
 DEFAULT_REASONING = "low"
 
 
@@ -207,9 +209,13 @@ ALLOWED_ITEMS = frozenset({"agent_message", "reasoning"})
 # action but a record OF one's surroundings. It is allowlisted and then read
 # again below, because it is where `agents_md` is, and `agents_md` is the
 # single best positive evidence that no project instruction reached the seat.
+# `token_usage_record` arrived with codex-cli 0.153.4 (observed live
+# 2026-09-14, calibration build one): a per-turn token-accounting line whose
+# payload is thread, turn and response ids plus `usage` counters, carrying no
+# model content and no tool. Allowlisted as the record of a cost, not an act.
 ALLOWED_ROLLOUT_TYPES = frozenset({
     "session_meta", "turn_context", "response_item", "event_msg",
-    "world_state", "compacted",
+    "world_state", "compacted", "token_usage_record",
 })
 # ...the model-facing items inside a `response_item`. `custom_tool_call`,
 # `custom_tool_call_output`, `function_call`, `function_call_output`,

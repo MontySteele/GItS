@@ -120,7 +120,14 @@ OFF in a release package). **Last RELEASE package:
   six rows shelved as lower value, and the slices in the order Mines,
   finding and overflow, React's route, Spark-supported Cook, mischief. Its
   §8 staging is the next build: stage one (cuts, redesign, repairs) read by
-  round 27, stage two (the Mines batch) by round 28. **The fun calibration**
+  round 27, stage two (the Mines batch) by round 28. **Stage one is BUILT
+  and round 27 is READ** (`EB-749` closed; BaseLib moved to 3.4.7 under it,
+  `EB-751`; `review/records/klee-overhaul-round-27-2026-09-14.md`): four
+  seats on one seed, the core decision in every one, Grounded's condition a
+  fork, the Splash pairing an engine that then runs itself, Tinder Toss
+  never declined in three plays (one more read before its price moves).
+  Round 28 is the Mines batch plus the opening-bank comparison. **The fun
+  calibration**
   (`review/records/klee-fun-calibration-2026-09-14.md`) rides the next three
   builds: seats and [USER] answer three fixed lines on one seed, and the
   score decides whether seats can read for [USER]; Klee's done gate is in

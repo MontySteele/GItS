@@ -1,0 +1,7946 @@
+{
+ "session_id": "20260914-233423",
+ "snapshots": [
+  {
+   "index": 1,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Toadpole (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 21,
+     "max_hp": 21,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    },
+    {
+     "entity_id": "TOADPOLE_1",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "verb": "play",
+   "command": "play \"Defend (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 21,
+     "max_hp": 21,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    },
+    {
+     "entity_id": "TOADPOLE_1",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "verb": "play",
+   "command": "play \"Defend (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 21,
+     "max_hp": 21,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    },
+    {
+     "entity_id": "TOADPOLE_1",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 10,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 21,
+     "max_hp": 21,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    },
+    {
+     "entity_id": "TOADPOLE_1",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 5,
+   "verb": "play",
+   "command": "play \"Defend\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 21,
+     "max_hp": 21,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x3",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "TOADPOLE_1",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Toadpole (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 21,
+     "max_hp": 21,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x3",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "TOADPOLE_1",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Toadpole (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 3,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 5,
+     "max_hp": 21,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x3",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "TOADPOLE_1",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "verb": "play",
+   "command": "play \"Neow's Fury\" on \"Toadpole (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 1,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 24,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "NEOWS_FURY",
+     "card_name": "Neow's Fury",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 1,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 7,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 14,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 10,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Toadpole (2)\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 0,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "TOADPOLE_0",
+     "name": "Toadpole",
+     "hp": 14,
+     "max_hp": 24,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x3",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 39,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 12,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 39,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 13,
+   "verb": "play",
+   "command": "play \"Neow's Fury\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 26,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "NEOWS_FURY",
+     "card_name": "Neow's Fury",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 14,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 0,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 16,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "NEOWS_FURY",
+     "card_name": "Neow's Fury",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 15,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 1,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 16,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "NEOWS_FURY",
+     "card_name": "Neow's Fury",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 16,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "name": "Tinder Toss",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 17,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "name": "Tinder Toss",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 18,
+   "verb": "play",
+   "command": "play \"Tinder Toss\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "name": "Tinder Toss",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 14,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "card_name": "Tinder Toss",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_TINDER_TOSS",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 19,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 6,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 17,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "card_name": "Tinder Toss",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_TINDER_TOSS",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 20,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 17,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "card_name": "Tinder Toss",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_TINDER_TOSS",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 21,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 17,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "card_name": "Tinder Toss",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_TINDER_TOSS",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 22,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 11,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "card_name": "Tinder Toss",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_TINDER_TOSS",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 23,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 5,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "card_name": "Tinder Toss",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_TINDER_TOSS",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 24,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 75,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 25,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 69,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 26,
+   "verb": "play",
+   "command": "play \"Razor \u2014 Claw and Thunder\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 63,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 27,
+   "verb": "play",
+   "command": "play \"Defend\"",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 55,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 28,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 54,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 55,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 29,
+   "verb": "play",
+   "command": "play \"Pop!\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 55,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 30,
+   "verb": "play",
+   "command": "play \"Amber \u2014 Explosive Puppet\"",
+   "state_type": "elite",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 55,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 31,
+   "verb": "play",
+   "command": "play \"Defend (1)\"",
+   "state_type": "elite",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 55,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 32,
+   "verb": "play",
+   "command": "play \"Defend\"",
+   "state_type": "elite",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 55,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 33,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "elite",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 45,
+   "max_hp": 62,
+   "block": 10,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 9,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 55,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 34,
+   "verb": "play",
+   "command": "play \"Defend\"",
+   "state_type": "elite",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "name": "Tinder Toss",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 41,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 10,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 35,
+   "verb": "play",
+   "command": "play \"Tinder Toss\"",
+   "state_type": "elite",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "name": "Tinder Toss",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 41,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 11,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_KO_TINDER_TOSS",
+     "card_name": "Tinder Toss",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KO_TINDER_TOSS",
+       "delta": -1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 36,
+   "verb": "play",
+   "command": "play \"Neow's Fury\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "NEOWS_FURY",
+     "name": "Neow's Fury",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 27,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 12,
+     "meter": "spark",
+     "turn": 3,
+     "card": "NEOWS_FURY",
+     "card_name": "Neow's Fury",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 37,
+   "verb": "play",
+   "command": "play \"Defend\"",
+   "state_type": "elite",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 1,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 21,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 13,
+     "meter": "spark",
+     "turn": 3,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 38,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "elite",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 10,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 2,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 21,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 39,
+   "verb": "play",
+   "command": "play \"Razor \u2014 Claw and Thunder\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 3,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 21,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 14,
+     "meter": "spark",
+     "turn": 4,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 40,
+   "verb": "play",
+   "command": "play \"Strike (1)\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 4,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 7,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 15,
+     "meter": "spark",
+     "turn": 4,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 41,
+   "verb": "play",
+   "command": "play \"Defend\"",
+   "state_type": "elite",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 5,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 1,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 16,
+     "meter": "spark",
+     "turn": 4,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 42,
+   "verb": "play",
+   "command": "play \"Pop!\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 6,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 1,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 17,
+     "meter": "spark",
+     "turn": 4,
+     "card": "KLEEMOD-PROTO_KO_POP",
+     "card_name": "Pop!",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 43,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "elite",
+   "turn": 4,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 44,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 4,
+    "discard": 7,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 1,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": []
+  },
+  {
+   "index": 44,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Skulking Colony\"",
+   "state_type": "elite",
+   "turn": 5,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 37,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 0,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SKULKING_COLONY_0",
+     "name": "Skulking Colony",
+     "hp": 1,
+     "max_hp": 75,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "16",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 18,
+     "meter": "spark",
+     "turn": 5,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 45,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty+\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 10,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 55,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 46,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_KAPOW",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 10,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 55,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 47,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 10,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 39,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 48,
+   "verb": "play",
+   "command": "play \"Razor \u2014 Claw and Thunder\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "name": "Razor \u2014 Claw and Thunder",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 10,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 33,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 49,
+   "verb": "play",
+   "command": "play \"Amber \u2014 Explosive Puppet\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "name": "Amber \u2014 Explosive Puppet",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 10,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 19,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 50,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [],
+   "piles": {
+    "draw": 10,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 19,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 51,
+   "verb": "play",
+   "command": "play \"Strike\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_FIERY_RAIN",
+     "name": "Amber \u2014 Fiery Rain",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true
+    },
+    {
+     "id": "STRIKE_IRONCLAD",
+     "name": "Strike",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 19,
+     "max_hp": 55,
+     "block": 10,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 52,
+   "verb": "play",
+   "command": "play \"Amber \u2014 Fiery Rain\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_MC_AMBER_FIERY_RAIN",
+     "name": "Amber \u2014 Fiery Rain",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 19,
+     "max_hp": 55,
+     "block": 4,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_MC_AMBER_FIERY_RAIN",
+     "card_name": "Amber \u2014 Fiery Rain",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 53,
+   "verb": "play",
+   "command": "play \"Defend (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 9,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_MC_AMBER_FIERY_RAIN",
+     "card_name": "Amber \u2014 Fiery Rain",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 2,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 54,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 57,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4,
+     "BARON_BUNNY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KO_POP",
+     "name": "Pop!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "DEFEND_IRONCLAD",
+     "name": "Defend",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 5,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 9,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "kokomi_plans": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 0,
+     "card": "",
+     "card_name": "",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "klee_overhaul/opening_spark": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "klee_overhaul/opening_spark",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty+",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KO_KAPOW",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_RAZOR_CLAW_AND_THUNDER",
+     "card_name": "Razor \u2014 Claw and Thunder",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "companion:personal/play": 2
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "companion:personal/play",
+       "delta": 2,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_MC_AMBER_EXPLOSIVE_PUPPET",
+     "card_name": "Amber \u2014 Explosive Puppet",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "STRIKE_IRONCLAD",
+     "card_name": "Strike",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_MC_AMBER_FIERY_RAIN",
+     "card_name": "Amber \u2014 Fiery Rain",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    },
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 2,
+     "card": "DEFEND_IRONCLAD",
+     "card_name": "Defend",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/explosion": 1
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/explosion",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

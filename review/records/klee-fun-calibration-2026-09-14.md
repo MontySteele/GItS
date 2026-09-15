@@ -86,11 +86,49 @@ number on any prototype row is quotable off this record (R215 B).
 
 **Seed: `KLEECALIB001`**, written 2026-09-14 before any seat played, on the
 build that landed with PR #481 (main `584d63b1`); the installed `+proto`
-version is recorded with the seats' lines below. The three calibration
+version is `0.2.3214+proto.dirty` (deployed 2026-09-14, main `a3a2ba31`,
+all four arms). The game normalises the letter I in a seed to the digit 1,
+so the seed as the game reads it back is **`KLEECAL1B001`**; typing either
+spelling lands on the same run. The three calibration
 seats play NATURAL (no grant), as [USER] will; round 27's Cook lane
 (Grounded, Return to Sender, Sparks 'n' Splash granted) is a fourth read
 and is not scored here.
-_Seats' three lines: (copied and committed before [USER] plays)._
+**Attempt one (2026-09-14, `0.2.3214+proto.dirty`) was void:** both blind
+Opus lanes died on Neow's card-removal grid after one action each, on
+BaseLib 3.4.7's per-card cost display loading our resources' empty
+`TexturePath` (`EB-751`; records
+`review/qa/klee-round-27-2026-09-14/opus-lane*-natural-attempt1-dead-lane.md`,
+three lines all "none"). No combat turn was reached, so nothing here is a
+reading. **Attempt two** runs on `0.2.3218+proto.dirty` (main `b670f540`,
+`EB-751` fixed on #485), after a two-fight soak on lane 1 logged zero
+error lines; same seed, same three seats, natural.
+
+**Seats' three lines, attempt two** (copied verbatim, committed before
+[USER] plays; the commit hash is the seal):
+
+- **Opus, lane 1, natural** (floor 12, five fights won, 111 of 120 acts;
+  `review/qa/klee-round-27-2026-09-14/opus-lane1-natural.md`):
+  - `MOST WANTED TURN: fight 5 turn 2 -- Block stops bombs, so Amber had to strip 10 block before Chain Fuse and Perfect Timing dumped 41 into a bare body.`
+  - `NOTHING TURN: fight 5 turn 1 -- no incoming damage and no detonator in hand, so the turn was "play both bomb cards and a Strike" with nothing rejected.`
+  - `NEVER AGAIN: Defend -- 5 block (3 under Frail) is never the best use of an energy in a deck whose bombs want one more turn.`
+- **Opus, lane 2, natural** (floor 14, mid second elite, 120 of 120 acts;
+  `opus-lane2-natural.md`):
+  - `MOST WANTED TURN: fight 3 turn 3 -- Tinder Toss set off both bodies for a double kill on Sparks alone, with all 3 Energy unspent.`
+  - `NOTHING TURN: fight 4 turn 3 -- drew four Defends and a Strike against a 20-per-turn damage cap, so no card I held could change anything.`
+  - `NEVER AGAIN: Strike -- 6 damage for 1 Energy does nothing a Bomb, a Spark or a detonator does not do better.`
+- **Codex (gpt-6-astra), lane 1, natural: VOID on the usage cap.** It played
+  107 acts through four fights (`review/qa/blindplay/20260914-233423/`,
+  four fight records kept), then the ChatGPT usage limit refused the
+  fight-five record and the run record, so its three lines were never
+  asked. A first attempt the same evening refused itself on a rollout line
+  kind codex-cli 0.153.4 added (`token_usage_record`, allowlisted in this
+  branch). **Build one is scored on the two Opus seats** (both must agree;
+  disclosed E default); the Codex seat rejoins on build two, launched at
+  the top of a fresh usage window, since a blind run costs the window most
+  of its 5 hours.
+
+The fights the two seats name are on the same seed, so [USER]'s fight
+numbers line up with theirs where the route matches.
 _[USER]'s three lines: (verbatim)._
 _Agreement: (three marks per seat)._
 
