@@ -143,6 +143,18 @@ Deep in Chinju Forest a wisteria bud has grown to the size of a shrine gate, its
 
 Mechanics check: matches harvest. The payout ladder (35 / 75 / 135 gold at 5 / 6 / 7 HP, terminating in the named relic) is exactly the wiki's escalation; each rung forfeits the previous rung's payout, as the harvest states.
 
+@pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1 | Skim the Petals — Gain 35 Gold.
+@pages.INITIAL.options.REACH_DEEPER_1 | Reach Deeper — Lose 5 HP. Advance to the next level.
+@pages.REACH_DEEPER_1.description — The trapped Electro crackles up your sleeve past the outer petals. The tanuki keeps its counting hushed and its eyes on the bud, not on you.
+@pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2 | Skim the Petals — Gain 75 Gold.
+@pages.REACH_DEEPER_1.options.REACH_DEEPER_2 | Reach Deeper — Lose 6 HP. Advance to the next level.
+@pages.REACH_DEEPER_2.description — Shoulder-deep, and the wisteria is humming like a shrine bell. The tanuki has stopped counting. Something at the bud's heart is warm and turning slowly.
+@pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD | Skim the Petals — Gain 135 Gold.
+@pages.REACH_DEEPER_2.options.POLLINOUS_CORE | Enter the Bud's Heart — Lose 7 HP. Obtain the Wisteria Core.
+@pages.EXTRACT_CURRENT_PRIZE.description — You draw your arm out with petals stuck to it, and the tanuki exhales. It pays what every visitor gets and does not mention the rest.
+@pages.EXTRACT_INSTEAD.description — You draw your arm out numb to the shoulder. The tanuki pays out more than it has ever admitted to holding and pretends it did not see how deep you went.
+@pages.POLLINOUS_CORE.description — The bud opens the rest of the way and lets you go. The core is warm and faintly crackling in your hands, and the tanuki, for once, has nothing to say.
+
 ---
 
 ## - [ ] Crystal Sphere
