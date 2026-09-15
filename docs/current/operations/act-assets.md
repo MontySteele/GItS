@@ -14,8 +14,14 @@ powershell -File tools\build_pck.ps1                             # then the pack
 
 ### The shape
 
-Every path derives from `ActModel.FilePathIdentifier`, which is
-`Id.Entry.ToLowerInvariant()` — `MONDSTADT` → `mondstadt`. The five properties
+There are **six dressings**, two a face for each of the three acts (R273
+layout 1): act 1 as Mondstadt or Liyue, act 2 as Natlan or Inazuma, act 3 as
+Fontaine or Sumeru. Act 1's pair dresses two base zones; acts 2 and 3 have one
+base zone each (the Hive, Glory) with two faces standing on it. **None of that
+reaches this page** — a face costs the same eighteen files either way, because
+every path derives from `ActModel.FilePathIdentifier`, which is
+`Id.Entry.ToLowerInvariant()` — `MONDSTADT` → `mondstadt`, `NATLAN` →
+`natlan`. The five properties
 over it are **non-virtual** (`ActModel.cs:52-64`, `:248`), so a subclass cannot
 move a single one of them: the file is at the derived path, or it is nowhere.
 
@@ -31,7 +37,8 @@ move a single one of them: the file is at the derived path, or it is nowhere.
 | Act title | loc table `acts`, key `<Id.Entry>.title` | 1 row | — | — | renders the raw key |
 | Map colours | `MapTraveledColor` / `MapUntraveledColor` / `MapBgColor`, `abstract` on `ActModel` | 3 | — | — | compile error |
 
-Eighteen files a dressing, plus one loc row and three colours that live in C#.
+Eighteen files a dressing, plus one loc row and three colours that live in
+C#. Six dressings, so 108 rows and six loc rows.
 
 **The five rules underneath the table**, each of them a throw if broken:
 
@@ -44,8 +51,9 @@ Eighteen files a dressing, plus one loc row and three colours that live in C#.
    `rng.NextItem`, then makes **one further draw** over the `_fg_` list. The
    number of draws is therefore the number of groups plus one, whatever the
    variant count — so a dressing that keeps the base zone's **group count**
-   consumes the base zone's rng identically. Overgrowth and Underdocks both
-   ship `bg_00`..`bg_04` plus a foreground; so do both dressings.
+   consumes the base zone's rng identically. Overgrowth, Underdocks, the Hive
+   and Glory all ship `bg_00`..`bg_04` plus a foreground; so do all six
+   dressings.
 3. `NCombatBackground.Create` instantiates the background root and **casts** it
    to `NCombatBackground`, then calls `GetNodeOrNull("Layer_00")` ..
    `Layer_{n-1}` for the chosen layers and `"Foreground"` for the fg, throwing
@@ -67,22 +75,24 @@ it into an `NCombatBackground` on instantiation — the EB-760 mechanism the
 still portrait already uses, with one extra step: **BaseLib ships six node
 factories and none of them is for this type**, so
 `klee-mod/KleeCode/Teyvat/NCombatBackgroundFactory.cs` supplies the missing one
-and `TeyvatActAssets.RegisterActBackgrounds` builds it and registers the two
-scenes at `[ModInitializer]` time. Everything else in the table — layer scenes,
+and `TeyvatActAssets.RegisterActBackgrounds` builds it and registers every
+dressing's root scene at `[ModInitializer]` time. Everything else in the table — layer scenes,
 the rest site — is instantiated as a plain `Control` and needs no conversion at
 all.
 
 ### The placeholder recipe
 
 `tools/gen_act_placeholders.py` writes two-stop vertical gradients in the
-nation's colours (Mondstadt sky-blue over meadow green, Liyue amber over
-stone), darkening each layer toward the foreground so five flat plates read as
-five planes. It writes **only** under `ImageGen/images/teyvat/` (gitignored,
-Tier F) and `klee-mod/pck-src/scenes/` (committed, because a `.tscn` is text
+nation's colours — Mondstadt sky-blue over meadow green, Liyue amber over
+stone, Natlan warm red over gold, Inazuma violet over indigo, Fontaine teal
+over white, Sumeru green over sand — darkening each layer toward the
+foreground so five flat plates read as five planes. It writes **only** under
+`ImageGen/images/teyvat/` (gitignored, Tier F) and `klee-mod/pck-src/scenes/` (committed, because a `.tscn` is text
 and because `pck-src` overlays the export work directory verbatim, which is the
 only thing that can put a file at `res://scenes/...`). `git status --short
-ImageGen` prints nothing after a run; the sixteen scene sources are committed
-and `--check` fails if one drifts from what the generator would write.
+ImageGen` prints nothing after a run; the forty-eight scene sources are
+committed and `--check` fails if one drifts from what the generator would
+write.
 
 Sizes are the engine's, not a taste. The layer `TextureRect`'s rect is
 2764.8 × 1296 with `expand_mode = 1`, which **scales** the texture to the rect,
@@ -96,9 +106,10 @@ matches the base game's own 2035 × 1440 exactly.
 A real act asset is a media-ledger item, not a code change.
 `docs/current/operations/media.md` §1 is the layout and §3 the formats; act
 plates take the same `media/raw/…` → `media/out/…` route as music and
-portraits, with `<act-or-scene>` already reserved as `act1_mondstadt` /
-`act1_liyue`. Drop the file, add the row, and `build_pck.ps1`'s Teyvat act
-blocks copy it in at the same `res://` path the placeholder occupied — one
+portraits, with `<act-or-scene>` already reserved as `act1_mondstadt`, `act1_liyue`,
+`act2_natlan`, `act2_inazuma`, `act3_fontaine` and `act3_sumeru`. Drop the
+file, add the row, and `build_pck.ps1`'s Teyvat act blocks copy it in at the
+same `res://` path the placeholder occupied — one
 producer per out-path, exactly as `art/plan.tsv` requires. Nothing in
 `klee-mod/KleeCode` changes and no scene is re-authored: the scene names the
 path, the ledger names the file.
@@ -107,7 +118,7 @@ path, the ledger names the file.
 
 `KleeCode/Teyvat/Patches/ActFilePathIdentifierPatch.cs` rewrites the identifier
 so a dressing wears the base zone's clothes. With this set landed it **stands
-down for act 1**: `TeyvatActAssets.HasDressedAssetsCached` asks
+down for every dressing**: `TeyvatActAssets.HasDressedAssetsCached` asks
 `ResourceLoader.Exists` for the first layer scene, the background root and the
 rest-site scene, and the postfix returns untouched when all three are there.
 It still fires — and must — for a dressing with no set of its own and for a

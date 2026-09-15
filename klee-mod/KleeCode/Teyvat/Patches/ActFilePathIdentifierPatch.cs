@@ -39,10 +39,10 @@ namespace KleeMod.Teyvat.Patches;
 /// `res://scenes/backgrounds/mondstadt/layers` does not exist -- and the
 /// fallback is to ship the placeholder asset tree instead of aliasing.
 ///
-/// THE ALIAS IS NOW CONDITIONAL, AND ACT 1 HAS RETIRED IT IN PRACTICE.
-/// `tools/gen_act_placeholders.py` ships a complete placeholder set for both
-/// act-1 dressings -- five `_bg_NN_a` layer scenes, one `_fg_a`, a background
-/// root, a rest site and three map PNGs -- so
+/// THE ALIAS IS NOW CONDITIONAL, AND EVERY DRESSING HAS RETIRED IT IN
+/// PRACTICE. `tools/gen_act_placeholders.py` ships a complete placeholder set
+/// for all six faces -- five `_bg_NN_a` layer scenes, one `_fg_a`, a
+/// background root, a rest site and three map PNGs each -- so
 /// `TeyvatActAssets.HasDressedAssetsCached` answers TRUE for them in any build
 /// whose pck was rebuilt, the postfix stands down, and the act is drawn from
 /// OUR OWN FILES at the engine's own paths.

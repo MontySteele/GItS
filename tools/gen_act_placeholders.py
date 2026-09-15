@@ -1,4 +1,4 @@
-"""Placeholder-but-complete act asset sets for the two act-1 Teyvat dressings.
+"""Placeholder-but-complete act asset sets for the six Teyvat act dressings.
 
 WHY THIS EXISTS. `ActModel.FilePathIdentifier` is `Id.Entry.ToLowerInvariant()`
 and five NON-VIRTUAL properties derive every act-dressing path from it: the
@@ -11,8 +11,11 @@ site. The spike therefore shipped a Harmony postfix on
 `get_FilePathIdentifier` that aliased MONDSTADT to `overgrowth` and LIYUE to
 `underdocks` (`review/records/teyvat-spike-build-2026-09-15.md` item 1).
 
-This generator retires that alias for act 1 by producing a COMPLETE set per
-dressing, so the loaders are satisfied by our own files. Nothing here is art:
+This generator retires that alias for every dressing by producing a COMPLETE
+set per face -- act 1's Mondstadt and Liyue, act 2's Natlan and Inazuma, act
+3's Fontaine and Sumeru -- so the loaders are satisfied by our own files. The
+alias table stays, and stays right, as the fallback for a build whose pck
+predates a set. Nothing here is art:
 every picture is a two-stop vertical gradient in the nation's colours, and a
 real asset replaces it through `docs/current/operations/media.md`'s raw/out
 ledger with no code change at all.
@@ -98,9 +101,23 @@ class Nation:
 #: Mondstadt is sky-blue over meadow green; Liyue is amber over stone. Two
 #: stops per nation and nothing else: the depth reading comes from the per-layer
 #: darkening below, not from a second palette.
+#:
+#: SIX FACES, TWO PER ACT (R273 layout 1). Act 1's pair dresses two base zones
+#: (Overgrowth, Underdocks); acts 2 and 3 each have ONE base zone with two
+#: faces on it -- the Hive as Natlan or Inazuma, Glory as Fontaine or Sumeru
+#: (`review/ruled/teyvat-nation-mapping-2026-09-14.md` sec.1). Nothing in this
+#: file knows or cares which: a face is an id and two stops, and it gets the
+#: same eighteen files either way, because every path derives from
+#: `FilePathIdentifier` and not from the zone underneath it.
 NATIONS = (
     Nation(id="mondstadt", entry="MONDSTADT", sky=(122, 176, 214), ground=(96, 138, 74)),
     Nation(id="liyue", entry="LIYUE", sky=(214, 164, 86), ground=(108, 100, 92)),
+    # Act 2, the Hive: Natlan warm red over gold, Inazuma violet over indigo.
+    Nation(id="natlan", entry="NATLAN", sky=(198, 84, 56), ground=(206, 158, 74)),
+    Nation(id="inazuma", entry="INAZUMA", sky=(146, 108, 196), ground=(58, 62, 122)),
+    # Act 3, Glory: Fontaine teal over white, Sumeru green over sand.
+    Nation(id="fontaine", entry="FONTAINE", sky=(86, 170, 178), ground=(226, 232, 234)),
+    Nation(id="sumeru", entry="SUMERU", sky=(92, 156, 88), ground=(206, 184, 132)),
 )
 
 

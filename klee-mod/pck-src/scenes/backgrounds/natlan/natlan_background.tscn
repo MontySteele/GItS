@@ -1,0 +1,23 @@
+[gd_scene load_steps=1 format=3]
+
+[node name="NatlanBackground" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="Layer_00" type="Control" parent="."]
+anchors_preset = 0
+
+[node name="Layer_01" type="Control" parent="."]
+anchors_preset = 0
+
+[node name="Layer_02" type="Control" parent="."]
+anchors_preset = 0
+
+[node name="Layer_03" type="Control" parent="."]
+anchors_preset = 0
+
+[node name="Layer_04" type="Control" parent="."]
+anchors_preset = 0
+
+[node name="Foreground" type="Control" parent="."]
+anchors_preset = 0
