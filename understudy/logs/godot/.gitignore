@@ -1,0 +1,12 @@
+# `EB-766`. Copies of the game's own `godot.log`, one per session, taken at
+# teardown and at every detected boot stall (`understudy/soak_session.py`,
+# `Session.archive_log`). Godot keeps five logs and rotates on launch, so a
+# batch of relaunches erases the boot that went wrong before anybody reads it
+# -- which is why the six stalled boots of 2026-09-15 have no logs at all.
+#
+# Same rule and the same reason as blindplay/ and seat/ next door: this is the
+# ENGINE's raw output on this machine, kept so a failure can be read back, not
+# evidence about a design. The excerpt that carried a finding goes in the
+# commit message or the record; the file stays here.
+*
+!.gitignore

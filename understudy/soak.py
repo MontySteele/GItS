@@ -222,13 +222,17 @@ def game_dir() -> Path:
 # module at call time (`soak_session._soak`).
 
 from understudy.soak_shape import (        # noqa: E402,F401  (re-export)
-    BRIDGE_DLL, BRIDGE_MANIFEST, BRIDGE_RELATIVE, COMBAT, DECISION_SCREENS,
-    DEFAULT_CHARACTER, DEPLOY_BRIDGE, Defect, GAME_EXE, HAZARD_EVENT_TITLES,
+    BOOT_POLL_S, BOOT_STALL_AFTER_S, BOOT_STALL_LOG_QUIET_S,
+    BOOT_STALL_RETRIES, BRIDGE_DLL, BRIDGE_MANIFEST, BRIDGE_RELATIVE, COMBAT,
+    DECISION_SCREENS,
+    DEFAULT_CHARACTER, DEPLOY_BRIDGE, Defect, GAME_EXE, GODOT_LOG_ARCHIVE,
+    HAZARD_EVENT_TITLES,
     HAZARD_EVENTS, MAX_ACTIONS_PER_RUN, MENU_TIMEOUT_FILES_PER_S,
     MENU_TIMEOUT_MAX_S, MENU_TIMEOUT_S, MID_FIGHT,
     NO_PROGRESS_ACTIONS, NO_PROGRESS_CYCLE, PROCESS_EXIT_GRACE_S,
+    PROFILE_READY_MARKER, RELAUNCH_DEAD_GAP_S,
     RUN_TIMEOUT_S, SCHEMA_VERSION, SELECTOR_SCREENS, SPEED_SIDECAR,
-    STEAM_APPID, TIME_SCALE, menu_timeout_for)
+    STEAM_APPID, TIME_SCALE, boot_stall_verdict, menu_timeout_for)
 from understudy.soak_lane import (         # noqa: E402,F401  (re-export)
     bridge_installed, game_is_running, lane_setup)
 from understudy.soak_session import (      # noqa: E402,F401  (re-export)

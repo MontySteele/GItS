@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -18,9 +19,23 @@ from typing import Any
 
 from understudy import instances, keepawake
 from understudy.soak_lane import bridge_installed, game_is_running
-from understudy.soak_shape import (DEPLOY_BRIDGE, GAME_EXE, MENU_TIMEOUT_S,
-                                   PROCESS_EXIT_GRACE_S, REPO, SPEED_SIDECAR,
-                                   STEAM_APPID, TIME_SCALE, menu_timeout_for)
+from understudy.soak_shape import (BOOT_POLL_S, BOOT_STALL_AFTER_S,
+                                   BOOT_STALL_RETRIES,
+                                   DEPLOY_BRIDGE, GAME_EXE, GODOT_LOG_ARCHIVE,
+                                   MENU_TIMEOUT_S, PROCESS_EXIT_GRACE_S,
+                                   PROFILE_READY_MARKER, RELAUNCH_DEAD_GAP_S,
+                                   REPO, SPEED_SIDECAR, STEAM_APPID,
+                                   TIME_SCALE, boot_stall_verdict,
+                                   menu_timeout_for)
+
+#: `EB-766`. WHEN THIS PROCESS LAST KILLED A GAME, as a monotonic reading, or
+#: `None` before it has killed one. Module-level rather than per-session on
+#: purpose: what is being waited out is STEAM's teardown of the previous
+#: client session, which is a property of the machine, so the next launch owes
+#: the gap whether or not it is the same `Session` object that did the
+#: killing. A batch that builds a fresh `Session` per launch -- which is every
+#: batch this harness runs -- would otherwise skip the wait entirely.
+_last_kill_at: float | None = None
 
 
 def _soak():
@@ -39,6 +54,79 @@ def _wire():
     """`soak.bridge`, read at CALL time. Same reason as `_soak`."""
     from understudy import soak
     return soak.bridge
+
+
+# ------------------------------------------------- EB-766: the dead gap ----
+
+def note_kill() -> None:
+    """Record that a game process was just killed, for `await_dead_gap`."""
+    global _last_kill_at
+    _last_kill_at = time.monotonic()
+
+
+def await_dead_gap() -> float:
+    """Sleep until `RELAUNCH_DEAD_GAP_S` has passed since the last kill.
+
+    `EB-766`: 3 of the 8 launches that came within about a second of killing a
+    short-lived game stalled at boot, against 0 of the 12 that followed a
+    longer session -- Steam is still tearing the previous client session down
+    when the new process asks it for the remote store. Returns the seconds
+    actually slept, which is 0 for the first launch of a process and for any
+    launch that was already late enough.
+    """
+    if _last_kill_at is None:
+        return 0.0
+    owed = RELAUNCH_DEAD_GAP_S - (time.monotonic() - _last_kill_at)
+    if owed <= 0:
+        return 0.0
+    time.sleep(owed)
+    return owed
+
+
+# --------------------------------------------- EB-766: the log signals ----
+
+#: How much of `godot.log` the marker scan reads, from the end. See
+#: `_log_has_marker`: the boot writes ~65 KB of store lines ahead of the
+#: marker, and EB-1's spin can write gigabytes behind it.
+MARKER_TAIL_BYTES = 1_000_000
+
+
+def _file_size(path: Path) -> int:
+    """`godot.log`'s size, and 0 for a log that is not there yet.
+
+    Swallows every OS error for the same reason `run_history_store` does: this
+    is a watchdog's input on the launch path, and a permission error or a file
+    that vanished mid-rotation must degrade to "no growth", never take a round
+    down before it has started.
+    """
+    try:
+        return path.stat().st_size
+    except OSError:
+        return 0
+
+
+def _log_has_marker(path: Path, marker: str = PROFILE_READY_MARKER) -> bool:
+    """Has `godot.log` reached `Profile-scoped data path initialized` yet?
+
+    That line lands after the boot has rewritten the whole run-history store
+    to the Steam remote store, so its ABSENCE at 45 s is the difference
+    between a boot that is still working and one that is wedged.
+
+    THE READ IS BOUNDED, and EB-1 is why: a spinning game writes ~1.3 MB/s to
+    this file and once grew it to 2.4 GB in half an hour. Only the last
+    `MARKER_TAIL_BYTES` are scanned, which is an order of magnitude more than
+    the ~65 KB of store lines a boot writes ahead of the marker, and the
+    decode is lenient -- the file is the game's, in the game's encoding, and a
+    decode error here is not worth a failed round.
+    """
+    try:
+        with path.open("rb") as fh:
+            size = fh.seek(0, os.SEEK_END)
+            fh.seek(max(0, size - MARKER_TAIL_BYTES))
+            tail = fh.read()
+    except OSError:
+        return False
+    return marker in tail.decode("utf-8", "replace")
 
 
 # ------------------------------------------------------------- ledger ----
@@ -106,6 +194,10 @@ class Session:
     # holds no power request and its `teardown` must not release one.
     _power_counted: bool = False
     _power_held: bool = False
+    # EB-766. The last thing the bridge said during the boot watch, kept so a
+    # caller (and the give-up message) can tell "bridge unreachable" from
+    # "root ok, state endpoint hung". Empty until a boot has been watched.
+    last_boot_read: str = ""
 
     def __init__(self, stamp: str, do_setup: bool = True,
                  intent: str | None = None,
@@ -295,6 +387,14 @@ class Session:
         exe = self.dir / GAME_EXE
         if not exe.exists():
             raise SystemExit(f"game exe not found: {exe}")
+        # EB-766, AND BEFORE THE LEDGER ROW: a launch that has to wait has not
+        # happened yet, and the row's timestamp is what the boot-time
+        # measurement is taken from.
+        slept = await_dead_gap()
+        if slept:
+            print(f"lane {self.label}: waited {slept:.1f}s after the previous "
+                  f"kill before launching (EB-766: relaunching into Steam's "
+                  f"teardown is what stalls the next boot)")
         self._launch_entry = self.ledger.record(
             f"Launched `{GAME_EXE}` directly (Steam must be running)",
             "process terminated at teardown")
@@ -336,15 +436,50 @@ class Session:
         self.ledger.flush()
 
     def wait_for_menu(self, timeout: float = MENU_TIMEOUT_S) -> dict:
-        """R97/5a. Poll for the `options` key on a menu state -- never `GET /`.
+        """R97/5a. Ready is the `options` key on a menu state -- never `GET /`.
 
         The HTTP server answers ~20 s before the main menu has buttons. This is
         the difference between "the process is up" and "the game is ready", and
         it is the single cheapest bug in this file to have written correctly.
+        `GET /` is consulted here (`EB-766`), but ONLY as a stall signal: a
+        root endpoint that answers while the state endpoint never does is the
+        evidence for a relaunch, and it is never the evidence for readiness.
+
+        EB-766 ADDS A SHORT FUSE IN FRONT OF THE LONG BUDGET. A stalled boot
+        and a slow one are told apart in 45 s, and a stall is answered with a
+        kill, a dead gap and a relaunch rather than with the rest of the 426 s
+        the scaled budget was willing to spend. The budget itself is unchanged
+        and is what the last attempt falls back to: if the fuse is wrong about
+        this machine, the only cost is one relaunch per session.
+        """
+        for attempt in range(1, BOOT_STALL_RETRIES + 1):
+            state = self._watch_boot(timeout, fuse=BOOT_STALL_AFTER_S)
+            if state is not None:
+                return state
+            self._relaunch_after_stall(attempt)
+        # THE LAST ATTEMPT CARRIES NO FUSE. Two relaunches have been spent; a
+        # third would cost more than waiting, and the scaled EB-763 budget is
+        # still the number that says "this game is never coming up".
+        state = self._watch_boot(timeout, fuse=None)
+        assert state is not None          # fuse=None either returns or raises
+        return state
+
+    def _watch_boot(self, timeout: float, fuse: float | None) -> dict | None:
+        """One boot watch: the menu state, or `None` for a detected stall.
+
+        Raises `SystemExit` when the process dies or the budget expires. With
+        `fuse=None` the stall branch is off and this is exactly the pre-EB-766
+        loop, with the poll cadence at `BOOT_POLL_S`.
         """
         self.wire()
-        deadline = time.time() + timeout
+        start = time.time()
+        deadline = start + timeout
         last = "(no response)"
+        ever_state = False
+        log = self.log_path()
+        size = _file_size(log)
+        grew_at = start
+        marker = False
         while time.time() < deadline:
             if self.proc is not None and self.proc.poll() is not None:
                 raise SystemExit(
@@ -354,15 +489,125 @@ class Session:
                 state = _wire().get_state()
             except _wire().BridgeError as e:
                 last = str(e)[:120]
-                time.sleep(2.0)
-                continue
-            if state.get("state_type") == "menu" and state.get("options"):
-                return state
-            last = (f"state_type={state.get('state_type')} "
-                    f"menu_screen={state.get('menu_screen')} options=absent")
-            time.sleep(1.5)
-        raise SystemExit(f"menu never became ready within {timeout:.0f}s; "
-                         f"last read: {last}")
+            else:
+                ever_state = True
+                if state.get("state_type") == "menu" and state.get("options"):
+                    return state
+                last = (f"state_type={state.get('state_type')} "
+                        f"menu_screen={state.get('menu_screen')} "
+                        f"options=absent")
+            now = time.time()
+            grown = _file_size(log)
+            if grown > size:
+                size = grown
+                grew_at = now
+            if not marker:
+                marker = _log_has_marker(log)
+            # THE CHEAP HALF OF THE VERDICT IS CHECKED FIRST, and that is not
+            # an optimisation of arithmetic -- `_health_ok` is an HTTP call,
+            # and a boot watch that made one every 2 s would be adding load to
+            # a game it suspects of being wedged. The verdict function is
+            # still the authority; this only decides when to ask it.
+            if (fuse is not None and not ever_state and now - start >= fuse
+                    and boot_stall_verdict(
+                        now - start, self._health_ok(), ever_state, marker,
+                        now - grew_at)):
+                self.last_boot_read = last
+                print(f"WARN lane {self.label}: boot looks STALLED after "
+                      f"{now - start:.0f}s -- the root endpoint answers, the "
+                      f"state endpoint never has, godot.log is {size} bytes "
+                      f"and the profile marker is "
+                      f"{'present' if marker else 'ABSENT'} "
+                      f"(last {now - grew_at:.0f}s without growth). "
+                      f"Killing and relaunching (EB-766). Last read: {last}")
+                return None
+            time.sleep(BOOT_POLL_S)
+        # EB-766: THE LAST READ GOES IN BOTH PLACES. `SystemExit`'s message
+        # reaches a console somebody may not be watching; the print reaches
+        # the log file that is read the morning after, and it is what tells
+        # "bridge unreachable" (a dead process or a dead wire) apart from
+        # "root ok, state endpoint hung" (this row's defect).
+        self.last_boot_read = last
+        give_up = (f"menu never became ready within {timeout:.0f}s; "
+                   f"last read: {last}")
+        print(f"WARN lane {self.label}: {give_up}")
+        raise SystemExit(give_up)
+
+    def _relaunch_after_stall(self, attempt: int) -> None:
+        """`EB-766`. Close the stalled launch's row, kill, gap, launch again.
+
+        The superseded row is closed before a new one opens, for the reason
+        `restart` gives: a ledger that leaves an APPLIED row over a process
+        that no longer exists over-reports what is outstanding in the game
+        directory, and a reversibility log that cries wolf is one nobody
+        reads. The stalled boot's `godot.log` is copied aside FIRST -- it is
+        the only evidence of this defect, and the relaunch rotates it.
+        """
+        self.archive_log(f"stall{attempt}")
+        self._kill()
+        self._step(self._launch_entry,
+                   lambda: f"process terminated -- boot stalled, relaunch "
+                           f"{attempt} of {BOOT_STALL_RETRIES} (EB-766)")
+        self._launch_entry = None
+        # The dead gap itself is `_launch`'s, so it is paid once and by every
+        # relaunch path rather than once per caller that remembered.
+        self._launch()
+
+    def _health_ok(self) -> bool:
+        """`EB-766`. Did `GET /` answer? A STALL SIGNAL, NEVER A READY SIGNAL.
+
+        The two endpoints are answered from different threads -- `/` on the
+        ThreadPool worker that took the request, `/api/v1/singleplayer` after
+        a hop to the game thread (`understudy/hangwatch.py` carries the
+        decompiled reading, EB-489) -- so the pair separates "the game thread
+        is wedged" from "nothing is listening". Every failure is False: this
+        is a watchdog's input and it may not raise on the boot path.
+        """
+        try:
+            _wire().health()
+            return True
+        except Exception:                                    # noqa: BLE001
+            return False
+
+    def log_path(self) -> Path:
+        """This session's `godot.log`. Lane 0 reads the process's own APPDATA,
+        which is the same fallback `Instance.log_path` makes."""
+        if self.instance is not None:
+            return self.instance.log_path()
+        return Path(os.environ.get("APPDATA", "")).joinpath(
+            *instances.LOG_RELATIVE)
+
+    def archive_log(self, tag: str = "") -> Path | None:
+        """`EB-766`. Copy this session's `godot.log` somewhere it survives.
+
+        Godot keeps five logs and rotates on launch, so a batch of relaunches
+        erases the evidence of the boot that went wrong before anybody reads
+        it -- which is why the six stalled boots of 2026-09-15 have no logs at
+        all. A COPY, never a move: the live log belongs to the game.
+
+        Returns the path written, or `None` when there was nothing to copy or
+        the copy failed. It never raises: this is called from a teardown whose
+        whole contract is that every step runs.
+        """
+        try:
+            src = self.log_path()
+            if not src.is_file():
+                return None
+            pid = self.pid
+            stamp = getattr(self, "stamp", "") or "nostamp"
+            name = f"{stamp}-{pid if pid is not None else 'nopid'}"
+            dest = GODOT_LOG_ARCHIVE / f"{name}{'-' + tag if tag else ''}.log"
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dest)
+            return dest
+        except Exception as e:                               # noqa: BLE001
+            # EVERY failure, not just `OSError`. This runs inside a teardown
+            # whose contract is that every step runs, and a half-built session
+            # (the doubles this harness's own tests build with `__new__`) must
+            # not be able to take a teardown down over a log copy.
+            print(f"WARN: could not copy godot.log aside "
+                  f"({type(e).__name__}: {e})")
+            return None
 
     def _require_bridge(self) -> None:
         self.wire()
@@ -454,6 +699,15 @@ class Session:
                       f"so `{SPEED_SIDECAR}` is still in the game directory. "
                       f"The next launch restores from it; the captured "
                       f"original was {outstanding}.")
+        # EB-766, AND BEFORE THE KILL RATHER THAN AFTER: the pid is still on
+        # the launch entry here, so the copy can be named for the process it
+        # came from, and the file is still the one this session wrote -- the
+        # NEXT launch is what rotates it away, not this teardown. Outside the
+        # ledger: copying a log changes nothing in the game directory, so
+        # there is nothing to reverse.
+        copied = self.archive_log()
+        if copied is not None:
+            print(f"lane {self.label}: godot.log copied to {copied} (EB-766)")
         self._step(self._launch_entry, self._stop_game)
         # NO BRIDGE STEP, AND ITS ABSENCE IS THE RULE (`EB-310`): the shared
         # `mods\STS2_MCP` is what the owner's own Steam launch reads, so this
@@ -561,6 +815,11 @@ class Session:
         pids, and closing a process this session did not start is the
         operator's call rather than ours.
         """
+        # EB-766: the clock the next launch's dead gap is measured from starts
+        # HERE, at the request, not after `taskkill` returns -- the wait is for
+        # Steam to finish with the session, and Steam started finishing the
+        # moment the process went away.
+        note_kill()
         if self.proc is not None and self.proc.poll() is None:
             self.proc.terminate()
             for _ in range(20):
