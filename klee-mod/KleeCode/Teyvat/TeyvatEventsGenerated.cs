@@ -842,6 +842,101 @@ internal static partial class TeyvatLoc
                 "Procure 1 Glowwater Potion.",
             ["DROWNED_LIGHTKEEPERS_LENS.pages.CLIMB.description"] =
                 "Lose 13 Max HP. Obtain Fresnel Lens (relic).",
+            // FeiyunSlopeSupperBelt (Liyue / EndlessConveyor)
+            ["FEIYUN_SLOPE_SUPPER_BELT.title"] =
+                "The Feiyun Slope Supper Belt",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.INITIAL.description"] =
+                "A Feiyun clerk has rigged a dumbwaiter belt to run dish after dish "
+                + "up from a kitchen nobody can see the bottom of, and posted the "
+                + "price plainly: forty Mora a plate, no refunds, no guarantee what's "
+                + "under the lid. \"Guild takes no responsibility for what the belt "
+                + "serves,\" he recites, \"only for what it's paid.\" Anyone with a "
+                + "full purse may keep grabbing as long as the belt keeps turning; "
+                + "anyone without one is asked, politely, to step aside.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.LOCKED.title"] =
+                "Grab Something Off the Belt",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.LOCKED.description"] =
+                "Pay 40 Gold. Receive a random dish: Caviar (Gain 4 Max HP, weight "
+                + "6), Clam Roll (Heal 10 HP, weight 6, only if not at full HP), "
+                + "Spicy Snappy (Upgrade a random card, weight 3), Jelly Liver "
+                + "(Transform a card, weight 3), Fried Eel (Add a random Colorless "
+                + "card to Deck, weight 3), Suspicious Condiment (Procure a random "
+                + "Potion, weight 3, only if potion slots available), Golden Fysh "
+                + "(Gain 75 Gold, free, weight 1, only after 2+ grabs), Seapunk Salad "
+                + "(Add Feeding Frenzy to Deck, forced every 5th grab). The same dish "
+                + "never appears twice in a row. Requires at least 120 Gold on every "
+                + "player for the option to appear.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.INITIAL.options.OBSERVE_CHEF.title"] =
+                "Observe the Chef",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.INITIAL.options.OBSERVE_CHEF.description"] =
+                "Upgrade a random card.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE.title"] =
+                "Leave",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE.description"] =
+                "After each grab, you may continue grabbing or Leave.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CAVIAR.title"] =
+                "Caviar",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CAVIAR.description"] =
+                "Gain 4 Max HP, weight 6",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.CAVIAR.title"] =
+                "Caviar",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CLAM_ROLL.title"] =
+                "Clam Roll",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CLAM_ROLL.description"] =
+                "Heal 10 HP, weight 6, only if not at full HP",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.CLAM_ROLL.title"] =
+                "Clam Roll",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SPICY_SNAPPY.title"] =
+                "Spicy Snappy",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SPICY_SNAPPY.description"] =
+                "Upgrade a random card, weight 3",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.SPICY_SNAPPY.title"] =
+                "Spicy Snappy",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.JELLY_LIVER.title"] =
+                "Jelly Liver",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.JELLY_LIVER.description"] =
+                "Transform a card, weight 3",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.JELLY_LIVER.title"] =
+                "Jelly Liver",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.FRIED_EEL.title"] =
+                "Fried Eel",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.FRIED_EEL.description"] =
+                "Add a random Colorless card to Deck, weight 3",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.FRIED_EEL.title"] =
+                "Fried Eel",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SUSPICIOUS_CONDIMENT.title"] =
+                "Suspicious Condiment",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SUSPICIOUS_CONDIMENT.description"] =
+                "Procure a random Potion, weight 3, only if potion slots available",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.SUSPICIOUS_CONDIMENT.title"] =
+                "Suspicious Condiment",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.GOLDEN_FYSH.title"] =
+                "Golden Fysh",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.GOLDEN_FYSH.description"] =
+                "Gain 75 Gold, free, weight 1, only after 2+ grabs",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.GOLDEN_FYSH.title"] =
+                "Golden Fysh",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SEAPUNK_SALAD.title"] =
+                "Seapunk Salad",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SEAPUNK_SALAD.description"] =
+                "Add Feeding Frenzy to Deck, forced every 5th grab",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.SEAPUNK_SALAD.title"] =
+                "Seapunk Salad",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.GRAB_SOMETHING_OFF_THE_BELT.description"] =
+                "Pay 40 Gold. Receive a random dish: Caviar (Gain 4 Max HP, weight "
+                + "6), Clam Roll (Heal 10 HP, weight 6, only if not at full HP), "
+                + "Spicy Snappy (Upgrade a random card, weight 3), Jelly Liver "
+                + "(Transform a card, weight 3), Fried Eel (Add a random Colorless "
+                + "card to Deck, weight 3), Suspicious Condiment (Procure a random "
+                + "Potion, weight 3, only if potion slots available), Golden Fysh "
+                + "(Gain 75 Gold, free, weight 1, only after 2+ grabs), Seapunk Salad "
+                + "(Add Feeding Frenzy to Deck, forced every 5th grab). The same dish "
+                + "never appears twice in a row. Requires at least 120 Gold on every "
+                + "player for the option to appear.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.OBSERVE_CHEF.description"] =
+                "Upgrade a random card.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.LEAVE.description"] =
+                "After each grab, you may continue grabbing or Leave.",
             // GuyunStoneConstructs (Liyue / PunchOff)
             ["GUYUN_STONE_CONSTRUCTS.title"] =
                 "The Guyun Stone Constructs",
@@ -1482,6 +1577,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.BOTTLE.description", "pages.CLIMB.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Liyue.FeiyunSlopeSupperBelt)] = new EventShape(
+                "FEIYUN_SLOPE_SUPPER_BELT", "EndlessConveyorMirror",
+                new[] { "OBSERVE_CHEF" },
+                new[] { "pages.GRAB_SOMETHING_OFF_THE_BELT.description", "pages.OBSERVE_CHEF.description", "pages.LEAVE.description", "DISHES.CAVIAR.title", "DISHES.CLAM_ROLL.title", "DISHES.SPICY_SNAPPY.title", "DISHES.JELLY_LIVER.title", "DISHES.FRIED_EEL.title", "DISHES.SUSPICIOUS_CONDIMENT.title", "DISHES.GOLDEN_FYSH.title", "DISHES.SEAPUNK_SALAD.title" },
+                new[] { "pages.ALL.options.LOCKED", "pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE", "pages.ALL.options.CAVIAR", "pages.ALL.options.CLAM_ROLL", "pages.ALL.options.SPICY_SNAPPY", "pages.ALL.options.JELLY_LIVER", "pages.ALL.options.FRIED_EEL", "pages.ALL.options.SUSPICIOUS_CONDIMENT", "pages.ALL.options.GOLDEN_FYSH", "pages.ALL.options.SEAPUNK_SALAD" },
+                false),
             [typeof(Events.Liyue.GuyunStoneConstructs)] = new EventShape(
                 "GUYUN_STONE_CONSTRUCTS", "PunchOffMirror",
                 new[] { "NAB", "I_CAN_TAKE_THEM" },
@@ -1609,6 +1710,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.TwinGatesOfMtTianheng>(),
             [(TeyvatFrame.Liyue, typeof(DrowningBeacon))] =
                 () => ModelDb.Event<Events.Liyue.DrownedLightkeepersLens>(),
+            [(TeyvatFrame.Liyue, typeof(EndlessConveyor))] =
+                () => ModelDb.Event<Events.Liyue.FeiyunSlopeSupperBelt>(),
             [(TeyvatFrame.Liyue, typeof(PunchOff))] =
                 () => ModelDb.Event<Events.Liyue.GuyunStoneConstructs>(),
             [(TeyvatFrame.Liyue, typeof(RoomFullOfCheese))] =
@@ -1702,6 +1805,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/doors_of_light_and_dark.png",
             ["DROWNED_LIGHTKEEPERS_LENS"] =
                 "res://images/events/drowning_beacon.png",
+            ["FEIYUN_SLOPE_SUPPER_BELT"] =
+                "res://images/events/endless_conveyor.png",
             ["GUYUN_STONE_CONSTRUCTS"] =
                 "res://images/events/punch_off.png",
             ["QINGCE_LARDER"] =

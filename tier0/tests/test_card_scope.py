@@ -88,6 +88,12 @@ RUN_SCOPE_ALLOWED = {
         "base game clause for clause; a mirror that reached for "
         "`CombatState.CreateCard` here would diverge from the base event AND "
         "throw, because an event room has no combat state",
+    "EndlessConveyorMirror.cs":
+        "the same shape once more: the belt's forced fifth plate, the Seapunk "
+        "Salad, previews a Feeding Frenzy into the DECK from an event page "
+        "through the base event's own `RunState.CreateCard` "
+        "(`MegaCrit.Sts2.Core.Models.Events/EndlessConveyor.cs`). The dish is "
+        "eaten in an event room, which has no combat state to create it in",
 }
 
 

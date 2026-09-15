@@ -436,6 +436,7 @@ public class TeyvatFrameTests : IDisposable
             // Conveyor).
             new object[] { typeof(TabletOfTruthMirror), typeof(TabletOfTruth) },
             new object[] { typeof(AbyssalBathsMirror), typeof(AbyssalBaths) },
+            new object[] { typeof(EndlessConveyorMirror), typeof(EndlessConveyor) },
         };
 
     // ---------------------------------------------------------------

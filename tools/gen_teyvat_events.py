@@ -375,6 +375,26 @@ MIRRORS: Dict[str, MirrorSpec] = {
                      ("pages.DEATH_WARNING.description", "pages.ALL.options.LINGER"))
                     + tuple((f"pages.LINGER{i}.description", "pages.ALL.options.LINGER")
                             for i in range(1, 10))),
+    "EndlessConveyor": MirrorSpec(
+        "EndlessConveyorMirror",
+        # The grab option pairs with the one key it has that is NOT a rolled
+        # dish -- the LOCKED twin the base substitutes when the purse is
+        # short, which is the grab option greyed out and so takes the grab
+        # line, exactly as a `_LOCKED` twin does anywhere else. The eight
+        # dishes take their names and effects from the table inside that same
+        # line, through `dish_table`.
+        options=("pages.ALL.options.LOCKED", "OBSERVE_CHEF",
+                 "pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE"),
+        pages=("pages.GRAB_SOMETHING_OFF_THE_BELT.description",
+               "pages.OBSERVE_CHEF.description", "pages.LEAVE.description"),
+        page_source=(
+            ("pages.GRAB_SOMETHING_OFF_THE_BELT.description", "pages.ALL.options.LOCKED"),
+            ("pages.LEAVE.description", "pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE"),
+        ),
+        dish_table=DishTable(
+            "pages.ALL.options.LOCKED",
+            ("CAVIAR", "CLAM_ROLL", "SPICY_SNAPPY", "JELLY_LIVER", "FRIED_EEL",
+             "SUSPICIOUS_CONDIMENT", "GOLDEN_FYSH", "SEAPUNK_SALAD"))),
 }
 
 

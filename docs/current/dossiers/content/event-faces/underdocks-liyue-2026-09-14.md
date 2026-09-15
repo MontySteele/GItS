@@ -113,8 +113,9 @@ responsibility for what the belt serves," he recites, "only for what it's
 paid." Anyone with a full purse may keep grabbing as long as the belt keeps
 turning; anyone without one is asked, politely, to step aside.
 
-- **Grab Something Off the Belt** — Pay 40 Gold. Receive a random dish: Caviar (Gain 4 Max HP, weight 6), Clam Roll (Heal 10 HP, weight 6, only if not at full HP), Spicy Snappy (Upgrade a random card, weight 3), Jelly Liver (Transform a card, weight 3), Fried Eel (Add a random Colorless card to Deck, weight 3), Suspicious Condiment (Procure a random Potion, weight 3, only if potion slots available), Golden Fysh (Gain 75 Gold, free, weight 1, only after 2+ grabs), Seapunk Salad (Add Feeding Frenzy to Deck, forced every 5th grab). The same dish never appears twice in a row. Requires at least 120 Gold on every player for the option to appear. After each grab, you may continue grabbing or Leave.
+- **Grab Something Off the Belt** — Pay 40 Gold. Receive a random dish: Caviar (Gain 4 Max HP, weight 6), Clam Roll (Heal 10 HP, weight 6, only if not at full HP), Spicy Snappy (Upgrade a random card, weight 3), Jelly Liver (Transform a card, weight 3), Fried Eel (Add a random Colorless card to Deck, weight 3), Suspicious Condiment (Procure a random Potion, weight 3, only if potion slots available), Golden Fysh (Gain 75 Gold, free, weight 1, only after 2+ grabs), Seapunk Salad (Add Feeding Frenzy to Deck, forced every 5th grab). The same dish never appears twice in a row. Requires at least 120 Gold on every player for the option to appear.
 - **Observe the Chef** — Upgrade a random card.
+- **Leave** — After each grab, you may continue grabbing or Leave.
 
 Mechanics check: matches harvest.
 
