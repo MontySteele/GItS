@@ -1,7 +1,7 @@
 ## Media pipeline (music and still portraits)
 
 Scope: the **music tracks** and the **enemy / NPC still portraits** of the
-Teyvat run frame (R272, `review/active/teyvat-run-frame-2026-09-14.md` §1.4,
+Teyvat run frame (R272, `review/ruled/teyvat-run-frame-2026-09-14.md` §1.4,
 §2, §5). Tier F exactly as art is: the files never ship to the repo, never
 enter a commit, and are supplied by [USER] into gitignored raw roots on the
 art-bearing main checkout. **Only the ledgers and the tools are tracked.** A

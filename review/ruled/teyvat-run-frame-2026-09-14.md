@@ -1,4 +1,4 @@
-Status: OPEN (picks: the act-2 and act-3 nation pairs, posed when §3's mapping reports; nothing is open today)
+Status: RULED R272 2026-09-14
 
 # The Teyvat run frame: two nations per act, and the layer that can be built beside the kits
 
@@ -104,7 +104,7 @@ what a nation constraint scores and what it does not.
    body onto a frozen StS2 behaviour. (`dossiers/bosses/pattern-memo.md`
    runs the other way, Genshin patterns into StS vocabulary, and is not
    the source for this.)
-4. **Output.** `review/active/teyvat-nation-mapping-<date>.md`: the tables,
+4. **Output.** `review/ruled/teyvat-nation-mapping-<date>.md`: the tables,
    a proposed pair per act with the reason in one line each, and the
    acts 2 and 3 picks as a numbered list with defaults. That packet is
    [USER]'s; this one closes into it.

@@ -138,6 +138,15 @@ true of the work as a sequencing fact.
 
 **Nothing is open in this section.**
 
+## 7. The Teyvat run frame (R272)
+
+**R273 (2026-09-14) ruled the nation mapping at both defaults:** act 2 is Natlan or
+Inazuma, act 3 is Fontaine or Sumeru; act 1 was confirmed Mondstadt or Liyue; the
+Abyss is reserved as the act-4 face; Nod-Krai and Snezhnaya are later faces
+(`EB-752`). The packet is in `review/ruled/`.
+
+**Nothing is open in this section.**
+
 ---
 
 ## Not carried here
