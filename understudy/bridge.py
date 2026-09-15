@@ -552,12 +552,36 @@ def meter_ledger() -> dict:
 # and hovering any of them paints the same panel. `unhover` takes no card: the
 # tracker's own release takes none, because the hand reports "nothing is under
 # the cursor" rather than "this card left".
+
+# EB-761 ADDS `force_next_event`, THE ONE OP HERE THAT DOES NOT WRITE A COMBAT
+# -- IT WRITES A RUN, AND IT IS CALLED FROM A MAP SCREEN. The Teyvat spike
+# could not reach one named event in the real game at all
+# (`review/records/teyvat-spike-proofs-2026-09-15.md`, item 2): there was no
+# event op here, and the scenario runner wakes on a COMBAT screen and so cannot
+# stand on a map, which left luck across full runs as the only route to a given
+# `?` room's face.
+#
+# THE SEAM IS ONE INDEX AND IT CONSUMES NO RNG. `RunManager.GenerateRooms`
+# shuffles the act's events ONCE at run start into `RoomSet.events`; every `?`
+# room after that is a read at a moving cursor,
+# `events[eventsVisited % len(events)]`, taken by `ActModel.PullNextEvent`. The
+# op swaps the named event into that cursor slot -- two entries moved in a list
+# that was already this run's. No roll is taken, so every later room, reward
+# and encounter is still the one the seed would have produced; and nothing is
+# minted, because the event was already pending in this act.
+#
+# It refuses (as a dict, never a throw) a run that is not up, an unknown id, an
+# event this run has already visited, and one whose own `IsAllowed` is false --
+# the last two because `RoomSet.EnsureNextEventIsValid` steps the cursor past
+# both BEFORE the read, so the write would land, answer ok, and the `?` room
+# would open on something else.
 DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power",
-             "clear_hand", "hover", "unhover")
+             "clear_hand", "hover", "unhover", "force_next_event")
 
 
 def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
-                resource: str = "", power: str = "", card: str = "") -> dict:
+                resource: str = "", power: str = "", card: str = "",
+                event: str = "") -> dict:
     """Set one combat number. Returns the endpoint's report.
 
     A `status: "error"` answer comes back as an ordinary dict, not an
@@ -576,7 +600,7 @@ def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
     return _request(DEBUG_STATE, {"op": op, "amount": int(amount),
                                   "who": who, "resource": resource,
                                   "power": power, "card": card,
-                                  "why": str(why)})
+                                  "event": event, "why": str(why)})
 
 
 def debug_state_info() -> dict:
@@ -653,6 +677,35 @@ def clear_hand(why: str) -> dict:
     than an error -- it is the state the caller asked for.
     """
     return debug_state("clear_hand", why)
+
+
+def force_next_event(event_id: str, why: str) -> dict:
+    """Make the next `?` room open on `event_id` (EB-761). NOT COMPARABLE.
+
+    NOTHING MEASURED AFTER THIS CALL IS COMPARABLE TO ANY RUN, including this
+    one's own earlier floors. The run's `?` rooms are no longer the ones its
+    seed produced -- a face was chosen by hand -- so no winrate, no HP curve,
+    no damage average and no event-frequency read off this run may be quoted
+    beside any other. It is for reaching a FACE on demand: the text, the
+    options, the relic an option hands over. Never for a number.
+
+    `event_id` is the model's wire id (`ROOM_FULL_OF_CHEESE`); the endpoint
+    matches it exactly first and case-insensitively second and reports the
+    spelling it reached. It needs a RUN and not a combat -- the caller is
+    standing on a map -- and it consumes no rng: the act's event list was
+    shuffled once at run start and this swaps two entries in it, so every
+    later room is still the one the seed would have produced.
+
+    Refusals come back as ordinary dicts (this module's convention): no run,
+    an id this act has no event for, an event already visited this run, and
+    one whose own `IsAllowed` is false. The last two are refused rather than
+    written because the game skips both before it reads, so the write would
+    have landed and the room opened on something else.
+
+    Choosing the event does NOT walk to the room. `understudy/force_event.py`
+    is the driver that does both.
+    """
+    return debug_state("force_next_event", why, event=event_id)
 
 
 def settle(prev_type: str | None = None, tries: int = 12, delay: float = 0.6) -> dict:

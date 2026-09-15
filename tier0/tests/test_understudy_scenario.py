@@ -198,8 +198,17 @@ def test_the_setup_verbs_and_the_bridge_ops_are_one_list():
     # same equality, but they are not setup verbs -- they write no game state
     # -- which is why they are their own tuple rather than an eighth entry in
     # SETUP_STEPS. The list that has to stay in step with the bridge is both.
+    # EB-761: the subtraction on the OTHER side, one op, with its reason
+    # written on `scenario.NON_SCENARIO_OPS`. `force_next_event` acts on a MAP
+    # screen, which this runner never stops on -- it wakes on a combat screen
+    # -- so a verb for it would be a verb that could never fire, and
+    # `understudy/force_event.py` is the driver that calls it instead. It is a
+    # NAMED subtraction rather than a dropped equality: an op that simply went
+    # missing from this test is an op nobody notices is unreachable.
     verbs = (set(scenario.SETUP_STEPS) | set(scenario.CURSOR_STEPS)) - {"give"}
-    assert verbs == set(bridge.DEBUG_OPS)
+    assert verbs == set(bridge.DEBUG_OPS) - set(scenario.NON_SCENARIO_OPS)
+    assert set(scenario.NON_SCENARIO_OPS) <= set(bridge.DEBUG_OPS)
+    assert not set(scenario.NON_SCENARIO_OPS) & set(scenario.STEP_VERBS)
     setup = set(scenario.SETUP_STEPS) - {"give"}
     assert set(scenario.CREATURE_SETUP_STEPS)         | set(scenario.PLAYER_ONLY_SETUP_STEPS) == setup
     # Every verb takes an amount except the ones that say they do not.

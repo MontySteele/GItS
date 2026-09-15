@@ -42,6 +42,10 @@
 //   unhover       -> HoveredModelTracker.OnLocalCardUnhovered()
 //                    THE ONLY TWO OPS HERE THAT WRITE NO GAME STATE -- see
 //                    the EB-652 block below.
+//   force_next_event -> ActModel's own RoomSet.events, two entries swapped
+//                    (EB-761). THE ONE OP HERE THAT IS NOT A COMBAT WRITE and
+//                    the one that runs with no combat up -- see the EB-761
+//                    block below.
 //   set_power     -> PowerCmd.Apply / PowerCmd.ModifyAmount / PowerCmd.Remove
 //                    (EB-146) -- the three commands every card in the game
 //                    applies, stacks and clears a power with. Which one runs
@@ -186,11 +190,61 @@
 // hovering any of them paints the identical panel, so the first match wins
 // rather than a refusal that would refuse the scenario the op exists for.
 //
+// EB-761: WHY force_next_event EXISTS, AND WHY IT IS NOT A COMBAT WRITE.
+// The Teyvat spike (`review/records/teyvat-spike-proofs-2026-09-15.md`,
+// item 2) could not reach one named event -- the Springvale Cheese Cellar --
+// in the real game at all. Nothing here had an event op, and the scenario
+// runner wakes up only on a combat screen, so it cannot stand on a map; the
+// only route left was luck, over full runs whose path nothing steers. Six
+// event faces were therefore unreviewable on demand.
+//
+// THE SEAM IS ONE INDEX, AND IT CONSUMES NO RNG. `RunManager.GenerateRooms`
+// shuffles `AllEvents.Concat(ModelDb.AllSharedEvents)` ONCE at run start into
+// `RoomSet.events` and never rolls for an event again: every `?` room is a
+// read at a moving cursor, `events[eventsVisited % events.Count]`, taken by
+// `ActModel.PullNextEvent`. So "force this event" is "put the named model at
+// that cursor" -- two entries swapped in a list that was already this run's.
+// The rng stream does not move, so every later room, reward and encounter is
+// the one the seed would have produced anyway; and nothing is minted, because
+// the event was already pending in this act and would have come up on its
+// own. `gits/GitsForceEvent.cs` holds the arithmetic, game-type-free, and
+// `klee-mod/KleeTests/GitsForceEventTests.cs` compiles THAT file to pin it.
+//
+// IT RUNS WITH NO COMBAT UP, WHICH NO OTHER OP HERE DOES. That is the whole
+// point: the caller is standing on a map about to walk into a `?`. So the
+// combat-in-progress check is applied to the combat ops and not to this one,
+// and the run and multiplayer checks are unchanged for both.
+//
+// THE CURSOR IS NOT INDEX 0. `eventsVisited` is incremented by every `?` room
+// the act has visited AND by every skip `EnsureNextEventIsValid` makes, so
+// the slot to write is `eventsVisited % events.Count`. Writing index 0 would
+// be writing to a slot the act walked past on floor 3 -- the one error this
+// op could make that would look like it had worked.
+//
+// TWO REFUSALS THAT LOOK LIKE SUCCESS IF THEY ARE NOT MADE. `PullNextEvent`
+// calls `EnsureNextEventIsValid` BEFORE the read, and that walks the cursor
+// forward past any event failing `IsAllowed(runState)` or already in
+// `runState.VisitedEventIds`. A forced event in either state would be stepped
+// straight over: the write lands, the response says ok, and the `?` room
+// opens on something else entirely. Both are checked against the LIVE run
+// here and refused, which is this file's standing rule (a silent no-op
+// wearing an `ok` is the failure every other refusal below exists to stop).
+//
+// IT IS AS DISQUALIFYING AS EVERY OTHER OP HERE. A run whose next event was
+// chosen by hand is not a run the generators produced; the guardrail rides on
+// the answer unchanged, and `understudy/bridge.py` says the same thing in its
+// docstring. It is for reaching a FACE on demand -- text, options, the relic
+// an option hands over -- and never for a number.
+//
 // WHAT IS DELIBERATELY *NOT* HERE, and it is a follow-up rather than an
 // oversight:
 //   * enemy spawning -- the encounter is generated content and choosing one
 //     is `GitsSeed`'s job (pick the run), not this file's. A scenario that
 //     needs two enemies routes to a fight that has two.
+//   * WALKING TO THE `?` ROOM. This op chooses WHICH event the next `?` room
+//     opens; it does not choose the room. The walk is the caller's, and
+//     `understudy/force_event.py` is the driver that does it through the
+//     bridge's own `choose_map_node`.
 //
 // REFLECTION FOR THE RESOURCE HALF ONLY, and for the reason
 // `gits/GitsResources.cs` states: BaseLib's `CustomResourcePatches` registry is
@@ -218,11 +272,24 @@
 //                             dispatch; this route sits outside that dispatcher
 //                             (like speed, seed and give_card) so it checks
 //                             itself.
-//   * no combat in progress -- every op here writes combat state. Out of
-//                             combat there is no energy, no block and no
-//                             resource to move, and a silent no-op wearing an
-//                             `ok` is the failure give_card's combat-pile
-//                             refusal already names.
+//   * no combat in progress -- every op here EXCEPT `force_next_event` writes
+//                             combat state. Out of combat there is no energy,
+//                             no block and no resource to move, and a silent
+//                             no-op wearing an `ok` is the failure give_card's
+//                             combat-pile refusal already names.
+//                             `force_next_event` writes the ACT's pending
+//                             list, is used from a map screen, and is
+//                             therefore checked for a run and not for a
+//                             combat (EB-761).
+//   * unknown event id      -- refused with the act named and its pending
+//                             list printed back, on the unknown-creature
+//                             refusal's terms: the spelling the caller wants
+//                             is one this route can hand it.
+//   * an event already visited this run, or one whose `IsAllowed` is false
+//                             -- refused. `EnsureNextEventIsValid` walks the
+//                             cursor past both BEFORE the read, so the write
+//                             would land, answer ok, and the `?` room would
+//                             open on something else.
 //   * unknown card in hand  -- refused with the hand printed back, for the
 //                             unknown-creature refusal's reason below.
 //   * unknown creature      -- refused with the name echoed and the living
@@ -259,7 +326,12 @@
 //
 //   GET  /api/v1/gits/debug_state
 //        -> { status, message, guardrail, run_in_progress, combat_in_progress,
-//             ops, resources, creatures }
+//             ops, resources, creatures, powers, events, events_visited,
+//             next_event }
+//           (`events` is the CURRENT ACT's pending event list in the order it
+//            will be read, and `next_event` the one the next `?` room opens on
+//            as things stand -- both present whenever a run is up, combat or
+//            not, because the op they serve does not need a combat.)
 //   POST /api/v1/gits/debug_state
 //        { "op": "set_resource", "resource": "KLEEMOD_SPARK", "amount": 2,
 //          "why": "EB-142 spark-gate scenario" }
@@ -272,6 +344,15 @@
 //        { "op": "hover", "card": "Salon Debut"|"KLEEMOD-SALON_DEBUT",
 //          "why": "EB-652 salon hover frame" }
 //        { "op": "unhover", "why": "EB-652 release" }
+//        { "op": "force_next_event", "event": "ROOM_FULL_OF_CHEESE",
+//          "why": "EB-761 item-2 re-proof" }
+//          (no `who`, no `amount`, NO COMBAT NEEDED: it swaps two entries in
+//           the current act's pending event list so the next `?` room opens on
+//           the named one. `before` is the index it sat at, `after` is the
+//           slot `PullNextEvent` reads next, and the response also carries
+//           `event` (the id as the list spells it), `act`, `events_visited`,
+//           `pending` and `moved` -- `moved: false` with `status: ok` means it
+//           was already next.)
 //          (`hover` carries one extra key, `card`, naming the id it resolved
 //           in hand; `before` and `after` are the id THIS ROUTE last hovered
 //           and the one it hovered now -- see `GitsDebugHovered` for why that
@@ -329,6 +410,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Multiplayer.Game.PeerInput;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace STS2_MCP;
@@ -347,7 +429,15 @@ public static partial class McpMod
 
     private static readonly string[] GitsDebugStateOps =
         { "set_resource", "set_energy", "set_hp", "set_block", "set_power",
-          "clear_hand", "hover", "unhover" };
+          "clear_hand", "hover", "unhover", "force_next_event" };
+
+    /// <summary>The ops that do NOT need a combat up (EB-761).
+    ///
+    /// One entry, and it is a list rather than an `op ==` test so the
+    /// combat gate below reads as a rule with an exception rather than as a
+    /// special case for one string.</summary>
+    private static readonly string[] GitsDebugStateOutOfCombatOps =
+        { "force_next_event" };
 
     /// <summary>
     /// The card id this route last hovered, or the empty string -- THIS
@@ -687,7 +777,7 @@ public static partial class McpMod
 
     private static Dictionary<string, object?> GitsDebugStateApply(
         string op, string who, string resourceId, string powerId,
-        string cardName, int amount, string why)
+        string cardName, string eventId, int amount, string why)
     {
         if (!RunManager.Instance.IsInProgress)
             return Error("No run in progress; there is no player to write to.");
@@ -696,6 +786,13 @@ public static partial class McpMod
             return Error("debug_state is refused in multiplayer: these writes "
                          + "do not go through the action-queue synchronizer, "
                          + "so peers would diverge.");
+
+        // EB-761. The exception rather than a second gate: `force_next_event`
+        // writes the ACT's pending event list and is called from a MAP screen,
+        // so a combat check on it would refuse the op in the only place it is
+        // ever used. Everything else keeps the check unchanged.
+        if (Array.IndexOf(GitsDebugStateOutOfCombatOps, op) >= 0)
+            return GitsForceNextEventApply(op, eventId, why);
 
         if (!CombatManager.Instance.IsInProgress)
             return Error("No combat in progress. Every op here writes combat "
@@ -974,6 +1071,173 @@ public static partial class McpMod
         return report;
     }
 
+    // ------------------------------------------------- EB-761 force event ---
+
+    private static FieldInfo? _gitsActRoomsField;
+    private static bool _gitsActRoomsProbed;
+
+    /// <summary>The act's own `RoomSet`, by reflection.
+    ///
+    /// `ActModel._rooms` is protected and the class exposes the pieces a
+    /// caller normally needs (`BossEncounter`, `Ancient`, `PullNextEvent`)
+    /// rather than the set itself, so there is no public route to the pending
+    /// EVENT list. Reflection here, once, with the field cached -- the same
+    /// posture `gits/GitsCardSelection.cs` takes to `NCardGrid`'s private
+    /// highlight set, and for the same reason: the alternative is no op at
+    /// all. A null answer means the game's own field moved, and the refusal
+    /// says so rather than guessing at a new name.</summary>
+    private static RoomSet? GitsActRoomSet(ActModel act)
+    {
+        if (!_gitsActRoomsProbed)
+        {
+            _gitsActRoomsProbed = true;
+            try
+            {
+                _gitsActRoomsField = typeof(ActModel).GetField(
+                    "_rooms", BindingFlags.Instance | BindingFlags.NonPublic
+                              | BindingFlags.Public);
+            }
+            catch (Exception ex)
+            {
+                GD.PrintErr("[STS2 MCP][GItS] debug_state could not probe "
+                            + $"ActModel._rooms: {ex.Message}");
+            }
+        }
+        try { return _gitsActRoomsField?.GetValue(act) as RoomSet; }
+        catch { return null; }
+    }
+
+    /// <summary>How many event ids a refusal prints back before it stops.
+    /// The pending list is every event in the act plus every shared one --
+    /// long enough that printing all of it buries the sentence that matters,
+    /// short enough that a cap plus a count is still a usable spelling
+    /// aid.</summary>
+    private const int GitsDebugEventListCap = 40;
+
+    /// <summary>EB-761. Put a named event at the act's event cursor, so the
+    /// next `?` room opens on it. Consumes no rng; see the header.</summary>
+    private static Dictionary<string, object?> GitsForceNextEventApply(
+        string op, string eventId, string why)
+    {
+        if (string.IsNullOrWhiteSpace(eventId))
+            return Error("force_next_event needs an 'event' id, e.g. "
+                         + "ROOM_FULL_OF_CHEESE. GET this route while a run "
+                         + "is up for the act's pending list.");
+
+        var runState = RunManager.Instance.DebugOnlyGetState();
+        if (runState == null) return Error("No run state");
+
+        ActModel? act;
+        try { act = runState.Act; }
+        catch (Exception ex)
+        {
+            return Error("This run has no current act to read, so there is no "
+                         + $"pending event list: {ex.Message}");
+        }
+        if (act == null) return Error("This run has no current act.");
+        var actId = SafeGetText(() => act.Id.Entry) ?? "act";
+
+        var rooms = GitsActRoomSet(act);
+        if (rooms == null)
+            return Error("Could not reach the act's RoomSet (ActModel._rooms). "
+                         + "This op is a reflection read of a protected field "
+                         + "and cannot guess a new name for it -- the game's "
+                         + "own field has moved.");
+
+        var models = rooms.events;
+        var ids = models.Select(e => SafeGetText(() => e.Id.Entry) ?? "")
+                        .ToList();
+        var placement = GitsForceEvent.Locate(ids, rooms.eventsVisited, eventId);
+
+        if (!placement.Found)
+            return Error($"No event '{eventId}' pending in act '{actId}' "
+                         + $"({placement.Count} events). "
+                         + GitsDebugEventList(ids));
+
+        var model = models[placement.Index];
+
+        // BOTH OF THESE WOULD LAND AS A WRITE AND OPEN A DIFFERENT ROOM.
+        // `PullNextEvent` runs `EnsureNextEventIsValid` first, which walks the
+        // cursor forward past an event this run has already seen or one whose
+        // own `IsAllowed` says no -- so the forced event would be stepped over
+        // and the response would have said ok.
+        try
+        {
+            if (runState.VisitedEventIds.Contains(model.Id))
+                return Error(
+                    $"'{placement.Resolved}' has already been visited in this "
+                    + "run. RoomSet.EnsureNextEventIsValid skips a visited "
+                    + "event BEFORE the read, so forcing it would write the "
+                    + "list, answer ok, and open the next `?` room on "
+                    + "something else. Force it in a fresh run.");
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr("[STS2 MCP][GItS] force_next_event could not read "
+                        + $"VisitedEventIds: {ex.Message}");
+        }
+
+        try
+        {
+            if (!model.IsAllowed(runState))
+                return Error(
+                    $"'{placement.Resolved}' is not allowed in this run right "
+                    + "now (EventModel.IsAllowed is false -- an act, a relic "
+                    + "or a deck condition it asks about). "
+                    + "EnsureNextEventIsValid skips it before the read, so "
+                    + "the force would be a no-op wearing an ok.");
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr("[STS2 MCP][GItS] force_next_event could not ask "
+                        + $"IsAllowed: {ex.Message}");
+        }
+
+        // A SWAP, NEVER AN INSERT: the list's LENGTH is what `NextEvent`'s
+        // modulo divides by, so inserting would renumber every slot behind the
+        // cursor and change which event every later `?` room in the act opens.
+        var moved = GitsForceEvent.Swap(models, placement.Index, placement.Slot);
+
+        GD.Print($"[STS2 MCP][GItS] debug_state: {op} {actId} "
+                 + $"{placement.Resolved} index {placement.Index} -> slot "
+                 + $"{placement.Slot}{(moved ? "" : " (already next)")} "
+                 + $"| why: {why}");
+
+        return new Dictionary<string, object?>
+        {
+            ["status"] = "ok",
+            ["message"] = $"{op} {actId} {placement.Resolved}: index "
+                          + $"{placement.Index} -> slot {placement.Slot}"
+                          + (moved ? "; the next ? room opens on it"
+                                   : "; it was already next, nothing moved"),
+            ["guardrail"] = GitsDebugStateGuardrail,
+            ["op"] = op,
+            ["who"] = actId,
+            ["before"] = placement.Index,
+            ["after"] = placement.Slot,
+            // Synchronous and complete: this is a list write, not a command,
+            // so there is no frame to wait for and nothing for a caller to
+            // confirm by reading the next state.
+            ["queued"] = false,
+            ["why"] = why,
+            ["event"] = placement.Resolved,
+            ["act"] = actId,
+            ["events_visited"] = rooms.eventsVisited,
+            ["pending"] = placement.Count,
+            ["moved"] = moved
+        };
+    }
+
+    private static string GitsDebugEventList(List<string> ids)
+    {
+        if (ids.Count == 0)
+            return "This act has no pending events at all.";
+        var shown = ids.Take(GitsDebugEventListCap).ToList();
+        var rest = ids.Count - shown.Count;
+        return "Pending: " + string.Join(", ", shown)
+               + (rest > 0 ? $", and {rest} more." : ".");
+    }
+
     private static string GitsDebugUnknownCreature(string who, CombatState combat)
         => $"No living creature named '{who}'. Use \"player\", or one of the "
            + "entity ids the last GET reported: "
@@ -994,6 +1258,16 @@ public static partial class McpMod
         // list of what a creature currently holds would be a list that does not
         // answer the question a caller is asking. It is long, and this is a GET
         // nothing in the state loop makes.
+        // EB-761. The act's PENDING EVENT LIST, in the order it will be read,
+        // and the id of the one the next `?` room would open on as things
+        // stand. It is here rather than in a route of its own for the reason
+        // `creatures` and `powers` are: the spelling `force_next_event` wants
+        // is the spelling this GET hands back, and a caller that has to guess
+        // an id is a caller who guesses it at the machine with a run up.
+        var events = new List<string>();
+        string nextEvent = "";
+        var eventsVisited = 0;
+
         var powers = new List<string>();
         try
         {
@@ -1005,6 +1279,32 @@ public static partial class McpMod
             GD.PrintErr("[STS2 MCP][GItS] debug_state power list failed: "
                         + ex.Message);
         }
+        try
+        {
+            // IN A RUN IS ENOUGH HERE, and deliberately so: the op this list
+            // serves is the one op on this route that does not need a combat.
+            if (inRun)
+            {
+                var forState = RunManager.Instance.DebugOnlyGetState();
+                var act = forState?.Act;
+                var rooms = act == null ? null : GitsActRoomSet(act);
+                if (rooms != null)
+                {
+                    events = rooms.events
+                        .Select(e => SafeGetText(() => e.Id.Entry) ?? "")
+                        .ToList();
+                    eventsVisited = rooms.eventsVisited;
+                    var here = GitsForceEvent.Locate(events, eventsVisited, "");
+                    if (here.Slot >= 0) nextEvent = events[here.Slot];
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr("[STS2 MCP][GItS] debug_state event list failed: "
+                        + ex.Message);
+        }
+
         try
         {
             if (inRun && inCombat)
@@ -1028,7 +1328,7 @@ public static partial class McpMod
         {
             ["status"] = "ok",
             ["message"] = "POST { op, amount, why, who?, resource?, power?, "
-                          + "card? } "
+                          + "card?, event? } "
                           + "to set up a board through the game's own mutators. "
                           + "Ops: " + string.Join(", ", GitsDebugStateOps) + ".",
             ["guardrail"] = GitsDebugStateGuardrail,
@@ -1037,7 +1337,10 @@ public static partial class McpMod
             ["ops"] = GitsDebugStateOps.ToList(),
             ["resources"] = resources,
             ["creatures"] = creatures,
-            ["powers"] = powers
+            ["powers"] = powers,
+            ["events"] = events,
+            ["events_visited"] = eventsVisited,
+            ["next_event"] = nextEvent
         };
     }
 
@@ -1113,11 +1416,13 @@ public static partial class McpMod
             string resource = GitsDebugStr(parsed, "resource") ?? "";
             string power = GitsDebugStr(parsed, "power") ?? "";
             string card = GitsDebugStr(parsed, "card") ?? "";
+            string evt = GitsDebugStr(parsed, "event") ?? "";
 
             var applyTask = RunOnMainThread(
                 () => GitsDebugStateApply(op!.Trim(), who.Trim(),
                                           resource.Trim(), power.Trim(),
-                                          card.Trim(), amount, why!.Trim()));
+                                          card.Trim(), evt.Trim(), amount,
+                                          why!.Trim()));
             SendJson(response, applyTask.GetAwaiter().GetResult());
         }
         catch (Exception ex)

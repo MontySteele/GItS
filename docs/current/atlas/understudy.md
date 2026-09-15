@@ -321,6 +321,20 @@ file the code has left.
   numbers only** — HP, Block, power stacks, resource amounts, `prompt`,
   `can_play`, `unplayable_reason`, printed text — and a failed assert is a
   DEFECT, never a design finding.
+- **`force_event.py` reaches ONE NAMED EVENT, and is a driver rather than a
+  scenario step** (EB-761). `bridge.force_next_event` posts the ninth
+  `debug_state` op, `force_next_event`, which swaps a named event into the
+  cursor `ActModel.PullNextEvent` reads (`events[eventsVisited %
+  len(events)]`). The act's event list is shuffled ONCE at run start, so the
+  swap **consumes no rng** and every later room is still the seed's; it
+  selects rather than mints, the event having already been pending. It is not
+  a scenario verb because the scenario runner wakes on a COMBAT screen and
+  this op acts on a MAP — recorded as `scenario.NON_SCENARIO_OPS` and pinned
+  by the verb/op equality in `test_understudy_scenario.py`. The driver walks
+  to the next `?` room through `choose_map_node` and **stops** at any screen
+  that is neither a map nor the event: it does not fight, shop or rest, which
+  is the line between it and `soak.py`. Same guardrail as every other write on
+  that route — nothing measured after it is comparable to any run.
 - **`log_lacks` is the one check that reads the engine log, not the wire**
   (EB-292). Its defect class is invisible to a state read: an `NCard` handed a
   non-finite size still reports a legal board, and the bridge answers normally
