@@ -1603,6 +1603,9 @@ internal static partial class TeyvatLoc
             ["ARANARAS_TWO_CAPS.pages.FRAGRANT_MUSHROOM.description"] =
                 "Obtain Rukkhashava Bloom (Fragrant Mushroom, relic). Upon pickup, "
                 + "lose 15 HP and Upgrade 3 random cards.",
+            ["ARANARAS_TWO_CAPS.loss"] =
+                "{character} ate the Rukkhashava Bloom and never got up at the "
+                + "[gold]{event}[/gold].",
             // SpilledSatchelAtSumeruCitysGate (Sumeru / PotionCourier)
             ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.title"] =
                 "The Spilled Satchel at Sumeru City's Gate",
@@ -1876,6 +1879,9 @@ internal static partial class TeyvatLoc
                 "",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_LOOP.description"] =
                 "",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.loss"] =
+                "{character} let go of the rope over Ardravi Valley at the "
+                + "[gold]{event}[/gold].",
             // WitheringGraft (Sumeru / Symbiote)
             ["WITHERING_GRAFT.title"] =
                 "The Withering Graft",
@@ -1976,6 +1982,9 @@ internal static partial class TeyvatLoc
                 "It is unmistakably well-made gear, fitted for nobody in particular "
                 + "— least of all you. Add Clumsy (curse) to your Deck. Obtain a "
                 + "random Relic.",
+            ["CARAVAN_RIBAT_LEAVINGS.loss"] =
+                "{character} bled out on a coffer latch at the "
+                + "[gold]{event}[/gold].",
             // WarHistorianRapiya (Sumeru / WarHistorianRepy)
             ["WAR_HISTORIAN_RAPIYA.title"] =
                 "War Historian, Rapiya",
@@ -2117,6 +2126,9 @@ internal static partial class TeyvatLoc
             ["MEROPIDE_INFIRMARY_ROUNDS.pages.FRAGRANT_MUSHROOM.description"] =
                 "Obtain Clarity Tincture (Fragrant Mushroom relic). Upon pickup, "
                 + "lose 15 HP and Upgrade 3 random cards.",
+            ["MEROPIDE_INFIRMARY_ROUNDS.loss"] =
+                "{character} did not wake from the Clarity Tincture at the "
+                + "[gold]{event}[/gold].",
             // UndeliverableParcels (Fontaine / PotionCourier)
             ["UNDELIVERABLE_PARCELS.title"] =
                 "The Undeliverable Parcels",
@@ -2390,6 +2402,9 @@ internal static partial class TeyvatLoc
                 "",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_LOOP.description"] =
                 "",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.loss"] =
+                "{character} was crushed in the pressure lift at the "
+                + "[gold]{event}[/gold].",
             // GuestInTheHull (Fontaine / Symbiote)
             ["GUEST_IN_THE_HULL.title"] =
                 "The Guest in the Hull",
@@ -2488,6 +2503,9 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["TWO_GIFTS_FROM_THE_FONTEMER.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.loss"] =
+                "{character} bled out over a coin-purse at the "
+                + "[gold]{event}[/gold].",
             // SealedTestimonyOfRepie (Fontaine / WarHistorianRepy)
             ["SEALED_TESTIMONY_OF_REPIE.title"] =
                 "The Sealed Testimony of Repie",
@@ -2707,6 +2725,9 @@ internal static partial class TeyvatLoc
                 "",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_LOOP.description"] =
                 "",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.loss"] =
+                "{character} went into Musoujin Gorge with the load at the "
+                + "[gold]{event}[/gold].",
             // FrontLineTriageCache (Inazuma / TheFutureOfPotions)
             ["FRONT_LINE_TRIAGE_CACHE.title"] =
                 "The Front-Line Triage Cache",
@@ -2760,6 +2781,9 @@ internal static partial class TeyvatLoc
                 + "— least of all you. It hangs wrong on every stance you know, and "
                 + "the quartermaster does not offer to adjust it. Add Clumsy (Clumsy) "
                 + "to your Deck. Obtain a random Relic.",
+            ["QUARTERMASTERS_SPLIT.loss"] =
+                "{character} bled out on a Fatui paychest at the "
+                + "[gold]{event}[/gold].",
             // BankedForgeAtMusoujin (Inazuma / Amalgamator)
             ["BANKED_FORGE_AT_MUSOUJIN.title"] =
                 "The Banked Forge at Musoujin",
@@ -2814,6 +2838,9 @@ internal static partial class TeyvatLoc
                 "Let It Whisper",
             ["CHINJU_FOREST_PASSENGER.pages.SHARE_KNOWLEDGE.description"] =
                 "Choose 1 of 5 random cards to add to your deck.",
+            ["CHINJU_FOREST_PASSENGER.loss"] =
+                "{character} tore the passenger loose and did not survive it at the "
+                + "[gold]{event}[/gold].",
             // DrillmasterOfWatatsumi (Inazuma / Bugslayer)
             ["DRILLMASTER_OF_WATATSUMI.title"] =
                 "The Drillmaster of Watatsumi",
@@ -2931,6 +2958,9 @@ internal static partial class TeyvatLoc
                 "Obtain a random effigy charm (random Doll Relic).",
             ["HITOGATA_STOREHOUSE.pages.TAKE.options.TAKE.description"] =
                 "Obtain a random effigy charm (random Doll Relic).",
+            ["HITOGATA_STOREHOUSE.loss"] =
+                "{character}'s misfortune did not settle on the doll at the "
+                + "[gold]{event}[/gold].",
             // FoxDensOfChinjuForest (Inazuma / FieldOfManSizedHoles)
             ["FOX_DENS_OF_CHINJU_FOREST.title"] =
                 "The Fox-Dens of Chinju Forest",
@@ -3089,6 +3119,8 @@ internal static partial class TeyvatLoc
                 "Lose 14 HP clawing through packed salt and brine. Obtain the "
                 + "Ceremonial Crock (The Chosen Cheese): at the end of combat, gain 1 "
                 + "Max HP.",
+            ["BLOCKADE_LARDER.loss"] =
+                "{character} was buried in the salt of the [gold]{event}[/gold].",
             // NamelessUnderTheCedar (Inazuma / SpiritGrafter)
             ["NAMELESS_UNDER_THE_CEDAR.title"] =
                 "The Nameless Under the Cedar",
@@ -3118,6 +3150,9 @@ internal static partial class TeyvatLoc
                 "Lose 9 HP. Remove 1 card from your Deck — it recoils through your "
                 + "ribs on the way out, and takes with it one technique you can no "
                 + "longer remember learning.",
+            ["NAMELESS_UNDER_THE_CEDAR.loss"] =
+                "{character} did not survive the spirit's leaving at the "
+                + "[gold]{event}[/gold].",
             // StoneInTheSunkenRoad (Inazuma / StoneOfAllTime)
             ["STONE_IN_THE_SUNKEN_ROAD.title"] =
                 "The Stone in the Sunken Road",
@@ -3161,6 +3196,9 @@ internal static partial class TeyvatLoc
                 "Refuse the tonic, wedge your shoulder low under the stone, and "
                 + "push until the road is clear and your ribs are not. Lose 6 HP. "
                 + "Enchant an attack with Vigorous 8.",
+            ["STONE_IN_THE_SUNKEN_ROAD.loss"] =
+                "{character} was crushed under the shrine-stone at the "
+                + "[gold]{event}[/gold].",
             // DefilementAtSerpentsHead (Inazuma / Symbiote)
             ["DEFILEMENT_AT_SERPENTS_HEAD.title"] =
                 "Defilement at Serpent's Head",
@@ -3444,6 +3482,9 @@ internal static partial class TeyvatLoc
                 "Share Knowledge",
             ["EAR_WHISPERER.pages.SHARE_KNOWLEDGE.description"] =
                 "Choose 1 of 5 random cards to add to your Deck.",
+            ["EAR_WHISPERER.loss"] =
+                "{character} ripped the leech free and did not survive the lesson "
+                + "at the [gold]{event}[/gold].",
             // SweepOrStomp (Natlan / Bugslayer)
             ["SWEEP_OR_STOMP.title"] =
                 "Sweep or Stomp",
@@ -3552,6 +3593,9 @@ internal static partial class TeyvatLoc
                 "Obtain a random totem charm (Doll Relic).",
             ["TOTEM_SHELF.pages.TAKE.options.TAKE.description"] =
                 "Obtain a random totem charm (Doll Relic).",
+            ["TOTEM_SHELF.loss"] =
+                "{character} read every totem and had no luck left at the "
+                + "[gold]{event}[/gold].",
             // CookfirePits (Natlan / FieldOfManSizedHoles)
             ["COOKFIRE_PITS.title"] =
                 "The Cookfire Pits",
@@ -3711,6 +3755,9 @@ internal static partial class TeyvatLoc
             ["UNDER_STANDS_CELLAR.pages.SEARCH.description"] =
                 "Lose 14 HP. Obtain the Buried Prize (The Chosen Cheese, relic): at "
                 + "the end of combat, gain 1 Max HP.",
+            ["UNDER_STANDS_CELLAR.loss"] =
+                "{character} was buried under the stands at the "
+                + "[gold]{event}[/gold].",
             // SpringsRootedThing (Natlan / SpiritGrafter)
             ["SPRINGS_ROOTED_THING.title"] =
                 "The Springs' Rooted Thing",
@@ -3732,6 +3779,9 @@ internal static partial class TeyvatLoc
                 "Heal 25 HP. Add Metamorphosis to your Deck.",
             ["SPRINGS_ROOTED_THING.pages.REJECTION.description"] =
                 "Lose 9 HP. Remove 1 card from your Deck.",
+            ["SPRINGS_ROOTED_THING.loss"] =
+                "{character} tore the rooted thing out and did not survive it at "
+                + "the [gold]{event}[/gold].",
             // SlabOnTheAncientSacredMountain (Natlan / StoneOfAllTime)
             ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.title"] =
                 "The Slab on the Ancient Sacred Mountain",
@@ -3761,6 +3811,9 @@ internal static partial class TeyvatLoc
                 "Lose a random potion. Gain 10 Max HP.",
             ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.PUSH.description"] =
                 "Lose 6 HP. Enchant an Attack with Vigorous 8.",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.loss"] =
+                "{character} was crushed under the slab at the "
+                + "[gold]{event}[/gold].",
             // BladeThatBreathes (Natlan / Symbiote)
             ["BLADE_THAT_BREATHES.title"] =
                 "The Blade That Breathes",
@@ -4125,6 +4178,9 @@ internal static partial class TeyvatLoc
                 "",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_LOOP.description"] =
                 "",
+            ["ROPE_CROSSING_AT_COATEPEC.loss"] =
+                "{character} fell from the rope crossing at the "
+                + "[gold]{event}[/gold].",
             // MictlanRig (Natlan / TheFutureOfPotions)
             ["MICTLAN_RIG.title"] =
                 "The Mictlan Rig",
@@ -4168,6 +4224,8 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["UNCLAIMED_CRATES.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            ["UNCLAIMED_CRATES.loss"] =
+                "{character} bled out on a crate latch at the [gold]{event}[/gold].",
         };
 }
 
@@ -4452,7 +4510,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
                 new[] { "pages.BIG_MUSHROOM.description", "pages.FRAGRANT_MUSHROOM.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Sumeru.SpilledSatchelAtSumeruCitysGate)] = new EventShape(
                 "SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE", "PotionCourierMirror",
                 new[] { "GRAB_POTIONS", "RANSACK" },
@@ -4488,7 +4546,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
-                false),
+                true),
             [typeof(Events.Sumeru.WitheringGraft)] = new EventShape(
                 "WITHERING_GRAFT", "SymbioteMirror",
                 new[] { "APPROACH", "KILL_WITH_FIRE" },
@@ -4512,7 +4570,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Sumeru.WarHistorianRapiya)] = new EventShape(
                 "WAR_HISTORIAN_RAPIYA", "WarHistorianRepyMirror",
                 new[] { "UNLOCK_CAGE", "UNLOCK_CHEST" },
@@ -4542,7 +4600,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
                 new[] { "pages.BIG_MUSHROOM.description", "pages.FRAGRANT_MUSHROOM.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Fontaine.UndeliverableParcels)] = new EventShape(
                 "UNDELIVERABLE_PARCELS", "PotionCourierMirror",
                 new[] { "GRAB_POTIONS", "RANSACK" },
@@ -4578,7 +4636,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
-                false),
+                true),
             [typeof(Events.Fontaine.GuestInTheHull)] = new EventShape(
                 "GUEST_IN_THE_HULL", "SymbioteMirror",
                 new[] { "APPROACH", "KILL_WITH_FIRE" },
@@ -4602,7 +4660,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Fontaine.SealedTestimonyOfRepie)] = new EventShape(
                 "SEALED_TESTIMONY_OF_REPIE", "WarHistorianRepyMirror",
                 new[] { "UNLOCK_CAGE", "UNLOCK_CHEST" },
@@ -4620,7 +4678,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
-                false),
+                true),
             [typeof(Events.Inazuma.FrontLineTriageCache)] = new EventShape(
                 "FRONT_LINE_TRIAGE_CACHE", "TheFutureOfPotionsMirror",
                 new[] { "POTION" },
@@ -4632,7 +4690,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Inazuma.BankedForgeAtMusoujin)] = new EventShape(
                 "BANKED_FORGE_AT_MUSOUJIN", "AmalgamatorMirror",
                 new[] { "COMBINE_STRIKES", "COMBINE_DEFENDS" },
@@ -4644,7 +4702,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
                 new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Inazuma.DrillmasterOfWatatsumi)] = new EventShape(
                 "DRILLMASTER_OF_WATATSUMI", "BugslayerMirror",
                 new[] { "EXTERMINATION", "SQUASH" },
@@ -4668,7 +4726,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "RANDOM", "TAKE_SOME_TIME", "EXAMINE" },
                 new[] { "pages.TAKE_SOME_TIME.description", "pages.EXAMINE.description", "pages.DAUGHTER_OF_WIND.description", "pages.MR_STRUGGLES.description", "pages.FABLE.description", "pages.TAKE.options.TAKE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Inazuma.FoxDensOfChinjuForest)] = new EventShape(
                 "FOX_DENS_OF_CHINJU_FOREST", "FieldOfManSizedHolesMirror",
                 new[] { "RESIST", "ENTER_YOUR_HOLE" },
@@ -4704,19 +4762,19 @@ internal static class TeyvatGeneratedEvents
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Inazuma.NamelessUnderTheCedar)] = new EventShape(
                 "NAMELESS_UNDER_THE_CEDAR", "SpiritGrafterMirror",
                 new[] { "LET_IT_IN", "REJECTION" },
                 new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Inazuma.StoneInTheSunkenRoad)] = new EventShape(
                 "STONE_IN_THE_SUNKEN_ROAD", "StoneOfAllTimeMirror",
                 new[] { "LIFT", "PUSH" },
                 new[] { "pages.LIFT.description", "pages.PUSH.description" },
                 new[] { "pages.INITIAL.options.LIFT_LOCKED", "pages.INITIAL.options.PUSH_LOCKED" },
-                false),
+                true),
             [typeof(Events.Inazuma.DefilementAtSerpentsHead)] = new EventShape(
                 "DEFILEMENT_AT_SERPENTS_HEAD", "SymbioteMirror",
                 new[] { "APPROACH", "KILL_WITH_FIRE" },
@@ -4764,7 +4822,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
                 new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Natlan.SweepOrStomp)] = new EventShape(
                 "SWEEP_OR_STOMP", "BugslayerMirror",
                 new[] { "EXTERMINATION", "SQUASH" },
@@ -4788,7 +4846,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "RANDOM", "TAKE_SOME_TIME", "EXAMINE" },
                 new[] { "pages.TAKE_SOME_TIME.description", "pages.EXAMINE.description", "pages.DAUGHTER_OF_WIND.description", "pages.MR_STRUGGLES.description", "pages.FABLE.description", "pages.TAKE.options.TAKE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Natlan.CookfirePits)] = new EventShape(
                 "COOKFIRE_PITS", "FieldOfManSizedHolesMirror",
                 new[] { "RESIST", "ENTER_YOUR_HOLE" },
@@ -4824,19 +4882,19 @@ internal static class TeyvatGeneratedEvents
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Natlan.SpringsRootedThing)] = new EventShape(
                 "SPRINGS_ROOTED_THING", "SpiritGrafterMirror",
                 new[] { "LET_IT_IN", "REJECTION" },
                 new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Natlan.SlabOnTheAncientSacredMountain)] = new EventShape(
                 "SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN", "StoneOfAllTimeMirror",
                 new[] { "LIFT", "PUSH" },
                 new[] { "pages.LIFT.description", "pages.PUSH.description" },
                 new[] { "pages.INITIAL.options.LIFT_LOCKED", "pages.INITIAL.options.PUSH_LOCKED" },
-                false),
+                true),
             [typeof(Events.Natlan.BladeThatBreathes)] = new EventShape(
                 "BLADE_THAT_BREATHES", "SymbioteMirror",
                 new[] { "APPROACH", "KILL_WITH_FIRE" },
@@ -4884,7 +4942,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
-                false),
+                true),
             [typeof(Events.Natlan.MictlanRig)] = new EventShape(
                 "MICTLAN_RIG", "TheFutureOfPotionsMirror",
                 new[] { "POTION" },
@@ -4896,7 +4954,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
         };
 
     /// <summary>(dressing act entry, base event type) -> the dressed

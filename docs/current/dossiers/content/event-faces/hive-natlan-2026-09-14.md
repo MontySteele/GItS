@@ -45,6 +45,8 @@ Mechanics check: flag — the harvest's "Colorless 2 card reward" is template-lo
 
 ---
 
+Loss: {character} ripped the leech free and did not survive the lesson at the [gold]{event}[/gold].
+
 ## - [ ] Bugslayer
 ### Sweep or Stomp — Natlan / Scions of the Canopy — literal
 
@@ -110,6 +112,8 @@ Before a warrior enters the Stadium of the Sacred Flame, the Children of Echoes 
 Mechanics check: matches harvest. Flag — the Doll Relic family (which specific relics these totems grant) has no Teyvat naming hook of its own; text stays generic ("totem charm"), and this event is not modelled in tier05/content/events.yaml (skip list: three new hooks needed, plus a "choose 1 of N" op).
 
 ---
+
+Loss: {character} read every totem and had no luck left at the [gold]{event}[/gold].
 
 ## - [ ] Field of Man-Sized Holes
 ### The Cookfire Pits — Natlan / Collective of Plenty — literal
@@ -185,6 +189,8 @@ Mechanics check: matches harvest. Flag — tier05/content/events.yaml ships the 
 
 ---
 
+Loss: {character} was buried under the stands at the [gold]{event}[/gold].
+
 ## - [ ] Spirit Grafter
 ### The Springs' Rooted Thing — Natlan / People of the Springs — loose
 
@@ -197,6 +203,8 @@ Mechanics check: matches harvest. Flag — not modelled in tier05/content/events
 
 ---
 
+Loss: {character} tore the rooted thing out and did not survive it at the [gold]{event}[/gold].
+
 ## - [ ] Stone of All Time
 ### The Slab on the Ancient Sacred Mountain — Natlan / Masters of the Night-Wind — literal
 
@@ -208,6 +216,8 @@ On the Ancient Sacred Mountain, a slab older than any tribe's founding sits wher
 Mechanics check: matches harvest and tier05/content/events.yaml (`stone_of_all_time`) exactly.
 
 ---
+
+Loss: {character} was crushed under the slab at the [gold]{event}[/gold].
 
 ## - [ ] Symbiote
 ### The Blade That Breathes — Natlan / Children of Echoes — literal
@@ -311,6 +321,8 @@ Mechanics check: matches harvest.
 
 ---
 
+Loss: {character} fell from the rope crossing at the [gold]{event}[/gold].
+
 ## - [ ] The Future of Potions?
 ### The Mictlan Rig — Natlan / Collective of Plenty — loose
 
@@ -335,3 +347,6 @@ Two crates turned up unclaimed after the last relay through Tequemecan Valley, a
 - **That** — Add Clumsy (curse) to your Deck. Obtain a random Relic.
 
 Mechanics check: matches harvest and tier05/content/events.yaml (`this_or_that`) exactly.
+
+Loss: {character} bled out on a crate latch at the [gold]{event}[/gold].
+

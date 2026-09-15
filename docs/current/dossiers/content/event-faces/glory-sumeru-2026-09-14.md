@@ -87,6 +87,8 @@ Mechanics check: matches harvest.
 
 ---
 
+Loss: {character} ate the Rukkhashava Bloom and never got up at the [gold]{event}[/gold].
+
 ## - [ ] Potion Courier
 
 ### The Spilled Satchel at Sumeru City's Gate — Sumeru / Akademiya (Amurta darshan courier) — loose — DRAFTED
@@ -169,6 +171,8 @@ A Forest Ranger's rope bridge sags over a Withering-scarred ravine in Ardravi Va
 Mechanics check: matches harvest (first card never Basic unless deck is all-Basic; same card never repeats until every other card has been offered; escalating +1 HP per Hold On — all carried from the base rule, unchanged from the gallery's other variants).
 
 ---
+
+Loss: {character} let go of the rope over Ardravi Valley at the [gold]{event}[/gold].
 
 ## - [ ] Symbiote
 
@@ -258,6 +262,8 @@ A Forest Ranger patrol out of Caravan Ribat turned up two items scattered from a
 Mechanics check: matches harvest.
 
 ---
+
+Loss: {character} bled out on a coffer latch at the [gold]{event}[/gold].
 
 ## - [ ] Tinker Time
 

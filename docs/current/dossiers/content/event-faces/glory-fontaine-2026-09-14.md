@@ -89,6 +89,8 @@ Mechanics check: matches harvest. Flag: not in `events.yaml`'s pool — Big Mush
 
 ---
 
+Loss: {character} did not wake from the Clarity Tincture at the [gold]{event}[/gold].
+
 ## - [ ] Potion Courier
 
 ### The Undeliverable Parcels — Fontaine / Melusines (Merusea Village postal run, Beryl Region) — loose — REUSED event-conversion-gallery.md, Potion Courier variant 3
@@ -172,6 +174,8 @@ Mechanics check: matches harvest and the shipped `slippery_bridge` row (Overcome
 
 ---
 
+Loss: {character} was crushed in the pressure lift at the [gold]{event}[/gold].
+
 ## - [ ] Symbiote
 
 ### The Guest in the Hull — Fontaine / Melusines of Merusea Village — loose — REUSED event-conversion-gallery.md, Symbiote variant 3
@@ -248,6 +252,8 @@ Beneath the roots of Elynas, Kiara has laid out the week's salvage on a flat sto
 Mechanics check: matches harvest and the shipped `this_or_that` row (hp -6 / gold [57,57]; curse_clumsy + relic true). Flag: reused verbatim per the reuse rule even though the gallery's own curation note demotes this variant for spelling "Merusea Village" as "Merusee" — it is the only kept Fontaine draft for this event, so it is not corrected here.
 
 ---
+
+Loss: {character} bled out over a coin-purse at the [gold]{event}[/gold].
 
 ## - [ ] Tinker Time
 
