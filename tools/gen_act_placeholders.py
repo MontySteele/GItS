@@ -1,0 +1,476 @@
+"""Placeholder-but-complete act asset sets for the two act-1 Teyvat dressings.
+
+WHY THIS EXISTS. `ActModel.FilePathIdentifier` is `Id.Entry.ToLowerInvariant()`
+and five NON-VIRTUAL properties derive every act-dressing path from it: the
+combat background scene, the rest-site scene and the three map background PNGs
+(`MegaCrit.Sts2.Core.Models/ActModel.cs:52-64`, `:248`). Two of the loaders
+under those paths THROW rather than fall back -- `Rooms/BackgroundAssets`'s
+constructor on a missing `layers` directory and on a layer file matching
+neither `_bg_NN` nor `_fg_`, and `PreloadManager.Cache.GetScene` on the rest
+site. The spike therefore shipped a Harmony postfix on
+`get_FilePathIdentifier` that aliased MONDSTADT to `overgrowth` and LIYUE to
+`underdocks` (`review/records/teyvat-spike-build-2026-09-15.md` item 1).
+
+This generator retires that alias for act 1 by producing a COMPLETE set per
+dressing, so the loaders are satisfied by our own files. Nothing here is art:
+every picture is a two-stop vertical gradient in the nation's colours, and a
+real asset replaces it through `docs/current/operations/media.md`'s raw/out
+ledger with no code change at all.
+
+WHAT IT WRITES, AND WHERE. Two trees and only two:
+
+  * `ImageGen/images/teyvat/...`  -- the PNGs. GITIGNORED, Tier F, and the
+    directory `tools/build_pck.ps1`'s Teyvat act blocks copy from.
+  * `klee-mod/pck-src/scenes/...` -- the `.tscn` sources. COMMITTED, because
+    a scene is text and because `pck-src` overlays the export work directory
+    verbatim, which is what puts them at the `res://scenes/...` paths the
+    engine derives and nothing else can move.
+
+`docs/current/operations/act-assets.md` is the shape in one table and the
+command line. Run it with the venv python by absolute path:
+
+    .venv\\Scripts\\python.exe tools\\gen_act_placeholders.py
+
+`--check` writes nothing and exits non-zero if any planned file is missing or
+any committed scene source differs from what this file would write; that is
+the staleness gate `tier0/tests/test_act_placeholder_plan.py` rides.
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+# --------------------------------------------------------------------------
+# the shape, stated once
+# --------------------------------------------------------------------------
+
+#: `BackgroundAssets`'s constructor groups layer files by the `_bg_NN` prefix
+#: and picks ONE per group with the combat rng, then makes one further draw
+#: over the `_fg_` list. So the number of DRAWS is the number of groups plus
+#: one, whatever the variant count -- and matching the base zone's five groups
+#: plus a foreground keeps a dressing's rng consumption identical to the zone
+#: it stands beside (Overgrowth and Underdocks both ship `bg_00`..`bg_04`).
+#: One variant each, `_a`, because a placeholder has nothing to vary.
+BG_GROUPS = 5
+FG_VARIANT = "a"
+BG_VARIANT = "a"
+
+#: The layer `TextureRect`'s own rect in the base game's layer scenes is
+#: 2764.8 x 1296 (offsets -1382.4..1382.4, -648..648) with `expand_mode = 1`,
+#: which SCALES the texture to the rect -- so the placeholder is authored at
+#: half that, exactly on aspect, and the pack carries a quarter of the pixels.
+LAYER_RECT = (2764.8, 1296.0)
+LAYER_PNG = (1382, 648)
+
+#: The map screen's three `TextureRect`s are `expand_mode = 1`,
+#: `stretch_mode = 5` (KEEP_ASPECT_CENTERED) with `custom_minimum_size`
+#: (0, 1080), so ASPECT is what has to be right. The base game's four acts all
+#: ship 2035x1440 and the placeholder matches them exactly.
+MAP_PNG = (2035, 1440)
+
+#: The rest-site background sits in `rest_site_room.tscn`'s `BgContainer` at
+#: the same 2764.8 x 1296 rect as a combat layer, with `expand_mode = 1`.
+REST_PNG = (1382, 648)
+
+
+@dataclass(frozen=True)
+class Nation:
+    """One dressing: its `FilePathIdentifier` and its two gradient stops.
+
+    `FilePathIdentifier` is `Id.Entry.ToLowerInvariant()`, so `id` here is the
+    lowercase spelling and `entry` the `MONDSTADT` / `LIYUE` the loc table and
+    `TeyvatFrame`'s tables use.
+    """
+
+    id: str
+    entry: str
+    #: top-of-frame stop, RGB
+    sky: tuple[int, int, int]
+    #: bottom-of-frame stop, RGB
+    ground: tuple[int, int, int]
+
+
+#: Mondstadt is sky-blue over meadow green; Liyue is amber over stone. Two
+#: stops per nation and nothing else: the depth reading comes from the per-layer
+#: darkening below, not from a second palette.
+NATIONS = (
+    Nation(id="mondstadt", entry="MONDSTADT", sky=(122, 176, 214), ground=(96, 138, 74)),
+    Nation(id="liyue", entry="LIYUE", sky=(214, 164, 86), ground=(108, 100, 92)),
+)
+
+
+@dataclass(frozen=True)
+class Planned:
+    """One file this generator owns.
+
+    `repo` is relative to the repository root. `res` is the `res://` path the
+    file reaches in the merged pack, and is `None` for a source that is not
+    itself packed (there are none today -- every row is packed -- but the
+    field keeps the contract comparison honest if that ever changes).
+    """
+
+    kind: str  # "png" | "scene"
+    repo: str
+    res: str
+
+
+def plan() -> list[Planned]:
+    """Every file, for every dressing, in one list.
+
+    THIS IS THE PIN. `tier0/tests/test_act_placeholder_plan.py` asserts that
+    the `res` column of this list is exactly the set of Teyvat act rows in
+    `tools/visual_qa/fixtures/sample.contract.txt`, so a file added here
+    without a contract row -- or a row with no producer -- fails headlessly,
+    long before a pck build or a deploy could notice.
+    """
+    rows: list[Planned] = []
+    for nation in NATIONS:
+        i = nation.id
+        # --- combat background: layer textures, layer scenes, the root ----
+        for group in range(BG_GROUPS):
+            rows.append(Planned(
+                "png",
+                f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_{group:02d}.png",
+                f"res://teyvat/backgrounds/{i}/{i}_bg_{group:02d}.png"))
+            rows.append(Planned(
+                "scene",
+                f"klee-mod/pck-src/scenes/backgrounds/{i}/layers/"
+                f"{i}_bg_{group:02d}_{BG_VARIANT}.tscn",
+                f"res://scenes/backgrounds/{i}/layers/"
+                f"{i}_bg_{group:02d}_{BG_VARIANT}.tscn"))
+        rows.append(Planned(
+            "png",
+            f"ImageGen/images/teyvat/backgrounds/{i}/{i}_fg.png",
+            f"res://teyvat/backgrounds/{i}/{i}_fg.png"))
+        rows.append(Planned(
+            "scene",
+            f"klee-mod/pck-src/scenes/backgrounds/{i}/layers/{i}_fg_{FG_VARIANT}.tscn",
+            f"res://scenes/backgrounds/{i}/layers/{i}_fg_{FG_VARIANT}.tscn"))
+        rows.append(Planned(
+            "scene",
+            f"klee-mod/pck-src/scenes/backgrounds/{i}/{i}_background.tscn",
+            f"res://scenes/backgrounds/{i}/{i}_background.tscn"))
+        # --- rest site ----------------------------------------------------
+        rows.append(Planned(
+            "png",
+            f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png",
+            f"res://teyvat/rest_site/{i}_rest_site_bg.png"))
+        rows.append(Planned(
+            "scene",
+            f"klee-mod/pck-src/scenes/rest_site/{i}_rest_site.tscn",
+            f"res://scenes/rest_site/{i}_rest_site.tscn"))
+        # --- map screen ---------------------------------------------------
+        for slot in ("top", "middle", "bottom"):
+            rows.append(Planned(
+                "png",
+                f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png",
+                f"res://images/packed/map/map_bgs/{i}/map_{slot}_{i}.png"))
+    return rows
+
+
+# --------------------------------------------------------------------------
+# the pictures
+# --------------------------------------------------------------------------
+
+def _mix(a: tuple[int, int, int], b: tuple[int, int, int], t: float) -> tuple[int, int, int]:
+    return tuple(round(a[k] + (b[k] - a[k]) * t) for k in range(3))  # type: ignore[return-value]
+
+
+def _scale(c: tuple[int, int, int], f: float) -> tuple[int, int, int]:
+    return tuple(max(0, min(255, round(v * f))) for v in c)  # type: ignore[return-value]
+
+
+def _gradient(size: tuple[int, int], top: tuple[int, int, int],
+              bottom: tuple[int, int, int]):
+    """A two-stop vertical gradient, RGBA, opaque.
+
+    Drawn one row at a time onto a 1-pixel-wide image and then resized, which
+    is both exact and fast at 2035x1440 -- Pillow's bilinear resize of a 1xH
+    strip reproduces the same column H times with no interpolation error in
+    the vertical direction (the strip already has one sample per output row).
+    """
+    from PIL import Image
+
+    height = size[1]
+    strip = Image.new("RGBA", (1, height))
+    for y in range(height):
+        t = y / (height - 1) if height > 1 else 0.0
+        strip.putpixel((0, y), (*_mix(top, bottom, t), 255))
+    return strip.resize(size, Image.NEAREST)
+
+
+def _write_png(path: Path, size: tuple[int, int], top: tuple[int, int, int],
+               bottom: tuple[int, int, int]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _gradient(size, top, bottom).save(path, "PNG")
+
+
+def _layer_stops(nation: Nation, depth: float) -> tuple[tuple[int, int, int],
+                                                        tuple[int, int, int]]:
+    """A layer's two stops, darkened with depth.
+
+    `depth` runs 0 (the far plate, `bg_00`) to 1 (the foreground). Nearer
+    layers are darker and slightly less saturated toward the nation's ground
+    colour, which is the only thing that makes five flat gradients read as five
+    planes rather than as one.
+    """
+    factor = 1.0 - 0.45 * depth
+    top = _scale(_mix(nation.sky, nation.ground, 0.15 + 0.35 * depth), factor)
+    bottom = _scale(_mix(nation.ground, nation.sky, 0.10), factor)
+    return top, bottom
+
+
+# --------------------------------------------------------------------------
+# the scenes
+# --------------------------------------------------------------------------
+
+def _layer_scene(nation: Nation, texture_res: str) -> str:
+    """One background layer: a `TextureRect` at the base game's own rect.
+
+    Instantiated by `NCombatBackground.AddLayer` as a plain `Control`
+    (`NCombatBackground.cs:82`), so it carries NO script and needs no
+    conversion -- unlike the background root beside it.
+    """
+    left, top = -LAYER_RECT[0] / 2, -LAYER_RECT[1] / 2
+    return f"""[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="{texture_res}" id="1_tex"]
+
+[node name="A" type="TextureRect"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = {left}
+offset_top = {top}
+offset_right = {-left}
+offset_bottom = {-top}
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_tex")
+expand_mode = 1
+"""
+
+
+def _background_scene(nation: Nation) -> str:
+    """The background ROOT, and the one scene in this set that is converted.
+
+    `NCombatBackground.Create` does `GetScene(path).Instantiate<NCombatBackground>()`
+    -- it CASTS, it does not adapt -- and `NCombatBackground`'s script lives in
+    the game's own pack at `res://src/Core/Nodes/Rooms/NCombatBackground.cs`,
+    which a mod pck cannot reference (a scene source with an
+    `ext_resource type="Script"` row is `SD-SCRIPT`, and the export would carry
+    a dependency the scratch project cannot resolve). So the root here is a
+    plain `Control` and `KleeCode/Teyvat/NCombatBackgroundFactory.cs` teaches
+    BaseLib to convert it, exactly as `TeyvatVisuals` already does for the
+    still portrait -- the same EB-760 mechanism, a second type.
+
+    The children are the contract with `NCombatBackground.AddLayer`, which
+    does `GetNodeOrNull("Layer_00")` .. `GetNodeOrNull($"Layer_{{i:D2}}")` for
+    each chosen bg layer and `GetNodeOrNull("Foreground")` for the fg, and
+    THROWS on a miss. Five plus one, matching `BG_GROUPS`.
+    """
+    layers = "\n".join(
+        f'[node name="Layer_{n:02d}" type="Control" parent="."]\nanchors_preset = 0\n'
+        for n in range(BG_GROUPS)
+    )
+    return f"""[gd_scene load_steps=1 format=3]
+
+[node name="{nation.entry.capitalize()}Background" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+{layers}
+[node name="Foreground" type="Control" parent="."]
+anchors_preset = 0
+"""
+
+
+def _rest_site_scene(nation: Nation, texture_res: str) -> str:
+    """The rest site, mirroring the base scene's shape at its two load-bearing points.
+
+    `ActModel.CreateRestSiteBackground` instantiates it as a plain `Control`
+    (`ActModel.cs:251`) -- no script, no conversion -- and
+    `NRestSiteRoom._Ready` then does `control.GetNode<Control>("%RestSiteLighting")`
+    (`NRestSiteRoom.cs:325`) with `GetNode` and not `GetNodeOrNull`, so a scene
+    without that node throws before the campfire is drawn. `RestSiteLighting`
+    is empty here: the base game fills it with fire VFX, particles and log
+    lights, and the arm's own `Visible = false` write (`NRestSiteRoom.cs:646`)
+    is happy with an empty `Control`.
+
+    The art node is a `TextureRect` and not a `Sprite2D` because that is what
+    the base scenes carry -- `RestSiteBG` in both `overgrowth_rest_site.tscn`
+    and `underdocks_rest_site.tscn` -- and mirroring the shape means mirroring
+    the node type, at the base scene's own anchors and offsets.
+    """
+    return f"""[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="{texture_res}" id="1_tex"]
+
+[node name="{nation.entry.capitalize()}RestSite" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="RestSiteBG" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -444.0
+offset_top = -139.0
+offset_right = 2320.8
+offset_bottom = 1157.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_tex")
+expand_mode = 1
+
+[node name="RestSiteLighting" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -942.0
+offset_top = -507.0
+offset_right = -942.0
+offset_bottom = -507.0
+grow_horizontal = 2
+grow_vertical = 2
+"""
+
+
+def scene_sources() -> dict[str, str]:
+    """Every committed `.tscn`, repo-relative path -> exact text.
+
+    Separated from the PNG half so `--check` can compare the committed files
+    without needing Pillow or the gitignored ImageGen tree.
+    """
+    out: dict[str, str] = {}
+    for nation in NATIONS:
+        i = nation.id
+        for group in range(BG_GROUPS):
+            out[f"klee-mod/pck-src/scenes/backgrounds/{i}/layers/"
+                f"{i}_bg_{group:02d}_{BG_VARIANT}.tscn"] = _layer_scene(
+                    nation, f"res://teyvat/backgrounds/{i}/{i}_bg_{group:02d}.png")
+        out[f"klee-mod/pck-src/scenes/backgrounds/{i}/layers/"
+            f"{i}_fg_{FG_VARIANT}.tscn"] = _layer_scene(
+                nation, f"res://teyvat/backgrounds/{i}/{i}_fg.png")
+        out[f"klee-mod/pck-src/scenes/backgrounds/{i}/"
+            f"{i}_background.tscn"] = _background_scene(nation)
+        out[f"klee-mod/pck-src/scenes/rest_site/"
+            f"{i}_rest_site.tscn"] = _rest_site_scene(
+                nation, f"res://teyvat/rest_site/{i}_rest_site_bg.png")
+    return out
+
+
+# --------------------------------------------------------------------------
+# driver
+# --------------------------------------------------------------------------
+
+def write_all(root: Path) -> list[str]:
+    written: list[str] = []
+    for relative, text in sorted(scene_sources().items()):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # LF, explicitly: a `.tscn` is a Godot text resource and the rest of
+        # pck-src is LF. Newline is stated rather than defaulted so a Windows
+        # run cannot rewrite every committed scene with CRLF and show sixteen
+        # files as modified.
+        with path.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+        written.append(relative)
+
+    for nation in NATIONS:
+        i = nation.id
+        for group in range(BG_GROUPS):
+            depth = group / max(1, BG_GROUPS)  # 0.0 .. 0.8
+            top, bottom = _layer_stops(nation, depth)
+            relative = f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_{group:02d}.png"
+            _write_png(root / relative, LAYER_PNG, top, bottom)
+            written.append(relative)
+        top, bottom = _layer_stops(nation, 1.0)
+        relative = f"ImageGen/images/teyvat/backgrounds/{i}/{i}_fg.png"
+        _write_png(root / relative, LAYER_PNG, top, bottom)
+        written.append(relative)
+
+        relative = f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png"
+        _write_png(root / relative, REST_PNG,
+                   _scale(_mix(nation.sky, nation.ground, 0.55), 0.45),
+                   _scale(nation.ground, 0.35))
+        written.append(relative)
+
+        # The three map plates read top -> bottom as one continuous wall, so
+        # each takes a third of the nation's ramp rather than the whole of it.
+        for index, slot in enumerate(("top", "middle", "bottom")):
+            a = _mix(nation.sky, nation.ground, index / 3)
+            b = _mix(nation.sky, nation.ground, (index + 1) / 3)
+            relative = f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png"
+            _write_png(root / relative, MAP_PNG, a, b)
+            written.append(relative)
+    return written
+
+
+def check(root: Path) -> list[str]:
+    problems: list[str] = []
+    for relative, text in sorted(scene_sources().items()):
+        path = root / relative
+        if not path.exists():
+            problems.append(f"missing committed scene source {relative}")
+            continue
+        with path.open("r", encoding="utf-8", newline="") as handle:
+            actual = handle.read().replace("\r\n", "\n")
+        if actual != text:
+            problems.append(
+                f"{relative} differs from what tools/gen_act_placeholders.py "
+                "would write; re-run the generator or move the change into it")
+    for row in plan():
+        if row.kind == "png" and not (root / row.repo).exists():
+            problems.append(
+                f"missing placeholder texture {row.repo} (gitignored; run the "
+                "generator on the art-bearing checkout)")
+    return problems
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--check", action="store_true",
+                        help="write nothing; report drift and missing files")
+    parser.add_argument("--list", action="store_true",
+                        help="print the planned res:// rows, one per line")
+    parser.add_argument("--root", default=str(ROOT))
+    args = parser.parse_args(argv)
+    root = Path(args.root)
+
+    if args.list:
+        for row in plan():
+            print(row.res)
+        return 0
+
+    if args.check:
+        problems = check(root)
+        for problem in problems:
+            print(problem)
+        print(f"{len(plan())} planned file(s); {len(problems)} problem(s).")
+        return 1 if problems else 0
+
+    written = write_all(root)
+    scenes = sum(1 for w in written if w.endswith(".tscn"))
+    print(f"Wrote {len(written)} file(s): {scenes} committed scene source(s) "
+          f"under klee-mod/pck-src/scenes, {len(written) - scenes} gitignored "
+          f"texture(s) under ImageGen/images/teyvat.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
