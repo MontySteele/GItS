@@ -27,8 +27,18 @@ namespace KleeMod.Teyvat;
 internal static class TeyvatLoc
 {
     /// <summary>
-    /// Merge the arm's rows. Called from `KleeMod.Initialize` after the
-    /// patches are applied, and a no-op with the arm off.
+    /// Merge the arm's rows. A no-op with the arm off.
+    ///
+    /// CALLED FROM THE `LocManager.Initialize` POSTFIX (`KleeMod.cs`'s
+    /// `LocManager_Initialize_Patch`), beside the card rows -- and NOT from
+    /// `KleeMod.Initialize`, which is where it was and is EB-759. A
+    /// `[ModInitializer]` runs before `LocManager` has built a single table,
+    /// so `LocManager.Instance.GetTable(...)` threw an NRE on every boot, the
+    /// catch below turned it into one ERROR line, and zero rows merged: every
+    /// dressed string rendered as its raw key
+    /// (`review/records/teyvat-spike-proofs-2026-09-15.md`). The rule the card
+    /// rows already followed is the right one -- merge once the tables EXIST,
+    /// not merely before they are read.
     ///
     /// ONE TRY/CATCH AROUND THE WHOLE THING, on `InjectLocStrings`'s
     /// precedent: a missing table or a `LocManager` that is not up yet must

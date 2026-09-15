@@ -346,6 +346,108 @@ public class TeyvatFrameTests : IDisposable
     }
 
     // ---------------------------------------------------------------
+    // EB-759 / EB-760: the two seams the spike's deploy proved wrong.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// EB-759, STRUCTURALLY, because that is as far as a headless suite can
+    /// go. `LocManager` is outside the headless boundary -- its tables are
+    /// built by the game's boot and this process never loads them -- so no pin
+    /// here can assert that the Mondstadt rows are PRESENT after init; only a
+    /// deploy can, and the row's acceptance line says so. What a pin CAN say
+    /// is the thing that was actually wrong: WHICH SEAM the merge is called
+    /// from.
+    ///
+    /// `TeyvatLoc.Inject` ran from `KleeMod.Initialize`, a `[ModInitializer]`,
+    /// which is upstream of `LocManager.Initialize`. `LocManager.Instance` had
+    /// no tables yet, the merge threw an NRE on every boot, its own catch
+    /// turned that into one ERROR line, and zero rows landed -- so every
+    /// dressed string rendered as its raw key. The card rows never had the bug
+    /// because they have always ridden the postfix. Both halves are pinned: it
+    /// IS in the postfix, and it is NOT in `Initialize`.
+    /// </summary>
+    [Fact]
+    public void The_loc_merge_rides_the_LocManager_postfix_and_not_the_ModInitializer()
+    {
+        var patch = typeof(TeyvatFrame).Assembly
+            .GetType("KleeMod.LocManager_Initialize_Patch", throwOnError: true)!;
+        var postfix = StaticMethod(patch, "Postfix");
+
+        var inPostfix = Il.Calls(postfix);
+        Assert.Contains("TeyvatLoc.Inject", inPostfix);
+        Assert.Contains("KleeMod.InjectLocStrings", inPostfix);
+
+        var initialize = StaticMethod(typeof(KleeMod), nameof(KleeMod.Initialize));
+        Assert.DoesNotContain("TeyvatLoc.Inject", Il.Calls(initialize));
+    }
+
+    /// <summary>
+    /// EB-760. `MonsterModel.CreateVisuals` CASTS the instantiated scene root
+    /// to `NCreatureVisuals`, and a script-less scene's root is a plain
+    /// `Node2D`, so the still portrait drew the game's pink error creature.
+    /// BaseLib's auto-conversion is what makes the cast succeed, and
+    /// `NodeFactory.TryAutoConvert` converts only a REGISTERED path --
+    /// registration being exactly what nothing did, because the automatic pass
+    /// (`PostModInitPatch.RegisterSceneConversions`) only reaches models that
+    /// are our own and a dressed base-game monster is not.
+    ///
+    /// The registration sits at `[ModInitializer]` time, and NOT on the loc
+    /// postfix EB-759 just moved the merge to: it writes into a BaseLib
+    /// dictionary that exists from the moment BaseLib loads, and only has to
+    /// precede the scene's first INSTANTIATION, which is first combat at the
+    /// earliest. The two halves are that the registration reaches BaseLib's
+    /// extension at all, and that `KleeMod.Initialize` is where it is reached
+    /// from.
+    /// </summary>
+    [Fact]
+    public void Every_still_portrait_is_registered_for_BaseLib_auto_conversion()
+    {
+        var calls = Il.Calls(
+            StaticMethod(typeof(TeyvatVisuals), nameof(TeyvatVisuals.RegisterStillPortraits)));
+
+        Assert.Contains(calls, c => c.EndsWith("RegisterSceneForConversion", StringComparison.Ordinal));
+
+        // The same `ResourceLoader.Exists` guard the path patch uses: a build
+        // whose pck was not rebuilt registers nothing rather than registering
+        // a dead path and putting a misleading line in the boot log.
+        Assert.Contains("ResourceLoader.Exists", calls);
+
+        Assert.Contains(
+            "TeyvatVisuals.RegisterStillPortraits",
+            Il.Calls(StaticMethod(typeof(KleeMod), nameof(KleeMod.Initialize))));
+    }
+
+    [Fact]
+    public void With_the_arm_off_the_registration_returns_before_it_touches_Godot()
+    {
+        TeyvatFrame.Enabled = false;
+
+        // The flag is this method's first line, as it is in every file in the
+        // arm -- and it has to be the FLAG and not `CurrentActEntry`, because
+        // this is the arm's one call that runs outside a run entirely. The
+        // assertion is that it neither throws nor reaches `ResourceLoader`
+        // (which would need a Godot runtime this process does not have).
+        TeyvatVisuals.RegisterStillPortraits();
+    }
+
+    /// <summary>
+    /// The scene the registration names is the scene the pck ships, spelled
+    /// identically. Drift here is silent twice over -- the path patch declines
+    /// to swap AND the registration registers a path nothing will instantiate
+    /// -- so the spelling is pinned against the source tree's own layout.
+    /// </summary>
+    [Fact]
+    public void Every_still_portrait_names_a_scene_in_the_frames_own_namespace()
+    {
+        Assert.NotEmpty(TeyvatFrame.StillPortraits);
+        Assert.All(TeyvatFrame.StillPortraits.Values, scene =>
+        {
+            Assert.StartsWith("res://teyvat/creature_visuals/", scene, StringComparison.Ordinal);
+            Assert.EndsWith(".tscn", scene, StringComparison.Ordinal);
+        });
+    }
+
+    // ---------------------------------------------------------------
     // Reflection helpers. Public/protected members are reached by name so a
     // rename is a compile error here rather than a silent skip.
     // ---------------------------------------------------------------
@@ -371,6 +473,16 @@ public class TeyvatFrameTests : IDisposable
     }
 
     private static MethodBase Private(Type type, string name) => Method(type, name);
+
+    /// <summary>The same lookup for a STATIC method -- the boot seams
+    /// EB-759/EB-760 pin are all static.</summary>
+    private static MethodBase StaticMethod(Type type, string name)
+    {
+        var m = type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic
+                                   | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        Assert.NotNull(m);
+        return m!;
+    }
 
     private static MethodBase Getter(Type type, string name)
     {
