@@ -18,7 +18,7 @@ namespace KleeMod.Teyvat.Events.Fontaine;
 /// base event's clauses are in <see cref="ReflectionsMirror"/>, written
 /// once and shared by every nation that dresses this event; this class
 /// is a NAME. `ModelDb.GetEntry` slugifies it into
-/// `CORAL_MIRROR_RORRI_MLARO_CEH_T`, `EventModel.Title` and `InitialDescription`
+/// `CORAL_MIRROR_RORRI_M_LARO_C_EH_T`, `EventModel.Title` and `InitialDescription`
 /// derive from that, and `EventModel.OptionKey` slugifies
 /// `GetType().Name` -- so every loc key the mirror asks for is already
 /// this dressing's. The rows are in `TeyvatLoc.GeneratedEventRows`.

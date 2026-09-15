@@ -634,15 +634,24 @@ PARKED: Dict[str, str] = {
 # Slugs and names.
 # ---------------------------------------------------------------------------
 
-_CAMEL = re.compile(r"([a-z0-9])([A-Z])")
+#: `StringHelper.CamelCaseRegex` is `([A-Za-z0-9]|\G(?!^))([A-Z])`: an
+#: underscore lands before EVERY capital that follows a letter or digit,
+#: including a capital that follows another capital. `ToABetterYou` is
+#: `TO_A_BETTER_YOU`, not `TO_ABETTER_YOU`; the lower->upper-only rule this
+#: replaced put the Six Contracts event's rows under a key the game never
+#: asks for, and the page opened with a raw key and no options (proofs-4).
+_CAMEL = re.compile(r"(?<=[A-Za-z0-9])([A-Z])")
+_NOT_SLUG = re.compile(r"[^A-Z0-9_]")
 
 
 def slugify(name: str) -> str:
     """`StringHelper.Slugify`, for the one input shape we hand it: a C# type
-    name. CamelCase gets an underscore at each lower->upper boundary and the
-    whole thing is upper-cased, which is exactly what `ModelDb.GetEntry` does
-    to produce an `Id.Entry`."""
-    return _CAMEL.sub(r"\1_\2", name.strip()).upper()
+    name. An underscore before each capital that follows a letter or digit,
+    whitespace to underscores, upper-cased, anything else dropped -- which is
+    exactly what `ModelDb.GetEntry` does to produce an `Id.Entry`."""
+    text = _CAMEL.sub(r"_\1", name.strip())
+    text = re.sub(r"\s+", "_", text.upper())
+    return _NOT_SLUG.sub("", text)
 
 
 def normalise(text: str) -> str:

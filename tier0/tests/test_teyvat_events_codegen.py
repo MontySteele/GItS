@@ -156,7 +156,27 @@ def test_the_generated_tables_name_every_dressed_event_exactly_once():
             f"{cls} is not in the shape table exactly once")
         assert text.count(f".{cls}>()") == 1, (
             f"{cls} is not in the substitution table exactly once")
-        entry = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", cls).upper()
+        # StringHelper.CamelCaseRegex: an underscore before EVERY capital
+        # that follows a letter or digit (ToABetterYou -> TO_A_BETTER_YOU).
+        entry = re.sub(r"(?<=[A-Za-z0-9])([A-Z])", r"_\1", cls).upper()
         assert f'["{entry}"] =\n                "res://images/events/' in text, (
             f"{cls} has no portrait borrow; the event page throws "
             f"AssetLoadException before it is drawn (EB-764)")
+
+
+def test_slugify_is_the_games_camel_case_rule():
+    """`StringHelper.Slugify` (0.111.0) puts an underscore before EVERY capital
+    that follows a letter or digit, a capital after a capital included. A
+    lower->upper-only rule keyed the Six Contracts rows under
+    `SIX_CONTRACTS_TO_ABETTER_YOU` while the game asked for
+    `SIX_CONTRACTS_TO_A_BETTER_YOU`; the page opened with a raw key, no options
+    and no portrait, and the run softlocked (proofs-4, 2026-09-15)."""
+    sys.path.insert(0, str(REPO / "tools"))
+    try:
+        from gen_teyvat_events import slugify
+    finally:
+        sys.path.pop(0)
+    assert slugify("SixContractsToABetterYou") == "SIX_CONTRACTS_TO_A_BETTER_YOU"
+    assert slugify("CoralMirrorRorriMLaroCEhT") == "CORAL_MIRROR_RORRI_M_LARO_C_EH_T"
+    assert slugify("TeaMaster") == "TEA_MASTER"
+    assert slugify("Act2Boss") == "ACT2_BOSS"

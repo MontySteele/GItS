@@ -1274,9 +1274,9 @@ internal static partial class TeyvatLoc
             ["FLOODED_LEDGER_ROOM.pages.BLOODY_INK.description"] =
                 "Gain 6 Max HP.",
             // SixContractsToABetterYou (Liyue / SelfHelpBook)
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.title"] =
                 "Six Contracts to a Better You",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.description"] =
                 "A Feiyun pamphleteer has set up a folding stall on the Harbor "
                 + "steps selling a slim, badly bound book that promises to sharpen, "
                 + "steady, or quicken whatever you already carry — no refunds, terms "
@@ -1285,41 +1285,41 @@ internal static partial class TeyvatLoc
                 + "here for a hand with nothing in it.\" If none of the three "
                 + "chapters have anything to grip onto, she simply takes the book "
                 + "back and waves you on.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_THE_BACK.title"] =
                 "Read the Back",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_THE_BACK.description"] =
                 "Choose an Attack to Enchant with Sharp 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_PASSAGE.title"] =
                 "Read a Random Passage",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_PASSAGE.description"] =
                 "Choose a Skill to Enchant with Nimble 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
                 "Read the Entire Book",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
                 "Choose a Power to Enchant with Swift 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.NO_OPTIONS.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.NO_OPTIONS.title"] =
                 "Move On",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.NO_OPTIONS.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.NO_OPTIONS.description"] =
                 "Nothing happens.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
                 "Read the Back",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
                 "Choose an Attack to Enchant with Sharp 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
                 "Read a Random Passage",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
                 "Choose a Skill to Enchant with Nimble 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
                 "Read the Entire Book",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
                 "Choose a Power to Enchant with Swift 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.READ_THE_BACK.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.READ_THE_BACK.description"] =
                 "Choose an Attack to Enchant with Sharp 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.READ_PASSAGE.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.READ_PASSAGE.description"] =
                 "Choose a Skill to Enchant with Nimble 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.READ_ENTIRE_BOOK.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.READ_ENTIRE_BOOK.description"] =
                 "Choose a Power to Enchant with Swift 2.",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.NO_OPTIONS.description"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU.pages.NO_OPTIONS.description"] =
                 "Nothing happens.",
             // RopeBridgeBelowDunyuRuins (Liyue / SlipperyBridge)
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.title"] =
@@ -1717,49 +1717,49 @@ internal static partial class TeyvatLoc
             ["KSHAHREWAR_SURPLUS_OFFICE.pages.DONE.description"] =
                 "Trade for the top one.",
             // SixWeeksToABetterYouIlluminated (Sumeru / SelfHelpBook)
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.title"] =
                 "Six Weeks to a Better You, Illuminated",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.description"] =
                 "A warped stall in the shadow of the House of Daena, where a "
                 + "Vahumana dropout hawks the treatise the Sages refused to shelve: "
                 + "SIX WEEKS TO A BETTER YOU, ILLUMINATED. The spine cracks like "
                 + "nothing has ever opened it. He swears every chapter is "
                 + "field-tested, then admits the field was his dormitory.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK.title"] =
                 "Read the Back",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK.description"] =
                 "Choose an Attack to Enchant with Sharp 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE.title"] =
                 "Read a Random Passage",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE.description"] =
                 "Choose a Skill to Enchant with Nimble 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
                 "Read the Entire Book",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
                 "Choose a Power to Enchant with Swift 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.NO_OPTIONS.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.NO_OPTIONS.title"] =
                 "Move On",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.NO_OPTIONS.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.NO_OPTIONS.description"] =
                 "Nothing happens.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
                 "Read the Back",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
                 "Choose an Attack to Enchant with Sharp 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
                 "Read a Random Passage",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
                 "Choose a Skill to Enchant with Nimble 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
                 "Read the Entire Book",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
                 "Choose a Power to Enchant with Swift 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.READ_THE_BACK.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.READ_THE_BACK.description"] =
                 "Choose an Attack to Enchant with Sharp 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.READ_PASSAGE.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.READ_PASSAGE.description"] =
                 "Choose a Skill to Enchant with Nimble 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.READ_ENTIRE_BOOK.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.READ_ENTIRE_BOOK.description"] =
                 "Choose a Power to Enchant with Swift 2.",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.NO_OPTIONS.description"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED.pages.NO_OPTIONS.description"] =
                 "Nothing happens.",
             // RopeLineOverArdraviValley (Sumeru / SlipperyBridge)
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.title"] =
@@ -2191,9 +2191,9 @@ internal static partial class TeyvatLoc
                 "Obtain 2 random Relics. (The harvest itself strips the offered "
                 + "item's name on this option; base reads \"[Give ]\".)",
             // CoralMirrorRorriMLaroCEhT (Fontaine / Reflections)
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.title"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.title"] =
                 "The Coral Mirror rorriM laroC ehT",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.description"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.pages.INITIAL.description"] =
                 "Merusea Village keeps one wall of grown coral that no diver "
                 + "touches without asking first — polished by the current into "
                 + "something that reflects a little wrong on purpose. A Melusine "
@@ -2204,17 +2204,17 @@ internal static partial class TeyvatLoc
                 + "outright, it keeps no favorites: it copies everything you are, all "
                 + "at once, and hands back a second you that carries its own bad "
                 + "luck. She will not choose for you, and she is sorry either way.",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.TOUCH_A_MIRROR.title"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.pages.INITIAL.options.TOUCH_A_MIRROR.title"] =
                 "Touch a Mirror",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.TOUCH_A_MIRROR.description"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.pages.INITIAL.options.TOUCH_A_MIRROR.description"] =
                 "Downgrade 2 random cards. Upgrade 4 random cards.",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.SHATTER.title"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.pages.INITIAL.options.SHATTER.title"] =
                 "Shatter",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.SHATTER.description"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.pages.INITIAL.options.SHATTER.description"] =
                 "Duplicate your entire Deck. Add Bad Luck (curse) to your Deck.",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.TOUCH_A_MIRROR.description"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.pages.TOUCH_A_MIRROR.description"] =
                 "Downgrade 2 random cards. Upgrade 4 random cards.",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.SHATTER.description"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.pages.SHATTER.description"] =
                 "Duplicate your entire Deck. Add Bad Luck (curse) to your Deck.",
             // FoundThingsShelfMeruseaVillage (Fontaine / RelicTrader)
             ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.title"] =
@@ -4464,7 +4464,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.INITIAL.options.TENTACLE_QUILL_LOCKED", "pages.INITIAL.options.PRICKLY_SPONGE_LOCKED" },
                 false),
             [typeof(Events.Liyue.SixContractsToABetterYou)] = new EventShape(
-                "SIX_CONTRACTS_TO_ABETTER_YOU", "SelfHelpBookMirror",
+                "SIX_CONTRACTS_TO_A_BETTER_YOU", "SelfHelpBookMirror",
                 new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
                 new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
                 new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
@@ -4536,7 +4536,7 @@ internal static class TeyvatGeneratedEvents
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Sumeru.SixWeeksToABetterYouIlluminated)] = new EventShape(
-                "SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED", "SelfHelpBookMirror",
+                "SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED", "SelfHelpBookMirror",
                 new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
                 new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
                 new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
@@ -4614,7 +4614,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.INITIAL.options.POTION_LOCKED", "pages.INITIAL.options.RELIC_LOCKED" },
                 false),
             [typeof(Events.Fontaine.CoralMirrorRorriMLaroCEhT)] = new EventShape(
-                "CORAL_MIRROR_RORRI_MLARO_CEH_T", "ReflectionsMirror",
+                "CORAL_MIRROR_RORRI_M_LARO_C_EH_T", "ReflectionsMirror",
                 new[] { "TOUCH_A_MIRROR", "SHATTER" },
                 new[] { "pages.TOUCH_A_MIRROR.description", "pages.SHATTER.description" },
                 Array.Empty<string>(),
@@ -5287,7 +5287,7 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/trash_heap.png",
             ["FLOODED_LEDGER_ROOM"] =
                 "res://images/events/waterlogged_scriptorium.png",
-            ["SIX_CONTRACTS_TO_ABETTER_YOU"] =
+            ["SIX_CONTRACTS_TO_A_BETTER_YOU"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS"] =
                 "res://images/events/slippery_bridge.png",
@@ -5311,7 +5311,7 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/reflections.png",
             ["KSHAHREWAR_SURPLUS_OFFICE"] =
                 "res://images/events/relic_trader.png",
-            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED"] =
+            ["SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY"] =
                 "res://images/events/slippery_bridge.png",
@@ -5337,7 +5337,7 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/potion_courier.png",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE"] =
                 "res://images/events/ranwid_the_elder.png",
-            ["CORAL_MIRROR_RORRI_MLARO_CEH_T"] =
+            ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T"] =
                 "res://images/events/reflections.png",
             ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE"] =
                 "res://images/events/relic_trader.png",
