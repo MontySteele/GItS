@@ -435,6 +435,7 @@ public class TeyvatFrameTests : IDisposable
             // Potions), and an option key that IS the rolled dish (Endless
             // Conveyor).
             new object[] { typeof(TabletOfTruthMirror), typeof(TabletOfTruth) },
+            new object[] { typeof(AbyssalBathsMirror), typeof(AbyssalBaths) },
         };
 
     // ---------------------------------------------------------------

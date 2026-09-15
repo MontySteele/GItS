@@ -364,6 +364,17 @@ MIRRORS: Dict[str, MirrorSpec] = {
         page_source=(("pages.GIVE_UP.description", "pages.DECIPHER.options.GIVE_UP"),)
                     + tuple((f"pages.DECIPHER_{i}.description", "DECIPHER_1")
                             for i in range(2, 6))),
+    "AbyssalBaths": MirrorSpec(
+        "AbyssalBathsMirror",
+        options=("IMMERSE", "pages.ALL.options.LINGER",
+                 "pages.ALL.options.EXIT_BATHS", "ABSTAIN"),
+        pages=("pages.IMMERSE.description", "pages.ABSTAIN.description",
+               "pages.EXIT_BATHS.description", "pages.DEATH_WARNING.description")
+              + tuple(f"pages.LINGER{i}.description" for i in range(1, 10)),
+        page_source=(("pages.EXIT_BATHS.description", "pages.ALL.options.EXIT_BATHS"),
+                     ("pages.DEATH_WARNING.description", "pages.ALL.options.LINGER"))
+                    + tuple((f"pages.LINGER{i}.description", "pages.ALL.options.LINGER")
+                            for i in range(1, 10))),
 }
 
 

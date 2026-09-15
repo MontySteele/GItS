@@ -36,7 +36,7 @@ owed." Behind her, someone still in the water has stopped counting how many
 times they've gone under.
 
 - **Immerse** — Gain 2 Max HP. Take 3 damage.
-- **Linger** (offered after Immersing, repeatable) — Gain 2 Max HP. Take escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, 9, 10...).
+- **Linger** — (offered after Immersing, repeatable) Gain 2 Max HP. Take escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, 9, 10...).
 - **Exit Baths** — can be chosen at any stage to leave.
 - **Abstain** — Heal 10 HP.
 

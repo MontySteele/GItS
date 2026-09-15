@@ -692,6 +692,82 @@ internal static partial class TeyvatLoc
                 + "with Slither)",
             ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.TORUS.description"] =
                 "Choose 1 starter card to Transform into Toric Toughness.",
+            // TideWarmedPoolsOfYaoguangShoal (Liyue / AbyssalBaths)
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.title"] =
+                "The Tide-Warmed Pools of Yaoguang Shoal",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.description"] =
+                "Yaoguang Shoal keeps a run of mineral pools the diviners swear "
+                + "were dug by something older than Liyue's contracts. A robed "
+                + "attendant stands at the rail with a lacquered tally-board, terms "
+                + "already recited: the water gives, but it also takes, and it will "
+                + "keep taking for as long as you keep asking. \"Every soak is priced "
+                + "the same,\" she says, \"a little given back, a little owed.\" "
+                + "Behind her, someone still in the water has stopped counting how "
+                + "many times they've gone under.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.IMMERSE.title"] =
+                "Immerse",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.IMMERSE.description"] =
+                "Gain 2 Max HP. Take 3 damage.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.LINGER.title"] =
+                "Linger",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.LINGER.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.EXIT_BATHS.title"] =
+                "Exit Baths",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.EXIT_BATHS.description"] =
+                "can be chosen at any stage to leave.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.ABSTAIN.title"] =
+                "Abstain",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.ABSTAIN.description"] =
+                "Heal 10 HP.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.IMMERSE.description"] =
+                "Gain 2 Max HP. Take 3 damage.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ABSTAIN.description"] =
+                "Heal 10 HP.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.EXIT_BATHS.description"] =
+                "can be chosen at any stage to leave.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.DEATH_WARNING.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER1.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER2.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER3.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER4.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER5.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER6.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER7.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER8.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER9.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
             // ContractRecitingGrowth (Liyue / BrainLeech)
             ["CONTRACT_RECITING_GROWTH.title"] =
                 "The Contract-Reciting Growth",
@@ -1382,6 +1458,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.BIRD.description", "pages.SNAKE.description", "pages.TORUS.description" },
                 new[] { "pages.INITIAL.options.SNAKE_LOCKED" },
                 false),
+            [typeof(Events.Liyue.TideWarmedPoolsOfYaoguangShoal)] = new EventShape(
+                "TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL", "AbyssalBathsMirror",
+                new[] { "IMMERSE", "ABSTAIN" },
+                new[] { "pages.IMMERSE.description", "pages.ABSTAIN.description", "pages.EXIT_BATHS.description", "pages.DEATH_WARNING.description", "pages.LINGER1.description", "pages.LINGER2.description", "pages.LINGER3.description", "pages.LINGER4.description", "pages.LINGER5.description", "pages.LINGER6.description", "pages.LINGER7.description", "pages.LINGER8.description", "pages.LINGER9.description" },
+                new[] { "pages.ALL.options.LINGER", "pages.ALL.options.EXIT_BATHS" },
+                false),
             [typeof(Events.Liyue.ContractRecitingGrowth)] = new EventShape(
                 "CONTRACT_RECITING_GROWTH", "BrainLeechMirror",
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
@@ -1519,6 +1601,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.MosiMosiAtStormbearerPoint>(),
             [(TeyvatFrame.Mondstadt, typeof(WoodCarvings))] =
                 () => ModelDb.Event<Events.Mondstadt.HuntersTotemPostsNearWolvendom>(),
+            [(TeyvatFrame.Liyue, typeof(AbyssalBaths))] =
+                () => ModelDb.Event<Events.Liyue.TideWarmedPoolsOfYaoguangShoal>(),
             [(TeyvatFrame.Liyue, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Liyue.ContractRecitingGrowth>(),
             [(TeyvatFrame.Liyue, typeof(DoorsOfLightAndDark))] =
@@ -1610,6 +1694,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/whispering_hollow.png",
             ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM"] =
                 "res://images/events/wood_carvings.png",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL"] =
+                "res://images/events/abyssal_baths.png",
             ["CONTRACT_RECITING_GROWTH"] =
                 "res://images/events/brain_leech.png",
             ["TWIN_GATES_OF_MT_TIANHENG"] =
