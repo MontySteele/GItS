@@ -25,11 +25,20 @@ namespace KleeMod.Teyvat.Patches;
 /// "work" and look like a bug.
 ///
 /// WHAT THE STILL ACTUALLY IS: a `Sprite2D` under the `%Visuals` node of a
-/// scene whose root is an `NCreatureVisuals`-shaped tree -- the same route
+/// scene whose root BECOMES an `NCreatureVisuals` -- the same route
 /// `pck-src/kokomi/model/bake_kurage.tscn` takes for a pet, and the same route
 /// `Vfx/StaticPortraitIdle` documents for our characters out of combat. The
 /// scene is `pck-src/teyvat/creature_visuals/hilichurl_guard.tscn` and its
 /// texture is a placeholder PNG.
+///
+/// SWAPPING THE PATH IS ONLY HALF OF IT, and the missing half was EB-760.
+/// `MonsterModel.CreateVisuals` CASTS the instantiated root to
+/// `NCreatureVisuals`; a script-less scene's root is a plain `Node2D` and the
+/// cast throws, which `CreateVisuals`'s catch turns into the pink error body.
+/// `Teyvat/TeyvatVisuals.RegisterStillPortraits` is what makes the cast
+/// succeed -- it registers every scene named in `TeyvatFrame.StillPortraits`
+/// with BaseLib's auto-conversion, and the argument is written out in full
+/// there. A path swapped without that registration draws the error scene.
 ///
 /// THE SPINE DOORS IT TRIPS ARE IN THE REPORT, NOT IN THIS COMMENT, because
 /// they are a decompile finding and not a decision this file makes. The short

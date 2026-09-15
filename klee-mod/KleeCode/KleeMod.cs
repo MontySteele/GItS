@@ -41,6 +41,19 @@ public static class KleeMod
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
         KleePck.LogStatus();
 
+        // THE TEYVAT RUN FRAME ARM's still portraits (spike item 3,
+        // -p:TeyvatFrame=true). A no-op with the arm off, one dictionary write
+        // per dressed body with it on.
+        //
+        // THIS one belongs at [ModInitializer] and the arm's loc merge did NOT
+        // (EB-759, one commit back): registering a scene for auto-conversion
+        // writes into a registry BaseLib owns from the moment it loads — and
+        // BaseLib is a manifest dependency, so it loads before us — and it
+        // only has to be in place before the scene is INSTANTIATED, which is
+        // first combat at the earliest. No table has to exist for it to be
+        // correct. Teyvat/TeyvatVisuals.cs carries the argument in full.
+        Teyvat.TeyvatVisuals.RegisterStillPortraits();
+
         // Convention-scene + build-id telemetry (animation sprint 1, A3 —
         // permanent). One line per shipped scene: path, found/missing, root
         // node type. A missing scene falls back quietly at the use site, so
