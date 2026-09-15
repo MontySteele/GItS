@@ -65,6 +65,15 @@ RUN_SCOPE_ALLOWED = {
         "hand the screen a row straight out of `GetPossibleCards`, which is a "
         "CANONICAL model, and serialising the pick threw "
         "`CanonicalModelException` inside HeftyTablet.AfterObtained",
+    "TheLegendsWereTrueMirror.cs":
+        "the Teyvat arm's mirror of the base game's `TheLegendsWereTrue`, "
+        "mirrored clause for clause: `NabTheMap` puts a Spoils Map straight "
+        "into the DECK from an event page, which is run scope's real "
+        "lifetime and is the base event's own call "
+        "(`MegaCrit.Sts2.Core.Models.Events/TheLegendsWereTrue.cs`). An event "
+        "page is not combat, and the card never enters one -- changing it to "
+        "`CombatState.CreateCard` would both diverge from the base event and "
+        "throw, since there is no combat state to create it in",
 }
 
 

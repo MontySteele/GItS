@@ -181,6 +181,8 @@ A collapsed stair below Springvale opens onto a dairy cellar the Guild's commiss
 - **Taste the Racks (Gorge)** — Choose 2 of 8 random Common cards to add to your Deck. The eight wheels offered are never duplicates.
 - **Haul Out the Back Wall (Search)** — Lose 14 HP to strained shoulders and spore-thick air. Obtain The Anointed Wheel (The Chosen Cheese): at the end of combat, gain 1 Max HP.
 
+Loss: {character} was buried under the back wall of the [gold]{event}[/gold].
+
 Mechanics check: matches harvest; flag: the sim substitutes a plain random relic for The Chosen Cheese (`tier05/content/events.yaml:101-105`), so the printed "+1 Max HP at end of combat" promise above overstates what currently ships — the same flag the gallery carries at the Room Full of Cheese heading (`docs/current/dossiers/content/event-conversion-gallery.md:749`).
 
 ---
