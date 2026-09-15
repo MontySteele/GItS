@@ -158,7 +158,29 @@ param(
     # finishes that retirement, and passing BOTH is a configuration of the
     # compiler rather than of the design -- it gives one Furina two engines.
     # Pass one. The banner below says so in red if both are set.
-    [switch]$FurinaStage
+    [switch]$FurinaStage,
+    # THE TEYVAT RUN FRAME ARM (R272, the frame packet
+    # review/active/teyvat-run-frame-2026-09-14.md sec.4; the spike merged as
+    # PR #492). Adds -p:TeyvatFrame=true to the build below, which is the ONLY
+    # thing that turns the arm on: without it a dev build compiles the arm's
+    # types -- they are compiled in BOTH directions, unlike Cards/Prototype/**,
+    # so a pin can say what the act list contains on each side -- and reaches
+    # none of them, because every file under KleeCode/Teyvat/** reads
+    # TeyvatFrame.Enabled first and ModelDb.Acts keeps its hardcoded four.
+    # C# twin: TeyvatFrame.Enabled, which ships false. There is no sim twin:
+    # tier0 has no run frame.
+    #
+    # IT IS THE ONE ARM THAT IS NOT A CHARACTER'S, and that is the only way it
+    # differs from the five above. It dresses the RUN -- act names, monster
+    # names, still portraits, music -- and changes no starter, no relic and no
+    # pool, so it is independent of all five and composes with any of them.
+    #
+    # OFF ON EVERY CALIBRATION DEPLOY (frame packet sec.5): a dressing's event
+    # pool differing in LENGTH from the base zone's would move the UpFront rng
+    # and with it the Klee calibration seed's whole map. The pools are equal by
+    # construction and pinned equal by TeyvatFrameTests; the flag staying off
+    # is the second belt.
+    [switch]$TeyvatFrame
 )
 
 $ErrorActionPreference = 'Stop'
@@ -243,6 +265,7 @@ if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
 if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
 if ($FurinaReframe) { $arms += 'the Furina reframe arm' }
 if ($FurinaStage) { $arms += 'the Furina stage arm' }
+if ($TeyvatFrame) { $arms += 'the Teyvat run frame arm' }
 $armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
 
 # EB-161, on deploy.ps1's terms exactly: computed BEFORE the build because the
@@ -262,6 +285,7 @@ if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
 if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
 if ($FurinaReframe) { $buildArgs += '-p:FurinaReframe=true' }
 if ($FurinaStage) { $buildArgs += '-p:FurinaStage=true' }
+if ($TeyvatFrame) { $buildArgs += '-p:TeyvatFrame=true' }
 $buildArgs += $stamp.BuildArgs
 & dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
@@ -351,6 +375,26 @@ if ($FurinaStage) {
         Write-Host "      retires the reframe, so this build has given one" -ForegroundColor Red
         Write-Host "      Furina two engines. Pass one." -ForegroundColor Red
     }
+}
+
+if ($TeyvatFrame) {
+    Write-Host ""
+    Write-Host "*** TEYVAT RUN FRAME ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  A SPIKE, and it dresses the RUN rather than a character:" -ForegroundColor Magenta
+    Write-Host "  no starter, no relic and no pool moves, so this arm" -ForegroundColor Magenta
+    Write-Host "  composes with every arm above it." -ForegroundColor Magenta
+    Write-Host "  Acts one and two are MONDSTADT and LIYUE, standing at" -ForegroundColor Magenta
+    Write-Host "  Overgrowth's and Underdocks' index and returning those" -ForegroundColor Magenta
+    Write-Host "  zones' OWN encounters -- the mechanics cannot drift." -ForegroundColor Magenta
+    Write-Host "  They wear the base zones' pictures: the asset alias is a" -ForegroundColor Magenta
+    Write-Host "  disclosed spike shortcut, so the map screen reads the new" -ForegroundColor Magenta
+    Write-Host "  names over Overgrowth's and Underdocks' backgrounds." -ForegroundColor Magenta
+    Write-Host "  Nibbit reads as the Wooden Shield Hilichurl Guard in" -ForegroundColor Magenta
+    Write-Host "  Mondstadt only, and draws a still portrait there if" -ForegroundColor Magenta
+    Write-Host "  res://teyvat/ carries one; music is local placeholders." -ForegroundColor Magenta
+    Write-Host "  NEVER PASS IT ON A CALIBRATION DEPLOY: an act's event pool" -ForegroundColor Magenta
+    Write-Host "  length moves the UpFront rng and with it the Klee seed's" -ForegroundColor Magenta
+    Write-Host "  whole map (frame packet sec.5)." -ForegroundColor Magenta
 }
 
 if ($version.IsDirty) {

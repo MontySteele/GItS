@@ -499,9 +499,11 @@ def test_deploy_round_maps_the_arms_to_the_scripts_own_switches():
     # is an arm nobody can reach from the one wrapper that drives a deploy.
     declared = set(re.findall(r"\[switch\]\$(\w+)", script))
     # `-Package` and the pck/test flags are not arms; the arms are exactly the
-    # ones whose name ends in an arm word.
+    # ones whose name ends in an arm word. `Frame` is the run frame's word
+    # (`-TeyvatFrame`, R272): the first arm that dresses the RUN rather than a
+    # character, so it ends in neither of a character arm's three.
     arms_in_script = {d for d in declared
-                      if d.endswith(("Overhaul", "Reframe", "Stage"))}
+                      if d.endswith(("Overhaul", "Reframe", "Stage", "Frame"))}
     assert arms_in_script == {s[1:] for s in deploy.ARMS.values()}, (
         sorted(arms_in_script), sorted(deploy.ARMS.values()))
 
