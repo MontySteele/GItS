@@ -1446,6 +1446,34 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            // AranarasTwoCaps (Sumeru / HungryForMushrooms)
+            ["ARANARAS_TWO_CAPS.title"] =
+                "The Aranara's Two Caps",
+            ["ARANARAS_TWO_CAPS.pages.INITIAL.description"] =
+                "Off the trail in Ardravi Valley, an Aranara called Arapacati tugs "
+                + "your sleeve toward a hollow beneath a rotting Zaytun stump. Two "
+                + "fungi have grown there side by side: one swollen and pale as a "
+                + "drum, one small and giving off a sweet, resinous smell that "
+                + "carries further than it should. The Forest Rangers say everything "
+                + "edible in the rainforest is also, in some sense, a test. \"Nara "
+                + "must choose,\" Arapacati says. \"Aranara will not choose for "
+                + "Nara.\"",
+            ["ARANARAS_TWO_CAPS.pages.INITIAL.options.BIG_MUSHROOM.title"] =
+                "Eat the Bulging Cap",
+            ["ARANARAS_TWO_CAPS.pages.INITIAL.options.BIG_MUSHROOM.description"] =
+                "Obtain Bulging Cap (Big Mushroom, relic). Upon pickup, raise your "
+                + "Max HP by 20. At the start of each combat, draw 2 fewer cards.",
+            ["ARANARAS_TWO_CAPS.pages.INITIAL.options.FRAGRANT_MUSHROOM.title"] =
+                "Eat the Rukkhashava Bloom",
+            ["ARANARAS_TWO_CAPS.pages.INITIAL.options.FRAGRANT_MUSHROOM.description"] =
+                "Obtain Rukkhashava Bloom (Fragrant Mushroom, relic). Upon pickup, "
+                + "lose 15 HP and Upgrade 3 random cards.",
+            ["ARANARAS_TWO_CAPS.pages.BIG_MUSHROOM.description"] =
+                "Obtain Bulging Cap (Big Mushroom, relic). Upon pickup, raise your "
+                + "Max HP by 20. At the start of each combat, draw 2 fewer cards.",
+            ["ARANARAS_TWO_CAPS.pages.FRAGRANT_MUSHROOM.description"] =
+                "Obtain Rukkhashava Bloom (Fragrant Mushroom, relic). Upon pickup, "
+                + "lose 15 HP and Upgrade 3 random cards.",
             // SixWeeksToABetterYouIlluminated (Sumeru / SelfHelpBook)
             ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.title"] =
                 "Six Weeks to a Better You, Illuminated",
@@ -1655,6 +1683,35 @@ internal static partial class TeyvatLoc
                 "It is unmistakably well-made gear, fitted for nobody in particular "
                 + "— least of all you. Add Clumsy (curse) to your Deck. Obtain a "
                 + "random Relic.",
+            // MeropideInfirmaryRounds (Fontaine / HungryForMushrooms)
+            ["MEROPIDE_INFIRMARY_ROUNDS.title"] =
+                "The Meropide Infirmary Rounds",
+            ["MEROPIDE_INFIRMARY_ROUNDS.pages.INITIAL.description"] =
+                "Down in the Fortress of Meropide, a Melusine nurse pulls a curtain "
+                + "around your cot and sets two vials on the tray with great "
+                + "ceremony. One is cloudy and thick, brewed from Fontemer kelp to "
+                + "\"make you bigger, and slower to wake.\" The other is clear and "
+                + "stings the eyes from across the room; she assures you it sharpens "
+                + "everything a person already knows how to do. Both are, "
+                + "regrettably, non-refundable.",
+            ["MEROPIDE_INFIRMARY_ROUNDS.pages.INITIAL.options.BIG_MUSHROOM.title"] =
+                "Drink the Deepwater Draught",
+            ["MEROPIDE_INFIRMARY_ROUNDS.pages.INITIAL.options.BIG_MUSHROOM.description"] =
+                "Obtain Deepwater Draught (Big Mushroom relic). Upon pickup, raise "
+                + "your Max HP by 20. At the start of each combat, draw 2 fewer "
+                + "cards.",
+            ["MEROPIDE_INFIRMARY_ROUNDS.pages.INITIAL.options.FRAGRANT_MUSHROOM.title"] =
+                "Drink the Clarity Tincture",
+            ["MEROPIDE_INFIRMARY_ROUNDS.pages.INITIAL.options.FRAGRANT_MUSHROOM.description"] =
+                "Obtain Clarity Tincture (Fragrant Mushroom relic). Upon pickup, "
+                + "lose 15 HP and Upgrade 3 random cards.",
+            ["MEROPIDE_INFIRMARY_ROUNDS.pages.BIG_MUSHROOM.description"] =
+                "Obtain Deepwater Draught (Big Mushroom relic). Upon pickup, raise "
+                + "your Max HP by 20. At the start of each combat, draw 2 fewer "
+                + "cards.",
+            ["MEROPIDE_INFIRMARY_ROUNDS.pages.FRAGRANT_MUSHROOM.description"] =
+                "Obtain Clarity Tincture (Fragrant Mushroom relic). Upon pickup, "
+                + "lose 15 HP and Upgrade 3 random cards.",
             // MelusinesPamphletOfEncouragement (Fontaine / SelfHelpBook)
             ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.title"] =
                 "A Melusine's Pamphlet of Encouragement",
@@ -2123,6 +2180,51 @@ internal static partial class TeyvatLoc
                 "Let It Whisper",
             ["CHINJU_FOREST_PASSENGER.pages.SHARE_KNOWLEDGE.description"] =
                 "Choose 1 of 5 random cards to add to your deck.",
+            // DrillmasterOfWatatsumi (Inazuma / Bugslayer)
+            ["DRILLMASTER_OF_WATATSUMI.title"] =
+                "The Drillmaster of Watatsumi",
+            ["DRILLMASTER_OF_WATATSUMI.pages.INITIAL.description"] =
+                "On the terraced stone above Sangonomiya Shrine, a drillmaster "
+                + "works a line of fishermen who were handed spears three weeks ago "
+                + "and have not slept properly since. She fought Fatui at Nazuchi "
+                + "Beach and came back with opinions. Her whole curriculum, she "
+                + "admits, is two motions — everything else is Watatsumi bravado. "
+                + "\"Learn one properly,\" she says, \"and I will not have to write "
+                + "your family.\"",
+            ["DRILLMASTER_OF_WATATSUMI.pages.INITIAL.options.EXTERMINATION.title"] =
+                "Learn the Sweeping Tide (Learn Extermination Technique)",
+            ["DRILLMASTER_OF_WATATSUMI.pages.INITIAL.options.EXTERMINATION.description"] =
+                "Add Sweeping Tide (Exterminate) to your Deck.",
+            ["DRILLMASTER_OF_WATATSUMI.pages.INITIAL.options.SQUASH.title"] =
+                "Learn the Anchor Drop (Learn Squash Technique)",
+            ["DRILLMASTER_OF_WATATSUMI.pages.INITIAL.options.SQUASH.description"] =
+                "Add Anchor Drop (Squash) to your Deck.",
+            ["DRILLMASTER_OF_WATATSUMI.pages.EXTERMINATION.description"] =
+                "Add Sweeping Tide (Exterminate) to your Deck.",
+            ["DRILLMASTER_OF_WATATSUMI.pages.SQUASH.description"] =
+                "Add Anchor Drop (Squash) to your Deck.",
+            // NestedArray (Inazuma / InfestedAutomaton)
+            ["NESTED_ARRAY.title"] =
+                "The Nested Array",
+            ["NESTED_ARRAY.pages.INITIAL.description"] =
+                "On the black sand under Serpent's Head, a severed limb of the "
+                + "Perpetual Mechanical Array is still humming after all these years. "
+                + "Crystalflies have made a nest of its open joints, drifting in and "
+                + "out of the leaking Electro like sparks that forgot to die. A "
+                + "Watatsumi salvager crouches beside it, counting the pulses under "
+                + "her breath before she'll let anyone closer.",
+            ["NESTED_ARRAY.pages.INITIAL.options.STUDY.title"] =
+                "Chart the Discharge Pattern",
+            ["NESTED_ARRAY.pages.INITIAL.options.STUDY.description"] =
+                "Obtain a random Power.",
+            ["NESTED_ARRAY.pages.INITIAL.options.TOUCH_CORE.title"] =
+                "Grip the Humming Core (Touch the Core)",
+            ["NESTED_ARRAY.pages.INITIAL.options.TOUCH_CORE.description"] =
+                "Obtain a random 0 cost card.",
+            ["NESTED_ARRAY.pages.STUDY.description"] =
+                "Obtain a random Power.",
+            ["NESTED_ARRAY.pages.TOUCH_CORE.description"] =
+                "Obtain a random 0 cost card.",
             // BlockadeLarder (Inazuma / RoomFullOfCheese)
             ["BLOCKADE_LARDER.title"] =
                 "The Blockade Larder",
@@ -2152,6 +2254,35 @@ internal static partial class TeyvatLoc
                 "Lose 14 HP clawing through packed salt and brine. Obtain the "
                 + "Ceremonial Crock (The Chosen Cheese): at the end of combat, gain 1 "
                 + "Max HP.",
+            // NamelessUnderTheCedar (Inazuma / SpiritGrafter)
+            ["NAMELESS_UNDER_THE_CEDAR.title"] =
+                "The Nameless Under the Cedar",
+            ["NAMELESS_UNDER_THE_CEDAR.pages.INITIAL.description"] =
+                "Mist pools under the great cedar of Chinju Forest, and something "
+                + "without a shrine is waiting inside it. The ofuda has peeled from "
+                + "the bark; the spirit behind it has forgotten its own name and "
+                + "would rather borrow a body than fade. It offers warmth for your "
+                + "wounds, if you will let it share your breath.",
+            ["NAMELESS_UNDER_THE_CEDAR.pages.INITIAL.options.LET_IT_IN.title"] =
+                "Let It In",
+            ["NAMELESS_UNDER_THE_CEDAR.pages.INITIAL.options.LET_IT_IN.description"] =
+                "Heal 25 HP. Add Borrowed Shape (Metamorphosis) to your Deck — the "
+                + "spirit settles into you, closing your hurts, and thereafter "
+                + "insists on wearing your hands its own way.",
+            ["NAMELESS_UNDER_THE_CEDAR.pages.INITIAL.options.REJECTION.title"] =
+                "Refuse the Bond",
+            ["NAMELESS_UNDER_THE_CEDAR.pages.INITIAL.options.REJECTION.description"] =
+                "Lose 9 HP. Remove 1 card from your Deck — it recoils through your "
+                + "ribs on the way out, and takes with it one technique you can no "
+                + "longer remember learning.",
+            ["NAMELESS_UNDER_THE_CEDAR.pages.LET_IT_IN.description"] =
+                "Heal 25 HP. Add Borrowed Shape (Metamorphosis) to your Deck — the "
+                + "spirit settles into you, closing your hurts, and thereafter "
+                + "insists on wearing your hands its own way.",
+            ["NAMELESS_UNDER_THE_CEDAR.pages.REJECTION.description"] =
+                "Lose 9 HP. Remove 1 card from your Deck — it recoils through your "
+                + "ribs on the way out, and takes with it one technique you can no "
+                + "longer remember learning.",
             // KettleBelowSangonomiya (Inazuma / TeaMaster)
             ["KETTLE_BELOW_SANGONOMIYA.title"] =
                 "The Kettle Below Sangonomiya",
@@ -2193,6 +2324,43 @@ internal static partial class TeyvatLoc
             ["KETTLE_BELOW_SANGONOMIYA.pages.TEA_OF_DISCOURTESY.description"] =
                 "Drink what is left in the pot, unasked and unpaid. At the start of "
                 + "the next combat, shuffle 2 Dazed into your Draw Pile.",
+            // SignalLampCipher (Inazuma / TheLanternKey)
+            ["SIGNAL_LAMP_CIPHER.title"] =
+                "The Signal-Lamp Cipher",
+            ["SIGNAL_LAMP_CIPHER.pages.INITIAL.description"] =
+                "Rain sheets across the Bourou Village boardwalks, and a resistance "
+                + "runner presses a notched bronze pin into your hand before "
+                + "vanishing between the stilts. It sets the shutter code on "
+                + "Watatsumi's coastal signal lamps — the whole island's night "
+                + "language, small enough to lose in a pocket. Down the strand, a "
+                + "lantern that should be dark is burning.",
+            ["SIGNAL_LAMP_CIPHER.pages.INITIAL.options.RETURN_THE_KEY.title"] =
+                "Turn it in at Sangonomiya Shrine",
+            ["SIGNAL_LAMP_CIPHER.pages.INITIAL.options.RETURN_THE_KEY.description"] =
+                "Give the pin to the resistance quartermaster, who counts out the "
+                + "standing bounty for recovered signal gear. Gain 100 Gold (Mora).",
+            ["SIGNAL_LAMP_CIPHER.pages.INITIAL.options.KEEP_THE_KEY.title"] =
+                "Keep the Pin",
+            ["SIGNAL_LAMP_CIPHER.pages.INITIAL.options.KEEP_THE_KEY.description"] =
+                "Keep the island's night language for yourself. Enter combat "
+                + "against a Mysterious Knight — a masked Shogunate blade waiting "
+                + "under the burning lamp, crest scraped off the shoulder — for the "
+                + "Signal-Lamp Pin (Lantern Key) card.",
+            ["SIGNAL_LAMP_CIPHER.pages.KEEP_THE_KEY.options.FIGHT.title"] =
+                "Keep the Pin",
+            ["SIGNAL_LAMP_CIPHER.pages.KEEP_THE_KEY.options.FIGHT.description"] =
+                "Keep the island's night language for yourself. Enter combat "
+                + "against a Mysterious Knight — a masked Shogunate blade waiting "
+                + "under the burning lamp, crest scraped off the shoulder — for the "
+                + "Signal-Lamp Pin (Lantern Key) card.",
+            ["SIGNAL_LAMP_CIPHER.pages.DONE.options.RETURN_THE_KEY.description"] =
+                "Give the pin to the resistance quartermaster, who counts out the "
+                + "standing bounty for recovered signal gear. Gain 100 Gold (Mora).",
+            ["SIGNAL_LAMP_CIPHER.pages.KEEP_THE_KEY.description"] =
+                "Keep the island's night language for yourself. Enter combat "
+                + "against a Mysterious Knight — a masked Shogunate blade waiting "
+                + "under the burning lamp, crest scraped off the shoulder — for the "
+                + "Signal-Lamp Pin (Lantern Key) card.",
             // EarWhisperer (Natlan / BrainLeech)
             ["EAR_WHISPERER.title"] =
                 "The Ear-Whisperer",
@@ -2222,6 +2390,51 @@ internal static partial class TeyvatLoc
                 "Share Knowledge",
             ["EAR_WHISPERER.pages.SHARE_KNOWLEDGE.description"] =
                 "Choose 1 of 5 random cards to add to your Deck.",
+            // SweepOrStomp (Natlan / Bugslayer)
+            ["SWEEP_OR_STOMP.title"] =
+                "Sweep or Stomp",
+            ["SWEEP_OR_STOMP.pages.INITIAL.description"] =
+                "Deep in the canopy of Coatepec Mountain, a Scions of the Canopy "
+                + "ranger has been thinning a swarm of biting beetles for three days "
+                + "straight and has worn her arm down to two moves. \"Sweep or "
+                + "stomp,\" she says, tossing you the choice like a dare. \"Learn one "
+                + "clean and you'll never fumble the other one in.\" A Yumkasaur "
+                + "chitters at her heel, already scorching the stragglers she missed.",
+            ["SWEEP_OR_STOMP.pages.INITIAL.options.EXTERMINATION.title"] =
+                "Learn Extermination Technique",
+            ["SWEEP_OR_STOMP.pages.INITIAL.options.EXTERMINATION.description"] =
+                "Add Exterminate to your Deck.",
+            ["SWEEP_OR_STOMP.pages.INITIAL.options.SQUASH.title"] =
+                "Learn Squash Technique",
+            ["SWEEP_OR_STOMP.pages.INITIAL.options.SQUASH.description"] =
+                "Add Squash to your Deck.",
+            ["SWEEP_OR_STOMP.pages.EXTERMINATION.description"] =
+                "Add Exterminate to your Deck.",
+            ["SWEEP_OR_STOMP.pages.SQUASH.description"] =
+                "Add Squash to your Deck.",
+            // TickingRelic (Natlan / InfestedAutomaton)
+            ["TICKING_RELIC.title"] =
+                "The Ticking Relic",
+            ["TICKING_RELIC.pages.INITIAL.description"] =
+                "Half-buried on the Tepeacac Rise scree, a machine older than any "
+                + "tribe's memory still ticks with something inside it — Night "
+                + "Kingdom make, the Children of Echoes say, plain as anything, the "
+                + "way they say most things that would scare another tribe silent. "
+                + "Study the ticking and it teaches you something with weight to it. "
+                + "Touch the core direct and it hands you something instant, no "
+                + "weight at all.",
+            ["TICKING_RELIC.pages.INITIAL.options.STUDY.title"] =
+                "Study",
+            ["TICKING_RELIC.pages.INITIAL.options.STUDY.description"] =
+                "Obtain a random Power card.",
+            ["TICKING_RELIC.pages.INITIAL.options.TOUCH_CORE.title"] =
+                "Touch the Core",
+            ["TICKING_RELIC.pages.INITIAL.options.TOUCH_CORE.description"] =
+                "Obtain a random 0-cost card.",
+            ["TICKING_RELIC.pages.STUDY.description"] =
+                "Obtain a random Power card.",
+            ["TICKING_RELIC.pages.TOUCH_CORE.description"] =
+                "Obtain a random 0-cost card.",
             // UnderStandsCellar (Natlan / RoomFullOfCheese)
             ["UNDER_STANDS_CELLAR.title"] =
                 "The Under-Stands Cellar",
@@ -2250,6 +2463,27 @@ internal static partial class TeyvatLoc
             ["UNDER_STANDS_CELLAR.pages.SEARCH.description"] =
                 "Lose 14 HP. Obtain the Buried Prize (The Chosen Cheese, relic): at "
                 + "the end of combat, gain 1 Max HP.",
+            // SpringsRootedThing (Natlan / SpiritGrafter)
+            ["SPRINGS_ROOTED_THING.title"] =
+                "The Springs' Rooted Thing",
+            ["SPRINGS_ROOTED_THING.pages.INITIAL.description"] =
+                "At the Toyac Springs, something has rooted in the wet stone that "
+                + "isn't quite plant and isn't quite anything the People of the "
+                + "Springs have a clean word for. It offers to knit into you and "
+                + "close every wound at once. Their binder warns you plainly, the way "
+                + "her people always do: it heals wonderful, and it stays.",
+            ["SPRINGS_ROOTED_THING.pages.INITIAL.options.LET_IT_IN.title"] =
+                "Let It In",
+            ["SPRINGS_ROOTED_THING.pages.INITIAL.options.LET_IT_IN.description"] =
+                "Heal 25 HP. Add Metamorphosis to your Deck.",
+            ["SPRINGS_ROOTED_THING.pages.INITIAL.options.REJECTION.title"] =
+                "Rejection",
+            ["SPRINGS_ROOTED_THING.pages.INITIAL.options.REJECTION.description"] =
+                "Lose 9 HP. Remove 1 card from your Deck.",
+            ["SPRINGS_ROOTED_THING.pages.LET_IT_IN.description"] =
+                "Heal 25 HP. Add Metamorphosis to your Deck.",
+            ["SPRINGS_ROOTED_THING.pages.REJECTION.description"] =
+                "Lose 9 HP. Remove 1 card from your Deck.",
             // FestivalBrewStand (Natlan / TeaMaster)
             ["FESTIVAL_BREW_STAND.title"] =
                 "The Festival Brew-Stand",
@@ -2289,6 +2523,32 @@ internal static partial class TeyvatLoc
             ["FESTIVAL_BREW_STAND.pages.TEA_OF_DISCOURTESY.description"] =
                 "At the start of the next combat, shuffle 2 Dazed into your Draw "
                 + "Pile.",
+            // MarkerOffTheRacetrack (Natlan / TheLanternKey)
+            ["MARKER_OFF_THE_RACETRACK.title"] =
+                "The Marker Off the Racetrack",
+            ["MARKER_OFF_THE_RACETRACK.pages.INITIAL.description"] =
+                "A Night-Wind racer clipped a marker-lantern off its post mid-race "
+                + "and hasn't slowed down long enough to feel bad about it. Turn it "
+                + "back in at the circuit and the stewards pay the standing bounty, "
+                + "no questions. Or keep it — but whatever's been guarding that post "
+                + "is already climbing down to ask for it back, in the one language a "
+                + "guard post understands.",
+            ["MARKER_OFF_THE_RACETRACK.pages.INITIAL.options.RETURN_THE_KEY.title"] =
+                "Return the Key",
+            ["MARKER_OFF_THE_RACETRACK.pages.INITIAL.options.RETURN_THE_KEY.description"] =
+                "Gain 100 Gold.",
+            ["MARKER_OFF_THE_RACETRACK.pages.INITIAL.options.KEEP_THE_KEY.title"] =
+                "Keep the Key",
+            ["MARKER_OFF_THE_RACETRACK.pages.INITIAL.options.KEEP_THE_KEY.description"] =
+                "Enter combat against a Mysterious Knight for the Lantern Key card.",
+            ["MARKER_OFF_THE_RACETRACK.pages.KEEP_THE_KEY.options.FIGHT.title"] =
+                "Keep the Key",
+            ["MARKER_OFF_THE_RACETRACK.pages.KEEP_THE_KEY.options.FIGHT.description"] =
+                "Enter combat against a Mysterious Knight for the Lantern Key card.",
+            ["MARKER_OFF_THE_RACETRACK.pages.DONE.options.RETURN_THE_KEY.description"] =
+                "Gain 100 Gold.",
+            ["MARKER_OFF_THE_RACETRACK.pages.KEEP_THE_KEY.description"] =
+                "Enter combat against a Mysterious Knight for the Lantern Key card.",
             // HollowTreeGuide (Natlan / SelfHelpBook)
             ["HOLLOW_TREE_GUIDE.title"] =
                 "The Hollow-Tree Guide",
@@ -2752,6 +3012,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.AranarasTwoCaps)] = new EventShape(
+                "ARANARAS_TWO_CAPS", "HungryForMushroomsMirror",
+                new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
+                new[] { "pages.BIG_MUSHROOM.description", "pages.FRAGRANT_MUSHROOM.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Sumeru.SixWeeksToABetterYouIlluminated)] = new EventShape(
                 "SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED", "SelfHelpBookMirror",
                 new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
@@ -2774,6 +3040,12 @@ internal static class TeyvatGeneratedEvents
                 "CARAVAN_RIBAT_LEAVINGS", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.MeropideInfirmaryRounds)] = new EventShape(
+                "MEROPIDE_INFIRMARY_ROUNDS", "HungryForMushroomsMirror",
+                new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
+                new[] { "pages.BIG_MUSHROOM.description", "pages.FRAGRANT_MUSHROOM.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Fontaine.MelusinesPamphletOfEncouragement)] = new EventShape(
@@ -2830,10 +3102,28 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.DrillmasterOfWatatsumi)] = new EventShape(
+                "DRILLMASTER_OF_WATATSUMI", "BugslayerMirror",
+                new[] { "EXTERMINATION", "SQUASH" },
+                new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.NestedArray)] = new EventShape(
+                "NESTED_ARRAY", "InfestedAutomatonMirror",
+                new[] { "STUDY", "TOUCH_CORE" },
+                new[] { "pages.STUDY.description", "pages.TOUCH_CORE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Inazuma.BlockadeLarder)] = new EventShape(
                 "BLOCKADE_LARDER", "RoomFullOfCheeseMirror",
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.NamelessUnderTheCedar)] = new EventShape(
+                "NAMELESS_UNDER_THE_CEDAR", "SpiritGrafterMirror",
+                new[] { "LET_IT_IN", "REJECTION" },
+                new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Inazuma.KettleBelowSangonomiya)] = new EventShape(
@@ -2842,10 +3132,28 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
                 new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
                 false),
+            [typeof(Events.Inazuma.SignalLampCipher)] = new EventShape(
+                "SIGNAL_LAMP_CIPHER", "TheLanternKeyMirror",
+                new[] { "RETURN_THE_KEY", "KEEP_THE_KEY" },
+                new[] { "pages.DONE.options.RETURN_THE_KEY.description", "pages.KEEP_THE_KEY.description" },
+                new[] { "pages.KEEP_THE_KEY.options.FIGHT" },
+                false),
             [typeof(Events.Natlan.EarWhisperer)] = new EventShape(
                 "EAR_WHISPERER", "BrainLeechMirror",
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
                 new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.SweepOrStomp)] = new EventShape(
+                "SWEEP_OR_STOMP", "BugslayerMirror",
+                new[] { "EXTERMINATION", "SQUASH" },
+                new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.TickingRelic)] = new EventShape(
+                "TICKING_RELIC", "InfestedAutomatonMirror",
+                new[] { "STUDY", "TOUCH_CORE" },
+                new[] { "pages.STUDY.description", "pages.TOUCH_CORE.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Natlan.UnderStandsCellar)] = new EventShape(
@@ -2854,11 +3162,23 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Natlan.SpringsRootedThing)] = new EventShape(
+                "SPRINGS_ROOTED_THING", "SpiritGrafterMirror",
+                new[] { "LET_IT_IN", "REJECTION" },
+                new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Natlan.FestivalBrewStand)] = new EventShape(
                 "FESTIVAL_BREW_STAND", "TeaMasterMirror",
                 new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
                 new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
                 new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
+                false),
+            [typeof(Events.Natlan.MarkerOffTheRacetrack)] = new EventShape(
+                "MARKER_OFF_THE_RACETRACK", "TheLanternKeyMirror",
+                new[] { "RETURN_THE_KEY", "KEEP_THE_KEY" },
+                new[] { "pages.DONE.options.RETURN_THE_KEY.description", "pages.KEEP_THE_KEY.description" },
+                new[] { "pages.KEEP_THE_KEY.options.FIGHT" },
                 false),
             [typeof(Events.Natlan.HollowTreeGuide)] = new EventShape(
                 "HOLLOW_TREE_GUIDE", "SelfHelpBookMirror",
@@ -2969,6 +3289,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.BureauOfReclaimedMedicine>(),
             [(TeyvatFrame.Liyue, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
+            [(TeyvatFrame.Sumeru, typeof(HungryForMushrooms))] =
+                () => ModelDb.Event<Events.Sumeru.AranarasTwoCaps>(),
             [(TeyvatFrame.Sumeru, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Sumeru.SixWeeksToABetterYouIlluminated>(),
             [(TeyvatFrame.Sumeru, typeof(SlipperyBridge))] =
@@ -2977,6 +3299,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Sumeru.FutureOfElixirs>(),
             [(TeyvatFrame.Sumeru, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Sumeru.CaravanRibatLeavings>(),
+            [(TeyvatFrame.Fontaine, typeof(HungryForMushrooms))] =
+                () => ModelDb.Event<Events.Fontaine.MeropideInfirmaryRounds>(),
             [(TeyvatFrame.Fontaine, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Fontaine.MelusinesPamphletOfEncouragement>(),
             [(TeyvatFrame.Fontaine, typeof(SlipperyBridge))] =
@@ -2995,16 +3319,32 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.QuartermastersSplit>(),
             [(TeyvatFrame.Inazuma, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Inazuma.ChinjuForestPassenger>(),
+            [(TeyvatFrame.Inazuma, typeof(Bugslayer))] =
+                () => ModelDb.Event<Events.Inazuma.DrillmasterOfWatatsumi>(),
+            [(TeyvatFrame.Inazuma, typeof(InfestedAutomaton))] =
+                () => ModelDb.Event<Events.Inazuma.NestedArray>(),
             [(TeyvatFrame.Inazuma, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Inazuma.BlockadeLarder>(),
+            [(TeyvatFrame.Inazuma, typeof(SpiritGrafter))] =
+                () => ModelDb.Event<Events.Inazuma.NamelessUnderTheCedar>(),
             [(TeyvatFrame.Inazuma, typeof(TeaMaster))] =
                 () => ModelDb.Event<Events.Inazuma.KettleBelowSangonomiya>(),
+            [(TeyvatFrame.Inazuma, typeof(TheLanternKey))] =
+                () => ModelDb.Event<Events.Inazuma.SignalLampCipher>(),
             [(TeyvatFrame.Natlan, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Natlan.EarWhisperer>(),
+            [(TeyvatFrame.Natlan, typeof(Bugslayer))] =
+                () => ModelDb.Event<Events.Natlan.SweepOrStomp>(),
+            [(TeyvatFrame.Natlan, typeof(InfestedAutomaton))] =
+                () => ModelDb.Event<Events.Natlan.TickingRelic>(),
             [(TeyvatFrame.Natlan, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Natlan.UnderStandsCellar>(),
+            [(TeyvatFrame.Natlan, typeof(SpiritGrafter))] =
+                () => ModelDb.Event<Events.Natlan.SpringsRootedThing>(),
             [(TeyvatFrame.Natlan, typeof(TeaMaster))] =
                 () => ModelDb.Event<Events.Natlan.FestivalBrewStand>(),
+            [(TeyvatFrame.Natlan, typeof(TheLanternKey))] =
+                () => ModelDb.Event<Events.Natlan.MarkerOffTheRacetrack>(),
             [(TeyvatFrame.Natlan, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Natlan.HollowTreeGuide>(),
             [(TeyvatFrame.Natlan, typeof(SlipperyBridge))] =
@@ -3112,6 +3452,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_future_of_potions.png",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE"] =
                 "res://images/events/this_or_that.png",
+            ["ARANARAS_TWO_CAPS"] =
+                "res://images/events/hungry_for_mushrooms.png",
             ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY"] =
@@ -3120,6 +3462,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_future_of_potions.png",
             ["CARAVAN_RIBAT_LEAVINGS"] =
                 "res://images/events/this_or_that.png",
+            ["MEROPIDE_INFIRMARY_ROUNDS"] =
+                "res://images/events/hungry_for_mushrooms.png",
             ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT"] =
                 "res://images/events/self_help_book.png",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT"] =
@@ -3138,16 +3482,32 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/this_or_that.png",
             ["CHINJU_FOREST_PASSENGER"] =
                 "res://images/events/brain_leech.png",
+            ["DRILLMASTER_OF_WATATSUMI"] =
+                "res://images/events/bugslayer.png",
+            ["NESTED_ARRAY"] =
+                "res://images/events/infested_automaton.png",
             ["BLOCKADE_LARDER"] =
                 "res://images/events/room_full_of_cheese.png",
+            ["NAMELESS_UNDER_THE_CEDAR"] =
+                "res://images/events/spirit_grafter.png",
             ["KETTLE_BELOW_SANGONOMIYA"] =
                 "res://images/events/tea_master.png",
+            ["SIGNAL_LAMP_CIPHER"] =
+                "res://images/events/the_lantern_key.png",
             ["EAR_WHISPERER"] =
                 "res://images/events/brain_leech.png",
+            ["SWEEP_OR_STOMP"] =
+                "res://images/events/bugslayer.png",
+            ["TICKING_RELIC"] =
+                "res://images/events/infested_automaton.png",
             ["UNDER_STANDS_CELLAR"] =
                 "res://images/events/room_full_of_cheese.png",
+            ["SPRINGS_ROOTED_THING"] =
+                "res://images/events/spirit_grafter.png",
             ["FESTIVAL_BREW_STAND"] =
                 "res://images/events/tea_master.png",
+            ["MARKER_OFF_THE_RACETRACK"] =
+                "res://images/events/the_lantern_key.png",
             ["HOLLOW_TREE_GUIDE"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_CROSSING_AT_COATEPEC"] =

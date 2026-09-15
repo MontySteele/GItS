@@ -94,6 +94,22 @@ RUN_SCOPE_ALLOWED = {
         "through the base event's own `RunState.CreateCard` "
         "(`MegaCrit.Sts2.Core.Models.Events/EndlessConveyor.cs`). The dish is "
         "eaten in an event room, which has no combat state to create it in",
+    "BugslayerMirror.cs":
+        "the same shape, acts 2 and 3: `AddAndPreview<T>` puts Exterminate or "
+        "Squash straight into the DECK from an event page, through the base "
+        "event's own call (`MegaCrit.Sts2.Core.Models.Events/Bugslayer.cs`). "
+        "An event room has no combat state to create either card in",
+    "SpiritGrafterMirror.cs":
+        "the same shape: `LetItIn` puts Metamorphosis into the DECK from an "
+        "event page, through the base event's own call "
+        "(`MegaCrit.Sts2.Core.Models.Events/SpiritGrafter.cs`)",
+    "TheLanternKeyMirror.cs":
+        "the same shape with one difference that argues the SAME way: `Fight` "
+        "creates the Lantern Key as a `SpecialCardReward` rather than adding "
+        "it to a pile, so it is picked into the deck off the post-combat "
+        "reward screen and run scope is its whole lifetime. It is the base "
+        "event's own call "
+        "(`MegaCrit.Sts2.Core.Models.Events/TheLanternKey.cs`)",
 }
 
 

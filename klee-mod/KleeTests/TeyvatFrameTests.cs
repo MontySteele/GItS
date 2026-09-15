@@ -456,14 +456,29 @@ public class TeyvatFrameTests : IDisposable
         // A count pin on a call the method demonstrably makes, which is the
         // only count `Il.CallSequence` is safe for (its own caveat). The count
         // the re-proof read as zero is the one this is looking at.
+        // AN OPTION IS NOT ALWAYS A `new EventOption`. `EventModel.RelicOption`
+        // is the base game's own helper for an option whose title, description
+        // and hover tips come off a RELIC (Hungry for Mushrooms builds both of
+        // its options that way), and it constructs the `EventOption` inside
+        // `EventModel` rather than in the event. Counting only the ctor would
+        // read such an event as having ZERO options -- which is the exact
+        // reading `Assert.NotEqual(0, mine)` exists to catch, so the helper is
+        // counted as what it is.
         var mine = Il.CallSequence(Method(mirror, "GenerateInitialOptions"))
-            .Count(c => c == "EventOption..ctor");
+            .Count(IsAnOption);
         var theirs = Il.CallSequence(Method(baseEvent, "GenerateInitialOptions"))
-            .Count(c => c == "EventOption..ctor");
+            .Count(IsAnOption);
 
         Assert.Equal(theirs, mine);
         Assert.NotEqual(0, mine);
     }
+
+    /// <summary>One option built, however it was built: the `EventOption`
+    /// constructor, or `EventModel.RelicOption`, which constructs one from a
+    /// relic on the event's behalf.</summary>
+    private static bool IsAnOption(string call) =>
+        call == "EventOption..ctor"
+     || call.StartsWith("EventModel.RelicOption", StringComparison.Ordinal);
 
     [Theory]
     [MemberData(nameof(MirrorPairs))]
@@ -561,6 +576,12 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(AbyssalBathsMirror), typeof(AbyssalBaths) },
             new object[] { typeof(EndlessConveyorMirror), typeof(EndlessConveyor) },
             new object[] { typeof(TheFutureOfPotionsMirror), typeof(TheFutureOfPotions) },
+            // Acts 2 and 3, batch 1.
+            new object[] { typeof(BugslayerMirror), typeof(Bugslayer) },
+            new object[] { typeof(InfestedAutomatonMirror), typeof(InfestedAutomaton) },
+            new object[] { typeof(SpiritGrafterMirror), typeof(SpiritGrafter) },
+            new object[] { typeof(HungryForMushroomsMirror), typeof(HungryForMushrooms) },
+            new object[] { typeof(TheLanternKeyMirror), typeof(TheLanternKey) },
         };
 
     // ---------------------------------------------------------------
@@ -964,7 +985,10 @@ public class TeyvatFrameTests : IDisposable
         _ = baseEvent;
 
         var shape = Shapes().Values.First(s => s.Mirror == mirror.Name);
+        var derived = RelicKeyedOptions.TryGetValue(mirror.Name, out var keys)
+            ? keys : Array.Empty<string>();
         var expected = shape.OptionKeys
+            .Where(k => !derived.Contains(k, StringComparer.Ordinal))
             .Concat(shape.PageKeys.Select(Unprefixed))
             .Concat(shape.ExtraOptionKeys.Select(Unprefixed))
             // Both sides are filtered by the SAME shape test, so the pin
@@ -1010,8 +1034,41 @@ public class TeyvatFrameTests : IDisposable
         : key.StartsWith("pages.", StringComparison.Ordinal)
             ? key.Substring("pages.".Length) : key;
 
+    /// <summary>
+    /// OPTION KEYS THAT NEITHER THE MIRROR NOR ITS BASE EVENT SPELLS, per
+    /// mirror, because `EventModel.RelicOption` builds them out of the RELIC:
+    /// its key is `OptionKey(pageName, relic.Id.Entry)`, so the only place
+    /// `BIG_MUSHROOM` appears is the relic type's own name. There is no
+    /// `ldstr` to compare on either side, and requiring one would mean
+    /// authoring a literal the base game does not have.
+    ///
+    /// The keys still have to EXIST -- the generator writes both rows for each
+    /// of them and the loc pin above requires them, because that pin builds
+    /// its asked-for set from the shape rather than from the IL. What is
+    /// declared here is only that this pin cannot see them.
+    ///
+    /// A STATED FACT, NOT A FILTER. A rule of the shape "drop any key the base
+    /// event does not spell either" would also drop Slippery Bridge's eight
+    /// Hold On pages, which the base event builds by concatenation and the
+    /// mirror writes out on purpose -- and dropping those is exactly what this
+    /// pin must not do.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, string[]> RelicKeyedOptions =
+        new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["HungryForMushroomsMirror"] = new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
+        };
+
     private static bool IsComparableKey(string s) =>
-        System.Text.RegularExpressions.Regex.IsMatch(
+        // A BARE `INITIAL` IS NOT A KEY, it is an argument. `RelicOption` and
+        // `OptionKey` take `pageName` with a default of "INITIAL", and a call
+        // that passes it explicitly -- or a call the compiler fills the
+        // default in at -- emits an `ldstr "INITIAL"` that no loc table ever
+        // sees. No shape key is the bare word either: `OptionKeys` holds
+        // option NAMES and `PageKeys` holds the pages that are not INITIAL, so
+        // dropping it on both sides drops nothing a shape could carry.
+        s != "INITIAL"
+     && System.Text.RegularExpressions.Regex.IsMatch(
             s, @"^[A-Z0-9_]+(\.[A-Za-z]+)?$");
 
     /// <summary>

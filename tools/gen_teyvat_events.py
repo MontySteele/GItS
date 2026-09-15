@@ -413,6 +413,34 @@ MIRRORS: Dict[str, MirrorSpec] = {
             slots=(("a specified Common potion", "{Potion}"),
                    ("Upgraded Common", "Upgraded {Rarity}"),
                    ("[Attack/Skill]", "{Type}")))),
+
+    # --- acts 2 and 3, batch 1 -------------------------------------------
+    # Five two-option events. Three of them the index's scrape already reads
+    # correctly; the two that carry a spec carry it for a shape the scrape
+    # cannot reach.
+    "Bugslayer": MirrorSpec("BugslayerMirror"),
+    "InfestedAutomaton": MirrorSpec("InfestedAutomatonMirror"),
+    "SpiritGrafter": MirrorSpec("SpiritGrafterMirror"),
+    # `RelicOption<T>` keys an option by the RELIC's `Id.Entry`, not by a name
+    # the event writes, so neither the base event's source nor the mirror's
+    # contains these two literals and the scrape reports NO option keys at
+    # all. They are declared instead.
+    "HungryForMushrooms": MirrorSpec(
+        "HungryForMushroomsMirror",
+        options=("BIG_MUSHROOM", "FRAGRANT_MUSHROOM")),
+    # Return the Key's outcome page is
+    # `pages.DONE.options.RETURN_THE_KEY.description` -- a page named DONE
+    # with the option's name inside it, which nothing derives -- and
+    # `pages.KEEP_THE_KEY.options.FIGHT` is an option only the second page
+    # offers and the face writes no line for.
+    "TheLanternKey": MirrorSpec(
+        "TheLanternKeyMirror",
+        options=("RETURN_THE_KEY", "KEEP_THE_KEY"),
+        extra_options=(("pages.KEEP_THE_KEY.options.FIGHT", "KEEP_THE_KEY"),),
+        pages=("pages.DONE.options.RETURN_THE_KEY.description",
+               "pages.KEEP_THE_KEY.description"),
+        page_source=(("pages.DONE.options.RETURN_THE_KEY.description",
+                      "RETURN_THE_KEY"),)),
 }
 
 
