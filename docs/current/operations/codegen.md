@@ -108,26 +108,71 @@ mirror is REPORTED, not generated — the generator names it and moves on. That
 list is the engineering queue for this surface.
 
 A mirror's row in `MIRRORS` is a `MirrorSpec`, not just a class name, because
-the index's key scrape is a regex over string literals and three shapes defeat
-it: a `_LOCKED` twin (`options` gives the face-paired keys in LIST order,
-`extra_options` gives the twins and the option each borrows its text from), a
-key built by concatenation (`pages` enumerates what a run can actually reach),
-and a page two options share (`page_source` says which line supplies it). The
-mirror's doc comment says which of its own keys are which, and the pins read
-the generated `EventShape` rather than either.
+the index's key scrape is a regex over string literals and no scrape can say
+how a face's lines pair with an event's keys. Six shapes defeat it, and the
+spec has a field for each:
 
-**Act 1's four PARKED events**, which is what is left on that queue:
+| Shape | Field | What it says |
+| --- | --- | --- |
+| a `_LOCKED` twin, or a later-page option with no line | `extra_options` | the key, and the paired option it borrows its text from |
+| source order, not list order | `options` | the face-paired keys in LIST order |
+| a key built by concatenation | `pages` | the page keys a run can actually reach |
+| a page two options share | `page_source` | which line supplies it |
+| a later-page option that HAS a line | `options`, spelled as a full suffix | it pairs by position and is written where it sits |
+| the face's lines are a TABLE, not options | `table_option` / `dish_table` | how the table folds into the key or keys that exist |
 
-| Event | Why it is not mirrored |
-| --- | --- |
-| The Future of Potions_ | Builds its INITIAL options from the player's potion BELT — up to three, all under the one key `…options.POTION` with per-potion `LocString`s and `ThatHasDynamicTitle()`. The face's five lines are a rarity TABLE, not option lines, so there is nothing to pair. |
-| Tablet of Truth | Two INITIAL options (`DECIPHER_1`, `SMASH`) against the face's three lines: Give Up is a later-page option the face lists inline. Pairing needs the face's option block reshaped, which is content and not this surface's. |
-| Abyssal Baths | The same shape: two INITIAL options against four face lines, of which Linger and Exit Baths are later-page options and Linger's line does not even parse as one. |
-| Endless Conveyor | The grab option's key is the ROLLED DISH (`…pages.ALL.options.<DISH_ID>`) and each dish needs a `DISHES.<id>.title` row. The face carries the eight-dish table inside one option line, so the titles cannot be derived without authoring text. |
+The last two are batch 6's, and they are what un-parked act 1's final four.
 
-All four are mirrorable as C#; what stops them is the PAIRING, and three of the
-four are one face edit away. That edit is curation and belongs to a face pass,
-not to a mirror pass.
+**A full-suffix key in `options`** — `pages.ALL.options.LINGER`,
+`pages.DECIPHER.options.GIVE_UP` — is an option a LATER PAGE offers that the
+face already writes a line for, because the wiki lists it beside the INITIAL
+ones and the curation followed the wiki. It pairs by position exactly like a
+bare name; the only difference is where its two rows are written. In the
+generated `EventShape` it lands in `ExtraOptionKeys`, which is the full-suffix
+list, because `OptionKeys` is the list the pins prefix with
+`pages.INITIAL.options.`.
+
+**`table_option`** is for an event with ONE option key and a face full of
+lines. The Future of Potions builds up to three options, all under
+`…options.POTION`, with the per-potion words supplied at runtime as `LocString`
+vars; the face's five lines are the five rarities that one option can wear. The
+title row becomes a SmartFormat `choose` over the rarity, whose arms are the
+face's own five labels in the face's order plus the first again as the default
+arm — `ChooseFormatter` is one of the extensions `LocManager.InitSmartFormat`
+registers, and the shipped GERMAN row for this very key already uses it. The
+description row is the FIRST line's outcome with declared literal-for-literal
+`slots` swapped for the vars the engine fills (`a specified Common potion` →
+`{Potion}`, and so on); a literal the face does not contain is a refusal, not a
+silent no-op. Page text comes off the RAW line, because a page is looked up
+through `L10NLookup`, which adds only the event's own `DynamicVars` — a page
+row carrying `{Potion}` would be a format call on a var nobody supplies.
+
+**`dish_table`** is for Endless Conveyor, whose grab option's key IS the rolled
+dish (`…pages.ALL.options.<id>`, eight of them) and each of whose dishes also
+needs a `DISHES.<id>.title` row that `CalculateVars` reads into
+`CurrentDishTitle`. The face writes the belt as one line with the eight dishes
+inside it; the hook splits its `<Name> (<effect>)` pairs and gives each dish its
+name and its effect. Positional against the ids the spec lists in the face's
+order, because a nation may rename every dish and a name match would then
+quietly find nothing; a count that disagrees is a refusal. The grab LINE pairs
+with `pages.ALL.options.LOCKED`, the one key on that branch that is not a dish
+and the same option greyed out.
+
+**The harvest count is a NOTE, not a refusal, once a mirror declares
+`options`.** The count exists to stop a face's lines pairing with the wrong
+keys, and the wiki writes a multi-page event's later options as it pleases —
+Abyssal Baths lists Linger and Exit Baths beside the two INITIAL ones, Endless
+Conveyor writes Leave as a bullet under the grab option rather than as an
+option at all. A declared `options` list is read off the DECOMPILE, and the
+pairing check compares the face against THAT. A mirror that declares no list
+still pairs off the scrape, and there the harvest count is the only guard
+there is.
+
+The mirror's doc comment says which of its own keys are which, and the pins
+read the generated `EventShape` rather than either.
+
+**Act 1 has no parked events.** All thirty-eight (base event, face) pairs
+across the two active faces generate.
 
 `tools/data/sts2_base_events.json` is the structural index the generator and
 the pins both read: per base event the class name, the `Id.Entry`, the option
@@ -152,8 +197,12 @@ every pin in this surface.
 ### THE REFUSALS
 
 The generator exits nonzero, naming the event, when a face's option count
-disagrees with the frozen harvest's, or a face names a base event the game
-does not have. It SKIPS with a note an event the harvest marks
+cannot be paired with the mirror's keys, when a face's option count disagrees
+with the frozen harvest's AND the mirror declares no `options` list of its own,
+when a `table_option`'s slot literal is not in the face, when a `dish_table`
+parses a different number of dishes than the mirror names, or when a face names
+a base event the game does not have. It SKIPS with a note an event the harvest
+marks
 `<<NO OPTIONS SECTION ON PAGE>>` (The Merchant___). Faces map to dressing act
 ids in `FACES` at the top of the generator; acts 2 and 3 are listed there and
 inactive — their acts exist since R273, so what they wait on now is their own

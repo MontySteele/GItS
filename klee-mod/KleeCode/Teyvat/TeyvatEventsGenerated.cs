@@ -149,6 +149,26 @@ internal static partial class TeyvatLoc
                 "",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.description"] =
                 "",
+            // ConfiscationWithCompensation (Mondstadt / TheFutureOfPotions)
+            ["CONFISCATION_WITH_COMPENSATION.title"] =
+                "Confiscation, With Compensation",
+            ["CONFISCATION_WITH_COMPENSATION.pages.INITIAL.description"] =
+                "A confiscation tray sits on a trestle outside Favonius Cathedral, "
+                + "and the duty quartermaster is being very reasonable about it. "
+                + "\"Regulations say unlicensed concoctions get surrendered. Courtesy "
+                + "says you don't leave empty-handed.\" Surrender one flask and a "
+                + "Knight will drill you on a maneuver until it's clean. He reaches "
+                + "for the first three flasks on your belt, leftmost first.",
+            ["CONFISCATION_WITH_COMPENSATION.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Surrender the "
+                + "Everyday Flask|Surrender the Restricted Flask|Surrender the "
+                + "Contraband Flask|Surrender the Unlisted Flask|Surrender the "
+                + "Obvious Fake|Surrender the Everyday Flask}",
+            ["CONFISCATION_WITH_COMPENSATION.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["CONFISCATION_WITH_COMPENSATION.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
             // UnmarkedCrates (Mondstadt / ThisOrThat)
             ["UNMARKED_CRATES.title"] =
                 "The Unmarked Crates",
@@ -424,6 +444,99 @@ internal static partial class TeyvatLoc
                 "Heal 9 HP. Upgrade a card in your Deck.",
             ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.PLANT.description"] =
                 "Enchant a card with Sown.",
+            // CrackedTabletAtStormterrorsLair (Mondstadt / TabletOfTruth)
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.title"] =
+                "The Cracked Tablet at Stormterror's Lair",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.description"] =
+                "Half-buried in scree at the foot of Stormterror's Lair, a stone "
+                + "tablet carries lines no Knight on the patrol can read. The duty "
+                + "Knight says regulation calls for cataloguing it and moving on; "
+                + "courtesy admits that touching it seems to do something. Each time "
+                + "you press your hand flat against the stone, it takes a little more "
+                + "and gives a little more back — and you can always pull your hand "
+                + "away.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.SMASH.title"] =
+                "Smash",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.SMASH.description"] =
+                "Heal 20 HP.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.DECIPHER_1.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.DECIPHER_1.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER.options.GIVE_UP.title"] =
+                "Give Up",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER.options.GIVE_UP.description"] =
+                "can be chosen at any stage to leave.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.SMASH.description"] =
+                "Heal 20 HP.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.GIVE_UP.description"] =
+                "can be chosen at any stage to leave.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_5.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
             // AngelsSharesTastingFlight (Mondstadt / TeaMaster)
             ["ANGELS_SHARES_TASTING_FLIGHT.title"] =
                 "The Angel's Share's Tasting Flight",
@@ -599,6 +712,82 @@ internal static partial class TeyvatLoc
                 + "with Slither)",
             ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.TORUS.description"] =
                 "Choose 1 starter card to Transform into Toric Toughness.",
+            // TideWarmedPoolsOfYaoguangShoal (Liyue / AbyssalBaths)
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.title"] =
+                "The Tide-Warmed Pools of Yaoguang Shoal",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.description"] =
+                "Yaoguang Shoal keeps a run of mineral pools the diviners swear "
+                + "were dug by something older than Liyue's contracts. A robed "
+                + "attendant stands at the rail with a lacquered tally-board, terms "
+                + "already recited: the water gives, but it also takes, and it will "
+                + "keep taking for as long as you keep asking. \"Every soak is priced "
+                + "the same,\" she says, \"a little given back, a little owed.\" "
+                + "Behind her, someone still in the water has stopped counting how "
+                + "many times they've gone under.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.IMMERSE.title"] =
+                "Immerse",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.IMMERSE.description"] =
+                "Gain 2 Max HP. Take 3 damage.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.LINGER.title"] =
+                "Linger",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.LINGER.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.EXIT_BATHS.title"] =
+                "Exit Baths",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ALL.options.EXIT_BATHS.description"] =
+                "can be chosen at any stage to leave.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.ABSTAIN.title"] =
+                "Abstain",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.INITIAL.options.ABSTAIN.description"] =
+                "Heal 10 HP.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.IMMERSE.description"] =
+                "Gain 2 Max HP. Take 3 damage.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.ABSTAIN.description"] =
+                "Heal 10 HP.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.EXIT_BATHS.description"] =
+                "can be chosen at any stage to leave.",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.DEATH_WARNING.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER1.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER2.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER3.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER4.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER5.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER6.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER7.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER8.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.pages.LINGER9.description"] =
+                "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
+                + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
+                + "9, 10...).",
             // ContractRecitingGrowth (Liyue / BrainLeech)
             ["CONTRACT_RECITING_GROWTH.title"] =
                 "The Contract-Reciting Growth",
@@ -673,6 +862,101 @@ internal static partial class TeyvatLoc
                 "Procure 1 Glowwater Potion.",
             ["DROWNED_LIGHTKEEPERS_LENS.pages.CLIMB.description"] =
                 "Lose 13 Max HP. Obtain Fresnel Lens (relic).",
+            // FeiyunSlopeSupperBelt (Liyue / EndlessConveyor)
+            ["FEIYUN_SLOPE_SUPPER_BELT.title"] =
+                "The Feiyun Slope Supper Belt",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.INITIAL.description"] =
+                "A Feiyun clerk has rigged a dumbwaiter belt to run dish after dish "
+                + "up from a kitchen nobody can see the bottom of, and posted the "
+                + "price plainly: forty Mora a plate, no refunds, no guarantee what's "
+                + "under the lid. \"Guild takes no responsibility for what the belt "
+                + "serves,\" he recites, \"only for what it's paid.\" Anyone with a "
+                + "full purse may keep grabbing as long as the belt keeps turning; "
+                + "anyone without one is asked, politely, to step aside.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.LOCKED.title"] =
+                "Grab Something Off the Belt",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.LOCKED.description"] =
+                "Pay 40 Gold. Receive a random dish: Caviar (Gain 4 Max HP, weight "
+                + "6), Clam Roll (Heal 10 HP, weight 6, only if not at full HP), "
+                + "Spicy Snappy (Upgrade a random card, weight 3), Jelly Liver "
+                + "(Transform a card, weight 3), Fried Eel (Add a random Colorless "
+                + "card to Deck, weight 3), Suspicious Condiment (Procure a random "
+                + "Potion, weight 3, only if potion slots available), Golden Fysh "
+                + "(Gain 75 Gold, free, weight 1, only after 2+ grabs), Seapunk Salad "
+                + "(Add Feeding Frenzy to Deck, forced every 5th grab). The same dish "
+                + "never appears twice in a row. Requires at least 120 Gold on every "
+                + "player for the option to appear.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.INITIAL.options.OBSERVE_CHEF.title"] =
+                "Observe the Chef",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.INITIAL.options.OBSERVE_CHEF.description"] =
+                "Upgrade a random card.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE.title"] =
+                "Leave",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE.description"] =
+                "After each grab, you may continue grabbing or Leave.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CAVIAR.title"] =
+                "Caviar",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CAVIAR.description"] =
+                "Gain 4 Max HP, weight 6",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.CAVIAR.title"] =
+                "Caviar",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CLAM_ROLL.title"] =
+                "Clam Roll",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.CLAM_ROLL.description"] =
+                "Heal 10 HP, weight 6, only if not at full HP",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.CLAM_ROLL.title"] =
+                "Clam Roll",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SPICY_SNAPPY.title"] =
+                "Spicy Snappy",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SPICY_SNAPPY.description"] =
+                "Upgrade a random card, weight 3",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.SPICY_SNAPPY.title"] =
+                "Spicy Snappy",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.JELLY_LIVER.title"] =
+                "Jelly Liver",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.JELLY_LIVER.description"] =
+                "Transform a card, weight 3",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.JELLY_LIVER.title"] =
+                "Jelly Liver",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.FRIED_EEL.title"] =
+                "Fried Eel",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.FRIED_EEL.description"] =
+                "Add a random Colorless card to Deck, weight 3",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.FRIED_EEL.title"] =
+                "Fried Eel",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SUSPICIOUS_CONDIMENT.title"] =
+                "Suspicious Condiment",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SUSPICIOUS_CONDIMENT.description"] =
+                "Procure a random Potion, weight 3, only if potion slots available",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.SUSPICIOUS_CONDIMENT.title"] =
+                "Suspicious Condiment",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.GOLDEN_FYSH.title"] =
+                "Golden Fysh",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.GOLDEN_FYSH.description"] =
+                "Gain 75 Gold, free, weight 1, only after 2+ grabs",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.GOLDEN_FYSH.title"] =
+                "Golden Fysh",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SEAPUNK_SALAD.title"] =
+                "Seapunk Salad",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.ALL.options.SEAPUNK_SALAD.description"] =
+                "Add Feeding Frenzy to Deck, forced every 5th grab",
+            ["FEIYUN_SLOPE_SUPPER_BELT.DISHES.SEAPUNK_SALAD.title"] =
+                "Seapunk Salad",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.GRAB_SOMETHING_OFF_THE_BELT.description"] =
+                "Pay 40 Gold. Receive a random dish: Caviar (Gain 4 Max HP, weight "
+                + "6), Clam Roll (Heal 10 HP, weight 6, only if not at full HP), "
+                + "Spicy Snappy (Upgrade a random card, weight 3), Jelly Liver "
+                + "(Transform a card, weight 3), Fried Eel (Add a random Colorless "
+                + "card to Deck, weight 3), Suspicious Condiment (Procure a random "
+                + "Potion, weight 3, only if potion slots available), Golden Fysh "
+                + "(Gain 75 Gold, free, weight 1, only after 2+ grabs), Seapunk Salad "
+                + "(Add Feeding Frenzy to Deck, forced every 5th grab). The same dish "
+                + "never appears twice in a row. Requires at least 120 Gold on every "
+                + "player for the option to appear.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.OBSERVE_CHEF.description"] =
+                "Upgrade a random card.",
+            ["FEIYUN_SLOPE_SUPPER_BELT.pages.LEAVE.description"] =
+                "After each grab, you may continue grabbing or Leave.",
             // GuyunStoneConstructs (Liyue / PunchOff)
             ["GUYUN_STONE_CONSTRUCTS.title"] =
                 "The Guyun Stone Constructs",
@@ -1119,6 +1403,26 @@ internal static partial class TeyvatLoc
                 "",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.description"] =
                 "",
+            // BureauOfReclaimedMedicine (Liyue / TheFutureOfPotions)
+            ["BUREAU_OF_RECLAIMED_MEDICINE.title"] =
+                "The Bureau of Reclaimed Medicine",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.INITIAL.description"] =
+                "A Qixing licensing clerk has set up a confiscation desk at the "
+                + "Harbor customs gate, with a Northland Bank appraiser standing by "
+                + "to certify the trade. \"Unlicensed brews get surrendered, per the "
+                + "harbor charter,\" the clerk recites, \"and in exchange, a "
+                + "technique — upgraded, and yours to keep.\" He reaches for the "
+                + "first three flasks on your belt, leftmost first, and names the "
+                + "rarity of each before you've said a word.",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Insert Common "
+                + "Potion|Insert Uncommon Potion|Insert Rare Potion|Insert Event "
+                + "Potion|Insert Token Potion|Insert Common Potion}",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
             // UnclaimedCratesAtFeiyunSlope (Liyue / ThisOrThat)
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.title"] =
                 "The Unclaimed Crates at Feiyun Slope",
@@ -1187,6 +1491,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
                 false),
+            [typeof(Events.Mondstadt.ConfiscationWithCompensation)] = new EventShape(
+                "CONFISCATION_WITH_COMPENSATION", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Mondstadt.UnmarkedCrates)] = new EventShape(
                 "UNMARKED_CRATES", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
@@ -1247,6 +1557,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EAT.description", "pages.PLANT.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Mondstadt.CrackedTabletAtStormterrorsLair)] = new EventShape(
+                "CRACKED_TABLET_AT_STORMTERRORS_LAIR", "TabletOfTruthMirror",
+                new[] { "SMASH", "DECIPHER_1" },
+                new[] { "pages.SMASH.description", "pages.GIVE_UP.description", "pages.DECIPHER_1.description", "pages.DECIPHER_2.description", "pages.DECIPHER_3.description", "pages.DECIPHER_4.description", "pages.DECIPHER_5.description" },
+                new[] { "pages.DECIPHER.options.GIVE_UP", "pages.DECIPHER_1.options.DECIPHER", "pages.DECIPHER_2.options.DECIPHER", "pages.DECIPHER_3.options.DECIPHER", "pages.DECIPHER_4.options.DECIPHER" },
+                false),
             [typeof(Events.Mondstadt.AngelsSharesTastingFlight)] = new EventShape(
                 "ANGELS_SHARES_TASTING_FLIGHT", "TeaMasterMirror",
                 new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
@@ -1283,6 +1599,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.BIRD.description", "pages.SNAKE.description", "pages.TORUS.description" },
                 new[] { "pages.INITIAL.options.SNAKE_LOCKED" },
                 false),
+            [typeof(Events.Liyue.TideWarmedPoolsOfYaoguangShoal)] = new EventShape(
+                "TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL", "AbyssalBathsMirror",
+                new[] { "IMMERSE", "ABSTAIN" },
+                new[] { "pages.IMMERSE.description", "pages.ABSTAIN.description", "pages.EXIT_BATHS.description", "pages.DEATH_WARNING.description", "pages.LINGER1.description", "pages.LINGER2.description", "pages.LINGER3.description", "pages.LINGER4.description", "pages.LINGER5.description", "pages.LINGER6.description", "pages.LINGER7.description", "pages.LINGER8.description", "pages.LINGER9.description" },
+                new[] { "pages.ALL.options.LINGER", "pages.ALL.options.EXIT_BATHS" },
+                false),
             [typeof(Events.Liyue.ContractRecitingGrowth)] = new EventShape(
                 "CONTRACT_RECITING_GROWTH", "BrainLeechMirror",
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
@@ -1300,6 +1622,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "BOTTLE", "CLIMB" },
                 new[] { "pages.BOTTLE.description", "pages.CLIMB.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.FeiyunSlopeSupperBelt)] = new EventShape(
+                "FEIYUN_SLOPE_SUPPER_BELT", "EndlessConveyorMirror",
+                new[] { "OBSERVE_CHEF" },
+                new[] { "pages.GRAB_SOMETHING_OFF_THE_BELT.description", "pages.OBSERVE_CHEF.description", "pages.LEAVE.description", "DISHES.CAVIAR.title", "DISHES.CLAM_ROLL.title", "DISHES.SPICY_SNAPPY.title", "DISHES.JELLY_LIVER.title", "DISHES.FRIED_EEL.title", "DISHES.SUSPICIOUS_CONDIMENT.title", "DISHES.GOLDEN_FYSH.title", "DISHES.SEAPUNK_SALAD.title" },
+                new[] { "pages.ALL.options.LOCKED", "pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE", "pages.ALL.options.CAVIAR", "pages.ALL.options.CLAM_ROLL", "pages.ALL.options.SPICY_SNAPPY", "pages.ALL.options.JELLY_LIVER", "pages.ALL.options.FRIED_EEL", "pages.ALL.options.SUSPICIOUS_CONDIMENT", "pages.ALL.options.GOLDEN_FYSH", "pages.ALL.options.SEAPUNK_SALAD" },
                 false),
             [typeof(Events.Liyue.GuyunStoneConstructs)] = new EventShape(
                 "GUYUN_STONE_CONSTRUCTS", "PunchOffMirror",
@@ -1367,6 +1695,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
                 false),
+            [typeof(Events.Liyue.BureauOfReclaimedMedicine)] = new EventShape(
+                "BUREAU_OF_RECLAIMED_MEDICINE", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Liyue.UnclaimedCratesAtFeiyunSlope)] = new EventShape(
                 "UNCLAIMED_CRATES_AT_FEIYUN_SLOPE", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
@@ -1386,6 +1720,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.GuildDesksReturnedCopy>(),
             [(TeyvatFrame.Mondstadt, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Mondstadt.CutRopeBridgeAboveCiderLake>(),
+            [(TeyvatFrame.Mondstadt, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Mondstadt.ConfiscationWithCompensation>(),
             [(TeyvatFrame.Mondstadt, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Mondstadt.UnmarkedCrates>(),
             [(TeyvatFrame.Mondstadt, typeof(AromaOfChaos))] =
@@ -1406,6 +1742,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.SpringvaleCheeseCellar>(),
             [(TeyvatFrame.Mondstadt, typeof(SapphireSeed))] =
                 () => ModelDb.Event<Events.Mondstadt.CliffsideSeedNearCapeOath>(),
+            [(TeyvatFrame.Mondstadt, typeof(TabletOfTruth))] =
+                () => ModelDb.Event<Events.Mondstadt.CrackedTabletAtStormterrorsLair>(),
             [(TeyvatFrame.Mondstadt, typeof(TeaMaster))] =
                 () => ModelDb.Event<Events.Mondstadt.AngelsSharesTastingFlight>(),
             [(TeyvatFrame.Mondstadt, typeof(TheLegendsWereTrue))] =
@@ -1418,12 +1756,16 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.MosiMosiAtStormbearerPoint>(),
             [(TeyvatFrame.Mondstadt, typeof(WoodCarvings))] =
                 () => ModelDb.Event<Events.Mondstadt.HuntersTotemPostsNearWolvendom>(),
+            [(TeyvatFrame.Liyue, typeof(AbyssalBaths))] =
+                () => ModelDb.Event<Events.Liyue.TideWarmedPoolsOfYaoguangShoal>(),
             [(TeyvatFrame.Liyue, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Liyue.ContractRecitingGrowth>(),
             [(TeyvatFrame.Liyue, typeof(DoorsOfLightAndDark))] =
                 () => ModelDb.Event<Events.Liyue.TwinGatesOfMtTianheng>(),
             [(TeyvatFrame.Liyue, typeof(DrowningBeacon))] =
                 () => ModelDb.Event<Events.Liyue.DrownedLightkeepersLens>(),
+            [(TeyvatFrame.Liyue, typeof(EndlessConveyor))] =
+                () => ModelDb.Event<Events.Liyue.FeiyunSlopeSupperBelt>(),
             [(TeyvatFrame.Liyue, typeof(PunchOff))] =
                 () => ModelDb.Event<Events.Liyue.GuyunStoneConstructs>(),
             [(TeyvatFrame.Liyue, typeof(RoomFullOfCheese))] =
@@ -1446,6 +1788,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.SixContractsToABetterYou>(),
             [(TeyvatFrame.Liyue, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Liyue.RopeBridgeBelowDunyuRuins>(),
+            [(TeyvatFrame.Liyue, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Liyue.BureauOfReclaimedMedicine>(),
             [(TeyvatFrame.Liyue, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
         };
@@ -1475,6 +1819,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/self_help_book.png",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE"] =
                 "res://images/events/slippery_bridge.png",
+            ["CONFISCATION_WITH_COMPENSATION"] =
+                "res://images/events/the_future_of_potions.png",
             ["UNMARKED_CRATES"] =
                 "res://images/events/this_or_that.png",
             ["WANDERING_CASK"] =
@@ -1495,6 +1841,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/room_full_of_cheese.png",
             ["CLIFFSIDE_SEED_NEAR_CAPE_OATH"] =
                 "res://images/events/sapphire_seed.png",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR"] =
+                "res://images/events/tablet_of_truth.png",
             ["ANGELS_SHARES_TASTING_FLIGHT"] =
                 "res://images/events/tea_master.png",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH"] =
@@ -1507,12 +1855,16 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/whispering_hollow.png",
             ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM"] =
                 "res://images/events/wood_carvings.png",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL"] =
+                "res://images/events/abyssal_baths.png",
             ["CONTRACT_RECITING_GROWTH"] =
                 "res://images/events/brain_leech.png",
             ["TWIN_GATES_OF_MT_TIANHENG"] =
                 "res://images/events/doors_of_light_and_dark.png",
             ["DROWNED_LIGHTKEEPERS_LENS"] =
                 "res://images/events/drowning_beacon.png",
+            ["FEIYUN_SLOPE_SUPPER_BELT"] =
+                "res://images/events/endless_conveyor.png",
             ["GUYUN_STONE_CONSTRUCTS"] =
                 "res://images/events/punch_off.png",
             ["QINGCE_LARDER"] =
@@ -1535,6 +1887,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/self_help_book.png",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS"] =
                 "res://images/events/slippery_bridge.png",
+            ["BUREAU_OF_RECLAIMED_MEDICINE"] =
+                "res://images/events/the_future_of_potions.png",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE"] =
                 "res://images/events/this_or_that.png",
         };

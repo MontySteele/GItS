@@ -122,6 +122,68 @@ FACES: Tuple[FaceSpec, ...] = (
 
 
 @dataclass(frozen=True)
+class TableOption:
+    """ONE OPTION KEY WHOSE FACE LINES ARE A TABLE OF WHAT IT CAN BE.
+
+    The Future of Potions builds its INITIAL options from the player's potion
+    BELT -- up to three, every one of them under the SINGLE key
+    `...options.POTION`, with the per-potion words supplied at runtime as
+    `LocString` vars (`Rarity` on the title; `Potion`, `Rarity` and `Type` on
+    the description). The face's five lines are therefore not five options:
+    they are the five rarities that ONE option can wear, and pairing them one
+    to one against option keys is impossible because there is only one key.
+
+    So the table is carried into the one key, and nothing is authored to do it:
+
+    `choices` -- the rendered values of `var`, in the face's table order. The
+    title row becomes a SmartFormat `choose` over them whose arms are the
+    face's own labels in that same order, plus the first label again as the
+    default arm. `ChooseFormatter` is one of the extensions
+    `LocManager.InitSmartFormat` registers, and the shipped German row for
+    THIS VERY KEY already uses it, so this is the base game's own device and
+    not a new one.
+
+    `slots` -- literal-for-literal substitutions applied to the FIRST line's
+    outcome to produce the description row, each swapping a rarity- or
+    type-specific phrase for the var the engine fills at runtime. A literal
+    the face does not contain is a REFUSAL rather than a silent no-op: the
+    whole point is that the dressed key ends up carrying the same vars the
+    base prints.
+
+    Page text never goes through either. A page is looked up through
+    `L10NLookup`, which adds only the event's own `DynamicVars`, so a page row
+    carrying `{Potion}` would be a SmartFormat call on a var nobody supplies;
+    page text comes off the RAW face line.
+    """
+
+    var: str
+    choices: Tuple[str, ...]
+    slots: Tuple[Tuple[str, str], ...] = ()
+
+
+@dataclass(frozen=True)
+class DishTable:
+    """THE EIGHT-DISH TABLE ENDLESS CONVEYOR CARRIES INSIDE ONE OPTION LINE.
+
+    The grab option's key IS THE ROLLED DISH -- `...pages.ALL.options.<id>`,
+    eight of them -- and each dish also needs a `DISHES.<id>.title` row, which
+    is what `CalculateVars` reads into the `CurrentDishTitle` var. None of
+    that can be derived from an option line, because the face writes the belt
+    as ONE line with the eight dishes listed inside it.
+
+    `source` is the paired option key whose outcome carries the table, and
+    `ids` the base event's dish ids IN THE FACE'S ORDER. The generator splits
+    the line's `<Name> (<effect>)` pairs and hands each dish its own name and
+    its own effect -- the dish's title row and its option's two rows -- so no
+    dish name is authored here and none is written in the face twice. A parse
+    that does not yield exactly `len(ids)` pairs is a refusal.
+    """
+
+    source: str
+    ids: Tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class MirrorSpec:
     """One hand-written mirror, and the loc-key shape it asks for.
 
@@ -158,6 +220,21 @@ class MirrorSpec:
     is not named after an option. Tea Master's `DONE` page is reached from
     Bone Tea AND Ember Tea, so there is no option of that name to derive
     from and the row says which line supplies it.
+
+    A LATER-PAGE OPTION THAT HAS A FACE LINE OF ITS OWN goes in `options`,
+    spelled as a FULL SUFFIX under the entry -- `pages.ALL.options.LINGER`,
+    `pages.DECIPHER.options.GIVE_UP`. It pairs by position exactly like an
+    INITIAL one and is emitted at its own path rather than under
+    `pages.INITIAL.options.`; in the generated `EventShape` it lands in
+    `ExtraOptionKeys`, which is the list of full-suffix option keys, because
+    `OptionKeys` is the list the pins prefix with `pages.INITIAL.options.`.
+    This is the third of the three shapes act 1 parks on: an event whose face
+    lists a later page's option inline (Tablet of Truth's Give Up, Abyssal
+    Baths' Linger and Exit Baths) needs the LINE, and the line is already
+    written -- what was missing was somewhere for it to pair.
+
+    `table_option` and `dish_table` are the two shapes no pairing can reach at
+    all; see their own docstrings above.
     """
 
     cls: str
@@ -165,6 +242,8 @@ class MirrorSpec:
     extra_options: Tuple[Tuple[str, str], ...] = ()
     pages: Tuple[str, ...] = ()
     page_source: Tuple[Tuple[str, str], ...] = ()
+    table_option: Optional[TableOption] = None
+    dish_table: Optional[DishTable] = None
 
 
 #: Slippery Bridge's eight reachable Hold On pages, and the Hold On option
@@ -271,6 +350,69 @@ MIRRORS: Dict[str, MirrorSpec] = {
             ("pages.INITIAL.options.TENTACLE_QUILL_LOCKED", "TENTACLE_QUILL"),
             ("pages.INITIAL.options.PRICKLY_SPONGE_LOCKED", "PRICKLY_SPONGE"),
         )),
+
+    # --- act 1, batch 6: the four the pairing parked ----------------------
+    # Every one of these is a face whose lines were already written and had
+    # nowhere to land. Nothing below authors a line; what is new is the three
+    # places a line may now land -- a later-page option key in `options`, a
+    # `table_option`, and a `dish_table`.
+    "TabletOfTruth": MirrorSpec(
+        "TabletOfTruthMirror",
+        options=("SMASH", "DECIPHER_1", "pages.DECIPHER.options.GIVE_UP"),
+        extra_options=tuple(
+            (f"pages.DECIPHER_{i}.options.DECIPHER", "DECIPHER_1")
+            for i in range(1, 5)),
+        pages=("pages.SMASH.description", "pages.GIVE_UP.description")
+              + tuple(f"pages.DECIPHER_{i}.description" for i in range(1, 6)),
+        page_source=(("pages.GIVE_UP.description", "pages.DECIPHER.options.GIVE_UP"),)
+                    + tuple((f"pages.DECIPHER_{i}.description", "DECIPHER_1")
+                            for i in range(2, 6))),
+    "AbyssalBaths": MirrorSpec(
+        "AbyssalBathsMirror",
+        options=("IMMERSE", "pages.ALL.options.LINGER",
+                 "pages.ALL.options.EXIT_BATHS", "ABSTAIN"),
+        pages=("pages.IMMERSE.description", "pages.ABSTAIN.description",
+               "pages.EXIT_BATHS.description", "pages.DEATH_WARNING.description")
+              + tuple(f"pages.LINGER{i}.description" for i in range(1, 10)),
+        page_source=(("pages.EXIT_BATHS.description", "pages.ALL.options.EXIT_BATHS"),
+                     ("pages.DEATH_WARNING.description", "pages.ALL.options.LINGER"))
+                    + tuple((f"pages.LINGER{i}.description", "pages.ALL.options.LINGER")
+                            for i in range(1, 10))),
+    "EndlessConveyor": MirrorSpec(
+        "EndlessConveyorMirror",
+        # The grab option pairs with the one key it has that is NOT a rolled
+        # dish -- the LOCKED twin the base substitutes when the purse is
+        # short, which is the grab option greyed out and so takes the grab
+        # line, exactly as a `_LOCKED` twin does anywhere else. The eight
+        # dishes take their names and effects from the table inside that same
+        # line, through `dish_table`.
+        options=("pages.ALL.options.LOCKED", "OBSERVE_CHEF",
+                 "pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE"),
+        pages=("pages.GRAB_SOMETHING_OFF_THE_BELT.description",
+               "pages.OBSERVE_CHEF.description", "pages.LEAVE.description"),
+        page_source=(
+            ("pages.GRAB_SOMETHING_OFF_THE_BELT.description", "pages.ALL.options.LOCKED"),
+            ("pages.LEAVE.description", "pages.GRAB_SOMETHING_OFF_THE_BELT.options.LEAVE"),
+        ),
+        dish_table=DishTable(
+            "pages.ALL.options.LOCKED",
+            ("CAVIAR", "CLAM_ROLL", "SPICY_SNAPPY", "JELLY_LIVER", "FRIED_EEL",
+             "SUSPICIOUS_CONDIMENT", "GOLDEN_FYSH", "SEAPUNK_SALAD"))),
+    "TheFutureOfPotions": MirrorSpec(
+        "TheFutureOfPotionsMirror",
+        options=("POTION",),
+        pages=("pages.DONE.description",),
+        page_source=(("pages.DONE.description", "POTION"),),
+        table_option=TableOption(
+            var="Rarity",
+            choices=("Common", "Uncommon", "Rare", "Event", "Token"),
+            # The base's English description is
+            # `Lose {Potion}. Obtain an Upgraded {Rarity} {Type}.` -- three
+            # vars, and these three swaps are what put the same three into
+            # the dressed row without touching a word around them.
+            slots=(("a specified Common potion", "{Potion}"),
+                   ("Upgraded Common", "Upgraded {Rarity}"),
+                   ("[Attack/Skill]", "{Type}")))),
 }
 
 
@@ -590,6 +732,63 @@ class Dressed:
     can_kill: bool
     extra_options: Tuple[Tuple[str, str], ...] = ()
     page_source: Tuple[Tuple[str, str], ...] = ()
+    #: The paired rows for a `table_option`, already chosen and slotted, or
+    #: None for an event that pairs one line to one key.
+    table_pair: Optional[Tuple[str, str, str]] = None
+    #: `(dish id, dressed name, dressed effect)` for a `dish_table`.
+    dishes: Tuple[Tuple[str, str, str], ...] = ()
+
+    def _paired(self) -> Tuple[Dict[str, Tuple[str, str]], Dict[str, Tuple[str, str]]]:
+        """`(emitted, raw)` -- the face's lines matched to the keys they pair
+        with, twice over.
+
+        `emitted` is what the option rows are written from; `raw` is the face
+        line untouched, and it is what PAGE text is written from. They differ
+        only for a `table_option`, whose emitted rows carry SmartFormat vars
+        that no page's `L10NLookup` would supply.
+        """
+        if self.table_pair is not None:
+            key, title, description = self.table_pair
+            label, outcome = self.face_event.options[0]
+            return ({key: (title, description)},
+                    {key: (strip_base_gloss(label, key), outcome)})
+        paired = {
+            key: (strip_base_gloss(label, key), outcome)
+            for key, (label, outcome) in zip(self.option_keys, self.face_event.options)
+        }
+        return paired, paired
+
+    def option_key_path(self, key: str) -> str:
+        """Where an option key's rows are written.
+
+        A bare name is an option on the INITIAL page and the engine builds its
+        key through `EventModel.OptionKey`; a key spelled as a full suffix
+        under the entry is a LATER PAGE's option that happens to have a face
+        line of its own, and is written where it sits.
+        """
+        if key.startswith("pages."):
+            return f"{self.entry}.{key}"
+        return f"{self.entry}.pages.INITIAL.options.{key}"
+
+    def shape_option_keys(self) -> List[str]:
+        """The INITIAL option NAMES, which is what the pins prefix with
+        `pages.INITIAL.options.`."""
+        return [k for k in self.option_keys if not k.startswith("pages.")]
+
+    def shape_extra_keys(self) -> List[str]:
+        """Every option key that is a FULL SUFFIX under the entry: the paired
+        later-page options, the `_LOCKED` twins and the later-page options
+        with no line, and a `dish_table`'s eight rolled dishes."""
+        return ([k for k in self.option_keys if k.startswith("pages.")]
+                + [k for k, _ in self.extra_options]
+                + [f"pages.ALL.options.{did}" for did, _, _ in self.dishes])
+
+    def shape_page_keys(self) -> List[str]:
+        """Every other key the mirror hands to the loc table whole -- the page
+        descriptions, and a `dish_table`'s `DISHES.<id>.title` rows, which are
+        single keys rather than prefixes."""
+        return list(self.page_keys) + [
+            f"DISHES.{did}.title" for did, _, _ in self.dishes]
 
     def rows(self) -> List[Tuple[str, str]]:
         """Every loc row this dressed event needs, in key order.
@@ -606,14 +805,18 @@ class Dressed:
             (f"{self.entry}.title", self.face_event.title),
             (f"{self.entry}.pages.INITIAL.description", self.face_event.body),
         ]
-        paired = {
-            key: (strip_base_gloss(label, key), outcome)
-            for key, (label, outcome) in zip(self.option_keys, self.face_event.options)
-        }
+        paired, raw = self._paired()
         for key in self.option_keys:
-            base = f"{self.entry}.pages.INITIAL.options.{key}"
+            base = self.option_key_path(key)
             out.append((base + ".title", paired[key][0]))
             out.append((base + ".description", paired[key][1]))
+        # A `dish_table`'s eight dishes: each one an option key of its own,
+        # plus the `DISHES.<id>.title` row `CalculateVars` reads. Both halves
+        # come out of the one face line the belt is written on.
+        for did, name, effect in self.dishes:
+            out.append((f"{self.entry}.pages.ALL.options.{did}.title", name))
+            out.append((f"{self.entry}.pages.ALL.options.{did}.description", effect))
+            out.append((f"{self.entry}.DISHES.{did}.title", name))
         # An option a player can be SHOWN but that has no face line of its
         # own -- a `_LOCKED` twin, or an option a later page offers. Both
         # rows, for the same EB-765 reason as above: the key is a prefix
@@ -625,7 +828,7 @@ class Dressed:
             out.append((f"{self.entry}.{key}.title", label))
             out.append((f"{self.entry}.{key}.description", outcome))
         for page in self.page_keys:
-            out.append((f"{self.entry}.{page}", _page_text(paired, page, sources)))
+            out.append((f"{self.entry}.{page}", _page_text(raw, page, sources)))
         if self.can_kill and self.face_event.loss:
             out.append((f"{self.entry}.loss", self.face_event.loss))
         return out
@@ -650,6 +853,60 @@ def strip_base_gloss(label: str, option_key: str) -> str:
 
 def slugify_words(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", text).upper().strip("_")
+
+
+def build_table_option(key: str, table: TableOption,
+                       lines: Sequence[Tuple[str, str]]) -> Tuple[Tuple[str, str, str],
+                                                                  List[str]]:
+    """The one option key a `TableOption` collapses its face lines into.
+
+    Returns `((key, title, description), refusals)`. The title is a
+    SmartFormat `choose` over `table.var` whose arms are the face's own labels
+    in the face's order, with the first repeated as the default arm -- a
+    `choose` with one more output than choice takes the last as the fallback,
+    which is what keeps a rarity the table does not name from being a format
+    error on the page. The description is the FIRST line's outcome with each
+    declared slot swapped for its var.
+    """
+    refusals: List[str] = []
+    labels = [strip_base_gloss(label, key) for label, _ in lines]
+    if any("|" in l or "{" in l or "}" in l for l in labels):
+        refusals.append("a table option's label carries a `|` or a brace, "
+                        "which SmartFormat's `choose` would read as syntax")
+    description = lines[0][1]
+    for literal, replacement in table.slots:
+        if literal not in description:
+            refusals.append(
+                f"the table option's first line does not contain {literal!r}, "
+                f"so the {replacement} var has nowhere to go")
+            continue
+        description = description.replace(literal, replacement)
+    title = "{%s:choose(%s):%s}" % (
+        table.var, "|".join(table.choices), "|".join(labels + labels[:1]))
+    return (key, title, description), refusals
+
+
+_DISH_RE = re.compile(r"([A-Za-z][A-Za-z' -]*?)\s*\(([^()]*)\)")
+
+
+def parse_dish_table(outcome: str, ids: Sequence[str]) -> Tuple[
+        Tuple[Tuple[str, str, str], ...], List[str]]:
+    """The `<Name> (<effect>)` pairs a belt line lists, matched to dish ids.
+
+    The face writes the eight dishes inside the grab option's one outcome
+    sentence, after a colon; each is a dressed NAME and a parenthesised
+    effect. Positional against `ids`, because a nation is free to rename every
+    dish and a name match would then quietly find nothing -- the ORDER is the
+    contract, and a count that disagrees is a refusal rather than a short
+    table with silent blanks.
+    """
+    segment = outcome.split(":", 1)[1] if ":" in outcome else outcome
+    found = _DISH_RE.findall(segment)
+    if len(found) != len(ids):
+        return (), [f"the belt line lists {len(found)} dish(es) and the mirror "
+                    f"names {len(ids)}"]
+    return tuple((did, name.strip(), effect.strip())
+                 for did, (name, effect) in zip(ids, found)), []
 
 
 def _page_text(paired: Dict[str, Tuple[str, str]], page: str,
@@ -734,9 +991,9 @@ def generated_cs_source(items: Sequence[Dressed]) -> str:
         "                {kill}),".format(
             face=item.face.folder, cls=item.cls,
             base_entry=item.entry, mirror=item.mirror,
-            opts=_cs_array(item.option_keys),
-            pages=_cs_array(item.page_keys),
-            extra=_cs_array([k for k, _ in item.extra_options]),
+            opts=_cs_array(item.shape_option_keys()),
+            pages=_cs_array(item.shape_page_keys()),
+            extra=_cs_array(item.shape_extra_keys()),
             kill="true" if (item.can_kill and item.face_event.loss) else "false")
         for item in items
     )
@@ -886,6 +1143,7 @@ class Plan:
     refusals: List[str] = field(default_factory=list)
     skipped: List[str] = field(default_factory=list)
     no_mirror: List[str] = field(default_factory=list)
+    notes: List[str] = field(default_factory=list)
 
 
 def build_plan() -> Plan:
@@ -941,9 +1199,23 @@ def build_plan() -> Plan:
                 plan.no_mirror.append(f"{face.key}: {base} ({event.title}){note}")
                 continue
 
+            # AND A MISMATCH ON A MIRROR THAT DECLARES ITS OWN OPTION LIST IS
+            # A NOTE TOO, for the same reason read from the other end. The
+            # harvest's count is the wiki's, and the wiki writes a multi-page
+            # event's later-page options as it pleases -- Abyssal Baths lists
+            # Linger and Exit Baths beside the two INITIAL ones, Endless
+            # Conveyor writes Leave as a note under the grab option rather
+            # than as an option at all. A declared `options` list is read off
+            # the DECOMPILE, which is the stronger truth, and the pairing
+            # check below compares the face against THAT rather than against
+            # the wiki. A mirror that does not declare one still pairs
+            # position by position off the index's scrape, and there the
+            # harvest count is the only guard there is.
             if mismatch:
-                plan.refusals.append(mismatch)
-                continue
+                if not spec.options:
+                    plan.refusals.append(mismatch)
+                    continue
+                plan.notes.append(mismatch + " (the mirror's declared list governs)")
 
             # The MIRROR'S spec wins over the index's literal scrape wherever
             # it speaks: the scrape reads every key literal in the base class,
@@ -952,12 +1224,39 @@ def build_plan() -> Plan:
             # concatenation). The spec is what the mirror actually asks for.
             option_keys = list(spec.options) or list(info["option_keys"])
             page_keys = list(spec.pages) or list(info["page_keys"])
-            if len(option_keys) != len(event.options):
+            # A `table_option` is ONE key wearing a table of face lines, so
+            # the count it has to agree with is the table's, not the key
+            # list's.
+            wanted_lines = (len(spec.table_option.choices)
+                            if spec.table_option is not None else len(option_keys))
+            if wanted_lines != len(event.options):
                 plan.refusals.append(
-                    f"{face.key}: {base} -- the mirror's {len(option_keys)} option "
+                    f"{face.key}: {base} -- the mirror's {wanted_lines} option "
                     f"key(s) {option_keys} cannot be paired with the face's "
                     f"{len(event.options)} option line(s)")
                 continue
+
+            table_pair = None
+            if spec.table_option is not None:
+                table_pair, bad = build_table_option(
+                    option_keys[0], spec.table_option, event.options)
+                plan.refusals.extend(f"{face.key}: {base} -- {b}" for b in bad)
+                if bad:
+                    continue
+
+            dishes: Tuple[Tuple[str, str, str], ...] = ()
+            if spec.dish_table is not None:
+                source = spec.dish_table.source
+                line = dict(zip(option_keys, event.options)).get(source)
+                if line is None:
+                    plan.refusals.append(
+                        f"{face.key}: {base} -- the dish table names {source}, "
+                        f"which is not one of the paired option keys")
+                    continue
+                dishes, bad = parse_dish_table(line[1], spec.dish_table.ids)
+                plan.refusals.extend(f"{face.key}: {base} -- {b}" for b in bad)
+                if bad:
+                    continue
 
             cls = class_name_from_title(event.title)
             if cls in claimed:
@@ -975,6 +1274,8 @@ def build_plan() -> Plan:
                 can_kill=bool(info["can_kill"]),
                 extra_options=spec.extra_options,
                 page_source=spec.page_source,
+                table_pair=table_pair,
+                dishes=dishes,
             ))
 
     return plan
@@ -1000,6 +1301,8 @@ def report(plan: Plan) -> None:
         print(f"  SKIP    {line}")
     for line in plan.no_mirror:
         print(f"  NO MIRROR {line}")
+    for line in plan.notes:
+        print(f"  NOTE    {line}")
     for line in plan.refusals:
         print(f"  REFUSE  {line}", file=sys.stderr)
 
