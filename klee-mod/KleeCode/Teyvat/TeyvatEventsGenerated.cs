@@ -149,6 +149,9 @@ internal static partial class TeyvatLoc
                 "",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.description"] =
                 "",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.loss"] =
+                "{character} was swept off the rope and into Cider Lake at the "
+                + "[gold]{event}[/gold].",
             // ConfiscationWithCompensation (Mondstadt / TheFutureOfPotions)
             ["CONFISCATION_WITH_COMPENSATION.title"] =
                 "Confiscation, With Compensation",
@@ -200,6 +203,9 @@ internal static partial class TeyvatLoc
                 + "far more than the paperwork on it — and badly enough balanced that "
                 + "you keep catching your own boot on it. Add Clumsy (curse) to your "
                 + "Deck. Obtain a random Relic.",
+            ["UNMARKED_CRATES.loss"] =
+                "{character} was struck down by the rigged crate at the "
+                + "[gold]{event}[/gold].",
             // WanderingCask (Mondstadt / AromaOfChaos)
             ["WANDERING_CASK.title"] =
                 "The Wandering Cask",
@@ -253,6 +259,9 @@ internal static partial class TeyvatLoc
             ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.SHARE_KNOWLEDGE.description"] =
                 "Stand still and let the lesson finish. Choose 1 of 5 random cards "
                 + "to add to your deck.",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.loss"] =
+                "{character} did not survive tearing free of the shard at the "
+                + "[gold]{event}[/gold].",
             // WindfalconsRoost (Mondstadt / ByrdonisNest)
             ["WINDFALCONS_ROOST.title"] =
                 "The Windfalcon's Roost",
@@ -312,6 +321,9 @@ internal static partial class TeyvatLoc
                 "Make camp in the lee of the ridge. Heal HP (rest site amount). The "
                 + "wet undergrowth begins to move — Fight 4 Bramble Wrigglers "
                 + "(Wrigglers).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.loss"] =
+                "{character} was lost to the bramble line below Wolvendom at the "
+                + "[gold]{event}[/gold].",
             // GuildCommissionAtStarsnatchCliff (Mondstadt / JungleMazeAdventure)
             ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.title"] =
                 "The Guild Commission at Starsnatch Cliff",
@@ -334,6 +346,9 @@ internal static partial class TeyvatLoc
                 "Gain 135-165 Mora (Gold). Lose 18 HP.",
             ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.JOIN_FORCES.description"] =
                 "Gain 35-65 Mora (Gold).",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.loss"] =
+                "{character} was lost in the switchback maze at the "
+                + "[gold]{event}[/gold].",
             // SingingGrowthUnderWolvendom (Mondstadt / LuminousChoir)
             ["SINGING_GROWTH_UNDER_WOLVENDOM.title"] =
                 "The Singing Growth Under Wolvendom",
@@ -537,6 +552,9 @@ internal static partial class TeyvatLoc
                 + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
                 + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
                 + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.loss"] =
+                "{character} gave the tablet everything and did not get up from the "
+                + "[gold]{event}[/gold].",
             // AngelsSharesTastingFlight (Mondstadt / TeaMaster)
             ["ANGELS_SHARES_TASTING_FLIGHT.title"] =
                 "The Angel's Share's Tasting Flight",
@@ -601,6 +619,9 @@ internal static partial class TeyvatLoc
                 "Receive the Spoils Map.",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH.pages.SLOWLY_FIND_AN_EXIT.description"] =
                 "Lose 8 HP. Procure 1 random Potion.",
+            ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH.loss"] =
+                "{character} went over the cliffs searching for an exit from the "
+                + "[gold]{event}[/gold].",
             // HauntedCampsiteBelowDragonspine (Mondstadt / UnrestSite)
             ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.title"] =
                 "The Haunted Campsite Below Dragonspine",
@@ -624,6 +645,9 @@ internal static partial class TeyvatLoc
                 "Heal to full HP. Receive Poor Sleep (curse).",
             ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.KILL.description"] =
                 "Lose 8 Max HP. Obtain a random Relic.",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.loss"] =
+                "{character} was dragged under by the roots at the "
+                + "[gold]{event}[/gold].",
             // SpringvaleFont (Mondstadt / Wellspring)
             ["SPRINGVALE_FONT.title"] =
                 "The Springvale Font",
@@ -677,6 +701,9 @@ internal static partial class TeyvatLoc
                 "Lose 50 Mora. Procure 2 random Potions.",
             ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.HUG.description"] =
                 "Lose 9 HP. Choose a card to Transform.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.loss"] =
+                "{character} did not survive the shaman's mark at the "
+                + "[gold]{event}[/gold].",
             // HuntersTotemPostsNearWolvendom (Mondstadt / WoodCarvings)
             ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.title"] =
                 "The Hunters' Totem Posts Near Wolvendom",
@@ -788,6 +815,9 @@ internal static partial class TeyvatLoc
                 "(offered after Immersing, repeatable) Gain 2 Max HP. Take "
                 + "escalating damage: 3, then +1 per further Linger (4, 5, 6, 7, 8, "
                 + "9, 10...).",
+            ["TIDE_WARMED_POOLS_OF_YAOGUANG_SHOAL.loss"] =
+                "{character} lingered too long in the tide-warmed pools at the "
+                + "[gold]{event}[/gold].",
             // ContractRecitingGrowth (Liyue / BrainLeech)
             ["CONTRACT_RECITING_GROWTH.title"] =
                 "The Contract-Reciting Growth",
@@ -814,6 +844,9 @@ internal static partial class TeyvatLoc
                 "Share Knowledge",
             ["CONTRACT_RECITING_GROWTH.pages.SHARE_KNOWLEDGE.description"] =
                 "Choose 1 of 5 random cards to add to your deck.",
+            ["CONTRACT_RECITING_GROWTH.loss"] =
+                "{character} did not survive tearing the growth free at the "
+                + "[gold]{event}[/gold].",
             // TwinGatesOfMtTianheng (Liyue / DoorsOfLightAndDark)
             ["TWIN_GATES_OF_MT_TIANHENG.title"] =
                 "The Twin Gates of Mt. Tianheng",
@@ -862,6 +895,9 @@ internal static partial class TeyvatLoc
                 "Procure 1 Glowwater Potion.",
             ["DROWNED_LIGHTKEEPERS_LENS.pages.CLIMB.description"] =
                 "Lose 13 Max HP. Obtain Fresnel Lens (relic).",
+            ["DROWNED_LIGHTKEEPERS_LENS.loss"] =
+                "{character} did not surface after diving for the lens at the "
+                + "[gold]{event}[/gold].",
             // FeiyunSlopeSupperBelt (Liyue / EndlessConveyor)
             ["FEIYUN_SLOPE_SUPPER_BELT.title"] =
                 "The Feiyun Slope Supper Belt",
@@ -1022,6 +1058,9 @@ internal static partial class TeyvatLoc
             ["QINGCE_LARDER.pages.SEARCH.description"] =
                 "Lose 14 HP. Obtain The Chosen Cheese (relic): at the end of "
                 + "combat, gain 1 Max HP.",
+            ["QINGCE_LARDER.loss"] =
+                "{character} did not climb back out of the Qingce cellar at the "
+                + "[gold]{event}[/gold].",
             // WhirlpoolBelowYaoguangShoal (Liyue / SpiralingWhirlpool)
             ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.title"] =
                 "The Whirlpool Below Yaoguang Shoal",
@@ -1159,6 +1198,9 @@ internal static partial class TeyvatLoc
                 "Obtain Sword of Stone (relic).",
             ["BLADE_IN_THE_STONE_FOREST.pages.DIVE_INTO_WATER.description"] =
                 "Gain 101–121 Gold. Lose 7 HP.",
+            ["BLADE_IN_THE_STONE_FOREST.loss"] =
+                "{character} did not surface from the cold shallows at the "
+                + "[gold]{event}[/gold].",
             // DocksScrapManifest (Liyue / TrashHeap)
             ["DOCKS_SCRAP_MANIFEST.title"] =
                 "The Docks Scrap Manifest",
@@ -1190,6 +1232,9 @@ internal static partial class TeyvatLoc
                 "Gain 100 Gold. Obtain a random card, chosen with equal probability "
                 + "from Caltrops, Distraction, Outmaneuver, Clash, Dual Wield, "
                 + "Entrench, Hello World, Rebound, Stack, and Rip and Tear.",
+            ["DOCKS_SCRAP_MANIFEST.loss"] =
+                "{character} was pulled under diving into the scrap pile at the "
+                + "[gold]{event}[/gold].",
             // FloodedLedgerRoom (Liyue / WaterloggedScriptorium)
             ["FLOODED_LEDGER_ROOM.title"] =
                 "The Flooded Ledger-Room",
@@ -1403,6 +1448,9 @@ internal static partial class TeyvatLoc
                 "",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.description"] =
                 "",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.loss"] =
+                "{character} fell from the rope bridge into the mist at the "
+                + "[gold]{event}[/gold].",
             // BureauOfReclaimedMedicine (Liyue / TheFutureOfPotions)
             ["BUREAU_OF_RECLAIMED_MEDICINE.title"] =
                 "The Bureau of Reclaimed Medicine",
@@ -1446,6 +1494,9 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.loss"] =
+                "{character} did not walk away from the loading-dock crate at the "
+                + "[gold]{event}[/gold].",
             // KshahrewarProvingCage (Sumeru / BattlewornDummy)
             ["KSHAHREWAR_PROVING_CAGE.title"] =
                 "The Kshahrewar Proving Cage",
@@ -4161,7 +4212,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
-                false),
+                true),
             [typeof(Events.Mondstadt.ConfiscationWithCompensation)] = new EventShape(
                 "CONFISCATION_WITH_COMPENSATION", "TheFutureOfPotionsMirror",
                 new[] { "POTION" },
@@ -4173,7 +4224,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Mondstadt.WanderingCask)] = new EventShape(
                 "WANDERING_CASK", "AromaOfChaosMirror",
                 new[] { "LET_GO", "MAINTAIN_CONTROL" },
@@ -4185,7 +4236,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
                 new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Mondstadt.WindfalconsRoost)] = new EventShape(
                 "WINDFALCONS_ROOST", "ByrdonisNestMirror",
                 new[] { "EAT", "TAKE" },
@@ -4197,13 +4248,13 @@ internal static class TeyvatGeneratedEvents
                 new[] { "TRUDGE_ON", "REST" },
                 new[] { "pages.TRUDGE_ON.description", "pages.REST.description" },
                 new[] { "pages.REST.options.FIGHT" },
-                false),
+                true),
             [typeof(Events.Mondstadt.GuildCommissionAtStarsnatchCliff)] = new EventShape(
                 "GUILD_COMMISSION_AT_STARSNATCH_CLIFF", "JungleMazeAdventureMirror",
                 new[] { "SOLO_QUEST", "JOIN_FORCES" },
                 new[] { "pages.SOLO_QUEST.description", "pages.JOIN_FORCES.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Mondstadt.SingingGrowthUnderWolvendom)] = new EventShape(
                 "SINGING_GROWTH_UNDER_WOLVENDOM", "LuminousChoirMirror",
                 new[] { "REACH_INTO_THE_FLESH", "OFFER_TRIBUTE" },
@@ -4233,7 +4284,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "SMASH", "DECIPHER_1" },
                 new[] { "pages.SMASH.description", "pages.GIVE_UP.description", "pages.DECIPHER_1.description", "pages.DECIPHER_2.description", "pages.DECIPHER_3.description", "pages.DECIPHER_4.description", "pages.DECIPHER_5.description" },
                 new[] { "pages.DECIPHER.options.GIVE_UP", "pages.DECIPHER_1.options.DECIPHER", "pages.DECIPHER_2.options.DECIPHER", "pages.DECIPHER_3.options.DECIPHER", "pages.DECIPHER_4.options.DECIPHER" },
-                false),
+                true),
             [typeof(Events.Mondstadt.AngelsSharesTastingFlight)] = new EventShape(
                 "ANGELS_SHARES_TASTING_FLIGHT", "TeaMasterMirror",
                 new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
@@ -4245,13 +4296,13 @@ internal static class TeyvatGeneratedEvents
                 new[] { "NAB_THE_MAP", "SLOWLY_FIND_AN_EXIT" },
                 new[] { "pages.NAB_THE_MAP.description", "pages.SLOWLY_FIND_AN_EXIT.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Mondstadt.HauntedCampsiteBelowDragonspine)] = new EventShape(
                 "HAUNTED_CAMPSITE_BELOW_DRAGONSPINE", "UnrestSiteMirror",
                 new[] { "REST", "KILL" },
                 new[] { "pages.REST.description", "pages.KILL.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Mondstadt.SpringvaleFont)] = new EventShape(
                 "SPRINGVALE_FONT", "WellspringMirror",
                 new[] { "BOTTLE", "BATHE" },
@@ -4263,7 +4314,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "GOLD", "HUG" },
                 new[] { "pages.GOLD.description", "pages.HUG.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Mondstadt.HuntersTotemPostsNearWolvendom)] = new EventShape(
                 "HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM", "WoodCarvingsMirror",
                 new[] { "BIRD", "SNAKE", "TORUS" },
@@ -4275,13 +4326,13 @@ internal static class TeyvatGeneratedEvents
                 new[] { "IMMERSE", "ABSTAIN" },
                 new[] { "pages.IMMERSE.description", "pages.ABSTAIN.description", "pages.EXIT_BATHS.description", "pages.DEATH_WARNING.description", "pages.LINGER1.description", "pages.LINGER2.description", "pages.LINGER3.description", "pages.LINGER4.description", "pages.LINGER5.description", "pages.LINGER6.description", "pages.LINGER7.description", "pages.LINGER8.description", "pages.LINGER9.description" },
                 new[] { "pages.ALL.options.LINGER", "pages.ALL.options.EXIT_BATHS" },
-                false),
+                true),
             [typeof(Events.Liyue.ContractRecitingGrowth)] = new EventShape(
                 "CONTRACT_RECITING_GROWTH", "BrainLeechMirror",
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
                 new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Liyue.TwinGatesOfMtTianheng)] = new EventShape(
                 "TWIN_GATES_OF_MT_TIANHENG", "DoorsOfLightAndDarkMirror",
                 new[] { "LIGHT", "DARK" },
@@ -4293,7 +4344,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "BOTTLE", "CLIMB" },
                 new[] { "pages.BOTTLE.description", "pages.CLIMB.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Liyue.FeiyunSlopeSupperBelt)] = new EventShape(
                 "FEIYUN_SLOPE_SUPPER_BELT", "EndlessConveyorMirror",
                 new[] { "OBSERVE_CHEF" },
@@ -4311,7 +4362,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Liyue.WhirlpoolBelowYaoguangShoal)] = new EventShape(
                 "WHIRLPOOL_BELOW_YAOGUANG_SHOAL", "SpiralingWhirlpoolMirror",
                 new[] { "OBSERVE", "DRINK" },
@@ -4341,13 +4392,13 @@ internal static class TeyvatGeneratedEvents
                 new[] { "GRAB_SWORD", "DIVE_INTO_WATER" },
                 new[] { "pages.GRAB_SWORD.description", "pages.DIVE_INTO_WATER.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Liyue.DocksScrapManifest)] = new EventShape(
                 "DOCKS_SCRAP_MANIFEST", "TrashHeapMirror",
                 new[] { "DIVE_IN", "GRAB" },
                 new[] { "pages.DIVE_IN.description", "pages.GRAB.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Liyue.FloodedLedgerRoom)] = new EventShape(
                 "FLOODED_LEDGER_ROOM", "WaterloggedScriptoriumMirror",
                 new[] { "BLOODY_INK", "TENTACLE_QUILL", "PRICKLY_SPONGE" },
@@ -4365,7 +4416,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
-                false),
+                true),
             [typeof(Events.Liyue.BureauOfReclaimedMedicine)] = new EventShape(
                 "BUREAU_OF_RECLAIMED_MEDICINE", "TheFutureOfPotionsMirror",
                 new[] { "POTION" },
@@ -4377,7 +4428,7 @@ internal static class TeyvatGeneratedEvents
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
-                false),
+                true),
             [typeof(Events.Sumeru.KshahrewarProvingCage)] = new EventShape(
                 "KSHAHREWAR_PROVING_CAGE", "BattlewornDummyMirror",
                 new[] { "SETTING_1", "SETTING_2", "SETTING_3" },
