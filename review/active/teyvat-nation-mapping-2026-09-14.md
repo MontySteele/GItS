@@ -2,14 +2,16 @@ Status: OPEN (picks 1 and 2: the act-2 and act-3 nation pairs; the kickoff packe
 
 # Which nations dress acts 2 and 3
 
-Written 2026-09-14 under R272 pick 2. The three tables behind this page are
+Written 2026-09-14 under R272 pick 2; amended the same evening after
+[USER]'s read (the Abyss reserved, the default flipped, Nod-Krai and
+Snezhnaya carried as later faces). The three tables behind this page are
 `teyvat-nation-mapping-act1-2026-09-14.md`, `-act2-` and `-act3-` (Sonnet,
 one per act, scored by the rule in the kickoff packet §7.1); the feasibility
 read is `review/records/teyvat-spike-zone-read-2026-09-14.md` (Opus, off
 the installed 0.111.0 decompile). This page is the curation and ends in two
 picks.
 
-## 1. The precondition holds
+## 1. The precondition holds, and it generalises
 
 A zone can be dressed two ways from the mod. The spike's decompile read
 found that an act is one model object, rolled at run start by the game's
@@ -21,14 +23,15 @@ objects, so mechanics cannot drift and the coin, its co-op sync and its
 save/load are the game's, not ours. The cost is three Harmony patches (the
 hardcoded act list, monster names, monster visuals) and a complete asset
 set per dressing, because the background loader throws rather than falls
-back. So acts 2 and 3 each take a pair, and the single-nation fallbacks in
-§4 are recorded only in case the build half of the spike overturns the
-read.
+back.
 
-One constraint falls out of it for everything below: **sibling dressings
-must carry the same number of events.** Events are shuffled once at run
-start off one random stream, so a pool of a different size moves every
-later roll in the run, bosses and Ancients included.
+Two things follow. **A third face on an act costs the same as the second:**
+the patches are written once, and a face is content only (a mapping
+against that zone's table, portraits, an event pool). So a nation left out
+today is not locked out; it is a later face. **Sibling faces must carry
+the same number of events,** because events are shuffled once at run start
+off one random stream, and a pool of a different size moves every later
+roll, bosses and Ancients included.
 
 ## 2. What the tables found
 
@@ -47,14 +50,14 @@ Geovishap, who is an Underdocks boss by origin). The reverse scores 0 and
 | Fontaine | 2 | 0 | 0 | 2 top, 13 alt | 5 | 2 | 1 | 16 |
 | Natlan | 6 | 0 | 1 top | 0 | 2 | 1 | 0 | 0 |
 | The Abyss | 4 | 2 alt | 0 | 0 | 7 | 1, the strongest | 0 | 0 |
-| Snezhnaya | 2 | top | 0 | 0 | 3 | 1, under protest | 0 | 0 |
+| "Snezhnaya" (see §3) | 2 | top | 0 | 0 | 3 | 1, under protest | 0 | 0 |
 
 The tables' own rankings were Sumeru, Inazuma, Fontaine for the Hive and
 Fontaine, Sumeru, Inazuma for Glory.
 
 ## 3. How to read them
 
-The event column is not a fit signal. The event gallery was drafted in
+**The event column is not a fit signal.** The event gallery was drafted in
 August with exactly three faction voices, Melusines for Fontaine, the
 Sangonomiya resistance for Inazuma and the Akademiya and Aranara for
 Sumeru, so those three nations "own" every event and the other three own
@@ -64,48 +67,64 @@ and every layout in §4 costs about the same on it: between 35 and 42 new
 event variants across both acts, plus about a dozen Mondstadt variants and
 the ten unconverted Underdocks events for act 1.
 
+**The "Snezhnaya" column is mislabelled.** Every body it scored is a
+Nod-Krai Fatui body (the Oprichniki ranks, the Operatives), because the
+August atlas covers Nod-Krai only through its Fatui and covers Snezhnaya
+proper not at all: Snezhnaya released in Genshin 7.0 last month, after the
+atlas was cut. Neither region has a family pass, so neither is scored here;
+both are carried in §5 as later faces.
+
 Read on enemies, bosses, Ancients and the zone's own character instead,
 the picture changes. The Hive is an organic zone (bowlbugs, exoskeletons,
 chompers, the Entomancer, the Decimillipede), and its two richest exclusive
 rosters are Natlan's Saurians and Sumeru's Fungi and Eremites. Glory is a
 machine-and-knight zone (Axebot, Guardbot, the Cubex gang, the Fabricator,
 the Frog, Flail and Mecha Knights), and its exclusive rosters are
-Fontaine's Meks, which alone clear the Axebot slot, and the Abyss's Black
-Serpent Knights, Heralds and Lectors, which also hold the strongest single
-boss reading in either gallery (Aeonglass as the Abyss Lector, Fathomless
-Flames). The Abyss as the final act's second face also serves the frame
-[USER] named, a run that feels like a Spiral Abyss clear.
+Fontaine's Meks, which alone clear the Axebot slot, and Sumeru's ritual
+casters and devotees, which clear nine of the twelve slots.
+
+**The Abyss is reserved for a fourth act.** Its canon role is the bottom
+of the descent, which is what an act 4 or an ending is; StS1 shipped one
+and StS2 is early access with three. Spending it as a face of Glory is only
+half reversible (the Glory readings would not travel, and act 3 would need
+a replacement face built from nothing), and reserving it costs nothing,
+since Fontaine and Sumeru each hold two Glory boss readings. Its strongest
+reading, Aeonglass as the Abyss Lector, Fathomless Flames, stays recorded
+in the act-3 table. Whether the mod can add an act 4 itself, or waits for
+MegaCrit to ship one, is a scoping read (`BACKLOG.md`, the act-4 row); the
+spike already found one hard wall, the rest site throwing on any act index
+past the third.
 
 Sumeru is the strongest nation in both zones and can take only one.
-Snezhnaya is thin in both: the Fatui rank and file are pan-national, and
-its one great boss reading, La Signora, is under its own gallery's protest
-for turning her sequential fight into a simultaneous one. Inazuma is a
-solid second-tier fit in both zones and Kokomi's home, which the kickoff
-packet makes a tie-break and not a rule.
+Inazuma is a solid second-tier fit in both and Kokomi's home, which the
+kickoff packet makes a tie-break and not a rule.
 
 ## 4. The layouts
 
 Exclusive enemy slots covered, Hive plus Glory, and what each leaves out:
 
-1. **Sumeru + Natlan, then Fontaine + the Abyss.** 5+6 and 5+7 = 23. An
-   organic act, then a machine-and-knight act that ends in the Abyss.
-   Leaves out Inazuma and Snezhnaya. Fallbacks: Sumeru, Fontaine.
-2. **Sumeru + Inazuma, then Fontaine + the Abyss.** 5+4 and 5+7 = 21. The
-   Hive table's own pair, both roster homes in the run. Leaves out Natlan,
-   whose six Hive slots are the richest exclusive roster of any nation in
-   either zone, and Snezhnaya.
-3. **Natlan + Inazuma, then Sumeru + Fontaine.** 6+4 and 9+5 = 24. The
-   highest count, with Sumeru where its roster is widest. Leaves out the
-   Abyss, and with it the Aeonglass reading and the Spiral Abyss finale,
-   and Snezhnaya.
+1. **Natlan + Inazuma, then Fontaine + Sumeru.** 6+4 and 9+5 = 24. The
+   highest count, Sumeru where its roster is widest, both roster homes in
+   the run. An organic act of beasts and hounds, then a machine act with
+   Fontaine's Meks and Sumeru's ritual rows.
+2. **Sumeru + Natlan, then Fontaine + Inazuma.** 5+6 and 5+6 = 22. Sumeru's
+   jungle on the Hive; Inazuma's Kairagi and knights on Glory.
+3. **Sumeru + Inazuma, then Fontaine + Natlan.** 5+4 and 5+2 = 16. The Hive
+   table's own pair; Natlan's two Glory slots are thin.
 
 The losers' best slots are recorded in each act table's §5 so nothing is
-lost: Inazuma's Knight Gang and Mecha Knight readings, Natlan's Iktomisaurus
-for the Ovicopter and Chanca of the Weary Inn for the Tezcatara Ancient,
-Snezhnaya's Frost Operative and Oprichniki squad.
+lost: Natlan's Iktomisaurus for the Ovicopter and Chanca of the Weary Inn
+for the Tezcatara Ancient where Natlan is not on the Hive, Inazuma's Knight
+Gang and Mecha Knight readings where Inazuma is not on Glory.
 
-## 5. Parked, not proposed
+## 5. Carried, not decided
 
+- **Nod-Krai and Snezhnaya are later faces,** one atlas pass each
+  (`BACKLOG.md`, the atlas row) and then a scoring against both zones' tables
+  by the §7.1 rule. Nod-Krai's Fatui machines and the Mechanized Fortress
+  hint at Glory; that is a hint, not a score. A third face is content only
+  (§1) and asks no new engineering.
+- **The Abyss** is the act-4 face (§3).
 - Tanx, the act-3 Ancient, has no candidate in any of the six nations, and
   Queen, Glory's third boss, has no candidate in any family and ships
   dropped already.
@@ -120,10 +139,11 @@ Snezhnaya's Frost Operative and Oprichniki squad.
 
 ## 6. Picks
 
-1. **CHOOSE the act-2 pair.** (1, default) Sumeru + Natlan; (2) Sumeru +
-   Inazuma; (3) Natlan + Inazuma, which sends Sumeru to act 3.
-2. **CHOOSE the act-3 pair.** (1, default) Fontaine + the Abyss; (2)
-   Fontaine + Sumeru, only with pick 1 at (3); (3) Fontaine + Inazuma.
+1. **CHOOSE the act-2 pair.** (1, default) Natlan + Inazuma; (2) Sumeru +
+   Natlan; (3) Sumeru + Inazuma.
+2. **CHOOSE the act-3 pair.** (1, default) Fontaine + Sumeru, which needs
+   pick 1 at (1); (2) Fontaine + Inazuma, with pick 1 at (2); (3)
+   Fontaine + Natlan, with pick 1 at (3).
 
-Layout 1 in §4 is picks 1(1) and 2(1). Whatever is ruled, the spike's build
-half proceeds on act 1 with Mondstadt and Liyue, which no pick touches.
+Layout 1 in §4 is both defaults. Whatever is ruled, the spike's build half
+proceeds on act 1 with Mondstadt and Liyue, which no pick touches.
