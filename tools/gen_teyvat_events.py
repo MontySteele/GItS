@@ -544,6 +544,89 @@ MIRRORS: Dict[str, MirrorSpec] = {
         options=("TOP", "MIDDLE", "BOTTOM"),
         pages=("pages.DONE.description",),
         page_source=(("pages.DONE.description", "TOP"),)),
+
+    # --- acts 2 and 3, batch 5 -------------------------------------------
+    "WarHistorianRepy": MirrorSpec(
+        "WarHistorianRepyMirror",
+        options=("UNLOCK_CAGE", "UNLOCK_CHEST"),
+        pages=("pages.UNLOCK_CAGE.description", "pages.UNLOCK_CHEST.description",
+               "pages.EXTRA_UNLOCK_CAGE.description",
+               "pages.EXTRA_UNLOCK_CHEST.description"),
+        page_source=(("pages.EXTRA_UNLOCK_CAGE.description", "UNLOCK_CAGE"),
+                     ("pages.EXTRA_UNLOCK_CHEST.description", "UNLOCK_CHEST"))),
+    # The three doll pages and the shared TAKE description all come off the
+    # first line, which is the one that says what taking a doll gets you. The
+    # doll options themselves need no rows: their key is the RELIC's title
+    # text and their words are the relic's own -- see the mirror.
+    "DollRoom": MirrorSpec(
+        "DollRoomMirror",
+        options=("RANDOM", "TAKE_SOME_TIME", "EXAMINE"),
+        pages=("pages.TAKE_SOME_TIME.description", "pages.EXAMINE.description",
+               "pages.DAUGHTER_OF_WIND.description", "pages.MR_STRUGGLES.description",
+               "pages.FABLE.description", "pages.TAKE.options.TAKE.description"),
+        page_source=(("pages.DAUGHTER_OF_WIND.description", "RANDOM"),
+                     ("pages.MR_STRUGGLES.description", "RANDOM"),
+                     ("pages.FABLE.description", "RANDOM"),
+                     ("pages.TAKE.options.TAKE.description", "RANDOM"))),
+    # All three purchases end on `CheckObtainWongoBadge`, which picks one of
+    # three AFTER_BUY pages by the player's banked Wongo Points -- so none of
+    # the three is an option's own page and all three take the Bargain Bin
+    # line.
+    "WelcomeToWongos": MirrorSpec(
+        "WelcomeToWongosMirror",
+        options=("BARGAIN_BIN", "FEATURED_ITEM", "MYSTERY_BOX", "LEAVE"),
+        extra_options=(
+            ("pages.INITIAL.options.BARGAIN_BIN_LOCKED", "BARGAIN_BIN"),
+            ("pages.INITIAL.options.FEATURED_ITEM_LOCKED", "FEATURED_ITEM"),
+            ("pages.INITIAL.options.MYSTERY_BOX_LOCKED", "MYSTERY_BOX"),
+        ),
+        pages=("pages.AFTER_BUY.description",
+               "pages.AFTER_BUY_BADGE_COUNTER.description",
+               "pages.AFTER_BUY_RECEIVE_BADGE.description",
+               "pages.LEAVE.description"),
+        page_source=(("pages.AFTER_BUY.description", "BARGAIN_BIN"),
+                     ("pages.AFTER_BUY_BADGE_COUNTER.description", "BARGAIN_BIN"),
+                     ("pages.AFTER_BUY_RECEIVE_BADGE.description", "BARGAIN_BIN"))),
+}
+
+
+#: PARKED: BASE EVENTS A FACE NAMES THAT ARE NOT DRESSED, AND WHY.
+#:
+#: A park is NOT a missing mirror. The generator already reports an event with
+#: no mirror, and that report is the engineering queue; these three would sit
+#: on it for ever with no work attached, because the work is not engineering.
+#: Each is an event whose reachable options outnumber the lines the faces
+#: write, in a way `extra_options` CANNOT paper over: `extra_options` exists
+#: for an option that is the same branch continued -- a `_LOCKED` twin, a
+#: later page's Fight -- and borrowing a line for an option with a DIFFERENT
+#: outcome would print the wrong consequences on the button.
+#:
+#: Dressing any of these needs new curated prose, which is the face's work and
+#: [USER]'s taste, not a generator change. Listed here so the report says PARKED
+#: with a reason rather than NO MIRROR with none.
+PARKED: Dict[str, str] = {
+    "Trial":
+        "the faces write the SIX verdict options (Merchant/Noble/Nondescript "
+        "x Guilty/Innocent) and no line for the INITIAL Accept/Reject pair, "
+        "the Reject page's Accept and Double Down, or the three story pages. "
+        "There is nothing to borrow for Accept that would not print a "
+        "verdict's consequences on the summons button, and Double Down opens "
+        "the abandon-run popup -- the one option in this surface where wrong "
+        "text is dangerous",
+    "TinkerTime":
+        "the faces write the three CARD TYPES (Attack/Skill/Power), which are "
+        "`pages.CHOOSE_CARD_TYPE.options.*`, and no line for the INITIAL "
+        "Choose Card Type option or for any of the NINE rider effects on "
+        "`pages.CHOOSE_RIDER.options.*`. The riders are nine distinct "
+        "mechanical effects picked two at a time; one borrowed line across all "
+        "nine would print the wrong effect on eight of them",
+    "ColossalFlower":
+        "the faces write TWO lines -- take the prize, dig deeper -- for a "
+        "three-level dig with six reachable option keys. The two per-level "
+        "repeats are the same branch continued and would borrow cleanly, but "
+        "the final page's Pollinous Core branch (the relic, for 7 unblockable) "
+        "and its Extract Instead sibling are distinct outcomes with no line "
+        "between them",
 }
 
 
@@ -1316,6 +1399,7 @@ class Plan:
     refusals: List[str] = field(default_factory=list)
     skipped: List[str] = field(default_factory=list)
     no_mirror: List[str] = field(default_factory=list)
+    parked: List[str] = field(default_factory=list)
     notes: List[str] = field(default_factory=list)
 
 
@@ -1365,6 +1449,10 @@ def build_plan() -> Plan:
             # the harvest's shape as the face's -- and it is settled when the
             # mirror is written and the event becomes generatable, which is
             # exactly when the refusal below starts biting.
+            if base in PARKED:
+                plan.parked.append(f"{face.key}: {base} ({event.title}) -- {PARKED[base]}")
+                continue
+
             spec = MIRRORS.get(base)
             if spec is None:
                 note = f" [option count {len(event.options)} vs harvest {want}]" \
@@ -1487,6 +1575,8 @@ def report(plan: Plan) -> None:
         print(f"  SKIP    {line}")
     for line in plan.no_mirror:
         print(f"  NO MIRROR {line}")
+    for line in plan.parked:
+        print(f"  PARKED  {line}")
     for line in plan.notes:
         print(f"  NOTE    {line}")
     for line in plan.refusals:

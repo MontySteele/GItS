@@ -1925,6 +1925,38 @@ internal static partial class TeyvatLoc
                 "It is unmistakably well-made gear, fitted for nobody in particular "
                 + "— least of all you. Add Clumsy (curse) to your Deck. Obtain a "
                 + "random Relic.",
+            // WarHistorianRapiya (Sumeru / WarHistorianRepy)
+            ["WAR_HISTORIAN_RAPIYA.title"] =
+                "War Historian, Rapiya",
+            ["WAR_HISTORIAN_RAPIYA.pages.INITIAL.description"] =
+                "Deep beneath Ardravi Valley, the Akademiya buries what it would "
+                + "rather not teach. In a forgotten Matra holding-cell sits Rapiya, a "
+                + "Haravatat war-historian condemned for reading the Archon War the "
+                + "wrong way — and beside her cage stands the Matra's confiscation "
+                + "strongbox, still sealed. Your Lantern Key turns once, and only "
+                + "once.",
+            ["WAR_HISTORIAN_RAPIYA.pages.INITIAL.options.UNLOCK_CAGE.title"] =
+                "Open the Cage",
+            ["WAR_HISTORIAN_RAPIYA.pages.INITIAL.options.UNLOCK_CAGE.description"] =
+                "Lose Lantern Key. Obtain Chronicle of the Archon War (History "
+                + "Course).",
+            ["WAR_HISTORIAN_RAPIYA.pages.INITIAL.options.UNLOCK_CHEST.title"] =
+                "Open the Strongbox",
+            ["WAR_HISTORIAN_RAPIYA.pages.INITIAL.options.UNLOCK_CHEST.description"] =
+                "Lose Lantern Key. Procure 2 random Potions. Obtain 2 random "
+                + "Relics.",
+            ["WAR_HISTORIAN_RAPIYA.pages.UNLOCK_CAGE.description"] =
+                "Lose Lantern Key. Obtain Chronicle of the Archon War (History "
+                + "Course).",
+            ["WAR_HISTORIAN_RAPIYA.pages.UNLOCK_CHEST.description"] =
+                "Lose Lantern Key. Procure 2 random Potions. Obtain 2 random "
+                + "Relics.",
+            ["WAR_HISTORIAN_RAPIYA.pages.EXTRA_UNLOCK_CAGE.description"] =
+                "Lose Lantern Key. Obtain Chronicle of the Archon War (History "
+                + "Course).",
+            ["WAR_HISTORIAN_RAPIYA.pages.EXTRA_UNLOCK_CHEST.description"] =
+                "Lose Lantern Key. Procure 2 random Potions. Obtain 2 random "
+                + "Relics.",
             // PressureTrialAtTheInstitute (Fontaine / BattlewornDummy)
             ["PRESSURE_TRIAL_AT_THE_INSTITUTE.title"] =
                 "Pressure Trial at the Institute",
@@ -2405,6 +2437,39 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["TWO_GIFTS_FROM_THE_FONTEMER.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            // SealedTestimonyOfRepie (Fontaine / WarHistorianRepy)
+            ["SEALED_TESTIMONY_OF_REPIE.title"] =
+                "The Sealed Testimony of Repie",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.INITIAL.description"] =
+                "Beneath the Palais Mermonia, past Gardemek that no longer "
+                + "recognize anyone's warrant, lies the Court's Remurian evidence "
+                + "vault. Repie — the Melusine archivist who inherited the keyring "
+                + "and lost most of it — walks you down without comment. Two seals "
+                + "remain intact, and your Lantern Key will spend itself on exactly "
+                + "one: the war tribunal's testimony reel, or the contraband locker "
+                + "shelved beside it.",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.INITIAL.options.UNLOCK_CAGE.title"] =
+                "Unseal the Testimony Reel",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.INITIAL.options.UNLOCK_CAGE.description"] =
+                "Lose Lantern Key. Obtain Remurian Tribunal Record (History "
+                + "Course).",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.INITIAL.options.UNLOCK_CHEST.title"] =
+                "Unseal the Contraband Locker",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.INITIAL.options.UNLOCK_CHEST.description"] =
+                "Lose Lantern Key. Procure 2 random Potions. Obtain 2 random "
+                + "Relics.",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.UNLOCK_CAGE.description"] =
+                "Lose Lantern Key. Obtain Remurian Tribunal Record (History "
+                + "Course).",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.UNLOCK_CHEST.description"] =
+                "Lose Lantern Key. Procure 2 random Potions. Obtain 2 random "
+                + "Relics.",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.EXTRA_UNLOCK_CAGE.description"] =
+                "Lose Lantern Key. Obtain Remurian Tribunal Record (History "
+                + "Course).",
+            ["SEALED_TESTIMONY_OF_REPIE.pages.EXTRA_UNLOCK_CHEST.description"] =
+                "Lose Lantern Key. Procure 2 random Potions. Obtain 2 random "
+                + "Relics.",
             // WatatsumiDrillPrimer (Inazuma / SelfHelpBook)
             ["WATATSUMI_DRILL_PRIMER.title"] =
                 "The Watatsumi Drill Primer",
@@ -2775,6 +2840,46 @@ internal static partial class TeyvatLoc
                 "Gain a Debt. Divine 6 times.",
             ["TIDE_SCRYING_STONE_OF_YASHIORI.pages.FINISH.description"] =
                 "Pay 51-99 Gold. Divine 3 times.",
+            // HitogataStorehouse (Inazuma / DollRoom)
+            ["HITOGATA_STOREHOUSE.title"] =
+                "The Hitogata Storehouse",
+            ["HITOGATA_STOREHOUSE.pages.INITIAL.description"] =
+                "Beneath Sangonomiya Shrine, the resistance keeps a storehouse of "
+                + "hitogata — paper-and-cord effigies left by pilgrims so that "
+                + "misfortune might settle on the doll instead of the person. A "
+                + "shrine maiden explains the old bargain plainly: an effigy will "
+                + "shoulder a soldier's ill luck, but only once the soldier has given "
+                + "it something of themselves first. General Gorou's quartermaster "
+                + "has authorized one draw per fighter before the march. The maiden "
+                + "slides the lattice door open.",
+            ["HITOGATA_STOREHOUSE.pages.INITIAL.options.RANDOM.title"] =
+                "Draw Blind From the Basket",
+            ["HITOGATA_STOREHOUSE.pages.INITIAL.options.RANDOM.description"] =
+                "Obtain a random effigy charm (random Doll Relic).",
+            ["HITOGATA_STOREHOUSE.pages.INITIAL.options.TAKE_SOME_TIME.title"] =
+                "Let Her Set Out Two",
+            ["HITOGATA_STOREHOUSE.pages.INITIAL.options.TAKE_SOME_TIME.description"] =
+                "Lose 5 HP pricking your thumb to mark the seal. Choose 1 of 2 "
+                + "effigy charms (Doll Relics).",
+            ["HITOGATA_STOREHOUSE.pages.INITIAL.options.EXAMINE.title"] =
+                "Read Every Name on the Shelf",
+            ["HITOGATA_STOREHOUSE.pages.INITIAL.options.EXAMINE.description"] =
+                "Lose 15 HP as three seals each take their tithe. Choose 1 of 3 "
+                + "effigy charms (Doll Relics).",
+            ["HITOGATA_STOREHOUSE.pages.TAKE_SOME_TIME.description"] =
+                "Lose 5 HP pricking your thumb to mark the seal. Choose 1 of 2 "
+                + "effigy charms (Doll Relics).",
+            ["HITOGATA_STOREHOUSE.pages.EXAMINE.description"] =
+                "Lose 15 HP as three seals each take their tithe. Choose 1 of 3 "
+                + "effigy charms (Doll Relics).",
+            ["HITOGATA_STOREHOUSE.pages.DAUGHTER_OF_WIND.description"] =
+                "Obtain a random effigy charm (random Doll Relic).",
+            ["HITOGATA_STOREHOUSE.pages.MR_STRUGGLES.description"] =
+                "Obtain a random effigy charm (random Doll Relic).",
+            ["HITOGATA_STOREHOUSE.pages.FABLE.description"] =
+                "Obtain a random effigy charm (random Doll Relic).",
+            ["HITOGATA_STOREHOUSE.pages.TAKE.options.TAKE.description"] =
+                "Obtain a random effigy charm (random Doll Relic).",
             // FoxDensOfChinjuForest (Inazuma / FieldOfManSizedHoles)
             ["FOX_DENS_OF_CHINJU_FOREST.title"] =
                 "The Fox-Dens of Chinju Forest",
@@ -3139,6 +3244,65 @@ internal static partial class TeyvatLoc
                 "You leave the flame to its business and work the tailings instead, "
                 + "where the smelters' pay-chests burst open years ago. Gain 45-75 "
                 + "Mora (Gold).",
+            // QuartermastersTentWatatsumi (Inazuma / WelcomeToWongos)
+            ["QUARTERMASTERS_TENT_WATATSUMI.title"] =
+                "The Quartermaster's Tent, Watatsumi",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.description"] =
+                "Below Sangonomiya Shrine, a canvas tent holds everything the "
+                + "resistance has stripped off Tenryou patrols and never found owners "
+                + "for. The quartermaster does not haggle; mora becomes rations, and "
+                + "rations become another week. She notches Merit Tallies onto a "
+                + "bamboo slip filed under your name, and those slips outlive "
+                + "campaigns.",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.BARGAIN_BIN.title"] =
+                "The Salvage Bin (Wongo's Bargain Bin)",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.BARGAIN_BIN.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. You also receive 32 "
+                + "Merit Tallies (Wongo Points).",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM.title"] =
+                "Requisition of the Day (Wongo's Featured Item)",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM.description"] =
+                "Pay 200 Gold. Obtain [Rare Relic], read aloud off the manifest "
+                + "before you commit. You also receive 8 Merit Tallies.",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX.title"] =
+                "Standing Order (Wongo's Mystery Box)",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX.description"] =
+                "Pay 300 Gold. Obtain 3 random Relics after 5 combats, when the "
+                + "next supply run clears; until then you hold a Standing Order Slip "
+                + "(Wongo's Mystery Ticket). You also receive 16 Merit Tallies.",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.LEAVE.title"] =
+                "Leave",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.LEAVE.description"] =
+                "She reclaims a worn strap off your kit for the front lines. "
+                + "Downgrade a random card.",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.BARGAIN_BIN_LOCKED.title"] =
+                "The Salvage Bin (Wongo's Bargain Bin)",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.BARGAIN_BIN_LOCKED.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. You also receive 32 "
+                + "Merit Tallies (Wongo Points).",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM_LOCKED.title"] =
+                "Requisition of the Day (Wongo's Featured Item)",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM_LOCKED.description"] =
+                "Pay 200 Gold. Obtain [Rare Relic], read aloud off the manifest "
+                + "before you commit. You also receive 8 Merit Tallies.",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX_LOCKED.title"] =
+                "Standing Order (Wongo's Mystery Box)",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX_LOCKED.description"] =
+                "Pay 300 Gold. Obtain 3 random Relics after 5 combats, when the "
+                + "next supply run clears; until then you hold a Standing Order Slip "
+                + "(Wongo's Mystery Ticket). You also receive 16 Merit Tallies.",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.AFTER_BUY.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. You also receive 32 "
+                + "Merit Tallies (Wongo Points).",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.AFTER_BUY_BADGE_COUNTER.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. You also receive 32 "
+                + "Merit Tallies (Wongo Points).",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.AFTER_BUY_RECEIVE_BADGE.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. You also receive 32 "
+                + "Merit Tallies (Wongo Points).",
+            ["QUARTERMASTERS_TENT_WATATSUMI.pages.LEAVE.description"] =
+                "She reclaims a worn strap off your kit for the front lines. "
+                + "Downgrade a random card.",
             // LoomSageOfChinjuForest (Inazuma / ZenWeaver)
             ["LOOM_SAGE_OF_CHINJU_FOREST.title"] =
                 "The Loom-Sage of Chinju Forest",
@@ -3303,6 +3467,40 @@ internal static partial class TeyvatLoc
                 "Gain a Debt. Divine 6 times.",
             ["SPRINGS_GRID.pages.FINISH.description"] =
                 "Pay 51-99 Gold. Divine 3 times.",
+            // TotemShelf (Natlan / DollRoom)
+            ["TOTEM_SHELF.title"] =
+                "The Totem Shelf",
+            ["TOTEM_SHELF.pages.INITIAL.description"] =
+                "Before a warrior enters the Stadium of the Sacred Flame, the "
+                + "Children of Echoes keep a shelf of small carved totems — each one "
+                + "holding a scrap of an ancestor's luck, the kind the Wayob still "
+                + "remembers even when the living don't. Take one blind and trust the "
+                + "shelf. Or spend a little of yourself sorting through it, and trust "
+                + "your own eye instead.",
+            ["TOTEM_SHELF.pages.INITIAL.options.RANDOM.title"] =
+                "Take One Blind",
+            ["TOTEM_SHELF.pages.INITIAL.options.RANDOM.description"] =
+                "Obtain a random totem charm (Doll Relic).",
+            ["TOTEM_SHELF.pages.INITIAL.options.TAKE_SOME_TIME.title"] =
+                "Sort Through Two",
+            ["TOTEM_SHELF.pages.INITIAL.options.TAKE_SOME_TIME.description"] =
+                "Lose 5 HP. Choose 1 of 2 totem charms (Doll Relics).",
+            ["TOTEM_SHELF.pages.INITIAL.options.EXAMINE.title"] =
+                "Read Every Totem on the Shelf",
+            ["TOTEM_SHELF.pages.INITIAL.options.EXAMINE.description"] =
+                "Lose 15 HP. Choose 1 of 3 totem charms (Doll Relics).",
+            ["TOTEM_SHELF.pages.TAKE_SOME_TIME.description"] =
+                "Lose 5 HP. Choose 1 of 2 totem charms (Doll Relics).",
+            ["TOTEM_SHELF.pages.EXAMINE.description"] =
+                "Lose 15 HP. Choose 1 of 3 totem charms (Doll Relics).",
+            ["TOTEM_SHELF.pages.DAUGHTER_OF_WIND.description"] =
+                "Obtain a random totem charm (Doll Relic).",
+            ["TOTEM_SHELF.pages.MR_STRUGGLES.description"] =
+                "Obtain a random totem charm (Doll Relic).",
+            ["TOTEM_SHELF.pages.FABLE.description"] =
+                "Obtain a random totem charm (Doll Relic).",
+            ["TOTEM_SHELF.pages.TAKE.options.TAKE.description"] =
+                "Obtain a random totem charm (Doll Relic).",
             // CookfirePits (Natlan / FieldOfManSizedHoles)
             ["COOKFIRE_PITS.title"] =
                 "The Cookfire Pits",
@@ -3626,6 +3824,63 @@ internal static partial class TeyvatLoc
                 "Add Decay (curse) to your Deck. Obtain the Lost Wisp (relic).",
             ["DRIFTING_LIGHT.pages.SEARCH.description"] =
                 "Gain 45-75 Gold.",
+            // MictlanTallyStall (Natlan / WelcomeToWongos)
+            ["MICTLAN_TALLY_STALL.title"] =
+                "The Mictlan Tally Stall",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.description"] =
+                "At the busiest stall in Mictlan, a Collective trader keeps a "
+                + "running tally chalked on a hide behind the counter — every "
+                + "purchase you make here follows your name for good, she says "
+                + "plainly, same as every debt does. The bargain crate is cheap and "
+                + "quick. The featured piece is pricier and named up front, no "
+                + "surprises. The sealed box costs the most and pays out slow, after "
+                + "five bouts have come and gone. Walk off with nothing, and she'll "
+                + "still take a look at your gear on the way past.",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.BARGAIN_BIN.title"] =
+                "Wongo's Bargain Bin",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.BARGAIN_BIN.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. Also receive 32 Wongo "
+                + "Points.",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.FEATURED_ITEM.title"] =
+                "Wongo's Featured Item",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.FEATURED_ITEM.description"] =
+                "Pay 200 Gold. Obtain a named Rare Relic (randomly selected from "
+                + "the standard rare relic pool). Also receive 8 Wongo Points.",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.MYSTERY_BOX.title"] =
+                "Wongo's Mystery Box",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.MYSTERY_BOX.description"] =
+                "Pay 300 Gold. Obtain 3 random Relics after 5 combats (carry "
+                + "Wongo's Mystery Ticket until then). Also receive 16 Wongo Points.",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.LEAVE.title"] =
+                "Leave",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.LEAVE.description"] =
+                "Downgrade a random card.",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.BARGAIN_BIN_LOCKED.title"] =
+                "Wongo's Bargain Bin",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.BARGAIN_BIN_LOCKED.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. Also receive 32 Wongo "
+                + "Points.",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.FEATURED_ITEM_LOCKED.title"] =
+                "Wongo's Featured Item",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.FEATURED_ITEM_LOCKED.description"] =
+                "Pay 200 Gold. Obtain a named Rare Relic (randomly selected from "
+                + "the standard rare relic pool). Also receive 8 Wongo Points.",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.MYSTERY_BOX_LOCKED.title"] =
+                "Wongo's Mystery Box",
+            ["MICTLAN_TALLY_STALL.pages.INITIAL.options.MYSTERY_BOX_LOCKED.description"] =
+                "Pay 300 Gold. Obtain 3 random Relics after 5 combats (carry "
+                + "Wongo's Mystery Ticket until then). Also receive 16 Wongo Points.",
+            ["MICTLAN_TALLY_STALL.pages.AFTER_BUY.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. Also receive 32 Wongo "
+                + "Points.",
+            ["MICTLAN_TALLY_STALL.pages.AFTER_BUY_BADGE_COUNTER.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. Also receive 32 Wongo "
+                + "Points.",
+            ["MICTLAN_TALLY_STALL.pages.AFTER_BUY_RECEIVE_BADGE.description"] =
+                "Pay 100 Gold. Obtain 1 random Common Relic. Also receive 32 Wongo "
+                + "Points.",
+            ["MICTLAN_TALLY_STALL.pages.LEAVE.description"] =
+                "Downgrade a random card.",
             // SpringsEightStrandWeaver (Natlan / ZenWeaver)
             ["SPRINGS_EIGHT_STRAND_WEAVER.title"] =
                 "The Springs' Eight-Strand Weaver",
@@ -4207,6 +4462,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.WarHistorianRapiya)] = new EventShape(
+                "WAR_HISTORIAN_RAPIYA", "WarHistorianRepyMirror",
+                new[] { "UNLOCK_CAGE", "UNLOCK_CHEST" },
+                new[] { "pages.UNLOCK_CAGE.description", "pages.UNLOCK_CHEST.description", "pages.EXTRA_UNLOCK_CAGE.description", "pages.EXTRA_UNLOCK_CHEST.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Fontaine.PressureTrialAtTheInstitute)] = new EventShape(
                 "PRESSURE_TRIAL_AT_THE_INSTITUTE", "BattlewornDummyMirror",
                 new[] { "SETTING_1", "SETTING_2", "SETTING_3" },
@@ -4291,6 +4552,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Fontaine.SealedTestimonyOfRepie)] = new EventShape(
+                "SEALED_TESTIMONY_OF_REPIE", "WarHistorianRepyMirror",
+                new[] { "UNLOCK_CAGE", "UNLOCK_CHEST" },
+                new[] { "pages.UNLOCK_CAGE.description", "pages.UNLOCK_CHEST.description", "pages.EXTRA_UNLOCK_CAGE.description", "pages.EXTRA_UNLOCK_CHEST.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Inazuma.WatatsumiDrillPrimer)] = new EventShape(
                 "WATATSUMI_DRILL_PRIMER", "SelfHelpBookMirror",
                 new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
@@ -4343,6 +4610,12 @@ internal static class TeyvatGeneratedEvents
                 "TIDE_SCRYING_STONE_OF_YASHIORI", "CrystalSphereMirror",
                 new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
                 new[] { "pages.FINISH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.HitogataStorehouse)] = new EventShape(
+                "HITOGATA_STOREHOUSE", "DollRoomMirror",
+                new[] { "RANDOM", "TAKE_SOME_TIME", "EXAMINE" },
+                new[] { "pages.TAKE_SOME_TIME.description", "pages.EXAMINE.description", "pages.DAUGHTER_OF_WIND.description", "pages.MR_STRUGGLES.description", "pages.FABLE.description", "pages.TAKE.options.TAKE.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Inazuma.FoxDensOfChinjuForest)] = new EventShape(
@@ -4417,6 +4690,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.CLAIM.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.QuartermastersTentWatatsumi)] = new EventShape(
+                "QUARTERMASTERS_TENT_WATATSUMI", "WelcomeToWongosMirror",
+                new[] { "BARGAIN_BIN", "FEATURED_ITEM", "MYSTERY_BOX", "LEAVE" },
+                new[] { "pages.AFTER_BUY.description", "pages.AFTER_BUY_BADGE_COUNTER.description", "pages.AFTER_BUY_RECEIVE_BADGE.description", "pages.LEAVE.description" },
+                new[] { "pages.INITIAL.options.BARGAIN_BIN_LOCKED", "pages.INITIAL.options.FEATURED_ITEM_LOCKED", "pages.INITIAL.options.MYSTERY_BOX_LOCKED" },
+                false),
             [typeof(Events.Inazuma.LoomSageOfChinjuForest)] = new EventShape(
                 "LOOM_SAGE_OF_CHINJU_FOREST", "ZenWeaverMirror",
                 new[] { "BREATHING_TECHNIQUES", "EMOTIONAL_AWARENESS", "ARACHNID_ACUPUNCTURE" },
@@ -4451,6 +4730,12 @@ internal static class TeyvatGeneratedEvents
                 "SPRINGS_GRID", "CrystalSphereMirror",
                 new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
                 new[] { "pages.FINISH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.TotemShelf)] = new EventShape(
+                "TOTEM_SHELF", "DollRoomMirror",
+                new[] { "RANDOM", "TAKE_SOME_TIME", "EXAMINE" },
+                new[] { "pages.TAKE_SOME_TIME.description", "pages.EXAMINE.description", "pages.DAUGHTER_OF_WIND.description", "pages.MR_STRUGGLES.description", "pages.FABLE.description", "pages.TAKE.options.TAKE.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Natlan.CookfirePits)] = new EventShape(
@@ -4524,6 +4809,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "CLAIM", "SEARCH" },
                 new[] { "pages.CLAIM.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.MictlanTallyStall)] = new EventShape(
+                "MICTLAN_TALLY_STALL", "WelcomeToWongosMirror",
+                new[] { "BARGAIN_BIN", "FEATURED_ITEM", "MYSTERY_BOX", "LEAVE" },
+                new[] { "pages.AFTER_BUY.description", "pages.AFTER_BUY_BADGE_COUNTER.description", "pages.AFTER_BUY_RECEIVE_BADGE.description", "pages.LEAVE.description" },
+                new[] { "pages.INITIAL.options.BARGAIN_BIN_LOCKED", "pages.INITIAL.options.FEATURED_ITEM_LOCKED", "pages.INITIAL.options.MYSTERY_BOX_LOCKED" },
                 false),
             [typeof(Events.Natlan.SpringsEightStrandWeaver)] = new EventShape(
                 "SPRINGS_EIGHT_STRAND_WEAVER", "ZenWeaverMirror",
@@ -4668,6 +4959,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Sumeru.RoundTableAtTheHouseOfDaena>(),
             [(TeyvatFrame.Sumeru, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Sumeru.CaravanRibatLeavings>(),
+            [(TeyvatFrame.Sumeru, typeof(WarHistorianRepy))] =
+                () => ModelDb.Event<Events.Sumeru.WarHistorianRapiya>(),
             [(TeyvatFrame.Fontaine, typeof(BattlewornDummy))] =
                 () => ModelDb.Event<Events.Fontaine.PressureTrialAtTheInstitute>(),
             [(TeyvatFrame.Fontaine, typeof(CrystalSphere))] =
@@ -4696,6 +4989,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Fontaine.RoundTableAtCafLutece>(),
             [(TeyvatFrame.Fontaine, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Fontaine.TwoGiftsFromTheFontemer>(),
+            [(TeyvatFrame.Fontaine, typeof(WarHistorianRepy))] =
+                () => ModelDb.Event<Events.Fontaine.SealedTestimonyOfRepie>(),
             [(TeyvatFrame.Inazuma, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Inazuma.WatatsumiDrillPrimer>(),
             [(TeyvatFrame.Inazuma, typeof(SlipperyBridge))] =
@@ -4714,6 +5009,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.WarCouncilAtSangonomiya>(),
             [(TeyvatFrame.Inazuma, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Inazuma.TideScryingStoneOfYashiori>(),
+            [(TeyvatFrame.Inazuma, typeof(DollRoom))] =
+                () => ModelDb.Event<Events.Inazuma.HitogataStorehouse>(),
             [(TeyvatFrame.Inazuma, typeof(FieldOfManSizedHoles))] =
                 () => ModelDb.Event<Events.Inazuma.FoxDensOfChinjuForest>(),
             [(TeyvatFrame.Inazuma, typeof(InfestedAutomaton))] =
@@ -4738,6 +5035,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.SignalLampCipher>(),
             [(TeyvatFrame.Inazuma, typeof(LostWisp))] =
                 () => ModelDb.Event<Events.Inazuma.FoxfireOnTheSlag>(),
+            [(TeyvatFrame.Inazuma, typeof(WelcomeToWongos))] =
+                () => ModelDb.Event<Events.Inazuma.QuartermastersTentWatatsumi>(),
             [(TeyvatFrame.Inazuma, typeof(ZenWeaver))] =
                 () => ModelDb.Event<Events.Inazuma.LoomSageOfChinjuForest>(),
             [(TeyvatFrame.Natlan, typeof(Amalgamator))] =
@@ -4750,6 +5049,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Natlan.RacingCampsWager>(),
             [(TeyvatFrame.Natlan, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Natlan.SpringsGrid>(),
+            [(TeyvatFrame.Natlan, typeof(DollRoom))] =
+                () => ModelDb.Event<Events.Natlan.TotemShelf>(),
             [(TeyvatFrame.Natlan, typeof(FieldOfManSizedHoles))] =
                 () => ModelDb.Event<Events.Natlan.CookfirePits>(),
             [(TeyvatFrame.Natlan, typeof(InfestedAutomaton))] =
@@ -4774,6 +5075,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Natlan.MarkerOffTheRacetrack>(),
             [(TeyvatFrame.Natlan, typeof(LostWisp))] =
                 () => ModelDb.Event<Events.Natlan.DriftingLight>(),
+            [(TeyvatFrame.Natlan, typeof(WelcomeToWongos))] =
+                () => ModelDb.Event<Events.Natlan.MictlanTallyStall>(),
             [(TeyvatFrame.Natlan, typeof(ZenWeaver))] =
                 () => ModelDb.Event<Events.Natlan.SpringsEightStrandWeaver>(),
             [(TeyvatFrame.Natlan, typeof(SelfHelpBook))] =
@@ -4911,6 +5214,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/round_tea_party.png",
             ["CARAVAN_RIBAT_LEAVINGS"] =
                 "res://images/events/this_or_that.png",
+            ["WAR_HISTORIAN_RAPIYA"] =
+                "res://images/events/war_historian_repy.png",
             ["PRESSURE_TRIAL_AT_THE_INSTITUTE"] =
                 "res://images/events/battleworn_dummy.png",
             ["SOUNDING_THE_BERYL_SHELF"] =
@@ -4939,6 +5244,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/round_tea_party.png",
             ["TWO_GIFTS_FROM_THE_FONTEMER"] =
                 "res://images/events/this_or_that.png",
+            ["SEALED_TESTIMONY_OF_REPIE"] =
+                "res://images/events/war_historian_repy.png",
             ["WATATSUMI_DRILL_PRIMER"] =
                 "res://images/events/self_help_book.png",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE"] =
@@ -4957,6 +5264,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/colorful_philosophers.png",
             ["TIDE_SCRYING_STONE_OF_YASHIORI"] =
                 "res://images/events/crystal_sphere.png",
+            ["HITOGATA_STOREHOUSE"] =
+                "res://images/events/doll_room.png",
             ["FOX_DENS_OF_CHINJU_FOREST"] =
                 "res://images/events/field_of_man_sized_holes.png",
             ["NESTED_ARRAY"] =
@@ -4981,6 +5290,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_lantern_key.png",
             ["FOXFIRE_ON_THE_SLAG"] =
                 "res://images/events/lost_wisp.png",
+            ["QUARTERMASTERS_TENT_WATATSUMI"] =
+                "res://images/events/welcome_to_wongos.png",
             ["LOOM_SAGE_OF_CHINJU_FOREST"] =
                 "res://images/events/zen_weaver.png",
             ["COOKFIRE_FORGE"] =
@@ -4993,6 +5304,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/colorful_philosophers.png",
             ["SPRINGS_GRID"] =
                 "res://images/events/crystal_sphere.png",
+            ["TOTEM_SHELF"] =
+                "res://images/events/doll_room.png",
             ["COOKFIRE_PITS"] =
                 "res://images/events/field_of_man_sized_holes.png",
             ["TICKING_RELIC"] =
@@ -5017,6 +5330,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_lantern_key.png",
             ["DRIFTING_LIGHT"] =
                 "res://images/events/lost_wisp.png",
+            ["MICTLAN_TALLY_STALL"] =
+                "res://images/events/welcome_to_wongos.png",
             ["SPRINGS_EIGHT_STRAND_WEAVER"] =
                 "res://images/events/zen_weaver.png",
             ["HOLLOW_TREE_GUIDE"] =

@@ -614,6 +614,10 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(ColorfulPhilosophersMirror), typeof(ColorfulPhilosophers) },
             new object[] { typeof(RanwidTheElderMirror), typeof(RanwidTheElder) },
             new object[] { typeof(RelicTraderMirror), typeof(RelicTrader) },
+            // Acts 2 and 3, batch 5 -- the last three that pair.
+            new object[] { typeof(WarHistorianRepyMirror), typeof(WarHistorianRepy) },
+            new object[] { typeof(DollRoomMirror), typeof(DollRoom) },
+            new object[] { typeof(WelcomeToWongosMirror), typeof(WelcomeToWongos) },
         };
 
     // ---------------------------------------------------------------
