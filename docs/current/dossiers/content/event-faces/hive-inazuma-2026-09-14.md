@@ -47,6 +47,8 @@ Mechanics check: matches harvest.
 
 ---
 
+Loss: {character} went into Musoujin Gorge with the load at the [gold]{event}[/gold].
+
 ## - [ ] The Future of Potions?
 ### The Front-Line Triage Cache — Inazuma / Sangonomiya resistance — loose — DRAFTED
 
@@ -74,6 +76,8 @@ Mechanics check: matches harvest.
 
 ---
 
+Loss: {character} bled out on a Fatui paychest at the [gold]{event}[/gold].
+
 ## - [ ] Amalgamator
 ### The Banked Forge at Musoujin — Inazuma / Sangonomiya resistance — loose — REUSED event-conversion-gallery.md § Amalgamator, variant 2
 
@@ -97,6 +101,8 @@ Chinju Forest, an hour past the shrine. The straw hat that dropped onto your sho
 Mechanics check: matches harvest | flag: inherited from the gallery — the harvest's "Colorless 2 card reward" is template-lossy and glossed here as two cards, per the gallery's own flag on this event; [USER] decision on the resolution channel is unresolved and unaffected by this pass.
 
 ---
+
+Loss: {character} tore the passenger loose and did not survive it at the [gold]{event}[/gold].
 
 ## - [ ] Bugslayer
 ### The Drillmaster of Watatsumi — Inazuma / Sangonomiya resistance — loose — REUSED event-conversion-gallery.md § Bugslayer, variant 3
@@ -165,6 +171,8 @@ Beneath Sangonomiya Shrine, the resistance keeps a storehouse of hitogata — pa
 Mechanics check: matches harvest | flag: inherited from the gallery — the Doll Relic family has no Teyvat naming hook of its own; the gallery flags the rename as a pool-level [USER] call this event text can only gesture at generically.
 
 ---
+
+Loss: {character}'s misfortune did not settle on the doll at the [gold]{event}[/gold].
 
 ## - [ ] Field of Man-Sized Holes
 ### The Fox-Dens of Chinju Forest — Inazuma / Chinju Forest youkai — loose — DRAFTED
@@ -240,6 +248,8 @@ Mechanics check: matches harvest | flag: inherited from the gallery — the sim 
 
 ---
 
+Loss: {character} was buried in the salt of the [gold]{event}[/gold].
+
 ## - [ ] Spirit Grafter
 ### The Nameless Under the Cedar — Inazuma / Grand Narukami Shrine (shrine-maiden lore) — literal — REUSED event-conversion-gallery.md § Spirit Grafter, variant 1
 
@@ -252,6 +262,8 @@ Mechanics check: matches harvest.
 
 ---
 
+Loss: {character} did not survive the spirit's leaving at the [gold]{event}[/gold].
+
 ## - [ ] Stone of All Time
 ### The Stone in the Sunken Road — Inazuma / Sangonomiya resistance — loose — REUSED event-conversion-gallery.md § Stone of All Time, variant 2
 
@@ -263,6 +275,8 @@ A tremor has dropped a shrine-stone across the switchback road to Bourou Village
 Mechanics check: matches harvest.
 
 ---
+
+Loss: {character} was crushed under the shrine-stone at the [gold]{event}[/gold].
 
 ## - [ ] Symbiote
 ### Defilement at Serpent's Head — Inazuma / Sangonomiya resistance — loose — REUSED event-conversion-gallery.md § Symbiote, variant 1
