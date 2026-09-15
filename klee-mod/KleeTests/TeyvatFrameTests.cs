@@ -366,6 +366,14 @@ public class TeyvatFrameTests : IDisposable
         return Il.Calls(method)
             .Select(c => System.Text.RegularExpressions.Regex.Replace(
                 c, @"b__\d+_(\d+)$", "b__$1"))
+            // The SAME ordinal, on the other shape a lambda compiles to. A
+            // gate whose predicate CAPTURES something -- Luminous Choir's
+            // closes over `runState` -- gets a `<>c__DisplayClassN_M` rather
+            // than the cached `<>c`, and N is again the declaring method's
+            // ordinal within its type, which differs between a base event and
+            // a mirror for no reason that means anything.
+            .Select(c => System.Text.RegularExpressions.Regex.Replace(
+                c, @"<>c__DisplayClass\d+_(\d+)", "<>c__DisplayClass_$1"))
             .OrderBy(c => c, StringComparer.Ordinal)
             .ToList();
     }
@@ -392,6 +400,11 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(AromaOfChaosMirror), typeof(AromaOfChaos) },
             new object[] { typeof(BrainLeechMirror), typeof(BrainLeech) },
             new object[] { typeof(ByrdonisNestMirror), typeof(ByrdonisNest) },
+            new object[] { typeof(DenseVegetationMirror), typeof(DenseVegetation) },
+            new object[] { typeof(JungleMazeAdventureMirror), typeof(JungleMazeAdventure) },
+            new object[] { typeof(LuminousChoirMirror), typeof(LuminousChoir) },
+            new object[] { typeof(MorphicGroveMirror), typeof(MorphicGrove) },
+            new object[] { typeof(SapphireSeedMirror), typeof(SapphireSeed) },
         };
 
     // ---------------------------------------------------------------

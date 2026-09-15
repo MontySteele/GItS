@@ -213,6 +213,22 @@ MIRRORS: Dict[str, MirrorSpec] = {
     "AromaOfChaos": MirrorSpec("AromaOfChaosMirror"),
     "BrainLeech": MirrorSpec("BrainLeechMirror"),
     "ByrdonisNest": MirrorSpec("ByrdonisNestMirror"),
+
+    # --- act 1, batch 2 ---------------------------------------------------
+    "DenseVegetation": MirrorSpec(
+        "DenseVegetationMirror",
+        options=("TRUDGE_ON", "REST"),
+        extra_options=(("pages.REST.options.FIGHT", "REST"),),
+        pages=("pages.TRUDGE_ON.description", "pages.REST.description")),
+    "JungleMazeAdventure": MirrorSpec("JungleMazeAdventureMirror"),
+    "LuminousChoir": MirrorSpec(
+        "LuminousChoirMirror",
+        options=("REACH_INTO_THE_FLESH", "OFFER_TRIBUTE"),
+        extra_options=(
+            ("pages.INITIAL.options.OFFER_TRIBUTE_LOCKED", "OFFER_TRIBUTE"),
+        )),
+    "MorphicGrove": MirrorSpec("MorphicGroveMirror"),
+    "SapphireSeed": MirrorSpec("SapphireSeedMirror"),
 }
 
 

@@ -255,6 +255,121 @@ internal static partial class TeyvatLoc
                 "Gain 7 Max HP.",
             ["WINDFALCONS_ROOST.pages.TAKE.description"] =
                 "Add Windfalcon Egg (Byrdonis Egg) to deck.",
+            // BrambleLineBelowWolvendom (Mondstadt / DenseVegetation)
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.title"] =
+                "The Bramble Line Below Wolvendom",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.description"] =
+                "The Knights' patrol trail past Wolvendom has gone to bramble since "
+                + "the wolves reclaimed the ridge, and the duty Knight will not swear "
+                + "to what is on the other side. She offers two regulations: push "
+                + "through at your own risk, or make camp and let her post a watch — "
+                + "though something is already moving in the wet undergrowth nearby.",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.TRUDGE_ON.title"] =
+                "Trudge On",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.TRUDGE_ON.description"] =
+                "One of the following is randomly offered: a bramble stand snaps "
+                + "back and takes something with it (Remove a card from your Deck. "
+                + "Lose 11 HP); or you turn up a lost courier's satchel, still sealed "
+                + "(Gain 64 Gold (Mora). Lose 8 HP).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.REST.title"] =
+                "Rest",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.REST.description"] =
+                "Make camp in the lee of the ridge. Heal HP (rest site amount). The "
+                + "wet undergrowth begins to move — Fight 4 Bramble Wrigglers "
+                + "(Wrigglers).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.REST.options.FIGHT.title"] =
+                "Rest",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.REST.options.FIGHT.description"] =
+                "Make camp in the lee of the ridge. Heal HP (rest site amount). The "
+                + "wet undergrowth begins to move — Fight 4 Bramble Wrigglers "
+                + "(Wrigglers).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.TRUDGE_ON.description"] =
+                "One of the following is randomly offered: a bramble stand snaps "
+                + "back and takes something with it (Remove a card from your Deck. "
+                + "Lose 11 HP); or you turn up a lost courier's satchel, still sealed "
+                + "(Gain 64 Gold (Mora). Lose 8 HP).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.REST.description"] =
+                "Make camp in the lee of the ridge. Heal HP (rest site amount). The "
+                + "wet undergrowth begins to move — Fight 4 Bramble Wrigglers "
+                + "(Wrigglers).",
+            // GuildCommissionAtStarsnatchCliff (Mondstadt / JungleMazeAdventure)
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.title"] =
+                "The Guild Commission at Starsnatch Cliff",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.description"] =
+                "The Adventurers' Guild desk has posted the same commission twice: "
+                + "a switchback maze of scree and old stonework under Starsnatch "
+                + "Cliff, where the paths are said to rearrange after every storm. A "
+                + "pair of Guild regulars drinking at the Angel's Share offer to walk "
+                + "it with you and split whatever turns up; the board pays better for "
+                + "whoever signs alone.",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.SOLO_QUEST.title"] =
+                "Solo Quest",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.SOLO_QUEST.description"] =
+                "Gain 135-165 Mora (Gold). Lose 18 HP.",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.JOIN_FORCES.title"] =
+                "Join Forces",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.JOIN_FORCES.description"] =
+                "Gain 35-65 Mora (Gold).",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.SOLO_QUEST.description"] =
+                "Gain 135-165 Mora (Gold). Lose 18 HP.",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.JOIN_FORCES.description"] =
+                "Gain 35-65 Mora (Gold).",
+            // SingingGrowthUnderWolvendom (Mondstadt / LuminousChoir)
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.title"] =
+                "The Singing Growth Under Wolvendom",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.description"] =
+                "On the wooded slope beneath Wolvendom, a ring of pale fungus has "
+                + "fused into a single body the size of a cart, and it is singing — "
+                + "many small voices braided into one chord. A Knights of Favonius "
+                + "outrider says a courier's satchel went into the growth two winters "
+                + "back, and that whatever's left of it is still in there, glowing "
+                + "faintly under the bark.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.REACH_INTO_THE_FLESH.title"] =
+                "Reach into the Flesh",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.REACH_INTO_THE_FLESH.description"] =
+                "You push your arm through the warm pulp until your fingers close "
+                + "on something buried. Remove 2 cards from Deck. Add Spore Mind "
+                + "(curse) to Deck.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE.title"] =
+                "Offer Tribute",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE.description"] =
+                "Pay 99-149 Mora (Gold). Obtain a random Relic.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE_LOCKED.title"] =
+                "Offer Tribute",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE_LOCKED.description"] =
+                "Pay 99-149 Mora (Gold). Obtain a random Relic.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.REACH_INTO_THE_FLESH.description"] =
+                "You push your arm through the warm pulp until your fingers close "
+                + "on something buried. Remove 2 cards from Deck. Add Spore Mind "
+                + "(curse) to Deck.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.OFFER_TRIBUTE.description"] =
+                "Pay 99-149 Mora (Gold). Obtain a random Relic.",
+            // WolfRingAboveWindrise (Mondstadt / MorphicGrove)
+            ["WOLF_RING_ABOVE_WINDRISE.title"] =
+                "The Wolf-Ring Above Windrise",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.description"] =
+                "A perfect ring of pines stands above Windrise where no windmill "
+                + "was ever built, and Adventurers' Guild hunters camped nearby swear "
+                + "the ring moves half a pace every full moon. One hunter, well into "
+                + "her cups from the Angel's Share, waves you toward the center and "
+                + "says the ring pays generously for company — and asks nothing at "
+                + "all of anyone who just keeps walking.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.GROUP.title"] =
+                "Group",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.GROUP.description"] =
+                "You empty your purse into the grass and let the ring do as it "
+                + "likes. Lose ALL of your Gold (Mora). Transform 2 cards.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.LONER.title"] =
+                "Loner",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.LONER.description"] =
+                "You walk on toward Windrise and let the quiet do its own work. "
+                + "Gain 5 Max HP.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.LONER.description"] =
+                "You walk on toward Windrise and let the quiet do its own work. "
+                + "Gain 5 Max HP.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.GROUP.description"] =
+                "You empty your purse into the grass and let the ring do as it "
+                + "likes. Lose ALL of your Gold (Mora). Transform 2 cards.",
             // SpringvaleCheeseCellar (Mondstadt / RoomFullOfCheese)
             ["SPRINGVALE_CHEESE_CELLAR.title"] =
                 "The Springvale Cheese Cellar",
@@ -287,6 +402,28 @@ internal static partial class TeyvatLoc
             ["SPRINGVALE_CHEESE_CELLAR.loss"] =
                 "{character} was buried under the back wall of the "
                 + "[gold]{event}[/gold].",
+            // CliffsideSeedNearCapeOath (Mondstadt / SapphireSeed)
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.title"] =
+                "The Cliffside Seed Near Cape Oath",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.description"] =
+                "On the sea-cliffs above Cape Oath, a Knights of Favonius botanist "
+                + "has found a single seed the color of deep water, wedged in a crack "
+                + "the wind can't reach. She has half a mind to grind it for the "
+                + "infirmary and half a mind to see what it grows into — regulations "
+                + "don't cover either, she admits, so the choice is yours to make and "
+                + "hers to write up afterward.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.EAT.title"] =
+                "Consume",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.EAT.description"] =
+                "Heal 9 HP. Upgrade a card in your Deck.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.PLANT.title"] =
+                "Plant and Nourish",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.PLANT.description"] =
+                "Enchant a card with Sown.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.EAT.description"] =
+                "Heal 9 HP. Upgrade a card in your Deck.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.PLANT.description"] =
+                "Enchant a card with Sown.",
             // GuildsStandingCommissionAtCapeOath (Mondstadt / TheLegendsWereTrue)
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH.title"] =
                 "The Guild's Standing Commission at Cape Oath",
@@ -656,12 +793,42 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EAT.description", "pages.TAKE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Mondstadt.BrambleLineBelowWolvendom)] = new EventShape(
+                "BRAMBLE_LINE_BELOW_WOLVENDOM", "DenseVegetationMirror",
+                new[] { "TRUDGE_ON", "REST" },
+                new[] { "pages.TRUDGE_ON.description", "pages.REST.description" },
+                new[] { "pages.REST.options.FIGHT" },
+                false),
+            [typeof(Events.Mondstadt.GuildCommissionAtStarsnatchCliff)] = new EventShape(
+                "GUILD_COMMISSION_AT_STARSNATCH_CLIFF", "JungleMazeAdventureMirror",
+                new[] { "SOLO_QUEST", "JOIN_FORCES" },
+                new[] { "pages.SOLO_QUEST.description", "pages.JOIN_FORCES.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.SingingGrowthUnderWolvendom)] = new EventShape(
+                "SINGING_GROWTH_UNDER_WOLVENDOM", "LuminousChoirMirror",
+                new[] { "REACH_INTO_THE_FLESH", "OFFER_TRIBUTE" },
+                new[] { "pages.REACH_INTO_THE_FLESH.description", "pages.OFFER_TRIBUTE.description" },
+                new[] { "pages.INITIAL.options.OFFER_TRIBUTE_LOCKED" },
+                false),
+            [typeof(Events.Mondstadt.WolfRingAboveWindrise)] = new EventShape(
+                "WOLF_RING_ABOVE_WINDRISE", "MorphicGroveMirror",
+                new[] { "GROUP", "LONER" },
+                new[] { "pages.LONER.description", "pages.GROUP.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Mondstadt.SpringvaleCheeseCellar)] = new EventShape(
                 "SPRINGVALE_CHEESE_CELLAR", "RoomFullOfCheeseMirror",
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
                 true),
+            [typeof(Events.Mondstadt.CliffsideSeedNearCapeOath)] = new EventShape(
+                "CLIFFSIDE_SEED_NEAR_CAPE_OATH", "SapphireSeedMirror",
+                new[] { "EAT", "PLANT" },
+                new[] { "pages.EAT.description", "pages.PLANT.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Mondstadt.GuildsStandingCommissionAtCapeOath)] = new EventShape(
                 "GUILDS_STANDING_COMMISSION_AT_CAPE_OATH", "TheLegendsWereTrueMirror",
                 new[] { "NAB_THE_MAP", "SLOWLY_FIND_AN_EXIT" },
@@ -725,8 +892,18 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.StormTouchedShardAtStormterrorsLair>(),
             [(TeyvatFrame.Mondstadt, typeof(ByrdonisNest))] =
                 () => ModelDb.Event<Events.Mondstadt.WindfalconsRoost>(),
+            [(TeyvatFrame.Mondstadt, typeof(DenseVegetation))] =
+                () => ModelDb.Event<Events.Mondstadt.BrambleLineBelowWolvendom>(),
+            [(TeyvatFrame.Mondstadt, typeof(JungleMazeAdventure))] =
+                () => ModelDb.Event<Events.Mondstadt.GuildCommissionAtStarsnatchCliff>(),
+            [(TeyvatFrame.Mondstadt, typeof(LuminousChoir))] =
+                () => ModelDb.Event<Events.Mondstadt.SingingGrowthUnderWolvendom>(),
+            [(TeyvatFrame.Mondstadt, typeof(MorphicGrove))] =
+                () => ModelDb.Event<Events.Mondstadt.WolfRingAboveWindrise>(),
             [(TeyvatFrame.Mondstadt, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Mondstadt.SpringvaleCheeseCellar>(),
+            [(TeyvatFrame.Mondstadt, typeof(SapphireSeed))] =
+                () => ModelDb.Event<Events.Mondstadt.CliffsideSeedNearCapeOath>(),
             [(TeyvatFrame.Mondstadt, typeof(TheLegendsWereTrue))] =
                 () => ModelDb.Event<Events.Mondstadt.GuildsStandingCommissionAtCapeOath>(),
             [(TeyvatFrame.Liyue, typeof(BrainLeech))] =
@@ -776,8 +953,18 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/brain_leech.png",
             ["WINDFALCONS_ROOST"] =
                 "res://images/events/byrdonis_nest.png",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM"] =
+                "res://images/events/dense_vegetation.png",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF"] =
+                "res://images/events/jungle_maze_adventure.png",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM"] =
+                "res://images/events/luminous_choir.png",
+            ["WOLF_RING_ABOVE_WINDRISE"] =
+                "res://images/events/morphic_grove.png",
             ["SPRINGVALE_CHEESE_CELLAR"] =
                 "res://images/events/room_full_of_cheese.png",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH"] =
+                "res://images/events/sapphire_seed.png",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH"] =
                 "res://images/events/the_legends_were_true.png",
             ["CONTRACT_RECITING_GROWTH"] =
