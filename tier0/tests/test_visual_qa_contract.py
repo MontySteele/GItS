@@ -83,7 +83,21 @@ def test_the_sample_contract_is_well_formed():
     # Asserted as a number rather than derived, so a scene that gains a texture
     # nobody added to the fixture universe fails HERE, beside the file, and not
     # only in the scene-deps gate downstream that resolves against it.
-    assert len(parsed.resources) == 38
+    #
+    # Then +36 for the two act-1 dressings' complete placeholder asset sets,
+    # eighteen rows each (`tools/gen_act_placeholders.py`;
+    # `docs/current/operations/act-assets.md` is the shape in one table): eight
+    # committed scene sources -- five `_bg_NN_a` layers, one `_fg_a`, the
+    # background root and the rest site -- and ten Tier F textures, six layer
+    # plates, one rest-site plate and the three map backgrounds. The scenes sit
+    # under `pck-src/scenes/...` rather than a `teyvat/` namespace because
+    # `ActModel`'s five asset-path properties are NON-VIRTUAL and derive
+    # `res://scenes/backgrounds/<id>/...` and `res://scenes/rest_site/...` from
+    # the act id; satisfying them with our own files is what retires the
+    # `get_FilePathIdentifier` alias patch for act 1. The thirty-six rows are
+    # pinned against the generator's own plan in
+    # tier0/tests/test_act_placeholder_plan.py, so neither side can move alone.
+    assert len(parsed.resources) == 74
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -184,6 +198,8 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     report = contract.run(None, ROOT, package_dir=package, pck_src=PCK_SRC)
     assert report.errors == [], report.render(verbose=True)
     # +6 at EB-40, +2 for the pet, +6 for the stage, +2 for the Teyvat
-    # spike's Hilichurl Guard (scene + its Tier F texture).
-    assert report.checked["contract_resources"] == 38
+    # spike's Hilichurl Guard (scene + its Tier F texture), +36 for the two
+    # act-1 dressings' placeholder asset sets (eighteen each; see the count's
+    # reason above the first assertion).
+    assert report.checked["contract_resources"] == 74
     assert report.checked["package_files"] == 3
