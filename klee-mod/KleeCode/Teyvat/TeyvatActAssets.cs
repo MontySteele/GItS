@@ -19,8 +19,9 @@ namespace KleeMod.Teyvat;
 /// (`review/records/teyvat-spike-build-2026-09-15.md` item 1).
 ///
 /// THIS CLASS IS HOW THAT ALIAS RETIRES. `tools/gen_act_placeholders.py`
-/// writes a complete placeholder set per dressing -- five `_bg_NN_a` layer
-/// scenes, one `_fg_a`, a background root, a rest site and three map PNGs --
+/// writes a complete placeholder set per dressing, for all six of them --
+/// five `_bg_NN_a` layer scenes, one `_fg_a`, a background root, a rest site
+/// and three map PNGs each --
 /// and <see cref="HasDressedAssets"/> is the single boolean that decides
 /// whether the identifier is left alone (our files are there) or aliased
 /// (they are not). `docs/current/operations/act-assets.md` is the shape.

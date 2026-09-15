@@ -99,52 +99,149 @@ public class TeyvatFrameTests : IDisposable
         Assert.Equal(BaseActs, ModelDb_Acts_TeyvatDressings_Patch.Plan(BaseActs));
     }
 
+    /// <summary>
+    /// THE SIX-ACT SHAPE, which is the whole of R273's engineering.
+    ///
+    /// The base game ships TWO zones at index 0 and exactly ONE at each of
+    /// index 1 and 2. So act 1's dressings are a one-for-one swap that leaves
+    /// the bucket size alone, while acts 2 and 3 each replace their single
+    /// base act with a PAIR of faces on the same zone
+    /// (`review/ruled/teyvat-nation-mapping-2026-09-14.md` sec.1). Four acts
+    /// in, six out, two per index, and no base zone reachable with the arm on.
+    /// </summary>
     [Fact]
-    public void With_the_arm_on_the_two_act_one_zones_are_replaced_not_joined()
+    public void With_the_arm_on_every_base_zone_is_replaced_by_its_faces()
     {
         TeyvatFrame.Enabled = true;
 
         var planned = ModelDb_Acts_TeyvatDressings_Patch.Plan(BaseActs);
 
-        // The SAME LENGTH is the whole point: act 1 is still exactly two
-        // candidates, so `ActModel.GetRandomList` still makes exactly one
-        // `rng.NextItem` draw against a two-element list at index 0. A
-        // four-way roll would put the base zone and its own dressing in the
-        // same coin.
-        Assert.Equal(4, planned.Count);
+        Assert.Equal(6, planned.Count);
         Assert.Equal(
-            new[] { typeof(Mondstadt), typeof(Liyue), typeof(Hive), typeof(Glory) },
+            new[]
+            {
+                typeof(Mondstadt), typeof(Liyue),
+                typeof(Natlan), typeof(Inazuma),
+                typeof(Fontaine), typeof(Sumeru),
+            },
             planned);
-        Assert.DoesNotContain(typeof(Overgrowth), planned);
-        Assert.DoesNotContain(typeof(Underdocks), planned);
+
+        // Not a single base zone survives: appending a face beside the zone it
+        // dresses would put the same zone in its own coin twice.
+        foreach (var baseAct in BaseActs)
+        {
+            Assert.DoesNotContain(baseAct, planned);
+        }
     }
 
+    /// <summary>
+    /// TWO CANDIDATES AT EVERY INDEX, expressed over the swap table rather
+    /// than over the planned list, because `Plan` deals in types and
+    /// `ActsByIndex` is the game's own derivation from `Acts` that no headless
+    /// process can build.
+    ///
+    /// `ActModel.GetRandomList` (`ActModel.cs:551-578`) calls `rng.NextItem`
+    /// ONCE per index bucket whatever the bucket holds -- the loop is over
+    /// `actsByIndex` and not over candidates -- so three draws before and
+    /// three after, and a two-element bucket is a coin.
+    /// </summary>
     [Fact]
-    public void Acts_two_and_three_are_untouched_by_the_arm()
+    public void Each_act_index_ends_up_with_exactly_two_faces()
     {
-        TeyvatFrame.Enabled = true;
+        var byBase = ModelDb_Acts_TeyvatDressings_Patch.Swaps
+            .ToDictionary(s => s.BaseAct, s => s.Dressings.Count);
 
-        var planned = ModelDb_Acts_TeyvatDressings_Patch.Plan(BaseActs);
+        // Act 1: two base zones, one face each.
+        Assert.Equal(1, byBase[typeof(Overgrowth)]);
+        Assert.Equal(1, byBase[typeof(Underdocks)]);
 
-        // The frame packet sec.4 leaves acts 2 and 3 to a later pick. The
-        // spike must not quietly pre-empt it.
-        Assert.Equal(typeof(Hive), planned[2]);
-        Assert.Equal(typeof(Glory), planned[3]);
+        // Acts 2 and 3: one base zone, two faces each.
+        Assert.Equal(2, byBase[typeof(Hive)]);
+        Assert.Equal(2, byBase[typeof(Glory)]);
+
+        // Every face appears exactly once across the whole table.
+        var faces = ModelDb_Acts_TeyvatDressings_Patch.Swaps
+            .SelectMany(s => s.Dressings).ToList();
+        Assert.Equal(6, faces.Count);
+        Assert.Equal(6, faces.Distinct().Count());
+    }
+
+    /// <summary>
+    /// EQUAL EVENT COUNTS AT EVERY INDEX, BY IDENTITY, which is the hard rule
+    /// the whole arm rests on (`review/records/teyvat-spike-zone-read-2026-09-14.md`
+    /// sec.6). `ActModel.GenerateRooms` shuffles `AllEvents.Concat(
+    /// AllSharedEvents)` on the run's `UpFront` rng at run start, so two faces
+    /// at one index whose pools differed in LENGTH would consume different
+    /// numbers of draws and move every later roll -- bosses, Ancients,
+    /// encounter order.
+    ///
+    /// The pin is stronger than a count comparison and cheaper: each face's
+    /// private `Base` property is typed as the zone it dresses, so proving
+    /// both faces at an index name the SAME base type proves they return the
+    /// same list object, and one list has one count. The delegation itself is
+    /// pinned above, through `Il`, for each of the six.
+    /// </summary>
+    [Fact]
+    public void Both_faces_at_an_index_dress_the_same_base_zone()
+    {
+        foreach (var (baseAct, dressings, _) in ModelDb_Acts_TeyvatDressings_Patch.Swaps)
+        {
+            foreach (var dressing in dressings)
+            {
+                var basis = dressing.GetProperty(
+                    "Base", BindingFlags.NonPublic | BindingFlags.Static);
+
+                Assert.NotNull(basis);
+                Assert.Equal(baseAct, basis!.PropertyType);
+            }
+        }
+    }
+
+    /// <summary>
+    /// EVERY FACE IS IN THE DRESSING REGISTRY, and its fallback points at the
+    /// zone it actually dresses.
+    ///
+    /// `TeyvatFrame.AssetAlias` is both the alias table and the registry
+    /// `TeyvatFrame.IsDressing` answers from, so a face published as an act
+    /// but missing here would be named by its loc row and then silently
+    /// unable to carry a monster name or an event substitution. The alias
+    /// value is the base zone's own `FilePathIdentifier` -- `Id.Entry`
+    /// lowercased, which for every base act is its class name lowercased --
+    /// so a face whose placeholder set has not reached the pck borrows the
+    /// right zone's art rather than some other act's.
+    /// </summary>
+    [Fact]
+    public void Every_face_is_registered_and_falls_back_to_its_own_base_zone()
+    {
+        foreach (var (baseAct, dressings, _) in ModelDb_Acts_TeyvatDressings_Patch.Swaps)
+        {
+            foreach (var dressing in dressings)
+            {
+                var entry = dressing.Name.ToUpperInvariant();
+
+                Assert.True(TeyvatFrame.IsDressing(entry), entry);
+                Assert.Equal(baseAct.Name.ToLowerInvariant(), TeyvatFrame.AssetAlias[entry]);
+            }
+        }
     }
 
     [Fact]
-    public void A_base_act_the_postfix_cannot_find_is_left_alone_not_appended_to()
+    public void A_base_act_the_postfix_cannot_find_is_left_alone_not_spliced_around()
     {
         TeyvatFrame.Enabled = true;
 
         // A game patch that removed Underdocks, or a second mod that already
-        // replaced it. Appending Liyue here would make act 1 a three-way roll.
+        // replaced it. Splicing Liyue in here would make act 1 a three-way
+        // roll against a zone that is no longer the one it dresses.
         var without = new[] { typeof(Overgrowth), typeof(Hive), typeof(Glory) };
         var planned = ModelDb_Acts_TeyvatDressings_Patch.Plan(without);
 
-        Assert.Equal(3, planned.Count);
+        // Mondstadt (1 for 1), then the Hive's two and Glory's two.
+        Assert.Equal(5, planned.Count);
         Assert.DoesNotContain(typeof(Liyue), planned);
         Assert.Contains(typeof(Mondstadt), planned);
+        Assert.Contains(typeof(Natlan), planned);
+        Assert.Contains(typeof(Sumeru), planned);
     }
 
     // ---------------------------------------------------------------
@@ -154,6 +251,10 @@ public class TeyvatFrameTests : IDisposable
     [Theory]
     [InlineData(typeof(Mondstadt))]
     [InlineData(typeof(Liyue))]
+    [InlineData(typeof(Natlan))]
+    [InlineData(typeof(Inazuma))]
+    [InlineData(typeof(Fontaine))]
+    [InlineData(typeof(Sumeru))]
     public void A_dressings_encounter_table_is_the_base_zones_own_object(Type dressing)
     {
         var calls = Il.Calls(Method(dressing, nameof(ActModel.GenerateAllEncounters)));
@@ -172,6 +273,10 @@ public class TeyvatFrameTests : IDisposable
     [Theory]
     [InlineData(typeof(Mondstadt))]
     [InlineData(typeof(Liyue))]
+    [InlineData(typeof(Natlan))]
+    [InlineData(typeof(Inazuma))]
+    [InlineData(typeof(Fontaine))]
+    [InlineData(typeof(Sumeru))]
     public void A_dressings_event_pool_is_the_base_zones_own_list(Type dressing)
     {
         // EQUAL COUNTS ARE A HARD RULE (the read's sec.6): `GenerateRooms`
@@ -193,6 +298,10 @@ public class TeyvatFrameTests : IDisposable
     [Theory]
     [InlineData(typeof(Mondstadt))]
     [InlineData(typeof(Liyue))]
+    [InlineData(typeof(Natlan))]
+    [InlineData(typeof(Inazuma))]
+    [InlineData(typeof(Fontaine))]
+    [InlineData(typeof(Sumeru))]
     public void A_dressings_ancient_pool_is_the_base_zones_own(Type dressing)
     {
         var calls = Il.Calls(Getter(dressing, nameof(ActModel.AllAncients)));
@@ -203,14 +312,28 @@ public class TeyvatFrameTests : IDisposable
     }
 
     [Theory]
-    [InlineData(typeof(Mondstadt))]
-    [InlineData(typeof(Liyue))]
-    public void A_dressing_stands_at_act_one_and_needs_no_epoch(Type dressing)
+    [InlineData(typeof(Mondstadt), 0)]
+    [InlineData(typeof(Liyue), 0)]
+    [InlineData(typeof(Natlan), 1)]
+    [InlineData(typeof(Inazuma), 1)]
+    [InlineData(typeof(Fontaine), 2)]
+    [InlineData(typeof(Sumeru), 2)]
+    public void A_dressing_stands_at_its_base_zones_index_and_needs_no_epoch(
+        Type dressing, int index)
     {
         // `Index` and `IsDefault` decide whether the pair is a coin at all,
         // and both are compile-time literals in the dressing classes, so the
-        // IL is read directly: an `Index` getter must be `ldc.i4.0; ret` and
+        // IL is read directly: an `Index` getter must be `ldc.i4.<n>; ret` --
+        // the `ldc.i4.<n>` short forms are consecutive opcodes from `ldc.i4.0`
+        // at 0x16, so index n is 0x16 + n for the 0..2 this can ever be -- and
         // an `IsDefault` getter `ldc.i4.1; ret`.
+        //
+        // THE INDEX IS THE PAIRING, which is why it is pinned per dressing. A
+        // face at the wrong index joins the wrong coin, and since its base
+        // zone has already been removed that leaves one index with a single
+        // candidate and another with three. Act 1's two faces stand at 0
+        // (Overgrowth's and Underdocks'), act 2's at 1 (the Hive's) and act
+        // 3's at 2 (Glory's).
         //
         // `IsDefault => true` is load-bearing and is the reason this pin is
         // worth its awkwardness: `ActModel.GetRandomList` FORCES a
@@ -218,7 +341,7 @@ public class TeyvatFrameTests : IDisposable
         // single-player run (`ActModel.cs:563`), so a dressing marked
         // non-default would appear on the first run whatever the coin said.
         Assert.Equal(
-            new byte[] { 0x16, 0x2a },
+            new byte[] { (byte)(0x16 + index), 0x2a },
             Getter(dressing, nameof(ActModel.Index)).GetMethodBody()!.GetILAsByteArray());
         Assert.Equal(
             new byte[] { 0x17, 0x2a },
@@ -452,11 +575,52 @@ public class TeyvatFrameTests : IDisposable
         // since every one of its patches is table-driven.
         var dressings = TeyvatFrame.AssetAlias.Keys.ToHashSet(StringComparer.Ordinal);
 
-        Assert.Equal(new[] { TeyvatFrame.Mondstadt, TeyvatFrame.Liyue }.OrderBy(d => d),
-                     dressings.OrderBy(d => d));
+        Assert.Equal(
+            new[]
+            {
+                TeyvatFrame.Mondstadt, TeyvatFrame.Liyue,
+                TeyvatFrame.Natlan, TeyvatFrame.Inazuma,
+                TeyvatFrame.Fontaine, TeyvatFrame.Sumeru,
+            }.OrderBy(d => d, StringComparer.Ordinal),
+            dressings.OrderBy(d => d, StringComparer.Ordinal));
         Assert.All(TeyvatFrame.MonsterNames.Keys, k => Assert.Contains(k.Dressing, dressings));
         Assert.All(TeyvatFrame.IntentWords.Keys, k => Assert.Contains(k.Dressing, dressings));
         Assert.All(TeyvatFrame.StillPortraits.Keys, k => Assert.Contains(k.Dressing, dressings));
+    }
+
+    /// <summary>
+    /// EVERY FACE HAS AN ACT TITLE, or the map screen prints a raw key.
+    ///
+    /// `ActModel.Title` is `new LocString("acts", Id.Entry + ".title")` and
+    /// there is no fallback: an unmerged key renders as `NATLAN.title` on the
+    /// map, in the run-history row and in rich presence. The rows are written
+    /// inline in `TeyvatLoc.Inject` rather than in a table, so the pin reads
+    /// the method's string literals -- which is what a missing row actually
+    /// looks like from here.
+    /// </summary>
+    [Fact]
+    public void Every_dressing_has_an_act_title_row()
+    {
+        // Reached by name through the assembly: `TeyvatLoc` is `internal`,
+        // like most of the arm, and an `InternalsVisibleTo` for one pin is a
+        // bigger change than this line.
+        var strings = Il.Strings(StaticMethod(
+            InArm("KleeMod.Teyvat.TeyvatLoc"), "Inject")).ToHashSet(
+                StringComparer.Ordinal);
+
+        foreach (var dressing in TeyvatFrame.AssetAlias.Keys)
+        {
+            // ONE `ldstr` AND NOT TWO: `TeyvatFrame.<Face>` is a `const`, so
+            // `<Face> + ".title"` is folded at compile time and the literal in
+            // the method body is the whole key. That is the key
+            // `ActModel.Title` asks the `acts` table for.
+            Assert.Contains(dressing + ".title", strings);
+
+            // And the value, which is the entry in title case -- the only
+            // thing in this arm a player ever reads as the act's name.
+            Assert.Contains(
+                dressing[..1] + dressing[1..].ToLowerInvariant(), strings);
+        }
     }
 
     [Fact]

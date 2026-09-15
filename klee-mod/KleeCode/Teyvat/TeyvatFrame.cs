@@ -56,6 +56,28 @@ public static class TeyvatFrame
     public const string Liyue = "LIYUE";
 
     /// <summary>
+    /// `Natlan` -- act 2's first face (R273 pick 1 at its default, layout 1).
+    ///
+    /// ACTS 2 AND 3 ARE ONE ZONE WITH TWO FACES EACH. The base game ships
+    /// exactly one zone at index 1 and one at index 2, so both act-2 dressings
+    /// stand on the Hive and both act-3 dressings on Glory
+    /// (`review/ruled/teyvat-nation-mapping-2026-09-14.md` sec.1). That is
+    /// invisible from here -- a dressing is an `Id.Entry` and a row in the
+    /// tables below, whatever it dresses -- and visible only in
+    /// `Patches/ModelDbActsPatch`, which splices a pair in where one act was.
+    /// </summary>
+    public const string Natlan = "NATLAN";
+
+    /// <summary>`Inazuma` -- act 2's second face, the Hive's other coat.</summary>
+    public const string Inazuma = "INAZUMA";
+
+    /// <summary>`Fontaine` -- act 3's first face, standing on Glory.</summary>
+    public const string Fontaine = "FONTAINE";
+
+    /// <summary>`Sumeru` -- act 3's second face, Glory's other coat.</summary>
+    public const string Sumeru = "SUMERU";
+
+    /// <summary>
     /// THE ASSET ALIAS, and it is a spike shortcut stated as one.
     ///
     /// `ActModel.FilePathIdentifier` is <c>Id.Entry.ToLowerInvariant()</c>,
@@ -78,12 +100,26 @@ public static class TeyvatFrame
     /// `ActModel.Title` reads `Id.Entry`, so the act's name on the map screen
     /// is the dressing's ("MONDSTADT.title" in the `acts` loc table) while its
     /// pictures are Overgrowth's.
+    ///
+    /// IT IS ALSO THE ARM'S DRESSING REGISTRY, and that is why every face is
+    /// in here whether or not it needs the fallback. <see cref="IsDressing"/>
+    /// is `AssetAlias.ContainsKey`, and it is what
+    /// `Patches/MonsterNamePatch` and `Patches/PullNextEventPatch` ask before
+    /// they dress anything -- so a face missing from this table would be
+    /// published as an act, named by its loc row, and then silently unable to
+    /// carry a monster name or an event substitution. The four act-2 and
+    /// act-3 faces land here with no monster or event rows of their own yet;
+    /// that is content and comes later.
     /// </summary>
     public static readonly IReadOnlyDictionary<string, string> AssetAlias =
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
             [Mondstadt] = "overgrowth",
             [Liyue] = "underdocks",
+            [Natlan] = "hive",
+            [Inazuma] = "hive",
+            [Fontaine] = "glory",
+            [Sumeru] = "glory",
         };
 
     /// <summary>

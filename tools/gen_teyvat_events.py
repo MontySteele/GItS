@@ -87,11 +87,14 @@ class FaceSpec:
     substitution table is looked up by. `folder` is both the output directory
     and the C# namespace leaf.
 
-    `active` is how acts 2 and 3 wait: their faces are curated and listed here,
-    but their sibling ACTS do not exist (`TeyvatFrame` publishes two dressings,
-    at index 0), so generating their events would mint classes no run can
-    reach and a substitution table keyed on an act id nothing answers to.
-    Turning one on is this flag plus the act.
+    `active` is how acts 2 and 3 wait, and the reason CHANGED when R273's acts
+    landed. It used to be that their sibling ACTS did not exist, so generating
+    their events would have minted classes no run could reach and a
+    substitution table keyed on an act id nothing answered to. The acts exist
+    now -- `TeyvatFrame` publishes six dressings, two at each of the three
+    indices -- so what is left is the CONTENT: a face's mirrors have to be
+    written and read before its rows are emitted, exactly as act 1's six were.
+    Turning one on is this flag and its mirrors, and nothing else.
     """
 
     key: str
@@ -106,7 +109,7 @@ FACES: Tuple[FaceSpec, ...] = (
              "MONDSTADT", "Mondstadt"),
     FaceSpec("underdocks-liyue", "underdocks-liyue-2026-09-14.md",
              "LIYUE", "Liyue"),
-    # Acts 2 and 3, curated and waiting on their acts.
+    # Acts 2 and 3: the acts are published (R273); these wait on their mirrors.
     FaceSpec("glory-sumeru", "glory-sumeru-2026-09-14.md",
              "SUMERU", "Sumeru", active=False),
     FaceSpec("glory-fontaine", "glory-fontaine-2026-09-14.md",

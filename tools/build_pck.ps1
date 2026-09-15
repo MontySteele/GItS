@@ -249,7 +249,7 @@ if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $te
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
-# THE ACT-1 DRESSINGS' PLACEHOLDER ASSET SETS (tools/gen_act_placeholders.py,
+# THE ACT DRESSINGS' PLACEHOLDER ASSET SETS (tools/gen_act_placeholders.py,
 # docs/current/operations/act-assets.md). Three blocks per dressing, and the
 # split between them is NOT cosmetic:
 #
@@ -266,9 +266,15 @@ if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $te
 # Note-Skip and not an error, like every other block: art never blocks a build.
 # With the textures absent the scenes still export, and the EXPORT log sweep
 # turns their dangling ExtResources into a failed build rather than a silent
-# black layer -- which is the behaviour we want, because an act-1 dressing with
-# no background throws out of `BackgroundAssets` on its first combat.
-foreach ($dressing in 'mondstadt', 'liyue') {
+# black layer -- which is the behaviour we want, because a dressing with no
+# background throws out of `BackgroundAssets` on its first combat.
+#
+# SIX FACES, TWO PER ACT (R273 layout 1): act 1 as Mondstadt or Liyue, act 2 as
+# Natlan or Inazuma, act 3 as Fontaine or Sumeru. The list below is the
+# lowercased `Id.Entry` of each, which is `FilePathIdentifier`, which is what
+# every path here derives from -- and it is pinned against the generator's own
+# NATIONS tuple by tier0/tests/test_act_placeholder_plan.py.
+foreach ($dressing in 'mondstadt', 'liyue', 'natlan', 'inazuma', 'fontaine', 'sumeru') {
     $bgSrc = Join-Path $src "teyvat\backgrounds\$dressing"
     if (-not (Test-Path $bgSrc)) { Note-Skip "teyvat\backgrounds\$dressing" $bgSrc } else {
         $to = Join-Path $work "teyvat\backgrounds\$dressing"
