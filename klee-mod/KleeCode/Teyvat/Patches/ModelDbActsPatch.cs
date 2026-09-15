@@ -48,7 +48,7 @@ namespace KleeMod.Teyvat.Patches;
 /// candidate and may not take a patch at all.
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), "get_Acts")]
-internal static class ModelDb_Acts_TeyvatDressings_Patch
+public static class ModelDb_Acts_TeyvatDressings_Patch
 {
     /// <summary>
     /// The two swaps, stated once: base act type -> the dressing that stands
@@ -56,12 +56,48 @@ internal static class ModelDb_Acts_TeyvatDressings_Patch
     /// (Overgrowth then Underdocks), so the list this postfix hands back has
     /// the same shape and the same indices as the one it was given.
     /// </summary>
-    private static readonly IReadOnlyList<(System.Type BaseAct, System.Func<ActModel> Dressing)> Swaps =
-        new (System.Type, System.Func<ActModel>)[]
+    public static readonly IReadOnlyList<(System.Type BaseAct, System.Type Dressing, System.Func<ActModel> Resolve)> Swaps =
+        new (System.Type, System.Type, System.Func<ActModel>)[]
         {
-            (typeof(Overgrowth), () => ModelDb.Act<Mondstadt>()),
-            (typeof(Underdocks), () => ModelDb.Act<Liyue>()),
+            (typeof(Overgrowth), typeof(Mondstadt), () => ModelDb.Act<Mondstadt>()),
+            (typeof(Underdocks), typeof(Liyue), () => ModelDb.Act<Liyue>()),
         };
+
+    /// <summary>
+    /// THE DECISION, over TYPES rather than over instances, so it can be
+    /// exercised headlessly.
+    ///
+    /// `ModelDb` is outside the headless boundary -- it is populated only by
+    /// the game's boot, and `ReflectionHelper.GetSubtypesInMods` throws
+    /// outright before `ModManager` has initialised -- so no `dotnet test` can
+    /// call `ModelDb.Acts` or construct an `ActModel`. What it CAN do is ask
+    /// this method what the postfix would have produced, which is the same
+    /// decision with the instances left out: the same flag read, the same
+    /// table, the same in-place replacement, the same stand-down when a base
+    /// act is absent.
+    ///
+    /// The postfix below is then three lines over this, and the pin and the
+    /// shipped path cannot disagree about what a swap is.
+    /// </summary>
+    public static IReadOnlyList<System.Type> Plan(IReadOnlyList<System.Type> actTypes)
+    {
+        if (!TeyvatFrame.Enabled || actTypes == null)
+        {
+            return actTypes ?? new List<System.Type>();
+        }
+
+        var planned = actTypes.ToList();
+        foreach (var (baseAct, dressing, _) in Swaps)
+        {
+            var index = planned.IndexOf(baseAct);
+            if (index >= 0)
+            {
+                planned[index] = dressing;
+            }
+        }
+
+        return planned;
+    }
 
     /// <summary>
     /// ALLOCATES A NEW LIST rather than mutating `__result`. The value behind
@@ -81,21 +117,21 @@ internal static class ModelDb_Acts_TeyvatDressings_Patch
 
         var acts = __result.ToList();
 
-        foreach (var (baseAct, dressing) in Swaps)
+        foreach (var (baseAct, _, resolve) in Swaps)
         {
             var index = acts.FindIndex(a => a != null && a.GetType() == baseAct);
             if (index < 0)
             {
-                // The base act is not in the list -- a game patch moved it, or
-                // a second mod already replaced it. Standing down beats
-                // appending: a dressing appended to a list that no longer
+                // The base act is not in the list: a game patch moved it, or a
+                // second mod already replaced it. Standing down beats
+                // appending -- a dressing appended to a list that no longer
                 // holds the zone it dresses would be a THIRD candidate at
                 // index 0, which is the one outcome this patch exists to
-                // prevent.
+                // prevent. `Plan` makes the same choice.
                 continue;
             }
 
-            acts[index] = dressing();
+            acts[index] = resolve();
         }
 
         __result = acts;

@@ -52,7 +52,7 @@ namespace KleeMod.Teyvat.Patches;
 /// arm off, `PullNextEvent` returns exactly what it returned before.
 /// </summary>
 [HarmonyPatch(typeof(ActModel), nameof(ActModel.PullNextEvent))]
-internal static class ActModel_PullNextEvent_TeyvatConversions_Patch
+public static class ActModel_PullNextEvent_TeyvatConversions_Patch
 {
     /// <summary>
     /// (dressing, base event type) -> the conversion that stands in for it.

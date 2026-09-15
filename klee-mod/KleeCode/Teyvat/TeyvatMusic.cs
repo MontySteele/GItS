@@ -50,24 +50,24 @@ namespace KleeMod.Teyvat;
 /// `mondstadt` and `liyue` -- the ledger's own `act1_mondstadt` naming is one
 /// packager-side rename away and is the packager's business, not this file's.
 /// </summary>
-internal static class TeyvatMusic
+public static class TeyvatMusic
 {
     /// <summary>The pck namespace the packager writes into. One producer, one
     /// out-path (`operations/media.md` sec.1's rule).</summary>
-    internal const string Root = "res://teyvat/music/";
+    public const string Root = "res://teyvat/music/";
 
     /// <summary>The name of the node this arm adds under the run's music
     /// controller. Named, not anonymous, so a second call recognises its own
     /// work and an operator reading the remote scene tree knows whose node it
     /// is -- `Vfx/StaticPortraitIdle.PivotName`'s reason exactly.</summary>
-    internal const string PlayerNodeName = "TeyvatTrack";
+    public const string PlayerNodeName = "TeyvatTrack";
 
     /// <summary>
     /// The extensions the packager may produce, in preference order.
     /// `operations/media.md` sec.3: OGG Vorbis is the default, MP3 is
     /// accepted, WAV is never placed.
     /// </summary>
-    internal static readonly string[] Extensions = { ".ogg", ".mp3" };
+    public static readonly string[] Extensions = { ".ogg", ".mp3" };
 
     /// <summary>Directory lookups are cached: these sit on a path the run
     /// music controller reaches on every room change, and a `DirAccess` walk
@@ -87,7 +87,7 @@ internal static class TeyvatMusic
     /// Sorted, so a directory that somehow holds two tracks picks the same one
     /// every boot instead of whichever the filesystem offered first.
     /// </summary>
-    internal static string? TrackFor(string? actEntry)
+    public static string? TrackFor(string? actEntry)
     {
         if (string.IsNullOrEmpty(actEntry))
         {
@@ -157,7 +157,7 @@ internal static class TeyvatMusic
     /// all, which is also the answer to "surviving a combat start, a rest site
     /// and the map screen" -- those are room changes, not scene changes.
     /// </summary>
-    internal static bool Play(Node? host, string? actEntry)
+    public static bool Play(Node? host, string? actEntry)
     {
         var track = TrackFor(actEntry);
         if (host == null || track == null)
@@ -217,7 +217,7 @@ internal static class TeyvatMusic
     /// the game's own `StopMusic`, so the arm's track dies exactly where the
     /// act's track dies -- a run ending, a quit to menu.
     /// </summary>
-    internal static void Stop(Node? host)
+    public static void Stop(Node? host)
     {
         if (host == null)
         {

@@ -35,16 +35,16 @@ namespace KleeMod.Teyvat.Patches;
 /// compendium outside a run, and with the arm off.
 /// </summary>
 [HarmonyPatch(typeof(MonsterModel), nameof(MonsterModel.L10NMonsterLookup))]
-internal static class MonsterModel_L10NMonsterLookup_TeyvatNames_Patch
+public static class MonsterModel_L10NMonsterLookup_TeyvatNames_Patch
 {
     /// <summary>The separator between a base key and its dressing. A
     /// character the base game's own keys never contain, so a dressed key
     /// cannot collide with a shipped one.</summary>
-    internal const char DressingSeparator = '@';
+    public const char DressingSeparator = '@';
 
     /// <summary>The dressed key for a base key, or the base key unchanged.
     /// PURE and internal so the pin can ask it without a run.</summary>
-    internal static string Dressed(string key, string? dressing) =>
+    public static string Dressed(string key, string? dressing) =>
         dressing == null ? key : key + DressingSeparator + dressing;
 
     private static void Postfix(string entryName, ref LocString __result)
