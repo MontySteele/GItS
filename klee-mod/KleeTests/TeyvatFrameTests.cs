@@ -5,7 +5,7 @@ using System.Reflection;
 using HarmonyLib;
 using KleeMod.Teyvat;
 using KleeMod.Teyvat.Acts;
-using KleeMod.Teyvat.Events;
+using KleeMod.Teyvat.Events.Mirrors;
 using KleeMod.Teyvat.Patches;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Models;
@@ -216,27 +216,74 @@ public class TeyvatFrameTests : IDisposable
     }
 
     // ---------------------------------------------------------------
-    // Item 4.2: the converted event.
+    // Item 4.2, generalised: the DRESSED EVENTS.
+    //
+    // The spike had one, hand-written. There are six now, generated from the
+    // curated faces by `tools/gen_teyvat_events.py`, and every pin below is
+    // written over the GENERATED TABLE rather than over a class name, so
+    // adding a seventh costs no test.
     // ---------------------------------------------------------------
 
+    /// <summary>Every dressed event type the generator emitted, with the
+    /// mirror it subclasses and the base event it stands in for.</summary>
+    public static IEnumerable<object[]> DressedEvents() =>
+        Shapes().Select(kv => new object[] { kv.Key });
+
     [Fact]
-    public void The_conversion_is_a_substitution_and_not_a_pool_edit()
+    public void Every_dressed_event_is_a_one_line_subclass_of_a_mirror()
     {
-        // The converted event is NOT in any act's `AllEvents` -- Room Full of
-        // Cheese is one of `ModelDb.AllSharedEvents`'s eighteen
-        // (`ModelDb.cs:157`), not an act event, so swapping it inside a
-        // dressing's pool would have ADDED a fourteenth act event beside the
-        // shared thirteenth and changed the pool's length.
+        // THE SHAPE DECISION, pinned. A dressed event declares no member of
+        // its own: every mechanic is in the mirror, and everything else --
+        // `Id.Entry`, `Title`, `InitialDescription`, every option key -- is
+        // derived by the engine from the class NAME. A generated class that
+        // grew a body would mean a mechanic had been authored per nation,
+        // which is the exact drift this surface exists to prevent.
+        Assert.NotEmpty(Shapes());
+        foreach (var (dressed, shape) in Shapes())
+        {
+            Assert.True(dressed.IsSealed, dressed.Name + " is not sealed");
+            Assert.Equal(shape.Mirror, dressed.BaseType!.Name);
+            Assert.True(dressed.BaseType.IsAbstract,
+                shape.Mirror + " must be abstract so ModelDb does not register it");
+            Assert.Empty(dressed.GetMembers(
+                BindingFlags.Public | BindingFlags.NonPublic
+              | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Where(m => m.Name != ".ctor"));
+        }
+    }
+
+    [Fact]
+    public void A_dressed_events_entry_is_slugified_from_its_own_class_name()
+    {
+        // `ModelDb.GetEntry(type)` is `StringHelper.Slugify(type.Name)` and
+        // `OptionKey` slugifies `GetType().Name`, so the id and every loc key
+        // follow the dressed name with no table. The generator's rows are
+        // written against that derivation; this is the two sides agreeing.
+        foreach (var (dressed, shape) in Shapes())
+        {
+            Assert.Equal(shape.BaseEntry, Slugify(dressed.Name));
+        }
+    }
+
+    [Fact]
+    public void The_substitution_is_a_substitution_and_not_a_pool_edit()
+    {
+        // A dressed event is NOT in any act's `AllEvents`. The four base
+        // events dressed today are all in `ModelDb.AllSharedEvents`'s eighteen
+        // (`ModelDb.cs:157`), not act events, so swapping one inside a
+        // dressing's pool would have ADDED an event beside the shared one and
+        // changed the pool's LENGTH -- which moves the run's `UpFront` rng.
         //
-        // The pin is that the arm's own event class is reached from the
-        // PullNextEvent postfix's table and from nowhere else in the assembly.
+        // The pin is that a dressed model is constructed from the generated
+        // substitution table and from nowhere else in the assembly.
+        var dressed = Shapes().Keys.ToHashSet();
         var reachedFrom = typeof(TeyvatFrame).Assembly
             .GetTypes()
             .Where(t => t.Namespace != null && t.Namespace.StartsWith("KleeMod.Teyvat", StringComparison.Ordinal))
             .SelectMany(t => t.GetMethods(BindingFlags.Static | BindingFlags.Instance
                                         | BindingFlags.Public | BindingFlags.NonPublic
                                         | BindingFlags.DeclaredOnly))
-            .Where(m => !m.IsAbstract && m.DeclaringType != typeof(SpringvaleCheeseCellar))
+            .Where(m => !m.IsAbstract && !dressed.Contains(m.DeclaringType!))
             .Where(m => Il.Calls(m).Contains("ModelDb.Event"))
             // A lambda in a field initialiser compiles into a nested `<>c`
             // closure class, so the owner is the outermost non-generated type.
@@ -244,38 +291,103 @@ public class TeyvatFrameTests : IDisposable
             .Distinct()
             .ToList();
 
-        Assert.Equal(
-            new[] { nameof(ActModel_PullNextEvent_TeyvatConversions_Patch) },
-            reachedFrom);
+        Assert.Equal(new[] { "TeyvatGeneratedEvents" }, reachedFrom);
     }
 
-    [Fact]
-    public void The_conversion_carries_the_base_events_act_gate()
+    [Theory]
+    [MemberData(nameof(MirrorPairs))]
+    public void A_mirror_carries_its_base_events_act_gate(Type mirror, Type baseEvent)
     {
         // `RoomSet.EnsureNextEventIsValid` consults whatever event is at the
         // head of the pre-shuffled list -- which is the BASE event -- and the
         // postfix then swaps. Identical gates are what make that ordering
-        // irrelevant: both answer `CurrentActIndex < 2`.
-        var mine = Il.Calls(Method(typeof(SpringvaleCheeseCellar), nameof(EventModel.IsAllowed)));
-        var theirs = Il.Calls(Method(typeof(RoomFullOfCheese), nameof(EventModel.IsAllowed)));
+        // irrelevant.
+        // A base event that does not OVERRIDE `IsAllowed` takes
+        // `EventModel`'s `return true` -- This or That is one -- so "no
+        // declared method" is itself an answer the mirror has to match, and
+        // `DeclaredOnlyCalls` returns null for it rather than throwing.
+        var mine = DeclaredOnlyCalls(mirror, nameof(EventModel.IsAllowed));
+        var theirs = DeclaredOnlyCalls(baseEvent, nameof(EventModel.IsAllowed));
 
-        Assert.Equal(theirs.OrderBy(c => c, StringComparer.Ordinal),
-                     mine.OrderBy(c => c, StringComparer.Ordinal));
+        Assert.Equal(theirs == null, mine == null);
+        if (theirs != null)
+        {
+            Assert.Equal(theirs, mine);
+        }
     }
 
-    [Fact]
-    public void The_conversion_mirrors_the_base_events_two_outcomes()
+    [Theory]
+    [MemberData(nameof(MirrorPairs))]
+    public void A_mirror_offers_the_same_number_of_options_as_its_base(Type mirror, Type baseEvent)
     {
-        // Hygiene-grade means checkable: the two option bodies reach the same
-        // commands as the base event's, so nothing mechanical was authored.
-        var gorge = Il.Calls(Private(typeof(SpringvaleCheeseCellar), "TasteTheRacks"));
-        Assert.Contains("CardFactory.CreateForReward", gorge);
-        Assert.Contains("EventModel.SelectCardsToAddToDeckFromGrid", gorge);
+        // A count pin on a call the method demonstrably makes, which is the
+        // only count `Il.CallSequence` is safe for (its own caveat). The count
+        // the re-proof read as zero is the one this is looking at.
+        var mine = Il.CallSequence(Method(mirror, "GenerateInitialOptions"))
+            .Count(c => c == "EventOption..ctor");
+        var theirs = Il.CallSequence(Method(baseEvent, "GenerateInitialOptions"))
+            .Count(c => c == "EventOption..ctor");
 
-        var search = Il.Calls(Private(typeof(SpringvaleCheeseCellar), "HaulOutTheBackWall"));
-        Assert.Contains("CreatureCmd.Damage", search);
-        Assert.Contains("RelicCmd.Obtain", search);
+        Assert.Equal(theirs, mine);
+        Assert.NotEqual(0, mine);
     }
+
+    [Theory]
+    [MemberData(nameof(MirrorPairs))]
+    public void A_mirror_reaches_the_same_commands_as_its_base(Type mirror, Type baseEvent)
+    {
+        // Hygiene-grade means checkable: the mirror's option bodies reach the
+        // same COMMANDS as the base event's, so nothing mechanical was
+        // authored. Compared as a SET over the private option handlers,
+        // because the handlers are renamed by nothing and ordered by nothing
+        // that matters -- what matters is that no command appears in one and
+        // not the other.
+        Assert.Equal(CommandsIn(baseEvent), CommandsIn(mirror));
+    }
+
+    /// <summary>
+    /// The call set of one DECLARED method, or null when the type does not
+    /// declare it. Compiler-generated lambda names are normalised: a lambda in
+    /// `IsAllowed` compiles to `&lt;&gt;c.&lt;IsAllowed&gt;b__N_M`, where N is the
+    /// ordinal of the declaring method within its type -- which differs between
+    /// a base event and a mirror for no reason that means anything, and would
+    /// otherwise make every predicate-carrying gate look changed.
+    /// </summary>
+    private static IReadOnlyList<string> DeclaredOnlyCalls(Type type, string name)
+    {
+        var method = type.GetMethod(name,
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+          | BindingFlags.DeclaredOnly);
+        if (method == null)
+        {
+            return null;
+        }
+
+        return Il.Calls(method)
+            .Select(c => System.Text.RegularExpressions.Regex.Replace(
+                c, @"b__\d+_(\d+)$", "b__$1"))
+            .OrderBy(c => c, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private static IReadOnlyList<string> CommandsIn(Type eventType) =>
+        eventType
+            .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic
+                      | BindingFlags.Public | BindingFlags.DeclaredOnly)
+            .SelectMany(Il.Calls)
+            .Where(c => c.Contains("Cmd.") || c.StartsWith("CardFactory.", StringComparison.Ordinal)
+                     || c.StartsWith("RelicFactory.", StringComparison.Ordinal))
+            .Distinct()
+            .OrderBy(c => c, StringComparer.Ordinal)
+            .ToList();
+
+    public static IEnumerable<object[]> MirrorPairs() =>
+        new[]
+        {
+            new object[] { typeof(RoomFullOfCheeseMirror), typeof(RoomFullOfCheese) },
+            new object[] { typeof(TheLegendsWereTrueMirror), typeof(TheLegendsWereTrue) },
+            new object[] { typeof(ThisOrThatMirror), typeof(ThisOrThat) },
+        };
 
     // ---------------------------------------------------------------
     // Items 4.3 and 4.4: the dressing tables, and the music's silence.
@@ -454,9 +566,10 @@ public class TeyvatFrameTests : IDisposable
     // ---------------------------------------------------------------
 
     /// <summary>
-    /// EB-765, and it is the whole defect reduced to a set comparison.
+    /// EB-765, and it is the whole defect reduced to a set comparison --
+    /// now asked of every generated dressing at once.
     ///
-    /// `EventOption`'s constructor does not read the key it is handed -- it
+    /// `EventOption`'s constructor does not read the key it is handed: it
     /// reads `eventModel.GetOptionTitle(textKey)` and `GetOptionDescription`,
     /// which are `LocString.GetIfExists(LocTable, textKey + ".title")` and
     /// `+ ".description"` (`EventModel.cs:216-224`). `GetIfExists` answers NULL
@@ -464,91 +577,113 @@ public class TeyvatFrameTests : IDisposable
     /// whose first line dereferences that null through
     /// `CharacterModel.AddDetailsTo`. So a missing `.description` row is not a
     /// blank line on the page: it is an NRE that aborts
-    /// `GenerateInitialOptions` before the first option exists.
+    /// `GenerateInitialOptions` before the first option exists. The spike
+    /// shipped one FLAT row per option, which is why the page came up with
+    /// `options: []`.
     ///
-    /// The spike shipped one FLAT row per option, which is why the page came
-    /// up with `options: []`. The pin is that every key the event asks for has
-    /// a row, with an option key expanded into the two the engine derives from
-    /// it -- the same shape the base event's own rows have in the pck
-    /// (`ROOM_FULL_OF_CHEESE.pages.INITIAL.options.GORGE.title` and
-    /// `.description`).
-    ///
-    /// LITERALS ARE THE RIGHT SOURCE HERE because that is what the class
-    /// contains: every key it asks for is an `ldstr` in one of its methods,
-    /// except the two the base class derives from `Id.Entry`, which are
-    /// asserted by name.
+    /// THE GENERATED SHAPE IS THE RIGHT SOURCE HERE, where the spike's pin
+    /// read `ldstr` literals out of the class. A dressed event has no
+    /// literals -- it has no body at all -- because every key is derived from
+    /// its name at runtime by `EventModel.OptionKey` and `Id.Entry`. So the
+    /// key set is rebuilt here the same way the engine builds it, from the
+    /// option and page names the generator recorded off the base event, and
+    /// compared against the merged rows.
     /// </summary>
     [Fact]
-    public void Every_loc_key_the_converted_event_asks_for_has_a_merged_row()
+    public void Every_loc_key_a_dressed_event_asks_for_has_a_merged_row()
     {
         var rows = EventRows();
-        const string entry = "SPRINGVALE_CHEESE_CELLAR";
+        Assert.NotEmpty(Shapes());
 
-        var asked = new HashSet<string>(StringComparer.Ordinal)
+        foreach (var (dressed, shape) in Shapes())
         {
-            // `EventModel.Title` and `InitialDescription` (`:62`, `:64`).
-            entry + ".title",
-            entry + ".pages.INITIAL.description",
-        };
-
-        foreach (var method in typeof(SpringvaleCheeseCellar).GetMethods(
-                     BindingFlags.Public | BindingFlags.NonPublic
-                   | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-        {
-            foreach (var literal in Il.Strings(method))
+            var entry = shape.BaseEntry;
+            var asked = new HashSet<string>(StringComparer.Ordinal)
             {
-                if (!literal.StartsWith(entry, StringComparison.Ordinal))
-                {
-                    continue;
-                }
+                // `EventModel.Title` and `InitialDescription` (`:62`, `:64`).
+                entry + ".title",
+                entry + ".pages.INITIAL.description",
+            };
 
-                // An option key is a PREFIX the engine suffixes twice; every
-                // other literal is a whole key handed to `L10NLookup`.
-                if (literal.Contains(".pages.INITIAL.options."))
-                {
-                    asked.Add(literal + ".title");
-                    asked.Add(literal + ".description");
-                }
-                else
-                {
-                    asked.Add(literal);
-                }
+            // An option key is a PREFIX the engine suffixes twice.
+            foreach (var option in shape.OptionKeys)
+            {
+                asked.Add($"{entry}.pages.INITIAL.options.{option}.title");
+                asked.Add($"{entry}.pages.INITIAL.options.{option}.description");
             }
+
+            // Every other key the mirror hands to `L10NLookup` whole.
+            foreach (var page in shape.PageKeys)
+            {
+                asked.Add($"{entry}.{page}");
+            }
+
+            if (shape.HasLossRow)
+            {
+                asked.Add(entry + ".loss");
+            }
+
+            Assert.All(asked, key => Assert.True(
+                rows.ContainsKey(key), $"no merged row for {key} ({dressed.Name})"));
         }
-
-        // The two option prefixes' four derived keys, the two page
-        // descriptions, the selection prompt, the title and the body.
-        Assert.Equal(9, asked.Count);
-        Assert.All(asked, key => Assert.True(rows.ContainsKey(key), "no merged row for " + key));
     }
 
     /// <summary>
-    /// The generator yields exactly two options, and both are constructed --
-    /// the count the re-proof read as zero. A count pin on a call the method
-    /// demonstrably makes, which is the only count `Il.CallSequence` is safe
-    /// for (its own caveat).
+    /// THE MIRROR AND THE GENERATED SHAPE CANNOT DISAGREE about which keys
+    /// exist. The mirror builds its keys from `InitialOptionKey("GORGE")` and
+    /// `PageKey("GORGE.description")`, so the option and page NAMES are
+    /// `ldstr` literals in its methods; the shape table carries the same names
+    /// read off the decompiled base event by `--refresh`. A mirror that
+    /// renamed a page, or a shape row that went stale, shows up here and
+    /// nowhere else -- the loc pin above would still pass, because it builds
+    /// the asked-for set from the shape rather than from the code.
     /// </summary>
-    [Fact]
-    public void The_converted_event_generates_two_options()
+    [Theory]
+    [MemberData(nameof(MirrorPairs))]
+    public void A_mirrors_key_literals_are_exactly_its_shape(Type mirror, Type baseEvent)
     {
-        var generate = Method(typeof(SpringvaleCheeseCellar), "GenerateInitialOptions");
+        _ = baseEvent;
 
-        Assert.Equal(2, Il.CallSequence(generate).Count(c => c == "EventOption..ctor"));
+        var shape = Shapes().Values.First(s => s.Mirror == mirror.Name);
+        var expected = shape.OptionKeys
+            .Concat(shape.PageKeys.Select(p => p.StartsWith("pages.", StringComparison.Ordinal)
+                ? p.Substring("pages.".Length) : p))
+            .OrderBy(k => k, StringComparer.Ordinal)
+            .ToList();
+
+        var actual = mirror
+            .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic
+                      | BindingFlags.Public | BindingFlags.DeclaredOnly)
+            .SelectMany(Il.Strings)
+            // A mirror also carries literals that are not loc keys at all --
+            // `ThisOrThat`'s `StringVar("Curse", ...)` names a DynamicVar. A
+            // key name is an ALL-CAPS option segment, optionally followed by
+            // one camelCase page word; nothing else is compared.
+            .Where(s => System.Text.RegularExpressions.Regex.IsMatch(
+                s, @"^[A-Z0-9_]+(\.[A-Za-z]+)?$"))
+            .Distinct()
+            .OrderBy(k => k, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.Equal(expected, actual);
     }
 
     /// <summary>
-    /// Every merged event row belongs to the converted event. A merge is
-    /// GLOBAL -- `LocTable.MergeWith` overwrites -- so a row whose key drifted
-    /// onto a base event's family would silently rewrite the shipped game's
-    /// text, and the `events` table has no dressed-key trick to fall back on
-    /// the way the monster names do.
+    /// Every merged event row belongs to a dressed event. A merge is GLOBAL --
+    /// `LocTable.MergeWith` overwrites -- so a row whose key drifted onto a
+    /// base event's family would silently rewrite the shipped game's text, and
+    /// the `events` table has no dressed-key trick to fall back on the way the
+    /// monster names do.
     /// </summary>
     [Fact]
     public void No_merged_event_row_can_overwrite_a_base_events_text()
     {
+        var prefixes = Shapes().Values.Select(s => s.BaseEntry + ".").ToList();
+
         Assert.NotEmpty(EventRows());
-        Assert.All(EventRows().Keys, key =>
-            Assert.StartsWith("SPRINGVALE_CHEESE_CELLAR.", key, StringComparison.Ordinal));
+        Assert.All(EventRows().Keys, key => Assert.True(
+            prefixes.Any(p => key.StartsWith(p, StringComparison.Ordinal)),
+            key + " is not under any dressed event's id"));
     }
 
     /// <summary>
@@ -585,39 +720,103 @@ public class TeyvatFrameTests : IDisposable
     }
 
     /// <summary>
-    /// A portrait row names an event this arm actually converts, spelled as
-    /// the engine spells it. A typo here is silent in the same way a dressing
-    /// typo is: the postfix never fires and the event throws again.
+    /// EVERY DRESSED EVENT HAS A PORTRAIT ROW, AND EVERY ROW NAMES ONE. EB-764
+    /// was one missing borrow; the shape of it was that the class and the row
+    /// were written in different files by different hands. They are generated
+    /// together now, and this is that statement as a set equality -- plus the
+    /// derivation the patch depends on: the value is the BASE event's image at
+    /// the path `ImageHelper.GetImagePath("events/...")` builds, and the key is
+    /// the dressed id the engine would have derived the dead path from.
     /// </summary>
     [Fact]
-    public void Every_portrait_row_names_a_converted_event()
+    public void Every_dressed_event_has_a_portrait_row_and_every_row_is_a_dressed_event()
     {
-        Assert.Equal(
-            new[] { "SPRINGVALE_CHEESE_CELLAR" },
+        var dressedIds = Shapes().Values.Select(s => s.BaseEntry)
+            .OrderBy(k => k, StringComparer.Ordinal).ToArray();
+
+        Assert.Equal(dressedIds,
             TeyvatFrame.EventPortraits.Keys.OrderBy(k => k, StringComparer.Ordinal).ToArray());
 
-        // And the dressed path the patch replaces is the one the engine would
-        // have derived from that id, so the borrow cannot be aimed at a key
-        // no reader ever asks for.
-        Assert.Equal(
-            "res://images/events/springvale_cheese_cellar.png",
-            "res://images/events/"
-                + TeyvatFrame.EventPortraits.Keys.Single().ToLowerInvariant() + ".png");
+        Assert.All(TeyvatFrame.EventPortraits, row =>
+        {
+            Assert.StartsWith("res://images/events/", row.Value, StringComparison.Ordinal);
+            Assert.EndsWith(".png", row.Value, StringComparison.Ordinal);
+            // The borrow points at a BASE event's image, never at the dressed
+            // path -- which is the path the patch is standing in for.
+            Assert.NotEqual(
+                "res://images/events/" + row.Key.ToLowerInvariant() + ".png", row.Value);
+        });
     }
 
     /// <summary>`TeyvatLoc` is internal and this mod carries no
     /// `InternalsVisibleTo` -- the standing call -- so its one table is
-    /// reached by reflection.</summary>
+    /// reached by reflection. It is a PROPERTY now, aliasing the generated
+    /// rows, so both member kinds are tried.</summary>
     private static IReadOnlyDictionary<string, string> EventRows()
     {
         var type = typeof(TeyvatFrame).Assembly
             .GetType("KleeMod.Teyvat.TeyvatLoc", throwOnError: true)!;
-        var field = type.GetField("EventRows", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(field);
-        var rows = field!.GetValue(null) as IReadOnlyDictionary<string, string>;
+        const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public
+                                 | BindingFlags.Static;
+        var rows = (type.GetProperty("EventRows", flags)?.GetValue(null)
+                 ?? type.GetField("EventRows", flags)?.GetValue(null))
+            as IReadOnlyDictionary<string, string>;
         Assert.NotNull(rows);
         return rows!;
     }
+
+    /// <summary>
+    /// The generated shape table, flattened into something a pin can read
+    /// without an `InternalsVisibleTo`: dressed event type -> (the dressed
+    /// `Id.Entry`, the mirror's name, the option key names, the other page
+    /// keys, whether a `.loss` row was written).
+    ///
+    /// Reached by reflection over the record's properties rather than by
+    /// name-and-cast, because `TeyvatGeneratedEvents` and its `EventShape` are
+    /// both internal and both GENERATED -- a pin that named their members in
+    /// C# would have to be regenerated beside them.
+    /// </summary>
+    private static IReadOnlyDictionary<Type, TestShape> Shapes()
+    {
+        var owner = typeof(TeyvatFrame).Assembly
+            .GetType("KleeMod.Teyvat.TeyvatGeneratedEvents", throwOnError: true)!;
+        var table = owner.GetField("Shapes",
+            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)!
+            .GetValue(null)!;
+
+        var result = new Dictionary<Type, TestShape>();
+        foreach (var entry in (System.Collections.IEnumerable)table)
+        {
+            var kvType = entry.GetType();
+            var key = (Type)kvType.GetProperty("Key")!.GetValue(entry)!;
+            var value = kvType.GetProperty("Value")!.GetValue(entry)!;
+            var shapeType = value.GetType();
+            result[key] = new TestShape(
+                (string)shapeType.GetProperty("BaseEntry")!.GetValue(value)!,
+                (string)shapeType.GetProperty("Mirror")!.GetValue(value)!,
+                (IReadOnlyList<string>)shapeType.GetProperty("OptionKeys")!.GetValue(value)!,
+                (IReadOnlyList<string>)shapeType.GetProperty("PageKeys")!.GetValue(value)!,
+                (bool)shapeType.GetProperty("HasLossRow")!.GetValue(value)!);
+        }
+        return result;
+    }
+
+    private sealed record TestShape(
+        string BaseEntry,
+        string Mirror,
+        IReadOnlyList<string> OptionKeys,
+        IReadOnlyList<string> PageKeys,
+        bool HasLossRow);
+
+    /// <summary>`StringHelper.Slugify` for a C# type name, reimplemented so
+    /// the pin does not depend on an internal of the game assembly: an
+    /// underscore at each lower-to-upper boundary, then upper-cased. That is
+    /// the derivation `ModelDb.GetEntry` and `EventModel.OptionKey` both
+    /// make.</summary>
+    private static string Slugify(string name) =>
+        System.Text.RegularExpressions.Regex
+            .Replace(name, "([a-z0-9])([A-Z])", "$1_$2")
+            .ToUpperInvariant();
 
     // ---------------------------------------------------------------
     // Reflection helpers. Public/protected members are reached by name so a
