@@ -46,7 +46,58 @@ DEFAULT_CHARACTER = "KLEEMOD-FURINA"
 
 # How long to wait for the MENU (not the HTTP server) after launching. Boot to
 # a usable bridge measured ~50 s in P0; three times that is a hang.
+#
+# EB-763 MADE THIS A BASE RATHER THAN THE BOUND. It is the right number for a
+# fresh profile and the wrong one for a used one: the game rewrites the
+# profile's whole run-history store to the Steam remote store on every boot,
+# and the store only grows.
 MENU_TIMEOUT_S = 180.0
+
+# ------------------------------------------------- EB-763: the boot tax ----
+#
+# WHAT HAPPENED. Four of the nine batches of the Teyvat spike's proof round
+# died on `menu never became ready within 180s` with the game alive and the
+# bridge already answering (`[STS2 MCP] v0.4.0 server started`); the stall
+# worsened as the batches themselves added run history, and batches of four
+# were the workaround, which is why that round's tally is 14 and not 20
+# (`review/records/teyvat-spike-proofs-2026-09-15.md`, "An operational finding
+# that is not the arm's"). The store was **869 files, 23 MB** at
+# `%APPDATA%\SlayTheSpire2\steam\<id>\modded\profile1\saves\history\`.
+#
+# NOTHING HERE DELETES IT, PRUNES IT OR MOVES IT. It is the owner's play
+# history, and a harness that trims a profile to make its own watchdog pass
+# has broken the thing it was measuring. The store is READ, and the watchdog
+# is scaled to what it finds.
+#
+# WHERE THE RATE COMES FROM. Boot to a usable menu is ~50 s on a fresh profile
+# (the P0 measurement above), and the observed batches ran PAST 180 s at ~869
+# files -- so the store was already costing more than (180 - 50) / 869 =
+# 0.15 s per file, and that is a LOWER BOUND rather than a measurement: those
+# waits were cut off, not completed. `1 s per 5 files` is 0.2 s per file,
+# ~1.35x that lower bound, which is the headroom a watchdog wants and still
+# well short of turning itself off: at today's store it asks for 354 s where
+# the base asked for 180 s, and a game that really has hung still fails, six
+# minutes later instead of three.
+#
+# THE CAP IS NOT DECORATION. Without it a store that grew without bound would
+# take the menu watchdog with it, and an overnight round would spend the night
+# waiting on a game that died at boot. 900 s is fifteen minutes, reached at
+# 3,600 files -- about four times today's store.
+MENU_TIMEOUT_FILES_PER_S = 5.0
+MENU_TIMEOUT_MAX_S = 900.0
+
+
+def menu_timeout_for(history_files: int) -> float:
+    """The menu-ready wait for a profile whose run-history store holds N files.
+
+    `MENU_TIMEOUT_S + N / MENU_TIMEOUT_FILES_PER_S`, capped at
+    `MENU_TIMEOUT_MAX_S`. Pure, so the dial is read off a test rather than off
+    a night that went wrong; the block above carries the rate and the cap.
+    """
+    if history_files <= 0:
+        return MENU_TIMEOUT_S
+    return min(MENU_TIMEOUT_MAX_S,
+               MENU_TIMEOUT_S + history_files / MENU_TIMEOUT_FILES_PER_S)
 
 # The state-progress watchdog: if the state FINGERPRINT (screen + floor + hp +
 # hand shape + enemy hp) is unchanged across this many consecutive posted

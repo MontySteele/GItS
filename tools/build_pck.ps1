@@ -249,6 +249,51 @@ if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $te
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
+# THE ACT-1 DRESSINGS' PLACEHOLDER ASSET SETS (tools/gen_act_placeholders.py,
+# docs/current/operations/act-assets.md). Three blocks per dressing, and the
+# split between them is NOT cosmetic:
+#
+#   * background layer plates and the rest-site plate go to res://teyvat/...,
+#     a namespace of the frame's own, because the SCENES that reference them
+#     are ours and name the path in full;
+#   * the three map backgrounds go to res://images/packed/map/map_bgs/<id>/,
+#     which is NOT a choice -- `ActModel.MapTopBgPath` and its two siblings are
+#     non-virtual expression-bodied properties over `FilePathIdentifier`
+#     (`ActModel.cs:52-64`), so the file is at that path or the map screen
+#     draws nothing. The committed `.tscn` sources land at the engine's
+#     `res://scenes/...` paths the same way, through the pck-src overlay below.
+#
+# Note-Skip and not an error, like every other block: art never blocks a build.
+# With the textures absent the scenes still export, and the EXPORT log sweep
+# turns their dangling ExtResources into a failed build rather than a silent
+# black layer -- which is the behaviour we want, because an act-1 dressing with
+# no background throws out of `BackgroundAssets` on its first combat.
+foreach ($dressing in 'mondstadt', 'liyue') {
+    $bgSrc = Join-Path $src "teyvat\backgrounds\$dressing"
+    if (-not (Test-Path $bgSrc)) { Note-Skip "teyvat\backgrounds\$dressing" $bgSrc } else {
+        $to = Join-Path $work "teyvat\backgrounds\$dressing"
+        New-Item -ItemType Directory -Force -Path $to | Out-Null
+        $files = Select-PackablePngs $bgSrc
+        if ($files) { Copy-Item $files.FullName -Destination $to }
+    }
+
+    $mapSrc = Join-Path $src "teyvat\map_bgs\$dressing"
+    if (-not (Test-Path $mapSrc)) { Note-Skip "teyvat\map_bgs\$dressing" $mapSrc } else {
+        $to = Join-Path $work "images\packed\map\map_bgs\$dressing"
+        New-Item -ItemType Directory -Force -Path $to | Out-Null
+        $files = Select-PackablePngs $mapSrc
+        if ($files) { Copy-Item $files.FullName -Destination $to }
+    }
+}
+
+$teyvatRest = Join-Path $src 'teyvat\rest_site'
+if (-not (Test-Path $teyvatRest)) { Note-Skip 'teyvat\rest_site' $teyvatRest } else {
+    $to = Join-Path $work 'teyvat\rest_site'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Select-PackablePngs $teyvatRest
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
 # Animation sprint 1 (Track B): pre-scaled combat layer sprites for the
 # animated combat scene. Full-res layer masters live in ImageGen/images/model
 # /layers; only the combat-scale derivatives in layers/combat ship, matching

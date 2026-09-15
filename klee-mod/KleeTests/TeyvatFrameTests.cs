@@ -49,7 +49,17 @@ public class TeyvatFrameTests : IDisposable
     /// </summary>
     private readonly bool _enabled = TeyvatFrame.Enabled;
 
-    public void Dispose() => TeyvatFrame.Enabled = _enabled;
+    public void Dispose()
+    {
+        TeyvatFrame.Enabled = _enabled;
+        // EB-758's pins move `TeyvatMusic`'s three probes and populate its
+        // per-directory cache. Both are process-wide statics, so both are put
+        // back HERE rather than in the tests that moved them: a pin that
+        // leaked a fake probe would hand the next test a lookup answering out
+        // of a table that is not the engine's.
+        TeyvatMusic.ResetProbes();
+        TeyvatMusic.ClearCache();
+    }
 
     // ---------------------------------------------------------------
     // The acceptance condition the whole quarantine rests on.
@@ -490,6 +500,100 @@ public class TeyvatFrameTests : IDisposable
     }
 
     // ---------------------------------------------------------------
+    // EB-758: the no-track path costs nothing and says nothing.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// EB-758, AND IT IS THE WHOLE ROW. The spike's deploy proved the arm's
+    /// control flow correct and its LOG wrong: `DirAccess.GetFilesAt` on the
+    /// absent `res://teyvat/music/mondstadt` is an `ERR_FAIL_COND_V_MSG`, so
+    /// every miss printed an engine ERROR with a 31-frame backtrace through
+    /// `TrackFor` → `Play` → `UpdateMusicPostfix`.
+    ///
+    /// The repair is a silent existence question in front of the enumeration,
+    /// and THE THING TO PIN IS THAT THE ENUMERATION IS NOT REACHED. Asserting
+    /// only that `TrackFor` returns null would pass against the defect — it
+    /// returned null before, noisily. So the enumerating probe counts its
+    /// calls and the assertion is that the count is zero.
+    /// </summary>
+    [Fact]
+    public void A_missing_directory_is_never_enumerated()
+    {
+        var listed = 0;
+        var probed = new List<string>();
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = path => { probed.Add(path); return false; };
+        TeyvatMusic.ListFiles = _ => { listed++; return Array.Empty<string>(); };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+
+        Assert.Equal(0, listed);
+        Assert.Equal(new[] { "res://teyvat/music/mondstadt" }, probed);
+    }
+
+    /// <summary>
+    /// The cache is the second half of the cost, and it covers the existence
+    /// question too. `UpdateMusic` runs on every room change; a probe per room
+    /// for an answer that cannot change inside a session is a cost, and before
+    /// this row it was a LOG LINE per act id per boot as well.
+    /// </summary>
+    [Fact]
+    public void The_absence_is_asked_once_per_act_and_then_remembered()
+    {
+        var probes = 0;
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => { probes++; return false; };
+        TeyvatMusic.ListFiles = _ => Array.Empty<string>();
+
+        for (var i = 0; i < 5; i++)
+        {
+            Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+        }
+
+        Assert.Equal(1, probes);
+
+        // A DIFFERENT act is a different question, and must not read the first
+        // one's answer: the entry is what the directory is named after.
+        Assert.Null(TeyvatMusic.TrackFor("Liyue"));
+        Assert.Equal(2, probes);
+    }
+
+    /// <summary>
+    /// The other side of the same switch, so the guard cannot be "return null
+    /// always" wearing a probe: with a directory present and a loadable file
+    /// in it, the lookup still finds the track, still prefers `.ogg` over
+    /// `.mp3`, and still refuses a name `ResourceLoader` says will not load.
+    /// </summary>
+    [Fact]
+    public void A_present_directory_still_resolves_its_track()
+    {
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => true;
+        // Deliberately NOT in preference order on disk, and with one loadable
+        // `.mp3` beside the `.ogg`, so the assertion is about the preference
+        // list and not about enumeration order.
+        TeyvatMusic.ListFiles = _ => new[] { "theme.mp3", "theme.ogg" };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        Assert.Equal("res://teyvat/music/mondstadt/theme.ogg",
+                     TeyvatMusic.TrackFor("Mondstadt"));
+
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.ResourceExists = path => path.EndsWith(".mp3", StringComparison.Ordinal);
+        Assert.Equal("res://teyvat/music/mondstadt/theme.mp3",
+                     TeyvatMusic.TrackFor("Mondstadt"));
+    }
+
+    // NOT PINNED HERE, and for the boundary's reason rather than for want of
+    // trying: that a throwing probe answers null instead of taking the run's
+    // music controller down with it. `TrackFor`'s catch clause calls
+    // `Log.Warn`, and `MegaCrit.Sts2.Core.Logging.Logger`'s static
+    // constructor calls `OS.GetCmdlineArgs()` — a Godot call, outside this
+    // suite's headless boundary. The `try`/`catch` is still there and still
+    // the right shape; only a deploy can watch it work.
+
+    // ---------------------------------------------------------------
     // EB-759 / EB-760: the two seams the spike's deploy proved wrong.
     // ---------------------------------------------------------------
 
@@ -889,9 +993,165 @@ public class TeyvatFrameTests : IDisposable
             .ToUpperInvariant();
 
     // ---------------------------------------------------------------
+    // The dressed asset set, and the alias that now stands down for it.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// THE ALIAS DECISION, BOTH DIRECTIONS, over a predicate rather than over
+    /// a real `ResourceLoader` -- which is the only reason it is answerable in
+    /// a headless process at all.
+    ///
+    /// The direction that matters is the FALSE one. A dressing whose set is
+    /// half-landed must take the alias whole: `BackgroundAssets`'s constructor
+    /// throws on a missing `layers` directory AND on a layer file matching
+    /// neither prefix, and the map PNGs and the rest-site scene have no
+    /// fallback, so "use the two files that did arrive" is not a state the
+    /// engine has.
+    /// </summary>
+    [Fact]
+    public void A_dressing_takes_its_own_assets_only_when_the_whole_set_is_there()
+    {
+        var complete = new HashSet<string>(StringComparer.Ordinal)
+        {
+            TeyvatActAssets.FirstLayerPath("mondstadt"),
+            TeyvatActAssets.BackgroundScenePath("mondstadt"),
+            TeyvatActAssets.RestSiteScenePath("mondstadt"),
+        };
+
+        Assert.True(TeyvatActAssets.HasDressedAssets(
+            TeyvatFrame.Mondstadt, complete.Contains));
+
+        // Any ONE of the three missing puts the dressing back on the alias.
+        foreach (var path in complete.ToArray())
+        {
+            var partial = new HashSet<string>(complete, StringComparer.Ordinal);
+            partial.Remove(path);
+            Assert.False(TeyvatActAssets.HasDressedAssets(
+                TeyvatFrame.Mondstadt, partial.Contains), path);
+        }
+
+        // Nothing at all -- a build whose pck predates the set.
+        Assert.False(TeyvatActAssets.HasDressedAssets(TeyvatFrame.Mondstadt, _ => false));
+
+        // And "we could not ask" answers the same as "it is not there",
+        // because the alias points at a tree that is certainly present.
+        Assert.False(TeyvatActAssets.HasDressedAssets(TeyvatFrame.Mondstadt, null));
+    }
+
+    /// <summary>
+    /// The paths are `ActModel`'s own, spelled out because the postfix runs
+    /// INSIDE the getter that would otherwise build them. `FilePathIdentifier`
+    /// is `Id.Entry.ToLowerInvariant()`, so the lowercasing is part of the
+    /// contract and not a convenience.
+    /// </summary>
+    [Fact]
+    public void The_dressed_paths_are_the_engines_own_spelling()
+    {
+        Assert.Equal("res://scenes/backgrounds/liyue/liyue_background.tscn",
+                     TeyvatActAssets.BackgroundScenePath("liyue"));
+        Assert.Equal("res://scenes/backgrounds/liyue/layers/liyue_bg_00_a.tscn",
+                     TeyvatActAssets.FirstLayerPath("liyue"));
+        Assert.Equal("res://scenes/rest_site/liyue_rest_site.tscn",
+                     TeyvatActAssets.RestSiteScenePath("liyue"));
+
+        foreach (var dressing in TeyvatFrame.AssetAlias.Keys)
+        {
+            Assert.Contains(dressing.ToLowerInvariant(),
+                            TeyvatActAssets.BackgroundScenePath(dressing.ToLowerInvariant()));
+        }
+    }
+
+    /// <summary>
+    /// The alias postfix ASKS. Structural, through `Il`, because the getter it
+    /// postfixes cannot be invoked without an `ActModel` -- and the thing that
+    /// would go wrong silently is the check being DROPPED, not being wrong.
+    /// </summary>
+    [Fact]
+    public void The_alias_postfix_stands_down_when_the_set_is_present()
+    {
+        // Reached by name through the assembly rather than by `typeof`: the
+        // patch class is `internal`, like every other file in `Teyvat/Patches`
+        // except the one whose helper the loc merge calls, and an
+        // `InternalsVisibleTo` for one pin is a bigger change than this line.
+        var calls = Il.Calls(StaticMethod(
+            InArm("KleeMod.Teyvat.Patches.ActModel_FilePathIdentifier_TeyvatAlias_Patch"),
+            "Postfix"));
+
+        Assert.Contains("TeyvatActAssets.HasDressedAssetsCached", calls);
+        // The alias table is still consulted first -- a base zone reached
+        // while the flag is on has no row and the postfix must not ask the
+        // pack about `overgrowth`. (`AssetAlias` itself is an `ldsfld`, not a
+        // call, so the lookup through it is what the IL can show.)
+        Assert.Contains(calls, c => c.EndsWith("TryGetValue", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// The background root is converted, and by a factory that exists.
+    /// BaseLib ships six and none is for `NCombatBackground`, so registration
+    /// alone would log "no factory exists for that type" and fall through to
+    /// the same failed cast EB-760 diagnosed for the still portrait.
+    /// </summary>
+    [Fact]
+    public void Act_backgrounds_are_registered_with_a_factory_that_exists()
+    {
+        var calls = Il.Calls(StaticMethod(typeof(TeyvatActAssets),
+                                          nameof(TeyvatActAssets.RegisterActBackgrounds)));
+
+        Assert.Contains("NCombatBackgroundFactory.Ensure", calls);
+        Assert.Contains(calls,
+                        c => c.EndsWith("RegisterSceneForConversion", StringComparison.Ordinal));
+
+        Assert.Contains("TeyvatActAssets.RegisterActBackgrounds",
+                        Il.Calls(StaticMethod(typeof(KleeMod), nameof(KleeMod.Initialize))));
+    }
+
+    /// <summary>
+    /// The slots the factory declares are the slots the generator writes into
+    /// the background scene, and they are `AddLayer`'s own names
+    /// (`$"Layer_{i:D2}"`, then `"Foreground"`). A drift here is an
+    /// `InvalidOperationException` on the first frame of the first combat of a
+    /// dressed run.
+    /// </summary>
+    [Fact]
+    public void The_factorys_layer_slots_match_AddLayers_naming()
+    {
+        var slots = InArm("KleeMod.Teyvat.NCombatBackgroundFactory")
+            .GetField("LayerSlots", BindingFlags.NonPublic | BindingFlags.Static)!
+            .GetValue(null) as string[];
+
+        Assert.NotNull(slots);
+        Assert.Equal(new[] { "Layer_00", "Layer_01", "Layer_02", "Layer_03", "Layer_04",
+                             "Foreground" }, slots!);
+    }
+
+    [Fact]
+    public void With_the_arm_off_the_act_background_registration_touches_nothing()
+    {
+        TeyvatFrame.Enabled = false;
+
+        // The flag is the method's first line, as everywhere in the arm: this
+        // one runs outside a run entirely, so it cannot key off the current
+        // act, and it must not reach Godot or BaseLib in a process with no
+        // runtime behind either.
+        TeyvatActAssets.RegisterActBackgrounds();
+    }
+
+    // ---------------------------------------------------------------
     // Reflection helpers. Public/protected members are reached by name so a
     // rename is a compile error here rather than a silent skip.
     // ---------------------------------------------------------------
+
+    /// <summary>
+    /// A type in the mod assembly by full name, for the arm's `internal`
+    /// classes. Asserting rather than returning null so a rename reads as a
+    /// named failure instead of an NRE three lines later.
+    /// </summary>
+    private static Type InArm(string fullName)
+    {
+        var type = typeof(TeyvatFrame).Assembly.GetType(fullName, throwOnError: false);
+        Assert.NotNull(type);
+        return type!;
+    }
 
     /// <summary>The outermost non-compiler-generated type enclosing
     /// <paramref name="type"/>.</summary>
