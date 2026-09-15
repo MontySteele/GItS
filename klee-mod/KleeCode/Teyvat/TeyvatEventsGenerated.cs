@@ -170,8 +170,9 @@ internal static partial class TeyvatLoc
             ["CONFISCATION_WITH_COMPENSATION.pages.INITIAL.options.POTION.description"] =
                 "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
             ["CONFISCATION_WITH_COMPENSATION.pages.DONE.description"] =
-                "Lose a specified Common potion. Obtain an Upgraded Common "
-                + "[Attack/Skill] card reward.",
+                "The quartermaster signs the confiscation slip and slides the "
+                + "technique across the trestle. \"Regulations satisfied. Courtesy "
+                + "too.\"",
             // UnmarkedCrates (Mondstadt / ThisOrThat)
             ["UNMARKED_CRATES.title"] =
                 "The Unmarked Crates",
@@ -1469,8 +1470,9 @@ internal static partial class TeyvatLoc
             ["BUREAU_OF_RECLAIMED_MEDICINE.pages.INITIAL.options.POTION.description"] =
                 "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
             ["BUREAU_OF_RECLAIMED_MEDICINE.pages.DONE.description"] =
-                "Lose a specified Common potion. Obtain an Upgraded Common "
-                + "[Attack/Skill] card reward.",
+                "The clerk stamps the surrender, the appraiser countersigns, and "
+                + "the technique changes hands at the customs gate. \"Per the "
+                + "charter.\"",
             // UnclaimedCratesAtFeiyunSlope (Liyue / ThisOrThat)
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.title"] =
                 "The Unclaimed Crates at Feiyun Slope",
@@ -1521,11 +1523,11 @@ internal static partial class TeyvatLoc
             ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.options.SETTING_3.description"] =
                 "Fight a 300 HP dummy. Obtain a random Relic.",
             ["KSHAHREWAR_PROVING_CAGE.pages.VICTORY.description"] =
-                "You have 3 turns to defeat the dummy. Failing results in no "
-                + "reward.",
+                "The spring-drum winds down before the proctor's count does. He "
+                + "marks the bout complete and unlocks that setting's prize.",
             ["KSHAHREWAR_PROVING_CAGE.pages.DEFEAT.description"] =
-                "You have 3 turns to defeat the dummy. Failing results in no "
-                + "reward.",
+                "The proctor's count runs out with the construct still on its feet. "
+                + "He marks the bout incomplete and unlocks nothing.",
             // RtawahistsStarfallGlass (Sumeru / CrystalSphere)
             ["RTAWAHISTS_STARFALL_GLASS.title"] =
                 "Rtawahist's Starfall Glass",
@@ -1955,6 +1957,95 @@ internal static partial class TeyvatLoc
                 "Lose 11 HP. Obtain a random Relic.",
             ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.CONTINUE_FIGHT.description"] =
                 "Lose 11 HP. Obtain a random Relic.",
+            // ThreeDossiersBeforeSabzeruz (Sumeru / Trial)
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.title"] =
+                "Three Dossiers Before Sabzeruz",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.INITIAL.description"] =
+                "The lamps of the House of Daena have burned down to their last "
+                + "oil. A Kshahrewar proctor drops three sealed dossiers on your "
+                + "desk: manuscripts accused of forged findings, all of which the "
+                + "sages want ruled on before the Sabzeruz festival crowds the halls. "
+                + "Akademiya custom hands the first ruling to the newest reader in "
+                + "the room. Only one author is awake to hear it. **The Trader's "
+                + "Treatise (Merchant Trial)**",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.MERCHANT.options.GUILTY.title"] =
+                "RULE: Forged (Guilty)",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.MERCHANT.options.GUILTY.description"] =
+                "Add Regret (curse) to your Deck. Obtain 2 random Relics.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.MERCHANT.options.INNOCENT.title"] =
+                "RULE: Sound (Innocent)",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.MERCHANT.options.INNOCENT.description"] =
+                "Add Shame (curse) to your Deck. Upgrade 2 cards.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NOBLE.options.GUILTY.title"] =
+                "RULE: Forged (Guilty)",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NOBLE.options.GUILTY.description"] =
+                "Heal 10 HP.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NOBLE.options.INNOCENT.title"] =
+                "RULE: Sound (Innocent)",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NOBLE.options.INNOCENT.description"] =
+                "Add Regret (curse) to your Deck. Gain 300 Gold.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NONDESCRIPT.options.GUILTY.title"] =
+                "RULE: Forged (Guilty)",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NONDESCRIPT.options.GUILTY.description"] =
+                "Add Doubt (curse) to your Deck. Gain 2 card rewards.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NONDESCRIPT.options.INNOCENT.title"] =
+                "RULE: Sound (Innocent)",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NONDESCRIPT.options.INNOCENT.description"] =
+                "Add Doubt (curse) to your Deck. Transform 2 cards.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.INITIAL.options.ACCEPT.title"] =
+                "Open the Dossiers",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.INITIAL.options.ACCEPT.description"] =
+                "Rule on one treatise. The proctor picks which.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.INITIAL.options.REJECT.title"] =
+                "Refuse the Desk",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.INITIAL.options.REJECT.description"] =
+                "Push the dossiers back across the desk.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.REJECT.options.ACCEPT.title"] =
+                "Rule After All",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.REJECT.options.ACCEPT.description"] =
+                "Open the dossiers. One treatise is put before you.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.REJECT.options.DOUBLE_DOWN.title"] =
+                "Walk Out of the House",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.REJECT.options.DOUBLE_DOWN.description"] =
+                "Leave the desk, the docket and the Akademiya behind. This ends the "
+                + "run.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.REJECT.description"] =
+                "The proctor does not pick them up. \"The sages assigned you this "
+                + "desk. Sabzeruz begins at dawn, and no one leaves the House of "
+                + "Daena with an open docket.\" The lamps gutter.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.MERCHANT.description"] =
+                "The Trader's Treatise: a Port Ormos merchant's account of a rare "
+                + "ink, suspiciously profitable and suspiciously well cited. The "
+                + "proctor waits with the seal.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NOBLE.description"] =
+                "The Patron's Treatise: a rich patron's name on a paper his scribes "
+                + "plainly wrote, with a footnote that flatters a sage. The proctor "
+                + "waits with the seal.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NONDESCRIPT.description"] =
+                "The Unsigned Treatise: no author, no darshan, and findings nobody "
+                + "has managed to repeat or to disprove. The proctor waits with the "
+                + "seal.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.MERCHANT_GUILTY.description"] =
+                "Forged. The merchant's samples are seized, and the proctor lets "
+                + "you keep two of them. The seal you pressed is Regret.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.MERCHANT_INNOCENT.description"] =
+                "Sound. The merchant sells his ink at a premium the next morning, "
+                + "and the proctor notes your leniency as Shame. Your fee is "
+                + "technique, refined.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NOBLE_GUILTY.description"] =
+                "Forged. The patron is struck from the roll, and the House stewards "
+                + "bring you tea and a bandage.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NOBLE_INNOCENT.description"] =
+                "Sound. The patron's steward leaves a very heavy purse on the desk, "
+                + "and you carry the seal out as Regret.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NONDESCRIPT_GUILTY.description"] =
+                "Forged, you rule, and nobody can prove otherwise. The proctor "
+                + "files it under Doubt and hands you the next two manuscripts from "
+                + "the pile.",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ.pages.NONDESCRIPT_INNOCENT.description"] =
+                "Sound, you rule, and nobody can prove otherwise. The proctor files "
+                + "it under Doubt, and two of your own notes come back to you "
+                + "rewritten.",
             // CaravanRibatLeavings (Sumeru / ThisOrThat)
             ["CARAVAN_RIBAT_LEAVINGS.title"] =
                 "The Caravan Ribat Leavings",
@@ -1985,6 +2076,78 @@ internal static partial class TeyvatLoc
             ["CARAVAN_RIBAT_LEAVINGS.loss"] =
                 "{character} bled out on a coffer latch at the "
                 + "[gold]{event}[/gold].",
+            // KshahrewarWorkbench (Sumeru / TinkerTime)
+            ["KSHAHREWAR_WORKBENCH.title"] =
+                "The Kshahrewar Workbench",
+            ["KSHAHREWAR_WORKBENCH.pages.INITIAL.description"] =
+                "In a cluttered annex of the Kshahrewar darshan's fabrication hall "
+                + "in Sumeru City, a mechanist clears bench space and slides forward "
+                + "a half-built chassis. \"One design per visitor, and please stand "
+                + "behind the containment glass,\" she says, already reaching for the "
+                + "parts bin. Two of three frames are laid out; two of three riders "
+                + "wait beside them. **Step 1: Choose a Frame** (two of the three "
+                + "offered at random)",
+            ["KSHAHREWAR_WORKBENCH.pages.INITIAL.options.CHOOSE_CARD_TYPE.title"] =
+                "Choose a Frame",
+            ["KSHAHREWAR_WORKBENCH.pages.INITIAL.options.CHOOSE_CARD_TYPE.description"] =
+                "Pick one of the two frames on the bench.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_CARD_TYPE.options.ATTACK.title"] =
+                "Calibrated Striker",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_CARD_TYPE.options.ATTACK.description"] =
+                "Create an Attack. (Deal 12 damage.)",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_CARD_TYPE.options.SKILL.title"] =
+                "Ward Plate",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_CARD_TYPE.options.SKILL.description"] =
+                "Create a Skill. (Gain 8 Block.)",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_CARD_TYPE.options.POWER.title"] =
+                "Field Array",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_CARD_TYPE.options.POWER.description"] =
+                "Create a Power.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.SAPPING.title"] =
+                "Corrosive Filing",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.SAPPING.description"] =
+                "Apply 2 Weak. Apply 2 Vulnerable.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.VIOLENCE.title"] =
+                "Repeater Coil",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.VIOLENCE.description"] =
+                "Hits 2 additional times.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.CHOKING.title"] =
+                "Bleed-Off Valve",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.CHOKING.description"] =
+                "Whenever you play a card this turn, the enemy loses 6 HP.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.ENERGIZED.title"] =
+                "Surplus Charge",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.ENERGIZED.description"] =
+                "Gain 2 energy.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.WISDOM.title"] =
+                "Annotated Draft",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.WISDOM.description"] =
+                "Draw 3 cards.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.CHAOS.title"] =
+                "Improvised Patch",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.CHAOS.description"] =
+                "Add a random card into your Hand. It's free to play this turn.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.EXPERTISE.title"] =
+                "Field Calibration",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.EXPERTISE.description"] =
+                "Gain 2 Strength. Gain 2 Dexterity.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.CURIOUS.title"] =
+                "Peer-Reviewed Design",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.CURIOUS.description"] =
+                "Powers cost 1 less.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.IMPROVEMENT.title"] =
+                "Ongoing Revision",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.options.IMPROVEMENT.description"] =
+                "At the end of combat, Upgrade a random card.",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_CARD_TYPE.description"] =
+                "The mechanist lays two frames on the bench. \"One design per "
+                + "visitor. Pick the frame, then the rider that goes in it.\"",
+            ["KSHAHREWAR_WORKBENCH.pages.CHOOSE_RIDER.description"] =
+                "She opens the drawer beneath the chosen frame. Two riders fit it. "
+                + "\"Choose. I will not tell you which one I would take.\"",
+            ["KSHAHREWAR_WORKBENCH.pages.DONE.description"] =
+                "The Proving Draft comes off the bench warm. She logs it under your "
+                + "name and points you at the containment glass on your way out.",
             // WarHistorianRapiya (Sumeru / WarHistorianRepy)
             ["WAR_HISTORIAN_RAPIYA.title"] =
                 "War Historian, Rapiya",
@@ -2040,11 +2203,13 @@ internal static partial class TeyvatLoc
             ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.options.SETTING_3.description"] =
                 "Fight a 300 HP dummy. Obtain a random Relic.",
             ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.VICTORY.description"] =
-                "You have 3 turns to defeat the dummy. Failing results in no "
-                + "reward.",
+                "The water-clock is not yet empty when the meka's padding gives "
+                + "way. The technician closes her ledger and hands over what that "
+                + "valve was rated for.",
             ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.DEFEAT.description"] =
-                "You have 3 turns to defeat the dummy. Failing results in no "
-                + "reward.",
+                "The water-clock runs dry with the meka still standing. The "
+                + "technician closes her ledger without writing anything, which is "
+                + "somehow worse.",
             // SoundingTheBerylShelf (Fontaine / CrystalSphere)
             ["SOUNDING_THE_BERYL_SHELF.title"] =
                 "Sounding the Beryl Shelf",
@@ -2482,6 +2647,97 @@ internal static partial class TeyvatLoc
                 "Lose 11 HP. Obtain a random Relic.",
             ["ROUND_TABLE_AT_CAF_LUTECE.pages.CONTINUE_FIGHT.description"] =
                 "Lose 11 HP. Obtain a random Relic.",
+            // EmptySeatInTheGallery (Fontaine / Trial)
+            ["EMPTY_SEAT_IN_THE_GALLERY.title"] =
+                "The Empty Seat in the Gallery",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.INITIAL.description"] =
+                "The Opera Epiclese is packed to the rafters, and the Oratrice "
+                + "Mecanique d'Analyse Cardinale hums cold above the dock. A gardes "
+                + "usher finds you in the aisle: a juror has fainted, and the Chief "
+                + "Justice will not open a docket a seat short. The Oratrice weighs "
+                + "the gallery's conviction — so tonight your opinion is evidence. "
+                + "The bailiff calls one case only. The Merchant's Case (Merchant "
+                + "Trial):",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.MERCHANT.options.GUILTY.title"] =
+                "VERDICT: Guilty",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.MERCHANT.options.GUILTY.description"] =
+                "Add Regret (curse) to your Deck. Obtain 2 random Relics.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.MERCHANT.options.INNOCENT.title"] =
+                "VERDICT: Innocent",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.MERCHANT.options.INNOCENT.description"] =
+                "Add Shame (curse) to your Deck. Upgrade 2 cards.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NOBLE.options.GUILTY.title"] =
+                "VERDICT: Guilty",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NOBLE.options.GUILTY.description"] =
+                "Heal 10 HP.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NOBLE.options.INNOCENT.title"] =
+                "VERDICT: Innocent",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NOBLE.options.INNOCENT.description"] =
+                "Add Regret (curse) to your Deck. Gain 300 Gold.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NONDESCRIPT.options.GUILTY.title"] =
+                "VERDICT: Guilty",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NONDESCRIPT.options.GUILTY.description"] =
+                "Add Doubt (curse) to your Deck. Gain 2 card rewards.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NONDESCRIPT.options.INNOCENT.title"] =
+                "VERDICT: Innocent",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NONDESCRIPT.options.INNOCENT.description"] =
+                "Add Doubt (curse) to your Deck. Transform 2 cards.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.INITIAL.options.ACCEPT.title"] =
+                "Take the Empty Seat",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.INITIAL.options.ACCEPT.description"] =
+                "Sit on the jury. One case is called, and you deliver its verdict.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.INITIAL.options.REJECT.title"] =
+                "Decline the Summons",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.INITIAL.options.REJECT.description"] =
+                "Try to leave the gallery.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.REJECT.options.ACCEPT.title"] =
+                "Take the Seat After All",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.REJECT.options.ACCEPT.description"] =
+                "Sit on the jury. One case is called.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.REJECT.options.DOUBLE_DOWN.title"] =
+                "Walk Out of the Opera",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.REJECT.options.DOUBLE_DOWN.description"] =
+                "Push past the gardes and leave Fontaine's justice behind. This "
+                + "ends the run.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.REJECT.description"] =
+                "The usher's smile does not move. \"The Chief Justice does not open "
+                + "a docket a seat short, and the doors do not open until the docket "
+                + "closes.\" Behind him the gardes have already turned to face the "
+                + "aisle.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.MERCHANT.description"] =
+                "The defendant is a Fleuve Cendre smuggler in a Court-issued suit, "
+                + "accused of moving unlicensed potions through the Poisson canals. "
+                + "The Oratrice hums. The gallery waits on the empty seat.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NOBLE.description"] =
+                "The defendant is a Palais Mermonia heir accused of paying a duel's "
+                + "loser to lose. The Oratrice hums. The gallery waits on the empty "
+                + "seat.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NONDESCRIPT.description"] =
+                "The defendant gives no name, and the docket lists no crime beyond "
+                + "\"obstruction of the Oratrice.\" The Oratrice hums. The gallery "
+                + "waits on the empty seat.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.MERCHANT_GUILTY.description"] =
+                "The Oratrice agrees with you. The smuggler's confiscated stock is "
+                + "offered to the jury first, and the verdict follows you out of the "
+                + "Opera as Regret.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.MERCHANT_INNOCENT.description"] =
+                "The Oratrice disagrees. The gardes release the smuggler, and a "
+                + "clerk quietly notes the dissent beside your name: Shame. The Court "
+                + "pays its jurors in technique, not Mora.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NOBLE_GUILTY.description"] =
+                "The Oratrice agrees. The heir is fined, the gallery cheers, and a "
+                + "Melusine attendant presses a tonic into your hand on the way out.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NOBLE_INNOCENT.description"] =
+                "The Oratrice disagrees, loudly. The heir's family thanks you with "
+                + "a very full purse, and you carry the verdict out as Regret.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NONDESCRIPT_GUILTY.description"] =
+                "The Oratrice returns no reading at all. The nameless defendant is "
+                + "led away, the docket closes, and Doubt closes with it. The clerk "
+                + "hands you two files from the evidence table.",
+            ["EMPTY_SEAT_IN_THE_GALLERY.pages.NONDESCRIPT_INNOCENT.description"] =
+                "The Oratrice returns no reading at all. The nameless defendant "
+                + "walks, thanks you, and leaves you with Doubt and two techniques "
+                + "you no longer recognise as your own.",
             // TwoGiftsFromTheFontemer (Fontaine / ThisOrThat)
             ["TWO_GIFTS_FROM_THE_FONTEMER.title"] =
                 "Two Gifts from the Fontemer",
@@ -2506,6 +2762,77 @@ internal static partial class TeyvatLoc
             ["TWO_GIFTS_FROM_THE_FONTEMER.loss"] =
                 "{character} bled out over a coin-purse at the "
                 + "[gold]{event}[/gold].",
+            // PrototypeHourAtTheInstitute (Fontaine / TinkerTime)
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.title"] =
+                "Prototype Hour at the Institute",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.INITIAL.description"] =
+                "A Melusine engineer waves you past a wall of half-built clockwork "
+                + "at the Fontaine Research Institute of Kinetic Energy Engineering. "
+                + "\"One prototype per visitor. Pick a chassis, pick a modification, "
+                + "and please stand behind the blast glass.\" Chassis (two of the "
+                + "three offered at random):",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.INITIAL.options.CHOOSE_CARD_TYPE.title"] =
+                "Choose a Chassis",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.INITIAL.options.CHOOSE_CARD_TYPE.description"] =
+                "Pick one of the two chassis on offer.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_CARD_TYPE.options.ATTACK.title"] =
+                "Harpoon",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_CARD_TYPE.options.ATTACK.description"] =
+                "Create an Attack. (Deal 12 damage.)",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_CARD_TYPE.options.SKILL.title"] =
+                "Bulwark Plate",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_CARD_TYPE.options.SKILL.description"] =
+                "Create a Skill. (Gain 8 Block.)",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_CARD_TYPE.options.POWER.title"] =
+                "Aetheric Core",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_CARD_TYPE.options.POWER.description"] =
+                "Create a Power.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.SAPPING.title"] =
+                "Corrosive",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.SAPPING.description"] =
+                "Apply 2 Weak. Apply 2 Vulnerable.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.VIOLENCE.title"] =
+                "Repeater",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.VIOLENCE.description"] =
+                "Hits 2 additional times.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.CHOKING.title"] =
+                "Pressure Leak",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.CHOKING.description"] =
+                "Whenever you play a card this turn, the enemy loses 6 HP.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.ENERGIZED.title"] =
+                "Overcharge",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.ENERGIZED.description"] =
+                "Gain 2 energy.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.WISDOM.title"] =
+                "Blueprints",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.WISDOM.description"] =
+                "Draw 3 cards.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.CHAOS.title"] =
+                "Misfire",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.CHAOS.description"] =
+                "Add a random card into your Hand. It's free to play this turn.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.EXPERTISE.title"] =
+                "Calibration",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.EXPERTISE.description"] =
+                "Gain 2 Strength. Gain 2 Dexterity.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.CURIOUS.title"] =
+                "Curiosity",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.CURIOUS.description"] =
+                "Powers cost 1 less.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.IMPROVEMENT.title"] =
+                "Field Testing",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.options.IMPROVEMENT.description"] =
+                "At the end of combat, Upgrade a random card.",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_CARD_TYPE.description"] =
+                "The Melusine engineer sets two chassis on the bench and taps the "
+                + "blast glass. \"One prototype per visitor. Chassis first, then the "
+                + "modification.\"",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.CHOOSE_RIDER.description"] =
+                "She slides open the drawer for that chassis. Two modifications fit "
+                + "it. \"Pick one. Both are tested. Neither is safe.\"",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE.pages.DONE.description"] =
+                "The Prototype comes off the bench ticking. She stamps the "
+                + "Institute's mark on it and waves you back behind the glass.",
             // SealedTestimonyOfRepie (Fontaine / WarHistorianRepy)
             ["SEALED_TESTIMONY_OF_REPIE.title"] =
                 "The Sealed Testimony of Repie",
@@ -2897,6 +3224,61 @@ internal static partial class TeyvatLoc
                 "Obtain 3 Regent cards.",
             ["WAR_COUNCIL_AT_SANGONOMIYA.pages.DONE.description"] =
                 "Obtain 3 Ironclad cards.",
+            // WisteriaWellOfChinjuForest (Inazuma / ColossalFlower)
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.title"] =
+                "The Wisteria Well of Chinju Forest",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.INITIAL.description"] =
+                "Deep in Chinju Forest a wisteria bud has grown to the size of a "
+                + "shrine gate, its petals crackling faintly with trapped Electro. "
+                + "The tanuki who tends it will not say how old it is, only that "
+                + "every visitor takes the same choice: skim what's easy, or go in "
+                + "after the sweetness at the center. It does not warn you what waits "
+                + "at the bottom. It only watches, ears back, to see how far you'll "
+                + "reach.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1.title"] =
+                "Skim the Petals",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1.description"] =
+                "Gain 35 Gold.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.INITIAL.options.REACH_DEEPER_1.title"] =
+                "Reach Deeper",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.INITIAL.options.REACH_DEEPER_1.description"] =
+                "Lose 5 HP. Advance to the next level.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2.title"] =
+                "Skim the Petals",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2.description"] =
+                "Gain 75 Gold.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_1.options.REACH_DEEPER_2.title"] =
+                "Reach Deeper",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_1.options.REACH_DEEPER_2.description"] =
+                "Lose 6 HP. Advance to the next level.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD.title"] =
+                "Skim the Petals",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD.description"] =
+                "Gain 135 Gold.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_2.options.POLLINOUS_CORE.title"] =
+                "Enter the Bud's Heart",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_2.options.POLLINOUS_CORE.description"] =
+                "Lose 7 HP. Obtain the Wisteria Core.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_1.description"] =
+                "The trapped Electro crackles up your sleeve past the outer petals. "
+                + "The tanuki keeps its counting hushed and its eyes on the bud, not "
+                + "on you.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.REACH_DEEPER_2.description"] =
+                "Shoulder-deep, and the wisteria is humming like a shrine bell. The "
+                + "tanuki has stopped counting. Something at the bud's heart is warm "
+                + "and turning slowly.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.EXTRACT_CURRENT_PRIZE.description"] =
+                "You draw your arm out with petals stuck to it, and the tanuki "
+                + "exhales. It pays what every visitor gets and does not mention the "
+                + "rest.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.EXTRACT_INSTEAD.description"] =
+                "You draw your arm out numb to the shoulder. The tanuki pays out "
+                + "more than it has ever admitted to holding and pretends it did not "
+                + "see how deep you went.",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST.pages.POLLINOUS_CORE.description"] =
+                "The bud opens the rest of the way and lets you go. The core is "
+                + "warm and faintly crackling in your hands, and the tanuki, for "
+                + "once, has nothing to say.",
             // TideScryingStoneOfYashiori (Inazuma / CrystalSphere)
             ["TIDE_SCRYING_STONE_OF_YASHIORI.title"] =
                 "The Tide-Scrying Stone of Yashiori",
@@ -3539,6 +3921,60 @@ internal static partial class TeyvatLoc
                 "Obtain 3 Regent cards.",
             ["RACING_CAMPS_WAGER.pages.DONE.description"] =
                 "Obtain 3 Ironclad cards.",
+            // BloomOfTequemecan (Natlan / ColossalFlower)
+            ["BLOOM_OF_TEQUEMECAN.title"] =
+                "The Bloom of Tequemecan",
+            ["BLOOM_OF_TEQUEMECAN.pages.INITIAL.description"] =
+                "In the high meadows of Tequemecan Valley grows a flower the size "
+                + "of a war-drum, and the Flower-Feather Clan has been daring each "
+                + "other into it for a generation. Reach past the outer petals and "
+                + "the nectar runs sweet and easy. Reach again, and the bud tightens "
+                + "around your arm like it means it. The clan's oldest racer grins at "
+                + "you over the rim: \"Third reach or nothing, if you've got the "
+                + "nerve for the heart of it.\"",
+            ["BLOOM_OF_TEQUEMECAN.pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1.title"] =
+                "Tap the Nectar",
+            ["BLOOM_OF_TEQUEMECAN.pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1.description"] =
+                "Gain 35 Gold.",
+            ["BLOOM_OF_TEQUEMECAN.pages.INITIAL.options.REACH_DEEPER_1.title"] =
+                "Reach Deeper",
+            ["BLOOM_OF_TEQUEMECAN.pages.INITIAL.options.REACH_DEEPER_1.description"] =
+                "Lose 5 HP. Advance to the next level.",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2.title"] =
+                "Tap the Nectar",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2.description"] =
+                "Gain 75 Gold.",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_1.options.REACH_DEEPER_2.title"] =
+                "Reach Deeper",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_1.options.REACH_DEEPER_2.description"] =
+                "Lose 6 HP. Advance to the next level.",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD.title"] =
+                "Tap the Nectar",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD.description"] =
+                "Gain 135 Gold.",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_2.options.POLLINOUS_CORE.title"] =
+                "Reach the Bloom's Heart",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_2.options.POLLINOUS_CORE.description"] =
+                "Lose 7 HP. Obtain the Bloom's Heart.",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_1.description"] =
+                "Past the outer petals the nectar thickens and the flower closes a "
+                + "little around your arm. The clan's drummer starts a slow beat: the "
+                + "count for how long you keep it in.",
+            ["BLOOM_OF_TEQUEMECAN.pages.REACH_DEEPER_2.description"] =
+                "Shoulder-deep now. The drumming is faster, the petals are tight "
+                + "enough to bruise, and something at the flower's heart is warm and "
+                + "pulsing under your fingers.",
+            ["BLOOM_OF_TEQUEMECAN.pages.EXTRACT_CURRENT_PRIZE.description"] =
+                "You pull free with your arm slick to the elbow, and the drummer "
+                + "stops mid-beat. The clan pays out the wager without complaint.",
+            ["BLOOM_OF_TEQUEMECAN.pages.EXTRACT_INSTEAD.description"] =
+                "You pull free with your whole side aching, and the drummer stops. "
+                + "The clan pays out the biggest wager of the season and says nothing "
+                + "about the heart.",
+            ["BLOOM_OF_TEQUEMECAN.pages.POLLINOUS_CORE.description"] =
+                "The flower shudders and lets go. What you hold is warm, heavy and "
+                + "humming, and every Flower-Feather warrior in the meadow is looking "
+                + "at it.",
             // SpringsGrid (Natlan / CrystalSphere)
             ["SPRINGS_GRID.title"] =
                 "The Springs' Grid",
@@ -4565,12 +5001,24 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.ENJOY_TEA.description", "pages.PICK_FIGHT.description", "pages.CONTINUE_FIGHT.description" },
                 new[] { "pages.PICK_FIGHT.options.CONTINUE_FIGHT" },
                 false),
+            [typeof(Events.Sumeru.ThreeDossiersBeforeSabzeruz)] = new EventShape(
+                "THREE_DOSSIERS_BEFORE_SABZERUZ", "TrialMirror",
+                Array.Empty<string>(),
+                new[] { "pages.REJECT.description", "pages.MERCHANT.description", "pages.NOBLE.description", "pages.NONDESCRIPT.description", "pages.MERCHANT_GUILTY.description", "pages.MERCHANT_INNOCENT.description", "pages.NOBLE_GUILTY.description", "pages.NOBLE_INNOCENT.description", "pages.NONDESCRIPT_GUILTY.description", "pages.NONDESCRIPT_INNOCENT.description" },
+                new[] { "pages.MERCHANT.options.GUILTY", "pages.MERCHANT.options.INNOCENT", "pages.NOBLE.options.GUILTY", "pages.NOBLE.options.INNOCENT", "pages.NONDESCRIPT.options.GUILTY", "pages.NONDESCRIPT.options.INNOCENT", "pages.INITIAL.options.ACCEPT", "pages.INITIAL.options.REJECT", "pages.REJECT.options.ACCEPT", "pages.REJECT.options.DOUBLE_DOWN" },
+                false),
             [typeof(Events.Sumeru.CaravanRibatLeavings)] = new EventShape(
                 "CARAVAN_RIBAT_LEAVINGS", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 true),
+            [typeof(Events.Sumeru.KshahrewarWorkbench)] = new EventShape(
+                "KSHAHREWAR_WORKBENCH", "TinkerTimeMirror",
+                Array.Empty<string>(),
+                new[] { "pages.CHOOSE_CARD_TYPE.description", "pages.CHOOSE_RIDER.description", "pages.DONE.description" },
+                new[] { "pages.INITIAL.options.CHOOSE_CARD_TYPE", "pages.CHOOSE_CARD_TYPE.options.ATTACK", "pages.CHOOSE_CARD_TYPE.options.SKILL", "pages.CHOOSE_CARD_TYPE.options.POWER", "pages.CHOOSE_RIDER.options.SAPPING", "pages.CHOOSE_RIDER.options.VIOLENCE", "pages.CHOOSE_RIDER.options.CHOKING", "pages.CHOOSE_RIDER.options.ENERGIZED", "pages.CHOOSE_RIDER.options.WISDOM", "pages.CHOOSE_RIDER.options.CHAOS", "pages.CHOOSE_RIDER.options.EXPERTISE", "pages.CHOOSE_RIDER.options.CURIOUS", "pages.CHOOSE_RIDER.options.IMPROVEMENT" },
+                false),
             [typeof(Events.Sumeru.WarHistorianRapiya)] = new EventShape(
                 "WAR_HISTORIAN_RAPIYA", "WarHistorianRepyMirror",
                 new[] { "UNLOCK_CAGE", "UNLOCK_CHEST" },
@@ -4655,12 +5103,24 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.ENJOY_TEA.description", "pages.PICK_FIGHT.description", "pages.CONTINUE_FIGHT.description" },
                 new[] { "pages.PICK_FIGHT.options.CONTINUE_FIGHT" },
                 false),
+            [typeof(Events.Fontaine.EmptySeatInTheGallery)] = new EventShape(
+                "EMPTY_SEAT_IN_THE_GALLERY", "TrialMirror",
+                Array.Empty<string>(),
+                new[] { "pages.REJECT.description", "pages.MERCHANT.description", "pages.NOBLE.description", "pages.NONDESCRIPT.description", "pages.MERCHANT_GUILTY.description", "pages.MERCHANT_INNOCENT.description", "pages.NOBLE_GUILTY.description", "pages.NOBLE_INNOCENT.description", "pages.NONDESCRIPT_GUILTY.description", "pages.NONDESCRIPT_INNOCENT.description" },
+                new[] { "pages.MERCHANT.options.GUILTY", "pages.MERCHANT.options.INNOCENT", "pages.NOBLE.options.GUILTY", "pages.NOBLE.options.INNOCENT", "pages.NONDESCRIPT.options.GUILTY", "pages.NONDESCRIPT.options.INNOCENT", "pages.INITIAL.options.ACCEPT", "pages.INITIAL.options.REJECT", "pages.REJECT.options.ACCEPT", "pages.REJECT.options.DOUBLE_DOWN" },
+                false),
             [typeof(Events.Fontaine.TwoGiftsFromTheFontemer)] = new EventShape(
                 "TWO_GIFTS_FROM_THE_FONTEMER", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 true),
+            [typeof(Events.Fontaine.PrototypeHourAtTheInstitute)] = new EventShape(
+                "PROTOTYPE_HOUR_AT_THE_INSTITUTE", "TinkerTimeMirror",
+                Array.Empty<string>(),
+                new[] { "pages.CHOOSE_CARD_TYPE.description", "pages.CHOOSE_RIDER.description", "pages.DONE.description" },
+                new[] { "pages.INITIAL.options.CHOOSE_CARD_TYPE", "pages.CHOOSE_CARD_TYPE.options.ATTACK", "pages.CHOOSE_CARD_TYPE.options.SKILL", "pages.CHOOSE_CARD_TYPE.options.POWER", "pages.CHOOSE_RIDER.options.SAPPING", "pages.CHOOSE_RIDER.options.VIOLENCE", "pages.CHOOSE_RIDER.options.CHOKING", "pages.CHOOSE_RIDER.options.ENERGIZED", "pages.CHOOSE_RIDER.options.WISDOM", "pages.CHOOSE_RIDER.options.CHAOS", "pages.CHOOSE_RIDER.options.EXPERTISE", "pages.CHOOSE_RIDER.options.CURIOUS", "pages.CHOOSE_RIDER.options.IMPROVEMENT" },
+                false),
             [typeof(Events.Fontaine.SealedTestimonyOfRepie)] = new EventShape(
                 "SEALED_TESTIMONY_OF_REPIE", "WarHistorianRepyMirror",
                 new[] { "UNLOCK_CAGE", "UNLOCK_CHEST" },
@@ -4714,6 +5174,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT" },
                 new[] { "pages.DONE.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.WisteriaWellOfChinjuForest)] = new EventShape(
+                "WISTERIA_WELL_OF_CHINJU_FOREST", "ColossalFlowerMirror",
+                Array.Empty<string>(),
+                new[] { "pages.REACH_DEEPER_1.description", "pages.REACH_DEEPER_2.description", "pages.EXTRACT_CURRENT_PRIZE.description", "pages.EXTRACT_INSTEAD.description", "pages.POLLINOUS_CORE.description" },
+                new[] { "pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1", "pages.INITIAL.options.REACH_DEEPER_1", "pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2", "pages.REACH_DEEPER_1.options.REACH_DEEPER_2", "pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD", "pages.REACH_DEEPER_2.options.POLLINOUS_CORE" },
                 false),
             [typeof(Events.Inazuma.TideScryingStoneOfYashiori)] = new EventShape(
                 "TIDE_SCRYING_STONE_OF_YASHIORI", "CrystalSphereMirror",
@@ -4834,6 +5300,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT" },
                 new[] { "pages.DONE.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.BloomOfTequemecan)] = new EventShape(
+                "BLOOM_OF_TEQUEMECAN", "ColossalFlowerMirror",
+                Array.Empty<string>(),
+                new[] { "pages.REACH_DEEPER_1.description", "pages.REACH_DEEPER_2.description", "pages.EXTRACT_CURRENT_PRIZE.description", "pages.EXTRACT_INSTEAD.description", "pages.POLLINOUS_CORE.description" },
+                new[] { "pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1", "pages.INITIAL.options.REACH_DEEPER_1", "pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2", "pages.REACH_DEEPER_1.options.REACH_DEEPER_2", "pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD", "pages.REACH_DEEPER_2.options.POLLINOUS_CORE" },
                 false),
             [typeof(Events.Natlan.SpringsGrid)] = new EventShape(
                 "SPRINGS_GRID", "CrystalSphereMirror",
@@ -5066,8 +5538,12 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Sumeru.FutureOfElixirs>(),
             [(TeyvatFrame.Sumeru, typeof(RoundTeaParty))] =
                 () => ModelDb.Event<Events.Sumeru.RoundTableAtTheHouseOfDaena>(),
+            [(TeyvatFrame.Sumeru, typeof(Trial))] =
+                () => ModelDb.Event<Events.Sumeru.ThreeDossiersBeforeSabzeruz>(),
             [(TeyvatFrame.Sumeru, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Sumeru.CaravanRibatLeavings>(),
+            [(TeyvatFrame.Sumeru, typeof(TinkerTime))] =
+                () => ModelDb.Event<Events.Sumeru.KshahrewarWorkbench>(),
             [(TeyvatFrame.Sumeru, typeof(WarHistorianRepy))] =
                 () => ModelDb.Event<Events.Sumeru.WarHistorianRapiya>(),
             [(TeyvatFrame.Fontaine, typeof(BattlewornDummy))] =
@@ -5096,8 +5572,12 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Fontaine.WhatTheMelusinesTradeFor>(),
             [(TeyvatFrame.Fontaine, typeof(RoundTeaParty))] =
                 () => ModelDb.Event<Events.Fontaine.RoundTableAtCafLutece>(),
+            [(TeyvatFrame.Fontaine, typeof(Trial))] =
+                () => ModelDb.Event<Events.Fontaine.EmptySeatInTheGallery>(),
             [(TeyvatFrame.Fontaine, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Fontaine.TwoGiftsFromTheFontemer>(),
+            [(TeyvatFrame.Fontaine, typeof(TinkerTime))] =
+                () => ModelDb.Event<Events.Fontaine.PrototypeHourAtTheInstitute>(),
             [(TeyvatFrame.Fontaine, typeof(WarHistorianRepy))] =
                 () => ModelDb.Event<Events.Fontaine.SealedTestimonyOfRepie>(),
             [(TeyvatFrame.Inazuma, typeof(SelfHelpBook))] =
@@ -5116,6 +5596,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.DrillmasterOfWatatsumi>(),
             [(TeyvatFrame.Inazuma, typeof(ColorfulPhilosophers))] =
                 () => ModelDb.Event<Events.Inazuma.WarCouncilAtSangonomiya>(),
+            [(TeyvatFrame.Inazuma, typeof(ColossalFlower))] =
+                () => ModelDb.Event<Events.Inazuma.WisteriaWellOfChinjuForest>(),
             [(TeyvatFrame.Inazuma, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Inazuma.TideScryingStoneOfYashiori>(),
             [(TeyvatFrame.Inazuma, typeof(DollRoom))] =
@@ -5156,6 +5638,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Natlan.SweepOrStomp>(),
             [(TeyvatFrame.Natlan, typeof(ColorfulPhilosophers))] =
                 () => ModelDb.Event<Events.Natlan.RacingCampsWager>(),
+            [(TeyvatFrame.Natlan, typeof(ColossalFlower))] =
+                () => ModelDb.Event<Events.Natlan.BloomOfTequemecan>(),
             [(TeyvatFrame.Natlan, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Natlan.SpringsGrid>(),
             [(TeyvatFrame.Natlan, typeof(DollRoom))] =
@@ -5321,8 +5805,12 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_future_of_potions.png",
             ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA"] =
                 "res://images/events/round_tea_party.png",
+            ["THREE_DOSSIERS_BEFORE_SABZERUZ"] =
+                "res://images/events/trial.png",
             ["CARAVAN_RIBAT_LEAVINGS"] =
                 "res://images/events/this_or_that.png",
+            ["KSHAHREWAR_WORKBENCH"] =
+                "res://images/events/tinker_time.png",
             ["WAR_HISTORIAN_RAPIYA"] =
                 "res://images/events/war_historian_repy.png",
             ["PRESSURE_TRIAL_AT_THE_INSTITUTE"] =
@@ -5351,8 +5839,12 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_future_of_potions.png",
             ["ROUND_TABLE_AT_CAF_LUTECE"] =
                 "res://images/events/round_tea_party.png",
+            ["EMPTY_SEAT_IN_THE_GALLERY"] =
+                "res://images/events/trial.png",
             ["TWO_GIFTS_FROM_THE_FONTEMER"] =
                 "res://images/events/this_or_that.png",
+            ["PROTOTYPE_HOUR_AT_THE_INSTITUTE"] =
+                "res://images/events/tinker_time.png",
             ["SEALED_TESTIMONY_OF_REPIE"] =
                 "res://images/events/war_historian_repy.png",
             ["WATATSUMI_DRILL_PRIMER"] =
@@ -5371,6 +5863,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/bugslayer.png",
             ["WAR_COUNCIL_AT_SANGONOMIYA"] =
                 "res://images/events/colorful_philosophers.png",
+            ["WISTERIA_WELL_OF_CHINJU_FOREST"] =
+                "res://images/events/colossal_flower.png",
             ["TIDE_SCRYING_STONE_OF_YASHIORI"] =
                 "res://images/events/crystal_sphere.png",
             ["HITOGATA_STOREHOUSE"] =
@@ -5411,6 +5905,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/bugslayer.png",
             ["RACING_CAMPS_WAGER"] =
                 "res://images/events/colorful_philosophers.png",
+            ["BLOOM_OF_TEQUEMECAN"] =
+                "res://images/events/colossal_flower.png",
             ["SPRINGS_GRID"] =
                 "res://images/events/crystal_sphere.png",
             ["TOTEM_SHELF"] =

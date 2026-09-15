@@ -109,7 +109,7 @@ list is the engineering queue for this surface.
 
 A mirror's row in `MIRRORS` is a `MirrorSpec`, not just a class name, because
 the index's key scrape is a regex over string literals and no scrape can say
-how a face's lines pair with an event's keys. Six shapes defeat it, and the
+how a face's lines pair with an event's keys. Seven shapes defeat it, and the
 spec has a field for each:
 
 | Shape | Field | What it says |
@@ -120,8 +120,34 @@ spec has a field for each:
 | a page two options share | `page_source` | which line supplies it |
 | a later-page option that HAS a line | `options`, spelled as a full suffix | it pairs by position and is written where it sits |
 | the face's lines are a TABLE, not options | `table_option` / `dish_table` | how the table folds into the key or keys that exist |
+| the face line names its OWN key | `keyed` | the keys the face's `@` lines must fill |
 
-The last two are batch 6's, and they are what un-parked act 1's final four.
+The two table shapes un-parked act 1's final four.
+
+**`keyed` — the line that carries its own key.** Position runs out at an event
+whose reachable keys outnumber a wiki-shaped face's bullets, and borrowing a
+neighbour's line there prints another branch's consequences on the button. So a
+face may write a line that names the key it fills:
+
+```
+@pages.REJECT.options.DOUBLE_DOWN | Walk Out of the Opera — … This ends the run.
+@pages.MERCHANT.description — The defendant is a Fleuve Cendre smuggler …
+```
+
+The first form is an OPTION and supplies `<entry>.<key>.title` and
+`.description`; the second is a PAGE and supplies `<entry>.<key>`. The key is
+the full suffix under the entry, spelled as the base event's own literals off
+the decompile; the separator is an em dash and a plain ` - ` is accepted. A
+keyed line is NEVER an option, so adding one cannot move what a face's
+positional lines pair with. The mirror declares `keyed=KeyedLines((…))` and the
+check is by NAME both ways: a declared key with no line on a face is a refusal
+naming the key, and a line whose key no mirror declares is a refusal too.
+`KeyedLines.optional` is for a key that already has a derivation (The Future of
+Potions' `DONE`) — a face that writes a line wins, one that does not keeps
+deriving; `positional=False` says the face's bullets are a reader's
+restatement and the keyed list is the whole pairing (Tinker Time, Colossal
+Flower). A mirror that declares `keyed` never falls back to the index's scrape
+for its option or page lists. This is what un-parked acts 2 and 3's last three.
 
 **A full-suffix key in `options`** — `pages.ALL.options.LINGER`,
 `pages.DECIPHER.options.GIVE_UP` — is an option a LATER PAGE offers that the
@@ -171,8 +197,9 @@ there is.
 The mirror's doc comment says which of its own keys are which, and the pins
 read the generated `EventShape` rather than either.
 
-**Act 1 has no parked events.** All thirty-eight (base event, face) pairs
-across the two active faces generate.
+**No face has a parked event.** All six faces generate every (base event,
+face) pair they name; the only skip left is The Merchant___, whose wiki page
+has no options section for a face to disagree with.
 
 `tools/data/sts2_base_events.json` is the structural index the generator and
 the pins both read: per base event the class name, the `Id.Entry`, the option
@@ -200,8 +227,9 @@ The generator exits nonzero, naming the event, when a face's option count
 cannot be paired with the mirror's keys, when a face's option count disagrees
 with the frozen harvest's AND the mirror declares no `options` list of its own,
 when a `table_option`'s slot literal is not in the face, when a `dish_table`
-parses a different number of dishes than the mirror names, or when a face names
-a base event the game does not have. It SKIPS with a note an event the harvest
+parses a different number of dishes than the mirror names, when a keyed key the
+mirror declares has no line on a face or a face writes one the mirror does not
+declare, or when a face names a base event the game does not have. It SKIPS with a note an event the harvest
 marks
 `<<NO OPTIONS SECTION ON PAGE>>` (The Merchant___). Faces map to dressing act
 ids in `FACES` at the top of the generator; acts 2 and 3 are listed there and
