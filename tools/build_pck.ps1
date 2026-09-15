@@ -109,6 +109,39 @@ if (Test-Path $work) { Remove-Item $work -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 
 # Minimal project: its only job is to import the textures and export a pack.
+#
+# TEXT SCENES SHIP AS TEXT. `editor/export/convert_text_resources_to_binary`
+# is a PROJECT SETTING (read by Godot's exporter in `_export_project_files`,
+# not an export-preset option), it defaults to TRUE, and with it on every
+# `.tscn` is packed as a binary `.scn` under `.godot/imported/` plus a
+# `<name>.tscn.remap` stub at the original path. `ResourceLoader.Load` follows
+# a remap transparently, so a scene reached BY NAME still loads -- which is
+# why the background ROOT (`SceneHelper.GetScenePath`) and
+# `teyvat/creature_visuals/hilichurl_guard.tscn` always worked.
+#
+# The background LAYERS are not reached by name. `Rooms/BackgroundAssets`'s
+# constructor `DirAccess.Open`s `res://scenes/backgrounds/<id>/layers` and
+# takes each `GetNext()` filename VERBATIM, so with remaps in the pack it
+# builds `.../liyue_bg_00_a.tscn.remap` -- a path with no loader. The preload
+# session then calls `AssetCache.MarkAssetFailed` on it
+# (`AssetLoadingSession.cs:235`), and `NCombatBackground.AddLayer`'s
+# `GetScene` throws `AssetLoadException: Asset previously failed to load`
+# INSIDE `CombatManager.SetUpCombat`, so combat never starts. That was the
+# blocking defect of `git show ecfa839d:review/records/teyvat-proofs-3-2026-09-15.md`,
+# and it only
+# surfaced once the placeholder sets were complete enough for the
+# `FilePathIdentifier` alias to stand down and the real layer paths to be used.
+#
+# The base game does exactly this: SlayTheSpire2.pck carries 173 raw
+# `scenes/backgrounds/*/layers/*.tscn` entries and NOT ONE `.tscn.remap` (its
+# only 56 remaps are `.gd.remap`, which this pack has none of --
+# `script_export_mode=2`). So this line is not a workaround, it is matching the
+# packaging the engine code was written against.
+#
+# It also re-aligns the pck with its own contract: the contract is derived from
+# the WORK directory, so it has always listed `...liyue_bg_00_a.tscn` while the
+# pack held `...liyue_bg_00_a.tscn.remap`. Nothing compares the two, which is
+# why that divergence was silent.
 [IO.File]::WriteAllText((Join-Path $work 'project.godot'), @'
 ; Minimal project whose only job is to import Klee's art and export a .pck
 ; the game (MegaDot 4.5.1) can merge into res:// at runtime.
@@ -117,6 +150,15 @@ config_version=5
 [application]
 
 config/name="KleePck"
+
+[editor]
+
+; Ship .tscn as .tscn, the way the game's own pack does. See the comment
+; above this heredoc in tools/build_pck.ps1: with this at its default (true)
+; the exporter emits .tscn.remap stubs, and BackgroundAssets' DirAccess scan
+; of the layers directory hands those straight to AssetCache, which aborts
+; combat setup.
+export/convert_text_resources_to_binary=false
 '@)
 
 [IO.File]::WriteAllText((Join-Path $work 'export_presets.cfg'), @'

@@ -129,6 +129,67 @@ def test_the_six_faces_are_two_per_act():
     assert [n.entry for n in gen.NATIONS] == [n.id.upper() for n in gen.NATIONS]
 
 
+def project_godot_text() -> str:
+    """The `project.godot` heredoc `tools/build_pck.ps1` writes for the export.
+
+    Sliced out rather than grepped for, because the setting below is only
+    load-bearing INSIDE this heredoc: the same line sitting in a comment, or in
+    the `export_presets.cfg` heredoc next door, changes nothing about the pack.
+    """
+    script = BUILD_PCK.read_text(encoding="utf-8")
+    opening = "'project.godot'), @'"
+    start = script.index(opening) + len(opening)
+    return script[start:script.index("'@)", start)]
+
+
+def test_the_export_ships_text_scenes_as_text():
+    r"""The layer scenes must reach the pack as `.tscn`, not `.tscn.remap`.
+
+    `editor/export/convert_text_resources_to_binary` is a PROJECT SETTING read
+    by Godot's exporter, and it defaults to TRUE: every `.tscn` is then packed
+    as a binary `.scn` plus a `<name>.tscn.remap` stub at the original path.
+
+    `ResourceLoader` follows a remap transparently, so a scene reached BY NAME
+    still loads -- the background root and the still portraits never noticed.
+    `Rooms/BackgroundAssets`'s constructor does not use `ResourceLoader`: it
+    `DirAccess.Open`s `res://scenes/backgrounds/<id>/layers` and takes each
+    `GetNext()` filename VERBATIM. With remaps it therefore builds
+    `.../<id>_bg_00_a.tscn.remap`, a path no loader recognizes;
+    `NCombatBackground.AddLayer`'s `GetScene` throws inside
+    `CombatManager.SetUpCombat` and combat never starts. That is the blocking
+    defect of `git show ecfa839d:review/records/teyvat-proofs-3-2026-09-15.md`.
+
+    The base game's own pack settles what correct looks like: 173 raw
+    `scenes/backgrounds/*/layers/*.tscn` entries and zero `.tscn.remap` (its
+    only remaps are `.gd.remap`, and this pack ships no scripts at all).
+    """
+    project = project_godot_text()
+    assert "[editor]" in project
+    assert "export/convert_text_resources_to_binary=false" in project
+
+    # Not true by construction: the value is the whole point, and `true` here
+    # reinstates the defect exactly.
+    assert "export/convert_text_resources_to_binary=true" not in project
+
+
+def test_no_contract_row_is_a_remap_stub():
+    """The contract names what the pack must hold, and a stub is never it.
+
+    The contract is derived from the work directory, so it has always listed
+    `...liyue_bg_00_a.tscn` -- while the shipped pack held
+    `...liyue_bg_00_a.tscn.remap`. Nothing compares the contract to the pack's
+    actual entries, which is why that divergence was silent for a whole build.
+    This is the half of it that CAN be asked headlessly.
+    """
+    parsed = contract.parse(FIXTURE.read_text(encoding="utf-8"))
+    assert [r for r in parsed.resource_set if r.endswith(".remap")] == []
+
+    planned = {row.res for row in gen.plan()}
+    scenes = {r for r in planned if r.endswith(".tscn")}
+    assert scenes, planned
+    assert not any(r.endswith(".remap") for r in planned)
+
+
 def test_build_pck_copies_every_directory_the_generator_writes():
     """A produced texture with no copy block never reaches the pack."""
     script = BUILD_PCK.read_text(encoding="utf-8")
