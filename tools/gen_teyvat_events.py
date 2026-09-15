@@ -441,6 +441,24 @@ MIRRORS: Dict[str, MirrorSpec] = {
                "pages.KEEP_THE_KEY.description"),
         page_source=(("pages.DONE.options.RETURN_THE_KEY.description",
                       "RETURN_THE_KEY"),)),
+
+    # --- acts 2 and 3, batch 2 -------------------------------------------
+    "Reflections": MirrorSpec("ReflectionsMirror"),
+    "FieldOfManSizedHoles": MirrorSpec("FieldOfManSizedHolesMirror"),
+    "LostWisp": MirrorSpec("LostWispMirror"),
+    "PotionCourier": MirrorSpec("PotionCourierMirror"),
+    # Pick Fight opens a second page with one option, `CONTINUE_FIGHT`, which
+    # the face writes no line for -- it is the same branch continued -- and
+    # whose own outcome page is `pages.CONTINUE_FIGHT.description`. The
+    # scrape puts the option key in with the pages, so both lists are
+    # declared.
+    "RoundTeaParty": MirrorSpec(
+        "RoundTeaPartyMirror",
+        options=("ENJOY_TEA", "PICK_FIGHT"),
+        extra_options=(("pages.PICK_FIGHT.options.CONTINUE_FIGHT", "PICK_FIGHT"),),
+        pages=("pages.ENJOY_TEA.description", "pages.PICK_FIGHT.description",
+               "pages.CONTINUE_FIGHT.description"),
+        page_source=(("pages.CONTINUE_FIGHT.description", "PICK_FIGHT"),)),
 }
 
 

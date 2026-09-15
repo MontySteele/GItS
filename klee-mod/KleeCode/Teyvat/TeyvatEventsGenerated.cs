@@ -1474,6 +1474,53 @@ internal static partial class TeyvatLoc
             ["ARANARAS_TWO_CAPS.pages.FRAGRANT_MUSHROOM.description"] =
                 "Obtain Rukkhashava Bloom (Fragrant Mushroom, relic). Upon pickup, "
                 + "lose 15 HP and Upgrade 3 random cards.",
+            // SpilledSatchelAtSumeruCitysGate (Sumeru / PotionCourier)
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.title"] =
+                "The Spilled Satchel at Sumeru City's Gate",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.INITIAL.description"] =
+                "At the western gate of Sumeru City, an Amurta darshan courier has "
+                + "upended her satchel dodging the bell of a Matra checkpoint. Half "
+                + "her stock is common field-brews nobody at the Akademiya will miss; "
+                + "the other case still carries an uncommon-grade tincture sealed for "
+                + "a professor's private study, and she has not yet decided whether "
+                + "to report it lost.",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.INITIAL.options.GRAB_POTIONS.title"] =
+                "Gather the Spilled Brews",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.INITIAL.options.GRAB_POTIONS.description"] =
+                "Procure 3 field brews (Foul Potion).",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.INITIAL.options.RANSACK.title"] =
+                "Claim the Sealed Tincture",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.INITIAL.options.RANSACK.description"] =
+                "Procure 1 random uncommon-grade tincture (Uncommon Potion).",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.GRAB_POTIONS.description"] =
+                "Procure 3 field brews (Foul Potion).",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.RANSACK.description"] =
+                "Procure 1 random uncommon-grade tincture (Uncommon Potion).",
+            // RtawahistTwinningGlass (Sumeru / Reflections)
+            ["RTAWAHIST_TWINNING_GLASS.title"] =
+                "The Rtawahist Twinning Glass",
+            ["RTAWAHIST_TWINNING_GLASS.pages.INITIAL.description"] =
+                "In a cold observation loft above the House of Daena, a Rtawahist "
+                + "scholar keeps a pane of starfall glass that does not merely "
+                + "reflect — it corrects, showing the observer back sharpened in some "
+                + "ways and reversed in others. She has one working pane and one "
+                + "cracked spare. \"Touch the true glass, and it edits generously,\" "
+                + "she says. \"Break the spare, and everything you are gets a "
+                + "duplicate — including the parts that shouldn't have one.\"",
+            ["RTAWAHIST_TWINNING_GLASS.pages.INITIAL.options.TOUCH_A_MIRROR.title"] =
+                "Touch the True Glass",
+            ["RTAWAHIST_TWINNING_GLASS.pages.INITIAL.options.TOUCH_A_MIRROR.description"] =
+                "Downgrade 2 random cards. Upgrade 4 random cards.",
+            ["RTAWAHIST_TWINNING_GLASS.pages.INITIAL.options.SHATTER.title"] =
+                "Break the Spare Pane",
+            ["RTAWAHIST_TWINNING_GLASS.pages.INITIAL.options.SHATTER.description"] =
+                "Duplicate your entire Deck. Add Reflected Doubt (Bad Luck curse) "
+                + "to your Deck.",
+            ["RTAWAHIST_TWINNING_GLASS.pages.TOUCH_A_MIRROR.description"] =
+                "Downgrade 2 random cards. Upgrade 4 random cards.",
+            ["RTAWAHIST_TWINNING_GLASS.pages.SHATTER.description"] =
+                "Duplicate your entire Deck. Add Reflected Doubt (Bad Luck curse) "
+                + "to your Deck.",
             // SixWeeksToABetterYouIlluminated (Sumeru / SelfHelpBook)
             ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.title"] =
                 "Six Weeks to a Better You, Illuminated",
@@ -1656,6 +1703,34 @@ internal static partial class TeyvatLoc
             ["FUTURE_OF_ELIXIRS.pages.DONE.description"] =
                 "Lose a specified Common potion. Obtain an Upgraded Common "
                 + "[Attack/Skill] card reward.",
+            // RoundTableAtTheHouseOfDaena (Sumeru / RoundTeaParty)
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.title"] =
+                "The Round Table at the House of Daena",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.INITIAL.description"] =
+                "Five senior researchers of the Akademiya take their seminar tea at "
+                + "a table built perfectly round, specifically so no darshan can "
+                + "claim the head seat. It has not stopped four of them from "
+                + "suspecting the fifth authored an anonymous ethics complaint. A "
+                + "junior scholar sets a sixth cup before you without asking your "
+                + "darshan and returns to her own argument mid-sentence.",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.INITIAL.options.ENJOY_TEA.title"] =
+                "Take the Cup",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.INITIAL.options.ENJOY_TEA.description"] =
+                "Obtain Seminar Reserve (Royal Poison, relic). Heal to full HP.",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.INITIAL.options.PICK_FIGHT.title"] =
+                "Name the Suspect",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.INITIAL.options.PICK_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.PICK_FIGHT.options.CONTINUE_FIGHT.title"] =
+                "Name the Suspect",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.PICK_FIGHT.options.CONTINUE_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.ENJOY_TEA.description"] =
+                "Obtain Seminar Reserve (Royal Poison, relic). Heal to full HP.",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.PICK_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.pages.CONTINUE_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
             // CaravanRibatLeavings (Sumeru / ThisOrThat)
             ["CARAVAN_RIBAT_LEAVINGS.title"] =
                 "The Caravan Ribat Leavings",
@@ -1712,6 +1787,54 @@ internal static partial class TeyvatLoc
             ["MEROPIDE_INFIRMARY_ROUNDS.pages.FRAGRANT_MUSHROOM.description"] =
                 "Obtain Clarity Tincture (Fragrant Mushroom relic). Upon pickup, "
                 + "lose 15 HP and Upgrade 3 random cards.",
+            // UndeliverableParcels (Fontaine / PotionCourier)
+            ["UNDELIVERABLE_PARCELS.title"] =
+                "The Undeliverable Parcels",
+            ["UNDELIVERABLE_PARCELS.pages.INITIAL.description"] =
+                "The aquabus to Merusea Village has stalled off the Beryl Region "
+                + "shallows, and its Melusine postmistress has laid the undeliverable "
+                + "parcels along the pier in tidy, apologetic rows. Most are returns "
+                + "from the Fontaine Research Institute — labels dissolved, contents "
+                + "entirely unrepentant. One box, set slightly apart, still smells of "
+                + "the Court of Fontaine's better apothecaries.",
+            ["UNDELIVERABLE_PARCELS.pages.INITIAL.options.GRAB_POTIONS.title"] =
+                "Take the Returned Batch",
+            ["UNDELIVERABLE_PARCELS.pages.INITIAL.options.GRAB_POTIONS.description"] =
+                "Procure 3 unlabelled draughts (Foul Potion).",
+            ["UNDELIVERABLE_PARCELS.pages.INITIAL.options.RANSACK.title"] =
+                "Ask After the Good Box",
+            ["UNDELIVERABLE_PARCELS.pages.INITIAL.options.RANSACK.description"] =
+                "Procure 1 random Court apothecary tonic (Uncommon Potion).",
+            ["UNDELIVERABLE_PARCELS.pages.GRAB_POTIONS.description"] =
+                "Procure 3 unlabelled draughts (Foul Potion).",
+            ["UNDELIVERABLE_PARCELS.pages.RANSACK.description"] =
+                "Procure 1 random Court apothecary tonic (Uncommon Potion).",
+            // CoralMirrorRorriMLaroCEhT (Fontaine / Reflections)
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.title"] =
+                "The Coral Mirror rorriM laroC ehT",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.description"] =
+                "Merusea Village keeps one wall of grown coral that no diver "
+                + "touches without asking first — polished by the current into "
+                + "something that reflects a little wrong on purpose. A Melusine "
+                + "archivist keeps a ledger of every change it has ever made and "
+                + "reads you the relevant page before you get close, at some length, "
+                + "with diagrams. Touched carefully, she explains, the wall corrects "
+                + "two of your habits for the worse and four for the better. Broken "
+                + "outright, it keeps no favorites: it copies everything you are, all "
+                + "at once, and hands back a second you that carries its own bad "
+                + "luck. She will not choose for you, and she is sorry either way.",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.TOUCH_A_MIRROR.title"] =
+                "Touch a Mirror",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.TOUCH_A_MIRROR.description"] =
+                "Downgrade 2 random cards. Upgrade 4 random cards.",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.SHATTER.title"] =
+                "Shatter",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.INITIAL.options.SHATTER.description"] =
+                "Duplicate your entire Deck. Add Bad Luck (curse) to your Deck.",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.TOUCH_A_MIRROR.description"] =
+                "Downgrade 2 random cards. Upgrade 4 random cards.",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.SHATTER.description"] =
+                "Duplicate your entire Deck. Add Bad Luck (curse) to your Deck.",
             // MelusinesPamphletOfEncouragement (Fontaine / SelfHelpBook)
             ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.title"] =
                 "A Melusine's Pamphlet of Encouragement",
@@ -1893,6 +2016,34 @@ internal static partial class TeyvatLoc
             ["WHAT_THE_MELUSINES_TRADE_FOR.pages.DONE.description"] =
                 "Lose a specified Common potion. Obtain an Upgraded Common "
                 + "[Attack/Skill] card reward.",
+            // RoundTableAtCafLutece (Fontaine / RoundTeaParty)
+            ["ROUND_TABLE_AT_CAF_LUTECE.title"] =
+                "The Round Table at Café Lutece",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.INITIAL.description"] =
+                "Five aristocrats of the Court of Fontaine take their afternoon "
+                + "service at Café Lutece, at a table made perfectly round so that no "
+                + "one can be seated below anyone else. Seating rank is thereby a "
+                + "solved problem; the arsenic is not. A Melusine attendant sets a "
+                + "sixth cup before you without being asked, and the conversation "
+                + "does not pause for you.",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.INITIAL.options.ENJOY_TEA.title"] =
+                "Take the Cup",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.INITIAL.options.ENJOY_TEA.description"] =
+                "Obtain Vintage Reserve (Royal Poison relic). Heal to full HP.",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.INITIAL.options.PICK_FIGHT.title"] =
+                "Name the Poisoner",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.INITIAL.options.PICK_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.PICK_FIGHT.options.CONTINUE_FIGHT.title"] =
+                "Name the Poisoner",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.PICK_FIGHT.options.CONTINUE_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.ENJOY_TEA.description"] =
+                "Obtain Vintage Reserve (Royal Poison relic). Heal to full HP.",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.PICK_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
+            ["ROUND_TABLE_AT_CAF_LUTECE.pages.CONTINUE_FIGHT.description"] =
+                "Lose 11 HP. Obtain a random Relic.",
             // TwoGiftsFromTheFontemer (Fontaine / ThisOrThat)
             ["TWO_GIFTS_FROM_THE_FONTEMER.title"] =
                 "Two Gifts from the Fontemer",
@@ -2203,6 +2354,28 @@ internal static partial class TeyvatLoc
                 "Add Sweeping Tide (Exterminate) to your Deck.",
             ["DRILLMASTER_OF_WATATSUMI.pages.SQUASH.description"] =
                 "Add Anchor Drop (Squash) to your Deck.",
+            // FoxDensOfChinjuForest (Inazuma / FieldOfManSizedHoles)
+            ["FOX_DENS_OF_CHINJU_FOREST.title"] =
+                "The Fox-Dens of Chinju Forest",
+            ["FOX_DENS_OF_CHINJU_FOREST.pages.INITIAL.description"] =
+                "Past the mossed torii the forest floor is pocked with dens, each "
+                + "opening exactly the size of a person, the walls smooth as though "
+                + "someone had been poured in and let go politely. A tanuki sits at "
+                + "the nearest rim, counting on its claws. It will not tell you which "
+                + "den is yours to try; it only watches to see whether you'll trust "
+                + "the earth to give you back the shape you came in with.",
+            ["FOX_DENS_OF_CHINJU_FOREST.pages.INITIAL.options.RESIST.title"] =
+                "Enter Your Hole",
+            ["FOX_DENS_OF_CHINJU_FOREST.pages.INITIAL.options.RESIST.description"] =
+                "Enchant a card with Perfect Fit.",
+            ["FOX_DENS_OF_CHINJU_FOREST.pages.INITIAL.options.ENTER_YOUR_HOLE.title"] =
+                "Resist",
+            ["FOX_DENS_OF_CHINJU_FOREST.pages.INITIAL.options.ENTER_YOUR_HOLE.description"] =
+                "Remove 2 cards from your Deck. Add Normality (curse) to your Deck.",
+            ["FOX_DENS_OF_CHINJU_FOREST.pages.RESIST.description"] =
+                "Enchant a card with Perfect Fit.",
+            ["FOX_DENS_OF_CHINJU_FOREST.pages.ENTER_YOUR_HOLE.description"] =
+                "Remove 2 cards from your Deck. Add Normality (curse) to your Deck.",
             // NestedArray (Inazuma / InfestedAutomaton)
             ["NESTED_ARRAY.title"] =
                 "The Nested Array",
@@ -2225,6 +2398,29 @@ internal static partial class TeyvatLoc
                 "Obtain a random Power.",
             ["NESTED_ARRAY.pages.TOUCH_CORE.description"] =
                 "Obtain a random 0 cost card.",
+            // BourouVillageMedicineRun (Inazuma / PotionCourier)
+            ["BOUROU_VILLAGE_MEDICINE_RUN.title"] =
+                "The Bourou Village Medicine Run",
+            ["BOUROU_VILLAGE_MEDICINE_RUN.pages.INITIAL.description"] =
+                "Rain hammers the terraces above Bourou Village. A runner for "
+                + "Sangonomiya's field infirmary is crouched under a torii with a "
+                + "soaked satchel — a Shogunate patrol took the rest of her shipment "
+                + "on the coast road, and she has stopped pretending she will reach "
+                + "the front tonight. What survived is what nobody wanted: "
+                + "home-pressed sea-grass draughts, and one small vial out of Ritou "
+                + "she was told not to open.",
+            ["BOUROU_VILLAGE_MEDICINE_RUN.pages.INITIAL.options.GRAB_POTIONS.title"] =
+                "Take What's Left",
+            ["BOUROU_VILLAGE_MEDICINE_RUN.pages.INITIAL.options.GRAB_POTIONS.description"] =
+                "Procure 3 sea-grass draughts (Foul Potion).",
+            ["BOUROU_VILLAGE_MEDICINE_RUN.pages.INITIAL.options.RANSACK.title"] =
+                "Open the Ritou Vial",
+            ["BOUROU_VILLAGE_MEDICINE_RUN.pages.INITIAL.options.RANSACK.description"] =
+                "Procure 1 random smuggled tonic (Uncommon Potion).",
+            ["BOUROU_VILLAGE_MEDICINE_RUN.pages.GRAB_POTIONS.description"] =
+                "Procure 3 sea-grass draughts (Foul Potion).",
+            ["BOUROU_VILLAGE_MEDICINE_RUN.pages.RANSACK.description"] =
+                "Procure 1 random smuggled tonic (Uncommon Potion).",
             // BlockadeLarder (Inazuma / RoomFullOfCheese)
             ["BLOCKADE_LARDER.title"] =
                 "The Blockade Larder",
@@ -2361,6 +2557,36 @@ internal static partial class TeyvatLoc
                 + "against a Mysterious Knight — a masked Shogunate blade waiting "
                 + "under the burning lamp, crest scraped off the shoulder — for the "
                 + "Signal-Lamp Pin (Lantern Key) card.",
+            // FoxfireOnTheSlag (Inazuma / LostWisp)
+            ["FOXFIRE_ON_THE_SLAG.title"] =
+                "The Foxfire on the Slag",
+            ["FOXFIRE_ON_THE_SLAG.pages.INITIAL.description"] =
+                "On the Musoujin Gorge slopes a pale foxfire hangs over ground the "
+                + "Tatarigami never fully let go of. Resistance scouts mark such "
+                + "lights on the map and walk past them; the Watatsumi shrine maidens "
+                + "hold that a flame which will not settle is a flame still carrying "
+                + "something. Below, the old slag fields are full of what the war "
+                + "left behind.",
+            ["FOXFIRE_ON_THE_SLAG.pages.INITIAL.options.CLAIM.title"] =
+                "Bottle the Foxfire (Capture the Wisp)",
+            ["FOXFIRE_ON_THE_SLAG.pages.INITIAL.options.CLAIM.description"] =
+                "It goes into the jar without a fight and settles against the glass "
+                + "like it was waiting. Add Tatarigami Rot (Decay curse) to Deck. "
+                + "Obtain the Stray Foxfire (Lost Wisp relic).",
+            ["FOXFIRE_ON_THE_SLAG.pages.INITIAL.options.SEARCH.title"] =
+                "Pick Over the Slag Fields (Search the Nearby Area)",
+            ["FOXFIRE_ON_THE_SLAG.pages.INITIAL.options.SEARCH.description"] =
+                "You leave the flame to its business and work the tailings instead, "
+                + "where the smelters' pay-chests burst open years ago. Gain 45-75 "
+                + "Mora (Gold).",
+            ["FOXFIRE_ON_THE_SLAG.pages.CLAIM.description"] =
+                "It goes into the jar without a fight and settles against the glass "
+                + "like it was waiting. Add Tatarigami Rot (Decay curse) to Deck. "
+                + "Obtain the Stray Foxfire (Lost Wisp relic).",
+            ["FOXFIRE_ON_THE_SLAG.pages.SEARCH.description"] =
+                "You leave the flame to its business and work the tailings instead, "
+                + "where the smelters' pay-chests burst open years ago. Gain 45-75 "
+                + "Mora (Gold).",
             // EarWhisperer (Natlan / BrainLeech)
             ["EAR_WHISPERER.title"] =
                 "The Ear-Whisperer",
@@ -2412,6 +2638,28 @@ internal static partial class TeyvatLoc
                 "Add Exterminate to your Deck.",
             ["SWEEP_OR_STOMP.pages.SQUASH.description"] =
                 "Add Squash to your Deck.",
+            // CookfirePits (Natlan / FieldOfManSizedHoles)
+            ["COOKFIRE_PITS.title"] =
+                "The Cookfire Pits",
+            ["COOKFIRE_PITS.pages.INITIAL.description"] =
+                "The cookfire grounds at Mictlan are pocked with holes this season, "
+                + "each one sized exact to a person, rims smooth as a mold. Nobody "
+                + "dug them and nobody's found the bottom. The Collective's cooks "
+                + "have started betting on who fits which hole. \"Get in,\" says the "
+                + "eldest, not looking up from the spit. \"Or walk off and let two "
+                + "things go instead — your call, but the pot's already opened.\"",
+            ["COOKFIRE_PITS.pages.INITIAL.options.RESIST.title"] =
+                "Enter Your Hole",
+            ["COOKFIRE_PITS.pages.INITIAL.options.RESIST.description"] =
+                "Enchant a card with Perfect Fit.",
+            ["COOKFIRE_PITS.pages.INITIAL.options.ENTER_YOUR_HOLE.title"] =
+                "Resist",
+            ["COOKFIRE_PITS.pages.INITIAL.options.ENTER_YOUR_HOLE.description"] =
+                "Remove 2 cards from your Deck. Add Normality (curse) to your Deck.",
+            ["COOKFIRE_PITS.pages.RESIST.description"] =
+                "Enchant a card with Perfect Fit.",
+            ["COOKFIRE_PITS.pages.ENTER_YOUR_HOLE.description"] =
+                "Remove 2 cards from your Deck. Add Normality (curse) to your Deck.",
             // TickingRelic (Natlan / InfestedAutomaton)
             ["TICKING_RELIC.title"] =
                 "The Ticking Relic",
@@ -2435,6 +2683,29 @@ internal static partial class TeyvatLoc
                 "Obtain a random Power card.",
             ["TICKING_RELIC.pages.TOUCH_CORE.description"] =
                 "Obtain a random 0-cost card.",
+            // OvershotDrop (Natlan / PotionCourier)
+            ["OVERSHOT_DROP.title"] =
+                "The Overshot Drop",
+            ["OVERSHOT_DROP.pages.INITIAL.description"] =
+                "A Night-Wind courier overshot her drop on the ridge above "
+                + "Tequemecan Valley and the satchel burst wide — three bottles of "
+                + "something rough and mostly spoiled, and underneath, sealed better, "
+                + "one bottle she was actually paid to carry. \"Grab the cheap stuff "
+                + "by the handful,\" she calls down, already remounting, \"or dig for "
+                + "the one that's worth the climb. I'm not waiting on your "
+                + "decision.\"",
+            ["OVERSHOT_DROP.pages.INITIAL.options.GRAB_POTIONS.title"] =
+                "Grab Potions",
+            ["OVERSHOT_DROP.pages.INITIAL.options.GRAB_POTIONS.description"] =
+                "Procure 3 Foul Potions.",
+            ["OVERSHOT_DROP.pages.INITIAL.options.RANSACK.title"] =
+                "Ransack",
+            ["OVERSHOT_DROP.pages.INITIAL.options.RANSACK.description"] =
+                "Procure 1 random Uncommon Potion.",
+            ["OVERSHOT_DROP.pages.GRAB_POTIONS.description"] =
+                "Procure 3 Foul Potions.",
+            ["OVERSHOT_DROP.pages.RANSACK.description"] =
+                "Procure 1 random Uncommon Potion.",
             // UnderStandsCellar (Natlan / RoomFullOfCheese)
             ["UNDER_STANDS_CELLAR.title"] =
                 "The Under-Stands Cellar",
@@ -2549,6 +2820,29 @@ internal static partial class TeyvatLoc
                 "Gain 100 Gold.",
             ["MARKER_OFF_THE_RACETRACK.pages.KEEP_THE_KEY.description"] =
                 "Enter combat against a Mysterious Knight for the Lantern Key card.",
+            // DriftingLight (Natlan / LostWisp)
+            ["DRIFTING_LIGHT.title"] =
+                "The Drifting Light",
+            ["DRIFTING_LIGHT.pages.INITIAL.description"] =
+                "A stray light drifts loose over the Tepeacac Rise scree, guttering "
+                + "like it's lost its court. The Children of Echoes have a plain rule "
+                + "for such things, the same one they have for most of what the "
+                + "mountain keeps: bottle it and it answers you back, at a cost the "
+                + "tribe never pretends is free. Or leave it be and work the ground "
+                + "it's hovering over instead, where something older than the light "
+                + "has been sitting untouched.",
+            ["DRIFTING_LIGHT.pages.INITIAL.options.CLAIM.title"] =
+                "Capture the Wisp",
+            ["DRIFTING_LIGHT.pages.INITIAL.options.CLAIM.description"] =
+                "Add Decay (curse) to your Deck. Obtain the Lost Wisp (relic).",
+            ["DRIFTING_LIGHT.pages.INITIAL.options.SEARCH.title"] =
+                "Search the Nearby Area",
+            ["DRIFTING_LIGHT.pages.INITIAL.options.SEARCH.description"] =
+                "Gain 45-75 Gold.",
+            ["DRIFTING_LIGHT.pages.CLAIM.description"] =
+                "Add Decay (curse) to your Deck. Obtain the Lost Wisp (relic).",
+            ["DRIFTING_LIGHT.pages.SEARCH.description"] =
+                "Gain 45-75 Gold.",
             // HollowTreeGuide (Natlan / SelfHelpBook)
             ["HOLLOW_TREE_GUIDE.title"] =
                 "The Hollow-Tree Guide",
@@ -3018,6 +3312,18 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.BIG_MUSHROOM.description", "pages.FRAGRANT_MUSHROOM.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.SpilledSatchelAtSumeruCitysGate)] = new EventShape(
+                "SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE", "PotionCourierMirror",
+                new[] { "GRAB_POTIONS", "RANSACK" },
+                new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Sumeru.RtawahistTwinningGlass)] = new EventShape(
+                "RTAWAHIST_TWINNING_GLASS", "ReflectionsMirror",
+                new[] { "TOUCH_A_MIRROR", "SHATTER" },
+                new[] { "pages.TOUCH_A_MIRROR.description", "pages.SHATTER.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Sumeru.SixWeeksToABetterYouIlluminated)] = new EventShape(
                 "SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED", "SelfHelpBookMirror",
                 new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
@@ -3036,6 +3342,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.DONE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.RoundTableAtTheHouseOfDaena)] = new EventShape(
+                "ROUND_TABLE_AT_THE_HOUSE_OF_DAENA", "RoundTeaPartyMirror",
+                new[] { "ENJOY_TEA", "PICK_FIGHT" },
+                new[] { "pages.ENJOY_TEA.description", "pages.PICK_FIGHT.description", "pages.CONTINUE_FIGHT.description" },
+                new[] { "pages.PICK_FIGHT.options.CONTINUE_FIGHT" },
+                false),
             [typeof(Events.Sumeru.CaravanRibatLeavings)] = new EventShape(
                 "CARAVAN_RIBAT_LEAVINGS", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
@@ -3046,6 +3358,18 @@ internal static class TeyvatGeneratedEvents
                 "MEROPIDE_INFIRMARY_ROUNDS", "HungryForMushroomsMirror",
                 new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
                 new[] { "pages.BIG_MUSHROOM.description", "pages.FRAGRANT_MUSHROOM.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.UndeliverableParcels)] = new EventShape(
+                "UNDELIVERABLE_PARCELS", "PotionCourierMirror",
+                new[] { "GRAB_POTIONS", "RANSACK" },
+                new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.CoralMirrorRorriMLaroCEhT)] = new EventShape(
+                "CORAL_MIRROR_RORRI_MLARO_CEH_T", "ReflectionsMirror",
+                new[] { "TOUCH_A_MIRROR", "SHATTER" },
+                new[] { "pages.TOUCH_A_MIRROR.description", "pages.SHATTER.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Fontaine.MelusinesPamphletOfEncouragement)] = new EventShape(
@@ -3065,6 +3389,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "POTION" },
                 new[] { "pages.DONE.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.RoundTableAtCafLutece)] = new EventShape(
+                "ROUND_TABLE_AT_CAF_LUTECE", "RoundTeaPartyMirror",
+                new[] { "ENJOY_TEA", "PICK_FIGHT" },
+                new[] { "pages.ENJOY_TEA.description", "pages.PICK_FIGHT.description", "pages.CONTINUE_FIGHT.description" },
+                new[] { "pages.PICK_FIGHT.options.CONTINUE_FIGHT" },
                 false),
             [typeof(Events.Fontaine.TwoGiftsFromTheFontemer)] = new EventShape(
                 "TWO_GIFTS_FROM_THE_FONTEMER", "ThisOrThatMirror",
@@ -3108,10 +3438,22 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.FoxDensOfChinjuForest)] = new EventShape(
+                "FOX_DENS_OF_CHINJU_FOREST", "FieldOfManSizedHolesMirror",
+                new[] { "RESIST", "ENTER_YOUR_HOLE" },
+                new[] { "pages.RESIST.description", "pages.ENTER_YOUR_HOLE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Inazuma.NestedArray)] = new EventShape(
                 "NESTED_ARRAY", "InfestedAutomatonMirror",
                 new[] { "STUDY", "TOUCH_CORE" },
                 new[] { "pages.STUDY.description", "pages.TOUCH_CORE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.BourouVillageMedicineRun)] = new EventShape(
+                "BOUROU_VILLAGE_MEDICINE_RUN", "PotionCourierMirror",
+                new[] { "GRAB_POTIONS", "RANSACK" },
+                new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Inazuma.BlockadeLarder)] = new EventShape(
@@ -3138,6 +3480,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.DONE.options.RETURN_THE_KEY.description", "pages.KEEP_THE_KEY.description" },
                 new[] { "pages.KEEP_THE_KEY.options.FIGHT" },
                 false),
+            [typeof(Events.Inazuma.FoxfireOnTheSlag)] = new EventShape(
+                "FOXFIRE_ON_THE_SLAG", "LostWispMirror",
+                new[] { "CLAIM", "SEARCH" },
+                new[] { "pages.CLAIM.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Natlan.EarWhisperer)] = new EventShape(
                 "EAR_WHISPERER", "BrainLeechMirror",
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
@@ -3150,10 +3498,22 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Natlan.CookfirePits)] = new EventShape(
+                "COOKFIRE_PITS", "FieldOfManSizedHolesMirror",
+                new[] { "RESIST", "ENTER_YOUR_HOLE" },
+                new[] { "pages.RESIST.description", "pages.ENTER_YOUR_HOLE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Natlan.TickingRelic)] = new EventShape(
                 "TICKING_RELIC", "InfestedAutomatonMirror",
                 new[] { "STUDY", "TOUCH_CORE" },
                 new[] { "pages.STUDY.description", "pages.TOUCH_CORE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.OvershotDrop)] = new EventShape(
+                "OVERSHOT_DROP", "PotionCourierMirror",
+                new[] { "GRAB_POTIONS", "RANSACK" },
+                new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Natlan.UnderStandsCellar)] = new EventShape(
@@ -3179,6 +3539,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "RETURN_THE_KEY", "KEEP_THE_KEY" },
                 new[] { "pages.DONE.options.RETURN_THE_KEY.description", "pages.KEEP_THE_KEY.description" },
                 new[] { "pages.KEEP_THE_KEY.options.FIGHT" },
+                false),
+            [typeof(Events.Natlan.DriftingLight)] = new EventShape(
+                "DRIFTING_LIGHT", "LostWispMirror",
+                new[] { "CLAIM", "SEARCH" },
+                new[] { "pages.CLAIM.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
                 false),
             [typeof(Events.Natlan.HollowTreeGuide)] = new EventShape(
                 "HOLLOW_TREE_GUIDE", "SelfHelpBookMirror",
@@ -3291,22 +3657,34 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
             [(TeyvatFrame.Sumeru, typeof(HungryForMushrooms))] =
                 () => ModelDb.Event<Events.Sumeru.AranarasTwoCaps>(),
+            [(TeyvatFrame.Sumeru, typeof(PotionCourier))] =
+                () => ModelDb.Event<Events.Sumeru.SpilledSatchelAtSumeruCitysGate>(),
+            [(TeyvatFrame.Sumeru, typeof(Reflections))] =
+                () => ModelDb.Event<Events.Sumeru.RtawahistTwinningGlass>(),
             [(TeyvatFrame.Sumeru, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Sumeru.SixWeeksToABetterYouIlluminated>(),
             [(TeyvatFrame.Sumeru, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Sumeru.RopeLineOverArdraviValley>(),
             [(TeyvatFrame.Sumeru, typeof(TheFutureOfPotions))] =
                 () => ModelDb.Event<Events.Sumeru.FutureOfElixirs>(),
+            [(TeyvatFrame.Sumeru, typeof(RoundTeaParty))] =
+                () => ModelDb.Event<Events.Sumeru.RoundTableAtTheHouseOfDaena>(),
             [(TeyvatFrame.Sumeru, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Sumeru.CaravanRibatLeavings>(),
             [(TeyvatFrame.Fontaine, typeof(HungryForMushrooms))] =
                 () => ModelDb.Event<Events.Fontaine.MeropideInfirmaryRounds>(),
+            [(TeyvatFrame.Fontaine, typeof(PotionCourier))] =
+                () => ModelDb.Event<Events.Fontaine.UndeliverableParcels>(),
+            [(TeyvatFrame.Fontaine, typeof(Reflections))] =
+                () => ModelDb.Event<Events.Fontaine.CoralMirrorRorriMLaroCEhT>(),
             [(TeyvatFrame.Fontaine, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Fontaine.MelusinesPamphletOfEncouragement>(),
             [(TeyvatFrame.Fontaine, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Fontaine.BallastCheckOnTheMeropideLift>(),
             [(TeyvatFrame.Fontaine, typeof(TheFutureOfPotions))] =
                 () => ModelDb.Event<Events.Fontaine.WhatTheMelusinesTradeFor>(),
+            [(TeyvatFrame.Fontaine, typeof(RoundTeaParty))] =
+                () => ModelDb.Event<Events.Fontaine.RoundTableAtCafLutece>(),
             [(TeyvatFrame.Fontaine, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Fontaine.TwoGiftsFromTheFontemer>(),
             [(TeyvatFrame.Inazuma, typeof(SelfHelpBook))] =
@@ -3321,8 +3699,12 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.ChinjuForestPassenger>(),
             [(TeyvatFrame.Inazuma, typeof(Bugslayer))] =
                 () => ModelDb.Event<Events.Inazuma.DrillmasterOfWatatsumi>(),
+            [(TeyvatFrame.Inazuma, typeof(FieldOfManSizedHoles))] =
+                () => ModelDb.Event<Events.Inazuma.FoxDensOfChinjuForest>(),
             [(TeyvatFrame.Inazuma, typeof(InfestedAutomaton))] =
                 () => ModelDb.Event<Events.Inazuma.NestedArray>(),
+            [(TeyvatFrame.Inazuma, typeof(PotionCourier))] =
+                () => ModelDb.Event<Events.Inazuma.BourouVillageMedicineRun>(),
             [(TeyvatFrame.Inazuma, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Inazuma.BlockadeLarder>(),
             [(TeyvatFrame.Inazuma, typeof(SpiritGrafter))] =
@@ -3331,12 +3713,18 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.KettleBelowSangonomiya>(),
             [(TeyvatFrame.Inazuma, typeof(TheLanternKey))] =
                 () => ModelDb.Event<Events.Inazuma.SignalLampCipher>(),
+            [(TeyvatFrame.Inazuma, typeof(LostWisp))] =
+                () => ModelDb.Event<Events.Inazuma.FoxfireOnTheSlag>(),
             [(TeyvatFrame.Natlan, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Natlan.EarWhisperer>(),
             [(TeyvatFrame.Natlan, typeof(Bugslayer))] =
                 () => ModelDb.Event<Events.Natlan.SweepOrStomp>(),
+            [(TeyvatFrame.Natlan, typeof(FieldOfManSizedHoles))] =
+                () => ModelDb.Event<Events.Natlan.CookfirePits>(),
             [(TeyvatFrame.Natlan, typeof(InfestedAutomaton))] =
                 () => ModelDb.Event<Events.Natlan.TickingRelic>(),
+            [(TeyvatFrame.Natlan, typeof(PotionCourier))] =
+                () => ModelDb.Event<Events.Natlan.OvershotDrop>(),
             [(TeyvatFrame.Natlan, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Natlan.UnderStandsCellar>(),
             [(TeyvatFrame.Natlan, typeof(SpiritGrafter))] =
@@ -3345,6 +3733,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Natlan.FestivalBrewStand>(),
             [(TeyvatFrame.Natlan, typeof(TheLanternKey))] =
                 () => ModelDb.Event<Events.Natlan.MarkerOffTheRacetrack>(),
+            [(TeyvatFrame.Natlan, typeof(LostWisp))] =
+                () => ModelDb.Event<Events.Natlan.DriftingLight>(),
             [(TeyvatFrame.Natlan, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Natlan.HollowTreeGuide>(),
             [(TeyvatFrame.Natlan, typeof(SlipperyBridge))] =
@@ -3454,22 +3844,34 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/this_or_that.png",
             ["ARANARAS_TWO_CAPS"] =
                 "res://images/events/hungry_for_mushrooms.png",
+            ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE"] =
+                "res://images/events/potion_courier.png",
+            ["RTAWAHIST_TWINNING_GLASS"] =
+                "res://images/events/reflections.png",
             ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY"] =
                 "res://images/events/slippery_bridge.png",
             ["FUTURE_OF_ELIXIRS"] =
                 "res://images/events/the_future_of_potions.png",
+            ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA"] =
+                "res://images/events/round_tea_party.png",
             ["CARAVAN_RIBAT_LEAVINGS"] =
                 "res://images/events/this_or_that.png",
             ["MEROPIDE_INFIRMARY_ROUNDS"] =
                 "res://images/events/hungry_for_mushrooms.png",
+            ["UNDELIVERABLE_PARCELS"] =
+                "res://images/events/potion_courier.png",
+            ["CORAL_MIRROR_RORRI_MLARO_CEH_T"] =
+                "res://images/events/reflections.png",
             ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT"] =
                 "res://images/events/self_help_book.png",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT"] =
                 "res://images/events/slippery_bridge.png",
             ["WHAT_THE_MELUSINES_TRADE_FOR"] =
                 "res://images/events/the_future_of_potions.png",
+            ["ROUND_TABLE_AT_CAF_LUTECE"] =
+                "res://images/events/round_tea_party.png",
             ["TWO_GIFTS_FROM_THE_FONTEMER"] =
                 "res://images/events/this_or_that.png",
             ["WATATSUMI_DRILL_PRIMER"] =
@@ -3484,8 +3886,12 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/brain_leech.png",
             ["DRILLMASTER_OF_WATATSUMI"] =
                 "res://images/events/bugslayer.png",
+            ["FOX_DENS_OF_CHINJU_FOREST"] =
+                "res://images/events/field_of_man_sized_holes.png",
             ["NESTED_ARRAY"] =
                 "res://images/events/infested_automaton.png",
+            ["BOUROU_VILLAGE_MEDICINE_RUN"] =
+                "res://images/events/potion_courier.png",
             ["BLOCKADE_LARDER"] =
                 "res://images/events/room_full_of_cheese.png",
             ["NAMELESS_UNDER_THE_CEDAR"] =
@@ -3494,12 +3900,18 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/tea_master.png",
             ["SIGNAL_LAMP_CIPHER"] =
                 "res://images/events/the_lantern_key.png",
+            ["FOXFIRE_ON_THE_SLAG"] =
+                "res://images/events/lost_wisp.png",
             ["EAR_WHISPERER"] =
                 "res://images/events/brain_leech.png",
             ["SWEEP_OR_STOMP"] =
                 "res://images/events/bugslayer.png",
+            ["COOKFIRE_PITS"] =
+                "res://images/events/field_of_man_sized_holes.png",
             ["TICKING_RELIC"] =
                 "res://images/events/infested_automaton.png",
+            ["OVERSHOT_DROP"] =
+                "res://images/events/potion_courier.png",
             ["UNDER_STANDS_CELLAR"] =
                 "res://images/events/room_full_of_cheese.png",
             ["SPRINGS_ROOTED_THING"] =
@@ -3508,6 +3920,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/tea_master.png",
             ["MARKER_OFF_THE_RACETRACK"] =
                 "res://images/events/the_lantern_key.png",
+            ["DRIFTING_LIGHT"] =
+                "res://images/events/lost_wisp.png",
             ["HOLLOW_TREE_GUIDE"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_CROSSING_AT_COATEPEC"] =

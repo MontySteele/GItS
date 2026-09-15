@@ -582,6 +582,12 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(SpiritGrafterMirror), typeof(SpiritGrafter) },
             new object[] { typeof(HungryForMushroomsMirror), typeof(HungryForMushrooms) },
             new object[] { typeof(TheLanternKeyMirror), typeof(TheLanternKey) },
+            // Acts 2 and 3, batch 2.
+            new object[] { typeof(ReflectionsMirror), typeof(Reflections) },
+            new object[] { typeof(RoundTeaPartyMirror), typeof(RoundTeaParty) },
+            new object[] { typeof(FieldOfManSizedHolesMirror), typeof(FieldOfManSizedHoles) },
+            new object[] { typeof(LostWispMirror), typeof(LostWisp) },
+            new object[] { typeof(PotionCourierMirror), typeof(PotionCourier) },
         };
 
     // ---------------------------------------------------------------
