@@ -424,6 +424,99 @@ internal static partial class TeyvatLoc
                 "Heal 9 HP. Upgrade a card in your Deck.",
             ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.PLANT.description"] =
                 "Enchant a card with Sown.",
+            // CrackedTabletAtStormterrorsLair (Mondstadt / TabletOfTruth)
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.title"] =
+                "The Cracked Tablet at Stormterror's Lair",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.description"] =
+                "Half-buried in scree at the foot of Stormterror's Lair, a stone "
+                + "tablet carries lines no Knight on the patrol can read. The duty "
+                + "Knight says regulation calls for cataloguing it and moving on; "
+                + "courtesy admits that touching it seems to do something. Each time "
+                + "you press your hand flat against the stone, it takes a little more "
+                + "and gives a little more back — and you can always pull your hand "
+                + "away.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.SMASH.title"] =
+                "Smash",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.SMASH.description"] =
+                "Heal 20 HP.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.DECIPHER_1.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.DECIPHER_1.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER.options.GIVE_UP.title"] =
+                "Give Up",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER.options.GIVE_UP.description"] =
+                "can be chosen at any stage to leave.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.options.DECIPHER.title"] =
+                "Decipher",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.options.DECIPHER.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.SMASH.description"] =
+                "Heal 20 HP.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.GIVE_UP.description"] =
+                "can be chosen at any stage to leave.",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_5.description"] =
+                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
+                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
+                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
+                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
+                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
             // AngelsSharesTastingFlight (Mondstadt / TeaMaster)
             ["ANGELS_SHARES_TASTING_FLIGHT.title"] =
                 "The Angel's Share's Tasting Flight",
@@ -1247,6 +1340,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EAT.description", "pages.PLANT.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Mondstadt.CrackedTabletAtStormterrorsLair)] = new EventShape(
+                "CRACKED_TABLET_AT_STORMTERRORS_LAIR", "TabletOfTruthMirror",
+                new[] { "SMASH", "DECIPHER_1" },
+                new[] { "pages.SMASH.description", "pages.GIVE_UP.description", "pages.DECIPHER_1.description", "pages.DECIPHER_2.description", "pages.DECIPHER_3.description", "pages.DECIPHER_4.description", "pages.DECIPHER_5.description" },
+                new[] { "pages.DECIPHER.options.GIVE_UP", "pages.DECIPHER_1.options.DECIPHER", "pages.DECIPHER_2.options.DECIPHER", "pages.DECIPHER_3.options.DECIPHER", "pages.DECIPHER_4.options.DECIPHER" },
+                false),
             [typeof(Events.Mondstadt.AngelsSharesTastingFlight)] = new EventShape(
                 "ANGELS_SHARES_TASTING_FLIGHT", "TeaMasterMirror",
                 new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
@@ -1406,6 +1505,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.SpringvaleCheeseCellar>(),
             [(TeyvatFrame.Mondstadt, typeof(SapphireSeed))] =
                 () => ModelDb.Event<Events.Mondstadt.CliffsideSeedNearCapeOath>(),
+            [(TeyvatFrame.Mondstadt, typeof(TabletOfTruth))] =
+                () => ModelDb.Event<Events.Mondstadt.CrackedTabletAtStormterrorsLair>(),
             [(TeyvatFrame.Mondstadt, typeof(TeaMaster))] =
                 () => ModelDb.Event<Events.Mondstadt.AngelsSharesTastingFlight>(),
             [(TeyvatFrame.Mondstadt, typeof(TheLegendsWereTrue))] =
@@ -1495,6 +1596,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/room_full_of_cheese.png",
             ["CLIFFSIDE_SEED_NEAR_CAPE_OATH"] =
                 "res://images/events/sapphire_seed.png",
+            ["CRACKED_TABLET_AT_STORMTERRORS_LAIR"] =
+                "res://images/events/tablet_of_truth.png",
             ["ANGELS_SHARES_TASTING_FLIGHT"] =
                 "res://images/events/tea_master.png",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH"] =

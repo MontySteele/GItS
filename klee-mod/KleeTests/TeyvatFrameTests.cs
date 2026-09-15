@@ -428,6 +428,13 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(SunkenStatueMirror), typeof(SunkenStatue) },
             new object[] { typeof(TrashHeapMirror), typeof(TrashHeap) },
             new object[] { typeof(WaterloggedScriptoriumMirror), typeof(WaterloggedScriptorium) },
+            // Batch 6, act 1's last four -- the shapes whose faces had no
+            // option key to pair with until the generator grew one: a
+            // later-page option with a line of its own (Tablet of Truth,
+            // Abyssal Baths), a table of lines under one key (The Future of
+            // Potions), and an option key that IS the rolled dish (Endless
+            // Conveyor).
+            new object[] { typeof(TabletOfTruthMirror), typeof(TabletOfTruth) },
         };
 
     // ---------------------------------------------------------------
