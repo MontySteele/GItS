@@ -282,8 +282,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R270 | 2026-09-08 | (2026-09-08): what Spark is for, option 1; Spark is a currency, its income stays, and pool pass two gives it things to buy, Regent's Stars the comparison | `add2d4f` |
 | R271 | 2026-09-14 | (2026-09-14): the Klee pool consolidation at its four defaults; two cuts, Booby Trap, Grounded on no Set off, Return to Sender capped, the shelf, Mines first | `d3739dd` |
 | R272 | 2026-09-14 | (2026-09-14): the Teyvat run frame; the freeze lifts for the non-mechanical layer, two nations per act with act 1 Mondstadt or Liyue, music as locally… | `40afdc6` |
+| R273 | 2026-09-14 | (2026-09-14): the Teyvat nation mapping at both defaults; | `22cdb50` |
 
-271 rows over the R1..R272 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 160 from a commit message, 0 unresolved.
+272 rows over the R1..R273 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 161 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
