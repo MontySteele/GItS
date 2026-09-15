@@ -459,6 +459,39 @@ MIRRORS: Dict[str, MirrorSpec] = {
         pages=("pages.ENJOY_TEA.description", "pages.PICK_FIGHT.description",
                "pages.CONTINUE_FIGHT.description"),
         page_source=(("pages.CONTINUE_FIGHT.description", "PICK_FIGHT"),)),
+
+    # --- acts 2 and 3, batch 3 -------------------------------------------
+    # Both options land on the SAME page, so `page_source` says which face
+    # line supplies it -- the first, as Tea Master's `DONE` takes Bone Tea's.
+    "CrystalSphere": MirrorSpec(
+        "CrystalSphereMirror",
+        options=("UNCOVER_FUTURE", "PAYMENT_PLAN"),
+        pages=("pages.FINISH.description",),
+        page_source=(("pages.FINISH.description", "UNCOVER_FUTURE"),)),
+    "Symbiote": MirrorSpec(
+        "SymbioteMirror",
+        options=("APPROACH", "KILL_WITH_FIRE"),
+        extra_options=(("pages.INITIAL.options.APPROACH_LOCKED", "APPROACH"),)),
+    "GraveOfTheForgotten": MirrorSpec(
+        "GraveOfTheForgottenMirror",
+        options=("CONFRONT", "ACCEPT"),
+        extra_options=(("pages.INITIAL.options.CONFRONT_LOCKED", "CONFRONT"),)),
+    # ONE locked key serves TWO options -- `CreateLockedOption` returns
+    # `...options.LOCKED` for both the second and the third, where Self-Help
+    # Book and Tea Master name a twin per option. So the greyed-out row has to
+    # take ONE face line, and it takes Emotional Awareness's: the cheaper of
+    # the two, and so the one a player sees locked first. A text choice, the
+    # same shape as Tea Master's shared `DONE` page.
+    "ZenWeaver": MirrorSpec(
+        "ZenWeaverMirror",
+        options=("BREATHING_TECHNIQUES", "EMOTIONAL_AWARENESS", "ARACHNID_ACUPUNCTURE"),
+        extra_options=(("pages.INITIAL.options.LOCKED", "EMOTIONAL_AWARENESS"),)),
+    # Amalgamator is one of the few base events that calls `InitialOptionKey`
+    # instead of writing its literals out, so the scrape reports no option
+    # keys at all and the two are declared.
+    "Amalgamator": MirrorSpec(
+        "AmalgamatorMirror",
+        options=("COMBINE_STRIKES", "COMBINE_DEFENDS")),
 }
 
 

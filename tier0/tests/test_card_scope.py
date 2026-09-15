@@ -110,6 +110,15 @@ RUN_SCOPE_ALLOWED = {
         "reward screen and run scope is its whole lifetime. It is the base "
         "event's own call "
         "(`MegaCrit.Sts2.Core.Models.Events/TheLanternKey.cs`)",
+    "AmalgamatorMirror.cs":
+        "the same shape: the forge puts the Ultimate Strike or Ultimate "
+        "Defend it just made straight into the DECK from an event page, "
+        "through the base event's own call "
+        "(`MegaCrit.Sts2.Core.Models.Events/Amalgamator.cs`)",
+    "ZenWeaverMirror.cs":
+        "the same shape: Breathing Techniques puts TWO Enlightenments into "
+        "the DECK from an event page as one add, through the base event's own "
+        "call (`MegaCrit.Sts2.Core.Models.Events/ZenWeaver.cs`)",
 }
 
 

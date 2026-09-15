@@ -1446,6 +1446,55 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            // RtawahistsStarfallGlass (Sumeru / CrystalSphere)
+            ["RTAWAHISTS_STARFALL_GLASS.title"] =
+                "Rtawahist's Starfall Glass",
+            ["RTAWAHISTS_STARFALL_GLASS.pages.INITIAL.description"] =
+                "In a cold observation cell high in the Akademiya, a lens of "
+                + "starfall glass hangs in a gimbal ring, its face ruled into eleven "
+                + "by eleven wards. The Rtawahist scholar explains that each reading "
+                + "burns the clouding away — one ward, or a three-by-three quarter — "
+                + "and that a horoscope half-read is no horoscope at all. Downstairs, "
+                + "Dori Sangemah Bay has already drafted a contract with one very "
+                + "small clause.",
+            ["RTAWAHISTS_STARFALL_GLASS.pages.INITIAL.options.UNCOVER_FUTURE.title"] =
+                "Pay the Bench Fee",
+            ["RTAWAHISTS_STARFALL_GLASS.pages.INITIAL.options.UNCOVER_FUTURE.description"] =
+                "Pay 51-99 Mora (Gold). Divine 3 times.",
+            ["RTAWAHISTS_STARFALL_GLASS.pages.INITIAL.options.PAYMENT_PLAN.title"] =
+                "Sign with Dori",
+            ["RTAWAHISTS_STARFALL_GLASS.pages.INITIAL.options.PAYMENT_PLAN.description"] =
+                "Gain a Debt. Divine 6 times.",
+            ["RTAWAHISTS_STARFALL_GLASS.pages.FINISH.description"] =
+                "Pay 51-99 Mora (Gold). Divine 3 times.",
+            // HollowOfTheStruckName (Sumeru / GraveOfTheForgotten)
+            ["HOLLOW_OF_THE_STRUCK_NAME.title"] =
+                "Hollow of the Struck Name",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.INITIAL.description"] =
+                "In a withered hollow off Avidya Forest, a Forest Ranger's marker "
+                + "names no one. The Akademiya struck this researcher from the "
+                + "Akasha, and what remains of them drifts here, half-remembered, "
+                + "thinning at the edges like everything the withering touches. A "
+                + "ranger's offering-bowl sits beside the marker. So does an unsealed "
+                + "field journal.",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.INITIAL.options.CONFRONT.title"] =
+                "Take the Unnamed Keepsake",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.INITIAL.options.CONFRONT.description"] =
+                "Obtain Unnamed Keepsake (Forgotten Soul relic).",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.INITIAL.options.ACCEPT.title"] =
+                "Speak the Struck Name Aloud",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.INITIAL.options.ACCEPT.description"] =
+                "Add Withering (Decay curse) to your Deck. Enchant a card that "
+                + "Exhausts with Soul's Power.",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.INITIAL.options.CONFRONT_LOCKED.title"] =
+                "Take the Unnamed Keepsake",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.INITIAL.options.CONFRONT_LOCKED.description"] =
+                "Obtain Unnamed Keepsake (Forgotten Soul relic).",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.CONFRONT.description"] =
+                "Obtain Unnamed Keepsake (Forgotten Soul relic).",
+            ["HOLLOW_OF_THE_STRUCK_NAME.pages.ACCEPT.description"] =
+                "Add Withering (Decay curse) to your Deck. Enchant a card that "
+                + "Exhausts with Soul's Power.",
             // AranarasTwoCaps (Sumeru / HungryForMushrooms)
             ["ARANARAS_TWO_CAPS.title"] =
                 "The Aranara's Two Caps",
@@ -1684,6 +1733,32 @@ internal static partial class TeyvatLoc
                 "",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_LOOP.description"] =
                 "",
+            // WitheringGraft (Sumeru / Symbiote)
+            ["WITHERING_GRAFT.title"] =
+                "The Withering Graft",
+            ["WITHERING_GRAFT.pages.INITIAL.description"] =
+                "In a hollow below Chatrakam Cave, a withered branch has swollen "
+                + "into a soft black bulb that pulses in time with your heartbeat. A "
+                + "Forest Ranger's abandoned trail-marker warns of it in three "
+                + "languages and one Aranara pictogram. As you lean in, the growth "
+                + "leans back — patient, and very interested in the hand that holds "
+                + "your weapon.",
+            ["WITHERING_GRAFT.pages.INITIAL.options.APPROACH.title"] =
+                "Let It Graft",
+            ["WITHERING_GRAFT.pages.INITIAL.options.APPROACH.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["WITHERING_GRAFT.pages.INITIAL.options.KILL_WITH_FIRE.title"] =
+                "Burn It Out",
+            ["WITHERING_GRAFT.pages.INITIAL.options.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
+            ["WITHERING_GRAFT.pages.INITIAL.options.APPROACH_LOCKED.title"] =
+                "Let It Graft",
+            ["WITHERING_GRAFT.pages.INITIAL.options.APPROACH_LOCKED.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["WITHERING_GRAFT.pages.APPROACH.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["WITHERING_GRAFT.pages.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
             // FutureOfElixirs (Sumeru / TheFutureOfPotions)
             ["FUTURE_OF_ELIXIRS.title"] =
                 "The Future of Elixirs",
@@ -1758,6 +1833,58 @@ internal static partial class TeyvatLoc
                 "It is unmistakably well-made gear, fitted for nobody in particular "
                 + "— least of all you. Add Clumsy (curse) to your Deck. Obtain a "
                 + "random Relic.",
+            // SoundingTheBerylShelf (Fontaine / CrystalSphere)
+            ["SOUNDING_THE_BERYL_SHELF.title"] =
+                "Sounding the Beryl Shelf",
+            ["SOUNDING_THE_BERYL_SHELF.pages.INITIAL.description"] =
+                "The Melusines of Merusea Village have gridded a sunken freight lot "
+                + "on the Beryl Region shelf: eleven squares by eleven of grey silt, "
+                + "cargo somewhere beneath it. A harbormistress in an oilskin cap "
+                + "explains the sounding charges — one clears a single square, or a "
+                + "three-by-three sweep — and warns that only crates bared completely "
+                + "can be winched up. The big one at the lot's heart is four squares "
+                + "across; three soundings will never strip it.",
+            ["SOUNDING_THE_BERYL_SHELF.pages.INITIAL.options.UNCOVER_FUTURE.title"] =
+                "Buy Sounding Charges",
+            ["SOUNDING_THE_BERYL_SHELF.pages.INITIAL.options.UNCOVER_FUTURE.description"] =
+                "Pay 51-99 Gold. Divine 3 times.",
+            ["SOUNDING_THE_BERYL_SHELF.pages.INITIAL.options.PAYMENT_PLAN.title"] =
+                "Take the Meropide Tab",
+            ["SOUNDING_THE_BERYL_SHELF.pages.INITIAL.options.PAYMENT_PLAN.description"] =
+                "Gain a Debt. Divine 6 times.",
+            ["SOUNDING_THE_BERYL_SHELF.pages.FINISH.description"] =
+                "Pay 51-99 Gold. Divine 3 times.",
+            // LedgerOfSunkenNames (Fontaine / GraveOfTheForgotten)
+            ["LEDGER_OF_SUNKEN_NAMES.title"] =
+                "The Ledger of Sunken Names",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.INITIAL.description"] =
+                "Beneath Merusea Village, a Melusine tends a coral shelf of "
+                + "keepsakes left by people the Court of Fontaine never entered among "
+                + "the drowned. She has copied every name into a ledger nobody has "
+                + "ever asked to read. You may take one keepsake away with you, she "
+                + "says, or you may read a name aloud — though the primordial water "
+                + "still remembers how to take back what it made.",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.INITIAL.options.CONFRONT.title"] =
+                "Accept the Keepsake",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.INITIAL.options.CONFRONT.description"] =
+                "Obtain Sunken Keepsake (Forgotten Soul relic): whenever you "
+                + "Exhaust a card, deal 1 damage to a random enemy.",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.INITIAL.options.ACCEPT.title"] =
+                "Read the Name Aloud",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.INITIAL.options.ACCEPT.description"] =
+                "Add Dissolution (Decay curse) to your Deck. Enchant a card that "
+                + "Exhausts with Soul's Power (this card loses Exhaust).",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.INITIAL.options.CONFRONT_LOCKED.title"] =
+                "Accept the Keepsake",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.INITIAL.options.CONFRONT_LOCKED.description"] =
+                "Obtain Sunken Keepsake (Forgotten Soul relic): whenever you "
+                + "Exhaust a card, deal 1 damage to a random enemy.",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.CONFRONT.description"] =
+                "Obtain Sunken Keepsake (Forgotten Soul relic): whenever you "
+                + "Exhaust a card, deal 1 damage to a random enemy.",
+            ["LEDGER_OF_SUNKEN_NAMES.pages.ACCEPT.description"] =
+                "Add Dissolution (Decay curse) to your Deck. Enchant a card that "
+                + "Exhausts with Soul's Power (this card loses Exhaust).",
             // MeropideInfirmaryRounds (Fontaine / HungryForMushrooms)
             ["MEROPIDE_INFIRMARY_ROUNDS.title"] =
                 "The Meropide Infirmary Rounds",
@@ -1997,6 +2124,36 @@ internal static partial class TeyvatLoc
                 "",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_LOOP.description"] =
                 "",
+            // GuestInTheHull (Fontaine / Symbiote)
+            ["GUEST_IN_THE_HULL.title"] =
+                "The Guest in the Hull",
+            ["GUEST_IN_THE_HULL.pages.INITIAL.description"] =
+                "A Melusine dockhand at Romaritime Harbor waves you over to an "
+                + "overturned skiff with the delight of someone showing off a pet. "
+                + "Something soft and iridescent has taken up residence in the hull; "
+                + "it hums, and it has plainly been reading the salvage logs of "
+                + "everyone who touched it. \"It gets lonely down there,\" she "
+                + "explains. \"It only wants to come along with somebody.\" A "
+                + "lumidouce lantern hangs by the mooring post, already lit.",
+            ["GUEST_IN_THE_HULL.pages.INITIAL.options.APPROACH.title"] =
+                "Let It Come Along",
+            ["GUEST_IN_THE_HULL.pages.INITIAL.options.APPROACH.description"] =
+                "Enchant an Attack with Corrupted (deal 50% more damage; lose 2 HP "
+                + "each time the card is played).",
+            ["GUEST_IN_THE_HULL.pages.INITIAL.options.KILL_WITH_FIRE.title"] =
+                "Set the Lantern to It",
+            ["GUEST_IN_THE_HULL.pages.INITIAL.options.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
+            ["GUEST_IN_THE_HULL.pages.INITIAL.options.APPROACH_LOCKED.title"] =
+                "Let It Come Along",
+            ["GUEST_IN_THE_HULL.pages.INITIAL.options.APPROACH_LOCKED.description"] =
+                "Enchant an Attack with Corrupted (deal 50% more damage; lose 2 HP "
+                + "each time the card is played).",
+            ["GUEST_IN_THE_HULL.pages.APPROACH.description"] =
+                "Enchant an Attack with Corrupted (deal 50% more damage; lose 2 HP "
+                + "each time the card is played).",
+            ["GUEST_IN_THE_HULL.pages.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
             // WhatTheMelusinesTradeFor (Fontaine / TheFutureOfPotions)
             ["WHAT_THE_MELUSINES_TRADE_FOR.title"] =
                 "What the Melusines Trade For",
@@ -2304,6 +2461,33 @@ internal static partial class TeyvatLoc
                 + "— least of all you. It hangs wrong on every stance you know, and "
                 + "the quartermaster does not offer to adjust it. Add Clumsy (Clumsy) "
                 + "to your Deck. Obtain a random Relic.",
+            // BankedForgeAtMusoujin (Inazuma / Amalgamator)
+            ["BANKED_FORGE_AT_MUSOUJIN.title"] =
+                "The Banked Forge at Musoujin",
+            ["BANKED_FORGE_AT_MUSOUJIN.pages.INITIAL.description"] =
+                "A field forge under a tarp in Musoujin Gorge, banked low so the "
+                + "Kujou patrols upriver see no smoke. The resistance quartermaster "
+                + "has more scavenged gear than hands to carry it, and a Watatsumi "
+                + "smith who would rather make one good thing than inventory two poor "
+                + "ones. The Divine Priestess's standing order, she reminds you, is "
+                + "that nothing on Yashiori gets wasted twice. She holds out both "
+                + "hands and waits.",
+            ["BANKED_FORGE_AT_MUSOUJIN.pages.INITIAL.options.COMBINE_STRIKES.title"] =
+                "Give her two blades",
+            ["BANKED_FORGE_AT_MUSOUJIN.pages.INITIAL.options.COMBINE_STRIKES.description"] =
+                "Remove 2 Strike (Ironclad). Add Reforged Edge (Ultimate Strike) to "
+                + "your Deck.",
+            ["BANKED_FORGE_AT_MUSOUJIN.pages.INITIAL.options.COMBINE_DEFENDS.title"] =
+                "Give her two shields",
+            ["BANKED_FORGE_AT_MUSOUJIN.pages.INITIAL.options.COMBINE_DEFENDS.description"] =
+                "Remove 2 Defend (Ironclad). Add Reforged Bulwark (Ultimate Defend) "
+                + "to your Deck.",
+            ["BANKED_FORGE_AT_MUSOUJIN.pages.COMBINE_STRIKES.description"] =
+                "Remove 2 Strike (Ironclad). Add Reforged Edge (Ultimate Strike) to "
+                + "your Deck.",
+            ["BANKED_FORGE_AT_MUSOUJIN.pages.COMBINE_DEFENDS.description"] =
+                "Remove 2 Defend (Ironclad). Add Reforged Bulwark (Ultimate Defend) "
+                + "to your Deck.",
             // ChinjuForestPassenger (Inazuma / BrainLeech)
             ["CHINJU_FOREST_PASSENGER.title"] =
                 "The Chinju Forest Passenger",
@@ -2354,6 +2538,27 @@ internal static partial class TeyvatLoc
                 "Add Sweeping Tide (Exterminate) to your Deck.",
             ["DRILLMASTER_OF_WATATSUMI.pages.SQUASH.description"] =
                 "Add Anchor Drop (Squash) to your Deck.",
+            // TideScryingStoneOfYashiori (Inazuma / CrystalSphere)
+            ["TIDE_SCRYING_STONE_OF_YASHIORI.title"] =
+                "The Tide-Scrying Stone of Yashiori",
+            ["TIDE_SCRYING_STONE_OF_YASHIORI.pages.INITIAL.description"] =
+                "A slab of sea-worn stone on the Yashiori shoreline, said to show "
+                + "what the tide hasn't washed in yet. A resistance scout keeps watch "
+                + "over it with a sand-timer and a ledger of hits and misses. She "
+                + "will not divine on your behalf — she states the terms and steps "
+                + "back. Clear the stone's face a patch at a time, or by the handful, "
+                + "and whatever comes up whole is yours to take or leave, save the "
+                + "one reading nobody wants, which does not wait for you to choose.",
+            ["TIDE_SCRYING_STONE_OF_YASHIORI.pages.INITIAL.options.UNCOVER_FUTURE.title"] =
+                "Pay the Scout's Fee",
+            ["TIDE_SCRYING_STONE_OF_YASHIORI.pages.INITIAL.options.UNCOVER_FUTURE.description"] =
+                "Pay 51-99 Gold. Divine 3 times.",
+            ["TIDE_SCRYING_STONE_OF_YASHIORI.pages.INITIAL.options.PAYMENT_PLAN.title"] =
+                "Take on the Debt",
+            ["TIDE_SCRYING_STONE_OF_YASHIORI.pages.INITIAL.options.PAYMENT_PLAN.description"] =
+                "Gain a Debt. Divine 6 times.",
+            ["TIDE_SCRYING_STONE_OF_YASHIORI.pages.FINISH.description"] =
+                "Pay 51-99 Gold. Divine 3 times.",
             // FoxDensOfChinjuForest (Inazuma / FieldOfManSizedHoles)
             ["FOX_DENS_OF_CHINJU_FOREST.title"] =
                 "The Fox-Dens of Chinju Forest",
@@ -2479,6 +2684,32 @@ internal static partial class TeyvatLoc
                 "Lose 9 HP. Remove 1 card from your Deck — it recoils through your "
                 + "ribs on the way out, and takes with it one technique you can no "
                 + "longer remember learning.",
+            // DefilementAtSerpentsHead (Inazuma / Symbiote)
+            ["DEFILEMENT_AT_SERPENTS_HEAD.title"] =
+                "Defilement at Serpent's Head",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.INITIAL.description"] =
+                "Among the ribs of the fallen serpent on Yashiori Island, a scout's "
+                + "blade stands abandoned in the ash. Tatarigami residue has crept up "
+                + "the steel and moves along it like something drawing breath. A "
+                + "Sangonomiya field medic watches you notice it. \"Defilement "
+                + "doesn't leave a thing,\" she says. \"It only changes hands.\" She "
+                + "holds out a flint, and says nothing else.",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.INITIAL.options.APPROACH.title"] =
+                "Take Up the Blade",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.INITIAL.options.APPROACH.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.INITIAL.options.KILL_WITH_FIRE.title"] =
+                "Purify by Bonfire",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.INITIAL.options.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.INITIAL.options.APPROACH_LOCKED.title"] =
+                "Take Up the Blade",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.INITIAL.options.APPROACH_LOCKED.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.APPROACH.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["DEFILEMENT_AT_SERPENTS_HEAD.pages.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
             // KettleBelowSangonomiya (Inazuma / TeaMaster)
             ["KETTLE_BELOW_SANGONOMIYA.title"] =
                 "The Kettle Below Sangonomiya",
@@ -2587,6 +2818,67 @@ internal static partial class TeyvatLoc
                 "You leave the flame to its business and work the tailings instead, "
                 + "where the smelters' pay-chests burst open years ago. Gain 45-75 "
                 + "Mora (Gold).",
+            // LoomSageOfChinjuForest (Inazuma / ZenWeaver)
+            ["LOOM_SAGE_OF_CHINJU_FOREST.title"] =
+                "The Loom-Sage of Chinju Forest",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.description"] =
+                "Deep in Chinju Forest, past the mossed-over fox statues, a "
+                + "silk-draped youkai keeps a loom she has never once been seen to "
+                + "leave. The villagers of Konda call her the Loom-Sage, and the "
+                + "eight lacquered needles that drift around her work like a second "
+                + "pair of hands. She does not haggle. The price of stillness is "
+                + "brushed onto a wooden tag hung from the warp threads.",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.BREATHING_TECHNIQUES.title"] =
+                "Breathing Techniques",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.BREATHING_TECHNIQUES.description"] =
+                "Pay 50 Mora (Gold). Add 2 Enlightenment to your Deck.",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.EMOTIONAL_AWARENESS.title"] =
+                "Emotional Awareness",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.EMOTIONAL_AWARENESS.description"] =
+                "Pay 125 Mora (Gold). Remove 1 card from your Deck.",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.ARACHNID_ACUPUNCTURE.title"] =
+                "Silk-Needle Acupuncture",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.ARACHNID_ACUPUNCTURE.description"] =
+                "Pay 250 Mora (Gold). Remove 2 cards from your Deck.",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.LOCKED.title"] =
+                "Emotional Awareness",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.INITIAL.options.LOCKED.description"] =
+                "Pay 125 Mora (Gold). Remove 1 card from your Deck.",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.BREATHING_TECHNIQUES.description"] =
+                "Pay 50 Mora (Gold). Add 2 Enlightenment to your Deck.",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.EMOTIONAL_AWARENESS.description"] =
+                "Pay 125 Mora (Gold). Remove 1 card from your Deck.",
+            ["LOOM_SAGE_OF_CHINJU_FOREST.pages.ARACHNID_ACUPUNCTURE.description"] =
+                "Pay 250 Mora (Gold). Remove 2 cards from your Deck.",
+            // CookfireForge (Natlan / Amalgamator)
+            ["COOKFIRE_FORGE.title"] =
+                "The Cookfire Forge",
+            ["COOKFIRE_FORGE.pages.INITIAL.description"] =
+                "At the cookfires of Mictlan, a Collective of Plenty smith has two "
+                + "worn practice blades and two dented practice bucklers laid on the "
+                + "anvil-stone, and no patience for carrying four mediocre things "
+                + "when the forge could make two good ones. \"Every warrior in this "
+                + "camp bets on one pairing or the other,\" she says, banging her "
+                + "hammer flat for quiet. \"Feed me your strikes, or feed me your "
+                + "guards — I only fold one kind at a time, and I fold it right.\" A "
+                + "Tatankasaur snorts approval from its stall, already used to being "
+                + "right about these things.",
+            ["COOKFIRE_FORGE.pages.INITIAL.options.COMBINE_STRIKES.title"] =
+                "Combine Strikes",
+            ["COOKFIRE_FORGE.pages.INITIAL.options.COMBINE_STRIKES.description"] =
+                "Remove 2 Strike (Ironclad) from your Deck. Add Ultimate Strike to "
+                + "your Deck.",
+            ["COOKFIRE_FORGE.pages.INITIAL.options.COMBINE_DEFENDS.title"] =
+                "Combine Defends",
+            ["COOKFIRE_FORGE.pages.INITIAL.options.COMBINE_DEFENDS.description"] =
+                "Remove 2 Defend (Ironclad) from your Deck. Add Ultimate Defend to "
+                + "your Deck.",
+            ["COOKFIRE_FORGE.pages.COMBINE_STRIKES.description"] =
+                "Remove 2 Strike (Ironclad) from your Deck. Add Ultimate Strike to "
+                + "your Deck.",
+            ["COOKFIRE_FORGE.pages.COMBINE_DEFENDS.description"] =
+                "Remove 2 Defend (Ironclad) from your Deck. Add Ultimate Defend to "
+                + "your Deck.",
             // EarWhisperer (Natlan / BrainLeech)
             ["EAR_WHISPERER.title"] =
                 "The Ear-Whisperer",
@@ -2638,6 +2930,26 @@ internal static partial class TeyvatLoc
                 "Add Exterminate to your Deck.",
             ["SWEEP_OR_STOMP.pages.SQUASH.description"] =
                 "Add Squash to your Deck.",
+            // SpringsGrid (Natlan / CrystalSphere)
+            ["SPRINGS_GRID.title"] =
+                "The Springs' Grid",
+            ["SPRINGS_GRID.pages.INITIAL.description"] =
+                "At the Toyac Springs, a People of the Springs elder keeps a broad "
+                + "basin of still water ruled into an eleven-by-eleven grid of "
+                + "stones, each one hiding something under the silt. Clear a stone at "
+                + "a time, she says, or sweep a handful at once — either way you're "
+                + "paying for the clearing, not for what's under it. One custom you "
+                + "settle now; the other, she says, the springs settle after.",
+            ["SPRINGS_GRID.pages.INITIAL.options.UNCOVER_FUTURE.title"] =
+                "Pay the Springs' Toll",
+            ["SPRINGS_GRID.pages.INITIAL.options.UNCOVER_FUTURE.description"] =
+                "Pay 51-99 Gold. Divine 3 times.",
+            ["SPRINGS_GRID.pages.INITIAL.options.PAYMENT_PLAN.title"] =
+                "Take the Springs' Long Debt",
+            ["SPRINGS_GRID.pages.INITIAL.options.PAYMENT_PLAN.description"] =
+                "Gain a Debt. Divine 6 times.",
+            ["SPRINGS_GRID.pages.FINISH.description"] =
+                "Pay 51-99 Gold. Divine 3 times.",
             // CookfirePits (Natlan / FieldOfManSizedHoles)
             ["COOKFIRE_PITS.title"] =
                 "The Cookfire Pits",
@@ -2755,6 +3067,32 @@ internal static partial class TeyvatLoc
                 "Heal 25 HP. Add Metamorphosis to your Deck.",
             ["SPRINGS_ROOTED_THING.pages.REJECTION.description"] =
                 "Lose 9 HP. Remove 1 card from your Deck.",
+            // BladeThatBreathes (Natlan / Symbiote)
+            ["BLADE_THAT_BREATHES.title"] =
+                "The Blade That Breathes",
+            ["BLADE_THAT_BREATHES.pages.INITIAL.description"] =
+                "A blade left out on a Tepeacac Rise slope has picked something up "
+                + "that moves along the steel like it's breathing. The Children of "
+                + "Echoes know this for what it is and don't flinch from naming it: "
+                + "take it up and it hits harder for what it costs you every swing, "
+                + "or burn it clean and let the weapon become something else "
+                + "entirely.",
+            ["BLADE_THAT_BREATHES.pages.INITIAL.options.APPROACH.title"] =
+                "Approach",
+            ["BLADE_THAT_BREATHES.pages.INITIAL.options.APPROACH.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["BLADE_THAT_BREATHES.pages.INITIAL.options.KILL_WITH_FIRE.title"] =
+                "Kill with Fire",
+            ["BLADE_THAT_BREATHES.pages.INITIAL.options.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
+            ["BLADE_THAT_BREATHES.pages.INITIAL.options.APPROACH_LOCKED.title"] =
+                "Approach",
+            ["BLADE_THAT_BREATHES.pages.INITIAL.options.APPROACH_LOCKED.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["BLADE_THAT_BREATHES.pages.APPROACH.description"] =
+                "Enchant an Attack with Corrupted.",
+            ["BLADE_THAT_BREATHES.pages.KILL_WITH_FIRE.description"] =
+                "Choose a card to Transform.",
             // FestivalBrewStand (Natlan / TeaMaster)
             ["FESTIVAL_BREW_STAND.title"] =
                 "The Festival Brew-Stand",
@@ -2843,6 +3181,40 @@ internal static partial class TeyvatLoc
                 "Add Decay (curse) to your Deck. Obtain the Lost Wisp (relic).",
             ["DRIFTING_LIGHT.pages.SEARCH.description"] =
                 "Gain 45-75 Gold.",
+            // SpringsEightStrandWeaver (Natlan / ZenWeaver)
+            ["SPRINGS_EIGHT_STRAND_WEAVER.title"] =
+                "The Springs' Eight-Strand Weaver",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.description"] =
+                "At the Toyac Springs, a weaver works eight strands at once, and "
+                + "half her trade isn't cloth at all — it's people, and the bad "
+                + "habits she says are only knots a patient hand can work loose. Pay "
+                + "the least and she teaches your hands to move lighter. Pay more and "
+                + "she picks a single tangle out of you for good. Pay the most and "
+                + "she takes two.",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.BREATHING_TECHNIQUES.title"] =
+                "Breathing Techniques",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.BREATHING_TECHNIQUES.description"] =
+                "Pay 50 Gold. Add 2 Enlightenment to your Deck.",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.EMOTIONAL_AWARENESS.title"] =
+                "Emotional Awareness",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.EMOTIONAL_AWARENESS.description"] =
+                "Pay 125 Gold. Remove 1 card from your Deck.",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.ARACHNID_ACUPUNCTURE.title"] =
+                "Arachnid Acupuncture",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.ARACHNID_ACUPUNCTURE.description"] =
+                "Pay 250 Gold. Remove 2 cards from your Deck. (Emotional Awareness "
+                + "and Arachnid Acupuncture lock if you don't have enough Gold.)",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.LOCKED.title"] =
+                "Emotional Awareness",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.INITIAL.options.LOCKED.description"] =
+                "Pay 125 Gold. Remove 1 card from your Deck.",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.BREATHING_TECHNIQUES.description"] =
+                "Pay 50 Gold. Add 2 Enlightenment to your Deck.",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.EMOTIONAL_AWARENESS.description"] =
+                "Pay 125 Gold. Remove 1 card from your Deck.",
+            ["SPRINGS_EIGHT_STRAND_WEAVER.pages.ARACHNID_ACUPUNCTURE.description"] =
+                "Pay 250 Gold. Remove 2 cards from your Deck. (Emotional Awareness "
+                + "and Arachnid Acupuncture lock if you don't have enough Gold.)",
             // HollowTreeGuide (Natlan / SelfHelpBook)
             ["HOLLOW_TREE_GUIDE.title"] =
                 "The Hollow-Tree Guide",
@@ -3306,6 +3678,18 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.RtawahistsStarfallGlass)] = new EventShape(
+                "RTAWAHISTS_STARFALL_GLASS", "CrystalSphereMirror",
+                new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
+                new[] { "pages.FINISH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Sumeru.HollowOfTheStruckName)] = new EventShape(
+                "HOLLOW_OF_THE_STRUCK_NAME", "GraveOfTheForgottenMirror",
+                new[] { "CONFRONT", "ACCEPT" },
+                new[] { "pages.CONFRONT.description", "pages.ACCEPT.description" },
+                new[] { "pages.INITIAL.options.CONFRONT_LOCKED" },
+                false),
             [typeof(Events.Sumeru.AranarasTwoCaps)] = new EventShape(
                 "ARANARAS_TWO_CAPS", "HungryForMushroomsMirror",
                 new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
@@ -3336,6 +3720,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
                 false),
+            [typeof(Events.Sumeru.WitheringGraft)] = new EventShape(
+                "WITHERING_GRAFT", "SymbioteMirror",
+                new[] { "APPROACH", "KILL_WITH_FIRE" },
+                new[] { "pages.APPROACH.description", "pages.KILL_WITH_FIRE.description" },
+                new[] { "pages.INITIAL.options.APPROACH_LOCKED" },
+                false),
             [typeof(Events.Sumeru.FutureOfElixirs)] = new EventShape(
                 "FUTURE_OF_ELIXIRS", "TheFutureOfPotionsMirror",
                 new[] { "POTION" },
@@ -3353,6 +3743,18 @@ internal static class TeyvatGeneratedEvents
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.SoundingTheBerylShelf)] = new EventShape(
+                "SOUNDING_THE_BERYL_SHELF", "CrystalSphereMirror",
+                new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
+                new[] { "pages.FINISH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.LedgerOfSunkenNames)] = new EventShape(
+                "LEDGER_OF_SUNKEN_NAMES", "GraveOfTheForgottenMirror",
+                new[] { "CONFRONT", "ACCEPT" },
+                new[] { "pages.CONFRONT.description", "pages.ACCEPT.description" },
+                new[] { "pages.INITIAL.options.CONFRONT_LOCKED" },
                 false),
             [typeof(Events.Fontaine.MeropideInfirmaryRounds)] = new EventShape(
                 "MEROPIDE_INFIRMARY_ROUNDS", "HungryForMushroomsMirror",
@@ -3383,6 +3785,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
+                false),
+            [typeof(Events.Fontaine.GuestInTheHull)] = new EventShape(
+                "GUEST_IN_THE_HULL", "SymbioteMirror",
+                new[] { "APPROACH", "KILL_WITH_FIRE" },
+                new[] { "pages.APPROACH.description", "pages.KILL_WITH_FIRE.description" },
+                new[] { "pages.INITIAL.options.APPROACH_LOCKED" },
                 false),
             [typeof(Events.Fontaine.WhatTheMelusinesTradeFor)] = new EventShape(
                 "WHAT_THE_MELUSINES_TRADE_FOR", "TheFutureOfPotionsMirror",
@@ -3426,6 +3834,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.BankedForgeAtMusoujin)] = new EventShape(
+                "BANKED_FORGE_AT_MUSOUJIN", "AmalgamatorMirror",
+                new[] { "COMBINE_STRIKES", "COMBINE_DEFENDS" },
+                new[] { "pages.COMBINE_STRIKES.description", "pages.COMBINE_DEFENDS.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Inazuma.ChinjuForestPassenger)] = new EventShape(
                 "CHINJU_FOREST_PASSENGER", "BrainLeechMirror",
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
@@ -3436,6 +3850,12 @@ internal static class TeyvatGeneratedEvents
                 "DRILLMASTER_OF_WATATSUMI", "BugslayerMirror",
                 new[] { "EXTERMINATION", "SQUASH" },
                 new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.TideScryingStoneOfYashiori)] = new EventShape(
+                "TIDE_SCRYING_STONE_OF_YASHIORI", "CrystalSphereMirror",
+                new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
+                new[] { "pages.FINISH.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Inazuma.FoxDensOfChinjuForest)] = new EventShape(
@@ -3468,6 +3888,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.DefilementAtSerpentsHead)] = new EventShape(
+                "DEFILEMENT_AT_SERPENTS_HEAD", "SymbioteMirror",
+                new[] { "APPROACH", "KILL_WITH_FIRE" },
+                new[] { "pages.APPROACH.description", "pages.KILL_WITH_FIRE.description" },
+                new[] { "pages.INITIAL.options.APPROACH_LOCKED" },
+                false),
             [typeof(Events.Inazuma.KettleBelowSangonomiya)] = new EventShape(
                 "KETTLE_BELOW_SANGONOMIYA", "TeaMasterMirror",
                 new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
@@ -3486,6 +3912,18 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.CLAIM.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.LoomSageOfChinjuForest)] = new EventShape(
+                "LOOM_SAGE_OF_CHINJU_FOREST", "ZenWeaverMirror",
+                new[] { "BREATHING_TECHNIQUES", "EMOTIONAL_AWARENESS", "ARACHNID_ACUPUNCTURE" },
+                new[] { "pages.BREATHING_TECHNIQUES.description", "pages.EMOTIONAL_AWARENESS.description", "pages.ARACHNID_ACUPUNCTURE.description" },
+                new[] { "pages.INITIAL.options.LOCKED" },
+                false),
+            [typeof(Events.Natlan.CookfireForge)] = new EventShape(
+                "COOKFIRE_FORGE", "AmalgamatorMirror",
+                new[] { "COMBINE_STRIKES", "COMBINE_DEFENDS" },
+                new[] { "pages.COMBINE_STRIKES.description", "pages.COMBINE_DEFENDS.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Natlan.EarWhisperer)] = new EventShape(
                 "EAR_WHISPERER", "BrainLeechMirror",
                 new[] { "SHARE_KNOWLEDGE", "RIP" },
@@ -3496,6 +3934,12 @@ internal static class TeyvatGeneratedEvents
                 "SWEEP_OR_STOMP", "BugslayerMirror",
                 new[] { "EXTERMINATION", "SQUASH" },
                 new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.SpringsGrid)] = new EventShape(
+                "SPRINGS_GRID", "CrystalSphereMirror",
+                new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
+                new[] { "pages.FINISH.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Natlan.CookfirePits)] = new EventShape(
@@ -3528,6 +3972,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Natlan.BladeThatBreathes)] = new EventShape(
+                "BLADE_THAT_BREATHES", "SymbioteMirror",
+                new[] { "APPROACH", "KILL_WITH_FIRE" },
+                new[] { "pages.APPROACH.description", "pages.KILL_WITH_FIRE.description" },
+                new[] { "pages.INITIAL.options.APPROACH_LOCKED" },
+                false),
             [typeof(Events.Natlan.FestivalBrewStand)] = new EventShape(
                 "FESTIVAL_BREW_STAND", "TeaMasterMirror",
                 new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
@@ -3545,6 +3995,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "CLAIM", "SEARCH" },
                 new[] { "pages.CLAIM.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.SpringsEightStrandWeaver)] = new EventShape(
+                "SPRINGS_EIGHT_STRAND_WEAVER", "ZenWeaverMirror",
+                new[] { "BREATHING_TECHNIQUES", "EMOTIONAL_AWARENESS", "ARACHNID_ACUPUNCTURE" },
+                new[] { "pages.BREATHING_TECHNIQUES.description", "pages.EMOTIONAL_AWARENESS.description", "pages.ARACHNID_ACUPUNCTURE.description" },
+                new[] { "pages.INITIAL.options.LOCKED" },
                 false),
             [typeof(Events.Natlan.HollowTreeGuide)] = new EventShape(
                 "HOLLOW_TREE_GUIDE", "SelfHelpBookMirror",
@@ -3655,6 +4111,10 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.BureauOfReclaimedMedicine>(),
             [(TeyvatFrame.Liyue, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
+            [(TeyvatFrame.Sumeru, typeof(CrystalSphere))] =
+                () => ModelDb.Event<Events.Sumeru.RtawahistsStarfallGlass>(),
+            [(TeyvatFrame.Sumeru, typeof(GraveOfTheForgotten))] =
+                () => ModelDb.Event<Events.Sumeru.HollowOfTheStruckName>(),
             [(TeyvatFrame.Sumeru, typeof(HungryForMushrooms))] =
                 () => ModelDb.Event<Events.Sumeru.AranarasTwoCaps>(),
             [(TeyvatFrame.Sumeru, typeof(PotionCourier))] =
@@ -3665,12 +4125,18 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Sumeru.SixWeeksToABetterYouIlluminated>(),
             [(TeyvatFrame.Sumeru, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Sumeru.RopeLineOverArdraviValley>(),
+            [(TeyvatFrame.Sumeru, typeof(Symbiote))] =
+                () => ModelDb.Event<Events.Sumeru.WitheringGraft>(),
             [(TeyvatFrame.Sumeru, typeof(TheFutureOfPotions))] =
                 () => ModelDb.Event<Events.Sumeru.FutureOfElixirs>(),
             [(TeyvatFrame.Sumeru, typeof(RoundTeaParty))] =
                 () => ModelDb.Event<Events.Sumeru.RoundTableAtTheHouseOfDaena>(),
             [(TeyvatFrame.Sumeru, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Sumeru.CaravanRibatLeavings>(),
+            [(TeyvatFrame.Fontaine, typeof(CrystalSphere))] =
+                () => ModelDb.Event<Events.Fontaine.SoundingTheBerylShelf>(),
+            [(TeyvatFrame.Fontaine, typeof(GraveOfTheForgotten))] =
+                () => ModelDb.Event<Events.Fontaine.LedgerOfSunkenNames>(),
             [(TeyvatFrame.Fontaine, typeof(HungryForMushrooms))] =
                 () => ModelDb.Event<Events.Fontaine.MeropideInfirmaryRounds>(),
             [(TeyvatFrame.Fontaine, typeof(PotionCourier))] =
@@ -3681,6 +4147,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Fontaine.MelusinesPamphletOfEncouragement>(),
             [(TeyvatFrame.Fontaine, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Fontaine.BallastCheckOnTheMeropideLift>(),
+            [(TeyvatFrame.Fontaine, typeof(Symbiote))] =
+                () => ModelDb.Event<Events.Fontaine.GuestInTheHull>(),
             [(TeyvatFrame.Fontaine, typeof(TheFutureOfPotions))] =
                 () => ModelDb.Event<Events.Fontaine.WhatTheMelusinesTradeFor>(),
             [(TeyvatFrame.Fontaine, typeof(RoundTeaParty))] =
@@ -3695,10 +4163,14 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.FrontLineTriageCache>(),
             [(TeyvatFrame.Inazuma, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Inazuma.QuartermastersSplit>(),
+            [(TeyvatFrame.Inazuma, typeof(Amalgamator))] =
+                () => ModelDb.Event<Events.Inazuma.BankedForgeAtMusoujin>(),
             [(TeyvatFrame.Inazuma, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Inazuma.ChinjuForestPassenger>(),
             [(TeyvatFrame.Inazuma, typeof(Bugslayer))] =
                 () => ModelDb.Event<Events.Inazuma.DrillmasterOfWatatsumi>(),
+            [(TeyvatFrame.Inazuma, typeof(CrystalSphere))] =
+                () => ModelDb.Event<Events.Inazuma.TideScryingStoneOfYashiori>(),
             [(TeyvatFrame.Inazuma, typeof(FieldOfManSizedHoles))] =
                 () => ModelDb.Event<Events.Inazuma.FoxDensOfChinjuForest>(),
             [(TeyvatFrame.Inazuma, typeof(InfestedAutomaton))] =
@@ -3709,16 +4181,24 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.BlockadeLarder>(),
             [(TeyvatFrame.Inazuma, typeof(SpiritGrafter))] =
                 () => ModelDb.Event<Events.Inazuma.NamelessUnderTheCedar>(),
+            [(TeyvatFrame.Inazuma, typeof(Symbiote))] =
+                () => ModelDb.Event<Events.Inazuma.DefilementAtSerpentsHead>(),
             [(TeyvatFrame.Inazuma, typeof(TeaMaster))] =
                 () => ModelDb.Event<Events.Inazuma.KettleBelowSangonomiya>(),
             [(TeyvatFrame.Inazuma, typeof(TheLanternKey))] =
                 () => ModelDb.Event<Events.Inazuma.SignalLampCipher>(),
             [(TeyvatFrame.Inazuma, typeof(LostWisp))] =
                 () => ModelDb.Event<Events.Inazuma.FoxfireOnTheSlag>(),
+            [(TeyvatFrame.Inazuma, typeof(ZenWeaver))] =
+                () => ModelDb.Event<Events.Inazuma.LoomSageOfChinjuForest>(),
+            [(TeyvatFrame.Natlan, typeof(Amalgamator))] =
+                () => ModelDb.Event<Events.Natlan.CookfireForge>(),
             [(TeyvatFrame.Natlan, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Natlan.EarWhisperer>(),
             [(TeyvatFrame.Natlan, typeof(Bugslayer))] =
                 () => ModelDb.Event<Events.Natlan.SweepOrStomp>(),
+            [(TeyvatFrame.Natlan, typeof(CrystalSphere))] =
+                () => ModelDb.Event<Events.Natlan.SpringsGrid>(),
             [(TeyvatFrame.Natlan, typeof(FieldOfManSizedHoles))] =
                 () => ModelDb.Event<Events.Natlan.CookfirePits>(),
             [(TeyvatFrame.Natlan, typeof(InfestedAutomaton))] =
@@ -3729,12 +4209,16 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Natlan.UnderStandsCellar>(),
             [(TeyvatFrame.Natlan, typeof(SpiritGrafter))] =
                 () => ModelDb.Event<Events.Natlan.SpringsRootedThing>(),
+            [(TeyvatFrame.Natlan, typeof(Symbiote))] =
+                () => ModelDb.Event<Events.Natlan.BladeThatBreathes>(),
             [(TeyvatFrame.Natlan, typeof(TeaMaster))] =
                 () => ModelDb.Event<Events.Natlan.FestivalBrewStand>(),
             [(TeyvatFrame.Natlan, typeof(TheLanternKey))] =
                 () => ModelDb.Event<Events.Natlan.MarkerOffTheRacetrack>(),
             [(TeyvatFrame.Natlan, typeof(LostWisp))] =
                 () => ModelDb.Event<Events.Natlan.DriftingLight>(),
+            [(TeyvatFrame.Natlan, typeof(ZenWeaver))] =
+                () => ModelDb.Event<Events.Natlan.SpringsEightStrandWeaver>(),
             [(TeyvatFrame.Natlan, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Natlan.HollowTreeGuide>(),
             [(TeyvatFrame.Natlan, typeof(SlipperyBridge))] =
@@ -3842,6 +4326,10 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_future_of_potions.png",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE"] =
                 "res://images/events/this_or_that.png",
+            ["RTAWAHISTS_STARFALL_GLASS"] =
+                "res://images/events/crystal_sphere.png",
+            ["HOLLOW_OF_THE_STRUCK_NAME"] =
+                "res://images/events/grave_of_the_forgotten.png",
             ["ARANARAS_TWO_CAPS"] =
                 "res://images/events/hungry_for_mushrooms.png",
             ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE"] =
@@ -3852,12 +4340,18 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/self_help_book.png",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY"] =
                 "res://images/events/slippery_bridge.png",
+            ["WITHERING_GRAFT"] =
+                "res://images/events/symbiote.png",
             ["FUTURE_OF_ELIXIRS"] =
                 "res://images/events/the_future_of_potions.png",
             ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA"] =
                 "res://images/events/round_tea_party.png",
             ["CARAVAN_RIBAT_LEAVINGS"] =
                 "res://images/events/this_or_that.png",
+            ["SOUNDING_THE_BERYL_SHELF"] =
+                "res://images/events/crystal_sphere.png",
+            ["LEDGER_OF_SUNKEN_NAMES"] =
+                "res://images/events/grave_of_the_forgotten.png",
             ["MEROPIDE_INFIRMARY_ROUNDS"] =
                 "res://images/events/hungry_for_mushrooms.png",
             ["UNDELIVERABLE_PARCELS"] =
@@ -3868,6 +4362,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/self_help_book.png",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT"] =
                 "res://images/events/slippery_bridge.png",
+            ["GUEST_IN_THE_HULL"] =
+                "res://images/events/symbiote.png",
             ["WHAT_THE_MELUSINES_TRADE_FOR"] =
                 "res://images/events/the_future_of_potions.png",
             ["ROUND_TABLE_AT_CAF_LUTECE"] =
@@ -3882,10 +4378,14 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_future_of_potions.png",
             ["QUARTERMASTERS_SPLIT"] =
                 "res://images/events/this_or_that.png",
+            ["BANKED_FORGE_AT_MUSOUJIN"] =
+                "res://images/events/amalgamator.png",
             ["CHINJU_FOREST_PASSENGER"] =
                 "res://images/events/brain_leech.png",
             ["DRILLMASTER_OF_WATATSUMI"] =
                 "res://images/events/bugslayer.png",
+            ["TIDE_SCRYING_STONE_OF_YASHIORI"] =
+                "res://images/events/crystal_sphere.png",
             ["FOX_DENS_OF_CHINJU_FOREST"] =
                 "res://images/events/field_of_man_sized_holes.png",
             ["NESTED_ARRAY"] =
@@ -3896,16 +4396,24 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/room_full_of_cheese.png",
             ["NAMELESS_UNDER_THE_CEDAR"] =
                 "res://images/events/spirit_grafter.png",
+            ["DEFILEMENT_AT_SERPENTS_HEAD"] =
+                "res://images/events/symbiote.png",
             ["KETTLE_BELOW_SANGONOMIYA"] =
                 "res://images/events/tea_master.png",
             ["SIGNAL_LAMP_CIPHER"] =
                 "res://images/events/the_lantern_key.png",
             ["FOXFIRE_ON_THE_SLAG"] =
                 "res://images/events/lost_wisp.png",
+            ["LOOM_SAGE_OF_CHINJU_FOREST"] =
+                "res://images/events/zen_weaver.png",
+            ["COOKFIRE_FORGE"] =
+                "res://images/events/amalgamator.png",
             ["EAR_WHISPERER"] =
                 "res://images/events/brain_leech.png",
             ["SWEEP_OR_STOMP"] =
                 "res://images/events/bugslayer.png",
+            ["SPRINGS_GRID"] =
+                "res://images/events/crystal_sphere.png",
             ["COOKFIRE_PITS"] =
                 "res://images/events/field_of_man_sized_holes.png",
             ["TICKING_RELIC"] =
@@ -3916,12 +4424,16 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/room_full_of_cheese.png",
             ["SPRINGS_ROOTED_THING"] =
                 "res://images/events/spirit_grafter.png",
+            ["BLADE_THAT_BREATHES"] =
+                "res://images/events/symbiote.png",
             ["FESTIVAL_BREW_STAND"] =
                 "res://images/events/tea_master.png",
             ["MARKER_OFF_THE_RACETRACK"] =
                 "res://images/events/the_lantern_key.png",
             ["DRIFTING_LIGHT"] =
                 "res://images/events/lost_wisp.png",
+            ["SPRINGS_EIGHT_STRAND_WEAVER"] =
+                "res://images/events/zen_weaver.png",
             ["HOLLOW_TREE_GUIDE"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_CROSSING_AT_COATEPEC"] =

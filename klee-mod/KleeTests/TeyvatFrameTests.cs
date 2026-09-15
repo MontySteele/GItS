@@ -499,7 +499,9 @@ public class TeyvatFrameTests : IDisposable
     /// `IsAllowed` compiles to `&lt;&gt;c.&lt;IsAllowed&gt;b__N_M`, where N is the
     /// ordinal of the declaring method within its type -- which differs between
     /// a base event and a mirror for no reason that means anything, and would
-    /// otherwise make every predicate-carrying gate look changed.
+    /// otherwise make every predicate-carrying gate look changed. A call to
+    /// the type's OWN member is normalised the same way and for the same
+    /// reason; see the comment on that step.
     /// </summary>
     private static IReadOnlyList<string> DeclaredOnlyCalls(Type type, string name)
     {
@@ -512,6 +514,18 @@ public class TeyvatFrameTests : IDisposable
         }
 
         return Il.Calls(method)
+            // A CALL TO THE EVENT'S OWN MEMBER carries the DECLARING TYPE's
+            // name, and that name is the one thing a mirror can never match:
+            // `Amalgamator.IsValid` against `AmalgamatorMirror.IsValid`,
+            // `GraveOfTheForgotten.HasEnchantableCards` against the mirror's,
+            // and the uncached lambda `ZenWeaver.<IsAllowed>b__0` that a
+            // predicate capturing `this` compiles to. All three are the gate
+            // calling ITSELF, which is what the pin wants to see the same on
+            // both sides, so the self-reference is normalised away and
+            // everything else -- a call into any OTHER type -- still compares
+            // by its full name.
+            .Select(c => c.StartsWith(type.Name + ".", StringComparison.Ordinal)
+                ? "<self>." + c.Substring(type.Name.Length + 1) : c)
             .Select(c => System.Text.RegularExpressions.Regex.Replace(
                 c, @"b__\d+_(\d+)$", "b__$1"))
             // The SAME ordinal, on the other shape a lambda compiles to. A
@@ -588,6 +602,12 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(FieldOfManSizedHolesMirror), typeof(FieldOfManSizedHoles) },
             new object[] { typeof(LostWispMirror), typeof(LostWisp) },
             new object[] { typeof(PotionCourierMirror), typeof(PotionCourier) },
+            // Acts 2 and 3, batch 3.
+            new object[] { typeof(CrystalSphereMirror), typeof(CrystalSphere) },
+            new object[] { typeof(SymbioteMirror), typeof(Symbiote) },
+            new object[] { typeof(GraveOfTheForgottenMirror), typeof(GraveOfTheForgotten) },
+            new object[] { typeof(ZenWeaverMirror), typeof(ZenWeaver) },
+            new object[] { typeof(AmalgamatorMirror), typeof(Amalgamator) },
         };
 
     // ---------------------------------------------------------------
