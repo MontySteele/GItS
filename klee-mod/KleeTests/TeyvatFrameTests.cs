@@ -1279,12 +1279,14 @@ public class TeyvatFrameTests : IDisposable
 
     /// <summary>`StringHelper.Slugify` for a C# type name, reimplemented so
     /// the pin does not depend on an internal of the game assembly: an
-    /// underscore at each lower-to-upper boundary, then upper-cased. That is
+    /// underscore before every capital that follows a letter or digit
+    /// (the game's CamelCaseRegex; ToABetterYou is TO_A_BETTER_YOU), then
+    /// upper-cased. That is
     /// the derivation `ModelDb.GetEntry` and `EventModel.OptionKey` both
     /// make.</summary>
     private static string Slugify(string name) =>
         System.Text.RegularExpressions.Regex
-            .Replace(name, "([a-z0-9])([A-Z])", "$1_$2")
+            .Replace(name, @"([A-Za-z0-9]|\G(?!^))([A-Z])", "$1_$2")
             .ToUpperInvariant();
 
     // ---------------------------------------------------------------
