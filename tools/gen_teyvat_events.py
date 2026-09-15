@@ -395,6 +395,21 @@ MIRRORS: Dict[str, MirrorSpec] = {
             "pages.ALL.options.LOCKED",
             ("CAVIAR", "CLAM_ROLL", "SPICY_SNAPPY", "JELLY_LIVER", "FRIED_EEL",
              "SUSPICIOUS_CONDIMENT", "GOLDEN_FYSH", "SEAPUNK_SALAD"))),
+    "TheFutureOfPotions": MirrorSpec(
+        "TheFutureOfPotionsMirror",
+        options=("POTION",),
+        pages=("pages.DONE.description",),
+        page_source=(("pages.DONE.description", "POTION"),),
+        table_option=TableOption(
+            var="Rarity",
+            choices=("Common", "Uncommon", "Rare", "Event", "Token"),
+            # The base's English description is
+            # `Lose {Potion}. Obtain an Upgraded {Rarity} {Type}.` -- three
+            # vars, and these three swaps are what put the same three into
+            # the dressed row without touching a word around them.
+            slots=(("a specified Common potion", "{Potion}"),
+                   ("Upgraded Common", "Upgraded {Rarity}"),
+                   ("[Attack/Skill]", "{Type}")))),
 }
 
 

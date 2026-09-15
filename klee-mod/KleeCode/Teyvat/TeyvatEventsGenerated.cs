@@ -149,6 +149,26 @@ internal static partial class TeyvatLoc
                 "",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.description"] =
                 "",
+            // ConfiscationWithCompensation (Mondstadt / TheFutureOfPotions)
+            ["CONFISCATION_WITH_COMPENSATION.title"] =
+                "Confiscation, With Compensation",
+            ["CONFISCATION_WITH_COMPENSATION.pages.INITIAL.description"] =
+                "A confiscation tray sits on a trestle outside Favonius Cathedral, "
+                + "and the duty quartermaster is being very reasonable about it. "
+                + "\"Regulations say unlicensed concoctions get surrendered. Courtesy "
+                + "says you don't leave empty-handed.\" Surrender one flask and a "
+                + "Knight will drill you on a maneuver until it's clean. He reaches "
+                + "for the first three flasks on your belt, leftmost first.",
+            ["CONFISCATION_WITH_COMPENSATION.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Surrender the "
+                + "Everyday Flask|Surrender the Restricted Flask|Surrender the "
+                + "Contraband Flask|Surrender the Unlisted Flask|Surrender the "
+                + "Obvious Fake|Surrender the Everyday Flask}",
+            ["CONFISCATION_WITH_COMPENSATION.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["CONFISCATION_WITH_COMPENSATION.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
             // UnmarkedCrates (Mondstadt / ThisOrThat)
             ["UNMARKED_CRATES.title"] =
                 "The Unmarked Crates",
@@ -1383,6 +1403,26 @@ internal static partial class TeyvatLoc
                 "",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.description"] =
                 "",
+            // BureauOfReclaimedMedicine (Liyue / TheFutureOfPotions)
+            ["BUREAU_OF_RECLAIMED_MEDICINE.title"] =
+                "The Bureau of Reclaimed Medicine",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.INITIAL.description"] =
+                "A Qixing licensing clerk has set up a confiscation desk at the "
+                + "Harbor customs gate, with a Northland Bank appraiser standing by "
+                + "to certify the trade. \"Unlicensed brews get surrendered, per the "
+                + "harbor charter,\" the clerk recites, \"and in exchange, a "
+                + "technique — upgraded, and yours to keep.\" He reaches for the "
+                + "first three flasks on your belt, leftmost first, and names the "
+                + "rarity of each before you've said a word.",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Insert Common "
+                + "Potion|Insert Uncommon Potion|Insert Rare Potion|Insert Event "
+                + "Potion|Insert Token Potion|Insert Common Potion}",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["BUREAU_OF_RECLAIMED_MEDICINE.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
             // UnclaimedCratesAtFeiyunSlope (Liyue / ThisOrThat)
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.title"] =
                 "The Unclaimed Crates at Feiyun Slope",
@@ -1450,6 +1490,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "OVERCOME", "HOLD_ON_0" },
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
+                false),
+            [typeof(Events.Mondstadt.ConfiscationWithCompensation)] = new EventShape(
+                "CONFISCATION_WITH_COMPENSATION", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
                 false),
             [typeof(Events.Mondstadt.UnmarkedCrates)] = new EventShape(
                 "UNMARKED_CRATES", "ThisOrThatMirror",
@@ -1649,6 +1695,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
                 new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
                 false),
+            [typeof(Events.Liyue.BureauOfReclaimedMedicine)] = new EventShape(
+                "BUREAU_OF_RECLAIMED_MEDICINE", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Liyue.UnclaimedCratesAtFeiyunSlope)] = new EventShape(
                 "UNCLAIMED_CRATES_AT_FEIYUN_SLOPE", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
@@ -1668,6 +1720,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.GuildDesksReturnedCopy>(),
             [(TeyvatFrame.Mondstadt, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Mondstadt.CutRopeBridgeAboveCiderLake>(),
+            [(TeyvatFrame.Mondstadt, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Mondstadt.ConfiscationWithCompensation>(),
             [(TeyvatFrame.Mondstadt, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Mondstadt.UnmarkedCrates>(),
             [(TeyvatFrame.Mondstadt, typeof(AromaOfChaos))] =
@@ -1734,6 +1788,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.SixContractsToABetterYou>(),
             [(TeyvatFrame.Liyue, typeof(SlipperyBridge))] =
                 () => ModelDb.Event<Events.Liyue.RopeBridgeBelowDunyuRuins>(),
+            [(TeyvatFrame.Liyue, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Liyue.BureauOfReclaimedMedicine>(),
             [(TeyvatFrame.Liyue, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
         };
@@ -1763,6 +1819,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/self_help_book.png",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE"] =
                 "res://images/events/slippery_bridge.png",
+            ["CONFISCATION_WITH_COMPENSATION"] =
+                "res://images/events/the_future_of_potions.png",
             ["UNMARKED_CRATES"] =
                 "res://images/events/this_or_that.png",
             ["WANDERING_CASK"] =
@@ -1829,6 +1887,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/self_help_book.png",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS"] =
                 "res://images/events/slippery_bridge.png",
+            ["BUREAU_OF_RECLAIMED_MEDICINE"] =
+                "res://images/events/the_future_of_potions.png",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE"] =
                 "res://images/events/this_or_that.png",
         };

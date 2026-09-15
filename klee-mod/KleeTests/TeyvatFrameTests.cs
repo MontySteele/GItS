@@ -437,6 +437,7 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(TabletOfTruthMirror), typeof(TabletOfTruth) },
             new object[] { typeof(AbyssalBathsMirror), typeof(AbyssalBaths) },
             new object[] { typeof(EndlessConveyorMirror), typeof(EndlessConveyor) },
+            new object[] { typeof(TheFutureOfPotionsMirror), typeof(TheFutureOfPotions) },
         };
 
     // ---------------------------------------------------------------
