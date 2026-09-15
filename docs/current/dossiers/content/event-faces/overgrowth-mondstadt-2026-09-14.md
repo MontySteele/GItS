@@ -48,6 +48,8 @@ Mechanics notes (verbatim from the harvest): choosing Hold On replaces the liste
 
 Mechanics check: matches harvest.
 
+Loss: {character} was swept off the rope and into Cider Lake at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] The Future of Potions?
@@ -79,6 +81,8 @@ Two unlabeled crates sit on the Guild's back counter in Mondstadt, hauled down f
 
 Mechanics check: matches harvest (verified in the original gallery pass).
 
+Loss: {character} was struck down by the rigged crate at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] Aroma of Chaos
@@ -104,6 +108,8 @@ At the scarred rim of Stormterror's Lair, a shard of black wind-crystal is still
 - **Rip the Leech Off** — You tear it free with a strip of ear. Lose 5 HP. Gain a Colorless 2 card reward — two loose companion (Colorless) cards salvaged from what it was still transmitting.
 
 Mechanics check: matches harvest; flag: "Colorless 2 card reward" is template-lossy on the wiki page and read here as two cards, the same reading the gallery flags for [USER] at the Brain Leech heading (`docs/current/dossiers/content/event-conversion-gallery.md:184`).
+
+Loss: {character} did not survive tearing free of the shard at the [gold]{event}[/gold].
 
 ---
 
@@ -131,6 +137,8 @@ The Knights' patrol trail past Wolvendom has gone to bramble since the wolves re
 
 Mechanics check: matches harvest.
 
+Loss: {character} was lost to the bramble line below Wolvendom at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] Jungle Maze Adventure
@@ -143,6 +151,8 @@ The Adventurers' Guild desk has posted the same commission twice: a switchback m
 - **Join Forces** — Gain 35-65 Mora (Gold).
 
 Mechanics check: matches harvest.
+
+Loss: {character} was lost in the switchback maze at the [gold]{event}[/gold].
 
 ---
 
@@ -212,6 +222,8 @@ Half-buried in scree at the foot of Stormterror's Lair, a stone tablet carries l
 
 Mechanics check: matches harvest.
 
+Loss: {character} gave the tablet everything and did not get up from the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] Tea Master
@@ -239,6 +251,8 @@ The Adventurers' Guild desk has kept a commission open for years on the old sail
 
 Mechanics check: matches harvest.
 
+Loss: {character} went over the cliffs searching for an exit from the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] Unrest Site
@@ -251,6 +265,8 @@ A ring of scorched stones at Dragonspine's foot looks like a rest site from a di
 - **Kill the Trees** — Lose 8 Max HP. Obtain a random Relic.
 
 Mechanics check: matches harvest.
+
+Loss: {character} was dragged under by the roots at the [gold]{event}[/gold].
 
 ---
 
@@ -277,6 +293,8 @@ Wind off Stormbearer Point has scoured a hilichurl camp down to stakes, a cauldr
 - **Kneel for the Shaman's Mark** — Lose 9 HP. Choose a card to Transform.
 
 Mechanics check: matches harvest (verified in the original gallery pass).
+
+Loss: {character} did not survive the shaman's mark at the [gold]{event}[/gold].
 
 ---
 

@@ -42,6 +42,8 @@ times they've gone under.
 
 Mechanics check: matches harvest.
 
+Loss: {character} lingered too long in the tide-warmed pools at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] Brain Leech
@@ -62,6 +64,8 @@ off and take what it was holding.
 Mechanics check: flag — "Colorless 2 card reward" is template-lossy in the
 harvest (the same ambiguity the gallery flagged on this event's other
 variants); read as two Colorless cards, per the gallery's own resolution.
+
+Loss: {character} did not survive tearing the growth free at the [gold]{event}[/gold].
 
 ---
 
@@ -99,6 +103,8 @@ go down after the lens itself and pay for it in altitude you won't get back.
 - **Climb** — Lose 13 Max HP. Obtain Fresnel Lens (relic).
 
 Mechanics check: matches harvest.
+
+Loss: {character} did not surface after diving for the lens at the [gold]{event}[/gold].
 
 ---
 
@@ -159,6 +165,8 @@ flagged substitution); this draft states the real relic's promise per the
 no-substitution rule's own exception, matching the gallery's existing
 Overgrowth/Hive variants of this event.
 
+Loss: {character} did not climb back out of the Qingce cellar at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] Spiraling Whirlpool
@@ -214,6 +222,8 @@ contract being a contract.
 
 Mechanics check: matches harvest.
 
+Loss: {character} did not clear the flooded crawlway at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] The Legends Were True
@@ -251,6 +261,8 @@ mind the cold."
 
 Mechanics check: matches harvest.
 
+Loss: {character} did not surface from the cold shallows at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] Trash Heap
@@ -268,6 +280,8 @@ the same to the Guild, which is to say it isn't priced at all."
 - **Grab Random Junk** — Gain 100 Gold. Obtain a random card, chosen with equal probability from Caltrops, Distraction, Outmaneuver, Clash, Dual Wield, Entrench, Hello World, Rebound, Stack, and Rip and Tear.
 
 Mechanics check: matches harvest.
+
+Loss: {character} was pulled under diving into the scrap pile at the [gold]{event}[/gold].
 
 ---
 
@@ -331,6 +345,8 @@ drops away, and your overloaded pack swings out over nothing but mist.
 
 Mechanics check: matches harvest.
 
+Loss: {character} fell from the rope bridge into the mist at the [gold]{event}[/gold].
+
 ---
 
 ## - [ ] The Future of Potions_
@@ -373,3 +389,5 @@ entered into the ledger either way.
 - **That** — Add Clumsy (curse) to your Deck. Obtain a random Relic.
 
 Mechanics check: matches harvest.
+
+Loss: {character} did not walk away from the loading-dock crate at the [gold]{event}[/gold].
