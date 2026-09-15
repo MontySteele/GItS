@@ -608,6 +608,12 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(GraveOfTheForgottenMirror), typeof(GraveOfTheForgotten) },
             new object[] { typeof(ZenWeaverMirror), typeof(ZenWeaver) },
             new object[] { typeof(AmalgamatorMirror), typeof(Amalgamator) },
+            // Acts 2 and 3, batch 4.
+            new object[] { typeof(StoneOfAllTimeMirror), typeof(StoneOfAllTime) },
+            new object[] { typeof(BattlewornDummyMirror), typeof(BattlewornDummy) },
+            new object[] { typeof(ColorfulPhilosophersMirror), typeof(ColorfulPhilosophers) },
+            new object[] { typeof(RanwidTheElderMirror), typeof(RanwidTheElder) },
+            new object[] { typeof(RelicTraderMirror), typeof(RelicTrader) },
         };
 
     // ---------------------------------------------------------------
@@ -1011,8 +1017,10 @@ public class TeyvatFrameTests : IDisposable
         _ = baseEvent;
 
         var shape = Shapes().Values.First(s => s.Mirror == mirror.Name);
-        var derived = RelicKeyedOptions.TryGetValue(mirror.Name, out var keys)
+        var derived = UnspelledOptionKeys.TryGetValue(mirror.Name, out var keys)
             ? keys : Array.Empty<string>();
+        var foreign = ForeignKeyLiterals.TryGetValue(mirror.Name, out var shared)
+            ? shared : Array.Empty<string>();
         var expected = shape.OptionKeys
             .Where(k => !derived.Contains(k, StringComparer.Ordinal))
             .Concat(shape.PageKeys.Select(Unprefixed))
@@ -1039,6 +1047,7 @@ public class TeyvatFrameTests : IDisposable
             // key name is an ALL-CAPS option segment, optionally followed by
             // one camelCase page word; nothing else is compared.
             .Where(IsComparableKey)
+            .Where(k => !foreign.Contains(k, StringComparer.Ordinal))
             .Distinct()
             .OrderBy(k => k, StringComparer.Ordinal)
             .ToList();
@@ -1062,11 +1071,16 @@ public class TeyvatFrameTests : IDisposable
 
     /// <summary>
     /// OPTION KEYS THAT NEITHER THE MIRROR NOR ITS BASE EVENT SPELLS, per
-    /// mirror, because `EventModel.RelicOption` builds them out of the RELIC:
-    /// its key is `OptionKey(pageName, relic.Id.Entry)`, so the only place
-    /// `BIG_MUSHROOM` appears is the relic type's own name. There is no
-    /// `ldstr` to compare on either side, and requiring one would mean
-    /// authoring a literal the base game does not have.
+    /// mirror. Two events build their option keys out of something other than
+    /// a literal, so there is no `ldstr` to compare on either side and
+    /// requiring one would mean authoring a literal the base game has not got:
+    ///
+    ///   * `HungryForMushroomsMirror` -- `EventModel.RelicOption` keys an
+    ///     option `OptionKey(pageName, relic.Id.Entry)`, so the only place
+    ///     `BIG_MUSHROOM` appears is the relic TYPE's name.
+    ///   * `ColorfulPhilosophersMirror` -- the key is
+    ///     `InitialOptionKey(pool.EnergyColorName.ToUpperInvariant())`, so the
+    ///     five it can be are named by the five card POOLS.
     ///
     /// The keys still have to EXIST -- the generator writes both rows for each
     /// of them and the loc pin above requires them, because that pin builds
@@ -1079,10 +1093,30 @@ public class TeyvatFrameTests : IDisposable
     /// mirror writes out on purpose -- and dropping those is exactly what this
     /// pin must not do.
     /// </summary>
-    private static readonly IReadOnlyDictionary<string, string[]> RelicKeyedOptions =
+    private static readonly IReadOnlyDictionary<string, string[]> UnspelledOptionKeys =
         new Dictionary<string, string[]>(StringComparer.Ordinal)
         {
             ["HungryForMushroomsMirror"] = new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
+            ["ColorfulPhilosophersMirror"] = new[]
+            {
+                "IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT",
+            },
+        };
+
+    /// <summary>
+    /// LITERALS THAT LOOK LIKE A KEY AND ARE NOT THIS EVENT'S, per mirror.
+    ///
+    /// `RelicTraderMirror` keeps the base event's bare `"PROCEED"` for the
+    /// fallback option it offers when nothing tradable survives -- the shipped
+    /// game's SHARED row, not a key under any event's entry. Re-keying it to
+    /// the dressed entry would ask for a row nobody writes, and writing one
+    /// would be a dressed copy of a word the whole game already shares; so the
+    /// literal stays and this pin is told it is not a dressed key.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, string[]> ForeignKeyLiterals =
+        new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["RelicTraderMirror"] = new[] { "PROCEED" },
         };
 
     private static bool IsComparableKey(string s) =>

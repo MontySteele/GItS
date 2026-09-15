@@ -1446,6 +1446,35 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            // KshahrewarProvingCage (Sumeru / BattlewornDummy)
+            ["KSHAHREWAR_PROVING_CAGE.title"] =
+                "The Kshahrewar Proving Cage",
+            ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.description"] =
+                "In a fenced yard behind the Kshahrewar workshops below the "
+                + "Akademiya, mechanists have rigged a padded practice construct to a "
+                + "calibrated spring-drum, patched and re-patched past counting. A "
+                + "darshan proctor times every bout against a water-clock she refuses "
+                + "to slow down for anyone. \"Three turns,\" she says, already "
+                + "resetting the gauge. \"Higher tension, better data, better prize. "
+                + "The construct does not care how tired you are.\"",
+            ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.options.SETTING_1.title"] =
+                "Setting 1",
+            ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.options.SETTING_1.description"] =
+                "Fight a 75 HP dummy. Procure 1 random Potion.",
+            ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.options.SETTING_2.title"] =
+                "Setting 2",
+            ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.options.SETTING_2.description"] =
+                "Fight a 150 HP dummy. Upgrade 2 random cards.",
+            ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.options.SETTING_3.title"] =
+                "Setting 3",
+            ["KSHAHREWAR_PROVING_CAGE.pages.INITIAL.options.SETTING_3.description"] =
+                "Fight a 300 HP dummy. Obtain a random Relic.",
+            ["KSHAHREWAR_PROVING_CAGE.pages.VICTORY.description"] =
+                "You have 3 turns to defeat the dummy. Failing results in no "
+                + "reward.",
+            ["KSHAHREWAR_PROVING_CAGE.pages.DEFEAT.description"] =
+                "You have 3 turns to defeat the dummy. Failing results in no "
+                + "reward.",
             // RtawahistsStarfallGlass (Sumeru / CrystalSphere)
             ["RTAWAHISTS_STARFALL_GLASS.title"] =
                 "Rtawahist's Starfall Glass",
@@ -1545,6 +1574,44 @@ internal static partial class TeyvatLoc
                 "Procure 3 field brews (Foul Potion).",
             ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE.pages.RANSACK.description"] =
                 "Procure 1 random uncommon-grade tincture (Uncommon Potion).",
+            // AranwidEldestOfVanarana (Sumeru / RanwidTheElder)
+            ["ARANWID_ELDEST_OF_VANARANA.title"] =
+                "Aranwid, Eldest of Vanarana",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.description"] =
+                "In the dream-lit hollow of Vanarana, past the singing seelie-lamps "
+                + "of Vissudha Field, sits an Aranara so old its leaves have gone "
+                + "silver. Around it lies a nest of small kept things — gifts from "
+                + "Nara who passed through and never came back for them. \"Aranara "
+                + "remember,\" it hums. \"Nara gives, Aranara gives back.\"",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.POTION.title"] =
+                "Offer a Potion",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.POTION.description"] =
+                "Obtain a random Relic.",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.GOLD.title"] =
+                "Offer 100 Mora",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC.title"] =
+                "Offer the greater gift",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC.description"] =
+                "Obtain 2 random Relics. (harvest strips the offered item on this "
+                + "option: base reads \"[Give ]\")",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.POTION_LOCKED.title"] =
+                "Offer a Potion",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.POTION_LOCKED.description"] =
+                "Obtain a random Relic.",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC_LOCKED.title"] =
+                "Offer the greater gift",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC_LOCKED.description"] =
+                "Obtain 2 random Relics. (harvest strips the offered item on this "
+                + "option: base reads \"[Give ]\")",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.POTION.description"] =
+                "Obtain a random Relic.",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["ARANWID_ELDEST_OF_VANARANA.pages.RELIC.description"] =
+                "Obtain 2 random Relics. (harvest strips the offered item on this "
+                + "option: base reads \"[Give ]\")",
             // RtawahistTwinningGlass (Sumeru / Reflections)
             ["RTAWAHIST_TWINNING_GLASS.title"] =
                 "The Rtawahist Twinning Glass",
@@ -1570,6 +1637,31 @@ internal static partial class TeyvatLoc
             ["RTAWAHIST_TWINNING_GLASS.pages.SHATTER.description"] =
                 "Duplicate your entire Deck. Add Reflected Doubt (Bad Luck curse) "
                 + "to your Deck.",
+            // KshahrewarSurplusOffice (Sumeru / RelicTrader)
+            ["KSHAHREWAR_SURPLUS_OFFICE.title"] =
+                "The Kshahrewar Surplus Office",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.INITIAL.description"] =
+                "Behind the Akademiya's confiscations depot in Sumeru City, a "
+                + "Kshahrewar clerk has racked three items seized from students' "
+                + "unauthorized projects on a tiered shelf — top, middle, bottom — "
+                + "each tagged and cross-filed. He will not sell; departmental "
+                + "policy, which he cites by filing number, permits only "
+                + "like-for-like exchange. \"One of yours for one of the shelf's,\" "
+                + "he says. \"Choose the tier. I do not choose for you.\"",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.INITIAL.options.TOP.title"] =
+                "Take the Top Shelf",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.INITIAL.options.TOP.description"] =
+                "Trade for the top one.",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.INITIAL.options.MIDDLE.title"] =
+                "Take the Middle Shelf",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.INITIAL.options.MIDDLE.description"] =
+                "Trade for the middle one.",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.INITIAL.options.BOTTOM.title"] =
+                "Take the Bottom Shelf",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.INITIAL.options.BOTTOM.description"] =
+                "Trade for the bottom one.",
+            ["KSHAHREWAR_SURPLUS_OFFICE.pages.DONE.description"] =
+                "Trade for the top one.",
             // SixWeeksToABetterYouIlluminated (Sumeru / SelfHelpBook)
             ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.title"] =
                 "Six Weeks to a Better You, Illuminated",
@@ -1833,6 +1925,34 @@ internal static partial class TeyvatLoc
                 "It is unmistakably well-made gear, fitted for nobody in particular "
                 + "— least of all you. Add Clumsy (curse) to your Deck. Obtain a "
                 + "random Relic.",
+            // PressureTrialAtTheInstitute (Fontaine / BattlewornDummy)
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.title"] =
+                "Pressure Trial at the Institute",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.description"] =
+                "Beneath the Institute's glass roof, a Melusine technician in "
+                + "oversized overalls wheels out a padded clockwork meka on a rail. "
+                + "Her ledger is already open: every strike will be logged, and the "
+                + "water-clock beside her drains in three measured pours. \"Set the "
+                + "pressure valve first,\" she chirps. \"Higher pressure, better "
+                + "data, better prize. But the clock does not negotiate.\"",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.options.SETTING_1.title"] =
+                "First Valve",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.options.SETTING_1.description"] =
+                "Fight a 75 HP dummy. Procure 1 random Potion.",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.options.SETTING_2.title"] =
+                "Second Valve",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.options.SETTING_2.description"] =
+                "Fight a 150 HP dummy. Upgrade 2 random cards.",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.options.SETTING_3.title"] =
+                "Third Valve",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.INITIAL.options.SETTING_3.description"] =
+                "Fight a 300 HP dummy. Obtain a random Relic.",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.VICTORY.description"] =
+                "You have 3 turns to defeat the dummy. Failing results in no "
+                + "reward.",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE.pages.DEFEAT.description"] =
+                "You have 3 turns to defeat the dummy. Failing results in no "
+                + "reward.",
             // SoundingTheBerylShelf (Fontaine / CrystalSphere)
             ["SOUNDING_THE_BERYL_SHELF.title"] =
                 "Sounding the Beryl Shelf",
@@ -1936,6 +2056,45 @@ internal static partial class TeyvatLoc
                 "Procure 3 unlabelled draughts (Foul Potion).",
             ["UNDELIVERABLE_PARCELS.pages.RANSACK.description"] =
                 "Procure 1 random Court apothecary tonic (Uncommon Potion).",
+            // GrandmotherCoralieOfMeruseaVillage (Fontaine / RanwidTheElder)
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.title"] =
+                "Grandmother Coralie of Merusea Village",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.description"] =
+                "Merusea Village hangs quiet in the blue below Fontaine, and the "
+                + "oldest Melusine there keeps a driftwood counter of everything the "
+                + "water has handed back. She has no use for any of it; she simply "
+                + "likes the ceremony of exchange, and the Marechaussee Phantom long "
+                + "ago stopped asking where her stock comes from. \"A courtesy for a "
+                + "courtesy, monsieur adventurer.\"",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.POTION.title"] =
+                "Hand Over a Potion",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.POTION.description"] =
+                "Obtain a random Relic.",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.GOLD.title"] =
+                "Hand Over 100 Gold",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC.title"] =
+                "Hand Over the greater courtesy",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC.description"] =
+                "Obtain 2 random Relics. (The harvest itself strips the offered "
+                + "item's name on this option; base reads \"[Give ]\".)",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.POTION_LOCKED.title"] =
+                "Hand Over a Potion",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.POTION_LOCKED.description"] =
+                "Obtain a random Relic.",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC_LOCKED.title"] =
+                "Hand Over the greater courtesy",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC_LOCKED.description"] =
+                "Obtain 2 random Relics. (The harvest itself strips the offered "
+                + "item's name on this option; base reads \"[Give ]\".)",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.POTION.description"] =
+                "Obtain a random Relic.",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.RELIC.description"] =
+                "Obtain 2 random Relics. (The harvest itself strips the offered "
+                + "item's name on this option; base reads \"[Give ]\".)",
             // CoralMirrorRorriMLaroCEhT (Fontaine / Reflections)
             ["CORAL_MIRROR_RORRI_MLARO_CEH_T.title"] =
                 "The Coral Mirror rorriM laroC ehT",
@@ -1962,6 +2121,30 @@ internal static partial class TeyvatLoc
                 "Downgrade 2 random cards. Upgrade 4 random cards.",
             ["CORAL_MIRROR_RORRI_MLARO_CEH_T.pages.SHATTER.description"] =
                 "Duplicate your entire Deck. Add Bad Luck (curse) to your Deck.",
+            // FoundThingsShelfMeruseaVillage (Fontaine / RelicTrader)
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.title"] =
+                "The Found-Things Shelf, Merusea Village",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.INITIAL.description"] =
+                "Merusea Village's hollow glows tide-blue and smells of kelp and "
+                + "candle wax. A Melusine keeps the village's shelf of found things, "
+                + "three of them set out on grown coral — one high, one at eye level, "
+                + "one down by her boots. Nothing here can be bought, she explains "
+                + "gravely; a thing without a story attached to it is only ballast. "
+                + "So you must leave a story behind to take one away.",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.INITIAL.options.TOP.title"] =
+                "Reach for the Top Shell",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.INITIAL.options.TOP.description"] =
+                "Trade for the top one.",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.INITIAL.options.MIDDLE.title"] =
+                "Reach for the Middle Shell",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.INITIAL.options.MIDDLE.description"] =
+                "Trade for the middle one.",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.INITIAL.options.BOTTOM.title"] =
+                "Reach for the Bottom Shell",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.INITIAL.options.BOTTOM.description"] =
+                "Trade for the bottom one.",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE.pages.DONE.description"] =
+                "Trade for the top one.",
             // MelusinesPamphletOfEncouragement (Fontaine / SelfHelpBook)
             ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.title"] =
                 "A Melusine's Pamphlet of Encouragement",
@@ -2538,6 +2721,39 @@ internal static partial class TeyvatLoc
                 "Add Sweeping Tide (Exterminate) to your Deck.",
             ["DRILLMASTER_OF_WATATSUMI.pages.SQUASH.description"] =
                 "Add Anchor Drop (Squash) to your Deck.",
+            // WarCouncilAtSangonomiya (Inazuma / ColorfulPhilosophers)
+            ["WAR_COUNCIL_AT_SANGONOMIYA.title"] =
+                "The War Council at Sangonomiya",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.description"] =
+                "Below the shrine, five division commanders have laid their banners "
+                + "over the map table and are arguing doctrine, each certain her "
+                + "unit's drill is the one that wins Watatsumi back. Three will get a "
+                + "hearing before the tide-drum calls the room to order, and none "
+                + "pitches the style you already carry. Each commander offers her "
+                + "technique in three grades — a common form, an uncommon one, and "
+                + "the drill she saves for veterans.",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.IRONCLAD.title"] =
+                "Crimson Banner (Red)",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.IRONCLAD.description"] =
+                "Obtain 3 Ironclad cards.",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.SILENT.title"] =
+                "Kelp-Green Banner (Green)",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.SILENT.description"] =
+                "Obtain 3 Silent cards.",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.DEFECT.title"] =
+                "Tide-Blue Banner (Blue)",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.DEFECT.description"] =
+                "Obtain 3 Defect cards.",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.NECROBINDER.title"] =
+                "Ash-Pink Banner (Pink)",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.NECROBINDER.description"] =
+                "Obtain 3 Necrobinder cards.",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.REGENT.title"] =
+                "Ember-Orange Banner (Orange)",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.INITIAL.options.REGENT.description"] =
+                "Obtain 3 Regent cards.",
+            ["WAR_COUNCIL_AT_SANGONOMIYA.pages.DONE.description"] =
+                "Obtain 3 Ironclad cards.",
             // TideScryingStoneOfYashiori (Inazuma / CrystalSphere)
             ["TIDE_SCRYING_STONE_OF_YASHIORI.title"] =
                 "The Tide-Scrying Stone of Yashiori",
@@ -2626,6 +2842,68 @@ internal static partial class TeyvatLoc
                 "Procure 3 sea-grass draughts (Foul Potion).",
             ["BOUROU_VILLAGE_MEDICINE_RUN.pages.RANSACK.description"] =
                 "Procure 1 random smuggled tonic (Uncommon Potion).",
+            // OldYorozuOfChinjuForest (Inazuma / RanwidTheElder)
+            ["OLD_YOROZU_OF_CHINJU_FOREST.title"] =
+                "Old Yorozu of Chinju Forest",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.description"] =
+                "Under a leaning torii on the road toward the Grand Narukami "
+                + "Shrine, a tanuki elder in a leaf hat has laid out a mat of curios: "
+                + "a cracked mask, a bell, things that hum faintly of Electro. He is "
+                + "far too polite to beg, and far too old to be refused. \"Etiquette, "
+                + "traveler. One does not receive without first giving.\"",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.POTION.title"] =
+                "Give a Potion",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.POTION.description"] =
+                "Obtain a random Relic.",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.GOLD.title"] =
+                "Give 100 Mora",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC.title"] =
+                "Give the proper tribute",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC.description"] =
+                "(harvest strips the offered item: base reads \"[Give ]\") Obtain 2 "
+                + "random Relics.",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.POTION_LOCKED.title"] =
+                "Give a Potion",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.POTION_LOCKED.description"] =
+                "Obtain a random Relic.",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC_LOCKED.title"] =
+                "Give the proper tribute",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC_LOCKED.description"] =
+                "(harvest strips the offered item: base reads \"[Give ]\") Obtain 2 "
+                + "random Relics.",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.POTION.description"] =
+                "Obtain a random Relic.",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["OLD_YOROZU_OF_CHINJU_FOREST.pages.RELIC.description"] =
+                "(harvest strips the offered item: base reads \"[Give ]\") Obtain 2 "
+                + "random Relics.",
+            // TanukiStallOnTheShrineRoad (Inazuma / RelicTrader)
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.title"] =
+                "The Tanuki Stall on the Shrine Road",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.INITIAL.description"] =
+                "A tanuki has set up shop on a flat stone by the Grand Narukami "
+                + "Shrine road: three items on a lacquer tier, one high, one at eye "
+                + "level, one low. It will not name what any of them are, and it will "
+                + "not be hurried into explaining. Etiquette says a gift answers a "
+                + "gift; it folds its paws and waits for you to choose a shelf, not a "
+                + "price.",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.INITIAL.options.TOP.title"] =
+                "Take the Top Shelf",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.INITIAL.options.TOP.description"] =
+                "Trade for the top one.",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.INITIAL.options.MIDDLE.title"] =
+                "Take the Middle Shelf",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.INITIAL.options.MIDDLE.description"] =
+                "Trade for the middle one.",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.INITIAL.options.BOTTOM.title"] =
+                "Take the Bottom Shelf",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.INITIAL.options.BOTTOM.description"] =
+                "Trade for the bottom one.",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD.pages.DONE.description"] =
+                "Trade for the top one.",
             // BlockadeLarder (Inazuma / RoomFullOfCheese)
             ["BLOCKADE_LARDER.title"] =
                 "The Blockade Larder",
@@ -2684,6 +2962,49 @@ internal static partial class TeyvatLoc
                 "Lose 9 HP. Remove 1 card from your Deck — it recoils through your "
                 + "ribs on the way out, and takes with it one technique you can no "
                 + "longer remember learning.",
+            // StoneInTheSunkenRoad (Inazuma / StoneOfAllTime)
+            ["STONE_IN_THE_SUNKEN_ROAD.title"] =
+                "The Stone in the Sunken Road",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.description"] =
+                "A tremor has dropped a shrine-stone across the switchback road to "
+                + "Bourou Village, and Watatsumi's supply carts have been queued "
+                + "behind it since dawn. The quartermaster says the stone was set "
+                + "there before the war, before the Vision Hunt Decree — old enough "
+                + "that the resistance's engineers refuse to blast it. She will not "
+                + "order anyone to try. She simply steps aside and lets you look at "
+                + "it.",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.LIFT.title"] =
+                "Drink and Lift",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.LIFT.description"] =
+                "Take a field tonic from the divers' stores, plant your feet in the "
+                + "wet gravel, and lift from the knees. Lose a random potion. Gain 10 "
+                + "Max HP.",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.PUSH.title"] =
+                "Push",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.PUSH.description"] =
+                "Refuse the tonic, wedge your shoulder low under the stone, and "
+                + "push until the road is clear and your ribs are not. Lose 6 HP. "
+                + "Enchant an attack with Vigorous 8.",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.LIFT_LOCKED.title"] =
+                "Drink and Lift",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.LIFT_LOCKED.description"] =
+                "Take a field tonic from the divers' stores, plant your feet in the "
+                + "wet gravel, and lift from the knees. Lose a random potion. Gain 10 "
+                + "Max HP.",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.PUSH_LOCKED.title"] =
+                "Push",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.INITIAL.options.PUSH_LOCKED.description"] =
+                "Refuse the tonic, wedge your shoulder low under the stone, and "
+                + "push until the road is clear and your ribs are not. Lose 6 HP. "
+                + "Enchant an attack with Vigorous 8.",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.LIFT.description"] =
+                "Take a field tonic from the divers' stores, plant your feet in the "
+                + "wet gravel, and lift from the knees. Lose a random potion. Gain 10 "
+                + "Max HP.",
+            ["STONE_IN_THE_SUNKEN_ROAD.pages.PUSH.description"] =
+                "Refuse the tonic, wedge your shoulder low under the stone, and "
+                + "push until the road is clear and your ribs are not. Lose 6 HP. "
+                + "Enchant an attack with Vigorous 8.",
             // DefilementAtSerpentsHead (Inazuma / Symbiote)
             ["DEFILEMENT_AT_SERPENTS_HEAD.title"] =
                 "Defilement at Serpent's Head",
@@ -2930,6 +3251,38 @@ internal static partial class TeyvatLoc
                 "Add Exterminate to your Deck.",
             ["SWEEP_OR_STOMP.pages.SQUASH.description"] =
                 "Add Squash to your Deck.",
+            // RacingCampsWager (Natlan / ColorfulPhilosophers)
+            ["RACING_CAMPS_WAGER.title"] =
+                "The Racing Camp's Wager",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.description"] =
+                "At the racing camp above Tequemecan Valley, three Masters of the "
+                + "Night-Wind riders corner you between heats, each certain their "
+                + "mount-style is the only one worth learning. Three will get a word "
+                + "in before the starting horn; the rest already know you ride your "
+                + "own way. Each rider bets a full set on their color — one common "
+                + "trick, one solid one, and one they'll only show you if you lose.",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.IRONCLAD.title"] =
+                "Red — the Flame-Runner's wager",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.IRONCLAD.description"] =
+                "Obtain 3 Ironclad cards.",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.SILENT.title"] =
+                "Green — the Wind-Strider's wager",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.SILENT.description"] =
+                "Obtain 3 Silent cards.",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.DEFECT.title"] =
+                "Blue — the Storm-Rider's wager",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.DEFECT.description"] =
+                "Obtain 3 Defect cards.",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.NECROBINDER.title"] =
+                "Pink — the Bone-Caller's wager",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.NECROBINDER.description"] =
+                "Obtain 3 Necrobinder cards.",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.REGENT.title"] =
+                "Orange — the Sun-Chaser's wager",
+            ["RACING_CAMPS_WAGER.pages.INITIAL.options.REGENT.description"] =
+                "Obtain 3 Regent cards.",
+            ["RACING_CAMPS_WAGER.pages.DONE.description"] =
+                "Obtain 3 Ironclad cards.",
             // SpringsGrid (Natlan / CrystalSphere)
             ["SPRINGS_GRID.title"] =
                 "The Springs' Grid",
@@ -3018,6 +3371,69 @@ internal static partial class TeyvatLoc
                 "Procure 3 Foul Potions.",
             ["OVERSHOT_DROP.pages.RANSACK.description"] =
                 "Procure 1 random Uncommon Potion.",
+            // CanopyEldersLedgerOfGifts (Natlan / RanwidTheElder)
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.title"] =
+                "The Canopy Elder's Ledger of Gifts",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.description"] =
+                "An elder of the Scions of the Canopy keeps a nest of everything "
+                + "the forest has handed back to her over a long life, high in the "
+                + "branches of Coatepec Mountain. She trades plain: give something, "
+                + "get something, no counting owed either way. A potion earns a "
+                + "relic. A hundred coin earns a relic. And if you've got something "
+                + "rarer to offer — she won't name it for you, but she'll know it "
+                + "when she sees it — she'll match it with two.",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.POTION.title"] =
+                "Offer a Potion",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.POTION.description"] =
+                "Obtain a random Relic.",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.GOLD.title"] =
+                "Offer 100 Gold",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC.title"] =
+                "Offer the Greater Gift",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC.description"] =
+                "Obtain 2 random Relics. (The harvest's third option reads \"[Give "
+                + "]\" — the offered item is stripped by template-stripping.)",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.POTION_LOCKED.title"] =
+                "Offer a Potion",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.POTION_LOCKED.description"] =
+                "Obtain a random Relic.",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC_LOCKED.title"] =
+                "Offer the Greater Gift",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC_LOCKED.description"] =
+                "Obtain 2 random Relics. (The harvest's third option reads \"[Give "
+                + "]\" — the offered item is stripped by template-stripping.)",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.POTION.description"] =
+                "Obtain a random Relic.",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.GOLD.description"] =
+                "Obtain a random Relic.",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.RELIC.description"] =
+                "Obtain 2 random Relics. (The harvest's third option reads \"[Give "
+                + "]\" — the offered item is stripped by template-stripping.)",
+            // MictlanTradeCircle (Natlan / RelicTrader)
+            ["MICTLAN_TRADE_CIRCLE.title"] =
+                "The Mictlan Trade-Circle",
+            ["MICTLAN_TRADE_CIRCLE.pages.INITIAL.description"] =
+                "At the Mictlan trade-circle, a Collective broker has three things "
+                + "laid out on a woven mat — top, middle, bottom — and won't say what "
+                + "any of them are until you've already reached. \"Half the fun's in "
+                + "not knowing,\" he says, \"and I'm not explaining it. Point, and "
+                + "it's yours.\"",
+            ["MICTLAN_TRADE_CIRCLE.pages.INITIAL.options.TOP.title"] =
+                "Take the Top One",
+            ["MICTLAN_TRADE_CIRCLE.pages.INITIAL.options.TOP.description"] =
+                "Trade for the top item.",
+            ["MICTLAN_TRADE_CIRCLE.pages.INITIAL.options.MIDDLE.title"] =
+                "Take the Middle One",
+            ["MICTLAN_TRADE_CIRCLE.pages.INITIAL.options.MIDDLE.description"] =
+                "Trade for the middle item.",
+            ["MICTLAN_TRADE_CIRCLE.pages.INITIAL.options.BOTTOM.title"] =
+                "Take the Bottom One",
+            ["MICTLAN_TRADE_CIRCLE.pages.INITIAL.options.BOTTOM.description"] =
+                "Trade for the bottom item.",
+            ["MICTLAN_TRADE_CIRCLE.pages.DONE.description"] =
+                "Trade for the top item.",
             // UnderStandsCellar (Natlan / RoomFullOfCheese)
             ["UNDER_STANDS_CELLAR.title"] =
                 "The Under-Stands Cellar",
@@ -3067,6 +3483,35 @@ internal static partial class TeyvatLoc
                 "Heal 25 HP. Add Metamorphosis to your Deck.",
             ["SPRINGS_ROOTED_THING.pages.REJECTION.description"] =
                 "Lose 9 HP. Remove 1 card from your Deck.",
+            // SlabOnTheAncientSacredMountain (Natlan / StoneOfAllTime)
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.title"] =
+                "The Slab on the Ancient Sacred Mountain",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.description"] =
+                "On the Ancient Sacred Mountain, a slab older than any tribe's "
+                + "founding sits where it fell, and the Night-Wind riders dare each "
+                + "other at it between races. Drink something down first and lift "
+                + "with a clear head, or refuse the bottle and put your whole back "
+                + "into it instead. Either way something in you changes for good.",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.LIFT.title"] =
+                "Drink and Lift",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.LIFT.description"] =
+                "Lose a random potion. Gain 10 Max HP.",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.PUSH.title"] =
+                "Push",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.PUSH.description"] =
+                "Lose 6 HP. Enchant an Attack with Vigorous 8.",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.LIFT_LOCKED.title"] =
+                "Drink and Lift",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.LIFT_LOCKED.description"] =
+                "Lose a random potion. Gain 10 Max HP.",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.PUSH_LOCKED.title"] =
+                "Push",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.INITIAL.options.PUSH_LOCKED.description"] =
+                "Lose 6 HP. Enchant an Attack with Vigorous 8.",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.LIFT.description"] =
+                "Lose a random potion. Gain 10 Max HP.",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN.pages.PUSH.description"] =
+                "Lose 6 HP. Enchant an Attack with Vigorous 8.",
             // BladeThatBreathes (Natlan / Symbiote)
             ["BLADE_THAT_BREATHES.title"] =
                 "The Blade That Breathes",
@@ -3678,6 +4123,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.KshahrewarProvingCage)] = new EventShape(
+                "KSHAHREWAR_PROVING_CAGE", "BattlewornDummyMirror",
+                new[] { "SETTING_1", "SETTING_2", "SETTING_3" },
+                new[] { "pages.VICTORY.description", "pages.DEFEAT.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Sumeru.RtawahistsStarfallGlass)] = new EventShape(
                 "RTAWAHISTS_STARFALL_GLASS", "CrystalSphereMirror",
                 new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
@@ -3702,10 +4153,22 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.AranwidEldestOfVanarana)] = new EventShape(
+                "ARANWID_ELDEST_OF_VANARANA", "RanwidTheElderMirror",
+                new[] { "POTION", "GOLD", "RELIC" },
+                new[] { "pages.POTION.description", "pages.GOLD.description", "pages.RELIC.description" },
+                new[] { "pages.INITIAL.options.POTION_LOCKED", "pages.INITIAL.options.RELIC_LOCKED" },
+                false),
             [typeof(Events.Sumeru.RtawahistTwinningGlass)] = new EventShape(
                 "RTAWAHIST_TWINNING_GLASS", "ReflectionsMirror",
                 new[] { "TOUCH_A_MIRROR", "SHATTER" },
                 new[] { "pages.TOUCH_A_MIRROR.description", "pages.SHATTER.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Sumeru.KshahrewarSurplusOffice)] = new EventShape(
+                "KSHAHREWAR_SURPLUS_OFFICE", "RelicTraderMirror",
+                new[] { "TOP", "MIDDLE", "BOTTOM" },
+                new[] { "pages.DONE.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Sumeru.SixWeeksToABetterYouIlluminated)] = new EventShape(
@@ -3744,6 +4207,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Fontaine.PressureTrialAtTheInstitute)] = new EventShape(
+                "PRESSURE_TRIAL_AT_THE_INSTITUTE", "BattlewornDummyMirror",
+                new[] { "SETTING_1", "SETTING_2", "SETTING_3" },
+                new[] { "pages.VICTORY.description", "pages.DEFEAT.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Fontaine.SoundingTheBerylShelf)] = new EventShape(
                 "SOUNDING_THE_BERYL_SHELF", "CrystalSphereMirror",
                 new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
@@ -3768,10 +4237,22 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Fontaine.GrandmotherCoralieOfMeruseaVillage)] = new EventShape(
+                "GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE", "RanwidTheElderMirror",
+                new[] { "POTION", "GOLD", "RELIC" },
+                new[] { "pages.POTION.description", "pages.GOLD.description", "pages.RELIC.description" },
+                new[] { "pages.INITIAL.options.POTION_LOCKED", "pages.INITIAL.options.RELIC_LOCKED" },
+                false),
             [typeof(Events.Fontaine.CoralMirrorRorriMLaroCEhT)] = new EventShape(
                 "CORAL_MIRROR_RORRI_MLARO_CEH_T", "ReflectionsMirror",
                 new[] { "TOUCH_A_MIRROR", "SHATTER" },
                 new[] { "pages.TOUCH_A_MIRROR.description", "pages.SHATTER.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.FoundThingsShelfMeruseaVillage)] = new EventShape(
+                "FOUND_THINGS_SHELF_MERUSEA_VILLAGE", "RelicTraderMirror",
+                new[] { "TOP", "MIDDLE", "BOTTOM" },
+                new[] { "pages.DONE.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Fontaine.MelusinesPamphletOfEncouragement)] = new EventShape(
@@ -3852,6 +4333,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.WarCouncilAtSangonomiya)] = new EventShape(
+                "WAR_COUNCIL_AT_SANGONOMIYA", "ColorfulPhilosophersMirror",
+                new[] { "IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Inazuma.TideScryingStoneOfYashiori)] = new EventShape(
                 "TIDE_SCRYING_STONE_OF_YASHIORI", "CrystalSphereMirror",
                 new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
@@ -3876,6 +4363,18 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Inazuma.OldYorozuOfChinjuForest)] = new EventShape(
+                "OLD_YOROZU_OF_CHINJU_FOREST", "RanwidTheElderMirror",
+                new[] { "POTION", "GOLD", "RELIC" },
+                new[] { "pages.POTION.description", "pages.GOLD.description", "pages.RELIC.description" },
+                new[] { "pages.INITIAL.options.POTION_LOCKED", "pages.INITIAL.options.RELIC_LOCKED" },
+                false),
+            [typeof(Events.Inazuma.TanukiStallOnTheShrineRoad)] = new EventShape(
+                "TANUKI_STALL_ON_THE_SHRINE_ROAD", "RelicTraderMirror",
+                new[] { "TOP", "MIDDLE", "BOTTOM" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Inazuma.BlockadeLarder)] = new EventShape(
                 "BLOCKADE_LARDER", "RoomFullOfCheeseMirror",
                 new[] { "GORGE", "SEARCH" },
@@ -3887,6 +4386,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "LET_IT_IN", "REJECTION" },
                 new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.StoneInTheSunkenRoad)] = new EventShape(
+                "STONE_IN_THE_SUNKEN_ROAD", "StoneOfAllTimeMirror",
+                new[] { "LIFT", "PUSH" },
+                new[] { "pages.LIFT.description", "pages.PUSH.description" },
+                new[] { "pages.INITIAL.options.LIFT_LOCKED", "pages.INITIAL.options.PUSH_LOCKED" },
                 false),
             [typeof(Events.Inazuma.DefilementAtSerpentsHead)] = new EventShape(
                 "DEFILEMENT_AT_SERPENTS_HEAD", "SymbioteMirror",
@@ -3936,6 +4441,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EXTERMINATION.description", "pages.SQUASH.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Natlan.RacingCampsWager)] = new EventShape(
+                "RACING_CAMPS_WAGER", "ColorfulPhilosophersMirror",
+                new[] { "IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Natlan.SpringsGrid)] = new EventShape(
                 "SPRINGS_GRID", "CrystalSphereMirror",
                 new[] { "UNCOVER_FUTURE", "PAYMENT_PLAN" },
@@ -3960,6 +4471,18 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.GRAB_POTIONS.description", "pages.RANSACK.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Natlan.CanopyEldersLedgerOfGifts)] = new EventShape(
+                "CANOPY_ELDERS_LEDGER_OF_GIFTS", "RanwidTheElderMirror",
+                new[] { "POTION", "GOLD", "RELIC" },
+                new[] { "pages.POTION.description", "pages.GOLD.description", "pages.RELIC.description" },
+                new[] { "pages.INITIAL.options.POTION_LOCKED", "pages.INITIAL.options.RELIC_LOCKED" },
+                false),
+            [typeof(Events.Natlan.MictlanTradeCircle)] = new EventShape(
+                "MICTLAN_TRADE_CIRCLE", "RelicTraderMirror",
+                new[] { "TOP", "MIDDLE", "BOTTOM" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
             [typeof(Events.Natlan.UnderStandsCellar)] = new EventShape(
                 "UNDER_STANDS_CELLAR", "RoomFullOfCheeseMirror",
                 new[] { "GORGE", "SEARCH" },
@@ -3971,6 +4494,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "LET_IT_IN", "REJECTION" },
                 new[] { "pages.LET_IT_IN.description", "pages.REJECTION.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.SlabOnTheAncientSacredMountain)] = new EventShape(
+                "SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN", "StoneOfAllTimeMirror",
+                new[] { "LIFT", "PUSH" },
+                new[] { "pages.LIFT.description", "pages.PUSH.description" },
+                new[] { "pages.INITIAL.options.LIFT_LOCKED", "pages.INITIAL.options.PUSH_LOCKED" },
                 false),
             [typeof(Events.Natlan.BladeThatBreathes)] = new EventShape(
                 "BLADE_THAT_BREATHES", "SymbioteMirror",
@@ -4111,6 +4640,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.BureauOfReclaimedMedicine>(),
             [(TeyvatFrame.Liyue, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
+            [(TeyvatFrame.Sumeru, typeof(BattlewornDummy))] =
+                () => ModelDb.Event<Events.Sumeru.KshahrewarProvingCage>(),
             [(TeyvatFrame.Sumeru, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Sumeru.RtawahistsStarfallGlass>(),
             [(TeyvatFrame.Sumeru, typeof(GraveOfTheForgotten))] =
@@ -4119,8 +4650,12 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Sumeru.AranarasTwoCaps>(),
             [(TeyvatFrame.Sumeru, typeof(PotionCourier))] =
                 () => ModelDb.Event<Events.Sumeru.SpilledSatchelAtSumeruCitysGate>(),
+            [(TeyvatFrame.Sumeru, typeof(RanwidTheElder))] =
+                () => ModelDb.Event<Events.Sumeru.AranwidEldestOfVanarana>(),
             [(TeyvatFrame.Sumeru, typeof(Reflections))] =
                 () => ModelDb.Event<Events.Sumeru.RtawahistTwinningGlass>(),
+            [(TeyvatFrame.Sumeru, typeof(RelicTrader))] =
+                () => ModelDb.Event<Events.Sumeru.KshahrewarSurplusOffice>(),
             [(TeyvatFrame.Sumeru, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Sumeru.SixWeeksToABetterYouIlluminated>(),
             [(TeyvatFrame.Sumeru, typeof(SlipperyBridge))] =
@@ -4133,6 +4668,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Sumeru.RoundTableAtTheHouseOfDaena>(),
             [(TeyvatFrame.Sumeru, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Sumeru.CaravanRibatLeavings>(),
+            [(TeyvatFrame.Fontaine, typeof(BattlewornDummy))] =
+                () => ModelDb.Event<Events.Fontaine.PressureTrialAtTheInstitute>(),
             [(TeyvatFrame.Fontaine, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Fontaine.SoundingTheBerylShelf>(),
             [(TeyvatFrame.Fontaine, typeof(GraveOfTheForgotten))] =
@@ -4141,8 +4678,12 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Fontaine.MeropideInfirmaryRounds>(),
             [(TeyvatFrame.Fontaine, typeof(PotionCourier))] =
                 () => ModelDb.Event<Events.Fontaine.UndeliverableParcels>(),
+            [(TeyvatFrame.Fontaine, typeof(RanwidTheElder))] =
+                () => ModelDb.Event<Events.Fontaine.GrandmotherCoralieOfMeruseaVillage>(),
             [(TeyvatFrame.Fontaine, typeof(Reflections))] =
                 () => ModelDb.Event<Events.Fontaine.CoralMirrorRorriMLaroCEhT>(),
+            [(TeyvatFrame.Fontaine, typeof(RelicTrader))] =
+                () => ModelDb.Event<Events.Fontaine.FoundThingsShelfMeruseaVillage>(),
             [(TeyvatFrame.Fontaine, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Fontaine.MelusinesPamphletOfEncouragement>(),
             [(TeyvatFrame.Fontaine, typeof(SlipperyBridge))] =
@@ -4169,6 +4710,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.ChinjuForestPassenger>(),
             [(TeyvatFrame.Inazuma, typeof(Bugslayer))] =
                 () => ModelDb.Event<Events.Inazuma.DrillmasterOfWatatsumi>(),
+            [(TeyvatFrame.Inazuma, typeof(ColorfulPhilosophers))] =
+                () => ModelDb.Event<Events.Inazuma.WarCouncilAtSangonomiya>(),
             [(TeyvatFrame.Inazuma, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Inazuma.TideScryingStoneOfYashiori>(),
             [(TeyvatFrame.Inazuma, typeof(FieldOfManSizedHoles))] =
@@ -4177,10 +4720,16 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Inazuma.NestedArray>(),
             [(TeyvatFrame.Inazuma, typeof(PotionCourier))] =
                 () => ModelDb.Event<Events.Inazuma.BourouVillageMedicineRun>(),
+            [(TeyvatFrame.Inazuma, typeof(RanwidTheElder))] =
+                () => ModelDb.Event<Events.Inazuma.OldYorozuOfChinjuForest>(),
+            [(TeyvatFrame.Inazuma, typeof(RelicTrader))] =
+                () => ModelDb.Event<Events.Inazuma.TanukiStallOnTheShrineRoad>(),
             [(TeyvatFrame.Inazuma, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Inazuma.BlockadeLarder>(),
             [(TeyvatFrame.Inazuma, typeof(SpiritGrafter))] =
                 () => ModelDb.Event<Events.Inazuma.NamelessUnderTheCedar>(),
+            [(TeyvatFrame.Inazuma, typeof(StoneOfAllTime))] =
+                () => ModelDb.Event<Events.Inazuma.StoneInTheSunkenRoad>(),
             [(TeyvatFrame.Inazuma, typeof(Symbiote))] =
                 () => ModelDb.Event<Events.Inazuma.DefilementAtSerpentsHead>(),
             [(TeyvatFrame.Inazuma, typeof(TeaMaster))] =
@@ -4197,6 +4746,8 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Natlan.EarWhisperer>(),
             [(TeyvatFrame.Natlan, typeof(Bugslayer))] =
                 () => ModelDb.Event<Events.Natlan.SweepOrStomp>(),
+            [(TeyvatFrame.Natlan, typeof(ColorfulPhilosophers))] =
+                () => ModelDb.Event<Events.Natlan.RacingCampsWager>(),
             [(TeyvatFrame.Natlan, typeof(CrystalSphere))] =
                 () => ModelDb.Event<Events.Natlan.SpringsGrid>(),
             [(TeyvatFrame.Natlan, typeof(FieldOfManSizedHoles))] =
@@ -4205,10 +4756,16 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Natlan.TickingRelic>(),
             [(TeyvatFrame.Natlan, typeof(PotionCourier))] =
                 () => ModelDb.Event<Events.Natlan.OvershotDrop>(),
+            [(TeyvatFrame.Natlan, typeof(RanwidTheElder))] =
+                () => ModelDb.Event<Events.Natlan.CanopyEldersLedgerOfGifts>(),
+            [(TeyvatFrame.Natlan, typeof(RelicTrader))] =
+                () => ModelDb.Event<Events.Natlan.MictlanTradeCircle>(),
             [(TeyvatFrame.Natlan, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Natlan.UnderStandsCellar>(),
             [(TeyvatFrame.Natlan, typeof(SpiritGrafter))] =
                 () => ModelDb.Event<Events.Natlan.SpringsRootedThing>(),
+            [(TeyvatFrame.Natlan, typeof(StoneOfAllTime))] =
+                () => ModelDb.Event<Events.Natlan.SlabOnTheAncientSacredMountain>(),
             [(TeyvatFrame.Natlan, typeof(Symbiote))] =
                 () => ModelDb.Event<Events.Natlan.BladeThatBreathes>(),
             [(TeyvatFrame.Natlan, typeof(TeaMaster))] =
@@ -4326,6 +4883,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/the_future_of_potions.png",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE"] =
                 "res://images/events/this_or_that.png",
+            ["KSHAHREWAR_PROVING_CAGE"] =
+                "res://images/events/battleworn_dummy.png",
             ["RTAWAHISTS_STARFALL_GLASS"] =
                 "res://images/events/crystal_sphere.png",
             ["HOLLOW_OF_THE_STRUCK_NAME"] =
@@ -4334,8 +4893,12 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/hungry_for_mushrooms.png",
             ["SPILLED_SATCHEL_AT_SUMERU_CITYS_GATE"] =
                 "res://images/events/potion_courier.png",
+            ["ARANWID_ELDEST_OF_VANARANA"] =
+                "res://images/events/ranwid_the_elder.png",
             ["RTAWAHIST_TWINNING_GLASS"] =
                 "res://images/events/reflections.png",
+            ["KSHAHREWAR_SURPLUS_OFFICE"] =
+                "res://images/events/relic_trader.png",
             ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY"] =
@@ -4348,6 +4911,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/round_tea_party.png",
             ["CARAVAN_RIBAT_LEAVINGS"] =
                 "res://images/events/this_or_that.png",
+            ["PRESSURE_TRIAL_AT_THE_INSTITUTE"] =
+                "res://images/events/battleworn_dummy.png",
             ["SOUNDING_THE_BERYL_SHELF"] =
                 "res://images/events/crystal_sphere.png",
             ["LEDGER_OF_SUNKEN_NAMES"] =
@@ -4356,8 +4921,12 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/hungry_for_mushrooms.png",
             ["UNDELIVERABLE_PARCELS"] =
                 "res://images/events/potion_courier.png",
+            ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE"] =
+                "res://images/events/ranwid_the_elder.png",
             ["CORAL_MIRROR_RORRI_MLARO_CEH_T"] =
                 "res://images/events/reflections.png",
+            ["FOUND_THINGS_SHELF_MERUSEA_VILLAGE"] =
+                "res://images/events/relic_trader.png",
             ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT"] =
                 "res://images/events/self_help_book.png",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT"] =
@@ -4384,6 +4953,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/brain_leech.png",
             ["DRILLMASTER_OF_WATATSUMI"] =
                 "res://images/events/bugslayer.png",
+            ["WAR_COUNCIL_AT_SANGONOMIYA"] =
+                "res://images/events/colorful_philosophers.png",
             ["TIDE_SCRYING_STONE_OF_YASHIORI"] =
                 "res://images/events/crystal_sphere.png",
             ["FOX_DENS_OF_CHINJU_FOREST"] =
@@ -4392,10 +4963,16 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/infested_automaton.png",
             ["BOUROU_VILLAGE_MEDICINE_RUN"] =
                 "res://images/events/potion_courier.png",
+            ["OLD_YOROZU_OF_CHINJU_FOREST"] =
+                "res://images/events/ranwid_the_elder.png",
+            ["TANUKI_STALL_ON_THE_SHRINE_ROAD"] =
+                "res://images/events/relic_trader.png",
             ["BLOCKADE_LARDER"] =
                 "res://images/events/room_full_of_cheese.png",
             ["NAMELESS_UNDER_THE_CEDAR"] =
                 "res://images/events/spirit_grafter.png",
+            ["STONE_IN_THE_SUNKEN_ROAD"] =
+                "res://images/events/stone_of_all_time.png",
             ["DEFILEMENT_AT_SERPENTS_HEAD"] =
                 "res://images/events/symbiote.png",
             ["KETTLE_BELOW_SANGONOMIYA"] =
@@ -4412,6 +4989,8 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/brain_leech.png",
             ["SWEEP_OR_STOMP"] =
                 "res://images/events/bugslayer.png",
+            ["RACING_CAMPS_WAGER"] =
+                "res://images/events/colorful_philosophers.png",
             ["SPRINGS_GRID"] =
                 "res://images/events/crystal_sphere.png",
             ["COOKFIRE_PITS"] =
@@ -4420,10 +4999,16 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/infested_automaton.png",
             ["OVERSHOT_DROP"] =
                 "res://images/events/potion_courier.png",
+            ["CANOPY_ELDERS_LEDGER_OF_GIFTS"] =
+                "res://images/events/ranwid_the_elder.png",
+            ["MICTLAN_TRADE_CIRCLE"] =
+                "res://images/events/relic_trader.png",
             ["UNDER_STANDS_CELLAR"] =
                 "res://images/events/room_full_of_cheese.png",
             ["SPRINGS_ROOTED_THING"] =
                 "res://images/events/spirit_grafter.png",
+            ["SLAB_ON_THE_ANCIENT_SACRED_MOUNTAIN"] =
+                "res://images/events/stone_of_all_time.png",
             ["BLADE_THAT_BREATHES"] =
                 "res://images/events/symbiote.png",
             ["FESTIVAL_BREW_STAND"] =

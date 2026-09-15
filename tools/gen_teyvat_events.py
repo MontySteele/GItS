@@ -233,6 +233,17 @@ class MirrorSpec:
     Baths' Linger and Exit Baths) needs the LINE, and the line is already
     written -- what was missing was somewhere for it to pair.
 
+    `line_pages` -- A FACE LINE THAT IS NOT AN OPTION AT ALL. The curation
+    follows the wiki, and the wiki sometimes writes a rule that applies to
+    EVERY option as one more bullet beside them: Battleworn Dummy's
+    `(all settings)` line is the three-turn limit and the no-reward failure,
+    which is not a fourth setting and has no option key waiting for it. Such a
+    line still has to pair with something or the count check refuses the whole
+    event, so the spec names the PAGE keys it supplies instead -- one entry per
+    consumed line, each a tuple of the page keys that line's outcome is written
+    to, and the lines are taken in order AFTER the `options` list. A page named
+    here is not also looked up through `page_source`: the line IS the page.
+
     `table_option` and `dish_table` are the two shapes no pairing can reach at
     all; see their own docstrings above.
     """
@@ -242,6 +253,7 @@ class MirrorSpec:
     extra_options: Tuple[Tuple[str, str], ...] = ()
     pages: Tuple[str, ...] = ()
     page_source: Tuple[Tuple[str, str], ...] = ()
+    line_pages: Tuple[Tuple[str, ...], ...] = ()
     table_option: Optional[TableOption] = None
     dish_table: Optional[DishTable] = None
 
@@ -492,6 +504,46 @@ MIRRORS: Dict[str, MirrorSpec] = {
     "Amalgamator": MirrorSpec(
         "AmalgamatorMirror",
         options=("COMBINE_STRIKES", "COMBINE_DEFENDS")),
+
+    # --- acts 2 and 3, batch 4 -------------------------------------------
+    "StoneOfAllTime": MirrorSpec(
+        "StoneOfAllTimeMirror",
+        options=("LIFT", "PUSH"),
+        extra_options=(
+            ("pages.INITIAL.options.LIFT_LOCKED", "LIFT"),
+            ("pages.INITIAL.options.PUSH_LOCKED", "PUSH"),
+        )),
+    # The face's FOURTH line, `(all settings)`, is the wiki's rule bullet --
+    # the three-turn limit and the no-reward failure -- and it is not a fourth
+    # setting. `line_pages` gives it the two pages that rule describes.
+    "BattlewornDummy": MirrorSpec(
+        "BattlewornDummyMirror",
+        options=("SETTING_1", "SETTING_2", "SETTING_3"),
+        pages=("pages.VICTORY.description", "pages.DEFEAT.description"),
+        line_pages=(("pages.VICTORY.description", "pages.DEFEAT.description"),)),
+    # The option key is `...options.` + the pool's `EnergyColorName` upper-cased,
+    # so the scrape sees none of the five. Declared in the FACE's order, because
+    # each key is its own colour and the pairing is by NAME rather than by the
+    # order `CardPoolColorOrder` builds them in.
+    "ColorfulPhilosophers": MirrorSpec(
+        "ColorfulPhilosophersMirror",
+        options=("IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT"),
+        pages=("pages.DONE.description",),
+        page_source=(("pages.DONE.description", "IRONCLAD"),)),
+    "RanwidTheElder": MirrorSpec(
+        "RanwidTheElderMirror",
+        options=("POTION", "GOLD", "RELIC"),
+        extra_options=(
+            ("pages.INITIAL.options.POTION_LOCKED", "POTION"),
+            ("pages.INITIAL.options.RELIC_LOCKED", "RELIC"),
+        ),
+        pages=("pages.POTION.description", "pages.GOLD.description",
+               "pages.RELIC.description")),
+    "RelicTrader": MirrorSpec(
+        "RelicTraderMirror",
+        options=("TOP", "MIDDLE", "BOTTOM"),
+        pages=("pages.DONE.description",),
+        page_source=(("pages.DONE.description", "TOP"),)),
 }
 
 
@@ -848,6 +900,10 @@ class Dressed:
     table_pair: Optional[Tuple[str, str, str]] = None
     #: `(dish id, dressed name, dressed effect)` for a `dish_table`.
     dishes: Tuple[Tuple[str, str, str], ...] = ()
+    #: `page key -> the text of the face line that is not an option`, already
+    #: resolved from the mirror's `line_pages`. Those pages take their text
+    #: from here and never from `page_source`.
+    line_page_text: Dict[str, str] = field(default_factory=dict)
 
     def _paired(self) -> Tuple[Dict[str, Tuple[str, str]], Dict[str, Tuple[str, str]]]:
         """`(emitted, raw)` -- the face's lines matched to the keys they pair
@@ -939,6 +995,12 @@ class Dressed:
             out.append((f"{self.entry}.{key}.title", label))
             out.append((f"{self.entry}.{key}.description", outcome))
         for page in self.page_keys:
+            # A page a `line_pages` entry supplies takes that face line's text
+            # directly: the line IS the page, so there is no option to derive
+            # it from and `page_source` is not consulted for it.
+            if page in self.line_page_text:
+                out.append((f"{self.entry}.{page}", self.line_page_text[page]))
+                continue
             out.append((f"{self.entry}.{page}", _page_text(raw, page, sources)))
         if self.can_kill and self.face_event.loss:
             out.append((f"{self.entry}.loss", self.face_event.loss))
@@ -1340,12 +1402,24 @@ def build_plan() -> Plan:
             # list's.
             wanted_lines = (len(spec.table_option.choices)
                             if spec.table_option is not None else len(option_keys))
+            # A `line_pages` entry consumes one more face line that is not an
+            # option at all -- the wiki's rule-beside-the-options bullet -- so
+            # it counts toward what the face must supply.
+            wanted_lines += len(spec.line_pages)
             if wanted_lines != len(event.options):
                 plan.refusals.append(
                     f"{face.key}: {base} -- the mirror's {wanted_lines} option "
                     f"key(s) {option_keys} cannot be paired with the face's "
                     f"{len(event.options)} option line(s)")
                 continue
+
+            # The consumed lines are taken in order AFTER the option lines,
+            # and each one's OUTCOME is the text of every page it supplies.
+            line_page_text: Dict[str, str] = {}
+            for offset, pages_for_line in enumerate(spec.line_pages):
+                _, outcome = event.options[len(event.options) - len(spec.line_pages) + offset]
+                for page in pages_for_line:
+                    line_page_text[page] = outcome
 
             table_pair = None
             if spec.table_option is not None:
@@ -1385,6 +1459,7 @@ def build_plan() -> Plan:
                 can_kill=bool(info["can_kill"]),
                 extra_options=spec.extra_options,
                 page_source=spec.page_source,
+                line_page_text=line_page_text,
                 table_pair=table_pair,
                 dishes=dishes,
             ))
