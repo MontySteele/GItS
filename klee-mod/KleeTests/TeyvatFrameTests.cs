@@ -49,7 +49,17 @@ public class TeyvatFrameTests : IDisposable
     /// </summary>
     private readonly bool _enabled = TeyvatFrame.Enabled;
 
-    public void Dispose() => TeyvatFrame.Enabled = _enabled;
+    public void Dispose()
+    {
+        TeyvatFrame.Enabled = _enabled;
+        // EB-758's pins move `TeyvatMusic`'s three probes and populate its
+        // per-directory cache. Both are process-wide statics, so both are put
+        // back HERE rather than in the tests that moved them: a pin that
+        // leaked a fake probe would hand the next test a lookup answering out
+        // of a table that is not the engine's.
+        TeyvatMusic.ResetProbes();
+        TeyvatMusic.ClearCache();
+    }
 
     // ---------------------------------------------------------------
     // The acceptance condition the whole quarantine rests on.
@@ -345,6 +355,100 @@ public class TeyvatFrameTests : IDisposable
         Assert.Equal("res://teyvat/music/", TeyvatMusic.Root);
         Assert.Equal(new[] { ".ogg", ".mp3" }, TeyvatMusic.Extensions);
     }
+
+    // ---------------------------------------------------------------
+    // EB-758: the no-track path costs nothing and says nothing.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// EB-758, AND IT IS THE WHOLE ROW. The spike's deploy proved the arm's
+    /// control flow correct and its LOG wrong: `DirAccess.GetFilesAt` on the
+    /// absent `res://teyvat/music/mondstadt` is an `ERR_FAIL_COND_V_MSG`, so
+    /// every miss printed an engine ERROR with a 31-frame backtrace through
+    /// `TrackFor` → `Play` → `UpdateMusicPostfix`.
+    ///
+    /// The repair is a silent existence question in front of the enumeration,
+    /// and THE THING TO PIN IS THAT THE ENUMERATION IS NOT REACHED. Asserting
+    /// only that `TrackFor` returns null would pass against the defect — it
+    /// returned null before, noisily. So the enumerating probe counts its
+    /// calls and the assertion is that the count is zero.
+    /// </summary>
+    [Fact]
+    public void A_missing_directory_is_never_enumerated()
+    {
+        var listed = 0;
+        var probed = new List<string>();
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = path => { probed.Add(path); return false; };
+        TeyvatMusic.ListFiles = _ => { listed++; return Array.Empty<string>(); };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+
+        Assert.Equal(0, listed);
+        Assert.Equal(new[] { "res://teyvat/music/mondstadt" }, probed);
+    }
+
+    /// <summary>
+    /// The cache is the second half of the cost, and it covers the existence
+    /// question too. `UpdateMusic` runs on every room change; a probe per room
+    /// for an answer that cannot change inside a session is a cost, and before
+    /// this row it was a LOG LINE per act id per boot as well.
+    /// </summary>
+    [Fact]
+    public void The_absence_is_asked_once_per_act_and_then_remembered()
+    {
+        var probes = 0;
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => { probes++; return false; };
+        TeyvatMusic.ListFiles = _ => Array.Empty<string>();
+
+        for (var i = 0; i < 5; i++)
+        {
+            Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+        }
+
+        Assert.Equal(1, probes);
+
+        // A DIFFERENT act is a different question, and must not read the first
+        // one's answer: the entry is what the directory is named after.
+        Assert.Null(TeyvatMusic.TrackFor("Liyue"));
+        Assert.Equal(2, probes);
+    }
+
+    /// <summary>
+    /// The other side of the same switch, so the guard cannot be "return null
+    /// always" wearing a probe: with a directory present and a loadable file
+    /// in it, the lookup still finds the track, still prefers `.ogg` over
+    /// `.mp3`, and still refuses a name `ResourceLoader` says will not load.
+    /// </summary>
+    [Fact]
+    public void A_present_directory_still_resolves_its_track()
+    {
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => true;
+        // Deliberately NOT in preference order on disk, and with one loadable
+        // `.mp3` beside the `.ogg`, so the assertion is about the preference
+        // list and not about enumeration order.
+        TeyvatMusic.ListFiles = _ => new[] { "theme.mp3", "theme.ogg" };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        Assert.Equal("res://teyvat/music/mondstadt/theme.ogg",
+                     TeyvatMusic.TrackFor("Mondstadt"));
+
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.ResourceExists = path => path.EndsWith(".mp3", StringComparison.Ordinal);
+        Assert.Equal("res://teyvat/music/mondstadt/theme.mp3",
+                     TeyvatMusic.TrackFor("Mondstadt"));
+    }
+
+    // NOT PINNED HERE, and for the boundary's reason rather than for want of
+    // trying: that a throwing probe answers null instead of taking the run's
+    // music controller down with it. `TrackFor`'s catch clause calls
+    // `Log.Warn`, and `MegaCrit.Sts2.Core.Logging.Logger`'s static
+    // constructor calls `OS.GetCmdlineArgs()` — a Godot call, outside this
+    // suite's headless boundary. The `try`/`catch` is still there and still
+    // the right shape; only a deploy can watch it work.
 
     // ---------------------------------------------------------------
     // EB-759 / EB-760: the two seams the spike's deploy proved wrong.

@@ -411,6 +411,26 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   a fix. To confirm a live run is holding it, run `powercfg /requests` in an
   elevated shell — the harness's `python.exe` is listed under `SYSTEM:`, and
   `None.` there while a round is up means the request was not taken.
+- **The menu-ready wait is sized to the profile's run history (EB-763).** The
+  game rewrites the whole run-history store —
+  `%APPDATA%\SlayTheSpire2\steam\<id>\...\saves\history\`, **869 files / 23 MB**
+  when this was found, and it only grows — to the Steam remote store on every
+  boot, so boot time is a function of how much has been played and the 180 s
+  base is a fresh-profile number. Four of the nine batches of the Teyvat
+  spike's proof round died on `menu never became ready within 180s` with the
+  game alive and the bridge already answering. `Session.setup` now counts the
+  store before the launch, prints one `WARN lane <n>: the profile's
+  run-history store holds N files (M MB) …` naming both, and waits
+  **180 s + 1 s per 5 files, capped at 900 s** (`soak_shape.menu_timeout_for`,
+  pinned in `tier0/tests/test_understudy_soak.py`). The rate is justified from
+  the stall itself: boot to menu is ~50 s fresh and the 869-file batches ran
+  past 180 s, so the store already cost more than 0.15 s/file; 0.2 s/file is
+  that lower bound plus about a third. Today's store asks for 354 s, a hung
+  game still fails, and the cap (reached at 3,600 files) is what keeps this a
+  watchdog rather than an off switch. **Nothing in the harness deletes,
+  prunes, or moves the store** — it is the owner's play history and it is read
+  and nothing else; a run that needs a clean profile uses a lane, which gets
+  its own `user://` tree.
 - **`--read-workers N`: the model half, and it is where the round is.**
   `KLEESPARK-R2` is the first pipelined round with a wall clock, and it says
   plainly what the funnel is bound by: six boards, 372 s total — **stage 89 s

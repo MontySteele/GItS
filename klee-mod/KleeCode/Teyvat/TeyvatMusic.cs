@@ -41,6 +41,15 @@ namespace KleeMod.Teyvat;
 /// return immediately -- which is exactly what a skeleton has to be able to
 /// prove.
 ///
+/// AND IT RETURNS SILENTLY NOW (`EB-758`). The first cut asked the absence
+/// question with `DirAccess.GetFilesAt`, which is an `ERR_FAIL_*_MSG` on a
+/// missing directory: the arm's control flow fell through as designed and the
+/// engine logged an ERROR with a 31-frame backtrace anyway. The lookup leads
+/// with `DirAccess.DirExistsAbsolute` instead, which answers false without
+/// printing, so no Godot node and no logging engine call is reached at all on
+/// the no-track path. `DirectoryExists` carries the reasoning and the Godot
+/// source both claims rest on.
+///
 /// WHERE THE FILE COMES FROM: `docs/current/operations/media.md` sec.1 puts
 /// [USER]'s tracks at `media/out/music/&lt;act-or-scene&gt;/&lt;track&gt;.ogg`, gitignored,
 /// one ledger row each in `media/MUSIC.tsv`. Its sec.7 leaves the pck path to
@@ -75,6 +84,82 @@ public static class TeyvatMusic
     /// session.</summary>
     private static readonly Dictionary<string, string?> Cache = new(StringComparer.Ordinal);
 
+    // ---------------------------------------------------------------
+    // EB-758: THE THREE ENGINE QUESTIONS, BEHIND DELEGATES.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// EB-758. **`DirAccess.GetFilesAt` PRINTS when the directory is absent**,
+    /// and absent is the normal case on a tree with no track packaged. Godot 4's
+    /// `DirAccess::get_files_at` is
+    /// `Ref&lt;DirAccess&gt; da = DirAccess::open(p_path);`
+    /// `ERR_FAIL_COND_V_MSG(da.is_null(), PackedStringArray(), vformat("Couldn't open directory at path \"%s\".", p_path));`
+    /// — an `ERR_FAIL_*_MSG` macro, so a miss is an engine ERROR with a full
+    /// backtrace. That is exactly the line the spike proof recorded
+    /// (`review/records/teyvat-spike-proofs-2026-09-15.md`, item 4):
+    /// `ERROR: Couldn't open directory at path "res://teyvat/music/mondstadt"`,
+    /// 31 frames through `TrackFor` → `Play` → `UpdateMusicPostfix`.
+    ///
+    /// **`DirAccess.DirExistsAbsolute` is the silent question.** Its body is
+    /// `Ref&lt;DirAccess&gt; d = DirAccess::create_for_path(p_dir); return d->dir_exists(p_dir);`
+    /// — no `ERR_*` macro on the path, so a false answer costs a bool and no
+    /// log line. It was chosen over the other candidate, `ResourceLoader.Exists`
+    /// on a probe path, for two reasons: `Exists` needs a FILE NAME and the
+    /// ledger owns the track's name (this file may not guess it — see
+    /// `TrackFor`'s header), so a probe path would be a guess dressed as a
+    /// check; and `DirExistsAbsolute` asks the question the code actually has,
+    /// "is there a directory here to enumerate". The class reference documents
+    /// neither method's absent-directory behaviour, so the answer is read off
+    /// `core/io/dir_access.cpp` rather than off the docs page.
+    ///
+    /// **The cache was already in front of this and was not enough.** It bounds
+    /// the noise to one ERROR per act id per boot rather than one per
+    /// `UpdateMusic`; the guard takes it to zero, which is what the row's
+    /// acceptance line ("logs nothing from the music patches across a
+    /// three-fight soak") asks for.
+    ///
+    /// The delegates exist so the decision can be pinned HEADLESSLY. `DirAccess`
+    /// and `ResourceLoader` are outside `KleeTests`' headless boundary
+    /// (`KleeTests.csproj`: GodotSharp is copied so `sts2` resolves and nothing
+    /// there may CALL it), so the only way a suite can assert "the no-track path
+    /// returns before touching any Godot node" is to hand `TrackFor` a probe it
+    /// can watch. Default-wired to the engine; a test that moves them restores
+    /// them with <see cref="ResetProbes"/>.
+    /// </summary>
+    public static Func<string, bool> DirectoryExists { get; set; } = GodotDirectoryExists;
+
+    /// <summary>The enumeration, reached only once <see cref="DirectoryExists"/>
+    /// has said yes. See that member for why the guard sits in front of it.</summary>
+    public static Func<string, string[]> ListFiles { get; set; } = GodotListFiles;
+
+    /// <summary>Whether a named resource will actually load. Silent on absence
+    /// by construction — `ResourceLoader::exists` returns a bool and prints
+    /// nothing — so this one needed no repair; it is a delegate only so one
+    /// headless pin can reach the whole lookup.</summary>
+    public static Func<string, bool> ResourceExists { get; set; } = GodotResourceExists;
+
+    // Static methods rather than lambdas assigned inline, so the three defaults
+    // are named things a stack trace can show.
+    private static bool GodotDirectoryExists(string path) => DirAccess.DirExistsAbsolute(path);
+
+    private static string[] GodotListFiles(string path) => DirAccess.GetFilesAt(path);
+
+    private static bool GodotResourceExists(string path) => ResourceLoader.Exists(path);
+
+    /// <summary>Put the three probes back on the engine. For tests only; the
+    /// mod never calls it.</summary>
+    public static void ResetProbes()
+    {
+        DirectoryExists = GodotDirectoryExists;
+        ListFiles = GodotListFiles;
+        ResourceExists = GodotResourceExists;
+    }
+
+    /// <summary>Drop the memoised per-directory answers. For tests only: inside
+    /// a session the answer cannot change, which is the whole point of the
+    /// cache.</summary>
+    public static void ClearCache() => Cache.Clear();
+
     /// <summary>
     /// The packaged track for an act entry, or null if the pack has none.
     ///
@@ -103,7 +188,12 @@ public static class TeyvatMusic
         string? found = null;
         try
         {
-            var names = DirAccess.GetFilesAt(dir);
+            // EB-758. THE GUARD, AND IT IS THE WHOLE FIX. `GetFilesAt` on a
+            // missing directory is a logged engine ERROR with a backtrace, and
+            // a missing directory is the normal case until a track is packaged.
+            // `DirExistsAbsolute` asks the same question silently; see the
+            // member's header for the Godot source both claims rest on.
+            var names = DirectoryExists(dir) ? ListFiles(dir) : null;
             if (names != null)
             {
                 Array.Sort(names, StringComparer.Ordinal);
@@ -117,7 +207,7 @@ public static class TeyvatMusic
                         // trustworthy question about what will actually load.
                         var candidate = dir + "/" + name;
                         if (name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)
-                            && ResourceLoader.Exists(candidate))
+                            && ResourceExists(candidate))
                         {
                             found = candidate;
                             break;
