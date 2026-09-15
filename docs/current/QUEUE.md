@@ -143,7 +143,7 @@ true of the work as a sequencing fact.
 **R273 (2026-09-14) ruled the nation mapping at both defaults:** act 2 is Natlan or
 Inazuma, act 3 is Fontaine or Sumeru; act 1 was confirmed Mondstadt or Liyue; the
 Abyss is reserved as the act-4 face; Nod-Krai and Snezhnaya are later faces
-(`EB-752`). The packet is in `review/ruled/`.
+(`EB-757`). The packet is in `review/ruled/`.
 
 **Nothing is open in this section.**
 
