@@ -132,3 +132,44 @@ Crab ↔ La Signora, a Harbinger, top of the boss gallery's own allocation).
 - **Knowledge Demon ↔ Shouki no Kami** — the enemy-entity name is a non-playable weekly-boss entry, but the underlying model (Wanderer) is a playable roster character; the boss gallery flags this as a curation-only decision, not a mechanics one, and it collides with Act 2's own contention (Guardian of Apep's Oasis is claimed by both this slot and Kaiser Crab's slot-A alt) (`candidates.md:305-307`, `326-327`).
 
 **Other things worth carrying into the pick:** several Hive events' single best-ranked variant sits outside the six act-2/3 candidate nations (Colossal Flower, Potion Courier, Relic Trader, Room Full of Cheese, The Future of Potions?, The Lantern Key, This or That?, Welcome to Wongo's all rank a Mondstadt or Liyue variant first) — this is because the event gallery was drafted before a nation constraint existed (`event-conversion-gallery.md:1`), not evidence against Sumeru/Inazuma; their in-scope alternates are still solidly loose-to-literal and are what's recorded above as "top-in-scope." Several of these events also carry pre-existing `[USER] decision needed` flags of their own (Colorful Philosophers, Doll Room, Ranwid, Relic Trader, Welcome to Wongo's) that are unrelated to nation and are not re-litigated here.
+
+## 7. Nod-Krai and Snezhnaya as NATIVE columns (EB-757, scored 2026-09-15)
+
+The "Snezhnaya" column in §2.1 was scored before either nation had an atlas
+and is Fatui-bodied throughout (Oprichniki, Frost Operative, La Signora):
+under the §7.1 rule those are pan-national and score zero, so that column
+is really a Fatui palette column. This section scores the two nations on
+their nation-exclusive families only, from
+`docs/current/dossiers/remap/atlas-nod-krai.md` and `atlas-snezhnaya.md`
+(re-verified 2026-09-15; no numeric statlines were recoverable, so every
+reading is qualitative). Legend as in §2.1; a Hive slot not listed scored
+nothing for either nation.
+
+| Slot | Nod-Krai (native) | Snezhnaya (native) |
+|---|---|---|
+| Bowlbug (Rock+Silk), easy | — | Chimeric Armored Beast (P; kit unfetched) |
+| Exoskeletons ×3, easy | Radiant Antelope/Bladehorn/Glacial Wolf pack (P) | Volkodlak Raider pack (S; the line ships squad-shaped) |
+| Tunneler, easy | — | Chimeric Burrowbeast (P; silhouette-literal, kit unfetched) |
+| Chompers ×2, hard | Wilderness Hunter + Wilderness Exile (P; Grief-Stricken has no analogue here) | Volkodlak Basher pair (P) |
+| Hunter Killer, hard | Radiant Glacial Wolf (P; Radiant Cocoon ↔ Tender) | Volkodlak Raider (S; evades "by instinct alone" ↔ Puncture 7x3) |
+| Louse Progenitor, hard | — | Rugged Elder Leshy (P; no gimmick, a plain damage check) |
+| Mytes ×2, hard | — | Juvenile Tree Segment ×2 (P) |
+| Ovicopter+eggs, hard | Knuckle Duckle + Stamping Devices (S; a duck that lays its own sub-bodies) | — |
+| Decimillipede, elite | — | Unbound Remnant (P, kit unfetched; a self-reassembling body is the FIRST candidate in any nation for Reattach, see §6) |
+| Infested Prism, elite | Frostnight Scion (S; Gloomveiled ↔ Vital Spark, both "your normal tool does not work") | Glaciomancer (P; silhouette without the Ice Coffin) |
+| Knowledge Demon (boss) | Frostnight Herra (X; a crystal boss keyed to the player's most-used tool, no mechanical read) | — |
+| Kaiser Crab (boss) | — | — (Winged Lion is one body; the Crab is two) |
+| Ancients (Orobas, Pael, Tezcatara, Darv) | — | — |
+| Events (25) | 0 (no gallery voice drafted) | 0 (no gallery voice drafted) |
+
+**Totals:** Nod-Krai 5 enemy slots (2 S, 3 P), 0 boss, 0 Ancient, 0 events.
+Snezhnaya 9 enemy slots (2 S, 7 P), 0 boss, 0 Ancient, 0 events.
+
+**Reading.** Neither native column can outrank the ruled pair (R273:
+Natlan+Inazuma) under §7.1, because both carry nation only in the common
+enemy column. As a THIRD Hive face, Snezhnaya reads better than Nod-Krai
+here: nine slots including the only Reattach candidate in the exercise,
+and the Volkodlak line's squad shape matches the Hive's pack encounters.
+Nod-Krai's two strong Hive slots are both bodies the Glory table (act 3
+§7) uses better. Carried, not decided: no pick is posed until a third face
+is scheduled.

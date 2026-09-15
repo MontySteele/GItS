@@ -22,21 +22,21 @@ see Sources):
 - **Frostnight Scion** — an "Elemental Lifeforms"-adjacent family of
   amorphous elemental-crystal bodies, billed ELITE, one per element.
   VERIFIED to exist and to carry the Gloomveiled enhanced-state/immunity
-  gimmick. Variant count is UNVERIFIED: game8 names seven location pages
-  (Icy Crystal, Tangled Vines, Blazing Brilliance, Gleaming Charge, Gilded
-  Sunshard, Surging Currents, Veiled Cloudchaser) but a direct Fandom search
-  only turned up six elemental variants (Cryo/Pyro/Electro/Dendro/Hydro/
-  Geo) plus a separate "Frostnight Herra" page whose relationship to the
-  family — an Anemo variant, or something else — is unconfirmed.
+  gimmick, six elemental variants (Cryo/Pyro/Electro/Dendro/Hydro/Geo).
+  **Frostnight Herra** is NOT a seventh variant: it is a separate Normal
+  Boss (6.1 "Luna II", October 22, 2025) with its own Gloomveiled rule,
+  written up in §2.
 - **Radiant Beast / Radiant Mutant** — a Mystical-Beasts group of
   moon-touched animals (Antelope, Bladehorn, Glacial Wolf, Lunapod as
   overworld bodies; Moonfly and Moongecko as named world bosses). VERIFIED
   via game8 faction guide; shared gimmick is the Radiant Cocoon debuff.
-- **Shadow of the Wild Hunt** — a small Abyss-adjacent faction unique to
+- **Wasteland Wild Hunt** (also "Wilderness Ghouls"; an earlier draft of
+  this file called it "Shadow of the Wild Hunt", which is not a game name)
+  — a sub-family of the Abyss faction **The Wild Hunt**, unique to
   Nod-Krai's "frozen wilderness," two bodies (Wilderness Hunter, Wilderness
-  Exile). VERIFIED to exist and to carry a fixed combo plus a
-  second-life/Grief-Stricken mechanic; individual move damage numbers are
-  UNVERIFIED (no numeric statline page was fetchable).
+  Exile). VERIFIED to exist and to carry a fixed combo plus the
+  Grief-Stricken max-HP-attrition mechanic; individual move damage numbers
+  are UNVERIFIED (no numeric statline page was fetchable).
 - **Knuckle Duckle** — a unique named world boss (Aino's invention, an
   iron-clad mechanical duck), not a family with variants. VERIFIED.
 - Sigurd (Local Legend, Blue Amber Lake) and Crab Tsar (Local Legend,
@@ -68,6 +68,18 @@ rock-shard body for Geo, a flowing water-glass form for Hydro).
   pages returned: Icy Crystal, Blazing Brilliance, Gleaming Charge, Tangled
   Vines, Surging Currents, Gilded Sunshard).
 
+### Frostnight Herra (Normal Boss, 6.1)
+Silhouette UNVERIFIED beyond family resemblance to the Scions (a crystal
+lifeform). Not a Scion variant.
+- behavior: Its Gloomveiled rule differs from the Scions': on entering the
+  state it becomes invulnerable to whichever element has dealt it the most
+  damage so far, so the answer is to switch damage type rather than to
+  hit it with a fixed element. Intent vocabulary: enhanced attack under a
+  shield keyed to the PLAYER'S most-used tool / vulnerable window on a
+  switch. Numbers UNVERIFIED.
+- Sources: game8.co archive 557056; hoyolab.com article 42240714 (search
+  snippets; neither fetched directly).
+
 ### Radiant Beast family (Radiant Antelope / Bladehorn / Glacial Wolf / Lunapod)
 Silhouette: "magical beasts that have undergone unique evolutions due to
 age-long immersion in the ancient moon's power" (game8); normal Teyvat
@@ -97,24 +109,29 @@ Silhouette UNVERIFIED beyond naming.
 - Sources: ldshop.gg summary, cross-checked against game8.co archives
   550406; no per-boss page independently fetched.
 
-### Shadow of the Wild Hunt — Wilderness Hunter / Wilderness Exile
+### Wasteland Wild Hunt — Wilderness Hunter / Wilderness Exile
 Silhouette UNVERIFIED beyond "abyss enemies that stalk the frozen
 wilderness when the pitch-dark mist rolls in" (game8); dual-axe wielding
 per the move names implies a humanoid/beast-humanoid frame.
 - behavior: Wilderness Hunter runs a fixed three-beat melee combo —
   **Right-Hand Cleave → Left-Hand Claw Smash → Dual-Axe Spinning Slash** —
   escalating across the string. On being reduced to 0 HP it (like all Wild
-  Hunt bodies) enters a **Grief-Stricken state** instead of dying: it gains
-  additional HP and keeps fighting, a scripted second life. **Ascendant
-  Gleam** is the player's tool to shortcut or finish that second phase.
-  Intent vocabulary: fixed melee combo (three escalating beats) / an
-  HP-based phase-transition that looks like a kill but isn't / a
-  specific-tool finisher window.
+  Hunt bodies) enters a **Grief-Stricken state** instead of dying: it is
+  paralysed for about 10 s, damage dealt in that window permanently
+  shrinks its max HP (a grey segment draining right to left), and it then
+  heals to its new, smaller max and resumes. Not a flat HP gain: a second
+  life whose size the player sets by hitting it while it is down.
+  **Ascendant Gleam** is the player's tool to shortcut or finish that
+  second phase. Intent vocabulary: fixed melee combo (three escalating
+  beats) / an HP-based phase-transition that looks like a kill but isn't /
+  a punish-the-downed window whose damage decides the second phase.
 - Sources: game8.co archives 550407.
 
 ### Knuckle Duckle (unique named boss, mechanized — Aino's invention)
 Silhouette: "a massive, iron-clad avian brawler" — a giant scrap-metal duck
-construct built by the playable character Aino, distinct from both the
+construct associated with the playable character Aino (it drops her
+ascension material; "built by Aino" is lore framing no source states
+directly), distinct from both the
 Fatui Landcruiser line and the beast families above.
 - behavior: Resists all forms of damage by default. Periodically enters
   **Duckstruction Mode** (heavier attacks) and **summons five Ducks/Stamping
@@ -135,10 +152,10 @@ Fatui Landcruiser line and the beast families above.
   `atlas.md`).
 - **ELITE** — Frostnight Scion (explicitly billed ELITE by game8); the
   Radiant Beast normals sit at a mid weight, UNVERIFIED which side of the
-  normal/elite line the game draws them on; Shadow of the Wild Hunt reads
+  normal/elite line the game draws them on; the Wasteland Wild Hunt reads
   elite-weight given the Grief-Stricken second-life mechanic.
-- **BOSS** — Knuckle Duckle; Radiant Moonfly and Moongecko (named world
-  bosses within the Radiant Beast family).
+- **BOSS** — Knuckle Duckle; Frostnight Herra; Radiant Moonfly and
+  Moongecko (named world bosses within the Radiant Beast family).
 - **MECHANIZED** — the Fatui Landcruiser line (already in `atlas.md`);
   Knuckle Duckle is a second, DIFFERENT mechanized body (Aino's, not Fatui)
   and should not be conflated with it for pairing purposes.
@@ -164,12 +181,12 @@ Fatui Landcruiser line and the beast families above.
   trigger for Aeonglass) rather than a single burst answer.
 - `Test Subject (Act 3 / Glory BOSS, 3 phases 100/200/300 HP; Adaptable:
   revives into the next phase; P2 Painful Stabs shuffles Wounds on unblocked
-  damage; P3 gains Intangible every other turn) — §2.3` ↔ **Shadow of the
+  damage; P3 gains Intangible every other turn) — §2.3` ↔ **Wasteland
   Wild Hunt (Wilderness Hunter, boss-scaled)** (strong) — Grief-Stricken is
   the same shape as Adaptable: the body appears to die, doesn't, and comes
-  back changed rather than ending the fight, and Ascendant Gleam (the tool
-  that shortcuts that second life) reads onto whatever finisher-punish the
-  sim already models for the later phases. The escalating fixed combo
+  back changed rather than ending the fight; the downed window in which
+  damage shrinks the next phase's max HP even reads onto the phase HP
+  ladder (100/200/300) as a phase the player can pre-size. The escalating fixed combo
   (Right-Hand Cleave → Left-Hand Claw Smash → Dual-Axe Spinning Slash) maps
   cleanly onto a phase's repeating attack string.
 - `Queen + Torch Head Amalgam (Act 3 / Glory BOSS; Queen 400 HP A8 419 +
@@ -191,9 +208,11 @@ Fatui Landcruiser line and the beast families above.
 - **Radiant Beast family (Antelope/Bladehorn/Glacial Wolf/Lunapod/Moonfly/
   Moongecko)** — exclusive to Nod-Krai (verified; tied to "the ancient
   moon's power," a region-specific lore hook).
-- **Shadow of the Wild Hunt** — exclusive to Nod-Krai as currently shipped
-  (verified for 6.0); UNVERIFIED whether it stays confined here or is an
-  early piece of a wider Abyss expansion that later reappears elsewhere.
+- **Wasteland Wild Hunt** — exclusive to Nod-Krai as currently shipped
+  (verified for 6.0); its parent faction The Wild Hunt is an Abyss faction,
+  so a later appearance elsewhere would not be surprising.
+- **Frostnight Herra** — exclusive to Nod-Krai (6.1 Normal Boss; verified
+  by search snippet).
 - **Knuckle Duckle** — exclusive to Nod-Krai (a named, one-off boss tied to
   the character Aino; verified).
 - **Fatui Skirmishers, Oprichniki, Landcruisers** — NOT exclusive (pan-
@@ -212,8 +231,8 @@ pages); 546862 (Knuckle Duckle boss guide); ldshop.gg "All New Enemies in
 Nod-Krai: Genshin Impact 6.0" (cross-check, Moonfly line, Oprichniki
 Thunderblitz Druzhina naming); domain-restricted WebSearch of
 genshin-impact.fandom.com for "Frostnight Scion Gloomveiled State abilities
-moves attack" (six elemental variants confirmed; a separate "Frostnight
-Herra" page found, relationship UNVERIFIED) and for Sternshield Crab
+moves attack" (six elemental variants confirmed; Frostnight Herra is a
+separate 6.1 Normal Boss, see §2) and for Sternshield Crab
 cross-checks; hoyolab.com article 41401272 (via WebSearch snippet, not
 independently fetched); docs/current/research/act2-act3-roster-research.md
 §§1.1/1.2/2.1/2.2/2.3; docs/current/dossiers/remap/atlas.md:337-478 (the
@@ -224,5 +243,13 @@ returned HTTP 402 this session; all Fandom-sourced material above is
 secondhand, via a domain-restricted WebSearch snippet or a mirroring page
 (game8.co, ldshop.gg, hoyolab.com). No numeric statline for any Nod-Krai
 native body was independently verifiable — reasoning above is qualitative,
-and a future pass with working Fandom access should re-verify the
-seven-vs-six Frostnight Scion variant count and pull real move numbers.
+and a future pass with working Fandom access should pull real move numbers.
+
+RE-VERIFIED 2026-09-15 (EB-757; WebSearch snippets of the Fandom index plus
+game8 and HoYoLAB; direct Fandom fetches still 402): the Scion family and
+Gloomveiled rule, the Radiant Beast family, and Knuckle Duckle's
+Duckstruction Mode and hostile-summons rule all CONFIRMED. CORRECTED in
+this pass: the Wild Hunt sub-family's name ("Wasteland Wild Hunt",
+genshin-impact.fandom.com/wiki/Wasteland_Wild_Hunt), the Grief-Stricken
+mechanic (max-HP attrition, same page), and Herra's status (separate boss,
+game8 archive 557056). Still unverifiable: every numeric statline.

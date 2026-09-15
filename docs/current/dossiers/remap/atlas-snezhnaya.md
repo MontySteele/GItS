@@ -43,9 +43,13 @@ name each), with a caveat on internal taxonomy for the first:
   Burrowbeast, Horned Bear, Winged Elephant, and the named boss Winged
   Lion. VERIFIED, and the best-documented family here — Winged Lion has a
   full fetched moveset (see below).
-- UNWRITTEN below, too thin to verify: a second world boss, **Immortal
-  Construct** (named in one aggregator summary only); the Fatui's own
-  Snezhnaya-native elite rung, already in `atlas.md`.
+- NAMED BUT NOT WRITTEN UP (confirmed to exist by the 2026-09-15
+  re-verification, kits unfetched): **Winged Sylph** (flying wind-spirit
+  bodies tied to the Vila clan), **Cryo Wraith**, and **Unbound Remnant**
+  (a self-reassembling Chimaera boss-weight body, probably belonging under
+  Aberrant Chimeric Monsters). Too thin to verify at all: a second world
+  boss, **Immortal Construct** (named in one aggregator summary only); the
+  Fatui's own Snezhnaya-native elite rung, already in `atlas.md`.
 
 ## 2. Variants
 
@@ -57,9 +61,11 @@ fae." All four are native to Snezhnaya's mountain ranges (Svetloledovka
 named as one Glacial Warden location).
 - behavior: The shared, verified mechanic is the **Ice Coffin**: "Fae will
   entomb themselves in an Ice Coffin when they are threatened" — a full
-  damage-immunity/retreat state, not a partial shield, broken (and the body
-  defeated in the same stroke) by "elements that can react to Cryo."
-  Individual move lists beyond this defensive beat are UNVERIFIED — no
+  damage-immunity/retreat state, not a partial shield, weakened
+  specifically by the Stellar Glimmer reaction and "more easily broken with
+  Electro or Anemo attacks" (Fandom, via search snippet), the break
+  defeating the body in the same stroke. Narrower than "any reaction with
+  Cryo": two named elements and one named reaction. Individual move lists beyond this defensive beat are UNVERIFIED — no
   per-body page was fetched. Intent vocabulary (partial): a hard
   invulnerability/retreat state entered under threat, cleared only by the
   correct reaction — the Fatui Skirmisher shield's logic taken to its
@@ -242,3 +248,13 @@ membership; (2) the Fae-line taxonomy split between "Fae of Crystalline
 Flesh" (game8's combat-faction name) and "Snegovik / Snowland Fae" (the
 Fandom lore-group name) is unresolved — fetch `Category:Snowland_Fae`
 directly once access works to settle whether these are one listing or two.
+
+RE-VERIFIED 2026-09-15 (EB-757; WebSearch snippets of the Fandom index plus
+game8; direct Fandom and Honey Hunter fetches still refused): the Fae of
+Crystalline Flesh sub-group, Snegovik as "one of six common types of
+Snowland Fae", every Volkodlak body as an Elite Enemy under Mystical
+Beasts, and Winged Lion's Thundercall/Galeforce rule all CONFIRMED.
+CORRECTED: the Ice Coffin break condition (Stellar Glimmer, Electro,
+Anemo). ADDED to §1 by name only: Winged Sylph, Cryo Wraith, Unbound
+Remnant. Still unverifiable: every numeric statline and the four Chimeric
+normals' kits.
