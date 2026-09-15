@@ -18,7 +18,7 @@ namespace KleeMod.Teyvat.Events.Sumeru;
 /// base event's clauses are in <see cref="SelfHelpBookMirror"/>, written
 /// once and shared by every nation that dresses this event; this class
 /// is a NAME. `ModelDb.GetEntry` slugifies it into
-/// `SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED`, `EventModel.Title` and `InitialDescription`
+/// `SIX_WEEKS_TO_A_BETTER_YOU_ILLUMINATED`, `EventModel.Title` and `InitialDescription`
 /// derive from that, and `EventModel.OptionKey` slugifies
 /// `GetType().Name` -- so every loc key the mirror asks for is already
 /// this dressing's. The rows are in `TeyvatLoc.GeneratedEventRows`.
