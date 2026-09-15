@@ -27,6 +27,76 @@ namespace KleeMod.Teyvat;
 internal static class TeyvatLoc
 {
     /// <summary>
+    /// THE CONVERTED EVENT'S ROWS, in the `events` table
+    /// (`EventModel.LocTable`), under `Id.Entry`-derived keys exactly as the
+    /// base game's are. Flavour is
+    /// `docs/current/dossiers/content/event-conversion-gallery.md` variant 1;
+    /// the two option DESCRIPTIONS and the `.loss` line are the base event's
+    /// strings verbatim, markup and `{Damage}` included, because they state
+    /// mechanics and nothing mechanical is authored in this conversion.
+    ///
+    /// AN OPTION KEY IS A PREFIX, NOT A STRING, and getting that wrong was
+    /// EB-765. `EventOption`'s `(eventModel, onChosen, textKey, hoverTips)`
+    /// constructor does NOT read the key it is handed -- it reads
+    /// `eventModel.GetOptionTitle(textKey)` and `GetOptionDescription(textKey)`,
+    /// which are `LocString.GetIfExists(LocTable, textKey + ".title")` and
+    /// `... + ".description"` (`EventModel.cs:216-224`). `GetIfExists` returns
+    /// NULL for a key that is not in the table, and the constructor's last act
+    /// is `AddLocVars`, whose first line is
+    /// `eventModel.Owner?.Character.AddDetailsTo(Description)` --
+    /// `CharacterModel.AddDetailsTo` then calls `str.Add(...)` on that null and
+    /// throws. The spike wrote ONE flat row per option
+    /// (`...options.TASTE_THE_RACKS` = "Taste the Racks"), so both descriptions
+    /// were null, the first `new EventOption(...)` threw, `GenerateInitialOptions`
+    /// never returned, and the page opened with `body: null` and `options: []`
+    /// (`review/records/teyvat-spike-reproof-2026-09-15.md` item 2).
+    ///
+    /// The base event's own rows, read out of `SlayTheSpire2.pck`, are the
+    /// proof of the shape: `ROOM_FULL_OF_CHEESE.pages.INITIAL.options.GORGE.title`
+    /// AND `.description`, never a bare `...options.GORGE`.
+    ///
+    /// `.loss` is optional to the engine -- `NRunHistory` asks
+    /// `LocString.GetIfExists` and falls back to `DEFAULT_EVENT_LOSS_MESSAGE`
+    /// -- but Haul Out the Back Wall can kill, so the base event has one and so
+    /// does this. Its `{character}` var comes from `CharacterModel.AddDetailsTo`
+    /// and `{event}` from the run-history screen itself.
+    /// </summary>
+    internal static readonly IReadOnlyDictionary<string, string> EventRows =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["SPRINGVALE_CHEESE_CELLAR.title"] = "The Springvale Cheese Cellar",
+            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.description"] =
+                "A collapsed stair below Springvale opens onto a dairy cellar the "
+              + "Guild's commission board never got around to delisting. Wheels of "
+              + "Mondstadt cheese sit rack on rack, gold-rinded and humming with "
+              + "age, and the slip in your hand says only: inventory it. Behind the "
+              + "furthest rack, something older than the racks is sweating brine.",
+            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.TASTE_THE_RACKS.title"] =
+                "Taste the Racks",
+            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.TASTE_THE_RACKS.description"] =
+                "Choose [blue]2[/blue] of [blue]8[/blue] random [gold]Common[/gold] "
+              + "cards to add to your [gold]Deck[/gold].",
+            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.HAUL_OUT_THE_BACK_WALL.title"] =
+                "Haul Out the Back Wall",
+            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.HAUL_OUT_THE_BACK_WALL.description"] =
+                "Lose [red]{Damage}[/red] HP. Obtain the [gold]Chosen Cheese[/gold].",
+            // The spike's flavour, unchanged: this row was never part of the
+            // defect and a text edit here would be an unasked design call.
+            ["SPRINGVALE_CHEESE_CELLAR.pages.TASTE_THE_RACKS.selectionScreenPrompt"] =
+                "Choose 2 wheels",
+            ["SPRINGVALE_CHEESE_CELLAR.pages.TASTE_THE_RACKS.description"] =
+                "You eat your way along the racks and carry off the two that were "
+              + "worth the trip.",
+            ["SPRINGVALE_CHEESE_CELLAR.pages.HAUL_OUT_THE_BACK_WALL.description"] =
+                "The back wall comes down on your shoulders and the spore-thick air "
+              + "goes into your lungs. Behind it, gold-rinded and perfect, waits "
+              + "the wheel the Guild never listed.",
+            ["SPRINGVALE_CHEESE_CELLAR.loss"] =
+                "{character} was buried under the back wall of the "
+              + "[gold]{event}[/gold].",
+        };
+
+    /// <summary>
     /// Merge the arm's rows. A no-op with the arm off.
     ///
     /// CALLED FROM THE `LocManager.Initialize` POSTFIX (`KleeMod.cs`'s
@@ -82,37 +152,15 @@ internal static class TeyvatLoc
             LocManager.Instance.GetTable("monsters").MergeWith(monsters);
             LocManager.Instance.GetTable("intents").MergeWith(intents);
 
-            // The converted event's own rows. Its table is `EventModel.LocTable`,
-            // which is "events"; the keys are `Id.Entry`-derived exactly as the
-            // base game's are. Text is
-            // `docs/current/dossiers/content/event-conversion-gallery.md`
-            // variant 1, verbatim.
-            LocManager.Instance.GetTable("events").MergeWith(new Dictionary<string, string>
-            {
-                ["SPRINGVALE_CHEESE_CELLAR.title"] = "The Springvale Cheese Cellar",
-                ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.description"] =
-                    "A collapsed stair below Springvale opens onto a dairy cellar the "
-                  + "Guild's commission board never got around to delisting. Wheels of "
-                  + "Mondstadt cheese sit rack on rack, gold-rinded and humming with "
-                  + "age, and the slip in your hand says only: inventory it. Behind the "
-                  + "furthest rack, something older than the racks is sweating brine.",
-                ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.TASTE_THE_RACKS"] =
-                    "Taste the Racks",
-                ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.HAUL_OUT_THE_BACK_WALL"] =
-                    "Haul Out the Back Wall",
-                ["SPRINGVALE_CHEESE_CELLAR.pages.TASTE_THE_RACKS.selectionScreenPrompt"] =
-                    "Choose 2 wheels",
-                ["SPRINGVALE_CHEESE_CELLAR.pages.TASTE_THE_RACKS.description"] =
-                    "You eat your way along the racks and carry off the two that were "
-                    + "worth the trip.",
-                ["SPRINGVALE_CHEESE_CELLAR.pages.HAUL_OUT_THE_BACK_WALL.description"] =
-                    "The back wall comes down on your shoulders and the spore-thick air "
-                    + "goes into your lungs. Behind it, gold-rinded and perfect, waits "
-                    + "the wheel the Guild never listed.",
-            });
+            // The converted event's own rows (see `EventRows`). Copied rather
+            // than passed, because `MergeWith` takes a concrete `Dictionary`
+            // and the table itself stays read-only to everything else.
+            LocManager.Instance.GetTable("events")
+                .MergeWith(new Dictionary<string, string>(EventRows, StringComparer.Ordinal));
 
             Log.Info($"[{KleeMod.ModId}] teyvat: loc merged ({monsters.Count} dressed enemy "
-                   + $"name(s), {intents.Count} dressed intent word(s)).");
+                   + $"name(s), {intents.Count} dressed intent word(s), {EventRows.Count} "
+                   + $"converted-event row(s)).");
         }
         catch (Exception e)
         {

@@ -124,6 +124,38 @@ public static class TeyvatFrame
         new Dictionary<(string, string), string>();
 
     /// <summary>
+    /// THE EVENT-PORTRAIT TABLE: a converted event's `Id.Entry` -> the image
+    /// the default event layout draws for it until one of its own is supplied.
+    ///
+    /// WHY IT EXISTS (EB-764). `EventModel.InitialPortraitPath` is
+    /// `ImageHelper.GetImagePath("events/" + Id.Entry.ToLowerInvariant() +
+    /// ".png")` (`EventModel.cs:198`) -- the path is DERIVED from the id and
+    /// there is no seam on it by design: the property is `private` and NOT
+    /// virtual, and `CreateInitialPortrait` (`:351`) hands it straight to
+    /// `PreloadManager.Cache.GetTexture2D`. A converted event therefore asks
+    /// the pack for `res://images/events/springvale_cheese_cellar.png`, which
+    /// nothing in this repo produces, and `NEventLayout.InitializeVisuals`
+    /// threw `AssetLoadException` before the page was drawn
+    /// (`review/records/teyvat-spike-reproof-2026-09-15.md` item 2).
+    ///
+    /// THE VALUE IS THE BASE EVENT'S OWN IMAGE, which is the same borrowing
+    /// <see cref="AssetAlias"/> makes for a dressing's backgrounds, and it is
+    /// retired the same way: the row is deleted in the commit that lands a
+    /// real portrait, and `Patches/EventPortraitPatch`'s fall-through means a
+    /// portrait added at the dressed path wins with no code change at all.
+    ///
+    /// A REAL PORTRAIT IS A MEDIA-LEDGER ITEM and not a code change --
+    /// `docs/current/operations/media.md` is the convention it lands under
+    /// (one producer per out-path, declared encoding, `build_pck` before any
+    /// deploy).
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string> EventPortraits =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["SPRINGVALE_CHEESE_CELLAR"] = "res://images/events/room_full_of_cheese.png",
+        };
+
+    /// <summary>
     /// THE STILL-PORTRAIT TABLE: (dressing, monster `Id.Entry`) -> the pck
     /// scene path that draws it, in place of the monster's Spine rig.
     ///
