@@ -11,6 +11,7 @@ using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Acts;
 using MegaCrit.Sts2.Core.Models.Events;
+using MegaCrit.Sts2.Core.Settings;
 using Xunit;
 
 namespace KleeMod.Tests;
@@ -1490,6 +1491,103 @@ public class TeyvatFrameTests : IDisposable
         // act, and it must not reach Godot or BaseLib in a process with no
         // runtime behind either.
         TeyvatActAssets.RegisterActBackgrounds();
+    }
+
+    // ---------------------------------------------------------------
+    // `EB-769`: the Punch-Off's hit sparks are bounded.
+    //
+    // WHAT WENT WRONG. `PunchEachOther` spawns one `NHitSparkVfx` per swing
+    // and is paced only by `Cmd.Wait(1.2f)`. Under the soak harness's speed
+    // endpoint -- `FastMode = Instant`, `Engine.TimeScale = 3` -- the waits
+    // collapse and nothing bounds the spawn: proofs-5 measured 34,501
+    // `Element limit reached at _allocate_rid`, 613,190 `particles is null`,
+    // a 2.56 GB `godot.log` and an unresponsive process, all of it under
+    // `NHitSparkVfx.Create` called from this loop. At default speed the same
+    // event PASSED with zero RID errors -- so the rule wanted here is "the
+    // picture is unchanged and the allocation is bounded".
+    //
+    // The decision is a pure function precisely so it can be pinned here:
+    // `SaveManager` and `Engine.TimeScale` live outside the headless
+    // boundary, `ShouldSpawnHitSpark` does not.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// `PunchOffMirror.ShouldSpawnHitSpark`, reached by name: the guard is
+    /// `internal` like most of the arm, and an `InternalsVisibleTo` for one
+    /// pin is a bigger change than these two lines (the standing call, the
+    /// same one `Every_dressing_has_an_act_title_row` above makes).
+    /// </summary>
+    private static bool SparkAllowed(FastModeType mode, int spawned) =>
+        (bool)StaticMethod(typeof(PunchOffMirror), "ShouldSpawnHitSpark")
+            .Invoke(null, new object[] { mode, spawned })!;
+
+    /// <summary>`PunchOffMirror.MaxHitSparksPerVisit`, the same way. A
+    /// `const` has no storage, so the value is read off the field's baked
+    /// constant rather than off an instance.</summary>
+    private static int MaxHitSparks =>
+        (int)typeof(PunchOffMirror).GetField(
+            "MaxHitSparksPerVisit",
+            BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)!
+            .GetRawConstantValue()!;
+
+    [Fact]
+    public void EB769_no_hit_spark_is_spawned_under_the_harnesss_instant_mode()
+    {
+        // `vendor/STS2_MCP/gits/GitsSpeed.cs` sets exactly this value.
+        Assert.False(SparkAllowed(FastModeType.Instant, 0));
+        Assert.False(SparkAllowed(FastModeType.Instant, 5));
+    }
+
+    [Theory]
+    [InlineData(FastModeType.Normal)]
+    [InlineData(FastModeType.Fast)]
+    public void EB769_at_the_players_own_speed_the_sparks_run_to_a_fixed_cap(FastModeType mode)
+    {
+        // The picture a person sees is unchanged for far longer than anyone
+        // reads this page...
+        Assert.True(SparkAllowed(mode, 0));
+        Assert.True(SparkAllowed(mode, MaxHitSparks - 1));
+        // ...and then the backstop bites, whatever the speed setting says.
+        Assert.False(SparkAllowed(mode, MaxHitSparks));
+        Assert.False(SparkAllowed(mode, 1_000_000));
+    }
+
+    [Fact]
+    public void EB769_the_cap_is_small_enough_that_the_allocator_cannot_be_reached()
+    {
+        // Not a taste number: the RID allocator was reached at tens of
+        // thousands. Two dozen is three orders of magnitude clear of it and
+        // half a minute of the loop's intended 1.2 s pacing.
+        Assert.InRange(MaxHitSparks, 1, 100);
+    }
+
+    [Fact]
+    public void EB769_the_punching_loop_reaches_the_spark_only_through_the_guard()
+    {
+        // STRUCTURAL, because the spawn itself cannot be run headlessly: the
+        // loop must not construct a hit spark directly any more, and the one
+        // place that does must consult the guard. `Il.CallSequence` walks the
+        // async state machine's `MoveNext` (`Harness/Il.cs`).
+        var loop = Il.CallSequence(Method(typeof(PunchOffMirror), "PunchEachOther")).ToList();
+        Assert.DoesNotContain(loop, c => c.StartsWith("NHitSparkVfx.Create", StringComparison.Ordinal));
+        Assert.Contains(loop, c => c.StartsWith("PunchOffMirror.SpawnHitSpark", StringComparison.Ordinal));
+
+        var spawn = Il.CallSequence(Method(typeof(PunchOffMirror), "SpawnHitSpark")).ToList();
+        Assert.Contains(spawn, c => c.StartsWith("PunchOffMirror.ShouldSpawnHitSpark", StringComparison.Ordinal));
+        Assert.Contains(spawn, c => c.StartsWith("NHitSparkVfx.Create", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void EB769_nothing_else_in_the_swing_moved()
+    {
+        // The event's mechanics and its picture are the base game's, and the
+        // fix is not allowed to quietly drop either half of the blow: the
+        // anim trigger and `vfx_attack_blunt` are still in the loop, and so
+        // are the base event's waits.
+        var loop = Il.CallSequence(Method(typeof(PunchOffMirror), "PunchEachOther")).ToList();
+        Assert.Contains(loop, c => c.StartsWith("CreatureCmd.TriggerAnim", StringComparison.Ordinal));
+        Assert.Contains(loop, c => c.StartsWith("VfxCmd.PlayOnCreatureCenter", StringComparison.Ordinal));
+        Assert.Contains(loop, c => c.StartsWith("Cmd.Wait", StringComparison.Ordinal));
     }
 
     // ---------------------------------------------------------------

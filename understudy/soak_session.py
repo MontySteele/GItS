@@ -19,8 +19,13 @@ from typing import Any
 
 from understudy import instances, keepawake
 from understudy.soak_lane import bridge_installed, game_is_running
-from understudy.soak_shape import (BOOT_POLL_S, BOOT_STALL_AFTER_S,
+from understudy.soak_shape import (ARCHIVE_LOG_HEAD_BYTES,
+                                   ARCHIVE_LOG_MAX_BYTES,
+                                   ARCHIVE_LOG_TAIL_BYTES,
+                                   ARCHIVE_LOG_TRUNCATION_MARK,
+                                   BOOT_POLL_S, BOOT_STALL_AFTER_S,
                                    BOOT_STALL_RETRIES,
+                                   BOOT_STALL_STATE_QUIET_S,
                                    DEPLOY_BRIDGE, GAME_EXE, GODOT_LOG_ARCHIVE,
                                    MENU_TIMEOUT_S, PROCESS_EXIT_GRACE_S,
                                    PROFILE_READY_MARKER, RELAUNCH_DEAD_GAP_S,
@@ -127,6 +132,37 @@ def _log_has_marker(path: Path, marker: str = PROFILE_READY_MARKER) -> bool:
     except OSError:
         return False
     return marker in tail.decode("utf-8", "replace")
+
+
+def _copy_log_truncated(src: Path, dest: Path, size: int) -> None:
+    """Write `dest` as `src`'s head, a marker line, and `src`'s tail.
+
+    `EB-766`. Bytes are moved in fixed-size blocks and never through one big
+    `read()`: the file this exists for was 2.56 GB, and an archiver that had
+    to hold it in memory to bound it would be a worse failure than the one it
+    is fixing. The marker is written as bytes so the two halves of the game's
+    own output are passed through untouched, in whatever encoding it used.
+    """
+    block = 1 << 20
+    dropped = size - ARCHIVE_LOG_HEAD_BYTES - ARCHIVE_LOG_TAIL_BYTES
+    mark = ARCHIVE_LOG_TRUNCATION_MARK.format(
+        n=dropped, cap=ARCHIVE_LOG_MAX_BYTES, head=ARCHIVE_LOG_HEAD_BYTES,
+        tail=ARCHIVE_LOG_TAIL_BYTES).encode("utf-8")
+    with src.open("rb") as fh, dest.open("wb") as out:
+        left = ARCHIVE_LOG_HEAD_BYTES
+        while left > 0:
+            chunk = fh.read(min(block, left))
+            if not chunk:
+                break
+            out.write(chunk)
+            left -= len(chunk)
+        out.write(mark)
+        fh.seek(size - ARCHIVE_LOG_TAIL_BYTES)
+        while True:
+            chunk = fh.read(block)
+            if not chunk:
+                break
+            out.write(chunk)
 
 
 # ------------------------------------------------------------- ledger ----
@@ -470,16 +506,24 @@ class Session:
         Raises `SystemExit` when the process dies or the budget expires. With
         `fuse=None` the stall branch is off and this is exactly the pre-EB-766
         loop, with the poll cadence at `BOOT_POLL_S`.
+
+        THE STATE SIGNAL IS A CLOCK, NOT A FLAG, and that is the 2026-09-15
+        fix. It used to be `ever_state`, a latch that closed on the first
+        pre-menu answer -- which this method's own caller documents as
+        arriving ~20 s in, before the 45 s fuse is ever consulted -- so the
+        fuse could not fire on any boot whose bridge had answered once and
+        then wedged. `soak_shape.BOOT_STALL_STATE_QUIET_S` has the reading.
         """
         self.wire()
         start = time.time()
         deadline = start + timeout
         last = "(no response)"
-        ever_state = False
+        state_at: float | None = None
         log = self.log_path()
         size = _file_size(log)
         grew_at = start
         marker = False
+        diagnosed = False
         while time.time() < deadline:
             if self.proc is not None and self.proc.poll() is not None:
                 raise SystemExit(
@@ -490,12 +534,21 @@ class Session:
             except _wire().BridgeError as e:
                 last = str(e)[:120]
             else:
-                ever_state = True
                 if state.get("state_type") == "menu" and state.get("options"):
                     return state
-                last = (f"state_type={state.get('state_type')} "
-                        f"menu_screen={state.get('menu_screen')} "
-                        f"options=absent")
+                # AN ERROR BODY IS NOT AN ANSWER. `bridge._request` returns
+                # the JSON of an HTTP 4xx/5xx rather than raising, and
+                # `McpMod.HandleGetState` answers 500 with
+                # `{"error": ..., "stack_trace": ...}` when the main-thread
+                # hop throws. Counting that as "the state endpoint is alive"
+                # is counting the wedge as health.
+                if "state_type" in state:
+                    state_at = time.time()
+                    last = (f"state_type={state.get('state_type')} "
+                            f"menu_screen={state.get('menu_screen')} "
+                            f"options=absent")
+                else:
+                    last = f"error body: {str(state.get('error'))[:90]}"
             now = time.time()
             grown = _file_size(log)
             if grown > size:
@@ -503,24 +556,45 @@ class Session:
                 grew_at = now
             if not marker:
                 marker = _log_has_marker(log)
+            state_quiet = (now - state_at if state_at is not None
+                           else now - start)
+            state_recent = (state_at is not None
+                            and state_quiet < BOOT_STALL_STATE_QUIET_S)
             # THE CHEAP HALF OF THE VERDICT IS CHECKED FIRST, and that is not
             # an optimisation of arithmetic -- `_health_ok` is an HTTP call,
             # and a boot watch that made one every 2 s would be adding load to
             # a game it suspects of being wedged. The verdict function is
             # still the authority; this only decides when to ask it.
-            if (fuse is not None and not ever_state and now - start >= fuse
-                    and boot_stall_verdict(
-                        now - start, self._health_ok(), ever_state, marker,
-                        now - grew_at)):
-                self.last_boot_read = last
-                print(f"WARN lane {self.label}: boot looks STALLED after "
-                      f"{now - start:.0f}s -- the root endpoint answers, the "
-                      f"state endpoint never has, godot.log is {size} bytes "
-                      f"and the profile marker is "
-                      f"{'present' if marker else 'ABSENT'} "
-                      f"(last {now - grew_at:.0f}s without growth). "
-                      f"Killing and relaunching (EB-766). Last read: {last}")
-                return None
+            if fuse is not None and not state_recent and now - start >= fuse:
+                health = self._health_ok()
+                if boot_stall_verdict(now - start, health, state_recent,
+                                      marker, now - grew_at):
+                    self.last_boot_read = last
+                    print(f"WARN lane {self.label}: boot looks STALLED after "
+                          f"{now - start:.0f}s -- the root endpoint answers, "
+                          f"the state endpoint has been silent for "
+                          f"{state_quiet:.0f}s, godot.log is {size} bytes "
+                          f"and the profile marker is "
+                          f"{'present' if marker else 'ABSENT'} "
+                          f"(last {now - grew_at:.0f}s without growth). "
+                          f"Killing and relaunching (EB-766). "
+                          f"Last read: {last}")
+                    return None
+                # THE FUSE SAYS WHY IT REFUSED, ONCE. The 2026-09-15 stall
+                # cost a night precisely because a silent watchdog and an
+                # absent one read the same in the morning. One line, at the
+                # first deadline only, naming every signal the verdict saw.
+                if not diagnosed:
+                    diagnosed = True
+                    print(f"DIAG lane {self.label}: boot fuse deadline at "
+                          f"{now - start:.0f}s and the verdict is NOT a "
+                          f"stall -- health_ok={health} "
+                          f"state_recent={state_recent} "
+                          f"(state silent {state_quiet:.0f}s of "
+                          f"{BOOT_STALL_STATE_QUIET_S:.0f}s) "
+                          f"marker={'present' if marker else 'ABSENT'} "
+                          f"log={size}B quiet {now - grew_at:.0f}s. "
+                          f"Last read: {last}")
             time.sleep(BOOT_POLL_S)
         # EB-766: THE LAST READ GOES IN BOTH PLACES. `SystemExit`'s message
         # reaches a console somebody may not be watching; the print reaches
@@ -562,12 +636,19 @@ class Session:
         decompiled reading, EB-489) -- so the pair separates "the game thread
         is wedged" from "nothing is listening". Every failure is False: this
         is a watchdog's input and it may not raise on the boot path.
+
+        ASKED TWICE BEFORE IT ANSWERS NO. A False here does not merely fail to
+        prove a stall, it VETOES the verdict, so one dropped probe against a
+        loaded machine buys a wedged game another four hundred seconds of
+        budget. A yes is taken on the first ask and costs nothing extra.
         """
-        try:
-            _wire().health()
-            return True
-        except Exception:                                    # noqa: BLE001
-            return False
+        for _ in range(2):
+            try:
+                _wire().health()
+                return True
+            except Exception:                                # noqa: BLE001
+                continue
+        return False
 
     def log_path(self) -> Path:
         """This session's `godot.log`. Lane 0 reads the process's own APPDATA,
@@ -585,6 +666,13 @@ class Session:
         it -- which is why the six stalled boots of 2026-09-15 have no logs at
         all. A COPY, never a move: the live log belongs to the game.
 
+        BOUNDED, because an engine spin makes this file unbounded: the
+        Punch-Off VFX spin of 2026-09-15 wrote 2.56 GB in about two minutes
+        and this method copied all of it. Past
+        `ARCHIVE_LOG_MAX_BYTES` the head and the tail are kept with a marker
+        line between them, and one line says so; under it the copy is
+        byte-for-byte what it always was.
+
         Returns the path written, or `None` when there was nothing to copy or
         the copy failed. It never raises: this is called from a teardown whose
         whole contract is that every step runs.
@@ -598,7 +686,16 @@ class Session:
             name = f"{stamp}-{pid if pid is not None else 'nopid'}"
             dest = GODOT_LOG_ARCHIVE / f"{name}{'-' + tag if tag else ''}.log"
             dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, dest)
+            size = _file_size(src)
+            if size <= ARCHIVE_LOG_MAX_BYTES:
+                shutil.copy2(src, dest)
+                return dest
+            _copy_log_truncated(src, dest, size)
+            dropped = size - ARCHIVE_LOG_HEAD_BYTES - ARCHIVE_LOG_TAIL_BYTES
+            print(f"WARN: godot.log was {size} bytes; archived TRUNCATED to "
+                  f"the first {ARCHIVE_LOG_HEAD_BYTES} and the last "
+                  f"{ARCHIVE_LOG_TAIL_BYTES} bytes, {dropped} dropped "
+                  f"(EB-766) -> {dest}")
             return dest
         except Exception as e:                               # noqa: BLE001
             # EVERY failure, not just `OSError`. This runs inside a teardown

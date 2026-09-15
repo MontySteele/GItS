@@ -414,6 +414,18 @@ MIRRORED: dict[str, object] = {
 # --------------------------------------------------------------------------
 
 UNMIRRORED: dict[str, str] = {
+    "PunchOffMirror.MaxHitSparksPerVisit":
+        "`EB-769`. AN ALLOCATION BOUND on a decoration, not balance: how many "
+        "`NHitSparkVfx` nodes one visit to the Punch-Off may add to the combat "
+        "VFX container. The base event spawns one per swing paced only by "
+        "`Cmd.Wait(1.2f)`, which is fine at the player's own speed and "
+        "unbounded once a harness collapses the wait -- the deploy proofs of "
+        "2026-09-15 measured 34,501 `Element limit reached at _allocate_rid` "
+        "and a 2.56 GB `godot.log` from this one call site. Nothing a card, a "
+        "rule or a reward reads is priced in it: the anims, "
+        "`vfx_attack_blunt`, the waits, the options and the gold roll are all "
+        "untouched, and a player at the game's own speed never reaches the "
+        "cap. tier0 draws nothing and has no counterpart.",
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
     "RosterArt.PortraitWidth":

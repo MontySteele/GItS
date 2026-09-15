@@ -123,6 +123,27 @@ MENU_TIMEOUT_MAX_S = 900.0
 # false positive is one relaunch; the cost of a false negative was the four
 # lost batches EB-763 is about.
 BOOT_STALL_AFTER_S = 45.0
+# HOW LONG A STATE ANSWER COUNTS FOR, and the whole of the 2026-09-15 miss.
+#
+# The fuse as first written asked "has `/api/v1/singleplayer` EVER answered"
+# and read a yes as proof that the game thread was not wedged. That is a
+# LATCH, and `wait_for_menu`'s own docstring says why it is the wrong shape:
+# "The HTTP server answers ~20 s before the main menu has buttons." So on an
+# ordinary boot the latch closes around 20 s -- before the 45 s fuse is ever
+# consulted -- and from that moment the fuse is off for the life of the watch
+# no matter what the game does next. Launch 6 of
+# the deploy proofs of 2026-09-15 are the bill (`git show
+# d47d9fcc:review/records/teyvat-proofs-5-2026-09-15.md`, launch 6): the root
+# endpoint answered, the profile marker never landed, `godot.log` froze at
+# 21,753 bytes, and the watch spent its whole 444 s budget without printing a
+# word, because one early pre-menu answer had already disarmed it.
+#
+# THE SIGNAL IS "ANSWERED RECENTLY", NOT "ANSWERED ONCE". 25 s, because
+# `bridge._request` carries a 20 s socket timeout: a single poll that times
+# out is already proof of 20 s of silence, and 25 gives that one poll of
+# slack before it is called a wedge. A boot that is merely slow answers every
+# poll and never goes quiet for that long.
+BOOT_STALL_STATE_QUIET_S = 25.0
 # How long the log may stand still, once the profile marker HAS landed, before
 # a boot with a live root endpoint and a dead state endpoint is called a
 # stall. A boot that is merely slow is still writing store lines.
@@ -151,23 +172,48 @@ PROFILE_READY_MARKER = "Profile-scoped data path initialized"
 # boots of 2026-09-15 have no logs at all.
 GODOT_LOG_ARCHIVE = REPO / "understudy" / "logs" / "godot"
 
+# --------------------------------------- EB-766: the archive is bounded ----
+#
+# THE ARCHIVER COPIED 2.56 GB. The Punch-Off VFX spin of 2026-09-15 wrote
+# 2,561,687,155 bytes of `godot.log` in about two minutes -- 613,190 repeated
+# `Parameter "particles" is null` lines -- and the teardown dutifully copied
+# every byte of it beside the log it came from. An unattended batch that hit
+# that twice would write five gigabytes of log and five gigabytes of archive.
+#
+# WHAT A TRUNCATED ARCHIVE STILL ANSWERS. The two questions ever asked of one
+# of these files are "what did the boot do" (the head: mod load order, the
+# port, the bridge's start line, the store rewrite) and "what was it doing
+# when it went wrong" (the tail). The megabytes in between a spin are the
+# same line repeated and carry nothing the head and tail do not.
+ARCHIVE_LOG_MAX_BYTES = 8_000_000
+ARCHIVE_LOG_HEAD_BYTES = 1_000_000
+ARCHIVE_LOG_TAIL_BYTES = 4_000_000
+# Written on its own line between the two halves, so nobody reads the seam as
+# the game's own output. `{n}` is the byte count dropped.
+ARCHIVE_LOG_TRUNCATION_MARK = (
+    "\n\n[understudy] ---- {n} bytes omitted by the archiver (EB-766): this "
+    "log exceeded {cap} bytes, so the first {head} and the last {tail} are "
+    "kept and the middle is dropped ----\n\n")
 
-def boot_stall_verdict(elapsed_s: float, health_ok: bool, ever_state: bool,
+
+def boot_stall_verdict(elapsed_s: float, health_ok: bool, state_recent: bool,
                        marker_seen: bool, log_quiet_s: float) -> bool:
     """`EB-766`. Does this boot look STALLED rather than merely slow?
 
     Pure, so the judgment is exercised off a test rather than off a night that
     went wrong. The three signals are the root endpoint (answered from a
     ThreadPool worker, so it survives a game-thread stall), whether the state
-    endpoint has EVER answered, and the log -- its size and whether the
-    profile marker has landed. The block above says where each number is from.
+    endpoint has answered WITHIN THE LAST `BOOT_STALL_STATE_QUIET_S` (the
+    block above says why that is not "ever"), and the log -- its size and
+    whether the profile marker has landed. The block above also carries the
+    provenance of every number here.
     """
     if elapsed_s < BOOT_STALL_AFTER_S:
         return False
-    # A state endpoint that has answered once is not stalled on the game
+    # A state endpoint that is still answering is not stalled on the game
     # thread, and a root endpoint that is silent is a dead process or a dead
     # wire -- neither is this defect, and a relaunch is not its answer.
-    if ever_state or not health_ok:
+    if state_recent or not health_ok:
         return False
     return (not marker_seen) or log_quiet_s >= BOOT_STALL_LOG_QUIET_S
 
