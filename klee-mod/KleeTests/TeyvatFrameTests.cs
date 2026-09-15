@@ -410,6 +410,11 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(WellspringMirror), typeof(Wellspring) },
             new object[] { typeof(WhisperingHollowMirror), typeof(WhisperingHollow) },
             new object[] { typeof(WoodCarvingsMirror), typeof(WoodCarvings) },
+            new object[] { typeof(DoorsOfLightAndDarkMirror), typeof(DoorsOfLightAndDark) },
+            new object[] { typeof(DrowningBeaconMirror), typeof(DrowningBeacon) },
+            new object[] { typeof(PunchOffMirror), typeof(PunchOff) },
+            new object[] { typeof(SpiralingWhirlpoolMirror), typeof(SpiralingWhirlpool) },
+            new object[] { typeof(SunkenTreasuryMirror), typeof(SunkenTreasury) },
         };
 
     // ---------------------------------------------------------------

@@ -625,6 +625,90 @@ internal static partial class TeyvatLoc
                 "Share Knowledge",
             ["CONTRACT_RECITING_GROWTH.pages.SHARE_KNOWLEDGE.description"] =
                 "Choose 1 of 5 random cards to add to your deck.",
+            // TwinGatesOfMtTianheng (Liyue / DoorsOfLightAndDark)
+            ["TWIN_GATES_OF_MT_TIANHENG.title"] =
+                "The Twin Gates of Mt. Tianheng",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.description"] =
+                "Two shrine gates stand side by side on Mt. Tianheng's switchback "
+                + "trail, one lacquered gold, one lacquered black, and a diviner has "
+                + "set up a folding table between them like it's the most ordinary "
+                + "commission in the world. \"Both gates are paid for,\" she says, "
+                + "tapping the ledger. \"Light refines what you already carry. Dark "
+                + "takes something off your hands entirely. Choose the gate, not the "
+                + "philosophy — I only keep the tally.\" She does not recommend "
+                + "either.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.LIGHT.title"] =
+                "Light Door",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.LIGHT.description"] =
+                "Upgrade 2 random cards.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.DARK.title"] =
+                "Dark Door",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.DARK.description"] =
+                "Remove 1 card from Deck.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.LIGHT.description"] =
+                "Upgrade 2 random cards.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.DARK.description"] =
+                "Remove 1 card from Deck.",
+            // DrownedLightkeepersLens (Liyue / DrowningBeacon)
+            ["DROWNED_LIGHTKEEPERS_LENS.title"] =
+                "The Drowned Lightkeeper's Lens",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.description"] =
+                "A dockhand crew at Yaoguang Shoal has been hauling up pieces of a "
+                + "lighthouse nobody remembers building. Most of it is junk, but the "
+                + "lamp-glass came up whole, still faintly warm, still faintly "
+                + "glowing. The foreman states the terms flat: a bottle of what "
+                + "leaked out of it is yours for free, or you can go down after the "
+                + "lens itself and pay for it in altitude you won't get back. "
+                + "\"Ledger's the same either way,\" he says. \"Just different "
+                + "columns.\"",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.BOTTLE.title"] =
+                "Bottle",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.BOTTLE.description"] =
+                "Procure 1 Glowwater Potion.",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.CLIMB.title"] =
+                "Climb",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.CLIMB.description"] =
+                "Lose 13 Max HP. Obtain Fresnel Lens (relic).",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.BOTTLE.description"] =
+                "Procure 1 Glowwater Potion.",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.CLIMB.description"] =
+                "Lose 13 Max HP. Obtain Fresnel Lens (relic).",
+            // GuyunStoneConstructs (Liyue / PunchOff)
+            ["GUYUN_STONE_CONSTRUCTS.title"] =
+                "The Guyun Stone Constructs",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.description"] =
+                "Two Geo constructs stand half-buried in the Guyun Stone Forest, "
+                + "cracked and listing but still upright, with a Treasure Hoarder "
+                + "crouched a safe distance off, pricing his find aloud for anyone "
+                + "who'll listen. \"Relic's already loose in the rubble — free, take "
+                + "it,\" he says, \"or you fight the both of them for the rest of "
+                + "what's buried under them. Millelith posted this as a hazard, not a "
+                + "commission, so nobody's paying you either way but them.\"",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.NAB.title"] =
+                "Nab",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.NAB.description"] =
+                "Add Injury (curse) to Deck. Obtain a random Relic.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.I_CAN_TAKE_THEM.title"] =
+                "I Can Take Them",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.I_CAN_TAKE_THEM.description"] =
+                "Enter combat against 2 Punch Constructs for greater rewards: "
+                + "obtain a random Relic, a random Potion, and a standard combat "
+                + "reward. Each Punch Construct starts off slightly damaged, missing "
+                + "between 2 and 9 HP.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.I_CAN_TAKE_THEM.options.FIGHT.title"] =
+                "I Can Take Them",
+            ["GUYUN_STONE_CONSTRUCTS.pages.I_CAN_TAKE_THEM.options.FIGHT.description"] =
+                "Enter combat against 2 Punch Constructs for greater rewards: "
+                + "obtain a random Relic, a random Potion, and a standard combat "
+                + "reward. Each Punch Construct starts off slightly damaged, missing "
+                + "between 2 and 9 HP.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.NAB.description"] =
+                "Add Injury (curse) to Deck. Obtain a random Relic.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.I_CAN_TAKE_THEM.description"] =
+                "Enter combat against 2 Punch Constructs for greater rewards: "
+                + "obtain a random Relic, a random Potion, and a standard combat "
+                + "reward. Each Punch Construct starts off slightly damaged, missing "
+                + "between 2 and 9 HP.",
             // QingceLarder (Liyue / RoomFullOfCheese)
             ["QINGCE_LARDER.title"] =
                 "The Qingce Larder",
@@ -654,6 +738,55 @@ internal static partial class TeyvatLoc
             ["QINGCE_LARDER.pages.SEARCH.description"] =
                 "Lose 14 HP. Obtain The Chosen Cheese (relic): at the end of "
                 + "combat, gain 1 Max HP.",
+            // WhirlpoolBelowYaoguangShoal (Liyue / SpiralingWhirlpool)
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.title"] =
+                "The Whirlpool Below Yaoguang Shoal",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.description"] =
+                "The current off Yaoguang Shoal has been turning the same slow "
+                + "circle for as long as the local diviners can attest, and they've "
+                + "taken to renting out a front-row rock to anyone curious enough to "
+                + "pay for the privilege. \"Watch it turn a card into something "
+                + "stranger,\" the attendant offers, gesturing at a plain Strike or "
+                + "Defend you're carrying, \"or just drink from it and be done.\" "
+                + "Terms are posted on a board nobody has ever needed to read twice.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.OBSERVE.title"] =
+                "Observe",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.OBSERVE.description"] =
+                "Enchant a Basic Strike (Ironclad) or Defend (Ironclad) with "
+                + "Spiral.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.DRINK.title"] =
+                "Drink",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.DRINK.description"] =
+                "Heal 33% of Max HP.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.OBSERVE.description"] =
+                "Enchant a Basic Strike (Ironclad) or Defend (Ironclad) with "
+                + "Spiral.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.DRINK.description"] =
+                "Heal 33% of Max HP.",
+            // NorthlandBanksDrownedVault (Liyue / SunkenTreasury)
+            ["NORTHLAND_BANKS_DROWNED_VAULT.title"] =
+                "The Northland Bank's Drowned Vault",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.description"] =
+                "The Northland Bank's Liyue branch has one vault the tide claimed "
+                + "decades ago and never gave back, and a Feiyun clerk has been "
+                + "contracted to appraise whatever a diver brings up from it. The "
+                + "first chest is modest and clean. The second is heavier, and the "
+                + "clerk warns you — plainly, before you touch it — that the Bank's "
+                + "gold never leaves a debt unnamed. \"Take the small chest and walk "
+                + "away clean,\" she says, \"or take the large one and carry what "
+                + "comes with it.\"",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.FIRST_CHEST.title"] =
+                "First Chest",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.FIRST_CHEST.description"] =
+                "Gain 52–68 Gold.",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.SECOND_CHEST.title"] =
+                "Second Chest",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.SECOND_CHEST.description"] =
+                "Gain 303–363 Gold. Add Greed (curse) to Deck.",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.FIRST_CHEST.description"] =
+                "Gain 52–68 Gold.",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.SECOND_CHEST.description"] =
+                "Gain 303–363 Gold. Add Greed (curse) to Deck.",
             // SteeperAtHeyu (Liyue / TeaMaster)
             ["STEEPER_AT_HEYU.title"] =
                 "The Steeper at Heyu",
@@ -1063,10 +1196,40 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Liyue.TwinGatesOfMtTianheng)] = new EventShape(
+                "TWIN_GATES_OF_MT_TIANHENG", "DoorsOfLightAndDarkMirror",
+                new[] { "LIGHT", "DARK" },
+                new[] { "pages.LIGHT.description", "pages.DARK.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.DrownedLightkeepersLens)] = new EventShape(
+                "DROWNED_LIGHTKEEPERS_LENS", "DrowningBeaconMirror",
+                new[] { "BOTTLE", "CLIMB" },
+                new[] { "pages.BOTTLE.description", "pages.CLIMB.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.GuyunStoneConstructs)] = new EventShape(
+                "GUYUN_STONE_CONSTRUCTS", "PunchOffMirror",
+                new[] { "NAB", "I_CAN_TAKE_THEM" },
+                new[] { "pages.NAB.description", "pages.I_CAN_TAKE_THEM.description" },
+                new[] { "pages.I_CAN_TAKE_THEM.options.FIGHT" },
+                false),
             [typeof(Events.Liyue.QingceLarder)] = new EventShape(
                 "QINGCE_LARDER", "RoomFullOfCheeseMirror",
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.WhirlpoolBelowYaoguangShoal)] = new EventShape(
+                "WHIRLPOOL_BELOW_YAOGUANG_SHOAL", "SpiralingWhirlpoolMirror",
+                new[] { "OBSERVE", "DRINK" },
+                new[] { "pages.OBSERVE.description", "pages.DRINK.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.NorthlandBanksDrownedVault)] = new EventShape(
+                "NORTHLAND_BANKS_DROWNED_VAULT", "SunkenTreasuryMirror",
+                new[] { "FIRST_CHEST", "SECOND_CHEST" },
+                new[] { "pages.FIRST_CHEST.description", "pages.SECOND_CHEST.description" },
                 Array.Empty<string>(),
                 false),
             [typeof(Events.Liyue.SteeperAtHeyu)] = new EventShape(
@@ -1146,8 +1309,18 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.HuntersTotemPostsNearWolvendom>(),
             [(TeyvatFrame.Liyue, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Liyue.ContractRecitingGrowth>(),
+            [(TeyvatFrame.Liyue, typeof(DoorsOfLightAndDark))] =
+                () => ModelDb.Event<Events.Liyue.TwinGatesOfMtTianheng>(),
+            [(TeyvatFrame.Liyue, typeof(DrowningBeacon))] =
+                () => ModelDb.Event<Events.Liyue.DrownedLightkeepersLens>(),
+            [(TeyvatFrame.Liyue, typeof(PunchOff))] =
+                () => ModelDb.Event<Events.Liyue.GuyunStoneConstructs>(),
             [(TeyvatFrame.Liyue, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Liyue.QingceLarder>(),
+            [(TeyvatFrame.Liyue, typeof(SpiralingWhirlpool))] =
+                () => ModelDb.Event<Events.Liyue.WhirlpoolBelowYaoguangShoal>(),
+            [(TeyvatFrame.Liyue, typeof(SunkenTreasury))] =
+                () => ModelDb.Event<Events.Liyue.NorthlandBanksDrownedVault>(),
             [(TeyvatFrame.Liyue, typeof(TeaMaster))] =
                 () => ModelDb.Event<Events.Liyue.SteeperAtHeyu>(),
             [(TeyvatFrame.Liyue, typeof(TheLegendsWereTrue))] =
@@ -1219,8 +1392,18 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/wood_carvings.png",
             ["CONTRACT_RECITING_GROWTH"] =
                 "res://images/events/brain_leech.png",
+            ["TWIN_GATES_OF_MT_TIANHENG"] =
+                "res://images/events/doors_of_light_and_dark.png",
+            ["DROWNED_LIGHTKEEPERS_LENS"] =
+                "res://images/events/drowning_beacon.png",
+            ["GUYUN_STONE_CONSTRUCTS"] =
+                "res://images/events/punch_off.png",
             ["QINGCE_LARDER"] =
                 "res://images/events/room_full_of_cheese.png",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL"] =
+                "res://images/events/spiraling_whirlpool.png",
+            ["NORTHLAND_BANKS_DROWNED_VAULT"] =
+                "res://images/events/sunken_treasury.png",
             ["STEEPER_AT_HEYU"] =
                 "res://images/events/tea_master.png",
             ["TALES_OF_GUYUN_WERE_TRUE"] =

@@ -246,6 +246,17 @@ MIRRORS: Dict[str, MirrorSpec] = {
         "WoodCarvingsMirror",
         options=("BIRD", "SNAKE", "TORUS"),
         extra_options=(("pages.INITIAL.options.SNAKE_LOCKED", "SNAKE"),)),
+
+    # --- act 1, batch 4 ---------------------------------------------------
+    "DoorsOfLightAndDark": MirrorSpec("DoorsOfLightAndDarkMirror"),
+    "DrowningBeacon": MirrorSpec("DrowningBeaconMirror"),
+    "PunchOff": MirrorSpec(
+        "PunchOffMirror",
+        options=("NAB", "I_CAN_TAKE_THEM"),
+        extra_options=(("pages.I_CAN_TAKE_THEM.options.FIGHT", "I_CAN_TAKE_THEM"),),
+        pages=("pages.NAB.description", "pages.I_CAN_TAKE_THEM.description")),
+    "SpiralingWhirlpool": MirrorSpec("SpiralingWhirlpoolMirror"),
+    "SunkenTreasury": MirrorSpec("SunkenTreasuryMirror"),
 }
 
 
