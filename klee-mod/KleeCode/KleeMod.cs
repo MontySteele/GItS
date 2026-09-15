@@ -41,6 +41,14 @@ public static class KleeMod
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
         KleePck.LogStatus();
 
+        // THE TEYVAT RUN FRAME ARM's loc rows (spike, -p:TeyvatFrame=true).
+        // A no-op with the arm off -- Teyvat.TeyvatLoc.Inject's first line is
+        // the flag -- so a release build merges not one row. It runs AFTER the
+        // patch bootstrap, because the dressed keys it writes are the keys the
+        // arm's monster-name postfix rewrites to, and before anything reads a
+        // table, because [ModInitializer] is well upstream of any run.
+        Teyvat.TeyvatLoc.Inject();
+
         // Convention-scene + build-id telemetry (animation sprint 1, A3 —
         // permanent). One line per shipped scene: path, found/missing, root
         // node type. A missing scene falls back quietly at the use site, so
