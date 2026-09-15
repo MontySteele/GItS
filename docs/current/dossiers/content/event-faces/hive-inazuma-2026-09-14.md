@@ -1,5 +1,9 @@
 # Hive — Inazuma face (event text)
 
+> **Fable curation pass, 2026-09-14.** Selection only; the seven fresh drafts
+> read in register and are kept. Count matches the Natlan face at 25.
+
+
 Face: **Inazuma**. Zone: **Act 2, the Hive** (both faces share this zone; a run
 rolls one face and the engine shuffles that face's pool at run start).
 Event count: **25** (21 Hive-tagged + 4 all-acts), matching

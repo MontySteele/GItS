@@ -1,5 +1,9 @@
 # Underdocks — Liyue Face (2026-09-14)
 
+> **Fable curation pass, 2026-09-14.** Selection only; fifteen fresh drafts in
+> the mercantile register, all kept. This is the first paper Underdocks has had.
+
+
 Face: Liyue mercantile (Qixing, Feiyun, diviners, Wangsheng), per R273.
 Zone: Underdocks (act 1 alternate) + the 4 all-acts events.
 Count: 18 events (14 Underdocks + 4 all-acts) — matches the harvest's

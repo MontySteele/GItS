@@ -1,5 +1,13 @@
 # Hive — Natlan Face
 
+> **Fable curation pass, 2026-09-14.** Selection and lore only, no mechanics
+> touched. The Scions of the Canopy now sit on Coatepec Mountain and the
+> Children of Echoes at Tepeacac Rise, their canon homes; one invented beetle
+> and one Guild aside removed. The Collective of Plenty's placement at Mictlan
+> is unverified and rides until an EB-757-style check reaches Natlan. Count
+> matches the Inazuma face at 25; The Merchant___ keeps base text on both.
+
+
 Face: Natlan
 Zone: Act 2 (the Hive)
 Event count: 25 — 21 Hive events + 4 all-acts events (docs/current/research/sts2-map-and-events-research.md §2.1/§2.3)
@@ -28,7 +36,7 @@ Mechanics check: matches harvest.
 ## - [ ] Brain Leech
 ### The Ear-Whisperer — Natlan / Children of Echoes — literal
 
-On the scree slopes below Coatepec Mountain, a Children of Echoes tracker finds you first — an old memory-leech has fastened behind your ear, feeding you fragments of something it half-remembers. "Let it finish the lesson," she says, "or I rip it clear myself." Either way you learn something today, she promises; the tribe just disagrees on the price. A Qucusaur circles overhead, unbothered, the way it always is when the Echoes start arguing about the past.
+On the scree slopes of Tepeacac Rise, a Children of Echoes tracker finds you first — an old memory-leech has fastened behind your ear, feeding you fragments of something it half-remembers. "Let it finish the lesson," she says, "or I rip it clear myself." Either way you learn something today, she promises; the tribe just disagrees on the price. A Qucusaur circles overhead, unbothered, the way it always is when the Echoes start arguing about the past.
 
 - **Share Knowledge** — Choose 1 of 5 random cards to add to your Deck.
 - **Rip the Leech Off** — Lose 5 HP. Gain a companion (Colorless) card reward — two cards, following the gallery's own reading of the harvest's template-stripped "Colorless 2 card reward."
@@ -40,7 +48,7 @@ Mechanics check: flag — the harvest's "Colorless 2 card reward" is template-lo
 ## - [ ] Bugslayer
 ### Sweep or Stomp — Natlan / Scions of the Canopy — literal
 
-Deep in the canopy above Ochkanatlan, a Scions of the Canopy ranger has been thinning a swarm of stingwood beetles for three days straight and has worn her arm down to two moves. "Sweep or stomp," she says, tossing you the choice like a dare. "Learn one clean and you'll never fumble the other one in." A Yumkasaur chitters at her heel, already scorching the stragglers she missed.
+Deep in the canopy of Coatepec Mountain, a Scions of the Canopy ranger has been thinning a swarm of biting beetles for three days straight and has worn her arm down to two moves. "Sweep or stomp," she says, tossing you the choice like a dare. "Learn one clean and you'll never fumble the other one in." A Yumkasaur chitters at her heel, already scorching the stragglers she missed.
 
 - **Learn Extermination Technique** — Add Exterminate to your Deck.
 - **Learn Squash Technique** — Add Squash to your Deck.
@@ -118,7 +126,7 @@ Mechanics check: matches harvest and tier05/content/events.yaml (`field_of_man_s
 ## - [ ] Infested Automaton
 ### The Ticking Relic — Natlan / Children of Echoes — literal
 
-Half-buried on the Coatepec Mountain scree, a machine older than any tribe's memory still ticks with something inside it — Night Kingdom make, the Children of Echoes say, plain as anything, the way they say most things that would scare another tribe silent. Study the ticking and it teaches you something with weight to it. Touch the core direct and it hands you something instant, no weight at all.
+Half-buried on the Tepeacac Rise scree, a machine older than any tribe's memory still ticks with something inside it — Night Kingdom make, the Children of Echoes say, plain as anything, the way they say most things that would scare another tribe silent. Study the ticking and it teaches you something with weight to it. Touch the core direct and it hands you something instant, no weight at all.
 
 - **Study** — Obtain a random Power card.
 - **Touch the Core** — Obtain a random 0-cost card.
@@ -142,7 +150,7 @@ Mechanics check: matches harvest. Flag — not modelled in tier05/content/events
 ## - [ ] Ranwid the Elder
 ### The Canopy Elder's Ledger of Gifts — Natlan / Scions of the Canopy — literal
 
-An elder of the Scions of the Canopy keeps a nest of everything the forest has handed back to her over a long life, high in the branches above Ochkanatlan. She trades plain: give something, get something, no counting owed either way. A potion earns a relic. A hundred coin earns a relic. And if you've got something rarer to offer — she won't name it for you, but she'll know it when she sees it — she'll match it with two.
+An elder of the Scions of the Canopy keeps a nest of everything the forest has handed back to her over a long life, high in the branches of Coatepec Mountain. She trades plain: give something, get something, no counting owed either way. A potion earns a relic. A hundred coin earns a relic. And if you've got something rarer to offer — she won't name it for you, but she'll know it when she sees it — she'll match it with two.
 
 - **Offer a Potion** — Obtain a random Relic.
 - **Offer 100 Gold** — Obtain a random Relic.
@@ -155,7 +163,7 @@ Mechanics check: flag — the harvest's third option name is template-lossy ("[G
 ## - [ ] Relic Trader
 ### The Mictlan Trade-Circle — Natlan / Collective of Plenty — loose
 
-At the Mictlan trade-circle, a Collective broker has three things laid out on a woven mat — top, middle, bottom — and won't say what any of them are until you've already reached. "Half the fun's in not knowing," he says, "and I'm not explaining it Guild-style. Point, and it's yours."
+At the Mictlan trade-circle, a Collective broker has three things laid out on a woven mat — top, middle, bottom — and won't say what any of them are until you've already reached. "Half the fun's in not knowing," he says, "and I'm not explaining it. Point, and it's yours."
 
 - **Take the Top One** — Trade for the top item.
 - **Take the Middle One** — Trade for the middle item.
@@ -204,7 +212,7 @@ Mechanics check: matches harvest and tier05/content/events.yaml (`stone_of_all_t
 ## - [ ] Symbiote
 ### The Blade That Breathes — Natlan / Children of Echoes — literal
 
-A blade left out on the Coatepec Mountain slope has picked something up that moves along the steel like it's breathing. The Children of Echoes know this for what it is and don't flinch from naming it: take it up and it hits harder for what it costs you every swing, or burn it clean and let the weapon become something else entirely.
+A blade left out on a Tepeacac Rise slope has picked something up that moves along the steel like it's breathing. The Children of Echoes know this for what it is and don't flinch from naming it: take it up and it hits harder for what it costs you every swing, or burn it clean and let the weapon become something else entirely.
 
 - **Approach** — Enchant an Attack with Corrupted.
 - **Kill with Fire** — Choose a card to Transform.
@@ -241,7 +249,7 @@ Mechanics check: matches harvest. Flag — not modelled in tier05/content/events
 ## - [ ] The Lost Wisp
 ### The Drifting Light — Natlan / Children of Echoes — literal
 
-A stray light drifts loose over the Coatepec Mountain scree, guttering like it's lost its court. The Children of Echoes have a plain rule for such things, the same one they have for most of what the mountain keeps: bottle it and it answers you back, at a cost the tribe never pretends is free. Or leave it be and work the ground it's hovering over instead, where something older than the light has been sitting untouched.
+A stray light drifts loose over the Tepeacac Rise scree, guttering like it's lost its court. The Children of Echoes have a plain rule for such things, the same one they have for most of what the mountain keeps: bottle it and it answers you back, at a cost the tribe never pretends is free. Or leave it be and work the ground it's hovering over instead, where something older than the light has been sitting untouched.
 
 - **Capture the Wisp** — Add Decay (curse) to your Deck. Obtain the Lost Wisp (relic).
 - **Search the Nearby Area** — Gain 45-75 Gold.
@@ -280,7 +288,7 @@ Mechanics check: matches harvest. Flag — not modelled in tier05/content/events
 ## - [ ] Self-Help Book
 ### The Hollow-Tree Guide — Natlan / Scions of the Canopy — loose
 
-A Scions of the Canopy scout found a stitched-together guide wedged in a hollow tree above Ochkanatlan, left by some outsider who clearly meant to come back for it. Every page bets on a different discipline — a sharpened swing, a lighter guard, a quicker draw — and she's read enough to know only one page will actually apply to what you're carrying. "Take the page that fits your kit," she says, "or don't bother — I'm not walking you through pages that don't."
+A Scions of the Canopy scout found a stitched-together guide wedged in a hollow tree on Coatepec Mountain, left by some outsider who clearly meant to come back for it. Every page bets on a different discipline — a sharpened swing, a lighter guard, a quicker draw — and she's read enough to know only one page will actually apply to what you're carrying. "Take the page that fits your kit," she says, "or don't bother — I'm not walking you through pages that don't."
 
 - **Read the Back** — Choose an Attack to Enchant with Sharp 2.
 - **Read a Random Passage** — Choose a Skill to Enchant with Nimble 2.

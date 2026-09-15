@@ -1,5 +1,11 @@
 # Overgrowth → Mondstadt Event Face — 2026-09-14
 
+> **Fable curation pass, 2026-09-14.** Selection and lore only; one ring of
+> palms above Windrise is now pines. Seven reused, thirteen drafted, all in
+> register. Overgrowth's count is its own (20); Underdocks is a different base
+> zone, so the act-1 faces need not match.
+
+
 Face: Mondstadt (Knights of Favonius / Adventurers' Guild registers)
 Zone: Act 1, Overgrowth (R273: Overgrowth = Mondstadt)
 Source events: 16 Overgrowth (research §2.2) + 4 all-acts (research §2.1) = 20
@@ -157,7 +163,7 @@ Mechanics check: matches harvest.
 
 ### The Wolf-Ring Above Windrise — Mondstadt / Adventurers' Guild — DRAFTED
 
-A perfect ring of windmill-palms stands above Windrise where no windmill was ever built, and Adventurers' Guild hunters camped nearby swear the ring moves half a pace every full moon. One hunter, well into her cups from the Angel's Share, waves you toward the center and says the ring pays generously for company — and asks nothing at all of anyone who just keeps walking.
+A perfect ring of pines stands above Windrise where no windmill was ever built, and Adventurers' Guild hunters camped nearby swear the ring moves half a pace every full moon. One hunter, well into her cups from the Angel's Share, waves you toward the center and says the ring pays generously for company — and asks nothing at all of anyone who just keeps walking.
 
 - **Group** — You empty your purse into the grass and let the ring do as it likes. Lose ALL of your Gold (Mora). Transform 2 cards.
 - **Loner** — You walk on toward Windrise and let the quiet do its own work. Gain 5 Max HP.
