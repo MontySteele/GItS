@@ -194,7 +194,7 @@ OFF in a release package). **Last RELEASE package:
   (`review/ruled/teyvat-nation-mapping-2026-09-14.md`): each act has two
   faces, act 1 Mondstadt or Liyue, act 2 Natlan or Inazuma, act 3 Fontaine or
   Sumeru; the Abyss is reserved as the act-4 face, Nod-Krai and Snezhnaya are
-  later faces (`EB-752`), an act-4 scoping read is `EB-751`. The spike's
+  later faces (`EB-757`), an act-4 scoping read is `EB-756`. The spike's
   decompile half (`review/records/teyvat-spike-zone-read-2026-09-14.md`)
   found a face is a sibling `ActModel` sharing the zone's encounter objects,
   works with a cost; its build half runs on act 1 behind the `TeyvatFrame`
