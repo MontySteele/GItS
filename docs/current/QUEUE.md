@@ -140,9 +140,12 @@ true of the work as a sequencing fact.
 
 ## 7. The Teyvat run frame (R272)
 
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `teyvat-nation-mapping 6` | **CHOOSE** the act-2 and act-3 nation pairs. Pick 1, act 2: (1, default) Natlan + Inazuma; (2) Sumeru + Natlan; (3) Sumeru + Inazuma. Pick 2, act 3: (1, default) Fontaine + Sumeru, with pick 1 at (1); (2) Fontaine + Inazuma; (3) Fontaine + Natlan. The Abyss is the act-4 face; Nod-Krai and Snezhnaya are later faces. -> review/active/teyvat-nation-mapping-2026-09-14.md | OPEN -- spike build half runs on act 1 meanwhile | R272; teyvat-spike-zone-read record |
+**R273 (2026-09-14) ruled the nation mapping at both defaults:** act 2 is Natlan or
+Inazuma, act 3 is Fontaine or Sumeru; act 1 was confirmed Mondstadt or Liyue; the
+Abyss is reserved as the act-4 face; Nod-Krai and Snezhnaya are later faces
+(`EB-752`). The packet is in `review/ruled/`.
+
+**Nothing is open in this section.**
 
 ---
 

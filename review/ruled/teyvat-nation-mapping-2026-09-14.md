@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 and 2: the act-2 and act-3 nation pairs; the kickoff packet `teyvat-run-frame-2026-09-14.md` closes into this one when they are ruled)
+Status: RULED R273 2026-09-14
 
 # Which nations dress acts 2 and 3
 

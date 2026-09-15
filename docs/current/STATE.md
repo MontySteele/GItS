@@ -180,11 +180,19 @@ OFF in a release package). **Last RELEASE package:
   packets: `eb74-lever2-options` (a staged lever, C), `p2-hard-state-thresholds`
   (picks 1–4).
 - **The Teyvat run frame (R272, 2026-09-14)** — the non-mechanical layer
-  reopened beside the kits: two nations per act (act 1 Mondstadt or Liyue),
-  events, text, portraits, act theming and locally packaged music; enemy
-  intents, boss behaviour, relic and potion mechanics stay frozen. Kickoff
-  `review/active/teyvat-run-frame-2026-09-14.md`; a second Fable session
-  runs it. The measurement windows `Win10` and `Win11` stay FROZEN (R213).
+  reopened beside the kits: events, text, portraits, act theming and locally
+  packaged music; enemy intents, boss behaviour, relic and potion mechanics
+  stay frozen, as do the measurement windows `Win10` and `Win11` (R213).
+  **R273 (2026-09-14)** ruled the nation mapping
+  (`review/ruled/teyvat-nation-mapping-2026-09-14.md`): each act has two
+  faces, act 1 Mondstadt or Liyue, act 2 Natlan or Inazuma, act 3 Fontaine or
+  Sumeru; the Abyss is reserved as the act-4 face, Nod-Krai and Snezhnaya are
+  later faces (`EB-752`), an act-4 scoping read is `EB-751`. The spike's
+  decompile half (`review/records/teyvat-spike-zone-read-2026-09-14.md`)
+  found a face is a sibling `ActModel` sharing the zone's encounter objects,
+  works with a cost; its build half runs on act 1 behind the `TeyvatFrame`
+  arm, OFF on every calibration deploy. Media conventions:
+  `operations/media.md`. Kickoff `review/ruled/teyvat-run-frame-2026-09-14.md`.
 
 ## Open [USER] pile
 

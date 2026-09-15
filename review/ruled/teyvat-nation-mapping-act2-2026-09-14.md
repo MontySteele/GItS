@@ -1,6 +1,6 @@
-Status: OPEN (feeds pick 1, the act-2 pair, in teyvat-nation-mapping-2026-09-14.md §6)
+Status: RULED R273 2026-09-14
 
-Scope: ACT 2 (the Hive) ONLY, per `review/active/teyvat-run-frame-2026-09-14.md` §3.2;
+Scope: ACT 2 (the Hive) ONLY, per `review/ruled/teyvat-run-frame-2026-09-14.md` §3.2;
 act 3 (Glory) is a separate agent's packet. Scoring rule is §7.1 of that
 packet: a slot scores for a nation only where the best-fit body is
 nation-exclusive per the family list there; pan-national families (hilichurls,

@@ -1,4 +1,4 @@
-Status: OPEN (feeds pick 2, the act-3 pair, in teyvat-nation-mapping-2026-09-14.md §6)
+Status: RULED R273 2026-09-14
 
 # Act 3 (Glory) nation mapping — all six candidates ranked
 

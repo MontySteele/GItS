@@ -1,8 +1,8 @@
-Status: OPEN (no pick of its own; act 1 is confirmed at its default in teyvat-nation-mapping-2026-09-14.md §2)
+Status: RULED R273 2026-09-14
 
 # Act 1 nation mapping — Overgrowth / Underdocks vs Mondstadt / Liyue
 
-Written per `review/active/teyvat-run-frame-2026-09-14.md` §3.1/§7.1. Scoring
+Written per `review/ruled/teyvat-run-frame-2026-09-14.md` §3.1/§7.1. Scoring
 rule (§7.1): a slot scores for a nation only where its best-fit body is
 **nation-exclusive** (Liyue: Geovishaps, Millelith, Liyue-only Treasure
 Hoarder variants; Mondstadt: Dvalin-adjacent, Stormterror-era, Knights of

@@ -2,7 +2,7 @@ Status: RECORD (spike 4.1 decompile half; feasibility only, nothing measured)
 
 # Spike 4.1, first half: can one zone be dressed two ways?
 
-A decompile read of `sts2.dll` 0.111.0, answering §4.1 of `review/active/teyvat-run-frame-2026-09-14.md`. Nothing was built, deployed or launched. The decompile lives outside the repo at `C:\Users\Monty\AppData\Local\Temp\claude\teyvat-decomp\` (3,538 files, `ilspycmd -p`); every path below is relative to that directory. Nothing here is measured and nothing here is quotable.
+A decompile read of `sts2.dll` 0.111.0, answering §4.1 of `review/ruled/teyvat-run-frame-2026-09-14.md`. Nothing was built, deployed or launched. The decompile lives outside the repo at `C:\Users\Monty\AppData\Local\Temp\claude\teyvat-decomp\` (3,538 files, `ilspycmd -p`); every path below is relative to that directory. Nothing here is measured and nothing here is quotable.
 
 ## 1. Verdict: WORKS WITH A COST
 
