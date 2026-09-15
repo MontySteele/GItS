@@ -86,6 +86,91 @@ MENU_TIMEOUT_S = 180.0
 MENU_TIMEOUT_FILES_PER_S = 5.0
 MENU_TIMEOUT_MAX_S = 900.0
 
+# ----------------------------------------------- EB-766: the boot stall ----
+#
+# EB-763 SCALED THE WAIT; IT DID NOT EXPLAIN THE OUTLIERS. The fairness read
+# of 2026-09-15 launched 30 times: 24 games reached the menu in about 20 s and
+# 6 blew the whole scaled budget -- up to 426 s of an overnight round spent
+# waiting on a process that was never going to answer. The two populations do
+# not overlap, so the long tail is not "a bigger store took longer". It is a
+# different failure wearing the budget's clothes.
+#
+# WHAT A GOOD BOOT LOOKS LIKE. 25 sessions were measured off
+# `understudy/logs/soak/reversibility-*.json` (entry 3's `ts` is the launch,
+# entry 4's is the first line after `wait_for_menu` returned): 15.6 s to
+# 27.4 s, and the spread does NOT track the store's size. In `godot.log` the
+# boot is `[INFO] OVERWRITING cloud saves with local saves.`, then ~811
+# `Wrote N bytes to ... in steam remote store` lines, then
+# `Profile-scoped data path initialized: user://steam/...` -- which is the
+# marker that the profile is up and the menu is close behind.
+#
+# WHAT A STALLED BOOT LOOKS LIKE. The process is alive. `GET /` answers `ok`.
+# `GET /api/v1/singleplayer` never returns, because that route hops to the
+# game thread and waits there with no timeout -- the EB-489 shape, which
+# `understudy/hangwatch.py` already carries the diagnosis for. The log stops
+# growing and the profile marker never lands. A relaunch one second later
+# boots normally, every time it was tried.
+#
+# WHAT PRECEDES ONE. 3 of the 8 launches that followed a game which had lived
+# under 40 s and was killed 1.1 s earlier stalled; 0 of the 12 that followed a
+# longer session did. Steam is still tearing the previous client session down
+# when the next process asks it for the remote store, so the fix has two
+# halves: DO NOT RELAUNCH INTO THE TEARDOWN (`RELAUNCH_DEAD_GAP_S`), and when
+# it happens anyway, notice in 45 s rather than in 426 (everything else here).
+#
+# WHY 45 s. It is 1.6x the slowest good boot measured, which is the margin a
+# watchdog wants over a population whose spread is 12 s wide. The cost of a
+# false positive is one relaunch; the cost of a false negative was the four
+# lost batches EB-763 is about.
+BOOT_STALL_AFTER_S = 45.0
+# How long the log may stand still, once the profile marker HAS landed, before
+# a boot with a live root endpoint and a dead state endpoint is called a
+# stall. A boot that is merely slow is still writing store lines.
+BOOT_STALL_LOG_QUIET_S = 15.0
+# Kill-sleep-relaunch this many times before falling back to the full scaled
+# budget from `menu_timeout_for`. Two, because the live read never saw a
+# second consecutive stall and because three relaunches cost more than the
+# budget they are saving.
+BOOT_STALL_RETRIES = 2
+# The dead gap between killing a game and launching the next one, and the
+# first half of EB-766's fix (see the block above: the stalls followed a kill
+# 1.1 s before the launch). It is a floor under EVERY relaunch this session
+# makes -- the stall retry, `restart()`, and a second `setup()` in the same
+# process -- because the thing being waited out is Steam's teardown, not ours.
+RELAUNCH_DEAD_GAP_S = 10.0
+# How often the boot watch looks at its three signals. `bridge._request`
+# carries a 20 s socket timeout of its own, so a hung state endpoint sets the
+# real cadence; this is the floor, not the period.
+BOOT_POLL_S = 2.0
+# The line in `godot.log` that says the profile is up. Matched as a substring:
+# the path that follows it is the machine's business.
+PROFILE_READY_MARKER = "Profile-scoped data path initialized"
+# Where a session's `godot.log` is copied at teardown. Godot keeps five logs
+# and a stalled boot is usually diagnosed the morning after, by which time the
+# fifth relaunch has rotated the evidence out -- which is why the six stalled
+# boots of 2026-09-15 have no logs at all.
+GODOT_LOG_ARCHIVE = REPO / "understudy" / "logs" / "godot"
+
+
+def boot_stall_verdict(elapsed_s: float, health_ok: bool, ever_state: bool,
+                       marker_seen: bool, log_quiet_s: float) -> bool:
+    """`EB-766`. Does this boot look STALLED rather than merely slow?
+
+    Pure, so the judgment is exercised off a test rather than off a night that
+    went wrong. The three signals are the root endpoint (answered from a
+    ThreadPool worker, so it survives a game-thread stall), whether the state
+    endpoint has EVER answered, and the log -- its size and whether the
+    profile marker has landed. The block above says where each number is from.
+    """
+    if elapsed_s < BOOT_STALL_AFTER_S:
+        return False
+    # A state endpoint that has answered once is not stalled on the game
+    # thread, and a root endpoint that is silent is a dead process or a dead
+    # wire -- neither is this defect, and a relaunch is not its answer.
+    if ever_state or not health_ok:
+        return False
+    return (not marker_seen) or log_quiet_s >= BOOT_STALL_LOG_QUIET_S
+
 
 def menu_timeout_for(history_files: int) -> float:
     """The menu-ready wait for a profile whose run-history store holds N files.

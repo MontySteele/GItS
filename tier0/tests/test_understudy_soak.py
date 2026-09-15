@@ -40,17 +40,34 @@ def _combat(hp=50, round_=1, enemies=(("JAW_0", "Jaxfruit", 30, 40),),
 def test_readiness_is_the_options_key_and_never_the_health_endpoint():
     """R97/5a, made structural. The HTTP server answers ~20 s before the main
     menu has buttons; a launcher that trusts `GET /` acts into an empty menu
-    and then someone spends an evening diagnosing the game for it."""
+    and then someone spends an evening diagnosing the game for it.
+
+    AMENDED BY `EB-766`, AND THE CLAIM IS NARROWER RATHER THAN WEAKER. The
+    boot watch now reads `GET /` -- a root endpoint that answers while the
+    state endpoint never does is the whole evidence for a stalled boot -- so
+    "the seam never calls health" is no longer the fence. The fence is that
+    the only way OUT of the boot watch with a state in hand is the `options`
+    key, and that every health call lives in the one function that cannot
+    return a state.
+    """
     # `EB-180` moved `wait_for_menu` into `soak_session.py`, so this reads the
     # whole seam family: the claim is about the launcher wherever it sits.
     src = seam_source("soak")
-    body = src.split("def wait_for_menu", 1)[1].split("\n    def ", 1)[0]
-    assert '"options"' in body or "options" in body
-    assert "health" not in body, "readiness must not consult GET /"
-    # And the module must not call it at all outside its own docstring.
+    body = src.split("def _watch_boot", 1)[1].split("\n    def ", 1)[0]
+    assert 'state.get("options")' in body, "ready is the options key"
+    for line in body.splitlines():
+        if line.strip() == "return state":
+            break
+    else:                                                    # pragma: no cover
+        raise AssertionError("the boot watch must return the state it read")
+    # THE HEALTH CALL HAS EXACTLY ONE HOME, and that home answers a bool.
     code = "\n".join(line for line in src.splitlines()
                      if not line.strip().startswith("#"))
-    assert "bridge.health(" not in code and "_wire().health(" not in code
+    assert code.count("_wire().health(") == 1
+    assert "bridge.health(" not in code
+    ok = src.split("    def _health_ok", 1)[1].split("\n    def ", 1)[0]
+    assert "_wire().health(" in ok, "and it is `_health_ok`'s"
+    assert "return state" not in ok, "which never hands back a state"
 
 
 # ------------------------------------------------------- EB-763 boot tax ---
