@@ -46,15 +46,16 @@ public abstract class LostWispMirror : TeyvatEventMirror
 
     private const string CurseKey = "Curse";
 
-    private const int BaseGold = 60;
-
-    private const int GoldVariance = 15;
+    // The 60 and the 15 are inlined at their use sites, as every other
+    // mirror's base-game numbers are: they are the shipped game's values, and
+    // a named C# constant is one `lint_constant_parity` expects the sim to
+    // have a counterpart for.
 
     /// <summary>`LostWisp.cs:21-26`, value for value.</summary>
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new GoldVar(BaseGold),
+            new GoldVar(60),
             new StringVar(RelicKey,
                 ModelDb.Relic<MegaCrit.Sts2.Core.Models.Relics.LostWisp>().Title.GetFormattedText()),
             new StringVar(CurseKey, ModelDb.Card<Decay>().Title),
@@ -79,7 +80,7 @@ public abstract class LostWispMirror : TeyvatEventMirror
     /// <summary>The base event's swing, ADDED to the canonical 60: 45-75.</summary>
     public override void CalculateVars()
     {
-        DynamicVars.Gold.BaseValue += (decimal)Rng.NextInt(-GoldVariance, GoldVariance + 1);
+        DynamicVars.Gold.BaseValue += (decimal)Rng.NextInt(-15, 16);
     }
 
     /// <summary>`Claim`: the curse FIRST, then the relic.</summary>

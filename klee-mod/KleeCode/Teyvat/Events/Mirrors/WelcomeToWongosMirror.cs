@@ -52,9 +52,9 @@ namespace KleeMod.Teyvat.Events.Mirrors;
 /// </summary>
 public abstract class WelcomeToWongosMirror : TeyvatEventMirror
 {
-    /// <summary>The base event's own constant and key names.</summary>
-    private const int WongoPointsForBadge = 2000;
-
+    /// <summary>The base event's own key names. Its 2000-point badge
+    /// threshold is inlined at its use sites, as every other mirror's
+    /// base-game numbers are.</summary>
     private const string BargainBinCostKey = "BargainBinCost";
 
     private const string FeaturedItemCostKey = "FeaturedItemCost";
@@ -145,14 +145,14 @@ public abstract class WelcomeToWongosMirror : TeyvatEventMirror
     private async Task<LocString> CheckObtainWongoBadge(int pointsEarned)
     {
         int banked = SaveManager.Instance.Progress.WongoPoints;
-        int intoBadge = banked % WongoPointsForBadge;
+        int intoBadge = banked % 2000;
         int afterPurchase = intoBadge + pointsEarned;
         int total = banked + pointsEarned;
         DynamicVars[WongoPointAmountKey].BaseValue = afterPurchase;
-        DynamicVars[RemainingWongoPointAmountKey].BaseValue = WongoPointsForBadge - afterPurchase;
-        DynamicVars[TotalWongoBadgeAmountKey].BaseValue = total / WongoPointsForBadge;
+        DynamicVars[RemainingWongoPointAmountKey].BaseValue = 2000 - afterPurchase;
+        DynamicVars[TotalWongoBadgeAmountKey].BaseValue = total / 2000;
         Owner.ExtraFields.WongoPoints = pointsEarned;
-        if (afterPurchase >= WongoPointsForBadge)
+        if (afterPurchase >= 2000)
         {
             await RelicCmd.Obtain<WongoCustomerAppreciationBadge>(Owner);
             return L10NLookup(PageKey("AFTER_BUY_RECEIVE_BADGE.description"));

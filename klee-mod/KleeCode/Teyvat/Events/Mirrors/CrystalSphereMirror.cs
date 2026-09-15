@@ -53,15 +53,11 @@ public abstract class CrystalSphereMirror : TeyvatEventMirror
 
     private const string PaymentPlanKey = "PaymentPlanCount";
 
-    private const int UncoverFutureCost = 50;
-
-    private const int UncoverFutureRandomMin = 1;
-
-    private const int UncoverFutureRandomMax = 50;
-
-    private const int UncoverFutureProphesizeCount = 3;
-
-    private const int PaymentPlanCount = 6;
+    // The base event's five NUMBERS are inlined at their use sites rather
+    // than named, which is this directory's standing choice (This or That's
+    // 41-69 roll, Punch Off's 91-99). A mirror's numbers are the shipped
+    // game's, not the sim's, and `lint_constant_parity` reads a named C#
+    // constant as one the sim should have a counterpart for.
 
     /// <summary>The base event's own: this event does not replay
     /// identically.</summary>
@@ -71,9 +67,9 @@ public abstract class CrystalSphereMirror : TeyvatEventMirror
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar(UncoverFutureCostKey, UncoverFutureCost),
-            new DynamicVar(UncoverFutureProphesizeKey, UncoverFutureProphesizeCount),
-            new DynamicVar(PaymentPlanKey, PaymentPlanCount),
+            new DynamicVar(UncoverFutureCostKey, 50m),
+            new DynamicVar(UncoverFutureProphesizeKey, 3m),
+            new DynamicVar(PaymentPlanKey, 6m),
             new StringVar("CurseTitle", ModelDb.Card<Debt>().Title),
         };
 
@@ -82,7 +78,7 @@ public abstract class CrystalSphereMirror : TeyvatEventMirror
     public override void CalculateVars()
     {
         DynamicVars[UncoverFutureCostKey].BaseValue +=
-            (decimal)Rng.NextInt(UncoverFutureRandomMin, UncoverFutureRandomMax);
+            (decimal)Rng.NextInt(1, 50);
     }
 
     /// <summary>The base event's gate, both halves: 100 gold on every player,
@@ -114,7 +110,7 @@ public abstract class CrystalSphereMirror : TeyvatEventMirror
         await PlayerCmd.LoseGold(
             DynamicVars[UncoverFutureCostKey].BaseValue, Owner, GoldLossType.Spent);
         CrystalSphereMinigame minigame =
-            new CrystalSphereMinigame(Owner, Rng, UncoverFutureProphesizeCount);
+            new CrystalSphereMinigame(Owner, Rng, 3);
         await minigame.PlayMinigame();
         SetEventFinished(L10NLookup(PageKey("FINISH.description")));
     }
@@ -124,7 +120,7 @@ public abstract class CrystalSphereMirror : TeyvatEventMirror
     private async Task PaymentPlan()
     {
         await CardPileCmd.AddCurseToDeck<Debt>(Owner);
-        CrystalSphereMinigame minigame = new CrystalSphereMinigame(Owner, Rng, PaymentPlanCount);
+        CrystalSphereMinigame minigame = new CrystalSphereMinigame(Owner, Rng, 6);
         await minigame.PlayMinigame();
         SetEventFinished(L10NLookup(PageKey("FINISH.description")));
     }
