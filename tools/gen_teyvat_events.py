@@ -229,6 +229,23 @@ MIRRORS: Dict[str, MirrorSpec] = {
         )),
     "MorphicGrove": MirrorSpec("MorphicGroveMirror"),
     "SapphireSeed": MirrorSpec("SapphireSeedMirror"),
+
+    # --- act 1, batch 3 ---------------------------------------------------
+    "TeaMaster": MirrorSpec(
+        "TeaMasterMirror",
+        options=("BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY"),
+        extra_options=(
+            ("pages.INITIAL.options.BONE_TEA_LOCKED", "BONE_TEA"),
+            ("pages.INITIAL.options.EMBER_TEA_LOCKED", "EMBER_TEA"),
+        ),
+        page_source=(("pages.DONE.description", "BONE_TEA"),)),
+    "UnrestSite": MirrorSpec("UnrestSiteMirror"),
+    "Wellspring": MirrorSpec("WellspringMirror"),
+    "WhisperingHollow": MirrorSpec("WhisperingHollowMirror"),
+    "WoodCarvings": MirrorSpec(
+        "WoodCarvingsMirror",
+        options=("BIRD", "SNAKE", "TORUS"),
+        extra_options=(("pages.INITIAL.options.SNAKE_LOCKED", "SNAKE"),)),
 }
 
 

@@ -424,6 +424,47 @@ internal static partial class TeyvatLoc
                 "Heal 9 HP. Upgrade a card in your Deck.",
             ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.PLANT.description"] =
                 "Enchant a card with Sown.",
+            // AngelsSharesTastingFlight (Mondstadt / TeaMaster)
+            ["ANGELS_SHARES_TASTING_FLIGHT.title"] =
+                "The Angel's Share's Tasting Flight",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.description"] =
+                "The Angel's Share keeps a back-room tasting flight nobody orders "
+                + "unless Charles vouches for them personally. Three cups sit on the "
+                + "bar: a bone-pale tea that sharpens a duelist's opening stance, a "
+                + "bitter ember-red brew that a Knight swears kept her arm strong "
+                + "through five straight bouts, and a free cup Charles pours with a "
+                + "warning look that you should probably heed.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA.title"] =
+                "Bone Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA.description"] =
+                "Pay 50 Gold (Mora). At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA.title"] =
+                "Ember Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA.description"] =
+                "Pay 150 Gold (Mora). At the start of the next 5 combats, gain 2 "
+                + "Strength.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.TEA_OF_DISCOURTESY.title"] =
+                "Tea of Discourtesy",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.TEA_OF_DISCOURTESY.description"] =
+                "At the start of the next combat, shuffle 2 Dazed into your Draw "
+                + "Pile.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA_LOCKED.title"] =
+                "Bone Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA_LOCKED.description"] =
+                "Pay 50 Gold (Mora). At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA_LOCKED.title"] =
+                "Ember Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA_LOCKED.description"] =
+                "Pay 150 Gold (Mora). At the start of the next 5 combats, gain 2 "
+                + "Strength.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.DONE.description"] =
+                "Pay 50 Gold (Mora). At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.TEA_OF_DISCOURTESY.description"] =
+                "At the start of the next combat, shuffle 2 Dazed into your Draw "
+                + "Pile.",
             // GuildsStandingCommissionAtCapeOath (Mondstadt / TheLegendsWereTrue)
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH.title"] =
                 "The Guild's Standing Commission at Cape Oath",
@@ -447,6 +488,117 @@ internal static partial class TeyvatLoc
                 "Receive the Spoils Map.",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH.pages.SLOWLY_FIND_AN_EXIT.description"] =
                 "Lose 8 HP. Procure 1 random Potion.",
+            // HauntedCampsiteBelowDragonspine (Mondstadt / UnrestSite)
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.title"] =
+                "The Haunted Campsite Below Dragonspine",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.description"] =
+                "A ring of scorched stones at Dragonspine's foot looks like a rest "
+                + "site from a distance, but the Knights of Favonius have posted it "
+                + "as unfit for overnight use — regulation says why, in three dense "
+                + "paragraphs about what campers here report seeing. You can make "
+                + "camp anyway and take your chances with the dreams, or dig out the "
+                + "roots that seem to be causing the trouble and see what comes "
+                + "loose.",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.REST.title"] =
+                "Rest Anyways",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.REST.description"] =
+                "Heal to full HP. Receive Poor Sleep (curse).",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.KILL.title"] =
+                "Kill the Trees",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.KILL.description"] =
+                "Lose 8 Max HP. Obtain a random Relic.",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.REST.description"] =
+                "Heal to full HP. Receive Poor Sleep (curse).",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.KILL.description"] =
+                "Lose 8 Max HP. Obtain a random Relic.",
+            // SpringvaleFont (Mondstadt / Wellspring)
+            ["SPRINGVALE_FONT.title"] =
+                "The Springvale Font",
+            ["SPRINGVALE_FONT.pages.INITIAL.description"] =
+                "Above Springvale, past the last hound, a spring feeds Cider Lake "
+                + "straight out of the rock. A Knight of Favonius on well-duty is "
+                + "scrubbing her tabard in it and does not stop to salute you. "
+                + "\"Sister Victoria says it's Barbatos's water, so it hears "
+                + "confession whether you offer one or not. I'd bottle it and keep "
+                + "your mouth shut.\"",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BOTTLE.title"] =
+                "Bottle It",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BOTTLE.description"] =
+                "You fill a flask from the head of the spring while the current is "
+                + "still bright. Procure 1 random Potion.",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BATHE.title"] =
+                "Bathe",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BATHE.description"] =
+                "You wade in and the cold pulls one old reflex right out of your "
+                + "hands — Remove 1 card from Deck. You climb out clean, and spend "
+                + "the rest of the walk to Mondstadt turning over exactly why that "
+                + "one, and who it belonged to before you. Add 1 Guilty (curse) to "
+                + "Deck.",
+            ["SPRINGVALE_FONT.pages.BOTTLE.description"] =
+                "You fill a flask from the head of the spring while the current is "
+                + "still bright. Procure 1 random Potion.",
+            ["SPRINGVALE_FONT.pages.BATHE.description"] =
+                "You wade in and the cold pulls one old reflex right out of your "
+                + "hands — Remove 1 card from Deck. You climb out clean, and spend "
+                + "the rest of the walk to Mondstadt turning over exactly why that "
+                + "one, and who it belonged to before you. Add 1 Guilty (curse) to "
+                + "Deck.",
+            // MosiMosiAtStormbearerPoint (Mondstadt / WhisperingHollow)
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.title"] =
+                "Mosi Mosi at Stormbearer Point",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.description"] =
+                "Wind off Stormbearer Point has scoured a hilichurl camp down to "
+                + "stakes, a cauldron, and one enormous mask. A Guild scout chalked "
+                + "the rock nearby: NON-HOSTILE, DO NOT PROVOKE, THEY TRADE. The "
+                + "shaman stirs something violently blue, taps the cauldron twice, "
+                + "then taps its own chest — two prices, your pick.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.GOLD.title"] =
+                "Barter for the Brew",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.GOLD.description"] =
+                "Lose 50 Mora. Procure 2 random Potions.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.HUG.title"] =
+                "Kneel for the Shaman's Mark",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.HUG.description"] =
+                "Lose 9 HP. Choose a card to Transform.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.GOLD.description"] =
+                "Lose 50 Mora. Procure 2 random Potions.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.HUG.description"] =
+                "Lose 9 HP. Choose a card to Transform.",
+            // HuntersTotemPostsNearWolvendom (Mondstadt / WoodCarvings)
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.title"] =
+                "The Hunters' Totem Posts Near Wolvendom",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.description"] =
+                "Adventurers' Guild hunters camped at the edge of Wolvendom have "
+                + "carved three totem posts from windfall wood — a diving falcon, a "
+                + "coiled serpent, and a squat, armored shape nobody can agree on. A "
+                + "hunter says each post remembers what it was carved to be, and "
+                + "offers to work the same trick into a beginner's starting gear, if "
+                + "you can spare one to the fire.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.BIRD.title"] =
+                "Bird",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.BIRD.description"] =
+                "Choose 1 starter card to Transform into Peck.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE.title"] =
+                "Snake",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE.description"] =
+                "Enchant 1 card with Slither. (Locked if no cards can be enchanted "
+                + "with Slither)",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.TORUS.title"] =
+                "Torus",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.TORUS.description"] =
+                "Choose 1 starter card to Transform into Toric Toughness.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE_LOCKED.title"] =
+                "Snake",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE_LOCKED.description"] =
+                "Enchant 1 card with Slither. (Locked if no cards can be enchanted "
+                + "with Slither)",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.BIRD.description"] =
+                "Choose 1 starter card to Transform into Peck.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.SNAKE.description"] =
+                "Enchant 1 card with Slither. (Locked if no cards can be enchanted "
+                + "with Slither)",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.TORUS.description"] =
+                "Choose 1 starter card to Transform into Toric Toughness.",
             // ContractRecitingGrowth (Liyue / BrainLeech)
             ["CONTRACT_RECITING_GROWTH.title"] =
                 "The Contract-Reciting Growth",
@@ -502,6 +654,46 @@ internal static partial class TeyvatLoc
             ["QINGCE_LARDER.pages.SEARCH.description"] =
                 "Lose 14 HP. Obtain The Chosen Cheese (relic): at the end of "
                 + "combat, gain 1 Max HP.",
+            // SteeperAtHeyu (Liyue / TeaMaster)
+            ["STEEPER_AT_HEYU.title"] =
+                "The Steeper at Heyu",
+            ["STEEPER_AT_HEYU.pages.INITIAL.description"] =
+                "Heyu Tea House keeps a back room where the kettle is never quite "
+                + "allowed to cool. The master there does not ask your name, only "
+                + "your intent, then sets three cups on a Cor Lapis tray without "
+                + "waiting for an answer. Payment, she mentions, is customary before "
+                + "the first sip — this being Liyue, and a contract being a contract.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA.title"] =
+                "Bone-Ash Oolong",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA.description"] =
+                "Pay 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA.title"] =
+                "Cinnabar Ember Tea",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA.description"] =
+                "Pay 150 Mora. At the start of the next 5 combats, gain 2 Strength.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.TEA_OF_DISCOURTESY.title"] =
+                "Tea of Discourtesy",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.TEA_OF_DISCOURTESY.description"] =
+                "Take the free cup — yesterday's leaves, poured without ceremony "
+                + "and drunk the same way. At the start of the next combat, shuffle 2 "
+                + "Dazed into your Draw Pile.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA_LOCKED.title"] =
+                "Bone-Ash Oolong",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA_LOCKED.description"] =
+                "Pay 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA_LOCKED.title"] =
+                "Cinnabar Ember Tea",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA_LOCKED.description"] =
+                "Pay 150 Mora. At the start of the next 5 combats, gain 2 Strength.",
+            ["STEEPER_AT_HEYU.pages.DONE.description"] =
+                "Pay 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["STEEPER_AT_HEYU.pages.TEA_OF_DISCOURTESY.description"] =
+                "Take the free cup — yesterday's leaves, poured without ceremony "
+                + "and drunk the same way. At the start of the next combat, shuffle 2 "
+                + "Dazed into your Draw Pile.",
             // TalesOfGuyunWereTrue (Liyue / TheLegendsWereTrue)
             ["TALES_OF_GUYUN_WERE_TRUE.title"] =
                 "The Tales of Guyun Were True",
@@ -829,11 +1021,41 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.EAT.description", "pages.PLANT.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Mondstadt.AngelsSharesTastingFlight)] = new EventShape(
+                "ANGELS_SHARES_TASTING_FLIGHT", "TeaMasterMirror",
+                new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
+                new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
+                new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
+                false),
             [typeof(Events.Mondstadt.GuildsStandingCommissionAtCapeOath)] = new EventShape(
                 "GUILDS_STANDING_COMMISSION_AT_CAPE_OATH", "TheLegendsWereTrueMirror",
                 new[] { "NAB_THE_MAP", "SLOWLY_FIND_AN_EXIT" },
                 new[] { "pages.NAB_THE_MAP.description", "pages.SLOWLY_FIND_AN_EXIT.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.HauntedCampsiteBelowDragonspine)] = new EventShape(
+                "HAUNTED_CAMPSITE_BELOW_DRAGONSPINE", "UnrestSiteMirror",
+                new[] { "REST", "KILL" },
+                new[] { "pages.REST.description", "pages.KILL.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.SpringvaleFont)] = new EventShape(
+                "SPRINGVALE_FONT", "WellspringMirror",
+                new[] { "BOTTLE", "BATHE" },
+                new[] { "pages.BOTTLE.description", "pages.BATHE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.MosiMosiAtStormbearerPoint)] = new EventShape(
+                "MOSI_MOSI_AT_STORMBEARER_POINT", "WhisperingHollowMirror",
+                new[] { "GOLD", "HUG" },
+                new[] { "pages.GOLD.description", "pages.HUG.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.HuntersTotemPostsNearWolvendom)] = new EventShape(
+                "HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM", "WoodCarvingsMirror",
+                new[] { "BIRD", "SNAKE", "TORUS" },
+                new[] { "pages.BIRD.description", "pages.SNAKE.description", "pages.TORUS.description" },
+                new[] { "pages.INITIAL.options.SNAKE_LOCKED" },
                 false),
             [typeof(Events.Liyue.ContractRecitingGrowth)] = new EventShape(
                 "CONTRACT_RECITING_GROWTH", "BrainLeechMirror",
@@ -846,6 +1068,12 @@ internal static class TeyvatGeneratedEvents
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
                 Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.SteeperAtHeyu)] = new EventShape(
+                "STEEPER_AT_HEYU", "TeaMasterMirror",
+                new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
+                new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
+                new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
                 false),
             [typeof(Events.Liyue.TalesOfGuyunWereTrue)] = new EventShape(
                 "TALES_OF_GUYUN_WERE_TRUE", "TheLegendsWereTrueMirror",
@@ -904,12 +1132,24 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Mondstadt.SpringvaleCheeseCellar>(),
             [(TeyvatFrame.Mondstadt, typeof(SapphireSeed))] =
                 () => ModelDb.Event<Events.Mondstadt.CliffsideSeedNearCapeOath>(),
+            [(TeyvatFrame.Mondstadt, typeof(TeaMaster))] =
+                () => ModelDb.Event<Events.Mondstadt.AngelsSharesTastingFlight>(),
             [(TeyvatFrame.Mondstadt, typeof(TheLegendsWereTrue))] =
                 () => ModelDb.Event<Events.Mondstadt.GuildsStandingCommissionAtCapeOath>(),
+            [(TeyvatFrame.Mondstadt, typeof(UnrestSite))] =
+                () => ModelDb.Event<Events.Mondstadt.HauntedCampsiteBelowDragonspine>(),
+            [(TeyvatFrame.Mondstadt, typeof(Wellspring))] =
+                () => ModelDb.Event<Events.Mondstadt.SpringvaleFont>(),
+            [(TeyvatFrame.Mondstadt, typeof(WhisperingHollow))] =
+                () => ModelDb.Event<Events.Mondstadt.MosiMosiAtStormbearerPoint>(),
+            [(TeyvatFrame.Mondstadt, typeof(WoodCarvings))] =
+                () => ModelDb.Event<Events.Mondstadt.HuntersTotemPostsNearWolvendom>(),
             [(TeyvatFrame.Liyue, typeof(BrainLeech))] =
                 () => ModelDb.Event<Events.Liyue.ContractRecitingGrowth>(),
             [(TeyvatFrame.Liyue, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Liyue.QingceLarder>(),
+            [(TeyvatFrame.Liyue, typeof(TeaMaster))] =
+                () => ModelDb.Event<Events.Liyue.SteeperAtHeyu>(),
             [(TeyvatFrame.Liyue, typeof(TheLegendsWereTrue))] =
                 () => ModelDb.Event<Events.Liyue.TalesOfGuyunWereTrue>(),
             [(TeyvatFrame.Liyue, typeof(SelfHelpBook))] =
@@ -965,12 +1205,24 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/room_full_of_cheese.png",
             ["CLIFFSIDE_SEED_NEAR_CAPE_OATH"] =
                 "res://images/events/sapphire_seed.png",
+            ["ANGELS_SHARES_TASTING_FLIGHT"] =
+                "res://images/events/tea_master.png",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH"] =
                 "res://images/events/the_legends_were_true.png",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE"] =
+                "res://images/events/unrest_site.png",
+            ["SPRINGVALE_FONT"] =
+                "res://images/events/wellspring.png",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT"] =
+                "res://images/events/whispering_hollow.png",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM"] =
+                "res://images/events/wood_carvings.png",
             ["CONTRACT_RECITING_GROWTH"] =
                 "res://images/events/brain_leech.png",
             ["QINGCE_LARDER"] =
                 "res://images/events/room_full_of_cheese.png",
+            ["STEEPER_AT_HEYU"] =
+                "res://images/events/tea_master.png",
             ["TALES_OF_GUYUN_WERE_TRUE"] =
                 "res://images/events/the_legends_were_true.png",
             ["SIX_CONTRACTS_TO_ABETTER_YOU"] =
