@@ -92,13 +92,19 @@ internal static partial class TeyvatLoc
 
         try
         {
-            // The two act titles. `ActModel.Title` is `new LocString("acts",
-            // Id.Entry + ".title")`, so these are the names the map screen and
-            // the run-history row print.
+            // The six act titles, two faces for each of the three acts.
+            // `ActModel.Title` is `new LocString("acts", Id.Entry +
+            // ".title")`, so these are the names the map screen and the
+            // run-history row print -- and the only thing that names a
+            // dressing at all, since a missing row renders the raw key.
             LocManager.Instance.GetTable("acts").MergeWith(new Dictionary<string, string>
             {
                 [TeyvatFrame.Mondstadt + ".title"] = "Mondstadt",
                 [TeyvatFrame.Liyue + ".title"] = "Liyue",
+                [TeyvatFrame.Natlan + ".title"] = "Natlan",
+                [TeyvatFrame.Inazuma + ".title"] = "Inazuma",
+                [TeyvatFrame.Fontaine + ".title"] = "Fontaine",
+                [TeyvatFrame.Sumeru + ".title"] = "Sumeru",
             });
 
             // The dressed enemy names, derived from the same table the patch
