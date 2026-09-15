@@ -372,6 +372,8 @@ each option randomly specifies Attack, Skill, or Power.
 
 Mechanics check: matches harvest.
 
+@pages.DONE.description — The clerk stamps the surrender, the appraiser countersigns, and the technique changes hands at the customs gate. "Per the charter."
+
 ---
 
 ## - [ ] This or That_

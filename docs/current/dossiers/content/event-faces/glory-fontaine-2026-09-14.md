@@ -46,6 +46,9 @@ Beneath the Institute's glass roof, a Melusine technician in oversized overalls 
 
 Mechanics check: matches harvest (75/150/300 HP dummy, 3-turn cap, potion / 2-upgrade / relic rewards, no reward on failure).
 
+@pages.VICTORY.description — The water-clock is not yet empty when the meka's padding gives way. The technician closes her ledger and hands over what that valve was rated for.
+@pages.DEFEAT.description — The water-clock runs dry with the meka still standing. The technician closes her ledger without writing anything, which is somehow worse.
+
 ---
 
 ## - [ ] Crystal Sphere
@@ -238,6 +241,21 @@ The Nameless Case (Nondescript Trial):
 
 Mechanics check: matches harvest and the shipped `the_trial` row (one of the three variants rolled per visit; every verdict a curse-for-payout trade, numbers unchanged).
 
+@pages.INITIAL.options.ACCEPT | Take the Empty Seat — Sit on the jury. One case is called, and you deliver its verdict.
+@pages.INITIAL.options.REJECT | Decline the Summons — Try to leave the gallery.
+@pages.REJECT.description — The usher's smile does not move. "The Chief Justice does not open a docket a seat short, and the doors do not open until the docket closes." Behind him the gardes have already turned to face the aisle.
+@pages.REJECT.options.ACCEPT | Take the Seat After All — Sit on the jury. One case is called.
+@pages.REJECT.options.DOUBLE_DOWN | Walk Out of the Opera — Push past the gardes and leave Fontaine's justice behind. This ends the run.
+@pages.MERCHANT.description — The defendant is a Fleuve Cendre smuggler in a Court-issued suit, accused of moving unlicensed potions through the Poisson canals. The Oratrice hums. The gallery waits on the empty seat.
+@pages.NOBLE.description — The defendant is a Palais Mermonia heir accused of paying a duel's loser to lose. The Oratrice hums. The gallery waits on the empty seat.
+@pages.NONDESCRIPT.description — The defendant gives no name, and the docket lists no crime beyond "obstruction of the Oratrice." The Oratrice hums. The gallery waits on the empty seat.
+@pages.MERCHANT_GUILTY.description — The Oratrice agrees with you. The smuggler's confiscated stock is offered to the jury first, and the verdict follows you out of the Opera as Regret.
+@pages.MERCHANT_INNOCENT.description — The Oratrice disagrees. The gardes release the smuggler, and a clerk quietly notes the dissent beside your name: Shame. The Court pays its jurors in technique, not Mora.
+@pages.NOBLE_GUILTY.description — The Oratrice agrees. The heir is fined, the gallery cheers, and a Melusine attendant presses a tonic into your hand on the way out.
+@pages.NOBLE_INNOCENT.description — The Oratrice disagrees, loudly. The heir's family thanks you with a very full purse, and you carry the verdict out as Regret.
+@pages.NONDESCRIPT_GUILTY.description — The Oratrice returns no reading at all. The nameless defendant is led away, the docket closes, and Doubt closes with it. The clerk hands you two files from the evidence table.
+@pages.NONDESCRIPT_INNOCENT.description — The Oratrice returns no reading at all. The nameless defendant walks, thanks you, and leaves you with Doubt and two techniques you no longer recognise as your own.
+
 ---
 
 ## - [ ] This or That?
@@ -280,6 +298,23 @@ Modification (two of that chassis's three offered at random):
 The result is your custom Prototype (Mad Science) card.
 
 Mechanics check: matches harvest (two-step chassis/modification chooser, both steps randomly offering two of three, all rider numbers unchanged). Flag: not in `events.yaml`'s pool — absent from the modelled pool with no named blocker in the file's skip list; an engine gap, not a mechanics mismatch.
+
+@pages.INITIAL.options.CHOOSE_CARD_TYPE | Choose a Chassis — Pick one of the two chassis on offer.
+@pages.CHOOSE_CARD_TYPE.description — The Melusine engineer sets two chassis on the bench and taps the blast glass. "One prototype per visitor. Chassis first, then the modification."
+@pages.CHOOSE_CARD_TYPE.options.ATTACK | Harpoon — Create an Attack. (Deal 12 damage.)
+@pages.CHOOSE_CARD_TYPE.options.SKILL | Bulwark Plate — Create a Skill. (Gain 8 Block.)
+@pages.CHOOSE_CARD_TYPE.options.POWER | Aetheric Core — Create a Power.
+@pages.CHOOSE_RIDER.description — She slides open the drawer for that chassis. Two modifications fit it. "Pick one. Both are tested. Neither is safe."
+@pages.CHOOSE_RIDER.options.SAPPING | Corrosive — Apply 2 Weak. Apply 2 Vulnerable.
+@pages.CHOOSE_RIDER.options.VIOLENCE | Repeater — Hits 2 additional times.
+@pages.CHOOSE_RIDER.options.CHOKING | Pressure Leak — Whenever you play a card this turn, the enemy loses 6 HP.
+@pages.CHOOSE_RIDER.options.ENERGIZED | Overcharge — Gain 2 energy.
+@pages.CHOOSE_RIDER.options.WISDOM | Blueprints — Draw 3 cards.
+@pages.CHOOSE_RIDER.options.CHAOS | Misfire — Add a random card into your Hand. It's free to play this turn.
+@pages.CHOOSE_RIDER.options.EXPERTISE | Calibration — Gain 2 Strength. Gain 2 Dexterity.
+@pages.CHOOSE_RIDER.options.CURIOUS | Curiosity — Powers cost 1 less.
+@pages.CHOOSE_RIDER.options.IMPROVEMENT | Field Testing — At the end of combat, Upgrade a random card.
+@pages.DONE.description — The Prototype comes off the bench ticking. She stamps the Institute's mark on it and waves you back behind the glass.
 
 ---
 

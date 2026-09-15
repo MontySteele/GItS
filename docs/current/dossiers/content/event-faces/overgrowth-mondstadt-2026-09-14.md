@@ -68,6 +68,8 @@ Mechanics notes (verbatim from the harvest): the first 3 potions in your potion 
 
 Mechanics check: matches harvest (verified in the original gallery pass).
 
+@pages.DONE.description — The quartermaster signs the confiscation slip and slides the technique across the trestle. "Regulations satisfied. Courtesy too."
+
 ---
 
 ## - [ ] This or That?

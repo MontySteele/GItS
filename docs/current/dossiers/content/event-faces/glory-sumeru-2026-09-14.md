@@ -44,6 +44,9 @@ In a fenced yard behind the Kshahrewar workshops below the Akademiya, mechanists
 
 Mechanics check: matches harvest.
 
+@pages.VICTORY.description — The spring-drum winds down before the proctor's count does. He marks the bout complete and unlocks that setting's prize.
+@pages.DEFEAT.description — The proctor's count runs out with the construct still on its feet. He marks the bout incomplete and unlocks nothing.
+
 ---
 
 ## - [ ] Crystal Sphere
@@ -248,6 +251,21 @@ The lamps of the House of Daena have burned down to their last oil. A Kshahrewar
 
 Mechanics check: matches harvest (one of the three sub-trials rolled per visit, exactly as `tier05/content/events.yaml`'s `variants` ships).
 
+@pages.INITIAL.options.ACCEPT | Open the Dossiers — Rule on one treatise. The proctor picks which.
+@pages.INITIAL.options.REJECT | Refuse the Desk — Push the dossiers back across the desk.
+@pages.REJECT.description — The proctor does not pick them up. "The sages assigned you this desk. Sabzeruz begins at dawn, and no one leaves the House of Daena with an open docket." The lamps gutter.
+@pages.REJECT.options.ACCEPT | Rule After All — Open the dossiers. One treatise is put before you.
+@pages.REJECT.options.DOUBLE_DOWN | Walk Out of the House — Leave the desk, the docket and the Akademiya behind. This ends the run.
+@pages.MERCHANT.description — The Trader's Treatise: a Port Ormos merchant's account of a rare ink, suspiciously profitable and suspiciously well cited. The proctor waits with the seal.
+@pages.NOBLE.description — The Patron's Treatise: a rich patron's name on a paper his scribes plainly wrote, with a footnote that flatters a sage. The proctor waits with the seal.
+@pages.NONDESCRIPT.description — The Unsigned Treatise: no author, no darshan, and findings nobody has managed to repeat or to disprove. The proctor waits with the seal.
+@pages.MERCHANT_GUILTY.description — Forged. The merchant's samples are seized, and the proctor lets you keep two of them. The seal you pressed is Regret.
+@pages.MERCHANT_INNOCENT.description — Sound. The merchant sells his ink at a premium the next morning, and the proctor notes your leniency as Shame. Your fee is technique, refined.
+@pages.NOBLE_GUILTY.description — Forged. The patron is struck from the roll, and the House stewards bring you tea and a bandage.
+@pages.NOBLE_INNOCENT.description — Sound. The patron's steward leaves a very heavy purse on the desk, and you carry the seal out as Regret.
+@pages.NONDESCRIPT_GUILTY.description — Forged, you rule, and nobody can prove otherwise. The proctor files it under Doubt and hands you the next two manuscripts from the pile.
+@pages.NONDESCRIPT_INNOCENT.description — Sound, you rule, and nobody can prove otherwise. The proctor files it under Doubt, and two of your own notes come back to you rewritten.
+
 ---
 
 ## - [ ] This or That?
@@ -284,6 +302,23 @@ In a cluttered annex of the Kshahrewar darshan's fabrication hall in Sumeru City
 You leave with a custom Proving Draft (Mad Science) card.
 
 Mechanics check: matches harvest.
+
+@pages.INITIAL.options.CHOOSE_CARD_TYPE | Choose a Frame — Pick one of the two frames on the bench.
+@pages.CHOOSE_CARD_TYPE.description — The mechanist lays two frames on the bench. "One design per visitor. Pick the frame, then the rider that goes in it."
+@pages.CHOOSE_CARD_TYPE.options.ATTACK | Calibrated Striker — Create an Attack. (Deal 12 damage.)
+@pages.CHOOSE_CARD_TYPE.options.SKILL | Ward Plate — Create a Skill. (Gain 8 Block.)
+@pages.CHOOSE_CARD_TYPE.options.POWER | Field Array — Create a Power.
+@pages.CHOOSE_RIDER.description — She opens the drawer beneath the chosen frame. Two riders fit it. "Choose. I will not tell you which one I would take."
+@pages.CHOOSE_RIDER.options.SAPPING | Corrosive Filing — Apply 2 Weak. Apply 2 Vulnerable.
+@pages.CHOOSE_RIDER.options.VIOLENCE | Repeater Coil — Hits 2 additional times.
+@pages.CHOOSE_RIDER.options.CHOKING | Bleed-Off Valve — Whenever you play a card this turn, the enemy loses 6 HP.
+@pages.CHOOSE_RIDER.options.ENERGIZED | Surplus Charge — Gain 2 energy.
+@pages.CHOOSE_RIDER.options.WISDOM | Annotated Draft — Draw 3 cards.
+@pages.CHOOSE_RIDER.options.CHAOS | Improvised Patch — Add a random card into your Hand. It's free to play this turn.
+@pages.CHOOSE_RIDER.options.EXPERTISE | Field Calibration — Gain 2 Strength. Gain 2 Dexterity.
+@pages.CHOOSE_RIDER.options.CURIOUS | Peer-Reviewed Design — Powers cost 1 less.
+@pages.CHOOSE_RIDER.options.IMPROVEMENT | Ongoing Revision — At the end of combat, Upgrade a random card.
+@pages.DONE.description — The Proving Draft comes off the bench warm. She logs it under your name and points you at the containment glass on your way out.
 
 ---
 

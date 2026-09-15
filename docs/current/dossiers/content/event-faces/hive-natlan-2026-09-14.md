@@ -86,6 +86,18 @@ In the high meadows of Tequemecan Valley grows a flower the size of a war-drum, 
 
 Mechanics check: matches harvest and tier05/content/events.yaml (`colossal_flower` / `colossal_flower_2` / `colossal_flower_3`) exactly.
 
+@pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1 | Tap the Nectar — Gain 35 Gold.
+@pages.INITIAL.options.REACH_DEEPER_1 | Reach Deeper — Lose 5 HP. Advance to the next level.
+@pages.REACH_DEEPER_1.description — Past the outer petals the nectar thickens and the flower closes a little around your arm. The clan's drummer starts a slow beat: the count for how long you keep it in.
+@pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2 | Tap the Nectar — Gain 75 Gold.
+@pages.REACH_DEEPER_1.options.REACH_DEEPER_2 | Reach Deeper — Lose 6 HP. Advance to the next level.
+@pages.REACH_DEEPER_2.description — Shoulder-deep now. The drumming is faster, the petals are tight enough to bruise, and something at the flower's heart is warm and pulsing under your fingers.
+@pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD | Tap the Nectar — Gain 135 Gold.
+@pages.REACH_DEEPER_2.options.POLLINOUS_CORE | Reach the Bloom's Heart — Lose 7 HP. Obtain the Bloom's Heart.
+@pages.EXTRACT_CURRENT_PRIZE.description — You pull free with your arm slick to the elbow, and the drummer stops mid-beat. The clan pays out the wager without complaint.
+@pages.EXTRACT_INSTEAD.description — You pull free with your whole side aching, and the drummer stops. The clan pays out the biggest wager of the season and says nothing about the heart.
+@pages.POLLINOUS_CORE.description — The flower shudders and lets go. What you hold is warm, heavy and humming, and every Flower-Feather warrior in the meadow is looking at it.
+
 ---
 
 ## - [ ] Crystal Sphere
