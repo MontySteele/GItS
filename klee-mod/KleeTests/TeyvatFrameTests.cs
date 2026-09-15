@@ -346,6 +346,42 @@ public class TeyvatFrameTests : IDisposable
     }
 
     // ---------------------------------------------------------------
+    // EB-759 / EB-760: the two seams the spike's deploy proved wrong.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// EB-759, STRUCTURALLY, because that is as far as a headless suite can
+    /// go. `LocManager` is outside the headless boundary -- its tables are
+    /// built by the game's boot and this process never loads them -- so no pin
+    /// here can assert that the Mondstadt rows are PRESENT after init; only a
+    /// deploy can, and the row's acceptance line says so. What a pin CAN say
+    /// is the thing that was actually wrong: WHICH SEAM the merge is called
+    /// from.
+    ///
+    /// `TeyvatLoc.Inject` ran from `KleeMod.Initialize`, a `[ModInitializer]`,
+    /// which is upstream of `LocManager.Initialize`. `LocManager.Instance` had
+    /// no tables yet, the merge threw an NRE on every boot, its own catch
+    /// turned that into one ERROR line, and zero rows landed -- so every
+    /// dressed string rendered as its raw key. The card rows never had the bug
+    /// because they have always ridden the postfix. Both halves are pinned: it
+    /// IS in the postfix, and it is NOT in `Initialize`.
+    /// </summary>
+    [Fact]
+    public void The_loc_merge_rides_the_LocManager_postfix_and_not_the_ModInitializer()
+    {
+        var patch = typeof(TeyvatFrame).Assembly
+            .GetType("KleeMod.LocManager_Initialize_Patch", throwOnError: true)!;
+        var postfix = StaticMethod(patch, "Postfix");
+
+        var inPostfix = Il.Calls(postfix);
+        Assert.Contains("TeyvatLoc.Inject", inPostfix);
+        Assert.Contains("KleeMod.InjectLocStrings", inPostfix);
+
+        var initialize = StaticMethod(typeof(KleeMod), nameof(KleeMod.Initialize));
+        Assert.DoesNotContain("TeyvatLoc.Inject", Il.Calls(initialize));
+    }
+
+    // ---------------------------------------------------------------
     // Reflection helpers. Public/protected members are reached by name so a
     // rename is a compile error here rather than a silent skip.
     // ---------------------------------------------------------------
@@ -371,6 +407,16 @@ public class TeyvatFrameTests : IDisposable
     }
 
     private static MethodBase Private(Type type, string name) => Method(type, name);
+
+    /// <summary>The same lookup for a STATIC method -- the boot seams
+    /// EB-759/EB-760 pin are all static.</summary>
+    private static MethodBase StaticMethod(Type type, string name)
+    {
+        var m = type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic
+                                   | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        Assert.NotNull(m);
+        return m!;
+    }
 
     private static MethodBase Getter(Type type, string name)
     {

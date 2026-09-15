@@ -41,14 +41,6 @@ public static class KleeMod
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
         KleePck.LogStatus();
 
-        // THE TEYVAT RUN FRAME ARM's loc rows (spike, -p:TeyvatFrame=true).
-        // A no-op with the arm off -- Teyvat.TeyvatLoc.Inject's first line is
-        // the flag -- so a release build merges not one row. It runs AFTER the
-        // patch bootstrap, because the dressed keys it writes are the keys the
-        // arm's monster-name postfix rewrites to, and before anything reads a
-        // table, because [ModInitializer] is well upstream of any run.
-        Teyvat.TeyvatLoc.Inject();
-
         // Convention-scene + build-id telemetry (animation sprint 1, A3 —
         // permanent). One line per shipped scene: path, found/missing, root
         // node type. A missing scene falls back quietly at the use site, so
@@ -712,12 +704,38 @@ public static class KleeMod
 //  Harmony patches
 // ---------------------------------------------------------------------------
 
-/// <summary>Injects our loc strings once LocManager has built its tables.</summary>
+/// <summary>
+/// Injects our loc strings once LocManager has built its tables.
+///
+/// BOTH MERGES RIDE THIS ONE SEAM (EB-759). The Teyvat arm's rows used to be
+/// merged from <c>KleeMod.Initialize</c>, a <c>[ModInitializer]</c>, which runs
+/// well before <c>LocManager.Initialize</c> — so <c>LocManager.Instance</c>
+/// had no tables and <c>TeyvatLoc.Inject</c>'s own try/catch caught an
+/// <c>NullReferenceException</c> on EVERY boot, merged zero rows, and left
+/// every dressed string rendering as its raw key
+/// (<c>review/records/teyvat-spike-proofs-2026-09-15.md</c>). The call-site
+/// comment there reasoned about when a table is READ; the constraint is when
+/// it EXISTS. The card rows never had the bug because they have always been
+/// here, and the arm's rows are here now for the same reason.
+///
+/// ORDER INSIDE THE POSTFIX DOES NOT MATTER: the two merges touch disjoint
+/// tables (cards/card_keywords/powers/characters against acts/monsters/
+/// intents/events) and neither reads the other's. Both swallow their own
+/// exceptions, so one failing cannot cost the other its text.
+/// </summary>
 [HarmonyPatch(typeof(LocManager), nameof(LocManager.Initialize))]
 internal static class LocManager_Initialize_Patch
 {
     [HarmonyPostfix]
-    public static void Postfix() => KleeMod.InjectLocStrings();
+    public static void Postfix()
+    {
+        KleeMod.InjectLocStrings();
+
+        // THE TEYVAT RUN FRAME ARM's rows (spike, -p:TeyvatFrame=true). A
+        // no-op with the arm off — `TeyvatLoc.Inject`'s first line is the
+        // flag — so a release build merges not one row.
+        Teyvat.TeyvatLoc.Inject();
+    }
 }
 
 // ---------------------------------------------------------------------------
