@@ -292,7 +292,7 @@
       "can_kill": false,
       "dynamic_keys": false,
       "entry": "FAKE_MERCHANT",
-      "harvest_options": null,
+      "harvest_options": "none",
       "option_keys": [],
       "page_keys": [],
       "sealed": true
@@ -531,7 +531,7 @@
       "can_kill": false,
       "dynamic_keys": false,
       "entry": "REFLECTIONS",
-      "harvest_options": null,
+      "harvest_options": 2,
       "option_keys": [
         "TOUCH_A_MIRROR",
         "SHATTER"

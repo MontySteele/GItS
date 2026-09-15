@@ -456,14 +456,29 @@ public class TeyvatFrameTests : IDisposable
         // A count pin on a call the method demonstrably makes, which is the
         // only count `Il.CallSequence` is safe for (its own caveat). The count
         // the re-proof read as zero is the one this is looking at.
+        // AN OPTION IS NOT ALWAYS A `new EventOption`. `EventModel.RelicOption`
+        // is the base game's own helper for an option whose title, description
+        // and hover tips come off a RELIC (Hungry for Mushrooms builds both of
+        // its options that way), and it constructs the `EventOption` inside
+        // `EventModel` rather than in the event. Counting only the ctor would
+        // read such an event as having ZERO options -- which is the exact
+        // reading `Assert.NotEqual(0, mine)` exists to catch, so the helper is
+        // counted as what it is.
         var mine = Il.CallSequence(Method(mirror, "GenerateInitialOptions"))
-            .Count(c => c == "EventOption..ctor");
+            .Count(IsAnOption);
         var theirs = Il.CallSequence(Method(baseEvent, "GenerateInitialOptions"))
-            .Count(c => c == "EventOption..ctor");
+            .Count(IsAnOption);
 
         Assert.Equal(theirs, mine);
         Assert.NotEqual(0, mine);
     }
+
+    /// <summary>One option built, however it was built: the `EventOption`
+    /// constructor, or `EventModel.RelicOption`, which constructs one from a
+    /// relic on the event's behalf.</summary>
+    private static bool IsAnOption(string call) =>
+        call == "EventOption..ctor"
+     || call.StartsWith("EventModel.RelicOption", StringComparison.Ordinal);
 
     [Theory]
     [MemberData(nameof(MirrorPairs))]
@@ -484,7 +499,9 @@ public class TeyvatFrameTests : IDisposable
     /// `IsAllowed` compiles to `&lt;&gt;c.&lt;IsAllowed&gt;b__N_M`, where N is the
     /// ordinal of the declaring method within its type -- which differs between
     /// a base event and a mirror for no reason that means anything, and would
-    /// otherwise make every predicate-carrying gate look changed.
+    /// otherwise make every predicate-carrying gate look changed. A call to
+    /// the type's OWN member is normalised the same way and for the same
+    /// reason; see the comment on that step.
     /// </summary>
     private static IReadOnlyList<string> DeclaredOnlyCalls(Type type, string name)
     {
@@ -497,6 +514,18 @@ public class TeyvatFrameTests : IDisposable
         }
 
         return Il.Calls(method)
+            // A CALL TO THE EVENT'S OWN MEMBER carries the DECLARING TYPE's
+            // name, and that name is the one thing a mirror can never match:
+            // `Amalgamator.IsValid` against `AmalgamatorMirror.IsValid`,
+            // `GraveOfTheForgotten.HasEnchantableCards` against the mirror's,
+            // and the uncached lambda `ZenWeaver.<IsAllowed>b__0` that a
+            // predicate capturing `this` compiles to. All three are the gate
+            // calling ITSELF, which is what the pin wants to see the same on
+            // both sides, so the self-reference is normalised away and
+            // everything else -- a call into any OTHER type -- still compares
+            // by its full name.
+            .Select(c => c.StartsWith(type.Name + ".", StringComparison.Ordinal)
+                ? "<self>." + c.Substring(type.Name.Length + 1) : c)
             .Select(c => System.Text.RegularExpressions.Regex.Replace(
                 c, @"b__\d+_(\d+)$", "b__$1"))
             // The SAME ordinal, on the other shape a lambda compiles to. A
@@ -561,6 +590,34 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(AbyssalBathsMirror), typeof(AbyssalBaths) },
             new object[] { typeof(EndlessConveyorMirror), typeof(EndlessConveyor) },
             new object[] { typeof(TheFutureOfPotionsMirror), typeof(TheFutureOfPotions) },
+            // Acts 2 and 3, batch 1.
+            new object[] { typeof(BugslayerMirror), typeof(Bugslayer) },
+            new object[] { typeof(InfestedAutomatonMirror), typeof(InfestedAutomaton) },
+            new object[] { typeof(SpiritGrafterMirror), typeof(SpiritGrafter) },
+            new object[] { typeof(HungryForMushroomsMirror), typeof(HungryForMushrooms) },
+            new object[] { typeof(TheLanternKeyMirror), typeof(TheLanternKey) },
+            // Acts 2 and 3, batch 2.
+            new object[] { typeof(ReflectionsMirror), typeof(Reflections) },
+            new object[] { typeof(RoundTeaPartyMirror), typeof(RoundTeaParty) },
+            new object[] { typeof(FieldOfManSizedHolesMirror), typeof(FieldOfManSizedHoles) },
+            new object[] { typeof(LostWispMirror), typeof(LostWisp) },
+            new object[] { typeof(PotionCourierMirror), typeof(PotionCourier) },
+            // Acts 2 and 3, batch 3.
+            new object[] { typeof(CrystalSphereMirror), typeof(CrystalSphere) },
+            new object[] { typeof(SymbioteMirror), typeof(Symbiote) },
+            new object[] { typeof(GraveOfTheForgottenMirror), typeof(GraveOfTheForgotten) },
+            new object[] { typeof(ZenWeaverMirror), typeof(ZenWeaver) },
+            new object[] { typeof(AmalgamatorMirror), typeof(Amalgamator) },
+            // Acts 2 and 3, batch 4.
+            new object[] { typeof(StoneOfAllTimeMirror), typeof(StoneOfAllTime) },
+            new object[] { typeof(BattlewornDummyMirror), typeof(BattlewornDummy) },
+            new object[] { typeof(ColorfulPhilosophersMirror), typeof(ColorfulPhilosophers) },
+            new object[] { typeof(RanwidTheElderMirror), typeof(RanwidTheElder) },
+            new object[] { typeof(RelicTraderMirror), typeof(RelicTrader) },
+            // Acts 2 and 3, batch 5 -- the last three that pair.
+            new object[] { typeof(WarHistorianRepyMirror), typeof(WarHistorianRepy) },
+            new object[] { typeof(DollRoomMirror), typeof(DollRoom) },
+            new object[] { typeof(WelcomeToWongosMirror), typeof(WelcomeToWongos) },
         };
 
     // ---------------------------------------------------------------
@@ -964,7 +1021,12 @@ public class TeyvatFrameTests : IDisposable
         _ = baseEvent;
 
         var shape = Shapes().Values.First(s => s.Mirror == mirror.Name);
+        var derived = UnspelledOptionKeys.TryGetValue(mirror.Name, out var keys)
+            ? keys : Array.Empty<string>();
+        var foreign = ForeignKeyLiterals.TryGetValue(mirror.Name, out var shared)
+            ? shared : Array.Empty<string>();
         var expected = shape.OptionKeys
+            .Where(k => !derived.Contains(k, StringComparer.Ordinal))
             .Concat(shape.PageKeys.Select(Unprefixed))
             .Concat(shape.ExtraOptionKeys.Select(Unprefixed))
             // Both sides are filtered by the SAME shape test, so the pin
@@ -989,6 +1051,7 @@ public class TeyvatFrameTests : IDisposable
             // key name is an ALL-CAPS option segment, optionally followed by
             // one camelCase page word; nothing else is compared.
             .Where(IsComparableKey)
+            .Where(k => !foreign.Contains(k, StringComparer.Ordinal))
             .Distinct()
             .OrderBy(k => k, StringComparer.Ordinal)
             .ToList();
@@ -1010,8 +1073,66 @@ public class TeyvatFrameTests : IDisposable
         : key.StartsWith("pages.", StringComparison.Ordinal)
             ? key.Substring("pages.".Length) : key;
 
+    /// <summary>
+    /// OPTION KEYS THAT NEITHER THE MIRROR NOR ITS BASE EVENT SPELLS, per
+    /// mirror. Two events build their option keys out of something other than
+    /// a literal, so there is no `ldstr` to compare on either side and
+    /// requiring one would mean authoring a literal the base game has not got:
+    ///
+    ///   * `HungryForMushroomsMirror` -- `EventModel.RelicOption` keys an
+    ///     option `OptionKey(pageName, relic.Id.Entry)`, so the only place
+    ///     `BIG_MUSHROOM` appears is the relic TYPE's name.
+    ///   * `ColorfulPhilosophersMirror` -- the key is
+    ///     `InitialOptionKey(pool.EnergyColorName.ToUpperInvariant())`, so the
+    ///     five it can be are named by the five card POOLS.
+    ///
+    /// The keys still have to EXIST -- the generator writes both rows for each
+    /// of them and the loc pin above requires them, because that pin builds
+    /// its asked-for set from the shape rather than from the IL. What is
+    /// declared here is only that this pin cannot see them.
+    ///
+    /// A STATED FACT, NOT A FILTER. A rule of the shape "drop any key the base
+    /// event does not spell either" would also drop Slippery Bridge's eight
+    /// Hold On pages, which the base event builds by concatenation and the
+    /// mirror writes out on purpose -- and dropping those is exactly what this
+    /// pin must not do.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, string[]> UnspelledOptionKeys =
+        new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["HungryForMushroomsMirror"] = new[] { "BIG_MUSHROOM", "FRAGRANT_MUSHROOM" },
+            ["ColorfulPhilosophersMirror"] = new[]
+            {
+                "IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT",
+            },
+        };
+
+    /// <summary>
+    /// LITERALS THAT LOOK LIKE A KEY AND ARE NOT THIS EVENT'S, per mirror.
+    ///
+    /// `RelicTraderMirror` keeps the base event's bare `"PROCEED"` for the
+    /// fallback option it offers when nothing tradable survives -- the shipped
+    /// game's SHARED row, not a key under any event's entry. Re-keying it to
+    /// the dressed entry would ask for a row nobody writes, and writing one
+    /// would be a dressed copy of a word the whole game already shares; so the
+    /// literal stays and this pin is told it is not a dressed key.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, string[]> ForeignKeyLiterals =
+        new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["RelicTraderMirror"] = new[] { "PROCEED" },
+        };
+
     private static bool IsComparableKey(string s) =>
-        System.Text.RegularExpressions.Regex.IsMatch(
+        // A BARE `INITIAL` IS NOT A KEY, it is an argument. `RelicOption` and
+        // `OptionKey` take `pageName` with a default of "INITIAL", and a call
+        // that passes it explicitly -- or a call the compiler fills the
+        // default in at -- emits an `ldstr "INITIAL"` that no loc table ever
+        // sees. No shape key is the bare word either: `OptionKeys` holds
+        // option NAMES and `PageKeys` holds the pages that are not INITIAL, so
+        // dropping it on both sides drops nothing a shape could carry.
+        s != "INITIAL"
+     && System.Text.RegularExpressions.Regex.IsMatch(
             s, @"^[A-Z0-9_]+(\.[A-Za-z]+)?$");
 
     /// <summary>

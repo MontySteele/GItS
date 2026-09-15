@@ -42,7 +42,7 @@ Beneath the Institute's glass roof, a Melusine technician in oversized overalls 
 - **First Valve** — Fight a 75 HP dummy. Procure 1 random Potion.
 - **Second Valve** — Fight a 150 HP dummy. Upgrade 2 random cards.
 - **Third Valve** — Fight a 300 HP dummy. Obtain a random Relic.
-- (You have 3 turns to defeat the dummy. Failing results in no reward.)
+- **(all valves)** — You have 3 turns to defeat the dummy. Failing results in no reward.
 
 Mechanics check: matches harvest (75/150/300 HP dummy, 3-turn cap, potion / 2-upgrade / relic rewards, no reward on failure).
 

@@ -109,15 +109,15 @@ FACES: Tuple[FaceSpec, ...] = (
              "MONDSTADT", "Mondstadt"),
     FaceSpec("underdocks-liyue", "underdocks-liyue-2026-09-14.md",
              "LIYUE", "Liyue"),
-    # Acts 2 and 3: the acts are published (R273); these wait on their mirrors.
+    # Acts 2 and 3: the acts are published (R273) and the mirrors are written.
     FaceSpec("glory-sumeru", "glory-sumeru-2026-09-14.md",
-             "SUMERU", "Sumeru", active=False),
+             "SUMERU", "Sumeru"),
     FaceSpec("glory-fontaine", "glory-fontaine-2026-09-14.md",
-             "FONTAINE", "Fontaine", active=False),
+             "FONTAINE", "Fontaine"),
     FaceSpec("hive-inazuma", "hive-inazuma-2026-09-14.md",
-             "INAZUMA", "Inazuma", active=False),
+             "INAZUMA", "Inazuma"),
     FaceSpec("hive-natlan", "hive-natlan-2026-09-14.md",
-             "NATLAN", "Natlan", active=False),
+             "NATLAN", "Natlan"),
 )
 
 
@@ -233,6 +233,17 @@ class MirrorSpec:
     Baths' Linger and Exit Baths) needs the LINE, and the line is already
     written -- what was missing was somewhere for it to pair.
 
+    `line_pages` -- A FACE LINE THAT IS NOT AN OPTION AT ALL. The curation
+    follows the wiki, and the wiki sometimes writes a rule that applies to
+    EVERY option as one more bullet beside them: Battleworn Dummy's
+    `(all settings)` line is the three-turn limit and the no-reward failure,
+    which is not a fourth setting and has no option key waiting for it. Such a
+    line still has to pair with something or the count check refuses the whole
+    event, so the spec names the PAGE keys it supplies instead -- one entry per
+    consumed line, each a tuple of the page keys that line's outcome is written
+    to, and the lines are taken in order AFTER the `options` list. A page named
+    here is not also looked up through `page_source`: the line IS the page.
+
     `table_option` and `dish_table` are the two shapes no pairing can reach at
     all; see their own docstrings above.
     """
@@ -242,6 +253,7 @@ class MirrorSpec:
     extra_options: Tuple[Tuple[str, str], ...] = ()
     pages: Tuple[str, ...] = ()
     page_source: Tuple[Tuple[str, str], ...] = ()
+    line_pages: Tuple[Tuple[str, ...], ...] = ()
     table_option: Optional[TableOption] = None
     dish_table: Optional[DishTable] = None
 
@@ -413,6 +425,208 @@ MIRRORS: Dict[str, MirrorSpec] = {
             slots=(("a specified Common potion", "{Potion}"),
                    ("Upgraded Common", "Upgraded {Rarity}"),
                    ("[Attack/Skill]", "{Type}")))),
+
+    # --- acts 2 and 3, batch 1 -------------------------------------------
+    # Five two-option events. Three of them the index's scrape already reads
+    # correctly; the two that carry a spec carry it for a shape the scrape
+    # cannot reach.
+    "Bugslayer": MirrorSpec("BugslayerMirror"),
+    "InfestedAutomaton": MirrorSpec("InfestedAutomatonMirror"),
+    "SpiritGrafter": MirrorSpec("SpiritGrafterMirror"),
+    # `RelicOption<T>` keys an option by the RELIC's `Id.Entry`, not by a name
+    # the event writes, so neither the base event's source nor the mirror's
+    # contains these two literals and the scrape reports NO option keys at
+    # all. They are declared instead.
+    "HungryForMushrooms": MirrorSpec(
+        "HungryForMushroomsMirror",
+        options=("BIG_MUSHROOM", "FRAGRANT_MUSHROOM")),
+    # Return the Key's outcome page is
+    # `pages.DONE.options.RETURN_THE_KEY.description` -- a page named DONE
+    # with the option's name inside it, which nothing derives -- and
+    # `pages.KEEP_THE_KEY.options.FIGHT` is an option only the second page
+    # offers and the face writes no line for.
+    "TheLanternKey": MirrorSpec(
+        "TheLanternKeyMirror",
+        options=("RETURN_THE_KEY", "KEEP_THE_KEY"),
+        extra_options=(("pages.KEEP_THE_KEY.options.FIGHT", "KEEP_THE_KEY"),),
+        pages=("pages.DONE.options.RETURN_THE_KEY.description",
+               "pages.KEEP_THE_KEY.description"),
+        page_source=(("pages.DONE.options.RETURN_THE_KEY.description",
+                      "RETURN_THE_KEY"),)),
+
+    # --- acts 2 and 3, batch 2 -------------------------------------------
+    "Reflections": MirrorSpec("ReflectionsMirror"),
+    "FieldOfManSizedHoles": MirrorSpec("FieldOfManSizedHolesMirror"),
+    "LostWisp": MirrorSpec("LostWispMirror"),
+    "PotionCourier": MirrorSpec("PotionCourierMirror"),
+    # Pick Fight opens a second page with one option, `CONTINUE_FIGHT`, which
+    # the face writes no line for -- it is the same branch continued -- and
+    # whose own outcome page is `pages.CONTINUE_FIGHT.description`. The
+    # scrape puts the option key in with the pages, so both lists are
+    # declared.
+    "RoundTeaParty": MirrorSpec(
+        "RoundTeaPartyMirror",
+        options=("ENJOY_TEA", "PICK_FIGHT"),
+        extra_options=(("pages.PICK_FIGHT.options.CONTINUE_FIGHT", "PICK_FIGHT"),),
+        pages=("pages.ENJOY_TEA.description", "pages.PICK_FIGHT.description",
+               "pages.CONTINUE_FIGHT.description"),
+        page_source=(("pages.CONTINUE_FIGHT.description", "PICK_FIGHT"),)),
+
+    # --- acts 2 and 3, batch 3 -------------------------------------------
+    # Both options land on the SAME page, so `page_source` says which face
+    # line supplies it -- the first, as Tea Master's `DONE` takes Bone Tea's.
+    "CrystalSphere": MirrorSpec(
+        "CrystalSphereMirror",
+        options=("UNCOVER_FUTURE", "PAYMENT_PLAN"),
+        pages=("pages.FINISH.description",),
+        page_source=(("pages.FINISH.description", "UNCOVER_FUTURE"),)),
+    "Symbiote": MirrorSpec(
+        "SymbioteMirror",
+        options=("APPROACH", "KILL_WITH_FIRE"),
+        extra_options=(("pages.INITIAL.options.APPROACH_LOCKED", "APPROACH"),)),
+    "GraveOfTheForgotten": MirrorSpec(
+        "GraveOfTheForgottenMirror",
+        options=("CONFRONT", "ACCEPT"),
+        extra_options=(("pages.INITIAL.options.CONFRONT_LOCKED", "CONFRONT"),)),
+    # ONE locked key serves TWO options -- `CreateLockedOption` returns
+    # `...options.LOCKED` for both the second and the third, where Self-Help
+    # Book and Tea Master name a twin per option. So the greyed-out row has to
+    # take ONE face line, and it takes Emotional Awareness's: the cheaper of
+    # the two, and so the one a player sees locked first. A text choice, the
+    # same shape as Tea Master's shared `DONE` page.
+    "ZenWeaver": MirrorSpec(
+        "ZenWeaverMirror",
+        options=("BREATHING_TECHNIQUES", "EMOTIONAL_AWARENESS", "ARACHNID_ACUPUNCTURE"),
+        extra_options=(("pages.INITIAL.options.LOCKED", "EMOTIONAL_AWARENESS"),)),
+    # Amalgamator is one of the few base events that calls `InitialOptionKey`
+    # instead of writing its literals out, so the scrape reports no option
+    # keys at all and the two are declared.
+    "Amalgamator": MirrorSpec(
+        "AmalgamatorMirror",
+        options=("COMBINE_STRIKES", "COMBINE_DEFENDS")),
+
+    # --- acts 2 and 3, batch 4 -------------------------------------------
+    "StoneOfAllTime": MirrorSpec(
+        "StoneOfAllTimeMirror",
+        options=("LIFT", "PUSH"),
+        extra_options=(
+            ("pages.INITIAL.options.LIFT_LOCKED", "LIFT"),
+            ("pages.INITIAL.options.PUSH_LOCKED", "PUSH"),
+        )),
+    # The face's FOURTH line, `(all settings)`, is the wiki's rule bullet --
+    # the three-turn limit and the no-reward failure -- and it is not a fourth
+    # setting. `line_pages` gives it the two pages that rule describes.
+    "BattlewornDummy": MirrorSpec(
+        "BattlewornDummyMirror",
+        options=("SETTING_1", "SETTING_2", "SETTING_3"),
+        pages=("pages.VICTORY.description", "pages.DEFEAT.description"),
+        line_pages=(("pages.VICTORY.description", "pages.DEFEAT.description"),)),
+    # The option key is `...options.` + the pool's `EnergyColorName` upper-cased,
+    # so the scrape sees none of the five. Declared in the FACE's order, because
+    # each key is its own colour and the pairing is by NAME rather than by the
+    # order `CardPoolColorOrder` builds them in.
+    "ColorfulPhilosophers": MirrorSpec(
+        "ColorfulPhilosophersMirror",
+        options=("IRONCLAD", "SILENT", "DEFECT", "NECROBINDER", "REGENT"),
+        pages=("pages.DONE.description",),
+        page_source=(("pages.DONE.description", "IRONCLAD"),)),
+    "RanwidTheElder": MirrorSpec(
+        "RanwidTheElderMirror",
+        options=("POTION", "GOLD", "RELIC"),
+        extra_options=(
+            ("pages.INITIAL.options.POTION_LOCKED", "POTION"),
+            ("pages.INITIAL.options.RELIC_LOCKED", "RELIC"),
+        ),
+        pages=("pages.POTION.description", "pages.GOLD.description",
+               "pages.RELIC.description")),
+    "RelicTrader": MirrorSpec(
+        "RelicTraderMirror",
+        options=("TOP", "MIDDLE", "BOTTOM"),
+        pages=("pages.DONE.description",),
+        page_source=(("pages.DONE.description", "TOP"),)),
+
+    # --- acts 2 and 3, batch 5 -------------------------------------------
+    "WarHistorianRepy": MirrorSpec(
+        "WarHistorianRepyMirror",
+        options=("UNLOCK_CAGE", "UNLOCK_CHEST"),
+        pages=("pages.UNLOCK_CAGE.description", "pages.UNLOCK_CHEST.description",
+               "pages.EXTRA_UNLOCK_CAGE.description",
+               "pages.EXTRA_UNLOCK_CHEST.description"),
+        page_source=(("pages.EXTRA_UNLOCK_CAGE.description", "UNLOCK_CAGE"),
+                     ("pages.EXTRA_UNLOCK_CHEST.description", "UNLOCK_CHEST"))),
+    # The three doll pages and the shared TAKE description all come off the
+    # first line, which is the one that says what taking a doll gets you. The
+    # doll options themselves need no rows: their key is the RELIC's title
+    # text and their words are the relic's own -- see the mirror.
+    "DollRoom": MirrorSpec(
+        "DollRoomMirror",
+        options=("RANDOM", "TAKE_SOME_TIME", "EXAMINE"),
+        pages=("pages.TAKE_SOME_TIME.description", "pages.EXAMINE.description",
+               "pages.DAUGHTER_OF_WIND.description", "pages.MR_STRUGGLES.description",
+               "pages.FABLE.description", "pages.TAKE.options.TAKE.description"),
+        page_source=(("pages.DAUGHTER_OF_WIND.description", "RANDOM"),
+                     ("pages.MR_STRUGGLES.description", "RANDOM"),
+                     ("pages.FABLE.description", "RANDOM"),
+                     ("pages.TAKE.options.TAKE.description", "RANDOM"))),
+    # All three purchases end on `CheckObtainWongoBadge`, which picks one of
+    # three AFTER_BUY pages by the player's banked Wongo Points -- so none of
+    # the three is an option's own page and all three take the Bargain Bin
+    # line.
+    "WelcomeToWongos": MirrorSpec(
+        "WelcomeToWongosMirror",
+        options=("BARGAIN_BIN", "FEATURED_ITEM", "MYSTERY_BOX", "LEAVE"),
+        extra_options=(
+            ("pages.INITIAL.options.BARGAIN_BIN_LOCKED", "BARGAIN_BIN"),
+            ("pages.INITIAL.options.FEATURED_ITEM_LOCKED", "FEATURED_ITEM"),
+            ("pages.INITIAL.options.MYSTERY_BOX_LOCKED", "MYSTERY_BOX"),
+        ),
+        pages=("pages.AFTER_BUY.description",
+               "pages.AFTER_BUY_BADGE_COUNTER.description",
+               "pages.AFTER_BUY_RECEIVE_BADGE.description",
+               "pages.LEAVE.description"),
+        page_source=(("pages.AFTER_BUY.description", "BARGAIN_BIN"),
+                     ("pages.AFTER_BUY_BADGE_COUNTER.description", "BARGAIN_BIN"),
+                     ("pages.AFTER_BUY_RECEIVE_BADGE.description", "BARGAIN_BIN"))),
+}
+
+
+#: PARKED: BASE EVENTS A FACE NAMES THAT ARE NOT DRESSED, AND WHY.
+#:
+#: A park is NOT a missing mirror. The generator already reports an event with
+#: no mirror, and that report is the engineering queue; these three would sit
+#: on it for ever with no work attached, because the work is not engineering.
+#: Each is an event whose reachable options outnumber the lines the faces
+#: write, in a way `extra_options` CANNOT paper over: `extra_options` exists
+#: for an option that is the same branch continued -- a `_LOCKED` twin, a
+#: later page's Fight -- and borrowing a line for an option with a DIFFERENT
+#: outcome would print the wrong consequences on the button.
+#:
+#: Dressing any of these needs new curated prose, which is the face's work and
+#: [USER]'s taste, not a generator change. Listed here so the report says PARKED
+#: with a reason rather than NO MIRROR with none.
+PARKED: Dict[str, str] = {
+    "Trial":
+        "the faces write the SIX verdict options (Merchant/Noble/Nondescript "
+        "x Guilty/Innocent) and no line for the INITIAL Accept/Reject pair, "
+        "the Reject page's Accept and Double Down, or the three story pages. "
+        "There is nothing to borrow for Accept that would not print a "
+        "verdict's consequences on the summons button, and Double Down opens "
+        "the abandon-run popup -- the one option in this surface where wrong "
+        "text is dangerous",
+    "TinkerTime":
+        "the faces write the three CARD TYPES (Attack/Skill/Power), which are "
+        "`pages.CHOOSE_CARD_TYPE.options.*`, and no line for the INITIAL "
+        "Choose Card Type option or for any of the NINE rider effects on "
+        "`pages.CHOOSE_RIDER.options.*`. The riders are nine distinct "
+        "mechanical effects picked two at a time; one borrowed line across all "
+        "nine would print the wrong effect on eight of them",
+    "ColossalFlower":
+        "the faces write TWO lines -- take the prize, dig deeper -- for a "
+        "three-level dig with six reachable option keys. The two per-level "
+        "repeats are the same branch continued and would borrow cleanly, but "
+        "the final page's Pollinous Core branch (the relic, for 7 unblockable) "
+        "and its Extract Instead sibling are distinct outcomes with no line "
+        "between them",
 }
 
 
@@ -437,6 +651,30 @@ def normalise(text: str) -> str:
     return out
 
 
+#: WIKI HEADINGS THE NORMALISER CANNOT REACH THE CLASS NAME FROM, keyed by the
+#: normalised heading and read BOTH ways -- `match_base` uses it to find the
+#: class, and `refresh_index` uses its inverse to find the harvest row whose
+#: option count freezes that class.
+#:
+#: Two, and both are the wiki's title differing from the identifier by more
+#: than punctuation and an article, which is the only difference `normalise`
+#: was built to absorb:
+#:
+#:   * `Reflections snoitcelfeR` is the wiki's rendering of the event's own
+#:     mirror-writing joke; the class is plain `Reflections`.
+#:   * `The Merchant___` is class `FakeMerchant` -- the identifier says the
+#:     twist the title hides, and no normalisation of one produces the other.
+#:     It is the event the harvest marks `<<NO OPTIONS SECTION ON PAGE>>`, so
+#:     the alias exists to make that SKIP reachable rather than to dress it.
+#:
+#: An alias is a stated fact, not a fuzzy match: a heading that is in neither
+#: the normaliser's reach nor this table stays a refusal.
+HEADING_ALIASES: Dict[str, str] = {
+    "reflectionssnoitcelfer": "Reflections",
+    "themerchant": "FakeMerchant",
+}
+
+
 def match_base(heading: str, index: Dict[str, dict]) -> Optional[str]:
     """Which base event class a face's `## - [ ] <name>` heading names.
 
@@ -456,6 +694,9 @@ def match_base(heading: str, index: Dict[str, dict]) -> Optional[str]:
         bare = norm[3:] if norm.startswith("the") else norm
         if bare == stripped:
             return cls
+    alias = HEADING_ALIASES.get(want)
+    if alias in index:
+        return alias
     return None
 
 
@@ -553,6 +794,11 @@ def refresh_index(decomp: Path) -> int:
 
         norm = normalise(cls)
         count = harvest.get(norm)
+        if count is None:
+            for heading_norm, alias_cls in HEADING_ALIASES.items():
+                if alias_cls == cls and heading_norm in harvest:
+                    count = harvest[heading_norm]
+                    break
         if count is None:
             # The harvest is keyed by the wiki's title, which may carry a
             # leading article the class name drops.
@@ -737,6 +983,10 @@ class Dressed:
     table_pair: Optional[Tuple[str, str, str]] = None
     #: `(dish id, dressed name, dressed effect)` for a `dish_table`.
     dishes: Tuple[Tuple[str, str, str], ...] = ()
+    #: `page key -> the text of the face line that is not an option`, already
+    #: resolved from the mirror's `line_pages`. Those pages take their text
+    #: from here and never from `page_source`.
+    line_page_text: Dict[str, str] = field(default_factory=dict)
 
     def _paired(self) -> Tuple[Dict[str, Tuple[str, str]], Dict[str, Tuple[str, str]]]:
         """`(emitted, raw)` -- the face's lines matched to the keys they pair
@@ -828,6 +1078,12 @@ class Dressed:
             out.append((f"{self.entry}.{key}.title", label))
             out.append((f"{self.entry}.{key}.description", outcome))
         for page in self.page_keys:
+            # A page a `line_pages` entry supplies takes that face line's text
+            # directly: the line IS the page, so there is no option to derive
+            # it from and `page_source` is not consulted for it.
+            if page in self.line_page_text:
+                out.append((f"{self.entry}.{page}", self.line_page_text[page]))
+                continue
             out.append((f"{self.entry}.{page}", _page_text(raw, page, sources)))
         if self.can_kill and self.face_event.loss:
             out.append((f"{self.entry}.loss", self.face_event.loss))
@@ -1143,6 +1399,7 @@ class Plan:
     refusals: List[str] = field(default_factory=list)
     skipped: List[str] = field(default_factory=list)
     no_mirror: List[str] = field(default_factory=list)
+    parked: List[str] = field(default_factory=list)
     notes: List[str] = field(default_factory=list)
 
 
@@ -1192,6 +1449,10 @@ def build_plan() -> Plan:
             # the harvest's shape as the face's -- and it is settled when the
             # mirror is written and the event becomes generatable, which is
             # exactly when the refusal below starts biting.
+            if base in PARKED:
+                plan.parked.append(f"{face.key}: {base} ({event.title}) -- {PARKED[base]}")
+                continue
+
             spec = MIRRORS.get(base)
             if spec is None:
                 note = f" [option count {len(event.options)} vs harvest {want}]" \
@@ -1229,12 +1490,24 @@ def build_plan() -> Plan:
             # list's.
             wanted_lines = (len(spec.table_option.choices)
                             if spec.table_option is not None else len(option_keys))
+            # A `line_pages` entry consumes one more face line that is not an
+            # option at all -- the wiki's rule-beside-the-options bullet -- so
+            # it counts toward what the face must supply.
+            wanted_lines += len(spec.line_pages)
             if wanted_lines != len(event.options):
                 plan.refusals.append(
                     f"{face.key}: {base} -- the mirror's {wanted_lines} option "
                     f"key(s) {option_keys} cannot be paired with the face's "
                     f"{len(event.options)} option line(s)")
                 continue
+
+            # The consumed lines are taken in order AFTER the option lines,
+            # and each one's OUTCOME is the text of every page it supplies.
+            line_page_text: Dict[str, str] = {}
+            for offset, pages_for_line in enumerate(spec.line_pages):
+                _, outcome = event.options[len(event.options) - len(spec.line_pages) + offset]
+                for page in pages_for_line:
+                    line_page_text[page] = outcome
 
             table_pair = None
             if spec.table_option is not None:
@@ -1274,6 +1547,7 @@ def build_plan() -> Plan:
                 can_kill=bool(info["can_kill"]),
                 extra_options=spec.extra_options,
                 page_source=spec.page_source,
+                line_page_text=line_page_text,
                 table_pair=table_pair,
                 dishes=dishes,
             ))
@@ -1301,6 +1575,8 @@ def report(plan: Plan) -> None:
         print(f"  SKIP    {line}")
     for line in plan.no_mirror:
         print(f"  NO MIRROR {line}")
+    for line in plan.parked:
+        print(f"  PARKED  {line}")
     for line in plan.notes:
         print(f"  NOTE    {line}")
     for line in plan.refusals:
