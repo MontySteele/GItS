@@ -74,6 +74,20 @@ RUN_SCOPE_ALLOWED = {
         "page is not combat, and the card never enters one -- changing it to "
         "`CombatState.CreateCard` would both diverge from the base event and "
         "throw, since there is no combat state to create it in",
+    "ByrdonisNestMirror.cs":
+        "the same shape, and the same argument: `Take` puts the Byrdonis Egg "
+        "into the DECK from an event page and does it with the base event's "
+        "own call (`MegaCrit.Sts2.Core.Models.Events/ByrdonisNest.cs`). The "
+        "egg is a quest card that is never in a combat pile when it is "
+        "created",
+    "TrashHeapMirror.cs":
+        "the same shape again: `Grab` previews one of the base event's ten "
+        "fixed cards into the DECK from an event page, through the base "
+        "event's own `RunState.CreateCard` overload "
+        "(`MegaCrit.Sts2.Core.Models.Events/TrashHeap.cs`). Mirrors copy the "
+        "base game clause for clause; a mirror that reached for "
+        "`CombatState.CreateCard` here would diverge from the base event AND "
+        "throw, because an event room has no combat state",
 }
 
 

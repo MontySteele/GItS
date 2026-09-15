@@ -33,6 +33,122 @@ internal static partial class TeyvatLoc
     internal static readonly IReadOnlyDictionary<string, string> GeneratedEventRows =
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
+            // GuildDesksReturnedCopy (Mondstadt / SelfHelpBook)
+            ["GUILD_DESKS_RETURNED_COPY.title"] =
+                "The Guild Desk's Returned Copy",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.description"] =
+                "At the Adventurers' Guild desk in Mondstadt City, a dog-eared "
+                + "self-improvement pamphlet has cycled through the returns bin for "
+                + "three seasons running, its spine held together with "
+                + "commission-board tape. The receptionist has annotated every margin "
+                + "in a hand you recognize as Katheryne's, complete with a delisting "
+                + "notice for the chapter on grappling technique. She slides it "
+                + "across the counter without looking up. \"Read what applies. Return "
+                + "what doesn't.\"",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_THE_BACK.title"] =
+                "Read the Back",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_PASSAGE.title"] =
+                "Read a Random Passage",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+                "Read the Entire Book",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.NO_OPTIONS.title"] =
+                "Move On",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+                "Read the Back",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+                "Read a Random Passage",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+                "Read the Entire Book",
+            ["GUILD_DESKS_RETURNED_COPY.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["GUILD_DESKS_RETURNED_COPY.pages.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            // CutRopeBridgeAboveCiderLake (Mondstadt / SlipperyBridge)
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.title"] =
+                "The Cut Rope Bridge Above Cider Lake",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.description"] =
+                "The rope bridge below Springvale sways badly enough that a Knights "
+                + "of Favonius patrol has roped off both ends and posted a warning "
+                + "plank. The duty Knight says regulation calls for a full unload "
+                + "before crossing — courtesy says she'll let you pick what goes over "
+                + "the rail first. Below, Cider Lake is a long way down, and she is "
+                + "not in a hurry.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.OVERCOME.title"] =
+                "Overcome",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.OVERCOME.description"] =
+                "The specific card named is removed from your deck.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.HOLD_ON_0.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.HOLD_ON_0.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
+                "Hold On",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.OVERCOME.description"] =
+                "The specific card named is removed from your deck.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_0.description"] =
+                "Lose 3 HP. The card in the above option is randomized.",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_1.description"] =
+                "",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_2.description"] =
+                "",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_3.description"] =
+                "",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_4.description"] =
+                "",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_5.description"] =
+                "",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_6.description"] =
+                "",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.description"] =
+                "",
             // UnmarkedCrates (Mondstadt / ThisOrThat)
             ["UNMARKED_CRATES.title"] =
                 "The Unmarked Crates",
@@ -64,6 +180,196 @@ internal static partial class TeyvatLoc
                 + "far more than the paperwork on it — and badly enough balanced that "
                 + "you keep catching your own boot on it. Add Clumsy (curse) to your "
                 + "Deck. Obtain a random Relic.",
+            // WanderingCask (Mondstadt / AromaOfChaos)
+            ["WANDERING_CASK.title"] =
+                "The Wandering Cask",
+            ["WANDERING_CASK.pages.INITIAL.description"] =
+                "In the cellars beneath Dawn Winery, a Knights of Favonius "
+                + "quartermaster shows you a cask mislabeled two harvests ago. "
+                + "Whatever grew inside is no longer Dandelion Wine; the vintner is "
+                + "delighted, and the Knight very much is not. \"Broach it and see "
+                + "what it became,\" the vintner offers. The quartermaster taps the "
+                + "ledger instead: \"Or we do it properly, to the notes as written.\"",
+            ["WANDERING_CASK.pages.INITIAL.options.LET_GO.title"] =
+                "Broach the Wild Cask",
+            ["WANDERING_CASK.pages.INITIAL.options.LET_GO.description"] =
+                "Transform a card in your Deck.",
+            ["WANDERING_CASK.pages.INITIAL.options.MAINTAIN_CONTROL.title"] =
+                "Follow the Vintner's Notes",
+            ["WANDERING_CASK.pages.INITIAL.options.MAINTAIN_CONTROL.description"] =
+                "Upgrade a card in your Deck.",
+            ["WANDERING_CASK.pages.LET_GO.description"] =
+                "Transform a card in your Deck.",
+            ["WANDERING_CASK.pages.MAINTAIN_CONTROL.description"] =
+                "Upgrade a card in your Deck.",
+            // StormTouchedShardAtStormterrorsLair (Mondstadt / BrainLeech)
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.title"] =
+                "The Storm-Touched Shard at Stormterror's Lair",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.INITIAL.description"] =
+                "At the scarred rim of Stormterror's Lair, a shard of black "
+                + "wind-crystal is still humming with borrowed memory. Before the "
+                + "Knights' scouting patrol can rope it off, it fastens itself "
+                + "against your ear and starts reciting something that isn't quite "
+                + "draconic and isn't quite language. The duty Knight logs the "
+                + "incident and does not offer to help. \"Regulations say I note the "
+                + "time. Courtesy says I warn you it bites on the way out.\"",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.INITIAL.options.SHARE_KNOWLEDGE.title"] =
+                "Share Knowledge",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.INITIAL.options.SHARE_KNOWLEDGE.description"] =
+                "Stand still and let the lesson finish. Choose 1 of 5 random cards "
+                + "to add to your deck.",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.INITIAL.options.RIP.title"] =
+                "Rip the Leech Off",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.INITIAL.options.RIP.description"] =
+                "You tear it free with a strip of ear. Lose 5 HP. Gain a Colorless "
+                + "2 card reward — two loose companion (Colorless) cards salvaged "
+                + "from what it was still transmitting.",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.RIP.description"] =
+                "You tear it free with a strip of ear. Lose 5 HP. Gain a Colorless "
+                + "2 card reward — two loose companion (Colorless) cards salvaged "
+                + "from what it was still transmitting.",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.SHARE_KNOWLEDGE.selectionScreenPrompt"] =
+                "Share Knowledge",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR.pages.SHARE_KNOWLEDGE.description"] =
+                "Stand still and let the lesson finish. Choose 1 of 5 random cards "
+                + "to add to your deck.",
+            // WindfalconsRoost (Mondstadt / ByrdonisNest)
+            ["WINDFALCONS_ROOST.title"] =
+                "The Windfalcon's Roost",
+            ["WINDFALCONS_ROOST.pages.INITIAL.description"] =
+                "Stormbearer Point, where the wind never quite sets down. A Guild "
+                + "scout walks you up a shale ledge to a nest of driftwood and torn "
+                + "sailcloth — a Falcon of the West's, by the span of it — and inside "
+                + "sits one pale egg as tall as your knee. The mother is out over "
+                + "Falcon Coast, circling wide. You have roughly as long as it takes "
+                + "her to turn.",
+            ["WINDFALCONS_ROOST.pages.INITIAL.options.EAT.title"] =
+                "Crack It Over the Fire",
+            ["WINDFALCONS_ROOST.pages.INITIAL.options.EAT.description"] =
+                "Gain 7 Max HP.",
+            ["WINDFALCONS_ROOST.pages.INITIAL.options.TAKE.title"] =
+                "Bundle It Into Your Pack",
+            ["WINDFALCONS_ROOST.pages.INITIAL.options.TAKE.description"] =
+                "Add Windfalcon Egg (Byrdonis Egg) to deck.",
+            ["WINDFALCONS_ROOST.pages.EAT.description"] =
+                "Gain 7 Max HP.",
+            ["WINDFALCONS_ROOST.pages.TAKE.description"] =
+                "Add Windfalcon Egg (Byrdonis Egg) to deck.",
+            // BrambleLineBelowWolvendom (Mondstadt / DenseVegetation)
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.title"] =
+                "The Bramble Line Below Wolvendom",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.description"] =
+                "The Knights' patrol trail past Wolvendom has gone to bramble since "
+                + "the wolves reclaimed the ridge, and the duty Knight will not swear "
+                + "to what is on the other side. She offers two regulations: push "
+                + "through at your own risk, or make camp and let her post a watch — "
+                + "though something is already moving in the wet undergrowth nearby.",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.TRUDGE_ON.title"] =
+                "Trudge On",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.TRUDGE_ON.description"] =
+                "One of the following is randomly offered: a bramble stand snaps "
+                + "back and takes something with it (Remove a card from your Deck. "
+                + "Lose 11 HP); or you turn up a lost courier's satchel, still sealed "
+                + "(Gain 64 Gold (Mora). Lose 8 HP).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.REST.title"] =
+                "Rest",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.INITIAL.options.REST.description"] =
+                "Make camp in the lee of the ridge. Heal HP (rest site amount). The "
+                + "wet undergrowth begins to move — Fight 4 Bramble Wrigglers "
+                + "(Wrigglers).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.REST.options.FIGHT.title"] =
+                "Rest",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.REST.options.FIGHT.description"] =
+                "Make camp in the lee of the ridge. Heal HP (rest site amount). The "
+                + "wet undergrowth begins to move — Fight 4 Bramble Wrigglers "
+                + "(Wrigglers).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.TRUDGE_ON.description"] =
+                "One of the following is randomly offered: a bramble stand snaps "
+                + "back and takes something with it (Remove a card from your Deck. "
+                + "Lose 11 HP); or you turn up a lost courier's satchel, still sealed "
+                + "(Gain 64 Gold (Mora). Lose 8 HP).",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM.pages.REST.description"] =
+                "Make camp in the lee of the ridge. Heal HP (rest site amount). The "
+                + "wet undergrowth begins to move — Fight 4 Bramble Wrigglers "
+                + "(Wrigglers).",
+            // GuildCommissionAtStarsnatchCliff (Mondstadt / JungleMazeAdventure)
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.title"] =
+                "The Guild Commission at Starsnatch Cliff",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.description"] =
+                "The Adventurers' Guild desk has posted the same commission twice: "
+                + "a switchback maze of scree and old stonework under Starsnatch "
+                + "Cliff, where the paths are said to rearrange after every storm. A "
+                + "pair of Guild regulars drinking at the Angel's Share offer to walk "
+                + "it with you and split whatever turns up; the board pays better for "
+                + "whoever signs alone.",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.SOLO_QUEST.title"] =
+                "Solo Quest",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.SOLO_QUEST.description"] =
+                "Gain 135-165 Mora (Gold). Lose 18 HP.",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.JOIN_FORCES.title"] =
+                "Join Forces",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.INITIAL.options.JOIN_FORCES.description"] =
+                "Gain 35-65 Mora (Gold).",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.SOLO_QUEST.description"] =
+                "Gain 135-165 Mora (Gold). Lose 18 HP.",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF.pages.JOIN_FORCES.description"] =
+                "Gain 35-65 Mora (Gold).",
+            // SingingGrowthUnderWolvendom (Mondstadt / LuminousChoir)
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.title"] =
+                "The Singing Growth Under Wolvendom",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.description"] =
+                "On the wooded slope beneath Wolvendom, a ring of pale fungus has "
+                + "fused into a single body the size of a cart, and it is singing — "
+                + "many small voices braided into one chord. A Knights of Favonius "
+                + "outrider says a courier's satchel went into the growth two winters "
+                + "back, and that whatever's left of it is still in there, glowing "
+                + "faintly under the bark.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.REACH_INTO_THE_FLESH.title"] =
+                "Reach into the Flesh",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.REACH_INTO_THE_FLESH.description"] =
+                "You push your arm through the warm pulp until your fingers close "
+                + "on something buried. Remove 2 cards from Deck. Add Spore Mind "
+                + "(curse) to Deck.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE.title"] =
+                "Offer Tribute",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE.description"] =
+                "Pay 99-149 Mora (Gold). Obtain a random Relic.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE_LOCKED.title"] =
+                "Offer Tribute",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.INITIAL.options.OFFER_TRIBUTE_LOCKED.description"] =
+                "Pay 99-149 Mora (Gold). Obtain a random Relic.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.REACH_INTO_THE_FLESH.description"] =
+                "You push your arm through the warm pulp until your fingers close "
+                + "on something buried. Remove 2 cards from Deck. Add Spore Mind "
+                + "(curse) to Deck.",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM.pages.OFFER_TRIBUTE.description"] =
+                "Pay 99-149 Mora (Gold). Obtain a random Relic.",
+            // WolfRingAboveWindrise (Mondstadt / MorphicGrove)
+            ["WOLF_RING_ABOVE_WINDRISE.title"] =
+                "The Wolf-Ring Above Windrise",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.description"] =
+                "A perfect ring of pines stands above Windrise where no windmill "
+                + "was ever built, and Adventurers' Guild hunters camped nearby swear "
+                + "the ring moves half a pace every full moon. One hunter, well into "
+                + "her cups from the Angel's Share, waves you toward the center and "
+                + "says the ring pays generously for company — and asks nothing at "
+                + "all of anyone who just keeps walking.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.GROUP.title"] =
+                "Group",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.GROUP.description"] =
+                "You empty your purse into the grass and let the ring do as it "
+                + "likes. Lose ALL of your Gold (Mora). Transform 2 cards.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.LONER.title"] =
+                "Loner",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.INITIAL.options.LONER.description"] =
+                "You walk on toward Windrise and let the quiet do its own work. "
+                + "Gain 5 Max HP.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.LONER.description"] =
+                "You walk on toward Windrise and let the quiet do its own work. "
+                + "Gain 5 Max HP.",
+            ["WOLF_RING_ABOVE_WINDRISE.pages.GROUP.description"] =
+                "You empty your purse into the grass and let the ring do as it "
+                + "likes. Lose ALL of your Gold (Mora). Transform 2 cards.",
             // SpringvaleCheeseCellar (Mondstadt / RoomFullOfCheese)
             ["SPRINGVALE_CHEESE_CELLAR.title"] =
                 "The Springvale Cheese Cellar",
@@ -96,6 +402,69 @@ internal static partial class TeyvatLoc
             ["SPRINGVALE_CHEESE_CELLAR.loss"] =
                 "{character} was buried under the back wall of the "
                 + "[gold]{event}[/gold].",
+            // CliffsideSeedNearCapeOath (Mondstadt / SapphireSeed)
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.title"] =
+                "The Cliffside Seed Near Cape Oath",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.description"] =
+                "On the sea-cliffs above Cape Oath, a Knights of Favonius botanist "
+                + "has found a single seed the color of deep water, wedged in a crack "
+                + "the wind can't reach. She has half a mind to grind it for the "
+                + "infirmary and half a mind to see what it grows into — regulations "
+                + "don't cover either, she admits, so the choice is yours to make and "
+                + "hers to write up afterward.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.EAT.title"] =
+                "Consume",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.EAT.description"] =
+                "Heal 9 HP. Upgrade a card in your Deck.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.PLANT.title"] =
+                "Plant and Nourish",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.INITIAL.options.PLANT.description"] =
+                "Enchant a card with Sown.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.EAT.description"] =
+                "Heal 9 HP. Upgrade a card in your Deck.",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH.pages.PLANT.description"] =
+                "Enchant a card with Sown.",
+            // AngelsSharesTastingFlight (Mondstadt / TeaMaster)
+            ["ANGELS_SHARES_TASTING_FLIGHT.title"] =
+                "The Angel's Share's Tasting Flight",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.description"] =
+                "The Angel's Share keeps a back-room tasting flight nobody orders "
+                + "unless Charles vouches for them personally. Three cups sit on the "
+                + "bar: a bone-pale tea that sharpens a duelist's opening stance, a "
+                + "bitter ember-red brew that a Knight swears kept her arm strong "
+                + "through five straight bouts, and a free cup Charles pours with a "
+                + "warning look that you should probably heed.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA.title"] =
+                "Bone Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA.description"] =
+                "Pay 50 Gold (Mora). At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA.title"] =
+                "Ember Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA.description"] =
+                "Pay 150 Gold (Mora). At the start of the next 5 combats, gain 2 "
+                + "Strength.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.TEA_OF_DISCOURTESY.title"] =
+                "Tea of Discourtesy",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.TEA_OF_DISCOURTESY.description"] =
+                "At the start of the next combat, shuffle 2 Dazed into your Draw "
+                + "Pile.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA_LOCKED.title"] =
+                "Bone Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.BONE_TEA_LOCKED.description"] =
+                "Pay 50 Gold (Mora). At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA_LOCKED.title"] =
+                "Ember Tea",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.INITIAL.options.EMBER_TEA_LOCKED.description"] =
+                "Pay 150 Gold (Mora). At the start of the next 5 combats, gain 2 "
+                + "Strength.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.DONE.description"] =
+                "Pay 50 Gold (Mora). At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["ANGELS_SHARES_TASTING_FLIGHT.pages.TEA_OF_DISCOURTESY.description"] =
+                "At the start of the next combat, shuffle 2 Dazed into your Draw "
+                + "Pile.",
             // GuildsStandingCommissionAtCapeOath (Mondstadt / TheLegendsWereTrue)
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH.title"] =
                 "The Guild's Standing Commission at Cape Oath",
@@ -119,6 +488,227 @@ internal static partial class TeyvatLoc
                 "Receive the Spoils Map.",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH.pages.SLOWLY_FIND_AN_EXIT.description"] =
                 "Lose 8 HP. Procure 1 random Potion.",
+            // HauntedCampsiteBelowDragonspine (Mondstadt / UnrestSite)
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.title"] =
+                "The Haunted Campsite Below Dragonspine",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.description"] =
+                "A ring of scorched stones at Dragonspine's foot looks like a rest "
+                + "site from a distance, but the Knights of Favonius have posted it "
+                + "as unfit for overnight use — regulation says why, in three dense "
+                + "paragraphs about what campers here report seeing. You can make "
+                + "camp anyway and take your chances with the dreams, or dig out the "
+                + "roots that seem to be causing the trouble and see what comes "
+                + "loose.",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.REST.title"] =
+                "Rest Anyways",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.REST.description"] =
+                "Heal to full HP. Receive Poor Sleep (curse).",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.KILL.title"] =
+                "Kill the Trees",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.INITIAL.options.KILL.description"] =
+                "Lose 8 Max HP. Obtain a random Relic.",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.REST.description"] =
+                "Heal to full HP. Receive Poor Sleep (curse).",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE.pages.KILL.description"] =
+                "Lose 8 Max HP. Obtain a random Relic.",
+            // SpringvaleFont (Mondstadt / Wellspring)
+            ["SPRINGVALE_FONT.title"] =
+                "The Springvale Font",
+            ["SPRINGVALE_FONT.pages.INITIAL.description"] =
+                "Above Springvale, past the last hound, a spring feeds Cider Lake "
+                + "straight out of the rock. A Knight of Favonius on well-duty is "
+                + "scrubbing her tabard in it and does not stop to salute you. "
+                + "\"Sister Victoria says it's Barbatos's water, so it hears "
+                + "confession whether you offer one or not. I'd bottle it and keep "
+                + "your mouth shut.\"",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BOTTLE.title"] =
+                "Bottle It",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BOTTLE.description"] =
+                "You fill a flask from the head of the spring while the current is "
+                + "still bright. Procure 1 random Potion.",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BATHE.title"] =
+                "Bathe",
+            ["SPRINGVALE_FONT.pages.INITIAL.options.BATHE.description"] =
+                "You wade in and the cold pulls one old reflex right out of your "
+                + "hands — Remove 1 card from Deck. You climb out clean, and spend "
+                + "the rest of the walk to Mondstadt turning over exactly why that "
+                + "one, and who it belonged to before you. Add 1 Guilty (curse) to "
+                + "Deck.",
+            ["SPRINGVALE_FONT.pages.BOTTLE.description"] =
+                "You fill a flask from the head of the spring while the current is "
+                + "still bright. Procure 1 random Potion.",
+            ["SPRINGVALE_FONT.pages.BATHE.description"] =
+                "You wade in and the cold pulls one old reflex right out of your "
+                + "hands — Remove 1 card from Deck. You climb out clean, and spend "
+                + "the rest of the walk to Mondstadt turning over exactly why that "
+                + "one, and who it belonged to before you. Add 1 Guilty (curse) to "
+                + "Deck.",
+            // MosiMosiAtStormbearerPoint (Mondstadt / WhisperingHollow)
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.title"] =
+                "Mosi Mosi at Stormbearer Point",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.description"] =
+                "Wind off Stormbearer Point has scoured a hilichurl camp down to "
+                + "stakes, a cauldron, and one enormous mask. A Guild scout chalked "
+                + "the rock nearby: NON-HOSTILE, DO NOT PROVOKE, THEY TRADE. The "
+                + "shaman stirs something violently blue, taps the cauldron twice, "
+                + "then taps its own chest — two prices, your pick.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.GOLD.title"] =
+                "Barter for the Brew",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.GOLD.description"] =
+                "Lose 50 Mora. Procure 2 random Potions.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.HUG.title"] =
+                "Kneel for the Shaman's Mark",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.INITIAL.options.HUG.description"] =
+                "Lose 9 HP. Choose a card to Transform.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.GOLD.description"] =
+                "Lose 50 Mora. Procure 2 random Potions.",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT.pages.HUG.description"] =
+                "Lose 9 HP. Choose a card to Transform.",
+            // HuntersTotemPostsNearWolvendom (Mondstadt / WoodCarvings)
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.title"] =
+                "The Hunters' Totem Posts Near Wolvendom",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.description"] =
+                "Adventurers' Guild hunters camped at the edge of Wolvendom have "
+                + "carved three totem posts from windfall wood — a diving falcon, a "
+                + "coiled serpent, and a squat, armored shape nobody can agree on. A "
+                + "hunter says each post remembers what it was carved to be, and "
+                + "offers to work the same trick into a beginner's starting gear, if "
+                + "you can spare one to the fire.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.BIRD.title"] =
+                "Bird",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.BIRD.description"] =
+                "Choose 1 starter card to Transform into Peck.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE.title"] =
+                "Snake",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE.description"] =
+                "Enchant 1 card with Slither. (Locked if no cards can be enchanted "
+                + "with Slither)",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.TORUS.title"] =
+                "Torus",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.TORUS.description"] =
+                "Choose 1 starter card to Transform into Toric Toughness.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE_LOCKED.title"] =
+                "Snake",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.INITIAL.options.SNAKE_LOCKED.description"] =
+                "Enchant 1 card with Slither. (Locked if no cards can be enchanted "
+                + "with Slither)",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.BIRD.description"] =
+                "Choose 1 starter card to Transform into Peck.",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.SNAKE.description"] =
+                "Enchant 1 card with Slither. (Locked if no cards can be enchanted "
+                + "with Slither)",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM.pages.TORUS.description"] =
+                "Choose 1 starter card to Transform into Toric Toughness.",
+            // ContractRecitingGrowth (Liyue / BrainLeech)
+            ["CONTRACT_RECITING_GROWTH.title"] =
+                "The Contract-Reciting Growth",
+            ["CONTRACT_RECITING_GROWTH.pages.INITIAL.description"] =
+                "At the Chasm's mouth, a Qixing survey crew has roped off a "
+                + "ley-line growth that fastened onto a miner before anyone could "
+                + "stop it. It hasn't let go, and it hasn't stopped reciting — old "
+                + "adeptal covenants, none of them Liyue law anymore, all of it "
+                + "delivered in a bored monotone against your ear the moment you get "
+                + "close. A diviner offers you the standing choice she's already "
+                + "offered three others today, terms unchanged: sit still and learn, "
+                + "or tear it off and take what it was holding.",
+            ["CONTRACT_RECITING_GROWTH.pages.INITIAL.options.SHARE_KNOWLEDGE.title"] =
+                "Share Knowledge",
+            ["CONTRACT_RECITING_GROWTH.pages.INITIAL.options.SHARE_KNOWLEDGE.description"] =
+                "Choose 1 of 5 random cards to add to your deck.",
+            ["CONTRACT_RECITING_GROWTH.pages.INITIAL.options.RIP.title"] =
+                "Rip the Leech Off",
+            ["CONTRACT_RECITING_GROWTH.pages.INITIAL.options.RIP.description"] =
+                "Lose 5 HP. Gain a Colorless 2 card reward.",
+            ["CONTRACT_RECITING_GROWTH.pages.RIP.description"] =
+                "Lose 5 HP. Gain a Colorless 2 card reward.",
+            ["CONTRACT_RECITING_GROWTH.pages.SHARE_KNOWLEDGE.selectionScreenPrompt"] =
+                "Share Knowledge",
+            ["CONTRACT_RECITING_GROWTH.pages.SHARE_KNOWLEDGE.description"] =
+                "Choose 1 of 5 random cards to add to your deck.",
+            // TwinGatesOfMtTianheng (Liyue / DoorsOfLightAndDark)
+            ["TWIN_GATES_OF_MT_TIANHENG.title"] =
+                "The Twin Gates of Mt. Tianheng",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.description"] =
+                "Two shrine gates stand side by side on Mt. Tianheng's switchback "
+                + "trail, one lacquered gold, one lacquered black, and a diviner has "
+                + "set up a folding table between them like it's the most ordinary "
+                + "commission in the world. \"Both gates are paid for,\" she says, "
+                + "tapping the ledger. \"Light refines what you already carry. Dark "
+                + "takes something off your hands entirely. Choose the gate, not the "
+                + "philosophy — I only keep the tally.\" She does not recommend "
+                + "either.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.LIGHT.title"] =
+                "Light Door",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.LIGHT.description"] =
+                "Upgrade 2 random cards.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.DARK.title"] =
+                "Dark Door",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.INITIAL.options.DARK.description"] =
+                "Remove 1 card from Deck.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.LIGHT.description"] =
+                "Upgrade 2 random cards.",
+            ["TWIN_GATES_OF_MT_TIANHENG.pages.DARK.description"] =
+                "Remove 1 card from Deck.",
+            // DrownedLightkeepersLens (Liyue / DrowningBeacon)
+            ["DROWNED_LIGHTKEEPERS_LENS.title"] =
+                "The Drowned Lightkeeper's Lens",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.description"] =
+                "A dockhand crew at Yaoguang Shoal has been hauling up pieces of a "
+                + "lighthouse nobody remembers building. Most of it is junk, but the "
+                + "lamp-glass came up whole, still faintly warm, still faintly "
+                + "glowing. The foreman states the terms flat: a bottle of what "
+                + "leaked out of it is yours for free, or you can go down after the "
+                + "lens itself and pay for it in altitude you won't get back. "
+                + "\"Ledger's the same either way,\" he says. \"Just different "
+                + "columns.\"",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.BOTTLE.title"] =
+                "Bottle",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.BOTTLE.description"] =
+                "Procure 1 Glowwater Potion.",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.CLIMB.title"] =
+                "Climb",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.INITIAL.options.CLIMB.description"] =
+                "Lose 13 Max HP. Obtain Fresnel Lens (relic).",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.BOTTLE.description"] =
+                "Procure 1 Glowwater Potion.",
+            ["DROWNED_LIGHTKEEPERS_LENS.pages.CLIMB.description"] =
+                "Lose 13 Max HP. Obtain Fresnel Lens (relic).",
+            // GuyunStoneConstructs (Liyue / PunchOff)
+            ["GUYUN_STONE_CONSTRUCTS.title"] =
+                "The Guyun Stone Constructs",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.description"] =
+                "Two Geo constructs stand half-buried in the Guyun Stone Forest, "
+                + "cracked and listing but still upright, with a Treasure Hoarder "
+                + "crouched a safe distance off, pricing his find aloud for anyone "
+                + "who'll listen. \"Relic's already loose in the rubble — free, take "
+                + "it,\" he says, \"or you fight the both of them for the rest of "
+                + "what's buried under them. Millelith posted this as a hazard, not a "
+                + "commission, so nobody's paying you either way but them.\"",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.NAB.title"] =
+                "Nab",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.NAB.description"] =
+                "Add Injury (curse) to Deck. Obtain a random Relic.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.I_CAN_TAKE_THEM.title"] =
+                "I Can Take Them",
+            ["GUYUN_STONE_CONSTRUCTS.pages.INITIAL.options.I_CAN_TAKE_THEM.description"] =
+                "Enter combat against 2 Punch Constructs for greater rewards: "
+                + "obtain a random Relic, a random Potion, and a standard combat "
+                + "reward. Each Punch Construct starts off slightly damaged, missing "
+                + "between 2 and 9 HP.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.I_CAN_TAKE_THEM.options.FIGHT.title"] =
+                "I Can Take Them",
+            ["GUYUN_STONE_CONSTRUCTS.pages.I_CAN_TAKE_THEM.options.FIGHT.description"] =
+                "Enter combat against 2 Punch Constructs for greater rewards: "
+                + "obtain a random Relic, a random Potion, and a standard combat "
+                + "reward. Each Punch Construct starts off slightly damaged, missing "
+                + "between 2 and 9 HP.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.NAB.description"] =
+                "Add Injury (curse) to Deck. Obtain a random Relic.",
+            ["GUYUN_STONE_CONSTRUCTS.pages.I_CAN_TAKE_THEM.description"] =
+                "Enter combat against 2 Punch Constructs for greater rewards: "
+                + "obtain a random Relic, a random Potion, and a standard combat "
+                + "reward. Each Punch Construct starts off slightly damaged, missing "
+                + "between 2 and 9 HP.",
             // QingceLarder (Liyue / RoomFullOfCheese)
             ["QINGCE_LARDER.title"] =
                 "The Qingce Larder",
@@ -148,6 +738,95 @@ internal static partial class TeyvatLoc
             ["QINGCE_LARDER.pages.SEARCH.description"] =
                 "Lose 14 HP. Obtain The Chosen Cheese (relic): at the end of "
                 + "combat, gain 1 Max HP.",
+            // WhirlpoolBelowYaoguangShoal (Liyue / SpiralingWhirlpool)
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.title"] =
+                "The Whirlpool Below Yaoguang Shoal",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.description"] =
+                "The current off Yaoguang Shoal has been turning the same slow "
+                + "circle for as long as the local diviners can attest, and they've "
+                + "taken to renting out a front-row rock to anyone curious enough to "
+                + "pay for the privilege. \"Watch it turn a card into something "
+                + "stranger,\" the attendant offers, gesturing at a plain Strike or "
+                + "Defend you're carrying, \"or just drink from it and be done.\" "
+                + "Terms are posted on a board nobody has ever needed to read twice.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.OBSERVE.title"] =
+                "Observe",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.OBSERVE.description"] =
+                "Enchant a Basic Strike (Ironclad) or Defend (Ironclad) with "
+                + "Spiral.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.DRINK.title"] =
+                "Drink",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.INITIAL.options.DRINK.description"] =
+                "Heal 33% of Max HP.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.OBSERVE.description"] =
+                "Enchant a Basic Strike (Ironclad) or Defend (Ironclad) with "
+                + "Spiral.",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL.pages.DRINK.description"] =
+                "Heal 33% of Max HP.",
+            // NorthlandBanksDrownedVault (Liyue / SunkenTreasury)
+            ["NORTHLAND_BANKS_DROWNED_VAULT.title"] =
+                "The Northland Bank's Drowned Vault",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.description"] =
+                "The Northland Bank's Liyue branch has one vault the tide claimed "
+                + "decades ago and never gave back, and a Feiyun clerk has been "
+                + "contracted to appraise whatever a diver brings up from it. The "
+                + "first chest is modest and clean. The second is heavier, and the "
+                + "clerk warns you — plainly, before you touch it — that the Bank's "
+                + "gold never leaves a debt unnamed. \"Take the small chest and walk "
+                + "away clean,\" she says, \"or take the large one and carry what "
+                + "comes with it.\"",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.FIRST_CHEST.title"] =
+                "First Chest",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.FIRST_CHEST.description"] =
+                "Gain 52–68 Gold.",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.SECOND_CHEST.title"] =
+                "Second Chest",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.INITIAL.options.SECOND_CHEST.description"] =
+                "Gain 303–363 Gold. Add Greed (curse) to Deck.",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.FIRST_CHEST.description"] =
+                "Gain 52–68 Gold.",
+            ["NORTHLAND_BANKS_DROWNED_VAULT.pages.SECOND_CHEST.description"] =
+                "Gain 303–363 Gold. Add Greed (curse) to Deck.",
+            // SteeperAtHeyu (Liyue / TeaMaster)
+            ["STEEPER_AT_HEYU.title"] =
+                "The Steeper at Heyu",
+            ["STEEPER_AT_HEYU.pages.INITIAL.description"] =
+                "Heyu Tea House keeps a back room where the kettle is never quite "
+                + "allowed to cool. The master there does not ask your name, only "
+                + "your intent, then sets three cups on a Cor Lapis tray without "
+                + "waiting for an answer. Payment, she mentions, is customary before "
+                + "the first sip — this being Liyue, and a contract being a contract.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA.title"] =
+                "Bone-Ash Oolong",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA.description"] =
+                "Pay 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA.title"] =
+                "Cinnabar Ember Tea",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA.description"] =
+                "Pay 150 Mora. At the start of the next 5 combats, gain 2 Strength.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.TEA_OF_DISCOURTESY.title"] =
+                "Tea of Discourtesy",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.TEA_OF_DISCOURTESY.description"] =
+                "Take the free cup — yesterday's leaves, poured without ceremony "
+                + "and drunk the same way. At the start of the next combat, shuffle 2 "
+                + "Dazed into your Draw Pile.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA_LOCKED.title"] =
+                "Bone-Ash Oolong",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.BONE_TEA_LOCKED.description"] =
+                "Pay 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA_LOCKED.title"] =
+                "Cinnabar Ember Tea",
+            ["STEEPER_AT_HEYU.pages.INITIAL.options.EMBER_TEA_LOCKED.description"] =
+                "Pay 150 Mora. At the start of the next 5 combats, gain 2 Strength.",
+            ["STEEPER_AT_HEYU.pages.DONE.description"] =
+                "Pay 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["STEEPER_AT_HEYU.pages.TEA_OF_DISCOURTESY.description"] =
+                "Take the free cup — yesterday's leaves, poured without ceremony "
+                + "and drunk the same way. At the start of the next combat, shuffle 2 "
+                + "Dazed into your Draw Pile.",
             // TalesOfGuyunWereTrue (Liyue / TheLegendsWereTrue)
             ["TALES_OF_GUYUN_WERE_TRUE.title"] =
                 "The Tales of Guyun Were True",
@@ -172,6 +851,274 @@ internal static partial class TeyvatLoc
             ["TALES_OF_GUYUN_WERE_TRUE.pages.SLOWLY_FIND_AN_EXIT.description"] =
                 "Lose 8 HP scraping through the flooded crawlway. Procure 1 random "
                 + "Potion from a cracked Hoarder crate.",
+            // BladeInTheStoneForest (Liyue / SunkenStatue)
+            ["BLADE_IN_THE_STONE_FOREST.title"] =
+                "The Blade in the Stone Forest",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.description"] =
+                "Half-submerged among the pillars of Guyun Stone Forest stands a "
+                + "blade driven hilt-first into bedrock, old enough that a Millelith "
+                + "patrol logs it on every pass and does nothing else about it. A "
+                + "Treasure Hoarder has been eyeing it for a week and finally admits "
+                + "he can't shift it alone. \"Pull it and it's yours, free and "
+                + "clear,\" he says, \"or leave the sword be and just work the "
+                + "shallows with me — there's coin enough down there either way, if "
+                + "you don't mind the cold.\"",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.GRAB_SWORD.title"] =
+                "Grab the Sword",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.GRAB_SWORD.description"] =
+                "Obtain Sword of Stone (relic).",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.DIVE_INTO_WATER.title"] =
+                "Dive into the Water",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.DIVE_INTO_WATER.description"] =
+                "Gain 101–121 Gold. Lose 7 HP.",
+            ["BLADE_IN_THE_STONE_FOREST.pages.GRAB_SWORD.description"] =
+                "Obtain Sword of Stone (relic).",
+            ["BLADE_IN_THE_STONE_FOREST.pages.DIVE_INTO_WATER.description"] =
+                "Gain 101–121 Gold. Lose 7 HP.",
+            // DocksScrapManifest (Liyue / TrashHeap)
+            ["DOCKS_SCRAP_MANIFEST.title"] =
+                "The Docks Scrap Manifest",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.description"] =
+                "A scrap pile has grown against the Liyue Harbor breakwater for as "
+                + "long as the dockhands can remember, added to by every ship that "
+                + "doesn't want to pay the disposal fee. A Feiyun clerk pokes through "
+                + "it with a ledger stick, sorting what's worth logging from what "
+                + "isn't. \"Dive in for whatever's still good underneath,\" she "
+                + "offers, \"or just grab what's on top — it's all priced the same to "
+                + "the Guild, which is to say it isn't priced at all.\"",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.DIVE_IN.title"] =
+                "Dive In",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.DIVE_IN.description"] =
+                "Lose 8 HP. Obtain a random Relic, chosen with equal probability "
+                + "from Darkstone Periapt, Dream Catcher, Hand Drill, Maw Bank, and "
+                + "The Boot.",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.GRAB.title"] =
+                "Grab Random Junk",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.GRAB.description"] =
+                "Gain 100 Gold. Obtain a random card, chosen with equal probability "
+                + "from Caltrops, Distraction, Outmaneuver, Clash, Dual Wield, "
+                + "Entrench, Hello World, Rebound, Stack, and Rip and Tear.",
+            ["DOCKS_SCRAP_MANIFEST.pages.DIVE_IN.description"] =
+                "Lose 8 HP. Obtain a random Relic, chosen with equal probability "
+                + "from Darkstone Periapt, Dream Catcher, Hand Drill, Maw Bank, and "
+                + "The Boot.",
+            ["DOCKS_SCRAP_MANIFEST.pages.GRAB.description"] =
+                "Gain 100 Gold. Obtain a random card, chosen with equal probability "
+                + "from Caltrops, Distraction, Outmaneuver, Clash, Dual Wield, "
+                + "Entrench, Hello World, Rebound, Stack, and Rip and Tear.",
+            // FloodedLedgerRoom (Liyue / WaterloggedScriptorium)
+            ["FLOODED_LEDGER_ROOM.title"] =
+                "The Flooded Ledger-Room",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.description"] =
+                "Below the Wangsheng Funeral Parlor, a records room kept every "
+                + "burial contract Liyue Harbor ever signed, until the last flood "
+                + "took the lower shelves. An archivist wades among the salvage with "
+                + "a bottle of ink that somehow never ran, and recites the terms "
+                + "without flinching: gain a little strength for free, or pay to have "
+                + "the ink itself steady a page — or two — against everything still "
+                + "trying to wash it away. The dead's contracts, she says, are never "
+                + "mocked here, only kept.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.BLOODY_INK.title"] =
+                "Bloody Ink",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.BLOODY_INK.description"] =
+                "Gain 6 Max HP.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL.title"] =
+                "Tentacle Quill",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL.description"] =
+                "Pay 55 Gold. Enchant a card with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE.title"] =
+                "Prickly Sponge",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE.description"] =
+                "Pay 99 Gold. Enchant 2 cards with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL_LOCKED.title"] =
+                "Tentacle Quill",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL_LOCKED.description"] =
+                "Pay 55 Gold. Enchant a card with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE_LOCKED.title"] =
+                "Prickly Sponge",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE_LOCKED.description"] =
+                "Pay 99 Gold. Enchant 2 cards with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.PRICKLY_SPONGE.description"] =
+                "Pay 99 Gold. Enchant 2 cards with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.TENTACLE_QUILL.description"] =
+                "Pay 55 Gold. Enchant a card with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.BLOODY_INK.description"] =
+                "Gain 6 Max HP.",
+            // SixContractsToABetterYou (Liyue / SelfHelpBook)
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.title"] =
+                "Six Contracts to a Better You",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.description"] =
+                "A Feiyun pamphleteer has set up a folding stall on the Harbor "
+                + "steps selling a slim, badly bound book that promises to sharpen, "
+                + "steady, or quicken whatever you already carry — no refunds, terms "
+                + "printed small on the back cover. \"Read whichever chapter applies "
+                + "to your kit,\" she says, sliding it across, \"there's nothing in "
+                + "here for a hand with nothing in it.\" If none of the three "
+                + "chapters have anything to grip onto, she simply takes the book "
+                + "back and waves you on.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK.title"] =
+                "Read the Back",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE.title"] =
+                "Read a Random Passage",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+                "Read the Entire Book",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.NO_OPTIONS.title"] =
+                "Move On",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+                "Read the Back",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+                "Read a Random Passage",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+                "Read the Entire Book",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU.pages.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            // RopeBridgeBelowDunyuRuins (Liyue / SlipperyBridge)
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.title"] =
+                "The Rope Bridge Below Dunyu Ruins",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.description"] =
+                "Rain has been falling on the upper Chasm since dawn, and the old "
+                + "rope bridge toward the Dunyu Ruins sways black and slick with it. "
+                + "Katheryne's commission notes said to travel light; you did not. "
+                + "Halfway across a plank drops away, and your overloaded pack swings "
+                + "out over nothing but mist.",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.OVERCOME.title"] =
+                "Let It Fall",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.OVERCOME.description"] =
+                "[Specific card] is removed from your deck.",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.HOLD_ON_0.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.HOLD_ON_0.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
+                "Hold On",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.OVERCOME.description"] =
+                "[Specific card] is removed from your deck.",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_0.description"] =
+                "Lose 3 HP as the wet rope scours your palms. The thing about to "
+                + "slip is randomized — some other piece of your kit takes its place "
+                + "at the knot. Each time you clamp down again, the strain costs 1 "
+                + "more HP than the last, and the bridge keeps offering you the same "
+                + "two choices until you finally let something fall. The knot never "
+                + "picks the same thing twice while anything else remains, and never "
+                + "anything lashed down for good (Eternal).",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_1.description"] =
+                "",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_2.description"] =
+                "",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_3.description"] =
+                "",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_4.description"] =
+                "",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_5.description"] =
+                "",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_6.description"] =
+                "",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.description"] =
+                "",
             // UnclaimedCratesAtFeiyunSlope (Liyue / ThisOrThat)
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.title"] =
                 "The Unclaimed Crates at Feiyun Slope",
@@ -208,49 +1155,223 @@ internal static partial class TeyvatLoc
 internal static class TeyvatGeneratedEvents
 {
     /// <summary>What a dressed event's mirror asks the loc table for:
-    /// the option key names, in the base event's order, and the other
-    /// page keys. Read by the headless pins, which check the key set
-    /// against the merged rows without constructing a model.</summary>
+    /// the INITIAL option key names, in the base event's order; the
+    /// other page keys; and `ExtraOptionKeys`, the option keys that
+    /// are not on the INITIAL page or have no face line of their own
+    /// -- a `_LOCKED` twin, or an option a later page offers. An
+    /// extra key is a full suffix under the entry and is a PREFIX
+    /// like any option key: `.title` and `.description` both. Read
+    /// by the headless pins, which check the key set against the
+    /// merged rows without constructing a model.</summary>
     internal sealed record EventShape(
         string BaseEntry,
         string Mirror,
         IReadOnlyList<string> OptionKeys,
         IReadOnlyList<string> PageKeys,
+        IReadOnlyList<string> ExtraOptionKeys,
         bool HasLossRow);
 
     /// <summary>Dressed event type -> its shape.</summary>
     internal static readonly IReadOnlyDictionary<Type, EventShape> Shapes =
         new Dictionary<Type, EventShape>
         {
+            [typeof(Events.Mondstadt.GuildDesksReturnedCopy)] = new EventShape(
+                "GUILD_DESKS_RETURNED_COPY", "SelfHelpBookMirror",
+                new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
+                new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
+                new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
+                false),
+            [typeof(Events.Mondstadt.CutRopeBridgeAboveCiderLake)] = new EventShape(
+                "CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE", "SlipperyBridgeMirror",
+                new[] { "OVERCOME", "HOLD_ON_0" },
+                new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
+                new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
+                false),
             [typeof(Events.Mondstadt.UnmarkedCrates)] = new EventShape(
                 "UNMARKED_CRATES", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.WanderingCask)] = new EventShape(
+                "WANDERING_CASK", "AromaOfChaosMirror",
+                new[] { "LET_GO", "MAINTAIN_CONTROL" },
+                new[] { "pages.LET_GO.description", "pages.MAINTAIN_CONTROL.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.StormTouchedShardAtStormterrorsLair)] = new EventShape(
+                "STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR", "BrainLeechMirror",
+                new[] { "SHARE_KNOWLEDGE", "RIP" },
+                new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.WindfalconsRoost)] = new EventShape(
+                "WINDFALCONS_ROOST", "ByrdonisNestMirror",
+                new[] { "EAT", "TAKE" },
+                new[] { "pages.EAT.description", "pages.TAKE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.BrambleLineBelowWolvendom)] = new EventShape(
+                "BRAMBLE_LINE_BELOW_WOLVENDOM", "DenseVegetationMirror",
+                new[] { "TRUDGE_ON", "REST" },
+                new[] { "pages.TRUDGE_ON.description", "pages.REST.description" },
+                new[] { "pages.REST.options.FIGHT" },
+                false),
+            [typeof(Events.Mondstadt.GuildCommissionAtStarsnatchCliff)] = new EventShape(
+                "GUILD_COMMISSION_AT_STARSNATCH_CLIFF", "JungleMazeAdventureMirror",
+                new[] { "SOLO_QUEST", "JOIN_FORCES" },
+                new[] { "pages.SOLO_QUEST.description", "pages.JOIN_FORCES.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.SingingGrowthUnderWolvendom)] = new EventShape(
+                "SINGING_GROWTH_UNDER_WOLVENDOM", "LuminousChoirMirror",
+                new[] { "REACH_INTO_THE_FLESH", "OFFER_TRIBUTE" },
+                new[] { "pages.REACH_INTO_THE_FLESH.description", "pages.OFFER_TRIBUTE.description" },
+                new[] { "pages.INITIAL.options.OFFER_TRIBUTE_LOCKED" },
+                false),
+            [typeof(Events.Mondstadt.WolfRingAboveWindrise)] = new EventShape(
+                "WOLF_RING_ABOVE_WINDRISE", "MorphicGroveMirror",
+                new[] { "GROUP", "LONER" },
+                new[] { "pages.LONER.description", "pages.GROUP.description" },
+                Array.Empty<string>(),
                 false),
             [typeof(Events.Mondstadt.SpringvaleCheeseCellar)] = new EventShape(
                 "SPRINGVALE_CHEESE_CELLAR", "RoomFullOfCheeseMirror",
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
                 true),
+            [typeof(Events.Mondstadt.CliffsideSeedNearCapeOath)] = new EventShape(
+                "CLIFFSIDE_SEED_NEAR_CAPE_OATH", "SapphireSeedMirror",
+                new[] { "EAT", "PLANT" },
+                new[] { "pages.EAT.description", "pages.PLANT.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.AngelsSharesTastingFlight)] = new EventShape(
+                "ANGELS_SHARES_TASTING_FLIGHT", "TeaMasterMirror",
+                new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
+                new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
+                new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
+                false),
             [typeof(Events.Mondstadt.GuildsStandingCommissionAtCapeOath)] = new EventShape(
                 "GUILDS_STANDING_COMMISSION_AT_CAPE_OATH", "TheLegendsWereTrueMirror",
                 new[] { "NAB_THE_MAP", "SLOWLY_FIND_AN_EXIT" },
                 new[] { "pages.NAB_THE_MAP.description", "pages.SLOWLY_FIND_AN_EXIT.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.HauntedCampsiteBelowDragonspine)] = new EventShape(
+                "HAUNTED_CAMPSITE_BELOW_DRAGONSPINE", "UnrestSiteMirror",
+                new[] { "REST", "KILL" },
+                new[] { "pages.REST.description", "pages.KILL.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.SpringvaleFont)] = new EventShape(
+                "SPRINGVALE_FONT", "WellspringMirror",
+                new[] { "BOTTLE", "BATHE" },
+                new[] { "pages.BOTTLE.description", "pages.BATHE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.MosiMosiAtStormbearerPoint)] = new EventShape(
+                "MOSI_MOSI_AT_STORMBEARER_POINT", "WhisperingHollowMirror",
+                new[] { "GOLD", "HUG" },
+                new[] { "pages.GOLD.description", "pages.HUG.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Mondstadt.HuntersTotemPostsNearWolvendom)] = new EventShape(
+                "HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM", "WoodCarvingsMirror",
+                new[] { "BIRD", "SNAKE", "TORUS" },
+                new[] { "pages.BIRD.description", "pages.SNAKE.description", "pages.TORUS.description" },
+                new[] { "pages.INITIAL.options.SNAKE_LOCKED" },
+                false),
+            [typeof(Events.Liyue.ContractRecitingGrowth)] = new EventShape(
+                "CONTRACT_RECITING_GROWTH", "BrainLeechMirror",
+                new[] { "SHARE_KNOWLEDGE", "RIP" },
+                new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.TwinGatesOfMtTianheng)] = new EventShape(
+                "TWIN_GATES_OF_MT_TIANHENG", "DoorsOfLightAndDarkMirror",
+                new[] { "LIGHT", "DARK" },
+                new[] { "pages.LIGHT.description", "pages.DARK.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.DrownedLightkeepersLens)] = new EventShape(
+                "DROWNED_LIGHTKEEPERS_LENS", "DrowningBeaconMirror",
+                new[] { "BOTTLE", "CLIMB" },
+                new[] { "pages.BOTTLE.description", "pages.CLIMB.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.GuyunStoneConstructs)] = new EventShape(
+                "GUYUN_STONE_CONSTRUCTS", "PunchOffMirror",
+                new[] { "NAB", "I_CAN_TAKE_THEM" },
+                new[] { "pages.NAB.description", "pages.I_CAN_TAKE_THEM.description" },
+                new[] { "pages.I_CAN_TAKE_THEM.options.FIGHT" },
                 false),
             [typeof(Events.Liyue.QingceLarder)] = new EventShape(
                 "QINGCE_LARDER", "RoomFullOfCheeseMirror",
                 new[] { "GORGE", "SEARCH" },
                 new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.WhirlpoolBelowYaoguangShoal)] = new EventShape(
+                "WHIRLPOOL_BELOW_YAOGUANG_SHOAL", "SpiralingWhirlpoolMirror",
+                new[] { "OBSERVE", "DRINK" },
+                new[] { "pages.OBSERVE.description", "pages.DRINK.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.NorthlandBanksDrownedVault)] = new EventShape(
+                "NORTHLAND_BANKS_DROWNED_VAULT", "SunkenTreasuryMirror",
+                new[] { "FIRST_CHEST", "SECOND_CHEST" },
+                new[] { "pages.FIRST_CHEST.description", "pages.SECOND_CHEST.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.SteeperAtHeyu)] = new EventShape(
+                "STEEPER_AT_HEYU", "TeaMasterMirror",
+                new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
+                new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
+                new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
                 false),
             [typeof(Events.Liyue.TalesOfGuyunWereTrue)] = new EventShape(
                 "TALES_OF_GUYUN_WERE_TRUE", "TheLegendsWereTrueMirror",
                 new[] { "NAB_THE_MAP", "SLOWLY_FIND_AN_EXIT" },
                 new[] { "pages.NAB_THE_MAP.description", "pages.SLOWLY_FIND_AN_EXIT.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.BladeInTheStoneForest)] = new EventShape(
+                "BLADE_IN_THE_STONE_FOREST", "SunkenStatueMirror",
+                new[] { "GRAB_SWORD", "DIVE_INTO_WATER" },
+                new[] { "pages.GRAB_SWORD.description", "pages.DIVE_INTO_WATER.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.DocksScrapManifest)] = new EventShape(
+                "DOCKS_SCRAP_MANIFEST", "TrashHeapMirror",
+                new[] { "DIVE_IN", "GRAB" },
+                new[] { "pages.DIVE_IN.description", "pages.GRAB.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.FloodedLedgerRoom)] = new EventShape(
+                "FLOODED_LEDGER_ROOM", "WaterloggedScriptoriumMirror",
+                new[] { "BLOODY_INK", "TENTACLE_QUILL", "PRICKLY_SPONGE" },
+                new[] { "pages.PRICKLY_SPONGE.description", "pages.TENTACLE_QUILL.description", "pages.BLOODY_INK.description" },
+                new[] { "pages.INITIAL.options.TENTACLE_QUILL_LOCKED", "pages.INITIAL.options.PRICKLY_SPONGE_LOCKED" },
+                false),
+            [typeof(Events.Liyue.SixContractsToABetterYou)] = new EventShape(
+                "SIX_CONTRACTS_TO_ABETTER_YOU", "SelfHelpBookMirror",
+                new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
+                new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
+                new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
+                false),
+            [typeof(Events.Liyue.RopeBridgeBelowDunyuRuins)] = new EventShape(
+                "ROPE_BRIDGE_BELOW_DUNYU_RUINS", "SlipperyBridgeMirror",
+                new[] { "OVERCOME", "HOLD_ON_0" },
+                new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
+                new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
                 false),
             [typeof(Events.Liyue.UnclaimedCratesAtFeiyunSlope)] = new EventShape(
                 "UNCLAIMED_CRATES_AT_FEIYUN_SLOPE", "ThisOrThatMirror",
                 new[] { "PLAIN", "ORNATE" },
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
+                Array.Empty<string>(),
                 false),
         };
 
@@ -261,16 +1382,70 @@ internal static class TeyvatGeneratedEvents
     internal static readonly IReadOnlyDictionary<(string Dressing, Type BaseEvent), Func<EventModel>> Substitutions =
         new Dictionary<(string, Type), Func<EventModel>>
         {
+            [(TeyvatFrame.Mondstadt, typeof(SelfHelpBook))] =
+                () => ModelDb.Event<Events.Mondstadt.GuildDesksReturnedCopy>(),
+            [(TeyvatFrame.Mondstadt, typeof(SlipperyBridge))] =
+                () => ModelDb.Event<Events.Mondstadt.CutRopeBridgeAboveCiderLake>(),
             [(TeyvatFrame.Mondstadt, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Mondstadt.UnmarkedCrates>(),
+            [(TeyvatFrame.Mondstadt, typeof(AromaOfChaos))] =
+                () => ModelDb.Event<Events.Mondstadt.WanderingCask>(),
+            [(TeyvatFrame.Mondstadt, typeof(BrainLeech))] =
+                () => ModelDb.Event<Events.Mondstadt.StormTouchedShardAtStormterrorsLair>(),
+            [(TeyvatFrame.Mondstadt, typeof(ByrdonisNest))] =
+                () => ModelDb.Event<Events.Mondstadt.WindfalconsRoost>(),
+            [(TeyvatFrame.Mondstadt, typeof(DenseVegetation))] =
+                () => ModelDb.Event<Events.Mondstadt.BrambleLineBelowWolvendom>(),
+            [(TeyvatFrame.Mondstadt, typeof(JungleMazeAdventure))] =
+                () => ModelDb.Event<Events.Mondstadt.GuildCommissionAtStarsnatchCliff>(),
+            [(TeyvatFrame.Mondstadt, typeof(LuminousChoir))] =
+                () => ModelDb.Event<Events.Mondstadt.SingingGrowthUnderWolvendom>(),
+            [(TeyvatFrame.Mondstadt, typeof(MorphicGrove))] =
+                () => ModelDb.Event<Events.Mondstadt.WolfRingAboveWindrise>(),
             [(TeyvatFrame.Mondstadt, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Mondstadt.SpringvaleCheeseCellar>(),
+            [(TeyvatFrame.Mondstadt, typeof(SapphireSeed))] =
+                () => ModelDb.Event<Events.Mondstadt.CliffsideSeedNearCapeOath>(),
+            [(TeyvatFrame.Mondstadt, typeof(TeaMaster))] =
+                () => ModelDb.Event<Events.Mondstadt.AngelsSharesTastingFlight>(),
             [(TeyvatFrame.Mondstadt, typeof(TheLegendsWereTrue))] =
                 () => ModelDb.Event<Events.Mondstadt.GuildsStandingCommissionAtCapeOath>(),
+            [(TeyvatFrame.Mondstadt, typeof(UnrestSite))] =
+                () => ModelDb.Event<Events.Mondstadt.HauntedCampsiteBelowDragonspine>(),
+            [(TeyvatFrame.Mondstadt, typeof(Wellspring))] =
+                () => ModelDb.Event<Events.Mondstadt.SpringvaleFont>(),
+            [(TeyvatFrame.Mondstadt, typeof(WhisperingHollow))] =
+                () => ModelDb.Event<Events.Mondstadt.MosiMosiAtStormbearerPoint>(),
+            [(TeyvatFrame.Mondstadt, typeof(WoodCarvings))] =
+                () => ModelDb.Event<Events.Mondstadt.HuntersTotemPostsNearWolvendom>(),
+            [(TeyvatFrame.Liyue, typeof(BrainLeech))] =
+                () => ModelDb.Event<Events.Liyue.ContractRecitingGrowth>(),
+            [(TeyvatFrame.Liyue, typeof(DoorsOfLightAndDark))] =
+                () => ModelDb.Event<Events.Liyue.TwinGatesOfMtTianheng>(),
+            [(TeyvatFrame.Liyue, typeof(DrowningBeacon))] =
+                () => ModelDb.Event<Events.Liyue.DrownedLightkeepersLens>(),
+            [(TeyvatFrame.Liyue, typeof(PunchOff))] =
+                () => ModelDb.Event<Events.Liyue.GuyunStoneConstructs>(),
             [(TeyvatFrame.Liyue, typeof(RoomFullOfCheese))] =
                 () => ModelDb.Event<Events.Liyue.QingceLarder>(),
+            [(TeyvatFrame.Liyue, typeof(SpiralingWhirlpool))] =
+                () => ModelDb.Event<Events.Liyue.WhirlpoolBelowYaoguangShoal>(),
+            [(TeyvatFrame.Liyue, typeof(SunkenTreasury))] =
+                () => ModelDb.Event<Events.Liyue.NorthlandBanksDrownedVault>(),
+            [(TeyvatFrame.Liyue, typeof(TeaMaster))] =
+                () => ModelDb.Event<Events.Liyue.SteeperAtHeyu>(),
             [(TeyvatFrame.Liyue, typeof(TheLegendsWereTrue))] =
                 () => ModelDb.Event<Events.Liyue.TalesOfGuyunWereTrue>(),
+            [(TeyvatFrame.Liyue, typeof(SunkenStatue))] =
+                () => ModelDb.Event<Events.Liyue.BladeInTheStoneForest>(),
+            [(TeyvatFrame.Liyue, typeof(TrashHeap))] =
+                () => ModelDb.Event<Events.Liyue.DocksScrapManifest>(),
+            [(TeyvatFrame.Liyue, typeof(WaterloggedScriptorium))] =
+                () => ModelDb.Event<Events.Liyue.FloodedLedgerRoom>(),
+            [(TeyvatFrame.Liyue, typeof(SelfHelpBook))] =
+                () => ModelDb.Event<Events.Liyue.SixContractsToABetterYou>(),
+            [(TeyvatFrame.Liyue, typeof(SlipperyBridge))] =
+                () => ModelDb.Event<Events.Liyue.RopeBridgeBelowDunyuRuins>(),
             [(TeyvatFrame.Liyue, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
         };
@@ -296,16 +1471,70 @@ internal static class TeyvatGeneratedEvents
     internal static readonly IReadOnlyDictionary<string, string> Portraits =
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
+            ["GUILD_DESKS_RETURNED_COPY"] =
+                "res://images/events/self_help_book.png",
+            ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE"] =
+                "res://images/events/slippery_bridge.png",
             ["UNMARKED_CRATES"] =
                 "res://images/events/this_or_that.png",
+            ["WANDERING_CASK"] =
+                "res://images/events/aroma_of_chaos.png",
+            ["STORM_TOUCHED_SHARD_AT_STORMTERRORS_LAIR"] =
+                "res://images/events/brain_leech.png",
+            ["WINDFALCONS_ROOST"] =
+                "res://images/events/byrdonis_nest.png",
+            ["BRAMBLE_LINE_BELOW_WOLVENDOM"] =
+                "res://images/events/dense_vegetation.png",
+            ["GUILD_COMMISSION_AT_STARSNATCH_CLIFF"] =
+                "res://images/events/jungle_maze_adventure.png",
+            ["SINGING_GROWTH_UNDER_WOLVENDOM"] =
+                "res://images/events/luminous_choir.png",
+            ["WOLF_RING_ABOVE_WINDRISE"] =
+                "res://images/events/morphic_grove.png",
             ["SPRINGVALE_CHEESE_CELLAR"] =
                 "res://images/events/room_full_of_cheese.png",
+            ["CLIFFSIDE_SEED_NEAR_CAPE_OATH"] =
+                "res://images/events/sapphire_seed.png",
+            ["ANGELS_SHARES_TASTING_FLIGHT"] =
+                "res://images/events/tea_master.png",
             ["GUILDS_STANDING_COMMISSION_AT_CAPE_OATH"] =
                 "res://images/events/the_legends_were_true.png",
+            ["HAUNTED_CAMPSITE_BELOW_DRAGONSPINE"] =
+                "res://images/events/unrest_site.png",
+            ["SPRINGVALE_FONT"] =
+                "res://images/events/wellspring.png",
+            ["MOSI_MOSI_AT_STORMBEARER_POINT"] =
+                "res://images/events/whispering_hollow.png",
+            ["HUNTERS_TOTEM_POSTS_NEAR_WOLVENDOM"] =
+                "res://images/events/wood_carvings.png",
+            ["CONTRACT_RECITING_GROWTH"] =
+                "res://images/events/brain_leech.png",
+            ["TWIN_GATES_OF_MT_TIANHENG"] =
+                "res://images/events/doors_of_light_and_dark.png",
+            ["DROWNED_LIGHTKEEPERS_LENS"] =
+                "res://images/events/drowning_beacon.png",
+            ["GUYUN_STONE_CONSTRUCTS"] =
+                "res://images/events/punch_off.png",
             ["QINGCE_LARDER"] =
                 "res://images/events/room_full_of_cheese.png",
+            ["WHIRLPOOL_BELOW_YAOGUANG_SHOAL"] =
+                "res://images/events/spiraling_whirlpool.png",
+            ["NORTHLAND_BANKS_DROWNED_VAULT"] =
+                "res://images/events/sunken_treasury.png",
+            ["STEEPER_AT_HEYU"] =
+                "res://images/events/tea_master.png",
             ["TALES_OF_GUYUN_WERE_TRUE"] =
                 "res://images/events/the_legends_were_true.png",
+            ["BLADE_IN_THE_STONE_FOREST"] =
+                "res://images/events/sunken_statue.png",
+            ["DOCKS_SCRAP_MANIFEST"] =
+                "res://images/events/trash_heap.png",
+            ["FLOODED_LEDGER_ROOM"] =
+                "res://images/events/waterlogged_scriptorium.png",
+            ["SIX_CONTRACTS_TO_ABETTER_YOU"] =
+                "res://images/events/self_help_book.png",
+            ["ROPE_BRIDGE_BELOW_DUNYU_RUINS"] =
+                "res://images/events/slippery_bridge.png",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE"] =
                 "res://images/events/this_or_that.png",
         };

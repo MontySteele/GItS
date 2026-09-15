@@ -376,6 +376,14 @@ public class TeyvatFrameTests : IDisposable
         return Il.Calls(method)
             .Select(c => System.Text.RegularExpressions.Regex.Replace(
                 c, @"b__\d+_(\d+)$", "b__$1"))
+            // The SAME ordinal, on the other shape a lambda compiles to. A
+            // gate whose predicate CAPTURES something -- Luminous Choir's
+            // closes over `runState` -- gets a `<>c__DisplayClassN_M` rather
+            // than the cached `<>c`, and N is again the declaring method's
+            // ordinal within its type, which differs between a base event and
+            // a mirror for no reason that means anything.
+            .Select(c => System.Text.RegularExpressions.Regex.Replace(
+                c, @"<>c__DisplayClass\d+_(\d+)", "<>c__DisplayClass_$1"))
             .OrderBy(c => c, StringComparer.Ordinal)
             .ToList();
     }
@@ -397,6 +405,29 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(RoomFullOfCheeseMirror), typeof(RoomFullOfCheese) },
             new object[] { typeof(TheLegendsWereTrueMirror), typeof(TheLegendsWereTrue) },
             new object[] { typeof(ThisOrThatMirror), typeof(ThisOrThat) },
+            new object[] { typeof(SelfHelpBookMirror), typeof(SelfHelpBook) },
+            new object[] { typeof(SlipperyBridgeMirror), typeof(SlipperyBridge) },
+            new object[] { typeof(AromaOfChaosMirror), typeof(AromaOfChaos) },
+            new object[] { typeof(BrainLeechMirror), typeof(BrainLeech) },
+            new object[] { typeof(ByrdonisNestMirror), typeof(ByrdonisNest) },
+            new object[] { typeof(DenseVegetationMirror), typeof(DenseVegetation) },
+            new object[] { typeof(JungleMazeAdventureMirror), typeof(JungleMazeAdventure) },
+            new object[] { typeof(LuminousChoirMirror), typeof(LuminousChoir) },
+            new object[] { typeof(MorphicGroveMirror), typeof(MorphicGrove) },
+            new object[] { typeof(SapphireSeedMirror), typeof(SapphireSeed) },
+            new object[] { typeof(TeaMasterMirror), typeof(TeaMaster) },
+            new object[] { typeof(UnrestSiteMirror), typeof(UnrestSite) },
+            new object[] { typeof(WellspringMirror), typeof(Wellspring) },
+            new object[] { typeof(WhisperingHollowMirror), typeof(WhisperingHollow) },
+            new object[] { typeof(WoodCarvingsMirror), typeof(WoodCarvings) },
+            new object[] { typeof(DoorsOfLightAndDarkMirror), typeof(DoorsOfLightAndDark) },
+            new object[] { typeof(DrowningBeaconMirror), typeof(DrowningBeacon) },
+            new object[] { typeof(PunchOffMirror), typeof(PunchOff) },
+            new object[] { typeof(SpiralingWhirlpoolMirror), typeof(SpiralingWhirlpool) },
+            new object[] { typeof(SunkenTreasuryMirror), typeof(SunkenTreasury) },
+            new object[] { typeof(SunkenStatueMirror), typeof(SunkenStatue) },
+            new object[] { typeof(TrashHeapMirror), typeof(TrashHeap) },
+            new object[] { typeof(WaterloggedScriptoriumMirror), typeof(WaterloggedScriptorium) },
         };
 
     // ---------------------------------------------------------------
@@ -716,6 +747,16 @@ public class TeyvatFrameTests : IDisposable
                 asked.Add($"{entry}.pages.INITIAL.options.{option}.description");
             }
 
+            // An option key that is NOT on the INITIAL page, or that has no
+            // face line of its own -- a `_LOCKED` twin, an option a later
+            // page offers -- is a full suffix under the entry, and is a
+            // prefix exactly like the ones above.
+            foreach (var extra in shape.ExtraOptionKeys)
+            {
+                asked.Add($"{entry}.{extra}.title");
+                asked.Add($"{entry}.{extra}.description");
+            }
+
             // Every other key the mirror hands to `L10NLookup` whole.
             foreach (var page in shape.PageKeys)
             {
@@ -750,8 +791,18 @@ public class TeyvatFrameTests : IDisposable
 
         var shape = Shapes().Values.First(s => s.Mirror == mirror.Name);
         var expected = shape.OptionKeys
-            .Concat(shape.PageKeys.Select(p => p.StartsWith("pages.", StringComparison.Ordinal)
-                ? p.Substring("pages.".Length) : p))
+            .Concat(shape.PageKeys.Select(Unprefixed))
+            .Concat(shape.ExtraOptionKeys.Select(Unprefixed))
+            // Both sides are filtered by the SAME shape test, so the pin
+            // compares exactly the literals it can see and says so. A key
+            // deeper than one page word -- Dense Vegetation's
+            // `REST.options.FIGHT`, Slippery Bridge's
+            // `HOLD_ON_0.options.HOLD_ON_1` -- is out of BOTH sets rather
+            // than in one and not the other; the loc pin above still
+            // requires its rows, because that pin builds its asked-for set
+            // from the shape and not from the IL.
+            .Where(IsComparableKey)
+            .Distinct()
             .OrderBy(k => k, StringComparer.Ordinal)
             .ToList();
 
@@ -763,14 +814,31 @@ public class TeyvatFrameTests : IDisposable
             // `ThisOrThat`'s `StringVar("Curse", ...)` names a DynamicVar. A
             // key name is an ALL-CAPS option segment, optionally followed by
             // one camelCase page word; nothing else is compared.
-            .Where(s => System.Text.RegularExpressions.Regex.IsMatch(
-                s, @"^[A-Z0-9_]+(\.[A-Za-z]+)?$"))
+            .Where(IsComparableKey)
             .Distinct()
             .OrderBy(k => k, StringComparer.Ordinal)
             .ToList();
 
         Assert.Equal(expected, actual);
     }
+
+    /// <summary>A shape key as the MIRROR spells it.
+    ///
+    /// The shape carries full suffixes under the dressed entry; the mirror
+    /// builds them through two helpers that supply the front of the key --
+    /// `EventModel.InitialOptionKey(name)` for an option on the INITIAL page
+    /// (a `_LOCKED` twin included) and `TeyvatEventMirror.PageKey(suffix)`
+    /// for everything else -- so the literal in the IL is what is left after
+    /// the helper's own prefix.</summary>
+    private static string Unprefixed(string key) =>
+        key.StartsWith("pages.INITIAL.options.", StringComparison.Ordinal)
+            ? key.Substring("pages.INITIAL.options.".Length)
+        : key.StartsWith("pages.", StringComparison.Ordinal)
+            ? key.Substring("pages.".Length) : key;
+
+    private static bool IsComparableKey(string s) =>
+        System.Text.RegularExpressions.Regex.IsMatch(
+            s, @"^[A-Z0-9_]+(\.[A-Za-z]+)?$");
 
     /// <summary>
     /// Every merged event row belongs to a dressed event. A merge is GLOBAL --
@@ -900,6 +968,7 @@ public class TeyvatFrameTests : IDisposable
                 (string)shapeType.GetProperty("Mirror")!.GetValue(value)!,
                 (IReadOnlyList<string>)shapeType.GetProperty("OptionKeys")!.GetValue(value)!,
                 (IReadOnlyList<string>)shapeType.GetProperty("PageKeys")!.GetValue(value)!,
+                (IReadOnlyList<string>)shapeType.GetProperty("ExtraOptionKeys")!.GetValue(value)!,
                 (bool)shapeType.GetProperty("HasLossRow")!.GetValue(value)!);
         }
         return result;
@@ -910,6 +979,7 @@ public class TeyvatFrameTests : IDisposable
         string Mirror,
         IReadOnlyList<string> OptionKeys,
         IReadOnlyList<string> PageKeys,
+        IReadOnlyList<string> ExtraOptionKeys,
         bool HasLossRow);
 
     /// <summary>`StringHelper.Slugify` for a C# type name, reimplemented so

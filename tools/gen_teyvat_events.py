@@ -118,15 +118,156 @@ FACES: Tuple[FaceSpec, ...] = (
 )
 
 
+@dataclass(frozen=True)
+class MirrorSpec:
+    """One hand-written mirror, and the loc-key shape it asks for.
+
+    `cls` alone is enough for a two-option event whose keys the index's
+    literal scrape already reads correctly -- the three the spike shipped are
+    all of that kind, and their rows below carry nothing else. The other
+    fields exist because the scrape is a REGEX OVER STRING LITERALS and three
+    kinds of base event defeat it:
+
+    `options` -- THE FACE-PAIRED OPTION KEYS, IN THE ORDER
+    `GenerateInitialOptions` BUILDS THEM, which is the order the face's
+    option lines are written in. The scrape cannot produce that list: it also
+    picks up the `_LOCKED` twin an event substitutes when an option is
+    unaffordable (Self-Help Book has three, Tea Master two), and it reports
+    literals in SOURCE order rather than list order -- Wood Carvings
+    constructs the locked Snake twin first and adds it second.
+
+    `extra_options` -- the option keys a player can be shown that have NO
+    face line of their own: those `_LOCKED` twins, and the options a LATER
+    PAGE offers (Dense Vegetation's `FIGHT`). Each names the paired option
+    key whose text it reuses, because an unaffordable option is the SAME
+    option greyed out and a later page's option is the same branch continued
+    -- neither is new prose, and prose is the face's to write, not this
+    file's. Both rows are emitted for every one of them: an option key is a
+    PREFIX the engine suffixes with `.title` and `.description` (EB-765),
+    whichever page it sits on.
+
+    `pages` -- the non-INITIAL page keys, for an event whose keys the scrape
+    cannot read. An event that builds a page key by CONCATENATION leaves the
+    index a truncated stub (`SLIPPERY_BRIDGE.pages.HOLD_ON_`) that nothing
+    will ever look up; the mirror's real keys are enumerated here instead.
+
+    `page_source` -- the option line a page's text comes from, when the page
+    is not named after an option. Tea Master's `DONE` page is reached from
+    Bone Tea AND Ember Tea, so there is no option of that name to derive
+    from and the row says which line supplies it.
+    """
+
+    cls: str
+    options: Tuple[str, ...] = ()
+    extra_options: Tuple[Tuple[str, str], ...] = ()
+    pages: Tuple[str, ...] = ()
+    page_source: Tuple[Tuple[str, str], ...] = ()
+
+
+#: Slippery Bridge's eight reachable Hold On pages, and the Hold On option
+#: each of them offers. `GetHoldOnSuffix` answers the hold-on ordinal below
+#: seven and `LOOP` at seven or above, so a run reaches pages 0 through 6 and
+#: then LOOP for ever; the option on a page carries the NEXT ordinal, which is
+#: what lets its title print the next HP price. The same eight are written out
+#: literally in `SlipperyBridgeMirror` -- there, so the pin that compares a
+#: mirror's literals to its shape can see them; here, so the rows exist.
+_HOLD_ON_STEPS: Tuple[str, ...] = ("0", "1", "2", "3", "4", "5", "6", "LOOP")
+
+
+def _hold_on_pages() -> Tuple[str, ...]:
+    return tuple(f"pages.HOLD_ON_{s}.description" for s in _HOLD_ON_STEPS)
+
+
+def _hold_on_options() -> Tuple[Tuple[str, str], ...]:
+    pairs = [(_HOLD_ON_STEPS[i], _HOLD_ON_STEPS[i + 1])
+             for i in range(len(_HOLD_ON_STEPS) - 1)]
+    pairs.append(("LOOP", "LOOP"))
+    return tuple((f"pages.HOLD_ON_{a}.options.HOLD_ON_{b}", "HOLD_ON_0")
+                 for a, b in pairs)
+
+
 #: Base event class -> the hand-written abstract mirror that re-implements it.
 #: THE HAND-WORK LEDGER. Everything absent from here is reported by the
 #: generator as needing a mirror; adding one is a C# file under
 #: `Teyvat/Events/Mirrors/` plus a row here, and every face that names the
 #: event generates on the next run with no further work.
-MIRRORS: Dict[str, str] = {
-    "RoomFullOfCheese": "RoomFullOfCheeseMirror",
-    "TheLegendsWereTrue": "TheLegendsWereTrueMirror",
-    "ThisOrThat": "ThisOrThatMirror",
+MIRRORS: Dict[str, MirrorSpec] = {
+    "RoomFullOfCheese": MirrorSpec("RoomFullOfCheeseMirror"),
+    "TheLegendsWereTrue": MirrorSpec("TheLegendsWereTrueMirror"),
+    "ThisOrThat": MirrorSpec("ThisOrThatMirror"),
+
+    # --- act 1, batch 1 ---------------------------------------------------
+    "SelfHelpBook": MirrorSpec(
+        "SelfHelpBookMirror",
+        options=("READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS"),
+        extra_options=(
+            ("pages.INITIAL.options.READ_THE_BACK_LOCKED", "READ_THE_BACK"),
+            ("pages.INITIAL.options.READ_PASSAGE_LOCKED", "READ_PASSAGE"),
+            ("pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED", "READ_ENTIRE_BOOK"),
+        )),
+    "SlipperyBridge": MirrorSpec(
+        "SlipperyBridgeMirror",
+        options=("OVERCOME", "HOLD_ON_0"),
+        extra_options=_hold_on_options(),
+        pages=("pages.OVERCOME.description",) + _hold_on_pages()),
+    "AromaOfChaos": MirrorSpec("AromaOfChaosMirror"),
+    "BrainLeech": MirrorSpec("BrainLeechMirror"),
+    "ByrdonisNest": MirrorSpec("ByrdonisNestMirror"),
+
+    # --- act 1, batch 2 ---------------------------------------------------
+    "DenseVegetation": MirrorSpec(
+        "DenseVegetationMirror",
+        options=("TRUDGE_ON", "REST"),
+        extra_options=(("pages.REST.options.FIGHT", "REST"),),
+        pages=("pages.TRUDGE_ON.description", "pages.REST.description")),
+    "JungleMazeAdventure": MirrorSpec("JungleMazeAdventureMirror"),
+    "LuminousChoir": MirrorSpec(
+        "LuminousChoirMirror",
+        options=("REACH_INTO_THE_FLESH", "OFFER_TRIBUTE"),
+        extra_options=(
+            ("pages.INITIAL.options.OFFER_TRIBUTE_LOCKED", "OFFER_TRIBUTE"),
+        )),
+    "MorphicGrove": MirrorSpec("MorphicGroveMirror"),
+    "SapphireSeed": MirrorSpec("SapphireSeedMirror"),
+
+    # --- act 1, batch 3 ---------------------------------------------------
+    "TeaMaster": MirrorSpec(
+        "TeaMasterMirror",
+        options=("BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY"),
+        extra_options=(
+            ("pages.INITIAL.options.BONE_TEA_LOCKED", "BONE_TEA"),
+            ("pages.INITIAL.options.EMBER_TEA_LOCKED", "EMBER_TEA"),
+        ),
+        page_source=(("pages.DONE.description", "BONE_TEA"),)),
+    "UnrestSite": MirrorSpec("UnrestSiteMirror"),
+    "Wellspring": MirrorSpec("WellspringMirror"),
+    "WhisperingHollow": MirrorSpec("WhisperingHollowMirror"),
+    "WoodCarvings": MirrorSpec(
+        "WoodCarvingsMirror",
+        options=("BIRD", "SNAKE", "TORUS"),
+        extra_options=(("pages.INITIAL.options.SNAKE_LOCKED", "SNAKE"),)),
+
+    # --- act 1, batch 4 ---------------------------------------------------
+    "DoorsOfLightAndDark": MirrorSpec("DoorsOfLightAndDarkMirror"),
+    "DrowningBeacon": MirrorSpec("DrowningBeaconMirror"),
+    "PunchOff": MirrorSpec(
+        "PunchOffMirror",
+        options=("NAB", "I_CAN_TAKE_THEM"),
+        extra_options=(("pages.I_CAN_TAKE_THEM.options.FIGHT", "I_CAN_TAKE_THEM"),),
+        pages=("pages.NAB.description", "pages.I_CAN_TAKE_THEM.description")),
+    "SpiralingWhirlpool": MirrorSpec("SpiralingWhirlpoolMirror"),
+    "SunkenTreasury": MirrorSpec("SunkenTreasuryMirror"),
+
+    # --- act 1, batch 5 ---------------------------------------------------
+    "SunkenStatue": MirrorSpec("SunkenStatueMirror"),
+    "TrashHeap": MirrorSpec("TrashHeapMirror"),
+    "WaterloggedScriptorium": MirrorSpec(
+        "WaterloggedScriptoriumMirror",
+        options=("BLOODY_INK", "TENTACLE_QUILL", "PRICKLY_SPONGE"),
+        extra_options=(
+            ("pages.INITIAL.options.TENTACLE_QUILL_LOCKED", "TENTACLE_QUILL"),
+            ("pages.INITIAL.options.PRICKLY_SPONGE_LOCKED", "PRICKLY_SPONGE"),
+        )),
 }
 
 
@@ -444,6 +585,8 @@ class Dressed:
     option_keys: List[str]
     page_keys: List[str]
     can_kill: bool
+    extra_options: Tuple[Tuple[str, str], ...] = ()
+    page_source: Tuple[Tuple[str, str], ...] = ()
 
     def rows(self) -> List[Tuple[str, str]]:
         """Every loc row this dressed event needs, in key order.
@@ -468,8 +611,18 @@ class Dressed:
             base = f"{self.entry}.pages.INITIAL.options.{key}"
             out.append((base + ".title", paired[key][0]))
             out.append((base + ".description", paired[key][1]))
+        # An option a player can be SHOWN but that has no face line of its
+        # own -- a `_LOCKED` twin, or an option a later page offers. Both
+        # rows, for the same EB-765 reason as above: the key is a prefix
+        # wherever it sits, and `GetIfExists` answering null for one half is
+        # what took the spike's page down to `options: []`.
+        sources = dict(self.page_source)
+        for key, source in self.extra_options:
+            label, outcome = paired.get(source, ("", ""))
+            out.append((f"{self.entry}.{key}.title", label))
+            out.append((f"{self.entry}.{key}.description", outcome))
         for page in self.page_keys:
-            out.append((f"{self.entry}.{page}", _page_text(paired, page)))
+            out.append((f"{self.entry}.{page}", _page_text(paired, page, sources)))
         if self.can_kill and self.face_event.loss:
             out.append((f"{self.entry}.loss", self.face_event.loss))
         return out
@@ -496,7 +649,8 @@ def slugify_words(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", text).upper().strip("_")
 
 
-def _page_text(paired: Dict[str, Tuple[str, str]], page: str) -> str:
+def _page_text(paired: Dict[str, Tuple[str, str]], page: str,
+               sources: Optional[Dict[str, str]] = None) -> str:
     """The text for a non-INITIAL page key.
 
     A page key is `pages.<OPTION>.description` (the outcome screen the option
@@ -510,6 +664,10 @@ def _page_text(paired: Dict[str, Tuple[str, str]], page: str) -> str:
     """
     tail = page[len("pages."):] if page.startswith("pages.") else page
     option, _, kind = tail.partition(".")
+    # A page that is not named after an option -- Tea Master's `DONE`, which
+    # Bone Tea and Ember Tea both land on -- says in the mirror's spec which
+    # option line supplies it, because there is nothing to derive.
+    option = (sources or {}).get(page, option)
     label, outcome = paired.get(option, ("", ""))
     if kind == "selectionScreenPrompt":
         return label or option.replace("_", " ").title()
@@ -569,11 +727,13 @@ def generated_cs_source(items: Sequence[Dressed]) -> str:
         "                \"{base_entry}\", \"{mirror}\",\n"
         "                {opts},\n"
         "                {pages},\n"
+        "                {extra},\n"
         "                {kill}),".format(
             face=item.face.folder, cls=item.cls,
             base_entry=item.entry, mirror=item.mirror,
             opts=_cs_array(item.option_keys),
             pages=_cs_array(item.page_keys),
+            extra=_cs_array([k for k, _ in item.extra_options]),
             kill="true" if (item.can_kill and item.face_event.loss) else "false")
         for item in items
     )
@@ -601,14 +761,20 @@ def generated_cs_source(items: Sequence[Dressed]) -> str:
         + "internal static class TeyvatGeneratedEvents\n"
         + "{\n"
         + "    /// <summary>What a dressed event's mirror asks the loc table for:\n"
-        + "    /// the option key names, in the base event's order, and the other\n"
-        + "    /// page keys. Read by the headless pins, which check the key set\n"
-        + "    /// against the merged rows without constructing a model.</summary>\n"
+        + "    /// the INITIAL option key names, in the base event's order; the\n"
+        + "    /// other page keys; and `ExtraOptionKeys`, the option keys that\n"
+        + "    /// are not on the INITIAL page or have no face line of their own\n"
+        + "    /// -- a `_LOCKED` twin, or an option a later page offers. An\n"
+        + "    /// extra key is a full suffix under the entry and is a PREFIX\n"
+        + "    /// like any option key: `.title` and `.description` both. Read\n"
+        + "    /// by the headless pins, which check the key set against the\n"
+        + "    /// merged rows without constructing a model.</summary>\n"
         + "    internal sealed record EventShape(\n"
         + "        string BaseEntry,\n"
         + "        string Mirror,\n"
         + "        IReadOnlyList<string> OptionKeys,\n"
         + "        IReadOnlyList<string> PageKeys,\n"
+        + "        IReadOnlyList<string> ExtraOptionKeys,\n"
         + "        bool HasLossRow);\n"
         + "\n"
         + "    /// <summary>Dressed event type -> its shape.</summary>\n"
@@ -765,8 +931,8 @@ def build_plan() -> Plan:
             # the harvest's shape as the face's -- and it is settled when the
             # mirror is written and the event becomes generatable, which is
             # exactly when the refusal below starts biting.
-            mirror = MIRRORS.get(base)
-            if mirror is None:
+            spec = MIRRORS.get(base)
+            if spec is None:
                 note = f" [option count {len(event.options)} vs harvest {want}]" \
                     if mismatch else ""
                 plan.no_mirror.append(f"{face.key}: {base} ({event.title}){note}")
@@ -776,7 +942,13 @@ def build_plan() -> Plan:
                 plan.refusals.append(mismatch)
                 continue
 
-            option_keys = list(info["option_keys"])
+            # The MIRROR'S spec wins over the index's literal scrape wherever
+            # it speaks: the scrape reads every key literal in the base class,
+            # which is a superset (the `_LOCKED` twins) in source order (not
+            # list order) and sometimes a truncated stub (a key built by
+            # concatenation). The spec is what the mirror actually asks for.
+            option_keys = list(spec.options) or list(info["option_keys"])
+            page_keys = list(spec.pages) or list(info["page_keys"])
             if len(option_keys) != len(event.options):
                 plan.refusals.append(
                     f"{face.key}: {base} -- the mirror's {len(option_keys)} option "
@@ -793,11 +965,13 @@ def build_plan() -> Plan:
             claimed[cls] = f"{face.key}/{base}"
 
             plan.items.append(Dressed(
-                face=face, base_class=base, mirror=mirror, cls=cls,
+                face=face, base_class=base, mirror=spec.cls, cls=cls,
                 entry=slugify(cls), base_entry=info["entry"], face_event=event,
                 option_keys=option_keys,
-                page_keys=list(info["page_keys"]),
+                page_keys=page_keys,
                 can_kill=bool(info["can_kill"]),
+                extra_options=spec.extra_options,
+                page_source=spec.page_source,
             ))
 
     return plan

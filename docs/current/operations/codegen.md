@@ -107,6 +107,28 @@ Hand-written: the mirrors under `Teyvat/Events/Mirrors/`. A base event with no
 mirror is REPORTED, not generated — the generator names it and moves on. That
 list is the engineering queue for this surface.
 
+A mirror's row in `MIRRORS` is a `MirrorSpec`, not just a class name, because
+the index's key scrape is a regex over string literals and three shapes defeat
+it: a `_LOCKED` twin (`options` gives the face-paired keys in LIST order,
+`extra_options` gives the twins and the option each borrows its text from), a
+key built by concatenation (`pages` enumerates what a run can actually reach),
+and a page two options share (`page_source` says which line supplies it). The
+mirror's doc comment says which of its own keys are which, and the pins read
+the generated `EventShape` rather than either.
+
+**Act 1's four PARKED events**, which is what is left on that queue:
+
+| Event | Why it is not mirrored |
+| --- | --- |
+| The Future of Potions_ | Builds its INITIAL options from the player's potion BELT — up to three, all under the one key `…options.POTION` with per-potion `LocString`s and `ThatHasDynamicTitle()`. The face's five lines are a rarity TABLE, not option lines, so there is nothing to pair. |
+| Tablet of Truth | Two INITIAL options (`DECIPHER_1`, `SMASH`) against the face's three lines: Give Up is a later-page option the face lists inline. Pairing needs the face's option block reshaped, which is content and not this surface's. |
+| Abyssal Baths | The same shape: two INITIAL options against four face lines, of which Linger and Exit Baths are later-page options and Linger's line does not even parse as one. |
+| Endless Conveyor | The grab option's key is the ROLLED DISH (`…pages.ALL.options.<DISH_ID>`) and each dish needs a `DISHES.<id>.title` row. The face carries the eight-dish table inside one option line, so the titles cannot be derived without authoring text. |
+
+All four are mirrorable as C#; what stops them is the PAIRING, and three of the
+four are one face edit away. That edit is curation and belongs to a face pass,
+not to a mirror pass.
+
 `tools/data/sts2_base_events.json` is the structural index the generator and
 the pins both read: per base event the class name, the `Id.Entry`, the option
 key names in order, the other page keys, whether an option can kill, and the

@@ -89,7 +89,29 @@ CS_ROOT = REPO / "klee-mod" / "KleeCode"
 
 # Telemetry and parity-vector text: written for this repo's own logs, never
 # rendered to a player, and full of `{0}` format placeholders.
-EXCLUDED_DIRS = ("Diagnostics",)
+#
+# `Teyvat` for a different reason, and the stronger one: NOTHING UNDER IT
+# CARRIES ONE OF THIS MOD'S BALANCE CONSTANTS. A mirror's numbers are the base
+# game's, copied clause for clause off the 0.111.0 decompile -- Room Full of
+# Cheese's 14, Brain Leech's 5 -- and interpolating a Klee-side constant into
+# one would be a MECHANICAL CHANGE to a base event, which is the single thing
+# this surface exists to prevent. The generated rows are curated FACE prose
+# about those same base-game numbers, which is the same argument once
+# removed. So a match here is a coincidence by construction, and an ALLOWED
+# entry per dressed row would be a list that churns on every face edit and
+# says nothing.
+#
+# AND IT SKEWS THE CORPUS, which is the reason it is an exclusion and not an
+# allowlist. `RARE_FRACTION` decides when ONE shared word is enough, and it
+# is measured over the displayed strings this lint can see. Act 1's thirty-
+# three dressed events are thirty-three SCENE PARAGRAPHS of Genshin prose --
+# by far the longest displayed strings in the mod and none of them about a
+# card -- so letting them into the denominator moved words like "block" and
+# "damage" across that line and un-suppressed fifty-seven findings in
+# `Cards/Prototype/Generated` that have nothing to do with this arm. A gate
+# whose verdict on a Klee card moves when a Mondstadt event is dressed is
+# measuring the wrong corpus.
+EXCLUDED_DIRS = ("Diagnostics", "Teyvat")
 
 BACKSLASH = chr(92)
 
