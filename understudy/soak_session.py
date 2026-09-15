@@ -20,7 +20,7 @@ from understudy import instances, keepawake
 from understudy.soak_lane import bridge_installed, game_is_running
 from understudy.soak_shape import (DEPLOY_BRIDGE, GAME_EXE, MENU_TIMEOUT_S,
                                    PROCESS_EXIT_GRACE_S, REPO, SPEED_SIDECAR,
-                                   STEAM_APPID, TIME_SCALE)
+                                   STEAM_APPID, TIME_SCALE, menu_timeout_for)
 
 
 def _soak():
@@ -194,9 +194,38 @@ class Session:
                 print(f"lane {self.instance.label}: seeded {path}")
         self._steam_appid()
         self._deploy_bridge()
+        # EB-763. READ THE BOOT TAX BEFORE THE LAUNCH, not after: the number
+        # has to be in the operator's scrollback ahead of the wait it explains,
+        # or the only thing a failed batch leaves behind is `menu never became
+        # ready within 180s` and no reason.
+        timeout = self._menu_budget()
         self._launch()
-        self.wait_for_menu()
+        self.wait_for_menu(timeout)
         self._speed_on()
+
+    def _menu_budget(self) -> float:
+        """EB-763. The menu-ready wait for THIS lane's profile, and one WARN.
+
+        The game rewrites the profile's whole run-history store to the Steam
+        remote store on every boot, so boot time is a function of how much the
+        owner has played and the 180 s base is a fresh-profile number. Four of
+        the Teyvat spike's nine proof batches died on that (`soak_shape`'s
+        EB-763 block has the record and the arithmetic).
+
+        NOTHING HERE TOUCHES THE STORE. It is counted and nothing else; the
+        store is the owner's play history and no part of this harness prunes
+        it.
+        """
+        appdata = self.instance.appdata if self.instance is not None else None
+        files, size = instances.run_history_store(appdata)
+        timeout = menu_timeout_for(files)
+        if timeout > MENU_TIMEOUT_S:
+            print(f"WARN lane {self.label}: the profile's run-history store "
+                  f"holds {files} files ({size / 1_000_000:.1f} MB) and the "
+                  f"game rewrites all of it at boot; menu-ready wait raised "
+                  f"{MENU_TIMEOUT_S:.0f}s -> {timeout:.0f}s. Nothing here "
+                  f"deletes it (EB-763).")
+        return timeout
 
     def _steam_appid(self) -> None:
         p = self.dir / "steam_appid.txt"

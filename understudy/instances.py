@@ -95,6 +95,58 @@ SETTINGS_RELATIVE = (GAME_APPDATA_DIR, "steam")
 SETTINGS_NAME = "settings.save"
 SEED_FILES = ("settings.save", "profile.save", "prefs.save", "progress.save")
 
+#: `EB-763`. WHERE THE RUN-HISTORY STORE LIVES, relative to
+#: `SETTINGS_RELATIVE`, as a glob rather than a path. The Steam id and the
+#: profile number are both the machine's business and neither is knowable
+#: here, and `modded/` and the vanilla tree each have their own store -- the
+#: cost the game pays at boot is all of them, so the glob takes all of them.
+#: Today's machine: `76561197999302235/modded/profile1/saves/history`, 899
+#: files, and `76561197999302235/profile1/saves/history`, 330.
+HISTORY_GLOB = "**/saves/history"
+
+
+def run_history_store(appdata: Path | None = None) -> tuple[int, int]:
+    """`EB-763`. How many files the profile's run-history store holds, and how
+    many bytes, for the APPDATA tree a lane is about to launch under.
+
+    Returns `(files, bytes)` and `(0, 0)` for a tree that has none -- a fresh
+    lane, or a machine where the glob finds nothing. `appdata` is `None` for
+    lane 0, which runs on the process's own `%APPDATA%`; that is the same
+    fallback `Instance.log_path` makes, and for the same reason.
+
+    READ-ONLY, ABSOLUTELY. The caller is a watchdog deciding how long to wait,
+    not a cleaner: nothing in this function or its callers deletes, moves,
+    prunes or rewrites anything under the profile. The store is the owner's
+    play history (`docs/current/operations/understudy-seats.md`, the boot-tax
+    paragraph).
+
+    Errors are swallowed to `(0, 0)` rather than raised. This is called on the
+    launch path of every session, and a permission error or a file that
+    vanished between the walk and the `stat` must degrade to "the base wait",
+    never take a round down before it has started.
+    """
+    root = Path(appdata if appdata is not None
+                else os.environ.get("APPDATA", "")).joinpath(
+        *SETTINGS_RELATIVE)
+    files = 0
+    total = 0
+    try:
+        if not root.is_dir():
+            return 0, 0
+        for store in root.glob(HISTORY_GLOB):
+            if not store.is_dir():
+                continue
+            for p in store.rglob("*"):
+                try:
+                    if p.is_file():
+                        files += 1
+                        total += p.stat().st_size
+                except OSError:
+                    continue
+    except OSError:
+        return files, total
+    return files, total
+
 
 @dataclass(frozen=True)
 class Instance:

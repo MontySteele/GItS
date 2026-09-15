@@ -53,6 +53,93 @@ def test_readiness_is_the_options_key_and_never_the_health_endpoint():
     assert "bridge.health(" not in code and "_wire().health(" not in code
 
 
+# ------------------------------------------------------- EB-763 boot tax ---
+
+def test_a_fresh_profile_waits_the_base_and_not_a_second_more():
+    """The compatibility half. A lane with no run history is the shape every
+    measurement in this file was taken on, and it must still ask for exactly
+    180 s -- a scaled watchdog that moved the fresh-profile number would have
+    changed what "hang" means for every round that came before it."""
+    assert soak.menu_timeout_for(0) == soak.MENU_TIMEOUT_S
+    assert soak.menu_timeout_for(-1) == soak.MENU_TIMEOUT_S
+
+
+def test_the_wait_is_scaled_past_the_store_that_killed_four_batches():
+    """EB-763, PINNED AT THE OBSERVED NUMBER. The Teyvat spike's proof round
+    lost four of nine batches to `menu never became ready within 180s` on a
+    store of 869 files / 23 MB. The formula is base + 1 s per 5 files, so that
+    store buys 174 s on top of the 180 s base, and 354 s is comfortably past a
+    stall that had already exceeded 180 s. If someone retunes the rate, this
+    is the case the new number has to keep clearing."""
+    assert soak.menu_timeout_for(869) == 180.0 + 869 / 5.0
+    assert soak.menu_timeout_for(869) > 340.0
+    # Monotone, so a store that grew since the record cannot ask for less.
+    assert soak.menu_timeout_for(899) > soak.menu_timeout_for(869)
+
+
+def test_the_scaled_wait_is_capped_so_a_dead_boot_still_fails():
+    """The cap is the half that keeps this a watchdog. Without it a profile
+    that grew without bound would turn the menu timeout off, and an overnight
+    round would spend the night waiting on a game that died at boot."""
+    assert soak.menu_timeout_for(10_000_000) == soak.MENU_TIMEOUT_MAX_S
+    # And the cap is nowhere near today's store, or it would be the timeout
+    # rather than a backstop.
+    assert soak.menu_timeout_for(899) < soak.MENU_TIMEOUT_MAX_S
+
+
+def test_the_store_is_counted_and_never_touched(tmp_path):
+    """Both halves of the read. The count and the byte total come off the
+    profile's `saves/history` directories -- BOTH of them, the modded tree's
+    and the vanilla tree's, because the game pays for all of it at boot -- and
+    the walk leaves the store exactly as it found it. Nothing in this harness
+    may prune the owner's play history (EB-763)."""
+    steam = tmp_path.joinpath(*instances.SETTINGS_RELATIVE)
+    modded = steam / "76561197999302235" / "modded" / "profile1" / "saves" / "history"
+    vanilla = steam / "76561197999302235" / "profile1" / "saves" / "history"
+    for d in (modded, vanilla):
+        d.mkdir(parents=True)
+    for n in range(3):
+        (modded / f"{n}.run").write_bytes(b"x" * 100)
+    (vanilla / "0.run").write_bytes(b"y" * 50)
+    # A save OUTSIDE a history directory is not part of the store's cost.
+    (steam / "76561197999302235" / "modded" / "profile1" / "saves"
+     / "prefs.save").write_bytes(b"z" * 999)
+
+    before = sorted(p.name for p in modded.iterdir())
+    files, size = instances.run_history_store(tmp_path)
+
+    assert files == 4
+    assert size == 350
+    assert sorted(p.name for p in modded.iterdir()) == before
+    assert vanilla.is_dir()
+
+
+def test_a_tree_with_no_store_reads_zero_rather_than_raising(tmp_path):
+    """This runs on the launch path of every session, so a machine with no
+    profile yet -- a fresh lane's first boot -- degrades to the base wait
+    instead of taking the round down before it has started."""
+    assert instances.run_history_store(tmp_path) == (0, 0)
+    assert soak.menu_timeout_for(
+        instances.run_history_store(tmp_path)[0]) == soak.MENU_TIMEOUT_S
+
+
+def test_the_launcher_reads_the_store_and_never_prunes_it():
+    """Structural, and the important half of the row. The scaled wait is worth
+    nothing if `setup` still calls `wait_for_menu()` with the default, and the
+    store is the owner's data: a harness that deleted it to make its own
+    watchdog pass would have broken the thing it was measuring."""
+    src = seam_source("soak")
+    setup = src.split("    def setup(self)", 1)[1].split(
+        "\n    def _menu_budget", 1)[0]
+    assert "_menu_budget()" in setup, "setup must size the wait"
+    assert "self.wait_for_menu(timeout)" in setup, "and then pass it"
+    budget = src.split("    def _menu_budget", 1)[1].split("\n    def ", 1)[0]
+    assert "run_history_store" in budget
+    assert "WARN" in budget, "the operator must be told the count"
+    for verb in ("unlink", "rmtree", "shutil.move", "os.remove", ".rename("):
+        assert verb not in budget, f"the store is read-only: {verb}"
+
+
 # -------------------------------------------------------------- watchdog ---
 
 def test_a_repeated_fingerprint_is_a_stall():
