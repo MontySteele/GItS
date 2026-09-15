@@ -295,6 +295,15 @@ def _resolve_nodepath(scene: Scene, origin, raw: str):
 #: form is turned into a pattern rather than skipped -- a rename that misses
 #: one of the five slot animations is exactly the defect this catches.
 _PLAY_CALL = re.compile(r'\.(?:Play|Queue|PlayBackwards)\(\s*\$?"([^"]*)"')
+#: A SOUND FILE, not an animation name. `NDebugAudioManager.Instance.Play`
+#: shares the verb with `AnimationPlayer.Play` and takes an asset FILENAME --
+#: `Play("slash_attack.mp3")`, `Play("sleep.tres", 0.8f)`. An animation name
+#: is a bare identifier and never carries one of these extensions, so the
+#: distinction is readable off the argument and needs no type inference. The
+#: Teyvat mirrors are where this first mattered: they copy the base game's
+#: audio calls clause for clause, and every one of them was being reported as
+#: an animation no scene declares.
+_AUDIO_ASSET = re.compile(r"\.(?:mp3|ogg|wav|tres|res)$", re.IGNORECASE)
 _SCENE_CONST = re.compile(r'"([A-Za-z0-9_]+(?:/[A-Za-z0-9_./]+)*\.tscn)"')
 _INTERP = re.compile(r"\{[^}]*\}")
 
@@ -340,6 +349,8 @@ def check_csharp_animation_names(
                 continue
             for match in _PLAY_CALL.finditer(line):
                 name = match.group(1)
+                if _AUDIO_ASSET.search(name):
+                    continue
                 calls += 1
                 if "{" in name:
                     pattern = _pattern_for(name)

@@ -257,6 +257,17 @@ MIRRORS: Dict[str, MirrorSpec] = {
         pages=("pages.NAB.description", "pages.I_CAN_TAKE_THEM.description")),
     "SpiralingWhirlpool": MirrorSpec("SpiralingWhirlpoolMirror"),
     "SunkenTreasury": MirrorSpec("SunkenTreasuryMirror"),
+
+    # --- act 1, batch 5 ---------------------------------------------------
+    "SunkenStatue": MirrorSpec("SunkenStatueMirror"),
+    "TrashHeap": MirrorSpec("TrashHeapMirror"),
+    "WaterloggedScriptorium": MirrorSpec(
+        "WaterloggedScriptoriumMirror",
+        options=("BLOODY_INK", "TENTACLE_QUILL", "PRICKLY_SPONGE"),
+        extra_options=(
+            ("pages.INITIAL.options.TENTACLE_QUILL_LOCKED", "TENTACLE_QUILL"),
+            ("pages.INITIAL.options.PRICKLY_SPONGE_LOCKED", "PRICKLY_SPONGE"),
+        )),
 }
 
 

@@ -415,6 +415,9 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(PunchOffMirror), typeof(PunchOff) },
             new object[] { typeof(SpiralingWhirlpoolMirror), typeof(SpiralingWhirlpool) },
             new object[] { typeof(SunkenTreasuryMirror), typeof(SunkenTreasury) },
+            new object[] { typeof(SunkenStatueMirror), typeof(SunkenStatue) },
+            new object[] { typeof(TrashHeapMirror), typeof(TrashHeap) },
+            new object[] { typeof(WaterloggedScriptoriumMirror), typeof(WaterloggedScriptorium) },
         };
 
     // ---------------------------------------------------------------

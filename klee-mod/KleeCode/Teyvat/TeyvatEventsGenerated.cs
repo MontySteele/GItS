@@ -851,6 +851,99 @@ internal static partial class TeyvatLoc
             ["TALES_OF_GUYUN_WERE_TRUE.pages.SLOWLY_FIND_AN_EXIT.description"] =
                 "Lose 8 HP scraping through the flooded crawlway. Procure 1 random "
                 + "Potion from a cracked Hoarder crate.",
+            // BladeInTheStoneForest (Liyue / SunkenStatue)
+            ["BLADE_IN_THE_STONE_FOREST.title"] =
+                "The Blade in the Stone Forest",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.description"] =
+                "Half-submerged among the pillars of Guyun Stone Forest stands a "
+                + "blade driven hilt-first into bedrock, old enough that a Millelith "
+                + "patrol logs it on every pass and does nothing else about it. A "
+                + "Treasure Hoarder has been eyeing it for a week and finally admits "
+                + "he can't shift it alone. \"Pull it and it's yours, free and "
+                + "clear,\" he says, \"or leave the sword be and just work the "
+                + "shallows with me — there's coin enough down there either way, if "
+                + "you don't mind the cold.\"",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.GRAB_SWORD.title"] =
+                "Grab the Sword",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.GRAB_SWORD.description"] =
+                "Obtain Sword of Stone (relic).",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.DIVE_INTO_WATER.title"] =
+                "Dive into the Water",
+            ["BLADE_IN_THE_STONE_FOREST.pages.INITIAL.options.DIVE_INTO_WATER.description"] =
+                "Gain 101–121 Gold. Lose 7 HP.",
+            ["BLADE_IN_THE_STONE_FOREST.pages.GRAB_SWORD.description"] =
+                "Obtain Sword of Stone (relic).",
+            ["BLADE_IN_THE_STONE_FOREST.pages.DIVE_INTO_WATER.description"] =
+                "Gain 101–121 Gold. Lose 7 HP.",
+            // DocksScrapManifest (Liyue / TrashHeap)
+            ["DOCKS_SCRAP_MANIFEST.title"] =
+                "The Docks Scrap Manifest",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.description"] =
+                "A scrap pile has grown against the Liyue Harbor breakwater for as "
+                + "long as the dockhands can remember, added to by every ship that "
+                + "doesn't want to pay the disposal fee. A Feiyun clerk pokes through "
+                + "it with a ledger stick, sorting what's worth logging from what "
+                + "isn't. \"Dive in for whatever's still good underneath,\" she "
+                + "offers, \"or just grab what's on top — it's all priced the same to "
+                + "the Guild, which is to say it isn't priced at all.\"",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.DIVE_IN.title"] =
+                "Dive In",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.DIVE_IN.description"] =
+                "Lose 8 HP. Obtain a random Relic, chosen with equal probability "
+                + "from Darkstone Periapt, Dream Catcher, Hand Drill, Maw Bank, and "
+                + "The Boot.",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.GRAB.title"] =
+                "Grab Random Junk",
+            ["DOCKS_SCRAP_MANIFEST.pages.INITIAL.options.GRAB.description"] =
+                "Gain 100 Gold. Obtain a random card, chosen with equal probability "
+                + "from Caltrops, Distraction, Outmaneuver, Clash, Dual Wield, "
+                + "Entrench, Hello World, Rebound, Stack, and Rip and Tear.",
+            ["DOCKS_SCRAP_MANIFEST.pages.DIVE_IN.description"] =
+                "Lose 8 HP. Obtain a random Relic, chosen with equal probability "
+                + "from Darkstone Periapt, Dream Catcher, Hand Drill, Maw Bank, and "
+                + "The Boot.",
+            ["DOCKS_SCRAP_MANIFEST.pages.GRAB.description"] =
+                "Gain 100 Gold. Obtain a random card, chosen with equal probability "
+                + "from Caltrops, Distraction, Outmaneuver, Clash, Dual Wield, "
+                + "Entrench, Hello World, Rebound, Stack, and Rip and Tear.",
+            // FloodedLedgerRoom (Liyue / WaterloggedScriptorium)
+            ["FLOODED_LEDGER_ROOM.title"] =
+                "The Flooded Ledger-Room",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.description"] =
+                "Below the Wangsheng Funeral Parlor, a records room kept every "
+                + "burial contract Liyue Harbor ever signed, until the last flood "
+                + "took the lower shelves. An archivist wades among the salvage with "
+                + "a bottle of ink that somehow never ran, and recites the terms "
+                + "without flinching: gain a little strength for free, or pay to have "
+                + "the ink itself steady a page — or two — against everything still "
+                + "trying to wash it away. The dead's contracts, she says, are never "
+                + "mocked here, only kept.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.BLOODY_INK.title"] =
+                "Bloody Ink",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.BLOODY_INK.description"] =
+                "Gain 6 Max HP.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL.title"] =
+                "Tentacle Quill",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL.description"] =
+                "Pay 55 Gold. Enchant a card with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE.title"] =
+                "Prickly Sponge",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE.description"] =
+                "Pay 99 Gold. Enchant 2 cards with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL_LOCKED.title"] =
+                "Tentacle Quill",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.TENTACLE_QUILL_LOCKED.description"] =
+                "Pay 55 Gold. Enchant a card with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE_LOCKED.title"] =
+                "Prickly Sponge",
+            ["FLOODED_LEDGER_ROOM.pages.INITIAL.options.PRICKLY_SPONGE_LOCKED.description"] =
+                "Pay 99 Gold. Enchant 2 cards with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.PRICKLY_SPONGE.description"] =
+                "Pay 99 Gold. Enchant 2 cards with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.TENTACLE_QUILL.description"] =
+                "Pay 55 Gold. Enchant a card with Steady.",
+            ["FLOODED_LEDGER_ROOM.pages.BLOODY_INK.description"] =
+                "Gain 6 Max HP.",
             // SixContractsToABetterYou (Liyue / SelfHelpBook)
             ["SIX_CONTRACTS_TO_ABETTER_YOU.title"] =
                 "Six Contracts to a Better You",
@@ -1244,6 +1337,24 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.NAB_THE_MAP.description", "pages.SLOWLY_FIND_AN_EXIT.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Liyue.BladeInTheStoneForest)] = new EventShape(
+                "BLADE_IN_THE_STONE_FOREST", "SunkenStatueMirror",
+                new[] { "GRAB_SWORD", "DIVE_INTO_WATER" },
+                new[] { "pages.GRAB_SWORD.description", "pages.DIVE_INTO_WATER.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.DocksScrapManifest)] = new EventShape(
+                "DOCKS_SCRAP_MANIFEST", "TrashHeapMirror",
+                new[] { "DIVE_IN", "GRAB" },
+                new[] { "pages.DIVE_IN.description", "pages.GRAB.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Liyue.FloodedLedgerRoom)] = new EventShape(
+                "FLOODED_LEDGER_ROOM", "WaterloggedScriptoriumMirror",
+                new[] { "BLOODY_INK", "TENTACLE_QUILL", "PRICKLY_SPONGE" },
+                new[] { "pages.PRICKLY_SPONGE.description", "pages.TENTACLE_QUILL.description", "pages.BLOODY_INK.description" },
+                new[] { "pages.INITIAL.options.TENTACLE_QUILL_LOCKED", "pages.INITIAL.options.PRICKLY_SPONGE_LOCKED" },
+                false),
             [typeof(Events.Liyue.SixContractsToABetterYou)] = new EventShape(
                 "SIX_CONTRACTS_TO_ABETTER_YOU", "SelfHelpBookMirror",
                 new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
@@ -1325,6 +1436,12 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.SteeperAtHeyu>(),
             [(TeyvatFrame.Liyue, typeof(TheLegendsWereTrue))] =
                 () => ModelDb.Event<Events.Liyue.TalesOfGuyunWereTrue>(),
+            [(TeyvatFrame.Liyue, typeof(SunkenStatue))] =
+                () => ModelDb.Event<Events.Liyue.BladeInTheStoneForest>(),
+            [(TeyvatFrame.Liyue, typeof(TrashHeap))] =
+                () => ModelDb.Event<Events.Liyue.DocksScrapManifest>(),
+            [(TeyvatFrame.Liyue, typeof(WaterloggedScriptorium))] =
+                () => ModelDb.Event<Events.Liyue.FloodedLedgerRoom>(),
             [(TeyvatFrame.Liyue, typeof(SelfHelpBook))] =
                 () => ModelDb.Event<Events.Liyue.SixContractsToABetterYou>(),
             [(TeyvatFrame.Liyue, typeof(SlipperyBridge))] =
@@ -1408,6 +1525,12 @@ internal static class TeyvatGeneratedEvents
                 "res://images/events/tea_master.png",
             ["TALES_OF_GUYUN_WERE_TRUE"] =
                 "res://images/events/the_legends_were_true.png",
+            ["BLADE_IN_THE_STONE_FOREST"] =
+                "res://images/events/sunken_statue.png",
+            ["DOCKS_SCRAP_MANIFEST"] =
+                "res://images/events/trash_heap.png",
+            ["FLOODED_LEDGER_ROOM"] =
+                "res://images/events/waterlogged_scriptorium.png",
             ["SIX_CONTRACTS_TO_ABETTER_YOU"] =
                 "res://images/events/self_help_book.png",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS"] =
