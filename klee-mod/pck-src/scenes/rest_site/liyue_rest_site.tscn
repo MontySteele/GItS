@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://teyvat/rest_site/liyue_rest_site_bg.png" id="1_tex"]
+
+[node name="LiyueRestSite" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="RestSiteBG" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -444.0
+offset_top = -139.0
+offset_right = 2320.8
+offset_bottom = 1157.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_tex")
+expand_mode = 1
+
+[node name="RestSiteLighting" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -942.0
+offset_top = -507.0
+offset_right = -942.0
+offset_bottom = -507.0
+grow_horizontal = 2
+grow_vertical = 2

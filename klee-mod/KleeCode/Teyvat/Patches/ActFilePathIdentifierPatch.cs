@@ -39,9 +39,22 @@ namespace KleeMod.Teyvat.Patches;
 /// `res://scenes/backgrounds/mondstadt/layers` does not exist -- and the
 /// fallback is to ship the placeholder asset tree instead of aliasing.
 ///
-/// A REAL DRESSING DELETES THIS FILE. It is a scaffold that exists because the
-/// spike commissions no art, and `TeyvatFrame.AssetAlias`'s table is the thing
-/// that gets emptied, one row at a time, as each nation's asset set lands.
+/// THE ALIAS IS NOW CONDITIONAL, AND ACT 1 HAS RETIRED IT IN PRACTICE.
+/// `tools/gen_act_placeholders.py` ships a complete placeholder set for both
+/// act-1 dressings -- five `_bg_NN_a` layer scenes, one `_fg_a`, a background
+/// root, a rest site and three map PNGs -- so
+/// `TeyvatActAssets.HasDressedAssetsCached` answers TRUE for them in any build
+/// whose pck was rebuilt, the postfix stands down, and the act is drawn from
+/// OUR OWN FILES at the engine's own paths.
+///
+/// What is left here is the FALLBACK, and it is why the file is kept rather
+/// than deleted: a dressing with no set of its own, or a build whose pck
+/// predates one, still borrows the base zone's art rather than throwing out of
+/// `BackgroundAssets`'s constructor on its first combat. The condition is a
+/// pure function over a predicate (`TeyvatActAssets.HasDressedAssets`) so both
+/// of its directions are pinned headlessly; the cached form below asks the
+/// real `ResourceLoader` once per dressing, because this getter is read many
+/// times a frame. `docs/current/operations/act-assets.md` states the set.
 /// </summary>
 [HarmonyPatch(typeof(ActModel), "get_FilePathIdentifier")]
 internal static class ActModel_FilePathIdentifier_TeyvatAlias_Patch
@@ -59,9 +72,22 @@ internal static class ActModel_FilePathIdentifier_TeyvatAlias_Patch
             return;
         }
 
-        if (TeyvatFrame.AssetAlias.TryGetValue(__instance.Id.Entry, out var aliased))
+        var entry = __instance.Id.Entry;
+        if (!TeyvatFrame.AssetAlias.TryGetValue(entry, out var aliased))
         {
-            __result = aliased;
+            return;
         }
+
+        // THE SET WINS WHEN IT IS THERE. Asked of the pack rather than of a
+        // table, because "did the pck get rebuilt" is a fact about the
+        // installed build and not about this source tree -- a dressing whose
+        // scenes are committed but whose pck is stale must fall back, not
+        // throw.
+        if (TeyvatActAssets.HasDressedAssetsCached(entry))
+        {
+            return;
+        }
+
+        __result = aliased;
     }
 }

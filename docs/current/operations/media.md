@@ -28,6 +28,20 @@ producer per out-path** — exactly one ledger row may name a given `out`, and
 only the media tool writes under `media/out/`; a hand-placed file there is a
 defect, the rule `art/plan.tsv` already runs under.
 
+**Act plates take the same raw/out route.** A zone dressing's background
+layers, rest-site plate and three map backgrounds are Tier F pictures like the
+portraits above and land under `media/raw/act/<act-or-scene>/` →
+`media/out/act/<act-or-scene>/`, one ledger row each, `<act-or-scene>` being
+the same `act1_mondstadt` / `act1_liyue` the music column already uses. What is
+different — and the reason they have a page of their own,
+`operations/act-assets.md` — is that their `res://` paths are **not ours to
+choose**: `ActModel`'s five asset-path properties are non-virtual and derive
+every one of them from the act id, so the `out` column names the file and the
+act's id names where it goes. Until a real plate lands,
+`tools/gen_act_placeholders.py` fills all of those paths with nation-tinted
+gradients and takes no ledger row at all — it is a generator, on
+`gen_furina_stills.py`'s terms, not a media drop.
+
 Both ledgers are **UTF-8 + CRLF**, like `art/plan.tsv` and `art/SOURCES.tsv`:
 read with `encoding="utf-8", newline=""` and `rstrip("\r\n")`, or the last
 column silently stops matching. TSV and not CSV, and not by taste: `.gitignore`

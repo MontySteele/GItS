@@ -2,7 +2,13 @@
 
 Everything under this directory is copied verbatim into the pck work dir by
 `tools/build_pck.ps1` (layout here == layout inside the pack: `klee/...`,
-`furina/...`). It exists for text resources — scenes, materials — that are
+`furina/...`, and — for the act dressings only — `scenes/...`, which is the
+BASE GAME's own namespace and is used deliberately: `ActModel`'s five
+asset-path properties are non-virtual and derive `res://scenes/backgrounds/...`
+and `res://scenes/rest_site/...` from the act id, so a dressing's scenes are at
+those paths or nowhere. `docs/current/operations/act-assets.md` is the shape,
+and `tools/gen_act_placeholders.py` is their one producer — edit the generator,
+not the sixteen files). It exists for text resources — scenes, materials — that are
 too large or too editable to live as heredocs inside the build script;
 the historical heredoc scenes stay in `build_pck.ps1` until they next need
 editing (animation sprint 1 DECISIONS entry).
