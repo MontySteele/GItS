@@ -204,6 +204,32 @@ SETUP_STEPS = ("give", "set_resource", "set_energy", "set_hp", "set_block",
 # scenario may hover between two assertions without changing what the second
 # one reads.
 CURSOR_STEPS = ("hover", "unhover")
+
+# EB-761. THE BRIDGE OPS THIS FILE DELIBERATELY HAS NO VERB FOR, and the one
+# entry is `force_next_event`.
+#
+# It is not a step here because a scenario CANNOT REACH THE SCREEN IT ACTS ON.
+# Read this module's own header: the runner delegates every menu, select and
+# map screen to `policy_v1` untouched and wakes up only when a COMBAT screen
+# appears, and only then does it start executing steps. `force_next_event`
+# chooses which event the next `?` room opens on, which is a decision taken on
+# a MAP -- floors before the first combat step could run, and about a room the
+# scenario will never walk to, because a scenario ends with its fight.
+#
+# Bolting a pre-combat phase onto the runner to hold it would be a second
+# driver inside this one: the steps would have to run before `policy_v1` is
+# handed the map, the watchdog and the JSONL are written around the combat
+# loop, and every existing scenario file would acquire a phase it does not
+# use. `understudy/force_event.py` is the driver instead -- it calls the op
+# and then walks the map through the bridge's own `choose_map_node`, which is
+# the part a scenario has no shape for.
+#
+# The list is named rather than implied so
+# `tier0/tests/test_understudy_scenario.py`'s verb/op equality stays an
+# equality: an op missing from this file is either in that test's subtraction
+# WITH a reason written here, or it is a bug.
+NON_SCENARIO_OPS = ("force_next_event",)
+
 OTHER_STEPS = ("expect", "read", "mark", "wait")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + CURSOR_STEPS + OTHER_STEPS
 

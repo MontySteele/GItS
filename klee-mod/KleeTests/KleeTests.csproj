@@ -121,6 +121,19 @@
              Link="Vendor/GitsModalTargeting.cs" />
   </ItemGroup>
 
+  <!-- EB-761's event-cursor arithmetic, on the same terms and for the same
+       reason. `GitsForceEvent.cs` holds the one index `force_next_event`
+       computes (`events[eventsVisited % events.Count]`, the slot the act
+       reads NEXT and not index 0) and holds no game type, so a decision
+       that would otherwise only be checkable with a live run up is exercised
+       headlessly. The half that needs `ActModel` (the reflection read of the
+       act's RoomSet, and the two refusals that depend on a run) stays in
+       `gits/GitsDebugState.cs`. One file, no fork. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsForceEvent.cs"
+             Link="Vendor/GitsForceEvent.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
