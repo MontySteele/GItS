@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using HarmonyLib;
 using KleeMod.Teyvat;
 using KleeMod.Teyvat.Acts;
 using KleeMod.Teyvat.Events;
@@ -445,6 +446,177 @@ public class TeyvatFrameTests : IDisposable
             Assert.StartsWith("res://teyvat/creature_visuals/", scene, StringComparison.Ordinal);
             Assert.EndsWith(".tscn", scene, StringComparison.Ordinal);
         });
+    }
+
+    // ---------------------------------------------------------------
+    // EB-764 / EB-765: the two throws that made the converted event
+    // unplayable the first time it was reached in a real run.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// EB-765, and it is the whole defect reduced to a set comparison.
+    ///
+    /// `EventOption`'s constructor does not read the key it is handed -- it
+    /// reads `eventModel.GetOptionTitle(textKey)` and `GetOptionDescription`,
+    /// which are `LocString.GetIfExists(LocTable, textKey + ".title")` and
+    /// `+ ".description"` (`EventModel.cs:216-224`). `GetIfExists` answers NULL
+    /// for an absent key, and the constructor's last act is `AddLocVars`,
+    /// whose first line dereferences that null through
+    /// `CharacterModel.AddDetailsTo`. So a missing `.description` row is not a
+    /// blank line on the page: it is an NRE that aborts
+    /// `GenerateInitialOptions` before the first option exists.
+    ///
+    /// The spike shipped one FLAT row per option, which is why the page came
+    /// up with `options: []`. The pin is that every key the event asks for has
+    /// a row, with an option key expanded into the two the engine derives from
+    /// it -- the same shape the base event's own rows have in the pck
+    /// (`ROOM_FULL_OF_CHEESE.pages.INITIAL.options.GORGE.title` and
+    /// `.description`).
+    ///
+    /// LITERALS ARE THE RIGHT SOURCE HERE because that is what the class
+    /// contains: every key it asks for is an `ldstr` in one of its methods,
+    /// except the two the base class derives from `Id.Entry`, which are
+    /// asserted by name.
+    /// </summary>
+    [Fact]
+    public void Every_loc_key_the_converted_event_asks_for_has_a_merged_row()
+    {
+        var rows = EventRows();
+        const string entry = "SPRINGVALE_CHEESE_CELLAR";
+
+        var asked = new HashSet<string>(StringComparer.Ordinal)
+        {
+            // `EventModel.Title` and `InitialDescription` (`:62`, `:64`).
+            entry + ".title",
+            entry + ".pages.INITIAL.description",
+        };
+
+        foreach (var method in typeof(SpringvaleCheeseCellar).GetMethods(
+                     BindingFlags.Public | BindingFlags.NonPublic
+                   | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+        {
+            foreach (var literal in Il.Strings(method))
+            {
+                if (!literal.StartsWith(entry, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                // An option key is a PREFIX the engine suffixes twice; every
+                // other literal is a whole key handed to `L10NLookup`.
+                if (literal.Contains(".pages.INITIAL.options."))
+                {
+                    asked.Add(literal + ".title");
+                    asked.Add(literal + ".description");
+                }
+                else
+                {
+                    asked.Add(literal);
+                }
+            }
+        }
+
+        // The two option prefixes' four derived keys, the two page
+        // descriptions, the selection prompt, the title and the body.
+        Assert.Equal(9, asked.Count);
+        Assert.All(asked, key => Assert.True(rows.ContainsKey(key), "no merged row for " + key));
+    }
+
+    /// <summary>
+    /// The generator yields exactly two options, and both are constructed --
+    /// the count the re-proof read as zero. A count pin on a call the method
+    /// demonstrably makes, which is the only count `Il.CallSequence` is safe
+    /// for (its own caveat).
+    /// </summary>
+    [Fact]
+    public void The_converted_event_generates_two_options()
+    {
+        var generate = Method(typeof(SpringvaleCheeseCellar), "GenerateInitialOptions");
+
+        Assert.Equal(2, Il.CallSequence(generate).Count(c => c == "EventOption..ctor"));
+    }
+
+    /// <summary>
+    /// Every merged event row belongs to the converted event. A merge is
+    /// GLOBAL -- `LocTable.MergeWith` overwrites -- so a row whose key drifted
+    /// onto a base event's family would silently rewrite the shipped game's
+    /// text, and the `events` table has no dressed-key trick to fall back on
+    /// the way the monster names do.
+    /// </summary>
+    [Fact]
+    public void No_merged_event_row_can_overwrite_a_base_events_text()
+    {
+        Assert.NotEmpty(EventRows());
+        Assert.All(EventRows().Keys, key =>
+            Assert.StartsWith("SPRINGVALE_CHEESE_CELLAR.", key, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// EB-764. The portrait patch sits on the GETTER, not on
+    /// `CreateInitialPortrait` -- because `EventModel.GetAssetPaths` (`:431`)
+    /// feeds the same private property to the preloader, and a fix on the
+    /// create call would leave the preload asking for the dead path and
+    /// caching the failure. The two halves pinned here are the target and the
+    /// `ResourceLoader.Exists` fall-through that retires the borrow the day a
+    /// real portrait lands.
+    /// </summary>
+    [Fact]
+    public void The_converted_events_portrait_falls_back_to_the_base_events_image()
+    {
+        var patch = typeof(TeyvatFrame).Assembly.GetType(
+            "KleeMod.Teyvat.Patches.EventModel_InitialPortraitPath_TeyvatConversions_Patch",
+            throwOnError: true)!;
+
+        var target = patch.GetCustomAttribute<HarmonyPatch>();
+        Assert.NotNull(target);
+        Assert.Equal(typeof(EventModel), target!.info.declaringType);
+        Assert.Equal("get_InitialPortraitPath", target.info.methodName);
+
+        Assert.Contains("ResourceLoader.Exists", Il.Calls(StaticMethod(patch, "Postfix")));
+
+        // Every row names an image the base game ships, under the path shape
+        // `ImageHelper.GetImagePath("events/...")` builds.
+        Assert.NotEmpty(TeyvatFrame.EventPortraits);
+        Assert.All(TeyvatFrame.EventPortraits.Values, path =>
+        {
+            Assert.StartsWith("res://images/events/", path, StringComparison.Ordinal);
+            Assert.EndsWith(".png", path, StringComparison.Ordinal);
+        });
+    }
+
+    /// <summary>
+    /// A portrait row names an event this arm actually converts, spelled as
+    /// the engine spells it. A typo here is silent in the same way a dressing
+    /// typo is: the postfix never fires and the event throws again.
+    /// </summary>
+    [Fact]
+    public void Every_portrait_row_names_a_converted_event()
+    {
+        Assert.Equal(
+            new[] { "SPRINGVALE_CHEESE_CELLAR" },
+            TeyvatFrame.EventPortraits.Keys.OrderBy(k => k, StringComparer.Ordinal).ToArray());
+
+        // And the dressed path the patch replaces is the one the engine would
+        // have derived from that id, so the borrow cannot be aimed at a key
+        // no reader ever asks for.
+        Assert.Equal(
+            "res://images/events/springvale_cheese_cellar.png",
+            "res://images/events/"
+                + TeyvatFrame.EventPortraits.Keys.Single().ToLowerInvariant() + ".png");
+    }
+
+    /// <summary>`TeyvatLoc` is internal and this mod carries no
+    /// `InternalsVisibleTo` -- the standing call -- so its one table is
+    /// reached by reflection.</summary>
+    private static IReadOnlyDictionary<string, string> EventRows()
+    {
+        var type = typeof(TeyvatFrame).Assembly
+            .GetType("KleeMod.Teyvat.TeyvatLoc", throwOnError: true)!;
+        var field = type.GetField("EventRows", BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.NotNull(field);
+        var rows = field!.GetValue(null) as IReadOnlyDictionary<string, string>;
+        Assert.NotNull(rows);
+        return rows!;
     }
 
     // ---------------------------------------------------------------
