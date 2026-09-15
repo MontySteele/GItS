@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
-using KleeMod.Teyvat.Events;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Events;
 
 namespace KleeMod.Teyvat.Patches;
 
@@ -55,16 +53,19 @@ namespace KleeMod.Teyvat.Patches;
 public static class ActModel_PullNextEvent_TeyvatConversions_Patch
 {
     /// <summary>
-    /// (dressing, base event type) -> the conversion that stands in for it.
-    /// A table and not an `if`, because the whole gallery lands here one row
-    /// at a time and the row is the only thing a conversion should cost.
+    /// (dressing, base event type) -> the dressed event that stands in for it.
+    ///
+    /// A TABLE AND NOT AN `if`, because the whole face gallery lands here one
+    /// row at a time and the row is the only thing a dressing should cost --
+    /// and the rows are now GENERATED. `TeyvatGeneratedEvents.Substitutions`
+    /// is emitted by `tools/gen_teyvat_events.py` from the same curated face
+    /// files as the dressed classes and their loc rows, so a dressing cannot
+    /// have a class the table does not name or a row the class does not ask
+    /// for. This alias exists so the postfix below reads the same as it did
+    /// when the table was hand-written, and so the pins have one name to hold.
     /// </summary>
-    private static readonly IReadOnlyDictionary<(string Dressing, Type BaseEvent), Func<EventModel>> Conversions =
-        new Dictionary<(string, Type), Func<EventModel>>
-        {
-            [(TeyvatFrame.Mondstadt, typeof(RoomFullOfCheese))] =
-                () => ModelDb.Event<SpringvaleCheeseCellar>(),
-        };
+    private static IReadOnlyDictionary<(string Dressing, Type BaseEvent), Func<EventModel>> Conversions =>
+        TeyvatGeneratedEvents.Substitutions;
 
     private static void Postfix(ActModel __instance, ref EventModel __result)
     {

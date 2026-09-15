@@ -124,36 +124,25 @@ public static class TeyvatFrame
         new Dictionary<(string, string), string>();
 
     /// <summary>
-    /// THE EVENT-PORTRAIT TABLE: a converted event's `Id.Entry` -> the image
-    /// the default event layout draws for it until one of its own is supplied.
+    /// THE EVENT-PORTRAIT TABLE: a dressed event's `Id.Entry` -> the image the
+    /// default event layout draws for it until one of its own is supplied.
     ///
-    /// WHY IT EXISTS (EB-764). `EventModel.InitialPortraitPath` is
-    /// `ImageHelper.GetImagePath("events/" + Id.Entry.ToLowerInvariant() +
-    /// ".png")` (`EventModel.cs:198`) -- the path is DERIVED from the id and
-    /// there is no seam on it by design: the property is `private` and NOT
-    /// virtual, and `CreateInitialPortrait` (`:351`) hands it straight to
-    /// `PreloadManager.Cache.GetTexture2D`. A converted event therefore asks
-    /// the pack for `res://images/events/springvale_cheese_cellar.png`, which
-    /// nothing in this repo produces, and `NEventLayout.InitializeVisuals`
-    /// threw `AssetLoadException` before the page was drawn
-    /// (`review/records/teyvat-spike-reproof-2026-09-15.md` item 2).
-    ///
-    /// THE VALUE IS THE BASE EVENT'S OWN IMAGE, which is the same borrowing
-    /// <see cref="AssetAlias"/> makes for a dressing's backgrounds, and it is
-    /// retired the same way: the row is deleted in the commit that lands a
-    /// real portrait, and `Patches/EventPortraitPatch`'s fall-through means a
-    /// portrait added at the dressed path wins with no code change at all.
+    /// GENERATED (`TeyvatEventsGenerated.cs`'s `Portraits`), which is what
+    /// closes EB-764's shape rather than its instance: a dressed event and its
+    /// portrait row are emitted by the same run of
+    /// `tools/gen_teyvat_events.py` from the same face file, so an event
+    /// cannot reach the map without one. This alias is what the patch and the
+    /// pins read.
     ///
     /// A REAL PORTRAIT IS A MEDIA-LEDGER ITEM and not a code change --
     /// `docs/current/operations/media.md` is the convention it lands under
     /// (one producer per out-path, declared encoding, `build_pck` before any
-    /// deploy).
+    /// deploy). `Patches/EventPortraitPatch` asks `ResourceLoader.Exists` of
+    /// the DRESSED path first, so the day one is packaged it wins and the
+    /// borrow stands down on its own.
     /// </summary>
-    public static readonly IReadOnlyDictionary<string, string> EventPortraits =
-        new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["SPRINGVALE_CHEESE_CELLAR"] = "res://images/events/room_full_of_cheese.png",
-        };
+    public static IReadOnlyDictionary<string, string> EventPortraits =>
+        TeyvatGeneratedEvents.Portraits;
 
     /// <summary>
     /// THE STILL-PORTRAIT TABLE: (dressing, monster `Id.Entry`) -> the pck

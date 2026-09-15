@@ -24,16 +24,19 @@ namespace KleeMod.Teyvat;
 /// EVERYTHING HERE IS GATED ON THE ARM. With `TeyvatFrame.Enabled` false not a
 /// single row is merged, so a release build's loc tables are byte-identical.
 /// </summary>
-internal static class TeyvatLoc
+internal static partial class TeyvatLoc
 {
     /// <summary>
-    /// THE CONVERTED EVENT'S ROWS, in the `events` table
-    /// (`EventModel.LocTable`), under `Id.Entry`-derived keys exactly as the
-    /// base game's are. Flavour is
-    /// `docs/current/dossiers/content/event-conversion-gallery.md` variant 1;
-    /// the two option DESCRIPTIONS and the `.loss` line are the base event's
-    /// strings verbatim, markup and `{Damage}` included, because they state
-    /// mechanics and nothing mechanical is authored in this conversion.
+    /// THE DRESSED EVENTS' ROWS, in the `events` table (`EventModel.LocTable`),
+    /// under `Id.Entry`-derived keys exactly as the base game's are.
+    ///
+    /// GENERATED, AND THAT IS THE POINT OF THIS SURFACE. The rows themselves
+    /// are `TeyvatEventsGenerated.cs`'s `GeneratedEventRows`, emitted by
+    /// `tools/gen_teyvat_events.py` from the curated face files; this alias is
+    /// what the arm and its pins read, so a reader does not have to know which
+    /// file a row was born in. The spike's hand-written block is retired: the
+    /// Springvale Cheese Cellar is now one of six generated dressings and its
+    /// rows are word for word the face file's.
     ///
     /// AN OPTION KEY IS A PREFIX, NOT A STRING, and getting that wrong was
     /// EB-765. `EventOption`'s `(eventModel, onChosen, textKey, hoverTips)`
@@ -45,56 +48,22 @@ internal static class TeyvatLoc
     /// is `AddLocVars`, whose first line is
     /// `eventModel.Owner?.Character.AddDetailsTo(Description)` --
     /// `CharacterModel.AddDetailsTo` then calls `str.Add(...)` on that null and
-    /// throws. The spike wrote ONE flat row per option
-    /// (`...options.TASTE_THE_RACKS` = "Taste the Racks"), so both descriptions
-    /// were null, the first `new EventOption(...)` threw, `GenerateInitialOptions`
-    /// never returned, and the page opened with `body: null` and `options: []`
-    /// (`review/records/teyvat-spike-reproof-2026-09-15.md` item 2).
-    ///
-    /// The base event's own rows, read out of `SlayTheSpire2.pck`, are the
-    /// proof of the shape: `ROOM_FULL_OF_CHEESE.pages.INITIAL.options.GORGE.title`
-    /// AND `.description`, never a bare `...options.GORGE`.
+    /// throws. The spike wrote ONE flat row per option, so both descriptions
+    /// were null, the first `new EventOption(...)` threw,
+    /// `GenerateInitialOptions` never returned, and the page opened with
+    /// `body: null` and `options: []`
+    /// (`review/records/teyvat-spike-reproof-2026-09-15.md` item 2). The
+    /// generator writes BOTH rows for every option and cannot write one.
     ///
     /// `.loss` is optional to the engine -- `NRunHistory` asks
     /// `LocString.GetIfExists` and falls back to `DEFAULT_EVENT_LOSS_MESSAGE`
-    /// -- but Haul Out the Back Wall can kill, so the base event has one and so
-    /// does this. Its `{character}` var comes from `CharacterModel.AddDetailsTo`
-    /// and `{event}` from the run-history screen itself.
+    /// -- so the generator writes one only where the base event can kill AND
+    /// the face supplies a `Loss:` line. Today that is the Springvale Cheese
+    /// Cellar alone, carrying the spike's shipped sentence; the other five
+    /// dressings take the engine's fallback rather than have a machine invent
+    /// a death line.
     /// </summary>
-    internal static readonly IReadOnlyDictionary<string, string> EventRows =
-        new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["SPRINGVALE_CHEESE_CELLAR.title"] = "The Springvale Cheese Cellar",
-            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.description"] =
-                "A collapsed stair below Springvale opens onto a dairy cellar the "
-              + "Guild's commission board never got around to delisting. Wheels of "
-              + "Mondstadt cheese sit rack on rack, gold-rinded and humming with "
-              + "age, and the slip in your hand says only: inventory it. Behind the "
-              + "furthest rack, something older than the racks is sweating brine.",
-            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.TASTE_THE_RACKS.title"] =
-                "Taste the Racks",
-            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.TASTE_THE_RACKS.description"] =
-                "Choose [blue]2[/blue] of [blue]8[/blue] random [gold]Common[/gold] "
-              + "cards to add to your [gold]Deck[/gold].",
-            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.HAUL_OUT_THE_BACK_WALL.title"] =
-                "Haul Out the Back Wall",
-            ["SPRINGVALE_CHEESE_CELLAR.pages.INITIAL.options.HAUL_OUT_THE_BACK_WALL.description"] =
-                "Lose [red]{Damage}[/red] HP. Obtain the [gold]Chosen Cheese[/gold].",
-            // The spike's flavour, unchanged: this row was never part of the
-            // defect and a text edit here would be an unasked design call.
-            ["SPRINGVALE_CHEESE_CELLAR.pages.TASTE_THE_RACKS.selectionScreenPrompt"] =
-                "Choose 2 wheels",
-            ["SPRINGVALE_CHEESE_CELLAR.pages.TASTE_THE_RACKS.description"] =
-                "You eat your way along the racks and carry off the two that were "
-              + "worth the trip.",
-            ["SPRINGVALE_CHEESE_CELLAR.pages.HAUL_OUT_THE_BACK_WALL.description"] =
-                "The back wall comes down on your shoulders and the spore-thick air "
-              + "goes into your lungs. Behind it, gold-rinded and perfect, waits "
-              + "the wheel the Guild never listed.",
-            ["SPRINGVALE_CHEESE_CELLAR.loss"] =
-                "{character} was buried under the back wall of the "
-              + "[gold]{event}[/gold].",
-        };
+    internal static IReadOnlyDictionary<string, string> EventRows => GeneratedEventRows;
 
     /// <summary>
     /// Merge the arm's rows. A no-op with the arm off.
