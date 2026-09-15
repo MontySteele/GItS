@@ -108,7 +108,7 @@ def walk_to_event(event_id: str, why: str, *,
     report = bridge.force_next_event(event_id, why)
     if str(report.get("status")) != "ok":
         raise ForceEventError(
-            f"the bridge refused the force: {report.get('message')!r}")
+            f"the bridge refused the force: {(report.get('error') or report.get('message'))!r}")
     log(f"FORCED: {report.get('event')} in act {report.get('act')} "
         f"(index {report.get('before')} -> slot {report.get('after')}, "
         f"moved={report.get('moved')})")
@@ -148,7 +148,7 @@ def walk_to_event(event_id: str, why: str, *,
         answer = bridge.post("choose_map_node", index=idx)
         if str(answer.get("status")) == "error":
             raise ForceEventError(
-                f"choose_map_node {idx} was refused: {answer.get('message')!r}")
+                f"choose_map_node {idx} was refused: {(answer.get('error') or answer.get('message'))!r}")
         bridge.settle("map")
 
     raise ForceEventError(
