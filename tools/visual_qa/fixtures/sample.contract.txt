@@ -36,3 +36,5 @@ resource=res://kokomi/model/bake_kurage.tscn
 resource=res://kokomi/summon/bake_kurage.png
 resource=res://shared/gauge.tscn
 resource=res://shared/turn_end_docket.tscn
+resource=res://teyvat/creature_visuals/hilichurl_guard.png
+resource=res://teyvat/creature_visuals/hilichurl_guard.tscn

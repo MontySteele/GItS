@@ -89,6 +89,15 @@
     <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
   </PropertyGroup>
 
+  <!-- The Teyvat run frame arm, mirrored here on exactly the terms above and
+       for the same reason. Its pins do not need the property:
+       `TeyvatFrame.Enabled` is settable, so one build asserts both sides of
+       the switch, including the flag-off acceptance condition: that
+       `ModelDb.Acts` is the base game's four acts, unchanged. -->
+  <PropertyGroup Condition="'$(TeyvatFrame)' == 'true'">
+    <DefineConstants>$(DefineConstants);TEYVAT_FRAME</DefineConstants>
+  </PropertyGroup>
+
   <!-- THE BRIDGE'S PORT RESOLVER, compiled into this assembly rather than
        referenced. `vendor/STS2_MCP/gits/GitsPort.cs` is deliberately free of
        Godot, Harmony and game types precisely so the one decision that must

@@ -224,6 +224,31 @@ if (-not (Test-Path $modImageSrc)) { Note-Skip 'klee\mod_image.png' $modImageSrc
     Copy-Item $modImageSrc -Destination (Join-Path $work 'klee\mod_image.png')
 }
 
+# THE TEYVAT RUN FRAME SPIKE's still portraits (R272, spike item 4.3). One
+# more copy block, which operations/media.md sec.4 says is the smallest
+# extension this script has: there is no manifest to add a row to, only a list
+# of literal blocks, and the pck contract is DERIVED from the work directory
+# after the export.
+#
+# A NAMESPACE OF ITS OWN, res://teyvat/, and not res://klee/: a dressed enemy
+# body is the FRAME's, not one character's, and the C# that reads it
+# (klee-mod/KleeCode/Teyvat/TeyvatFrame.StillPortraits) names the path in full.
+#
+# Note-Skip and not an error, on every other block's terms: art never blocks a
+# build. On today's tree the source directory does not exist, the block prints
+# its gap, and klee-mod/pck-src/teyvat/creature_visuals/hilichurl_guard.tscn
+# overlays anyway with a dead texture reference -- which is why the C# asks
+# ResourceLoader.Exists on the SCENE before it swaps a monster's visuals, and
+# would still be right to fall through if the scene loaded with no picture in
+# it.
+$teyvatPortraits = Join-Path $src 'teyvat\creature_visuals'
+if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $teyvatPortraits } else {
+    $to = Join-Path $work 'teyvat\creature_visuals'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Select-PackablePngs $teyvatPortraits
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
 # Animation sprint 1 (Track B): pre-scaled combat layer sprites for the
 # animated combat scene. Full-res layer masters live in ImageGen/images/model
 # /layers; only the combat-scale derivatives in layers/combat ship, matching

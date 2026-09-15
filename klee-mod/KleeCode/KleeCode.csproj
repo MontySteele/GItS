@@ -190,6 +190,43 @@
   <PropertyGroup Condition="'$(FurinaStage)' == 'true'">
     <DefineConstants>$(DefineConstants);FURINA_STAGE</DefineConstants>
   </PropertyGroup>
+  <!-- THE TEYVAT RUN FRAME ARM (R272; the frame packet
+       review/active/teyvat-run-frame-2026-09-14.md sec.4, and the decompile
+       read review/records/teyvat-spike-zone-read-2026-09-14.md sec.7).
+
+           dotnet build ... -p:TeyvatFrame=true
+
+       A SEVENTH property, on exactly the terms the second through sixth have:
+       it gates an ARM and not a compilation unit. Everything the arm owns
+       lives under Teyvat/**, and every one of those files reads
+       `TeyvatFrame.Enabled` before it does anything: the Harmony postfixes
+       return unchanged on the flag-off path, and the two dressing acts are
+       never published into `ModelDb.Acts`.
+
+       COMPILED IN BOTH DIRECTIONS ON PURPOSE, unlike Cards/Prototype/**. The
+       acceptance condition of this arm is a statement about what the act list
+       CONTAINS ; the base four with the flag off, two dressings standing in
+       their place with it on ; and a pin that could only be compiled on one
+       side of the switch could not say the first half. `TeyvatFrame.Enabled`
+       is a settable static for that reason, exactly as the five arms above.
+
+       WHAT IT COSTS WITH THE FLAG OFF, disclosed rather than assumed: the two
+       `ActModel` subclasses and the one `EventModel` subclass are visible to
+       `ModelDb`'s reflection walk (`ReflectionHelper.GetSubtypesInMods`), so
+       they are constructed once at boot and hold a `ModelId`. They are
+       reachable from NOTHING: `ModelDb.Acts` is a hardcoded four-element list
+       this arm's postfix declines to touch with the flag off, and
+       `ModelDb.AllEvents` is `Acts.SelectMany(a => a.AllEvents)` concatenated
+       with the shared pool, so an unpublished act's events are not in it.
+
+       THE ARM IS OFF ON EVERY CALIBRATION DEPLOY (frame packet sec.5): a
+       dressing's event pool, were it ever to differ in LENGTH from the base
+       zone's, would move the `UpFront` rng and with it the Klee calibration
+       seed's whole map. The pools are equal by construction and pinned equal
+       by `TeyvatFrameTests`; the flag staying off is the second belt. -->
+  <PropertyGroup Condition="'$(TeyvatFrame)' == 'true'">
+    <DefineConstants>$(DefineConstants);TEYVAT_FRAME</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition="'$(PrototypeCards)' != 'true'">
     <Compile Remove="Cards/Prototype/**/*.cs" />
     <!-- The same quarantine, for a RULE rather than a card. Two arms use it and
