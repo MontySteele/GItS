@@ -156,4 +156,5 @@ disagrees with the frozen harvest's, or a face names a base event the game
 does not have. It SKIPS with a note an event the harvest marks
 `<<NO OPTIONS SECTION ON PAGE>>` (The Merchant___). Faces map to dressing act
 ids in `FACES` at the top of the generator; acts 2 and 3 are listed there and
-inactive, because their sibling acts do not exist yet.
+inactive — their acts exist since R273, so what they wait on now is their own
+mirrors, not their sibling acts.

@@ -103,6 +103,32 @@ def test_the_committed_scenes_carry_no_script_and_the_right_nodes():
         assert "unique_name_in_owner = true" in rest
 
 
+def test_build_pck_names_every_dressing_in_its_copy_loop():
+    r"""A face the copy loop does not name gets no plates in the pack at all.
+
+    The per-directory check below cannot see this: the directories are
+    interpolated (`teyvat\backgrounds\$dressing`), so its leading segments are
+    present whatever the loop iterates. This is the assertion that a new face
+    costs a word in the script.
+    """
+    script = BUILD_PCK.read_text(encoding="utf-8")
+    for nation in gen.NATIONS:
+        assert f"'{nation.id}'" in script, nation.id
+
+
+def test_the_six_faces_are_two_per_act():
+    """R273 layout 1, as a shape rather than as a list of names.
+
+    Act 1's pair dresses two base zones and acts 2 and 3 dress one each, but
+    the GENERATOR sees none of that -- the pin is only that the arm ships six
+    faces, so this file fails loudly if one is dropped or a seventh is added
+    without the C# side moving too.
+    """
+    assert len(gen.NATIONS) == 6
+    assert len({n.id for n in gen.NATIONS}) == 6
+    assert [n.entry for n in gen.NATIONS] == [n.id.upper() for n in gen.NATIONS]
+
+
 def test_build_pck_copies_every_directory_the_generator_writes():
     """A produced texture with no copy block never reaches the pack."""
     script = BUILD_PCK.read_text(encoding="utf-8")
