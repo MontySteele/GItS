@@ -109,15 +109,15 @@ FACES: Tuple[FaceSpec, ...] = (
              "MONDSTADT", "Mondstadt"),
     FaceSpec("underdocks-liyue", "underdocks-liyue-2026-09-14.md",
              "LIYUE", "Liyue"),
-    # Acts 2 and 3: the acts are published (R273); these wait on their mirrors.
+    # Acts 2 and 3: the acts are published (R273) and the mirrors are written.
     FaceSpec("glory-sumeru", "glory-sumeru-2026-09-14.md",
-             "SUMERU", "Sumeru", active=False),
+             "SUMERU", "Sumeru"),
     FaceSpec("glory-fontaine", "glory-fontaine-2026-09-14.md",
-             "FONTAINE", "Fontaine", active=False),
+             "FONTAINE", "Fontaine"),
     FaceSpec("hive-inazuma", "hive-inazuma-2026-09-14.md",
-             "INAZUMA", "Inazuma", active=False),
+             "INAZUMA", "Inazuma"),
     FaceSpec("hive-natlan", "hive-natlan-2026-09-14.md",
-             "NATLAN", "Natlan", active=False),
+             "NATLAN", "Natlan"),
 )
 
 
@@ -437,6 +437,30 @@ def normalise(text: str) -> str:
     return out
 
 
+#: WIKI HEADINGS THE NORMALISER CANNOT REACH THE CLASS NAME FROM, keyed by the
+#: normalised heading and read BOTH ways -- `match_base` uses it to find the
+#: class, and `refresh_index` uses its inverse to find the harvest row whose
+#: option count freezes that class.
+#:
+#: Two, and both are the wiki's title differing from the identifier by more
+#: than punctuation and an article, which is the only difference `normalise`
+#: was built to absorb:
+#:
+#:   * `Reflections snoitcelfeR` is the wiki's rendering of the event's own
+#:     mirror-writing joke; the class is plain `Reflections`.
+#:   * `The Merchant___` is class `FakeMerchant` -- the identifier says the
+#:     twist the title hides, and no normalisation of one produces the other.
+#:     It is the event the harvest marks `<<NO OPTIONS SECTION ON PAGE>>`, so
+#:     the alias exists to make that SKIP reachable rather than to dress it.
+#:
+#: An alias is a stated fact, not a fuzzy match: a heading that is in neither
+#: the normaliser's reach nor this table stays a refusal.
+HEADING_ALIASES: Dict[str, str] = {
+    "reflectionssnoitcelfer": "Reflections",
+    "themerchant": "FakeMerchant",
+}
+
+
 def match_base(heading: str, index: Dict[str, dict]) -> Optional[str]:
     """Which base event class a face's `## - [ ] <name>` heading names.
 
@@ -456,6 +480,9 @@ def match_base(heading: str, index: Dict[str, dict]) -> Optional[str]:
         bare = norm[3:] if norm.startswith("the") else norm
         if bare == stripped:
             return cls
+    alias = HEADING_ALIASES.get(want)
+    if alias in index:
+        return alias
     return None
 
 
@@ -553,6 +580,11 @@ def refresh_index(decomp: Path) -> int:
 
         norm = normalise(cls)
         count = harvest.get(norm)
+        if count is None:
+            for heading_norm, alias_cls in HEADING_ALIASES.items():
+                if alias_cls == cls and heading_norm in harvest:
+                    count = harvest[heading_norm]
+                    break
         if count is None:
             # The harvest is keyed by the wiki's title, which may carry a
             # leading article the class name drops.

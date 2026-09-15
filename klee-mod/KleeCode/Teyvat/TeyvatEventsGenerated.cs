@@ -1446,6 +1446,1051 @@ internal static partial class TeyvatLoc
                 "Lose 6 HP. Gain 57 Gold.",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE.pages.ORNATE.description"] =
                 "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            // SixWeeksToABetterYouIlluminated (Sumeru / SelfHelpBook)
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.title"] =
+                "Six Weeks to a Better You, Illuminated",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.description"] =
+                "A warped stall in the shadow of the House of Daena, where a "
+                + "Vahumana dropout hawks the treatise the Sages refused to shelve: "
+                + "SIX WEEKS TO A BETTER YOU, ILLUMINATED. The spine cracks like "
+                + "nothing has ever opened it. He swears every chapter is "
+                + "field-tested, then admits the field was his dormitory.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK.title"] =
+                "Read the Back",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE.title"] =
+                "Read a Random Passage",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+                "Read the Entire Book",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.NO_OPTIONS.title"] =
+                "Move On",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+                "Read the Back",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+                "Read a Random Passage",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+                "Read the Entire Book",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED.pages.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            // RopeLineOverArdraviValley (Sumeru / SlipperyBridge)
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.title"] =
+                "The Rope Line Over Ardravi Valley",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.description"] =
+                "A Forest Ranger's rope bridge sags over a Withering-scarred ravine "
+                + "in Ardravi Valley, one cable frayed past its posted weight marker. "
+                + "The ranger stationed at the near post says nothing beyond pointing "
+                + "at the sign; she has watched three travelers cross overloaded and "
+                + "does not care to watch a fourth. Something in your pack will have "
+                + "to go, or the crossing will take it anyway.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.OVERCOME.title"] =
+                "Cut It Loose",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.OVERCOME.description"] =
+                "[Specific card] is removed from your deck.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.HOLD_ON_0.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.HOLD_ON_0.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
+                "Grip the Rope",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.OVERCOME.description"] =
+                "[Specific card] is removed from your deck.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_0.description"] =
+                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
+                + "over the ravine is randomized. Each further grip costs 1 more HP "
+                + "than the last, and the ranger keeps pointing at the same sign "
+                + "until you finally cut something away. Gear marked for the Ranger "
+                + "corps' own use (Eternal) never sways loose, and the wind never "
+                + "picks the same bundle twice while others remain.",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_1.description"] =
+                "",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_2.description"] =
+                "",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_3.description"] =
+                "",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_4.description"] =
+                "",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_5.description"] =
+                "",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_6.description"] =
+                "",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_LOOP.description"] =
+                "",
+            // FutureOfElixirs (Sumeru / TheFutureOfPotions)
+            ["FUTURE_OF_ELIXIRS.title"] =
+                "The Future of Elixirs",
+            ["FUTURE_OF_ELIXIRS.pages.INITIAL.description"] =
+                "In a greenhouse annex off the Vissudha Field, an Amurta "
+                + "researcher's prototype still hisses and drips. \"Drinking a phial "
+                + "teaches you nothing. Feed it here and the apparatus reads out the "
+                + "technique the brew was hiding.\" She gestures at an intake tray; "
+                + "only the first three bottles on your belt will fit, leftmost "
+                + "first.",
+            ["FUTURE_OF_ELIXIRS.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Feed the Common "
+                + "Phial|Feed the Uncommon Phial|Feed the Rare Phial|Feed the "
+                + "Anomalous Phial|Feed the Worthless Phial|Feed the Common Phial}",
+            ["FUTURE_OF_ELIXIRS.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["FUTURE_OF_ELIXIRS.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
+            // CaravanRibatLeavings (Sumeru / ThisOrThat)
+            ["CARAVAN_RIBAT_LEAVINGS.title"] =
+                "The Caravan Ribat Leavings",
+            ["CARAVAN_RIBAT_LEAVINGS.pages.INITIAL.description"] =
+                "A Forest Ranger patrol out of Caravan Ribat turned up two items "
+                + "scattered from a raided trade caravan, and neither carries a "
+                + "manifest tag to say who they belonged to. The ranger captain has "
+                + "no patience for a full inventory report over two loose objects; "
+                + "she holds them out, one in each hand, and waits for you to pick.",
+            ["CARAVAN_RIBAT_LEAVINGS.pages.INITIAL.options.PLAIN.title"] =
+                "Take the Locked Coffer",
+            ["CARAVAN_RIBAT_LEAVINGS.pages.INITIAL.options.PLAIN.description"] =
+                "The seized latch bites your knuckles clearing the lid. Lose 6 HP. "
+                + "Gain 57 Mora.",
+            ["CARAVAN_RIBAT_LEAVINGS.pages.INITIAL.options.ORNATE.title"] =
+                "Take the Unmarked Kit",
+            ["CARAVAN_RIBAT_LEAVINGS.pages.INITIAL.options.ORNATE.description"] =
+                "It is unmistakably well-made gear, fitted for nobody in particular "
+                + "— least of all you. Add Clumsy (curse) to your Deck. Obtain a "
+                + "random Relic.",
+            ["CARAVAN_RIBAT_LEAVINGS.pages.PLAIN.description"] =
+                "The seized latch bites your knuckles clearing the lid. Lose 6 HP. "
+                + "Gain 57 Mora.",
+            ["CARAVAN_RIBAT_LEAVINGS.pages.ORNATE.description"] =
+                "It is unmistakably well-made gear, fitted for nobody in particular "
+                + "— least of all you. Add Clumsy (curse) to your Deck. Obtain a "
+                + "random Relic.",
+            // MelusinesPamphletOfEncouragement (Fontaine / SelfHelpBook)
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.title"] =
+                "A Melusine's Pamphlet of Encouragement",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.description"] =
+                "In Merusea Village a small Melusine in a rain hat presses a "
+                + "hand-stitched pamphlet on you, all pressed sumeru rose petals and "
+                + "enormous cheerful handwriting. She has been practising the speech "
+                + "that goes with it for some weeks. She will read you as much of it "
+                + "as you can bear, and takes no offence either way.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_THE_BACK.title"] =
+                "Take the Cover Line",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_PASSAGE.title"] =
+                "Let Her Pick a Page",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+                "Sit Through the Whole Speech",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.NO_OPTIONS.title"] =
+                "Thank Her and Go",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+                "Take the Cover Line",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+                "Let Her Pick a Page",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+                "Sit Through the Whole Speech",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT.pages.NO_OPTIONS.description"] =
+                "Nothing happens.",
+            // BallastCheckOnTheMeropideLift (Fontaine / SlipperyBridge)
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.title"] =
+                "Ballast Check on the Meropide Lift",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.description"] =
+                "The pressure lift running down from Poisson to the Fortress of "
+                + "Meropide is rated to the ounce, and the Melusine attendant's brass "
+                + "ballast wheel says your kit is over it. She spins the wheel with "
+                + "one webbed hand; it ticks to a stop above a single item. Outside "
+                + "the porthole the water goes from green to black.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.OVERCOME.title"] =
+                "Let the Wheel Decide",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.OVERCOME.description"] =
+                "A specific card is removed from your deck.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.HOLD_ON_0.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.HOLD_ON_0.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
+                "Spin Again",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.OVERCOME.description"] =
+                "A specific card is removed from your deck.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_0.description"] =
+                "Lose 3 HP as the cable lurches and the pressure squeezes your "
+                + "ears. The wheel selects a different item at random. Every further "
+                + "spin costs 1 more HP than the last, and the attendant will "
+                + "patiently re-offer both choices until you surrender something. The "
+                + "wheel skips anything bolted to the frame (Eternal) and will not "
+                + "land twice on the same item while others remain.",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_1.description"] =
+                "",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_2.description"] =
+                "",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_3.description"] =
+                "",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_4.description"] =
+                "",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_5.description"] =
+                "",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_6.description"] =
+                "",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_LOOP.description"] =
+                "",
+            // WhatTheMelusinesTradeFor (Fontaine / TheFutureOfPotions)
+            ["WHAT_THE_MELUSINES_TRADE_FOR.title"] =
+                "What the Melusines Trade For",
+            ["WHAT_THE_MELUSINES_TRADE_FOR.pages.INITIAL.description"] =
+                "The Melusines of Merusea Village have decided that bottles are the "
+                + "finest currency in Fontaine. Hand one over, they promise, and they "
+                + "will sing you the trick that kept a friend alive down in the "
+                + "Primordial Sea — Sigewinne taught them triage, and the songs stick "
+                + "better than any lecture. Three bottles on your belt catch their "
+                + "eyes, the leftmost ones first.",
+            ["WHAT_THE_MELUSINES_TRADE_FOR.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Trade the Plain "
+                + "Bottle|Trade the Pretty Bottle|Trade the Treasured Bottle|Trade "
+                + "the Strange Bottle|Trade the Silly Bottle|Trade the Plain Bottle}",
+            ["WHAT_THE_MELUSINES_TRADE_FOR.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["WHAT_THE_MELUSINES_TRADE_FOR.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
+            // TwoGiftsFromTheFontemer (Fontaine / ThisOrThat)
+            ["TWO_GIFTS_FROM_THE_FONTEMER.title"] =
+                "Two Gifts from the Fontemer",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.pages.INITIAL.description"] =
+                "Beneath the roots of Elynas, Kiara has laid out the week's salvage "
+                + "on a flat stone, and two pieces have no owner listed in any "
+                + "Merusee ledger. She is delighted to give one away and firmly "
+                + "unwilling to give away both. She will not tell you which is the "
+                + "better find; she says that would spoil it.",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.pages.INITIAL.options.PLAIN.title"] =
+                "Take the Coin-Purse",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.pages.INITIAL.options.PLAIN.description"] =
+                "Lose 6 HP. Gain 57 Gold.",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.pages.INITIAL.options.ORNATE.title"] =
+                "Take the Whirring Apparatus",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.pages.INITIAL.options.ORNATE.description"] =
+                "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.pages.PLAIN.description"] =
+                "Lose 6 HP. Gain 57 Gold.",
+            ["TWO_GIFTS_FROM_THE_FONTEMER.pages.ORNATE.description"] =
+                "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            // WatatsumiDrillPrimer (Inazuma / SelfHelpBook)
+            ["WATATSUMI_DRILL_PRIMER.title"] =
+                "The Watatsumi Drill Primer",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.description"] =
+                "A field manual with no cover left, passed down the Watatsumi line "
+                + "since before the Vision Hunt Decree. Every margin carries a dead "
+                + "soldier's handwriting — a grip correction, a stance fix, one line "
+                + "struck through and rewritten twice. The drill sergeant who hands "
+                + "it to new recruits below Sangonomiya Shrine does not recommend a "
+                + "page. She says only that the book teaches whatever the reader "
+                + "still has left to learn, and closes on nothing when there is "
+                + "nothing to teach.",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_THE_BACK.title"] =
+                "Read the Back",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2. (Offered only if you "
+                + "hold a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_PASSAGE.title"] =
+                "Read a Random Passage",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2. (Offered only if you hold "
+                + "a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+                "Read the Entire Book",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2. (Offered only if you hold "
+                + "a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.NO_OPTIONS.title"] =
+                "Move On",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.NO_OPTIONS.description"] =
+                "Nothing happens. (Offered only when none of the three readings has "
+                + "a legal target.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+                "Read the Back",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+                "Choose an Attack to Enchant with Sharp 2. (Offered only if you "
+                + "hold a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+                "Read a Random Passage",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+                "Choose a Skill to Enchant with Nimble 2. (Offered only if you hold "
+                + "a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+                "Read the Entire Book",
+            ["WATATSUMI_DRILL_PRIMER.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+                "Choose a Power to Enchant with Swift 2. (Offered only if you hold "
+                + "a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2. (Offered only if you "
+                + "hold a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2. (Offered only if you hold "
+                + "a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2. (Offered only if you hold "
+                + "a card of that type to enchant.)",
+            ["WATATSUMI_DRILL_PRIMER.pages.NO_OPTIONS.description"] =
+                "Nothing happens. (Offered only when none of the three readings has "
+                + "a legal target.)",
+            // TidewornCausewayAtMusoujinGorge (Inazuma / SlipperyBridge)
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.title"] =
+                "The Tideworn Causeway at Musoujin Gorge",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.description"] =
+                "Watatsumi's supply line to Yashiori crosses a plank causeway slung "
+                + "over Musoujin Gorge, and the storm has been chewing the ropes "
+                + "since nightfall. Your runner's load is lashed to the guide line "
+                + "with one hand and to you with the other. Below is only rain and "
+                + "Tatarigami haze.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.OVERCOME.title"] =
+                "Cut It Loose",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.OVERCOME.description"] =
+                "[Specific card] is removed from your deck.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.HOLD_ON_0.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.HOLD_ON_0.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
+                "Grip the Rope (Hold On)",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.OVERCOME.description"] =
+                "[Specific card] is removed from your deck.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_0.description"] =
+                "Lose 3 HP as the line saws through your grip. The wind shifts the "
+                + "load, and the piece hanging over the drop is randomized. Each "
+                + "further grip costs 1 more HP than the one before, and the crossing "
+                + "keeps putting the same two choices to you until you cut something "
+                + "away. Gear tied down by the priestess's own order (Eternal) never "
+                + "swings out, and the wind will not pick the same bundle twice while "
+                + "others hang.",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_1.description"] =
+                "",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_2.description"] =
+                "",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_3.description"] =
+                "",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_4.description"] =
+                "",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_5.description"] =
+                "",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_6.description"] =
+                "",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_LOOP.description"] =
+                "",
+            // FrontLineTriageCache (Inazuma / TheFutureOfPotions)
+            ["FRONT_LINE_TRIAGE_CACHE.title"] =
+                "The Front-Line Triage Cache",
+            ["FRONT_LINE_TRIAGE_CACHE.pages.INITIAL.description"] =
+                "A supply officer keeps a triage cache at the Bourou Village "
+                + "staging point, three flasks laid out on a salt-stained cloth — "
+                + "always the three nearest her elbow, never the ones you'd pick. She "
+                + "trades a flask for a drilled technique on the spot: better stock "
+                + "earns a better lesson, and she says so before you hand anything "
+                + "over. A fourth tray, marked with the resistance's own brewers' "
+                + "seal, and a fifth, a single cracked stone bottle nobody claims, "
+                + "sit apart from the rest.",
+            ["FRONT_LINE_TRIAGE_CACHE.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Surrender the "
+                + "Common Flask|Surrender the Uncommon Flask|Surrender the Rare "
+                + "Flask|Surrender the Sealed Flask|Surrender the Stone "
+                + "Bottle|Surrender the Common Flask}",
+            ["FRONT_LINE_TRIAGE_CACHE.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["FRONT_LINE_TRIAGE_CACHE.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
+            // QuartermastersSplit (Inazuma / ThisOrThat)
+            ["QUARTERMASTERS_SPLIT.title"] =
+                "Quartermaster's Split",
+            ["QUARTERMASTERS_SPLIT.pages.INITIAL.description"] =
+                "On the Watatsumi terraces, a resistance quartermaster is dividing "
+                + "what came back from a raid on a Fatui shipment. Two items are off "
+                + "the manifest entirely, and she would rather hand one to a fighter "
+                + "than explain both to Her Excellency's clerks. She slides them both "
+                + "forward and steps back.",
+            ["QUARTERMASTERS_SPLIT.pages.INITIAL.options.PLAIN.title"] =
+                "Claim the Paychest (This)",
+            ["QUARTERMASTERS_SPLIT.pages.INITIAL.options.PLAIN.description"] =
+                "The Fatui latched it against thieves; the wire inside takes a "
+                + "strip off your forearm before the lid comes free. Lose 6 HP. Gain "
+                + "57 Mora.",
+            ["QUARTERMASTERS_SPLIT.pages.INITIAL.options.ORNATE.title"] =
+                "Claim the Field Gear (That)",
+            ["QUARTERMASTERS_SPLIT.pages.INITIAL.options.ORNATE.description"] =
+                "Unissued Fatui kit, well made and fitted for nobody in particular "
+                + "— least of all you. It hangs wrong on every stance you know, and "
+                + "the quartermaster does not offer to adjust it. Add Clumsy (Clumsy) "
+                + "to your Deck. Obtain a random Relic.",
+            ["QUARTERMASTERS_SPLIT.pages.PLAIN.description"] =
+                "The Fatui latched it against thieves; the wire inside takes a "
+                + "strip off your forearm before the lid comes free. Lose 6 HP. Gain "
+                + "57 Mora.",
+            ["QUARTERMASTERS_SPLIT.pages.ORNATE.description"] =
+                "Unissued Fatui kit, well made and fitted for nobody in particular "
+                + "— least of all you. It hangs wrong on every stance you know, and "
+                + "the quartermaster does not offer to adjust it. Add Clumsy (Clumsy) "
+                + "to your Deck. Obtain a random Relic.",
+            // ChinjuForestPassenger (Inazuma / BrainLeech)
+            ["CHINJU_FOREST_PASSENGER.title"] =
+                "The Chinju Forest Passenger",
+            ["CHINJU_FOREST_PASSENGER.pages.INITIAL.description"] =
+                "Chinju Forest, an hour past the shrine. The straw hat that dropped "
+                + "onto your shoulders is not a hat — it has paws, and it is already "
+                + "whispering fox-lore and old sword forms into your ear like it has "
+                + "been waiting years for someone to hold still long enough. Your "
+                + "Sangonomiya scout mouths one word: tanuki. Do not insult it.",
+            ["CHINJU_FOREST_PASSENGER.pages.INITIAL.options.SHARE_KNOWLEDGE.title"] =
+                "Let It Whisper",
+            ["CHINJU_FOREST_PASSENGER.pages.INITIAL.options.SHARE_KNOWLEDGE.description"] =
+                "Choose 1 of 5 random cards to add to your deck.",
+            ["CHINJU_FOREST_PASSENGER.pages.INITIAL.options.RIP.title"] =
+                "Shake It Loose (Rip the Leech Off)",
+            ["CHINJU_FOREST_PASSENGER.pages.INITIAL.options.RIP.description"] =
+                "It leaves without letting go first. Lose 5 HP. Gain a Colorless 2 "
+                + "card reward — two companion (Colorless) charms shaken from its "
+                + "belt as it bolts for the canopy.",
+            ["CHINJU_FOREST_PASSENGER.pages.RIP.description"] =
+                "It leaves without letting go first. Lose 5 HP. Gain a Colorless 2 "
+                + "card reward — two companion (Colorless) charms shaken from its "
+                + "belt as it bolts for the canopy.",
+            ["CHINJU_FOREST_PASSENGER.pages.SHARE_KNOWLEDGE.selectionScreenPrompt"] =
+                "Let It Whisper",
+            ["CHINJU_FOREST_PASSENGER.pages.SHARE_KNOWLEDGE.description"] =
+                "Choose 1 of 5 random cards to add to your deck.",
+            // BlockadeLarder (Inazuma / RoomFullOfCheese)
+            ["BLOCKADE_LARDER.title"] =
+                "The Blockade Larder",
+            ["BLOCKADE_LARDER.pages.INITIAL.description"] =
+                "Watatsumi's resistance sealed this sea-cave larder when the Sakoku "
+                + "Decree cut the supply lines, and nobody ever came back for it. "
+                + "Eight crocks of fermented stores line the shelf under the "
+                + "salt-crust, no two the same pickle. Deeper in, one crock was not "
+                + "stored — it was buried, on purpose, wrapped in a soldier's sash.",
+            ["BLOCKADE_LARDER.pages.INITIAL.options.GORGE.title"] =
+                "Break Open the Shelf",
+            ["BLOCKADE_LARDER.pages.INITIAL.options.GORGE.description"] =
+                "Choose 2 of 8 random Common cards to add to your Deck. The eight "
+                + "crocks never repeat.",
+            ["BLOCKADE_LARDER.pages.INITIAL.options.SEARCH.title"] =
+                "Unearth the Buried Crock",
+            ["BLOCKADE_LARDER.pages.INITIAL.options.SEARCH.description"] =
+                "Lose 14 HP clawing through packed salt and brine. Obtain the "
+                + "Ceremonial Crock (The Chosen Cheese): at the end of combat, gain 1 "
+                + "Max HP.",
+            ["BLOCKADE_LARDER.pages.GORGE.selectionScreenPrompt"] =
+                "Break Open the Shelf",
+            ["BLOCKADE_LARDER.pages.GORGE.description"] =
+                "Choose 2 of 8 random Common cards to add to your Deck. The eight "
+                + "crocks never repeat.",
+            ["BLOCKADE_LARDER.pages.SEARCH.description"] =
+                "Lose 14 HP clawing through packed salt and brine. Obtain the "
+                + "Ceremonial Crock (The Chosen Cheese): at the end of combat, gain 1 "
+                + "Max HP.",
+            // KettleBelowSangonomiya (Inazuma / TeaMaster)
+            ["KETTLE_BELOW_SANGONOMIYA.title"] =
+                "The Kettle Below Sangonomiya",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.description"] =
+                "Below Sangonomiya Shrine an old attendant keeps a brazier lit for "
+                + "anyone marching toward Nazuchi Beach. She pours in strict order "
+                + "and takes donations toward the resistance's stores, since the "
+                + "Divine Priestess's war is not cheap and Watatsumi's soil grows "
+                + "very little worth selling. The last cup on the tray she will pour "
+                + "for anybody. She warns you about it first.",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.BONE_TEA.title"] =
+                "Sakura-Bone Brew",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.BONE_TEA.description"] =
+                "Donate 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.EMBER_TEA.title"] =
+                "Emberkindle Sencha",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.EMBER_TEA.description"] =
+                "Donate 150 Mora. At the start of the next 5 combats, gain 2 "
+                + "Strength.",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.TEA_OF_DISCOURTESY.title"] =
+                "Cup of Discourtesy",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.TEA_OF_DISCOURTESY.description"] =
+                "Drink what is left in the pot, unasked and unpaid. At the start of "
+                + "the next combat, shuffle 2 Dazed into your Draw Pile.",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.BONE_TEA_LOCKED.title"] =
+                "Sakura-Bone Brew",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.BONE_TEA_LOCKED.description"] =
+                "Donate 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.EMBER_TEA_LOCKED.title"] =
+                "Emberkindle Sencha",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.INITIAL.options.EMBER_TEA_LOCKED.description"] =
+                "Donate 150 Mora. At the start of the next 5 combats, gain 2 "
+                + "Strength.",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.DONE.description"] =
+                "Donate 50 Mora. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["KETTLE_BELOW_SANGONOMIYA.pages.TEA_OF_DISCOURTESY.description"] =
+                "Drink what is left in the pot, unasked and unpaid. At the start of "
+                + "the next combat, shuffle 2 Dazed into your Draw Pile.",
+            // EarWhisperer (Natlan / BrainLeech)
+            ["EAR_WHISPERER.title"] =
+                "The Ear-Whisperer",
+            ["EAR_WHISPERER.pages.INITIAL.description"] =
+                "On the scree slopes of Tepeacac Rise, a Children of Echoes tracker "
+                + "finds you first — an old memory-leech has fastened behind your "
+                + "ear, feeding you fragments of something it half-remembers. \"Let "
+                + "it finish the lesson,\" she says, \"or I rip it clear myself.\" "
+                + "Either way you learn something today, she promises; the tribe just "
+                + "disagrees on the price. A Qucusaur circles overhead, unbothered, "
+                + "the way it always is when the Echoes start arguing about the past.",
+            ["EAR_WHISPERER.pages.INITIAL.options.SHARE_KNOWLEDGE.title"] =
+                "Share Knowledge",
+            ["EAR_WHISPERER.pages.INITIAL.options.SHARE_KNOWLEDGE.description"] =
+                "Choose 1 of 5 random cards to add to your Deck.",
+            ["EAR_WHISPERER.pages.INITIAL.options.RIP.title"] =
+                "Rip the Leech Off",
+            ["EAR_WHISPERER.pages.INITIAL.options.RIP.description"] =
+                "Lose 5 HP. Gain a companion (Colorless) card reward — two cards, "
+                + "following the gallery's own reading of the harvest's "
+                + "template-stripped \"Colorless 2 card reward.\"",
+            ["EAR_WHISPERER.pages.RIP.description"] =
+                "Lose 5 HP. Gain a companion (Colorless) card reward — two cards, "
+                + "following the gallery's own reading of the harvest's "
+                + "template-stripped \"Colorless 2 card reward.\"",
+            ["EAR_WHISPERER.pages.SHARE_KNOWLEDGE.selectionScreenPrompt"] =
+                "Share Knowledge",
+            ["EAR_WHISPERER.pages.SHARE_KNOWLEDGE.description"] =
+                "Choose 1 of 5 random cards to add to your Deck.",
+            // UnderStandsCellar (Natlan / RoomFullOfCheese)
+            ["UNDER_STANDS_CELLAR.title"] =
+                "The Under-Stands Cellar",
+            ["UNDER_STANDS_CELLAR.pages.INITIAL.description"] =
+                "Under the stands at the Stadium of the Sacred Flame, the "
+                + "Flower-Feather Clan keeps a cellar of festival prizes nobody "
+                + "claimed — eight of them laid out, no two alike. Pick your two and "
+                + "walk off happy, or dig past the racks for the one prize the clan "
+                + "swears is still down there, buried deep enough to cost you "
+                + "something getting to it.",
+            ["UNDER_STANDS_CELLAR.pages.INITIAL.options.GORGE.title"] =
+                "Gorge",
+            ["UNDER_STANDS_CELLAR.pages.INITIAL.options.GORGE.description"] =
+                "Choose 2 of 8 random Common cards to add to your Deck (the eight "
+                + "are never duplicates).",
+            ["UNDER_STANDS_CELLAR.pages.INITIAL.options.SEARCH.title"] =
+                "Search",
+            ["UNDER_STANDS_CELLAR.pages.INITIAL.options.SEARCH.description"] =
+                "Lose 14 HP. Obtain the Buried Prize (The Chosen Cheese, relic): at "
+                + "the end of combat, gain 1 Max HP.",
+            ["UNDER_STANDS_CELLAR.pages.GORGE.selectionScreenPrompt"] =
+                "Gorge",
+            ["UNDER_STANDS_CELLAR.pages.GORGE.description"] =
+                "Choose 2 of 8 random Common cards to add to your Deck (the eight "
+                + "are never duplicates).",
+            ["UNDER_STANDS_CELLAR.pages.SEARCH.description"] =
+                "Lose 14 HP. Obtain the Buried Prize (The Chosen Cheese, relic): at "
+                + "the end of combat, gain 1 Max HP.",
+            // FestivalBrewStand (Natlan / TeaMaster)
+            ["FESTIVAL_BREW_STAND.title"] =
+                "The Festival Brew-Stand",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.description"] =
+                "At the festival grounds, a Flower-Feather brewer pours three cups "
+                + "and names her price for each before you've even sat down — that's "
+                + "the custom, she says, not a courtesy. Pay for the sharp one and "
+                + "your opening hand comes out honed. Pay more for the slow-burning "
+                + "one and you run hot for five whole bouts. Or take the free cup, "
+                + "which she pours for anyone, and warns you about first.",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.BONE_TEA.title"] =
+                "Bone Tea",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.BONE_TEA.description"] =
+                "Pay 50 Gold. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.EMBER_TEA.title"] =
+                "Ember Tea",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.EMBER_TEA.description"] =
+                "Pay 150 Gold. At the start of the next 5 combats, gain 2 Strength.",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.TEA_OF_DISCOURTESY.title"] =
+                "Tea of Discourtesy",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.TEA_OF_DISCOURTESY.description"] =
+                "At the start of the next combat, shuffle 2 Dazed into your Draw "
+                + "Pile.",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.BONE_TEA_LOCKED.title"] =
+                "Bone Tea",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.BONE_TEA_LOCKED.description"] =
+                "Pay 50 Gold. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.EMBER_TEA_LOCKED.title"] =
+                "Ember Tea",
+            ["FESTIVAL_BREW_STAND.pages.INITIAL.options.EMBER_TEA_LOCKED.description"] =
+                "Pay 150 Gold. At the start of the next 5 combats, gain 2 Strength.",
+            ["FESTIVAL_BREW_STAND.pages.DONE.description"] =
+                "Pay 50 Gold. At the start of the next combat, Upgrade your "
+                + "starting hand.",
+            ["FESTIVAL_BREW_STAND.pages.TEA_OF_DISCOURTESY.description"] =
+                "At the start of the next combat, shuffle 2 Dazed into your Draw "
+                + "Pile.",
+            // HollowTreeGuide (Natlan / SelfHelpBook)
+            ["HOLLOW_TREE_GUIDE.title"] =
+                "The Hollow-Tree Guide",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.description"] =
+                "A Scions of the Canopy scout found a stitched-together guide "
+                + "wedged in a hollow tree on Coatepec Mountain, left by some "
+                + "outsider who clearly meant to come back for it. Every page bets on "
+                + "a different discipline — a sharpened swing, a lighter guard, a "
+                + "quicker draw — and she's read enough to know only one page will "
+                + "actually apply to what you're carrying. \"Take the page that fits "
+                + "your kit,\" she says, \"or don't bother — I'm not walking you "
+                + "through pages that don't.\"",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_THE_BACK.title"] =
+                "Read the Back",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_PASSAGE.title"] =
+                "Read a Random Passage",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_ENTIRE_BOOK.title"] =
+                "Read the Entire Book",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.NO_OPTIONS.title"] =
+                "Move On",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.NO_OPTIONS.description"] =
+                "Nothing happens. (Each reading is offered only if you hold a card "
+                + "of that type; Move On is offered only when you hold none.)",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_THE_BACK_LOCKED.title"] =
+                "Read the Back",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_THE_BACK_LOCKED.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_PASSAGE_LOCKED.title"] =
+                "Read a Random Passage",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_PASSAGE_LOCKED.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.title"] =
+                "Read the Entire Book",
+            ["HOLLOW_TREE_GUIDE.pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["HOLLOW_TREE_GUIDE.pages.READ_THE_BACK.description"] =
+                "Choose an Attack to Enchant with Sharp 2.",
+            ["HOLLOW_TREE_GUIDE.pages.READ_PASSAGE.description"] =
+                "Choose a Skill to Enchant with Nimble 2.",
+            ["HOLLOW_TREE_GUIDE.pages.READ_ENTIRE_BOOK.description"] =
+                "Choose a Power to Enchant with Swift 2.",
+            ["HOLLOW_TREE_GUIDE.pages.NO_OPTIONS.description"] =
+                "Nothing happens. (Each reading is offered only if you hold a card "
+                + "of that type; Move On is offered only when you hold none.)",
+            // RopeCrossingAtCoatepec (Natlan / SlipperyBridge)
+            ["ROPE_CROSSING_AT_COATEPEC.title"] =
+                "The Rope Crossing at Coatepec",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.description"] =
+                "The rope-and-plank crossing above Coatepec Mountain has seen "
+                + "better seasons, and it groans under your kit the moment you commit "
+                + "to the middle span. A Night-Wind rider waiting on the far side "
+                + "calls out the wager the crossing always makes: let it take one "
+                + "thing from your pack now, clean, or hold on and let the wind "
+                + "decide which piece hangs loose next — at a steeper price every "
+                + "time you refuse to choose.",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.OVERCOME.title"] =
+                "Overcome",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.OVERCOME.description"] =
+                "A specific card is removed from your Deck.",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.HOLD_ON_0.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.HOLD_ON_0.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
+                "Hold On",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.OVERCOME.description"] =
+                "A specific card is removed from your Deck.",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_0.description"] =
+                "Lose 3 HP. The card named in the above option is randomized, and "
+                + "the HP cost rises by 1 each further time you choose this option. "
+                + "(The card is drawn from all cards without Eternal; the first card "
+                + "offered is never Basic rarity unless every card you hold is; the "
+                + "same card is never offered twice while others remain unoffered.)",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_1.description"] =
+                "",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_2.description"] =
+                "",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_3.description"] =
+                "",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_4.description"] =
+                "",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_5.description"] =
+                "",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_6.description"] =
+                "",
+            ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_LOOP.description"] =
+                "",
+            // MictlanRig (Natlan / TheFutureOfPotions)
+            ["MICTLAN_RIG.title"] =
+                "The Mictlan Rig",
+            ["MICTLAN_RIG.pages.INITIAL.description"] =
+                "A Collective trader at Mictlan has built a rig that reads a "
+                + "concoction for the technique hidden in it, rather than just "
+                + "drinking it down like everyone else does. Only the first three "
+                + "bottles on your belt fit the rig, leftmost first — she's not "
+                + "sorting your pack for you. Whatever you feed it, you walk away "
+                + "better armed than you walked in, upgraded to match what the bottle "
+                + "was worth.",
+            ["MICTLAN_RIG.pages.INITIAL.options.POTION.title"] =
+                "{Rarity:choose(Common|Uncommon|Rare|Event|Token):Insert Common "
+                + "Potion|Insert Uncommon Potion|Insert Rare Potion|Insert Event "
+                + "Potion|Insert Token Potion|Insert Common Potion}",
+            ["MICTLAN_RIG.pages.INITIAL.options.POTION.description"] =
+                "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
+            ["MICTLAN_RIG.pages.DONE.description"] =
+                "Lose a specified Common potion. Obtain an Upgraded Common "
+                + "[Attack/Skill] card reward.",
+            // UnclaimedCrates (Natlan / ThisOrThat)
+            ["UNCLAIMED_CRATES.title"] =
+                "The Unclaimed Crates",
+            ["UNCLAIMED_CRATES.pages.INITIAL.description"] =
+                "Two crates turned up unclaimed after the last relay through "
+                + "Tequemecan Valley, and the Flower-Feather quartermaster running "
+                + "the prize table isn't in the mood to sort them. Pry the first and "
+                + "something in the latch bites back on the way to a fistful of coin. "
+                + "Or take the second, gear that's plainly worth more and plainly "
+                + "cursed to trip you on every third step — she'll let you decide "
+                + "which kind of trouble you'd rather carry.",
+            ["UNCLAIMED_CRATES.pages.INITIAL.options.PLAIN.title"] =
+                "This",
+            ["UNCLAIMED_CRATES.pages.INITIAL.options.PLAIN.description"] =
+                "Lose 6 HP. Gain 57 Gold.",
+            ["UNCLAIMED_CRATES.pages.INITIAL.options.ORNATE.title"] =
+                "That",
+            ["UNCLAIMED_CRATES.pages.INITIAL.options.ORNATE.description"] =
+                "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
+            ["UNCLAIMED_CRATES.pages.PLAIN.description"] =
+                "Lose 6 HP. Gain 57 Gold.",
+            ["UNCLAIMED_CRATES.pages.ORNATE.description"] =
+                "Add Clumsy (curse) to your Deck. Obtain a random Relic.",
         };
 }
 
@@ -1707,6 +2752,138 @@ internal static class TeyvatGeneratedEvents
                 new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
                 Array.Empty<string>(),
                 false),
+            [typeof(Events.Sumeru.SixWeeksToABetterYouIlluminated)] = new EventShape(
+                "SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED", "SelfHelpBookMirror",
+                new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
+                new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
+                new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
+                false),
+            [typeof(Events.Sumeru.RopeLineOverArdraviValley)] = new EventShape(
+                "ROPE_LINE_OVER_ARDRAVI_VALLEY", "SlipperyBridgeMirror",
+                new[] { "OVERCOME", "HOLD_ON_0" },
+                new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
+                new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
+                false),
+            [typeof(Events.Sumeru.FutureOfElixirs)] = new EventShape(
+                "FUTURE_OF_ELIXIRS", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Sumeru.CaravanRibatLeavings)] = new EventShape(
+                "CARAVAN_RIBAT_LEAVINGS", "ThisOrThatMirror",
+                new[] { "PLAIN", "ORNATE" },
+                new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.MelusinesPamphletOfEncouragement)] = new EventShape(
+                "MELUSINES_PAMPHLET_OF_ENCOURAGEMENT", "SelfHelpBookMirror",
+                new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
+                new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
+                new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
+                false),
+            [typeof(Events.Fontaine.BallastCheckOnTheMeropideLift)] = new EventShape(
+                "BALLAST_CHECK_ON_THE_MEROPIDE_LIFT", "SlipperyBridgeMirror",
+                new[] { "OVERCOME", "HOLD_ON_0" },
+                new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
+                new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
+                false),
+            [typeof(Events.Fontaine.WhatTheMelusinesTradeFor)] = new EventShape(
+                "WHAT_THE_MELUSINES_TRADE_FOR", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Fontaine.TwoGiftsFromTheFontemer)] = new EventShape(
+                "TWO_GIFTS_FROM_THE_FONTEMER", "ThisOrThatMirror",
+                new[] { "PLAIN", "ORNATE" },
+                new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.WatatsumiDrillPrimer)] = new EventShape(
+                "WATATSUMI_DRILL_PRIMER", "SelfHelpBookMirror",
+                new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
+                new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
+                new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
+                false),
+            [typeof(Events.Inazuma.TidewornCausewayAtMusoujinGorge)] = new EventShape(
+                "TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE", "SlipperyBridgeMirror",
+                new[] { "OVERCOME", "HOLD_ON_0" },
+                new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
+                new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
+                false),
+            [typeof(Events.Inazuma.FrontLineTriageCache)] = new EventShape(
+                "FRONT_LINE_TRIAGE_CACHE", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.QuartermastersSplit)] = new EventShape(
+                "QUARTERMASTERS_SPLIT", "ThisOrThatMirror",
+                new[] { "PLAIN", "ORNATE" },
+                new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.ChinjuForestPassenger)] = new EventShape(
+                "CHINJU_FOREST_PASSENGER", "BrainLeechMirror",
+                new[] { "SHARE_KNOWLEDGE", "RIP" },
+                new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.BlockadeLarder)] = new EventShape(
+                "BLOCKADE_LARDER", "RoomFullOfCheeseMirror",
+                new[] { "GORGE", "SEARCH" },
+                new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Inazuma.KettleBelowSangonomiya)] = new EventShape(
+                "KETTLE_BELOW_SANGONOMIYA", "TeaMasterMirror",
+                new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
+                new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
+                new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
+                false),
+            [typeof(Events.Natlan.EarWhisperer)] = new EventShape(
+                "EAR_WHISPERER", "BrainLeechMirror",
+                new[] { "SHARE_KNOWLEDGE", "RIP" },
+                new[] { "pages.RIP.description", "pages.SHARE_KNOWLEDGE.selectionScreenPrompt", "pages.SHARE_KNOWLEDGE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.UnderStandsCellar)] = new EventShape(
+                "UNDER_STANDS_CELLAR", "RoomFullOfCheeseMirror",
+                new[] { "GORGE", "SEARCH" },
+                new[] { "pages.GORGE.selectionScreenPrompt", "pages.GORGE.description", "pages.SEARCH.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.FestivalBrewStand)] = new EventShape(
+                "FESTIVAL_BREW_STAND", "TeaMasterMirror",
+                new[] { "BONE_TEA", "EMBER_TEA", "TEA_OF_DISCOURTESY" },
+                new[] { "pages.DONE.description", "pages.TEA_OF_DISCOURTESY.description" },
+                new[] { "pages.INITIAL.options.BONE_TEA_LOCKED", "pages.INITIAL.options.EMBER_TEA_LOCKED" },
+                false),
+            [typeof(Events.Natlan.HollowTreeGuide)] = new EventShape(
+                "HOLLOW_TREE_GUIDE", "SelfHelpBookMirror",
+                new[] { "READ_THE_BACK", "READ_PASSAGE", "READ_ENTIRE_BOOK", "NO_OPTIONS" },
+                new[] { "pages.READ_THE_BACK.description", "pages.READ_PASSAGE.description", "pages.READ_ENTIRE_BOOK.description", "pages.NO_OPTIONS.description" },
+                new[] { "pages.INITIAL.options.READ_THE_BACK_LOCKED", "pages.INITIAL.options.READ_PASSAGE_LOCKED", "pages.INITIAL.options.READ_ENTIRE_BOOK_LOCKED" },
+                false),
+            [typeof(Events.Natlan.RopeCrossingAtCoatepec)] = new EventShape(
+                "ROPE_CROSSING_AT_COATEPEC", "SlipperyBridgeMirror",
+                new[] { "OVERCOME", "HOLD_ON_0" },
+                new[] { "pages.OVERCOME.description", "pages.HOLD_ON_0.description", "pages.HOLD_ON_1.description", "pages.HOLD_ON_2.description", "pages.HOLD_ON_3.description", "pages.HOLD_ON_4.description", "pages.HOLD_ON_5.description", "pages.HOLD_ON_6.description", "pages.HOLD_ON_LOOP.description" },
+                new[] { "pages.HOLD_ON_0.options.HOLD_ON_1", "pages.HOLD_ON_1.options.HOLD_ON_2", "pages.HOLD_ON_2.options.HOLD_ON_3", "pages.HOLD_ON_3.options.HOLD_ON_4", "pages.HOLD_ON_4.options.HOLD_ON_5", "pages.HOLD_ON_5.options.HOLD_ON_6", "pages.HOLD_ON_6.options.HOLD_ON_LOOP", "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP" },
+                false),
+            [typeof(Events.Natlan.MictlanRig)] = new EventShape(
+                "MICTLAN_RIG", "TheFutureOfPotionsMirror",
+                new[] { "POTION" },
+                new[] { "pages.DONE.description" },
+                Array.Empty<string>(),
+                false),
+            [typeof(Events.Natlan.UnclaimedCrates)] = new EventShape(
+                "UNCLAIMED_CRATES", "ThisOrThatMirror",
+                new[] { "PLAIN", "ORNATE" },
+                new[] { "pages.PLAIN.description", "pages.ORNATE.description" },
+                Array.Empty<string>(),
+                false),
         };
 
     /// <summary>(dressing act entry, base event type) -> the dressed
@@ -1792,6 +2969,50 @@ internal static class TeyvatGeneratedEvents
                 () => ModelDb.Event<Events.Liyue.BureauOfReclaimedMedicine>(),
             [(TeyvatFrame.Liyue, typeof(ThisOrThat))] =
                 () => ModelDb.Event<Events.Liyue.UnclaimedCratesAtFeiyunSlope>(),
+            [(TeyvatFrame.Sumeru, typeof(SelfHelpBook))] =
+                () => ModelDb.Event<Events.Sumeru.SixWeeksToABetterYouIlluminated>(),
+            [(TeyvatFrame.Sumeru, typeof(SlipperyBridge))] =
+                () => ModelDb.Event<Events.Sumeru.RopeLineOverArdraviValley>(),
+            [(TeyvatFrame.Sumeru, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Sumeru.FutureOfElixirs>(),
+            [(TeyvatFrame.Sumeru, typeof(ThisOrThat))] =
+                () => ModelDb.Event<Events.Sumeru.CaravanRibatLeavings>(),
+            [(TeyvatFrame.Fontaine, typeof(SelfHelpBook))] =
+                () => ModelDb.Event<Events.Fontaine.MelusinesPamphletOfEncouragement>(),
+            [(TeyvatFrame.Fontaine, typeof(SlipperyBridge))] =
+                () => ModelDb.Event<Events.Fontaine.BallastCheckOnTheMeropideLift>(),
+            [(TeyvatFrame.Fontaine, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Fontaine.WhatTheMelusinesTradeFor>(),
+            [(TeyvatFrame.Fontaine, typeof(ThisOrThat))] =
+                () => ModelDb.Event<Events.Fontaine.TwoGiftsFromTheFontemer>(),
+            [(TeyvatFrame.Inazuma, typeof(SelfHelpBook))] =
+                () => ModelDb.Event<Events.Inazuma.WatatsumiDrillPrimer>(),
+            [(TeyvatFrame.Inazuma, typeof(SlipperyBridge))] =
+                () => ModelDb.Event<Events.Inazuma.TidewornCausewayAtMusoujinGorge>(),
+            [(TeyvatFrame.Inazuma, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Inazuma.FrontLineTriageCache>(),
+            [(TeyvatFrame.Inazuma, typeof(ThisOrThat))] =
+                () => ModelDb.Event<Events.Inazuma.QuartermastersSplit>(),
+            [(TeyvatFrame.Inazuma, typeof(BrainLeech))] =
+                () => ModelDb.Event<Events.Inazuma.ChinjuForestPassenger>(),
+            [(TeyvatFrame.Inazuma, typeof(RoomFullOfCheese))] =
+                () => ModelDb.Event<Events.Inazuma.BlockadeLarder>(),
+            [(TeyvatFrame.Inazuma, typeof(TeaMaster))] =
+                () => ModelDb.Event<Events.Inazuma.KettleBelowSangonomiya>(),
+            [(TeyvatFrame.Natlan, typeof(BrainLeech))] =
+                () => ModelDb.Event<Events.Natlan.EarWhisperer>(),
+            [(TeyvatFrame.Natlan, typeof(RoomFullOfCheese))] =
+                () => ModelDb.Event<Events.Natlan.UnderStandsCellar>(),
+            [(TeyvatFrame.Natlan, typeof(TeaMaster))] =
+                () => ModelDb.Event<Events.Natlan.FestivalBrewStand>(),
+            [(TeyvatFrame.Natlan, typeof(SelfHelpBook))] =
+                () => ModelDb.Event<Events.Natlan.HollowTreeGuide>(),
+            [(TeyvatFrame.Natlan, typeof(SlipperyBridge))] =
+                () => ModelDb.Event<Events.Natlan.RopeCrossingAtCoatepec>(),
+            [(TeyvatFrame.Natlan, typeof(TheFutureOfPotions))] =
+                () => ModelDb.Event<Events.Natlan.MictlanRig>(),
+            [(TeyvatFrame.Natlan, typeof(ThisOrThat))] =
+                () => ModelDb.Event<Events.Natlan.UnclaimedCrates>(),
         };
 
     /// <summary>
@@ -1890,6 +3111,50 @@ internal static class TeyvatGeneratedEvents
             ["BUREAU_OF_RECLAIMED_MEDICINE"] =
                 "res://images/events/the_future_of_potions.png",
             ["UNCLAIMED_CRATES_AT_FEIYUN_SLOPE"] =
+                "res://images/events/this_or_that.png",
+            ["SIX_WEEKS_TO_ABETTER_YOU_ILLUMINATED"] =
+                "res://images/events/self_help_book.png",
+            ["ROPE_LINE_OVER_ARDRAVI_VALLEY"] =
+                "res://images/events/slippery_bridge.png",
+            ["FUTURE_OF_ELIXIRS"] =
+                "res://images/events/the_future_of_potions.png",
+            ["CARAVAN_RIBAT_LEAVINGS"] =
+                "res://images/events/this_or_that.png",
+            ["MELUSINES_PAMPHLET_OF_ENCOURAGEMENT"] =
+                "res://images/events/self_help_book.png",
+            ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT"] =
+                "res://images/events/slippery_bridge.png",
+            ["WHAT_THE_MELUSINES_TRADE_FOR"] =
+                "res://images/events/the_future_of_potions.png",
+            ["TWO_GIFTS_FROM_THE_FONTEMER"] =
+                "res://images/events/this_or_that.png",
+            ["WATATSUMI_DRILL_PRIMER"] =
+                "res://images/events/self_help_book.png",
+            ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE"] =
+                "res://images/events/slippery_bridge.png",
+            ["FRONT_LINE_TRIAGE_CACHE"] =
+                "res://images/events/the_future_of_potions.png",
+            ["QUARTERMASTERS_SPLIT"] =
+                "res://images/events/this_or_that.png",
+            ["CHINJU_FOREST_PASSENGER"] =
+                "res://images/events/brain_leech.png",
+            ["BLOCKADE_LARDER"] =
+                "res://images/events/room_full_of_cheese.png",
+            ["KETTLE_BELOW_SANGONOMIYA"] =
+                "res://images/events/tea_master.png",
+            ["EAR_WHISPERER"] =
+                "res://images/events/brain_leech.png",
+            ["UNDER_STANDS_CELLAR"] =
+                "res://images/events/room_full_of_cheese.png",
+            ["FESTIVAL_BREW_STAND"] =
+                "res://images/events/tea_master.png",
+            ["HOLLOW_TREE_GUIDE"] =
+                "res://images/events/self_help_book.png",
+            ["ROPE_CROSSING_AT_COATEPEC"] =
+                "res://images/events/slippery_bridge.png",
+            ["MICTLAN_RIG"] =
+                "res://images/events/the_future_of_potions.png",
+            ["UNCLAIMED_CRATES"] =
                 "res://images/events/this_or_that.png",
         };
 }
