@@ -380,8 +380,22 @@ public sealed class FurinaBurstResource : BasicCustomResource
 /// </summary>
 public static class FurinaResources
 {
-    public static bool IsFurina(Creature creature) =>
-        creature.Player?.Character is IFurinaCharacter;
+    /// <summary>
+    /// Is this creature Furina? THE QUESTION IS ANSWERED, never thrown.
+    ///
+    /// `EB-727`: this used to take a non-nullable <c>Creature</c> and
+    /// dereference it, so a caller with no creature -- a compendium page, a
+    /// card on a shelf, a hook fired on a board being torn down -- got a
+    /// NullReferenceException where the honest answer is "no, that is not
+    /// Furina". Several call sites already hold a <c>Creature?</c>, and two
+    /// of them (<c>FurinaStage.LiveFor</c>, <c>FurinaReframe.IsFurina</c>)
+    /// had each grown their own null test in front of this one. A predicate
+    /// that cannot answer for the absent case makes every caller carry the
+    /// guard, and the first caller that forgets it is a crash -- so the guard
+    /// lives here, once, at the source.
+    /// </summary>
+    public static bool IsFurina(Creature? creature) =>
+        creature?.Player?.Character is IFurinaCharacter;
 
     /// <summary>
     /// Are the FOUR SHIPPED FANFARE MINT LEGS retired for this creature?
