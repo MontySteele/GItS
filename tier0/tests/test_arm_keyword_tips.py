@@ -500,7 +500,15 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # before the meter exists, and every Furina row the Stage
                     # does not swap still carries it. `EB-407`'s finding is
                     # unchanged; only the door it comes through is.
-                    "KLEEMOD-ARM_ENCORE"}
+                    "KLEEMOD-ARM_ENCORE",
+                    # A Stage round-three defect: WHICH BAR a reader's number
+                    # is. The seventh of these, and the second whose sentence
+                    # changes with the screen -- beside
+                    # `KLEEMOD-ARM_EMPTY_FIELD`. The four readers multiply a
+                    # LIVE bar, so off a board their faces print a literal 0,
+                    # and a hover tip is the only surface that can say why: a
+                    # description is a loc string injected once at boot.
+                    "KLEEMOD-ARM_STAGE_READER"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -701,8 +709,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # complete list, and the carry-out is an UNPOWERED hit. 135
             # characters rendered, at the ceiling: "the front enemy" and "or
             # ALL if it says so" paid for both facts.
-            "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
-            "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. ",
+            "On the [gold]Bake-Kurage[/gold], paid now; any number wait, in ",
+            "order, and the badge is their count. Next turn: front ",
+            "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too, into ",
+            "[gold]Block[/gold] still standing. ",
             # `EB-599` REVERSED WHICH SIDE THE CLAUSE NAMES. The Plan line
             # folds HER Strength at writing time and nothing of the target's,
             # because a Plan resolves next morning against whatever the body
@@ -710,7 +720,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # that arrived as 7 once that Vulnerable had expired. The clause
             # says WHEN each side is read, which is what the old two-item
             # enumeration could not carry.
-            "Your [gold]Strength[/gold] folds in as you write it; the ",
+            "Your [gold]Strength[/gold] folds as you write it; the ",
             # `EB-623` retired "morning" from every printed surface.
             "enemy's [gold]Vulnerable[/gold] counts next turn. A ",
             # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
@@ -1240,7 +1250,7 @@ def test_the_plan_tip_says_when_each_side_of_the_line_is_read():
             / "KokomiPlan.cs").read_text(encoding="utf-8")
     assert "UNPOWERED -- no Strength, no Weak" in plan
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+    assert ("Your Strength folds as you write it; the enemy's Vulnerable "
             "counts next turn.") in body
     assert "morning" not in body
 
@@ -1283,13 +1293,60 @@ def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
     `EB-623` TOOK FIVE BACK, for free: "counts at the morning" became "counts
     next turn", which is the same fact in the base game's own timing words and
     retires a word no printed surface teaches. The overage stands.
+
+    `EB-330` / `EB-563` / `EB-411` TOOK 81 MORE, in one rewrite, and the
+    exception's reason names all six findings now. The three facts were on the
+    blind-play panel and nowhere in the game: how many Plans wait (any number,
+    in order), what the badge's number IS (their count, not a cap), and where a
+    carry-out lands (the Block the enemy is still standing in from its own
+    turn). `EB-330`'s next action asked for "a clause must go"; every clause on
+    this word is a seat that read the board wrong without it, so the overage
+    went up instead and this pin is what keeps it honest.
     """
     from tools import lint_text_conventions as lint
 
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert len(body) == 211
+    assert len(body) == 292
     assert "PlanKey" in lint.EXCEPTIONS
     assert "EB-538" in lint.EXCEPTIONS["PlanKey"]
+    for row in ("EB-330", "EB-563", "EB-411"):
+        assert row in lint.EXCEPTIONS["PlanKey"]
+
+
+def test_the_plan_tip_says_any_number_wait_and_the_badge_is_their_count():
+    """`EB-563` and `EB-330`, which are one sentence and were filed as two.
+
+    THE FIND. Three r4c seats read the `Plan` badge's number as a CAPACITY --
+    the tip printed "Carries out N Plans" and nothing said N was a tally -- and
+    the r20 lane-2 seat wrote one Plan at a time for four fights before trying
+    two. `KokomiPlan` caps nothing on an unconfigured build.
+
+    THE PANEL HAS SAID IT SINCE `EB-648` (`PLAN_COUNT_NOTE`) and the word did
+    not, which is the gap both rows are: a seat reading a card in hand never
+    reaches the panel's Bake-Kurage section. Twinned here and on the pet's own
+    badge (`ProtoBakeKuragePower`), whose acceptance sentence is the box's.
+    """
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "any number wait, in order, and the badge is their count" in body
+    page = blindplay.PLAN_COUNT_NOTE
+    assert "holds any number of Plans" in page
+    assert "not a limit" in page
+
+
+def test_the_plan_tip_says_a_carry_out_lands_in_standing_block():
+    """`EB-411`. A Plating 8 Sewer Clam ate a whole Plan and no screen in the
+    game said it would (Kokomi r10 run 2 (c) 4).
+
+    THE RULE, in the turn-start order's own words: the morning resolves before
+    the player has played a card, and an enemy's Block falls at ITS turn start
+    -- so whatever it raised on its own turn is still standing, and there is no
+    move that strips it first. The panel half is `PLAN_BLOCK_NOTE`
+    (`EB-411`'s built half, 2026-09-07); this is the twin on the word, which is
+    what the row's "Next action: the tip clause" owed.
+    """
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "into Block still standing" in body
+    assert "still standing in" in blindplay.PLAN_BLOCK_NOTE
 
 
 def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
@@ -1325,3 +1382,99 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
     scout = (PROTOTYPE_DIR / "ProtoKkScoutAhead.cs")
     if scout.exists():
         assert "ForPlanTwice" not in scout.read_text(encoding="utf-8")
+
+
+# --- a Stage round-three defect: the readers' literal 0 off the board --------
+#
+# THE FIND (round three). *Let the People Rejoice* read "Deal 0 damage to ALL
+# enemies" on the Neow screen and *Ousia Surge* read "Deal 0 damage" at a card
+# reward, and two seats turned the Rare down on it. The number is right in
+# combat and right at resolution -- `EB-747`, whose tests stand below -- but
+# every reader multiplies a LIVE bar and off a board there are no bars, so a
+# CalculatedVar honestly reports nothing and the face prints the nothing.
+#
+# THE FACE CANNOT SAY IT. A description is a loc string injected once at boot
+# (`LocManager_Initialize_Patch`), with no runtime seam; the only expression
+# that would switch on the board is a nested `{CalculatedDamage:choose(0):...}`,
+# which would be the repo's first and has no headless renderer to pin. So the
+# rule goes on the HOVER TIP, the house route: `FurinaRiderTips.FanfareBody`
+# already says "out of combat the rate stands alone rather than printing a
+# misleading zero", and `KokomiRiderTips` takes the same posture.
+
+#: Each reader, the bar its number is, and the sentence it owes.
+STAGE_READERS = {
+    "proto_fs_ousia_surge": ("Lead", "ProtoFsOusiaSurge"),
+    "proto_fs_pneuma_refrain": ("Back", "ProtoFsPneumaRefrain"),
+    "proto_fs_final_bow": ("SpendLead", "ProtoFsFinalBow"),
+    "proto_fs_let_the_people_rejoice": ("SpendAll",
+                                        "ProtoFsLetThePeopleRejoice"),
+}
+
+
+def test_the_four_readers_are_the_rows_whose_number_is_a_bar():
+    """DERIVED FROM THE MULTIPLIER, never a list of ids.
+
+    `stage_reader_source` reads the C# expression `EB-747` already picked for
+    the row's `amount_formula`, so a fifth reader carries the sentence the day
+    its row exists and a row that stops reading a bar loses it the same day.
+
+    Seen to FAIL before the rider: no row on the surface attached one.
+    """
+    rows = {row["id"]: row for row in proto._rows()}
+    found = {rid: gen.stage_reader_source(row)
+             for rid, row in rows.items()
+             if gen.stage_reader_source(row)}
+    assert found == {rid: src for rid, (src, _) in STAGE_READERS.items()}
+
+
+@pytest.mark.parametrize("rid", sorted(STAGE_READERS))
+def test_every_reader_carries_the_rule_its_number_obeys(rid):
+    """The attach is committed, with the right one of the four sentences."""
+    source, cls = STAGE_READERS[rid]
+    src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
+    assert ("ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, "
+            f"ArmKeywordTips.StageReader.{source})") in src
+
+
+def test_the_readers_tip_states_each_rule_and_the_absent_stage():
+    """THE RULE ALWAYS, THE DISCLAIMER ONLY OFF THE BOARD.
+
+    In combat the face is already right and a sentence about an absent stage
+    would be false, so the tip says which bar the number is and stops. Off the
+    board it adds the one fact the screen is lying about.
+    """
+    tips = TIPS_CS.read_text(encoding="utf-8")
+    assert 'const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";' in tips
+    # The four rules, each read off its own reader's code.
+    assert "The number is the [gold]lead performer[/gold]'s " in tips
+    assert "The number is the [gold]back performer[/gold]'s " in tips
+    assert ("[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends."
+            in tips)
+    assert ("The number is every performer's [gold]Fanfare[/gold] added up and"
+            in tips)
+    # And the clause that is the whole defect, appended only off a board.
+    assert ("\" There is no stage outside combat, so the number above reads "
+            "0.\"" in tips)
+    assert "OnAStage(card) ? rule : rule + ReaderNoStage" in tips
+    # The title row is registered, or the tip renders with a raw loc key.
+    assert 'ArmKeywordTips.ReaderKey + ".title"' in MOD_CS.read_text(
+        encoding="utf-8")
+
+
+def test_the_readers_rules_are_measured_as_they_render_off_the_board():
+    """The census sees all four, at their LONGEST rendering.
+
+    A `With(...)` call whose body is built by a switch reaches
+    `lint_text_conventions.tip_rows` as an empty string -- the silence
+    `EB-343` was filed on -- so the four are parsed out by name, each with the
+    no-stage clause appended, which is the longest the tip is ever printed.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import lint_text_conventions as lint       # noqa: E402
+
+    rows = {row.ident: row.raw for row in lint.tip_rows()
+            if row.ident.startswith("ReaderKey.")}
+    assert len(rows) == 4
+    for ident, raw in rows.items():
+        assert "no stage outside combat" in raw, ident
+        assert len(lint.render(raw)) <= lint.CEILING["tip"], ident

@@ -105,6 +105,21 @@ public static class TurnEndPreviewBridge
 
     private const string KeywordTable = "card_keywords";
 
+    /// <summary>
+    /// `EB-160`. THE DOCKET HEADER'S LOC ROW.
+    ///
+    /// `shared/turn_end_docket.tscn` baked `END OF TURN` into the header
+    /// node's `text` property. Scene data is not a loc table: it reaches no
+    /// translator, and a locale switch rebuilds the tables while a string
+    /// sitting in a `.tscn` cannot follow. It was the mod's only such string.
+    ///
+    /// The scene KEEPS the words, as the fallback for a pack older than the
+    /// row: <see cref="LocalizeHeader"/> writes over the node only where the
+    /// table answers, so a missing row leaves the docket reading exactly as it
+    /// always did rather than blank or raw.
+    /// </summary>
+    private const string HeaderKey = "KLEEMOD-TURN_END_DOCKET.header";
+
     private const string HoverTitleMeta = "kleemod_hover_title";
     private const string HoverBodyMeta = "kleemod_hover_body";
     private const string HoverWiredMeta = "kleemod_hover_wired";
@@ -209,10 +224,49 @@ public static class TurnEndPreviewBridge
         anim.Play($"fire{index + 1}");
     }
 
+    /// <summary>
+    /// Put the localized header on the docket, or leave the scene's own words
+    /// where it is (`EB-160`).
+    ///
+    /// EVERY EARLY RETURN IS THE FALLBACK, not a failure: no header node is a
+    /// pack older than the docket, and an empty or key-shaped answer is a
+    /// table with no row for us -- a build whose pck predates the row, or a
+    /// locale that has not been given one. In each case the scene's baked
+    /// `END OF TURN` is exactly right and is left alone. The only thing this
+    /// method may never do is throw: it runs from `RefreshDisplay`, which runs
+    /// inside the turn loop, which is `MeterCostBadge.Paint`'s own rule.
+    /// </summary>
+    private static void LocalizeHeader(Node2D display)
+    {
+        try
+        {
+            if (display.GetNodeOrNull<Label>("%Header") is not { } header)
+            {
+                return;
+            }
+
+            var text = new LocString(KeywordTable, HeaderKey)
+                .GetFormattedText();
+            if (string.IsNullOrWhiteSpace(text) || text.Contains(HeaderKey))
+            {
+                return;
+            }
+
+            header.Text = text;
+        }
+        catch (Exception)
+        {
+            // A torn-down node, or a table read on a half-built LocManager.
+            // The header keeps the scene's words, which say the same thing.
+        }
+    }
+
     private static void RefreshDisplay(
         Node2D display, Player player, Creature creature)
     {
         var standing = TurnEndAttribution.Standing(creature);
+
+        LocalizeHeader(display);
 
         // The whole docket disappears when the creature's end of turn does
         // nothing. An empty plate reading "END OF TURN" over every creature in

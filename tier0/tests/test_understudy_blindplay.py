@@ -35,7 +35,8 @@ import pytest
 from tier0 import constants as C
 from tier0.tests.conftest import seam_files
 from understudy import (blindplay, blindplay_board, blindplay_notes,
-                        blindplay_shape, embark, qa_packet, soak)
+                        blindplay_render, blindplay_shape, embark, qa_packet,
+                        soak)
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -1334,22 +1335,29 @@ def test_a_card_reward_says_which_relic_has_rewritten_its_alternative():
     # It says what the feed has and does not claim what the button is.
     assert "never what that button says or does" in page
     assert "cannot tell you whether that is a plain skip" in page
-    # And the verbs are unchanged: there is no `sacrifice` to offer.
+    # And on a feed with no `alternatives` key the verbs are unchanged: there
+    # is no `sacrifice` to offer and `skip` posts exactly what it always did.
     assert "sacrifice`" not in page
     assert blindplay.act(paels_wing_reward_state(), "skip")["post"] == {
         "action": "skip_card_reward"}
 
 
-def test_the_wire_carries_no_sacrifice_control_to_offer():
-    """The reason this row is a page line and not a verb, asserted against the
-    vendored builder rather than against a memory of it."""
+def test_the_wire_carries_the_alternative_buttons_words():
+    """`EB-374`, the wire half, asserted against the vendored builder rather
+    than against a memory of it.
+
+    THIS TEST USED TO PIN THE OPPOSITE. While the words were not on the feed it
+    read `set(...) == {"cards", "can_skip"}` and `"sacrifice" not in builder`,
+    which was the reason the row was a page caveat and not a verb. The bridge
+    half is built, so the pin is inverted rather than deleted: the alternatives
+    key is published beside `can_skip`, and `can_skip` itself is untouched."""
     builder = (REPO / "vendor" / "STS2_MCP" / "McpMod.StateBuilder.cs"
                ).read_text(encoding="utf-8")
     head = builder.index("BuildCardRewardState(NCardRewardSelectionScreen")
     body = builder[head:builder.index("private static", head + 10)]
     assert 'state["can_skip"] = altButtons.Count > 0;' in body
-    assert set(re.findall(r'state\["(\w+)"\]', body)) == {"cards", "can_skip"}
-    assert "sacrifice" not in builder.casefold()
+    assert "GitsAlternativesKey" in body
+    assert "GitsAlternativeName" in body
 
 
 def test_a_run_without_the_relic_reads_exactly_as_before():
@@ -3852,7 +3860,7 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     diverge and the keyword must not be emptied into the panel."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
-    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+    assert ("Your Strength folds as you write it; the enemy's Vulnerable "
             "counts next turn.") in plan
 
 
@@ -5178,7 +5186,7 @@ def test_the_plan_word_says_when_each_side_of_the_line_is_read():
     """
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
-    assert "Your Strength folds in as you write it" in plan
+    assert "Your Strength folds as you write it" in plan
     assert "the enemy's Vulnerable counts next turn" in plan
     assert "Weak" not in plan
 
@@ -6544,8 +6552,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-599`: and the modifier clause became a clause about WHEN each
         # side is read -- her Strength at writing time, the target's
         # Vulnerable at the morning.
-        "Plan": [", paid now; next turn: front ",
-                 " folds in as you write it; the ",
+        "Plan": [", paid now; any number wait, in ",
+                 "order, and the badge is their count. Next turn: front ",
+                 " too, into ",
+                 " still standing. ",
+                 " folds as you write it; the ",
                  " counts next turn. A ",
                  "carry-out is not a hit: no when-hit power fires."],
         # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
@@ -7516,6 +7527,42 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
     for word, body in blindplay.REACTION_KEYWORDS.items():
         assert "[" not in body and "]" not in body, word
         assert not qa_packet.leaks(body), word
+
+
+def test_every_reaction_name_has_a_glossary_row():
+    """`EB-410`'s last link, from the page's side.
+
+    The row's acceptance is "every reaction that fires is named", and `EB-681`
+    met it: `ReactionEffects.Resolve` is the single site a reaction resolves
+    in, it writes a `ReactionLog` row before it switches on the kind, and the
+    page prints a named row per beat with its source. The half nothing pinned
+    is that the NAME a beat arrives under is a word this page can define --
+    `ReactionLog.PrintedName` falls through to the enum's own `ToString()`, so
+    a ninth reaction would reach a seat as a bare identifier with no glossary
+    row behind it.
+
+    Read off the two C# sources rather than listed here, `EB-465`'s discipline
+    one table over: a member added to the enum fails this the day it lands,
+    and a list would simply not mention it. The C# twin is
+    `ReactionLogTests.Every_reaction_the_table_can_produce_has_a_printed_name`.
+    """
+    table = (REPO / "klee-mod" / "KleeCode" / "Elements"
+             / "ReactionTable.cs").read_text(encoding="utf-8")
+    body = re.search(r"enum Reaction\s*\{(.*?)\}", table, re.S)
+    assert body, "the Reaction enum moved; this pin reads it by name"
+    members = [m for m in re.findall(r"^\s*(\w+)\s*[,=]", body.group(1), re.M)
+               if m != "None"]
+    assert len(members) == 8, members
+
+    # The two the enum spells differently from every player surface, off the
+    # map that exists for exactly that reason.
+    log = (REPO / "klee-mod" / "KleeCode" / "Powers"
+           / "ReactionLog.cs").read_text(encoding="utf-8")
+    printed = dict(re.findall(r"Reaction\.(\w+)\s*=>\s*\"([^\"]+)\"", log))
+
+    for member in members:
+        word = printed.get(member, member)
+        assert word in blindplay.REACTION_KEYWORDS, (member, word)
 
 
 def galvanic_state() -> dict:
@@ -10891,8 +10938,9 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
 #: without the cap clause `KokomiPlan.CapSentence` appends. The uncapped half
 #: is `ProtoBakeKuragePower.Localization` verbatim; the capped half is what a
 #: build launched with `GITS_KOKOMI_PLAN_CAP=2` prints.
-PET_FACE = ("Enemies cannot target it. Lasts all combat. Play a Plan card on "
-            "it: it carries out next turn, or at this turn's end if Dusk.")
+PET_FACE = ("Enemies cannot target it, all combat. Holds any number of "
+            "Plans; each carries out next turn, or at this turn's end if "
+            "Dusk.")
 PET_FACE_CAPPED = (PET_FACE
                    + " Carries out at most 2 at the start of your turn;"
                      " the rest wait in order.")
@@ -11650,6 +11698,71 @@ def test_a_bomb_gap_with_no_reactable_aura_names_no_reaction():
     assert "and Pyro into Pyro is" not in same
 
 
+# --- `EB-755`: WHICH OF TWO BOMBS PLACED THIS TURN GOES OFF FIRST -----------
+
+
+def _real_bomb_board(headline: int, sizes: str, aura: str | None = None,
+                     tail: str = ", growing each turn.") -> dict:
+    """The badge as `ProtoBombPower.Face` REALLY spells it.
+
+    `_bomb_board` above spells the clause `Bomb sizes here: 4`, and the live
+    face has read `Bomb sizes here, oldest first: ...` since `EB-432` put the
+    order on the badge. That is the fixture drift `EB-755` found: the page's
+    own pattern demanded the colon straight after `here`, so the `EB-605` note
+    matched nothing in the real game while its test went on passing.
+    """
+    state = copy.deepcopy(combat_state())
+    rows = [{"title": "Bomb", "name": "Bomb", "amount": headline,
+             "type": "Debuff",
+             "description": (f"Set off here deals {headline} Pyro damage. "
+                             f"Bomb sizes here, oldest first: {sizes}{tail}")}]
+    if aura:
+        rows.append({"title": f"{aura} Aura", "name": f"{aura} Aura",
+                     "amount": 2, "type": "Buff",
+                     "description": f"This enemy is wearing {aura}."})
+    body = dict(state["battle"]["enemies"][0], status=rows)
+    state["battle"] = dict(state["battle"], enemies=[body])
+    return state
+
+
+def test_the_sizes_clause_is_read_through_its_oldest_first_qualifier():
+    """`EB-755`, the half nobody was watching. The note is gated on the sizes
+    clause parsing, and on the live badge it did not parse at all.
+
+    Seen to FAIL: with the pattern demanding `here:`, this board printed no
+    note, because the real badge says `here, oldest first:`.
+    """
+    page = blindplay.observe(_real_bomb_board(6, "4", aura="Hydro"))
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=6, total=4).rstrip("*") in page
+    assert blindplay.BOMB_REACTION_CLAUSE.format(
+        aura="Hydro", element="Pyro", reaction="Vaporize") in page
+
+
+def test_two_bombs_placed_in_one_turn_print_under_their_set_off_ordinals():
+    """`EB-755`'s acceptance, from the page's side. Two Bombs placed in the
+    same turn have no age a reader can see, and only the leading charge takes
+    the aura -- so the list names its own positions (the D default: set-off
+    order with ordinals) and the page prints them unchanged.
+
+    The page must also still read the SIZES through them: `1st 12` is one
+    charge of twelve, never a 1 and a 12.
+    """
+    page = blindplay.observe(
+        _real_bomb_board(30, "1st 12 / 2nd 8", aura="Hydro"))
+    assert "1st 12 / 2nd 8" in page
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=30, total=20).rstrip("*") in page
+
+
+def test_the_ordinals_are_not_mistaken_for_charges_beside_a_mine_count():
+    """The clause a pile with Mines prints carries a SECOND number after its
+    comma (`including 2 Mines`), and the ordinals must not drag it in: the
+    sizes run to the clause's own comma and no further."""
+    assert blindplay_render._bomb_charge_sizes("1st 12 / 2nd 8 / 3rd 5") == [12, 8, 5]
+    sizes = blindplay_render._BOMB_SIZES.search(
+        "Bomb sizes here, oldest first: 1st 12 / 2nd 8, including 2 Mines.")
+    assert blindplay_render._bomb_charge_sizes(sizes.group(1)) == [12, 8]
+
+
 # --- `EB-585`: THE ARRIVAL THAT PERFORMED AND WAS NOT FILED -----------------
 
 
@@ -12288,3 +12401,90 @@ def test_a_settled_act_break_still_prints_its_own_note():
     page = blindplay.observe(second)
     assert "the act changed" in page
     assert "nothing here says which step did what" in page
+
+
+# --- a Stage round-three defect: the readers' 0 on a reward screen -----------
+
+def _stage_reader_reward_state() -> dict:
+    """THE OFFER THE ROUND-THREE SEATS TURNED DOWN.
+
+    A CARD REWARD, which is the screen the defect was filed on: the four Stage
+    readers multiply a LIVE bar, and a reward screen has no board, so the wire
+    sends the face with a literal 0 in it. `keywords` is the card's own hover
+    tips resolved by the game (`BuildCardInfo`, `McpMod.StateBuilder.cs:1452`,
+    the same field `BuildCardRewardState` sends for every offered card), and
+    that is the channel the rule arrives on -- rendered here as the mod
+    renders it off a board, rule plus the no-stage clause.
+    """
+    return {"state_type": "card_reward",
+            "player": {"character": "Furina", "hp": 61, "max_hp": 78},
+            "card_reward": {"can_skip": True, "cards": [
+                {"name": "Let the People Rejoice", "cost": "2",
+                 "type": "Attack",
+                 "description": "Spend all Fanfare on stage. Deal 0 damage "
+                                "to ALL enemies. Every performer takes a Bow, "
+                                "then returns at 1. Exhaust.",
+                 "keywords": [
+                     {"name": "What this number is",
+                      "description": "The number is every performer's Fanfare "
+                                     "added up and spent. There is no stage "
+                                     "outside combat, so the number above "
+                                     "reads 0."}]},
+                {"name": "Ousia Surge", "cost": "1", "type": "Attack",
+                 "description": "Deal 0 damage, the lead performer's Fanfare.",
+                 "keywords": [
+                     {"name": "What this number is",
+                      "description": "The number is the lead performer's "
+                                     "Fanfare. There is no stage outside "
+                                     "combat, so the number above reads "
+                                     "0."}]}]}}
+
+
+def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
+    """A STAGE ROUND-THREE DEFECT, THE PAGE'S HALF.
+
+    THE FIND (round three). "Deal 0 damage to ALL enemies" on the Rare at
+    Neow, "Deal 0 damage" on *Ousia Surge* at a reward; two seats turned the
+    Rare down on it. The face cannot say otherwise -- a description is a loc
+    string injected once at boot -- so the mod puts the rule on a hover tip,
+    and the page's job is to print it where the 0 is.
+
+    NOT A GLOSSARY ROW. The sentence is a RIDER about THIS card's number, so
+    it travels on the card's own `keywords` and renders under the face, the
+    way `Element overridden` does -- which is the channel this pins, because
+    a rule printed on a screen the reader never reaches is no fix at all.
+    """
+    page = blindplay.observe(_stage_reader_reward_state())
+
+    # The face the game prints, zero and all, unchanged.
+    assert "Deal 0 damage to ALL enemies." in page
+    # And directly under it, on both offers, what that number actually is.
+    assert ("    *What this number is* — The number is every performer's "
+            "Fanfare added up and spent. There is no stage outside combat, "
+            "so the number above reads 0.") in page
+    assert ("    *What this number is* — The number is the lead performer's "
+            "Fanfare. There is no stage outside combat, so the number above "
+            "reads 0.") in page
+
+
+def test_the_reader_fixture_is_the_mods_own_sentence():
+    """Held in step from THIS side, the way the Shatter row is: the fixture
+    above claims what the game sends, so it may not drift from the C# that
+    sends it.
+
+    THE COMPARISON IS THE RENDERED SENTENCE. The wire resolves a hover tip to
+    the text the game paints, so the markup goes and the source's own
+    line-broken concatenation is joined before the match.
+    """
+    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+           / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    plain = re.sub(r'"\s*\+\s*"', "", src)
+    plain = plain.replace("[gold]", "").replace("[/gold]", "")
+    for sentence in (
+            "The number is every performer's Fanfare added up and spent.",
+            "The number is the lead performer's Fanfare.",
+            "The number is the back performer's Fanfare.",
+            "The number is the lead performer's Fanfare, which this Bow "
+            "spends.",
+            " There is no stage outside combat, so the number above reads 0."):
+        assert sentence in plain, sentence

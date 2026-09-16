@@ -71,7 +71,10 @@ public static partial class McpMod
             "shop_purchase" => ExecuteShopPurchase(player, data),
             "claim_reward" => ExecuteClaimReward(data),
             "select_card_reward" => ExecuteSelectCardReward(data),
-            "skip_card_reward" => ExecuteSkipCardReward(),
+            // GItS LOCAL EDIT (`EB-374`): the verb takes an optional
+            // `alternative_index` now, so the screen's second button is
+            // reachable. No argument is the plain skip, exactly as before.
+            "skip_card_reward" => ExecuteSkipCardReward(data),
             "proceed" => ExecuteProceed(),
             "select_card" => ExecuteSelectCard(data),
             "confirm_selection" => ExecuteConfirmSelection(),
@@ -596,7 +599,26 @@ public static partial class McpMod
         };
     }
 
-    private static Dictionary<string, object?> ExecuteSkipCardReward()
+    // GItS LOCAL EDIT (`EB-374`). AND WHICH OF THE ALTERNATIVES TO PRESS.
+    //
+    // This pressed `altButtons[0]` unconditionally, so a screen carrying two
+    // alternatives -- Pael's Wing's sacrifice beside the plain skip (Klee r9)
+    // -- could only ever be told to press the first, and the page half naming
+    // both would have been lying about what it could reach. The index is
+    // OPTIONAL and defaults to 0, so every existing caller
+    // (`understudy.blindplay_grammar._skip`, `policy_v0`, `policy_v1`,
+    // `soak_screens`) sends exactly what it always sent and gets exactly what
+    // it always got. `BuildCardRewardState` publishes the words beside each
+    // index under `alternatives`.
+    // The no-argument overload upstream's multiplayer dispatch still calls
+    // (`McpMod.MultiplayerActions.cs`, a carried file this edit does not
+    // touch). A plain skip is the alternative at index 0, which is what that
+    // call has always pressed.
+    private static Dictionary<string, object?> ExecuteSkipCardReward() =>
+        ExecuteSkipCardReward(new Dictionary<string, JsonElement>());
+
+    private static Dictionary<string, object?> ExecuteSkipCardReward(
+        Dictionary<string, JsonElement> data)
     {
         var overlay = NOverlayStack.Instance?.Peek();
         if (overlay is not NCardRewardSelectionScreen cardScreen)
@@ -606,12 +628,34 @@ public static partial class McpMod
         if (altButtons.Count == 0)
             return Error("No skip option available on this card reward");
 
-        altButtons[0].ForceClick();
+        int index = 0;
+        if (data.TryGetValue("alternative_index", out var altElem))
+        {
+            try { index = altElem.GetInt32(); }
+            catch (System.Exception) { return Error("'alternative_index' is not a number"); }
+        }
+        if (index < 0 || index >= altButtons.Count)
+            return Error($"Alternative index {index} out of range "
+                         + $"({altButtons.Count} on this screen)");
+
+        var button = altButtons[index];
+        string? words = GitsAlternativeName(button, () =>
+        {
+            var label = button.GetNodeOrNull("Label");
+            if (label == null) return null;
+            var text = label.Get("text");
+            return text.VariantType != Godot.Variant.Type.Nil
+                ? StripRichTextTags(text.AsString())
+                : null;
+        });
+        button.ForceClick();
 
         return new Dictionary<string, object?>
         {
             ["status"] = "ok",
-            ["message"] = "Skipping card reward"
+            ["message"] = words != null
+                ? $"Taking the card reward's alternative: {words}"
+                : "Skipping card reward"
         };
     }
 
@@ -702,6 +746,38 @@ public static partial class McpMod
                 return Error("Card grid not found in selection screen");
 
             var holders = FindAllSortedByPosition<NGridCardHolder>(gridScreen);
+
+            // GItS LOCAL EDIT (`EB-350`). THE ROWS BELOW THE FOLD ARE
+            // REACHABLE NOW.
+            //
+            // `BuildCardSelectState` sends every card in the grid rather than
+            // the ~25 that a viewport's worth of holders happens to cover, so
+            // an index past the last holder is no longer out of range -- it is
+            // a row nothing has scrolled to. It cannot be pressed through a
+            // holder (there is none), so it goes through the screen's own
+            // `OnCardClicked(CardModel)`, which is what the grid's
+            // `HolderPressed` signal ends up calling anyway.
+            //
+            // THE ON-SCREEN PATH IS UNTOUCHED, deliberately: where a holder
+            // exists this presses the holder exactly as it always has, so
+            // nothing about the rows a seat could already click changes.
+            var gridCards = GitsGridCards(gridScreen);
+            if (gridCards != null && index >= holders.Count
+                && index >= 0 && index < gridCards.Count)
+            {
+                if (gridCards[index] is not MegaCrit.Sts2.Core.Models.CardModel offScreen)
+                    return Error($"Card index {index} is not a card");
+                if (!GitsClickGridCard(gridScreen, offScreen))
+                    return Error($"Card index {index} is in the grid but off "
+                                 + "screen, and this build could not press it");
+                return new Dictionary<string, object?>
+                {
+                    ["status"] = "ok",
+                    ["message"] = "Toggling card selection: "
+                        + (SafeGetText(() => offScreen.Title) ?? "unknown")
+                };
+            }
+
             if (index < 0 || index >= holders.Count)
                 return Error($"Card index {index} out of range ({holders.Count} cards available)");
 

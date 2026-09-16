@@ -1,4 +1,4 @@
-"""EB-118 sec.5.4: the modal surface across the two engines.
+﻿"""EB-118 sec.5.4: the modal surface across the two engines.
 
 Three questions this file answers and the modal behaviour file does not:
 what the GENERATOR emits for a modal row, what it REFUSES, and whether the
@@ -62,8 +62,10 @@ def test_the_body_routes_through_the_games_own_choice_surface():
     # `ModalChoicePinTests` is what says so structurally.
     assert ("ModalChoice.SelectAffordableMode(choiceContext, Owner, "
             "modeOptions, ModePrices)") in src
-    assert "ModalChoice.CreateOption<ModalProbeModeA>(Owner)" in src
-    assert "ModalChoice.CreateOption<ModalProbeModeB>(Owner)" in src
+    # Round three (Furina, the Stage): `(Owner, this)`. The option face carries
+    # the parent's vars now, so it has to carry the parent's upgrade state too.
+    assert "ModalChoice.CreateMatchingOption<ModalProbeModeA>(Owner, this)" in src
+    assert "ModalChoice.CreateMatchingOption<ModalProbeModeB>(Owner, this)" in src
     assert "if (modeIndex == 0)" in src
     # One class per mode, in the card's own file, off the shared base.
     assert "public sealed class ModalProbeModeA : ModalOptionCard" in src
@@ -324,8 +326,8 @@ def test_the_prototypes_committed_cs_carries_both_ruled_modes():
     src = _deep_breath_cs()
     assert ("ModalChoice.SelectAffordableMode(choiceContext, Owner, "
             "modeOptions, ModePrices)") in src
-    assert "ModalChoice.CreateOption<DeepBreathModeA>(Owner)" in src
-    assert "ModalChoice.CreateOption<DeepBreathModeB>(Owner)" in src
+    assert "ModalChoice.CreateMatchingOption<DeepBreathModeA>(Owner, this)" in src
+    assert "ModalChoice.CreateMatchingOption<DeepBreathModeB>(Owner, this)" in src
     assert "public sealed class DeepBreathModeA : ModalOptionCard" in src
     assert "public sealed class DeepBreathModeB : ModalOptionCard" in src
 

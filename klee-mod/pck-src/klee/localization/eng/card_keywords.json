@@ -34,5 +34,6 @@
   "KLEEMOD-SWIRL_PREVIEW.title": "Reaction preview: Swirl",
   "KLEEMOD-SWIRL_PREVIEW.description": "[gold]Anemo[/gold] meets an aura: the aura is consumed and copied onto ALL enemies.",
   "KLEEMOD-CRYSTALLIZE_PREVIEW.title": "Reaction preview: Crystallize",
-  "KLEEMOD-CRYSTALLIZE_PREVIEW.description": "[gold]Geo[/gold] meets an aura: [blue]4[/blue] [gold]Block[/gold], and the aura is consumed -- nothing is left to react with."
+  "KLEEMOD-CRYSTALLIZE_PREVIEW.description": "[gold]Geo[/gold] meets an aura: [blue]4[/blue] [gold]Block[/gold], and the aura is consumed -- nothing is left to react with.",
+  "KLEEMOD-TURN_END_DOCKET.header": "END OF TURN"
 }

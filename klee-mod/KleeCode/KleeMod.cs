@@ -338,6 +338,24 @@ public static class KleeMod
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
                         $"[gold]Geo[/gold] meets an aura: [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold], and the aura is consumed -- nothing is left to react with.",
 
+                    // `EB-160`. THE ONE PLAYER-FACING STRING BAKED INTO A
+                    // SCENE. `shared/turn_end_docket.tscn`'s header node
+                    // carried `text = "END OF TURN"` as scene data, which is
+                    // in no loc table, reaches no translator and cannot
+                    // follow a locale switch. It is a UI LABEL and not a
+                    // keyword, so it takes a `.header` suffix rather than
+                    // `.title`; it lives in this table for the reason the
+                    // rider titles below do, which is that this is the mod's
+                    // one merge point and a code-only rebuild must never show
+                    // a raw key. A plain literal key, so `gen_keyword_loc.py`
+                    // derives it into the pck copy the game merges over ours.
+                    //
+                    // The scene keeps the words as its FALLBACK: a docket
+                    // built from a pack older than this row still reads
+                    // correctly, because `TurnEndPreviewBridge` overwrites the
+                    // node's text only where the row resolves to something.
+                    ["KLEEMOD-TURN_END_DOCKET.header"] = "END OF TURN",
+
                     // Legibility sprint L-C: titles for the re-homed rider
                     // tips (FurinaRiderTips). These are NOT card keywords --
                     // they are hover-tip titles, which need a LocString --
@@ -553,6 +571,13 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
                         "Back performer",
                     [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
+                    // A Stage round-three defect, and a RIDER rather than a
+                    // keyword: the four readers multiply a live bar, so off a
+                    // board their faces print a literal 0. The title names
+                    // what the reader is looking at rather than a word, the
+                    // way `PlanTwiceKey`'s does.
+                    [Cards.ArmKeywordTips.ReaderKey + ".title"] =
+                        "What this number is",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

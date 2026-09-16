@@ -260,7 +260,7 @@
 - {id: proto_ko_sizzle, name: "Sizzle", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "[gold]Set off[/gold]. Deal 6 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal 6 additional damage.",
+   description: "[gold]Set off[/gold]. Deal 6 damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
    effects: [{op: set_off, target: enemy, damage: 6},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: damage, amount: 6, target: enemy}]}]}
@@ -327,7 +327,7 @@
 - {id: proto_ko_run_away, name: "Run Away!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 3 [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 4 additional [gold]Block[/gold].",
+   description: "Gain 3 [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 3},
              {op: conditional, if: bomb_went_off_this_turn,
               then: [{op: block, amount: 4}]}]}
@@ -577,7 +577,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
-   description: "Gain 6 [gold]Block[/gold]. If you are below half HP, gain 4 additional [gold]Block[/gold].",
+   description: "Gain 6 [gold]Block[/gold]. If you are below half HP, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 6},
              {op: conditional, if: hp_pct_below_50,
               then: [{op: block, amount: 4}]}]}
@@ -1409,7 +1409,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain 4 additional [gold]Block[/gold].",
+   description: "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 4},
              {op: conditional, if: hp_lost_this_turn,
               then: [{op: block, amount: 4}]}]}
@@ -1418,7 +1418,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 8 damage. If you are below half HP, deal 5 additional damage.",
+   description: "Deal 8 damage. If you are below half HP, deal {BranchDamage:diff()} additional damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: conditional, if: hp_pct_below_50,
               then: [{op: damage, amount: 5, target: enemy, applies_element: true}]}]}

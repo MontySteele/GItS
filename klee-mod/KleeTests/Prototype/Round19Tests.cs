@@ -95,9 +95,16 @@ public class Round19Tests
         //
         // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
         // "counts next turn", the same fact in the base game's timing words.
+        //
+        // `EB-330` / `EB-563` / `EB-411` PUT 81 MORE ON, in one rewrite: how
+        // many Plans wait and what the badge's number is, and where a
+        // carry-out lands. All three were on the blind-play panel and nowhere
+        // in the game, and `EB-330`'s "a clause must go" is answered the other
+        // way round -- every clause on this word is a seat that read the board
+        // wrong without it.
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(211, rendered.Length);
+        Assert.Equal(292, rendered.Length);
         Assert.EndsWith("A carry-out is not a hit: no when-hit power fires.",
                         rendered);
     }

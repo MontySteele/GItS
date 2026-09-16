@@ -93,8 +93,8 @@ public sealed class ProtoSparkModeBombs : CustomCardModel, IModalCard
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoSparkModeBombsModeA>(Owner),
-            ModalChoice.CreateOption<ProtoSparkModeBombsModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoSparkModeBombsModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoSparkModeBombsModeB>(Owner, this),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, ModePrices);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Place 1 [gold]Bomb[/gold] dealing 5", "Spend 3 [gold]Sparks[/gold]: place 3 [gold]Bombs[/gold] dealing 5" }[modeIndex]);

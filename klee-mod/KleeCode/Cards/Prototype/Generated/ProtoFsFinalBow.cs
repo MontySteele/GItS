@@ -41,7 +41,7 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendLead), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("take_your_bow");
 

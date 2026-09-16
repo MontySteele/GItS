@@ -167,7 +167,12 @@ public class Round13Tests
         // order the aura clause is about. Slash-separated: the sentence around
         // the hole is comma-separated, and a comma list inside it would hide
         // where the pile stops.
-        Assert.Equal("5 / 8 / 20",
+        //
+        // `EB-755` PUT THE ORDINALS ON. "Oldest first" states the rule and the
+        // list states the order, and for two charges placed in the SAME turn
+        // nothing joined the two -- so each position names itself. The order
+        // this test is about has not moved; it is now printed twice over.
+        Assert.Equal("1st 5 / 2nd 8 / 3rd 20",
                      pile.DynamicVars["Charges"].ToString());
     }
 
@@ -184,7 +189,7 @@ public class Round13Tests
             new ProtoBombs.Charge(4, IsMine: true));
         pile.AddCharge(new ProtoBombPower.ProtoCharge(8, false, 0));
 
-        Assert.Equal("4 / 8", pile.DynamicVars["Charges"].ToString());
+        Assert.Equal("1st 4 / 2nd 8", pile.DynamicVars["Charges"].ToString());
 
         pile.TakeMines();
 
