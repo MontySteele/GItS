@@ -235,6 +235,21 @@ public static class FurinaStageRoster
     /// the question: <see cref="SwapOfferedRows"/> reaches <c>ModelDb</c> for
     /// the fourteen it concatenates on, which the test harness has no
     /// registration for (KleeTests/README.md), and this half needs none.
+    ///
+    /// EXCEPT AN ANCIENT ROW, WHICH IS NEVER DROPPED (`EB-363`). Furina's one
+    /// Ancient, <i>All the World's a Stage</i>, prints a retired word and the
+    /// filter was taking it -- so under this arm her pool held no Ancient card
+    /// at all, and that is `EB-284`'s defect exactly: `DustyTome.SetupForPlayer`
+    /// draws a random <c>CardRarity.Ancient</c> card from <c>GetUnlockedCards</c>
+    /// and nothing else in the game does, so an empty Ancient cell makes
+    /// <c>NextItem(...).Id</c> throw inside <c>Darv.GenerateInitialOptions</c>
+    /// and the run ends at the act-two door. The whole argument is in
+    /// <c>RosterAncientCards</c>, and the trade it names is the one taken here:
+    /// an Ancient is reachable through Dusty Tome and through NOTHING else --
+    /// reward rolls, transforms and shop inventory all filter the rarity
+    /// upstream -- so keeping it costs the arm no offer it was trying to
+    /// protect, and the alternative costs the run. A row printing a retired
+    /// word in a place the player reaches once is the smaller defect.
     /// </summary>
     public static IEnumerable<CardModel> DropRetiredRows(
         IEnumerable<CardModel> offered)
@@ -243,8 +258,14 @@ public static class FurinaStageRoster
         var dropped = 0;
         foreach (var card in offered)
         {
-            if (ReadsARetiredSystem(card)) dropped++;
-            else kept.Add(card);
+            if (card.Rarity != CardRarity.Ancient && ReadsARetiredSystem(card))
+            {
+                dropped++;
+            }
+            else
+            {
+                kept.Add(card);
+            }
         }
         LastRetiredCount = dropped;
         MegaCrit.Sts2.Core.Logging.Log.Info(
