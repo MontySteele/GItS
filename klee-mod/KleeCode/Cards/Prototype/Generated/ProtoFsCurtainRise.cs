@@ -78,8 +78,8 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoFsCurtainRiseModeA>(Owner),
-            ModalChoice.CreateOption<ProtoFsCurtainRiseModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoFsCurtainRiseModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoFsCurtainRiseModeB>(Owner, this),
         };
         var modeRules = new ModeRequirement?[]
         {
@@ -127,8 +127,21 @@ public sealed class ProtoFsCurtainRiseModeA : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deal 7 damage"),
-        ("description", "Deal 7 damage"),
+        ("description", "Deal {PlainDamage:diff()} damage"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+    }
 }
 
 /// <summary>Mode 1 of proto_fs_curtain_rise. A face for the choose-a-card screen;
@@ -141,6 +154,19 @@ public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "[gold]Spend[/gold] 3: deal 13 instead"),
-        ("description", "[gold]Spend[/gold] 3: deal 13 instead"),
+        ("description", "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+    }
 }

@@ -78,8 +78,8 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoFsTidalFlourishModeA>(Owner),
-            ModalChoice.CreateOption<ProtoFsTidalFlourishModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoFsTidalFlourishModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoFsTidalFlourishModeB>(Owner, this),
         };
         var modeRules = new ModeRequirement?[]
         {
@@ -128,8 +128,21 @@ public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deal 5 damage to ALL enemies"),
-        ("description", "Deal 5 damage to ALL enemies"),
+        ("description", "Deal {PlainDamage:diff()} damage to ALL enemies"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new DamageVar("PlainDamage", 5m, ValueProp.Move),
+            new DamageVar("BranchDamage", 9m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+    }
 }
 
 /// <summary>Mode 1 of proto_fs_tidal_flourish. A face for the choose-a-card screen;
@@ -142,6 +155,19 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "[gold]Spend[/gold] 2: deal 9 instead"),
-        ("description", "[gold]Spend[/gold] 2: deal 9 instead"),
+        ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new DamageVar("PlainDamage", 5m, ValueProp.Move),
+            new DamageVar("BranchDamage", 9m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(3m);
+    }
 }
