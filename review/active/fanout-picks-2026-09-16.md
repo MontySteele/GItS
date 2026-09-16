@@ -69,7 +69,7 @@ semicolons are measured, Fanfare's meter at 234 and Salon Member at 397
 pays it nothing (`EB-798`, E default: planned-only Block is not enchantable,
 you veto); the four Furina power badges draw card portraits shrunk into badge
 slots, an art bill (`EB-65`); the engine's own death wait is still skipped
-for a spine-less body (`EB-805`); the bridge does not build in a bare
+for a spine-less body (`EB-797`); the bridge does not build in a bare
 worktree without the game-dir flag (`EB-799`); the two Kaeya rows wear each
 other's named art (`EB-803`); the second capture path may carry the same clip
 and nothing refuses an incomplete frame (`EB-802`); the five arm properties
