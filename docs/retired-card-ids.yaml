@@ -1,0 +1,80 @@
+# RETIRED CARD IDS -- the tombstone register (EB-790).
+#
+# A progress save keeps a `CardStats` row and a `DiscoveredCards` entry for
+# every card the profile has ever seen, BY ID, and validates each one with
+# `ModelDb.GetByIdOrNull<CardModel>`. A miss is a non-fatal `ValidationError`
+# in godot.log, twice per boot, for the life of the profile -- and this
+# project never edits the owner's save. `live-looks-8c` (2026-09-16) found
+# `KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED` warning on every launch, the Furina
+# reframe id `EB-726` deleted.
+#
+# Each row below becomes ONE HIDDEN ALIAS: a `RetiredCardAlias` claiming the
+# id and nothing else -- in `ModelDb` so the lookup resolves, in no pool so
+# nothing can offer or grant it, out of the card library, carrying no rule.
+# `klee-mod/KleeCode/Cards/Retired/RetiredCardAlias.cs` is the full argument
+# and the four properties it rests on; `tools/gen_retired_card_aliases.py`
+# emits the classes and `tools/lint_retired_card_ids.py` is the gate.
+#
+# ROWS ARRIVE AUTOMATICALLY. `gen_klee_cards._write_plan` deletes a generated
+# class and appends its id here in the same breath, so the next retirement is
+# covered without anyone remembering. The seed was the union of two sweeps
+# taken 2026-09-16 -- every `.cs` git has seen deleted from a generated card
+# directory with no live class re-using the name, and every `KLEEMOD-` id any
+# archived godot.log reports as unknown. `id` is the exact `ModelId.Entry` a
+# save holds; `owner` picks the pool `Pool` answers with, and is cosmetic.
+
+retired:
+  - {id: KLEEMOD-BOX_SEATS,                          owner: furina, left: "Fanfare rework, redesigned away"}
+  - {id: KLEEMOD-PROTO_CHARGE_MODE_GUARD,            owner: kokomi, left: "Kokomi slice 2 Charge arms retired (M67, R227)"}
+  - {id: KLEEMOD-PROTO_CHARGE_MODE_GUARD_MODE_A,     owner: kokomi, left: "mode face of proto_charge_mode_guard"}
+  - {id: KLEEMOD-PROTO_CHARGE_MODE_GUARD_MODE_B,     owner: kokomi, left: "mode face of proto_charge_mode_guard"}
+  - {id: KLEEMOD-PROTO_CHARGE_MUSTER_PRICE,          owner: kokomi, left: "Kokomi slice 2 Charge arms retired (M67, R227)"}
+  - {id: KLEEMOD-PROTO_CHARGE_SPEND_STRIKE,          owner: kokomi, left: "Kokomi slice 2 Charge arms retired (M67, R227)"}
+  - {id: KLEEMOD-PROTO_CHARGE_THRESHOLD_STRIKE,      owner: kokomi, left: "Kokomi slice 2 Charge arms retired (M67, R227)"}
+  - {id: KLEEMOD-PROTO_FR_ARIA_OF_RECOMPENSE,        owner: furina, left: "Furina reframe arm (EB-726)"}
+  - {id: KLEEMOD-PROTO_FR_CURTAIN_RISES,             owner: furina, left: "Furina reframe arm (EB-719)"}
+  - {id: KLEEMOD-PROTO_FR_DRAMATIC_ENTRANCE,         owner: furina, left: "Furina reframe arm (EB-726)"}
+  - {id: KLEEMOD-PROTO_FR_FLORID_CADENZA,            owner: furina, left: "Furina reframe arm (EB-726)"}
+  - {id: KLEEMOD-PROTO_FR_GUEST_LIST,                owner: furina, left: "Furina reframe arm (EB-726)"}
+  - {id: KLEEMOD-PROTO_FR_ROLLING_TIDE,              owner: furina, left: "withdrawn from the reframe arm (EB-552, EB-550)"}
+  - {id: KLEEMOD-PROTO_FR_SALON_DEBUT_NAMED,         owner: furina, left: "Furina reframe arm (EB-719); the id live-looks-8c found"}
+  - {id: KLEEMOD-PROTO_FR_SECOND_COURSE,             owner: furina, left: "Furina reframe arm (EB-726)"}
+  - {id: KLEEMOD-PROTO_FR_SHARED_BILLING,            owner: furina, left: "Furina reframe arm (EB-719)"}
+  - {id: KLEEMOD-PROTO_FR_UNIVERSAL_REVELRY,         owner: furina, left: "Furina reframe arm (EB-726)"}
+  - {id: KLEEMOD-PROTO_HOLD_THE_LINE_SPARK,          owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_KABOOM_SINK,                  owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_KK_BREAKER,                   owner: kokomi, left: "Kokomi pool pass, row cut"}
+  - {id: KLEEMOD-PROTO_KK_CONTINGENCY,               owner: kokomi, left: "Kokomi pool pass, row cut"}
+  - {id: KLEEMOD-PROTO_KK_CONVERGING_TIDE,           owner: kokomi, left: "pool pass three (EB-655)"}
+  - {id: KLEEMOD-PROTO_KK_CORAL_GUARD,               owner: kokomi, left: "R242: the base game's Strike and Defend"}
+  - {id: KLEEMOD-PROTO_KK_DEFEND,                    owner: kokomi, left: "passes six and seven withdrawn (#461)"}
+  - {id: KLEEMOD-PROTO_KK_EBB_TIDE,                  owner: kokomi, left: "Kokomi round 23, Ebb Tide retired"}
+  - {id: KLEEMOD-PROTO_KK_HIGH_TIDE,                 owner: kokomi, left: "Kokomi pool pass, row cut"}
+  - {id: KLEEMOD-PROTO_KK_NIGHT_WATCH,               owner: kokomi, left: "pool pass five (EB-685)"}
+  - {id: KLEEMOD-PROTO_KK_ORDERS,                    owner: kokomi, left: "Kokomi slice 1 draft 6"}
+  - {id: KLEEMOD-PROTO_KK_QUIET_STUDY,               owner: kokomi, left: "Kokomi pool pass, row cut"}
+  - {id: KLEEMOD-PROTO_KK_READING_THE_TIDE,          owner: kokomi, left: "Kokomi pool pass, row cut"}
+  - {id: KLEEMOD-PROTO_KK_RISING_TIDE,               owner: kokomi, left: "Kokomi pool pass, row cut"}
+  - {id: KLEEMOD-PROTO_KK_SEA_SPRAY,                 owner: kokomi, left: "Kokomi slice 1 draft 6"}
+  - {id: KLEEMOD-PROTO_KK_STRIKE,                    owner: kokomi, left: "passes six and seven withdrawn (#461)"}
+  - {id: KLEEMOD-PROTO_KK_THE_MOON_OVERLOOKS_THE_WATERS, owner: kokomi, left: "withdrawn from the arm (EB-570)"}
+  - {id: KLEEMOD-PROTO_KK_TIDAL_PRAYER,              owner: kokomi, left: "Kokomi slice 1 draft 6"}
+  - {id: KLEEMOD-PROTO_KK_WATERS_EDGE,               owner: kokomi, left: "R242: the base game's Strike and Defend"}
+  - {id: KLEEMOD-PROTO_KO_DUCK_AND_COVER,            owner: klee,   left: "R242: the base game's Strike and Defend"}
+  - {id: KLEEMOD-PROTO_KO_FIREWORKS_SHOW,            owner: klee,   left: "cut by R271 / EB-749"}
+  - {id: KLEEMOD-PROTO_KO_FIRE_SAFETY,               owner: klee,   left: "withdrawn on the R253 audit"}
+  - {id: KLEEMOD-PROTO_KO_FWOOSH,                    owner: klee,   left: "cut by R271 / EB-749"}
+  - {id: KLEEMOD-PROTO_KO_KABOOM,                    owner: klee,   left: "R242: the base game's Strike and Defend"}
+  - {id: KLEEMOD-PROTO_KO_POWDER_CHARGE,             owner: klee,   left: "redesigned as Booby Trap (R271 / EB-749)"}
+  - {id: KLEEMOD-PROTO_KO_SAFETY_LESSON,             owner: klee,   left: "withdrawn on the R253 audit"}
+  - {id: KLEEMOD-PROTO_POP_SPARK,                    owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_POWDER_CHARGE_SPARK,          owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK,       owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_SPARK_BLAST,                  owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_SPARK_DOUBLE_TAP,             owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_SPARK_FINISHER,               owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_SPARK_STRIKE,                 owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_SPARK_SWEEP,                  owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-PROTO_TRUE_SPARK_KNIGHT,            owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
+  - {id: KLEEMOD-RISING_TIDE,                        owner: furina, left: "cut from the Furina sheet"}
+  - {id: KLEEMOD-SWIFT_CURRENTS,                     owner: kokomi, left: "cut from the Kokomi sheet"}

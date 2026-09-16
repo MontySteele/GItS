@@ -87,6 +87,10 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_card_effects,  # noqa: E402
                                iter_effects, sly_autoplays, sly_riders)
+# EB-790. The register of ids this mod has shipped and since removed, written
+# at the one moment that knows a row has left: `_write_plan`'s stale-file
+# delete. See that function and `tools/retired_ids.py`.
+from tools import retired_ids                                   # noqa: E402
 # EB-118 sec.4.6. The generator prints the `skill_tag` contribution on the
 # face, and it READS the number off tier0 rather than restating it: a printed
 # 5 that could drift from the constant is the defect this line exists to
@@ -14457,6 +14461,27 @@ def _check_plan(profile: CharacterProfile, plan: ProfilePlan) -> int:
 
 def _write_plan(profile: CharacterProfile, plan: ProfilePlan) -> None:
     profile.out_dir.mkdir(parents=True, exist_ok=True)
+    # EB-790. THE DELETE BELOW IS THE RETIREMENT, and this is the only moment
+    # in the pipeline holding both halves of it: the id that is going away and
+    # the fact that it is going. A save keeps a CardStats row and a
+    # DiscoveredCards entry for every card the profile ever saw, by id, and
+    # `ProgressState.FromSerializable` writes a non-fatal ValidationError to
+    # godot.log for each one `ModelDb.GetByIdOrNull<CardModel>` no longer
+    # resolves -- twice per boot, for as long as the profile lives, because
+    # nothing here will ever edit the owner's save. So a departing id is
+    # written to `docs/retired-card-ids.yaml`, which
+    # `tools/gen_retired_card_aliases.py` turns into a hidden alias that makes
+    # the lookup resolve. Appending here rather than in each profile is the
+    # whole point: the next retirement is covered without anyone remembering.
+    departed = ({old.stem for old in profile.out_dir.glob("*.cs")}
+                - {pascal(card_id) for card_id in plan.generated})
+    if departed:
+        added = retired_ids.record(
+            sorted(departed), profile.character_id,
+            f"left the {profile.character_id} codegen")
+        for entry in added:
+            print(f"retired id recorded: {entry} "
+                  f"(regen tools/gen_retired_card_aliases.py)")
     # Clear stale files so a card removed from the sheet does not linger.
     for old in profile.out_dir.glob("*.cs"):
         old.unlink()

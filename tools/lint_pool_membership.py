@@ -79,10 +79,23 @@ MEMBERSHIP_FILES += sorted(CARD_ROOT.rglob("*ModalOptions.cs"))
 # `NChooseACardSelectionScreen._Ready()`, and soft-locked the turn on the
 # 2026-08-26 playtest. This lint's docstring had described that exact failure
 # since 2026-07-21; only its regex had not kept up.
+#
+# `RetiredCardAlias` is in the alternation for the OPPOSITE reason, and it is
+# an exemption that is read rather than a regex that quietly fails to match.
+# Its subclasses (`EB-790`) are tombstones for ids a save still holds after
+# their class left the tree: registered in `ModelDb` so a progress save
+# validates, and in NO pool on purpose, because pool membership is exactly
+# what would make them offerable again. They are safe against the failure
+# above because `CardModel.Pool` is `virtual` and the base OVERRIDES it to the
+# old owner's pool -- the same guarantee membership buys, bought without
+# membership. Matching them here and excusing them by name below means the
+# next reader sees the decision; leaving them outside the pattern would have
+# passed this lint by accident, which is how EB-150 shipped.
 CLASS_RE = re.compile(
     r"^\s*public\s+sealed\s+class\s+(\w+)\s*:\s*"
-    r"(?:CustomCardModel|ModalOptionCard)\b", re.M
+    r"(CustomCardModel|ModalOptionCard|RetiredCardAlias)\b", re.M
 )
+EXEMPT_BASE = "RetiredCardAlias"
 # `ModelDb.Card<Foo>()`, or the namespace-qualified `ModelDb.Card<A.B.Foo>()`.
 # The qualified form is legal C# and reads identically to the compiler; a
 # pattern that only matched the bare name reported a correctly-pooled card as
@@ -95,12 +108,17 @@ def main() -> int:
     findings: list[str] = []
 
     declared: dict[str, Path] = {}
+    exempt: dict[str, Path] = {}
     if not CARD_ROOT.is_dir():
         findings.append(f"card directory missing: {CARD_ROOT}")
     else:
         for path in sorted(CARD_ROOT.rglob("*.cs")):
-            for name in CLASS_RE.findall(path.read_text(encoding="utf-8")):
-                declared[name] = path
+            text = path.read_text(encoding="utf-8")
+            for name, base in CLASS_RE.findall(text):
+                if base == EXEMPT_BASE:
+                    exempt[name] = path
+                else:
+                    declared[name] = path
 
     if not declared:
         # A lint that silently passes because it found nothing is not a gate.
@@ -129,7 +147,8 @@ def main() -> int:
         print(f"FINDING: {finding}")
     if findings:
         return 1
-    print(f"pool membership: OK ({len(declared)} card classes, all pooled)")
+    print(f"pool membership: OK ({len(declared)} card classes, all pooled; "
+          f"{len(exempt)} {EXEMPT_BASE} tombstone(s) pooled by override)")
     return 0
 
 
