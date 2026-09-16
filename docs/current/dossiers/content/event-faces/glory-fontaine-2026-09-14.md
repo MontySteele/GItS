@@ -206,6 +206,8 @@ The Melusines of Merusea Village have decided that bottles are the finest curren
 
 Mechanics check: matches harvest's full 5-option, potion-tier-gated shape. Flag: the shipped `the_future_of_potions` row in `events.yaml` compresses this to 2 options (spend any held potion for an upgraded 3-card reward screen, or Leave) rather than the harvest's tier-gated 5 — an existing sim simplification, orthogonal to this face and not something this pass changes.
 
+@pages.DONE.description — The bottle disappears into a Melusine's satchel and the song starts before you can ask for it. By the second verse you have the trick; by the third they have moved on to the next bottle.
+
 ---
 
 ## - [ ] The Round Tea Party

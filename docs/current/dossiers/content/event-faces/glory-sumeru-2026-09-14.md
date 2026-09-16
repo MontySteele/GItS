@@ -204,6 +204,8 @@ In a greenhouse annex off the Vissudha Field, an Amurta researcher's prototype s
 
 Mechanics check: matches harvest.
 
+@pages.DONE.description — The apparatus stops hissing and prints the technique on a strip of damp paper. The researcher tears it off for you without looking up from her notes.
+
 ---
 
 ## - [ ] The Merchant___

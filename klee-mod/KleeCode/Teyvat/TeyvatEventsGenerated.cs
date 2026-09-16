@@ -1927,8 +1927,9 @@ internal static partial class TeyvatLoc
             ["FUTURE_OF_ELIXIRS.pages.INITIAL.options.POTION.description"] =
                 "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
             ["FUTURE_OF_ELIXIRS.pages.DONE.description"] =
-                "Lose a specified Common potion. Obtain an Upgraded Common "
-                + "[Attack/Skill] card reward.",
+                "The apparatus stops hissing and prints the technique on a strip of "
+                + "damp paper. The researcher tears it off for you without looking up "
+                + "from her notes.",
             // RoundTableAtTheHouseOfDaena (Sumeru / RoundTeaParty)
             ["ROUND_TABLE_AT_THE_HOUSE_OF_DAENA.title"] =
                 "The Round Table at the House of Daena",
@@ -2617,8 +2618,9 @@ internal static partial class TeyvatLoc
             ["WHAT_THE_MELUSINES_TRADE_FOR.pages.INITIAL.options.POTION.description"] =
                 "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
             ["WHAT_THE_MELUSINES_TRADE_FOR.pages.DONE.description"] =
-                "Lose a specified Common potion. Obtain an Upgraded Common "
-                + "[Attack/Skill] card reward.",
+                "The bottle disappears into a Melusine's satchel and the song "
+                + "starts before you can ask for it. By the second verse you have the "
+                + "trick; by the third they have moved on to the next bottle.",
             // RoundTableAtCafLutece (Fontaine / RoundTeaParty)
             ["ROUND_TABLE_AT_CAF_LUTECE.title"] =
                 "The Round Table at Café Lutece",
@@ -3075,8 +3077,9 @@ internal static partial class TeyvatLoc
             ["FRONT_LINE_TRIAGE_CACHE.pages.INITIAL.options.POTION.description"] =
                 "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
             ["FRONT_LINE_TRIAGE_CACHE.pages.DONE.description"] =
-                "Lose a specified Common potion. Obtain an Upgraded Common "
-                + "[Attack/Skill] card reward.",
+                "The officer stoppers the flask, files it with the cache, and "
+                + "drills the technique into you on the spot. \"Better stock next "
+                + "time,\" she says, whatever you handed her.",
             // QuartermastersSplit (Inazuma / ThisOrThat)
             ["QUARTERMASTERS_SPLIT.title"] =
                 "Quartermaster's Split",
@@ -4635,8 +4638,9 @@ internal static partial class TeyvatLoc
             ["MICTLAN_RIG.pages.INITIAL.options.POTION.description"] =
                 "Lose {Potion}. Obtain an Upgraded {Rarity} {Type} card reward.",
             ["MICTLAN_RIG.pages.DONE.description"] =
-                "Lose a specified Common potion. Obtain an Upgraded Common "
-                + "[Attack/Skill] card reward.",
+                "The rig chews through the bottle, clicks twice, and hands back the "
+                + "technique on a strip of scorched hide. The trader is already "
+                + "reaching for your belt again.",
             // UnclaimedCrates (Natlan / ThisOrThat)
             ["UNCLAIMED_CRATES.title"] =
                 "The Unclaimed Crates",
