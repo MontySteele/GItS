@@ -289,7 +289,7 @@ public class ArmKeywordTipTests
         // that arrived as 7 once that Vulnerable had expired. `Weak` stays
         // off the sentence -- `powered: false` at the carry-out answers for
         // every other term of hers at once.
-        Assert.Contains("folds in as you write it", body);
+        Assert.Contains("folds as you write it", body);
         // `EB-623`: "morning" is retired from every printed surface.
         Assert.Contains("counts next turn", body);
         Assert.DoesNotContain("morning", body);
@@ -315,9 +315,40 @@ public class ArmKeywordTipTests
         // the clause is about WHEN each side is read.
         // `EB-623` TOOK FIVE OFF for free: "counts at the morning" became
         // "counts next turn", the same fact in the base game's timing words.
-        Assert.Equal(211, rendered.Length);
+        // `EB-330` / `EB-563` / `EB-411` TOOK 81 MORE in one rewrite: how
+        // many Plans wait and what the badge's number is, and where a
+        // carry-out lands. All three were on the blind-play panel and nowhere
+        // in the game.
+        Assert.Equal(292, rendered.Length);
         Assert.Contains("A carry-out is not a hit: no when-hit power fires.",
                         body);
+    }
+
+    [Fact]
+    public void The_plan_word_says_any_number_wait_and_the_badge_is_their_count()
+    {
+        // `EB-563` and `EB-330`, one sentence filed as two. Three r4c seats
+        // read the `Plan` badge's number as a CAPACITY, and the r20 lane-2
+        // seat wrote ONE Plan at a time for four fights before trying two.
+        // `KokomiPlan` caps nothing on an unconfigured build. The panel has
+        // said so since `EB-648` (`blindplay_notes.PLAN_COUNT_NOTE`); a seat
+        // reading a card in hand never reaches the panel, which is the gap.
+        var body = Printed("ForPlan");
+        Assert.Contains("any number wait, in ", body);
+        Assert.Contains("order, and the badge is their count", body);
+    }
+
+    [Fact]
+    public void The_plan_word_says_a_carry_out_lands_in_standing_block()
+    {
+        // `EB-411`. A Plating 8 Sewer Clam ate a whole Plan and no screen in
+        // the game said it would (Kokomi r10 run 2 (c) 4). The morning
+        // resolves before the player has played a card and an enemy's Block
+        // falls at ITS turn start, so whatever it raised on its own turn is
+        // still standing and no move strips it first. Panel twin:
+        // `blindplay_notes.PLAN_BLOCK_NOTE`.
+        var body = Printed("ForPlan");
+        Assert.Contains("still standing", body);
     }
 
     [Fact]
@@ -495,7 +526,19 @@ public class ArmKeywordTipTests
         // entry counted as one Plan or two for a per-Plan clause (Kokomi r31
         // lane 2). It counts as two, and the card that bends the count is
         // where the count is explained.
-        Assert.Equal(25, attaches.Count);
+        //
+        // THE TWENTY-SEVENTH IS THE STAGE READERS' `ForStageReader`, a RIDER
+        // and the SECOND whose sentence comes and goes with the screen
+        // (`ForEmptyField` is the first). The four readers multiply a LIVE
+        // bar, so off a board their faces print a literal 0 -- "Deal 0 damage
+        // to ALL enemies" on the Rare at Neow, "Deal 0 damage" on `Ousia
+        // Surge` at a reward -- and two round-three seats turned the Rare down
+        // on it. The face cannot say otherwise: a description is a loc string
+        // injected once at boot. It goes through the same `With`, four times
+        // over: which of its four rules a row gets is derived from the
+        // multiplier `EB-747` picked for that row's payoff.
+        Assert.Equal(26, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForStageReader");
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
         Assert.Contains(attaches, m => m.Name == "ForFanfare");
@@ -724,5 +767,64 @@ public class ArmKeywordTipTests
             Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere",
                             Il.Calls(Il.Method("ArmKeywordTips", word)));
         }
+    }
+
+    // --- a Stage round-three defect: the readers' 0 off the board ----------
+
+    [Fact]
+    public void The_stage_readers_tip_states_each_rule_and_the_absent_stage()
+    {
+        // THE FIND (round three). The four readers multiply a LIVE bar, so
+        // off a board their faces print a literal 0 -- "Deal 0 damage to ALL
+        // enemies" on the Rare at Neow, "Deal 0 damage" on `Ousia Surge` at a
+        // reward -- and two seats turned the Rare down on it. The number is
+        // right in combat and right at resolution (`EB-747`); what is wrong
+        // is the screen with no stage behind it, and a description cannot fix
+        // itself because it is a loc string injected once at boot.
+        //
+        // THE SENTENCES OFF THE COMPILED METHOD, this file's own rule: a
+        // materialised `HoverTip` resolves a `LocString` through a
+        // `LocManager` that is null until the game boots, so what is
+        // reachable here is the text each branch would print.
+        var body = Printed("ForStageReader");
+
+        // One rule per reader, each read off that reader's own code.
+        Assert.Contains(
+            "The number is the [gold]lead performer[/gold]'s "
+          + "[gold]Fanfare[/gold].", body);
+        Assert.Contains(
+            "The number is the [gold]back performer[/gold]'s "
+          + "[gold]Fanfare[/gold].", body);
+        Assert.Contains(
+            "The number is the [gold]lead performer[/gold]'s "
+          + "[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends.", body);
+        Assert.Contains(
+            "The number is every performer's [gold]Fanfare[/gold] added up "
+          + "and spent.", body);
+
+        // And the clause that IS the defect, which the rule carries only
+        // where there is no combat behind the card: in a fight the face is
+        // already right and this sentence would be false.
+        Assert.Contains(
+            " There is no stage outside combat, so the number above reads 0.",
+            body);
+    }
+
+    [Fact]
+    public void The_readers_rider_yields_on_and_off_a_board_alike()
+    {
+        // UNLIKE `ForEmptyField`, WHICH GOES SILENT. That rider is a sentence
+        // about a board in a particular state; this one is about what the
+        // card's number IS, which is true on every screen -- and the screen
+        // it was filed on is the one with no board at all.
+        var none = System.Linq.Enumerable.Empty<IHoverTip>();
+        var offTheBoard = new ProtoFsOusiaSurge();
+        Assert.NotSame(none, ArmKeywordTips.ForStageReader(
+            none, offTheBoard, ArmKeywordTips.StageReader.Lead));
+
+        var furina = Seat.Furina();
+        var inPlay = Owned<ProtoFsOusiaSurge>(furina);
+        Assert.NotSame(none, ArmKeywordTips.ForStageReader(
+            none, inPlay, ArmKeywordTips.StageReader.Lead));
     }
 }

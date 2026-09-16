@@ -46,6 +46,26 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         NO_REACTION_THIS_TURN,
                                         PENDING_PICK_NOTE, PICKED_MARK,
                                         REACTIONS_HEADING,
+                                        RESOLUTIONS_HEADING,
+                                        RESOLUTION_ROW,
+                                        RESOLUTION_HIT_ROW,
+                                        RESOLUTION_HIT_BLOCKED,
+                                        RESOLUTION_HIT_ALL_BLOCKED,
+                                        RESOLUTION_NO_HITS,
+                                        RESOLUTION_AUTO_CLAUSE,
+                                        RESOLUTION_CARRIED_CLAUSE,
+                                        RESOLUTION_OVERFLOW_CLAUSE,
+                                        RESOLUTION_AUTO_TURN_NOTE,
+                                        NO_RESOLUTIONS_THIS_TURN,
+                                        INTENT_FOLD_CLAUSE,
+                                        INTENT_FOLD_NOTHING,
+                                        INTENT_TOTAL_CLAUSE,
+                                        INTENT_TARGET_SIDE,
+                                        REWARD_ALTERNATIVES_HEADING,
+                                        REWARD_ALTERNATIVE_ROW,
+                                        REWARD_ALTERNATIVE_UNNAMED,
+                                        GRID_INCOMPLETE_NOTE,
+                                        DECK_IS_THE_RUNS_OWN,
                                         REACTION_CARRIED_CLAUSE,
                                         REACTION_CARRIED_ONLY, REACTION_ROW,
                                         REACTION_ROW_NO_SOURCE,
@@ -69,7 +89,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         UNBLOCKED_RAISER_CLAUSE,
                                         UNBLOCKED_RAISE_CLAUSE)
 from understudy.blindplay_observe import observation
-from understudy.blindplay_read import _fold
+from understudy.blindplay_read import _fold, _text
 from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
                                         FIGHT_OVERLAYS, KURAGE_COST_PER_ENERGY)
 
@@ -979,7 +999,7 @@ def _attack_buff_note(you: dict[str, Any],
                                         n=buff["stacks"])]
 
 
-def _numbers_disagree(intent: dict[str, str]) -> bool:
+def _numbers_disagree(intent: dict[str, Any]) -> bool:
     """`EB-607`: does the hover sentence's number contradict the icon's?
 
     Only where BOTH fields carry a number and they share none: `6x3` beside
@@ -1115,7 +1135,55 @@ def _intent_fold_lines(enemy: dict[str, Any],
     return out
 
 
-def _render_intents(intents: list[dict[str, str]]) -> list[str]:
+def _resolution_lines(rows: list[dict[str, Any]]) -> list[str]:
+    """`EB-349` / `EB-611`. The turn's resolutions, with their hits numbered.
+
+    ONE ROW PER CARD, ONE NUMBERED LINE PER HIT. The numbering is the point:
+    `EB-611`'s seat could confirm which bodies a random multi-hit struck and
+    never the order, and "Rapid Fire on a hallway prints four ordered lines" is
+    the row's acceptance in as many words.
+
+    A HIT THAT LANDED ENTIRELY ON BLOCK STILL PRINTS, and says so. It is a
+    place in the order, and dropping it would print three lines for a four-hit
+    card -- the same defect wearing a different hat.
+
+    THE AUTO-PLAYED TURN IS THE ONE THIS SECTION WAS OPENED FOR. Where the game
+    played every row, the note under them says what the board below is: the
+    turn the reader never saw, which the page has had to describe as a gap
+    since `AUTO_TURN_NOTE` was written.
+    """
+    if not rows:
+        return [NO_RESOLUTIONS_THIS_TURN]
+    out: list[str] = []
+    for row in rows:
+        clauses = ""
+        if row.get("auto_played"):
+            clauses += RESOLUTION_AUTO_CLAUSE
+        if row.get("carried"):
+            clauses += RESOLUTION_CARRIED_CLAUSE
+        if row.get("overflowed"):
+            clauses += RESOLUTION_OVERFLOW_CLAUSE
+        out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
+        if not row["hits"]:
+            out.append(RESOLUTION_NO_HITS)
+            continue
+        for n, hit in enumerate(row["hits"], start=1):
+            target = hit["target"] or "an enemy"
+            if hit["amount"] <= 0 and hit["blocked"] > 0:
+                out.append(RESOLUTION_HIT_ALL_BLOCKED.format(
+                    n=n, target=target, blocked=hit["blocked"]))
+                continue
+            line = RESOLUTION_HIT_ROW.format(n=n, target=target,
+                                             amount=hit["amount"])
+            if hit["blocked"] > 0:
+                line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
+            out.append(line)
+    if all(row.get("auto_played") for row in rows):
+        out += ["", RESOLUTION_AUTO_TURN_NOTE]
+    return out
+
+
+def _render_intents(intents: list[dict[str, Any]]) -> list[str]:
     """Every component of one telegraph, one line each (`EB-342`).
 
     A move with one component reads exactly as it always did -- `Intent:` and
@@ -1139,7 +1207,7 @@ def _render_intents(intents: list[dict[str, str]]) -> list[str]:
     return out
 
 
-def _render_intent(intent: dict[str, str], part: bool = False) -> str:
+def _render_intent(intent: dict[str, Any], part: bool = False) -> str:
     """One telegraph, with every field saying what it is (`EB-299`).
 
     The line used to be `kind`, `label` and `text` joined by commas, so a
@@ -1173,14 +1241,63 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
     # page printed both and said nothing about the pair.
     if _numbers_disagree(intent):
         bits.append(INTENT_NUMBER_DISAGREES)
+    # `EB-607`, the second half: WHERE THAT NUMBER CAME FROM. The bridge sends
+    # the game's own base, the figure its hook phases arrived at, and the
+    # models it folded in -- so the line no longer has to leave `12 before and
+    # after Strength 3` unexplained. Nothing here is recomputed; the fold line
+    # prints only where something WAS folded, and the total only on a
+    # multi-hit, because a clause under every intent is noise.
+    bits += _breakdown_clauses(intent.get("breakdown") or {})
     if _fold(kind) == "defend":
         bits.append(DEFEND_INTENT_CLAUSE)
-    # `EB-323`: and a `Buff` part says whose side it is on. `Empower (Buff)`
-    # was a heading, a bracketed kind and nothing else on a board of three
-    # bodies; the target itself is not on the wire and the clause says so.
-    if _fold(kind) == "buff":
+    # `EB-323`: and a part says whose side it is on. `Empower (Buff)` was a
+    # heading, a bracketed kind and nothing else on a board of three bodies.
+    # The WIRE answers this now, off the game's own `IntentType`, for every
+    # kind that settles it; the older buff-only clause is what a feed that
+    # sends nothing still gets, so a bridge predating the row is unmoved.
+    side = _text(intent.get("target_side"))
+    if side:
+        bits.append(INTENT_TARGET_SIDE.format(side=side))
+    elif _fold(kind) == "buff":
         bits.append(BUFF_INTENT_CLAUSE)
     return " — ".join(b for b in bits if b) or "(no intent shown)"
+
+
+def _breakdown_clauses(breakdown: dict[str, Any]) -> list[str]:
+    """`EB-607`. What the bridge read off `Hook.ModifyDamage`, in two clauses.
+
+    The FOLD clause answers the r23 question directly -- `12 on the move and 15
+    after`, naming what did it -- and the NOTHING-FOLDED form answers the other
+    half of the same find, Fossil Stalker's 12 that did not move under
+    Strength 3. Both print only on an attack part, because that is the only
+    part the game hands a breakdown for.
+
+    THE TOTAL is a multi-hit's own line, and it is the game's arithmetic and
+    not this page's: the bridge sends the product beside its factors, and this
+    prints all three so the reader can check it.
+    """
+    if not breakdown or not breakdown.get("repeats"):
+        return []
+    out: list[str] = []
+    mods = breakdown.get("modifiers") or []
+    if mods:
+        out.append(INTENT_FOLD_CLAUSE.format(
+            modifiers=_and_list([f"**{m}**" for m in mods]),
+            base=breakdown["base"], folded=breakdown["folded"]))
+    elif breakdown["base"] == breakdown["folded"]:
+        out.append(INTENT_FOLD_NOTHING.format(base=breakdown["base"]))
+    if breakdown["repeats"] > 1:
+        out.append(INTENT_TOTAL_CLAUSE.format(
+            folded=breakdown["folded"], repeats=breakdown["repeats"],
+            total=breakdown["total"]))
+    return out
+
+
+def _and_list(items: list[str]) -> str:
+    """`a`, `a and b`, `a, b and c`. The page's own joining, spelled once."""
+    if len(items) <= 1:
+        return items[0] if items else ""
+    return ", ".join(items[:-1]) + " and " + items[-1]
 
 
 #: `EB-701`. The trigger the turn-order note answers, matched on the SENTENCE
@@ -1822,6 +1939,17 @@ def render(obs: dict[str, Any]) -> str:
                 if row.get("carried"):
                     line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE
                 out.append(line)
+        # `EB-349` / `EB-611`. WHAT RESOLVED THIS TURN, beside the two receipts
+        # above and for their reason: this page prints after-states, and the
+        # beat that produced one was on no feed at all. A card's hits are
+        # NUMBERED under it, because the order is the whole of `EB-611` -- a
+        # seat could confirm which bodies a random multi-hit struck and never
+        # in what order -- and the empty line prints, unlike the relic-answer
+        # section, because on a turn the game played for you the empty list IS
+        # the finding.
+        if c.get("resolutions") is not None:
+            out += ["", RESOLUTIONS_HEADING, ""]
+            out += _resolution_lines(c["resolutions"])
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
@@ -2045,12 +2173,20 @@ def render(obs: dict[str, Any]) -> str:
             out += [f"- **{c['title']}**"
                     + (f" × {c['count']}" if c["count"] > 1 else "")
                     for c in obs["deck"]]
-            floor = obs.get("deck_floor")
-            out += ["", "*This page has no deck on this screen's data feed: "
-                        "the list above is your deck as it stood in the last "
-                        "fight"
-                    + (f" (floor {floor})" if floor else "")
-                    + ". Anything you have picked up since is not in it.*"]
+            # `EB-447`: and WHICH of the two lists this is. Where the
+            # bridge sends `player.master_deck` the list above is the run's
+            # own deck, read on this screen, and the fight-old caveat that
+            # stood here would be simply wrong. Where it does not, the caveat
+            # is exactly as it was.
+            if obs.get("deck_is_master"):
+                out += ["", DECK_IS_THE_RUNS_OWN]
+            else:
+                floor = obs.get("deck_floor")
+                out += ["", "*This page has no deck on this screen's data "
+                            "feed: the list above is your deck as it stood in "
+                            "the last fight"
+                        + (f" (floor {floor})" if floor else "")
+                        + ". Anything you have picked up since is not in it.*"]
         else:
             out += ["", "*This page cannot say what is in your deck yet: the "
                         "deck is on a fight's data feed and no fight of this "
@@ -2099,13 +2235,21 @@ def render(obs: dict[str, Any]) -> str:
                 out += ["", "## Not on this list, and why", ""]
                 out += [f"- **{o['title']}** — {o['reason']}"
                         for o in obs["omitted"]]
-                floor = obs.get("deck_floor")
-                out += ["", "*This page has no deck on this screen's data "
-                           "feed: the list above is your deck as it stood in "
-                           "the last fight"
-                        + (f" (floor {floor})" if floor else "")
-                        + ", minus the cards the screen is offering. Anything "
-                          "you have picked up since is in neither list.*"]
+                # `EB-447`: and which deck the subtraction was against.
+                if obs.get("deck_is_master"):
+                    out += ["", "*The subtraction above is against the run's "
+                                "own deck list, off this screen's own data "
+                                "feed, minus the cards the screen is "
+                                "offering.*"]
+                else:
+                    floor = obs.get("deck_floor")
+                    out += ["", "*This page has no deck on this screen's data "
+                               "feed: the list above is your deck as it stood "
+                               "in the last fight"
+                            + (f" (floor {floor})" if floor else "")
+                            + ", minus the cards the screen is offering. "
+                              "Anything you have picked up since is in "
+                              "neither list.*"]
             # `EB-674`: what the verb after `choose` is, before the refusal
             # that would otherwise teach it. Above the button's own state,
             # because the sentence is about the screen and the line below is
@@ -2120,10 +2264,34 @@ def render(obs: dict[str, Any]) -> str:
                         "again; it does not leave the screen."]
         elif obs.get("can_skip"):
             out += ["", "You may skip this."]
+        # `EB-350`: and where the page could not read the whole grid off the
+        # feed, that the list above is a viewport and not the grid. Printed
+        # under the list it is about; silent on a bridge that answered.
+        if obs.get("grid_incomplete"):
+            out += ["", GRID_INCOMPLETE_NOTE]
+        # `EB-374`: the alternative buttons, BY NAME. The bridge sends each
+        # button's own printed words now, so the screen's other option is a
+        # named row with the verb that presses it rather than a caveat about a
+        # control the feed would not describe.
+        if obs.get("alternatives"):
+            out += ["", REWARD_ALTERNATIVES_HEADING, ""]
+            for alt in obs["alternatives"]:
+                if alt["name"] and alt["verb"]:
+                    out.append(REWARD_ALTERNATIVE_ROW.format(
+                        name=alt["name"], verb=alt["verb"]))
+                elif alt["name"]:
+                    # A third button, which no run has produced yet: named,
+                    # and honest that this page has no verb aimed at it.
+                    out.append(f"- **{alt['name']}** — this page has no verb "
+                               "for this one.")
+                else:
+                    out.append(REWARD_ALTERNATIVE_UNNAMED)
         # `EB-374`: and where a held relic has rewritten what that alternative
-        # IS, the caveat goes with it. Printed under the skip line because it
-        # is about the skip, and only on a run holding one of those relics.
-        if obs.get("alternative_relics"):
+        # IS and the words did NOT reach the feed, the caveat goes with it.
+        # Printed under the skip line because it is about the skip, on a run
+        # holding one of those relics, and only while the page cannot name the
+        # button for itself -- a caveat beside the answer is worse than none.
+        if obs.get("alternative_relics") and not obs.get("alternatives"):
             out += ["", CARD_REWARD_ALTERNATIVE_NOTE.format(
                 relics=" and ".join(f"**{r}**"
                                     for r in obs["alternative_relics"]))]

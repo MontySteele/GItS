@@ -17,12 +17,14 @@ from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _map_options, _proceed_option,
                                         _potion_slots, _relic_options,
                                         _rest_options, _reward_items,
-                                        _screen_cards, map_floor)
+                                        _screen_cards, map_floor,
+                                        reward_alternatives)
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
                                         _shop_items, _shop_options)
-from understudy.blindplay_notes import (PREVIEW_LOCKED,
+from understudy.blindplay_notes import (NO_ALTERNATIVE_AT_ALL,
+                                        NO_SACRIFICE_HERE, PREVIEW_LOCKED,
                                         SKIPPED_CARD_REWARD)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import (_blob, _enemies, _entity_id, _fold,
@@ -37,6 +39,11 @@ _QUOTED = re.compile(r'"([^"]*)"|“([^”]*)”')
 
 VERBS = ("play", "end turn", "choose", "skip", "go", "buy", "rest",
          "upgrade", "remove", "use potion", "drop potion", "confirm",
+         # `EB-374`: the card reward's OTHER button, which `skip` cannot
+         # reach. It is not a synonym -- `skip` presses the screen's first
+         # alternative and always has; this presses the one whose printed
+         # words are not a plain skip.
+         "sacrifice",
          # `EB-396`. `leave` is NOT a synonym for `proceed`: it is the exit
          # from a screen this tool does not drive, and it is the only verb
          # that resolves while `observation` reports the screen blocked.
@@ -1297,6 +1304,8 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
         res = _confirm(state)
     elif cmd.verb == "skip":
         res = _skip(state)
+    elif cmd.verb == "sacrifice":
+        res = _sacrifice(state)
     elif cmd.verb == "proceed":
         res = _proceed(state)
     else:                                                # pragma: no cover
@@ -1313,6 +1322,34 @@ def _confirm(state: dict[str, Any]) -> Resolution:
     if st not in verbs:
         return _refuse("there is nothing waiting to be confirmed")
     return Resolution(True, "confirm", {"action": verbs[st]}, {})
+
+
+def _sacrifice(state: dict[str, Any]) -> Resolution:
+    """`EB-374`. Press the card reward's alternative that is not a plain skip.
+
+    THE FIND (Klee r9 act 2). Pael's Wing adds a SACRIFICE option to the card
+    reward screen; two rewards in that run printed `choose` and `skip` and
+    nothing else, and the seat holding the relic never saw the control its
+    whole rule is about. The words are on the wire now, so the button has a
+    name on the page and a verb that presses it.
+
+    NOT A SYNONYM FOR `skip`, deliberately. `skip` presses the screen's FIRST
+    alternative -- what `ExecuteSkipCardReward` has always pressed and what
+    every policy and soak caller sends -- and a verb that quietly started
+    pressing a different button would be a worse defect than the one this
+    closes. Where the screen offers only the plain skip, this REFUSES and says
+    which verb is the one for that.
+    """
+    if _screen(state) != "card_reward":
+        return _refuse("this is not a card reward screen")
+    alts = reward_alternatives(_blob(state, "card_reward"))
+    row = next((a for a in alts if a["verb"] == "sacrifice"), None)
+    if row is None:
+        return _refuse(NO_SACRIFICE_HERE if alts else NO_ALTERNATIVE_AT_ALL)
+    return Resolution(True, "sacrifice",
+                      {"action": "skip_card_reward",
+                       "alternative_index": row["index"]},
+                      {"skipped": SKIPPED_CARD_REWARD})
 
 
 def _skip(state: dict[str, Any]) -> Resolution:

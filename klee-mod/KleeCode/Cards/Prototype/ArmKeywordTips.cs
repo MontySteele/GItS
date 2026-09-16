@@ -139,6 +139,16 @@ public static class ArmKeywordTips
     // "completely undiscoverable except by accident".
     public const string MergeRidersKey = "KLEEMOD-ARM_MERGE_RIDERS";
 
+    // A STAGE ROUND-THREE DEFECT. THE SIXTH KEY HERE THAT TITLES NO KEYWORD,
+    // and it is the second one whose sentence changes with the screen. The
+    // four Stage READERS multiply a live bar, so off a board they print a
+    // literal 0 -- "Deal 0 damage to ALL enemies" on the Rare at Neow, "Deal 0
+    // damage" on `Ousia Surge` at a reward -- and two round-three seats turned
+    // the Rare down on it. The description cannot say otherwise: a face is a
+    // loc string injected once at boot. So the rule is a rider, beside
+    // `EmptyFieldKey` and for its reason.
+    public const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";
+
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -872,13 +882,50 @@ public static class ArmKeywordTips
     /// every clause there is a seat's finding -- so the tip is carried in
     /// `tools/lint_text_conventions.py` as a named exception with its reason,
     /// which is the bargain `SetOffKey` already makes.
+    ///
+    /// `EB-330` / `EB-563` / `EB-411`: THE THREE FACTS THE PAGE CARRIED AND
+    /// THE WORD DID NOT, added in ONE rewrite, because the tip had no room for
+    /// any of them separately and three separate trims would have been three
+    /// separate arguments about which finding to drop.
+    ///
+    /// "ANY NUMBER WAIT, IN ORDER, AND THE BADGE IS THEIR COUNT" is `EB-563`
+    /// and `EB-330`, which are one sentence and were filed as two. The r4c
+    /// seats read `Plan 1` as a CAPACITY -- the old tip printed "Carries out N
+    /// Plans" and nothing said N was a tally -- and the r20 lane-2 seat wrote
+    /// one Plan at a time for four fights on the same reading.
+    /// <see cref="KokomiPlan"/> holds no cap on an unconfigured build; the
+    /// page has said so since `EB-648`
+    /// (`blindplay_notes.PLAN_COUNT_NOTE`) and this is its twin on the word.
+    /// "Any number" is the no-limit half and "their count" is the badge half,
+    /// in that order, because a reader who has already misread the badge needs
+    /// the rule before the gloss.
+    ///
+    /// "INTO BLOCK STILL STANDING" IS `EB-411`, the twin of
+    /// `blindplay_notes.PLAN_BLOCK_NOTE` ("lands in whatever Block the enemy
+    /// is still standing in from its own turn"). The morning resolves before
+    /// the player has played a card and an enemy's Block falls at ITS turn
+    /// start, so a Plating 8 Sewer Clam ate a whole Plan and no surface in the
+    /// game said it would (Kokomi r10 run 2 (c) 4). It sits on the AIM clause
+    /// rather than in a sentence of its own because it is a fact about where
+    /// the carry-out lands, which is what that clause is already about.
+    ///
+    /// WHAT THE REWRITE PAID WITH, and it dropped no finding: "folds in as you
+    /// write it" lost its "in", and the rest of the overage is carried on
+    /// `PlanKey`'s existing named exception in
+    /// `tools/lint_text_conventions.py`, whose reason now names all six
+    /// findings. That is the bargain `SetOffKey` and `BombKey` already make,
+    /// and it is `EB-330`'s "a clause must go" answered the other way round:
+    /// no clause here is droppable, because every one of them is a seat that
+    /// read the board wrong without it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
-          + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
-          + "Your [gold]Strength[/gold] folds in as you write it; the "
+            "On the [gold]Bake-Kurage[/gold], paid now; any number wait, in "
+          + "order, and the badge is their count. Next turn: front "
+          + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too, into "
+          + "[gold]Block[/gold] still standing. "
+          + "Your [gold]Strength[/gold] folds as you write it; the "
           + "enemy's [gold]Vulnerable[/gold] counts next turn. A "
           + "carry-out is not a hit: no when-hit power fires.");
 
@@ -1361,6 +1408,105 @@ public static class ArmKeywordTips
         With(inherited, RotateKey,
             "Seats change order and every bar comes with them. Nobody leaves "
           + "and nobody takes a [gold]Bow[/gold].");
+
+    /// <summary>
+    /// WHICH BAR A READER'S NUMBER IS. One value per reader, and the four are
+    /// the four the sheet declares: <i>Ousia Surge</i> reads the lead's bar,
+    /// <i>Pneuma Refrain</i> the back's, <i>Final Bow</i> the lead's as it
+    /// bows, and <i>Let the People Rejoice</i> the whole company's.
+    ///
+    /// DERIVED AND NEVER DECLARED. `gen_klee_cards.stage_reader_source` reads
+    /// the value off the multiplier `EB-747` already picked for the row's
+    /// `amount_formula`, so a fifth reader authored tomorrow carries the
+    /// sentence because of what its number IS, not because somebody
+    /// remembered to tag it.
+    /// </summary>
+    public enum StageReader
+    {
+        /// <summary>`stage_lead_fanfare` -- <i>Ousia Surge</i>.</summary>
+        Lead,
+        /// <summary>`stage_back_fanfare` -- <i>Pneuma Refrain</i>.</summary>
+        Back,
+        /// <summary>`SpentOrLeadFanfare` -- <i>Final Bow</i>.</summary>
+        SpendLead,
+        /// <summary>`SpentOrTotalFanfare` -- the Rare.</summary>
+        SpendAll,
+    }
+
+    // The four rules, as `const string` rather than inline literals, because
+    // `tools/lint_text_conventions.tip_rows` reads THIS file for its census
+    // and a body built by a method reaches it as an empty string -- the
+    // silence `EB-343` was filed on. The lint parses these four by name and
+    // measures each against the ceiling with `ReaderNoStage` appended, which
+    // is the longest the tip is ever rendered.
+    private const string ReaderLeadRule =
+        "The number is the [gold]lead performer[/gold]'s "
+      + "[gold]Fanfare[/gold].";
+    private const string ReaderBackRule =
+        "The number is the [gold]back performer[/gold]'s "
+      + "[gold]Fanfare[/gold].";
+    private const string ReaderSpendLeadRule =
+        "The number is the [gold]lead performer[/gold]'s "
+      + "[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends.";
+    private const string ReaderSpendAllRule =
+        "The number is every performer's [gold]Fanfare[/gold] added up and "
+      + "spent.";
+    private const string ReaderNoStage =
+        " There is no stage outside combat, so the number above reads 0.";
+
+    /// <summary>
+    /// A STAGE ROUND-THREE DEFECT: THE READERS PRINT A LITERAL 0 OFF THE
+    /// BOARD.
+    ///
+    /// THE FIND (round three). <i>Let the People Rejoice</i> read "Deal 0
+    /// damage to ALL enemies" on the Neow screen and <i>Ousia Surge</i> read
+    /// "Deal 0 damage" at a card reward, and two seats turned the Rare down on
+    /// it. The number is correct in combat and correct at resolution -- that
+    /// is `EB-747`, and its tests stand -- but every reader multiplies a LIVE
+    /// BAR, and off a board there are no bars, so a CalculatedVar honestly
+    /// reports nothing and the face prints the nothing.
+    ///
+    /// THE DESCRIPTION CANNOT SAY IT. A face is a loc string injected once at
+    /// boot (`LocManager_Initialize_Patch`) with no runtime seam, and the only
+    /// expression that would switch on the board is a nested
+    /// `{CalculatedDamage:choose(0):...}` -- the repo's first, with no
+    /// headless renderer to pin it against. So the rule goes where this mod
+    /// already puts a rule a number cannot carry: the HOVER TIP, which is
+    /// `FurinaRiderTips.FanfareBody`'s posture one arm over ("out of combat
+    /// the rate stands alone rather than printing a misleading zero") and
+    /// `KokomiRiderTips`'.
+    ///
+    /// THE RULE ALWAYS, THE DISCLAIMER ONLY OFF THE BOARD. In combat the face
+    /// is already right and a sentence about an absent stage would be false,
+    /// so the tip says which bar the number is and stops. Off the board --
+    /// Neow, a reward, a shop, the deck view, the blind-play page -- it adds
+    /// the one fact the screen is lying about: the 0 is the absence of a
+    /// stage and not the card's damage.
+    ///
+    /// THE OWNER'S COMBAT AND NOT THE CARD'S, <see cref="FieldIsEmptyFor"/>'s
+    /// read verbatim and for its reason: `CardModel.CombatState` walks the
+    /// card's pile and throws off a board, which is the exact case this guard
+    /// exists for.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForStageReader(
+        IEnumerable<IHoverTip> inherited, CardModel card, StageReader source)
+    {
+        var rule = source switch
+        {
+            StageReader.Back => ReaderBackRule,
+            StageReader.SpendLead => ReaderSpendLeadRule,
+            StageReader.SpendAll => ReaderSpendAllRule,
+            _ => ReaderLeadRule,
+        };
+        return With(inherited, ReaderKey,
+            OnAStage(card) ? rule : rule + ReaderNoStage);
+    }
+
+    /// <summary>Is this card being read with a combat behind it? False on
+    /// every screen that has no board, which is where the 0 is printed.
+    /// </summary>
+    private static bool OnAStage(CardModel? card) =>
+        TipOwner.CreatureOf(card)?.CombatState != null;
 
     /// <summary>
     /// `EB-407`. THE WORD IS PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is

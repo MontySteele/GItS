@@ -1451,22 +1451,29 @@ def test_a_card_reward_says_which_relic_has_rewritten_its_alternative():
     # It says what the feed has and does not claim what the button is.
     assert "never what that button says or does" in page
     assert "cannot tell you whether that is a plain skip" in page
-    # And the verbs are unchanged: there is no `sacrifice` to offer.
+    # And on a feed with no `alternatives` key the verbs are unchanged: there
+    # is no `sacrifice` to offer and `skip` posts exactly what it always did.
     assert "sacrifice`" not in page
     assert blindplay.act(paels_wing_reward_state(), "skip")["post"] == {
         "action": "skip_card_reward"}
 
 
-def test_the_wire_carries_no_sacrifice_control_to_offer():
-    """The reason this row is a page line and not a verb, asserted against the
-    vendored builder rather than against a memory of it."""
+def test_the_wire_carries_the_alternative_buttons_words():
+    """`EB-374`, the wire half, asserted against the vendored builder rather
+    than against a memory of it.
+
+    THIS TEST USED TO PIN THE OPPOSITE. While the words were not on the feed it
+    read `set(...) == {"cards", "can_skip"}` and `"sacrifice" not in builder`,
+    which was the reason the row was a page caveat and not a verb. The bridge
+    half is built, so the pin is inverted rather than deleted: the alternatives
+    key is published beside `can_skip`, and `can_skip` itself is untouched."""
     builder = (REPO / "vendor" / "STS2_MCP" / "McpMod.StateBuilder.cs"
                ).read_text(encoding="utf-8")
     head = builder.index("BuildCardRewardState(NCardRewardSelectionScreen")
     body = builder[head:builder.index("private static", head + 10)]
     assert 'state["can_skip"] = altButtons.Count > 0;' in body
-    assert set(re.findall(r'state\["(\w+)"\]', body)) == {"cards", "can_skip"}
-    assert "sacrifice" not in builder.casefold()
+    assert "GitsAlternativesKey" in body
+    assert "GitsAlternativeName" in body
 
 
 def test_a_run_without_the_relic_reads_exactly_as_before():
@@ -3969,7 +3976,7 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     diverge and the keyword must not be emptied into the panel."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
-    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+    assert ("Your Strength folds as you write it; the enemy's Vulnerable "
             "counts next turn.") in plan
 
 
@@ -5295,7 +5302,7 @@ def test_the_plan_word_says_when_each_side_of_the_line_is_read():
     """
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
-    assert "Your Strength folds in as you write it" in plan
+    assert "Your Strength folds as you write it" in plan
     assert "the enemy's Vulnerable counts next turn" in plan
     assert "Weak" not in plan
 
@@ -6661,8 +6668,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-599`: and the modifier clause became a clause about WHEN each
         # side is read -- her Strength at writing time, the target's
         # Vulnerable at the morning.
-        "Plan": [", paid now; next turn: front ",
-                 " folds in as you write it; the ",
+        "Plan": [", paid now; any number wait, in ",
+                 "order, and the badge is their count. Next turn: front ",
+                 " too, into ",
+                 " still standing. ",
+                 " folds as you write it; the ",
                  " counts next turn. A ",
                  "carry-out is not a hit: no when-hit power fires."],
         # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
@@ -11044,8 +11054,9 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
 #: without the cap clause `KokomiPlan.CapSentence` appends. The uncapped half
 #: is `ProtoBakeKuragePower.Localization` verbatim; the capped half is what a
 #: build launched with `GITS_KOKOMI_PLAN_CAP=2` prints.
-PET_FACE = ("Enemies cannot target it. Lasts all combat. Play a Plan card on "
-            "it: it carries out next turn, or at this turn's end if Dusk.")
+PET_FACE = ("Enemies cannot target it, all combat. Holds any number of "
+            "Plans; each carries out next turn, or at this turn's end if "
+            "Dusk.")
 PET_FACE_CAPPED = (PET_FACE
                    + " Carries out at most 2 at the start of your turn;"
                      " the rest wait in order.")
@@ -12506,3 +12517,90 @@ def test_a_settled_act_break_still_prints_its_own_note():
     page = blindplay.observe(second)
     assert "the act changed" in page
     assert "nothing here says which step did what" in page
+
+
+# --- a Stage round-three defect: the readers' 0 on a reward screen -----------
+
+def _stage_reader_reward_state() -> dict:
+    """THE OFFER THE ROUND-THREE SEATS TURNED DOWN.
+
+    A CARD REWARD, which is the screen the defect was filed on: the four Stage
+    readers multiply a LIVE bar, and a reward screen has no board, so the wire
+    sends the face with a literal 0 in it. `keywords` is the card's own hover
+    tips resolved by the game (`BuildCardInfo`, `McpMod.StateBuilder.cs:1452`,
+    the same field `BuildCardRewardState` sends for every offered card), and
+    that is the channel the rule arrives on -- rendered here as the mod
+    renders it off a board, rule plus the no-stage clause.
+    """
+    return {"state_type": "card_reward",
+            "player": {"character": "Furina", "hp": 61, "max_hp": 78},
+            "card_reward": {"can_skip": True, "cards": [
+                {"name": "Let the People Rejoice", "cost": "2",
+                 "type": "Attack",
+                 "description": "Spend all Fanfare on stage. Deal 0 damage "
+                                "to ALL enemies. Every performer takes a Bow, "
+                                "then returns at 1. Exhaust.",
+                 "keywords": [
+                     {"name": "What this number is",
+                      "description": "The number is every performer's Fanfare "
+                                     "added up and spent. There is no stage "
+                                     "outside combat, so the number above "
+                                     "reads 0."}]},
+                {"name": "Ousia Surge", "cost": "1", "type": "Attack",
+                 "description": "Deal 0 damage, the lead performer's Fanfare.",
+                 "keywords": [
+                     {"name": "What this number is",
+                      "description": "The number is the lead performer's "
+                                     "Fanfare. There is no stage outside "
+                                     "combat, so the number above reads "
+                                     "0."}]}]}}
+
+
+def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
+    """A STAGE ROUND-THREE DEFECT, THE PAGE'S HALF.
+
+    THE FIND (round three). "Deal 0 damage to ALL enemies" on the Rare at
+    Neow, "Deal 0 damage" on *Ousia Surge* at a reward; two seats turned the
+    Rare down on it. The face cannot say otherwise -- a description is a loc
+    string injected once at boot -- so the mod puts the rule on a hover tip,
+    and the page's job is to print it where the 0 is.
+
+    NOT A GLOSSARY ROW. The sentence is a RIDER about THIS card's number, so
+    it travels on the card's own `keywords` and renders under the face, the
+    way `Element overridden` does -- which is the channel this pins, because
+    a rule printed on a screen the reader never reaches is no fix at all.
+    """
+    page = blindplay.observe(_stage_reader_reward_state())
+
+    # The face the game prints, zero and all, unchanged.
+    assert "Deal 0 damage to ALL enemies." in page
+    # And directly under it, on both offers, what that number actually is.
+    assert ("    *What this number is* — The number is every performer's "
+            "Fanfare added up and spent. There is no stage outside combat, "
+            "so the number above reads 0.") in page
+    assert ("    *What this number is* — The number is the lead performer's "
+            "Fanfare. There is no stage outside combat, so the number above "
+            "reads 0.") in page
+
+
+def test_the_reader_fixture_is_the_mods_own_sentence():
+    """Held in step from THIS side, the way the Shatter row is: the fixture
+    above claims what the game sends, so it may not drift from the C# that
+    sends it.
+
+    THE COMPARISON IS THE RENDERED SENTENCE. The wire resolves a hover tip to
+    the text the game paints, so the markup goes and the source's own
+    line-broken concatenation is joined before the match.
+    """
+    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+           / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    plain = re.sub(r'"\s*\+\s*"', "", src)
+    plain = plain.replace("[gold]", "").replace("[/gold]", "")
+    for sentence in (
+            "The number is every performer's Fanfare added up and spent.",
+            "The number is the lead performer's Fanfare.",
+            "The number is the back performer's Fanfare.",
+            "The number is the lead performer's Fanfare, which this Bow "
+            "spends.",
+            " There is no stage outside combat, so the number above reads 0."):
+        assert sentence in plain, sentence

@@ -1501,6 +1501,25 @@ def _hand(state: dict[str, Any], loc: dict[str, str],
             "unplayable_reason": _text(entry.get("unplayable_reason_text")
                                        or entry.get("unplayable_reason")),
         })
+    # ROUND THREE (Furina, the Stage, sec.4): "two copies of one card in hand
+    # print as two rows with no numbering". The BLIND-PLAY page has numbered
+    # repeats since `EB-177` (`blindplay_board`'s hand is built through
+    # `_number_faces(..., "title")`); this packet is the parallel renderer and
+    # never got it, so two copies of *Rising Applause* reached a reader as two
+    # byte-identical `### Rising Applause` blocks -- and a reader who cannot
+    # tell two copies from one card printed twice cannot count the hand.
+    #
+    # THE SAME SCHEME AND NOT A SECOND ONE: `_number_names` folds the printed
+    # title and numbers only what repeats, so a hand of distinct cards reads
+    # exactly as it always did.
+    return _number_hand(cards)
+
+
+def _number_hand(cards: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """`blindplay_read._number_names` over the packet's hand titles."""
+    from understudy.blindplay_read import _number_names
+    for card, name in zip(cards, _number_names([c["title"] for c in cards])):
+        card["title"] = name
     return cards
 
 

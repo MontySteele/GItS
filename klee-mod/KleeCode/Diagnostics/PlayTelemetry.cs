@@ -1153,6 +1153,10 @@ public sealed class PlayTelemetryHooks : AbstractModel
         // `EB-216`. A ledger carrying one fight's rows into the next would let
         // a grader attribute a spend to the wrong fight.
         MeterLedger.ResetFight();
+        // `EB-349` / `EB-611`. The same rule for the resolution ledger, one
+        // reader over: a row from the last fight printed on this fight's first
+        // page is the `EB-447` deck defect wearing a different hat.
+        ResolutionLedger.ResetFight();
         return Task.CompletedTask;
     }
 
@@ -1199,6 +1203,15 @@ public sealed class PlayTelemetryHooks : AbstractModel
             {
                 return Task.CompletedTask;
             }
+            // `EB-349` / `EB-611`. THE ROW THIS CARD'S HITS WILL BE FILED
+            // AGAINST, opened on the same boundary the meter rows open on and
+            // under the same `IsFirstInSeries` gate. It is opened BEFORE the
+            // owner check below, deliberately: that check is about a meter
+            // living on a creature, and a card resolving is a fact whether or
+            // not anybody has a bank. `ResolutionLedger.OpenPlay` applies the
+            // gate itself so the two cannot drift apart.
+            ResolutionLedger.OpenPlay(cardPlay);
+
             var creature = cardPlay.Card.Owner?.Creature;
             if (creature == null) return Task.CompletedTask;
             string id = cardPlay.Card.Id.Entry;
@@ -1263,6 +1276,11 @@ public sealed class PlayTelemetryHooks : AbstractModel
                                          CardPlay cardPlay)
     {
         PlayTelemetry.CardPlayed(cardPlay);
+        // `EB-349` / `EB-611`. The row closes on the LAST play of the series
+        // and not the first: a replayed card is ONE row to a reader (the
+        // `IsFirstInSeries` gate on the open), and closing on play one would
+        // file the replays' hits against nothing at all.
+        if (cardPlay?.IsLastInSeries ?? true) ResolutionLedger.ClosePlay();
         return Task.CompletedTask;
     }
 
@@ -1271,6 +1289,13 @@ public sealed class PlayTelemetryHooks : AbstractModel
         Creature? dealer, CardModel? cardSource)
     {
         PlayTelemetry.Damage(target, result, dealer, cardSource);
+        // `EB-611`. THE HIT, IN HIT ORDER, under whichever card is resolving.
+        // This hook is the one place every number the game delivers arrives
+        // at, and the ledger files only the ones that land inside an open play
+        // -- so an enemy's attack, a bomb on nobody's turn and a relic's
+        // answer pass straight through, each of which has its own receipt.
+        ResolutionLedger.NoteHit(target, (int)result.UnblockedDamage,
+                                 (int)result.BlockedDamage);
         return Task.CompletedTask;
     }
 }

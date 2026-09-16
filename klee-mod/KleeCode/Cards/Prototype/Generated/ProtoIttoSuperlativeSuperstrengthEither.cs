@@ -85,8 +85,8 @@ public sealed class ProtoIttoSuperlativeSuperstrengthEither : CustomCardModel, I
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoIttoSuperlativeSuperstrengthEitherModeA>(Owner),
-            ModalChoice.CreateOption<ProtoIttoSuperlativeSuperstrengthEitherModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoIttoSuperlativeSuperstrengthEitherModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoIttoSuperlativeSuperstrengthEitherModeB>(Owner, this),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 14 damage", "Gain 6 Block" }[modeIndex]);

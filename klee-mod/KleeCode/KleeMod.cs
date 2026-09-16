@@ -571,6 +571,13 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
                         "Back performer",
                     [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
+                    // A Stage round-three defect, and a RIDER rather than a
+                    // keyword: the four readers multiply a live bar, so off a
+                    // board their faces print a literal 0. The title names
+                    // what the reader is looking at rather than a word, the
+                    // way `PlanTwiceKey`'s does.
+                    [Cards.ArmKeywordTips.ReaderKey + ".title"] =
+                        "What this number is",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

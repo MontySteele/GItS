@@ -438,10 +438,27 @@ def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():
 
 
 def test_only_the_set_off_cards_own_hit_is_an_attack():
-    """MATRIX V7. `DamageCmd.Attack` appears outside `Cards/` exactly once, in
-    `ProtoBombPower.DealCardDamage` -- the printed number a Set-off card owes
-    after its explosions, which IS an Attack and takes every T2/T3/T4 trigger.
-    A second non-card site would be a new Attack-shaped verb and a new row."""
+    """MATRIX V7. `DamageCmd.Attack` outside `Cards/` is a SHORT, NAMED LIST,
+    and each entry is a hit that IS an Attack and therefore takes every
+    T2/T3/T4 trigger. Anything else appearing here is a new Attack-shaped verb
+    and a new row.
+
+    `ProtoBombPower.DealCardDamage` is the original: the printed number a
+    Set-off card owes after its explosions.
+
+    `EB-693` ADDED THE OTHER TWO, and it is a deliberate re-answer of this
+    column rather than a copy-paste. `KokomiRules.QuarterMaxHp` and
+    `QuarterMaxHpAll` are Sango Isshin's two now-line clauses, and the card's
+    own type is `Attack`. They used to go out through `ElementalHit.Deal` --
+    the unpowered door -- so the hit took her Strength (hand-rolled by
+    `SimDamagePipeline.DealerMods`) and skipped every power that answers an
+    attack: the r29 lane-1 seat watched it ignore an Effigy's Slow that Strike
+    and Feint both took on the next turn. The D default is one damage kind,
+    Attack, with all modifiers, so the two clauses take this door now.
+
+    THE PLANNED HALF IS NOT HERE and must not be: a Plan's carry-out is the
+    jellyfish's (`EB-334`, R246 pick 1) and stays an unpowered `ElementalHit`,
+    which is what the `Plan` keyword prints."""
     sites = []
     for path in sorted(MOD.rglob("*.cs")):
         if "/Cards/" in path.as_posix() or "\\Cards\\" in str(path):
@@ -453,6 +470,8 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # The path and the count are the pin; the line number is not (it moved
     # 1315 -> 1386 under an unrelated edit and turned main red on #549).
     assert [path for path, _line in sites] == [
+        "Powers/Prototype/ProtoBakeKuragePower.cs",
+        "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBombPower.cs"]
 
 

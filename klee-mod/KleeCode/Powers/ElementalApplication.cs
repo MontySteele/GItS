@@ -199,6 +199,12 @@ public sealed class KleeElementalHooks : AbstractModel
         // `EB-695`: the relic-answer log takes the same mark from the same
         // broadcast, so the two receipts on one page name one boundary.
         RelicAnswerLog.MarkPlayerTurnEnd();
+        // `EB-349` / `EB-611`: and the resolution ledger, third on the same
+        // boundary. It is the one the carry was FILED about -- a relic that
+        // plays a turn for you plays it on the far side of this line, so a
+        // ledger cleared on the wrong window would drop exactly the turn
+        // nobody watched.
+        ResolutionLedger.MarkPlayerTurnEnd();
         foreach (var creature in participants)
         {
             if (creature.Player != null)

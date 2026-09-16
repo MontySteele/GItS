@@ -126,7 +126,16 @@ EXCEPTIONS = {
         "sentence at the same call one kit over, and every clause above it is "
         "a seat's finding: the aim, the ALL exception, and whose modifiers a "
         "carry-out reads (EB-329, R250, EB-380, EB-538). None is droppable to "
-        "make room"),
+        "make room. `EB-330` / `EB-563` / `EB-411` then added the three facts "
+        "the blind-play page carried and the word did not, in one rewrite: "
+        "that any number of Plans wait in order and the badge is their COUNT "
+        "and not a cap (three r4c seats read `Plan 1` as a capacity and the "
+        "r20 lane-2 seat wrote one Plan at a time for four fights), and that a "
+        "carry-out lands in the Block the enemy is still standing in from its "
+        "own turn (a Plating 8 Sewer Clam ate a whole Plan, Kokomi r10 run 2). "
+        "Six findings on one word, twinned to `PLAN_COUNT_NOTE` and "
+        "`PLAN_BLOCK_NOTE`; the ceiling buys nothing a seat has not already "
+        "paid for by reading the board wrong"),
     "ProtoBakeKuragePower.descriptionCapped": (
         "`EB-653` (Kokomi r24). The cap lane's face, and it exists only under "
         "`GITS_KOKOMI_PLAN_CAP` -- a default build prints the row above it, "
@@ -384,6 +393,12 @@ def tip_rows() -> list[Row]:
             r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
         if "SparkBody()" in body or "EncoreBody()" in body:
             continue
+        # A Stage round-three defect: the readers' tip picks one of four
+        # `const string` rules and appends a fifth off the board, so the call
+        # carries no literal at all and reaches this census as an empty
+        # string. Parsed out by name below, `EncoreKey`'s bargain exactly.
+        if "ReaderNoStage" in body:
+            continue
         rows.append(Row("tip", name, csharp_text(body), where))
     concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
     word = csharp_text(re.search(r"const string word =\s*" + concat + ";", src).group(1))
@@ -406,6 +421,21 @@ def tip_rows() -> list[Row]:
     off = re.search(r'return absorbs \+ ("One pool(?:[^;])*);', src)
     rows.append(Row("tip", "EncoreKey",
                     absorbs + csharp_text(off.group(1)), where))
+    # A Stage round-three defect. THE READERS' FOUR RULES, each measured AS
+    # RENDERED OFF THE BOARD -- rule plus the no-stage clause -- because that
+    # is the longest the tip is ever printed and the screen it was filed on.
+    # Four rows and not one, for `SparkKey`'s reason two blocks up: a switch
+    # with four arms is four faces, and a ceiling met by the shortest of them
+    # is no ceiling at all.
+    no_stage = csharp_text(
+        re.search(r"const string ReaderNoStage =\s*" + concat + ";",
+                  src).group(1))
+    for rule in ("ReaderLeadRule", "ReaderBackRule",
+                 "ReaderSpendLeadRule", "ReaderSpendAllRule"):
+        body = csharp_text(
+            re.search(rf"const string {rule} =\s*" + concat + ";",
+                      src).group(1))
+        rows.append(Row("tip", f"ReaderKey.{rule}", body + no_stage, where))
     return rows
 
 

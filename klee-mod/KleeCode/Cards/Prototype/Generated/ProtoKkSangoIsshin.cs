@@ -71,7 +71,7 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
     {
         if (KokomiOverhaulLedger.For(Owner.Creature).PlanCarriedOutThisTurn)
         {
-            await KokomiRules.QuarterMaxHpAll(choiceContext, Owner.Creature);
+            await KokomiRules.QuarterMaxHpAll(choiceContext, Owner.Creature, this, cardPlay);
         }
         else
         {

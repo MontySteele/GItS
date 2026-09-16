@@ -91,6 +91,54 @@ public static class ModalChoice
         owner.Creature!.CombatState!.CreateCard(ModelDb.Card<T>(), owner);
 
     /// <summary>
+    /// ROUND THREE: THE SAME OPTION, CARRYING THE PARENT'S UPGRADE STATE.
+    ///
+    /// "The mode chooser's option faces print sheet literals: unupgraded (8/12
+    /// in hand, 5/9 in the chooser) and unfolded under Weak (7/15 in hand,
+    /// 10/20 in the chooser); asking by the hand's wording is refused."
+    ///
+    /// TWO HALVES, AND THIS IS THE SECOND. Codegen now gives an option face the
+    /// PARENT's wording and the PARENT's <c>CanonicalVars</c>, so the tokens
+    /// resolve and the game's own preview folds Weak, Strength and the rest
+    /// over them exactly as it does in the hand. What a fresh
+    /// <c>CreateCard</c> cannot know is whether the copy in the hand has been
+    /// smithed -- an option is built from a canonical template every play -- so
+    /// the upgrade is applied here, from the parent, and the emitted
+    /// <c>OnUpgrade</c> on the option carries the parent's own
+    /// <c>DynamicVars[...]</c> bumps and nothing else (an option has no Energy
+    /// cost to move).
+    ///
+    /// <paramref name="parent"/> is the card being played, which is the only
+    /// copy that knows. A null parent is the unupgraded read, which is what
+    /// every option printed before this row.
+    ///
+    /// A DISTINCT NAME rather than an overload of <see cref="CreateOption{T}"/>
+    /// -- <see cref="SelectAffordableMode"/>'s rule, for its reason, and this
+    /// row met it: the structural pins reach a method by name through
+    /// <c>Type.GetMethod</c>, which threw <c>AmbiguousMatchException</c> on the
+    /// overload pair and took <c>ModalChoicePinTests</c>'s
+    /// <c>Option_cards_are_combat_scoped_owned_instances</c> down with it.
+    /// </summary>
+    public static CardModel CreateMatchingOption<T>(
+        Player owner, CardModel? parent) where T : CardModel
+    {
+        var option = CreateOption<T>(owner);
+        // `UpgradeInternal` and not a <c>CardCmd</c>: this is the same call the
+        // bridge makes to build an upgraded FACE
+        // (<c>McpMod.Helpers.SafeBuildUpgradedCardPreview</c>) -- it moves the
+        // model's own numbers and opens no screen, plays no vfx and touches no
+        // pile, which is all an option face needs. <c>IsUpgradable</c> guards
+        // it, so an option whose class declares no upgrade path is simply left
+        // where it is rather than throwing on the choose screen.
+        if (parent is { IsUpgraded: true }
+            && option.IsUpgradable && !option.IsUpgraded)
+        {
+            option.UpgradeInternal();
+        }
+        return option;
+    }
+
+    /// <summary>
     /// Ask the player which mode to take. Returns the mode INDEX, in the order
     /// the sheet printed the modes, which is the order both engines record.
     /// </summary>

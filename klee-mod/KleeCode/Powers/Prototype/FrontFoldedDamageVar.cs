@@ -176,11 +176,81 @@ public sealed class FoldedDamageVar : DamageVar
         // this branch prints the OTHER half of one conditional face, so the
         // two halves have to fold under one rule or the sentence argues with
         // itself again.
-        base.UpdateCardPreview(
-            card, previewMode,
-            HitOrder.BodyForPreview(
-                card, previewMode, target,
-                KokomiPlan.FrontEnemy(card.Owner?.Creature)),
-            runGlobalHooks);
+        var body = HitOrder.BodyForPreview(
+            card, previewMode, target,
+            KokomiPlan.FrontEnemy(card.Owner?.Creature));
+        base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+        if (card.Owner?.Creature == null) return;
+        // `EB-388` / `EB-498`: AND THE SPOTLIGHT, WHICH IS NOT A HOOK. The
+        // emitted play wraps every branch leg of a Companion row in
+        // <c>SpotlightSystem.PrintedDamage</c> -- so under Guest Cast the leg
+        // already PAYS the multiplied number, and only the face was behind
+        // (Furina r2 run 2; r3's Freminet printing 6 and paying 9).
+        // `PrintedDamageDelta`'s own note says why it cannot ride
+        // `Hook.ModifyDamage`: Spotlight multiplies the PRINTED number and
+        // adds its flat bonus ahead of Strength and Vulnerable, and routing it
+        // through the hook would fold Strength into the multiplier and change
+        // the resolved hit.
+        //
+        // IDENTITY EVERYWHERE ELSE, which is why it is unconditional here:
+        // <c>PrintedDamage</c> takes <c>OutwardMultiplier</c> 1 and returns
+        // its argument for any card that is not a spotlighted
+        // <c>ICompanionCard</c> -- every Kokomi and Klee row that prints a
+        // branch pair reads exactly what it read before.
+        //
+        // FOLDED FIRST AND HOOKED SECOND, `SpotlitBlockVar`'s order and for
+        // its reason: the play hands <c>DamageCmd.Attack</c> the printed
+        // number and the game's terms apply to THAT, so a percentage must not
+        // compound against the wrong base.
+        var folded = new DamageVar(
+            Name, SpotlightSystem.PrintedDamage(card, BaseValue), Props);
+        folded.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+        PreviewValue = folded.PreviewValue;
+    }
+}
+
+/// <summary>
+/// `EB-498` / `EB-388`: <see cref="FoldedDamageVar"/>'s BLOCK twin -- a named
+/// <c>BlockVar</c> whose preview runs the game's block hooks over the number
+/// the play will actually gain.
+///
+/// WHY IT EXISTS. A conditional face's Block arm is a second Block number on
+/// one card, so it cannot be <c>CalculatedBlockVar</c> (one
+/// <c>CalculationBase</c> per card) and it cannot be
+/// <see cref="SpotlightSystem.SpotlitBlockVar"/> either, whose token is the
+/// card's own <c>Block</c> slot. It is the game's own <c>BlockVar</c> under a
+/// token of its own -- `EB-737`'s shape -- plus the Spotlight fold the
+/// emitted play already applies (<c>PrintedBlock</c>), so "gain 4 additional
+/// Block" prints 6 under Guest Cast where the card gains 6.
+///
+/// IDENTITY OFF A COMPANION ROW, for <see cref="FoldedDamageVar"/>'s reason:
+/// <c>PrintedBlock</c> returns its argument for anything that is not a
+/// spotlighted <c>ICompanionCard</c>.
+///
+/// IT SUBCLASSES <c>BlockVar</c> AND THAT IS LOAD-BEARING
+/// (<c>SpotlitBlockVar</c>'s own note): <c>DynamicVarSet</c> casts, and a
+/// plain <c>DynamicVar</c> under a Block token throws the first time the card
+/// is played.
+///
+/// QUARANTINED, in this file and by this file's csproj rule.
+/// </summary>
+public sealed class FoldedBlockVar : BlockVar
+{
+    public FoldedBlockVar(string name, decimal amount, ValueProp props)
+        : base(name, amount, props)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+        if (!runGlobalHooks || !card.IsMutable) return;
+        if (card.Owner?.Creature == null) return;
+        var folded = new BlockVar(
+            Name, SpotlightSystem.PrintedBlock(card, BaseValue), Props);
+        folded.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+        PreviewValue = folded.PreviewValue;
     }
 }
