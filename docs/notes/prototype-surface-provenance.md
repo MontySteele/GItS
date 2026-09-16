@@ -8,6 +8,33 @@ A heading names the row the block was attached to. `before <id>`
 means a column-0 section note that sat above that row. `header` is
 the file header. Blocks of three lines or fewer stayed in the sheet.
 
+## RETIRED — the Sparks alternative-cost arm's eleven rows (`EB-750`)
+
+The blocks that used to sit here for `proto_pop_spark`, `proto_kaboom_sink`,
+`proto_spark_strike` (Fwoosh!), `proto_spark_sweep` (Tinder Toss),
+`proto_spark_double_tap` (Bang Bang!), `proto_spark_blast` (Dodoco Blast),
+`proto_spark_finisher` (Firework Finale), `proto_true_spark_knight` (Spark
+Knight's Oath), `proto_powder_charge_spark` (Set It Off),
+`proto_hold_the_line_spark` (Dig In) and `proto_smoke_and_sparks_spark` (Powder
+Smoke) went with those rows on 2026-09-16.
+
+R270 ruled Spark a CURRENCY under `KLEE_OVERHAUL`, which superseded the whole
+alternative-cost pool, so the surface's own deletion rule applied: the rows, the
+two substitution maps (`SPARK_ALT_STARTER_SUBS`, `SPARK_ALT_POOL_SUBS`), the
+derived `KLEE_SPARK_ALT_ROWS` and the C# starter seam left HEAD together.
+
+Retrieval — the last tree that carried them:
+
+```
+git fetch --depth=1 origin 036c12d150d6dbd58f0776a0d07e3c028a321a61
+git show 036c12d150d6dbd58f0776a0d07e3c028a321a61:docs/notes/prototype-surface-provenance.md
+git show 036c12d150d6dbd58f0776a0d07e3c028a321a61:docs/prototype-surface.yaml
+```
+
+The arm's design reasoning is `review/ruled/klee-sparks-2026-08-29.md`; the
+published `KLEESPARK` reads stand as published (R101b) and are not re-graded by
+this deletion.
+
 ## header
 
 ```
@@ -640,158 +667,6 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # one: it prints the ruled 3 and, past a campfire, the ruled 5, off the same
 # var `EB-213`'s upgrade delta moves.
 # =============================================================================
-```
-
-## before proto_pop_spark
-
-```
-# ---------- PICK 1: the starter's Basic that MAKES ---------------------------
-# Shipped twin: `pop` / "Pop!" (0, Skill, Basic, skill_tag -- one Bomb at 5).
-# Cost, type, rarity, tag and the Bomb are unmoved; a Spark rider joins them,
-# which is the packet's option 1 verbatim: "the natural home is `pop` (0
-# energy, places a bomb), which becomes 'place a Bomb, gain 1 Spark'."
-#
-# WHY THE BUFFER GOES ON A CARD AND NOT ON THE RELIC (options 2 and 3): the
-# relic's grant would be unsteerable income, and the seat cited D2's "the
-# control must be reachable early and reliably -- starter kit, starting relic,
-# base system, or the ordinary pool" for putting it on a card the player
-# chooses to play. Pounding Surprise keeps its body unchanged and untouched.
-```
-
-## before proto_pop_spark
-
-```
-# ---------- PICK 1: the starter's Basic that MAKES ---------------------------
-# Shipped twin: `pop` / "Pop!" (0, Skill, Basic, skill_tag -- one Bomb at 5).
-# Cost, type, rarity, tag and the Bomb are unmoved; a Spark rider joins them,
-# which is the packet's option 1 verbatim: "the natural home is `pop` (0
-# energy, places a bomb), which becomes 'place a Bomb, gain 1 Spark'."
-#
-# WHY THE BUFFER GOES ON A CARD AND NOT ON THE RELIC (options 2 and 3): the
-# relic's grant would be unsteerable income, and the seat cited D2's "the
-# control must be reachable early and reliably -- starter kit, starting relic,
-# base system, or the ordinary pool" for putting it on a card the player
-# chooses to play. Pounding Surprise keeps its body unchanged and untouched.
-```
-
-## before proto_kaboom_sink
-
-```
-# ---------- PICK 1: the starter's Basic that SPENDS --------------------------
-# Shipped twin: `kaboom` / "Kaboom!" (1, Attack, Basic -- 7 damage). The
-# packet's option 5: "`kaboom` becomes 0 energy / Spend 1 Spark. This is
-# `FallingStar`'s exact role." The damage figure does not move, so the whole
-# delta is the CURRENCY: this Attack is bought with the bank instead of with
-# the turn.
-#
-# ONE COPY, NOT FOUR, AND THE PACKET DOES NOT SAY WHICH. Klee's starter holds
-# four `kaboom` and one `pop`; Regent's holds one generator and one sink out
-# of ten. Substituting one copy of each is the reading that "matches their
-# generation pattern" ([USER], sec.1(a)); substituting all four `kaboom` would
-# make four of her ten opening cards unplayable on an empty bank. The seam at
-# `loader._starter_ids` does one of each and says so; it goes back to [USER]
-# in the packet's sec.10.
-```
-
-## before proto_spark_strike
-
-```
-# Candidate 1, renamed. sec.4.2: "Spend 1 / 8 damage", mirroring Regent's
-# `GuidingStar` (1 star, 12 damage). Its twin on the printed sheet is
-# `sparkly_treasure`, whose entire body is "gain 1 Spark" -- the purest
-# generator in the pool becoming the cheapest sink in it.
-```
-
-## before proto_spark_strike
-
-```
-# Candidate 1, renamed. sec.4.2: "Spend 1 / 8 damage", mirroring Regent's
-# `GuidingStar` (1 star, 12 damage). Its twin on the printed sheet is
-# `sparkly_treasure`, whose entire body is "gain 1 Spark" -- the purest
-# generator in the pool becoming the cheapest sink in it.
-```
-
-## before proto_spark_double_tap
-
-```
-# sec.4.2 candidate 3. Spend 2 / 5 damage to a random enemy, twice --
-# mirroring `FallingStar`, Regent's own Basic sink, at his own price.
-# `times: 2` is the sheet's standard multi-hit count (jumpy_dumpty,
-# pocket_fireworks).
-```
-
-## before proto_spark_finisher
-
-```
-# sec.4.2 candidate 5. Spend 3, Exhaust / 18 damage single target, mirroring
-# `Devastate` (4 stars, the big hit). Three Sparks is Regent's median sink and
-# the retired threshold's own number, so this card is the direct question the
-# slice asks: is a full bank worth more as this, or as the free Attack the
-# rule used to hand out?
-```
-
-## before proto_true_spark_knight
-
-```
-# THE EIGHTH ROW, and it is the RULE the other seven are priced against
-# (sec.5, PICK 5 wording (1) STRICT, sub-pick (a); the independent seat FOLLOWS
-# on both). It replaces the shipped `true_spark_knight`'s body, which dies with
-# the base rule -- a modifier to a threshold that does not exist. Same id shape,
-# same rarity, same cost; only the rule moved.
-#
-# THE GENERATOR REFUSED THIS ROW ON THE SIM BRANCH BY NAME -- "apply_power power
-# 'spark_attack_cost' (no PowerModel in the registry)" -- and the refusal was
-# left standing rather than worked around, because a row emitting a reference to
-# a class that does not exist is a prototype that cannot be staged. The class
-# now exists (`klee-mod/KleeCode/Powers/Prototype/SparkAttackCostPower.cs`,
-# compiled only under -p:PrototypeCards=true) and the row goes on.
-#
-# `amount: 1` is ONE STACK, not the price. The price is a constant of the rule
-# (3, tier0 C.SPARK_ATTACK_POWER_PRICE); the registry template prints it as a
-# literal for exactly that reason.
-```
-
-## before proto_powder_charge_spark
-
-```
-# Shipped twin: `powder_charge` / "Powder Charge" (docs/klee-cards.yaml:248 --
-# 1 Energy, Spend 2 Sparks, Uncommon Skill: detonate the target's Bombs for
-# +4 each). Cost 1 -> 0; the Spark price, the detonation and the +4 are
-# unmoved. Its shipped caveats ride along unchanged: dead on an unbombed
-# target, and the bank is spent either way.
-```
-
-## before proto_powder_charge_spark
-
-```
-# Shipped twin: `powder_charge` / "Powder Charge" (docs/klee-cards.yaml:248 --
-# 1 Energy, Spend 2 Sparks, Uncommon Skill: detonate the target's Bombs for
-# +4 each). Cost 1 -> 0; the Spark price, the detonation and the +4 are
-# unmoved. Its shipped caveats ride along unchanged: dead on an unbombed
-# target, and the bank is spent either way.
-```
-
-## before proto_hold_the_line_spark
-
-```
-# Shipped twin: `hold_the_line` / "Hold the Line" (docs/klee-cards.yaml:303 --
-# 1 Energy, Spend 2 Sparks, Uncommon Skill: Block 5, and 6 more if the enemy
-# intends to attack). Cost 1 -> 0; both Block halves and the conditional are
-# unmoved. This is the row sec.14.2's candidate 3 (Behind the Barrel) turned
-# out to be a duplicate of, which is the finding that produced option (5) --
-# so migrating it is what makes minting that candidate unnecessary.
-```
-
-## before proto_smoke_and_sparks_spark
-
-```
-# Shipped twin: `smoke_and_sparks` / "Smoke and Sparks"
-# (docs/klee-cards.yaml:320 -- 1 Energy, Spend 2 Sparks, Uncommon Skill: apply
-# 3 Vulnerable). Cost 1 -> 0; the three stacks are unmoved. Note the shipped
-# row's own exchange-rate comment prices the Sparks against `surprise_visit`
-# (1 Energy, 2 Vulnerable) -- with the Energy gone that comparison is no
-# longer the one the card makes, and re-reading it is acceptance work, not
-# this row's.
 ```
 
 ## before proto_muster_subsidy_funnel

@@ -5492,7 +5492,7 @@ def test_the_map_prints_the_gold_and_the_deck():
     assert "## Your deck" in page
     # A title the run holds one of, and the upgrade mark on the copy that
     # carries it -- the grammar's own `(upgraded)` spelling.
-    assert "- **Powder Charge**" in page
+    assert "- **Bag of Tricks**" in page
     assert "- **Ka-pow! (upgraded)**" in page
     # Repeats are counted rather than listed, and the staleness travels with
     # the list.
@@ -8327,8 +8327,11 @@ def upgrade_run_states() -> tuple[dict, dict]:
                       "description": "Gain 5 Block."}
                      for i, name in enumerate(grid)],
             "draw_pile": [
-                {"id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
-                 "name": "Powder Charge", "type": "Skill", "cost": "0",
+                # `EB-750` retired `PROTO_POWDER_CHARGE_SPARK` with the
+                # rest of the superseded Sparks pool, so the row this clause
+                # needs -- one on `UPGRADE_DEBT` -- is `Bag of Tricks`.
+                {"id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+                 "name": "Bag of Tricks", "type": "Skill", "cost": "0",
                  "description": "Place a Bomb 6."},
                 {"id": "KLEEMOD-PROTO_KO_KAPOW", "name": "Ka-pow!",
                  "type": "Attack", "cost": "0", "is_upgraded": True,
@@ -8361,7 +8364,7 @@ def test_the_smith_says_why_a_card_is_not_on_its_list():
     blindplay.observe(fight)
     page = blindplay.observe(smith)
     assert "## Not on this list, and why" in page
-    assert ("- **Powder Charge** — " + blindplay.NO_UPGRADE_DEFINED) \
+    assert ("- **Bag of Tricks** — " + blindplay.NO_UPGRADE_DEFINED) \
         in page
     assert ("- **Ka-pow!** — " + blindplay.ALREADY_UPGRADED) in page
     assert ("- **Sizzle** — " + blindplay.UNEXPLAINED_OMISSION) in page
@@ -8395,7 +8398,7 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
     numbers, which is exactly what may not reach a blind page. Only the key set
     is read, and the page writes its own plain sentence."""
     index = qa_packet.no_upgrade_index()
-    assert "PROTO_POWDER_CHARGE_SPARK" in index
+    assert "PROTO_SPARK_MODE_BOMBS" in index
     assert "PROTO_SHINOBU_SANCTIFYING_RING_EITHER" in index
     for entry in index:
         assert entry == entry.upper()

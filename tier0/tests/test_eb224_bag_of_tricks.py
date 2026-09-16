@@ -190,19 +190,16 @@ def test_a_card_with_this_price_on_every_mode_is_refused_whole(state):
 def test_the_row_replaces_no_shipped_row_in_any_pool():
     """THE STAGING PATH IS A GRANT BY ID, like its three slice-1 siblings.
 
-    `C.SPARK_ALT_POOL_SUBS` is the SPARKS packet's own one-for-one conversion
-    map (PICK 4) and carries none of the four slice-1 arms. The only shipped
-    row this arm names is `pop`, its cheap mode's twin -- and `pop` is a BASIC
-    starter card, substituted through the other seam entirely
-    (`C.SPARK_ALT_STARTER_SUBS`), so it is not a pool row at all. There is
-    nothing here to swap one-for-one, and inventing a donor Uncommon would be
-    a picked number in a slice that has none.
+    It never had a pool seam: `C.SPARK_ALT_POOL_SUBS` was the SPARKS packet's
+    one-for-one conversion map (PICK 4) and carried none of the four slice-1
+    arms. Since `EB-750` there is no such map at all -- R270 superseded the
+    eleven priced rows and both substitution maps went with them -- so the
+    claim is now the flat one: NO arm substitutes this row in, at either door.
     """
-    assert ROW_ID not in C.SPARK_ALT_POOL_SUBS.values()
-    assert ROW_ID not in dict(C.SPARK_ALT_STARTER_SUBS).values()
-    # `pop` is where it always was: the starter seam, not the pool seam.
-    assert dict(C.SPARK_ALT_STARTER_SUBS)["pop"] == "proto_pop_spark"
-    assert "pop" not in C.SPARK_ALT_POOL_SUBS
+    assert ROW_ID not in loader.declared_pool_substitutions().values()
+    assert ROW_ID not in loader.declared_starter_substitutions().values()
+    assert not hasattr(C, "SPARK_ALT_POOL_SUBS")
+    assert not hasattr(C, "SPARK_ALT_STARTER_SUBS")
 
 
 @pytest.mark.parametrize("flag", [False, True])

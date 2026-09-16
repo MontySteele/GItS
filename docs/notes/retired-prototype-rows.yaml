@@ -1,0 +1,246 @@
+# RETIRED PROTOTYPE ROWS -- FROZEN, AND NOT A SECOND SURFACE.
+#
+# `EB-750`, 2026-09-16. R270 ruled Spark a CURRENCY under `KLEE_OVERHAUL`,
+# which superseded the Sparks alternative-cost arm whole. Its eleven rows left
+# `docs/prototype-surface.yaml` under that sheet's own deletion rule, together
+# with both substitution maps, the derived `KLEE_SPARK_ALT_ROWS`, the emitted
+# C# classes and the C# starter seam. They read back at commit
+# 036c12d150d6dbd58f0776a0d07e3c028a321a61.
+#
+# WHY THE FACES SURVIVE HERE AND NOTHING ELSE DOES. `KLEESPARK-R1`, `-R2`,
+# `-BT1`, `-BT2` and `-BT3` are SEALED records (R101b): their boards, their
+# graded forms and the locks written on them
+# (`tier0/tests/test_seat_instruments.py`) name these cards by printed TITLE,
+# and a replay that cannot resolve a title cannot say whether the play aimed.
+# Deleting the rows outright would therefore have struck a published record's
+# machinery, which R101b forbids, so the FACES are frozen here and read by
+# exactly one door: `understudy/resource_order.SHEETS`, the printed-title index
+# a sealed record is replayed through.
+#
+# WHAT THIS FILE IS NOT. It is in no pool, no reward, no shop, no draft, no
+# digest and no version stamp; `tier0/content/loader.py` never reads it; no
+# codegen emits from it; no row here can be granted. Nothing is ever ADDED to
+# it except by the same route -- a superseded row that a sealed record names --
+# and a row whose records are archived leaves it.
+
+- id: proto_pop_spark
+  name: Powder Pop
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: skill
+  rarity: basic
+  solve:
+  - frontload
+  archetypes:
+  - demolition
+  role: enabler
+  tags:
+  - skill_tag
+  effects:
+  - op: place_bomb
+    amount: 1
+    target: enemy
+    bomb_damage: 5
+  - op: gain_spark
+    amount: 1
+- id: proto_kaboom_sink
+  name: Ka-pow!
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: attack
+  rarity: basic
+  solve:
+  - frontload
+  archetypes:
+  - generic
+  role: glue
+  effects:
+  - op: spend_spark
+    amount: 1
+  - op: damage
+    amount: 7
+    target: enemy
+- id: proto_spark_strike
+  name: Fwoosh!
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: attack
+  rarity: common
+  solve:
+  - frontload
+  archetypes:
+  - spark
+  role: payoff
+  effects:
+  - op: spend_spark
+    amount: 1
+  - op: damage
+    amount: 8
+    target: enemy
+- id: proto_spark_sweep
+  name: Tinder Toss
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: attack
+  rarity: common
+  solve:
+  - frontload
+  archetypes:
+  - spark
+  role: payoff
+  effects:
+  - op: spend_spark
+    amount: 1
+  - op: damage
+    amount: 4
+    target: all_enemies
+- id: proto_spark_double_tap
+  name: Bang Bang!
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: attack
+  rarity: common
+  solve:
+  - frontload
+  archetypes:
+  - spark
+  role: payoff
+  effects:
+  - op: spend_spark
+    amount: 2
+  - op: damage
+    amount: 5
+    target: random_enemy
+    times: 2
+- id: proto_spark_blast
+  name: Dodoco Blast
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: attack
+  rarity: uncommon
+  solve:
+  - frontload
+  archetypes:
+  - spark
+  role: payoff
+  effects:
+  - op: spend_spark
+    amount: 2
+  - op: damage
+    amount: 7
+    target: all_enemies
+- id: proto_spark_finisher
+  name: Firework Finale
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: attack
+  rarity: uncommon
+  solve:
+  - frontload
+  archetypes:
+  - spark
+  role: payoff
+  exhaust: true
+  effects:
+  - op: spend_spark
+    amount: 3
+  - op: damage
+    amount: 18
+    target: enemy
+- id: proto_true_spark_knight
+  name: Spark Knight's Oath
+  character: klee
+  authored_by:
+  - claude
+  cost: 2
+  type: power
+  rarity: rare
+  solve:
+  - scaling
+  archetypes:
+  - spark
+  role: payoff
+  effects:
+  - op: apply_power
+    power: spark_attack_cost
+    amount: 1
+    target: self
+    note: Attacks that do not already cost Sparks cost 3 Sparks and 0 Energy
+- id: proto_powder_charge_spark
+  name: Set It Off
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: skill
+  rarity: uncommon
+  solve:
+  - utility
+  archetypes:
+  - demolition
+  - spark
+  role: glue
+  effects:
+  - op: spend_spark
+    amount: 2
+  - op: detonate
+    target: enemy
+    bonus: 4
+- id: proto_hold_the_line_spark
+  name: Dig In
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: skill
+  rarity: uncommon
+  solve:
+  - block
+  archetypes:
+  - spark
+  role: glue
+  effects:
+  - op: spend_spark
+    amount: 2
+  - op: block
+    amount: 5
+  - op: conditional
+    if: enemy_intends_attack
+    then:
+    - op: block
+      amount: 6
+- id: proto_smoke_and_sparks_spark
+  name: Powder Smoke
+  character: klee
+  authored_by:
+  - claude
+  cost: 0
+  type: skill
+  rarity: uncommon
+  solve:
+  - utility
+  archetypes:
+  - spark
+  - generic
+  role: glue
+  effects:
+  - op: spend_spark
+    amount: 2
+  - op: apply_power
+    power: vulnerable
+    amount: 3
+    target: enemy

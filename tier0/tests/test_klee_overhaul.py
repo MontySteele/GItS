@@ -167,14 +167,21 @@ def test_the_overhaul_ids_do_not_resolve_with_the_flag_off():
     loader.reset_arm_caches()
 
 
-def test_the_sparks_arm_is_untouched():
-    """The overhaul is a THIRD arm. Editing the Sparks arm's constants would
-    make its OFF/ON pair incomparable, which is the one thing a two-arm flag
-    exists to prevent."""
+def test_the_sparks_arms_rule_stands_and_its_content_is_gone():
+    """`EB-750`. The overhaul was a THIRD arm and the Sparks arm's RULE is
+    still untouched -- editing that would make its published OFF/ON pair
+    incomparable, which is the one thing a two-arm flag exists to prevent.
+
+    What DID go is the arm's CONTENT, and R270 is why: it ruled Spark a
+    currency under this arm, which superseded all eleven priced rows, so the
+    rows, both substitution maps and the derived `KLEE_SPARK_ALT_ROWS` left
+    HEAD together (commit 036c12d150d6dbd58f0776a0d07e3c028a321a61). The two
+    names below are asserted ABSENT rather than deleted from the test, so a
+    re-introduction has to argue with a lock."""
     assert C.SPARK_ALT_COST_ENABLED is False
-    assert dict(C.SPARK_ALT_STARTER_SUBS) == {
-        "pop": "proto_pop_spark", "kaboom": "proto_kaboom_sink"}
-    assert len(C.SPARK_ALT_POOL_SUBS) == 9
+    assert not hasattr(C, "SPARK_ALT_STARTER_SUBS")
+    assert not hasattr(C, "SPARK_ALT_POOL_SUBS")
+    assert not hasattr(C, "KLEE_SPARK_ALT_ROWS")
     assert C.KURAGE_MEMORY is False or C.KURAGE_MEMORY is True   # still there
 
 

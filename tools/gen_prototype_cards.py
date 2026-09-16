@@ -248,29 +248,18 @@ _DEBT_SPARK_ARM = (
 #: arm's alone, which is the one arm the Prototype-stage rule never claimed.
 UPGRADE_DEBT: dict[str, str] = {
     # The Spark arm and its migration twins (`EB-218`, R224).
-    "proto_hold_the_line_spark": _DEBT_SPARK_ARM,
     "proto_itto_superlative_superstrength_either": _DEBT_SPARK_ARM,
     "proto_itto_superlative_superstrength_priced": _DEBT_SPARK_ARM,
-    "proto_kaboom_sink": _DEBT_SPARK_ARM,
     "proto_muster_subsidy_funnel": _DEBT_SPARK_ARM,
     "proto_pearl_barrage_turn": _DEBT_SPARK_ARM,
-    "proto_pop_spark": _DEBT_SPARK_ARM,
-    "proto_powder_charge_spark": _DEBT_SPARK_ARM,
     "proto_shinobu_sanctifying_ring_either": _DEBT_SPARK_ARM,
     "proto_shinobu_sanctifying_ring_priced": _DEBT_SPARK_ARM,
-    "proto_smoke_and_sparks_spark": _DEBT_SPARK_ARM,
-    "proto_spark_blast": _DEBT_SPARK_ARM,
     "proto_spark_burst_conversion": _DEBT_SPARK_ARM,
-    "proto_spark_double_tap": _DEBT_SPARK_ARM,
-    "proto_spark_finisher": _DEBT_SPARK_ARM,
     "proto_spark_mode_bombs": _DEBT_SPARK_ARM,
     "proto_spark_priced_draw": _DEBT_SPARK_ARM,
     "proto_spark_priced_strike": _DEBT_SPARK_ARM,
-    "proto_spark_strike": _DEBT_SPARK_ARM,
-    "proto_spark_sweep": _DEBT_SPARK_ARM,
     "proto_thoma_crimson_ooyoroi_either": _DEBT_SPARK_ARM,
     "proto_thoma_crimson_ooyoroi_priced": _DEBT_SPARK_ARM,
-    "proto_true_spark_knight": _DEBT_SPARK_ARM,
 }
 
 

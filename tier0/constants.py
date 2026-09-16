@@ -115,57 +115,24 @@ SPARK_ALT_COST_ENABLED = False
 # the Power charges exactly what the base rule used to hand out for free.
 SPARK_ATTACK_POWER_PRICE = 3
 
-# THE STARTER SUBSTITUTIONS (PICK 1, options 1 and 5 together -- the seat:
-# "Options 1 and 5 together follow"). Both are proto rows on
-# docs/prototype-surface.yaml and both enter through the ONE seam at
-# `loader._starter_ids`; NO PRINTED SHEET MOVES. Regent's ten-card starter
-# ships exactly one generator (Venerate) and exactly one sink (FallingStar),
-# so exactly ONE COPY of each is substituted here -- see the seam for the
-# decision that leaves for [USER].
-SPARK_ALT_STARTER_SUBS: tuple[tuple[str, str], ...] = (
-    ("pop", "proto_pop_spark"),          # opt 1: the Basic that MAKES
-    ("kaboom", "proto_kaboom_sink"),     # opt 5: the Basic that SPENDS
-)
-
-# THE OFFERABLE-POOL SUBSTITUTIONS -- PICK 4's own one-for-one map, read at
-# `loader._pool_substitutions` under this same flag and nowhere else.
+# THE STARTER AND POOL SUBSTITUTIONS ARE DELETED (`EB-750`, R270). The arm's
+# eleven prototype rows -- `proto_pop_spark`, `proto_kaboom_sink`,
+# `proto_spark_strike` (Fwoosh!), `proto_spark_sweep`, `proto_spark_double_tap`,
+# `proto_spark_blast`, `proto_spark_finisher`, `proto_true_spark_knight` and the
+# three migrated hybrid spenders -- were SUPERSEDED when R270 ruled Spark a
+# CURRENCY under `KLEE_OVERHAUL`, so they were unreachable by any door and the
+# prototype surface's own deletion rule applies. The rows, both substitution
+# maps (`SPARK_ALT_STARTER_SUBS`, `SPARK_ALT_POOL_SUBS`), the derived
+# `KLEE_SPARK_ALT_ROWS` and the C# starter seam left HEAD together; they are
+# retrievable at commit `036c12d150d6dbd58f0776a0d07e3c028a321a61`, and the
+# provenance for each row is under that commit in
+# `docs/notes/prototype-surface-provenance.md`.
 #
-# WHY IT EXISTS. `KLEESPARK-R1` sec.11.6 item 5 records the gap as a limitation
-# of the round: "`loader._pool_substitutions` returns `{}` for Klee, so the
-# tier 0.5 drafter structurally cannot be offered a prototype Spark row",
-# which forced P5 and P6 to read a deck assembled BY ID rather than drafted.
-# The Kokomi arm had a pool seam and this one did not; the asymmetry was an
-# omission, not a decision, and this is the same seam Kokomi already uses.
-#
-# THE MAP IS NOT NEW AND NOTHING HERE IS PICKED: it is the surface's own
-# header, the one-for-one conversion PICK 4 describes, in the order the packet
-# prints it. Each prototype is filed at the SHIPPED row's rarity and
-# `rewards.character_pool` REFUSES a substitution that would move a card
-# between tiers, so the offer odds are untouched -- three commons, two
-# uncommons, one rare, in and out.
-#
-# WITH THE FLAG OFF this constant is UNREAD: `_pool_substitutions` returns
-# `{}` for Klee exactly as before, `_substituted_card_index` stays empty, and
-# no pool, reward, shop, event or drafter can see a `proto_` id. That is the
-# acceptance condition, pinned by test rather than intended.
-SPARK_ALT_POOL_SUBS: dict[str, str] = {
-    "sparkly_treasure": "proto_spark_strike",      # Fwoosh!,         common
-    "spark_collection": "proto_spark_double_tap",  # Bang Bang!,      common
-    "pocket_fireworks": "proto_spark_sweep",       # Tinder Toss,     common
-    "sugar_rush": "proto_spark_blast",             # Dodoco Blast,    uncommon
-    "cant_catch_me": "proto_spark_finisher",       # Firework Finale, uncommon
-    "true_spark_knight": "proto_true_spark_knight",  # the Oath,      rare
-    # THE THREE HYBRID SPENDERS, MIGRATED (R224 slate item 16, EB-218). These
-    # three are NOT conversions in PICK 4's sense -- no body and no number
-    # moves. Each shipped row is a HYBRID (1 Energy AND `spend_spark 2`), and
-    # its twin here is the same card at 0 Energy, so the whole delta is that
-    # the bank alone can now reach it. Same rarity in and out (three
-    # Uncommons), so the offer odds are untouched here too, and with the flag
-    # off none of this is read.
-    "powder_charge": "proto_powder_charge_spark",        # Set It Off,   uncommon
-    "hold_the_line": "proto_hold_the_line_spark",        # Dig In,       uncommon
-    "smoke_and_sparks": "proto_smoke_and_sparks_spark",  # Powder Smoke, uncommon
-}
+# THE FLAG ITSELF STANDS. `SPARK_ALT_COST_ENABLED` above still governs the
+# ENGINE rule (no threshold, no zeroing, no automatic consume, the strict Rare
+# Power's price, and tier 0.5's Spark dials), which is what the published
+# `KLEESPARK` reads were taken under and what R101b keeps standing. What is
+# gone is the arm's CONTENT, not its rule.
 
 # =============================================================================
 # THE KLEE OVERHAUL, SLICE ONE -- R213 B PROTOTYPE ARM, QUARANTINED.
@@ -1606,14 +1573,17 @@ KURAGE_MEMORY_POOL_ADD = "proto_kurages_oath_memory"
 # DERIVED FROM THE ARMS' OWN SUBSTITUTION MAPS rather than re-listed, so a row
 # added to an arm cannot be missed here: a superseded arm's rows ARE the rows
 # it substitutes in.
-KLEE_SPARK_ALT_ROWS: tuple[str, ...] = tuple(dict.fromkeys(
-    [add for _, add in SPARK_ALT_STARTER_SUBS]
-    + list(SPARK_ALT_POOL_SUBS.values())))
-
+#
+# THE KLEE HALF IS GONE, and its absence is the stronger form of the same rule
+# (`EB-750`, 2026-09-16). `KLEE_SPARK_ALT_ROWS` derived the Sparks arm's eleven
+# rows from `SPARK_ALT_STARTER_SUBS` and `SPARK_ALT_POOL_SUBS`; R270 superseded
+# them, so under the surface's deletion rule the rows themselves left HEAD
+# rather than being listed here as reachable-but-refused. A row that does not
+# exist cannot be granted into the wrong arm. Kokomi's two rows still do exist
+# -- `KURAGE_MEMORY` is a live arm -- so they are still named.
 PROTOTYPE_ARM_SUPERSEDED: dict[str, str] = {
     **{cid: "KOKOMI_OVERHAUL" for cid in (KURAGE_MEMORY_POOL_ADD,
                                           KURAGE_MEMORY_STARTER_ADD)},
-    **{cid: "KLEE_OVERHAUL" for cid in KLEE_SPARK_ALT_ROWS},
 }
 
 KURAGE_MEMORY_COST_PER_ENERGY = 3

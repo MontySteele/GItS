@@ -62,6 +62,18 @@ SHEETS: tuple[str, ...] = (
     "docs/mondstadt-companions.yaml",
     "docs/fontaine-companions.yaml",
     "docs/inazuma-companions.yaml",
+    # A SEALED RECORD'S door, not a live sheet (`EB-750`): the faces of
+    # prototype rows a later arm superseded, kept so a sealed round's board and
+    # graded form can still be replayed by printed title (R101b). Read here and
+    # nowhere else -- no pool, no draft, no codegen, no stamp.
+    #
+    # BEFORE the surface, and that is the whole reason the position is stated:
+    # the retired rows used to sit ABOVE the overhaul's rows in that one file,
+    # so "Bang Bang!" resolved to `proto_spark_double_tap` (random_enemy) and
+    # not to `proto_ko_bang_bang` (enemy). `KLEESPARK-R1`'s t03 lock reads that
+    # exact distinction off its sealed form, so moving the rows to their own
+    # file must not move what a sealed title means.
+    "docs/notes/retired-prototype-rows.yaml",
     "docs/prototype-surface.yaml",
 )
 

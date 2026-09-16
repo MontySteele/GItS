@@ -41,13 +41,19 @@ def test_the_memory_row_is_declared_superseded_by_the_overhaul():
     assert MEMORY_ROW == C.KURAGE_MEMORY_POOL_ADD
 
 
-def test_the_map_is_derived_from_the_arms_own_substitutions():
-    """NOT A SECOND LIST. A superseded arm's rows ARE the rows it substitutes
-    in, so a row added to an arm cannot be missed here."""
-    for _, add in C.SPARK_ALT_STARTER_SUBS:
-        assert C.PROTOTYPE_ARM_SUPERSEDED[add] == "KLEE_OVERHAUL"
-    for add in C.SPARK_ALT_POOL_SUBS.values():
-        assert C.PROTOTYPE_ARM_SUPERSEDED[add] == "KLEE_OVERHAUL"
+def test_the_klee_half_is_gone_because_the_rows_are(monkeypatch):
+    """`EB-750`, and it is the stronger form of this row's own rule.
+
+    The map used to DERIVE the Sparks arm's eleven rows from its two
+    substitution maps. R270 superseded them, so under the prototype surface's
+    deletion rule the rows themselves left HEAD rather than staying reachable
+    and refused -- a row that does not exist cannot be granted into the wrong
+    arm. Kokomi's two rows still exist, so they are still named."""
+    assert not hasattr(C, "SPARK_ALT_POOL_SUBS")
+    assert set(C.PROTOTYPE_ARM_SUPERSEDED) == {C.KURAGE_MEMORY_POOL_ADD,
+                                               C.KURAGE_MEMORY_STARTER_ADD}
+    for cid in ("proto_pop_spark", "proto_kaboom_sink", "proto_spark_strike"):
+        assert cid not in {c.id for c in loader.prototype_cards()}
 
 
 def test_the_grant_door_refuses_it(monkeypatch):
