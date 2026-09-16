@@ -2816,6 +2816,23 @@ twice" said twice is still twice -- so the entry it reaches runs
 state that at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT` and at
 `KokomiPlan.Kind.NextPlanExtraCarryOut`, and both pin it.
 
+### `proto_mi_heizou_heartstopper` -- one folding convention (`EB-696`, r30)
+
+Kokomi r30 lane 2 (c): "Heizou's face kept printing Deal 6 under Shrink while
+Strike printed 4 and Oath 2, and dealt 4." The row's first number was a LITERAL
+in the description, so nothing on that screen could fold anything into it --
+one hand, two conventions. The card already carries a `FrontFoldedDamageVar` at
+`ValueProp.Move`; only the face was not reading it.
+
+So the face takes Well Laid's shape (`EB-539`): the live TOTAL, which is the
+base plus the per-Swirl term plus every modifier on the board, with the rate
+written beside it as a rate rather than as a second number to add. The same
+row's other half is the WINDOW -- the count is taken before the hit, so a
+Heartstopper played into a bare board pays nothing for its own Swirl, which is
+why the clause "never paid" in the seat's reading. "Counts 4 for each Swirl
+made before it this turn" is that rule, on the card. 64 of the card ceiling's
+120, two of four sentences.
+
 ### `proto_kk_feint` -- the Plan line it could always write (`EB-660`, r25)
 
 The row carried a `plan:` clause from pool pass three and printed no Plan line

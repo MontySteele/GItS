@@ -1511,7 +1511,9 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 1, type: attack,
-   description: "Deal 6 damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
+   # `EB-696`: the LIVE total, Well Laid's shape, and the count's window said
+   # out loud. The finding: the provenance note.
+   description: "Deal {CalculatedDamage:diff()} damage. Counts 4 for each [gold]Swirl[/gold] made before it this turn.",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
 
