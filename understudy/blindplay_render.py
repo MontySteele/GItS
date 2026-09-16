@@ -557,6 +557,41 @@ def _slow_clause(power: dict[str, Any]) -> str:
     return _SLOW_CLAUSE if _SLOW_TRIGGER in text.casefold() else ""
 
 
+#: `EB-722`. A PLACER POWER, whose number is the SIZE of the charge it plants
+#: and not how many stacks of it stand. Klee's arm has two -- `Witches' Circle`
+#: and `Chained Reactions` -- and both print the same shape of sentence, so the
+#: test is that sentence and never their names: a third placer worded the same
+#: way gets the same label and a renamed one does not go silent, which is the
+#: discipline `_turn_allowance` and `_PLAN_CAP_SENTENCE` already keep here.
+_PLACED_CHARGE = re.compile(r"place a (Bomb|Mine)\s+(\d+)\b", re.IGNORECASE)
+
+
+def _placed_charge(power: dict[str, Any]) -> str:
+    """What this power's number IS, where it is a charge size. `EB-722`.
+
+    THE DEFECT (Klee r25 lane 2, (c) 4). Every other numbered buff on that
+    strip prints its own stack count, and `Witches' Circle 3 (buff)` and
+    `Chained Reactions 3` name the SIZE each one places -- so a seat reading
+    the strip cannot tell which kind of number it is looking at.
+
+    THE ROW'S OWN DEFAULT WAS "print the number the face means", and that is
+    what this does: the number stays and takes the noun the sentence beside it
+    uses, `Witches' Circle: Bomb 3`. Dropping it was the fallback and is not
+    needed -- the size is the one fact about this power a reader plans on.
+
+    MATCHED ONLY WHERE THE TWO AGREE. A power whose stack count and whose
+    printed size have come apart is not a placer wearing this shape -- it is a
+    power that stacks AND places -- and it gets the line it always had.
+    """
+    found = _PLACED_CHARGE.search(str(power.get("text") or ""))
+    if not found:
+        return ""
+    stacks = power.get("stacks")
+    if not isinstance(stacks, int) or isinstance(stacks, bool):
+        return ""
+    return found.group(1).title() if int(found.group(2)) == stacks else ""
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
@@ -567,13 +602,19 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     `EB-525`: and where the sentence describes a stack that arrives after the
     card that adds it has already resolved, the page says which cards the
     number counts.
+
+    `EB-722`: and where the number is the SIZE of a charge the power plants
+    rather than a count of itself, the noun rides beside it.
     """
     cap = _turn_allowance(power)
-    if cap is None:
-        line = f"{indent}{power['name']} {power['stacks']}"
-    else:
+    placed = _placed_charge(power)
+    if cap is not None:
         line = f"{indent}{power['name']} {power['stacks']} of {cap} left " \
                f"this turn"
+    elif placed:
+        line = f"{indent}{power['name']}: {placed} {power['stacks']}"
+    else:
+        line = f"{indent}{power['name']} {power['stacks']}"
     kind = str(power.get("kind") or "").strip().lower()
     if kind:
         line += f" ({kind})"

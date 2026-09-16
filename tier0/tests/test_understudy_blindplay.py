@@ -12664,3 +12664,50 @@ def test_the_written_face_is_read_by_id_and_not_by_title():
         "Gain 3 Block. At the start of your next turn, gain 4 Block.")
     state["player"]["hand"][0]["id"] = "KLEEMOD-NO_SUCH_CARD"
     assert "Written:" not in blindplay.observe(state)
+
+def placer_power_state(name: str = "Witches' Circle",
+                       amount: int = 3, size: int = 3) -> dict:
+    """A player-side placer Power on the buff strip (`EB-722`)."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["player"]["status"] = [
+        {"id": "KLEEMOD-WITCHES_CIRCLE", "name": name, "amount": amount,
+         "type": "Buff",
+         "description": (f"Whenever you play a Hexerei card, place a Bomb "
+                         f"{size} on a random enemy.")}]
+    return state
+
+
+def test_a_placer_powers_number_is_labelled_as_the_size_it_places():
+    """`EB-722`. WHICH KIND OF NUMBER IS THIS?
+
+    THE DEFECT (Klee r25 lane 2, (c) 4). Every other numbered buff on the
+    strip prints its own stack count, and `Witches' Circle 3 (buff)` and
+    `Chained Reactions 3` name the SIZE each one places -- so a seat reading
+    the strip cannot tell which kind of number it is looking at.
+
+    THE ROW'S DEFAULT was "print the number the face means", taken: the number
+    stays and takes the noun its own sentence uses.
+
+    OFF THE SENTENCE AND NEVER OFF THE NAME, `_turn_allowance`'s discipline one
+    power over, so a third placer worded the same way gets the same label and a
+    renamed one does not go silent.
+
+    Seen to FAIL: the line printed `Witches' Circle 3 (buff)`.
+    """
+    page = blindplay.observe(placer_power_state())
+    assert "Witches' Circle: Bomb 3 (buff)" in page
+    assert "Witches' Circle 3 (buff)" not in page
+
+    # A second placer, a different trigger, the same label.
+    assert "Chained Reactions: Bomb 5 (buff)" in blindplay.observe(
+        placer_power_state("Chained Reactions", 5, 5))
+
+
+def test_a_power_that_stacks_and_also_places_reads_as_it_always_did():
+    """The other half: the label is only right where the two numbers ARE one
+    number. A power whose stack count and whose printed size disagree is not a
+    placer wearing this shape, and it keeps the line it had."""
+    page = blindplay.observe(placer_power_state(amount=2, size=7))
+    assert "Witches' Circle 2 (buff)" in page
+    assert ": Bomb" not in page
