@@ -191,14 +191,17 @@ def test_an_allowlisted_pair_is_reported_but_not_failed(tmp_path, monkeypatch,
     cards = tmp_path / "ImageGen" / "images" / "cards" / "klee"
     cards.mkdir(parents=True)
     blob = b"\x89PNG\r\n\x1a\n" + b"same"
-    (cards / "kaboom.png").write_bytes(blob)
-    (cards / "spark_knight_style.png").write_bytes(blob)
+    # crowd_work / standing_ovation: a pair still in KNOWN_IDENTICAL. (The
+    # kaboom / spark_knight_style pair this fixture used left the set on
+    # 2026-09-16 when #564 gave spark_knight_style its own art.)
+    (cards / "crowd_work.png").write_bytes(blob)
+    (cards / "standing_ovation.png").write_bytes(blob)
 
     monkeypatch.setattr(art_lint, "__file__", str(tmp_path / "tools" / "x.py"))
     assert art_lint.identical_crops() == []
     out = capsys.readouterr().out
     assert "KNOWN IDENTICAL (allowlisted)" in out
-    assert "kaboom" in out
+    assert "crowd_work" in out
 
 
 # --- the three PENDING waiver sets, and their rot direction ---------------
