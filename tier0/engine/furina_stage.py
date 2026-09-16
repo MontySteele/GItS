@@ -318,7 +318,12 @@ def _leave(state, index: int, *, bowed: bool, reason: str) -> None:
 def _bow(state, member: str) -> None:
     """Rule 9, the curtain call, performed ONCE by a performer emptied by a
     Spend. Usher: Furina gains 4 Block. Chevalmarin: Hydro on every enemy.
-    Crabaletta: deal 8 to a random enemy."""
+    Crabaletta: deal 8 to a random enemy.
+
+    `EB-495` D3: Crabaletta's bow is `powered=False`, which is what
+    `FurinaStage.Bow` has always passed (`FurinaStage.cs:544`). See `perform`
+    below for the whole argument; the two methods are twins and move together.
+    """
     from tier0.engine import effects, reactions       # late: avoids the cycle
     p = state.player
     state.emit("stage_bow", member=member)
@@ -332,6 +337,7 @@ def _bow(state, member: str) -> None:
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy, BOW_CRABALETTA_DAMAGE,
+                                         powered=False,
                                          source="furina_stage/bow")
 
 
@@ -656,6 +662,21 @@ def perform(state, member: str) -> None:
     (sec.12) -- so an act cannot mean two things. A newcomer's arrival was the
     third until `EB-738` removed it: a summon performs at the END of the turn,
     with the others, and reaches this function through the sweep.
+
+    `EB-495` D3, REPAIRED HERE. This function called `deal_damage_to_enemy`
+    with no `powered=` at all, so the signature's default `True` applied and
+    Furina's Strength and Weak scaled a performance.
+
+    `FurinaStage.Perform` passes `powered: false` (`FurinaStage.cs:463`,
+    `:477`) and `.Bow` a third time (`:544`) -- the same refusal the Salon's
+    `PerformMember` makes at `SalonPowers.cs:981`, and the one the sim's own
+    Salon twin already made at `effects.salon_member_act`. THE BRIEF IS WITH
+    THE GAME, so the sim was the one-sided defect and this is the model
+    catching up rather than a rule moving: sec.3 rule 10 calls an act "a flat
+    act that does not read its bar" and ends "scaling on Fanfare lives in
+    payoff cards (sec.5.2), never in the performer", and the sentence the
+    Stage inherited from the Salon is "a performance is not an Attack and not
+    a hit" (`EB-588`).
     """
     from tier0.engine import effects, reactions       # late: avoids the cycle
     p = state.player
@@ -669,6 +690,7 @@ def perform(state, member: str) -> None:
             effects.deal_damage_to_enemy(state, enemy,
                                          ACT_CHEVALMARIN_DAMAGE,
                                          element="hydro",
+                                         powered=False,
                                          source="furina_stage/act")
         # The Hydro is the ACT's, not the hit's: sec.3 rule 10 reads "deals 2
         # to every enemy AND APPLIES HYDRO", so a dead body or a zero that
@@ -683,6 +705,7 @@ def perform(state, member: str) -> None:
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy, ACT_CRABALETTA_DAMAGE,
+                                         powered=False,
                                          source="furina_stage/act")
 
 

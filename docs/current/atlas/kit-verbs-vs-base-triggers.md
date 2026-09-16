@@ -178,8 +178,8 @@ because the engine has no mirror of that trigger at all (see §2); functionally
 | V11 Casket strike | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V12 Salon performance | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V13 Salon bow / Evoke | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V14 Stage act | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3**) | **debuff ≠ none (D4)** |
-| V15 Stage bow | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3**) | **debuff ≠ none (D4)** |
+| V14 Stage act | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | **debuff ≠ none (D4)** |
+| V15 Stage bow | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | **debuff ≠ none (D4)** |
 | V16 Stage Spend | none | none | none | none | none | none | none | none |
 | V17 companion pulse | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V18 aura application only | none | none | none | none | none | none | none | none |
@@ -259,7 +259,7 @@ future Unpowered card clause must not quietly start poisoning. `UnblockedDamage
 `tier0/tests/test_eb495_d2_envenom_takes_a_powered_attack.py`. No published sim
 number moved.
 
-### D3 — Furina's Stage act and bow take her Strength in the sim and not in the game
+### D3 — Furina's Stage act and bow took her Strength in the sim — REPAIRED
 
 `FurinaStage.Perform` and `FurinaStage.Bow` both pass `powered: false`
 (`Powers/Prototype/FurinaStage.cs:463`, `:477`, `:544`), the same refusal the
@@ -271,6 +271,19 @@ and Crabaletta's numbers by Furina's Strength and Weak. The sim's own Salon
 twin one file over does pass `powered=False` (`effects.py:7139`), so this
 reads as an omission rather than a decision. The brief's own sentence is the
 Salon's — "a performance is not an Attack and not a hit".
+
+**Repaired 2026-09-16, sim side only.** All three sim call sites now pass
+`powered=False`. THE BRIEF WAS CHECKED FIRST and it is with the game, so this
+is a model catching up and not a rule moving: sec.3 rule 10 calls an act "a
+flat act that does not read its bar" and ends "scaling on Fanfare lives in
+payoff cards (§5.2), never in the performer". Pinned printed-equals-dealt with
+Strength up, with Weak on, and with both, by
+`tier0/tests/test_eb495_d3_a_performance_carries_no_strength.py` — Weak
+beside Strength because `powered` drops both at one site
+(`powers.modify_damage_dealt`), so a Strength-only pin would pass a half
+repair. Furina's own cards are untouched and that control is pinned in the
+same file. No published sim number moved: the Stage is a prototype arm, no
+battery runs it, and the whole suite was unchanged apart from these pins.
 
 ### D4 — Crabaletta's act and bow apply Hydro in the game and no element in the sim
 

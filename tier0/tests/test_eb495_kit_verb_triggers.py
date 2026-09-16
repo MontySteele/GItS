@@ -206,9 +206,9 @@ SIM_CALL_SITES = {
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
     ('effects.py', 28): ("'companion'", None, "'pyro'"),
-    ('furina_stage.py', 1): ("'furina_stage/bow'", None, None),
-    ('furina_stage.py', 2): ("'furina_stage/act'", None, "'hydro'"),
-    ('furina_stage.py', 3): ("'furina_stage/act'", None, None),
+    ('furina_stage.py', 1): ("'furina_stage/bow'", 'False', None),
+    ('furina_stage.py', 2): ("'furina_stage/act'", 'False', "'hydro'"),
+    ('furina_stage.py', 3): ("'furina_stage/act'", 'False', None),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     ('klee_overhaul.py', 2): ('ECHO_SOURCE', None, "'pyro'"),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
@@ -319,18 +319,21 @@ def test_the_three_verbs_that_refuse_the_dealers_terms_still_refuse_them():
         assert powered in _cs(rel), verb
 
 
-def test_the_stage_passes_powered_false_where_the_sim_passes_nothing():
-    """DISAGREEMENT D3, pinned from both sides in one place so a repair on
-    either side has to come here and decide.
+def test_the_stage_refuses_the_dealers_terms_in_both_engines():
+    """DISAGREEMENT D3, REPAIRED, and still pinned from both sides in one
+    place so a later move on either side has to come here and decide.
 
     `FurinaStage.Perform` and `.Bow` pass `powered: false` three times; the
-    sim's `furina_stage.perform` and `._bow` pass no `powered=` at all, so
-    Furina's Strength and Weak scale a performance in tier0 and not in the
-    game."""
+    sim's `furina_stage.perform` and `._bow` now pass `powered=False` at the
+    same three places, so Furina's Strength and Weak scale a performance in
+    neither engine. The behavioural half is
+    `test_eb495_d3_a_performance_carries_no_strength.py`."""
     assert _cs("Powers/Prototype/FurinaStage.cs").count("powered: false") == 3
 
-    sim = (ENGINE / "furina_stage.py").read_text(encoding="utf-8")
-    assert "powered=" not in sim
+    stage = [flags for (name, _i), flags in sorted(_sim_call_sites().items())
+             if name == "furina_stage.py"]
+    assert len(stage) == 3, stage
+    assert [powered for _s, powered, _e in stage] == ["False"] * 3
 
 
 def test_crabaletta_carries_hydro_in_the_game_and_no_element_in_the_sim():
