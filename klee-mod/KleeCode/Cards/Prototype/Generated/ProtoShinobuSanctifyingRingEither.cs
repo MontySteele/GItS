@@ -95,8 +95,8 @@ public sealed class ProtoShinobuSanctifyingRingEither : CustomCardModel, IElemen
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoShinobuSanctifyingRingEitherModeA>(Owner),
-            ModalChoice.CreateOption<ProtoShinobuSanctifyingRingEitherModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoShinobuSanctifyingRingEitherModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoShinobuSanctifyingRingEitherModeB>(Owner, this),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage to ALL enemies, applying its element", "Gain 4 Block, applying no element" }[modeIndex]);

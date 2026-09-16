@@ -178,9 +178,17 @@ public class FurinaStageRoundTwoTests
         Assert.Contains("{PlainBlock:diff()}", source);
         Assert.Contains("{BranchBlock:diff()}", source);
         Assert.DoesNotContain("{IfUpgraded:show:", source);
-        Assert.Contains("new BlockVar(\"PlainBlock\", 5m, ValueProp.Move)",
+        // `EB-388` / `EB-498`: `FoldedBlockVar` rather than the bare named
+        // `BlockVar` this pin was written against. It IS the game's own
+        // `BlockVar` -- it subclasses it, and the preview above still runs the
+        // block hooks -- plus the Spotlight fold the emitted play already
+        // applies on a Companion row (`PrintedBlock`), which is the identity
+        // on anything that is not one. So the Stage's faces read exactly what
+        // they read before, and Itto's modal stops printing 6 while gaining 9
+        // under Guest Cast.
+        Assert.Contains("new FoldedBlockVar(\"PlainBlock\", 5m, ValueProp.Move)",
                         source);
-        Assert.Contains("new BlockVar(\"BranchBlock\", 10m, ValueProp.Move)",
+        Assert.Contains("new FoldedBlockVar(\"BranchBlock\", 10m, ValueProp.Move)",
                         source);
         Assert.Contains("DynamicVars[\"PlainBlock\"].UpgradeValueBy(3m);",
                         source);

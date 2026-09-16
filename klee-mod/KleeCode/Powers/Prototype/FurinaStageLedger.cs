@@ -536,11 +536,50 @@ public sealed class FurinaStageLedger
     // the payoff multiplies is what this play TOOK, written here as it is
     // taken. `FurinaDrain.Amount` is the same shape one arm over.
 
-    /// <summary>What this play has taken off the bars so far.</summary>
+    /// <summary>What this play has taken off the bars so far. 0 at every
+    /// moment no card is in flight, which is what makes the readers' faces a
+    /// FORECAST off the bars rather than a memory of the last spend.</summary>
     public int SpentThisPlay { get; private set; }
 
+    /// <summary>
+    /// ROUND THREE'S STALE FORECAST. <i>Let the People Rejoice</i> printed
+    /// "Deal 2 damage to ALL" with the stage reading Usher 12 and no Weak: the
+    /// 2 was an EARLIER card's spend, still sitting in this record while the
+    /// Rare sat in hand. `EB-747` opened the record at
+    /// <c>BeforeCardPlayed</c> and never closed it, so between two plays the
+    /// forecast read the last play's number instead of the bars.
+    ///
+    /// SO THE RECORD IS A STACK, which is <c>combat.SAVED_PER_CARD</c>'s shape
+    /// one engine over (<c>stage_spent_this_card</c> is saved and restored
+    /// around a free play "for its neighbour's reason exactly: a free play that
+    /// spent inside an outer card would otherwise hand the outer card its
+    /// number"). <see cref="BeginPlay"/> pushes and zeroes,
+    /// <see cref="EndPlay"/> pops -- and the OUTERMOST pop lands on 0 rather
+    /// than on what it found, because outside a play there is no play to have
+    /// spent anything.
+    /// </summary>
+    private readonly List<int> _spendStack = new();
+
     /// <summary>A fresh, empty record for one card play.</summary>
-    public void BeginPlay() => SpentThisPlay = 0;
+    public void BeginPlay()
+    {
+        _spendStack.Add(SpentThisPlay);
+        SpentThisPlay = 0;
+    }
+
+    /// <summary>Close the record this play opened: the enclosing play's number
+    /// where there is one, and 0 where there is not.</summary>
+    public void EndPlay()
+    {
+        if (_spendStack.Count == 0)
+        {
+            SpentThisPlay = 0;
+            return;
+        }
+        var enclosing = _spendStack[_spendStack.Count - 1];
+        _spendStack.RemoveAt(_spendStack.Count - 1);
+        SpentThisPlay = _spendStack.Count == 0 ? 0 : enclosing;
+    }
 
     /// <summary>
     /// <i>Let the People Rejoice</i>, first clause: "Spend all Fanfare on
@@ -600,6 +639,7 @@ public sealed class FurinaStageLedger
         _seats.Clear();
         _pendingCurtainCall.Clear();
         _beats.Clear();
+        _spendStack.Clear();
         SpentThisPlay = 0;
     }
 

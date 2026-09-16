@@ -63,8 +63,8 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar("PlainBlock", 5m, ValueProp.Move),
-            new BlockVar("BranchBlock", 10m, ValueProp.Move)
+            new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,8 +78,8 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoFsInterpositionModeA>(Owner),
-            ModalChoice.CreateOption<ProtoFsInterpositionModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoFsInterpositionModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoFsInterpositionModeB>(Owner, this),
         };
         var modeRules = new ModeRequirement?[]
         {
@@ -118,8 +118,21 @@ public sealed class ProtoFsInterpositionModeA : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gain 5 [gold]Block[/gold]"),
-        ("description", "Gain 5 [gold]Block[/gold]"),
+        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new BlockVar("PlainBlock", 5m, ValueProp.Move),
+            new BlockVar("BranchBlock", 10m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainBlock"].UpgradeValueBy(3m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
+    }
 }
 
 /// <summary>Mode 1 of proto_fs_interposition. A face for the choose-a-card screen;
@@ -132,6 +145,19 @@ public sealed class ProtoFsInterpositionModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "[gold]Spend[/gold] 2: gain 10 instead"),
-        ("description", "[gold]Spend[/gold] 2: gain 10 instead"),
+        ("description", "[gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new BlockVar("PlainBlock", 5m, ValueProp.Move),
+            new BlockVar("BranchBlock", 10m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainBlock"].UpgradeValueBy(3m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
+    }
 }

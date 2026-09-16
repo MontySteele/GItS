@@ -7346,7 +7346,8 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         return []
     if not str(card.get("id") or "").startswith("proto_"):
         return []
-    if eff.get("op") == "choose_one":
+    modal = eff.get("op") == "choose_one"
+    if modal:
         # `EB-746`. THE SAME TWO PRINTED NUMBERS, ONE SHAPE OVER. A Spend face
         # is a CHOICE now -- "Deal 7" or "Spend 3: deal 13 instead" -- and the
         # two arms it prints are the two modes rather than the two branches of
@@ -7401,13 +7402,62 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         return [("PlainDamage", int(els["amount"]), both, cls),
                 ("BranchDamage", int(then["amount"]), both + extra, cls)]
 
+    # `EB-498`. THE ONE-ARMED "ADDITIONAL" SHAPE, which is the same defect
+    # without an `else` to compare against.
+    #
+    # THE FIND (Klee r17, and `EB-438`'s census one row over). Shinobu --
+    # Thundergrust printed "Deal 8 damage. If you are below half HP, deal 5
+    # additional damage" at 29 of 62 HP and removed 13. Both numbers were true
+    # of a board nobody could see from the face: the 8 renders through the
+    # card's one `CalculationBase` triple and the 5 was a LITERAL, so the
+    # branch folded nothing -- not Strength, not the Spotlight, not the
+    # enemy's Vulnerable -- and the face under-reported the card by whatever
+    # those came to.
+    #
+    # WHY IT WAS NOT ALREADY THIS FUNCTION'S. A one-armed conditional prints
+    # ONE number and a two-armed one prints two, so the pair above had nothing
+    # to pair it with. That is a fact about the face's shape and not about the
+    # fold: the branch number is dealt through the same `DamageCmd.Attack` the
+    # top-level clause uses, so it takes the same terms and has the same right
+    # to print them. The var family is `EB-624`'s, which the row's own next
+    # action names -- the card's ONE `CalculationBase` triple is spent on the
+    # top-level clause (and, on a Companion row, on the Spotlight fold), and
+    # `FoldedDamageVar` / a named `BlockVar` is the second declared family that
+    # exists precisely because a card cannot have two triples.
+    #
+    # AIMED ONLY, `folded_branch_damage`'s own rule above: a `random_enemy`
+    # arm has no body for the preview to fold (Fischl's Oz is the row that
+    # bites), and an `all_enemies` arm would print one number for a board that
+    # takes several. Either keeps its literal.
+    if (not modal and then is not None and els is None
+            and then.get("target") == "enemy"):
+        both = conditional_damage_upgrade(card)
+        extra = (conditional_then_damage_upgrade(card)
+                 if _is_then_first_damage(card, then) else 0)
+        return [("BranchDamage", int(then["amount"]), both + extra,
+                 "FoldedDamageVar")]
+
     then = _one_printed(eff.get("then"), "block")
     els = _one_printed(eff.get("else"), "block")
+    if not modal and then is not None and els is None:
+        # `EB-498`'s block half, and it is four of the row's five census
+        # entries: "gain 4 additional Block" is a number Dexterity and Frail
+        # move exactly as they move the clause above it. A named `BlockVar` is
+        # the game's own var under a token of its own, which is what lets two
+        # of them stand on one face (`EB-737`'s argument, verbatim).
+        return [("BranchBlock", int(then["amount"]),
+                 conditional_block_upgrade(card), "FoldedBlockVar")]
     if then is None or els is None:
         return []
     both = conditional_block_upgrade(card)
-    return [("PlainBlock", int(els["amount"]), both, "BlockVar"),
-            ("BranchBlock", int(then["amount"]), both, "BlockVar")]
+    # `EB-388` / `EB-498`: `FoldedBlockVar` rather than a bare named
+    # `BlockVar`. It IS the game's own var plus the Spotlight fold the emitted
+    # play already applies (`PrintedBlock`), and `PrintedBlock` is the identity
+    # on anything that is not a spotlighted Companion row -- so every Furina
+    # Stage face here reads exactly what it read before, and Itto's modal
+    # stops printing 6 while gaining 9 under Guest Cast.
+    return [("PlainBlock", int(els["amount"]), both, "FoldedBlockVar"),
+            ("BranchBlock", int(then["amount"]), both, "FoldedBlockVar")]
 
 
 def _is_then_first_damage(card: dict, eff: dict) -> bool:
@@ -8231,9 +8281,12 @@ def _emit_branch_op(
         # byte-for-byte the call `build_body`'s top-level all-enemies arm
         # makes: the quarter is computed in ONE place so the printed face and
         # the hit cannot round differently.
+        # `EB-693`: it is ATTACK damage with all modifiers, so the call takes
+        # the card and the play -- `DamageCmd.Attack` needs a source for the
+        # element and for every power that answers an attack (Slow included).
         lines.append(
             "await KokomiRules.QuarterMaxHpAll("
-            "choiceContext, Owner.Creature);")
+            "choiceContext, Owner.Creature, this, cardPlay);")
     elif op == "mend":
         # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Byte-for-byte the call
         # `build_body`'s top-level arm makes, because it IS the same rule: one
@@ -8330,6 +8383,39 @@ def _conditional_block(pred: str, then_lines: list[str],
 def modal_option_class(card: dict, index: int) -> str:
     """The generated class name for one mode's face on the choice screen."""
     return f"{pascal(card['id'])}Mode{chr(ord('A') + index)}"
+
+
+#: The sentence a `choose_one` row's description is, and the separator between
+#: its halves -- the very string the description emitter builds (see the
+#: `choose_one` arm of the face builder, "Choose one: {labels}.").
+MODAL_FACE_PREFIX = "Choose one: "
+MODAL_FACE_SEPARATOR = " | "
+
+
+def modal_option_faces(card: dict, modes: list) -> list[str] | None:
+    """One face per mode, taken out of the card's OWN description.
+
+    Round three's chooser defect: the option classes printed the sheet's
+    authored `label`, which is plain text with the unupgraded, unfolded numbers
+    written into it, while the parent printed var tokens. The two halves of one
+    decision therefore disagreed on every upgraded card and under every debuff.
+
+    The parent's description already holds the per-mode wording WITH the
+    tokens, because that is how it is composed, so this splits it back apart
+    rather than asking an author to keep two strings in step. `None` where the
+    description is not that shape -- a row whose face says something else keeps
+    its label, which is what it printed before this row.
+    """
+    desc = str(card.get("description") or "").strip()
+    if not desc.startswith(MODAL_FACE_PREFIX):
+        return None
+    body = desc[len(MODAL_FACE_PREFIX):].rstrip()
+    if body.endswith("."):
+        body = body[:-1]
+    parts = [p.strip() for p in body.split(MODAL_FACE_SEPARATOR)]
+    if len(parts) != len(modes) or not all(parts):
+        return None
+    return parts
 
 
 def modal_effect(card: dict) -> dict | None:
@@ -9253,11 +9339,11 @@ def build_body(
                 _target_guard(lines, ctx)
                 lines.append(
                     "await KokomiRules.QuarterMaxHp(choiceContext, "
-                    "Owner.Creature, cardPlay.Target);")
+                    "Owner.Creature, cardPlay.Target, this, cardPlay);")
             else:
                 lines.append(
                     "await KokomiRules.QuarterMaxHpAll("
-                    "choiceContext, Owner.Creature);")
+                    "choiceContext, Owner.Creature, this, cardPlay);")
 
         elif op == "block_half_damage":
             # THE INAZUMA ARM (QUARANTINED). Gorou's second clause. No number
@@ -10009,7 +10095,11 @@ def build_body(
             # generated is the option list, the record, and the ladder.
             modes = eff["modes"]
             options = ",\n            ".join(
-                f"ModalChoice.CreateOption<{modal_option_class(card, i)}>(Owner)"
+                # ROUND THREE: `(Owner, this)` and not `(Owner)`. The option
+                # face carries the PARENT's vars now, so it has to carry the
+                # parent's upgrade state too -- see `ModalChoice.CreateOption`.
+                f"ModalChoice.CreateMatchingOption"
+                f"<{modal_option_class(card, i)}>(Owner, this)"
                 for i in range(len(modes)))
             lines.append(
                 "var modeOptions = new List<CardModel>\n        {\n"
@@ -13073,8 +13163,57 @@ def emit(
     modal_option_classes = ""
     modal_eff = modal_effect(card)
     if modal_eff is not None:
+        # ROUND THREE, sec.4: THE CHOOSER PRINTED THE SHEET AND THE HAND
+        # PRINTED THE BOARD.
+        #
+        # "The mode chooser's option faces print sheet literals: unupgraded
+        # (8/12 in hand, 5/9 in the chooser) and unfolded under Weak (7/15 in
+        # hand, 10/20 in the chooser); asking by the hand's wording is
+        # refused." The option class was two authored strings and
+        # `CanonicalVars => Array.Empty`, so the one screen where the choice is
+        # actually made was the one screen printing numbers nothing on the
+        # board had touched -- and the seat, matching by what the hand printed,
+        # could not name the mode it wanted.
+        #
+        # THE FACES ARE THE PARENT'S OWN WORDING, taken out of the parent's
+        # description rather than re-authored: a `choose_one` row's description
+        # IS "Choose one: <mode 0> | <mode 1>", the halves carry the parent's
+        # var tokens, and splitting it is what makes the chooser and the hand
+        # one sentence by construction. Where a row's description is not that
+        # shape the option keeps its authored label, which is the old
+        # behaviour.
+        #
+        # AND THE VARS COME WITH THEM, whole: the tokens resolve only if the
+        # option declares the vars, the fold happens only if they are the
+        # parent's var TYPES (`FrontFoldedDamageVar` and its neighbours), and
+        # the upgraded number appears only if the option is upgraded with the
+        # parent -- which `ModalChoice.CreateOption(owner, parent)` does, off
+        # the `DynamicVars[...]` half of the parent's own `OnUpgrade`.
+        option_faces = modal_option_faces(card, modal_eff["modes"])
+        option_upgrade = "\n        ".join(
+            line.strip() for line in upgrade_cs.split("\n")
+            if "DynamicVars[" in line)
         for i, mode in enumerate(modal_eff["modes"]):
+            # THE TITLE STAYS THE AUTHORED LABEL AND THE BODY TAKES THE TOKENS.
+            # A card TITLE is the one loc string in this generator that has
+            # never carried a var -- `title_cs` is a display name on every row
+            # -- so putting one there would be the first, on the screen with no
+            # headless renderer to check it. The BODY is where every other face
+            # prints its live numbers, it is what the chooser shows under the
+            # name, and it is the half the round measured ("5/9 in the
+            # chooser").
             label = cs_escape(mode["label"])
+            face = cs_escape(option_faces[i] if option_faces
+                             else mode["label"])
+            option_vars = (
+                "\n\n    protected override IEnumerable<DynamicVar> "
+                "CanonicalVars =>\n        new List<DynamicVar>\n        {\n"
+                f"{vars_block.rstrip()}\n        }};"
+                if option_faces and vars_block else "")
+            option_upgrade_member = (
+                "\n\n    protected override void OnUpgrade()\n    {\n"
+                f"        {option_upgrade}\n    }}"
+                if option_vars and option_upgrade else "")
             # EB-182 / EB-220: a priced mode's FACE declares its price, so
             # the meter cost badge paints the option exactly as it paints any
             # priced card -- the price is on the option a player is choosing
@@ -13107,8 +13246,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     public override List<(string, string)>? Localization => new()
     {{
         ("title", "{label}"),
-        ("description", "{label}"),
-    }};{face_price_member}
+        ("description", "{face}"),
+    }};{option_vars}{option_upgrade_member}{face_price_member}
 }}
 '''
 

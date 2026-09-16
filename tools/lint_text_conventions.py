@@ -126,7 +126,16 @@ EXCEPTIONS = {
         "sentence at the same call one kit over, and every clause above it is "
         "a seat's finding: the aim, the ALL exception, and whose modifiers a "
         "carry-out reads (EB-329, R250, EB-380, EB-538). None is droppable to "
-        "make room"),
+        "make room. `EB-330` / `EB-563` / `EB-411` then added the three facts "
+        "the blind-play page carried and the word did not, in one rewrite: "
+        "that any number of Plans wait in order and the badge is their COUNT "
+        "and not a cap (three r4c seats read `Plan 1` as a capacity and the "
+        "r20 lane-2 seat wrote one Plan at a time for four fights), and that a "
+        "carry-out lands in the Block the enemy is still standing in from its "
+        "own turn (a Plating 8 Sewer Clam ate a whole Plan, Kokomi r10 run 2). "
+        "Six findings on one word, twinned to `PLAN_COUNT_NOTE` and "
+        "`PLAN_BLOCK_NOTE`; the ceiling buys nothing a seat has not already "
+        "paid for by reading the board wrong"),
     "ProtoBakeKuragePower.descriptionCapped": (
         "`EB-653` (Kokomi r24). The cap lane's face, and it exists only under "
         "`GITS_KOKOMI_PLAN_CAP` -- a default build prints the row above it, "

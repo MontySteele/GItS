@@ -882,13 +882,50 @@ public static class ArmKeywordTips
     /// every clause there is a seat's finding -- so the tip is carried in
     /// `tools/lint_text_conventions.py` as a named exception with its reason,
     /// which is the bargain `SetOffKey` already makes.
+    ///
+    /// `EB-330` / `EB-563` / `EB-411`: THE THREE FACTS THE PAGE CARRIED AND
+    /// THE WORD DID NOT, added in ONE rewrite, because the tip had no room for
+    /// any of them separately and three separate trims would have been three
+    /// separate arguments about which finding to drop.
+    ///
+    /// "ANY NUMBER WAIT, IN ORDER, AND THE BADGE IS THEIR COUNT" is `EB-563`
+    /// and `EB-330`, which are one sentence and were filed as two. The r4c
+    /// seats read `Plan 1` as a CAPACITY -- the old tip printed "Carries out N
+    /// Plans" and nothing said N was a tally -- and the r20 lane-2 seat wrote
+    /// one Plan at a time for four fights on the same reading.
+    /// <see cref="KokomiPlan"/> holds no cap on an unconfigured build; the
+    /// page has said so since `EB-648`
+    /// (`blindplay_notes.PLAN_COUNT_NOTE`) and this is its twin on the word.
+    /// "Any number" is the no-limit half and "their count" is the badge half,
+    /// in that order, because a reader who has already misread the badge needs
+    /// the rule before the gloss.
+    ///
+    /// "INTO BLOCK STILL STANDING" IS `EB-411`, the twin of
+    /// `blindplay_notes.PLAN_BLOCK_NOTE` ("lands in whatever Block the enemy
+    /// is still standing in from its own turn"). The morning resolves before
+    /// the player has played a card and an enemy's Block falls at ITS turn
+    /// start, so a Plating 8 Sewer Clam ate a whole Plan and no surface in the
+    /// game said it would (Kokomi r10 run 2 (c) 4). It sits on the AIM clause
+    /// rather than in a sentence of its own because it is a fact about where
+    /// the carry-out lands, which is what that clause is already about.
+    ///
+    /// WHAT THE REWRITE PAID WITH, and it dropped no finding: "folds in as you
+    /// write it" lost its "in", and the rest of the overage is carried on
+    /// `PlanKey`'s existing named exception in
+    /// `tools/lint_text_conventions.py`, whose reason now names all six
+    /// findings. That is the bargain `SetOffKey` and `BombKey` already make,
+    /// and it is `EB-330`'s "a clause must go" answered the other way round:
+    /// no clause here is droppable, because every one of them is a seat that
+    /// read the board wrong without it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "On the [gold]Bake-Kurage[/gold], paid now; next turn: front "
-          + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. "
-          + "Your [gold]Strength[/gold] folds in as you write it; the "
+            "On the [gold]Bake-Kurage[/gold], paid now; any number wait, in "
+          + "order, and the badge is their count. Next turn: front "
+          + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too, into "
+          + "[gold]Block[/gold] still standing. "
+          + "Your [gold]Strength[/gold] folds as you write it; the "
           + "enemy's [gold]Vulnerable[/gold] counts next turn. A "
           + "carry-out is not a hit: no when-hit power fires.");
 

@@ -709,8 +709,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # complete list, and the carry-out is an UNPOWERED hit. 135
             # characters rendered, at the ceiling: "the front enemy" and "or
             # ALL if it says so" paid for both facts.
-            "On the [gold]Bake-Kurage[/gold], paid now; next turn: front ",
-            "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too. ",
+            "On the [gold]Bake-Kurage[/gold], paid now; any number wait, in ",
+            "order, and the badge is their count. Next turn: front ",
+            "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too, into ",
+            "[gold]Block[/gold] still standing. ",
             # `EB-599` REVERSED WHICH SIDE THE CLAUSE NAMES. The Plan line
             # folds HER Strength at writing time and nothing of the target's,
             # because a Plan resolves next morning against whatever the body
@@ -718,7 +720,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # that arrived as 7 once that Vulnerable had expired. The clause
             # says WHEN each side is read, which is what the old two-item
             # enumeration could not carry.
-            "Your [gold]Strength[/gold] folds in as you write it; the ",
+            "Your [gold]Strength[/gold] folds as you write it; the ",
             # `EB-623` retired "morning" from every printed surface.
             "enemy's [gold]Vulnerable[/gold] counts next turn. A ",
             # `EB-538`: the class a carry-out belongs to, in `ForSetOff`'s
@@ -1248,7 +1250,7 @@ def test_the_plan_tip_says_when_each_side_of_the_line_is_read():
             / "KokomiPlan.cs").read_text(encoding="utf-8")
     assert "UNPOWERED -- no Strength, no Weak" in plan
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+    assert ("Your Strength folds as you write it; the enemy's Vulnerable "
             "counts next turn.") in body
     assert "morning" not in body
 
@@ -1291,13 +1293,60 @@ def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
     `EB-623` TOOK FIVE BACK, for free: "counts at the morning" became "counts
     next turn", which is the same fact in the base game's own timing words and
     retires a word no printed surface teaches. The overage stands.
+
+    `EB-330` / `EB-563` / `EB-411` TOOK 81 MORE, in one rewrite, and the
+    exception's reason names all six findings now. The three facts were on the
+    blind-play panel and nowhere in the game: how many Plans wait (any number,
+    in order), what the badge's number IS (their count, not a cap), and where a
+    carry-out lands (the Block the enemy is still standing in from its own
+    turn). `EB-330`'s next action asked for "a clause must go"; every clause on
+    this word is a seat that read the board wrong without it, so the overage
+    went up instead and this pin is what keeps it honest.
     """
     from tools import lint_text_conventions as lint
 
     body = blindplay.ARM_KEYWORDS["Plan"]
-    assert len(body) == 211
+    assert len(body) == 292
     assert "PlanKey" in lint.EXCEPTIONS
     assert "EB-538" in lint.EXCEPTIONS["PlanKey"]
+    for row in ("EB-330", "EB-563", "EB-411"):
+        assert row in lint.EXCEPTIONS["PlanKey"]
+
+
+def test_the_plan_tip_says_any_number_wait_and_the_badge_is_their_count():
+    """`EB-563` and `EB-330`, which are one sentence and were filed as two.
+
+    THE FIND. Three r4c seats read the `Plan` badge's number as a CAPACITY --
+    the tip printed "Carries out N Plans" and nothing said N was a tally -- and
+    the r20 lane-2 seat wrote one Plan at a time for four fights before trying
+    two. `KokomiPlan` caps nothing on an unconfigured build.
+
+    THE PANEL HAS SAID IT SINCE `EB-648` (`PLAN_COUNT_NOTE`) and the word did
+    not, which is the gap both rows are: a seat reading a card in hand never
+    reaches the panel's Bake-Kurage section. Twinned here and on the pet's own
+    badge (`ProtoBakeKuragePower`), whose acceptance sentence is the box's.
+    """
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "any number wait, in order, and the badge is their count" in body
+    page = blindplay.PLAN_COUNT_NOTE
+    assert "holds any number of Plans" in page
+    assert "not a limit" in page
+
+
+def test_the_plan_tip_says_a_carry_out_lands_in_standing_block():
+    """`EB-411`. A Plating 8 Sewer Clam ate a whole Plan and no screen in the
+    game said it would (Kokomi r10 run 2 (c) 4).
+
+    THE RULE, in the turn-start order's own words: the morning resolves before
+    the player has played a card, and an enemy's Block falls at ITS turn start
+    -- so whatever it raised on its own turn is still standing, and there is no
+    move that strips it first. The panel half is `PLAN_BLOCK_NOTE`
+    (`EB-411`'s built half, 2026-09-07); this is the twin on the word, which is
+    what the row's "Next action: the tip clause" owed.
+    """
+    body = blindplay.ARM_KEYWORDS["Plan"]
+    assert "into Block still standing" in body
+    assert "still standing in" in blindplay.PLAN_BLOCK_NOTE
 
 
 def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
