@@ -324,11 +324,11 @@ PENDING_RED_PEN = {
     # entry would suppress a duplicate-source finding that can no longer occur,
     # which is an exemption guarding nothing.
     #
-    # The pair is STILL in KNOWN_IDENTICAL below, and that is not a
-    # contradiction: the two registries record different facts. This one is
-    # about the PLAN (two rows wanting one source -- fixed now). That one is
-    # about the SHIPPED PIXELS (two files still byte-identical -- fixed only
-    # when the rehunt lands new art).
+    # The pair stayed in KNOWN_IDENTICAL below until 2026-09-16, and that was
+    # not a contradiction: the two registries record different facts. This
+    # one is about the PLAN (two rows wanting one source -- fixed in D1). That
+    # one is about the SHIPPED PIXELS (two files byte-identical -- fixed when
+    # #564 landed the rehunt's art).
     #
     # Dodoco's Marvelous Magic: ruled onto catalytic_conversion (promoted
     # from its power icon), but it is ALSO spark_collection's effective r1,
