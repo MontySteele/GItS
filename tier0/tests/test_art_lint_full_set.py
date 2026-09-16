@@ -112,10 +112,11 @@ def test_l12_hashes_the_shipped_files_not_the_shortlist():
     """
     stems = {p.stem for p in SHIPPED.rglob("*.png")}
     assert len(stems) > 100, "shipped card art is suspiciously sparse"
-    # The pair C3 found the moment this was pointed at the package. Both are
-    # auto-picks, which is exactly why the old candidates hash could not see
-    # them; it is allowlisted with its reason, not silently tolerated.
-    assert frozenset({"kaboom", "spark_knight_style"}) in art_lint.KNOWN_IDENTICAL
+    # A pair the shipped-file hash can see and the old candidates hash could
+    # not; it is allowlisted with its reason, not silently tolerated. (The
+    # pair C3 first found here, kaboom / spark_knight_style, left the set on
+    # 2026-09-16 when #564 gave spark_knight_style its own art.)
+    assert frozenset({"crowd_work", "standing_ovation"}) in art_lint.KNOWN_IDENTICAL
 
 
 @needs_art
