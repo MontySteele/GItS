@@ -461,14 +461,24 @@ public sealed class CelestialGiftPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Bennett burst (Fantastic Voyage): attacks +Amount for the REST OF THIS
-/// TURN; the sim pops attack_up_this_turn at player_turn_end_triggers.
+/// Attacks +Amount for the REST OF THIS TURN; the sim pops
+/// attack_up_this_turn at player_turn_end_triggers.
+///
+/// `EB-699`. TITLED AFTER ITS EFFECT, BECAUSE NO ONE CARD OWNS IT. It read
+/// "Fantastic Voyage" from when Bennett's burst was the only thing that made
+/// it, and that card stopped making it in the redesign a few lines up
+/// (<see cref="CelestialGiftPower"/>'s note: the burst grants real
+/// <c>StrengthPower</c> now). What applies it today is Kujou Sara's Tengu
+/// Stormcall, paying in at the start of the turn it promised -- so the buff on
+/// the player's bar wore another companion's card name and nothing on the
+/// screen connected the two (Kokomi r30 lane 1). A power more than one card
+/// can make is named for what it does.
 /// </summary>
 public sealed class AttackUpThisTurnPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Fantastic Voyage"),
+        ("title", "Attack Up"),
         ("description",
             "Your Attacks deal [blue]{Amount}[/blue] additional damage this "
           + "turn."),
