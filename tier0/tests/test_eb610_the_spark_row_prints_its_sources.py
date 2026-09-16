@@ -17,7 +17,7 @@ nothing wider: the GAINS of the SPARK meter, each with the card its row opened
 on. `blindplay_board.spark_sources` turns the event word into the printed one
 before any page sees it.
 
-`EB-792`: AND THE WINDOW IS THE FIGHT, NOT THE NEWEST TURN. The live look of
+`EB-796`: AND THE WINDOW IS THE FIGHT, NOT THE NEWEST TURN. The live look of
 2026-09-16 (proofs-9 lane 0, defect 3) watched the opening bank leave both the
 sentence and the wire the moment a later turn's explosion landed -- `Spark 3`
 explained by "+2 an explosion" alone. A Spark does not expire at end of turn
@@ -149,7 +149,7 @@ def test_the_line_hangs_under_the_spark_row_and_nothing_else():
 
 
 def test_the_bridge_sends_every_gain_of_the_fight_and_not_one_turn_of_it():
-    """`EB-792` (proofs-9 lane 0, defect 3, 2026-09-16).
+    """`EB-796` (proofs-9 lane 0, defect 3, 2026-09-16).
 
     THE DEFECT, on the WIRE and not on the page. Turn one printed `This turn:
     +1 your opening bank` beside `Spark 1`; a later turn printed `Spark 3`
@@ -180,4 +180,4 @@ def test_the_bridge_sends_every_gain_of_the_fight_and_not_one_turn_of_it():
     # The reason, beside the code, so the window is not narrowed back by
     # someone reading `MeterLedger.ResetFight` as a per-turn reset.
     assert "ResetFight" in src
-    assert "`EB-792`" in src
+    assert "`EB-796`" in src

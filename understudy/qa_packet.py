@@ -1009,7 +1009,7 @@ def upgrade_keywords(card_id: Any,
 # `OnUpgrade` delta, because the card in front of the player is the upgraded one
 # and its written face is the upgraded one.
 #
-# `EB-791`: AND THE NAMED FORM IS A FORM OF THE SAME THING. The second arm
+# `EB-795`: AND THE NAMED FORM IS A FORM OF THE SAME THING. The second arm
 # below used to read the literal word `DynamicVar`, because that was the only
 # var whose constructor was known to take its hole's name as a string. It is
 # not: `FoldedDamageVar` and `FoldedBlockVar` -- the pair every BRANCH face is

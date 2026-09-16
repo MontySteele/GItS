@@ -136,7 +136,7 @@ public sealed class ProtoMcDurinBinaryFormModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]"),
+        ("title", "White: enemies take 50% more damage from Elemental Reactions"),
         ("description", "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]"),
     };
 }
@@ -157,7 +157,7 @@ public sealed class ProtoMcDurinBinaryFormModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage"),
+        ("title", "Dark: your Pyro Attacks that react deal 8 additional damage"),
         ("description", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage"),
     };
 }

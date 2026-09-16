@@ -139,7 +139,7 @@ public static partial class McpMod
     /// printed word before any page sees it. No price, no bank, no other
     /// meter.
     ///
-    /// `EB-792`: THE WINDOW IS THE FIGHT, AND IT USED TO BE THE NEWEST TURN.
+    /// `EB-796`: THE WINDOW IS THE FIGHT, AND IT USED TO BE THE NEWEST TURN.
     /// The live look of 2026-09-16 (proofs-9 lane 0, defect 3) read a Klee
     /// fight whose turn one printed `This turn: +1 your opening bank` beside
     /// `Spark 1`, and then, after a set-off on a later turn, `Spark 3` beside
@@ -175,7 +175,7 @@ public static partial class McpMod
         var sources = new List<Dictionary<string, object?>>();
         try
         {
-            // `EB-792`: EVERY SPARK ROW THE LEDGER HOLDS, in the order it
+            // `EB-796`: EVERY SPARK ROW THE LEDGER HOLDS, in the order it
             // resolved them. The ledger is emptied per fight
             // (`MeterLedger.ResetFight`), so "every row" already means "this
             // fight" and no turn filter is needed to keep the last fight out.

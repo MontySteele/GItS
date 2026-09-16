@@ -12344,7 +12344,7 @@ def test_the_written_face_is_read_by_id_and_not_by_title():
 
 
 def test_a_branch_clause_un_folds_too_and_not_only_the_first_one():
-    """`EB-791` (proofs-9 lane 0, defect 2, 2026-09-16).
+    """`EB-795` (proofs-9 lane 0, defect 2, 2026-09-16).
 
     THE DEFECT. `Noelle - Breastplate` is written `block 6` then `block 4`.
     Under Dexterity 2 the wire's face reads "Gain 8 Block. If you are below

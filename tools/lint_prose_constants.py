@@ -102,6 +102,9 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from tools import lint_constant_parity as cp  # noqa: E402
+# `EB-791`: the blind page's stripper, so this lint and the generator that
+# writes the titles agree about what a rich-text tag is.
+from understudy.qa_packet import strip_markup  # noqa: E402
 
 CS_ROOT = REPO / "klee-mod" / "KleeCode"
 
@@ -520,13 +523,40 @@ class Finding:
 
 
 def displayed_corpus() -> list[tuple[str, int, str]]:
-    """(relative path, line, text) for every displayed string in scope."""
+    """(relative path, line, text) for every displayed string in scope.
+
+    `EB-791`: A STRING THAT IS ANOTHER STRING WITH THE TAGS OFF IS NOT A
+    SECOND PIECE OF PROSE. A modal card's mode face carries its sentence
+    twice -- as the option card's TITLE, which the game draws as plain text,
+    and as its DESCRIPTION, which the game renders. The tags therefore come
+    off one and stay on the other, and this lint's join is word ADJACENCY:
+    `[gold]Energy[/gold]` next to a numeral is not a join and `Energy` next to
+    the same numeral is, which is the reason three of the entries in `ALLOWED`
+    above record themselves as dropped ("golding the resources broke that join
+    at the source"). Un-golding the title re-created every one of those
+    coincidences, on a copy of a sentence the lint is already reading one line
+    below with its tags intact.
+
+    So the copy does not vote and is not reported. Matched EXACTLY -- the
+    title must be some other literal in the same file with `strip_markup`
+    applied and nothing else -- so a title that says anything of its own is
+    scanned as normal, and so is one whose description carries an
+    interpolation hole the title spells out as a number.
+    """
     out = []
     for path in sources():
         rel = path.relative_to(REPO).as_posix()
-        for lit in scan_strings(path.read_text(encoding="utf-8")):
-            if is_displayed(lit.text):
-                out.append((rel, lit.line, lit.text))
+        lits = scan_strings(path.read_text(encoding="utf-8"))
+        # Off EVERY literal and not only the displayed ones: a closing tag
+        # reads as a path to `is_displayed`, so the tagged original is not in
+        # the corpus at all -- which is exactly why golding a resource drops a
+        # face out of this lint's reach.
+        untagged = {strip_markup(lit.text) for lit in lits
+                    if strip_markup(lit.text) != lit.text}
+        for lit in lits:
+            if lit.text in untagged or not is_displayed(lit.text):
+                continue
+            out.append((rel, lit.line, lit.text))
     return out
 
 

@@ -55,6 +55,36 @@ have caught this.
 The script also makes itself per-monitor DPI aware before it asks for
 anything, so the fallback path is right as well as second.
 
+AND WHY IT CHANGED AGAIN (2026-09-16, EB-788)
+
+`PrintWindow` CLIPS. It asks the window to draw itself into the device context
+it is handed and throws away whatever does not fit -- and on this machine the
+game draws itself at 1.5x its own client rectangle (measured on lane 1: a
+3841x2160 client, a 5762x3240 render). Printed into a client-sized bitmap that
+kept the top-left two thirds, which on a 16:9 screen is the HUD bar and the
+player, and lost the bottom strip (THE HAND) and the right strip (THE ENEMIES).
+Every frame of `live-looks-8c` was that crop, and `EB-142` read the same
+symptom as a Godot/Vulkan window rendering only some of its layers. It renders
+all of them.
+
+Nothing in the apparatus could see this either, and the reason is the same one
+as 2026-08-13: `PrintWindow` returned true, the bitmap was the size the
+manifest claimed, and the surface was not blank. **Existence, dimensions and
+variety are not verification.** So the module now measures instead: it prints
+into an OVERSIZED canvas pre-filled with a sentinel colour, reads back how far
+the drawing actually reached, and resamples that region down to the client
+size. The measured extent and the scale it implies go onto every manifest row
+beside a `complete` flag, so a frame that IS a crop says so on its own row --
+which is the check `capture_geometry` exists to be, and the one the suite can
+run on a machine with no game and no display.
+
+The factor is measured and never assumed. It is not the obvious suspect: this
+host is per-monitor-v2 aware and `GetDpiForWindow`, `GetDpiForSystem` and the
+screen's `LOGPIXELSX` all read 288 here, so window-over-system DPI is 1.0 and
+would predict no scaling at all. A factor this file guessed would be a factor
+that is wrong on the next monitor, and a wrong guess here looks exactly like a
+right one.
+
 The fallback keeps the old honest caveat: it is the screen CONTENT under the
 window's rectangle, so a window sitting ON TOP of the game appears in the
 frame. `PrintWindow` does not have that problem, which is the other reason it
@@ -88,21 +118,32 @@ MANIFEST = FRAME_DIR / "frames.jsonl"
 
 CAPTURE_ENV = "GITS_UNDERSTUDY_CAPTURE"
 
-# EB-142 hygiene, 2026-08-25. The auto route is `printwindow` first and
-# `copyfromscreen` only if the surface comes back BLANK -- and on this
-# Godot/Vulkan window `PrintWindow` returns a surface that is not blank and is
-# not complete either: the background and the HUD chrome render, the HAND, the
-# ENEMIES and the prompt caption do not. `Test-Blank` sees a varied bitmap,
-# says "fine", and every in-combat frame on the default route is a PARTIAL --
-# missing exactly the three things anyone captures a combat frame to look at.
-# There is no way to make the blank test catch that (the frame genuinely is
-# not blank), so the answer is an explicit override rather than a smarter
-# heuristic: name the route and take responsibility for its caveat.
+# EB-142 hygiene, 2026-08-25, amended by EB-788, 2026-09-16. The auto route is
+# `printwindow` first and `copyfromscreen` only if the surface comes back
+# BLANK. EB-142 added the override because the default route's frames were not
+# blank and not complete either, and read that as a Godot/Vulkan window
+# rendering only some of its layers. EB-788 measured it: the window renders all
+# of its layers, at 1.5x its client rectangle, and the missing hand and enemies
+# were the clip. The default route is fixed, so the override is no longer the
+# way to get a whole frame -- it stays because naming a route and taking
+# responsibility for its caveat is still the honest answer to a route question,
+# and because `copyfromscreen` is the only route that can see a window
+# `PrintWindow` cannot render at all. Its caveat is unchanged and it is the
+# expensive one: that route reads the SCREEN, so it raises the game to the
+# front and photographs whatever is on top of it.
 ROUTE_ENV = "GITS_UNDERSTUDY_CAPTURE_ROUTE"
 ROUTE_AUTO = "auto"
 ROUTES = (ROUTE_AUTO, "printwindow", "copyfromscreen")
 
 GAME_IMAGE = "SlayTheSpire2"          # process name, no .exe -- Get-Process
+
+# EB-788. How much bigger than the client area the print canvas is made, so the
+# window's own render has room to overflow into and BE MEASURED instead of
+# silently clipped. 2.0 covers the 1.5x this machine renders at with headroom,
+# and still leaves sentinel showing when the render is 1:1 -- which is how a
+# scale of exactly one is told apart from an overflow that filled the canvas.
+# Costs one bitmap of `4 * probe^2 * w * h` bytes for the length of the call.
+PROBE_FACTOR = 2.0
 
 GUARDRAIL = (
     "MATERIAL, not evidence. A frame captured by this apparatus is something "
@@ -162,9 +203,18 @@ Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 public struct GitsRect { public int Left; public int Top; public int Right; public int Bottom; }
+public struct GitsPoint { public int X; public int Y; }
 public static class GitsWin {
     [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr hWnd, out GitsRect lpRect);
+    // The CLIENT area is what a frame is OF -- the game's pixels and nothing
+    // else. On this borderless window it equals the window rect, but the two
+    // are not the same question and `EB-788` is what asking the wrong one
+    // costs.
+    [DllImport("user32.dll")]
+    public static extern bool GetClientRect(IntPtr hWnd, out GitsRect lpRect);
+    [DllImport("user32.dll")]
+    public static extern bool ClientToScreen(IntPtr hWnd, ref GitsPoint pt);
     // PW_RENDERFULLCONTENT = 2. Asks the window to render ITSELF into a device
     // context, so no screen coordinate, no monitor index and no DPI mapping is
     // involved anywhere in the path.
@@ -211,8 +261,27 @@ if (-not $proc) {
 $hwnd = $proc.MainWindowHandle
 $rect = New-Object GitsRect
 [void][GitsWin]::GetWindowRect($hwnd, [ref]$rect)
-$w = $rect.Right - $rect.Left
-$h = $rect.Bottom - $rect.Top
+# THE FRAME IS OF THE CLIENT AREA. `GetClientRect` gives its SIZE at the
+# origin; `ClientToScreen` gives where that size sits on the desktop, which is
+# what the screen route needs. On this game's borderless window the two
+# rectangles coincide, so nothing here moves the picture -- it names what the
+# picture is of, and the size the capture is checked against.
+$crect = New-Object GitsRect
+[void][GitsWin]::GetClientRect($hwnd, [ref]$crect)
+$corigin = New-Object GitsPoint
+$corigin.X = 0
+$corigin.Y = 0
+[void][GitsWin]::ClientToScreen($hwnd, [ref]$corigin)
+$w = $crect.Right - $crect.Left
+$h = $crect.Bottom - $crect.Top
+if ($w -le 0 -or $h -le 0) {
+    # A window with no client area at all is the EMPTY_RECT refusal too; fall
+    # back to the window rect only so the refusal below reads the same.
+    $w = $rect.Right - $rect.Left
+    $h = $rect.Bottom - $rect.Top
+    $corigin.X = $rect.Left
+    $corigin.Y = $rect.Top
+}
 if ($w -le 0 -or $h -le 0) {
     Write-Output 'EMPTY_RECT'
     exit 3
@@ -255,67 +324,280 @@ function Clear-Foreground($hWnd) {
     [void][GitsWin]::SetWindowPos($hWnd, [IntPtr](-2), 0, 0, 0, 0, 0x0013)
 }
 
-$bmp = New-Object System.Drawing.Bitmap $w, $h
-$gfx = [System.Drawing.Graphics]::FromImage($bmp)
+# EB-788, 2026-09-16. THE RENDER IS NOT THE SIZE OF THE WINDOW, and that is the
+# whole defect. `PrintWindow` asks the window to draw itself into the device
+# context and CLIPS whatever overflows -- and on this machine the game draws
+# itself at 1.5x its own client rectangle (measured: a 3841x2160 client renders
+# 5762x3240). Into a client-sized bitmap that lands the top-left two thirds and
+# throws the rest away, which is why the HAND -- along the bottom -- and the
+# ENEMIES -- along the right -- were absent from every frame of `live-looks-8c`
+# while the HUD bar and the player, both top-left, came through fine. Nothing in
+# the apparatus could see it: `PrintWindow` returned true, the bitmap was the
+# size the manifest claimed, and the surface was not blank. `Test-Blank` cannot
+# catch a frame that is complete-looking and two thirds of a picture.
+#
+# WHERE THE 1.5 COMES FROM IS NOT SETTLED and the fix does not depend on it.
+# It is not the obvious suspect: the capture host IS per-monitor-v2 aware
+# (checked), and `GetDpiForWindow`, `GetDpiForSystem` and the screen's
+# LOGPIXELSX all read 288 here, so window-over-system DPI is 1.0 and would
+# predict no scaling at all. So the factor is MEASURED rather than derived:
+# print into an oversized canvas pre-filled with a sentinel colour, find where
+# the drawing stopped, and resample that region down to the client size. A
+# factor this apparatus guessed would be a factor that is wrong on the next
+# monitor, and a wrong guess here looks exactly like a right one.
+function Measure-Extent($bitmap, $limitW, $limitH, $sr, $sg, $sb) {
+    # The drawn region is a top-left block, so the extent is the LAST pixel that
+    # is not the sentinel. Scanned BACKWARDS along three lines rather than one,
+    # and the widest answer taken, so a run of genuinely-sentinel-coloured game
+    # pixels at the edge of one line cannot shrink the answer.
+    $maxX = 0
+    $maxY = 0
+    foreach ($y in @(1, [int]($limitH / 3), [int]($limitH / 2))) {
+        if ($y -ge $bitmap.Height) { continue }
+        for ($x = $bitmap.Width - 1; $x -ge 0; $x--) {
+            $c = $bitmap.GetPixel($x, $y)
+            if ($c.R -ne $sr -or $c.G -ne $sg -or $c.B -ne $sb) {
+                if (($x + 1) -gt $maxX) { $maxX = $x + 1 }
+                break
+            }
+        }
+    }
+    foreach ($x in @(1, [int]($limitW / 3), [int]($limitW / 2))) {
+        if ($x -ge $bitmap.Width) { continue }
+        for ($y = $bitmap.Height - 1; $y -ge 0; $y--) {
+            $c = $bitmap.GetPixel($x, $y)
+            if ($c.R -ne $sr -or $c.G -ne $sg -or $c.B -ne $sb) {
+                if (($y + 1) -gt $maxY) { $maxY = $y + 1 }
+                break
+            }
+        }
+    }
+    return @($maxX, $maxY)
+}
 
+# Resample a top-left region of the canvas down onto a client-sized bitmap.
+function Resize-Region($canvas, $dw, $dh, $w, $h) {
+    $dst = New-Object System.Drawing.Bitmap $w, $h
+    # 96 is what a PNG should declare. `New-Object Bitmap w,h` inherits the
+    # DEVICE's resolution -- 288 on this 300% display -- and a viewer that
+    # honours the header then draws a correct 3841x2160 frame at a third of its
+    # size. Pixels were never wrong; the header was.
+    $dst.SetResolution(96, 96)
+    $g = [System.Drawing.Graphics]::FromImage($dst)
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    $g.DrawImage($canvas,
+        (New-Object System.Drawing.Rectangle 0, 0, $w, $h),
+        0, 0, $dw, $dh, [System.Drawing.GraphicsUnit]::Pixel)
+    $g.Dispose()
+    return $dst
+}
+
+$probe = [double]'__PROBE__'
+if ($probe -lt 1.0) { $probe = 1.0 }
+$drawnW = $w
+$drawnH = $h
+
+$bmp = $null
 $forced = '__ROUTE__'
 if ($forced -eq 'copyfromscreen') {
     # PINNED by GITS_UNDERSTUDY_CAPTURE_ROUTE. No PrintWindow attempt at all,
     # so the partial surface this route exists to avoid is never written.
     $route = 'copyfromscreen-forced'
+    $bmp = New-Object System.Drawing.Bitmap $w, $h
+    $bmp.SetResolution(96, 96)
+    $gfx = [System.Drawing.Graphics]::FromImage($bmp)
     Set-Foreground $hwnd
     try {
         $gfx.Clear([System.Drawing.Color]::Black)
-        $gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
+        $gfx.CopyFromScreen($corigin.X, $corigin.Y, 0, 0, $bmp.Size)
     } finally { Clear-Foreground $hwnd }
+    $gfx.Dispose()
 } else {
     $route = 'printwindow'
-    $hdc = $gfx.GetHdc()
+    # The oversized canvas. `$probe` is the headroom the render is allowed to
+    # overflow by; at 2.0 a 1.5x render fits with room to spare AND a 1.0x
+    # render still leaves sentinel showing, which is how a scale of exactly one
+    # is told apart from an overflow that filled the canvas.
+    $cw = [int][Math]::Ceiling($w * $probe)
+    $ch = [int][Math]::Ceiling($h * $probe)
+    $canvas = New-Object System.Drawing.Bitmap $cw, $ch
+    $cg = [System.Drawing.Graphics]::FromImage($canvas)
+    $cg.Clear([System.Drawing.Color]::FromArgb(255, 255, 0, 255))
+    $hdc = $cg.GetHdc()
     $ok = [GitsWin]::PrintWindow($hwnd, $hdc, 2)
-    $gfx.ReleaseHdc($hdc)
+    $cg.ReleaseHdc($hdc)
+    $cg.Dispose()
+    $ext = Measure-Extent $canvas $w $h 255 0 255
+    if ($ext[0] -gt 0 -and $ext[1] -gt 0) {
+        $drawnW = $ext[0]
+        $drawnH = $ext[1]
+    }
+    # A render that reached the far edge of the canvas overflowed IT too, so the
+    # measurement is a floor and not the answer. Say so rather than resample a
+    # number that is not the extent.
+    if ($drawnW -ge $cw -or $drawnH -ge $ch) {
+        $drawnW = $cw
+        $drawnH = $ch
+        $route = 'printwindow-overflow'
+    }
+    $bmp = Resize-Region $canvas $drawnW $drawnH $w $h
+    $canvas.Dispose()
     if ($forced -ne 'printwindow' -and ((-not $ok) -or (Test-Blank $bmp))) {
-        # Fallback: the screen under the window's rectangle. Now DPI-correct,
-        # because awareness was set above -- but still the screen and not the
-        # window, so anything sitting on top of the game lands in the frame.
-        # Foregrounded for the same reason the forced route is.
+        # Fallback: the screen under the window's CLIENT rectangle. Now
+        # DPI-correct, because awareness was set above -- but still the screen
+        # and not the window, so anything sitting on top of the game lands in
+        # the frame. Foregrounded for the same reason the forced route is.
         $route = 'copyfromscreen'
+        $bmp.Dispose()
+        $bmp = New-Object System.Drawing.Bitmap $w, $h
+        $bmp.SetResolution(96, 96)
+        $gfx = [System.Drawing.Graphics]::FromImage($bmp)
         Set-Foreground $hwnd
         try {
             $gfx.Clear([System.Drawing.Color]::Black)
-            $gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
+            $gfx.CopyFromScreen($corigin.X, $corigin.Y, 0, 0, $bmp.Size)
         } finally { Clear-Foreground $hwnd }
+        $gfx.Dispose()
+        $drawnW = $w
+        $drawnH = $h
     } elseif ($forced -eq 'printwindow') {
         $route = 'printwindow-forced'
     }
 }
 $bmp.Save('__OUT__', [System.Drawing.Imaging.ImageFormat]::Png)
-$gfx.Dispose()
 $bmp.Dispose()
-Write-Output ("OK {0} {1} {2}" -f $w, $h, $route)
+Write-Output ("OK {0} {1} {2} {3} {4}" -f $w, $h, $route, $drawnW, $drawnH)
 """
+
+
+_HERE_OPEN = '@"'
+_HERE_CLOSE = '"@'
+
+
+def strip_ps_comments(script: str) -> str:
+    """Whole-line `#` comments out, everything else byte for byte.
+
+    NOT cosmetic, and NOT optional. `-EncodedCommand` is base64 of UTF-16LE, so
+    every character of prose costs FOUR on a command line Windows caps near
+    32767 -- and this script's comments are the half of it worth reading. Adding
+    `EB-788`'s explanation to the script itself pushed the encoded form to 34524
+    characters and the capture died with `WinError 206`, a length limit wearing
+    the costume of a missing file. So the prose lives in the source, where a
+    person reads it, and is dropped on the way to the wire, where nobody does.
+
+    Only a line whose first non-space character is `#` goes. A `#` inside a
+    string, or after code on the same line, is left alone -- the rule has to be
+    one that cannot eat a literal. The C# here-string is skipped whole, tracked
+    by its `@"` / `"@` delimiters, because what is inside it is not PowerShell
+    and its comment syntax is not `#`.
+    """
+    out: list[str] = []
+    in_here = False
+    for line in script.splitlines():
+        stripped = line.strip()
+        if in_here:
+            out.append(line)
+            if stripped == _HERE_CLOSE:
+                in_here = False
+            continue
+        if stripped.endswith(_HERE_OPEN):
+            in_here = True
+            out.append(line)
+            continue
+        if stripped.startswith("#"):
+            continue
+        out.append(line)
+    return "\n".join(out)
 
 
 def build_script(image: str, out_path: Path,
                  forced_route: str = ROUTE_AUTO,
-                 pid: int | None = None) -> str:
-    """The script with its four holes filled. Separated so it can be read.
+                 pid: int | None = None,
+                 probe: float = PROBE_FACTOR) -> str:
+    """The script with its five holes filled. Separated so it can be read.
 
     The substitutions are a process NAME, an integer pid, a path this module
-    chose, and a route drawn from `ROUTES` -- none of them caller text
+    chose, a route drawn from `ROUTES` and a float -- none of them caller text
     arriving from a wire; `frame_path` slugs the label before it can reach
     here, an unknown route is normalised to `auto` rather than interpolated,
-    and the pid goes through `int()` before it is spelled into the selector.
+    the pid goes through `int()` before it is spelled into the selector, and
+    the probe factor goes through `float()` and a floor of 1.0.
     """
     if forced_route not in ROUTES:
         forced_route = ROUTE_AUTO
     pidsel = (f"Get-Process -Id {int(pid)} -ErrorAction SilentlyContinue"
               if pid is not None else
               f"Get-Process -Name '{image}' -ErrorAction SilentlyContinue")
-    return (_PS_SCRIPT
+    return (strip_ps_comments(_PS_SCRIPT)
             .replace("__PIDSEL__", pidsel)
             .replace("__IMAGE__", image)
             .replace("__OUT__", str(out_path).replace("'", "''"))
-            .replace("__ROUTE__", forced_route))
+            .replace("__ROUTE__", forced_route)
+            .replace("__PROBE__", f"{max(1.0, float(probe)):.4f}"))
+
+
+def parse_token(token: str) -> dict:
+    """The success line, as fields. `OK <w> <h> <route> [<drawnW> <drawnH>]`.
+
+    The last two are what `EB-788` added and are optional on the way in, so a
+    manifest written by the old script -- or a stubbed runner in a test that
+    predates them -- still reads back rather than raising.
+    """
+    parts = (token or "").split()
+    out: dict = {"client": None, "route": "unknown", "drawn": None}
+    if len(parts) >= 3:
+        try:
+            out["client"] = (int(parts[1]), int(parts[2]))
+        except ValueError:
+            out["client"] = None
+        out["route"] = parts[3] if len(parts) > 3 else "unknown"
+    if len(parts) >= 6:
+        try:
+            out["drawn"] = (int(parts[4]), int(parts[5]))
+        except ValueError:
+            out["drawn"] = None
+    return out
+
+
+def capture_geometry(client: tuple[int, int] | None,
+                     drawn: tuple[int, int] | None) -> dict:
+    """Does this frame show the WHOLE client area, and at what render scale?
+
+    `EB-788`'s pin, and the only thing in this module that can answer the
+    question the defect turned on. `client` is what the window says its client
+    area is; `drawn` is how far the window's own render actually reached in the
+    canvas it was printed into. The frame is COMPLETE when the render was
+    resampled from a region at least as large as the client area in both axes:
+    a render that covered less than the client is a render that stopped short,
+    and one that covered more is the 1.5x overflow, resampled back down.
+
+    `scale` is `drawn / client` per axis. It is a FACT ABOUT THIS MACHINE, not
+    a constant: it is measured every capture and written onto the manifest row,
+    so a frame that was taken at a different factor says so on its own row
+    rather than leaving a reader to assume the factor that held last week.
+
+    Pure arithmetic on two pairs of integers, on purpose -- no window, no
+    screen, no PowerShell -- so the check a frame is verified by is one the
+    suite can run on a machine with no game and no display.
+    """
+    if not client or client[0] <= 0 or client[1] <= 0:
+        return {"complete": False, "scale": None, "client": client,
+                "drawn": drawn,
+                "note": "the window reported no client area to check against"}
+    if not drawn or drawn[0] <= 0 or drawn[1] <= 0:
+        return {"complete": False, "scale": None, "client": client,
+                "drawn": drawn,
+                "note": "the capture did not report how far the render reached"}
+    sx = drawn[0] / client[0]
+    sy = drawn[1] / client[1]
+    complete = drawn[0] >= client[0] and drawn[1] >= client[1]
+    note = ("the frame covers the whole client area" if complete else
+            f"the render reached {drawn[0]}x{drawn[1]} of a "
+            f"{client[0]}x{client[1]} client area, so the frame is a CROP and "
+            f"whatever sits along its missing edges is not in it")
+    return {"complete": complete, "scale": (round(sx, 4), round(sy, 4)),
+            "client": client, "drawn": drawn, "note": note}
 
 
 def encoded_command(script: str) -> str:
@@ -392,17 +674,32 @@ def capture(label: str = "frame", note: str = "",
         }.get(token, stderr or token or "no output")
         return {"status": "error", "message": reason,
                 "guardrail": GUARDRAIL, "path": str(out)}
+    parsed = parse_token(token)
     parts = token.split()
     size = " ".join(parts[1:3])
     # WHICH ROUTE RAN IS PART OF THE RECORD. `copyfromscreen` frames can carry
     # an overlapping window; `printwindow` frames cannot. A reader of the
     # manifest is entitled to know which kind of frame they are looking at.
-    ran_route = parts[3] if len(parts) > 3 else "unknown"
+    ran_route = parsed["route"]
+    geom = capture_geometry(parsed["client"], parsed["drawn"])
 
     row = {
         "record": "frame", "ts": time.time(),
         "path": str(out), "label": label, "note": note,
         "size": size,
+        # EB-788. THE FRAME'S OWN ANSWER TO "IS THIS THE WHOLE SCREEN". The
+        # defect it closes produced frames that were the right size, not blank,
+        # and two thirds of a picture, so size alone is not the check and never
+        # was. `complete` is the check; `render_scale` is the measured factor
+        # the window drew itself at, which is a fact about the machine and is
+        # therefore recorded rather than assumed.
+        "client_size": (f"{parsed['client'][0]} {parsed['client'][1]}"
+                        if parsed["client"] else None),
+        "render_extent": (f"{parsed['drawn'][0]} {parsed['drawn'][1]}"
+                          if parsed["drawn"] else None),
+        "render_scale": geom["scale"],
+        "complete": geom["complete"],
+        "complete_note": geom["note"],
         "route": ran_route,
         # The `*-forced` suffix on `route` already says a route was PINNED;
         # this says what it was pinned TO, so a manifest read back months
@@ -420,8 +717,11 @@ def capture(label: str = "frame", note: str = "",
         "guardrail": GUARDRAIL,
     }
     _append(manifest or MANIFEST, row)
-    return {"status": "ok", "message": f"captured {size} via {ran_route}",
+    caveat = "" if geom["complete"] else f" -- INCOMPLETE: {geom['note']}"
+    return {"status": "ok",
+            "message": f"captured {size} via {ran_route}{caveat}",
             "guardrail": GUARDRAIL, "path": str(out), "route": ran_route,
+            "complete": geom["complete"], "render_scale": geom["scale"],
             "row": row}
 
 
