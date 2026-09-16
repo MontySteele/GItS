@@ -128,6 +128,13 @@ public sealed class ProtoThomaCrimsonOoyoroiEither : CustomCardModel, IElemental
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoThomaCrimsonOoyoroiEitherModeA : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        KleeArt.CardPortrait("proto_thoma_crimson_ooyoroi_either");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deal 8 damage, applying its element"),
@@ -142,6 +149,13 @@ public sealed class ProtoThomaCrimsonOoyoroiEitherModeA : ModalOptionCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoThomaCrimsonOoyoroiEitherModeB : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        KleeArt.CardPortrait("proto_thoma_crimson_ooyoroi_either");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gain 3 Block, applying no element"),

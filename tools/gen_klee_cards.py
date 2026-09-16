@@ -13256,6 +13256,19 @@ def emit(
                 f"    public int PrintedMeterPrice =>\n"
                 f"        {pascal(card['id'])}.ModePrices[{i}]!.Value.Amount;"
                 if priced_mode else "")
+            # THE PARENT'S PORTRAIT, and it is a resolved picture rather than
+            # a new art row (proofs-8a, 2026-09-16). `ModalOptionCard`
+            # declared `CustomPortrait => null`, which is the pre-`EB-275`
+            # answer: the game then went to its OWN `card_atlas` for an id
+            # only this mod knows and logged
+            # `AtlasResourceLoader: Missing sprite
+            # 'furina/kleemod-proto_fs_curtain_rise_mode_a'` on every draw of
+            # the chooser. A mode is a FACE OF ITS PARENT, not a card of its
+            # own, so it wears the parent's illustration -- the same literal
+            # the parent's own getter emits, `art_of:` already folded in -- and
+            # no new `art/plan.tsv` row is owed. D/E pick, taken at its stated
+            # default.
+            option_art_id = card.get("art_of") or card["id"]
             modal_option_classes += f'''
 /// <summary>Mode {i} of {card["id"]}. A face for the choose-a-card screen;
 /// never played, never in a pile, never a reward -- but a POOL MEMBER, via
@@ -13264,6 +13277,13 @@ def emit(
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interface}
 {{
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        {profile.art_loader}.CardPortrait("{option_art_id}");
+
     public override List<(string, string)>? Localization => new()
     {{
         ("title", "{label}"),

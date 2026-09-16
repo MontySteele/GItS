@@ -98,43 +98,43 @@ internal static partial class TeyvatLoc
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.HOLD_ON_0.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.OVERCOME.description"] =
                 "{RandomCard} is removed from your deck.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_0.description"] =
-                "Lose 3 HP. The card in the above option is randomized.",
+                "Lose {HpLoss} HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_1.description"] =
                 "",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_2.description"] =
@@ -478,11 +478,12 @@ internal static partial class TeyvatLoc
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.DECIPHER_1.title"] =
                 "Decipher",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.INITIAL.options.DECIPHER_1.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER.options.GIVE_UP.title"] =
                 "Give Up",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER.options.GIVE_UP.description"] =
@@ -490,69 +491,78 @@ internal static partial class TeyvatLoc
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.options.DECIPHER.title"] =
                 "Decipher",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.options.DECIPHER.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.options.DECIPHER.title"] =
                 "Decipher",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.options.DECIPHER.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.options.DECIPHER.title"] =
                 "Decipher",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.options.DECIPHER.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.options.DECIPHER.title"] =
                 "Decipher",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.options.DECIPHER.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.SMASH.description"] =
                 "Heal 20 HP.",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.GIVE_UP.description"] =
                 "can be chosen at any stage to leave.",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_1.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_2.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_3.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_4.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.pages.DECIPHER_5.description"] =
-                "Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, "
-                + "additional stages follow with escalating costs: Stage 2 (Lose 6 "
-                + "Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a "
-                + "random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), "
-                + "Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).",
+                "Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If "
+                + "Decipher is chosen, additional stages follow with escalating "
+                + "costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 "
+                + "(Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, "
+                + "Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade "
+                + "ALL cards in your deck).",
             ["CRACKED_TABLET_AT_STORMTERRORS_LAIR.loss"] =
                 "{character} gave the tablet everything and did not get up from the "
                 + "[gold]{event}[/gold].",
@@ -1338,103 +1348,103 @@ internal static partial class TeyvatLoc
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.HOLD_ON_0.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.OVERCOME.description"] =
                 "{RandomCard} is removed from your deck.",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_0.description"] =
-                "Lose 3 HP as the wet rope scours your palms. The thing about to "
-                + "slip is randomized — some other piece of your kit takes its place "
-                + "at the knot. Each time you clamp down again, the strain costs 1 "
-                + "more HP than the last, and the bridge keeps offering you the same "
-                + "two choices until you finally let something fall. The knot never "
-                + "picks the same thing twice while anything else remains, and never "
-                + "anything lashed down for good (Eternal).",
+                "Lose {HpLoss} HP as the wet rope scours your palms. The thing "
+                + "about to slip is randomized — some other piece of your kit takes "
+                + "its place at the knot. Each time you clamp down again, the strain "
+                + "costs 1 more HP than the last, and the bridge keeps offering you "
+                + "the same two choices until you finally let something fall. The "
+                + "knot never picks the same thing twice while anything else remains, "
+                + "and never anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_1.description"] =
                 "",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_2.description"] =
@@ -1777,93 +1787,93 @@ internal static partial class TeyvatLoc
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.HOLD_ON_0.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.OVERCOME.description"] =
                 "{RandomCard} is removed from your deck.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_0.description"] =
-                "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
-                + "over the ravine is randomized. Each further grip costs 1 more HP "
-                + "than the last, and the ranger keeps pointing at the same sign "
-                + "until you finally cut something away. Gear marked for the Ranger "
-                + "corps' own use (Eternal) never sways loose, and the wind never "
-                + "picks the same bundle twice while others remain.",
+                "Lose {HpLoss} HP as the frayed cable saws at your palms. The item "
+                + "hanging over the ravine is randomized. Each further grip costs 1 "
+                + "more HP than the last, and the ranger keeps pointing at the same "
+                + "sign until you finally cut something away. Gear marked for the "
+                + "Ranger corps' own use (Eternal) never sways loose, and the wind "
+                + "never picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_1.description"] =
                 "",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_2.description"] =
@@ -2461,90 +2471,90 @@ internal static partial class TeyvatLoc
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.HOLD_ON_0.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.OVERCOME.description"] =
                 "{RandomCard} is removed from your deck.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_0.description"] =
-                "Lose 3 HP as the cable lurches and the pressure squeezes your "
-                + "ears. The wheel selects a different item at random. Every further "
-                + "spin costs 1 more HP than the last, and the attendant will "
+                "Lose {HpLoss} HP as the cable lurches and the pressure squeezes "
+                + "your ears. The wheel selects a different item at random. Every "
+                + "further spin costs 1 more HP than the last, and the attendant will "
                 + "patiently re-offer both choices until you surrender something. The "
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
@@ -2937,103 +2947,103 @@ internal static partial class TeyvatLoc
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.HOLD_ON_0.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.OVERCOME.description"] =
                 "{RandomCard} is removed from your deck.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_0.description"] =
-                "Lose 3 HP as the line saws through your grip. The wind shifts the "
-                + "load, and the piece hanging over the drop is randomized. Each "
-                + "further grip costs 1 more HP than the one before, and the crossing "
-                + "keeps putting the same two choices to you until you cut something "
-                + "away. Gear tied down by the priestess's own order (Eternal) never "
-                + "swings out, and the wind will not pick the same bundle twice while "
-                + "others hang.",
+                "Lose {HpLoss} HP as the line saws through your grip. The wind "
+                + "shifts the load, and the piece hanging over the drop is "
+                + "randomized. Each further grip costs 1 more HP than the one before, "
+                + "and the crossing keeps putting the same two choices to you until "
+                + "you cut something away. Gear tied down by the priestess's own "
+                + "order (Eternal) never swings out, and the wind will not pick the "
+                + "same bundle twice while others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_1.description"] =
                 "",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_2.description"] =
@@ -4514,83 +4524,93 @@ internal static partial class TeyvatLoc
             ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.HOLD_ON_0.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_0.options.HOLD_ON_1.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_0.options.HOLD_ON_1.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_1.options.HOLD_ON_2.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_1.options.HOLD_ON_2.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_2.options.HOLD_ON_3.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_2.options.HOLD_ON_3.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_3.options.HOLD_ON_4.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_3.options.HOLD_ON_4.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_4.options.HOLD_ON_5.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_4.options.HOLD_ON_5.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_5.options.HOLD_ON_6.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_5.options.HOLD_ON_6.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_6.options.HOLD_ON_LOOP.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_6.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.OVERCOME.description"] =
                 "{RandomCard} is removed from your Deck.",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_0.description"] =
-                "Lose 3 HP. The card named in the above option is randomized, and "
-                + "the HP cost rises by 1 each further time you choose this option. "
-                + "(The card is drawn from all cards without Eternal; the first card "
-                + "offered is never Basic rarity unless every card you hold is; the "
-                + "same card is never offered twice while others remain unoffered.)",
+                "Lose {HpLoss} HP. The card named in the above option is "
+                + "randomized, and the HP cost rises by 1 each further time you "
+                + "choose this option. (The card is drawn from all cards without "
+                + "Eternal; the first card offered is never Basic rarity unless every "
+                + "card you hold is; the same card is never offered twice while "
+                + "others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_1.description"] =
                 "",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_2.description"] =

@@ -577,7 +577,15 @@ def teardown(stamp: str = "", lane: object = None) -> str:
         raise EmbarkError(f"the ledger named by the sidecar is gone: "
                           f"{ledger_path}")
     entries = json.loads(ledger_path.read_text(encoding="utf-8"))
-    session = soak.Session(stamp, do_setup=False, intent="")
+    # THE LANE GOES INTO THE SESSION, not just onto the thread. `bridge.use`
+    # above settles where the WIRE talks; a Session with no instance still
+    # resolves its own per-lane paths off the default, and `archive_log` then
+    # copied lane 0's `godot.log` under a lane-1 stamp -- five of six archives
+    # of proofs-8a (2026-09-16) were the other lane's game. `cli_lane` is
+    # `None` for lane 0 exactly as the setup call above is, so the default
+    # teardown is byte-for-byte what it was. Same family as EB-210 / EB-435.
+    session = soak.Session(stamp, do_setup=False, intent="",
+                           instance=instances.cli_lane(recorded))
     session.ledger.path = ledger_path
     session.ledger.entries = entries
     for attr, marker in _LEDGER_SLOTS:

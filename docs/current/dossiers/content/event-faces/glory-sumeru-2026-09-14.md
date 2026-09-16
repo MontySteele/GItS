@@ -169,7 +169,7 @@ Mechanics check: matches harvest.
 A Forest Ranger's rope bridge sags over a Withering-scarred ravine in Ardravi Valley, one cable frayed past its posted weight marker. The ranger stationed at the near post says nothing beyond pointing at the sign; she has watched three travelers cross overloaded and does not care to watch a fourth. Something in your pack will have to go, or the crossing will take it anyway.
 
 - **Cut It Loose** — {RandomCard} is removed from your deck.
-- **Grip the Rope** — Lose 3 HP as the frayed cable saws at your palms. The item hanging over the ravine is randomized. Each further grip costs 1 more HP than the last, and the ranger keeps pointing at the same sign until you finally cut something away. Gear marked for the Ranger corps' own use (Eternal) never sways loose, and the wind never picks the same bundle twice while others remain.
+- **Grip the Rope** — Lose {HpLoss} HP as the frayed cable saws at your palms. The item hanging over the ravine is randomized. Each further grip costs 1 more HP than the last, and the ranger keeps pointing at the same sign until you finally cut something away. Gear marked for the Ranger corps' own use (Eternal) never sways loose, and the wind never picks the same bundle twice while others remain.
 
 Mechanics check: matches harvest (first card never Basic unless deck is all-Basic; same card never repeats until every other card has been offered; escalating +1 HP per Hold On — all carried from the base rule, unchanged from the gallery's other variants).
 

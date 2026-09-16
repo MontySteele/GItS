@@ -42,7 +42,7 @@ Mechanics check: matches harvest.
 The rope bridge below Springvale sways badly enough that a Knights of Favonius patrol has roped off both ends and posted a warning plank. The duty Knight says regulation calls for a full unload before crossing — courtesy says she'll let you pick what goes over the rail first. Below, Cider Lake is a long way down, and she is not in a hurry.
 
 - **Overcome** — {RandomCard} is removed from your deck.
-- **Hold On** — Lose 3 HP. The card in the above option is randomized.
+- **Hold On** — Lose {HpLoss} HP. The card in the above option is randomized.
 
 Mechanics notes (verbatim from the harvest): choosing Hold On replaces the listed card with another chosen at random, and the event continues to ask you to choose between these options until you choose Overcome. Each time Hold On is selected, the HP cost increases by 1. The card is chosen randomly from all your cards without Eternal. The first card chosen will never be Basic rarity (unless all of your cards are Basic); Basic cards can be chosen during rerolls. The same card will never be chosen twice (unless it has already offered to remove all other cards in your deck at least once).
 
@@ -219,7 +219,7 @@ Mechanics check: matches harvest.
 Half-buried in scree at the foot of Stormterror's Lair, a stone tablet carries lines no Knight on the patrol can read. The duty Knight says regulation calls for cataloguing it and moving on; courtesy admits that touching it seems to do something. Each time you press your hand flat against the stone, it takes a little more and gives a little more back — and you can always pull your hand away.
 
 - **Smash** — Heal 20 HP.
-- **Decipher** — Lose 3 Max HP. Upgrade a random card. If Decipher is chosen, additional stages follow with escalating costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).
+- **Decipher** — Lose {DecipherMaxHpLoss} Max HP. Upgrade a random card. If Decipher is chosen, additional stages follow with escalating costs: Stage 2 (Lose 6 Max HP, Upgrade a random card), Stage 3 (Lose 12 Max HP, Upgrade a random card), Stage 4 (Lose 24 Max HP, Upgrade a random card), Stage 5 (Lose all but 1 Max HP, Upgrade ALL cards in your deck).
 - **Give Up** — can be chosen at any stage to leave.
 
 Mechanics check: matches harvest.

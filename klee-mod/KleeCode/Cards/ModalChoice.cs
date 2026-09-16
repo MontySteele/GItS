@@ -455,6 +455,18 @@ public abstract class ModalOptionCard : CustomCardModel
     {
     }
 
+    /// <summary>
+    /// OVERRIDE THIS WITH THE PARENT'S KEY. Null is the pre-<c>EB-275</c>
+    /// answer: the game falls back to its own <c>card_atlas</c>, finds no
+    /// sprite under an id only this mod knows, and logs
+    /// <c>AtlasResourceLoader: Missing sprite
+    /// 'furina/kleemod-proto_fs_curtain_rise_mode_a'</c> on every draw of the
+    /// chooser (seen live, proofs-8a 2026-09-16). A mode is a FACE of its
+    /// parent, so it wears the parent's illustration and owes no art row --
+    /// which is what the generator emits, and what
+    /// <c>tools/art_coverage.py</c>'s mode-face check refuses to ship
+    /// without.
+    /// </summary>
     public override Texture2D? CustomPortrait => null;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

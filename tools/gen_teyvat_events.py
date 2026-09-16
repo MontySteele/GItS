@@ -2113,6 +2113,82 @@ def placeholder_refusals(plan: "Plan", index: Dict[str, dict]) -> List[str]:
     return out
 
 
+def reused_line_groups(item: "Dressed") -> Dict[str, List[str]]:
+    """The description key SUFFIXES each single face line is written to.
+
+    A mirror's `extra_options` says "this key reuses that line": the
+    `_LOCKED` twins, a later page's continuation of the same branch, and --
+    the case this exists for -- Slippery Bridge's eight Hold On pages, whose
+    option all reuses the ONE Hold On line the face writes
+    (`_hold_on_options`). `rows()` copies that line into every one of them, so
+    a group with more than one member is one sentence the player reads on
+    several different pages.
+    """
+    groups: Dict[str, List[str]] = {}
+    prefix = len(item.entry) + 1
+    for key in item.option_keys:
+        groups.setdefault(key, []).append(
+            item.option_key_path(key)[prefix:] + ".description")
+    for key, source in item.extra_options:
+        groups.setdefault(source, []).append(key + ".description")
+    return groups
+
+
+def reused_line_var_refusals(plan: "Plan", index: Dict[str, dict]) -> List[str]:
+    """Refuse a face line that SPELLS OUT a value the game recomputes per page.
+
+    THE SECOND HALF OF THE PLACEHOLDER RULE, and the reason it is not the
+    same check. `placeholder_refusals` lets a dressing replace a base var
+    with words on purpose: "Gain 7 Max HP" where the base writes `{MaxHp}`
+    reads correctly, because 7 is what the player gets every time. That
+    licence stops where ONE face line is copied to SEVERAL PAGES and the base
+    declares the SAME var on more than one of them -- then the number is not
+    one number, and any literal is wrong everywhere but the first page.
+
+    SEVERAL PAGES, not several keys, is what makes this a defect rather than
+    a duplicate. A `_LOCKED` twin is the same option on the SAME page greyed
+    out, so its cost is the cost the affordable row prints and a literal is
+    right on both (Tea Master, Wongo's, the Scriptorium, the Choir). A group
+    that spans distinct page keys is the escalating one: Slippery Bridge's
+    Hold On across nine pages, the Tablet's Decipher across five.
+
+    This is the Slippery Bridge defect (proofs-8a, 2026-09-16). The base
+    price is `3 + NumberOfHoldOns` and the base text carries it as
+    `{HpLoss}` on all nine Hold On description keys; all six Teyvat faces
+    wrote "Lose 3 HP" once, `rows()` copied that literal into all nine, and
+    the second page offered a 4 HP click while printing 3.
+    """
+    out: List[str] = []
+    for item in plan.items:
+        row = index.get(item.base_class, {})
+        key_vars = row.get("key_vars") or {}
+        if not key_vars:
+            continue
+        rows = dict(item.rows())
+        for source, suffixes in reused_line_groups(item).items():
+            pages = {s.split(".options.", 1)[0] for s in suffixes}
+            if len(pages) < 2:
+                continue
+            counts: Dict[str, int] = {}
+            for suffix in suffixes:
+                for var in key_vars.get(suffix, ()):
+                    counts[var] = counts.get(var, 0) + 1
+            owed = sorted(v for v, n in counts.items() if n > 1)
+            if not owed:
+                continue
+            text = rows.get(f"{item.entry}.{suffixes[0]}", "")
+            for var in owed:
+                if "{" + var + "}" in text:
+                    continue
+                out.append(
+                    f"{item.face.key}: {item.cls} ({item.base_class}) -- the "
+                    f"{source} line is written to {len(pages)} pages and the "
+                    f"base row carries {{{var}}} on {counts[var]} of them, so "
+                    f"the value differs page to page; the face spells it out "
+                    f"instead: {text!r}")
+    return out
+
+
 # ---------------------------------------------------------------------------
 # The plan.
 # ---------------------------------------------------------------------------
@@ -2337,6 +2413,7 @@ def build_plan() -> Plan:
             ))
 
     plan.refusals.extend(placeholder_refusals(plan, index))
+    plan.refusals.extend(reused_line_var_refusals(plan, index))
     return plan
 
 

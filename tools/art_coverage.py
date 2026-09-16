@@ -189,6 +189,53 @@ def mod_art_keys(src=MOD_SRC):
     return keys
 
 
+#: `public sealed class Foo : ModalOptionCard` and its `, IMeterPricedCard`
+#: form -- the generated face of one mode of a choose-one card
+#: (`ModalChoice.cs`, `EB-746`).
+MODAL_FACE_RE = re.compile(
+    r"^\s*public\s+sealed\s+class\s+(\w+)\s*:\s*ModalOptionCard\b", re.M)
+
+
+def portraitless_modal_faces(src=MOD_SRC):
+    """Mode faces that ask for no portrait. STRUCTURAL, not an art bill.
+
+    THE DEFECT (proofs-8a, 2026-09-16). `ModalOptionCard` declared
+    `CustomPortrait => null`, which is the pre-`EB-275` answer: the game falls
+    back to its OWN `card_atlas`, finds no sprite under an id only this mod
+    knows, and logs
+
+        [WARN] AtlasResourceLoader: Missing sprite
+               'furina/kleemod-proto_fs_curtain_rise_mode_a' in card_atlas
+
+    on every draw of the chooser -- the exact shape `EB-275` closed for
+    ordinary rows, reopened by a card class that bypassed the getter. Two
+    Curtain Rise faces shipped that way and were seen live in lane 0's log.
+
+    A mode owes NO ART: it wears its parent's illustration, so the bill does
+    not move and this check never reads a PNG. What it refuses is a modal row
+    shipping with no portrait request AT ALL -- which is why it fails whether
+    or not `--strict` was asked for, and whether or not `ImageGen/` is on this
+    machine. The generator emits the parent's key
+    (`tools/gen_klee_cards.py`, the `modal_option_classes` block); a
+    hand-written face has to say so too.
+
+    Returns `[(class name, file)]`, and a class's request is looked for inside
+    its own declaration -- the parent card in the same file has one of its
+    own, so a file-wide search would pass every face for free.
+    """
+    out = []
+    if not src.is_dir():
+        return out
+    for path in sorted(src.rglob("*.cs")):
+        text = path.read_text(encoding="utf-8")
+        hits = list(MODAL_FACE_RE.finditer(text))
+        for i, match in enumerate(hits):
+            end = (hits[i + 1].start() if i + 1 < len(hits) else len(text))
+            if not ART_KEY_RE.search(text[match.start():end]):
+                out.append((match.group(1), path))
+    return out
+
+
 # Two different groupings, because the two surfaces are reviewed differently
 # (§10). Companions group by CHARACTER -- that is the §9.3 source_group axis and
 # the only way sibling crop differentiation gets reviewed together. Furina's own
@@ -291,6 +338,27 @@ def main():
     print(f"  covered: {total_covered}    missing: {total_missing}")
     print("=" * 72)
 
+    # STRUCTURAL, and it gates without `--strict`: a mode face with no
+    # portrait request is not an art debt, it is a missing-sprite warn on
+    # every draw of the chooser (proofs-8a, 2026-09-16). See
+    # `portraitless_modal_faces`.
+    portraitless = portraitless_modal_faces()
+    print("\n" + "-" * 72)
+    print("MODE FACES (choose-one option cards -- each wears its PARENT's art)")
+    print("-" * 72)
+    if portraitless:
+        for name, path in portraitless:
+            print(f"  [FAIL]  {name} in {path.relative_to(ROOT)} "
+                  f"requests no portrait")
+    else:
+        print("  all mode faces request a portrait.")
+
+    if portraitless:
+        print(f"\nFAIL: {len(portraitless)} choose-one mode face(s) ask for no "
+              f"portrait; the game then logs AtlasResourceLoader: Missing "
+              f"sprite on every draw of the chooser. A mode wears its "
+              f"parent's illustration and owes no new art row.")
+        return 1
     if unknown_stale:
         print(f"\nFAIL: {len(unknown_stale)} unrecorded stale file(s); add a KNOWN_STALE reason or delete.")
         return 1

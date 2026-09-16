@@ -651,10 +651,30 @@ class Session:
         return False
 
     def log_path(self) -> Path:
-        """This session's `godot.log`. Lane 0 reads the process's own APPDATA,
-        which is the same fallback `Instance.log_path` makes."""
+        """This session's `godot.log`.
+
+        `None` MEANS "WHATEVER THIS THREAD IS ALREADY ON", exactly as
+        `__init__` says it does -- so an instance-less Session asks the wire
+        which lane its thread is bound to before it falls back to the
+        process's own APPDATA. Resolving `None` straight to APPDATA is what
+        made a lane-1 teardown archive LANE 0's log: `embark.teardown` binds
+        the thread with `bridge.use(...)` and then rebuilt the Session
+        without an instance, so five of six archives written under a lane-1
+        stamp on 2026-09-16 opened with lane 0's `User Data Directory`
+        (proofs-8a). Same family as `EB-210` / `EB-435`: the question is
+        which USER TREE, not which port.
+
+        Lane 0, bound or unbound, still reads the process's own APPDATA --
+        `Instance.log_path` makes that same fallback for an instance whose
+        `appdata` is `None`.
+        """
         if self.instance is not None:
             return self.instance.log_path()
+        # `getattr`, because `soak.bridge` is swappable and a test's fake wire
+        # need not carry the whole module's surface.
+        bound = getattr(_wire(), "current_instance", lambda: None)()
+        if bound is not None:
+            return bound.log_path()
         return Path(os.environ.get("APPDATA", "")).joinpath(
             *instances.LOG_RELATIVE)
 

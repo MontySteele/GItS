@@ -115,6 +115,13 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoFsInterpositionModeA : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("stage_lights");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gain 5 [gold]Block[/gold]"),
@@ -142,6 +149,13 @@ public sealed class ProtoFsInterpositionModeA : ModalOptionCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoFsInterpositionModeB : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("stage_lights");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "[gold]Spend[/gold] 2: gain 10 instead"),

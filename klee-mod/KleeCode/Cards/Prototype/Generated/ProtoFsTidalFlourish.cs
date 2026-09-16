@@ -125,6 +125,13 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("usher_the_waves");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deal 5 damage to ALL enemies"),
@@ -152,6 +159,13 @@ public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("usher_the_waves");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "[gold]Spend[/gold] 2: deal 9 instead"),

@@ -124,6 +124,13 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoFsGrandEntranceModeA : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("torrential_turn");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deal 10 damage"),
@@ -151,6 +158,13 @@ public sealed class ProtoFsGrandEntranceModeA : ModalOptionCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoFsGrandEntranceModeB : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("torrential_turn");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "[gold]Spend[/gold] 5: deal 20 instead"),
