@@ -882,6 +882,19 @@ def forget_run() -> None:
         pass
 
 
+#: `EB-676`, the bridge half. The one key that says whether the HP figure on a
+#: payload has SETTLED -- that nothing in flight can still move it. Written by
+#: `gits/GitsSettledHp.cs` on every screen, so a MISSING key means "this bridge
+#: predates EB-676" and is read here as "cannot say", never as "settled".
+_SETTLED_KEY = "hp_settled"
+
+
+def _settled(player: dict[str, Any]) -> bool | None:
+    """`True` / `False` off the feed, or `None` where the bridge is older."""
+    held = player.get(_SETTLED_KEY)
+    return held if isinstance(held, bool) else None
+
+
 def _run_snapshot(state: dict[str, Any]) -> dict[str, Any]:
     """The four numbers the ledger watches, off the feed alone."""
     player = _blob(state, "player")
@@ -889,6 +902,7 @@ def _run_snapshot(state: dict[str, Any]) -> dict[str, Any]:
     deck = sum(len(player.get(pile) or []) for pile in _DECK_PILES)
     return {"hp": _int(player.get("hp")) if player.get("hp") is not None
             else None,
+            "hp_settled": _settled(player),
             "max_hp": _int(player.get("max_hp"))
             if player.get("max_hp") is not None else None,
             "gold": _int(player.get("gold")) if player.get("gold") is not None
@@ -947,6 +961,16 @@ def run_change(state: dict[str, Any]) -> dict[str, Any]:
             # round two of a fight moving HP is the fight, and the combat page
             # has already printed the blow that did it.
             change["room_changed"] = before.get("screen") != here.get("screen")
+            # `EB-676`, THE BRIDGE HALF: whether the note comes off. The note
+            # hedges the EARLIER of the two reads -- "a drop that appears on
+            # the next screen may be the previous screen's number settling" --
+            # so it comes off only when BOTH reads say settled: the figure
+            # this page is subtracting FROM and the figure it is subtracting
+            # TO. An older bridge writes the key on neither, `_settled`
+            # answers None on both, and the note stays exactly as PR #546
+            # shipped it. Nothing here is ever inferred from the numbers.
+            change["hp_settled"] = (before.get("hp_settled") is True
+                                    and here.get("hp_settled") is True)
     row = {"key": key, "here": here, "change": change,
            "character": _text(_blob(state, "player").get("character"))}
     _RUN_MEMORY.clear()

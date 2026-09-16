@@ -12843,3 +12843,82 @@ def test_a_bomb_header_with_nothing_folded_in_reads_as_it_always_did():
     capped = blindplay.observe(
         bomb_pile_state(9, " after Vulnerable, capped by Intangible"))
     assert "Bomb 9 (buff)" in capped
+
+
+# ---- EB-676, the bridge half: the note comes off when the feed says settled --
+#
+# PR #546 could only hedge. There is one HP field on the wire, so the page had
+# no way to tell a fight's number that had finished moving from one that had
+# not, and every HP move it printed carried the same note. The bridge now
+# publishes `player.hp_settled` (`vendor/STS2_MCP/gits/GitsSettledHp.cs`): true
+# only when no action is executing AND no ended combat is still standing in its
+# own teardown -- the second clause being the r26 kill screen exactly, and the
+# reason `!IsInProgress` could not have been the predicate.
+#
+# THREE FIXTURES, because there are three states a page can be in: both reads
+# settled (the note comes off), the earlier read unsettled (it stays), and a
+# bridge with no such field at all (it stays, because "cannot say" is not
+# "settled").
+
+def _kill_screen_settled(hp: int, settled) -> dict:
+    """The rewards screen a fight ends into, carrying the bridge's verdict."""
+    state = _kill_screen_state(hp)
+    if settled is not None:
+        state["player"]["hp_settled"] = settled
+    return state
+
+
+def _map_settled(hp: int, settled) -> dict:
+    state = _map_after_the_kill(hp)
+    if settled is not None:
+        state["player"]["hp_settled"] = settled
+    return state
+
+
+def test_a_settled_drop_prints_the_move_without_the_hedge():
+    """Both reads say settled, so the drop is a real drop: the page names it
+    and says nothing about end-of-turn queues."""
+    blindplay.observe(_kill_screen_settled(25, True))
+    page = blindplay.observe(_map_settled(16, True))
+    assert "- HP 25 → 16 (of 80), down 9" in page
+    assert "end-of-turn effects have landed in it" not in page
+
+
+def test_the_r26_kill_screen_keeps_the_hedge():
+    """The defect's own shape: the victory screen's figure was read with the
+    fight's end-of-turn queue still draining, and the bridge says so. The note
+    stays, because the 9 may be that number settling rather than a new loss."""
+    blindplay.observe(_kill_screen_settled(25, False))
+    page = blindplay.observe(_map_settled(16, True))
+    assert "- HP 25 → 16 (of 80), down 9" in page
+    assert "end-of-turn effects have landed in it" in page
+
+
+def test_an_unsettled_read_now_keeps_the_hedge_too():
+    """The other direction: the figure this page is printing may itself still
+    move, and the hedge covers both ends of the subtraction."""
+    blindplay.observe(_kill_screen_settled(25, True))
+    page = blindplay.observe(_map_settled(16, False))
+    assert "end-of-turn effects have landed in it" in page
+
+
+def test_a_bridge_without_the_field_reads_exactly_as_it_did():
+    """A MISSING key means "this bridge predates EB-676", never "settled".
+    The page in front of an unpatched bridge is PR #546's page, unchanged."""
+    blindplay.observe(_kill_screen_settled(25, None))
+    page = blindplay.observe(_map_settled(16, None))
+    assert "- HP 25 → 16 (of 80), down 9" in page
+    assert "end-of-turn effects have landed in it" in page
+
+
+def test_a_settled_act_break_still_prints_its_own_note():
+    """The act block is `EB-715`'s and is not gated on this flag: its note is
+    about a SCREEN this tool is never shown, which no bridge field answers."""
+    first = _kill_screen_settled(25, True)
+    first["run"] = {"act": 1, "floor": 16}
+    blindplay.observe(first)
+    second = _map_settled(71, True)
+    second["run"] = {"act": 2, "floor": 17}
+    page = blindplay.observe(second)
+    assert "the act changed" in page
+    assert "nothing here says which step did what" in page
