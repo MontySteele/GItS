@@ -46,6 +46,8 @@ import ast
 import re
 from pathlib import Path
 
+import pytest
+
 from tier0.engine import effects
 from tier0.engine.state import Bomb
 from tier0.tests.conftest import make_enemy, make_state
@@ -148,20 +150,76 @@ def test_shatter_answers_an_attack_hit_and_nothing_else():
         assert shattered is (source == "attack"), source
 
 
-def test_the_sim_has_no_enemy_side_damage_received_funnel():
-    """MATRIX T5/T6, DISAGREEMENTS D5 and D6, pinned as an ABSENCE.
-
-    `refpowers.on_damage_received` reads `state.player`'s powers and is called
-    from one site for damage the player received, so no verb can ever wake an
-    enemy's Thorns, FlameBarrier, HardenedShell or EmotionChip. Asserting the
-    absence is what makes ADDING the funnel a deliberate act: this test fails
-    the day somebody gives an enemy Thorns, which is the moment the matrix's
-    whole T6 column has to be re-answered.
-    """
+def test_the_player_side_funnel_is_still_the_players_alone():
+    """MATRIX T5/T6. `refpowers.on_damage_received` is the PLAYER's funnel and
+    stays that way: it reads `state.player.powers` and returns early for any
+    other target, so the enemy side could not be bolted onto it and was not.
+    The enemy's own funnel is `enemy_on_damage_received`, asserted below."""
     src = (ENGINE / "combat.py").read_text(encoding="utf-8")
     calls = re.findall(r"refpowers\.on_damage_received\(\s*state,\s*(\w[\w.]*)",
                        src)
     assert calls == ["state.player"], calls
+
+
+def test_the_enemy_side_damage_received_funnel_exists_and_has_one_door():
+    """MATRIX T5, DISAGREEMENT D5 — REPAIRED, and pinned the way the absence
+    used to be: by counting doors.
+
+    This test used to assert that tier0 had NO enemy-side
+    `AfterDamageReceived` at all, which was the whole of D5 and D6. It now
+    asserts the funnel exists and that exactly ONE site drives it —
+    `effects.deal_damage_to_enemy`, the door the atlas's sec.2 names. The
+    count is the pin: the game broadcasts the hook from `CreatureCmd.Damage`,
+    which `refpowers.unpowered_damage` and the direct-HP paths also mirror,
+    and wiring any of those is a second decision with its own cells rather
+    than a copy of this one."""
+    engine = "".join(path.read_text(encoding="utf-8")
+                     for path in sorted(ENGINE.glob("*.py")))
+    calls = re.findall(r"\.enemy_on_damage_received\(", engine)
+    assert len(calls) == 1, calls
+    assert "_refpowers.enemy_on_damage_received(" in (
+        ENGINE / "effects.py").read_text(encoding="utf-8")
+
+
+def test_the_enemy_side_before_damage_funnel_exists_and_has_one_door():
+    """MATRIX T6, DISAGREEMENT D6 — REPAIRED, and a SECOND door because the
+    game has a second hook. `ThornsPower` is the assembly's only
+    `BeforeDamageReceived` override and it fires above Block and above the HP
+    loss, so it cannot share the after-hook's entry point: a fully blocked hit
+    and a killing blow are both thorned and neither reaches the other funnel.
+    One driver, the same door as D5's."""
+    engine = "".join(path.read_text(encoding="utf-8")
+                     for path in sorted(ENGINE.glob("*.py")))
+    assert len(re.findall(r"\.enemy_retaliates_before_the_hit\(", engine)) == 1
+
+
+@pytest.mark.parametrize("power,amount", [("thorns", 5), ("flame_barrier", 4),
+                                          ("curl_up", 14)])
+def test_no_kit_verb_wakes_an_enemys_retaliation(power, amount):
+    """MATRIX T6, the column as it must stay. All three readers ask
+    `IsPoweredAttack()`, which every kit verb fails by construction —
+    `ElementalHit.Deal` passes `ValueProp.Unpowered` with `dealer: null`. The
+    end-to-end half is `test_eb495_d6_an_enemy_can_retaliate.py`; this is the
+    whole-population sweep beside the other three behavioural pins above."""
+    for source in KIT_SOURCES:
+        state, enemy = _fresh()
+        enemy.powers[power] = amount
+        state.card_in_flight = "pin_card"
+        hp = state.player.hp
+        effects.deal_damage_to_enemy(state, enemy, 5, source=source)
+        fired = (state.player.hp != hp) or enemy.curl_up_card is not None
+        assert fired is (source in effects.CARD_DAMAGE_SOURCES), (power, source)
+
+
+def test_the_hp_loss_cap_runs_at_the_one_place_the_game_runs_it():
+    """MATRIX T5, D5's other half. `HardenedShellPower` is the assembly's only
+    `ModifyHpLostBeforeOstyLate` override, and the game applies that hook to
+    `max(modifiedAmount - blocked, 0)` — after Block, before HP. Both sim
+    reads sit in `deal_damage_to_enemy`: the real hit and the amp
+    counterfactual, which has to see the same clamp or it credits the
+    amplifier with damage the shell refused."""
+    src = (ENGINE / "effects.py").read_text(encoding="utf-8")
+    assert src.count("enemy_hardened_shell_cap(enemy,") == 2
 
 
 # ==========================================================================
