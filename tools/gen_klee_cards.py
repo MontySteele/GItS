@@ -5180,6 +5180,52 @@ def stage_count_block_rider(card: dict,
     return (int(formula.get("base", 0)), int(formula.get("per", 1)), expr)
 
 
+#: The four readers' C# multipliers, and the order matters: the substring
+#: `LeadFanfare` is INSIDE `SpentOrLeadFanfare`, so the two spend forecasts
+#: are tested first and the live bar reads second.
+_STAGE_READER_SOURCE = (
+    ("SpentOrLeadFanfare", "SpendLead"),
+    ("SpentOrTotalFanfare", "SpendAll"),
+    ("LeadFanfare", "Lead"),
+    ("BackFanfare", "Back"),
+)
+
+
+def stage_reader_source(card: dict) -> str | None:
+    """A Stage round-three defect. WHICH BAR THIS ROW'S NUMBER IS, or None.
+
+    THE DEFECT. The four readers -- *Ousia Surge*, *Pneuma Refrain*, *Final
+    Bow*, *Let the People Rejoice* -- multiply a LIVE bar (`EB-747`), and off
+    a board there are no bars, so the face prints a literal 0: "Deal 0 damage
+    to ALL enemies" on the Rare at Neow, "Deal 0 damage" on *Ousia Surge* at a
+    reward. Two round-three seats turned the Rare down on it. The face cannot
+    say otherwise -- a description is a loc string injected once at boot, with
+    no runtime seam -- so the rule goes on a HOVER TIP, which is
+    `FurinaRiderTips.FanfareBody`'s posture one arm over: out of combat the
+    rule stands alone rather than printing a misleading zero.
+
+    DERIVED FROM THE MULTIPLIER `EB-747` ALREADY PICKED, never a sheet key: a
+    row's number IS its lead bar or its back bar or its spend, and that fact
+    is already decided by `stage_count_calc_rider` / `stage_count_block_rider`
+    and by the spend standing in front of the payoff. A fifth reader authored
+    tomorrow carries the sentence the day its row exists, and a row whose
+    number stops reading a bar loses it the same day.
+
+    FIRST PAYOFF WINS, which is every row on the surface today: no reader
+    reads two different bars, and a row that did would owe a sentence this
+    rider has no shape for.
+    """
+    for eff in card.get("effects") or []:
+        rider = (stage_count_calc_rider(card, eff)
+                 or stage_count_block_rider(card, eff))
+        if rider is None:
+            continue
+        for needle, source in _STAGE_READER_SOURCE:
+            if needle in rider[2]:
+                return source
+    return None
+
+
 def fanfare_drained_calc_rider(card: dict,
                                eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: fanfare_drained}` on a DAMAGE op --
@@ -13678,6 +13724,21 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForMergeRiders("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # A STAGE ROUND-THREE DEFECT, and it sits beside the two riders above
+        # it for their reason: a fact about THIS card on THIS screen, read
+        # before the definition of a word. The four readers print a literal 0
+        # off a board -- the face is a boot-time loc string and cannot switch
+        # on a combat -- so the tip says which bar the number is, and adds the
+        # disclaimer only where there is no stage. Which of the four sentences
+        # a row gets is `stage_reader_source`'s, derived from the multiplier
+        # `EB-747` already picked, so a row whose number changes bars changes
+        # sentence with it.
+        reader = stage_reader_source(card)
+        if reader:
+            tips_expr = (
+                "ArmKeywordTips.ForStageReader("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+                f"ArmKeywordTips.StageReader.{reader})")
         # `EB-418`, and it goes here for `EB-378`'s reason one line up: a rider
         # is a fact about THIS card and is read before the definition of a
         # word. DERIVED FROM THE ROW rather than declared per card, and from

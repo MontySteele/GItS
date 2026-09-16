@@ -12401,3 +12401,90 @@ def test_a_settled_act_break_still_prints_its_own_note():
     page = blindplay.observe(second)
     assert "the act changed" in page
     assert "nothing here says which step did what" in page
+
+
+# --- a Stage round-three defect: the readers' 0 on a reward screen -----------
+
+def _stage_reader_reward_state() -> dict:
+    """THE OFFER THE ROUND-THREE SEATS TURNED DOWN.
+
+    A CARD REWARD, which is the screen the defect was filed on: the four Stage
+    readers multiply a LIVE bar, and a reward screen has no board, so the wire
+    sends the face with a literal 0 in it. `keywords` is the card's own hover
+    tips resolved by the game (`BuildCardInfo`, `McpMod.StateBuilder.cs:1452`,
+    the same field `BuildCardRewardState` sends for every offered card), and
+    that is the channel the rule arrives on -- rendered here as the mod
+    renders it off a board, rule plus the no-stage clause.
+    """
+    return {"state_type": "card_reward",
+            "player": {"character": "Furina", "hp": 61, "max_hp": 78},
+            "card_reward": {"can_skip": True, "cards": [
+                {"name": "Let the People Rejoice", "cost": "2",
+                 "type": "Attack",
+                 "description": "Spend all Fanfare on stage. Deal 0 damage "
+                                "to ALL enemies. Every performer takes a Bow, "
+                                "then returns at 1. Exhaust.",
+                 "keywords": [
+                     {"name": "What this number is",
+                      "description": "The number is every performer's Fanfare "
+                                     "added up and spent. There is no stage "
+                                     "outside combat, so the number above "
+                                     "reads 0."}]},
+                {"name": "Ousia Surge", "cost": "1", "type": "Attack",
+                 "description": "Deal 0 damage, the lead performer's Fanfare.",
+                 "keywords": [
+                     {"name": "What this number is",
+                      "description": "The number is the lead performer's "
+                                     "Fanfare. There is no stage outside "
+                                     "combat, so the number above reads "
+                                     "0."}]}]}}
+
+
+def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
+    """A STAGE ROUND-THREE DEFECT, THE PAGE'S HALF.
+
+    THE FIND (round three). "Deal 0 damage to ALL enemies" on the Rare at
+    Neow, "Deal 0 damage" on *Ousia Surge* at a reward; two seats turned the
+    Rare down on it. The face cannot say otherwise -- a description is a loc
+    string injected once at boot -- so the mod puts the rule on a hover tip,
+    and the page's job is to print it where the 0 is.
+
+    NOT A GLOSSARY ROW. The sentence is a RIDER about THIS card's number, so
+    it travels on the card's own `keywords` and renders under the face, the
+    way `Element overridden` does -- which is the channel this pins, because
+    a rule printed on a screen the reader never reaches is no fix at all.
+    """
+    page = blindplay.observe(_stage_reader_reward_state())
+
+    # The face the game prints, zero and all, unchanged.
+    assert "Deal 0 damage to ALL enemies." in page
+    # And directly under it, on both offers, what that number actually is.
+    assert ("    *What this number is* — The number is every performer's "
+            "Fanfare added up and spent. There is no stage outside combat, "
+            "so the number above reads 0.") in page
+    assert ("    *What this number is* — The number is the lead performer's "
+            "Fanfare. There is no stage outside combat, so the number above "
+            "reads 0.") in page
+
+
+def test_the_reader_fixture_is_the_mods_own_sentence():
+    """Held in step from THIS side, the way the Shatter row is: the fixture
+    above claims what the game sends, so it may not drift from the C# that
+    sends it.
+
+    THE COMPARISON IS THE RENDERED SENTENCE. The wire resolves a hover tip to
+    the text the game paints, so the markup goes and the source's own
+    line-broken concatenation is joined before the match.
+    """
+    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+           / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    plain = re.sub(r'"\s*\+\s*"', "", src)
+    plain = plain.replace("[gold]", "").replace("[/gold]", "")
+    for sentence in (
+            "The number is every performer's Fanfare added up and spent.",
+            "The number is the lead performer's Fanfare.",
+            "The number is the back performer's Fanfare.",
+            "The number is the lead performer's Fanfare, which this Bow "
+            "spends.",
+            " There is no stage outside combat, so the number above reads 0."):
+        assert sentence in plain, sentence
