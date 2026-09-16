@@ -176,6 +176,22 @@ METER_RULES: dict[str, str] = {
 SPARK_OPENING_RULE = (f"you start each combat with {OPENING_SPARK}, and cards "
                       "that print a Spark price spend it")
 
+# `EB-610`. WHERE THIS TURN'S SPARKS CAME FROM.
+#
+# THE FIND (Klee r23 lane 2, fight 5, turn 4): "a Spark appeared with no Bomb
+# on the field" -- the bank went 2 to 3 across Kaeya and Rapid Fire on a bare
+# board. The one sentence naming a Spark source anywhere on that screen is the
+# relic's, "whenever a Bomb goes off", so the meter contradicted the only rule
+# the reader had been given and nothing could settle it. The rule above says
+# where the OPENING bank came from and `METER_RULES` says what the meter IS;
+# neither can say what this turn did.
+#
+# "THIS TURN", said out loud, because the bank is cumulative and the sources
+# are not: the number on the row is the whole fight's arithmetic so far and
+# this line is one turn's worth of it, which are two different questions and
+# would read as one if the window were left implicit.
+SPARK_SOURCES_LINE = "This turn: {sources}."
+
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
 # the hard way: after `choose "Flame Dance"` "the whole list reprinted
 # byte-identically; the only change anywhere on the screen was the footer
@@ -728,6 +744,55 @@ REACTION_ROW_NO_SOURCE = "- **{reaction}** on **{target}**."
 #: reading, since "no line" and "no reaction" were the same page.
 NO_REACTION_THIS_TURN = ("- Nothing reacted this turn. A reaction that "
                          "happened would be listed here by name.")
+
+# `EB-710`. THE HALF OF THE BEAT NOBODY WAS SHOWN.
+#
+# THE FIND. This heading said "Nothing reacted this turn" through a run where
+# Electro-Charged fired six times off Shinobu's Ring -- at the END of the turn
+# -- and Klee r26 read the header EMPTY on two Melts and an Overloaded off a
+# played Set off. The log was cleared on the wrong window: it opens at the end
+# of the ENEMY turn, so every reaction from the player's own end-of-turn
+# tenants and from the whole enemy side was written and dropped with no player
+# page in between. `KleeMod.Powers.ReactionLog.MarkTurnStart` now carries them.
+#
+# THEY CARRY ONE TURN, AND THEY SAY SO. A carried row prints under THIS
+# heading, because it is the only receipt on the page and the alternative is
+# the silence that was the defect; and it carries its own window on the line,
+# because the heading names THIS turn and a row from before it would otherwise
+# make the heading the second false thing on the screen. The wording is the
+# Stage log's ("since you ended your last turn"), so the two receipts on this
+# page name one boundary with one phrase.
+REACTION_CARRIED_CLAUSE = " *(since you ended your last turn)*"
+#: Printed above the rows where EVERY row is a carried one -- the honest
+#: reading of a turn on which nothing has reacted YET and something reacted
+#: while the reader was not being shown a page.
+REACTION_CARRIED_ONLY = ("- Nothing has reacted yet this turn. These landed "
+                         "after you ended your last turn:")
+
+# `EB-695`. WHAT A RELIC ANSWERED WITH, ON THE PATH THAT HAD NO RECEIPT.
+#
+# THE FIND (Kokomi r30 lane 2, debrief 1). The Tamakushi Casket answers a
+# debuff with a 2-damage Hydro strike from the jellyfish. Inside a PLAN
+# carry-out it is named -- "Inside the same beat: Tamakushi Casket 2 on Damp
+# Cultist", the clause `EB-453`/`EB-518` built -- because `KokomiPlan.NoteRider`
+# is standing there to catch it. Play the same debuff card FROM HAND and the
+# same strike lands with nothing naming it, and the seat subtracted it from HP
+# by hand on every such play.
+#
+# THE ROW IS THE RIDER CLAUSE'S OWN SHAPE -- source, number, body -- because a
+# reader meeting the two on different screens of one run is adding the same
+# kind of thing, and two spellings of one fact is the defect this page has
+# closed twice elsewhere.
+#
+# NO EMPTY LINE, unlike the reaction log beside it, and that is a difference
+# rather than an inconsistency: the reaction section prints "nothing reacted"
+# because a seat read the SILENCE as "may or may not have fired" (`EB-681`
+# lane 1), and no such question exists here -- a relic that answered nothing
+# answered nothing, and a page saying so on every screen of every run that
+# holds no such relic is noise.
+RELIC_ANSWERS_HEADING = "## What your relics answered with"
+RELIC_ANSWER_ROW = "- **{source}** {amount} on **{target}**."
+RELIC_ANSWER_ROW_NO_TARGET = "- **{source}** {amount}."
 
 # `EB-708`. A SIZE IS NOT A STATUS, AND THE PAGE HAD NO LEGEND FOR EITHER.
 #

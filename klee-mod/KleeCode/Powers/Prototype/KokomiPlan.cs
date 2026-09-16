@@ -529,13 +529,21 @@ public static class KokomiPlan
     /// not close. The target is read the way <see cref="MovedOn"/> reads it --
     /// <see cref="EnemyName"/> for the title, <c>CombatId</c> for the handle --
     /// so the page resolves both rows through one lookup.
+    ///
+    /// `EB-695` MADE IT ANSWER. It returns whether the rider was FILED: true
+    /// inside a Plan, false where no Plan is running -- which is exactly the
+    /// played-card path. The caller needs that answer because the same fact
+    /// has two homes now: inside a carry-out this clause prints it, and from
+    /// hand `RelicAnswerLog` does. A strike named TWICE on one screen would be
+    /// the arithmetic defect `EB-518` closed, reopened from the other side.
     /// </summary>
-    public static void NoteRider(string source, int amount,
+    public static bool NoteRider(string source, int amount,
                                  Creature? target = null)
     {
-        if (_riders == null || amount <= 0) return;
+        if (_riders == null || amount <= 0) return false;
         _riders.Add(new Rider(source, amount, EnemyName(target),
                               target?.CombatId.ToString() ?? string.Empty));
+        return true;
     }
 
     /// <summary>

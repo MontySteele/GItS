@@ -72,6 +72,10 @@ internal static class ReactionEffects
         // `EB-681`: the seat's reaction log keeps the same window every other
         // per-turn reaction fact keeps, and is cleared by the same call.
         ReactionLog.MarkTurnStart();
+        // `EB-695`: and the relic-answer log beside it, on the same window and
+        // for the same reason -- one boundary, named once, so two receipts on
+        // one page cannot disagree about which turn they are about.
+        RelicAnswerLog.MarkTurnStart();
         // Fully cleared rather than purged: every key is written and read
         // inside a single player turn, so there is nothing to carry over and
         // no way for this map to grow across a run.
@@ -119,6 +123,7 @@ internal static class ReactionEffects
     {
         _turnStartTotal = TotalResolved;
         ReactionLog.MarkTurnStart();
+        RelicAnswerLog.MarkTurnStart();
         if (extraTurnCreature != null)
         {
             DealerReactionsThisTurn.Remove(extraTurnCreature);

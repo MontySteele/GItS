@@ -26,11 +26,19 @@
 //
 // THE CONTRACT. `KleeMod.Powers.ReactionLog.Snapshot()` returns a
 // List<Dictionary<string, object?>> of primitives -- `reaction`, `source`,
-// `target`, `combat_id` -- and this file hands it straight to the wire under
-// `player.reactions`. An ABSENT key means "no reaction log in this build"; an
-// EMPTY list means "the log is here and nothing reacted this turn". Those are
-// different facts and `understudy/blindplay_board.reaction_log` tells them
-// apart.
+// `target`, `combat_id`, `carried` -- and this file hands it straight to the
+// wire under `player.reactions`. An ABSENT key means "no reaction log in this
+// build"; an EMPTY list means "the log is here and nothing reacted this turn".
+// Those are different facts and `understudy/blindplay_board.reaction_log`
+// tells them apart.
+//
+// `EB-710` ADDED `carried`, and this file needed no edit for it, which is what
+// handing the rows straight through buys. A carried row is one whose reaction
+// resolved after the player ended their last turn -- their own end-of-turn
+// tenants, or the enemy side -- and which no page has printed: the log used to
+// be cleared at the top of the next turn, so "What reacted this turn" read
+// Nothing through a run with six Electro-Charged in it. The mod carries such a
+// row exactly one turn and the page prints it with its window on the line.
 //
 // READ-ONLY. Nothing here resolves a reaction or clears a log. It is a
 // serialiser.
@@ -48,8 +56,20 @@ public static partial class McpMod
     private const string GitsReactionLogType = "KleeMod.Powers.ReactionLog";
     private const string GitsReactionLogMethod = "Snapshot";
 
+    // `EB-695`. THE RELIC-ANSWER LOG, on this file's seam and by the same
+    // reflection, because it is the same kind of fact one step over: what
+    // LANDED inside a beat that the beat's own number does not account for.
+    // Kokomi r30 lane 2 met the Tamakushi Casket's answering 2 named inside a
+    // Plan carry-out and named nowhere at all when the debuff card was played
+    // from hand -- "the seat subtracted it from HP on every such play".
+    private const string GitsRelicAnswerLogType =
+        "KleeMod.Powers.RelicAnswerLog";
+
     private static bool _gitsReactionsProbed;
     private static MethodInfo? _gitsReactionsSnapshot;
+
+    private static bool _gitsRelicAnswersProbed;
+    private static MethodInfo? _gitsRelicAnswersSnapshot;
 
     /// <summary>
     /// Locate the mod's reaction-log snapshot once. A null result is cached
@@ -99,6 +119,60 @@ public static partial class McpMod
         catch (Exception ex)
         {
             GD.PrintErr($"[STS2 MCP][GItS] reaction log snapshot failed: "
+                        + $"{ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Locate the mod's relic-answer snapshot once, on
+    /// <see cref="GitsReactionLogSnapshot"/>'s own terms and for its reasons.
+    /// `EB-695`.
+    /// </summary>
+    private static MethodInfo? GitsRelicAnswerLogSnapshot()
+    {
+        if (_gitsRelicAnswersProbed) return _gitsRelicAnswersSnapshot;
+        _gitsRelicAnswersProbed = true;
+        try
+        {
+            var type = AppDomain.CurrentDomain.GetAssemblies()
+                .Select(a =>
+                {
+                    try { return a.GetType(GitsRelicAnswerLogType, false); }
+                    catch { return null; }
+                })
+                .FirstOrDefault(t => t != null);
+            _gitsRelicAnswersSnapshot = type?.GetMethod(
+                GitsReactionLogMethod,
+                BindingFlags.Static | BindingFlags.Public);
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[STS2 MCP][GItS] relic answer log probe failed: "
+                        + $"{ex.Message}");
+            _gitsRelicAnswersSnapshot = null;
+        }
+        return _gitsRelicAnswersSnapshot;
+    }
+
+    /// <summary>
+    /// This turn's relic answers, in the order they landed, or NULL when this
+    /// build carries no log. `EB-695`, and the same absent / empty /
+    /// populated contract the reactions above keep: a relic that answered
+    /// nothing this turn is a fact, and no log at all is a different one.
+    /// </summary>
+    internal static List<Dictionary<string, object?>>? GitsRelicAnswerState()
+    {
+        var snapshot = GitsRelicAnswerLogSnapshot();
+        if (snapshot == null) return null;
+        try
+        {
+            return snapshot.Invoke(null, Array.Empty<object>())
+                   as List<Dictionary<string, object?>>;
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[STS2 MCP][GItS] relic answer snapshot failed: "
                         + $"{ex.Message}");
             return null;
         }

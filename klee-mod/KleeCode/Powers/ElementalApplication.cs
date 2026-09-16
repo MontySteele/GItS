@@ -180,12 +180,37 @@ public sealed class KleeElementalHooks : AbstractModel
     /// Durin resolves later in AfterSideTurnEnd to guarantee it consumes the
     /// volley's Pyro; its Burst Energy is granted at the next turn-start check.
     /// The granted card's Retain then carries it through the flush.
+    ///
+    /// `EB-710` ALSO MARKS WHERE THE PLAYER STOPS WATCHING, on the first line
+    /// below. Everything that reacts from here on -- their end-of-turn
+    /// tenants, and then the whole enemy side -- resolves with no player page
+    /// in front of it, and <see cref="ReactionEffects.MarkTurnStart"/> used to
+    /// drop exactly those rows when the next turn opened, which is why "What
+    /// reacted this turn" said Nothing through a run where Shinobu's Ring
+    /// reacted six times. The mark is an INDEX into the log's one list;
+    /// <c>ReactionLog.MarkTurnStart</c> carries what lies past it into the
+    /// turn whose first page prints it.
+    ///
+    /// THIS HOOK AND NOT THE AFTER TWIN, because every end-of-turn tenant that
+    /// puts an element on the board is later than this line: Durin's consume
+    /// and the whole <c>CompanionOverhaulTurnEnd</c> volley run in
+    /// <c>AfterSideTurnEnd(Player)</c>, and `KleeElementalHooks` is the FIRST
+    /// listener in `KleeMod`'s subscribe chain, so this broadcast reaches here
+    /// before <c>TurnEndSequencer</c>'s. What is still earlier is a POWER's
+    /// own <c>BeforeSideTurnEnd</c> -- this comment's own note above says so,
+    /// and it is why the volley is already counted for the kit grant. No power
+    /// deals an element there today; one that did would file its row on the
+    /// watched side, which is the failure being repaired rather than a new one.
     /// </summary>
     public override async Task BeforeSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,
         IEnumerable<Creature> participants)
     {
         if (side != CombatSide.Player) return;
+        ReactionLog.MarkPlayerTurnEnd();
+        // `EB-695`: the relic-answer log takes the same mark from the same
+        // broadcast, so the two receipts on one page name one boundary.
+        RelicAnswerLog.MarkPlayerTurnEnd();
         foreach (var creature in participants)
         {
             if (creature.Player != null)

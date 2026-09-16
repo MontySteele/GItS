@@ -48,8 +48,13 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         MULTI_INTENT_NOTE,
                                         NO_REACTION_THIS_TURN,
                                         PENDING_PICK_NOTE, PICKED_MARK,
-                                        REACTIONS_HEADING, REACTION_ROW,
+                                        REACTIONS_HEADING,
+                                        REACTION_CARRIED_CLAUSE,
+                                        REACTION_CARRIED_ONLY, REACTION_ROW,
                                         REACTION_ROW_NO_SOURCE,
+                                        RELIC_ANSWER_ROW,
+                                        RELIC_ANSWER_ROW_NO_TARGET,
+                                        RELIC_ANSWERS_HEADING,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
                                         PLAN_CASKET_AURA_CLAUSE,
@@ -59,6 +64,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
+                                        SPARK_SOURCES_LINE,
                                         SPOTLIGHT_WINDOW_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
                                         TURN_ORDER_NOTE)
@@ -1481,6 +1487,24 @@ def render(obs: dict[str, Any]) -> str:
             else:
                 out.append(f"- {name}: {amount}{bound} — "
                            f"{rule or METER_NOTE}")
+            # `EB-610`. AND WHERE THIS TURN'S SPARKS CAME FROM, under the row
+            # they moved. Klee r23 lane 2 watched the bank go 2 to 3 across
+            # Kaeya and Rapid Fire on a BARE BOARD, while the only sentence
+            # naming a Spark source anywhere on the screen is the relic's
+            # "whenever a Bomb goes off" -- so the meter contradicted the one
+            # rule the reader had, and nothing could settle it.
+            #
+            # A SUB-LINE AND NOT A CLAUSE ON THE ROW, `ENEMY_REPLACED_LINE`'s
+            # shape: the row above says what the meter IS, which is true on
+            # every turn, and this says what it DID this turn, which is a
+            # different fact with a different lifetime. Printed only where
+            # there is something to say -- a turn with no gain prints nothing,
+            # because a reader asking "where did that come from" is only ever
+            # asking about a number that moved.
+            if name == "Spark" and c.get("spark_sources"):
+                out.append("    - " + SPARK_SOURCES_LINE.format(
+                    sources=", ".join(f"+{s['amount']} {s['name']}"
+                                      for s in c["spark_sources"])))
         for pw in you["powers"]:
             out.append(_render_power(pw, "- "))
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
@@ -1688,13 +1712,43 @@ def render(obs: dict[str, Any]) -> str:
         # the other receipts on this page are (the carry-out block, the
         # Salon's). Present and empty prints its own line, because "no line"
         # and "no reaction" were the same page to the r27 lane-1 seat.
+        #
+        # `EB-710`. AND THE ROWS FROM THE WINDOW NOBODY WAS SHOWN. A reaction
+        # off an end-of-turn tenant, or off the enemy side, used to be cleared
+        # before any page could print it -- this heading said "Nothing reacted
+        # this turn" through six Electro-Charged. The mod carries those rows
+        # one turn (`ReactionLog.MarkTurnStart`); they print here, marked with
+        # their own window, and where they are ALL the page has, the empty
+        # line is replaced by one that says both facts rather than the false
+        # one.
         if c.get("reactions") is not None:
             out += ["", REACTIONS_HEADING, ""]
-            for row in c["reactions"]:
-                out.append((REACTION_ROW if row["source"]
-                            else REACTION_ROW_NO_SOURCE).format(**row))
-            if not c["reactions"]:
+            rows = c["reactions"]
+            if rows and all(row.get("carried") for row in rows):
+                out.append(REACTION_CARRIED_ONLY)
+            for row in rows:
+                line = (REACTION_ROW if row["source"]
+                        else REACTION_ROW_NO_SOURCE).format(**row)
+                if row.get("carried"):
+                    line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE
+                out.append(line)
+            if not rows:
                 out.append(NO_REACTION_THIS_TURN)
+        # `EB-695`. AND WHAT A RELIC ANSWERED WITH, beside the reactions and
+        # for the same reason: it is a thing that LANDED inside a beat whose
+        # own number does not account for it. Inside a Plan carry-out the
+        # rider clause names the Casket's 2; played from hand it was named
+        # nowhere, and the r30 seat subtracted it from HP by hand every time.
+        # Printed only where something answered -- see `RELIC_ANSWERS_HEADING`
+        # for why this section has no empty line where the one above it does.
+        if c.get("relic_answers"):
+            out += ["", RELIC_ANSWERS_HEADING, ""]
+            for row in c["relic_answers"]:
+                line = (RELIC_ANSWER_ROW if row["target"]
+                        else RELIC_ANSWER_ROW_NO_TARGET).format(**row)
+                if row.get("carried"):
+                    line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE
+                out.append(line)
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
