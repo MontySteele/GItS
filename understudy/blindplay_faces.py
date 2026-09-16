@@ -871,9 +871,19 @@ def _deck_card(entry: dict[str, Any]) -> dict[str, Any]:
     ONE FUNCTION FOR BOTH READS (`EB-447`): the master deck's rows and the
     combat piles' rows come off `BuildPileCardList` in the same shape, and two
     copies of this rule would be two places for the `+` to be forgotten.
+
+    `EB-789`: AND THE ENCHANTMENT, which is the second way two copies of one
+    title differ and the one this list could not show. A pile row carried no
+    `enchantment` key at all until the bridge routed every pile through
+    `BuildCardInfo` -- the same absence that printed *Gain 5 Block* in the draw
+    pile for a card that gains 7 in hand -- so a deck holding a Sharp *Water's
+    Edge* beside a plain one printed one title twice and nothing else. `None`
+    on a bridge older than that row, which is the state this list has always
+    been in and is never a claim that the card is unenchanted.
     """
     return {"title": _text(entry.get("name")),
             "key": qa_packet.card_key(entry.get("id")),
+            "enchantment": _enchantment(entry.get("enchantment")),
             "upgraded": bool(entry.get("is_upgraded")
                              or entry.get("upgraded")
                              or _text(entry.get("name")).rstrip()
