@@ -47,9 +47,12 @@ def _sheet_row(card_id: str) -> dict:
 def test_feints_face_prints_both_branches_as_folded_vars():
     row = _sheet_row("proto_kk_feint")
     face = row["description"]
+    # `EB-660` added the third sentence: the Plan line this row could always
+    # write and never printed. The two folded branch vars are unchanged.
     assert face == ("Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] "
                     "was carried out this turn, deal {BranchDamage:diff()} "
-                    "damage instead.")
+                    "damage instead. [gold]Plan[/gold]: Deal "
+                    "{PlanDamage:diff()} damage.")
     # The static swap the seat read is gone from this row entirely.
     assert "{IfUpgraded:show:" not in face
 

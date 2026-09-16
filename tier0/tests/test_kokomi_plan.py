@@ -1992,6 +1992,26 @@ def test_riptide_then_gambit_doubles_nothing(overhaul):
     assert enemy.hp == 200 - 26
 
 
+def test_a_damageless_follower_is_unchanged_and_the_face_says_so(overhaul):
+    """`EB-687`. The rider pays nothing when the Plan behind it deals no
+    damage -- a Block Plan is carried out exactly as written -- and the face
+    used to promise "the next Plan ... deals double damage" without naming
+    the object, so seats spent the energy and learned the condition from the
+    no-Plan-followed line afterwards. The rule is here; the words are on the
+    card, which is the half this row moved."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}],
+        cid="proto_kk_opening_gambit"))
+    kokomi_plan.schedule(st, plan_card([{"op": "block", "amount": 8}],
+                                       cid="proto_kk_coral_bulwark"))
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == 8
+    assert _faces()["proto_kk_opening_gambit"].endswith(
+        "Doubles the damage of the next [gold]Plan[/gold] carried out with "
+        "this one.")
+
+
 def test_a_rider_with_no_follower_says_so(overhaul):
     """`EB-645`. The r23 defence lane wrote Second Wave with no Plan behind it
     in the same morning; the rider fell off the end of the drain as designed
@@ -2620,9 +2640,12 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     assert faces["proto_kk_second_wave"] == (
         "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next "
         "[gold]Plan[/gold] carried out with this one is carried out twice.")
+    # `EB-687` moved the verb to the front so the clause names WHAT it
+    # doubles; the window itself -- "the next ... carried out with this one"
+    # -- is the half this pin is about and is unchanged.
     assert faces["proto_kk_opening_gambit"].endswith(
-        "The next [gold]Plan[/gold] carried out with this one deals double "
-        "damage.")
+        "Doubles the damage of the next [gold]Plan[/gold] carried out with "
+        "this one.")
     # R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a window
     # on the drain again, and "later" is the position rule printed -- the one
     # word a seat needs to read the ordering decision off the face.
@@ -2766,6 +2789,20 @@ def test_feints_two_printed_numbers_upgrade_by_different_amounts(overhaul):
     assert branch["then"][0]["amount"] == 13
     assert branch["else"][0]["amount"] == 7
     assert up.plan[0]["amount"] == 13
+
+
+def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
+    """`EB-660`. "Feint's face prints no Plan line although it can be written;
+    the seat found it by testing and did not know what it had written" (round
+    25 lane 1, fight 2). Every other Plan-capable row prints its line and this
+    one had a `plan:` list all along, so the silence was the face's and not
+    the rule's. The number is the Plan's own, printed live, so a Smithed copy
+    prints 13 without a second string.
+    """
+    faces = _faces()
+    assert faces["proto_kk_feint"].endswith(
+        "[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.")
+    assert _row("proto_kk_feint").plan[0]["amount"] == 10
 
 
 def test_read_the_field_bottoms_the_costliest_of_the_top_two(overhaul):

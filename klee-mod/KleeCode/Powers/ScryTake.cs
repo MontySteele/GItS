@@ -1,4 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MegaCrit.Sts2.Core.CardSelection;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
 
@@ -50,4 +58,74 @@ public static class ScryTake
     /// <summary>The selection prompt. One member, so the copy lands in one
     /// place.</summary>
     public static LocString Prompt => new LocString(Table, PromptKey);
+
+    /// <summary>
+    /// `EB-686`. THE PICK WITH NOTHING TO PICK BETWEEN.
+    ///
+    /// THE FIND (Kokomi r28 lane 1, fight 3 turn 3). Read the Field with one
+    /// card left in the draw pile "showed no selection, put that card in hand,
+    /// charged the energy and printed nothing; the seat spent a turn unsure it
+    /// had whiffed." A grid of one holds no decision, so the game opens no
+    /// screen -- which is right, and silent.
+    ///
+    /// THE RULE DOES NOT MOVE, only what is said: the one card was always
+    /// taken and still is. What is added is the LINE, and it names both halves
+    /// -- what was taken, and why there was no screen -- because "it took
+    /// something" and "it did nothing" are the same silence to a player who
+    /// did not count the pile.
+    ///
+    /// AN EMPTY PILE IS STILL NOTHING and says so. The emitted arm only
+    /// reaches here with at least one card, but a branch that indexed off the
+    /// end the day that changed would be a crash in a play, not a red test.
+    ///
+    /// THE MOVE ITSELF IS STILL EMITTED. This owns the CHOICE alone, so where
+    /// the taken card lands and where the rest are bottomed stays in one
+    /// place, exactly as it was.
+    /// </summary>
+    public static async Task<List<CardModel>> Choose(
+        PlayerChoiceContext choiceContext, List<CardModel> top, Player owner)
+    {
+        if (top.Count == 0) return new List<CardModel>();
+        if (top.Count == 1)
+        {
+            Announce(owner, top[0]);
+            return new List<CardModel> { top[0] };
+        }
+        return (await CardSelectCmd.FromSimpleGrid(
+            choiceContext, top, owner,
+            new CardSelectorPrefs(Prompt, 1))).ToList();
+    }
+
+    /// <summary>The line the auto-take says, built in ONE place so the pin and
+    /// the screen read the same words. <c>KurageBeat.Line</c>'s bargain and
+    /// its reason: a <c>LocString</c> is a table plus a key with no raw-text
+    /// constructor, and this sentence is built per play out of a card
+    /// title.</summary>
+    public static string AutoTakeLine(string title) =>
+        $"Only one card left to look at: {title} taken.";
+
+    /// <summary>Over the player's head, and silent headless -- by the engine's
+    /// own guards rather than ours (<c>KurageBeat.Say</c>).</summary>
+    private static void Announce(Player owner, CardModel card)
+    {
+#if PROTOTYPE_CARDS
+        Vfx.KurageBeat.Say(owner.Creature, AutoTakeLine(Named(card)));
+#endif
+    }
+
+    /// <summary>A printed title, or `""`, and never a throw --
+    /// <c>ReactionLog.Named</c>'s bargain: a display read is a read of live
+    /// game objects, and a receipt must never be the thing that ends a
+    /// play.</summary>
+    private static string Named(CardModel card)
+    {
+        try
+        {
+            return card.Title.ToString() ?? string.Empty;
+        }
+        catch (System.Exception)
+        {
+            return string.Empty;
+        }
+    }
 }

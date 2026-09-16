@@ -8,7 +8,9 @@ using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.ValueProps;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -1267,5 +1269,60 @@ public class KokomiOverhaulRuleTests
         var calls = Il.Calls(snapshot);
         Assert.Contains("BakeKuragePet.Of", calls);
         Assert.Contains("KokomiPlan.Pending", calls);
+    }
+
+    // ==================================================================
+    // `EB-659` -- the Plan-half Block folds what the carry-out pays
+    // ==================================================================
+
+    [Theory]
+    [InlineData("ProtoKkCoralBulwark", 8)]
+    [InlineData("ProtoKkReadTheField", 10)]
+    [InlineData("ProtoKkBreakwater", 5)]
+    public void A_planned_blocks_printed_number_is_a_block_var(
+        string card, int printed)
+    {
+        // THE FIND (round 25 lane 1, fight 6). "Coral Bulwark's Plan half
+        // printed 8, delivered 6 under Frail 2; the seat chose on the 8." The
+        // now-line beside it had already folded the same Frail, because only
+        // a `BlockVar` writes a `PreviewValue` -- it runs `Hook.ModifyBlock`
+        // in `UpdateCardPreview` -- and a bare `DynamicVar`'s override is
+        // empty. One screen, two Block numbers, two rules. `EB-513` is the
+        // same fix on a companion's printed Block.
+        //
+        // THE PROP IS THE FOLD, which is why it is the value pinned:
+        // `FrailPower.ModifyBlockMultiplicative` and
+        // `DexterityPower.ModifyBlockAdditive` both gate on `Move` and not on
+        // `Unpowered`, and the carry-out
+        // (`KokomiPlan.ResolveClause`, `Kind.Block`) pays
+        // `CreatureCmd.GainBlock(kokomi, amount, ValueProp.Move, null)`.
+        //
+        // ONE FOLD: `IntValue` is `(int)BaseValue`, so the clause still
+        // queues the PRINTED number and the fold happens once, on the way
+        // out.
+        var model = (CardModel)Activator.CreateInstance(
+            typeof(ProtoKkCoralBulwark).Assembly
+                .GetTypes().Single(t => t.Name == card))!;
+
+        var block = Assert.IsType<BlockVar>(model.DynamicVars["PlanBlock"]);
+        Assert.Equal(ValueProp.Move, block.Props);
+        Assert.Equal(printed, block.IntValue);
+    }
+
+    [Fact]
+    public void The_scaled_block_clauses_keep_their_plain_var()
+    {
+        // The bound, and it is the row's one judgement: Tide Wall and
+        // Breakwater's second clause print a RATE -- Block PER Plan -- and a
+        // percentage folded into a rate is a number no card pays. Breakwater's
+        // own `PlanBlock` is its FLAT first clause and folds above; the rate
+        // beside it is a literal in the clause list and reaches no var at all.
+        var breakwater = new ProtoKkBreakwater();
+
+        Assert.Equal(2, breakwater.PlanClauses.Count);
+        Assert.Equal(KokomiPlan.Kind.Block, breakwater.PlanClauses[0].Kind);
+        Assert.Equal(KokomiPlan.Kind.BlockPerPlanHeld,
+                     breakwater.PlanClauses[1].Kind);
+        Assert.Equal(3, breakwater.PlanClauses[1].Amount);
     }
 }

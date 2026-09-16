@@ -108,6 +108,54 @@ public class ReactionLogTests
     }
 
     [Fact]
+    public void An_open_attribution_names_the_relic_and_not_the_pet()
+    {
+        // `EB-697`. The r30 lane-1 seat read `Bake-Kurage` against a Vaporize
+        // in a fight with no Plan written in it: the hit was the Tamakushi
+        // Casket's answer to a Vulnerable, and the relic hands the PET in as
+        // the dealer on purpose, so the log's card-then-dealer resolution had
+        // nothing truer to reach for.
+        ReactionLog.MarkTurnStart();
+        var seat = Seat.Kokomi();
+
+        using (ReactionLog.Attribute("Tamakushi Casket"))
+        {
+            ReactionLog.Note(Reaction.Vaporize, seat.Creature, seat.Creature,
+                             null);
+        }
+
+        Assert.Equal("Tamakushi Casket",
+                     ReactionLog.Snapshot().Single()["source"]);
+    }
+
+    [Fact]
+    public void The_attribution_covers_its_scope_and_nothing_after_it()
+    {
+        // A scope and not a mode: the hit inside it is the relic's and the
+        // next card played is its own. It also NESTS -- the previous value is
+        // restored rather than cleared -- so an answer inside an answer
+        // leaves the outer name standing.
+        ReactionLog.MarkTurnStart();
+        var seat = Seat.Kokomi();
+
+        using (ReactionLog.Attribute("Tamakushi Casket"))
+        {
+            using (ReactionLog.Attribute("Inner"))
+            {
+                ReactionLog.Note(Reaction.Frozen, seat.Creature, null, null);
+            }
+            ReactionLog.Note(Reaction.Frozen, seat.Creature, null, null);
+        }
+        ReactionLog.Note(Reaction.Frozen, seat.Creature, seat.Creature, null);
+
+        var sources = ReactionLog.Snapshot()
+            .ConvertAll(row => (string?)row["source"]);
+        Assert.Equal("Inner", sources[0]);
+        Assert.Equal("Tamakushi Casket", sources[1]);
+        Assert.NotEqual("Tamakushi Casket", sources[2]);
+    }
+
+    [Fact]
     public void The_wire_row_carries_the_four_keys_the_page_reads()
     {
         // The key names ARE the contract with

@@ -6329,6 +6329,24 @@ def build_vars(card: dict) -> list[str]:
         amount = int(plan_line[index]["amount"])
         if key == "plan_damage" and plan_line[index].get("op") == "damage":
             out.append(f'new KokomiPlan.PlanDamageVar({amount}m)')
+        # `EB-659`. THE PLAN-HALF BLOCK IS THE SECOND LIVE PLAN NUMBER, and
+        # for the mirror image of the damage half's reason: a planned Block is
+        # paid out `ValueProp.Move` (`KokomiPlan.Kind.Block`), so her Dexterity
+        # and her Frail bite it exactly as they bite the now-line's Block --
+        # and a plain `DynamicVar` under this token reaches no hook, so Coral
+        # Bulwark printed 8 and paid 6 under Frail 2 while the Block sentence
+        # beside it had already folded the same Frail (r25 lane 1, fight 6).
+        # THE GAME'S OWN `BlockVar` UNDER ITS OWN NAME, not a subclass: the
+        # class has a `(name, block, props)` constructor, and `UpdateCardPreview`
+        # there IS `Hook.ModifyBlock` -- so the mod does not restate Frail's or
+        # Dexterity's arithmetic anywhere. This is `EB-513`'s fix one surface
+        # over, where a companion's printed Block became a `BlockVar` for the
+        # same reason. `IntValue` is still `(int)BaseValue`, so the clause
+        # queues the printed number and the fold happens ONCE, on the way out.
+        # THE FLAT CLAUSE ONLY: the scaled Block clauses print a RATE, and a
+        # percentage folded into a rate is a number no card pays.
+        elif key == "plan_block" and plan_line[index].get("op") == "block":
+            out.append(f'new BlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
     if added_encore_salon(card) is not None:
@@ -9688,6 +9706,13 @@ def build_body(
             #
             # THE SIM HAS NO SCREEN and takes the lowest-cost card of the N,
             # stated there as the stand-in for player choice it is.
+            #
+            # `EB-686`. THE CHOICE GOES THROUGH `ScryTake.Choose`, which is
+            # the one branch this arm does not own: a grid of ONE holds no
+            # decision, so the game opens no screen, and the r28 lane "spent a
+            # turn unsure it had whiffed" because nothing said the card had
+            # been taken. The take and the bottoming stay here; only the
+            # picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
             lines.append(
@@ -9695,9 +9720,8 @@ def build_body(
                 f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();" + "\n" +
                 "            if (top != null && top.Count > 0)" + "\n" +
                 "            {" + "\n" +
-                "                var takePick = (await CardSelectCmd.FromSimpleGrid(" + "\n" +
-                "                    choiceContext, top, Owner," + "\n" +
-                "                    new CardSelectorPrefs(ScryTake.Prompt, 1))).ToList();" + "\n" +
+                "                var takePick = await ScryTake.Choose(" + "\n" +
+                "                    choiceContext, top, Owner);" + "\n" +
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +

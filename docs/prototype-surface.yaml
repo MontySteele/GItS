@@ -938,7 +938,9 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead.",
+   # `EB-660`: AND THE PLAN LINE, which this row could always write and never
+   # printed. The finding and the reasoning: the provenance note.
+   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.",
    effects: [{op: conditional, if: plan_carried_out_this_turn,
               then: [{op: damage, amount: 10, target: enemy}],
               else: [{op: damage, amount: 5, target: enemy}]}],
@@ -1279,7 +1281,9 @@
 - {id: proto_kk_opening_gambit, name: "Opening Gambit", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] carried out with this one deals double damage.",
+   # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
+   # visibly unchanged. The finding and the ceiling: the provenance note.
+   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. Doubles the damage of the next [gold]Plan[/gold] carried out with this one.",
    effects: [{op: damage, amount: 5, target: enemy}],
    # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
    # the entry carried out immediately after this one in the same drain.
@@ -1507,7 +1511,9 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 1, type: attack,
-   description: "Deal 6 damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
+   # `EB-696`: the LIVE total, Well Laid's shape, and the count's window said
+   # out loud. The finding: the provenance note.
+   description: "Deal {CalculatedDamage:diff()} damage. Counts 4 for each [gold]Swirl[/gold] made before it this turn.",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
 

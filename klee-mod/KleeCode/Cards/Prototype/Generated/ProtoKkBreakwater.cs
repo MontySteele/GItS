@@ -61,7 +61,7 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard, IPlanne
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanBlock", 5m)
+            new BlockVar("PlanBlock", 5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

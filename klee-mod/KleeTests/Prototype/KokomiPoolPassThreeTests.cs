@@ -95,6 +95,12 @@ public class KokomiPoolPassThreeTests
         Assert.Equal(KokomiPlan.Kind.Damage, clause.Kind);
         Assert.Equal(10, clause.Amount);
         Assert.Contains("PlanDamage\"].UpgradeValueBy(3m)", Source("ProtoKkFeint"));
+        // `EB-660`: AND THE FACE SAYS SO. The row had a Plan clause and no
+        // printed Plan line, so the round-25 seat wrote a Plan with Feint,
+        // found the 10 by testing, and "did not know what it had written".
+        // Printed live off the Plan's own var, so a Smithed copy says 13.
+        Assert.Contains("[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.",
+                        Face(new ProtoKkFeint()));
     }
 
     [Fact]
@@ -120,7 +126,11 @@ public class KokomiPoolPassThreeTests
         // pick. The verb, the count and the take are pinned in
         // `KokomiPoolPassFourTests`.
         var play = Il.Calls(Il.Method("ProtoKkReadTheField", "OnPlay")).ToList();
-        Assert.Contains(play, c => c.Contains("CardSelectCmd.FromSimpleGrid"));
+        // `EB-686` moved the screen one call out, into `ScryTake.Choose`,
+        // which owns the grid and the one-candidate branch alike.
+        Assert.Contains(play, c => c.Contains("ScryTake.Choose"));
+        Assert.Contains(Il.Calls(Il.Method("ScryTake", "Choose")),
+                        c => c.Contains("CardSelectCmd.FromSimpleGrid"));
         Assert.Contains(play, c => c.Contains("CardPileCmd.Add"));
     }
 

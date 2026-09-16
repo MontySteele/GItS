@@ -542,4 +542,34 @@ public class InazumaCompanionOverhaulTests
         var hook = Il.Method("CompanionOverhaulPlayWatcher", "AfterDamageReceived");
         Assert.Contains(Il.Calls(hook), c => c.Contains("NoteDamage"));
     }
+
+    // ==================================================================
+    // `EB-696` -- Heizou's printed number folds what the rest of the hand does
+    // ==================================================================
+
+    [Fact]
+    public void Heizous_face_prints_the_live_total_and_the_counts_window()
+    {
+        // THE FIND (Kokomi r30 lane 2 (c)). "Heizou's face kept printing Deal
+        // 6 under Shrink while Strike printed 4 and Oath 2, and dealt 4." The
+        // row's first number was a LITERAL in the description, so nothing on
+        // that screen could fold anything into it -- one hand, two folding
+        // conventions. The card already carries a `FrontFoldedDamageVar` at
+        // `ValueProp.Move`; only the face was not reading it.
+        //
+        // WELL LAID'S SHAPE (`EB-539`): the face is the live TOTAL, which is
+        // base plus the per-Swirl term plus every modifier, and the rate is
+        // written beside it as a rate rather than as a second number to add.
+        //
+        // AND THE WINDOW, which is the same row's other half: the count is
+        // taken BEFORE the hit, so this card played into a bare board pays
+        // nothing for its own Swirl. "made before it this turn" is that rule,
+        // on the card, where the seat looked for it.
+        var face = ((CustomCardModel)(CardModel)new ProtoMiHeizouHeartstopper())
+            .Localization!.First(r => r.Item1 == "description").Item2;
+
+        Assert.Contains("Deal {CalculatedDamage:diff()} damage.", face);
+        Assert.Contains("made before it this turn", face);
+        Assert.DoesNotContain("Deal 6 damage", face);
+    }
 }

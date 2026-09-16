@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Cards;
+#if PROTOTYPE_CARDS
+using KleeMod.Cards.Prototype.Generated;
+#endif
 using KleeMod.Elements;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -136,6 +139,48 @@ public class ReactionPreviewNoHitTests
         var resolve = Il.Calls(Il.Method("ReactionEffects", "Resolve"));
 
         Assert.Contains("ReactionEffects.FrozenBossVulnWillApply", resolve);
+    }
+
+
+    // ==================================================================
+    // `EB-733` -- a card that Sets off first does not get its own amplifier
+    // ==================================================================
+
+#if PROTOTYPE_CARDS
+    [Fact]
+    public void A_set_off_first_face_is_recognised_off_its_printed_order()
+    {
+        // THE FIND (Klee r26 lane 1, (c) 5). Pocket Match's "Reaction preview:
+        // Melt" said "this card's 7 lands 12" into a Cryo aura and it landed
+        // 7: the Set off in its own first sentence had eaten the aura a beat
+        // earlier, so the 1.75x was the Bomb's. The Set off tip already says
+        // "the first takes the aura", which is what made the number beside it
+        // a contradiction rather than a gap.
+        //
+        // THE TEST IS THE PRINTED ORDER, the row's own wording. Read off the
+        // authored English row rather than a loc lookup, so a non-English host
+        // cannot answer it differently.
+        Assert.True(KleeCardTooltips.SetsOffFirst(new ProtoKoPocketMatch()));
+        Assert.True(KleeCardTooltips.SetsOffFirst(new ProtoKoKapow()));
+
+        // A Bomb card that never Sets off, and one whose damage comes first:
+        // there the card's own hit does meet the aura and the amplified body
+        // is right as it stands.
+        Assert.False(KleeCardTooltips.SetsOffFirst(new ProtoKoBombsAway()));
+    }
+#endif
+
+    [Fact]
+    public void The_set_off_branch_names_the_order_and_the_number_that_lands()
+    {
+        // The body is built live against a board, so what is pinned here is
+        // the branch's shape: the amplified body has a Set-off arm, it goes
+        // out through the same `ResolveOnTarget` the un-amplified number does,
+        // and it is chosen by the face read above.
+        var calls = Il.Calls(Il.Method("KleeCardTooltips", "AmplifiedBody"));
+
+        Assert.Contains("KleeCardTooltips.SetsOffFirst", calls);
+        Assert.Contains("SimDamagePipeline.ResolveOnTarget", calls);
     }
 
     private static IReadOnlyCollection<string> Registered()
