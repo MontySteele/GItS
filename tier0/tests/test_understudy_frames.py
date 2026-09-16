@@ -267,10 +267,16 @@ def test_the_soak_cannot_take_pictures():
 
 # ------------------------------------------------------------- the route ----
 #
-# EB-142 hygiene, 2026-08-25. The auto route's blank test cannot catch this
-# window's failure mode -- PrintWindow returns a surface that is varied and
-# INCOMPLETE (no hand, no enemies, no prompt caption) -- so the route is an
-# explicit env choice rather than a smarter heuristic.
+# EB-142, 2026-08-25, and what EB-788 found it had actually been looking at.
+# The symptom EB-142 named was real -- PrintWindow returned a surface with no
+# hand, no enemies and no prompt caption -- but its diagnosis, a Godot/Vulkan
+# window that renders only some of its layers, was WRONG. The window renders
+# every layer. It renders them at 1.5x its own client rectangle, and a
+# client-sized bitmap clips the overflow, which on a 16:9 screen is exactly the
+# bottom (the hand) and the right (the enemies). Measured on lane 1,
+# 2026-09-16: a 3841x2160 client, a 5762x3240 render. The escape hatch EB-142
+# added is kept -- an env-chosen route is still the honest answer to a route
+# question -- but the default no longer needs it.
 
 def test_the_route_is_env_only_and_defaults_to_auto():
     assert frames.route({}) == frames.ROUTE_AUTO
@@ -335,6 +341,143 @@ def test_the_guardrail_still_rides_a_forced_route_row(tmp_path):
                                 manifest=tmp_path / "m.jsonl",
                                 runner=_Runner(0, f"OK 1 1 {ran}"))
         assert report["row"]["guardrail"] == frames.GUARDRAIL
+
+
+# ------------------------------------ EB-788: the whole client area, or not --
+#
+# THE CHECK A FRAME IS VERIFIED BY, and it is arithmetic on two pairs of
+# integers so that the suite can run it on a machine with no game and no
+# display. What it pins is the sentence this defect cost: a frame that is the
+# size the manifest claims, is not blank, and is two thirds of a picture.
+
+
+def test_a_render_that_covers_the_client_area_is_complete():
+    g = frames.capture_geometry((3841, 2160), (5762, 3240))
+    assert g["complete"] is True
+    assert g["scale"] == (1.5001, 1.5)
+
+
+def test_a_one_to_one_render_is_complete_and_scales_at_one():
+    g = frames.capture_geometry((1920, 1080), (1920, 1080))
+    assert g["complete"] is True and g["scale"] == (1.0, 1.0)
+
+
+def test_a_render_that_stopped_short_of_the_client_area_is_a_crop():
+    """`live-looks-8c`'s frames, in the shape the apparatus could not see. The
+    bitmap was 3841x2160 and so was the client rect, so SIZE agreed with
+    itself the whole time -- what disagreed was how far the window had drawn."""
+    g = frames.capture_geometry((3841, 2160), (3841, 1440))
+    assert g["complete"] is False
+    assert "CROP" in g["note"] and "3841x1440" in g["note"]
+
+
+def test_a_capture_that_reported_no_extent_is_not_called_complete():
+    """Silence is not a pass. An old script, or a route that cannot measure,
+    leaves the question open and the row says so rather than claiming a yes."""
+    for drawn in (None, (0, 0), (5762, 0)):
+        assert frames.capture_geometry((3841, 2160), drawn)["complete"] is False
+    assert frames.capture_geometry(None, (10, 10))["complete"] is False
+    assert frames.capture_geometry((0, 0), (10, 10))["complete"] is False
+
+
+def test_the_manifest_row_carries_the_client_size_and_the_measured_scale(
+        tmp_path):
+    runner = _Runner(0, "OK 3841 2160 printwindow 5762 3240")
+    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                            out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
+                            runner=runner)
+    row = json.loads((tmp_path / "m.jsonl").read_text(
+        encoding="utf-8").splitlines()[0])
+    # The size the image was written at IS the client size -- that is the
+    # acceptance, and it is on the row rather than in somebody's memory.
+    assert row["size"] == "3841 2160" == row["client_size"]
+    assert row["render_extent"] == "5762 3240"
+    assert row["render_scale"] == [1.5001, 1.5]
+    assert row["complete"] is True
+    assert report["complete"] is True
+
+
+def test_an_incomplete_frame_says_so_in_the_report_and_on_the_row(tmp_path):
+    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                            out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
+                            runner=_Runner(0, "OK 3841 2160 printwindow 2560 1440"))
+    assert report["status"] == "ok", "an incomplete frame is still a frame"
+    assert "INCOMPLETE" in report["message"]
+    row = json.loads((tmp_path / "m.jsonl").read_text(
+        encoding="utf-8").splitlines()[0])
+    assert row["complete"] is False
+
+
+def test_an_old_success_line_without_an_extent_still_reads_back(tmp_path):
+    """Manifests are concatenated across months. A row the old script wrote
+    must not turn into a crash in the reader that replaced it."""
+    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                            out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
+                            runner=_Runner(0, "OK 1920 1080 printwindow"))
+    assert report["status"] == "ok" and report["complete"] is False
+    assert report["row"]["render_extent"] is None
+
+
+def test_the_script_measures_the_render_instead_of_assuming_a_factor():
+    """A factor this apparatus guessed would be a factor that is wrong on the
+    next monitor, and a wrong guess here looks exactly like a right one. So the
+    canvas is oversized, pre-filled with a sentinel, and the extent is read
+    back off the pixels."""
+    script = frames.build_script("X", frames.Path("C:/o.png"))
+    assert "Measure-Extent" in script
+    assert "255, 0, 255" in script          # the sentinel fill
+    assert "GetClientRect" in script        # what the frame is OF
+    assert "SetResolution(96, 96)" in script
+    # and nothing anywhere multiplies by a hard-coded 1.5
+    assert "1.5" not in script
+
+
+def test_the_probe_factor_is_floored_at_one_and_never_interpolated_raw():
+    """It reaches the script as a number, through `float()` and a floor: a
+    canvas smaller than the client area would clip before it measured."""
+    assert "2.0000" in frames.build_script("X", frames.Path("C:/o.png"))
+    assert "1.0000" in frames.build_script("X", frames.Path("C:/o.png"),
+                                           probe=0.25)
+
+
+def test_a_render_that_filled_the_probe_canvas_is_reported_not_guessed():
+    """If the overflow overflowed the canvas too, the measurement is a floor
+    and not the answer, and the route name says which."""
+    script = frames.build_script("X", frames.Path("C:/o.png"))
+    assert "printwindow-overflow" in script
+
+
+# --------------------------------------- EB-788: the length of the script ----
+
+def test_whole_line_comments_are_dropped_on_the_way_to_the_wire():
+    """`-EncodedCommand` is base64 of UTF-16LE: every character of prose costs
+    four on a command line Windows caps near 32767. Adding EB-788's
+    explanation to the script pushed the encoded form to 34524 characters and
+    the capture died with `WinError 206` -- a length limit wearing the costume
+    of a missing file."""
+    src = 'Write-Output 1\n  # a comment\n$x = "a # b"   # trailing\n'
+    out = frames.strip_ps_comments(src)
+    assert "# a comment" not in out
+    assert '$x = "a # b"   # trailing' in out, "a mid-line # is not a comment"
+    assert "Write-Output 1" in out
+
+
+def test_the_csharp_here_string_survives_stripping_untouched():
+    """What is inside `@" ... "@` is not PowerShell and its comment syntax is
+    not `#`. A stripper that walked into it would eat a preprocessor line or a
+    string and the P/Invoke block would stop compiling."""
+    src = '$t = @"\n#define X 1\n// kept\n"@\n# gone\n'
+    out = frames.strip_ps_comments(src)
+    assert "#define X 1" in out and "// kept" in out
+    assert "# gone" not in out
+
+
+def test_the_encoded_command_fits_on_a_windows_command_line():
+    """The live failure, pinned as a number. 32767 is the cap; the script is
+    checked with room for the flags that precede it."""
+    script = frames.build_script("SlayTheSpire2",
+                                 frames.Path("C:/understudy/logs/frames/f.png"))
+    assert len(frames.encoded_command(script)) < 30000
 
 
 # ------------------------------------------------- the state renderer -------
