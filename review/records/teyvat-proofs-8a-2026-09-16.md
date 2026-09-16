@@ -418,7 +418,7 @@ You have 744 gold.
 The **relic** row's text is the new `relic_description` field: the wire's item reads
 `{"type": "relic", "relic_id": "BAG_OF_PREPARATION", "relic_name": "Bag of Preparation",
 "relic_description": "At the start of each combat, draw 2 additional cards."}`. The **potion**
-row's is `potion_description`. Across 182 pages rendered this round the reward-item kinds seen
+row's is `potion_description`. Across 264 pages rendered this round the reward-item kinds seen
 were `gold`, `potion`, `relic`, `card` and `special_card`, and every potion and relic row
 printed its kind and its text. **Board writes: none.**
 
@@ -561,7 +561,7 @@ the one archived copy that is genuinely lane 1's.
 - **`EB-191` — `seed_not_honoured`.** **0** across every launch this round.
 - **`EB-510` — doubled `Your hand` / `The other side` headings.** `blindplay.observe` runs
   `assert_one_page` before it returns, so a doubled section comes back as a refusal rather than
-  a page. **182 pages were rendered off live state this round and 0 were refused**, and no page
+  a page. **264 pages were rendered off live state this round and 0 were refused**, and no page
   sha needed recording.
 - **`EB-325` — the page's map block against the harness's reachable set.** Three act-1 map
   screens compared, and all three agree exactly, in kind and in order:
@@ -665,7 +665,7 @@ finding is filing it against somebody else's game.
   `set_hp player 1`; it needs nothing at all.
 
 Frames were not captured this round — the evidence is page text and wire payloads, both of
-which are checkable against the file and line named beside them. The 182 rendered pages and
+which are checkable against the file and line named beside them. The 264 rendered pages and
 their state snapshots were kept in the session scratchpad, which is not the tree; the driver
 itself (`drv.py`, `tour1.py`, `tour2.py`, `camp4*.py`) is scratch and is not committed, as
 proofs-6 and proofs-7 did with theirs. No register was edited, no row retired, and no C#
