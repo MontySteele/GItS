@@ -13,6 +13,7 @@ already carries the `(lint-ok: reason)` markers the convention provides;
 the other five had never been through the pass.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -1044,3 +1045,37 @@ def test_the_review_status_lint_catches_a_packet_in_the_wrong_place():
          "--self-test"], capture_output=True, text=True)
     assert res.returncode == 0, res.stdout + res.stderr
     assert "0 failure(s)" in res.stdout
+
+
+def test_a_finding_on_a_music_note_title_prints_on_a_cp1252_console(tmp_path):
+    """`EB-741`. The lint's findings QUOTE SHIPPED TITLES, and two shipped
+    Barbara titles carry `U+266A MUSIC NOTE`. `sys.stdout`'s encoding is the
+    console's -- cp1252 on a default Windows terminal -- so before
+    `console_safe()` the first such finding raised `UnicodeEncodeError` at the
+    `print` and the gate exited on a traceback instead of a report. It was
+    green only because no finding existed to print; this pin makes one.
+
+    `PYTHONIOENCODING=cp1252` is the console, reproduced: it is exactly the
+    stream state a default Windows terminal hands the tool.
+    """
+    lint = str(REPO / "tools" / "lint_unique_names.py")
+    sheet = tmp_path / "note-sheet.yaml"
+    sheet.write_text(
+        '- {id: note_one, name: "Glissando ♪", cost: 1, type: skill,\n'
+        '   rarity: common}\n'
+        '- {id: note_two, name: "Glissando ♪", cost: 1, type: skill,\n'
+        '   rarity: common}\n', encoding="utf-8")
+
+    env = dict(os.environ, PYTHONIOENCODING="cp1252")
+    res = subprocess.run([sys.executable, lint, str(sheet)],
+                         capture_output=True, env=env)
+    out = res.stdout.decode("utf-8", "replace")
+    err = res.stderr.decode("utf-8", "replace")
+
+    # The finding REPORTED, exit 1 -- not a traceback, and not the exit 1 a
+    # crash would also produce, which is why the stream is checked too.
+    assert "UnicodeEncodeError" not in err, err
+    assert "Traceback" not in err, err
+    assert res.returncode == 1, out + err
+    assert "DUPLICATE NAME" in out
+    assert "Glissando" in out
