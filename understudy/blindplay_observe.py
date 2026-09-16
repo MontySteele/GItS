@@ -25,7 +25,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
-                                        deck_elements, relic_faces, run_change)
+                                        deck_elements, relic_faces, run_change,
+                                        stage_arm)
 from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
@@ -549,6 +550,24 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     change = run_change(state)
     if change:
         obs["run_change"] = change
+
+    # ROUND THREE: THE GLOSSARY'S ARM SIGNAL IS A FACT ABOUT THE RUN.
+    #
+    # "The Companion glossary alternates between two sentences on consecutive
+    # screens of one fight." The reading is still the combat block -- the mod
+    # saying the rule is live -- but it is LATCHED here, so a chooser overlay, a
+    # reward and a shop carry the same answer the fight before them gave. A
+    # screen that can answer writes the latch; one that cannot reads it. See
+    # `blindplay_faces.stage_arm` for the two guards that keep another lane's
+    # game and a run started since out of it.
+    combat_block = obs.get("combat")
+    if isinstance(combat_block, dict):
+        live: bool | None = combat_block.get("stage") is not None
+    else:
+        live = None
+    held = stage_arm(state, live)
+    if held is not None:
+        obs["stage_arm"] = held
 
     # `EB-371`: the belt, and the verb that empties a slot, on every screen
     # the wire allows the action on. Before the sprite pass, so a potion face

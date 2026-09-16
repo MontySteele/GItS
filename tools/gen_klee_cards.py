@@ -8286,6 +8286,39 @@ def modal_option_class(card: dict, index: int) -> str:
     return f"{pascal(card['id'])}Mode{chr(ord('A') + index)}"
 
 
+#: The sentence a `choose_one` row's description is, and the separator between
+#: its halves -- the very string the description emitter builds (see the
+#: `choose_one` arm of the face builder, "Choose one: {labels}.").
+MODAL_FACE_PREFIX = "Choose one: "
+MODAL_FACE_SEPARATOR = " | "
+
+
+def modal_option_faces(card: dict, modes: list) -> list[str] | None:
+    """One face per mode, taken out of the card's OWN description.
+
+    Round three's chooser defect: the option classes printed the sheet's
+    authored `label`, which is plain text with the unupgraded, unfolded numbers
+    written into it, while the parent printed var tokens. The two halves of one
+    decision therefore disagreed on every upgraded card and under every debuff.
+
+    The parent's description already holds the per-mode wording WITH the
+    tokens, because that is how it is composed, so this splits it back apart
+    rather than asking an author to keep two strings in step. `None` where the
+    description is not that shape -- a row whose face says something else keeps
+    its label, which is what it printed before this row.
+    """
+    desc = str(card.get("description") or "").strip()
+    if not desc.startswith(MODAL_FACE_PREFIX):
+        return None
+    body = desc[len(MODAL_FACE_PREFIX):].rstrip()
+    if body.endswith("."):
+        body = body[:-1]
+    parts = [p.strip() for p in body.split(MODAL_FACE_SEPARATOR)]
+    if len(parts) != len(modes) or not all(parts):
+        return None
+    return parts
+
+
 def modal_effect(card: dict) -> dict | None:
     """The card's `choose_one` effect, or None. One per card by construction."""
     return next((eff for eff in card.get("effects", [])
@@ -9963,7 +9996,11 @@ def build_body(
             # generated is the option list, the record, and the ladder.
             modes = eff["modes"]
             options = ",\n            ".join(
-                f"ModalChoice.CreateOption<{modal_option_class(card, i)}>(Owner)"
+                # ROUND THREE: `(Owner, this)` and not `(Owner)`. The option
+                # face carries the PARENT's vars now, so it has to carry the
+                # parent's upgrade state too -- see `ModalChoice.CreateOption`.
+                f"ModalChoice.CreateMatchingOption"
+                f"<{modal_option_class(card, i)}>(Owner, this)"
                 for i in range(len(modes)))
             lines.append(
                 "var modeOptions = new List<CardModel>\n        {\n"
@@ -13027,8 +13064,57 @@ def emit(
     modal_option_classes = ""
     modal_eff = modal_effect(card)
     if modal_eff is not None:
+        # ROUND THREE, sec.4: THE CHOOSER PRINTED THE SHEET AND THE HAND
+        # PRINTED THE BOARD.
+        #
+        # "The mode chooser's option faces print sheet literals: unupgraded
+        # (8/12 in hand, 5/9 in the chooser) and unfolded under Weak (7/15 in
+        # hand, 10/20 in the chooser); asking by the hand's wording is
+        # refused." The option class was two authored strings and
+        # `CanonicalVars => Array.Empty`, so the one screen where the choice is
+        # actually made was the one screen printing numbers nothing on the
+        # board had touched -- and the seat, matching by what the hand printed,
+        # could not name the mode it wanted.
+        #
+        # THE FACES ARE THE PARENT'S OWN WORDING, taken out of the parent's
+        # description rather than re-authored: a `choose_one` row's description
+        # IS "Choose one: <mode 0> | <mode 1>", the halves carry the parent's
+        # var tokens, and splitting it is what makes the chooser and the hand
+        # one sentence by construction. Where a row's description is not that
+        # shape the option keeps its authored label, which is the old
+        # behaviour.
+        #
+        # AND THE VARS COME WITH THEM, whole: the tokens resolve only if the
+        # option declares the vars, the fold happens only if they are the
+        # parent's var TYPES (`FrontFoldedDamageVar` and its neighbours), and
+        # the upgraded number appears only if the option is upgraded with the
+        # parent -- which `ModalChoice.CreateOption(owner, parent)` does, off
+        # the `DynamicVars[...]` half of the parent's own `OnUpgrade`.
+        option_faces = modal_option_faces(card, modal_eff["modes"])
+        option_upgrade = "\n        ".join(
+            line.strip() for line in upgrade_cs.split("\n")
+            if "DynamicVars[" in line)
         for i, mode in enumerate(modal_eff["modes"]):
+            # THE TITLE STAYS THE AUTHORED LABEL AND THE BODY TAKES THE TOKENS.
+            # A card TITLE is the one loc string in this generator that has
+            # never carried a var -- `title_cs` is a display name on every row
+            # -- so putting one there would be the first, on the screen with no
+            # headless renderer to check it. The BODY is where every other face
+            # prints its live numbers, it is what the chooser shows under the
+            # name, and it is the half the round measured ("5/9 in the
+            # chooser").
             label = cs_escape(mode["label"])
+            face = cs_escape(option_faces[i] if option_faces
+                             else mode["label"])
+            option_vars = (
+                "\n\n    protected override IEnumerable<DynamicVar> "
+                "CanonicalVars =>\n        new List<DynamicVar>\n        {\n"
+                f"{vars_block.rstrip()}\n        }};"
+                if option_faces and vars_block else "")
+            option_upgrade_member = (
+                "\n\n    protected override void OnUpgrade()\n    {\n"
+                f"        {option_upgrade}\n    }}"
+                if option_vars and option_upgrade else "")
             # EB-182 / EB-220: a priced mode's FACE declares its price, so
             # the meter cost badge paints the option exactly as it paints any
             # priced card -- the price is on the option a player is choosing
@@ -13061,8 +13147,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     public override List<(string, string)>? Localization => new()
     {{
         ("title", "{label}"),
-        ("description", "{label}"),
-    }};{face_price_member}
+        ("description", "{face}"),
+    }};{option_vars}{option_upgrade_member}{face_price_member}
 }}
 '''
 
