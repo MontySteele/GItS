@@ -167,6 +167,49 @@ internal static class Il
         return found;
     }
 
+    /// <summary>
+    /// The NAME of every instance field this method stores to (`stfld`).
+    ///
+    /// WHY THIS EXISTS. `EB-769`'s Punch-Off budgets are PER VISIT, and an
+    /// event model outlives the room it was shown in, so the fact worth
+    /// pinning is not a value but a PLACE: the counters are zeroed where the
+    /// visit starts (`AfterEventStarted`) rather than where the model is
+    /// constructed. Running that hook needs `RunManager` and a live room,
+    /// which is outside the headless boundary; reading which fields it writes
+    /// is not.
+    ///
+    /// The same byte-scan caveat as <see cref="Calls"/>: assertions on this
+    /// should be "this method DOES write X", never a count or an absence.
+    /// </summary>
+    internal static IReadOnlyCollection<string> FieldsWritten(MethodBase method)
+    {
+        var found = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var body in Bodies(method))
+        {
+            var il = body.GetMethodBody()?.GetILAsByteArray();
+            if (il == null) continue;
+
+            for (var i = 0; i < il.Length - 4; i++)
+            {
+                if (il[i] != 0x7D && il[i] != 0x80) continue; // stfld, stsfld
+                try
+                {
+                    var target = body.Module.ResolveField(
+                        BitConverter.ToInt32(il, i + 1),
+                        body.DeclaringType?.GetGenericArguments(),
+                        null);
+                    if (target != null) found.Add(target.Name);
+                }
+                catch
+                {
+                    // Not a field token. Expected while byte-scanning.
+                }
+            }
+        }
+
+        return found;
+    }
+
     private static IEnumerable<MethodBase> Bodies(MethodBase method)
     {
         yield return method;

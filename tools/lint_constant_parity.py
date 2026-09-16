@@ -426,6 +426,29 @@ UNMIRRORED: dict[str, str] = {
         "`vfx_attack_blunt`, the waits, the options and the gold roll are all "
         "untouched, and a player at the game's own speed never reaches the "
         "cap. tier0 draws nothing and has no counterpart.",
+    "PunchOffMirror.MaxBluntVfxPerVisit":
+        "`EB-769`, the sibling of the line above and the same kind of number: "
+        "how many `vfx/vfx_attack_blunt` scenes one visit to the Punch-Off may "
+        "instantiate. `VfxCmd.PlayOnCreatureCenter` reaches "
+        "`PackedScene.Instantiate` through `VfxCmd.PlayVfx`, so it is exactly "
+        "as unbounded as the spark was once the 1.2 s wait collapses -- with "
+        "the sparks capped and absent from every log, the proofs of 2026-09-16 "
+        "found the process still dying under `FastMode = Instant` with "
+        "`PackedScene.Instantiate` at the top of the backtrace. Its own "
+        "constant rather than a shared one because the blunt impact is the "
+        "blow a player reads and the spark is decoration on top of it. Nothing "
+        "a card, a rule or a reward is priced in it, and tier0 has no "
+        "counterpart.",
+    "PunchOffMirror.MaxSwingsUnderInstant":
+        "`EB-769`. A LOOP BOUND on a decoration, and only under "
+        "`FastModeType.Instant`. `Cmd.Wait` creates no timer at all at that "
+        "setting, so every `await` in the punching loop completes "
+        "synchronously and the loop never yields; capping what a pass "
+        "allocates makes each pass cheap but does not make a spinning loop "
+        "stop. At `Normal` and `Fast` -- every speed a person plays at -- the "
+        "constructs punch until the player leaves the room exactly as the base "
+        "event has them do, so this number cannot be reached by play. tier0 "
+        "has no event loop and no counterpart.",
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
     "RosterArt.PortraitWidth":

@@ -52,13 +52,35 @@ namespace KleeMod.Teyvat.Events.Mirrors;
 /// `TeyvatEventMirror` accessor or reverse patch is needed.
 ///
 /// THE ONE DEVIATION FROM THE BASE EVENT IS `EB-769`, AND IT IS NOT
-/// MECHANICAL: the decorative `NHitSparkVfx` node each swing adds is skipped
-/// under `FastModeType.Instant` and capped at `MaxHitSparksPerVisit`
-/// otherwise. The base event spawns one per swing paced only by
-/// `Cmd.Wait(1.2f)`, which is fine at the game's own speed and is an
-/// unbounded allocation when a harness collapses the wait. Nothing else
-/// moves: the same anims, the same `vfx_attack_blunt`, the same waits, the
-/// same options, the same rewards.
+/// MECHANICAL: EVERY PER-SWING ALLOCATION IN THE LOOP IS BOUNDED, and the
+/// loop itself stops swinging under `FastModeType.Instant`.
+///
+/// The base loop is paced by `Cmd.Wait`, and `Cmd.Wait` IS A NO-OP UNDER
+/// `Instant` (`Cmd.cs`: the `SceneTreeTimer` is never created when
+/// `PrefsSave.FastMode == FastModeType.Instant`), as is
+/// `Cmd.CustomScaledWait` inside `CreatureCmd.TriggerAnim(.., 0f)`. So under
+/// the soak harness the `while` has no awaited suspension left in it at all:
+/// it is a tight loop that both never yields and allocates a Godot node on
+/// every pass. Three guards, one per thing a pass costs:
+///
+/// * the decorative `NHitSparkVfx` node -- skipped under `Instant`, capped at
+///   `MaxHitSparksPerVisit` otherwise (the half of this that shipped in #528);
+/// * the `vfx/vfx_attack_blunt` scene, which `VfxCmd.PlayOnCreatureCenter`
+///   reaches through `PlayVfx` -> `PackedScene.Instantiate` -- skipped under
+///   `Instant`, capped at `MaxBluntVfxPerVisit` otherwise. This is the one
+///   proofs-6 caught: with the sparks capped and absent from every log, the
+///   top backtrace frame moved to `Godot.PackedScene.Instantiate_Patch1`
+///   under `PunchEachOther`;
+/// * the swing itself -- under `Instant` the loop stops after
+///   `MaxSwingsUnderInstant`, so no per-pass cost of ANY kind, named here or
+///   not, is left unbounded.
+///
+/// `CreatureCmd.TriggerAnim` allocates nothing per swing for these two: it
+/// sets an animation trigger on the existing `NCreature` node, and its SFX
+/// arm is `creature.IsPlayer` only. It is left exactly as the base event has
+/// it. NOTHING ELSE MOVES: the same anims, the same waits, the same options,
+/// the same rewards, and at the player's own speed (`Normal` / `Fast`) the
+/// punching runs on forever as it always did.
 ///
 /// THE ENCOUNTER AND THE CURSE ARE THE BASE GAME'S. `PunchOffEventEncounter`
 /// and `Injury` carry global rows; the constructs' NAMES are dressed through
@@ -115,6 +137,75 @@ public abstract class PunchOffMirror : TeyvatEventMirror
         => fastMode != FastModeType.Instant && spawned < MaxHitSparksPerVisit;
 
     /// <summary>
+    /// `EB-769`. HOW MANY BLUNT-IMPACT SCENES ONE VISIT MAY INSTANTIATE.
+    ///
+    /// A SIBLING OF `MaxHitSparksPerVisit`, AND FOR THE SAME REASON: each
+    /// swing's `VfxCmd.PlayOnCreatureCenter(target, "vfx/vfx_attack_blunt")`
+    /// runs `PreloadManager.Cache.GetScene(path).Instantiate<Node2D>(..)` and
+    /// adds the node to the combat VFX container (`VfxCmd.PlayVfx`), so it is
+    /// exactly as unbounded as the spark was once the 1.2 s wait collapses.
+    /// #528 capped the spark and left this one, and proofs-6 read the result:
+    /// no `NHitSparkVfx` in any log, the process still dead under
+    /// `FastMode = Instant` / `TimeScale 3`, and the top backtrace frame now
+    /// `Godot.PackedScene.Instantiate_Patch1` under `PunchEachOther`
+    /// (`review/records/teyvat-proofs-6-2026-09-16.md`, item 3).
+    ///
+    /// ITS OWN CONSTANT RATHER THAN A SHARED ONE, because the two are
+    /// separate pictures with separate budgets: the blunt impact is the blow
+    /// the player reads and the spark is decoration on top of it, and a later
+    /// ruling that moves one should not silently move the other. They start
+    /// at the same value because the same half-minute of the loop's intended
+    /// pacing is the right budget for both.
+    /// </summary>
+    internal const int MaxBluntVfxPerVisit = 24;
+
+    /// <summary>
+    /// `EB-769`. HOW MANY SWINGS THE LOOP TAKES WHEN THE WAITS ARE GONE.
+    ///
+    /// THE BOUND OF LAST RESORT, and the only guard here that is about the
+    /// loop rather than about one allocation in it. Under `Instant` neither
+    /// `Cmd.Wait` nor `Cmd.CustomScaledWait` creates a timer, so every
+    /// `await` in the body completes synchronously and the `while` becomes a
+    /// tight loop that never returns to the scene tree. Capping the two known
+    /// spawns makes each pass cheap; it does not make a spinning loop stop.
+    /// This does, and it bounds anything a future engine version starts
+    /// allocating in a pass that nobody has audited yet.
+    ///
+    /// ONLY UNDER `Instant`. At `Normal` and `Fast` the waits are real, the
+    /// loop yields, and the constructs punch until the player leaves the room
+    /// exactly as they do in the base event -- nothing a person sees at their
+    /// own speed is changed by this beyond the two caps above.
+    /// </summary>
+    internal const int MaxSwingsUnderInstant = 24;
+
+    /// <summary>Blunt-impact scenes instantiated by THIS visit's loop.</summary>
+    private int _bluntVfx;
+
+    /// <summary>Swings taken by THIS visit's loop, counting each blow.</summary>
+    private int _swings;
+
+    /// <summary>
+    /// `EB-769`. May this swing play its `vfx_attack_blunt`?
+    ///
+    /// Pure and `internal` for the same reason `ShouldSpawnHitSpark` is: the
+    /// scene cache and the node tree are outside the headless boundary, this
+    /// judgment is not.
+    /// </summary>
+    internal static bool ShouldPlayBluntVfx(FastModeType fastMode, int played)
+        => fastMode != FastModeType.Instant && played < MaxBluntVfxPerVisit;
+
+    /// <summary>
+    /// `EB-769`. May the loop take another swing?
+    ///
+    /// `true` at every speed a person plays at, whatever the count -- the
+    /// base event's loop is endless and stays endless. Under `Instant` it
+    /// stops at `MaxSwingsUnderInstant`, which is what turns the tight
+    /// no-yield loop into a bounded one.
+    /// </summary>
+    internal static bool ShouldKeepPunching(FastModeType fastMode, int swings)
+        => fastMode != FastModeType.Instant || swings < MaxSwingsUnderInstant;
+
+    /// <summary>
     /// The player's animation-pacing setting, or `Normal` when it cannot be
     /// read. NEVER THROWS: this is consulted inside a background loop in a
     /// room the player is standing in, and an exception here would leave the
@@ -145,6 +236,22 @@ public abstract class PunchOffMirror : TeyvatEventMirror
 
         _hitSparks++;
         vfxContainer?.AddChildSafely(NHitSparkVfx.Create(target, requireInteractable: false));
+    }
+
+    /// <summary>
+    /// `EB-769`. One swing's blunt impact, played only when the budget and
+    /// the speed setting both allow it. The call itself is the base event's,
+    /// argument for argument.
+    /// </summary>
+    private void PlayBluntVfx(Creature target)
+    {
+        if (!ShouldPlayBluntVfx(CurrentFastMode(), _bluntVfx))
+        {
+            return;
+        }
+
+        _bluntVfx++;
+        VfxCmd.PlayOnCreatureCenter(target, "vfx/vfx_attack_blunt");
     }
 
     /// <summary>The base event's own: this event draws the combat room.</summary>
@@ -179,10 +286,12 @@ public abstract class PunchOffMirror : TeyvatEventMirror
     public override Task AfterEventStarted()
     {
         RunManager.Instance.RoomExited += OnRoomExited;
-        // `EB-769`: the spark budget is PER VISIT, so it is zeroed where the
-        // visit starts rather than where the model is constructed -- an event
-        // model outlives the room it was shown in.
+        // `EB-769`: every budget here is PER VISIT, so they are zeroed where
+        // the visit starts rather than where the model is constructed -- an
+        // event model outlives the room it was shown in.
         _hitSparks = 0;
+        _bluntVfx = 0;
+        _swings = 0;
         _punchCts = new CancellationTokenSource();
         TaskHelper.RunSafely(PunchEachOther());
         return Task.CompletedTask;
@@ -195,6 +304,12 @@ public abstract class PunchOffMirror : TeyvatEventMirror
     /// checked between the two halves as well as at the top. The scale is put
     /// back only if the node is still valid, which is the base event's guard
     /// against a room torn down mid-swing.
+    ///
+    /// `EB-769` adds only the swing bound beside each of those two cancel
+    /// checks, and routes the blunt impact and the hit spark through their
+    /// guards. Leaving by the bound takes the base event's own exit path --
+    /// the handle is cleared and the scale is put back -- so a room exit
+    /// after it is the same no-op it is after a cancel.
     /// </summary>
     private async Task PunchEachOther()
     {
@@ -210,23 +325,30 @@ public abstract class PunchOffMirror : TeyvatEventMirror
         leftEnemyNode.Scale = new Vector2(-originalScale.X, originalScale.Y);
         Control vfxContainer = NCombatRoom.Instance?.CombatVfxContainer;
 
-        while (!_punchCts.IsCancellationRequested)
+        // `EB-769`: the base event's `while (!cancelled)` with the swing bound
+        // beside the cancel check. The bound is `true` at every speed a person
+        // plays at, so this is the base event's condition unchanged there.
+        while (!_punchCts.IsCancellationRequested
+               && ShouldKeepPunching(CurrentFastMode(), _swings))
         {
+            _swings++;
             await CreatureCmd.TriggerAnim(leftEnemy, "Attack", 0f);
             await Cmd.Wait(0.1f);
-            VfxCmd.PlayOnCreatureCenter(rightEnemy, "vfx/vfx_attack_blunt");
+            PlayBluntVfx(rightEnemy);
             SpawnHitSpark(vfxContainer, rightEnemy);
             await CreatureCmd.TriggerAnim(rightEnemy, "Hit", 0f);
             await Cmd.Wait(1.2f);
 
-            if (_punchCts.IsCancellationRequested)
+            if (_punchCts.IsCancellationRequested
+                || !ShouldKeepPunching(CurrentFastMode(), _swings))
             {
                 break;
             }
 
+            _swings++;
             await CreatureCmd.TriggerAnim(rightEnemy, "Attack", 0f);
             await Cmd.Wait(0.1f);
-            VfxCmd.PlayOnCreatureCenter(leftEnemy, "vfx/vfx_attack_blunt");
+            PlayBluntVfx(leftEnemy);
             SpawnHitSpark(vfxContainer, leftEnemy);
             await CreatureCmd.TriggerAnim(leftEnemy, "Hit", 0f);
             await Cmd.Wait(1.2f);
