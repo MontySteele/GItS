@@ -32,8 +32,8 @@ Build `0.2.3541+proto`, all arms ON, read by two lanes (proofs-9,
   live preview, Stoke the Fuse's X, two Bombs in set-off order, a
   conditional companion preview, and Salon Solitaire draws its sigil (the
   8b placeholder was the base game's own `CARD.SNECKO-NOPE` id).
-- **27 rows retired on those reads**; the register stands at 74 open rows
-  after 9 minted for what the reads found.
+- **27 rows retired on those reads**; the register stands at 73 open rows
+  after 8 minted for what the reads found.
 
 ## 2. Built today and waiting for the live look (proofs-10, `EB-804`)
 
