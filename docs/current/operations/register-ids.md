@@ -1606,3 +1606,93 @@ EB-726 RETIRED 2026-09-16: the FURINA_REFRAME arm is out of the tree whole (#561
 EB-618 RETIRED 2026-09-16: moot with #561 -- the x3 damage and Block sites the row asked about were the reframe's, and proto_fr_curtain_rises left the surface with the arm, so there is no site left to make order-blind.
 EB-414 RETIRED 2026-09-16: moot with #561 -- the 'a deploy performs its member at once' clause is the reframe's rule and no rule the Stage has, so the Deploy tip the row was owed has nothing to say; the shipped deploy faces are unchanged.
 EB-772 RETIRED 2026-09-16: reaction_census.py grows --check --record PATH so the stale-record check verifies a temp COPY and the committed record is never written by a test; pinned under two concurrent lanes held at a threading.Barrier, and the sweep found and fixed one other in-place writer, test_prototype_surface's version-stamp test (#560).
+EB-154 RETIRED 2026-09-16: godot_log_sweep is wired into build_pck.ps1:93 with a hard throw, 18 fixtures green, and tonight's real build printed import clean / export clean; the negative (a dropped dependency fails) is the fixture's.
+EB-181 RETIRED 2026-09-16: an enchanted card carried its enchantment and a capped meter its max (#573).
+EB-191 RETIRED 2026-09-16: the seed re-read retries inside the session (#568) and proofs-8a ran 15 launches with zero seed_not_honoured (#573).
+EB-220 RETIRED 2026-09-16: live: meter cost badges and glyphs at card size (#570); [USER] vetoes on sight.
+EB-263 RETIRED 2026-09-16: the chest named its relic and the enchant picker marked the pick (#573).
+EB-269 RETIRED 2026-09-16: a self-targeted potion was used through the wire and consumed (#573).
+EB-274 RETIRED 2026-09-16: a shop entered with no SpineSprite line in the lane log (#573).
+EB-275 RETIRED 2026-09-16: fights with no Missing sprite line in the lane log (#573).
+EB-292 RETIRED 2026-09-16: the lane log carries no NCardTrail catch line across 15 launches (#573); nothing to name.
+EB-316 RETIRED 2026-09-16: live: the pet lunges and names the Casket hit on its own frame (#570).
+EB-317 RETIRED 2026-09-16: live: the pet names each carry-out and the strip empties a thumbnail at a time (#570).
+EB-324 RETIRED 2026-09-16: local_play chains one thread per act with the sealed record carried (#568), pinned on a fake model at a slot the un-chained run could not fit.
+EB-325 RETIRED 2026-09-16: the page's map block matched the harness's reachable set on three screens (#573).
+EB-326 RETIRED 2026-09-16: the three Hexerei readers play in both engines and rounds 24-27 named the window; their illustrations ride art_of proxies, moved to the proxy-art bill row minted today.
+EB-330 RETIRED 2026-09-16: one Plan tip rewrite (#567): the number is the count and there is no limit; Kurage box 123/125; page twins word for word.
+EB-335 RETIRED 2026-09-16: R246 built and the two act-2 defence cards print live (#570); whether a seat blocks an act-2 turn with them is the next Kokomi round's read, not a row.
+EB-336 RETIRED 2026-09-16: live: a lethal Mine cost no HP (#570).
+EB-337 RETIRED 2026-09-16: live: Blazing Barrier's line and the Block pool agreed after a hit (#570).
+EB-338 RETIRED 2026-09-16: live: Barbara's preview named the aura consumption (#570).
+EB-339 RETIRED 2026-09-16: live: a Spark-priced face at 0 Energy printed the Spark sentence (#570).
+EB-348 RETIRED 2026-09-16: live: a Casket strike prices from the relic face (#570).
+EB-360 RETIRED 2026-09-16: the page half is EMPTY_SHELVES_NOTE; the buff-owner half is EB-699's build (the power wears its own card's name), and live-looks-8b read it (#570).
+EB-361 RETIRED 2026-09-16: live: a kill moved the Bombs to a survivor and the tip says so (#570).
+EB-389 RETIRED 2026-09-16: live: the applied element read off the face under Lightning Fang (#570); the leftover 'Applies Pyro' row is its own row today.
+EB-394 RETIRED 2026-09-16: live: Careful Now's face says when-played, up to 10 (#570).
+EB-395 RETIRED 2026-09-16: live: JD + Pop! stacked paid its Mine (#570).
+EB-396 RETIRED 2026-09-16: the Crystal Sphere page offers `leave`, a blocked screen with a verb is not the end of the run, and both options warn (#568).
+EB-398 RETIRED 2026-09-16: live: a deploy card's face says the member performs at once (#570).
+EB-399 RETIRED 2026-09-16: EB-470 moved Lightning Rose's tick to AfterPlayerTurnStartLate and live-looks-8b saw the Vulnerable on the body the next observe (#570).
+EB-410 RETIRED 2026-09-16: EB-681's ReactionLog is the row's next action verbatim (a mod ledger, a Gits block, player.reactions); #563 pins that all eight reaction kinds carry a printed name the page defines.
+EB-411 RETIRED 2026-09-16: the Plan tip carries 'into Block still standing' beside PLAN_BLOCK_NOTE (#567).
+EB-424 RETIRED 2026-09-16: moot with #561 -- the salon activity log that printed the un-numbered copy left with the page's salon block (99a7c42c).
+EB-435 RETIRED 2026-09-16: a lone lane read its own seed and logged under its lane on every embark (#573).
+EB-470 RETIRED 2026-09-16: live: the enemy wore Lisa's Vulnerable on the player's next turn (#570).
+EB-479 RETIRED 2026-09-16: moot with #561 -- FurinaReframeOpening.cs and the sim's opening-Encore grant left with the arm.
+EB-491 RETIRED 2026-09-16: all ten rows built (2026-09-05) and #564 placed rank-1 art on every one of them (54 -> 0 uncovered).
+EB-493 RETIRED 2026-09-16: moot with #723/#561 -- the four proto_fr_ Commons are frozen in docs/notes/retired-prototype-rows.yaml and no sheet asks for their art.
+EB-510 RETIRED 2026-09-16: no doubled heading on any page across proofs-8a and live-looks-8b (#573, #570); the sighting-or-close closes.
+EB-522 RETIRED 2026-09-16: live: Well Laid's Plan line folded against the aimed enemy (#570).
+EB-563 RETIRED 2026-09-16: the C# box and the Plan tip say the jellyfish holds any number of Plans (#567).
+EB-582 RETIRED 2026-09-16: moot with #561 -- the Evoke line and its pin left with the page's salon block (99a7c42c).
+EB-585 RETIRED 2026-09-16: moot with #561 -- FurinaReframeLedger and SALON_ARRIVAL_NOTE left the tree with the reframe arm, so the filing the row owed has no table to file into.
+EB-605 RETIRED 2026-09-16: the C# clause already named the reaction multiplier (EB-721); #563 pins the clause SELECTION on a lone Bomb, a Hydro aura and a Cryo aura, and live-looks-8b recorded the text (#570).
+EB-631 RETIRED 2026-09-16: moot with #561 -- R260's free arrivals rode the reframe arm and Ethereal Spotlight is back at the shipped rule; neither candidate cause exists.
+EB-637 RETIRED 2026-09-16: moot with #561 -- the four HoveredModelTracker postfixes fed the deleted Salon panel.
+EB-644 RETIRED 2026-09-16: moot with #561 -- the Salon panel it framed is deleted.
+EB-652 RETIRED 2026-09-16: MET -- furina-hover-states.yaml ran green on lane 0 and all four hover windows were framed by pid (#575), which also fixed the scenario's ambiguous card name.
+EB-659 RETIRED 2026-09-16: live: Coral Bulwark's Plan half printed the Frail-folded number (#570).
+EB-660 RETIRED 2026-09-16: live: Feint's face carries Plan: Deal 10 (#570).
+EB-676 RETIRED 2026-09-16: hp_settled held on a kill with a late HP change and the kill screen matched the next (#573); the flag reading false on the map is a row of its own today.
+EB-682 RETIRED 2026-09-16: three Ancient rooms printed their option rows on the page (#573).
+EB-686 RETIRED 2026-09-16: live: Read the Field on a one-card pile printed the auto-take (#570).
+EB-687 RETIRED 2026-09-16: live: Opening Gambit's condition is on the card (#570).
+EB-693 RETIRED 2026-09-16: the quarter-of-max-HP hit is Attack damage with every modifier in both engines (#567): sim parity test and a C# Slow test; the face already calls it an Attack.
+EB-695 RETIRED 2026-09-16: live: a played Slack Water printed Tamakushi Casket 2 on the body (#570).
+EB-696 RETIRED 2026-09-16: live: Heizou's face folded Shrink and the Swirl clause paid (#570).
+EB-697 RETIRED 2026-09-16: live: a Casket answer named Tamakushi Casket as its source (#570).
+EB-698 RETIRED 2026-09-16: live: Soumetsu's card and buff named the number about to land (#570).
+EB-699 RETIRED 2026-09-16: live: Tengu Stormcall's power wears its own name (#570).
+EB-710 RETIRED 2026-09-16: live: an end-of-turn Electro-Charged was named on the next page (#570).
+EB-716 RETIRED 2026-09-16: a potion row and a relic row each printed kind and text (#573).
+EB-718 RETIRED 2026-09-16: pinned in test_kokomi_plan.py and KokomiPoolPass{Two,Four}Tests; nothing owed.
+EB-721 RETIRED 2026-09-16: live: the Bomb header and the sizes list agree or say why (#570).
+EB-722 RETIRED 2026-09-16: live: the buff strip's Witches' Circle number reads as a stack count (#570).
+EB-723 RETIRED 2026-09-16: 17 proto_fs_ rows on the surface, zero proto_fr_ ids in any sheet or .cs; sheet lints green.
+EB-724 RETIRED 2026-09-16: tier0/engine/furina_stage.py with 83 pins and tools/furina_stage_report.py; sec.7 numbers replay.
+EB-728 RETIRED 2026-09-16: the Fanfare glossary row is keyed on the live arm (FANFARE_SHIPPED_ROW, #566), both readings pinned.
+EB-732 RETIRED 2026-09-16: the six pool-pass-two rows are built C# first with tier0 twins (KleeOverhaulRoster.cs:295) and round 26 read them on both lanes; the row's 'seven' was six in three pairs.
+EB-733 RETIRED 2026-09-16: live: a Set-off-first card's preview named the number that landed (#570).
+EB-735 RETIRED 2026-09-16: the page prints three named bars in seat order and a bow line (FurinaStageLedger.cs, test_eb735_eb736_*); live-looks-8b PASS (#570).
+EB-736 RETIRED 2026-09-16: an arm run offers proto_fs_, retired-free shipped and Companion rows (four pins in FurinaStageRoundTwoTests); live-looks-8b PASS (#570).
+EB-737 RETIRED 2026-09-16: under Weak Curtain Rise printed 5/9 live (#570), the acceptance verbatim; pinned as vars not literals.
+EB-738 RETIRED 2026-09-16: a summon changes no enemy number on play, both engines pinned; live-looks-8b PASS (#570).
+EB-739 RETIRED 2026-09-16: the Refill is Rising Applause; lint_unique_names green with the arm on; live PASS (#570).
+EB-740 RETIRED 2026-09-16: every Neow option printed its rules text (#573).
+EB-742 RETIRED 2026-09-16: FALSE POSITIVE -- the three cards open with {op: block}; the PowerAmount BlockVar is EB-513's Frail-fold rider, and CompanionBlockVarPinTests (#565) pins the truth so the change is not made by mistake.
+EB-743 RETIRED 2026-09-16: act lines name effect and seat (FurinaStage.cs:466/537/579); live-looks-8b PASS (#570).
+EB-744 RETIRED 2026-09-16: the arm page carries no Encore row and prints each performer's act; live-looks-8b PASS (#570).
+EB-745 RETIRED 2026-09-16: #565 pins the five mint doors; live-looks-8b saw no Fanfare buff or Encore in the arm's status list (#570). Its caveats are rows of their own today.
+EB-746 RETIRED 2026-09-16: Curtain Rise is offered both ways from one board (furina_stage.mode_refusal, ModalChoice.cs); live-looks-8b PASS (#570).
+EB-747 RETIRED 2026-09-16: #565 pins the empty-stage 0 and the live number; live-looks-8b PASS (#570); the out-of-combat wording is #572's hover tip.
+EB-754 RETIRED 2026-09-16: live: Amber's buff printed a number, no {Damage} (#570).
+EB-767 RETIRED 2026-09-16: a dressed id forced SELF_HELP_BOOK onto the dressed page (#573).
+EB-769 RETIRED 2026-09-16: Punch-Off ran to its reward in 17 s at Instant and 45 s at 1x with zero 'Element limit reached' and a 15 KB log (#573).
+EB-770 RETIRED 2026-09-16: the dressed Slippery Bridge's first option printed the card name live (#573); its 'Lose 3 HP' literal is a row of its own today.
+EB-773 RETIRED 2026-09-16: live: a queued Plan past lethal warned before the write (#570).
+EB-494 RETIRED 2026-09-16: moved to QUEUE (fanout-picks-2026-09-16 pick 3) -- the census is done (#545) and what is left is curation, a design call BACKLOG's header excludes.
+EB-444 RETIRED 2026-09-16: moved to QUEUE (fanout-picks-2026-09-16 pick 4) -- what the third companion set is now is a design pass, not engineering; the sweep and lint follow the pick.
+EB-415 RETIRED 2026-09-16: live: the upgraded War Banner left Dexterity at 0 before and after its clock (#575).
+EB-673 RETIRED 2026-09-16: live: Shrinker Beetle's Shrink -1 and a hand-set Weak 2 both printed on the player's line; qa_packet._powers drops only a row with neither title nor name (#575). The Kin Priest is a boss; nothing generic is left.

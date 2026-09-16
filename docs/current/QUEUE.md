@@ -43,6 +43,10 @@ band and protocol are drafted fresh when the overhaul reaches Balance.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
+| `fanout-picks-2026-09-16 4.7` | **CHOOSE** `EB-255`'s window: excluding starters by membership in `archetype_shares` moves `dominant_archetype` on two rosters, a `POLICY_VERSION` window and a re-baseline. (1) DEFAULT: fold it into the 4.5 window; (2) leave the lint red as debt. **Gate:** the 4.5 window. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
+| `fanout-picks-2026-09-16 4.6` | **CHOOSE** whether the sim's act-2 Louse gets Curl Up 14 (the yaml says UNIMPLEMENTED; D5/D6 under #557 made the trigger real): it moves an encounter's difficulty. (1) DEFAULT: wire it at the same re-baseline window as 4.5; (2) leave it out. **Gate:** the 4.5 window. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
+| `fanout-picks-2026-09-16 4.5` | **CHOOSE** when the twelve-arm table re-runs (`EB-195`, with `EB-74`'s staged lever): its gate EB-199 retired 2026-09-08, so only the measurement window binds (R101b: strike, never rewrite). (1) DEFAULT: at the next re-baseline window, with the Kokomi fold's; (2) now, on its own. **Gate:** none. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
+| `fanout-picks-2026-09-16 4.1` | **CHOOSE** whether a Skill may consume Vigor: Kurage's Oath (a starter Skill) printed Deal 7 under Vigor 8 and dealt 7, face and hit agreeing, and the game keys Vigor on the attack door, not the card type. (1) DEFAULT: the game's rule stands, `EB-441` closed; (2) retype Kurage's Oath as an Attack; (3) make Skill damage unpowered (drops Strength too). **Gate:** none. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
 
 ## 2. Shop, pricing, and money
 
@@ -107,6 +111,10 @@ to buy, priced against Regent's Stars. The packet is in `review/ruled/`.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
+| `fanout-picks-2026-09-16 4.8` | **CHOOSE** what to do with `EXPERIMENTS.md` registrations that now name deleted instruments (KLEESPARK-S1 after #535, the FURINAREFRAME rows after #561); the file is yours. (1) DEFAULT: leave them as published, the deletion's ledger line striking them; (2) strike them in the file with a one-line note. **Gate:** none. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
+| `fanout-picks-2026-09-16 4.4` | **CHOOSE** what the third companion set is now that EB-504/642/663 moved the ground: Witches' Circle keys off 'a Hexerei card', Noelle prints 'Klee's own Companions', a plain Companion card says neither. (1) DEFAULT: one printed name per set from a short design pass with Fable, then the sweep and a lint; (2) leave the three words. **Gate:** none. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
+| `fanout-picks-2026-09-16 4.3` | **CHOOSE** the curation of the inherited Silent relics and potions (census `review/active/inherited-potions-relics-census-2026-09-16.md`): Helical Dart and Snecko Skull mislead every kit, Ring of the Snake never rolls. (1) DEFAULT: drop Helical Dart and Snecko Skull from all three pools; (2) drop nothing; (3) replace them with kit relics, a design pass. **Gate:** none. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
+| `fanout-picks-2026-09-16 4.2` | **CHOOSE** whether Guest Cast multiplies a granted rider: delayed and conditional Companion legs print the multiplied number (#567); Kujou Sara's 'next Attack deals 4 additional' is not multiplied, and 6 would move a shipped card's strength (`EB-388`). (1) DEFAULT: leave it; (2) multiply every granted rider, one commit. **Gate:** none. | OPEN 2026-09-16. | review/active/fanout-picks-2026-09-16.md |
 | `klee-opening-bank 5.1` | **CHOOSE** the opening Spark bank, round 26 finding the pass's Regent prices bind only on turn one where the bank is 1: (1, default) open every combat at 3 Sparks (Regent's Divine Right), rule 4 changes, [USER] plays; (2) reprice the six sinks to Klee's bank (1/1/1+1/2/2/4), rule 4 untouched; (3) as it is, one more lane. -> review/active/klee-overhaul-round-26-2026-09-08.md | HELD — gated on the consolidated pool's first read (R271 §3) | Klee r26; R270; R271 |
 
 → **`review/ruled/sitting-2026-08-30.md` is CLOSED by R224 (2026-08-30).**
