@@ -1134,6 +1134,39 @@ public static partial class McpMod
         state["max_hp"] = creature.MaxHp;
         state["block"] = creature.Block;
 
+        // GItS LOCAL EDIT (`EB-676`). WHETHER THE HP LINE ABOVE HAS SETTLED.
+        // There is one HP field on this wire and it is written on every
+        // screen, so a victory screen reading 25/80 and the next screen
+        // reading 16/80 are that field at two moments -- the first taken
+        // before the fight's own end-of-turn queue drained into it. This is
+        // the flag that tells the two moments apart, so the blind page can
+        // print the number plainly when nothing is in flight instead of
+        // hedging every figure it draws. Always emitted, so a MISSING key
+        // means "bridge predates EB-676" and never "settled". The decision
+        // and both of its clauses: gits/GitsSettledHp.cs.
+        var settled = GitsSettledHp.Unreadable();
+        try
+        {
+            var executor = RunManager.Instance?.ActionExecutor;
+            var combat = CombatManager.Instance;
+            settled = GitsSettledHp.Decide(
+                actionQueueRunning: executor?.IsRunning ?? false,
+                actionInFlight: executor?.CurrentlyRunningAction != null,
+                combatStateStands: combat?.CurrentCombatId != null,
+                combatOverOrEnding: combat?.IsOverOrEnding ?? false);
+        }
+        catch (Exception)
+        {
+            // Fail closed: a state read must never throw, and an unreadable
+            // game is not a settled one.
+            settled = GitsSettledHp.Unreadable();
+        }
+        state[GitsSettledHp.SettledKey] = settled.Settled;
+        if (!settled.Settled)
+        {
+            state[GitsSettledHp.ReasonKey] = settled.Reason;
+        }
+
         // PlayerCombatState can linger after combat while on map/rest/shop. Energy/MaxEnergy getters
         // run hooks (e.g. Hook.ModifyMaxEnergy) that null-ref without a live combat - only serialize
         // combat fields when a fight is actually in progress.

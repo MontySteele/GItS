@@ -164,6 +164,25 @@
              Link="Vendor/GitsRefusalSource.cs" />
   </ItemGroup>
 
+  <!-- EB-676's settled-HP predicate, on the same terms and for the same
+       reason. `GitsSettledHp.cs` decides whether the HP figure on a state
+       payload is the one the run has settled on or one read with work still
+       in flight, and it holds no game type, so the clause that matters is
+       pinned headlessly. It matters because the OBVIOUS version of this
+       predicate, `!CombatManager.Instance.IsInProgress`, is ALREADY false
+       on the very frame the defect was filed against (the game's own summary
+       of that property: "False when ... the combat is ending"), so the wrong
+       answer looks exactly like the right one until a fight happens to end on
+       a damage-over-time power and a seat reads its map off a number 9 too
+       high. Both states are pinned, the kill screen and the map after it. The
+       half that needs `RunManager` and `CombatManager` (reading the four live
+       facts) stays in `McpMod.StateBuilder.cs`, where it is one try/catch over
+       the answer this file computes. One file, no fork. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsSettledHp.cs"
+             Link="Vendor/GitsSettledHp.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />

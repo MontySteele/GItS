@@ -1402,7 +1402,18 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
         out += ["", "## Since the screen before this one", "",
                 f"- HP {was} → {now}"
                 + (f" (of {change['max_hp']})" if change.get("max_hp") else "")
-                + f", {moved}", "", HP_SETTLE_NOTE]
+                + f", {moved}"]
+        # `EB-676`, THE BRIDGE HALF. The note above says a figure read the
+        # instant a fight ends may not have settled yet. The bridge now ANSWERS
+        # that question -- `player.hp_settled`, true only when no action is
+        # executing and no dead combat is still standing in its own teardown
+        # (`gits/GitsSettledHp.cs`) -- so where both of the two reads this
+        # block subtracts say settled, the move is a real move and the hedge
+        # comes off. `run_change` folds the pair into one boolean and answers
+        # false where the bridge is older than the field, so the page in front
+        # of an unpatched bridge reads exactly as it did.
+        if not change.get("hp_settled"):
+            out += ["", HP_SETTLE_NOTE]
     return out
 
 
