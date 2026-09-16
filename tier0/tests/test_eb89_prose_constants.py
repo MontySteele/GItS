@@ -13,6 +13,7 @@ this repo is: a lint whose red half is "the codebase today" goes green the
 moment someone fixes the finding and then proves nothing forever. The last
 test is the green half -- the shipped mod, which must stay clean.
 """
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -217,6 +218,109 @@ def test_the_lint_refuses_to_pass_on_an_empty_tree(fake_mod, monkeypatch,
     fake_mod("")
     monkeypatch.setattr(lint, "CS_ROOT", tmp_path / "nothing-here")
     assert lint.main([]) == 1
+
+
+# --- EB-160: the copy the game merges OVER the dll's rows ------------------
+
+
+def _loc_table(tmp_path: Path, name: str, rows: dict) -> Path:
+    """A tracked loc table in the pck overlay -- the file the pack copies in
+    as-is and the game merges over ours."""
+    out = tmp_path / "klee-mod" / "pck-src" / "klee" / "localization" / "eng"
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / name
+    path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    return path
+
+
+def _packer(tmp_path: Path, body: str) -> Path:
+    """The pck script's own shape, cut down to the one thing this lint reads:
+    a loc table written into `$locDir` from a here-string."""
+    out = tmp_path / "tools"
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / lint.pck_script().name
+    path.write_text(
+        "$locDir = Join-Path $work 'klee\\localization\\eng'\n"
+        "[IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'\n"
+        + body + "\n'@)\n", encoding="utf-8")
+    return path
+
+
+def test_a_hand_typed_numeral_in_a_packaged_loc_table_is_a_finding(fake_mod,
+                                                                   tmp_path):
+    """`EB-160`. The game merges `res://klee/localization/<lang>/<table>.json`
+    OVER the dll's rows, so the copy a player reads is the JSON -- and this
+    lint's scope was `KleeCode/**/*.cs`, which cannot see it.
+
+    Seen to FAIL: the table was outside every gate the repo owns.
+    """
+    fake_mod("")
+    _loc_table(tmp_path, "events.json", {
+        "EVENT.body": "Its next action deals half damage; attacking it "
+                      "Shatters for 6 damage.",
+    })
+
+    assert [f.const for f in lint.prose_findings()] == [
+        "ReactionConstants.ShatterDamage"]
+
+
+def test_a_derived_loc_table_is_out_of_scope(fake_mod, tmp_path, monkeypatch):
+    """A table GENERATED from an interpolated source cannot interpolate -- it
+    IS the resolved output, and the fix this lint asks for is an edit its
+    generator throws away. `gen_keyword_loc.py --check` is that table's gate.
+    """
+    fake_mod("")
+    _loc_table(tmp_path, "derived.json", {
+        "K.description": "Its next action deals half damage; attacking it "
+                         "Shatters for 6 damage.",
+    })
+    monkeypatch.setattr(lint, "DERIVED_LOC_TABLES", frozenset({
+        "klee-mod/pck-src/klee/localization/eng/derived.json"}))
+
+    assert lint.prose_findings() == []
+
+
+def test_a_stale_derived_entry_is_itself_a_finding(fake_mod, tmp_path,
+                                                   monkeypatch):
+    """`ALLOWED`'s rule one list over: the exclusion may not outlive the
+    generator that earned it."""
+    fake_mod("")
+    _loc_table(tmp_path, "events.json", {"E.body": "Nothing to see here."})
+    _packer(tmp_path, '{\n  "A.talk": "Climb, little spark."\n}')
+    monkeypatch.setattr(lint, "DERIVED_LOC_TABLES", frozenset({
+        "klee-mod/pck-src/klee/localization/eng/gone.json"}))
+
+    _rows, complaints = lint.loc_corpus()
+    assert any("gone.json" in c for c in complaints), complaints
+
+
+def test_the_packers_own_here_string_table_is_read(fake_mod, tmp_path):
+    """The other half of the row, and the one the register names: the packer
+    still types a loc table into `$locDir` at pack time, so that table exists
+    as a file NOWHERE in the repo and was outside every gate."""
+    fake_mod("")
+    _loc_table(tmp_path, "events.json", {"E.body": "Nothing to see here."})
+    _packer(tmp_path,
+            '{\n  "A.talk": "Its next action deals half damage; attacking '
+            'it Shatters for 6 damage."\n}')
+
+    findings = lint.prose_findings()
+    assert [f.const for f in findings] == ["ReactionConstants.ShatterDamage"]
+    assert "(ancients.json)" in findings[0].path
+    # The line is the ROW's, not the script's first line: a finding nobody can
+    # locate is a finding nobody fixes.
+    assert findings[0].line == 4
+
+
+def test_a_packer_table_that_does_not_parse_is_a_finding(fake_mod, tmp_path):
+    """Nothing but a loc table is written into `$locDir`, and the game merges
+    a broken one as nothing at all."""
+    fake_mod("")
+    _loc_table(tmp_path, "events.json", {"E.body": "Nothing to see here."})
+    _packer(tmp_path, "{ not json at all }")
+
+    _rows, complaints = lint.loc_corpus()
+    assert any("does not parse as JSON" in c for c in complaints), complaints
 
 
 # --- GREEN: the shipped mod ------------------------------------------------
