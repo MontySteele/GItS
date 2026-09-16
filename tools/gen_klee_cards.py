@@ -923,13 +923,19 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
       card whose face says nothing about an element", in a kit whose whole
       reaction layer keys off which element is clinging to a body.
 
-    THE PLAN HALF ADDS THE KEYWORD AND NOT `elemental`, and that split is the
-    whole of its safety. `elemental` decides `IElementalCard`, which is what
-    `CatalystCadence.PrintedElement` reads to element the card's OWN hit -- so
-    setting it would make Kurage's Oath's now-line apply Hydro, which is a
-    rules change and not this row's business. What is added is the face
-    DECLARATION: the gem, the reaction rule, and (from `emit`) one sentence
-    saying the aura rides the carry-out rather than the play.
+    `EB-713` TOOK THE PLAN HALF BACK OUT OF THE TAG, and left the sentence.
+    `EB-378`'s fix put the GEM on a card whose own hit applies nothing, and the
+    gem is the page's and the badge's shorthand for "this face applies the
+    element". The r32 lane-1 seat read `Applies Hydro` and the reaction
+    glossary on a row printing `applies_element: false`, and concluded that no
+    face-up Hydro card of hers seeds an aura -- the opposite of the rule, from
+    the surface that exists to state it. So THE TAG IS THE FACE-UP HIT and
+    nothing else: a card whose element rides the carry-out declares no element
+    of its own, and `ArmKeywordTips.ForPlanElement` -- attached from this same
+    predicate in `emit`, and unmoved -- says the written hit is the one that
+    applies ("Its own hit applies no aura; the Bake-Kurage carries out the Plan
+    as a Hydro hit, which does"). EB-378's finding keeps its answer; it moves
+    from a gem that overclaims to a sentence that is true.
     """
     elements: list[str] = []
     if elemental:
@@ -938,8 +944,6 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
         )
         if source_element in AURA_KEYWORD_BY_ELEMENT:
             elements.append(source_element)
-    if plan_applies_element(card, profile):
-        elements.append(profile.native_element)
     for effect in _effects_everywhere(card):
         if (effect.get("op") == "apply_aura"
                 and effect.get("element") in AURA_KEYWORD_BY_ELEMENT):

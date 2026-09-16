@@ -265,12 +265,17 @@ def test_a_damaging_plan_declares_the_carry_outs_element():
     """`KokomiPlan.ResolveAll` deals every damaging Plan clause as
     `ElementalHit.Deal(..., Element.Hydro, ...)`, whatever the card's type, and
     the sim's twin does the same. So a SKILL with a damaging Plan leaves a
-    Hydro aura and its face must say so."""
+    Hydro aura, and `EB-713` decided WHERE its face says so: on the tip, not
+    on the gem. The predicate is what `emit` attaches
+    `ArmKeywordTips.ForPlanElement` from, and it is unmoved; what moved is that
+    it no longer adds an element to the TAG, because the gem is the page's
+    shorthand for "this face-up hit applies the element" and the r32 lane-1
+    seat read it that way on a row that applies nothing face-up."""
     oath = {"id": "x", "type": "skill",
             "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}],
             "plan": [{"op": "damage", "amount": 7, "target": "all_enemies"}]}
     assert gen.plan_applies_element(oath, gen.KOKOMI_PROFILE) is True
-    assert gen.aura_elements_for(oath, gen.KOKOMI_PROFILE, False) == ["hydro"]
+    assert gen.aura_elements_for(oath, gen.KOKOMI_PROFILE, False) == []
     # All three hitting clauses, and only those.
     for op in sorted(gen.PLAN_DAMAGE_OPS):
         row = {"id": "x", "type": "skill", "effects": [],
@@ -301,9 +306,12 @@ def test_the_plan_half_never_elements_the_cards_own_hit():
     assert gen.KOKOMI_PROFILE.damage_applies_element(oath) is False
     text = (proto.OUT_DIR / "ProtoKkAmbush.cs").read_text(encoding="utf-8")
     assert "IElementalCard" not in text
-    assert "KleeKeywords.AppliesHydro" in text
-    # And the sentence that says when, so the gem cannot be read as "this
-    # card's own hit applies Hydro".
+    # `EB-713`: AND NO GEM EITHER. The gem said "this face applies Hydro" on a
+    # face that applies nothing until the jellyfish carries it out, and the r32
+    # lane-1 seat concluded from it that no face-up Hydro card of hers seeds an
+    # aura -- the opposite of the rule, off the surface that states it. The
+    # sentence that says WHEN is the whole declaration now.
+    assert "KleeKeywords.AppliesHydro" not in text
     assert "ArmKeywordTips.ForPlanElement(" in text
 
 
@@ -414,7 +422,9 @@ def test_only_the_plan_only_rows_carry_the_when_sentence():
         own = [line.strip() for line in text.splitlines()
                if line.strip().startswith("public Element Element =>")]
         assert own in ([], ["public Element Element => Element.None;"]), stem
-        assert "KleeKeywords.AppliesHydro" in text, stem
+        # `EB-713`: the sentence and the gem are now alternatives, not a pair.
+        # A row whose element rides the carry-out carries the sentence alone.
+        assert "KleeKeywords.AppliesHydro" not in text, stem
     assert "ProtoKkSangoIsshin" not in carriers
 
 
@@ -439,3 +449,52 @@ def test_a_skill_grade_row_whose_damage_is_branch_gated_is_elemental():
         encoding="utf-8")
     assert "IElementalCard" in text
     assert "KleeKeywords.AppliesHydro" in text
+
+
+def test_a_row_declaring_no_element_prints_no_tag_and_no_glossary():
+    """`EB-713`. THE TAG IS THE FACE-UP HIT.
+
+    THE FIND (r32, `review/qa/kokomi-round-32-2026-09-08` lane 1 (c) 3). A card
+    declaring `applies_element: false` -- the codegen path kept from the
+    withdrawn pass six -- still printed the Hydro tag and the `Applies Hydro`
+    glossary block on its face, and the seat concluded that no face-up Hydro
+    card of hers seeds an aura. That is the opposite of the rule, read off the
+    surface whose whole job is to state it, and the page's glossary is driven
+    by the same tag (`blindplay_notes._reachable_elements` walks the face's
+    `element`).
+
+    WHAT REPLACES IT is the sentence, not silence:
+    `ArmKeywordTips.ForPlanElement` is attached from `plan_applies_element`,
+    which is unmoved, and says the written hit is the one that applies.
+
+    Seen to FAIL: `aura_elements_for` added the native element for any row with
+    a damaging Plan, whatever its own damage declared.
+    """
+    # An ATTACK of hers that declares the face-up half applies nothing, and
+    # whose Plan still hits -- Kokomi's own basic Strike's shape (`EB-703`).
+    row = {"id": "proto_kk_probe", "type": "attack", "rarity": "basic",
+           "name": "probe", "cost": 1,
+           "effects": [{"op": "damage", "amount": 6, "target": "enemy",
+                        "applies_element": False}],
+           "plan": [{"op": "damage", "amount": 4, "target": "enemy"}]}
+    assert gen.KOKOMI_PROFILE.damage_applies_element(row) is False
+    assert gen.declares_no_element(row, gen.KOKOMI_PROFILE) is True
+    # The Plan still hits as Hydro, and still owes its sentence ...
+    assert gen.plan_applies_element(row, gen.KOKOMI_PROFILE) is True
+    # ... but the face declares no element of its own, so no gem and no
+    # glossary block.
+    assert gen.aura_elements_for(row, gen.KOKOMI_PROFILE, False) == []
+    assert gen.element_tag_elements_for(row, gen.KOKOMI_PROFILE, False) == []
+
+    # A printed `apply_aura` is untouched: that face SAYS "Apply Hydro", so the
+    # gem and the glossary are what the words already promise.
+    applier = {"id": "x", "type": "skill", "effects": [
+        {"op": "apply_aura", "element": "hydro", "target": "enemy"}]}
+    assert gen.aura_elements_for(applier, gen.KOKOMI_PROFILE, False) == ["hydro"]
+
+    # And every row that lost the gem kept the sentence, on disk.
+    for stem in ("ProtoKkAmbush", "ProtoKkChainOfCommand",
+                 "ProtoKkFeignedRetreat", "ProtoKkWarCouncil"):
+        text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
+        assert "KleeKeywords.AppliesHydro" not in text, stem
+        assert "ArmKeywordTips.ForPlanElement(" in text, stem
