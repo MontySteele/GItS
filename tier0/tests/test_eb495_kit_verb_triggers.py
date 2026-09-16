@@ -166,35 +166,38 @@ SIM_CALL_SITES = {
     ("companion_hexerei.py", 238): ("'companion'", None, "None"),
     ("companion_hexerei.py", 244): ("'companion'", None, "'electro'"),
     ("companion_hexerei.py", 303): ("'companion'", None, "element"),
-    ("effects.py", 1146): ("'bomb'", None, "bomb.element"),
-    ("effects.py", 1589): ("source", None, "element"),
-    ("effects.py", 1941): ("'salon_final_bow'", None, "'hydro'"),
-    ("effects.py", 5353): ("'companion'", None, "'hydro'"),
-    ("effects.py", 6019): ("'attack' if card.type == 'attack' else 'card'",
+    ("effects.py", 1182): ("'bomb'", None, "bomb.element"),
+    ("effects.py", 1625): ("source", None, "element"),
+    ("effects.py", 1977): ("'salon_final_bow'", None, "'hydro'"),
+    ("effects.py", 5389): ("'companion'", None, "'hydro'"),
+    ("effects.py", 6055): ("'attack' if card.type == 'attack' else 'card'",
                            None, "'hydro'"),
-    ("effects.py", 7042): ("'companion'", None, "None"),
-    ("effects.py", 7137): ("'salon'", "False", "'hydro'"),
-    ("effects.py", 7246): ("'burst'", None, "'pyro'"),
-    ("effects.py", 7252): ("'companion'", None, "'electro'"),
-    ("effects.py", 7298): ("'companion'", None, "'hydro'"),
-    ("effects.py", 7323): ("'companion'", None, "None"),
-    ("effects.py", 7374): ("'companion'", None, "'cryo'"),
-    ("effects.py", 7388): ("'companion'", None, "'electro'"),
-    ("effects.py", 7398): ("'companion'", None, "'electro'"),
-    ("effects.py", 7439): ("'companion'", None, "None"),
-    ("effects.py", 7469): ("'companion'", None, "None"),
-    ("effects.py", 7545): ("'companion'", None, "'geo'"),
-    ("effects.py", 7558): ("'companion'", None, "None"),
-    ("effects.py", 7571): ("'companion'", None, "'electro'"),
-    ("effects.py", 7598): ("'companion'", None, "'electro'"),
-    ("effects.py", 7610): ("'companion'", None, "'cryo'"),
-    ("effects.py", 7614): ("'companion'", None, "'cryo'"),
-    ("effects.py", 7623): ("'companion'", None, "'hydro'"),
-    ("effects.py", 7635): ("'companion'", None, "'geo'"),
-    ("effects.py", 7859): ("'companion'", None, "'hydro'"),
-    ("effects.py", 7871): ("'companion'", None, "'pyro'"),
-    ("effects.py", 8122): ("'companion'", None, "'pyro'"),
-    ("effects.py", 8148): ("'companion'", None, "'pyro'"),
+    # `EB-470` moved Lisa's Lightning Rose volley out of the end-of-turn
+    # block and into the start-of-turn tail, which is why the Electro row
+    # below now sits ABOVE the salon row rather than among the six.
+    ("effects.py", 7048): ("'companion'", None, "'electro'"),
+    ("effects.py", 7117): ("'companion'", None, "None"),
+    ("effects.py", 7212): ("'salon'", "False", "'hydro'"),
+    ("effects.py", 7321): ("'burst'", None, "'pyro'"),
+    ("effects.py", 7327): ("'companion'", None, "'electro'"),
+    ("effects.py", 7373): ("'companion'", None, "'hydro'"),
+    ("effects.py", 7398): ("'companion'", None, "None"),
+    ("effects.py", 7450): ("'companion'", None, "'cryo'"),
+    ("effects.py", 7464): ("'companion'", None, "'electro'"),
+    ("effects.py", 7504): ("'companion'", None, "None"),
+    ("effects.py", 7534): ("'companion'", None, "None"),
+    ("effects.py", 7610): ("'companion'", None, "'geo'"),
+    ("effects.py", 7623): ("'companion'", None, "None"),
+    ("effects.py", 7636): ("'companion'", None, "'electro'"),
+    ("effects.py", 7663): ("'companion'", None, "'electro'"),
+    ("effects.py", 7675): ("'companion'", None, "'cryo'"),
+    ("effects.py", 7679): ("'companion'", None, "'cryo'"),
+    ("effects.py", 7688): ("'companion'", None, "'hydro'"),
+    ("effects.py", 7700): ("'companion'", None, "'geo'"),
+    ("effects.py", 7924): ("'companion'", None, "'hydro'"),
+    ("effects.py", 7936): ("'companion'", None, "'pyro'"),
+    ("effects.py", 8187): ("'companion'", None, "'pyro'"),
+    ("effects.py", 8213): ("'companion'", None, "'pyro'"),
     # D3 and D4 BOTH LIVE IN THESE THREE ROWS. `powered` absent where the C#
     # twin passes `powered: false`, and `element` absent on the two Crabaletta
     # legs where the C# twin passes `Element.Hydro`.
@@ -203,8 +206,8 @@ SIM_CALL_SITES = {
     ("furina_stage.py", 685): ("'furina_stage/act'", None, None),
     ("klee_overhaul.py", 562): ("EXPLOSION_SOURCE", "False", "element"),
     ("klee_overhaul.py", 964): ("ECHO_SOURCE", None, "'pyro'"),
-    ("kokomi_plan.py", 1494): ("'plan'", "False", "'hydro'"),
-    ("kokomi_plan.py", 1749): ("'casket'", "False", "'hydro'"),
+    ("kokomi_plan.py", 1508): ("'plan'", "False", "'hydro'"),
+    ("kokomi_plan.py", 1763): ("'casket'", "False", "'hydro'"),
 }
 
 
@@ -362,7 +365,7 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
                 path.read_text(encoding="utf-8").splitlines(), 1):
             if re.search(r"await\s+DamageCmd\.Attack\(", line):
                 sites.append((path.relative_to(MOD).as_posix(), lineno))
-    assert sites == [("Powers/Prototype/ProtoBombPower.cs", 1315)]
+    assert sites == [("Powers/Prototype/ProtoBombPower.cs", 1386)]
 
 
 def test_no_kit_verb_hands_the_game_a_card_source_for_its_debuff():
