@@ -1047,6 +1047,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     blocked = min(absorb, dmg)
     enemy.block -= blocked
     hp_dmg = dmg - blocked
+    # `EB-495` D5, the HP-loss half. `Hook.ModifyHpLost(..., BeforeOsty)` runs
+    # on exactly this quantity in the game -- `max(modifiedAmount - blocked,
+    # 0)` at `CreatureCmd.cs:286` -- and `HardenedShellPower` is the only
+    # override of it in the assembly. A no-op for every enemy that does not
+    # carry the power, which today is every enemy in every sim encounter.
+    from tier0.engine import refpowers as _rp        # late import (cycle)
+    hp_dmg = _rp.enemy_hardened_shell_cap(enemy, hp_dmg)
     was_alive = enemy.alive
     effective = min(hp_dmg, max(0, enemy.hp))   # overkill doesn't count
     # `EB-603`. THE SAME CLAMP, KEPT for the arm reader at the tail. `hp_dmg`
@@ -1076,6 +1083,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
             un *= slow_mult
         un = int(un)
         un_hp = un - min(absorb, un)
+        # The counterfactual runs the identical downstream chain, and since
+        # `EB-495` D5 that chain includes the shell cap. Without this line an
+        # amped hit into a Hardened Shell would credit the amplifier with
+        # damage the shell refused -- the same over-read this block exists to
+        # remove, one clamp later. The cap is read against the SAME pre-hit
+        # spent allowance as the real hit, because `un` is that same hit.
+        un_hp = _rp.enemy_hardened_shell_cap(enemy, un_hp)
         realized = effective - min(un_hp, max(0, hp_before))
         reactions.settle_amp_delta(state, log_mark, realized)
     # Frozen v2 Shatter (v1.5): the first Attack hit on a frozen enemy
@@ -1125,6 +1139,29 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # predicate is that flag rather than the card's type.
     from tier0.engine import refpowers as _refpowers
     _refpowers.envenom_on_hit(state, enemy, hp_dmg, source, powered)
+    # Hook.AfterDamageReceived on the ENEMY -- `EB-495` D5 and D6, the funnel
+    # tier0 did not have. BELOW Envenom for the reason the game orders them
+    # that way: `AfterDamageGiven` is broadcast first (`CreatureCmd.cs:406`)
+    # and `AfterDamageReceived` second (`:416`), both inside
+    # `CreatureCmd.Damage` and both ABOVE `Hook.AfterAttack`, which is where
+    # Skittish below sits.
+    #
+    # THE THREE FACTS THE BODY CANNOT RECOVER, all settled here:
+    #   * `killed` -- `was_alive and not enemy.alive`. The game skips the
+    #     whole broadcast for a creature this hit killed (`:410`), and by the
+    #     time the funnel is called the HP has already moved.
+    #   * `fully_blocked` -- `WasFullyBlocked` transcribed (`:299`): not
+    #     Unblockable, Block was present or spent, and nothing reached HP.
+    #     `ignore_block` is the sim's `ValueProp.Unblockable`.
+    #   * `unblocked` -- `effective`, i.e. the OVERKILL-CLAMPED loss, because
+    #     `DamageResult.UnblockedDamage` and `.OverkillDamage` are separate
+    #     fields in the game and only the first is what the readers add up.
+    _refpowers.enemy_on_damage_received(
+        state, enemy, unblocked=effective,
+        fully_blocked=(not ignore_block
+                       and (blocked > 0 or enemy.block > 0)
+                       and hp_dmg <= 0),
+        killed=(was_alive and not enemy.alive))
     # Skittish (§10.9 promotion): "The first time it is hit each turn, it
     # gains N Block." AFTER the whole hit resolves (incl. any detonation
     # rider), so the triggering attack is never mitigated by it; the latch

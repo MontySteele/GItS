@@ -91,12 +91,13 @@ Attack.
 * **`card.type == "attack"`**, read by the card-play mirrors in
   `refpowers.before_card_played` / `after_card_played`.
 
-A structural gap worth naming once, because it fills a whole column below:
-**the sim models no enemy-side "took damage" power except Skittish.**
-`refpowers.on_damage_received` (`refpowers.py:561`) is called from exactly one
-site, `combat.py:1603`, for damage the PLAYER received, and reads
-`state.player.powers` only. There is no tier0 mirror of `EmotionChip`,
-`LavaLamp`, `HardenedShellPower`, `CurlUpPower` or `BeatingRemnant`.
+* **`refpowers.enemy_on_damage_received`**, the ENEMY's own
+  `Hook.AfterDamageReceived`, driven from `deal_damage_to_enemy` and from
+  nowhere else. It was built on 2026-09-16 (D5 and D6); before that the sim
+  modelled no enemy-side "took damage" power except Skittish, and that one
+  absence filled the whole T5 and T6 columns.
+  `refpowers.on_damage_received` remains the PLAYER's funnel and reads
+  `state.player.powers` only.
 
 ---
 
@@ -165,23 +166,23 @@ because the engine has no mirror of that trigger at all (see §2); functionally
 
 | verb | T1 card played | T2 played an Attack | T3 you attack | T4 you deal damage | T5 takes unblocked damage | T6 retaliation | T7 damage modifiers | T8 applied a debuff |
 |---|---|---|---|---|---|---|---|---|
-| V1 Attack-card damage | Attack | Attack | Attack | Attack | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
-| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | Attack (**D2 repaired**) | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
-| V3 card HP-loss (self) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V4 Bomb detonation (shipped) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V5 Bomb explosion / Set off | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V6 Mine trigger | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V7 Set-off card's own hit | Attack | Attack | Attack | Attack | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
-| V8 Bomb echo | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V9 planned hit | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
+| V1 Attack-card damage | Attack | Attack | Attack | Attack | damage-only (**D5 repaired**) | Attack ≠ none* (**D6**) | Attack | none |
+| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | Attack (**D2 repaired**) | damage-only (**D5 repaired**) | Attack ≠ none* (**D6**) | Attack | none |
+| V3 card HP-loss (self) | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V4 Bomb detonation (shipped) | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V5 Bomb explosion / Set off | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V6 Mine trigger | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V7 Set-off card's own hit | Attack | Attack | Attack | Attack | damage-only (**D5 repaired**) | Attack ≠ none* (**D6**) | Attack | none |
+| V8 Bomb echo | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V9 planned hit | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V10 Plan debuff | none | none | none | none | none | none | none | debuff |
-| V11 Casket strike | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V12 Salon performance | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V13 Salon bow / Evoke | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V14 Stage act | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
-| V15 Stage bow | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
+| V11 Casket strike | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V12 Salon performance | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V13 Salon bow / Evoke | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
+| V14 Stage act | none | none | none | none | damage-only (**D5 repaired**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
+| V15 Stage bow | none | none | none | none | damage-only (**D5 repaired**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
 | V16 Stage Spend | none | none | none | none | none | none | none | none |
-| V17 companion pulse | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
+| V17 companion pulse | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V18 aura application only | none | none | none | none | none | none | none | none |
 | V19 reaction-applied debuff | none | none | none | none | none | none | none | debuff (**D7**) |
 | V20 Overload splash | none | none | none | none | none | none | none | none |
@@ -210,8 +211,10 @@ What the two engines say DIFFERENTLY is §6.
 
 ## 6. Disagreements
 
-Seven. Four are engine-vs-engine; three are structural absences on the sim
-side. None was repaired here.
+Seven. Four were engine-vs-engine and were repaired on 2026-09-16 (D1–D4);
+three were structural absences on the sim side, of which D5 and D6 were built
+on 2026-09-16 and D7 stands. Every repair is sim-side only — no C# moved, no
+rule moved, and no published sim number moved.
 
 ### D1 — a Skill's damage is an Attack to `SkittishPower` — REPAIRED in the sim
 
@@ -316,17 +319,62 @@ the game had and the sim did not) and the DoT is what is pinned, by
 `tier0/tests/test_eb495_d4_crabaletta_hits_hydro.py`. No published sim number
 moved.
 
-### D5 — the sim has no mirror of the enemy-side "took unblocked damage" triggers
+### D5 — the sim had no mirror of the enemy-side "took unblocked damage" triggers — REPAIRED in the sim
 
 `Hook.AfterDamageReceived` fires in the game for EVERY damage instance,
 including every `ElementalHit.Deal`, with no attack filter; `EmotionChip:31`,
 `LavaLamp:52`, `HardenedShellPower:62` and `BeatingRemnant:71` read it.
-`refpowers.on_damage_received` is called from one site
-(`combat.py:1603`) for damage the PLAYER received and reads `state.player`'s
-powers only, so no tier0 verb can ever wake an enemy's `HardenedShell`. Every
-`none*` in the T5 column is this one absence. It is a comparability gap, not a
-shipped-behaviour difference, but it means no sim number is a forecast of a
-fight against a Hardened-Shell body.
+`refpowers.on_damage_received` was called from one site (`combat.py`) for
+damage the PLAYER received and read `state.player`'s powers only, so no tier0
+verb could wake an enemy's `HardenedShell`. Every `none*` in the T5 column was
+this one absence. It is a comparability gap, not a shipped-behaviour
+difference, but it meant no sim number was a forecast of a fight against a
+Hardened-Shell body.
+
+**Repaired 2026-09-16, sim side only.** `refpowers.enemy_on_damage_received`
+is the enemy's own funnel, driven from `effects.deal_damage_to_enemy` — the
+one kit-verb door §2 names — and `refpowers.enemy_hardened_shell_cap` is its
+HP-loss half.
+
+THE CENSUS CORRECTS THIS ROW'S OWN LIST. Three of the four powers named above
+are PLAYER-side relics: `EmotionChip`, `LavaLamp` and `BeatingRemnant` all
+live in `Models/Relics/` and read the hook for the creature that owns them,
+which is never a monster. The enemy-side T5 population in the whole shipped
+assembly is `HardenedShellPower` alone, granted by `SkulkingColony:56` at 20,
+so that is what was built. The assembly holds eleven other enemy-side
+`AfterDamageReceived` overrides — `AsleepPower`, `FlutterPower`,
+`PersonalHivePower`, `PlowPower`, `ReflectPower`, `ShriekPower`,
+`SlipperyPower`, `SlumberPower`, `TheGambitPower`, `LagavulinMatriarch`'s own,
+and `CurlUpPower` under D6 — none of which is a "took unblocked damage"
+reaction; each is its own unmodelled mechanic, and where the sim carries the
+body at all it is already flagged `UNIMPLEMENTED` on its enemy in
+`tier05/content/act*_pool.yaml`.
+
+The predicates, read off the decompile rather than off the card:
+`CreatureCmd.Damage` skips the broadcast entirely for a creature the hit
+killed (`:410`); `HardenedShellPower.AfterDamageReceived` (`:52`) returns on
+`WasFullyBlocked` and otherwise adds `result.UnblockedDamage` — the
+overkill-free number — to the turn's spent allowance;
+`ModifyHpLostBeforeOstyLate` (`:38`) caps the post-Block loss at the unspent
+remainder; and `BeforeSideTurnStart` (`:66`) restores the allowance with **no
+side filter**, so it resets at the top of BOTH sides, twice a round.
+
+**WHAT NO SIM FIGHT REACHES.** No encounter the sim owns carries the power:
+`tier0/content/encounters/` is the frozen synthetic battery, and
+`tier05/content/act1_pool.yaml`–`act3_pool.yaml` hold no Skulking Colony (the
+game's is `SkulkingColonyElite`, in `Underdocks`). The `powers:` key those
+pools already own is the door, so nothing new was allowlisted — but authoring
+the power onto a body would move that encounter's difficulty, which is a
+content pick and not a parity repair, so none was. Pinned by
+`tier0/tests/test_eb495_d5_an_enemy_can_read_the_hit_it_took.py`, which stands
+the power up by hand. No published sim number moved.
+
+**One named limit.** The funnel hangs off `deal_damage_to_enemy` only. In the
+game the hook is broadcast from `CreatureCmd.Damage`, which
+`refpowers.unpowered_damage` (a power's own tick) and the direct-HP paths
+(`reactions._splash`, Shatter, Overload) also mirror. Those are not wired, and
+the door count is pinned in `test_eb495_kit_verb_triggers.py`, so widening it
+is a deliberate act.
 
 ### D6 — the sim models no enemy-side retaliation power
 

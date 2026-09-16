@@ -619,6 +619,98 @@ def on_damage_received(state: CombatState, target: Fighter, unblocked: int,
 
 
 # ---------------------------------------------------------------------------
+# Funnel 3b -- damage taken by an ENEMY (`EB-495` D5 / D6).
+#
+# The other side of the funnel above, and until 2026-09-16 it did not exist:
+# `on_damage_received` reads `state.player.powers` and is called for damage the
+# PLAYER received, so no tier0 verb could wake an enemy's Hardened Shell, its
+# Thorns or its Curl Up. The atlas's whole T5 and T6 columns were `none*` --
+# an absence, not a decision -- and `EB-495` D5 and D6 are that absence.
+#
+# ONE DOOR, the one the atlas names: `effects.deal_damage_to_enemy`. In the
+# game every one of these hooks hangs off `CreatureCmd.Damage`, which is also
+# reached by `refpowers.unpowered_damage` (a power's own tick) and by the
+# direct-HP paths (`reactions._splash`, Shatter, Overload). Those are NOT
+# wired here and the limit is deliberate: the door in the atlas's sec.2 is the
+# kit-verb door, this repair is the kit-verb matrix's T5/T6 columns, and
+# widening the funnel to the Unpowered and Unblockable paths is a second
+# question with its own cells. It is listed as an absence in the atlas's D5
+# paragraph rather than left to be rediscovered.
+# ---------------------------------------------------------------------------
+
+def enemy_hardened_shell_cap(enemy: Enemy, hp_loss: int) -> int:
+    """`HardenedShellPower.ModifyHpLostBeforeOstyLate` (`:38`).
+
+    "This enemy cannot lose more than Amount HP each turn." The game runs it
+    at `HpLossHookPhase.BeforeOsty`, i.e. on `max(modifiedAmount - blocked, 0)`
+    -- AFTER Block, BEFORE the HP comes off -- and returns
+    `min(amount, Amount - damageReceivedThisTurn)`, so an allowance already
+    spent this turn admits only the remainder and a fully spent one admits 0.
+
+    `amount == 0` returns early in the game, which matters only for the
+    negative-remainder case this clamp would otherwise invent: with the
+    allowance overspent the `min` is negative, and HP loss is never negative.
+    """
+    allowance = enemy.powers.get("hardened_shell", 0)
+    if not allowance or hp_loss <= 0:
+        return hp_loss
+    return max(0, min(hp_loss, allowance - enemy.hardened_shell_taken))
+
+
+def enemy_on_damage_received(state: CombatState, enemy: Enemy,
+                             unblocked: int, fully_blocked: bool,
+                             killed: bool) -> None:
+    """`Hook.AfterDamageReceived` on the ENEMY side (`CreatureCmd.cs:416`).
+
+    THE ONE PREDICATE EVERY READER SHARES, and it is easy to miss reading the
+    powers alone: `CreatureCmd.Damage` only broadcasts this hook
+    `if (!result.WasTargetKilled || !originalTarget.IsDead)` (`:410`). A
+    killing blow fires NOTHING here. That is why `killed` is a parameter
+    rather than a read of `enemy.alive`: the sim's damage has already landed
+    by the time this is called, so "did this hit kill it" is a fact the caller
+    holds and the body cannot recover.
+
+    Beyond that gate the hook has NO attack filter of its own -- every damage
+    instance reaches it, a kit verb's `ElementalHit.Deal` included -- and each
+    reader supplies its own. Today the enemy-side population is one:
+
+      * `HardenedShellPower.AfterDamageReceived` (`:52`): returns on
+        `result.WasFullyBlocked`, then adds `result.UnblockedDamage` to the
+        turn's spent allowance. No `IsPoweredAttack`, no `dealer`, no
+        `cardSource` -- so a Bomb, a Plan, a Mine and a performance all spend
+        the shell, which is the whole reason D5 is a comparability gap and not
+        a cosmetic one.
+
+    THE THREE POWERS THE ATLAS NAMES BESIDE IT ARE PLAYER-SIDE RELICS --
+    `EmotionChip`, `LavaLamp` and `BeatingRemnant` all live in
+    `Models/Relics/` and read this hook for the creature that owns them, which
+    is never a monster. The enemy-side T5 population in the shipped game is
+    `HardenedShellPower` alone, carried by `SkulkingColony` (`:56`, 20).
+    """
+    if killed:
+        return
+    n = enemy.powers.get("hardened_shell", 0)
+    if n and not fully_blocked:
+        enemy.hardened_shell_taken += max(0, unblocked)
+        state.emit("hardened_shell_spent", enemy=enemy.name,
+                   spent=enemy.hardened_shell_taken, allowance=n)
+
+
+def reset_enemy_damage_caps(state: CombatState) -> None:
+    """`HardenedShellPower.BeforeSideTurnStart` (`:66`), transcribed with its
+    missing filter intact.
+
+    The override takes a `side` argument and never looks at it, so the
+    allowance is restored at the top of the PLAYER's side and again at the top
+    of the enemy's -- two full allowances per round, not one. Written the way
+    the game wrote it rather than the way the card text reads, because "each
+    turn" is exactly the phrase that hides which turn.
+    """
+    for enemy in state.enemies:
+        enemy.hardened_shell_taken = 0
+
+
+# ---------------------------------------------------------------------------
 # Funnel 4 / 5 -- card plays and power application.
 # ---------------------------------------------------------------------------
 

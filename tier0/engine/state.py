@@ -1012,6 +1012,17 @@ class Enemy(Fighter):
     # it gains N Block. Does not stack." The latch resets each player turn.
     skittish: int = 0
     skittish_fired: bool = False
+    # `EB-495` D5. HardenedShellPower's private `damageReceivedThisTurn`
+    # (`HardenedShellPower.cs:19`), which is the whole of the power: the
+    # `hardened_shell` stack is a per-turn ALLOWANCE and this is how much of
+    # it has been spent. Two halves read it -- the HP-loss cap
+    # (`ModifyHpLostBeforeOstyLate`, `:38`) and the accumulator
+    # (`AfterDamageReceived`, `:52`) -- and `BeforeSideTurnStart` (`:66`)
+    # zeroes it with NO side filter, so it resets at the top of BOTH sides.
+    # A counter rather than a latch, unlike Skittish above, because the game's
+    # is a decimal running total: a 20-point shell that has already taken 6
+    # must still admit 14 this turn.
+    hardened_shell_taken: int = 0
     # The turn this enemy entered its CURRENT phase; `ramp` counts from here,
     # not from combat start (combat._settle_phases stamps it on each revive).
     # 0 for every unphased enemy, which is combat start -- so the frozen

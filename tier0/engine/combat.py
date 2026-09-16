@@ -978,6 +978,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.cards_played_this_turn = 0
     for e in state.enemies:
         e.skittish_fired = False     # Skittish latch is per-turn (§10.9)
+    # `EB-495` D5: BeforeSideTurnStart, the PLAYER's side. Hardened Shell's
+    # allowance is restored here and again at the top of the enemy side, which
+    # is the game's own shape -- its override ignores the `side` it is handed.
+    refpowers.reset_enemy_damage_caps(state)
     state.in_player_turn = True              # StS2 CombatState.CurrentSide
     refpowers.reset_turn_counters(state)
     # Fanfare decay, HERE at the true top of the turn -- before the block
@@ -1784,6 +1788,12 @@ def _run_rounds(state: CombatState, pilot: Pilot) -> None:
     while not state.over and state.turn < C.MAX_TURNS:
         _player_turn(state, pilot)
         if not state.over:
+            # `EB-495` D5: BeforeSideTurnStart, the ENEMY's side -- the second
+            # of the two resets the game's unfiltered override performs. The
+            # player-side one is in `_player_turn`; both are needed, and a
+            # single per-round reset would make a Hardened Shell twice as hard
+            # to break as the game's is.
+            refpowers.reset_enemy_damage_caps(state)
             for enemy in list(state.enemies):
                 _enemy_turn(state, enemy)
                 _settle_phases(state)    # FlameBarrier retaliation can drop a
