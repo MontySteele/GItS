@@ -12597,3 +12597,61 @@ def test_a_board_with_no_multiplier_prints_no_fold_line():
     page = blindplay.observe(_weak_intent_state("11", weak=0))
     assert "Folded through" not in page
     assert "raw damage" not in page
+
+
+# ---------- EB-700: the written face beside the one the board is printing ----
+
+def _folded_hand_state(printed: str, upgraded: bool = False) -> dict:
+    """A combat whose hand holds one Slack Water at a given printed face."""
+    state = copy.deepcopy(combat_state())
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-SLACK_WATER", "name": "Slack Water", "type": "Skill",
+         "cost": "1", "can_play": True, "index": 0, "target_type": "Self",
+         "is_upgraded": upgraded, "keywords": [], "description": printed}]
+    return state
+
+
+def test_a_folded_face_prints_the_written_one_beside_it():
+    """`EB-700`. Seen to FAIL: the face printed only the current number, so a
+    seat "cannot tell a modified number from a base one and reconstructs the
+    base from HP". Slack Water is written `Gain 4 Block`; a board printing 3
+    now says both.
+    """
+    page = blindplay.observe(_folded_hand_state(
+        "Gain 3 Block. At the start of your next turn, gain 4 Block."))
+    assert "Gain 3 Block. At the start of your next turn" in page
+    assert ("Written: Gain 4 Block. At the start of your next turn, gain 4 "
+            "Block.") in page
+    assert "the difference is the board's" in page
+
+
+def test_an_unfolded_face_prints_no_written_line():
+    """The gate is a difference: a board with nothing folding into the card
+    prints the face it always did and no second sentence."""
+    assert "Written:" not in blindplay.observe(_folded_hand_state(
+        "Gain 4 Block. At the start of your next turn, gain 4 Block."))
+
+
+def test_an_upgraded_cards_written_face_is_the_upgraded_one():
+    """The card in front of the player is the upgraded one, so its written
+    number is the canonical value plus its own OnUpgrade delta -- 4 + 3."""
+    page = blindplay.observe(_folded_hand_state(
+        "Gain 5 Block. At the start of your next turn, gain 4 Block.",
+        upgraded=True))
+    assert "Written: Gain 7 Block." in page
+
+
+def test_a_face_this_build_has_reworded_prints_nothing_rather_than_a_guess():
+    """The template is matched against the WIRE's own face; a sentence this
+    repo does not recognise gets silence, never a rebuilt number."""
+    assert "Written:" not in blindplay.observe(_folded_hand_state(
+        "Something this card has never said. Gain 3 Block."))
+
+
+def test_the_written_face_is_read_by_id_and_not_by_title():
+    """`EB-267`'s rule, one field over: a prototype row may print a shipped
+    card's name at different numbers, so an unknown id answers nothing."""
+    state = _folded_hand_state(
+        "Gain 3 Block. At the start of your next turn, gain 4 Block.")
+    state["player"]["hand"][0]["id"] = "KLEEMOD-NO_SUCH_CARD"
+    assert "Written:" not in blindplay.observe(state)

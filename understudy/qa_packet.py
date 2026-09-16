@@ -743,6 +743,35 @@ def _plural_arm(spec: str, value: int) -> str:
     return arms[0] if value == 1 else arms[-1]
 
 
+def _compile_template(template: str) -> tuple[str, list[tuple[str, str, str]]]:
+    """A hole-bearing template as `(pattern over a printed face, pieces)`.
+
+    `EB-700`'s half of the machinery `upgrade_preview` writes inline: literal
+    text escaped, a numeric hole a group that reads the number the screen is
+    showing, a plural hole the arms it could have printed. Only templates with
+    NO `{IfUpgraded}` arm reach this -- the two-arm swap is a second sentence
+    and its caller skips it whole -- so there is one shape of piece here and
+    not three.
+    """
+    pattern: list[str] = []
+    pieces: list[tuple[str, str, str]] = []
+    at = 0
+    for m in _HOLE_RE.finditer(template):
+        pattern.append(re.escape(template[at:m.start()]))
+        pieces.append(("literal", template[at:m.start()], ""))
+        spec = m.group(2) or ""
+        if spec.startswith("plural:"):
+            arms = [re.escape(a) for a in spec[len("plural:"):].split("|")]
+            pattern.append("(?:" + "|".join(arms) + ")")
+        else:
+            pattern.append(r"(-?\d+)")
+        pieces.append(("hole", m.group(1), spec))
+        at = m.end()
+    pattern.append(re.escape(template[at:]))
+    pieces.append(("literal", template[at:], ""))
+    return "".join(pattern), pieces
+
+
 @lru_cache(maxsize=4)
 def _upgraded_face_index_cached(repo: Path) -> tuple[
         tuple[str, tuple[str, tuple[tuple[str, int], ...], str,
@@ -948,6 +977,148 @@ def upgrade_keywords(card_id: Any,
     root = repo if repo is not None else Path(__file__).resolve().parents[1]
     row = dict(_upgraded_face_index_cached(root)).get(card_key(card_id))
     return row[3] if row is not None else ()
+
+
+# `EB-700`. A FOLDED FACE PRINTS ONLY THE CURRENT NUMBER.
+#
+# THE FIND (Kokomi r30 lane 1, debrief 1). "Slack Water read Deal 3 under Weak
+# and Deal 4 later, so a seat cannot tell a modified number from a base one and
+# reconstructs the base from HP."
+#
+# THE WIRE HAS ONE FIELD AND IT IS THE RESOLVED ONE. A card's body is
+# `GetDescriptionForPile` -- the game's own description with the board's numbers
+# already in it (`McpMod.Helpers.cs:48`) -- and there is no base anywhere on the
+# feed, no modifier list and no second field. `EB-408` settled that and printed
+# the PROVENANCE, which is as far as the feed goes.
+#
+# THE BASE IS IN THIS REPO, THOUGH, and it is in the same two places the upgrade
+# preview is already derived from: `Localization` holds the description
+# TEMPLATE and `CanonicalVars` holds each hole's WRITTEN value --
+# `new BlockVar(4m, ValueProp.Move)`, `new DynamicVar("PowerAmount", 3m)`. So
+# the card's own sentence with its own written numbers can be rebuilt exactly.
+# That is not arithmetic on the board's figure and not a guess about what folded
+# it: it is the face the sheet says this card has, printed beside the face the
+# screen is showing.
+#
+# THE SAME BOUNDS THE UPGRADE PREVIEW IS UNDER. The template is matched against
+# the WIRE's printed face, so a build that has reworded a card simply does not
+# match and prints nothing; a template carrying an `{IfUpgraded}` arm is two
+# sentences rather than one sentence with a number in it and is skipped whole;
+# and a hole with no written value keeps whatever the screen is showing. An
+# UPGRADED card's written number is the canonical value plus its own
+# `OnUpgrade` delta, because the card in front of the player is the upgraded one
+# and its written face is the upgraded one.
+_CANONICAL_VAR_RE = re.compile(
+    r"new\s+(?:([A-Za-z_][A-Za-z0-9_]*)Var\s*\(\s*(-?\d+(?:\.\d+)?)m?\s*[,)]"
+    r"|DynamicVar\s*\(\s*\"([A-Za-z_][A-Za-z0-9_]*)\"\s*,"
+    r"\s*(-?\d+(?:\.\d+)?)m?\s*[,)])")
+
+
+def _canonical_values(src: str) -> dict[str, int]:
+    """`{var name: its written value}` off a card's `CanonicalVars` block."""
+    out: dict[str, int] = {}
+    for named, value, dyn, dyn_value in _CANONICAL_VAR_RE.findall(src):
+        name, raw = (named, value) if named else (dyn, dyn_value)
+        try:
+            out.setdefault(name, int(float(raw)))
+        except ValueError:
+            continue
+    return out
+
+
+def _hole_values(template: str, values: dict[str, int]) -> dict[str, int]:
+    """`_hole_deltas`'s remap, lenient: a value with no hole is DROPPED.
+
+    The strict version answers `None` for a delta that lands nowhere, because a
+    card that moves a number its face does not print has no upgrade preview to
+    offer. Here the same case is harmless -- a var the sentence does not print
+    has no number to set beside anything -- so the rest of the face is still
+    rebuilt. `CalculationBase` is remapped onto the one `Calculated*` hole for
+    the reason `_hole_deltas` gives.
+    """
+    holes = [m.group(1) for m in _HOLE_RE.finditer(template)]
+    out: dict[str, int] = {}
+    for name, value in values.items():
+        if name in holes:
+            out[name] = value
+        elif name == "CalculationBase":
+            calculated = {h for h in holes if h.startswith("Calculated")}
+            if len(calculated) == 1:
+                out[calculated.pop()] = value
+    return out
+
+
+@lru_cache(maxsize=4)
+def _written_face_index_cached(repo: Path) -> tuple[
+        tuple[str, tuple[str, tuple[tuple[str, int], ...],
+                         tuple[tuple[str, int], ...]]], ...]:
+    """`{card id: (template, written values, upgrade deltas)}`, per class."""
+    index: dict[str, tuple[str, tuple[tuple[str, int], ...],
+                           tuple[tuple[str, int], ...]]] = {}
+    root = repo / "klee-mod"
+    if not root.is_dir():
+        return ()
+    for path in sorted(root.glob(_CARD_SOURCE_GLOB)):
+        try:
+            src = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        key = _class_key(src)
+        if not key or key in index:
+            continue
+        template = strip_markup(_loc_description(src))
+        # A two-arm swap is two sentences; `EB-529`'s bound, for its reason.
+        if not template or "{IfUpgraded" in template:
+            continue
+        values = _hole_values(template, _canonical_values(src))
+        if not values:
+            continue
+        index[key] = (template, tuple(sorted(values.items())),
+                      tuple(sorted(_hole_values(
+                          template, _upgrade_deltas(src)).items())))
+    return tuple(sorted(index.items()))
+
+
+def written_face(card_id: Any, printed: str, upgraded: bool = False,
+                 repo: Path | None = None) -> str:
+    """The face this card is WRITTEN with, where the board has moved it.
+
+    `""` where the two are the same, where the index has no row, and where the
+    card's own sentence does not match the face on the screen -- an absent
+    answer is silence, never a guess. `printed` is the wire's current body.
+    """
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    row = dict(_written_face_index_cached(root)).get(card_key(card_id))
+    if row is None:
+        return ""
+    template, values, deltas = row
+    written = dict(values)
+    if upgraded:
+        for name, delta in deltas:
+            if name in written:
+                written[name] += delta
+    pattern, pieces = _compile_template(template)
+    face = strip_markup(printed).strip()
+    hit = re.search(pattern, face)
+    if hit is None:
+        return ""
+    out: list[str] = []
+    group = 0
+    numbers: dict[str, int] = {}
+    for kind, name, spec in pieces:
+        if kind == "literal":
+            out.append(name)
+            continue
+        if spec.startswith("plural:"):
+            out.append(_plural_arm(spec[len("plural:"):],
+                                   numbers.get(name, 2)))
+            continue
+        group += 1
+        value = written.get(name, int(hit.group(group)))
+        numbers[name] = value
+        out.append(str(value))
+    rebuilt = face[:hit.start()] + "".join(out) + face[hit.end():]
+    return "" if rebuilt == face else rebuilt
 
 
 # `EB-264`. THE WIRE'S UNPLAYABLE REASON IS AN ENUM NAME, AND A PLAYER CANNOT

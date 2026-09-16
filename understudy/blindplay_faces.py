@@ -177,6 +177,17 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
                 if entry.get("spark_price") is not None else None)),
         # `EB-445`: whether that price is the whole bank.
         "spark_all": qa_packet.spends_all_sparks(entry.get("id")),
+        # `EB-700`. THE FACE THIS CARD IS WRITTEN WITH, where the board has
+        # moved it. The wire carries the RESOLVED sentence and nothing else --
+        # "Slack Water read Deal 3 under Weak and Deal 4 later, so a seat
+        # cannot tell a modified number from a base one and reconstructs the
+        # base from HP" -- and the written numbers are in this repo, in the
+        # same two places the upgrade preview is derived from. `""` where the
+        # two agree, which is every card on a board with nothing folding into
+        # it; see `qa_packet.written_face` for all three of its bounds.
+        "written_face": qa_packet.written_face(
+            entry.get("id"), _text(entry.get("description")),
+            bool(entry.get("is_upgraded") or entry.get("upgraded"))),
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,

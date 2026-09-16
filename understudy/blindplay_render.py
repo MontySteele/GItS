@@ -120,6 +120,15 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # upgrade does, so the note above it is false rather than merely silent.
     # The note is the "this page cannot tell you what it does" line, and a row
     # whose schema upgrade is a keyword has already told the reader.
+    # `EB-700`: the face this card is WRITTEN with, above the upgrade line and
+    # below the one the board is printing, because it is about the sentence
+    # directly above it. Absent wherever the two agree, which is every card on
+    # a board with nothing folding into it.
+    if c.get("written_face"):
+        out.append(f"    Written: {c['written_face']}")
+        out.append("    (the line above this one is what the board is "
+                   "printing now; this is the card's own written face, off "
+                   "its sheet -- the difference is the board's.)")
     if c.get("upgraded_face"):
         out.append(f"    Upgraded: {c['upgraded_face']}")
     elif c.get("upgraded_note") and not c.get("upgraded_keywords"):
