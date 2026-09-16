@@ -406,6 +406,20 @@ UNMIRRORED: dict[str, str] = {
         "constructs punch until the player leaves the room exactly as the base "
         "event has them do, so this number cannot be reached by play. tier0 "
         "has no event loop and no counterpart.",
+    "ModdedPlayerDeathSeam.FallbackDeathAnimLength":
+        "`EB-159`. A PRESENTATION DURATION, not balance: how long a spine-less "
+        "player body with no death clip to measure is reported to be dying for, "
+        "so the death sound has room and `Hook.AfterDeath` waits something "
+        "instead of nothing. The number is one of the mod's own authored clips "
+        "(`pck-src/klee/model/combat.tscn`, `Animation_death` `length = 1.0`), "
+        "and a body that HAS a clip is measured rather than given this. tier0 "
+        "has no animations, no clock the player sees and no counterpart.",
+    "ModdedPlayerDeathSeam.MaxDeathAnimLength":
+        "`EB-159`. THE BASE GAME'S OWN CEILING, copied from it rather than "
+        "chosen here: `NCreature.StartDeathAnim` returns `Mathf.Min(a, 30f)` "
+        "(0.111.0 decompile, `NCreature.cs:945`), and the seam that fills in "
+        "the length the spine gate skipped keeps the same cap so it can never "
+        "report a longer death than the base could. tier0 has no counterpart.",
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
     "RosterArt.PortraitWidth":

@@ -133,15 +133,14 @@ internal static class NCreature_StartDeathAnim_AnimationTreeRoute
 /// <c>ImmediatelySetIdle</c> does with the animator. Inert for every creature
 /// with no %AnimationTree, which is the whole base cast.
 ///
-/// THE OTHER TWO SEAMS ARE REPORTED RATHER THAN QUIETLY LEFT.
-/// <c>ImmediatelySetIdle</c> is reachable only through this same tween in the
-/// 0.111.0 decompile, so this postfix covers it. <c>StartDeathAnim</c>'s own
-/// <c>_spineAnimator != null</c> gate (NCreature.cs:944) also skips
-/// <c>SfxCmd.PlayDeath(Entity.Player)</c> and leaves the returned anim length
-/// at 0, so a modded player dies silently and <c>Hook.AfterDeath</c> waits
-/// zero seconds for an animation the tree is playing. Both of those move a
-/// SOUND and a WAIT the player feels, which is a taste call and not this
-/// row's.
+/// THE OTHER TWO SEAMS ARE CLOSED TOO, NOW. <c>ImmediatelySetIdle</c> is
+/// reachable only through this same tween in the 0.111.0 decompile, so this
+/// postfix covers it. <c>StartDeathAnim</c>'s own <c>_spineAnimator != null</c>
+/// gate (NCreature.cs:944) also skips <c>SfxCmd.PlayDeath(Entity.Player)</c> and
+/// leaves the returned anim length at 0, so a modded player died silently and
+/// <c>Hook.AfterDeath</c> waited zero seconds for an animation the tree was
+/// playing; that SOUND and that WAIT are filled in beside this file by
+/// <see cref="ModdedPlayerDeathSeam"/>, which is the row's remaining third.
 /// </summary>
 [HarmonyPatch(typeof(NCreature), nameof(NCreature.StartReviveAnim))]
 internal static class NCreature_StartReviveAnim_AnimationTreeRoute
