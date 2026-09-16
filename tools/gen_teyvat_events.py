@@ -35,7 +35,11 @@ THE INDEX
 `tools/data/sts2_base_events.json` carries the structural facts both this
 generator and the headless pins need: per base event the class name, the
 `Id.Entry`, its option key names in order, its other page keys, whether an
-option can kill, and the frozen harvest's option count. IDENTIFIERS ONLY --
+option can kill, the frozen harvest's option count, and `is_allowed` -- the
+event's own `IsAllowed` gate as one boolean expression over base-game member
+names, which is what `understudy/force_event.py` prints beside a refusal so a
+caller learns what the predicate WANTS instead of only that it said no.
+IDENTIFIERS ONLY --
 no method bodies, no base-game prose -- so the repo's decompiled-material rule
 (`.gitignore:28`, `csharp-build-spec.md` sec.0.3) is not bent, and `--check`
 never needs a decompile.
@@ -47,6 +51,8 @@ Usage
     python tools/gen_teyvat_events.py --refresh   # rebuild the base-event index
     python tools/gen_teyvat_events.py --refresh-vars   # rebuild key_vars from the
                                                   # installed game's English loc
+    python tools/gen_teyvat_events.py --refresh-allowed  # rebuild the IsAllowed
+                                                  # notes from the decompile
 
 THE PLACEHOLDER RULE (EB-770)
 -----------------------------
@@ -952,8 +958,11 @@ def refresh_index(decomp: Path) -> int:
                     count = value
                     break
 
+        note, gated = allowed_note(src)
         index[cls] = {
             "entry": entry,
+            "is_allowed": note,
+            "is_allowed_override": gated,
             "sealed": bool(m.group(1)),
             "base": base,
             "option_keys": options,
@@ -1021,6 +1030,307 @@ def read_pck_file(pck: Path, wanted: str) -> bytes:
                 fh.seek(offset + rel)
                 return fh.read(size)
     raise SystemExit(f"{wanted} is not in {pck}")
+
+
+# ---------------------------------------------------------------------------
+# The `IsAllowed` note (--refresh-allowed).
+# ---------------------------------------------------------------------------
+#
+# WHY A STATIC TABLE AND NOT A RUNTIME READ. `EventModel.IsAllowed(IRunState)`
+# is a compiled method. At the moment `force_next_event` refuses, the bridge
+# knows only that it answered false -- there is no expression to print, and
+# nothing short of shipping a decompiler would give it one. So the SOURCE
+# EXPRESSION is lifted here, once, off a local decompile, and carried in the
+# index beside the other structural facts the surface already keeps.
+#
+# IDENTIFIERS ONLY, exactly as `--refresh` and `--refresh-vars` are. A note is
+# a condensed boolean expression over base-game member names -- `TotalFloor > 6
+# && Players.All(Deck.Cards.Any(IsRemovable))` -- with the lambda headers, the
+# `runState.` prefixes and the casts stripped. No method body, no base-game
+# prose and no loc row is written; `.gitignore:28`'s rule is about distributing
+# the base game's WORDS, and a member name is not one.
+#
+# THE FOLD IS DELIBERATELY SMALL. Every gate in 0.111.0 is either a single
+# `return X;` or a run of `if (C) { return false; }` guards ending in one. The
+# folder handles exactly those shapes and falls back to the collapsed statement
+# text for anything else (two events iterate their players in a `foreach`), so
+# a game update that writes a new shape degrades to a longer note rather than
+# to a wrong one.
+
+#: `public override bool IsAllowed(IRunState runState)`.
+_IS_ALLOWED_SIG = re.compile(
+    r"public\s+override\s+bool\s+IsAllowed\s*\(\s*IRunState\s+(\w+)\s*\)")
+
+#: `(Player p) => `, `(CardModel c) => ` -- a one-parameter typed lambda head.
+_LAMBDA_HEAD = re.compile(r"\(\s*(\w+)\s+(\w+)\s*\)\s*=>\s*")
+
+#: `IRunState runState2 = runState;`, the alias the compiler emits when a
+#: lambda closes over the parameter (Luminous Choir).
+_RUNSTATE_ALIAS = re.compile(r"IRunState\s+(\w+)\s*=\s*(\w+)\s*;\s*")
+
+_FLIP = {"==": "!=", "!=": "==", "<": ">=", ">=": "<", ">": "<=", "<=": ">"}
+
+#: The note written for an event that does not override the gate.
+ALWAYS_ALLOWED = "true (EventModel default -- no gate)"
+
+
+def _balanced(text: str, start: int, opener: str = "{", closer: str = "}") -> int:
+    """The index just past the block `text[start]` opens. `-1` if unbalanced."""
+    depth = 0
+    for i in range(start, len(text)):
+        if text[i] == opener:
+            depth += 1
+        elif text[i] == closer:
+            depth -= 1
+            if depth == 0:
+                return i + 1
+    return -1
+
+
+def _split_top(text: str) -> List[str]:
+    """`text` split on top-level `&&`, parens respected."""
+    out, depth, last = [], 0, 0
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        elif depth == 0 and text[i:i + 2] == "&&":
+            out.append(text[last:i].strip())
+            last = i + 2
+            i += 1
+        i += 1
+    out.append(text[last:].strip())
+    return [part for part in out if part]
+
+
+def _strip_parens(expr: str) -> str:
+    expr = expr.strip()
+    while expr.startswith("(") and _balanced(expr, 0, "(", ")") == len(expr):
+        expr = expr[1:-1].strip()
+    return expr
+
+
+def _top_comparison(expr: str) -> Optional[Tuple[str, str, str]]:
+    """`(left, op, right)` for a comparison at paren depth zero, else None."""
+    depth = 0
+    i = 0
+    while i < len(expr):
+        ch = expr[i]
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        elif depth == 0:
+            for op in ("==", "!=", "<=", ">="):
+                if expr[i:i + 2] == op:
+                    return expr[:i].strip(), op, expr[i + 2:].strip()
+            if ch in "<>" and expr[i + 1:i + 2] != "=":
+                return expr[:i].strip(), ch, expr[i + 1:].strip()
+        i += 1
+    return None
+
+
+def negate(expr: str) -> str:
+    """`!expr`, written the way a reader would write it.
+
+    A guard clause in the decompile is `if (<not allowed>) return false;`, so
+    every note's clause is the NEGATION of what the source tests. Spelling that
+    as `!(CurrentActIndex == 0)` would make the reader do the flip; spelling it
+    `CurrentActIndex != 0` says what the predicate wants, which is the whole
+    point of the table.
+    """
+    expr = _strip_parens(expr)
+    if expr.startswith("!"):
+        return _strip_parens(expr[1:])
+    cmp_parts = _top_comparison(expr)
+    if cmp_parts:
+        left, op, right = cmp_parts
+        return f"{left} {_FLIP[op]} {right}"
+    # `X.Any(<whole rest of the expression>)` -> `X.All(not ...)`, so that a
+    # guard written `if (Players.Any(p => p.Gold < 100)) return false;` reads
+    # back as `Players.All(Gold >= 100)` rather than as a double negative.
+    open_idx = expr.find(".Any(")
+    if open_idx >= 0:
+        paren = open_idx + len(".Any")
+        if _balanced(expr, paren, "(", ")") == len(expr):
+            inner = expr[paren + 1:-1].strip()
+            if inner:
+                return f"{expr[:open_idx]}.All({negate(inner)})"
+    return f"!({expr})"
+
+
+def _denoise(body: str, param: str) -> str:
+    """The method body as one line of member names.
+
+    Drops the lambda headers and then the parameter prefixes they introduced,
+    the `runState.` prefix and its compiler alias, the `(decimal)` casts and
+    the `base.` and `global::` qualifiers -- everything that is C# ceremony
+    rather than a fact about the run.
+    """
+    text = re.sub(r"//[^\n]*", " ", body)
+    text = re.sub(r"\s+", " ", text).strip()
+    text = text.replace("global::", "").replace("base.", "")
+    text = re.sub(r"\(decimal\)\s*", "", text)
+
+    run_names = {param}
+    alias = _RUNSTATE_ALIAS.search(text)
+    if alias and alias.group(2) in run_names:
+        run_names.add(alias.group(1))
+        text = _RUNSTATE_ALIAS.sub("", text)
+    lambda_names = {var for _, var in _LAMBDA_HEAD.findall(text)}
+    text = _LAMBDA_HEAD.sub("", text)
+
+    for name in sorted(run_names | lambda_names, key=len, reverse=True):
+        text = re.sub(rf"\b{re.escape(name)}\.", "", text)
+    for name in sorted(run_names, key=len, reverse=True):
+        # `HasAvailableRelics(runState)` -- the run handed on to a helper. It
+        # is the only run there is, so the argument says nothing.
+        text = re.sub(rf"\(\s*{re.escape(name)}\s*\)", "()", text)
+    for name in sorted(lambda_names, key=len, reverse=True):
+        # A BARE lambda parameter is its subject passed on as an argument --
+        # `GetValidRelics(p)`, `IsValid(CardTag.Strike, c)`, `c is
+        # FoulPotion`. It becomes `it`: deleting it would leave a dangling
+        # comma, and a one-letter compiler name reads as a typo.
+        text = re.sub(rf"\b{re.escape(name)}\b(?![\w.])", "it", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def fold_is_allowed(body: str, param: str) -> str:
+    """One boolean expression for the gate `body` states.
+
+    `if (C) { return false; }` is a clause `not C`; a trailing `return X;` is a
+    clause `X`; `if (C) { return X; } return false;` is `C && X`. Anything else
+    -- a `foreach`, an early `return true;` -- is handed back as the denoised
+    statement text, because a note that is longer is still readable and a note
+    that guessed would not be.
+    """
+    text = _denoise(body, param)
+    clauses: List[str] = []
+    while True:
+        text = text.strip()
+        if text.startswith("if ("):
+            end = _balanced(text, text.index("("), "(", ")")
+            if end < 0:
+                return _denoise(body, param)
+            cond = _strip_parens(text[text.index("(") + 1:end - 1])
+            rest = text[end:].strip()
+            if not rest.startswith("{"):
+                return _denoise(body, param)
+            close = _balanced(rest, 0)
+            if close < 0:
+                return _denoise(body, param)
+            block = rest[1:close - 1].strip()
+            text = rest[close:].strip()
+            m = re.fullmatch(r"return\s+(.+);", block, re.S)
+            if not m:
+                return _denoise(body, param)
+            answer = m.group(1).strip()
+            if answer == "false":
+                clauses.extend(negate(part) for part in _split_top(cond))
+                continue
+            if answer == "true":
+                return _denoise(body, param)
+            # `if (C) { return X; } return false;` -- the only other shape.
+            if text != "return false;":
+                return _denoise(body, param)
+            clauses.extend(_split_top(cond))
+            clauses.extend(_split_top(answer))
+            text = ""
+            break
+        m = re.fullmatch(r"return\s+(.+);", text, re.S)
+        if not m:
+            return _denoise(body, param)
+        answer = m.group(1).strip()
+        if answer != "true" or not clauses:
+            clauses.extend(_split_top(answer))
+        text = ""
+        break
+    return " && ".join(clauses) if clauses else "true"
+
+
+#: `private IEnumerable<RelicModel> GetValidRelics(Player player) { return
+#: <one expression>; }` -- the shape of the private helper a gate leans on.
+_HELPER = re.compile(
+    r"private\s+[\w<>?\[\], .]+?\s+(\w+)\s*\(\s*(\w+)\s+(\w+)\s*\)\s*"
+    r"\{\s*return\s+([^;]+);\s*\}", re.S)
+
+
+def _inline_helpers(note: str, src: str) -> str:
+    """Fold a one-expression private helper INTO the note.
+
+    `GetValidRelics(it)` says nothing on its own; `Relics.Where(IsTradable)`
+    is the fact a caller staring at a refusal needs, and it is what Relic
+    Trader and Ranwid both hide behind that name. Only a helper whose whole
+    body is one `return` is inlined, and only where the note actually names
+    it -- a multi-statement helper is left as a name to look up.
+    """
+    for name, _, param, body in _HELPER.findall(src):
+        call = f"{name}(it)"
+        if call not in note:
+            continue
+        inlined = _denoise(body, param)
+        note = note.replace(call, inlined)
+    return note
+
+
+def allowed_note(src: str) -> Tuple[str, bool]:
+    """`(note, overrides)` for one decompiled event source."""
+    m = _IS_ALLOWED_SIG.search(src)
+    if not m:
+        return ALWAYS_ALLOWED, False
+    open_idx = src.find("{", m.end())
+    if open_idx < 0:
+        return ALWAYS_ALLOWED, False
+    close = _balanced(src, open_idx)
+    if close < 0:
+        return ALWAYS_ALLOWED, False
+    note = fold_is_allowed(src[open_idx + 1:close - 1], m.group(1))
+    return _inline_helpers(note, src), True
+
+
+def refresh_allowed(decomp: Path) -> int:
+    """Rewrite every event's `is_allowed` note in the index from a decompile.
+
+    In place, like `--refresh-vars`: the rest of each row -- including a
+    `key_vars` map that came from the installed game rather than the decompile
+    -- is left exactly as it was.
+    """
+    if not decomp.is_dir():
+        print(f"gen_teyvat_events: no decompile at {decomp}", file=sys.stderr)
+        print("  regenerate with: ilspycmd -p -o <dir> \"<GameDir>\\...\\sts2.dll\"",
+              file=sys.stderr)
+        return 2
+    payload = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
+    index = payload["events"]
+    gated = 0
+    missing: List[str] = []
+    for name, row in index.items():
+        path = decomp / f"{name}.cs"
+        if not path.exists():
+            missing.append(name)
+            continue
+        note, overrides = allowed_note(
+            path.read_text(encoding="utf-8", errors="replace"))
+        row["is_allowed"] = note
+        row["is_allowed_override"] = overrides
+        gated += int(overrides)
+    payload["_allowed_comment"] = (
+        "is_allowed is the event's own IsAllowed gate, lifted from the "
+        "decompile as one boolean expression over base-game member names "
+        "(identifiers only). CurrentActIndex is ZERO-BASED: act 1 is 0. "
+        "TotalFloor counts every floor of the run, not the act's. A clause "
+        "reading Players.All(...) is asked of every player in a co-op run.")
+    INDEX_PATH.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n",
+                          encoding="utf-8")
+    for name in missing:
+        print(f"  NOTE    {name}: not in the decompile, note left as it was",
+              file=sys.stderr)
+    print(f"gen_teyvat_events: {gated} of {len(index)} base events override "
+          f"IsAllowed -> {INDEX_PATH.relative_to(REPO)}")
+    return 0
 
 
 def refresh_vars(game_dir: Optional[Path] = None) -> int:
@@ -2062,6 +2372,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     help="fail if regenerating would change anything")
     ap.add_argument("--refresh", action="store_true",
                     help="rebuild tools/data/sts2_base_events.json from a decompile")
+    ap.add_argument("--refresh-allowed", action="store_true",
+                    help="rewrite the index's is_allowed notes from a decompile")
     ap.add_argument("--refresh-vars", action="store_true",
                     help="rewrite the index's key_vars from the installed game's "
                          "English loc (var NAMES only)")
@@ -2074,6 +2386,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if args.refresh:
         return refresh_index(args.decompile)
+
+    if args.refresh_allowed:
+        return refresh_allowed(args.decompile)
 
     if args.refresh_vars:
         return refresh_vars(args.game_dir)

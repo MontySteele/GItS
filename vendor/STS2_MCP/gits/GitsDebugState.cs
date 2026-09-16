@@ -1170,6 +1170,55 @@ public static partial class McpMod
     /// aid.</summary>
     private const int GitsDebugEventListCap = 40;
 
+    /// <summary>EB-770. The run values every base `IsAllowed` in 0.111.0 asks
+    /// about, for a refusal to print. READ-ONLY and best-effort: any member
+    /// that throws costs that one number and never the refusal, because a
+    /// refusal that failed to explain itself would be worse than the bare one
+    /// this replaces. Null when there is no player to read at all.
+    ///
+    /// THE WORST PLAYER AND NOT THE FIRST. Every base gate is
+    /// `Players.All(...)`, so the numbers a caller must compare are the
+    /// minimums across the party; in the single-player runs this harness
+    /// drives they are the one player's. `Players` is in the answer so a
+    /// co-op reading cannot be mistaken for a solo one.</summary>
+    private static Dictionary<string, object?>? GitsRunFacts(IRunState runState)
+    {
+        List<Player> players;
+        try { players = runState.Players.ToList(); }
+        catch { return null; }
+        if (players.Count == 0) return null;
+
+        int Least(Func<Player, int> read)
+        {
+            var least = int.MaxValue;
+            foreach (var player in players)
+            {
+                try { least = Math.Min(least, read(player)); }
+                catch { return -1; }
+            }
+            return least == int.MaxValue ? -1 : least;
+        }
+
+        var actIndex = -1;
+        var floor = -1;
+        try { actIndex = runState.CurrentActIndex; } catch { }
+        try { floor = runState.TotalFloor; } catch { }
+
+        return GitsForceEvent.Facts(
+            actIndex,
+            floor,
+            Least(p => p.Gold),
+            Least(p => p.Potions.Count()),
+            Least(p => p.Relics.Count()),
+            Least(p => p.Relics.Count(r => r.IsTradable)),
+            Least(p => p.Deck.Cards.Count),
+            Least(p => p.Deck.Cards.Count(c => c.IsRemovable)),
+            Least(p => p.Deck.Cards.Count(c => c.IsTransformable)),
+            Least(p => p.Creature.CurrentHp),
+            Least(p => p.Creature.MaxHp),
+            players.Count);
+    }
+
     /// <summary>EB-761. Put a named event at the act's event cursor, so the
     /// next `?` room opens on it. Consumes no rng; see the header.</summary>
     private static Dictionary<string, object?> GitsForceNextEventApply(
@@ -1236,12 +1285,32 @@ public static partial class McpMod
         try
         {
             if (!model.IsAllowed(runState))
-                return Error(
-                    $"'{placement.Resolved}' is not allowed in this run right "
-                    + "now (EventModel.IsAllowed is false -- an act, a relic "
-                    + "or a deck condition it asks about). "
-                    + "EnsureNextEventIsValid skips it before the read, so "
-                    + "the force would be a no-op wearing an ok.");
+            {
+                // EB-770. NOT JUST "false". The predicate's own source is not
+                // reachable from here (it is compiled), so the refusal prints
+                // what the RUN holds instead, and the caller reads the gate
+                // itself out of `tools/data/sts2_base_events.json` --
+                // `understudy/force_event.py` prints the two together.
+                var facts = GitsRunFacts(runState);
+                var refusal = new Dictionary<string, object?>
+                {
+                    ["status"] = "error",
+                    ["error"] =
+                        $"'{placement.Resolved}' is not allowed in this run "
+                        + "right now (EventModel.IsAllowed is false -- an act, "
+                        + "a relic or a deck condition it asks about). "
+                        + "EnsureNextEventIsValid skips it before the read, so "
+                        + "the force would be a no-op wearing an ok. "
+                        + GitsForceEvent.DescribeFacts(facts)
+                        + " The gate itself is in "
+                        + "tools/data/sts2_base_events.json (is_allowed); "
+                        + "`python -m understudy.force_event --list` prints it "
+                        + "beside each pending id.",
+                    ["event"] = placement.Resolved
+                };
+                if (facts != null) refusal["run_facts"] = facts;
+                return refusal;
+            }
         }
         catch (Exception ex)
         {

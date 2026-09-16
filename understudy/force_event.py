@@ -149,6 +149,76 @@ def resolve_event_id(event_id: str) -> tuple[str, str | None]:
     return row[0], row[1]
 
 
+# ------------------------------------- EB-770: what the predicate wants ---
+#
+# A REFUSAL THAT SAYS ONLY "IsAllowed is false" COSTS LAUNCHES.
+# The proofs-7 record (PR #556) spent them on four events --
+# `SLIPPERY_BRIDGE`, `RELIC_TRADER`, `RANWID_THE_ELDER`, `WELCOME_TO_WONGOS` --
+# each answering only that sentence, and its "Could not do" list asks for the
+# predicates to be read out of the source before the next round spends more.
+#
+# THE EXPRESSION IS NOT AVAILABLE AT RUNTIME. `EventModel.IsAllowed` is a
+# compiled method: the bridge can call it and can print what the run holds
+# (`run_facts` on the refusal), but it has no source to quote. So the gate is
+# lifted once, off the decompile, into `tools/data/sts2_base_events.json` by
+# `tools/gen_teyvat_events.py --refresh-allowed`, and printed from here.
+# `tier0/tests/test_understudy_force_event.py` pins that every base event a
+# Teyvat face dresses carries a note, so a new dressing cannot land without one.
+
+_INDEX_PATH = REPO / "tools" / "data" / "sts2_base_events.json"
+
+
+@functools.lru_cache(maxsize=1)
+def allowed_notes() -> dict[str, str]:
+    """`{base wire id: the IsAllowed gate, as an expression}`.
+
+    Empty when the index is missing, for the reason `dressed_to_base` returns
+    an empty table: a harness without the Teyvat sources still forces ids, and
+    a missing note is worth strictly less than a failed import.
+    """
+    try:
+        payload = json.loads(_INDEX_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    out: dict[str, str] = {}
+    for row in (payload.get("events") or {}).values():
+        entry = str(row.get("entry") or "").upper()
+        note = str(row.get("is_allowed") or "").strip()
+        if entry and note:
+            out[entry] = note
+    return out
+
+
+def allowed_note(event_id: str) -> str | None:
+    """The gate for one BASE id, or None when the index does not carry it."""
+    return allowed_notes().get((event_id or "").strip().upper())
+
+
+#: Printed beside any note, because both halves are easy to read backwards.
+NOTE_LEGEND = ("CurrentActIndex is ZERO-BASED (act 1 is 0); TotalFloor counts "
+               "the whole run, not the act.")
+
+
+def refusal_detail(report: dict, target: str) -> str:
+    """The extra lines a refusal earns: the gate, and what the run holds.
+
+    The gate comes from the index; `run_facts` comes from the bridge, which
+    reads the live run when it refuses on `IsAllowed` (`GitsDebugState.cs`).
+    Either may be absent -- an older bridge sends no facts, an index without
+    the event has no note -- and each is printed only when it is there.
+    """
+    lines: list[str] = []
+    note = allowed_note(target)
+    if note:
+        lines.append(f"WANTS: {target}.IsAllowed is {note}")
+        lines.append(f"       ({NOTE_LEGEND})")
+    facts = report.get("run_facts")
+    if isinstance(facts, dict) and facts:
+        holds = ", ".join(f"{key}={facts[key]}" for key in sorted(facts))
+        lines.append(f"HOLDS: {holds}")
+    return "\n".join(lines)
+
+
 #: How many screens the walk will step through before giving up. A `?` room is
 #: normally one or two nodes away on the floor the caller is standing on; this
 #: is a stall guard, not a budget to be spent.
@@ -206,8 +276,14 @@ def walk_to_event(event_id: str, why: str, *,
 
     report = bridge.force_next_event(target, why)
     if str(report.get("status")) != "ok":
+        # EB-770. The bridge's sentence first, then what the gate asks for and
+        # what the run holds -- the two facts that turn "no" into "go get a
+        # second relic" without another launch.
+        detail = refusal_detail(report, target)
         raise ForceEventError(
-            f"the bridge refused the force: {(report.get('error') or report.get('message'))!r}")
+            "the bridge refused the force: "
+            f"{(report.get('error') or report.get('message'))!r}"
+            + (f"\n{detail}" if detail else ""))
     log(f"FORCED: {report.get('event')} in act {report.get('act')} "
         f"(index {report.get('before')} -> slot {report.get('after')}, "
         f"moved={report.get('moved')})")
@@ -299,6 +375,13 @@ def main(argv: list[str] | None = None) -> int:
             suffix = ("  <- dressed as " + ", ".join(sorted(dressings))
                       if dressings else "")
             print(f"  {entry}{suffix}")
+            # EB-770. The gate beside the id, so a caller reads WHY an entry
+            # in this list will be refused before spending a launch on it.
+            note = allowed_note(str(entry))
+            if note:
+                print(f"      allowed when: {note}")
+        print(f"The `allowed when:` lines are each event's own IsAllowed, read "
+              f"off tools/data/sts2_base_events.json. {NOTE_LEGEND}")
         print("These are BASE ids, which is what the act's pending list holds: "
               "a dressing is substituted at PullNextEvent, so forcing a "
               "dressed id directly finds nothing (EB-767). Pass either -- a "

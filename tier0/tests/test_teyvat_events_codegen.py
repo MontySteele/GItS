@@ -52,6 +52,14 @@ EVENTS_ROOT = REPO / "klee-mod" / "KleeCode" / "Teyvat" / "Events"
 GENERATED_CS = REPO / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatEventsGenerated.cs"
 
 
+#: The only lowercase words an `is_allowed` note may contain: C# keywords the
+#: fold leaves standing, the `it` it writes for a lambda's subject, the `m` of
+#: a decimal literal, the `player` of a `foreach` it could not fold, and the
+#: four words of the note for an event with no gate at all.
+_NOTE_WORDS = {"if", "return", "foreach", "in", "is", "true", "false", "null",
+               "it", "m", "player", "default", "no", "gate"}
+
+
 def _run(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(
         [sys.executable, str(GENERATOR), *args],
@@ -95,6 +103,22 @@ def test_the_base_event_index_carries_identifiers_only():
         assert isinstance(row["can_kill"], bool)
         assert row["harvest_options"] in (None, "none") or \
             isinstance(row["harvest_options"], int)
+
+        # EB-770. `is_allowed` is the event's own gate, folded to one boolean
+        # expression by `--refresh-allowed`. It is the one value in the index
+        # that is not a single token, so it is checked WORD BY WORD: every
+        # word is either a base-game member name (a capitalised identifier) or
+        # one of the handful of C# words the fold leaves behind. A base-game
+        # sentence -- an event description, a comment out of a method body --
+        # could not get through that, which is the rule this arm is here for.
+        note = row["is_allowed"]
+        assert isinstance(note, str), name
+        assert isinstance(row["is_allowed_override"], bool), name
+        assert re.fullmatch(r"[A-Za-z0-9_ ().,;:!&|<>=*+\-\"'\[\]{}/%]+",
+                            note), f"{name}: {note}"
+        for word in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", note):
+            assert word in _NOTE_WORDS or word[0].isupper(), \
+                f"{name}: {word!r} in is_allowed"
 
 
 def test_a_face_whose_option_count_disagrees_with_the_harvest_is_refused(tmp_path):
@@ -443,3 +467,146 @@ def test_every_face_loss_line_reaches_the_generated_table():
                for key, _ in item.rows() if key.endswith(".loss"))
     assert lines == rows, f"{lines} face Loss: line(s), {rows} row(s) emitted"
     assert GENERATED_CS.read_text(encoding="utf-8").count('.loss"] =') == rows
+
+
+# ----------------------------------- EB-770: the IsAllowed fold -----------
+#
+# `--refresh-allowed` needs a decompile and CI has none, so the FOLD is pinned
+# here against source it is handed directly. These are the shapes 0.111.0
+# actually writes, one arm each, plus the fallback for the two events that
+# iterate their players.
+
+
+def _generator():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gen_teyvat_events",
+                                                  str(GENERATOR))
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_a_guard_clause_is_folded_into_what_the_gate_WANTS():
+    """`if (X) return false;` says what refuses the event. The note has to say
+    the opposite -- what lets it in -- or every reader does the flip by hand
+    and the round after this one flips one wrong."""
+    gen = _generator()
+    src = """
+    public override bool IsAllowed(IRunState runState)
+    {
+        if (runState.CurrentActIndex == 0)
+        {
+            return false;
+        }
+        return runState.Players.All((Player p) => p.Gold >= 100);
+    }
+    """
+    note, override = gen.allowed_note(src)
+    assert override is True
+    assert note == "CurrentActIndex != 0 && Players.All(Gold >= 100)"
+
+
+def test_an_any_guard_becomes_an_all_and_not_a_double_negative():
+    """`Players.Any(p => !p.Potions.Any())` refuses the event, so the gate
+    wants `Players.All(Potions.Any())`. Printing `!(Players.Any(!...))` would
+    be true and unreadable, which is the same as unhelpful."""
+    gen = _generator()
+    src = """
+    public override bool IsAllowed(IRunState runState)
+    {
+        if (runState.Players.Any((Player p) => !p.Potions.Any()))
+        {
+            return false;
+        }
+        return true;
+    }
+    """
+    assert gen.allowed_note(src)[0] == "Players.All(Potions.Any())"
+
+
+def test_a_conditional_return_is_folded_to_one_and():
+    gen = _generator()
+    src = """
+    public override bool IsAllowed(IRunState runState)
+    {
+        if (runState.TotalFloor > 6)
+        {
+            return runState.Players.All((Player p) =>
+                p.Deck.Cards.Any((CardModel c) => c.IsRemovable));
+        }
+        return false;
+    }
+    """
+    assert gen.allowed_note(src)[0] == (
+        "TotalFloor > 6 && Players.All(Deck.Cards.Any(IsRemovable))")
+
+
+def test_a_one_expression_private_helper_is_inlined():
+    """`GetValidRelics(it)` names nothing a caller can act on. The clause it
+    hides -- the relics that are tradable -- is the whole fact."""
+    gen = _generator()
+    src = """
+    public override bool IsAllowed(IRunState runState)
+    {
+        return runState.Players.All((Player p) => GetValidRelics(p).Count() >= 5);
+    }
+
+    private IEnumerable<RelicModel> GetValidRelics(Player player)
+    {
+        return player.Relics.Where((RelicModel r) => r.IsTradable);
+    }
+    """
+    assert gen.allowed_note(src)[0] == (
+        "Players.All(Relics.Where(IsTradable).Count() >= 5)")
+
+
+def test_a_shape_the_fold_does_not_know_degrades_to_the_source_not_a_guess():
+    """Two events walk their players in a `foreach`. A note that is longer is
+    still readable; a note that guessed at a shape would be wrong quietly,
+    which is the one outcome this table cannot afford."""
+    gen = _generator()
+    src = """
+    public override bool IsAllowed(IRunState runState)
+    {
+        if (runState.Players.Count == 1)
+        {
+            return true;
+        }
+        foreach (Player player in runState.Players)
+        {
+            if (player.Creature.CurrentHp <= 5)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    """
+    note, override = gen.allowed_note(src)
+    assert override is True
+    assert note.startswith("if (Players.Count == 1)")
+    assert "foreach" in note
+
+
+def test_an_event_with_no_override_is_marked_as_having_no_gate():
+    gen = _generator()
+    note, override = gen.allowed_note("public sealed class X : EventModel { }")
+    assert override is False
+    assert note == gen.ALWAYS_ALLOWED
+
+
+def test_every_dressed_base_event_in_the_index_carries_a_gate_note():
+    """The same claim `tier0/tests/test_understudy_force_event.py` makes from
+    the harness side, made here against the generator's own substitution
+    table: a dressing whose base event has no note would put the next proofs
+    round back on a refusal with nothing in it."""
+    events = json.loads(INDEX.read_text(encoding="utf-8"))["events"]
+    by_entry = {row["entry"]: row for row in events.values()}
+    source = GENERATED_CS.read_text(encoding="utf-8")
+    bases = set(re.findall(r"typeof\((\w+)\)", source))
+    assert bases, "no substitution rows in the generated file"
+    for base in sorted(bases):
+        row = events.get(base) or by_entry.get(base)
+        assert row is not None, f"{base} is not in the index"
+        assert row["is_allowed"], f"{base} has no is_allowed note"

@@ -62,6 +62,13 @@
 // run and REFUSES rather than writing a no-op wearing an ok; this file is the
 // arithmetic only and knows nothing about a run.
 
+// `#nullable enable` because this file is compiled TWICE: into the bridge,
+// whose project turns annotations on, and into `klee-mod/KleeTests`, whose
+// project does not. Without the directive the `object?` below is a warning in
+// the second build only, which is a difference between two compilations of one
+// file and exactly the kind of thing that gets waved through.
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 
@@ -140,6 +147,71 @@ public static class GitsForceEvent
             if (string.Equals(ids[i], target, StringComparison.OrdinalIgnoreCase))
                 return new Placement(true, i, slot, count, ids[i]);
         return new Placement(false, -1, slot, count, "");
+    }
+
+    // ------------------------------------------- EB-770: run facts -------
+    //
+    // WHY A REFUSAL CARRIES NUMBERS AND NOT AN EXPLANATION.
+    // `EventModel.IsAllowed(IRunState)` is a compiled method. When it answers
+    // false the bridge knows only that; there is no source expression to quote
+    // and no decompiler in the process to make one. What the bridge CAN do,
+    // cheaply and read-only, is print the handful of run values every base
+    // gate in 0.111.0 asks about -- the act index, the floor, gold, potions,
+    // relics, the deck's removable and transformable counts, HP -- and let the
+    // caller compare them against the gate, which `understudy/force_event.py`
+    // prints from `tools/data/sts2_base_events.json` beside them.
+    //
+    // THE SPELLING IS THE TABLE'S. A fact is named after the member the gate
+    // reads (`CurrentActIndex`, `TotalFloor`, `Gold`) so the two halves line
+    // up word for word on the page a caller is reading. Where they could not
+    // -- there is no member called `Deck.Cards.Any(IsRemovable)` -- the count
+    // is spelled `RemovableCards` and the gate's own clause stands next to it.
+    //
+    // ONE PLAYER, SAID OUT LOUD. Every base gate is `Players.All(...)`, so a
+    // co-op run's answer is the WORST player's and not the first one's. The
+    // caller passes whichever player it read plus `playerCount`, and that
+    // count is written into the facts so a two-player refusal cannot be read
+    // as if it described the whole party.
+
+    /// <summary>What the live run holds, for a caller comparing it against a
+    /// gate. Every value is a plain number read off the run; nothing here is a
+    /// judgement about whether the gate passes.</summary>
+    public static Dictionary<string, object?> Facts(
+        int currentActIndex, int totalFloor, int gold, int potions,
+        int relics, int tradableRelics, int deckCards, int removableCards,
+        int transformableCards, int currentHp, int maxHp, int playerCount)
+    {
+        return new Dictionary<string, object?>
+        {
+            ["CurrentActIndex"] = currentActIndex,
+            ["TotalFloor"] = totalFloor,
+            ["Gold"] = gold,
+            ["Potions"] = potions,
+            ["Relics"] = relics,
+            ["TradableRelics"] = tradableRelics,
+            ["DeckCards"] = deckCards,
+            ["RemovableCards"] = removableCards,
+            ["TransformableCards"] = transformableCards,
+            ["CurrentHp"] = currentHp,
+            ["MaxHp"] = maxHp,
+            ["Players"] = playerCount
+        };
+    }
+
+    /// <summary>The facts as one sentence, in the dictionary's own order.
+    ///
+    /// A SENTENCE AS WELL AS A DICTIONARY, because the refusal is read two
+    /// ways: `understudy/force_event.py` prints the structured `run_facts`,
+    /// while a caller holding only the error string -- an MCP client, a log
+    /// line -- would otherwise see the same bare "IsAllowed is false" the
+    /// round complained about.</summary>
+    public static string DescribeFacts(Dictionary<string, object?>? facts)
+    {
+        if (facts == null || facts.Count == 0) return "";
+        var parts = new List<string>(facts.Count);
+        foreach (var pair in facts)
+            parts.Add($"{pair.Key}={pair.Value}");
+        return "This run holds: " + string.Join(", ", parts) + ".";
     }
 
     /// <summary>Swap the entries at `from` and `to`. A SWAP AND NOT AN INSERT:

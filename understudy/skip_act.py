@@ -109,6 +109,27 @@ def act_number(state: dict[str, Any]) -> int | None:
         return None
 
 
+# THE FIRST `?` OF A SKIPPED-INTO ACT IS AN ANCIENT, AND IT IS NOT A DEFECT.
+# `StandardActMap.GenerateMapPointTypes` ends by stamping
+# `StartingMapPoint.PointType = MapPointType.Ancient`, so the node every act
+# opens on is an Ancient point drawn as a `?`; `RunManager` builds that room
+# from `ActModel.PullAncient()` -- a single model rolled once at
+# `GenerateRooms` -- and never from `PullNextEvent`, so the act's event list
+# and its cursor are not read at all there. In act 1 nobody notices, because
+# that node is Neow. After a `skip_act` the run lands on the new act's map
+# standing at exactly that point, so a forced event waits one `?` longer.
+#
+# `teyvat-proofs-7` filed two false negatives against `force_next_event` before
+# it worked this out, over five arrivals on three faces (Pael, Tezcatara, Darv,
+# Nonupeipe, Tanx). The forced event is NOT consumed: it stays at the cursor
+# and the next `?` serves it.
+ANCIENT_FIRST = (
+    "NOTE: the next `?` is this act's ANCIENT (every act's starting map point "
+    "is one, drawn as a `?`); your forced event comes after it. Compare the "
+    "page's `event_id` against the id you forced, answer the Ancient, and walk "
+    "to the next `?` -- the forced event is not consumed by the Ancient.")
+
+
 def skip_to_next_act(why: str, *, max_polls: int = MAX_POLLS,
                      delay: float = POLL_DELAY,
                      log: Callable[[str], None] = print) -> dict:
@@ -154,6 +175,7 @@ def skip_to_next_act(why: str, *, max_polls: int = MAX_POLLS,
         if want_number is not None and seen == want_number:
             log(f"ARRIVED: act {seen} ({want_id}), screen "
                 f"{str(state.get('state_type') or 'unknown')!r}")
+            log(ANCIENT_FIRST)
             return state
 
     raise SkipActError(

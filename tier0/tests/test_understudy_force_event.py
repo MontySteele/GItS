@@ -342,3 +342,94 @@ def test_list_annotates_each_base_id_with_the_faces_that_dress_it(
     assert "GUILD_DESKS_RETURNED_COPY" in out
     assert "dressed as" in out
     assert "EB-767" in out
+
+
+# ------------------------------- EB-770: what the predicate wants ----------
+#
+# The proofs-7 record (PR #556) spent four launches on four
+# events that each answered only "IsAllowed is false". The gate itself cannot
+# be read at runtime -- it is a compiled method -- so it is lifted off the
+# decompile into `tools/data/sts2_base_events.json` and printed from here.
+
+
+def test_every_base_event_a_face_dresses_carries_a_gate_note():
+    """The pin that keeps the table honest as faces land. A dressing whose
+    base event has no note would put the next round back where proofs-7 was:
+    a refusal with nothing in it but the word false."""
+    notes = force_event.allowed_notes()
+    assert notes, "the index carries no is_allowed notes at all"
+    missing = sorted({base for base, _ in force_event.dressed_to_base().values()
+                      if base not in notes})
+    assert missing == [], f"no IsAllowed note for: {missing}"
+
+
+def test_the_four_events_proofs_seven_could_not_force_now_say_what_they_want():
+    """The round's own list, by name. Each one is the base event's own
+    `IsAllowed`, folded to one expression; the numbers beside it on a refusal
+    are the bridge's `run_facts`."""
+    assert force_event.allowed_note("SLIPPERY_BRIDGE") == (
+        "TotalFloor > 6 && Players.All(Deck.Cards.Any(IsRemovable))")
+    assert force_event.allowed_note("RELIC_TRADER") == (
+        "CurrentActIndex != 0 && "
+        "Players.All(Relics.Where(IsTradable).Count() >= 5)")
+    assert force_event.allowed_note("RANWID_THE_ELDER") == (
+        "CurrentActIndex != 0 && Players.All(Relics.Where(IsTradable).Any()) "
+        "&& Players.All(Gold >= 100) && Players.All(Potions.Any())")
+    assert force_event.allowed_note("WELCOME_TO_WONGOS") == (
+        "CurrentActIndex == 1 && Players.All(Gold >= 100)")
+
+
+def test_an_event_with_no_gate_says_so_rather_than_saying_nothing():
+    """`EventModel.IsAllowed` returns true. An empty note would read as a
+    missing row; this one reads as an event that is always allowed."""
+    assert "no gate" in (force_event.allowed_note("SELF_HELP_BOOK") or "")
+
+
+def test_an_id_the_index_does_not_carry_is_none_and_not_a_guess():
+    assert force_event.allowed_note("NO_SUCH_EVENT") is None
+
+
+def test_a_refusal_prints_the_gate_and_what_the_run_holds(monkeypatch):
+    """The two halves together. Neither is useful alone: the gate without the
+    run does not say which clause failed, and the run without the gate is a
+    row of numbers."""
+    seen = _wire(monkeypatch, [_MAP], force={
+        "status": "error",
+        "error": "'SLIPPERY_BRIDGE' is not allowed in this run right now",
+        "run_facts": {"TotalFloor": 3, "RemovableCards": 12}})
+    with pytest.raises(force_event.ForceEventError) as exc:
+        force_event.walk_to_event("SLIPPERY_BRIDGE", "why", log=lambda _: None)
+    message = str(exc.value)
+    assert "TotalFloor > 6" in message
+    assert "TotalFloor=3" in message
+    assert "RemovableCards=12" in message
+    assert seen["posts"] == []
+
+
+def test_a_refusal_from_an_older_bridge_still_prints_the_gate(monkeypatch):
+    """`run_facts` is new. A bridge that does not send it must not cost the
+    caller the half that lives in this tree."""
+    _wire(monkeypatch, [_MAP], force={"status": "error",
+                                      "error": "not allowed"})
+    with pytest.raises(force_event.ForceEventError) as exc:
+        force_event.walk_to_event("WELCOME_TO_WONGOS", "why",
+                                  log=lambda _: None)
+    assert "CurrentActIndex == 1" in str(exc.value)
+    assert "HOLDS:" not in str(exc.value)
+
+
+def test_the_act_index_legend_rides_with_every_note():
+    """`CurrentActIndex == 1` is act TWO. A reader who takes it for act one
+    spends the launch the note was written to save."""
+    detail = force_event.refusal_detail({}, "WELCOME_TO_WONGOS")
+    assert "ZERO-BASED" in detail
+
+
+def test_list_prints_the_gate_beside_each_pending_id(monkeypatch, capsys):
+    monkeypatch.setattr(
+        force_event, "pending_events",
+        lambda: {"events": ["SLIPPERY_BRIDGE"], "events_visited": 0,
+                 "next_event": "SLIPPERY_BRIDGE"})
+    assert force_event.main(["--list"]) == 0
+    out = capsys.readouterr().out
+    assert "allowed when: TotalFloor > 6" in out

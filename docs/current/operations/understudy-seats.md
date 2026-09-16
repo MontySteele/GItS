@@ -47,6 +47,21 @@ refuses an unknown id, an event this run has already visited and one whose own
 `IsAllowed` is false. `--list` prints the pending ids so a caller does not
 guess a spelling.
 
+**An `IsAllowed` refusal says WHAT the predicate wants** (`EB-770`). The gate
+is a compiled method, so the bridge cannot quote it; what it prints instead is
+what the RUN holds — act index, floor, gold, potions, relics, tradable relics,
+removable and transformable cards, HP — as `run_facts`, while the gate itself
+is lifted once off the decompile into `tools/data/sts2_base_events.json`
+(`is_allowed`) by `python tools/gen_teyvat_events.py --refresh-allowed`.
+`force_event.py` prints the two together on a refusal, and the gate alone
+beside every id in `--list`. **`CurrentActIndex` is ZERO-BASED** — a gate
+wanting `CurrentActIndex == 1` wants act TWO — and `TotalFloor` counts the
+whole run rather than the act. `teyvat-proofs-7` spent four launches learning
+only that four events answered false; their gates are `SLIPPERY_BRIDGE` past
+floor 6 with a removable card in the deck, `RELIC_TRADER` outside act 1 with
+five tradable relics, `RANWID_THE_ELDER` outside act 1 with a tradable relic,
+100 gold and a potion, and `WELCOME_TO_WONGOS` in act 2 with 100 gold.
+
 **A DRESSED Teyvat id is accepted and translated** (`EB-767`). A dressing does
 not replace an event in the act's pool — it cannot, because the pool is
 shuffled once at run start and a pool one element different moves every later
@@ -77,6 +92,20 @@ seed chose at embark (Natlan or Inazuma at the Hive index, Fontaine or Sumeru
 at Glory's), so the four act-2/3 dressings can be looked at in under a minute
 instead of only after a bot survives act 1.  `--list` prints the run's act list
 and where it stands, writing nothing.
+
+**The first `?` after a skip is the act's ANCIENT, not the act's event list.**
+`StandardActMap.GenerateMapPointTypes` ends by stamping
+`StartingMapPoint.PointType = MapPointType.Ancient`, and `RunManager` builds
+that room from `ActModel.PullAncient()` — the single model rolled once at
+`GenerateRooms` — rather than from `PullNextEvent`, so the pending list and its
+cursor are never read there; in act 1 nobody notices, because that node is
+Neow. **The practical rule: compare the arrived page's `event_id` against the
+id you forced, and if it is an Ancient (Pael, Tezcatara, Darv, Nonupeipe,
+Tanx), answer it and walk to the NEXT `?` — the forced event is not consumed
+and is still at the cursor.** `skip_act` prints that line on arrival.
+`teyvat-proofs-7` filed two false negatives against `force_next_event` before
+working it out, over five arrivals on three faces; the cost is one extra `?`
+room, one extra fight and one extra map step per forced event.
 
 **`skip_act` is the one op on this route that is NOT rng-neutral, and it says
 so rather than claiming otherwise.** The floors it skips are floors whose rolls
