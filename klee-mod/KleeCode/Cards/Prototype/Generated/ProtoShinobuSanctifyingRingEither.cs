@@ -128,6 +128,13 @@ public sealed class ProtoShinobuSanctifyingRingEither : CustomCardModel, IElemen
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoShinobuSanctifyingRingEitherModeA : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        KleeArt.CardPortrait("proto_shinobu_sanctifying_ring_either");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deal 3 damage to ALL enemies, applying its element"),
@@ -142,6 +149,13 @@ public sealed class ProtoShinobuSanctifyingRingEitherModeA : ModalOptionCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoShinobuSanctifyingRingEitherModeB : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        KleeArt.CardPortrait("proto_shinobu_sanctifying_ring_either");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gain 4 Block, applying no element"),

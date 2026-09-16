@@ -126,6 +126,13 @@ public sealed class ProtoSparkModeBombs : CustomCardModel, IModalCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoSparkModeBombsModeA : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        KleeArt.CardPortrait("proto_spark_mode_bombs");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Place 1 [gold]Bomb[/gold] dealing 5"),
@@ -140,6 +147,13 @@ public sealed class ProtoSparkModeBombsModeA : ModalOptionCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class ProtoSparkModeBombsModeB : ModalOptionCard, IMeterPricedCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        KleeArt.CardPortrait("proto_spark_mode_bombs");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spend 3 [gold]Sparks[/gold]: place 3 [gold]Bombs[/gold] dealing 5"),

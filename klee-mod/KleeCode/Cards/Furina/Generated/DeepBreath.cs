@@ -125,6 +125,13 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard, IModalCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class DeepBreathModeA : ModalOptionCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("deep_breath");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]"),
@@ -139,6 +146,13 @@ public sealed class DeepBreathModeA : ModalOptionCard
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class DeepBreathModeB : ModalOptionCard, IMeterPricedCard
 {
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("deep_breath");
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spend 3 [gold]Encore[/gold]: draw 3 cards"),
