@@ -586,33 +586,48 @@ def test_prototype_rows_never_enter_the_sim_card_index(tmp_path, monkeypatch):
                            for c in cards)
 
 
-def test_version_stamps_cannot_see_the_prototype_surface():
+def test_version_stamps_cannot_see_the_prototype_surface(tmp_path):
     """R213 B: 'ignored by ... version stamps'.
 
     `lint_sheet_stamp`'s digest IS the sheet half of the stamp law. A staged
     prototype must not bump SHEET_DIGEST: nothing measured moved, and a stamp
     that bumps several times a week for scratch stops meaning anything.
+
+    `EB-772`: THE STAGED SHEET IS A COPY IN TEMP, and it used to be the
+    TRACKED sheet, written in the real checkout and put back in a `finally`.
+    The 2026-09-02 note below says what that cost once already; the rest of
+    the cost is that it is shared mutable state, so two lanes running this
+    module at the same time can each see the other's staged bytes and can
+    leave the tree dirty. Nothing in this test writes inside the checkout now.
+
+    AND IT PROVES MORE THAN THE OLD ONE DID, because a digest that ignores a
+    file also ignores a file it never saw. Two facts stand together: adding
+    the staged copy to the walk DOES move the digest -- so the walk is
+    sensitive to exactly this content -- and the sheet is not in the walk, so
+    the number the stamp law reads cannot move for it.
     """
     from tools import lint_sheet_stamp
 
     assert loader.PROTOTYPE_SHEET not in lint_sheet_stamp.sheets()
     assert "docs/prototype-surface.yaml" in lint_sheet_stamp.EXCLUDED
     before = lint_sheet_stamp.digest()
-    # BYTES, NOT TEXT (2026-09-02). This writes a TRACKED sheet in the real
-    # checkout and puts it back, and `write_text` on Windows translates "\n"
-    # into "\r\n" -- so the "restore" left the file byte-DIFFERENT from HEAD,
-    # which `.gitattributes`' LF working tree reports as a standing
-    # modification. Under `-n auto` it was worse than cosmetic while it lasted:
-    # a tracked file flickering modified is a working tree flickering DIRTY,
-    # and `test_manifest_version_gate` read exactly that flicker between two
-    # `Get-AutoVersion` calls and went red once for it.
-    raw = loader.PROTOTYPE_SHEET.read_bytes()
-    try:
-        loader.PROTOTYPE_SHEET.write_bytes(
-            raw + b"\n# staged, for one assertion\n")
-        assert lint_sheet_stamp.digest() == before
-    finally:
-        loader.PROTOTYPE_SHEET.write_bytes(raw)
+    assert lint_sheet_stamp.digest(lint_sheet_stamp.sheets()) == before
+
+    # BYTES, NOT TEXT (2026-09-02). `write_text` on Windows translates "\n"
+    # into "\r\n", so the tracked sheet's old "restore" left it byte-DIFFERENT
+    # from HEAD, which `.gitattributes`' LF working tree reports as a standing
+    # modification. Under `-n auto` that was worse than cosmetic: a tracked
+    # file flickering modified is a working tree flickering DIRTY, and
+    # `test_manifest_version_gate` read exactly that flicker between two
+    # `Get-AutoVersion` calls and went red once for it. The bytes rule is kept
+    # here for the copy, so the staged file is the sheet plus one line and
+    # nothing else.
+    staged = tmp_path / loader.PROTOTYPE_SHEET.name
+    staged.write_bytes(loader.PROTOTYPE_SHEET.read_bytes()
+                       + b"\n# staged, for one assertion\n")
+    assert lint_sheet_stamp.digest(
+        lint_sheet_stamp.sheets() + [staged]) != before
+    assert lint_sheet_stamp.digest() == before
 
 
 def test_distinctness_report_cannot_see_the_prototype_surface():
