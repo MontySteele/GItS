@@ -1164,7 +1164,20 @@ public sealed class BaronBunnyPower
     public List<(string, string)>? Localization => new()
     {
         ("title", "Baron Bunny"),
+        // `EB-754` (Klee r27, the Codex seat, fight 4): the decoy printed the
+        // literal `{Damage}` on the page. `PowerModel.HoverTips` binds
+        // `DynamicVars.AddTo` on the SMART branch alone -- the static branch
+        // binds the game's own three dumb variables and nothing else -- so a
+        // var written here was never filled and the placeholder itself reached
+        // the screen. `EB-353`'s split, one arm over: the compendium row
+        // carries the CONSTANT the var is seeded from, and the smart row
+        // carries the live number `EB-463` banks at play.
         ("description",
+            "The next time an enemy attacks you, take "
+          + $"[blue]{CompanionOverhaulLaw.BaronBunnyReduction}[/blue] less damage and deal "
+          + $"[blue]{CompanionOverhaulLaw.BaronBunnyDamage}[/blue] [gold]Pyro[/gold] "
+          + "damage to ALL enemies."),
+        ("smartDescription",
             "The next time an enemy attacks you, take "
           + $"[blue]{CompanionOverhaulLaw.BaronBunnyReduction}[/blue] less damage and deal "
           + "[blue]{Damage}[/blue] [gold]Pyro[/gold] "

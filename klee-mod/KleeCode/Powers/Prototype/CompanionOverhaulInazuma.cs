@@ -1110,7 +1110,18 @@ public sealed class TamotoPower
     public List<(string, string)>? Localization => new()
     {
         ("title", "Tamoto"),
+        // `EB-754`, and it is Amber's defect on Chiori's row -- the same
+        // construction, found on the same sweep. `PowerModel.HoverTips` binds
+        // `DynamicVars.AddTo` on the SMART branch alone, so `{Damage}` written
+        // on the static row was never filled and the placeholder reached the
+        // screen. `EB-353`'s split: the compendium row carries the CONSTANT
+        // the var is seeded from, the smart row the live number.
         ("description",
+            "At the end of your turn, deal "
+          + $"[blue]{CompanionOverhaulLaw.TamotoDamage}[/blue] [gold]Geo[/gold] "
+          + "damage to a random enemy, ignoring [gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+        ("smartDescription",
             "At the end of your turn, deal "
           + "[blue]{Damage}[/blue] [gold]Geo[/gold] "
           + "damage to a random enemy, ignoring [gold]Block[/gold]. "
