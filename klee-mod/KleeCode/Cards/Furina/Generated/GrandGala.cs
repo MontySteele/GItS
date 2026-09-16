@@ -53,7 +53,7 @@ public sealed class GrandGala : CustomCardModel, ICharacterCard, ISalonDeployCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Gala"),
-        ("description", FurinaBurstRider.Face("Add 2 [gold]Mademoiselle Crabaletta[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold].", "Add 2 [gold]Mademoiselle Crabaletta[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5.")),
+        ("description", FurinaBurstRider.Face("Add 2 [gold]Mademoiselle Crabaletta[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. They perform at once. Gain {Encore:diff()} [gold]Encore[/gold].", "Add 2 [gold]Mademoiselle Crabaletta[/gold], 1 [gold]Surintendante Chevalmarin[/gold], 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. They perform at once. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

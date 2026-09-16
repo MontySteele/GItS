@@ -321,3 +321,93 @@ internal static class KokomiTargetTypeInitPatch
     [HarmonyPostfix]
     public static void Postfix() => KokomiTargets.Register();
 }
+
+/// <summary>
+/// `EB-347`: THE PET IS A DELIBERATE TARGET, SO AN AUTO-PLAY NEVER ROLLS IT.
+///
+/// THE FIND (Kokomi r4d act 1, fight 3, and three unreported act-2 plays).
+/// Uproar's "Play a random Attack from your Draw Pile" pulled `Slack Water`
+/// and wrote it onto the Bake-Kurage as a Plan instead of playing it at the
+/// enemy -- 0 damage on a turn the seat had priced at 12 -- while one fight
+/// earlier the identical card pulled by the identical Uproar had gone at the
+/// enemy. Two behaviours from one screen, neither of them a choice anybody
+/// made.
+///
+/// WHOSE ROLL IT IS. <c>CardCmd.AutoPlay</c>'s own fallback covers only
+/// <c>TargetType.AnyEnemy</c> and <c>AnyAlly</c>; a CUSTOM single-target type
+/// is filled by BaseLib's <c>AutoPlayCustomTargetPatch</c>, which rolls over
+/// <c>combatState.Creatures</c> filtered by the type's predicate. <see
+/// cref="KokomiTargets.PetOrEnemy"/>'s predicate is the union of "an enemy"
+/// and "your pet" by design -- that is what the player may drag onto -- so the
+/// jellyfish is in the bag every time an effect plays one of her Plan cards
+/// for her.
+///
+/// A PREFIX AHEAD OF THAT ONE, NOT A REPLACEMENT FOR IT. This runs at
+/// <c>Priority.First</c> and declares <c>[HarmonyBefore("BaseLib")]</c>, fills
+/// the target itself from the arm's own three target types MINUS the pet, and
+/// then BaseLib's own prefix sees a non-null target and returns. The roll uses the run's own
+/// <c>Rng.CombatTargets</c> stream, the stream BaseLib would have used, so a
+/// seeded run is not re-shuffled by the fix. Where the pet is the ONLY thing
+/// the predicate accepts -- a Plan-only card, `PetOnly` -- the target is left
+/// null and the card plays its now-line at nobody, which is what "a deliberate
+/// target only" means.
+///
+/// AND THE RULE ITSELF IS NOT HERE. <see cref="KokomiPlan.PlayedOnPet"/> asks
+/// <c>cardPlay.IsAutoPlay</c>, so an auto-play writes no Plan whatever door
+/// its aim came through; this patch is what keeps an auto-played ATTACK from
+/// swinging at the jellyfish in the first place. The sim's twin is
+/// `kokomi_plan.plan_aimed_at_pet`.
+/// </summary>
+[HarmonyBefore("BaseLib")]
+[HarmonyPatch(typeof(CardCmd), "AutoPlay")]
+internal static class AutoPlayNeverAimsAtThePetPatch
+{
+    [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
+    public static void Prefix(CardModel card, ref Creature? target)
+    {
+        try
+        {
+            if (target != null || card == null) return;
+            // (a) CHARACTER SCOPE. Kokomi's pet, Kokomi's cards, and nothing
+            // else in the quarantine is touched by this patch.
+            var owner = card.Owner;
+            if (owner == null || !KokomiResources.IsKokomi(owner.Creature)) return;
+            if (card.CombatState is not { } combat) return;
+            var rng = owner.RunState?.Rng;
+            if (rng == null) return;
+
+            // THE THREE SPELLINGS, BY NAME. BaseLib's own roll reads its
+            // internal `SingleTargeting` table; naming `KokomiTargets`'
+            // three instead keeps this patch's reach exactly the arm's and
+            // asks for no `internal` access. `PetOnly` is deliberately absent:
+            // its predicate accepts the jellyfish and nothing else, so there
+            // is no non-pet aim to roll and the card plays its now-line at
+            // nobody, which is what "a deliberate target only" means.
+            List<Creature> candidates;
+            if (card.TargetType == KokomiTargets.PetOrEnemy)
+            {
+                candidates = combat.HittableEnemies
+                    .Where(c => c != null && c.IsAlive && !BakeKuragePet.Is(c))
+                    .ToList();
+            }
+            else if (card.TargetType == KokomiTargets.PetOrSelf)
+            {
+                candidates = owner.Creature is { IsAlive: true } me
+                    ? new List<Creature> { me }
+                    : new List<Creature>();
+            }
+            else
+            {
+                return;
+            }
+            if (candidates.Count == 0) return;
+            target = rng.CombatTargets.NextItem(candidates);
+        }
+        catch (Exception)
+        {
+            // BaseLib's own fallback swallows here for the same reason: a
+            // targeting nicety must never be the thing that ends a run.
+        }
+    }
+}

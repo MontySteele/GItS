@@ -557,6 +557,73 @@ def _slow_clause(power: dict[str, Any]) -> str:
     return _SLOW_CLAUSE if _SLOW_TRIGGER in text.casefold() else ""
 
 
+#: `EB-722`. A PLACER POWER, whose number is the SIZE of the charge it plants
+#: and not how many stacks of it stand. Klee's arm has two -- `Witches' Circle`
+#: and `Chained Reactions` -- and both print the same shape of sentence, so the
+#: test is that sentence and never their names: a third placer worded the same
+#: way gets the same label and a renamed one does not go silent, which is the
+#: discipline `_turn_allowance` and `_PLAN_CAP_SENTENCE` already keep here.
+_PLACED_CHARGE = re.compile(r"place a (Bomb|Mine)\s+(\d+)\b", re.IGNORECASE)
+
+
+def _placed_charge(power: dict[str, Any]) -> str:
+    """What this power's number IS, where it is a charge size. `EB-722`.
+
+    THE DEFECT (Klee r25 lane 2, (c) 4). Every other numbered buff on that
+    strip prints its own stack count, and `Witches' Circle 3 (buff)` and
+    `Chained Reactions 3` name the SIZE each one places -- so a seat reading
+    the strip cannot tell which kind of number it is looking at.
+
+    THE ROW'S OWN DEFAULT WAS "print the number the face means", and that is
+    what this does: the number stays and takes the noun the sentence beside it
+    uses, `Witches' Circle: Bomb 3`. Dropping it was the fallback and is not
+    needed -- the size is the one fact about this power a reader plans on.
+
+    MATCHED ONLY WHERE THE TWO AGREE. A power whose stack count and whose
+    printed size have come apart is not a placer wearing this shape -- it is a
+    power that stacks AND places -- and it gets the line it always had.
+    """
+    found = _PLACED_CHARGE.search(str(power.get("text") or ""))
+    if not found:
+        return ""
+    stacks = power.get("stacks")
+    if not isinstance(stacks, int) or isinstance(stacks, bool):
+        return ""
+    return found.group(1).title() if int(found.group(2)) == stacks else ""
+
+
+#: `EB-721`. The amplifying reaction a power's own sentence says is folded into
+#: the number it prints. `ProtoBombPower`'s face writes it as a clause on the
+#: total -- " with Vaporize", " with Melt" -- in the same place and the same
+#: shape as `after Vulnerable` and `capped by Hard To Kill`, so the pattern is
+#: that clause and not the badge's name.
+_FOLDED_REACTION = re.compile(
+    r"\bdeals? [^.]*?\bwith (Vaporize|Melt)\b", re.IGNORECASE)
+
+
+def _folded_reaction(power: dict[str, Any]) -> str:
+    """The header's label where a reaction is inside its number. `EB-721`.
+
+    THE DEFECT (Klee r25 lane 2, (c) 2). "`Bomb 18 ... sizes, oldest first:
+    12` is one 12-size Bomb standing against a Hydro aura for a Vaporize. Both
+    numbers are honest; they are adjacent and disagree." `EB-559` folded the
+    pending amplifier into the printed total, and until `EB-721` no surface
+    named it -- so the header and the raw list beside it could not be
+    reconciled without knowing a rule neither of them stated.
+
+    THE ROW'S PICK WAS THE LABEL, not folding the multiplier into both numbers:
+    the sizes list is the QUEUE, and multiplying every entry by a bonus only
+    the leading charge collects would make three of four figures false to buy
+    one agreement.
+
+    OFF THE SENTENCE AND NEVER OFF THE NAME, `_turn_allowance`'s discipline, so
+    a second badge that folds an amplifier in gets the same label the day its
+    face says so.
+    """
+    found = _FOLDED_REACTION.search(str(power.get("text") or ""))
+    return f", with {found.group(1).title()}" if found else ""
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
@@ -567,13 +634,22 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     `EB-525`: and where the sentence describes a stack that arrives after the
     card that adds it has already resolved, the page says which cards the
     number counts.
+
+    `EB-722`: and where the number is the SIZE of a charge the power plants
+    rather than a count of itself, the noun rides beside it.
+
+    `EB-721`: and where the number has an amplifying reaction folded into it
+    that the raw figures beside it do not, the header says which.
     """
     cap = _turn_allowance(power)
-    if cap is None:
-        line = f"{indent}{power['name']} {power['stacks']}"
-    else:
+    placed = _placed_charge(power)
+    if cap is not None:
         line = f"{indent}{power['name']} {power['stacks']} of {cap} left " \
                f"this turn"
+    elif placed:
+        line = f"{indent}{power['name']}: {placed} {power['stacks']}"
+    else:
+        line = f"{indent}{power['name']} {power['stacks']}{_folded_reaction(power)}"
     kind = str(power.get("kind") or "").strip().lower()
     if kind:
         line += f" ({kind})"
@@ -608,8 +684,15 @@ _ONE_USE_RIDER = re.compile(r"the next (\w+) you play\b", re.I)
 # makes the panel's "leaves no aura" clause false for a debuff Plan. The
 # Tamakushi Casket's own sentence, with the element left open: the clause is
 # about a hit that carries one, and the Plan is Hydro either way.
+#
+# `EB-348` REWROTE THAT SENTENCE ("Each debuff you apply lands a real 6 Hydro
+# hit on that enemy"), so the pattern follows it. Both spellings are matched
+# rather than only the current one: the gate is on a relic a RUN is holding,
+# the old wording is what a save from before the rewrite carries, and a clause
+# that silently stopped printing is exactly the defect `EB-433` was filed on.
 _DEBUFF_ANSWERING_HIT = re.compile(
-    r"whenever you apply a debuff[^.]*damage", re.I)
+    r"(?:whenever|each) (?:you apply a debuff|debuff you apply)[^.]*"
+    r"(?:damage|hit)", re.I)
 
 
 def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:

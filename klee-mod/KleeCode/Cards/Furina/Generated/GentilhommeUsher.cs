@@ -53,7 +53,7 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISalonDe
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", FurinaBurstRider.Face("Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold].", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. [gold]Burst[/gold] +5.")),
+        ("description", FurinaBurstRider.Face("Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. It performs at once. Gain {CalculatedBlock:diff()} [gold]Block[/gold].", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. It performs at once. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

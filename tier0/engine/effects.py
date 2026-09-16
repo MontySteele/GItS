@@ -688,8 +688,9 @@ def _pick_targets(state: CombatState, spec: str,
     raise ValueError(f"unknown target spec {spec!r}")
 
 
-def _is_base_game_basic(card: Card) -> bool:
-    """The base game's own basic cards -- Strike, Defend and their kin.
+def _is_off_sheet_card(state: CombatState, card: Card) -> bool:
+    """A card the character's SHEET does not own and this project did not
+    write -- the base game's own cards, whatever their rarity.
 
     [USER], 2026-09-02: "I think we actually SHOULD remove the elemental
     application from the basic Strikes for all characters. Those cards are
@@ -699,18 +700,52 @@ def _is_base_game_basic(card: Card) -> bool:
     is the ruled one -- a base Strike is the base game's card, weak on purpose,
     and the element is what her OWN Attacks are for.
 
-    TWO TESTS, AND BOTH ARE LOAD-BEARING. No owning `character:` is what makes
-    it the base game's rather than a kit's; `basic` is what keeps the exemption
-    to the BASICS rather than sweeping in a base colorless or event card a run
-    might hand her (`squash`, `exterminate` -- unmoved, and unmoved on the mod
-    side too). An Ancient is neither: it is the mod's own card and carries
-    `rarity: ancient`, so `jumpy_dumpty_mk_omega` still applies her Pyro here
-    exactly as its C# twin declares `Element.Pyro` outright.
+    `EB-331` WIDENED IT FROM THE BASICS TO EVERY OFF-SHEET CARD, and the find
+    is why: `Breakthrough`, an Ironclad event card, put `Hydro Aura 2` on three
+    enemies in a Kokomi run and the next Electro hit reacted with nothing on
+    screen to predict it (r4c act 2b finding 6). R244 ruled the base Strike
+    applies nothing BECAUSE IT PRINTS NOTHING, and that reading does not stop
+    at a rarity: a face with no element on it is a face that promises none,
+    whether the run handed it over as a starter, a reward, an event or a curse.
+    The `basic` half of the old test was doing the opposite job -- keeping a
+    base colorless or event card INSIDE the cadence -- so it goes.
 
-    `CatalystCadence.IsBaseGameBasic` is the mod's twin, the same two tests.
+    WHAT IS STILL INSIDE, and each for its own reason. An ANCIENT is the mod's
+    own card and carries `rarity: ancient` with no owning `character:`, so it
+    is named rather than swept: `jumpy_dumpty_mk_omega` still applies her Pyro
+    here exactly as its C# twin declares `Element.Pyro` outright. A COMPANION
+    row is exempt from the cadence one branch up and states its element on the
+    effect, so it never reaches this predicate.
+
+    ON HER SHEET IS ASKED OF THE PLAYER, not of the presence of a field. The
+    reference pools ARE tagged (`ref_ironclad`, `ref_silent`, and the
+    `game_ref/` layers force it) precisely so `rewards.character_pool` can drop
+    another character's cards, so "has a `character:`" would have called an
+    Ironclad package card hers. The idiom is the one the Spotlight readers
+    already use, `card.character == player.character_id`.
+
+    `CatalystCadence.IsOffSheet` is the mod's twin, and there the whole test is
+    `card is not CustomCardModel`: an Ancient and a companion are both this
+    mod's own classes and a character's pool is character-scoped, so the C#
+    says in one clause what the sheet needs three for.
     """
-    return (getattr(card, "rarity", None) == "basic"
-            and not getattr(card, "character", None))
+    if getattr(card, "is_companion", False):
+        return False
+    if getattr(card, "rarity", None) == "ancient":
+        return False
+    owner = getattr(card, "character", None)
+    if not owner:
+        # No owning sheet anywhere: a base basic, a token, a colorless, a
+        # curse. Off-sheet for everybody, which is R244's original reading.
+        return True
+    mine = getattr(state.player, "character_id", "")
+    if not mine:
+        # A hand-built state with no seat identity -- an engine fixture. A card
+        # that HAS an owner is not swept there: the predicate would otherwise
+        # answer "off-sheet" for every card in every such fixture and the
+        # cadence would go dark wherever the seat was left unset.
+        return False
+    return owner != mine
 
 
 def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
@@ -718,9 +753,10 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
 
     catalyst: every attack applies the character's element unless the
     sheet says applies_element: false. Cards with their own element
-    (companions) apply that instead. THE BASE GAME'S OWN BASICS ARE OUTSIDE IT
-    ([USER] 2026-09-02, LAW's cadence line): a base Strike applies nothing --
-    see `_is_base_game_basic`.
+    (companions) apply that instead. EVERY OFF-SHEET CARD IS OUTSIDE IT
+    ([USER] 2026-09-02, LAW's cadence line; widened by `EB-331`): a base Strike
+    applies nothing, and so does a base event or colorless card a run hands
+    her -- see `_is_off_sheet_card`.
 
     skill (Furina, Skill-grade): only Skill/Burst-tagged cards apply the
     CHARACTER's element -- attacks never auto-apply, which is what buys
@@ -761,7 +797,7 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
                 else state.player.element)
     if (card.type == "attack" and fx["op"] == "damage"
             and state.player.cadence == "catalyst"
-            and not _is_base_game_basic(card)):
+            and not _is_off_sheet_card(state, card)):
         return card.element if card.element != "none" else state.player.element
     if (state.player.cadence == "skill" and fx["op"] == "damage"
             and not card.is_companion

@@ -50,7 +50,7 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard, ISalonDeploy
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Waltz"),
-        ("description", "[gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher. Add 1 [gold]Mademoiselle Crabaletta[/gold] and 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]."),
+        ("description", "[gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher. Add 1 [gold]Mademoiselle Crabaletta[/gold] and 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. They perform at once."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

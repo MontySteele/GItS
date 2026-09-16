@@ -792,9 +792,25 @@ public static class KokomiPlan
     /// pipeline hands <c>OnPlay</c> the <c>Creature</c> that was targeted
     /// (<c>CardPlay.Target</c>), so "played on the Bake-Kurage" is a property
     /// of the play rather than of a mode, a keyword or a second card.
+    ///
+    /// `EB-347`: AND ONLY WHEN A PLAYER AIMED IT. Uproar's "Play a random
+    /// Attack from your Draw Pile" wrote Slack Water onto the jellyfish as a
+    /// Plan instead of playing it at the enemy (Kokomi r4d act 1 fight 3),
+    /// while the identical card pulled by the identical Uproar one fight
+    /// earlier had gone at the enemy -- a screen contradicting itself. The
+    /// roll is <c>BaseLib.Patches.Features.AutoPlayCustomTargetPatch</c>,
+    /// which fills a null target for any custom TargetType from every live
+    /// creature its predicate accepts, and <see cref="KokomiTargets.PetOrEnemy"/>
+    /// accepts the pet. <see cref="AutoPlayNeverAimsAtThePetPatch"/> takes the
+    /// pet out of that roll; this line is the rule itself, so a pet aim that
+    /// arrives by any other door still writes no Plan. The pet is a
+    /// DELIBERATE target -- the mod draws it so a player has something to drag
+    /// a card onto -- and an auto-play has nobody at the mouse. The sim's twin
+    /// is `kokomi_plan.plan_aimed_at_pet`, which refuses on
+    /// `force_random_targeting` and `kurage_autoplaying` for the same reason.
     /// </summary>
     public static bool PlayedOnPet(CardPlay cardPlay) =>
-        BakeKuragePet.Is(cardPlay.Target);
+        !cardPlay.IsAutoPlay && BakeKuragePet.Is(cardPlay.Target);
 
     /// <summary>
     /// Write one Plan down: rule 2's whole engine side.

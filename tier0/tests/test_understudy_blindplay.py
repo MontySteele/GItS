@@ -6489,9 +6489,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
         # `blindplay_shape.CASKET_STRIKE` -- so what is held in step is the
         # prose either side of it, the same fold-out the Encore row makes.
+        # `EB-348` widened both copies to the rule the ping actually has:
+        # it is a real Hydro HIT, so it reacts, takes the target's Vulnerable
+        # and re-arms Hydro. Same fold-out, one clause longer.
         "Tamakushi Casket": [
-            "Your relic. Whenever you apply a debuff to an enemy, it deals ",
-            " damage to ", "that enemy."],
+            "Your relic. Each debuff you apply is a ",
+            " hit on that ", "enemy: it reacts, takes its "],
     }
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the
@@ -7253,8 +7256,11 @@ def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
     geo = blindplay.observe(
         elemental_hand_state(aura=True, elements=("Geo",)))
     assert "NO REACTION IS REACHABLE" not in geo
-    assert (f"- **Crystallize** — Geo on any aura. The aura is consumed and "
-            f"you gain {blindplay.CRYSTALLIZE_BLOCK} Block.") in geo
+    # `EB-613` (R263 sec.5 item 1) turned the row round: a Geo hit is a COST
+    # to a reaction deck, so the price leads and the Block follows it.
+    assert (f"- **Crystallize** — Geo on any aura: "
+            f"{blindplay.CRYSTALLIZE_BLOCK} Block, and the aura is consumed "
+            f"-- nothing is left to react with.") in geo
 
 
 def test_a_trigger_element_with_no_aura_out_is_told_which_half_is_missing():
@@ -7357,7 +7363,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         "Swirl": ["aura is consumed and copied onto ALL enemies"],
-        "Crystallize": ["he aura is consumed and you gain "],
+        # `EB-613`: the price leads. Both copies moved in one commit, which
+        # is what this pin is for.
+        "Crystallize": [", and the aura is consumed -- nothing is left "
+                        "to react with."],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)
@@ -12101,9 +12110,8 @@ def _casket_plans_state() -> dict:
     state["player"]["relics"] = [
         {"id": "KLEEMOD-TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
          "description": ("Start each combat with the [gold]Bake-Kurage[/gold]."
-                         " Whenever you apply a debuff to an enemy, it deals "
-                         "[blue]2[/blue] [gold]Hydro[/gold] damage to that "
-                         "enemy."),
+                         " Each debuff you apply lands a real [blue]2[/blue] "
+                         "[gold]Hydro[/gold] hit on that enemy."),
          "counter": None, "keywords": []}]
     return state
 
@@ -12706,3 +12714,100 @@ def test_the_written_face_is_read_by_id_and_not_by_title():
         "Gain 3 Block. At the start of your next turn, gain 4 Block.")
     state["player"]["hand"][0]["id"] = "KLEEMOD-NO_SUCH_CARD"
     assert "Written:" not in blindplay.observe(state)
+
+def placer_power_state(name: str = "Witches' Circle",
+                       amount: int = 3, size: int = 3) -> dict:
+    """A player-side placer Power on the buff strip (`EB-722`)."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["player"]["status"] = [
+        {"id": "KLEEMOD-WITCHES_CIRCLE", "name": name, "amount": amount,
+         "type": "Buff",
+         "description": (f"Whenever you play a Hexerei card, place a Bomb "
+                         f"{size} on a random enemy.")}]
+    return state
+
+
+def test_a_placer_powers_number_is_labelled_as_the_size_it_places():
+    """`EB-722`. WHICH KIND OF NUMBER IS THIS?
+
+    THE DEFECT (Klee r25 lane 2, (c) 4). Every other numbered buff on the
+    strip prints its own stack count, and `Witches' Circle 3 (buff)` and
+    `Chained Reactions 3` name the SIZE each one places -- so a seat reading
+    the strip cannot tell which kind of number it is looking at.
+
+    THE ROW'S DEFAULT was "print the number the face means", taken: the number
+    stays and takes the noun its own sentence uses.
+
+    OFF THE SENTENCE AND NEVER OFF THE NAME, `_turn_allowance`'s discipline one
+    power over, so a third placer worded the same way gets the same label and a
+    renamed one does not go silent.
+
+    Seen to FAIL: the line printed `Witches' Circle 3 (buff)`.
+    """
+    page = blindplay.observe(placer_power_state())
+    assert "Witches' Circle: Bomb 3 (buff)" in page
+    assert "Witches' Circle 3 (buff)" not in page
+
+    # A second placer, a different trigger, the same label.
+    assert "Chained Reactions: Bomb 5 (buff)" in blindplay.observe(
+        placer_power_state("Chained Reactions", 5, 5))
+
+
+def test_a_power_that_stacks_and_also_places_reads_as_it_always_did():
+    """The other half: the label is only right where the two numbers ARE one
+    number. A power whose stack count and whose printed size disagree is not a
+    placer wearing this shape, and it keeps the line it had."""
+    page = blindplay.observe(placer_power_state(amount=2, size=7))
+    assert "Witches' Circle 2 (buff)" in page
+    assert ": Bomb" not in page
+
+
+def bomb_pile_state(header: int = 18, clause: str = " with Vaporize",
+                    sizes: str = "12") -> dict:
+    """An enemy wearing a Bomb pile whose printed total carries a clause."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": header,
+         "type": "Buff",
+         "description": (f"Set off here deals {header} Pyro damage{clause}. "
+                         f"Bomb sizes here, oldest first: {sizes}, growing "
+                         f"each turn. None goes off by itself.")}]
+    return state
+
+
+def test_a_bomb_header_that_folds_a_reaction_says_which_one():
+    """`EB-721`. TWO HONEST NUMBERS, ADJACENT, DISAGREEING.
+
+    THE FIND (Klee r25 lane 2, (c) 2). "`Bomb 18 ... sizes, oldest first: 12`
+    is one 12-size Bomb standing against a Hydro aura for a Vaporize. Both
+    numbers are honest; they are adjacent and disagree." `EB-559` folded the
+    pending amplifier into the printed total and named it nowhere, while every
+    other term the number passes through has carried a clause since R248.
+
+    THE ROW'S PICK WAS THE LABEL. Folding the multiplier into the sizes list
+    was the alternative and is worse: the list is the QUEUE, and only the
+    LEADING charge collects the amplifier, so multiplying every entry would
+    make most of the figures false to buy one agreement.
+
+    Seen to FAIL: the header printed `Bomb 18` beside `oldest first: 12`.
+    """
+    page = blindplay.observe(bomb_pile_state())
+    assert "Bomb 18, with Vaporize (buff)" in page
+    assert "Set off here deals 18 Pyro damage with Vaporize." in page
+
+    melted = blindplay.observe(
+        bomb_pile_state(27, " with Melt, after Vulnerable"))
+    assert "Bomb 27, with Melt (buff)" in melted
+
+
+def test_a_bomb_header_with_nothing_folded_in_reads_as_it_always_did():
+    """The other half: the label is the clause, and a bare pile has none."""
+    page = blindplay.observe(bomb_pile_state(12, "", "12"))
+    assert "Bomb 12 (buff)" in page
+    assert "with Vaporize" not in page
+    # And a cap or a Vulnerable alone is not a reaction.
+    capped = blindplay.observe(
+        bomb_pile_state(9, " after Vulnerable, capped by Intangible"))
+    assert "Bomb 9 (buff)" in capped

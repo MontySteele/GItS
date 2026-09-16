@@ -228,6 +228,13 @@ public class KleeOverhaulRoundFourTests
         // `EB-573` ADDED THE FOURTH: whether any charge here carries a rider
         // (Jumpy Dumpty's Mine-on-ALL). It survives a merge and it grows in
         // bulk, and until this row no surface said so.
+        // `EB-721` ADDED THE FIFTH: which amplifying reaction the leading
+        // charge will cause. `EB-559` folded it into the printed total and
+        // named it nowhere, so `Bomb 18` stood beside `sizes, oldest first:
+        // 12` and the two disagreed (Klee r25 lane 2, (c) 2). Two reactions
+        // and no others, because `ReactionTable.AmplifierMultiplier` answers
+        // above 1 only for Pyro over Hydro and Pyro over Cryo.
+        var reactions = new[] { "", "Vaporize", "Melt" };
         foreach (var single in new[] { "", "One" })
         {
             foreach (var mines in new[] { "", "Mines" })
@@ -238,18 +245,34 @@ public class KleeOverhaulRoundFourTests
                     {
                         foreach (var cap in caps)
                         {
-                            Assert.Contains(
-                                "smartDescription" + single + mines + rider
-                                + vulnerable + cap, rows);
+                            foreach (var reaction in reactions)
+                            {
+                                Assert.Contains(
+                                    "smartDescription" + single + mines + rider
+                                    + vulnerable + cap + reaction, rows);
+                            }
                         }
                     }
                 }
             }
         }
-        // And no more than the grid: four axes, nothing hand-added beside
+        // And no more than the grid: five axes, nothing hand-added beside
         // them.
-        Assert.Equal(2 * 2 * 2 * 2 * caps.Length,
+        Assert.Equal(2 * 2 * 2 * 2 * caps.Length * reactions.Length,
                      rows.Count(r => r.StartsWith("smartDescription")));
+
+        // `EB-721`'s clause is the plain row plus its own words, and it leads
+        // because it leads in the pipeline: the amplifier rides the first
+        // charge, then Vulnerable multiplies, then a cap clamps.
+        Assert.Equal(
+            Row(pile, "smartDescriptionMines"),
+            Row(pile, "smartDescriptionMinesVaporize")
+                .Replace(" with [gold]Vaporize[/gold]", string.Empty));
+        Assert.Equal(
+            Row(pile, "smartDescriptionMines"),
+            Row(pile, "smartDescriptionMinesVulnerableMelt")
+                .Replace(" with [gold]Melt[/gold], after "
+                         + "[gold]Vulnerable[/gold]", string.Empty));
 
         // Each modified row is the plain row with exactly its own clause in
         // it -- the mutation guard across the whole grid.

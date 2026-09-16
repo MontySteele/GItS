@@ -105,6 +105,11 @@ public static class ArmKeywordTips
     // Plan, which is this class's word and this quarantine's rule.
     public const string PlanElementKey = "KLEEMOD-ARM_PLAN_ELEMENT";
 
+    // `EB-709`. A RIDER AND NOT A KEYWORD, beside `PlanElementKey` for that
+    // key's reason: it is a sentence about the one card that doubles a
+    // carry-out, printed where that card is met.
+    public const string PlanTwiceKey = "KLEEMOD-ARM_PLAN_TWICE";
+
     // `EB-418`. THE SECOND KEY HERE THAT TITLES NO KEYWORD, and it names the
     // one Spark income no screen in the game stated: `KleeCompanionSpark`
     // ("Little Hexenzirkul"), the kit rule LAW:145 obliges Klee's own KIT to
@@ -944,6 +949,32 @@ public static class ArmKeywordTips
           + "does.");
 
     /// <summary>
+    /// `EB-709`: HOW MANY PLANS A DOUBLED CARRY-OUT IS, on the card that
+    /// doubles it.
+    ///
+    /// THE FIND (Kokomi r31 lane 2, (c)). Tide Wall paid 6 and then 9 under
+    /// Second Wave, and the seat could not tell from any face whether the
+    /// doubled entry counted as one Plan or two for a per-Plan clause. It
+    /// counts as TWO, and that is not a choice this row made:
+    /// <see cref="KokomiPlan.ResolveAll"/> arms a drain-local counter and
+    /// every later carry-out draws off it (`EB-501`, `EB-718`), so Scout
+    /// Ahead -> Second Wave -> Battle Plan draws 3.
+    ///
+    /// ON SECOND WAVE AND NOT ON THE PER-PLAN READERS, which is the whole
+    /// point of the row. A reader's own face states its rate truthfully; what
+    /// no face said is that ONE card can make the queue longer than the queue
+    /// looks. The card that bends the count is where the count is explained,
+    /// and it is derived from the clause rather than declared per row, so a
+    /// second doubler would carry the sentence the day its row exists.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForPlanTwice(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PlanTwiceKey,
+            "A [gold]Plan[/gold] carried out twice counts as two. Every "
+          + "clause that counts [gold]Plans[/gold] carried out pays for "
+          + "both.");
+
+    /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read
     /// as broken at full HP because a Mend at the ceiling does nothing and
     /// nothing on screen said there was a ceiling. The sentence is
@@ -981,9 +1012,10 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CasketKey,
-            "Your relic. Whenever you apply a debuff to an enemy, it deals "
-          + KokomiOverhaulLaw.CasketStrike + " [gold]Hydro[/gold] damage to "
-          + "that enemy.");
+            "Your relic. Each debuff you apply is a "
+          + KokomiOverhaulLaw.CasketStrike + " [gold]Hydro[/gold] hit on that "
+          + "enemy: it reacts, takes its [gold]Vulnerable[/gold], and re-arms "
+          + "[gold]Hydro[/gold].");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.

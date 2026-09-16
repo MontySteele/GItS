@@ -321,8 +321,22 @@ public static class KleeMod
                     ["KLEEMOD-SWIRL_PREVIEW.description"] =
                         "[gold]Anemo[/gold] meets an aura: the aura is consumed and copied onto ALL enemies.",
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.title"] = "Reaction preview: Crystallize",
+                    // `EB-613` (R263 sec.5 item 1). THE BLOCK IS NOT THE
+                    // POINT OF THIS ROW; THE AURA IS. A Geo hit is a COST to
+                    // a reaction deck -- it eats the standing aura for 4
+                    // Block -- and the seats already sequence around it
+                    // ("Gorou must come after the Electro hit or its
+                    // Crystallize eats the aura the reaction needs", Kokomi r5
+                    // run 3, under the heading "element ordering is the
+                    // deepest decision this deck has, and it is entirely
+                    // undocumented"). The old sentence named the consumption
+                    // in a trailing subclause behind a gain; this one leads
+                    // with the price and says what the price BUYS a reader
+                    // nothing -- there is no aura left to react with. The
+                    // comment sits ABOVE the key, for `gen_keyword_loc.py`'s
+                    // reader.
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
-                        $"[gold]Geo[/gold] meets an aura: the aura is consumed and you gain [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold].",
+                        $"[gold]Geo[/gold] meets an aura: [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold], and the aura is consumed -- nothing is left to react with.",
 
                     // Legibility sprint L-C: titles for the re-homed rider
                     // tips (FurinaRiderTips). These are NOT card keywords --
@@ -516,6 +530,10 @@ public static class KleeMod
                     // the play.
                     [Cards.ArmKeywordTips.PlanElementKey + ".title"] =
                         "Hydro on the carry-out",
+                    // `EB-709`. The rider, not a keyword: how many Plans a
+                    // doubled carry-out is, on the card that doubles it.
+                    [Cards.ArmKeywordTips.PlanTwiceKey + ".title"] =
+                        "Twice means two Plans",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see

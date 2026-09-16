@@ -241,6 +241,49 @@ public class KokomiOverhaulRuleTests
         var asked = typeof(KokomiPlan)
             .GetMethod("PlayedOnPet", HeadlessGame.All)!;
         Assert.Contains("BakeKuragePet.Is", Il.Calls(asked));
+
+        // `EB-347`: AND ONLY WHEN A PLAYER AIMED IT. Uproar's random Attack
+        // wrote Slack Water onto the jellyfish as a Plan instead of playing it
+        // at the enemy (Kokomi r4d act 1 fight 3), while the identical card
+        // pulled by the identical Uproar one fight earlier had gone at the
+        // enemy. The pet is a DELIBERATE target and an auto-play has nobody at
+        // the mouse, so the question now carries the play's own `IsAutoPlay`.
+        Assert.Contains("CardPlay.get_IsAutoPlay", Il.Calls(asked));
+    }
+
+    [Fact]
+    public void Rule2_an_auto_play_never_rolls_the_jellyfish_as_its_target()
+    {
+        // `EB-347`, the other half. BaseLib's `AutoPlayCustomTargetPatch`
+        // fills a null target for a CUSTOM TargetType from every live creature
+        // the type's predicate accepts, and `KokomiTargets.PetOrEnemy` accepts
+        // the pet by design. This patch runs ahead of it -- `Priority.First`
+        // plus `[HarmonyBefore("BaseLib")]` -- and fills the aim from the
+        // arm's own target types MINUS the pet, so BaseLib's prefix then sees
+        // a non-null target and returns.
+        var patch = typeof(KokomiPlan).Assembly
+            .GetType("KleeMod.Powers.AutoPlayNeverAimsAtThePetPatch")
+            ?? throw new System.InvalidOperationException(
+                "AutoPlayNeverAimsAtThePetPatch is gone -- an auto-play can "
+              + "aim at the jellyfish again (EB-347).");
+
+        var target = patch.GetCustomAttributesData()
+            .First(a => a.AttributeType.Name == "HarmonyPatch");
+        Assert.Contains(target.ConstructorArguments,
+                        a => a.Value is System.Type t && t.Name == "CardCmd");
+        Assert.Contains(patch.GetCustomAttributesData(),
+                        a => a.AttributeType.Name == "HarmonyBefore");
+
+        var prefix = patch.GetMethod("Prefix", HeadlessGame.All)!;
+        Assert.Contains(prefix.GetCustomAttributesData(),
+                        a => a.AttributeType.Name == "HarmonyPriority");
+        var calls = Il.Calls(prefix);
+        // Character-scoped (the prototype-patch lint's rule (a)) ...
+        Assert.Contains("KokomiResources.IsKokomi", calls);
+        // ... and the pet is what it takes out of the bag.
+        Assert.Contains("BakeKuragePet.Is", calls);
+        // The run's own target stream, so a seeded run is not re-shuffled.
+        Assert.Contains(calls, c => c.Contains("NextItem"));
     }
 
     [Fact]

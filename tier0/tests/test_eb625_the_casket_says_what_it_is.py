@@ -96,7 +96,7 @@ def test_the_number_is_read_and_never_typed():
     # The page's twin interpolates its own mirror of the same constant.
     notes = (REPO / "understudy"
              / "blindplay_notes.py").read_text(encoding="utf-8")
-    assert "{CASKET_STRIKE} Hydro damage" in notes
+    assert "{CASKET_STRIKE} Hydro hit on " in notes
 
 
 def test_both_surfaces_and_both_engines_carry_one_number():
@@ -110,24 +110,39 @@ def test_both_surfaces_and_both_engines_carry_one_number():
             f"{C.KOKOMI_OVERHAUL_CASKET_STRIKE};") in law
 
 
-def test_the_tip_is_the_relics_own_sentence():
-    """Word for word off the relic's face, minus the summon clause the card
-    has no use for and plus the two words the relic cannot say about itself.
+def test_the_relic_says_the_ping_is_a_real_hit_and_the_tip_says_what_that_buys():
+    """`EB-348`. THE RULE IN TWO SENTENCES, ONE PER SURFACE.
+
+    THE FIND (Kokomi r4d, act 1 finding 6, act 2 finding 5, act 3 finding 2).
+    "Deals N Hydro damage" reads as a number arriving. It is a HIT through the
+    same `ElementalHit` funnel every other non-attack hit in this mod uses, so
+    it reacts -- act 3 watched a ping Vaporize the player's own standing Pyro
+    aura for 2 x 1.5 x 1.5 -- it takes the target's Vulnerable, and it re-arms
+    Hydro; Red Mask's combat-start Weak fired it on all three enemies at once.
+
+    SPLIT ACROSS THE SURFACES BECAUSE THE RELIC ROW HAS NO ROOM: it sat at 119
+    of the 120-character relic ceiling. The FACE says the ping is a real hit
+    and names its element and its base; the TIP, which a card naming the relic
+    raises, spells out what "real" buys. The page carries the tip's sentence.
+
+    Seen to FAIL: every surface said "deals N Hydro damage" and stopped.
     """
-    tips = TIPS_CS.read_text(encoding="utf-8")
-    assert ('"Your relic. Whenever you apply a debuff to an enemy, it deals "'
-            in tips)
     relic = RELIC_CS.read_text(encoding="utf-8")
-    assert '"Start each combat with the [gold]Bake-Kurage[/gold]. Whenever "' \
-        in relic
-    assert '+ "you apply a debuff to an enemy, it deals [blue]"' in relic
+    assert ('"Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "'
+            in relic)
+    assert '+ "you apply lands a real [blue]"' in relic
+
+    tips = TIPS_CS.read_text(encoding="utf-8")
+    assert '"Your relic. Each debuff you apply is a "' in tips
+    assert "it reacts, takes its [gold]Vulnerable[/gold], and re-arms " in tips
 
     page = blindplay_notes.ARM_KEYWORDS["Tamakushi Casket"]
-    assert page == ("Your relic. Whenever you apply a debuff to an enemy, it "
-                    f"deals {C.KOKOMI_OVERHAUL_CASKET_STRIKE} Hydro damage to "
-                    "that enemy.")
-    # Inside the 135-character mechanic-tip ceiling with room to spare, so it
-    # needs no exception in `lint_text_conventions`.
+    assert page == (
+        f"Your relic. Each debuff you apply is a "
+        f"{C.KOKOMI_OVERHAUL_CASKET_STRIKE} Hydro hit on that enemy: it "
+        f"reacts, takes its Vulnerable, and re-arms Hydro.")
+    # Inside the 135-character mechanic-tip ceiling, so it needs no exception
+    # in `lint_text_conventions`.
     assert len(page) <= 135
 
 
@@ -189,3 +204,29 @@ def test_the_window_is_wider_than_this_turn_and_the_face_says_so(overhaul):
               / "KokomiOverhaulPowers.cs").read_text(encoding="utf-8")
     assert '"Until your next turn, whenever the [gold]Tamakushi Casket[/gold] "' \
         in powers
+
+
+def test_the_debuff_answer_clause_still_fires_on_both_spellings():
+    """`EB-348` rewrote the relic's sentence, and `EB-433`'s panel clause is
+    gated by matching that sentence rather than the relic's name.
+
+    BOTH SPELLINGS, not just the current one. The gate reads a relic a RUN is
+    holding, the old wording is what a save from before the rewrite carries,
+    and a clause that silently stopped printing is exactly the defect `EB-433`
+    was filed on.
+    """
+    from understudy import blindplay_render
+
+    rx = blindplay_render._DEBUFF_ANSWERING_HIT
+    now = ("Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "
+           f"you apply lands a real [blue]{C.KOKOMI_OVERHAUL_CASKET_STRIKE}"
+           "[/blue] [gold]Hydro[/gold] hit on that enemy.")
+    before = ("Start each combat with the [gold]Bake-Kurage[/gold]. Whenever "
+              "you apply a debuff to an enemy, it deals [blue]2[/blue] "
+              "[gold]Hydro[/gold] damage to that enemy.")
+    assert rx.search(now)
+    assert rx.search(before)
+    # And it is still a relic test and not a word test: nothing else on a
+    # relic face answers a debuff with a hit.
+    assert not rx.search("Start each combat with the Bake-Kurage.")
+    assert not rx.search("Gain 6 Block each turn.")

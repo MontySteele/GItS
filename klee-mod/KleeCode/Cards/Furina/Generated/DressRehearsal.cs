@@ -53,7 +53,7 @@ public sealed class DressRehearsal : CustomCardModel, ICharacterCard, ISalonDepl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dress Rehearsal"),
-        ("description", FurinaBurstRider.Face("Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Draw {DrawCards:diff()} card{DrawCards:plural:|s}.", "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Draw {DrawCards:diff()} card{DrawCards:plural:|s}. [gold]Burst[/gold] +5.")),
+        ("description", FurinaBurstRider.Face("Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. It performs at once. Draw {DrawCards:diff()} card{DrawCards:plural:|s}.", "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. It performs at once. Draw {DrawCards:diff()} card{DrawCards:plural:|s}. [gold]Burst[/gold] +5.")),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

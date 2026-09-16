@@ -37,9 +37,6 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesHydro };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this), this);
 

@@ -1823,3 +1823,40 @@ def test_eb338_the_no_hit_preview_flag_follows_the_op_that_applies():
     assert "ProtoMcAmberFieryRain.cs" not in flagged
     # And the flag is never raised where no preview is drawn at all.
     assert flagged <= previewed
+
+
+def test_every_salon_deploy_face_prints_the_performance():
+    """`EB-398`: the deploy's MAIN behaviour, on the deploy's own card.
+
+    A joining member performs the moment it arrives. That rule was printed
+    only on the Salon buff line, after the fact, so a seat learned the card's
+    central effect by accident (Furina r3 act 1 finding 4). Every rendered
+    deploy face now carries it, once per card however many members the body
+    fields, and in the number the sentence before it used.
+    """
+    cards = _furina_cards()
+    deploys = [c for c in cards
+               if any(fx.get("op") == "apply_power"
+                      and fx.get("power") == "salon_member"
+                      for fx in c["effects"])]
+    assert len(deploys) >= 8, "the deploy family has gone missing"
+
+    for card in deploys:
+        face = gen.build_description(card)
+        run = sum(1 for fx in card["effects"]
+                  if fx.get("op") == "apply_power"
+                  and fx.get("power") == "salon_member")
+        clause = "It performs at once." if run == 1 else "They perform at once."
+        assert clause in face, (card["id"], face)
+        # Once per card, never once per member.
+        assert face.count("perform at once") + face.count("performs at once") == 1
+
+    # And it lands on the sentence it belongs to, not at the end of the card.
+    debut = next(c for c in cards if c["id"] == "salon_debut")
+    assert gen.build_description(debut).startswith(
+        "Add 1 [gold]random Salon Member[/gold] to your [gold]Salon[/gold]. "
+        "It performs at once.")
+
+    # A card with no deploy never says it.
+    bow = next(c for c in cards if c["id"] == "take_your_bow")
+    assert "at once" not in gen.build_description(bow)

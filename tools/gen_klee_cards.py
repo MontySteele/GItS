@@ -923,13 +923,19 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
       card whose face says nothing about an element", in a kit whose whole
       reaction layer keys off which element is clinging to a body.
 
-    THE PLAN HALF ADDS THE KEYWORD AND NOT `elemental`, and that split is the
-    whole of its safety. `elemental` decides `IElementalCard`, which is what
-    `CatalystCadence.PrintedElement` reads to element the card's OWN hit -- so
-    setting it would make Kurage's Oath's now-line apply Hydro, which is a
-    rules change and not this row's business. What is added is the face
-    DECLARATION: the gem, the reaction rule, and (from `emit`) one sentence
-    saying the aura rides the carry-out rather than the play.
+    `EB-713` TOOK THE PLAN HALF BACK OUT OF THE TAG, and left the sentence.
+    `EB-378`'s fix put the GEM on a card whose own hit applies nothing, and the
+    gem is the page's and the badge's shorthand for "this face applies the
+    element". The r32 lane-1 seat read `Applies Hydro` and the reaction
+    glossary on a row printing `applies_element: false`, and concluded that no
+    face-up Hydro card of hers seeds an aura -- the opposite of the rule, from
+    the surface that exists to state it. So THE TAG IS THE FACE-UP HIT and
+    nothing else: a card whose element rides the carry-out declares no element
+    of its own, and `ArmKeywordTips.ForPlanElement` -- attached from this same
+    predicate in `emit`, and unmoved -- says the written hit is the one that
+    applies ("Its own hit applies no aura; the Bake-Kurage carries out the Plan
+    as a Hydro hit, which does"). EB-378's finding keeps its answer; it moves
+    from a gem that overclaims to a sentence that is true.
     """
     elements: list[str] = []
     if elemental:
@@ -938,8 +944,6 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
         )
         if source_element in AURA_KEYWORD_BY_ELEMENT:
             elements.append(source_element)
-    if plan_applies_element(card, profile):
-        elements.append(profile.native_element)
     for effect in _effects_everywhere(card):
         if (effect.get("op") == "apply_aura"
                 and effect.get("element") in AURA_KEYWORD_BY_ELEMENT):
@@ -1022,6 +1026,17 @@ def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
     if profile.native_element not in AURA_KEYWORD_BY_ELEMENT:
         return False
     return any(clause.get("op") in PLAN_DAMAGE_OPS
+               for clause in card.get("plan") or [])
+
+
+def doubles_a_carry_out(card: dict) -> bool:
+    """`EB-709`: does this row make one queued entry resolve more than once?
+
+    The clause is `next_plan_extra_carry_out` and today Second Wave is its
+    only writer. Asked of the ROW rather than listed by id so a second doubler
+    carries the sentence the day its row exists.
+    """
+    return any(clause.get("op") == "next_plan_extra_carry_out"
                for clause in card.get("plan") or [])
 
 
@@ -10864,6 +10879,8 @@ def build_description(card: dict, *,
     if upgrade_add_leads(card) and added_effect_anchor(card) is None:
         parts.extend(_upgrade_add_text(card))
     salon_named = False          # B5: has a deploy already said "your Salon"?
+    deploy_clause_said = False   # `EB-398`: has the deploy's "performs at
+                                 # once" clause been printed on this card yet?
     deploy_amounts, deploy_skip, deploy_runs = merged_deploy_text(card)
     add_anchor = added_effect_anchor(card)
     for eff_index, eff in enumerate(card["effects"]):
@@ -11378,6 +11395,14 @@ def build_description(card: dict, *,
                 where = "" if salon_named else " to your [gold]Salon[/gold]"
                 salon_named = True
                 parts.append(f"Add {listed}{where}.")
+                # `EB-398`: THE DEPLOY'S MAIN BEHAVIOUR, printed. A joining
+                # member performs the moment it arrives; that rule lived only
+                # on the Salon buff line, so a seat met it after the fact
+                # (Furina r3 act 1 (c) 4). Plural here because the run adds
+                # two or three of them in one sentence.
+                if not deploy_clause_said:
+                    deploy_clause_said = True
+                    parts.append("They perform at once.")
                 continue
             if "member" in eff:
                 # B5: name WHO. A11's random deploy says so instead -- it can
@@ -11408,6 +11433,11 @@ def build_description(card: dict, *,
                   else ("" if x == "1" else "s"))
             parts.append(template.replace("{X}", x).replace("{XS}", xs)
                          .replace("{TO}", to))
+            # `EB-398`, the lone-deploy half of the clause above. Said once
+            # per card, however many deploys the body carries.
+            if eff["power"] == "salon_member" and not deploy_clause_said:
+                deploy_clause_said = True
+                parts.append("It performs at once.")
 
         elif op == "detonate":
             where = ("an enemy's" if eff["target"] == "enemy" else "ALL")
@@ -13470,6 +13500,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if plan_applies_element(card, profile) and not elemental:
             tips_expr = (
                 "ArmKeywordTips.ForPlanElement("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-709`, and it sits beside the rider above it for that rider's
+        # reason: a fact about THIS card, read before the definition of the
+        # word `Plan`. DERIVED FROM THE CLAUSE rather than declared per row --
+        # a row whose Plan carries `next_plan_extra_carry_out` is a row that
+        # makes the queue longer than the queue looks, so a second doubler
+        # carries the sentence the day its row exists.
+        if doubles_a_carry_out(card):
+            tips_expr = (
+                "ArmKeywordTips.ForPlanTwice("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the
