@@ -660,10 +660,31 @@ FRONT_ENEMY_NOTE = (
 # SHAPE of the screen -- that a pick here is two commands and the screen stays
 # up between them -- and that is a sentence, printed whether or not the button
 # is live yet.
+# ROUND THREE (Furina, the Stage), sec.4: AND SOMETIMES THE SECOND COMMAND IS
+# `choose` AGAIN.
+#
+# "The Spend mode chooser needs `choose` twice: the first returns ok and the
+# chooser stays open, the next commands are refused; about eight occurrences a
+# run, two refusals spent on it." The seats were doing exactly what this note
+# told them -- `choose`, then `confirm` -- and on the mode chooser the
+# `confirm` was refused, so each pick cost two refusals and was then taken by
+# saying `choose` a second time.
+#
+# WHAT THE PAGE MAY CLAIM. The two live reports disagree about ONE screen: the
+# potion chooser `EB-674` was filed from took `confirm`, and the mode chooser
+# this round was filed from took a second `choose`. Both arrive at the page as
+# `card_select`, and the harness cannot open either to settle which press the
+# bridge's `ExecuteSelectCard` lands
+# (`vendor/STS2_MCP/McpMod.Actions.cs`, the `NChooseACardSelectionScreen`
+# branch), so the page does not pick between them -- it names both ways out,
+# which is what stops a refusal being the only teacher. The bridge half is a
+# live look and is NOT in this row.
 CHOOSER_CONFIRM_NOTE = (
     "*Choosing here arms a pick; it does not close the screen. Say `confirm` "
     "after `choose` to take it, and until you do this chooser stays open and "
-    "every other command is refused.*")
+    "every other command is refused. If `confirm` is refused, say `choose` "
+    "again on the same option -- one chooser in the game takes its answer on "
+    "the second `choose` and has no confirm button at all.*")
 
 # `EB-681`. EVERY REACTION IN A BEAT, BY NAME, IN ORDER.
 #
@@ -1335,8 +1356,19 @@ ARM_KEYWORDS: dict[str, str] = {
     # arrived as 7 once the Vulnerable it was folding had expired -- "the
     # committed number moving is the sharpest contradiction in the kit". The
     # clause now says WHEN each side is read.
-    "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
-             "ALL, Minions too. Your Strength folds in as you write it; the "
+    # `EB-330` / `EB-563` / `EB-411` PUT THREE OF THIS PANEL'S OWN FACTS ON
+    # THE WORD, in one rewrite, and this row is the twin: that any number of
+    # Plans wait in order and the badge is their COUNT (`PLAN_COUNT_NOTE`,
+    # which three r4c seats needed and the r20 lane-2 seat wrote one Plan at a
+    # time for four fights without), and that a carry-out lands in the Block
+    # the enemy is still standing in from its own turn (`PLAN_BLOCK_NOTE`, the
+    # Plating 8 Sewer Clam that ate a whole Plan). The panel keeps the long
+    # form of both, because the panel has no ceiling; this row is
+    # `ArmKeywordTips.ForPlan` word for word, as every row here is.
+    "Plan": ("On the Bake-Kurage, paid now; any number wait, in order, and "
+             "the badge is their count. Next turn: front non-Minion, or "
+             "ALL, Minions too, into Block still standing. Your Strength "
+             "folds as you write it; the "
              "enemy's Vulnerable counts next turn. A carry-out is not a "
              "hit: no when-hit power fires."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
@@ -1635,22 +1667,52 @@ _STAGE_CHARACTER = "furina"
 # one. Every one of them is a rule the ARM retires, so the arm has to be
 # askable.
 #
-# THE COMBAT BLOCK IS THE ANSWER AND ITS LIMIT IS STATED. `blindplay_board`
-# builds `combat.stage` from the wire's own `furina_stage` map, which is the
-# mod saying the rule is live for this seat -- the same fact `_stage_live`
-# hides the retired meters on. It exists only in COMBAT: outside one there is
-# no creature and the mod's snapshot is empty by construction, so a reward or a
-# shop screen under the arm still reads as a shipped Furina and keeps her
-# shipped rows. That is a known gap rather than a silent one, and it is the
-# narrower error: a rule stated where it is true, and the shipped rule left
-# standing where the page cannot tell.
+# THE COMBAT BLOCK IS THE ANSWER AND IT USED TO BE THE WHOLE ANSWER.
+# `blindplay_board` builds `combat.stage` from the wire's own `furina_stage`
+# map, which is the mod saying the rule is live for this seat -- the same fact
+# `_stage_live` hides the retired meters on. It exists only in COMBAT: outside
+# one there is no creature and the mod's snapshot is empty by construction.
+#
+# ROUND THREE MEASURED WHAT THAT GAP COSTS: "the Companion glossary alternates
+# between two sentences on consecutive screens of one fight" (sec.4). A chooser
+# overlay, a reward and a shop are all not-combat, so the same word changed its
+# meaning between two screens a seat read a minute apart. A rule that moves is
+# worse than a rule that is merely narrow.
+#
+# SO THE ARM IS A FACT ABOUT THE RUN AND IS HELD FOR IT. The arm cannot turn on
+# or off inside a run -- it is a build switch -- so the first screen that can
+# answer answers for all of them, latched by `blindplay_faces.stage_arm` under
+# the deck store's own two guards (character, and never backwards a floor). The
+# combat block stays the reading; the latch is only what carries it.
 _STAGE_RETIRED_KEYWORDS = frozenset({"Encore"})
+
+# `EB-728`. AND THE ROW THE SHIPPED KIT STILL OWNS.
+#
+# `Fanfare` is a word BOTH kits print and they do not mean the same thing by
+# it: under the Stage it is a performer's own bar, and on the shipped sheet it
+# is Furina's meter, whose rule `METER_RULES["Fanfare"]` already states beside
+# it. The table stated the Stage's bar unconditionally, so a flag-OFF seat read
+# the arm's rule next to the shipped meter's -- two rules for one word on one
+# screen. The row is keyed on the arm now, like `Encore`'s retirement above and
+# `Companion`'s clause below, and a screen that cannot tell keeps the reading
+# it has always had.
+FANFARE_SHIPPED_ROW = (
+    "Furina's own meter, spent by the cards that print a Fanfare rider. It is "
+    "hers and not a performer's -- this run has no stage.")
 
 
 def _stage_arm(obs: dict[str, object]) -> bool:
-    """Does this screen carry the Stage's own block (`EB-744`)?"""
+    """Is the Stage arm live for this RUN (`EB-744`, round three)?
+
+    The screen's own block where it has one; otherwise what an earlier screen
+    of this run latched. `False` where nothing has ever answered, which is the
+    reading every page had before the latch existed.
+    """
     combat = obs.get("combat")
-    return isinstance(combat, dict) and combat.get("stage") is not None
+    if isinstance(combat, dict) and combat.get("stage") is not None:
+        return True
+    held = obs.get("stage_arm")
+    return held is True
 
 # `EB-504`. TWO ROWS WHOSE RULE IS ABOUT A CHARACTER WHO IS NOT IN THE RUN.
 #
@@ -2671,7 +2733,13 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
                  growth=int(growth.group(1)) if growth else BOMB_GROWTH)
              + ((COMPANION_STAGE_ARM_CLAUSE if arm
                  else COMPANION_STAGE_CLAUSE)
-                if stage and word == "Companion" else "")}
+                if stage and word == "Companion" else "")
+             # `EB-728`: and `Fanfare` is the other word both kits print. The
+             # arm's row is a performer's bar; off the arm it is Furina's own
+             # meter, which `METER_RULES` states beside it -- and the shipped
+             # seat was reading the arm's rule next to the shipped meter's.
+             if not (word == "Fanfare" and not arm)
+             else FANFARE_SHIPPED_ROW}
             for word, pattern in _ARM_KEYWORD_RE.items()
             # `EB-744`: a word the ARM retires is not defined on an arm page.
             # The Encore row is the one -- Encore has no job under the Stage

@@ -95,8 +95,8 @@ public sealed class ProtoThomaCrimsonOoyoroiEither : CustomCardModel, IElemental
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoThomaCrimsonOoyoroiEitherModeA>(Owner),
-            ModalChoice.CreateOption<ProtoThomaCrimsonOoyoroiEitherModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoThomaCrimsonOoyoroiEitherModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoThomaCrimsonOoyoroiEitherModeB>(Owner, this),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage, applying its element", "Gain 3 Block, applying no element" }[modeIndex]);

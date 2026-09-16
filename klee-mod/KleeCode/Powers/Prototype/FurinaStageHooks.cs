@@ -119,9 +119,17 @@ public sealed class FurinaStageHooks : AbstractModel
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// ROUND THREE, sec.4: <i>Let the People Rejoice</i> printed "Deal 2 damage
+    /// to ALL" with the stage reading Usher 12 -- an earlier card's spend, read
+    /// off a record that was opened at <see cref="BeforeCardPlayed"/> and never
+    /// closed. The forecast is only a forecast while a play is in flight, so
+    /// the record CLOSES here and the face falls back to the bars.
+    /// </summary>
     public override Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        FurinaStage.EndPlay(cardPlay.Card?.Owner?.Creature);
         Vfx.FurinaStageStrip.Refresh(cardPlay.Card?.Owner?.Creature);
         return Task.CompletedTask;
     }

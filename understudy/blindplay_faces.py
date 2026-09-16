@@ -874,6 +874,84 @@ def remembered_deck(state: dict[str, Any]) -> dict[str, Any]:
     return {"cards": [dict(c) for c in held["cards"]], "floor": floor}
 
 
+# ROUND THREE: THE GLOSSARY ALTERNATED BETWEEN TWO SENTENCES INSIDE ONE FIGHT.
+#
+# "The Companion glossary alternates between two sentences on consecutive
+# screens of one fight" (`furina-stage-round-3-2026-09-09.md` sec.4). The
+# glossary's arm signal was the COMBAT BLOCK -- `combat.stage`, which the mod
+# writes off a live creature -- so every screen of a run that is not a fight
+# read as a shipped Furina and printed the shipped sentence: a card chooser
+# overlay, a reward, a shop, a rest. `blindplay_notes` states that limit
+# honestly ("a known gap rather than a silent one") and the round measured what
+# the gap costs a reader, which is a keyword whose meaning moves between two
+# screens of one fight.
+#
+# ONE SENTENCE PER ARM, HELD FOR THE RUN. The arm is a fact about the BUILD the
+# run is being played on: it cannot turn on or off inside a run, so once a
+# screen has answered it, every later screen of that run has its answer. This
+# is the deck store's shape and its two guards verbatim -- same lane file, same
+# character check, same never-go-backwards floor check -- because "a latch from
+# the other lane's game" and "a latch from a run that has since restarted" are
+# the two ways a remembered fact lies.
+#
+# IT LATCHES BOTH WAYS. A Furina combat that carries no stage block is a
+# SHIPPED Furina, which is an answer too; only a screen that cannot answer at
+# all leaves the latch as it found it.
+_ARM_MEMORY: dict[str, Any] = {}
+
+
+def _arm_store() -> Path:
+    lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
+    return _DECK_STORE_DIR / f"_blindplay-arm-lane{lane}.json"
+
+
+def _held_arm() -> dict[str, Any]:
+    try:
+        held = json.loads(_arm_store().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        held = _ARM_MEMORY
+    return held if isinstance(held, dict) and "live" in held else {}
+
+
+def forget_stage_arm() -> None:
+    """Drop the remembered arm. The operator's reset, and the tests'."""
+    _ARM_MEMORY.clear()
+    try:
+        _arm_store().unlink()
+    except OSError:
+        pass
+
+
+def stage_arm(state: dict[str, Any], live: bool | None) -> bool | None:
+    """Is this run being played on the Stage arm?
+
+    `live` is what THIS screen can say for itself: `True` where it carries the
+    arm's own block, `False` where it is a fight under the character and does
+    not, `None` where the screen cannot answer. The answer is remembered for
+    the run and handed back on every later screen of it.
+    """
+    player = _blob(state, "player")
+    floor = _int(_blob(state, "run").get("floor"))
+    held = _held_arm()
+    if held and (_fold(held.get("character")) != _fold(player.get("character"))
+                 or (_int(held.get("floor")) and floor
+                     and floor < _int(held.get("floor")))):
+        held = {}
+    if live is None:
+        return held.get("live") if held else None
+    row = {"live": bool(live),
+           "character": _text(player.get("character")),
+           "floor": floor}
+    _ARM_MEMORY.clear()
+    _ARM_MEMORY.update(row)
+    try:
+        _DECK_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        _arm_store().write_text(json.dumps(row), encoding="utf-8")
+    except OSError:
+        pass                       # a read-only tree still gets the in-process copy
+    return bool(live)
+
+
 # `EB-715` / `EB-676`. THE RUN MOVED BETWEEN TWO SCREENS AND NEITHER SAID SO.
 #
 # TWO FINDS, ONE MISSING ORGAN.

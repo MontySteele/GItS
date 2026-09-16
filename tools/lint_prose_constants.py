@@ -29,6 +29,23 @@ Concretely:
     strings are telemetry rows and parity-vector log lines, read by this repo
     and never by a player, and their numerals are mostly `{0}`-style format
     placeholders.
+  * SCOPE ALSO COVERS THE PACKAGED LOC TABLES (`EB-160`). The game merges
+    `res://klee/localization/<lang>/<table>.json` OVER the dll's rows, so the
+    copy a player actually reads is the JSON, and until this row the lint
+    could not see it at all. Two sources reach the pack: the tracked tables
+    under `klee-mod/pck-src/**/localization/**/*.json`, and the tables
+    `tools/build_pck.ps1` still writes from a here-string at pack time. Both
+    are read here; a numeral in a VALUE is a numeral a player is shown.
+    `gen_keyword_loc.py` derives `card_keywords.json` from the C# and
+    `--check` gates its staleness, so that table's rows can no longer drift on
+    their own -- but the gate for a HAND-TYPED table (today `ancients.json`,
+    tomorrow whatever the next dressing writes) is this one.
+  * THE CORPUS IS THE C# ALONE, and that is a separate question from scope.
+    `RARE_FRACTION` decides when ONE shared word is enough and is measured
+    over the denominator; the JSON tables are a DERIVED or a packaged copy of
+    the same prose, so counting them would let a table double a word's
+    frequency and quietly un-suppress findings elsewhere -- the exact skew the
+    `Teyvat` exclusion below is about. Scanned, not counted.
   * A DISPLAYED STRING is a string literal with at least three alphabetic
     words, no path characters, and no `KLEEMOD-` loc-key prefix. Comments are
     lexed out, so a doc comment quoting an old number is not a finding (it is
@@ -75,6 +92,7 @@ lint can see, for triaging a new finding.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from dataclasses import dataclass
@@ -86,6 +104,35 @@ sys.path.insert(0, str(REPO))
 from tools import lint_constant_parity as cp  # noqa: E402
 
 CS_ROOT = REPO / "klee-mod" / "KleeCode"
+
+# `EB-160`. The two other places a player-facing string reaches the pack: the
+# tracked overlay, copied in as-is, and the packer's own here-strings.
+#
+# RESOLVED FROM `REPO` AT CALL TIME, not bound at import: the lint's own tests
+# point `REPO` at a synthetic tree, and a path frozen here would send them at
+# the shipped pack while every other root was redirected.
+def pck_src() -> Path:
+    return REPO / "klee-mod" / "pck-src"
+
+
+def pck_script() -> Path:
+    return REPO / "tools" / "build_pck.ps1"
+
+# A loc table that is GENERATED from an interpolated source is out of scope,
+# and it is the one exclusion here that is not a judgement call: this lint's
+# whole demand is "interpolate the constant", and a derived file cannot --
+# it IS the resolved output, and editing it is an edit the generator throws
+# away. `tools/gen_keyword_loc.py` derives this table from `KleeMod.cs`'s
+# `keywordFallback`, whose numerals are interpolated (`EB-89`) and whose rows
+# this lint already reads at the source; `--check` is the staleness gate that
+# stops the copy drifting. Scanning the output would report every one of those
+# rows as a hand-typed literal, which is the definition of crying wolf.
+#
+# THE HAND-TYPED TABLES ARE THE POINT (`EB-160`) and none of them is here: the
+# packer's own here-strings, and any table a future dressing commits by hand.
+DERIVED_LOC_TABLES = frozenset({
+    "klee-mod/pck-src/klee/localization/eng/card_keywords.json",
+})
 
 # Telemetry and parity-vector text: written for this repo's own logs, never
 # rendered to a player, and full of `{0}` format placeholders.
@@ -335,6 +382,105 @@ def sources() -> list[Path]:
             if not any(part in EXCLUDED_DIRS for part in p.parts)]
 
 
+def loc_json_sources() -> list[Path]:
+    """The TRACKED loc tables that reach the pack (`EB-160`).
+
+    `klee-mod/pck-src` is the overlay: every file under it is copied into the
+    pack as-is, so a `localization/<lang>/<table>.json` here is a table the
+    game merges over the dll's rows and therefore the copy a player reads.
+    """
+    root = pck_src()
+    if not root.exists():
+        return []
+    return [p for p in sorted(root.rglob("*.json"))
+            if "localization" in p.parts
+            and p.relative_to(REPO).as_posix() not in DERIVED_LOC_TABLES]
+
+
+def loc_json_strings(path: Path) -> list[Literal]:
+    """Every VALUE in a loc table, with the line it sits on.
+
+    Keys are skipped: a key is `KLEEMOD-BOMB.title`, an identifier, and
+    `is_displayed` would refuse it anyway. Values are read with the line
+    number found by searching the raw text, because `json.loads` throws line
+    numbers away and a finding that cannot be located is a finding nobody
+    fixes. A table that will not parse is NOT silently skipped -- see
+    `main`.
+    """
+    raw = path.read_text(encoding="utf-8")
+    lines = raw.splitlines()
+    out: list[Literal] = []
+    rows = json.loads(raw)
+    if not isinstance(rows, dict):
+        return out
+    for key, value in rows.items():
+        if not isinstance(value, str):
+            continue
+        at = next((i for i, line in enumerate(lines, 1)
+                   if f'"{key}"' in line), 1)
+        out.append(Literal(value, at))
+    return out
+
+
+# The loc tables `tools/build_pck.ps1` still writes at pack time, as
+# `[IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'...'@)`.
+# These never exist as a file in the repo -- they are a here-string inside the
+# packer -- which is exactly why they were outside every gate the repo owns
+# (`EB-160`). `$locDir` is the localization directory the script builds once,
+# so matching on that variable is matching on "a loc table", not on a filename
+# that could be renamed out from under this pattern.
+PCK_LOC_HERESTRING = re.compile(
+    r"WriteAllText\(\(Join-Path\s+\$locDir\s+'(?P<name>[^']+)'\)\s*,\s*@'"
+    r"(?P<body>.*?)^'@\)",
+    re.S | re.M)
+
+
+def pck_loc_strings() -> tuple[list[tuple[str, int, str]], list[str]]:
+    """(rows, complaints) for every loc table the packer types by hand.
+
+    A row is `(rel path, line, value)`. A COMPLAINT is a table under
+    `$locDir` that will not parse as JSON: nothing else is written there, the
+    game would merge a broken table as nothing at all, and a lint that shrugged
+    at it would be reading past exactly the file it was widened to reach.
+    """
+    script = pck_script()
+    if not script.exists():
+        return [], [f"{script.name} is missing -- the packer moved, and a "
+                    f"lint that passes because it read nothing is not a gate."]
+    raw = script.read_text(encoding="utf-8")
+    out: list[tuple[str, int, str]] = []
+    complaints: list[str] = []
+    if not PCK_LOC_HERESTRING.search(raw):
+        complaints.append(
+            f"{script.relative_to(REPO).as_posix()}: no loc table is "
+            f"written from a here-string any more. If the packer stopped "
+            f"typing tables by hand that is the row's goal reached -- drop "
+            f"this reader; if the shape changed, point the pattern at it. A "
+            f"gate that reads nothing is not a gate.")
+    for match in PCK_LOC_HERESTRING.finditer(raw):
+        base = raw.count("\n", 0, match.start("body")) + 1
+        name = match.group("name")
+        rel = f"{script.relative_to(REPO).as_posix()} ({name})"
+        body = match.group("body")
+        try:
+            rows = json.loads(body)
+        except json.JSONDecodeError as exc:
+            complaints.append(f"{rel}:{base}: this loc table does not parse "
+                              f"as JSON ({exc.msg}), so the game merges "
+                              f"nothing from it.")
+            continue
+        if not isinstance(rows, dict):
+            continue
+        lines = body.splitlines()
+        for key, value in rows.items():
+            if not isinstance(value, str):
+                continue
+            at = base + next((i for i, line in enumerate(lines)
+                              if f'"{key}"' in line), 0)
+            out.append((rel, at, value))
+    return out, complaints
+
+
 def numeric_constants() -> dict[float, list[str]]:
     """Named numeric constants of the mod, keyed by value.
 
@@ -398,13 +544,52 @@ def common_words(corpus: list[tuple[str, int, str]]) -> set[str]:
     return {w for w, c in counts.items() if c > cap}
 
 
+def loc_corpus() -> tuple[list[tuple[str, int, str]], list[str]]:
+    """Every displayed string in a loc table that reaches the pack (`EB-160`).
+
+    SCANNED, NOT COUNTED: these rows are returned for findings and are NOT
+    part of `common_words`' denominator -- see the module docstring's CORPUS
+    paragraph for why letting a derived copy of the prose vote would move the
+    threshold under everything else.
+    """
+    out: list[tuple[str, int, str]] = []
+    complaints: list[str] = []
+    for path in loc_json_sources():
+        rel = path.relative_to(REPO).as_posix()
+        try:
+            rows = loc_json_strings(path)
+        except json.JSONDecodeError as exc:
+            complaints.append(f"{rel}: this loc table does not parse as JSON "
+                              f"({exc.msg}), so the game merges nothing from "
+                              f"it.")
+            continue
+        out += [(rel, lit.line, lit.text) for lit in rows
+                if is_displayed(lit.text)]
+
+    packed, packer_complaints = pck_loc_strings()
+    out += [row for row in packed if is_displayed(row[2])]
+    complaints += packer_complaints
+
+    # A DERIVED entry that names nothing is itself a finding, `ALLOWED`'s own
+    # rule one list over: the exclusion list may not quietly outlive the
+    # generator that earned it.
+    for rel in sorted(DERIVED_LOC_TABLES):
+        if not (REPO / rel).exists():
+            complaints.append(
+                f"DERIVED_LOC_TABLES names {rel}, which does not exist. Drop "
+                f"the entry, or point it at the table the generator writes "
+                f"now.")
+    return out, complaints
+
+
 def prose_findings() -> list[Finding]:
     by_value = numeric_constants()
     corpus = displayed_corpus()
     common = common_words(corpus)
+    loc_rows, _complaints = loc_corpus()
     findings: list[Finding] = []
     seen: set[tuple[str, int, str, str]] = set()
-    for rel, line, text in corpus:
+    for rel, line, text in corpus + loc_rows:
         skip = brace_spans(text)
         for m in NUM_RE.finditer(text):
             if any(a <= m.start() < b for a, b in skip):
@@ -448,7 +633,9 @@ def main(argv: list[str] | None = None) -> int:
               "nothing is not a gate.")
         return 1
 
+    tables = loc_json_sources()
     findings = prose_findings()
+    packaged, complaints = loc_corpus()
     live = {f.allow_key for f in findings}
     reported = [f for f in findings if f.allow_key not in ALLOWED]
     stale = sorted(set(ALLOWED) - live)
@@ -458,10 +645,14 @@ def main(argv: list[str] | None = None) -> int:
     for key in stale:
         print(f"FINDING: ALLOWED excuses {key}, which no longer matches any "
               f"displayed string. Drop the entry.")
+    for complaint in complaints:
+        print(f"FINDING: {complaint}")
 
-    if reported or stale:
+    if reported or stale or complaints:
         return 1
     print(f"prose constants: OK ({len(files)} source(s), "
+          f"{len(tables)} hand-written loc table(s) plus {len(packaged)} "
+          f"packaged loc row(s), "
           f"{sum(len(v) for v in numeric_constants().values())} named "
           f"constants, {len(ALLOWED)} allowed coincidence(s))")
     return 0

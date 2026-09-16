@@ -63,8 +63,35 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
             // power ceiling by dropping "the [gold]Plan[/gold]" and "at the
             // start of", which the sentence's own subject already carries:
             // 124 of 125.
-            "Enemies cannot target it. Lasts all combat. Play a "
-          + "[gold]Plan[/gold] card on it: it carries out next turn, or at "
+            //
+            // `EB-563`. AND HOW MANY IT HOLDS, which is the row's own
+            // acceptance sentence ("the box says the jellyfish holds any
+            // number of Plans"). No screen said it: the r20 lane-2 seat wrote
+            // ONE Plan at a time for four fights, and three r4c seats read the
+            // `Plan` badge's number as a capacity. `KokomiPlan` caps nothing
+            // on an unconfigured build, and under a declared cap the sentence
+            // is still true -- the jellyfish HOLDS them all and
+            // `KokomiPlan.CapSentence` below says how many it carries out.
+            //
+            // BOUGHT BY MERGING THE FIRST TWO SENTENCES ("Enemies cannot
+            // target it, all combat"), which costs no fact, and by letting
+            // "Holds ... Plans" carry the where in place of "Play a Plan card
+            // on it". `EB-293`'s half is not lost with it: the `Plan` keyword
+            // tip still leads with "On the [gold]Bake-Kurage[/gold]" and a
+            // Plan-only row's own face still leads with "Play on the
+            // Bake-Kurage." (`gen_klee_cards._plan_only_line`), so the player
+            // meets the where on the card in their hand as well as here.
+            // 123 of 125. Page twin: `blindplay_notes.PLAN_COUNT_NOTE`.
+            //
+            // NO SEMICOLON IN THIS STRING, and it is not a style
+            // choice: `lint_text_conventions.loc_rows` matches a
+            // power's localization body with a character class
+            // that excludes `;`, so a face carrying one is not
+            // measured at all -- the silence that shape of lint
+            // is worst at. ", each carried out" says the same
+            // thing the semicolon said.
+            "Enemies cannot target it, all combat. Holds any number of "
+          + "[gold]Plans[/gold], each carried out next turn, or at "
           + "this turn's end if [gold]Dusk[/gold]."
           // `EB-653` (round 24). THE CAP PRINTS WHERE IT BINDS. The r24 cap
           // lane carried out two of four written Plans four mornings running
@@ -296,33 +323,84 @@ public static class KokomiRules
 
     /// <summary>Sango Isshin's now-line: the quarter, at the enemy she aimed
     /// at, Hydro through the shared pipeline so Strength, the aura and the
-    /// reaction all behave as they do on any Attack of hers.</summary>
+    /// reaction all behave as they do on any Attack of hers.
+    ///
+    /// `EB-693`: AND NOW IT IS ONE KIND OF DAMAGE, which is what that sentence
+    /// always claimed and what the door never delivered.
+    ///
+    /// THE FIND (Kokomi r29, lane 1 (c)). The quarter hit took her Strength --
+    /// 22 where the face said 20 -- and did NOT take the Effigy's Slow, while
+    /// Strike and Feint took that same Slow on the next turn. Two hits from
+    /// one seat, one turn apart, obeying two different rule sets, and the face
+    /// calls itself an Attack.
+    ///
+    /// WHY IT HAPPENED. <see cref="ElementalHit.Deal"/> is the UNPOWERED door:
+    /// it hand-rolls the dealer's Strength and Weak
+    /// (<c>SimDamagePipeline.DealerMods</c>) and the target's Vulnerable
+    /// (<c>TargetMods</c>) and then reaches <c>CreatureCmd.Damage</c> as
+    /// <c>ValueProp.Unpowered</c> with <c>dealer: null</c>. That door exists
+    /// for a Bomb and for a Plan carry-out, where the rule IS that the hit is
+    /// nobody's attack -- and every game power that answers an attack, Slow
+    /// included, is skipped by construction because it gates on
+    /// <c>props.IsPoweredAttack()</c>. Sango Isshin's now-line is not one of
+    /// those: it is an <c>Attack</c>-type card's own damage, printed on its
+    /// own face.
+    ///
+    /// THE D DEFAULT, APPLIED: it is ATTACK damage with ALL modifiers --
+    /// Strength AND Slow, Weak and Vulnerable -- in both engines, because the
+    /// face calls itself an Attack and nothing else on the card asks for an
+    /// exception. So this is now <c>DamageCmd.Attack</c> from the card, which
+    /// is the same builder every other Attack row in the arm uses, and the
+    /// element still lands: <c>KleeElementalHooks.BeforeDamageReceived</c>
+    /// applies the aura for any powered hit whose <c>cardSource</c> is an
+    /// <see cref="IElementalCard"/>, which Sango Isshin declares.
+    ///
+    /// THE SIM WAS ALREADY THE DEFAULT and did not move:
+    /// `effects._op_damage_quarter_max_hp` deals it with
+    /// `source="attack" if card.type == "attack"`, and Sango Isshin is an
+    /// attack. `tier0/tests/test_eb693_the_quarter_hit_is_attack_damage.py` is
+    /// the parity read; `KleeTests/Prototype/KokomiQuarterHitTests.cs` is the
+    /// C# side, which can only read the call graph (the README's headless
+    /// boundary) and therefore reads exactly that.
+    ///
+    /// THE PLANNED HALF IS UNTOUCHED. A Plan's carry-out is the jellyfish's,
+    /// not hers (`EB-334`, R246 pick 1), so
+    /// <see cref="KokomiPlan.Kind.DamageQuarterMaxHp"/> still resolves through
+    /// <see cref="KokomiPlan.Hit"/> and still keeps the unpowered rule the
+    /// `Plan` keyword prints. One card, two clauses, two rules -- and both of
+    /// them are now printed where they are read.</summary>
     public static async Task QuarterMaxHp(
-        PlayerChoiceContext choiceContext, Creature? kokomi, Creature? target)
+        PlayerChoiceContext choiceContext, Creature? kokomi, Creature? target,
+        CardModel card, CardPlay cardPlay)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var amount = QuarterOfMaxHp(kokomi);
         if (amount <= 0 || target == null || target.IsDead) return;
-        await ElementalHit.Deal(
-            choiceContext, target, Element.Hydro, amount, kokomi);
+        await DamageCmd.Attack(amount)
+            .FromCard(card, cardPlay)
+            .Targeting(target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
     }
 
-    /// <summary>The same, at every living enemy. Snapshotted before the first
-    /// hit, so an enemy the volley kills does not change who is in it.</summary>
+    /// <summary>The same, at every living enemy. The volley is the builder's
+    /// own <c>TargetingAllOpponents</c> rather than a hand-rolled loop, for
+    /// `EB-693`'s reason: one door, so one enemy's Slow cannot be read on one
+    /// clause of this card and not the other.</summary>
     public static async Task QuarterMaxHpAll(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
+        PlayerChoiceContext choiceContext, Creature? kokomi,
+        CardModel card, CardPlay cardPlay)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var amount = QuarterOfMaxHp(kokomi);
         var combat = kokomi!.CombatState;
         if (amount <= 0 || combat == null) return;
-        foreach (var enemy in combat.HittableEnemies.Where(e => !e.IsDead)
-                                    .ToList())
-        {
-            if (enemy.IsDead) continue;
-            await ElementalHit.Deal(
-                choiceContext, enemy, Element.Hydro, amount, kokomi);
-        }
+        await DamageCmd.Attack(amount)
+            .FromCard(card, cardPlay)
+            .TargetingAllOpponents(combat)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
     }
 
     // ---- the Mend rule ----------------------------------------------------

@@ -131,6 +131,31 @@ internal static class MeterCostBadge
         _ => StsColors.cream,
     };
 
+    /// <summary>
+    /// `EB-445`. THE X PRICE'S OWN SLOT TEXT.
+    ///
+    /// THE DEFECT. Stoke the Fuse's face reads "Spend all your remaining
+    /// [Spark]s" and its badge read `1`. Both numbers are honest about
+    /// something -- the 1 is the GATE, the whole bank is the CHARGE -- and the
+    /// badge is where a player reads a price, so the slot named the one figure
+    /// the card never takes. The blind-play page had already been repaired
+    /// (`understudy/qa_packet.cost_label` prints `all your Sparks (1 to
+    /// play)`); this is its C# twin.
+    ///
+    /// X AND NOT THE WORDS, and the grammar is the base game's, not ours: an
+    /// X cost draws an X in the cost slot (`MeterCost.EncoreCostOf` skips
+    /// `CostsX` for exactly this reason, and `NCard` carries `HasStarCostX`),
+    /// the slot is one glyph wide, and "all your Sparks" is already on the
+    /// card's own face one line below. The page keeps the long form because a
+    /// page has room for it and a badge does not.
+    /// </summary>
+    private const string WholeBankPrice = "X";
+
+    private static string PriceText(CardModel card, MeterPrice price) =>
+        price.Meter == Meter.Sparks && SparkCost.PricesWholeBank(card)
+            ? WholeBankPrice
+            : price.Amount.ToString();
+
     private static bool _warnedFreedGlyph;
 
     /// <summary>
@@ -289,7 +314,7 @@ internal static class MeterCostBadge
         // warned once). Both draw the badge; neither throws.
         SetGlyph(icon, texture);
 
-        label.SetTextAutoSize(price.Amount.ToString());
+        label.SetTextAutoSize(PriceText(card, price));
 
         // Affordability, in the base game's own two colours. Only in HAND: a
         // card in the draw pile, the compendium or a reward screen has no bank

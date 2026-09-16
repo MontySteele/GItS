@@ -95,8 +95,8 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard, IModalCard
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<DeepBreathModeA>(Owner),
-            ModalChoice.CreateOption<DeepBreathModeB>(Owner),
+            ModalChoice.CreateMatchingOption<DeepBreathModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<DeepBreathModeB>(Owner, this),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, ModePrices);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]", "Spend 3 [gold]Encore[/gold]: draw 3 cards" }[modeIndex]);

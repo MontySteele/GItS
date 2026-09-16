@@ -121,3 +121,31 @@ def test_no_arm_keyword_reaches_the_packaged_table():
     table = json.loads(GENERATED.read_text(encoding="utf-8"))
     arm_keys = [k for k in table if k.startswith("KLEEMOD-ARM_")]
     assert arm_keys == [], arm_keys
+
+
+def test_the_turn_end_docket_header_is_a_loc_row_and_the_scene_keeps_it():
+    """`EB-160`. THE ONE PLAYER-FACING STRING BAKED INTO A SCENE.
+
+    `shared/turn_end_docket.tscn` carried `text = "END OF TURN"` as scene
+    data: not in any loc table, reachable by no translator, and unable to
+    follow a locale switch. It has a row now, and it is a PLAIN key so this
+    generator derives it into the packaged table.
+
+    THE SCENE KEEPS THE WORDS, which is the other half of the claim rather
+    than a leftover: `TurnEndPreviewBridge.LocalizeHeader` writes over the
+    node only where the table answers, so a docket built from a pack older
+    than the row still reads correctly instead of going blank.
+    """
+    key = "KLEEMOD-TURN_END_DOCKET.header"
+    words = "END OF TURN"
+
+    assert f'["{key}"] = "{words}"' in ENTRY.read_text(encoding="utf-8")
+    assert json.loads(GENERATED.read_text(encoding="utf-8"))[key] == words
+
+    bridge = (REPO / "klee-mod" / "KleeCode" / "Vfx"
+              / "TurnEndPreviewBridge.cs").read_text(encoding="utf-8")
+    assert f'HeaderKey = "{key}"' in bridge
+
+    scene = (REPO / "klee-mod" / "pck-src" / "shared"
+             / "turn_end_docket.tscn").read_text(encoding="utf-8")
+    assert f'text = "{words}"' in scene

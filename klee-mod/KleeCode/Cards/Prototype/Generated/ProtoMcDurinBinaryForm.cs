@@ -99,8 +99,8 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
             .Execute(choiceContext);
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoMcDurinBinaryFormModeA>(Owner),
-            ModalChoice.CreateOption<ProtoMcDurinBinaryFormModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoMcDurinBinaryFormModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoMcDurinBinaryFormModeB>(Owner, this),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "[gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]", "[gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage" }[modeIndex]);

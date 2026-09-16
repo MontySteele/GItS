@@ -188,6 +188,14 @@ public static class FurinaStage
         if (owner != null) FurinaStageLedger.For(owner).BeginPlay();
     }
 
+    /// <summary>Close the per-play spend record. Round three's stale forecast
+    /// is what this exists for -- see <see cref="FurinaStageLedger.EndPlay"/>.
+    /// </summary>
+    public static void EndPlay(Creature? owner)
+    {
+        if (owner != null) FurinaStageLedger.For(owner).EndPlay();
+    }
+
     /// <summary>What THIS play took off the bars, for the `stage_spent` count.
     /// A per-play record and not a live read, for the reason the sim leg
     /// gives: by the time <i>Final Bow</i>'s Block or the Rare's damage

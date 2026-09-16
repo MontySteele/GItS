@@ -42,13 +42,14 @@ public sealed class ProtoKoRunAway : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Run Away!"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 4 additional [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(3m, ValueProp.Move)
+            new BlockVar(3m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

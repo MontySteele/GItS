@@ -78,8 +78,8 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
     {
         var modeOptions = new List<CardModel>
         {
-            ModalChoice.CreateOption<ProtoFsGrandEntranceModeA>(Owner),
-            ModalChoice.CreateOption<ProtoFsGrandEntranceModeB>(Owner),
+            ModalChoice.CreateMatchingOption<ProtoFsGrandEntranceModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoFsGrandEntranceModeB>(Owner, this),
         };
         var modeRules = new ModeRequirement?[]
         {
@@ -127,8 +127,21 @@ public sealed class ProtoFsGrandEntranceModeA : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deal 10 damage"),
-        ("description", "Deal 10 damage"),
+        ("description", "Deal {PlainDamage:diff()} damage"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new FoldedDamageVar("PlainDamage", 10m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 20m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainDamage"].UpgradeValueBy(4m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
+    }
 }
 
 /// <summary>Mode 1 of proto_fs_grand_entrance. A face for the choose-a-card screen;
@@ -141,6 +154,19 @@ public sealed class ProtoFsGrandEntranceModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "[gold]Spend[/gold] 5: deal 20 instead"),
-        ("description", "[gold]Spend[/gold] 5: deal 20 instead"),
+        ("description", "[gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new FoldedDamageVar("PlainDamage", 10m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 20m, ValueProp.Move)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PlainDamage"].UpgradeValueBy(4m);
+        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
+    }
 }

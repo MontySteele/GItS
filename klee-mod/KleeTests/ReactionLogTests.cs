@@ -175,4 +175,44 @@ public class ReactionLogTests
             row.Keys.ToArray());
         Assert.Equal(false, row["carried"]);
     }
+
+    [Fact]
+    public void Every_reaction_the_table_can_produce_has_a_printed_name()
+    {
+        // `EB-410`, AUDITED AND CLOSED HERE. The row's acceptance is "every
+        // reaction that fires is named", and `EB-681` is what met it: every
+        // reaction resolves in `ReactionEffects.Resolve` (pinned one file up),
+        // Resolve writes a row before it switches on the kind, and the page
+        // prints a named row per beat. What nothing pinned is the LAST link --
+        // that the name a row carries is a real word for every member of the
+        // enum, including the two the enum spells differently from every
+        // player surface (`Overload` -> "Overloaded", `ElectroCharged` ->
+        // "Electro-Charged"). A ninth reaction added tomorrow inherits
+        // `ToString()`, and an enum member is the one place a word can reach a
+        // page without anybody having written it.
+        //
+        // Its Python twin is `test_every_reaction_name_has_a_glossary_row`,
+        // which reads these same names out of this source and demands a
+        // definition for each on the page.
+        var named = System.Enum.GetValues<Reaction>()
+            .Where(r => r != Reaction.None)
+            .Select(ReactionLog.PrintedName)
+            .ToList();
+
+        Assert.Equal(8, named.Count);
+        Assert.All(named, n => Assert.False(string.IsNullOrWhiteSpace(n)));
+        Assert.Equal(named.Count, named.Distinct().Count());
+        Assert.Contains("Overloaded", named);
+        Assert.Contains("Electro-Charged", named);
+        // And no row ever carries the enum's own spelling of those two.
+        Assert.DoesNotContain("Overload", named);
+        Assert.DoesNotContain("ElectroCharged", named);
+
+        // `None` names nothing and writes nothing -- the guard at the top of
+        // `Note`, which is what keeps "a row happened" equal to "a reaction
+        // happened".
+        ReactionLog.MarkTurnStart();
+        ReactionLog.Note(Reaction.None, Seat.Kokomi().Creature, null, null);
+        Assert.Empty(ReactionLog.Snapshot());
+    }
 }

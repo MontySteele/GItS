@@ -101,3 +101,52 @@ internal static class NCreature_StartDeathAnim_AnimationTreeRoute
     public static void Postfix(NCreature __instance)
         => CreatureAnimationRouter.Route(__instance, "Dead");
 }
+
+/// <summary>
+/// `EB-159`, THE ONE SEAM OF THE THREE THAT BITES A MODDED PLAYER TODAY.
+///
+/// REVIVE IS SPECIAL-CASED UPSTREAM THE SAME WAY DEATH IS, and one step
+/// further. <c>NCreature.StartReviveAnim</c> emits the "Revive" trigger only
+/// when <c>_spineAnimator != null</c> and that animator has the trigger
+/// (0.111.0 decompile, <c>Nodes.Combat/NCreature.cs:971</c>), and every
+/// character of ours is spine-less -- so the postfix above never hears about a
+/// revive. The arm a spine-less PLAYER takes instead is
+/// <c>else if (Entity.IsPlayer) AnimTempRevive()</c> (NCreature.cs:987), a
+/// tween that fades <c>Visuals</c> out and back and, between the two, calls
+/// <c>ImmediatelySetIdle</c> (NCreature.cs:997) -- which sets the trigger on
+/// <c>_spineAnimator</c> DIRECTLY rather than through
+/// <c>SetAnimationTrigger</c>, so it bypasses the router's other postfix too.
+///
+/// WHAT THAT COSTS, concretely. The state machine was driven to "death" by
+/// <c>StartDeathAnim</c>'s postfix, the player is brought back
+/// (<c>CreatureCmd.Heal</c>'s <c>wasDead</c> arm, CreatureCmd.cs:775;
+/// <c>SetCurrentHp</c> dead-to-alive, CreatureCmd.cs:827), and nothing ever
+/// tells the tree to leave that state: the character stands back up as her own
+/// corpse, faded to full alpha by the tween. Furina's graph has no
+/// death-to-idle transition at all (`pck-src/furina/model/combat.tscn`: death
+/// goes only to End), which is survivable -- Godot's <c>Travel</c> teleports
+/// where no path exists -- and is also why nothing recovers on its own.
+///
+/// SO IT IS ROUTED HERE, in the shape the death seam already uses, and it
+/// carries the game's own word: <c>TriggerToState</c> maps "Revive" to idle,
+/// which is what a base-game spine rig does with the trigger and what
+/// <c>ImmediatelySetIdle</c> does with the animator. Inert for every creature
+/// with no %AnimationTree, which is the whole base cast.
+///
+/// THE OTHER TWO SEAMS ARE REPORTED RATHER THAN QUIETLY LEFT.
+/// <c>ImmediatelySetIdle</c> is reachable only through this same tween in the
+/// 0.111.0 decompile, so this postfix covers it. <c>StartDeathAnim</c>'s own
+/// <c>_spineAnimator != null</c> gate (NCreature.cs:944) also skips
+/// <c>SfxCmd.PlayDeath(Entity.Player)</c> and leaves the returned anim length
+/// at 0, so a modded player dies silently and <c>Hook.AfterDeath</c> waits
+/// zero seconds for an animation the tree is playing. Both of those move a
+/// SOUND and a WAIT the player feels, which is a taste call and not this
+/// row's.
+/// </summary>
+[HarmonyPatch(typeof(NCreature), nameof(NCreature.StartReviveAnim))]
+internal static class NCreature_StartReviveAnim_AnimationTreeRoute
+{
+    [HarmonyPostfix]
+    public static void Postfix(NCreature __instance)
+        => CreatureAnimationRouter.Route(__instance, "Revive");
+}
