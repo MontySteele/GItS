@@ -513,22 +513,25 @@ public class Round16Tests
     [Fact]
     public void Both_printed_numbers_fold_the_way_the_dealt_one_does()
     {
-        // THE CLAIM OF THE ROW, and the part a headless pin can reach: the
-        // two printed halves go through the same two folds the dealt number
-        // does -- the game's own dealer hook, inherited from `DamageVar`
-        // (Strike's var), and `SimDamagePipeline`'s target side, added by
-        // `FoldedDamageVar` exactly as `FrontFoldedDamageVar` adds it. The
-        // NUMBERS need a live combat (KleeTests/README.md, "The headless
-        // boundary"), which is where the delivered-versus-printed read is.
+        // THE CLAIM OF THE ROW, and the part a headless pin can reach: the two
+        // printed halves go through the same fold the dealt number does --
+        // `Hook.ModifyDamage(..., All)` over one named body, inherited from
+        // `DamageVar` (Strike's var). `EB-328` is why that is now ONE call
+        // rather than the game's fold plus a mod-side target term: the game's
+        // fold already carries the target's side whenever a body is named, so
+        // the second term was the same Vulnerable twice. The NUMBERS need a
+        // live combat (KleeTests/README.md, "The headless boundary"), which is
+        // where the delivered-versus-printed read is.
         var folded = typeof(FoldedDamageVar);
         Assert.Equal(
             typeof(DamageVar),
             folded.BaseType);
         var calls = Il.Calls(
             folded.GetMethod("UpdateCardPreview", All)!).ToList();
-        Assert.Contains(calls, c => c.Contains("TargetMods"));
+        Assert.Contains(calls, c => c.Contains("BodyForPreview"));
         Assert.Contains(calls, c => c.Contains("FrontEnemy"));
         Assert.Contains(calls, c => c.Contains("UpdateCardPreview"));
+        Assert.DoesNotContain(calls, c => c.Contains("TargetMods"));
 
         // And the tip that used to carry the pair is gone rather than left
         // restating the sheet numbers beside a face printing folded ones.

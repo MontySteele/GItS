@@ -39,17 +39,30 @@ namespace KleeMod.Powers;
 /// is about the BODY, whichever way the preview learned of it: the aimed
 /// creature when the game names one, the front enemy when it does not.
 ///
-/// STILL INCAPABLE OF FOLDING TWICE, and by the same argument as before,
-/// checked rather than assumed: <c>CalculatedVar.UpdateCardPreview</c> runs
-/// the DEALER's hooks (her Strength, her Weak, the Spotlight, this row's own
-/// multiplier), which is why the face folds four modifiers and was silent
-/// about the fifth (`EB-589`'s finding, one surface over). The target's terms
-/// are added here, once.
+/// `EB-328`: AND IT WAS FOLDING TWICE, which the note here used to deny. The
+/// claim was that <c>CalculatedVar.UpdateCardPreview</c> runs "the DEALER's
+/// hooks" and therefore could not reach the target's side. It is not the
+/// dealer's hooks: <c>Hook.ModifyDamage</c> walks
+/// <c>CombatState.IterateHookListeners</c>, which is EVERY ally's and every
+/// enemy's powers (plus relics, potions, orbs and every card in every pile),
+/// and it hands each of them the <c>target</c> it was given --
+/// <c>VulnerablePower.ModifyDamageMultiplicative</c> fires on
+/// <c>target == Owner</c>. So whenever the game named a body, the base call
+/// had ALREADY folded that body's Vulnerable and that body's
+/// <c>ModifyDamageCap</c>, and the extra <c>SimDamagePipeline.TargetMods</c>
+/// multiplied the Vulnerable in a second time -- after the cap phase, so the
+/// number escaped a clamp the wire applies as well. Under Weak 1 and
+/// Vulnerable 1 a base 4 printed 4 x 0.75 x 1.5 x 1.5 = 6 while the board
+/// moved 4.
 ///
-/// <see cref="SimDamagePipeline.TargetMods"/> AND NOT A SECOND EXPRESSION,
-/// `EB-265`'s rule: it is the call <c>ElementalHit.Deal</c> makes on the same
-/// creature a beat later, so a face that disagrees with the board is a red
-/// test rather than a number a seat stops trusting.
+/// THE REPAIR IS TO NAME THE BODY ONCE AND LET THE ENGINE FOLD IT.
+/// <see cref="HitOrder.BodyForPreview"/> answers the aimed creature where the
+/// game named one, the front enemy where it did not, and null on the
+/// all-enemies branch the game folds for itself; the game's own var then runs
+/// phases 1-4 over that body in the engine's own order, which is written out
+/// in <see cref="HitOrder"/> with the type names it was decompiled from.
+/// Nothing is multiplied on top afterwards, which is why the pairs agree now:
+/// Weak and Vulnerable are BOTH phase-2 terms and belong in one product.
 ///
 /// QUARANTINED. The file sits under <c>Powers/Prototype/</c>, which
 /// <c>KleeCode.csproj</c> Compile-Removes from a release build, and
@@ -87,19 +100,25 @@ public sealed class FrontFoldedDamageVar : CalculatedDamageVar
         CardModel card, CardPreviewMode previewMode, Creature? target,
         bool runGlobalHooks)
     {
-        base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
         // OFF A CARD THAT IS NOT IN PLAY the game runs no hooks at all, and
         // neither does this: a compendium or deck-view read prints its base.
-        if (!runGlobalHooks) return;
         // A canonical (compendium) copy has no owner and the getter ASSERTS
         // rather than returning null -- `PlanDamageVar`'s guard, verbatim.
-        if (!card.IsMutable) return;
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
         // `EB-598`: THE AIMED BODY WHERE THE GAME NAMED ONE, the front enemy
-        // where it did not. Both are the same question -- which creature is
-        // this number about -- and the base var answers neither.
-        var body = target ?? KokomiPlan.FrontEnemy(card.Owner?.Creature);
-        if (body == null) return;
-        PreviewValue = (int)SimDamagePipeline.TargetMods(body, PreviewValue);
+        // where it did not. `EB-328`: and handed to the game's own var as the
+        // target, ONCE, rather than folded on top of its answer -- see the
+        // note above and `HitOrder`.
+        base.UpdateCardPreview(
+            card, previewMode,
+            HitOrder.BodyForPreview(
+                card, previewMode, target,
+                KokomiPlan.FrontEnemy(card.Owner?.Creature)),
+            runGlobalHooks);
     }
 }
 
@@ -120,9 +139,9 @@ public sealed class FrontFoldedDamageVar : CalculatedDamageVar
 /// one card is one var: a face needs two tokens. <c>DamageVar</c> is the one
 /// damage var the game gives a <c>(string name, ...)</c> overload, and its
 /// preview is the same <c>Hook.ModifyDamage(..., ModifyDamageHookType.All)</c>
-/// call the calculated var makes -- Strike's own fold. So the dealer's side is
-/// the game's, by the game's own call, and the target's side is the shared
-/// <see cref="SimDamagePipeline.TargetMods"/> the var above already adds.
+/// call the calculated var makes -- Strike's own fold. So both sides are the
+/// game's, by the game's own call, over the body
+/// <see cref="HitOrder.BodyForPreview"/> names (`EB-328`).
 ///
 /// THE HIT IS UNTOUCHED. <c>CalculatedDamage</c> stays on the card and stays
 /// what <c>DamageCmd.Attack</c> is handed; these two are printed and nothing
@@ -143,15 +162,25 @@ public sealed class FoldedDamageVar : DamageVar
         CardModel card, CardPreviewMode previewMode, Creature? target,
         bool runGlobalHooks)
     {
-        base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
         // Off a card that is not in play the game runs no hooks, and neither
         // does this: a shop shelf and a deck view print the sheet's numbers,
         // which is the screen `EB-484` was filed from and the screen this
         // shape finally answers.
-        if (!runGlobalHooks) return;
-        if (!card.IsMutable) return;
-        var body = target ?? KokomiPlan.FrontEnemy(card.Owner?.Creature);
-        if (body == null) return;
-        PreviewValue = (int)SimDamagePipeline.TargetMods(body, PreviewValue);
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        // `EB-328`: the body named once and handed to the game's own var, the
+        // same repair `FrontFoldedDamageVar` takes and for the same reason --
+        // this branch prints the OTHER half of one conditional face, so the
+        // two halves have to fold under one rule or the sentence argues with
+        // itself again.
+        base.UpdateCardPreview(
+            card, previewMode,
+            HitOrder.BodyForPreview(
+                card, previewMode, target,
+                KokomiPlan.FrontEnemy(card.Owner?.Creature)),
+            runGlobalHooks);
     }
 }
