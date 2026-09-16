@@ -495,7 +495,19 @@ public class ArmKeywordTipTests
         // entry counted as one Plan or two for a per-Plan clause (Kokomi r31
         // lane 2). It counts as two, and the card that bends the count is
         // where the count is explained.
-        Assert.Equal(25, attaches.Count);
+        //
+        // THE TWENTY-SEVENTH IS THE STAGE READERS' `ForStageReader`, a RIDER
+        // and the SECOND whose sentence comes and goes with the screen
+        // (`ForEmptyField` is the first). The four readers multiply a LIVE
+        // bar, so off a board their faces print a literal 0 -- "Deal 0 damage
+        // to ALL enemies" on the Rare at Neow, "Deal 0 damage" on `Ousia
+        // Surge` at a reward -- and two round-three seats turned the Rare down
+        // on it. The face cannot say otherwise: a description is a loc string
+        // injected once at boot. It goes through the same `With`, four times
+        // over: which of its four rules a row gets is derived from the
+        // multiplier `EB-747` picked for that row's payoff.
+        Assert.Equal(26, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForStageReader");
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
         Assert.Contains(attaches, m => m.Name == "ForFanfare");
@@ -724,5 +736,64 @@ public class ArmKeywordTipTests
             Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere",
                             Il.Calls(Il.Method("ArmKeywordTips", word)));
         }
+    }
+
+    // --- a Stage round-three defect: the readers' 0 off the board ----------
+
+    [Fact]
+    public void The_stage_readers_tip_states_each_rule_and_the_absent_stage()
+    {
+        // THE FIND (round three). The four readers multiply a LIVE bar, so
+        // off a board their faces print a literal 0 -- "Deal 0 damage to ALL
+        // enemies" on the Rare at Neow, "Deal 0 damage" on `Ousia Surge` at a
+        // reward -- and two seats turned the Rare down on it. The number is
+        // right in combat and right at resolution (`EB-747`); what is wrong
+        // is the screen with no stage behind it, and a description cannot fix
+        // itself because it is a loc string injected once at boot.
+        //
+        // THE SENTENCES OFF THE COMPILED METHOD, this file's own rule: a
+        // materialised `HoverTip` resolves a `LocString` through a
+        // `LocManager` that is null until the game boots, so what is
+        // reachable here is the text each branch would print.
+        var body = Printed("ForStageReader");
+
+        // One rule per reader, each read off that reader's own code.
+        Assert.Contains(
+            "The number is the [gold]lead performer[/gold]'s "
+          + "[gold]Fanfare[/gold].", body);
+        Assert.Contains(
+            "The number is the [gold]back performer[/gold]'s "
+          + "[gold]Fanfare[/gold].", body);
+        Assert.Contains(
+            "The number is the [gold]lead performer[/gold]'s "
+          + "[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends.", body);
+        Assert.Contains(
+            "The number is every performer's [gold]Fanfare[/gold] added up "
+          + "and spent.", body);
+
+        // And the clause that IS the defect, which the rule carries only
+        // where there is no combat behind the card: in a fight the face is
+        // already right and this sentence would be false.
+        Assert.Contains(
+            " There is no stage outside combat, so the number above reads 0.",
+            body);
+    }
+
+    [Fact]
+    public void The_readers_rider_yields_on_and_off_a_board_alike()
+    {
+        // UNLIKE `ForEmptyField`, WHICH GOES SILENT. That rider is a sentence
+        // about a board in a particular state; this one is about what the
+        // card's number IS, which is true on every screen -- and the screen
+        // it was filed on is the one with no board at all.
+        var none = System.Linq.Enumerable.Empty<IHoverTip>();
+        var offTheBoard = new ProtoFsOusiaSurge();
+        Assert.NotSame(none, ArmKeywordTips.ForStageReader(
+            none, offTheBoard, ArmKeywordTips.StageReader.Lead));
+
+        var furina = Seat.Furina();
+        var inPlay = Owned<ProtoFsOusiaSurge>(furina);
+        Assert.NotSame(none, ArmKeywordTips.ForStageReader(
+            none, inPlay, ArmKeywordTips.StageReader.Lead));
     }
 }

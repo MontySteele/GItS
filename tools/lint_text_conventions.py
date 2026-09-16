@@ -384,6 +384,12 @@ def tip_rows() -> list[Row]:
             r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
         if "SparkBody()" in body or "EncoreBody()" in body:
             continue
+        # A Stage round-three defect: the readers' tip picks one of four
+        # `const string` rules and appends a fifth off the board, so the call
+        # carries no literal at all and reaches this census as an empty
+        # string. Parsed out by name below, `EncoreKey`'s bargain exactly.
+        if "ReaderNoStage" in body:
+            continue
         rows.append(Row("tip", name, csharp_text(body), where))
     concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
     word = csharp_text(re.search(r"const string word =\s*" + concat + ";", src).group(1))
@@ -406,6 +412,21 @@ def tip_rows() -> list[Row]:
     off = re.search(r'return absorbs \+ ("One pool(?:[^;])*);', src)
     rows.append(Row("tip", "EncoreKey",
                     absorbs + csharp_text(off.group(1)), where))
+    # A Stage round-three defect. THE READERS' FOUR RULES, each measured AS
+    # RENDERED OFF THE BOARD -- rule plus the no-stage clause -- because that
+    # is the longest the tip is ever printed and the screen it was filed on.
+    # Four rows and not one, for `SparkKey`'s reason two blocks up: a switch
+    # with four arms is four faces, and a ceiling met by the shortest of them
+    # is no ceiling at all.
+    no_stage = csharp_text(
+        re.search(r"const string ReaderNoStage =\s*" + concat + ";",
+                  src).group(1))
+    for rule in ("ReaderLeadRule", "ReaderBackRule",
+                 "ReaderSpendLeadRule", "ReaderSpendAllRule"):
+        body = csharp_text(
+            re.search(rf"const string {rule} =\s*" + concat + ";",
+                      src).group(1))
+        rows.append(Row("tip", f"ReaderKey.{rule}", body + no_stage, where))
     return rows
 
 

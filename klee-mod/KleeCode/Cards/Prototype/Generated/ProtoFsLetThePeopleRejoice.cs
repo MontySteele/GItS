@@ -41,7 +41,7 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendAll), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("let_the_people_rejoice");
 

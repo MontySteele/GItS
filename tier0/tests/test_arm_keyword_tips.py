@@ -500,7 +500,15 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # before the meter exists, and every Furina row the Stage
                     # does not swap still carries it. `EB-407`'s finding is
                     # unchanged; only the door it comes through is.
-                    "KLEEMOD-ARM_ENCORE"}
+                    "KLEEMOD-ARM_ENCORE",
+                    # A Stage round-three defect: WHICH BAR a reader's number
+                    # is. The seventh of these, and the second whose sentence
+                    # changes with the screen -- beside
+                    # `KLEEMOD-ARM_EMPTY_FIELD`. The four readers multiply a
+                    # LIVE bar, so off a board their faces print a literal 0,
+                    # and a hover tip is the only surface that can say why: a
+                    # description is a loc string injected once at boot.
+                    "KLEEMOD-ARM_STAGE_READER"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -1325,3 +1333,99 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
     scout = (PROTOTYPE_DIR / "ProtoKkScoutAhead.cs")
     if scout.exists():
         assert "ForPlanTwice" not in scout.read_text(encoding="utf-8")
+
+
+# --- a Stage round-three defect: the readers' literal 0 off the board --------
+#
+# THE FIND (round three). *Let the People Rejoice* read "Deal 0 damage to ALL
+# enemies" on the Neow screen and *Ousia Surge* read "Deal 0 damage" at a card
+# reward, and two seats turned the Rare down on it. The number is right in
+# combat and right at resolution -- `EB-747`, whose tests stand below -- but
+# every reader multiplies a LIVE bar and off a board there are no bars, so a
+# CalculatedVar honestly reports nothing and the face prints the nothing.
+#
+# THE FACE CANNOT SAY IT. A description is a loc string injected once at boot
+# (`LocManager_Initialize_Patch`), with no runtime seam; the only expression
+# that would switch on the board is a nested `{CalculatedDamage:choose(0):...}`,
+# which would be the repo's first and has no headless renderer to pin. So the
+# rule goes on the HOVER TIP, the house route: `FurinaRiderTips.FanfareBody`
+# already says "out of combat the rate stands alone rather than printing a
+# misleading zero", and `KokomiRiderTips` takes the same posture.
+
+#: Each reader, the bar its number is, and the sentence it owes.
+STAGE_READERS = {
+    "proto_fs_ousia_surge": ("Lead", "ProtoFsOusiaSurge"),
+    "proto_fs_pneuma_refrain": ("Back", "ProtoFsPneumaRefrain"),
+    "proto_fs_final_bow": ("SpendLead", "ProtoFsFinalBow"),
+    "proto_fs_let_the_people_rejoice": ("SpendAll",
+                                        "ProtoFsLetThePeopleRejoice"),
+}
+
+
+def test_the_four_readers_are_the_rows_whose_number_is_a_bar():
+    """DERIVED FROM THE MULTIPLIER, never a list of ids.
+
+    `stage_reader_source` reads the C# expression `EB-747` already picked for
+    the row's `amount_formula`, so a fifth reader carries the sentence the day
+    its row exists and a row that stops reading a bar loses it the same day.
+
+    Seen to FAIL before the rider: no row on the surface attached one.
+    """
+    rows = {row["id"]: row for row in proto._rows()}
+    found = {rid: gen.stage_reader_source(row)
+             for rid, row in rows.items()
+             if gen.stage_reader_source(row)}
+    assert found == {rid: src for rid, (src, _) in STAGE_READERS.items()}
+
+
+@pytest.mark.parametrize("rid", sorted(STAGE_READERS))
+def test_every_reader_carries_the_rule_its_number_obeys(rid):
+    """The attach is committed, with the right one of the four sentences."""
+    source, cls = STAGE_READERS[rid]
+    src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
+    assert ("ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, "
+            f"ArmKeywordTips.StageReader.{source})") in src
+
+
+def test_the_readers_tip_states_each_rule_and_the_absent_stage():
+    """THE RULE ALWAYS, THE DISCLAIMER ONLY OFF THE BOARD.
+
+    In combat the face is already right and a sentence about an absent stage
+    would be false, so the tip says which bar the number is and stops. Off the
+    board it adds the one fact the screen is lying about.
+    """
+    tips = TIPS_CS.read_text(encoding="utf-8")
+    assert 'const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";' in tips
+    # The four rules, each read off its own reader's code.
+    assert "The number is the [gold]lead performer[/gold]'s " in tips
+    assert "The number is the [gold]back performer[/gold]'s " in tips
+    assert ("[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends."
+            in tips)
+    assert ("The number is every performer's [gold]Fanfare[/gold] added up and"
+            in tips)
+    # And the clause that is the whole defect, appended only off a board.
+    assert ("\" There is no stage outside combat, so the number above reads "
+            "0.\"" in tips)
+    assert "OnAStage(card) ? rule : rule + ReaderNoStage" in tips
+    # The title row is registered, or the tip renders with a raw loc key.
+    assert 'ArmKeywordTips.ReaderKey + ".title"' in MOD_CS.read_text(
+        encoding="utf-8")
+
+
+def test_the_readers_rules_are_measured_as_they_render_off_the_board():
+    """The census sees all four, at their LONGEST rendering.
+
+    A `With(...)` call whose body is built by a switch reaches
+    `lint_text_conventions.tip_rows` as an empty string -- the silence
+    `EB-343` was filed on -- so the four are parsed out by name, each with the
+    no-stage clause appended, which is the longest the tip is ever printed.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import lint_text_conventions as lint       # noqa: E402
+
+    rows = {row.ident: row.raw for row in lint.tip_rows()
+            if row.ident.startswith("ReaderKey.")}
+    assert len(rows) == 4
+    for ident, raw in rows.items():
+        assert "no stage outside combat" in raw, ident
+        assert len(lint.render(raw)) <= lint.CEILING["tip"], ident
