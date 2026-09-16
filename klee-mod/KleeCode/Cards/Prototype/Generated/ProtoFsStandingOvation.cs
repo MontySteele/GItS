@@ -40,7 +40,7 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("an_invitation");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_standing_ovation");
 
     public override List<(string, string)>? Localization => new()
     {

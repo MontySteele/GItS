@@ -48,7 +48,7 @@ public sealed class ProtoMcAlbedoTectonicTide : CustomCardModel, ICompanionCard,
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_albedo_solar_isotoma");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_albedo_tectonic_tide");
 
     public override List<(string, string)>? Localization => new()
     {

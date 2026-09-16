@@ -40,7 +40,7 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForLeadPerformer(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("change_the_bill");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bis");
 
     public override List<(string, string)>? Localization => new()
     {

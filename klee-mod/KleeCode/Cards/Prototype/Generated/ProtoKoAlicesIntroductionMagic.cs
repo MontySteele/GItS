@@ -37,7 +37,7 @@ public sealed class ProtoKoAlicesIntroductionMagic : CustomCardModel, IHexereiCa
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_alices_recipe");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_alices_introduction_magic");
 
     public override List<(string, string)>? Localization => new()
     {

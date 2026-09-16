@@ -40,7 +40,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("aria_of_recompense");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_curtain_rise");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -129,7 +129,7 @@ public sealed class ProtoFsCurtainRiseModeA : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("aria_of_recompense");
+        RosterArt.CardPortrait("proto_fs_curtain_rise");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -163,7 +163,7 @@ public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("aria_of_recompense");
+        RosterArt.CardPortrait("proto_fs_curtain_rise");
 
     public override List<(string, string)>? Localization => new()
     {

@@ -40,7 +40,7 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("stage_lights");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_interposition");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -120,7 +120,7 @@ public sealed class ProtoFsInterpositionModeA : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("stage_lights");
+        RosterArt.CardPortrait("proto_fs_interposition");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -154,7 +154,7 @@ public sealed class ProtoFsInterpositionModeB : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("stage_lights");
+        RosterArt.CardPortrait("proto_fs_interposition");
 
     public override List<(string, string)>? Localization => new()
     {

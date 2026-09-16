@@ -40,7 +40,7 @@ public sealed class ProtoKkShellGuard : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForCasket(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_salt_line");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_shell_guard");
 
     public override List<(string, string)>? Localization => new()
     {

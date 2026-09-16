@@ -282,14 +282,17 @@ def test_art_of_proxies_are_read_off_the_sheets(tmp_path):
     assert art_coverage.plan_out_paths(tmp_path / "nope.tsv") == {}
 
 
-def test_the_proxy_bill_prints_and_names_the_eb326_three():
-    """`EB-778`, the report half.
+def test_the_proxy_bill_prints_every_proxy_it_finds():
+    """`EB-778`, the report half, and then the placement half.
 
-    The three EB-326 rows are asserted by NAME because they are the rows the
-    defect was filed on -- they wear a neighbour and appeared in no section of
-    this report at all. Every other assertion here is derived: whatever
-    `art_of_proxies` finds must reach the printed bill, so a fourth proxy
-    joins the pin the day it is written.
+    The three `EB-326` rows were asserted here BY NAME while the bill was new,
+    because they were the rows the defect was filed on: they wore a neighbour
+    and appeared in no section of this report at all. The placement pass
+    (2026-09-16) gave them -- and 26 others -- their own rank-1 art and took
+    `art_of:` off the sheet, so naming them here would now pin the defect
+    rather than the fix. What is asserted instead is the property that made the
+    bill worth having: whatever `art_of_proxies` finds reaches the printed
+    section, so a proxy written tomorrow is on the bill the day it is written.
     """
     sys.path.insert(0, str(REPO / "tools"))
     import art_coverage
@@ -297,12 +300,15 @@ def test_the_proxy_bill_prints_and_names_the_eb326_three():
     body = run_tool().stdout
     assert "ART_OF PROXIES" in body
     section = body.split("ART_OF PROXIES")[1].split("MODE FACES")[0]
-    for name in ("proto_ko_coven_errand", "proto_ko_witches_circle",
-                 "proto_ko_alices_introduction_magic"):
-        assert name in section, f"{name} is not on the proxy bill:\n{section}"
-    for row in art_coverage.art_of_proxies():
+    proxies = art_coverage.art_of_proxies()
+    assert proxies, "the bill has nothing to print and so proves nothing"
+    for row in proxies:
         assert row["id"] in section, row["id"]
         assert row["wears"] in section, row["wears"]
+    # Why the survivors kept their proxy: the neighbour's picture IS the right
+    # picture, because it is the same card under a different id.
+    for row in proxies:
+        assert row["id"].endswith(row["wears"]), row["id"]
 
 
 def test_bill_is_derived_from_canonical_sheets():

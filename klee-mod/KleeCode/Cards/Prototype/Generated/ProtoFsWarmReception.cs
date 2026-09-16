@@ -40,7 +40,7 @@ public sealed class ProtoFsWarmReception : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("blocking_notes");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_warm_reception");
 
     public override List<(string, string)>? Localization => new()
     {

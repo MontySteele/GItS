@@ -36,7 +36,7 @@ public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("salon_debut");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_salon_debut");
 
     public override List<(string, string)>? Localization => new()
     {

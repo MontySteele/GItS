@@ -40,7 +40,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("usher_the_waves");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_tidal_flourish");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -130,7 +130,7 @@ public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("usher_the_waves");
+        RosterArt.CardPortrait("proto_fs_tidal_flourish");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -164,7 +164,7 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("usher_the_waves");
+        RosterArt.CardPortrait("proto_fs_tidal_flourish");
 
     public override List<(string, string)>? Localization => new()
     {

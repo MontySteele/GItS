@@ -370,7 +370,7 @@
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
    personal_pool: [klee],
-   replaces: proto_mc_barbara_show_begin, art_of: proto_mc_barbara_show_begin,
+   replaces: proto_mc_barbara_show_begin,
    description: "Gain 5 [gold]Block[/gold]. Apply [gold]Hydro[/gold] twice. Whenever a [gold]Bomb[/gold] goes off this turn, gain 3 [gold]Block[/gold].",
    upgrade: {block: +2, power_amount: +1},
    effects: [{op: block, amount: 5},
@@ -383,7 +383,7 @@
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_ko_coven_errand, name: "Coven Errand", character: klee,
-   authored_by: [claude], art_of: proto_ko_mine_toss,
+   authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    upgrade: {bomb_size: +2},
    description: "Place a [gold]Bomb[/gold] 5. If you played a [gold]Hexerei[/gold] card this turn, place it on ALL enemies instead.",
@@ -391,14 +391,14 @@
               wide_if: hexerei_played_this_turn}]}
 
 - {id: proto_ko_witches_circle, name: "Witches' Circle", character: klee,
-   authored_by: [claude], art_of: proto_ko_chained_reactions,
+   authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    upgrade: {power_amount: +2},
    description: "Whenever you play a [gold]Hexerei[/gold] card, place a [gold]Bomb[/gold] 3 on a random enemy.",
    effects: [{op: apply_power, power: ko_witches_circle, amount: 3, target: self}]}
 
 - {id: proto_ko_alices_introduction_magic, name: "Alice's Introduction Magic", character: klee,
-   authored_by: [claude], hexerei: true, art_of: proto_ko_alices_recipe,
+   authored_by: [claude], hexerei: true,
    cost: 1, type: skill, rarity: rare,
    upgrade: {retain: true},
    description: "All cards in your hand count as [gold]Hexerei[/gold] cards this turn.",
@@ -849,15 +849,15 @@
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
 # stand-ins (caretakers), PR: stand-in seam
-# A Klee-only card handed to Klee in place of the Universal `replaces:` names;
-# `art_of:` is whose art it wears. In NO pool -- docs/notes/prototype-surface-provenance.md.
+# A Klee-only card handed to Klee in place of the Universal `replaces:` names.
+# `EB-778` gave each its own art. In NO pool -- docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_mc_diona_shaken_not_purred, name: "Diona — Shaken, Not Purred", character: klee,
    authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill,
    personal_pool: [klee],
-   replaces: proto_mc_diona_icy_paws, art_of: proto_mc_diona_icy_paws,
+   replaces: proto_mc_diona_icy_paws,
    description: "Gain 6 [gold]Block[/gold]. Apply [gold]Cryo[/gold] twice to an enemy. If a [gold]Bomb[/gold] goes off this turn, gain 5 [gold]Block[/gold].",
    effects: [{op: block, amount: 6},
              {op: apply_aura, element: cryo, target: enemy},
@@ -869,7 +869,7 @@
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
    personal_pool: [klee],
-   replaces: proto_mc_noelle_breastplate, art_of: proto_mc_noelle_breastplate,
+   replaces: proto_mc_noelle_breastplate,
    description: "Gain 6 [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain 4 [gold]Block[/gold].",
    effects: [{op: block, amount: 6},
              {op: apply_power, power: mc_i_got_your_back, amount: 4, target: self}]}
@@ -881,7 +881,7 @@
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
    personal_pool: [klee],
-   replaces: proto_mc_kaeya_frostgnaw, art_of: proto_mc_kaeya_frostgnaw,
+   replaces: proto_mc_kaeya_frostgnaw,
    description: "Deal 8 damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] pays even if you played a [gold]Set off[/gold] card.",
    upgrade: {damage: 3},
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
@@ -892,7 +892,7 @@
    nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: anemo,
    cost: 2, type: power,
    personal_pool: [klee],
-   replaces: proto_mc_jean_dandelion_breeze, art_of: proto_mc_jean_dandelion_breeze,
+   replaces: proto_mc_jean_dandelion_breeze,
    description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card.",
    effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}]}
 
@@ -1049,12 +1049,12 @@
              {op: remove_debuff}],
    plan: [{op: block, amount: 10}]}
 
-# `EB-335`, R246 pick 2: the kit's own defence in act 2, and the `art_of:`
-# reuse both rows carry -- docs/notes/prototype-surface-provenance.md.
+# `EB-335`, R246 pick 2: the kit's own defence in act 2. Both rows wore a
+# neighbour's illustration through `art_of:` until `EB-778` placed their own
+# -- docs/notes/prototype-surface-provenance.md.
 - {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   art_of: proto_kk_coral_bulwark,
    # `EB-623`: "morning" is retired from every printed surface. The clause is
    # paid out of the same drain as the Plans it counts, and "carried out with
    # it" says so without a word the base game never taught.
@@ -1067,7 +1067,6 @@
 - {id: proto_kk_shell_guard, name: "Shell Guard", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   art_of: proto_kk_salt_line,
    description: "Gain 5 [gold]Block[/gold]. Until your next turn, whenever the [gold]Tamakushi Casket[/gold] strikes, gain 3 [gold]Block[/gold].",
    effects: [{op: block, amount: 5},
              {op: apply_power, power: kk_shell_guard, amount: 3, target: self}],
@@ -1548,7 +1547,7 @@
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_mc_prune_hexhunter_chime, name: "Prune — Ring-A-Ding-Ding! Hexhunter Chime", character: klee,
-   authored_by: [claude], hexerei: true, art_of: prune_witch_hunt,
+   authored_by: [claude], hexerei: true,
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack, personal_pool: klee,
    upgrade: {damage: +3},
@@ -1586,7 +1585,7 @@
 - {id: proto_mi_gorou_crystal_collapse, name: "Gorou — Crystal Collapse", character: kokomi,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
-   personal_pool: kokomi, art_of: proto_mi_gorou_juuga,
+   personal_pool: kokomi,
    cost: 1, type: skill,
    description: "[gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn.",
    effects: [],
@@ -1602,7 +1601,7 @@
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: power,
    personal_pool: [klee],
-   replaces: proto_mc_albedo_solar_isotoma, art_of: proto_mc_albedo_solar_isotoma,
+   replaces: proto_mc_albedo_solar_isotoma,
    description: "Whenever an [gold]Elemental Reaction[/gold] happens, deal 4 damage to that enemy.",
    effects: [{op: apply_power, power: mc_tectonic_tide, amount: 4, target: self}]}
 
@@ -1611,7 +1610,7 @@
    nation: mondstadt, star: 4, rarity: common, role_c: trigger, element: electro,
    cost: 1, type: attack,
    personal_pool: [klee],
-   replaces: proto_mc_fischl_nightrider, art_of: proto_mc_fischl_nightrider,
+   replaces: proto_mc_fischl_nightrider,
    description: "Deal 7 damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
              {op: apply_power, power: mc_sinful_hex, amount: 5, target: self}]}
@@ -1621,7 +1620,7 @@
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill,
    personal_pool: [klee],
-   replaces: proto_mc_sucrose_gust, art_of: proto_mc_sucrose_gust,
+   replaces: proto_mc_sucrose_gust,
    description: "[gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal 4 additional damage.",
    effects: [{op: swirl, target: enemy},
              {op: draw, amount: 1},
@@ -1632,7 +1631,7 @@
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
    personal_pool: [klee],
-   replaces: proto_mc_nicole_revelation, art_of: proto_mc_nicole_revelation,
+   replaces: proto_mc_nicole_revelation,
    description: "Whenever you play a [gold]Hexerei[/gold] card, deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
 
@@ -1651,7 +1650,6 @@
    authored_by: [claude],
    replaces: salon_debut,
    register: salon, cost: 1, type: skill, rarity: basic,
-   art_of: salon_debut,
    description: "Summon a random performer who is not on stage.",
    effects: [{op: stage_summon, member: random}]}
 
@@ -1660,7 +1658,6 @@
    authored_by: [claude],
    replaces: aria_of_recompense,
    register: salon, cost: 1, type: attack, rarity: basic,
-   art_of: aria_of_recompense,
    description: "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 7 damage",
@@ -1674,7 +1671,6 @@
    authored_by: [claude],
    replaces: an_invitation,
    register: salon, cost: 1, type: skill, rarity: basic,
-   art_of: an_invitation,
    description: "[gold]Raise[/gold] 5 [gold]Fanfare[/gold] on the [gold]back performer[/gold].",
    effects: [{op: stage_raise, amount: 5}]}
 
@@ -1712,7 +1708,6 @@
    authored_by: [claude],
    replaces: suffering_for_art,
    register: salon, cost: 0, type: skill, rarity: common, exhaust: true,
-   art_of: suffering_for_art,
    description: "Summon a random performer who is not on stage. Exhaust.",
    effects: [{op: stage_summon, member: random}]}
 
@@ -1721,7 +1716,6 @@
    authored_by: [claude],
    replaces: blocking_notes,
    register: salon, cost: 1, type: skill, rarity: common,
-   art_of: blocking_notes,
    description: "[gold]Raise[/gold] 3 [gold]Fanfare[/gold] on the [gold]back performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: stage_raise, amount: 3},
              {op: draw, amount: 1}]}
@@ -1731,7 +1725,6 @@
    authored_by: [claude],
    replaces: usher_the_waves,
    register: salon, cost: 1, type: attack, rarity: common,
-   art_of: usher_the_waves,
    description: "Choose one: Deal {PlainDamage:diff()} damage to ALL enemies | [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 5 damage to ALL enemies",
@@ -1745,7 +1738,6 @@
    authored_by: [claude],
    replaces: stage_lights,
    register: salon, cost: 1, type: skill, rarity: common,
-   art_of: stage_lights,
    description: "Choose one: Gain {PlainBlock:diff()} [gold]Block[/gold] | [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Gain 5 [gold]Block[/gold]",
@@ -1759,7 +1751,6 @@
    authored_by: [claude],
    replaces: held_breath,
    register: salon, cost: 0, type: skill, rarity: common,
-   art_of: held_breath,
    description: "[gold]Rotate[/gold] the cast: the front performer moves to the back seat.",
    effects: [{op: stage_scene_change}]}
 
@@ -1770,7 +1761,6 @@
    authored_by: [claude],
    replaces: torrential_turn,
    register: salon, cost: 2, type: attack, rarity: uncommon,
-   art_of: torrential_turn,
    description: "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 10 damage",
@@ -1784,7 +1774,6 @@
    authored_by: [claude],
    replaces: crescendo,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   art_of: crescendo,
    description: "Deal {CalculatedDamage:diff()} damage, the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].",
    effects: [{op: damage,
               amount_formula: {base: 0, per: 1, count: stage_lead_fanfare},
@@ -1795,7 +1784,6 @@
    authored_by: [claude],
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   art_of: many_waters_melody,
    description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold], the [gold]back performer[/gold]'s [gold]Fanfare[/gold].",
    effects: [{op: block,
               amount_formula: {base: 0, per: 1, count: stage_back_fanfare}}]}
@@ -1805,7 +1793,6 @@
    authored_by: [claude],
    replaces: change_the_bill,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   art_of: change_the_bill,
    description: "The [gold]lead performer[/gold] performs its act now.",
    effects: [{op: stage_perform_lead}]}
 
@@ -1814,7 +1801,6 @@
    authored_by: [claude],
    replaces: take_your_bow,
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   art_of: take_your_bow,
    description: "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain {CalculatedBlock:diff()} [gold]Block[/gold], its [gold]Fanfare[/gold]. Exhaust.",
    effects: [{op: stage_final_bow},
              {op: block,

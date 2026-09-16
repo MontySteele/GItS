@@ -39,7 +39,7 @@ public sealed class ProtoFsUnderstudy : CustomCardModel, ICharacterCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("suffering_for_art");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_understudy");
 
     public override List<(string, string)>? Localization => new()
     {

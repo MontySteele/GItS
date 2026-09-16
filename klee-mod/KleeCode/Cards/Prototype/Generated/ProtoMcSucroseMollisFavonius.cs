@@ -48,7 +48,7 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_gust");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_mollis_favonius");
 
     public override List<(string, string)>? Localization => new()
     {

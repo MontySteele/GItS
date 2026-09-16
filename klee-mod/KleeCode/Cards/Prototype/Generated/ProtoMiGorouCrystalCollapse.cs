@@ -48,7 +48,7 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mi_gorou_juuga");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mi_gorou_crystal_collapse");
 
     public override List<(string, string)>? Localization => new()
     {
