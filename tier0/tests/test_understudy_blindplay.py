@@ -6197,9 +6197,18 @@ def test_a_refusal_that_already_has_a_sentence_gains_nothing():
 # ------------------------------- EB-272: the arm keywords, defined per screen
 
 
-def keyword_hand_state(descriptions: list[str]) -> dict:
-    """A combat whose hand prints the given bodies, and nothing else."""
+def keyword_hand_state(descriptions: list[str],
+                       character: str | None = None) -> dict:
+    """A combat whose hand prints the given bodies, and nothing else.
+
+    `EB-753`: and WHO IS PLAYING, because the glossary is scoped to the arm
+    the run's character owns. The recorded board is a Kokomi run, so a hand
+    printing another kit's word on it is a board that cannot happen -- a test
+    about that word says whose run it is.
+    """
     state = json.loads(json.dumps(combat_state()))
+    if character:
+        state["player"]["character"] = character
     state["player"]["hand"] = [
         {"id": f"KLEEMOD-PROTO_KO_ROW_{i}", "name": f"Row {i}",
          "type": "Attack", "cost": "1", "can_play": True, "index": i,
@@ -6217,7 +6226,7 @@ def test_an_arm_keyword_prints_one_definition_per_screen():
     Seen to FAIL: with no glossary the definition is absent entirely.
     """
     page = blindplay.observe(keyword_hand_state(
-        ["Set off. Deal 8 damage.", "Set off. Place a Bomb 4."]))
+        ["Set off. Deal 8 damage.", "Set off. Place a Bomb 4."], "Klee"))
     assert "## Words on this screen" in page
     assert page.count("- **Set off** ") == 1
     assert page.count("- **Bomb** ") == 1
@@ -6254,6 +6263,7 @@ def test_the_word_is_found_wherever_the_screen_prints_it():
     """Not only in a hand: an enemy's badge, a relic and a reward row print the
     same words, and the reader who has just met one is the same reader."""
     state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Klee"        # `EB-753`: whose words these are
     state["player"]["hand"] = []
     state["battle"]["enemies"][0]["status"] = [
         {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": 6,
@@ -6626,7 +6636,7 @@ def test_the_spend_row_says_a_short_bar_still_pays_in_full():
     every row in that table is under.
     """
     page = blindplay.observe(keyword_hand_state([
-        "Choose one: Deal 7 damage | Spend 3: deal 13 instead."]))
+        "Choose one: Deal 7 damage | Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
     # `EB-746`: and the first clause is the CHOICE, because four of six
     # round-two seats said the card spent for them. "No stage, no rider" left
@@ -6852,7 +6862,8 @@ ALL_ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
 
 
 def elemental_hand_state(*, aura: bool = False, bomb_tip: str = "",
-                         elements: tuple[str, ...] = ("Pyro",)) -> dict:
+                         elements: tuple[str, ...] = ("Pyro",),
+                         character: str | None = None) -> dict:
     """A combat holding one card per named element, optionally against an aura.
 
     `EB-340` built this on ONE Pyro card. `EB-428` made the ELEMENTS IN REACH
@@ -6865,6 +6876,8 @@ def elemental_hand_state(*, aura: bool = False, bomb_tip: str = "",
     fields under test is a real wire state.
     """
     state = json.loads(json.dumps(combat_state()))
+    if character:                                 # `EB-753`: whose words these are
+        state["player"]["character"] = character
     hand = []
     for index, element in enumerate(elements):
         keywords = [{"name": f"Applies {element}",
@@ -7495,7 +7508,8 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     fact that growth is PER BOMB lives on the badge in game and the seat page
     has no badge.
     """
-    page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."]))
+    page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."],
+                                                "Klee"))
     assert (f"- **Bomb** — A charge on an enemy: each grows "
             f"{blindplay.BOMB_GROWTH} a turn,") in page
     # LIVE FIRST: where the screen's own tip carries the number, that number is
@@ -7503,7 +7517,7 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     # WORD with no tip on it, which is an enemy's badge and a reward row.
     live_tip = blindplay.observe(elemental_hand_state(
         bomb_tip="A charge on an enemy: grows 9 a turn, and goes off when "
-                 "Set off."))
+                 "Set off.", character="Klee"))
     assert "each grows 9 a turn" in live_tip
 
 
@@ -9179,10 +9193,16 @@ def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
 
 # --------------------- EB-404: a keyword in a TITLE defines nothing --------
 
-def titled_hand_state(title: str, body: str) -> dict:
+def titled_hand_state(title: str, body: str,
+                      character: str | None = None) -> dict:
     """A combat whose hand holds one card with the given printed title and
-    body, and nothing else."""
+    body, and nothing else.
+
+    `EB-753`: and whose run it is, where the word under test is a kit's own.
+    """
     state = json.loads(json.dumps(combat_state()))
+    if character:
+        state["player"]["character"] = character
     state["player"]["hand"] = [
         {"id": "KLEEMOD-PROTO_FR_ROW", "name": title, "type": "Attack",
          "cost": "1", "can_play": True, "index": 0, "target_type": "AnyEnemy",
@@ -9212,7 +9232,8 @@ def test_the_same_word_in_the_body_still_raises_it():
     identical card whose BODY carries the word is glossed exactly as before."""
     page = blindplay.observe(
         titled_hand_state("Curtain Rise",
-                          "Deal 7 damage. Spend 3: deal 13 instead."))
+                          "Deal 7 damage. Spend 3: deal 13 instead.",
+                          "Furina"))
     assert "- **Spend** " in page
 
 
@@ -9243,6 +9264,7 @@ def test_an_enemy_badge_is_a_printed_rule_and_still_defines_its_word():
     a printed rule and not a title, and it keeps defining the word.
     """
     state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Klee"        # `EB-753`: whose word it is
     state["player"]["hand"] = []
     state["battle"]["enemies"][0]["status"] = [
         {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": 6,
@@ -9304,6 +9326,7 @@ def test_the_encore_meter_line_does_not_repeat_the_gloss():
     glossary carries it, the meter line points at it; where a meter has no
     glossary row, the line is exactly what it always was."""
     state = json.loads(json.dumps(combat_state()))
+    state["player"]["character"] = "Furina"      # `EB-753`: whose meters these are
     state["player"]["resources"] = {"KLEEMOD_ENCORE": 4, "KLEEMOD_FANFARE": 6}
     page = blindplay.observe(state)
     assert "- Encore: 4 — defined under *Words on this screen*" in page
@@ -10882,14 +10905,29 @@ def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
             f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in blindplay.observe(state)
 
 
-def test_every_other_arm_word_is_still_defined_on_every_run():
-    """The gate is exactly two rows wide. `Companion` already answers the arm
-    for its stage CLAUSE (`EB-460`) and keeps its definition on every run;
-    nothing else in the table is character-owned, and a gate that grew would
-    be taking rules off the seats that need them."""
+def test_the_off_arm_sentence_is_exactly_two_rows_wide():
+    """`EB-504`'s gate -- the one that prints a sentence INSTEAD of the rule --
+    is still the two words that ride faces every run can draft.
+
+    `EB-753` added a second, different gate beside it (`_ARM_KEYWORD_ARM`), and
+    the two are not the same rule: a word another kit OWNS does not print at
+    all, because the match is a false positive in ordinary English rather than
+    an off-arm tag on a card the reader is holding. `Companion` keeps its
+    definition on every run and answers the arm only for its stage CLAUSE
+    (`EB-460`).
+    """
     assert set(blindplay_notes._ARM_KEYWORD_CHARACTER) == {
         "Hexerei", "Oz"}
-    page = blindplay.observe(_klee_combat_state())
+    assert "Companion" not in blindplay_notes._ARM_KEYWORD_ARM
+    assert "Swirl" not in blindplay_notes._ARM_KEYWORD_ARM
+
+
+def test_a_kit_word_is_defined_on_the_run_that_owns_it():
+    """And the other direction, so the scoping cannot pass by defining
+    nothing: Klee's own board still reads Klee's own rules."""
+    state = _klee_combat_state()
+    state["player"]["character"] = "Klee"
+    page = blindplay.observe(state)
     assert "- **Bomb** — " in page
 
 

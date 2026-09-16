@@ -1646,6 +1646,46 @@ def _stage_arm(obs: dict[str, object]) -> bool:
 # about the character is not evidence it is somebody else's.
 _ARM_KEYWORD_CHARACTER: dict[str, str] = {"Hexerei": "klee", "Oz": "klee"}
 
+# `EB-753`. AND THE OTHER KIND OF OFF-ARM WORD, WHICH IS NOT THAT ONE.
+#
+# THE FIND (Klee r27, lane 1 and cook, fight 2 reward). The Furina Stage's
+# `Spend` row -- lead performer, Bow, an empty stage -- printed on a KLEE card
+# reward screen, because R270 made Spark a currency and Klee's sinks print the
+# word "Spend". A rule about three performers, on a screen with no performers
+# and no way to get one.
+#
+# THE DIFFERENCE FROM `_ARM_KEYWORD_CHARACTER` IS THE WORD AND NOT THE RULE.
+# `Hexerei` and `Oz` are printed BY faces every run can draft, so the word is
+# genuinely on the screen and the reader is owed the sentence saying it is
+# inert here (`EB-583`). These words are not: `Spend`, `Bow`, `Raise`,
+# `Rotate`, `Mine`, `Plan`, `Mend` are ordinary English that another kit's
+# prose says for its own reasons, and the match is a FALSE POSITIVE rather
+# than an off-arm tag. A false positive owes no entry at all -- there is
+# nothing to say "is inert here" about -- so the row does not print.
+#
+# THE UNIVERSAL WORDS KEEP NO OWNER and are untouched: `Companion` (every arm
+# drafts them and `EB-460` already splits its one arm-conditional clause),
+# `Swirl` (ten Universals print the verb), `Grounded` (Kaeya's Power, on a
+# companion card), and the two above.
+#
+# A FEED THAT DOES NOT SAY WHO IS PLAYING GETS EVERY ROW, which is
+# `_ARM_KEYWORD_CHARACTER`'s direction one table up and `absent is not zero`'s:
+# silence about the character is not evidence it is somebody else's.
+_ARM_KEYWORD_ARM: dict[str, str] = {
+    "Bomb": "klee", "Set off": "klee", "Spark": "klee", "Mine": "klee",
+    "Plan": "kokomi", "Dusk": "kokomi", "Mend": "kokomi",
+    "Tamakushi Casket": "kokomi",
+    "Spend": "furina", "Fanfare": "furina", "Raise": "furina", "Bow": "furina",
+    "lead performer": "furina", "back performer": "furina",
+    "Rotate": "furina", "Encore": "furina", "Spotlighted": "furina",
+}
+
+
+def _arm_owns(word: str, who: str) -> bool:
+    """May this run's character be shown this kit word's rule? (`EB-753`)"""
+    owner = _ARM_KEYWORD_ARM.get(word)
+    return not (owner and who and owner != who)
+
 # `EB-583`. WHAT AN OFF-ARM WORD SAYS INSTEAD, and it is the correction to the
 # paragraph above rather than a second rule.
 #
@@ -2577,6 +2617,11 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             # (brief sec.2, R269) and since `EB-745` nothing grants it -- and a
             # rule for a meter that cannot move is the noise round two filed.
             if not (arm and word in _STAGE_RETIRED_KEYWORDS)
+            # `EB-753`: and a word another kit OWNS is not defined at all on
+            # this run's screens. The match on a Klee reward screen was the
+            # English word `Spend` in a Spark sink's own prose, not the Stage's
+            # keyword, so there is no off-arm sentence to print either.
+            and _arm_owns(word, who)
             and pattern.search(_bomb_hay(word, hay, obs))]
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()
