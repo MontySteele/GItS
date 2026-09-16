@@ -112,6 +112,22 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
+    public void Opening_gambits_doubling_clause_names_what_it_doubles()
+    {
+        // `EB-687`. "Seats held it four times in r28 and twice in r26 with
+        // only Block or draw Plans and learned it only from the
+        // no-Plan-followed line afterwards": "deals double damage" read as a
+        // promise about the next Plan whatever that Plan was. The verb moved
+        // to the front, so the object -- damage -- is on the card before the
+        // energy is spent, and a Plan that deals none has nothing to double.
+        var face = Face(new ProtoKkOpeningGambit());
+        Assert.Contains(
+            "Doubles the damage of the next [gold]Plan[/gold] carried out "
+            + "with this one.", face);
+        Assert.DoesNotContain("deals double damage", face);
+    }
+
+    [Fact]
     public void Second_waves_plan_is_the_extra_carry_out_rider_alone()
     {
         var card = new ProtoKkSecondWave();
@@ -539,9 +555,12 @@ public class KokomiPoolPassTwoTests
           + "next [gold]Plan[/gold] carried out with this one is carried out "
           + "twice.",
             Face(new ProtoKkSecondWave()));
+        // `EB-687` moved the verb to the front so the clause names WHAT it
+        // doubles; the window -- "the next ... carried out with this one" --
+        // is the half this pin is about and is unchanged.
         Assert.EndsWith(
-            "The next [gold]Plan[/gold] carried out with this one deals "
-          + "double damage.",
+            "Doubles the damage of the next [gold]Plan[/gold] carried out "
+          + "with this one.",
             Face(new ProtoKkOpeningGambit()));
         // R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a
         // window on the drain again, and "later" is the position rule printed.

@@ -1992,6 +1992,26 @@ def test_riptide_then_gambit_doubles_nothing(overhaul):
     assert enemy.hp == 200 - 26
 
 
+def test_a_damageless_follower_is_unchanged_and_the_face_says_so(overhaul):
+    """`EB-687`. The rider pays nothing when the Plan behind it deals no
+    damage -- a Block Plan is carried out exactly as written -- and the face
+    used to promise "the next Plan ... deals double damage" without naming
+    the object, so seats spent the energy and learned the condition from the
+    no-Plan-followed line afterwards. The rule is here; the words are on the
+    card, which is the half this row moved."""
+    st = kokomi_state()
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}],
+        cid="proto_kk_opening_gambit"))
+    kokomi_plan.schedule(st, plan_card([{"op": "block", "amount": 8}],
+                                       cid="proto_kk_coral_bulwark"))
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == 8
+    assert _faces()["proto_kk_opening_gambit"].endswith(
+        "Doubles the damage of the next [gold]Plan[/gold] carried out with "
+        "this one.")
+
+
 def test_a_rider_with_no_follower_says_so(overhaul):
     """`EB-645`. The r23 defence lane wrote Second Wave with no Plan behind it
     in the same morning; the rider fell off the end of the drain as designed
@@ -2620,9 +2640,12 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     assert faces["proto_kk_second_wave"] == (
         "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next "
         "[gold]Plan[/gold] carried out with this one is carried out twice.")
+    # `EB-687` moved the verb to the front so the clause names WHAT it
+    # doubles; the window itself -- "the next ... carried out with this one"
+    # -- is the half this pin is about and is unchanged.
     assert faces["proto_kk_opening_gambit"].endswith(
-        "The next [gold]Plan[/gold] carried out with this one deals double "
-        "damage.")
+        "Doubles the damage of the next [gold]Plan[/gold] carried out with "
+        "this one.")
     # R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a window
     # on the drain again, and "later" is the position rule printed -- the one
     # word a seat needs to read the ordering decision off the face.

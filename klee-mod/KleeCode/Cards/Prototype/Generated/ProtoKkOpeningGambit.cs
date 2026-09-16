@@ -45,7 +45,7 @@ public sealed class ProtoKkOpeningGambit : CustomCardModel, ICharacterCard, IPla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Opening Gambit"),
-        ("description", "Deal {Damage:diff()} damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] carried out with this one deals double damage."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. Doubles the damage of the next [gold]Plan[/gold] carried out with this one."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

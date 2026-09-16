@@ -1283,7 +1283,14 @@
 - {id: proto_kk_opening_gambit, name: "Opening Gambit", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] carried out with this one deals double damage.",
+   # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES. "deals double damage" reads
+   # as a promise about the next Plan whatever that Plan is, so seats held
+   # this card four times in r28 and twice in r26 with only Block or draw
+   # Plans on the lane and learned the condition from the no-Plan-followed
+   # line afterwards. "Doubles the damage of" puts the object on the card,
+   # before the energy is spent: a Plan that deals none has no damage to
+   # double and is unchanged. 118 of the card ceiling's 120.
+   description: "Deal 5 damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. Doubles the damage of the next [gold]Plan[/gold] carried out with this one.",
    effects: [{op: damage, amount: 5, target: enemy}],
    # THE RIDER IS THE SECOND CLAUSE and it aims at nothing: "the next Plan" is
    # the entry carried out immediately after this one in the same drain.
