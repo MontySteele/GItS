@@ -35,7 +35,8 @@ import pytest
 from tier0 import constants as C
 from tier0.tests.conftest import seam_files
 from understudy import (blindplay, blindplay_board, blindplay_notes,
-                        blindplay_shape, embark, qa_packet, soak, teyvat_ids)
+                        blindplay_render, blindplay_shape, embark, qa_packet,
+                        soak, teyvat_ids)
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -7634,6 +7635,42 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         assert not qa_packet.leaks(body), word
 
 
+def test_every_reaction_name_has_a_glossary_row():
+    """`EB-410`'s last link, from the page's side.
+
+    The row's acceptance is "every reaction that fires is named", and `EB-681`
+    met it: `ReactionEffects.Resolve` is the single site a reaction resolves
+    in, it writes a `ReactionLog` row before it switches on the kind, and the
+    page prints a named row per beat with its source. The half nothing pinned
+    is that the NAME a beat arrives under is a word this page can define --
+    `ReactionLog.PrintedName` falls through to the enum's own `ToString()`, so
+    a ninth reaction would reach a seat as a bare identifier with no glossary
+    row behind it.
+
+    Read off the two C# sources rather than listed here, `EB-465`'s discipline
+    one table over: a member added to the enum fails this the day it lands,
+    and a list would simply not mention it. The C# twin is
+    `ReactionLogTests.Every_reaction_the_table_can_produce_has_a_printed_name`.
+    """
+    table = (REPO / "klee-mod" / "KleeCode" / "Elements"
+             / "ReactionTable.cs").read_text(encoding="utf-8")
+    body = re.search(r"enum Reaction\s*\{(.*?)\}", table, re.S)
+    assert body, "the Reaction enum moved; this pin reads it by name"
+    members = [m for m in re.findall(r"^\s*(\w+)\s*[,=]", body.group(1), re.M)
+               if m != "None"]
+    assert len(members) == 8, members
+
+    # The two the enum spells differently from every player surface, off the
+    # map that exists for exactly that reason.
+    log = (REPO / "klee-mod" / "KleeCode" / "Powers"
+           / "ReactionLog.cs").read_text(encoding="utf-8")
+    printed = dict(re.findall(r"Reaction\.(\w+)\s*=>\s*\"([^\"]+)\"", log))
+
+    for member in members:
+        word = printed.get(member, member)
+        assert word in blindplay.REACTION_KEYWORDS, (member, word)
+
+
 def galvanic_state() -> dict:
     """An enemy buff that names a keyword and carries its tip (`EB-340`).
 
@@ -11764,6 +11801,71 @@ def test_a_bomb_gap_with_no_reactable_aura_names_no_reaction():
     assert "is wearing a" not in bare
     same = blindplay.observe(_bomb_board(9, "6", aura="Pyro"))
     assert "and Pyro into Pyro is" not in same
+
+
+# --- `EB-755`: WHICH OF TWO BOMBS PLACED THIS TURN GOES OFF FIRST -----------
+
+
+def _real_bomb_board(headline: int, sizes: str, aura: str | None = None,
+                     tail: str = ", growing each turn.") -> dict:
+    """The badge as `ProtoBombPower.Face` REALLY spells it.
+
+    `_bomb_board` above spells the clause `Bomb sizes here: 4`, and the live
+    face has read `Bomb sizes here, oldest first: ...` since `EB-432` put the
+    order on the badge. That is the fixture drift `EB-755` found: the page's
+    own pattern demanded the colon straight after `here`, so the `EB-605` note
+    matched nothing in the real game while its test went on passing.
+    """
+    state = copy.deepcopy(combat_state())
+    rows = [{"title": "Bomb", "name": "Bomb", "amount": headline,
+             "type": "Debuff",
+             "description": (f"Set off here deals {headline} Pyro damage. "
+                             f"Bomb sizes here, oldest first: {sizes}{tail}")}]
+    if aura:
+        rows.append({"title": f"{aura} Aura", "name": f"{aura} Aura",
+                     "amount": 2, "type": "Buff",
+                     "description": f"This enemy is wearing {aura}."})
+    body = dict(state["battle"]["enemies"][0], status=rows)
+    state["battle"] = dict(state["battle"], enemies=[body])
+    return state
+
+
+def test_the_sizes_clause_is_read_through_its_oldest_first_qualifier():
+    """`EB-755`, the half nobody was watching. The note is gated on the sizes
+    clause parsing, and on the live badge it did not parse at all.
+
+    Seen to FAIL: with the pattern demanding `here:`, this board printed no
+    note, because the real badge says `here, oldest first:`.
+    """
+    page = blindplay.observe(_real_bomb_board(6, "4", aura="Hydro"))
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=6, total=4).rstrip("*") in page
+    assert blindplay.BOMB_REACTION_CLAUSE.format(
+        aura="Hydro", element="Pyro", reaction="Vaporize") in page
+
+
+def test_two_bombs_placed_in_one_turn_print_under_their_set_off_ordinals():
+    """`EB-755`'s acceptance, from the page's side. Two Bombs placed in the
+    same turn have no age a reader can see, and only the leading charge takes
+    the aura -- so the list names its own positions (the D default: set-off
+    order with ordinals) and the page prints them unchanged.
+
+    The page must also still read the SIZES through them: `1st 12` is one
+    charge of twelve, never a 1 and a 12.
+    """
+    page = blindplay.observe(
+        _real_bomb_board(30, "1st 12 / 2nd 8", aura="Hydro"))
+    assert "1st 12 / 2nd 8" in page
+    assert blindplay.BOMB_FORECAST_NOTE.format(n=30, total=20).rstrip("*") in page
+
+
+def test_the_ordinals_are_not_mistaken_for_charges_beside_a_mine_count():
+    """The clause a pile with Mines prints carries a SECOND number after its
+    comma (`including 2 Mines`), and the ordinals must not drag it in: the
+    sizes run to the clause's own comma and no further."""
+    assert blindplay_render._bomb_charge_sizes("1st 12 / 2nd 8 / 3rd 5") == [12, 8, 5]
+    sizes = blindplay_render._BOMB_SIZES.search(
+        "Bomb sizes here, oldest first: 1st 12 / 2nd 8, including 2 Mines.")
+    assert blindplay_render._bomb_charge_sizes(sizes.group(1)) == [12, 8]
 
 
 # --- `EB-585`: THE ARRIVAL THAT PERFORMED AND WAS NOT FILED -----------------

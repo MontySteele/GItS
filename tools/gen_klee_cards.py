@@ -12913,6 +12913,18 @@ def emit(
     if any(eff.get("op") == "spend_spark" for eff in card["effects"]):
         interfaces += ", ISparkPricedCard"
 
+    # `EB-445`. AND WHICH KIND OF PRICE IT IS. The X price ("spend all your
+    # Sparks") declares a `PrintedSparkPrice` of 1 because that is what its
+    # GATE charges -- and the cost badge reads that same number, so Stoke the
+    # Fuse's slot printed `1` beside a face that spends the whole bank. There
+    # is no second number to declare (the amount is the bank at play time), so
+    # the card declares the KIND and the badge draws the base game's X.
+    # Emitted off the same effect as the interface above, so the two cannot
+    # arrive apart. tier0's twin is `effects.spend_spark_is_all`.
+    if any(eff.get("op") == "spend_spark" and eff.get("amount") == SPEND_ALL
+           for eff in card["effects"]):
+        interfaces += ", ISparkXPricedCard"
+
     # EB-220, the same rule one meter over: a row printing a TOP-LEVEL
     # `spend_charge` declares that price on IMeterPricedCard, and the generated
     # Charge gate reads it back through `MeterCost.PriceIn` rather than

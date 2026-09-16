@@ -414,9 +414,16 @@ endless_waltz	ImageGen/images/cards/furina/endless_waltz.png	500	380	cover_autoc
 #     fetch pass: add rows here, then `python tools/art_fetch.py` (NO arguments --
 #     it always runs the full global fetch and rewrites SOURCES.tsv).
 # grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese.png		splash
+# EB-36/grand_gala close-out 2026-09-16 (R212's art rung, the EB-65 pattern:
+# promote the FIRST SURVIVING candidate, no taste call). r1 was retired to
+# standing_room_only; r2 'Item Furina Banquet' is overflowing_hospitality's
+# effective pick (L1) and r3 'Opera Epiclese - Neuvillette's Seat' is claimed
+# this same pass by spotlight_guest_cast, whose own shortlist names it at r2
+# and which has no earlier candidate. r4 survives, so r4 takes rank 1; r2/r3
+# keep THEIR ranks rather than being renumbered.
 grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Furina Banquet.png		item
 grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Opera Epiclese - Neuvillette's Seat.png		splash
-grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	4	png	Savoring the Breeze Wallpaper Furina.png		splash
+grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Savoring the Breeze Wallpaper Furina.png		splash
 grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	Starlit Letter Wallpaper Furina.png		splash
 the_sea_is_my_stage	ImageGen/images/cards/furina/the_sea_is_my_stage.png	500	380	cover	y0.27	shortlist	1	png	Furina Card.png		splash	
 the_sea_is_my_stage	ImageGen/images/cards/furina/the_sea_is_my_stage.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Wallpaper without Watermark.png		splash	
@@ -1201,12 +1208,15 @@ power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.p
 power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	1	png	Item Fontaine Redemption.png		icon
 power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	2	png	Item Fontaine Lucine.png		icon
 # -- run 8 (EB-36 hunt half): the three placeholder-rendering mod art keys --
-spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Tabletop Troupe Pros Furina.png		splash	furina_pool
-spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
-spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Opera Epiclese - Neuvillette's Seat.png		splash	furina_pool
-spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Tabletop Troupe Pros Navia.png		splash	furina_pool
-confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Klee Shorts 2023-06-12.png		splash
-confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Klee Birthday 2022 - Shorts.png		splash
+spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	furina_pool
+spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Festival Spotlight.png		item	furina_pool
+spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese - Neuvillette's Seat.png		splash	furina_pool
+spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Tabletop Troupe Pros Navia.png		splash	furina_pool
+# YIELDED 2026-09-16 (EB-36 close-out): r2's 'Klee Shorts 2023-06-12' is already
+# smoke_and_sparks's effective rank 1 in the shipped partition, so promoting it
+# would be an L1 duplicate. Commented rather than demoted, per the R231 pattern.
+# confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Klee Shorts 2023-06-12.png		splash
+confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Birthday 2022 - Shorts.png		splash
 # --- 2026-08-13 art run 9 (EB-88 / R166 re-hunt / EB-26 gap). Every row below is
 #     rank >= 2 BY DESIGN: art_process promotes only rank 1, so a candidate set
 #     lands without making a pick. Do not renumber to rank 1 without a ruling.
@@ -1482,10 +1492,19 @@ smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y
 # They stay on the bill until a fetch lands, which is not this pass's job.
 #
 # ---------- Klee overhaul (proto_ko_) ----------
-proto_ko_kaboom	ImageGen/images/cards/klee/proto_ko_kaboom.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg	
+# RETIRED 2026-09-16 (found by the coverage close-out: art_process placed these
+# four and art_coverage reported them as NEW unrecorded STALE files). The block's
+# own rule is that a placeholder leaves with the surface row it serves, and all
+# four surface rows are gone: R242 replaced a character's renamed Strike/Defend
+# with the BASE GAME's, so proto_ko_kaboom and proto_ko_duck_and_cover left with
+# Klee draft 4 (tier0/constants.py:229) and proto_kk_waters_edge and
+# proto_kk_coral_guard were deleted under R213 B
+# (klee-mod/KleeCode/Powers/Prototype/KokomiOverhaulRoster.cs:57-68). Commented
+# rather than deleted, the pop/R231 pattern, and their placed PNGs are removed.
+# proto_ko_kaboom	ImageGen/images/cards/klee/proto_ko_kaboom.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg	
 # proto_ko_kapow <- crackle: Klee's shipped spark-burst VFX; Ka-pow! is the second face of the basic Attack
 proto_ko_kapow	ImageGen/images/cards/klee/proto_ko_kapow.png	500	380	contain	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx	
-proto_ko_duck_and_cover	ImageGen/images/cards/klee/proto_ko_duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker	
+# proto_ko_duck_and_cover	ImageGen/images/cards/klee/proto_ko_duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker	
 proto_ko_pop	ImageGen/images/cards/klee/proto_ko_pop.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 11.png		splash	
 proto_ko_jumpy_dumpty	ImageGen/images/cards/klee/proto_ko_jumpy_dumpty.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item	
 proto_ko_fish_flavored_bait	ImageGen/images/cards/klee/proto_ko_fish_flavored_bait.png	500	380	contain	center	shortlist	1	png	Item Fish-Flavored Toast.png		item	
@@ -1551,8 +1570,8 @@ proto_mc_durin_binary_form	ImageGen/images/cards/companions/proto_mc_durin_binar
 # name matches a shipped Kokomi card takes that card's source and crop and
 # carries no comment; every other row borrows a shipped Kokomi card the
 # overhaul retires, and the line above it names the donor and why it fits.
-proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
-proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+# proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+# proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 proto_kk_kurages_oath	ImageGen/images/cards/kokomi/proto_kk_kurages_oath.png	500	380	cover	y0.24	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
 proto_kk_slack_water	ImageGen/images/cards/kokomi/proto_kk_slack_water.png	500	380	cover	y0.54	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
 # proto_kk_feint <- press_the_advantage: the follow-up blow a feint sets up
@@ -1666,3 +1685,113 @@ proto_mi_kirara_surprise_dispatch	ImageGen/images/cards/companions/proto_mi_kira
 proto_mi_mizuki_anraku	ImageGen/images/cards/companions/proto_mi_mizuki_anraku.png	500	380	cover	y0.16	shortlist	1	png	Yumemizuki Mizuki Character Card.png		tcg	mizuki
 proto_mi_yae_sesshou_sakura	ImageGen/images/cards/companions/proto_mi_yae_sesshou_sakura.png	500	380	cover	y0.16	shortlist	1	png	Yae Miko Character Card.png		tcg	yae
 proto_mi_yoimiya_aurous_blaze	ImageGen/images/cards/companions/proto_mi_yoimiya_aurous_blaze.png	500	380	cover	y0.16	shortlist	1	png	Yoimiya Character Card.png		tcg	yoimiya
+# ================================================================
+# COVERAGE CLOSE-OUT 2026-09-16 -- the 54-row art bill (art_coverage.py).
+# ================================================================
+# Same two kinds of pick as the PROTOTYPE PLACEHOLDERS block above: NAME MATCH
+# where a prototype row's name is a shipped card's name (it wears that card's
+# source and crop), and REUSE otherwise -- a cleared source in art/SOURCES.tsv
+# that no pick in the same partition claims. Nothing here is commissioned and
+# nothing new is painted. Every row is `shortlist` rank 1, so the whole set
+# renders onto ONE contact sheet and [USER] vetoes there (R212's art rung).
+# L1 partitions prototypes from shipped, so a proto row wearing a shipped
+# card's picture is legal by construction; two proto rows on one picture is
+# not, and none of these do it.
+# ---------- Klee overhaul + Spark arms (proto_ko_, proto_spark_) ----------
+# Ungrouped (blank source_group) = strict L1, so each row takes its own source.
+# proto_ko_blazing_delight / fish_blasting / vermillion_pact are NAME MATCHES:
+# same source AND same crop as the shipped card of that name.
+proto_ko_blazing_delight	ImageGen/images/cards/klee/proto_ko_blazing_delight.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Glimmering Firework.png		item	
+proto_ko_fish_blasting	ImageGen/images/cards/klee/proto_ko_fish_blasting.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Dodoco's Beach Nap.png		item	
+proto_ko_vermillion_pact	ImageGen/images/cards/klee/proto_ko_vermillion_pact.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Duet.png		item	
+# proto_ko_all_of_my_treasures <- Klee's own hoard render; the card IS the hoard
+proto_ko_all_of_my_treasures	ImageGen/images/cards/klee/proto_ko_all_of_my_treasures.png	500	380	contain	center	shortlist	1	png	Item Sparkly Shiny Dodoco!.png		item	
+# proto_ko_blast_shield <- Klee braced behind Dodoco in the event illustration
+proto_ko_blast_shield	ImageGen/images/cards/klee/proto_ko_blast_shield.png	500	380	cover	center	shortlist	1	png	Let's Go Dodoco! Illustration 2.png		splash	
+# proto_ko_bombs_away <- a shell already falling. NOT the shipped card's own
+#   'Kaboom! Plunging Preview.gif': that source is 480x270 and rides the L8
+#   KNOWN_UNDERSIZED allowlist, which a NEW pick may not join.
+proto_ko_bombs_away	ImageGen/images/cards/klee/proto_ko_bombs_away.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 5.png		splash	
+# proto_ko_booby_trap <- the Kaboom Box: the thing that goes off when opened
+proto_ko_booby_trap	ImageGen/images/cards/klee/proto_ko_booby_trap.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Kaboom Box.png		item	
+# proto_ko_bottomless_bag <- Dodoco's satchel render
+proto_ko_bottomless_bag	ImageGen/images/cards/klee/proto_ko_bottomless_bag.png	500	380	contain	center	shortlist	1	png	Item Let's Go, Dodoco!.png		item	
+# proto_ko_careful_now <- the wary Klee emoji
+proto_ko_careful_now	ImageGen/images/cards/klee/proto_ko_careful_now.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 3.png		sticker	
+# proto_ko_countdown <- a firework not yet lit
+proto_ko_countdown	ImageGen/images/cards/klee/proto_ko_countdown.png	500	380	contain	center	shortlist	1	png	Item Slumbering Fireworks.png		item	
+# proto_ko_dodoco_cover <- Dodoco himself, which is what the card puts in front of you
+proto_ko_dodoco_cover	ImageGen/images/cards/klee/proto_ko_dodoco_cover.png	500	380	contain	center	shortlist	1	png	Item Imaginary Friend Dodoco.png		item	
+# proto_ko_flash_point <- the birthday illustration's burst of light
+proto_ko_flash_point	ImageGen/images/cards/klee/proto_ko_flash_point.png	500	380	cover	center	shortlist	1	png	Klee Birthday 2023.png		splash	
+# proto_ko_kindling <- the small, slow firework: kindling rather than the blast
+proto_ko_kindling	ImageGen/images/cards/klee/proto_ko_kindling.png	500	380	contain	center	shortlist	1	png	Item Leisurely Fireworks.png		item	
+# proto_ko_long_fuse <- the oversized firework that takes its time
+proto_ko_long_fuse	ImageGen/images/cards/klee/proto_ko_long_fuse.png	500	380	contain	center	shortlist	1	png	Item Supersized Firework.png		item	
+# proto_ko_once_more <- a second shell going up over the first
+proto_ko_once_more	ImageGen/images/cards/klee/proto_ko_once_more.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 2.png		splash	
+# proto_ko_pocket_match <- the struck light; Pocket Match is R271's Fwoosh at 5 with Retain
+proto_ko_pocket_match	ImageGen/images/cards/klee/proto_ko_pocket_match.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 10.png		splash	
+# proto_ko_return_to_sender <- the mine's blast footprint, aimed back out
+proto_ko_return_to_sender	ImageGen/images/cards/klee/proto_ko_return_to_sender.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine AoE.png		item	
+# proto_ko_sparkling_burst <- the open burst
+proto_ko_sparkling_burst	ImageGen/images/cards/klee/proto_ko_sparkling_burst.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 1.png		splash	
+# proto_ko_split_charge <- one Jumpy Dumpty resolving into an area, which is the split
+proto_ko_split_charge	ImageGen/images/cards/klee/proto_ko_split_charge.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty AoE.png		item	
+# proto_ko_stoke_the_fuse <- the Sparks 'n' Splash item: the burn being fed
+proto_ko_stoke_the_fuse	ImageGen/images/cards/klee/proto_ko_stoke_the_fuse.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Sparks 'n' Splash.png		item	
+# proto_spark_priced_strike 'Second Helping' <- the food render; a second helping of it
+proto_spark_priced_strike	ImageGen/images/cards/klee/proto_spark_priced_strike.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Summertime.png		item	
+# proto_spark_priced_draw 'Rummage' <- the cupboard you rummage through
+proto_spark_priced_draw	ImageGen/images/cards/klee/proto_spark_priced_draw.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Collection Cupboard.png		item	
+# proto_spark_burst_conversion 'Slow Burn' <- the long, low-key illustration
+proto_spark_burst_conversion	ImageGen/images/cards/klee/proto_spark_burst_conversion.png	500	380	cover	center	shortlist	1	png	Let's Go Dodoco! Illustration 3.png		splash	
+# proto_spark_mode_bombs 'Bag of Tricks' <- the Kaboom King, the biggest trick in it
+proto_spark_mode_bombs	ImageGen/images/cards/klee/proto_spark_mode_bombs.png	500	380	contain	center	shortlist	1	png	Item Kaboom King.png		item	
+# ---------- Kokomi overhaul round 2 (proto_kk_ and the three unprefixed rows) ----------
+# source_group kokomi_pool, exactly like the block above: one strong source
+# family, siblings differentiated by CROP (L7). Every focus below is new to the
+# prototype partition -- no two of these rows share a source AND a crop.
+proto_kk_breakwater	ImageGen/images/cards/kokomi/proto_kk_breakwater.png	500	380	cover	y0.34	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+proto_kk_feigned_retreat	ImageGen/images/cards/kokomi/proto_kk_feigned_retreat.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+proto_kk_flank	ImageGen/images/cards/kokomi/proto_kk_flank.png	500	380	cover	y0.55	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+proto_kk_opening_gambit	ImageGen/images/cards/kokomi/proto_kk_opening_gambit.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+proto_kk_pincer	ImageGen/images/cards/kokomi/proto_kk_pincer.png	500	380	cover	y0.60	shortlist	1	png	Character Sangonomiya Kokomi Game.png		splash	kokomi_pool
+proto_kk_ripple	ImageGen/images/cards/kokomi/proto_kk_ripple.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
+proto_kk_riptide	ImageGen/images/cards/kokomi/proto_kk_riptide.png	500	380	cover	y0.50	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+proto_kk_scout_ahead	ImageGen/images/cards/kokomi/proto_kk_scout_ahead.png	500	380	cover	x0.45	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+# proto_kk_second_thoughts <- her one unused expression sheet, the sticker treatment salt_line and change_of_plans already use
+proto_kk_second_thoughts	ImageGen/images/cards/kokomi/proto_kk_second_thoughts.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
+proto_kk_second_wave	ImageGen/images/cards/kokomi/proto_kk_second_wave.png	500	380	cover	y0.35	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+# proto_kk_tide_chart <- the Deep namecard: the water read as a chart
+proto_kk_tide_chart	ImageGen/images/cards/kokomi/proto_kk_tide_chart.png	500	380	cover	center	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+proto_kk_well_laid	ImageGen/images/cards/kokomi/proto_kk_well_laid.png	500	380	cover	y0.72	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
+# proto_kurages_oath_memory <- the pearl: the memory the Oath leaves behind
+proto_kurages_oath_memory	ImageGen/images/cards/kokomi/proto_kurages_oath_memory.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl.png		item	kokomi_pool
+# proto_pearl_barrage_turn 'Tidal Barrage' <- the multi-wish banner: many at once
+proto_pearl_barrage_turn	ImageGen/images/cards/kokomi/proto_pearl_barrage_turn.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+# proto_muster_subsidy_funnel 'Bounty of the Isles' <- the Deep item render; the isles' own bounty
+proto_muster_subsidy_funnel	ImageGen/images/cards/kokomi/proto_muster_subsidy_funnel.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sangonomiya Kokomi The Deep.png		item	kokomi_pool
+# ---------- Companion overhaul round 3 (the nine remaining keys) ----------
+# Qiqi and Yaoyao had NO cleared asset at all, so each takes a fresh fetch of
+# its own TCG Character Card, the round-2 convention. The six _either/_priced
+# twins and Sayu's third card take their character's own family source at a
+# DIFFERENT crop -- the Companion pattern L7 exists for (Kaeya's pair, above).
+proto_mc_qiqi_herald_of_frost	ImageGen/images/cards/companions/proto_mc_qiqi_herald_of_frost.png	500	380	cover	y0.16	shortlist	1	png	Qiqi Character Card.png		tcg	qiqi
+proto_mc_yaoyao_yuegui_throwing_mode	ImageGen/images/cards/companions/proto_mc_yaoyao_yuegui_throwing_mode.png	500	380	cover	y0.16	shortlist	1	png	Yaoyao Character Card.png		tcg	yaoyao
+proto_mc_sayu_silencers_secret	ImageGen/images/cards/companions/proto_mc_sayu_silencers_secret.png	500	380	cover	y0.45	shortlist	1	png	Sayu Character Card.png		tcg	sayu
+proto_itto_superlative_superstrength_either	ImageGen/images/cards/companions/proto_itto_superlative_superstrength_either.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Arataki Itto Wish.png		splash	itto
+proto_itto_superlative_superstrength_priced	ImageGen/images/cards/companions/proto_itto_superlative_superstrength_priced.png	500	380	cover	y0.45	shortlist	1	png	Arataki Itto Character Card.png		tcg	itto
+proto_shinobu_sanctifying_ring_either	ImageGen/images/cards/companions/proto_shinobu_sanctifying_ring_either.png	500	380	cover	y0.45	shortlist	1	png	Kuki Shinobu Character Card.png		tcg	shinobu
+proto_shinobu_sanctifying_ring_priced	ImageGen/images/cards/companions/proto_shinobu_sanctifying_ring_priced.png	500	380	cover	y0.16	shortlist	1	png	Kuki Shinobu Wish.png		splash	shinobu
+proto_thoma_crimson_ooyoroi_either	ImageGen/images/cards/companions/proto_thoma_crimson_ooyoroi_either.png	500	380	cover	y0.45	shortlist	1	png	Thoma Character Card.png		tcg	thoma
+proto_thoma_crimson_ooyoroi_priced	ImageGen/images/cards/companions/proto_thoma_crimson_ooyoroi_priced.png	500	380	cover	y0.35	shortlist	1	png	Thoma Wish.png		splash	thoma
+# ---------- Furina sheet: the two rows that never had a shortlist ----------
+# Blank source_group = strict L1, the sheet default. Both sources are cleared
+# and unclaimed by any effective card pick in the shipped partition.
+# change_the_bill <- the printed ticket: the bill you change
+change_the_bill	ImageGen/images/cards/furina/change_the_bill.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	The Opera of Noirceur and Blancheur Ticket.png		item	
+# take_it_from_the_top <- her own TCG card, the round-2 companion convention.
+#   'Opera Epiclese Passage 1' was the first pick and L9 refused it: the
+#   'Opera Epiclese Passage' family is banned as an empty-corridor screenshot.
+take_it_from_the_top	ImageGen/images/cards/furina/take_it_from_the_top.png	500	380	cover	y0.16	shortlist	1	png	Furina Character Card Golden.png		tcg	
