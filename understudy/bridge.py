@@ -575,8 +575,35 @@ def meter_ledger() -> dict:
 # the last two because `RoomSet.EnsureNextEventIsValid` steps the cursor past
 # both BEFORE the read, so the write would land, answer ok, and the `?` room
 # would open on something else.
+#
+# EB-771 ADDS `skip_act`, THE SECOND RUN OP AND THE FIRST ONE THAT MOVES THE
+# RUN'S RNG. The Teyvat frame dresses six acts and, until this op, the only way
+# to SEE act 2 or act 3 was for a bot to survive act 1 and beat its boss:
+# proofs-4 stopped at that wall and proofs-5 reached Natlan only by writing HP,
+# then died on floor 25. Four dressings were unreviewable on demand.
+#
+# IT PRESSES THE GAME'S OWN BUTTON ONE FLOOR EARLY. The whole write is
+# `RunManager.Instance.ActChangeSynchronizer.SetLocalPlayerReady()` -- what the
+# terminal BOSS rewards screen calls when Proceed is clicked. In a singleplayer
+# run that vote is unanimous at once, so the game runs `ActFloor++` and
+# `RunManager.EnterNextAct()` -> `EnterAct(CurrentActIndex + 1)`: fade, exit
+# rooms, set the act, preload ITS assets, generate ITS map, swap the music,
+# open on the map. No boss is faked and no act is constructed, and the act
+# entered is `Acts[CurrentActIndex + 1]` -- the DRESSED face this seed's act
+# roll already chose at embark, not a second roll.
+#
+# UNLIKE `force_next_event` IT IS NOT RNG-NEUTRAL, and it says so rather than
+# claiming otherwise: the floors it skips are floors whose rolls never happen.
+# Nothing after a `skip_act` is comparable to anything, this run's own earlier
+# floors included.
+#
+# It refuses (as a dict, never a throw) a run that is not up, multiplayer, a
+# combat in progress, a stacked sub-room, the victory room, and the LAST act --
+# the last because the native call does not advance there at all, it opens The
+# Architect's room, so an op without the check would answer ok and land the run
+# somewhere nobody asked for. EB-771 adds no act-4 path.
 DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power",
-             "clear_hand", "hover", "unhover", "force_next_event")
+             "clear_hand", "hover", "unhover", "force_next_event", "skip_act")
 
 
 def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
@@ -706,6 +733,38 @@ def force_next_event(event_id: str, why: str) -> dict:
     is the driver that does both.
     """
     return debug_state("force_next_event", why, event=event_id)
+
+
+def skip_act(why: str) -> dict:
+    """End the current act at the next map step (EB-771). NOT COMPARABLE.
+
+    NOTHING MEASURED AFTER THIS CALL IS COMPARABLE TO ANYTHING, including this
+    run's own earlier floors. It is not the rng-neutral op `force_next_event`
+    is: the floors it skips are floors whose rolls -- room types, encounters,
+    rewards, card offers, the act's own boss fight -- simply never happen, so
+    every act-scoped stream is read from a different position afterwards. It
+    exists to reach a dressed act 2 or 3 in under a minute so its FACE can be
+    looked at. Never for a number.
+
+    The endpoint calls the game's own act-transition path,
+    `RunManager.Instance.ActChangeSynchronizer.SetLocalPlayerReady()` -- the
+    call the terminal boss rewards screen makes when Proceed is clicked -- so
+    the act entered is `RunState.Acts[CurrentActIndex + 1]`, the dressed face
+    this seed's act roll already chose at embark, reached through the game's
+    own fade, asset preload, map generation and music swap.
+
+    It answers `queued: true`: the transition resolves over frames. Read the
+    state back (or call `settle`) to confirm the new act's map.
+
+    Refusals come back as ordinary dicts (this module's convention): no run,
+    multiplayer, a combat in progress, a room stack deeper than one, the
+    victory room, and the LAST act -- the last because the native call opens
+    The Architect's room there instead of advancing. There is no act-4 path.
+
+    `understudy/skip_act.py` is the attended CLI over this, with a `--list`
+    that prints the run's act list without writing anything.
+    """
+    return debug_state("skip_act", why)
 
 
 def settle(prev_type: str | None = None, tries: int = 12, delay: float = 0.6) -> dict:

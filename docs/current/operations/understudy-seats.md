@@ -22,6 +22,82 @@ defect, never a design finding. It is deliberately unreachable from `soak.py`;
 `tier0/tests/test_understudy_scenario.py` pins that. Depth:
 `understudy/README.md` and `docs/current/atlas/understudy.md`.
 
+### Understudy — the two attended RUN doors (`EB-761`, `EB-771`)
+
+```
+python -m understudy.force_event --list                        # what this act has pending
+python -m understudy.force_event ROOM_FULL_OF_CHEESE --why "..."
+python -m understudy.skip_act --list                           # this run's act list
+python -m understudy.skip_act --why "EB-771 act-2 dressing proof"
+```
+
+Both post a `debug_state` op, both need a run OPEN and standing on a map (not a
+combat), both require `--why` and log it, and both carry
+`bridge.GRANT_GUARDRAIL`. They are the two ops on that route that write a RUN
+rather than a board, which is why they are drivers and not scenario steps: the
+scenario runner wakes on a combat screen and can never stand where these act
+(`scenario.NON_SCENARIO_OPS`, pinned by the verb/op equality in
+`tier0/tests/test_understudy_scenario.py`).
+
+**`force_event`** puts a named event at the act's event cursor so the next `?`
+room opens on it, then walks there through `choose_map_node`. It **consumes no
+rng** — the act's event list was shuffled once at run start and this swaps two
+entries in it — and mints nothing, the event having already been pending. It
+refuses an unknown id, an event this run has already visited and one whose own
+`IsAllowed` is false. `--list` prints the pending ids so a caller does not
+guess a spelling.
+
+**A DRESSED Teyvat id is accepted and translated** (`EB-767`). A dressing does
+not replace an event in the act's pool — it cannot, because the pool is
+shuffled once at run start and a pool one element different moves every later
+roll on that stream — so the substitution happens downstream, in the
+`PullNextEvent` postfix. The pending list therefore holds the BASE id, and
+forcing a dressed name directly finds nothing: six proof ids failed that way
+against a run holding exactly the events they dress
+(`review/records/teyvat-proofs-3-2026-09-15.md`), and a `?` room forced by a
+name nothing matched can resolve to a room that is not an event at all. So
+`python -m understudy.force_event GUILD_DESKS_RETURNED_COPY --why "..."` forces
+`SELF_HELP_BOOK` and **prints that it did** — the translation is never silent,
+because a driver that quietly retargeted an id would make the next failure
+unreadable. `--list` annotates each base id with the faces that dress it. The
+table is read out of `klee-mod/KleeCode/Teyvat/TeyvatEventsGenerated.cs`
+itself, so there is exactly one substitution table in the repo, and the id rule
+is pinned against `tools/gen_teyvat_events.py`'s own `slugify` over every class
+name in it.
+
+**`skip_act`** ends the current act at the next map step and lands the run on
+the next act's map. Its whole write is the game's own
+`RunManager.Instance.ActChangeSynchronizer.SetLocalPlayerReady()` — what the
+terminal BOSS rewards screen calls when Proceed is clicked — so the game runs
+`ActFloor++` and `EnterNextAct()` → `EnterAct(CurrentActIndex + 1)`: fade, exit
+rooms, set the act, preload ITS assets, generate ITS map, swap the music, open
+on a map. No boss is faked, no act is constructed and no act roll is re-taken:
+the act entered is `RunState.Acts[CurrentActIndex + 1]`, the DRESSED face this
+seed chose at embark (Natlan or Inazuma at the Hive index, Fontaine or Sumeru
+at Glory's), so the four act-2/3 dressings can be looked at in under a minute
+instead of only after a bot survives act 1.  `--list` prints the run's act list
+and where it stands, writing nothing.
+
+**`skip_act` is the one op on this route that is NOT rng-neutral, and it says
+so rather than claiming otherwise.** The floors it skips are floors whose rolls
+— room types, encounters, rewards, card offers, the act's own boss fight —
+never happen, so every act-scoped stream is read from a different position
+afterwards. Nothing measured after a `skip_act` is comparable to anything,
+including this run's own earlier floors. It refuses a combat in progress, a
+room stack deeper than one (a run inside an event's own fight), the victory
+room, and the LAST act — that last because `EnterNextAct` does not advance
+there at all, it opens The Architect's room. **There is no act-4 path**; the
+Abyss is reserved and unbuilt. The answer is `queued: true` and the transition
+resolves over frames, so the driver polls `run.act` until it reaches the number
+the report predicted and errors loudly if it never does — calling the op twice
+would move the run two acts past the dressing it meant to show you.
+
+The decision halves are compiled headlessly:
+`vendor/STS2_MCP/gits/GitsForceEvent.cs`
+(`klee-mod/KleeTests/GitsForceEventTests.cs`) and
+`vendor/STS2_MCP/gits/GitsSkipAct.cs`
+(`klee-mod/KleeTests/GitsSkipActTests.cs`).
+
 ### Understudy — staged turns and the blind QA funnel (`EB-149`, R213 step 2)
 
 ```

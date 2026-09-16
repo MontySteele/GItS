@@ -246,6 +246,54 @@
 //     `understudy/force_event.py` is the driver that does it through the
 //     bridge's own `choose_map_node`.
 //
+// EB-771: WHY skip_act EXISTS, AND WHAT IT COSTS.
+// The Teyvat frame dresses six acts, and until this op the only way to SEE
+// act 2 or act 3 was for a bot to survive act 1 and win its boss fight.
+// Proofs-4 stopped at that wall; proofs-5 got to Natlan by writing HP with
+// `set_hp` and still died on floor 25
+// (`review/records/teyvat-proofs-5-2026-09-15.md`). Four dressings -- Natlan,
+// Inazuma, Fontaine, Sumeru -- were therefore unreviewable on demand.
+//
+// IT PRESSES THE GAME'S OWN BUTTON, ONE FLOOR EARLY. The whole write is
+// `RunManager.Instance.ActChangeSynchronizer.SetLocalPlayerReady()`, which is
+// exactly what `NRewardsScreen.OnProceedButtonPressed` calls on a terminal
+// BOSS rewards screen. That vote is unanimous immediately in a singleplayer
+// run, so `ActChangeSynchronizer.MoveToNextAct` runs `RunState.ActFloor++` and
+// `RunManager.EnterNextAct()`, which is `EnterAct(CurrentActIndex + 1)`: fade,
+// clear screens, exit rooms, `SetActInternal` (index, visited coords, odds
+// reset, `PreloadManager.LoadActAssets`, `GenerateMap`, music, rich presence),
+// then a `MapRoom` and `Hook.AfterActEntered`. Nothing is faked: no boss clear
+// is simulated, no `ActModel` is constructed, `CurrentActIndex` is never
+// written by hand, and no map is invented.
+//
+// THE ACT IT LANDS IN IS THE ONE THE EMBARK ROLLED. `RunState.Acts` is built
+// once at run start by `ActModel.GetRandomList`; `Acts[CurrentActIndex + 1]`
+// is the DRESSED face that roll already chose, so the skip reaches act 2 or 3
+// exactly as a real transition would -- same face, same room set, same save
+// shape -- and takes no second roll to do it.
+//
+// IT IS NOT RNG-NEUTRAL AND DOES NOT PRETEND TO BE. `force_next_event` one
+// paragraph up consumes no rng and says so; this op is the opposite case and
+// says that instead. The floors it skips are floors whose rolls -- room types,
+// encounters, rewards, card offers, the act boss itself -- never happen, so
+// every act-scoped stream is read from a different position afterwards. The
+// acts and their room sets were generated up front and are untouched; the new
+// act's map is generated at the transition, which is when the game would have
+// generated it anyway. Nothing after a `skip_act` is comparable to anything,
+// this run's own earlier floors included. It is attended-only, `why` is
+// required and logged, and the guardrail rides on the answer unchanged.
+//
+// FOUR REFUSALS, EACH A STATE WHERE THE NATIVE CALL WOULD DO SOMETHING ELSE:
+// a combat in progress (the transition would tear the room stack down under a
+// live combat state), a room stack deeper than one (the run is inside a
+// sub-room it still expects to return to), the victory room (the game calls
+// `WinRun` there, not `EnterNextAct`), and THE LAST ACT -- where
+// `EnterNextAct` does not advance at all but opens The Architect's room.
+// EB-771 adds NO act-4 path; the Abyss is reserved and unbuilt, so the op
+// refuses by name rather than letting the native call land somewhere else.
+// The decision lives in `gits/GitsSkipAct.cs`, game-type-free, and
+// `klee-mod/KleeTests/GitsSkipActTests.cs` compiles THAT file to pin it.
+//
 // REFLECTION FOR THE RESOURCE HALF ONLY, and for the reason
 // `gits/GitsResources.cs` states: BaseLib's `CustomResourcePatches` registry is
 // `internal`, and BaseLib is a Workshop mod that may not be installed at all. A
@@ -346,6 +394,7 @@
 //        { "op": "unhover", "why": "EB-652 release" }
 //        { "op": "force_next_event", "event": "ROOM_FULL_OF_CHEESE",
 //          "why": "EB-761 item-2 re-proof" }
+//        { "op": "skip_act", "why": "EB-771 act-2 dressing proof" }
 //          (no `who`, no `amount`, NO COMBAT NEEDED: it swaps two entries in
 //           the current act's pending event list so the next `?` room opens on
 //           the named one. `before` is the index it sat at, `after` is the
@@ -409,6 +458,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Multiplayer.Game.PeerInput;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
@@ -429,15 +479,18 @@ public static partial class McpMod
 
     private static readonly string[] GitsDebugStateOps =
         { "set_resource", "set_energy", "set_hp", "set_block", "set_power",
-          "clear_hand", "hover", "unhover", "force_next_event" };
+          "clear_hand", "hover", "unhover", "force_next_event", "skip_act" };
 
-    /// <summary>The ops that do NOT need a combat up (EB-761).
+    /// <summary>The ops that do NOT need a combat up (EB-761, EB-771).
     ///
-    /// One entry, and it is a list rather than an `op ==` test so the
-    /// combat gate below reads as a rule with an exception rather than as a
-    /// special case for one string.</summary>
+    /// A list rather than an `op ==` test so the combat gate below reads as a
+    /// rule with an exception rather than as a special case for one string.
+    /// Both entries are RUN ops called from a map screen. `skip_act` is on
+    /// this list because it must not answer the GENERIC combat refusal: it
+    /// makes its own, in its own words, through
+    /// <see cref="GitsSkipAct.Decide"/>.</summary>
     private static readonly string[] GitsDebugStateOutOfCombatOps =
-        { "force_next_event" };
+        { "force_next_event", "skip_act" };
 
     /// <summary>
     /// The card id this route last hovered, or the empty string -- THIS
@@ -787,12 +840,15 @@ public static partial class McpMod
                          + "do not go through the action-queue synchronizer, "
                          + "so peers would diverge.");
 
-        // EB-761. The exception rather than a second gate: `force_next_event`
-        // writes the ACT's pending event list and is called from a MAP screen,
-        // so a combat check on it would refuse the op in the only place it is
-        // ever used. Everything else keeps the check unchanged.
+        // EB-761, EB-771. The exception rather than a second gate: both RUN
+        // ops are called from a MAP screen, so the generic combat check would
+        // refuse them in the only place they are ever used. `skip_act` makes
+        // its OWN combat refusal a line later, in its own words.
+        // Everything else keeps the check unchanged.
         if (Array.IndexOf(GitsDebugStateOutOfCombatOps, op) >= 0)
-            return GitsForceNextEventApply(op, eventId, why);
+            return op == "skip_act"
+                ? GitsSkipActApply(op, why)
+                : GitsForceNextEventApply(op, eventId, why);
 
         if (!CombatManager.Instance.IsInProgress)
             return Error("No combat in progress. Every op here writes combat "
@@ -1238,6 +1294,137 @@ public static partial class McpMod
                + (rest > 0 ? $", and {rest} more." : ".");
     }
 
+    // ------------------------------------------------------- skip_act -----
+
+    /// <summary>The run's acts in order, as the run spells them, or an empty
+    /// list. A read and never a construction: `RunState.Acts` was built once
+    /// at embark by the act roll, and the ids in it are the DRESSED faces this
+    /// seed chose when the Teyvat arm is on.</summary>
+    private static List<string> GitsRunActIds(RunState? runState)
+    {
+        var ids = new List<string>();
+        if (runState == null) return ids;
+        try
+        {
+            foreach (var act in runState.Acts)
+                ids.Add(SafeGetText(() => act.Id.Entry) ?? "");
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr("[STS2 MCP][GItS] debug_state could not read the "
+                        + $"run's act list: {ex.Message}");
+            ids.Clear();
+        }
+        return ids;
+    }
+
+    /// <summary>EB-771. End the act at the next map step: press the button the
+    /// boss-rewards screen presses, one floor early.
+    ///
+    /// The whole write is
+    /// `RunManager.Instance.ActChangeSynchronizer.SetLocalPlayerReady()` --
+    /// what `NRewardsScreen.OnProceedButtonPressed` calls on a terminal BOSS
+    /// rewards screen. It votes the local player ready, and in a singleplayer
+    /// run that vote is unanimous the moment it lands, so
+    /// `ActChangeSynchronizer.MoveToNextAct` runs: `RunState.ActFloor++` and
+    /// `RunManager.EnterNextAct()`, which is `EnterAct(CurrentActIndex + 1)`
+    /// -- fade, clear screens, exit rooms, set the act, preload ITS assets,
+    /// generate ITS map, swap the music, open on a MapRoom. No boss is faked,
+    /// no act is constructed, no index is written by hand and no act roll is
+    /// re-taken: the act entered is `Acts[CurrentActIndex + 1]`, the face this
+    /// seed already chose at embark.
+    ///
+    /// NOT RNG-NEUTRAL, and unlike `force_next_event` it does not claim to be.
+    /// The floors it skips are floors whose rolls never happen. The header of
+    /// `gits/GitsSkipAct.cs` states the cost in full; the guardrail on the
+    /// answer is the same guardrail every op here carries.</summary>
+    private static Dictionary<string, object?> GitsSkipActApply(
+        string op, string why)
+    {
+        var runState = RunManager.Instance.DebugOnlyGetState();
+        if (runState == null) return Error("No run state");
+
+        var actIds = GitsRunActIds(runState);
+
+        bool inCombat;
+        try { inCombat = CombatManager.Instance.IsInProgress; }
+        catch { inCombat = false; }
+
+        bool inVictoryRoom;
+        try { inVictoryRoom = runState.CurrentRoom?.IsVictoryRoom ?? false; }
+        catch { inVictoryRoom = false; }
+
+        int roomDepth;
+        try { roomDepth = runState.CurrentRoomCount; }
+        catch { roomDepth = 1; }
+
+        int actIndex;
+        try { actIndex = runState.CurrentActIndex; }
+        catch (Exception ex)
+        {
+            return Error("This run has no current act index to read: "
+                         + ex.Message);
+        }
+
+        var decision = GitsSkipAct.Decide(actIds, actIndex, inCombat,
+                                          inVictoryRoom, roomDepth);
+        if (!decision.Allowed) return Error(decision.Refusal);
+
+        // THE ONE NATIVE CALL. Reached through the property rather than
+        // reconstructed: a synchronizer this route built would not be the one
+        // the run's own vote lands in.
+        ActChangeSynchronizer? sync;
+        try { sync = RunManager.Instance.ActChangeSynchronizer; }
+        catch (Exception ex)
+        {
+            return Error("Could not reach RunManager.ActChangeSynchronizer, "
+                         + "which is the game's own act-transition path: "
+                         + ex.Message);
+        }
+        if (sync == null)
+            return Error("RunManager.ActChangeSynchronizer is null, so there "
+                         + "is no act-transition path to call. This op does "
+                         + "not have a second route and will not invent one.");
+
+        try { sync.SetLocalPlayerReady(); }
+        catch (Exception ex)
+        {
+            return Error("The act transition was refused by the game: "
+                         + ex.Message);
+        }
+
+        GD.Print($"[STS2 MCP][GItS] debug_state: {op} "
+                 + $"{decision.FromAct} (index {decision.FromIndex}) -> "
+                 + $"{decision.ToAct} (index {decision.ToIndex}) "
+                 + $"| why: {why}");
+
+        return new Dictionary<string, object?>
+        {
+            ["status"] = "ok",
+            ["message"] = $"{op}: {decision.FromAct} (index "
+                          + $"{decision.FromIndex}) -> {decision.ToAct} "
+                          + $"(index {decision.ToIndex}); the act transition "
+                          + "runs over the next frames and the run opens on "
+                          + "the new act's map.",
+            ["guardrail"] = GitsDebugStateGuardrail,
+            ["op"] = op,
+            ["who"] = decision.FromAct,
+            ["before"] = decision.FromIndex,
+            ["after"] = decision.ToIndex,
+            // TRUE, and it is the honest answer rather than a convention:
+            // the vote goes through the action queue and `EnterNextAct` is an
+            // async fade-out/preload/map-generate/fade-in. A caller confirms
+            // by reading the next state, which is what `queued` promises.
+            ["queued"] = true,
+            ["why"] = why,
+            ["act"] = decision.FromAct,
+            ["next_act"] = decision.ToAct,
+            ["act_index"] = decision.FromIndex,
+            ["next_act_index"] = decision.ToIndex,
+            ["acts"] = actIds
+        };
+    }
+
     private static string GitsDebugUnknownCreature(string who, CombatState combat)
         => $"No living creature named '{who}'. Use \"player\", or one of the "
            + "entity ids the last GET reported: "
@@ -1268,6 +1455,15 @@ public static partial class McpMod
         string nextEvent = "";
         var eventsVisited = 0;
 
+        // EB-771. The run's ACT LIST, in order, with where the run stands in
+        // it. Here for the reason the event list is here: `skip_act`'s answer
+        // is an act id, and a caller that wants to know WHICH dressed face
+        // this seed rolled for act 2 should be able to read it off the GET
+        // before it decides to skip anything -- and afterwards, to see that
+        // the skip landed where the list said it would.
+        var acts = new List<string>();
+        var actIndex = -1;
+
         var powers = new List<string>();
         try
         {
@@ -1286,6 +1482,9 @@ public static partial class McpMod
             if (inRun)
             {
                 var forState = RunManager.Instance.DebugOnlyGetState();
+                acts = GitsRunActIds(forState);
+                try { actIndex = forState?.CurrentActIndex ?? -1; }
+                catch { actIndex = -1; }
                 var act = forState?.Act;
                 var rooms = act == null ? null : GitsActRoomSet(act);
                 if (rooms != null)
@@ -1340,7 +1539,13 @@ public static partial class McpMod
             ["powers"] = powers,
             ["events"] = events,
             ["events_visited"] = eventsVisited,
-            ["next_event"] = nextEvent
+            ["next_event"] = nextEvent,
+            ["acts"] = acts,
+            ["act_index"] = actIndex,
+            ["act"] = actIndex >= 0 && actIndex < acts.Count
+                          ? acts[actIndex] : "",
+            ["next_act"] = actIndex >= 0 && actIndex + 1 < acts.Count
+                               ? acts[actIndex + 1] : ""
         };
     }
 
