@@ -559,6 +559,38 @@ def test_anemo_and_geo_carry_the_tag_too():
                                              "Hydro"]
 
 
+def test_the_element_tag_follows_a_riders_override():
+    """`EB-389`. THE FIND (Furina r2 run 2 act 2, finding 1): with Razor's
+    Lightning Fang up, High Tide ("[Hydro]") and Chevreuse ("[Pyro]") both
+    applied Electro and the faces never changed. It cost a planned Overloaded.
+
+    The mod grows a LINE on such a card naming the element the hit will apply
+    (`KleeCardTooltips.AppliedElement`), and the wire sends a card's tips
+    resolved -- so it arrives as a row beside the printed `Applies X`, which
+    the override does not remove. The page's indicator reads the override,
+    because that is the one computed against the board.
+    """
+    state = combat_state()
+    state["player"]["hand"][0]["keywords"] = [
+        {"name": "Applies Hydro",
+         "description": "No aura: applies Hydro for 2 turns."},
+        {"name": "Element overridden",
+         "description": ("While the buff stands, this card's hit applies "
+                         "[gold]Electro[/gold] instead of the element it "
+                         "prints.")}]
+
+    faces = blindplay.observation(state)["combat"]["hand"]
+
+    assert faces[0]["element"] == "Electro"
+    # The other faces are untouched, and a stripped body still reads.
+    state["player"]["hand"][1]["keywords"] = [
+        {"name": "Element overridden",
+         "description": "While the buff stands, this card's hit applies "
+                        "Cryo instead of the element it prints."}]
+    faces = blindplay.observation(state)["combat"]["hand"]
+    assert [f["element"] for f in faces][:2] == ["Electro", "Cryo"]
+
+
 def test_the_element_tag_is_never_read_off_a_reaction_word():
     """`Applies Electro-Charged` is a REACTION a companion prints, not an
     element, and the six elements are not the seven words that follow the verb.

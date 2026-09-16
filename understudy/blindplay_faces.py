@@ -112,6 +112,22 @@ def _hazard(state: dict[str, Any]) -> tuple[str, str] | None:
 _ELEMENT_KEYWORD = re.compile(
     r"^Applies (Pyro|Hydro|Electro|Cryo|Anemo|Geo)$")
 
+# `EB-389`. THE RIDER'S ELEMENT BEATS THE PRINTED ONE.
+#
+# THE FIND (Furina r2 run 2 act 2, finding 1). With Razor's Lightning Fang up,
+# High Tide ("[Hydro]", Applies Hydro) and Chevreuse ("[Pyro]") both applied
+# Electro and the faces never changed; without it the same sequence Vaporized
+# as printed. It cost the seat a planned Overloaded.
+#
+# The mod now grows a LINE on such a card naming the element the hit will apply
+# (`KleeCardTooltips.AppliedElement` / `OverriddenElementBody`), and the wire
+# sends a card's tips resolved -- so that line arrives here as a row of its own,
+# beside the printed `Applies X` the override has not removed. This is the page
+# reading it: the indicator beside the title says what will LAND.
+_ELEMENT_OVERRIDE_TITLE = "Element overridden"
+_ELEMENT_OVERRIDE_BODY = re.compile(
+    r"applies (?:\[gold\])?(Pyro|Hydro|Electro|Cryo|Anemo|Geo)")
+
 
 def _element(keywords: list[dict[str, str]]) -> str:
     """The element this face applies or triggers with (`Pyro`), or `""`.
@@ -120,7 +136,17 @@ def _element(keywords: list[dict[str, str]]) -> str:
     (`ElementBadge.ElementOf` takes the card's own element, which is the first
     keyword codegen emits) for the handful of companion rows that apply a
     second aura on top of their own.
+
+    AN OVERRIDE ROW WINS OVER ALL OF THEM (`EB-389`), because it is the one
+    that was computed against the board rather than printed at codegen time.
     """
+    for k in keywords:
+        if k["name"] != _ELEMENT_OVERRIDE_TITLE:
+            continue
+        m = _ELEMENT_OVERRIDE_BODY.search(
+            k.get("text") or k.get("description") or "")
+        if m:
+            return m.group(1)
     for k in keywords:
         m = _ELEMENT_KEYWORD.match(k["name"])
         if m:

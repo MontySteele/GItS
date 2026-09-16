@@ -262,7 +262,17 @@ internal static class ElementBadge
         // The element, every paint rather than only on creation: a pooled
         // `NCard` reaches us carrying whatever the last card left on it, and a
         // Pyro gem on a Hydro card is worse than no gem at all.
-        var element = ElementOf(card);
+        //
+        // `EB-389`: AND THE RIDER'S ELEMENT WHERE ONE STANDS. With Razor's
+        // Lightning Fang up the card's hit applies Electro whatever the face
+        // prints, and the gem went on saying Hydro or Pyro (Furina r2 run 2
+        // act 2). `Paint` runs on every redraw, so a gem read off the board is
+        // as cheap as one read off the keyword, and
+        // `KleeCardTooltips.AppliedElement` is the one expression -- the same
+        // one the reaction preview and the hit itself go through, so the gem,
+        // the words and the aura cannot come apart. In a release build it
+        // returns the printed element unchanged.
+        var element = KleeCardTooltips.AppliedElement(card, ElementOf(card));
         Texture2D? texture = null;
         if (element != Element.None)
         {

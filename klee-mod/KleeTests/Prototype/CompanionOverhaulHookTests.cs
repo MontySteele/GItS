@@ -273,6 +273,70 @@ public class CompanionOverhaulHookTests
     }
 
     [Fact]
+    public void EB389_the_face_reprints_the_element_the_rider_will_apply()
+    {
+        // `EB-389`. THE FIND (Furina r2 run 2 act 2, finding 1). With Razor's
+        // Lightning Fang up, High Tide ("[Hydro]") and Chevreuse ("[Pyro]")
+        // both applied Electro and the faces never changed; without it the
+        // same sequence Vaporized as printed. It cost a planned Overloaded,
+        // because the reaction preview was computed against the PRINTED
+        // element too.
+        //
+        // THE CARD READS THE BOARD NOW, through the one expression the hit and
+        // the reaction site already share.
+        var card = new global::KleeMod.Cards.Generated
+            .ChevreuseBurstingGrenades();          // prints Pyro
+        var fang = Seat.Klee().WithCombatState()
+            .WithPower<LightningFangPower>(2);
+        // `IsMutable` first: Owner's accessors call AssertMutable, which is
+        // `EB-94`'s hazard and the reason this read goes through `TipOwner`.
+        Seat.Set(card, "IsMutable", true);
+        Seat.Set(card, "Owner", fang.Player);
+        Assert.Equal(Element.Electro,
+            KleeCardTooltips.AppliedElement(card, Element.Pyro));
+
+        // Nothing standing: the printed element, untouched. This is also the
+        // release build's answer, where the rider file is Compile Removed.
+        var plainCard = new global::KleeMod.Cards.Generated
+            .ChevreuseBurstingGrenades();
+        Seat.Set(plainCard, "IsMutable", true);
+        Seat.Set(plainCard, "Owner", Seat.Klee().WithCombatState().Player);
+        Assert.Equal(Element.Pyro,
+            KleeCardTooltips.AppliedElement(plainCard, Element.Pyro));
+
+        // A CANONICAL card -- the compendium, a reward shelf -- has no owner
+        // to read and must not throw out of the whole HoverTips getter.
+        Assert.Equal(Element.Pyro, KleeCardTooltips.AppliedElement(
+            new global::KleeMod.Cards.Generated.ChevreuseBurstingGrenades(),
+            Element.Pyro));
+
+        // AND IT SAYS SO IN WORDS, because a gem swapped under a reader who
+        // has already read the face is the same silence one step quieter.
+        var body = KleeCardTooltips.OverriddenElementBody(Element.Electro);
+        Assert.Contains("[gold]Electro[/gold]", body);
+        Assert.Contains("instead of the element it prints", body);
+
+        // The line has a TITLE ROW, so it cannot render as its own key
+        // (`EB-64`'s standing hazard for this table).
+        Assert.Contains(
+            "KLEEMOD-ELEMENT_OVERRIDDEN.title",
+            Il.Strings(typeof(global::KleeMod.KleeMod)
+                .GetMethod("InjectLocStrings", HeadlessGame.All)!));
+
+        // THE GEM READS THE SAME EXPRESSION, so the picture, the words and the
+        // aura cannot come apart.
+        Assert.Contains(
+            Il.Calls(Il.Method("ElementBadge", "Paint")),
+            c => c.Contains("KleeCardTooltips.AppliedElement"));
+
+        // AND THE BUFF SAYS IT OVERRIDES. "Your Attacks apply Electro" reads
+        // as an addition beside a card printing [Pyro]; it is a replacement.
+        var fangFace = new LightningFangPower().Localization!
+            .Single(e => e.Item1 == "description").Item2;
+        Assert.Contains("INSTEAD of the element they print", fangFace);
+    }
+
+    [Fact]
     public void The_override_reaches_a_card_that_would_apply_nothing()
     {
         // "Your next Attack applies Pyro" is a statement about the Attack, not
