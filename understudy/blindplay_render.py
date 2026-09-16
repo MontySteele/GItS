@@ -23,6 +23,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
                                         INTENT_NUMBER_DISAGREES,
                                         INTENT_SOURCE_NOTE,
+                                        INTENT_SOURCE_NOTE_BREAKDOWN,
                                         ONE_USE_DISCOUNT_NOTE,
                                         ONE_USE_RIDER_NOTE,
                                         PER_HIT_NOTE,
@@ -30,6 +31,9 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         CHOOSER_CONFIRM_NOTE,
+                                        CHOOSER_ONE_CHOICE_NOTE,
+                                        ONE_PRESS_CHOOSER_KIND,
+                                        chooser_note,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
                                         ENEMY_REPLACED_LINE,
@@ -1035,13 +1039,25 @@ def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
     provenance of a number nobody is checking against a modifier is furniture.
     Keyed on the power's printed name, which is the row this page prints and
     the word the reader is reading it against.
+
+    `EB-779`: AND THE CLOSING SENTENCE IS CHOSEN OFF THIS BOARD. The clause
+    saying the feed carries no base, no modifier list and no breakdown was
+    true when it was written and `EB-607`'s bridge half made it false, so on
+    the very page that printed *"the game folded Strength into that: it is 12
+    on the move and 15 after"* the footnote denied all three. It is now
+    conditional on the breakdown having actually arrived on an intent of this
+    board -- a bridge older than `EB-607` sends none and reads as before.
     """
     for enemy in enemies:
         if not any(_fold(p.get("name")) == "strength"
                    for p in enemy.get("powers") or []):
             continue
+        intents = enemy.get("intents") or []
         if any(_fold(i.get("type")) == "attack" or i.get("label")
-               for i in enemy.get("intents") or []):
+               for i in intents):
+            if any(_breakdown_clauses(i.get("breakdown") or {})
+                   for i in intents):
+                return ["", INTENT_SOURCE_NOTE_BREAKDOWN]
             return ["", INTENT_SOURCE_NOTE]
     return []
 
@@ -2288,8 +2304,20 @@ def render(obs: dict[str, Any]) -> str:
             # that would otherwise teach it. Above the button's own state,
             # because the sentence is about the screen and the line below is
             # about this instant.
-            out += ["", CHOOSER_CONFIRM_NOTE]
-            out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
+            #
+            # `EB-779`: and it is the sentence TRUE OF THIS SCREEN. One
+            # `choose` closes the mode chooser and resolves the mode (proofs-9
+            # lane 1 sec.9), so the two-command sentence was false on it and
+            # the `confirm` it told a seat to say cost a refusal every time.
+            note = chooser_note(obs.get("select_kind"))
+            out += ["", note]
+            # And the button's own state, on the screens that HAVE one. The
+            # mode chooser has none -- `BuildChooseCardState` hardwires
+            # `can_confirm: false` -- so "Confirm is not available" there reads
+            # as a button a reader is waiting for rather than one that is not
+            # on the screen at all, which is the misread the note just closed.
+            if note is not CHOOSER_ONE_CHOICE_NOTE:
+                out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
         # `EB-314`: over an open preview `skip` does not leave the screen --
         # it cancels the pick and puts the grid back (`ExecuteCancelSelection`
         # presses the preview's own Cancel), so the page says which one it is.
@@ -2511,6 +2539,12 @@ def assert_chooser_note(obs: dict[str, Any], text: str) -> None:
     branches" but "no chooser without it" -- so the pin is here, at the one
     place the page is finished, and it reads the GRAMMAR rather than the branch:
     whatever screen starts offering the verb tomorrow owes the sentence too.
+
+    `EB-779` ADDS THE OTHER DIRECTION, which is the half proofs-9 lane 1 found
+    live: the one-press chooser must NEVER be told to say `confirm`. One
+    `choose` closes that screen, so the word is a refusal a seat spends eight
+    times a run, and the assertion reads the page's own text rather than the
+    branch that wrote it.
     """
     if "confirm" in (obs.get("commands") or []) \
             and CHOOSER_CONFIRM_NOTE not in text:
@@ -2518,6 +2552,17 @@ def assert_chooser_note(obs: dict[str, Any], text: str) -> None:
             "this page offers `confirm` and does not say that a pick here is "
             "two commands, so a reader would learn it from a refusal: "
             + str(obs.get("screen")))
+    if str(obs.get("select_kind") or "").strip().lower() \
+            == ONE_PRESS_CHOOSER_KIND:
+        if CHOOSER_ONE_CHOICE_NOTE not in text:
+            raise BlindPlayError(
+                "this is the one-press chooser and the page does not say that "
+                "one `choose` closes it: " + str(obs.get("screen")))
+        if "`confirm`" in text:
+            raise BlindPlayError(
+                "this page tells a reader to say `confirm` on the chooser "
+                "that has no confirm button (`EB-779`): "
+                + str(obs.get("screen")))
 
 
 #: A section heading, which on this page is the only line that opens with a

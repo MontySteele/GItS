@@ -108,6 +108,11 @@ from tier0.content.upgrades import PLAN_DELTA_OPS               # noqa: E402
 # the sim does not -- which is exactly what the row forbids.
 from tier0.content.loader import (PROTOTYPE_ID_PREFIX,          # noqa: E402
                                   display_name)
+# proofs-9 lane 1, defect 1: the game's rich-text tags come OFF a card title,
+# which is not rich text, and stay in a description, which is. One stripper,
+# the blind page's own, rather than a second regex here -- the page and the
+# generator disagreeing about what a tag is would be the defect one layer up.
+from understudy.qa_packet import strip_markup                   # noqa: E402
 
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
@@ -13245,7 +13250,22 @@ def emit(
             # prints its live numbers, it is what the chooser shows under the
             # name, and it is the half the round measured ("5/9 in the
             # chooser").
-            label = cs_escape(mode["label"])
+            #
+            # AND THE TITLE CARRIES NO MARKUP (proofs-9 lane 1, defect 1).
+            # `proto_fs_curtain_rise`'s mode B label is
+            # `[gold]Spend[/gold] 3: deal 13 instead`, and the game drew
+            # exactly that string -- brackets, slash and all -- on the mode
+            # card in the chooser, while the description an inch below it
+            # rendered the same word in gold. A card TITLE is not rich text in
+            # this game and a DESCRIPTION is, so the tags belong in one and
+            # never in the other. Stripped for EVERY mode label rather than
+            # this one, and the tags come off the TITLE only: the description
+            # keeps them (it renders), and `ModeLabels` -- a wire contract the
+            # bridge reads by name (`gits/GitsModalTargeting.cs`) -- keeps the
+            # sheet's own spelling. Invisible to a seat, because the blind
+            # page strips tags of its own, which is why three seat rounds
+            # walked past it.
+            label = cs_escape(strip_markup(mode["label"]))
             face = cs_escape(option_faces[i] if option_faces
                              else mode["label"])
             option_vars = (

@@ -167,7 +167,7 @@ public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "[gold]Spend[/gold] 3: deal 13 instead"),
+        ("title", "Spend 3: deal 13 instead"),
         ("description", "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead"),
     };
 
