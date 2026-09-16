@@ -62,6 +62,8 @@ A supply officer keeps a triage cache at the Bourou Village staging point, three
 
 Mechanics check: matches harvest. The officer's first three flasks are the first three potions in your potion slots, leftmost first (matching the wiki's own line); each option's card-type roll (Attack/Skill/Power) is random per the harvest, not chosen.
 
+@pages.DONE.description — The officer stoppers the flask, files it with the cache, and drills the technique into you on the spot. "Better stock next time," she says, whatever you handed her.
+
 ---
 
 ## - [ ] This or That?

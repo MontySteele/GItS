@@ -348,6 +348,8 @@ A Collective trader at Mictlan has built a rig that reads a concoction for the t
 
 Mechanics check: matches harvest's full 5-tier version (the first 3 potions in your slots are offered, leftmost first; each option's Attack/Skill/Power split is randomized). Flag — tier05/content/events.yaml ships a collapsed 2-option version (`spend_potion` + `card_reward: 3` + `upgraded: true`, plus Leave) rather than the harvest's 5-tier ladder; an engine simplification, not a text discrepancy.
 
+@pages.DONE.description — The rig chews through the bottle, clicks twice, and hands back the technique on a strip of scorched hide. The trader is already reaching for your belt again.
+
 ---
 
 ## - [ ] This or That?
