@@ -470,6 +470,18 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["potion_offered"] = any(
             _fold(r.get("type")) == "potion"
             for r in _reward_items(state) if isinstance(r, dict))
+        # `EB-702`: the CARD rows, named, so the page can say where their skip
+        # lives. A reward screen's card row is an offer and not the offer's own
+        # page; the sentence under the list is the same one `_skip`'s refusal
+        # carries, so a seat reading the page and a seat typing the verb are
+        # told the same thing.
+        # Read off the wire's own `type` and not off the printed `kind`: a row
+        # whose name IS its kind prints no kind at all (`_reward_kind`,
+        # `EB-661`), which is exactly the bare `Card` row this is about.
+        obs["card_offers"] = [
+            o["name"] for o, raw in zip(obs["items"], _reward_items(state))
+            if isinstance(raw, dict) and _fold(raw.get("type")) == "card"
+            and o["name"] and o["enabled"]]
         # `EB-294`. THE VERB WAS A CONSTANT HERE TOO. Once both rewards were
         # taken the page printed `- (nothing here to take)` and still offered
         # `choose "<reward>"` under "What you can say", which is the same

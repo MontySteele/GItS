@@ -1299,7 +1299,52 @@ def _skip(state: dict[str, Any]) -> Resolution:
         verb = ("cancel_selection" if st == "card_select"
                 else "combat_confirm_selection")
         return Resolution(True, "skip", {"action": verb}, {})
+    # `EB-702`. THE VERB THAT WAS A DEAD END ON THE SCREEN ABOVE ITS OWN
+    # INVITATION.
+    #
+    # THE FIND (Kokomi r30 lane 1, refusal 4). "`skip` at the boss reward
+    # screen -- refused with *there is nothing here to skip*, on a screen whose
+    # card list had said *You may skip this*. `proceed` worked."
+    #
+    # THE TWO SCREENS ARE TWO SCREENS AND THE PAGE NEVER SAID SO. A reward
+    # screen's card row is an OFFER rather than the offer's own page: `choose`
+    # opens `NCardRewardSelectionScreen` and the skip lives THERE, on that
+    # screen's own ALTERNATIVE button, which is the only control
+    # `ExecuteSkipCardReward` can press -- "Card reward selection screen is
+    # not open" otherwise (`McpMod.Actions.cs:599`). So one post cannot skip an
+    # offer that has not been opened, and the refusal the seat met said nothing
+    # about either half. It names both now -- the offer, and the verb that
+    # reaches its page -- and `blindplay_render` prints the same sentence
+    # beside the row, so the invitation and the verb agree before a seat spends
+    # an action finding out.
+    if st == "rewards":
+        cards = _card_offers(state)
+        if cards:
+            return _refuse(
+                "the card offer on this screen has not been opened yet, so "
+                "there is no card reward here to skip; the skip is on the "
+                "offer's own page",
+                *[f'choose "{name}"' for name in cards])
     return _refuse("there is nothing here to skip")
+
+
+def _card_offers(state: dict[str, Any]) -> list[str]:
+    """The names of the CARD rows a reward screen is offering (`EB-702`).
+
+    Named through `_reward_option`, the same reader the page names its rows
+    with, so the form a refusal hands back is a form that resolves; typed off
+    the WIRE's own `type`, because a row whose printed name IS its kind prints
+    no kind at all (`_reward_kind`, `EB-661`) and the bare `Card` row is
+    exactly that shape.
+    """
+    out: list[str] = []
+    for raw in _reward_items(state):
+        if not isinstance(raw, dict) or _fold(raw.get("type")) != "card":
+            continue
+        option = _reward_option(raw)
+        if option["enabled"] and option["name"]:
+            out.append(option["name"])
+    return out
 
 
 def _proceed(state: dict[str, Any]) -> Resolution:

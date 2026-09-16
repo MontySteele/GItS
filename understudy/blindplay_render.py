@@ -1827,6 +1827,21 @@ def render(obs: dict[str, Any]) -> str:
             out += [obs["message"], ""]
         out += (_render_options(obs["items"]) if obs["items"]
                 else ["- (nothing here to take)"])
+        # `EB-702`: WHERE THE CARD OFFER'S SKIP IS, on the screen a seat typed
+        # `skip` at and was told there was nothing here to skip. The row above
+        # is the offer; its own page is where the skip lives, and that page is
+        # opened with `choose`. Printed only where a card row is actually on
+        # offer, so a gold-and-potion screen reads exactly as it always did.
+        if obs.get("card_offers"):
+            out += ["", "*" + " and ".join(f"**{n}**"
+                                           for n in obs["card_offers"])
+                    + (" is a card OFFER" if len(obs["card_offers"]) == 1
+                       else " are card OFFERS")
+                    + " rather than the offer's own page: `choose` it to open "
+                      "the card screen, and the skip -- *You may skip this* -- "
+                      "is on THAT screen. `skip` typed here has no card reward "
+                      "open to skip, and `proceed` leaves the whole reward "
+                      "screen.*"]
         # `EB-341`: said on the screen where the claim is made, and only where
         # a potion is actually on offer -- a run with a free slot reads
         # exactly as it always did.

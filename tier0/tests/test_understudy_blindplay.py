@@ -12270,3 +12270,39 @@ def test_a_reward_with_no_such_relic_prints_no_caveat():
     known to rewrite this screen's alternative is taught no doubt."""
     assert "changes what the alternative" not in blindplay.observe(
         card_reward_state())
+
+
+# ------------------------- EB-702: the reward screen's skip is not a dead end --
+
+def test_skip_on_a_reward_screen_names_the_card_offer_and_the_way_in():
+    """`EB-702`. The verb that refused above its own invitation.
+
+    Seen to FAIL: `skip` at a reward screen carrying a card offer came back
+    "there is nothing here to skip" -- true of the post and useless to a seat
+    that had just read *You may skip this* on the card screen. The refusal
+    names the offer and hands back the form that opens its page, where the
+    skip actually is.
+    """
+    res = blindplay.act(rewards_state(), "skip")
+    assert res["ok"] is False
+    assert "nothing here to skip" not in res["refusal"]
+    assert "has not been opened yet" in res["refusal"]
+    assert "Card" in res["refusal"]
+
+
+def test_the_reward_page_says_where_the_card_offers_skip_lives():
+    """The page and the verb say the same thing (`EB-702`): the row is an
+    offer, `choose` opens its page, and the skip is on that page."""
+    page = blindplay.observe(rewards_state())
+    assert "is a card OFFER" in page
+    assert "the skip -- *You may skip this* -- is on THAT screen" in page
+
+
+def test_a_reward_screen_with_no_card_offer_reads_as_it_always_did():
+    """The gate is the card row: a gold-and-potion screen prints no such
+    sentence and keeps the old refusal."""
+    state = copy.deepcopy(rewards_state())
+    state["rewards"]["items"] = [i for i in state["rewards"]["items"]
+                                 if i["type"] != "card"]
+    assert "is a card OFFER" not in blindplay.observe(state)
+    assert "nothing here to skip" in blindplay.act(state, "skip")["refusal"]
