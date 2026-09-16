@@ -77,8 +77,9 @@ contract `roster-pck-v3`, package `klee` **v0.2**. Deploy stamps
 (2026-09-16, main after #530, arms `klee,companion,kokomi,furina-stage,teyvat`:
 the prototype rows behind `-p:PrototypeCards=true`, the Stage behind
 `-p:FurinaStage=true`, the Teyvat frame behind `-p:TeyvatFrame=true` and ON
-for the deploy proofs, OFF again on the next calibration deploy; `furina` is
-the retired reframe arm; every arm ships OFF in a release package).
+for the deploy proofs, OFF again on the next calibration deploy; the reframe
+arm left the tree under `EB-726`, so `furina-stage` is her only arm; every arm
+ships OFF in a release package).
 **Last RELEASE package:
 `0.2.1357`** (2026-08-29). Pin history: [`workstreams.md`](workstreams.md).
 
@@ -147,7 +148,7 @@ the retired reframe arm; every arm ships OFF in a release package).
   (`review/ruled/kokomi-plan-less-hand-2026-09-08.md`). **No pick open.**
   Next round: the depth of the current pool's Plan interactions, with Scout
   Ahead and Slack Water on the lane, before any access card is drafted.
-- **Furina.** The reframe (R220 A) ran 16 seat rounds on the arm and one
+- **Furina.** The retired reframe (R220 A) ran 16 seat rounds and one
   [USER] act-1 run whose notes were all interface. On 2026-09-07 [USER]
   reset the kit to its identity, and on 2026-09-08 the design sitting
   re-founded it as **the Stage**: three performers as pets with visible
@@ -157,7 +158,8 @@ the retired reframe arm; every arm ships OFF in a release package).
   read). **R269 (2026-09-08)** ruled its three picks: build it, the healing
   law gets the pet clause (`LAW.md`), the concepts packet and #433 close.
   Encore, the Spotlight, the Fanfare counter and the reframe arm retire
-  under it. Batch one is BUILT in both engines (`EB-723`-`EB-725`, #443,
+  under it, and **`EB-726` took the reframe out of the tree whole**
+  (2026-09-16): one Furina arm, `furina-stage`. Batch one is BUILT in both engines (`EB-723`-`EB-725`, #443,
   #469) and **round one is READ**
   (`review/active/furina-stage-round-1-2026-09-08.md`): three seats on one
   seed; turn one was a wager two seats named, all three wanted a second
