@@ -954,8 +954,9 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
       twice -- Nereid's Ascension is up, so every Plan below happens TWICE. It
         is the one thing that makes the count stop being the number of things
         that will happen, which is why it is a field and not an inference.
-      queue -- ordered, front first: the card's name and how many clauses its
-        Plan line carries.
+      queue -- ordered, front first: the card's name, how many clauses its
+        Plan line carries, and (`EB-773`) the `damage` already written into it
+        against one body with the `aim` that number lands on.
       carried_out -- `EB-317`: what the jellyfish has already done THIS TURN,
         in the order it did it. Each row carries `card`, the `number` its
         clause produced (null when it produced none) and `line`, THE STRING THE
@@ -979,8 +980,17 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
     raw = player.get("kokomi_plans")
     if not isinstance(raw, dict) or not raw:
         return None
+    # `EB-773`: and what each entry has WRITTEN against a body -- `damage`, the
+    # number already fixed in it, and `aim`, the one word saying where that
+    # number lands ("front", "all", "other", or "" for an entry with no damage
+    # clause). ABSENT IS NOT ZERO, this reader's standing rule: a bridge older
+    # than the fields sends neither, `_int` answers 0 and `_text` answers "",
+    # and the page's warning is gated on `aim == "front"` -- so such a feed
+    # prints exactly the queue it always printed.
     queue = [{"name": _text(row.get("name")),
-              "clauses": _int(row.get("clauses"))}
+              "clauses": _int(row.get("clauses")),
+              "damage": _int(row.get("damage")),
+              "aim": _text(row.get("aim"))}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

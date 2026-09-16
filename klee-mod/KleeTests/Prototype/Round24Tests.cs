@@ -168,6 +168,101 @@ public class Round24Tests
                             .GetMethod("Snapshot", All)!));
     }
 
+    // ==================================================================
+    // `EB-773` -- a queued Plan carries what it has WRITTEN, and where
+    // ==================================================================
+
+    [Fact]
+    public void The_wire_carries_each_queued_plans_written_damage_and_aim()
+    {
+        // The two keys `understudy/blindplay_board.kokomi_plans` reads to warn
+        // that a Plan is written at a body the queue will already have killed.
+        // Named literals in `Snapshot`, which is what a headless pin can see --
+        // the same shape the summon-log pin above takes.
+        var strings = Il.Strings(typeof(KokomiPlan).GetMethod("Snapshot", All)!);
+        Assert.Contains("damage", strings);
+        Assert.Contains("aim", strings);
+    }
+
+    [Fact]
+    public void Only_a_written_front_damage_clause_reaches_the_wires_number()
+    {
+        // THE CLAIM THE KEY MAKES is that its number is already FIXED -- the
+        // blind page's `PLAN_WRITTEN_NUMBER_NOTE` rule -- so the two derived
+        // damage kinds, computed at carry-out off the target's max HP and off
+        // a count not yet taken, contribute nothing. `Times` multiplies,
+        // because "deal 3 damage three times" is three hits into one aim and
+        // the page keeps a total.
+        Assert.Equal(8, WrittenFrontDamage(Damage(8)));
+        Assert.Equal(9, WrittenFrontDamage(Damage(3, times: 3)));
+        Assert.Equal(11, WrittenFrontDamage(Damage(8), Damage(3)));
+        Assert.Equal(0, WrittenFrontDamage(Damage(8, aim: "AllEnemies")));
+        Assert.Equal(0, WrittenFrontDamage(Clause("DamageQuarterMaxHp", 8)));
+        Assert.Equal(0, WrittenFrontDamage(Clause("Block", 8)));
+        // A mixed entry reports the part it knows; the page's sentence says
+        // "may" for exactly this reason.
+        Assert.Equal(8, WrittenFrontDamage(
+            Damage(8), Clause("DamagePerCompanionLastTurn", 4)));
+    }
+
+    [Fact]
+    public void The_wires_aim_word_is_the_one_the_page_can_resolve()
+    {
+        // "front" is the single-target aim the page's running total is about;
+        // "all" cannot be over-killed past the front body; "other" is a
+        // Converging Tide stamp, a `CombatId` the page has no way to resolve
+        // against the list it prints, so it says nothing rather than guessing;
+        // "" is an entry with no damage clause at all.
+        Assert.Equal("front", WrittenAim(Damage(8)));
+        Assert.Equal("all", WrittenAim(Damage(8, aim: "AllEnemies")));
+        Assert.Equal("other", WrittenAim(Damage(8), over: "7"));
+        Assert.Equal("other", WrittenAim(Damage(8, aim: "Self")));
+        Assert.Equal("", WrittenAim(Clause("Block", 8)));
+        Assert.Equal("", WrittenAim(Clause("Block", 8), over: "7"));
+    }
+
+    // ------------------------------------------------ `EB-773` helpers --
+
+    /// <summary>One clause, named by its ENUM MEMBERS, so the helper reads the
+    /// way the sheet grammar does and a renamed member fails loudly here.
+    /// </summary>
+    private static object Clause(string kind, int amount,
+                                 string aim = "FrontEnemy", int times = 1)
+    {
+        var planned = typeof(KokomiPlan).GetNestedType("Planned", All)!;
+        var kindType = typeof(KokomiPlan).GetNestedType("Kind", All)!;
+        var aimType = typeof(KokomiPlan).GetNestedType("Aim", All)!;
+        return Activator.CreateInstance(
+            planned,
+            Enum.Parse(kindType, kind), amount, Enum.Parse(aimType, aim),
+            null, times, null)!;
+    }
+
+    private static object Damage(int amount, string aim = "FrontEnemy",
+                                 int times = 1) =>
+        Clause("Damage", amount, aim, times);
+
+    /// <summary>An <c>Entry</c> holding these clauses. <c>Source</c> is null:
+    /// a `CardModel` needs the game's model tables and nothing read here
+    /// touches it.</summary>
+    private static object Entry(string? over, params object[] clauses)
+    {
+        var planned = typeof(KokomiPlan).GetNestedType("Planned", All)!;
+        var list = Array.CreateInstance(planned, clauses.Length);
+        for (var i = 0; i < clauses.Length; i++) list.SetValue(clauses[i], i);
+        return Activator.CreateInstance(
+            typeof(KokomiPlan).GetNestedType("Entry", All)!,
+            null, list, null, false, over)!;
+    }
+
+    private static int WrittenFrontDamage(params object[] clauses) =>
+        (int)typeof(KokomiPlan).GetMethod("WrittenFrontDamage", All)!
+            .Invoke(null, new[] { Entry(null, clauses) })!;
+
+    private static string WrittenAim(object clause, string? over = null) =>
+        (string)typeof(KokomiPlan).GetMethod("WrittenAim", All)!
+            .Invoke(null, new[] { Entry(over, clause) })!;
+
     // ------------------------------------------------------------ helpers --
 
     /// <summary>Run <paramref name="body"/> with the lane's cap declared (or

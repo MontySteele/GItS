@@ -12,6 +12,7 @@ same script that wrote them.
 
 import subprocess
 import sys
+import threading
 
 from tools import reaction_census as census
 
@@ -52,20 +53,85 @@ def test_check_passes_on_the_committed_record():
         f"stdout={result.stdout!r} stderr={result.stderr!r}")
 
 
-def test_check_fails_when_the_record_is_stale(tmp_path, monkeypatch):
-    """A tampered committed file must be reported as stale, not silently
-    accepted -- `--check`'s entire job."""
-    stale = census.OUT.read_text(encoding="utf-8") + "\nSTALE MARKER\n"
-    backup = census.OUT.read_text(encoding="utf-8")
-    census.OUT.write_text(stale, encoding="utf-8")
-    try:
-        result = subprocess.run(
-            [sys.executable, "tools/reaction_census.py", "--check"],
-            cwd=census.REPO, capture_output=True, text=True)
-        assert result.returncode != 0
+def _stale_copy(tmp_path, name="reaction-census-stale.md"):
+    """A record that is exactly the committed one plus a marker, IN TEMP.
+
+    `EB-772`. This used to be the committed record itself, tampered with in
+    place and put back in a `finally`. That made a tracked file into shared
+    mutable state for the length of a subprocess, and two fast lanes running
+    at once raced over it: whichever lane's `--check` read the other lane's
+    tampered bytes, and the tree was left modified whenever the loser restored
+    last. The stale record is a COPY now, and nothing in this module writes
+    inside the checkout at all.
+    """
+    copy = tmp_path / name
+    copy.write_text(census.OUT.read_text(encoding="utf-8") + "\nSTALE MARKER\n",
+                    encoding="utf-8")
+    return copy
+
+
+def _check(record=None):
+    """`--check`, optionally against a copy. Returns the finished process."""
+    argv = [sys.executable, "tools/reaction_census.py", "--check"]
+    if record is not None:
+        argv += ["--record", str(record)]
+    return subprocess.run(argv, cwd=census.REPO, capture_output=True,
+                          text=True)
+
+
+def test_check_fails_when_the_record_is_stale(tmp_path):
+    """A tampered record must be reported as stale, not silently accepted --
+    `--check`'s entire job. Read off a temp copy (`EB-772`); the committed
+    record is never written by this suite."""
+    before = census.OUT.read_bytes()
+    result = _check(_stale_copy(tmp_path))
+    assert result.returncode != 0
+    assert "STALE" in result.stdout
+    assert census.OUT.read_bytes() == before, (
+        "the tracked record must be untouched by the stale-record check")
+
+
+def test_the_stale_check_survives_two_lanes_running_it_at_once(tmp_path):
+    """`EB-772`, and it is `EB-730`'s pin one test over.
+
+    THE FAILURE, FOUR TIMES ON 2026-09-16 AND ONLY EVER WITH A SECOND LANE UP:
+    the old test wrote its stale marker into the TRACKED record, ran a
+    subprocess, and restored it. Two full fast lanes each did that, so one
+    lane's `--check` read bytes the other lane had staged (or had already put
+    back, which reads as OK where STALE was asserted), and the loser's restore
+    left `review/records/reaction-census-2026-09-05.md` modified in the tree.
+
+    THE OVERLAP IS COMMANDED, NOT TIMED, which is `_CommandedReads`' rule in
+    `test_local_tester`: a BARRIER holds both checks until both are genuinely
+    in flight, so this asserts about a real concurrency rather than hoping two
+    sleeps interleave. What it then asserts is the property the repair buys --
+    each lane reads ITS OWN copy, both see STALE, and the tracked record is
+    byte-identical afterwards.
+    """
+    before = census.OUT.read_bytes()
+    copies = [_stale_copy(tmp_path, f"stale-{lane}.md") for lane in "ab"]
+    gate = threading.Barrier(len(copies), timeout=120.0)
+    results: dict[int, subprocess.CompletedProcess] = {}
+
+    def lane(index):
+        gate.wait()
+        results[index] = _check(copies[index])
+
+    threads = [threading.Thread(target=lane, args=(i,))
+               for i in range(len(copies))]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=300.0)
+        assert not thread.is_alive(), "a lane never finished"
+
+    assert len(results) == len(copies)
+    for index, result in results.items():
+        assert result.returncode != 0, (
+            f"lane {index}: stdout={result.stdout!r} "
+            f"stderr={result.stderr!r}")
         assert "STALE" in result.stdout
-    finally:
-        census.OUT.write_text(backup, encoding="utf-8")
+    assert census.OUT.read_bytes() == before
 
 
 def test_committed_record_names_its_inputs():
