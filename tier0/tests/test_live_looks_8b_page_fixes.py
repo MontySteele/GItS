@@ -56,7 +56,7 @@ def _spark_meter_state() -> dict:
 
 def _source_lines(page: str) -> list[str]:
     return [line for line in page.splitlines()
-            if line.strip().startswith("- This turn:")]
+            if line.strip().startswith("- So far this fight:")]
 
 
 def test_eb610_the_sources_print_beside_a_power_shaped_spark_row():
@@ -94,7 +94,7 @@ def test_eb610_the_power_row_prints_the_sources_under_itself():
     page = blindplay.observe(_spark_power_state())
     lines = page.splitlines()
     idx = next(i for i, line in enumerate(lines)
-               if line.strip().startswith("- This turn:"))
+               if line.strip().startswith("- So far this fight:"))
     assert "Spark 3" in lines[idx - 1], (
         "the source line belongs to the row whose number it explains")
     assert lines[idx].startswith("    - "), "and hangs under it, indented"

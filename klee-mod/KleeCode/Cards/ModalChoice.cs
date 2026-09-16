@@ -97,10 +97,11 @@ public static class ModalChoice
     /// in hand, 5/9 in the chooser) and unfolded under Weak (7/15 in hand,
     /// 10/20 in the chooser); asking by the hand's wording is refused."
     ///
-    /// TWO HALVES, AND THIS IS THE SECOND. Codegen now gives an option face the
-    /// PARENT's wording and the PARENT's <c>CanonicalVars</c>, so the tokens
-    /// resolve and the game's own preview folds Weak, Strength and the rest
-    /// over them exactly as it does in the hand. What a fresh
+    /// THREE HALVES BY NOW, AND THIS IS THE SECOND AND THE THIRD. Codegen
+    /// gives an option face the PARENT's wording and the PARENT's
+    /// <c>CanonicalVars</c>, so the tokens resolve; the BOARD then had to be
+    /// let in separately, because an off-pile face runs no hooks at all
+    /// (`EB-780`'s second half, in the body below). What a fresh
     /// <c>CreateCard</c> cannot know is whether the copy in the hand has been
     /// smithed -- an option is built from a canonical template every play -- so
     /// the upgrade is applied here, from the parent, and the emitted
@@ -135,6 +136,58 @@ public static class ModalChoice
         {
             option.UpgradeInternal();
         }
+        // `EB-780`, THE FOLD, FOUND FAILING BY THE LIVE LOOK OF 2026-09-16
+        // (proofs-9 lane 0, B3): under Weak 3 an upgraded Curtain Rise read
+        // 7 / 12 in the hand and 10 / 16 in the chooser. The upgrade carried;
+        // the BOARD did not. 10 and 16 are the upgraded sheet literals, and
+        // 7 and 12 are those literals with Weak folded in.
+        //
+        // AND THE VARS WERE NEVER THE PROBLEM. An option already carries the
+        // parent's `CanonicalVars` -- the same `FoldedDamageVar`s, bound to
+        // the same owner by <see cref="CreateOption{T}"/> -- so the fold was
+        // being asked for and answered with the base value. The gate is one
+        // line of the game's own, in `CardModel.UpdateDynamicVarPreview`
+        // (0.111.0 decompile):
+        //
+        //     runGlobalHooks = CombatState != null
+        //                      && (Pile?.Type is Hand or Play
+        //                          || UpgradePreviewType == Combat)
+        //
+        // An option is in NO PILE by construction (`ModalOptionCard`: never
+        // played, never in a pile, never in a pool) -- so `Pile` is null, and
+        // `CardModel.CombatState` is itself null for the same reason, because
+        // its getter reads `Pile.IsCombatPile || UpgradePreviewType ==
+        // Combat`. Both halves fail, `runGlobalHooks` is false, and every var
+        // on the face -- ours and the game's alike -- falls through to
+        // `BaseValue`. `KokomiPlan.PlanDamageVar` and
+        // `SpotlightSystem.DeferredBlockVar` both record the same rule from
+        // the other side ("runGlobalHooks is false off the hand").
+        //
+        // THE GAME'S OWN DOOR, FOR THE GAME'S OWN REASON. That enum member
+        // exists so a face the player is looking at OUTSIDE a pile still
+        // reflects the powers on the board -- its summary is "to facilitate
+        // having upgrade previews reflect power values from the player in
+        // combat (i.e. Armaments)". A mode option is exactly that face: it is
+        // shown, in combat, to be compared against the card in hand, and the
+        // only true reading of it is the hand's. So it is declared a combat
+        // preview, which flips both halves at once -- `CombatState` resolves
+        // to the owner's, and `runGlobalHooks` goes true.
+        //
+        // WHAT IT COSTS, read off the same decompile: `IsPreview()` is true
+        // afterwards, and exactly two things in the game read it.
+        // `CardPileCmd` refuses to add a preview to a pile -- which an option
+        // may never be in anyway, so that is a guard rail and not a cost --
+        // and `NPreviewCardHolder.IsShowingUpgradedCard` paints a preview
+        // glow, which the chooser cannot reach: `NChooseACardSelectionScreen`
+        // builds `NGridCardHolder`s and nothing else. Nothing here is added
+        // to a pile, played, or kept past the screen.
+        //
+        // SET AFTER THE UPGRADE, not before: the property's setter asserts
+        // mutability and refuses to leave the preview state once entered, and
+        // `UpgradeInternal` on a card the game already considers a preview is
+        // a path nothing else in the game takes. Ordering them this way keeps
+        // both calls on the shapes their own code was written for.
+        option.UpgradePreviewType = CardUpgradePreviewType.Combat;
         return option;
     }
 

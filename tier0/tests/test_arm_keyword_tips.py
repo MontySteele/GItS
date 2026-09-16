@@ -581,6 +581,44 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     assert "ArmKeywordTips.ForEmptyField(" in match and ", this, true)" in match
 
 
+def test_the_merge_clause_is_on_the_tip_and_the_page():
+    """`EB-287`, the glossary half (proofs-9 lane 0, A2, 2026-09-16).
+
+    THE DEFECT. `ForBomb` carried "; a second Bomb joins the first." and the
+    blind page's own `Bomb` glossary row did not -- and the two print on ONE
+    screen, the tip on the card rail and the row twenty lines below it. So the
+    reader the keyword exists for, the one who has not built a pile yet, met
+    one surface saying a second placer joins the charge and another that never
+    mentioned it. The row's acceptance names both surfaces.
+
+    A PIN AND NOT A SHARED CONSTANT, and the reason is structural: the tip is a
+    C# literal compiled into the mod, the glossary row is a Python string in a
+    process that reads the WIRE and never loads the assembly -- and that
+    renders pages on builds carrying no klee mod at all. Nothing can be read by
+    both at run time, so the agreement is asserted here, at the only place that
+    sees both files. That is `test_rule_three_...`'s shape, one surface out.
+
+    Seen to FAIL on the live look: `Bomb 9` on the badge, the merge on the tip,
+    and the glossary row silent about it.
+    """
+    import sys
+    sys.path.insert(0, str(REPO))
+    from tools import lint_text_conventions as ltc
+    from understudy import blindplay_notes
+
+    clause = "; a second Bomb joins the first. "
+    tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
+    assert clause in tips["BombKey"]
+    # The same words in the same place on the page: the clause hangs off what
+    # a charge IS, and `Block stops it.` still follows it.
+    page = blindplay_notes.ARM_KEYWORDS["Bomb"]
+    assert clause in page
+    assert page.index(clause) < page.index("Block stops it.")
+    # The clause carries no `[gold]` span, so the two readings are identical
+    # character for character rather than one being the other's paraphrase.
+    assert "[gold]" not in clause
+
+
 def test_rule_three_says_which_kill_it_means_on_all_three_surfaces():
     """`EB-574`. The sentence is about the BODY, not the charge.
 
