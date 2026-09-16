@@ -27,8 +27,12 @@ played or being built; the
 THE SHIPPED SHEETS are `--shipped`, a REPORT rather than a gate. `R249` (`EB-345`)
 ruled the pass on them and it is applied: the Furina sheet, the companion
 rows, the shared keyword tips, the shipped powers and the shipped relics all
-read against the same rules now, and the report is clean but for the
-exceptions below. The Klee and Kokomi CARD rows are the one part left alone
+read against the same rules now. The report was clean but for the exceptions
+below until `EB-777`, which found eight shipped power faces the old matcher
+had never read at all (a semicolon in their prose); all eight are over the
+power ceiling and they are reported, not rewritten -- this is a tooling row
+and shipped prose belongs to a text pass.
+The Klee and Kokomi CARD rows are the one part left alone
 (pick 1(b)) -- the overhauls being played replace them, so a rewrite of their
 faces is work the overhaul deletes -- and they are skipped by id, off their
 two sheets.
@@ -50,6 +54,7 @@ import glob
 import os
 import re
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -150,11 +155,21 @@ EXCEPTIONS = {
         "prints nowhere is not a rule a round can read; every clause above it "
         "is what the jellyfish IS (untargetable, all combat, what a Plan does "
         "on it) and none is droppable to make room"),
-    # `PendingPlansPower.descriptionCapped` left this list with `EB-680`: the
-    # Dusk clause was bought by cutting "at the start of" and "on you ... the
-    # numbers" out of the two sentences above it, and the cap face came back
-    # under the ceiling on the same trim. An exception that no longer names a
-    # string over its ceiling is rot, and this gate says so.
+    "PendingPlansPower.descriptionCapped": (
+        "`EB-777`. The cap lane's Plan badge, and it is on this list because "
+        "the lint could not SEE it until now: the badge's own prose carries a "
+        "semicolon (`in order next turn; a Dusk Plan at this turn's end`) and "
+        "the old matcher's character class excluded one, so both of this "
+        "power's faces were skipped whole and neither ever met a ceiling. "
+        "`EB-680` recorded that the capped face 'came back under the ceiling' "
+        "on the Dusk trim -- a conclusion drawn from a row nothing measured, "
+        "and it was wrong: the face is 188 of 125. It is carried rather than "
+        "rewritten for `ProtoBakeKuragePower.descriptionCapped`'s reason, "
+        "word for word -- it prints only under `GITS_KOKOMI_PLAN_CAP`, a "
+        "default build shows the row above it at 118 of 125, and a rule that "
+        "binds and prints nowhere is not a rule a round can read. The prose "
+        "is the kit's, not this lint's, and EB-777 is a tooling row: the "
+        "trim, if one is wanted, is a Kokomi text pass"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.
@@ -443,9 +458,66 @@ def tip_rows() -> list[Row]:
     return rows
 
 
+def skip_literal(src: str, i: int) -> int:
+    """Index of the character after the C# string literal that opens at `i`.
+
+    `EB-777`. The one primitive this file was missing. Every matcher below used
+    to reason about C# with a character class, and a character class cannot
+    tell a `;` in PROSE from a `;` that ends a statement -- so a face that used
+    one was skipped whole and never met its ceiling. Scanning the literal is
+    the only way to know which is which, and it is eight lines.
+    """
+    i += 1                                   # past the opening quote
+    n = len(src)
+    while i < n:
+        if src[i] == "\\":
+            i += 2
+            continue
+        if src[i] == '"':
+            return i + 1
+        i += 1
+    return n
+
+
+def _statement_end(src: str, start: int) -> int:
+    """Index of the `;` that ends the statement beginning at `start`.
+
+    Literal-aware, for `skip_literal`'s reason: `const string X = "a; b";` is
+    one statement and its value contains a semicolon.
+    """
+    i = start
+    n = len(src)
+    while i < n:
+        c = src[i]
+        if c == '"':
+            i = skip_literal(src, i)
+            continue
+        if c == "/" and src[i + 1:i + 2] == "/":
+            while i < n and src[i] != "\n":
+                i += 1
+            continue
+        if c == ";":
+            return i
+        i += 1
+    return n
+
+
+_CONST_HEAD = re.compile(r"const string (\w+) =\s*")
+
+
 def _consts(src: str) -> dict[str, str]:
-    return {n: csharp_text(e) for n, e in
-            re.findall(r"const string (\w+) =\s*((?:[^;])*);", src)}
+    """`const string` declarations, read to the statement's own `;`.
+
+    `EB-777` made this literal-aware. It used to run `[^;]*` to the first
+    semicolon ANYWHERE, so a const whose prose carried one was truncated and
+    every face that appends it was measured SHORT -- an under-measure rather
+    than a skip, and just as silent.
+    """
+    out: dict[str, str] = {}
+    for m in _CONST_HEAD.finditer(src):
+        end = _statement_end(src, m.end())
+        out[m.group(1)] = csharp_text(src[m.end():end])
+    return out
 
 
 #: `EB-540`. `NextAttackRiderPower.CardTypeClause`, read out of the one file
@@ -470,14 +542,15 @@ _CAP_SENTENCE: list[str] = []
 def _plan_cap_sentence() -> str:
     """`KokomiPlan.CapSentenceFormat`, read to the statement's own `;`.
 
-    NOT THROUGH `_consts`, and the reason is `tip_rows`' own trap one surface
-    over: that pattern runs to the first semicolon ANYWHERE, and this sentence
-    contains one ("at most 2 at the start of your turn; the rest wait in
-    order"). It would return half a literal, the clause would measure as
-    nothing, and the capped face
-    would sit outside every ceiling -- the silence `EB-343` was filed on. So
-    the literals are matched as literals and the terminator is the one after
-    them.
+    This sentence contains a semicolon ("at most 2 at the start of your turn;
+    the rest wait in order"), so it is the one clause in the tree that proved
+    the trap: read to the first semicolon ANYWHERE it returns half a literal,
+    the clause measures as nothing, and the capped face sits outside every
+    ceiling -- the silence `EB-343` was filed on. `_consts` is literal-aware
+    since `EB-777` and would answer this correctly too; the explicit read
+    stays because the sentence is a *format* string this file composes rather
+    than a clause it appends, and because a fixture that pins the trap is
+    worth keeping pointed at the one string that sprang it.
     """
     if not _CAP_SENTENCE:
         src = read(MOD / "Powers" / "Prototype" / "KokomiPlan.cs")
@@ -488,6 +561,105 @@ def _plan_cap_sentence() -> str:
     return _CAP_SENTENCE[0]
 
 
+#: `EB-777`. The start of a Localization row: `("description",` or
+#: `("smartDescriptionWhatever",`. Where the body ENDS is not a regex's
+#: question -- see `loc_bodies`.
+LOC_MARKER = re.compile(r'\("(description|smartDescription\w*)",')
+
+
+@dataclass(frozen=True)
+class LocFace:
+    key: str
+    body: str
+    start: int
+    #: `row` measured here, `grid` rebuilt by the `ProtoBombPower` block
+    #: below, `unparsed` -- a face nothing measures, which is a finding.
+    status: str
+
+
+def loc_bodies(src: str) -> list[LocFace]:
+    """Every Localization row in `src`, body scanned rather than matched.
+
+    `EB-777`, and it is `tip_rows`' trap one surface over. The old matcher ran
+    `[^;)\\n]` to a `),\\n` terminator, so a body was allowed to contain
+    anything EXCEPT a semicolon -- which meant a face whose prose used one
+    matched nothing at all and was never measured against its ceiling. A
+    missing row is silent here, exactly like the missing hover tip `EB-272`
+    was filed on, and `ProtoBombPower.cs` carries a comment telling authors
+    not to type a semicolon in player-facing prose because of it.
+
+    Widening the character class is not the fix, because the class was doing
+    two jobs: excluding `;` kept a body from running off the end of its own
+    statement when the row had no `),\\n` after it. So the boundary is found
+    the way C# finds it -- count parentheses, skip string literals and line
+    comments, and stop at a `;` that is really a statement terminator.
+    """
+    out: list[LocFace] = []
+    n = len(src)
+    for m in LOC_MARKER.finditer(src):
+        start = m.end()
+        depth = 1                    # the `(` in front of the key is open
+        i = start
+        body: str | None = None
+        while i < n:
+            c = src[i]
+            if c == '"':
+                i = skip_literal(src, i)
+                continue
+            if c == "/" and src[i + 1:i + 2] == "/":
+                while i < n and src[i] != "\n":
+                    i += 1
+                continue
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+                if depth == 0:
+                    body = src[start:i]
+                    break
+            elif c == ";" and depth == 1:
+                break                # a statement ended inside the tuple
+            i += 1
+        if body is None:
+            out.append(LocFace(m.group(1), "", start, "unparsed"))
+        elif "Face(" in body:
+            out.append(LocFace(m.group(1), body, start, "grid"))
+        else:
+            out.append(LocFace(m.group(1), body, start, "row"))
+    return out
+
+
+#: `EB-777`'s POSITIVE COUNT. One entry per Localization row the scanner met,
+#: as `(file, key, status)`. A ceiling that is never reached fails nothing, so
+#: the gate also has to answer "how many faces exist" -- `loc_audit_findings`
+#: turns an `unparsed` marker into a failure and `main` prints the arithmetic.
+#: Appended to by `loc_rows`, which is called once per surface set, so the
+#: tally is reset at the top of `prototype_rows` / `shipped_rows`.
+LOC_TALLY: list[tuple[str, str, str]] = []
+
+
+def loc_audit_findings() -> list[str]:
+    """A Localization row the scanner could not read is a face nobody measures."""
+    return [f"{where} [{key}]: UNMEASURED -- a Localization row this lint "
+            f"could not read to its own `)`. No ceiling was applied to it."
+            for where, key, status in LOC_TALLY if status == "unparsed"]
+
+
+def loc_counts() -> tuple[int, int, int]:
+    """(markers seen, rows measured, rows rebuilt as the Bomb grid)."""
+    return (len(LOC_TALLY),
+            sum(1 for _w, _k, s in LOC_TALLY if s == "row"),
+            sum(1 for _w, _k, s in LOC_TALLY if s == "grid"))
+
+
+def loc_count_line() -> str:
+    """The positive count. `EB-777`: a skip has to be VISIBLE, not merely absent."""
+    seen, measured, grid = loc_counts()
+    return (f"  localization rows scanned: {seen} = {measured} measured "
+            f"+ {grid} composed by the Bomb grid "
+            f"+ {seen - measured - grid} unmeasured")
+
+
 def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
     rows: list[Row] = []
     for path in paths:
@@ -496,18 +668,12 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
         src = re.sub(r"^\s*//.*$", "", src, flags=re.M)
         where = str(path.relative_to(REPO))
         consts = _consts(src)
-        # `[^;)\n]` and `\n` are disjoint on purpose. Written as `[^;)]|...|\n`
-        # the two branches BOTH matched a newline, so every line inside a
-        # localization body doubled the paths the lazy quantifier had to
-        # retry, and a 50-line body (KurageSummonPower's two faces) took
-        # longer than the rest of the lint put together. Same language, one
-        # way to match each character.
-        for key, expr in re.findall(
-                r'\("(description|smartDescription\w*)",'
-                r'\s*((?:[^;)\n]|\n|\)(?!,\n))*?)\),\n', src):
-            if "Face(" in expr:
+        for face in loc_bodies(src):
+            LOC_TALLY.append((where, face.key, face.status))
+            if face.status != "row":
                 continue
-            classes = re.findall(r"class (\w+)", src[:src.find(expr)])
+            key, expr = face.key, face.body
+            classes = re.findall(r"class (\w+)", src[:face.start])
             cls = classes[-1] if classes else path.stem
             expr = pick_branch(expr, branch)
             text = csharp_text(expr)
@@ -644,6 +810,7 @@ def exempt_card_ids() -> set[str]:
 
 
 def prototype_rows() -> list[Row]:
+    LOC_TALLY.clear()
     return (card_rows(MOD / "Cards" / "Prototype" / "Generated", IN_SCOPE)
             + tip_rows()
             + loc_rows(sorted((MOD / "Powers" / "Prototype").glob("*.cs")), "power", "proto")
@@ -654,6 +821,7 @@ def prototype_rows() -> list[Row]:
 
 
 def shipped_rows() -> list[Row]:
+    LOC_TALLY.clear()
     rows: list[Row] = []
     for gen in (MOD / "Cards" / "Generated", MOD / "Cards" / "Kokomi" / "Generated",
                 MOD / "Cards" / "Furina" / "Generated"):
@@ -717,8 +885,60 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
 
 # --- the self-test: seen to FAIL on a fixture -------------------------------------
 
+#: `EB-777`'s FIXTURE. A `Localization` body whose prose carries a SEMICOLON,
+#: written the way the tree writes one. Under the old matcher this file
+#: produced NO rows at all -- not a short row, not a wrong row, nothing -- and
+#: `ProtoBombPower.cs` carries a comment telling authors never to type a
+#: semicolon in player-facing prose because of it. The fixture is over the
+#: power ceiling on purpose: "it is read" and "it is MEASURED" are two claims,
+#: and a fixture that is comfortably short only proves the first.
+SEMICOLON_FIXTURE = '''namespace Fixture;
+
+public sealed class SemicolonFacePower : PowerModel, ILocalizationProvider
+{
+    private const string Tail = " it is spent; nothing refunds it.";
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Semicolon"),
+        ("description",
+            "At the start of your turn this pays [blue]{Amount}[/blue] "
+          + "[gold]Block[/gold]; whatever is left over is carried; and when "
+          + "the turn after it ends, the whole pile goes off at once."
+          + Tail),
+    };
+}
+'''
+
+
 def self_test() -> list[str]:
     bad: list[str] = []
+    # `EB-777`, the SOURCE half of the self-test: every fixture below is a
+    # `Row` handed straight to the checks, which tests the ceilings and says
+    # nothing about whether a face reaches them. This one goes through the
+    # parser.
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "SemicolonFacePower.cs"
+        path.write_text(SEMICOLON_FIXTURE, encoding="utf-8")
+        faces = [f for f in loc_bodies(re.sub(r"^\s*//.*$", "",
+                                              path.read_text(encoding="utf-8"),
+                                              flags=re.M))
+                 if f.status == "row"]
+        if len(faces) != 1:
+            bad.append(f"self-test: the semicolon face parsed as {len(faces)} "
+                       "row(s), not 1")
+        else:
+            text = render(csharp_text(faces[0].body))
+            if ";" not in text:
+                bad.append("self-test: the semicolon face lost its semicolon")
+            if len(text) <= CEILING["power"]:
+                bad.append("self-test: the semicolon fixture is under the "
+                           "power ceiling and proves nothing")
+            probe = [Row("power", "fx_semicolon", csharp_text(faces[0].body),
+                         "fixture")]
+            if not any("> 125" in f for f in findings_for(probe, {}, gate=False)):
+                bad.append("self-test: the semicolon face was not measured "
+                           "against the power ceiling")
     fixture = [
         Row("card", "fx_long", "Deal 6 damage to ALL enemies, then choose one for the fight. "
             "White: enemies take 50% more damage from reactions. Dark: your Pyro Attacks that "
@@ -775,14 +995,15 @@ def main(argv: list[str]) -> int:
         bad = self_test()
         for line in bad:
             print(line)
-        print(f"self-test: 12 bad + 4 clean case(s), {len(bad)} failure(s)")
+        print("self-test: 12 bad + 4 clean case(s) + the EB-777 semicolon "
+              f"face, {len(bad)} failure(s)")
         return 1 if bad else 0
     if "--shipped" in argv:
         rows = shipped_rows()
         exempt = exempt_card_ids()
         scoped = [r for r in rows if r.ident.split("#")[0] not in exempt]
-        found = findings_for(scoped, SHIPPED_EXCEPTIONS,
-                             skip_spellings=SHIPPED_SKIP_SPELLINGS)
+        found = loc_audit_findings() + findings_for(
+            scoped, SHIPPED_EXCEPTIONS, skip_spellings=SHIPPED_SKIP_SPELLINGS)
         for line in found:
             print(line)
         print("text-conventions (shipped): exceptions carried "
@@ -790,6 +1011,7 @@ def main(argv: list[str]) -> int:
         print("\n".join(f"  {k}: {v}" for k, v in SHIPPED_EXCEPTIONS.items()))
         print(f"  spellings not read here: {sorted(SHIPPED_SKIP_SPELLINGS)} "
               "-- R249 pick 2(a), the shipped kit keeps 'detonates'")
+        print(loc_count_line())
         print(f"shipped report: {len(scoped)} strings read, "
               f"{len(rows) - len(scoped)} Klee/Kokomi card faces skipped "
               f"(R249 pick 1(b)), {len(found)} finding(s) "
@@ -799,12 +1021,13 @@ def main(argv: list[str]) -> int:
     if "--census" in argv:
         census(rows)
         return 0
-    found = findings_for(rows, EXCEPTIONS)
+    found = loc_audit_findings() + findings_for(rows, EXCEPTIONS)
     for line in found:
         print(line)
     exceptions = [f"  {k}: {v}" for k, v in EXCEPTIONS.items()]
     print("text-conventions: exceptions carried (each over its ceiling for the reason given):")
     print("\n".join(exceptions))
+    print(loc_count_line())
     if found:
         print(f"{len(found)} finding(s). The rules: docs/current/text-conventions.md")
         return 1
