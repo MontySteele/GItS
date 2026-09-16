@@ -10411,6 +10411,34 @@ def _authored_face_var(card: dict, eff: dict, plain: str) -> str:
     return plain
 
 
+def _in_face_order(card: dict, entries: list) -> list:
+    """`EB-729`. Branch entries sorted by where the AUTHORED face prints them.
+
+    `_authored_face_with_tokens` walks the yielded run with a cursor that only
+    moves forward, so two numbers yielded out of print order cost the second
+    one its swap. A conditional's two arms have no fixed print order on an
+    authored face -- "deal 7 ... deal 13 instead" prints the else arm first and
+    "If ...: deal 13. Otherwise: deal 7." prints the then arm first -- so the
+    order is READ off the row's own text.
+
+    Stable, and a no-op in every case that does not need it: fewer than two
+    entries, no `description:`, or a literal the face does not print (its
+    position is then `len(text)`, which keeps it behind the ones that are
+    printed without reordering those).
+    """
+    if len(entries) < 2:
+        return entries
+    text = card.get("description") or ""
+    if not text:
+        return entries
+
+    def _at(entry) -> int:
+        hit = re.search(rf"(?<!\d){entry[2]}(?!\d)", text)
+        return hit.start() if hit else len(text)
+
+    return sorted(entries, key=_at)
+
+
 def _authored_face_numbers(card: dict):
     """Every number a row's AUTHORED face is expected to print, in print
     order, as `(delta_key_or_None, var_name_or_None, literal)`.
@@ -10501,14 +10529,35 @@ def _authored_face_numbers(card: dict):
             # here by R252's Fire Safety, the first authored row to carry the
             # key. The swap TEXT is `_branch_amount_text`'s, so the two face
             # paths cannot disagree about what an upgraded branch looks like.
+            #
+            # `EB-729`: BOTH ARMS, IN THE ORDER THE FACE PRINTS THEM. A
+            # `conditional_damage` / `conditional_block` delta moves EVERY
+            # matching clause (tier0 `upgrades.apply` bumps them `everywhere`),
+            # so a conditional carrying a number in each arm has TWO numbers to
+            # hole. The walk below places its cursor strictly forward, and the
+            # rendered path's order -- then, then else -- is not the order an
+            # authored face has to print them in: a row that writes "Deal 7
+            # damage. If an enemy intends to attack: deal 13 instead." prints
+            # the ELSE number first, so yielding the then-arm first spent the
+            # cursor on 13 and left the 7 bare. The card then dealt 10 and
+            # printed 7, which is the `EB-288` / `EB-291` defect class again.
+            #
+            # The order is read off the AUTHORED TEXT rather than assumed: the
+            # arm whose literal appears earlier is yielded first. With no
+            # authored face (`description:` absent) nothing here is consulted
+            # at all -- the rendered path builds its own text -- so the
+            # fallback is the rendered path's own then/else order.
+            arms = []
             for arm in ("then", "else"):
                 for inner in eff.get(arm) or []:
                     key = next((k for k, match in _CONDITIONAL_DELTA_OPS.items()
                                 if match(inner)), None)
                     if key is None:
                         continue
-                    yield key, _branch_amount_text(card, inner, key), \
-                        int(inner["amount"])
+                    arms.append((key,
+                                 _branch_amount_text(card, inner, key),
+                                 int(inner["amount"])))
+            yield from _in_face_order(card, arms)
     # EB-315. THE PLAN LINE'S NUMBERS, AFTER THE NOW-LINE'S, because that is
     # the order a Plan row's own face prints them in ("Deal 6 damage. Plan:
     # Deal 10 damage.") and the walk below places its cursor by that order. A
