@@ -73,7 +73,7 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
   (`lint_text_encoding.py:4-16`, `:33-36`); binary I/O and `PIL.Image.open` are
   the only exemptions (`:38-41`, `:52`). Per-file bare-`open` counts are a debt
   ledger that may only shrink (`tier0/tests/test_encoding_gate.py:30-57`).
-- **`art/plan.tsv` is UTF-8 and CRLF**: read with `encoding="utf-8"`,
+- **`art/plan.tsv` is UTF-8, LF in the index** (`.gitattributes` normalises; older notes said CRLF): read with `encoding="utf-8"`,
   `newline=""`, and `rstrip("\r\n")` on the whole line, or the last column
   (`register`) carries a `\r` and L3/L4 silently stop matching
   (`art_fetch.py:38-58`).

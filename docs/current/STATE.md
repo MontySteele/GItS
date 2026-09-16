@@ -73,8 +73,8 @@ hand-written kit machinery.
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**. Deploy stamps
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3352+proto`**
-(2026-09-16, main after #530, arms `klee,companion,kokomi,furina-stage,teyvat`:
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3480+proto`**
+(2026-09-16, main after #562, arms `klee,companion,kokomi,furina-stage,teyvat`:
 the prototype rows behind `-p:PrototypeCards=true`, the Stage behind
 `-p:FurinaStage=true`, the Teyvat frame behind `-p:TeyvatFrame=true` and ON
 for the deploy proofs, OFF again on the next calibration deploy; the reframe
@@ -214,8 +214,12 @@ ships OFF in a release package).
   (`review/records/teyvat-proofs-4-2026-09-15.md`, `-5-`); and acts 2 and 3
   on all four faces — map header, combat background and real fights, rest
   site and dressed events — reached through the act-skip op
-  (`review/records/teyvat-proofs-7-2026-09-16.md`). Open rows: `EB-767`,
-  `EB-769`, `EB-770`, all built with live looks owed on the next deploy. Kickoff
+  (`review/records/teyvat-proofs-7-2026-09-16.md`); and on the `0.2.3480`
+  deploy the Punch-Off at both speeds, the four unfinished event pages, the
+  dressed Slippery Bridge's card name and a dressed-id force
+  (`review/records/teyvat-proofs-8a-2026-09-16.md`). Nothing parked;
+  the Slippery Bridge price literal and the potions event per arm are open
+  rows. Kickoff
   `review/ruled/teyvat-run-frame-2026-09-14.md`.
 
 ## Open [USER] pile

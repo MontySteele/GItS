@@ -13,6 +13,6 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
 ```
 
-`art/plan.tsv` is UTF-8 + CRLF — read with `encoding="utf-8", newline=""` and
+`art/plan.tsv` is UTF-8, LF in the index (`.gitattributes` normalises) — read with `encoding="utf-8", newline=""` and
 `rstrip("\r\n")`, or the last column silently stops matching. Depth:
 `docs/current/art/` and `docs/current/atlas/tools.md`.
