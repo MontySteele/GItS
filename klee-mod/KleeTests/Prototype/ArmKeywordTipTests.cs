@@ -205,7 +205,14 @@ public class ArmKeywordTipTests
         // unnecessary tooltip text that could be trimmed"). Every rule read
         // back here is still on the word; what left is the prose around them.
         Assert.Contains(" a turn, and goes off when [gold]Set off[/gold] "
-                      + "or as a [gold]Mine[/gold]. ", printed);
+                      + "or as a [gold]Mine[/gold]", printed);
+        // `EB-287` (the live look of 2026-09-16): THE MERGE. It was stated on
+        // the enemy BADGE of a pile that already exists and nowhere a reader
+        // who has not built one could meet it -- and it is the rule every
+        // Bomb plan turns on. A CLAUSE and not a sentence, because the tip is
+        // at the base game's four-sentence cap and a fifth would displace one
+        // of the ruled findings read back below.
+        Assert.Contains("; a second Bomb joins the first. ", printed);
         // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
         // and it reads two things off the target -- Vulnerable, and whichever
         // power sets the lowest damage cap -- so "takes the enemy's debuffs"

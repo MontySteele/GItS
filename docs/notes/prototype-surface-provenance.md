@@ -3029,6 +3029,23 @@ Ovation* and *Let the People Rejoice* are cards this kit is a rewrite of, and
 the arm swaps a shipped row out at the same door, so no run can hold both. The
 reframe's own Rare took the same liberty for the same reason.
 
+**`Salon Début` became `Take the Stage` (live look 8b, 2026-09-16).** The
+paragraph above is the rule and this is the pair that broke it. The shipped
+`Salon Début` and the Stage's were both live ids on `0.2.3480+proto` and both
+printed the same title — `Salon Début (1)` / `Salon Début (2)` with one of
+each in hand — held apart only by `EB-736`'s OFFER filter. An offer filter is
+not a rule about a hand: a `give_card`, a Conscript or any later route puts a
+shipped Salon row beside the Stage's and `EB-739`'s defect recurs with this
+pair. So the Stage's row is renamed, which is exactly the repair `EB-739`
+made to Standing Ovation, and an E default under R179: the brief's own card
+table says "Names are provisional", the id (`proto_fs_salon_debut`) does not
+move, and `lint_unique_names` is the proof it is cosmetic. **Not "Curtain
+Up"**, the first name suggested: `Curtain Rise` is the card directly beneath
+it in the same three-card starter kit, and two starters called Curtain Rise
+and Curtain Up would be the legibility defect this rename exists to remove,
+one word over. *Take the Stage* is the brief's own phrase for what the card
+does — a performer joins the stage — and shares no word with a live title.
+
 **Why the two-branch faces carry two `{IfUpgraded:show:…}` holes.** Every Spend
 rider is printed as `conditional {if: stage_occupied, then: [stage_spend,
 <big>], else: [<base>]}`, which is rule 8's two sentences as two branches. A

@@ -482,6 +482,27 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature owner, int amount,
         CardModel? cardSource, SalonMember? member)
     {
+        // `EB-745` CAVEAT 1 (live look 8b, 2026-09-16). THE GRANT SITE, AND
+        // NOT ONLY THE OFFER FILTER. Under the Stage arm a hand-granted
+        // shipped `Salon Début` still put `Salon Member 3 (buff)` on Furina,
+        // with the whole shipped Encore glossary riding on it. `EB-736` hides
+        // the shipped rows from an OFFER, and an offer filter is not a rule
+        // about what the machinery does when such a row reaches the board
+        // anyway -- which a `give_card`, a Conscript or any later route can
+        // do.
+        //
+        // THE SAME GATE THE METERS TAKE
+        // (<see cref="FurinaResources.StageRetiresTheShippedMeters"/>): the
+        // brief retires the Salon beside Encore and the Fanfare counter
+        // (sec.2's table, R269), so the honest place to say so is the one
+        // grant door every leg reaches rather than each surface that draws
+        // it. It answers 0 -- nobody deployed -- rather than throwing,
+        // because a card already in flight is past refusing and the arm's job
+        // is only that it changes nothing.
+        //
+        // FALSE IN A RELEASE BUILD BY CONSTRUCTION, for that method's reason.
+        if (FurinaResources.StageRetiresTheShippedMeters(owner)) return 0;
+
         var company = CompanyFor(owner);
         var replacements = 0;
         for (var i = 0; i < amount; i++)

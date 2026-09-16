@@ -415,8 +415,30 @@ public static class FurinaResources
     /// without the quarantine property there is nothing to ask and the gauge
     /// applies to every Furina exactly as it ships.
     /// </summary>
+    /// <remarks>
+    /// `EB-745` CAVEAT 2 (live look 8b, 2026-09-16). AND THE STAGE IS THE
+    /// SECOND ARM THAT RETIRES IT. `EB-726` took the reframe out of the tree,
+    /// which left this body a bare <c>IsFurina</c> -- so under
+    /// <c>-p:FurinaStage=true</c> the shipped ribbon drew above her all run
+    /// (`0/70`, later `15/70`, on a board where no shipped card had been
+    /// played), which is the same 0/70 ribbon `EB-365` was filed on one arm
+    /// over. The Stage brief has no Burst bar in it at all (R269, rule 11:
+    /// her own bars are touched by nothing in the kit), so the meter is
+    /// retired there and the gauge goes with it.
+    ///
+    /// THE DISPLAY AND NOT THE RESOURCE, deliberately: this method answers
+    /// "should the overhead gauge exist", and a bar nothing feeds is the
+    /// whole of the defect. Whether anything still WRITES Burst under the arm
+    /// is a separate question with a separate home
+    /// (<see cref="StageRetiresTheShippedMeters"/>), and the wire listing a
+    /// registered-and-never-granted meter at 0 is what round two read as
+    /// MEETING `EB-745` rather than breaking it.
+    /// </remarks>
     public static bool BurstGaugeApplies(Creature creature)
     {
+#if PROTOTYPE_CARDS
+        if (FurinaStage.LiveFor(creature)) return false;
+#endif
         return IsFurina(creature);
     }
 

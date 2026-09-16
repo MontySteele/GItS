@@ -31,19 +31,42 @@
 //
 //   (2) NO COMBAT IS STANDING IN ITS OWN TEARDOWN. `CurrentCombatId` is
 //       `_turnState?.Id`, and `CombatManager.Reset` drops `_turnState`
-//       wholesale when the run leaves the room -- so a non-null id means a
-//       combat object still exists. Paired with `IsOverOrEnding` (the game's
-//       own "this combat has ended or is ending, use this rather than
-//       `IsEnding` or `!IsInProgress`, which return unexpected results at
-//       boundary points") that pair is precisely the window between the last
-//       monster dying and the room being torn down: the kill screen.
+//       wholesale -- so a non-null id means a combat object still exists.
+//       Paired with `IsEnding` -- the game's own "combat is in progress but
+//       all the enemies are dead and nothing is stopping it from ending, or
+//       a pending loss is waiting to be processed" -- that pair is precisely
+//       the window between the last monster dying and the room being torn
+//       down: the kill screen.
 //
-// So the unsettled states are "an action is running" and "a dead combat has
-// not been dropped yet", and everything else -- the map, a shop, a rest, an
-// event, and a live fight sitting in the play phase with an empty queue -- is
-// settled. A live fight IS settled by this test, deliberately: mid-turn with
-// nothing executing, `CurrentHp` is the number the player is on, and a flag
-// that cried "provisional" through every combat would be a flag nobody reads.
+// CLAUSE (2) WAS `IsOverOrEnding` AND THAT WAS TOO WIDE (proofs-8a, PR #573).
+// Its finding: `hp_settled` was FALSE on 26 of 26 post-combat map, rewards
+// and card-reward reads, and true only on the event, treasure and card-select
+// screens that never follow a fight. The reason is written into this file's
+// own first draft -- "off the map the first half is false" -- and it is not
+// true: `Reset` runs when the run leaves the ROOM, not when the fight ends,
+// so `CurrentCombatId` is still non-null all the way across the rewards
+// screen and onto the map. And `IsOverOrEnding` is `IsEnding || !IsInProgress`
+// (decompiled), so the moment `IsInProgress` goes false it is true and STAYS
+// true for every screen until the next `SetUpCombat`. Two facts that both
+// linger are not a window; they are a latch, and the flag the page was given
+// to stop hedging hedged everything instead.
+//
+// `IsEnding` IS THE HALF THAT DOES NOT LINGER: it is false unless a
+// turn state is IN PROGRESS with its enemies dead (or a loss pending), which
+// is the kill screen and is over the moment the combat stops being in
+// progress. The window `EB-676` was filed on is inside it, and the
+// post-combat screens are outside it. The boundary-point warning the game
+// attaches to `IsEnding` is about using it ALONE to decide "should I skip
+// this effect"; here it is paired with a live id and read only as "is this
+// fight in the act of ending", which is the question it answers exactly.
+//
+// So the unsettled states are "an action is running" and "a live combat is in
+// the act of ending", and everything else -- the map, the rewards screen, a
+// shop, a rest, an event, and a live fight sitting in the play phase with an
+// empty queue -- is settled. A live fight IS settled by this test,
+// deliberately: mid-turn with nothing executing, `CurrentHp` is the number
+// the player is on, and a flag that cried "provisional" through every combat
+// would be a flag nobody reads.
 //
 // FAIL CLOSED. Every caller-supplied fact this file cannot read for itself
 // arrives as a bool; `McpMod.StateBuilder.cs` reads them inside a try/catch
@@ -112,9 +135,12 @@ public static class GitsSettledHp
     /// `actionInFlight` is its `CurrentlyRunningAction != null`,
     /// `combatStateStands` is `CombatManager.Instance.CurrentCombatId != null`
     /// (the combat's turn state has not been dropped by `Reset`), and
-    /// `combatOverOrEnding` is `CombatManager.Instance.IsOverOrEnding`.</summary>
+    /// `combatEnding` is `CombatManager.Instance.IsEnding` -- NOT
+    /// `IsOverOrEnding`, which latches true for every screen after a fight
+    /// (proofs-8a; the block at the top of this file has the whole
+    /// argument).</summary>
     public static Verdict Decide(bool actionQueueRunning, bool actionInFlight,
-                                 bool combatStateStands, bool combatOverOrEnding)
+                                 bool combatStateStands, bool combatEnding)
     {
         // THE QUEUE FIRST, because it is the clause that holds on every screen
         // in the game and the one a reader can check against the page: an
@@ -122,10 +148,13 @@ public static class GitsSettledHp
         if (actionQueueRunning || actionInFlight)
             return new Verdict(false, ActionRunningReason);
 
-        // THE KILL SCREEN. A combat object that still exists AND has ended is
-        // the r26 window and nothing else: during a live fight the second half
-        // is false, and off the map the first half is.
-        if (combatStateStands && combatOverOrEnding)
+        // THE KILL SCREEN. A combat object that still exists AND is in the
+        // act of ending is the r26 window and nothing else: during a live
+        // fight with enemies alive the second half is false, and once the
+        // fight is over -- rewards, map, everything after -- it is false
+        // again. Both halves have to be live at once, which is what the
+        // first draft's `IsOverOrEnding` could not say.
+        if (combatStateStands && combatEnding)
             return new Verdict(false, CombatTearingDownReason);
 
         return new Verdict(true, "");

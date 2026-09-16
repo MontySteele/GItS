@@ -58,7 +58,16 @@ def test_feints_face_prints_both_branches_as_folded_vars():
 
     src = (GENERATED / "ProtoKkFeint.cs").read_text(encoding="utf-8")
     assert face in src
-    assert 'new FoldedDamageVar("PlainDamage", 5m, ValueProp.Move)' in src
+    # `EB-670` (the live look of 2026-09-16) MOVED THE HEADLINE'S CLASS and
+    # nothing else: on a morning a Plan HAD carried out, the else-arm number
+    # was the first number a reader met and was not the number the card would
+    # deal. `PlanCarriedDamageVar` reads the same ledger flag the emitted
+    # `OnPlay` reads and, where it is set, folds against the SIBLING var's
+    # base -- which is why `BranchDamage` is still declared here, still on its
+    # own upgrade key. Both printed numbers stay on the face and both stay
+    # live; the fold itself is still `FoldedDamageVar`'s, delegated.
+    assert ('new PlanCarriedDamageVar("PlainDamage", 5m, "BranchDamage", '
+            'ValueProp.Move)') in src
     assert 'new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move)' in src
 
 

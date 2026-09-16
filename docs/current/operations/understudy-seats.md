@@ -127,6 +127,72 @@ The decision halves are compiled headlessly:
 `vendor/STS2_MCP/gits/GitsSkipAct.cs`
 (`klee-mod/KleeTests/GitsSkipActTests.cs`).
 
+### Understudy — the three RUN GRANTS (live look 8b / proofs-8a, 2026-09-16)
+
+```
+python -c "from understudy import bridge; print(bridge.give_relic('THE_BOOT', why='EB-752'))"
+python -c "from understudy import bridge; print(bridge.give_potion('FLEX_POTION', why='EB-684'))"
+python -c "from understudy import bridge; print(bridge.give_gold(100, why='RELIC_TRADER gate'))"
+```
+
+The `debug_state` op list is now **`set_resource`, `set_energy`, `set_hp`,
+`set_block`, `set_power`, `clear_hand`, `hover`, `unhover`,
+`force_next_event`, `skip_act`, `give_relic`, `give_potion`, `give_gold`** —
+the first six write a combat board, `hover`/`unhover` write nothing at all,
+the next two write a RUN, and the last three put a THING in the run.
+
+**Why they exist.** Three built rows came back NOT DONE from the live look for
+one reason, and it was not the rows: `EB-752` (The Boot), `EB-684` (Flex
+Potion) and `EB-116` (Pael's Eye) each need an item in the run, and this route
+had no way to put a relic or a potion in front of anybody. A row whose
+acceptance costs a relic roll is a row that waits for luck.
+
+**Each is the game's own command** — `RelicCmd.Obtain(relic.ToMutable(),
+player)` and `PotionCmd.TryToProcure(potion.ToMutable(), player, slot)`, the
+pair the game's own dev console reaches through `RelicConsoleCmd` and
+`PotionConsoleCmd` — so the relic's `AfterObtained`, the potion's
+`Hook.ShouldProcurePotion` and both run-history rows run exactly as they run
+on a drop. Nothing is reimplemented.
+
+**Ids, exactly.** The wire id (`THE_BOOT`, `FLEX_POTION`) first, the exact
+printed title second, and a spelling that resolves to neither is REFUSED with
+the build's own ids printed back — `give_card`'s rule and its reason: a
+scenario that silently got the nearest relic is a scenario whose finding is
+about the wrong item. `give_potion` takes an optional `slot`; `-1`, the
+default, is the game's own "first free slot".
+
+**What they refuse.** No run, multiplayer, an unknown id, and — for
+`give_relic` — a non-stackable relic the player already holds, because
+`RelicCmd.Obtain` appends unconditionally and a second grant would put two of
+it in the inventory, a board the game cannot produce. A FULL BELT is refused
+by the game rather than by the endpoint: `TryToProcure` answers
+`success: false` a frame later, so `give_potion` reports `queued: true` and
+the next state is where a caller reads whether the potion arrived.
+
+**RNG-neutral on the spot, not on the run, and it says so.** A grant rolls
+nothing, spends no pity counter and moves no floor roll — which is what makes
+it unlike `skip_act`. But a relic is a standing rule and a potion is a slot,
+and later rolls read both: `EventModel.IsAllowed` asks about relic and potion
+counts, and obtaining a non-stackable relic removes it from the grab bag, so
+the next drop's pool is one smaller. Nothing read after a grant is comparable
+to a run that was not given one — which is what `bridge.GRANT_GUARDRAIL`, on
+every response, already says.
+
+**`give_gold` is the third, and its absence was a wall** (proofs-8a, PR #573).
+`RELIC_TRADER` (100 gold and five tradable relics), `RANWID_THE_ELDER` (100
+gold, a tradable relic and a potion), `WELCOME_TO_WONGOS` (100 gold in act 2)
+and `EB-459` (Neow's Arcane Scroll roll) are all `EventModel.IsAllowed` gates
+that `force_next_event` refuses on while `run_facts` names the number that is
+short — and nothing on this route could move it. It is `PlayerCmd.GainGold`,
+so `Hook.ModifyGoldGained` runs on it exactly as it runs on a chest and the
+report's `after` is the arithmetic's prediction rather than a promise. It is a
+GRANT and not a set — `amount` is what is ADDED, and a non-positive number is
+refused, because the game's own decrease path writes a LOSS into the run's
+history, which is a fact about the run nobody asked for.
+
+All three are RUN ops rather than combat ops: a relic is granted on a map
+screen as readily as in a fight, so none takes the generic combat refusal.
+
 ### Understudy — staged turns and the blind QA funnel (`EB-149`, R213 step 2)
 
 ```

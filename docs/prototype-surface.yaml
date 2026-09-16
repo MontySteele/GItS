@@ -1643,7 +1643,10 @@
 # --- the starter's three kit cards (sec.12), `basic` so no offer door can
 # reach them: they arrive through `loader._starter_ids` alone. ---
 
-- {id: proto_fs_salon_debut, name: "Salon Début", character: furina,
+# `EB-739`'s second pair: renamed off the shipped `Salon Début`, whose title
+# this one printed. An E default under R179 -- the brief calls its names
+# provisional -- and the reasoning is in the provenance note.
+- {id: proto_fs_salon_debut, name: "Take the Stage", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    replaces: salon_debut,

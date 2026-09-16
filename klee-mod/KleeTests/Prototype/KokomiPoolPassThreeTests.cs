@@ -72,8 +72,16 @@ public class KokomiPoolPassThreeTests
         Assert.Contains("{BranchDamage:diff()}", face);
         Assert.DoesNotContain("{IfUpgraded:show:", face);
         var source = Source("ProtoKkFeint");
-        Assert.Contains("new FoldedDamageVar(\"PlainDamage\", 5m, ValueProp.Move)",
-                        source);
+        // `EB-670` (the live look of 2026-09-16) MOVED THE HEADLINE'S CLASS
+        // and nothing else: on a morning a Plan HAD carried out, the else-arm
+        // number was the first number a reader met and was not the number the
+        // card would deal. `PlanCarriedDamageVar` reads the same ledger flag
+        // the emitted `OnPlay` reads and, where it is set, folds against the
+        // SIBLING var's base -- which is why `BranchDamage` below is still
+        // declared and still takes its own delta. Both printed numbers stay
+        // on the face and both stay live.
+        Assert.Contains("new PlanCarriedDamageVar(\"PlainDamage\", 5m, "
+                      + "\"BranchDamage\", ValueProp.Move)", source);
         Assert.Contains("new FoldedDamageVar(\"BranchDamage\", 10m, ValueProp.Move)",
                         source);
         Assert.Contains("DynamicVars[\"PlainDamage\"].UpgradeValueBy(2m);", source);

@@ -40,7 +40,7 @@ public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Salon Début"),
+        ("title", "Take the Stage"),
         ("description", "Summon a random performer who is not on stage."),
     };
 

@@ -234,7 +234,21 @@ CURSOR_STEPS = ("hover", "unhover")
 # grades one fight; a step that threw the run into the next act would leave
 # every step after it addressing a combat that no longer exists.
 # `understudy/skip_act.py` is its driver.
-NON_SCENARIO_OPS = ("force_next_event", "skip_act")
+#
+# LIVE LOOK 8b / proofs-8a: `give_relic`, `give_potion` and `give_gold` join
+# the list, and for a DIFFERENT reason, which is why it is written here rather
+# than folded into the two above. They are not unreachable -- all three work
+# in a fight as readily as on a map. They are not BOARD writes: a scenario
+# stages a board and grades one fight, and a relic, a potion and a purse are
+# facts about the RUN that outlive the fight and are read by every later floor
+# (`EventModel.IsAllowed` counts relics, potions and gold; obtaining a
+# non-stackable relic takes it out of the grab bag). A step that quietly
+# changed the run under a graded fight is the shape `EB-142`'s guardrail
+# sentence exists to keep visible, and `bridge.give_relic` /
+# `bridge.give_potion` / `bridge.give_gold` are the attended doors instead --
+# `give_card`'s own posture one endpoint over.
+NON_SCENARIO_OPS = ("force_next_event", "skip_act",
+                    "give_relic", "give_potion", "give_gold")
 
 OTHER_STEPS = ("expect", "read", "mark", "wait")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + CURSOR_STEPS + OTHER_STEPS
