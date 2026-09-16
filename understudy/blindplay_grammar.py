@@ -29,7 +29,7 @@ from understudy.blindplay_read import (_blob, _enemies, _entity_id, _fold,
                                        _hand, _int, _number_names, _player,
                                        _potions, _screen, _text)
 from understudy.blindplay_shape import (BlindPlayError, COMBAT_SCREENS,
-                                        SELECT_SCREENS)
+                                        SELECT_SCREENS, UNDRIVEN_EXITS)
 
 
 
@@ -37,7 +37,10 @@ _QUOTED = re.compile(r'"([^"]*)"|“([^”]*)”')
 
 VERBS = ("play", "end turn", "choose", "skip", "go", "buy", "rest",
          "upgrade", "remove", "use potion", "drop potion", "confirm",
-         "proceed")
+         # `EB-396`. `leave` is NOT a synonym for `proceed`: it is the exit
+         # from a screen this tool does not drive, and it is the only verb
+         # that resolves while `observation` reports the screen blocked.
+         "proceed", "leave")
 
 
 @dataclass
@@ -1235,13 +1238,30 @@ def act(state: dict[str, Any], command: str) -> dict[str, Any]:
     st = _screen(state)
     obs = observation(state)
     if obs["blocked"]:
+        # `EB-396`: one verb crosses the block, and only where the screen
+        # declares an exit. A minigame this tool cannot play is still a screen
+        # a run can walk away from, and the r10 seat that could not was left
+        # standing on it with the run alive at 53/77.
+        exit_ = UNDRIVEN_EXITS.get(st)
+        if cmd.verb == "leave" and exit_:
+            return _with_forms(
+                Resolution(True, "leave", dict(exit_["action"]), {}),
+                obs).as_dict()
         # No forms, deliberately: a screen that is not being driven has no
         # command that resolves, and `_with_forms` leaves the sentence alone.
+        # Where it has an exit, `obs["blocked"]` already names it.
         return _with_forms(
             _refuse(f"this screen is not being driven: {obs['blocked']}"),
             obs).as_dict()
 
-    if cmd.verb == "play":
+    if cmd.verb == "leave":
+        # `EB-396`, the other half. Off an undriven screen the word has no
+        # meaning this page can honour, and the honest answer names the verb
+        # that does -- `proceed` walks the screens with a way onward, and its
+        # own refusal below names the rest.
+        res = _refuse("there is nothing to leave here; `proceed` is what "
+                      "walks on from a screen that has a way onward")
+    elif cmd.verb == "play":
         res = (_play(state, cmd) if st in COMBAT_SCREENS
                else _refuse(_not_in_battle(obs)))
     elif cmd.verb == "use potion":

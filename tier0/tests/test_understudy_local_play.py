@@ -674,3 +674,162 @@ def test_a_schema_quoted_mid_thought_is_not_mistaken_for_the_answer(tmp_path):
         _s, summary, wire, _t = _session(tmp_path, stub,
                                          states=[combat_state()])
     assert summary["termination"] == "seat_refused" and wire.posts == []
+
+
+# ========== EB-324: one thread per act, the sealed record carried across =====
+#
+# THE FIND. `local_play` keeps the whole conversation -- deliberately: a blind
+# PLAYER has to have seen the previous board -- at about 850 tokens a turn. The
+# Kokomi r4 run died at turn 77, 66,019 tokens over a 64k slot:
+# `prompt_exceeds_ctx` fired correctly, nothing was truncated, and NO RECORD
+# WAS SEALED, so seventy-six screens of play produced nothing at all. A bigger
+# slot moves that wall and does not remove it -- 128k buys about 150 turns,
+# which is under two acts.
+#
+# THE RULE BUILT HERE is the first of the two the row names, and it is the D
+# default: one thread per act, the tester's own sealed handover carried across
+# the boundary and nothing else.
+
+
+def act_rewards_state(act: int) -> dict:
+    """SYNTHETIC. `rewards_state` with the run's act on it, which is where
+    `run.act` sits on every state the bridge builds during a run."""
+    state = rewards_state()
+    state["run"] = {"act": act, "floor": act * 3}
+    return state
+
+
+def three_act_states() -> list[dict]:
+    return [act_rewards_state(1), act_rewards_state(2), act_rewards_state(3),
+            dict(game_over_state(), run={"act": 3, "floor": 9})]
+
+
+def _three_act_replies() -> list[dict]:
+    """One command per act, a handover at each of the two boundaries, and the
+    run record at the end."""
+    return [_reply(command='choose "Gold"', thinking="act 1"),
+            _reply(record="Act 1: 46/60, no relic, the deck wants a finisher."),
+            _reply(command='choose "Gold"', thinking="act 2"),
+            _reply(record="Act 2: 31/60, took the finisher, out of potions."),
+            _reply(command='choose "Gold"', thinking="act 3"),
+            _reply(record="Three acts on three threads.")]
+
+
+#: The slot these fixtures run in. Small on purpose and sized from the
+#: measured pages below: one act's conversation fits it with room to spare and
+#: all three do not, which is the whole claim `EB-324` makes.
+CHAINED_CTX = 4096
+CHAINED_ANSWER_TOKENS = 256
+
+
+def _chained_session(tmp_path, stub, *, ctx: int,
+                     max_tokens: int = CHAINED_ANSWER_TOKENS):
+    thread = local_play.LocalThread(tmp_path / "turns",
+                                    client=stub.client(ctx=ctx),
+                                    max_tokens=max_tokens)
+    wire = blindplay.ScriptedWire(three_act_states())
+    s = blindplay.Session(thread, wire=wire, session_id="t",
+                          budget=blindplay.Budget(max_actions=10),
+                          log_root=tmp_path)
+    thread.transcript = s.transcript
+    return s, s.run(), wire, thread
+
+
+def test_a_three_act_run_ends_on_a_budget_and_never_on_the_window(tmp_path):
+    """THE ACCEPTANCE SENTENCE, on a fake model. Three acts, a window sized to
+    ONE of them, and the run reaches `game_over` and seals its record --
+    where the un-chained thread would have carried act 1's conversation into
+    act 3 and refused `prompt_exceeds_ctx` with nothing sealed."""
+    with _StubEndpoint(_three_act_replies()) as stub:
+        _s, summary, wire, thread = _chained_session(tmp_path, stub,
+                                                     ctx=CHAINED_CTX)
+        peak = max(local_model.messages_tokens(m["messages"])
+                   for m in stub.requests)
+    assert summary["termination"] == "run_over"
+    assert summary["run_record"] == "Three acts on three threads."
+    assert [p["action"] for p in wire.posts] == ["claim_reward"] * 3
+    # TWO boundaries, not three: entering act 1 is not a crossing, because
+    # there is no previous thread and nothing to hand over.
+    assert [(c["previous"], c["act"]) for c in thread.chains] == [(1, 2),
+                                                                 (2, 3)]
+    assert "prompt_exceeds_ctx" not in json.dumps(_rows(tmp_path))
+    # AND THE SLOT WAS THE BINDING CONSTRAINT, not a formality. The biggest
+    # prompt the run actually sent fits with room for the answer; the same
+    # three acts on ONE thread would have carried every dropped turn into
+    # that same page and would not have fit -- which is the run that died at
+    # turn 77 with nothing sealed.
+    assert peak + CHAINED_ANSWER_TOKENS <= CHAINED_CTX
+    assert peak + sum(c["dropped_tokens"] for c in thread.chains) > CHAINED_CTX
+
+
+def test_the_boundary_drops_the_acts_messages_and_carries_the_handover(
+        tmp_path):
+    """The drop IS the rule: keeping the messages and adding the handover
+    would be the old behaviour plus a paragraph. What crosses is the tester's
+    own words and nothing this module knows."""
+    with _StubEndpoint(_three_act_replies()) as stub:
+        _s, _summary, _wire, thread = _chained_session(tmp_path, stub,
+                                                       ctx=CHAINED_CTX)
+        sent = [m["messages"] for m in stub.requests]
+    assert all(c["dropped_messages"] > 0 for c in thread.chains)
+    # Every request that opens an act carries exactly one message: the page,
+    # with the handover on top of it. The window therefore restarts at each
+    # boundary instead of growing for the whole run.
+    assert max(len(m) for m in sent) <= 3
+    act2_page = sent[2][-1]["content"]
+    assert "What you carried out of Act 1" in act2_page
+    assert "the deck wants a finisher" in act2_page
+    assert "Act 2: 31/60" not in act2_page          # not yet written
+    # And act 1's turns are gone STRUCTURALLY: the act opens on ONE message,
+    # so no earlier board and no earlier answer of its own is in the window at
+    # all -- only the handover, which is inside that one message.
+    assert len(sent[2]) == 1
+    assert thread.chains[0]["dropped_tokens"] > 0
+
+
+def test_a_chained_act_is_sent_the_brief_again(tmp_path):
+    """The new thread has never seen the brief. Sending the page alone would
+    hand a fresh model a board with no rules, no grammar and no guardrail --
+    and it would answer anyway, which is the worst of the three outcomes."""
+    with _StubEndpoint(_three_act_replies()) as stub:
+        _chained_session(tmp_path, stub, ctx=CHAINED_CTX)
+        sent = [m["messages"][-1]["content"] for m in stub.requests]
+    brief = "Everything you know is on the page"
+    # request 0 = act 1's page, 1 = act 1's handover, 2 = act 2's page.
+    assert brief in sent[0] and brief not in sent[1] and brief in sent[2]
+
+
+def test_the_handover_is_in_the_record_and_on_disk(tmp_path):
+    """A reader asking why act 3's tester never mentioned act 1's relic has to
+    be able to see what act 3 was actually told."""
+    with _StubEndpoint(_three_act_replies()) as stub:
+        _s, summary, _wire, _thread = _chained_session(tmp_path, stub,
+                                                       ctx=CHAINED_CTX)
+    chained = summary["chained_sessions"]
+    assert [c["act"] for c in chained] == [2, 3]
+    rows = [r for r in _rows(tmp_path) if r["kind"] == "local_chain"]
+    assert [r["record"] for r in rows] == [
+        "Act 1: 46/60, no relic, the deck wants a finisher.",
+        "Act 2: 31/60, took the finisher, out of potions."]
+    assert (tmp_path / "turns" / "turn-002-handover"
+            / "handover.md").read_text(encoding="utf-8").startswith("Act 1:")
+
+
+def test_the_codex_thread_is_not_chained_and_needs_no_counterpart(tmp_path):
+    """`codex exec resume` keeps the context on the vendor's side, so there is
+    no window here to bound and no `chain_act` on that thread. The loop asks
+    through `getattr`, so a thread without one -- every double, and every test
+    thread written before this existed -- crosses acts exactly as it did."""
+    assert not hasattr(blindplay.CodexThread, "chain_act")
+    assert not hasattr(blindplay.ScriptedThread, "chain_act")
+    thread = blindplay.ScriptedThread(
+        [{"command": 'choose "Gold"', "thinking": "a"},
+         {"command": 'choose "Gold"', "thinking": "b"},
+         {"command": 'choose "Gold"', "thinking": "c"},
+         {"record": "no chaining happened"}])
+    s = blindplay.Session(thread, wire=blindplay.ScriptedWire(
+        three_act_states()), session_id="t",
+        budget=blindplay.Budget(max_actions=10), log_root=tmp_path)
+    summary = s.run()
+    assert summary["termination"] == "run_over"
+    assert not [r for r in _rows(tmp_path) if r["kind"] == "chained"]

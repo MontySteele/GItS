@@ -434,6 +434,10 @@ class Session:
         self._ledger_seen = 0
         self.fight_records: list[str] = []
         self.run_record = ""
+        # `EB-324`: the act this loop last saw, so a boundary can be noticed.
+        # Zero until the wire names one; a wire that never does (every staged
+        # fixture) never crosses a boundary and the chaining never fires.
+        self._act = 0
         self.stopped = ""
         self.started = time.time()
 
@@ -508,6 +512,39 @@ class Session:
         self.transcript.write(kind="record", chars=len(text))
         return text
 
+    def _chain_at_act_boundary(self, state: dict[str, Any]) -> bool:
+        """`EB-324`. A tester that keeps a window of its own gets a new thread
+        at each act, carrying the record it sealed for itself at the boundary.
+
+        Returns True where a thread was chained, which is the caller's signal
+        to send the brief again: the new thread has never seen it.
+
+        THROUGH `getattr`, SO THE LOOP STAYS BACKEND-BLIND. `CodexThread` keeps
+        its context on the vendor's side (`codex exec resume`) and has no
+        window this module could bound, so it declares no `chain_act` and
+        nothing here fires for it -- which is also true of both shipped
+        doubles and of every test thread written before this existed.
+
+        THE ACT IS READ OFF THE WIRE, NOT OFF THE PAGE. `run.act` is on every
+        state the bridge builds during a run; the blind page prints what a
+        player can see and this is bookkeeping, so it never reaches the seat.
+        A wire that names no act (a staged board, a menu) leaves `_act` at its
+        last value and no boundary is crossed.
+        """
+        act_no = _int((state.get("run") or {}).get("act"))
+        if not act_no or act_no == self._act:
+            return False
+        previous, self._act = self._act, act_no
+        chain = getattr(self.thread, "chain_act", None)
+        # The FIRST act is not a boundary: there is no previous thread and
+        # nothing to hand over. Only a real crossing chains.
+        if not previous or chain is None:
+            return False
+        carried = chain(act=act_no, previous=previous)
+        self.transcript.write(kind="chained", act=act_no, previous=previous,
+                              carried_chars=len(carried or ""))
+        return True
+
     # -- the loop ----------------------------------------------------------
 
     def run(self) -> dict[str, Any]:
@@ -568,9 +605,35 @@ class Session:
                                           at="fight_record")
                     break
 
-            if obs["blocked"]:
+            # `EB-396`: BLOCKED WITH A VERB IS NOT A STOP. This was the half
+            # that ended the run: `observation` reported the Crystal Sphere
+            # undriven, the session read that as the end, and a seat sitting
+            # on a live run at 53/77 never got to type anything. A blocked
+            # screen that offers a command is played to the extent of that one
+            # command and the run goes on; `game_over` offers none, so the
+            # `run_over` branch is untouched.
+            if obs["blocked"] and not obs["commands"]:
                 self.stopped = ("run_over" if obs["screen"] == "game_over"
                                 else "tool_blocked")
+                break
+
+            # `EB-324`. BEFORE the page is sent, and after the stop
+            # conditions: an act boundary crossed onto a `game_over` screen
+            # would otherwise spend a handover on a run that is already over.
+            # A chained thread has never seen the brief, so it is sent again
+            # on the act's first page exactly as it was on the run's.
+            try:
+                if self._chain_at_act_boundary(state):
+                    first = True
+            except SeatBudgetExhausted as exc:
+                self.stopped = "budget:rate_limit"
+                self.transcript.write(kind="seat_budget", detail=str(exc),
+                                      at="chain")
+                break
+            except BlindPlayError as exc:
+                self.stopped = "seat_refused"
+                self.transcript.write(kind="seat_error", detail=str(exc),
+                                      at="chain")
                 break
 
             # `EB-229`. A forecast is a PER-TURN pre-commitment, so it is

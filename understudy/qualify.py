@@ -112,6 +112,16 @@ class Threshold:
 
 REGRESSION_KEY = "free_claim_regression"
 
+#: `EB-212`, said in every scorecard that scored no pair. The scorer, its
+#: guard and its fixture pair are built; what is owed is the sealed pairs
+#: themselves, which are game time -- two packets staged from one board with
+#: the telegraph the only difference between them.
+INTENT_PAIRS_OWED = (
+    "no MATCHED-TELEGRAPH PAIR was scored, so the `intent` reading here is "
+    "the single-board self-report check (R223) and not the paired one: the "
+    "scorer exists (`score_intent_pair`) and the sealed pairs are OWED -- "
+    "staging them is game time (EB-212)")
+
 
 def load_battery(path: Path | None = None) -> list[Item]:
     """The SCORED items, and only those: `items:`, never the regression set.
@@ -390,13 +400,164 @@ SCORERS: dict[str, Callable[[Mapping[str, Any], Path], tuple[bool, str]]] = {
 }
 
 
+# ------------------------------------ EB-212: MATCHED-TELEGRAPH PAIRS -------
+#
+# `score_intent` ABOVE IS SELF-REPORT AND THAT IS ITS WHOLE DEFECT. It passes
+# any form whose `q4_changed` is not `False`, so a seat that learns to answer
+# *yes* passes the category without the telegraph ever entering its line, and
+# nothing in the scorecard can tell the two apart. R223 accepted it as what
+# the sealed record could honestly support, and said so.
+#
+# THE SHAPE THAT ANSWERS IT. Two packets IDENTICAL BUT FOR THE ENEMY INTENT,
+# read blind, scored on whether the seat's two LINES DIFFER. An identical line
+# across the pair FAILS: the seat played the same turn against a different
+# telegraph, whatever it wrote in question four. There is nothing to answer
+# *yes* to here -- the evidence is the play.
+#
+# WHAT IS BUILT HERE AND WHAT IS OWED. The scorer, its guard, its fixture pair
+# and the battery hook are built. THE SEALED PAIRS ARE OWED: no telegraph-only
+# pair exists in the record -- every matched pair this funnel has run differs
+# in the ARM under test -- and staging real ones is game time and is not this
+# row's. So the shipped battery carries NO pairs, `load_pairs` reads an empty
+# list off it, and the single-board `intent` items still score the category
+# exactly as R223 left them. When pairs are staged they are added to the
+# battery file and this scorer reads them; the mark they are scored against is
+# [USER]'s to move and is not moved here.
+
+#: The one line a matched pair is ALLOWED to differ on. The packet writes the
+#: telegraph as `- Intent: <mood>, <number>, <sentence>`, and a pair that
+#: differs anywhere else is not a matched pair -- it is two boards, and a line
+#: that differs across it says nothing about the telegraph.
+_INTENT_LINE = re.compile(r"^\s*-\s*Intent:", re.IGNORECASE)
+
+
+@dataclass
+class PairItem:
+    """Two sealed packets that differ only in the enemy's telegraph."""
+
+    id: str
+    left: str
+    right: str
+    why: str = ""
+    category: str = "intent"
+
+
+def load_pairs(path: Path | None = None) -> list[PairItem]:
+    """The `intent_pairs:` list, or an empty one where the file has none.
+
+    OPTIONAL BY DESIGN, not by oversight: the shipped battery has no pairs
+    today and a battery without them is still a valid battery (R223's three
+    categories are unchanged). A file that GROWS a pairs section is validated
+    the same way every other section is.
+    """
+    p = Path(path or BATTERY_FILE)
+    blob = yaml.safe_load(p.read_text(encoding="utf-8"))
+    if not isinstance(blob, Mapping) or "intent_pairs" not in blob:
+        return []
+    raw_list = blob.get("intent_pairs")
+    if not isinstance(raw_list, list):
+        raise BatteryError(f"{p}: 'intent_pairs' is a list of pairs")
+    pairs: list[PairItem] = []
+    for i, raw in enumerate(raw_list):
+        if not isinstance(raw, Mapping):
+            raise BatteryError(f"{p}: intent pair {i} is a mapping")
+        for key in ("id", "left", "right"):
+            if not raw.get(key):
+                raise BatteryError(f"{p}: intent pair {i} has no {key!r}")
+        if str(raw["left"]) == str(raw["right"]):
+            raise BatteryError(
+                f"{p}: intent pair {raw['id']!r} names one turn twice; a pair "
+                "read against itself is guaranteed to produce one line")
+        pairs.append(PairItem(id=str(raw["id"]), left=str(raw["left"]),
+                              right=str(raw["right"]),
+                              why=str(raw.get("why") or "")))
+    return pairs
+
+
+def pair_differences(left_dir: Path, right_dir: Path) -> list[str]:
+    """Every line the two packets differ on that is NOT the telegraph.
+
+    THE GUARD IS THE HALF THAT MAKES THE SCORE MEAN ANYTHING. Two boards that
+    differ in a card, a bank or an enemy's HP produce two different lines for
+    reasons that have nothing to do with the intent, and such a pair would
+    PASS this scorer while proving nothing -- which is precisely the state the
+    sealed record is already in. So a pair whose packets differ anywhere but
+    the `- Intent:` lines is REFUSED rather than scored, and the refusal names
+    the lines.
+    """
+    problems: list[str] = []
+    for side, d in (("left", left_dir), ("right", right_dir)):
+        if not (d / "packet.md").is_file():
+            problems.append(f"the {side} item has no packet.md at {d}")
+    if problems:
+        return problems
+    a = (left_dir / "packet.md").read_text(encoding="utf-8").splitlines()
+    b = (right_dir / "packet.md").read_text(encoding="utf-8").splitlines()
+    if len(a) != len(b):
+        return [f"the packets are {len(a)} and {len(b)} lines long; a matched "
+                "pair differs on the telegraph and nowhere else"]
+    intents = 0
+    for n, (x, y) in enumerate(zip(a, b), 1):
+        if x == y:
+            continue
+        if _INTENT_LINE.match(x) and _INTENT_LINE.match(y):
+            intents += 1
+            continue
+        problems.append(f"line {n} differs and is not a telegraph: "
+                        f"{x.strip()[:60]!r} against {y.strip()[:60]!r}")
+    if not problems and not intents:
+        problems.append("the two packets are identical, telegraph included; "
+                        "there is nothing for a line to be sensitive to")
+    return problems
+
+
+def line_shape(form: Mapping[str, Any]) -> list[tuple[str, str, str]]:
+    """A line as the thing two of them are compared on.
+
+    The card, its target and the mode it was played in -- the three fields
+    that make a play a different play. `thinking`, prose and question four are
+    NOT here: what a seat SAYS about the telegraph is the self-report this
+    scorer exists to stop reading.
+    """
+    out: list[tuple[str, str, str]] = []
+    for play in list(form.get("chosen_line") or []):
+        if not isinstance(play, Mapping):
+            continue
+        out.append((str(play.get("card") or "").strip().casefold(),
+                    str(play.get("target") or "").strip().casefold(),
+                    str(play.get("choose") or "").strip().casefold()))
+    return out
+
+
+def score_intent_pair(left_form: Mapping[str, Any],
+                      right_form: Mapping[str, Any],
+                      left_dir: Path, right_dir: Path) -> tuple[bool, str]:
+    """The pair scorer. An identical line across the pair FAILS."""
+    bad = pair_differences(left_dir, right_dir)
+    if bad:
+        return False, "pair_mismatch: " + "; ".join(bad)
+    left, right = line_shape(left_form), line_shape(right_form)
+    if not left or not right:
+        return False, ("one side of the pair names no cards played; a pair is "
+                       "scored on two lines and there is only one")
+    if left == right:
+        return False, ("intent_insensitive: the same line was played against "
+                       "both telegraphs (" + ", ".join(p[0] for p in left)
+                       + ") -- what question four says about the intent is "
+                       "not evidence that the intent was read")
+    return True, ("the line moved with the telegraph: "
+                  f"{[p[0] for p in left]} against {[p[0] for p in right]}")
+
+
 # -------------------------------------------------------------- the runner --
 
 def run_battery(items: Sequence[Item], *,
                 reader: Callable[[Item], Mapping[str, Any] | None],
                 qa_dir: Path | None = None,
                 seat_id: str = "",
-                threshold: Threshold | None = None) -> dict[str, Any]:
+                threshold: Threshold | None = None,
+                pairs: Sequence[PairItem] = (),
+                ) -> dict[str, Any]:
     """Score every item. `reader` returns the seat's form for one item.
 
     Injected rather than called: the locks run this against a fake seat, and a
@@ -406,6 +567,13 @@ def run_battery(items: Sequence[Item], *,
     `threshold` omitted means the shipped battery's mark (R223). Pass the one
     loaded beside a custom `--battery` file, so the boards and the mark that
     grades them always come from the same place.
+
+    `pairs` (`EB-212`) are MATCHED-TELEGRAPH PAIRS and are scored into the
+    `intent` category beside its single-board items -- the same category,
+    because they ask the same question of the same seat, better. THE SHIPPED
+    BATTERY HAS NONE: `load_pairs` reads an empty list off it and this loop
+    does nothing, so a run today scores exactly what R223 ruled. The sealed
+    pairs are OWED and are game time; see the block above `PairItem`.
     """
     threshold = threshold or load_threshold()
     base = qa_dir or QA_DIR
@@ -428,6 +596,32 @@ def run_battery(items: Sequence[Item], *,
         ok, why = SCORERS[item.category](form, turn_dir)
         rows.append({"item": item.id, "category": item.category,
                      "turn_id": item.turn_id, "passed": bool(ok), "why": why})
+
+    # `EB-212`. ONE ROW PER PAIR, not one per side: the pair is the item, and
+    # scoring each half separately would be the self-report check again with
+    # twice the boards. The row names both turns so a reader can open them.
+    for pair in pairs:
+        left_dir, right_dir = base / pair.left, base / pair.right
+        row = {"item": pair.id, "category": pair.category,
+               "turn_id": f"{pair.left} | {pair.right}", "pair": True,
+               "left": pair.left, "right": pair.right}
+        try:
+            left_form = reader(Item(id=f"{pair.id}:left", category="intent",
+                                    turn_id=pair.left, why=pair.why))
+            right_form = reader(Item(id=f"{pair.id}:right", category="intent",
+                                     turn_id=pair.right, why=pair.why))
+        except Exception as exc:                              # noqa: BLE001
+            rows.append({**row, "passed": False,
+                         "why": f"the seat raised {type(exc).__name__}: {exc}"})
+            continue
+        if not left_form or not right_form:
+            rows.append({**row, "passed": False,
+                         "why": ("the seat filed no form for one side of the "
+                                 "pair -- a refusal is a failed item, never a "
+                                 "skipped one")})
+            continue
+        ok, why = score_intent_pair(left_form, right_form, left_dir, right_dir)
+        rows.append({**row, "passed": bool(ok), "why": why})
 
     per_category = {}
     for cat in CATEGORIES:
@@ -452,6 +646,14 @@ def run_battery(items: Sequence[Item], *,
         "threshold_owner": threshold.owner or THRESHOLD_NOTE,
         "threshold_note": THRESHOLD_NOTE,
         "thin_categories": thin_categories(items),
+        # `EB-212`: SAID IN THE SCORECARD, every run, whether any pair was
+        # scored -- because an `intent` PASS read off self-report alone is a
+        # weaker claim than one read off matched telegraphs, and a reader of
+        # this file should not have to know which it got.
+        "intent_pairs": {
+            "scored": len(pairs),
+            "owed": INTENT_PAIRS_OWED if not pairs else "",
+        },
         "run_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
 

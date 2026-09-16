@@ -1522,6 +1522,10 @@ def cmd_qualify(args) -> int:
     try:
         items = qualify.load_battery(battery_path)
         threshold = qualify.load_threshold(battery_path)
+        # `EB-212`. Empty on the shipped battery, and that is the current
+        # state rather than an oversight: the scorer is built and the sealed
+        # pairs are owed. The scorecard says so on every run that scores none.
+        pairs = qualify.load_pairs(battery_path)
     except (OSError, qualify.BatteryError) as exc:
         print(f"qualify: {exc}", file=sys.stderr)
         return 2
@@ -1558,7 +1562,7 @@ def cmd_qualify(args) -> int:
         return json.loads(Path(record["form"]).read_text(encoding="utf-8"))
 
     card = qualify.run_battery(items, reader=reader, seat_id=args.tester_id,
-                               threshold=threshold)
+                               threshold=threshold, pairs=pairs)
     out = qualify.write_scorecard(card, Path(args.out) if args.out else
                                   land_root / "scorecard.json")
     for row in card["items"]:
@@ -1568,6 +1572,9 @@ def cmd_qualify(args) -> int:
         print(f"  {'PASS' if v['pass'] else 'FAIL'}  {cat:<8} "
               f"{v['passed']}/{v['items']}, mark {v['required']}")
     print(qualify.one_line(card))
+    owed = (card.get("intent_pairs") or {}).get("owed")
+    if owed:
+        print(f"  note: {owed}")
     print(f"scorecard: {out}")
     return 0 if card["pass"] else 1
 

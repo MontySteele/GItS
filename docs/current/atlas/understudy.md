@@ -177,6 +177,19 @@ file the code has left.
   stop the driver. There is no first-button fallback in the file:
   `soak._mechanical_action` has one because a soak must keep moving
   (`soak_screens.py`), and a blind tester must not.
+  **BLOCKED IS NOT STRANDED where the screen declares an EXIT (`EB-396`).**
+  `blindplay_shape.UNDRIVEN_EXITS` maps such a screen to the one verb that
+  leaves it — `crystal_sphere` → `leave` → `crystal_sphere_proceed`, which is
+  `soak_screens._escape`'s own action, so the blind page and the policy bot
+  leave by the same door — the page prints that verb, `act` resolves it though
+  the screen is blocked, and `Session.run` no longer reads a blocked screen
+  that offers a command as the end of the run. The minigame is still not
+  DRIVEN; leaving is not playing. `overlay` and `unknown` declare no exit,
+  because nobody knows one, and are exactly as they were. The event that leads
+  there warns first: `UNDRIVEN_AFTER_EVENT`, keyed on the BASE event id through
+  `understudy/teyvat_ids.py`'s substitution table so the warning follows the
+  event through its Teyvat dressings, puts the note on every non-Proceed
+  option.
 - **The seat's identity fill has an exact limit:** `grader.id`,
   `grader.kind` and `grader.model` only — the three facts about the SEAT that
   a model cannot know. `turn_id`, `packet_sha256`, `designed_these_cards`,

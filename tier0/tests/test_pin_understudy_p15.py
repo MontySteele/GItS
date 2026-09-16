@@ -398,6 +398,142 @@ def test_a_run_that_reads_back_another_seed_files_a_defect(monkeypatch):
     assert "seed_not_honoured" in soak._HARNESS_SIDE
 
 
+# ================================== EB-191: the read-back is retried ======
+#
+# `seed_not_honoured: the run reads back None` fired on 7 of 12 replays in one
+# sitting and an identical retry always worked, so it was a launch race in the
+# session's readiness path and not a turn result -- and it cost a launch and
+# wrote an `ok: false` replay a later reader could have mistaken for a
+# finding. The retry is taken INSIDE the session, in `RunDriver._settle_seed`.
+# These are the four shapes it has to get right.
+
+
+class _ScriptedSeedBridge(ts._FakeBridge):
+    """A bridge whose read-back answers a SCRIPT, one entry per call.
+
+    An entry is a seed, `None` (the window: in tree, no seed yet -- which is
+    exactly what `bridge.seed_read_back` returns at its own deadline), or a
+    `LaneCrossed` instance, which is raised.
+    """
+
+    LaneCrossed = soak.bridge.LaneCrossed
+
+    def __init__(self, script):
+        super().__init__()
+        self.script = list(script)
+        self.reads = []
+
+    def seed_read_back(self, wait=0.0, poll=0.0):
+        answer = self.script.pop(0) if self.script else None
+        self.reads.append(answer)
+        if isinstance(answer, BaseException):
+            raise answer
+        return answer
+
+
+def _seed_driver(monkeypatch, fake, chosen):
+    monkeypatch.setattr(soak, "bridge", fake)
+    monkeypatch.setattr(soak, "SEED_READ_BACK_RETRY_SLEEP_S", 0.0)
+    d = ts._driver()
+    d.session = _SeedSession()
+    d.chosen_seed = chosen
+    d.log = None
+    d.records = []
+    d.emit = d.records.append
+    d._to_main_menu = lambda: fake.get_state()
+    d._embark = lambda state: state
+    d._verify_character = lambda state: state
+    d._drive = lambda state: ("won", "")
+    return d
+
+
+def test_a_read_back_that_settles_on_the_retry_files_no_defect(monkeypatch):
+    """THE LIVE FAILURE, SCRIPTED. The first read answers `None` -- the run is
+    up, the save is in this lane's tree, and the seed has not landed in it yet
+    -- and the second answers the chosen seed. That is a race, not a game
+    refusing a seed, so nothing is filed and the run drives on."""
+    fake = _ScriptedSeedBridge([None, "SSRWEGLNRG"])
+    d = _seed_driver(monkeypatch, fake, "SSRWEGLNRG")
+
+    summary = d.run()
+    assert d.defects == []
+    assert summary["outcome"] == "won"
+    assert d.seed == "SSRWEGLNRG"
+    assert len(fake.reads) == 2
+    # And the log SAYS the retry happened, so a replay that took 30s longer
+    # than its neighbours is readable afterwards.
+    retries = [r for r in d.records
+               if r.get("record") == "seed_read_back_retry"]
+    assert [r["attempt"] for r in retries] == [1]
+    assert retries[0]["seed"] is None
+    read_backs = [r for r in d.records if r.get("record") == "seed_read_back"]
+    assert read_backs[0]["honoured"] is True
+
+
+def test_a_stale_save_read_back_is_re_read_before_it_is_believed(monkeypatch):
+    """The other face of the window: the previous run's `current_run.save` is
+    still on disk, so the read answers a SEED and not `None`. Re-read, it is
+    this run's. A first read taken as a verdict here files the same false
+    defect with a more convincing detail line."""
+    fake = _ScriptedSeedBridge(["PREVIOUSRUN", "SSRWEGLNRG"])
+    d = _seed_driver(monkeypatch, fake, "SSRWEGLNRG")
+
+    assert d.run()["outcome"] == "won"
+    assert d.defects == []
+    assert d.seed == "SSRWEGLNRG"
+
+
+def test_the_retry_does_not_soften_a_seed_the_game_really_refused(monkeypatch):
+    """WAITING IS NOT WAVING THROUGH, the same claim `EB-435`'s wait makes.
+    A read-back that answers somebody else's seed on every attempt is the
+    failure `seed_not_honoured` exists for, and it still stops the soak --
+    later, by the attempts, and correctly."""
+    fake = _ScriptedSeedBridge(["OTHERSEED1", "OTHERSEED1", "OTHERSEED1"])
+    d = _seed_driver(monkeypatch, fake, "SSRWEGLNRG")
+
+    summary = d.run()
+    assert summary["outcome"] == "defect"
+    assert [x["kind"] for x in d.defects] == ["seed_not_honoured"]
+    assert len(fake.reads) == soak.SEED_READ_BACK_ATTEMPTS
+
+
+def test_the_read_back_arm_settles_on_any_seed_at_all(monkeypatch):
+    """R95's arm has nothing to compare against -- the game rolls and the
+    harness records -- so ANY non-empty seed is settled and the retry only
+    covers the empty read. Asking the chosen arm's question here would retry
+    every unseeded run to the deadline for nothing."""
+    fake = _ScriptedSeedBridge([None, "GAMEROLLED1", "NEVERASKED1"])
+    d = _seed_driver(monkeypatch, fake, None)
+
+    assert d.run()["outcome"] == "won"
+    assert d.seed == "GAMEROLLED1"
+    assert len(fake.reads) == 2
+    read_backs = [r for r in d.records if r.get("record") == "seed_read_back"]
+    assert read_backs[0]["honoured"] is None
+
+
+def test_a_crossing_that_resolves_on_the_retry_is_not_filed(monkeypatch):
+    """`EB-210`'s refusal is kept and is still raised from the LAST thing
+    seen. A crossing that has resolved into this lane's own tree by the next
+    read was the transient cause (`EB-435`), not the structural one, and two
+    lone-lane soaks died on exactly that."""
+    crossed = soak.bridge.LaneCrossed("save_path left the lane's tree")
+    fake = _ScriptedSeedBridge([crossed, "SSRWEGLNRG"])
+    d = _seed_driver(monkeypatch, fake, "SSRWEGLNRG")
+
+    assert d.run()["outcome"] == "won"
+    assert d.defects == []
+
+
+def test_a_crossing_that_outlasts_the_attempts_is_still_filed(monkeypatch):
+    fake = _ScriptedSeedBridge(
+        [soak.bridge.LaneCrossed("crossed") for _ in range(4)])
+    d = _seed_driver(monkeypatch, fake, "SSRWEGLNRG")
+
+    assert d.run()["outcome"] == "defect"
+    assert [x["kind"] for x in d.defects] == ["seed_read_back_crossed"]
+
+
 def test_the_seed_channel_is_on_the_ledger_before_the_seed_is_set(monkeypatch):
     """`note_seed_channel` is documented as being triggered by the first
     CHOICE rather than by setup, precisely so that `--no-setup` -- which makes

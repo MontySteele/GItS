@@ -977,3 +977,160 @@ def test_the_local_tester_reads_the_same_schema_as_the_codex_seat():
     prompt = local_seat.build_grade_prompt("PACKET", "0" * 64)
     assert '"forecast"' in prompt
     assert json.dumps(seat.form_schema(), indent=1) in prompt
+
+
+# ================= EB-212: MATCHED-TELEGRAPH PAIRS, and what is OWED ========
+#
+# R223's `intent` category is SELF-REPORT: `qualify.score_intent` passes any
+# form whose question four is not a flat *no*, so a seat that learns to answer
+# *yes* passes the category without the telegraph ever entering its line, and
+# nothing in the scorecard can tell the two apart. The answer is two packets
+# IDENTICAL BUT FOR THE ENEMY INTENT, scored on whether the seat's two LINES
+# differ.
+#
+# BUILT HERE: the scorer, its guard, the fixture pair and the battery hook.
+# OWED: the sealed pairs themselves, which are a launch and a round of game
+# time and are not this row's.
+
+PAIRS_DIR = REPO / "understudy" / "battery" / "pairs"
+PAIR_LEFT, PAIR_RIGHT = "fixture-attack", "fixture-block"
+
+
+def _line(*cards) -> dict:
+    return {"chosen_line": [{"card": c, "target": "Nibbit"} for c in cards]}
+
+
+def test_the_fixture_pair_differs_on_the_telegraph_and_nowhere_else():
+    """The guard is the half that makes the score mean anything: two boards
+    that differ in a card or a bank produce two lines for reasons that have
+    nothing to do with the intent, and such a pair would PASS while proving
+    nothing."""
+    assert qualify.pair_differences(PAIRS_DIR / PAIR_LEFT,
+                                    PAIRS_DIR / PAIR_RIGHT) == []
+
+
+def test_an_identical_line_across_a_pair_fails():
+    """THE ACCEPTANCE SENTENCE. The seat played the same turn against a
+    different telegraph; what it wrote in question four is not evidence."""
+    ok, why = qualify.score_intent_pair(
+        _line("Defend", "Strike"), _line("Defend", "Strike"),
+        PAIRS_DIR / PAIR_LEFT, PAIRS_DIR / PAIR_RIGHT)
+    assert not ok and "intent_insensitive" in why
+
+
+def test_a_line_that_moves_with_the_telegraph_passes():
+    ok, why = qualify.score_intent_pair(
+        _line("Bubble Screen"), _line("Strike"),
+        PAIRS_DIR / PAIR_LEFT, PAIRS_DIR / PAIR_RIGHT)
+    assert ok and "moved with the telegraph" in why
+
+
+def test_the_line_is_the_play_and_never_the_prose():
+    """A seat whose two lines are identical cannot buy the item back with
+    question four, a different `thinking`, or a longer answer -- which is the
+    whole difference between this scorer and the one it sits beside."""
+    left = dict(_line("Defend"), q4_changed=True,
+                q4_different_intent="yes, completely", thinking="the 12 hurts")
+    right = dict(_line("Defend"), q4_changed=True,
+                 q4_different_intent="yes, completely", thinking="no threat")
+    ok, _why = qualify.score_intent_pair(left, right, PAIRS_DIR / PAIR_LEFT,
+                                         PAIRS_DIR / PAIR_RIGHT)
+    assert not ok
+    # ...and the SINGLE-BOARD scorer passes both of them, which is the defect.
+    assert qualify.score_intent(left, PAIRS_DIR / PAIR_LEFT)[0]
+    assert qualify.score_intent(right, PAIRS_DIR / PAIR_RIGHT)[0]
+
+
+def test_a_pair_that_is_not_matched_is_refused_rather_than_scored(tmp_path):
+    """Two boards is not a pair. The refusal names the line that differs."""
+    left, right = tmp_path / "a", tmp_path / "b"
+    for d in (left, right):
+        d.mkdir()
+    text = (PAIRS_DIR / PAIR_LEFT / "packet.md").read_text(encoding="utf-8")
+    left.joinpath("packet.md").write_text(text, encoding="utf-8")
+    right.joinpath("packet.md").write_text(
+        text.replace("- Cost: 1\n- Gain 5 Block.", "- Cost: 0\n- Gain 5 Block."),
+        encoding="utf-8")
+    ok, why = qualify.score_intent_pair(_line("Defend"), _line("Strike"),
+                                        left, right)
+    assert not ok and why.startswith("pair_mismatch")
+    assert "Cost: 0" in why
+
+
+def test_two_packets_identical_telegraph_included_are_refused(tmp_path):
+    """Nothing for a line to be sensitive to. A pass here would be free."""
+    left, right = tmp_path / "a", tmp_path / "b"
+    text = (PAIRS_DIR / PAIR_LEFT / "packet.md").read_text(encoding="utf-8")
+    for d in (left, right):
+        d.mkdir()
+        d.joinpath("packet.md").write_text(text, encoding="utf-8")
+    ok, why = qualify.score_intent_pair(_line("Defend"), _line("Strike"),
+                                        left, right)
+    assert not ok and "identical" in why
+
+
+def test_the_shipped_battery_carries_no_pairs_and_the_scorecard_says_so():
+    """WHAT IS OWED, IN THE ARTIFACT AND NOT ONLY IN A COMMENT. No
+    telegraph-only pair is sealed today -- every matched pair this funnel has
+    run differs in the ARM under test -- so `intent` is still read off the
+    single-board check, and a scorecard that does not say which of the two it
+    got would be read as the stronger claim."""
+    assert qualify.load_pairs() == []
+    card = qualify.run_battery(qualify.load_battery(),
+                               reader=lambda i: None,
+                               threshold=qualify.load_threshold())
+    assert card["intent_pairs"]["scored"] == 0
+    assert "OWED" in card["intent_pairs"]["owed"]
+    assert "EB-212" in card["intent_pairs"]["owed"]
+
+
+def test_a_battery_that_grows_pairs_scores_them_into_intent(tmp_path,
+                                                            monkeypatch):
+    """THE HOOK, exercised on the fixture pair. One row per PAIR, not one per
+    side: the pair is the item, and scoring each half separately would be the
+    self-report check again with twice the boards."""
+    path = tmp_path / "battery.yaml"
+    path.write_text(
+        "items:\n"
+        "  - {id: I1, category: intent, turn_id: kokomi-slice2-t03, why: x}\n"
+        "intent_pairs:\n"
+        f"  - {{id: P1, left: {PAIR_LEFT}, right: {PAIR_RIGHT}, why: fixture}}\n",
+        encoding="utf-8")
+    pairs = qualify.load_pairs(path)
+    assert [(p.id, p.left, p.right) for p in pairs] == [
+        ("P1", PAIR_LEFT, PAIR_RIGHT)]
+
+    forms = {PAIR_LEFT: _line("Bubble Screen"), PAIR_RIGHT: _line("Strike")}
+    card = qualify.run_battery(
+        [], reader=lambda i: forms[i.turn_id], qa_dir=PAIRS_DIR,
+        threshold=qualify.load_threshold(), pairs=pairs)
+    rows = [r for r in card["items"] if r.get("pair")]
+    assert len(rows) == 1
+    assert rows[0]["passed"] and rows[0]["category"] == "intent"
+    assert rows[0]["left"] == PAIR_LEFT and rows[0]["right"] == PAIR_RIGHT
+    assert card["per_category"]["intent"]["items"] == 1
+    assert card["intent_pairs"]["scored"] == 1
+    assert card["intent_pairs"]["owed"] == ""
+
+
+def test_a_pair_naming_one_turn_twice_is_refused_by_the_loader(tmp_path):
+    """A pair read against itself is guaranteed to produce one line, so it
+    would fail every seat for a reason that is the file's and not the seat's.
+    """
+    path = tmp_path / "battery.yaml"
+    path.write_text(
+        "items: []\n"
+        "intent_pairs:\n"
+        "  - {id: P1, left: same-turn, right: same-turn}\n", encoding="utf-8")
+    with pytest.raises(qualify.BatteryError, match="names one turn twice"):
+        qualify.load_pairs(path)
+
+
+def test_a_side_the_seat_refused_fails_the_pair_and_never_skips_it():
+    forms = {PAIR_LEFT: _line("Defend"), PAIR_RIGHT: None}
+    card = qualify.run_battery(
+        [], reader=lambda i: forms[i.turn_id], qa_dir=PAIRS_DIR,
+        threshold=qualify.load_threshold(),
+        pairs=[qualify.PairItem(id="P1", left=PAIR_LEFT, right=PAIR_RIGHT)])
+    assert card["items"][0]["passed"] is False
+    assert "refusal is a failed item" in card["items"][0]["why"]

@@ -103,6 +103,69 @@ SEAT_FAMILIES: tuple[tuple[str, str], ...] = (
 # run can see the window filling rather than discovering it at the stop.
 WINDOW_WARN_FRACTION = 0.8
 
+# ---------------- EB-324: ONE THREAD PER ACT, THE SEALED RECORD CARRIED -----
+#
+# THE FIND. `local_play` keeps the whole conversation -- that is the point of
+# it, a blind PLAYER has to have seen the previous board -- and the whole
+# conversation costs about 850 tokens a turn. The Kokomi r4 run died on turn 77
+# at 66,019 tokens against a 64k slot: `prompt_exceeds_ctx` fired correctly,
+# nothing was truncated, and NO RECORD WAS SEALED, so a run that had played
+# seventy-six screens produced nothing. One 128k slot buys about 150 turns,
+# which is under two acts, so a bigger slot moves the wall rather than removing
+# it.
+#
+# THE RULE, and it is the D default of the two the row names (the other being
+# to declare the local seat an act-and-a-half instrument by law): ONE THREAD
+# PER ACT. At an act boundary the thread asks the model, while it still has
+# the act in front of it, for the handover record -- and then DROPS the act's
+# messages and starts the next act on that record alone. The window is
+# therefore bounded by the longest single act instead of by the run, and the
+# 850-tokens-a-turn growth restarts from nothing three times.
+#
+# WHAT IS CARRIED IS THE MODEL'S OWN SEALED RECORD AND NOTHING ELSE. It is
+# written by the tester, in the tester's words, from what the tester saw -- so
+# nothing crosses the act boundary that this module knows and the page did not
+# print, and the blindness argument is exactly the one `identity()` states. The
+# record is kept on disk beside the turn that produced it and is written into
+# the transcript, so a reader can see what act 2 was told about act 1.
+#
+# IT IS NOT A SUMMARISER AND IT IS NOT A SECOND SEAT. The handover is one more
+# turn of the same conversation, on the same endpoint, at the same temperature,
+# and it is counted in the run's turn numbering for that reason.
+CHAIN_QUESTION = (
+    "You are about to leave Act {previous} and enter Act {act}, and this "
+    "conversation ends here: the next screen starts a fresh thread that will "
+    "have seen nothing of what you have played.\n\n"
+    "Write the handover for yourself. In plain language, in your own words, "
+    "and in no more than about three hundred words: where the run stands "
+    "(HP, gold, potions, relics), what your deck does and what it is missing, "
+    "what you have been trying to do and what has been going wrong, and "
+    "anything you learned that you would otherwise have to learn again.\n\n"
+    "This is the ONLY thing that crosses into Act {act}. Nothing you leave "
+    "out here can be asked about later.")
+
+#: The reply shape of a handover. The same one-string shape a fight or run
+#: record uses, because it is the same kind of thing.
+CHAIN_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {"record": {"type": "string"}},
+    "required": ["record"],
+    "additionalProperties": False}
+
+#: What the first page of a new act is prefixed with. The record is quoted as
+#: the tester's own, because it is, and the sentence says plainly that
+#: everything else is gone -- a thread that thought it still remembered act 1
+#: would answer about a board nobody can show it.
+CHAIN_PREAMBLE = (
+    "## What you carried out of Act {previous}\n\n"
+    "This is a fresh conversation. You have played Act {previous} already, "
+    "and the only thing that came across is the handover you wrote for "
+    "yourself at the act boundary:\n\n"
+    "{record}\n\n"
+    "Nothing else from that act is available. The screen below is where the "
+    "run stands now.\n"
+)
+
 # `<think>...</think>` -- what a server launched WITHOUT `--reasoning-format
 # deepseek` inlines into `content`. Non-greedy and DOTALL: a reply may carry
 # more than one block, and every one of them comes out.
@@ -328,6 +391,13 @@ class LocalThread:
         # only, exactly as it does for codex, and every page after it is read
         # against what is already in here.
         self.messages: list[dict[str, str]] = []
+        # `EB-324`. The act this thread is playing, the handover it came in
+        # with, and one row per boundary crossed. `act` counts the chain and
+        # not the run: a run that began in act 1 and chained twice has played
+        # three threads, whatever the game calls the acts.
+        self.act = 0
+        self.carried = ""
+        self.chains: list[dict[str, Any]] = []
 
     # -- the shape `Session` drives ---------------------------------------
 
@@ -343,6 +413,11 @@ class LocalThread:
                 "model_observed": self.model_observed or self.model,
                 "seat_family": self.seat_family,
                 "backend": "local",
+                # `EB-324`: what the record has to say for a run that was
+                # played on more than one thread. A reader asking why act 3's
+                # tester did not mention act 1's relic needs this at the top
+                # of the record and not in a transcript row.
+                "chained_sessions": [dict(c) for c in self.chains],
                 "endpoint": self.client.base_url,
                 "server_version": self.server_version,
                 "server_version_source": self.server_version_source,
@@ -364,6 +439,69 @@ class LocalThread:
     def close(self) -> None:
         """Nothing to tear down: no scratch root, no process, no login."""
 
+    # -- the act boundary (`EB-324`) ---------------------------------------
+
+    def chain_act(self, act: int, previous: int) -> str:
+        """End this act's thread on a handover and start the next on it.
+
+        Called by `Session` at an act boundary, through `getattr` -- the codex
+        thread has no counterpart and needs none, because `codex exec resume`
+        keeps the context on the vendor's side and this window is ours.
+
+        Returns the record that was carried, or `""` when there was nothing to
+        carry (a boundary crossed before the tester has answered anything --
+        there is no act to hand over and nothing is spent asking for one).
+        """
+        if not self.messages:
+            self.act = act
+            return ""
+        self.turn += 1
+        d = self.session / f"turn-{self.turn:03d}-handover"
+        d.mkdir(parents=True, exist_ok=True)
+        body = CHAIN_QUESTION.format(previous=previous, act=act)
+        (d / "prompt.md").write_text(body, encoding="utf-8")
+        messages = self.messages + [{"role": "user", "content": body}]
+
+        reply = self._chat(messages, CHAIN_SCHEMA, d)
+        (d / "reply.txt").write_text(reply.text, encoding="utf-8")
+        answer, inline = strip_reasoning(reply.text)
+        reasoning = "\n\n".join(x for x in (reply.reasoning, inline) if x)
+        if reasoning:
+            (d / "reasoning.txt").write_text(reasoning, encoding="utf-8")
+        record = ""
+        try:
+            record = str(local_seat.extract_json(answer).get("record") or "")
+        except ValueError:
+            # A HANDOVER IS NOT A COMMAND AND MUST NOT STOP THE RUN. Every
+            # other refusal in this module is refusing to play on from a page
+            # the model was half-shown; this one has no such stake -- the act
+            # is over either way, and the choice is between the next act
+            # starting on a short record and the run ending here with nothing
+            # sealed, which is the exact failure `EB-324` is about. So the
+            # prose is taken as it stands and the row says the JSON was not
+            # there.
+            record = answer.strip()
+            self._row(kind="local_chain_unparsed", turn=self.turn,
+                      detail="the handover carried no JSON object; its prose "
+                             "was carried across as written")
+        record = record.strip()
+        if record:
+            (d / "handover.md").write_text(record + "\n", encoding="utf-8")
+
+        row = {"act": act, "previous": previous, "turn": self.turn,
+               "dropped_messages": len(self.messages),
+               "dropped_tokens": local_model.messages_tokens(self.messages),
+               "carried_chars": len(record)}
+        self.chains.append(row)
+        self._row(kind="local_chain", record=record, **row)
+
+        # THE DROP IS THE WHOLE POINT. Keeping the messages and adding the
+        # handover would be the old behaviour plus a paragraph.
+        self.messages = []
+        self.carried = record
+        self.act = act
+        return record
+
     # -- one screen --------------------------------------------------------
 
     def send(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
@@ -377,6 +515,13 @@ class LocalThread:
 
         body = prompt + SCHEMA_INSTRUCTION.format(
             schema=json.dumps(schema, indent=1))
+        # `EB-324`: the first page of a chained act opens on the handover the
+        # tester wrote for itself, and only the first -- from the second page
+        # on it is in `self.messages` like any other turn.
+        if self.carried and not self.messages:
+            body = CHAIN_PREAMBLE.format(
+                previous=self.chains[-1]["previous"],
+                record=self.carried) + "\n" + body
         messages = self.messages + [{"role": "user", "content": body}]
         estimate = local_model.messages_tokens(messages)
         ctx = int(self.client.ctx or 0)
@@ -393,9 +538,12 @@ class LocalThread:
                 f"{self.max_tokens} reserved for the answer against "
                 f"{local_model.ENV_CTX}={ctx}. NOTHING WAS TRUNCATED: a "
                 f"tester played on from a page it was half-shown would look "
-                f"exactly like a tester making a decision. Raise the "
-                f"server's -c and {local_model.ENV_CTX} together, or run a "
-                f"shorter Act.")
+                f"exactly like a tester making a decision. `EB-324`: the "
+                f"window is per-ACT and not per-run -- the thread is chained "
+                f"at each act boundary and starts the next act on the "
+                f"handover alone -- so this is ONE act that did not fit, and "
+                f"the answer is to raise the server's -c and "
+                f"{local_model.ENV_CTX} together.")
         if ctx and estimate > ctx * WINDOW_WARN_FRACTION:
             self._row(kind="local_window", turn=self.turn,
                       estimated_prompt_tokens=estimate, ctx=ctx)

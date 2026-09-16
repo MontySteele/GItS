@@ -29,6 +29,7 @@ double quotes exactly as the screen prints it:
     choose "<option, card or reward>"    skip            confirm     proceed
     go "<map node>"                      buy "<shop item>"
     rest                                 upgrade         remove
+    leave
 
 **When two things on one screen print the same name,** the screen numbers
 them in the order it prints them — `Water's Edge (1)` and `Water's Edge (2)`,
