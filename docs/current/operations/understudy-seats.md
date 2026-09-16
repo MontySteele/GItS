@@ -47,6 +47,24 @@ refuses an unknown id, an event this run has already visited and one whose own
 `IsAllowed` is false. `--list` prints the pending ids so a caller does not
 guess a spelling.
 
+**A DRESSED Teyvat id is accepted and translated** (`EB-767`). A dressing does
+not replace an event in the act's pool — it cannot, because the pool is
+shuffled once at run start and a pool one element different moves every later
+roll on that stream — so the substitution happens downstream, in the
+`PullNextEvent` postfix. The pending list therefore holds the BASE id, and
+forcing a dressed name directly finds nothing: six proof ids failed that way
+against a run holding exactly the events they dress
+(`review/records/teyvat-proofs-3-2026-09-15.md`), and a `?` room forced by a
+name nothing matched can resolve to a room that is not an event at all. So
+`python -m understudy.force_event GUILD_DESKS_RETURNED_COPY --why "..."` forces
+`SELF_HELP_BOOK` and **prints that it did** — the translation is never silent,
+because a driver that quietly retargeted an id would make the next failure
+unreadable. `--list` annotates each base id with the faces that dress it. The
+table is read out of `klee-mod/KleeCode/Teyvat/TeyvatEventsGenerated.cs`
+itself, so there is exactly one substitution table in the repo, and the id rule
+is pinned against `tools/gen_teyvat_events.py`'s own `slugify` over every class
+name in it.
+
 **`skip_act`** ends the current act at the next map step and lands the run on
 the next act's map. Its whole write is the game's own
 `RunManager.Instance.ActChangeSynchronizer.SetLocalPlayerReady()` — what the

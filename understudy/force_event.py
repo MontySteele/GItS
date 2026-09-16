@@ -46,16 +46,107 @@ legibility or feel, and neither may anything reading its output.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
+import re
 import sys
+from pathlib import Path
 from typing import Any, Callable
 
 from tier05.maps import UNKNOWN
 from understudy import bridge, policy_v0
 
+REPO = Path(__file__).resolve().parents[1]
+
 
 class ForceEventError(RuntimeError):
     """The walk could not get there, and the message says where it stopped."""
+
+
+# ------------------------------------------- EB-767: dressed -> base ------
+#
+# THE OP TAKES BASE IDS ONLY, AND THAT IS NOT A BUG IN THE OP.
+#
+# A Teyvat dressing does not replace an event in the act's pool. It cannot:
+# `ActModel.GenerateRooms` concatenates `AllEvents` with
+# `ModelDb.AllSharedEvents` and shuffles the whole thing ONCE on the run's
+# `UpFront` rng, so a pool one element longer or shorter moves every later roll
+# on that stream -- bosses, Ancients, encounter order. The substitution
+# therefore happens DOWNSTREAM of the shuffle, in the `PullNextEvent` postfix
+# (`klee-mod/KleeCode/Teyvat/Patches/PullNextEventPatch.cs`): the pending list
+# holds the BASE event, and the dressed model is swapped in at the moment the
+# map hands the player an event.
+#
+# So `force_next_event` -- which walks the pending list -- can only ever find a
+# base id. Six proof ids were typed as their dressed names and all six failed
+# against a run that was holding exactly the events they dress
+# (`review/records/teyvat-proofs-3-2026-09-15.md`), and a `?` room forced by a
+# name nothing matched can also resolve to a room that is not an event at all.
+# This maps the name a reader has (the dressed one, the one on the page) to the
+# name the op needs, and SAYS SO on every translation rather than doing it
+# quietly -- a driver that silently retargeted an id would make the next
+# failure unreadable.
+#
+# THE TABLE IS THE GENERATED FILE ITSELF, not a copy of it. `TeyvatEventsGenerated.cs`
+# is written by `tools/gen_teyvat_events.py` from the curated faces and is
+# checked for drift by that generator's own `--check`, so reading it here means
+# there is exactly one substitution table in the repo. A second one maintained
+# by hand would be a second thing to forget when a face lands.
+
+_SUBSTITUTIONS_SOURCE = (REPO / "klee-mod" / "KleeCode" / "Teyvat"
+                         / "TeyvatEventsGenerated.cs")
+
+#: `[(TeyvatFrame.<Dressing>, typeof(<BaseClass>))] = () =>
+#:  ModelDb.Event<Events.<Dressing>.<DressedClass>>(),` -- one generated row.
+_SUBSTITUTION_ROW = re.compile(
+    r"\[\(TeyvatFrame\.(\w+),\s*typeof\((\w+)\)\)\]\s*=\s*"
+    r"\(\)\s*=>\s*ModelDb\.Event<Events\.\w+\.(\w+)>\(\)")
+
+#: An underscore before each capital that follows a letter or digit. This is
+#: `StringHelper.Slugify` for the one input shape it is handed here, a C# type
+#: name, and it is what `ModelDb.GetEntry` does to produce an `Id.Entry`.
+#: `tier0/tests/test_understudy_force_event.py` pins it against
+#: `tools/gen_teyvat_events.py`'s own copy over every class name in the table,
+#: so the two cannot drift into disagreeing about an id.
+_CAMEL = re.compile(r"(?<=[A-Za-z0-9])([A-Z])")
+
+
+def wire_id(class_name: str) -> str:
+    """A C# event class name as the wire spells its `Id.Entry`."""
+    text = _CAMEL.sub(r"_\1", class_name.strip())
+    return re.sub(r"[^A-Z0-9_]", "", re.sub(r"\s+", "_", text.upper()))
+
+
+@functools.lru_cache(maxsize=1)
+def dressed_to_base() -> dict[str, tuple[str, str]]:
+    """`{dressed wire id: (base wire id, dressing)}`, read off the generator's
+    output. An empty dict when that file is missing, because a harness without
+    the Teyvat sources should still force a base id.
+    """
+    try:
+        text = _SUBSTITUTIONS_SOURCE.read_text(encoding="utf-8")
+    except OSError:
+        return {}
+    _, _, block = text.partition("Substitutions =")
+    table: dict[str, tuple[str, str]] = {}
+    for dressing, base_cls, dressed_cls in _SUBSTITUTION_ROW.findall(block):
+        table[wire_id(dressed_cls)] = (wire_id(base_cls), dressing)
+    return table
+
+
+def resolve_event_id(event_id: str) -> tuple[str, str | None]:
+    """`(the id to force, the dressing it was translated out of or None)`.
+
+    An id the table does not know is returned UNCHANGED and untranslated: this
+    is a translation and never a validation, and the endpoint's own refusal --
+    which prints the act's pending list back -- is a better answer for an
+    unknown id than a guess made here without a run up.
+    """
+    target = (event_id or "").strip()
+    row = dressed_to_base().get(target.upper())
+    if row is None:
+        return target, None
+    return row[0], row[1]
 
 
 #: How many screens the walk will step through before giving up. A `?` room is
@@ -105,7 +196,15 @@ def walk_to_event(event_id: str, why: str, *,
             "No run is open (the bridge is on a menu screen). This driver "
             "acts on a run that already exists; embark one first.")
 
-    report = bridge.force_next_event(event_id, why)
+    # EB-767. Said out loud, never done quietly: a driver that silently
+    # retargeted an id would make the next failure unreadable.
+    target, dressing = resolve_event_id(event_id)
+    if dressing is not None:
+        log(f"DRESSED: {event_id} is {dressing}'s face on {target}; forcing "
+            f"{target}, which is the id the act's pending list holds "
+            "(the dressing is swapped in at PullNextEvent).")
+
+    report = bridge.force_next_event(target, why)
     if str(report.get("status")) != "ok":
         raise ForceEventError(
             f"the bridge refused the force: {(report.get('error') or report.get('message'))!r}")
@@ -173,7 +272,10 @@ def main(argv: list[str] | None = None) -> int:
                      "ATTENDED ONLY; nothing measured after it is comparable "
                      "to any run."))
     ap.add_argument("event", nargs="?", default="",
-                    help="the event's wire id, e.g. ROOM_FULL_OF_CHEESE")
+                    help=("the event's wire id, e.g. ROOM_FULL_OF_CHEESE. A "
+                          "DRESSED Teyvat id is accepted too and is "
+                          "translated to the base id the pending list holds "
+                          "(EB-767); the translation is printed."))
     ap.add_argument("--why", default="",
                     help="the reason, logged with the write by the endpoint")
     ap.add_argument("--list", action="store_true",
@@ -185,8 +287,22 @@ def main(argv: list[str] | None = None) -> int:
         info = pending_events()
         print(f"act events_visited={info.get('events_visited')} "
               f"next_event={info.get('next_event')!r}")
+        # EB-767. The list is BASE ids -- that is what the pending pool holds --
+        # so each one that a dressing covers is annotated with the face a
+        # reader would have typed instead. Without this the list is a wall of
+        # names that do not match anything on any page they have seen.
+        faces: dict[str, list[str]] = {}
+        for dressed, (base, dressing) in dressed_to_base().items():
+            faces.setdefault(base, []).append(f"{dressed} ({dressing})")
         for entry in info.get("events") or []:
-            print(f"  {entry}")
+            dressings = faces.get(str(entry).upper())
+            suffix = ("  <- dressed as " + ", ".join(sorted(dressings))
+                      if dressings else "")
+            print(f"  {entry}{suffix}")
+        print("These are BASE ids, which is what the act's pending list holds: "
+              "a dressing is substituted at PullNextEvent, so forcing a "
+              "dressed id directly finds nothing (EB-767). Pass either -- a "
+              "dressed name is translated, and the translation is printed.")
         return 0
 
     if not args.event:

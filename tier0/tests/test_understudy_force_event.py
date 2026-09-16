@@ -237,3 +237,108 @@ def test_the_soak_cannot_reach_this_module():
     import understudy.soak as soak
     text = (soak.__file__ and open(soak.__file__, encoding="utf-8").read()) or ""
     assert "force_event" not in text
+
+
+# ---------------------------------------- EB-767: dressed ids translate ----
+
+def test_a_dressed_id_is_translated_to_the_base_the_pending_list_holds():
+    """A dressing does not replace an event in the act's pool -- the pool is
+    shuffled once at run start and a pool one element different moves every
+    later roll on that stream -- so the substitution happens downstream, in the
+    `PullNextEvent` postfix. The pending list therefore holds the BASE id, and
+    six proof ids typed as their dressed names all failed against a run that
+    was holding exactly the events they dress (proofs-3)."""
+    target, dressing = force_event.resolve_event_id(
+        "GUILD_DESKS_RETURNED_COPY")
+    assert target == "SELF_HELP_BOOK"
+    assert dressing == "Mondstadt"
+
+
+def test_a_base_id_is_left_exactly_alone():
+    assert force_event.resolve_event_id("SELF_HELP_BOOK") == (
+        "SELF_HELP_BOOK", None)
+
+
+def test_an_unknown_id_is_a_passthrough_and_not_a_guess():
+    """A translation, never a validation. The endpoint's own refusal prints
+    the act's pending list back, which is a better answer for an unknown id
+    than anything this file could invent without a run up."""
+    assert force_event.resolve_event_id("NO_SUCH_EVENT") == (
+        "NO_SUCH_EVENT", None)
+
+
+def test_the_table_is_the_generated_file_and_covers_every_dressed_event():
+    """One substitution table in the repo. `TeyvatEventsGenerated.cs` is
+    written by `tools/gen_teyvat_events.py` from the curated faces and drift-
+    checked by that generator's `--check`; a second table maintained by hand
+    here would be a second thing to forget when a face lands."""
+    table = force_event.dressed_to_base()
+    source = force_event._SUBSTITUTIONS_SOURCE.read_text(encoding="utf-8")
+    rows = source.partition("Substitutions =")[2].count("[(TeyvatFrame.")
+    assert rows > 0
+    assert len(table) == rows
+    # Every value is a base id and a dressing name, and no dressed id is also
+    # a base id -- if one were, a translation would be ambiguous.
+    bases = {base for base, _ in table.values()}
+    assert not (bases & set(table))
+
+
+def test_the_wire_id_rule_is_the_generators_own():
+    """Pinned against `tools/gen_teyvat_events.py`'s `slugify` over every class
+    name in the table rather than against a handful of examples: the two
+    functions produce `Id.Entry` for the same names, and a drift between them
+    would send the op at an id the game never answers to. `ToABetterYou` is
+    `TO_A_BETTER_YOU`, which is the case that already cost a proof round."""
+    import importlib.util
+    import sys
+    spec = importlib.util.spec_from_file_location(
+        "_gen_teyvat_events",
+        force_event.REPO / "tools" / "gen_teyvat_events.py")
+    gen = importlib.util.module_from_spec(spec)
+    # REGISTERED BEFORE IT IS EXECUTED: the generator declares dataclasses, and
+    # `dataclasses` resolves a string annotation through `sys.modules[cls.
+    # __module__]`, which is None for a module that was never registered.
+    sys.modules[spec.name] = gen
+    try:
+        spec.loader.exec_module(gen)
+    finally:
+        sys.modules.pop(spec.name, None)
+
+    source = force_event._SUBSTITUTIONS_SOURCE.read_text(encoding="utf-8")
+    block = source.partition("Substitutions =")[2]
+    names = set()
+    for _dressing, base_cls, dressed_cls in (
+            force_event._SUBSTITUTION_ROW.findall(block)):
+        names.add(base_cls)
+        names.add(dressed_cls)
+    assert names
+    for name in sorted(names):
+        assert force_event.wire_id(name) == gen.slugify(name), name
+    assert force_event.wire_id("ToABetterYou") == "TO_A_BETTER_YOU"
+
+
+def test_the_walk_forces_the_translated_id_and_says_it_did(monkeypatch):
+    """Said out loud on every translation. A driver that silently retargeted
+    an id would make the next failure unreadable."""
+    seen = _wire(monkeypatch, [_MAP, _MAP, _EVENT])
+    lines: list[str] = []
+    force_event.walk_to_event("GUILD_DESKS_RETURNED_COPY", "why",
+                              log=lines.append)
+    assert seen["forced"] == [("SELF_HELP_BOOK", "why")]
+    assert any("DRESSED" in line and "SELF_HELP_BOOK" in line
+               for line in lines)
+
+
+def test_list_annotates_each_base_id_with_the_faces_that_dress_it(
+        monkeypatch, capsys):
+    """Without this the list is a wall of names that match nothing on any page
+    a reader has seen."""
+    monkeypatch.setattr(
+        force_event, "pending_events",
+        lambda: {"events": ["SELF_HELP_BOOK", "A_NIGHT_AT_THE_INN"],
+                 "events_visited": 0, "next_event": "SELF_HELP_BOOK"})
+    assert force_event.main(["--list"]) == 0
+    out = capsys.readouterr().out
+    assert "GUILD_DESKS_RETURNED_COPY" in out
+    assert "dressed as" in out
+    assert "EB-767" in out

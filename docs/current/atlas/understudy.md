@@ -334,7 +334,14 @@ file the code has left.
   to the next `?` room through `choose_map_node` and **stops** at any screen
   that is neither a map nor the event: it does not fight, shop or rest, which
   is the line between it and `soak.py`. Same guardrail as every other write on
-  that route — nothing measured after it is comparable to any run.
+  that route — nothing measured after it is comparable to any run. **It takes
+  base ids, and translates dressed ones** (EB-767): a Teyvat dressing is
+  substituted downstream of the act's one shuffle, in the `PullNextEvent`
+  postfix, so the pending list holds the BASE event and a dressed name finds
+  nothing there (six proof ids failed that way, proofs-3). `resolve_event_id`
+  maps dressed → base off `TeyvatEventsGenerated.cs` itself — one table in the
+  repo, its id rule pinned against `tools/gen_teyvat_events.py`'s `slugify` —
+  and the driver PRINTS every translation rather than retargeting quietly.
 - **`skip_act.py` ends the ACT, and is the one op on that route that moves the
   run's rng** (EB-771). `bridge.skip_act` posts the tenth `debug_state` op,
   whose whole write is the game's own
