@@ -2,10 +2,14 @@
 
 The matrix itself, its reasoning and its seven disagreements live in
 `docs/current/atlas/kit-verbs-vs-base-triggers.md`. This file is the half that
-fails when a cell moves. It pins the CURRENT answer, not the desired one --
-three of the cells it pins are recorded defects (D1, D2, D3/D4 in the atlas),
-and they are pinned exactly as they behave so that a repair is a visible diff
-here rather than a silent one in the engine.
+fails when a cell moves. It pins the CURRENT answer, not the desired one.
+
+FOUR OF THE CELLS IT PINNED WERE RECORDED DEFECTS -- D1, D2, D3 and D4 in the
+atlas, every one of them the sim disagreeing with the game one-sidedly -- and
+all four were repaired on 2026-09-16, sim side only. The pins below moved with
+them, which is exactly the visible diff this file exists to force: a repair
+lands here or it does not land. D5, D6 and D7 remain, D5 and D6 pinned as
+absences.
 
 THREE KINDS OF PIN, all labelled where they are used.
 
@@ -82,32 +86,40 @@ def _fresh(**enemy_kwargs):
     return make_state(enemies=[enemy]), enemy
 
 
-def test_skittish_answers_the_source_attack_and_nothing_else():
+def test_skittish_answers_any_card_sourced_damage_and_nothing_else():
     """MATRIX T3, the sim column. `SkittishPower` is the only enemy-side
-    on-hit power tier0 models at all (atlas sec.2), and its gate is
-    `source == "attack"` -- i.e. the CARD's declared type.
+    on-hit power tier0 models at all (atlas sec.2).
 
-    THIS IS DISAGREEMENT D1 AND THE PIN IS THE DEFECT. In the game the gate is
-    `DamageProps.HasFlag(ValueProp.Move) && ModelSource is CardModel`, which a
-    Skill's damage satisfies, so `source="card"` below is a cell the two
-    engines answer differently. Pinned as it behaves.
+    DISAGREEMENT D1, REPAIRED. The gate is now
+    `source in effects.CARD_DAMAGE_SOURCES`, the sim's spelling of the game's
+    `DamageProps.HasFlag(ValueProp.Move) && ModelSource is CardModel`
+    (`SkittishPower.cs:58`): a Skill's damage (`source="card"`) wakes it in
+    both engines, and every kit verb still does not, because
+    `ElementalHit.Deal` hands the game no `ModelSource` at all. The end-to-end
+    half is `test_eb495_d1_skittish_wakes_on_a_skill.py`.
     """
     for source in KIT_SOURCES:
         state, enemy = _fresh(skittish=3)
         effects.deal_damage_to_enemy(state, enemy, 5, source=source)
-        assert enemy.skittish_fired is (source == "attack"), source
+        assert enemy.skittish_fired is (
+            source in effects.CARD_DAMAGE_SOURCES), source
 
 
-def test_envenom_answers_the_source_attack_and_nothing_else():
-    """MATRIX T4, the sim column, and DISAGREEMENT D2 -- the same shape as
-    D1 with `refpowers.envenom_on_hit`'s `source != "attack"` early return
-    (`refpowers.py:1082`) in place of Skittish's gate."""
+def test_envenom_answers_any_powered_card_hit_and_nothing_else():
+    """MATRIX T4, the sim column, and DISAGREEMENT D2, REPAIRED -- the same
+    shape as D1 one power over. `EnvenomPower.AfterDamageGiven` asks
+    `props.IsPoweredAttack()` (`EnvenomPower.cs:22`), which is `Move` and not
+    `Unpowered` and says nothing about `CardType.Attack`, so a Skill's damage
+    poisons in the game; `refpowers.envenom_on_hit` returned early on
+    `source != "attack"`. It now asks the same two things the game does, and
+    `test_eb495_d2_envenom_takes_a_powered_attack.py` is the end-to-end half.
+    """
     for source in KIT_SOURCES:
         state, enemy = _fresh()
         state.player.powers["envenom"] = 1
         effects.deal_damage_to_enemy(state, enemy, 5, source=source)
         poisoned = enemy.powers.get("poison", 0) > 0
-        assert poisoned is (source == "attack"), source
+        assert poisoned is (source in effects.CARD_DAMAGE_SOURCES), source
 
 
 def test_the_shipped_bomb_detonates_on_an_attack_hit_and_on_nothing_else():
@@ -198,9 +210,9 @@ SIM_CALL_SITES = {
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
     ('effects.py', 28): ("'companion'", None, "'pyro'"),
-    ('furina_stage.py', 1): ("'furina_stage/bow'", None, None),
-    ('furina_stage.py', 2): ("'furina_stage/act'", None, "'hydro'"),
-    ('furina_stage.py', 3): ("'furina_stage/act'", None, None),
+    ('furina_stage.py', 1): ("'furina_stage/bow'", 'False', "'hydro'"),
+    ('furina_stage.py', 2): ("'furina_stage/act'", 'False', "'hydro'"),
+    ('furina_stage.py', 3): ("'furina_stage/act'", 'False', "'hydro'"),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     ('klee_overhaul.py', 2): ('ECHO_SOURCE', None, "'pyro'"),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
@@ -311,24 +323,29 @@ def test_the_three_verbs_that_refuse_the_dealers_terms_still_refuse_them():
         assert powered in _cs(rel), verb
 
 
-def test_the_stage_passes_powered_false_where_the_sim_passes_nothing():
-    """DISAGREEMENT D3, pinned from both sides in one place so a repair on
-    either side has to come here and decide.
+def test_the_stage_refuses_the_dealers_terms_in_both_engines():
+    """DISAGREEMENT D3, REPAIRED, and still pinned from both sides in one
+    place so a later move on either side has to come here and decide.
 
     `FurinaStage.Perform` and `.Bow` pass `powered: false` three times; the
-    sim's `furina_stage.perform` and `._bow` pass no `powered=` at all, so
-    Furina's Strength and Weak scale a performance in tier0 and not in the
-    game."""
+    sim's `furina_stage.perform` and `._bow` now pass `powered=False` at the
+    same three places, so Furina's Strength and Weak scale a performance in
+    neither engine. The behavioural half is
+    `test_eb495_d3_a_performance_carries_no_strength.py`."""
     assert _cs("Powers/Prototype/FurinaStage.cs").count("powered: false") == 3
 
-    sim = (ENGINE / "furina_stage.py").read_text(encoding="utf-8")
-    assert "powered=" not in sim
+    stage = [flags for (name, _i), flags in sorted(_sim_call_sites().items())
+             if name == "furina_stage.py"]
+    assert len(stage) == 3, stage
+    assert [powered for _s, powered, _e in stage] == ["False"] * 3
 
 
-def test_crabaletta_carries_hydro_in_the_game_and_no_element_in_the_sim():
-    """DISAGREEMENT D4, the same shape as D3 one argument over. The C# act and
-    bow both name `Elements.Element.Hydro`; the sim's two Crabaletta legs name
-    no element, so the hit sets no aura and consumes none."""
+def test_crabaletta_carries_hydro_in_both_engines():
+    """DISAGREEMENT D4, REPAIRED, the same shape as D3 one argument over. The
+    C# act and bow both name `Elements.Element.Hydro`, and the sim's two
+    Crabaletta legs now do too, so a Crabaletta hit sets an aura and consumes
+    one in both engines. The behavioural half is
+    `test_eb495_d4_crabaletta_hits_hydro.py`."""
     cs = _cs("Powers/Prototype/FurinaStage.cs")
     assert cs.count("Elements.Element.Hydro") == 4   # 2 acts, 2 bows
 
@@ -336,10 +353,7 @@ def test_crabaletta_carries_hydro_in_the_game_and_no_element_in_the_sim():
     stage = [flags for (name, _i), flags in sorted(sites.items())
              if name == "furina_stage.py"]
     assert len(stage) == 3, stage
-    bow, act_chevalmarin, act_crabaletta = stage
-    assert bow[2] is None                    # bow, Crabaletta
-    assert act_crabaletta[2] is None         # act, Crabaletta
-    assert act_chevalmarin[2] == "'hydro'"   # act, Chevalmarin
+    assert [element for _s, _p, element in stage] == ["'hydro'"] * 3
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():

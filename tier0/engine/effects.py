@@ -917,6 +917,19 @@ def _spotlight_scale(state: CombatState, card: Card, amount: int) -> int:
     return int(amount * m) if m != 1.0 else amount
 
 
+#: `EB-495` D1/D2. The sim's spelling of the game's "this damage came out of
+#: a card". In C# that is `command.ModelSource is CardModel` together with
+#: `DamageProps.HasFlag(ValueProp.Move)`, and the mod's generator emits EVERY
+#: damage clause -- a Skill's and a Power's included -- as
+#: `DamageCmd.Attack(...).FromCard(...)`, so the card's printed `type:` is
+#: never read. tier0 mints exactly two `source` literals off a card
+#: (`_op_damage`: `"attack"` when `card.type == "attack"`, `"card"`
+#: otherwise); every kit verb mints its own, and in the game every kit verb
+#: leaves through `ElementalHit.Deal`, which carries no `ModelSource` at all.
+#: So "the damage came out of a card" is membership in this pair.
+CARD_DAMAGE_SOURCES = ("attack", "card")
+
+
 def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                          element: Optional[str] = None,
                          source: str = "card",
@@ -1107,14 +1120,26 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # Hook.AfterDamageGiven -- Envenom. Placed on the POWERED attack pipeline
     # only (this function), which is what IsPoweredAttack() means; the
     # Unpowered path in refpowers.unpowered_damage deliberately does not
-    # envenom.
+    # envenom. `EB-495` D2: `powered` travels with it, because a caller INSIDE
+    # this pipeline can still refuse the dealer's terms, and the game's
+    # predicate is that flag rather than the card's type.
     from tier0.engine import refpowers as _refpowers
-    _refpowers.envenom_on_hit(state, enemy, hp_dmg, source)
+    _refpowers.envenom_on_hit(state, enemy, hp_dmg, source, powered)
     # Skittish (§10.9 promotion): "The first time it is hit each turn, it
     # gains N Block." AFTER the whole hit resolves (incl. any detonation
     # rider), so the triggering attack is never mitigated by it; the latch
     # resets in combat._player_turn.
-    if (enemy.skittish and not enemy.skittish_fired and source == "attack"
+    #
+    # `EB-495` D1, repaired: the gate is CARD-SOURCED, not Attack-typed.
+    # `SkittishPower.AfterAttack` asks
+    # `command.DamageProps.HasFlag(ValueProp.Move) && command.ModelSource is
+    # CardModel` (`Models/Powers/SkittishPower.cs:58`) and never reads the
+    # card's `type:`, so the 17 non-Attack cards that deal damage wake it in
+    # the game. tier0 asked `source == "attack"` and did not -- one-sided, so
+    # the GAME is the truth and this line is the model catching up. Same
+    # shape as `EB-521`'s Thorns finding.
+    if (enemy.skittish and not enemy.skittish_fired
+            and source in CARD_DAMAGE_SOURCES
             and enemy.alive):
         enemy.skittish_fired = True
         enemy.block += enemy.skittish

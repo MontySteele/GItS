@@ -166,7 +166,7 @@ because the engine has no mirror of that trigger at all (see §2); functionally
 | verb | T1 card played | T2 played an Attack | T3 you attack | T4 you deal damage | T5 takes unblocked damage | T6 retaliation | T7 damage modifiers | T8 applied a debuff |
 |---|---|---|---|---|---|---|---|---|
 | V1 Attack-card damage | Attack | Attack | Attack | Attack | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
-| V2 non-Attack-card damage | damage-only | none | **Attack ≠ none (D1)** | **Attack ≠ none (D2)** | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
+| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | Attack (**D2 repaired**) | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
 | V3 card HP-loss (self) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V4 Bomb detonation (shipped) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V5 Bomb explosion / Set off | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
@@ -178,8 +178,8 @@ because the engine has no mirror of that trigger at all (see §2); functionally
 | V11 Casket strike | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V12 Salon performance | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V13 Salon bow / Evoke | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V14 Stage act | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3**) | **debuff ≠ none (D4)** |
-| V15 Stage bow | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3**) | **debuff ≠ none (D4)** |
+| V14 Stage act | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
+| V15 Stage bow | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
 | V16 Stage Spend | none | none | none | none | none | none | none | none |
 | V17 companion pulse | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V18 aura application only | none | none | none | none | none | none | none | none |
@@ -213,7 +213,7 @@ What the two engines say DIFFERENTLY is §6.
 Seven. Four are engine-vs-engine; three are structural absences on the sim
 side. None was repaired here.
 
-### D1 — a Skill's damage is an Attack to `SkittishPower` in the game, and is not in the sim
+### D1 — a Skill's damage is an Attack to `SkittishPower` — REPAIRED in the sim
 
 `SkittishPower.AfterAttack` gates on
 `command.DamageProps.HasFlag(ValueProp.Move) && command.ModelSource is CardModel`
@@ -224,22 +224,42 @@ damage (`FloodOfEmotion`, `MatineePerformance`, `TakeItFromTheTop`,
 `SecretStash`, `StudyOfExplosions`, `ProtoKkAmbush`, … ) **do** wake Skittish
 in the game.
 
-The sim's Skittish is inline in `deal_damage_to_enemy` and gated
-`source == "attack"` (`tier0/engine/effects.py:1080`), which is
-`card.type == "attack"`. It does not fire. Evidence: `EB-521` already ruled
-the same asymmetry for Thorns and found the ENGINE right and the words wrong.
+The sim's Skittish was inline in `deal_damage_to_enemy` and gated
+`source == "attack"`, which is `card.type == "attack"`, and did not fire.
+Evidence: `EB-521` already ruled the same asymmetry for Thorns and found the
+ENGINE right and the words wrong.
 
-### D2 — likewise for `EnvenomPower`
+**Repaired 2026-09-16, sim side only.** The gate is now
+`source in effects.CARD_DAMAGE_SOURCES` — the two `source` literals
+`_op_damage` mints off a card, which is this engine's spelling of
+`ModelSource is CardModel`. The negative half is unchanged and is the reason
+the repair is narrow: a kit verb mints its own literal and, in the game,
+leaves through `ElementalHit.Deal`, which carries no `ModelSource`, so no
+Bomb, Plan, Mine or performance wakes Skittish in either engine. Pinned end to
+end by `tier0/tests/test_eb495_d1_skittish_wakes_on_a_skill.py`. No published
+sim number moved: the whole suite, batteries included, was unchanged by it.
+
+### D2 — likewise for `EnvenomPower` — REPAIRED in the sim
 
 `EnvenomPower.AfterDamageGiven` gates on
 `dealer == Owner && props.IsPoweredAttack() && result.UnblockedDamage > 0`
 (`Models/Powers/EnvenomPower.cs:22`). A Skill's `DamageCmd.Attack` is
 `ValueProp.Move` and powered, so it poisons. The sim's
-`refpowers.envenom_on_hit` returns early on `source != "attack"`
-(`refpowers.py:1082`). Same shape as D1, different power; both are one line in
-the sim.
+`refpowers.envenom_on_hit` returned early on `source != "attack"`. Same shape
+as D1, different power.
 
-### D3 — Furina's Stage act and bow take her Strength in the sim and not in the game
+**Repaired 2026-09-16, sim side only.** `envenom_on_hit` now takes the hit's
+`powered` flag alongside its `source` and asks for both halves of
+`IsPoweredAttack()`: `source in effects.CARD_DAMAGE_SOURCES` for `Move` /
+`ModelSource`, and `powered` for the absence of `Unpowered`. The second is
+redundant against the first today — every card-sourced call site in tier0 is
+powered — and is written anyway, because the C# predicate is the flag and a
+future Unpowered card clause must not quietly start poisoning. `UnblockedDamage
+> 0` is untouched and pinned beside the repair. Pinned by
+`tier0/tests/test_eb495_d2_envenom_takes_a_powered_attack.py`. No published sim
+number moved.
+
+### D3 — Furina's Stage act and bow took her Strength in the sim — REPAIRED
 
 `FurinaStage.Perform` and `FurinaStage.Bow` both pass `powered: false`
 (`Powers/Prototype/FurinaStage.cs:463`, `:477`, `:544`), the same refusal the
@@ -252,16 +272,49 @@ twin one file over does pass `powered=False` (`effects.py:7139`), so this
 reads as an omission rather than a decision. The brief's own sentence is the
 Salon's — "a performance is not an Attack and not a hit".
 
-### D4 — Crabaletta's act and bow apply Hydro in the game and no element in the sim
+**Repaired 2026-09-16, sim side only.** All three sim call sites now pass
+`powered=False`. THE BRIEF WAS CHECKED FIRST and it is with the game, so this
+is a model catching up and not a rule moving: sec.3 rule 10 calls an act "a
+flat act that does not read its bar" and ends "scaling on Fanfare lives in
+payoff cards (§5.2), never in the performer". Pinned printed-equals-dealt with
+Strength up, with Weak on, and with both, by
+`tier0/tests/test_eb495_d3_a_performance_carries_no_strength.py` — Weak
+beside Strength because `powered` drops both at one site
+(`powers.modify_damage_dealt`), so a Strength-only pin would pass a half
+repair. Furina's own cards are untouched and that control is pinned in the
+same file. No published sim number moved: the Stage is a prototype arm, no
+battery runs it, and the whole suite was unchanged apart from these pins.
+
+### D4 — Crabaletta's act and bow apply Hydro — REPAIRED in the sim
 
 `FurinaStage.cs:461` and `:542` pass `Elements.Element.Hydro`;
 `furina_stage.py:685` and `:334` pass no `element=` at all, so the default
 `None` applies and the hit neither sets an aura nor consumes one. That is a
 reaction difference, so it changes T8: a Crabaletta hit into a standing Electro
 aura applies Superconduct's Vulnerable in the game and nothing in the sim. The
-Chevalmarin leg of the same two methods DOES pass `"hydro"`
-(`furina_stage.py:669`), which is what makes this look like a miss rather than
-a rule.
+Chevalmarin leg of the same two methods DOES pass `"hydro"`, which is what
+makes this look like a miss rather than a rule.
+
+**Repaired 2026-09-16, sim side only.** Both Crabaletta legs now pass
+`element="hydro"`. THE BRIEF WAS CHECKED and it is SILENT: it names
+Chevalmarin's Hydro twice in as many words (rule 10 "deals 2 to every enemy
+and applies Hydro", rule 9 "Chevalmarin: Hydro on every enemy") and says only
+"Crabaletta deals 5 to a random enemy" and "Crabaletta: deal 8 to a random
+enemy". It never says a Crabaletta hit is elementless, so there is no rule for
+the C# to contradict and the game is the answer — recorded here because the
+reading is the load-bearing part, and writing the brief the other way would
+make this a rule change rather than a parity repair.
+
+No second `resolve_hit` pass was added. Chevalmarin's leg has one because rule
+10's clause has to hold against a body the hit loop skips; Crabaletta aims at
+one living enemy and the element travels with the hit ahead of Block in both
+engines. **One correction to this row's own text:** it said a Crabaletta hit
+into an Electro aura applies Superconduct's Vulnerable. It does not, in either
+engine — Superconduct is Electro + Cryo, and Hydro into Electro is
+Electro-Charged, whose rider is a DoT. The observable is the same (a reaction
+the game had and the sim did not) and the DoT is what is pinned, by
+`tier0/tests/test_eb495_d4_crabaletta_hits_hydro.py`. No published sim number
+moved.
 
 ### D5 — the sim has no mirror of the enemy-side "took unblocked damage" triggers
 
