@@ -184,6 +184,54 @@ class DishTable:
 
 
 @dataclass(frozen=True)
+class KeyedLines:
+    """THE FACE'S `@` LINES, AND THE KEYS THE MIRROR EXPECTS THEM TO FILL.
+
+    Pairing by POSITION is what `options`, `extra_options` and `line_pages`
+    all do, and it runs out at an event whose reachable keys outnumber the
+    outcomes a wiki-shaped face lists -- The Trial's summons pair and its
+    three story pages, Tinker Time's nine riders, Colossal Flower's third
+    level. Those three were PARKED for exactly that: no key to pair with, and
+    borrowing a neighbour's line would print another branch's consequences on
+    the button.
+
+    The curation answered with a line that carries its OWN key:
+
+        `@<key> | <Label> -- <outcome>`   an OPTION's `.title` and `.description`
+        `@<key> -- <text>`                a PAGE's row
+
+    where `<key>` is the full suffix under the dressed event's entry, spelled
+    as the base event's own literals read off the decompile. `keys` is the
+    list the mirror declares it needs. A declared key with no line on a face
+    is a REFUSAL naming the key, and a line whose key no mirror declares is a
+    refusal too -- the same bite the option count has, moved onto names, so a
+    key renamed on one side cannot quietly stop being written.
+
+    `optional` is the one relaxation, and it is for a key that ALREADY HAS A
+    DERIVATION. The Future of Potions' `DONE` page was derived from the first
+    potion line -- so the closing screen read as a Common flask's outcome
+    whichever flask was traded -- and two of its six faces now write a line of
+    their own for it. A face that writes one WINS over the derived row; a face
+    that does not keeps deriving, exactly as before. A key with no derivation
+    behind it is never optional: there the absence is a page with no row at
+    all, which is the EB-765 shape.
+
+    `positional` says whether the face's ordinary `- **x** -- y` lines are
+    still paired against `options`. It is FALSE for a face whose bullet list
+    is a human-readable restatement of the mechanics rather than a set of
+    options: Tinker Time writes the three chassis twice (once as a bullet for
+    a reader, once as a keyed line) and Colossal Flower writes its three dig
+    levels as two bullets with the later ones nested inside them. With
+    `positional` false the harvest's count is a NOTE and the keyed list is the
+    whole of the pairing.
+    """
+
+    keys: Tuple[str, ...]
+    optional: Tuple[str, ...] = ()
+    positional: bool = True
+
+
+@dataclass(frozen=True)
 class MirrorSpec:
     """One hand-written mirror, and the loc-key shape it asks for.
 
@@ -246,6 +294,9 @@ class MirrorSpec:
 
     `table_option` and `dish_table` are the two shapes no pairing can reach at
     all; see their own docstrings above.
+
+    `keyed` is the shape that needs no pairing at all, because the face's
+    line names the key it fills; see <see cref="KeyedLines"/>.
     """
 
     cls: str
@@ -256,6 +307,7 @@ class MirrorSpec:
     line_pages: Tuple[Tuple[str, ...], ...] = ()
     table_option: Optional[TableOption] = None
     dish_table: Optional[DishTable] = None
+    keyed: Optional[KeyedLines] = None
 
 
 #: Slippery Bridge's eight reachable Hold On pages, and the Hold On option
@@ -410,11 +462,18 @@ MIRRORS: Dict[str, MirrorSpec] = {
             "pages.ALL.options.LOCKED",
             ("CAVIAR", "CLAM_ROLL", "SPICY_SNAPPY", "JELLY_LIVER", "FRIED_EEL",
              "SUSPICIOUS_CONDIMENT", "GOLDEN_FYSH", "SEAPUNK_SALAD"))),
+    # The DONE page is derived from the first potion line, which is the line
+    # about surrendering a Common flask -- so the closing screen reads as one
+    # rarity's outcome whichever flask was traded. The Mondstadt and Liyue
+    # faces now write a keyed line for it and take that instead; the other
+    # four keep the derivation until they are written one too, which is what
+    # `optional` is for.
     "TheFutureOfPotions": MirrorSpec(
         "TheFutureOfPotionsMirror",
         options=("POTION",),
         pages=("pages.DONE.description",),
         page_source=(("pages.DONE.description", "POTION"),),
+        keyed=KeyedLines((), optional=("pages.DONE.description",)),
         table_option=TableOption(
             var="Rarity",
             choices=("Common", "Uncommon", "Rare", "Event", "Token"),
@@ -516,11 +575,19 @@ MIRRORS: Dict[str, MirrorSpec] = {
     # The face's FOURTH line, `(all settings)`, is the wiki's rule bullet --
     # the three-turn limit and the no-reward failure -- and it is not a fourth
     # setting. `line_pages` gives it the two pages that rule describes.
+    # The face's FOURTH line, `(all settings)`, is the wiki's rule bullet --
+    # the three-turn limit and the no-reward failure -- and it is not a fourth
+    # setting. It still has to be CONSUMED or the count check refuses the
+    # event, so `line_pages` keeps its entry; the entry is now EMPTY, because
+    # the two pages it used to supply have keyed lines of their own. That was
+    # the wart: one rule bullet stood in for both the victory and the defeat
+    # screen, so a win and a loss printed the same sentence.
     "BattlewornDummy": MirrorSpec(
         "BattlewornDummyMirror",
         options=("SETTING_1", "SETTING_2", "SETTING_3"),
-        pages=("pages.VICTORY.description", "pages.DEFEAT.description"),
-        line_pages=(("pages.VICTORY.description", "pages.DEFEAT.description"),)),
+        line_pages=((),),
+        keyed=KeyedLines(("pages.VICTORY.description",
+                          "pages.DEFEAT.description"))),
     # The option key is `...options.` + the pool's `EnergyColorName` upper-cased,
     # so the scrape sees none of the five. Declared in the FACE's order, because
     # each key is its own colour and the pairing is by NAME rather than by the
@@ -587,46 +654,92 @@ MIRRORS: Dict[str, MirrorSpec] = {
         page_source=(("pages.AFTER_BUY.description", "BARGAIN_BIN"),
                      ("pages.AFTER_BUY_BADGE_COUNTER.description", "BARGAIN_BIN"),
                      ("pages.AFTER_BUY_RECEIVE_BADGE.description", "BARGAIN_BIN"))),
-}
 
+    # --- acts 2 and 3, batch 6: the three the pairing parked ---------------
+    # Every one of these was parked for the same reason: reachable keys the
+    # faces had no line for, and no neighbouring line that could be borrowed
+    # without printing another branch's consequences. The curation answered
+    # with KEYED lines, and what is new here is only where a keyed line lands.
 
-#: PARKED: BASE EVENTS A FACE NAMES THAT ARE NOT DRESSED, AND WHY.
-#:
-#: A park is NOT a missing mirror. The generator already reports an event with
-#: no mirror, and that report is the engineering queue; these three would sit
-#: on it for ever with no work attached, because the work is not engineering.
-#: Each is an event whose reachable options outnumber the lines the faces
-#: write, in a way `extra_options` CANNOT paper over: `extra_options` exists
-#: for an option that is the same branch continued -- a `_LOCKED` twin, a
-#: later page's Fight -- and borrowing a line for an option with a DIFFERENT
-#: outcome would print the wrong consequences on the button.
-#:
-#: Dressing any of these needs new curated prose, which is the face's work and
-#: [USER]'s taste, not a generator change. Listed here so the report says PARKED
-#: with a reason rather than NO MIRROR with none.
-PARKED: Dict[str, str] = {
-    "Trial":
-        "the faces write the SIX verdict options (Merchant/Noble/Nondescript "
-        "x Guilty/Innocent) and no line for the INITIAL Accept/Reject pair, "
-        "the Reject page's Accept and Double Down, or the three story pages. "
-        "There is nothing to borrow for Accept that would not print a "
-        "verdict's consequences on the summons button, and Double Down opens "
-        "the abandon-run popup -- the one option in this surface where wrong "
-        "text is dangerous",
-    "TinkerTime":
-        "the faces write the three CARD TYPES (Attack/Skill/Power), which are "
-        "`pages.CHOOSE_CARD_TYPE.options.*`, and no line for the INITIAL "
-        "Choose Card Type option or for any of the NINE rider effects on "
-        "`pages.CHOOSE_RIDER.options.*`. The riders are nine distinct "
-        "mechanical effects picked two at a time; one borrowed line across all "
-        "nine would print the wrong effect on eight of them",
-    "ColossalFlower":
-        "the faces write TWO lines -- take the prize, dig deeper -- for a "
-        "three-level dig with six reachable option keys. The two per-level "
-        "repeats are the same branch continued and would borrow cleanly, but "
-        "the final page's Pollinous Core branch (the relic, for 7 unblockable) "
-        "and its Extract Instead sibling are distinct outcomes with no line "
-        "between them",
+    # The six verdict options stay POSITIONAL -- they are the face's six
+    # bullets, in the base event's own order (Merchant, Noble, Nondescript x
+    # Guilty, Innocent), and the harvest freezes six. Everything else is
+    # keyed: the summons pair, the Reject page and its two options, the three
+    # story pages and the six result pages.
+    #
+    # `trialFormat` and `trialResult` are NOT keyed and not dressed. They are
+    # the base event's two WRAPPER rows -- `TRIAL.trialFormat` holds the
+    # juror-number frame the story page is injected into as `{TrialStory}`,
+    # `TRIAL.trialResult` the frame the result page is injected into as
+    # `{TrialResult}` -- and the mirror looks them up under the BASE's entry,
+    # exactly as the portrait borrow does. They carry no nation's words, so
+    # there is nothing for a face to write.
+    "Trial": MirrorSpec(
+        "TrialMirror",
+        options=("pages.MERCHANT.options.GUILTY", "pages.MERCHANT.options.INNOCENT",
+                 "pages.NOBLE.options.GUILTY", "pages.NOBLE.options.INNOCENT",
+                 "pages.NONDESCRIPT.options.GUILTY",
+                 "pages.NONDESCRIPT.options.INNOCENT"),
+        keyed=KeyedLines((
+            "pages.INITIAL.options.ACCEPT", "pages.INITIAL.options.REJECT",
+            "pages.REJECT.description",
+            "pages.REJECT.options.ACCEPT", "pages.REJECT.options.DOUBLE_DOWN",
+            "pages.MERCHANT.description", "pages.NOBLE.description",
+            "pages.NONDESCRIPT.description",
+            "pages.MERCHANT_GUILTY.description",
+            "pages.MERCHANT_INNOCENT.description",
+            "pages.NOBLE_GUILTY.description", "pages.NOBLE_INNOCENT.description",
+            "pages.NONDESCRIPT_GUILTY.description",
+            "pages.NONDESCRIPT_INNOCENT.description"))),
+
+    # KEYED ONLY. The face's three bullets are the three chassis, written a
+    # second time as keyed lines so the nine riders beside them can be written
+    # at all; pairing the bullets as well would write two rows to each of the
+    # three chassis keys from two sources. `positional=False` says the bullets
+    # are the reader's copy.
+    "TinkerTime": MirrorSpec(
+        "TinkerTimeMirror",
+        keyed=KeyedLines((
+            "pages.INITIAL.options.CHOOSE_CARD_TYPE",
+            "pages.CHOOSE_CARD_TYPE.description",
+            "pages.CHOOSE_CARD_TYPE.options.ATTACK",
+            "pages.CHOOSE_CARD_TYPE.options.SKILL",
+            "pages.CHOOSE_CARD_TYPE.options.POWER",
+            "pages.CHOOSE_RIDER.description",
+            "pages.CHOOSE_RIDER.options.SAPPING",
+            "pages.CHOOSE_RIDER.options.VIOLENCE",
+            "pages.CHOOSE_RIDER.options.CHOKING",
+            "pages.CHOOSE_RIDER.options.ENERGIZED",
+            "pages.CHOOSE_RIDER.options.WISDOM",
+            "pages.CHOOSE_RIDER.options.CHAOS",
+            "pages.CHOOSE_RIDER.options.EXPERTISE",
+            "pages.CHOOSE_RIDER.options.CURIOUS",
+            "pages.CHOOSE_RIDER.options.IMPROVEMENT",
+            "pages.DONE.description"), positional=False)),
+
+    # KEYED ONLY, and the keys are the DYNAMIC ones spelled at the ordinals a
+    # run can reach. The base builds them by interpolation over
+    # `NumberOfDigs` -- `EXTRACT_CURRENT_PRIZE_{NumberOfDigs + 1}` -- and the
+    # index therefore carries the brace expression rather than a key; the
+    # reachable set is `_1` on INITIAL, `_2` on the `REACH_DEEPER_1` page, and
+    # then the `EXTRACT_INSTEAD` / `POLLINOUS_CORE` pair on `REACH_DEEPER_2`,
+    # because `ReachDeeper` increments before it branches and the `< 2` arm is
+    # only ever entered at one. The curator's keys are those, unchanged: no
+    # face key had to be remapped.
+    "ColossalFlower": MirrorSpec(
+        "ColossalFlowerMirror",
+        keyed=KeyedLines((
+            "pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1",
+            "pages.INITIAL.options.REACH_DEEPER_1",
+            "pages.REACH_DEEPER_1.description",
+            "pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2",
+            "pages.REACH_DEEPER_1.options.REACH_DEEPER_2",
+            "pages.REACH_DEEPER_2.description",
+            "pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD",
+            "pages.REACH_DEEPER_2.options.POLLINOUS_CORE",
+            "pages.EXTRACT_CURRENT_PRIZE.description",
+            "pages.EXTRACT_INSTEAD.description",
+            "pages.POLLINOUS_CORE.description"), positional=False)),
 }
 
 
@@ -865,11 +978,27 @@ class FaceEvent:
     subtitle: str
     body: str
     options: List[Tuple[str, str]] = field(default_factory=list)
+    #: The `@`-keyed lines of this section, in file order: key -> either
+    #: `(label, outcome)` for an OPTION line or `(text, None)` for a PAGE
+    #: line. Never counted as an option: a keyed line carries its own key and
+    #: pairs with nothing, so adding one to a face cannot change what its
+    #: positional lines pair with.
+    keyed: "Dict[str, Tuple[str, Optional[str]]]" = field(default_factory=dict)
+    keyed_lines: Dict[str, int] = field(default_factory=dict)
     loss: Optional[str] = None
     line: int = 0
 
 
 _OPTION_RE = re.compile(r"^-\s+\*\*(.+?)\*\*\s+[—-]\s+(.*)$")
+
+#: `@<key> | <Label> — <outcome>` -- an OPTION's two rows at `<entry>.<key>`.
+#: The em dash is the curation's separator everywhere in these files; a plain
+#: ` - ` is accepted too, and the label is matched non-greedily so the FIRST
+#: separator ends it.
+_KEYED_OPTION_RE = re.compile(r"^@(\S+)\s*\|\s*(.+?)\s+(?:—|–|-)\s+(.*)$")
+
+#: `@<key> — <text>` -- one PAGE row at `<entry>.<key>`.
+_KEYED_PAGE_RE = re.compile(r"^@(\S+)\s+(?:—|–|-)\s+(.*)$")
 
 
 def parse_face(path: Path) -> List[FaceEvent]:
@@ -882,6 +1011,12 @@ def parse_face(path: Path) -> List[FaceEvent]:
     line that is not itself an option line is a NOTE and is not emitted: the
     notes restate the harvest for a human reader and are not player-facing
     text.
+
+    A line beginning `@` is a KEYED line and names the loc key it fills --
+    `@<key> | <Label> - <outcome>` for an option's two rows, `@<key> - <text>`
+    for a page's one. It is collected separately and is NEVER an option, so a
+    face that grows one does not move what its positional lines pair with.
+    See <see cref="KeyedLines"/>.
 
     An optional `Loss: <text>` line anywhere in the section supplies the
     `.loss` row for an event whose base can kill; without one the engine falls
@@ -911,6 +1046,28 @@ def parse_face(path: Path) -> List[FaceEvent]:
             parts = re.split(r"\s+[—]\s+", head)
             current.title = parts[0].strip()
             current.subtitle = head
+            continue
+        if line.startswith("@"):
+            # A KEYED LINE IS NOT AN OPTION. It names the key it fills, so it
+            # pairs with nothing and is kept out of `options` entirely --
+            # which is what lets a face gain one without moving any existing
+            # face's option count.
+            km = _KEYED_OPTION_RE.match(line)
+            if km:
+                current.keyed[km.group(1)] = (km.group(2).strip(),
+                                              km.group(3).strip())
+                current.keyed_lines[km.group(1)] = lineno
+                continue
+            km = _KEYED_PAGE_RE.match(line)
+            if km:
+                current.keyed[km.group(1)] = (km.group(2).strip(), None)
+                current.keyed_lines[km.group(1)] = lineno
+                continue
+            # An `@` line that is neither shape is a malformed keyed line, not
+            # prose: it would otherwise vanish into the notes and the mirror
+            # would refuse for a missing key with no hint of why.
+            current.keyed[f"<malformed line {lineno}>"] = (line, None)
+            current.keyed_lines[f"<malformed line {lineno}>"] = lineno
             continue
         m = _OPTION_RE.match(line)
         if m:
@@ -992,6 +1149,11 @@ class Dressed:
     table_pair: Optional[Tuple[str, str, str]] = None
     #: `(dish id, dressed name, dressed effect)` for a `dish_table`.
     dishes: Tuple[Tuple[str, str, str], ...] = ()
+    #: `(full-suffix key, title, description)` for every KEYED OPTION line the
+    #: face supplies, in the mirror's declared order.
+    keyed_options: Tuple[Tuple[str, str, str], ...] = ()
+    #: `(full-suffix key, text)` for every KEYED PAGE line.
+    keyed_pages: Tuple[Tuple[str, str], ...] = ()
     #: `page key -> the text of the face line that is not an option`, already
     #: resolved from the mirror's `line_pages`. Those pages take their text
     #: from here and never from `page_source`.
@@ -1040,14 +1202,17 @@ class Dressed:
         with no line, and a `dish_table`'s eight rolled dishes."""
         return ([k for k in self.option_keys if k.startswith("pages.")]
                 + [k for k, _ in self.extra_options]
-                + [f"pages.ALL.options.{did}" for did, _, _ in self.dishes])
+                + [f"pages.ALL.options.{did}" for did, _, _ in self.dishes]
+                + [k for k, _, _ in self.keyed_options])
 
     def shape_page_keys(self) -> List[str]:
         """Every other key the mirror hands to the loc table whole -- the page
         descriptions, and a `dish_table`'s `DISHES.<id>.title` rows, which are
         single keys rather than prefixes."""
-        return list(self.page_keys) + [
-            f"DISHES.{did}.title" for did, _, _ in self.dishes]
+        keyed = [k for k, _ in self.keyed_pages]
+        return (list(self.page_keys)
+                + [f"DISHES.{did}.title" for did, _, _ in self.dishes]
+                + [k for k in keyed if k not in self.page_keys])
 
     def rows(self) -> List[Tuple[str, str]]:
         """Every loc row this dressed event needs, in key order.
@@ -1086,7 +1251,13 @@ class Dressed:
             label, outcome = paired.get(source, ("", ""))
             out.append((f"{self.entry}.{key}.title", label))
             out.append((f"{self.entry}.{key}.description", outcome))
+        keyed_page_keys = {k for k, _ in self.keyed_pages}
         for page in self.page_keys:
+            # A KEYED LINE WINS OVER A DERIVATION. Both would write the same
+            # key, and a dictionary cannot hold it twice; the line the face
+            # wrote for this page is the better of the two by construction.
+            if page in keyed_page_keys:
+                continue
             # A page a `line_pages` entry supplies takes that face line's text
             # directly: the line IS the page, so there is no option to derive
             # it from and `page_source` is not consulted for it.
@@ -1094,6 +1265,14 @@ class Dressed:
                 out.append((f"{self.entry}.{page}", self.line_page_text[page]))
                 continue
             out.append((f"{self.entry}.{page}", _page_text(raw, page, sources)))
+        # THE KEYED LINES, which pair with nothing because each names its own
+        # key. An option key is a prefix here too (EB-765), so both rows go
+        # out; a page key is one row.
+        for key, title, description in self.keyed_options:
+            out.append((f"{self.entry}.{key}.title", title))
+            out.append((f"{self.entry}.{key}.description", description))
+        for key, text in self.keyed_pages:
+            out.append((f"{self.entry}.{key}", text))
         if self.can_kill and self.face_event.loss:
             out.append((f"{self.entry}.loss", self.face_event.loss))
         return out
@@ -1408,7 +1587,6 @@ class Plan:
     refusals: List[str] = field(default_factory=list)
     skipped: List[str] = field(default_factory=list)
     no_mirror: List[str] = field(default_factory=list)
-    parked: List[str] = field(default_factory=list)
     notes: List[str] = field(default_factory=list)
 
 
@@ -1458,10 +1636,6 @@ def build_plan() -> Plan:
             # the harvest's shape as the face's -- and it is settled when the
             # mirror is written and the event becomes generatable, which is
             # exactly when the refusal below starts biting.
-            if base in PARKED:
-                plan.parked.append(f"{face.key}: {base} ({event.title}) -- {PARKED[base]}")
-                continue
-
             spec = MIRRORS.get(base)
             if spec is None:
                 note = f" [option count {len(event.options)} vs harvest {want}]" \
@@ -1482,18 +1656,59 @@ def build_plan() -> Plan:
             # position by position off the index's scrape, and there the
             # harvest count is the only guard there is.
             if mismatch:
-                if not spec.options:
+                if not spec.options and not (
+                        spec.keyed is not None and not spec.keyed.positional):
                     plan.refusals.append(mismatch)
                     continue
                 plan.notes.append(mismatch + " (the mirror's declared list governs)")
+
+            # THE KEYED LINES, CHECKED BY NAME BEFORE ANYTHING IS EMITTED.
+            # Both directions bite: a key the mirror declares and the face
+            # does not write would silently ship a page with no row, and a key
+            # the face writes and no mirror declares is prose aimed at a key
+            # that does not exist -- a rename on one side of the pair.
+            keyed_options: List[Tuple[str, str, str]] = []
+            keyed_pages: List[Tuple[str, str]] = []
+            required = spec.keyed.keys if spec.keyed is not None else ()
+            allowed = required + (spec.keyed.optional if spec.keyed else ())
+            declared = [k for k in allowed if k in event.keyed or k in required]
+            missing = [k for k in required if k not in event.keyed]
+            undeclared = [k for k in event.keyed if k not in allowed]
+            if missing:
+                plan.refusals.append(
+                    f"{face.key}: {base} -- the mirror declares keyed line(s) "
+                    f"the face does not write: {', '.join(missing)}")
+            if undeclared:
+                plan.refusals.append(
+                    f"{face.key}: {base} -- the face writes keyed line(s) the "
+                    f"mirror does not declare: {', '.join(undeclared)}")
+            if missing or undeclared:
+                continue
+            for key in declared:
+                first, second = event.keyed[key]
+                if second is None:
+                    keyed_pages.append((key, first))
+                else:
+                    keyed_options.append((key, first, second))
 
             # The MIRROR'S spec wins over the index's literal scrape wherever
             # it speaks: the scrape reads every key literal in the base class,
             # which is a superset (the `_LOCKED` twins) in source order (not
             # list order) and sometimes a truncated stub (a key built by
             # concatenation). The spec is what the mirror actually asks for.
-            option_keys = list(spec.options) or list(info["option_keys"])
-            page_keys = list(spec.pages) or list(info["page_keys"])
+            # A MIRROR THAT DECLARES KEYED LINES DECLARES EVERYTHING. The
+            # index's scrape is a superset in source order, and for these
+            # events it is a MIXED one -- Trial's page list holds its six
+            # verdict OPTION keys and its two wrapper rows beside the nine
+            # real pages -- so falling back to it would emit a bare option key
+            # as though it were a page. The keyed list plus what the spec
+            # spells is the whole of the shape.
+            if spec.keyed is not None:
+                option_keys = list(spec.options)
+                page_keys = list(spec.pages)
+            else:
+                option_keys = list(spec.options) or list(info["option_keys"])
+                page_keys = list(spec.pages) or list(info["page_keys"])
             # A `table_option` is ONE key wearing a table of face lines, so
             # the count it has to agree with is the table's, not the key
             # list's.
@@ -1503,7 +1718,13 @@ def build_plan() -> Plan:
             # option at all -- the wiki's rule-beside-the-options bullet -- so
             # it counts toward what the face must supply.
             wanted_lines += len(spec.line_pages)
-            if wanted_lines != len(event.options):
+            # A KEYED-ONLY MIRROR PAIRS NOTHING BY POSITION. Its face's
+            # bullets are a reader's restatement of the mechanics -- Tinker
+            # Time writes its three chassis twice over, Colossal Flower nests
+            # levels 2 and 3 inside its two bullets -- and every row it emits
+            # comes off a line that named its own key.
+            positional = spec.keyed is None or spec.keyed.positional
+            if positional and wanted_lines != len(event.options):
                 plan.refusals.append(
                     f"{face.key}: {base} -- the mirror's {wanted_lines} option "
                     f"key(s) {option_keys} cannot be paired with the face's "
@@ -1559,6 +1780,8 @@ def build_plan() -> Plan:
                 line_page_text=line_page_text,
                 table_pair=table_pair,
                 dishes=dishes,
+                keyed_options=tuple(keyed_options),
+                keyed_pages=tuple(keyed_pages),
             ))
 
     return plan
@@ -1584,8 +1807,6 @@ def report(plan: Plan) -> None:
         print(f"  SKIP    {line}")
     for line in plan.no_mirror:
         print(f"  NO MIRROR {line}")
-    for line in plan.parked:
-        print(f"  PARKED  {line}")
     for line in plan.notes:
         print(f"  NOTE    {line}")
     for line in plan.refusals:

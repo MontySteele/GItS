@@ -119,6 +119,13 @@ RUN_SCOPE_ALLOWED = {
         "the same shape: Breathing Techniques puts TWO Enlightenments into "
         "the DECK from an event page as one add, through the base event's own "
         "call (`MegaCrit.Sts2.Core.Models.Events/ZenWeaver.cs`)",
+    "TinkerTimeMirror.cs":
+        "three calls, all run-scope for the same reason and all the base "
+        "event's own (`MegaCrit.Sts2.Core.Models.Events/TinkerTime.cs`): the "
+        "Mad Science the chooser FINISHES with goes straight into the DECK "
+        "from an event page, and the two before it build the hover-tip "
+        "PREVIEWS -- a card made to be looked at on a tooltip, which never "
+        "enters a pile at all and so has no combat scope to want",
 }
 
 

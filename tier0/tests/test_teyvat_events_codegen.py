@@ -20,7 +20,12 @@ These arms are the gate on that arrangement, and they are four claims:
      keys -- the defect class that would ship a dressed option whose text
      describes another option's outcome;
   4. no generated file has been hand-edited into carrying a mechanic: a dressed
-     class is a name and a base, and nothing else.
+     class is a name and a base, and nothing else;
+  5. the KEYED lines -- a face line that names the loc key it fills, which is
+     what unparked The Trial, Tinker Time and Colossal Flower -- are checked
+     by NAME in both directions: a key the mirror declares and the face does
+     not write is refused, and a key the face writes and no mirror declares is
+     refused too. A keyed line is never counted as an option.
 """
 
 from __future__ import annotations
@@ -116,6 +121,113 @@ def test_a_face_whose_option_count_disagrees_with_the_harvest_is_refused(tmp_pat
     assert index["RoomFullOfCheese"]["harvest_options"] == 2, (
         "the harvest freezes Room Full of Cheese at two options; if that "
         "changed, this test's premise did too")
+
+
+def _load_generator():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("gen_teyvat_events", str(GENERATOR))
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+#: One Battleworn Dummy section: the three settings, the wiki's rule bullet,
+#: and whatever keyed lines a test wants after them. The mirror declares two
+#: keyed keys for this event -- the victory page and the defeat page -- which
+#: is what makes it the cheapest place to exercise both directions of the
+#: keyed check.
+_DUMMY_FACE = (
+    "## - [ ] Battleworn Dummy\n\n"
+    "### The Test Dummy — Fontaine / Test — DRAFTED\n\n"
+    "A dummy on a rail.\n\n"
+    "- **First Valve** — Fight a 75 HP dummy.\n"
+    "- **Second Valve** — Fight a 150 HP dummy.\n"
+    "- **Third Valve** — Fight a 300 HP dummy.\n"
+    "- **(all valves)** — Three turns, or no reward.\n"
+)
+
+
+def _plan_for(module, tmp_path, body: str):
+    """One plan built from ONE face file holding `body`, with everything else
+    -- the index, the harvest, the mirror ledger -- as it really is."""
+    face = tmp_path / "test-face.md"
+    face.write_text(body, encoding="utf-8")
+    module.FACE_DIR = tmp_path
+    module.FACES = (module.FaceSpec("test-face", "test-face.md",
+                                    "FONTAINE", "Fontaine"),)
+    return module.build_plan()
+
+
+def test_a_keyed_key_the_face_does_not_write_is_refused_by_name(tmp_path):
+    """A mirror's declared keyed key with no line on the face.
+
+    This is the EB-765 shape moved onto the new mechanism: the page would ship
+    with no row at all, and a page with no row opens on a raw key. The
+    generator must name the missing key rather than emit what it has.
+    """
+    module = _load_generator()
+    plan = _plan_for(module, tmp_path, _DUMMY_FACE
+                     + "\n@pages.VICTORY.description — The clock had time left.\n")
+
+    assert not plan.items, "nothing may be emitted for a refused event"
+    assert any("pages.DEFEAT.description" in r and "does not write" in r
+               for r in plan.refusals), plan.refusals
+
+
+def test_a_keyed_key_the_mirror_does_not_declare_is_refused_by_name(tmp_path):
+    """The other direction: prose aimed at a key that does not exist.
+
+    A keyed line names its own key, so a typo or a key renamed in the
+    decompile would otherwise write a row nothing ever looks up -- silently,
+    and with the page it was meant for still bare.
+    """
+    module = _load_generator()
+    plan = _plan_for(module, tmp_path, _DUMMY_FACE
+                     + "\n@pages.VICTORY.description — The clock had time left.\n"
+                       "@pages.DEFEAT.description — The clock ran dry.\n"
+                       "@pages.DRAW.description — A page this event has not got.\n")
+
+    assert not plan.items
+    assert any("pages.DRAW.description" in r and "does not declare" in r
+               for r in plan.refusals), plan.refusals
+
+
+def test_a_keyed_face_that_is_complete_emits_both_pages(tmp_path):
+    """And the passing case, so the two refusals above are not vacuous: with
+    both lines written, the victory and the defeat page carry DIFFERENT text.
+    That is the wart this mechanism retired -- one rule bullet used to supply
+    both, so a win and a loss printed the same sentence."""
+    module = _load_generator()
+    plan = _plan_for(module, tmp_path, _DUMMY_FACE
+                     + "\n@pages.VICTORY.description — The clock had time left.\n"
+                       "@pages.DEFEAT.description — The clock ran dry.\n")
+
+    assert not plan.refusals, plan.refusals
+    assert len(plan.items) == 1
+    rows = dict(plan.items[0].rows())
+    entry = plan.items[0].entry
+    assert rows[f"{entry}.pages.VICTORY.description"] == "The clock had time left."
+    assert rows[f"{entry}.pages.DEFEAT.description"] == "The clock ran dry."
+
+
+def test_a_keyed_line_is_not_counted_as_an_option(tmp_path):
+    """The parser's half of it. A keyed line carries its own key and pairs
+    with nothing, so adding one to a face must not move the option count the
+    harvest is compared against -- otherwise curating a page would refuse the
+    whole event."""
+    module = _load_generator()
+    face = tmp_path / "counted.md"
+    face.write_text(_DUMMY_FACE
+                    + "\n@pages.VICTORY.description — Won.\n"
+                      "@pages.DEFEAT.description — Lost.\n", encoding="utf-8")
+
+    events = module.parse_face(face)
+    assert len(events) == 1
+    assert len(events[0].options) == 4, "the four bullets, and not the two @ lines"
+    assert set(events[0].keyed) == {
+        "pages.VICTORY.description", "pages.DEFEAT.description"}
 
 
 def test_a_generated_dressed_event_is_a_name_and_a_base_and_nothing_else():

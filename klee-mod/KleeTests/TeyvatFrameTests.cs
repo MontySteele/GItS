@@ -619,6 +619,11 @@ public class TeyvatFrameTests : IDisposable
             new object[] { typeof(WarHistorianRepyMirror), typeof(WarHistorianRepy) },
             new object[] { typeof(DollRoomMirror), typeof(DollRoom) },
             new object[] { typeof(WelcomeToWongosMirror), typeof(WelcomeToWongos) },
+            // Acts 2 and 3, batch 6 -- the three the pairing PARKED, unparked
+            // by the faces' keyed lines rather than by a pairing rule.
+            new object[] { typeof(TrialMirror), typeof(Trial) },
+            new object[] { typeof(TinkerTimeMirror), typeof(TinkerTime) },
+            new object[] { typeof(ColossalFlowerMirror), typeof(ColossalFlower) },
         };
 
     // ---------------------------------------------------------------
@@ -1117,11 +1122,20 @@ public class TeyvatFrameTests : IDisposable
     /// the dressed entry would ask for a row nobody writes, and writing one
     /// would be a dressed copy of a word the whole game already shares; so the
     /// literal stays and this pin is told it is not a dressed key.
+    ///
+    /// `TrialMirror` keeps the base event's two WRAPPER rows,
+    /// `TRIAL.trialFormat` and `TRIAL.trialResult`. Every dressed word this
+    /// event prints is in the story page or the verdict page, which ARE keyed
+    /// per face and injected into those two as `{TrialStory}` and
+    /// `{TrialResult}`; the wrappers themselves carry the juror-number frame
+    /// and nothing a nation owns, so they are borrowed under the BASE entry
+    /// exactly as the portrait is. They are keys -- just not this dressing's.
     /// </summary>
     private static readonly IReadOnlyDictionary<string, string[]> ForeignKeyLiterals =
         new Dictionary<string, string[]>(StringComparer.Ordinal)
         {
             ["RelicTraderMirror"] = new[] { "PROCEED" },
+            ["TrialMirror"] = new[] { "TRIAL.trialFormat", "TRIAL.trialResult" },
         };
 
     private static bool IsComparableKey(string s) =>
