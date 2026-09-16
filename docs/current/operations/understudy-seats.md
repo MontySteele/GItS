@@ -93,6 +93,20 @@ at Glory's), so the four act-2/3 dressings can be looked at in under a minute
 instead of only after a bot survives act 1.  `--list` prints the run's act list
 and where it stands, writing nothing.
 
+**The first `?` after a skip is the act's ANCIENT, not the act's event list.**
+`StandardActMap.GenerateMapPointTypes` ends by stamping
+`StartingMapPoint.PointType = MapPointType.Ancient`, and `RunManager` builds
+that room from `ActModel.PullAncient()` — the single model rolled once at
+`GenerateRooms` — rather than from `PullNextEvent`, so the pending list and its
+cursor are never read there; in act 1 nobody notices, because that node is
+Neow. **The practical rule: compare the arrived page's `event_id` against the
+id you forced, and if it is an Ancient (Pael, Tezcatara, Darv, Nonupeipe,
+Tanx), answer it and walk to the NEXT `?` — the forced event is not consumed
+and is still at the cursor.** `skip_act` prints that line on arrival.
+`teyvat-proofs-7` filed two false negatives against `force_next_event` before
+working it out, over five arrivals on three faces; the cost is one extra `?`
+room, one extra fight and one extra map step per forced event.
+
 **`skip_act` is the one op on this route that is NOT rng-neutral, and it says
 so rather than claiming otherwise.** The floors it skips are floors whose rolls
 — room types, encounters, rewards, card offers, the act's own boss fight —

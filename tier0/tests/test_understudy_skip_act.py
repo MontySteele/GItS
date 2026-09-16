@@ -200,3 +200,31 @@ def test_the_module_says_what_a_run_that_used_it_is_not():
     assert "ATTENDED ONLY" in doc
     assert "NOT COMPARABLE" in (bridge.skip_act.__doc__ or "")
     assert "no act-4 path" in doc.lower() or "act-4 path" in doc
+
+
+# --------------------------------- EB-771: the Ancient comes first ---------
+
+
+def test_the_arrival_says_the_next_question_mark_is_the_acts_ancient(monkeypatch):
+    """The fact proofs-7 paid two false negatives for.
+    `StandardActMap.GenerateMapPointTypes` stamps every act's STARTING map
+    point `MapPointType.Ancient`, and `RunManager` builds that room from
+    `ActModel.PullAncient()` rather than from `PullNextEvent` -- so a forced
+    event is not what the first `?` after a skip opens on, and a driver that
+    does not check the page id it arrived at files a false negative against
+    `force_next_event`."""
+    monkeypatch.setattr(bridge, "_request", _Recorder())
+    monkeypatch.setattr(bridge, "get_state", _states(1, 2))
+    monkeypatch.setattr(skip_act.time, "sleep", lambda _s: None)
+    lines: list[str] = []
+    skip_act.skip_to_next_act("EB-771 proof", log=lines.append)
+    printed = " ".join(lines)
+    assert "ANCIENT" in printed
+    assert "event_id" in printed
+
+
+def test_the_note_says_the_forced_event_survives_the_ancient(monkeypatch):
+    """Half the fact is that the Ancient goes first; the other half is that it
+    costs nothing but a room. A caller told only the first would re-force an
+    event that is still sitting at the cursor."""
+    assert "not consumed" in skip_act.ANCIENT_FIRST
