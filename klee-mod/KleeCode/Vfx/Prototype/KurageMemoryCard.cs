@@ -257,6 +257,25 @@ internal static class KurageMemoryCard
     internal static Player? TryGetMe(CombatState? state)
     {
         if (state == null) return null;
+        // AND A ROOM STILL BEING BUILT IS NOT A DEFECT, which the live look
+        // of 2026-09-16 is the record of: the warning below fired seven times
+        // in one Klee run and at EVERY combat start of the Kokomi run, and
+        // every one of them was logged BEFORE `Creating NCombatRoom`. It is
+        // the `Deactivate` postfix at the bottom of this file, running while
+        // the INCOMING room is built -- the same ordering the summary above
+        // was written for. The combat holds no players yet, so `GetMe`
+        // throws, so a teardown with nothing to tear down logs a warning.
+        //
+        // NO TABLE MEANS NO ANSWER, SILENTLY. The loud warning is for the
+        // case it was written for -- a combat with a table in it and no local
+        // seat at that table -- and a line that fires on every fight is a
+        // line nobody reads on the fight where it means something.
+        //
+        // THE PROPERTY IS ITSELF GUARDED because it is a projection over
+        // `PlayerCreatures` (`CombatState.Players`, v0.111.0) and a half-built
+        // room is exactly where that can fault; the fallback is the same
+        // answer as an empty table.
+        if (!Seated(state)) return null;
         try
         {
             return LocalContext.GetMe(state);
@@ -267,6 +286,20 @@ internal static class KurageMemoryCard
                    + $"combat ({e.GetType().Name}: {e.Message}); drawing "
                    + "nothing.");
             return null;
+        }
+    }
+
+    /// <summary>Does this combat have anybody at the table yet?</summary>
+    private static bool Seated(CombatState state)
+    {
+        try
+        {
+            var players = state.Players;
+            return players != null && players.Count > 0;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 

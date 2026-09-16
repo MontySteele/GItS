@@ -210,6 +210,78 @@ public sealed class FoldedDamageVar : DamageVar
 }
 
 /// <summary>
+/// `EB-670`: THE HEADLINE OF A "IF A PLAN WAS CARRIED OUT" FACE, folded the
+/// way the HIT is folded.
+///
+/// THE FIND (live look 8b, 2026-09-16, and the r26 seat before it). Feint
+/// prints "Deal 5 damage. If a Plan was carried out this turn, deal 10 damage
+/// instead." On a morning whose carry-out drew nothing, the scenario wrote a
+/// Plan, ended the turn, and read Feint BEFORE any play: the headline said 5,
+/// and the hit that followed killed an 8-HP body, so it was the 10. The
+/// condition is not evaluated at preview time, so the first number a reader
+/// meets is the number the card will NOT deal.
+///
+/// THE HIT ALREADY KNOWS. The emitted <c>OnPlay</c> asks
+/// <c>KokomiOverhaulLedger.For(...).PlanCarriedOutThisTurn</c> and takes the
+/// branch; that is the same flag, the same ledger and the same turn, so
+/// reading it once more at preview time makes the face and the play agree
+/// without moving either number. WHAT IS NOT CHANGED: both printed numbers
+/// stay on the face and both stay live. The condition clause still says what
+/// the alternative is and when it applies -- the only thing that moves is
+/// WHICH of the two the headline is standing for today.
+///
+/// BY THE SIBLING VAR AND NOT BY A SECOND COPY OF THE NUMBER, which is the
+/// one design decision here: the branch amount is already declared as
+/// <c>BranchDamage</c>, upgrades on its own key (`conditional_damage` plus
+/// `conditional_then_damage`, which move the two halves by different amounts),
+/// and a second stored copy would be a second thing for an upgrade to miss.
+/// So this reads the sibling's <c>BaseValue</c> off the card.
+///
+/// AND IT DELEGATES TO <see cref="FoldedDamageVar"/> rather than reimplementing
+/// it: the body the face folds against, the Spotlight's printed multiplier and
+/// the enchantment are all that class's answers already, and two implementations
+/// of one fold is two places for it to drift.
+///
+/// OUTSIDE COMBAT IT PRINTS ITS BASE. No owner, no ledger, no swap -- a
+/// compendium, shop or deck-view copy reads exactly what it read before.
+/// </summary>
+public sealed class PlanCarriedDamageVar : DamageVar
+{
+    private readonly string _branch;
+
+    public PlanCarriedDamageVar(
+        string name, decimal damage, string branch, ValueProp props)
+        : base(name, damage, props)
+    {
+        _branch = branch;
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        var inner = new FoldedDamageVar(Name, Printed(card), Props);
+        inner.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+        EnchantedValue = inner.EnchantedValue;
+        PreviewValue = inner.PreviewValue;
+    }
+
+    /// <summary>Which of the face's two numbers this headline stands for.</summary>
+    private decimal Printed(CardModel card)
+    {
+        var kokomi = card.Owner?.Creature;
+        if (kokomi == null || !card.IsMutable) return BaseValue;
+        if (!KokomiOverhaulLedger.For(kokomi).PlanCarriedOutThisTurn)
+        {
+            return BaseValue;
+        }
+        return card.DynamicVars.TryGetValue(_branch, out var branch)
+            ? branch.BaseValue
+            : BaseValue;
+    }
+}
+
+/// <summary>
 /// `EB-498` / `EB-388`: <see cref="FoldedDamageVar"/>'s BLOCK twin -- a named
 /// <c>BlockVar</c> whose preview runs the game's block hooks over the number
 /// the play will actually gain.

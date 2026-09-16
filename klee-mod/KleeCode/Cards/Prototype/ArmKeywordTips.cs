@@ -260,7 +260,21 @@ public static class ArmKeywordTips
         With(inherited, BombKey,
             "A charge on an enemy: grows " + KleeOverhaulLaw.BombGrowth
           + " a turn, and goes off when [gold]Set off[/gold] or as a "
-          + "[gold]Mine[/gold]. "
+          + "[gold]Mine[/gold]"
+          // `EB-287`, FOUND FAILING BY THE LIVE LOOK OF 2026-09-16. Merging
+          // is stated on the enemy BADGE ("Bomb 9 ... sizes, oldest first:
+          // 5 / 4") and nowhere on the WORD -- so the one reader the keyword
+          // exists for, the one who has not built a pile yet, is never told
+          // that a second placer ADDS to the charge instead of starting a
+          // second one beside it. That is the rule the whole plan turns on
+          // and it is five words.
+          //
+          // A CLAUSE AND NOT A SENTENCE, because the tip is at the base
+          // game's four-sentence cap and a fifth sentence would push it over
+          // (`lint_text_conventions`, MAX_SENTENCES). It rides the clause it
+          // belongs to -- what a charge IS and how it behaves on the body --
+          // rather than displacing one of the three ruled findings below.
+          + "; a second Bomb joins the first. "
           // `EB-400`: BLOCK, NAMED. "Not an Attack: only Vulnerable and a
           // cap move it" is a true sentence that reads as a false one -- a
           // list of the only two things that touch the hit, with Block

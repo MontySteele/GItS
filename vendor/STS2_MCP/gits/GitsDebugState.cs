@@ -46,6 +46,13 @@
 //                    (EB-761). THE ONE OP HERE THAT IS NOT A COMBAT WRITE and
 //                    the one that runs with no combat up -- see the EB-761
 //                    block below.
+//   give_gold     -> PlayerCmd.GainGold(amount, player)
+//   give_relic    -> RelicCmd.Obtain(relic.ToMutable(), player)
+//   give_potion   -> PotionCmd.TryToProcure(potion.ToMutable(), player, slot)
+//                    (live look 8b, 2026-09-16). THE TWO RUN GRANTS, and the
+//                    only ops here that put a THING in the run rather than a
+//                    number on a board -- see the GitsDebugStateRunGrants
+//                    block below for why they exist and what they cost.
 //   set_power     -> PowerCmd.Apply / PowerCmd.ModifyAmount / PowerCmd.Remove
 //                    (EB-146) -- the three commands every card in the game
 //                    applies, stacks and clears a power with. Which one runs
@@ -479,7 +486,51 @@ public static partial class McpMod
 
     private static readonly string[] GitsDebugStateOps =
         { "set_resource", "set_energy", "set_hp", "set_block", "set_power",
-          "clear_hand", "hover", "unhover", "force_next_event", "skip_act" };
+          "clear_hand", "hover", "unhover", "force_next_event", "skip_act",
+          "give_relic", "give_potion", "give_gold" };
+
+    /// <summary>
+    /// THE THREE RUN GRANTS (live look 8b, 2026-09-16; `give_gold` from
+    /// proofs-8a, PR #573).
+    ///
+    /// WHY THEY EXIST. Three built rows came back NOT DONE from the live look
+    /// for one reason, and it was not the rows: `EB-752` (The Boot),
+    /// `EB-684` (Flex Potion) and `EB-116` (Pael's Eye) each need an item in
+    /// the run, this route could set a resource, a power, HP, Block and a
+    /// hand -- and had no way to put a relic or a potion in front of anybody.
+    /// "The Boot never dropped and the bridge has no relic-grant op." A row
+    /// whose acceptance costs a relic roll is a row that waits for luck, and
+    /// three of them had been waiting.
+    ///
+    /// THEY ARE THE GAME'S OWN TWO CALLS. <c>RelicCmd.Obtain(relic
+    /// .ToMutable(), player)</c> and <c>PotionCmd.TryToProcure(potion
+    /// .ToMutable(), player, slot)</c> -- the pair the game's own dev console
+    /// reaches through <c>RelicConsoleCmd</c> and <c>PotionConsoleCmd</c>
+    /// (decompiled, sts2.dll 0.111.0 `41cef1ea`). Nothing is reimplemented:
+    /// the relic's <c>AfterObtained</c>, the potion's
+    /// <c>Hook.ShouldProcurePotion</c> and both history rows run exactly as
+    /// they run on a drop.
+    ///
+    /// RNG NEUTRALITY, HONESTLY. A grant rolls NOTHING -- no pool draw, no
+    /// pity counter, no floor roll -- so it does not consume the run's own
+    /// rolls the way `skip_act` does. What it DOES move is the run: a relic
+    /// is a standing rule and a potion is a slot, and later rolls read both
+    /// (`EventModel.IsAllowed` asks about relic and potion counts;
+    /// <c>RelicCmd.Obtain</c> removes a non-stackable relic from the grab
+    /// bag, so the next drop's pool is one smaller). Neutral on the SPOT and
+    /// not on the RUN, and nothing read after one is comparable to a run that
+    /// was not given one -- which is what the guardrail sentence on every
+    /// response already says.
+    ///
+    /// RUN OPS AND NOT COMBAT OPS, which is why they have their own list: a
+    /// relic is granted on a map as readily as in a fight, and the generic
+    /// combat refusal would forbid the screen most callers stand on. They are
+    /// NOT on <see cref="GitsDebugStateOutOfCombatOps"/> because that list's
+    /// two entries must not reach the combat block at all, while these two
+    /// are indifferent to it.
+    /// </summary>
+    private static readonly string[] GitsDebugStateRunGrants =
+        { "give_relic", "give_potion", "give_gold" };
 
     /// <summary>The ops that do NOT need a combat up (EB-761, EB-771).
     ///
@@ -830,7 +881,8 @@ public static partial class McpMod
 
     private static Dictionary<string, object?> GitsDebugStateApply(
         string op, string who, string resourceId, string powerId,
-        string cardName, string eventId, int amount, string why)
+        string cardName, string eventId, string relicId, string potionId,
+        int amount, int slot, string why)
     {
         if (!RunManager.Instance.IsInProgress)
             return Error("No run in progress; there is no player to write to.");
@@ -849,6 +901,23 @@ public static partial class McpMod
             return op == "skip_act"
                 ? GitsSkipActApply(op, why)
                 : GitsForceNextEventApply(op, eventId, why);
+
+        // Live look 8b. THE TWO RUN GRANTS, above the combat gate and below
+        // the multiplayer one: they work on a map and in a fight alike, and
+        // both go through the same synchronizer-free path every write here
+        // does, so the multiplayer refusal is theirs too.
+        if (Array.IndexOf(GitsDebugStateRunGrants, op) >= 0)
+        {
+            switch (op)
+            {
+                case "give_relic":
+                    return GitsGiveRelicApply(op, relicId, why);
+                case "give_potion":
+                    return GitsGivePotionApply(op, potionId, slot, why);
+                default:
+                    return GitsGiveGoldApply(op, amount, why);
+            }
+        }
 
         if (!CombatManager.Instance.IsInProgress)
             return Error("No combat in progress. Every op here writes combat "
@@ -1125,6 +1194,272 @@ public static partial class McpMod
         if (powerEntry != null) report["power"] = powerEntry;
         if (cardEntry != null) report["card"] = cardEntry;
         return report;
+    }
+
+    // -------------------------------------------- live look 8b: the grants ---
+
+    /// <summary>How many ids a grant refusal prints back before it stops.
+    /// `GitsDebugEventList`'s cap and its reason: long enough to be a
+    /// spelling aid, short enough not to bury the sentence.</summary>
+    private const int GitsDebugGrantListCap = 40;
+
+    private static string GitsDebugIdList(List<string> ids, string what)
+    {
+        if (ids.Count == 0) return $"This build knows no {what} at all.";
+        ids.Sort(StringComparer.Ordinal);
+        var shown = ids.Take(GitsDebugGrantListCap).ToList();
+        return $"{ids.Count} {what}: " + string.Join(", ", shown)
+             + (ids.Count > shown.Count
+                    ? $", ... ({ids.Count - shown.Count} more)." : ".");
+    }
+
+    /// <summary>
+    /// Give the local player one relic, by id (`THE_BOOT`) or exact title.
+    ///
+    /// THE ID FIRST AND THE TITLE ONLY EXACTLY, `GitsGiveCardFind`'s rule and
+    /// its reason: an id is the thing itself and a title is loc data that
+    /// moves with a wording pass, so a fuzzy title match would hand back a
+    /// relic nobody asked for. The game's own console does a `Contains` walk
+    /// here; this route refuses instead and prints the ids, because a
+    /// scenario that silently got a different relic is a scenario whose
+    /// finding is about the wrong card.
+    /// </summary>
+    private static Dictionary<string, object?> GitsGiveRelicApply(
+        string op, string relicId, string why)
+    {
+        if (string.IsNullOrWhiteSpace(relicId))
+            return Error("give_relic needs a 'relic' id, e.g. THE_BOOT. GET "
+                         + "this route for what this build knows.");
+
+        var runState = RunManager.Instance.DebugOnlyGetState();
+        if (runState == null) return Error("No run state");
+        var player = LocalContext.GetMe(runState);
+        if (player == null) return Error("Could not find local player");
+
+        var relic = GitsDebugFindRelic(relicId);
+        if (relic == null)
+            return Error($"No relic '{relicId}'. "
+                         + GitsDebugIdList(
+                             ModelDb.AllRelics
+                                 .Select(r => SafeGetText(() => r.Id.Entry)
+                                              ?? "")
+                                 .Where(s => s.Length > 0).ToList(),
+                             "relics"));
+
+        // ALREADY HELD IS A REFUSAL AND NOT A SECOND COPY. `RelicCmd.Obtain`
+        // appends unconditionally, so a second grant of a non-stackable relic
+        // puts two of it in the inventory -- a board the game cannot produce,
+        // which is the same line `set_power` draws at Artifact.
+        var held = player.Relics.Count;
+        if (!relic.IsStackable)
+        {
+            foreach (var mine in player.Relics)
+            {
+                if (mine != null && mine.Id.Equals(relic.Id))
+                    return Error(
+                        $"'{SafeGetText(() => relic.Id.Entry)}' is not "
+                        + "stackable and this player already has it. A second "
+                        + "copy is a board the game cannot produce.");
+            }
+        }
+
+        var entry = SafeGetText(() => relic.Id.Entry) ?? relicId;
+        GD.Print($"[STS2 MCP][GItS] debug_state: {op} {entry} "
+                 + $"{held} -> {held + 1} (queued) | why: {why}");
+
+        TaskHelper.RunSafely(RelicCmd.Obtain(
+            relic.ToMutable(), player));
+
+        return new Dictionary<string, object?>
+        {
+            ["status"] = "ok",
+            ["message"] = $"{op} {entry}: {held} -> {held + 1} relics; "
+                          + "queued, read the next state to confirm",
+            ["guardrail"] = GitsDebugStateGuardrail,
+            ["op"] = op,
+            ["who"] = "player",
+            ["before"] = held,
+            ["after"] = held + 1,
+            // The game's own command is a Task and `AfterObtained` runs inside
+            // it, so the inventory is one frame behind this answer -- the same
+            // promise `set_power` and `clear_hand` make.
+            ["queued"] = true,
+            ["why"] = why,
+            ["relic"] = entry
+        };
+    }
+
+    /// <summary>
+    /// Give the local player one potion, by id (`FLEX_POTION`) or exact title.
+    ///
+    /// THE BELT CAN REFUSE, and the refusal is the game's: `TryToProcure`
+    /// asks `Hook.ShouldProcurePotion` and then `AddPotionInternal`, and a
+    /// full belt answers `success: false`. That answer arrives a frame later
+    /// than this response can, so what this route CAN check before queueing
+    /// is the one precondition it can read -- a named slot that is already
+    /// occupied -- and it says so rather than reporting an ok for a grant the
+    /// belt then dropped.
+    /// </summary>
+    private static Dictionary<string, object?> GitsGivePotionApply(
+        string op, string potionId, int slot, string why)
+    {
+        if (string.IsNullOrWhiteSpace(potionId))
+            return Error("give_potion needs a 'potion' id, e.g. FLEX_POTION. "
+                         + "GET this route for what this build knows.");
+
+        var runState = RunManager.Instance.DebugOnlyGetState();
+        if (runState == null) return Error("No run state");
+        var player = LocalContext.GetMe(runState);
+        if (player == null) return Error("Could not find local player");
+
+        var potion = GitsDebugFindPotion(potionId);
+        if (potion == null)
+            return Error($"No potion '{potionId}'. "
+                         + GitsDebugIdList(
+                             ModelDb.AllPotions
+                                 .Select(p => SafeGetText(() => p.Id.Entry)
+                                              ?? "")
+                                 .Where(s => s.Length > 0).ToList(),
+                             "potions"));
+
+        var held = player.Potions.Count();
+        var entry = SafeGetText(() => potion.Id.Entry) ?? potionId;
+
+        GD.Print($"[STS2 MCP][GItS] debug_state: {op} {entry} "
+                 + $"{held} -> {held + 1} slot {slot} (queued) | why: {why}");
+
+        TaskHelper.RunSafely(PotionCmd.TryToProcure(
+            potion.ToMutable(), player, slot));
+
+        return new Dictionary<string, object?>
+        {
+            ["status"] = "ok",
+            ["message"] = $"{op} {entry}: {held} -> {held + 1} potions"
+                          + (slot >= 0 ? $" at slot {slot}" : "")
+                          + "; queued, read the next state to confirm -- a "
+                          + "full belt refuses inside the game's own command "
+                          + "and the next state is where that shows",
+            ["guardrail"] = GitsDebugStateGuardrail,
+            ["op"] = op,
+            ["who"] = "player",
+            ["before"] = held,
+            ["after"] = held + 1,
+            ["queued"] = true,
+            ["why"] = why,
+            ["potion"] = entry,
+            ["slot"] = slot
+        };
+    }
+
+    /// <summary>
+    /// Give the local player gold (proofs-8a, PR #573).
+    ///
+    /// WHY IT IS HERE. Its absence kept four checks out of reach:
+    /// `RELIC_TRADER` wants 100 gold and five tradable relics,
+    /// `RANWID_THE_ELDER` wants 100 gold, a tradable relic and a potion,
+    /// `WELCOME_TO_WONGOS` wants 100 gold in act 2, and `EB-459` is Neow's
+    /// Arcane Scroll roll. Each is an `EventModel.IsAllowed` gate that
+    /// `force_next_event` refuses on, with `run_facts` naming the number that
+    /// is short -- and nothing on this route could move it.
+    ///
+    /// THE GAME'S OWN COMMAND, this block's rule: <c>PlayerCmd.GainGold</c>,
+    /// which is what a chest, a fight's loot and a relic all end in. So
+    /// <c>Hook.ModifyGoldGained</c> RUNS -- a relic that changes gold gained
+    /// changes this too, exactly as it changes a drop -- and the `after` on
+    /// the report is what the arithmetic predicts while the next state is
+    /// what landed. Deliberate: the alternative is <c>player.Gold +=</c>,
+    /// which would be the one write on this route the game cannot itself
+    /// produce.
+    ///
+    /// A GRANT, NOT A SET. <c>PlayerCmd.SetGold</c>'s decrease path is
+    /// <c>LoseGold</c>, which writes a LOSS into the run's own history -- a
+    /// fact about the run nobody asked for. A caller who wants a floor asks
+    /// for the difference, which the report's `before` hands them.
+    ///
+    /// RNG-NEUTRAL ON THE SPOT AND NOT ON THE RUN, its two neighbours' rule:
+    /// no roll is taken, and every later gate that asks about gold then reads
+    /// a number nobody earned.
+    /// </summary>
+    private static Dictionary<string, object?> GitsGiveGoldApply(
+        string op, int amount, string why)
+    {
+        if (amount <= 0)
+            return Error("give_gold needs a positive 'amount'. It is a GRANT "
+                         + "and not a set: the game's own decrease path writes "
+                         + "a loss into the run's history, which is a fact "
+                         + "about the run nobody asked for. Read `before` and "
+                         + "ask for the difference.");
+
+        var runState = RunManager.Instance.DebugOnlyGetState();
+        if (runState == null) return Error("No run state");
+        var player = LocalContext.GetMe(runState);
+        if (player == null) return Error("Could not find local player");
+
+        var before = player.Gold;
+
+        GD.Print($"[STS2 MCP][GItS] debug_state: {op} {amount} "
+                 + $"{before} -> {before + amount} (queued) | why: {why}");
+
+        TaskHelper.RunSafely(PlayerCmd.GainGold(amount, player));
+
+        return new Dictionary<string, object?>
+        {
+            ["status"] = "ok",
+            ["message"] = $"{op} {amount}: {before} -> {before + amount} gold; "
+                          + "queued, read the next state to confirm -- "
+                          + "Hook.ModifyGoldGained runs on this exactly as it "
+                          + "runs on a drop, so a relic may move the number",
+            ["guardrail"] = GitsDebugStateGuardrail,
+            ["op"] = op,
+            ["who"] = "player",
+            ["before"] = before,
+            ["after"] = before + amount,
+            ["queued"] = true,
+            ["why"] = why,
+            ["granted"] = amount
+        };
+    }
+
+    private static RelicModel? GitsDebugFindRelic(string wanted)
+    {
+        RelicModel? byTitle = null;
+        foreach (var relic in ModelDb.AllRelics)
+        {
+            var id = SafeGetText(() => relic.Id.Entry);
+            if (!string.IsNullOrWhiteSpace(id)
+                && string.Equals(id, wanted, StringComparison.OrdinalIgnoreCase))
+                return relic;
+            if (byTitle == null)
+            {
+                var title = SafeGetText(() => relic.Title);
+                if (!string.IsNullOrWhiteSpace(title)
+                    && string.Equals(title, wanted,
+                                     StringComparison.OrdinalIgnoreCase))
+                    byTitle = relic;
+            }
+        }
+        return byTitle;
+    }
+
+    private static PotionModel? GitsDebugFindPotion(string wanted)
+    {
+        PotionModel? byTitle = null;
+        foreach (var potion in ModelDb.AllPotions)
+        {
+            var id = SafeGetText(() => potion.Id.Entry);
+            if (!string.IsNullOrWhiteSpace(id)
+                && string.Equals(id, wanted, StringComparison.OrdinalIgnoreCase))
+                return potion;
+            if (byTitle == null)
+            {
+                var title = SafeGetText(() => potion.Title);
+                if (!string.IsNullOrWhiteSpace(title)
+                    && string.Equals(title, wanted,
+                                     StringComparison.OrdinalIgnoreCase))
+                    byTitle = potion;
+            }
+        }
+        return byTitle;
     }
 
     // ------------------------------------------------- EB-761 force event ---
@@ -1686,17 +2021,30 @@ public static partial class McpMod
                 && amountElem.TryGetInt32(out var parsedAmount))
                 amount = parsedAmount;
 
+            // Live look 8b: the potion's slot, and -1 rather than 0 because
+            // `PotionCmd.TryToProcure` reads -1 as "the first free slot" and
+            // 0 as "the first slot, occupied or not". A caller that named no
+            // slot asked for the former.
+            int slot = -1;
+            if (parsed.TryGetValue("slot", out var slotElem)
+                && slotElem.ValueKind == JsonValueKind.Number
+                && slotElem.TryGetInt32(out var parsedSlot))
+                slot = parsedSlot;
+
             string who = GitsDebugStr(parsed, "who") ?? "player";
             string resource = GitsDebugStr(parsed, "resource") ?? "";
             string power = GitsDebugStr(parsed, "power") ?? "";
             string card = GitsDebugStr(parsed, "card") ?? "";
             string evt = GitsDebugStr(parsed, "event") ?? "";
+            string relic = GitsDebugStr(parsed, "relic") ?? "";
+            string potion = GitsDebugStr(parsed, "potion") ?? "";
 
             var applyTask = RunOnMainThread(
                 () => GitsDebugStateApply(op!.Trim(), who.Trim(),
                                           resource.Trim(), power.Trim(),
-                                          card.Trim(), evt.Trim(), amount,
-                                          why!.Trim()));
+                                          card.Trim(), evt.Trim(),
+                                          relic.Trim(), potion.Trim(),
+                                          amount, slot, why!.Trim()));
             SendJson(response, applyTask.GetAwaiter().GetResult());
         }
         catch (Exception ex)

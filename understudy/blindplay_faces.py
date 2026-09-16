@@ -154,6 +154,50 @@ def _element(keywords: list[dict[str, str]]) -> str:
     return ""
 
 
+def _follow_the_override(keywords: list[dict[str, str]]
+                         ) -> list[dict[str, str]]:
+    """`EB-389`'s other half: the `Applies X` ROW follows the override too.
+
+    THE FIND (live look 8b, 2026-09-16). Under `Lightning Fang 2 (buff) --
+    Your Attacks apply Electro INSTEAD of the element they print`, Ka-pow!'s
+    face read `[Electro]` in the title, carried the `*Element overridden*`
+    clause that explains why -- and then printed an `*Applies Pyro*` keyword
+    row underneath it. Three rows of one face, two of them agreeing and the
+    third contradicting both, which is the shape `EB-389` was filed on in the
+    first place: the printed element and the applied one disagreeing with
+    nothing on the screen able to settle it.
+
+    THE ROW IS NOT DROPPED, because it carries the only sentence on the page
+    saying what an element DOES -- "Another aura: consumed, and an Elemental
+    Reaction triggers" -- and a face that applies an aura with no such
+    sentence is a worse page than one that names the wrong aura. What moves
+    is the NAME, onto the element the override says will land; the body is
+    the same rule whichever aura it is about.
+
+    NOTHING MOVES WITHOUT AN OVERRIDE ROW, which is every card on every board
+    with no Lightning Fang on it: `_element` returns the printed element, this
+    returns the rows it was handed, and the face reads exactly as before.
+    """
+    landed = ""
+    for k in keywords:
+        if k["name"] != _ELEMENT_OVERRIDE_TITLE:
+            continue
+        m = _ELEMENT_OVERRIDE_BODY.search(k.get("text") or "")
+        if m:
+            landed = m.group(1)
+            break
+    if not landed:
+        return keywords
+    out = []
+    for k in keywords:
+        printed = _ELEMENT_KEYWORD.match(k["name"])
+        if printed and printed.group(1) != landed:
+            out.append({**k, "name": f"Applies {landed}"})
+        else:
+            out.append(k)
+    return out
+
+
 def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     """One card as the game prints it. Field by field, never spread.
 
@@ -167,6 +211,9 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         if isinstance(k, dict) and _text(k.get("name")):
             kws.append({"name": _text(k.get("name")),
                         "text": _text(k.get("description"))})
+    # `EB-389`: and where an override row names the aura that will LAND, the
+    # printed `Applies X` row follows it instead of arguing with it.
+    kws = _follow_the_override(kws)
     return {
         "title": _text(entry.get("name")),
         "text": _text(entry.get("description")),

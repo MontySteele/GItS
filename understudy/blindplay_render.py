@@ -659,6 +659,20 @@ def _folded_reaction(power: dict[str, Any]) -> str:
     return f", with {found.group(1).title()}" if found else ""
 
 
+def _spark_sources_line(combat: dict[str, Any]) -> str:
+    """`EB-610`'s sub-line, in one place because two rows now print it.
+
+    Spark reaches the page in two shapes -- a METER row on a build that sends
+    `combat["meters"]`, and a POWER row (`Spark 3 (buff)`) on a build that
+    does not -- and the sentence saying where this turn's Sparks came from is
+    the same sentence under either. Assembling it twice is how the power
+    shape came to print nothing at all.
+    """
+    return SPARK_SOURCES_LINE.format(
+        sources=", ".join(f"+{s['amount']} {s['name']}"
+                          for s in combat["spark_sources"]))
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
@@ -1411,7 +1425,7 @@ STAGE_LOG_HEADING = ("- Since you ended your last turn, in order (the "
                      "end-of-turn acts, the enemies' turn, then what you have "
                      "played this turn):")
 
-STAGE_EMPTY_LINE = ("- The stage is empty. A [gold]Spend[/gold] rider cannot "
+STAGE_EMPTY_LINE = ("- The stage is empty. A Spend rider cannot "
                     "fire at all, so those cards play at their base number.")
 
 
@@ -1434,9 +1448,17 @@ STAGE_EMPTY_LINE = ("- The stage is empty. A [gold]Spend[/gold] rider cannot "
 #
 # CHEVALMARIN NAMES NO BODY because it aims at all of them, which is why the
 # wire carries a target for one performer and not for three.
+#
+# AND NO MARKUP IN ANY OF THEM (`EB-246`, live look 8b defect 1). The page's
+# rule is that the game's `[gold]` tags are folded out of every printed name
+# and body, and that fold runs over what arrives on the WIRE -- so a tag typed
+# into a RENDERER literal never meets it, and the stage section printed
+# `joined the stage at 3 [gold]Fanfare[/gold]`, `Furina gains 3
+# [gold]Block[/gold]` and `took a [gold]Bow[/gold]` verbatim. The words the
+# page writes itself are already folded, so they are written folded.
 STAGE_ACT_EFFECTS = {
-    "usher": "Furina gains {n} [gold]Block[/gold]",
-    "chevalmarin": "{n} across every enemy, and [gold]Hydro[/gold] on each",
+    "usher": "Furina gains {n} Block",
+    "chevalmarin": "{n} across every enemy, and Hydro on each",
     "crabaletta": "{n} to {who}",
 }
 
@@ -1444,8 +1466,8 @@ STAGE_ACT_EFFECTS = {
 #: so it is the one row with no `{n}` in it -- the beat files 0 and a line
 #: reading "0 to every enemy" would be describing a hit that did not happen.
 STAGE_BOW_EFFECTS = {
-    "usher": "Furina gains {n} [gold]Block[/gold]",
-    "chevalmarin": "[gold]Hydro[/gold] on every enemy",
+    "usher": "Furina gains {n} Block",
+    "chevalmarin": "Hydro on every enemy",
     "crabaletta": "{n} to {who}",
 }
 
@@ -1559,20 +1581,20 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
         where = f" the {seat} seat" if seat else ""
         if row["event"] == "arrive":
             out.append(f"  - {who} joined the stage at {row['fanfare']} "
-                       f"[gold]Fanfare[/gold]"
+                       "Fanfare"
                        + (f", and stands in{where}." if where else "."))
         elif row["event"] == "act":
             out.append(f"  - {who} performed: "
                        f"{_stage_effect(row, STAGE_ACT_EFFECTS)}.")
         elif row["event"] == "bow":
-            out.append(f"  - {who} took a [gold]Bow[/gold]: "
+            out.append(f"  - {who} took a Bow: "
                        f"{_stage_effect(row, STAGE_BOW_EFFECTS)}.")
         elif row["event"] == "leave":
             out.append(f"  - {who} left the stage: {row['why']}.")
         elif row["event"] == "rotate":
             out.append(f"  - {who} moved from the front seat to the back, "
-                       f"bar and all. Nobody left and nobody took a "
-                       f"[gold]Bow[/gold].")
+                       "bar and all. Nobody left and nobody took a "
+                       "Bow.")
     return out
 
 
@@ -1678,6 +1700,7 @@ def render(obs: dict[str, Any]) -> str:
                 f"- Block {you['block']}",
                 f"- Energy {you['energy']}/{you['max_energy']}"]
         defined = {row["name"] for row in (obs.get("keywords") or [])}
+        spark_named = False
         for name, amount in sorted(you["meters"].items()):
             # `EB-181`: with a ceiling the row reads like the HP and Energy
             # rows above it and the note narrows to the half still true; with
@@ -1751,11 +1774,22 @@ def render(obs: dict[str, Any]) -> str:
             # because a reader asking "where did that come from" is only ever
             # asking about a number that moved.
             if name == "Spark" and c.get("spark_sources"):
-                out.append("    - " + SPARK_SOURCES_LINE.format(
-                    sources=", ".join(f"+{s['amount']} {s['name']}"
-                                      for s in c["spark_sources"])))
+                out.append("    - " + _spark_sources_line(c))
+                spark_named = True
         for pw in you["powers"]:
             out.append(_render_power(pw, "- "))
+            # `EB-610`, THE OTHER SHAPE SPARK ARRIVES IN. The clause above is
+            # emitted inside the METERS loop, and the live look of 2026-09-16
+            # read a build whose wire carried Spark POWER-shaped -- a
+            # `Spark 3 (buff)` status row with `combat["meters"]` empty -- so
+            # the sources rode the wire, folded correctly, and were printed
+            # nowhere. The fact belongs beside the number it explains,
+            # whichever row that number is on; `spark_named` keeps it to ONE
+            # copy on a build that sends both shapes.
+            if (not spark_named and c.get("spark_sources")
+                    and _fold(pw.get("name")) == "spark"):
+                out.append("    - " + _spark_sources_line(c))
+                spark_named = True
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
                    f"{c['piles']['discard']} discarded, "
                    f"{c['piles']['exhaust']} exhausted")

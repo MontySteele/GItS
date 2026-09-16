@@ -1130,15 +1130,25 @@ public class KokomiOverhaulRuleTests
     public void EB599_the_number_written_and_the_number_printed_take_one_fold()
     {
         // ONE CALL, TWO READERS -- `EB-265`'s rule and `EB-580`'s own pin,
-        // now on the call that carries both terms. The face must not fold the
-        // target's side any more, so `PlannedDamage` is off the preview.
+        // now on the call that carries HER terms: what is queued is what
+        // `Hers` made of the sheet number, and the face previews that same
+        // call.
         Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
                         c => c == "KokomiPlan.Hers");
         var preview = typeof(KokomiPlan.PlanDamageVar)
             .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
         var calls = Il.Calls(preview);
         Assert.Contains(calls, c => c == "KokomiPlan.Hers");
-        Assert.DoesNotContain(calls, c => c == "KokomiPlan.PlannedDamage");
+        // AND THE TARGET'S SIDE IS BACK ON THE PREVIEW (`EB-334`, the live
+        // look of 2026-09-16). The line printed 10 where the morning dealt 15
+        // against a Vulnerable-2 body, which is the two numbers R246 pick 1
+        // forbids: "the Plan line prints the number it will deal against the
+        // enemy's current state". `EB-599` took the fold off as the r22
+        // packet's D DEFAULT; R246 is [USER]'s ruling and nothing since
+        // amended it, so the default yields. What survives of `EB-599` is the
+        // writing-time fold above and the Plan word's own sentence saying
+        // WHEN each side is read.
+        Assert.Contains(calls, c => c == "KokomiPlan.PlannedDamage");
     }
 
     [Fact]

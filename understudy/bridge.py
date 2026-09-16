@@ -602,13 +602,52 @@ def meter_ledger() -> dict:
 # the last because the native call does not advance there at all, it opens The
 # Architect's room, so an op without the check would answer ok and land the run
 # somewhere nobody asked for. EB-771 adds no act-4 path.
+#
+# LIVE LOOK 8b (2026-09-16) ADDS `give_relic` AND `give_potion`, AND
+# proofs-8a (PR #573) ADDS `give_gold`: THE THREE RUN GRANTS.
+#
+# Three built rows came back NOT DONE from that look for one reason,
+# and it was not the rows: `EB-752` (The Boot), `EB-684` (Flex Potion) and
+# `EB-116` (Pael's Eye) each need an ITEM in the run, and this route could set
+# a resource, a power, HP, Block and a hand and had no way to put a relic or a
+# potion in front of anybody. "The Boot never dropped and the bridge has no
+# relic-grant op."
+#
+# Each is the game's OWN command -- `RelicCmd.Obtain` and
+# `PotionCmd.TryToProcure`, the pair the game's dev console reaches -- so the
+# relic's `AfterObtained`, the potion's procure hook and both history rows run
+# exactly as they run on a drop.
+#
+# RNG-NEUTRAL ON THE SPOT AND NOT ON THE RUN, stated rather than implied: a
+# grant rolls nothing, spends no pity counter and moves no floor roll, which
+# is what makes it unlike `skip_act`. But a relic is a standing rule and a
+# potion is a slot, and later rolls read both -- `EventModel.IsAllowed` asks
+# about relic and potion counts, and obtaining a non-stackable relic takes it
+# out of the grab bag, so the next drop's pool is one smaller. Nothing read
+# after a grant is comparable to a run that was not given one.
+#
+# `give_gold` IS THE THIRD, AND ITS ABSENCE WAS A WALL: `RELIC_TRADER`
+# (100 gold, five tradable relics), `RANWID_THE_ELDER` (100 gold, a tradable
+# relic, a potion), `WELCOME_TO_WONGOS` (100 gold in act 2) and `EB-459`
+# (Neow's Arcane Scroll roll) are all `EventModel.IsAllowed` gates that
+# `force_next_event` refuses on while `run_facts` names the number that is
+# short -- and nothing here could move it. It is `PlayerCmd.GainGold`, so
+# `Hook.ModifyGoldGained` runs on it exactly as it runs on a drop, and it is a
+# GRANT rather than a set because the game's decrease path writes a LOSS into
+# the run's own history.
+#
+# ALL THREE ARE RUN OPS, on a map screen and in a fight alike, because a relic
+# is granted on either. All three answer `queued`: the game's commands are
+# Tasks.
 DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power",
-             "clear_hand", "hover", "unhover", "force_next_event", "skip_act")
+             "clear_hand", "hover", "unhover", "force_next_event", "skip_act",
+             "give_relic", "give_potion", "give_gold")
 
 
 def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
                 resource: str = "", power: str = "", card: str = "",
-                event: str = "") -> dict:
+                event: str = "", relic: str = "", potion: str = "",
+                slot: int = -1) -> dict:
     """Set one combat number. Returns the endpoint's report.
 
     A `status: "error"` answer comes back as an ordinary dict, not an
@@ -627,7 +666,60 @@ def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
     return _request(DEBUG_STATE, {"op": op, "amount": int(amount),
                                   "who": who, "resource": resource,
                                   "power": power, "card": card,
-                                  "event": event, "why": str(why)})
+                                  "event": event, "relic": relic,
+                                  "potion": potion, "slot": int(slot),
+                                  "why": str(why)})
+
+
+def give_relic(relic_id: str, why: str) -> dict:
+    """Put one relic in the local player's inventory (live look 8b).
+
+    `relic_id` is the wire's own id (`THE_BOOT`) or the exact printed title;
+    the endpoint matches the id first and the title second, and refuses
+    anything it cannot resolve exactly rather than taking the nearest one --
+    a scenario that silently got a different relic is a scenario whose
+    finding is about the wrong item.
+
+    A relic the player already holds and that is not stackable is REFUSED:
+    `RelicCmd.Obtain` appends unconditionally, so a second grant would put two
+    of it in the inventory, which is a board the game cannot produce.
+
+    Neutral on the spot, not on the run -- `DEBUG_OPS` above says how.
+    """
+    return debug_state("give_relic", why, relic=relic_id)
+
+
+def give_potion(potion_id: str, why: str, slot: int = -1) -> dict:
+    """Put one potion on the local player's belt (live look 8b).
+
+    `potion_id` is the wire's own id (`FLEX_POTION`) or the exact printed
+    title, matched the way `give_relic` matches. `slot` is the belt index;
+    `-1`, the default, is the game's own "first free slot".
+
+    THE BELT CAN STILL REFUSE, and that refusal is the game's rather than the
+    endpoint's: `PotionCmd.TryToProcure` asks `Hook.ShouldProcurePotion` and
+    then the belt, and a full belt answers `success: false` a frame after this
+    call returns. So this answers `queued` and the next state is where a
+    caller reads whether the potion arrived.
+    """
+    return debug_state("give_potion", why, potion=potion_id, slot=slot)
+
+
+def give_gold(amount: int, why: str) -> dict:
+    """Give the local player `amount` gold (proofs-8a).
+
+    A GRANT and not a set: `amount` is what is ADDED, and the endpoint refuses
+    a non-positive number, because the game's own decrease path writes a loss
+    into the run's history. A caller who wants a floor reads `before` off the
+    report (or off `run_facts` on a `force_next_event` refusal) and asks for
+    the difference.
+
+    It goes through `PlayerCmd.GainGold`, so `Hook.ModifyGoldGained` runs on
+    it exactly as it runs on a chest -- a relic that changes gold gained
+    changes this too. The report's `after` is therefore the arithmetic's
+    prediction and the next state is what landed.
+    """
+    return debug_state("give_gold", why, amount=amount)
 
 
 def debug_state_info() -> dict:

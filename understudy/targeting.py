@@ -115,6 +115,27 @@ def takes_a_target(title: Any, *,
     return needs_target(cards.get(resource_order.normalise(title)))
 
 
+def posted_mode(title: Any, choose: Any, *,
+                index: Mapping[str, Mapping[str, Any]] | None = None,
+                repo: Path | None = None) -> str:
+    """The mode string to PUT ON THE WIRE, for a mode named as the page prints it.
+
+    The one-title door onto `resource_order.mode_label`, which carries the
+    whole argument: the page folds the game's markup out (`EB-246`) and the
+    bridge matches against the card's RAW labels, so a mode read off the page
+    is refused unless the poster hands back the sheet's own spelling.
+
+    Unresolvable in any way -- no such title, no `choose_one`, no matching
+    label -- returns the caller's text unchanged, so what a caller then sees
+    is the bridge's own refusal listing the labels it does have.
+    """
+    if not choose:
+        return ""
+    cards = index if index is not None else resource_order.card_index(repo)
+    return resource_order.mode_label(
+        cards.get(resource_order.normalise(title)), choose)
+
+
 # ------------------------------------------------------------ the packet ---
 
 def packet_titles(turn_dir: Path) -> list[str]:

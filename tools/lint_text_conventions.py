@@ -101,7 +101,11 @@ EXCEPTIONS = {
         "and Ka-pow! is not, so the opening hand always holds a placer and "
         "never necessarily the detonator. The keyword rail states that about "
         "one CARD, on the card; what a reader of the WORD needs is the fact "
-        "about the DECK, which no other surface carries"),
+        "about the DECK, which no other surface carries. `EB-287` (the live "
+        "look of 2026-09-16) added the MERGE in five words: merging was "
+        "stated on the enemy BADGE of a pile that already exists and nowhere "
+        "a reader who has not built one could meet it, and it is the rule "
+        "every Bomb plan turns on"),
     "MineKey": (
         "`EB-574` put rule 3 on this tip, at 133 of 135. The jump sentence "
         "was printed on the BADGE of the body the pile was about to kill and "

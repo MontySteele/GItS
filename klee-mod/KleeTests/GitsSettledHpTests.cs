@@ -33,8 +33,9 @@ namespace KleeMod.Tests;
 public class GitsSettledHpTests
 {
     /// <summary>THE KILL SCREEN, as the r26 seat met it: the last monster is
-    /// dead, so `IsOverOrEnding` is true, and `CombatManager.Reset` has not
-    /// dropped the turn state yet, so `CurrentCombatId` is still non-null.
+    /// dead while the turn state is still in progress, so `IsEnding` is true,
+    /// and `CombatManager.Reset` has not dropped it, so `CurrentCombatId` is
+    /// still non-null.
     /// The queue happens to be between actions at the instant of the read,
     /// which is why clause (1) alone would not have caught this.</summary>
     [Fact]
@@ -42,7 +43,7 @@ public class GitsSettledHpTests
     {
         var verdict = GitsSettledHp.Decide(
             actionQueueRunning: false, actionInFlight: false,
-            combatStateStands: true, combatOverOrEnding: true);
+            combatStateStands: true, combatEnding: true);
 
         Assert.False(verdict.Settled);
         Assert.Equal(GitsSettledHp.CombatTearingDownReason, verdict.Reason);
@@ -56,10 +57,55 @@ public class GitsSettledHpTests
     {
         var verdict = GitsSettledHp.Decide(
             actionQueueRunning: false, actionInFlight: false,
-            combatStateStands: false, combatOverOrEnding: true);
+            combatStateStands: false, combatEnding: false);
 
         Assert.True(verdict.Settled);
         Assert.Equal("", verdict.Reason);
+    }
+
+    /// <summary>
+    /// PROOFS-8a (PR #573). THE POST-COMBAT SCREENS, WHICH THE FIRST DRAFT
+    /// GOT WRONG ON ALL OF THEM.
+    ///
+    /// THE FIND: `hp_settled` was FALSE on 26 of 26 post-combat map, rewards
+    /// and card-reward reads, and true only on the event, treasure and
+    /// card-select screens that never follow a fight. Clause (2) was
+    /// `IsOverOrEnding`, which is `IsEnding || !IsInProgress` -- true from the
+    /// moment a fight stops being in progress and true for every screen after
+    /// it -- while `CurrentCombatId` stays non-null until the run leaves the
+    /// ROOM. Two facts that both linger are not a window; they are a latch,
+    /// and the flag that was meant to let the page stop hedging hedged
+    /// everything instead.
+    ///
+    /// `IsEnding` IS THE HALF THAT DOES NOT LINGER: it needs a turn state
+    /// that is IN PROGRESS with its enemies dead (or a pending loss), which
+    /// is the kill screen and is over the instant the combat is.
+    /// </summary>
+    [Fact]
+    public void The_rewards_screen_and_the_map_after_a_fight_are_settled()
+    {
+        // The combat object has not been dropped -- `Reset` runs when the run
+        // leaves the room -- but the fight is over and nothing is executing.
+        var verdict = GitsSettledHp.Decide(
+            actionQueueRunning: false, actionInFlight: false,
+            combatStateStands: true, combatEnding: false);
+
+        Assert.True(verdict.Settled);
+        Assert.Equal("", verdict.Reason);
+    }
+
+    /// <summary>And the queue clause still holds on those screens: an
+    /// end-of-combat effect still draining is an HP change that has not
+    /// landed, whatever room the page is drawing.</summary>
+    [Fact]
+    public void A_rewards_screen_with_work_in_flight_is_still_not_settled()
+    {
+        var verdict = GitsSettledHp.Decide(
+            actionQueueRunning: false, actionInFlight: true,
+            combatStateStands: true, combatEnding: false);
+
+        Assert.False(verdict.Settled);
+        Assert.Equal(GitsSettledHp.ActionRunningReason, verdict.Reason);
     }
 
     /// <summary>A LIVE FIGHT SITTING IN THE PLAY PHASE IS SETTLED, and that is
@@ -72,7 +118,7 @@ public class GitsSettledHpTests
     {
         var verdict = GitsSettledHp.Decide(
             actionQueueRunning: false, actionInFlight: false,
-            combatStateStands: true, combatOverOrEnding: false);
+            combatStateStands: true, combatEnding: false);
 
         Assert.True(verdict.Settled);
     }
@@ -84,7 +130,7 @@ public class GitsSettledHpTests
     {
         var verdict = GitsSettledHp.Decide(
             actionQueueRunning: true, actionInFlight: false,
-            combatStateStands: false, combatOverOrEnding: false);
+            combatStateStands: false, combatEnding: false);
 
         Assert.False(verdict.Settled);
         Assert.Equal(GitsSettledHp.ActionRunningReason, verdict.Reason);
@@ -98,7 +144,7 @@ public class GitsSettledHpTests
     {
         var verdict = GitsSettledHp.Decide(
             actionQueueRunning: false, actionInFlight: true,
-            combatStateStands: false, combatOverOrEnding: false);
+            combatStateStands: false, combatEnding: false);
 
         Assert.False(verdict.Settled);
         Assert.Equal(GitsSettledHp.ActionRunningReason, verdict.Reason);
@@ -111,7 +157,7 @@ public class GitsSettledHpTests
     {
         var verdict = GitsSettledHp.Decide(
             actionQueueRunning: true, actionInFlight: true,
-            combatStateStands: true, combatOverOrEnding: true);
+            combatStateStands: true, combatEnding: true);
 
         Assert.False(verdict.Settled);
         Assert.Equal(GitsSettledHp.ActionRunningReason, verdict.Reason);

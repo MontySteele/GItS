@@ -45,7 +45,8 @@ def test_the_skip_goes_to_the_debug_state_route_with_every_field(monkeypatch):
     url, payload = rec.calls[0]
     assert url == bridge.DEBUG_STATE
     assert payload == {"op": "skip_act", "amount": 0, "who": "player",
-                       "resource": "", "power": "", "card": "", "event": "",
+                       "resource": "", "power": "", "card": "",
+                           "relic": "", "potion": "", "slot": -1, "event": "",
                        "why": "EB-771 act-2 dressing proof"}
 
 

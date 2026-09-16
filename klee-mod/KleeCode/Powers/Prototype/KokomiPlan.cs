@@ -2869,11 +2869,13 @@ public static class KokomiPlan
     /// <see cref="SimDamagePipeline.TargetMods"/> -- the same call
     /// <see cref="ElementalHit.Deal"/> makes on the same target a beat later.
     ///
-    /// `EB-599` TOOK THIS OFF THE FACE and left it here. It is a fact about
-    /// the body the hit finds NEXT MORNING, and the r22 lane-2 seat paid for
-    /// a "Plan: Deal 10" that arrived as 7 once the Vulnerable it was folding
-    /// had expired. So the line previews <see cref="Hers"/> and this stays
-    /// what the morning does -- the pins below are its readers.
+    /// `EB-599` TOOK THIS OFF THE FACE for one build and the live look of
+    /// 2026-09-16 put it back (`EB-334`): a Plan printed "Deal 10" and the
+    /// morning carried out 15 against a Vulnerable-2 body, which is the two
+    /// numbers R246 pick 1 forbids. `EB-599` was the r22 packet's D default
+    /// and R246 is [USER]'s ruling, so the default yields; what survives of it
+    /// is the Plan word saying WHEN each side is read, which is the fact a
+    /// printed number cannot carry on its own.
     ///
     /// THE REACTION AMPLIFIER IS DELIBERATELY LEFT OUT, exactly as
     /// <c>ProtoBombPower.PredictedSetOffDamage</c> leaves it out and for the
@@ -2990,16 +2992,14 @@ public static class KokomiPlan
     /// <see cref="Schedule"/> folds <see cref="Hers"/> onto it once, so the
     /// fold is applied exactly once and by one call.
     ///
-    /// `EB-599` TOOK THE TARGET'S SIDE OFF THIS LINE AND PUT HERS ON. It used
-    /// to fold the FRONT enemy's <see cref="PlannedDamage"/>, and the r22
-    /// lane-2 seat paid for a "Plan: Deal 10" that the morning carried out as
-    /// 7 once that Vulnerable had expired -- "for a mechanic sold on
-    /// committing a turn early, the committed number moving is the sharpest
-    /// contradiction in the kit". A Plan resolves against whatever the target
-    /// wears NEXT MORNING, which is a thing no line written today knows; her
-    /// Strength and this copy's enchantment are things it does know, and
-    /// <see cref="Hers"/> folds both into the number that is queued, so the
-    /// face and the queue print one number (`EB-265`'s rule).
+    /// BOTH SIDES ARE ON THIS LINE. `EB-599` added hers -- her Strength and
+    /// this copy's enchantment, folded at WRITING time by <see cref="Hers"/>
+    /// so the face and the queue print one number (`EB-265`'s rule) -- and in
+    /// the same move took the target's off, which the live look of 2026-09-16
+    /// found printing 10 where the morning dealt 15. That half was a D default
+    /// against [USER]'s R246 pick 1 and is reversed here; the fact it was
+    /// reaching for (a Plan resolves against whatever the body wears NEXT
+    /// morning) is carried by the Plan keyword's own sentence instead.
     ///
     /// OUTSIDE COMBAT IT PRINTS ITS BASE. A compendium or reward copy has no
     /// combat and no enemies, and `runGlobalHooks` is false off the hand, so
@@ -3030,12 +3030,40 @@ public static class KokomiPlan
             PreviewValue = Enchanted(card, (int)BaseValue);
             var kokomi = card.Owner?.Creature;
             if (!KokomiOverhaul.LiveFor(kokomi)) return;
-            // `EB-599`: AND HER STRENGTH, WHICH NEEDS THE CREATURE. Nothing of
-            // the TARGET's is folded here any more: the Plan lands next
-            // morning, against whatever that body wears then, and the r22
-            // lane-2 seat paid for a "Plan: Deal 10" that arrived as 7 once
-            // the Vulnerable the line was folding had expired.
+            // `EB-599`: AND HER STRENGTH, WHICH NEEDS THE CREATURE. It is
+            // folded at WRITING time -- `Schedule` puts `Hers` onto the queued
+            // clause -- so the face previews the same call the queue holds.
             PreviewValue = Hers(kokomi, card, (int)BaseValue);
+            // AND THEN THE TARGET'S, WHICH `EB-599` HAD TAKEN OFF (live look
+            // 8b, `EB-334`). A Plan printed "Deal 10" and carried out 15
+            // against a body wearing Vulnerable 2, so the line and the
+            // morning were two numbers again -- which is exactly what R246
+            // pick 1 rules out: "the Plan line prints the number it will deal
+            // against the enemy's current state".
+            //
+            // A RULING BEATS A D DEFAULT, and that is the whole decision here.
+            // `EB-599` is the r22 packet sec.5 default (a D, taken by Claude,
+            // recorded as one in the packet and in the row); R246 is [USER]'s,
+            // and neither it nor any later ruling was amended when the default
+            // was taken. So the default yields and the fold comes back.
+            //
+            // THE HONEST HALF OF `EB-599` SURVIVES AS THE PLAN WORD, not as a
+            // missing term: the keyword says WHEN each side is read ("Your
+            // Strength folds in as you write it; the enemy's Vulnerable counts
+            // at the morning"), so a reader is told that the target's half of
+            // this number is today's board and may not be tomorrow's. That
+            // sentence is what a printed number cannot carry; dropping the
+            // term instead made the printed number wrong today as well.
+            //
+            // THE BODY IS THE PLAN'S OWN, never the hovered one:
+            // `Aim.FrontEnemy` is where a carry-out lands, and previewing
+            // against whatever the cursor happens to be over would print a
+            // number for a body the morning will not hit. `HitOrder` answers
+            // the same question for every other folded face on this kit.
+            PreviewValue = PlannedDamage(
+                HitOrder.BodyForPreview(
+                    card, previewMode, target, FrontEnemy(kokomi)),
+                (int)PreviewValue);
         }
     }
 }

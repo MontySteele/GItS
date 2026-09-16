@@ -218,7 +218,7 @@ steps:
   - expect:
       page_contains: {text: "back: Crabaletta"}
   - expect:
-      page_contains: {text: "took a [gold]Bow[/gold]"}
+      page_contains: {text: "took a Bow"}
   - expect:
       page_contains: {text: "**Usher** left the stage: emptied by a Spend"}
 
@@ -258,7 +258,7 @@ steps:
   - expect:
       page_contains: {text: "**Usher** performed: Furina gains"}
   - expect:
-      page_contains: {text: "[gold]Block[/gold]."}
+      page_contains: {text: "Block."}
 
   - wait: {seconds: 20}
 

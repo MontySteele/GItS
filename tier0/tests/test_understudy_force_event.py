@@ -45,6 +45,7 @@ def test_the_force_goes_to_the_debug_state_route_with_every_field(monkeypatch):
     assert url == bridge.DEBUG_STATE
     assert payload == {"op": "force_next_event", "amount": 0, "who": "player",
                        "resource": "", "power": "", "card": "",
+                           "relic": "", "potion": "", "slot": -1,
                        "event": "ROOM_FULL_OF_CHEESE",
                        "why": "EB-761 re-proof"}
 

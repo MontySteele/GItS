@@ -147,7 +147,7 @@ from typing import Any, Callable
 
 import yaml
 
-from understudy import adapter, bridge, instances, naming, qa_packet
+from understudy import adapter, bridge, instances, naming, qa_packet, targeting
 
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
 # Gitignored, like `logs/soak/` and for the same reason: a reading taken on a
@@ -234,7 +234,21 @@ CURSOR_STEPS = ("hover", "unhover")
 # grades one fight; a step that threw the run into the next act would leave
 # every step after it addressing a combat that no longer exists.
 # `understudy/skip_act.py` is its driver.
-NON_SCENARIO_OPS = ("force_next_event", "skip_act")
+#
+# LIVE LOOK 8b / proofs-8a: `give_relic`, `give_potion` and `give_gold` join
+# the list, and for a DIFFERENT reason, which is why it is written here rather
+# than folded into the two above. They are not unreachable -- all three work
+# in a fight as readily as on a map. They are not BOARD writes: a scenario
+# stages a board and grades one fight, and a relic, a potion and a purse are
+# facts about the RUN that outlive the fight and are read by every later floor
+# (`EventModel.IsAllowed` counts relics, potions and gold; obtaining a
+# non-stackable relic takes it out of the grab bag). A step that quietly
+# changed the run under a graded fight is the shape `EB-142`'s guardrail
+# sentence exists to keep visible, and `bridge.give_relic` /
+# `bridge.give_potion` / `bridge.give_gold` are the attended doors instead --
+# `give_card`'s own posture one endpoint over.
+NON_SCENARIO_OPS = ("force_next_event", "skip_act",
+                    "give_relic", "give_potion", "give_gold")
 
 OTHER_STEPS = ("expect", "read", "mark", "wait")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + CURSOR_STEPS + OTHER_STEPS
@@ -1403,10 +1417,23 @@ class Runner:
         # `AnyEnemy` for the sake of the mode that aims -- the game fixes the
         # aim before the mode is chosen -- so the type answers for the CARD and
         # not for the play, and the targetless mode was refused with "Card
-        # requires a target". Passed through verbatim: the bridge owns the
-        # match against the card's own printed mode labels.
+        # requires a target".
+        #
+        # NO LONGER VERBATIM (`EB-246`, live look 8b defect 2). The bridge
+        # matches against the card's RAW labels -- `'[gold]Spend[/gold] 3:
+        # deal 13 instead'` -- and every printed surface in this harness folds
+        # that markup out, so a mode named the way the page prints it
+        # (`Spend 3: deal 13 instead`) matched neither of
+        # `GitsModalTargeting.Match`'s two rules and the play was refused. The
+        # sheet holds the same raw string the card hands the bridge, so the
+        # poster looks the caller's spelling up there and sends the label the
+        # bridge will recognise; a mode the sheet cannot resolve goes over
+        # unchanged and collects the bridge's own refusal, which lists the
+        # labels it does have.
         if body.get("mode"):
-            action["mode"] = str(body["mode"])
+            action["mode"] = targeting.posted_mode(
+                entry.get("name") or name, str(body["mode"])) \
+                or str(body["mode"])
         self._post(action, f"play {entry.get('name') or name}")
 
     def _do_select(self, body: dict[str, Any]) -> None:

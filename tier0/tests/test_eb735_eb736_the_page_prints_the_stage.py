@@ -218,14 +218,17 @@ def test_one_line_per_arrival_act_bow_departure_and_rotation():
     # `EB-743`: THE SEAT IS READ OFF THE BLOCK AT PRINT TIME. Chevalmarin
     # stands in the middle seat now, and that is the seat the reader is looking
     # at three lines up -- not the back one she arrived in.
-    assert ("**Chevalmarin** joined the stage at 1 [gold]Fanfare[/gold], and "
+    # `EB-246` (the live look of 2026-09-16): these lines are RENDERER
+    # literals, so the page's markup fold -- which runs over what arrives on
+    # the WIRE -- never met them, and the stage section printed the raw tags.
+    # They are written folded now.
+    assert ("**Chevalmarin** joined the stage at 1 Fanfare, and "
             "stands in the middle seat.") in page
     # And every act NAMES ITS EFFECT, with the measured number in it.
-    assert "**Usher** performed: Furina gains 3 [gold]Block[/gold]." in page
+    assert "**Usher** performed: Furina gains 3 Block." in page
     assert "**Usher** left the stage: emptied by a Spend, so it takes a Bow." \
         in page
-    assert "**Usher** took a [gold]Bow[/gold]: Furina gains 4 " \
-        "[gold]Block[/gold]." in page
+    assert "**Usher** took a Bow: Furina gains 4 Block." in page
     assert "**Crabaletta** moved from the front seat to the back" in page
 
 
@@ -239,9 +242,9 @@ def test_each_performers_act_says_what_it_did():
                       "log": [_beat("act", member, name, moved=moved,
                                     target=target, combat_id="4")]})
 
-    assert "performed: Furina gains 3 [gold]Block[/gold]." in line(
+    assert "performed: Furina gains 3 Block." in line(
         "usher", "Gentilhomme Usher", 3)
-    assert ("performed: 4 across every enemy, and [gold]Hydro[/gold] on "
+    assert ("performed: 4 across every enemy, and Hydro on "
             "each.") in line("chevalmarin", "Surintendante Chevalmarin", 4)
     assert "performed: 5 to Corpse Slug (2)." in line(
         "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
@@ -280,7 +283,7 @@ def test_a_beat_that_moved_nothing_prints_no_number():
     page = _page({"live": True, "seats": THREE_SEATS,
                   "log": [_beat("bow", "chevalmarin",
                                 "Surintendante Chevalmarin", seat=-1)]})
-    assert ("**Chevalmarin** took a [gold]Bow[/gold]: [gold]Hydro[/gold] on "
+    assert ("**Chevalmarin** took a Bow: Hydro on "
             "every enemy.") in page
     assert "It moved" not in page
 
@@ -385,7 +388,7 @@ def test_a_scenario_can_assert_the_stage_block_and_the_missing_meters():
 
     assert contains({"text": "lead: Usher 5"}, {}, after) is None
     assert contains({"text": "back: Crabaletta 6"}, {}, after) is None
-    assert contains({"text": "took a [gold]Bow[/gold]"}, {}, after) is None
+    assert contains({"text": "took a Bow"}, {}, after) is None
     assert contains({"text": "no such line"}, {}, after) is not None
     assert lacks({"text": "- Encore:"}, {}, after) is None
     assert lacks({"text": "## Your stage"}, {}, after) is not None
@@ -410,7 +413,7 @@ def test_the_stage_scenario_asserts_the_block_and_parses():
     body = path.read_text(encoding="utf-8")
     assert "lead: Chevalmarin" in body
     assert "back: Crabaletta" in body
-    assert "took a [gold]Bow[/gold]" in body
+    assert "took a Bow" in body
 
 
 # ---------------------------------------------------------------------------

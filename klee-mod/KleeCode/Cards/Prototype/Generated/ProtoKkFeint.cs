@@ -66,7 +66,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 5m, ValueProp.Move),
+            new PlanCarriedDamageVar("PlainDamage", 5m, "BranchDamage", ValueProp.Move),
             new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(10m)
         };

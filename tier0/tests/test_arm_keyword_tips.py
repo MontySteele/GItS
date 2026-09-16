@@ -643,7 +643,13 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # printed under it says a Mine also goes off before its enemy's
             # hit and the two contradicted each other on one screen.
             " a turn, and goes off when [gold]Set off[/gold] or as a ",
-            "[gold]Mine[/gold]. ",
+            # `EB-287` (the live look of 2026-09-16): the MERGE, which was
+            # stated on the enemy badge of a pile that already exists and
+            # nowhere a reader who has not built one could meet it. A CLAUSE
+            # and not a sentence, because the tip is at the base game's
+            # four-sentence cap and a fifth would displace a ruled finding.
+            "[gold]Mine[/gold]",
+            "; a second Bomb joins the first. ",
             # `EB-555` defined the cap inside the clause that names it.
             # `EB-400`: Block, named in the clause that read as a list of
             # the only two things that touch the hit.

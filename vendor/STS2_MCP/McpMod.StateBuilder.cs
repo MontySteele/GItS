@@ -1157,7 +1157,13 @@ public static partial class McpMod
                 actionQueueRunning: executor?.IsRunning ?? false,
                 actionInFlight: executor?.CurrentlyRunningAction != null,
                 combatStateStands: combat?.CurrentCombatId != null,
-                combatOverOrEnding: combat?.IsOverOrEnding ?? false);
+                // `IsEnding` AND NOT `IsOverOrEnding` (proofs-8a, PR #573).
+                // The latter is `IsEnding || !IsInProgress`, so it latches
+                // true for every screen after a fight while `CurrentCombatId`
+                // stays non-null until the run leaves the ROOM -- which made
+                // `hp_settled` false on 26 of 26 post-combat map, rewards and
+                // card-reward reads. gits/GitsSettledHp.cs carries it.
+                combatEnding: combat?.IsEnding ?? false);
         }
         catch (Exception)
         {
@@ -1910,7 +1916,17 @@ public static partial class McpMod
         // the model rather than off a live button.
         if (options.Count == 0)
         {
-            var liveEvent = eventRoom.LocalMutableEvent ?? eventModel;
+            // GItS LOCAL EDIT (live look 8b, 2026-09-16). GUARDED, because
+            // `LocalMutableEvent` is `EventSynchronizer.GetLocalEvent()` and
+            // that is an unguarded index into a private array: two `get_state`
+            // calls on the Furina run died with `ArgumentOutOfRangeException`
+            // at `GetEventForPlayer`, losing the WHOLE screen rather than the
+            // options. gits/GitsLocalEvent.cs carries the reasoning and logs
+            // once; the fallback is the room's own canonical event, which is
+            // what every other field on this screen is read off.
+            var liveEvent =
+                GitsLocalEvent.OrNothing(() => eventRoom.LocalMutableEvent)
+                ?? eventModel;
             int index = 0;
             foreach (var opt in GitsModelEventOptions(liveEvent))
             {
