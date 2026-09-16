@@ -556,6 +556,20 @@ def render(mentions: list[Mention], infos: list[RecordInfo],
     return "\n".join(lines) + "\n" + inputs_footer(records)
 
 
+def _shown(path: Path) -> str:
+    """How a record path is NAMED in this script's own messages.
+
+    `EB-772`. The messages used to spell `OUT.relative_to(REPO)`, which is the
+    right words for the committed record and raises for a `--record` copy in a
+    temp directory. Relative where it can be, absolute where it cannot, and
+    the committed record's line is byte-for-byte what it always was.
+    """
+    try:
+        return path.relative_to(REPO).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true",
@@ -565,16 +579,39 @@ def main(argv: list[str] | None = None) -> int:
                     help="write over the record files present in this git "
                          "tree (a published census gains its inputs footer "
                          "without its numbers moving)")
+    # `EB-772`. THE RECORD PATH IS AN ARGUMENT, so a caller can point --check
+    # at a COPY. The one reader that needs it is the regression test for
+    # --check's own job: it has to hand the script a STALE record, and the
+    # only stale record it had was the committed one, which it tampered with
+    # in place and put back in a `finally`. Two fast lanes running at once
+    # turned that into a race -- one lane's tampered bytes read by the other
+    # lane's --check, and a working tree left modified whichever lane restored
+    # last. A path here costs one argument and removes the shared mutable file
+    # from the test entirely (`EB-730`'s lesson, one test over: state a thing
+    # instead of assuming no one else is touching it).
+    #
+    # WRITES STILL GO TO THE COMMITTED RECORD AND NOWHERE ELSE: the flag is
+    # refused without --check, so there is no way to spell "write the census
+    # somewhere else" and no second output path to keep in step.
+    ap.add_argument("--record", metavar="PATH",
+                    help="verify THIS file instead of the committed record "
+                         "(only with --check)")
     args = ap.parse_args(argv)
 
+    if args.record and not args.check:
+        print("reaction_census: --record is only meaningful with --check",
+              file=sys.stderr)
+        return 2
+    out = Path(args.record).resolve() if args.record else OUT
+
     only: set[str] | None = None
-    if args.check and OUT.exists():
-        listed = listed_inputs(OUT.read_text(encoding="utf-8"))
+    if args.check and out.exists():
+        listed = listed_inputs(out.read_text(encoding="utf-8"))
         if listed is not None:
             only = set(listed)
             missing = [x for x in listed if not (REPO / x).is_file()]
             if missing:
-                print(f"reaction_census: {OUT.relative_to(REPO)} names "
+                print(f"reaction_census: {_shown(out)} names "
                       f"{len(missing)} record file(s) no longer on disk: "
                       + ", ".join(missing[:5]))
                 return 1
@@ -591,13 +628,13 @@ def main(argv: list[str] | None = None) -> int:
     text = render(mentions, infos, records)
 
     if args.check:
-        if not OUT.exists():
-            print(f"reaction_census: {OUT.relative_to(REPO)} is missing. "
+        if not out.exists():
+            print(f"reaction_census: {_shown(out)} is missing. "
                   f"Run: python tools/reaction_census.py")
             return 1
-        current = OUT.read_text(encoding="utf-8")
+        current = out.read_text(encoding="utf-8")
         if current != text:
-            print(f"reaction_census: {OUT.relative_to(REPO)} is STALE -- "
+            print(f"reaction_census: {_shown(out)} is STALE -- "
                   f"the seat records on disk no longer match the committed "
                   f"census. Run: python tools/reaction_census.py")
             return 1

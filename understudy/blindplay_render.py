@@ -59,11 +59,15 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_COUNT_NOTE,
                                         PLAN_WRITTEN_NUMBER_NOTE,
                                         PLAN_HYDRO_NOTE,
+                                        PLAN_PAST_LETHAL_BLOCK,
+                                        PLAN_PAST_LETHAL_CLAUSE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
                                         SPARK_SOURCES_LINE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
-                                        TURN_ORDER_NOTE)
+                                        TURN_ORDER_NOTE,
+                                        UNBLOCKED_RAISER_CLAUSE,
+                                        UNBLOCKED_RAISE_CLAUSE)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
@@ -73,10 +77,15 @@ from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
 # ----------------------------------------------------------------- render --
 
 def _render_card(c: dict[str, Any], bullet: str = "-",
-                 mark: str = "") -> list[str]:
+                 mark: str = "", raiser: dict[str, Any] | None = None) -> \
+        list[str]:
     """One card face. `mark` is a state the SCREEN is in about this row and
     not a fact about the card, so it goes at the END of the head, after the
-    cost and the type -- the shape `EB-294` gave a picked bundle."""
+    cost and the type -- the shape `EB-294` gave a picked bundle.
+
+    `raiser` is `EB-752`'s held relic, or None: a rule that raises UNBLOCKED
+    damage, which no damage face can fold and which therefore rides beside the
+    number instead of inside it."""
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
@@ -107,7 +116,12 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
         head += f" — {', '.join(bits)}"
     if mark:
         head += f" — {mark}"
-    out = [head, f"    {c['text'] or '(no printed text)'}"]
+    # `EB-752`: the held relic's term BESIDE the number, never inside it. The
+    # face's sentence is the game's and is printed unchanged; the clause is
+    # this page's and is appended after it, the way `_rider_clause` puts a
+    # named source beside a carry-out's figure.
+    out = [head, f"    {c['text'] or '(no printed text)'}"
+                 + _unblocked_raise_clause(c, raiser)]
     # `EB-483`: on the Smith's grid, the face this card would print UPGRADED,
     # under the one it prints now. Absent on every other screen, and absent
     # here for a row this page cannot render without guessing -- see
@@ -279,6 +293,71 @@ _DUSK_MARK = "Dusk: "
 def _is_dusk(row: dict[str, Any]) -> bool:
     """Is this queued or carried-out Plan a DUSK entry? (`EB-680`)"""
     return str(row.get("card") or row.get("name") or "").startswith(_DUSK_MARK)
+
+
+def _front_body(enemies: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """The body a single-target Plan lands on, off the rows this page prints.
+
+    `EB-773`. `PLAN_AIM_NOTE` is the rule and `blindplay_board.mark_front` is
+    where it is already applied -- the leftmost living non-Minion, falling
+    back to the leftmost living body where every one of them is a Minion. That
+    reader sets `front` only where two or more are alive, because with one
+    body there is no choice to get wrong; here a lone living body IS the
+    answer, so the mark is asked first and the list second. Reading the
+    PRINTED rows rather than the wire keeps this and the warning's own
+    `target` naming the same body a reader can see.
+    """
+    alive = [e for e in enemies if isinstance(e.get("hp"), int)
+             and e["hp"] > 0 and not e.get("phase_flip")]
+    if not alive:
+        return None
+    return next((e for e in alive if e.get("front")), alive[0])
+
+
+def _past_lethal_clauses(pl: dict[str, Any],
+                         enemies: list[dict[str, Any]]) -> dict[int, str]:
+    """`EB-773`: which queued Plans are written past the front body's life.
+
+    THE RUNNING SUBTRACTION, over the queue in the order the jellyfish takes
+    it. An entry earns the clause when the damage queued AHEAD of it already
+    covers the front body's HP behind its Block -- which is the board the
+    `EB-714` seat wrote a second 8 into, and the one nothing on this screen
+    said anything about.
+
+    ONLY `aim == "front"` COUNTS, on both sides of the comparison. A Plan whose
+    face says ALL hits every living body and cannot be over-killed past the
+    front one; a Plan Converging Tide has stamped is aimed by `CombatId` at a
+    body this page cannot resolve, and says nothing rather than guessing; an
+    entry with no damage clause adds nothing to the total and never earns the
+    clause. A feed older than the fields sends `aim == ""` for everything and
+    this returns an empty map -- the queue prints exactly as it always did.
+
+    NEREID'S ASCENSION IS COUNTED, because `twice` is a fact about the next
+    morning and not a forecast: the Rare carries out the FIRST entry twice, so
+    its damage is doubled in the running total before the second entry is
+    weighed. Nothing else in the queue changes.
+
+    THE FIRST ENTRY NEVER EARNS IT -- nothing is queued ahead of it -- which is
+    also why this is a warning about a QUEUE and not about a card.
+    """
+    body = _front_body(enemies)
+    if body is None:
+        return {}
+    queue = pl.get("queue") or []
+    out: dict[int, str] = {}
+    ahead = 0
+    for index, entry in enumerate(queue):
+        if entry.get("aim") != "front":
+            continue
+        if ahead > 0 and body["hp"] <= max(0, ahead - (body.get("block") or 0)):
+            block = (PLAN_PAST_LETHAL_BLOCK.format(block=body["block"])
+                     if body.get("block") else "")
+            out[index] = PLAN_PAST_LETHAL_CLAUSE.format(
+                target=f"**{body['name']}**", hp=body["hp"], block=block,
+                queued=ahead)
+        damage = entry.get("damage") or 0
+        ahead += damage * 2 if index == 0 and pl.get("twice") else damage
+    return out
 
 
 def _carry_out_rows(rows: list[dict[str, Any]]) -> list[str]:
@@ -629,6 +708,82 @@ _ONE_USE_RIDER = re.compile(r"the next (\w+) you play\b", re.I)
 _DEBUFF_ANSWERING_HIT = re.compile(
     r"(?:whenever|each) (?:you apply a debuff|debuff you apply)[^.]*"
     r"(?:damage|hit)", re.I)
+
+# `EB-752`. A RELIC THAT RAISES UNBLOCKED DAMAGE -- The Boot's sentence with
+# its two numbers left open. Matched on the SENTENCE and never on a name,
+# `_PLAYS_YOUR_TURN`'s discipline: a second relic worded the same way gets the
+# same clause and a renamed one does not go silent.
+#
+# TWO PATTERNS BECAUSE THERE ARE TWO ANSWERS. The first is the rule's whole
+# shape ("deal 4 or less unblocked attack damage ... increase it to 5"), which
+# hands the page an arithmetic it can actually do; the second is the bare
+# topic, so a relic that raises unblocked damage in some other wording is
+# still NAMED beside the number rather than vanishing from the page.
+_UNBLOCKED_RAISE = re.compile(
+    r"\b(\d+)\s*or less unblocked attack damage[^.]*?increase it to\s*(\d+)",
+    re.I)
+_UNBLOCKED_TOPIC = re.compile(r"unblocked attack damage", re.I)
+#: The printed damage on a face, which is the number the clause is about.
+_DEAL_DAMAGE = re.compile(r"\bdeal\s+(\d+)\b", re.I)
+
+
+def _unblocked_raiser(you: dict[str, Any]) -> dict[str, Any] | None:
+    """`EB-752`: the held relic whose rule no damage face can carry.
+
+    THE FIND (Klee r27, lanes 2 and cook). "Ka-pow! printed Deal 4 while The
+    Boot made it 5", and on a Weak turn the printed numbers under-counted in
+    the direction that makes a seat UNDER-play. The first reading was that the
+    face's calculator was wrong; `EB-328` settled that it is not. The Boot is
+    a `ModifyHpLostAfterOstyLate` hook -- it runs after the target's Block has
+    been taken out of the hit -- and a card in hand has no target, no Block
+    and therefore no honest way to fold it. So the number stays the game's and
+    the modifier is printed BESIDE it.
+
+    `low` / `high` ARE THE RELIC'S OWN NUMBERS where its sentence spells them,
+    and None where it does not. The page does no arithmetic it cannot source
+    off the feed: with them it says how much this face gains, without them it
+    names the relic and says the rule is not in the number.
+    """
+    for relic in you.get("relics") or []:
+        text = str(relic.get("text") or "")
+        if not _UNBLOCKED_TOPIC.search(text):
+            continue
+        found = _UNBLOCKED_RAISE.search(text)
+        return {"name": relic["name"],
+                "low": int(found.group(1)) if found else None,
+                "high": int(found.group(2)) if found else None}
+    return None
+
+
+def _unblocked_raise_clause(c: dict[str, Any],
+                            raiser: dict[str, Any] | None) -> str:
+    """`EB-752`: what that relic adds to THIS face, beside its number.
+
+    BOTH HALVES ON THIS SCREEN, `_attack_buff_note`'s rule: the relic is held
+    and this card is an Attack printing a damage figure. A Skill, a Power and
+    an Attack that prints no number raise no question and get no clause.
+
+    "ON AN UNBLOCKED HIT" IS THE WHOLE CONDITION and it is said every time,
+    because it is the half a seat cannot see: the hit that lands into Block
+    gets nothing, and a page that printed a flat `+1` would be wrong on every
+    such hit. Where the relic's sentence gives its numbers, a face already
+    above the threshold gains nothing and says nothing.
+    """
+    if not raiser:
+        return ""
+    if str(c.get("kind") or "").strip().casefold() != "attack":
+        return ""
+    found = _DEAL_DAMAGE.search(str(c.get("text") or ""))
+    if not found:
+        return ""
+    name = f"**{raiser['name']}**"
+    if raiser["low"] is None:
+        return UNBLOCKED_RAISER_CLAUSE.format(relic=name)
+    printed = int(found.group(1))
+    if printed > raiser["low"] or raiser["high"] <= printed:
+        return ""
+    return UNBLOCKED_RAISE_CLAUSE.format(n=raiser["high"] - printed,
+                                         relic=name)
 
 
 def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:
@@ -1544,11 +1699,15 @@ def render(obs: dict[str, Any]) -> str:
                 out.append(
                     f"- Planned, and carried out at the start of your next "
                     f"turn in this order ({pl['pending']}):")
+                # `EB-773`: and which of them is written at a body the Plans
+                # ahead of it will already have killed.
+                past_lethal = _past_lethal_clauses(pl, c.get("enemies") or [])
                 for i, e in enumerate(pl["queue"], 1):
                     out.append(f"  {i}. **{e['name']}**"
                                + (" — Dusk: this one is carried out at the "
                                   "END of this turn instead, before the "
-                                  "enemies act" if _is_dusk(e) else ""))
+                                  "enemies act" if _is_dusk(e) else "")
+                               + past_lethal.get(i - 1, ""))
                 if pl["twice"]:
                     out.append("- The jellyfish carries out your FIRST Plan "
                                "twice while Nereid's Ascension lasts.")
@@ -1722,8 +1881,11 @@ def render(obs: dict[str, Any]) -> str:
         out += ["", "## Your hand", ""]
         if c.get("spark_note"):
             out += [c["spark_note"], ""]
+        # `EB-752`: read once for the hand and handed to each face, because it
+        # is a fact about what you are HOLDING and not about any one card.
+        raiser = _unblocked_raiser(you)
         for card in c["hand"]:
-            out += _render_card(card)
+            out += _render_card(card, raiser=raiser)
         if not c["hand"]:
             out.append("- (your hand is empty)")
         if c.get("hand_repeats"):

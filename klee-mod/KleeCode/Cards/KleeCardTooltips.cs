@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using BaseLib.Abstracts;
 using KleeMod.Elements;
 using KleeMod.Powers;
@@ -6,6 +7,8 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
+// `EB-752`: `TheBoot`, the relic whose rule runs after Block.
+using MegaCrit.Sts2.Core.Models.Relics;
 
 namespace KleeMod.Cards;
 
@@ -409,15 +412,49 @@ public static class KleeCardTooltips
                 : SimDamagePipeline.ResolveOnTarget(enemy, printed, 1m);
             return $"The [gold]Set off[/gold] takes the {aura} aura first, so "
                  + $"the {mult:0.##}x is the [gold]Bomb[/gold]'s. This card's "
-                 + $"own {printed} lands {own}.";
+                 + $"own {printed} lands {own}." + UnblockedRaiserClause(dealer);
         }
         var landed = TargetAlreadyFolded(card)
             ? Capped(enemy, (int)(printed * mult))
             : SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
         return $"The triggering hit deals {mult:0.##}x damage and consumes "
              + $"the aura. Into that {aura} aura this card's {printed} lands "
-             + $"{landed}.";
+             + $"{landed}." + UnblockedRaiserClause(dealer);
     }
+
+    /// <summary>
+    /// `EB-752`. THE ONE TERM THIS NUMBER CANNOT CARRY, named beside it.
+    ///
+    /// THE FIND (Klee r27, lanes 2 and cook, fight 2 each). "Ka-pow! printed
+    /// Deal 4 while The Boot made it 5", and on a Weak turn the printed
+    /// numbers under-counted in the direction that makes a seat UNDER-play.
+    ///
+    /// WHY NO FACE AND NO FOLD CAN HOLD IT, which is `EB-328`'s finding and
+    /// the reason the row was re-scoped: The Boot is a
+    /// <c>ModifyHpLostAfterOstyLate</c> hook. It runs AFTER the target's Block
+    /// has been taken out of the hit, so it is not a damage modifier at all --
+    /// it is an HP-loss modifier, and every arithmetic on this tip (and every
+    /// <c>CalculatedDamageVar</c> on every face) stops one phase earlier. A
+    /// number here that included it would be wrong on every blocked hit.
+    ///
+    /// THIS TIP IS THE SURFACE THAT CAN SAY IT, for <see cref="AmplifiedBody"/>'s
+    /// own reason: it is the one place in this class that prints a LANDED
+    /// number, and a landed number is exactly what a reader will compare with
+    /// the bar afterwards. The blind page's twin is
+    /// `blindplay_render._unblocked_raise_clause`, and it says the same thing
+    /// in the same place -- after the number, with the condition attached.
+    ///
+    /// NO ARITHMETIC, DELIBERATELY. The page can do it because the relic's own
+    /// printed sentence rides the feed with its numbers in it; here the relic
+    /// is a held model and its rule is a localized row, so the honest thing is
+    /// to name it and say WHERE it runs. "" for a player not holding it, which
+    /// is every board the clause would be noise on.
+    /// </summary>
+    private static string UnblockedRaiserClause(Creature? dealer) =>
+        dealer?.Player?.Relics.Any(relic => relic is TheBoot) == true
+            ? " [gold]The Boot[/gold] raises an unblocked hit after Block, so "
+            + "it is not in that number."
+            : "";
 
     /// <summary>
     /// `EB-733`. Does this card's printed face put <b>Set off</b> before its

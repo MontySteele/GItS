@@ -964,6 +964,67 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
                             "on you never cuts it, before or after you write "
                             "it; a planned BLOCK is yours, so Frail does cut "
                             "it.")
+
+# `EB-752`. THE RELIC TERM NO DAMAGE FACE CAN FOLD.
+#
+# THE FIND (Klee r27, lanes 2 and cook, fight 2 each). "Ka-pow! printed Deal 4
+# while The Boot made it 5", and on a Weak turn the printed numbers
+# under-counted in the direction that makes a seat UNDER-play.
+#
+# WHY IT IS A CLAUSE AND NOT A FOLD, which is `EB-328`'s finding and the
+# reason this row was re-scoped: The Boot is a `ModifyHpLostAfterOstyLate`
+# hook. It runs AFTER the target's Block has been taken out of the hit, so it
+# is not a damage modifier at all -- it is an HP-loss modifier, and a card in
+# hand has no target, no Block and no honest way to carry its number. The
+# game's own figure stays the game's, and the modifier is printed beside it.
+#
+# "ON AN UNBLOCKED HIT" IS SAID EVERY TIME, because it is the half a reader
+# cannot see: a hit that lands into Block gains nothing, and a flat `+1` on
+# the face would be wrong on every such hit.
+UNBLOCKED_RAISE_CLAUSE = " (+{n} {relic} on an unblocked hit)"
+
+# The same clause for a relic whose sentence does not spell its numbers: the
+# page names it and says where its rule runs, and does no arithmetic it cannot
+# source off the feed.
+UNBLOCKED_RAISER_CLAUSE = (
+    " ({relic} can raise this on an unblocked hit; its rule runs after Block "
+    "and is not in the number above)")
+
+# `EB-773`. THE PLAN WRITTEN AT A BODY THE QUEUE WILL ALREADY HAVE KILLED.
+#
+# THE FIND (Kokomi r32 lane 1, read again in PR #554). "The two carry-outs
+# both landed on Leaf Slime (S) -- 8 killed it down to 3, the second 8 killed
+# it with 5 wasted. They did not retarget." The retarget half was wrong -- the
+# aim is re-read per entry and the body was still alive when the second
+# arrived -- and the seat's own next sentence is the true complaint: "nothing
+# on the Plan screen warns you". The waste is ordinary overkill, and the
+# screen a player writes a Plan from said nothing about it.
+#
+# THE ARITHMETIC IS THE BOARD'S AND NOT A FORECAST. Every figure in it is
+# already on this page: the written numbers, fixed by the note above; the
+# body's HP; and the Block it is standing in, which `PLAN_BLOCK_NOTE` says
+# survives to the morning. Nothing here predicts a roll, reads an intent or
+# re-aims anything.
+#
+# "MAY", DELIBERATELY, and it is the honest word rather than a hedge: a Plan
+# ahead of this one can be hurried out early by Change of Plans, a reaction or
+# a relic can move the bar first, and a Dusk entry lands a turn sooner. The
+# page names the reason and leaves the decision where it belongs.
+#
+# ON THE ENTRY'S OWN ROW, because the reader deciding whether to write another
+# Plan is reading the queue, and the fact is about THIS entry rather than
+# about the jellyfish.
+PLAN_PAST_LETHAL_CLAUSE = (
+    " — target may be dead by then: {target} has {hp} HP{block}, and the "
+    "{queued} already queued ahead of this one covers it")
+
+# The Block half of the clause above, printed only where the body has some: a
+# bare "12 queued ahead covers 11 HP" is a false sentence about a body standing
+# in 6 Block, and the subtraction is the one a seat would otherwise do by hand
+# off `PLAN_BLOCK_NOTE`.
+PLAN_PAST_LETHAL_BLOCK = " behind {block} Block"
+
+
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "
              "clinging to a body, and it is what an Elemental Reaction needs "
