@@ -58,6 +58,10 @@ public class DerivationPinTests
     [Fact]
     public void H3_authority_fanfare_cap_clamps_the_meter_on_gain()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         var seat = Seat.Furina(60).WithCombatState();
 
         FurinaResources.GainFanfare(seat.Creature, 100);
@@ -109,6 +113,10 @@ public class DerivationPinTests
     [Fact]
     public void Salon_tick_gains_one_per_ten_held_fanfare()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         var seat = Seat.Furina().WithCombatState();
         FurinaResources.GainFanfare(seat.Creature, 30);   // clamped by the cap to 30
 
@@ -120,6 +128,10 @@ public class DerivationPinTests
     [Fact]
     public void A_dry_member_acts_at_three_quarters_truncated()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         var seat = Seat.Furina().WithCombatState();
         FurinaResources.GainFanfare(seat.Creature, 30);
 
