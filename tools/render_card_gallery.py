@@ -92,6 +92,29 @@ MOD_CARDS_DIR = ROOT / "klee-mod" / "KleeCode" / "Cards"
 # C# string literal, escapes included: "...\"..." stops at the real close quote.
 _CS_STR = r'"((?:[^"\\]|\\.)*)"'
 _LOC_RE = re.compile(r'\(\s*"(title|description)"\s*,\s*' + _CS_STR + r'\s*\)')
+# `EB-615`. THE RIDER-WRAPPED FACE, which `_LOC_RE` above cannot see.
+#
+# THE FIND (`EB-369` read, 2026-09-06). Thirteen Furina rows do not print a
+# bare literal: they print `FurinaBurstRider.Face(arm, shipped)`, which is a
+# per-BUILD choice between two faces (`klee-mod/KleeCode/Cards/FurinaBurstRider.cs`
+# -- the arm's wording where the shipped Burst meter is retired, the shipped
+# wording otherwise). `_LOC_RE` wants the close paren straight after the
+# string, so it matched nothing on those rows, `ingame_index` reported them as
+# carrying no in-game text at all, and the gallery tile fell back to the
+# sheet's own op lines -- the single thing this page exists NOT to do, since
+# the whole value of the in-game column is that it comes from a second,
+# independent producer (usher and high_tide were the two verified by hand).
+#
+# BOTH FACES, AND THE SHIPPED ONE IS THE GALLERY'S (default APPLIED, a D pick
+# under CLAUDE.md's ladder -- one-way error direction, no number moves). A
+# gallery is read to see what SHIPS, so the shipped face is the tile's face
+# and the arm face prints beside it, labelled. Showing only the arm face would
+# make a release build's gallery lie; showing only the shipped one would hide
+# the thirteen rows' other half from the reader who is looking for exactly
+# that drift.
+_RIDER_RE = re.compile(
+    r'\(\s*"description"\s*,\s*FurinaBurstRider\.Face\(\s*'
+    + _CS_STR + r'\s*,\s*' + _CS_STR + r'\s*\)\s*\)')
 _PORTRAIT_RE = re.compile(r'CardPortrait\(\s*"([a-z0-9_]+)"\s*\)')
 
 
@@ -116,6 +139,10 @@ def ingame_index(card_ids: set[str]) -> tuple[dict[str, dict], dict[str, str]]:
 
     Absence is information too, so it is reported rather than blanked: a card
     the generator refused shows the manifest's `blocked` reason verbatim.
+
+    `EB-615`: a row whose description is `FurinaBurstRider.Face(arm, shipped)`
+    reports BOTH, `description` being the shipped face and `arm` the other one
+    (empty for every row that prints one face). See `_RIDER_RE`.
     """
     shipped: dict[str, dict] = {}
     if not MOD_CARDS_DIR.exists():
@@ -125,6 +152,12 @@ def ingame_index(card_ids: set[str]) -> tuple[dict[str, dict], dict[str, str]]:
     for path in sorted(MOD_CARDS_DIR.rglob("*.cs")):
         src = path.read_text(encoding="utf-8", errors="replace")
         loc = dict(_LOC_RE.findall(src))
+        rider = _RIDER_RE.search(src)
+        if rider:
+            # The SHIPPED half is the description; the arm half rides beside
+            # it. Set here rather than merged after, so a file carrying both a
+            # bare pair and a rider (none does today) cannot half-report.
+            loc["description"] = rider.group(2)
         if "description" not in loc and "title" not in loc:
             continue
         # Prefer the explicit id anchor the generator emits; fall back to the
@@ -139,6 +172,7 @@ def ingame_index(card_ids: set[str]) -> tuple[dict[str, dict], dict[str, str]]:
         shipped[cid] = {
             "title": _unescape_cs(loc.get("title", "")),
             "description": _unescape_cs(loc.get("description", "")),
+            "arm": _unescape_cs(rider.group(1)) if rider else "",
             "src": path.relative_to(ROOT).as_posix(),
         }
 
@@ -249,7 +283,17 @@ def tile(card, row, covered: bool, inline: bool, out_dir: Path,
             up_html = _upgrade_error(exc)
     ship = shipped.get(card.id)
     if ship and ship["description"]:
+        # `EB-615`. THE ARM FACE BESIDE THE SHIPPED ONE, and labelled, for a
+        # row whose description is chosen per build by `FurinaBurstRider.Face`.
+        # Beside rather than instead: the gallery's face is what SHIPS, and the
+        # other half is exactly the drift a reader opens this page to see.
+        arm_html = ""
+        if ship.get("arm") and ship["arm"] != ship["description"]:
+            arm_html = ('<div class="ig-arm"><span class="ig-arm-tag">under the '
+                        'arm</span>'
+                        f'{ingame_html(ship["arm"])}</div>')
         ig_html = (f'<div class="ig-text">{ingame_html(ship["description"])}</div>'
+                   f'{arm_html}'
                    f'<div class="ig-src">{html.escape(ship["src"])}</div>')
         ig_state = "shipped"
         # A shipped title that disagrees with the sheet name is drift worth
@@ -269,7 +313,8 @@ def tile(card, row, covered: bool, inline: bool, out_dir: Path,
                     + [card.type, card.rarity, card.character or ""])
     title = row["title"] if row else ""
     search = (card.id + " " + card.name + " " + tags + " "
-              + (ship["description"] if ship else ""))
+              + (ship["description"] if ship else "")
+              + " " + (ship.get("arm", "") if ship else ""))
     return f"""
 <div class="card" data-rarity="{html.escape(card.rarity)}" data-art="{state}"
      data-ingame="{ig_state}"
@@ -322,6 +367,8 @@ body.view-ingame .ops{display:none}
 body.view-ingame .ingame{display:block}
 .ig-text{padding:7px 10px 0;font-size:12.5px;line-height:1.5}
 .ig-src{padding:5px 10px 0;color:#4e535c;font-size:10px;font-family:ui-monospace,Consolas,monospace}
+.ig-arm{padding:6px 10px 0;font-size:12px;line-height:1.45;color:#b9c6d8}
+.ig-arm-tag{display:inline-block;margin-right:6px;padding:1px 5px;border:1px solid #3f4b5c;border-radius:9px;color:#7f93ab;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
 .ig-none{padding:7px 10px 0;color:#7a6b4a;font-size:11.5px;font-style:italic}
 .card[data-ingame=blocked]{border-color:#6b5a2e}
 .ig-warn{margin:6px 10px 0;padding:3px 6px;background:#3a2e1a;border-left:2px solid #d8b34a;color:#e0c583;font-size:11px}
