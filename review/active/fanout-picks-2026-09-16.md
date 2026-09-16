@@ -26,9 +26,10 @@ what is proven in the running game, what is built and waiting for the next deplo
   Stage batch (three bars in seat order, act lines, the glossary, Curtain
   Rise both ways and 5/9 under Weak, no Fanfare buff or Encore under the
   arm).
-- **The register went from 162 open rows to 84**: 86 retired (nine moot with
-  the reframe deletion, the rest done and seen), 26 narrowed to the one thing
-  still owed, ten minted for what the rounds found.
+- **The register went from 162 open rows to 87**: 90 retired (nine moot with
+  the reframe deletion, two moved to QUEUE, the rest done and seen), 33
+  narrowed to the one thing still owed, 17 minted for what the rounds found
+  (EB-774 to EB-790).
 
 ## 2. Built and waiting for the next deploy (proofs-9, `EB-782`)
 
