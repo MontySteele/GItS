@@ -62,7 +62,7 @@ public sealed class ProtoKkCoralBulwark : CustomCardModel, ICharacterCard, IPlan
         new List<DynamicVar>
         {
             new BlockVar(6m, ValueProp.Move),
-            new DynamicVar("PlanBlock", 8m),
+            new BlockVar("PlanBlock", 8m, ValueProp.Move),
             new DynamicVar("PlanPowerAmount", 1m)
         };
 

@@ -6329,6 +6329,24 @@ def build_vars(card: dict) -> list[str]:
         amount = int(plan_line[index]["amount"])
         if key == "plan_damage" and plan_line[index].get("op") == "damage":
             out.append(f'new KokomiPlan.PlanDamageVar({amount}m)')
+        # `EB-659`. THE PLAN-HALF BLOCK IS THE SECOND LIVE PLAN NUMBER, and
+        # for the mirror image of the damage half's reason: a planned Block is
+        # paid out `ValueProp.Move` (`KokomiPlan.Kind.Block`), so her Dexterity
+        # and her Frail bite it exactly as they bite the now-line's Block --
+        # and a plain `DynamicVar` under this token reaches no hook, so Coral
+        # Bulwark printed 8 and paid 6 under Frail 2 while the Block sentence
+        # beside it had already folded the same Frail (r25 lane 1, fight 6).
+        # THE GAME'S OWN `BlockVar` UNDER ITS OWN NAME, not a subclass: the
+        # class has a `(name, block, props)` constructor, and `UpdateCardPreview`
+        # there IS `Hook.ModifyBlock` -- so the mod does not restate Frail's or
+        # Dexterity's arithmetic anywhere. This is `EB-513`'s fix one surface
+        # over, where a companion's printed Block became a `BlockVar` for the
+        # same reason. `IntValue` is still `(int)BaseValue`, so the clause
+        # queues the printed number and the fold happens ONCE, on the way out.
+        # THE FLAT CLAUSE ONLY: the scaled Block clauses print a RATE, and a
+        # percentage folded into a rate is a number no card pays.
+        elif key == "plan_block" and plan_line[index].get("op") == "block":
+            out.append(f'new BlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
     if added_encore_salon(card) is not None:
