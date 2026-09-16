@@ -335,6 +335,29 @@ file the code has left.
   that is neither a map nor the event: it does not fight, shop or rest, which
   is the line between it and `soak.py`. Same guardrail as every other write on
   that route — nothing measured after it is comparable to any run.
+- **`skip_act.py` ends the ACT, and is the one op on that route that moves the
+  run's rng** (EB-771). `bridge.skip_act` posts the tenth `debug_state` op,
+  whose whole write is the game's own
+  `RunManager.Instance.ActChangeSynchronizer.SetLocalPlayerReady()` — the call
+  `NRewardsScreen.OnProceedButtonPressed` makes on a terminal BOSS rewards
+  screen. The vote is unanimous at once in singleplayer, so the game runs
+  `RunState.ActFloor++` and `EnterNextAct()` → `EnterAct(CurrentActIndex + 1)`:
+  fade, exit rooms, `SetActInternal` (index, visited coords, odds reset,
+  `PreloadManager.LoadActAssets`, `GenerateMap`, music), then a `MapRoom`. No
+  boss is faked, no `ActModel` is built, `CurrentActIndex` is never written by
+  hand and **no act roll is re-taken** — `RunState.Acts` was built once at
+  embark, so `Acts[CurrentActIndex + 1]` is the dressed Teyvat face this seed
+  already chose. It exists because acts 2 and 3 could otherwise only be seen by
+  a bot surviving act 1 (`review/records/teyvat-proofs-5-2026-09-15.md`).
+  **Unlike `force_next_event` it is NOT rng-neutral and does not claim to be:**
+  the skipped floors' rolls never happen, so nothing after it is comparable to
+  anything, this run's own earlier floors included. Four refusals — a combat
+  up, a room stack deeper than one, the victory room, and the last act, where
+  `EnterNextAct` opens The Architect's room instead of advancing. **No act-4
+  path.** The decision is `vendor/STS2_MCP/gits/GitsSkipAct.cs`, compiled
+  headlessly by `klee-mod/KleeTests/GitsSkipActTests.cs`; the driver polls
+  `run.act` because the answer is `queued: true` and the screen type does not
+  change (map before, map after).
 - **`log_lacks` is the one check that reads the engine log, not the wire**
   (EB-292). Its defect class is invisible to a state read: an `NCard` handed a
   non-finite size still reports a legal board, and the bridge answers normally

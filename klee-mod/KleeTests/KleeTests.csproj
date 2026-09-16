@@ -134,6 +134,21 @@
              Link="Vendor/GitsForceEvent.cs" />
   </ItemGroup>
 
+  <!-- EB-771's act-skip decision, on the same terms and for the same reason.
+       `GitsSkipAct.cs` decides whether a run may leave its act right now and
+       which act it lands in, and holds no game type, so the four refusals
+       (a live combat, a stacked sub-room, the victory room, and the LAST act,
+       where the native call opens The Architect's room instead of advancing)
+       are pinned headlessly rather than only being discoverable with a run up
+       in the very act that would prove them. The half that needs `RunManager`
+       (reading the live run and calling
+       `ActChangeSynchronizer.SetLocalPlayerReady`) stays in
+       `gits/GitsDebugState.cs`. One file, no fork. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsSkipAct.cs"
+             Link="Vendor/GitsSkipAct.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />

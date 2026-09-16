@@ -228,7 +228,13 @@ CURSOR_STEPS = ("hover", "unhover")
 # `tier0/tests/test_understudy_scenario.py`'s verb/op equality stays an
 # equality: an op missing from this file is either in that test's subtraction
 # WITH a reason written here, or it is a bug.
-NON_SCENARIO_OPS = ("force_next_event",)
+# EB-771's `skip_act` is on this list for the same reason and one more. It is
+# also a MAP decision the runner can never stand on; and it ENDS THE ACT, which
+# is the opposite of what a scenario is for. A scenario sets up one board and
+# grades one fight; a step that threw the run into the next act would leave
+# every step after it addressing a combat that no longer exists.
+# `understudy/skip_act.py` is its driver.
+NON_SCENARIO_OPS = ("force_next_event", "skip_act")
 
 OTHER_STEPS = ("expect", "read", "mark", "wait")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + CURSOR_STEPS + OTHER_STEPS
