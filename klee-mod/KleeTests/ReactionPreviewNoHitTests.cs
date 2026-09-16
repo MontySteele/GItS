@@ -82,6 +82,36 @@ public class ReactionPreviewNoHitTests
     }
 
     [Fact]
+    public void A_declared_element_with_no_hit_takes_the_no_hit_body_too()
+    {
+        // `EB-614` (R263 sec.5 item 4). THE OTHER DOOR INTO `EB-338`'s DEFECT.
+        //
+        // `appliesWithoutHit` is set off the DECLARATION and not off the
+        // number, so a zero-damage card that declares its element goes through
+        // `AmplifiedBody` instead. That method answered null on a card with no
+        // damage number, which means "keep the keyword's own body" -- and the
+        // keyword's own body promises "the triggering hit deals 1.5x damage".
+        // The card fires the reaction, strips the aura and pays nothing, and
+        // the seat that used it on purpose derived that from the board (Klee
+        // r8 run 2 act 2; again in r10 run 2 act 2).
+        //
+        // STRUCTURAL, and it has to be: `AmplifiedBody` reads the card's own
+        // `DynamicVars` and a live `Creature`, and a booted `LocManager` is
+        // outside the headless boundary (README). What is pinned is that the
+        // no-damage branch reaches `EB-338`'s sentence rather than a second
+        // wording of it -- which is the whole of the row.
+        var amplified = typeof(KleeCardTooltips)
+            .GetMethod("AmplifiedBody", HeadlessGame.All)!;
+        Assert.Contains("KleeCardTooltips.NoHitBody", Il.Calls(amplified));
+
+        // And the sentence it reaches is still the one `EB-338` ruled: it
+        // names the consumption and refuses the multiplier.
+        var vaporize = KleeCardTooltips.NoHitBody(Reaction.Vaporize)!;
+        Assert.Contains("still consumed", vaporize);
+        Assert.DoesNotContain("The triggering hit deals", vaporize);
+    }
+
+    [Fact]
     public void The_two_title_keys_are_rows_the_mod_actually_registers()
     {
         // The substitute keeps the keyword's own TITLE so a reader still finds

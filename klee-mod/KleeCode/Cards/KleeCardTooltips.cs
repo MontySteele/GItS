@@ -271,9 +271,20 @@ public static class KleeCardTooltips
     /// rolls no counter: <c>ReactionTable.AmplifierMultiplier</c>,
     /// <c>ResolveOnTarget</c> and a var read are all reads.
     ///
-    /// NULL WHERE THERE IS NOTHING TO FOLD -- no amplifier on this reaction,
-    /// or no damage number on this card -- and the keyword's own body prints
-    /// exactly as it always has.
+    /// NULL WHERE THERE IS NOTHING TO FOLD -- no amplifier on this reaction --
+    /// and the keyword's own body prints exactly as it always has.
+    ///
+    /// `EB-614`: EXCEPT WHERE THE CARD HAS NO HIT, WHICH IS NOT THE SAME
+    /// SILENCE. A zero-damage card that DECLARES the element takes this branch
+    /// rather than <see cref="NoHitBody"/>'s -- `appliesWithoutHit` is set off
+    /// the declaration and not off the number -- so "no damage number on this
+    /// card" fell back to a keyword row promising "the triggering hit deals
+    /// 1.5x damage". Such a card fires the reaction, strips the aura and pays
+    /// nothing, and the seat that used it on purpose derived that from the
+    /// board (Klee r8 run 2 act 2, and again in r10 run 2 act 2). That is
+    /// `EB-338`'s finding arriving through the other door, so it takes
+    /// `EB-338`'s answer -- the same sentence, out of the same method, because
+    /// two wordings of one rule is how a screen contradicts itself.
     /// </summary>
     private static string? AmplifiedBody(
         CardModel card, Reaction reaction, Creature enemy, Element aura)
@@ -282,7 +293,7 @@ public static class KleeCardTooltips
         var mult = ReactionTable.AmplifierMultiplier(reaction, dealer);
         if (mult == 1m) return null;
         var printed = PrintedDamage(card);
-        if (printed <= 0) return null;
+        if (printed <= 0) return NoHitBody(reaction);
 
         // `EB-602`: THE TARGET'S TERMS ONLY WHERE THE FACE HAS NOT ALREADY
         // FOLDED THEM. `FrontFoldedDamageVar` (the arm's proto rows) writes
