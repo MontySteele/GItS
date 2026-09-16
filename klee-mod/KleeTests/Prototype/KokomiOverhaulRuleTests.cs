@@ -405,6 +405,54 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
+    public void EB714_no_plan_lands_on_a_corpse()
+    {
+        // `EB-714`. THE READ (r32 lane 1, fight 1 turn 2): "the two carry-outs
+        // both landed on Leaf Slime (S) -- 8 killed it down to 3, the second 8
+        // killed it with 5 wasted. They did not retarget."
+        //
+        // READ AGAIN WITH THE NUMBERS: the body was at 11, the first Plan took
+        // it to 3, and it was STILL ALIVE when the second arrived. The 5 is
+        // OVERKILL on a living body, which is what a second 8 into a 3-HP
+        // enemy is in any deck -- not a Plan landing on a corpse. The seat's
+        // own next sentence is the true complaint ("nothing on the Plan screen
+        // warns you"), and that is a legibility row, not this one.
+        //
+        // THE DEATH DOES NOT RESOLVE AFTER THE DRAIN. `Creature.IsDead` is
+        // `CurrentHp <= 0` off the 0.111.0 decompile -- a property, not a flag
+        // a later action sets -- so a body the first entry kills is out of the
+        // aim the moment the awaited hit returns. THREE GUARDS SAY SO, and
+        // this is them: the aim is re-read per entry rather than snapshotted,
+        // it is filtered to the living, and the hit refuses a dead target
+        // anyway. The behavioural half is the sim's
+        // (`test_eb714_a_second_plan_re_aims_at_the_next_living_body`), because
+        // the headless boundary has no board to kill anything on.
+        var front = typeof(KokomiPlan)
+            .GetMethod("FrontEnemy", HeadlessGame.All)!;
+        Assert.Contains("KokomiPlan.IsAlive", Il.Calls(front));
+
+        var aimed = typeof(KokomiPlan).GetMethod("Aimed", HeadlessGame.All)!;
+        var aimCalls = Il.Calls(aimed);
+        Assert.Contains(aimCalls, c => c.Contains("KokomiPlan.FrontEnemy"));
+        Assert.Contains(aimCalls, c => c.Contains("get_IsDead")
+                                    || c.Contains("KokomiPlan.IsAlive"));
+
+        // RE-READ, NOT SNAPSHOTTED: `Hit` calls `Aimed` from inside its own
+        // loop, so a second entry -- and a second pass of one entry -- asks
+        // the board again.
+        var hit = typeof(KokomiPlan).GetMethod("Hit", HeadlessGame.All)!;
+        var hitCalls = Il.Calls(hit);
+        Assert.Contains(hitCalls, c => c.Contains("KokomiPlan.Aimed"));
+        Assert.Contains(hitCalls, c => c.Contains("get_IsDead"));
+
+        // And the debuff door keeps the same guard, so "no Plan lands on a
+        // corpse" is true of the whole clause table and not of damage alone.
+        Assert.Contains(
+            Il.Calls(typeof(KokomiPlan).GetMethod("Debuff", HeadlessGame.All)!),
+            c => c.Contains("get_IsDead"));
+    }
+
+    [Fact]
     public void Rule3_the_front_enemy_skips_a_minion()
     {
         // `R250`, round-5 sec.6 pick 1 at its default: The Kin's Followers

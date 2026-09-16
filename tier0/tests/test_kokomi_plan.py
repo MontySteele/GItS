@@ -431,6 +431,35 @@ def test_the_caskets_strike_leaves_a_hydro_aura(overhaul):
     assert "and re-arms " in tips
 
 
+def test_eb714_a_second_plan_re_aims_at_the_next_living_body(overhaul):
+    """`EB-714`. THE ACCEPTANCE: no Plan lands on a corpse.
+
+    THE READ (r32 lane 1, fight 1 turn 2): "the two carry-outs both landed on
+    Leaf Slime (S) -- 8 killed it down to 3, the second 8 killed it with 5
+    wasted. They did not retarget." Read again with the numbers: the body was
+    at 11, the first Plan took it to 3, and it was STILL ALIVE when the second
+    arrived. The 5 is OVERKILL on a living body, which is what a second 8 into
+    a 3-HP enemy is in any deck; it is not a Plan landing on a corpse, and the
+    seat's own complaint one sentence later is the true one -- "nothing on the
+    Plan screen warns you" -- which is a legibility row and not this one.
+
+    THE AIM IS RE-READ PER ENTRY and always was: `_aimed` resolves at
+    carry-out and `front_enemy` is leftmost ALIVE, which is a read of `hp`.
+    This is that, driven: a front body the FIRST Plan kills, and a second
+    entry that finds the next one.
+    """
+    front = make_enemy(hp=8, name="front")
+    behind = make_enemy(hp=40, name="behind")
+    st = kokomi_state(enemies=[front, behind])
+    clause = [{"op": "damage", "amount": 8, "target": "front_enemy"}]
+    kokomi_plan.schedule(st, plan_card(clause))
+    kokomi_plan.schedule(st, plan_card(clause))
+    kokomi_plan.resolve_all(st)
+
+    assert front.hp <= 0 and not front.alive
+    assert behind.hp == 40 - 8, "the second entry found the next living body"
+
+
 def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
     """`EB-334` PIN 1: Weak ON KOKOMI, no effect. The seat's own arithmetic --
     "Plan: Deal 12 damage" paying 9 the next morning, exactly x0.75."""
