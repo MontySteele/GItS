@@ -145,14 +145,11 @@ def _arm_residue():
     """Everything about the world that says an arm is still on. Empty is good."""
     from tier0 import constants as C
     from tier0.content import loader, upgrades
-    from tier0.engine import furina_reframe
 
     found = []
     for flag in _ARM_FLAGS:
         if getattr(C, flag):
             found.append(f"tier0.constants.{flag} is still True")
-    if furina_reframe.FURINA_REFRAME:
-        found.append("furina_reframe.FURINA_REFRAME is still True")
     warm = sorted(loader._substituted_card_index())
     if warm:
         found.append("loader._substituted_card_index still holds "
@@ -169,13 +166,11 @@ def _arm_residue():
 def _the_arms_stay_quarantined(request):
     from tier0 import constants as C
     from tier0.content import loader
-    from tier0.engine import furina_reframe
 
     residue = _arm_residue()
     if residue:
         for flag in _ARM_FLAGS:
             setattr(C, flag, False)
-        furina_reframe.FURINA_REFRAME = False
         loader.reset_arm_caches()
     culprit = _previous_test["id"]
     try:

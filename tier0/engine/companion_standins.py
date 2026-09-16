@@ -116,11 +116,10 @@ def validate_row(card: "Card") -> None:
     card to nor a declared swap is a row no surface can ever reach, and still
     raises.
 
-    The Furina reframe's four riders (2026-09-04) are the first users of the
-    second shape at the offer door; her starter reader
-    (`proto_fr_aria_of_recompense`, R254) is the first at the starter, and it
-    is why the check reads two maps rather than one: that row is `basic`, so
-    the POOL map could never legally name it. The Mondstadt stand-ins are the
+    Furina's arm rows are the users of the second shape at the offer door,
+    and her arm STARTERS are the reason the check reads two maps rather than
+    one: a starter row is `basic`, so the POOL map could never legally name
+    it. The Mondstadt stand-ins are the
     first shape and nothing about them moves -- `_replacements` has always
     filtered on `personal_pool`.
     """

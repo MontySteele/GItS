@@ -36,19 +36,12 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import effects, furina_reframe
+from tier0.engine import effects
 from tier0.engine.state import CombatState
 from tier0.tests.conftest import make_enemy
 
 ENEMY_HP = 400
 SKITTISH = 6
-
-
-@pytest.fixture(autouse=True)
-def manual_on(monkeypatch):
-    """A member performs on a play only under the reframe's MANUAL leg."""
-    for flag in ("FURINA_REFRAME", "FURINA_REFRAME_MANUAL"):
-        monkeypatch.setattr(furina_reframe, flag, True)
 
 
 def _board(stage=("crabaletta",)):

@@ -110,17 +110,11 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # minted this lint. The scope lives at the only door that BUILDS the node
     # (`SparkCounter.Setup` through `SparkGauge.AppliesTo`).
     #
-    # IT WENT FIVE -> FOUR -> FIVE ON 2026-09-07, and the round trip is the
-    # record of a wrong answer. `EB-628`'s Fanfare badge was struck when
-    # `EB-627` folded it into `SalonPanel`, and the note here said the panel
-    # "hangs on the Salon stage's own door and needs no teardown patch of its
-    # own". `EB-640` is the frame that refuted it: the stage's door BUILDS the
-    # panel and never closed it, so a lethal Evoke left the whole panel drawn,
-    # dimmed, behind the Loot dialog. The panel's postfix takes the same shape
-    # as the Spark counter's -- it frees, by name, the one node its file added
-    # to the room's vfx container, and resolves no seat.
-    # A SIXTH appearing here is the next review question.
-    assert len(markers) == 5, markers
+    # IT WENT FIVE -> FOUR ON 2026-09-16 (`EB-726`): the Salon panel's own
+    # teardown patch left HEAD with the retired reframe, which is the only arm
+    # that ever built the panel.
+    # A FIFTH appearing here is the next review question.
+    assert len(markers) == 4, markers
 
 
 def test_registered_in_the_ci_lane() -> None:
