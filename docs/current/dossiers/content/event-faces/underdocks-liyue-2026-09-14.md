@@ -222,8 +222,6 @@ contract being a contract.
 
 Mechanics check: matches harvest.
 
-Loss: {character} did not clear the flooded crawlway at the [gold]{event}[/gold].
-
 ---
 
 ## - [ ] The Legends Were True
@@ -340,7 +338,7 @@ bridge toward the Dunyu Ruins sways black and slick with it. Katheryne's
 commission notes said to travel light; you did not. Halfway across a plank
 drops away, and your overloaded pack swings out over nothing but mist.
 
-- **Let It Fall** — [Specific card] is removed from your deck.
+- **Let It Fall** — {RandomCard} is removed from your deck.
 - **Hold On** — Lose 3 HP as the wet rope scours your palms. The thing about to slip is randomized — some other piece of your kit takes its place at the knot. Each time you clamp down again, the strain costs 1 more HP than the last, and the bridge keeps offering you the same two choices until you finally let something fall. The knot never picks the same thing twice while anything else remains, and never anything lashed down for good (Eternal).
 
 Mechanics check: matches harvest.

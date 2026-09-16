@@ -45,6 +45,20 @@ Usage
     python tools/gen_teyvat_events.py             # write the active faces
     python tools/gen_teyvat_events.py --check     # fail if output would change
     python tools/gen_teyvat_events.py --refresh   # rebuild the base-event index
+    python tools/gen_teyvat_events.py --refresh-vars   # rebuild key_vars from the
+                                                  # installed game's English loc
+
+THE PLACEHOLDER RULE (EB-770)
+-----------------------------
+A base loc row spells a runtime value with a SmartFormat var --
+`[red]{RandomCard}[/red] is removed from your [gold]Deck[/gold].` A dressed
+row may spell that value out in WORDS instead; that is what a dressing is for.
+What it may not do is stand a BRACKETED GLOSS in its place: the engine reads
+`[...]` as a rich-text tag, finds no tag by that name, and deletes the group,
+so `[Specific card] is removed from your deck.` reached the player as
+` is removed from your deck.` `placeholder_refusals` refuses that shape, and
+the var names it checks against live in the index's `key_vars` -- identifiers,
+so `--check` still needs neither the decompile nor the game.
 """
 
 from __future__ import annotations
@@ -52,6 +66,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import struct
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -64,6 +79,13 @@ FACE_DIR = REPO / "docs" / "current" / "dossiers" / "content" / "event-faces"
 HARVEST = REPO / "docs" / "sts2-events-harvest.txt"
 EVENTS_ROOT = REPO / "klee-mod" / "KleeCode" / "Teyvat" / "Events"
 GENERATED_CS = REPO / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatEventsGenerated.cs"
+LOCAL_PROPS = REPO / "klee-mod" / "local.props"
+
+#: The English base-event loc file inside the game's pck. Read ONLY by
+#: `--refresh-vars`, and only for the VAR NAMES it declares; no base-game
+#: sentence is written to the index or anywhere else in the repo
+#: (`.gitignore:28`, `csharp-build-spec.md` sec.0.3).
+BASE_LOC_IN_PCK = "localization/eng/events.json"
 
 #: The decompiled namespace the index is refreshed from. Not in the repo; see
 #: `tools/extract_base_game_pool.py` for the ilspycmd line that produces it.
@@ -958,6 +980,92 @@ def refresh_index(decomp: Path) -> int:
     return 0
 
 
+def _game_dir() -> Path:
+    """The installed game, read from `local.props` -- the one place a machine
+    path is configured (`tools/extract_base_game_pool.py` reads the same tag)."""
+    if not LOCAL_PROPS.exists():
+        raise SystemExit(f"missing {LOCAL_PROPS} -- copy local.props.example first")
+    m = re.search(r"<GameDir>(.*?)</GameDir>",
+                  LOCAL_PROPS.read_text(encoding="utf-8"))
+    if not m:
+        raise SystemExit("no <GameDir> in local.props")
+    return Path(m.group(1).strip())
+
+
+def read_pck_file(pck: Path, wanted: str) -> bytes:
+    """One file out of a Godot 4.5 `.pck`, by its `res://` path.
+
+    Format, version 3 (`core/io/file_access_pack.cpp`): `GDPC`, the four
+    version ints, a `u32` of pack flags and a `u64` file base, a `u64` offset
+    to the file DIRECTORY (v3 moved it to the end of the pack), then reserved
+    zeroes. Each directory entry is a length-prefixed path, a `u64` offset, a
+    `u64` size, a 16-byte md5 and a `u32` of per-file flags. `PACK_REL_FILEBASE`
+    (flag 2) makes every entry offset relative to the file base.
+    """
+    with pck.open("rb") as fh:
+        if fh.read(4) != b"GDPC":
+            raise SystemExit(f"{pck} is not a Godot pack")
+        struct.unpack("<4i", fh.read(16))
+        pack_flags, file_base = struct.unpack("<Iq", fh.read(12))
+        (dir_offset,) = struct.unpack("<q", fh.read(8))
+        rel = file_base if pack_flags & 2 else 0
+        fh.seek(dir_offset)
+        (count,) = struct.unpack("<I", fh.read(4))
+        for _ in range(count):
+            (path_len,) = struct.unpack("<I", fh.read(4))
+            path = fh.read(path_len).rstrip(b"\0").decode("utf-8")
+            offset, size = struct.unpack("<qq", fh.read(16))
+            fh.read(16)
+            struct.unpack("<I", fh.read(4))
+            if path == wanted:
+                fh.seek(offset + rel)
+                return fh.read(size)
+    raise SystemExit(f"{wanted} is not in {pck}")
+
+
+def refresh_vars(game_dir: Optional[Path] = None) -> int:
+    """Rewrite every event's `key_vars` in the index from the installed game.
+
+    Reads ONLY the var NAMES each base loc row declares -- `RandomCard`,
+    `HpLoss` -- and writes those names against the key suffix that carries
+    them. Identifiers, exactly as `--refresh` writes identifiers: not one
+    base-game sentence enters the repo, and `--check` therefore never needs
+    the game installed. See `placeholder_refusals` for what the map is for.
+    """
+    game = game_dir or _game_dir()
+    pck = game / "SlayTheSpire2.pck"
+    if not pck.exists():
+        print(f"gen_teyvat_events: no pack at {pck}", file=sys.stderr)
+        return 2
+    rows = json.loads(read_pck_file(pck, BASE_LOC_IN_PCK).decode("utf-8"))
+
+    payload = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
+    index = payload["events"]
+    # Longest entry first, so an entry that is a prefix of another one never
+    # swallows the longer entry's keys.
+    entries = sorted(((row["entry"], name) for name, row in index.items()),
+                     key=lambda pair: -len(pair[0]))
+    key_vars: Dict[str, Dict[str, List[str]]] = {name: {} for name in index}
+    for key, text in rows.items():
+        names = sorted(set(_VAR_RE.findall(text)))
+        if not names:
+            continue
+        for entry, name in entries:
+            if key.startswith(entry + "."):
+                key_vars[name][key[len(entry) + 1:]] = names
+                break
+
+    total = 0
+    for name, row in index.items():
+        row["key_vars"] = dict(sorted(key_vars[name].items()))
+        total += len(row["key_vars"])
+    INDEX_PATH.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n",
+                          encoding="utf-8")
+    print(f"gen_teyvat_events: {total} base loc key(s) carry a var "
+          f"-> {INDEX_PATH.relative_to(REPO)}")
+    return 0
+
+
 def load_index() -> Dict[str, dict]:
     if not INDEX_PATH.exists():
         raise SystemExit(
@@ -1577,6 +1685,125 @@ def _generated_table_doc() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Loc VARS: the placeholder rule (EB-770).
+# ---------------------------------------------------------------------------
+
+#: Every rich-text tag the game's own base loc rows use, plus the closing
+#: forms. The engine's parser reads `[...]` as a TAG: a bracket group that is
+#: not one of these is not printed as words, it is DELETED, and the row reaches
+#: the player with a hole where the words were.
+RICH_TEXT_TAGS = frozenset({
+    "gold", "red", "blue", "green", "purple", "orange", "aqua",
+    "sine", "jitter", "rainbow", "b", "i", "u",
+})
+
+_BRACKET_RE = re.compile(r"\[([^\[\]]*)\]")
+#: A SmartFormat placeholder opens with `{` and a name -- `{RandomCard}` and
+#: `{Rarity:choose(a|b)}` both name `Rarity`-shaped vars, so the closing brace
+#: is deliberately not part of the match.
+_VAR_RE = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)")
+
+
+def unrendered_glosses(text: str) -> List[str]:
+    """The bracket groups in `text` that the game would silently delete.
+
+    THIS IS EB-770. The Liyue Slippery Bridge's first option was written
+    `[Specific card] is removed from your deck.` -- a human-readable gloss
+    standing in for the card the engine names at runtime. The base row spells
+    that card with a var (`[red]{RandomCard}[/red] is removed from your
+    [gold]Deck[/gold].`), and the gloss is not a var: the parser looked for a
+    tag called `Specific card`, found none, dropped the group, and the option
+    printed ` is removed from your deck.` with a leading space where the card
+    name should have been (proofs-4, 2026-09-15).
+    """
+    out: List[str] = []
+    for group in _BRACKET_RE.findall(text):
+        name = group.lstrip("/").split(" ", 1)[0].split("=", 1)[0].lower()
+        if name in RICH_TEXT_TAGS:
+            continue
+        out.append(group)
+    return out
+
+
+#: Vars no event declares and every event may use. `EventModel.DynamicVars`
+#: holds an event's OWN vars; these two are the run-history formatter's, which
+#: is why `SLIPPERY_BRIDGE.loss` reads `{character} fell off of a {event}.`
+#: while `THE_LEGENDS_WERE_TRUE.loss` names its room in prose and uses neither.
+#: A dressed `.loss` line may use them whatever its base row does.
+GLOBAL_LOC_VARS = frozenset({"character", "event"})
+
+
+def base_vars(index_row: dict, suffix: str) -> List[str]:
+    """The var names the BASE loc row for this key suffix declares, or []."""
+    return list(index_row.get("key_vars", {}).get(suffix, ()))
+
+
+def event_vars(index_row: dict) -> set:
+    """Every var the base event declares ANYWHERE.
+
+    `DynamicVars` belongs to the EventModel, not to a row: a var Slippery
+    Bridge declares is substitutable on every one of its keys, whichever key
+    the base game happened to spend it on. So this, and not the per-row list,
+    is what a dressed row's vars are checked against.
+    """
+    out = set(GLOBAL_LOC_VARS)
+    for names in index_row.get("key_vars", {}).values():
+        out.update(names)
+    return out
+
+
+def placeholder_refusals(plan: "Plan", index: Dict[str, dict]) -> List[str]:
+    """Refuse a face line that hands the player a gloss instead of a value.
+
+    THE RULE, and its one exemption list, which is EMPTY and is meant to stay
+    empty:
+
+      A dressed row may replace a base var with WORDS -- the dressing spelling
+      the value out ("Gain 7 Max HP" where the base writes `{MaxHp}`) is the
+      whole point of a face, and that row reads correctly in game. It may NOT
+      replace it with a bracketed GLOSS, because a gloss is not words: the
+      engine deletes it, and the row loses the value entirely.
+
+    So the refusal is on the SHAPE that cannot survive the parser, and it is
+    read against the base row's vars only to say WHICH var the face owes. A
+    row with a gloss and no base var behind it is refused too -- the words are
+    just as gone.
+
+    The second half of the rule is the same claim from the other side: a
+    dressed row may only use a var the base EVENT declares (see
+    `event_vars`). A var it does not declare is one `L10NLookup` will not
+    substitute, so it would print as literal braces.
+    """
+    out: List[str] = []
+    for item in plan.items:
+        row = index.get(item.base_class, {})
+        allowed = event_vars(row)
+        for key, text in item.rows():
+            suffix = key[len(item.entry) + 1:]
+            declared = base_vars(row, suffix)
+            glosses = unrendered_glosses(text)
+            if glosses:
+                owed = (f"; the base row here carries {{{'}, {'.join(declared)}}}"
+                        if declared else "")
+                out.append(
+                    f"{item.face.key}: {item.cls} ({item.base_class}) -- "
+                    f"{suffix} carries the gloss(es) "
+                    f"{', '.join(repr(g) for g in glosses)}, which the game's "
+                    f"rich-text parser deletes rather than prints{owed}")
+            if not row.get("key_vars"):
+                # An event the index has no var map for yet: nothing to check
+                # the used vars against, and guessing would refuse honest rows.
+                continue
+            for used in _VAR_RE.findall(text):
+                if used not in allowed:
+                    out.append(
+                        f"{item.face.key}: {item.cls} ({item.base_class}) -- "
+                        f"{suffix} uses {{{used}}}, which the base event does "
+                        f"not declare; it would print as literal braces")
+    return out
+
+
+# ---------------------------------------------------------------------------
 # The plan.
 # ---------------------------------------------------------------------------
 
@@ -1769,6 +1996,21 @@ def build_plan() -> Plan:
                 continue
             claimed[cls] = f"{face.key}/{base}"
 
+            # A `Loss:` LINE ON AN EVENT WHOSE BASE CANNOT KILL IS REFUSED,
+            # not dropped. `Dressed.rows` writes the `.loss` row only when the
+            # base `can_kill`, because an event with no lethal option never
+            # asks `NRunHistory` for one -- so a face that writes the line
+            # anyway has written player-facing prose no run can reach, and the
+            # only sign of it was a count that did not agree (39 `Loss:` lines
+            # in the faces against 38 rows in the table).
+            if event.loss and not info["can_kill"]:
+                plan.refusals.append(
+                    f"{face.key}: {base} ({event.title}) writes a `Loss:` line "
+                    f"in the section at line {event.line}, but no option of the "
+                    f"base event can kill, so the row is never looked up -- "
+                    f"delete the line")
+                continue
+
             plan.items.append(Dressed(
                 face=face, base_class=base, mirror=spec.cls, cls=cls,
                 entry=slugify(cls), base_entry=info["entry"], face_event=event,
@@ -1784,6 +2026,7 @@ def build_plan() -> Plan:
                 keyed_pages=tuple(keyed_pages),
             ))
 
+    plan.refusals.extend(placeholder_refusals(plan, index))
     return plan
 
 
@@ -1819,12 +2062,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     help="fail if regenerating would change anything")
     ap.add_argument("--refresh", action="store_true",
                     help="rebuild tools/data/sts2_base_events.json from a decompile")
+    ap.add_argument("--refresh-vars", action="store_true",
+                    help="rewrite the index's key_vars from the installed game's "
+                         "English loc (var NAMES only)")
     ap.add_argument("--decompile", type=Path, default=DECOMP_DEFAULT,
                     help="the decompiled MegaCrit.Sts2.Core.Models.Events directory")
+    ap.add_argument("--game-dir", type=Path, default=None,
+                    help="the installed game, for --refresh-vars "
+                         "(default: <GameDir> in klee-mod/local.props)")
     args = ap.parse_args(argv)
 
     if args.refresh:
         return refresh_index(args.decompile)
+
+    if args.refresh_vars:
+        return refresh_vars(args.game_dir)
 
     plan = build_plan()
     files = plan_files(plan)
