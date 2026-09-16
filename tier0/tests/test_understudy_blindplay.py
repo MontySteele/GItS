@@ -12342,6 +12342,41 @@ def test_the_written_face_is_read_by_id_and_not_by_title():
     state["player"]["hand"][0]["id"] = "KLEEMOD-NO_SUCH_CARD"
     assert "Written:" not in blindplay.observe(state)
 
+
+def test_a_branch_clause_un_folds_too_and_not_only_the_first_one():
+    """`EB-795` (proofs-9 lane 0, defect 2, 2026-09-16).
+
+    THE DEFECT. `Noelle - Breastplate` is written `block 6` then `block 4`.
+    Under Dexterity 2 the wire's face reads "Gain 8 Block. If you are below
+    half HP, gain 6 additional Block." and the Written line read "Gain 6 Block.
+    ... gain 6 additional Block." -- the first clause un-folded to its sheet
+    number and the branch clause printed the FOLDED one, so the line claiming
+    to be the card's own written face showed a face the sheet does not have.
+
+    WHY. `_CANONICAL_VAR_RE` read a hole's written value off two shapes, a
+    positional `new BlockVar(4m, ...)` and a `new DynamicVar("Name", 3m)`, and
+    a BRANCH hole is neither: it is `new FoldedBlockVar("BranchBlock", 4m,
+    ...)`, a named var whose class is not literally `DynamicVar`. With no
+    written value for that hole the rebuild keeps what the screen is showing,
+    which is exactly the number the line exists to un-fold. Every row carrying
+    a `FoldedBlockVar` / `FoldedDamageVar` branch was affected -- which is
+    every conditional face on the three arms.
+
+    Seen to FAIL on the live look, on this card, at these numbers.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-PROTO_MC_NOELLE_BREASTPLATE",
+         "name": "Noelle — Breastplate", "type": "Skill", "cost": "1",
+         "can_play": True, "index": 0, "target_type": "Self",
+         "is_upgraded": False, "keywords": [],
+         "description": ("Gain 8 Block. If you are below half HP, gain 6 "
+                         "additional Block.")}]
+    page = blindplay.observe(state)
+    assert ("Written: Gain 6 Block. If you are below half HP, gain 4 "
+            "additional Block.") in page
+
+
 def placer_power_state(name: str = "Witches' Circle",
                        amount: int = 3, size: int = 3) -> dict:
     """A player-side placer Power on the buff strip (`EB-722`)."""

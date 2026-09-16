@@ -1008,9 +1008,35 @@ def upgrade_keywords(card_id: Any,
 # UPGRADED card's written number is the canonical value plus its own
 # `OnUpgrade` delta, because the card in front of the player is the upgraded one
 # and its written face is the upgraded one.
+#
+# `EB-795`: AND THE NAMED FORM IS A FORM OF THE SAME THING. The second arm
+# below used to read the literal word `DynamicVar`, because that was the only
+# var whose constructor was known to take its hole's name as a string. It is
+# not: `FoldedDamageVar` and `FoldedBlockVar` -- the pair every BRANCH face is
+# built out of (`Powers/Prototype/FrontFoldedDamageVar.cs`) -- take
+# `(string name, decimal amount, ValueProp props)` for the reason that file
+# states, that the game's calculated vars hard-code their own token and a face
+# printing two numbers needs two.
+#
+# SO THE BRANCH CLAUSE HAD NO WRITTEN VALUE, and the rebuild kept whatever the
+# screen was showing -- which is the FOLDED number. The live look of 2026-09-16
+# (proofs-9 lane 0, defect 2) read `Noelle - Breastplate` under Dexterity 2:
+# "Gain 8 Block. If you are below half HP, gain 6 additional Block." with
+# "Written: Gain 6 Block. ... gain 6 additional Block." against a sheet of 6
+# and 4. The first clause un-folded and the branch clause did not, so the
+# "card's own written face" was a face the sheet does not have -- worse than
+# silence, because the bound this function is built on is that an absent answer
+# is silence and never a guess.
+#
+# THE ARM IS WIDENED AND NOT DUPLICATED: any `*Var` whose first argument is a
+# quoted name and whose second is a literal number declares that hole's written
+# value, which is what both the game's `DynamicVar` and the arm's folded pair
+# do. The `setdefault` below still gives the FIRST occurrence in the file, and
+# `CanonicalVars` precedes `OnPlay` in every generated card, so a play-site
+# `new DamageVar("X", n, ...)` cannot outrank the sheet's own row.
 _CANONICAL_VAR_RE = re.compile(
     r"new\s+(?:([A-Za-z_][A-Za-z0-9_]*)Var\s*\(\s*(-?\d+(?:\.\d+)?)m?\s*[,)]"
-    r"|DynamicVar\s*\(\s*\"([A-Za-z_][A-Za-z0-9_]*)\"\s*,"
+    r"|[A-Za-z_][A-Za-z0-9_]*Var\s*\(\s*\"([A-Za-z_][A-Za-z0-9_]*)\"\s*,"
     r"\s*(-?\d+(?:\.\d+)?)m?\s*[,)])")
 
 

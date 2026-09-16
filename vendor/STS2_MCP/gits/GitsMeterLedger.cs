@@ -117,7 +117,7 @@ public static partial class McpMod
     }
 
     /// <summary>
-    /// `EB-610`. WHERE THIS TURN'S SPARKS CAME FROM, on the PLAYER's payload.
+    /// `EB-610`. WHERE THIS FIGHT'S SPARKS CAME FROM, on the PLAYER's payload.
     ///
     /// THE FIND (Klee r23 lane 2, fight 5, turn 4). "A Spark appeared with no
     /// Bomb on the field": the bank went 2 to 3 across Kaeya and Rapid Fire on
@@ -133,17 +133,38 @@ public static partial class McpMod
     /// (`relic:pounding_surprise/detonation`) and a page is a grading surface
     /// (R101b). That argument is about the ROWS, not about the fact, and it
     /// still stands: what goes out here is the narrow read the page needs --
-    /// the GAINS of the SPARK meter on the CURRENT turn, positive entries
-    /// only, each with the card its row was opened on -- and
+    /// the GAINS of the SPARK meter, positive entries only, each with the card
+    /// its row was opened on -- and
     /// `understudy/blindplay_board.spark_sources` turns the event name into a
     /// printed word before any page sees it. No price, no bank, no other
-    /// meter, no other turn.
+    /// meter.
     ///
-    /// THE TURN IS THE LARGEST ONE THE SPARK ROWS CARRY, which needs no game
-    /// type: the ledger is reset per fight (`MeterLedger.ResetFight`) and its
-    /// turn numbers only climb, so the newest turn present IS this turn.
+    /// `EB-796`: THE WINDOW IS THE FIGHT, AND IT USED TO BE THE NEWEST TURN.
+    /// The live look of 2026-09-16 (proofs-9 lane 0, defect 3) read a Klee
+    /// fight whose turn one printed `This turn: +1 your opening bank` beside
+    /// `Spark 1`, and then, after a set-off on a later turn, `Spark 3` beside
+    /// `This turn: +2 an explosion`. The listed sources summed to 2 against a
+    /// bank of 3 and the opening bank had left the sentence AND this field.
     ///
-    /// ABSENT WHERE THE LEDGER IS ABSENT, EMPTY where this turn moved no
+    /// AND THE WINDOW WAS THE WRONG ONE, not the sentence. A Spark is a
+    /// CURRENCY whose income stays (R270) -- it does not expire at end of
+    /// turn the way an Energy or a Block does -- so the number on the row is
+    /// the whole fight's income less the whole fight's spending, and a source
+    /// list scoped to one turn can only ever explain the last slice of it.
+    /// That is the question the row was filed on ("a Spark appeared with no
+    /// Bomb on the field"): a reader asks where the BANK came from, and the
+    /// bank is a fight-long fact. So every gain the ledger holds is sent, and
+    /// the ledger's own scope is already the fight -- `MeterLedger.ResetFight`
+    /// empties it at each fight's start, which is why no turn filter is needed
+    /// to keep a previous fight's Sparks out of this one's list.
+    ///
+    /// IT IS INCOME AND NOT A RECONCILIATION, which the page says in its own
+    /// words (`blindplay_notes.SPARK_SOURCES_LINE`): the gains listed here sum
+    /// to the bank only on a fight that has spent nothing, because a Spark
+    /// PRICE is a row of this same ledger and is deliberately not on this
+    /// field. A reader is told what paid in, not what is left.
+    ///
+    /// ABSENT WHERE THE LEDGER IS ABSENT, EMPTY where this fight has moved no
     /// Spark -- the same two facts the route below keeps apart, kept apart
     /// here for the same reason.
     /// </summary>
@@ -154,19 +175,15 @@ public static partial class McpMod
         var sources = new List<Dictionary<string, object?>>();
         try
         {
-            var turn = int.MinValue;
+            // `EB-796`: EVERY SPARK ROW THE LEDGER HOLDS, in the order it
+            // resolved them. The ledger is emptied per fight
+            // (`MeterLedger.ResetFight`), so "every row" already means "this
+            // fight" and no turn filter is needed to keep the last fight out.
+            // What the turn filter used to do was drop the EARLIER turns of
+            // THIS fight, which is where the opening bank lives.
             foreach (var row in rows)
             {
                 if (!GitsIsSparkRow(row)) continue;
-                var rowTurn = GitsLedgerInt(row, "turn");
-                if (rowTurn > turn) turn = rowTurn;
-            }
-            if (turn == int.MinValue) return sources;
-
-            foreach (var row in rows)
-            {
-                if (!GitsIsSparkRow(row)) continue;
-                if (GitsLedgerInt(row, "turn") != turn) continue;
                 var card = row.TryGetValue("card_name", out var name)
                     ? name as string ?? string.Empty
                     : string.Empty;

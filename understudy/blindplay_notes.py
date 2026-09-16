@@ -175,7 +175,7 @@ METER_RULES: dict[str, str] = {
 SPARK_OPENING_RULE = (f"you start each combat with {OPENING_SPARK}, and cards "
                       "that print a Spark price spend it")
 
-# `EB-610`. WHERE THIS TURN'S SPARKS CAME FROM.
+# `EB-610`. WHERE THIS FIGHT'S SPARKS CAME FROM.
 #
 # THE FIND (Klee r23 lane 2, fight 5, turn 4): "a Spark appeared with no Bomb
 # on the field" -- the bank went 2 to 3 across Kaeya and Rapid Fire on a bare
@@ -183,13 +183,26 @@ SPARK_OPENING_RULE = (f"you start each combat with {OPENING_SPARK}, and cards "
 # relic's, "whenever a Bomb goes off", so the meter contradicted the only rule
 # the reader had been given and nothing could settle it. The rule above says
 # where the OPENING bank came from and `METER_RULES` says what the meter IS;
-# neither can say what this turn did.
+# neither can say what paid the bank in.
 #
-# "THIS TURN", said out loud, because the bank is cumulative and the sources
-# are not: the number on the row is the whole fight's arithmetic so far and
-# this line is one turn's worth of it, which are two different questions and
-# would read as one if the window were left implicit.
-SPARK_SOURCES_LINE = "This turn: {sources}."
+# `EB-796`: THE WINDOW WAS ONE TURN AND IS NOW THE FIGHT, and the line says so.
+# It used to read "This turn:", stated out loud on the reasoning that the bank
+# is cumulative and the sources were not. The live look of 2026-09-16 (proofs-9
+# lane 0, defect 3) showed what that costs: turn one printed "This turn: +1
+# your opening bank" beside `Spark 1`, and a later turn printed `Spark 3`
+# beside "This turn: +2 an explosion" -- the sources summing to 2 against a
+# bank of 3, with the +1 that is still sitting in that bank named nowhere. A
+# Spark does not expire at end of turn (R270: a currency whose income stays),
+# so the reader's question is about the BANK and the bank is a fight-long fact.
+# `GitsSparkSourcesState` now sends every gain of the fight, and this line
+# names that window rather than a narrower one.
+#
+# "SO FAR", AND "+", BECAUSE IT IS INCOME AND NOT A BALANCE. The gains here sum
+# to the bank only on a fight that has spent nothing: a Spark PRICE is a row of
+# the same ledger and is deliberately not on this field (the ledger's own
+# header argues why a page may not carry it). So the sentence promises what
+# paid in, which every term in it is, and never what is left.
+SPARK_SOURCES_LINE = "So far this fight: {sources}."
 
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
 # the hard way: after `choose "Flame Dance"` "the whole list reprinted
@@ -1336,8 +1349,31 @@ ARM_KEYWORDS: dict[str, str] = {
     # where "the HP cap" says the same thing, and the starter line, which is
     # about the deck rather than the word. Held in step with
     # `ArmKeywordTips.ForBomb`.
+    #
+    # `EB-287`, THE GLOSSARY HALF, FOUND FAILING BY THE LIVE LOOK OF
+    # 2026-09-16 (proofs-9 lane 0, A2). The tip and this row print on ONE
+    # page -- the tip on the card rail, this row twenty lines below it -- and
+    # only the tip said that a second placer ADDS to the charge instead of
+    # starting a second one beside it. The row's acceptance names both
+    # surfaces, so a page carrying the clause once is the two-sources defect
+    # with both sources inside one screen.
+    #
+    # THE SAME FIVE WORDS IN THE SAME PLACE, riding the clause about what a
+    # charge IS rather than standing as a sentence of its own -- which is
+    # `ForBomb`'s own reason for the shape: that tip sits at the base game's
+    # four-sentence cap and a fifth sentence would displace a ruled finding.
+    #
+    # A PIN AND NOT A SHARED CONSTANT, because there is nothing for the two to
+    # share: the tip is a C# literal compiled into the mod, and this page is
+    # rendered by a Python process that reads the wire and never loads the
+    # assembly (and is read on builds carrying no klee mod at all). So the
+    # join is asserted instead --
+    # `test_arm_keyword_tips.test_the_merge_clause_is_on_the_tip_and_the_page`
+    # reads the clause out of `ArmKeywordTips.cs` and out of this dict and
+    # refuses a drift in either direction.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, and goes off "
-             "when Set off or as a Mine. Block stops it. Only Vulnerable "
+             "when Set off or as a Mine; a second Bomb joins the first. "
+             "Block stops it. Only Vulnerable "
              "and the HP cap move it. If the enemy dies with it on, it moves "
              "to a survivor."),
     # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`

@@ -193,4 +193,50 @@ public class FurinaStageRoundThreeTests
         Assert.Contains("parent is { IsUpgraded: true }", modal);
         Assert.Contains("option.UpgradeInternal();", modal);
     }
+
+    /// <summary>
+    /// `EB-780`'s OTHER HALF, found failing by the live look of 2026-09-16
+    /// (proofs-9 lane 0, B3): under Weak 3 an upgraded Curtain Rise read
+    /// 7 / 12 in the hand and 10 / 16 in the chooser. The upgrade above
+    /// carried -- 10 and 16 ARE the upgraded literals, which is what the test
+    /// above bought -- and the board never reached the face at all.
+    ///
+    /// AND THE CAUSE IS NOT THE VARS. The option already carries the parent's
+    /// <c>CanonicalVars</c>, bound to the parent's owner. What it does not
+    /// carry is a PILE: <c>CardModel.UpdateDynamicVarPreview</c> hands its
+    /// vars <c>runGlobalHooks: CombatState != null &amp;&amp; (Pile?.Type is
+    /// Hand or Play || UpgradePreviewType == Combat)</c>, and an option is in
+    /// no pile by construction -- which also nulls <c>CombatState</c>, whose
+    /// getter reads the same two facts. Both halves failed, so every var on
+    /// the face printed its <c>BaseValue</c>.
+    ///
+    /// The repair is the game's own door for exactly this case, whose summary
+    /// in the 0.111.0 decompile is "to facilitate having upgrade previews
+    /// reflect power values from the player in combat (i.e. Armaments)".
+    ///
+    /// A SOURCE PIN, for the reason this class's header gives: the number
+    /// itself needs a live combat this harness cannot build, so what is pinned
+    /// is the wiring and the number is owed a live look.
+    /// </summary>
+    [Fact]
+    public void A_mode_option_is_a_combat_preview_so_the_board_folds_into_it()
+    {
+        var modal = Source(Path.Combine("klee-mod", "KleeCode", "Cards",
+                                        "ModalChoice.cs"));
+
+        Assert.Contains(
+            "option.UpgradePreviewType = CardUpgradePreviewType.Combat;",
+            modal);
+        // AFTER the upgrade, never before: the setter asserts mutability and
+        // refuses to leave the preview state once entered, so `UpgradeInternal`
+        // runs on a card the game does not yet consider a preview.
+        Assert.True(
+            modal.IndexOf("option.UpgradeInternal();", StringComparison.Ordinal)
+            < modal.IndexOf(
+                "option.UpgradePreviewType = CardUpgradePreviewType.Combat;",
+                StringComparison.Ordinal));
+        // And the decompiled rule it turns on is written down beside it, so a
+        // later reader need not re-derive why an off-pile face is unfolded.
+        Assert.Contains("runGlobalHooks", modal);
+    }
 }
