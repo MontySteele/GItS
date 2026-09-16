@@ -166,7 +166,7 @@ because the engine has no mirror of that trigger at all (see §2); functionally
 | verb | T1 card played | T2 played an Attack | T3 you attack | T4 you deal damage | T5 takes unblocked damage | T6 retaliation | T7 damage modifiers | T8 applied a debuff |
 |---|---|---|---|---|---|---|---|---|
 | V1 Attack-card damage | Attack | Attack | Attack | Attack | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
-| V2 non-Attack-card damage | damage-only | none | **Attack ≠ none (D1)** | **Attack ≠ none (D2)** | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
+| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | **Attack ≠ none (D2)** | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
 | V3 card HP-loss (self) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V4 Bomb detonation (shipped) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V5 Bomb explosion / Set off | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
@@ -213,7 +213,7 @@ What the two engines say DIFFERENTLY is §6.
 Seven. Four are engine-vs-engine; three are structural absences on the sim
 side. None was repaired here.
 
-### D1 — a Skill's damage is an Attack to `SkittishPower` in the game, and is not in the sim
+### D1 — a Skill's damage is an Attack to `SkittishPower` — REPAIRED in the sim
 
 `SkittishPower.AfterAttack` gates on
 `command.DamageProps.HasFlag(ValueProp.Move) && command.ModelSource is CardModel`
@@ -224,10 +224,20 @@ damage (`FloodOfEmotion`, `MatineePerformance`, `TakeItFromTheTop`,
 `SecretStash`, `StudyOfExplosions`, `ProtoKkAmbush`, … ) **do** wake Skittish
 in the game.
 
-The sim's Skittish is inline in `deal_damage_to_enemy` and gated
-`source == "attack"` (`tier0/engine/effects.py:1080`), which is
-`card.type == "attack"`. It does not fire. Evidence: `EB-521` already ruled
-the same asymmetry for Thorns and found the ENGINE right and the words wrong.
+The sim's Skittish was inline in `deal_damage_to_enemy` and gated
+`source == "attack"`, which is `card.type == "attack"`, and did not fire.
+Evidence: `EB-521` already ruled the same asymmetry for Thorns and found the
+ENGINE right and the words wrong.
+
+**Repaired 2026-09-16, sim side only.** The gate is now
+`source in effects.CARD_DAMAGE_SOURCES` — the two `source` literals
+`_op_damage` mints off a card, which is this engine's spelling of
+`ModelSource is CardModel`. The negative half is unchanged and is the reason
+the repair is narrow: a kit verb mints its own literal and, in the game,
+leaves through `ElementalHit.Deal`, which carries no `ModelSource`, so no
+Bomb, Plan, Mine or performance wakes Skittish in either engine. Pinned end to
+end by `tier0/tests/test_eb495_d1_skittish_wakes_on_a_skill.py`. No published
+sim number moved: the whole suite, batteries included, was unchanged by it.
 
 ### D2 — likewise for `EnvenomPower`
 

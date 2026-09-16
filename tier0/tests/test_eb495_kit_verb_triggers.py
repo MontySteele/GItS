@@ -82,20 +82,23 @@ def _fresh(**enemy_kwargs):
     return make_state(enemies=[enemy]), enemy
 
 
-def test_skittish_answers_the_source_attack_and_nothing_else():
+def test_skittish_answers_any_card_sourced_damage_and_nothing_else():
     """MATRIX T3, the sim column. `SkittishPower` is the only enemy-side
-    on-hit power tier0 models at all (atlas sec.2), and its gate is
-    `source == "attack"` -- i.e. the CARD's declared type.
+    on-hit power tier0 models at all (atlas sec.2).
 
-    THIS IS DISAGREEMENT D1 AND THE PIN IS THE DEFECT. In the game the gate is
-    `DamageProps.HasFlag(ValueProp.Move) && ModelSource is CardModel`, which a
-    Skill's damage satisfies, so `source="card"` below is a cell the two
-    engines answer differently. Pinned as it behaves.
+    DISAGREEMENT D1, REPAIRED. The gate is now
+    `source in effects.CARD_DAMAGE_SOURCES`, the sim's spelling of the game's
+    `DamageProps.HasFlag(ValueProp.Move) && ModelSource is CardModel`
+    (`SkittishPower.cs:58`): a Skill's damage (`source="card"`) wakes it in
+    both engines, and every kit verb still does not, because
+    `ElementalHit.Deal` hands the game no `ModelSource` at all. The end-to-end
+    half is `test_eb495_d1_skittish_wakes_on_a_skill.py`.
     """
     for source in KIT_SOURCES:
         state, enemy = _fresh(skittish=3)
         effects.deal_damage_to_enemy(state, enemy, 5, source=source)
-        assert enemy.skittish_fired is (source == "attack"), source
+        assert enemy.skittish_fired is (
+            source in effects.CARD_DAMAGE_SOURCES), source
 
 
 def test_envenom_answers_the_source_attack_and_nothing_else():
