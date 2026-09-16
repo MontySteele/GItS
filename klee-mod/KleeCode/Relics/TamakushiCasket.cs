@@ -84,15 +84,32 @@ public sealed class TamakushiCasket : CustomRelicModel
     /// badge's "{Size} Pyro damage" is the same distinction one arm over), and
     /// it is the honest short form: the number is what the hit starts at, and
     /// every modifier on the board moves it from there.
+    ///
+    /// `EB-348`: AND THE FACE NOW SAYS IT IS A HIT. "Deals N Hydro damage"
+    /// reads as a number arriving, and the Kokomi r4d seat priced it that way
+    /// in all three acts: act 1 finding 6, act 2 finding 5, and act 3 finding
+    /// 2, where a Casket ping Vaporized the player's OWN standing Pyro aura for
+    /// 2 x 1.5 x 1.5 and Red Mask's combat-start Weak fired the relic on all
+    /// three enemies at once. Every one of those is the same fact -- the ping
+    /// goes out through <see cref="ElementalHit"/> like every other non-attack
+    /// hit in this mod, so it REACTS, it takes the target's Vulnerable, and it
+    /// leaves Hydro behind for the next hit to react with.
+    ///
+    /// TWO SENTENCES, SPLIT ACROSS THE TWO SURFACES, because the relic row is
+    /// at 119 of the 120-character relic ceiling and the whole rule does not
+    /// fit on it. The FACE says the ping is a real hit and names its element
+    /// and its base; <see cref="ArmKeywordTips.ForCasket"/>, which is what a
+    /// card naming the relic raises, spells out what "real" buys. Both are
+    /// read off the same constant, so a repricing cannot leave either lying.
     /// </summary>
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tamakushi Casket"),
         ("description",
-            "Start each combat with the [gold]Bake-Kurage[/gold]. Whenever "
-          + "you apply a debuff to an enemy, it deals [blue]"
-          + KokomiOverhaulLaw.CasketStrike + "[/blue] [gold]Hydro[/gold] damage "
-          + "to that enemy."),
+            "Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "
+          + "you apply lands a real [blue]"
+          + KokomiOverhaulLaw.CasketStrike + "[/blue] [gold]Hydro[/gold] hit "
+          + "on that enemy."),
     };
 
     /// <summary>

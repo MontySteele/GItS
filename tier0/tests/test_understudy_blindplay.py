@@ -6445,9 +6445,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
         # `blindplay_shape.CASKET_STRIKE` -- so what is held in step is the
         # prose either side of it, the same fold-out the Encore row makes.
+        # `EB-348` widened both copies to the rule the ping actually has:
+        # it is a real Hydro HIT, so it reacts, takes the target's Vulnerable
+        # and re-arms Hydro. Same fold-out, one clause longer.
         "Tamakushi Casket": [
-            "Your relic. Whenever you apply a debuff to an enemy, it deals ",
-            " damage to ", "that enemy."],
+            "Your relic. Each debuff you apply is a ",
+            " hit on that ", "enemy: it reacts, takes its "],
     }
     # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
     # with, because the game hangs no tip on the word at all -- which is the
@@ -12057,9 +12060,8 @@ def _casket_plans_state() -> dict:
     state["player"]["relics"] = [
         {"id": "KLEEMOD-TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
          "description": ("Start each combat with the [gold]Bake-Kurage[/gold]."
-                         " Whenever you apply a debuff to an enemy, it deals "
-                         "[blue]2[/blue] [gold]Hydro[/gold] damage to that "
-                         "enemy."),
+                         " Each debuff you apply lands a real [blue]2[/blue] "
+                         "[gold]Hydro[/gold] hit on that enemy."),
          "counter": None, "keywords": []}]
     return state
 

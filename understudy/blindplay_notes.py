@@ -1331,9 +1331,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # the card and could not tell. The mod's twin is
     # `ArmKeywordTips.ForCasket`; this is the same sentence, from the relic's
     # own face, with the number off the shared constant.
+    # `EB-348` WIDENED IT TO THE RULE THE PING ACTUALLY HAS. "Deals N Hydro
+    # damage" reads as a number arriving, and the r4d seat priced it that way
+    # in all three acts -- act 3 finding 2 is the sharpest: a Casket ping
+    # Vaporized the player's OWN standing Pyro aura for 2 x 1.5 x 1.5, and Red
+    # Mask's combat-start Weak fired the relic on all three enemies at once.
+    # The ping goes out through the same `ElementalHit` funnel every other
+    # non-attack hit in this mod does, so it reacts, it takes the target's
+    # Vulnerable, and it leaves Hydro behind.
     "Tamakushi Casket": (
-        f"Your relic. Whenever you apply a debuff to an enemy, it deals "
-        f"{CASKET_STRIKE} Hydro damage to that enemy."),
+        f"Your relic. Each debuff you apply is a {CASKET_STRIKE} Hydro hit on "
+        f"that enemy: it reacts, takes its Vulnerable, and re-arms Hydro."),
     # `EB-377` ADDED THESE TWO, and their absence was the same defect one row
     # over rather than a decision: both have had an `ArmKeywordTips` twin since
     # R244, and neither had a page row -- so the mod defined them on a hover

@@ -608,8 +608,15 @@ _ONE_USE_RIDER = re.compile(r"the next (\w+) you play\b", re.I)
 # makes the panel's "leaves no aura" clause false for a debuff Plan. The
 # Tamakushi Casket's own sentence, with the element left open: the clause is
 # about a hit that carries one, and the Plan is Hydro either way.
+#
+# `EB-348` REWROTE THAT SENTENCE ("Each debuff you apply lands a real 6 Hydro
+# hit on that enemy"), so the pattern follows it. Both spellings are matched
+# rather than only the current one: the gate is on a relic a RUN is holding,
+# the old wording is what a save from before the rewrite carries, and a clause
+# that silently stopped printing is exactly the defect `EB-433` was filed on.
 _DEBUFF_ANSWERING_HIT = re.compile(
-    r"whenever you apply a debuff[^.]*damage", re.I)
+    r"(?:whenever|each) (?:you apply a debuff|debuff you apply)[^.]*"
+    r"(?:damage|hit)", re.I)
 
 
 def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:

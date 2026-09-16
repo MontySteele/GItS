@@ -1012,9 +1012,10 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CasketKey,
-            "Your relic. Whenever you apply a debuff to an enemy, it deals "
-          + KokomiOverhaulLaw.CasketStrike + " [gold]Hydro[/gold] damage to "
-          + "that enemy.");
+            "Your relic. Each debuff you apply is a "
+          + KokomiOverhaulLaw.CasketStrike + " [gold]Hydro[/gold] hit on that "
+          + "enemy: it reacts, takes its [gold]Vulnerable[/gold], and re-arms "
+          + "[gold]Hydro[/gold].");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.
