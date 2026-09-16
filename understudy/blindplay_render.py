@@ -35,6 +35,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
                                         ENEMY_REPLACED_LINE,
+                                        ENEMY_SIZE_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
                                         FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
@@ -866,6 +867,12 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 
+#: `EB-708`. The size the game draws into a printed name -- `Twig Slime (M)`,
+#: `Leaf Slime (S)`. Case-sensitive and anchored on the brackets, so it fires
+#: on a size and not on a parenthetical the mod writes into a title.
+_SIZE_LETTER = re.compile(r"\((?:S|M|L)\)")
+
+
 def _colliding(items: list[dict[str, Any]]) -> bool:
     """Do two of these options print the same name? (`EB-341`)
 
@@ -1568,6 +1575,12 @@ def render(obs: dict[str, Any]) -> str:
         # opposite, which is what sent a seat's Melt into the wrong body.
         if c["enemies"]:
             out += ["", ENEMY_HANDLE_NOTE]
+        # `EB-708`: and where one of those names carries a SIZE letter, the
+        # legend for it -- beside the handle note, because both are about a
+        # bracketed thing the list above just printed, and because the seat
+        # that lost a Plan on it read the two brackets as one convention.
+        if any(_SIZE_LETTER.search(e["name"] or "") for e in c["enemies"]):
+            out += ["", ENEMY_SIZE_NOTE]
         # `EB-671`: and what the mark on one of those lines means, beside the
         # note about the handles on all of them.
         if any(e.get("front") for e in c["enemies"]):

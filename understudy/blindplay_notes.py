@@ -705,6 +705,29 @@ REACTION_ROW_NO_SOURCE = "- **{reaction}** on **{target}**."
 NO_REACTION_THIS_TURN = ("- Nothing reacted this turn. A reaction that "
                          "happened would be listed here by name.")
 
+# `EB-708`. A SIZE IS NOT A STATUS, AND THE PAGE HAD NO LEGEND FOR EITHER.
+#
+# THE FIND (Kokomi r31 lane 2, (c)). `Twig Slime (M)` and `Leaf Slime (S)` read
+# as MINION MARKERS against a Plan rule written in terms of Minion -- "the seat
+# guessed whether a single-target Plan could hit them". The letters are part of
+# the name the GAME prints (the slime family is drawn at three sizes) and this
+# page passes a printed name through verbatim, so a reader meeting a bracketed
+# letter on a screen that also prints `[A]` handles and two Minion rules has
+# three bracketed things and a legend for one of them.
+#
+# IT SAYS WHERE MINION DOES LIVE, because the negative alone leaves the reader
+# where it found them. `MinionPower` is a POWER on the body and this page
+# prints every power a body wears under its intents, so the answer to "is this
+# one a Minion" is on the same screen one line down -- which is `mark_front`'s
+# own rule too, read off exactly those rows.
+ENEMY_SIZE_NOTE = (
+    "*A letter in round brackets inside an enemy's name is its SIZE -- `(S)` "
+    "small, `(M)` medium, `(L)` large. It is part of the name the game prints: "
+    "not a status, and not the `[A]` handle this page aims cards by. It does "
+    "not make the body a Minion. Minion is a printed status, so a body that is "
+    "one carries a `Minion` line of its own under its intents, and a body "
+    "without that line is not one whatever size it is.*")
+
 ENEMY_HANDLE_NOTE = (
     "*Each enemy keeps its letter and its number for the whole fight: a body "
     "that dies does not renumber or re-letter the ones still standing, and a "
