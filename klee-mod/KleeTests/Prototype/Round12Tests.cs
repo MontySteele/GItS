@@ -279,38 +279,6 @@ public class Round12Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForCovenSpark", HeadlessGame.All)!)));
     }
-
-    // ---- EB-425: a deploy deals damage and takes no target ---------------
-
-    [Fact]
-    public void The_salon_rules_say_the_member_picks_its_own_enemy()
-    {
-        // THE REFUSAL WAS THE FIRST PLACE THE SEAT LEARNED IT. r5 run 1: "the
-        // first thing I tried was `play 'Salon Debut' on 'Corpse Slug (1)'`
-        // and it was refused... a card that deals damage but takes no target
-        // is not something the face warns you about. The Salon picked slug 2
-        // on its own. I never got to choose a member's target all round."
-        //
-        // It is a rule about every PERFORMANCE -- `PerformMember` draws the
-        // body from `Rng.CombatTargets` and is the only implementation of a
-        // member acting -- so it is on the paragraph every Salon card carries
-        // rather than on one card's face.
-        // `EB-629` MOVED IT ONE SURFACE DOWN, to the member's own tip: the
-        // rules paragraph had grown to seven rules and was read as a wall of
-        // text, and the aim is a fact about the member that is about to
-        // perform. Still one string for all three members, still the
-        // paragraph-behind-the-word rather than a card face.
-        var body = string.Concat(Il.Strings(typeof(SalonMemberTips)
-            .GetMethod("BodyFor", HeadlessGame.All)!));
-
-        // `EB-451` extended the sentence rather than replacing it: the aim is
-        // still the member's own, and the clause after the comma is the limit
-        // r7 paid for. The pin follows the sentence it is about.
-        Assert.Contains("picks its own enemy, never a "
-                      + "[gold]Minion[/gold] while another enemy stands",
-                        body);
-    }
-
     // `EB-723` RETIRED THE SECOND HALF OF THIS PAIR. It asserted that
     // `ArmKeywordTips.ForDeploy` was at its ceiling and so could not have
     // carried the aim clause -- and the `Deploy` word left the mod with the
@@ -433,17 +401,6 @@ public class Round12Tests
         Assert.Contains(
             "$\"[blue]{CompanionOverhaulLaw.ShowerDamage}[/blue]", src);
     }
-
-    [Fact]
-    public void The_guest_cast_badge_says_a_member_is_not_one()
-    {
-        // The buff is the surface on screen at the moment the question
-        // arises, so it answers it rather than leaving "card" to do the work
-        // silently in the sentence above.
-        Assert.Contains("No member is one.",
-                        Printed("Powers/SpotlightSystem.cs"));
-    }
-
     // ==================================================================
     // `EB-526` -- "Spotlight every Companion card" and the card made after
     // ==================================================================
@@ -464,11 +421,7 @@ public class Round12Tests
     // and carries its owner (`GuestStarGenerator` hands `source.Owner` to
     // `CreateCard`), so it answers the same question the same way.
 
-#if FURINA_REFRAME
-    [Fact(Skip = "-p:FurinaReframe=true replaces the shipped Spotlight rule this pin asserts. Arm properties are deploy-line only: see docs/current/operations/prototype.md.")]
-#else
     [Fact]
-#endif
     public void EB526_a_companion_made_after_the_lighting_is_lit_by_the_same_test()
     {
         // The lighting FIRST and the card SECOND, which is the whole of the
@@ -486,11 +439,7 @@ public class Round12Tests
         Assert.Equal(6m, SpotlightSystem.PrintedDamage(made, 4m));
     }
 
-#if FURINA_REFRAME
-    [Fact(Skip = "-p:FurinaReframe=true replaces the shipped Spotlight rule this pin asserts. Arm properties are deploy-line only: see docs/current/operations/prototype.md.")]
-#else
     [Fact]
-#endif
     public void EB526_an_unlit_seat_prints_the_four_the_sheet_prints()
     {
         // The other leg, so the pin above is not passing for a reason

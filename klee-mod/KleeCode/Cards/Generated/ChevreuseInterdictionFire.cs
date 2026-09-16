@@ -51,7 +51,7 @@ public sealed class ChevreuseInterdictionFire : CustomCardModel, IElementalCard,
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("chevreuse_interdiction_fire");
 

@@ -64,7 +64,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import effects, furina_reframe, powers
+from tier0.engine import effects, powers
 from tier0.engine.state import CombatState
 from tier0.tests.conftest import make_enemy
 
@@ -76,13 +76,6 @@ DRY = C.SALON_DRY_DAMAGE_MULT
 VAPORIZE = C.VAPORIZE_MULT
 #: The third term, and the one the round never had on a screen.
 WEAK = C.WEAK_DEALT_MULT
-
-
-@pytest.fixture(autouse=True)
-def manual_on(monkeypatch):
-    """A member performs on a play only under the reframe's MANUAL leg."""
-    for flag in ("FURINA_REFRAME", "FURINA_REFRAME_MANUAL"):
-        monkeypatch.setattr(furina_reframe, flag, True)
 
 
 def _board(encore: int, weak: int = 0):

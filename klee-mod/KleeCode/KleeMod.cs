@@ -370,10 +370,6 @@ public static class KleeMod
                         "Guest Star",
                     [Cards.FurinaRiderTips.BowKey + ".title"] =
                         "Takes their bow",
-                    // `EB-477`: the half of a Companion card that went missing
-                    // in silence on an empty stage.
-                    [Cards.FurinaRiderTips.CompanionPerformKey + ".title"] =
-                        "Performs a member",
                     // `EB-485`: how long the lighting lasts, on the card that
                     // pays for it. Same dictionary and the same reason as
                     // every row above -- the pck's `card_keywords.json`
@@ -381,12 +377,6 @@ public static class KleeMod
                     // directly player-visible as the raw key.
                     [Cards.FurinaRiderTips.SpotlightLastsKey + ".title"] =
                         "Lit for this combat",
-                    // `EB-567`: the WINDOW, beside the duration above. Two
-                    // rows because they are two facts -- how long the
-                    // lighting lasts is about the next fight, and this is
-                    // about the only turn the Encore can buy it.
-                    [Cards.FurinaRiderTips.SpotlightWindowKey + ".title"] =
-                        "Buy it before anything performs",
 
                     // B5: the member tips the deploy faces hand off to. Only
                     // the TITLES are rows -- the bodies are built live in
@@ -563,12 +553,6 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
                         "Back performer",
                     [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
-                    // `EB-553` (R260). The third rider here that titles no
-                    // keyword: the reframe's starting relic fields the stage
-                    // at combat start, and the relic's own face has no room
-                    // left for the sentence.
-                    [Cards.ArmKeywordTips.OpeningStageKey + ".title"] =
-                        "Opening stage",
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

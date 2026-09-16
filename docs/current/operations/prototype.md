@@ -49,12 +49,6 @@ at all — a dev running the game's own build line over the tests gets the same
 `DefineConstants` and no "this property means nothing here" surprise — and not
 because any pin needs one.
 
-One arm has a second casualty, honest for the same reason:
-`ParityAuthorityPinTests.M2_authority_a_furina_card_is_spotlighted_under_the_both_modes_relic`
-asserts the SHIPPED Spotlight rule, which `-p:FurinaReframe=true` deliberately
-replaces (Center Stage retires, the selector aims Guest Cast). It carries the
-same `#if` skip.
-
 **Deploying a dev build** — `klee-mod\build\deploy_proto.ps1`, from the
 art-bearing main checkout, game closed. It is `deploy.ps1` plus three things:
 `gen_prototype_cards.py --check` first, `-p:PrototypeCards=true` on the build,

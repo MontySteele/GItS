@@ -127,70 +127,22 @@ public class ArmKeywordTipTests
         }
     }
 
-    // ---- the SECOND runtime branch (`EB-479`, R258) -----------------------
-
-    private static string EncoreBody()
+    [Fact]
+    public void The_encore_tip_names_what_spends_the_pool()
     {
-        var body = Tips.GetMethod("EncoreBody", HeadlessGame.All)
+        // `EB-407`'s sentence, and no opening bank in it: the shipped kit
+        // grants none, and the arm that did is retired (`EB-726`).
+        var body = (string)(Tips.GetMethod("EncoreBody", HeadlessGame.All)
             ?? throw new System.InvalidOperationException(
-                "ArmKeywordTips.EncoreBody is gone -- the Encore tip's arm "
-              + "branch moved, and with it the only surface that states the "
-              + "reframe's opening bank.");
-        return (string)body.Invoke(null, System.Array.Empty<object>())!;
-    }
+                "ArmKeywordTips.EncoreBody is gone."))
+            .Invoke(null, System.Array.Empty<object>())!;
 
-    [Fact]
-    public void Under_the_reframe_the_encore_tip_states_the_opening()
-    {
-        var was = FurinaReframe.Enabled;
-        try
-        {
-            FurinaReframe.Enabled = true;
-
-            var body = EncoreBody();
-
-            // R258's whole content, with the amount READ from the law rather
-            // than typed, so a repricing moves the expectation and the
-            // sentence together (`EB-89`, the Spark tip's rule above).
-            Assert.Contains(
-                "Start each combat with " + FurinaReframeLaw.OpeningEncore
-                + ".", body);
-            // And the three things that spend it are still named, which is
-            // what `EB-407` put on this tip in the first place.
-            Assert.Contains("After [gold]Block[/gold] it absorbs damage "
-                            + "before HP.", body);
-            Assert.Contains("a card pays", body);
-            Assert.Contains("a member spends 1 or acts at 3/4.", body);
-        }
-        finally
-        {
-            FurinaReframe.Enabled = was;
-        }
-    }
-
-    [Fact]
-    public void With_the_arm_off_the_encore_tip_claims_no_opening()
-    {
-        // The shipped kit grants none, so the release sentence stands exactly
-        // as `EB-407` wrote it -- a tip that promised an opening bank the kit
-        // does not hand out is the same class of defect as explaining one
-        // arm's word with the other arm's rules.
-        var was = FurinaReframe.Enabled;
-        try
-        {
-            FurinaReframe.Enabled = false;
-
-            var body = EncoreBody();
-
-            Assert.DoesNotContain("Start each combat", body);
-            Assert.Contains("One pool, as each lands: a card pays to resolve, "
-                            + "a member spends 1 to perform or acts at 3/4.",
-                            body);
-        }
-        finally
-        {
-            FurinaReframe.Enabled = was;
-        }
+        Assert.DoesNotContain("Start each combat", body);
+        Assert.Contains("After [gold]Block[/gold] it absorbs damage "
+                        + "before HP.", body);
+        Assert.Contains("One pool, as each lands: a card pays to resolve, "
+                        + "a member spends 1 to perform or acts at 3/4.",
+                        body);
     }
 
     // ---- the two sentences the row names ----------------------------------
@@ -288,20 +240,6 @@ public class ArmKeywordTipTests
         Assert.DoesNotContain(KleeOverhaulLaw.BombGrowth.ToString(), printed);
         Assert.Contains(Il.Calls(Tips.GetMethod("ForBomb", HeadlessGame.All)!),
                         c => c.Contains("Concat"));
-    }
-
-    [Fact]
-    public void EB553_the_opening_stage_tip_names_the_member_and_the_moment()
-    {
-        // R260. The reframe's stage is never unlit, and the relic that fields
-        // it is where a player reads so. Two facts and no more: WHEN (every
-        // fight, on its opening) and WHO (the member by name, in full -- the
-        // badge prints the short "Crabaletta" only because three rules and an
-        // identity have to fit under the power ceiling).
-        var body = Printed("ForOpeningStage");
-        Assert.Contains("Every fight opens with", body);
-        Assert.Contains("[gold]Mademoiselle Crabaletta[/gold]", body);
-        Assert.Contains("on stage.", body);
     }
 
     // ---- the shape --------------------------------------------------------
@@ -464,8 +402,8 @@ public class ArmKeywordTipTests
         // cannot arrive with a different shape by accident.
         var attaches = Attaches().ToList();
 
-        // SEVENTEEN KEYWORDS AND FIVE RIDERS (`EB-625` made the words
-        // fifteen). Originally: SIXTEEN, FOURTEEN KEYWORDS AND TWO RIDERS. Draft 6 cut Tide, Surge, Exert and the Garment as
+        // SEVENTEEN KEYWORDS AND FOUR RIDERS (`EB-625` made the words
+        // fifteen; `EB-726` took `ForOpeningStage` with the retired reframe). Originally: SIXTEEN, FOURTEEN KEYWORDS AND TWO RIDERS. Draft 6 cut Tide, Surge, Exert and the Garment as
         // keywords and their four `For*` methods left with the rules they
         // defined, taking the table from eleven to seven; the Furina reframe's
         // slice two put Deploy, Evoke and Drain on it (2026-09-02), and R244
@@ -500,14 +438,7 @@ public class ArmKeywordTipTests
         // the face that prints it carries the definition. The r7 seat played
         // Fischl -- Nightrider five times without learning what puts Oz out.
         //
-        // THE SEVENTEENTH IS `EB-553`'s `ForOpeningStage`, the third entry
-        // here that titles no keyword and the first that rides a RELIC rather
-        // than a card. R260 fields Mademoiselle Crabaletta at combat start, so
-        // the stage is never unlit -- and the relic's own arm face is at 117
-        // of the 120-character relic ceiling with two ruled sentences already
-        // on it, which leaves this table as the only surface with room.
-        //
-        // THE EIGHTEENTH IS `EB-575`'s `ForEmptyField`, the fourth entry that
+        // THE SEVENTEENTH IS `EB-575`'s `ForEmptyField`, the fourth entry that
         // titles no keyword and the FIRST whose sentence comes and goes with
         // the board. A `Set off` row or the merge played with no Bomb anywhere
         // is accepted, charges its Energy and its Spark, and resolves its own
@@ -564,7 +495,7 @@ public class ArmKeywordTipTests
         // entry counted as one Plan or two for a per-Plan clause (Kokomi r31
         // lane 2). It counts as two, and the card that bends the count is
         // where the count is explained.
-        Assert.Equal(26, attaches.Count);
+        Assert.Equal(25, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
         Assert.Contains(attaches, m => m.Name == "ForFanfare");
@@ -577,7 +508,6 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.Contains(attaches, m => m.Name == "ForCovenSpark");
-        Assert.Contains(attaches, m => m.Name == "ForOpeningStage");
         Assert.Contains(attaches, m => m.Name == "ForEmptyField");
         Assert.Contains(attaches, m => m.Name == "ForMergeRiders");
         Assert.All(attaches, m => Assert.Contains(

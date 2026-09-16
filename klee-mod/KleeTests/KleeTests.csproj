@@ -69,17 +69,6 @@
     <DefineConstants>$(DefineConstants);KOKOMI_OVERHAUL</DefineConstants>
   </PropertyGroup>
 
-  <!-- The Furina reframe arm, mirrored here on exactly the terms above and
-       for the same reason. Its pins do not need the property either: the five
-       `FurinaReframe` flags are settable, so one build asserts both sides of
-       every leg, including the flag-off acceptance condition: that the
-       turn-start upkeep runs, a Companion play touches the stage not at all, a
-       deploy performs nobody, a bow is the shipped bow and all four shipped
-       Fanfare mint legs pay. -->
-  <PropertyGroup Condition="'$(FurinaReframe)' == 'true'">
-    <DefineConstants>$(DefineConstants);FURINA_REFRAME</DefineConstants>
-  </PropertyGroup>
-
   <!-- The Furina stage arm, mirrored here on exactly the terms above and for
        the same reason. Its pins do not need the property: FurinaStage.Enabled
        is settable, so one build asserts both sides of the switch, including

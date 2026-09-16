@@ -52,7 +52,7 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
         new[] { KleeKeywords.AppliesGeo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_itto_superlative_superstrength");
 

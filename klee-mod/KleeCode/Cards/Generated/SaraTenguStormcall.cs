@@ -51,7 +51,7 @@ public sealed class SaraTenguStormcall : CustomCardModel, IElementalCard, ICompa
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("sara_tengu_stormcall");
 

@@ -15,7 +15,7 @@ from typing import Callable
 
 from tier0 import constants as C
 from tier0.engine import (companion_hexerei, companion_standins, effects,
-                          furina_reframe, furina_stage, klee_overhaul,
+                          furina_stage, klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
                           resources)
@@ -115,17 +115,9 @@ def grant_charged_kit(state: CombatState) -> None:
     Respects MAX_HAND_SIZE: a full hand defers the grant to the next check
     rather than dropping it -- the meter stays full, so it cannot be lost.
 
-    QUARANTINED (`FURINA_REFRAME_BURST`), `EB-365` / R251: THE ARM NEVER GRANTS
-    THE KIT CARD. Nothing feeds the meter under the flag
-    (`resources.gain_burst`), so this branch is unreachable in play -- and it is
-    written anyway, because "Let the People Rejoice is not part of the reframe"
-    is a rule of the arm rather than a consequence of one guard sitting
-    upstream. The mod's twin is the same guard in `FurinaKitGrant.GrantIfCharged`.
     """
     p = state.player
     if not p.burst_max or p.burst_energy < p.burst_max:
-        return
-    if furina_reframe.burst_retired(p):
         return
     for kit in p.kit_cards:
         if any(c.id == kit.id for c in p.hand):
@@ -559,14 +551,7 @@ def play_card(state: CombatState, card: Card) -> None:
         # Stage the mode" stops being the same question as "does this card
         # mint Fanfare". Companions are lit under the upgrade and still mint
         # nothing -- the upgrade drops the exclusivity, not the targeting.
-        if (effects.center_stage_active(state, card)
-                and not furina_reframe.meter_active(p)):
-            # RETIRED UNDER `FURINA_REFRAME_METER` (reframe §4.1): a
-            # Spotlighted card played mints nothing, because only a member
-            # PERFORMING mints. R228's one-mode Spotlight retires Center Stage
-            # outright as well, and `center_stage_active` answers False under
-            # its own flag -- two flags, two reasons, and either alone is
-            # enough to empty this leg.
+        if effects.center_stage_active(state, card):
             resources.gain_fanfare(
                 state, C.FANFARE_PER_SPOTLIGHT_CARD, "center_stage")
         # Card-level Spotlight texture (sheet pass 1, ratified design
@@ -731,31 +716,6 @@ def _finish_play(state: CombatState, card: Card,
         # Ascent pays on every Hexerei card played, and reads the mark
         # off the card. `tier0.engine.companion_hexerei`.
         companion_hexerei.note_card_played(state, card)
-        # FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play makes
-        # the FRONT Salon member perform, then rotates it to the back.
-        #
-        # `EB-464` TOOK THIS ONE OUT OF THE `replay_index == 0` GATE. It shared
-        # the gate with Klee's mint below on LAW:145's clause -- "a per-play
-        # bound a replay can double is not a bound" -- and that clause is about
-        # a RESOURCE MINT. A performance is not one: the Companion tip says a
-        # played Companion card performs the front member and Replay says it
-        # plays the card again, so the r8 seat counted 16 where 20 was
-        # promised, twice, with Fanfare (2 per performance) agreeing with ONE
-        # performance (D default, r8 packet sec.4). Klee's mint keeps the gate,
-        # three lines down, which is where the clause actually bites.
-        #
-        # STILL AFTER A RESOLUTION HAS RUN, which is what this site is. Inert
-        # unless `FURINA_REFRAME_MANUAL` is on, and inert for every other
-        # character in every world. C# twin: the same call, ungated, in
-        # `FurinaResources.AfterCardPlayed`.
-        if card.is_companion:
-            furina_reframe.companion_play_trigger(state, card)
-            if replay_index:
-                # `EB-420`'s RECORD OUTLIVES ITS REASON. The extra PLAY still
-                # leaves no trace of its own, because the act above is
-                # indistinguishable from any other row of the performance list.
-                # C# twin: `SalonMemberPower.NoteCompanionReplay`.
-                furina_reframe.companion_replay(state, card)
         if replay_index == 0 and (card.is_companion or C.KLEE_OVERHAUL):
             # "Little Hexenzirkul" (EB-219, retargeted by EB-642): Klee's kit
             # answering a HEXEREI play, which is where LAW:145 puts
@@ -860,9 +820,9 @@ _FREE_PLAY_CONTEXT = (
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
     "block_gained_this_card", "discards_this_card", "last_drawn_type",
-    # QUARANTINED (R213 B). The Furina reframe's per-play drain total,
-    # saved for its neighbours' reason: a free play that drained inside
-    # an outer card would otherwise hand the outer card its number.
+    # QUARANTINED (R213 B). The drain op's per-play total, saved for its
+    # neighbours' reason: a free play that drained inside an outer card would
+    # otherwise hand the outer card its number.
     "fanfare_drained_this_card",
     # QUARANTINED (`furina_stage.FURINA_STAGE`). The Stage's per-play spend
     # total, saved for its neighbour's reason exactly: a free play that spent
@@ -1099,24 +1059,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Block has to land here because it reads a ledger that was rolled at the
     # top of this function.
     klee_overhaul.turn_start_late(state)
-
-    # QUARANTINED (`furina_reframe.FURINA_REFRAME`, R258 / `EB-479`): THE
-    # OPENING ENCORE, at the same site as the opening Spark one line up and for
-    # the same reason -- this engine's combat-start effects fire on TURN 1
-    # after the block clear, the energy reset and the draw, so this is where a
-    # "starts each combat with" grant is true on both sides. The mod's twin is
-    # `FurinaReframeOpening.GrantEncore`, on `AfterPlayerTurnStart`.
-    furina_reframe.grant_opening_encore(state)
-
-    # QUARANTINED (`furina_reframe.FURINA_REFRAME`, R260 / `EB-553`): THE
-    # MEMBER THE STAGE OPENS WITH, at the same site and AFTER the grant one
-    # line up. She performs on arrival -- a deploy performs -- and that
-    # performance spends Encore, so a fielding that ran before the grant would
-    # leave her acting dry at three-quarters on the one turn the player could
-    # not have paid for her. The mod's twin is
-    # `FurinaReframeOpening.FieldOpeningMember`, on the same hook and in the
-    # same order.
-    furina_reframe.field_opening_member(state)
 
     # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE STAGE, at the
     # same site and for the same reason as the two lines above: her starting

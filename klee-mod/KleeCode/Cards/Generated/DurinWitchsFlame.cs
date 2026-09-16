@@ -45,7 +45,7 @@ public sealed class DurinWitchsFlame : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForBurst(base.ExtraHoverTips, this), this);
+        KleeCardTooltips.ForBurst(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("durin_witchs_flame");
 

@@ -35,6 +35,42 @@ The arm's design reasoning is `review/ruled/klee-sparks-2026-08-29.md`; the
 published `KLEESPARK` reads stand as published (R101b) and are not re-graded by
 this deletion.
 
+## RETIRED — the Furina reframe's sixteen rows and their blocks (`EB-726`)
+
+The blocks that used to sit here for `proto_fr_salon_debut_named`,
+`proto_fr_curtain_call`, `proto_fr_exit_stage_left`,
+`proto_fr_let_the_people_rejoice`, `proto_fr_intermission`,
+`proto_fr_florid_cadenza`, `proto_fr_dramatic_entrance`,
+`proto_fr_universal_revelry`, `proto_fr_flood_of_emotion`,
+`proto_fr_aria_of_recompense`, `proto_fr_curtain_rises`,
+`proto_fr_second_course`, `proto_fr_guest_list`, `proto_fr_shared_billing`,
+`proto_fr_rapturous_applause` and `proto_fr_unheard_confession` went on
+2026-09-16.
+
+R269 ruled the Stage, and its brief's §2 retires the reframe by name. The
+sixteen rows left the surface with `EB-719` (2026-09-08) when batch one landed;
+`EB-726` took the rest of the arm — the `FurinaReframe` compile switch and its
+five flags, the sim's `tier0/engine/furina_reframe.py`, the C# roster, ledger
+and opening seams, the Salon panel and its scale table, and every pin that
+named one of them.
+
+Retrieval — the last tree that carried the rows, with these blocks:
+
+```
+git fetch --depth=1 origin 525c5c58dd0d9aa958284a4b10cd34402ebcf8f5
+git show 525c5c58dd0d9aa958284a4b10cd34402ebcf8f5^:docs/prototype-surface.yaml
+git show 525c5c58dd0d9aa958284a4b10cd34402ebcf8f5^:docs/notes/prototype-surface-provenance.md
+```
+
+SIX FACES ARE FROZEN rather than gone: `docs/notes/retired-prototype-rows.yaml`
+carries the six printed titles a sealed reframe round names that nothing in
+HEAD resolves, so those records still replay through
+`understudy/resource_order.SHEETS` (R101b). Its own header gives the split.
+
+The arm's design reasoning is `review/ruled/furina-reframe-2026-08-29.md`
+(R220 A); the published reads stand as published and are not re-graded by this
+deletion.
+
 ## header
 
 ```
@@ -1840,138 +1876,6 @@ THE DELETION RULE AT THE TOP OF THE SHEET BINDS ALL FOUR: they leave when the
 slice is accepted or rejected.
 ```
 
-## before proto_fr_salon_debut_named
-
-```
-# =========================================================================
-# THE FURINA REFRAME, SLICE TWO -- the first cards the reframe's rules have
-# (R220 A; the countersigned packet is review/ruled/furina-reframe-2026-08-29.md,
-# its sec.6.2 row list, with sec.4.4 the Evoke, sec.4.6 the drain and sec.5 the
-# starter delta). Slice one built the RULES -- the manual stage, the Companion
-# trigger, the deploy that performs, the aimed Evoke and the meter that only
-# performance mints -- in both engines and behind FURINA_REFRAME, and it left
-# the surface with no row that speaks them. These five are that row list.
-#
-# THEY PRINT THREE WORDS THE SHIPPED KIT DOES NOT HAVE, and each carries its
-# rule in a hover tip the codegen attaches off the printed word (`EB-272`):
-# Deploy (a member joins AND performs), Evoke (it performs, leaves, counts its
-# Fanfare bonus three times and prints five), Drain (the meter falls to nothing
-# and the next clause is priced off what it took).
-#
-# FLAG-OFF AND UNRUN. Nothing here has been played, in the game or in a sim,
-# and no number below is quotable (R215 B): the two mint figures and the Focus
-# multiplier are slice one's prototype seeds, and the costs, the two Encore
-# prices and the Rare's base are this slice's.
-# =========================================================================
-```
-
-## proto_fr_salon_debut_named
-
-Face: "Deploy Mademoiselle Crabaletta." The Deploy keyword tip carries the
-perform clause: a deployed member performs at once; deployed onto a full stage,
-the front member Evokes first. Reframe sec.5's starter delta: a NAMED member, so
-which member is on the board is a decision and not a coin flip.
-
-The shipped `salon_debut` it is a delta OF deploys `member: random`, which is
-what makes the two a real A/B rather than a rename, and the row borrows that
-card's illustration under R179 (`art_of`, cosmetic, lint-proved).
-
-## proto_fr_curtain_call
-
-Face: "Evoke the front Salon member." Prints its Encore price. The Evoke tip:
-the member leaves the stage, its performance applies the Fanfare bonus three
-times, and it mints 5 Fanfare. sec.6.2 row 2, `F16` (1)'s cheap Evoke.
-
-The price is PRINTED as a sentence rather than left to the cost badge, which is
-this sheet's shipped convention -- every priced Furina row on
-`docs/furina-cards.yaml` opens "Spend N [gold]Encore[/gold]." -- and it is
-shipped machinery on both engines: the playability gate and the spend run
-before the op resolves, which is why `F7` (1) needed no port.
-
-THE SENTENCE IS THE CODEGEN'S AND NOT THE ROW'S, which is what the designer's
-`upgrade: {encore_cost: -1}` forced. The row used to write "Spend 2
-[gold]Encore[/gold]." into its own `description:`, and a literal cannot move:
-the delta emitted a real `UpgradeCostBy(-1)`, the gate and the badge charged
-the moved number, and the face went on printing the old one -- so the emitter's
-own visibility gate refused the row by name. `meter_price_clauses` is now the
-ONE builder both face paths call, the base card prints "Spend 2 Encore" and the
-`+` card "Spend 1 Encore", and a row's `description:` states what the card DOES
-and never what it costs.
-
-## proto_fr_exit_stage_left
-
-Face: "Evoke Surintendante Chevalmarin." The aimed Evoke (`F5` (2)); her bow is
-the alternative effect (the all-enemy aura and the Encore refund). If she is
-not on stage the slice-1 fallback rule applies and the face must say what
-happens then -- print exactly what the engine does. sec.6.2 row 3.
-
-WHAT THE ENGINE DOES, printed: an aimed Evoke whose member is absent Evokes the
-FRONT and reports it (`furina_reframe.EVOKE_TARGET_ABSENT`,
-`FurinaReframeLedger.NoteEvokeTargetAbsent`) -- an aimed card that cannot find
-its member is an unaimed Evoke, never a wasted one. So the face reads "or the
-front member if she is not on stage" and the row's pin compares that sentence
-with the rule rather than with a second copy of itself.
-
-The aim is a `member:` ARGUMENT on the shipped `salon_bow` verb and not a new
-op, which is the slot-6 ruling's own shape on both sides: registering a
-`salon_evoke` would have grown the priced-op set, and that is a
-`DRAFTER_VERSION` bump bought for a synonym.
-
-ITS UPGRADE TAKES THE PRICE TO NOTHING, which is the one shape a printed price
-had no wording for. "Spend 0 [gold]Encore[/gold]." is not a smaller price, it
-is a line claiming a cost the card does not have -- and the rendered path's own
-first clause already skips a row priced at 0. So the `+` card drops the whole
-sentence, separator included, and the base card is unchanged.
-
-## proto_fr_let_the_people_rejoice
-
-Face: "Drain your Fanfare. Deal 5 damage to ALL enemies, plus 1 per Fanfare
-drained." The Rare drain (sec.4.6, `F11` (1) as a proto twin: no `kit_card`, no
-`requires` gate, a real cost). Playable at any Fanfare value; it reads the HELD
-meter, never a threshold.
-
-Neither gate travels with it, and each for its own reason: `kit_card` makes a
-row inexpressible by name in the emitter ("hand-write it against the KitBurst
-machinery"), and a `requires: burst_energy_full` would put back the threshold
-the reframe took out. The shipped row keeps both and costs 0; this one costs 2.
-
-IT NOW HAS A SLOT (`EB-507`, 2026-09-06). Until this change the row was granted
-from a scenario and offered by nothing -- the arm's own Rare drain, unreachable
-in a run. `EB-507` took the three shipped Fanfare-floor Rares off the arm's
-offer surface, and one of them, `the_sea_is_my_stage`, is NOTHING but the
-floor rider: one `gain_fanfare_floor 15` op and no body. There is no copy to
-make of a card with no body, so what it hands over is its Rare slot, and the
-drain takes it. Rare for Rare, so the offer odds do not move; the row itself is
-unchanged, and the shipped card still exists and is still dealt with the arm
-off (R213 B).
-
-THE SLOPE IS 2 PER DRAINED (the second-wave review of 2026-09-06; a D default).
-At `per: 1` the Rare never out-damaged Universal Revelry's arm copy anywhere in
-the meter's measured 0-to-15 range -- and it emptied the meter to do it, so the
-card paid twice and bought nothing. `{base: 5, per: 2, count: fanfare_drained}`
-is the printed slope; the face renders it through `{ExtraDamage:diff()}`, which
-the emitter reads off `per:` (`fanfare_drained_calc_rider`).
-
-ITS UPGRADE IS `{cost: -1}`, 2 Energy to 1, and it is DERIVED rather than
-authored: the row carries no `upgrade:` key, so
-`upgrades.prototype_default_delta` decides, and every number-moving clause of
-that rule passes over it -- the damage op is formula-scaled and carries no
-literal `amount`, which `_proto_hit` skips by name -- leaving the rule's cost
-clause, "a card of cost 2 or more with no printed number costs 1 less". The
-slope moving 1 to 2 does not change which clause fires.
-
-## proto_fr_intermission
-
-Face: "Drain your Fanfare. Gain Block equal to the Fanfare drained." `F12` (1):
-the survival drain beside the damage one, so draining is a plan and not a single
-card.
-
-It is the first `amount_formula` on a BLOCK op in either engine, which is the
-sentence four damage-side riders in `tools/gen_klee_cards.py` have carried for a
-sprint ("a block-side reader needs `block_calc_rider`'s CalculationBase plumbing
-and has no card yet"). The rail was already there; what this row added is a
-predicate reading the other key.
-
 ## before proto_ko_dodoco_cover
 
 The defence shelf, R252 (2026-09-04), Klee round 9 pick 1 taken at its
@@ -2039,24 +1943,6 @@ Energy. Both were ruled REQUIRES_MODIFICATION; the shelf ships as two.
 Numbers are Prototype numbers, D by the ladder; the seats read them on
 Kokomi round 10 before [USER] does.
 
-## before proto_fr_florid_cadenza
-
-The shipped Fanfare riders under the Furina arm, round 2 pick 1 taken at
-its default (2026-09-04, disclosed and unanswered before the build; the
-packet is `review/ruled/furina-reframe-round-2-2026-09-04.md`). The arm
-mints Fanfare by performance only, 2 per trigger and 5 per Evoke, and in
-three rounds Fanfare ranged 0 to 15 while the shipped riders asked 12, 15
-and 20. These four rows are arm-only copies at the arm's scale (12 to 6, 15
-to 8, 20 to 10), swapped in for the shipped ids at the same rarity by the
-pool seam (`loader._pool_substitutions`, the Kurage's Oath shape), so
-nothing on the shipped sheet moves and a run with the arm off is offered
-the shipped card. The rows declare the shadow with ` (proto)`, the one suffix
-`loader.display_name` strips in both engines, so the face the player
-sees is the card's own name (`EB-419`: they spelled it ` (reframe)`
-at first, which nothing stripped, and the arm's starter reached the
-round-5 seat printing the tag).
-
-
 ## proto_mi_ayaka_soumetsu
 
 `EB-698` (Kokomi round 30, lane 1, (c)). The card said "at the end of your
@@ -2109,55 +1995,6 @@ Dexterity for 2 turns, then the banner takes it back", with no second number to
 disagree with the first, and the badge prints the live `{Granted}` on its smart
 row (a var on the static row would reach the screen as a placeholder --
 `EB-353`).
-
-## before proto_fr_aria_of_recompense
-
-The starter's reader, R254 (2026-09-04), Furina reframe round 4 pick 1. The
-packet is `review/ruled/furina-reframe-round-4-2026-09-04.md`; its sec.6 is
-the ruling, and it answers neither of the two options as written. [USER]:
-"maybe a reader in the starter deck? I still want to leave it at just 2
-'good' cards, but they can be stronger." So her starter keeps its two kit
-cards -- Salon Début and Aria of Recompense -- and ONE of them reads Fanfare.
-
-The reader goes on Aria, the card the seats had already weighed on three
-axes. Under the arm it prints "Gain 5 Encore. If you have at least 6
-Fanfare, gain 5 more." Both numbers are lifted and neither is new: the 5 is
-Aria's own printed Encore and the 6 is the bar the four rider copies above
-already carry. The loop it closes is the reframe's own -- a stage that
-performs mints Fanfare, Fanfare pays Encore, Encore pays performances -- and
-the 20% Encore decay is its brake.
-
-Arm-only copy by the same seam as the riders, so the shipped sheet stands
-(R213 B). The difference is which door: the riders are swapped in where a
-run is OFFERED a card (`loader._pool_substitutions`,
-`FurinaReframeRoster.SwapOfferedRiders`) and this one where a run is DEALT
-one (`furina_reframe.STARTER_SUBS` read by `loader._starter_ids`;
-`FurinaReframeRoster.StarterAria` called from `Furina.StartingDeck`). One
-card for one card, so the printed ten is still ten, and with the arm off the
-shipped Aria is dealt. The R130 veto on the SHIPPED starter's payoff
-([USER], 2026-08-07) is untouched: it rules a Balance-stage sheet, and this
-moves a prototype arm.
-
-A STARTER CARD'S TEXT IS A RULE, so this one goes back to [USER]: he plays
-the first build that carries it, per the norm on when [USER] plays. The
-alternative reader is HELD rather than withdrawn -- Salon Début performing
-its member again at 6 Fanfare is the packet's own re-ask if Aria's does not
-read.
-
-THE BAR MOVED 6 -> 3 (the Furina reframe's round 6, sec.4, 2026-09-04 -- a D
-default taken at its stated value and disclosed in that round's record, which
-is where the three runs are read). It was built at the riders' 6 and three seat runs played Aria with the second
-line never paying once: Aria is a STARTER, played at the top of a turn and
-before the stage performs, so the meter it reads is not the one the offered
-riders read later in the same turn -- 3 is the Fanfare the records show on an
-Aria turn. So the row's condition is `fanfare_at_least_3` and it pays 5 at
-Fanfare 2 and 10 at Fanfare 3. The 5 is untouched, the upgrade is untouched,
-and the four OFFERED rider copies keep their own bars (6, 6, 8 and 10) --
-those are read at a different point in the turn, and nothing in this move
-says anything about them.
-
-Numbers are Prototype numbers, D by the ladder, and nothing measured on them
-is quotable.
 
 ## before proto_ko_countdown
 
@@ -2524,87 +2361,6 @@ row keeps `ArmKeywordTips.ForPlan`. Without it the card would have gone on
 saying `Plan` in its tip with nothing on screen defining it, which is the exact
 silence that rule exists to make impossible.
 
-## before proto_fr_curtain_rises
-
-The Furina pool pass, one (`EB-493`); the packet is
-`review/records/furina-pool-pass-2026-09-05.md` and all four rows are FOLLOWS on
-the doctrine read (`review/records/card-audit-2026-09-04.md` sec.5.5).
-
-WHAT THE ROUNDS SAID. Rounds 9 and 10 read the Salon as FURNITURE: one Deploy
-in the whole deck, most Companion plays printing "No member on stage: performs
-nobody", the kit's headline mechanic spent as text explaining why nothing
-happened -- and the two turns it was live were the best of the run. The shipped
-sheet offers three single-deploy Commons in twenty-three, all Skills of one
-shape, and neither seat drafted one. Round 9 also found no legal way to make
-her act: a member idle, no Companion card in hand, and nothing of Furina's own
-that asks the stage for anything. The four rows answer one reading each.
-
-**Curtain Rises** (replaces *House Call*) is the second Deploy SHAPE: a deploy
-on an Attack, with the usher's Block as he arrives. Against *Cold Snap* (1
-energy: 6 damage, channel Frost) it is the same line with a member for an orb.
-A deploy on an Attack was new to the surface and needed nothing built -- the
-damage aims, the deploy is the owner's, and one card carries both because they
-target different things.
-
-**Second Course** (replaces *Dinner Service*) buys a member's second
-performance for three Encore, which is three Block she would otherwise hold:
-the hold-or-spend tension on a deploy. The price is the `encore_cost` GATE and
-NOT the `spend_encore` op -- the packet's sentence is "Unplayable below 3
-Encore", and `spend_encore` is the overdraw primitive, which would have made
-the card playable at 0 Encore for 3 HP. That is *Breathless*' rule and it is
-printed on *Breathless*. THE PRINTED PRICE IS 1 AND NOT THE 3 IT WAS BUILT AT (`EB-552`, round 13,
-FOLLOWS on the doctrine read, record sec.5.8): the printed 3 plus the shipped
-per-performance drain is five Encore against an opening of two, and across
-three rounds the card was refused on all four draws it ever had. At 1 the full
-value is 3. The upgrade's `-1` is unchanged, so the `+` card is free and the
-codegen drops the "Spend N Encore" sentence rather than printing "Spend 0"
-(text conventions, the Evoke row).
-
-**Guest List** (replaces *Blocking Notes*) puts An Invitation's verb in the
-pool at a price: an energy and no Exhaust, three Block short of a Stage
-Presence. THE EXHAUST IS THE ONE GUARDRAIL THIS PASS MOVES, and it is the only
-one of kickoff sec.9's four that is a balance rule rather than a structural
-fact -- this-combat-only, equal-rarity and the companion-plus-Guest-Star pool
-are all properties of the code, while "generators Exhaust" is a sheet field.
-`gen_klee_cards.blocked_reason` still refuses a non-Exhaust generator on any
-`docs/*-cards.yaml` row; the exemption is the `proto_` prefix and nothing else,
-so a row promoted to a shipped sheet meets the bar again on the way in.
-
-THE ONE THING BUILT FOR THE PASS is an ARGUMENT and not an op:
-`salon_perform` learned `member:`, so *Second Course* can say "she performs
-once more" about the member it just deployed rather than about whoever stands
-at the front (a deploy appends, so the two are only the same on an empty
-stage). It rides the shipped verb for the reason the aimed Evoke does --
-`tools/lint_op_parity.py` compares the KEY SET of the sim's op registry against
-the drafter's priced-op table, so an extra field leaves the priced set
-identical while a `salon_perform_member` synonym would have bought a
-`DRAFTER_VERSION` stamp for a verb both engines already have. A named member
-who is not on stage takes the FRONT, which is the slot-6 ruling's fallback for
-the aimed Evoke, and the fact is emitted (`salon_perform_target_absent`) rather
-than left silent.
-
-ROLLING TIDE IS WITHDRAWN (`EB-552`, round 13, a D default, and the loop's
-first cut). It replaced *Undercurrent* and was the kit's own perform verb on a
-card she could draft. Four seats over three rounds read it the same way at two
-energy and at one -- "4 damage into one body; zero against Plating 8; actively
-harmful against four Skittish bodies" -- so the price was never the reason and
-the row left the arm rather than moving a third time. The shipped Undercurrent
-is offered again at that seam, and the row left this sheet with its pins under
-R213 B's deletion rule.
-
-WHICH SHIPPED ROWS, and it is the packet's sec.5 D default: each replaced
-row is a plain number card of the same type and cost as its replacement, so the
-swap moves what the card does and nothing about where it sits. Common for
-Common in every case, so the offer odds do not move. The choice moves on the
-seats' word. The shipped sheet stands (R213 B) -- the seam is
-`furina_reframe.POOL_SUBS` and `FurinaReframeRoster.SwapOfferedRiders`, and
-with the arm off no surface can see a `proto_fr_` id.
-
-NO ` (proto)` SUFFIX ON THESE FOUR, unlike the rider copies above. The riders
-are COPIES of a shipped card and share its name, which is what the shadow
-suffix is for (`EB-419`); these are new rows with names of their own, so there
-is nothing to shadow.
-
 ## proto_ko_jumpy_dumpty, `innate: true` (R261, `EB-557`, 2026-09-05)
 
 THE PLACER IS INNATE AND THE DETONATOR IS NOT. [USER] took none of the four
@@ -2625,126 +2381,6 @@ inside a branch either engine has to remember to take.
 A FIELD AND NOT AN UPGRADE DELTA, so both faces carry it: an upgrade is a
 different card, and a player who smiths the placer must not lose the opening
 the ruling gave it.
-
-## proto_fr_florid_cadenza, the arm copy (2026-09-06)
-
-THE `+` CARD MOVES THE BAR INSTEAD OF DELETING IT. The rider copy is the
-shipped Florid Cadenza at the arm's meter -- draw 1, and 2 more at 6 Fanfare
-instead of 12 -- and it inherited the shipped row's `{condition: unconditional}`
-upgrade, which HOISTS the gated clause out. That made the `+` card a 0-cost
-"draw 3" that asks nothing at all: the strongest card in the arm's pool, and
-the one card in it with no relationship to the meter the whole reframe is
-about. The 2026-09-06 GPT balance review read it that way and the main session
-took the D default.
-
-So the delta is `{condition: fanfare_at_least_3}`: the gate STAYS and its
-threshold falls 6 -> 3. The upgraded card still draws 1, still asks the arm's
-question, and asks it at a bar an opening turn can reach -- the same 3 R254's
-starter reader was moved to, and for the same measured reason (the meter an
-early turn actually holds).
-
-THE GRAMMAR IS NEW AND IT IS THE SMALLER OF THE TWO SPELLINGS. `condition:`
-used to accept only `unconditional`. It now also accepts a meter bar naming the
-upgraded threshold: tier0 rewrites the top-level conditional's `if:`
-(`content/upgrades.py`), and the codegen emits ONE comparison whose threshold is
-`(IsUpgraded ? 3 : 6)` with the face printing both numbers through a single
-`{IfUpgraded:show:3|6}` token (`gen_klee_cards.moved_bar_predicate_cs`). Both
-bars are authored on the row; nothing computes a threshold. Both engines refuse
-a bar that reads a different meter from the printed one.
-
-AND THE COPY EXHAUSTS (the second-wave review of 2026-09-06; a D default). A
-0-cost non-Exhaust draw-3 whose bar does not deplete is a
-hold-the-rest-of-the-deck loop -- three copies, a hand cap of 10, the overflow
-to discard -- and it is that at bar 6 exactly as much as at bar 3, so the bar
-move above was never the whole answer. `exhaust: true` makes each copy a
-one-shot and the moved bar stays as it is.
-
-The sheet's sentence keeps the word and the emitted face drops it
-(`_dedupe_printed_exhaust`, `EB-293`): `exhaust: true` puts
-`CardKeyword.Exhaust` on the card and the game's keyword rail prints the
-banner, so a face that also wrote it would print it twice.
-
-Nothing else on the row moves -- same cost, same rarity, same body -- and
-`docs/furina-cards.yaml` and `docs/furina-upgrades.yaml` do not move at all:
-the shipped Florid Cadenza, its shipped `{condition: unconditional}` and the
-absence of Exhaust on it are Balance-stage content (R213 B).
-
-## proto_fr_shared_billing
-
-Face: the shipped Shared Billing's, unchanged -- "Apply Hydro to a random
-enemy. Spotlighted Companion cards gain 25% this turn. Gain 1 Energy." Same
-cost, same rarity, same three effects, same art (`art_of`, R179).
-
-ONLY THE UPGRADE DIFFERS, and that is the whole row (the 2026-09-06 GPT
-balance review; the main session's D default). The shipped delta is
-`{cost: -1}`, which takes a Common that already REFUNDS its Energy down to 0 --
-a card that costs nothing, gives a card's worth of Energy back, and is handed
-out at every campfire.
-
-IT BUYS BLOCK, NOT A CARD (the second-wave review of 2026-09-06; a D default).
-The first pass bought a card, `{add: {op: draw, amount: 1}}`, and a card that
-refunds its own Energy and then replaces itself is the same loop piece the
-shipped `{cost: -1}` was taken off for -- free, repeatable, and net-positive on
-both of the resources a loop needs. Block is neither energy nor draw, so the
-delta is `{add: {op: block, amount: 3}}`: the `+` card buys survival and the
-loop stays shut. Rendered by the emitter as an `IsUpgraded`-gated Block
-appended after the printed body, with `GainsBlock => IsUpgraded` so the base
-card claims none (`EB-122`), and an
-`{IfUpgraded:show:Gain 3 [gold]Block[/gold].|}` clause on the face.
-
-Common for Common at the same seam as the rider copies
-(`furina_reframe.POOL_SUBS`, `FurinaReframeRoster.SwapOfferedRiders`). The
-shipped row and its shipped delta stand (R213 B).
-
-## proto_fr_rapturous_applause
-
-Face: "Your Attacks deal 1 additional damage per 5 Fanfare." The shipped
-Rare's body with its `gain_fanfare_floor 8` rider removed (`EB-507`), read at
-the arm's own granularity.
-
-WHY THE RIDER GOES. The reframe mints Fanfare by PERFORMING -- 2 per trigger, 5
-per Evoke -- and `gain_fanfare_floor` mints it for being played. That is a
-second source the arm neither has nor priced, and with the arm on it is the
-offer surface contradicting the arm's one sentence about where the meter comes
-from. Three shipped Rares print the rider; this is one of the two that have a
-body underneath it.
-
-WHY PER 5 AND NOT THE SHIPPED PER 10. The floor the copy no longer mints was
-also this card's own opening payment -- it arrived with 8 Fanfare already on
-the meter, which is most of the first 10 the shipped clause reads -- and a
-per-10 clause on a meter that runs 0 to 15 pays on the top third of the range
-or not at all. So the copy takes the THRESHOLD mapping every other arm copy in
-`POOL_SUBS` takes: the shipped bars 12, 12, 15 and 20 became 6, 6, 8 and 10
-because the shipped meter's 20-to-30 range maps to the arm's 0-to-15, and this
-row's 10 becomes 5 for the same reason. The upgrade is the shipped
-`{power_amount: +1}`, so the `+` card reads 2 per 5.
-
-THE FIRST READ WAS 2 PER 10, AND THE AUDIT OF 2026-09-07 RULED IT
-REQUIRES_MODIFICATION ON C8. That number pays for the lost floor out of the
-PAYOUT rather than the threshold, which is the one move an arm copy of a
-shipped rider may not make: it is the shipped card at 10 Fanfare, twice the
-shipped card at 20, and nothing at all below 10. 1 per 5 is the same slope --
-one point of damage for every ten points of shipped Fanfare, or every five of
-the arm's -- and the granularity is the only thing that changed, which is what
-puts the copy back on the mapping the other four rows already use.
-
-Rare for Rare, art borrowed from the shipped row (`art_of`, R179), shipped
-sheet unmoved (R213 B).
-
-## proto_fr_unheard_confession
-
-Face: "Whenever your Fanfare changes amount, gain 2 Block." The shipped Rare's
-body with its `gain_fanfare_floor 8` rider removed, for `EB-507`'s reason
-above.
-
-TWO PER CHANGE, NOT THE SHIPPED ONE (the second-wave review of 2026-09-06; a D
-default). The power pays per change EVENT and not per point moved, which is
-what the first pass read as "no number to compensate" -- but it is also the
-reason 1 is not a Rare's payout: a 2-cost Rare Power that pays 1 Block each
-time the meter ticks is a dead card on a meter that ticks a few times a turn.
-2 is the floor that makes the slot worth a Rare. Cost 2 and the shipped
-`{cost: -1}` upgrade are unchanged. Rare for Rare, art borrowed (`art_of`,
-R179), shipped sheet unmoved (R213 B).
 
 ## the coven's Hexerei mark (`EB-642`, 2026-09-07)
 

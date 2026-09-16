@@ -33,7 +33,7 @@ namespace KleeMod.Tests;
 /// `PowerCmd` and a `CombatState` -- which is outside the headless boundary
 /// this project draws. What a headless test CAN read is the mark's own state
 /// machine and the call graph that drives it, which is the same posture
-/// `FurinaReframeRuleTests`' structural section takes for the Salon seam.
+/// the Salon pins' structural section takes for that seam.
 /// </summary>
 public class ShatterRemovesFrozenTests
 {

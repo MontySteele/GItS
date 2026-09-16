@@ -48,7 +48,7 @@ public sealed class FurinaStageHooks : AbstractModel
     }
 
     /// <summary>
-    /// RULE 4. The site is <c>FurinaReframeOpening.GrantEncore</c>'s and its
+    /// RULE 4. The site is the retired reframe's opening grant's and its
     /// argument carries over whole: this engine's turn-start effects fire on
     /// <c>AfterPlayerTurnStart</c>, after the block clear, the energy reset and
     /// the draw -- the moment the sim's <c>_player_turn</c> fires its own, and

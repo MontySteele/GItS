@@ -46,7 +46,7 @@ public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard,
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForMine(ArmKeywordTips.ForCovenSpark(FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this), this), this), this);
+        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForMine(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_noelle_breastplate");
 

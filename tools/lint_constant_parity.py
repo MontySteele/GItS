@@ -57,26 +57,10 @@ def _salon(member: str, phase: str, key: str):
     return C.SALON_MEMBERS[member][phase][key]
 
 
-def _reframe(name: str):
-    """A number out of the Furina reframe's quarantined engine module.
-
-    NOT `constants.py`, and that is the countersigned packet's own decision
-    (its sec.6.1): the reframe's flags and seeds are "a module constant in the
-    reframe module, **not** in `constants.py`", so that a quarantined slice
-    moves neither the constant census nor the world stamp. Mirroring is a
-    different question from stamping -- the C# arm PLAYS these numbers, so the
-    two engines have to agree on them by value or a seat grades a rule the sim
-    never scored. Reading them from where the sim keeps them is what lets both
-    facts be true at once.
-    """
-    from tier0.engine import furina_reframe as _fr
-    return getattr(_fr, name)
-
-
 def _stage(name: str):
     """A number out of the Furina STAGE's quarantined engine module.
 
-    `_reframe` above's argument one arm over and unchanged: the sim keeps these
+    The brief's own decision: the sim keeps these
     in `tier0/engine/furina_stage.py` rather than in `constants.py`, so that a
     prototype moves neither the constant census nor the world stamp. Mirroring
     is a different question from stamping -- the C# arm PLAYS these numbers and
@@ -348,33 +332,6 @@ MIRRORED: dict[str, object] = {
     # other figure is a CARD's, on its own row. The six draft 2 declared went
     # with the pulse, the Garment and the Tide.
     "KokomiOverhaulLaw.CasketStrike": C.KOKOMI_OVERHAUL_CASKET_STRIKE,
-    # THE FURINA REFRAME, SLICE ONE (QUARANTINED -- the C# arm lives under
-    # klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of a
-    # release build; the sim half is tier0/engine/furina_reframe.py, every flag
-    # False). Same terms as the four arms above and for the same reason:
-    # quarantined is not exempt. These FIVE numbers ARE the slice's rules --
-    # the two mint amounts, the LAW:145 bound, the Evoke's Focus multiplier and
-    # the one-mode selector's price -- and the sim declared every one of them
-    # first, because R220 B sequenced the C# leg last. See `_reframe` for why
-    # they are read out of the reframe module rather than constants.py.
-    "FurinaReframeLaw.FanfarePerTrigger": _reframe("FANFARE_PER_TRIGGER"),
-    "FurinaReframeLaw.FanfarePerEvoke": _reframe("FANFARE_PER_EVOKE"),
-    "FurinaReframeLaw.FanfarePerCompanionTriggerMax":
-        _reframe("FANFARE_PER_COMPANION_TRIGGER_MAX"),
-    "FurinaReframeLaw.EvokeFocusMult": _reframe("EVOKE_FOCUS_MULT"),
-    "FurinaReframeLaw.SpotlightDesignateEncoreCost":
-        _reframe("SPOTLIGHT_DESIGNATE_ENCORE_COST"),
-    # A SIXTH since R258 (`EB-479`): the Encore she OPENS each combat with.
-    # Same terms as the five above -- both engines grant it, the Encore tip
-    # prints it out of the C# constant, and a pair that drifted would give the
-    # sim's Furina a different first turn from the mod's.
-    "FurinaReframeLaw.OpeningEncore": _reframe("OPENING_ENCORE"),
-    # A SENTINEL rather than a balance number, and mirrored anyway because it
-    # HAS a sim counterpart -- "the named member is not on the stage" is a
-    # value both engines return and both engines test against, so filing it
-    # UNMIRRORED as "not balance" would be true and useless. The classification
-    # this table asks for is where the number came from.
-    "FurinaReframe.EvokeTargetAbsent": _reframe("EVOKE_TARGET_ABSENT"),
     # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These TEN numbers ARE the
@@ -636,112 +593,6 @@ UNMIRRORED: dict[str, str] = {
         "than collapsing to nothing.",
     "SparkCounter.CountFontSize":
         "presentation: the Spark count's font size.",
-    # FURINA'S BOARD (`EB-627`, `EB-628`, `EB-633`, `EB-634`, `EB-635`,
-    # `EB-639`, `EB-641`), which is ONE panel and one table. `EB-634` replaced
-    # four elements sizing themselves with `FurinaBoardScale`: three TIERS --
-    # what a performance pays, who is on stage and what is in the bank, and
-    # everything that qualifies something else -- plus the panel's rows, its
-    # paddings, and the character table its widths are MEASURED with. Every
-    # number is a pixel, a font size or a fraction of one, and the sim models
-    # none of them.
-    #
-    # The panel's own WIDTH is not a constant anywhere any more: `EB-639` filed
-    # text running together across the chips because the box was the creature's
-    # 240-wide bounds and the strings were never measured against it, so the
-    # width is computed in `SalonPanel` from the words the panel prints.
-    #
-    # What the panel SAYS is rules and none of it is written here: the chip
-    # count is `SalonMemberPower.SlotsFor`, the act is `TickValue`, the pip
-    # count is Encore over `TickEncoreCost`, and the member bonus is
-    # `SALON_FOCUS_PER_FANFARE` -- all mirrored elsewhere in this file.
-    "FurinaBoardScale.Tier1FontSize":
-        "presentation: tier 1, what a performance pays. The largest thing on "
-        "the panel because it is the number every play is priced against.",
-    "FurinaBoardScale.Tier2FontSize":
-        "presentation: tier 2, member names and the resource line.",
-    "FurinaBoardScale.Tier3FontSize":
-        "presentation: tier 3, anything that qualifies something else.",
-    "FurinaBoardScale.EnergyOrbFontSizeFallback":
-        "presentation: the energy orb's own number size, used when the live "
-        "label will not give one up. `SparkCounter.CountFontSize` by value -- "
-        "the size Klee's badge mirrors `NStarCounter`'s number at -- so "
-        "`EB-634`'s rule that the Fanfare number is smaller than the orb's is "
-        "enforced against a measured figure rather than a guess.",
-    "FurinaBoardScale.WideCharEm":
-        "presentation: how wide a digit, a capital or an unknown glyph is as a "
-        "fraction of the font size. The conservative half of `EB-639`'s fit "
-        "table -- there is no live font where the panel is built and none at "
-        "all in the test host, so the width is a documented table that "
-        "OVER-estimates: too wide is a box, too narrow is a collision.",
-    "FurinaBoardScale.NarrowCharEm":
-        "presentation: ordinary lowercase, as a fraction of the font size.",
-    "FurinaBoardScale.SpaceEm":
-        "presentation: the space, as a fraction of the font size.",
-    "FurinaBoardScale.PunctEm":
-        "presentation: punctuation and the thin lowercase letters, as a "
-        "fraction of the font size.",
-    "FurinaBoardScale.PanelHeight":
-        "presentation: the panel's height in pixels.",
-    "FurinaBoardScale.PanelPad":
-        "presentation: every row's inset from the panel edge, in pixels -- the "
-        "ONE inset (`EB-644`).",
-    "FurinaBoardScale.ResourceRowY":
-        "presentation: where the resource line sits inside the panel.",
-    "FurinaBoardScale.ResourceRowHeight":
-        "presentation: the resource line's height in pixels.",
-    "FurinaBoardScale.ChipsRowY":
-        "presentation: where the chip row sits inside the panel.",
-    "FurinaBoardScale.ChipPad":
-        "presentation: the padding inside a chip, left and right of its "
-        "widest text. The chip's WIDTH is no longer a constant at all: it is "
-        "measured from the strings the panel prints (`SalonPanel."
-        "ChipContentWidth`), which is what `EB-639` filed.",
-    "FurinaBoardScale.ChipGap":
-        "presentation: the gap between two chips, in pixels.",
-    "FurinaBoardScale.IconGap":
-        "presentation: the gap between the number and the element glyph "
-        "beside it, in pixels.",
-    "FurinaBoardScale.NameRowHeight":
-        "presentation: the member name's row height inside a chip.",
-    "FurinaBoardScale.ActRowHeight":
-        "presentation: the number-and-unit row's height inside a chip.",
-    "FurinaBoardScale.FrontRowHeight":
-        "presentation: the FRONT marker's own row height inside a chip.",
-    "FurinaBoardScale.MeterRowY":
-        "presentation: where line 2 of the resource header sits.",
-    "FurinaBoardScale.MeterRowHeight":
-        "presentation: line 2's height in pixels.",
-    "FurinaBoardScale.FooterRowY":
-        "presentation: where the front chip's Replace footer sits.",
-    "FurinaBoardScale.FooterRowHeight":
-        "presentation: the footer row's height in pixels.",
-    "FurinaBoardScale.FaceHeight":
-        "presentation: how much of a chip the member's face crop occupies.",
-    "FurinaBoardScale.PipWidth":
-        "presentation: one Encore pip's width in pixels.",
-    "FurinaBoardScale.PipHeight":
-        "presentation: one Encore pip's height in pixels.",
-    "FurinaBoardScale.PipGap":
-        "presentation: the gap between pips, in pixels.",
-    "FurinaBoardScale.PipStripGap":
-        "presentation: the gap between the Encore number and the first pip -- "
-        "what 'beside the number' is in pixels, now that where the number ENDS "
-        "is measured rather than guessed at.",
-    "FurinaBoardScale.RowGap":
-        "presentation: the one gap between the panel's rows -- header to "
-        "chips, chips to footer -- in pixels (`EB-644`: one rhythm, so the "
-        "three bands read as one object).",
-    "FurinaBoardScale.RuleHeight":
-        "presentation: the hairline drawn in each row gap, in pixels.",
-    "SalonPanel.MaxChips":
-        "presentation: how many chips the panel can draw before it overflows "
-        "the bounds box. Not a cap on the Salon -- `SalonMemberPower.SlotsFor` "
-        "is the rule and is mirrored -- and the excess is logged rather than "
-        "silently invisible, so no rule is hiding here.",
-    "SalonPanel.MaxPips":
-        "presentation: how many Encore pips fit beside the number. Not a cap "
-        "on Encore, which is uncapped: the NUMBER is the reading (`EB-635`) "
-        "and the pips are secondary, so the sim has nothing to compare.",
     # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
     # TIME. They decide how long an animation and a speech bubble occupy the
     # frame and nothing else: no hit is added, removed, resized or reordered by

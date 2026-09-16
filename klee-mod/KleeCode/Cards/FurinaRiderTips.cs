@@ -59,17 +59,6 @@ public static class FurinaRiderTips
     public const string GuestStarKey = "KLEEMOD-GUEST_STAR";
     public const string BowKey = "KLEEMOD-TAKES_BOW";
 
-    // `EB-477`. THE HALF OF A COMPANION CARD THAT GOES MISSING IN SILENCE.
-    //
-    // THE FIND (Furina r9 (b); r8 (c) said the same two rounds earlier). Under
-    // the arm a Companion card you play performs the front member -- and with
-    // an EMPTY stage it performs nobody, silently. The r9 seat lost two turns
-    // to it, one of them the elite's turn 1, and round 8 waited two fights to
-    // learn the same thing. Nothing on the card, and nothing on the board,
-    // says the second half is not going to happen: the stage badge is the
-    // Salon power, and an empty stage has no badge at all.
-    public const string CompanionPerformKey = "KLEEMOD-COMPANION_PERFORMS";
-
     // `EB-485`. THE PRICE A SEAT WEIGHED AS A ONE-TIME PURCHASE.
     //
     // THE FIND (Furina r10 (c) 1). The relic reads "It does nothing once your
@@ -86,11 +75,6 @@ public static class FurinaRiderTips
     // only WHILE the lighting is live, which is the one moment the duration
     // is not the question.
     public const string SpotlightLastsKey = "KLEEMOD-SPOTLIGHT_LASTS";
-
-    /// <summary>`EB-567`. The window, beside the duration: two facts, two
-    /// rows, because a reader weighing the Encore is asking about THIS turn
-    /// and the row above answers about the next fight.</summary>
-    public const string SpotlightWindowKey = "KLEEMOD-SPOTLIGHT_WINDOW";
 
     /// <summary>
     /// `EB-475`, the first word. What MOVES the Spotlight, and whether it has
@@ -160,111 +144,6 @@ public static class FurinaRiderTips
           + "again next fight.");
     }
 
-    /// <summary>
-    /// `EB-567`. THE WINDOW, AND IT IS THE KIT'S FIRST DECISION.
-    ///
-    /// A SECOND METHOD RATHER THAN A SECOND `yield` IN THE ONE ABOVE, because
-    /// the two are different facts and each is one tip row against [USER]'s
-    /// 135-character ceiling: how long the lighting lasts is about the next
-    /// fight, and this is about the only turn the Encore can buy it.
-    ///
-    /// THE RULE. The Spotlight's price is the opening Encore exactly (R228's
-    /// 2 against R258's 2) and any performance spends one, so the only turn
-    /// it can be bought is turn one before anything performs; after that it
-    /// is shut for the combat. Both r14 seats derived that from the REFUSAL,
-    /// which arrives one action after the turn it would have changed -- lane
-    /// 1 "by my second card the Spotlight was locked out", then played it
-    /// first in every fight after; lane 2 the same way. The refusal keeps its
-    /// own text (`EB-364`); this is the thing a refusal cannot be, which is a
-    /// sentence that comes first.
-    ///
-    /// BOTH NUMBERS INTERPOLATED and neither typed, `EtherealSpotlight`'s own
-    /// rule on its face: a repricing must not be able to leave a tip teaching
-    /// a retired figure.
-    ///
-    /// `EB-586` TOOK THE ADVICE OUT AND LEFT THE WINDOW. "Light your Companion
-    /// cards before anything performs" is a RECOMMENDATION, and the r15 lane-1
-    /// seat refused it on turn one of fight one and was right to: the starter
-    /// holds two Companion cards, the Spotlight costs the whole opening
-    /// Encore, and "the correct first move is to refuse the screen's own
-    /// advice". Lane 2 paid it in most fights and zeroed Encore twice, which
-    /// is where nine of its eleven HP went. The decision is REAL on both
-    /// lanes, so the sentence states the window and the price and stops --
-    /// which is the same discipline every other tip in this file is under
-    /// (`ProtoBombPower`'s badge says what a pile is worth and never what to
-    /// do with it).
-    ///
-    /// `EB-600` REPLACED THAT WORDING, because what it left behind was still
-    /// false. "It is this turn's first action or not this fight" describes a
-    /// window that only ever shuts, and Encore is refillable: BOTH r16 lanes
-    /// broke the sentence. Lane 1 -- "Aria and Hearts Swelling grant Encore
-    /// without performing, and I broke the rule on turn 1 of the run." Lane 2
-    /// lit it AFTER a performance in three fights, off Chevalmarin's grant of
-    /// 3, and called working that out "the best moment in the kit".
-    ///
-    /// SO THE LINE STATES THE RULE AND LETS THE PLAYER DERIVE THE WINDOW,
-    /// which is what a rule is for: the price, what spends it, and what
-    /// refills it. The third clause is the R260 OPENING arrival's free
-    /// performance -- the opening one and no other (`EB-638`: "an
-    /// arrival's" read as every deploy, and a card's deploy pays its 1) --
-    /// (`EB-558`'s <c>free</c>, <see cref="SalonPowers.PerformanceSpends"/>) --
-    /// every combat now opens with a member performing, so a line that said
-    /// "any performance spends one" was false about the fight's very first
-    /// act on every board.
-    ///
-    /// ARM-ONLY, at the CALL SITE, exactly as the duration tip is: a release
-    /// build's selector charges no Encore and this sentence would be false.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForSpotlightWindow(
-        IEnumerable<IHoverTip> inherited, CardModel card)
-    {
-        foreach (var tip in inherited) yield return tip;
-#if PROTOTYPE_CARDS
-        yield return new HoverTip(
-            new LocString(Table, SpotlightWindowKey + ".title"),
-            $"It costs {FurinaReframeLaw.SpotlightDesignateEncoreCost} "
-          + "[gold]Encore[/gold] of the "
-          + $"{FurinaReframeLaw.OpeningEncore} you open with. Anything that "
-          + "performs spends 1; a card that grants [gold]Encore[/gold] "
-          + "reopens the window. The opening arrival's performance is free.");
-#endif
-    }
-
-    /// <summary>
-    /// `EB-477`. What playing this Companion card will perform, live -- and
-    /// the refusal form when the stage is empty, which is the case the seats
-    /// lost turns to.
-    ///
-    /// THE RULE IS THE ARM'S, so the tip is too: with the manual leg off
-    /// members act on their own turn and a Companion play performs nobody at
-    /// all, which is a sentence about a rule that build does not have. It
-    /// yields NOTHING there, and nothing out of combat -- the stage is a
-    /// board fact, and a deck view has no board.
-    ///
-    /// ATTACHED TO EVERY COMPANION ROW, whichever character's sheet emitted
-    /// it, because Furina can hold a shared Companion and a Guest Star alike;
-    /// the OWNER decides whether the sentence prints, not the sheet.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForCompanionPerform(
-        IEnumerable<IHoverTip> inherited, CardModel card)
-    {
-        foreach (var tip in inherited) yield return tip;
-#if PROTOTYPE_CARDS
-        var owner = TipOwner.CreatureOf(card);
-        if (owner == null || card.CombatState == null) yield break;
-        if (!Powers.FurinaReframe.ManualLiveFor(owner)) yield break;
-        var member = SalonMemberPower.LeftmostMember(owner);
-        yield return new HoverTip(
-            new LocString(Table, CompanionPerformKey + ".title"),
-            member is { } who
-                ? $"Playing this performs {SalonMemberTips.DisplayName(who)}, "
-                + "your front member."
-                : "No member on stage: performs nobody. Deploy a member "
-                + "first, or this card is only its own line.");
-#else
-        yield break;
-#endif
-    }
 
     public static IEnumerable<IHoverTip> ForCard(
         IEnumerable<IHoverTip> inherited,

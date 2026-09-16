@@ -14,7 +14,7 @@ from typing import Optional, Sequence
 
 from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei,
-                          companion_standins, furina_reframe, furina_stage,
+                          companion_standins, furina_stage,
                           klee_overhaul, kokomi_plan, powers, reactions,
                           resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
@@ -402,7 +402,7 @@ def _runtime_count(state: CombatState, token: str,
         return state.fanfare_drained_this_card
     # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`) -- the STAGE's three.
     #
-    # `stage_spent` is the reframe token's argument one arm over: what THIS
+    # `stage_spent` is the drain token's argument one arm over: what THIS
     # play took off the bars, read back by the effect after it, because by the
     # time *Final Bow*'s Block or the Rare's damage resolves the bar it is
     # measuring is gone. Written by `_op_stage_spend`, `_op_stage_spend_all`
@@ -848,13 +848,6 @@ def center_stage_active(state: CombatState, card: Card) -> bool:
     card is ICharacterCard { CharacterId: "furina" }`.
     """
     p = state.player
-    if furina_reframe.spotlight_active(p):
-        # R228 (1): Center Stage retires, so its half is False everywhere --
-        # including under the upgraded relic, which is why this test sits
-        # ABOVE the both-modes branch. "Both modes at once" is meaningless
-        # with one mode, and the relic's re-authoring is deferred with the
-        # rest of the sheet work (§11).
-        return False
     if both_spotlight_modes(state):
         return bool(p.character_id and card.character == p.character_id)
     return p.spotlight == p.character_id
@@ -1960,21 +1953,9 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("energy", amount=amount)
 
 
-def _salon_amount(state: CombatState, base: int, note: bool = True,
-                  focus_mult: int = 1) -> int:
+def _salon_amount(state: CombatState, base: int, note: bool = True) -> int:
     """A Salon member numeric amount (Salon v2): base + the Fanfare Focus
     term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon.
-
-    `focus_mult` is the Furina reframe's `F6` (1) shape, and it is 1 on every
-    shipped path: an Evoke applies the SAME Focus term N times, so there is
-    one divisor and one number on screen and the face can print "x N". The
-    multiplier lands on the Focus term ALONE and never on the printed base --
-    that is what makes it "much stronger Fanfare scaling" rather than a bigger
-    card. The prospective scaling invariant (packet §3.1 amendment 4,
-    countersigned PROSPECTIVE by R224) is satisfied structurally here and not
-    by discipline: this function is reached only from a member's damage and
-    Block, so Chevalmarin's Encore refund and an aura's stack count have no
-    path to the Focus term, multiplied or not.
 
     `note=False` returns the SAME number without filing the `fanfare_read`
     census row (EB-144). It exists for the pilot, which forecasts what a
@@ -1994,7 +1975,7 @@ def _salon_amount(state: CombatState, base: int, note: bool = True,
     # Clamped: a negative meter must not chip the stage. Negative member
     # ticks are the exact reading that would look like a bug rather than a
     # cost (Track C.2, PROPOSED semantics, flagged for review).
-    focus = (resources.readable(p) // C.SALON_FOCUS_PER) * focus_mult
+    focus = resources.readable(p) // C.SALON_FOCUS_PER
     return base + focus + p.powers.get("salon_damage_up", 0)
 
 
@@ -2007,55 +1988,25 @@ def _salon_dry(amount: int, paid: bool) -> int:
     return amount if paid else int(amount * C.SALON_DRY_DAMAGE_MULT)
 
 
-def _salon_bow(state: CombatState, member: str, evoked: bool = False) -> None:
+def _salon_bow(state: CombatState, member: str) -> None:
     """The displaced member's final bow (Salon v2, rework plan §1): its
     UNIQUE payoff. Focus/Grand-Salon scaled numerics, feeds the Burst meter
     like a tick.
 
-    `evoked=True` is the Furina reframe's EVOKE (§4.4), and it changes exactly
-    three things: the Focus term is applied `EVOKE_FOCUS_MULT` times instead of
-    once (`F6` (1)), the performance mints the larger Fanfare amount (§4.1),
-    and since `EB-587` it PAYS THE UPKEEP -- 1 Encore, or three-quarters when
-    the pool is dry, exactly as a performance does. Everything else about a
-    bow -- which end of the queue it takes, the aura, the Encore refund, the
-    riders -- is the shipped bow, because the
-    packet's own §2.2 finding is that the bow ALREADY IS the Defect-evoke
-    analogue and the reframe renames it rather than rebuilding it. Both
-    changes are inert unless `FURINA_REFRAME_EVOKE` / `_METER` are on, so an
-    `evoked=True` call on a release build is the shipped bow exactly.
     """
     p = state.player
     spec = C.SALON_MEMBERS[member]["bow"]
-    mult = furina_reframe.evoke_focus_mult(p) if evoked else 1
-    # `EB-587`. AN EVOKE IS A PERFORMANCE AND PAYS LIKE ONE: it spends the
-    # upkeep's 1 Encore, or resolves at three-quarters when the pool is dry.
-    # THE FIND (Furina r15 lane 1 (c) 1): at 0 Encore three performances
-    # printed and landed dry while the Evoke on the same turn delivered its
-    # full 14, so the one act that costs a member was the one act the economy
-    # did not price. The rule it replaces -- the card's own printed Encore
-    # price pays for it -- had no answer on Curtain Rises, which deploys onto
-    # a full stage and prints no Encore price at all.
-    #
-    # ARM-SCOPED, like the Focus multiplier on the line above: a SHIPPED bow
-    # is the displaced member's payoff and is not a performance, so a release
-    # build's bow is byte-identical. C# twin: `SalonMemberPower.Bow`.
-    paid = True
-    if evoked:
-        paid = p.encore >= C.SALON_TICK_ENCORE_COST
-        if paid:
-            resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
-                                   "salon_evoke")
     dmg = spec.get("damage", 0)
     if dmg and state.living_enemies:
         # `EB-451`: the roll's pool, not the raw board.
         enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
         deal_damage_to_enemy(
             state, enemy,
-            _salon_dry(_salon_amount(state, dmg, focus_mult=mult), paid),
+            _salon_amount(state, dmg),
             element="hydro", source="salon_final_bow")
     blk = spec.get("block", 0)
     if blk:
-        amt = _salon_dry(_salon_amount(state, blk, focus_mult=mult), paid)
+        amt = _salon_amount(state, blk)
         p.block += amt
         state.emit("block", amount=amt)
     if spec.get("aura_all"):
@@ -2077,14 +2028,6 @@ def _salon_bow(state: CombatState, member: str, evoked: bool = False) -> None:
     if enc2:
         resources.gain_encore(state, enc2, "salon_bow_encore")
     state.emit("salon_final_bow", member=member)
-    if evoked:
-        # A SECOND event rather than a field on the shipped one: `salon_final_bow`
-        # is read by the instruments and by tests that compare whole rows, and a
-        # new key on it would move a shipped record for a reason no shipped
-        # build has. §4.1's mint rides here -- an Evoke mints the larger amount
-        # because it costs a member -- and both are inert with the flags off.
-        state.emit("salon_evoke", member=member, focus_mult=mult)
-        furina_reframe.mint_for_evoke(state, member)
 
 
 def salon_slots(player) -> int:
@@ -2153,8 +2096,7 @@ def _card_will_replace(state: CombatState, card: Card) -> bool:
 
 
 def _deploy_salon_members(state: CombatState, amount: int,
-                          member: str = "crabaletta",
-                          free_performance: bool = False) -> None:
+                          member: str = "crabaletta") -> None:
     """Salon v2 deploy (rework plan §1): the typed FIFO queue with Defect
     evoke geometry. Deploying into full slots bows the OLDEST member OUT
     (its unique bow) and the new member takes the vacated slot — the v1
@@ -2162,10 +2104,7 @@ def _deploy_salon_members(state: CombatState, amount: int,
     archive. powers['salon_member'] mirrors len(queue) so every count
     read (has_salon_members, the pilot, instruments) is unchanged.
 
-    `free_performance` (`EB-558`) is passed straight through to
-    `salon_member_act` and has exactly one caller:
-    `furina_reframe.field_opening_member`, the relic's arrival. Every DEPLOY a
-    card makes pays its 1 as it always has."""
+"""
     p = state.player
     if member != "random" and member not in C.SALON_MEMBERS:
         raise ValueError(f"unknown salon member {member!r}")
@@ -2178,37 +2117,11 @@ def _deploy_salon_members(state: CombatState, amount: int,
                     if member == "random" else member)
         if len(p.salon) >= salon_slots(p):
             state.salon_replacements_this_card += 1
-            # THE FULL-STAGE EVOKE (reframe §4.2, RULED). The mechanism does
-            # not move one line: [USER]'s "overcrowding the stage still forces
-            # out an Evoke" is this displacement bow, and the reframe renames
-            # it. What the flag adds is that the displaced member's bow is an
-            # EVOKE -- multiplied Focus, the larger mint -- which is the exact
-            # asymmetry the packet's slate slot 6 was written to measure
-            # against a dedicated Evoke card. Flag off, it is the shipped bow.
-            #
-            # AUTOMATIC AND FRONT-ONLY, BY RULING (slot 6, 2026-08-30). This
-            # path deliberately does NOT go through
-            # `furina_reframe.evoke_target_index`: overflow deployment keeps
-            # evoking the front for free as the reward for filling the stage,
-            # and the aim is the thing the dedicated Evoke buys with Encore.
-            # `pop(0)` here is the answer to slot 6, not an omission -- a
-            # future `member:` on a deploy row would erase the asymmetry the
-            # ruling created on purpose.
-            _salon_bow(state, p.salon.pop(0),
-                       evoked=furina_reframe.manual_active(p))
+            _salon_bow(state, p.salon.pop(0))
         p.salon.append(entering)
         # `entering`, not `member`: an observer of this event wants to know
         # WHO took the stage, and "random" is not a member.
         state.emit("salon_deploy", member=entering, company=list(p.salon))
-        # DEPLOY PERFORMS (reframe §4.2, RULED: "most deploy cards deploy AND
-        # make that member perform once immediately"), so a deploy pays on the
-        # turn it is played. The member that performs is the one that just
-        # ENTERED, not the front of the queue: the card's promise is about the
-        # member it names. It resolves through `salon_member_act`, the one
-        # implementation, so the upkeep price, the dry three-quarters and the
-        # Focus term are inherited rather than restated.
-        if furina_reframe.manual_active(p):
-            salon_member_act(state, entering, free=free_performance)
         # Fortissimo Guard (Curtain Call B, R85): block per DEPLOY, per
         # deployment event rather than per card -- Full Ensemble's three
         # deploys are three cues. Direct add + emit, the _salon_bow block
@@ -2655,71 +2568,6 @@ def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
                                  "spend_encore_op", card.id)
 
 
-def _spotlight_designate_one_mode(state: CombatState) -> None:
-    """R228 option (1): ONE MODE, PRICED.
-
-    Center Stage retires -- its only mechanical payoff, `FANFARE_PER_SPOTLIGHT
-    _CARD`, is already retired by the reframe's §4.1, so a two-mode selector
-    would be choosing between a multiplier and a no-op. Guest Cast and
-    `SPOTLIGHT_BASE_MULT` stay exactly as they ship. What changes is what the
-    selector IS: the shipped two-line heuristic (E4's finding: the heuristic
-    is not a lean toward a mode, it IS the collapse rule) becomes one aim with
-    a price, paid in Encore -- the reframe's own aiming currency.
-
-    THE RISK IS NAMED IN THE RULING AND IT IS NOT SOFTENED HERE: this is a
-    THIRD claim on one unbounded buffer, beside Encore's deferred Block and
-    the Evoke price, and R228 rules that the price is MEASURED (a slate slot
-    staged as a matched pair against slot 2) rather than assumed away.
-
-    UNPAID IS A NO-OP, NOT A DISCOUNT. A designation that could not be paid
-    for leaves the Spotlight where it was and says so, because the alternative
-    -- aiming for free when the buffer is empty -- is exactly the "free when
-    under-priced" failure the ruling flags.
-
-    WHAT IS DEFERRED, so the absence is not read as a decision: R228's
-    selector "aims a Companion", and this slice aims the Companion CATEGORY
-    (the shipped `SPOTLIGHT_GUEST_CAST` sentinel) rather than a named
-    Companion. The named-target half needs a new target type on the
-    designation and a face that can print it; §11 of the packet carries it as
-    deferred with its reason.
-    """
-    p = state.player
-    if spotlight_designate_is_redundant(state):
-        # Already aimed. Re-aiming at the same target buys nothing, so it
-        # cannot be allowed to bill for nothing either.
-        state.emit("spotlight_designate_redundant")
-        return
-    price = furina_reframe.SPOTLIGHT_DESIGNATE_ENCORE_COST
-    if p.encore < price:
-        state.emit("spotlight_designate_unpaid", price=price,
-                   encore=p.encore)
-        return
-    resources.spend_encore(state, price, "spotlight_designate")
-    p.spotlight = C.SPOTLIGHT_GUEST_CAST
-    state.spotlight_moved_this_turn = True
-    state.spotlight_moves_this_combat += 1
-    state.emit("spotlight_designated", character=C.SPOTLIGHT_GUEST_CAST,
-               mode="guest_cast")
-
-
-def spotlight_designate_is_redundant(state: CombatState) -> bool:
-    """Whether the one-mode designation has nothing left to choose.
-
-    `EB-509`: two callers, and they must never disagree. The designation
-    itself refuses a second aim here, and Furina's starting relic asks the
-    same question one broadcast earlier so it stops DEALING a card the
-    designation would refuse. C# twin:
-    `SpotlightSystem.DesignateOneModeIsRedundant`, read by both
-    `EtherealSpotlight.IsPlayable` and `EtherealSpotlightRelic
-    .BeforeSideTurnStart`.
-
-    The reframe's own gate, because Center Stage retires only under the arm:
-    off it the selector still has two targets and a second play RE-AIMS.
-    """
-    return (furina_reframe.spotlight_active(state.player)
-            and state.player.spotlight == C.SPOTLIGHT_GUEST_CAST)
-
-
 def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     """Choose between Center Stage and Guest Cast.
 
@@ -2730,9 +2578,6 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     the selector defaults to Center Stage. The diagnostic override retains
     forced self/companion arms for experiments."""
     p = state.player
-    if furina_reframe.spotlight_active(p):
-        _spotlight_designate_one_mode(state)
-        return
     companion_in_hand = any(c.is_companion and not c.kit_card for c in p.hand)
     companion_anywhere = any(
         c.is_companion and not c.kit_card
@@ -2868,6 +2713,11 @@ def _op_drain_fanfare(state: CombatState, fx: dict, card: Card) -> None:
                floor=p.fanfare_floor, total=p.fanfare)
 
 
+#: The `member:` value that means "the leftmost member", spelled out. The
+#: C# side spells the same sentinel as a null aim argument.
+SALON_AIM_FRONT = "front"
+
+
 def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
     """The on-demand bow (Track D, the D6 probe, 2026-07-28).
 
@@ -2887,50 +2737,37 @@ def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
     no-op, not an error, so the card is never unplayable and never wasted in
     a way the player cannot see coming from the stage itself.
 
-    `member:` AIMS THE EVOKE (the slot-6 ruling, 2026-08-30). The card names
+
+    `member:` AIMS THE BOW (the slot-6 ruling, 2026-08-30). The card names
     which member it removes; unstated -- and `member: front`, the same thing
     written out -- is the leftmost, so every row written before the ruling
     means exactly what it always meant, explicitly rather than by accident.
-    The aim is `FURINA_REFRAME_EVOKE`'s to give: with the leg off the argument
-    is ignored and this verb pops the front, which is the shipped bow. It is
-    an ARGUMENT on this verb and not a new op, deliberately, for the reason
-    `furina_reframe.evoke_target_index` carries in full.
+    It is an ARGUMENT on this verb and not a new op, deliberately: registering
+    a synonym would have moved the priced-op set, which is a DRAFTER_VERSION
+    bump. C# twin: `SalonMemberPower.BowLeftmost`'s optional aim.
     """
     p = state.player
     named = fx.get("member")
-    if named not in (None, furina_reframe.EVOKE_TARGET_FRONT):
+    if named not in (None, SALON_AIM_FRONT) and named not in C.SALON_MEMBERS:
         # The deploy verb refuses an unknown member name and so does this one:
-        # a typo in a row must not degrade quietly into "the front member",
-        # which is the one failure an aimed Evoke could hide indefinitely.
-        if named not in C.SALON_MEMBERS:
-            raise ValueError(f"unknown salon member {named!r}")
-    # THE REFRAME'S EVOKE IS THIS VERB (§4.4), not a new one, and that is a
-    # deliberate refusal to register an op. `salon_bow`'s own docstring already
-    # calls itself "the Defect-evoke analogue"; the packet's §2.2 finding is
-    # that the Evoke SHIPS and the reframe renames it. Registering a
-    # `salon_evoke` op would have changed the priced-op set, which is a
-    # DRAFTER_VERSION bump -- a stamp event, and a slice that is supposed to
-    # move no stamp cannot buy one for a synonym. With the flag on, this verb
-    # applies the Focus term `EVOKE_FOCUS_MULT` times and mints the larger
-    # Fanfare; with it off it is the shipped bow to the digit. The Encore
-    # price is the card's printed `encore_cost` (`F7` (1)), which is shipped
-    # machinery: playability gate, then spend, both before this op resolves.
-    evoked = furina_reframe.evoke_active(p)
+        # a typo in a row must not degrade quietly into "the front member".
+        raise ValueError(f"unknown salon member {named!r}")
     for _ in range(_amount(state, fx.get("amount", 1))):
         if not p.salon:
             break
-        idx = furina_reframe.evoke_target_index(p, named)
-        if idx == furina_reframe.EVOKE_TARGET_ABSENT:
-            # Named a member who is not on the stage. NOT silent, for the same
-            # D4 reason `salon_rotate_whiffed` exists: the aim is invisible in
-            # the state afterwards, so a display that wants to say "she called
-            # for Crabaletta and Crabaletta was not there" must be able to.
-            # The Evoke still happens, on the front -- an aimed card that
-            # cannot find its member is an unaimed Evoke, never a wasted one.
-            state.emit("salon_evoke_target_absent", member=named,
-                       company=list(p.salon))
-            idx = 0
-        _salon_bow(state, p.salon.pop(idx), evoked=evoked)
+        idx = 0
+        if named not in (None, SALON_AIM_FRONT):
+            if named in p.salon:
+                idx = p.salon.index(named)
+            else:
+                # Named a member who is not on the stage. NOT silent, for the
+                # same D4 reason `salon_rotate_whiffed` exists: the aim is
+                # invisible in the state afterwards. The bow still happens, on
+                # the front -- an aimed card that cannot find its member is an
+                # unaimed bow, never a wasted one.
+                state.emit("salon_bow_target_absent", member=named,
+                           company=list(p.salon))
+        _salon_bow(state, p.salon.pop(idx))
     p.powers["salon_member"] = len(p.salon)
 
 
@@ -4118,7 +3955,7 @@ RUNTIME_COUNT_NAMES = frozenset({
     # resolved in `_runtime_count` for this registry's own reason: the loader
     # validates every count token at LOAD off this set.
     "plans_carried_out_this_morning",
-    # QUARANTINED USE ONLY (R213 B) -- the FURINA REFRAME's drain slice. Same
+    # QUARANTINED USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
     "fanfare_drained",
@@ -6345,8 +6182,8 @@ OPS = {
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,
-    # QUARANTINED (R213 B): the Furina reframe's drain, slice two.
     "drain_fanfare": _op_drain_fanfare,
+    # QUARANTINED (R213 B): the Furina reframe's drain, slice two.
     "salon_bow": _op_salon_bow,
     "salon_rotate": _op_salon_rotate,
     "salon_perform": _op_salon_perform,
@@ -6805,14 +6642,7 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
 def player_turn_start_triggers(state: CombatState) -> None:
     p = state.player
     if ("ethereal_spotlight" in p.relic_hooks           # Furina's relic
-            and not both_spotlight_modes(state)
-            # `EB-509`: and the Spotlight is not already lit. The relic's own
-            # arm face says "It does nothing once your Companion cards are lit
-            # for this combat", and until this line it went on dealing the
-            # selector anyway -- five to seven refused Ethereal draws a fight
-            # (Furina r11 lane 2). One predicate with the designation's own
-            # refusal, so the two cannot disagree about when that is.
-            and not spotlight_designate_is_redundant(state)):
+            and not both_spotlight_modes(state)):
         # Selector to hand each turn (kickoff §3.1). Ethereal: unplayed
         # copies vanish at end of turn (combat loop), so the deck never
         # silts up with selectors. Emits its own event, NOT add_card --
@@ -6928,19 +6758,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
     n = p.powers.get("encore_per_turn", 0)         # All the World's a Stage
     if n:
         resources.gain_encore(state, n, source="encore_per_turn")
-    if furina_reframe.manual_active(p):
-        # THE SINGLE BIGGEST CHANGE IN THE REFRAME (§4.2 / §2.2): members do
-        # not auto-play. There is no end-of-turn Salon path, so suppressing
-        # this one call removes the automatic engine entirely -- the stage now
-        # performs only when a Companion play, a deploy or an Evoke makes it.
-        # The suppression is LOUD rather than silent: an instrument that
-        # counted upkeeps must be able to tell "no members" from "no upkeep
-        # exists any more", and R177's fuel finding was measured on the row
-        # this event replaces.
-        if p.salon:
-            state.emit("salon_upkeep_suppressed", members=len(p.salon))
-    else:
-        salon_tick(state)                               # Furina (kickoff §5)
+    salon_tick(state)                                   # Furina (kickoff §5)
     # Nicole -- REDESIGNED 2026-07-26 (red-pen, item 4). Was "+N flat attack
     # damage, and 4 Block each turn"; is now "gain N Strength and 4 Block each
     # turn". The rationale on the record: a 2-cost Power must clear a high bar
@@ -7294,15 +7112,6 @@ def salon_member_act(state: CombatState, member: str,
     if p.burst_max:
         # §1 particle economy
         resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
-    # THE REFRAME'S ONE MINT SITE for a member that performs and STAYS
-    # (§4.1). It is here, inside the single implementation of a member
-    # acting, rather than at the three callers -- the Companion trigger, the
-    # deploy-performs clause and the `salon_perform` card -- because "a member
-    # performing mints Fanfare, and nothing else does" is one rule and a rule
-    # with three copies is a rule that drifts. Inert unless the meter leg is
-    # on. An Evoke does NOT pass through here (it is a bow) and mints the
-    # larger amount at its own site.
-    furina_reframe.mint_for_performance(state, member)
     return True
 
 

@@ -133,18 +133,18 @@ public static class KleeCardTooltips
         // about a resource the arm does not have, printed on the one surface
         // a reader consults before drafting.
         //
-        // `FurinaReframe.BurstRetiredFor` IS THE GATE, the same one
-        // `FurinaResources` asks before granting, spending or displaying the
-        // meter (three call sites, all in that file). Asking it here makes
-        // "she has no Burst meter under the arm" one decision rather than
-        // four, and keeps this branch owner-scoped like every other reframe
-        // seam: in co-op the other seat may be Klee, whose meter is live, and
-        // whose card must keep the paragraph.
+        // `FurinaResources.StageRetiresTheShippedMeters` IS THE GATE, the
+        // same one that file asks before granting, spending or displaying the
+        // meter. Asking it here makes "she has no Burst meter under the arm"
+        // one decision rather than four, and keeps this branch owner-scoped:
+        // in co-op the other seat may be Klee, whose meter is live, and whose
+        // card must keep the paragraph.
         //
         // NOT THE `Elemental Skill` KEYWORD, which is loc registered once at
         // boot and cannot be owner-branched. Its own retirement is
         // `EB-200`'s, which rides `EB-199`; this is the tip the seat read.
-        if (FurinaReframe.BurstRetiredFor(TipOwner.CreatureOf(card)))
+        if (FurinaResources.StageRetiresTheShippedMeters(
+                TipOwner.CreatureOf(card)))
         {
             yield break;
         }

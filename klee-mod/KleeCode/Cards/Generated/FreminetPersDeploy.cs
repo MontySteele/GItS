@@ -51,7 +51,7 @@ public sealed class FreminetPersDeploy : CustomCardModel, IElementalCard, ICompa
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("freminet_pers_deploy");
 

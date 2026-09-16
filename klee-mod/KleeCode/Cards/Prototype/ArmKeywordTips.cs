@@ -139,14 +139,6 @@ public static class ArmKeywordTips
     // "completely undiscoverable except by accident".
     public const string MergeRidersKey = "KLEEMOD-ARM_MERGE_RIDERS";
 
-    // `EB-553` (R260). THE THIRD KEY HERE THAT TITLES NO KEYWORD, and it names
-    // the one rule the reframe's STARTING RELIC now carries: the stage is
-    // fielded before the first card is played. The relic's own face is at 117
-    // of the 120-character relic ceiling and already states two rules, so the
-    // third sentence rides beside it as a tip rather than displacing one of
-    // them -- and a tip is where a rule about the board belongs anyway.
-    public const string OpeningStageKey = "KLEEMOD-ARM_OPENING_STAGE";
-
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -1142,37 +1134,6 @@ public static class ArmKeywordTips
     // WHAT REPLACED THEM is the STAGE's seven, at the foot of this class.
 
     /// <summary>
-    /// `EB-553` (R260): the reframe's stage is never unlit, and the relic that
-    /// fields it is where a player reads so.
-    ///
-    /// Round 11 read both lanes' turn one as empty BY CONSTRUCTION and the
-    /// natural lane counted it -- zero empty turns in the fights where the
-    /// starter deploy was in the opening hand, six of twenty-two otherwise.
-    /// [USER] took the relic over an Innate starter, so the fact belongs to
-    /// the relic and not to a card: it is true on turn one of every fight
-    /// whatever the opening hand holds.
-    ///
-    /// THE MEMBER IS NAMED IN FULL here and short on the badge, which is the
-    /// shipped split: <c>SalonMemberPower.ManualFrontName</c> prints
-    /// "Crabaletta" because three rules and an identity have to fit under the
-    /// power ceiling, and a tip with one sentence in it can afford her title.
-    ///
-    /// `EB-558` ADDED THE SECOND SENTENCE, because the first one hid a price.
-    /// The arrival is a deploy and a deploy performs, so a reader who knows
-    /// the deploy rule reads "opens with her on stage" as "opens one Encore
-    /// down" -- which is what the build did until R260's arithmetic was
-    /// settled. It does not now: the arrival performs at full value and costs
-    /// nothing, so turn one opens on the whole of R258's bank. Both halves are
-    /// stated, because "performs" without "free" is the reading that costs a
-    /// player their opening move.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForOpeningStage(
-        IEnumerable<IHoverTip> inherited) =>
-        With(inherited, OpeningStageKey,
-             "Every fight opens with [gold]Mademoiselle Crabaletta[/gold] on "
-           + "stage. She performs on arrival for free.");
-
-    /// <summary>
     /// `EB-479` (R258): THE OPENING JOINS THE SENTENCE THAT DEFINES THE WORD,
     /// and only under the arm that grants it -- <see cref="SparkBody"/>'s
     /// shape one character over, for its reason.
@@ -1199,15 +1160,8 @@ public static class ArmKeywordTips
         // have it measure the Spark tip's opening twice and this one never.
         const string absorbs =
             "After [gold]Block[/gold] it absorbs damage before HP. ";
-        if (!FurinaReframe.Enabled)
-        {
-            return absorbs + "One pool, as each lands: a card pays to "
-                 + "resolve, a member spends 1 to perform or acts at 3/4.";
-        }
-        return absorbs + "Start each combat with "
-             + FurinaReframeLaw.OpeningEncore
-             + ". One pool, in order: a card pays, a member spends 1 or acts "
-             + "at 3/4.";
+        return absorbs + "One pool, as each lands: a card pays to "
+             + "resolve, a member spends 1 to perform or acts at 3/4.";
     }
 
     /// <summary>

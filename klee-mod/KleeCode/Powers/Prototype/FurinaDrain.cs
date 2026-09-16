@@ -51,12 +51,12 @@ namespace KleeMod.Powers;
 /// plays another card, so the honest state is a note rather than a mechanism
 /// nothing exercises.
 ///
-/// PER CREATURE, keyed the way <see cref="FurinaReframeLedger"/> is keyed and
+/// PER CREATURE, keyed the way the arm ledgers are keyed and
 /// for the same reason (R205): in co-op the other seat's meter is not hers.
 ///
 /// QUARANTINED. <c>Powers/Prototype/</c> is <c>Compile Remove</c>d from a
 /// release build, so a shipped mod contains no drain at all -- and unlike the
-/// four legs of <see cref="FurinaReframe"/> there is no flag to read, because
+/// four legs of the retired reframe there is no flag to read, because
 /// there is no shipped rule for this one to replace. The gate is the ROWS: only
 /// a prototype card carries <c>drain_fanfare</c>, and a prototype card exists
 /// only under <c>-p:PrototypeCards=true</c>.
@@ -101,7 +101,6 @@ public static class FurinaDrain
         // "whenever Fanfare changes amount" is one rule with one home.
         var drained = FurinaResources.DrainFanfare(owner);
         _drained[owner] = drained;
-        FurinaReframeLedger.For(owner).NoteDrain(drained);
         return drained;
     }
 
@@ -119,8 +118,7 @@ public static class FurinaDrain
             : FurinaResources.ReadableFanfare(owner);
     }
 
-    /// <summary>Every seat's record, dropped. Test-facing, and the same
-    /// courtesy <c>FurinaReframeLedger.ResetAll</c> extends: a static table
+    /// <summary>Every seat's record, dropped. Test-facing: a static table
     /// keyed on live objects outlives a headless fixture otherwise.</summary>
     public static void ResetAll() => _drained.Clear();
 }

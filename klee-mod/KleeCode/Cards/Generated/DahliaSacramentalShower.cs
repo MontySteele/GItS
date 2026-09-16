@@ -51,7 +51,7 @@ public sealed class DahliaSacramentalShower : CustomCardModel, IElementalCard, I
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("dahlia_sacramental_shower");
 

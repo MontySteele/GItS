@@ -41,19 +41,11 @@ import random
 import pytest
 
 from tier0.content import loader
-from tier0.engine import effects, furina_reframe
+from tier0.engine import effects
 from tier0.engine.state import CombatState
 from tier0.tests.conftest import make_enemy
 
 SKITTISH = 6
-
-
-@pytest.fixture(autouse=True)
-def manual_on(monkeypatch):
-    """Under the arm, so the claim is about the arm's board and not a
-    flag-off one."""
-    for flag in ("FURINA_REFRAME", "FURINA_REFRAME_MANUAL"):
-        monkeypatch.setattr(furina_reframe, flag, True)
 
 
 def _gardener(hp):

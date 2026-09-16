@@ -192,16 +192,6 @@ public static class SpotlightSystem
     /// Fanfare? True under the mode, or unconditionally when upgraded.</summary>
     private static bool CenterStageActive(Creature creature)
     {
-#if PROTOTYPE_CARDS
-        // R228 (1): Center Stage RETIRES, so its half is False everywhere --
-        // including under the upgraded relic, which is why this test sits
-        // ABOVE the both-modes branch. "Both modes at once" is meaningless
-        // with one mode, and the relic's re-authoring is deferred with the
-        // rest of the sheet work (packet §11). Mirrors tier0
-        // `effects.center_stage_active`, which puts its flag test in exactly
-        // the same place for exactly this reason.
-        if (FurinaReframe.SpotlightLiveFor(creature)) return false;
-#endif
         return Mode(creature) == SpotlightMode.CenterStage || BothModes(creature);
     }
 
@@ -312,133 +302,6 @@ public static class SpotlightSystem
         }
     }
 
-#if PROTOTYPE_CARDS
-    /// <summary>
-    /// THE ONE-MODE, PRICED SELECTOR -- R228 option (1), and the whole of the
-    /// reframe's SPOTLIGHT leg beside <see cref="CenterStageActive"/>'s
-    /// retirement.
-    ///
-    /// Center Stage retires; Guest Cast and
-    /// <see cref="GuestCastBaseMultiplier"/> stay exactly as they ship; and
-    /// the selector stops running a heuristic between two modes and instead
-    /// COSTS Encore. The ruling names the risk itself -- a THIRD claim on one
-    /// unbounded buffer, beside Encore's deferred Block and the Evoke price --
-    /// and rules that the price is MEASURED rather than assumed away.
-    ///
-    /// RE-AIMING AT THE SAME TARGET BILLS NOTHING. It buys nothing, so it
-    /// cannot be allowed to bill for nothing either; the early-out is above
-    /// the price for that reason and not for tidiness.
-    ///
-    /// UNPAID IS A NO-OP, NOT A DISCOUNT. A designation that could not be paid
-    /// for leaves the Spotlight where it was and says so, because the
-    /// alternative -- aiming for free when the buffer is empty -- is exactly
-    /// the "free when under-priced" failure the ruling flags.
-    ///
-    /// THE SPEND IS THE SHIPPED SPEND, through
-    /// <see cref="FurinaResources.SpendEncore"/>, which under the shipped rule
-    /// mints Fanfare and feeds Burst. That is the sim's call too
-    /// (<c>resources.spend_encore(state, price, "spotlight_designate")</c>):
-    /// the SPOTLIGHT leg prices a designation, and whether an Encore spend
-    /// still mints is the METER leg's question, asked in one place.
-    ///
-    /// WHAT IS DEFERRED, so the absence is not read as a decision: R228's
-    /// selector "aims a Companion", and this slice aims the Companion CATEGORY
-    /// -- the shipped Guest Cast mode -- rather than a named Companion. The
-    /// named-target half needs a new target type on the designation and a face
-    /// that can print it; §11 of the packet carries it as deferred with its
-    /// reason, and the sim's slice stops at the same line.
-    ///
-    /// Mirrors tier0 <c>effects._spotlight_designate_one_mode</c>.
-    /// </summary>
-    public static async Task DesignateOneMode(
-        PlayerChoiceContext choiceContext, Creature creature,
-        CardModel? cardSource)
-    {
-        if (!FurinaReframe.SpotlightLiveFor(creature)) return;
-        if (Mode(creature) == SpotlightMode.GuestCast)
-        {
-            FurinaReframeLedger.For(creature).NoteDesignationRedundant();
-            return;
-        }
-        var price = FurinaReframeLaw.SpotlightDesignateEncoreCost;
-        if (FurinaResources.Encore(creature) < price)
-        {
-            FurinaReframeLedger.For(creature).NoteDesignationUnpaid();
-            return;
-        }
-        FurinaResources.SpendEncore(creature, price);
-        await Designate(
-            choiceContext, creature, SpotlightMode.GuestCast, cardSource);
-    }
-
-    /// <summary>
-    /// `EB-364`. THE REFUSAL <see cref="DesignateOneMode"/> WOULD MAKE, ASKED
-    /// ONE PHASE EARLIER -- and its ONLY statement, so the question the
-    /// playability gate asks and the answer the designation acts on can never
-    /// drift apart. It decides nothing; it only reports.
-    ///
-    /// WHAT THE SEAT SAW. Ethereal Spotlight prints "Costs 2 Encore" under the
-    /// arm, and the round-one seat played it at 0 Encore in fight 2 round 1: no
-    /// refusal, no Guest Cast, no line on the page, and it found out two turns
-    /// later that its Companions were never empowered. The card is a 0-ENERGY
-    /// token whose Encore price is charged INSIDE the op rather than declared
-    /// as a resource cost, so no gate ran for it at all -- <c>CanPlay</c> had
-    /// nothing to refuse on, and "unpaid is a no-op" (above) turned the whole
-    /// play into an Ethereal card exhausting for nothing.
-    ///
-    /// THE REDUNDANT CASE IS NOT THIS GATE'S, and since `EB-406` it is not a
-    /// free play either -- it is <see cref="DesignateOneModeIsRedundant"/>
-    /// below. This one names the PRICE and nothing else, which is why it steps
-    /// aside where the mode is already Guest Cast: there is no price to fail
-    /// to meet there.
-    ///
-    /// NULL-TOLERANT AND READ-ONLY: it is called on every card in hand on every
-    /// state poll and on the compendium's ownerless copy, so no combat, no
-    /// owner and no resource table all answer <c>false</c> -- a card nobody
-    /// holds is refused by nothing.
-    /// </summary>
-    public static bool DesignateOneModeIsUnpayable(Creature? creature) =>
-        creature != null
-        && FurinaReframe.SpotlightLiveFor(creature)
-        && Mode(creature) != SpotlightMode.GuestCast
-        && FurinaResources.Encore(creature)
-            < FurinaReframeLaw.SpotlightDesignateEncoreCost;
-
-    /// <summary>
-    /// `EB-406`. THE SECOND COPY, AND IT WAS THE HOLE THE PRICE GATE LEFT.
-    ///
-    /// WHAT THE SEAT SAW (Furina round 4, run 1, fight 1). Ethereal Spotlight
-    /// at 0 Encore was refused one turn -- "CANNOT BE PLAYED: you have no
-    /// Encore, and this costs 2" -- and ACCEPTED the next at the same 0
-    /// Encore, Exhausting with no effect: no Encore moved and Guest Cast
-    /// stayed 1. The card is `Ethereal` and `Exhaust`, and the starter relic
-    /// puts a fresh copy in hand every turn, so this is a dead card handed
-    /// back every turn for the rest of the fight.
-    ///
-    /// THE PATH. The price gate above steps aside once the mode IS Guest Cast,
-    /// on the reading that re-aiming at the same target bills nothing and so
-    /// may be allowed at an empty buffer. Under the arm there is no other
-    /// target -- R228 (1) retires Center Stage, and
-    /// <see cref="CenterStageActive"/> returns false unconditionally -- so
-    /// "re-aim" is not a thing the card can do: the only second play is the
-    /// redundant one, and <see cref="DesignateOneMode"/> answers it with
-    /// `NoteDesignationRedundant()` and a bare `return`. Bill nothing and do
-    /// nothing is exactly the state the gate above says a play must never
-    /// reach; it just could not see this way in.
-    ///
-    /// SO IT IS A REFUSAL, and the card carries the sentence
-    /// (`IUnplayableReasonCard`), because the reason is not the price and must
-    /// not be reported as one. The op's early-out stays where it is: a gate
-    /// and a payment that disagree is the defect `EB-364` closed, and this
-    /// keeps them agreeing from both ends.
-    ///
-    /// NULL-TOLERANT AND READ-ONLY, for the reason its neighbour is.
-    /// </summary>
-    public static bool DesignateOneModeIsRedundant(Creature? creature) =>
-        creature != null
-        && FurinaReframe.SpotlightLiveFor(creature)
-        && Mode(creature) == SpotlightMode.GuestCast;
-#endif
 
     /// <summary>
     /// R2 reading 1 ([USER], 2026-07-26): the upgrade removes the
@@ -730,16 +593,8 @@ public static class SpotlightSystem
         // is what keeps Guest Cast's "their plays generate no Fanfare" clause
         // true for Companions even when R2's upgrade has both halves live --
         // the upgrade drops the exclusivity, not the targeting.
-        //
-        // RETIRED UNDER THE REFRAME'S METER LEG TOO (packet §4.1, leg 4 of 4),
-        // and by TWO flags for two different reasons -- either alone is enough
-        // to empty this leg, exactly as the sim's `combat._finish_play` has it.
-        // The METER leg retires "a Spotlighted card played" as a Fanfare
-        // source; R228's one-mode SPOTLIGHT leg retires Center Stage outright,
-        // which `CenterStageActive` answers for above.
         if (CenterStageActive(owner)
-            && card is ICharacterCard { CharacterId: "furina" }
-            && !FurinaResources.ReframeRetiresTheShippedMintLegs(owner))
+            && card is ICharacterCard { CharacterId: "furina" })
         {
             FurinaResources.GainFanfare(owner, FanfarePerCenterStagePlay);
         }
@@ -838,89 +693,8 @@ public sealed class GuestCastPower : PowerModel, ILocalizationProvider
             "Companion cards are Spotlighted: 50% stronger printed damage and "
           + "[gold]Block[/gold], no Fanfare. Lasts until the "
           + "[gold]Spotlight[/gold] moves."),
-#if PROTOTYPE_CARDS
-        // `EB-421`. THE ARM'S FACE, and it is the shipped sentence with one
-        // clause removed and nothing added.
-        //
-        // "no Fanfare" is true of the SHIPPED kit, where the Fanfare a
-        // Spotlight makes is Center Stage's -- her own cards, by the card-class
-        // test in `NoteSpotlightedPlay` -- so a Companion play mints none. The
-        // arm retires that leg outright (`ReframeRetiresTheShippedMintLegs`)
-        // and mints by PERFORMANCE instead, and a Companion play is exactly
-        // what makes the front member perform
-        // (`SalonMemberPower.CompanionPlayTrigger`). So under the arm the
-        // clause is not merely stale, it is backwards: a Guest Cast play is
-        // the commonest way to make Fanfare. The round-5 seat watched the
-        // meter go 3 to 5 on the beat this sentence forbade.
-        //
-        // NOTHING IS PUT IN ITS PLACE. The rate and the two sites are the
-        // Fanfare badge's sentence (`FanfareMeterPower`'s own arm face,
-        // `EB-385`), and a mode buff restating a meter's rule is the second
-        // surface `EB-386` already refused for the mode number.
-        //
-        // Same `SmartDescriptionLocKey` mechanism, same no-semicolon rule as
-        // that face: `lint_text_conventions` reads these literals out of the
-        // source and its regex stops at one.
-        //
-        // `EB-437` ADDED THE THIRD SENTENCE, and it is three words long
-        // because the confusion it answers is one word. The r6 act-1 seat
-        // deployed under this buff and watched the member perform dry:
-        // "`Guest Cast 1` was active and claims Companions are '50%
-        // stronger', yet the log printed `Crabaletta hit Corpse Slug for 4
-        // Hydro` -- 6 x 0.75, with no 1.5x anywhere. Reading the Spotlight
-        // card again, it says 'Spotlight every Companion card', and a Salon
-        // member is not a card; but the relic that hands you the card says
-        // 'It does nothing once your Companions are lit', and the salon
-        // members are the things the game calls Companions everywhere else. I
-        // could not tell from the screens whether that was a bug or my
-        // misreading, and that is the point."
-        //
-        // It is not a bug: `OutwardMultiplier` refuses anything that is not an
-        // `ICompanionCard`, and a member is a POWER. The buff is the surface
-        // that is on screen at the moment the question arises, so it answers
-        // it here rather than leaving the reader to notice that "card" is
-        // doing the work in the sentence above.
-        //
-        // `EB-584` PUT ONE DURATION SENTENCE ON BOTH FACES, and under this arm
-        // the shipped one was not merely confusing but circular: PLAYING
-        // Ethereal Spotlight is what moves the Spotlight, so "lasts until the
-        // Spotlight moves" reads as a buff ended by the thing that creates it
-        // (Furina r15 lane 1 (c) 4). `DesignateOneMode` never moves it off
-        // Guest Cast, so on this arm the duration that never elapses is
-        // exactly "this combat" -- which is the sentence
-        // `FurinaRiderTips.ForSpotlightDuration` already prints on the card
-        // that buys the lighting. Two surfaces, one sentence.
-        //
-        // THE SHIPPED FACE ABOVE IS UNTOUCHED and must stay so: a release
-        // build's selector offers two modes, so its Spotlight really does
-        // move and "until it moves" is the true duration there.
-        ("smartDescriptionReframe",
-            "Companion cards are Spotlighted: 50% stronger printed damage and "
-          + "[gold]Block[/gold]. No member is one. Lasts this combat."),
-#endif
     };
 
-#if PROTOTYPE_CARDS
-    /// <summary>
-    /// `EB-421`. Which face this badge prints, the `FanfareMeterPower` shape
-    /// one power over. `IsMutable` first for its reason: `HasSmartDescription`
-    /// probes this key on a canonical copy, whose `Owner` getter asserts
-    /// mutability (`EB-94`), so a compendium copy reads the shipped sentence --
-    /// which is what a release build has anyway.
-    /// </summary>
-    protected override string SmartDescriptionLocKey
-    {
-        get
-        {
-            if (IsMutable && Owner is { } owner
-                && FurinaReframe.MeterLiveFor(owner))
-            {
-                return Id.Entry + ".smartDescriptionReframe";
-            }
-            return base.SmartDescriptionLocKey;
-        }
-    }
-#endif
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Single;

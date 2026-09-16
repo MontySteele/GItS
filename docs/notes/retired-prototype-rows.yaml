@@ -244,3 +244,153 @@
     power: vulnerable
     amount: 3
     target: enemy
+
+# RETIRED -- the Furina REFRAME's six sealed-record faces (`EB-726`)
+#
+# R269 ruled the Stage, whose brief sec.2 retires the reframe by name. Its
+# sixteen `proto_fr_` rows left `docs/prototype-surface.yaml` with `EB-719`
+# (commit 525c5c58, 2026-09-08) and the rest of the arm -- the C# switch, the
+# sim engine module, the Salon panel and every pin -- left HEAD with `EB-726`.
+#
+# SIX FACES SURVIVE HERE AND TEN DO NOT, and the split is the R101b rule this
+# file exists for. The reframe rounds 1 to 16 are sealed records
+# (`review/ruled/furina-reframe-round-*`, `review/records/furina-reframe-round-*`)
+# and they name cards by printed TITLE. Ten of the sixteen titles are either
+# named by no record or already resolve on a live sheet -- `Salon Debut`,
+# `Let the People Rejoice`, `Shared Billing`, `Rapturous Applause` and
+# `Unheard Confession` are shipped rows, and a frozen twin would only give one
+# title two rows. The six below are the titles a sealed record names that
+# NOTHING in HEAD resolves, so freezing them is what keeps those records
+# replayable through `understudy/resource_order.SHEETS`.
+#
+# Retrieval -- the last tree that carried all sixteen, with their comments:
+#
+#     git fetch --depth=1 origin 525c5c58dd0d9aa958284a4b10cd34402ebcf8f5
+#     git show 525c5c58dd0d9aa958284a4b10cd34402ebcf8f5^:docs/prototype-surface.yaml
+#
+# The arm's design reasoning is `review/ruled/furina-reframe-2026-08-29.md`
+# (R220 A); the published reads stand as published (R101b) and are not
+# re-graded by this deletion.
+
+- id: proto_fr_curtain_call
+  name: Curtain Call
+  character: furina
+  authored_by:
+  - claude
+  register: salon
+  cost: 1
+  type: skill
+  rarity: common
+  encore_cost: 2
+  art_of: take_your_bow
+  upgrade:
+    encore_cost: -1
+  description: '[gold]Evoke[/gold] the front [gold]Salon[/gold] member.'
+  effects:
+  - op: salon_bow
+    amount: 1
+- id: proto_fr_exit_stage_left
+  name: Exit Stage Left
+  character: furina
+  authored_by:
+  - claude
+  register: salon
+  cost: 1
+  type: skill
+  rarity: uncommon
+  encore_cost: 1
+  art_of: surintendante_chevalmarin
+  upgrade:
+    encore_cost: -1
+  description: '[gold]Evoke[/gold] Surintendante Chevalmarin, or the front member if she is not on stage.'
+  effects:
+  - op: salon_bow
+    amount: 1
+    member: chevalmarin
+- id: proto_fr_intermission
+  name: Intermission
+  character: furina
+  authored_by:
+  - claude
+  register: salon
+  cost: 1
+  type: skill
+  rarity: rare
+  art_of: stage_presence
+  upgrade:
+    retain: true
+  description: '[gold]Drain[/gold] your [gold]Fanfare[/gold]. Gain [gold]Block[/gold] equal to the [gold]Fanfare[/gold]
+    drained.'
+  effects:
+  - op: drain_fanfare
+  - op: block
+    amount_formula:
+      base: 0
+      per: 1
+      count: fanfare_drained
+- id: proto_fr_curtain_rises
+  name: Curtain Rises
+  character: furina
+  authored_by:
+  - claude
+  replaces: house_call
+  register: salon
+  cost: 1
+  type: attack
+  rarity: common
+  art_of: house_call
+  upgrade:
+    damage: 3
+  description: Deal 6 damage. [gold]Deploy[/gold] Surintendante Chevalmarin.
+  effects:
+  - op: damage
+    amount: 6
+    target: enemy
+  - op: apply_power
+    power: salon_member
+    amount: 1
+    target: self
+    member: chevalmarin
+- id: proto_fr_second_course
+  name: Second Course
+  character: furina
+  authored_by:
+  - claude
+  replaces: dinner_service
+  register: salon
+  cost: 1
+  type: skill
+  rarity: common
+  encore_cost: 1
+  art_of: dinner_service
+  upgrade:
+    encore_cost: -1
+  description: '[gold]Deploy[/gold] Mademoiselle Crabaletta. She performs once more.'
+  effects:
+  - op: apply_power
+    power: salon_member
+    amount: 1
+    target: self
+    member: crabaletta
+  - op: salon_perform
+    member: crabaletta
+- id: proto_fr_guest_list
+  name: Guest List
+  character: furina
+  authored_by:
+  - claude
+  replaces: blocking_notes
+  register: salon
+  cost: 1
+  type: skill
+  rarity: common
+  art_of: blocking_notes
+  upgrade:
+    block: 2
+  description: Gain 3 [gold]Block[/gold]. Add a random Common [gold]Companion[/gold] card to your hand.
+  effects:
+  - op: block
+    amount: 3
+  - op: generate_guest_star
+    rarity: common
+    amount: 1

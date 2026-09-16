@@ -212,49 +212,6 @@ public class Round16Tests
 
     private static string SpotlightDurationTip() =>
         Printed(typeof(FurinaRiderTips), "ForSpotlightDuration");
-
-    [Fact]
-    public void The_relic_line_says_how_long_the_lighting_lasts()
-    {
-        var relic = Source("Relics/EtherealSpotlightRelic.cs")
-            .Replace("\r\n", "\n");
-
-        Assert.Contains(
-            "\"Each turn, add an [gold]Ethereal Spotlight[/gold] to your \"\n"
-          + "          + \"[gold]Hand[/gold]. It does nothing once your \"\n"
-          + "          + \"[gold]Companion[/gold] cards are lit for this "
-          + "combat.\"", relic);
-
-        // Inside the 120-character relic ceiling, and at the SAME length the
-        // sentence it replaces had: "Each turn" is what paid for the duration.
-        const string rendered =
-            "Each turn, add an Ethereal Spotlight to your Hand. It does "
-          + "nothing once your Companion cards are lit for this combat.";
-        Assert.Equal(117, rendered.Length);
-    }
-
-    [Fact]
-    public void The_card_that_pays_the_encore_carries_the_same_sentence()
-    {
-        // The attach, on the card and under the arm's own compile gate.
-        var card = Source("Cards/Furina/SpotlightCards.cs").Replace("\r\n", "\n");
-        Assert.Contains("#if PROTOTYPE_CARDS && FURINA_REFRAME", card);
-        Assert.Contains(
-            "FurinaRiderTips.ForSpotlightDuration(base.ExtraHoverTips, this)",
-            card);
-
-        // And the sentence itself, off the compiled method -- that one is not
-        // inside an `#if`, because a tip class is compiled whole and the call
-        // site is what the arm gates.
-        var body = SpotlightDurationTip();
-        Assert.Contains("lasts this combat", body);
-        Assert.Contains("Every fight starts unlit", body);
-        Assert.True(
-            body.Replace("[gold]", string.Empty)
-                .Replace("[/gold]", string.Empty).Length <= 135,
-            body.Length.ToString());
-    }
-
     [Fact]
     public void The_new_tip_title_is_registered_and_not_a_raw_key()
     {

@@ -10,9 +10,10 @@ namespace KleeMod.Cards;
 /// <summary>
 /// `EB-449`. THE PRINTED HALF OF A RETIRED METER.
 ///
-/// THE DEFECT, three rounds running. Under the Furina reframe the Burst meter
-/// is retired -- <c>FurinaReframe.BurstRetiredFor</c> is the one question the
-/// display guard, the income funnel and the kit grant all ask -- and `EB-449`
+/// THE DEFECT, three rounds running. Under a Furina arm the Burst meter
+/// is retired -- <c>FurinaResources.StageRetiresTheShippedMeters</c> is the one
+/// question the display guard, the income funnel and the kit grant all ask --
+/// and `EB-449`
 /// took the explanatory TIP off her faces in r8. It did not touch the two
 /// things the seat actually reads: the printed line "<c>Burst +5.</c>" at the
 /// end of the body, and the gold "<c>Elemental Skill</c>" keyword the game
@@ -33,7 +34,7 @@ namespace KleeMod.Cards;
 /// committed and must be one text whatever the build; a compile switch inside
 /// them would make the codegen check answer differently under two property
 /// sets, and no headless test could then read the OTHER side. The flag's
-/// default IS the compile switch (<c>FurinaReframe.DefaultEnabled</c>), a
+/// default IS the compile switch (<c>FurinaStage.DefaultEnabled</c>), a
 /// <c>Localization</c> property builds its list per call, and BaseLib reads it
 /// at registration -- so a real build answers exactly what a `#if` would, and
 /// a test can flip the flag and read both faces.
@@ -51,11 +52,12 @@ namespace KleeMod.Cards;
 public static class FurinaBurstRider
 {
     /// <summary>Whether the shipped Burst meter is retired for this BUILD --
-    /// the creature-less half of <c>FurinaReframe.BurstRetiredFor</c>, for the
-    /// surfaces that have no creature to ask about.</summary>
+    /// the creature-less half of
+    /// <c>FurinaResources.StageRetiresTheShippedMeters</c>, for the surfaces
+    /// that have no creature to ask about.</summary>
     public static bool Retired =>
 #if PROTOTYPE_CARDS
-        FurinaReframe.Enabled && FurinaReframe.BurstEnabled;
+        FurinaStage.Enabled;
 #else
         false;
 #endif

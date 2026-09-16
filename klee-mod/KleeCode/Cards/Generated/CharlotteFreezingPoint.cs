@@ -51,7 +51,7 @@ public sealed class CharlotteFreezingPoint : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("charlotte_freezing_point");
 

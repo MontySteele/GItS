@@ -41,7 +41,7 @@ rather than a design dial -- under decay the ceiling does not bind.
 from __future__ import annotations
 
 from tier0 import constants as C
-from tier0.engine import furina_reframe, furina_stage
+from tier0.engine import furina_stage
 from tier0.engine.state import CombatState
 
 
@@ -90,10 +90,9 @@ def stage_retires_the_shipped_meters(player) -> bool:
     nothing in the kit. So the arm does not merely hide them -- it never
     grants them, and a run under the flag carries neither.
 
-    ONE GATE AT THE MINT rather than one at each funnel, which is where
-    `furina_reframe.meter_active` is asked. The reframe retired three named
-    LEGS and left the meter itself alive; the Stage retires the meters, so the
-    honest place to say so is the two grant doors every leg reaches. C# twin:
+    ONE GATE AT THE MINT rather than one at each funnel. The Stage retires
+    the meters, so the honest place to say so is the two grant doors every leg
+    reaches. C# twin:
     `FurinaResources.StageRetiresTheShippedMeters`.
     """
     return furina_stage.active(player)
@@ -406,13 +405,8 @@ def spend_encore(state: CombatState, n: int, source: str = UNATTRIBUTED,
     if spent:
         p.encore -= spent
         state.emit("encore_spent", amount=spent, source=source, card=card)
-        if not furina_reframe.meter_active(p):
-            # RETIRED UNDER `FURINA_REFRAME_METER` (§4.1): deliberate Encore
-            # spend mints nothing by itself -- it mints through the
-            # performance it buys. The branch is left inert rather than
-            # deleted so the OFF arm runs the shipped rule byte for byte.
-            gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT,
-                         "encore_spent")
+        gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT,
+                     "encore_spent")
         if p.burst_max:
             gain_burst(state, spent * C.BURST_PER_ENCORE_SPENT,
                        "encore_spent")
@@ -486,12 +480,8 @@ def absorb_into_encore(state: CombatState, dmg: int,
     if absorbed:
         p.encore -= absorbed
         state.emit("encore_absorb", amount=absorbed, source=source)
-        if not furina_reframe.meter_active(p):
-            # RETIRED UNDER `FURINA_REFRAME_METER` (§4.1). Absorbing a hit is
-            # Encore doing its FIRST job, and under the reframe only the stage
-            # performing mints.
-            gain_fanfare(state, absorbed * C.FANFARE_PER_ENCORE_ABSORBED,
-                         "encore_absorbed")
+        gain_fanfare(state, absorbed * C.FANFARE_PER_ENCORE_ABSORBED,
+                     "encore_absorbed")
     return dmg - absorbed
 
 
@@ -593,16 +583,10 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
     "reactions in particular do not feed it". The mod's twin is the same one
     line inside `KokomiResources.GainBurst`.
 
-    QUARANTINED (`FURINA_REFRAME_BURST`), `EB-365` / R251: THE THIRD ARM, AND
-    THE FIRST ONE RULED RATHER THAN FOUND. The Furina reframe's first blind
-    round read the shipped meter at `78/70` -- over its own cap -- and *Let the
-    People Rejoice* arrived off that overflow to win the boss fight, so the
-    round's clutch turn was the shipped kit's and not the reframe's. R251 (1)
-    retires the meter under the arm now instead of waiting on the shared fold
-    (`EB-199`, `EB-200`), which still owns the shipped engines. The guard goes
-    beside the other two, at this funnel, for their reason: the arm's answer is
-    "she has no Burst meter". The mod's twin is the same one line inside
-    `FurinaResources.GainBurst`.
+    FURINA'S THIRD GUARD LEFT WITH THE REFRAME (`EB-726`). Her Burst
+    retirement is the STAGE's now, and the Stage never grants the meter at all
+    (`stage_retires_the_shipped_meters`), so there is nothing left to guard at
+    this funnel.
 
     R14: diagnostic. Nothing reads these events to make a decision.
     """
@@ -613,8 +597,6 @@ def gain_burst(state: CombatState, n: int, source: str) -> None:
         return
     from tier0.engine import kokomi_plan           # late import (cycle)
     if kokomi_plan.live(state):
-        return
-    if furina_reframe.burst_retired(state.player):
         return
     p = state.player
     p.burst_energy += n
@@ -630,10 +612,4 @@ def note_player_hp_loss(state: CombatState, n: int) -> None:
         return
     state.hp_lost_this_turn += n
     state.player_damage_events += 1
-    if furina_reframe.meter_active(state.player):
-        # RETIRED UNDER `FURINA_REFRAME_METER` (§4.1), and with it the design
-        # invariant "every point of damage past Block prints exactly 1
-        # Fanfare" and the test that asserts it. The flux BOOKKEEPING above
-        # stays -- other instruments read it -- and only the mint goes.
-        return
     gain_fanfare(state, n * C.FANFARE_PER_HP_LOST, "hp_lost")

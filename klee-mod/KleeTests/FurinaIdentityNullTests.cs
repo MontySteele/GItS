@@ -18,7 +18,7 @@ namespace KleeMod.Tests;
 /// So the guard is at the SOURCE, and this is what pins it there. The two
 /// derived predicates are pinned on the prototype side, where their types
 /// are compiled: <c>FurinaStageRuleTests.The_arm_is_hers_alone</c> and
-/// <c>FurinaReframeRuleTests</c> both already ask them for null.
+/// the Salon pins both already ask them for null.
 /// </summary>
 public class FurinaIdentityNullTests
 {

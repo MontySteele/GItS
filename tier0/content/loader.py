@@ -18,7 +18,7 @@ from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.engine import companion_standins
-from tier0.engine import furina_reframe, furina_stage
+from tier0.engine import furina_stage
 from tier0.engine import state as state_mod
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
@@ -1003,7 +1003,7 @@ def _card_prototype(card_id: str) -> Card:
         card = upgrades.apply_upgrade(base)
     elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL
            or C.COMPANION_OVERHAUL or C.KOKOMI_OVERHAUL
-           or furina_reframe.FURINA_REFRAME)
+           or furina_stage.FURINA_STAGE)
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
@@ -1034,12 +1034,12 @@ def _card_prototype(card_id: str) -> Card:
         # `_starter_ids` returns ten `proto_kk_` id STRINGS and
         # `pool_replacement` returns twenty-eight more.
         #
-        # AND THE FURINA REFRAME, fifth arm (R254), for the reason the first
-        # clause gives and one more of its own. Her starter reader is a
-        # `proto_fr_` id STRING in the printed ten, so it needs this door like
-        # every other dealt prototype -- and this door READS THE FLAG AT CALL
-        # TIME while `_substituted_card_index` is memoized, so a test (or a
-        # sim arm) that flips the flag over a warm cache resolves the row
+        # AND THE FURINA STAGE, fifth arm (`EB-723`), for the reason the
+        # first clause gives and one more of its own. Her starter rows are
+        # `proto_fs_` id STRINGS in the printed ten, so they need this door
+        # like every other dealt prototype -- and this door READS THE FLAG AT
+        # CALL TIME while `_substituted_card_index` is memoized, so a test (or
+        # a sim arm) that flips the flag over a warm cache resolves the row
         # instead of raising a `KeyError` on the first draw. The substitution
         # table still carries the row, because `upgrades._prototype_deltas`
         # derives campfire reachability from it; this branch is simply reached
@@ -1224,30 +1224,8 @@ def _starter_ids(spec: dict) -> list[str]:
     # printed starter is what `SPARK_ALT_COST_ENABLED` now opens with, exactly
     # as a flag-off tree does.
 
-    # FURINA, THE REFRAME'S STARTER READER (R254, round 4 pick 1, 2026-09-04),
-    # ONE substitution. [USER]: "maybe a reader in the starter deck? I still
-    # want to leave it at just 2 'good' cards, but they can be stronger." Her
-    # two kit starters stay two; one of them -- Aria of Recompense -- reads the
-    # arm's Fanfare bar under the arm and is the printed card otherwise. The
-    # map, the numbers and the reason are on `furina_reframe.STARTER_SUBS`; the
-    # flag is that module's rather than `constants.py`'s, for the reason its own
-    # header gives. The deck size is unchanged at ten, which is what keeps this
-    # a substitution rather than a starter rework, and the raise is the Kurage
-    # branch's raise one arm over: a swap with nothing to replace is a silent
-    # no-op nobody would notice until a smoke ran.
-    if (character == furina_reframe.CHARACTER
-            and furina_reframe.FURINA_REFRAME):
-        for drop, add in furina_reframe.STARTER_SUBS.items():
-            if drop not in ids:
-                raise ValueError(
-                    f"furina reframe: {drop!r} is not in the printed starter, "
-                    f"so the {add!r} substitution has nothing to replace")
-            ids[ids.index(drop)] = add      # ONE copy: `.index` is the first
-
     # FURINA, THE STAGE (`EB-723`, brief sec.7 and sec.12), THREE
-    # substitutions, and they are the reframe branch above one arm over with
-    # one difference worth naming: this arm swaps all THREE of her kit
-    # starters, not one. The brief's opening ten is "three Soloist's
+    # substitutions. The brief's opening ten is "three Soloist's
     # Solicitation, three Stage Presence, Regal Bearing, all the base game's
     # basics and untouched; plus Salon Début, Curtain Rise, Rising Applause",
     # so the seven basics stay exactly as printed and the three kit slots take
@@ -1260,24 +1238,11 @@ def _starter_ids(spec: dict) -> list[str]:
     # its own header gives. The raise is the branch above's raise: a swap with
     # nothing to replace is a silent no-op nobody would notice until a smoke
     # ran.
-    #
-    # AND THE TWO FURINA ARMS DO NOT STACK. They are alternatives, not layers
-    # -- the Stage retires the Fanfare meter the reframe's Aria reads and the
-    # Salon its named Début deploys -- so this branch is written to run AFTER
-    # the reframe's and its own substitutions win where both flags are somehow
-    # on, which is the shape `_starter_ids` already uses for Klee's two and
-    # Kokomi's two. `salon_debut` is named by BOTH maps, so the raise below
-    # would fire on the second pass; it is looked up by VALUE-independent
-    # membership for that reason.
     if (character == furina_stage.CHARACTER
             and furina_stage.FURINA_STAGE):
         for drop, add in furina_stage.STARTER_SUBS.items():
             if drop in ids:
                 ids[ids.index(drop)] = add   # ONE copy: `.index` is the first
-            elif furina_reframe.STARTER_SUBS.get(drop) in ids:
-                # The reframe branch above already swapped this slot out.
-                # Take it back: the Stage's starter is the printed one.
-                ids[ids.index(furina_reframe.STARTER_SUBS[drop])] = add
             else:
                 raise ValueError(
                     f"furina stage: {drop!r} is not in the printed starter, "
@@ -1353,20 +1318,7 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
     if (character == "kokomi" and C.KURAGE_MEMORY
             and not C.KOKOMI_OVERHAUL):
         return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
-    if (character == furina_reframe.CHARACTER
-            and furina_reframe.FURINA_REFRAME):
-        # THE THIRD ARM (round 2 pick 1 at its default, 2026-09-04), and it is
-        # the Kurage's Oath case exactly: four shipped rows print a Fanfare bar
-        # this arm's meter cannot reach, so under the arm the shipped id leaves
-        # the pool and the prototype takes its slot at the same rarity. The
-        # flag is the module's, not `constants.py`'s, for the reason
-        # `furina_reframe`'s own header gives -- a reframe flag is quarantined
-        # machinery and must not reach the constant census.
-        return dict(furina_reframe.POOL_SUBS)
-    # THE FOURTH ARM (`EB-723`), and the Stage WINS where both Furina flags are
-    # somehow on, for the reason `_starter_ids` gives at the same seam: the two
-    # are alternatives and not layers. Tested after the reframe so that
-    # ordering is stated by the code rather than assumed.
+    # THE THIRD ARM (`EB-723`).
     if (character == furina_stage.CHARACTER
             and furina_stage.FURINA_STAGE):
         return dict(furina_stage.POOL_SUBS)
@@ -1384,12 +1336,11 @@ def declared_pool_substitutions() -> dict[str, str]:
     from a pool substitution (swapped in at the offer door for everybody
     playing the arm, and carrying none).
 
-    Derived from the same three maps the branch above reads, so an arm cannot
-    have a substitution here that the run does not make, or the reverse.
+    Derived from the same maps the branch above reads, so an arm cannot have
+    a substitution here that the run does not make, or the reverse.
     """
     subs: dict[str, str] = {
         C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
-    subs.update(furina_reframe.POOL_SUBS)
     subs.update(furina_stage.POOL_SUBS)
     return subs
 
@@ -1401,11 +1352,11 @@ def declared_starter_substitutions() -> dict[str, str]:
     exists for the same caller and the same reason. `validate_row` has to
     accept a `replaces:` row that carries no `personal_pool:`, and until R254
     every such row was a POOL substitution -- so the pool map alone was the
-    whole answer. The Furina reframe's starter reader
-    (`furina_reframe.STARTER_SUBS`) is the first row swapped in at the printed
-    starter and never offered, and asking the pool map about it would be asking
-    the wrong door: its rarity is `basic`, so `rewards.character_pool` cannot
-    offer it whatever any map says.
+    whole answer. The Furina Stage's starter rows
+    (`furina_stage.STARTER_SUBS`) are swapped in at the printed starter and
+    never offered, and asking the pool map about them would be asking the
+    wrong door: their rarity is `basic`, so `rewards.character_pool` cannot
+    offer them whatever any map says.
 
     TWO FUNCTIONS RATHER THAN ONE UNION, because the two answer different
     questions and a caller that wants "is this offerable" must not be handed a
@@ -1415,7 +1366,6 @@ def declared_starter_substitutions() -> dict[str, str]:
     """
     subs: dict[str, str] = {
         C.KURAGE_MEMORY_STARTER_DROP: C.KURAGE_MEMORY_STARTER_ADD}
-    subs.update(furina_reframe.STARTER_SUBS)
     subs.update(furina_stage.STARTER_SUBS)
     return subs
 
@@ -1601,7 +1551,7 @@ def _substituted_card_index() -> dict[str, Card]:
     BOTH DOORS, NOT JUST THE OFFER ONE (R254). A run reaches a prototype row
     by being OFFERED one or by being DEALT one, and until R254 the Furina arm
     only did the first -- so this table was built from `_pool_substitutions`
-    alone. Her starter reader (`furina_reframe.STARTER_SUBS`) is dealt and
+    alone. Her starter rows (`furina_stage.STARTER_SUBS`) are dealt and
     never offered, and a deck is a list of id STRINGS that `build_player` and
     the run layer both resolve back through `_card_prototype`; a starter id
     with no entry here is a `KeyError` on the first draw. The starter half is

@@ -118,48 +118,6 @@ public class Round14Tests
             Il.Calls(Il.Method("ProtoKkWarCouncil", "get_PlanClauses")),
             c => c.Contains("Planned..ctor"));
     }
-
-    // ==================================================================
-    // `EB-464` -- a replayed Companion card performs the front member
-    // ==================================================================
-    //
-    // THE FIND (Furina r8 (c) 2). The Companion tip says a played Companion
-    // card performs the front member, Replay says it plays the card again, and
-    // twice the seat counted 16 where 20 was promised -- Fanfare, at 2 per
-    // performance, agreeing with ONE performance. Nothing said the replay
-    // skipped it.
-    //
-    // WHAT THE GATE WAS FOR. `AfterCardPlayed` gated the trigger on
-    // `IsFirstInSeries`, on LAW:145 read through `KleeCompanionSpark`: "a
-    // per-play bound a replay can double is not a bound". That clause is about
-    // a RESOURCE MINT. A performance is not one, so the gate came off the
-    // trigger and stays on Klee's mint, which is what it was written for
-    // (D default, r8 packet sec.4).
-
-    [Fact]
-    public void The_companion_trigger_runs_before_the_series_is_asked_about()
-    {
-        // The SHAPE of the ungating, read off the IL: the trigger call now
-        // precedes every `IsFirstInSeries` read in this method, and the only
-        // read left is the one guarding `EB-420`'s ledger row. A gate put back
-        // would have to read the flag first, which reverses this order.
-        var calls = Il.CallSequence(
-            Il.Method("FurinaResourceHooks", "AfterCardPlayed"));
-        var trigger = calls.ToList().FindIndex(
-            c => c.Contains("CompanionPlayTrigger"));
-        var series = calls.ToList().FindIndex(
-            c => c.Contains("IsFirstInSeries"));
-        var note = calls.ToList().FindIndex(
-            c => c.Contains("NoteCompanionReplay"));
-
-        Assert.True(trigger >= 0, "the trigger is not called at all");
-        Assert.True(series >= 0, "EB-420's ledger row lost its guard");
-        Assert.True(note >= 0, "the replay is no longer recorded");
-        Assert.True(trigger < series,
-            "the trigger is gated on the series again");
-        Assert.True(series < note, "the ledger row lost its guard");
-    }
-
     [Fact]
     public void Klees_mint_keeps_the_gate_the_performance_lost()
     {

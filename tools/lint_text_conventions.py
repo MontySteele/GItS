@@ -19,8 +19,8 @@ counts as one numeral, a `{hole}` as one numeral, a `[tag]` as nothing --
 the same rendering `text-conventions.md` measured the base game with.
 
 SCOPE, and why the older Sparks arm is outside it. Rows `proto_ko_*`,
-`proto_kk_*`, `proto_mc_*`, `proto_mi_*`, `proto_fr_*` are the arms being
-played or being built (the Furina reframe joined on 2026-09-02); the
+`proto_kk_*`, `proto_mc_*`, `proto_mi_*`, `proto_fs_*` are the arms being
+played or being built; the
 `proto_spark_*` rows and their power are the retired-in-place Sparks arm
 (`M48`), which carries no `description:` and prints the shipped grammar.
 
@@ -392,26 +392,20 @@ def tip_rows() -> list[Row]:
     rows.append(Row("tip", "SparkKey", word + "Start each combat with "
                     + csharp_text(arm.group(1)) + shared, where))
     rows.append(Row("tip", "SparkKey.sparks-arm", word + shared, where))
-    # `EB-479`. THE SECOND BODY DECIDED AT RUNTIME, measured the same way and
-    # for the same reason: the Encore tip gains the reframe's opening bank
-    # under `FurinaReframe.Enabled` and keeps the shipped sentence with the arm
-    # off, so BOTH faces are rows and each meets the ceiling on its own. A
+    # `EB-479`'s SECOND BODY LEFT WITH THE REFRAME (`EB-726`): the Encore tip
+    # has one face again, and it is still parsed out by name because a
     # `With(...)` call whose body is a method reaches this file as an empty
-    # string, which is a face nothing measures -- the silence `EB-343` was
-    # filed on -- so the two are parsed out by name here.
-    absorbs = csharp_text(
-        re.search(r"const string absorbs =\s*" + concat + ";", src).group(1))
+    # string -- the silence `EB-343` was filed on.
+    #
     # THE CAPTURE STARTS AT THE OPENING QUOTE, unlike the Spark pair above,
     # whose own capture begins after one: `csharp_text` reads LITERALS, so a
     # group that starts INSIDE a string hands it ` + ` as if that were the
-    # prose. Both branches are taken whole and the ceiling does the rest.
+    # prose.
+    absorbs = csharp_text(
+        re.search(r"const string absorbs =\s*" + concat + ";", src).group(1))
     off = re.search(r'return absorbs \+ ("One pool(?:[^;])*);', src)
-    rows.append(Row("tip", "EncoreKey.reframe-off",
-                    absorbs + csharp_text(off.group(1)), where))
-    on = re.search(
-        r'return absorbs \+ ("Start each combat with "(?:[^;])*);', src)
     rows.append(Row("tip", "EncoreKey",
-                    absorbs + csharp_text(on.group(1)), where))
+                    absorbs + csharp_text(off.group(1)), where))
     return rows
 
 
@@ -503,8 +497,8 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
             # The sentence prints only where a lane declared
             # `GITS_KOKOMI_PLAN_CAP`, so the face a default build shows and the
             # face a cap lane shows are two faces, each measured on its own --
-            # the arrangement `EncoreKey.reframe-off` already takes for a body
-            # decided at runtime.
+            # the arrangement the Spark tip already takes for a body decided
+            # at runtime.
             if "CapSentence" in expr:
                 text = text[:-1] if text.endswith("6") else text
                 rows.append(Row(surface, f"{cls}.{key}", text, where))
@@ -577,40 +571,6 @@ def loc_rows(paths: list[Path], surface: str, branch: str) -> list[Row]:
     return rows
 
 
-def salon_arm_rows() -> list[Row]:
-    """`EB-383`. The Salon buff's ARM faces, rebuilt from their own pieces.
-
-    Same shape and same reason as the Bomb badge's grid above: the badge
-    generates its rows in C# off one list, so a typed copy here would be a
-    second copy that agrees until one is edited. This composes the four faces
-    out of the constants `SalonMemberPower.ManualFace` composes them from, and
-    the member names out of `ManualFrontName`'s own switch, so a reworded rule
-    or a renamed member reaches its ceiling the day it lands.
-
-    THE SHIPPED PAIR IS NOT HERE, deliberately rather than by omission:
-    `SalonMemberPower`'s `description` and `smartDescription` are the RELEASE
-    face, they belong to the `--shipped` report, and nothing on this branch
-    touches them.
-    """
-    path = MOD / "Powers" / "SalonPowers.cs"
-    src = re.sub(r"^\s*///.*$", "", read(path), flags=re.M)
-    src = re.sub(r"^\s*//.*$", "", src, flags=re.M)
-    where = str(path.relative_to(REPO))
-    consts = _consts(src)
-    body = src[src.index("ManualFrontName"):]
-    body = body[:body.index("};")]
-    names = dict(re.findall(r"SalonMember\.(\w+) => \"([^\"]+)\"", body))
-    names["Chevalmarin"] = re.search(r"_ => \"([^\"]+)\"", body).group(1)
-    rows = [Row("power", "SalonMemberPower.smartDescriptionManualEmpty",
-                consts["ManualLead"] + consts["ManualEmptyTail"], where)]
-    for member, printed in sorted(names.items()):
-        rows.append(Row(
-            "power", f"SalonMemberPower.smartDescriptionManual{member}",
-            consts["ManualLead"] + consts["ManualNamedTail"] + printed + ".",
-            where))
-    return rows
-
-
 #: The SHIPPED power files the arm adds a face to. `EB-421` and `EB-420` put
 #: the second and third here -- Guest Cast's mode buff and the replay buff Duet
 #: applies -- and they are LISTED rather than globbed because "which shipped
@@ -655,7 +615,6 @@ def prototype_rows() -> list[Row]:
             + loc_rows(sorted((MOD / "Powers" / "Prototype").glob("*.cs")), "power", "proto")
             + loc_rows([MOD / "Relics" / "PoundingSurprise.cs",
                         MOD / "Relics" / "TamakushiCasket.cs"], "relic", "proto")
-            + salon_arm_rows()
             + furina_arm_rows()
             + prompt_rows())
 

@@ -153,68 +153,6 @@ public static class SalonMemberTips
     /// </param>
     public static string BodyFor(SalonMember member, Creature? owner = null)
     {
-#if PROTOTYPE_CARDS
-        // `EB-384`. THE MEMBER'S OWN TIP SAYS WHAT A PERFORMANCE PAYS, because
-        // under the arm a deploy card's damage is the entering member's and
-        // the card face prints none of it. The round-two seat watched
-        // Overflowing Hospitality -- a card whose face is one deploy line --
-        // take an enemy for 1 in one fight and 2 in another and called both
-        // unexplained. Both were this member: the printed 2, and the
-        // three-quarters cut of it on the turn the stage could not pay.
-        //
-        // "EACH TURN" IS THE CLAUSE THAT HAD TO GO. It is the shipped upkeep,
-        // which the MANUAL leg deletes, so every member tip on the screen was
-        // contradicting the Salon rules tip printed directly under it
-        // (`SalonRulesBody`, whose own arm branch is `EB-368`'s). Same defect
-        // as `EB-383`'s buff, one surface over.
-        //
-        // `EB-629` MOVED THREE CLAUSES DOWN HERE FROM THE RULES PARAGRAPH,
-        // which had grown to about 700 characters carrying seven rules and
-        // which [USER] read, in his own act-1 run, as "still a gigantic wall of
-        // text". All three are facts about A MEMBER ABOUT TO PERFORM -- the
-        // enemy its roll may take (`EB-425`, `EB-451`), the damage class the
-        // performance belongs to (`EB-476`, `EB-548`, one rule: `EB-343`'s
-        // `ValueProp.Unpowered`) and the dry cut (R220 A, `EB-587`) -- so this
-        // is the tip they are read on at the moment they matter, which is what
-        // the rules paragraph never was.
-        //
-        // `EB-632` THEN SPLIT THEM, because appending all three to all three
-        // members moved the wall instead of shrinking it. Two of the clauses
-        // are about DEALING DAMAGE and the Usher deals none, so his tip was
-        // printing an enemy-selection rule that never runs for him and a
-        // Shatter exception he can never be on either side of. Each member now
-        // carries only its own: the damage pair
-        // (<see cref="DamagePerformanceRules"/>) on Crabaletta and
-        // Chevalmarin, and <see cref="DryCut"/> on all three, since all three
-        // can be asked to perform on an empty buffer. Two strings and no
-        // typed copies, which is `SalonConstants`' own argument one level up.
-        if (FurinaReframe.ManualLiveFor(owner))
-        {
-            return member switch
-            {
-                SalonMember.Crabaletta =>
-                    $"Performs for {SalonConstants.CrabalettaTick} Hydro "
-                  + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
-                  + $"Evokes for {SalonConstants.CrabalettaBow} Hydro damage "
-                  + "and leaves the stage. "
-                  + DamagePerformanceRules + " " + DryCut,
-                // THE USHER GAINS BLOCK AND HITS NOBODY, so neither damage
-                // clause is a fact about him. The dry cut is: his Block is
-                // three-quarters too.
-                SalonMember.Usher =>
-                    $"Performs for {SalonConstants.UsherTick} Block, paying "
-                  + $"{SalonConstants.TickEncoreCost} Encore. Evokes for "
-                  + $"{SalonConstants.UsherBow} Block and leaves the stage. "
-                  + DryCut,
-                _ =>
-                    $"Performs for {SalonConstants.ChevalmarinTick} Hydro "
-                  + $"damage, paying {SalonConstants.TickEncoreCost} Encore. "
-                  + "Evokes by applying Hydro to ALL enemies and granting "
-                  + $"{SalonConstants.ChevalmarinBowEncore} Encore. "
-                  + DamagePerformanceRules + " " + DryCut,
-            };
-        }
-#endif
         return ShippedBodyFor(member);
     }
 
@@ -327,81 +265,12 @@ public static class SalonMemberTips
           + $"{SalonConstants.FocusPerFanfare} Fanfare you hold; a member "
           + "with no Encore to spend acts at three-quarters.";
 
-#if PROTOTYPE_CARDS
-        // `EB-368`. THE ARM'S SALON RULES ARE PRINTED NOWHERE ELSE, and the
-        // act-2 seat played no Salon card across three fights because of it.
-        // Every sentence in the shipped paragraph above is a rule the reframe
-        // replaces -- members do not act on their own turn, a deploy performs
-        // on the spot, a deploy onto a full stage EVOKES the front rather than
-        // bowing the oldest out for its payoff, and a Companion play performs
-        // the front member -- so the arm's whole engine is here, on the tip
-        // both the deploy card and the stage read (D1 sec.4), stated once and
-        // unable to fork.
-        //
-        // `EB-629` CUT IT TO THREE SENTENCES, and the reason is the shape it
-        // had grown into rather than any one clause in it. [USER]'s own act-1
-        // run, 2026-09-07: "still a gigantic wall of text" -- about 700
-        // characters carrying seven rules, at the moment a player is deciding
-        // whether to play one card. Seven rules on one tip is not seven rules
-        // read; it is one tip skipped. What stays is the three a player cannot
-        // act without: THE CAP, WHAT PERFORMS, and THE BONUS.
-        //
-        // NOTHING WAS DELETED FROM THE MOD'S TEXT. Each dropped clause moved
-        // to the surface read AT THE MOMENT IT MATTERS, which for all of them
-        // is a member about to perform -- i.e. the member's own tip,
-        // <see cref="BodyFor"/>:
-        //
-        //   * THE AIM (`EB-425`, limited by `EB-451`). "A deploy card deals
-        //     damage and takes no target" cost the r5 seat a refused play, and
-        //     "its own choice" then cost the r7 seat the run's one PAID
-        //     performance to a 6-HP Eye with Teeth that revives at full. The
-        //     rule is `SalonMemberPower.PerformMember`'s roll over
-        //     `AimPool`, so it belongs to a MEMBER performing and now reads on
-        //     the member.
-        //   * NOT AN ATTACK AND NOT A HIT (`EB-476`, `EB-548`). One rule,
-        //     `EB-343`'s: a performance goes out through `ElementalHit.Deal`
-        //     as `ValueProp.Unpowered`, so the Shatter mark and every on-Attack
-        //     trigger refuse it while `TargetMods` still reads Vulnerable. The
-        //     r13 seat called it "the most useful thing I learned and
-        //     effectively invisible"; it is now on the tip of the thing that
-        //     does it.
-        //   * THE DRY CUT (R220 A, `EB-587`). A member with no Encore performs
-        //     at three-quarters -- a fact about ONE member's next act, which is
-        //     what its own tip is for.
-        //
-        // AND THE FRONT. "The leftmost member is the front" left with no new
-        // home in text, because `EB-627` gave it a better one: chip 0 on the
-        // member strip wears a highlight frame. A rule the player can SEE does
-        // not need a sentence.
-        if (FurinaReframe.ManualLiveFor(owner))
-        {
-            body =
-                $"Your Salon holds {slots} members. A [gold]Companion[/gold] "
-              + "card you play performs the front member; a "
-              + "[gold]Deploy[/gold] performs the member it adds, and onto a "
-              + "full stage it first [gold]Evokes[/gold] the front one. "
-              + "Member numbers gain +1 per "
-              + $"{SalonConstants.FocusPerFanfare} [gold]Fanfare[/gold] you "
-              + "hold.";
-        }
-#endif
 
         if (owner == null) return body;
 
         var onStage = SalonMemberPower.Count(owner);
         if (onStage < slots) return $"{body} You have {onStage} on stage.";
         var full = "Your stage is FULL: the next deploy bows someone out.";
-#if PROTOTYPE_CARDS
-        // `EB-368`. The live half of the same sentence: under the arm a full
-        // stage is a REWARD (the free Evoke), not a cost, and telling a seat
-        // it is about to lose a member for a payoff it does not get is how the
-        // round-two seat learned to stop deploying.
-        if (FurinaReframe.ManualLiveFor(owner))
-        {
-            full = "Your stage is FULL: the next deploy [gold]Evokes[/gold] "
-                 + "the front member first.";
-        }
-#endif
         return $"{body} {full}";
     }
 }

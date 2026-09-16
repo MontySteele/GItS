@@ -562,14 +562,6 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # the body a performer hit by combat id and THE PAGE OWNS THE NAMES.
         name_stage_targets(stage, _enemies(state), combat["enemies"])
         combat["stage"] = stage
-    salon = furina_salon(p)
-    if salon is not None:
-        # `EB-405`, and it is `EB-329`'s rule one arm over: the mod names the
-        # body it hit by combat id and THE PAGE OWNS THE NAMES, so `Slug (2)`
-        # in a performance line means the same body as `Slug (2)` in the enemy
-        # list under it.
-        name_performances(salon, _enemies(state), combat["enemies"])
-        combat["salon"] = salon
     return combat
 
 
@@ -689,7 +681,7 @@ def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],
                        printed: list[dict[str, Any]]) -> None:
     """Resolve each beat's target combat id to the name this page uses.
 
-    `EB-743`, and it is `name_performances` verbatim one arm over: THE ID IS
+    `EB-743`, and THE ID IS
     THE HANDLE AND THE NAME IS THE FALLBACK. Crabaletta picks its own body, and
     an act of that size is the most likely beat in the fight to have KILLED
     what it hit -- a body that is off the next board entirely and keeps the
@@ -721,127 +713,6 @@ def stage_seat_name(index: int, occupied: int) -> str:
     if index >= occupied - 1:
         return STAGE_SEAT_NAMES[2]
     return STAGE_SEAT_NAMES[1]
-
-
-def furina_salon(player: dict[str, Any]) -> dict[str, Any] | None:
-    """This turn's Salon performances, as the observed board sees them.
-
-    `EB-405`. THE DEFECT, in the seat's own words: "Crabaletta chose its own
-    enemy and left a Hydro aura on a body the seat had not picked" (Furina
-    round 4, run 1, (c) 4), in a kit whose readable decision is which element
-    lands on which aura. Nothing about that reached the page, because nothing
-    about it reached the wire: the only Salon row on a screen was the counter
-    power's static rulebook sentence, which carries the company COUNT and
-    cannot carry a body.
-
-    THE ABSENT / EMPTY SPLIT IS `kokomi_plans`', and for the same reason: an
-    ABSENT key is "no reframe in this build", an EMPTY map is "the rule is here
-    and this seat is not playing it", and a populated map is her stage. `None`
-    here keeps the section off the page in both of the first two cases.
-
-    Emitted by `vendor/STS2_MCP/gits/GitsFurinaSalon.cs`, which lifts it by
-    reflection from `KleeMod.Powers.FurinaReframeLedger.Snapshot`. Every field
-    below is that method's, and the two together are the contract:
-
-      performed -- this turn's acts, in the order they happened. `member` is
-        the stage name the faces use; `target` and `combat_id` are the body the
-        member PICKED, both null for the Usher, who blocks and aims at nobody;
-        `element` is what the member supplied and `aura` is what the body is
-        wearing AFTERWARDS, which are not the same fact -- a hit into a
-        different aura consumes it into a reaction and leaves the body bare;
-        `amount` is the number it dealt or blocked and `paid` is whether it
-        could afford its Encore, which is the difference between the printed
-        number and three-quarters of it.
-
-      replayed -- `EB-420`. This turn's Companion cards that were played an
-        EXTRA time, by printed title, one entry per extra play. Since `EB-464`
-        the extra play PERFORMS like any other, so these are no longer the
-        plays missing from `performed`: they are the reason one of its rows is
-        there, which that list cannot say for itself. The round-5 seat is why
-        it is printed at all -- "two Crabaletta lines ... for three
-        Companion-card plays' worth of triggers", and "no line anywhere on the
-        screen said Duet".
-
-      evoked -- `EB-564`. This turn's EVOKES, in order. An Evoke is a BOW and
-        a bow is not a performance, so it is in neither list above and the r14
-        seat that met two of them knew only from the auras: "the Salon log
-        printed the two performances and never printed the Evoke". `member` is
-        the stage name; `fanfare` is what the Evoke minted and `focus_mult`
-        how many times its Focus term counted; `encore` is Chevalmarin's flat
-        grant; `aura_all` is that member's whole-board Hydro, which has no
-        target to name; `target`/`combat_id`/`damage` are Crabaletta's hit and
-        `block` is the Usher's.
-    """
-    raw = player.get("furina_salon")
-    if not isinstance(raw, dict) or not raw:
-        return None
-    performed = [
-        {"member": _text(row.get("member")),
-         "target": _text(row.get("target")),
-         "combat_id": _text(row.get("combat_id")),
-         "element": _text(row.get("element")),
-         "aura": _text(row.get("aura")),
-         "amount": _int(row.get("amount")),
-         "paid": bool(row.get("paid"))}
-        for row in (raw.get("performed") or []) if isinstance(row, dict)]
-    replayed = [name for name in
-                (_text(entry) for entry in (raw.get("replayed") or []))
-                if name]
-    # `EB-564`. ABSENT IS NOT EMPTY, this block's standing rule: a bridge or a
-    # klee.dll older than the field sends no `evoked` key and the page prints
-    # no Evoke line, exactly as before.
-    evoked = [
-        {"member": _text(row.get("member")),
-         "focus_mult": _int(row.get("focus_mult")),
-         "fanfare": _int(row.get("fanfare")),
-         "encore": _int(row.get("encore")),
-         "aura_all": bool(row.get("aura_all")),
-         "target": _text(row.get("target")),
-         "combat_id": _text(row.get("combat_id")),
-         "damage": _int(row.get("damage")),
-         "block": _int(row.get("block"))}
-        for row in (raw.get("evoked") or []) if isinstance(row, dict)]
-    # `EB-506`: the stage itself, front first. ABSENT IS NOT EMPTY, this
-    # block's standing rule: a bridge or a klee.dll older than the field sends
-    # no `company` key and the page prints no stage line, exactly as before.
-    company = [name for name in
-               (_text(entry) for entry in (raw.get("company") or []))
-               if name]
-    return {"performed": performed, "replayed": replayed,
-            "evoked": evoked, "company": company}
-
-
-def name_performances(salon: dict[str, Any], wire: list[dict[str, Any]],
-                      printed: list[dict[str, Any]]) -> None:
-    """Resolve each performance's combat id to the name this page uses.
-
-    `EB-405`, and it is `name_moved_rows` verbatim: THE ID IS THE HANDLE AND
-    THE NAME IS THE FALLBACK. A body still on the board gets the page's own
-    numbered name; one the performance KILLED is off the next board entirely
-    and keeps the title the mod recorded, which is why the mod sends a title
-    at all.
-
-    `EB-424`, AND IT IS `EB-427` ONE ARM OVER. The mod's title is the game's
-    printed name and carries no copy number, so the r5 seat read
-    *"Crabaletta hit Corpse Slug (2)"* on turn 1 and *"Crabaletta hit Corpse
-    Slug"* on turn 2 -- "in a two-of-a-kind fight I could not tell which body
-    it hit" -- for the one reason that the second body was no longer on the
-    board. The fight's own memory names it, so a performance on a duplicate
-    always says which copy.
-    """
-    by_id = {_text(raw.get("combat_id")): face["name"]
-             for raw, face in zip(wire, printed)
-             if _text(raw.get("combat_id"))}
-    # `EB-564`: THE EVOKE'S OWN BODY TAKES THE SAME NAMING. Crabaletta's bow
-    # picks a target the way its performance does, and a bow of that size is
-    # the most likely act in the fight to have KILLED what it hit -- which is
-    # exactly the case the title fallback exists for.
-    for row in salon["performed"] + salon.get("evoked", []):
-        if not row["combat_id"]:
-            continue
-        row["target"] = (by_id.get(row["combat_id"])
-                         or remembered_enemy_name(row["combat_id"],
-                                                  row["target"]))
 
 
 def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
@@ -1257,50 +1128,6 @@ def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
         return None
     return {"pet_name": plans["pet_name"], "carried_out": plans["carried_out"],
             "fired_now": plans["fired_now"]}
-
-
-def last_salon(state: dict[str, Any]) -> dict[str, Any] | None:
-    """The last beat of a fight that is already over (`EB-604`).
-
-    `last_morning`'s twin one arm over, filed for the same defect and closed
-    the same way. A deliberate Evoke onto a full stage that KILLS ends the
-    fight, the game goes straight to the reward screen, and the combat block
-    does not run for it -- so the one beat the seat spent a turn building is
-    the one beat of the run with no receipt. Furina r16 lane 2 Evoked twice on
-    purpose, at 10 and 7 Encore, and "the bridge printed nothing about either
-    because both were lethal"; r14 lane 1's Second Course was the same turn a
-    round earlier.
-
-    THE WIRE ALREADY CARRIES IT. `furina_salon` is emitted OUTSIDE the combat
-    block (`McpMod.StateBuilder`, beside `kokomi_plans` and for `EB-329`'s
-    reason): `FurinaReframeLedger.Snapshot` reads per-Player records and
-    touches no `CombatState`, and the ledger is rolled at a TURN boundary --
-    which a fight ending into a reward screen never crosses. So the last
-    turn's acts are still there to be read; nothing but the reader was
-    missing.
-
-    THE LISTS ALONE, which is `last_morning`'s rule: the stage's `company`,
-    the Encore and every other live-board field are about a fight that no
-    longer exists, so this returns what HAPPENED and nothing about what is.
-
-    NO BODY IS RENAMED, and that is a boundary rather than an oversight: a
-    reward screen has no enemy list, so `name_performances` has nothing to map
-    a `combat_id` onto and the mod's own title stands. It is the same trade
-    `last_morning` makes on the same screen.
-
-    `None` where there is nothing to say -- a build with no reframe, a seat
-    who is not Furina, or a last turn whose stage did nothing.
-    """
-    salon = furina_salon(_player(state))
-    if salon is None:
-        return None
-    said = (salon["performed"] + salon["replayed"]
-            + salon.get("evoked", []))
-    if not said:
-        return None
-    return {"performed": salon["performed"],
-            "replayed": salon["replayed"],
-            "evoked": salon.get("evoked", [])}
 
 
 def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
