@@ -401,17 +401,57 @@ def _named_option(entry: Any) -> dict[str, Any]:
 # the reward's printed face ("Golden Pearl", "12 Gold", "40 Gold (stolen
 # back)"), so it is the NAME here; the type word survives only where the row
 # prints nothing else, which is where it is all there is.
+#: `EB-661`. WHAT KIND OF THING A REWARD ROW HANDS OVER, in the wire's own
+#: word. `BuildRewardsState` sends `type` on every row (`gold`, `potion`,
+#: `relic`, `card`, `special_card`, `card_removal`) and nothing read it: the
+#: shop's `category` reader is `_shelf_kind`, which looks at `category` and
+#: `card_type`, and a reward carries neither. So `Mazaleth's Gift` printed as a
+#: bare name beside the relics and the round-25 lane-1 seat took it believing it
+#: was a relic.
+#:
+#: EVERY OFFER NAMES ITS KIND, and the word is dropped only where it IS the
+#: name -- `_shelf_kind`'s own rule one screen over, so a row the wire could
+#: name no better than `Card` does not read `Card - card`. It is not dropped
+#: merely because the name contains the word: `Fire Potion` says potion and
+#: `Mazaleth's Gift` does not, and a rule that reads the title to decide would
+#: go quiet on exactly the row this was filed for.
+def _reward_kind(entry: dict[str, Any], name: str) -> str:
+    """`potion` / `relic` / `card`, off the reward's own `type`. `EB-661`."""
+    kind = _text(entry.get("type")).replace("_", " ").lower().strip()
+    if not kind or _fold(kind) == _fold(name):
+        return ""
+    return kind
+
+
 def _reward_option(entry: Any) -> dict[str, Any]:
-    """One reward row, named by the thing it hands over (`EB-290`)."""
+    """One reward row, named by the thing it hands over (`EB-290`).
+
+    `EB-661` puts the row's KIND on it and `EB-716` the potion's own TEXT, so
+    an offer reads the way the chest screen's relics already do: what it is,
+    then what it does.
+    """
     option = _named_option(entry)
     if not isinstance(entry, dict):
         return option
     if any(_text(entry.get(k)) for k in _OPTION_NAME_KEYS):
-        return option                        # a potion: it printed its name
+        # A potion: it printed its name. `EB-716` -- and its own rules text,
+        # which `_named_option`'s generic `description` reader shadowed with a
+        # copy of that title (`Reward.Description` IS the potion's title), so
+        # `_dedupe_text` then cleared it and the row printed a bare name. The
+        # prefixed spelling is the thing's own face and wins here.
+        for key in ("potion_description", "relic_description",
+                    "card_description"):
+            body = _text(entry.get(key))
+            if body and _fold(body) != _fold(option["name"]):
+                option["text"] = body
+                break
+        option["kind"] = _reward_kind(entry, option["name"])
+        return option
     described = _text(entry.get("description"))
     if described and "\n" not in described:
         option["name"] = described
         option["text"] = ""                  # it is the heading now
+    option["kind"] = _reward_kind(entry, option["name"])
     return option
 
 
