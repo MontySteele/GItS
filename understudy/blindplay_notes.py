@@ -1356,8 +1356,19 @@ ARM_KEYWORDS: dict[str, str] = {
     # arrived as 7 once the Vulnerable it was folding had expired -- "the
     # committed number moving is the sharpest contradiction in the kit". The
     # clause now says WHEN each side is read.
-    "Plan": ("On the Bake-Kurage, paid now; next turn: front non-Minion, or "
-             "ALL, Minions too. Your Strength folds in as you write it; the "
+    # `EB-330` / `EB-563` / `EB-411` PUT THREE OF THIS PANEL'S OWN FACTS ON
+    # THE WORD, in one rewrite, and this row is the twin: that any number of
+    # Plans wait in order and the badge is their COUNT (`PLAN_COUNT_NOTE`,
+    # which three r4c seats needed and the r20 lane-2 seat wrote one Plan at a
+    # time for four fights without), and that a carry-out lands in the Block
+    # the enemy is still standing in from its own turn (`PLAN_BLOCK_NOTE`, the
+    # Plating 8 Sewer Clam that ate a whole Plan). The panel keeps the long
+    # form of both, because the panel has no ceiling; this row is
+    # `ArmKeywordTips.ForPlan` word for word, as every row here is.
+    "Plan": ("On the Bake-Kurage, paid now; any number wait, in order, and "
+             "the badge is their count. Next turn: front non-Minion, or "
+             "ALL, Minions too, into Block still standing. Your Strength "
+             "folds as you write it; the "
              "enemy's Vulnerable counts next turn. A carry-out is not a "
              "hit: no when-hit power fires."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about

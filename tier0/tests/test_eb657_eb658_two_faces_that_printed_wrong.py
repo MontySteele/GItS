@@ -81,9 +81,20 @@ def test_the_hit_is_untouched_and_still_swaps_at_play_time():
 
 
 def test_the_pair_is_a_shape_and_not_a_card_special_case():
-    """Two aimed arms, a prototype row, and nothing else takes it: a
-    single-armed conditional has no second number to disagree with, and a
-    shipped row is outside the arm's quarantine (`calculated_damage_var`)."""
+    """Two aimed arms and a prototype row take the PAIR; a shipped row is
+    outside the arm's quarantine (`calculated_damage_var`) and takes nothing.
+
+    `EB-498` GAVE THE SINGLE-ARMED SHAPE ONE VAR, which is why the middle
+    block below reads one tuple where it used to read none. The argument that
+    put a single-armed row outside this function was "no second number to
+    disagree with", and it was about the FACE's shape rather than about the
+    fold: Shinobu -- Thundergrust printed "Deal 8 damage. If you are below
+    half HP, deal 5 additional damage" at 29 of 62 and removed 13, because the
+    branch's 5 was a literal that folded nothing while the 8 rendered through
+    the card's `CalculationBase` triple. The branch is dealt through the same
+    `DamageCmd.Attack` the clause above it uses, so it has the same right to
+    print the same terms -- and one number is still a number that can be
+    wrong."""
     feint = _sheet_row("proto_kk_feint")
     both = feint["effects"][0]
     # `EB-737` widened the shape to the Stage's Spend riders and gave every
@@ -94,8 +105,10 @@ def test_the_pair_is_a_shape_and_not_a_card_special_case():
         ("BranchDamage", "FoldedDamageVar")]
 
     single = _sheet_row("proto_ko_sizzle")
-    for eff in single["effects"]:
-        assert folded_branch_damage(single, eff) == []
+    folded = [t for eff in single["effects"]
+              for t in folded_branch_damage(single, eff)]
+    assert [(n, c) for n, _b, _d, c in folded] == [
+        ("BranchDamage", "FoldedDamageVar")]
 
     shipped = dict(feint, id="feint")
     assert folded_branch_damage(shipped, both) == []

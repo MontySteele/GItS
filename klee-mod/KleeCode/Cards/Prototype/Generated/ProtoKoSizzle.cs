@@ -48,13 +48,14 @@ public sealed class ProtoKoSizzle : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sizzle"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal 6 additional damage."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move),
+            new FoldedDamageVar("BranchDamage", 6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
