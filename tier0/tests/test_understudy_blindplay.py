@@ -7212,8 +7212,11 @@ def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
     geo = blindplay.observe(
         elemental_hand_state(aura=True, elements=("Geo",)))
     assert "NO REACTION IS REACHABLE" not in geo
-    assert (f"- **Crystallize** — Geo on any aura. The aura is consumed and "
-            f"you gain {blindplay.CRYSTALLIZE_BLOCK} Block.") in geo
+    # `EB-613` (R263 sec.5 item 1) turned the row round: a Geo hit is a COST
+    # to a reaction deck, so the price leads and the Block follows it.
+    assert (f"- **Crystallize** — Geo on any aura: "
+            f"{blindplay.CRYSTALLIZE_BLOCK} Block, and the aura is consumed "
+            f"-- nothing is left to react with.") in geo
 
 
 def test_a_trigger_element_with_no_aura_out_is_told_which_half_is_missing():
@@ -7316,7 +7319,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         "Swirl": ["aura is consumed and copied onto ALL enemies"],
-        "Crystallize": ["he aura is consumed and you gain "],
+        # `EB-613`: the price leads. Both copies moved in one commit, which
+        # is what this pin is for.
+        "Crystallize": [", and the aura is consumed -- nothing is left "
+                        "to react with."],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)

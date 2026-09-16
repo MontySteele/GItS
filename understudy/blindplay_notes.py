@@ -2146,8 +2146,17 @@ REACTION_KEYWORDS: dict[str, str] = {
     # second copy of it, because ten Universals print the word as a verb and
     # one screen must not carry two definitions of it.
     "Swirl": ARM_KEYWORDS["Swirl"],
-    "Crystallize": ("Geo on any aura. The aura is consumed and you gain "
-                    f"{CRYSTALLIZE_BLOCK} Block."),
+    # `EB-613` (R263 sec.5 item 1). THE BLOCK IS NOT THE POINT OF THIS ROW;
+    # THE AURA IS. A Geo hit is a COST to a reaction deck, and the seats
+    # already sequence around it -- "Gorou must come after the Electro hit or
+    # its Crystallize eats the aura the reaction needs" (Kokomi r5 run 3),
+    # under the heading "element ordering is the deepest decision this deck
+    # has, and it is entirely undocumented". The clause is the C#'s own, moved
+    # in the same commit, so the tooltip and this page cannot say different
+    # things about it.
+    "Crystallize": ("Geo on any aura: "
+                    f"{CRYSTALLIZE_BLOCK} Block, and the aura is consumed -- "
+                    "nothing is left to react with."),
 }
 
 # `EB-428`. THE SIX ROWS FILLED 40% OF A SCREEN THAT COULD FIRE NONE OF THEM.
