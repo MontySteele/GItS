@@ -69,9 +69,22 @@ steps:
   # Fill the stage. The Encore ladder these three walk down is
   # furina-full-stage-frame.yaml's assertion, not this file's; what is asserted
   # here is only the board the frames are taken against.
-  - play: {card: "Salon Début"}
-  - play: {card: "Salon Début"}
-  - play: {card: "Salon Début"}
+  #
+  # BY ID, NOT BY TITLE, and that is a defect fix rather than a style choice
+  # (`EB-652`, live look 8c). TWO live cards print the title `Salon Début` on
+  # this build -- the shipped `KLEEMOD-SALON_DEBUT` and the Stage arm's
+  # `KLEEMOD-PROTO_FS_SALON_DEBUT`, which is exactly the pair `EB-739`'s
+  # recorded caveat says is held apart only by the offer filter -- and
+  # `scenario.find_card` resolves an ID first and a TITLE second. So a title
+  # here matched whichever of the two sat earlier in the hand: on 2026-09-16
+  # the first of these three plays went to `KLEEMOD-PROTO_FS_SALON_DEBUT`,
+  # which seats a Stage performer rather than a Salon member, the `expect`
+  # below read `salon member` 2 instead of 3, and the run stopped before any
+  # of the four capture windows. The `give` steps above already name the id;
+  # these now agree with them.
+  - play: {card: KLEEMOD-SALON_DEBUT}
+  - play: {card: KLEEMOD-SALON_DEBUT}
+  - play: {card: KLEEMOD-SALON_DEBUT}
   - expect:
       power: {who: player, name: "salon member", stacks: 3}
 
@@ -93,7 +106,7 @@ steps:
   # A DEPLOY ONTO A FULL STAGE. The front chip's word turns to LEAVES and the
   # footer -- the front member's replacement price, always a row and dim by
   # default -- goes bright.
-  - hover: {card: "Salon Début"}
+  - hover: {card: KLEEMOD-SALON_DEBUT}   # by id, for the reason above
   # CAPTURE WINDOW 3 -- LEAVES on the front chip, bright footer.
   - wait: {seconds: 25}
   - unhover: {}
