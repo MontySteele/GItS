@@ -9,6 +9,7 @@ using BaseLib.Abstracts;
 using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
@@ -1017,6 +1018,67 @@ public class Round19Tests
 
         Assert.True(amp >= 0 && mods > amp && hit > mods,
                     "amplifier, then the target's terms, then the hit");
+    }
+
+    // ------------------------------------------------------------------
+    // THE CAUSE, 2026-09-16, and it was never the amplifier.
+    // ------------------------------------------------------------------
+    //
+    // The amplifier WAS applied. What was also applied, and what no screen in
+    // the round said a word about, was the DEALER's Weak -- and the enemy the
+    // seat named is the one that hands it out. `SludgeSpinner.OilSprayMove`
+    // applies `WeakPower` 1 off the 0.111.0 decompile, its opening move
+    // carries a `DebuffIntent` beside the attack, and the reading is fight 1
+    // TURN TWO -- so Furina performed while Weak.
+    //
+    //     paid tick 6 -> Weak 0.75 -> 4.5 -> Vaporize 1.5 -> 6.75
+    //                 -> one truncation -> 6 landed, aura consumed
+    //
+    // Six, with the aura gone, and every clause of the report true at once.
+    // The fight-2 reading is the SAME number by a different route -- a DRY,
+    // unWeakened tick, `(int)(6 * 0.75) = 4`, then `* 1.5 = 6` -- which is
+    // precisely why the two could not be reconciled off the screens: they
+    // share no term but the amplifier.
+    //
+    // ALREADY FIXED, BY `EB-588`, which found the same Weak two rounds later
+    // from the other end (a 6 cut to 4 with no reaction in the picture at
+    // all). A performance asks the funnel for an UNPOWERED hit in both
+    // engines now and `Round21Tests` pins that call; these two pin the
+    // ARITHMETIC either side of it, which is what the r13 reading lacked.
+
+    [Fact]
+    public void The_seats_six_is_the_dealers_weak_and_the_amplifier_together()
+    {
+        // `SimDamagePipeline.Resolve` IS the pre-`EB-588` performance, and it
+        // says so in its own doc: the dealer's terms, the amplifier, the
+        // target's, one truncation. Run it on the seat's numbers and the
+        // answer is the six that was on the bar.
+        var weakened = Seat.Furina().WithPower<WeakPower>(1);
+        var target = Seat.Klee().WithCombatState();
+
+        Assert.Equal(6, SimDamagePipeline.Resolve(
+            weakened.Creature, target.Creature,
+            SalonConstants.CrabalettaTick, ReactionConstants.VaporizeMult));
+
+        // And the number the seat expected, which is what the same board
+        // lands today: the same call with the dealer's terms not entering.
+        Assert.Equal(9, SimDamagePipeline.Resolve(
+            null, target.Creature,
+            SalonConstants.CrabalettaTick, ReactionConstants.VaporizeMult));
+    }
+
+    [Fact]
+    public void The_enemy_the_seat_named_is_the_one_that_applies_the_weak()
+    {
+        // The claim above rests on a fact about the BASE GAME, so it is read
+        // off the base game rather than asserted in a comment.
+        var oilSpray = typeof(MegaCrit.Sts2.Core.Models.Monsters.SludgeSpinner)
+            .GetMethod("OilSprayMove", All)!;
+
+        // `CallSequence` rather than `Calls`, because the fact is the TYPE
+        // ARGUMENT -- `PowerCmd.Apply<WeakPower>` -- and `Calls` drops it.
+        Assert.Contains(Il.CallSequence(oilSpray),
+                        c => c.Contains("WeakPower", StringComparison.Ordinal));
     }
 
     // ==================================================================
