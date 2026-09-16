@@ -172,3 +172,79 @@ public class GitsForceEventTests
         Assert.Equal(4, ids.Count);
     }
 }
+
+// -------------------------------------------------- EB-770: run facts ----
+//
+// THE REFUSAL THAT COST FOUR LAUNCHES. `teyvat-proofs-7` forced
+// `SLIPPERY_BRIDGE`, `RELIC_TRADER`, `RANWID_THE_ELDER` and
+// `WELCOME_TO_WONGOS` and got back "IsAllowed is false" and nothing else --
+// four launches spent learning only that. The predicate's source cannot be
+// read at runtime, so the refusal now prints what the RUN holds and the
+// caller compares it against the gate in `tools/data/sts2_base_events.json`.
+// These pin the half that has no game type in it: the order of the facts and
+// the sentence they make.
+
+public sealed class GitsRunFactsTests
+{
+    private static Dictionary<string, object?> Sample(int gold = 120,
+                                                      int players = 1) =>
+        GitsForceEvent.Facts(
+            currentActIndex: 1, totalFloor: 9, gold: gold, potions: 2,
+            relics: 4, tradableRelics: 3, deckCards: 14, removableCards: 12,
+            transformableCards: 11, currentHp: 55, maxHp: 80,
+            playerCount: players);
+
+    [Fact]
+    public void EveryFactABaseGateAsksAboutIsInTheAnswer()
+    {
+        // The names are the MEMBER names the gates read, so that the printed
+        // facts and the printed gate line up word for word.
+        var facts = Sample();
+        foreach (var key in new[]
+                 {
+                     "CurrentActIndex", "TotalFloor", "Gold", "Potions",
+                     "Relics", "TradableRelics", "DeckCards",
+                     "RemovableCards", "TransformableCards", "CurrentHp",
+                     "MaxHp", "Players"
+                 })
+            Assert.True(facts.ContainsKey(key), key);
+        Assert.Equal(12, facts.Count);
+    }
+
+    [Fact]
+    public void TheActIndexIsReportedAsTheGateSpellsIt()
+    {
+        // ZERO-BASED, because `WelcomeToWongos.IsAllowed` is
+        // `CurrentActIndex == 1`. Reporting the player-facing act number here
+        // would make every act clause read off by one, which is exactly the
+        // mistake the table exists to stop.
+        Assert.Equal(1, Sample()["CurrentActIndex"]);
+    }
+
+    [Fact]
+    public void TheSentenceKeepsTheDictionaryOrder()
+    {
+        var line = GitsForceEvent.DescribeFacts(Sample());
+        Assert.StartsWith("This run holds: CurrentActIndex=1, TotalFloor=9, "
+                          + "Gold=120,", line);
+        Assert.EndsWith("Players=1.", line);
+    }
+
+    [Fact]
+    public void NoFactsIsAnEmptyStringAndNotTheWordNull()
+    {
+        // A refusal appends this to its sentence. An empty string disappears;
+        // the string "null" would be printed at the player.
+        Assert.Equal("", GitsForceEvent.DescribeFacts(null));
+        Assert.Equal("", GitsForceEvent.DescribeFacts(
+            new Dictionary<string, object?>()));
+    }
+
+    [Fact]
+    public void ThePartySizeTravelsWithTheNumbers()
+    {
+        // Every base gate is `Players.All(...)`, so a two-player refusal's
+        // numbers are the worst player's. The count says so.
+        Assert.Equal(2, Sample(players: 2)["Players"]);
+    }
+}
