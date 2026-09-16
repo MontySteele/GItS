@@ -318,11 +318,12 @@ def _leave(state, index: int, *, bowed: bool, reason: str) -> None:
 def _bow(state, member: str) -> None:
     """Rule 9, the curtain call, performed ONCE by a performer emptied by a
     Spend. Usher: Furina gains 4 Block. Chevalmarin: Hydro on every enemy.
-    Crabaletta: deal 8 to a random enemy.
+    Crabaletta: deal 8 Hydro to a random enemy.
 
-    `EB-495` D3: Crabaletta's bow is `powered=False`, which is what
-    `FurinaStage.Bow` has always passed (`FurinaStage.cs:544`). See `perform`
-    below for the whole argument; the two methods are twins and move together.
+    `EB-495` D3/D4: Crabaletta's bow is `powered=False` and Hydro, which is
+    what `FurinaStage.Bow` has always passed (`FurinaStage.cs:542`, `:544`).
+    See `perform` below for the whole argument; the two methods are twins and
+    move together.
     """
     from tier0.engine import effects, reactions       # late: avoids the cycle
     p = state.player
@@ -337,6 +338,7 @@ def _bow(state, member: str) -> None:
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy, BOW_CRABALETTA_DAMAGE,
+                                         element="hydro",
                                          powered=False,
                                          source="furina_stage/bow")
 
@@ -677,6 +679,19 @@ def perform(state, member: str) -> None:
     payoff cards (sec.5.2), never in the performer", and the sentence the
     Stage inherited from the Salon is "a performance is not an Attack and not
     a hit" (`EB-588`).
+
+    `EB-495` D4, the same omission one argument over. `FurinaStage.cs:461`
+    (the act) and `:542` (the bow) both pass `Elements.Element.Hydro`;
+    Crabaletta's two sim legs passed no `element=`, so the hit set no aura and
+    consumed none, and every reaction off a Crabaletta hit existed in the game
+    and nowhere here. THE BRIEF IS SILENT: it names Chevalmarin's Hydro in
+    rules 9 and 10 in as many words and says only "Crabaletta deals 5 to a
+    random enemy", so there is no rule for the C# to contradict and the game
+    is the answer. No second `resolve_hit` pass is added: Chevalmarin's leg
+    has one because rule 10 reads "deals 2 to every enemy AND APPLIES HYDRO"
+    and the clause has to hold against a body the hit loop skips. Crabaletta
+    aims at one living enemy, and the element travels with the hit ahead of
+    Block in both engines, so the single argument is the whole of it.
     """
     from tier0.engine import effects, reactions       # late: avoids the cycle
     p = state.player
@@ -705,6 +720,7 @@ def perform(state, member: str) -> None:
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy, ACT_CRABALETTA_DAMAGE,
+                                         element="hydro",
                                          powered=False,
                                          source="furina_stage/act")
 

@@ -178,8 +178,8 @@ because the engine has no mirror of that trigger at all (see §2); functionally
 | V11 Casket strike | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V12 Salon performance | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V13 Salon bow / Evoke | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
-| V14 Stage act | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | **debuff ≠ none (D4)** |
-| V15 Stage bow | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | **debuff ≠ none (D4)** |
+| V14 Stage act | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
+| V15 Stage bow | none | none | none | none | damage-only ≠ none* (**D5**) | none | none (**D3 repaired**) | debuff (**D4 repaired**) |
 | V16 Stage Spend | none | none | none | none | none | none | none | none |
 | V17 companion pulse | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V18 aura application only | none | none | none | none | none | none | none | none |
@@ -285,16 +285,36 @@ repair. Furina's own cards are untouched and that control is pinned in the
 same file. No published sim number moved: the Stage is a prototype arm, no
 battery runs it, and the whole suite was unchanged apart from these pins.
 
-### D4 — Crabaletta's act and bow apply Hydro in the game and no element in the sim
+### D4 — Crabaletta's act and bow apply Hydro — REPAIRED in the sim
 
 `FurinaStage.cs:461` and `:542` pass `Elements.Element.Hydro`;
 `furina_stage.py:685` and `:334` pass no `element=` at all, so the default
 `None` applies and the hit neither sets an aura nor consumes one. That is a
 reaction difference, so it changes T8: a Crabaletta hit into a standing Electro
 aura applies Superconduct's Vulnerable in the game and nothing in the sim. The
-Chevalmarin leg of the same two methods DOES pass `"hydro"`
-(`furina_stage.py:669`), which is what makes this look like a miss rather than
-a rule.
+Chevalmarin leg of the same two methods DOES pass `"hydro"`, which is what
+makes this look like a miss rather than a rule.
+
+**Repaired 2026-09-16, sim side only.** Both Crabaletta legs now pass
+`element="hydro"`. THE BRIEF WAS CHECKED and it is SILENT: it names
+Chevalmarin's Hydro twice in as many words (rule 10 "deals 2 to every enemy
+and applies Hydro", rule 9 "Chevalmarin: Hydro on every enemy") and says only
+"Crabaletta deals 5 to a random enemy" and "Crabaletta: deal 8 to a random
+enemy". It never says a Crabaletta hit is elementless, so there is no rule for
+the C# to contradict and the game is the answer — recorded here because the
+reading is the load-bearing part, and writing the brief the other way would
+make this a rule change rather than a parity repair.
+
+No second `resolve_hit` pass was added. Chevalmarin's leg has one because rule
+10's clause has to hold against a body the hit loop skips; Crabaletta aims at
+one living enemy and the element travels with the hit ahead of Block in both
+engines. **One correction to this row's own text:** it said a Crabaletta hit
+into an Electro aura applies Superconduct's Vulnerable. It does not, in either
+engine — Superconduct is Electro + Cryo, and Hydro into Electro is
+Electro-Charged, whose rider is a DoT. The observable is the same (a reaction
+the game had and the sim did not) and the DoT is what is pinned, by
+`tier0/tests/test_eb495_d4_crabaletta_hits_hydro.py`. No published sim number
+moved.
 
 ### D5 — the sim has no mirror of the enemy-side "took unblocked damage" triggers
 

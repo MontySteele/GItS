@@ -2,10 +2,14 @@
 
 The matrix itself, its reasoning and its seven disagreements live in
 `docs/current/atlas/kit-verbs-vs-base-triggers.md`. This file is the half that
-fails when a cell moves. It pins the CURRENT answer, not the desired one --
-three of the cells it pins are recorded defects (D1, D2, D3/D4 in the atlas),
-and they are pinned exactly as they behave so that a repair is a visible diff
-here rather than a silent one in the engine.
+fails when a cell moves. It pins the CURRENT answer, not the desired one.
+
+FOUR OF THE CELLS IT PINNED WERE RECORDED DEFECTS -- D1, D2, D3 and D4 in the
+atlas, every one of them the sim disagreeing with the game one-sidedly -- and
+all four were repaired on 2026-09-16, sim side only. The pins below moved with
+them, which is exactly the visible diff this file exists to force: a repair
+lands here or it does not land. D5, D6 and D7 remain, D5 and D6 pinned as
+absences.
 
 THREE KINDS OF PIN, all labelled where they are used.
 
@@ -206,9 +210,9 @@ SIM_CALL_SITES = {
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
     ('effects.py', 28): ("'companion'", None, "'pyro'"),
-    ('furina_stage.py', 1): ("'furina_stage/bow'", 'False', None),
+    ('furina_stage.py', 1): ("'furina_stage/bow'", 'False', "'hydro'"),
     ('furina_stage.py', 2): ("'furina_stage/act'", 'False', "'hydro'"),
-    ('furina_stage.py', 3): ("'furina_stage/act'", 'False', None),
+    ('furina_stage.py', 3): ("'furina_stage/act'", 'False', "'hydro'"),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     ('klee_overhaul.py', 2): ('ECHO_SOURCE', None, "'pyro'"),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
@@ -336,10 +340,12 @@ def test_the_stage_refuses_the_dealers_terms_in_both_engines():
     assert [powered for _s, powered, _e in stage] == ["False"] * 3
 
 
-def test_crabaletta_carries_hydro_in_the_game_and_no_element_in_the_sim():
-    """DISAGREEMENT D4, the same shape as D3 one argument over. The C# act and
-    bow both name `Elements.Element.Hydro`; the sim's two Crabaletta legs name
-    no element, so the hit sets no aura and consumes none."""
+def test_crabaletta_carries_hydro_in_both_engines():
+    """DISAGREEMENT D4, REPAIRED, the same shape as D3 one argument over. The
+    C# act and bow both name `Elements.Element.Hydro`, and the sim's two
+    Crabaletta legs now do too, so a Crabaletta hit sets an aura and consumes
+    one in both engines. The behavioural half is
+    `test_eb495_d4_crabaletta_hits_hydro.py`."""
     cs = _cs("Powers/Prototype/FurinaStage.cs")
     assert cs.count("Elements.Element.Hydro") == 4   # 2 acts, 2 bows
 
@@ -347,10 +353,7 @@ def test_crabaletta_carries_hydro_in_the_game_and_no_element_in_the_sim():
     stage = [flags for (name, _i), flags in sorted(sites.items())
              if name == "furina_stage.py"]
     assert len(stage) == 3, stage
-    bow, act_chevalmarin, act_crabaletta = stage
-    assert bow[2] is None                    # bow, Crabaletta
-    assert act_crabaletta[2] is None         # act, Crabaletta
-    assert act_chevalmarin[2] == "'hydro'"   # act, Chevalmarin
+    assert [element for _s, _p, element in stage] == ["'hydro'"] * 3
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():
