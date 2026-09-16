@@ -189,6 +189,58 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # under a flag that is off in every anchor and every shipped arm, so no
     # stamp moves -- `C.PLAN_DELAY_DISCOUNT`'s own argument, verbatim.
     "plan_held",
+    # `EB-712`, and it is `EB-144`'s hole found one layer down. Every census
+    # this file's lint ran walked `loader._card_index()` -- the SHIPPED index,
+    # which by construction holds no `proto_` row -- so a predicate printed
+    # ONLY by the prototype surface was triaged by nobody and priced at zero by
+    # the bare `continue` below. `plan_held` was found that way and read 37% to
+    # 28% once it was taught; the six names below were in the same hole, and
+    # `test_the_prototype_surface_prints_no_untaught_predicate` is what now
+    # stops a seventh joining them.
+    #
+    # `plan_carried_out_this_turn` (QUARANTINED, `C.KOKOMI_OVERHAUL`) --
+    # Feint's and Sango Isshin's condition, `state.kk_plan_carried_out_this_turn`.
+    # A turn-level flag written at the one place a Plan is carried out
+    # (`kokomi_plan._resolve_entry`), so it is a pure current-state read with no
+    # snapshot field and no telemetry row: exactly this collection's test. It
+    # matters more than most, because Feint prints its two numbers as 5 and 10
+    # -- untaught, the pilot scored the 10 branch at nothing and read the card
+    # as a 5-damage Attack it would rarely take.
+    "plan_carried_out_this_turn",
+    # `EB-712`. THE KLEE OVERHAUL'S TWO PER-TURN COUNTERS (QUARANTINED,
+    # `C.KLEE_OVERHAUL`) -- Run Away!'s `bomb_went_off_this_turn` and Sizzle's
+    # and Perfect Timing's `bomb_reacted_this_turn`, read off the arm's ledger
+    # (`state.ko_set_off_this_turn` / `.ko_reacted_this_turn`). Both are pure
+    # per-turn counts with no snapshot field. The engine REFUSES both off the
+    # arm, and that refusal is the right answer rather than a hazard here: the
+    # rows printing them are the arm's own pool, so a hand holding one is a
+    # hand the arm owns.
+    "bomb_went_off_this_turn",
+    "bomb_reacted_this_turn",
+    # `EB-712`, the parameterised names -- and they are listed ONE BY ONE
+    # rather than as prefixes, which is the conservative half of this row.
+    # A prefix here would teach the pilot every member of its family at once,
+    # including names the `real_ironclad` / `real_silent` anchors print on a
+    # `game_ref/` checkout, and THAT would move how an anchor scores its hand
+    # and force a `P` stamp bump -- the exact reason `self_has_power_tracking`
+    # is declared BLIND below rather than read live. Every name here is
+    # printed only by a `proto_` row, behind a flag that is off in every
+    # anchor and every shipped arm, so none of them moves a published number.
+    #
+    #   * `hp_pct_above_70` / `hp_pct_below_50` -- Bennett's Fantastic Voyage
+    #     and Noelle's Breastplate. `hp * 100` cross-multiplied against
+    #     `max_hp * N`, a pure read of current HP.
+    #   * `nth_attack_this_turn_3` -- Razor's Claw and Thunder. The engine's
+    #     `+ 1` is the card counting itself, and the pilot scores BEFORE the
+    #     play -- the same point in the turn the resolver reads it at -- so the
+    #     delegated answer is the one the card will actually get.
+    #   * `self_has_power_mc_oz` -- Fischl's Nightrider reading its own Oz.
+    #     The mirror of `target_has_power_`, scorable since `EB-144`. Its
+    #     FAMILY stays untaught for the anchor reason above.
+    "hp_pct_above_70",
+    "hp_pct_below_50",
+    "nth_attack_this_turn_3",
+    "self_has_power_mc_oz",
 })
 _ENGINE_LIVE_PREFIXES = ("charge_at_least_",)
 

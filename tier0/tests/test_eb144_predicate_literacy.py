@@ -282,6 +282,110 @@ def test_the_two_collections_cover_todays_sheet_exactly():
     ]
 
 
+# --- `EB-712`: the layer every census above cannot see ----------------------
+#
+# THE HOLE UNDER THE HOLE. `_every_printed_predicate` walks
+# `loader._card_index()`, and that index by construction holds NO `proto_` row
+# -- the quarantine is the whole point of `docs/prototype-surface.yaml`. So the
+# lint that exists because a silently-lost branch is invisible was itself blind
+# to the surface where new conditionals are actually written, and the
+# prototype rows are the ones a seat plays for a round before anyone reads a
+# number off them.
+#
+# `plan_held` is the measured cost: untaught, the pilot priced the whole
+# conditional at zero and Kokomi's basic Defend read 37% to 28% until the name
+# joined the live predicates (`EB-711` provenance). The census below found six
+# more names in the same hole on the day this was written, and the lint is what
+# stops a seventh.
+
+
+def _prototype_predicates():
+    """Every `if:` any prototype row prints, by row id.
+
+    The surface's own faces AND their `plan:` lines, because a planned clause
+    is scored through the same `_active_effects` walk the now-line is
+    (`policy._plan_discounted`) and a predicate inside one falls into exactly
+    the same hole.
+    """
+    found = {}
+    for card in loader.prototype_cards():
+        for source in (card.effects, getattr(card, "plan", None) or []):
+            for name in _printed_predicates(source):
+                found.setdefault(name, set()).add(card.id)
+    return found
+
+
+def test_the_prototype_surface_prints_no_untaught_predicate():
+    """THE LINT `EB-712` ASKED FOR. Every predicate a prototype row prints is
+    either scorable or declared blind with a reason -- the same claim the
+    shipped sheets have had to make since `EB-144`, now asked of the layer the
+    shipped census cannot reach.
+
+    Deliberately NOT a curated list: the surface turns over every slice, so a
+    census of today's names would be a test about the staging file's contents
+    rather than about the pilot's literacy. The claim is the property.
+    """
+    untriaged = {
+        name: sorted(users)
+        for name, users in _prototype_predicates().items()
+        if not (policy.predicate_is_scorable(name)
+                or policy.predicate_is_declared_blind(name))
+    }
+    assert not untriaged, (
+        "prototype row(s) print a predicate the pilot cannot score and has "
+        "not declared blind -- it prices the WHOLE conditional at zero and no "
+        "round measured on that row means anything. Add to "
+        "policy.SCORABLE_PREDICATES / _ENGINE_LIVE_PREDICATES (with a live "
+        f"read) or to policy.BLIND_PREDICATES (with the reason): {untriaged}")
+
+
+def test_the_surface_is_actually_being_censused():
+    """The lint's own guard. An empty surface, a loader that stopped returning
+    prototype rows, or a walk that stopped descending would make the assertion
+    above pass by finding nothing -- which is the failure mode this whole file
+    exists to refuse."""
+    assert loader.prototype_cards(), "no prototype rows loaded at all"
+    printed = _prototype_predicates()
+    assert printed, "no prototype row prints a conditional -- suspicious"
+    assert "plan_carried_out_this_turn" in printed, sorted(printed)
+
+
+def test_feints_carry_out_branch_is_scored_and_not_priced_at_zero():
+    """`EB-712`'s named row, both ways round. Feint prints 5 and 10 and the
+    difference IS the card; untaught, the pilot read the 10 as nothing and the
+    row as a 5-damage Attack.
+
+    Seen to FAIL before the predicate was taught: both states scored 0.0,
+    because a `continue` on an unknown predicate yields NEITHER branch.
+    """
+    card = next(c for c in loader.prototype_cards() if c.id == "proto_kk_feint")
+
+    quiet = make_state(enemies=[make_enemy(hp=60)])
+    quiet.kk_plan_carried_out_this_turn = False
+    assert policy._expected_damage(quiet, card) == 5.0
+
+    carried = make_state(enemies=[make_enemy(hp=60)])
+    carried.kk_plan_carried_out_this_turn = True
+    assert policy._expected_damage(carried, card) == 10.0
+
+
+def test_the_prototype_predicate_read_is_the_engine_s_own(monkeypatch):
+    """One rule, asked from both sides. The pilot delegates to
+    `effects._predicate` rather than keeping a second copy, so the branch it
+    scores and the branch that resolves cannot drift."""
+    card = next(c for c in loader.prototype_cards() if c.id == "proto_kk_feint")
+    state = make_state(enemies=[make_enemy(hp=60)])
+    state.kk_plan_carried_out_this_turn = True
+
+    asked = []
+    real = effects._predicate
+    monkeypatch.setattr(effects, "_predicate",
+                        lambda st, nm, *a, **k: (asked.append(nm),
+                                                 real(st, nm, *a, **k))[1])
+    list(policy._active_effects(state, card.effects, card))
+    assert "plan_carried_out_this_turn" in asked
+
+
 def test_the_reference_pools_print_only_the_three_blind_names():
     """The half of the lint the checkout can hide, made explicit.
 

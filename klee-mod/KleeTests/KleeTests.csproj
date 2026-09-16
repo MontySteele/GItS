@@ -149,6 +149,21 @@
              Link="Vendor/GitsSkipAct.cs" />
   </ItemGroup>
 
+  <!-- EB-748's refusal reader, on the same terms and for the same reason.
+       `GitsRefusalSource.cs` turns whatever `CardModel.CanPlay` hands back as
+       the PREVENTER into the sentence a blind page prints, and it does that by
+       reflection over an object whose static type the bridge deliberately does
+       not name, so both of its failure directions are invisible to a compile
+       and expensive to reach with a run up: a preventer whose name it cannot
+       read prints nothing and looks exactly like the defect this was filed
+       for, and a slot holding something that is not a preventer at all would
+       print "True is stopping you right now". The file holds no game type, so
+       both are decided headlessly here. One file, no fork. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsRefusalSource.cs"
+             Link="Vendor/GitsRefusalSource.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />

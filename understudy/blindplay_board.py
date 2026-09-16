@@ -1533,7 +1533,25 @@ def _event_option(entry: Any) -> dict[str, Any]:
     # `EB-393`: and where the row's own sentence promises a card that neither
     # channel carried, the gap is stated rather than left as a title with no
     # face under it (the Bugslayer event, Klee r10 act 2).
-    if not option["names"] and _GRANTS_A_CARD.search(option.get("text") or ""):
+    #
+    # `EB-740`, AND THE TEST IS THE FEED AND NOT THE PRINTED LIST. Neow's Lead
+    # Paperweight -- "Choose 1 of 2 Colorless cards to add to your Deck" --
+    # carried its face all along: `EventOption.FromRelic` sets `Relic`, so
+    # `BuildEventState` sends `relic_name` and `relic_description`, and the
+    # option's own printed text IS that relic's text. What emptied `names` was
+    # `_option_faces`'s DEDUPE, which drops a face whose name repeats the row's
+    # own heading -- correct for the printing, and read here as "the feed
+    # carried nothing" -- so the row that HAD its rules text on the page was
+    # the one told it had none. The round-1 seat read the note and rejected
+    # the option for a gap that was not there.
+    #
+    # So the note fires on the RAW entry naming nothing at all. The Bugslayer
+    # rows still get it: they carry no face key and no keyword tip, which is
+    # what "the feed carried no face" means. A relic's own later doing -- two
+    # Colorless cards rolled when it is obtained -- is not a face any feed
+    # could carry, and this page no longer claims it was owed one.
+    if not _option_faces(entry) \
+            and _GRANTS_A_CARD.search(option.get("text") or ""):
         option["note"] = OPTION_UNNAMED_GRANT
     return option
 
