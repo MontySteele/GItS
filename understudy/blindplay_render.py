@@ -1773,6 +1773,17 @@ def render(obs: dict[str, Any]) -> str:
                     "no single bundle above.*", ""]
         elif obs.get("selected", -1) < 0:
             out += ["*Nothing is picked yet.*", ""]
+        # `EB-704`: and the SHAPE of the screen, which this chooser owed as
+        # much as the card grid did. A bundle is picked with `choose` and taken
+        # with `confirm` -- the verb is in this screen's own command list -- and
+        # `EB-674`'s sentence was printed on one of the two paths.
+        #
+        # THE NOTE AND NOT THE BUTTON'S STATE. The card grid prints `Confirm
+        # is ...` beside it because that screen's command list is gated on
+        # `can_confirm`; this one offers the verb on every render, so a line
+        # saying the button is not available would contradict the grammar three
+        # lines below it.
+        out += ["", CHOOSER_CONFIRM_NOTE]
     elif obs["screen"] == "shop":
         out += ["# The shop", "", f"You have {obs['gold']} gold.", ""]
         if obs["items"]:
@@ -1901,8 +1912,28 @@ def render(obs: dict[str, Any]) -> str:
     out += ["", obs["guardrail"], ""]
     text = "\n".join(out).rstrip() + "\n"
     assert_one_page(text)
+    assert_chooser_note(obs, text)
     qa_packet.assert_blind(text, allow={st})
     return text
+
+
+def assert_chooser_note(obs: dict[str, Any], text: str) -> None:
+    """No chooser without `EB-674`'s sentence (`EB-704`).
+
+    A screen that offers `confirm` is a screen where a pick is TWO commands and
+    the chooser stays up between them, which is the shape `EB-674` found a seat
+    learning from a refusal. The note was printed on the card grid and not on
+    the bundle picker, and the acceptance the row asks for is not "these two
+    branches" but "no chooser without it" -- so the pin is here, at the one
+    place the page is finished, and it reads the GRAMMAR rather than the branch:
+    whatever screen starts offering the verb tomorrow owes the sentence too.
+    """
+    if "confirm" in (obs.get("commands") or []) \
+            and CHOOSER_CONFIRM_NOTE not in text:
+        raise BlindPlayError(
+            "this page offers `confirm` and does not say that a pick here is "
+            "two commands, so a reader would learn it from a refusal: "
+            + str(obs.get("screen")))
 
 
 #: A section heading, which on this page is the only line that opens with a
