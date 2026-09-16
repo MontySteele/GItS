@@ -298,6 +298,10 @@ public class MeterCostBadgeTests
     [Fact]
     public void Affordability_is_the_owner_s_bank_in_that_meter()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         var seat = Seat.Furina().WithCombatState();
         var face = Held<DeepBreathModeB>(seat);
         var price = MeterCost.Priced(face)!.Value;

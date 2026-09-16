@@ -123,11 +123,11 @@ def test_gates_optional_lanes_are_off_by_default():
         fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
 
     names = [g.name for g in gates.gates(Args())]
-    assert names == ["lints", "pytest", "dotnet-test"]
+    assert names == ["lints", "pytest", "dotnet-test", "dotnet-test-stage"]
     Args.dotnet = Args.codegen = True
     assert [g.name for g in gates.gates(Args())] == [
         "lints", "pytest", "codegen-roster", "codegen-prototype",
-        "dotnet-build", "dotnet-test"]
+        "dotnet-build", "dotnet-test", "dotnet-test-stage"]
 
 
 def test_the_csharp_suite_is_in_both_lanes_with_the_prototype_switch():
@@ -158,6 +158,43 @@ def test_the_csharp_suite_is_in_both_lanes_with_the_prototype_switch():
     summary, _ = gates.summarise(gates.Gate("dotnet-test", []), out, 0)
     assert summary.startswith("563 passed, 0 failed, 0 skipped")
     assert "local-only" in summary
+
+
+def test_the_stage_configuration_is_a_gate_of_its_own():
+    """`EB-781`: the second world the suite has, gated in both lanes.
+
+    `-p:FurinaStage=true` moves `FurinaStage.DefaultEnabled`, which is what
+    `deploy_proto.ps1` passes and therefore what the seats play. Nothing ran
+    the suite that way, so nine shipped Fanfare/Encore pins stood red under
+    `EB-745`'s retirement guard and no gate said so. The second line is what
+    makes that configuration's red arrive on the day it is made.
+    """
+    gates = _module("gates")
+
+    class Args:
+        fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
+
+    for lane in (True, False):
+        Args.fast, Args.full = lane, not lane
+        picked = [g for g in gates.gates(Args())
+                  if g.name == "dotnet-test-stage"]
+        assert len(picked) == 1, f"fast={lane}: the stage lane is missing"
+        assert picked[0].optional == ""
+        assert "-p:PrototypeCards=true" in picked[0].argv
+        assert "-p:FurinaStage=true" in picked[0].argv
+
+    # It reads through the same summariser, so its line carries the counts and
+    # the local-only mark rather than a bare `ok`.
+    out = ("Passed!  - Failed:     0, Passed:  1870, Skipped:     0, "
+           "Total:  1870, Duration: 1 s")
+    summary, _ = gates.summarise(gates.Gate("dotnet-test-stage", []), out, 0)
+    assert summary.startswith("1870 passed, 0 failed, 0 skipped")
+    assert "local-only" in summary
+
+    # And the pre-push hook asks for BOTH by name, through the same wrapper.
+    # `--only` is a set, so naming the first does not carry the second.
+    hook = _module("pre_push_gate", TOOLS / "hooks")
+    assert "dotnet-test,dotnet-test-stage" in hook.KLEETESTS
 
 
 def test_a_machine_without_the_game_skips_the_csharp_gate_rather_than_passing(
