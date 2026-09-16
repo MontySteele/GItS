@@ -381,6 +381,56 @@ def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
     assert "KleeKeywords.AppliesHydro" not in face
 
 
+def test_the_caskets_strike_leaves_a_hydro_aura(overhaul):
+    """`EB-562`. THE QUESTION: does the Tamakushi Casket's Hydro hit leave an
+    aura? The reaction glossary's sources clause (`EB-544`) says a relic
+    applies no element unless its own face says so, and the Casket's face does
+    not say so; the round-18 seat watched it re-lay Hydro inside a beat, and
+    the r20 seat called this "the single fact I most wanted and never got".
+
+    THE ANSWER IS YES, and it always was: `casket_strike` goes through
+    `deal_damage_to_enemy` with `element="hydro"`, the same funnel every other
+    non-attack hit here uses, and the C# twin goes through `ElementalHit.Deal`.
+    So the strike lays Hydro on a bare body and REACTS with whatever else is
+    standing. What was missing was a surface saying so. `EB-348` put it on the
+    relic's own face and on the card-side tip ("it reacts, takes its
+    Vulnerable, and re-arms Hydro") while this row was open; what was still
+    missing is the GLOSSARY, whose sources clause (`EB-544`) sends a reader to
+    the relic's face for exactly this and says a relic applies no element.
+    """
+    bare = make_enemy(hp=40)
+    st = kokomi_state(enemies=[bare])
+    kokomi_plan.casket_strike(st, bare)
+    assert bare.hp == 40 - C.KOKOMI_OVERHAUL_CASKET_STRIKE
+    assert bare.aura == "hydro"
+
+    # AND IT REACTS rather than laying Hydro where another aura stands, which
+    # is the other half of "a real Hydro hit".
+    chilled = make_enemy(hp=40)
+    chilled.aura = "cryo"
+    chilled.aura_turns_left = 3
+    st2 = kokomi_state(enemies=[chilled])
+    kokomi_plan.casket_strike(st2, chilled)
+    assert chilled.aura != "cryo", "the Cryo aura was consumed"
+
+    # And the surfaces carry the sentence, so the engine and the words cannot
+    # drift apart again. The relic tip and its page twin say "re-arms Hydro"
+    # (`EB-348`); the glossary's sources clause now admits the exception.
+    from understudy import blindplay_notes
+    assert "re-arms Hydro" in (
+        blindplay_notes.ARM_KEYWORDS["Tamakushi Casket"])
+    gloss = blindplay_notes.REACTION_KEYWORDS["Elemental Reaction"]
+    assert "one relic's line does" in gloss
+    # Not BY NAME on that row: `EB-329` keeps it general, because it prints
+    # for a Klee who holds no Casket. The relic is named on its own row.
+    assert "Casket" not in gloss
+    import pathlib
+    repo = pathlib.Path(__file__).resolve().parents[2]
+    tips = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    assert "and re-arms " in tips
+
+
 def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
     """`EB-334` PIN 1: Weak ON KOKOMI, no effect. The seat's own arithmetic --
     "Plan: Deal 12 damage" paying 9 the next morning, exactly x0.75."""

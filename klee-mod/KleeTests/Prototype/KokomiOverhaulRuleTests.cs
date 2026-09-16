@@ -769,6 +769,37 @@ public class KokomiOverhaulRuleTests
         Assert.Contains("ElementalHit.Deal", calls);
     }
 
+    [Fact]
+    public void EB562_the_caskets_strike_is_a_real_hydro_hit_and_says_so()
+    {
+        // `EB-562`. THE QUESTION the r20 seat called "the single fact I most
+        // wanted and never got": does the Casket's Hydro hit leave an aura?
+        // The reaction glossary's sources clause (`EB-544`) says a relic
+        // applies no element unless its own face says so, and this relic's
+        // face did not say so -- while the round-18 seat watched it re-lay
+        // Hydro inside a beat.
+        //
+        // THE ANSWER IS YES, AND IT IS STRUCTURAL: the strike goes out through
+        // `ElementalHit.Deal`, the funnel every other non-attack hit in this
+        // mod uses, so it lays Hydro on a bare body and reacts with whatever
+        // else is standing. The sim twin is
+        // `tier0.engine.kokomi_plan.casket_strike`, pinned by
+        // `test_the_caskets_strike_leaves_a_hydro_aura`.
+        var strike = typeof(global::KleeMod.Relics.TamakushiCasket)
+            .GetMethod("Strike", HeadlessGame.All)!;
+        Assert.Contains("ElementalHit.Deal", Il.Calls(strike));
+
+        // AND THE SURFACES SAY IT. `EB-348` put the sentence on the relic's
+        // own face and on the card-side tip while this row was open; this is
+        // that half read back, so the words and the funnel cannot drift apart
+        // again. The glossary's sources clause carries the third statement
+        // (`blindplay_notes.REACTION_KEYWORDS`).
+        var tip = string.Concat(Il.Strings(
+            typeof(global::KleeMod.Cards.ArmKeywordTips)
+                .GetMethod("ForCasket", HeadlessGame.All)!));
+        Assert.Contains("and re-arms ", tip);
+    }
+
     // ---- THE MEND RULE ---------------------------------------------------
 
     [Fact]
