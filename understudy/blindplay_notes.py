@@ -65,6 +65,30 @@ POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
               "The feed carries no duration and no expiry, so unless a "
               "power's own text says when it ends, this page cannot say "
               "either.*")
+
+# `EB-701`. NOTHING ON THE PAGE SAID WHEN "THE END OF YOUR TURN" IS.
+#
+# THE FIND (Kokomi r30 lane 1, debrief 5). No line says that end-of-turn
+# effects -- a companion's end-of-turn hit, a Dusk Plan -- resolve BEFORE the
+# enemies act; the seat learned it from a Gas Bomb dying without its Death
+# Blow, which is a rule learned from a body that did not do the thing the page
+# had just telegraphed.
+#
+# IT IS A SENTENCE ABOUT THE TURN AND NOT ABOUT ANY POWER, so it sits with
+# `POWER_NOTE` at the foot of the board rather than under the row that raised
+# it: two powers with the same trigger would otherwise print it twice, and the
+# question is asked once per screen.
+#
+# THE CONSEQUENCE IS HALF THE POINT. "Before the enemies act" is only a fact
+# about ordering until it is said what the ordering buys, which is that a body
+# killed at the end of your turn never takes the intent printed above it.
+TURN_ORDER_NOTE = (
+    "*The end of your turn is a step of its own, and it comes BEFORE the "
+    "enemies act: everything that fires at the end of your turn -- a power's "
+    "end-of-turn trigger, a performer's act, a Dusk Plan -- resolves first, "
+    "and only then do the bodies above take their intents. So an enemy killed "
+    "by one of those never takes the intent this page printed for it.*")
+
 METER_NOTE = ("the game's data feed carries this meter's amount only: no "
               "maximum, and no rule for how it is spent")
 # `EB-181`. The same row where the meter DOES declare a ceiling. The second
@@ -704,6 +728,29 @@ REACTION_ROW_NO_SOURCE = "- **{reaction}** on **{target}**."
 #: reading, since "no line" and "no reaction" were the same page.
 NO_REACTION_THIS_TURN = ("- Nothing reacted this turn. A reaction that "
                          "happened would be listed here by name.")
+
+# `EB-708`. A SIZE IS NOT A STATUS, AND THE PAGE HAD NO LEGEND FOR EITHER.
+#
+# THE FIND (Kokomi r31 lane 2, (c)). `Twig Slime (M)` and `Leaf Slime (S)` read
+# as MINION MARKERS against a Plan rule written in terms of Minion -- "the seat
+# guessed whether a single-target Plan could hit them". The letters are part of
+# the name the GAME prints (the slime family is drawn at three sizes) and this
+# page passes a printed name through verbatim, so a reader meeting a bracketed
+# letter on a screen that also prints `[A]` handles and two Minion rules has
+# three bracketed things and a legend for one of them.
+#
+# IT SAYS WHERE MINION DOES LIVE, because the negative alone leaves the reader
+# where it found them. `MinionPower` is a POWER on the body and this page
+# prints every power a body wears under its intents, so the answer to "is this
+# one a Minion" is on the same screen one line down -- which is `mark_front`'s
+# own rule too, read off exactly those rows.
+ENEMY_SIZE_NOTE = (
+    "*A letter in round brackets inside an enemy's name is its SIZE -- `(S)` "
+    "small, `(M)` medium, `(L)` large. It is part of the name the game prints: "
+    "not a status, and not the `[A]` handle this page aims cards by. It does "
+    "not make the body a Minion. Minion is a printed status, so a body that is "
+    "one carries a `Minion` line of its own under its intents, and a body "
+    "without that line is not one whatever size it is.*")
 
 ENEMY_HANDLE_NOTE = (
     "*Each enemy keeps its letter and its number for the whole fight: a body "
@@ -1598,6 +1645,46 @@ def _stage_arm(obs: dict[str, object]) -> bool:
 # who is playing gets the rule, `absent is not zero`'s direction: silence
 # about the character is not evidence it is somebody else's.
 _ARM_KEYWORD_CHARACTER: dict[str, str] = {"Hexerei": "klee", "Oz": "klee"}
+
+# `EB-753`. AND THE OTHER KIND OF OFF-ARM WORD, WHICH IS NOT THAT ONE.
+#
+# THE FIND (Klee r27, lane 1 and cook, fight 2 reward). The Furina Stage's
+# `Spend` row -- lead performer, Bow, an empty stage -- printed on a KLEE card
+# reward screen, because R270 made Spark a currency and Klee's sinks print the
+# word "Spend". A rule about three performers, on a screen with no performers
+# and no way to get one.
+#
+# THE DIFFERENCE FROM `_ARM_KEYWORD_CHARACTER` IS THE WORD AND NOT THE RULE.
+# `Hexerei` and `Oz` are printed BY faces every run can draft, so the word is
+# genuinely on the screen and the reader is owed the sentence saying it is
+# inert here (`EB-583`). These words are not: `Spend`, `Bow`, `Raise`,
+# `Rotate`, `Mine`, `Plan`, `Mend` are ordinary English that another kit's
+# prose says for its own reasons, and the match is a FALSE POSITIVE rather
+# than an off-arm tag. A false positive owes no entry at all -- there is
+# nothing to say "is inert here" about -- so the row does not print.
+#
+# THE UNIVERSAL WORDS KEEP NO OWNER and are untouched: `Companion` (every arm
+# drafts them and `EB-460` already splits its one arm-conditional clause),
+# `Swirl` (ten Universals print the verb), `Grounded` (Kaeya's Power, on a
+# companion card), and the two above.
+#
+# A FEED THAT DOES NOT SAY WHO IS PLAYING GETS EVERY ROW, which is
+# `_ARM_KEYWORD_CHARACTER`'s direction one table up and `absent is not zero`'s:
+# silence about the character is not evidence it is somebody else's.
+_ARM_KEYWORD_ARM: dict[str, str] = {
+    "Bomb": "klee", "Set off": "klee", "Spark": "klee", "Mine": "klee",
+    "Plan": "kokomi", "Dusk": "kokomi", "Mend": "kokomi",
+    "Tamakushi Casket": "kokomi",
+    "Spend": "furina", "Fanfare": "furina", "Raise": "furina", "Bow": "furina",
+    "lead performer": "furina", "back performer": "furina",
+    "Rotate": "furina", "Encore": "furina", "Spotlighted": "furina",
+}
+
+
+def _arm_owns(word: str, who: str) -> bool:
+    """May this run's character be shown this kit word's rule? (`EB-753`)"""
+    owner = _ARM_KEYWORD_ARM.get(word)
+    return not (owner and who and owner != who)
 
 # `EB-583`. WHAT AN OFF-ARM WORD SAYS INSTEAD, and it is the correction to the
 # paragraph above rather than a second rule.
@@ -2530,6 +2617,11 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             # (brief sec.2, R269) and since `EB-745` nothing grants it -- and a
             # rule for a meter that cannot move is the noise round two filed.
             if not (arm and word in _STAGE_RETIRED_KEYWORDS)
+            # `EB-753`: and a word another kit OWNS is not defined at all on
+            # this run's screens. The match on a Klee reward screen was the
+            # English word `Spend` in a Spark sink's own prose, not the Stage's
+            # keyword, so there is no off-arm sentence to print either.
+            and _arm_owns(word, who)
             and pattern.search(_bomb_hay(word, hay, obs))]
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()

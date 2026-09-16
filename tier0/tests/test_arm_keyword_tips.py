@@ -835,6 +835,9 @@ def _hand_with(tips: list[dict]) -> dict:
     """
     from tier0.tests.test_understudy_blindplay import combat_state
     state = combat_state()
+    # `EB-753`: `Set off` is Klee's word and the glossary is scoped to the arm
+    # the run's character owns, so the board this card is dealt onto is hers.
+    state["player"]["character"] = "Klee"
     card = state["player"]["hand"][0]
     card["name"] = "Kaboom!"
     card["description"] = "Set off. Deal 6 damage."
@@ -1071,6 +1074,32 @@ DEFINED_BY_A_CARD_TIP = {
 CONJUGATIONS = {"Exhausted": "Exhaust"}
 
 
+def _word_owner(word: str) -> str:
+    """Whose run is this printed word's own? (`EB-504`, `EB-753`)
+
+    Two tables answer it and they answer different questions. `EB-504`'s says
+    whose RULE a universally printed word states (`Hexerei`, `Oz`);
+    `EB-753`'s says which kit OWNS the word outright, and a word another kit
+    owns has no glossary row on this run at all. Either way the census has to
+    ask its question on the run the word belongs to: the recorded fixture is a
+    Kokomi, and asking there whether Klee's `Bomb` is defined would be asking
+    about the defect rather than about the contract.
+
+    THE PLURAL IS THE SAME WORD, which is the assertion's own rule ("a row
+    whose name is a prefix of the printed span counts"), so `Bombs` resolves
+    through `Bomb` and `Sparks` through `Spark`.
+    """
+    from understudy.blindplay_notes import (_ARM_KEYWORD_ARM,
+                                            _ARM_KEYWORD_CHARACTER)
+    for table in (_ARM_KEYWORD_CHARACTER, _ARM_KEYWORD_ARM):
+        if word in table:
+            return table[word]
+        for name, owner in table.items():
+            if word.startswith(name):
+                return owner
+    return ""
+
+
 def _page_for_word(word: str) -> str:
     """One rendered page whose hand holds a single face naming `word`.
 
@@ -1090,10 +1119,9 @@ def _page_for_word(word: str) -> str:
     defect, not the contract.
     """
     from tier0.tests.test_understudy_blindplay import combat_state
-    from understudy.blindplay_notes import _ARM_KEYWORD_CHARACTER
     import json
     state = json.loads(json.dumps(combat_state()))
-    owner = _ARM_KEYWORD_CHARACTER.get(word)
+    owner = _word_owner(word)
     if owner:
         state["player"]["character"] = owner.capitalize()
     state["player"]["hand"] = [{

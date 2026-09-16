@@ -8,6 +8,7 @@ on the way to one. Re-exported from `blindplay.py`, so
 """
 from __future__ import annotations
 
+import json
 import re
 import time
 from typing import Any
@@ -476,6 +477,22 @@ def _enemies(state: dict[str, Any]) -> list[dict[str, Any]]:
     tie-break exists to survive. Two genuinely distinct bodies differ in at
     least their ids, and two bodies that differ in nothing at all are one body
     sent twice.
+
+    `EB-705`. AND FIELD FOR FIELD WAS ONE FIELD TOO MANY. The doubled list came
+    back on r31 lane 1 and r27 lane 2 -- "footnotes included", fights 3 and 5 --
+    so the two copies were equal in everything a READER could see and unequal
+    somewhere in the record, and one such field put the body back on the page as
+    a second creature with a second name and a second letter. Above the record
+    level, which is where the row said to look.
+
+    SO THE TEST IS THE PRINTED FACE. A repeat is dropped where the ids match and
+    every field this page reads off the blob -- the name, the HP pair, the
+    Block, the telegraph and the status list -- matches too. That is STRICTLY
+    WIDER than the old rule and narrower than the ids alone: it can only ever
+    remove a row the reader could not have told from the one above it, so
+    `test_two_bodies_that_differ_are_both_kept` is untouched (two Nibbits at
+    different HP are two rows, and the `#n` tie-break still names them), while a
+    record repeated with a bookkeeping field moved is one body sent twice.
     """
     battle = state.get("battle")
     if isinstance(battle, dict) and isinstance(battle.get("enemies"), list):
@@ -486,12 +503,26 @@ def _enemies(state: dict[str, Any]) -> list[dict[str, Any]]:
     for e in blobs:
         if not isinstance(e, dict):
             continue
-        key = (_entity_id(e), e.get("combat_id"))
-        if any(key == (_entity_id(seen), seen.get("combat_id")) and seen == e
-               for seen in out):
+        key = (_entity_id(e), e.get("combat_id"), _printed_body(e))
+        if any(key == (_entity_id(seen), seen.get("combat_id"),
+                       _printed_body(seen)) for seen in out):
             continue
         out.append(e)
     return out
+
+
+#: `EB-705`. Every field of an enemy blob the page reads a PRINTED line out of:
+#: the name, the HP pair, the Block, the telegraph and the status list. Two
+#: records equal across all of them, under one pair of ids, are a body a reader
+#: could not have told from the row above it.
+_PRINTED_BODY_KEYS = ("name", "hp", "max_hp", "block", "intents", "intent",
+                      "status")
+
+
+def _printed_body(e: dict[str, Any]) -> str:
+    """The blob's printed face, as a comparable string (`EB-705`)."""
+    return json.dumps([e.get(k) for k in _PRINTED_BODY_KEYS],
+                      sort_keys=True, default=str)
 
 
 def _entity_id(e: dict[str, Any]) -> str:

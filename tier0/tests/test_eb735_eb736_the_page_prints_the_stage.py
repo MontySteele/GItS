@@ -450,9 +450,14 @@ def test_a_monster_called_a_bomb_does_not_raise_the_bomb_row():
     page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                  enemy="Gas Bomb")
     assert "**Bomb**" not in page
-    # A card that PLACES one still raises it: the word is keyed off the board
-    # and the faces, not struck from the page.
-    assert "**Bomb**" in _page(
+    # `EB-753` CLOSED THE SECOND HALF FROM THE OTHER SIDE. This row used to add
+    # that a card PLACING one still raises the word on a Furina board, "keyed
+    # off the board and the faces". It is not raised there any more, and must
+    # not be: `Bomb` is Klee's, the glossary is scoped to the arm the run's
+    # character owns, and a Furina seat has no route to a charge whatever a
+    # face on the screen says. The word keeps its definition on Klee's own run,
+    # which `test_a_kit_word_is_defined_on_the_run_that_owns_it` pins.
+    assert "**Bomb**" not in _page(
         {"live": True, "seats": THREE_SEATS, "log": []}, enemy="Gas Bomb",
         hand=[_card("Place 1 [gold]Bomb[/gold] dealing 5.")])
 

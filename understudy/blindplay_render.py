@@ -35,6 +35,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         DEFEND_INTENT_CLAUSE,
                                         ENEMY_HANDLE_NOTE,
                                         ENEMY_REPLACED_LINE,
+                                        ENEMY_SIZE_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
                                         FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
@@ -59,7 +60,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
                                         SPOTLIGHT_WINDOW_NOTE,
-                                        TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
+                                        TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
+                                        TURN_ORDER_NOTE)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
@@ -866,6 +868,42 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 
+#: `EB-701`. The trigger the turn-order note answers, matched on the SENTENCE
+#: and never on a name -- the rule this page is under for every note it reads
+#: off a printed face. "at the end of your turn", "at the end of the turn",
+#: "at end of turn": the game writes all three and they are one moment.
+_END_OF_TURN = re.compile(r"\bend of (?:your |the |this )?turn\b", re.I)
+
+
+def _end_of_turn_on_board(c: dict[str, Any]) -> bool:
+    """Does anything on this combat screen fire at the end of your turn?
+
+    THE POWERS FIRST, because that is the row `EB-701`'s gate names, and both
+    sides of the board: an enemy's own end-of-turn trigger resolves in the same
+    step and a reader planning a kill needs the order either way.
+
+    AND THE TWO KIT BLOCKS, which carry the two effects the seat named. A Dusk
+    entry is a Plan whose carry-out moved to the end of THIS turn, and the
+    stage's performers act at the end of your turn by rule -- neither is a
+    power and neither would be found by reading the power rows alone.
+    """
+    powers = list(c["you"]["powers"])
+    for e in c["enemies"]:
+        powers += e["powers"]
+    if any(_END_OF_TURN.search(p.get("text") or "") for p in powers):
+        return True
+    if c.get("stage") is not None:
+        return True
+    plans = c.get("plans") or {}
+    return any(_is_dusk(e) for e in (plans.get("queue") or []))
+
+
+#: `EB-708`. The size the game draws into a printed name -- `Twig Slime (M)`,
+#: `Leaf Slime (S)`. Case-sensitive and anchored on the brackets, so it fires
+#: on a size and not on a parenthetical the mod writes into a title.
+_SIZE_LETTER = re.compile(r"\((?:S|M|L)\)")
+
+
 def _colliding(items: list[dict[str, Any]]) -> bool:
     """Do two of these options print the same name? (`EB-341`)
 
@@ -1531,7 +1569,7 @@ def render(obs: dict[str, Any]) -> str:
                 and any(card["title"] == "Ethereal Spotlight"
                         for card in c["hand"])):
             out += ["", SPOTLIGHT_WINDOW_NOTE]
-        out += ["", "## The other side", ""]
+        out += ["", _OTHER_SIDE, ""]
         for e in c["enemies"]:
             # `EB-496`: the letter in brackets after the name, where the card
             # face already carries its element -- the handle at a glance,
@@ -1568,6 +1606,12 @@ def render(obs: dict[str, Any]) -> str:
         # opposite, which is what sent a seat's Melt into the wrong body.
         if c["enemies"]:
             out += ["", ENEMY_HANDLE_NOTE]
+        # `EB-708`: and where one of those names carries a SIZE letter, the
+        # legend for it -- beside the handle note, because both are about a
+        # bracketed thing the list above just printed, and because the seat
+        # that lost a Plan on it read the two brackets as one convention.
+        if any(_SIZE_LETTER.search(e["name"] or "") for e in c["enemies"]):
+            out += ["", ENEMY_SIZE_NOTE]
         # `EB-671`: and what the mark on one of those lines means, beside the
         # note about the handles on all of them.
         if any(e.get("front") for e in c["enemies"]):
@@ -1586,6 +1630,12 @@ def render(obs: dict[str, Any]) -> str:
         out += _intent_source_note(c["enemies"])
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
             out += ["", POWER_NOTE]
+        # `EB-701`: and where something on this board fires at the END of your
+        # turn, when that is -- beside the note above, because both are
+        # sentences about the powers the screen has just printed, and once per
+        # screen however many of them carry the trigger.
+        if _end_of_turn_on_board(c):
+            out += ["", TURN_ORDER_NOTE]
         if any(p.get("kind") == "aura"
                for p in you["powers"] + [x for e in c["enemies"]
                                          for x in e["powers"]]):
@@ -1723,6 +1773,17 @@ def render(obs: dict[str, Any]) -> str:
                     "no single bundle above.*", ""]
         elif obs.get("selected", -1) < 0:
             out += ["*Nothing is picked yet.*", ""]
+        # `EB-704`: and the SHAPE of the screen, which this chooser owed as
+        # much as the card grid did. A bundle is picked with `choose` and taken
+        # with `confirm` -- the verb is in this screen's own command list -- and
+        # `EB-674`'s sentence was printed on one of the two paths.
+        #
+        # THE NOTE AND NOT THE BUTTON'S STATE. The card grid prints `Confirm
+        # is ...` beside it because that screen's command list is gated on
+        # `can_confirm`; this one offers the verb on every render, so a line
+        # saying the button is not available would contradict the grammar three
+        # lines below it.
+        out += ["", CHOOSER_CONFIRM_NOTE]
     elif obs["screen"] == "shop":
         out += ["# The shop", "", f"You have {obs['gold']} gold.", ""]
         if obs["items"]:
@@ -1851,8 +1912,28 @@ def render(obs: dict[str, Any]) -> str:
     out += ["", obs["guardrail"], ""]
     text = "\n".join(out).rstrip() + "\n"
     assert_one_page(text)
+    assert_chooser_note(obs, text)
     qa_packet.assert_blind(text, allow={st})
     return text
+
+
+def assert_chooser_note(obs: dict[str, Any], text: str) -> None:
+    """No chooser without `EB-674`'s sentence (`EB-704`).
+
+    A screen that offers `confirm` is a screen where a pick is TWO commands and
+    the chooser stays up between them, which is the shape `EB-674` found a seat
+    learning from a refusal. The note was printed on the card grid and not on
+    the bundle picker, and the acceptance the row asks for is not "these two
+    branches" but "no chooser without it" -- so the pin is here, at the one
+    place the page is finished, and it reads the GRAMMAR rather than the branch:
+    whatever screen starts offering the verb tomorrow owes the sentence too.
+    """
+    if "confirm" in (obs.get("commands") or []) \
+            and CHOOSER_CONFIRM_NOTE not in text:
+        raise BlindPlayError(
+            "this page offers `confirm` and does not say that a pick here is "
+            "two commands, so a reader would learn it from a refusal: "
+            + str(obs.get("screen")))
 
 
 #: A section heading, which on this page is the only line that opens with a
@@ -1893,6 +1974,46 @@ def assert_one_page(text: str) -> None:
         raise BlindPlayError(
             "this page printed a section twice, so a reader would read the "
             "same board as two boards: " + ", ".join(repr(h) for h in twice))
+    _assert_one_enemy_list(text)
+
+
+#: `EB-705`. The enemy block, and the body rows inside it. A body row is the
+#: one bullet in that section that opens with a bold name; its intents, powers
+#: and the replaced-body line are all indented under it.
+_OTHER_SIDE = "## The other side"
+_BODY_ROW = re.compile(r"^- \*\*.+", re.MULTILINE)
+
+
+def _assert_one_enemy_list(text: str) -> None:
+    """One body per board, and one board per screen (`EB-705`).
+
+    THE FIND. The enemy list printed TWICE on multi-enemy screens, footnotes
+    included, after `EB-694`'s dedupe -- so the copies were not equal field for
+    field and the second one arrived as three more creatures. `EB-694`'s own
+    reasoning is why the check belongs here: the render appends this block at
+    exactly one place, so a doubled list is either a feed that repeated itself
+    or a caller that appended the section twice, and neither is a screen a seat
+    should have to read.
+
+    IT NEEDS NO IDS BECAUSE THE PAGE ALREADY MINTED THEM. `_enemy_names` gives
+    every body on a board a printed name of its own -- `Slug (1)`, `Slug (2)` --
+    and `_enemy_handles` a letter, so two identical body rows in one enemy
+    block are one body printed twice and can be nothing else.
+    """
+    if _OTHER_SIDE not in text:
+        return
+    block = text.split(_OTHER_SIDE, 1)[1]
+    cut = _HEADING.search(block)
+    if cut:
+        block = block[:cut.start()]
+    seen: dict[str, int] = {}
+    for row in _BODY_ROW.findall(block):
+        seen[row] = seen.get(row, 0) + 1
+    twice = sorted(r for r, n in seen.items() if n > 1)
+    if twice:
+        raise BlindPlayError(
+            "this page printed the enemy list twice, so a reader would count "
+            "the board as two boards: " + ", ".join(repr(r) for r in twice))
 
 
 def observe(state: dict[str, Any]) -> str:
