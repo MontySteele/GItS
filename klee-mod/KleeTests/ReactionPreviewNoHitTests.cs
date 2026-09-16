@@ -213,6 +213,36 @@ public class ReactionPreviewNoHitTests
         Assert.Contains("SimDamagePipeline.ResolveOnTarget", calls);
     }
 
+    [Fact]
+    public void Both_landed_numbers_carry_the_after_block_relics_clause()
+    {
+        // `EB-752`. THE ONE TERM NO NUMBER ON THIS TIP CAN HOLD. The Boot is a
+        // `ModifyHpLostAfterOstyLate` hook (`EB-328`), so it runs after the
+        // target's Block is taken out of the hit and every arithmetic here
+        // stops one phase earlier. Both of `AmplifiedBody`'s landed numbers --
+        // the Set-off arm's and the amplified one's -- reach the clause, so a
+        // reader about to compare the number with the bar is told the one
+        // thing that can move it afterwards.
+        //
+        // STRUCTURAL, this file's standing rule: the body is built live
+        // against a board and a booted `LocManager` is outside the headless
+        // boundary. What a pin can see is that the clause is reached from BOTH
+        // arm, that it is ONE method rather than two wordings, and that it is
+        // gated on the relic rather than printed flat. (`Il.Calls` answers the
+        // DISTINCT call set, so it says the arm exists and not how many times
+        // it is reached; that both returns carry it is the file's one line of
+        // source review, and the clause being a method is what keeps the two
+        // from drifting apart.)
+        Assert.Contains("KleeCardTooltips.UnblockedRaiserClause",
+                        Il.Calls(Il.Method("KleeCardTooltips",
+                                           "AmplifiedBody")));
+
+        var said = Il.Strings(
+            Il.Method("KleeCardTooltips", "UnblockedRaiserClause"));
+        Assert.Contains(said, line => line.Contains("after Block"));
+        Assert.Contains(said, line => line.Contains("The Boot"));
+    }
+
     private static IReadOnlyCollection<string> Registered()
         => Il.Strings(typeof(global::KleeMod.KleeMod)
                           .GetMethod("InjectLocStrings", HeadlessGame.All)!);

@@ -1021,6 +1021,31 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
                             "it; a planned BLOCK is yours, so Frail does cut "
                             "it.")
 
+# `EB-752`. THE RELIC TERM NO DAMAGE FACE CAN FOLD.
+#
+# THE FIND (Klee r27, lanes 2 and cook, fight 2 each). "Ka-pow! printed Deal 4
+# while The Boot made it 5", and on a Weak turn the printed numbers
+# under-counted in the direction that makes a seat UNDER-play.
+#
+# WHY IT IS A CLAUSE AND NOT A FOLD, which is `EB-328`'s finding and the
+# reason this row was re-scoped: The Boot is a `ModifyHpLostAfterOstyLate`
+# hook. It runs AFTER the target's Block has been taken out of the hit, so it
+# is not a damage modifier at all -- it is an HP-loss modifier, and a card in
+# hand has no target, no Block and no honest way to carry its number. The
+# game's own figure stays the game's, and the modifier is printed beside it.
+#
+# "ON AN UNBLOCKED HIT" IS SAID EVERY TIME, because it is the half a reader
+# cannot see: a hit that lands into Block gains nothing, and a flat `+1` on
+# the face would be wrong on every such hit.
+UNBLOCKED_RAISE_CLAUSE = " (+{n} {relic} on an unblocked hit)"
+
+# The same clause for a relic whose sentence does not spell its numbers: the
+# page names it and says where its rule runs, and does no arithmetic it cannot
+# source off the feed.
+UNBLOCKED_RAISER_CLAUSE = (
+    " ({relic} can raise this on an unblocked hit; its rule runs after Block "
+    "and is not in the number above)")
+
 # `EB-773`. THE PLAN WRITTEN AT A BODY THE QUEUE WILL ALREADY HAVE KILLED.
 #
 # THE FIND (Kokomi r32 lane 1, read again in PR #554). "The two carry-outs

@@ -69,7 +69,9 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         SPARK_SOURCES_LINE,
                                         SPOTLIGHT_WINDOW_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
-                                        TURN_ORDER_NOTE)
+                                        TURN_ORDER_NOTE,
+                                        UNBLOCKED_RAISER_CLAUSE,
+                                        UNBLOCKED_RAISE_CLAUSE)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
@@ -79,10 +81,15 @@ from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
 # ----------------------------------------------------------------- render --
 
 def _render_card(c: dict[str, Any], bullet: str = "-",
-                 mark: str = "") -> list[str]:
+                 mark: str = "", raiser: dict[str, Any] | None = None) -> \
+        list[str]:
     """One card face. `mark` is a state the SCREEN is in about this row and
     not a fact about the card, so it goes at the END of the head, after the
-    cost and the type -- the shape `EB-294` gave a picked bundle."""
+    cost and the type -- the shape `EB-294` gave a picked bundle.
+
+    `raiser` is `EB-752`'s held relic, or None: a rule that raises UNBLOCKED
+    damage, which no damage face can fold and which therefore rides beside the
+    number instead of inside it."""
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
@@ -113,7 +120,12 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
         head += f" — {', '.join(bits)}"
     if mark:
         head += f" — {mark}"
-    out = [head, f"    {c['text'] or '(no printed text)'}"]
+    # `EB-752`: the held relic's term BESIDE the number, never inside it. The
+    # face's sentence is the game's and is printed unchanged; the clause is
+    # this page's and is appended after it, the way `_rider_clause` puts a
+    # named source beside a carry-out's figure.
+    out = [head, f"    {c['text'] or '(no printed text)'}"
+                 + _unblocked_raise_clause(c, raiser)]
     # `EB-483`: on the Smith's grid, the face this card would print UPGRADED,
     # under the one it prints now. Absent on every other screen, and absent
     # here for a row this page cannot render without guessing -- see
@@ -766,6 +778,82 @@ _ONE_USE_RIDER = re.compile(r"the next (\w+) you play\b", re.I)
 _DEBUFF_ANSWERING_HIT = re.compile(
     r"(?:whenever|each) (?:you apply a debuff|debuff you apply)[^.]*"
     r"(?:damage|hit)", re.I)
+
+# `EB-752`. A RELIC THAT RAISES UNBLOCKED DAMAGE -- The Boot's sentence with
+# its two numbers left open. Matched on the SENTENCE and never on a name,
+# `_PLAYS_YOUR_TURN`'s discipline: a second relic worded the same way gets the
+# same clause and a renamed one does not go silent.
+#
+# TWO PATTERNS BECAUSE THERE ARE TWO ANSWERS. The first is the rule's whole
+# shape ("deal 4 or less unblocked attack damage ... increase it to 5"), which
+# hands the page an arithmetic it can actually do; the second is the bare
+# topic, so a relic that raises unblocked damage in some other wording is
+# still NAMED beside the number rather than vanishing from the page.
+_UNBLOCKED_RAISE = re.compile(
+    r"\b(\d+)\s*or less unblocked attack damage[^.]*?increase it to\s*(\d+)",
+    re.I)
+_UNBLOCKED_TOPIC = re.compile(r"unblocked attack damage", re.I)
+#: The printed damage on a face, which is the number the clause is about.
+_DEAL_DAMAGE = re.compile(r"\bdeal\s+(\d+)\b", re.I)
+
+
+def _unblocked_raiser(you: dict[str, Any]) -> dict[str, Any] | None:
+    """`EB-752`: the held relic whose rule no damage face can carry.
+
+    THE FIND (Klee r27, lanes 2 and cook). "Ka-pow! printed Deal 4 while The
+    Boot made it 5", and on a Weak turn the printed numbers under-counted in
+    the direction that makes a seat UNDER-play. The first reading was that the
+    face's calculator was wrong; `EB-328` settled that it is not. The Boot is
+    a `ModifyHpLostAfterOstyLate` hook -- it runs after the target's Block has
+    been taken out of the hit -- and a card in hand has no target, no Block
+    and therefore no honest way to fold it. So the number stays the game's and
+    the modifier is printed BESIDE it.
+
+    `low` / `high` ARE THE RELIC'S OWN NUMBERS where its sentence spells them,
+    and None where it does not. The page does no arithmetic it cannot source
+    off the feed: with them it says how much this face gains, without them it
+    names the relic and says the rule is not in the number.
+    """
+    for relic in you.get("relics") or []:
+        text = str(relic.get("text") or "")
+        if not _UNBLOCKED_TOPIC.search(text):
+            continue
+        found = _UNBLOCKED_RAISE.search(text)
+        return {"name": relic["name"],
+                "low": int(found.group(1)) if found else None,
+                "high": int(found.group(2)) if found else None}
+    return None
+
+
+def _unblocked_raise_clause(c: dict[str, Any],
+                            raiser: dict[str, Any] | None) -> str:
+    """`EB-752`: what that relic adds to THIS face, beside its number.
+
+    BOTH HALVES ON THIS SCREEN, `_attack_buff_note`'s rule: the relic is held
+    and this card is an Attack printing a damage figure. A Skill, a Power and
+    an Attack that prints no number raise no question and get no clause.
+
+    "ON AN UNBLOCKED HIT" IS THE WHOLE CONDITION and it is said every time,
+    because it is the half a seat cannot see: the hit that lands into Block
+    gets nothing, and a page that printed a flat `+1` would be wrong on every
+    such hit. Where the relic's sentence gives its numbers, a face already
+    above the threshold gains nothing and says nothing.
+    """
+    if not raiser:
+        return ""
+    if str(c.get("kind") or "").strip().casefold() != "attack":
+        return ""
+    found = _DEAL_DAMAGE.search(str(c.get("text") or ""))
+    if not found:
+        return ""
+    name = f"**{raiser['name']}**"
+    if raiser["low"] is None:
+        return UNBLOCKED_RAISER_CLAUSE.format(relic=name)
+    printed = int(found.group(1))
+    if printed > raiser["low"] or raiser["high"] <= printed:
+        return ""
+    return UNBLOCKED_RAISE_CLAUSE.format(n=raiser["high"] - printed,
+                                         relic=name)
 
 
 def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:
@@ -1926,8 +2014,11 @@ def render(obs: dict[str, Any]) -> str:
         out += ["", "## Your hand", ""]
         if c.get("spark_note"):
             out += [c["spark_note"], ""]
+        # `EB-752`: read once for the hand and handed to each face, because it
+        # is a fact about what you are HOLDING and not about any one card.
+        raiser = _unblocked_raiser(you)
         for card in c["hand"]:
-            out += _render_card(card)
+            out += _render_card(card, raiser=raiser)
         if not c["hand"]:
             out.append("- (your hand is empty)")
         if c.get("hand_repeats"):

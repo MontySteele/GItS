@@ -3642,6 +3642,79 @@ def test_a_feed_with_no_written_damage_prints_the_queue_it_always_did():
     assert "2. **War Council**" in page
 
 
+# `EB-752`. THE BOOT'S OWN SENTENCE, which is the only thing the page reads it
+# by -- never its name. `EB-328` settled that no damage face can fold it: it is
+# a `ModifyHpLostAfterOstyLate` hook, so it runs after the target's Block is
+# taken out of the hit, and a card in hand has no target and no Block.
+THE_BOOT = {"id": "THE_BOOT", "name": "The Boot", "counter": None,
+            "keywords": [],
+            "description": "Whenever you deal 4 or less unblocked attack "
+                           "damage, increase it to 5."}
+
+
+def _boot_state(hand, relics=(THE_BOOT,)):
+    """A combat with these relics held and exactly this hand."""
+    state = combat_state()
+    player = dict(state["player"])
+    player["relics"] = [dict(r) for r in relics]
+    player["hand"] = [dict(card) for card in hand]
+    state = dict(state)
+    state["player"] = player
+    return state
+
+
+KAPOW = {"name": "Ka-pow!", "type": "Attack", "cost": 1,
+         "description": "Deal 4 damage."}
+BIG_ATTACK = {"name": "Gorou - Inuzaka All-Round Defense", "type": "Attack",
+              "cost": 1, "description": "Deal 6 damage. Exhaust."}
+A_SKILL = {"name": "Send the Runner", "type": "Skill", "cost": 1,
+           "description": "Draw 1 card."}
+
+
+def test_a_held_boot_is_printed_beside_the_number_it_cannot_fold():
+    """`EB-752`, the row's own find. Ka-pow! prints `Deal 4` and The Boot
+    makes it 5; the face's number stays the game's and the modifier rides
+    beside it, with the condition a reader cannot see said out loud."""
+    page = blindplay.render(blindplay.observation(_boot_state([KAPOW])))
+    assert "Deal 4 damage. (+1 **The Boot** on an unblocked hit)" in page
+
+
+def test_a_face_the_boot_cannot_reach_says_nothing():
+    """The relic's own numbers, read off its own sentence: a face already
+    above `4 or less` gains nothing, and a clause there would be false."""
+    page = blindplay.render(blindplay.observation(_boot_state([BIG_ATTACK])))
+    assert "Deal 6 damage. Exhaust." in page
+    assert "unblocked hit" not in page.split("## Your hand")[1]
+
+
+def test_only_an_attack_printing_a_number_carries_the_clause():
+    """BOTH HALVES ON THIS SCREEN, `_attack_buff_note`'s rule: a Skill raises
+    no question about unblocked attack damage and gets no line."""
+    page = blindplay.render(blindplay.observation(_boot_state([A_SKILL])))
+    assert "Draw 1 card." in page
+    assert "unblocked hit" not in page
+
+
+def test_no_boot_held_is_the_face_exactly_as_it_always_printed():
+    page = blindplay.render(blindplay.observation(
+        _boot_state([KAPOW], relics=())))
+    assert "Deal 4 damage." in page
+    assert "unblocked hit" not in page
+
+
+def test_a_relic_that_raises_unblocked_damage_without_spelling_its_numbers():
+    """Matched on the SENTENCE and never on a name. A relic worded another way
+    is still NAMED beside the number -- the page does no arithmetic it cannot
+    source off the feed, and says where the rule runs instead."""
+    odd = dict(THE_BOOT, name="Reinforced Sole",
+               description="Your unblocked attack damage is raised.")
+    page = blindplay.render(blindplay.observation(
+        _boot_state([KAPOW], relics=(odd,))))
+    assert ("Deal 4 damage. (**Reinforced Sole** can raise this on an "
+            "unblocked hit; its rule runs after Block and is not in the "
+            "number above)") in page
+
+
 def test_a_board_with_no_plan_rule_carries_no_plan_section():
     """The ABSENT / EMPTY split, and it is the same one the memory makes: a
     release build has no Plan rule and a Klee at this table is not playing it,
