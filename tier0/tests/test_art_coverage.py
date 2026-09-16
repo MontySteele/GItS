@@ -245,6 +245,66 @@ def test_shipped_card_with_no_sheet_row_is_billed():
         assert key in missing_section, f"{key} has no art and is not billed"
 
 
+def test_art_of_proxies_are_read_off_the_sheets(tmp_path):
+    """`EB-778`, the unit half: the proxy scan is READ, never listed.
+
+    Hermetic, `test_mod_art_key_scan_reads_literal_portrait_requests`'s
+    bargain exactly: it builds its own two-sheet tree so it pins the
+    contract -- flat card lists in, mappings and rows without `art_of:` out --
+    and stays true whatever `docs/` happens to hold today.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import art_coverage
+
+    (tmp_path / "probe-cards.yaml").write_text(
+        "- {id: probe_plain, name: Plain}\n"
+        "- {id: probe_proxy, name: Proxy, art_of: probe_plain}\n",
+        encoding="utf-8")
+    # A mapping sheet (the `*-upgrades.yaml` shape) carries no rows and must
+    # not crash the scan or contribute to it.
+    (tmp_path / "probe-upgrades.yaml").write_text(
+        "probe_plain: {damage: +2}\n", encoding="utf-8")
+
+    proxies = art_coverage.art_of_proxies(tmp_path)
+    assert [(p["id"], p["wears"]) for p in proxies] == [
+        ("probe_proxy", "probe_plain")]
+
+    plan = tmp_path / "plan.tsv"
+    plan.write_text(
+        "# a comment line, skipped\n"
+        "probe_plain\tImageGen/images/cards/klee/probe_plain.png\t500\t380\n",
+        encoding="utf-8")
+    planned = art_coverage.plan_out_paths(plan)
+    assert planned["probe_plain"] == ["ImageGen/images/cards/klee/probe_plain.png"]
+    # The whole point of the bill: the PROXY has no plan row of its own.
+    assert "probe_proxy" not in planned
+    # A plan that is not there at all is an empty universe, not a crash.
+    assert art_coverage.plan_out_paths(tmp_path / "nope.tsv") == {}
+
+
+def test_the_proxy_bill_prints_and_names_the_eb326_three():
+    """`EB-778`, the report half.
+
+    The three EB-326 rows are asserted by NAME because they are the rows the
+    defect was filed on -- they wear a neighbour and appeared in no section of
+    this report at all. Every other assertion here is derived: whatever
+    `art_of_proxies` finds must reach the printed bill, so a fourth proxy
+    joins the pin the day it is written.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import art_coverage
+
+    body = run_tool().stdout
+    assert "ART_OF PROXIES" in body
+    section = body.split("ART_OF PROXIES")[1].split("MODE FACES")[0]
+    for name in ("proto_ko_coven_errand", "proto_ko_witches_circle",
+                 "proto_ko_alices_introduction_magic"):
+        assert name in section, f"{name} is not on the proxy bill:\n{section}"
+    for row in art_coverage.art_of_proxies():
+        assert row["id"] in section, row["id"]
+        assert row["wears"] in section, row["wears"]
+
+
 def test_bill_is_derived_from_canonical_sheets():
     """Every expected id traces to a canonical sheet -- no hardcoded inventory.
 
