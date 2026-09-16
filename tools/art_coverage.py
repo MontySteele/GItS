@@ -30,6 +30,17 @@ sheets on three counts at once:
       SEPARATE from the companion count, but they are ordinary rows in
       fontaine-companions.yaml -- so a sheet-driven check sees them twice.
 
+  D5  a row saying `art_of: <neighbour>` wears that neighbour's illustration,
+      so the generator emits the NEIGHBOUR's key and the row's own id is
+      requested by nothing. It is not COVERED, not MISSING and not STALE --
+      D4's blind spot one seam over, and D4's fix cannot reach it, because
+      that fix reads the keys the mod asks for and a proxy asks for someone
+      else's. Coven Errand, Witches' Circle and Alice's Introduction Magic
+      (EB-326's three) have worn a neighbour since 2026-09-02 and no surface
+      has ever said so. Fixed by a third section -- a BILL, not a failure:
+      wearing a neighbour is a sanctioned stand-in, and the defect was that
+      the debt was unsayable rather than that it existed. See `art_of_proxies`.
+
 D2 and D3 cancelled each other numerically (3 rares swapped in, 3 guest stars
 dropped out), which is why the doc's arithmetic looked self-consistent while
 being wrong in both directions. That is the whole argument for this file: the
@@ -158,6 +169,65 @@ KNOWN_STALE = {
         "looked at is worse than no ledger."
     ),
 }
+
+
+# D5 (`EB-778`). THE PROXY BILL. A sheet row may say `art_of: <neighbour>`,
+# and the generator then emits the NEIGHBOUR's key in that card's
+# `CustomPortrait` getter (`tools/gen_klee_cards.py`: `card.get("art_of") or
+# card["id"]`). So the row asks for no art of its own, its own id never
+# reaches `mod_art_keys`, and it is neither COVERED, MISSING nor STALE -- D4's
+# blind spot one seam over, and D4's own fix cannot see it because the fix
+# reads what the mod ASKS FOR and a proxy asks for someone else's.
+#
+# Three rows wear a neighbour today (EB-326's): Coven Errand, Witches' Circle
+# and Alice's Introduction Magic. Wearing one is a legitimate stand-in, not a
+# defect -- what is a defect is that no surface says the debt exists, so it
+# can never be worked off. Hence a BILL and not a failure: the section names
+# each proxy, whose art it wears and whether its own key has a plan row yet.
+#
+# DERIVED, never listed: every flat card-list sheet in docs/ is read, so a
+# fourth proxy joins this bill the day it is written. `docs/notes/` is out of
+# scope on purpose -- `retired-prototype-rows.yaml` lives there and a retired
+# row owes no art.
+SHEET_DIR = ROOT / "docs"
+
+# The shortlist/plan universe. Column 0 is asset_id, column 1 the out-path
+# (art/plan.tsv's own header). A proxy whose own key appears here has had its
+# art pass planned; one that does not has nothing on the bill anywhere.
+PLAN = ROOT / "art" / "plan.tsv"
+
+
+def plan_out_paths(path=PLAN):
+    """asset_id -> the out-paths its plan rows name. Missing file => empty."""
+    out = {}
+    if not path.is_file():
+        return out
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        cells = line.split("\t")
+        if len(cells) < 2:
+            continue
+        out.setdefault(cells[0], []).append(cells[1])
+    return out
+
+
+def art_of_proxies(sheet_dir=SHEET_DIR):
+    """Every row wearing a neighbour's art, as [{id, wears, sheet}].
+
+    Flat card-list sheets only: the `*-upgrades.yaml` files are mappings and
+    carry no rows.
+    """
+    rows = []
+    for path in sorted(sheet_dir.glob("*.yaml")):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if not isinstance(data, list):
+            continue
+        for r in data:
+            if isinstance(r, dict) and r.get("art_of") and "id" in r:
+                rows.append({"id": r["id"], "wears": r["art_of"],
+                             "sheet": path.name})
+    return rows
 
 
 def sheet_rows(path):
@@ -337,6 +407,31 @@ def main():
     print(f"TOTAL card-sized outputs expected: {total_expected}")
     print(f"  covered: {total_covered}    missing: {total_missing}")
     print("=" * 72)
+
+    # D5 / `EB-778`: the proxy bill. A REPORT and not a gate -- wearing a
+    # neighbour's illustration is a sanctioned stand-in, and what was missing
+    # was any surface that said the debt exists.
+    proxies = art_of_proxies()
+    planned = plan_out_paths()
+    print("\n" + "-" * 72)
+    print("ART_OF PROXIES (rows wearing a neighbour's art -- invisible above)")
+    print("-" * 72)
+    if not proxies:
+        print("  none.")
+    for row in proxies:
+        wears = row["wears"]
+        worn = any((d / f"{wears}.png").exists() for d in CARD_DIRS)
+        own = planned.get(row["id"])
+        plan_note = (f"plan row -> {own[0]}" if own
+                     else "NO plan row for its own key")
+        print(f"  {row['id']:44s} wears {wears}"
+              f" [{'painted' if worn else 'UNPAINTED'}]  {plan_note}")
+    if proxies:
+        unplanned = [r["id"] for r in proxies if r["id"] not in planned]
+        print(f"\n  {len(proxies)} proxy row(s); {len(unplanned)} with no plan "
+              f"row of their own: {', '.join(sorted(unplanned)) or 'none'}")
+        print("  Each wears its neighbour by design; the bill is what a "
+              "rank-1 pass would have to place (R212).")
 
     # STRUCTURAL, and it gates without `--strict`: a mode face with no
     # portrait request is not an art debt, it is a missing-sprite warn on
