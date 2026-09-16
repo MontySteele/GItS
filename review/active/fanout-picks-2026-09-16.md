@@ -1,60 +1,79 @@
 Status: OPEN (picks for [USER]; nothing here is measured)
 
-# The 2026-09-16 fan-out: what landed, and eight picks
+# The 2026-09-16 fan-outs: what landed, and eight picks
 
-Two fan-outs ran on 2026-09-16 after the epoch-reveal click: 32 PRs in the
-day (#531-#562) and 11 in the evening (#563-#573), all merged by Claude as
-plumbing under R259. Main is green. This page is the evening's close-out:
-what is proven in the running game, what is built and waiting for the next deploy (the proofs-9 row, `EB-782`), and the picks only you can make (QUEUE rows `fanout-picks-2026-09-16 4.1` to `4.8`). Every claim names a file or a PR.
+Three fan-outs ran on 2026-09-16 after the epoch-reveal click: 32 PRs in the
+day (#531-#562), 11 in the evening (#563-#573) and 19 in the afternoon after
+(#574-#592), all merged by Claude as plumbing under R259. Main is green. This
+page is the close-out: what is proven in the running game, what is built and
+waiting for the live look now running (the proofs-10 row, `EB-804`), and the
+picks only you can make (QUEUE rows `fanout-picks-2026-09-16 4.1` to `4.8`).
+Every claim names a file or a PR.
 
-## 1. Proven in the running game (build `0.2.3480+proto`, arm ON)
+## 1. Proven in the running game
 
-- **The Punch-Off is fixed.** The Liyue fight ran to its reward in 17 s at
-  harness speed and 45 s at the game's own speed, with zero "Element limit
-  reached" lines and a 15 KB log, against the 2.5 GB spin it was opened for
-  (`review/records/teyvat-proofs-8a-2026-09-16.md`, item 1).
-- **Every Teyvat event page that was parked is reached**: the Trial's Reject
-  page and Double Down popup, Tinker Time to DONE, the Colossal Flower's
-  third reach both ways, the training dummy's loss branch (same record,
-  items 2-5). The dressed Slippery Bridge prints the card name, a dressed id
-  forces its base event onto the dressed page, three Ancient rooms print
-  their options, Neow's options print their rules text.
-- **33 of 48 face and page rows read PASS on a lane** (`review/records/live-looks-8b-2026-09-16.md`):
-  Set-off previews, the buff strip, Bomb headers, reaction naming, Amber's
-  buff, Lisa's Vulnerable, Lightning Fang's override, Heizou under Shrink,
-  Feint's Plan line, the Plan-screen lethal warning, and the whole Furina
-  Stage batch (three bars in seat order, act lines, the glossary, Curtain
-  Rise both ways and 5/9 under Weak, no Fanfare buff or Encore under the
-  arm).
-- **The register went from 162 open rows to 87**: 90 retired (nine moot with
-  the reframe deletion, two moved to QUEUE, the rest done and seen), 33
-  narrowed to the one thing still owed, 17 minted for what the rounds found
-  (EB-774 to EB-790).
+Build `0.2.3541+proto`, all arms ON, read by two lanes (proofs-9,
+`review/records/teyvat-proofs-9-lane1-2026-09-16.md` and `-lane0-`):
 
-## 2. Built and waiting for the next deploy (proofs-9, `EB-782`)
+- **The Punch-Off is fixed** (proofs-8a, item 1: 17 s at harness speed, 45 s
+  at the game's own, zero "Element limit reached" lines). Every parked Teyvat
+  event page is reached (items 2-5).
+- **Every new wire field is live**: the enemy intent's breakdown folded an
+  elite's Strength and a Tainted modifier (15 to 25), the intent names its
+  side, the master deck reads on every screen, a 39-row removal grid came
+  through whole, Pael's Wing's sacrifice reached the page, a resolution
+  ledger listed an auto-played turn and a random Set off hit by hit.
+- **The three grant ops** (relic, potion, gold) unlocked four rows proofs-8a
+  could not reach: Pael's Eye's extra turn, Flex Potion's fold gone next
+  turn, Neow's Arcane Scroll under Kokomi, The Future of Potions under all
+  three arms.
+- **On the faces**: the Spark sources line, Feint's fold, Ka-pow! with The
+  Boot, the Plan line under Vulnerable (R246), the Stage rename, Rejoice's
+  live preview, Stoke the Fuse's X, two Bombs in set-off order, a
+  conditional companion preview, and Salon Solitaire draws its sigil (the
+  8b placeholder was the base game's own `CARD.SNECKO-NOPE` id).
+- **27 rows retired on those reads**; the register stands at 74 open rows
+  after 9 minted for what the reads found.
 
-Six new wire fields (#569: the enemy intent's breakdown and side, the master
-deck on every screen, the whole removal grid, the reward's alternative
-button and a `sacrifice` verb, a per-card resolution ledger with hits in
-order); the Stage round-three fixes from your PR #476 (#566, #572: five of
-six fixed, the sixth as a hover tip; the chooser's bridge press is a live
-look); the Kokomi Plan tip rewrite and the quarter-hit's one damage kind
-(#567); the harness's seed retry, per-act local-play sessions, the Crystal
-Sphere exit, the matched-telegraph scorer and the seed ledger (#568); 54
-card faces placed at shortlist rank 1 (#564, 54 uncovered -> 0).
+## 2. Built today and waiting for the live look (proofs-10, `EB-804`)
 
-## 3. Found tonight and not yet fixed (rows minted or in flight)
+Running now on both lanes against `0.2.3581+proto` (Kokomi arm OFF on
+purpose, the only condition under which the Kurage Memory rows `EB-247` and
+`EB-248` have a surface):
 
-Every dressed Slippery Bridge hard-codes "Lose 3 HP" where the base charges
-3 + hold-ons; a lane-1 teardown archives lane 0's log; the two Curtain Rise
-mode cards are missing from the atlas; the KurageMemory card throws "Local
-player not found in combat" at every combat start (which is why its two
-rows have no surface to read); `hp_settled` is false on every map screen;
-the bridge has no relic, potion or gold grant op, which kept five rows out
-of reach; nine C# pins fail under the Stage test property and the gate never
-runs it (`EB-781`); the Salon Solitaire relic draws the placeholder
-(`EB-776`). Fixes for most of these were in flight when this page was
-written and their rows carry the PR that lands them.
+- A modded death is heard and waited for (#582, `EB-159`, an E default you
+  can veto: the body's own clip length, Klee 1.0 s, Furina 1.2 s).
+- An old save no longer logs two ValidationErrors per boot: 54 retired card
+  ids carry hidden aliases and the codegen appends the next one on
+  retirement (#585, `EB-790`, E default).
+- Nimble on Barbara moves the Block and never the rider; the rider's payout
+  never took the enchant, only the face lied (#583, nine generated cards).
+- Piles and the master deck print the enchanted face with the hand's fields
+  (#580, #588); the mode chooser's option cards fold the board (#590) and
+  their titles print no raw markup (#588); the Spark sources line covers the
+  whole fight, not the last turn (#590); the removal grid marks the picked
+  row (#588); the page's Written line prints the sheet's literal on branch
+  faces (#590); the Bomb clause is on the tip and the glossary (#590).
+- The nine C# pins that failed under the Stage test property now declare
+  their world, and the gate runs both configurations (#581).
+- The harness frames the whole window: PrintWindow was clipping a 1.5x
+  render, so every frame lost the hand and the enemies (#589, `EB-788`).
+- 29 cards that wore a neighbour's art have their own (#591), and a
+  semicolon no longer hides a face from the text ceiling (#584).
+
+## 3. Found today and rowed, not fixed
+
+Eight shipped power faces run over the 125-character ceiling now that
+semicolons are measured, Fanfare's meter at 234 and Salon Member at 397
+(`EB-801`, a text pass for Fable); Breakwater is offered Nimble and Nimble
+pays it nothing (`EB-798`, E default: planned-only Block is not enchantable,
+you veto); the four Furina power badges draw card portraits shrunk into badge
+slots, an art bill (`EB-65`); the engine's own death wait is still skipped
+for a spine-less body (`EB-805`); the bridge does not build in a bare
+worktree without the game-dir flag (`EB-799`); the two Kaeya rows wear each
+other's named art (`EB-803`); the second capture path may carry the same clip
+and nothing refuses an incomplete frame (`EB-802`); the five arm properties
+disagree on one test's shape (`EB-800`).
 
 ## 4. Picks
 
@@ -101,9 +120,14 @@ Defaults are marked. A pick not taken stands at its default.
    **(1) DEFAULT: leave them as published, struck by the deletion's
    ledger line;** (2) strike them in the file with a one-line note.
 
-Two things to look at, not picks: the 54 new card faces on
+Three things to look at, not picks. The 54 card faces on
 `art/contact_sheet_coverage_2026-09-16.html` (one, `grand_gala`, took a
 picnic chibi at rank 4 while ranks 6 and 7 are literally the Lavish Gala,
-veto by a line), and your PR #476, which needs a rebase because its six new
-row ids collided with rows minted since; the six defects it names are fixed
-or rowed on main (`EB-774`, `EB-775`, `EB-779`, `EB-780`, `EB-783`).
+veto by a line). The 30 faces on
+`art/contact_sheet_eb778_proxies_2026-09-16.html`: `proto_fs_final_bow` is a
+tea party, `proto_fs_warm_reception` is desserts with no figure, six Stage
+rows re-crop pictures Furina's shipped cards already hold, and
+`proto_kk_tide_wall` is a third crop of the same Wish art. And your PR #476,
+which needs a rebase because its six new row ids collided with rows minted
+since; the six defects it names are fixed or rowed on main (`EB-774`,
+`EB-775`, `EB-779`, `EB-780`, `EB-783`).

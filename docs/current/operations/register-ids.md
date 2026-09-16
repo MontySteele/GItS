@@ -1696,3 +1696,30 @@ EB-494 RETIRED 2026-09-16: moved to QUEUE (fanout-picks-2026-09-16 pick 3) -- th
 EB-444 RETIRED 2026-09-16: moved to QUEUE (fanout-picks-2026-09-16 pick 4) -- what the third companion set is now is a design pass, not engineering; the sweep and lint follow the pick.
 EB-415 RETIRED 2026-09-16: live: the upgraded War Banner left Dexterity at 0 before and after its clock (#575).
 EB-673 RETIRED 2026-09-16: live: Shrinker Beetle's Shrink -1 and a hand-set Weak 2 both printed on the player's line; qa_packet._powers drops only a row with neither title nor name (#575). The Kin Priest is a boss; nothing generic is left.
+EB-116 RETIRED 2026-09-16: live: Pael's Eye's extra turn reopened Courtroom Drama's window and the Vulnerable applied, watched not pinned (#586).
+EB-323 RETIRED 2026-09-16: live: a Buff intent named `its own side`, an attack `you` (#586).
+EB-334 RETIRED 2026-09-16: live: a Plan line printed the morning's number against Vulnerable and the carry-out matched, under R246 (#587).
+EB-349 RETIRED 2026-09-16: live: an auto-played turn and a per-hit debuff printed off `player.resolutions` (#586).
+EB-350 RETIRED 2026-09-16: live: a 39-row shop removal grid and the Smith's, `grid_complete` true, past the 25-row viewport (#586).
+EB-363 RETIRED 2026-09-16: live: The Future of Potions opened a non-empty selection under Klee, Kokomi and Furina Stage (#586).
+EB-374 RETIRED 2026-09-16: live: Pael's Wing's sacrifice reached the page as `alternatives`, `sacrifice` and `skip_card_reward alternative_index` (#586).
+EB-445 RETIRED 2026-09-16: live: Stoke the Fuse's badge printed X, the spend, not the gate (#587).
+EB-447 RETIRED 2026-09-16: live: `player.master_deck` on map, shop and rest screens matched the harness count (#586).
+EB-459 RETIRED 2026-09-16: live: Neow's Arcane Scroll added a Kokomi card (#586).
+EB-498 RETIRED 2026-09-16: live: a conditional companion face previewed its number (#587).
+EB-607 RETIRED 2026-09-16: live: an act-2 elite's intent breakdown folded Strength and an unforced Tainted modifier (15 -> 25), every seam non-null (#586).
+EB-610 RETIRED 2026-09-16: live: the Spark sources line printed beside the Spark row (#587); its window is EB-796's.
+EB-611 RETIRED 2026-09-16: live: a multi-hit random Set off filed each hit in order; the choice between bodies was read on a one-enemy board only (#586).
+EB-670 RETIRED 2026-09-16: live: Feint's headline folded on a morning whose Plan carried out and drew nothing (#587).
+EB-684 RETIRED 2026-09-16: live: Flex Potion's +5 read on the turn and was gone from the powers and the face next turn (#586).
+EB-752 RETIRED 2026-09-16: live: Ka-pow! printed The Boot's unblocked-hit term beside the number (#587).
+EB-755 RETIRED 2026-09-16: live: two Bombs placed in one turn printed `1st / 2nd` on the page and the badge (#587).
+EB-774 RETIRED 2026-09-16: live: the arm-keyed Fanfare glossary row printed one sentence across five consecutive screens of one fight (#587).
+EB-775 RETIRED 2026-09-16: live: Let the People Rejoice previewed the live stage reading (#587).
+EB-776 RETIRED 2026-09-16: live: Salon Solitaire draws its spotlight sigil on 0.2.3541 and Klee's relics draw beside it; no `pck resource missing` line; 8b's NOPE was the base's own `CARD.SNECKO-NOPE` id (#587). The spare `relic_salon_solitaire` image #591 placed is unreferenced by the relic and can go with its plan row.
+EB-778 RETIRED 2026-09-16: the proxy bill printed (#584) and 29 of 33 proxies drew their own rank-1 art, `art_of:` off them; the four kept wear the same-id shipped card's picture on purpose (#591).
+EB-782 RETIRED 2026-09-16: the proofs-9 list ran on 0.2.3541: lane 1 (#586) and lane 0 (#587); every item PASS, FAIL (a row each) or NOT DONE with the reason.
+EB-783 RETIRED 2026-09-16: live: the four Stage readers printed the hover tip, not a 0, on an out-of-combat deck screen (#587).
+EB-784 RETIRED 2026-09-16: live: Slippery Bridge's page-two number matched the click cost through `{HpLoss}` (#586).
+EB-785 RETIRED 2026-09-16: live: three lane-1 teardowns archived lane 1's own godot.log (#586).
+EB-786 RETIRED 2026-09-16: live: both Curtain Rise mode faces drew portraits in card_atlas (#586).
