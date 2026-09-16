@@ -3852,7 +3852,7 @@ def test_the_plan_keywords_aim_clause_stays_the_pointer():
     diverge and the keyword must not be emptied into the panel."""
     plan = blindplay.ARM_KEYWORDS["Plan"]
     assert "front non-Minion, or ALL, Minions too" in plan
-    assert ("Your Strength folds in as you write it; the enemy's Vulnerable "
+    assert ("Your Strength folds as you write it; the enemy's Vulnerable "
             "counts next turn.") in plan
 
 
@@ -5178,7 +5178,7 @@ def test_the_plan_word_says_when_each_side_of_the_line_is_read():
     """
     plan = blindplay.ARM_KEYWORDS["Plan"]
 
-    assert "Your Strength folds in as you write it" in plan
+    assert "Your Strength folds as you write it" in plan
     assert "the enemy's Vulnerable counts next turn" in plan
     assert "Weak" not in plan
 
@@ -6544,8 +6544,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-599`: and the modifier clause became a clause about WHEN each
         # side is read -- her Strength at writing time, the target's
         # Vulnerable at the morning.
-        "Plan": [", paid now; next turn: front ",
-                 " folds in as you write it; the ",
+        "Plan": [", paid now; any number wait, in ",
+                 "order, and the badge is their count. Next turn: front ",
+                 " too, into ",
+                 " still standing. ",
+                 " folds as you write it; the ",
                  " counts next turn. A ",
                  "carry-out is not a hit: no when-hit power fires."],
         # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
@@ -10891,8 +10894,9 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
 #: without the cap clause `KokomiPlan.CapSentence` appends. The uncapped half
 #: is `ProtoBakeKuragePower.Localization` verbatim; the capped half is what a
 #: build launched with `GITS_KOKOMI_PLAN_CAP=2` prints.
-PET_FACE = ("Enemies cannot target it. Lasts all combat. Play a Plan card on "
-            "it: it carries out next turn, or at this turn's end if Dusk.")
+PET_FACE = ("Enemies cannot target it, all combat. Holds any number of "
+            "Plans; each carries out next turn, or at this turn's end if "
+            "Dusk.")
 PET_FACE_CAPPED = (PET_FACE
                    + " Carries out at most 2 at the start of your turn;"
                      " the rest wait in order.")

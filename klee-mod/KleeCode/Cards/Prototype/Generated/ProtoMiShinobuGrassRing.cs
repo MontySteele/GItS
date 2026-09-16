@@ -49,7 +49,7 @@ public sealed class ProtoMiShinobuGrassRing : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Grass Ring of Sanctification"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you lost HP this turn, gain 4 additional [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you lost HP this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -57,7 +57,8 @@ public sealed class ProtoMiShinobuGrassRing : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new FoldedBlockVar("BranchBlock", 4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

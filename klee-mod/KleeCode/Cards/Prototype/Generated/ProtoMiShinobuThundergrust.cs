@@ -59,7 +59,7 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Thundergrust"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. If you are below half HP, deal 5 additional damage."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. If you are below half HP, deal {BranchDamage:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -67,7 +67,8 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
         {
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new FoldedDamageVar("BranchDamage", 5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

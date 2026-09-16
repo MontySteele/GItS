@@ -7300,7 +7300,8 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         return []
     if not str(card.get("id") or "").startswith("proto_"):
         return []
-    if eff.get("op") == "choose_one":
+    modal = eff.get("op") == "choose_one"
+    if modal:
         # `EB-746`. THE SAME TWO PRINTED NUMBERS, ONE SHAPE OVER. A Spend face
         # is a CHOICE now -- "Deal 7" or "Spend 3: deal 13 instead" -- and the
         # two arms it prints are the two modes rather than the two branches of
@@ -7355,13 +7356,62 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         return [("PlainDamage", int(els["amount"]), both, cls),
                 ("BranchDamage", int(then["amount"]), both + extra, cls)]
 
+    # `EB-498`. THE ONE-ARMED "ADDITIONAL" SHAPE, which is the same defect
+    # without an `else` to compare against.
+    #
+    # THE FIND (Klee r17, and `EB-438`'s census one row over). Shinobu --
+    # Thundergrust printed "Deal 8 damage. If you are below half HP, deal 5
+    # additional damage" at 29 of 62 HP and removed 13. Both numbers were true
+    # of a board nobody could see from the face: the 8 renders through the
+    # card's one `CalculationBase` triple and the 5 was a LITERAL, so the
+    # branch folded nothing -- not Strength, not the Spotlight, not the
+    # enemy's Vulnerable -- and the face under-reported the card by whatever
+    # those came to.
+    #
+    # WHY IT WAS NOT ALREADY THIS FUNCTION'S. A one-armed conditional prints
+    # ONE number and a two-armed one prints two, so the pair above had nothing
+    # to pair it with. That is a fact about the face's shape and not about the
+    # fold: the branch number is dealt through the same `DamageCmd.Attack` the
+    # top-level clause uses, so it takes the same terms and has the same right
+    # to print them. The var family is `EB-624`'s, which the row's own next
+    # action names -- the card's ONE `CalculationBase` triple is spent on the
+    # top-level clause (and, on a Companion row, on the Spotlight fold), and
+    # `FoldedDamageVar` / a named `BlockVar` is the second declared family that
+    # exists precisely because a card cannot have two triples.
+    #
+    # AIMED ONLY, `folded_branch_damage`'s own rule above: a `random_enemy`
+    # arm has no body for the preview to fold (Fischl's Oz is the row that
+    # bites), and an `all_enemies` arm would print one number for a board that
+    # takes several. Either keeps its literal.
+    if (not modal and then is not None and els is None
+            and then.get("target") == "enemy"):
+        both = conditional_damage_upgrade(card)
+        extra = (conditional_then_damage_upgrade(card)
+                 if _is_then_first_damage(card, then) else 0)
+        return [("BranchDamage", int(then["amount"]), both + extra,
+                 "FoldedDamageVar")]
+
     then = _one_printed(eff.get("then"), "block")
     els = _one_printed(eff.get("else"), "block")
+    if not modal and then is not None and els is None:
+        # `EB-498`'s block half, and it is four of the row's five census
+        # entries: "gain 4 additional Block" is a number Dexterity and Frail
+        # move exactly as they move the clause above it. A named `BlockVar` is
+        # the game's own var under a token of its own, which is what lets two
+        # of them stand on one face (`EB-737`'s argument, verbatim).
+        return [("BranchBlock", int(then["amount"]),
+                 conditional_block_upgrade(card), "FoldedBlockVar")]
     if then is None or els is None:
         return []
     both = conditional_block_upgrade(card)
-    return [("PlainBlock", int(els["amount"]), both, "BlockVar"),
-            ("BranchBlock", int(then["amount"]), both, "BlockVar")]
+    # `EB-388` / `EB-498`: `FoldedBlockVar` rather than a bare named
+    # `BlockVar`. It IS the game's own var plus the Spotlight fold the emitted
+    # play already applies (`PrintedBlock`), and `PrintedBlock` is the identity
+    # on anything that is not a spotlighted Companion row -- so every Furina
+    # Stage face here reads exactly what it read before, and Itto's modal
+    # stops printing 6 while gaining 9 under Guest Cast.
+    return [("PlainBlock", int(els["amount"]), both, "FoldedBlockVar"),
+            ("BranchBlock", int(then["amount"]), both, "FoldedBlockVar")]
 
 
 def _is_then_first_damage(card: dict, eff: dict) -> bool:
@@ -8185,9 +8235,12 @@ def _emit_branch_op(
         # byte-for-byte the call `build_body`'s top-level all-enemies arm
         # makes: the quarter is computed in ONE place so the printed face and
         # the hit cannot round differently.
+        # `EB-693`: it is ATTACK damage with all modifiers, so the call takes
+        # the card and the play -- `DamageCmd.Attack` needs a source for the
+        # element and for every power that answers an attack (Slow included).
         lines.append(
             "await KokomiRules.QuarterMaxHpAll("
-            "choiceContext, Owner.Creature);")
+            "choiceContext, Owner.Creature, this, cardPlay);")
     elif op == "mend":
         # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Byte-for-byte the call
         # `build_body`'s top-level arm makes, because it IS the same rule: one
@@ -9207,11 +9260,11 @@ def build_body(
                 _target_guard(lines, ctx)
                 lines.append(
                     "await KokomiRules.QuarterMaxHp(choiceContext, "
-                    "Owner.Creature, cardPlay.Target);")
+                    "Owner.Creature, cardPlay.Target, this, cardPlay);")
             else:
                 lines.append(
                     "await KokomiRules.QuarterMaxHpAll("
-                    "choiceContext, Owner.Creature);")
+                    "choiceContext, Owner.Creature, this, cardPlay);")
 
         elif op == "block_half_damage":
             # THE INAZUMA ARM (QUARANTINED). Gorou's second clause. No number
