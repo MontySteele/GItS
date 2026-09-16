@@ -683,6 +683,55 @@ def test_a_teardown_of_a_lane_one_embark_touches_only_lane_one(
     assert not (tmp_path / "game").exists()      # nothing shared was touched
 
 
+def test_a_lane_one_teardown_archives_lane_ones_log_and_never_appdata(
+        tmp_path, monkeypatch):
+    """proofs-8a, 2026-09-16. Five of six archives were the OTHER lane's game.
+
+    `EB-766` copies the session's `godot.log` aside at teardown. `teardown`
+    bound the thread to the lane's wire but rebuilt the `Session` with no
+    `instance=`, and `Session.log_path` resolved a `None` instance straight
+    to `%APPDATA%` -- lane 0's tree, the owner's own game -- contradicting
+    the rule its own `__init__` states: `None` means "whatever this thread is
+    already on", not "lane 0". It is why an Ironclad run's "own" log appeared
+    to load two Furina prototype card faces.
+
+    Same family as `EB-210` and `EB-435`: the question a lane answers is
+    which USER TREE, not just which port, and a read that skips the tree
+    crosses lanes without ever crossing a port.
+    """
+    monkeypatch.setattr(embark, "LOG_DIR", tmp_path)
+    monkeypatch.setattr(soak, "game_dir", lambda: tmp_path / "game")
+    monkeypatch.setenv(instances.LANE_ENV, "")
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+
+    ledger = tmp_path / "reversibility-20260916-100000.json"
+    ledger.write_text(json.dumps([]), encoding="utf-8")
+    _sidecar(tmp_path, "20260916-100000", "lane1", ledger)
+
+    seen: list[Path] = []
+    monkeypatch.setattr(soak.Session, "archive_log",
+                        lambda self, tag="": seen.append(self.log_path()))
+
+    embark.teardown(lane=1)
+
+    assert seen, "the teardown never reached archive_log"
+    lane1 = instances.wire_lane("lane1").log_path()
+    assert seen[0] == lane1, f"archived {seen[0]}, wanted {lane1}"
+    assert "gits-lanes" in str(seen[0]).replace("\\", "/")
+    assert str(tmp_path / "appdata") not in str(seen[0])
+
+
+def test_an_unbound_lane_zero_session_still_reads_the_process_appdata(
+        monkeypatch, tmp_path):
+    """The other half of the same rule, and the compatibility claim: with no
+    instance and no thread binding, `log_path` is byte-for-byte the pre-lane
+    answer."""
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+    sess = soak.Session("20260916-100001", do_setup=False, intent="")
+    assert sess.log_path() == (tmp_path / "appdata").joinpath(
+        *instances.LOG_RELATIVE)
+
+
 def test_a_teardown_refuses_another_lanes_embark(tmp_path, monkeypatch):
     monkeypatch.setattr(embark, "LOG_DIR", tmp_path)
     _sidecar(tmp_path, "20260902-100000", "lane0", tmp_path / "l0.json")
