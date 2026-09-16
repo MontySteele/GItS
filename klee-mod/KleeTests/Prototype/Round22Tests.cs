@@ -40,11 +40,16 @@ public class Round22Tests
     //
     // THE EARLY RETURN WAS THE DEFECT. `EB-522` returned on a non-null target,
     // on the reading that the base var had already answered for that creature.
-    // It has not: `CalculatedVar.UpdateCardPreview` runs the DEALER's hooks
-    // and no target-side term at all, which is exactly `EB-589`'s finding one
-    // surface over ("the face is right about four modifiers and silent about
-    // the biggest one"). So the aimed body is a FALLBACK ORDER now, not an
-    // exclusion.
+    // So the aimed body is a FALLBACK ORDER now, not an exclusion.
+    //
+    // AND THE REASON GIVEN FOR IT WAS WRONG, which `EB-328` settled: the base
+    // var HAD already folded that creature's side, because
+    // `Hook.ModifyDamage` walks `CombatState.IterateHookListeners` -- every
+    // creature's powers on the board, not "the dealer's hooks" -- and hands
+    // each of them the target. The row's finding stands (an aimed face must
+    // fold the aimed body) and its mechanism was the wrong one: the fix is to
+    // give the game's own var the body, not to multiply a second Vulnerable
+    // over its answer. Pair table: `HitOrderPinTests`.
 
     [Fact]
     public void The_folded_face_reads_the_aimed_body_then_the_front_enemy()
@@ -52,9 +57,10 @@ public class Round22Tests
         var source = Source("Powers/Prototype/FrontFoldedDamageVar.cs")
             .Replace("\r\n", "\n");
 
-        Assert.Contains(
-            "var body = target ?? KokomiPlan.FrontEnemy(card.Owner?.Creature);",
-            source);
+        // The aimed body first, the front enemy second -- now expressed as the
+        // BODY HANDED TO THE GAME'S VAR (`EB-328`).
+        Assert.Contains("HitOrder.BodyForPreview(", source);
+        Assert.Contains("KokomiPlan.FrontEnemy(card.Owner?.Creature)", source);
         // The exclusion is gone, and its absence is the row.
         Assert.DoesNotContain("|| target != null", source);
     }
@@ -62,14 +68,16 @@ public class Round22Tests
     [Fact]
     public void And_it_is_still_one_fold_through_the_shared_call()
     {
-        // `EB-265`'s rule: the fold is the call `ElementalHit.Deal` makes on
-        // the same creature a beat later, so a face that disagrees with the
-        // board is a red test rather than a number a seat stops trusting.
+        // `EB-265`'s rule, with `EB-328`'s correction to which call it is: the
+        // fold is the engine's own `Hook.ModifyDamage`, run once over one
+        // named body, so a face that disagrees with the board is a red test
+        // rather than a number a seat stops trusting.
         var folded = typeof(FrontFoldedDamageVar)
             .GetMethod("UpdateCardPreview", All)!;
         var calls = Il.Calls(folded);
 
-        Assert.Single(calls.Where(c => c == "SimDamagePipeline.TargetMods"));
+        Assert.Single(calls.Where(c => c == "HitOrder.BodyForPreview"));
+        Assert.DoesNotContain("SimDamagePipeline.TargetMods", calls);
         Assert.Contains(calls,
             c => c.EndsWith("CalculatedDamageVar.UpdateCardPreview",
                             StringComparison.Ordinal));

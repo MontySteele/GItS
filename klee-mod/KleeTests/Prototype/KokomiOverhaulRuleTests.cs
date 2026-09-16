@@ -1071,16 +1071,20 @@ public class KokomiOverhaulRuleTests
         var folded = typeof(FrontFoldedDamageVar)
             .GetMethod("UpdateCardPreview", HeadlessGame.All)!;
         var calls = Il.Calls(folded);
-        // The base var runs first, so the DEALER's side of the face is the
-        // game's own answer and this adds nothing to it ...
+        // The game's own var does the whole fold, so nothing about the
+        // multiplier or the printed hole moves ...
         Assert.Contains(calls,
             c => c.EndsWith("CalculatedDamageVar.UpdateCardPreview",
                             StringComparison.Ordinal));
         // ... the body it falls back to is the Plan line's own ...
         Assert.Contains("KokomiPlan.FrontEnemy", calls);
-        // ... and the fold is the ONE call `ElementalHit.Deal` makes on the
-        // same creature a beat later, not a second expression (`EB-265`).
-        Assert.Contains("SimDamagePipeline.TargetMods", calls);
+        // ... and `EB-328`: that body is HANDED TO the game's var as its
+        // target rather than folded on top of its answer, so the target's
+        // Vulnerable lands once, and lands in phase 2 where it belongs
+        // instead of after the cap. The second expression is gone;
+        // `HitOrderPinTests` is the pair table saying what it was costing.
+        Assert.Contains("HitOrder.BodyForPreview", calls);
+        Assert.DoesNotContain("SimDamagePipeline.TargetMods", calls);
     }
 
     // --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) -----------
