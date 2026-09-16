@@ -725,7 +725,15 @@ def test_an_unbound_lane_zero_session_still_reads_the_process_appdata(
         monkeypatch, tmp_path):
     """The other half of the same rule, and the compatibility claim: with no
     instance and no thread binding, `log_path` is byte-for-byte the pre-lane
-    answer."""
+    answer.
+
+    `game_dir` is stubbed for the same reason the lane tests above stub it:
+    an instance-less `Session` resolves the install out of
+    `klee-mod/local.props`, and the CI runner has no game installed --
+    `SystemExit` there is a fact about the runner, not about the lane rule
+    this pins.
+    """
+    monkeypatch.setattr(soak, "game_dir", lambda: tmp_path / "game")
     monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
     sess = soak.Session("20260916-100001", do_setup=False, intent="")
     assert sess.log_path() == (tmp_path / "appdata").joinpath(
