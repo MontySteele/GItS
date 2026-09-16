@@ -260,9 +260,8 @@ TOKEN_PAYOFF_POWERS = {
         "genuinely multiplicative Fanfare read in the pool."),
     "fanfare_attack_per5": (
         "fanfare", ("scaling",),
-        "prototype-surface.yaml proto_fr_rapturous_applause: the row above's "
-        "clause at the reframe arm's granularity (per 5, on a meter that "
-        "ranges 0-15). Same side of the line, same tags."),
+        "the row above's clause at a retired arm's granularity (per 5, on "
+        "a meter that ranges 0-15). Same side of the line, same tags."),
     "fanfare_delta_block": (
         "fanfare", ("block",),
         "furina-cards.yaml unheard_confession: 'gain 1 Block whenever Fanfare "

@@ -18,7 +18,6 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
                                         BOMB_REACTION_CLAUSE,
                                         REACTION_ELEMENTS,
-                                        SALON_ARRIVAL_NOTE,
                                         AUTO_TURN_NOTE,
                                         BUFF_INTENT_CLAUSE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
@@ -27,7 +26,6 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ONE_USE_DISCOUNT_NOTE,
                                         ONE_USE_RIDER_NOTE,
                                         PER_HIT_NOTE,
-                                        LAST_SALON_NOTE,
                                         MAP_FLOOR_LINE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
@@ -40,7 +38,6 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
-                                        LAST_SALON_NOTE,
                                         METER_CAPPED_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
@@ -65,7 +62,6 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
                                         SPARK_SOURCES_LINE,
-                                        SPOTLIGHT_WINDOW_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
                                         TURN_ORDER_NOTE)
 from understudy.blindplay_observe import observation
@@ -422,72 +418,6 @@ def _board_note_wanted(pl: dict[str, Any]) -> bool:
     return any(said["board_read"]
                for said in pl["carried_out"] + pl["fired_now"]
                + (pl.get("summon_hits") or []))
-
-
-def _render_performance(row: dict[str, Any]) -> str:
-    """One Salon member's act (`EB-405`): who, on whom, for how much, and what
-    the body is wearing afterwards.
-
-    THREE FACTS AND NOT FOUR. The `paid` half is on the line because it is the
-    difference between the printed number and three-quarters of it
-    (`SalonConstants.DryDamageMultiplier`), and a reader watching a member act
-    small with an empty buffer is owed the reason. The aura clause is printed
-    only for a member that AIMED: the Usher gains Block and touches nobody, so
-    a sentence about what it left on a body would be about no body.
-    """
-    line = f"- **{row['member']}**"
-    if row["target"]:
-        line += (f" hit {row['target']} for {row['amount']}"
-                 + (f" {row['element']}" if row["element"] else ""))
-        line += (f", and it is wearing a {row['aura']} aura" if row["aura"]
-                 else ", and left no aura on it")
-    else:
-        line += f" gave you {row['amount']} Block"
-    if not row["paid"]:
-        line += " (dry: it could not pay its Encore, so it acted at "
-        line += "three-quarters)"
-    return line + "."
-
-
-def _render_evoke(row: dict[str, Any]) -> str:
-    """One Evoke (`EB-564`): who bowed, what the bow did, and what it minted.
-
-    THE DEFECT, in the r14 lane-1 seat's words: "The Salon log printed the two
-    performances and never printed the Evoke. I only knew it had happened by
-    reading the auras." It fired twice in one elite -- the kit's biggest single
-    beat -- and the whole evidence was Encore jumping by three and every body
-    coming out wearing Hydro.
-
-    IT IS ITS OWN SENTENCE AND NOT A PERFORMANCE LINE. A bow does things a
-    performance never does: Chevalmarin's touches EVERY enemy and names no
-    body, and every Evoke leaves the member. So the line says the member left,
-    then what the bow did, then what it paid -- and the clauses that do not
-    apply to this member are simply absent, `_render_performance`'s own rule
-    about the Usher and the aura.
-    """
-    line = f"- **{row['member']}** took its final bow — an EVOKE, so it left "
-    line += "the stage"
-    did: list[str] = []
-    if row["aura_all"]:
-        did.append("left Hydro on every enemy")
-    if row["target"]:
-        did.append(f"hit {row['target']} for {row['damage']} Hydro")
-    if row["block"]:
-        did.append(f"gave you {row['block']} Block")
-    if row["encore"]:
-        did.append(f"granted {row['encore']} Encore")
-    if row["fanfare"]:
-        # THE FOCUS MULTIPLIER IS ON THE LINE because it is the whole
-        # difference between an Evoke and a performance the reader can see
-        # from the numbers -- the Fanfare is larger BECAUSE the bow cost a
-        # member, and the Focus term counted `focus_mult` times.
-        mult = (f", its Focus counting {row['focus_mult']} times"
-                if row["focus_mult"] > 1 else "")
-        did.append(f"minted {row['fanfare']} Fanfare{mult}")
-    if did:
-        line += ". It " + ", ".join(did[:-1] + [f"and {did[-1]}"]
-                                    if len(did) > 1 else did)
-    return line + "."
 
 
 #: A per-turn ALLOWANCE stated in a power's own sentence (`EB-467`). The
@@ -1655,69 +1585,6 @@ def render(obs: dict[str, Any]) -> str:
         # receipt for what has already happened -- and because the section
         # below prints only on a turn something acted, while the question "who
         # is in front" is asked on every turn including the quiet ones.
-        if c.get("salon") and c["salon"].get("company"):
-            company = c["salon"]["company"]
-            out += ["", "## Your Salon", ""]
-            for i, member in enumerate(company):
-                out.append(f"- **{member}**"
-                           + (" — FRONT: the next Companion card you play "
-                              "performs this one, and then sends it to the "
-                              "back" if i == 0 else ""))
-            # `EB-585`. THE ARRIVAL THAT PERFORMED AND WAS NOT FILED. On the
-            # fight's first screen an occupied stage was occupied by the
-            # relic's arrival, and an arrival performs -- so an empty
-            # performance list here is a receipt that did not reach the feed,
-            # not a member that did nothing. Round one and an empty list are
-            # the only board the sentence is true on.
-            if c["round"] == 1 and not c["salon"]["performed"]:
-                out += ["", SALON_ARRIVAL_NOTE]
-        if c.get("salon") and (c["salon"]["performed"]
-                               or c["salon"]["replayed"]
-                               or c["salon"].get("evoked")):
-            # `EB-405`. WHAT THE STAGE DID THIS TURN, one act per line --
-            # `EB-198`'s contract, the same one the carry-out block is under.
-            #
-            # THE TARGET AND THE AURA ARE THE POINT. "Crabaletta chose its own
-            # enemy and left a Hydro aura on a body the seat had not picked"
-            # (Furina round 4, run 1, (c) 4) is a complaint about a decision
-            # the reader could not see, in a kit whose readable decision is
-            # which element lands on which aura. The member names its body, and
-            # the line ends with what that body is WEARING -- read after the
-            # hit, so a reaction that consumed the aura says "and left no
-            # aura" rather than claiming Hydro that is not there.
-            out += ["", "## What your Salon did this turn", ""]
-            # `EB-582`. THE EVOKE LEADS, because that is the order the card
-            # promises and the order the engines resolve. `EB-564` put the bow
-            # LAST here on the reading that "an Evoke follows the acts above",
-            # and the r15 lane-1 seat read the consequence off the page: the
-            # Deploy word says "a full stage [gold]Evokes[/gold] the front
-            # member first", the arriving member performs AFTER that bow, and
-            # the page printed the two the other way round (`EB-582`, Furina
-            # r15 lane 1 (c) 2).
-            #
-            # THE BOUNDARY, stated because the block cannot hide it: these are
-            # two lists and not one stream, so the grouping orders them by
-            # CLASS and cannot interleave. It is right for every turn whose
-            # Evoke came from a deploy -- which is every Evoke that has a
-            # performance beside it at all -- and the one turn it cannot order
-            # is a Companion play followed by a full-stage deploy, where the
-            # first performance belongs above the bow. Ordering that needs a
-            # per-act sequence on the wire, which the ledger does not carry.
-            out += [_render_evoke(row) for row in c["salon"].get("evoked", [])]
-            out += [_render_performance(row) for row in c["salon"]["performed"]]
-            # `EB-420`. THE PLAY BEHIND ONE OF THE ACTS ABOVE, named. The
-            # round-5 seat counted "two Crabaletta lines ... for three
-            # Companion-card plays' worth of triggers" and found "no line
-            # anywhere on the screen said Duet" -- and a performance list
-            # cannot say which of its acts came from a replay.
-            #
-            # `EB-464` FLIPPED THE SECOND HALF OF THE SENTENCE. The extra play
-            # used to perform nobody; it performs now, so the acts above are no
-            # longer one short of the plays and the line says what happened
-            # instead of what did not.
-            out += [f"- **{name}** was played an extra time, and the extra "
-                    "play performed as well."
-                    for name in c["salon"]["replayed"]]
         # `EB-681`. WHAT REACTED THIS TURN, under the board that reacted and
         # above the hand -- a receipt for the beat just watched, filed where
         # the other receipts on this page are (the carry-out block, the
@@ -1868,28 +1735,6 @@ def render(obs: dict[str, Any]) -> str:
         # figure on each of those faces came from -- one field of the feed,
         # printed unchanged, which may or may not already count the buff.
         out += _attack_buff_note(you, c["hand"])
-        # `EB-567`. THE WINDOW, BEFORE THE REFUSAL RATHER THAN AFTER IT. Under
-        # the arm the Spotlight's price is the opening Encore exactly, and
-        # both r14 seats learned that from a refusal one action too late.
-        #
-        # `EB-600` TOOK THE TURN-ONE GATE OFF, because the rule it was built
-        # on is false. The note used to print on round 1 only, on the reading
-        # that "the window is already open or already shut" by round 2; Encore
-        # is REFILLABLE, and both r16 lanes said so. Lane 1: "Aria and Hearts
-        # Swelling grant Encore without performing, and I broke the rule on
-        # turn 1 of the run." Lane 2 lit it after a performance in three
-        # fights off Chevalmarin's grant of 3. A window that reopens has to be
-        # stated on the turn it reopens on, so the note rides the CARD being
-        # in hand and nothing else.
-        #
-        # GATED ON THE SALON BLOCK, which is the page's own test for "this
-        # build plays the reframe": the block is sent only under
-        # `FurinaReframe.ManualLiveFor`, and a release build's selector costs
-        # no Encore and would make this sentence false.
-        if (c.get("salon") is not None
-                and any(card["title"] == "Ethereal Spotlight"
-                        for card in c["hand"])):
-            out += ["", SPOTLIGHT_WINDOW_NOTE]
         out += ["", _OTHER_SIDE, ""]
         for e in c["enemies"]:
             # `EB-496`: the letter in brackets after the name, where the card
@@ -2199,19 +2044,6 @@ def render(obs: dict[str, Any]) -> str:
                     LAST_MORNING_NOTE, ""] + _render_carry_out(lm)
             if _board_note_wanted(lm):
                 out += ["", CARRY_OUT_BOARD_NOTE]
-        # `EB-604`: the Salon's half of the same receipt, in the combat page's
-        # own order -- the Evoke leads (`EB-582`), then the performances, then
-        # the extra plays. No body is renamed here, because a reward screen
-        # has no enemy list to map a combat id onto; the mod's own title
-        # stands, which is the trade the carry-out block above already makes.
-        if obs.get("last_salon"):
-            ls = obs["last_salon"]
-            out += ["", "## What your Salon did in the fight's last beat", "",
-                    LAST_SALON_NOTE, ""]
-            out += [_render_evoke(row) for row in ls["evoked"]]
-            out += [_render_performance(row) for row in ls["performed"]]
-            out += [f"- **{name}** was played an extra time, and the extra "
-                    "play performed as well." for name in ls["replayed"]]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 

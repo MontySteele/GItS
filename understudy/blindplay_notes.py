@@ -24,9 +24,8 @@ from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
                                         CRYSTALLIZE_BLOCK, SHATTER_DAMAGE,
-                                        FRAIL_BLOCK_PCT, FURINA_OPENING_ENCORE,
+                                        FRAIL_BLOCK_PCT,
                                         SHRINK_DEALT_PCT,
-                                        SPOTLIGHT_ENCORE_COST,
                                         VULNERABLE_TAKEN_PCT,
                                         WEAK_DEALT_PCT)
 
@@ -434,45 +433,6 @@ ATTACK_BUFF_NOTE = (
     "for it, and does no arithmetic on it. So a row may already count your "
     "{n} or may not, and this page cannot say which -- both have been seen "
     "under one live buff.*")
-
-# `EB-585`. THE ARRIVAL THAT PERFORMED AND WAS NOT FILED.
-#
-# THE FIND (Furina r15 lane 1, fight 4). "Stage at turn one: `Crabaletta`.
-# Fogmog opened at 68/74, i.e. the free performance had landed, but this screen
-# printed no *What your Salon did this turn*." Five of the run's six fights
-# printed it.
-#
-# THE READ (2026-09-07) ELIMINATES BOTH OF THE ROW'S CANDIDATES. The page is
-# not dropping the row: it prints every act the ledger files, and the arrival
-# is filed inside `SalonMemberPower.PerformMember` like any other. Nor does the
-# turn-start clear beat it -- `FurinaReframeOpening.FieldOpeningMember`'s own
-# header settles the order ("the game broadcasts to powers before the
-# subscribed mod models ... on turn 1 the power does not exist yet anyway"),
-# and `PerformMember`'s no-hittable-body early return is refused by the r15
-# evidence, which is 6 HP off the body. What is left is a read that beat the
-# ledger write, and a third candidate the row had not named:
-# `FurinaReframeLedger.For` drops the WHOLE table whenever the combat instance
-# it last saw changes, so any call on a creature whose `CombatState` has moved
-# empties it before returning.
-#
-# WHAT THE PAGE CAN SAY MEANWHILE, and it is `AUTO_TURN_NOTE`'s shape: the
-# stage list is the arm's own evidence that a member is up, an arrival performs
-# by construction (a deploy performs, and the relic's is a deploy), and the
-# receipt for it is not on this screen's feed. So the page states the act and
-# states the gap, rather than leaving a reader to read the silence as "nothing
-# happened" -- which is exactly the reading the r15 seat had to argue itself
-# out of, off an enemy's HP bar.
-#
-# ROUND ONE AND AN EMPTY LIST, which is the only board the sentence is true on:
-# a stage occupied on the fight's first screen was occupied by the arrival, and
-# a stage that has already acted has its act printed under the heading below.
-SALON_ARRIVAL_NOTE = (
-    "*The fight opened with the stage already lit, and an arriving member "
-    "performs on arrival for free. That performance is not on this screen's "
-    "data feed -- the acts below are what the game filed, and it filed nothing "
-    "for the arrival -- so the enemy HP above is the board that performance "
-    "LEFT and not a report of it.*")
-
 # `EB-605`. TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE.
 #
 # THE FIND (Klee r22 lane 1 re-run (c) 2, fight 6 turn 4). "`Bomb 6 ... Bomb
@@ -613,22 +573,6 @@ CARRY_OUT_BOARD_NOTE = (
     "the whole beat, so anything the Plan set off is inside the number. The "
     "figure on the Plan's own line is what its first clause produced, which "
     "is a different quantity whenever that clause is not damage.*")
-
-# `EB-329`, the fight-ended half. The round-5 act-1 seat banked two Plans for
-# an exactly lethal morning and wrote: "the next screen was the reward screen
-# -- the two Plans killed it at the top of turn 3 as computed". Computed, and
-# never confirmed: a morning that ends the fight is the one morning no battle
-# screen is ever drawn for. The mod now records its line on the way out
-# (`KokomiPlan.ResolveEntry`'s finally) and the bridge sends the record on a
-# screen with no combat behind it, so the receipt has somewhere to land.
-# `EB-604`. THE SAME RECEIPT ONE ARM OVER: a lethal Evoke or performance ends
-# the fight and the next screen is the reward screen, so the winning beat had
-# no line anywhere (Furina r16 lane 2, r14 lane 1).
-LAST_SALON_NOTE = (
-    "*The fight is over. This is what your Salon did in its last beat -- "
-    "printed here because a performance or an Evoke whose kill ends a fight "
-    "never reaches a battle screen.*")
-
 # `EB-360`. A SHOP THE FEED SENT NOTHING FOR.
 EMPTY_SHELVES_NOTE = (
     "*The feed returned no shelves for this shop, so nothing is listed. This "
@@ -1020,53 +964,6 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
                             "on you never cuts it, before or after you write "
                             "it; a planned BLOCK is yours, so Frail does cut "
                             "it.")
-
-# `EB-567`. THE KIT'S FIRST DECISION, TAUGHT BY REFUSAL ONE ACTION TOO LATE.
-#
-# WHAT BOTH r14 SEATS MET. Ethereal Spotlight costs 2 Encore, the fight opens
-# with 2, and any performance spends one -- so the window is turn one before
-# anything performs, and it closes for the whole combat. Lane 1 lost it in
-# fight one ("by my second card the Spotlight was locked out") and played it
-# first in every fight after; lane 2 derived the same rule the same way. Both
-# seats learned it from the REFUSAL, which arrives after the turn it would
-# have changed.
-#
-# THE REFUSAL KEEPS ITS TEXT (`EB-364`): a card short of its price still says
-# so, and this note is not a second copy of that sentence. It is the thing the
-# refusal cannot be -- a sentence that arrives BEFORE the decision.
-#
-# PRINTED WHEREVER THE CARD IS IN HAND. It used to print on turn one and only
-# there, on the reading that by any later turn "the window is already open or
-# already shut"; `EB-600` is that reading being wrong, because Encore refills.
-#
-# `EB-586` TOOK THE ADVICE OUT AND LEFT THE WINDOW, in step with
-# `FurinaRiderTips.ForSpotlightWindow`. "Light your Companion cards before
-# anything performs" is a RECOMMENDATION, and the r15 lane-1 seat refused it on
-# turn one of fight one and was right to: the starter holds two Companion
-# cards, the Spotlight costs the whole opening Encore, and "the correct first
-# move is to refuse the screen's own advice". Lane 2 paid it in most fights and
-# zeroed Encore twice, which is where nine of its eleven HP went. The decision
-# is REAL on both lanes, so this states the window and the price and stops --
-# which is what every other line on this page does.
-# `EB-600` REPLACED `EB-586`'s WORDING, because what it left behind was still
-# false. "It is this turn's first action or not this fight" describes a window
-# that only ever shuts, and BOTH r16 lanes broke it. Lane 1: "Aria and Hearts
-# Swelling grant Encore without performing, and I broke the rule on turn 1 of
-# the run." Lane 2 lit it AFTER a performance in three fights, off
-# Chevalmarin's grant of 3, and called working that out "the best moment in
-# the kit". So the line states the RULE -- the price, what spends it, what
-# refills it -- and lets the player derive the window; and its last clause is
-# R260's free OPENING arrival (`EB-558`), which is the fight's own first
-# performance on every board and spends nothing. `EB-638`: "an arrival's"
-# read as every deploy, and a card's deploy pays its 1, so the clause names
-# the opening one. Same sentence as `FurinaRiderTips.ForSpotlightWindow`.
-SPOTLIGHT_WINDOW_NOTE = (
-    f"*It costs {SPOTLIGHT_ENCORE_COST} Encore of the "
-    f"{FURINA_OPENING_ENCORE} you open with. Anything that performs spends 1; "
-    "a card that grants Encore reopens the window. The opening arrival's "
-    "performance is free.*")
-
-
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
              "`(debuff)`, because it is neither: it is the element left "
              "clinging to a body, and it is what an Elemental Reaction needs "
@@ -2321,8 +2218,7 @@ _REACTION_WORD_RE: dict[str, "re.Pattern[str]"] = {
 # supplies it on arrival because a deploy performs.
 #
 # MATCHED ON THE MEMBER'S NAME, which is the one handle every surface carries --
-# the deploy card's face names her, the member tip is titled with her, and the
-# stage line (`furina_salon.company`) is a list of exactly these names. The
+# the deploy card's face names her and the member tip is titled with her. The
 # Usher is absent on purpose and it is not an omission: he performs BLOCK and
 # supplies no element at all, so a screen holding only his deploy really can
 # reach nothing.

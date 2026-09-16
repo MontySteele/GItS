@@ -60,7 +60,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from tier0 import constants as C                            # noqa: E402
 from tier0.content import loader                            # noqa: E402
-from tier0.engine import furina_reframe                     # noqa: E402
 from tier05 import rewards                                  # noqa: E402
 
 
@@ -121,13 +120,11 @@ def _arm(module=C, **flags):
     """Read the content tree under a flag set, then put it back.
 
     `module` is WHERE the flags live, and it DEFAULTS to `constants.py`
-    because that is where four of the five arms declare theirs -- so every
-    caller that names only flags keeps working unchanged. The fifth, the
-    Furina reframe, declares its master in `tier0/engine/furina_reframe.py` on
-    purpose: a flag in `constants.py` is read by the parity gate and the
-    constant census, and that module's header gives the argument in full. A
-    helper that could only reach `C` would have to skip the one arm whose flag
-    is quarantined hardest, which is exactly the arm nobody is watching.
+    because that is where every arm that moves a starter declares theirs --
+    so every caller that names only flags keeps working unchanged. It stays a
+    parameter because an arm may keep its master flag in its own quarantined
+    engine module rather than in `constants.py`, and a helper that could only
+    reach `C` would have to skip the arm whose flag is quarantined hardest.
     """
     old = {k: getattr(module, k) for k in flags}
     try:
@@ -151,10 +148,6 @@ ARMS: tuple[tuple[str, object, dict], ...] = (
     ("kokomi_overhaul", C, {"KOKOMI_OVERHAUL": True}),
     ("klee_overhaul", C, {"KLEE_OVERHAUL": True}),
     ("spark_alt_cost", C, {"SPARK_ALT_COST_ENABLED": True}),
-    # R254: her starter reader. One `basic` row swapped for one `basic` row,
-    # so the arm's delta ought to be empty -- which is the assertion, not an
-    # exemption.
-    ("furina_reframe", furina_reframe, {"FURINA_REFRAME": True}),
 )
 
 

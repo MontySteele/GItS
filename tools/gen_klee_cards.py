@@ -2949,8 +2949,8 @@ def salon_member_aim(eff: dict) -> str:
     what it was before -- `take_your_bow` and `change_the_bill` are the shipped
     rows that prove it, and a generated tree that moved for a feature no
     shipped card uses would be a diff nobody could read. The sim spells the
-    same sentinel as the string "front"; C# spells it as a nullable enum, and
-    `FurinaReframe.EvokeTargetFront` is the name for it.
+    same sentinel as the string "front" (`effects.SALON_AIM_FRONT`); C#
+    spells it as a nullable aim argument.
 
     Read through `SALON_MEMBER_CS`, the ONE member table, so the deploy verb
     and the Evoke verb cannot disagree about who Chevalmarin is. `random` is
@@ -13471,20 +13471,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "SalonMemberTips.ForSalonRules("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-    # `EB-477`. WHAT A COMPANION PLAY PERFORMS, AND THE REFUSAL FORM.
-    #
-    # Under the Furina arm a Companion card you play performs the front member,
-    # and with an EMPTY stage it performs nobody in silence -- two turns lost
-    # in r9 including the elite's turn 1, and r8 lost two fights to the same
-    # thing. NOT SCOPED BY SHEET, unlike the two above: Furina holds shared
-    # Companions and Guest Stars as readily as her own rows, so the attach is
-    # every Companion row and the OWNER decides whether the sentence prints.
-    # `FurinaRiderTips.ForCompanionPerform` yields nothing off her, nothing
-    # with the arm's manual leg off, and nothing out of combat.
-    if is_companion(card):
-        tips_expr = (
-            "FurinaRiderTips.ForCompanionPerform("
-            f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # `EB-477`'s COMPANION-PERFORM TIP LEFT WITH THE REFRAME (`EB-726`, R269).
+    # It said what a Companion play performs, which was the retired arm's rule
+    # and is no rule the Stage has: her performers are pets and a Companion
+    # play does not move them. A tip for a rule nothing runs is the defect the
+    # arm keyword table's own retirement note names.
     # `EB-272`, and it is LAST on purpose. Each call above wraps the list, so
     # the outermost wrapper's tip is yielded last: a card's live arithmetic (a
     # reaction preview, the Charge rate, the Garment window) says what THIS
