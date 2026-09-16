@@ -124,8 +124,8 @@ public sealed class ProtoFsInterpositionModeA : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar("PlainBlock", 5m, ValueProp.Move),
-            new BlockVar("BranchBlock", 10m, ValueProp.Move)
+            new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 10m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
@@ -151,8 +151,8 @@ public sealed class ProtoFsInterpositionModeB : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar("PlainBlock", 5m, ValueProp.Move),
-            new BlockVar("BranchBlock", 10m, ValueProp.Move)
+            new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 10m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()

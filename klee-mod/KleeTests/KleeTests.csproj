@@ -172,6 +172,20 @@
              Link="Vendor/GitsSettledHp.cs" />
   </ItemGroup>
 
+  <!-- EB-607 / EB-323's intent facts, on the same terms and for the same
+       reason. `GitsIntentBreakdown.cs` holds two decisions with no game type
+       in them: how a breakdown block is composed from the three answers the
+       bridge reads off `Hook.ModifyDamage`, and which of `IntentType`'s
+       fifteen values settle whose side a part lands on. The second is the one
+       that has exactly one way to look right and be wrong (a value put on the
+       wrong side, or a value that settles nothing answered anyway), and
+       neither is reachable from a headless run of the game. One file, no
+       fork. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsIntentBreakdown.cs"
+             Link="Vendor/GitsIntentBreakdown.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />

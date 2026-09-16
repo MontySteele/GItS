@@ -493,6 +493,21 @@ UNMIRRORED: dict[str, str] = {
         "card and no meter -- it is the size of a diagnostic buffer, and the "
         "sim has no ledger to size. R225 filed the ledger as instrument work "
         "that does not gate an arm; this is the only number it has.",
+    "ResolutionLedger.MaxRows":
+        "`EB-349` / `EB-611`. INSTRUMENT, not balance, on "
+        "`MeterLedger.MaxRows`' own terms one reader over: how many resolved "
+        "cards the per-turn ledger will file before it stops minting rows. It "
+        "touches no game number, no card and no meter -- it is the size of a "
+        "diagnostic buffer read by a PAGE rather than by a grader, so the only "
+        "growth it guards against is a single pathological turn. The sim has "
+        "no ledger to size.",
+    "ResolutionLedger.MaxHits":
+        "`EB-611`. INSTRUMENT, not balance: how many hits one resolved card "
+        "will file before the row says it overflowed. The same diagnostic "
+        "buffer as the row directly above, one level down, and said rather "
+        "than silently truncated because a reader adding up forty lines that "
+        "should be forty-three has been handed `EB-518`'s error in a new "
+        "place. The sim has no ledger to size.",
     "ExplosiveFrags.SparksPerDetonation":
         "the BASE starter's rate, carried forward unchanged by the upgrade -- "
         "which is the ratified design (the windfall is OpeningSparks; the "
