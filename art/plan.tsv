@@ -1817,7 +1817,7 @@ proto_kk_shell_guard	ImageGen/images/cards/kokomi/proto_kk_shell_guard.png	500	3
 # proto_kk_tide_wall <- the full Wish art at a LOWER crop than proto_kk_second_wave's
 #   y0.35 and proto_kk_sango_isshin's y0.62. Her own introduction banner was the first pick and lost: 604x268, and
 #   the burnt-in SANGONOMIYA KOKOMI wordmark fills the half a card crop keeps.
-proto_kk_tide_wall	ImageGen/images/cards/kokomi/proto_kk_tide_wall.png	500	380	cover	y0.78	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+proto_kk_tide_wall	ImageGen/images/cards/kokomi/proto_kk_tide_wall.png	500	380	cover	y0.5@1.4	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
 # Companion stand-ins: each is a DIFFERENT talent of the same character from
 # the row it stood in for, so each takes its own source inside its own family.
 # proto_mc_diona_shaken_not_purred <- the TCG card OF THAT TALENT: an exact name match
