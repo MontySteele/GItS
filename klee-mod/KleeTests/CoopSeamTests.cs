@@ -32,6 +32,10 @@ public class CoopSeamTests
     [Fact]
     public void Two_seats_hold_independent_fanfare_meters()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         var a = Seat.Furina().WithCombatState();
         var b = Seat.Furina().WithCombatState();
 
@@ -44,6 +48,10 @@ public class CoopSeamTests
     [Fact]
     public void A_seat_s_fanfare_ceiling_is_its_own_max_hp_not_the_table_s()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         // Two Furinas at different max HP -- legal in co-op, and the pair the
         // audit's H3 divergence would desynchronise.
         var healthy = Seat.Furina(60).WithCombatState();
@@ -59,6 +67,10 @@ public class CoopSeamTests
     [Fact]
     public void Furina_resource_hooks_do_not_fire_for_a_non_furina_seat()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         // The mixed table: one Furina, one Klee. A generated Furina card that
         // reached the Klee seat must not grant her HP-loss engine.
         var furina = Seat.Furina().WithCombatState();
@@ -105,6 +117,10 @@ public class CoopSeamTests
     [Fact]
     public void Salon_tick_scaling_is_read_off_the_acting_seat()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         // Fanfare is the Focus analogue, and Focus is per-creature. A stage
         // on the loaded seat must not scale off the other seat's meter.
         var loaded = Seat.Furina().WithCombatState();

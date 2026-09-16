@@ -22,7 +22,12 @@ reading it is a deliberate second step rather than the default.
 
 THE ONE GATE THAT CANNOT BE CI's (2026-09-02). `dotnet-test` -- the mod's C#
 suite, `klee-mod/KleeTests` under `-p:PrototypeCards=true` -- runs in BOTH
-lanes and is not behind `--dotnet` any more. It was optional here, absent from
+lanes and is not behind `--dotnet` any more. Since `EB-781` it is TWO lines,
+`dotnet-test` and `dotnet-test-stage`, because the suite has two worlds: the
+second adds `-p:FurinaStage=true`, which moves `FurinaStage.DefaultEnabled`
+and is what the live `+proto` deploy runs. A configuration no gate runs is a
+configuration that goes red quietly, which is exactly what happened -- nine
+shipped meter pins under `EB-745`'s guard. It was optional here, absent from
 `.github/workflows/repo.yml` and absent from the pre-push hook, so it was in no
 gate at all: two pins sat red on main for days and nothing said so. It cannot
 become a CI job, and that is a fact about the assemblies rather than a
@@ -131,6 +136,20 @@ def gates(args) -> list[Gate]:
         # live workstream is building against would otherwise be ungated.
         Gate("dotnet-test", ["dotnet", "test", "klee-mod/KleeTests",
                              "-p:PrototypeCards=true", "--nologo", "-v", "q"]),
+        # `EB-781`: THE SECOND CONFIGURATION, and the reason it is a gate.
+        # `-p:FurinaStage=true` moves `FurinaStage.DefaultEnabled`, which is
+        # the world the live `+proto` deploy actually runs in. Nothing ran it,
+        # so nine shipped meter pins stood red under it and no gate said so:
+        # `EB-745` retires Fanfare and Encore under the arm, and those nine
+        # mint one of them and assert the shipped number. The pins carry
+        # `ArmScope.ShippedMetersLive()` now; this line is what keeps the
+        # second world from drifting red again. It costs one more compile and
+        # one more run of the suite -- about four seconds each here, because
+        # the two configurations share nothing and each rebuilds.
+        Gate("dotnet-test-stage",
+             ["dotnet", "test", "klee-mod/KleeTests",
+              "-p:PrototypeCards=true", "-p:FurinaStage=true",
+              "--nologo", "-v", "q"]),
     ]
     picked = []
     for gate in out:
@@ -159,7 +178,7 @@ def summarise(gate: Gate, text: str, code: int) -> tuple[str, list[str]]:
         return ", ".join(parts) or "no items", PYTEST_FAIL.findall(text)
     if gate.name.startswith("codegen"):
         return ("in sync" if code == 0 else "STALE -- regenerate"), []
-    if gate.name == "dotnet-test":
+    if gate.name.startswith("dotnet-test"):
         m = DOTNET.search(text)
         if m:
             failed, passed, skipped = m.groups()

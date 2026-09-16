@@ -192,6 +192,10 @@ public class SalonVerbTests
     [Fact]
     public void The_leftmost_act_value_is_the_members_scaled_tick()
     {
+        // `EB-781`: a SHIPPED meter pin, so the seat has no stage --
+        // `EB-745` retires Fanfare and Encore under the arm.
+        using var _ = ArmScope.ShippedMetersLive();
+
         // The reward half, against TickValue's own pins in
         // DerivationPinTests: 6 printed, +2 from 20 held Fanfare, and the
         // meter is dry so it resolves at three-quarters (8 * 0.75 -> 6).

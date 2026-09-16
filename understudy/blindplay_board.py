@@ -453,6 +453,14 @@ def deck_titles(state: dict[str, Any]) -> list[dict[str, Any]]:
     (`"<title> (upgraded)"`, `_split_qualifier`) -- except where the game has
     already printed its own `+`, which is a mark the fold keeps and this must
     not double.
+
+    `EB-789`. AND AN ENCHANTED COPY IS NOT THE SAME CARD AS A PLAIN ONE, so it
+    does not fold into the same row. The enchantment rides beside the title in
+    the shape the hand already prints it in (`_render_card`, `EB-181`:
+    `"<title> (Sharp 2)"`), which is the second half of "pile and hand print
+    one face" -- the first half is the bridge sending the enchanted sentence at
+    all. A deck read off a bridge older than that row carries no enchantment on
+    any card and every row folds exactly as it did before.
     """
     held = remembered_deck(state)
     if not held:
@@ -464,6 +472,10 @@ def deck_titles(state: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         if card.get("upgraded") and not title.rstrip().endswith("+"):
             title += " (upgraded)"
+        ench = card.get("enchantment")
+        if isinstance(ench, dict) and ench.get("name"):
+            title += (f" ({ench['name']} {ench['amount']})"
+                      if ench.get("amount") else f" ({ench['name']})")
         counts[title] = counts.get(title, 0) + 1
     return [{"title": t, "count": n} for t, n in sorted(counts.items())]
 

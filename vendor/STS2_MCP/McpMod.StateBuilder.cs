@@ -1681,14 +1681,24 @@ public static partial class McpMod
         var list = new List<Dictionary<string, object?>>();
         foreach (var card in cards)
         {
-            // Pile cards only need a subset - keep it lightweight
-            list.Add(new Dictionary<string, object?>
-            {
-                ["name"] = SafeGetText(() => card.Title),
-                ["cost"] = GetCostDisplay(card),
-                ["star_cost"] = GetStarCostDisplay(card),
-                ["description"] = SafeGetCardDescription(card, pile)
-            });
+            // GItS LOCAL EDIT (`EB-789`). ONE FACE FOR A CARD, WHEREVER IT IS.
+            //
+            // Upstream's row was a deliberate subset ("Pile cards only need a
+            // subset - keep it lightweight"), and the subset is what the
+            // defect is made of: an enchanted card read *Gain 5 Block* in the
+            // draw pile and *Gain 7 Block* in hand a turn later (live look 8c,
+            // `#575`), because the pile row carried no `enchantment` at all
+            // and its `description` was the pile's face rather than the hand's
+            // -- and only the hand's folds the enchantment's number in. The
+            // row also carried no `id`, `is_upgraded` or `keywords`, which
+            // `understudy/blindplay_faces._deck_card` has been asking every
+            // pile row for since `EB-447`.
+            //
+            // So the row goes through the hand's own `BuildCardInfo` now.
+            // Additive on the wire: every old key is still here and spelled
+            // the same. The decision, its costs and the `pile_description`
+            // contract: gits/GitsPileCard.cs.
+            list.Add(GitsPileCardRow(card, pile));
         }
         return list;
     }

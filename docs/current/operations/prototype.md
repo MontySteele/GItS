@@ -23,15 +23,29 @@ is settled is a tax on the stage that wants taste, not numbers.
 dotnet build klee-mod/KleeCode -p:PrototypeCards=true       # the DEV build
 ```
 
-**ARM PROPERTIES ARE DEPLOY-LINE ONLY. There are exactly two supported test
-configurations** (2026-09-02):
+**THERE ARE THREE SUPPORTED TEST CONFIGURATIONS** (2026-09-02, third added
+`EB-781` 2026-09-16), and `tools/gates.py` runs the last two on every push:
 
 ```sh
-dotnet test klee-mod/KleeTests                              # 262 tests
-dotnet test klee-mod/KleeTests -p:PrototypeCards=true       # 727 tests
+dotnet test klee-mod/KleeTests                              # 790 tests
+dotnet test klee-mod/KleeTests -p:PrototypeCards=true       # 1871 tests
+dotnet test klee-mod/KleeTests -p:PrototypeCards=true -p:FurinaStage=true
+                                                            # 1870 tests
 ```
 
-`-p:KleeOverhaul=true` and its three siblings belong on a `dotnet build` or a
+**THE THIRD ONE IS A GATE BECAUSE IT IS THE WORLD THE DEPLOY RUNS IN**
+(`EB-781`). `-p:FurinaStage=true` moves `FurinaStage.DefaultEnabled`, and
+`deploy_proto.ps1` passes it; nothing ran the suite that way, so nine shipped
+meter pins stood red under it — `EB-745` retires Fanfare and Encore under the
+Stage, and those nine mint one of the two and assert the shipped number. The
+fix is `KleeTests/Harness/ArmScope.cs`: a shipped pin that needs the shipped
+meters opens with `using var _ = ArmScope.ShippedMetersLive();`, which says in
+one line that the seat it is about has no stage, and the pin keeps running in
+both configurations rather than being `#if`'d out of one. The gate line is
+`dotnet-test-stage`; it costs about four more seconds.
+
+**The OTHER arm properties are deploy-line only.**
+`-p:KleeOverhaul=true` and its two siblings belong on a `dotnet build` or a
 `deploy_proto.ps1` line and nowhere else. Each exists to MOVE an arm's
 `DefaultEnabled`, and each arm's suite opens with `The_arm_ships_off`,
 asserting that default is `false` — the acceptance condition the whole
@@ -39,8 +53,8 @@ quarantine rests on. Under the property that pin cannot say anything true:
 green would mean the property did nothing, and red is the property working. So
 it is **skipped there by an `#if`, not left to fail**, because a red that means
 "the switch works" teaches everyone to ignore reds. The pins run, and must be
-green, in both supported configurations, which is where the condition has to
-hold.
+green, in every supported configuration that does not move their own arm,
+which is where the condition has to hold.
 
 The arms' rules are exercised in both directions without any property:
 `Enabled` is a settable static, so one build asserts both sides of every

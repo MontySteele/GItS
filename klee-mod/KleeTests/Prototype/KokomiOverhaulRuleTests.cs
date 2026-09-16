@@ -1432,11 +1432,21 @@ public class KokomiOverhaulRuleTests
         // ONE FOLD: `IntValue` is `(int)BaseValue`, so the clause still
         // queues the PRINTED number and the fold happens once, on the way
         // out.
+        //
+        // `EB-787`: AND THE CLASS IS `UnsourcedBlockVar`, the mod's subclass
+        // of the game's own, for the fourth argument of that `GainBlock` --
+        // the null `CardPlay`. The game's `BlockVar.UpdateCardPreview` folds
+        // `card.Enchantment` as well as the hooks, and a payout with no card
+        // source consults no enchantment, so a Nimble printed a planned Block
+        // two higher than the morning pays. The subclass runs the payout's own
+        // `Hook.ModifyBlock` call instead, which leaves everything this test
+        // asserts exactly where it was (`EnchantedRiderTests`).
         var model = (CardModel)Activator.CreateInstance(
             typeof(ProtoKkCoralBulwark).Assembly
                 .GetTypes().Single(t => t.Name == card))!;
 
-        var block = Assert.IsType<BlockVar>(model.DynamicVars["PlanBlock"]);
+        var block = Assert.IsType<UnsourcedBlockVar>(
+            model.DynamicVars["PlanBlock"]);
         Assert.Equal(ValueProp.Move, block.Props);
         Assert.Equal(printed, block.IntValue);
     }

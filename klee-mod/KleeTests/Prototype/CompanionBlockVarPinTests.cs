@@ -102,12 +102,23 @@ public class CompanionBlockVarPinTests
     }
 
     /// <summary>
-    /// SOURCE PIN, the `EB-513` half. The bonus clause keeps its
-    /// <c>BlockVar</c> under <c>ValueProp.Move</c>, which is what routes it
-    /// through <c>Hook.ModifyBlock</c> on the face and through the same fold
-    /// at the power's payout. A regression to <c>DynamicVar("PowerAmount")</c>
+    /// SOURCE PIN, the `EB-513` half. The bonus clause keeps its block var
+    /// under <c>ValueProp.Move</c>, which is what routes it through
+    /// <c>Hook.ModifyBlock</c> on the face and through the same fold at the
+    /// power's payout. A regression to <c>DynamicVar("PowerAmount")</c>
     /// is invisible to every behavioural assertion in this repo's headless
     /// suite -- the preview hook needs a live combat -- so it is caught here.
+    ///
+    /// `EB-787`: THE CLASS IS <c>UnsourcedBlockVar</c>, the mod's subclass of
+    /// the game's own. It exists because the game's <c>BlockVar</c> folds the
+    /// card's ENCHANTMENT into the preview as well, and the payout cannot --
+    /// <c>Pay</c> hands <c>GainBlock</c> a null <c>CardPlay</c>, so
+    /// <c>Hook.ModifyBlock</c> has no card source to read one off. A Nimble
+    /// moved Barbara's rider 3 to 5 on the face and paid 3 (live-looks-8c,
+    /// #575). Everything the paragraph above says is unchanged: it IS a
+    /// <c>BlockVar</c>, its preview IS <c>Hook.ModifyBlock</c>, and
+    /// <c>GainsBlock</c> still answers true for the reason this file's first
+    /// assertion gives. <c>EnchantedRiderTests</c> measures the enchant half.
     /// </summary>
     [Fact]
     public void The_bonus_clause_is_still_a_block_var()
@@ -120,7 +131,7 @@ public class CompanionBlockVarPinTests
                  })
         {
             var source = Generated(type);
-            Assert.Contains("new BlockVar(\"PowerAmount\", ", source);
+            Assert.Contains("new UnsourcedBlockVar(\"PowerAmount\", ", source);
             // And the card's OWN Block is still there, which is the fact that
             // makes `GainsBlock` true for the right reason.
             Assert.Contains("new CalculatedBlockVar(", source);
