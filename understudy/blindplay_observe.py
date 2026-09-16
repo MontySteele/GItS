@@ -15,6 +15,9 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _event_option, _event_options,
                                         _map_ahead, _map_boss,
                                         _map_options, _omitted_from_upgrade,
+                                        _omitted_from_removal,
+                                        is_removal_screen,
+                                        reward_alternatives,
                                         _potion_slots, _preview_cards,
                                         _proceed_option, _relic_options,
                                         _rest_options, _reward_items,
@@ -25,8 +28,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
-                                        deck_elements, relic_faces, run_change,
-                                        stage_arm)
+                                        deck_elements, relic_faces,
+                                        remember_deck, run_change, stage_arm)
 from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
@@ -126,6 +129,20 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     inventing one.
     """
     st = _screen(state)
+    # `EB-447`. THE DECK IS READ ON EVERY SCREEN NOW, not only inside a fight.
+    #
+    # `_combat` has always called `remember_deck`, because the four combat
+    # piles were the only deck anywhere on the wire and a map or a Smith had to
+    # be answered out of that memory. The bridge sends `player.master_deck` on
+    # every screen of the run, so the read belongs where every screen passes: a
+    # deck remembered at the reward screen is a deck the Smith two rooms later
+    # gets right, and a run that has not fought since its last draft is no
+    # longer a run whose deck list is a fight old.
+    #
+    # ON A FEED WITH NO MASTER DECK THIS CALL DOES NOTHING outside a combat --
+    # the pile branch returns at once when no pile is on the state -- so a
+    # bridge older than this row behaves exactly as it did.
+    remember_deck(state)
     obs: dict[str, Any] = {
         "state_type": st,
         "guardrail": PLAY_GUARDRAIL,
@@ -220,6 +237,12 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             obs["gold"] = _int(_player(state).get("gold"))
         obs["deck"] = deck_titles(state)
         obs["deck_floor"] = upgrade_deck_floor(state)
+        # `EB-447`: and WHICH list that is -- the run's own deck off this
+        # screen's feed, or the fight-old reconstruction. The render prints a
+        # different caveat for each, and the fight-old one is wrong beside a
+        # list that is not fight-old.
+        obs["deck_is_master"] = isinstance(
+            _player(state).get("master_deck"), list)
         # `EB-323`: and WHERE THIS IS, in the run's own floor number. The map
         # named a room by a path number and the bridge answers `go` with a
         # grid coordinate; the only screen that ever said `floor` was the
@@ -235,10 +258,18 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             [_card_face(c) for c in _screen_cards(state)], "title")
         obs["can_skip"] = blob.get("can_skip") is not False
         # `EB-374`: the relics the run holds that rewrite what the alternative
-        # to choosing does here. Named, because the page can name them; the
-        # control itself is not on the feed and the note says so.
+        # to choosing does here. Named, because the page can name them; where
+        # the words themselves are on the feed the render prints the button
+        # instead of this caveat.
         obs["alternative_relics"] = _alternative_relics(state)
+        # `EB-374`, the wire half: each alternative button's own printed words,
+        # with the verb that presses it. `skip` is index 0 -- what it has
+        # always pressed -- and `sacrifice` is the first button whose words are
+        # not a plain skip.
+        obs["alternatives"] = reward_alternatives(blob)
         obs["commands"] = ['choose "<card title>"', "skip"]
+        if any(a["verb"] == "sacrifice" for a in obs["alternatives"]):
+            obs["commands"].append("sacrifice")
     elif st in SELECT_SCREENS:
         blob = _blob(state, st)
         obs["screen"] = "card_select"
@@ -271,9 +302,26 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # deck is not on this screen's feed, so the answer comes off the deck
         # this page printed for itself in the last fight. Empty -- and so
         # printed nowhere -- until a fight has been seen.
+        # `EB-350`: and WHETHER THE GRID ABOVE IS THE WHOLE GRID. The bridge
+        # sends the grid's own list now rather than the ~25 holders a viewport
+        # happened to cover; where it could not, this says so and the render
+        # prints the caveat.
+        obs["grid_incomplete"] = blob.get("grid_complete") is False
+        # `EB-350`, the second half: the removal screen's own "not on this
+        # list" model. A card in the deck and not on this grid is a card the
+        # game will not remove, which is a rule about the deck and nothing on
+        # the screen states it. Matched on the PROMPT, never on the screen
+        # name, because the game spells a dozen different asks `select`.
+        if is_removal_screen(blob):
+            obs["omitted"] = _omitted_from_removal(state)
+            obs["deck_floor"] = upgrade_deck_floor(state)
+            obs["deck_is_master"] = isinstance(
+                _player(state).get("master_deck"), list)
         if obs["select_kind"] == "upgrade":
             obs["omitted"] = _omitted_from_upgrade(state)
             obs["deck_floor"] = upgrade_deck_floor(state)
+            obs["deck_is_master"] = isinstance(
+                _player(state).get("master_deck"), list)
             # `EB-483`. AND WHAT EACH OF THE ONES IT IS OFFERING BECOMES.
             #
             # "The upgrade screen shows the current face, never the upgraded

@@ -38,7 +38,7 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Lead), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("crescendo");
 

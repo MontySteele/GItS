@@ -76,6 +76,10 @@ internal static class ReactionEffects
         // for the same reason -- one boundary, named once, so two receipts on
         // one page cannot disagree about which turn they are about.
         RelicAnswerLog.MarkTurnStart();
+        // `EB-349` / `EB-611`: and the resolution ledger, third on the same
+        // window, so the three receipts one page prints cannot disagree about
+        // which turn they are about.
+        ResolutionLedger.MarkTurnStart();
         // Fully cleared rather than purged: every key is written and read
         // inside a single player turn, so there is nothing to carry over and
         // no way for this map to grow across a run.
@@ -124,6 +128,7 @@ internal static class ReactionEffects
         _turnStartTotal = TotalResolved;
         ReactionLog.MarkTurnStart();
         RelicAnswerLog.MarkTurnStart();
+        ResolutionLedger.MarkTurnStart();
         if (extraTurnCreature != null)
         {
             DealerReactionsThisTurn.Remove(extraTurnCreature);

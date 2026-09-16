@@ -7,6 +7,10 @@ using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.HoverTips;
+// GItS LOCAL EDIT (`EB-607`): the two namespaces the game's own
+// `AttackIntent.GetSingleDamage` folds a number through.
+using MegaCrit.Sts2.Core.Hooks;
+using MegaCrit.Sts2.Core.ValueProps;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Potions;
 using MegaCrit.Sts2.Core.Models;
@@ -1282,6 +1286,64 @@ public static partial class McpMod
 
         state["gold"] = player.Gold;
 
+        // GItS LOCAL EDIT (`EB-447`). THE MASTER DECK, ON EVERY SCREEN.
+        //
+        // THE FIND (Klee r13 and r15, Furina r7, Kokomi r11). The blind page's
+        // deck list is RECONSTRUCTED: `understudy/blindplay_faces.remember_deck`
+        // takes the union of the four combat piles at a fight's first round-one
+        // read and carries it to the map, the shop and the Smith, because the
+        // wire has no deck on any of those screens. Every guard that memory
+        // has was bought with a defect -- "after the Haunted Ship the map
+        // listed Dazed x5, which are combat-only status cards"; "the same list
+        // dropped Catalytic Converter entirely after I played it as a Power";
+        // a generated Companion written into the deck because one fight's
+        // union happened to be bigger (`EB-528`). All of them are the same
+        // thing: a union of combat piles is not a deck.
+        //
+        // AND THE DECK IS RIGHT HERE. `Player.Deck` is a `CardPile(PileType
+        // .Deck)` -- the run's master list, the one the game's own Deck screen
+        // draws -- and it is readable on the map, at a shop, at a rest and at
+        // a reward, none of which have a `PlayerCombatState` at all. So this
+        // sits OUTSIDE the combat block, with `kokomi_plans` and for its
+        // reason: the screens that owe a reader a deck are exactly the screens
+        // with no fight on them.
+        //
+        // `BuildPileCardList`'S SHAPE, unchanged, because the page's deck
+        // reader already parses that shape four times over (`draw_pile`,
+        // `discard_pile`, `exhaust_pile`, and the hand beside them). An ABSENT
+        // key is a bridge older than this row and the page keeps the memory it
+        // has always kept; a PRESENT key is the deck, and the memory stands
+        // down.
+        try
+        {
+            state["master_deck"] = BuildPileCardList(
+                player.Deck.Cards, PileType.Deck);
+        }
+        catch (Exception)
+        {
+            // A read that throws is not a deck. Absent, and the page's
+            // remembered union answers exactly as it did before.
+        }
+
+        // GItS LOCAL EDIT (`EB-349` / `EB-611`). WHAT RESOLVED THIS TURN.
+        //
+        // The standing fact this closes is printed on the page itself
+        // (`understudy/blindplay_notes.AUTO_TURN_NOTE`): "there is no record of
+        // a card resolving on the wire at all". Every screen this bridge sends
+        // is an after-state, so a relic that plays a turn FOR the player
+        // (Vakuu: six openings, five from an empty hand -- Kokomi r4d) leaves
+        // nothing behind but a board, and a multi-hit random `Set off` (Klee
+        // r23 lane 2) tells a seat WHICH bodies were hit and never the order.
+        // One ledger answers both: a row per resolved card, the game's own
+        // `CardPlay.IsAutoPlay` on it, and the hits under it in hit order.
+        // Same absent/empty/populated contract as the rows above, same
+        // reflection seam, same turn window:
+        // gits/GitsResolutionLedger.cs.
+        if (GitsResolutionState() is { } resolutions)
+        {
+            state[GitsResolutionsKey] = resolutions;
+        }
+
         // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). The same gap
         // one rule over from `kurage_memory`: the arm's pending-Plans badge
         // reaches the wire as a COUNT, and what the next morning WILL BE is
@@ -1657,6 +1719,22 @@ public static partial class McpMod
                 {
                     ["type"] = intent.IntentType.ToString()
                 };
+
+                // GItS LOCAL EDIT (`EB-323`). WHOSE SIDE THIS PART LANDS ON.
+                // `Empower (Buff)` reached the page as a heading, a bracketed
+                // kind and nothing else, on a board of three bodies (Klee r7).
+                // No intent carries a TARGET -- the bodies arrive at
+                // `MoveState.PerformMove` when the move resolves, which is
+                // after the telegraph a reader is looking at -- but the SIDE
+                // is settled by the game's own `IntentType` for twelve of its
+                // fifteen values, and the bridge was dropping it. Absent on
+                // the three that settle nothing. gits/GitsIntentBreakdown.cs.
+                if (GitsIntentBreakdown.TargetSide(intent.IntentType.ToString())
+                    is { } targetSide)
+                {
+                    intentData[GitsIntentBreakdown.TargetSideKey] = targetSide;
+                }
+
                 try
                 {
                     var targets = creature.CombatState?.PlayerCreatures;
@@ -1673,12 +1751,83 @@ public static partial class McpMod
                     }
                 }
                 catch { /* intent label may fail for some types */ }
+
+                // GItS LOCAL EDIT (`EB-607`). HOW THE GAME ARRIVED AT THAT
+                // NUMBER. Fossil Stalker read 12 before and after Strength 3
+                // while Corpse Slug's moved (Klee r23 lane 1), and the label
+                // above cannot tell the two apart: it is one figure with no
+                // history. `AttackIntent.GetSingleDamage` makes exactly the
+                // call below and throws away the `out` list of the models it
+                // folded; this keeps all three answers. NOTHING IS RECOMPUTED
+                // HERE -- the moment the bridge does arithmetic of its own, a
+                // page can disagree with the icon beside it.
+                // gits/GitsIntentBreakdown.cs.
+                if (intent is AttackIntent attack)
+                {
+                    try
+                    {
+                        if (GitsAttackBreakdown(attack, creature) is { } breakdown)
+                        {
+                            intentData[GitsIntentBreakdown.BreakdownKey] = breakdown;
+                        }
+                    }
+                    catch { /* a read that throws is not a breakdown */ }
+                }
+
                 intents.Add(intentData);
             }
             state["intents"] = intents;
         }
 
         return state;
+    }
+
+    /// <summary>
+    /// GItS LOCAL EDIT (`EB-607`). The breakdown behind one attack intent's
+    /// icon figure: the base the move declares, the number the game's hook
+    /// phases arrived at, the repeat count, and the models the game folded in.
+    ///
+    /// THIS IS `AttackIntent.GetSingleDamage`, CALL FOR CALL (decompiled,
+    /// sts2.dll 0.111.0 `41cef1ea`), with the one difference that it keeps the
+    /// `out` list the game discards. The order the phases compose in is
+    /// written out on `klee-mod/KleeCode/Powers/HitOrder.cs` and is not
+    /// repeated here, because this method does not reproduce it: it asks the
+    /// game.
+    ///
+    /// NULL WHENEVER THE GAME'S OWN PRECONDITION FAILS -- no local player,
+    /// which is what `GetSingleDamage` guards on -- so the wire key stays
+    /// ABSENT rather than carrying a base with no fold beside it.
+    /// </summary>
+    private static Dictionary<string, object?>? GitsAttackBreakdown(
+        AttackIntent intent, Creature owner)
+    {
+        var calc = intent.DamageCalc;
+        if (calc == null) return null;
+        int baseDamage = Math.Max(0, (int)calc());
+        var me = LocalContext.GetMe(owner.CombatState);
+        if (me == null) return null;
+
+        decimal folded = Hook.ModifyDamage(
+            me.RunState, me.Creature.CombatState, me.Creature, owner,
+            calc(), ValueProp.Move, null, null, ModifyDamageHookType.All,
+            CardPreviewMode.None, out IEnumerable<AbstractModel> modifiers);
+
+        var names = new List<string>();
+        foreach (var model in modifiers ?? Enumerable.Empty<AbstractModel>())
+        {
+            if (model == null) continue;
+            // `gits/GitsRefusalSource.cs`'s namer, reused rather than forked:
+            // a model's own printed Title where it has one, else its class
+            // name as words. It is the nearest thing to a printed name a
+            // reflection reader can honestly offer, and the refusal line on
+            // the same page already uses it, so `Smoggy` reads as `Smoggy` in
+            // both places.
+            var name = GitsRefusalName(model, model.GetType());
+            if (!string.IsNullOrWhiteSpace(name)) names.Add(name!);
+        }
+
+        return GitsIntentBreakdown.Compose(
+            baseDamage, Math.Max(0, (int)folded), intent.Repeats, names);
     }
 
     private static Dictionary<string, object?> BuildEventState(EventRoom eventRoom, RunState runState)
@@ -2280,6 +2429,40 @@ public static partial class McpMod
         var altButtons = FindAll<NCardRewardAlternativeButton>(cardScreen);
         state["can_skip"] = altButtons.Count > 0;
 
+        // GItS LOCAL EDIT (`EB-374`). AND WHAT EACH OF THOSE BUTTONS SAYS.
+        //
+        // THE FIND (Klee r9, act 2). Pael's Wing adds a SACRIFICE option to
+        // this screen, and two card rewards in that run printed `choose` and
+        // `skip` and nothing else -- the seat was holding the relic whose
+        // whole rule is that button and never saw it. The bridge was counting
+        // the buttons and throwing their words away, which is the line
+        // directly above this one.
+        //
+        // The words, and the read order behind them: gits/GitsRewardAlternatives.cs.
+        // An unreadable button is published with a null `name` rather than
+        // dropped, because "there is a control here and the feed will not say
+        // what it does" is the caveat the page already prints and the count
+        // has to keep matching what `skip_card_reward` can press.
+        var alternatives = new List<Dictionary<string, object?>>();
+        for (int i = 0; i < altButtons.Count; i++)
+        {
+            var button = altButtons[i];
+            alternatives.Add(new Dictionary<string, object?>
+            {
+                ["index"] = i,
+                ["name"] = GitsAlternativeName(button, () =>
+                {
+                    var label = button.GetNodeOrNull("Label");
+                    if (label == null) return null;
+                    var text = label.Get("text");
+                    return text.VariantType != Godot.Variant.Type.Nil
+                        ? StripRichTextTags(text.AsString())
+                        : null;
+                }),
+            });
+        }
+        state[GitsAlternativesKey] = alternatives;
+
         return state;
     }
 
@@ -2316,20 +2499,70 @@ public static partial class McpMod
         var cardHolders = FindAllSortedByPosition<NGridCardHolder>(screen);
         // GItS LOCAL EDIT (`EB-263`): the selection, read once for the screen.
         var selected = GitsSelectedCards(screen);
+
+        // GItS LOCAL EDIT (`EB-350`). EVERY CARD IN THE GRID, NOT THE ONES
+        // THAT FIT.
+        //
+        // THE FIND (Kokomi r4d act 2, 10; act 3, 4 and 5). The shop's Card
+        // Removal grid printed exactly 25 rows against a 38-card deck and
+        // again against a 29-card deck, and a Klee seat routed into an Elite
+        // at 2/62 unseen because the screen it planned on was not the deck.
+        //
+        // THE 25 IS A VIEWPORT AND NOT A CAP. `NCardGrid` is virtualised: it
+        // holds every card in `_cards` and allocates holders only for the rows
+        // on screen, so the holder walk above is a screenshot. The full list
+        // and why it is safe to index into: gits/GitsCardGrid.cs.
+        //
+        // THE INDICES DO NOT MOVE. `_cards` IS the grid's row order and the
+        // window starts at row 0 when a screen opens, so the rows a page
+        // already printed as 0..24 are `_cards[0..24]` exactly, and every row
+        // past them is new. `McpMod.Actions.cs`'s `select_grid_card` reaches
+        // those new rows through the screen's own `OnCardClicked`.
+        var gridCards = GitsGridCards(screen);
         var cards = new List<Dictionary<string, object?>>();
         int index = 0;
-        foreach (var holder in cardHolders)
+        if (gridCards != null)
         {
-            var card = holder.CardModel;
-            if (card == null) continue;
+            var onScreen = new HashSet<CardModel>();
+            foreach (var holder in cardHolders)
+            {
+                if (holder.CardModel != null) onScreen.Add(holder.CardModel);
+            }
+            foreach (var entry in gridCards)
+            {
+                if (entry is not CardModel card) continue;
+                var cardInfo = BuildCardInfo(card);
+                cardInfo["index"] = index;
+                cardInfo["selected"] = selected != null && selected.Contains(card);
+                // Whether a holder is standing on this row right now. Not a
+                // reader's business on the page, and it is the one fact that
+                // says which half of the old feed a row came from.
+                cardInfo["on_screen"] = onScreen.Contains(card);
+                cards.Add(cardInfo);
+                index++;
+            }
+        }
+        else
+        {
+            foreach (var holder in cardHolders)
+            {
+                var card = holder.CardModel;
+                if (card == null) continue;
 
-            var cardInfo = BuildCardInfo(card);
-            cardInfo["index"] = index;
-            cardInfo["selected"] = selected != null && selected.Contains(card);
-            cards.Add(cardInfo);
-            index++;
+                var cardInfo = BuildCardInfo(card);
+                cardInfo["index"] = index;
+                cardInfo["selected"] = selected != null && selected.Contains(card);
+                cards.Add(cardInfo);
+                index++;
+            }
         }
         state["cards"] = cards;
+        // Which of the two answered. "These are all the cards" and "these are
+        // the cards that fit" are different claims, and a page that could not
+        // tell them apart would print the second under the first's heading --
+        // which is the r4d defect exactly.
+        state[GitsGridCompleteKey] = gridCards != null;
+        state[GitsGridTotalKey] = gridCards?.Count ?? cards.Count;
         // Whether the flag above is a READ or a default. `selected` is null
         // when the grid could not be asked, and a page that cannot tell
         // "nothing is selected" from "the feed does not know" would print the
