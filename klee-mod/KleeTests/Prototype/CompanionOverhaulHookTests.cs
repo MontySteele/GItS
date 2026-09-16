@@ -337,6 +337,46 @@ public class CompanionOverhaulHookTests
     }
 
     [Fact]
+    public void EB387_the_overload_preview_is_computed_against_the_hit()
+    {
+        // `EB-387`. THE FIND (Furina r2 run 2, (c) 3, twice): Chevreuse
+        // printed "Reaction preview: Overloaded -- 6 damage to ALL enemies and
+        // 1 Weak" and resolved as the bare hit -- 37 to 27, no Weak -- with
+        // the Electro aura still standing, while Vaporize on the same card
+        // resolved as previewed.
+        //
+        // THE TABLE WAS INNOCENT AND THE PREVIEW WAS LYING. The seat's own
+        // cleanest reading says so without knowing it: elite 3 turn 1 played
+        // RAZOR, and on turn 2 the aura "afterwards read 2, i.e. refreshed
+        // rather than consumed". Lightning Fang overrides the printed element
+        // (`EB-389`), so the hit was ELECTRO into an Electro aura -- a
+        // refresh, which fires nothing and consumes nothing -- while the
+        // preview was computed against the PRINTED Pyro and promised a pair
+        // the hit could not make.
+        //
+        // THE LOOKUP, UNMOVED, in both engines:
+        Assert.Equal(Reaction.Overload,
+            ReactionTable.Lookup(Element.Electro, Element.Pyro));
+        Assert.Equal(Reaction.Overload,
+            ReactionTable.Lookup(Element.Pyro, Element.Electro));
+
+        // AND THE PREVIEW NOW ASKS THE HIT. `ForCard` resolves the element
+        // through `AppliedElement` and looks the reaction up against THAT, so
+        // a Pyro face under the Fang previews what Electro does. Structural,
+        // because a board with auras on it is past the headless boundary; the
+        // resolution half is pinned in the sim
+        // (`test_eb387_a_pyro_companion_into_an_electro_aura_under_the_fang`).
+        var seq = Il.CallSequence(typeof(KleeCardTooltips)
+            .GetMethod("ForCard", HeadlessGame.All)!).ToList();
+        var applied = seq.FindIndex(c => c.Contains("AppliedElement"));
+        var lookup = seq.FindIndex(c => c.Contains("ReactionTable.Lookup"));
+        Assert.True(applied >= 0, "the preview no longer reads the applied element");
+        Assert.True(lookup >= 0, "the preview no longer looks a reaction up");
+        Assert.True(applied < lookup,
+            "the element must be resolved BEFORE the reaction is looked up");
+    }
+
+    [Fact]
     public void The_override_reaches_a_card_that_would_apply_nothing()
     {
         // "Your next Attack applies Pyro" is a statement about the Attack, not

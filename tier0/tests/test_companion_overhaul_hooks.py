@@ -283,6 +283,49 @@ def test_lightning_fang_pays_three_every_attack_for_two_turns(overhaul):
     assert "mc_lightning_fang" not in st.player.powers
 
 
+def test_eb387_a_pyro_companion_into_an_electro_aura_under_the_fang(overhaul):
+    """`EB-387`. THE FIND (Furina r2 run 2, (c) 3, twice): Chevreuse printed
+    "Reaction preview: Overloaded -- 6 damage to ALL enemies and 1 Weak" and
+    resolved as the bare hit -- 37 to 27, no Weak -- with the Electro aura
+    still standing. Vaporize on the same card resolved as previewed.
+
+    THE TABLE IS INNOCENT AND THE PREVIEW WAS LYING, which is what the seat's
+    own cleanest reading says without knowing it: elite 3 turn 1 played RAZOR,
+    and on turn 2 the Electro aura "afterwards read 2, i.e. refreshed rather
+    than consumed". Lightning Fang overrides the printed element (`EB-389`),
+    so Chevreuse's hit was ELECTRO into an Electro aura -- a refresh, which
+    fires no reaction and consumes nothing. The preview was computed against
+    the PRINTED Pyro and promised a pair the hit could not make. Both engines
+    resolved it correctly the whole time.
+
+    This is that beat, pinned: under the rider, no reaction and a refreshed
+    aura; without it, Overload. `ReactionTable.Lookup(Pyro, Electro)` is
+    Overload in both engines and no lookup moved.
+    """
+    fanged = make_state(enemies=[make_enemy(hp=37)])
+    fanged.enemies[0].aura = "electro"
+    fanged.enemies[0].aura_turns_left = 1
+    fanged.player.powers["mc_lightning_fang"] = 2
+    effects.resolve_card(fanged, _attack(element="pyro", amount=7))
+    enemy = fanged.enemies[0]
+    # 7 + the Fang's 3, and nothing else: no Overload splash, no Weak.
+    assert enemy.hp == 37 - (7 + C.MC_LIGHTNING_FANG_BONUS)
+    assert enemy.aura == "electro", "Electro into Electro refreshes"
+    assert enemy.aura_turns_left == C.AURA_DURATION_TURNS
+    assert "weak" not in enemy.powers
+
+    # AND WITHOUT THE RIDER THE SAME CARD OVERLOADS, which is the half that
+    # says the table was never the defect.
+    bare = make_state(enemies=[make_enemy(hp=37)])
+    bare.enemies[0].aura = "electro"
+    bare.enemies[0].aura_turns_left = 1
+    effects.resolve_card(bare, _attack(element="pyro", amount=7))
+    hit = bare.enemies[0]
+    assert hit.aura is None, "the Electro aura was consumed"
+    assert hit.powers.get("weak") == C.OVERLOAD_WEAK
+    assert hit.hp == 37 - 7 - C.OVERLOAD_SPLASH
+
+
 def test_the_one_shot_rider_beats_the_blanket_one(overhaul):
     """The order is law and is written down in `companion_overhaul_card_start`;
     this is the pin. Both DAMAGE halves stack; only the ELEMENT is exclusive,
