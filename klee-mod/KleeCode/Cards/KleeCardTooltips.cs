@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BaseLib.Abstracts;
 using KleeMod.Elements;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -291,12 +292,71 @@ public static class KleeCardTooltips
         // Vulnerable twice. Asked by TYPE NAME rather than by type, because
         // the class lives under `Cards/Prototype/` and a release build
         // Compile-Removes it -- there it simply never matches.
+        // `EB-733`. A CARD THAT SETS OFF FIRST DOES NOT GET ITS OWN AMPLIFIER.
+        //
+        // THE FIND (Klee r26 lane 1, (c) 5). Pocket Match's *Reaction preview:
+        // Melt* said "this card's 7 lands 12" into a Cryo aura, and it landed
+        // 7: the Set off in the card's own first sentence had eaten the aura a
+        // beat earlier, so the reaction was the BOMB's and the card's own hit
+        // met a bare body. "It reads as a contradiction until you work out the
+        // ordering." `EB-387`'s family -- and the Set off tip one class over
+        // already states the rule ("the first takes the aura"), which is what
+        // made the number beside it a contradiction rather than a gap.
+        //
+        // THE REACTION IS STILL PREVIEWED, because one still happens: the
+        // title row is true and only the body's arithmetic was false. So the
+        // body names the ORDER, whose multiplier it is, and the number that
+        // actually lands -- this card's own hit with no amplifier on it, the
+        // target's terms and the per-hit cap read exactly as below.
+        //
+        // THE FACE IS THE TEST, which is the row's own wording ("a card whose
+        // first sentence is Set off"): what decides this is whether the Set
+        // off resolves before the card's own damage, and the printed order is
+        // where that is written down.
+        if (SetsOffFirst(card))
+        {
+            var own = TargetAlreadyFolded(card)
+                ? Capped(enemy, printed)
+                : SimDamagePipeline.ResolveOnTarget(enemy, printed, 1m);
+            return $"The [gold]Set off[/gold] takes the {aura} aura first, so "
+                 + $"the {mult:0.##}x is the [gold]Bomb[/gold]'s. This card's "
+                 + $"own {printed} lands {own}.";
+        }
         var landed = TargetAlreadyFolded(card)
             ? Capped(enemy, (int)(printed * mult))
             : SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
         return $"The triggering hit deals {mult:0.##}x damage and consumes "
              + $"the aura. Into that {aura} aura this card's {printed} lands "
              + $"{landed}.";
+    }
+
+    /// <summary>
+    /// `EB-733`. Does this card's printed face put <b>Set off</b> before its
+    /// own damage?
+    ///
+    /// READ OFF THE ROW THE MOD AUTHORED, which is the one place a card's
+    /// clause ORDER is written down in a form this class can ask: the play
+    /// body is a compiled method, and the localized string is a table lookup a
+    /// non-English host would answer differently. <c>Localization</c> is
+    /// <c>CustomCardModel</c>'s own English source row -- the same one the
+    /// emitter writes and `lint_text_conventions` measures.
+    ///
+    /// FALSE FOR EVERY CARD THAT IS NOT ONE OF OURS, and false for a row whose
+    /// Set off comes AFTER its damage: there the card's own hit does meet the
+    /// aura and the amplified body is right as it stands.
+    /// </summary>
+    public static bool SetsOffFirst(CardModel card)
+    {
+        if (card is not CustomCardModel custom) return false;
+        var rows = custom.Localization;
+        if (rows == null) return false;
+        foreach (var row in rows)
+        {
+            if (row.Item1 != "description" || row.Item2 == null) continue;
+            return row.Item2.StartsWith("[gold]Set off[/gold].",
+                                        System.StringComparison.Ordinal);
+        }
+        return false;
     }
 
     /// <summary>
