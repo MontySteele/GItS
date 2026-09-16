@@ -1120,9 +1120,11 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # Hook.AfterDamageGiven -- Envenom. Placed on the POWERED attack pipeline
     # only (this function), which is what IsPoweredAttack() means; the
     # Unpowered path in refpowers.unpowered_damage deliberately does not
-    # envenom.
+    # envenom. `EB-495` D2: `powered` travels with it, because a caller INSIDE
+    # this pipeline can still refuse the dealer's terms, and the game's
+    # predicate is that flag rather than the card's type.
     from tier0.engine import refpowers as _refpowers
-    _refpowers.envenom_on_hit(state, enemy, hp_dmg, source)
+    _refpowers.envenom_on_hit(state, enemy, hp_dmg, source, powered)
     # Skittish (§10.9 promotion): "The first time it is hit each turn, it
     # gains N Block." AFTER the whole hit resolves (incl. any detonation
     # rider), so the triggering attack is never mitigated by it; the latch

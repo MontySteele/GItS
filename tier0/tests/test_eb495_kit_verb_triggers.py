@@ -101,16 +101,21 @@ def test_skittish_answers_any_card_sourced_damage_and_nothing_else():
             source in effects.CARD_DAMAGE_SOURCES), source
 
 
-def test_envenom_answers_the_source_attack_and_nothing_else():
-    """MATRIX T4, the sim column, and DISAGREEMENT D2 -- the same shape as
-    D1 with `refpowers.envenom_on_hit`'s `source != "attack"` early return
-    (`refpowers.py:1082`) in place of Skittish's gate."""
+def test_envenom_answers_any_powered_card_hit_and_nothing_else():
+    """MATRIX T4, the sim column, and DISAGREEMENT D2, REPAIRED -- the same
+    shape as D1 one power over. `EnvenomPower.AfterDamageGiven` asks
+    `props.IsPoweredAttack()` (`EnvenomPower.cs:22`), which is `Move` and not
+    `Unpowered` and says nothing about `CardType.Attack`, so a Skill's damage
+    poisons in the game; `refpowers.envenom_on_hit` returned early on
+    `source != "attack"`. It now asks the same two things the game does, and
+    `test_eb495_d2_envenom_takes_a_powered_attack.py` is the end-to-end half.
+    """
     for source in KIT_SOURCES:
         state, enemy = _fresh()
         state.player.powers["envenom"] = 1
         effects.deal_damage_to_enemy(state, enemy, 5, source=source)
         poisoned = enemy.powers.get("poison", 0) > 0
-        assert poisoned is (source == "attack"), source
+        assert poisoned is (source in effects.CARD_DAMAGE_SOURCES), source
 
 
 def test_the_shipped_bomb_detonates_on_an_attack_hit_and_on_nothing_else():

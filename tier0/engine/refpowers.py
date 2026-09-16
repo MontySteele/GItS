@@ -1070,16 +1070,35 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
 
 
 def envenom_on_hit(state: CombatState, enemy: Enemy, unblocked: float,
-                   source: str) -> None:
+                   source: str, powered: bool = True) -> None:
     """EnvenomPower.AfterDamageGiven(dealer == Owner, IsPoweredAttack,
     UnblockedDamage > 0) -> apply Amount Poison to the target.
 
     All three conditions matter and each removes a different free lunch: an
     Unpowered power tick does not envenom, a fully blocked hit does not, and
-    a non-attack does not.
+    damage that did not come out of a card does not.
+
+    `EB-495` D2, REPAIRED. This used to ask `source != "attack"`, i.e. the
+    card's printed `type:`. The game asks `props.IsPoweredAttack()`
+    (`Models/Powers/EnvenomPower.cs:22`), which is `ValueProp.Move` and NOT
+    `ValueProp.Unpowered` -- nothing about being an Attack card. A Skill's
+    damage clause is emitted as `DamageCmd.Attack(...).FromCard(...)`, so it
+    is a powered Move and it DOES poison in the game. The sim's spelling of
+    the same predicate is two halves, and both are needed:
+
+      * `source in effects.CARD_DAMAGE_SOURCES` -- the `Move`/`ModelSource`
+        half. Every kit verb leaves the mod through `ElementalHit.Deal`, which
+        passes `ValueProp.Unpowered`, so no Bomb, Plan, Mine or performance
+        has ever poisoned in the game and none may here.
+      * `powered` -- the `Unpowered` half read literally, so a caller that
+        refuses the dealer's terms is refused this too. Redundant against the
+        first half today (every card-sourced site is powered) and kept because
+        the C# predicate is the flag, not the source.
     """
+    from tier0.engine import effects as _effects
     n = state.player.powers.get("envenom", 0)
-    if not n or source != "attack" or unblocked <= 0 or not enemy.alive:
+    if (not n or not powered or source not in _effects.CARD_DAMAGE_SOURCES
+            or unblocked <= 0 or not enemy.alive):
         return
     from tier0.engine import powers as _powers
     _powers.apply_power(state, enemy, "poison", n, applier=state.player)

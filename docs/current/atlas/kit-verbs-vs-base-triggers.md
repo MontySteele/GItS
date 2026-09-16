@@ -166,7 +166,7 @@ because the engine has no mirror of that trigger at all (see §2); functionally
 | verb | T1 card played | T2 played an Attack | T3 you attack | T4 you deal damage | T5 takes unblocked damage | T6 retaliation | T7 damage modifiers | T8 applied a debuff |
 |---|---|---|---|---|---|---|---|---|
 | V1 Attack-card damage | Attack | Attack | Attack | Attack | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
-| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | **Attack ≠ none (D2)** | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
+| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | Attack (**D2 repaired**) | damage-only ≠ none* (**D5**) | Attack ≠ none* (**D6**) | Attack | none |
 | V3 card HP-loss (self) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V4 Bomb detonation (shipped) | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
 | V5 Bomb explosion / Set off | none | none | none | none | damage-only ≠ none* (**D5**) | none | none | none |
@@ -239,15 +239,25 @@ Bomb, Plan, Mine or performance wakes Skittish in either engine. Pinned end to
 end by `tier0/tests/test_eb495_d1_skittish_wakes_on_a_skill.py`. No published
 sim number moved: the whole suite, batteries included, was unchanged by it.
 
-### D2 — likewise for `EnvenomPower`
+### D2 — likewise for `EnvenomPower` — REPAIRED in the sim
 
 `EnvenomPower.AfterDamageGiven` gates on
 `dealer == Owner && props.IsPoweredAttack() && result.UnblockedDamage > 0`
 (`Models/Powers/EnvenomPower.cs:22`). A Skill's `DamageCmd.Attack` is
 `ValueProp.Move` and powered, so it poisons. The sim's
-`refpowers.envenom_on_hit` returns early on `source != "attack"`
-(`refpowers.py:1082`). Same shape as D1, different power; both are one line in
-the sim.
+`refpowers.envenom_on_hit` returned early on `source != "attack"`. Same shape
+as D1, different power.
+
+**Repaired 2026-09-16, sim side only.** `envenom_on_hit` now takes the hit's
+`powered` flag alongside its `source` and asks for both halves of
+`IsPoweredAttack()`: `source in effects.CARD_DAMAGE_SOURCES` for `Move` /
+`ModelSource`, and `powered` for the absence of `Unpowered`. The second is
+redundant against the first today — every card-sourced call site in tier0 is
+powered — and is written anyway, because the C# predicate is the flag and a
+future Unpowered card clause must not quietly start poisoning. `UnblockedDamage
+> 0` is untouched and pinned beside the repair. Pinned by
+`tier0/tests/test_eb495_d2_envenom_takes_a_powered_attack.py`. No published sim
+number moved.
 
 ### D3 — Furina's Stage act and bow take her Strength in the sim and not in the game
 
