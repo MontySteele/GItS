@@ -25,7 +25,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
-                                        relic_faces)
+                                        deck_elements, relic_faces)
 from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
@@ -140,6 +140,13 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # fires on every screen a card is read on, and three of those are not
         # fights.
         "character": _text(_player(state).get("character")),
+        # `EB-707`: the elements the RUN's deck and the board's powers can
+        # supply, carried and never printed. The glossary's reachability read
+        # walks what the page PRINTS, which is the hand and the board -- so a
+        # second element sitting in the draw pile was invisible and the
+        # NO REACTION IS REACHABLE HERE clause went back up at round one of
+        # every fight. Only the element set crosses; no pile is printed.
+        "deck_elements": deck_elements(state),
     }
     hazard = _hazard(state)
 

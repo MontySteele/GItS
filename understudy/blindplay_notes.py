@@ -2420,6 +2420,14 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
     yours or theirs, is one half of a pair already standing on the board.
     """
     found: set[str] = set()
+    # `EB-707`: THE DECK'S AND THE POWERS', off the observation's own carried
+    # field. `blindplay_faces.deck_elements` reads the four piles and every
+    # status row on the board -- the deck a card will be drawn from, and a
+    # power whose rule names an element -- so this answer is about the RUN
+    # rather than about the seven cards this turn happens to print. Nothing
+    # here prints a pile; only the element set crosses.
+    found.update(e for e in (obs.get("deck_elements") or [])
+                 if e in _ELEMENTS or e in _SPREAD_ELEMENTS)
 
     def walk(blob: Any) -> None:
         if isinstance(blob, dict):

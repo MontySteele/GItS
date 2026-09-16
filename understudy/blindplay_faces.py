@@ -558,6 +558,65 @@ def _shop_options(state: dict[str, Any]) -> list[dict[str, Any]]:
 # screen replaces the real deck with three cards.
 _DECK_PILES = ("hand", "draw_pile", "discard_pile", "exhaust_pile")
 
+# `EB-707`. THE LINE SAID NO REACTION WAS REACHABLE WHILE ONE WAS ON THE BOARD.
+#
+# THE FIND (Kokomi r31 lane 2). "NO REACTION IS REACHABLE HERE" stayed on every
+# screen after an Electro card entered the deck -- once printed beside an
+# Electro-Charged entry and a Poisoned enemy, which is the claim contradicting
+# itself on its own page.
+#
+# THE READ WAS THE HAND'S AND THE QUESTION IS THE RUN'S. `_reachable_elements`
+# walks the OBSERVATION, so it sees what the page PRINTS: the hand, the board's
+# auras, the belt, a reward row. A Sanctifying Ring sitting in the draw pile
+# prints nowhere, and `remember_elements` is dropped at each fight boundary --
+# so at round one of every fight the run's second element was invisible again
+# and the clause went back up. A Power's own rule is the same shape one source
+# over: it is on the screen, and its element is in prose rather than in an
+# `Applies X` keyword.
+#
+# SO REACHABILITY READS THE DECK AND THE POWERS. The four piles ARE the deck
+# inside a fight (`remember_deck`'s own argument) and they are on the feed of
+# every combat screen; a power row carries its rule. Neither is PRINTED by this
+# -- only the element set crosses, and the draw pile's order and contents stay
+# where they are.
+_ELEMENT_WORD_RE = re.compile(r"\b(Pyro|Hydro|Electro|Cryo|Anemo|Geo)\b")
+
+
+def _entry_elements(entry: dict[str, Any]) -> set[str]:
+    """The elements one card or power entry can supply, off its own face."""
+    found: set[str] = set()
+    kws = [{"name": _text(k.get("name"))}
+           for k in (entry.get("keywords") or []) if isinstance(k, dict)]
+    element = _element(kws)
+    if element:
+        found.add(element)
+    for key in ("description", "name", "title"):
+        found.update(_ELEMENT_WORD_RE.findall(_text(entry.get(key))))
+    return found
+
+
+def deck_elements(state: dict[str, Any]) -> list[str]:
+    """Every element this run's DECK and POWERS can supply (`EB-707`).
+
+    The four piles and every status row on the board, player's and enemies'
+    alike: a deck card in the draw pile is a card that will be in hand, and a
+    power whose rule names an element is an element the board already has.
+    Sorted, so the observation it rides on is stable to diff.
+    """
+    found: set[str] = set()
+    player = _blob(state, "player")
+    for pile in _DECK_PILES:
+        for entry in player.get(pile) or []:
+            if isinstance(entry, dict):
+                found |= _entry_elements(entry)
+    blobs = [player] + [b for b in (_blob(state, "battle").get("enemies") or [])
+                        if isinstance(b, dict)]
+    for blob in blobs:
+        for row in blob.get("status") or []:
+            if isinstance(row, dict):
+                found |= _entry_elements(row)
+    return sorted(found)
+
 # ON DISK, and that is not a convenience -- it is what makes the row's answer
 # reachable at all. A blind seat drives this tool as `python -m
 # understudy.blindplay observe` and `... act "<command>"`, one PROCESS PER

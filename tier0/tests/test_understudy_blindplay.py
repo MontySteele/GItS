@@ -6895,6 +6895,15 @@ def elemental_hand_state(*, aura: bool = False, bomb_tip: str = "",
              "keywords": keywords,
              "description": "Retain. Set off. Deal 4 damage."})
     state["player"]["hand"] = hand
+    # `EB-707`: AND THE REST OF THE DECK IS EMPTIED, because reachability is
+    # now the RUN's question rather than the hand's. The recorded state this
+    # fixture is built on carries a real Kokomi draw and discard pile, and
+    # those piles really do supply a second element -- so a fixture that says
+    # "one card per named element" has to mean the whole deck, or every
+    # assertion below about what is NOT reachable is an assertion about the
+    # recording rather than about the rule.
+    for pile in ("draw_pile", "discard_pile", "exhaust_pile"):
+        state["player"][pile] = []
     if aura:
         state["battle"]["enemies"][0]["status"] = [
             {"id": "KLEEMOD-CRYO_AURA", "name": "Cryo Aura", "amount": 2,
@@ -12348,3 +12357,54 @@ def test_a_full_belt_does_not_block_a_card_or_a_relic_shelf():
     state["player"]["gold"] = 400
     assert blindplay.act(state, 'buy "Coral Guard"')["ok"] is True
     assert blindplay.act(state, 'buy "Bottled Tide"')["ok"] is True
+
+
+# ------------- EB-707: reachability is the deck's question, not the hand's ---
+
+def test_a_second_element_in_the_draw_pile_ends_the_unreachable_claim():
+    """`EB-707`. Seen to FAIL: NO REACTION IS REACHABLE HERE stayed up on every
+    screen of a run whose deck held an Electro card, because the read walked
+    what the page PRINTS -- the hand and the board -- and a card in the draw
+    pile prints nowhere. The gate the row names: Sanctifying Ring in the deck.
+    """
+    state = elemental_hand_state(elements=("Pyro",))
+    state["player"]["draw_pile"] = [
+        {"name": "Shinobu -- Sanctifying Ring", "cost": "1",
+         "description": "Applies Electro. Deal 5 damage.",
+         "keywords": [{"name": "Applies Electro",
+                       "description": "If the target has no aura, this "
+                                      "applies Electro for 2 turns."}]}]
+    page = blindplay.observe(state)
+    assert "NO REACTION IS REACHABLE HERE" not in page
+    # And the pair that deck really can build is the one that comes back.
+    assert "Overloaded" in page
+
+
+def test_the_draw_pile_itself_is_never_printed_by_the_reachability_read():
+    """Only the element set crosses (`EB-707`): the pile's own cards stay off
+    the page, which is the whole reason the read was the hand's to begin with.
+    """
+    state = elemental_hand_state(elements=("Pyro",))
+    state["player"]["draw_pile"] = [
+        {"name": "Shinobu -- Sanctifying Ring", "cost": "1",
+         "description": "Applies Electro. Deal 5 damage.", "keywords": []}]
+    assert "Sanctifying Ring" not in blindplay.observe(state)
+
+
+def test_a_powers_own_element_counts_toward_reachability():
+    """The other half the row names: an element a POWER's rule supplies is on
+    the board whether or not any card in hand carries the keyword."""
+    state = elemental_hand_state(elements=("Pyro",))
+    state["player"]["status"] = [
+        {"id": "KLEEMOD-RING", "name": "Sanctifying Ring", "amount": 1,
+         "type": "Buff", "keywords": [],
+         "description": "At the end of your turn, apply Electro to a random "
+                        "enemy."}]
+    assert "NO REACTION IS REACHABLE HERE" not in blindplay.observe(state)
+
+
+def test_a_mono_element_run_still_gets_the_one_line():
+    """The claim is not deleted, only made true: a deck that really can supply
+    one element alone reads exactly as it did."""
+    page = blindplay.observe(elemental_hand_state(elements=("Pyro",)))
+    assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in page
