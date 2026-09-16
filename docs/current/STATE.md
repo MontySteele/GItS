@@ -73,7 +73,7 @@ hand-written kit machinery.
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**. Deploy stamps
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3480+proto`**
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3581+proto`**
 (2026-09-16, main after #562, arms `klee,companion,kokomi,furina-stage,teyvat`:
 the prototype rows behind `-p:PrototypeCards=true`, the Stage behind
 `-p:FurinaStage=true`, the Teyvat frame behind `-p:TeyvatFrame=true` and ON
