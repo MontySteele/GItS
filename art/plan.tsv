@@ -1492,10 +1492,19 @@ smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y
 # They stay on the bill until a fetch lands, which is not this pass's job.
 #
 # ---------- Klee overhaul (proto_ko_) ----------
-proto_ko_kaboom	ImageGen/images/cards/klee/proto_ko_kaboom.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg	
+# RETIRED 2026-09-16 (found by the coverage close-out: art_process placed these
+# four and art_coverage reported them as NEW unrecorded STALE files). The block's
+# own rule is that a placeholder leaves with the surface row it serves, and all
+# four surface rows are gone: R242 replaced a character's renamed Strike/Defend
+# with the BASE GAME's, so proto_ko_kaboom and proto_ko_duck_and_cover left with
+# Klee draft 4 (tier0/constants.py:229) and proto_kk_waters_edge and
+# proto_kk_coral_guard were deleted under R213 B
+# (klee-mod/KleeCode/Powers/Prototype/KokomiOverhaulRoster.cs:57-68). Commented
+# rather than deleted, the pop/R231 pattern, and their placed PNGs are removed.
+# proto_ko_kaboom	ImageGen/images/cards/klee/proto_ko_kaboom.png	500	380	cover	top	shortlist	1	png	Klee Character Card.png		tcg	
 # proto_ko_kapow <- crackle: Klee's shipped spark-burst VFX; Ka-pow! is the second face of the basic Attack
 proto_ko_kapow	ImageGen/images/cards/klee/proto_ko_kapow.png	500	380	contain	center	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		vfx	
-proto_ko_duck_and_cover	ImageGen/images/cards/klee/proto_ko_duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker	
+# proto_ko_duck_and_cover	ImageGen/images/cards/klee/proto_ko_duck_and_cover.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker	
 proto_ko_pop	ImageGen/images/cards/klee/proto_ko_pop.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 11.png		splash	
 proto_ko_jumpy_dumpty	ImageGen/images/cards/klee/proto_ko_jumpy_dumpty.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Tomato Pepper Jumpy Dumpty.png		item	
 proto_ko_fish_flavored_bait	ImageGen/images/cards/klee/proto_ko_fish_flavored_bait.png	500	380	contain	center	shortlist	1	png	Item Fish-Flavored Toast.png		item	
@@ -1561,8 +1570,8 @@ proto_mc_durin_binary_form	ImageGen/images/cards/companions/proto_mc_durin_binar
 # name matches a shipped Kokomi card takes that card's source and crop and
 # carries no comment; every other row borrows a shipped Kokomi card the
 # overhaul retires, and the line above it names the donor and why it fits.
-proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
-proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+# proto_kk_waters_edge	ImageGen/images/cards/kokomi/proto_kk_waters_edge.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
+# proto_kk_coral_guard	ImageGen/images/cards/kokomi/proto_kk_coral_guard.png	500	380	cover	y0.41	shortlist	1	png	Sangonomiya Kokomi Portrait.png		splash	kokomi_pool
 proto_kk_kurages_oath	ImageGen/images/cards/kokomi/proto_kk_kurages_oath.png	500	380	cover	y0.24	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
 proto_kk_slack_water	ImageGen/images/cards/kokomi/proto_kk_slack_water.png	500	380	cover	y0.54	shortlist	1	png	Sangonomiya Kokomi Card.png		splash	kokomi_pool
 # proto_kk_feint <- press_the_advantage: the follow-up blow a feint sets up
