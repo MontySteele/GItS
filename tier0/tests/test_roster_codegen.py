@@ -1436,6 +1436,98 @@ def test_conditional_damage_moves_take_it_from_the_tops_branch_only():
     assert "NO upgrade path" not in source
 
 
+# --- `EB-729`: a whole-card delta holes EVERY branch, not the then-arm alone --
+#
+# THE DEFECT, found on `EB-723` and worked around there by authoring the base
+# number's hole on the row. `conditional_damage` / `conditional_block` bump
+# every matching clause (tier0 `upgrades.apply` walks `everywhere`), so a
+# conditional carrying a number in EACH arm has two numbers to hole. On a row
+# that states its own `description:`, `_authored_face_with_tokens` walks the
+# printed numbers with a cursor that only moves forward, and the arms used to
+# be yielded then-first -- so a face written "Deal 7 damage. If ...: deal 13
+# instead." spent the cursor on the 13 and left the 7 bare. The card then dealt
+# 10 and printed 7, which is the `EB-288` / `EB-291` defect class: a printed
+# number that is not the number the card does.
+#
+# These are re-emissions on a synthetic row rather than reads off a shipped
+# `.cs`, because no row on any sheet carries this shape today -- the two live
+# both-arm rows print their pair through the `PlainDamage` / `BranchDamage`
+# fold instead. Regenerating after the fix moved no committed file, and that is
+# the acceptance: the emitter can now say it, and nothing shipped had to move.
+
+
+def _both_arm_probe(op: str, printed: int, branch: int, text: str) -> dict:
+    """A row whose conditional prints a number in BOTH arms and states its own
+    face, with the ELSE number written first -- the order the fix reads."""
+    return {"id": "eb729_both_arm_probe", "name": "Both Arm Probe",
+            "cost": 1, "type": "attack" if op == "damage" else "skill",
+            "rarity": "common", "description": text,
+            "effects": [{"op": "conditional", "if": "enemy_intends_attack",
+                         "then": [dict({"op": op, "amount": branch},
+                                       **({"target": "enemy"}
+                                          if op == "damage" else {}))],
+                         "else": [dict({"op": op, "amount": printed},
+                                       **({"target": "enemy"}
+                                          if op == "damage" else {}))]}]}
+
+
+def test_a_whole_card_conditional_delta_holes_both_printed_numbers(
+        monkeypatch):
+    """THE LOCK, both keys. Seen to FAIL before the fix: the `then` number was
+    holed and the base literal was printed bare."""
+    for key, op, printed, branch, delta, text in (
+            ("conditional_damage", "damage", 7, 13, 3,
+             "Deal 7 damage. If an enemy intends to attack: deal 13 instead."),
+            ("conditional_block", "block", 5, 10, 3,
+             "Gain 5 [gold]Block[/gold]. If an enemy intends to attack: "
+             "gain 10 instead.")):
+        card = _both_arm_probe(op, printed, branch, text)
+        monkeypatch.setattr(gen, "_upgrade_deltas",
+                            {"eb729_both_arm_probe": {key: delta}})
+        face = gen.build_description(card)
+
+        assert "{IfUpgraded:show:%d|%d}" % (printed + delta, printed) in face, \
+            f"{key}: the BASE literal is still bare -- {face}"
+        assert "{IfUpgraded:show:%d|%d}" % (branch + delta, branch) in face, \
+            f"{key}: the branch literal is not holed -- {face}"
+        # No bare copy of either number survives beside its hole.
+        assert re.search(rf"(?<![\d:|]){printed}(?![\d}}])", face) is None, face
+        assert re.search(rf"(?<![\d:|]){branch}(?![\d}}])", face) is None, face
+
+
+def test_the_then_arm_is_still_first_when_the_face_prints_it_first(
+        monkeypatch):
+    """The order is READ, not flipped. A face that prints the then number first
+    -- the rendered path's own order -- still holes both, so the fix cannot
+    have traded one direction of the defect for the other."""
+    card = _both_arm_probe(
+        "damage", 7, 13,
+        "If an enemy intends to attack: deal 13 damage. Otherwise: deal 7.")
+    monkeypatch.setattr(gen, "_upgrade_deltas",
+                        {"eb729_both_arm_probe": {"conditional_damage": 3}})
+    face = gen.build_description(card)
+
+    assert "{IfUpgraded:show:16|13}" in face, face
+    assert "{IfUpgraded:show:10|7}" in face, face
+    assert face.index("16|13") < face.index("10|7"), face
+
+
+def test_the_rendered_path_holed_both_arms_all_along(monkeypatch):
+    """The other half of the acceptance, and the reason the defect was only
+    ever an AUTHORED-face one: a row with no `description:` renders its own
+    text, in then/else order, and has holed both arms since `EB-140`."""
+    card = _both_arm_probe(
+        "damage", 7, 13,
+        "")                       # no authored face
+    card.pop("description")
+    monkeypatch.setattr(gen, "_upgrade_deltas",
+                        {"eb729_both_arm_probe": {"conditional_damage": 3}})
+    face = gen.build_description(card)
+
+    assert "{IfUpgraded:show:16|13}" in face, face
+    assert "{IfUpgraded:show:10|7}" in face, face
+
+
 def test_a_conditional_delta_with_no_op_to_bump_is_still_refused(monkeypatch):
     """The keys are expressible, not unconditional. A row that rules one with
     nothing to land on is a sheet/card mismatch and says so."""
