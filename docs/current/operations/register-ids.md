@@ -1723,3 +1723,19 @@ EB-783 RETIRED 2026-09-16: live: the four Stage readers printed the hover tip, n
 EB-784 RETIRED 2026-09-16: live: Slippery Bridge's page-two number matched the click cost through `{HpLoss}` (#586).
 EB-785 RETIRED 2026-09-16: live: three lane-1 teardowns archived lane 1's own godot.log (#586).
 EB-786 RETIRED 2026-09-16: live: both Curtain Rise mode faces drew portraits in card_atlas (#586).
+EB-247 RETIRED 2026-09-16: live, kokomi arm OFF: the memory's buff, tip and docket agreed with `pulse_kind` on four surfaces across three pulse states; promise 4, dealt 4 (#594).
+EB-248 RETIRED 2026-09-16: live, kokomi arm OFF: `1. Coral Guard -- 3 Charge, cost 1 x 3` and the bank 7 -> 4 when the front fired; the price-0 row prints bare `free` (EB-809) (#594).
+EB-287 RETIRED 2026-09-16: live: the Bomb tip and the page's glossary row both say a second Bomb joins the first (#595).
+EB-734 RETIRED 2026-09-16: live: the chooser row carried its hand tag on the Smith's chooser (#587) and the shop's removal grid (#595); a single-candidate enchant offer opens no chooser at all, so the enchant chooser itself is unreachable with one candidate (noted for drivers).
+EB-779 RETIRED 2026-09-16: live: the Spend mode chooser's hint did not say `confirm` and one `choose` resolved the folded 7 (#595).
+EB-780 RETIRED 2026-09-16: live: an upgraded Curtain Rise under Weak 3 printed one pair in hand and in the chooser (#595); the option TITLE's number is EB-805.
+EB-787 RETIRED 2026-09-16: live: Nimble on Barbara printed Block 7, rider 3, and 7 Block was gained (#595).
+EB-789 RETIRED 2026-09-16: live: an enchanted card's pile row matched its hand row, `enchantment: NIMBLE 2` included, on Klee and on Kokomi (#595, #594).
+EB-790 RETIRED 2026-09-16: live: a lane-0 boot on the owner's profile logged no Unknown card ID for any KLEEMOD- id (680 base-game unknowns in the same boot are not ours) (#594).
+EB-791 RETIRED 2026-09-16: live: no raw `[gold]` on a mode card's title in-game (#595); the title's NUMBER is EB-805.
+EB-792 RETIRED 2026-09-16: live: the intent caveat no longer contradicts the breakdown line (#595).
+EB-793 RETIRED 2026-09-16: live: `master_deck` rows carry id, rarity, is_upgraded, keywords, pile and the enchantment (#595, #594).
+EB-794 RETIRED 2026-09-16: live: the shop removal grid marked the picked row `selected: true` (#595).
+EB-795 RETIRED 2026-09-16: live: `Written:` printed Noelle's 6 and 4 (#595).
+EB-796 RETIRED 2026-09-16: live: `+1 your opening bank, +3 an explosion` on turn 2 (#595).
+EB-804 RETIRED 2026-09-16: the proofs-10 list ran on 0.2.3581: lane 0 (#594) and lane 1 (#595); every item PASS or narrowed with the reason.

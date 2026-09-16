@@ -5,9 +5,9 @@ Status: OPEN (picks for [USER]; nothing here is measured)
 Three fan-outs ran on 2026-09-16 after the epoch-reveal click: 32 PRs in the
 day (#531-#562), 11 in the evening (#563-#573) and 19 in the afternoon after
 (#574-#592), all merged by Claude as plumbing under R259. Main is green. This
-page is the close-out: what is proven in the running game, what is built and
-waiting for the live look now running (the proofs-10 row, `EB-804`), and the
-picks only you can make (QUEUE rows `fanout-picks-2026-09-16 4.1` to `4.8`).
+page is the close-out: what is proven in the running game, what the second
+deploy's live look proved (proofs-10, #594 and #595), and the picks only you
+can make (QUEUE rows `fanout-picks-2026-09-16 4.1` to `4.8`).
 Every claim names a file or a PR.
 
 ## 1. Proven in the running game
@@ -32,17 +32,20 @@ Build `0.2.3541+proto`, all arms ON, read by two lanes (proofs-9,
   live preview, Stoke the Fuse's X, two Bombs in set-off order, a
   conditional companion preview, and Salon Solitaire draws its sigil (the
   8b placeholder was the base game's own `CARD.SNECKO-NOPE` id).
-- **27 rows retired on those reads**; the register stands at 73 open rows
-  after 8 minted for what the reads found.
+- **27 rows retired on those reads, 16 more on proofs-10**; the register
+  stands at 62 open rows after 13 minted for what the reads found.
 
-## 2. Built today and waiting for the live look (proofs-10, `EB-804`)
+## 2. Built today and proven on the second deploy (proofs-10)
 
-Running now on both lanes against `0.2.3581+proto` (Kokomi arm OFF on
-purpose, the only condition under which the Kurage Memory rows `EB-247` and
-`EB-248` have a surface):
+Read on both lanes against `0.2.3581+proto` with the Kokomi arm OFF on
+purpose, the only condition under which the Kurage Memory has a surface: its
+two rows (`EB-247`, `EB-248`) passed and are retired. Every item below read
+PASS (`review/records/teyvat-proofs-10-lane1-2026-09-16.md` and `-lane0-`),
+except the death SOUND, which an agent cannot hear (`EB-159` now asks you to
+listen once). The installed build is now `0.2.3589+proto`, all arms ON.
 
-- A modded death is heard and waited for (#582, `EB-159`, an E default you
-  can veto: the body's own clip length, Klee 1.0 s, Furina 1.2 s).
+- A modded death is waited for, and should be heard (#582, `EB-159`, an E
+  default you can veto: the body's own clip length, Klee 1.0 s, Furina 1.2 s).
 - An old save no longer logs two ValidationErrors per boot: 54 retired card
   ids carry hidden aliases and the codegen appends the next one on
   retirement (#585, `EB-790`, E default).
@@ -73,7 +76,12 @@ for a spine-less body (`EB-797`); the bridge does not build in a bare
 worktree without the game-dir flag (`EB-799`); the two Kaeya rows wear each
 other's named art (`EB-803`); the second capture path may carry the same clip
 and nothing refuses an incomplete frame (`EB-802`); the five arm properties
-disagree on one test's shape (`EB-800`).
+disagree on one test's shape (`EB-800`). Proofs-10 added five: a mode card's
+title prints the sheet's number over a folded body (`EB-805`), the harness
+camera can frame the other lane and labels every frame lane 0 (`EB-806`), an
+arm-gated relic id warns at boot like the retired cards did (`EB-807`), a
+create-mode Muster never stamps its recruit's discount (`EB-808`), and a free
+queue entry prints no derivation (`EB-809`).
 
 ## 4. Picks
 
