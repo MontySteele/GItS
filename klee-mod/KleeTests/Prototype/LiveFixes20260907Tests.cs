@@ -127,7 +127,7 @@ public class LiveFixes20260907Tests
         pile.AddCharge(new ProtoBombPower.ProtoCharge(20, false, 0));
         pile.AddCharge(new ProtoBombPower.ProtoCharge(12, false, 0));
 
-        Assert.Equal("5 / 8 / 20 / 12",
+        Assert.Equal("1st 5 / 2nd 8 / 3rd 20 / 4th 12",
                      pile.DynamicVars["Charges"].ToString());
         // And the take the explosions walk hands the same order back.
         Assert.Equal(new[] { 5, 8, 20, 12 },

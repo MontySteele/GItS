@@ -899,7 +899,27 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
 
     /// <summary>
     /// <c>{Charges}</c>, the pile's sizes in the order they will go off
-    /// (`EB-450`).
+    /// (`EB-450`), EACH UNDER ITS ORDINAL (`EB-755`).
+    ///
+    /// `EB-755`. "OLDEST FIRST" DOES NOT SAY WHICH OF TWO IS OLDER. The clause
+    /// states the RULE and the list states the ORDER, and for two Bombs placed
+    /// in the SAME turn a reader has no way to join the two: nothing on the
+    /// board says which of them the game filed first, and only the leading
+    /// charge takes the aura (`PredictedSetOffDamage`), so a seat planning a
+    /// Vaporize could not tell which size the multiplier would ride. The D
+    /// default is taken: print them in SET-OFF ORDER WITH ORDINALS, so the list
+    /// names its own positions instead of leaving them to be counted.
+    ///
+    /// ONLY WHERE THERE ARE TWO OR MORE. A lone charge has no order to
+    /// disambiguate and `1st 12` on a single Bomb is a numeral a reader has to
+    /// discard -- the same argument `EB-536` made for the hit clause, which is
+    /// a fact about a STACK and reads as noise on one Bomb.
+    ///
+    /// AND THE ORDINALS RIDE THE VALUE, not the face. The face constants are
+    /// at their measured ceilings (<see cref="Bombs"/> is 125 of 125) and
+    /// `tools/lint_text_conventions.py` measures the SOURCE, so a word added
+    /// to the format string would cost the sentence a clause. This is the same
+    /// live var the sizes already arrive through.
     ///
     /// A <see cref="SetOffDamageVar"/> SUBCLASSED THE SAME WAY AND FOR THE
     /// SAME REASON: the game hands the var itself to SmartFormat
@@ -933,9 +953,38 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                 return "0";
             }
 
-            return string.Join(" / ", pile._charges.Select(
+            var sizes = pile._charges.Select(
                 c => c.Size.ToString(
-                    System.Globalization.CultureInfo.InvariantCulture)));
+                    System.Globalization.CultureInfo.InvariantCulture));
+            if (pile._charges.Count == 1)
+            {
+                return string.Join(" / ", sizes);
+            }
+
+            return string.Join(" / ", sizes.Select(
+                (size, index) => Ordinal(index + 1) + " " + size));
+        }
+
+        /// <summary>`1st`, `2nd`, `3rd`, `4th` ... -- the position of one
+        /// charge in the set-off order (`EB-755`).
+        ///
+        /// The teens are the exception every ordinal table carries (11th,
+        /// 12th, 13th, not 11st), and a pile CAN reach them: the r21 seat's
+        /// merged stack was nine charges and Jumpy Dumpty's rider adds one per
+        /// enemy per detonation.</summary>
+        private static string Ordinal(int position)
+        {
+            var suffix = (position % 100) is >= 11 and <= 13
+                ? "th"
+                : (position % 10) switch
+                {
+                    1 => "st",
+                    2 => "nd",
+                    3 => "rd",
+                    _ => "th",
+                };
+            return position.ToString(
+                System.Globalization.CultureInfo.InvariantCulture) + suffix;
         }
     }
 
