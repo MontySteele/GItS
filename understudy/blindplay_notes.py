@@ -2760,3 +2760,146 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             seen.add(word)
             rows.append({"name": word, "text": BASE_KEYWORDS[word]})
     return rows
+
+
+# ---------------------------------------------------------------------------
+# `EB-607`. HOW THE GAME ARRIVED AT THE NUMBER ON THE ICON.
+#
+# THE FIND (Klee r23 lane 1 (c) 3). "Fossil Stalker read 12 before and after I
+# gave it Strength 3, while Corpse Slug's number moved." The first half of this
+# row printed the game's own `GetIntentLabel` unchanged and named the pair
+# where an icon and its sentence disagree -- a DETECTOR, which fires after the
+# fact. The arithmetic itself is the bridge's, and it is on the wire now:
+# `Hook.ModifyDamage`'s base, its folded answer, the repeat count, and the
+# models the game folded in -- which the game's own
+# `AttackIntent.GetSingleDamage` computes and throws away.
+#
+# TWO LINES AND NOT ONE, because the two questions a reader has are different.
+# The FOLD line says where the number came from, and it prints only where
+# something was folded: an icon that is its own base is the ordinary case, and
+# a line under every intent saying "nothing was folded" would be noise. The
+# TOTAL line says what the whole move delivers if every hit lands, and prints
+# only on a multi-hit, because that is the multiplication the r23 seat and the
+# `PER_HIT_NOTE` reader are both doing by hand.
+#
+# NOTHING HERE IS RECOMPUTED. Every number on these lines is one the bridge
+# read off the game; the page multiplies nothing and predicts nothing, which is
+# the standing rule that keeps a printed line from disagreeing with the icon
+# four words to its left.
+INTENT_FOLD_CLAUSE = ("the game folded {modifiers} into that: it is {base} on "
+                      "the move and {folded} after")
+INTENT_FOLD_NOTHING = ("nothing on the board is folded into that number: it "
+                       "is the {base} the move itself declares")
+INTENT_TOTAL_CLAUSE = "{folded} x {repeats} is {total} if every hit lands"
+
+#: `EB-323`. The wire's own answer to whose side a part is on, read off the
+#: game's `IntentType`. Printed where the bridge sends it; the older
+#: locally-derived `BUFF_INTENT_CLAUSE` is what a feed that sends nothing gets.
+INTENT_TARGET_SIDE = ("this part lands on {side}, and the feed carries no "
+                      "target for an intent part, so this page cannot say "
+                      "which body")
+
+# ---------------------------------------------------------------------------
+# `EB-349` / `EB-611`. WHAT RESOLVED THIS TURN, AND WHAT EACH HIT DID.
+#
+# THE STANDING FACT this closes is further up this file, in `AUTO_TURN_NOTE`:
+# "there is no record of a card resolving on the wire at all". Every screen the
+# bridge sends is an after-state, so a relic that plays a turn for you left a
+# board and no turn (Vakuu: six openings, five from an empty hand -- Kokomi r4d
+# act 3, 1), and a multi-hit random `Set off` told a seat which bodies were hit
+# and never the order (Klee r23 lane 2 (c) 3).
+#
+# THE EMPTY LIST IS THE FINDING ON AN AUTO-PLAYED TURN, which is why this
+# section prints its empty state where the relic-answer section does not: a
+# turn the game took for you files no rows of yours, and "nothing of yours has
+# resolved" beside the auto-played row is the pair that tells a reader the
+# empty hand in front of them is the price of a relic and not a fault.
+#
+# ONE LINE PER HIT AND NOT PER BODY, `EB-518`'s rule one card over: four
+# entries reading `Rapid Fire 6` divide among a hallway more than one way, and
+# the beat that does not add up is the one that struck the same body twice.
+# Numbered, because the ORDER is the whole of `EB-611`.
+RESOLUTIONS_HEADING = "## What you played this turn, and what it did"
+RESOLUTION_ROW = "- **{card}**{clauses}"
+RESOLUTION_HIT_ROW = "  {n}. **{target}** -- {amount}"
+RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
+RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
+RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
+NO_RESOLUTIONS_THIS_TURN = (
+    "- Nothing has resolved on your turn yet. A card you played would be "
+    "listed here with what each of its hits did.")
+#: On a row the GAME played rather than the reader: the game's own
+#: `CardPlay.IsAutoPlay`, not a guess about which relic holds the controller.
+RESOLUTION_AUTO_CLAUSE = " *(the game played this one, not you)*"
+#: `EB-710`'s clause, on this ledger. Same window, same words.
+RESOLUTION_CARRIED_CLAUSE = " *(since you ended your last turn)*"
+#: A card whose hits ran past what one row will hold. Said rather than
+#: silently truncated, because a reader adding up forty lines that should be
+#: forty-three has been handed the `EB-518` error in a new place.
+RESOLUTION_OVERFLOW_CLAUSE = " *(more hits landed than this page will list)*"
+#: Printed under the section when every row on it was played by the game --
+#: the turn the reader never saw, with its contents on the page at last.
+RESOLUTION_AUTO_TURN_NOTE = (
+    "*The rows above are the turn the game took for you: what it played, what "
+    "it aimed at, and what each hit did. An empty hand or unspent energy on "
+    "the board below is that turn, not a fault.*")
+
+# ---------------------------------------------------------------------------
+# `EB-374`. THE REWARD SCREEN'S OTHER BUTTON, BY NAME.
+#
+# THE FIND (Klee r9, act 2). Pael's Wing adds a SACRIFICE option to a card
+# reward, and two rewards in that run printed `choose` and `skip` and nothing
+# else. `CARD_REWARD_ALTERNATIVE_NOTE` above is what the page could honestly
+# say while the words were not on the feed. They are on it now
+# (`BuildCardRewardState` sends `alternatives`), so the caveat comes off where
+# the words arrive and the button is named instead.
+#
+# THE VERB IS `sacrifice` AND IT IS NOT A SYNONYM FOR `skip`. `skip` presses
+# the screen's FIRST alternative, which is what it has always pressed and what
+# every policy and soak caller sends; `sacrifice` presses the one whose words
+# are not a plain skip. Where there is only a plain skip the verb refuses and
+# says so, rather than pressing the skip under another name.
+REWARD_ALTERNATIVES_HEADING = "## Instead of choosing a card"
+REWARD_ALTERNATIVE_ROW = "- **{name}** -- say `{verb}`"
+REWARD_ALTERNATIVE_UNNAMED = (
+    "- There is another button on this screen and the game's data feed does "
+    "not say what it is. `skip` presses it.")
+NO_SACRIFICE_HERE = ("this screen offers no alternative but the plain skip, "
+                     "and `skip` is the verb for that")
+NO_ALTERNATIVE_AT_ALL = "this card reward offers no alternative to choosing"
+
+# ---------------------------------------------------------------------------
+# `EB-350`. THE GRID THAT PRINTED TWENTY-FIVE ROWS WHATEVER THE DECK WAS.
+#
+# THE FIND (Kokomi r4d act 2, 10; act 3, 4 and 5). The shop's Card Removal grid
+# printed exactly 25 rows against a 38-card deck and again against a 29-card
+# one, and a Klee seat routed into an Elite at 2/62 unseen because the screen
+# it planned on was not the deck. The 25 was a VIEWPORT: `NCardGrid` is
+# virtualised, and the bridge was walking the holders that happened to fit.
+#
+# THE BRIDGE SENDS THE WHOLE GRID NOW, so the rows are the grid. What is left
+# is the other half of the row -- the Smith's "not on this list" model, kept on
+# the removal screen: a card in the deck and not on the grid is a card the game
+# will not remove, which is a rule about the deck and not a hole in the page.
+#: The reason itself lives in `blindplay_board.NOT_REMOVABLE`, beside the
+#: upgrade grid's three, because that is where the subtraction happens.
+#: Printed where the bridge could not read the grid's own list and the page is
+#: back on the viewport walk. It says which of the two a reader is looking at,
+#: because "these are all the cards" and "these are the cards that fit" are
+#: different claims and the second under the first's heading is the r4d defect.
+GRID_INCOMPLETE_NOTE = (
+    "*This page could not read the whole grid off this screen's data feed, so "
+    "the list above is the rows the screen has drawn and not necessarily "
+    "every card the grid holds.*")
+
+# ---------------------------------------------------------------------------
+# `EB-447`. THE DECK IS THE RUN'S OWN DECK NOW.
+#
+# Every deck list this page printed outside a fight was RECONSTRUCTED from the
+# union of four combat piles, and the caveat beside it said so: "your deck as
+# it stood in the last fight". The bridge sends `Player.Deck` -- the master
+# list the game's own Deck screen draws -- on every screen, so where that key
+# is present the caveat is simply wrong, and this prints instead.
+DECK_IS_THE_RUNS_OWN = (
+    "*This is the run's own deck list, off this screen's own data feed, and "
+    "it is current as of this screen.*")

@@ -9,7 +9,7 @@ and what each screen is offering. Re-exported from `blindplay.py`, so
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, Callable
 
 from understudy import qa_packet
 from understudy.blindplay_faces import (_card_face, _card_title,
@@ -219,6 +219,12 @@ NO_UPGRADE_DEFINED = "this build defines no upgrade for it"
 UNEXPLAINED_OMISSION = ("on the screen's list nowhere, and nothing on the feed "
                         "says why")
 
+#: `EB-350`. The removal grid's ONE reason, beside the upgrade grid's three.
+#: The upgrade screen omits a card for three things this page can tell apart;
+#: a removal grid omits one for exactly one thing it can state -- the game is
+#: not offering it -- and the page does not guess at which rule did it.
+NOT_REMOVABLE = "the game is not offering it for removal on this screen"
+
 
 #: `EB-332`. THE GAME PARKS A BOSS ON A SENTINEL WHILE IT CHANGES PHASE. The
 #: Kokomi r4c act-2 seat read `Waterfall Giant -- HP 999999997/999999999` for a
@@ -350,10 +356,63 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
     a remembered pile entry and a grid entry are the same card model and the
     title is what the reader is looking at.
     """
+    debt = qa_packet.no_upgrade_index()
+
+    def reason(card: dict[str, Any]) -> str:
+        if card["upgraded"]:
+            return ALREADY_UPGRADED
+        if card["key"] in debt:
+            return NO_UPGRADE_DEFINED
+        return UNEXPLAINED_OMISSION
+
+    return _omitted_from_grid(state, reason)
+
+
+#: `EB-350`. Whether this selection screen is the one that REMOVES a card.
+#: Matched on the printed prompt and never on a screen name, which is the rule
+#: every note on this page is read under: the game spells the screen `select`
+#: for a dozen different asks and the sentence is what tells them apart.
+_REMOVAL_PROMPT = re.compile(r"\b(remove|removal|destroy|purge)\b", re.I)
+
+
+def is_removal_screen(blob: dict[str, Any]) -> bool:
+    """`EB-350`. Whether a card-select screen is a removal screen."""
+    return bool(_REMOVAL_PROMPT.search(_text(blob.get("prompt"))))
+
+
+def _omitted_from_removal(state: dict[str, Any]) -> list[dict[str, str]]:
+    """Deck cards the removal grid does not offer (`EB-350`).
+
+    THE SECOND HALF OF THE ROW. With the grid's whole list on the wire the
+    screen is no longer a viewport, so what is left is the Smith's own model
+    one screen over: a card that is in the deck and not on this grid is a card
+    the game will not remove, and a reader planning a purge around it is
+    planning around a rule nothing on the screen states.
+
+    ONE REASON AND NOT THREE, unlike the upgrade screen: the upgrade grid omits
+    a card for three distinguishable reasons this page can tell apart (already
+    upgraded, no upgrade defined, unexplained), and a removal grid omits one
+    for exactly one reason it can state -- the game is not offering it. The
+    page does not guess at which rule did it.
+    """
+    return _omitted_from_grid(state, lambda card: NOT_REMOVABLE)
+
+
+def _omitted_from_grid(
+        state: dict[str, Any],
+        reason: Callable[[dict[str, Any]], str]) -> list[dict[str, str]]:
+    """The deck minus this screen's grid, each row with its reason.
+
+    MATCHED ON THE PRINTED FACE, `(folded title, upgraded)`, one grid card
+    consumed per deck card: three `Strike` in the deck and three on the grid
+    leave nothing over, and three in the deck against two on the grid leave
+    exactly one. The id is used for the REASON and never for the match, since a
+    remembered deck entry and a grid entry are the same card model and the
+    title is what the reader is looking at.
+    """
     held = remembered_deck(state)
     if not held:
         return []
-    deck = held["cards"]
     grid: list[tuple[str, bool]] = []
     for entry in _screen_cards(state):
         if isinstance(entry, dict):
@@ -362,20 +421,13 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
                               or entry.get("upgraded")
                               or _text(entry.get("name")).rstrip()
                               .endswith("+"))))      # `EB-609`
-    debt = qa_packet.no_upgrade_index()
     out: list[dict[str, str]] = []
-    for card in deck:
+    for card in held["cards"]:
         face = (_fold(card["title"]), bool(card["upgraded"]))
         if face in grid:
             grid.remove(face)
             continue
-        if card["upgraded"]:
-            reason = ALREADY_UPGRADED
-        elif card["key"] in debt:
-            reason = NO_UPGRADE_DEFINED
-        else:
-            reason = UNEXPLAINED_OMISSION
-        out.append({"title": card["title"], "reason": reason})
+        out.append({"title": card["title"], "reason": reason(card)})
     return out
 
 
@@ -545,6 +597,15 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     spark_from = spark_sources(p)
     if spark_from:
         combat["spark_sources"] = spark_from
+    # `EB-349` / `EB-611`: and what RESOLVED this turn -- which cards, whether
+    # the GAME played them, and per card the bodies its hits landed on in hit
+    # order. Absent on a build with no ledger; present and empty on a turn
+    # nothing resolved, which is a fact and precisely the one an auto-played
+    # turn makes.
+    resolved = resolutions(p)
+    if resolved is not None:
+        name_resolution_rows(resolved, _enemies(state), combat["enemies"])
+        combat["resolutions"] = resolved
     memory = kurage_memory(p)
     if memory is not None:
         combat["memory"] = memory
@@ -780,6 +841,134 @@ def relic_answers(player: dict[str, Any]) -> list[dict[str, Any]] | None:
             for r in rows
             if isinstance(r, dict) and _text(r.get("source"))
             and _int(r.get("amount")) > 0]
+
+
+def reward_alternatives(blob: dict[str, Any]) -> list[dict[str, Any]]:
+    """The card reward's alternative buttons, by name, with their verbs
+    (`EB-374`).
+
+    THE FIND (Klee r9 act 2). Pael's Wing adds a SACRIFICE option to this
+    screen; two card rewards in that run printed `choose` and `skip` and
+    nothing else, and the seat was holding the relic whose whole rule is that
+    button. The bridge counted the buttons and threw their words away.
+
+    `skip` IS INDEX 0 AND STAYS THERE. It is what `ExecuteSkipCardReward` has
+    always pressed, what `blindplay_grammar._skip` sends and what every policy
+    and soak caller sends, and a verb that quietly started pressing a different
+    button would be a worse defect than the one this closes. `sacrifice` is the
+    FIRST button whose words are not that plain skip.
+
+    A BUTTON WITH NO WORDS KEEPS ITS ROW. The bridge publishes a null `name`
+    where it could not read one rather than dropping the button, because the
+    count has to keep matching what the verbs can press; the render prints the
+    older caveat for such a row.
+
+    `[]` on a bridge that sends no `alternatives` key at all, and on a screen
+    that offers none -- which are different facts to the bridge and the same
+    one to this page, since `can_skip` already carries the second.
+    """
+    rows = blob.get("alternatives")
+    if not isinstance(rows, list):
+        return []
+    out: list[dict[str, Any]] = []
+    sacrifice_taken = False
+    for i, row in enumerate(rows):
+        if not isinstance(row, dict):
+            continue
+        name = _text(row.get("name"))
+        index = _int(row.get("index"), i)
+        if index == 0:
+            verb = "skip"
+        elif not sacrifice_taken and _fold(name) != "skip":
+            verb = "sacrifice"
+            sacrifice_taken = True
+        else:
+            verb = ""
+        out.append({"index": index, "name": name, "verb": verb})
+    return out
+
+
+def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """What resolved this turn, in order, with its hits under it
+    (`EB-349` / `EB-611`).
+
+    THE GAP THIS CLOSES IS THE ONE THE PAGE PRINTS ABOUT ITSELF. `AUTO_TURN_NOTE`
+    says, in as many words, "there is no record of a card resolving on the wire
+    at all" -- every screen the bridge sends is an after-state. So a relic that
+    plays a turn FOR the player (Vakuu: six openings, five from an empty hand,
+    Kokomi r4d) left a board and no turn, and a multi-hit random `Set off`
+    (Klee r23 lane 2) told a seat which bodies were hit and never the order.
+
+    A ROW IS ONE RESOLVED CARD. `auto_played` is the game's own
+    `CardPlay.IsAutoPlay` and not a guess about which relic is holding the
+    controller. `hits` is one entry per HIT and not per body, which is
+    `EB-611`'s whole point: four entries reading `Rapid Fire 6` divide among a
+    hallway more than one way, and the beat that does not add up is the one
+    that struck the same body twice.
+
+    TWO NUMBERS PER HIT. `amount` is the HP that came off and `blocked` is what
+    the body's Block ate, because a hit that landed entirely on Block is a
+    place in the order and would otherwise read as a hit that did not happen.
+
+    THE THREE STATES, this feed's standing contract: `None` is a build with no
+    ledger, `[]` is a turn on which nothing resolved -- which PRINTS, unlike
+    the relic-answer section, because on an auto-played turn the empty list IS
+    the finding -- and a populated list is the cards, in the order they
+    resolved.
+
+    `carried` IS `reaction_log`'S and means what it means there: a row that
+    resolved after the player ended their turn and that no page has printed.
+    """
+    rows = player.get("resolutions")
+    if not isinstance(rows, list):
+        return None
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        # THE PRINTED TITLE AND NEVER THE ID. `card_id` is on the wire beside
+        # it and is an internal snake-case name; `qa_packet.assert_blind`
+        # refuses one onto a blind page, and it is right to -- a reader is
+        # looking at `Rapid Fire`, not `rapid_fire`. A row the mod could not
+        # title is a row this page cannot print and does not.
+        card = _text(row.get("card"))
+        if not card:
+            continue
+        hits = [{"target": _text(h.get("target")),
+                 "amount": _int(h.get("amount")),
+                 "blocked": _int(h.get("blocked")),
+                 "combat_id": _text(h.get("combat_id"))}
+                for h in (row.get("hits") or [])
+                if isinstance(h, dict)]
+        out.append({"card": card,
+                    "auto_played": bool(row.get("auto_played")),
+                    "carried": bool(row.get("carried")),
+                    "overflowed": bool(row.get("overflowed")),
+                    "hits": hits})
+    return out
+
+
+def name_resolution_rows(rows: list[dict[str, Any]],
+                         wire: list[dict[str, Any]],
+                         printed: list[dict[str, Any]]) -> None:
+    """`name_answer_rows`' lookup, on the hits under each resolution.
+
+    THE PAGE OWNS THE NAMES (`EB-329` / `EB-427`) and it has to here for
+    `EB-518`'s reason, one card over: a receipt naming a body one way while
+    the enemy list four lines down names it another is the mix the r11 seat
+    read as the numbering having shifted. A body that DIED to the hit keeps
+    the title the mod recorded.
+    """
+    by_id = {_text(raw.get("combat_id")): face["name"]
+             for raw, face in zip(wire, printed)
+             if _text(raw.get("combat_id"))}
+    for row in rows:
+        for hit in row["hits"]:
+            if not hit["combat_id"]:
+                continue
+            hit["target"] = (by_id.get(hit["combat_id"])
+                             or remembered_enemy_name(hit["combat_id"],
+                                                      hit["target"]))
 
 
 def name_answer_rows(answers: list[dict[str, Any]],

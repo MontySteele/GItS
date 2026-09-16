@@ -744,22 +744,43 @@ def remember_deck(state: dict[str, Any]) -> None:
     labels the deck it prints with the floor that read was taken on.
     """
     player = _blob(state, "player")
+
+    # `EB-447`. THE RUN'S OWN DECK, WHERE THE BRIDGE SENDS IT, BEATS ALL OF
+    # THIS.
+    #
+    # Everything below this block is a RECONSTRUCTION: the union of four combat
+    # piles, taken at one blessed moment and carried to screens that have no
+    # deck on their feed. Every guard it has was bought with a defect --
+    # `Dazed x 5` listed on the map, a played Power dropped from the same list,
+    # a generated Companion written in because one fight's union happened to be
+    # bigger (`EB-528`) -- and all of them are one thing: a union of combat
+    # piles is not a deck.
+    #
+    # `player.master_deck` IS the deck. It is `Player.Deck`, the master list
+    # the game's own Deck screen draws, and the bridge sends it on every screen
+    # including the ones with no fight on them at all. Where it is present,
+    # nothing below runs and no round-one or floor guard applies -- those
+    # guards exist to stop a reconstruction being re-taken at a bad moment, and
+    # there is no bad moment to read a list that is not being inferred.
+    #
+    # ABSENT IS THE OLD BEHAVIOUR, BYTE FOR BYTE: a bridge older than this row
+    # sends no key, and the union memory below answers exactly as it always
+    # has.
+    master = player.get("master_deck")
+    if isinstance(master, list) and master:
+        deck = [_deck_card(entry) for entry in master
+                if isinstance(entry, dict) and _text(entry.get("name"))]
+        if deck:
+            _keep_deck(state, player, deck)
+            return
+
     if not any(isinstance(player.get(p), list) for p in _DECK_PILES):
         return
     cards: list[dict[str, Any]] = []
     for pile in _DECK_PILES:
         for entry in player.get(pile) or []:
             if isinstance(entry, dict) and _text(entry.get("name")):
-                # `EB-609`: the pile entry's flag OR the `+` the game prints
-                # on an upgraded title. The Klee r23 seat's Smith listed its
-                # upgraded cards under "nowhere, and nothing on the feed says
-                # why" because the flag was absent and the title was not read.
-                cards.append({"title": _text(entry.get("name")),
-                              "key": qa_packet.card_key(entry.get("id")),
-                              "upgraded": bool(entry.get("is_upgraded")
-                                               or entry.get("upgraded")
-                                               or _text(entry.get("name"))
-                                               .rstrip().endswith("+"))})
+                cards.append(_deck_card(entry))
     if not cards:
         return
     held = _held_deck()
@@ -789,10 +810,36 @@ def remember_deck(state: dict[str, Any]) -> None:
     # rather than a guess.
     if same_run and floor and _int(held.get("floor")) == floor:
         return
+    _keep_deck(state, player, cards)
+
+
+def _deck_card(entry: dict[str, Any]) -> dict[str, Any]:
+    """One card as the deck memory holds it.
+
+    `EB-609`: the entry's flag OR the `+` the game prints on an upgraded
+    title. The Klee r23 seat's Smith listed its upgraded cards under "nowhere,
+    and nothing on the feed says why" because the flag was absent and the
+    title was not read.
+
+    ONE FUNCTION FOR BOTH READS (`EB-447`): the master deck's rows and the
+    combat piles' rows come off `BuildPileCardList` in the same shape, and two
+    copies of this rule would be two places for the `+` to be forgotten.
+    """
+    return {"title": _text(entry.get("name")),
+            "key": qa_packet.card_key(entry.get("id")),
+            "upgraded": bool(entry.get("is_upgraded")
+                             or entry.get("upgraded")
+                             or _text(entry.get("name")).rstrip()
+                             .endswith("+"))}
+
+
+def _keep_deck(state: dict[str, Any], player: dict[str, Any],
+               cards: list[dict[str, Any]]) -> None:
+    """Write one deck row to the store and the in-process cache."""
     row = {"cards": cards,
            "character": _text(player.get("character")),
            "act": _int(_blob(state, "run").get("act")),
-           "floor": floor}
+           "floor": _int(_blob(state, "run").get("floor"))}
     _DECK_MEMORY.clear()
     _DECK_MEMORY.update(row)
     try:
@@ -1611,7 +1658,7 @@ def _is_aura(name: str) -> bool:
     return bool(words) and words[-1] == "aura"
 
 
-def _intent(blob: Any) -> dict[str, str]:
+def _intent(blob: Any) -> dict[str, Any]:
     """`qa_packet._intent` plus the wire's own `type` (`EB-299`).
 
     A telegraph on the wire is `type` (`Attack`, `Debuff`, ...), `label` (the
@@ -1623,7 +1670,46 @@ def _intent(blob: Any) -> dict[str, str]:
     out = qa_packet._intent(blob)
     row = blob[0] if isinstance(blob, list) and blob else blob
     out["type"] = _text(row.get("type")) if isinstance(row, dict) else ""
+    if isinstance(row, dict):
+        # `EB-323`: whose side this part lands on, which the bridge reads off
+        # the game's own `IntentType` and sends only where that classification
+        # settles it. ABSENT stays absent, and the page's standing clause --
+        # "the target itself is not on the wire" -- is what prints then.
+        side = _text(row.get("target_side"))
+        if side:
+            out["target_side"] = side
+        # `EB-607`: and how the game arrived at the number on the icon. The
+        # block is the bridge's arithmetic-free read of `Hook.ModifyDamage`;
+        # nothing here recomputes any of it, for the same reason the bridge
+        # does not -- a page that did could disagree with the icon beside it.
+        out["breakdown"] = _intent_breakdown(row.get("breakdown"))
     return out
+
+
+def _intent_breakdown(blob: Any) -> dict[str, Any]:
+    """`EB-607`. The five numbers behind one attack icon, or `{}`.
+
+    `{}` IS THE COMMON ANSWER and prints nothing: a non-attack part, a bridge
+    older than this row, or an attack the bridge could not read. What is here
+    when it is here is the base the move declares, the figure the game's hook
+    phases arrived at, the repeat count, their product, and the printed names
+    of the models the game folded in -- `Hook.ModifyDamage`'s own `out` list,
+    which the game itself discards.
+
+    THE PAIR THE ROW IS ABOUT is base against folded. Fossil Stalker read 12
+    before and after Strength 3 while Corpse Slug's number moved (Klee r23),
+    and `base 12 / folded 12 / nothing folded` and `base 12 / folded 15 /
+    Strength` are the two readings no surface could tell apart.
+    """
+    if not isinstance(blob, dict):
+        return {}
+    mods = [_text(m) for m in (blob.get("modifiers") or [])
+            if _text(m)]
+    return {"base": _int(blob.get("base_damage")),
+            "folded": _int(blob.get("folded_damage")),
+            "repeats": _int(blob.get("repeats")),
+            "total": _int(blob.get("total_damage")),
+            "modifiers": mods}
 
 
 # `EB-342`. A TELEGRAPH IS A LIST AND THE PAGE PRINTED ITS FIRST ROW.
@@ -1641,7 +1727,7 @@ def _intent(blob: Any) -> dict[str, str]:
 #
 # Every component, in the order the move declares them. A single-component move
 # renders exactly as it always did: one row, one line, unchanged.
-def _intents(blob: Any) -> list[dict[str, str]]:
+def _intents(blob: Any) -> list[dict[str, Any]]:
     """Every component of one telegraph, in the move's own order (`EB-342`)."""
     rows = blob if isinstance(blob, list) else [blob]
     out = [_intent(row) for row in rows if isinstance(row, dict)]

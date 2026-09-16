@@ -1334,22 +1334,29 @@ def test_a_card_reward_says_which_relic_has_rewritten_its_alternative():
     # It says what the feed has and does not claim what the button is.
     assert "never what that button says or does" in page
     assert "cannot tell you whether that is a plain skip" in page
-    # And the verbs are unchanged: there is no `sacrifice` to offer.
+    # And on a feed with no `alternatives` key the verbs are unchanged: there
+    # is no `sacrifice` to offer and `skip` posts exactly what it always did.
     assert "sacrifice`" not in page
     assert blindplay.act(paels_wing_reward_state(), "skip")["post"] == {
         "action": "skip_card_reward"}
 
 
-def test_the_wire_carries_no_sacrifice_control_to_offer():
-    """The reason this row is a page line and not a verb, asserted against the
-    vendored builder rather than against a memory of it."""
+def test_the_wire_carries_the_alternative_buttons_words():
+    """`EB-374`, the wire half, asserted against the vendored builder rather
+    than against a memory of it.
+
+    THIS TEST USED TO PIN THE OPPOSITE. While the words were not on the feed it
+    read `set(...) == {"cards", "can_skip"}` and `"sacrifice" not in builder`,
+    which was the reason the row was a page caveat and not a verb. The bridge
+    half is built, so the pin is inverted rather than deleted: the alternatives
+    key is published beside `can_skip`, and `can_skip` itself is untouched."""
     builder = (REPO / "vendor" / "STS2_MCP" / "McpMod.StateBuilder.cs"
                ).read_text(encoding="utf-8")
     head = builder.index("BuildCardRewardState(NCardRewardSelectionScreen")
     body = builder[head:builder.index("private static", head + 10)]
     assert 'state["can_skip"] = altButtons.Count > 0;' in body
-    assert set(re.findall(r'state\["(\w+)"\]', body)) == {"cards", "can_skip"}
-    assert "sacrifice" not in builder.casefold()
+    assert "GitsAlternativesKey" in body
+    assert "GitsAlternativeName" in body
 
 
 def test_a_run_without_the_relic_reads_exactly_as_before():
