@@ -40,7 +40,7 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Lead), this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("crescendo");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_ousia_surge");
 
     public override List<(string, string)>? Localization => new()
     {

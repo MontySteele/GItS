@@ -48,7 +48,7 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard, IHex
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_jean_dandelion_breeze");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_jean_lions_fang");
 
     public override List<(string, string)>? Localization => new()
     {

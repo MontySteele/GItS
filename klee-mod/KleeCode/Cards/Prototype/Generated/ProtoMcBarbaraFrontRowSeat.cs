@@ -51,7 +51,7 @@ public sealed class ProtoMcBarbaraFrontRowSeat : CustomCardModel, ICompanionCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this), this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_barbara_show_begin");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_barbara_front_row_seat");
 
     public override List<(string, string)>? Localization => new()
     {

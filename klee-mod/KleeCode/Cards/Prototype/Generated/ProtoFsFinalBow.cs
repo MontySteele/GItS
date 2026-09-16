@@ -43,7 +43,7 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendLead), this), this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("take_your_bow");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_final_bow");
 
     public override List<(string, string)>? Localization => new()
     {

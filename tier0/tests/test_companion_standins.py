@@ -18,6 +18,7 @@ NOTHING MEASURED ON A PROTOTYPE ROW IS QUOTABLE ANYWHERE (R215 B). These are
 shape assertions about an engine, not numbers about a game.
 """
 
+import pathlib
 import random
 
 import pytest
@@ -28,6 +29,8 @@ from tier0.engine import companion_standins as standins
 from tier0.engine import combat, effects, klee_overhaul
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards, shop
+
+REPO = pathlib.Path(__file__).resolve().parents[2]
 
 
 def _caches_clear():
@@ -78,16 +81,25 @@ def test_every_standin_is_klee_only_and_replaces_a_universal(overhaul):
         assert card.nation == loader.peek_card(card.replaces).nation, cid
 
 
-def test_art_of_names_the_row_it_replaces(overhaul):
-    """`art_of:` is stripped before `Card` (tier 0 draws nothing), so it is read
-    off the sheet -- which is also where the codegen reads it."""
+def test_no_standin_wears_a_neighbours_art(overhaul):
+    """`EB-778`: every stand-in owns its picture now.
+
+    Each of these rows used to carry `art_of: <the row it replaces>`, which
+    cost nothing but was INVISIBLE: a proxy asks for no art of its own, so it
+    reached no section of `art_coverage.py` and the debt could never be worked
+    off. The placement pass (2026-09-16) gave each a shortlist rank-1 row on
+    its own out-path and took the `art_of:` line off. `art_of:` is stripped
+    before `Card` (tier 0 draws nothing), so it is read off the SHEET -- which
+    is also where the codegen reads it, one line in `CustomPortrait`.
+    """
     rows = {r["id"]: r for r in loader.yaml.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))}
+    plan = (REPO / "art" / "plan.tsv").read_text(encoding="utf-8")
     for cid in C.COMPANION_STANDIN_IDS:
         row = rows[cid]
-        assert row["art_of"] == row["replaces"], cid
-        # No new image is owed: the id it wears is a row that already exists.
-        assert row["art_of"] in rows
+        assert "art_of" not in row, cid
+        # And the reason it may go: the row has a picture of its own planned.
+        assert f"{cid}	" in plan, cid
 
 
 def test_a_shipped_row_may_not_stand_in_for_anything():

@@ -37,7 +37,7 @@ public sealed class ProtoKoWitchesCircle : CustomCardModel
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_chained_reactions");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_witches_circle");
 
     public override List<(string, string)>? Localization => new()
     {

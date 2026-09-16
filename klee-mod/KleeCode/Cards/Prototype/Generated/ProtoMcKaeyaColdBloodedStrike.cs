@@ -54,7 +54,7 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForGrounded(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this), this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_kaeya_frostgnaw");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_kaeya_cold_blooded_strike");
 
     public override List<(string, string)>? Localization => new()
     {

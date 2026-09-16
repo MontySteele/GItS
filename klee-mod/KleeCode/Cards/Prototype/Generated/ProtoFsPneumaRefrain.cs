@@ -40,7 +40,7 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Back), this), this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("many_waters_melody");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_pneuma_refrain");
 
     public override List<(string, string)>? Localization => new()
     {

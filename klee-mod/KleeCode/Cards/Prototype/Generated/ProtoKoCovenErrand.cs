@@ -37,7 +37,7 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_mine_toss");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_coven_errand");
 
     public override List<(string, string)>? Localization => new()
     {

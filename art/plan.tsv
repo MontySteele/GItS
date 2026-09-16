@@ -1795,3 +1795,99 @@ change_the_bill	ImageGen/images/cards/furina/change_the_bill.png	500	380	cover_a
 #   'Opera Epiclese Passage 1' was the first pick and L9 refused it: the
 #   'Opera Epiclese Passage' family is banned as an empty-corridor screenshot.
 take_it_from_the_top	ImageGen/images/cards/furina/take_it_from_the_top.png	500	380	cover	y0.16	shortlist	1	png	Furina Character Card Golden.png		tcg	
+# ---------- EB-778 PLACEMENT: the art_of proxy bill (R212 rank 1) ----------
+# Each row below wore a NEIGHBOUR's illustration via `art_of:` on
+# docs/prototype-surface.yaml and asked for no art of its own (the ART_OF
+# PROXIES section of art_coverage.py, EB-778's tool half, PR #584). One
+# shortlist row each at rank 1 -- the PR #564 convention for a placement pass.
+# The four rows whose neighbour IS the right picture keep their proxy and get
+# no row here: the three Salon Member summons and Let the People Rejoice,
+# where the Stage card and the shipped card are the same card by name and
+# subject.
+# Klee: the three Hexerei rows (EB-326).
+# proto_ko_coven_errand <- the Witch's Homework event card: an errand set by the coven
+proto_ko_coven_errand	ImageGen/images/cards/klee/proto_ko_coven_errand.png	500	380	cover	top	shortlist	1	png	Witch's Homework Event Card.png		tcg	
+# proto_ko_witches_circle <- the Hexerei themselves: the circle of witches
+proto_ko_witches_circle	ImageGen/images/cards/klee/proto_ko_witches_circle.png	500	380	contain	center	shortlist	1	png	Hexerei.png		sticker	
+# proto_ko_alices_introduction_magic <- Alice herself; the card is named for her
+proto_ko_alices_introduction_magic	ImageGen/images/cards/klee/proto_ko_alices_introduction_magic.png	500	380	cover	top	shortlist	1	png	Alice.png		splash	
+# Kokomi: the two bulwarks.
+# proto_kk_shell_guard <- the Tamakushi Casket, the summon the card's own text names
+proto_kk_shell_guard	ImageGen/images/cards/kokomi/proto_kk_shell_guard.png	500	380	cover	top	shortlist	1	png	Tamakushi Casket Equipment Card.png		tcg	kokomi_pool
+# proto_kk_tide_wall <- the full Wish art at a LOWER crop than proto_kk_second_wave's
+#   y0.35 and proto_kk_sango_isshin's y0.62. Her own introduction banner was the first pick and lost: 604x268, and
+#   the burnt-in SANGONOMIYA KOKOMI wordmark fills the half a card crop keeps.
+proto_kk_tide_wall	ImageGen/images/cards/kokomi/proto_kk_tide_wall.png	500	380	cover	y0.78	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+# Companion stand-ins: each is a DIFFERENT talent of the same character from
+# the row it stood in for, so each takes its own source inside its own family.
+# proto_mc_diona_shaken_not_purred <- the TCG card OF THAT TALENT: an exact name match
+proto_mc_diona_shaken_not_purred	ImageGen/images/cards/companions/proto_mc_diona_shaken_not_purred.png	500	380	cover	top	shortlist	1	png	Shaken, Not Purred Equipment Card.png		tcg	diona
+# proto_mc_noelle_i_got_your_back <- the TCG card OF THAT TALENT: an exact name match
+proto_mc_noelle_i_got_your_back	ImageGen/images/cards/companions/proto_mc_noelle_i_got_your_back.png	500	380	cover	top	shortlist	1	png	I Got Your Back Equipment Card.png		tcg	noelle
+# proto_mc_barbara_front_row_seat <- her concert debut art: the show you have a seat
+#   at. Anchored LEFT (x0.22): the event banner burns its title into the right half.
+proto_mc_barbara_front_row_seat	ImageGen/images/cards/companions/proto_mc_barbara_front_row_seat.png	500	380	cover	x0.22	shortlist	1	png	Barbara's Shining Debut.png		splash	barbara
+# proto_mc_kaeya_cold_blooded_strike <- Kaeya's Wish splash. 'Cold-Blooded Strike
+#   Equipment Card' is the literal name match and is already proto_mc_kaeya_frostgnaw's
+#   effective pick in the prototype partition (L1), so it is not available.
+proto_mc_kaeya_cold_blooded_strike	ImageGen/images/cards/companions/proto_mc_kaeya_cold_blooded_strike.png	500	380	cover	top	shortlist	1	png	Kaeya Wish.png		splash	kaeya
+# proto_mc_jean_lions_fang <- her TCG card. The literal match, 'Constellation Lion's
+#   Fang, Fair Protector of Mondstadt', is a 256px constellation sigil and L8 bars it.
+proto_mc_jean_lions_fang	ImageGen/images/cards/companions/proto_mc_jean_lions_fang.png	500	380	cover	top	shortlist	1	png	Jean Card.png		tcg	jean
+# proto_mc_albedo_tectonic_tide <- Albedo's Wish splash; the Talent sigil is 256px (L8)
+proto_mc_albedo_tectonic_tide	ImageGen/images/cards/companions/proto_mc_albedo_tectonic_tide.png	500	380	cover	top	shortlist	1	png	Albedo Wish.png		splash	albedo
+# proto_mc_fischl_sinful_hex <- her full Wish art; the Talent sigil is 256px (L8)
+proto_mc_fischl_sinful_hex	ImageGen/images/cards/companions/proto_mc_fischl_sinful_hex.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Fischl Full Wish.png		splash	fischl
+# proto_mc_sucrose_mollis_favonius <- her Wish splash; the Talent sigil is 256px (L8)
+proto_mc_sucrose_mollis_favonius	ImageGen/images/cards/companions/proto_mc_sucrose_mollis_favonius.png	500	380	cover	top	shortlist	1	png	Sucrose Wish.png		splash	sucrose
+# proto_mc_nicole_ladder_of_ascent <- her full Wish art; the Talent sigil is 256px (L8)
+proto_mc_nicole_ladder_of_ascent	ImageGen/images/cards/companions/proto_mc_nicole_ladder_of_ascent.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Nicole Full Wish.png		splash	nicole
+# proto_mc_prune_hexhunter_chime <- her TCG card. Blank group: prune_witch_hunt carries
+#   none either, and 'Prune Card' is claimed by no effective pick in either partition.
+proto_mc_prune_hexhunter_chime	ImageGen/images/cards/companions/proto_mc_prune_hexhunter_chime.png	500	380	cover	top	shortlist	1	png	Prune Card.png		tcg	
+# proto_mi_gorou_crystal_collapse <- his full Wish art; his other three rows hold the
+#   three claimed Gorou sources (Character Card, Introduction Card, Wish).
+proto_mi_gorou_crystal_collapse	ImageGen/images/cards/companions/proto_mi_gorou_crystal_collapse.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Gorou Full Wish.png		splash	gorou
+# Furina's Stage batch. Blank source_group = strict L1, the sheet default.
+# Her shipped 84-row pass took nearly every clean Furina illustration the
+# wiki has, so six rows here take a source a SHIPPED Furina card already
+# holds, at a different crop. That is legal by construction, not a loophole:
+# L1, L7 and L12 all partition on is_prototype(), and a prototype row wearing
+# a shipped picture is the pattern the partition exists for. Those six are
+# the rows worth a second look on the contact sheet.
+# proto_fs_salon_debut 'Take the Stage' <- the Opera Epiclese at the Final Feast:
+#   the house the Stage arm plays to
+proto_fs_salon_debut	ImageGen/images/cards/furina/proto_fs_salon_debut.png	500	380	cover	center	shortlist	1	png	Opera Epiclese (The Final Feast).png		splash	
+# proto_fs_curtain_rise <- Chanson of Many Waters: the aria that opens the evening
+proto_fs_curtain_rise	ImageGen/images/cards/furina/proto_fs_curtain_rise.png	500	380	cover	center	shortlist	1	png	Chanson of Many Waters.png		splash	
+# proto_fs_standing_ovation 'Rising Applause' <- the Conclusive Ovation TCG card
+proto_fs_standing_ovation	ImageGen/images/cards/furina/proto_fs_standing_ovation.png	500	380	cover	top	shortlist	1	png	Conclusive Ovation Equipment Card.png		tcg	
+# proto_fs_understudy <- the chibi Furina: the small stand-in, not the star
+proto_fs_understudy	ImageGen/images/cards/furina/proto_fs_understudy.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Furina Special Program Chibi.png		sticker	
+# proto_fs_warm_reception <- the Banquet namecard: the house received and fed
+proto_fs_warm_reception	ImageGen/images/cards/furina/proto_fs_warm_reception.png	500	380	cover	center	shortlist	1	png	Namecard Background Furina Banquet.png		splash	
+# proto_fs_tidal_flourish <- Calamitous Tread: the wave that hits everything
+proto_fs_tidal_flourish	ImageGen/images/cards/furina/proto_fs_tidal_flourish.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 2.png		splash	
+# proto_fs_interposition <- Fragrant Fantasy 2, the sibling of held_breath's own pick
+proto_fs_interposition	ImageGen/images/cards/furina/proto_fs_interposition.png	500	380	cover	center	shortlist	1	png	Fragrant Fantasy Furina 2.png		splash	
+# proto_fs_scene_change <- the Fragrant Fantasy wallpaper: the same scene, restaged
+proto_fs_scene_change	ImageGen/images/cards/furina/proto_fs_scene_change.png	500	380	cover	y0.35	shortlist	1	png	Fragrant Fantasy Wallpaper.png		splash	
+# proto_fs_grand_entrance <- her full Wish splash: the arrival, at full height
+proto_fs_grand_entrance	ImageGen/images/cards/furina/proto_fs_grand_entrance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Full Wish.png		splash	
+# proto_fs_ousia_surge <- Furina in her OUSIA arkhe, the card's own word
+proto_fs_ousia_surge	ImageGen/images/cards/furina/proto_fs_ousia_surge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Game (Ousia).png		splash	
+# proto_fs_pneuma_refrain <- Furina in her PNEUMA arkhe, the card's own word
+proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Game (Pneuma).png		splash	
+# proto_fs_bis 'Bis!' <- her second TCG card: the encore of the first
+proto_fs_bis	ImageGen/images/cards/furina/proto_fs_bis.png	500	380	cover	top	shortlist	1	png	Furina Card 2.png		tcg	
+# proto_fs_final_bow <- the Starlit Letter wallpaper: the last look, house lights down
+proto_fs_final_bow	ImageGen/images/cards/furina/proto_fs_final_bow.png	500	380	cover	center	shortlist	1	png	Starlit Letter Wallpaper Furina.png		splash	
+# ---------- EB-776: the Stage arm's opening relic ----------
+# Salon Solitaire draws nothing because nothing was ever planned for
+# res://furina/relics/salon_solitaire.png (EB-776, PR #584: the C# wiring and
+# the pck entry are both present and correct). build_pck.ps1 copies every png
+# in ImageGen/images/<character>/relics, so a new relic needs no builder edit.
+# The source is the in-game skill icon the relic is named after. The same
+# picture serves power_furina_salon_member, which is a POWER slot: L1's scope
+# is /cards/ out-paths, so cross-slot reuse is legal by construction.
+relic_salon_solitaire	ImageGen/images/furina/relics/salon_solitaire.png	256	256	contain	center	shortlist	1	png	Talent Salon Solitaire.png		icon	

@@ -40,7 +40,7 @@ public sealed class ProtoKkTideWall : CustomCardModel, ICharacterCard, IPlannedC
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_coral_bulwark");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_tide_wall");
 
     public override List<(string, string)>? Localization => new()
     {

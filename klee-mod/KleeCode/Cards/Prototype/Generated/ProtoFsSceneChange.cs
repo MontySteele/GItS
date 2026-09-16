@@ -40,7 +40,7 @@ public sealed class ProtoFsSceneChange : CustomCardModel, ICharacterCard
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForRotate(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("held_breath");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_scene_change");
 
     public override List<(string, string)>? Localization => new()
     {

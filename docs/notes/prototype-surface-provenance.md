@@ -916,12 +916,16 @@ the mod hangs each PAYOUT on its own power's `AfterCardPlayed` and puts the
 COUNT on the arm's one standing card-play listener, because Coven Errand's read
 has to be answerable whether or not any power is on the board.
 
-THREE ILLUSTRATIONS ARE OWED. Each row wears the nearest Klee illustration
-through `art_of:` -- Mine Toss for the Errand (a Bomb going wide), Chained
-Reactions for the Circle (the power whose job it takes over one trigger away),
-Alice's Recipe for the Introduction Magic (the same Alice) -- on the standing
-terms: art is commissioned when a slice is ACCEPTED, and a prototype that
-shipped new art would be paying for a card that may be deleted next week.
+THREE ILLUSTRATIONS WERE OWED, AND `EB-778` PAID THEM (2026-09-16). Each row
+wore the nearest Klee illustration through `art_of:` -- Mine Toss for the
+Errand, Chained Reactions for the Circle, Alice's Recipe for the Introduction
+Magic -- on the terms that art is commissioned when a slice is ACCEPTED. What
+that reasoning missed is that a proxy asks for no art of its own, so the debt
+could never be seen or worked off; `art_coverage.py`'s ART_OF PROXIES bill made
+it visible and each row now carries its own rank-1 plan row (the Witch's
+Homework event card, the Hexerei roundel, Alice herself). Nothing is
+commissioned: all three are cleared wiki sources, the same tier every other
+prototype placeholder uses.
 ```
 
 ## before proto_mc_diona_signature_mix
@@ -1277,11 +1281,13 @@ one line AFTER the Plans are carried out rather than on the arm's turn-start
 roll, in both engines (`kokomi_plan.close_shell_guard`,
 `ProtoBakeKuragePower.AfterPlayerTurnStart`).
 
-NEITHER ROW IS OWED ART. Both carry `art_of:` -- Tide Wall wears Coral
-Bulwark's illustration and Shell Guard wears Salt Line's, the two nearest
-defensive rows already fetched -- on the rule the stand-ins use one section up:
-art is commissioned when a slice is ACCEPTED, and `tools/art_coverage.py` bills
-the literals the codegen emits, so no new image is owed.
+BOTH ROWS NOW OWN THEIR ART (`EB-778`, 2026-09-16). They carried `art_of:` --
+Tide Wall wearing Coral Bulwark's illustration, Shell Guard wearing Salt
+Line's -- on the rule the stand-ins used one section up, and that rule was
+sound about COST and wrong about VISIBILITY: because `art_coverage.py` bills
+the literals the codegen emits, a proxy's debt was unsayable rather than
+absent. Shell Guard now takes the Tamakushi Casket TCG card its own text names,
+and Tide Wall a lower crop of the full Wish art inside `kokomi_pool`.
 
 WHO DEALS A PLAN'S DAMAGE CHANGED IN THE SAME BUILD (`EB-334`, R246 pick 1).
 The slice's sec.5 gave a planned hit HER Strength and HER Weak; round four-c
@@ -1535,7 +1541,10 @@ add stand-ins use the same three unchanged:
                         a row that replaces a Universal for everybody is a pool
                         replacement, which the arm already has.
   art_of: <id>          whose illustration it wears. NO plan.tsv row and NO new
-                        image: the codegen emits that id into
+                        image -- and, until `EB-778` built the ART_OF PROXIES
+                        bill, no surface that said the debt existed either, so
+                        write one only where the neighbour's picture is the
+                        RIGHT picture: the codegen emits that id into
                         `RosterArt.CardPortrait`, deploy stages ONE flat
                         `images/cards` dir keyed by id (so the Universal's own
                         png is already the file that resolves), and
@@ -1625,10 +1634,11 @@ when the arm is accepted or rejected.
 # because the replacement KEEPS only rows of a nation the arm does not replace
 # -- Prune is Mondstadt. So the supersession is the nation filter that was
 # already there, and with the flag off the shipped row is byte-identical. Her
-# illustration is REUSED rather than re-fetched: `art_of: prune_witch_hunt` is
-# read at the codegen's one `CustomPortrait` line, because `art_lint` L11 is
-# one producer per out-path and a second plan.tsv row for the same picture is
-# exactly the collision that rule names.
+# illustration was REUSED rather than re-fetched: `art_of: prune_witch_hunt`
+# was read at the codegen's one `CustomPortrait` line. `EB-778` (2026-09-16)
+# gave the row its own pick -- Prune's TCG card, a DIFFERENT picture from the
+# Wish splash the shipped row holds -- so L11's one-producer-per-out-path rule
+# is untouched: two plan rows, two out-paths, two pictures.
 #
 # THE NATIONS ARE THE CHARACTERS' OWN, and two of them are new here. Sayu is
 # Inazuma; Qiqi and Yaoyao are LIYUE, which has no workshop, no shipped
@@ -1754,9 +1764,10 @@ strip line.
 NEREID'S ASCENSION DOUBLES IT like any other Plan, which is two copies; nothing
 about this clause is special to `ResolveAll`'s drain loop.
 
-ART: `art_of: proto_mi_gorou_juuga`, so the row borrows an illustration Gorou's
-Universals already staged rather than minting an `art/plan.tsv` row for a
-fourth picture of the same character.
+ART: it carried `art_of: proto_mi_gorou_juuga` and borrowed an illustration
+Gorou's Universals already staged. `EB-778` (2026-09-16) minted its own row
+after all -- his full Wish art, the fourth picture of the character -- because
+a borrowed one is invisible to the art bill and so can never be worked off.
 
 THE DELETION RULE AT THE TOP OF THE SHEET BINDS THIS ROW: it leaves when the
 arm is accepted or rejected.
@@ -1767,8 +1778,9 @@ arm is accepted or rejected.
 ```
 FOUR MORE STAND-INS ON THE SEAM ABOVE, and every key on the row is that seam's
 unchanged: `personal_pool: [klee]` (the LIST form, which `Card.from_dict`
-normalises to the string), `replaces:` the Universal, `art_of:` the same id.
-Nothing new was added to the contract for this slice.
+normalises to the string), `replaces:` the Universal, and -- until `EB-778`
+placed their own rank-1 art on 2026-09-16 -- `art_of:` the same id. Nothing new
+was added to the contract for this slice.
 
 WHAT MAKES THEM A FAMILY RATHER THAN CARETAKERS. The four caretakers read the
 Klee overhaul's explosion ledger, which is what a caretaker is for. These four

@@ -54,7 +54,7 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_nightrider");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_sinful_hex");
 
     public override List<(string, string)>? Localization => new()
     {
