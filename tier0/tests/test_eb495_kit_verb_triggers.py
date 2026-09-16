@@ -156,58 +156,61 @@ def test_the_sim_has_no_enemy_side_damage_received_funnel():
 # STRUCTURAL -- the sim's call-site census
 # ==========================================================================
 
-#: `file:line -> (source, powered, element)` for EVERY
-#: `deal_damage_to_enemy` call in `tier0/engine`, as the expressions are
-#: written. `None` means the keyword is absent and the signature's default
-#: applies (`powered=True`, `element=None`) -- which is exactly the state D3
-#: and D4 are about, so the absence is spelled rather than folded away.
+#: `(file, ordinal) -> (source, powered, element)` for EVERY
+#: `deal_damage_to_enemy` call in `tier0/engine`, in file order, as the
+#: expressions are written. The key is the call's ORDINAL within its file,
+#: not its line number: a line number moves under every unrelated edit
+#: (main went red on the merge of #549 for exactly that), an ordinal moves
+#: only when a call is added, removed or reordered. `None` means the keyword
+#: is absent and the signature's default applies (`powered=True`,
+#: `element=None`) -- which is exactly the state D3 and D4 are about, so the
+#: absence is spelled rather than folded away.
 SIM_CALL_SITES = {
-    ("companion_hexerei.py", 230): ("'companion'", None, "None"),
-    ("companion_hexerei.py", 238): ("'companion'", None, "None"),
-    ("companion_hexerei.py", 244): ("'companion'", None, "'electro'"),
-    ("companion_hexerei.py", 303): ("'companion'", None, "element"),
-    ("effects.py", 1182): ("'bomb'", None, "bomb.element"),
-    ("effects.py", 1625): ("source", None, "element"),
-    ("effects.py", 1977): ("'salon_final_bow'", None, "'hydro'"),
-    ("effects.py", 5389): ("'companion'", None, "'hydro'"),
-    ("effects.py", 6055): ("'attack' if card.type == 'attack' else 'card'",
-                           None, "'hydro'"),
-    # `EB-470` moved Lisa's Lightning Rose volley out of the end-of-turn
-    # block and into the start-of-turn tail, which is why the Electro row
-    # below now sits ABOVE the salon row rather than among the six.
-    ("effects.py", 7048): ("'companion'", None, "'electro'"),
-    ("effects.py", 7117): ("'companion'", None, "None"),
-    ("effects.py", 7212): ("'salon'", "False", "'hydro'"),
-    ("effects.py", 7321): ("'burst'", None, "'pyro'"),
-    ("effects.py", 7327): ("'companion'", None, "'electro'"),
-    ("effects.py", 7373): ("'companion'", None, "'hydro'"),
-    ("effects.py", 7398): ("'companion'", None, "None"),
-    ("effects.py", 7450): ("'companion'", None, "'cryo'"),
-    ("effects.py", 7464): ("'companion'", None, "'electro'"),
-    ("effects.py", 7504): ("'companion'", None, "None"),
-    ("effects.py", 7534): ("'companion'", None, "None"),
-    ("effects.py", 7610): ("'companion'", None, "'geo'"),
-    ("effects.py", 7623): ("'companion'", None, "None"),
-    ("effects.py", 7636): ("'companion'", None, "'electro'"),
-    ("effects.py", 7663): ("'companion'", None, "'electro'"),
-    ("effects.py", 7675): ("'companion'", None, "'cryo'"),
-    ("effects.py", 7679): ("'companion'", None, "'cryo'"),
-    ("effects.py", 7688): ("'companion'", None, "'hydro'"),
-    ("effects.py", 7700): ("'companion'", None, "'geo'"),
-    ("effects.py", 7924): ("'companion'", None, "'hydro'"),
-    ("effects.py", 7936): ("'companion'", None, "'pyro'"),
-    ("effects.py", 8187): ("'companion'", None, "'pyro'"),
-    ("effects.py", 8213): ("'companion'", None, "'pyro'"),
-    # D3 and D4 BOTH LIVE IN THESE THREE ROWS. `powered` absent where the C#
-    # twin passes `powered: false`, and `element` absent on the two Crabaletta
-    # legs where the C# twin passes `Element.Hydro`.
-    ("furina_stage.py", 334): ("'furina_stage/bow'", None, None),
-    ("furina_stage.py", 669): ("'furina_stage/act'", None, "'hydro'"),
-    ("furina_stage.py", 685): ("'furina_stage/act'", None, None),
-    ("klee_overhaul.py", 562): ("EXPLOSION_SOURCE", "False", "element"),
-    ("klee_overhaul.py", 964): ("ECHO_SOURCE", None, "'pyro'"),
-    ("kokomi_plan.py", 1508): ("'plan'", "False", "'hydro'"),
-    ("kokomi_plan.py", 1763): ("'casket'", "False", "'hydro'"),
+    ('companion_hexerei.py', 1): ("'companion'", None, 'None'),
+    ('companion_hexerei.py', 2): ("'companion'", None, 'None'),
+    ('companion_hexerei.py', 3): ("'companion'", None, "'electro'"),
+    ('companion_hexerei.py', 4): ("'companion'", None, 'element'),
+    ('effects.py', 1): ("'bomb'", None, 'bomb.element'),
+    ('effects.py', 2): ('source', None, 'element'),
+    ('effects.py', 3): ("'salon_final_bow'", None, "'hydro'"),
+    ('effects.py', 4): ("'companion'", None, "'hydro'"),
+    ('effects.py', 5): ("'attack' if card.type == 'attack' else 'card'", None, "'hydro'"),
+    # `EB-470` MOVED ONE ROW WITHOUT CHANGING ONE. Lisa's Lightning Rose volley
+    # left the end-of-turn block for the start-of-turn tail, so its Electro
+    # entry -- the thirteenth here -- is now the sixth and the seven between
+    # rotate down one. The MULTISET is untouched: the same twenty-eight calls
+    # with the same source / powered / element triple on every one, which is
+    # what this census is about. Nothing here is a flag moving.
+    ('effects.py', 6): ("'companion'", None, "'electro'"),
+    ('effects.py', 7): ("'companion'", None, 'None'),
+    ('effects.py', 8): ("'salon'", 'False', "'hydro'"),
+    ('effects.py', 9): ("'burst'", None, "'pyro'"),
+    ('effects.py', 10): ("'companion'", None, "'electro'"),
+    ('effects.py', 11): ("'companion'", None, "'hydro'"),
+    ('effects.py', 12): ("'companion'", None, 'None'),
+    ('effects.py', 13): ("'companion'", None, "'cryo'"),
+    ('effects.py', 14): ("'companion'", None, "'electro'"),
+    ('effects.py', 15): ("'companion'", None, 'None'),
+    ('effects.py', 16): ("'companion'", None, 'None'),
+    ('effects.py', 17): ("'companion'", None, "'geo'"),
+    ('effects.py', 18): ("'companion'", None, 'None'),
+    ('effects.py', 19): ("'companion'", None, "'electro'"),
+    ('effects.py', 20): ("'companion'", None, "'electro'"),
+    ('effects.py', 21): ("'companion'", None, "'cryo'"),
+    ('effects.py', 22): ("'companion'", None, "'cryo'"),
+    ('effects.py', 23): ("'companion'", None, "'hydro'"),
+    ('effects.py', 24): ("'companion'", None, "'geo'"),
+    ('effects.py', 25): ("'companion'", None, "'hydro'"),
+    ('effects.py', 26): ("'companion'", None, "'pyro'"),
+    ('effects.py', 27): ("'companion'", None, "'pyro'"),
+    ('effects.py', 28): ("'companion'", None, "'pyro'"),
+    ('furina_stage.py', 1): ("'furina_stage/bow'", None, None),
+    ('furina_stage.py', 2): ("'furina_stage/act'", None, "'hydro'"),
+    ('furina_stage.py', 3): ("'furina_stage/act'", None, None),
+    ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
+    ('klee_overhaul.py', 2): ('ECHO_SOURCE', None, "'pyro'"),
+    ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
+    ('kokomi_plan.py', 2): ("'casket'", 'False', "'hydro'"),
 }
 
 
@@ -227,7 +230,13 @@ def _sim_call_sites():
             found[(path.name, node.lineno)] = (kw.get("source"),
                                                kw.get("powered"),
                                                kw.get("element"))
-    return found
+    # Re-key by ordinal within the file (line order), see SIM_CALL_SITES.
+    ordinal = {}
+    keyed = {}
+    for (name, _line), flags in sorted(found.items()):
+        ordinal[name] = ordinal.get(name, 0) + 1
+        keyed[(name, ordinal[name])] = flags
+    return keyed
 
 
 def test_the_source_census_is_complete():
@@ -330,9 +339,13 @@ def test_crabaletta_carries_hydro_in_the_game_and_no_element_in_the_sim():
     assert cs.count("Elements.Element.Hydro") == 4   # 2 acts, 2 bows
 
     sites = _sim_call_sites()
-    assert sites[("furina_stage.py", 334)][2] is None   # bow, Crabaletta
-    assert sites[("furina_stage.py", 685)][2] is None   # act, Crabaletta
-    assert sites[("furina_stage.py", 669)][2] == "'hydro'"   # act, Chevalmarin
+    stage = [flags for (name, _i), flags in sorted(sites.items())
+             if name == "furina_stage.py"]
+    assert len(stage) == 3, stage
+    bow, act_chevalmarin, act_crabaletta = stage
+    assert bow[2] is None                    # bow, Crabaletta
+    assert act_crabaletta[2] is None         # act, Crabaletta
+    assert act_chevalmarin[2] == "'hydro'"   # act, Chevalmarin
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():
@@ -365,7 +378,10 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
                 path.read_text(encoding="utf-8").splitlines(), 1):
             if re.search(r"await\s+DamageCmd\.Attack\(", line):
                 sites.append((path.relative_to(MOD).as_posix(), lineno))
-    assert sites == [("Powers/Prototype/ProtoBombPower.cs", 1386)]
+    # The path and the count are the pin; the line number is not (it moved
+    # 1315 -> 1386 under an unrelated edit and turned main red on #549).
+    assert [path for path, _line in sites] == [
+        "Powers/Prototype/ProtoBombPower.cs"]
 
 
 def test_no_kit_verb_hands_the_game_a_card_source_for_its_debuff():
