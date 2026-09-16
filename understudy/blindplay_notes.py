@@ -65,6 +65,30 @@ POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
               "The feed carries no duration and no expiry, so unless a "
               "power's own text says when it ends, this page cannot say "
               "either.*")
+
+# `EB-701`. NOTHING ON THE PAGE SAID WHEN "THE END OF YOUR TURN" IS.
+#
+# THE FIND (Kokomi r30 lane 1, debrief 5). No line says that end-of-turn
+# effects -- a companion's end-of-turn hit, a Dusk Plan -- resolve BEFORE the
+# enemies act; the seat learned it from a Gas Bomb dying without its Death
+# Blow, which is a rule learned from a body that did not do the thing the page
+# had just telegraphed.
+#
+# IT IS A SENTENCE ABOUT THE TURN AND NOT ABOUT ANY POWER, so it sits with
+# `POWER_NOTE` at the foot of the board rather than under the row that raised
+# it: two powers with the same trigger would otherwise print it twice, and the
+# question is asked once per screen.
+#
+# THE CONSEQUENCE IS HALF THE POINT. "Before the enemies act" is only a fact
+# about ordering until it is said what the ordering buys, which is that a body
+# killed at the end of your turn never takes the intent printed above it.
+TURN_ORDER_NOTE = (
+    "*The end of your turn is a step of its own, and it comes BEFORE the "
+    "enemies act: everything that fires at the end of your turn -- a power's "
+    "end-of-turn trigger, a performer's act, a Dusk Plan -- resolves first, "
+    "and only then do the bodies above take their intents. So an enemy killed "
+    "by one of those never takes the intent this page printed for it.*")
+
 METER_NOTE = ("the game's data feed carries this meter's amount only: no "
               "maximum, and no rule for how it is spent")
 # `EB-181`. The same row where the meter DOES declare a ceiling. The second

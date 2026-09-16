@@ -60,7 +60,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
                                         SPOTLIGHT_WINDOW_NOTE,
-                                        TRANSFORM_NOTE, TRANSFORM_UNREADABLE)
+                                        TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
+                                        TURN_ORDER_NOTE)
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
@@ -867,6 +868,36 @@ def _render_intent(intent: dict[str, str], part: bool = False) -> str:
     return " — ".join(b for b in bits if b) or "(no intent shown)"
 
 
+#: `EB-701`. The trigger the turn-order note answers, matched on the SENTENCE
+#: and never on a name -- the rule this page is under for every note it reads
+#: off a printed face. "at the end of your turn", "at the end of the turn",
+#: "at end of turn": the game writes all three and they are one moment.
+_END_OF_TURN = re.compile(r"\bend of (?:your |the |this )?turn\b", re.I)
+
+
+def _end_of_turn_on_board(c: dict[str, Any]) -> bool:
+    """Does anything on this combat screen fire at the end of your turn?
+
+    THE POWERS FIRST, because that is the row `EB-701`'s gate names, and both
+    sides of the board: an enemy's own end-of-turn trigger resolves in the same
+    step and a reader planning a kill needs the order either way.
+
+    AND THE TWO KIT BLOCKS, which carry the two effects the seat named. A Dusk
+    entry is a Plan whose carry-out moved to the end of THIS turn, and the
+    stage's performers act at the end of your turn by rule -- neither is a
+    power and neither would be found by reading the power rows alone.
+    """
+    powers = list(c["you"]["powers"])
+    for e in c["enemies"]:
+        powers += e["powers"]
+    if any(_END_OF_TURN.search(p.get("text") or "") for p in powers):
+        return True
+    if c.get("stage") is not None:
+        return True
+    plans = c.get("plans") or {}
+    return any(_is_dusk(e) for e in (plans.get("queue") or []))
+
+
 #: `EB-708`. The size the game draws into a printed name -- `Twig Slime (M)`,
 #: `Leaf Slime (S)`. Case-sensitive and anchored on the brackets, so it fires
 #: on a size and not on a parenthetical the mod writes into a title.
@@ -1599,6 +1630,12 @@ def render(obs: dict[str, Any]) -> str:
         out += _intent_source_note(c["enemies"])
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
             out += ["", POWER_NOTE]
+        # `EB-701`: and where something on this board fires at the END of your
+        # turn, when that is -- beside the note above, because both are
+        # sentences about the powers the screen has just printed, and once per
+        # screen however many of them carry the trigger.
+        if _end_of_turn_on_board(c):
+            out += ["", TURN_ORDER_NOTE]
         if any(p.get("kind") == "aura"
                for p in you["powers"] + [x for e in c["enemies"]
                                          for x in e["powers"]]):
