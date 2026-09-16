@@ -1319,6 +1319,22 @@ public static partial class McpMod
             state["reactions"] = reactions;
         }
 
+        // GItS LOCAL EDIT (`EB-610`). WHERE THIS TURN'S SPARKS CAME FROM.
+        // Klee r23 lane 2 watched the bank go 2 to 3 across Kaeya and Rapid
+        // Fire on a BARE BOARD, while the only sentence on any screen naming a
+        // Spark source says "whenever a Bomb goes off" -- so the meter
+        // contradicted the one rule the reader had. This is the NARROW read
+        // the page needs and not the ledger route: gains of the SPARK meter on
+        // the CURRENT turn, each with the card its row opened on, and the
+        // engine's event word is turned into a printed one by
+        // `understudy/blindplay_board.spark_sources` before any page sees it.
+        // Same absent/empty contract as the rows above. Implementation and its
+        // reflection contract: gits/GitsMeterLedger.cs.
+        if (GitsSparkSourcesState() is { } sparkSources)
+        {
+            state["spark_sources"] = sparkSources;
+        }
+
         // Powers (status effects)
         state["status"] = BuildPowersState(creature);
 

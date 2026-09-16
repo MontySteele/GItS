@@ -176,6 +176,22 @@ METER_RULES: dict[str, str] = {
 SPARK_OPENING_RULE = (f"you start each combat with {OPENING_SPARK}, and cards "
                       "that print a Spark price spend it")
 
+# `EB-610`. WHERE THIS TURN'S SPARKS CAME FROM.
+#
+# THE FIND (Klee r23 lane 2, fight 5, turn 4): "a Spark appeared with no Bomb
+# on the field" -- the bank went 2 to 3 across Kaeya and Rapid Fire on a bare
+# board. The one sentence naming a Spark source anywhere on that screen is the
+# relic's, "whenever a Bomb goes off", so the meter contradicted the only rule
+# the reader had been given and nothing could settle it. The rule above says
+# where the OPENING bank came from and `METER_RULES` says what the meter IS;
+# neither can say what this turn did.
+#
+# "THIS TURN", said out loud, because the bank is cumulative and the sources
+# are not: the number on the row is the whole fight's arithmetic so far and
+# this line is one turn's worth of it, which are two different questions and
+# would read as one if the window were left implicit.
+SPARK_SOURCES_LINE = "This turn: {sources}."
+
 # `EB-263`. THE ENCHANT PICKER MARKS NOTHING, and the r3 Opus seat found out
 # the hard way: after `choose "Flame Dance"` "the whole list reprinted
 # byte-identically; the only change anywhere on the screen was the footer

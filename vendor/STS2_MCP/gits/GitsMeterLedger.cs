@@ -117,6 +117,110 @@ public static partial class McpMod
     }
 
     /// <summary>
+    /// `EB-610`. WHERE THIS TURN'S SPARKS CAME FROM, on the PLAYER's payload.
+    ///
+    /// THE FIND (Klee r23 lane 2, fight 5, turn 4). "A Spark appeared with no
+    /// Bomb on the field": the bank went 2 to 3 across Kaeya and Rapid Fire on
+    /// a bare board, and the only sentence on any screen naming a Spark source
+    /// is the relic's, which says "whenever a Bomb goes off". The page's Spark
+    /// row says what the word MEANS and never where the number came from, so
+    /// the reader's whole model of the meter was the one line that happened to
+    /// be printed -- and the meter contradicted it.
+    ///
+    /// AND WHY THIS IS NOT THE LEDGER ROUTE BELOW. This file's own header
+    /// argues the ledger must never arrive on the same payload as the board,
+    /// because its rows name ENGINE EVENTS in a developer's vocabulary
+    /// (`relic:pounding_surprise/detonation`) and a page is a grading surface
+    /// (R101b). That argument is about the ROWS, not about the fact, and it
+    /// still stands: what goes out here is the narrow read the page needs --
+    /// the GAINS of the SPARK meter on the CURRENT turn, positive entries
+    /// only, each with the card its row was opened on -- and
+    /// `understudy/blindplay_board.spark_sources` turns the event name into a
+    /// printed word before any page sees it. No price, no bank, no other
+    /// meter, no other turn.
+    ///
+    /// THE TURN IS THE LARGEST ONE THE SPARK ROWS CARRY, which needs no game
+    /// type: the ledger is reset per fight (`MeterLedger.ResetFight`) and its
+    /// turn numbers only climb, so the newest turn present IS this turn.
+    ///
+    /// ABSENT WHERE THE LEDGER IS ABSENT, EMPTY where this turn moved no
+    /// Spark -- the same two facts the route below keeps apart, kept apart
+    /// here for the same reason.
+    /// </summary>
+    internal static List<Dictionary<string, object?>>? GitsSparkSourcesState()
+    {
+        var rows = GitsMeterLedgerRows();
+        if (rows == null) return null;
+        var sources = new List<Dictionary<string, object?>>();
+        try
+        {
+            var turn = int.MinValue;
+            foreach (var row in rows)
+            {
+                if (!GitsIsSparkRow(row)) continue;
+                var rowTurn = GitsLedgerInt(row, "turn");
+                if (rowTurn > turn) turn = rowTurn;
+            }
+            if (turn == int.MinValue) return sources;
+
+            foreach (var row in rows)
+            {
+                if (!GitsIsSparkRow(row)) continue;
+                if (GitsLedgerInt(row, "turn") != turn) continue;
+                var card = row.TryGetValue("card_name", out var name)
+                    ? name as string ?? string.Empty
+                    : string.Empty;
+                if (!row.TryGetValue("entries", out var raw)
+                    || raw is not IEnumerable<object?> entries) continue;
+                foreach (var entry in entries)
+                {
+                    if (entry is not Dictionary<string, object?> e) continue;
+                    var delta = GitsLedgerInt(e, "delta");
+                    if (delta <= 0) continue;
+                    sources.Add(new Dictionary<string, object?>
+                    {
+                        ["source"] = e.TryGetValue("source", out var s)
+                            ? s as string ?? string.Empty : string.Empty,
+                        ["amount"] = delta,
+                        // The card the ROW was opened on, which is what names
+                        // a gain whose event word is the rule that paid rather
+                        // than the thing the player did: a Companion play
+                        // reads `companion:personal/play`, and what the player
+                        // saw was Kaeya.
+                        ["card"] = card,
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[STS2 MCP][GItS] spark sources read failed: "
+                        + $"{ex.Message}");
+            return sources;
+        }
+        return sources;
+    }
+
+    private static bool GitsIsSparkRow(Dictionary<string, object?> row) =>
+        row.TryGetValue("meter", out var meter) && (meter as string) == "spark";
+
+    /// <summary>An int off a ledger map, and never a throw. The values are
+    /// boxed ints today and no reader may depend on that staying true.</summary>
+    private static int GitsLedgerInt(Dictionary<string, object?> map, string key)
+    {
+        try
+        {
+            return map.TryGetValue(key, out var value) && value != null
+                ? Convert.ToInt32(value)
+                : 0;
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>
     /// GET only. The ledger is a read; there is no op that writes one, and a
     /// POST arm would be a door nothing needs.
     /// </summary>

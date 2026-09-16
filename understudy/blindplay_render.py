@@ -61,6 +61,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
+                                        SPARK_SOURCES_LINE,
                                         SPOTLIGHT_WINDOW_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
                                         TURN_ORDER_NOTE)
@@ -1400,6 +1401,24 @@ def render(obs: dict[str, Any]) -> str:
             else:
                 out.append(f"- {name}: {amount}{bound} — "
                            f"{rule or METER_NOTE}")
+            # `EB-610`. AND WHERE THIS TURN'S SPARKS CAME FROM, under the row
+            # they moved. Klee r23 lane 2 watched the bank go 2 to 3 across
+            # Kaeya and Rapid Fire on a BARE BOARD, while the only sentence
+            # naming a Spark source anywhere on the screen is the relic's
+            # "whenever a Bomb goes off" -- so the meter contradicted the one
+            # rule the reader had, and nothing could settle it.
+            #
+            # A SUB-LINE AND NOT A CLAUSE ON THE ROW, `ENEMY_REPLACED_LINE`'s
+            # shape: the row above says what the meter IS, which is true on
+            # every turn, and this says what it DID this turn, which is a
+            # different fact with a different lifetime. Printed only where
+            # there is something to say -- a turn with no gain prints nothing,
+            # because a reader asking "where did that come from" is only ever
+            # asking about a number that moved.
+            if name == "Spark" and c.get("spark_sources"):
+                out.append("    - " + SPARK_SOURCES_LINE.format(
+                    sources=", ".join(f"+{s['amount']} {s['name']}"
+                                      for s in c["spark_sources"])))
         for pw in you["powers"]:
             out.append(_render_power(pw, "- "))
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "

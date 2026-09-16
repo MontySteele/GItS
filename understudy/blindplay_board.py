@@ -532,6 +532,12 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     reactions = reaction_log(p)
     if reactions is not None:
         combat["reactions"] = reactions
+    # `EB-610`: and where each of this turn's Sparks came from, in printed
+    # words. Absent on a build with no ledger; empty on a turn the bank has
+    # not moved, on which the Spark row prints no source clause at all.
+    spark_from = spark_sources(p)
+    if spark_from:
+        combat["spark_sources"] = spark_from
     memory = kurage_memory(p)
     if memory is not None:
         combat["memory"] = memory
@@ -974,6 +980,99 @@ def reaction_log(player: dict[str, Any]) -> list[dict[str, str]] | None:
              "carried": bool(r.get("carried"))}
             for r in rows
             if isinstance(r, dict) and _text(r.get("reaction"))]
+
+
+# `EB-610`. THE ENGINE'S EVENT WORD, AND THE PLAYER'S.
+#
+# The ledger names a gain by the ENGINE EVENT that made it --
+# `relic:pounding_surprise/detonation`, `power:spark_per_turn/turn_start`,
+# `rule:threshold_consume` -- which is a developer's vocabulary and is exactly
+# what `gits/GitsMeterLedger.cs`'s header refuses to put on a page. So the
+# translation happens HERE, one step before the page, and what crosses onto the
+# screen is the word a player would use for the thing they just watched.
+#
+# KEYED ON THE LAST SEGMENT, not on the whole string, because that segment IS
+# the event and the prefix is only where it lives: `relic:explosive_frags/
+# detonation` and `relic:pounding_surprise/detonation` are one thing happening
+# to a reader, and a map keyed on the full name would need a row per relic and
+# would silently miss the next one.
+_SPARK_EVENTS = {
+    "detonation": "a detonation",
+    "explosion": "an explosion",
+    "bomb_reaction": "a Bomb's reaction",
+    "turn_start": "the start of your turn",
+    "combat_start": "the start of the fight",
+    "held_turn": "holding it a turn",
+    "opening_spark": "your opening bank",
+    "play": "a play",
+}
+
+
+def _spark_source_name(source: str, card: str) -> str:
+    """The printed word for one Spark gain (`EB-610`).
+
+    THE CARD WINS WHERE THE EVENT IS A PLAY, which is the r23 beat itself: the
+    bank moved on Kaeya, and the ledger's word for that is
+    `companion:personal/play` -- true, and not what the player did. Where the
+    row was opened on a card, that card's name is the honest answer and the
+    event word is machinery underneath it.
+
+    AND THE EVENT WINS OTHERWISE, because a turn-start grant or a relic's
+    detonation refund has no card behind it at all, which is precisely the case
+    the seat could not explain ("a Spark appeared with no Bomb on the field").
+
+    AN UNKNOWN EVENT FALLS BACK TO ITS OWN LAST SEGMENT with the underscores
+    out -- readable, never invented, and never silent. A source this map has
+    never seen is a source the page still names.
+    """
+    tail = (source or "").replace(":", "/").rsplit("/", 1)[-1]
+    if card and tail in ("play", ""):
+        return card
+    named = _SPARK_EVENTS.get(tail)
+    if named:
+        return named
+    if card:
+        return card
+    return tail.replace("_", " ") or "an unnamed source"
+
+
+def spark_sources(player: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """Where each of this turn's Sparks came from (`EB-610`).
+
+    THE FIND (Klee r23 lane 2, fight 5, turn 4). "A Spark appeared with no Bomb
+    on the field": the bank went 2 to 3 across Kaeya and Rapid Fire on a bare
+    board. The relic's line names only "whenever a Bomb goes off", and the
+    page's Spark row says what the word MEANS and never where the number came
+    from -- so the one rule the reader had been given was contradicted by the
+    meter, with nothing on the screen able to settle it.
+
+    ROWS ARE FOLDED BY PRINTED NAME, in first-seen order, because a reader
+    counting a bank wants "+2 a detonation" and not the same phrase twice: two
+    detonations in one turn are one source paying twice, and the ORDER is the
+    order the ledger resolved them in, which is the order they happened.
+
+    THE THREE STATES, this section's standing contract: `None` is a build with
+    no ledger to ask, `[]` is a turn on which the bank has not moved (and the
+    Spark row then prints no clause -- there is nothing to explain), and a
+    populated list is the gains, named.
+    """
+    rows = player.get("spark_sources")
+    if not isinstance(rows, list):
+        return None
+    folded: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        amount = _int(row.get("amount"))
+        if amount <= 0:
+            continue
+        name = _spark_source_name(_text(row.get("source")),
+                                  _text(row.get("card")))
+        if name in folded:
+            folded[name]["amount"] += amount
+        else:
+            folded[name] = {"name": name, "amount": amount}
+    return list(folded.values())
 
 
 def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
