@@ -103,6 +103,27 @@ Generated (never edit by hand): the dressed subclasses under
 (a `TeyvatLoc` partial), the `PullNextEvent` substitution table, and the shape
 table the headless pins read.
 
+**The placeholder rule (EB-770).** A base loc row spells a runtime value with
+a SmartFormat var — `[red]{RandomCard}[/red] is removed from your
+[gold]Deck[/gold].` A dressed row may spell that value out in WORDS instead;
+that is what a dressing is for. What it may not do is put a BRACKETED GLOSS in
+its place: the engine reads `[...]` as a rich-text tag, finds no tag by that
+name and deletes the group, so `[Specific card] is removed from your deck.`
+reached the player as ` is removed from your deck.` The generator refuses that
+shape, and refuses a var the base event does not declare. The var names it
+reads the rows against are in the index as `key_vars` — identifiers, like
+every other value there, so `--check` needs neither the game nor a decompile.
+Rebuild them on a machine with the game installed:
+
+```sh
+python tools/gen_teyvat_events.py --refresh-vars   # reads localization/eng/events.json
+                                                   # out of SlayTheSpire2.pck
+```
+
+A `Loss:` line is refused the same way when the base event has no lethal
+option: the `.loss` row is written only for a base that `can_kill`, so the
+line would be prose no run can reach.
+
 Hand-written: the mirrors under `Teyvat/Events/Mirrors/`. A base event with no
 mirror is REPORTED, not generated — the generator names it and moves on. That
 list is the engineering queue for this surface.

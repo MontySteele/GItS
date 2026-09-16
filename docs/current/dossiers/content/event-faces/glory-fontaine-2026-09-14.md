@@ -115,7 +115,7 @@ Merusea Village hangs quiet in the blue below Fontaine, and the oldest Melusine 
 
 - **Hand Over a Potion** — Obtain a random Relic.
 - **Hand Over 100 Gold** — Obtain a random Relic.
-- **Hand Over the greater courtesy** — Obtain 2 random Relics. (The harvest itself strips the offered item's name on this option; base reads "[Give ]".)
+- **Hand Over the greater courtesy** — Obtain 2 random Relics.
 
 Mechanics check: matches harvest as far as the harvest states it (its third option is template-lossy — the traded item's name is missing on the wiki page itself, not just here). Flag: reused verbatim per the reuse rule even though the gallery's own curation note demotes this variant for a register slip (the closing line's "monsieur" honorific trips the Melusine register's "never French honorifics" rule) — it is the only kept Fontaine draft for this event, so it is not rewritten here. Also not in `events.yaml`'s pool — the third option needs a relic-removal op `HeldRelics` doesn't have, per the file's own skip list.
 
@@ -170,7 +170,7 @@ Mechanics check: matches harvest and the shipped `self_help_book` row (each ench
 
 The pressure lift running down from Poisson to the Fortress of Meropide is rated to the ounce, and the Melusine attendant's brass ballast wheel says your kit is over it. She spins the wheel with one webbed hand; it ticks to a stop above a single item. Outside the porthole the water goes from green to black.
 
-- **Let the Wheel Decide** — A specific card is removed from your deck.
+- **Let the Wheel Decide** — {RandomCard} is removed from your deck.
 - **Spin Again** — Lose 3 HP as the cable lurches and the pressure squeezes your ears. The wheel selects a different item at random. Every further spin costs 1 more HP than the last, and the attendant will patiently re-offer both choices until you surrender something. The wheel skips anything bolted to the frame (Eternal) and will not land twice on the same item while others remain.
 
 Mechanics check: matches harvest and the shipped `slippery_bridge` row (Overcome = remove_random 1; Hold On = hp -3, remove 1, escalating +1 HP per re-spin, Eternal cards skipped, no repeats while others remain).

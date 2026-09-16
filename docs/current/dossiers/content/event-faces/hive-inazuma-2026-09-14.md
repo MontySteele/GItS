@@ -40,7 +40,7 @@ Mechanics check: matches harvest.
 
 Watatsumi's supply line to Yashiori crosses a plank causeway slung over Musoujin Gorge, and the storm has been chewing the ropes since nightfall. Your runner's load is lashed to the guide line with one hand and to you with the other. Below is only rain and Tatarigami haze.
 
-- **Cut It Loose (Overcome)** — [Specific card] is removed from your deck.
+- **Cut It Loose (Overcome)** — {RandomCard} is removed from your deck.
 - **Grip the Rope (Hold On)** — Lose 3 HP as the line saws through your grip. The wind shifts the load, and the piece hanging over the drop is randomized. Each further grip costs 1 more HP than the one before, and the crossing keeps putting the same two choices to you until you cut something away. Gear tied down by the priestess's own order (Eternal) never swings out, and the wind will not pick the same bundle twice while others hang.
 
 Mechanics check: matches harvest.
@@ -231,7 +231,7 @@ Under a leaning torii on the road toward the Grand Narukami Shrine, a tanuki eld
 
 - **Give a Potion** — Obtain a random Relic.
 - **Give 100 Mora (Gold)** — Obtain a random Relic.
-- **Give the proper tribute** — (harvest strips the offered item: base reads "[Give ]") Obtain 2 random Relics.
+- **Give the proper tribute** — Obtain 2 random Relics.
 
 Mechanics check: matches harvest | flag: inherited from the gallery — the third base option's offered item was lost to template-stripping on the wiki page; the gallery already flags a re-harvest as needed before the "greater gift" can be named or costed in any variant, this one included.
 
@@ -347,7 +347,7 @@ Mechanics check: matches harvest.
 Below Sangonomiya Shrine, a canvas tent holds everything the resistance has stripped off Tenryou patrols and never found owners for. The quartermaster does not haggle; mora becomes rations, and rations become another week. She notches Merit Tallies onto a bamboo slip filed under your name, and those slips outlive campaigns.
 
 - **The Salvage Bin (Wongo's Bargain Bin)** — Pay 100 Gold. Obtain 1 random Common Relic. You also receive 32 Merit Tallies (Wongo Points).
-- **Requisition of the Day (Wongo's Featured Item)** — Pay 200 Gold. Obtain [Rare Relic], read aloud off the manifest before you commit. You also receive 8 Merit Tallies.
+- **Requisition of the Day (Wongo's Featured Item)** — Pay {FeaturedItemCost} Gold. Obtain {RandomRelic}, read aloud off the manifest before you commit. You also receive 8 Merit Tallies.
 - **Standing Order (Wongo's Mystery Box)** — Pay 300 Gold. Obtain 3 random Relics after 5 combats, when the next supply run clears; until then you hold a Standing Order Slip (Wongo's Mystery Ticket). You also receive 16 Merit Tallies.
 - **Leave** — She reclaims a worn strap off your kit for the front lines. Downgrade a random card.
 

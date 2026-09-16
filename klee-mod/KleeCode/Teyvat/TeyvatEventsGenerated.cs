@@ -94,7 +94,7 @@ internal static partial class TeyvatLoc
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.OVERCOME.title"] =
                 "Overcome",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.OVERCOME.description"] =
-                "The specific card named is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Hold On",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.INITIAL.options.HOLD_ON_0.description"] =
@@ -132,7 +132,7 @@ internal static partial class TeyvatLoc
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description"] =
                 "Lose 3 HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.OVERCOME.description"] =
-                "The specific card named is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_0.description"] =
                 "Lose 3 HP. The card in the above option is randomized.",
             ["CUT_ROPE_BRIDGE_ABOVE_CIDER_LAKE.pages.HOLD_ON_1.description"] =
@@ -1334,7 +1334,7 @@ internal static partial class TeyvatLoc
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.OVERCOME.title"] =
                 "Let It Fall",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.OVERCOME.description"] =
-                "[Specific card] is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Hold On",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.INITIAL.options.HOLD_ON_0.description"] =
@@ -1426,7 +1426,7 @@ internal static partial class TeyvatLoc
                 + "picks the same thing twice while anything else remains, and never "
                 + "anything lashed down for good (Eternal).",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.OVERCOME.description"] =
-                "[Specific card] is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["ROPE_BRIDGE_BELOW_DUNYU_RUINS.pages.HOLD_ON_0.description"] =
                 "Lose 3 HP as the wet rope scours your palms. The thing about to "
                 + "slip is randomized — some other piece of your kit takes its place "
@@ -1650,8 +1650,7 @@ internal static partial class TeyvatLoc
             ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC.title"] =
                 "Offer the greater gift",
             ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC.description"] =
-                "Obtain 2 random Relics. (harvest strips the offered item on this "
-                + "option: base reads \"[Give ]\")",
+                "Obtain 2 random Relics.",
             ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.POTION_LOCKED.title"] =
                 "Offer a Potion",
             ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.POTION_LOCKED.description"] =
@@ -1659,15 +1658,13 @@ internal static partial class TeyvatLoc
             ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC_LOCKED.title"] =
                 "Offer the greater gift",
             ["ARANWID_ELDEST_OF_VANARANA.pages.INITIAL.options.RELIC_LOCKED.description"] =
-                "Obtain 2 random Relics. (harvest strips the offered item on this "
-                + "option: base reads \"[Give ]\")",
+                "Obtain 2 random Relics.",
             ["ARANWID_ELDEST_OF_VANARANA.pages.POTION.description"] =
                 "Obtain a random Relic.",
             ["ARANWID_ELDEST_OF_VANARANA.pages.GOLD.description"] =
                 "Obtain a random Relic.",
             ["ARANWID_ELDEST_OF_VANARANA.pages.RELIC.description"] =
-                "Obtain 2 random Relics. (harvest strips the offered item on this "
-                + "option: base reads \"[Give ]\")",
+                "Obtain 2 random Relics.",
             // RtawahistTwinningGlass (Sumeru / Reflections)
             ["RTAWAHIST_TWINNING_GLASS.title"] =
                 "The Rtawahist Twinning Glass",
@@ -1776,7 +1773,7 @@ internal static partial class TeyvatLoc
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.OVERCOME.title"] =
                 "Cut It Loose",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.OVERCOME.description"] =
-                "[Specific card] is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Grip the Rope",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.INITIAL.options.HOLD_ON_0.description"] =
@@ -1859,7 +1856,7 @@ internal static partial class TeyvatLoc
                 + "corps' own use (Eternal) never sways loose, and the wind never "
                 + "picks the same bundle twice while others remain.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.OVERCOME.description"] =
-                "[Specific card] is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["ROPE_LINE_OVER_ARDRAVI_VALLEY.pages.HOLD_ON_0.description"] =
                 "Lose 3 HP as the frayed cable saws at your palms. The item hanging "
                 + "over the ravine is randomized. Each further grip costs 1 more HP "
@@ -2338,8 +2335,7 @@ internal static partial class TeyvatLoc
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC.title"] =
                 "Hand Over the greater courtesy",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC.description"] =
-                "Obtain 2 random Relics. (The harvest itself strips the offered "
-                + "item's name on this option; base reads \"[Give ]\".)",
+                "Obtain 2 random Relics.",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.POTION_LOCKED.title"] =
                 "Hand Over a Potion",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.POTION_LOCKED.description"] =
@@ -2347,15 +2343,13 @@ internal static partial class TeyvatLoc
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC_LOCKED.title"] =
                 "Hand Over the greater courtesy",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.INITIAL.options.RELIC_LOCKED.description"] =
-                "Obtain 2 random Relics. (The harvest itself strips the offered "
-                + "item's name on this option; base reads \"[Give ]\".)",
+                "Obtain 2 random Relics.",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.POTION.description"] =
                 "Obtain a random Relic.",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.GOLD.description"] =
                 "Obtain a random Relic.",
             ["GRANDMOTHER_CORALIE_OF_MERUSEA_VILLAGE.pages.RELIC.description"] =
-                "Obtain 2 random Relics. (The harvest itself strips the offered "
-                + "item's name on this option; base reads \"[Give ]\".)",
+                "Obtain 2 random Relics.",
             // CoralMirrorRorriMLaroCEhT (Fontaine / Reflections)
             ["CORAL_MIRROR_RORRI_M_LARO_C_EH_T.title"] =
                 "The Coral Mirror rorriM laroC ehT",
@@ -2463,7 +2457,7 @@ internal static partial class TeyvatLoc
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.OVERCOME.title"] =
                 "Let the Wheel Decide",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.OVERCOME.description"] =
-                "A specific card is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Spin Again",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.INITIAL.options.HOLD_ON_0.description"] =
@@ -2546,7 +2540,7 @@ internal static partial class TeyvatLoc
                 + "wheel skips anything bolted to the frame (Eternal) and will not "
                 + "land twice on the same item while others remain.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.OVERCOME.description"] =
-                "A specific card is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["BALLAST_CHECK_ON_THE_MEROPIDE_LIFT.pages.HOLD_ON_0.description"] =
                 "Lose 3 HP as the cable lurches and the pressure squeezes your "
                 + "ears. The wheel selects a different item at random. Every further "
@@ -2939,7 +2933,7 @@ internal static partial class TeyvatLoc
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.OVERCOME.title"] =
                 "Cut It Loose",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.OVERCOME.description"] =
-                "[Specific card] is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Grip the Rope (Hold On)",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.INITIAL.options.HOLD_ON_0.description"] =
@@ -3031,7 +3025,7 @@ internal static partial class TeyvatLoc
                 + "swings out, and the wind will not pick the same bundle twice while "
                 + "others hang.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.OVERCOME.description"] =
-                "[Specific card] is removed from your deck.",
+                "{RandomCard} is removed from your deck.",
             ["TIDEWORN_CAUSEWAY_AT_MUSOUJIN_GORGE.pages.HOLD_ON_0.description"] =
                 "Lose 3 HP as the line saws through your grip. The wind shifts the "
                 + "load, and the piece hanging over the drop is randomized. Each "
@@ -3433,8 +3427,7 @@ internal static partial class TeyvatLoc
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC.title"] =
                 "Give the proper tribute",
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC.description"] =
-                "(harvest strips the offered item: base reads \"[Give ]\") Obtain 2 "
-                + "random Relics.",
+                "Obtain 2 random Relics.",
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.POTION_LOCKED.title"] =
                 "Give a Potion",
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.POTION_LOCKED.description"] =
@@ -3442,15 +3435,13 @@ internal static partial class TeyvatLoc
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC_LOCKED.title"] =
                 "Give the proper tribute",
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.INITIAL.options.RELIC_LOCKED.description"] =
-                "(harvest strips the offered item: base reads \"[Give ]\") Obtain 2 "
-                + "random Relics.",
+                "Obtain 2 random Relics.",
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.POTION.description"] =
                 "Obtain a random Relic.",
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.GOLD.description"] =
                 "Obtain a random Relic.",
             ["OLD_YOROZU_OF_CHINJU_FOREST.pages.RELIC.description"] =
-                "(harvest strips the offered item: base reads \"[Give ]\") Obtain 2 "
-                + "random Relics.",
+                "Obtain 2 random Relics.",
             // TanukiStallOnTheShrineRoad (Inazuma / RelicTrader)
             ["TANUKI_STALL_ON_THE_SHRINE_ROAD.title"] =
                 "The Tanuki Stall on the Shrine Road",
@@ -3736,8 +3727,8 @@ internal static partial class TeyvatLoc
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM.title"] =
                 "Requisition of the Day (Wongo's Featured Item)",
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM.description"] =
-                "Pay 200 Gold. Obtain [Rare Relic], read aloud off the manifest "
-                + "before you commit. You also receive 8 Merit Tallies.",
+                "Pay {FeaturedItemCost} Gold. Obtain {RandomRelic}, read aloud off "
+                + "the manifest before you commit. You also receive 8 Merit Tallies.",
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX.title"] =
                 "Standing Order (Wongo's Mystery Box)",
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX.description"] =
@@ -3757,8 +3748,8 @@ internal static partial class TeyvatLoc
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM_LOCKED.title"] =
                 "Requisition of the Day (Wongo's Featured Item)",
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.FEATURED_ITEM_LOCKED.description"] =
-                "Pay 200 Gold. Obtain [Rare Relic], read aloud off the manifest "
-                + "before you commit. You also receive 8 Merit Tallies.",
+                "Pay {FeaturedItemCost} Gold. Obtain {RandomRelic}, read aloud off "
+                + "the manifest before you commit. You also receive 8 Merit Tallies.",
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX_LOCKED.title"] =
                 "Standing Order (Wongo's Mystery Box)",
             ["QUARTERMASTERS_TENT_WATATSUMI.pages.INITIAL.options.MYSTERY_BOX_LOCKED.description"] =
@@ -4125,8 +4116,7 @@ internal static partial class TeyvatLoc
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC.title"] =
                 "Offer the Greater Gift",
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC.description"] =
-                "Obtain 2 random Relics. (The harvest's third option reads \"[Give "
-                + "]\" — the offered item is stripped by template-stripping.)",
+                "Obtain 2 random Relics.",
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.POTION_LOCKED.title"] =
                 "Offer a Potion",
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.POTION_LOCKED.description"] =
@@ -4134,15 +4124,13 @@ internal static partial class TeyvatLoc
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC_LOCKED.title"] =
                 "Offer the Greater Gift",
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.INITIAL.options.RELIC_LOCKED.description"] =
-                "Obtain 2 random Relics. (The harvest's third option reads \"[Give "
-                + "]\" — the offered item is stripped by template-stripping.)",
+                "Obtain 2 random Relics.",
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.POTION.description"] =
                 "Obtain a random Relic.",
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.GOLD.description"] =
                 "Obtain a random Relic.",
             ["CANOPY_ELDERS_LEDGER_OF_GIFTS.pages.RELIC.description"] =
-                "Obtain 2 random Relics. (The harvest's third option reads \"[Give "
-                + "]\" — the offered item is stripped by template-stripping.)",
+                "Obtain 2 random Relics.",
             // MictlanTradeCircle (Natlan / RelicTrader)
             ["MICTLAN_TRADE_CIRCLE.title"] =
                 "The Mictlan Trade-Circle",
@@ -4522,7 +4510,7 @@ internal static partial class TeyvatLoc
             ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.OVERCOME.title"] =
                 "Overcome",
             ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.OVERCOME.description"] =
-                "A specific card is removed from your Deck.",
+                "{RandomCard} is removed from your Deck.",
             ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.HOLD_ON_0.title"] =
                 "Hold On",
             ["ROPE_CROSSING_AT_COATEPEC.pages.INITIAL.options.HOLD_ON_0.description"] =
@@ -4596,7 +4584,7 @@ internal static partial class TeyvatLoc
                 + "offered is never Basic rarity unless every card you hold is; the "
                 + "same card is never offered twice while others remain unoffered.)",
             ["ROPE_CROSSING_AT_COATEPEC.pages.OVERCOME.description"] =
-                "A specific card is removed from your Deck.",
+                "{RandomCard} is removed from your Deck.",
             ["ROPE_CROSSING_AT_COATEPEC.pages.HOLD_ON_0.description"] =
                 "Lose 3 HP. The card named in the above option is randomized, and "
                 + "the HP cost rises by 1 each further time you choose this option. "

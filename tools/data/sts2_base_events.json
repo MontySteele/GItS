@@ -7,6 +7,23 @@
       "dynamic_keys": true,
       "entry": "ABYSSAL_BATHS",
       "harvest_options": 4,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.ALL.options.LINGER.description": [
+          "Damage",
+          "MaxHp"
+        ],
+        "pages.INITIAL.options.ABSTAIN.description": [
+          "Heal"
+        ],
+        "pages.INITIAL.options.IMMERSE.description": [
+          "Damage",
+          "MaxHp"
+        ]
+      },
       "option_keys": [
         "IMMERSE",
         "ABSTAIN"
@@ -28,6 +45,14 @@
       "dynamic_keys": false,
       "entry": "AMALGAMATOR",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.COMBINE_DEFENDS.description": [
+          "Card2"
+        ],
+        "pages.INITIAL.options.COMBINE_STRIKES.description": [
+          "Card1"
+        ]
+      },
       "option_keys": [],
       "page_keys": [
         "pages.COMBINE_STRIKES.description",
@@ -41,6 +66,11 @@
       "dynamic_keys": false,
       "entry": "AROMA_OF_CHAOS",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.MAINTAIN_CONTROL.description": [
+          "AromaPrinciple"
+        ]
+      },
       "option_keys": [
         "LET_GO",
         "MAINTAIN_CONTROL"
@@ -57,6 +87,21 @@
       "dynamic_keys": false,
       "entry": "BATTLEWORN_DUMMY",
       "harvest_options": 3,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.SETTING_1.description": [
+          "Setting1Hp"
+        ],
+        "pages.INITIAL.options.SETTING_2.description": [
+          "Setting2Hp"
+        ],
+        "pages.INITIAL.options.SETTING_3.description": [
+          "Setting3Hp"
+        ]
+      },
       "option_keys": [
         "SETTING_1",
         "SETTING_2",
@@ -74,6 +119,19 @@
       "dynamic_keys": false,
       "entry": "BRAIN_LEECH",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.RIP.description": [
+          "RipHpLoss"
+        ],
+        "pages.INITIAL.options.SHARE_KNOWLEDGE.description": [
+          "CardChoiceCount",
+          "FromCardChoiceCount"
+        ]
+      },
       "option_keys": [
         "SHARE_KNOWLEDGE",
         "RIP"
@@ -91,6 +149,14 @@
       "dynamic_keys": false,
       "entry": "BUGSLAYER",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.EXTERMINATION.description": [
+          "Card1"
+        ],
+        "pages.INITIAL.options.SQUASH.description": [
+          "Card2"
+        ]
+      },
       "option_keys": [
         "EXTERMINATION",
         "SQUASH"
@@ -107,6 +173,14 @@
       "dynamic_keys": false,
       "entry": "BYRDONIS_NEST",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.EAT.description": [
+          "MaxHp"
+        ],
+        "pages.INITIAL.options.TAKE.description": [
+          "Card"
+        ]
+      },
       "option_keys": [
         "EAT",
         "TAKE"
@@ -123,6 +197,23 @@
       "dynamic_keys": false,
       "entry": "COLORFUL_PHILOSOPHERS",
       "harvest_options": 5,
+      "key_vars": {
+        "pages.INITIAL.options.DEFECT.description": [
+          "Cards"
+        ],
+        "pages.INITIAL.options.IRONCLAD.description": [
+          "Cards"
+        ],
+        "pages.INITIAL.options.NECROBINDER.description": [
+          "Cards"
+        ],
+        "pages.INITIAL.options.REGENT.description": [
+          "Cards"
+        ],
+        "pages.INITIAL.options.SILENT.description": [
+          "Cards"
+        ]
+      },
       "option_keys": [],
       "page_keys": [
         "pages.DONE.description"
@@ -135,6 +226,21 @@
       "dynamic_keys": true,
       "entry": "COLOSSAL_FLOWER",
       "harvest_options": 6,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.EXTRACT_CURRENT_PRIZE_1.description": [
+          "Prize1"
+        ],
+        "pages.REACH_DEEPER_1.options.EXTRACT_CURRENT_PRIZE_2.description": [
+          "Prize2"
+        ],
+        "pages.REACH_DEEPER_2.options.EXTRACT_INSTEAD.description": [
+          "Prize3"
+        ]
+      },
       "option_keys": [
         "EXTRACT_CURRENT_PRIZE_{NumberOfDigs + 1}",
         "REACH_DEEPER_{NumberOfDigs + 1}"
@@ -158,6 +264,19 @@
       "dynamic_keys": false,
       "entry": "CRYSTAL_SPHERE",
       "harvest_options": 2,
+      "key_vars": {
+        "minigame.divinationsRemain": [
+          "Count"
+        ],
+        "pages.INITIAL.options.PAYMENT_PLAN.description": [
+          "CurseTitle",
+          "PaymentPlanCount"
+        ],
+        "pages.INITIAL.options.UNCOVER_FUTURE.description": [
+          "UncoverFutureCost",
+          "UncoverFutureProphesizeCount"
+        ]
+      },
       "option_keys": [
         "UNCOVER_FUTURE",
         "PAYMENT_PLAN"
@@ -173,6 +292,7 @@
       "dynamic_keys": false,
       "entry": "DARV",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": false
@@ -183,6 +303,19 @@
       "dynamic_keys": false,
       "entry": "DENSE_VEGETATION",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.REST.description": [
+          "Heal"
+        ],
+        "pages.INITIAL.options.TRUDGE_ON.description": [
+          "Gold",
+          "HpLoss"
+        ]
+      },
       "option_keys": [
         "TRUDGE_ON",
         "REST"
@@ -200,6 +333,7 @@
       "dynamic_keys": false,
       "entry": "DEPRECATED_ANCIENT_EVENT",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": true
@@ -210,6 +344,7 @@
       "dynamic_keys": false,
       "entry": "DEPRECATED_EVENT",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": true
@@ -220,6 +355,21 @@
       "dynamic_keys": false,
       "entry": "DOLL_ROOM",
       "harvest_options": 3,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.EXAMINE.description": [
+          "ExamineHpLoss"
+        ],
+        "pages.INITIAL.options.TAKE_SOME_TIME.description": [
+          "TakeTimeHpLoss"
+        ],
+        "pages.TAKE.options.TAKE.description": [
+          "RelicName"
+        ]
+      },
       "option_keys": [
         "RANDOM",
         "TAKE_SOME_TIME",
@@ -241,6 +391,11 @@
       "dynamic_keys": false,
       "entry": "DOORS_OF_LIGHT_AND_DARK",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.LIGHT.description": [
+          "Cards"
+        ]
+      },
       "option_keys": [
         "LIGHT",
         "DARK"
@@ -257,6 +412,19 @@
       "dynamic_keys": false,
       "entry": "DROWNING_BEACON",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.BOTTLE.description": [
+          "Potion"
+        ],
+        "pages.INITIAL.options.CLIMB.description": [
+          "HpLoss",
+          "Relic"
+        ]
+      },
       "option_keys": [
         "BOTTLE",
         "CLIMB"
@@ -273,6 +441,40 @@
       "dynamic_keys": false,
       "entry": "ENDLESS_CONVEYOR",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.ALL.options.CAVIAR.description": [
+          "CaviarMaxHp",
+          "Gold"
+        ],
+        "pages.ALL.options.CLAM_ROLL.description": [
+          "ClamRollHeal",
+          "Gold"
+        ],
+        "pages.ALL.options.FRIED_EEL.description": [
+          "Gold"
+        ],
+        "pages.ALL.options.GOLDEN_FYSH.description": [
+          "GoldenFyshGold"
+        ],
+        "pages.ALL.options.JELLY_LIVER.description": [
+          "Gold"
+        ],
+        "pages.ALL.options.SEAPUNK_SALAD.description": [
+          "Gold"
+        ],
+        "pages.ALL.options.SPICY_SNAPPY.description": [
+          "Gold"
+        ],
+        "pages.ALL.options.SUSPICIOUS_CONDIMENT.description": [
+          "Gold"
+        ],
+        "pages.GRAB_SOMETHING_OFF_THE_BELT.description": [
+          "LastDishTitle"
+        ],
+        "pages.INITIAL.description": [
+          "Gold"
+        ]
+      },
       "option_keys": [
         "OBSERVE_CHEF"
       ],
@@ -293,6 +495,12 @@
       "dynamic_keys": false,
       "entry": "FAKE_MERCHANT",
       "harvest_options": "none",
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ]
+      },
       "option_keys": [],
       "page_keys": [],
       "sealed": true
@@ -303,6 +511,15 @@
       "dynamic_keys": false,
       "entry": "FIELD_OF_MAN_SIZED_HOLES",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.ENTER_YOUR_HOLE.description": [
+          "Enchantment"
+        ],
+        "pages.INITIAL.options.RESIST.description": [
+          "Cards",
+          "ResistCurse"
+        ]
+      },
       "option_keys": [
         "RESIST",
         "ENTER_YOUR_HOLE"
@@ -319,6 +536,18 @@
       "dynamic_keys": false,
       "entry": "GRAVE_OF_THE_FORGOTTEN",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.ACCEPT.description": [
+          "Relic"
+        ],
+        "pages.INITIAL.options.ACCEPT.title": [
+          "Relic"
+        ],
+        "pages.INITIAL.options.CONFRONT.description": [
+          "Curse",
+          "Enchantment"
+        ]
+      },
       "option_keys": [
         "CONFRONT_LOCKED",
         "CONFRONT",
@@ -336,6 +565,13 @@
       "dynamic_keys": false,
       "entry": "HUNGRY_FOR_MUSHROOMS",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event",
+          "pronounSubject"
+        ]
+      },
       "option_keys": [],
       "page_keys": [
         "pages.BIG_MUSHROOM.description",
@@ -349,6 +585,7 @@
       "dynamic_keys": false,
       "entry": "INFESTED_AUTOMATON",
       "harvest_options": 2,
+      "key_vars": {},
       "option_keys": [
         "STUDY",
         "TOUCH_CORE"
@@ -365,6 +602,26 @@
       "dynamic_keys": false,
       "entry": "JUNGLE_MAZE_ADVENTURE",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event",
+          "possessiveAdjective"
+        ],
+        "pages.INITIAL.options.JOIN_FORCES.description": [
+          "JoinForcesGold"
+        ],
+        "pages.INITIAL.options.SOLO_QUEST.description": [
+          "SoloGold",
+          "SoloHp"
+        ],
+        "pages.JOIN_FORCES.description": [
+          "IsMultiplayer"
+        ],
+        "pages.SOLO_QUEST.description": [
+          "IsMultiplayer"
+        ]
+      },
       "option_keys": [
         "SOLO_QUEST",
         "JOIN_FORCES"
@@ -381,6 +638,15 @@
       "dynamic_keys": false,
       "entry": "LOST_WISP",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.CLAIM.description": [
+          "Curse",
+          "Relic"
+        ],
+        "pages.INITIAL.options.SEARCH.description": [
+          "Gold"
+        ]
+      },
       "option_keys": [
         "CLAIM",
         "SEARCH"
@@ -397,6 +663,14 @@
       "dynamic_keys": false,
       "entry": "LUMINOUS_CHOIR",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.OFFER_TRIBUTE.description": [
+          "Gold"
+        ],
+        "pages.INITIAL.options.OFFER_TRIBUTE_LOCKED.description": [
+          "Gold"
+        ]
+      },
       "option_keys": [
         "REACH_INTO_THE_FLESH",
         "OFFER_TRIBUTE",
@@ -414,6 +688,14 @@
       "dynamic_keys": false,
       "entry": "MORPHIC_GROVE",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.GROUP.description": [
+          "IsMultiplayer"
+        ],
+        "pages.INITIAL.options.LONER.description": [
+          "MaxHp"
+        ]
+      },
       "option_keys": [
         "GROUP",
         "LONER"
@@ -430,6 +712,7 @@
       "dynamic_keys": false,
       "entry": "NEOW",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [
         "pages.DONE.CURSED.description",
@@ -443,6 +726,7 @@
       "dynamic_keys": false,
       "entry": "NONUPEIPE",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": false
@@ -453,6 +737,7 @@
       "dynamic_keys": false,
       "entry": "OROBAS",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [
         "OPTION_POOL_3_LOCKED"
       ],
@@ -465,6 +750,7 @@
       "dynamic_keys": false,
       "entry": "PAEL",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": false
@@ -475,6 +761,11 @@
       "dynamic_keys": false,
       "entry": "POTION_COURIER",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.GRAB_POTIONS.description": [
+          "FoulPotions"
+        ]
+      },
       "option_keys": [
         "GRAB_POTIONS",
         "RANSACK"
@@ -491,6 +782,11 @@
       "dynamic_keys": false,
       "entry": "PUNCH_OFF",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character"
+        ]
+      },
       "option_keys": [
         "NAB",
         "I_CAN_TAKE_THEM"
@@ -508,6 +804,23 @@
       "dynamic_keys": false,
       "entry": "RANWID_THE_ELDER",
       "harvest_options": 3,
+      "key_vars": {
+        "pages.INITIAL.options.GOLD.title": [
+          "Gold"
+        ],
+        "pages.INITIAL.options.POTION.title": [
+          "Potion"
+        ],
+        "pages.INITIAL.options.RELIC.title": [
+          "Relic"
+        ],
+        "pages.POTION.description": [
+          "Potion"
+        ],
+        "pages.RELIC.description": [
+          "Relic"
+        ]
+      },
       "option_keys": [
         "POTION",
         "RELIC",
@@ -532,6 +845,12 @@
       "dynamic_keys": false,
       "entry": "REFLECTIONS",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.SHATTER.description": [
+          "pronounObject",
+          "pronounSubject"
+        ]
+      },
       "option_keys": [
         "TOUCH_A_MIRROR",
         "SHATTER"
@@ -548,6 +867,20 @@
       "dynamic_keys": false,
       "entry": "RELIC_TRADER",
       "harvest_options": 3,
+      "key_vars": {
+        "pages.INITIAL.options.BOTTOM.description": [
+          "BottomRelicNew",
+          "BottomRelicOwned"
+        ],
+        "pages.INITIAL.options.MIDDLE.description": [
+          "MiddleRelicNew",
+          "MiddleRelicOwned"
+        ],
+        "pages.INITIAL.options.TOP.description": [
+          "TopRelicNew",
+          "TopRelicOwned"
+        ]
+      },
       "option_keys": [
         "TOP",
         "MIDDLE",
@@ -564,6 +897,15 @@
       "dynamic_keys": false,
       "entry": "ROOM_FULL_OF_CHEESE",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.SEARCH.description": [
+          "Damage"
+        ]
+      },
       "option_keys": [
         "GORGE",
         "SEARCH"
@@ -581,6 +923,18 @@
       "dynamic_keys": false,
       "entry": "ROUND_TEA_PARTY",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.ENJOY_TEA.description": [
+          "Relic"
+        ],
+        "pages.INITIAL.options.PICK_FIGHT.description": [
+          "Damage"
+        ]
+      },
       "option_keys": [
         "ENJOY_TEA",
         "PICK_FIGHT"
@@ -599,6 +953,14 @@
       "dynamic_keys": false,
       "entry": "SAPPHIRE_SEED",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.EAT.description": [
+          "Heal"
+        ],
+        "pages.INITIAL.options.PLANT.description": [
+          "Enchantment"
+        ]
+      },
       "option_keys": [
         "EAT",
         "PLANT"
@@ -615,6 +977,20 @@
       "dynamic_keys": false,
       "entry": "SELF_HELP_BOOK",
       "harvest_options": 4,
+      "key_vars": {
+        "pages.INITIAL.options.READ_ENTIRE_BOOK.description": [
+          "Enchantment3",
+          "Enchantment3Amount"
+        ],
+        "pages.INITIAL.options.READ_PASSAGE.description": [
+          "Enchantment2",
+          "Enchantment2Amount"
+        ],
+        "pages.INITIAL.options.READ_THE_BACK.description": [
+          "Enchantment1",
+          "Enchantment1Amount"
+        ]
+      },
       "option_keys": [
         "READ_THE_BACK",
         "READ_THE_BACK_LOCKED",
@@ -638,6 +1014,42 @@
       "dynamic_keys": false,
       "entry": "SLIPPERY_BRIDGE",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.HOLD_ON_0.options.HOLD_ON_1.description": [
+          "HpLoss"
+        ],
+        "pages.HOLD_ON_1.options.HOLD_ON_2.description": [
+          "HpLoss"
+        ],
+        "pages.HOLD_ON_2.options.HOLD_ON_3.description": [
+          "HpLoss"
+        ],
+        "pages.HOLD_ON_3.options.HOLD_ON_4.description": [
+          "HpLoss"
+        ],
+        "pages.HOLD_ON_4.options.HOLD_ON_5.description": [
+          "HpLoss"
+        ],
+        "pages.HOLD_ON_5.options.HOLD_ON_6.description": [
+          "HpLoss"
+        ],
+        "pages.HOLD_ON_6.options.HOLD_ON_LOOP.description": [
+          "HpLoss"
+        ],
+        "pages.HOLD_ON_LOOP.options.HOLD_ON_LOOP.description": [
+          "HpLoss"
+        ],
+        "pages.INITIAL.options.HOLD_ON_0.description": [
+          "HpLoss"
+        ],
+        "pages.INITIAL.options.OVERCOME.description": [
+          "RandomCard"
+        ]
+      },
       "option_keys": [
         "OVERCOME",
         "HOLD_ON_0"
@@ -654,6 +1066,11 @@
       "dynamic_keys": false,
       "entry": "SPIRALING_WHIRLPOOL",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.DRINK.description": [
+          "Heal"
+        ]
+      },
       "option_keys": [
         "OBSERVE",
         "DRINK"
@@ -670,6 +1087,18 @@
       "dynamic_keys": false,
       "entry": "SPIRIT_GRAFTER",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.LET_IT_IN.description": [
+          "LetItInHealAmount"
+        ],
+        "pages.INITIAL.options.REJECTION.description": [
+          "RejectionHpLoss"
+        ]
+      },
       "option_keys": [
         "LET_IT_IN",
         "REJECTION"
@@ -686,6 +1115,23 @@
       "dynamic_keys": false,
       "entry": "STONE_OF_ALL_TIME",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.LIFT.description": [
+          "DrinkMaxHpGain",
+          "DrinkRandomPotion"
+        ],
+        "pages.INITIAL.options.PUSH.description": [
+          "PushHpLoss",
+          "PushVigorousAmount"
+        ],
+        "pages.LIFT.description": [
+          "DrinkRandomPotion"
+        ]
+      },
       "option_keys": [
         "LIFT",
         "LIFT_LOCKED",
@@ -704,6 +1150,19 @@
       "dynamic_keys": false,
       "entry": "SUNKEN_STATUE",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.DIVE_INTO_WATER.description": [
+          "Gold",
+          "HpLoss"
+        ],
+        "pages.INITIAL.options.GRAB_SWORD.description": [
+          "Relic"
+        ]
+      },
       "option_keys": [
         "GRAB_SWORD",
         "DIVE_INTO_WATER"
@@ -720,6 +1179,17 @@
       "dynamic_keys": false,
       "entry": "SUNKEN_TREASURY",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.FIRST_CHEST.description": [
+          "SmallChestGold"
+        ],
+        "pages.INITIAL.options.SECOND_CHEST.description": [
+          "LargeChestGold"
+        ],
+        "pages.SECOND_CHEST.description": [
+          "Monologue"
+        ]
+      },
       "option_keys": [
         "FIRST_CHEST",
         "SECOND_CHEST"
@@ -736,6 +1206,11 @@
       "dynamic_keys": false,
       "entry": "SYMBIOTE",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.APPROACH.description": [
+          "Enchantment"
+        ]
+      },
       "option_keys": [
         "APPROACH_LOCKED",
         "APPROACH",
@@ -753,6 +1228,30 @@
       "dynamic_keys": true,
       "entry": "TABLET_OF_TRUTH",
       "harvest_options": 3,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.DECIPHER_1.options.DECIPHER.description": [
+          "DecipherMaxHpLoss"
+        ],
+        "pages.DECIPHER_2.options.DECIPHER.description": [
+          "DecipherMaxHpLoss"
+        ],
+        "pages.DECIPHER_3.options.DECIPHER.description": [
+          "DecipherMaxHpLoss"
+        ],
+        "pages.DECIPHER_4.options.DECIPHER.description": [
+          "DecipherMaxHpLoss"
+        ],
+        "pages.INITIAL.options.DECIPHER_1.description": [
+          "DecipherMaxHpLoss"
+        ],
+        "pages.INITIAL.options.SMASH.description": [
+          "SmashHPGain"
+        ]
+      },
       "option_keys": [
         "DECIPHER_1",
         "SMASH"
@@ -772,6 +1271,7 @@
       "dynamic_keys": false,
       "entry": "TANX",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": false
@@ -782,6 +1282,25 @@
       "dynamic_keys": false,
       "entry": "TEA_MASTER",
       "harvest_options": 3,
+      "key_vars": {
+        "pages.INITIAL.options.BONE_TEA.description": [
+          "BoneTeaCost",
+          "BoneTeaDescription"
+        ],
+        "pages.INITIAL.options.BONE_TEA_LOCKED.description": [
+          "BoneTeaCost"
+        ],
+        "pages.INITIAL.options.EMBER_TEA.description": [
+          "EmberTeaCost",
+          "EmberTeaDescription"
+        ],
+        "pages.INITIAL.options.EMBER_TEA_LOCKED.description": [
+          "EmberTeaCost"
+        ],
+        "pages.INITIAL.options.TEA_OF_DISCOURTESY.description": [
+          "TeaOfDiscourtesyDescription"
+        ]
+      },
       "option_keys": [
         "BONE_TEA",
         "BONE_TEA_LOCKED",
@@ -801,6 +1320,7 @@
       "dynamic_keys": false,
       "entry": "TEZCATARA",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": false
@@ -811,6 +1331,7 @@
       "dynamic_keys": false,
       "entry": "THE_ARCHITECT",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [
         "CONTINUE",
@@ -824,6 +1345,16 @@
       "dynamic_keys": false,
       "entry": "THE_FUTURE_OF_POTIONS",
       "harvest_options": 5,
+      "key_vars": {
+        "pages.INITIAL.options.POTION.description": [
+          "Potion",
+          "Rarity",
+          "Type"
+        ],
+        "pages.INITIAL.options.POTION.title": [
+          "Rarity"
+        ]
+      },
       "option_keys": [
         "POTION",
         "POTION.title",
@@ -840,6 +1371,14 @@
       "dynamic_keys": false,
       "entry": "THE_LANTERN_KEY",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character"
+        ],
+        "pages.INITIAL.options.RETURN_THE_KEY.description": [
+          "Gold"
+        ]
+      },
       "option_keys": [
         "RETURN_THE_KEY",
         "KEEP_THE_KEY"
@@ -857,6 +1396,14 @@
       "dynamic_keys": false,
       "entry": "THE_LEGENDS_WERE_TRUE",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character"
+        ],
+        "pages.INITIAL.options.SLOWLY_FIND_AN_EXIT.description": [
+          "Damage"
+        ]
+      },
       "option_keys": [
         "NAB_THE_MAP",
         "SLOWLY_FIND_AN_EXIT"
@@ -873,6 +1420,20 @@
       "dynamic_keys": false,
       "entry": "THIS_OR_THAT",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event",
+          "pronounSubject"
+        ],
+        "pages.INITIAL.options.ORNATE.description": [
+          "Curse"
+        ],
+        "pages.INITIAL.options.PLAIN.description": [
+          "Gold",
+          "HpLoss"
+        ]
+      },
       "option_keys": [
         "PLAIN",
         "ORNATE"
@@ -889,6 +1450,29 @@
       "dynamic_keys": false,
       "entry": "TINKER_TIME",
       "harvest_options": 3,
+      "key_vars": {
+        "pages.CHOOSE_RIDER.options.CHOKING.description": [
+          "ChokingDamage"
+        ],
+        "pages.CHOOSE_RIDER.options.CURIOUS.description": [
+          "CuriousReduction",
+          "energyPrefix"
+        ],
+        "pages.CHOOSE_RIDER.options.ENERGIZED.description": [
+          "EnergizedEnergy"
+        ],
+        "pages.CHOOSE_RIDER.options.EXPERTISE.description": [
+          "ExpertiseDexterity",
+          "ExpertiseStrength"
+        ],
+        "pages.CHOOSE_RIDER.options.SAPPING.description": [
+          "SappingVulnerable",
+          "SappingWeak"
+        ],
+        "pages.CHOOSE_RIDER.options.WISDOM.description": [
+          "WisdomCards"
+        ]
+      },
       "option_keys": [
         "CHOOSE_CARD_TYPE"
       ],
@@ -917,6 +1501,18 @@
       "dynamic_keys": false,
       "entry": "TRASH_HEAP",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.DIVE_IN.description": [
+          "HpLoss"
+        ],
+        "pages.INITIAL.options.GRAB.description": [
+          "Gold"
+        ]
+      },
       "option_keys": [
         "DIVE_IN",
         "GRAB"
@@ -933,6 +1529,20 @@
       "dynamic_keys": false,
       "entry": "TRIAL",
       "harvest_options": 6,
+      "key_vars": {
+        "loss": [
+          "character"
+        ],
+        "pages.INITIAL.description": [
+          "EntrantNumber"
+        ],
+        "trialFormat": [
+          "TrialStory"
+        ],
+        "trialResult": [
+          "TrialResult"
+        ]
+      },
       "option_keys": [
         "ACCEPT",
         "REJECT"
@@ -967,6 +1577,15 @@
       "dynamic_keys": false,
       "entry": "UNREST_SITE",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character",
+          "event"
+        ],
+        "pages.INITIAL.options.KILL.description": [
+          "MaxHpLoss"
+        ]
+      },
       "option_keys": [
         "REST",
         "KILL"
@@ -983,6 +1602,7 @@
       "dynamic_keys": false,
       "entry": "VAKUU",
       "harvest_options": null,
+      "key_vars": {},
       "option_keys": [],
       "page_keys": [],
       "sealed": false
@@ -993,6 +1613,7 @@
       "dynamic_keys": false,
       "entry": "WAR_HISTORIAN_REPY",
       "harvest_options": 2,
+      "key_vars": {},
       "option_keys": [
         "UNLOCK_CAGE",
         "UNLOCK_CHEST"
@@ -1011,6 +1632,21 @@
       "dynamic_keys": false,
       "entry": "WATERLOGGED_SCRIPTORIUM",
       "harvest_options": 3,
+      "key_vars": {
+        "pages.INITIAL.options.PRICKLY_SPONGE.description": [
+          "Cards",
+          "PricklySpongeGold"
+        ],
+        "pages.INITIAL.options.PRICKLY_SPONGE_LOCKED.description": [
+          "PricklySpongeGold"
+        ],
+        "pages.INITIAL.options.TENTACLE_QUILL.description": [
+          "Gold"
+        ],
+        "pages.INITIAL.options.TENTACLE_QUILL_LOCKED.description": [
+          "Gold"
+        ]
+      },
       "option_keys": [
         "BLOODY_INK",
         "TENTACLE_QUILL",
@@ -1031,6 +1667,42 @@
       "dynamic_keys": false,
       "entry": "WELCOME_TO_WONGOS",
       "harvest_options": 4,
+      "key_vars": {
+        "pages.AFTER_BUY.description": [
+          "RemainingWongoPointAmount",
+          "WongoPointAmount"
+        ],
+        "pages.AFTER_BUY_BADGE_COUNTER.description": [
+          "RemainingWongoPointAmount",
+          "TotalWongoBadgeAmount",
+          "WongoPointAmount"
+        ],
+        "pages.AFTER_BUY_RECEIVE_BADGE.description": [
+          "TotalWongoBadgeAmount",
+          "WongoPointAmount"
+        ],
+        "pages.INITIAL.options.BARGAIN_BIN.description": [
+          "BargainBinCost"
+        ],
+        "pages.INITIAL.options.BARGAIN_BIN_LOCKED.description": [
+          "BargainBinCost"
+        ],
+        "pages.INITIAL.options.FEATURED_ITEM.description": [
+          "FeaturedItemCost",
+          "RandomRelic"
+        ],
+        "pages.INITIAL.options.FEATURED_ITEM_LOCKED.description": [
+          "FeaturedItemCost"
+        ],
+        "pages.INITIAL.options.MYSTERY_BOX.description": [
+          "MysteryBoxCombatCount",
+          "MysteryBoxCost",
+          "MysteryBoxRelicCount"
+        ],
+        "pages.INITIAL.options.MYSTERY_BOX_LOCKED.description": [
+          "MysteryBoxCost"
+        ]
+      },
       "option_keys": [
         "BARGAIN_BIN",
         "BARGAIN_BIN_LOCKED",
@@ -1054,6 +1726,11 @@
       "dynamic_keys": false,
       "entry": "WELLSPRING",
       "harvest_options": 2,
+      "key_vars": {
+        "pages.INITIAL.options.BATHE.description": [
+          "BatheCurses"
+        ]
+      },
       "option_keys": [
         "BOTTLE",
         "BATHE"
@@ -1070,6 +1747,17 @@
       "dynamic_keys": false,
       "entry": "WHISPERING_HOLLOW",
       "harvest_options": 2,
+      "key_vars": {
+        "loss": [
+          "character"
+        ],
+        "pages.INITIAL.options.GOLD.description": [
+          "Gold"
+        ],
+        "pages.INITIAL.options.HUG.description": [
+          "HpLoss"
+        ]
+      },
       "option_keys": [
         "GOLD",
         "HUG"
@@ -1086,6 +1774,17 @@
       "dynamic_keys": false,
       "entry": "WOOD_CARVINGS",
       "harvest_options": 3,
+      "key_vars": {
+        "pages.INITIAL.options.BIRD.description": [
+          "BirdCard"
+        ],
+        "pages.INITIAL.options.SNAKE.description": [
+          "SnakeEnchantment"
+        ],
+        "pages.INITIAL.options.TORUS.description": [
+          "ToricCard"
+        ]
+      },
       "option_keys": [
         "SNAKE_LOCKED",
         "SNAKE",
@@ -1105,6 +1804,17 @@
       "dynamic_keys": false,
       "entry": "ZEN_WEAVER",
       "harvest_options": 3,
+      "key_vars": {
+        "pages.INITIAL.options.ARACHNID_ACUPUNCTURE.description": [
+          "ArachnidAcupunctureCost"
+        ],
+        "pages.INITIAL.options.BREATHING_TECHNIQUES.description": [
+          "BreathingTechniquesCost"
+        ],
+        "pages.INITIAL.options.EMOTIONAL_AWARENESS.description": [
+          "EmotionalAwarenessCost"
+        ]
+      },
       "option_keys": [
         "BREATHING_TECHNIQUES",
         "EMOTIONAL_AWARENESS",

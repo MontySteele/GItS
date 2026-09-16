@@ -170,7 +170,7 @@ An elder of the Scions of the Canopy keeps a nest of everything the forest has h
 
 - **Offer a Potion** — Obtain a random Relic.
 - **Offer 100 Gold** — Obtain a random Relic.
-- **Offer the Greater Gift** — Obtain 2 random Relics. (The harvest's third option reads "[Give ]" — the offered item is stripped by template-stripping.)
+- **Offer the Greater Gift** — Obtain 2 random Relics.
 
 Mechanics check: flag — the harvest's third option name is template-lossy ("[Give ]"), unresolved without a targeted re-harvest; text follows the gallery's own reading (an unnamed "greater gift") rather than inventing a name. Flag — not modelled in tier05/content/events.yaml (skip list: HeldRelics has no removal op for trading away a held relic, if that is what the blank names).
 
@@ -326,7 +326,7 @@ Mechanics check: matches harvest and tier05/content/events.yaml (`self_help_book
 
 The rope-and-plank crossing above Coatepec Mountain has seen better seasons, and it groans under your kit the moment you commit to the middle span. A Night-Wind rider waiting on the far side calls out the wager the crossing always makes: let it take one thing from your pack now, clean, or hold on and let the wind decide which piece hangs loose next — at a steeper price every time you refuse to choose.
 
-- **Overcome** — A specific card is removed from your Deck.
+- **Overcome** — {RandomCard} is removed from your Deck.
 - **Hold On** — Lose 3 HP. The card named in the above option is randomized, and the HP cost rises by 1 each further time you choose this option. (The card is drawn from all cards without Eternal; the first card offered is never Basic rarity unless every card you hold is; the same card is never offered twice while others remain unoffered.)
 
 Mechanics check: matches harvest.

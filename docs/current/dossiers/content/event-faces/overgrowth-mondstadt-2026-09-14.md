@@ -41,7 +41,7 @@ Mechanics check: matches harvest.
 
 The rope bridge below Springvale sways badly enough that a Knights of Favonius patrol has roped off both ends and posted a warning plank. The duty Knight says regulation calls for a full unload before crossing — courtesy says she'll let you pick what goes over the rail first. Below, Cider Lake is a long way down, and she is not in a hurry.
 
-- **Overcome** — The specific card named is removed from your deck.
+- **Overcome** — {RandomCard} is removed from your deck.
 - **Hold On** — Lose 3 HP. The card in the above option is randomized.
 
 Mechanics notes (verbatim from the harvest): choosing Hold On replaces the listed card with another chosen at random, and the event continues to ask you to choose between these options until you choose Overcome. Each time Hold On is selected, the HP cost increases by 1. The card is chosen randomly from all your cards without Eternal. The first card chosen will never be Basic rarity (unless all of your cards are Basic); Basic cards can be chosen during rerolls. The same card will never be chosen twice (unless it has already offered to remove all other cards in your deck at least once).

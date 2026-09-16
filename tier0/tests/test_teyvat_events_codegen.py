@@ -25,7 +25,16 @@ These arms are the gate on that arrangement, and they are four claims:
      what unparked The Trial, Tinker Time and Colossal Flower -- are checked
      by NAME in both directions: a key the mirror declares and the face does
      not write is refused, and a key the face writes and no mirror declares is
-     refused too. A keyed line is never counted as an option.
+     refused too. A keyed line is never counted as an option;
+  6. THE PLACEHOLDER RULE (EB-770): no dressed row hands the player a
+     bracketed gloss where the base row spells a runtime value with a var.
+     `[Specific card]` is not words a player reads -- the engine's rich-text
+     parser deletes it -- and the exemption list for that is EMPTY. The vars
+     the rows are read against live in the index's `key_vars`, so this arm
+     needs neither the game nor a decompile;
+  7. every `Loss:` line a face writes reaches the table. Thirty-nine lines
+     against thirty-eight rows was the Liyue Tea Master's line being dropped
+     for a base event that cannot kill; the generator now refuses it instead.
 """
 
 from __future__ import annotations
@@ -292,3 +301,145 @@ def test_slugify_is_the_games_camel_case_rule():
     assert slugify("CoralMirrorRorriMLaroCEhT") == "CORAL_MIRROR_RORRI_M_LARO_C_EH_T"
     assert slugify("TeaMaster") == "TEA_MASTER"
     assert slugify("Act2Boss") == "ACT2_BOSS"
+
+
+# ---------------------------------------------------------------------------
+# The placeholder rule, and the `Loss:` line that never reached the table.
+# ---------------------------------------------------------------------------
+
+
+#: Dressed rows allowed to hand the player a bracket group the engine deletes.
+#: IT IS EMPTY, AND IT IS MEANT TO STAY EMPTY -- a gloss is not prose the
+#: player ever reads, it is prose the parser throws away. If a face genuinely
+#: needs square brackets on screen, the fix is the game's own escape, not a row
+#: on this list.
+GLOSS_EXEMPTIONS: frozenset = frozenset()
+
+
+def _real_plan():
+    module = _load_generator()
+    return module, module.build_plan()
+
+
+def test_no_dressed_row_hands_the_player_a_bracket_gloss():
+    """EB-770, pinned at the row.
+
+    The Liyue Slippery Bridge's first option was written `[Specific card] is
+    removed from your deck.` The engine's rich-text parser read `[...]` as a
+    tag, found no tag called `Specific card`, deleted the group, and the
+    option printed ` is removed from your deck.` with a hole where the card
+    name belonged (proofs-4, 2026-09-15). Every dressed row is checked, not
+    just that one, and the exemption list above is empty.
+    """
+    module, plan = _real_plan()
+    offenders = []
+    for item in plan.items:
+        for key, text in item.rows():
+            for gloss in module.unrendered_glosses(text):
+                if (item.cls, key) in GLOSS_EXEMPTIONS:
+                    continue
+                offenders.append(f"{item.face.key} {key}: [{gloss}]")
+    assert not offenders, "\n".join(offenders)
+    assert not GLOSS_EXEMPTIONS, "the exemption list is meant to stay empty"
+
+
+def test_the_card_the_bridge_takes_is_named_by_its_var_on_every_face():
+    """The positive half of EB-770: the option that names a card carries the
+    var that names it.
+
+    Read off the index's `key_vars` rather than spelled here, so the pin
+    follows the base game: if 0.111.x renames `RandomCard`, `--refresh-vars`
+    moves the expectation and this arm moves with it.
+    """
+    module, plan = _real_plan()
+    index = module.load_index()
+    bridges = [i for i in plan.items if i.base_class == "SlipperyBridge"]
+    assert len(bridges) == 6, "one Slippery Bridge dressing per face"
+
+    for item in bridges:
+        rows = dict(item.rows())
+        # The OUTCOME page is not pinned: the base game's own
+        # `pages.OVERCOME.description` carries no var, so there is nothing
+        # there for a dressing to owe.
+        suffix = "pages.INITIAL.options.OVERCOME.description"
+        wanted = module.base_vars(index["SlipperyBridge"], suffix)
+        assert wanted, f"the base row for {suffix} should carry a var"
+        text = rows[f"{item.entry}.{suffix}"]
+        for var in wanted:
+            assert "{" + var + "}" in text, (
+                f"{item.cls}.{suffix} does not name the card: {text!r}")
+
+
+def test_every_var_a_dressed_row_uses_is_one_the_base_event_declares():
+    """A var the base event does not declare is not substituted; it reaches
+    the player as literal braces. `DynamicVars` belongs to the EventModel, so
+    the comparison is against every var the base event uses ANYWHERE, plus the
+    run-history formatter's `{character}` and `{event}`."""
+    module, plan = _real_plan()
+    index = module.load_index()
+    offenders = []
+    for item in plan.items:
+        allowed = module.event_vars(index[item.base_class])
+        for key, text in item.rows():
+            for used in module._VAR_RE.findall(text):
+                if used not in allowed:
+                    offenders.append(f"{item.face.key} {key}: {{{used}}}")
+    assert not offenders, "\n".join(offenders)
+
+
+def test_the_index_key_vars_map_is_identifiers_only():
+    """`key_vars` comes out of the game's own loc file, so it is held to the
+    same rule as the rest of the index: key suffixes and var names, never a
+    base-game sentence."""
+    events = json.loads(INDEX.read_text(encoding="utf-8"))["events"]
+    assert any(row.get("key_vars") for row in events.values()), \
+        "no event carries a var map; run --refresh-vars"
+    for name, row in events.items():
+        for suffix, names in row.get("key_vars", {}).items():
+            assert re.fullmatch(r"[A-Za-z0-9_.]+", suffix), f"{name}: {suffix}"
+            assert names, f"{name}: {suffix} has an empty var list"
+            for var in names:
+                assert re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", var), \
+                    f"{name}: {suffix}: {var}"
+
+
+def test_a_loss_line_on_a_base_that_cannot_kill_is_refused(tmp_path):
+    """The 39th `Loss:` line.
+
+    Six faces carried 39 `Loss:` lines and the generated table held 38 death
+    rows. The missing one was the Liyue Tea Master's: `Dressed.rows` writes
+    the `.loss` row only when the base event `can_kill`, and Tea Master has no
+    lethal option, so the face's line was silently dropped. Silently is the
+    defect -- prose nobody will ever read, with nothing saying so.
+    """
+    module = _load_generator()
+    assert module.load_index()["TeaMaster"]["can_kill"] is False, \
+        "the premise: Tea Master has no lethal option"
+
+    plan = _plan_for(module, tmp_path,
+                     "## - [ ] Tea Master\n\n"
+                     "### The Test Tea House — Fontaine / Test — DRAFTED\n\n"
+                     "A kettle.\n\n"
+                     "- **First Cup** — Pay 50 Gold. Something.\n"
+                     "- **Second Cup** — Pay 150 Gold. Something else.\n"
+                     "- **Third Cup** — A free cup.\n\n"
+                     "Loss: {character} died at the [gold]{event}[/gold].\n")
+
+    assert not plan.items, "nothing may be emitted for a refused event"
+    assert any("`Loss:` line" in r and "can kill" in r for r in plan.refusals), \
+        plan.refusals
+
+
+def test_every_face_loss_line_reaches_the_generated_table():
+    """The count that caught it, kept as a gate: a `Loss:` line in a face and
+    a `.loss` row in the table are now one to one."""
+    module, plan = _real_plan()
+    lines = sum(
+        1 for face in module.FACES if face.active
+        for line in (module.FACE_DIR / face.file).read_text(
+            encoding="utf-8").splitlines()
+        if line.startswith("Loss:"))
+    rows = sum(1 for item in plan.items
+               for key, _ in item.rows() if key.endswith(".loss"))
+    assert lines == rows, f"{lines} face Loss: line(s), {rows} row(s) emitted"
+    assert GENERATED_CS.read_text(encoding="utf-8").count('.loss"] =') == rows
