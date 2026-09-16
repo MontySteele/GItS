@@ -234,7 +234,8 @@ from understudy.soak_shape import (        # noqa: E402,F401  (re-export)
     MENU_TIMEOUT_MAX_S, MENU_TIMEOUT_S, MID_FIGHT,
     NO_PROGRESS_ACTIONS, NO_PROGRESS_CYCLE, PROCESS_EXIT_GRACE_S,
     PROFILE_READY_MARKER, RELAUNCH_DEAD_GAP_S,
-    RUN_TIMEOUT_S, SCHEMA_VERSION, SELECTOR_SCREENS, SPEED_SIDECAR,
+    RUN_TIMEOUT_S, SCHEMA_VERSION, SEED_READ_BACK_ATTEMPTS,
+    SEED_READ_BACK_RETRY_SLEEP_S, SELECTOR_SCREENS, SPEED_SIDECAR,
     STEAM_APPID, TIME_SCALE, boot_stall_verdict, menu_timeout_for)
 from understudy.soak_lane import (         # noqa: E402,F401  (re-export)
     bridge_installed, game_is_running, lane_setup)

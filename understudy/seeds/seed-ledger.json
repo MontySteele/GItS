@@ -1,0 +1,5 @@
+{
+ "schema_version": 1,
+ "note": "EMPTY BY DESIGN, NOT BROKEN. The format and the recorder are built (EB-208 (c)); the seeds are OWED. Finding one means launching the game and staging boards until the encounter rolls, which is game time. Record with: python -m understudy.seed_ledger record <turn-id> --build <package version>",
+ "rows": []
+}

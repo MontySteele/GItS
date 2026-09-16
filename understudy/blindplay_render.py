@@ -1658,6 +1658,13 @@ def render(obs: dict[str, Any]) -> str:
                          + (f": {obs['result']}" if obs["result"] else ".")]
             if obs.get("summary"):
                 body += ["", "What the run ended with:", ""] + obs["summary"]
+        # `EB-396`: and where the blocked screen has a way OUT, the page ends
+        # on the command that takes it. A blocked page that printed no verb
+        # was the whole defect -- the seat had nothing to type and the run
+        # stopped on a screen rather than on a board.
+        if obs.get("commands"):
+            body += ["", "What you can say here:", ""] \
+                + [f"- `{c}`" for c in obs["commands"]]
         text = "\n".join(body) + "\n"
         qa_packet.assert_blind(text, allow={st})
         return text

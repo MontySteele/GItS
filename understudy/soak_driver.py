@@ -21,8 +21,9 @@ from understudy.soak_session import Session
 from understudy.soak_shape import (COMBAT, DEFAULT_CHARACTER, Defect,
                                    GAME_EXE, MAX_ACTIONS_PER_RUN, MID_FIGHT,
                                    NO_PROGRESS_ACTIONS, NO_PROGRESS_CYCLE,
-                                   RUN_TIMEOUT_S, SELECTOR_SCREENS,
-                                   TIME_SCALE)
+                                   RUN_TIMEOUT_S, SEED_READ_BACK_ATTEMPTS,
+                                   SEED_READ_BACK_RETRY_SLEEP_S,
+                                   SELECTOR_SCREENS, TIME_SCALE)
 from understudy.soak_telemetry import (FightTelemetry, _enemy_pool, _meters,
                                        _telegraphed)
 
@@ -427,6 +428,67 @@ class RunDriver(Navigation):
         self.fight = None
 
     # -- the run ----------------------------------------------------------
+    def _settle_seed(self) -> str | None:
+        """The run's seed, read back until it SETTLES (`EB-191`).
+
+        `bridge.seed_read_back` waits out `EB-435`'s window and then answers
+        with whatever it last saw, which on a busy machine was repeatedly
+        nothing at all: the block resolved inside this lane's tree -- so no
+        crossing was raised -- and named no seed, and a chosen-seed run then
+        filed `seed_not_honoured: the run reads back None` against a game that
+        had honoured the seed exactly. Seven of twelve replays in one sitting
+        died there and an identical retry always worked. The retry is
+        therefore taken HERE, inside the session that already owns the launch,
+        so no burnt launch and no `ok: false` replay is written for a race.
+
+        WHAT SETTLES IS NOT THE SAME QUESTION ON THE TWO ARMS. On the
+        read-back arm (`chosen_seed` is None, R95) any non-empty seed is the
+        answer, because there is nothing to compare it to. On the chosen arm
+        (P1.5) the settled state is the chosen seed itself, so a mismatch is
+        re-read rather than believed first time -- a save file that is still
+        the previous run's reads back as a seed and not as `None`.
+
+        WHAT THIS DOES NOT DO IS SOFTEN THE VERDICT. After the last attempt
+        the value is returned exactly as read and the caller's
+        `seed_not_honoured` check is unchanged, so a game that really does
+        ignore a chosen seed still stops the soak -- later, and correctly.
+        `EB-210`'s crossing still raises its own defect kind, and only when it
+        is the LAST thing seen: a crossing that has since resolved into this
+        lane's own tree is a race of the same family (`EB-435`).
+        """
+        shape = _soak()
+        attempts = max(1, int(getattr(shape, "SEED_READ_BACK_ATTEMPTS",
+                                      SEED_READ_BACK_ATTEMPTS)))
+        seed: str | None = None
+        # The LAST crossing seen, kept outside the loop because `except ... as
+        # crossed` unbinds its name at the end of the block; one that a later
+        # attempt resolved is dropped rather than raised.
+        last_crossing: Exception | None = None
+        for attempt in range(1, attempts + 1):
+            try:
+                seed = _wire().seed_read_back()
+            except _wire().LaneCrossed as crossed:
+                seed, last_crossing = None, crossed
+            else:
+                last_crossing = None
+            settled = bool(seed) and (not self.chosen_seed
+                                      or seed == self.chosen_seed)
+            if settled or attempt == attempts:
+                break
+            self.emit({"record": "seed_read_back_retry", "attempt": attempt,
+                       "attempts": attempts, "seed": seed,
+                       "chosen": self.chosen_seed,
+                       "crossed": (None if last_crossing is None
+                                   else str(last_crossing)),
+                       "note": "EB-191: the read had not settled; re-reading"})
+            time.sleep(max(0.0, float(
+                getattr(shape, "SEED_READ_BACK_RETRY_SLEEP_S",
+                        SEED_READ_BACK_RETRY_SLEEP_S))))
+        if last_crossing is not None:
+            raise Defect("seed_read_back_crossed", str(last_crossing),
+                         self._last_state or {}) from last_crossing
+        return seed
+
     def run(self) -> dict:
         # EB-117: `character` here is the READ-BACK identity and it is null at
         # this point on purpose -- nothing has embarked yet, so there is no
@@ -469,11 +531,9 @@ class RunDriver(Navigation):
             # post-embark preloads are done. Asked inside that window the
             # resolution leaves this lane's tree and the refusal above fires on
             # a run with nothing wrong with it -- twice, on a lone lane.
-            try:
-                self.seed = _wire().seed_read_back()
-            except _wire().LaneCrossed as crossed:
-                raise Defect("seed_read_back_crossed", str(crossed),
-                             self._last_state or {}) from crossed
+            # EB-191: AND IT IS RETRIED INSIDE THE SESSION. See
+            # `_settle_seed` for what the retry is for and what it is not.
+            self.seed = self._settle_seed()
             self.emit({"record": "seed_read_back", "seed": self.seed,
                        "chosen": self.chosen_seed,
                        "honoured": (None if not self.chosen_seed

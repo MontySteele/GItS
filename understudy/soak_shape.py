@@ -253,6 +253,26 @@ TIME_SCALE = 3.0
 # `Session.died`.
 PROCESS_EXIT_GRACE_S = 8.0
 
+# ------------------------------------------------- EB-191: the seed read ---
+#
+# THE READ-BACK IS RETRIED INSIDE THE SESSION RATHER THAN BY THE OPERATOR.
+# `bridge.seed_read_back` already waits out `EB-435`'s window -- the one
+# between `AbandonRun` deleting `current_run.save` and the new run writing its
+# first one -- but waiting is not the same as settling: on a busy machine (two
+# lanes, or a stage and a replay overlapping) the deadline was reached with the
+# block resolving IN TREE and naming no seed at all, and the driver then filed
+# `seed_not_honoured: the run reads back None` against a game that had done
+# nothing wrong. Seven of twelve replays in one sitting died that way and an
+# identical retry always worked, so the retry belongs here, where the launch
+# already is, and not in a human re-running the command.
+#
+# ATTEMPTS counts whole `seed_read_back` calls, so the worst case is ATTEMPTS
+# * `bridge.SEED_READ_BACK_WAIT_S` of waiting plus the sleeps between them --
+# generous, and still far under the cost of the burnt launch and the
+# `ok: false` replay it used to write.
+SEED_READ_BACK_ATTEMPTS = 3
+SEED_READ_BACK_RETRY_SLEEP_S = 2.0
+
 # ---------------------------------------------------------- EB-1 guard ----
 #
 # EVENTS THIS HARNESS WILL NOT DRIVE, and why the register is a register rather

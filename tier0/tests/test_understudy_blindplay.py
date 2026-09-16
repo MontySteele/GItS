@@ -36,7 +36,7 @@ from tier0 import constants as C
 from tier0.tests.conftest import seam_files
 from understudy import (blindplay, blindplay_board, blindplay_notes,
                         blindplay_render, blindplay_shape, embark, qa_packet,
-                        soak)
+                        soak, teyvat_ids)
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -652,6 +652,122 @@ def test_the_undriven_screens_are_named_rather_than_lumped_in():
     for st in ("crystal_sphere", "overlay", "unknown"):
         obs = blindplay.observation({"state_type": st})
         assert obs["blocked"] and obs["screen"] == "undriven"
+
+
+# =================== EB-396: the Crystal Sphere, and the way out of it ======
+#
+# THE FIND (Klee r10 run 3, act 2). A seat chose *Uncover Future*, the game put
+# up `crystal_sphere`, and the page said TOOL-BLOCKED and offered no command at
+# all -- so the seat had nothing to type, `Session.run` read the block as the
+# end of the run, and a run alive at 53/77 stopped on a screen instead of on a
+# board. The minigame is still not driven and is not going to be; what changes
+# is that leaving it is a thing the page can say, and that the event warns
+# before the seat gets there.
+
+
+def crystal_sphere_event_state(event_id: str = "CRYSTAL_SPHERE") -> dict:
+    """SYNTHETIC, in the shipped event's own two-option shape."""
+    return {"state_type": "event",
+            "event": {"event_id": event_id,
+                      "event_name": "Crystal Sphere",
+                      "in_dialogue": False,
+                      "body": "The sphere clouds over.",
+                      "options": [
+                          {"index": 0, "title": "Uncover Future",
+                           "description": "Pay 63 gold. Prophesize 3 times."},
+                          {"index": 1, "title": "Payment Plan",
+                           "description": "Prophesize 6 times."}]}}
+
+
+def test_the_crystal_sphere_offers_the_soaks_own_exit_as_a_verb():
+    """The acceptance sentence, first half: a seat can LEAVE the screen.
+
+    The action is the one `soak_screens._escape` has driven all along --
+    `crystal_sphere_proceed` -- so the blind page and the policy bot leave this
+    screen by the same door, and no second exit is invented here.
+    """
+    state = {"state_type": "crystal_sphere"}
+    obs = blindplay.observation(state)
+    # STILL BLOCKED. Leaving is not playing, and the minigame is still a
+    # screen this module has no grammar for.
+    assert obs["blocked"] and obs["screen"] == "undriven"
+    assert obs["commands"] == ["leave"]
+
+    page = blindplay.render(obs)
+    assert "TOOL-BLOCKED: crystal_sphere" in page
+    assert "`leave`" in page
+
+    res = blindplay.act(state, "leave")
+    assert not res["refusal"]
+    assert res["post"] == {"action": "crystal_sphere_proceed"}
+
+
+def test_the_page_and_the_policy_bot_leave_by_the_same_door():
+    """One exit, read off `soak_screens` rather than typed twice: a second
+    spelling here is a second thing to fix when the wire's verb moves."""
+    from understudy import soak_screens
+    assert (blindplay_shape.UNDRIVEN_EXITS["crystal_sphere"]["action"]
+            == soak_screens._escape({"state_type": "crystal_sphere"}))
+
+
+def test_a_blocked_screen_with_a_verb_does_not_end_the_run():
+    """The half that actually stranded the seat. `Session.run` stopped on any
+    blocked screen, so even a page that offered the exit would have been
+    rendered to nobody. A screen with a command is played; `game_over`, which
+    has none, still ends the run."""
+    src = (REPO / "understudy" / "blindplay_session.py").read_text(
+        encoding="utf-8")
+    assert 'if obs["blocked"] and not obs["commands"]:' in src
+    assert not blindplay.observation({"state_type": "game_over"})["commands"]
+
+
+def test_the_other_undriven_screens_are_untouched_and_still_offer_nothing():
+    """`overlay` and `unknown` declare no exit because nobody knows one. A
+    verb invented for them would be a guess posted at a game that is already
+    somewhere this module could not name."""
+    for st in ("overlay", "unknown"):
+        obs = blindplay.observation({"state_type": st})
+        assert obs["blocked"] and obs["commands"] == []
+        assert blindplay.act({"state_type": st}, "leave")["refusal"]
+
+
+def test_leave_off_an_undriven_screen_names_the_verb_that_does_walk_on():
+    """`leave` is not a synonym for `proceed` and the refusal says so rather
+    than posting one for the other."""
+    res = blindplay.act(event_state(), "leave")
+    assert res["refusal"] and "proceed" in res["refusal"]
+
+
+def test_both_crystal_sphere_options_warn_before_the_choice():
+    """The acceptance sentence, second half. BOTH options, because both end on
+    the minigame -- `CrystalSphereMirror`'s own note, "the same MINIGAME on
+    both" -- so warning on one would tell a seat the other was safe."""
+    obs = blindplay.observation(crystal_sphere_event_state())
+    notes = [o.get("note") or "" for o in obs["options"]]
+    assert len(notes) == 2
+    assert all("minigame" in n and "`leave`" in n for n in notes)
+    assert blindplay.render(obs).count("minigame") == 2
+
+
+def test_the_warning_follows_the_event_through_its_teyvat_dressings():
+    """A dressing renames the event and every option on it, so a warning that
+    matched printed words would fire on the base event and go quiet on the
+    faces that dress it -- `EB-767`'s lesson from the other side. It is keyed
+    on the base id, through the one substitution table.
+    """
+    dressed = sorted(k for k, (base, _) in teyvat_ids.dressed_to_base().items()
+                     if base == "CRYSTAL_SPHERE")
+    assert dressed, "the generated table names no Crystal Sphere dressing"
+    for event_id in dressed:
+        obs = blindplay.observation(crystal_sphere_event_state(event_id))
+        assert all(o.get("note") for o in obs["options"]), event_id
+
+
+def test_an_ordinary_event_is_not_warned_at():
+    """The register is a register. A note on every event would be furniture
+    and the one screen it matters on would stop reading as a warning."""
+    obs = blindplay.observation(event_state())
+    assert not any(o.get("note") for o in obs["options"])
 
 
 def test_a_hazard_event_is_tool_blocked():

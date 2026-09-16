@@ -627,6 +627,28 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   board in the stopping rule, in the round summary and in `packet-section`.
   The round does not stop: the board is still read, graded and replayed for
   the slots it could pose.
+- **And the SEED LEDGER, which is what can make the count happen
+  (`EB-208` (c)).** Neither half above can produce a three-body board: the
+  encounter is generated from the run seed, so the only thing that can is
+  knowing a seed that stages it — a fact about **(character, build,
+  encounter)** and nothing else.
+
+  ```
+  python -m understudy.seed_ledger record <turn-id> --build 0.2.3352+proto
+  python -m understudy.seed_ledger find --character klee --enemy-count 3
+  python -m understudy.seed_ledger list
+  ```
+
+  It reads a turn that has ALREADY been staged (`observed.json` carries both
+  the seed the game used and the board it produced) and appends one row to
+  `understudy/seeds/seed-ledger.json`; it never launches a game and never
+  writes into a closed turn directory (R101b). **`--build` is required and is
+  never defaulted** — a seed is a seed for the generator the package hands the
+  game, so a row with no build answers about a world that has moved. The
+  encounter key is sorted and COUNTED (`fuzzy_wurm_crawler_x3`), because the
+  thing a turn file wants to pin is *three bodies* and a name alone does not
+  say how many. **The ledger ships EMPTY and says so in its own `note`: the
+  Klee three-body seed hunt is game time and has not been run.**
 - **`staged_turn packet-section <slug>`** writes the round's results block
   from `review/qa/<slug>-t*/` and `review/qa/ledger.tsv`: per-turn rows, the
   per-slot tally, what the round spent (Codex reads counted separately), the
@@ -699,6 +721,22 @@ item shape the sealed record cannot give is the intent category's *two
 packets identical except the telegraph* — no such pair has been staged, every
 matched pair differs in the arm under test — so that category is scored one
 board at a time, and the item shape widens when such a pair exists.
+
+**The MATCHED-TELEGRAPH PAIR scorer is built; the pairs are OWED (`EB-212`).**
+`qualify.score_intent` is self-report — it passes any form whose question four
+is not a flat *no*, so a seat that learns to answer *yes* passes `intent`
+without the telegraph entering its line. `qualify.score_intent_pair` is the
+answer: two packets, **identical but for the enemy intent**, scored on whether
+the seat's two LINES differ, and **an identical line across a pair FAILS**.
+`pair_differences` refuses a pair whose packets differ anywhere but the
+`- Intent:` line, because two boards that differ in a card or a bank produce
+two lines for reasons that are not the telegraph. The battery reads them from
+an optional `intent_pairs:` section (`{id, left, right, why}`), scored into
+`intent` as ONE row per pair. **The shipped battery carries none** — staging a
+telegraph-only pair is game time — so every scorecard carries
+`intent_pairs: {scored: 0, owed: …}` saying which of the two checks the
+`intent` reading came from. The fixture pair that exercises the scorer is
+`understudy/battery/pairs/` and is not a battery item.
 
 **`--lanes N`: two game instances, one install (`EB-206`).**
 
@@ -966,6 +1004,24 @@ first condition applied to the run lane; `prompt_exceeds_ctx` is its twin —
 a run's conversation grows by a page and a reply per screen, so **the window
 is the thing to size before a live run**, and when it fills the run STOPS with
 its fight records intact rather than playing on from a page it was half shown.
+
+**THE WINDOW IS PER ACT, NOT PER RUN (`EB-324`).** The Kokomi r4 run died at
+turn 77, **66,019 tokens over a 64k slot, with no record sealed** — seventy-six
+screens of play producing nothing. A bigger slot moves that wall rather than
+removing it (128k buys about 150 turns, under two acts), so the rule is **one
+thread per act**: at each act boundary the thread asks the model, while it
+still has the act in front of it, for its own handover record — where the run
+stands, what the deck does, what it has been trying — and then DROPS the act's
+messages and opens the next act on that record alone. The act's first page
+carries the brief again, because the new thread has never seen it. What
+crosses is the tester's own words and nothing this harness knows, so the
+blindness claim is unchanged; the handover is written to
+`understudy/logs/local-seat/<session>/turn-NNN-handover/handover.md`, to the
+transcript (`kind: "local_chain"`) and into the sealed record's
+`chained_sessions`. `codex exec resume` keeps its context on the vendor's side
+and has no window here to bound, so the codex thread declares no `chain_act`
+and nothing chains for it. The D default is this rule and not the alternative
+the row offered (declaring the local seat an act-and-a-half instrument by law).
 
 **The record says which chair played it.** `model_requested: local`,
 `model_observed:` the name the endpoint reported, `server_version:` where the

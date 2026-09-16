@@ -36,7 +36,9 @@ from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
                                        _fold, _hand, _int, _player, _potions,
                                        _relics, _screen, _text)
 from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
-                                        SELECT_SCREENS, UNDRIVEN_SCREENS)
+                                        SELECT_SCREENS, UNDRIVEN_AFTER_EVENT,
+                                        UNDRIVEN_EXITS, UNDRIVEN_SCREENS)
+from understudy.teyvat_ids import resolve_event_id
 
 
 # `EB-371`. THE VERB, AND WHERE IT IS OFFERED.
@@ -174,6 +176,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     elif st in UNDRIVEN_SCREENS:
         obs["screen"] = "undriven"
         obs["blocked"] = UNDRIVEN_SCREENS[st]
+        # `EB-396`: BLOCKED IS NOT STRANDED where the screen has an exit. The
+        # minigame is still not driven -- the sentence above is unchanged --
+        # and the one verb that leaves it is offered, because a run alive at
+        # 53/77 ended on this screen for want of something to type.
+        exit_ = UNDRIVEN_EXITS.get(st)
+        if exit_:
+            obs["blocked"] = f"{obs['blocked']}. {exit_['how']}"
+            obs["commands"] = [exit_["command"]]
     elif st in COMBAT_SCREENS and _combat_torn_down(state):
         # `EB-178`, belt and braces. `settle` rides this out in well under a
         # second, but a wire that got STUCK here must be reported as stuck --
@@ -489,6 +499,27 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # already been taken -- and so `choose` resolves against the same rows
         # the page printed.
         obs["options"] = [_event_option(o) for o in _event_options(state)]
+        # `EB-396`: THE WARNING BEFORE THE CHOICE. An event every option of
+        # which lands on a screen this tool cannot drive says so on each of
+        # those options, so the seat that would otherwise be stranded there
+        # chooses knowing it. Through the dressing table, because the six
+        # Teyvat faces of this event carry different ids and different option
+        # titles and the warning is a fact about the event underneath them.
+        # A *Proceed* row is left alone: it is the way past the event, not
+        # into it.
+        warning = UNDRIVEN_AFTER_EVENT.get(
+            resolve_event_id(_text(ev.get("event_id")))[0].upper())
+        if warning:
+            proceed_at = _proceed_option(state)
+            for i, option in enumerate(obs["options"]):
+                if i == proceed_at:
+                    continue
+                # Beside `EB-393`'s missing-face note rather than over it:
+                # two different gaps in one row are two sentences, and a
+                # warning that quietly ate the other one would be the same
+                # defect this is fixing.
+                option["note"] = "; ".join(
+                    x for x in (option.get("note"), warning) if x)
         # `EB-259`, the other half. An event room has NO proceed button --
         # `ExecuteProceed` walks rewards, rest, both merchants and the
         # treasure room and stops (`McpMod.Actions.cs:600-663`) -- so a bare

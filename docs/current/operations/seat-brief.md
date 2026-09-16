@@ -57,6 +57,10 @@ in the record's last section.
 
 If you hit a screen the tool refuses to drive (`TOOL-BLOCKED: <state_type>`),
 say so in the record and stop; do not go looking for another way through.
+**Unless the page prints a command under *What you can say*** — a blocked
+screen that has a way OUT says so and offers exactly one verb (`EB-396`: the
+Crystal Sphere's minigame takes `leave`). Take it, note it in the record, and
+carry on with the run; a blocked screen with no verb is still the stop above.
 
 `TOOL-BLOCKED: lane dead (<reason>)` is the same stop and is final: the lane's
 game has been torn down under you (`EB-691`), so no retry can succeed — write

@@ -12,6 +12,7 @@ import json
 import os
 import re
 from pathlib import Path
+from typing import Any
 
 
 
@@ -276,6 +277,62 @@ UNDRIVEN_SCREENS = {
     "overlay": "the wire's own catch-all for an overlay it does not model, "
                "which is one of the two shapes a soft-lock takes",
     "unknown": "the wire could not name this screen",
+}
+
+# ------------------------------- EB-396: the way OUT of an undriven screen --
+#
+# TOOL-BLOCKED USED TO MEAN STRANDED, AND THAT IS A DIFFERENT THING.
+# A Klee r10 seat chose *Uncover Future*, landed on `crystal_sphere`, and sat
+# there with the run alive at 53/77: the page said the screen was not being
+# driven and offered no command at all, so there was nothing to type and the
+# run ended there rather than on a board. The minigame is still not driven and
+# is not going to be -- `UNDRIVEN_SCREENS` above is unchanged and says why --
+# but LEAVING it is not playing it, and the soak has driven that exit all
+# along (`soak_screens._escape`: `crystal_sphere_proceed`).
+#
+# So an undriven screen may declare an EXIT. Where it does, the page prints the
+# one verb and `act` resolves it even though the screen is blocked; where it
+# does not -- `overlay`, `unknown`, neither of which has an exit anyone knows
+# -- nothing changes and the block is exactly what it was. The verb is `leave`
+# rather than `proceed` because it is not a proceed button: a seat who typed
+# `proceed` here would be telling the truth about intent and the wire would
+# refuse it, which is the shape of `EB-259` one screen over.
+#
+# WHAT THE EXIT COSTS IS NOT HIDDEN. The gold is already spent by the time this
+# screen is up -- the option pays before the minigame opens -- so leaving
+# forfeits the divinations and nothing else, and the page says so rather than
+# letting a seat believe it has undone the choice.
+UNDRIVEN_EXITS: dict[str, dict[str, Any]] = {
+    "crystal_sphere": {
+        "command": "leave",
+        "action": {"action": "crystal_sphere_proceed"},
+        "how": "you can say `leave` to step away from it and carry on with "
+               "the run; what the option already paid is spent either way",
+    },
+}
+
+# ------------------- EB-396: and the warning BEFORE the choice is taken -----
+#
+# The exit above is the repair; this is the half that stops the seat needing
+# it. The Crystal Sphere's options both end on the same minigame (the mirror's
+# own note: "the same MINIGAME on both -- three divinations after paying, six
+# after taking the curse"), so the warning is a fact about the EVENT and is
+# printed on each of its options rather than guessed at from one option's
+# words.
+#
+# KEYED ON THE BASE EVENT ID, THROUGH THE ONE SUBSTITUTION TABLE. A Teyvat
+# dressing gives the same event a new id and new option titles, so matching on
+# printed words would warn on the base event and silently stop warning on the
+# six faces that dress it -- the failure mode `EB-767` already met from the
+# other side. `understudy/teyvat_ids.resolve_event_id` is that table, and it
+# imports the standard library and nothing else, which is why it is a module
+# and not a copy.
+UNDRIVEN_AFTER_EVENT: dict[str, str] = {
+    "CRYSTAL_SPHERE": "both of this event's options open a minigame this tool "
+                      "cannot play -- a grid of cells clicked one at a time. "
+                      "You will be able to say `leave` on that screen and "
+                      "carry on with the run, but what you spend here is "
+                      "spent and the divinations are forfeit",
 }
 
 # How long the driver rides out a TRANSITION before calling it a screen.
