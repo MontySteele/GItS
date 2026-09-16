@@ -191,6 +191,11 @@ def test_the_stage_configuration_is_a_gate_of_its_own():
     assert summary.startswith("1870 passed, 0 failed, 0 skipped")
     assert "local-only" in summary
 
+    # And the pre-push hook asks for BOTH by name, through the same wrapper.
+    # `--only` is a set, so naming the first does not carry the second.
+    hook = _module("pre_push_gate", TOOLS / "hooks")
+    assert "dotnet-test,dotnet-test-stage" in hook.KLEETESTS
+
 
 def test_a_machine_without_the_game_skips_the_csharp_gate_rather_than_passing(
         tmp_path, monkeypatch):
