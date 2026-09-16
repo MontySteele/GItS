@@ -406,6 +406,17 @@ def _reward_option(entry: Any) -> dict[str, Any]:
     option = _named_option(entry)
     if not isinstance(entry, dict):
         return option
+    # `EB-716`, THE RELIC HALF, and it is the same shadow the potion's text
+    # was under. `BuildRewardsState` now merges `relic_name` and
+    # `relic_description` into a relic row (`McpMod.StateBuilder.cs`), and the
+    # generic `description` reader in `_named_option` gets there first with a
+    # copy of the relic's TITLE -- `Reward.Description` for a `RelicReward` IS
+    # `_relic.Title` -- so `_dedupe_text` then cleared it and the offer printed
+    # as a bare name beside a potion that printed its rules. The relic's own
+    # prefixed spelling is its face and wins here.
+    relic_body = _text(entry.get("relic_description"))
+    if relic_body and _fold(relic_body) != _fold(option["name"]):
+        option["text"] = relic_body
     if any(_text(entry.get(k)) for k in _OPTION_NAME_KEYS):
         return option                        # a potion: it printed its name
     described = _text(entry.get("description"))

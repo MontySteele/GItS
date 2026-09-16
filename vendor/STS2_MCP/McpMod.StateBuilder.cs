@@ -2095,6 +2095,26 @@ public static partial class McpMod
                 item["potion_name"] = SafeGetText(() => potionReward.Potion.Title);
                 item["potion_description"] = SafeGetText(() => potionReward.Potion.DynamicDescription);
             }
+            // GItS LOCAL EDIT (`EB-716`, the relic half). A RELIC REWARD SENT
+            // ITS NAME AND NOTHING ELSE. `Reward.Description` for a
+            // `RelicReward` IS `_relic.Title` (decompiled), so a relic offer
+            // reached the blind page as `{"type": "relic", "description":
+            // "Golden Pearl"}` -- a name with no rules text, on a screen where
+            // the chest one room over prints both, and beside a potion that
+            // has carried its own text since this method was written.
+            //
+            // Same shape as the potion above and as `BuildShopState`'s relic
+            // shelf, which is the prefixed convention every reader on the page
+            // already follows. `Relic` is null on a reward that has not been
+            // populated yet (`IsPopulated` IS `_relic != null`; an elite's
+            // relic is rolled in `Populate`), so an ABSENT key means "not
+            // rolled yet" and that row is exactly what it was.
+            else if (reward is RelicReward relicReward && relicReward.Relic != null)
+            {
+                item["relic_id"] = relicReward.Relic.Id.Entry;
+                item["relic_name"] = SafeGetText(() => relicReward.Relic.Title);
+                item["relic_description"] = SafeGetText(() => relicReward.Relic.DynamicDescription);
+            }
 
             items.Add(item);
             index++;
