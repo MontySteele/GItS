@@ -25,7 +25,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
-                                        relic_faces)
+                                        deck_elements, relic_faces, run_change)
 from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
@@ -140,6 +140,13 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # fires on every screen a card is read on, and three of those are not
         # fights.
         "character": _text(_player(state).get("character")),
+        # `EB-707`: the elements the RUN's deck and the board's powers can
+        # supply, carried and never printed. The glossary's reachability read
+        # walks what the page PRINTS, which is the hand and the board -- so a
+        # second element sitting in the draw pile was invisible and the
+        # NO REACTION IS REACHABLE HERE clause went back up at round one of
+        # every fight. Only the element set crosses; no pile is printed.
+        "deck_elements": deck_elements(state),
     }
     hazard = _hazard(state)
 
@@ -470,6 +477,18 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["potion_offered"] = any(
             _fold(r.get("type")) == "potion"
             for r in _reward_items(state) if isinstance(r, dict))
+        # `EB-702`: the CARD rows, named, so the page can say where their skip
+        # lives. A reward screen's card row is an offer and not the offer's own
+        # page; the sentence under the list is the same one `_skip`'s refusal
+        # carries, so a seat reading the page and a seat typing the verb are
+        # told the same thing.
+        # Read off the wire's own `type` and not off the printed `kind`: a row
+        # whose name IS its kind prints no kind at all (`_reward_kind`,
+        # `EB-661`), which is exactly the bare `Card` row this is about.
+        obs["card_offers"] = [
+            o["name"] for o, raw in zip(obs["items"], _reward_items(state))
+            if isinstance(raw, dict) and _fold(raw.get("type")) == "card"
+            and o["name"] and o["enabled"]]
         # `EB-294`. THE VERB WAS A CONSTANT HERE TOO. Once both rewards were
         # taken the page printed `- (nothing here to take)` and still offered
         # `choose "<reward>"` under "What you can say", which is the same
@@ -532,6 +551,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     else:
         obs["screen"] = "unknown"
         obs["blocked"] = "this tool has never seen this screen"
+
+    # `EB-676` / `EB-715`: what moved between the previous screen this page
+    # rendered and this one. The ledger rolls on the SCREEN's identity rather
+    # than on the call, so a seat that says `observe` three times reads the
+    # same page three times; see `blindplay_faces.run_change`.
+    change = run_change(state)
+    if change:
+        obs["run_change"] = change
 
     # `EB-371`: the belt, and the verb that empties a slot, on every screen
     # the wire allows the action on. Before the sprite pass, so a potion face

@@ -120,6 +120,15 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # upgrade does, so the note above it is false rather than merely silent.
     # The note is the "this page cannot tell you what it does" line, and a row
     # whose schema upgrade is a keyword has already told the reader.
+    # `EB-700`: the face this card is WRITTEN with, above the upgrade line and
+    # below the one the board is printing, because it is about the sentence
+    # directly above it. Absent wherever the two agree, which is every card on
+    # a board with nothing folding into it.
+    if c.get("written_face"):
+        out.append(f"    Written: {c['written_face']}")
+        out.append("    (the line above this one is what the board is "
+                   "printing now; this is the card's own written face, off "
+                   "its sheet -- the difference is the board's.)")
     if c.get("upgraded_face"):
         out.append(f"    Upgraded: {c['upgraded_face']}")
     elif c.get("upgraded_note") and not c.get("upgraded_keywords"):
@@ -800,6 +809,109 @@ def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
     return []
 
 
+# `EB-706`. THE INTENT NUMBER FOLDED WEAK ON SOME SCREENS AND NOT OTHERS.
+#
+# THE FIND. "r31 lane 1 read 11 and took 8, then read 6 under Weak 2 and took
+# 6; r27 lane 2 saw 7 re-print to 5. The number a seat plans Block against
+# cannot be trusted."
+#
+# AND THE "SOMETIMES" IS IN THE GAME'S OWN GETTER, which the row asked for.
+# `AttackIntent.GetSingleDamage` (decompiled from `sts2.dll`, v0.111.0) is:
+#
+#     decimal num = DamageCalc();
+#     Player me = LocalContext.GetMe(owner.CombatState);
+#     if (me != null)
+#         num = Hook.ModifyDamage(..., ModifyDamageHookType.All, ...);
+#     return Math.Max(0, (int)num);
+#
+# So the label folds EVERY modifier -- the enemy's Weak, the player's
+# Vulnerable, Strength -- on a frame where the local player resolves, and
+# returns the RAW move damage on a frame where `LocalContext.GetMe` answers
+# null. The bridge asks for the label on whatever frame the poll lands on
+# (`McpMod.StateBuilder.cs:1606`), so both answers reach this page under one
+# field name and nothing on the wire says which one arrived. The seat's two
+# reads are that pair exactly: 11 raw is 8 through Weak (11 x 0.75, truncated),
+# and 7 raw is 5.
+#
+# THE PAGE DOES NO ARITHMETIC ON THE GAME'S NUMBER AND CLAIMS NEITHER. It
+# prints the multiplier the board is standing in and BOTH landings, which is
+# `PER_HIT_NOTE`'s shape one field over and for the same reason: two readings
+# are both live, both have been seen, and a page that picks one is guessing on
+# the seat's behalf.
+#
+# THE MULTIPLIERS ARE THE GAME'S OWN CONSTANTS. `WeakPower.CanonicalVars` is
+# `DamageDecrease 0.75`, `VulnerablePower.CanonicalVars` is `DamageIncrease
+# 1.5`, and both truncate to an int at the end (`(int)num`). Both can be moved
+# by a relic or a power -- Paper Krane and Debilitate on Weak, Paper Phrog and
+# Cruelty on Vulnerable -- and the note says so rather than pretending the
+# constant is the whole rule.
+INTENT_FOLD_NOTE = (
+    "*An intent's figure is the game's own `GetIntentLabel`, and that getter "
+    "folds the board's multipliers in only on a frame where it can resolve the "
+    "local player; on any other frame it returns the move's raw damage. Both "
+    "have been seen on this wire under one field name, and nothing on the feed "
+    "says which one a given read is -- so where a multiplier is standing, the "
+    "line above prints both landings and this page picks neither. The "
+    "multipliers used are the game's own constants (Weak x0.75, Vulnerable "
+    "x1.5, truncated); a relic or power that moves either -- Paper Krane, "
+    "Debilitate, Paper Phrog, Cruelty -- is not in this arithmetic.*")
+
+_WEAK_MULTIPLIER = 0.75
+_VULNERABLE_MULTIPLIER = 1.5
+
+
+def _stacks_of(blob: dict[str, Any], word: str) -> int:
+    """How many stacks of a named power this body is wearing, or 0."""
+    for power in blob.get("powers") or []:
+        if _fold(power.get("name")) == word and isinstance(
+                power.get("stacks"), int):
+            return int(power["stacks"])
+    return 0
+
+
+def _intent_fold_lines(enemy: dict[str, Any],
+                       you: dict[str, Any]) -> list[str]:
+    """`EB-706`: both landings of a telegraph, where a multiplier stands.
+
+    Empty on every board where neither Weak nor Vulnerable is up, which is
+    most of them, and empty for a part whose label is not a plain number or a
+    plain `NxM` -- the two shapes this page can take apart without guessing.
+    """
+    weak = _stacks_of(enemy, "weak")
+    vulnerable = _stacks_of(you, "vulnerable")
+    if not weak and not vulnerable:
+        return []
+    multiplier = ((_WEAK_MULTIPLIER if weak else 1.0)
+                  * (_VULNERABLE_MULTIPLIER if vulnerable else 1.0))
+    wearing = [w for w in (
+        f"the **Weak {weak}** on this body" if weak else "",
+        f"the **Vulnerable {vulnerable}** on you" if vulnerable else "") if w]
+    out: list[str] = []
+    for intent in enemy.get("intents") or []:
+        if _fold(intent.get("type")) != "attack":
+            continue
+        label = str(intent.get("label") or "").strip()
+        multi = _MULTI_HIT_LABEL.match(label)
+        if multi:
+            each, hits = int(multi.group(1)), int(multi.group(2))
+        elif label.isdigit():
+            each, hits = int(label), 1
+        else:
+            continue
+        folded = max(0, int(each * multiplier))
+        if folded == each:
+            continue
+        shown = f"{each} each" if hits > 1 else str(each)
+        lands = (f"{folded} each, {folded * hits} in all" if hits > 1
+                 else str(folded))
+        already = f"{each * hits} in all" if hits > 1 else str(each)
+        out.append(f"      Folded through {' and '.join(wearing)}, {shown} "
+                   f"lands as {lands}. If the figure above already counts "
+                   f"{'them' if len(wearing) > 1 else 'it'}, it lands as "
+                   f"{already}.")
+    return out
+
+
 def _render_intents(intents: list[dict[str, str]]) -> list[str]:
     """Every component of one telegraph, one line each (`EB-342`).
 
@@ -1141,6 +1253,67 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(f"  - {who} moved from the front seat to the back, "
                        f"bar and all. Nobody left and nobody took a "
                        f"[gold]Bow[/gold].")
+    return out
+
+
+#: `EB-676`. WHY THE TWO NUMBERS CAN DISAGREE, said once and claiming nothing
+#: about which is right. There is one HP field on the wire -- `BuildPlayerState`
+#: writes `creature.CurrentHp` on every screen -- so a victory screen reading
+#: 25/80 and the next screen reading 16/80 are ONE field at two moments, not a
+#: player block and a save disagreeing. The earlier of the two can be read
+#: before the fight's own end-of-turn effects have landed in it, which is
+#: exactly the 9 HP of Constrict the r26 seat planned its map around.
+HP_SETTLE_NOTE = (
+    "*This page reads one HP figure off the game's data feed and prints it "
+    "unchanged; it has no second source and does no arithmetic on it. A figure "
+    "read the instant a fight ends can be read before that fight's own "
+    "end-of-turn effects have landed in it, so a drop that appears on the next "
+    "screen may be the previous screen's number settling rather than anything "
+    "this screen did.*")
+
+#: `EB-715`. The act break is a room this page never had. Nothing here claims a
+#: cause: every number in the block is the feed's, before and after.
+ACT_CHANGE_NOTE = (
+    "*The game moves the run between acts on a screen this tool is not shown: "
+    "a boss reward, a rest and the act's own transition all resolve before the "
+    "next page is drawn. The numbers above are this page's own previous read "
+    "and its read now -- nothing here says which step did what.*")
+
+
+def _render_run_change(change: dict[str, Any]) -> list[str]:
+    """`EB-676` / `EB-715`: what moved since the previous screen, or nothing.
+
+    ONE BLOCK, TWO ROWS. An act change prints the whole ledger -- act, HP, gold
+    and deck -- because that is `EB-715`'s ask and because an act break moves
+    all four at once. Anything else prints the HP line alone, and only where
+    the ROOM changed: HP moving between round one and round two of a fight is
+    the fight, and the combat page has already printed the blow that did it.
+    """
+    if not change:
+        return []
+    out: list[str] = []
+    if change.get("act"):
+        was, now = change["act"]
+        out += ["", "## Between the last screen and this one, the act changed",
+                "", f"- Act {was} → Act {now}"]
+        if change.get("hp"):
+            out.append(f"- HP {change['hp'][0]} → {change['hp'][1]}"
+                       + (f" (of {change['max_hp']})" if change.get("max_hp")
+                          else ""))
+        if change.get("gold"):
+            out.append(f"- Gold {change['gold'][0]} → {change['gold'][1]}")
+        if change.get("deck"):
+            out.append(f"- Cards in the deck {change['deck'][0]} → "
+                       f"{change['deck'][1]}")
+        out += ["", ACT_CHANGE_NOTE]
+        return out
+    if change.get("hp") and change.get("room_changed"):
+        was, now = change["hp"]
+        moved = ("down" if now < was else "up") + f" {abs(now - was)}"
+        out += ["", "## Since the screen before this one", "",
+                f"- HP {was} → {now}"
+                + (f" (of {change['max_hp']})" if change.get("max_hp") else "")
+                + f", {moved}", "", HP_SETTLE_NOTE]
     return out
 
 
@@ -1596,6 +1769,11 @@ def render(obs: dict[str, Any]) -> str:
             if e.get("replaced"):
                 out.append(ENEMY_REPLACED_LINE.format(was=e["replaced"]))
             out += _render_intents(e["intents"])
+            # `EB-706`: and where a multiplier stands that the game's own label
+            # sometimes folds and sometimes does not, both numbers -- under the
+            # telegraph they are about, because a seat plans Block against THIS
+            # body's figure.
+            out += _intent_fold_lines(e, you)
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
                 # `EB-605`: and where a Bomb badge's headline and its list of
@@ -1628,6 +1806,11 @@ def render(obs: dict[str, Any]) -> str:
         # `EB-607`: and where an enemy is wearing Strength, where the number
         # on its icon came from -- one field, printed unchanged.
         out += _intent_source_note(c["enemies"])
+        # `EB-706`: and WHY the figure above can be either number, once per
+        # screen, beside the provenance note that answers the same question
+        # about Strength.
+        if any(_intent_fold_lines(e, you) for e in c["enemies"]):
+            out += ["", INTENT_FOLD_NOTE]
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
             out += ["", POWER_NOTE]
         # `EB-701`: and where something on this board fires at the END of your
@@ -1827,6 +2010,21 @@ def render(obs: dict[str, Any]) -> str:
             out += [obs["message"], ""]
         out += (_render_options(obs["items"]) if obs["items"]
                 else ["- (nothing here to take)"])
+        # `EB-702`: WHERE THE CARD OFFER'S SKIP IS, on the screen a seat typed
+        # `skip` at and was told there was nothing here to skip. The row above
+        # is the offer; its own page is where the skip lives, and that page is
+        # opened with `choose`. Printed only where a card row is actually on
+        # offer, so a gold-and-potion screen reads exactly as it always did.
+        if obs.get("card_offers"):
+            out += ["", "*" + " and ".join(f"**{n}**"
+                                           for n in obs["card_offers"])
+                    + (" is a card OFFER" if len(obs["card_offers"]) == 1
+                       else " are card OFFERS")
+                    + " rather than the offer's own page: `choose` it to open "
+                      "the card screen, and the skip -- *You may skip this* -- "
+                      "is on THAT screen. `skip` typed here has no card reward "
+                      "open to skip, and `proceed` leaves the whole reward "
+                      "screen.*"]
         # `EB-341`: said on the screen where the claim is made, and only where
         # a potion is actually on offer -- a run with a free slot reads
         # exactly as it always did.
@@ -1868,6 +2066,12 @@ def render(obs: dict[str, Any]) -> str:
                     "play performed as well." for name in ls["replayed"]]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
+
+    # `EB-676` / `EB-715`: what the run did between the previous screen this
+    # page drew and this one. Directly under the screen's own body, above the
+    # relics and the belt, because it is the thing a seat about to choose a
+    # route or plan a block has to know and the one thing no screen printed.
+    out += _render_run_change(obs.get("run_change") or {})
 
     # `EB-473`: the relic row, on a screen that is not a fight, in the
     # combat header's own words and under its own heading. A relic claimed at

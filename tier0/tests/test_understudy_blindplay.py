@@ -58,8 +58,13 @@ def _fresh_fight():
     gets it, because it carries WITHIN a test.
     """
     blindplay.forget_fight()
+    # `EB-676` / `EB-715`: and the run ledger, which is process state for the
+    # same reason and leaks between tests the same way -- one test's screen
+    # would otherwise be the screen the next test's page compares itself to.
+    blindplay.forget_run()
     yield
     blindplay.forget_fight()
+    blindplay.forget_run()
 
 
 def combat_state() -> dict:
@@ -6895,6 +6900,15 @@ def elemental_hand_state(*, aura: bool = False, bomb_tip: str = "",
              "keywords": keywords,
              "description": "Retain. Set off. Deal 4 damage."})
     state["player"]["hand"] = hand
+    # `EB-707`: AND THE REST OF THE DECK IS EMPTIED, because reachability is
+    # now the RUN's question rather than the hand's. The recorded state this
+    # fixture is built on carries a real Kokomi draw and discard pile, and
+    # those piles really do supply a second element -- so a fixture that says
+    # "one card per named element" has to mean the whole deck, or every
+    # assertion below about what is NOT reachable is an assertion about the
+    # recording rather than about the rule.
+    for pile in ("draw_pile", "discard_pile", "exhaust_pile"):
+        state["player"][pile] = []
     if aura:
         state["battle"]["enemies"][0]["status"] = [
             {"id": "KLEEMOD-CRYO_AURA", "name": "Cryo Aura", "amount": 2,
@@ -12277,3 +12291,374 @@ def test_a_reward_with_no_such_relic_prints_no_caveat():
     known to rewrite this screen's alternative is taught no doubt."""
     assert "changes what the alternative" not in blindplay.observe(
         card_reward_state())
+
+
+# ------------------------- EB-702: the reward screen's skip is not a dead end --
+
+def test_skip_on_a_reward_screen_names_the_card_offer_and_the_way_in():
+    """`EB-702`. The verb that refused above its own invitation.
+
+    Seen to FAIL: `skip` at a reward screen carrying a card offer came back
+    "there is nothing here to skip" -- true of the post and useless to a seat
+    that had just read *You may skip this* on the card screen. The refusal
+    names the offer and hands back the form that opens its page, where the
+    skip actually is.
+    """
+    res = blindplay.act(rewards_state(), "skip")
+    assert res["ok"] is False
+    assert "nothing here to skip" not in res["refusal"]
+    assert "has not been opened yet" in res["refusal"]
+    assert "Card" in res["refusal"]
+
+
+def test_the_reward_page_says_where_the_card_offers_skip_lives():
+    """The page and the verb say the same thing (`EB-702`): the row is an
+    offer, `choose` opens its page, and the skip is on that page."""
+    page = blindplay.observe(rewards_state())
+    assert "is a card OFFER" in page
+    assert "the skip -- *You may skip this* -- is on THAT screen" in page
+
+
+def test_a_reward_screen_with_no_card_offer_reads_as_it_always_did():
+    """The gate is the card row: a gold-and-potion screen prints no such
+    sentence and keeps the old refusal."""
+    state = copy.deepcopy(rewards_state())
+    state["rewards"]["items"] = [i for i in state["rewards"]["items"]
+                                 if i["type"] != "card"]
+    assert "is a card OFFER" not in blindplay.observe(state)
+    assert "nothing here to skip" in blindplay.act(state, "skip")["refusal"]
+
+
+# ---------------- EB-662: a potion shelf is not bought onto a full belt ------
+
+def _full_belt_shop_state() -> dict:
+    """`shop_state` with a STOCKED potion shelf and the belt at 3 of 3."""
+    state = copy.deepcopy(shop_state())
+    state["shop"]["items"][2]["is_stocked"] = True
+    state["player"]["max_potion_slots"] = 3
+    state["player"]["potions"] = [
+        {"name": "Block Potion", "description": "Gain 12 Block."},
+        {"name": "Swift Potion", "description": "Draw 3 cards."},
+        {"name": "Weak Potion", "description": "Apply 3 Weak."}]
+    return state
+
+
+def test_a_potion_is_not_bought_onto_a_full_belt_and_the_count_is_printed():
+    """`EB-662`. Seen to FAIL: the buy was accepted at 3 of 3, the gold went
+    and the potion never appeared -- 77 gold lost with no line anywhere."""
+    res = blindplay.act(_full_belt_shop_state(), 'buy "Fire Potion"')
+    assert res["ok"] is False
+    assert res["post"] is None
+    assert "belt is full: 3 of 3" in res["refusal"]
+    assert "drop potion" in res["refusal"]
+
+
+def test_a_belt_with_a_free_slot_still_buys_the_potion():
+    """The gate is the belt and nothing else: one slot free and the buy
+    resolves exactly as it always did."""
+    state = _full_belt_shop_state()
+    state["player"]["potions"] = state["player"]["potions"][:2]
+    res = blindplay.act(state, 'buy "Fire Potion"')
+    assert res["ok"] is True
+    assert res["post"]["action"] == "shop_purchase"
+
+
+def test_a_full_belt_does_not_block_a_card_or_a_relic_shelf():
+    """A relic shelf is not a potion; the belt has nothing to say about it."""
+    state = _full_belt_shop_state()
+    state["player"]["gold"] = 400
+    assert blindplay.act(state, 'buy "Coral Guard"')["ok"] is True
+    assert blindplay.act(state, 'buy "Bottled Tide"')["ok"] is True
+
+
+# ------------- EB-707: reachability is the deck's question, not the hand's ---
+
+def test_a_second_element_in_the_draw_pile_ends_the_unreachable_claim():
+    """`EB-707`. Seen to FAIL: NO REACTION IS REACHABLE HERE stayed up on every
+    screen of a run whose deck held an Electro card, because the read walked
+    what the page PRINTS -- the hand and the board -- and a card in the draw
+    pile prints nowhere. The gate the row names: Sanctifying Ring in the deck.
+    """
+    state = elemental_hand_state(elements=("Pyro",))
+    state["player"]["draw_pile"] = [
+        {"name": "Shinobu -- Sanctifying Ring", "cost": "1",
+         "description": "Applies Electro. Deal 5 damage.",
+         "keywords": [{"name": "Applies Electro",
+                       "description": "If the target has no aura, this "
+                                      "applies Electro for 2 turns."}]}]
+    page = blindplay.observe(state)
+    assert "NO REACTION IS REACHABLE HERE" not in page
+    # And the pair that deck really can build is the one that comes back.
+    assert "Overloaded" in page
+
+
+def test_the_draw_pile_itself_is_never_printed_by_the_reachability_read():
+    """Only the element set crosses (`EB-707`): the pile's own cards stay off
+    the page, which is the whole reason the read was the hand's to begin with.
+    """
+    state = elemental_hand_state(elements=("Pyro",))
+    state["player"]["draw_pile"] = [
+        {"name": "Shinobu -- Sanctifying Ring", "cost": "1",
+         "description": "Applies Electro. Deal 5 damage.", "keywords": []}]
+    assert "Sanctifying Ring" not in blindplay.observe(state)
+
+
+def test_a_powers_own_element_counts_toward_reachability():
+    """The other half the row names: an element a POWER's rule supplies is on
+    the board whether or not any card in hand carries the keyword."""
+    state = elemental_hand_state(elements=("Pyro",))
+    state["player"]["status"] = [
+        {"id": "KLEEMOD-RING", "name": "Sanctifying Ring", "amount": 1,
+         "type": "Buff", "keywords": [],
+         "description": "At the end of your turn, apply Electro to a random "
+                        "enemy."}]
+    assert "NO REACTION IS REACHABLE HERE" not in blindplay.observe(state)
+
+
+def test_a_mono_element_run_still_gets_the_one_line():
+    """The claim is not deleted, only made true: a deck that really can supply
+    one element alone reads exactly as it did."""
+    page = blindplay.observe(elemental_hand_state(elements=("Pyro",)))
+    assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in page
+
+
+# ------ EB-676: the HP a fight ends on, and the HP the next screen prints ----
+
+def _kill_screen_state(hp: int) -> dict:
+    """The rewards screen a fight ends into, at a given HP."""
+    state = copy.deepcopy(rewards_state())
+    state["run"] = {"act": 1, "floor": 4}
+    state["player"] = {"character": "Sangonomiya Kokomi", "hp": hp,
+                       "max_hp": 80, "gold": 120}
+    return state
+
+
+def _map_after_the_kill(hp: int) -> dict:
+    state = copy.deepcopy(map_state())
+    state["run"] = {"act": 1, "floor": 4}
+    state["player"] = {"character": "Sangonomiya Kokomi", "hp": hp,
+                       "max_hp": 80, "gold": 120}
+    return state
+
+
+def test_an_unexplained_hp_drop_between_two_screens_is_named():
+    """`EB-676`. Seen to FAIL: the victory screen printed 25/80 and the next
+    screen 16/80, Constrict's end-of-turn loss landed between the two, and no
+    line on either screen connected them -- "the seat chose its map off the
+    wrong number".
+
+    There is ONE HP field on the wire, so the page cannot settle the two; what
+    it can do is stop the change being silent, which it now does against its
+    own previous read.
+    """
+    blindplay.observe(_kill_screen_state(25))
+    page = blindplay.observe(_map_after_the_kill(16))
+    assert "## Since the screen before this one" in page
+    assert "- HP 25 → 16 (of 80), down 9" in page
+    assert "end-of-turn effects have landed in it" in page
+
+
+def test_the_same_screen_read_twice_prints_the_same_page():
+    """The ledger rolls on the SCREEN, not on the call: a seat that says
+    `observe` twice must not have the comparison vanish under it."""
+    blindplay.observe(_kill_screen_state(25))
+    first = blindplay.observe(_map_after_the_kill(16))
+    assert blindplay.observe(_map_after_the_kill(16)) == first
+
+
+def test_hp_that_did_not_move_prints_no_continuity_block():
+    """The gate is a change: a run that walked from a reward screen to the map
+    with its HP intact reads exactly as it always did."""
+    blindplay.observe(_kill_screen_state(25))
+    assert "## Since the screen before this one" not in blindplay.observe(
+        _map_after_the_kill(25))
+
+
+def test_the_first_screen_of_a_session_compares_itself_to_nothing():
+    """There is no previous read to subtract, and the page invents none."""
+    assert "## Since the screen before this one" not in blindplay.observe(
+        _map_after_the_kill(16))
+
+
+def test_hp_moving_inside_one_fight_is_the_fight_and_prints_no_block():
+    """The room has to change. Round two of a fight moving HP is the fight,
+    and the combat page has already printed the blow that did it."""
+    first = copy.deepcopy(combat_state())
+    second = copy.deepcopy(combat_state())
+    second["battle"]["round"] = first["battle"]["round"] + 1
+    second["player"]["hp"] = first["player"]["hp"] - 7
+    blindplay.observe(first)
+    assert "## Since the screen before this one" not in blindplay.observe(
+        second)
+
+
+def test_another_runs_screen_is_never_subtracted_from_this_one():
+    """The character guard `remembered_deck` already keeps: a second lane's
+    game, or a run started since, is not a change in this one."""
+    blindplay.observe(_kill_screen_state(25))
+    other = _map_after_the_kill(16)
+    other["player"]["character"] = "Klee"
+    assert "## Since the screen before this one" not in blindplay.observe(other)
+
+
+# ------------------ EB-715: the act break is a room with no screen ----------
+
+def _act_state(act: int, floor: int, hp: int, gold: int) -> dict:
+    """A combat screen in a named act, at a named HP and gold."""
+    state = copy.deepcopy(combat_state())
+    state["run"] = {"act": act, "floor": floor}
+    state["player"]["hp"] = hp
+    state["player"]["max_hp"] = 80
+    state["player"]["gold"] = gold
+    return state
+
+
+def test_the_act_transition_is_printed_with_what_it_did_to_the_run():
+    """`EB-715`. Seen to FAIL: HP went 15 to 71 between the act-1 boss and the
+    first act-2 fight with nothing printed -- no heal, no rest, no transition.
+    The act break resolves on screens this tool is never shown, so the first
+    screen of the new act names it and prints the ledger across it.
+    """
+    blindplay.observe(_act_state(1, 16, 15, 210))
+    page = blindplay.observe(_act_state(2, 17, 71, 250))
+    assert "## Between the last screen and this one, the act changed" in page
+    assert "- Act 1 → Act 2" in page
+    assert "- HP 15 → 71 (of 80)" in page
+    assert "- Gold 210 → 250" in page
+    assert "nothing here says which step did what" in page
+
+
+def test_the_act_block_replaces_the_plain_hp_line_rather_than_doubling_it():
+    """One block per page: an act break moves HP too, and two headings saying
+    the same thing twice is the noise every glossary row was filed on."""
+    blindplay.observe(_act_state(1, 16, 15, 210))
+    page = blindplay.observe(_act_state(2, 17, 71, 250))
+    assert "## Since the screen before this one" not in page
+
+
+def test_a_screen_inside_one_act_prints_no_act_block():
+    """The gate is the act number and nothing else."""
+    blindplay.observe(_act_state(1, 16, 40, 210))
+    assert "the act changed" not in blindplay.observe(_act_state(1, 17, 40, 210))
+
+
+# ------------- EB-706: both landings of a telegraph under a multiplier ------
+
+def _weak_intent_state(label: str = "11", weak: int = 2,
+                       vulnerable: int = 0) -> dict:
+    """A combat where the attacking body wears Weak and telegraphs a number."""
+    state = copy.deepcopy(combat_state())
+    enemy = state["battle"]["enemies"][0]
+    enemy["intents"] = [{"type": "Attack", "label": label,
+                         "title": "Attack",
+                         "description": "This enemy intends to attack."}]
+    enemy["status"] = ([{"id": "WEAK", "name": "Weak", "amount": weak,
+                         "type": "Debuff", "keywords": [],
+                         "description": "Deals 25% less damage."}]
+                       if weak else [])
+    if vulnerable:
+        state["player"]["status"] = [
+            {"id": "VULNERABLE", "name": "Vulnerable", "amount": vulnerable,
+             "type": "Debuff", "keywords": [],
+             "description": "Takes 50% more damage."}]
+    return state
+
+
+def test_a_telegraph_under_weak_prints_both_landings():
+    """`EB-706`. Seen to FAIL: the r31 lane-1 seat read 11 and took 8, then
+    read 6 under Weak 2 and took 6 -- one field carrying two readings, with
+    nothing on the page saying so. The figure is still the game's; what the
+    page adds is the other landing and which is which.
+    """
+    page = blindplay.observe(_weak_intent_state("11", weak=2))
+    assert "Folded through the **Weak 2** on this body, 11 lands as 8." in page
+    assert "If the figure above already counts it, it lands as 11." in page
+
+
+def test_the_fold_note_names_the_frame_that_makes_the_two_readings():
+    """The row's second ask: find why it re-prints only sometimes. The getter
+    folds on a frame where it can resolve the local player and returns the raw
+    move damage on any other, and the note says exactly that, once."""
+    page = blindplay.observe(_weak_intent_state("11", weak=2))
+    assert "only on a frame where it can resolve the local player" in page
+    assert page.count("on any other frame it returns the move's raw damage") == 1
+
+
+def test_vulnerable_on_the_player_folds_the_same_way():
+    """The player's half of the pair, off the same two game constants."""
+    page = blindplay.observe(_weak_intent_state("8", weak=0, vulnerable=1))
+    assert "Folded through the **Vulnerable 1** on you, 8 lands as 12." in page
+
+
+def test_a_multi_hit_telegraph_folds_per_hit_and_prints_the_total():
+    """`6x3` is three hits of six; the fold is per hit and the page says the
+    total both ways, which is the number Block is planned against."""
+    page = blindplay.observe(_weak_intent_state("6x3", weak=1))
+    assert "6 each lands as 4 each, 12 in all" in page
+    assert "it lands as 18 in all" in page
+
+
+def test_a_board_with_no_multiplier_prints_no_fold_line():
+    """The gate is a multiplier standing on the board. Nothing up, nothing
+    said -- the page does no arithmetic on a number nobody is checking."""
+    page = blindplay.observe(_weak_intent_state("11", weak=0))
+    assert "Folded through" not in page
+    assert "raw damage" not in page
+
+
+# ---------- EB-700: the written face beside the one the board is printing ----
+
+def _folded_hand_state(printed: str, upgraded: bool = False) -> dict:
+    """A combat whose hand holds one Slack Water at a given printed face."""
+    state = copy.deepcopy(combat_state())
+    state["player"]["hand"] = [
+        {"id": "KLEEMOD-SLACK_WATER", "name": "Slack Water", "type": "Skill",
+         "cost": "1", "can_play": True, "index": 0, "target_type": "Self",
+         "is_upgraded": upgraded, "keywords": [], "description": printed}]
+    return state
+
+
+def test_a_folded_face_prints_the_written_one_beside_it():
+    """`EB-700`. Seen to FAIL: the face printed only the current number, so a
+    seat "cannot tell a modified number from a base one and reconstructs the
+    base from HP". Slack Water is written `Gain 4 Block`; a board printing 3
+    now says both.
+    """
+    page = blindplay.observe(_folded_hand_state(
+        "Gain 3 Block. At the start of your next turn, gain 4 Block."))
+    assert "Gain 3 Block. At the start of your next turn" in page
+    assert ("Written: Gain 4 Block. At the start of your next turn, gain 4 "
+            "Block.") in page
+    assert "the difference is the board's" in page
+
+
+def test_an_unfolded_face_prints_no_written_line():
+    """The gate is a difference: a board with nothing folding into the card
+    prints the face it always did and no second sentence."""
+    assert "Written:" not in blindplay.observe(_folded_hand_state(
+        "Gain 4 Block. At the start of your next turn, gain 4 Block."))
+
+
+def test_an_upgraded_cards_written_face_is_the_upgraded_one():
+    """The card in front of the player is the upgraded one, so its written
+    number is the canonical value plus its own OnUpgrade delta -- 4 + 3."""
+    page = blindplay.observe(_folded_hand_state(
+        "Gain 5 Block. At the start of your next turn, gain 4 Block.",
+        upgraded=True))
+    assert "Written: Gain 7 Block." in page
+
+
+def test_a_face_this_build_has_reworded_prints_nothing_rather_than_a_guess():
+    """The template is matched against the WIRE's own face; a sentence this
+    repo does not recognise gets silence, never a rebuilt number."""
+    assert "Written:" not in blindplay.observe(_folded_hand_state(
+        "Something this card has never said. Gain 3 Block."))
+
+
+def test_the_written_face_is_read_by_id_and_not_by_title():
+    """`EB-267`'s rule, one field over: a prototype row may print a shipped
+    card's name at different numbers, so an unknown id answers nothing."""
+    state = _folded_hand_state(
+        "Gain 3 Block. At the start of your next turn, gain 4 Block.")
+    state["player"]["hand"][0]["id"] = "KLEEMOD-NO_SUCH_CARD"
+    assert "Written:" not in blindplay.observe(state)

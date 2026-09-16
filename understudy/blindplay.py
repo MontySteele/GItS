@@ -145,7 +145,8 @@ from understudy.blindplay_read import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _BARE_HOOK, _card_face, _card_title, _dedupe_text, _element,
     _ELEMENT_KEYWORD, EMPTY_SHELF, _enchantment, _enemy_key, _enemy_names,
-    _DECK_MEMORY, _FIGHT_MEMORY, forget_deck, forget_fight, forget_shelves,
+    _DECK_MEMORY, _FIGHT_MEMORY, forget_deck, forget_fight, forget_run,
+    forget_shelves, run_change, deck_elements,
     _hazard, _hook_note, _intent, _intents, _is_aura, _meter_max,
     _named_option, _number_faces, _OPTION_KIND_KEYS, _OPTION_NAME_KEYS,
     _OPTION_TEXT_KEYS, _powers, relic_faces, remember_deck, remembered_deck,

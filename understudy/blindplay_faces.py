@@ -177,6 +177,17 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
                 if entry.get("spark_price") is not None else None)),
         # `EB-445`: whether that price is the whole bank.
         "spark_all": qa_packet.spends_all_sparks(entry.get("id")),
+        # `EB-700`. THE FACE THIS CARD IS WRITTEN WITH, where the board has
+        # moved it. The wire carries the RESOLVED sentence and nothing else --
+        # "Slack Water read Deal 3 under Weak and Deal 4 later, so a seat
+        # cannot tell a modified number from a base one and reconstructs the
+        # base from HP" -- and the written numbers are in this repo, in the
+        # same two places the upgrade preview is derived from. `""` where the
+        # two agree, which is every card on a board with nothing folding into
+        # it; see `qa_packet.written_face` for all three of its bounds.
+        "written_face": qa_packet.written_face(
+            entry.get("id"), _text(entry.get("description")),
+            bool(entry.get("is_upgraded") or entry.get("upgraded"))),
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
@@ -569,6 +580,65 @@ def _shop_options(state: dict[str, Any]) -> list[dict[str, Any]]:
 # screen replaces the real deck with three cards.
 _DECK_PILES = ("hand", "draw_pile", "discard_pile", "exhaust_pile")
 
+# `EB-707`. THE LINE SAID NO REACTION WAS REACHABLE WHILE ONE WAS ON THE BOARD.
+#
+# THE FIND (Kokomi r31 lane 2). "NO REACTION IS REACHABLE HERE" stayed on every
+# screen after an Electro card entered the deck -- once printed beside an
+# Electro-Charged entry and a Poisoned enemy, which is the claim contradicting
+# itself on its own page.
+#
+# THE READ WAS THE HAND'S AND THE QUESTION IS THE RUN'S. `_reachable_elements`
+# walks the OBSERVATION, so it sees what the page PRINTS: the hand, the board's
+# auras, the belt, a reward row. A Sanctifying Ring sitting in the draw pile
+# prints nowhere, and `remember_elements` is dropped at each fight boundary --
+# so at round one of every fight the run's second element was invisible again
+# and the clause went back up. A Power's own rule is the same shape one source
+# over: it is on the screen, and its element is in prose rather than in an
+# `Applies X` keyword.
+#
+# SO REACHABILITY READS THE DECK AND THE POWERS. The four piles ARE the deck
+# inside a fight (`remember_deck`'s own argument) and they are on the feed of
+# every combat screen; a power row carries its rule. Neither is PRINTED by this
+# -- only the element set crosses, and the draw pile's order and contents stay
+# where they are.
+_ELEMENT_WORD_RE = re.compile(r"\b(Pyro|Hydro|Electro|Cryo|Anemo|Geo)\b")
+
+
+def _entry_elements(entry: dict[str, Any]) -> set[str]:
+    """The elements one card or power entry can supply, off its own face."""
+    found: set[str] = set()
+    kws = [{"name": _text(k.get("name"))}
+           for k in (entry.get("keywords") or []) if isinstance(k, dict)]
+    element = _element(kws)
+    if element:
+        found.add(element)
+    for key in ("description", "name", "title"):
+        found.update(_ELEMENT_WORD_RE.findall(_text(entry.get(key))))
+    return found
+
+
+def deck_elements(state: dict[str, Any]) -> list[str]:
+    """Every element this run's DECK and POWERS can supply (`EB-707`).
+
+    The four piles and every status row on the board, player's and enemies'
+    alike: a deck card in the draw pile is a card that will be in hand, and a
+    power whose rule names an element is an element the board already has.
+    Sorted, so the observation it rides on is stable to diff.
+    """
+    found: set[str] = set()
+    player = _blob(state, "player")
+    for pile in _DECK_PILES:
+        for entry in player.get(pile) or []:
+            if isinstance(entry, dict):
+                found |= _entry_elements(entry)
+    blobs = [player] + [b for b in (_blob(state, "battle").get("enemies") or [])
+                        if isinstance(b, dict)]
+    for blob in blobs:
+        for row in blob.get("status") or []:
+            if isinstance(row, dict):
+                found |= _entry_elements(row)
+    return sorted(found)
+
 # ON DISK, and that is not a convenience -- it is what makes the row's answer
 # reachable at all. A blind seat drives this tool as `python -m
 # understudy.blindplay observe` and `... act "<command>"`, one PROCESS PER
@@ -729,6 +799,138 @@ def remembered_deck(state: dict[str, Any]) -> dict[str, Any]:
     if floor and here and here < floor:
         return {}
     return {"cards": [dict(c) for c in held["cards"]], "floor": floor}
+
+
+# `EB-715` / `EB-676`. THE RUN MOVED BETWEEN TWO SCREENS AND NEITHER SAID SO.
+#
+# TWO FINDS, ONE MISSING ORGAN.
+#
+#   `EB-715` (Kokomi r32 lane 1). HP went 15 to 71 between the act-1 boss and
+#   the first act-2 fight with no screen printing a heal, a rest or an act
+#   transition. The act break really does move HP, gold and the deck, and this
+#   page had no screen for it -- the run simply reappeared, different.
+#
+#   `EB-676` (Kokomi r26 lane 1, fight 4). The victory screen printed HP 25/80
+#   and the next screen 16/80. "Constrict's end-of-turn loss is not on the kill
+#   screen, and the seat chose its map off the wrong number."
+#
+# WHAT THE FEED HAS AND WHAT IT HAS NOT. There is exactly ONE HP field on the
+# wire -- `BuildPlayerState` writes `creature.CurrentHp` on every screen
+# (`McpMod.StateBuilder.cs:1133`) -- so the two numbers the r26 seat read are
+# not two fields and neither is a save: they are one field at two moments, the
+# first read before the fight's end-of-turn queue had drained into it. Nothing
+# on this side can settle that; what it can do is stop the change being SILENT.
+#
+# SO THE PAGE KEEPS A LEDGER OF ITS OWN LAST SCREEN and prints what moved. It
+# is a fact about two renders this tool made, stated as such, and it claims no
+# cause: "your HP is 9 lower than the screen before this one printed" is
+# checkable against the page above it, and "an act break happened" is read off
+# the run's own act number.
+#
+# KEYED ON THE SCREEN'S IDENTITY, not on the call: a seat that says `observe`
+# three times on one screen must read the same page three times. The ledger
+# rolls only when the identity changes, so the comparison a page prints is
+# always against the previous DIFFERENT screen.
+_RUN_MEMORY: dict[str, Any] = {}
+
+
+def _run_store() -> Path:
+    lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
+    return _DECK_STORE_DIR / f"_blindplay-run-lane{lane}.json"
+
+
+def _held_run() -> dict[str, Any]:
+    try:
+        held = json.loads(_run_store().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        held = _RUN_MEMORY
+    return held if isinstance(held, dict) and held.get("here") else {}
+
+
+def forget_run() -> None:
+    """Drop the run ledger. The operator's reset, and the tests'."""
+    _RUN_MEMORY.clear()
+    try:
+        _run_store().unlink()
+    except OSError:
+        pass
+
+
+def _run_snapshot(state: dict[str, Any]) -> dict[str, Any]:
+    """The four numbers the ledger watches, off the feed alone."""
+    player = _blob(state, "player")
+    run = _blob(state, "run")
+    deck = sum(len(player.get(pile) or []) for pile in _DECK_PILES)
+    return {"hp": _int(player.get("hp")) if player.get("hp") is not None
+            else None,
+            "max_hp": _int(player.get("max_hp"))
+            if player.get("max_hp") is not None else None,
+            "gold": _int(player.get("gold")) if player.get("gold") is not None
+            else None,
+            "act": _int(run.get("act")) if run.get("act") is not None else None,
+            "floor": _int(run.get("floor")) if run.get("floor") is not None
+            else None,
+            "deck": deck or None,
+            "screen": _screen(state)}
+
+
+def _run_key(state: dict[str, Any]) -> str:
+    """What makes this screen THIS screen: the room, the place and the turn."""
+    run, battle = _blob(state, "run"), _blob(state, "battle")
+    return "|".join(str(x) for x in (
+        _fold(_blob(state, "player").get("character")), _screen(state),
+        _int(run.get("act")), _int(run.get("floor")),
+        _int(battle.get("round"))))
+
+
+def run_change(state: dict[str, Any]) -> dict[str, Any]:
+    """What moved between the previous DIFFERENT screen and this one.
+
+    `{}` on the first screen of a session, on a repeat read of one screen that
+    moved nothing, and on any screen belonging to a different run than the one
+    the ledger holds. Otherwise each key that MOVED, as `[before, after]`,
+    plus `max_hp` for the printing.
+    """
+    key = _run_key(state)
+    here = _run_snapshot(state)
+    held = _held_run()
+    if held.get("key") == key:
+        return dict(held.get("change") or {})
+    before = dict(held.get("here") or {})
+    change: dict[str, Any] = {}
+    # A DIFFERENT RUN IS NOT A CHANGE. The character has to match and the floor
+    # may not have gone backwards -- `remembered_deck`'s two guards, for its
+    # two reasons: another lane's game and a run started since are both worlds
+    # this page may not subtract across.
+    same_run = bool(before) and _fold(held.get("character")) == _fold(
+        _blob(state, "player").get("character"))
+    if before and _int(before.get("floor")) and _int(here.get("floor")) \
+            and _int(here["floor"]) < _int(before["floor"]):
+        same_run = False
+    if same_run:
+        for field_ in ("hp", "gold", "act", "deck"):
+            was, now = before.get(field_), here.get(field_)
+            if was is not None and now is not None and was != now:
+                change[field_] = [was, now]
+        if change:
+            change["max_hp"] = here.get("max_hp")
+            # WHETHER THE ROOM CHANGED, as a boolean and never as the previous
+            # screen's NAME: a screen name is wire vocabulary and only the two
+            # names on THIS page are exempt from the blindness scrubber
+            # (`observation`'s `allow`). It is what the HP line is gated on --
+            # round two of a fight moving HP is the fight, and the combat page
+            # has already printed the blow that did it.
+            change["room_changed"] = before.get("screen") != here.get("screen")
+    row = {"key": key, "here": here, "change": change,
+           "character": _text(_blob(state, "player").get("character"))}
+    _RUN_MEMORY.clear()
+    _RUN_MEMORY.update(row)
+    try:
+        _DECK_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        _run_store().write_text(json.dumps(row), encoding="utf-8")
+    except OSError:
+        pass
+    return dict(change)
 
 
 def _number_faces(faces: list[dict[str, Any]], field: str

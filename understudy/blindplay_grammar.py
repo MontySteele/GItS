@@ -15,9 +15,9 @@ from understudy import qa_packet
 from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _event_options, _map_nodes,
                                         _map_options, _proceed_option,
-                                        _relic_options, _rest_options,
-                                        _reward_items, _screen_cards,
-                                        map_floor)
+                                        _potion_slots, _relic_options,
+                                        _rest_options, _reward_items,
+                                        _screen_cards, map_floor)
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
@@ -1115,6 +1115,29 @@ def _buy(state: dict[str, Any], cmd: Command) -> Resolution:
     if price is not None and price > gold:
         return _refuse(f"{options[idx]['name']!r} costs {price} gold and you "
                        f"have {gold}")
+    # `EB-662`. SEVENTY-SEVEN GOLD FOR NOTHING, AND NO SCREEN SAID A WORD.
+    #
+    # THE FIND (Kokomi r25 lane 1, item 6). The seat bought a potion with the
+    # belt at 3 of 3; the gold went, the potion never appeared, and no line on
+    # either screen connected the two.
+    #
+    # THE GAME'S OWN PATH TAKES IT. `ExecuteShopPurchase` checks stock and gold
+    # and nothing else, then fires `entry.OnTryPurchaseWrapper(inventory)` --
+    # the merchant's own purchase (`McpMod.Actions.cs:433-502`). Clicking the
+    # shelf in the real UI runs the same wrapper; what the tool does not have
+    # is the player looking at a full belt before clicking. So the refusal is
+    # this page's, and it is the same refusal `EB-341` already makes one screen
+    # over, where a potion REWARD onto a full belt is not claimed: same two
+    # numbers off the same two feed fields, same way out named.
+    if (_fold(options[idx].get("kind")) == "potion"
+            and _potion_slots(state)
+            and len(_potions(state)) >= _potion_slots(state)):
+        return _refuse(
+            f"your potion belt is full: {len(_potions(state))} of "
+            f"{_potion_slots(state)} slots. The game's purchase takes the gold "
+            f"whether or not the potion has anywhere to go, so this page will "
+            f"not buy {options[idx]['name']!r} until a slot is free -- drink "
+            f"one (`use potion`) or drop one (`drop potion`) first")
     return Resolution(True, "buy", {"action": "shop_purchase", "index": idx},
                       _bought(options[idx], price))
 
@@ -1299,7 +1322,52 @@ def _skip(state: dict[str, Any]) -> Resolution:
         verb = ("cancel_selection" if st == "card_select"
                 else "combat_confirm_selection")
         return Resolution(True, "skip", {"action": verb}, {})
+    # `EB-702`. THE VERB THAT WAS A DEAD END ON THE SCREEN ABOVE ITS OWN
+    # INVITATION.
+    #
+    # THE FIND (Kokomi r30 lane 1, refusal 4). "`skip` at the boss reward
+    # screen -- refused with *there is nothing here to skip*, on a screen whose
+    # card list had said *You may skip this*. `proceed` worked."
+    #
+    # THE TWO SCREENS ARE TWO SCREENS AND THE PAGE NEVER SAID SO. A reward
+    # screen's card row is an OFFER rather than the offer's own page: `choose`
+    # opens `NCardRewardSelectionScreen` and the skip lives THERE, on that
+    # screen's own ALTERNATIVE button, which is the only control
+    # `ExecuteSkipCardReward` can press -- "Card reward selection screen is
+    # not open" otherwise (`McpMod.Actions.cs:599`). So one post cannot skip an
+    # offer that has not been opened, and the refusal the seat met said nothing
+    # about either half. It names both now -- the offer, and the verb that
+    # reaches its page -- and `blindplay_render` prints the same sentence
+    # beside the row, so the invitation and the verb agree before a seat spends
+    # an action finding out.
+    if st == "rewards":
+        cards = _card_offers(state)
+        if cards:
+            return _refuse(
+                "the card offer on this screen has not been opened yet, so "
+                "there is no card reward here to skip; the skip is on the "
+                "offer's own page",
+                *[f'choose "{name}"' for name in cards])
     return _refuse("there is nothing here to skip")
+
+
+def _card_offers(state: dict[str, Any]) -> list[str]:
+    """The names of the CARD rows a reward screen is offering (`EB-702`).
+
+    Named through `_reward_option`, the same reader the page names its rows
+    with, so the form a refusal hands back is a form that resolves; typed off
+    the WIRE's own `type`, because a row whose printed name IS its kind prints
+    no kind at all (`_reward_kind`, `EB-661`) and the bare `Card` row is
+    exactly that shape.
+    """
+    out: list[str] = []
+    for raw in _reward_items(state):
+        if not isinstance(raw, dict) or _fold(raw.get("type")) != "card":
+            continue
+        option = _reward_option(raw)
+        if option["enabled"] and option["name"]:
+            out.append(option["name"])
+    return out
 
 
 def _proceed(state: dict[str, Any]) -> Resolution:
