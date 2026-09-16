@@ -56,7 +56,7 @@ public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kamisato Ayaka — Soumetsu"),
-        ("description", "At the end of your turn, deal 8 [gold]Cryo[/gold] damage to ALL enemies. After {PowerAmount:diff()} turns, deal 16 [gold]Cryo[/gold] damage to ALL enemies."),
+        ("description", "At the end of each of your next {PowerAmount:diff()} turns, deal 8 [gold]Cryo[/gold] damage to ALL enemies. On the last of them, deal 16 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

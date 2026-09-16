@@ -829,13 +829,21 @@ public sealed class AurousBlazePower : PowerModel, ILocalizationProvider
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// Kamisato Ayaka, Soumetsu: "For 2 turns, at the end of your turn deal 8 Cryo
-/// damage to ALL enemies. After 2 turns, deal 16 Cryo damage to ALL
-/// enemies."
+/// Kamisato Ayaka, Soumetsu: "At the end of each of your next 2 turns, deal 8
+/// Cryo damage to ALL enemies. On the last of them, deal 16 more."
 ///
 /// FIRE, TICK, AND FIRE AGAIN AT ZERO -- both on the same turn when the clock
-/// runs out, because "then" is what happens after the two turns and the second
-/// turn's own 8 is one of them.
+/// runs out, because the last turn's own 8 is one of the two and the finale
+/// lands beside it. So the last turn pays 24.
+///
+/// `EB-698`. THE TEXT IS THE FIX AND THE NUMBERS ARE UNTOUCHED. Both surfaces
+/// used to say "after 2 turns, deal 16", which reads as a third event after
+/// the clock and says nothing about which of the turns in front of you pays
+/// which number; three plays and the seat never knew what was about to land
+/// (Kokomi r30 lane 1). The card and this badge now say the same sentence: 8
+/// on every one of them, 16 more on the last. The badge carries the live count
+/// on top, because `{Amount}` is TURNS REMAINING and is one of the three dumb
+/// variables `PowerModel.GetDumbHoverTip` binds on the static row.
 /// </summary>
 public sealed class SoumetsuPower : PowerModel, ILocalizationProvider
 {
@@ -845,9 +853,9 @@ public sealed class SoumetsuPower : PowerModel, ILocalizationProvider
         ("description",
             "At the end of your turn, deal "
           + $"[blue]{CompanionOverhaulLaw.SoumetsuDamage}[/blue] [gold]Cryo[/gold] "
-          + "damage to ALL enemies, then "
-          + $"[blue]{CompanionOverhaulLaw.SoumetsuFinale}[/blue] when it ends. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+          + "damage to ALL enemies. [blue]{Amount}[/blue] "
+          + "{Amount:plural:turn|turns} left; on the last, "
+          + $"[blue]{CompanionOverhaulLaw.SoumetsuFinale}[/blue] more."),
     };
 
     public override PowerType Type => PowerType.Buff;

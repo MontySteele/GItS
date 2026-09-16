@@ -2182,6 +2182,26 @@ at first, which nothing stripped, and the arm's starter reached the
 round-5 seat printing the tag).
 
 
+## proto_mi_ayaka_soumetsu
+
+`EB-698` (Kokomi round 30, lane 1, (c)). The card said "at the end of your
+turn, deal 8 Cryo damage to ALL enemies. After 2 turns, deal 16 Cryo damage to
+ALL enemies", and the buff said "8 ... then 16 when it ends, lasts 1 turn".
+Three plays, and the seat never knew which number was about to land: "after 2
+turns" reads as a third event happening AFTER the clock, and neither surface
+said how many 8s there are.
+
+What the code does -- `SoumetsuPower.FireVolley` and its twin
+`effects.inazuma_overhaul_turn_end` -- is one 8 at the end of each of the N
+turns and, on the LAST of them, the 16 beside it. So the last turn pays 24,
+which `test_soumetsu_sweeps_twice_then_ends_on_the_big_one` has measured all
+along. Both surfaces now say that sentence in that order; the badge carries
+the live turns-remaining count on top, because `{Amount}` is one of the three
+dumb variables `PowerModel.GetDumbHoverTip` binds on a static row. Neither
+number moved, and this supersedes `EB-379`'s wording for this row only --
+Kyouka keeps "after 2 turns", where the finale really is the only thing that
+happens then.
+
 ## proto_mi_gorou_war_banner
 
 `EB-403` (Kokomi round 10, run 1, (c) 1). The face printed "Gain 2 Dexterity
