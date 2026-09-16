@@ -938,7 +938,11 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead.",
+   # `EB-660`: AND THE PLAN LINE, which this face could always have written
+   # and never did -- the r25 seat wrote a Plan with Feint, found the number
+   # by testing, and "did not know what it had written". Every other
+   # Plan-capable row prints its line; this one is no different.
+   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.",
    effects: [{op: conditional, if: plan_carried_out_this_turn,
               then: [{op: damage, amount: 10, target: enemy}],
               else: [{op: damage, amount: 5, target: enemy}]}],

@@ -2768,6 +2768,20 @@ def test_feints_two_printed_numbers_upgrade_by_different_amounts(overhaul):
     assert up.plan[0]["amount"] == 13
 
 
+def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
+    """`EB-660`. "Feint's face prints no Plan line although it can be written;
+    the seat found it by testing and did not know what it had written" (round
+    25 lane 1, fight 2). Every other Plan-capable row prints its line and this
+    one had a `plan:` list all along, so the silence was the face's and not
+    the rule's. The number is the Plan's own, printed live, so a Smithed copy
+    prints 13 without a second string.
+    """
+    faces = _faces()
+    assert faces["proto_kk_feint"].endswith(
+        "[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.")
+    assert _row("proto_kk_feint").plan[0]["amount"] == 10
+
+
 def test_read_the_field_bottoms_the_costliest_of_the_top_two(overhaul):
     """THE PILOT'S CHOICE, STATED. The sim has no human, so `scry_bottom`
     bottoms the highest-cost card of the N it looked at -- the crude legible
