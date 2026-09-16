@@ -491,6 +491,11 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     "KLEEMOD-ARM_EMPTY_FIELD",
                     # `EB-573`: what a merge keeps besides the Mine.
                     "KLEEMOD-ARM_MERGE_RIDERS",
+                    # `EB-709`: how many Plans a doubled carry-out is, on the
+                    # one card that doubles one. A per-Plan reader's own face
+                    # states its rate truthfully; what no face said is that a
+                    # card can make the queue longer than the queue looks.
+                    "KLEEMOD-ARM_PLAN_TWICE",
                     # `EB-723`: `Encore` became the SIXTH of these when the
                     # reframe's rows left. Nothing on the prototype surface
                     # prints the word any more, so it is no longer an arm
@@ -1289,3 +1294,38 @@ def test_the_plan_tip_is_over_the_keyword_ceiling_and_the_lint_carries_it():
     assert len(body) == 211
     assert "PlanKey" in lint.EXCEPTIONS
     assert "EB-538" in lint.EXCEPTIONS["PlanKey"]
+
+
+def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
+    """`EB-709`. THE RULE IS ON THE CARD THAT DOUBLES.
+
+    THE FIND (Kokomi r31 lane 2, (c)). Tide Wall paid 6 and then 9 under
+    Second Wave, and the seat could not tell from any face whether the doubled
+    entry counted as one Plan or two for a per-Plan counter. It counts as two
+    (`EB-501`, `EB-718`: every carry-out draws off the drain-local counter),
+    and no surface said so.
+
+    DERIVED FROM THE CLAUSE, never a list of ids: `doubles_a_carry_out` asks
+    the row, so a second doubler carries the sentence the day its row exists.
+    """
+    rows = {row["id"]: row for row in proto._rows()}
+    doublers = {rid for rid, row in rows.items()
+                if gen.doubles_a_carry_out(row)}
+    assert doublers == {"proto_kk_second_wave"}
+
+    src = (PROTOTYPE_DIR / "ProtoKkSecondWave.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForPlanTwice(" in src
+    # And the definition of `Plan` still prints beside it.
+    assert "ArmKeywordTips.ForPlan(" in src
+
+    tips = TIPS_CS.read_text(encoding="utf-8")
+    assert ("\"A [gold]Plan[/gold] carried out twice counts as two. Every \"" in tips)
+    assert "clause that counts [gold]Plans[/gold] carried out pays for " in tips
+    # The title row is registered, or the tip renders with a raw key.
+    assert 'ArmKeywordTips.PlanTwiceKey + ".title"' in MOD_CS.read_text(
+        encoding="utf-8")
+
+    # Never on a row that merely READS the count: those faces are honest.
+    scout = (PROTOTYPE_DIR / "ProtoKkScoutAhead.cs")
+    if scout.exists():
+        assert "ForPlanTwice" not in scout.read_text(encoding="utf-8")

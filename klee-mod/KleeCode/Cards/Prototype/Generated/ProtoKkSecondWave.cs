@@ -38,7 +38,7 @@ public sealed class ProtoKkSecondWave : CustomCardModel, ICharacterCard, IPlanne
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanTwice(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_second_wave");
 

@@ -1025,6 +1025,17 @@ def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
                for clause in card.get("plan") or [])
 
 
+def doubles_a_carry_out(card: dict) -> bool:
+    """`EB-709`: does this row make one queued entry resolve more than once?
+
+    The clause is `next_plan_extra_carry_out` and today Second Wave is its
+    only writer. Asked of the ROW rather than listed by id so a second doubler
+    carries the sentence the day its row exists.
+    """
+    return any(clause.get("op") == "next_plan_extra_carry_out"
+               for clause in card.get("plan") or [])
+
+
 def arm_keywords_printed(description: str) -> list[ArmKeyword]:
     """The arm keywords this face prints as keywords, in table order."""
     printed = set(golded_tokens(description))
@@ -13461,6 +13472,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if plan_applies_element(card, profile) and not elemental:
             tips_expr = (
                 "ArmKeywordTips.ForPlanElement("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # `EB-709`, and it sits beside the rider above it for that rider's
+        # reason: a fact about THIS card, read before the definition of the
+        # word `Plan`. DERIVED FROM THE CLAUSE rather than declared per row --
+        # a row whose Plan carries `next_plan_extra_carry_out` is a row that
+        # makes the queue longer than the queue looks, so a second doubler
+        # carries the sentence the day its row exists.
+        if doubles_a_carry_out(card):
+            tips_expr = (
+                "ArmKeywordTips.ForPlanTwice("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the

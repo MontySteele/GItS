@@ -516,6 +516,10 @@ public static class KleeMod
                     // the play.
                     [Cards.ArmKeywordTips.PlanElementKey + ".title"] =
                         "Hydro on the carry-out",
+                    // `EB-709`. The rider, not a keyword: how many Plans a
+                    // doubled carry-out is, on the card that doubles it.
+                    [Cards.ArmKeywordTips.PlanTwiceKey + ".title"] =
+                        "Twice means two Plans",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see
