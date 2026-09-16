@@ -12533,3 +12533,67 @@ def test_a_screen_inside_one_act_prints_no_act_block():
     """The gate is the act number and nothing else."""
     blindplay.observe(_act_state(1, 16, 40, 210))
     assert "the act changed" not in blindplay.observe(_act_state(1, 17, 40, 210))
+
+
+# ------------- EB-706: both landings of a telegraph under a multiplier ------
+
+def _weak_intent_state(label: str = "11", weak: int = 2,
+                       vulnerable: int = 0) -> dict:
+    """A combat where the attacking body wears Weak and telegraphs a number."""
+    state = copy.deepcopy(combat_state())
+    enemy = state["battle"]["enemies"][0]
+    enemy["intents"] = [{"type": "Attack", "label": label,
+                         "title": "Attack",
+                         "description": "This enemy intends to attack."}]
+    enemy["status"] = ([{"id": "WEAK", "name": "Weak", "amount": weak,
+                         "type": "Debuff", "keywords": [],
+                         "description": "Deals 25% less damage."}]
+                       if weak else [])
+    if vulnerable:
+        state["player"]["status"] = [
+            {"id": "VULNERABLE", "name": "Vulnerable", "amount": vulnerable,
+             "type": "Debuff", "keywords": [],
+             "description": "Takes 50% more damage."}]
+    return state
+
+
+def test_a_telegraph_under_weak_prints_both_landings():
+    """`EB-706`. Seen to FAIL: the r31 lane-1 seat read 11 and took 8, then
+    read 6 under Weak 2 and took 6 -- one field carrying two readings, with
+    nothing on the page saying so. The figure is still the game's; what the
+    page adds is the other landing and which is which.
+    """
+    page = blindplay.observe(_weak_intent_state("11", weak=2))
+    assert "Folded through the **Weak 2** on this body, 11 lands as 8." in page
+    assert "If the figure above already counts it, it lands as 11." in page
+
+
+def test_the_fold_note_names_the_frame_that_makes_the_two_readings():
+    """The row's second ask: find why it re-prints only sometimes. The getter
+    folds on a frame where it can resolve the local player and returns the raw
+    move damage on any other, and the note says exactly that, once."""
+    page = blindplay.observe(_weak_intent_state("11", weak=2))
+    assert "only on a frame where it can resolve the local player" in page
+    assert page.count("on any other frame it returns the move's raw damage") == 1
+
+
+def test_vulnerable_on_the_player_folds_the_same_way():
+    """The player's half of the pair, off the same two game constants."""
+    page = blindplay.observe(_weak_intent_state("8", weak=0, vulnerable=1))
+    assert "Folded through the **Vulnerable 1** on you, 8 lands as 12." in page
+
+
+def test_a_multi_hit_telegraph_folds_per_hit_and_prints_the_total():
+    """`6x3` is three hits of six; the fold is per hit and the page says the
+    total both ways, which is the number Block is planned against."""
+    page = blindplay.observe(_weak_intent_state("6x3", weak=1))
+    assert "6 each lands as 4 each, 12 in all" in page
+    assert "it lands as 18 in all" in page
+
+
+def test_a_board_with_no_multiplier_prints_no_fold_line():
+    """The gate is a multiplier standing on the board. Nothing up, nothing
+    said -- the page does no arithmetic on a number nobody is checking."""
+    page = blindplay.observe(_weak_intent_state("11", weak=0))
+    assert "Folded through" not in page
+    assert "raw damage" not in page

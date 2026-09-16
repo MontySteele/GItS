@@ -800,6 +800,109 @@ def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
     return []
 
 
+# `EB-706`. THE INTENT NUMBER FOLDED WEAK ON SOME SCREENS AND NOT OTHERS.
+#
+# THE FIND. "r31 lane 1 read 11 and took 8, then read 6 under Weak 2 and took
+# 6; r27 lane 2 saw 7 re-print to 5. The number a seat plans Block against
+# cannot be trusted."
+#
+# AND THE "SOMETIMES" IS IN THE GAME'S OWN GETTER, which the row asked for.
+# `AttackIntent.GetSingleDamage` (decompiled from `sts2.dll`, v0.111.0) is:
+#
+#     decimal num = DamageCalc();
+#     Player me = LocalContext.GetMe(owner.CombatState);
+#     if (me != null)
+#         num = Hook.ModifyDamage(..., ModifyDamageHookType.All, ...);
+#     return Math.Max(0, (int)num);
+#
+# So the label folds EVERY modifier -- the enemy's Weak, the player's
+# Vulnerable, Strength -- on a frame where the local player resolves, and
+# returns the RAW move damage on a frame where `LocalContext.GetMe` answers
+# null. The bridge asks for the label on whatever frame the poll lands on
+# (`McpMod.StateBuilder.cs:1606`), so both answers reach this page under one
+# field name and nothing on the wire says which one arrived. The seat's two
+# reads are that pair exactly: 11 raw is 8 through Weak (11 x 0.75, truncated),
+# and 7 raw is 5.
+#
+# THE PAGE DOES NO ARITHMETIC ON THE GAME'S NUMBER AND CLAIMS NEITHER. It
+# prints the multiplier the board is standing in and BOTH landings, which is
+# `PER_HIT_NOTE`'s shape one field over and for the same reason: two readings
+# are both live, both have been seen, and a page that picks one is guessing on
+# the seat's behalf.
+#
+# THE MULTIPLIERS ARE THE GAME'S OWN CONSTANTS. `WeakPower.CanonicalVars` is
+# `DamageDecrease 0.75`, `VulnerablePower.CanonicalVars` is `DamageIncrease
+# 1.5`, and both truncate to an int at the end (`(int)num`). Both can be moved
+# by a relic or a power -- Paper Krane and Debilitate on Weak, Paper Phrog and
+# Cruelty on Vulnerable -- and the note says so rather than pretending the
+# constant is the whole rule.
+INTENT_FOLD_NOTE = (
+    "*An intent's figure is the game's own `GetIntentLabel`, and that getter "
+    "folds the board's multipliers in only on a frame where it can resolve the "
+    "local player; on any other frame it returns the move's raw damage. Both "
+    "have been seen on this wire under one field name, and nothing on the feed "
+    "says which one a given read is -- so where a multiplier is standing, the "
+    "line above prints both landings and this page picks neither. The "
+    "multipliers used are the game's own constants (Weak x0.75, Vulnerable "
+    "x1.5, truncated); a relic or power that moves either -- Paper Krane, "
+    "Debilitate, Paper Phrog, Cruelty -- is not in this arithmetic.*")
+
+_WEAK_MULTIPLIER = 0.75
+_VULNERABLE_MULTIPLIER = 1.5
+
+
+def _stacks_of(blob: dict[str, Any], word: str) -> int:
+    """How many stacks of a named power this body is wearing, or 0."""
+    for power in blob.get("powers") or []:
+        if _fold(power.get("name")) == word and isinstance(
+                power.get("stacks"), int):
+            return int(power["stacks"])
+    return 0
+
+
+def _intent_fold_lines(enemy: dict[str, Any],
+                       you: dict[str, Any]) -> list[str]:
+    """`EB-706`: both landings of a telegraph, where a multiplier stands.
+
+    Empty on every board where neither Weak nor Vulnerable is up, which is
+    most of them, and empty for a part whose label is not a plain number or a
+    plain `NxM` -- the two shapes this page can take apart without guessing.
+    """
+    weak = _stacks_of(enemy, "weak")
+    vulnerable = _stacks_of(you, "vulnerable")
+    if not weak and not vulnerable:
+        return []
+    multiplier = ((_WEAK_MULTIPLIER if weak else 1.0)
+                  * (_VULNERABLE_MULTIPLIER if vulnerable else 1.0))
+    wearing = [w for w in (
+        f"the **Weak {weak}** on this body" if weak else "",
+        f"the **Vulnerable {vulnerable}** on you" if vulnerable else "") if w]
+    out: list[str] = []
+    for intent in enemy.get("intents") or []:
+        if _fold(intent.get("type")) != "attack":
+            continue
+        label = str(intent.get("label") or "").strip()
+        multi = _MULTI_HIT_LABEL.match(label)
+        if multi:
+            each, hits = int(multi.group(1)), int(multi.group(2))
+        elif label.isdigit():
+            each, hits = int(label), 1
+        else:
+            continue
+        folded = max(0, int(each * multiplier))
+        if folded == each:
+            continue
+        shown = f"{each} each" if hits > 1 else str(each)
+        lands = (f"{folded} each, {folded * hits} in all" if hits > 1
+                 else str(folded))
+        already = f"{each * hits} in all" if hits > 1 else str(each)
+        out.append(f"      Folded through {' and '.join(wearing)}, {shown} "
+                   f"lands as {lands}. If the figure above already counts "
+                   f"{'them' if len(wearing) > 1 else 'it'}, it lands as "
+                   f"{already}.")
+    return out
+
+
 def _render_intents(intents: list[dict[str, str]]) -> list[str]:
     """Every component of one telegraph, one line each (`EB-342`).
 
@@ -1657,6 +1760,11 @@ def render(obs: dict[str, Any]) -> str:
             if e.get("replaced"):
                 out.append(ENEMY_REPLACED_LINE.format(was=e["replaced"]))
             out += _render_intents(e["intents"])
+            # `EB-706`: and where a multiplier stands that the game's own label
+            # sometimes folds and sometimes does not, both numbers -- under the
+            # telegraph they are about, because a seat plans Block against THIS
+            # body's figure.
+            out += _intent_fold_lines(e, you)
             for pw in e["powers"]:
                 out.append(_render_power(pw, "    "))
                 # `EB-605`: and where a Bomb badge's headline and its list of
@@ -1689,6 +1797,11 @@ def render(obs: dict[str, Any]) -> str:
         # `EB-607`: and where an enemy is wearing Strength, where the number
         # on its icon came from -- one field, printed unchanged.
         out += _intent_source_note(c["enemies"])
+        # `EB-706`: and WHY the figure above can be either number, once per
+        # screen, beside the provenance note that answers the same question
+        # about Strength.
+        if any(_intent_fold_lines(e, you) for e in c["enemies"]):
+            out += ["", INTENT_FOLD_NOTE]
         if you["powers"] or any(e["powers"] for e in c["enemies"]):
             out += ["", POWER_NOTE]
         # `EB-701`: and where something on this board fires at the END of your
