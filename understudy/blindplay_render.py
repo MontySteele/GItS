@@ -1569,7 +1569,7 @@ def render(obs: dict[str, Any]) -> str:
                 and any(card["title"] == "Ethereal Spotlight"
                         for card in c["hand"])):
             out += ["", SPOTLIGHT_WINDOW_NOTE]
-        out += ["", "## The other side", ""]
+        out += ["", _OTHER_SIDE, ""]
         for e in c["enemies"]:
             # `EB-496`: the letter in brackets after the name, where the card
             # face already carries its element -- the handle at a glance,
@@ -1974,6 +1974,46 @@ def assert_one_page(text: str) -> None:
         raise BlindPlayError(
             "this page printed a section twice, so a reader would read the "
             "same board as two boards: " + ", ".join(repr(h) for h in twice))
+    _assert_one_enemy_list(text)
+
+
+#: `EB-705`. The enemy block, and the body rows inside it. A body row is the
+#: one bullet in that section that opens with a bold name; its intents, powers
+#: and the replaced-body line are all indented under it.
+_OTHER_SIDE = "## The other side"
+_BODY_ROW = re.compile(r"^- \*\*.+", re.MULTILINE)
+
+
+def _assert_one_enemy_list(text: str) -> None:
+    """One body per board, and one board per screen (`EB-705`).
+
+    THE FIND. The enemy list printed TWICE on multi-enemy screens, footnotes
+    included, after `EB-694`'s dedupe -- so the copies were not equal field for
+    field and the second one arrived as three more creatures. `EB-694`'s own
+    reasoning is why the check belongs here: the render appends this block at
+    exactly one place, so a doubled list is either a feed that repeated itself
+    or a caller that appended the section twice, and neither is a screen a seat
+    should have to read.
+
+    IT NEEDS NO IDS BECAUSE THE PAGE ALREADY MINTED THEM. `_enemy_names` gives
+    every body on a board a printed name of its own -- `Slug (1)`, `Slug (2)` --
+    and `_enemy_handles` a letter, so two identical body rows in one enemy
+    block are one body printed twice and can be nothing else.
+    """
+    if _OTHER_SIDE not in text:
+        return
+    block = text.split(_OTHER_SIDE, 1)[1]
+    cut = _HEADING.search(block)
+    if cut:
+        block = block[:cut.start()]
+    seen: dict[str, int] = {}
+    for row in _BODY_ROW.findall(block):
+        seen[row] = seen.get(row, 0) + 1
+    twice = sorted(r for r, n in seen.items() if n > 1)
+    if twice:
+        raise BlindPlayError(
+            "this page printed the enemy list twice, so a reader would count "
+            "the board as two boards: " + ", ".join(repr(r) for r in twice))
 
 
 def observe(state: dict[str, Any]) -> str:
