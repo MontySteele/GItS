@@ -834,7 +834,36 @@ def _per_hit_note(you: dict[str, Any],
 # element it would deal, and the list of charge sizes is its own clause.
 _BOMB_FORECAST = re.compile(
     r"set off here deals[^.]*?(Pyro|Hydro|Electro|Cryo)", re.I)
-_BOMB_SIZES = re.compile(r"bomb sizes here:\s*([0-9/ ]+)", re.I)
+#
+# `EB-755` WIDENED THE SIZES CLAUSE TWICE OVER, and the first widening is a
+# defect this row found rather than one it set out to fix: the live face reads
+# `Bomb sizes here, OLDEST FIRST: ...` (`ProtoBombPower.Bombs`, since `EB-432`
+# put the order on the badge) and this pattern demanded the colon immediately
+# after `here`, so on the real badge it matched NOTHING and the note it gates
+# has been silent in the game while its fixture -- which spelled the clause
+# without the qualifier -- went on passing. The qualifier is now skipped
+# wherever it appears.
+#
+# AND THE CAPTURE ADMITS THE ORDINALS. The list is `1st 12 / 2nd 8` from this
+# row on, so the class can no longer be digits and slashes; it runs to the
+# clause's own comma instead, which is what kept `including {Mines} Mines` and
+# `growing each turn` out of the numbers before and still does.
+_BOMB_SIZES = re.compile(r"bomb sizes here[^:.]*:\s*([^,.]+)", re.I)
+
+# One charge per `/`-separated item, and the size is the LAST number in it:
+# `1st 12` is the twelfth-size charge in first position, not a charge of 1 and
+# a charge of 12 (`EB-755`).
+
+
+def _bomb_charge_sizes(clause: str) -> list[int]:
+    """The charge sizes in a Bomb badge's sizes clause, in set-off order."""
+    out: list[int] = []
+    for item in clause.split("/"):
+        found = _NUMBER.findall(item)
+        if found:
+            out.append(int(found[-1]))
+    return out
+
 
 
 def _bomb_forecast_note(power: dict[str, Any],
@@ -853,7 +882,7 @@ def _bomb_forecast_note(power: dict[str, Any],
     forecast, sizes = _BOMB_FORECAST.search(text), _BOMB_SIZES.search(text)
     if not forecast or not sizes or not isinstance(power.get("stacks"), int):
         return []
-    charges = [int(n) for n in _NUMBER.findall(sizes.group(1))]
+    charges = _bomb_charge_sizes(sizes.group(1))
     total = sum(charges)
     if not charges or total == power["stacks"]:
         return []
