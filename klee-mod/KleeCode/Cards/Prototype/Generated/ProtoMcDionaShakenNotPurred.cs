@@ -65,7 +65,7 @@ public sealed class ProtoMcDionaShakenNotPurred : CustomCardModel, ICompanionCar
             new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
             new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new BlockVar("PowerAmount", 5m, ValueProp.Move)
+            new UnsourcedBlockVar("PowerAmount", 5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

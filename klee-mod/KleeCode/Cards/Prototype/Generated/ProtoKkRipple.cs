@@ -62,7 +62,7 @@ public sealed class ProtoKkRipple : CustomCardModel, ICharacterCard, IPlannedCar
         new List<DynamicVar>
         {
             new BlockVar(2m, ValueProp.Move),
-            new BlockVar("PlanBlock", 4m, ValueProp.Move)
+            new UnsourcedBlockVar("PlanBlock", 4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

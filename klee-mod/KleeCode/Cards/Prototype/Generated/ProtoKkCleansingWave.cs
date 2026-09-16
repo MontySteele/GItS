@@ -61,7 +61,7 @@ public sealed class ProtoKkCleansingWave : CustomCardModel, ICharacterCard, IPla
         new List<DynamicVar>
         {
             new BlockVar(5m, ValueProp.Move),
-            new BlockVar("PlanBlock", 10m, ValueProp.Move)
+            new UnsourcedBlockVar("PlanBlock", 10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

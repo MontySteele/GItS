@@ -61,7 +61,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
         new List<DynamicVar>
         {
             new DynamicVar("Scry", 3m),
-            new BlockVar("PlanBlock", 10m, ValueProp.Move)
+            new UnsourcedBlockVar("PlanBlock", 10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

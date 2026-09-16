@@ -6300,15 +6300,24 @@ def build_vars(card: dict) -> list[str]:
             # duplicate "PowerAmount" key throws in the DynamicVarSet
             # constructor at reward time (2026-07-23 softlock).
             # `EB-513`: A POWER THAT PAYS THE CARD'S OWN PRINTED BLOCK GETS A
-            # `BlockVar`, so the printed number folds Frail the way the card's
-            # primary Block does. `BlockVar.UpdateCardPreview` runs
+            # BLOCK VAR, so the printed number folds Frail the way the card's
+            # primary Block does. The var's `UpdateCardPreview` runs
             # `Hook.ModifyBlock` and writes `PreviewValue`, which is what
             # `{PowerAmount:diff()}` renders; `IntValue` is `(int)BaseValue`
             # and is what the Apply hands the power, so the fold happens ONCE
             # -- on the face here and on the payout in the power's own `Pay`
             # -- and the two numbers agree.
+            # `EB-787`: AND IT IS `UnsourcedBlockVar` RATHER THAN THE GAME'S
+            # OWN `BlockVar`, because the game's own reads `card.Enchantment`
+            # as well, and the payout cannot: `Pay` calls `GainBlock` with a
+            # null `CardPlay`, so `Hook.ModifyBlock` gets a null card source
+            # and no enchantment is ever consulted. A Nimble on Barbara moved
+            # the rider 3 to 5 on the face and paid 3 (live-looks-8c, #575).
+            # The subclass makes the preview run the payout's own call --
+            # same hooks, same null source -- so Frail still folds and the
+            # enchantment no longer reaches it.
             if eff.get("power") in BLOCK_PAYING_POWERS:
-                out.append('new BlockVar("PowerAmount", '
+                out.append('new UnsourcedBlockVar("PowerAmount", '
                            f'{int(eff["amount"])}m, ValueProp.Move)')
             else:
                 out.append(
@@ -6418,17 +6427,26 @@ def build_vars(card: dict) -> list[str]:
         # and a plain `DynamicVar` under this token reaches no hook, so Coral
         # Bulwark printed 8 and paid 6 under Frail 2 while the Block sentence
         # beside it had already folded the same Frail (r25 lane 1, fight 6).
-        # THE GAME'S OWN `BlockVar` UNDER ITS OWN NAME, not a subclass: the
-        # class has a `(name, block, props)` constructor, and `UpdateCardPreview`
-        # there IS `Hook.ModifyBlock` -- so the mod does not restate Frail's or
+        # A BLOCK VAR UNDER ITS OWN NAME: the class has a
+        # `(name, block, props)` constructor, and `UpdateCardPreview` there IS
+        # `Hook.ModifyBlock` -- so the mod does not restate Frail's or
         # Dexterity's arithmetic anywhere. This is `EB-513`'s fix one surface
-        # over, where a companion's printed Block became a `BlockVar` for the
+        # over, where a companion's printed Block became a block var for the
         # same reason. `IntValue` is still `(int)BaseValue`, so the clause
         # queues the printed number and the fold happens ONCE, on the way out.
+        # `EB-787`: AND IT IS `UnsourcedBlockVar` RATHER THAN THE GAME'S OWN
+        # `BlockVar`, for the reason `BLOCK_PAYING_POWERS` above states at
+        # length. `KokomiPlan.Kind.Block` pays with
+        # `GainBlock(kokomi, plan.Amount, ValueProp.Move, null)`, and that
+        # trailing null is the `CardPlay`: the payout has no card source, so
+        # it consults no enchantment, so the FACE must not either. The
+        # companion rider was the surface the defect was caught on
+        # (live-looks-8c, #575); this is the same declaration one card over.
         # THE FLAT CLAUSE ONLY: the scaled Block clauses print a RATE, and a
         # percentage folded into a rate is a number no card pays.
         elif key == "plan_block" and plan_line[index].get("op") == "block":
-            out.append(f'new BlockVar("{var}", {amount}m, ValueProp.Move)')
+            out.append(
+                f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
     if added_encore_salon(card) is not None:

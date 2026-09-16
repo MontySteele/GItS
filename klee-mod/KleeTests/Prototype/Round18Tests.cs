@@ -280,6 +280,14 @@ public class Round18Tests
         //
         // ONE FOLD: `IntValue` is `(int)BaseValue`, so the Apply still hands the
         // power the PRINTED number and the fold happens once, on the way out.
+        //
+        // `EB-787`: THE CLASS IS `UnsourcedBlockVar`, which IS a `BlockVar`
+        // and whose `UpdateCardPreview` IS `Hook.ModifyBlock` -- so every
+        // sentence above still holds. What it drops is the game class's
+        // SECOND fold, the card's own enchantment, which the payout cannot
+        // apply: `Pay` passes a null `CardPlay`, so `Hook.ModifyBlock` gets no
+        // card source. A Nimble moved Barbara's rider 3 to 5 on the face and
+        // paid 3 (live-looks-8c, #575). `EnchantedRiderTests` is the pin.
         foreach (var card in new CardModelUnderTest[]
                  {
                      new(new ProtoMcDionaShakenNotPurred()),
@@ -288,7 +296,7 @@ public class Round18Tests
                  })
         {
             var amount = card.Var("PowerAmount");
-            var block = Assert.IsType<BlockVar>(amount);
+            var block = Assert.IsType<UnsourcedBlockVar>(amount);
             Assert.Equal(ValueProp.Move, block.Props);
             Assert.True(block.IntValue > 0);
         }

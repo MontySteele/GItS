@@ -62,7 +62,7 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
         new List<DynamicVar>
         {
             new BlockVar(4m, ValueProp.Move),
-            new BlockVar("PlanBlock", 4m, ValueProp.Move),
+            new UnsourcedBlockVar("PlanBlock", 4m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(6m)
         };
 
