@@ -114,12 +114,13 @@ public static class FurinaStage
     /// on every seat at the table under the one prototype switch: in co-op the
     /// other seat is not hers and must not grow a stage.
     /// </summary>
-    /// <remarks>The null test is FIRST and is load-bearing:
-    /// <c>FurinaResources.IsFurina</c> dereferences its argument, so a caller
-    /// with no creature -- a compendium page, a card on a shelf, a hook fired
-    /// on a board being torn down -- would throw rather than answer.</remarks>
+    /// <remarks>`EB-727`: this used to carry its own null test in front of
+    /// the identity read, because <c>FurinaResources.IsFurina</c>
+    /// dereferenced its argument and threw for a caller with no creature.
+    /// The predicate answers for the absent case itself now, so the local
+    /// guard is gone rather than duplicated here.</remarks>
     public static bool LiveFor(Creature? creature) =>
-        creature != null && Enabled && FurinaResources.IsFurina(creature);
+        Enabled && FurinaResources.IsFurina(creature);
 
     // ==================================================================
     // THE VERB SURFACE. Every member below carries the sim leg's signature,

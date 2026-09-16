@@ -1954,6 +1954,66 @@ class _SlowReads(local_tester.RoundSteps):
         pass
 
 
+class _CommandedReads(local_tester.RoundSteps):
+    """A fake seat whose reads finish in a COMMANDED order, not a timed one.
+
+    `EB-730`. The order was bought with `time.sleep` -- 0.30 / 0.20 / 0.05 and
+    the expectation that the short sleeper finishes first -- which is a
+    scheduler assumption, not a fact. Four times on 2026-09-08, whenever two
+    gates ran at once (last: a push gate beside a deploy's validate), a
+    thread that slept 0.05 s was not scheduled again for longer than one that
+    slept 0.30 s, and the test failed; alone it always passed. It blocked a
+    push and a deploy in one minute.
+
+    So the order is COMMANDED instead. Two waits, neither of them a duration:
+
+      * a BARRIER, so every read is genuinely in flight before any of them
+        finishes -- that is the overlap the old sleeps were really buying, and
+        a barrier states it instead of inferring it;
+      * each read then waits until its PREDECESSOR HAS BEEN RECORDED in the
+        pipeline's own `read_order` list, and only then returns. The handoff
+        is on the observable the test asserts about, so a slow box changes how
+        long the test takes and never what it sees.
+
+    The timeouts are deadlock insurance -- a wait that never comes is a
+    failure -- and are deliberately far longer than any scheduling delay.
+    """
+
+    LIMIT = 30.0
+
+    def __init__(self, finish_order, read_order, workers=None):
+        self.finish_order = list(finish_order)
+        #: The pipeline's own completion list, which is also the baton.
+        self.read_order = read_order
+        self.done = []
+        self.spans = []
+        self._lock = threading.Lock()
+        self._barrier = threading.Barrier(workers or len(self.finish_order))
+
+    def stage(self, row):
+        pass
+
+    def read(self, row):
+        tid = row["turn_id"]
+        start = time.monotonic()
+        self._barrier.wait(timeout=self.LIMIT)
+        want = self.finish_order[:self.finish_order.index(tid)]
+        deadline = time.monotonic() + self.LIMIT
+        while list(self.read_order) != want:
+            if time.monotonic() > deadline:
+                raise AssertionError(
+                    f"{tid} waited out its turn: read_order is "
+                    f"{list(self.read_order)}, wanted {want}")
+            time.sleep(0.001)
+        with self._lock:
+            self.spans.append((tid, start, time.monotonic()))
+            self.done.append(tid)
+        return {"turn_id": tid}
+
+    def execute(self, row, record):
+        pass
+
+
 def _overlapped(spans):
     for i, (_, s1, e1) in enumerate(spans):
         for (_, s2, e2) in spans[i + 1:]:
@@ -1986,14 +2046,22 @@ def test_records_stay_per_board_and_in_the_registered_order():
     The reads are made to finish in REVERSE, which is the adversarial case:
     the returned records must still be in the rows' order, keyed to their own
     boards, because that is what the stopping rule and the ledger read.
+
+    `EB-730`: the reversal is COMMANDED (`_CommandedReads`), not timed. It
+    used to be three sleeps trusting the shortest to finish first, which is a
+    scheduler assumption and failed four times on 2026-09-08 whenever a second
+    gate ran beside this one.
     """
     rows = [{"turn_id": f"t0{i}", "position": i} for i in (1, 2, 3)]
-    steps = _SlowReads({"t01": 0.30, "t02": 0.20, "t03": 0.05})
     order = []
+    steps = _CommandedReads(["t03", "t02", "t01"], order)
     out = local_tester.run_pipeline(rows, lane=local_tester.GameLane(),
                                     steps=steps, read_workers=3,
                                     read_order=order)
     assert steps.done == ["t03", "t02", "t01"], "the fake must finish reversed"
+    # And they really did overlap: a reversal produced by three reads run one
+    # after another would satisfy every line above while testing nothing.
+    assert _overlapped(steps.spans)
     assert [r["turn_id"] for r in out] == ["t01", "t02", "t03"]
     assert order == ["t03", "t02", "t01"]
 
@@ -2032,9 +2100,11 @@ def test_reversed_completion_produces_the_same_unrun_set(tmp_path):
                               steps=s_steps, read_workers=1)
     serial_decision = decide()
 
-    # Concurrent, finishing REVERSED.
-    c_steps = _SlowReads({"t01": 0.25, "t02": 0.02})
+    # Concurrent, finishing REVERSED. `EB-730`: commanded, not timed, for the
+    # reason `_CommandedReads` gives -- the same sleep-ordering assumption
+    # lived here, with a smaller margin.
     order = []
+    c_steps = _CommandedReads(["t02", "t01"], order)
     local_tester.run_pipeline(serial_rows, lane=local_tester.GameLane(),
                               steps=c_steps, read_workers=2, read_order=order)
     assert c_steps.done == ["t02", "t01"]

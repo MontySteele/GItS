@@ -75,6 +75,17 @@ from pathlib import Path
 import yaml
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+
+# `EB-741`, which is `EB-93`'s defect one tool over. EVERY finding this lint
+# prints QUOTES A SHIPPED TITLE, and two shipped Barbara titles carry
+# `U+266A MUSIC NOTE`. `sys.stdout`'s encoding is the CONSOLE's -- cp1252 on a
+# default Windows terminal -- so the first finding on such a title raises
+# `UnicodeEncodeError` at the `print`, and the gate reads as a crash instead of
+# as a report. Green today only because there is no finding, which is not a
+# property a gate gets to rely on.
+from understudy.report import console_safe          # noqa: E402
+
 RELIC_DIRS = (REPO / "klee-mod" / "KleeCode" / "Relics",)
 
 #: `EB-322`. The shadow declaration, and the ONE place its spelling lives on
@@ -144,6 +155,7 @@ def load_relic_names(dirs=RELIC_DIRS):
 
 
 def main(argv):
+    console_safe()          # `EB-741`; see the import.
     sheets = argv[1:]
     if not sheets:
         print("usage: lint_unique_names.py <sheet.yaml> [...]")
