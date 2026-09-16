@@ -26,11 +26,19 @@
 //
 // THE CONTRACT. `KleeMod.Powers.ReactionLog.Snapshot()` returns a
 // List<Dictionary<string, object?>> of primitives -- `reaction`, `source`,
-// `target`, `combat_id` -- and this file hands it straight to the wire under
-// `player.reactions`. An ABSENT key means "no reaction log in this build"; an
-// EMPTY list means "the log is here and nothing reacted this turn". Those are
-// different facts and `understudy/blindplay_board.reaction_log` tells them
-// apart.
+// `target`, `combat_id`, `carried` -- and this file hands it straight to the
+// wire under `player.reactions`. An ABSENT key means "no reaction log in this
+// build"; an EMPTY list means "the log is here and nothing reacted this turn".
+// Those are different facts and `understudy/blindplay_board.reaction_log`
+// tells them apart.
+//
+// `EB-710` ADDED `carried`, and this file needed no edit for it, which is what
+// handing the rows straight through buys. A carried row is one whose reaction
+// resolved after the player ended their last turn -- their own end-of-turn
+// tenants, or the enemy side -- and which no page has printed: the log used to
+// be cleared at the top of the next turn, so "What reacted this turn" read
+// Nothing through a run with six Electro-Charged in it. The mod carries such a
+// row exactly one turn and the page prints it with its window on the line.
 //
 // READ-ONLY. Nothing here resolves a reaction or clears a log. It is a
 // serialiser.

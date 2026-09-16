@@ -952,6 +952,17 @@ def reaction_log(player: dict[str, Any]) -> list[dict[str, str]] | None:
     already on the board and on the panel; what no surface carried was that it
     HAPPENED and off what. `KleeMod.Powers.ReactionLog.Snapshot` is the twin
     and its keys are the contract.
+
+    `EB-710` ADDS `carried`, and it is the state whose absence made the other
+    three a lie for a whole class of beat: a row that resolved after the player
+    ended their last turn -- their end-of-turn tenants, or the enemy side --
+    and that no page has printed yet. Those rows used to be dropped at the top
+    of the next turn without ever reaching a screen, which is why this heading
+    read "Nothing reacted this turn" through a run where Shinobu's Ring reacted
+    six times. A carried row prints with its window said ON THE LINE, because
+    the heading names THIS turn and a row from outside it may not be filed
+    under that word. ABSENT IS FALSE, this section's standing rule: a bridge
+    that does not send the key sends rows reading exactly as they always did.
     """
     rows = player.get("reactions")
     if not isinstance(rows, list):
@@ -959,7 +970,8 @@ def reaction_log(player: dict[str, Any]) -> list[dict[str, str]] | None:
     return [{"reaction": _text(r.get("reaction")),
              "source": _text(r.get("source")),
              "target": _text(r.get("target")),
-             "combat_id": _text(r.get("combat_id"))}
+             "combat_id": _text(r.get("combat_id")),
+             "carried": bool(r.get("carried"))}
             for r in rows
             if isinstance(r, dict) and _text(r.get("reaction"))]
 

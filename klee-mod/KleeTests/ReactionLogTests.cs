@@ -84,6 +84,9 @@ public class ReactionLogTests
     [Fact]
     public void A_new_turn_drops_the_last_turn_s_beats()
     {
+        // `EB-710`: with no `MarkPlayerTurnEnd` between them this is exactly
+        // what it always was -- no mark, no carry. The window that DOES carry
+        // is pinned in `ReactionLogWindowTests`.
         ReactionLog.MarkTurnStart();
         ReactionLog.Note(Reaction.Frozen, Seat.Kokomi().Creature, null, null);
         Assert.Single(ReactionLog.Snapshot());
@@ -156,17 +159,20 @@ public class ReactionLogTests
     }
 
     [Fact]
-    public void The_wire_row_carries_the_four_keys_the_page_reads()
+    public void The_wire_row_carries_the_five_keys_the_page_reads()
     {
         // The key names ARE the contract with
         // `understudy/blindplay_board.reaction_log`, the same discipline
-        // `KokomiPlan.CarriedOutRow` keeps.
+        // `KokomiPlan.CarriedOutRow` keeps. `carried` joined them under
+        // `EB-710`: which side of the player's last end-turn the row is on.
         ReactionLog.MarkTurnStart();
         ReactionLog.Note(Reaction.Swirl, Seat.Kokomi().Creature, null, null);
 
         var row = ReactionLog.Snapshot().Single();
 
-        Assert.Equal(new[] { "reaction", "source", "target", "combat_id" },
-                     row.Keys.ToArray());
+        Assert.Equal(
+            new[] { "reaction", "source", "target", "combat_id", "carried" },
+            row.Keys.ToArray());
+        Assert.Equal(false, row["carried"]);
     }
 }

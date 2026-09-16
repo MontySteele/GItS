@@ -44,11 +44,29 @@ namespace KleeMod.Powers;
 /// </summary>
 public static class ReactionLog
 {
-    /// <summary>One reaction, as the page prints it.</summary>
+    /// <summary>One reaction, as the page prints it.
+    ///
+    /// `EB-710` ADDS <paramref name="Carried"/>: true for a row the player
+    /// page has not had a chance to print yet, because it resolved after they
+    /// ended their turn. See <see cref="MarkTurnStart"/>.
+    /// </summary>
     public readonly record struct Reacted(
-        string Reaction, string Source, string Target, string CombatId);
+        string Reaction, string Source, string Target, string CombatId,
+        bool Carried = false);
 
     private static readonly List<Reacted> Rows = new();
+
+    /// <summary>
+    /// Where the player's own turn stopped and the unwatched half began: the
+    /// count of rows at the moment their turn began to end. `EB-710`.
+    ///
+    /// NEGATIVE MEANS NO MARK WAS TAKEN THIS TURN, and then
+    /// <see cref="MarkTurnStart"/> drops everything exactly as it always did.
+    /// That is the conservative direction rather than an oversight: a window
+    /// whose end was never announced is a window nothing can say was unwatched,
+    /// and a log that carried on a missing mark would carry forever.
+    /// </summary>
+    private static int _playerTurnEnd = -1;
 
     /// <summary>The printed word for each reaction.
     ///
@@ -65,11 +83,67 @@ public static class ReactionLog
         _ => reaction.ToString(),
     };
 
-    /// <summary>Drop the turn's rows. Called from
+    /// <summary>
+    /// "The player's turn is ending here." Called from
+    /// <c>ElementalApplication.BeforeSideTurnEnd(Player)</c> -- `EB-710`.
+    ///
+    /// WHY THIS MARK EXISTS AT ALL. Every row noted from here on resolved on a
+    /// board the player is no longer acting on: their end-of-turn effects, and
+    /// then the whole enemy side. Nothing renders a player page in that
+    /// window, so those rows were written and dropped without a screen ever
+    /// carrying them.
+    ///
+    /// AND WHY IT IS <c>BeforeSideTurnEnd</c> rather than the After twin one
+    /// hook later: the end-of-turn tenants that DEAL the elements deal them in
+    /// <c>AfterSideTurnEnd(Player)</c> (Durin's Pyro consume) and in the
+    /// <c>TurnEndSequencer</c>'s own fixed order, so a mark taken after them
+    /// would file exactly the rows this row is about on the wrong side of the
+    /// line. `KleeElementalHooks` is the FIRST listener in `KleeMod`'s
+    /// subscribe chain, so this broadcast reaches here before the tenants'.
+    /// </summary>
+    public static void MarkPlayerTurnEnd() => _playerTurnEnd = Rows.Count;
+
+    /// <summary>Open the turn's window. Called from
     /// <see cref="ReactionEffects.MarkTurnStart"/> and its extra-turn twin, so
     /// the window is exactly the one every other per-turn reaction fact
-    /// keeps.</summary>
-    public static void MarkTurnStart() => Rows.Clear();
+    /// keeps.
+    ///
+    /// `EB-710`: IT NO LONGER DROPS WHAT NO PAGE HAS PRINTED. Klee r26 and a
+    /// Kokomi run met the heading saying "Nothing reacted this turn" through
+    /// runs where reactions plainly happened: six Electro-Charged off Shinobu's
+    /// Ring at END of turn, two Melts and an Overloaded off a played Set off.
+    /// This method fires at the END OF THE ENEMY TURN
+    /// (<c>ElementalApplication.AfterSideTurnEnd(Enemy)</c>), which is the
+    /// opening of the player's next turn -- so a straight
+    /// <c>Rows.Clear()</c> threw away every row logged since the player last
+    /// had control, and those rows are precisely the ones no page ever showed.
+    /// The log was cleared on the wrong window.
+    ///
+    /// SO THE UNWATCHED HALF SURVIVES EXACTLY ONE TURN. Rows from before
+    /// <see cref="MarkPlayerTurnEnd"/> were on a page the player read while
+    /// they were acting and go; rows from after it carry, marked, into the
+    /// turn whose first page will print them. Next time round they sit BEFORE
+    /// the new mark and are dropped in their turn, so a row prints once and a
+    /// long enemy side cannot pile up.
+    ///
+    /// NO SECOND LIST AND NO TIMESTAMP, because neither is needed: the mark is
+    /// an index into the one list and the carry is a slice of it.
+    ///
+    /// NO MARK, NO CARRY. Where <see cref="MarkPlayerTurnEnd"/> never fired --
+    /// a combat opening, a window whose end nothing announced -- this drops
+    /// everything, which is what it has always done.
+    /// </summary>
+    public static void MarkTurnStart()
+    {
+        var carried = new List<Reacted>();
+        for (var i = _playerTurnEnd; i >= 0 && i < Rows.Count; i++)
+        {
+            carried.Add(Rows[i] with { Carried = true });
+        }
+        Rows.Clear();
+        Rows.AddRange(carried);
+        _playerTurnEnd = -1;
+    }
 
     /// <summary>
     /// `EB-697`. THE SOURCE A HIT CANNOT NAME FOR ITSELF.
@@ -180,5 +254,11 @@ public static class ReactionLog
             ["source"] = row.Source,
             ["target"] = row.Target,
             ["combat_id"] = row.CombatId,
+            // `EB-710`. WHICH SIDE OF THE PLAYER'S LAST END-TURN THIS ROW IS
+            // ON. A carried row is true and the page says so on the line
+            // rather than filing it under "this turn", because the heading
+            // names a window and a row that happened outside it would make the
+            // heading the second false thing on the screen.
+            ["carried"] = row.Carried,
         });
 }

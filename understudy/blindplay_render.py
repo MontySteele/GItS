@@ -48,7 +48,9 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         MULTI_INTENT_NOTE,
                                         NO_REACTION_THIS_TURN,
                                         PENDING_PICK_NOTE, PICKED_MARK,
-                                        REACTIONS_HEADING, REACTION_ROW,
+                                        REACTIONS_HEADING,
+                                        REACTION_CARRIED_CLAUSE,
+                                        REACTION_CARRIED_ONLY, REACTION_ROW,
                                         REACTION_ROW_NO_SOURCE,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
@@ -1605,12 +1607,27 @@ def render(obs: dict[str, Any]) -> str:
         # the other receipts on this page are (the carry-out block, the
         # Salon's). Present and empty prints its own line, because "no line"
         # and "no reaction" were the same page to the r27 lane-1 seat.
+        #
+        # `EB-710`. AND THE ROWS FROM THE WINDOW NOBODY WAS SHOWN. A reaction
+        # off an end-of-turn tenant, or off the enemy side, used to be cleared
+        # before any page could print it -- this heading said "Nothing reacted
+        # this turn" through six Electro-Charged. The mod carries those rows
+        # one turn (`ReactionLog.MarkTurnStart`); they print here, marked with
+        # their own window, and where they are ALL the page has, the empty
+        # line is replaced by one that says both facts rather than the false
+        # one.
         if c.get("reactions") is not None:
             out += ["", REACTIONS_HEADING, ""]
-            for row in c["reactions"]:
-                out.append((REACTION_ROW if row["source"]
-                            else REACTION_ROW_NO_SOURCE).format(**row))
-            if not c["reactions"]:
+            rows = c["reactions"]
+            if rows and all(row.get("carried") for row in rows):
+                out.append(REACTION_CARRIED_ONLY)
+            for row in rows:
+                line = (REACTION_ROW if row["source"]
+                        else REACTION_ROW_NO_SOURCE).format(**row)
+                if row.get("carried"):
+                    line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE
+                out.append(line)
+            if not rows:
                 out.append(NO_REACTION_THIS_TURN)
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip

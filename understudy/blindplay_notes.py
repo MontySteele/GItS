@@ -729,6 +729,30 @@ REACTION_ROW_NO_SOURCE = "- **{reaction}** on **{target}**."
 NO_REACTION_THIS_TURN = ("- Nothing reacted this turn. A reaction that "
                          "happened would be listed here by name.")
 
+# `EB-710`. THE HALF OF THE BEAT NOBODY WAS SHOWN.
+#
+# THE FIND. This heading said "Nothing reacted this turn" through a run where
+# Electro-Charged fired six times off Shinobu's Ring -- at the END of the turn
+# -- and Klee r26 read the header EMPTY on two Melts and an Overloaded off a
+# played Set off. The log was cleared on the wrong window: it opens at the end
+# of the ENEMY turn, so every reaction from the player's own end-of-turn
+# tenants and from the whole enemy side was written and dropped with no player
+# page in between. `KleeMod.Powers.ReactionLog.MarkTurnStart` now carries them.
+#
+# THEY CARRY ONE TURN, AND THEY SAY SO. A carried row prints under THIS
+# heading, because it is the only receipt on the page and the alternative is
+# the silence that was the defect; and it carries its own window on the line,
+# because the heading names THIS turn and a row from before it would otherwise
+# make the heading the second false thing on the screen. The wording is the
+# Stage log's ("since you ended your last turn"), so the two receipts on this
+# page name one boundary with one phrase.
+REACTION_CARRIED_CLAUSE = " *(since you ended your last turn)*"
+#: Printed above the rows where EVERY row is a carried one -- the honest
+#: reading of a turn on which nothing has reacted YET and something reacted
+#: while the reader was not being shown a page.
+REACTION_CARRIED_ONLY = ("- Nothing has reacted yet this turn. These landed "
+                         "after you ended your last turn:")
+
 # `EB-708`. A SIZE IS NOT A STATUS, AND THE PAGE HAD NO LEGEND FOR EITHER.
 #
 # THE FIND (Kokomi r31 lane 2, (c)). `Twig Slime (M)` and `Leaf Slime (S)` read
