@@ -800,6 +800,48 @@ internal static class LocManager_Initialize_Patch
 /// of CreateForReward exactly — Uniform excludes Basic and Ancient, everything
 /// else can only roll Common/Uncommon/Rare — because a pool of Curses passes a
 /// naive "not Basic" count and still throws.
+///
+/// `EB-363`: AND THE CLAMP'S OWN FLOOR, which is the second half of this patch.
+/// A clamp to ZERO is not a softlock and it is not a card either — it is a
+/// selection screen with no rows in it, which is exactly what [USER]'s Kokomi
+/// r5 run got twice when The Future of Potions took a Regen Potion for an
+/// "Upgraded Uncommon Attack" and her arm pool held no Uncommon Attack. The
+/// clamp turned the base game's descriptive throw into a silent nothing, so
+/// the event ate a potion and handed back an empty grid.
+///
+/// The cause is a CELL, not a count: a base effect can ask the character's pool
+/// for a rarity x type cell (`TheFutureOfPotions`), a rarity (`GlassEye`,
+/// `SeaGlass`, `ArcaneScroll`, `HeftyTablet`, `RoomFullOfCheese`) or a type
+/// (`InfestedAutomaton`), and a 40-row arm pool leaves cells that a 75-row
+/// shipped pool fills by sheer size. The full census of queried cells, and
+/// which ones each arm leaves empty or short, is
+/// `KleeTests/Prototype/PoolCellCoverageTests.cs` — that file is the ledger and
+/// this is the seam it walks.
+///
+/// THE WIDENING LADDER, and it runs BEFORE the clamp because the clamp is what
+/// it is trying not to reach:
+///
+///   1. THE CELL AS ASKED. If it can fill the draw, nothing here happens, and
+///      that is every draw on every shipped pool.
+///   2. THE NEIGHBOUR CELL — same rarity, any type. Taken only when the cell is
+///      non-empty (the surviving cards are where the rarity is read from) and
+///      only when it can fill the draw. Rarity is preserved ahead of type on
+///      purpose: a Rare potion traded for three Rares of mixed type is still
+///      the trade the event described, where three Commons would not be.
+///   3. THE WHOLE POOL. The fallback when the cell is EMPTY (there is no rarity
+///      to preserve) or when the neighbour cell cannot fill the draw either.
+///
+/// WHAT IS GIVEN UP, said plainly: a widened draw no longer matches the line
+/// the event printed — the "Uncommon Attack" it promised may arrive as an
+/// Uncommon Skill. That is the trade this row was opened to make. An event that
+/// hands back a card of the wrong type is a smaller defect than one that hands
+/// back nothing, and the widening stops by itself the day the cell is filled by
+/// a card, which is the real fix and a design pick, not a seam.
+///
+/// SELF-LIMITING TWICE OVER. An unfiltered draw (`Trial`, `LostCoffer`, Sealed
+/// Deck) has nothing to widen to — rungs 2 and 3 resolve to the same set the
+/// cell already is — so it falls straight through to the clamp exactly as
+/// before. And the roster gate above still stands in front of all of it.
 /// </summary>
 [HarmonyPatch(typeof(CardFactory), nameof(CardFactory.CreateForReward),
     new[] { typeof(Player), typeof(int), typeof(CardCreationOptions) })]
@@ -807,7 +849,7 @@ internal static class CardFactory_CreateForReward_Clamp_Patch
 {
     [HarmonyPrefix]
     public static void Prefix(Player player, ref int cardCount,
-                              CardCreationOptions options)
+                              ref CardCreationOptions options)
     {
         if (cardCount <= 0)
         {
@@ -832,11 +874,20 @@ internal static class CardFactory_CreateForReward_Clamp_Patch
         }
 
         var uniform = options.RarityOdds == CardRarityOddsType.Uniform;
-        var available = options.GetPossibleCards(player).Count(c => uniform
-            ? c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient
-            : c.Rarity == CardRarity.Common
-              || c.Rarity == CardRarity.Uncommon
-              || c.Rarity == CardRarity.Rare);
+        var cell = Rollable(options, player, uniform);
+
+        // `EB-363`. Rungs 2 and 3, before the clamp can floor the draw at zero.
+        if (cell.Count < cardCount && options.CardPoolFilter != null)
+        {
+            var widened = Widen(player, options, cardCount, cell, uniform);
+            if (widened != null)
+            {
+                options = widened;
+                cell = Rollable(options, player, uniform);
+            }
+        }
+
+        var available = cell.Count;
 
         if (cardCount > available)
         {
@@ -845,6 +896,130 @@ internal static class CardFactory_CreateForReward_Clamp_Patch
                    + "exhausting its blacklist and throwing.");
             cardCount = available;
         }
+    }
+
+    /// <summary>
+    /// The cards this draw could actually roll: what the options offer, minus
+    /// the rarities the two branches of <c>CreateForReward</c> can never select.
+    ///
+    /// Mirrors those branches exactly — Uniform excludes Basic and Ancient,
+    /// everything else can only roll Common/Uncommon/Rare — because a pool of
+    /// Curses passes a naive "not Basic" count and still throws.
+    /// </summary>
+    internal static List<CardModel> Rollable(
+        CardCreationOptions options, Player player, bool uniform) =>
+        options.GetPossibleCards(player).Where(c => uniform
+            ? c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient
+            : c.Rarity == CardRarity.Common
+              || c.Rarity == CardRarity.Uncommon
+              || c.Rarity == CardRarity.Rare).ToList();
+
+    /// <summary>
+    /// `EB-363`. Rung 2 then rung 3 of the ladder in the class comment, or null
+    /// when neither rung holds more cards than the cell already does (an
+    /// unfiltered draw, or a pool that is simply this small — the clamp owns
+    /// that case and always did).
+    ///
+    /// THE WIDENED FILTER IS A SET MEMBERSHIP TEST, not a rewritten predicate,
+    /// because the predicate this is widening is an opaque <c>Func</c> the mod
+    /// cannot take apart: it is the event's own lambda, closed over an
+    /// <c>Rng</c>-chosen <c>CardType</c> in <c>TheFutureOfPotions</c>'s case.
+    /// What CAN be read is which cards survive it, and a rung is defined by the
+    /// cards it admits rather than by the shape of the question.
+    ///
+    /// A COPY, NEVER A MUTATION. <c>CardCreationOptions.WithFilter</c> writes
+    /// through to the instance, and that instance is the caller's — a
+    /// <c>CardReward</c> keeps it for its reroll and an event may hold it
+    /// across two draws. Widening one draw must not widen a later one that the
+    /// pool might by then be able to answer as asked, so this returns a fresh
+    /// options object and the <c>ref</c> parameter above swaps it in for this
+    /// call alone.
+    /// </summary>
+    private static CardCreationOptions? Widen(
+        Player player, CardCreationOptions options, int wanted,
+        IReadOnlyList<CardModel> cell, bool uniform)
+    {
+        var whole = Rollable(
+            new CardCreationOptions(
+                options.CardPools, options.Source, options.RarityOdds, null),
+            player,
+            uniform);
+
+        var admitted = WidenedAdmissions(wanted, cell, whole);
+        if (admitted == null)
+        {
+            return null;
+        }
+
+        Log.Warn($"[{KleeMod.ModId}] a {wanted}-card draw asked a pool cell holding "
+               + $"{cell.Count}; widened to {admitted.Count} cards "
+               + $"({(admitted.Count == whole.Count ? "the whole pool" : "the same rarity at any type")}). "
+               + "EB-363's seam: the event hands back a card of another rarity or "
+               + "type rather than an empty selection, and it stops the moment the "
+               + "cell holds enough cards of its own.");
+
+        var ids = admitted.Select(c => c.Id).ToHashSet();
+        return Clone(options,
+            admitted.Count == whole.Count ? null : c => ids.Contains(c.Id));
+    }
+
+    /// <summary>
+    /// `EB-363`. THE LADDER ITSELF, as a decision over two lists and nothing
+    /// else: the cards the cell admits, and the cards the whole pool admits.
+    /// Null means "do not widen".
+    ///
+    /// SEPARATED FROM THE OPTIONS PLUMBING ON PURPOSE. Everything above this
+    /// needs a live <c>Player</c> — <c>GetPossibleCards</c> reads its unlock
+    /// state and its run's multiplayer constraint — and a live Player is
+    /// outside the headless boundary (KleeTests/README.md). The DECISION needs
+    /// neither, so it is pinned for real rather than structurally, in
+    /// <c>PoolCellCoverageTests</c>.
+    /// </summary>
+    internal static List<CardModel>? WidenedAdmissions(
+        int wanted, IReadOnlyList<CardModel> cell, IReadOnlyList<CardModel> whole)
+    {
+        // Rung 1: the cell as asked, and an unfiltered draw, which has nothing
+        // to widen to. Either way this is not the clamp's problem to dodge.
+        if (cell.Count >= wanted || whole.Count <= cell.Count)
+        {
+            return null;
+        }
+
+        // Rung 2: same rarity, any type -- but only if it can fill the draw. A
+        // neighbour cell that is ALSO short buys nothing over rung 3 and would
+        // cost the rows rung 3 would have found.
+        var rarities = cell.Select(c => c.Rarity).ToHashSet();
+        if (rarities.Count > 0)
+        {
+            var neighbour = whole.Where(c => rarities.Contains(c.Rarity)).ToList();
+            if (neighbour.Count >= wanted)
+            {
+                return neighbour;
+            }
+        }
+
+        // Rung 3: the whole pool. The cell is empty (there is no rarity to
+        // preserve) or its rarity cannot fill the draw either.
+        return whole.ToList();
+    }
+
+    /// <summary>
+    /// <paramref name="options"/> with a different filter and everything else
+    /// carried across by hand. The record's own copy constructor is protected
+    /// and <c>with</c> is not reachable from outside the assembly that declares
+    /// it, so the four remaining members are named here; a fifth added by a
+    /// game update would be dropped silently, which is why
+    /// <c>PoolCellCoverageTests</c> pins the member set.
+    /// </summary>
+    private static CardCreationOptions Clone(
+        CardCreationOptions options, Func<CardModel, bool>? filter)
+    {
+        var copy = new CardCreationOptions(
+                options.CardPools, options.Source, options.RarityOdds, filter)
+            .WithFlags(options.Flags);
+        return options.RngOverride == null
+            ? copy
+            : copy.WithRngOverride(options.RngOverride);
     }
 }
 
