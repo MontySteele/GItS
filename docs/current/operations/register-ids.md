@@ -1652,7 +1652,7 @@ EB-605 RETIRED 2026-09-16: the C# clause already named the reaction multiplier (
 EB-631 RETIRED 2026-09-16: moot with #561 -- R260's free arrivals rode the reframe arm and Ethereal Spotlight is back at the shipped rule; neither candidate cause exists.
 EB-637 RETIRED 2026-09-16: moot with #561 -- the four HoveredModelTracker postfixes fed the deleted Salon panel.
 EB-644 RETIRED 2026-09-16: moot with #561 -- the Salon panel it framed is deleted.
-EB-652 RETIRED 2026-09-16: moot with #561 -- SalonPanel.cs and its hover tests are gone; the Stage draws a three-bar strip instead (FurinaStageStrip.cs). The orphan scenario yaml is deleted here.
+EB-652 RETIRED 2026-09-16: MET -- furina-hover-states.yaml ran green on lane 0 and all four hover windows were framed by pid (#575), which also fixed the scenario's ambiguous card name.
 EB-659 RETIRED 2026-09-16: live: Coral Bulwark's Plan half printed the Frail-folded number (#570).
 EB-660 RETIRED 2026-09-16: live: Feint's face carries Plan: Deal 10 (#570).
 EB-676 RETIRED 2026-09-16: hp_settled held on a kill with a late HP change and the kill screen matched the next (#573); the flag reading false on the map is a row of its own today.
@@ -1694,3 +1694,5 @@ EB-770 RETIRED 2026-09-16: the dressed Slippery Bridge's first option printed th
 EB-773 RETIRED 2026-09-16: live: a queued Plan past lethal warned before the write (#570).
 EB-494 RETIRED 2026-09-16: moved to QUEUE (fanout-picks-2026-09-16 pick 3) -- the census is done (#545) and what is left is curation, a design call BACKLOG's header excludes.
 EB-444 RETIRED 2026-09-16: moved to QUEUE (fanout-picks-2026-09-16 pick 4) -- what the third companion set is now is a design pass, not engineering; the sweep and lint follow the pick.
+EB-415 RETIRED 2026-09-16: live: the upgraded War Banner left Dexterity at 0 before and after its clock (#575).
+EB-673 RETIRED 2026-09-16: live: Shrinker Beetle's Shrink -1 and a hand-set Weak 2 both printed on the player's line; qa_packet._powers drops only a row with neither title nor name (#575). The Kin Priest is a boss; nothing generic is left.
