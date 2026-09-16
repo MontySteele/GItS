@@ -82,6 +82,43 @@ public class Round14Tests
             c => c.Contains("ForPlanElement"));
     }
 
+    [Fact]
+    public void EB561_war_councils_hit_obeys_its_one_aura_statement()
+    {
+        // `EB-561`. THE FIND (Kokomi r20 lane 1): the face said "Its own hit
+        // applies no aura" and, above it, the generic `Applies Hydro` keyword
+        // said "No aura: applies Hydro for 2 turns" -- and four Wrigglers came
+        // out of a direct play wearing Hydro.
+        //
+        // THE FACE HALF IS `EB-713`'s, landed while this row was open: the
+        // generic keyword came OFF these rows entirely, leaving the rider as
+        // the one aura statement. This is that statement checked against the
+        // HIT, which is the half nothing had checked.
+        //
+        // THE HIT WAS NEVER THE DEFECT. Played directly the card applies Weak
+        // to every enemy and nothing else: no damage, no elemental call, so no
+        // aura and no reaction. (The Hydro the seat saw was the Tamakushi
+        // Casket's answering strike, `EB-562`.)
+        var play = Il.Calls(Il.Method("ProtoKkWarCouncil", "OnPlay"));
+        Assert.DoesNotContain(play, c => c.Contains("ElementalHit"));
+        Assert.DoesNotContain(play, c => c.Contains("Aura"));
+        Assert.Contains(play, c => c.Contains("PowerCmd.Apply"));
+
+        // ONE STATEMENT ON THE FACE: the rider, and no generic element keyword
+        // beside it to contradict it.
+        Assert.Contains(
+            Il.Calls(Il.Method("ProtoKkWarCouncil", "get_ExtraHoverTips")),
+            c => c.Contains("ForPlanElement"));
+
+        // And the Plan's carry-out is the half that DOES apply Hydro, the
+        // rider's second clause: `KokomiPlan.ResolveAll` deals every damaging
+        // clause as a Hydro hit, so the card's own declaration is the Plan
+        // clause it prints.
+        Assert.Contains(
+            Il.Calls(Il.Method("ProtoKkWarCouncil", "get_PlanClauses")),
+            c => c.Contains("Planned..ctor"));
+    }
+
     // ==================================================================
     // `EB-464` -- a replayed Companion card performs the front member
     // ==================================================================

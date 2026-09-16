@@ -332,6 +332,55 @@ def test_the_oaths_now_line_applies_hydro_like_its_carry_out(overhaul):
     assert charged.aura != "electro"
 
 
+def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
+    """`EB-561`. THE FIND (Kokomi r20 lane 1): "War Council's face contradicts
+    itself -- 'Its own hit applies no aura' above the generic 'Applies Hydro:
+    no aura, applies Hydro for 2 turns' rider", and four Wrigglers came out
+    wearing Hydro after a direct play.
+
+    THE FACE WAS THE DEFECT AND THE HIT WAS NOT. Played directly the card
+    applies Weak to every enemy and NOTHING ELSE -- no damage, no element -- so
+    the aura the seat saw did not come from it (the Tamakushi Casket's
+    answering strike did, `EB-562`).
+
+    THE FACE HALF IS `EB-713`'s, landed while this row was open: the generic
+    `Applies Hydro` keyword came OFF these rows entirely -- the gem was itself
+    telling a reader "this face applies Hydro" -- leaving the `ForPlanElement`
+    rider as the one aura statement, which is exactly this row's acceptance.
+    What is left to pin is the statement against the HIT, and that is this.
+    """
+    bare = make_enemy(hp=40)
+    st = kokomi_state(enemies=[bare])
+    effects.resolve_card(st, loader.get_card("proto_kk_war_council"))
+    assert bare.powers.get("weak") == 1
+    assert bare.hp == 40, "the now-line deals no damage"
+    assert bare.aura is None, "the now-line leaves no aura"
+
+    # AND IT DOES NOT EAT ONE EITHER: a standing aura is untouched by a play
+    # that applies no element, which is the other half of "applies no aura".
+    charged = make_enemy(hp=40)
+    charged.aura = "electro"
+    charged.aura_turns_left = 3
+    st2 = kokomi_state(enemies=[charged])
+    effects.resolve_card(st2, loader.get_card("proto_kk_war_council"))
+    assert charged.aura == "electro"
+
+    # THE CARRY-OUT IS THE HALF THAT DOES, which is the rider's second clause.
+    planned = make_enemy(hp=40)
+    st3 = kokomi_state(enemies=[planned])
+    carry_out(st3, loader.get_card("proto_kk_war_council").plan)
+    assert planned.aura == "hydro"
+
+    # AND THE FACE CARRIES ONE AURA STATEMENT: the rider, and no generic
+    # element keyword beside it to contradict it (`EB-713`).
+    import pathlib
+    repo = pathlib.Path(__file__).resolve().parents[2]
+    face = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+            / "Generated" / "ProtoKkWarCouncil.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForPlanElement(" in face
+    assert "KleeKeywords.AppliesHydro" not in face
+
+
 def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
     """`EB-334` PIN 1: Weak ON KOKOMI, no effect. The seat's own arithmetic --
     "Plan: Deal 12 damage" paying 9 the next morning, exactly x0.75."""
