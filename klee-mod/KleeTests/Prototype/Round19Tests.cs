@@ -849,6 +849,66 @@ public class Round19Tests
     }
 
     // ==================================================================
+    // `EB-409` -- what Strike Dummy actually reads, and both cards pinned
+    // ==================================================================
+    //
+    // THE FIND (Kokomi r10, run 2, (c)). Strike Dummy -- "Cards containing
+    // Strike deal 3 additional damage" -- paid on `Slack Water` (9 measured on
+    // a printed 7) and not on `Deep Current` (6 on 6). Neither Kokomi Attack is
+    // TITLED Strike, so the relic was matching something other than the
+    // printed title, and the row asked what.
+    //
+    // THE ANSWER, off the 0.111.0 decompile of
+    // `MegaCrit.Sts2.Core.Models.Relics.StrikeDummy.ModifyDamageAdditive`: a
+    // TAG, never a title. The body is four guards and a payout --
+    // `props.IsPoweredAttack()`, `cardSource != null`,
+    // `cardSource.Tags.Contains(CardTag.Strike)`, the owner check -- and it
+    // pays `DynamicVars["ExtraDamage"].BaseValue`. Nothing in it reads a
+    // string. So "does the title say Strike" was never the relic's question;
+    // the question is who WEARS the tag, and the codegen was handing it to
+    // every basic attack, prototype rows included.
+    //
+    // WHICH IS `EB-543`'s FIX, just above: a prototype basic takes neither tag
+    // by derivation, and a row that IS its arm's Strike says so on the sheet
+    // (`basic_tag:`; no row does). Slack Water is pinned there. This is the
+    // row's other half -- BOTH cards it named, and the whole arm behind them,
+    // so the relic cannot start paying on a row nobody looked at.
+
+    [Theory]
+    [InlineData(typeof(ProtoKkSlackWater))]     // it paid on this one
+    [InlineData(typeof(ProtoKkDeepCurrent))]    // and not on this one
+    public void EB409_neither_card_the_relic_was_measured_on_wears_the_tag(
+        Type row)
+    {
+        var card = (CardModel)Activator.CreateInstance(row)!;
+
+        Assert.DoesNotContain(CardTag.Strike, card.Tags);
+        Assert.DoesNotContain(CardTag.Defend, card.Tags);
+    }
+
+    [Fact]
+    public void EB409_no_generated_arm_row_wears_a_tag_it_did_not_declare()
+    {
+        // The sweep the two rows above are examples of. `basic_tag:` is the
+        // sheet's escape and no row declares one, so the honest assertion is
+        // that the arm's generated surface carries NEITHER tag -- the shipped
+        // basics keep theirs and are not generated here.
+        var arm = typeof(ProtoKkSlackWater).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract
+                     && typeof(CardModel).IsAssignableFrom(t)
+                     && t.Namespace == typeof(ProtoKkSlackWater).Namespace)
+            .ToList();
+        Assert.True(arm.Count > 100, $"only {arm.Count} prototype rows seen");
+
+        foreach (var type in arm)
+        {
+            var card = (CardModel)Activator.CreateInstance(type)!;
+            Assert.DoesNotContain(CardTag.Strike, card.Tags);
+            Assert.DoesNotContain(CardTag.Defend, card.Tags);
+        }
+    }
+
+    // ==================================================================
     // `EB-544` -- where an element comes from, and where it does not
     // ==================================================================
     //
