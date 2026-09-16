@@ -1038,6 +1038,18 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     if base > 0 and dmg > base * C.AMP_STACK_LIMIT:
         state.emit("amp_stack_warning", base=base, final=dmg, target=enemy.name)
     block_before, hp_before = enemy.block, enemy.hp
+    # Hook.BeforeDamageReceived on the ENEMY -- `EB-495` D6, Thorns. HERE and
+    # not at the tail with the rest of the funnel, because the game fires it
+    # at `CreatureCmd.cs:285`, one line ABOVE the Block computation: a fully
+    # blocked hit is thorned, and so is a killing blow, both of which the
+    # AfterDamageReceived readers below are denied. `ThornsPower` is the
+    # assembly's only override of this hook.
+    #
+    # The damage the hit is about to deal is already settled (`dmg`, one line
+    # up) and Thorns cannot change it, so putting the call on this line rather
+    # than at the top of the function is a placement, not a reordering.
+    from tier0.engine import refpowers as _rp_thorns    # late import (cycle)
+    _rp_thorns.enemy_retaliates_before_the_hit(state, enemy, source, powered)
     # QUARANTINED (C.COMPANION_OVERHAUL). `absorb` is the Block this hit may be
     # eaten by, which is the whole of "ignoring Block": zero for Chiori's
     # Tamoto and the standing pool for every other hit in the engine. Named
@@ -1161,7 +1173,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         fully_blocked=(not ignore_block
                        and (blocked > 0 or enemy.block > 0)
                        and hp_dmg <= 0),
-        killed=(was_alive and not enemy.alive))
+        killed=(was_alive and not enemy.alive),
+        source=source, powered=powered)
     # Skittish (§10.9 promotion): "The first time it is hit each turn, it
     # gains N Block." AFTER the whole hit resolves (incl. any detonation
     # rider), so the triggering attack is never mitigated by it; the latch

@@ -1023,6 +1023,14 @@ class Enemy(Fighter):
     # is a decimal running total: a 20-point shell that has already taken 6
     # must still admit 14 this turn.
     hardened_shell_taken: int = 0
+    # `EB-495` D6. CurlUpPower's private `playedCard` (`CurlUpPower.cs:19`):
+    # the card whose hit woke the power, remembered until that card's play
+    # FINISHES, at which point the enemy gains Block and the power is removed
+    # (`AfterCardPlayed`, `:49`). An id rather than a Card object, because the
+    # game's comparison is reference equality on one CardModel and the sim's
+    # `state.card_in_flight` -- the thing this is compared against -- is the
+    # same id, taken at the same two hooks.
+    curl_up_card: Optional[str] = None
     # The turn this enemy entered its CURRENT phase; `ramp` counts from here,
     # not from combat start (combat._settle_phases stamps it on each revive).
     # 0 for every unphased enemy, which is combat start -- so the frozen
@@ -1597,6 +1605,14 @@ class CombatState:
                                           # Inferno and Rupture both gate on
     card_play_depth: int = 0              # >0 while a card is mid-play
                                           # (Rupture's deferral window)
+    # `EB-495` D6. The id of the card currently mid-play, which is the sim's
+    # `cardSource`: the game hands every card-sourced damage instance the
+    # CardModel it came from, and tier0's damage pipeline carries a `source`
+    # string instead. Set at `before_card_played` and RESTORED (not cleared)
+    # at `after_card_played`, so a nested play -- an autoplay, a Sly rider --
+    # hands the inner card back to the outer one exactly as a call stack
+    # would. `None` outside any play, which is `cardSource: null`.
+    card_in_flight: Optional[str] = None
     rupture_pending: int = 0              # strength owed to the card in play
     # OutbreakPower's internal `timesPoisoned`. Combat-local and NOT reset per
     # turn: the source keeps it on the power's Data object for the whole

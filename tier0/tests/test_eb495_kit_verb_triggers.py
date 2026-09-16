@@ -46,6 +46,8 @@ import ast
 import re
 from pathlib import Path
 
+import pytest
+
 from tier0.engine import effects
 from tier0.engine.state import Bomb
 from tier0.tests.conftest import make_enemy, make_state
@@ -177,6 +179,36 @@ def test_the_enemy_side_damage_received_funnel_exists_and_has_one_door():
     assert len(calls) == 1, calls
     assert "_refpowers.enemy_on_damage_received(" in (
         ENGINE / "effects.py").read_text(encoding="utf-8")
+
+
+def test_the_enemy_side_before_damage_funnel_exists_and_has_one_door():
+    """MATRIX T6, DISAGREEMENT D6 — REPAIRED, and a SECOND door because the
+    game has a second hook. `ThornsPower` is the assembly's only
+    `BeforeDamageReceived` override and it fires above Block and above the HP
+    loss, so it cannot share the after-hook's entry point: a fully blocked hit
+    and a killing blow are both thorned and neither reaches the other funnel.
+    One driver, the same door as D5's."""
+    engine = "".join(path.read_text(encoding="utf-8")
+                     for path in sorted(ENGINE.glob("*.py")))
+    assert len(re.findall(r"\.enemy_retaliates_before_the_hit\(", engine)) == 1
+
+
+@pytest.mark.parametrize("power,amount", [("thorns", 5), ("flame_barrier", 4),
+                                          ("curl_up", 14)])
+def test_no_kit_verb_wakes_an_enemys_retaliation(power, amount):
+    """MATRIX T6, the column as it must stay. All three readers ask
+    `IsPoweredAttack()`, which every kit verb fails by construction —
+    `ElementalHit.Deal` passes `ValueProp.Unpowered` with `dealer: null`. The
+    end-to-end half is `test_eb495_d6_an_enemy_can_retaliate.py`; this is the
+    whole-population sweep beside the other three behavioural pins above."""
+    for source in KIT_SOURCES:
+        state, enemy = _fresh()
+        enemy.powers[power] = amount
+        state.card_in_flight = "pin_card"
+        hp = state.player.hp
+        effects.deal_damage_to_enemy(state, enemy, 5, source=source)
+        fired = (state.player.hp != hp) or enemy.curl_up_card is not None
+        assert fired is (source in effects.CARD_DAMAGE_SOURCES), (power, source)
 
 
 def test_the_hp_loss_cap_runs_at_the_one_place_the_game_runs_it():

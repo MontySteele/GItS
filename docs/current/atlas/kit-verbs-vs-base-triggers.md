@@ -160,19 +160,20 @@ do not it is written **`C# ≠ sim`** and carries a `D`-number from §6.
 (`CardType.Attack` for T1/T2, an `AttackCommand` or `IsPoweredAttack()` for
 T3–T7; `source == "attack"` in the sim). `damage-only` — the trigger fires but
 the effect is not an Attack. `debuff` — the trigger fires as a debuff
-application. `none` — the trigger does not fire. `none*` — does not fire
-because the engine has no mirror of that trigger at all (see §2); functionally
-`none` today, but it is an absence, not a decision.
+application. `none` — the trigger does not fire. There is no `none*` left:
+that mark meant "does not fire because the engine has no mirror of that
+trigger at all", it carried the whole T5 and T6 columns, and D5 and D6 built
+the two mirrors on 2026-09-16.
 
 | verb | T1 card played | T2 played an Attack | T3 you attack | T4 you deal damage | T5 takes unblocked damage | T6 retaliation | T7 damage modifiers | T8 applied a debuff |
 |---|---|---|---|---|---|---|---|---|
-| V1 Attack-card damage | Attack | Attack | Attack | Attack | damage-only (**D5 repaired**) | Attack ≠ none* (**D6**) | Attack | none |
-| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | Attack (**D2 repaired**) | damage-only (**D5 repaired**) | Attack ≠ none* (**D6**) | Attack | none |
+| V1 Attack-card damage | Attack | Attack | Attack | Attack | damage-only (**D5 repaired**) | Attack (**D6 repaired**) | Attack | none |
+| V2 non-Attack-card damage | damage-only | none | Attack (**D1 repaired**) | Attack (**D2 repaired**) | damage-only (**D5 repaired**) | Attack (**D6 repaired**) | Attack | none |
 | V3 card HP-loss (self) | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V4 Bomb detonation (shipped) | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V5 Bomb explosion / Set off | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V6 Mine trigger | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
-| V7 Set-off card's own hit | Attack | Attack | Attack | Attack | damage-only (**D5 repaired**) | Attack ≠ none* (**D6**) | Attack | none |
+| V7 Set-off card's own hit | Attack | Attack | Attack | Attack | damage-only (**D5 repaired**) | Attack (**D6 repaired**) | Attack | none |
 | V8 Bomb echo | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V9 planned hit | none | none | none | none | damage-only (**D5 repaired**) | none | none | none |
 | V10 Plan debuff | none | none | none | none | none | none | none | debuff |
@@ -376,12 +377,63 @@ game the hook is broadcast from `CreatureCmd.Damage`, which
 the door count is pinned in `test_eb495_kit_verb_triggers.py`, so widening it
 is a deliberate act.
 
-### D6 — the sim models no enemy-side retaliation power
+### D6 — the sim modelled no enemy-side retaliation power — REPAIRED in the sim
 
 Same shape, T6 column. `ThornsPower`, `FlameBarrierPower` and `CurlUpPower`
-exist on the player's side of `refpowers.py` (`:603`, `:616`) and nowhere on
-the enemy's. An Attack into an enemy carrying Thorns costs HP in the game and
-nothing in the sim.
+existed on the player's side of `refpowers.py` and nowhere on the enemy's. An
+Attack into an enemy carrying Thorns cost HP in the game and nothing in the
+sim.
+
+**Repaired 2026-09-16, sim side only.** All three are built, and the reading
+that matters is that they are THREE DIFFERENT HOOKS, not one:
+
+| power | hook | predicate, as decompiled | fires on a fully blocked hit? | on a killing blow? |
+|---|---|---|---|---|
+| `ThornsPower` (`:19`) | `BeforeDamageReceived` | `dealer != null && (IsPoweredAttack() \|\| cardSource is Omnislice)` | **yes** | **yes** |
+| `FlameBarrierPower` (`:20`) | `AfterDamageReceived` | `dealer != null && IsPoweredAttack()`, `DamageResult` taken as `_` | **yes** | no |
+| `CurlUpPower` (`:31`) | `AfterDamageReceived` | `IsPoweredAttack() && cardSource != null` | **yes** | no |
+
+Thorns fires above Block and above the HP loss (`CreatureCmd.cs:285`, one line
+above `blockedDamage`), so it has its own sim entry point,
+`refpowers.enemy_retaliates_before_the_hit`; the other two ride
+`enemy_on_damage_received` and are therefore denied by the broadcast's own
+kill gate (`:410`). None of the three asks for `unblocked > 0`. Curl Up does
+not retaliate at all: it remembers the card and pays `Amount` Block when that
+card's play FINISHES (`AfterCardPlayed`, `:49`), so the hit that woke it is
+never mitigated by the Block it bought — `state.card_in_flight` is the sim's
+`cardSource`, pushed and restored at the two card-play hooks so a nested play
+hands the outer card back. The `Omnislice` disjunct in Thorns is not
+transcribed: it is one base-game card the sim's pool does not hold.
+
+**THE NEGATIVE HALF IS THE POINT.** All three ask `IsPoweredAttack()`, which
+every kit verb fails by construction — `ElementalHit.Deal` passes
+`ValueProp.Unpowered` with `dealer: null`. So a Bomb, a Plan, a Mine, a
+performance and a Stage act are never thorned, never burned and never curl a
+Louse, in either engine, and every `none` in the T6 column below stayed
+`none`. That is swept over the whole `source` population in
+`test_eb495_kit_verb_triggers.py` and pinned end to end in
+`tier0/tests/test_eb495_d6_an_enemy_can_retaliate.py`.
+
+**WHAT THE SIM'S FIGHTS REACH.** `ThornsPower` is granted by `SpinyToad:76`
+and `Toadpole:110`, both `Underdocks` bodies and neither present in
+`tier05/content/act1_pool.yaml`. `FlameBarrierPower` is granted by no monster
+in the assembly at all — it is the player's card, and the enemy-side leg is
+built for symmetry and for the day one is authored. `CurlUpPower` is granted
+by `LouseProgenitor:70`, and **`louse_progenitor` IS in
+`act2_pool.yaml`**, where the comment already reads "UNIMPLEMENTED: Curl Up 14
+(folded into the block beat)". Wiring it there is now a one-line `powers:`
+entry — and it was NOT made, because it moves that encounter's difficulty and
+every tier0.5 number measured through it: a content pick, not a parity repair.
+No encounter file moved and no published sim number moved.
+
+An enemy-owned `flame_barrier` expires at the PLAYER's side turn end
+(`refpowers.on_fighter_turn_end`), the mirror image of the player's, which
+`after_enemy_side_turn_end` removes at the enemy side's end — two hook
+firings, written apart. One named limit, the twin of D5's: the retaliation
+hit on the player goes through Block and the Intangible cap but not through
+Furina's stage absorb, Kokomi's ward or Encore, which sit on the enemy-intent
+path only. The branch is unreachable in every shipped fight, and the function
+that owes that chain is named in its own docstring.
 
 ### D7 — a kit verb's reaction debuff carries no `cardSource`, and the sim cannot tell
 

@@ -638,6 +638,83 @@ def on_damage_received(state: CombatState, target: Fighter, unblocked: int,
 # paragraph rather than left to be rediscovered.
 # ---------------------------------------------------------------------------
 
+def unpowered_damage_player(state: CombatState, dealer: Enemy, amount: int,
+                            reason: str) -> None:
+    """`CreatureCmd.Damage(dealer=the enemy, player, Amount, Unpowered)` --
+    the shape both enemy-side retaliation powers deal in
+    (`ThornsPower:23`, `FlameBarrierPower:23`).
+
+    The twin of `unpowered_damage` one seat over, and Unpowered is not
+    Unblockable, so Block applies. Intangible caps it, because a cap has
+    nothing to do with who is dealing (`_intangible_cap`).
+
+    WHAT IT DOES NOT PASS THROUGH, named rather than hidden: Furina's stage
+    absorb, Kokomi's ward and Encore all sit between Block and HP on the
+    enemy-intent path in `combat._enemy_turn`, and this path does not visit
+    them. In the game they are `ModifyHpLost` hooks and would see an Unpowered
+    hit like any other. The branch is unreachable in every shipped fight -- no
+    monster in the assembly grants `FlameBarrierPower`, and the two that grant
+    `ThornsPower` are absent from every sim pool (see the atlas's D6) -- so
+    routing it through three prototype absorbs would be modelling a fight
+    nobody can have. The day a pool authors either power, this is the function
+    that owes the absorb chain.
+    """
+    if amount <= 0:
+        return
+    p = state.player
+    amount = int(_intangible_cap(p, amount))
+    blocked = min(p.block, amount)
+    p.block -= blocked
+    hp_loss = amount - blocked
+    p.hp -= hp_loss
+    state.emit("retaliation", enemy=dealer.name, amount=hp_loss,
+               blocked=blocked, reason=reason)
+    if hp_loss > 0:
+        from tier0.engine import resources
+        resources.note_player_hp_loss(state, hp_loss)
+    # AfterDamageReceived on the PLAYER, for the hit it just took. `Unpowered`
+    # is the whole reason this cannot loop: `powered_attack=False` refuses the
+    # player's own Thorns and FlameBarrier, so a retaliation is never
+    # retaliated against. Inferno and Rupture can still see it, which is
+    # correct -- they ask only for the player's own side and unblocked > 0.
+    on_damage_received(state, p, unblocked=hp_loss, dealer=dealer,
+                       powered_attack=False)
+
+
+def enemy_retaliates_before_the_hit(state: CombatState, enemy: Enemy,
+                                    source: str, powered: bool) -> None:
+    """`Hook.BeforeDamageReceived` on the ENEMY side (`CreatureCmd.cs:285`).
+
+    `ThornsPower` is the assembly's ONLY override of it, and it is the reason
+    this is a separate entry point from `enemy_on_damage_received` rather than
+    another leg of it. Three things separate them, all visible in the source:
+
+      * BeforeDamageReceived fires ABOVE Block (`:286` computes
+        `blockedDamage` on the next line), so a FULLY BLOCKED hit is still
+        thorned.
+      * It fires above `LoseHpInternal`, so a KILLING blow is still thorned --
+        where `AfterDamageReceived` is skipped outright for a creature the hit
+        killed (`:410`).
+      * It carries no `DamageResult` at all, so there is no `unblocked > 0`
+        to ask for.
+
+    The predicate is `dealer != null && (props.IsPoweredAttack() || cardSource
+    is Omnislice)` (`ThornsPower.cs:19`). The sim's spelling of the first
+    half is D1/D2's: `source in CARD_DAMAGE_SOURCES` for `Move` and a
+    non-null dealer, `powered` for the absence of `Unpowered`. So no kit verb
+    is thorned in either engine -- `ElementalHit.Deal` passes `Unpowered` with
+    `dealer: null` -- which is the T6 column's whole shape and the thing this
+    repair must not quietly change. The `Omnislice` disjunct is not
+    transcribed: it is one base-game card the sim's pool does not hold, and
+    faking a card id for it would be inventing content.
+    """
+    from tier0.engine import effects as _effects
+    n = enemy.powers.get("thorns", 0)
+    if not n or not powered or source not in _effects.CARD_DAMAGE_SOURCES:
+        return
+    unpowered_damage_player(state, enemy, n, "thorns")
+
+
 def enemy_hardened_shell_cap(enemy: Enemy, hp_loss: int) -> int:
     """`HardenedShellPower.ModifyHpLostBeforeOstyLate` (`:38`).
 
@@ -659,7 +736,8 @@ def enemy_hardened_shell_cap(enemy: Enemy, hp_loss: int) -> int:
 
 def enemy_on_damage_received(state: CombatState, enemy: Enemy,
                              unblocked: int, fully_blocked: bool,
-                             killed: bool) -> None:
+                             killed: bool, source: str = "card",
+                             powered: bool = True) -> None:
     """`Hook.AfterDamageReceived` on the ENEMY side (`CreatureCmd.cs:416`).
 
     THE ONE PREDICATE EVERY READER SHARES, and it is easy to miss reading the
@@ -686,6 +764,23 @@ def enemy_on_damage_received(state: CombatState, enemy: Enemy,
     `Models/Relics/` and read this hook for the creature that owns them, which
     is never a monster. The enemy-side T5 population in the shipped game is
     `HardenedShellPower` alone, carried by `SkulkingColony` (`:56`, 20).
+
+    `EB-495` D6 adds the two readers that ARE attack-filtered, both of them
+    asking `IsPoweredAttack()` — the sim's `source in CARD_DAMAGE_SOURCES`
+    and `powered`, D1/D2's predicate:
+
+      * `FlameBarrierPower.AfterDamageReceived` (`:20`): `dealer != null &&
+        IsPoweredAttack()`, and NOTHING else — it takes the `DamageResult` as
+        `_` and never reads it, so a fully blocked hit still burns. That is
+        why its leg sits above no `unblocked` test.
+      * `CurlUpPower.AfterDamageReceived` (`:31`): `IsPoweredAttack() &&
+        cardSource != null`, then it REMEMBERS the card instead of acting.
+        The Block arrives when that card's play finishes
+        (`enemy_curl_up_after_card_played`).
+
+    Thorns is NOT here. It reads `BeforeDamageReceived` and is the one reader
+    a killing blow and a full block cannot stop; it has its own entry point
+    above.
     """
     if killed:
         return
@@ -694,6 +789,50 @@ def enemy_on_damage_received(state: CombatState, enemy: Enemy,
         enemy.hardened_shell_taken += max(0, unblocked)
         state.emit("hardened_shell_spent", enemy=enemy.name,
                    spent=enemy.hardened_shell_taken, allowance=n)
+
+    from tier0.engine import effects as _effects
+    card_hit = powered and source in _effects.CARD_DAMAGE_SOURCES
+    if not card_hit:
+        return
+
+    n = enemy.powers.get("flame_barrier", 0)
+    if n:
+        unpowered_damage_player(state, enemy, n, "flame_barrier")
+
+    # `cardSource != null`, which in this engine is "a card is mid-play". The
+    # second clause is the game's own: a power already tracking one card
+    # ignores a hit from a different one (`CurlUpPower.cs:42`), so a
+    # multi-target or multi-hit turn cannot re-arm it onto a later card and
+    # win two Blocks.
+    n = enemy.powers.get("curl_up", 0)
+    if n and state.card_in_flight is not None:
+        if (enemy.curl_up_card is None
+                or enemy.curl_up_card == state.card_in_flight):
+            enemy.curl_up_card = state.card_in_flight
+
+
+def enemy_curl_up_after_card_played(state: CombatState, card: Card) -> None:
+    """`CurlUpPower.AfterCardPlayed` (`:49`).
+
+    "When the card that woke me finishes, gain Amount Block and go away."
+    `CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered, null)` then
+    `PowerCmd.Remove(this)` — the power is spent, not decremented, so a Louse
+    curls exactly once per application.
+
+    AFTER the card, not during it, which is the whole of the mechanic: the hit
+    that woke the power is never mitigated by the Block it buys, and neither
+    is the second hit of the same multi-hit card. Written here for the same
+    reason Skittish's latch lives at the damage site — the timing IS the
+    power.
+    """
+    for enemy in state.enemies:
+        if enemy.curl_up_card != card.id:
+            continue
+        enemy.curl_up_card = None
+        n = enemy.powers.pop("curl_up", 0)
+        if n and enemy.alive:
+            enemy.block += n
+            state.emit("curl_up", enemy=enemy.name, block=n)
 
 
 def reset_enemy_damage_caps(state: CombatState) -> None:
@@ -785,13 +924,18 @@ def before_card_played(state: CombatState, card: Card) -> dict:
         p.powers["free_skill"] -= 1
         state.emit("free_skill_spent", card=card.id)
     state.card_play_depth += 1
+    # `EB-495` D6: the sim's `cardSource`. Pushed here and RESTORED in
+    # `after_card_played` from the snapshot below, so a nested play hands the
+    # outer card back instead of clearing the slot.
+    outer_card = state.card_in_flight
+    state.card_in_flight = card.id
     # Afterimage / SerpentForm / Strangle all keep a
     # Dictionary<CardModel,int> filled at BeforeCardPlayed and drained at
     # AfterCardPlayed. The indirection is not decoration: it is what stops a
     # card that GRANTS one of these powers from paying itself on the very
     # play that granted it. Snapshotting the amounts here reproduces that.
     return {"hp": p.hp, "block": p.block, "exhaust": len(p.exhaust_pile),
-            "energy": p.energy,
+            "energy": p.energy, "outer_card": outer_card,
             "afterimage": p.powers.get("afterimage", 0),
             "serpent_form": p.powers.get("serpent_form", 0),
             "strangle": [(e, e.powers.get("strangle", 0))
@@ -804,6 +948,11 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     OneTwoPunch-doubled attack; Juggling counts it twice)."""
     p = state.player
     state.card_play_depth -= 1
+    # `EB-495` D6. Curl Up resolves at the TOP of AfterCardPlayed, while the
+    # card that woke it is still the one being compared, and the `cardSource`
+    # slot is restored immediately after.
+    enemy_curl_up_after_card_played(state, card)
+    state.card_in_flight = snap.get("outer_card")
 
     # CardPlaysFinished, tallied per tag. Counted here rather than at play
     # time because the base game's readers ask what has FINISHED this turn:
@@ -1613,6 +1762,18 @@ def on_fighter_turn_end(state: CombatState, fighter: Fighter) -> None:
                  "burst", "corrosive_wave", "shadowmeld"):
         fighter.powers.pop(name, None)
     state.no_energy_gain_ceiling = None
+
+    # `EB-495` D6: an ENEMY's FlameBarrier, whose lifetime is the mirror image
+    # of the player's. `FlameBarrierPower.AfterSideTurnEnd` removes itself
+    # when `Owner.Side != side` (`:29`), so a player-owned barrier goes at the
+    # ENEMY side's end (`after_enemy_side_turn_end`) and an enemy-owned one
+    # goes at the PLAYER's -- this site, which is AfterSideTurnEnd for
+    # whichever side just ended. The two are written apart rather than
+    # together because they are two different hook firings, and folding them
+    # would make an enemy's barrier cover the wrong half of the round.
+    if fighter is state.player:
+        for enemy in state.enemies:
+            enemy.powers.pop("flame_barrier", None)
 
     # DoubleDamage DECREMENTS here (PowerCmd.Decrement, not Remove), which is
     # why its stacks read as turns of doubling remaining -- the multiplier
