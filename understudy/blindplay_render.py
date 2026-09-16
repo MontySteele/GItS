@@ -62,6 +62,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_COUNT_NOTE,
                                         PLAN_WRITTEN_NUMBER_NOTE,
                                         PLAN_HYDRO_NOTE,
+                                        PLAN_PAST_LETHAL_BLOCK,
+                                        PLAN_PAST_LETHAL_CLAUSE,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE,
                                         SPARK_SOURCES_LINE,
@@ -283,6 +285,71 @@ _DUSK_MARK = "Dusk: "
 def _is_dusk(row: dict[str, Any]) -> bool:
     """Is this queued or carried-out Plan a DUSK entry? (`EB-680`)"""
     return str(row.get("card") or row.get("name") or "").startswith(_DUSK_MARK)
+
+
+def _front_body(enemies: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """The body a single-target Plan lands on, off the rows this page prints.
+
+    `EB-773`. `PLAN_AIM_NOTE` is the rule and `blindplay_board.mark_front` is
+    where it is already applied -- the leftmost living non-Minion, falling
+    back to the leftmost living body where every one of them is a Minion. That
+    reader sets `front` only where two or more are alive, because with one
+    body there is no choice to get wrong; here a lone living body IS the
+    answer, so the mark is asked first and the list second. Reading the
+    PRINTED rows rather than the wire keeps this and the warning's own
+    `target` naming the same body a reader can see.
+    """
+    alive = [e for e in enemies if isinstance(e.get("hp"), int)
+             and e["hp"] > 0 and not e.get("phase_flip")]
+    if not alive:
+        return None
+    return next((e for e in alive if e.get("front")), alive[0])
+
+
+def _past_lethal_clauses(pl: dict[str, Any],
+                         enemies: list[dict[str, Any]]) -> dict[int, str]:
+    """`EB-773`: which queued Plans are written past the front body's life.
+
+    THE RUNNING SUBTRACTION, over the queue in the order the jellyfish takes
+    it. An entry earns the clause when the damage queued AHEAD of it already
+    covers the front body's HP behind its Block -- which is the board the
+    `EB-714` seat wrote a second 8 into, and the one nothing on this screen
+    said anything about.
+
+    ONLY `aim == "front"` COUNTS, on both sides of the comparison. A Plan whose
+    face says ALL hits every living body and cannot be over-killed past the
+    front one; a Plan Converging Tide has stamped is aimed by `CombatId` at a
+    body this page cannot resolve, and says nothing rather than guessing; an
+    entry with no damage clause adds nothing to the total and never earns the
+    clause. A feed older than the fields sends `aim == ""` for everything and
+    this returns an empty map -- the queue prints exactly as it always did.
+
+    NEREID'S ASCENSION IS COUNTED, because `twice` is a fact about the next
+    morning and not a forecast: the Rare carries out the FIRST entry twice, so
+    its damage is doubled in the running total before the second entry is
+    weighed. Nothing else in the queue changes.
+
+    THE FIRST ENTRY NEVER EARNS IT -- nothing is queued ahead of it -- which is
+    also why this is a warning about a QUEUE and not about a card.
+    """
+    body = _front_body(enemies)
+    if body is None:
+        return {}
+    queue = pl.get("queue") or []
+    out: dict[int, str] = {}
+    ahead = 0
+    for index, entry in enumerate(queue):
+        if entry.get("aim") != "front":
+            continue
+        if ahead > 0 and body["hp"] <= max(0, ahead - (body.get("block") or 0)):
+            block = (PLAN_PAST_LETHAL_BLOCK.format(block=body["block"])
+                     if body.get("block") else "")
+            out[index] = PLAN_PAST_LETHAL_CLAUSE.format(
+                target=f"**{body['name']}**", hp=body["hp"], block=block,
+                queued=ahead)
+        damage = entry.get("damage") or 0
+        ahead += damage * 2 if index == 0 and pl.get("twice") else damage
+    return out
 
 
 def _carry_out_rows(rows: list[dict[str, Any]]) -> list[str]:
@@ -1614,11 +1681,15 @@ def render(obs: dict[str, Any]) -> str:
                 out.append(
                     f"- Planned, and carried out at the start of your next "
                     f"turn in this order ({pl['pending']}):")
+                # `EB-773`: and which of them is written at a body the Plans
+                # ahead of it will already have killed.
+                past_lethal = _past_lethal_clauses(pl, c.get("enemies") or [])
                 for i, e in enumerate(pl["queue"], 1):
                     out.append(f"  {i}. **{e['name']}**"
                                + (" — Dusk: this one is carried out at the "
                                   "END of this turn instead, before the "
-                                  "enemies act" if _is_dusk(e) else ""))
+                                  "enemies act" if _is_dusk(e) else "")
+                               + past_lethal.get(i - 1, ""))
                 if pl["twice"]:
                     out.append("- The jellyfish carries out your FIRST Plan "
                                "twice while Nereid's Ascension lasts.")

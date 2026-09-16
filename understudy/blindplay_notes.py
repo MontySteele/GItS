@@ -1021,6 +1021,40 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
                             "it; a planned BLOCK is yours, so Frail does cut "
                             "it.")
 
+# `EB-773`. THE PLAN WRITTEN AT A BODY THE QUEUE WILL ALREADY HAVE KILLED.
+#
+# THE FIND (Kokomi r32 lane 1, read again in PR #554). "The two carry-outs
+# both landed on Leaf Slime (S) -- 8 killed it down to 3, the second 8 killed
+# it with 5 wasted. They did not retarget." The retarget half was wrong -- the
+# aim is re-read per entry and the body was still alive when the second
+# arrived -- and the seat's own next sentence is the true complaint: "nothing
+# on the Plan screen warns you". The waste is ordinary overkill, and the
+# screen a player writes a Plan from said nothing about it.
+#
+# THE ARITHMETIC IS THE BOARD'S AND NOT A FORECAST. Every figure in it is
+# already on this page: the written numbers, fixed by the note above; the
+# body's HP; and the Block it is standing in, which `PLAN_BLOCK_NOTE` says
+# survives to the morning. Nothing here predicts a roll, reads an intent or
+# re-aims anything.
+#
+# "MAY", DELIBERATELY, and it is the honest word rather than a hedge: a Plan
+# ahead of this one can be hurried out early by Change of Plans, a reaction or
+# a relic can move the bar first, and a Dusk entry lands a turn sooner. The
+# page names the reason and leaves the decision where it belongs.
+#
+# ON THE ENTRY'S OWN ROW, because the reader deciding whether to write another
+# Plan is reading the queue, and the fact is about THIS entry rather than
+# about the jellyfish.
+PLAN_PAST_LETHAL_CLAUSE = (
+    " — target may be dead by then: {target} has {hp} HP{block}, and the "
+    "{queued} already queued ahead of this one covers it")
+
+# The Block half of the clause above, printed only where the body has some: a
+# bare "12 queued ahead covers 11 HP" is a false sentence about a body standing
+# in 6 Block, and the subtraction is the one a seat would otherwise do by hand
+# off `PLAN_BLOCK_NOTE`.
+PLAN_PAST_LETHAL_BLOCK = " behind {block} Block"
+
 # `EB-567`. THE KIT'S FIRST DECISION, TAUGHT BY REFUSAL ONE ACTION TOO LATE.
 #
 # WHAT BOTH r14 SEATS MET. Ethereal Spotlight costs 2 Encore, the fight opens

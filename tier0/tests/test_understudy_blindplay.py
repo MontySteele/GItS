@@ -3542,6 +3542,106 @@ TWO_PLANS = {
 }
 
 
+# `EB-773`. THE BOARD THE r32 SEAT WROTE A SECOND PLAN INTO, with the seat's
+# own numbers moved three so the queue is actually past lethal rather than
+# merely wasteful: a lone body at 8 HP and two 8-damage Plans aimed at the
+# front. The first kills it; the second is written at a body that will already
+# be gone when the jellyfish reaches it. (At the seat's own 11 the body was
+# still alive at 3, which is ordinary overkill and earns no warning -- the
+# next test is that case.)
+def _past_lethal_state(queue, hp=8, block=0, twice=False, enemies=None):
+    """A Kokomi combat whose front body and Plan queue are both stated."""
+    state = plans_combat_state(dict(TWO_PLANS, pending=len(queue),
+                                    twice=twice, queue=queue))
+    battle = dict(state["battle"])
+    battle["enemies"] = enemies if enemies is not None else [
+        {"entity_id": "SLIME_0", "combat_id": 1, "name": "Leaf Slime",
+         "hp": hp, "max_hp": 24, "block": block, "status": [],
+         "intents": [{"type": "Attack", "label": "7", "title": "Aggressive",
+                      "description": "This enemy intends to Attack for 7."}]}]
+    state = dict(state)
+    state["battle"] = battle
+    return state
+
+
+def _plan_page(**kwargs):
+    return blindplay.render(blindplay.observation(_past_lethal_state(**kwargs)))
+
+
+WARNING = "target may be dead by then"
+
+
+def test_a_plan_queued_behind_a_lethal_one_is_warned_about():
+    """`EB-773`, the row's own acceptance. Two 8-damage Plans into an 8-HP
+    body: the second is written past lethal and the queue says so, on that
+    entry's row and not the first one's."""
+    page = _plan_page(queue=[
+        {"name": "Kurage's Oath", "clauses": 1, "damage": 8, "aim": "front"},
+        {"name": "War Council", "clauses": 1, "damage": 8, "aim": "front"}])
+    first, second = [line for line in page.splitlines()
+                     if line.strip().startswith(("1. **", "2. **"))]
+    assert WARNING not in first, "nothing is queued ahead of the first Plan"
+    assert WARNING in second
+    assert "**Leaf Slime**" in second and "8 HP" in second
+    assert "the 8 already queued ahead of this one covers it" in second
+
+
+def test_a_plan_the_queue_cannot_reach_past_is_not_warned_about():
+    """THE SEAT'S OWN BOARD, and it earns no warning. 8 queued ahead of an
+    11-HP body leaves it alive at 3: the second Plan wastes 5 and lands, which
+    is ordinary overkill in any deck. A page that warned here would be noise
+    on every queue of two."""
+    page = _plan_page(hp=11, queue=[
+        {"name": "Kurage's Oath", "clauses": 1, "damage": 8, "aim": "front"},
+        {"name": "War Council", "clauses": 1, "damage": 8, "aim": "front"}])
+    assert WARNING not in page
+
+
+def test_the_front_body_s_block_is_taken_out_of_the_queued_damage():
+    """`PLAN_BLOCK_NOTE`: a Plan lands in whatever Block the enemy is still
+    standing in, and you cannot strip it first. So 12 queued ahead of an 8-HP
+    body behind 6 Block reaches 6 and warns nobody; take the Block down to 1
+    and the same queue is past lethal."""
+    queue = [{"name": "Kurage's Oath", "clauses": 1, "damage": 12,
+              "aim": "front"},
+             {"name": "War Council", "clauses": 1, "damage": 8,
+              "aim": "front"}]
+    assert WARNING not in _plan_page(hp=8, block=6, queue=queue)
+    warned = _plan_page(hp=8, block=1, queue=queue)
+    assert WARNING in warned
+    assert "behind 1 Block" in warned
+
+
+def test_an_all_enemies_plan_neither_counts_nor_is_warned_about():
+    """A Plan whose face says ALL hits every living body, so it cannot be
+    over-killed past the front one and its number is not the front body's."""
+    page = _plan_page(queue=[
+        {"name": "Tide Chart", "clauses": 1, "damage": 20, "aim": "all"},
+        {"name": "War Council", "clauses": 1, "damage": 8, "aim": "front"}])
+    assert WARNING not in page
+
+
+def test_nereids_ascension_doubles_the_first_plan_in_the_running_total():
+    """`twice` is a fact about the next morning, not a forecast: the Rare
+    carries out the FIRST entry twice, so a 6 ahead of the queue is a 12."""
+    queue = [{"name": "Kurage's Oath", "clauses": 1, "damage": 6,
+              "aim": "front"},
+             {"name": "War Council", "clauses": 1, "damage": 8,
+              "aim": "front"}]
+    assert WARNING not in _plan_page(hp=11, queue=queue)
+    assert WARNING in _plan_page(hp=11, queue=queue, twice=True)
+
+
+def test_a_feed_with_no_written_damage_prints_the_queue_it_always_did():
+    """ABSENT IS NOT ZERO. A bridge older than `damage` and `aim` sends
+    neither, and the queue reads exactly as it read before this row."""
+    page = _plan_page(queue=[{"name": "Kurage's Oath", "clauses": 1},
+                             {"name": "War Council", "clauses": 2}])
+    assert WARNING not in page
+    assert "1. **Kurage's Oath**" in page
+    assert "2. **War Council**" in page
+
+
 def test_a_board_with_no_plan_rule_carries_no_plan_section():
     """The ABSENT / EMPTY split, and it is the same one the memory makes: a
     release build has no Plan rule and a Klee at this table is not playing it,

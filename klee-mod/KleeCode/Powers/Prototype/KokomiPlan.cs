@@ -2667,6 +2667,55 @@ public static class KokomiPlan
     /// a populated map is her queue. A reader is entitled to tell those apart,
     /// which is why this returns an empty map rather than null for a Klee.
     /// </summary>
+    /// <summary>
+    /// `EB-773`. The damage this queued entry has WRITTEN against a single
+    /// body, or 0.
+    ///
+    /// ONLY <see cref="Kind.Damage"/>, and only where it aims at the front.
+    /// The other two damage kinds are derived at CARRY-OUT --
+    /// <see cref="Kind.DamageQuarterMaxHp"/> off the target's max HP and
+    /// <see cref="Kind.DamagePerCompanionLastTurn"/> off a count that is not
+    /// taken yet -- so a number for them here would be a forecast, and this
+    /// key's whole claim is that it is a read of a number already fixed
+    /// (`PLAN_WRITTEN_NUMBER_NOTE`). An entry that mixes one in reports the
+    /// part it knows, and the page's own sentence says "may".
+    ///
+    /// <see cref="Planned.Times"/> MULTIPLIES, because "deal 3 damage three
+    /// times" is three hits into the same aim and the running total the page
+    /// keeps is a total. Block is the page's subtraction, not this one's: the
+    /// body's Block is a fact about the board at the morning and it is on the
+    /// wire already.
+    /// </summary>
+    private static int WrittenFrontDamage(Entry entry) =>
+        entry.Clauses
+            .Where(clause => clause.Kind == Kind.Damage
+                             && clause.Aim == Aim.FrontEnemy)
+            .Sum(clause => clause.Amount * System.Math.Max(1, clause.Times));
+
+    /// <summary>
+    /// `EB-773`. WHERE this queued entry's damage lands, in one word.
+    ///
+    /// "front" is the single-target aim `PLAN_AIM_NOTE` describes and the only
+    /// one the page's running total is about. "all" is a Plan whose face says
+    /// ALL, which takes every living body and cannot be over-killed past the
+    /// front one. "other" is <see cref="Entry.AimOverride"/> -- Converging
+    /// Tide has stamped a body by <c>CombatId</c> and the page has no way to
+    /// resolve that id against the list it prints, so it says nothing rather
+    /// than guessing. "" is an entry with no damage clause at all.
+    /// </summary>
+    private static string WrittenAim(Entry entry)
+    {
+        var damage = entry.Clauses.Where(clause =>
+            clause.Kind == Kind.Damage
+            || clause.Kind == Kind.DamageQuarterMaxHp
+            || clause.Kind == Kind.DamagePerCompanionLastTurn).ToList();
+        if (damage.Count == 0) return "";
+        if (entry.AimOverride != null) return "other";
+        if (damage.Any(clause => clause.Aim == Aim.AllEnemies)) return "all";
+        return damage.Any(clause => clause.Aim == Aim.FrontEnemy)
+            ? "front" : "other";
+    }
+
     public static Dictionary<string, object?> Snapshot(Player? player)
     {
         var snapshot = new Dictionary<string, object?>();
@@ -2697,6 +2746,19 @@ public static class KokomiPlan
             {
                 ["name"] = entry.Title,
                 ["clauses"] = entry.Clauses.Count,
+                // `EB-773`. WHAT THIS ENTRY HAS ALREADY WRITTEN AGAINST THE
+                // FRONT BODY, so the blind page can say that a Plan queued
+                // behind a lethal one will find its target gone. The seat
+                // read in `EB-714` is the row: two 8-damage Plans into an
+                // 11-HP body, the second landing on 3 HP with 5 wasted, and
+                // "nothing on the Plan screen warns you".
+                //
+                // THE NUMBERS ARE ALREADY FIXED, which is what makes this
+                // reportable at all: `PLAN_WRITTEN_NUMBER_NOTE`'s rule is
+                // that a written Plan carries the number it was written with.
+                // So these two keys are a read of state, not a forecast.
+                ["damage"] = WrittenFrontDamage(entry),
+                ["aim"] = WrittenAim(entry),
             })
             .ToList();
         // `EB-317`. WHAT THE JELLYFISH HAS ALREADY DONE THIS TURN, in the
