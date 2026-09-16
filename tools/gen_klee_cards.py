@@ -10840,6 +10840,8 @@ def build_description(card: dict, *,
     if upgrade_add_leads(card) and added_effect_anchor(card) is None:
         parts.extend(_upgrade_add_text(card))
     salon_named = False          # B5: has a deploy already said "your Salon"?
+    deploy_clause_said = False   # `EB-398`: has the deploy's "performs at
+                                 # once" clause been printed on this card yet?
     deploy_amounts, deploy_skip, deploy_runs = merged_deploy_text(card)
     add_anchor = added_effect_anchor(card)
     for eff_index, eff in enumerate(card["effects"]):
@@ -11354,6 +11356,14 @@ def build_description(card: dict, *,
                 where = "" if salon_named else " to your [gold]Salon[/gold]"
                 salon_named = True
                 parts.append(f"Add {listed}{where}.")
+                # `EB-398`: THE DEPLOY'S MAIN BEHAVIOUR, printed. A joining
+                # member performs the moment it arrives; that rule lived only
+                # on the Salon buff line, so a seat met it after the fact
+                # (Furina r3 act 1 (c) 4). Plural here because the run adds
+                # two or three of them in one sentence.
+                if not deploy_clause_said:
+                    deploy_clause_said = True
+                    parts.append("They perform at once.")
                 continue
             if "member" in eff:
                 # B5: name WHO. A11's random deploy says so instead -- it can
@@ -11384,6 +11394,11 @@ def build_description(card: dict, *,
                   else ("" if x == "1" else "s"))
             parts.append(template.replace("{X}", x).replace("{XS}", xs)
                          .replace("{TO}", to))
+            # `EB-398`, the lone-deploy half of the clause above. Said once
+            # per card, however many deploys the body carries.
+            if eff["power"] == "salon_member" and not deploy_clause_said:
+                deploy_clause_said = True
+                parts.append("It performs at once.")
 
         elif op == "detonate":
             where = ("an enemy's" if eff["target"] == "enemy" else "ALL")
