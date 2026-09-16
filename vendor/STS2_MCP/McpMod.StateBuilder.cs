@@ -1676,9 +1676,79 @@ public static partial class McpMod
                 index++;
             }
         }
+        // GItS LOCAL EDIT (`EB-682`). THE ROOM THAT PRINTED NO CHOICES AND HAD
+        // THREE. The act-2 Ancient room (Tezcatara, Kokomi r27 lane 1) sent a
+        // heading and an empty `options`, the blind page printed the heading
+        // and its no-Proceed note with nothing between them, and the seat --
+        // who called it "the most serious defect I hit" -- typed `choose 1` on
+        // a guess and was handed Very Hot Cocoa. A seat that had trusted the
+        // page would have called the room stuck. r32 met the same thing in the
+        // Pael room.
+        //
+        // THE BUTTONS ARE A UI READ AND THE OPTIONS ARE NOT. `FindAll` walks
+        // the live scene under `NEventRoom.Instance`, so a layout that has not
+        // built its buttons yet -- an Ancient room animates them in after its
+        // dialogue (`NAncientEventLayout.AnimateButtonsIn`) -- answers none,
+        // while `EventModel.CurrentOptions` is the list the room is actually
+        // offering and the list those buttons are built FROM, in that order.
+        // `ExecuteChooseEventOption` still indexes the buttons, which is why
+        // this fallback preserves their order and does not renumber anything:
+        // it is the same rows, read one layer down, and the seat's `choose 1`
+        // proves the click lands.
+        //
+        // ONLY WHERE THE UI READ FOUND NOTHING, so every screen that already
+        // worked is byte-identical, and `from_model` marks the row as read off
+        // the model rather than off a live button.
+        if (options.Count == 0)
+        {
+            var liveEvent = eventRoom.LocalMutableEvent ?? eventModel;
+            int index = 0;
+            foreach (var opt in GitsModelEventOptions(liveEvent))
+            {
+                if (opt == null) continue;
+                var optData = new Dictionary<string, object?>
+                {
+                    ["index"] = index,
+                    ["title"] = SafeGetText(() => opt.Title),
+                    ["description"] = SafeGetText(() => opt.Description),
+                    ["is_locked"] = opt.IsLocked,
+                    ["is_proceed"] = opt.IsProceed,
+                    ["was_chosen"] = opt.WasChosen,
+                    ["from_model"] = true
+                };
+                if (opt.Relic != null)
+                {
+                    optData["relic_name"] = SafeGetText(() => opt.Relic.Title);
+                    optData["relic_description"] = SafeGetText(() => opt.Relic.DynamicDescription);
+                }
+                optData["keywords"] = BuildHoverTips(opt.HoverTips);
+                options.Add(optData);
+                index++;
+            }
+        }
         state["options"] = options;
 
         return state;
+    }
+
+    /// <summary>
+    /// GItS LOCAL ADDITION (`EB-682`). The options an event model is offering,
+    /// or an empty list. A state read must never throw, and this one reaches
+    /// past the UI into the run's own model, so the read is guarded and an
+    /// event with nothing to say answers nothing -- which is the state the
+    /// page already renders.
+    /// </summary>
+    private static IReadOnlyList<EventOption> GitsModelEventOptions(EventModel? model)
+    {
+        if (model == null) return Array.Empty<EventOption>();
+        try
+        {
+            return model.CurrentOptions ?? (IReadOnlyList<EventOption>)Array.Empty<EventOption>();
+        }
+        catch (Exception)
+        {
+            return Array.Empty<EventOption>();
+        }
     }
 
     private static Dictionary<string, object?> BuildFakeMerchantState(EventRoom eventRoom, RunState runState)
