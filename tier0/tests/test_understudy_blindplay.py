@@ -6065,6 +6065,50 @@ def test_an_enchantment_the_game_does_not_number_prints_no_number():
     assert "(Sharp 3)" not in page
 
 
+# ---------------- EB-734: the tag on a CHOOSER row, not only on a hand row
+#
+# THE FIND (Klee r26 lane 1, (c) 3). The floor-8 *Self-Help Book* enchant
+# chooser "printed ten cards -- Strike (1) ... Defend (5) -- with no
+# enchantment tag on any of them, while the combat hand screen does print the
+# tag (Strike (2) (Spiral))", on the one screen where the tag is the whole
+# basis for choosing. The seat could not find the Spiral copy and aimed the
+# enchantment elsewhere.
+#
+# THIS PAGE PRINTS IT AND DOES SO OFF THE SAME FACE BUILDER: `_card_face` for
+# a chooser row is the one `_card_face` the hand uses, and `_render_card`
+# prints the enchantment beside the title on every screen that renders a card.
+# So the page half of that row is sound TODAY and this is the pin that says
+# so -- the row itself needs a live look at the wire, because
+# `BuildCardSelectState` reads every grid row through the same `BuildCardInfo`
+# the hand does and `NCardGrid.SetCards` caches deck cards by reference.
+
+
+def enchanted_chooser_state() -> dict:
+    """The deck enchant picker, two copies of one title, one enchanted."""
+    plain = {"id": "KLEEMOD-STRIKE", "name": "Strike", "type": "Attack",
+             "cost": "1", "rarity": "Basic", "is_upgraded": False,
+             "keywords": [], "description": "Deal 6 damage.", "index": 0}
+    spiral = json.loads(json.dumps(plain))
+    spiral["index"] = 1
+    spiral["enchantment"] = {"id": "SPIRAL", "name": "Spiral",
+                             "description": "Replay 1.",
+                             "amount": 1, "shows_amount": True}
+    return {"state_type": "card_select",
+            "card_select": {"screen_type": "enchant",
+                            "prompt": "Choose an Attack to Enchant with "
+                                      "Sharp 2.",
+                            "cards": [plain, spiral],
+                            "selection_known": True,
+                            "can_confirm": False, "can_cancel": True}}
+
+
+def test_a_chooser_row_carries_the_tag_its_hand_entry_carries():
+    """`EB-734`. The acceptance sentence, on the screen the row is about."""
+    page = blindplay.observe(enchanted_chooser_state())
+    assert "**Strike (2)** (Spiral 1)" in page
+    assert "**Strike (1)** (Spiral" not in page
+
+
 def test_a_card_with_no_enchantment_key_claims_nothing():
     """An absent key is the positive statement "not enchanted", and it is also
     what every bridge older than this row sends for every card. Neither may
