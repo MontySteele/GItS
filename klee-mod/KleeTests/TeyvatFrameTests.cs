@@ -1535,12 +1535,34 @@ public class TeyvatFrameTests : IDisposable
         (bool)StaticMethod(typeof(PunchOffMirror), "ShouldSpawnHitSpark")
             .Invoke(null, new object[] { mode, spawned })!;
 
-    /// <summary>`PunchOffMirror.MaxHitSparksPerVisit`, the same way. A
-    /// `const` has no storage, so the value is read off the field's baked
-    /// constant rather than off an instance.</summary>
-    private static int MaxHitSparks =>
+    /// <summary>`PunchOffMirror.MaxHitSparksPerVisit`, the same way.</summary>
+    private static int MaxHitSparks => PunchOffConst("MaxHitSparksPerVisit");
+
+    /// <summary>`PunchOffMirror.ShouldPlayBluntVfx`: the blunt-impact half of
+    /// the same guard. #528 capped the spark and left this one, and proofs-6
+    /// caught it -- `VfxCmd.PlayOnCreatureCenter` reaches
+    /// `PackedScene.Instantiate` through `VfxCmd.PlayVfx`.</summary>
+    private static bool BluntAllowed(FastModeType mode, int played) =>
+        (bool)StaticMethod(typeof(PunchOffMirror), "ShouldPlayBluntVfx")
+            .Invoke(null, new object[] { mode, played })!;
+
+    /// <summary>`PunchOffMirror.ShouldKeepPunching`: the loop's own bound,
+    /// the guard that is about the swing rather than about one allocation in
+    /// it.</summary>
+    private static bool KeepPunching(FastModeType mode, int swings) =>
+        (bool)StaticMethod(typeof(PunchOffMirror), "ShouldKeepPunching")
+            .Invoke(null, new object[] { mode, swings })!;
+
+    private static int MaxBluntVfx => PunchOffConst("MaxBluntVfxPerVisit");
+
+    private static int MaxSwings => PunchOffConst("MaxSwingsUnderInstant");
+
+    /// <summary>One of the mirror's per-visit budgets. A `const` has no
+    /// storage, so the value is read off the field's baked constant rather
+    /// than off an instance.</summary>
+    private static int PunchOffConst(string name) =>
         (int)typeof(PunchOffMirror).GetField(
-            "MaxHitSparksPerVisit",
+            name,
             BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)!
             .GetRawConstantValue()!;
 
@@ -1596,12 +1618,137 @@ public class TeyvatFrameTests : IDisposable
     {
         // The event's mechanics and its picture are the base game's, and the
         // fix is not allowed to quietly drop either half of the blow: the
-        // anim trigger and `vfx_attack_blunt` are still in the loop, and so
-        // are the base event's waits.
+        // anim trigger and `vfx_attack_blunt` are still in the loop -- the
+        // latter now through its guard, as the spark is -- and so are the
+        // base event's waits.
         var loop = Il.CallSequence(Method(typeof(PunchOffMirror), "PunchEachOther")).ToList();
         Assert.Contains(loop, c => c.StartsWith("CreatureCmd.TriggerAnim", StringComparison.Ordinal));
-        Assert.Contains(loop, c => c.StartsWith("VfxCmd.PlayOnCreatureCenter", StringComparison.Ordinal));
+        Assert.Contains(loop, c => c.StartsWith("PunchOffMirror.PlayBluntVfx", StringComparison.Ordinal));
         Assert.Contains(loop, c => c.StartsWith("Cmd.Wait", StringComparison.Ordinal));
+
+        var blunt = Il.CallSequence(Method(typeof(PunchOffMirror), "PlayBluntVfx")).ToList();
+        Assert.Contains(blunt, c => c.StartsWith("VfxCmd.PlayOnCreatureCenter", StringComparison.Ordinal));
+    }
+
+    // ---------------------------------------------------------------
+    // `EB-769`, the second half: the loop's OTHER per-swing allocation, and
+    // the loop itself.
+    //
+    // WHAT PROOFS-6 READ. #528's cap worked -- no `NHitSparkVfx` appears in
+    // any log of the 2026-09-16 proofs. The process died anyway under
+    // `FastMode = Instant` / `TimeScale 3` (a 66 MB and a 512 MB `godot.log`,
+    // bridge timeout), and the top backtrace frame had moved to
+    // `Godot.PackedScene.Instantiate_Patch1` under
+    // `PunchOffMirror.PunchEachOther`: that is
+    // `VfxCmd.PlayOnCreatureCenter(.., "vfx/vfx_attack_blunt")`, which goes
+    // through `VfxCmd.PlayVfx` -> `PreloadManager.Cache.GetScene(path)
+    // .Instantiate<Node2D>(..)` -> `AddChildSafely`. Same shape, same cause,
+    // left alone by #528.
+    //
+    // AND THE LOOP ITSELF, which is why there is a third guard rather than a
+    // second. `Cmd.Wait` creates no `SceneTreeTimer` at all when
+    // `PrefsSave.FastMode == FastModeType.Instant`, and
+    // `CreatureCmd.TriggerAnim(.., 0f)` ends in a `CustomScaledWait` that is
+    // likewise a no-op there -- so under the harness every `await` in the
+    // body completes synchronously and the `while` never yields. Capping
+    // what a pass allocates makes each pass cheap; only a bound on the loop
+    // makes a spinning loop stop.
+    //
+    // The audit of the base event (`ilspycmd -t
+    // MegaCrit.Sts2.Core.Models.Events.PunchOff`) found these per-swing
+    // calls and no others: `CreatureCmd.TriggerAnim` x4, `Cmd.Wait` x4,
+    // `VfxCmd.PlayOnCreatureCenter` x2, `NHitSparkVfx.Create` x2. TriggerAnim
+    // allocates nothing for a monster -- it sets a trigger on the existing
+    // `NCreature` node and its SFX arm is `creature.IsPlayer` only -- and
+    // `Cmd.Wait` allocates its timer only at the speeds where the timer is
+    // the pacing. So the two spawns plus the loop bound are the whole set.
+    // ---------------------------------------------------------------
+
+    [Fact]
+    public void EB769_no_blunt_impact_is_instantiated_under_the_harnesss_instant_mode()
+    {
+        Assert.False(BluntAllowed(FastModeType.Instant, 0));
+        Assert.False(BluntAllowed(FastModeType.Instant, 5));
+    }
+
+    [Theory]
+    [InlineData(FastModeType.Normal)]
+    [InlineData(FastModeType.Fast)]
+    public void EB769_at_the_players_own_speed_the_blunt_impacts_run_to_a_fixed_cap(FastModeType mode)
+    {
+        Assert.True(BluntAllowed(mode, 0));
+        Assert.True(BluntAllowed(mode, MaxBluntVfx - 1));
+        Assert.False(BluntAllowed(mode, MaxBluntVfx));
+        Assert.False(BluntAllowed(mode, 1_000_000));
+    }
+
+    [Fact]
+    public void EB769_the_blunt_cap_is_a_sibling_of_the_spark_cap()
+    {
+        // Two budgets, not one shared number: the blunt impact is the blow a
+        // player reads and the spark is decoration on top of it, so a later
+        // ruling can move one without moving the other. They start equal
+        // because the same half-minute of the loop's intended 1.2 s pacing is
+        // the right budget for both.
+        Assert.InRange(MaxBluntVfx, 1, 100);
+        Assert.Equal(MaxHitSparks, MaxBluntVfx);
+    }
+
+    [Fact]
+    public void EB769_the_loop_stops_swinging_under_instant()
+    {
+        Assert.True(KeepPunching(FastModeType.Instant, 0));
+        Assert.True(KeepPunching(FastModeType.Instant, MaxSwings - 1));
+        Assert.False(KeepPunching(FastModeType.Instant, MaxSwings));
+        Assert.False(KeepPunching(FastModeType.Instant, 1_000_000));
+        Assert.InRange(MaxSwings, 1, 100);
+    }
+
+    [Theory]
+    [InlineData(FastModeType.Normal)]
+    [InlineData(FastModeType.Fast)]
+    public void EB769_at_the_players_own_speed_the_punching_never_stops(FastModeType mode)
+    {
+        // THE LINE THE FIX IS NOT ALLOWED TO CROSS. The base event's
+        // constructs punch until the player leaves the room; the only thing
+        // that changes at a speed a person plays at is the two caps above.
+        Assert.True(KeepPunching(mode, 0));
+        Assert.True(KeepPunching(mode, MaxSwings));
+        Assert.True(KeepPunching(mode, 1_000_000));
+    }
+
+    [Fact]
+    public void EB769_every_per_swing_allocation_reaches_its_guard()
+    {
+        // STRUCTURAL, because none of these can be run headlessly. The loop
+        // must not instantiate anything directly: each spawn goes through its
+        // helper, each helper consults its pure decision, and the loop's own
+        // condition consults the swing bound.
+        var loop = Il.CallSequence(Method(typeof(PunchOffMirror), "PunchEachOther")).ToList();
+        Assert.DoesNotContain(loop, c => c.StartsWith("NHitSparkVfx.Create", StringComparison.Ordinal));
+        Assert.DoesNotContain(loop, c => c.StartsWith("VfxCmd.PlayOnCreatureCenter", StringComparison.Ordinal));
+        Assert.Contains(loop, c => c.StartsWith("PunchOffMirror.SpawnHitSpark", StringComparison.Ordinal));
+        Assert.Contains(loop, c => c.StartsWith("PunchOffMirror.PlayBluntVfx", StringComparison.Ordinal));
+        Assert.Contains(loop, c => c.StartsWith("PunchOffMirror.ShouldKeepPunching", StringComparison.Ordinal));
+
+        var blunt = Il.CallSequence(Method(typeof(PunchOffMirror), "PlayBluntVfx")).ToList();
+        Assert.Contains(blunt, c => c.StartsWith("PunchOffMirror.ShouldPlayBluntVfx", StringComparison.Ordinal));
+        Assert.Contains(blunt, c => c.StartsWith("VfxCmd.PlayOnCreatureCenter", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void EB769_every_budget_is_zeroed_where_the_visit_starts()
+    {
+        // The budgets are PER VISIT and an event model outlives the room it
+        // was shown in, so a second visit that reused the first visit's
+        // counts would show a silent, sparkless punch-off. All three counters
+        // are written in `AfterEventStarted`, which is where the visit
+        // begins.
+        var start = Method(typeof(PunchOffMirror), "AfterEventStarted");
+        var written = Il.FieldsWritten(start).ToList();
+        Assert.Contains("_hitSparks", written);
+        Assert.Contains("_bluntVfx", written);
+        Assert.Contains("_swings", written);
     }
 
     // ---------------------------------------------------------------
