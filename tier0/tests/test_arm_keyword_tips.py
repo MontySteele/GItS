@@ -438,8 +438,10 @@ def test_the_sparks_arms_bomb_rows_keep_the_shipped_definition():
     """SEEN, not asserted in the abstract: the three rows the exclusion drops
     are the three that place a shipped Bomb, and they still carry the shipped
     keyword and the arm's Spark tip."""
-    for stem in ("ProtoPopSpark", "ProtoPowderChargeSpark",
-                 "ProtoSparkModeBombs"):
+    # `EB-750` retired `ProtoPopSpark` and `ProtoPowderChargeSpark` with the
+    # rest of the superseded Sparks pool; `ProtoSparkModeBombs` is the row of
+    # the three that still exists, and it carries the same proof.
+    for stem in ("ProtoSparkModeBombs",):
         text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "includesBombRules: true" in text, stem
         assert "ArmKeywordTips.ForBomb(" not in text, stem

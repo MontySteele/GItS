@@ -46,9 +46,22 @@ from tier0.tests.conftest import make_state
 from tier05 import draft
 
 SEED = 7
-PROTO_ATTACKS = ("proto_kaboom_sink", "proto_spark_strike",
-                 "proto_spark_sweep", "proto_spark_double_tap",
-                 "proto_spark_blast", "proto_spark_finisher")
+# `EB-750`: the arm's six priced pool Attacks were SUPERSEDED by R270's
+# currency ruling and left the prototype surface with both substitution maps
+# (commit 036c12d150d6dbd58f0776a0d07e3c028a321a61).
+# `proto_spark_priced_strike` is the priced Attack that still exists, so it is
+# what the rule is asked of; where a clause needs two DIFFERENT prices the
+# cards are built here, because that clause is about the pilot's arithmetic
+# and never about a sheet.
+PROTO_ATTACKS = ("proto_spark_priced_strike",)
+
+
+def sink(price, cid="sink", damage=6, times=1):
+    """A Spark-priced Attack at a chosen price, built rather than drafted."""
+    return Card(id=cid, name=cid, cost=0, type="attack",
+                effects=[{"op": "spend_spark", "amount": price},
+                         {"op": "damage", "amount": damage,
+                          "target": "enemy", "times": times}])
 
 
 @pytest.fixture
@@ -136,7 +149,8 @@ def test_the_power_contributes_nothing_with_the_flag_off():
     state = make_state()
     state.player.powers["spark_attack_cost"] = 1
     state.player.sparks = 9
-    for card in (attack(cost=1), attack(cost=0), proto("proto_spark_strike")):
+    for card in (attack(cost=1), attack(cost=0),
+                 proto("proto_spark_priced_strike")):
         assert spark_power_price(state, card) == 0
         assert spark_price(state, card) == spark_cost(card)
 
@@ -214,16 +228,17 @@ def test_each_proto_attack_gates_on_its_price_and_pays_it(alt_cost, card_id):
     assert state.player.energy == 3             # and no energy
 
 
-def test_the_five_pool_attacks_carry_the_packets_prices(alt_cost):
-    """The prices are the packet's sec.4.2 table. Pinned so a later edit to
-    the surface cannot move a price without moving a test."""
-    assert {cid: spark_cost(proto(cid)) for cid in PROTO_ATTACKS} == {
-        "proto_kaboom_sink": 1,
-        "proto_spark_strike": 1,
-        "proto_spark_sweep": 1,
-        "proto_spark_double_tap": 2,
-        "proto_spark_blast": 2,
-        "proto_spark_finisher": 3,
+def test_the_surviving_priced_rows_carry_their_sheet_prices(alt_cost):
+    """`EB-750`. This used to pin the packet's sec.4.2 table across the six
+    pool Attacks; R270 superseded every one of them and they left the surface.
+    What the pin is FOR survives unchanged -- a price on a sheet row may not
+    move without moving a test -- so it is asked of the rows still there."""
+    assert {cid: spark_cost(proto(cid)) for cid in (
+        "proto_spark_priced_strike", "proto_spark_priced_draw",
+        "proto_spark_burst_conversion")} == {
+        "proto_spark_priced_strike": 3,
+        "proto_spark_priced_draw": 3,
+        "proto_spark_burst_conversion": 3,
     }
 
 
@@ -270,11 +285,11 @@ def test_an_attack_is_playable_at_three_and_pays_three_and_no_energy(alt_cost):
 def test_an_already_priced_attack_is_unaffected(alt_cost):
     """SUB-PICK (a), which is the seat's pick and mine. (b) would have raised
     Fwoosh! from 1 to 3 and punished the cards the archetype drafts."""
-    card = proto("proto_spark_strike")           # prints Spend 1
-    state = with_power(1)
+    card = proto("proto_spark_priced_strike")    # prints Spend 3
+    state = with_power(3)
     assert spark_power_price(state, card) == 0
-    assert spark_price(state, card) == 1
-    assert card_playable(state, card)            # playable at ONE, not three
+    assert spark_price(state, card) == 3         # its own price, not the
+    assert card_playable(state, card)            # Power's, and never both
 
 
 def test_a_skill_is_unaffected(alt_cost):
@@ -310,33 +325,32 @@ def test_the_power_does_nothing_without_the_flag():
 
 # --- 5. THE STARTER (PICK 1, options 1 and 5) ------------------------------
 
-def test_the_starter_substitutes_one_generator_and_one_sink(alt_cost):
+def test_the_starter_is_the_printed_ten_under_the_flag(alt_cost):
+    """`EB-750` INVERTED THIS PIN, and the inversion is the acceptance.
+
+    PICK 1 used to substitute `proto_pop_spark` and one `proto_kaboom_sink`
+    into Klee's opening ten. R270 ruled Spark a currency under the overhaul,
+    which superseded both rows, so the rows, `SPARK_ALT_STARTER_SUBS` and the
+    seam that read it left HEAD together (commit
+    036c12d150d6dbd58f0776a0d07e3c028a321a61). The flag now governs the RULE
+    alone, so the starter under it is the printed starter -- which is what
+    section 1 asserts with the flag OFF, and the two agreeing is the point.
+    """
     deck = loader.starting_deck("klee")
-    assert len(deck) == 10                       # a substitution, not a rework
-    assert deck.count("proto_pop_spark") == 1
-    assert deck.count("proto_kaboom_sink") == 1
-    assert deck.count("pop") == 0
-    assert deck.count("kaboom") == 3             # ONE copy, not four -- mine
+    assert len(deck) == 10
+    assert deck.count("kaboom") == 4
+    assert deck.count("pop") == 1
     assert deck.count("duck_and_cover") == 4
     assert deck.count("jumpy_dumpty") == 1
+    assert not [cid for cid in deck if cid.startswith("proto_")]
 
 
-def test_the_substituted_basics_are_a_source_and_a_sink(alt_cost):
-    """Regent's starter shape: one card that makes, one card that spends."""
-    maker = proto("proto_pop_spark")
-    assert [fx["op"] for fx in maker.effects] == ["place_bomb", "gain_spark"]
-    assert spark_cost(maker) == 0
-
-    spender = proto("proto_kaboom_sink")
-    assert spark_cost(spender) == 1
-    assert spender.cost == 0
-
-
-def test_build_player_resolves_the_substituted_ids(alt_cost):
-    """The door into the quarantine, from the side that uses it."""
-    player = loader.build_player("klee")
-    assert [c.id for c in player.draw_pile].count("proto_kaboom_sink") == 1
-    assert [c.id for c in player.draw_pile].count("proto_pop_spark") == 1
+def test_no_pool_substitution_survives_the_arm(alt_cost):
+    """The other door, and the same fact. `SPARK_ALT_POOL_SUBS` swapped nine
+    shipped rows for priced twins; it went with them, so Klee's offerable pool
+    under the flag is the shipped pool."""
+    assert loader.pool_substitutions("klee") == {}
+    assert not hasattr(C, "SPARK_ALT_POOL_SUBS")
 
 
 def test_the_quarantine_still_holds_under_the_flag(alt_cost):
@@ -376,8 +390,11 @@ def test_the_unit_is_the_cheapest_affordable_sink_not_the_best_rate(alt_cost):
     price and the WORSE rate, Bang Bang! the dearer price and the better one.
     A best-rate implementation would pick Bang Bang! and pass a test built on
     a pair where cheapest and best happen to coincide."""
-    cheap = proto("proto_spark_sweep")           # Spend 1, 4 to ALL
-    better_rate = proto("proto_spark_double_tap")  # Spend 2, 5 x 2
+    # BUILT, not drafted (`EB-750`): the two rows this pair used to use were
+    # superseded and deleted, and the clause is about the pilot's arithmetic
+    # rather than about any sheet.
+    cheap = sink(1, cid="cheap", damage=4)                 # the worse rate
+    better_rate = sink(2, cid="better", damage=5, times=2)  # the better one
     scored = attack(cost=1)
     state = hand_state([cheap, better_rate, scored], bank=2)
 
@@ -391,8 +408,8 @@ def test_the_hold_term_uses_the_unit_and_not_the_retired_dial(alt_cost):
     """`_spark_hold_cost`'s leg 1, end to end. The old floor was a flat
     `C.PILOT_SPARK_VALUE` per Spark -- "a third of a free Attack" -- and this
     pins that the term now reads what the bank can actually buy instead."""
-    scored = proto("proto_spark_strike")         # Spend 1
-    other = proto("proto_spark_strike")          # a second copy, the sink
+    scored = sink(1, cid="scored")               # Spend 1
+    other = sink(1, cid="other")                 # a second copy, the sink
     state = hand_state([scored, other], bank=2)
 
     cost = policy._spark_hold_cost(state, scored)
@@ -402,7 +419,7 @@ def test_the_hold_term_uses_the_unit_and_not_the_retired_dial(alt_cost):
 
 def test_an_unaffordable_sink_does_not_set_the_unit(alt_cost):
     """A price the bank cannot meet is not a use the bank has."""
-    dear = proto("proto_spark_finisher")         # Spend 3
+    dear = sink(3, cid="dear", damage=18)        # Spend 3
     scored = attack(cost=1)
     assert policy._spark_unit_value(
         hand_state([dear, scored], bank=2), scored) == 0.0
@@ -425,9 +442,9 @@ def test_the_free_attack_leg_still_fires_with_the_flag_off():
 def test_the_hold_term_charges_the_powers_price_too(alt_cost):
     """`spark_price`, not `spark_cost`: an Attack the Power prices costs the
     pilot three Sparks of hold value, not zero."""
-    sink = proto("proto_spark_strike")
+    cheap_sink = sink(1, cid="cheap_sink")
     converted = attack(cost=1)
-    state = hand_state([sink, converted], bank=3)
+    state = hand_state([cheap_sink, converted], bank=3)
     state.player.powers["spark_attack_cost"] = 1
 
     assert policy._spark_hold_cost(state, converted) > 0.0
@@ -436,8 +453,8 @@ def test_the_hold_term_charges_the_powers_price_too(alt_cost):
 def test_the_pilot_plays_a_spark_priced_attack_it_can_afford(alt_cost):
     """End to end, through the real chooser: a Spark-priced Attack is a card
     the pilot reaches, not one the gate hides."""
-    card = proto("proto_spark_strike")
-    state = hand_state([card], bank=1)
+    card = proto("proto_spark_priced_strike")
+    state = hand_state([card], bank=3)
     pilot = make_pilot(loader.pilot_weights("spark"))
     assert pilot(state) is card
 
@@ -454,13 +471,21 @@ def test_the_dial_is_the_median_of_what_the_five_sinks_buy():
     """The arithmetic at `SPARK_ALT_VALUE`, re-run here so the comment and
     the constant cannot drift apart. Baselines are shipped 0-energy Attacks:
     Common 3.5 (`crackle` 3, `study_of_explosions` 4), Uncommon 6.0
-    (`flame_on_the_wick`)."""
+    (`flame_on_the_wick`).
+
+    `EB-750` deleted the five rows this median was taken over. The DIAL does
+    not move and is not re-derived: `SPARK_ALT_VALUE` is a published figure
+    the `KLEESPARK-S1` read was taken at, and a published read stands as
+    published (R101b). So the five bodies are written out here as the
+    packet's sec.4.2 table prints them, which is the same arithmetic this
+    test always re-ran -- it is no longer a read off a sheet, and it says so.
+    """
     aoe = draft.STATIC_AOE_MULT
     rates = sorted([
-        (8 - 3.5) / 1,              # Fwoosh!
-        (4 * aoe - 3.5) / 1,        # Tinder Toss
-        (5 * 2 - 3.5) / 2,          # Bang Bang!
-        (7 * aoe - 6.0) / 2,        # Dodoco Blast
-        (18 - 6.0) / 3,             # Firework Finale
+        (8 - 3.5) / 1,              # Fwoosh!,         Spend 1 / 8
+        (4 * aoe - 3.5) / 1,        # Tinder Toss,     Spend 1 / 4 to ALL
+        (5 * 2 - 3.5) / 2,          # Bang Bang!,      Spend 2 / 5 x 2
+        (7 * aoe - 6.0) / 2,        # Dodoco Blast,    Spend 2 / 7 to ALL
+        (18 - 6.0) / 3,             # Firework Finale, Spend 3 / 18
     ])
     assert rates[2] == draft.SPARK_ALT_VALUE

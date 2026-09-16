@@ -85,15 +85,17 @@ KNIGHT = {"id": "SPARK_ATTACK_COST_POWER", "name": "True Spark Knight",
 def test_the_observed_board_carries_each_hand_card_s_spark_price(alt_cost):
     """The read itself. Both keys land, per card, keyed by the SIM's id -- the
     id a grader's line and the falsifier both name -- and not by the wire's."""
-    state = board([priced("proto_spark_strike", 1),
-                   priced("proto_spark_finisher", 3, affordable=False)],
+    # `EB-750` retired `proto_spark_strike` and `proto_spark_finisher` with
+    # the rest of the superseded Sparks pool; these two are rows that exist.
+    state = board([priced("proto_spark_priced_strike", 3),
+                   priced("proto_spark_priced_draw", 3, affordable=False)],
                   status=[SPARK_BANK])
 
     _, notes = adapter.build_combat_state(state, prototype=True)
 
-    assert notes["spark_prices"] == {"proto_spark_strike": 1,
-                                     "proto_spark_finisher": 3}
-    assert notes["spark_unaffordable"] == ["proto_spark_finisher"]
+    assert notes["spark_prices"] == {"proto_spark_priced_strike": 3,
+                                     "proto_spark_priced_draw": 3}
+    assert notes["spark_unaffordable"] == ["proto_spark_priced_draw"]
     assert notes["spark_price_disagreements"] == []
 
 
@@ -120,13 +122,14 @@ def test_a_wire_price_that_disagrees_with_the_sim_is_reported_by_name(alt_cost):
     a divergence is a defect in one of them and is invisible unless something
     asks. It is REPORTED, never repaired -- the posture `unmapped_statuses`
     takes, and for the same reason."""
-    state = board([priced("proto_spark_strike", 2)], status=[SPARK_BANK])
+    state = board([priced("proto_spark_priced_strike", 2)],
+                  status=[SPARK_BANK])
 
     _, notes = adapter.build_combat_state(state, prototype=True)
 
-    assert notes["spark_prices"] == {"proto_spark_strike": 2}
+    assert notes["spark_prices"] == {"proto_spark_priced_strike": 2}
     assert notes["spark_price_disagreements"] == [
-        "proto_spark_strike: wire 2, sim 1"]
+        "proto_spark_priced_strike: wire 2, sim 3"]
 
 
 # ------------------------------------ the price that is not on the card ---

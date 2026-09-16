@@ -105,16 +105,33 @@ def test_a_bomb_or_detonate_body_is_not_an_attack_body(alt_cost):
 # --- the three EB-218 twins, against the already-published figures ----------
 
 #: `STATIC_SPARK_SPEND_COST`'s own disclosure prints these for the SHIPPED
-#: twins at 2.5. Under the flag the prototype twins are the same bodies with
-#: the Energy deleted, so the alternative-cost arm must reproduce them.
-TWIN_SCORES = {"proto_powder_charge_spark": 2.0,     # powder_charge 2.00
-               "proto_hold_the_line_spark": 0.0,     # hold_the_line 0.00
-               "proto_smoke_and_sparks_spark": 1.0}  # smoke_and_sparks 1.00
+#: twins at 2.5. The arm's twins were those bodies with the Energy deleted, so
+#: the alternative-cost arm must reproduce them.
+#:
+#: `EB-750` deleted the three prototype rows this used to read off the surface
+#: (R270 superseded the whole priced pool). The FIGURES are published and do
+#: not move -- R101b -- so what the pin reads instead is the three shipped
+#: bodies, written out here at 0 Energy, which is exactly what those rows were.
+#: The shipped rows themselves are untouched on `docs/klee-cards.yaml`.
+TWIN_BODIES = {
+    # `powder_charge`: detonate the target's Bombs for +4 each.
+    "powder_charge": ([{"op": "detonate", "target": "enemy", "bonus": 4}],
+                      "skill", 2.0),
+    # `hold_the_line`: Block 5, and 6 more if the enemy intends to attack.
+    "hold_the_line": ([{"op": "block", "amount": 5},
+                       {"op": "conditional", "if": "enemy_intends_attack",
+                        "then": [{"op": "block", "amount": 6}]}],
+                      "skill", 0.0),
+    # `smoke_and_sparks`: apply 3 Vulnerable.
+    "smoke_and_sparks": ([{"op": "apply_power", "power": "vulnerable",
+                           "amount": 3, "target": "enemy"}], "skill", 1.0),
+}
 
 
-@pytest.mark.parametrize("cid,expected", sorted(TWIN_SCORES.items()))
-def test_the_twins_land_on_the_published_figures(alt_cost, cid, expected):
-    card = loader.peek_card(cid)
+@pytest.mark.parametrize("name", sorted(TWIN_BODIES))
+def test_the_twins_land_on_the_published_figures(alt_cost, name):
+    body, ctype, expected = TWIN_BODIES[name]
+    card = _sink(body, ctype=ctype)
     assert not draft.prints_attack_body(card)
     assert draft._static_power(card) == expected
 
@@ -123,16 +140,14 @@ def test_the_twins_were_negative_before_this_row(alt_cost, monkeypatch):
     """The defect, pinned: at ONE rate every twin is unpickable."""
     monkeypatch.setattr(draft, "SPARK_ALT_NONDAMAGE_SPEND_COST",
                         draft.SPARK_ALT_VALUE)
-    assert all(draft._static_power(loader.peek_card(c)) < 0.0
-               for c in TWIN_SCORES)
+    assert all(draft._static_power(_sink(body, ctype=ctype)) < 0.0
+               for body, ctype, _ in TWIN_BODIES.values())
 
 
-@pytest.mark.parametrize("cid", ("proto_kaboom_sink", "proto_spark_strike",
-                                 "proto_spark_sweep",
-                                 "proto_spark_double_tap",
-                                 "proto_spark_blast",
-                                 "proto_spark_finisher"))
-def test_the_six_damage_sinks_are_unmoved(alt_cost, monkeypatch, cid):
+@pytest.mark.parametrize("cid", ("proto_spark_priced_strike",))
+def test_the_damage_sinks_are_unmoved(alt_cost, monkeypatch, cid):
+    """`EB-750` took the other five rows with the superseded pool; the
+    relationship this pins is the row's, not the list's."""
     after = draft._static_power(loader.peek_card(cid))
     monkeypatch.setattr(draft, "SPARK_ALT_NONDAMAGE_SPEND_COST",
                         draft.SPARK_ALT_VALUE)          # the pre-EB-233 world

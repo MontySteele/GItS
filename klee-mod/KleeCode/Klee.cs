@@ -121,34 +121,16 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
                 return Powers.KleeOverhaulRoster.StartingDeck();
             }
 #endif
+            // `EB-750`: the Sparks arm's two starter substitutions
+            // (`SparkStarter.PricedKaboom`, `SparkStarter.SparkingPop`) are
+            // DELETED. R270 ruled Spark a currency under the overhaul, which
+            // superseded the priced twins, so the rows left the prototype
+            // surface and this seam went with them. Under
+            // `-p:PrototypeCards=true` Klee now opens with her printed ten,
+            // exactly as a release build does. They read back at commit
+            // 036c12d150d6dbd58f0776a0d07e3c028a321a61.
             return new CardModel[]
             {
-#if PROTOTYPE_CARDS
-                // QUARANTINED, THE SPARKS ARM'S ONE STARTER SEAM
-                // (review/ruled/klee-sparks-2026-08-29.md sec.10.10 item 4; sim twin
-                // `tier0/content/loader._starter_ids`, which is the ONE seam both the
-                // tier 0 battery and the tier 0.5 run read so they cannot disagree
-                // about what she opens with). With the flag on these two slots are the
-                // PRICED twins and with it off they are Ka-boom! and Pop, byte for
-                // byte. THE SHEET DOES NOT MOVE -- only this list does, and only under
-                // the flag.
-                //
-                // ONE Kaboom of the four, not four (sec.10.11 item 2, and it goes back
-                // to [USER]): Regent's ten cards ship ONE sink, and four would make
-                // four of her ten opening cards unplayable on an empty bank. Pop's twin
-                // is a straight substitution -- Powder Pop carries pop's body unmoved
-                // and adds the Spark it needs to pay for the sink.
-                Powers.SparkStarter.PricedKaboom(),
-                ModelDb.Card<Kaboom>(),
-                ModelDb.Card<Kaboom>(),
-                ModelDb.Card<Kaboom>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<DuckAndCover>(),
-                ModelDb.Card<JumpyDumpty>(),
-                Powers.SparkStarter.SparkingPop(),
-#else
                 ModelDb.Card<Kaboom>(),
                 ModelDb.Card<Kaboom>(),
                 ModelDb.Card<Kaboom>(),
@@ -159,7 +141,6 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
                 ModelDb.Card<DuckAndCover>(),
                 ModelDb.Card<JumpyDumpty>(),
                 ModelDb.Card<Pop>(),
-#endif
             };
         }
     }

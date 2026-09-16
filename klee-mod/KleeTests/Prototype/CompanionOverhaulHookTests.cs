@@ -279,7 +279,7 @@ public class CompanionOverhaulHookTests
         // a modifier to one it was already making. The sim takes the same
         // reading and says so in `_element_for`.
         var seat = Seat.Klee().WithPower<PassionOverloadPower>(4);
-        var plain = new ProtoSparkBlast();                   // no IElementalCard
+        var plain = new ProtoIttoSuperlativeSuperstrengthPriced();  // no IElementalCard
         Assert.Equal(Element.Pyro,
             CompanionOverhaulRiders.ElementFor(plain, seat.Creature));
     }

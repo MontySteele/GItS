@@ -93,39 +93,29 @@ public class SparkAlternativeCostPinTests
                         .GetValue(power));
     }
 
-    // --- the derived price, per proto row --------------------------------
-
-    [Theory]
-    [InlineData(typeof(ProtoKaboomSink), 1)]
-    [InlineData(typeof(ProtoPopSpark), 0)]
-    [InlineData(typeof(ProtoSparkStrike), 1)]
-    [InlineData(typeof(ProtoSparkSweep), 1)]
-    [InlineData(typeof(ProtoSparkDoubleTap), 2)]
-    [InlineData(typeof(ProtoSparkBlast), 2)]
-    [InlineData(typeof(ProtoSparkFinisher), 3)]
-    [InlineData(typeof(ProtoTrueSparkKnight), 0)]
-    public void Each_proto_row_prints_the_price_its_sheet_row_charges(
-        System.Type cardType, int price)
-    {
-        // The sheet's own numbers (sec.10.2), read back off the emitted class.
-        // `PrintedSparkPrice` is the codegen's single declaration of the price
-        // and `PriceOf` is what the gate and the badge both consult, so the two
-        // agreeing here is the no-drift property itself -- with no Power on the
-        // board, PriceOf IS the printed half.
-        var card = (CardModel)System.Activator.CreateInstance(cardType)!;
-
-        Assert.Equal(price, SparkCost.PrintedPriceOf(card));
-        Assert.Equal(price, SparkCost.PriceOf(card));
-    }
+    // --- the derived price ------------------------------------------------
+    //
+    // `EB-750`: the per-row price theory is DELETED with its rows. It ran the
+    // eight `proto_*` classes of the Sparks pool past `SparkCost.PrintedPriceOf`
+    // and `SparkCost.PriceOf`; R270 ruled Spark a currency under the overhaul,
+    // the rows left the prototype surface and the classes with them (commit
+    // 036c12d150d6dbd58f0776a0d07e3c028a321a61). The codegen's single price
+    // declaration is still pinned here, on a row that DOES exist, and by the
+    // strict-Rare-Power clauses below, which read a price off a shipped card.
 
     [Fact]
     public void A_card_with_no_price_is_not_a_priced_card()
     {
         // Defence in depth for the interface itself: the marker is emitted only
         // for a row that prints a top-level spend_spark, so a card that does not
-        // must not answer the question at all.
+        // must not answer the question at all. `PrintedPriceOf` is the codegen's
+        // one declaration and `PriceOf` is what the gate and the badge consult,
+        // so the two agreeing with no Power on the board is the no-drift
+        // property itself.
         Assert.IsNotAssignableFrom<ISparkPricedCard>(new Kaboom());
-        Assert.IsAssignableFrom<ISparkPricedCard>(new ProtoSparkFinisher());
+        Assert.IsAssignableFrom<ISparkPricedCard>(new ProtoSparkPricedStrike());
+        Assert.Equal(3, SparkCost.PrintedPriceOf(new ProtoSparkPricedStrike()));
+        Assert.Equal(3, SparkCost.PriceOf(new ProtoSparkPricedStrike()));
     }
 
     // --- the strict Rare Power -------------------------------------------
@@ -184,11 +174,11 @@ public class SparkAlternativeCostPinTests
         // to it, and the gate charges the card's own 1.
         var klee = Seat.Klee()
             .WithPower<SparkAttackCostPower>(1)
-            .WithPower<SparkPower>(1);
+            .WithPower<SparkPower>(3);
         var power = klee.Creature.Powers.OfType<SparkAttackCostPower>().First();
-        var card = Held<ProtoSparkStrike>(klee);
+        var card = Held<ProtoSparkPricedStrike>(klee);
 
-        Assert.Equal(1, SparkCost.PriceOf(card));
+        Assert.Equal(3, SparkCost.PriceOf(card));
         Assert.True(power.ShouldPlay(card, AutoPlayType.None));
         Assert.False(power.TryModifyEnergyCostInCombat(card, 1m, out _));
     }
@@ -249,7 +239,7 @@ public class SparkAlternativeCostPinTests
         // -- so the price is still readable off the row and the AFFORDABILITY is
         // false, rather than a crash or a badge painted playable on a card
         // nobody holds.
-        var card = new ProtoSparkFinisher();
+        var card = new ProtoSparkPricedStrike();
 
         Assert.False(card.IsMutable);
         Assert.Equal(3, SparkCost.PriceOf(card));
@@ -317,24 +307,27 @@ public class SparkAlternativeCostPinTests
     // --- the starter ------------------------------------------------------
 
     [Fact]
-    public void The_starter_swaps_two_slots_and_only_two()
+    public void The_starter_is_the_printed_ten_under_the_flag_too()
     {
         // STRUCTURAL PIN, and the boundary is the reason: `Klee.StartingDeck` is
         // ten `ModelDb.Card<T>()` lookups, and ModelDb is populated only by the
-        // game's boot -- calling the getter here throws
-        // KeyNotFoundException on the first id (README, the ModelDb row).
+        // game's boot -- calling the getter here throws KeyNotFoundException on
+        // the first id (README, the ModelDb row).
         //
-        // What the IL DOES say is the whole of sec.10.10 item 4: the seam calls
-        // the two substitutions and it still calls Ka-boom! three times, so the
-        // deck is ten cards with ONE sink and not four. The count is what
-        // sec.10.11 item 2 puts back to [USER], so it is asserted rather than
-        // left to a reader.
+        // `EB-750` INVERTED WHAT THIS PINS. The arm used to swap two of the ten
+        // slots for `SparkStarter.PricedKaboom()` and `SparkStarter.SparkingPop()`;
+        // R270 ruled Spark a currency under the overhaul, the two priced twins
+        // were superseded, and the rows, the seam and `SparkStarter` itself left
+        // HEAD (commit 036c12d150d6dbd58f0776a0d07e3c028a321a61). So the fact
+        // worth pinning now is the ABSENCE: under `-p:PrototypeCards=true` the
+        // deck is four Ka-boom!, four Duck and Cover, Jumpy Dumpty and Pop --
+        // byte for byte the release list, with no seam left to drift.
         var calls = Il.CallSequence(Il.Method("Klee", "get_StartingDeck"));
 
-        Assert.Contains(calls, c => c.EndsWith("SparkStarter.PricedKaboom"));
-        Assert.Contains(calls, c => c.EndsWith("SparkStarter.SparkingPop"));
-        Assert.Equal(3, calls.Count(c => c == "ModelDb.Card<Kaboom>"));
+        Assert.DoesNotContain(calls, c => c.Contains("SparkStarter"));
+        Assert.Equal(4, calls.Count(c => c == "ModelDb.Card<Kaboom>"));
         Assert.Equal(4, calls.Count(c => c == "ModelDb.Card<DuckAndCover>"));
-        Assert.DoesNotContain("ModelDb.Card<Pop>", calls);
+        Assert.Equal(1, calls.Count(c => c == "ModelDb.Card<Pop>"));
+        Assert.Equal(1, calls.Count(c => c == "ModelDb.Card<JumpyDumpty>"));
     }
 }

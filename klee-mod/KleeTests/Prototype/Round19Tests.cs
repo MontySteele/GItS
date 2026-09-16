@@ -823,7 +823,6 @@ public class Round19Tests
 
     [Theory]
     [InlineData(typeof(ProtoKkSlackWater))]
-    [InlineData(typeof(ProtoKaboomSink))]
     public void No_prototype_basic_wears_the_strike_or_defend_tag(Type row)
     {
         var card = (CardModel)Activator.CreateInstance(row)!;

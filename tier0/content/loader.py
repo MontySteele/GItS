@@ -1168,32 +1168,15 @@ def _starter_ids(spec: dict) -> list[str]:
     times its cost) is printed in fight 1 instead of drafted. The deck size is
     unchanged at twelve.
 
-    KLEE -- Sparks as an alternative cost (`C.SPARK_ALT_COST_ENABLED`), TWO
-    substitutions. PICK 1 of the Sparks packet, options 1 and 5 together (the
-    seat: "Options 1 and 5 together follow"). Regent's ten-card starter ships
-    exactly one Spark generator (`Venerate`) and exactly one Spark sink
-    (`FallingStar`, 0 energy / 2 stars), and [USER] asked to "match their
-    generation pattern". Klee's ten ship neither. So:
+    KLEE -- NOTHING, since `EB-750`. The Sparks arm's two starter
+    substitutions (`pop` -> `proto_pop_spark`, one `kaboom` ->
+    `proto_kaboom_sink`) were SUPERSEDED by R270's currency ruling under
+    `KLEE_OVERHAUL`, and the rows, the map and this branch were deleted
+    together on 2026-09-16; they read back at commit
+    `036c12d150d6dbd58f0776a0d07e3c028a321a61`. Under
+    `C.SPARK_ALT_COST_ENABLED` Klee now opens with her printed ten, and the
+    flag governs the RULE alone.
 
-      * `pop` -> `proto_pop_spark`    -- the Basic that MAKES. Same Bomb, plus
-                                         one Spark. Divine Right's job (a
-                                         non-dead turn one) done by a card the
-                                         player chooses to play, which is
-                                         D2's answer and the seat's reason for
-                                         preferring option 1 to option 2.
-      * `kaboom` -> `proto_kaboom_sink` -- the Basic that SPENDS. Same 7
-                                         damage, 0 energy, Spend 1 Spark.
-                                         `FallingStar`'s exact role.
-
-    ONE COPY OF EACH, AND THE PACKET DOES NOT SAY WHICH. Klee's starter holds
-    FOUR `kaboom`; the packet says only "`kaboom` becomes 0 energy / Spend 1
-    Spark". Substituting one copy is what makes her opening ten match
-    Regent's shape (one source, one sink); substituting all four would make
-    four of ten opening cards unplayable on an empty bank, which is a
-    different card game and not the one the packet priced. One copy is taken,
-    it is the smaller change, and it goes back to [USER] as a real pick. The
-    deck size is unchanged at ten, which is what keeps this a substitution
-    rather than a starter rework.
     """
     ids = list(spec["starting_deck"])
     character = spec.get("id")
@@ -1235,13 +1218,11 @@ def _starter_ids(spec: dict) -> list[str]:
     if character == "kokomi" and C.KOKOMI_OVERHAUL:
         return list(C.KOKOMI_OVERHAUL_STARTER_IDS)
 
-    if character == "klee" and C.SPARK_ALT_COST_ENABLED:
-        for drop, add in C.SPARK_ALT_STARTER_SUBS:
-            if drop not in ids:
-                raise ValueError(
-                    f"klee: Spark starter substitution cannot replace missing "
-                    f"card {drop!r}")
-            ids[ids.index(drop)] = add      # ONE copy: `.index` is the first
+    # `EB-750`: the Sparks arm's two starter substitutions are DELETED. R270
+    # ruled Spark a currency under `KLEE_OVERHAUL`, which supersedes them, so
+    # the rows left the prototype surface and this seam with them. Klee's
+    # printed starter is what `SPARK_ALT_COST_ENABLED` now opens with, exactly
+    # as a flag-off tree does.
 
     # FURINA, THE REFRAME'S STARTER READER (R254, round 4 pick 1, 2026-09-04),
     # ONE substitution. [USER]: "maybe a reader in the starter deck? I still
@@ -1348,15 +1329,13 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
     the shipped id leaves the pool and the prototype takes its slot at the
     SAME rarity, so the only Oath a flagged run can be offered is the 3.
 
-    THE SECOND ARM, KLEE, under `C.SPARK_ALT_COST_ENABLED`
-    (`C.SPARK_ALT_POOL_SUBS`). `KLEESPARK-R1` sec.11.6 item 5 records the
-    absence of this branch as a limitation of the round -- with no pool seam
-    the drafter could never be OFFERED a priced Spark row, so the sim's P5/P6
-    read a deck assembled by id from PICK 4's own map instead of a drafted
-    one. The map here IS that map, one for one, at matching rarities. It is
-    the same shape as Kokomi's above and it is gated the same way; the only
-    difference is that Kokomi's swap fixes text that cannot bind and this one
-    makes an arm REACHABLE, which is what a two-arm flag is for.
+    THE SECOND ARM, KLEE, IS GONE (`EB-750`). `C.SPARK_ALT_POOL_SUBS` swapped
+    nine shipped rows for priced Spark twins under
+    `C.SPARK_ALT_COST_ENABLED`; R270 ruled Spark a currency under
+    `KLEE_OVERHAUL` and superseded every one of them, so the rows, the map and
+    this branch were deleted together on 2026-09-16 (commit
+    `036c12d150d6dbd58f0776a0d07e3c028a321a61` is where they read back).
+    Klee's offerable pool is therefore unsubstituted under that flag.
 
     With EITHER flag off this returns `{}` for that character, and with both
     off `{}` and nothing else, which is the acceptance condition on the flags:
@@ -1374,8 +1353,6 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
     if (character == "kokomi" and C.KURAGE_MEMORY
             and not C.KOKOMI_OVERHAUL):
         return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
-    if character == "klee" and C.SPARK_ALT_COST_ENABLED:
-        return dict(C.SPARK_ALT_POOL_SUBS)
     if (character == furina_reframe.CHARACTER
             and furina_reframe.FURINA_REFRAME):
         # THE THIRD ARM (round 2 pick 1 at its default, 2026-09-04), and it is
@@ -1410,8 +1387,8 @@ def declared_pool_substitutions() -> dict[str, str]:
     Derived from the same three maps the branch above reads, so an arm cannot
     have a substitution here that the run does not make, or the reverse.
     """
-    subs: dict[str, str] = dict(C.SPARK_ALT_POOL_SUBS)
-    subs[C.KURAGE_MEMORY_POOL_DROP] = C.KURAGE_MEMORY_POOL_ADD
+    subs: dict[str, str] = {
+        C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
     subs.update(furina_reframe.POOL_SUBS)
     subs.update(furina_stage.POOL_SUBS)
     return subs
@@ -1436,8 +1413,8 @@ def declared_starter_substitutions() -> dict[str, str]:
     cannot declare a substitution here that the run does not make, or the
     reverse.
     """
-    subs: dict[str, str] = dict(C.SPARK_ALT_STARTER_SUBS)
-    subs[C.KURAGE_MEMORY_STARTER_DROP] = C.KURAGE_MEMORY_STARTER_ADD
+    subs: dict[str, str] = {
+        C.KURAGE_MEMORY_STARTER_DROP: C.KURAGE_MEMORY_STARTER_ADD}
     subs.update(furina_reframe.STARTER_SUBS)
     subs.update(furina_stage.STARTER_SUBS)
     return subs
