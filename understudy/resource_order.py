@@ -250,6 +250,47 @@ def selected_effects(row: Mapping[str, Any], choose: Any = None) -> Any:
     return _selected(row, choose)
 
 
+def mode_label(row: Mapping[str, Any] | None, choose: Any) -> str:
+    """The sheet's RAW mode label for a mode named in the page's spelling.
+
+    `EB-246` FROM THE POSTING SIDE (live look 8b defect 2). Every printed
+    surface folds the game's markup out, so the page prints
+    `Spend 3: deal 13 instead` -- and the bridge's own mode list is the card's
+    UNFOLDED labels, `'[gold]Spend[/gold] 3: deal 13 instead'`. A caller that
+    names a mode off the page therefore matches neither of
+    `GitsModalTargeting.Match`'s two rules: the folded want is not the raw
+    label, and neither string contains the other, because the markup sits in
+    the middle of the phrase. `play` came back *"has no mode matching"* with
+    the two raw labels listed, and the only way through was to type `[gold]`
+    -- exactly the defect `EB-246` repaired one surface over.
+
+    THE FOLD IS ALREADY HERE, so the repair is to fold BOTH sides and post the
+    sheet's own spelling: `normalise` takes markup, punctuation and case off a
+    label or a want alike, and the sheet row carries the same string the card
+    hands the bridge. A want that matches nothing, a card on no sheet, or a
+    row with no `choose_one` all answer with the caller's own text unchanged
+    -- the bridge's refusal, listing the labels it does have, is a better
+    answer than a guess.
+
+    THE MATCH IS `_selected`'S, deliberately: equal, or either containing the
+    other. Two readers of one question is how they come to disagree.
+    """
+    want = normalise(choose)
+    if row is None or not want:
+        return str(choose or "")
+    for eff in _walk(row.get("effects")):
+        if str(eff.get("op") or "") != "choose_one":
+            continue
+        for mode in (eff.get("modes") or []):
+            if not isinstance(mode, Mapping):
+                continue
+            raw = str(mode.get("label") or "")
+            folded = normalise(raw)
+            if folded and (folded == want or folded in want or want in folded):
+                return raw
+    return str(choose or "")
+
+
 # ----------------------------------------------------------- the finding --
 
 def findings(chosen_line: Sequence[Mapping[str, Any]], *,

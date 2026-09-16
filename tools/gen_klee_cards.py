@@ -6299,9 +6299,30 @@ def build_vars(card: dict) -> list[str]:
             # `EB-657`. THE TWO PRINTED NUMBERS OF A TWO-ARMED AIMED HIT, live
             # -- `EB-624`'s pair one card over. Declared FIRST and in print
             # order, because the face reads the else arm before the then arm.
+            #
+            # `EB-670`. AND THE HEADLINE FOLDS THE CONDITION where the
+            # condition is one the preview can READ. A two-armed face prints
+            # the else arm first, so on a turn the then arm is the true one the
+            # first number a reader meets is the number the card will not deal
+            # -- Feint printed 5 on a morning whose hit was 10 (live look 8b).
+            # `plan_carried_out_this_turn` is a flag on the kit's own ledger,
+            # which is the same object the emitted `OnPlay` asks a beat later,
+            # so the headline can ask it too. Every other condition keeps the
+            # plain var: a condition the preview cannot evaluate honestly is
+            # one a headline must not pretend to have evaluated.
+            headline = ("PlanCarriedDamageVar"
+                        if (str(eff.get("if") or "")
+                            == "plan_carried_out_this_turn")
+                        else "")
             for name, amount, _delta, cls in folded_branch_damage(card, eff):
-                out.append(
-                    f'new {cls}("{name}", {amount}m, ValueProp.Move)')
+                if (headline and name == "PlainDamage"
+                        and cls == "FoldedDamageVar"):
+                    out.append(
+                        f'new {headline}("{name}", {amount}m, '
+                        '"BranchDamage", ValueProp.Move)')
+                else:
+                    out.append(
+                        f'new {cls}("{name}", {amount}m, ValueProp.Move)')
             cb = conditional_bonus_upgrade(card)
             bd = branch_draw_upgrade(card)
             then_var, else_var = branch_draw_vars(card)
