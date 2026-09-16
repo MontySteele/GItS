@@ -3054,3 +3054,37 @@ def test_battle_plans_rider_is_plan_only_from_a_body(overhaul):
         effects.OPS[op](kokomi_state(), {"op": op},
                         Card(id="proto_kk_x", name="x", cost=1,
                              type="skill", effects=[]))
+
+
+def test_an_auto_play_never_aims_at_the_pet(overhaul):
+    """`EB-347`. THE PET IS A DELIBERATE TARGET, AND AN AUTO-PLAY HAS NO HAND
+    ON THE MOUSE.
+
+    THE FIND (Kokomi r4d act 1, fight 3). Uproar's "Play a random Attack from
+    your Draw Pile" pulled `Slack Water` and wrote it onto the Bake-Kurage as a
+    Plan instead of playing it at the enemy -- 0 damage on a turn priced at 12
+    -- while one fight earlier the identical card pulled by the identical
+    Uproar had gone at the enemy.
+
+    Both auto-play doors are read: the base game's forced-random plays
+    (`force_random_targeting`, set by `_free_play` for Havoc, Cascade, Uproar
+    and the on-exhaust sweep) and the jellyfish's own replay
+    (`kurage_autoplaying`). The C# twin is `KokomiPlan.PlayedOnPet`, which
+    asks `cardPlay.IsAutoPlay`.
+
+    Seen to FAIL: the empty-now-line card below plans on every read before
+    this row, free play or not.
+    """
+    card = plan_card([{"op": "draw", "amount": 1}])
+    st = kokomi_state(enemies=[make_enemy(intents=ATTACKER)])
+    # The pilot's own rule still says yes on a deliberate play.
+    assert kokomi_plan.plan_aimed_at_pet(st, card) is True
+
+    st.force_random_targeting = True
+    assert kokomi_plan.plan_aimed_at_pet(st, card) is False
+    st.force_random_targeting = False
+
+    st.kurage_autoplaying = True
+    assert kokomi_plan.plan_aimed_at_pet(st, card) is False
+    st.kurage_autoplaying = False
+    assert kokomi_plan.plan_aimed_at_pet(st, card) is True

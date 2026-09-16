@@ -512,8 +512,22 @@ def plan_aimed_at_pet(state: CombatState, card: Card) -> bool:
     which half of a card's face to score, and `effects._resolve_card_bound`
     calls it to decide which half to run. A read with a side effect would make
     the pilot's forecast and the play disagree.
+
+    `EB-347`: AN AUTO-PLAY NEVER AIMS AT THE PET. Uproar's random Attack wrote
+    Slack Water onto the jellyfish as a Plan instead of playing it at the enemy
+    (Kokomi r4d act 1 fight 3, and three unreported act-2 plays); the identical
+    card pulled by the identical Uproar had gone at the enemy one fight
+    earlier, so the screen contradicted itself. The pet is a DELIBERATE target
+    -- the mod draws it so a player has something to drag a card onto -- and a
+    free play has nobody at the mouse. Both auto-play doors are read: the
+    base game's forced-random plays (Havoc, Cascade, Uproar, the on-exhaust
+    sweep) through `force_random_targeting`, and the jellyfish's own replay
+    through `kurage_autoplaying`. The C# twin is `KokomiPlan.PlayedOnPet`,
+    which asks `cardPlay.IsAutoPlay` for the same reason.
     """
     if not live(state) or not card.plan:
+        return False
+    if state.force_random_targeting or state.kurage_autoplaying:
         return False
     if not card.effects:
         return True
