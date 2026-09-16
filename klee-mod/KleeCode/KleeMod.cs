@@ -534,6 +534,12 @@ public static class KleeMod
                     // doubled carry-out is, on the card that doubles it.
                     [Cards.ArmKeywordTips.PlanTwiceKey + ".title"] =
                         "Twice means two Plans",
+                    // `EB-389`. The line a card grows while a rider overrides
+                    // the element it prints. A title row, not a keyword: it is
+                    // a fact about THIS card on THIS board, and it comes and
+                    // goes with the buff.
+                    [Cards.KleeCardTooltips.OverriddenElementKey + ".title"] =
+                        "Element overridden",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see

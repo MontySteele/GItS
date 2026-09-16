@@ -2157,9 +2157,23 @@ REACTION_KEYWORDS: dict[str, str] = {
         # all, answers `Element.None` and applies nothing. Named here rather
         # than on the six pair rows because it is true of all of them, and this
         # is the row a mono-element deck reads.
+        # `EB-562`. AND THE CLAUSE NOW ADMITS THE EXCEPTION. It sent a reader
+        # to the relic's own face, and the one relic that IS an exception did
+        # not carry the answer there: the r20 seat called "does the Tamakushi
+        # Casket's Hydro hit leave an aura" the single fact it most wanted and
+        # never got, and the round-18 seat watched it re-lay Hydro inside a
+        # beat. The strike is a real elemental hit in both engines
+        # (`kokomi_plan.casket_strike`'s "THE HIT IS OTHERWISE REAL";
+        # `TamakushiCasket.Strike` through `ElementalHit.Deal`), so it lays
+        # Hydro or reacts with what is there. `EB-348` put the sentence on the
+        # relic's face and on its keyword row; this is the glossary's half.
+        #
+        # NOT BY NAME HERE, for `EB-329`'s reason on this same row: it prints
+        # for a Klee who holds no Casket, and what is general is the shape.
         "An element comes from a CARD that prints one and from nothing else: "
-        "a potion, a relic or an enemy applies none unless its own face says "
-        "so."),
+        "a potion, a relic or an enemy applies none unless its own face or its "
+        "own glossary line says so -- and one relic's line does, because its "
+        "strike is a real elemental hit and leaves the aura to prove it."),
     # `EB-345` (R249) retuned the six preview rows in `KleeMod.cs` -- each one
     # now leads with the pair that reacts instead of a 60-character preamble
     # about what the CARD supplies, and Electro-Charged says what the dot

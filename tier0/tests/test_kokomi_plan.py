@@ -332,6 +332,134 @@ def test_the_oaths_now_line_applies_hydro_like_its_carry_out(overhaul):
     assert charged.aura != "electro"
 
 
+def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
+    """`EB-561`. THE FIND (Kokomi r20 lane 1): "War Council's face contradicts
+    itself -- 'Its own hit applies no aura' above the generic 'Applies Hydro:
+    no aura, applies Hydro for 2 turns' rider", and four Wrigglers came out
+    wearing Hydro after a direct play.
+
+    THE FACE WAS THE DEFECT AND THE HIT WAS NOT. Played directly the card
+    applies Weak to every enemy and NOTHING ELSE -- no damage, no element -- so
+    the aura the seat saw did not come from it (the Tamakushi Casket's
+    answering strike did, `EB-562`).
+
+    THE FACE HALF IS `EB-713`'s, landed while this row was open: the generic
+    `Applies Hydro` keyword came OFF these rows entirely -- the gem was itself
+    telling a reader "this face applies Hydro" -- leaving the `ForPlanElement`
+    rider as the one aura statement, which is exactly this row's acceptance.
+    What is left to pin is the statement against the HIT, and that is this.
+    """
+    bare = make_enemy(hp=40)
+    st = kokomi_state(enemies=[bare])
+    effects.resolve_card(st, loader.get_card("proto_kk_war_council"))
+    assert bare.powers.get("weak") == 1
+    assert bare.hp == 40, "the now-line deals no damage"
+    assert bare.aura is None, "the now-line leaves no aura"
+
+    # AND IT DOES NOT EAT ONE EITHER: a standing aura is untouched by a play
+    # that applies no element, which is the other half of "applies no aura".
+    charged = make_enemy(hp=40)
+    charged.aura = "electro"
+    charged.aura_turns_left = 3
+    st2 = kokomi_state(enemies=[charged])
+    effects.resolve_card(st2, loader.get_card("proto_kk_war_council"))
+    assert charged.aura == "electro"
+
+    # THE CARRY-OUT IS THE HALF THAT DOES, which is the rider's second clause.
+    planned = make_enemy(hp=40)
+    st3 = kokomi_state(enemies=[planned])
+    carry_out(st3, loader.get_card("proto_kk_war_council").plan)
+    assert planned.aura == "hydro"
+
+    # AND THE FACE CARRIES ONE AURA STATEMENT: the rider, and no generic
+    # element keyword beside it to contradict it (`EB-713`).
+    import pathlib
+    repo = pathlib.Path(__file__).resolve().parents[2]
+    face = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+            / "Generated" / "ProtoKkWarCouncil.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForPlanElement(" in face
+    assert "KleeKeywords.AppliesHydro" not in face
+
+
+def test_the_caskets_strike_leaves_a_hydro_aura(overhaul):
+    """`EB-562`. THE QUESTION: does the Tamakushi Casket's Hydro hit leave an
+    aura? The reaction glossary's sources clause (`EB-544`) says a relic
+    applies no element unless its own face says so, and the Casket's face does
+    not say so; the round-18 seat watched it re-lay Hydro inside a beat, and
+    the r20 seat called this "the single fact I most wanted and never got".
+
+    THE ANSWER IS YES, and it always was: `casket_strike` goes through
+    `deal_damage_to_enemy` with `element="hydro"`, the same funnel every other
+    non-attack hit here uses, and the C# twin goes through `ElementalHit.Deal`.
+    So the strike lays Hydro on a bare body and REACTS with whatever else is
+    standing. What was missing was a surface saying so. `EB-348` put it on the
+    relic's own face and on the card-side tip ("it reacts, takes its
+    Vulnerable, and re-arms Hydro") while this row was open; what was still
+    missing is the GLOSSARY, whose sources clause (`EB-544`) sends a reader to
+    the relic's face for exactly this and says a relic applies no element.
+    """
+    bare = make_enemy(hp=40)
+    st = kokomi_state(enemies=[bare])
+    kokomi_plan.casket_strike(st, bare)
+    assert bare.hp == 40 - C.KOKOMI_OVERHAUL_CASKET_STRIKE
+    assert bare.aura == "hydro"
+
+    # AND IT REACTS rather than laying Hydro where another aura stands, which
+    # is the other half of "a real Hydro hit".
+    chilled = make_enemy(hp=40)
+    chilled.aura = "cryo"
+    chilled.aura_turns_left = 3
+    st2 = kokomi_state(enemies=[chilled])
+    kokomi_plan.casket_strike(st2, chilled)
+    assert chilled.aura != "cryo", "the Cryo aura was consumed"
+
+    # And the surfaces carry the sentence, so the engine and the words cannot
+    # drift apart again. The relic tip and its page twin say "re-arms Hydro"
+    # (`EB-348`); the glossary's sources clause now admits the exception.
+    from understudy import blindplay_notes
+    assert "re-arms Hydro" in (
+        blindplay_notes.ARM_KEYWORDS["Tamakushi Casket"])
+    gloss = blindplay_notes.REACTION_KEYWORDS["Elemental Reaction"]
+    assert "one relic's line does" in gloss
+    # Not BY NAME on that row: `EB-329` keeps it general, because it prints
+    # for a Klee who holds no Casket. The relic is named on its own row.
+    assert "Casket" not in gloss
+    import pathlib
+    repo = pathlib.Path(__file__).resolve().parents[2]
+    tips = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    assert "and re-arms " in tips
+
+
+def test_eb714_a_second_plan_re_aims_at_the_next_living_body(overhaul):
+    """`EB-714`. THE ACCEPTANCE: no Plan lands on a corpse.
+
+    THE READ (r32 lane 1, fight 1 turn 2): "the two carry-outs both landed on
+    Leaf Slime (S) -- 8 killed it down to 3, the second 8 killed it with 5
+    wasted. They did not retarget." Read again with the numbers: the body was
+    at 11, the first Plan took it to 3, and it was STILL ALIVE when the second
+    arrived. The 5 is OVERKILL on a living body, which is what a second 8 into
+    a 3-HP enemy is in any deck; it is not a Plan landing on a corpse, and the
+    seat's own complaint one sentence later is the true one -- "nothing on the
+    Plan screen warns you" -- which is a legibility row and not this one.
+
+    THE AIM IS RE-READ PER ENTRY and always was: `_aimed` resolves at
+    carry-out and `front_enemy` is leftmost ALIVE, which is a read of `hp`.
+    This is that, driven: a front body the FIRST Plan kills, and a second
+    entry that finds the next one.
+    """
+    front = make_enemy(hp=8, name="front")
+    behind = make_enemy(hp=40, name="behind")
+    st = kokomi_state(enemies=[front, behind])
+    clause = [{"op": "damage", "amount": 8, "target": "front_enemy"}]
+    kokomi_plan.schedule(st, plan_card(clause))
+    kokomi_plan.schedule(st, plan_card(clause))
+    kokomi_plan.resolve_all(st)
+
+    assert front.hp <= 0 and not front.alive
+    assert behind.hp == 40 - 8, "the second entry found the next living body"
+
+
 def test_her_weak_does_not_shrink_a_planned_hit(overhaul):
     """`EB-334` PIN 1: Weak ON KOKOMI, no effect. The seat's own arithmetic --
     "Plan: Deal 12 damage" paying 9 the next morning, exactly x0.75."""

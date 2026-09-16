@@ -849,6 +849,14 @@ public sealed class StarfrostDiscountPower : NextAttackRiderPower, ILocalization
 /// the stack -- a second copy makes the window longer, not the hits bigger,
 /// which is the arm's standing rule for a timed power. The element half is read
 /// through <see cref="CompanionOverhaulRiders"/>.
+///
+/// `EB-389`. THE BUFF SAYS IT OVERRIDES, because the r2 seat could not have
+/// known: "your Attacks apply Electro" reads as an addition beside a card that
+/// prints "[Hydro]", and it is a REPLACEMENT -- High Tide and Chevreuse both
+/// applied Electro under it and cost a planned Overloaded. The word INSTEAD is
+/// the whole of the change on this face; the other half of the row is on the
+/// CARD, where <see cref="KleeCardTooltips.AppliedElement"/> now moves the gem
+/// and adds a line naming the element the hit will apply.
 /// </summary>
 public sealed class LightningFangPower : PowerModel, ILocalizationProvider
 {
@@ -856,7 +864,8 @@ public sealed class LightningFangPower : PowerModel, ILocalizationProvider
     {
         ("title", "Lightning Fang"),
         ("description",
-            "Your Attacks apply [gold]Electro[/gold] and deal "
+            "Your Attacks apply [gold]Electro[/gold] INSTEAD of the element "
+          + "they print, and deal "
           + $"[blue]{CompanionOverhaulLaw.LightningFangDamage}[/blue] additional damage. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
     };

@@ -434,11 +434,33 @@ def test_oz_is_permanent_and_pays_once_per_copy(overhaul):
 def test_lightning_rose_applies_its_vulnerable_after_the_hit(overhaul):
     st = make_state()
     st.player.powers["mc_lightning_rose"] = 3
-    effects.companion_overhaul_turn_end(st)
+    effects.companion_overhaul_turn_start(st)
     enemy = st.enemies[0]
     # The hit is unamplified: a Vulnerable applied first would have made it
     # 1.5x, which is the reading the printed sentence does not support.
     assert enemy.hp == 50 - C.MC_LIGHTNING_ROSE_DMG
+    assert enemy.powers["vulnerable"] == C.MC_LIGHTNING_ROSE_VULN
+    assert st.player.powers["mc_lightning_rose"] == 2
+
+
+def test_lightning_rose_fires_at_the_start_of_the_turn_not_the_end(overhaul):
+    """`EB-470`. The tick moved, and this is the pin that says so.
+
+    Fired at the END of the player's turn the Vulnerable was unobservable: the
+    stack falls off at the end of the enemy's turn, so no player card ever saw
+    it and only a Mine could. The acceptance line is "after Lisa, the enemy
+    wears Vulnerable on the player's next turn" -- which is what a stack laid
+    at the start of that turn, before any play, means.
+    """
+    st = make_state()
+    st.player.powers["mc_lightning_rose"] = 3
+    effects.companion_overhaul_turn_end(st)
+    enemy = st.enemies[0]
+    assert enemy.hp == 50, "nothing fires at the end of the turn any more"
+    assert "vulnerable" not in enemy.powers
+    assert st.player.powers["mc_lightning_rose"] == 3
+
+    effects.companion_overhaul_turn_start(st)
     assert enemy.powers["vulnerable"] == C.MC_LIGHTNING_ROSE_VULN
     assert st.player.powers["mc_lightning_rose"] == 2
 
@@ -520,7 +542,9 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
     body = body.split("\ndef ")[0]
     order = [m for m in re.findall(r'"(mc_[a-z_]+)"', body)]
     seen = list(dict.fromkeys(order))
-    assert seen == ["mc_glacial_waltz", "mc_oz", "mc_lightning_rose",
+    # `EB-470` took mc_lightning_rose OUT of this walk; it fires at the start
+    # of the turn now, and `_companion_overhaul_turn_start_late` is its twin.
+    assert seen == ["mc_glacial_waltz", "mc_oz",
                     "mc_grand_ode", "mc_dandelion_breeze",
                     "mc_isotoma_bloom",
                     "mc_lightfall_sword", "mc_favonian_favor",
@@ -529,9 +553,12 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
     cs = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
           / "CompanionOverhaulPowers.cs").read_text(encoding="utf-8")
     walk = cs.split("public override async Task AfterSideTurnEnd(")[1]
+    # Cut at the next override, so the start-of-turn tail below it is not read
+    # as part of this walk.
+    walk = walk.split("public override async Task AfterPlayerTurnStartLate(")[0]
     cs_order = re.findall(r"OfType<(\w+Power)>", walk)
     assert cs_order == ["GlacialWaltzPower", "MondstadtOzPower",
-                        "LightningRosePower", "GrandOdePower",
+                        "GrandOdePower",
                         "DandelionBreezePower", "SolarIsotomaBloomPower",
                         "LightfallSwordPower",
                         # THE INAZUMA ARM'S BLOCK, appended before the latch --
@@ -550,6 +577,37 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         # reason: the throw draws from the rng.
                         "YueguiPower",
                         "RevelationPower"], cs_order
+
+
+def test_the_start_of_turn_tail_is_lisa_alone_in_both_engines(overhaul):
+    """`EB-470`. The one power that fires after every other start-of-turn
+    block, and it is written down in both engines because it is not
+    commutative with them: it draws a target from the rng and puts Electro on
+    a body that may already carry an aura, while Mona Vulnerables the board,
+    Barbara lays Hydro and Qiqi lays Cryo.
+
+    The sim says so by CALL POSITION -- `_companion_overhaul_turn_start_late`
+    is the last line of `companion_overhaul_turn_start` -- and the mod says so
+    by HOOK: `AfterPlayerTurnStartLate` runs strictly after every
+    `AfterPlayerTurnStart`, which is where the other start-of-turn powers
+    live."""
+    src = (REPO / "tier0" / "engine" / "effects.py").read_text(
+        encoding="utf-8")
+    start = src.split("def companion_overhaul_turn_start(")[1]
+    start = start.split("\ndef ")[0]
+    assert start.rstrip().endswith(
+        "_companion_overhaul_turn_start_late(state)"), start[-200:]
+
+    tail = src.split("def _companion_overhaul_turn_start_late(")[1]
+    tail = tail.split("\ndef ")[0]
+    assert list(dict.fromkeys(re.findall(r'"(mc_[a-z_]+)"', tail))) == [
+        "mc_lightning_rose"]
+
+    cs = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+          / "CompanionOverhaulPowers.cs").read_text(encoding="utf-8")
+    late = cs.split(
+        "public override async Task AfterPlayerTurnStartLate(")[1]
+    assert re.findall(r"OfType<(\w+Power)>", late) == ["LightningRosePower"]
 
 
 # ---------------------------------------------------------------------------

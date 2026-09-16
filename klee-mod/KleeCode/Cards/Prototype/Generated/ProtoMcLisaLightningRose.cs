@@ -56,7 +56,7 @@ public sealed class ProtoMcLisaLightningRose : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lisa — Lightning Rose"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold]."),
+        ("description", "For {PowerAmount:diff()} turns, at the start of your turn deal 5 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

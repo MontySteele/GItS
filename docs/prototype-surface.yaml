@@ -728,7 +728,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold].",
+   description: "For 3 turns, at the start of your turn deal 5 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold].",
    effects: [{op: apply_power, power: mc_lightning_rose, amount: 3, target: self}]}
 
 - {id: proto_mc_rosaria_ravaging_confession, name: "Rosaria — Ravaging Confession", character: klee,

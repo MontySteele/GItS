@@ -28,6 +28,62 @@ public static class KleeCardTooltips
     /// </summary>
     public const string BurstKey = "KLEEMOD-BURST";
 
+#if PROTOTYPE_CARDS
+    /// <summary>`EB-389`. Titles the line a card grows while a rider is
+    /// overriding the element it prints.
+    ///
+    /// INSIDE THE SWITCH, and `KeywordTitleRowTests` is why: that rule finds
+    /// every `KLEEMOD-` key in the assembly by reflection and demands a
+    /// registered `.title` row for it, because a key with no row renders AS
+    /// the key (0.2-589, 0.2-634). The row it needs is registered beside the
+    /// arm's other title rows, which are themselves behind this switch -- and
+    /// an override can only exist under the arm anyway, since the rider file
+    /// is <c>Compile Remove</c>d in a release build.</summary>
+    public const string OverriddenElementKey = "KLEEMOD-ELEMENT_OVERRIDDEN";
+#endif
+
+    /// <summary>
+    /// `EB-389`. THE ELEMENT THIS CARD'S HIT WILL ACTUALLY APPLY.
+    ///
+    /// THE FIND (Furina r2 run 2 act 2, finding 1). With Razor's Lightning Fang
+    /// up, High Tide ("[Hydro]", Applies Hydro) and Chevreuse ("[Pyro]") both
+    /// applied Electro and the faces never changed; without it the same
+    /// sequence Vaporized as printed. The seat lost a planned Overloaded to it.
+    ///
+    /// <c>CompanionOverhaulRiders.ElementFor</c> IS THE ONE EXPRESSION, already
+    /// shared by the application site and the reaction site so the two cannot
+    /// disagree; this makes the FACE a third reader of it rather than a fourth
+    /// copy. It is pure and preview-safe, which is what its own header promises
+    /// and what a hover path needs. Sim twin:
+    /// `effects.companion_overhaul_card_start`.
+    ///
+    /// <paramref name="printed"/> is codegen's static answer and is returned
+    /// unchanged in a release build, where the whole rider file is
+    /// <c>Compile Remove</c>d and no override can exist.
+    /// </summary>
+    public static Element AppliedElement(CardModel card, Element printed)
+    {
+#if PROTOTYPE_CARDS
+        // `EB-94`'s door, and it is not optional here: `CardModel.Owner`'s
+        // getter asserts mutability, so asking it on a CANONICAL model -- the
+        // compendium, a reward shelf -- throws out of the whole `HoverTips`
+        // getter and the card loses every tip it had. `TipOwner` answers null
+        // there, which is also the right answer: a card nobody holds is under
+        // nobody's riders and prints what it prints.
+        var over = CompanionOverhaulRiders.ElementFor(
+            card, TipOwner.CreatureOf(card));
+        if (over != Element.None) return over;
+#endif
+        return printed;
+    }
+
+    /// <summary>`EB-389`'s second half: the card says WHICH element, in words,
+    /// because a gem swapped under a reader who has already read the face is
+    /// the same silence one step quieter.</summary>
+    public static string OverriddenElementBody(Element applied) =>
+        $"While the buff stands, this card's hit applies "
+      + $"[gold]{applied}[/gold] instead of the element it prints.";
+
     /// <summary>
     /// The [gold]Burst Energy[/gold] KEYWORD, roster-wide.
     ///
@@ -184,6 +240,28 @@ public static class KleeCardTooltips
         {
             yield return HoverTipFactory.FromKeyword(KleeKeywords.Confiscated);
         }
+
+        // `EB-389`. THE ELEMENT A RIDER IS ABOUT TO APPLY, not the one the face
+        // prints. `trigger` is codegen's STATIC answer -- the card's printed
+        // element -- and an override rider makes it wrong for as long as it
+        // stands: with Razor's Lightning Fang up, High Tide ("[Hydro]") and
+        // Chevreuse ("[Pyro]") both applied Electro and neither face moved
+        // (Furina r2 run 2 act 2). It cost a planned Overloaded, because the
+        // previews below were computed against the printed element too.
+        //
+        // ONE READ, TWO USES: the preview is computed against the element that
+        // will actually land, and where that differs from the print the card
+        // says so in words.
+        var applied = AppliedElement(card, trigger);
+#if PROTOTYPE_CARDS
+        if (applied != trigger && applied != Element.None)
+        {
+            yield return new HoverTip(
+                new LocString(Table, OverriddenElementKey + ".title"),
+                OverriddenElementBody(applied));
+        }
+#endif
+        trigger = applied;
 
         if (trigger == Element.None || card.CombatState == null) yield break;
 

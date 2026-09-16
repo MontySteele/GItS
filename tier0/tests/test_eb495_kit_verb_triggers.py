@@ -187,14 +187,20 @@ SIM_CALL_SITES = {
     ('effects.py', 3): ("'salon_final_bow'", None, "'hydro'"),
     ('effects.py', 4): ("'companion'", None, "'hydro'"),
     ('effects.py', 5): ("'attack' if card.type == 'attack' else 'card'", None, "'hydro'"),
-    ('effects.py', 6): ("'companion'", None, 'None'),
-    ('effects.py', 7): ("'salon'", 'False', "'hydro'"),
-    ('effects.py', 8): ("'burst'", None, "'pyro'"),
-    ('effects.py', 9): ("'companion'", None, "'electro'"),
-    ('effects.py', 10): ("'companion'", None, "'hydro'"),
-    ('effects.py', 11): ("'companion'", None, 'None'),
-    ('effects.py', 12): ("'companion'", None, "'cryo'"),
-    ('effects.py', 13): ("'companion'", None, "'electro'"),
+    # `EB-470` MOVED ONE ROW WITHOUT CHANGING ONE. Lisa's Lightning Rose volley
+    # left the end-of-turn block for the start-of-turn tail, so its Electro
+    # entry -- the thirteenth here -- is now the sixth and the seven between
+    # rotate down one. The MULTISET is untouched: the same twenty-eight calls
+    # with the same source / powered / element triple on every one, which is
+    # what this census is about. Nothing here is a flag moving.
+    ('effects.py', 6): ("'companion'", None, "'electro'"),
+    ('effects.py', 7): ("'companion'", None, 'None'),
+    ('effects.py', 8): ("'salon'", 'False', "'hydro'"),
+    ('effects.py', 9): ("'burst'", None, "'pyro'"),
+    ('effects.py', 10): ("'companion'", None, "'electro'"),
+    ('effects.py', 11): ("'companion'", None, "'hydro'"),
+    ('effects.py', 12): ("'companion'", None, 'None'),
+    ('effects.py', 13): ("'companion'", None, "'cryo'"),
     ('effects.py', 14): ("'companion'", None, "'electro'"),
     ('effects.py', 15): ("'companion'", None, 'None'),
     ('effects.py', 16): ("'companion'", None, 'None'),
