@@ -209,10 +209,11 @@ the retired reframe arm; every arm ships OFF in a release package).
   (`operations/act-assets.md`), music as a local skeleton
   (`operations/media.md`). Proven in the running game: act 1 both faces,
   combat backgrounds, rest site, six dressed act-1 events
-  (`review/records/teyvat-proofs-4-2026-09-15.md`, `-5-`); act 2 reached
-  once; acts 2 and 3 are otherwise unproven until the act-skip op `EB-771`
-  lands. Open rows: `EB-766` (boot-stall fuse, fixed in #528, unproven live),
-  `EB-767`, `EB-769` (fixed in #528, unproven live), `EB-770`, `EB-771`. Kickoff
+  (`review/records/teyvat-proofs-4-2026-09-15.md`, `-5-`); and acts 2 and 3
+  on all four faces — map header, combat background and real fights, rest
+  site and dressed events — reached through the act-skip op
+  (`review/records/teyvat-proofs-7-2026-09-16.md`). Open rows: `EB-767`,
+  `EB-769`, `EB-770`, all built with live looks owed on the next deploy. Kickoff
   `review/ruled/teyvat-run-frame-2026-09-14.md`.
 
 ## Open [USER] pile
