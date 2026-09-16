@@ -326,14 +326,32 @@ public sealed class MondstadtOzPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Lisa, Lightning Rose: "For 3 turns, at the end of your turn deal 5 Electro
+/// Lisa, Lightning Rose: "For 3 turns, at the start of your turn deal 5 Electro
 /// damage to a random enemy and apply 1 Vulnerable." Amount is TURNS
 /// REMAINING.
+///
+/// `EB-470`: THE TICK IS AT THE START OF YOUR TURN, not the end. Fired at the
+/// end of the player's turn the Vulnerable was unobservable -- the stack falls
+/// off at the end of the enemy's turn, so no player card ever saw it and only a
+/// Mine could (Klee r15 run 2, three fights, never a stack on any board). Fired
+/// at the start of the turn the stack is live for every play the player then
+/// makes, which is the only reading under which the printed word means
+/// anything. The face and the power's badge both say WHEN it fires.
 ///
 /// The Vulnerable lands on the SAME enemy the damage hit, and after it: the
 /// printed sentence is one clause about one enemy, and applying the debuff
 /// first would amplify the card's own hit by 50% on a card that does not say
 /// so.
+///
+/// It takes NO broadcast of its own. The volley draws a target from
+/// <c>Rng.CombatTargets</c> and puts Electro on a body that may already carry
+/// an aura, and Mona's omen (<see cref="StellarisOmenPower"/>) applies
+/// Vulnerable to the whole board from the ordinary start-of-turn hook -- so
+/// running before or after it is a 50% swing on this hit. The one tenant
+/// drives it from <c>AfterPlayerTurnStartLate</c>, which the 0.111.0 hook
+/// contract runs strictly after every <c>AfterPlayerTurnStart</c>, so Lisa is
+/// last in the arm's start-of-turn sequence in both engines -- the tail of
+/// tier0 `effects.companion_overhaul_turn_start`.
 /// </summary>
 public sealed class LightningRosePower : PowerModel, ILocalizationProvider
 {
@@ -341,7 +359,7 @@ public sealed class LightningRosePower : PowerModel, ILocalizationProvider
     {
         ("title", "Lightning Rose"),
         ("description",
-            "At the end of your turn, deal "
+            "At the start of your turn, deal "
           + $"[blue]{CompanionOverhaulLaw.LightningRoseDamage}[/blue] "
           + "[gold]Electro[/gold] damage and apply "
           + $"[blue]{CompanionOverhaulLaw.LightningRoseVulnerable}[/blue] "
@@ -531,17 +549,18 @@ public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// THE OVERHAUL'S END-OF-TURN ORDER, made explicit -- EB-19/races-c applied to
-/// this arm. One broadcast tenant drives all six end-of-turn powers in the
+/// this arm. One broadcast tenant drives the end-of-turn powers in the
 /// sim's sequence, so a deck holding two of them cannot have its reactions, or
 /// every later roll off <c>Rng.CombatTargets</c>, decided by listener
-/// iteration order.
+/// iteration order. Since `EB-470` the same tenant also owns the arm's
+/// start-of-turn TAIL (<see cref="AfterPlayerTurnStartLate"/>), for the same
+/// reason and over one power.
 ///
 /// THE SEQUENCE IS tier0 `effects.player_turn_end_triggers`, read top to
 /// bottom, in the block this arm appends after the shipped chain:
 ///
 ///     mc_glacial_waltz     (Cryo volley, one target)
 ///     mc_oz                (Electro volley, one target per stack)
-///     mc_lightning_rose    (Electro volley + Vulnerable, one target)
 ///     mc_grand_ode         (Anemo Swirl, every enemy)
 ///     mc_dandelion_breeze  (Anemo Swirl on the aura-bearer, then Block)
 ///     mc_isotoma_bloom     (unelemented damage on the aura-bearer, then Block)
@@ -601,10 +620,10 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             {
                 await Act(creature, oz, () => oz.FireVolley(choiceContext));
             }
-            foreach (var rose in creature.Powers.OfType<LightningRosePower>().ToList())
-            {
-                await Act(creature, rose, () => rose.FireVolley(choiceContext));
-            }
+            // `EB-470`: Lisa's Lightning Rose used to sit HERE, third. It now
+            // fires at the START of the player's turn, from
+            // AfterPlayerTurnStartLate below, so its Vulnerable is live for the
+            // plays that follow it.
             foreach (var ode in creature.Powers.OfType<GrandOdePower>().ToList())
             {
                 await Act(creature, ode, () => ode.FireVolley(choiceContext));
@@ -715,6 +734,35 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             {
                 rev.NoteEndOfTurn();
             }
+        }
+    }
+
+    /// <summary>
+    /// `EB-470`. THE ARM'S START-OF-TURN TAIL, and the one power in it.
+    ///
+    /// LATE, not the ordinary hook: the three commutative start-of-turn powers
+    /// (<see cref="SignatureMixPower"/>, <see cref="RevelationPower"/>,
+    /// <see cref="StellarisOmenPower"/>) keep their own
+    /// <c>AfterPlayerTurnStart</c> broadcast, and Lisa is NOT commutative with
+    /// Mona's -- the omen puts Vulnerable on the whole board and Lisa's hit
+    /// into it would be 50% larger. <c>AfterPlayerTurnStartLate</c> runs
+    /// strictly after every <c>AfterPlayerTurnStart</c>, so the sequence is
+    /// decided rather than left to listener iteration order, and it is the same
+    /// sequence tier0 `effects.companion_overhaul_turn_start` writes down: the
+    /// three, then Lisa.
+    ///
+    /// This also preserves what the end-of-turn placement used to give: Mona's
+    /// Vulnerable was applied at the start of the turn and was still standing
+    /// when Lisa fired at its end, so the hit was amplified then too.
+    /// </summary>
+    public override async Task AfterPlayerTurnStartLate(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        var creature = player.Creature;
+        if (creature == null) return;
+        foreach (var rose in creature.Powers.OfType<LightningRosePower>().ToList())
+        {
+            await Act(creature, rose, () => rose.FireVolley(choiceContext));
         }
     }
 

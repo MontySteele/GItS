@@ -89,15 +89,15 @@ public class CompanionOverhaulTests
         typeof(ProtoMcMikaStarfrostSwirl),
     };
 
-    /// <summary>The six powers that fire at the end of the player's turn, in
+    /// <summary>The five powers that fire at the end of the player's turn, in
     /// the sequence <see cref="CompanionOverhaulTurnEnd"/> must walk. Mirrors
     /// tier0 `effects.companion_overhaul_turn_end`, which the sim twin pins
-    /// against this same list.</summary>
+    /// against this same list. `EB-470` took Lisa's Lightning Rose out of it;
+    /// it is <see cref="LateStartOfTurnPowers"/> now.</summary>
     private static readonly string[] TurnEndOrder =
     {
         nameof(GlacialWaltzPower),
         nameof(MondstadtOzPower),
-        nameof(LightningRosePower),
         nameof(GrandOdePower),
         nameof(DandelionBreezePower),
         nameof(SolarIsotomaBloomPower),
@@ -110,10 +110,18 @@ public class CompanionOverhaulTests
         typeof(StellarisOmenPower),
     };
 
+    /// <summary>`EB-470`. The start-of-turn TAIL: driven by the one tenant
+    /// from <c>AfterPlayerTurnStartLate</c> rather than by a broadcast of its
+    /// own, because it is not commutative with the three above.</summary>
+    private static readonly Type[] LateStartOfTurnPowers =
+    {
+        typeof(LightningRosePower),
+    };
+
     private static Type[] EndOfTurnPowers() => new[]
     {
         typeof(GlacialWaltzPower), typeof(MondstadtOzPower),
-        typeof(LightningRosePower), typeof(GrandOdePower),
+        typeof(GrandOdePower),
         typeof(DandelionBreezePower), typeof(SolarIsotomaBloomPower),
     };
 
@@ -280,7 +288,8 @@ public class CompanionOverhaulTests
     {
         // Counter, not Stack: every one of these carries either a duration or
         // a copy count, and both are numbers the badge should print.
-        foreach (var type in StartOfTurnPowers.Concat(EndOfTurnPowers()))
+        foreach (var type in StartOfTurnPowers
+                     .Concat(LateStartOfTurnPowers).Concat(EndOfTurnPowers()))
         {
             var power = (PowerModel)Activator.CreateInstance(type)!;
             Assert.Equal(PowerType.Buff, power.Type);
@@ -480,6 +489,53 @@ public class CompanionOverhaulTests
             Assert.True(method != null && method.DeclaringType == type,
                 $"{type.Name} no longer pays at the start of the turn.");
         }
+    }
+
+    [Fact]
+    public void Lisa_fires_at_the_start_of_the_turn_from_the_one_tenant()
+    {
+        // `EB-470`. THE FIND (Klee r15 run 2): "apply 1 Vulnerable" was
+        // unobservable. Fired at the END of the player's turn the stack falls
+        // off at the end of the enemy's turn, so no player card ever saw it
+        // and only a Mine could -- three fights, never a stack on any board.
+        // It fires at the START of the turn now, so the stack is live for the
+        // plays that follow it.
+        //
+        // AND FROM THE TENANT, LATE, not from a broadcast of its own: the
+        // volley draws from Rng.CombatTargets and puts Electro on a body that
+        // may already carry an aura, while Mona's omen Vulnerables the whole
+        // board from the ordinary AfterPlayerTurnStart -- a 50% swing decided
+        // by listener iteration order otherwise. AfterPlayerTurnStartLate runs
+        // strictly after every AfterPlayerTurnStart, which is the tail
+        // position tier0 `_companion_overhaul_turn_start_late` holds.
+        foreach (var type in LateStartOfTurnPowers)
+        {
+            foreach (var hook in new[] { "BeforeSideTurnEnd", "AfterSideTurnEnd",
+                                         "AfterPlayerTurnStart",
+                                         "AfterPlayerTurnStartLate" })
+            {
+                var method = type.GetMethod(hook, All);
+                Assert.True(method == null || method.DeclaringType != type,
+                    $"{type.Name} takes {hook} of its own; the one tenant "
+                    + "(CompanionOverhaulTurnEnd) drives it.");
+            }
+        }
+
+        var late = typeof(CompanionOverhaulTurnEnd)
+            .GetMethod("AfterPlayerTurnStartLate", All)!;
+        Assert.Equal(typeof(CompanionOverhaulTurnEnd), late.DeclaringType);
+        Assert.Contains(Il.Calls(late),
+                        c => c.StartsWith(nameof(LightningRosePower) + "."));
+
+        // And the face says WHEN, which is half of what the row asked for:
+        // an unobservable debuff and a debuff the face mis-times read the same
+        // on the board.
+        var description = new LightningRosePower().Localization!
+            .Single(entry => entry.Item1 == "description").Item2;
+        Assert.Contains("At the start of your turn", description);
+        var face = new ProtoMcLisaLightningRose().Localization!
+            .Single(entry => entry.Item1 == "description").Item2;
+        Assert.Contains("at the start of your turn", face);
     }
 
     [Fact]

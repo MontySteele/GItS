@@ -7014,6 +7014,45 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
     # commutative with everything above: it grants Block and a draw and reads
     # only the explosion counter, which nothing here writes.
     companion_standins.turn_start(state)
+    _companion_overhaul_turn_start_late(state)
+
+
+def _companion_overhaul_turn_start_late(state: CombatState) -> None:
+    """THE START-OF-TURN TAIL, after every other start-of-turn block there is.
+
+    `EB-470` moved Lisa's Lightning Rose here from the end of the turn: fired
+    at the end of the player's turn its Vulnerable was unobservable, because
+    the stack falls off at the end of the enemy's turn and no player card ever
+    saw it (Klee r15 run 2, three fights, never a stack on any board). Fired
+    here the stack is live for every play the player then makes.
+
+    LAST, AND WRITTEN DOWN, because it is not commutative with what runs above
+    it: the volley draws a target from `state.rng` and puts Electro on a body
+    that may already carry an aura, Mona's omen Vulnerables the whole board,
+    Barbara's Melody Loop lays Hydro and Qiqi's Herald lays Cryo. The C# twin
+    is `CompanionOverhaulTurnEnd.AfterPlayerTurnStartLate`, and the 0.111.0
+    hook contract runs `AfterPlayerTurnStartLate` strictly after every
+    `AfterPlayerTurnStart` -- which is exactly this position, and the only
+    position the two engines can both name without a second ordered listener.
+    """
+    if not C.COMPANION_OVERHAUL:
+        return
+    p = state.player
+    # Lisa, Lightning Rose -- stacks are TURNS REMAINING. The Vulnerable lands
+    # on the SAME enemy the damage hit and AFTER it: the printed sentence is
+    # one clause about one enemy, and debuffing first would amplify the card's
+    # own hit by 50% on a card that does not say so.
+    if p.powers.get("mc_lightning_rose", 0):
+        if state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            deal_damage_to_enemy(state, enemy, C.MC_LIGHTNING_ROSE_DMG,
+                                 element="electro", source="companion")
+            if enemy.hp > 0:
+                powers.apply_power(state, enemy, "vulnerable",
+                                   C.MC_LIGHTNING_ROSE_VULN, applier=p)
+        p.powers["mc_lightning_rose"] -= 1
+        if p.powers["mc_lightning_rose"] <= 0:
+            del p.powers["mc_lightning_rose"]
 
 
 def inazuma_overhaul_turn_start(state: CombatState) -> None:
@@ -7371,24 +7410,25 @@ def player_turn_end_triggers(state: CombatState) -> None:
 
 def companion_overhaul_turn_end(state: CombatState) -> None:
     """THE MONDSTADT COMPANION OVERHAUL's end-of-turn block (QUARANTINED,
-    `C.COMPANION_OVERHAUL`). Six powers and one latch, in this order:
+    `C.COMPANION_OVERHAUL`). Five powers and one latch, in this order
+    (`EB-470` moved the sixth, Lisa's Lightning Rose, to the start of the
+    turn -- see `companion_overhaul_turn_start`):
 
         mc_glacial_waltz     Cryo volley, one target
         mc_oz                Electro volley, one target per stack
-        mc_lightning_rose    Electro volley + Vulnerable, one target
         mc_grand_ode         Anemo Swirl, every enemy
         mc_dandelion_breeze  Anemo Swirl on the aura-bearer, then Block
         mc_isotoma_bloom     unelemented damage on the aura-bearer, then Block
         mc_revelation        the LATCH, last
 
     THE ORDER IS LAW, and the C# twin (`CompanionOverhaulTurnEnd`) walks the
-    same list. Four of the six put an ELEMENT on an enemy that may already
-    carry one, so the order decides which reactions fire; three of them draw
+    same list. Four of the five put an ELEMENT on an enemy that may already
+    carry one, so the order decides which reactions fire; two of them draw
     from `state.rng`, so it also decides every later roll in the fight. That
     is EB-19/races-c, and this arm answers it the same way the shipped chain
     does: one sequence, written down once per engine.
 
-    THE LATCH IS LAST because two of the six GRANT Block, and Nicole's
+    THE LATCH IS LAST because two of the five GRANT Block, and Nicole's
     question is whether the player ENDED the turn holding any.
 
     AFTER the shipped chain, not interleaved with it. This block is appended
@@ -7424,21 +7464,10 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
         deal_damage_to_enemy(state, enemy, C.MC_OZ_DMG,
                              element="electro", source="companion")
 
-    # Lisa, Lightning Rose -- stacks are TURNS REMAINING. The Vulnerable lands
-    # on the SAME enemy the damage hit and AFTER it: the printed sentence is
-    # one clause about one enemy, and debuffing first would amplify the card's
-    # own hit by 50% on a card that does not say so.
-    if p.powers.get("mc_lightning_rose", 0):
-        if state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
-            deal_damage_to_enemy(state, enemy, C.MC_LIGHTNING_ROSE_DMG,
-                                 element="electro", source="companion")
-            if enemy.hp > 0:
-                powers.apply_power(state, enemy, "vulnerable",
-                                   C.MC_LIGHTNING_ROSE_VULN, applier=p)
-        p.powers["mc_lightning_rose"] -= 1
-        if p.powers["mc_lightning_rose"] <= 0:
-            del p.powers["mc_lightning_rose"]
+    # Lisa, Lightning Rose fired HERE, third, until `EB-470`. It now fires at
+    # the START of the player's turn, at the tail of
+    # `companion_overhaul_turn_start`, so its Vulnerable is live for the plays
+    # that follow it.
 
     # Venti, Wind's Grand Ode -- stacks are TURNS REMAINING. Swirl is a
     # damage-less Anemo application, which is exactly what the `swirl` op is,
