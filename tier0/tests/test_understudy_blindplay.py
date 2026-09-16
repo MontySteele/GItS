@@ -12492,3 +12492,44 @@ def test_another_runs_screen_is_never_subtracted_from_this_one():
     other = _map_after_the_kill(16)
     other["player"]["character"] = "Klee"
     assert "## Since the screen before this one" not in blindplay.observe(other)
+
+
+# ------------------ EB-715: the act break is a room with no screen ----------
+
+def _act_state(act: int, floor: int, hp: int, gold: int) -> dict:
+    """A combat screen in a named act, at a named HP and gold."""
+    state = copy.deepcopy(combat_state())
+    state["run"] = {"act": act, "floor": floor}
+    state["player"]["hp"] = hp
+    state["player"]["max_hp"] = 80
+    state["player"]["gold"] = gold
+    return state
+
+
+def test_the_act_transition_is_printed_with_what_it_did_to_the_run():
+    """`EB-715`. Seen to FAIL: HP went 15 to 71 between the act-1 boss and the
+    first act-2 fight with nothing printed -- no heal, no rest, no transition.
+    The act break resolves on screens this tool is never shown, so the first
+    screen of the new act names it and prints the ledger across it.
+    """
+    blindplay.observe(_act_state(1, 16, 15, 210))
+    page = blindplay.observe(_act_state(2, 17, 71, 250))
+    assert "## Between the last screen and this one, the act changed" in page
+    assert "- Act 1 → Act 2" in page
+    assert "- HP 15 → 71 (of 80)" in page
+    assert "- Gold 210 → 250" in page
+    assert "nothing here says which step did what" in page
+
+
+def test_the_act_block_replaces_the_plain_hp_line_rather_than_doubling_it():
+    """One block per page: an act break moves HP too, and two headings saying
+    the same thing twice is the noise every glossary row was filed on."""
+    blindplay.observe(_act_state(1, 16, 15, 210))
+    page = blindplay.observe(_act_state(2, 17, 71, 250))
+    assert "## Since the screen before this one" not in page
+
+
+def test_a_screen_inside_one_act_prints_no_act_block():
+    """The gate is the act number and nothing else."""
+    blindplay.observe(_act_state(1, 16, 40, 210))
+    assert "the act changed" not in blindplay.observe(_act_state(1, 17, 40, 210))
