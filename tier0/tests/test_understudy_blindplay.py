@@ -58,8 +58,13 @@ def _fresh_fight():
     gets it, because it carries WITHIN a test.
     """
     blindplay.forget_fight()
+    # `EB-676` / `EB-715`: and the run ledger, which is process state for the
+    # same reason and leaks between tests the same way -- one test's screen
+    # would otherwise be the screen the next test's page compares itself to.
+    blindplay.forget_run()
     yield
     blindplay.forget_fight()
+    blindplay.forget_run()
 
 
 def combat_state() -> dict:
@@ -12408,3 +12413,82 @@ def test_a_mono_element_run_still_gets_the_one_line():
     one element alone reads exactly as it did."""
     page = blindplay.observe(elemental_hand_state(elements=("Pyro",)))
     assert "NO REACTION IS REACHABLE HERE: Pyro is the only element" in page
+
+
+# ------ EB-676: the HP a fight ends on, and the HP the next screen prints ----
+
+def _kill_screen_state(hp: int) -> dict:
+    """The rewards screen a fight ends into, at a given HP."""
+    state = copy.deepcopy(rewards_state())
+    state["run"] = {"act": 1, "floor": 4}
+    state["player"] = {"character": "Sangonomiya Kokomi", "hp": hp,
+                       "max_hp": 80, "gold": 120}
+    return state
+
+
+def _map_after_the_kill(hp: int) -> dict:
+    state = copy.deepcopy(map_state())
+    state["run"] = {"act": 1, "floor": 4}
+    state["player"] = {"character": "Sangonomiya Kokomi", "hp": hp,
+                       "max_hp": 80, "gold": 120}
+    return state
+
+
+def test_an_unexplained_hp_drop_between_two_screens_is_named():
+    """`EB-676`. Seen to FAIL: the victory screen printed 25/80 and the next
+    screen 16/80, Constrict's end-of-turn loss landed between the two, and no
+    line on either screen connected them -- "the seat chose its map off the
+    wrong number".
+
+    There is ONE HP field on the wire, so the page cannot settle the two; what
+    it can do is stop the change being silent, which it now does against its
+    own previous read.
+    """
+    blindplay.observe(_kill_screen_state(25))
+    page = blindplay.observe(_map_after_the_kill(16))
+    assert "## Since the screen before this one" in page
+    assert "- HP 25 → 16 (of 80), down 9" in page
+    assert "end-of-turn effects have landed in it" in page
+
+
+def test_the_same_screen_read_twice_prints_the_same_page():
+    """The ledger rolls on the SCREEN, not on the call: a seat that says
+    `observe` twice must not have the comparison vanish under it."""
+    blindplay.observe(_kill_screen_state(25))
+    first = blindplay.observe(_map_after_the_kill(16))
+    assert blindplay.observe(_map_after_the_kill(16)) == first
+
+
+def test_hp_that_did_not_move_prints_no_continuity_block():
+    """The gate is a change: a run that walked from a reward screen to the map
+    with its HP intact reads exactly as it always did."""
+    blindplay.observe(_kill_screen_state(25))
+    assert "## Since the screen before this one" not in blindplay.observe(
+        _map_after_the_kill(25))
+
+
+def test_the_first_screen_of_a_session_compares_itself_to_nothing():
+    """There is no previous read to subtract, and the page invents none."""
+    assert "## Since the screen before this one" not in blindplay.observe(
+        _map_after_the_kill(16))
+
+
+def test_hp_moving_inside_one_fight_is_the_fight_and_prints_no_block():
+    """The room has to change. Round two of a fight moving HP is the fight,
+    and the combat page has already printed the blow that did it."""
+    first = copy.deepcopy(combat_state())
+    second = copy.deepcopy(combat_state())
+    second["battle"]["round"] = first["battle"]["round"] + 1
+    second["player"]["hp"] = first["player"]["hp"] - 7
+    blindplay.observe(first)
+    assert "## Since the screen before this one" not in blindplay.observe(
+        second)
+
+
+def test_another_runs_screen_is_never_subtracted_from_this_one():
+    """The character guard `remembered_deck` already keeps: a second lane's
+    game, or a run started since, is not a change in this one."""
+    blindplay.observe(_kill_screen_state(25))
+    other = _map_after_the_kill(16)
+    other["player"]["character"] = "Klee"
+    assert "## Since the screen before this one" not in blindplay.observe(other)

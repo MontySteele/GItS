@@ -25,7 +25,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
 from understudy.blindplay_faces import (_card_face, _dedupe_text, _hazard,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_options,
-                                        deck_elements, relic_faces)
+                                        deck_elements, relic_faces, run_change)
 from understudy.blindplay_notes import (REWARD_ALTERNATIVE_RELICS,
                                         keyword_notes)
 from understudy.blindplay_read import (_blob, _combat_torn_down, _despritify,
@@ -551,6 +551,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     else:
         obs["screen"] = "unknown"
         obs["blocked"] = "this tool has never seen this screen"
+
+    # `EB-676` / `EB-715`: what moved between the previous screen this page
+    # rendered and this one. The ledger rolls on the SCREEN's identity rather
+    # than on the call, so a seat that says `observe` three times reads the
+    # same page three times; see `blindplay_faces.run_change`.
+    change = run_change(state)
+    if change:
+        obs["run_change"] = change
 
     # `EB-371`: the belt, and the verb that empties a slot, on every screen
     # the wire allows the action on. Before the sprite pass, so a potion face

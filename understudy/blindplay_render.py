@@ -1144,6 +1144,67 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
     return out
 
 
+#: `EB-676`. WHY THE TWO NUMBERS CAN DISAGREE, said once and claiming nothing
+#: about which is right. There is one HP field on the wire -- `BuildPlayerState`
+#: writes `creature.CurrentHp` on every screen -- so a victory screen reading
+#: 25/80 and the next screen reading 16/80 are ONE field at two moments, not a
+#: player block and a save disagreeing. The earlier of the two can be read
+#: before the fight's own end-of-turn effects have landed in it, which is
+#: exactly the 9 HP of Constrict the r26 seat planned its map around.
+HP_SETTLE_NOTE = (
+    "*This page reads one HP figure off the game's data feed and prints it "
+    "unchanged; it has no second source and does no arithmetic on it. A figure "
+    "read the instant a fight ends can be read before that fight's own "
+    "end-of-turn effects have landed in it, so a drop that appears on the next "
+    "screen may be the previous screen's number settling rather than anything "
+    "this screen did.*")
+
+#: `EB-715`. The act break is a room this page never had. Nothing here claims a
+#: cause: every number in the block is the feed's, before and after.
+ACT_CHANGE_NOTE = (
+    "*The game moves the run between acts on a screen this tool is not shown: "
+    "a boss reward, a rest and the act's own transition all resolve before the "
+    "next page is drawn. The numbers above are this page's own previous read "
+    "and its read now -- nothing here says which step did what.*")
+
+
+def _render_run_change(change: dict[str, Any]) -> list[str]:
+    """`EB-676` / `EB-715`: what moved since the previous screen, or nothing.
+
+    ONE BLOCK, TWO ROWS. An act change prints the whole ledger -- act, HP, gold
+    and deck -- because that is `EB-715`'s ask and because an act break moves
+    all four at once. Anything else prints the HP line alone, and only where
+    the ROOM changed: HP moving between round one and round two of a fight is
+    the fight, and the combat page has already printed the blow that did it.
+    """
+    if not change:
+        return []
+    out: list[str] = []
+    if change.get("act"):
+        was, now = change["act"]
+        out += ["", "## Between the last screen and this one, the act changed",
+                "", f"- Act {was} → Act {now}"]
+        if change.get("hp"):
+            out.append(f"- HP {change['hp'][0]} → {change['hp'][1]}"
+                       + (f" (of {change['max_hp']})" if change.get("max_hp")
+                          else ""))
+        if change.get("gold"):
+            out.append(f"- Gold {change['gold'][0]} → {change['gold'][1]}")
+        if change.get("deck"):
+            out.append(f"- Cards in the deck {change['deck'][0]} → "
+                       f"{change['deck'][1]}")
+        out += ["", ACT_CHANGE_NOTE]
+        return out
+    if change.get("hp") and change.get("room_changed"):
+        was, now = change["hp"]
+        moved = ("down" if now < was else "up") + f" {abs(now - was)}"
+        out += ["", "## Since the screen before this one", "",
+                f"- HP {was} → {now}"
+                + (f" (of {change['max_hp']})" if change.get("max_hp") else "")
+                + f", {moved}", "", HP_SETTLE_NOTE]
+    return out
+
+
 def render(obs: dict[str, Any]) -> str:
     """The observation as the page the tester is handed. Same content."""
     st = obs["state_type"]
@@ -1883,6 +1944,12 @@ def render(obs: dict[str, Any]) -> str:
                     "play performed as well." for name in ls["replayed"]]
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
+
+    # `EB-676` / `EB-715`: what the run did between the previous screen this
+    # page drew and this one. Directly under the screen's own body, above the
+    # relics and the belt, because it is the thing a seat about to choose a
+    # route or plan a block has to know and the one thing no screen printed.
+    out += _render_run_change(obs.get("run_change") or {})
 
     # `EB-473`: the relic row, on a screen that is not a fight, in the
     # combat header's own words and under its own heading. A relic claimed at
