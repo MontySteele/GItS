@@ -331,6 +331,29 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private const string VulnerableClause = " after [gold]Vulnerable[/gold]";
 
+    /// <summary>
+    /// `EB-721`. THE TERM THAT WAS FOLDED IN AND NEVER NAMED.
+    ///
+    /// THE FIND (Klee r25 lane 2, (c) 2). "`Bomb 18 ... sizes, oldest first:
+    /// 12` is one 12-size Bomb standing against a Hydro aura for a Vaporize.
+    /// Both numbers are honest; they are adjacent and disagree." `EB-559`
+    /// folded the pending amplifier into the total and gave it no clause,
+    /// while every other term the number passes through has had one since
+    /// R248 -- so the one modifier a reader could not check against a badge on
+    /// the enemy was the one that moved the number most.
+    ///
+    /// TWO NAMED REACTIONS AND NO OTHERS, which is not a shortlist but the
+    /// table: <c>ReactionTable.AmplifierMultiplier</c> answers above 1 for
+    /// Pyro over Hydro and Pyro over Cryo, and this face prints Pyro damage.
+    /// An Electro or Anemo body reacts and does not multiply, so naming it
+    /// here would put a clause on a number it did not move.
+    /// </summary>
+    private const string VaporizeClause = " with [gold]Vaporize[/gold]";
+
+    /// <summary>`EB-721`, the other amplifier. See
+    /// <see cref="VaporizeClause"/>.</summary>
+    private const string MeltClause = " with [gold]Melt[/gold]";
+
     private const string HardToKillClause =
         " capped by [gold]Hard To Kill[/gold]";
 
@@ -626,9 +649,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// blink out on the boards where two modifiers happen to cancel, which is
     /// exactly when a player most wants to know both are there.
     /// </summary>
-    private readonly record struct FoldedMods(bool Vulnerable, CapKind Cap)
+    private readonly record struct FoldedMods(bool Vulnerable, CapKind Cap,
+                                              ReactionKind Reaction)
     {
-        internal static readonly FoldedMods None = new(false, CapKind.None);
+        internal static readonly FoldedMods None =
+            new(false, CapKind.None, ReactionKind.None);
 
         /// <summary>Every combination the selector can produce, so
         /// <see cref="Localization"/> can emit a row for each.</summary>
@@ -636,7 +661,9 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             from vulnerable in new[] { false, true }
             from cap in new[] { CapKind.None, CapKind.HardToKill,
                                 CapKind.Intangible, CapKind.Other }
-            select new FoldedMods(vulnerable, cap);
+            from reaction in new[] { ReactionKind.None, ReactionKind.Vaporize,
+                                     ReactionKind.Melt }
+            select new FoldedMods(vulnerable, cap, reaction);
 
         /// <summary>What is standing on <paramref name="target"/> right now.
         /// The Vulnerable read is <c>SimDamagePipeline.TargetMods</c>' own, and
@@ -666,7 +693,23 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                     _ => CapKind.Other,
                 };
             }
-            return new FoldedMods(vulnerable, cap);
+            // `EB-721`: AND THE REACTION THE FIRST CHARGE WILL CAUSE. It is
+            // already folded into the printed total (`EB-559`) and was the one
+            // term with no clause naming it, which is why `Bomb 18` stood next
+            // to `sizes, oldest first: 12` and the two disagreed. Read off the
+            // AURA alone, which is this struct own presence-not-effect rule:
+            // Pyro amplifies over Hydro and over Cryo and nothing else, so an
+            // Electro or Anemo body reacts without multiplying and is not
+            // named here.
+            var aura = AuraCmd.Find(target);
+            var reaction = aura?.Element switch
+            {
+                Elements.Element.Hydro => ReactionKind.Vaporize,
+                Elements.Element.Cryo => ReactionKind.Melt,
+                _ => ReactionKind.None,
+            };
+
+            return new FoldedMods(vulnerable, cap, reaction);
         }
 
         internal string KeySuffix =>
@@ -675,6 +718,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                 CapKind.HardToKill => "HardToKill",
                 CapKind.Intangible => "Intangible",
                 CapKind.Other => "Capped",
+                _ => string.Empty,
+            }
+            // `EB-721`'s axis, LAST so every key that existed before this row
+            // keeps the name it had -- `EB-573`'s discipline one axis over.
+            + Reaction switch
+            {
+                ReactionKind.Vaporize => "Vaporize",
+                ReactionKind.Melt => "Melt",
                 _ => string.Empty,
             };
 
@@ -693,9 +744,24 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                     CapKind.Other => UnnamedCapClause,
                     _ => string.Empty,
                 };
-                if (!Vulnerable) return capped;
-                return VulnerableClause
-                     + (capped.Length > 0 ? "," + capped : string.Empty);
+                var rest = !Vulnerable
+                    ? capped
+                    : VulnerableClause
+                      + (capped.Length > 0 ? "," + capped : string.Empty);
+                // `EB-721`: FIRST, because it is first in the pipeline. The
+                // amplifier rides the leading charge
+                // (`PredictedSetOffDamage`), then the target own Vulnerable
+                // multiplies, then a cap clamps -- and this sentence has read
+                // in pipeline order since `EB-343`.
+                var amplified = Reaction switch
+                {
+                    ReactionKind.Vaporize => VaporizeClause,
+                    ReactionKind.Melt => MeltClause,
+                    _ => string.Empty,
+                };
+                if (amplified.Length == 0) return rest;
+                return amplified
+                     + (rest.Length > 0 ? "," + rest : string.Empty);
             }
         }
     }
@@ -712,6 +778,11 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// exact defect R248 is fixing, so it gets a clause that claims no name.
     /// </summary>
     private enum CapKind { None, HardToKill, Intangible, Other }
+
+    /// <summary>The amplifying reaction the leading charge will cause, or
+    /// none. `EB-721`; see <see cref="VaporizeClause"/> for why the list is
+    /// two long.</summary>
+    private enum ReactionKind { None, Vaporize, Melt }
 
     public override PowerType Type => PowerType.Buff;
 

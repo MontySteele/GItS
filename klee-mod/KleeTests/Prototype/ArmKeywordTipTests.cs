@@ -557,7 +557,15 @@ public class ArmKeywordTipTests
         // not have. `ForEncore` survived the cut and became the SIXTH attach
         // here that titles no keyword: no prototype face prints the word any
         // more, and every Furina row the Stage does not swap still does.
-        Assert.Equal(25, attaches.Count);
+        //
+        // THE TWENTY-SIXTH IS `EB-709`'s `ForPlanTwice`, and it is a RIDER
+        // rather than a keyword -- `ForPlanElement`'s shape. Tide Wall paid 6
+        // and then 9 under Second Wave and no face said whether the doubled
+        // entry counted as one Plan or two for a per-Plan clause (Kokomi r31
+        // lane 2). It counts as two, and the card that bends the count is
+        // where the count is explained.
+        Assert.Equal(26, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
         Assert.Contains(attaches, m => m.Name == "ForFanfare");
         Assert.Contains(attaches, m => m.Name == "ForRaise");

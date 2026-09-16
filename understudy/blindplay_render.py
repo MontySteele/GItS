@@ -592,6 +592,38 @@ def _placed_charge(power: dict[str, Any]) -> str:
     return found.group(1).title() if int(found.group(2)) == stacks else ""
 
 
+#: `EB-721`. The amplifying reaction a power's own sentence says is folded into
+#: the number it prints. `ProtoBombPower`'s face writes it as a clause on the
+#: total -- " with Vaporize", " with Melt" -- in the same place and the same
+#: shape as `after Vulnerable` and `capped by Hard To Kill`, so the pattern is
+#: that clause and not the badge's name.
+_FOLDED_REACTION = re.compile(
+    r"\bdeals? [^.]*?\bwith (Vaporize|Melt)\b", re.IGNORECASE)
+
+
+def _folded_reaction(power: dict[str, Any]) -> str:
+    """The header's label where a reaction is inside its number. `EB-721`.
+
+    THE DEFECT (Klee r25 lane 2, (c) 2). "`Bomb 18 ... sizes, oldest first:
+    12` is one 12-size Bomb standing against a Hydro aura for a Vaporize. Both
+    numbers are honest; they are adjacent and disagree." `EB-559` folded the
+    pending amplifier into the printed total, and until `EB-721` no surface
+    named it -- so the header and the raw list beside it could not be
+    reconciled without knowing a rule neither of them stated.
+
+    THE ROW'S PICK WAS THE LABEL, not folding the multiplier into both numbers:
+    the sizes list is the QUEUE, and multiplying every entry by a bonus only
+    the leading charge collects would make three of four figures false to buy
+    one agreement.
+
+    OFF THE SENTENCE AND NEVER OFF THE NAME, `_turn_allowance`'s discipline, so
+    a second badge that folds an amplifier in gets the same label the day its
+    face says so.
+    """
+    found = _FOLDED_REACTION.search(str(power.get("text") or ""))
+    return f", with {found.group(1).title()}" if found else ""
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
@@ -605,6 +637,9 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
 
     `EB-722`: and where the number is the SIZE of a charge the power plants
     rather than a count of itself, the noun rides beside it.
+
+    `EB-721`: and where the number has an amplifying reaction folded into it
+    that the raw figures beside it do not, the header says which.
     """
     cap = _turn_allowance(power)
     placed = _placed_charge(power)
@@ -614,7 +649,7 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     elif placed:
         line = f"{indent}{power['name']}: {placed} {power['stacks']}"
     else:
-        line = f"{indent}{power['name']} {power['stacks']}"
+        line = f"{indent}{power['name']} {power['stacks']}{_folded_reaction(power)}"
     kind = str(power.get("kind") or "").strip().lower()
     if kind:
         line += f" ({kind})"

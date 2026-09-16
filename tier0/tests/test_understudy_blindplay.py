@@ -12711,3 +12711,53 @@ def test_a_power_that_stacks_and_also_places_reads_as_it_always_did():
     page = blindplay.observe(placer_power_state(amount=2, size=7))
     assert "Witches' Circle 2 (buff)" in page
     assert ": Bomb" not in page
+
+
+def bomb_pile_state(header: int = 18, clause: str = " with Vaporize",
+                    sizes: str = "12") -> dict:
+    """An enemy wearing a Bomb pile whose printed total carries a clause."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["hand"] = []
+    state["battle"]["enemies"][0]["status"] = [
+        {"id": "KLEEMOD-PROTO_BOMB", "name": "Bomb", "amount": header,
+         "type": "Buff",
+         "description": (f"Set off here deals {header} Pyro damage{clause}. "
+                         f"Bomb sizes here, oldest first: {sizes}, growing "
+                         f"each turn. None goes off by itself.")}]
+    return state
+
+
+def test_a_bomb_header_that_folds_a_reaction_says_which_one():
+    """`EB-721`. TWO HONEST NUMBERS, ADJACENT, DISAGREEING.
+
+    THE FIND (Klee r25 lane 2, (c) 2). "`Bomb 18 ... sizes, oldest first: 12`
+    is one 12-size Bomb standing against a Hydro aura for a Vaporize. Both
+    numbers are honest; they are adjacent and disagree." `EB-559` folded the
+    pending amplifier into the printed total and named it nowhere, while every
+    other term the number passes through has carried a clause since R248.
+
+    THE ROW'S PICK WAS THE LABEL. Folding the multiplier into the sizes list
+    was the alternative and is worse: the list is the QUEUE, and only the
+    LEADING charge collects the amplifier, so multiplying every entry would
+    make most of the figures false to buy one agreement.
+
+    Seen to FAIL: the header printed `Bomb 18` beside `oldest first: 12`.
+    """
+    page = blindplay.observe(bomb_pile_state())
+    assert "Bomb 18, with Vaporize (buff)" in page
+    assert "Set off here deals 18 Pyro damage with Vaporize." in page
+
+    melted = blindplay.observe(
+        bomb_pile_state(27, " with Melt, after Vulnerable"))
+    assert "Bomb 27, with Melt (buff)" in melted
+
+
+def test_a_bomb_header_with_nothing_folded_in_reads_as_it_always_did():
+    """The other half: the label is the clause, and a bare pile has none."""
+    page = blindplay.observe(bomb_pile_state(12, "", "12"))
+    assert "Bomb 12 (buff)" in page
+    assert "with Vaporize" not in page
+    # And a cap or a Vulnerable alone is not a reaction.
+    capped = blindplay.observe(
+        bomb_pile_state(9, " after Vulnerable, capped by Intangible"))
+    assert "Bomb 9 (buff)" in capped
