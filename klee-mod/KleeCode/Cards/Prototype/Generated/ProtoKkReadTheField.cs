@@ -82,9 +82,8 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
             var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take(DynamicVars["Scry"].IntValue).ToList();
             if (top != null && top.Count > 0)
             {
-                var takePick = (await CardSelectCmd.FromSimpleGrid(
-                    choiceContext, top, Owner,
-                    new CardSelectorPrefs(ScryTake.Prompt, 1))).ToList();
+                var takePick = await ScryTake.Choose(
+                    choiceContext, top, Owner);
                 foreach (var taken in takePick)
                 {
                     await CardPileCmd.Add(taken, PileType.Hand);

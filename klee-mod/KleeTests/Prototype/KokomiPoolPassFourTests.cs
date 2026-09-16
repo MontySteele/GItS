@@ -121,7 +121,12 @@ public class KokomiPoolPassFourTests
         // because the sim has no human.
         var source = Source("ProtoKkReadTheField");
         Assert.Contains("Cards.Take(DynamicVars[\"Scry\"].IntValue)", source);
-        Assert.Contains("ScryTake.Prompt", source);
+        // `EB-686` moved the PICKING behind `ScryTake.Choose`, which owns the
+        // grid and its one-candidate branch alike; the prompt is still
+        // that class's single ruled string, now read where it is used.
+        Assert.Contains("ScryTake.Choose(", source);
+        Assert.Contains(Il.Calls(Il.Method("ScryTake", "Choose")),
+                        c => c.Contains("ScryTake.get_Prompt"));
         Assert.Contains("CardPileCmd.Add(taken, PileType.Hand)", source);
         Assert.Contains("CardPilePosition.Bottom", source);
         // THE 5 BLOCK IS GONE: a dead slot beside a Dusk Plan, and the whole
@@ -183,5 +188,44 @@ public class KokomiPoolPassFourTests
                                      "Cards", "Prototype", "Generated");
         return System.IO.File.ReadAllText(
             System.IO.Path.Combine(dir, type + ".cs"));
+    }
+
+    // ======================================================================
+    // `EB-686` -- the pick with nothing to pick between
+    // ======================================================================
+
+    [Fact]
+    public void One_candidate_is_taken_and_the_take_is_announced()
+    {
+        // THE FIND (r28 lane 1, fight 3 turn 3). Read the Field with one card
+        // left in the draw pile "showed no selection, put that card in hand,
+        // charged the energy and printed nothing; the seat spent a turn unsure
+        // it had whiffed." A grid of one holds no decision, so the game opens
+        // no screen -- right, and silent.
+        //
+        // THE RULE DOES NOT MOVE. The one card was always taken and still is;
+        // what is added is the LINE, naming what was taken and why there was
+        // no screen. Read off the compiled body, because the screen and the
+        // bubble both need a live game (README's boundary) and the BRANCH is
+        // what the row is.
+        var calls = Il.Calls(Il.Method("ScryTake", "Choose"));
+
+        Assert.Contains(calls, c => c.Contains("ScryTake.Announce"));
+        Assert.Contains(calls, c => c.Contains("CardSelectCmd.FromSimpleGrid"));
+        Assert.Contains(Il.Calls(Il.Method("ScryTake", "Announce")),
+                        c => c.Contains("ScryTake.AutoTakeLine"));
+    }
+
+    [Fact]
+    public void The_auto_take_line_names_the_card_and_the_reason()
+    {
+        // Built in ONE place so the pin and the screen read the same words --
+        // `KurageBeat.Line`'s bargain, and its reason: a `LocString` is a
+        // table plus a key with no raw-text constructor, and this sentence is
+        // built per play out of a card title.
+        var line = ScryTake.AutoTakeLine("Slack Water");
+
+        Assert.Contains("Slack Water", line);
+        Assert.Contains("Only one card left to look at", line);
     }
 }

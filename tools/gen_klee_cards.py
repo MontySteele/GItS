@@ -9706,6 +9706,13 @@ def build_body(
             #
             # THE SIM HAS NO SCREEN and takes the lowest-cost card of the N,
             # stated there as the stand-in for player choice it is.
+            #
+            # `EB-686`. THE CHOICE GOES THROUGH `ScryTake.Choose`, which is
+            # the one branch this arm does not own: a grid of ONE holds no
+            # decision, so the game opens no screen, and the r28 lane "spent a
+            # turn unsure it had whiffed" because nothing said the card had
+            # been taken. The take and the bottoming stay here; only the
+            # picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
             lines.append(
@@ -9713,9 +9720,8 @@ def build_body(
                 f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();" + "\n" +
                 "            if (top != null && top.Count > 0)" + "\n" +
                 "            {" + "\n" +
-                "                var takePick = (await CardSelectCmd.FromSimpleGrid(" + "\n" +
-                "                    choiceContext, top, Owner," + "\n" +
-                "                    new CardSelectorPrefs(ScryTake.Prompt, 1))).ToList();" + "\n" +
+                "                var takePick = await ScryTake.Choose(" + "\n" +
+                "                    choiceContext, top, Owner);" + "\n" +
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
