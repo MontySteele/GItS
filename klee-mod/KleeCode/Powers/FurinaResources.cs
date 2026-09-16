@@ -388,7 +388,7 @@ public static class FurinaResources
     /// card on a shelf, a hook fired on a board being torn down -- got a
     /// NullReferenceException where the honest answer is "no, that is not
     /// Furina". Several call sites already hold a <c>Creature?</c>, and two
-    /// of them (<c>FurinaStage.LiveFor</c>, <c>FurinaReframe.IsFurina</c>)
+    /// of them (<c>FurinaStage.LiveFor</c>)
     /// had each grown their own null test in front of this one. A predicate
     /// that cannot answer for the absent case makes every caller carry the
     /// guard, and the first caller that forgets it is a crash -- so the guard
@@ -396,33 +396,6 @@ public static class FurinaResources
     /// </summary>
     public static bool IsFurina(Creature? creature) =>
         creature?.Player?.Character is IFurinaCharacter;
-
-    /// <summary>
-    /// Are the FOUR SHIPPED FANFARE MINT LEGS retired for this creature?
-    ///
-    /// The Furina reframe's §4.1 states its rule positively -- "Fanfare is
-    /// minted by a member PERFORMING and by nothing else" -- and the four legs
-    /// it retires are HP lost, Encore spent, Encore absorbed and a Spotlighted
-    /// card played. Three of those are in this file and the fourth is in
-    /// <c>SpotlightSystem.NotePlay</c>; all four ask THIS question, once,
-    /// rather than each carrying its own copy of the flag read, because a rule
-    /// stated once should be asked once. It is the same argument
-    /// <see cref="BurstResource"/>'s gauge guard makes and the same shape
-    /// <c>KokomiResources.BurstGaugeApplies</c> has.
-    ///
-    /// FALSE IN A RELEASE BUILD BY CONSTRUCTION: the arm's switch lives under
-    /// <c>Powers/Prototype/</c>, which is <c>Compile Remove</c>d, so without
-    /// the quarantine property there is nothing to ask and every leg mints
-    /// exactly as it ships.
-    /// </summary>
-    public static bool ReframeRetiresTheShippedMintLegs(Creature? creature)
-    {
-#if PROTOTYPE_CARDS
-        return FurinaReframe.MeterLiveFor(creature);
-#else
-        return false;
-#endif
-    }
 
     /// <summary>
     /// `EB-365` (R251). SHOULD THE OVERHEAD BURST GAUGE EXIST FOR THIS
@@ -444,21 +417,6 @@ public static class FurinaResources
     /// </summary>
     public static bool BurstGaugeApplies(Creature creature)
     {
-#if PROTOTYPE_CARDS
-        if (FurinaReframe.BurstRetiredFor(creature)) return false;
-        // `EB-628`. THE DISPLAY HALF IS WIDER THAN THE RULES HALF, and the
-        // reason is what [USER] read on screen: "an overhead bar reading
-        // 10/70", which is a value over a ceiling in the shipped Burst
-        // meter's shape. Under the arm no overhead value/max bar is honest --
-        // Fanfare's own cap is a demoted safety rail that F-A5 measured as
-        // never binding, and the Burst engine is retired -- so the whole
-        // overhead slot stands down whenever the MASTER is live, not only
-        // when the Burst LEG is. The rules half (the income funnel, the kit
-        // grant, the sim's `burst_retired`) stays on `BurstRetiredFor`: a
-        // build running the arm with the Burst leg deliberately off is still
-        // a build whose overhead bar would say nothing.
-        if (FurinaReframe.LiveFor(creature)) return false;
-#endif
         return IsFurina(creature);
     }
 
@@ -546,15 +504,13 @@ public static class FurinaResources
     /// Stage, and rule 11 says her own bars are touched by nothing in the
     /// kit. So the arm does not merely hide them -- it never grants them.
     ///
-    /// ONE GATE AT THE MINT rather than one at each funnel, which is where
-    /// <see cref="ReframeRetiresTheShippedMintLegs"/> is asked: the reframe
-    /// retired three named LEGS and left the meters alive, and the Stage
+    /// ONE GATE AT THE MINT rather than one at each funnel: the Stage
     /// retires the meters, so the honest place to say so is the grant doors
     /// every leg reaches. HP-loss Fanfare, the Encore-spend and Encore-absorb
     /// legs, Center Stage's pair and the Salon bows all end here.
     ///
-    /// FALSE IN A RELEASE BUILD BY CONSTRUCTION, <see cref="ReframeRetiresTheShippedMintLegs"/>'s
-    /// clause verbatim: the arm's switch lives under <c>Powers/Prototype/</c>,
+    /// FALSE IN A RELEASE BUILD BY CONSTRUCTION: the arm's switch lives under
+    /// <c>Powers/Prototype/</c>,
     /// which is <c>Compile Remove</c>d, so without the quarantine property
     /// there is nothing to ask and every meter grants exactly as it ships.
     ///
@@ -863,9 +819,6 @@ public static class FurinaResources
     public static void GainBurst(Creature creature, int amount)
     {
         if (amount <= 0 || !IsFurina(creature)) return;
-#if PROTOTYPE_CARDS
-        if (FurinaReframe.BurstRetiredFor(creature)) return;
-#endif
         BurstResourceFor(creature)?.ModifyAmount(amount);
     }
 
@@ -886,17 +839,8 @@ public static class FurinaResources
         // Encore's display moved to the Salon stage ribbon (animation sprint 2,
         // D3). Funnels unchanged -- only the surface it draws on.
         Vfx.SalonVisualsBridge.Refresh(creature);
-        // RETIRED UNDER THE REFRAME'S METER LEG (packet §4.1, leg 2 of 4):
-        // only a member PERFORMING mints Fanfare, so a deliberate Encore spend
-        // pays nothing. Burst is untouched -- the reframe retires the FANFARE
-        // legs and says nothing about the Burst particle. Inert with the arm
-        // off; mirrors tier0 `resources.spend_encore`, whose Fanfare limb the
-        // slice's `test_the_shipped_generation_legs_mint_nothing` empties.
-        if (!ReframeRetiresTheShippedMintLegs(creature))
-        {
-            GainFanfare(
-                creature, spent * FurinaResourceConstants.FanfarePerEncoreSpent);
-        }
+        GainFanfare(
+            creature, spent * FurinaResourceConstants.FanfarePerEncoreSpent);
         GainBurst(
             creature, spent * FurinaResourceConstants.BurstPerEncoreSpent);
         SpotlightSystem.OnEncoreSpent(creature);
@@ -948,16 +892,9 @@ public static class FurinaResources
         // Encore's display moved to the Salon stage ribbon (animation sprint 2,
         // D3). Funnels unchanged -- only the surface it draws on.
         Vfx.SalonVisualsBridge.Refresh(creature);
-        // RETIRED UNDER THE REFRAME'S METER LEG (packet §4.1, leg 3 of 4). The
-        // ABSORPTION still happens -- the buffer still eats the hit, which is
-        // what the buffer is for; what stops is the Fanfare it printed. Inert
-        // with the arm off; mirrors tier0 `resources.absorb_into_encore`.
-        if (!ReframeRetiresTheShippedMintLegs(creature))
-        {
-            GainFanfare(
-                creature,
-                absorbed * FurinaResourceConstants.FanfarePerEncoreAbsorbed);
-        }
+        GainFanfare(
+            creature,
+            absorbed * FurinaResourceConstants.FanfarePerEncoreAbsorbed);
         return Math.Max(0m, amount - absorbed);
     }
 
@@ -1031,11 +968,6 @@ public static class FurinaResources
         // dry-state moment, and the stage reads composition + Encore here.
         // The member tooltip's live cap rides the same moment, which is what
         // makes a Casting Call raise visible as soon as the card resolves.
-        //
-        // `EB-628`, folded into this one call rather than hung beside it: the
-        // arm's `SalonPanel` rides this funnel too, so the chips, the Encore
-        // number, the Fanfare and the member bonus all come from ONE read of
-        // the meters and cannot disagree.
         SalonMemberPower.SyncSlotsDisplay(creature);
         Vfx.SalonVisualsBridge.Refresh(creature);
         // Burst's gauge refresh used to ride the badge apply; now it is
@@ -1186,44 +1118,6 @@ public sealed class FurinaResourceHooks : AbstractModel
         var player = cardPlay.Card?.Owner;
         if (player?.Creature is not { } owner) return;
         await CurtainCallHooks.FlushPendingDraws(choiceContext, owner);
-#if PROTOTYPE_CARDS
-        // FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play makes
-        // the FRONT Salon member perform, then rotates it to the back.
-        //
-        // `EB-464` TOOK THE `IsFirstInSeries` GATE OFF THIS ONE.
-        //
-        // It sat here for `KleeCompanionSpark`'s reason -- "a per-play bound a
-        // replay can double is not a bound" -- and that argument is about a
-        // RESOURCE MINT, which a replay must not double. A performance is not
-        // a mint: the Companion tip says a played Companion card performs the
-        // front member, Replay says it plays the card again, and nothing said
-        // the performance was excepted. The Furina r8 seat counted 16 where 20
-        // was promised, twice, with Fanfare (2 per performance) agreeing with
-        // ONE performance. So the rule the faces state is the rule, and a
-        // replayed Companion card performs (D default, r8 packet sec.4).
-        //
-        // KLEE'S MINT IS UNMOVED, here and in the sim: `KleeCompanionSpark`
-        // keeps its gate, because it IS a per-play resource bound. The two
-        // rules were gated together only because they share a call site.
-        //
-        // PLACED BEFORE THE TWO FLUSHES BELOW so the performance's Block and
-        // its Fanfare mint settle inside the play that caused them rather than
-        // waiting for the next one. Inert unless the arm's MANUAL leg is on,
-        // and inert for every other character. The sim's twin is the same
-        // call, ungated, inside `combat._finish_play`'s replay loop.
-        await SalonMemberPower.CompanionPlayTrigger(
-            choiceContext, owner, cardPlay.Card);
-        if (!cardPlay.IsFirstInSeries)
-        {
-            // `EB-420`'S RECORD OUTLIVES ITS REASON. It was filed because the
-            // extra play left no trace at all -- "I ended the turn unable to
-            // say whether Duet had fired" -- and that is still true of the
-            // performance list, where the replay's act is indistinguishable
-            // from any other. So the replay keeps its own name in the ledger;
-            // what changed is that it performed, and the page says so.
-            SalonMemberPower.NoteCompanionReplay(owner, cardPlay.Card);
-        }
-#endif
         // A7: the play's Encore spend, Center Stage credit and floor grant all
         // moved the meter from BeforeCardPlayed, which has no context of its
         // own. Settling here puts the Block on the board before the enemy can
@@ -1466,17 +1360,8 @@ public sealed class FurinaResourceHooks : AbstractModel
             // local, so the mint and Slip Backstage's predicate can never
             // disagree about how much she lost.
             var lost = (int)Math.Ceiling(-delta);
-            // RETIRED UNDER THE REFRAME'S METER LEG (packet §4.1, leg 1 of 4),
-            // and with it the shipped invariant "every point of damage past
-            // Block prints exactly 1 Fanfare". Slip Backstage's predicate on
-            // the line below is NOT retired: it reads "she lost HP", which is
-            // still true. Inert with the arm off; mirrors tier0
-            // `resources.note_player_hp_loss`.
-            if (!FurinaResources.ReframeRetiresTheShippedMintLegs(creature))
-            {
-                FurinaResources.GainFanfare(
-                    creature, lost * FurinaResourceConstants.FanfarePerHpLost);
-            }
+            FurinaResources.GainFanfare(
+                creature, lost * FurinaResourceConstants.FanfarePerHpLost);
             // Slip Backstage's predicate reads off the same funnel, so
             // "she lost HP" is one fact rather than two trackers.
             CurtainCallHooks.NoteHpLost(creature, lost);
@@ -1529,54 +1414,8 @@ public sealed class FanfareMeterPower : PowerModel, ILocalizationProvider
           + "[gold]Encore[/gold] — and by Center Stage plays. Cards read it; "
           + "nothing spends it. It fades by 20% at the start of each of your "
           + "turns, never below the baseline your cards have built."),
-#if PROTOTYPE_CARDS
-        // `EB-385`. THE ARM'S FACE, and the shipped one above it is a list of
-        // four generators the reframe retires. The round-two seat lost 1 HP
-        // and spent 2 Encore in the same turn for 0 Fanfare, then watched
-        // Salon Debut pay 2 -- so the badge named three things that mint
-        // nothing and missed the only thing that does.
-        //
-        // THE TWO AMOUNTS ARE INTERPOLATED from the arm's own law, `EB-89`'s
-        // rule applied one meter over: a retune of the trigger or the Evoke
-        // mint must not be able to leave this sentence quoting a retired
-        // number, and these are the same two constants `ArmKeywordTips.ForEvoke`
-        // prints and `lint_constant_parity` mirrors against the sim.
-        //
-        // NO SEMICOLON, unlike the shipped row: `lint_text_conventions` reads
-        // these literals out of the SOURCE with a regex that stops at one, so
-        // a semicolon makes a player-facing string invisible to its own
-        // ceiling. This face is 123 of 125.
-        ("smartDescriptionReframe",
-            "Only a member performing makes it: "
-          + $"[blue]{FurinaReframeLaw.FanfarePerTrigger}[/blue] when it stays "
-          + $"and [blue]{FurinaReframeLaw.FanfarePerEvoke}[/blue] on an "
-          + "[gold]Evoke[/gold]. It fades "
-          + $"{(int)(FurinaResourceConstants.FanfareDecayFraction * 100)}% a "
-          + "turn. Cards read it and none spends it."),
-#endif
     };
 
-#if PROTOTYPE_CARDS
-    /// <summary>
-    /// `EB-385`. Which face this badge prints. `IsMutable` first, for
-    /// `SalonMemberPower`'s reason: `HasSmartDescription` probes this key on a
-    /// canonical copy too, and `PowerModel.Owner`'s getter asserts mutability
-    /// (`EB-94`). A compendium copy therefore reads the shipped generators,
-    /// which is what a release build has.
-    /// </summary>
-    protected override string SmartDescriptionLocKey
-    {
-        get
-        {
-            if (IsMutable && Owner is { } owner
-                && FurinaReframe.MeterLiveFor(owner))
-            {
-                return Id.Entry + ".smartDescriptionReframe";
-            }
-            return base.SmartDescriptionLocKey;
-        }
-    }
-#endif
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
@@ -1614,15 +1453,6 @@ public static class FurinaKitGrant
         PlayerChoiceContext choiceContext, Player? owner)
     {
         if (owner?.Character is not IFurinaCharacter) return;
-#if PROTOTYPE_CARDS
-        // `EB-365` (R251). THE ARM NEVER GRANTS THE KIT CARD. Nothing feeds
-        // the meter under the flag, so this branch is unreachable in play --
-        // and it is written anyway, because "Let the People Rejoice is not part
-        // of the reframe" is a rule of the arm rather than a consequence of one
-        // guard sitting upstream. Kokomi's kit grant carries the same guard for
-        // the same reason.
-        if (FurinaReframe.BurstRetiredFor(owner.Creature)) return;
-#endif
         var playerCombatState = owner.PlayerCombatState;
         var combatState = owner.Creature.CombatState;
         if (playerCombatState == null || combatState == null) return;

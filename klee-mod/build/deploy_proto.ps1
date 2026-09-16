@@ -128,21 +128,6 @@ param(
     # starter, relic and pool, and the three sets do not intersect. A dev build
     # that carries all three is the supported dev build.
     [switch]$KokomiOverhaul,
-    # THE FURINA REFRAME ARM (the countersigned packet
-    # review/ruled/furina-reframe-2026-08-29.md, R220 A; R228 option 1 for the
-    # Spotlight; the slot-6 ruling for the aimed Evoke). Adds
-    # -p:FurinaReframe=true to the build below, which is the ONLY thing that
-    # turns the arm on: without it a dev build compiles the arm's types and
-    # never reaches them, and Furina's Salon, her Fanfare meter and her
-    # Spotlight selector behave exactly as they ship. Sim twin: the five module
-    # flags in tier0/engine/furina_reframe.py, which all ship False.
-    #
-    # INDEPENDENT OF THE OTHER THREE, and all four may be passed together: the
-    # Klee arm replaces Klee's starter and pool, the companion arm replaces two
-    # nations' companion pools, the Kokomi arm replaces her starter, relic and
-    # pool, and this one changes FURINA's engine. The four sets do not
-    # intersect.
-    [switch]$FurinaReframe,
     # THE FURINA STAGE ARM (the brief
     # review/active/furina-stage-brief-2026-09-08.md, R269: sec.3 the rules,
     # sec.12 the seventeen faces). Adds -p:FurinaStage=true to the build
@@ -152,12 +137,8 @@ param(
     # are exactly what they ship. Sim twin: tier0/engine/furina_stage.py's
     # FURINA_STAGE, which ships False.
     #
-    # IT IS THE REFRAME'S SUCCESSOR AND NOT ITS SIBLING, which is the one way
-    # this switch differs from the four above it. The brief's sec.2 retires
-    # FurinaReframe by name; the two stand side by side only until EB-726
-    # finishes that retirement, and passing BOTH is a configuration of the
-    # compiler rather than of the design -- it gives one Furina two engines.
-    # Pass one. The banner below says so in red if both are set.
+    # IT IS FURINA'S ONLY ARM. The reframe it succeeded left the tree whole
+    # under EB-726 (the brief's sec.2, R269).
     [switch]$FurinaStage,
     # THE TEYVAT RUN FRAME ARM (R272, the frame packet
     # review/active/teyvat-run-frame-2026-09-14.md sec.4; the spike merged as
@@ -263,7 +244,6 @@ $arms = @()
 if ($KleeOverhaul) { $arms += 'the Klee overhaul arm' }
 if ($CompanionOverhaul) { $arms += 'the Mondstadt companion overhaul arm' }
 if ($KokomiOverhaul) { $arms += 'the Kokomi overhaul arm' }
-if ($FurinaReframe) { $arms += 'the Furina reframe arm' }
 if ($FurinaStage) { $arms += 'the Furina stage arm' }
 if ($TeyvatFrame) { $arms += 'the Teyvat run frame arm' }
 $armLabel = if ($arms.Count) { ' AND ' + ($arms -join ' AND ') } else { '' }
@@ -283,7 +263,6 @@ $buildArgs = @('-p:PrototypeCards=true')
 if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
 if ($CompanionOverhaul) { $buildArgs += '-p:CompanionOverhaul=true' }
 if ($KokomiOverhaul) { $buildArgs += '-p:KokomiOverhaul=true' }
-if ($FurinaReframe) { $buildArgs += '-p:FurinaReframe=true' }
 if ($FurinaStage) { $buildArgs += '-p:FurinaStage=true' }
 if ($TeyvatFrame) { $buildArgs += '-p:TeyvatFrame=true' }
 $buildArgs += $stamp.BuildArgs
@@ -341,19 +320,6 @@ if ($KokomiOverhaul) {
     Write-Host "  Exhausts for Charge and the Burst gate does not fill." -ForegroundColor Magenta
 }
 
-if ($FurinaReframe) {
-    Write-Host ""
-    Write-Host "*** FURINA REFRAME ARM ON ***" -ForegroundColor Magenta
-    Write-Host "  Salon Members DO NOT auto-play: the turn-start upkeep is" -ForegroundColor Magenta
-    Write-Host "  gone. A Companion play makes the front member perform and" -ForegroundColor Magenta
-    Write-Host "  rotate; a deploy performs the member it deploys; a deploy" -ForegroundColor Magenta
-    Write-Host "  onto a full stage EVOKES the front member." -ForegroundColor Magenta
-    Write-Host "  Fanfare is minted ONLY by a member performing -- HP lost," -ForegroundColor Magenta
-    Write-Host "  Encore spent, Encore absorbed and Center Stage all pay 0." -ForegroundColor Magenta
-    Write-Host "  Center Stage retires; the selector aims Guest Cast for" -ForegroundColor Magenta
-    Write-Host "  Encore. Her sheet is UNCHANGED -- this arm is engine only." -ForegroundColor Magenta
-}
-
 if ($FurinaStage) {
     Write-Host ""
     Write-Host "*** FURINA STAGE ARM ON ***" -ForegroundColor Magenta
@@ -369,12 +335,6 @@ if ($FurinaStage) {
     Write-Host "  swapped one for one. The REST of her pool still prints" -ForegroundColor Magenta
     Write-Host "  Encore and the shipped Salon, so a run drafts a MIXED sheet" -ForegroundColor Magenta
     Write-Host "  by construction -- batch one, brief sec.12." -ForegroundColor Magenta
-    if ($FurinaReframe) {
-        Write-Host "  *** BOTH FURINA ARMS ARE ON, and that is not a supported" -ForegroundColor Red
-        Write-Host "      configuration of the design: the Stage brief sec.2" -ForegroundColor Red
-        Write-Host "      retires the reframe, so this build has given one" -ForegroundColor Red
-        Write-Host "      Furina two engines. Pass one." -ForegroundColor Red
-    }
 }
 
 if ($TeyvatFrame) {

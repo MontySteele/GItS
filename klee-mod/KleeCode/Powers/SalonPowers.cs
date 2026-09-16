@@ -84,34 +84,6 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         get
         {
             var rows = ShippedLocalization();
-#if PROTOTYPE_CARDS
-            // `EB-383`. THE ARM'S OWN ROWS, one per member the stage can hold
-            // in front, plus the empty one. ROWS AND A KEY, not conditionals
-            // inside one row, for `ProtoBombPower.SmartDescriptionLocKey`'s
-            // reason: a headless pin can read a row and cannot run
-            // `LocManager`, and the row a live power picks is decided by
-            // <see cref="SmartDescriptionLocKey"/> below.
-            //
-            // WHY THE FRONT MEMBER IS THE ONE NAMED. Every rule the arm has is
-            // about it -- a Companion play performs the front member, an
-            // overflow deploy Evokes the front member -- so naming it is the
-            // same sentence as stating the rule, which is what makes all three
-            // rules AND an identity fit under the 125-character power ceiling
-            // (`docs/current/text-conventions.md`). The stage's own hover and
-            // every deploy card carry the rest (`SalonMemberTips`).
-            //
-            // GENERATED RATHER THAN TYPED, and every piece of the face is a
-            // named constant, both for `ProtoBombPower`'s reasons: the row set
-            // and the selector come off one list so a key the selector can
-            // compose always has a row behind it, and
-            // `tools/lint_text_conventions.py` rebuilds these four faces from
-            // these same names -- it reads SOURCE and can no more run
-            // `LocManager` than a headless pin can.
-            foreach (var front in ManualFronts)
-            {
-                rows.Add((ManualKey(front), ManualFace(front)));
-            }
-#endif
             return rows;
         }
     }
@@ -159,107 +131,6 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
           + $"{SalonConstants.ChevalmarinBowEncore} Encore."),
     };
 
-#if PROTOTYPE_CARDS
-    /// <summary>
-    /// `EB-383`. THE BUFF'S ARM FACE, and the defect it closes is that there
-    /// were TWO RULEBOOKS ON ONE SCREEN. The round-two seat read this badge
-    /// saying "At the start of your turn, each Salon Member spends 1 Encore
-    /// for its act" three lines above the Salon tip saying "Members do NOT act
-    /// on their own", and recorded that behaviour matched the tip and never
-    /// the badge across five fights. The shipped rows above are the SHIPPED
-    /// rule and stay exactly as they are for a release build.
-    ///
-    /// THREE RULES AND A NAME. The seat's other half was that the buff read
-    /// `Salon Member 1` and then recited all three members' abilities, so it
-    /// "worked out mine was Chevalmarin by subtracting Neuvillette's 7 from a
-    /// 9-point HP drop". What the member DOES is on its own hover tip
-    /// (`SalonMemberTips.BodyFor`, `EB-384`); what this row owes is which one
-    /// is there, and it lands as the object of the rule that acts on it.
-    /// </summary>
-    /// <summary>The three rules, which every face carries whole and which is
-    /// what makes this ONE rulebook rather than a second one.</summary>
-    private const string ManualLead =
-        "A joining member performs at once. A full stage [gold]Evokes[/gold] "
-      + "the front member. A [gold]Companion[/gold] card ";
-
-    /// <summary>An empty stage: the rule with no object to hang on.</summary>
-    private const string ManualEmptyTail = "performs the front one.";
-
-    /// <summary>A stage with somebody in front: the rule and the name, one
-    /// clause, which is how three rules and an identity fit under the
-    /// 125-character power ceiling.</summary>
-    private const string ManualNamedTail = "you play performs ";
-
-    /// <summary>Every front this stage can have, the empty one included. The
-    /// row set and the selector are built off the same list.</summary>
-    private static readonly SalonMember?[] ManualFronts =
-    {
-        null, SalonMember.Crabaletta, SalonMember.Usher,
-        SalonMember.Chevalmarin,
-    };
-
-    private static string ManualFace(SalonMember? front) =>
-        ManualLead + (front is { } who
-            ? ManualNamedTail + ManualFrontName(who) + "."
-            : ManualEmptyTail);
-
-    /// <summary>`EB-405`. The enemy's printed title, or an empty string where
-    /// the game will not answer -- `KokomiPlan.EnemyName`'s posture, verbatim
-    /// and for its reason: a state read must never throw, and the page has the
-    /// combat id to name the creature with anyway.</summary>
-    private static string EnemyName(Creature enemy)
-    {
-        try
-        {
-            return enemy.Monster?.Title.ToString() ?? "";
-        }
-        catch (Exception)
-        {
-            return "";
-        }
-    }
-
-    /// <summary>The stage NAME each face uses, not the full card title:
-    /// "Mademoiselle Crabaletta" and its two siblings run the face past its
-    /// ceiling, and the shipped description has printed the short form since
-    /// the v2 rework. Kept beside the faces as the one place the spelling is
-    /// declared, and pinned against them.</summary>
-    internal static string ManualFrontName(SalonMember front) => front switch
-    {
-        SalonMember.Crabaletta => "Crabaletta",
-        SalonMember.Usher => "the Usher",
-        _ => "Chevalmarin",
-    };
-
-    /// <summary>The row key each arm face is filed under, and the ONE place
-    /// the front is spelled into a key -- <see cref="Localization"/> writes
-    /// the rows with it and <see cref="SmartDescriptionLocKey"/> reads one
-    /// back, so a row and its selector cannot drift apart.</summary>
-    private static string ManualKey(SalonMember? front) =>
-        "smartDescriptionManual" + (front?.ToString() ?? "Empty");
-
-    /// <summary>
-    /// `EB-383`. Which face this badge prints right now.
-    ///
-    /// `IsMutable` FIRST, and it is not defensive tidiness: `HasSmartDescription`
-    /// probes this key on a CANONICAL power too, and `PowerModel.Owner`'s
-    /// getter asserts mutability (`EB-94`). A compendium copy therefore takes
-    /// the shipped key, which is also the honest answer -- it has no stage.
-    /// The guard and its reason are `ProtoBombPower.LiveMods`'.
-    /// </summary>
-    protected override string SmartDescriptionLocKey
-    {
-        get
-        {
-            if (IsMutable && Owner is { } owner
-                && FurinaReframe.ManualLiveFor(owner))
-            {
-                return Id.Entry + "." + ManualKey(LeftmostMember(owner));
-            }
-            return base.SmartDescriptionLocKey;
-        }
-    }
-#endif
 
     public override PowerType Type => PowerType.Buff;
 
@@ -328,8 +199,7 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     ///
     /// The combat identity answers the real question directly and cannot fire
     /// mid-deploy, because a deploy does not change combats. It is the same
-    /// token <see cref="FurinaReframeLedger.For"/> and `ProtoBombPower` key
-    /// their per-combat tables on.
+    /// token `ProtoBombPower` keys its per-combat tables on.
     /// </summary>
     private static List<SalonMember> CompanyFor(Creature owner)
     {
@@ -470,60 +340,10 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     private static bool IsNotMinion(Creature enemy) =>
         !enemy.Powers.OfType<MinionPower>().Any();
 
-    /// <param name="evoked">The Furina reframe's EVOKE (packet §4.4), and it
-    /// changes exactly two things: the Focus term is applied
-    /// <c>FurinaReframeLaw.EvokeFocusMult</c> times instead of once
-    /// (<c>F6</c> (1)), and the performance mints the larger Fanfare amount
-    /// (§4.1). Everything else about a bow -- which end of the queue it takes,
-    /// the aura, the Encore refund, the riders -- is the shipped bow, because
-    /// the packet's own §2.2 finding is that the bow ALREADY IS the
-    /// Defect-evoke analogue and the reframe renames it rather than rebuilding
-    /// it. Both changes are inert unless the arm's EVOKE / METER legs are on,
-    /// so an <c>evoked: true</c> call on a release build is the shipped bow
-    /// exactly. Mirrors tier0 <c>effects._salon_bow</c>'s parameter of the
-    /// same name.</param>
     private static async Task Bow(
-        PlayerChoiceContext choiceContext, Creature owner, SalonMember member,
-        bool evoked = false)
+        PlayerChoiceContext choiceContext, Creature owner, SalonMember member)
     {
-        var mult = 1;
-        // `EB-587`. AN EVOKE IS A PERFORMANCE AND PAYS LIKE ONE: it spends the
-        // upkeep's 1 Encore, or resolves at three-quarters when the pool is
-        // dry. THE FIND (Furina r15 lane 1 (c) 1): at 0 Encore three
-        // performances printed and landed dry while the Evoke on the same turn
-        // delivered its full 14, so the one act that costs a member was the one
-        // act the economy did not price. The old rule -- the card's own printed
-        // Encore price pays for it -- had no answer on Curtain Rises, which
-        // deploys onto a full stage and prints no Encore price at all.
-        //
-        // ARM-SCOPED, like the Focus multiplier beside it: a SHIPPED bow is
-        // the displaced member's payoff and is not a performance, so the flag
-        // guard covers both halves and a release build's bow is untouched.
-        var evokePaid = true;
-#if PROTOTYPE_CARDS
-        if (evoked)
-        {
-            mult = FurinaReframe.EvokeFocusMult(owner);
-            // `PerformancePays` and not a second copy of its comparison:
-            // "can this act afford the upkeep" is one question, and
-            // `PerformMember` already owns it.
-            evokePaid = PerformancePays(owner, free: false);
-            if (evokePaid)
-            {
-                FurinaResources.SpendEncore(
-                    owner, SalonConstants.TickEncoreCost);
-            }
-        }
-#endif
-        // `EB-564`. WHAT THE BOW DID, carried out of the branches in these
-        // locals and filed once below -- `PerformMember`'s own arrangement,
-        // and for its reason: one recording site for the one implementation of
-        // a member bowing, so the page and the board cannot come apart.
-        Creature? bowPicked = null;
-        var bowDamage = 0;
-        var bowBlockLanded = 0;
-        var bowEncoreGranted = 0;
-        var bowAuraAll = false;
+        const int mult = 1;
         switch (member)
         {
             case SalonMember.Crabaletta:
@@ -537,19 +357,15 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 // `EB-511`'s rule one method over: `Deal` runs the dealer's
                 // Weak, the reaction amplifier and the target's Vulnerable,
                 // and it is the landed figure a seat reconciles HP against.
-                bowDamage = await ElementalHit.Deal(
+                await ElementalHit.Deal(
                     choiceContext, target, Elements.Element.Hydro,
-                    Dry(Scaled(owner, SalonConstants.CrabalettaBow, mult),
-                        evokePaid),
+                    Scaled(owner, SalonConstants.CrabalettaBow, mult),
                     owner);
-                bowPicked = target;
                 break;
             }
             case SalonMember.Usher:
-                bowBlockLanded = Dry(
-                    Scaled(owner, SalonConstants.UsherBow, mult), evokePaid);
                 await CreatureCmd.GainBlock(
-                    owner, bowBlockLanded,
+                    owner, Scaled(owner, SalonConstants.UsherBow, mult),
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case SalonMember.Chevalmarin:
@@ -563,11 +379,9 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                             choiceContext, enemy, Elements.Element.Hydro,
                             owner);
                     }
-                    bowAuraAll = targets.Count > 0;
                 }
                 FurinaResources.GainEncore(
                     owner, SalonConstants.ChevalmarinBowEncore);
-                bowEncoreGranted = SalonConstants.ChevalmarinBowEncore;
                 break;
             }
         }
@@ -588,41 +402,6 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         {
             FurinaResources.GainEncore(owner, bowEncore);
         }
-#if PROTOTYPE_CARDS
-        if (evoked)
-        {
-            // LAST, and after every payout, because that is where the sim puts
-            // it: `_salon_bow` emits `salon_final_bow`, then `salon_evoke`,
-            // then mints. §4.1's rule rides here -- an Evoke mints the larger
-            // amount BECAUSE it costs a member.
-            //
-            // NO SECOND FLAG READ, deliberately, and this is the one place the
-            // shape could go wrong quietly. The CALLER decides whether a bow is
-            // an Evoke, and the two callers read DIFFERENT legs: the dedicated
-            // bow reads EVOKE, the full-stage deploy reads MANUAL (§4.2 --
-            // overcrowding forces out an Evoke, which is the reward for filling
-            // the stage and does not wait on the Evoke card's leg). Re-asking
-            // EVOKE here would silently un-Evoke the overflow bow and erase the
-            // asymmetry the slot-6 ruling created on purpose. The sim's
-            // `_salon_bow` takes the same boolean from the same two callers.
-            // With the arm off both callers pass false, so this is unreachable.
-            FurinaReframeLedger.For(owner).NoteEvoke(member, mult);
-            // `EB-564`: AND THE ROW THE PAGE PRINTS. Filed BEFORE the mint so
-            // the two cannot disagree about the amount -- the figure recorded
-            // is the one `MintForEvoke` is about to add, read off the same
-            // constant through the same leg test.
-            FurinaReframeLedger.For(owner).NoteEvoked(
-                new FurinaReframeLedger.Evoked(
-                    ManualFrontName(member), mult,
-                    FurinaReframe.MeterLiveFor(owner)
-                        ? FurinaReframeLaw.FanfarePerEvoke : 0,
-                    bowEncoreGranted, bowAuraAll,
-                    bowPicked == null ? null : EnemyName(bowPicked),
-                    bowPicked?.CombatId.ToString(),
-                    bowDamage, bowBlockLanded));
-            FurinaReframe.MintForEvoke(owner);
-        }
-#endif
     }
 
     /// <summary>The replacement rule, in ONE place: a deploy that lands on a
@@ -699,14 +478,9 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// itself fields the opening member at combat start, and the mirror
     /// <c>PowerCmd.Apply</c> below has taken a null source since
     /// <see cref="BowLeftmost"/> was written.</param>
-    /// <param name="freePerformance">`EB-558`: passed straight through to
-    /// <see cref="PerformMember"/> and with exactly one caller,
-    /// <c>FurinaReframeOpening.FieldOpeningMember</c> -- the relic's arrival.
-    /// Every deploy a CARD makes pays its 1 as it always has.</param>
     public static async Task<int> Deploy(
         PlayerChoiceContext choiceContext, Creature owner, int amount,
-        CardModel? cardSource, SalonMember? member,
-        bool freePerformance = false)
+        CardModel? cardSource, SalonMember? member)
     {
         var company = CompanyFor(owner);
         var replacements = 0;
@@ -724,42 +498,9 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                 var displaced = company[0];
                 company.RemoveAt(0);
                 replacements++;
-                var overflowEvoke = false;
-#if PROTOTYPE_CARDS
-                // THE FULL-STAGE EVOKE (reframe §4.2, RULED). The mechanism
-                // does not move one line: [USER]'s "overcrowding the stage
-                // still forces out an Evoke" IS this displacement bow, and the
-                // reframe renames it. What the flag adds is that the displaced
-                // member's bow is an EVOKE -- multiplied Focus, the larger
-                // mint.
-                //
-                // AUTOMATIC AND FRONT-ONLY, BY RULING (slot 6, 2026-08-30).
-                // This path deliberately does NOT consult
-                // `FurinaReframe.EvokeTargetIndex`: overflow deployment keeps
-                // evoking the front for free as the reward for filling the
-                // stage, and the aim is what the dedicated Evoke buys with
-                // Encore. `company[0]` above is the answer to slot 6, not an
-                // omission. Mirrors tier0 `_deploy_salon_members`.
-                overflowEvoke = FurinaReframe.ManualLiveFor(owner);
-#endif
-                await Bow(choiceContext, owner, displaced, overflowEvoke);
+                await Bow(choiceContext, owner, displaced);
             }
             company.Add(entering);
-#if PROTOTYPE_CARDS
-            // DEPLOY PERFORMS (reframe §4.2, RULED: "most deploy cards deploy
-            // AND make that member perform once immediately"), so a deploy pays
-            // on the turn it is played. The member that performs is the one
-            // that just ENTERED, not the front of the queue: the card's promise
-            // is about the member it names. It resolves through
-            // `PerformMember`, the one implementation, so the upkeep price, the
-            // dry three-quarters and the Focus term are inherited rather than
-            // restated. Mirrors tier0 `_deploy_salon_members`.
-            if (FurinaReframe.ManualLiveFor(owner))
-            {
-                await PerformMember(choiceContext, owner, entering,
-                                    free: freePerformance);
-            }
-#endif
 
             // Fortissimo Guard (R85): Block per DEPLOY, inside the loop, so a
             // three-deploy card pays three cues. Mirrors the sim, which adds
@@ -812,31 +553,17 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     {
         if (!FurinaResources.IsFurina(owner)) return;
         var company = CompanyFor(owner);
-        var evoked = false;
-#if PROTOTYPE_CARDS
-        evoked = FurinaReframe.EvokeLiveFor(owner);
-#endif
         for (var i = 0; i < amount && company.Count > 0; i++)
         {
-            var index = 0;
-#if PROTOTYPE_CARDS
-            index = FurinaReframe.EvokeTargetIndex(owner, company, aim);
-            if (index == FurinaReframe.EvokeTargetAbsent)
-            {
-                // Named a member who is not on the stage. NOT silent, for the
-                // D4 reason the sim's `salon_evoke_target_absent` exists: the
-                // aim leaves no trace in the state afterwards, so a display
-                // that wants to say "she called for Crabaletta and Crabaletta
-                // was not there" must be able to. The Evoke still happens, on
-                // the front -- an aimed card that cannot find its member is an
-                // unaimed Evoke, never a wasted one.
-                FurinaReframeLedger.For(owner).NoteEvokeTargetAbsent(aim!.Value);
-                index = 0;
-            }
-#endif
+            // The aim, or the front when the card names nobody -- and the
+            // front again when it names a member who is not on the stage: an
+            // aimed card that cannot find its member is an unaimed bow, never
+            // a wasted one. Mirrors tier0 `effects._op_salon_bow`.
+            var index = aim is { } who ? company.IndexOf(who) : 0;
+            if (index < 0) index = 0;
             var leaving = company[index];
             company.RemoveAt(index);
-            await Bow(choiceContext, owner, leaving, evoked);
+            await Bow(choiceContext, owner, leaving);
         }
 
         // Negative delta: the mirror of Deploy's positive one. The
@@ -879,11 +606,10 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     /// wanted a free one by writing its own body would be exactly the drift
     /// the shape exists to prevent. Mirrors tier0 `salon_member_act`'s
     /// `free=`. The two decisions it moves are split out into
-    /// <see cref="PerformancePays"/> and <see cref="PerformanceSpends"/> for
-    /// <see cref="FurinaReframeOpening.OpeningMemberFor"/>'s reason: this
-    /// method resolves through `ElementalHit` and is outside the headless
-    /// boundary, while "does this performance pay, and does it spend" is a
-    /// pure read the pins can ask for real.</param>
+    /// <see cref="PerformancePays"/> and <see cref="PerformanceSpends"/>
+    /// because this method resolves through `ElementalHit` and is outside the
+    /// headless boundary, while "does this performance pay, and does it spend"
+    /// is a pure read the pins can ask for real.</param>
     /// <summary>
     /// `EB-558`. Does this performance land at FULL value? True when the owner
     /// can afford the upkeep, and true unconditionally for the relic's free
@@ -993,30 +719,8 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
                     owner, amount, ValueProp.Unpowered, null, fast: true);
                 break;
         }
-#if PROTOTYPE_CARDS
-        FurinaReframeLedger.For(owner).NotePerformance(
-            new FurinaReframeLedger.Performed(
-                ManualFrontName(member),
-                picked == null ? null : EnemyName(picked),
-                picked?.CombatId.ToString(),
-                picked == null ? null : Elements.Element.Hydro.ToString(),
-                left?.ToString(),
-                landed, paid, Evoked: false));
-#endif
         FurinaResources.GainBurst(
             owner, FurinaResourceConstants.BurstPerSalonTick);
-#if PROTOTYPE_CARDS
-        // THE REFRAME'S ONE MINT SITE for a member that performs and STAYS
-        // (§4.1). It is here, inside the single implementation of a member
-        // acting, rather than at the three callers -- the Companion trigger,
-        // the deploy-performs clause and the `salon_perform` card -- because
-        // "a member performing mints Fanfare, and nothing else does" is one
-        // rule and a rule with three copies is a rule that drifts. Inert
-        // unless the METER leg is on. An Evoke does NOT pass through here (it
-        // is a bow) and mints the larger amount at its own site. Mirrors
-        // tier0 `effects.salon_member_act`.
-        FurinaReframe.MintForPerformance(owner);
-#endif
         return true;
     }
 
@@ -1068,9 +772,6 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         if (aimed is { } named && !company.Contains(named))
         {
             aimed = null;
-#if PROTOTYPE_CARDS
-            FurinaReframeLedger.For(owner).NotePerformTargetAbsent(named);
-#endif
         }
         for (var i = 0; i < amount && company.Count > 0; i++)
         {
@@ -1142,99 +843,6 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
 
 #if PROTOTYPE_CARDS
     /// <summary>
-    /// THE COMPANION TRIGGER (reframe §4.3, <c>F3</c> (1) / <c>F4</c> (1)): a
-    /// Companion play makes the FRONT member perform, then rotates it back.
-    ///
-    /// The pair is a perform then a rotate -- literally what
-    /// <c>change_the_bill</c> prints today (§4.3) -- so this adds no new
-    /// resolution path: it calls <see cref="PerformMember"/>, the one
-    /// implementation, and rotates the shipped queue. That is the same hard
-    /// requirement EB-118 §5.5 pinned for the card verbs, applied to a hook.
-    ///
-    /// AN EMPTY SALON DOES NOTHING EXTRA (§1.1a item 2, RULED), and under D4
-    /// that has to be visible, so the whiff is recorded rather than silent --
-    /// and under its OWN name, because a display that wants to say "your
-    /// Companion found an empty stage" must be able to tell that apart from a
-    /// card the player chose to play into an empty stage.
-    ///
-    /// NO MINT HERE, deliberately. <see cref="PerformMember"/> is the one
-    /// implementation of a member performing and it carries the one mint
-    /// (§4.1); a second mint at this seam would pay the trigger twice, which
-    /// is exactly the drift the shared act exists to prevent -- and it would
-    /// also break LAW:145's per-Companion-play bound while appearing to
-    /// honour it.
-    ///
-    /// Mirrors tier0 <c>furina_reframe.companion_play_trigger</c>, called from
-    /// <c>combat._finish_play</c>; the C# seam is
-    /// <c>FurinaResourceHooks.AfterCardPlayed</c>, gated to the first
-    /// resolution of the play for the same two reasons Klee's mint is
-    /// (<see cref="KleeCompanionSpark"/>): once per PLAY, because a replay is
-    /// one card resolved twice, and after a resolution has run.
-    /// </summary>
-    /// <param name="card">The card that was played. The COMPANION test lives
-    /// here rather than only at the seam, exactly as the sim's
-    /// <c>companion_play_trigger</c> asks <c>card.is_companion</c> itself: the
-    /// trigger is the Companion half of the kit -- Furina's own cards Evoke,
-    /// they do not also trigger for free -- and a rule that only a caller
-    /// enforces is a rule the next caller can forget.</param>
-    public static async Task CompanionPlayTrigger(
-        PlayerChoiceContext choiceContext, Creature owner, CardModel? card)
-    {
-        if (!FurinaReframe.ManualLiveFor(owner)) return;
-        if (card is not Cards.ICompanionCard) return;
-        var company = CompanyFor(owner);
-        if (company.Count == 0)
-        {
-            FurinaReframeLedger.For(owner).NoteTriggerWhiffed();
-            return;
-        }
-        var member = company[0];
-        if (!await PerformMember(choiceContext, owner, member))
-        {
-            // A cleared board or a dead player: the shared act refused, so
-            // nothing performed, so nothing mints and the queue does not turn
-            // either.
-            return;
-        }
-        RotateLeftmost(owner, 1);
-        FurinaReframeLedger.For(owner).NoteCompanionTrigger(member);
-    }
-
-    /// <summary>
-    /// `EB-420`. A Companion REPLAY -- the second and later resolutions of one
-    /// play, recorded under its own name.
-    ///
-    /// IT PERFORMS, SINCE `EB-464`. It did not until the r8 ruling: the
-    /// trigger above was gated on `IsFirstInSeries`, on LAW:145 read through
-    /// `KleeCompanionSpark`'s "a per-play bound a replay can double is not a
-    /// bound". That clause is about a RESOURCE MINT, and a performance is not
-    /// one -- the Companion tip says a played Companion card performs the
-    /// front member and Replay says it plays the card again, so the r8 seat
-    /// counted 16 where 20 was promised, twice. The gate is off
-    /// (<see cref="FurinaResources"/>'s <c>AfterCardPlayed</c>) and Klee's
-    /// mint keeps its own, which is where the LAW clause actually bites.
-    ///
-    /// SO THIS METHOD CHANGES NOTHING AND ONLY RECORDS, which is still worth
-    /// doing for the reason it was written: the Furina round-5 seat played Duet
-    /// into Freminet and found nothing on any screen naming the second play --
-    /// "I ended the turn unable to say whether Duet had fired at all" -- and a
-    /// performance list cannot say which of its acts came from a replay. The
-    /// face says the rule (<c>ReplayNextCompanionPower</c>'s arm sentence) and
-    /// the page says it happened. Sim twin:
-    /// <c>furina_reframe.companion_replay</c>.
-    ///
-    /// The same two guards as the trigger, in the same order and for the same
-    /// reasons: the arm's MANUAL leg owns this rule, and the Companion test
-    /// belongs to the rule rather than to a caller.
-    /// </summary>
-    public static void NoteCompanionReplay(Creature owner, CardModel? card)
-    {
-        if (!FurinaReframe.ManualLiveFor(owner)) return;
-        if (card is not Cards.ICompanionCard) return;
-        FurinaReframeLedger.For(owner).NoteReplay(PrintedTitle(card));
-    }
-
-    /// <summary>
     /// A card's printed title for a LEDGER row, and the id when it has none.
     ///
     /// `PlayTelemetry`'s `card.Title ?? card.Id.Entry` for the same question,
@@ -1264,33 +872,6 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
-#if PROTOTYPE_CARDS
-        // `EB-405`. THE TURN BOUNDARY, and the only one the ledger has. The
-        // performance list answers "what happened on the turn I am looking
-        // at", so it is emptied here -- before the suppression branch below
-        // returns, because that branch is the arm's turn start and the list
-        // has to be cleared on exactly the turns the page is read on.
-        FurinaReframeLedger.For(Owner).ClearPerformances();
-        if (FurinaReframe.ManualLiveFor(Owner))
-        {
-            // THE SINGLE BIGGEST CHANGE IN THE REFRAME (§4.2 / §2.2): members
-            // do not auto-play. There is no end-of-turn Salon path, so
-            // suppressing this one broadcast removes the automatic engine
-            // entirely -- the stage now performs only when a Companion play, a
-            // deploy or an Evoke makes it. The suppression is LOUD rather than
-            // silent: an instrument that counted upkeeps must be able to tell
-            // "no members" from "no upkeep exists any more", and R177's fuel
-            // finding was measured on the act this replaces. Mirrors tier0
-            // `effects.player_turn_start_triggers`, including the empty-stage
-            // case, which says nothing.
-            var staged = CompanyFor(Owner).Count;
-            if (staged > 0)
-            {
-                FurinaReframeLedger.For(Owner).NoteUpkeepSuppressed(staged);
-            }
-            return;
-        }
-#endif
         foreach (var member in CompanyFor(Owner).ToList())
         {
             if (!await PerformMember(choiceContext, Owner, member)) break;

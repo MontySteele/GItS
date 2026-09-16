@@ -33,7 +33,7 @@ namespace KleeMod.Powers;
 ///     flag-off wiring in one build -- the argument
 ///     <c>KleeTests.csproj</c> already makes for <c>PROTOTYPE_CARDS</c>.
 ///
-/// ONE FLAG, NOT FIVE, and the difference from <see cref="FurinaReframe"/> is
+/// ONE FLAG, NOT FIVE, and the difference from the retired reframe is
 /// the shape of the thing being switched. The reframe was four independent
 /// edits to a shipped engine, so each leg had to be settable on its own to
 /// pin "this rule moved and the other three did not". The stage is not an edit
@@ -82,13 +82,10 @@ namespace KleeMod.Powers;
 /// of the eleven is DELETED rather than reconciled: two declarations of one
 /// number is exactly the drift that gate exists to refuse.
 ///
-/// THE REFRAME IS NOT DELETED BY THIS BRANCH, and that is disclosed rather
-/// than assumed: brief sec.2 retires <c>FURINA_REFRAME</c>, but the brief is
-/// OPEN (its sec.11 picks are unruled) and the reframe's surface is a sim
-/// engine module, twenty-odd sheet rows and some five thousand lines of pins.
-/// Building this arm BESIDE it is the reversible move; the two are
-/// independent switches and a build carrying both is not a supported
-/// configuration of the design, only of the compiler.
+/// THE REFRAME IS GONE (`EB-726`, R269). It was built beside this arm rather
+/// than in place of it so that `EB-725` stayed reviewable; once the Stage had
+/// its seat rounds the brief's sec.2 retirement was taken whole, and this is
+/// the only Furina arm in the tree.
 /// </summary>
 public static class FurinaStage
 {
@@ -468,7 +465,7 @@ public static class FurinaStage
                 {
                     // `EB-743`: WHICH body, because Crabaletta picks its own.
                     // Held before the hit lands so a killing act still names
-                    // what it killed -- `FurinaReframeLedger`'s rule one arm
+                    // what it killed -- the retired reframe's rule one arm
                     // over, and the reason the mod sends a title at all.
                     hit = target;
                     await ElementalHit.Deal(
@@ -580,7 +577,7 @@ public static class FurinaStage
             seat >= 0 ? ledger.Seats[seat].Fanfare : 0,
             moved < 0 ? 0 : moved, "",
             // `EB-743`. WHO IT LANDED ON, for the one act and the one bow that
-            // pick a body. Title AND combat id, `FurinaReframeLedger`'s pair
+            // pick a body. Title AND combat id, the retired ledger's pair
             // one arm over: the id is the handle the page names a live body
             // by, and the title is the fallback for one this beat KILLED,
             // which is off the next board entirely.

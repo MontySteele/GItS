@@ -124,23 +124,6 @@ public class Round17Tests
         Assert.Equal(ReactionConstants.VaporizeMult, auraMult);
         Assert.Equal(11, (int)(10m * weakMult * auraMult));
     }
-
-    [Fact]
-    public void A_performance_is_filed_at_the_number_that_landed()
-    {
-        // THE FIX ITSELF, read off the call site: `PerformMember` cannot be
-        // run headless (a hit needs a live `CombatState`), so what a test CAN
-        // read is which value the ledger row is built from. `amount` there is
-        // the pre-pipeline tick and is the defect.
-        var source = System.IO.File.ReadAllText(
-            System.IO.Path.Combine(Repo(), "klee-mod", "KleeCode", "Powers",
-                                   "SalonPowers.cs"));
-
-        Assert.Contains("landed = await ElementalHit.Deal(", source);
-        Assert.Contains("landed, paid, Evoked: false));", source);
-        Assert.DoesNotContain("amount, paid, Evoked: false));", source);
-    }
-
     [Fact]
     public void Deal_still_hands_back_what_it_dealt()
     {
@@ -151,155 +134,6 @@ public class Round17Tests
 
         Assert.Equal(typeof(System.Threading.Tasks.Task<int>),
                      ((MethodInfo)deal).ReturnType);
-    }
-
-    // ==================================================================
-    // `EB-508` -- a Deploy performs the member it FIELDS
-    // ==================================================================
-    //
-    // WHAT THE SEAT SAW (Furina r11, natural lane, (c) 2). Fight 4 turn 6: it
-    // played Salon Début -- "Deploy Mademoiselle Crabaletta" -- and the Salon
-    // block's FIRST line was the Usher performing and taking the last Encore,
-    // with Crabaletta performing dry underneath. "Something performed the
-    // front member off a Deploy, and no printed line says it should."
-    //
-    // THE DEPLOY WAS NOT THE CAUSE. That turn held four performances from four
-    // causes -- a Companion card's front trigger, this deploy, a second
-    // Companion card, and a second deploy -- and only the deploy's own is
-    // about the member the card names. `Deploy` passes `entering`, the member
-    // that just took the stage, and it always has. What no line said was WHICH
-    // CARD each row came from, which is `EB-505`/`EB-506`'s question and not
-    // this one's.
-    //
-    // THE BEHAVIOURAL PIN IS THE SIM'S, because a deploy needs a live
-    // `CombatState`: `tier0/tests/test_eb508_deploy_performs_the_fielded_
-    // member.py` stages the seat's own full stage and reads who performed.
-    // What is checkable here is the call site and its order.
-
-    [Fact]
-    public void The_deploy_performs_after_the_member_has_entered()
-    {
-        var sequence = Il.CallSequence(
-            Il.Method("SalonMemberPower", "Deploy"));
-        var add = IndexOf(sequence, c => c.EndsWith(".Add", StringComparison.Ordinal));
-        var perform = IndexOf(sequence, c => c.Contains("PerformMember"));
-
-        Assert.True(add >= 0, string.Join(", ", sequence));
-        Assert.True(perform > add, string.Join(", ", sequence));
-    }
-
-    [Fact]
-    public void The_deploy_performs_the_entering_member_and_not_the_front()
-    {
-        var source = System.IO.File.ReadAllText(
-            System.IO.Path.Combine(Repo(), "klee-mod", "KleeCode", "Powers",
-                                   "SalonPowers.cs"));
-
-        // `EB-558` added the `free:` argument to the call; the member it names
-        // is the claim, and it is still `entering`.
-        Assert.Contains(
-            "await PerformMember(choiceContext, owner, entering,", source);
-        Assert.DoesNotContain(
-            "await PerformMember(choiceContext, owner, company[0]", source);
-    }
-
-    // ==================================================================
-    // `EB-509` -- the relic that went on dealing a card the card refuses
-    // ==================================================================
-    //
-    // WHAT THE SEAT SAW (Furina r11, natural lane). The starting relic adds an
-    // Ethereal Spotlight to hand every turn. Under the reframe Center Stage is
-    // retired, so Guest Cast is the only target and the second copy is refused
-    // by the card's own `IsPlayable` -- "the Spotlight is already on your
-    // Companion cards". That is five to seven dead draws a fight.
-    //
-    // THE RELIC'S ARM FACE ALREADY SAID SO -- "It does nothing once your
-    // Companion cards are lit for this combat" -- and the sentence was true
-    // about the CARD and false about the relic.
-    //
-    // ONE PREDICATE, TWO CALLERS, which is the whole fix:
-    // `SpotlightSystem.DesignateOneModeIsRedundant` is what the card's refusal
-    // reads, and the grant now asks it one broadcast earlier.
-
-    [Fact]
-    public void The_grant_asks_the_cards_own_refusal_before_it_deals()
-    {
-        var calls = Il.Calls(Il.Method("EtherealSpotlightRelic",
-                                       "BeforeSideTurnStart"));
-
-        Assert.Contains(
-            calls, c => c.Contains("DesignateOneModeIsRedundant"));
-    }
-
-    [Fact]
-    public void The_card_refuses_on_the_very_predicate_the_grant_asks()
-    {
-        var refusal = Il.Calls(Il.Method("EtherealSpotlight", "get_IsPlayable"));
-
-        Assert.Contains(
-            refusal, c => c.Contains("DesignateOneModeIsRedundant"));
-    }
-
-    [Fact]
-    public void The_price_is_not_what_stops_the_grant()
-    {
-        // A seat short of Encore this turn may have it next turn, so the
-        // refusal on price is temporary and the card belongs in hand. The
-        // card asks both questions; the relic asks only the lasting one.
-        var grant = Il.Calls(Il.Method("EtherealSpotlightRelic",
-                                       "BeforeSideTurnStart"));
-        var refusal = Il.Calls(Il.Method("EtherealSpotlight", "get_IsPlayable"));
-
-        Assert.DoesNotContain(
-            grant, c => c.Contains("DesignateOneModeIsUnpayable"));
-        Assert.Contains(
-            refusal, c => c.Contains("DesignateOneModeIsUnpayable"));
-    }
-
-    [Fact]
-    public void A_lit_spotlight_is_what_redundant_means()
-    {
-        // The predicate itself, run for real on both sides of the arm.
-        using var arm = new FurinaReframeArm();
-        var seat = Seat.Furina().WithCombatState();
-
-        Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(
-            seat.Creature));
-
-        CustomResources<SpotlightModeResource>
-            .Get(seat.Player.PlayerCombatState).Amount =
-                (int)SpotlightMode.GuestCast;
-
-        Assert.True(SpotlightSystem.DesignateOneModeIsRedundant(
-            seat.Creature));
-
-        arm.Off();
-        Assert.False(SpotlightSystem.DesignateOneModeIsRedundant(
-            seat.Creature));
-    }
-
-    private sealed class FurinaReframeArm : IDisposable
-    {
-        private readonly bool _enabled = FurinaReframe.Enabled;
-        private readonly bool _spotlight = FurinaReframe.SpotlightEnabled;
-
-        internal FurinaReframeArm()
-        {
-            FurinaReframe.Enabled = true;
-            FurinaReframe.SpotlightEnabled = true;
-        }
-
-        internal void Off()
-        {
-            FurinaReframe.Enabled = false;
-            FurinaReframe.SpotlightEnabled = false;
-        }
-
-        public void Dispose()
-        {
-            FurinaReframe.Enabled = _enabled;
-            FurinaReframe.SpotlightEnabled = _spotlight;
-        }
     }
 
     // ==================================================================
@@ -533,21 +367,22 @@ public class Round17Tests
         Assert.Contains(line, Face(new KleeGen.MineToss()));
     }
 
+    /// <summary>`EB-726`: the Burst retirement moved from the retired reframe
+    /// to the STAGE, which is the arm that has it now (brief sec.2 and rule
+    /// 11). The rule and these pins are unchanged; only the flag they flip
+    /// is.</summary>
     private sealed class FurinaBurstArm : IDisposable
     {
-        private readonly bool _enabled = FurinaReframe.Enabled;
-        private readonly bool _burst = FurinaReframe.BurstEnabled;
+        private readonly bool _enabled = FurinaStage.Enabled;
 
         internal FurinaBurstArm(bool retired)
         {
-            FurinaReframe.Enabled = retired;
-            FurinaReframe.BurstEnabled = retired;
+            FurinaStage.Enabled = retired;
         }
 
         public void Dispose()
         {
-            FurinaReframe.Enabled = _enabled;
-            FurinaReframe.BurstEnabled = _burst;
+            FurinaStage.Enabled = _enabled;
         }
     }
 

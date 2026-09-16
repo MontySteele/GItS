@@ -52,71 +52,11 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ethereal Spotlight"),
-#if PROTOTYPE_CARDS && FURINA_REFRAME
-        // `EB-406`. THE COPY THIS RELIC KEEPS HANDING BACK IS DEAD ONCE THE
-        // SPOTLIGHT IS OUT, and under the arm that is permanent for the fight:
-        // R228 (1) retires Center Stage, so Guest Cast is the only target and
-        // there is no second aim to re-take. The card refuses itself now
-        // (`SpotlightSystem.DesignateOneModeIsRedundant`), and this is the
-        // sentence a reader gets BEFORE spending a turn finding out.
-        //
-        // ARM-ONLY, and chosen by the COMPILE constant for the reason the
-        // card's own face is (`SpotlightCards.cs`): a Localization is read
-        // once at registration. On a release build the selector has two modes
-        // and a second play RE-AIMS, so the sentence would be false there.
-        //
-        // `EB-485` PUT THE DURATION IN IT, and the duration is the half a
-        // seat cannot infer. "It does nothing once your Companion cards are
-        // lit" reads as permanent; the lighting is a POWER and dies with the
-        // fight, so the 2 Encore is paid again every combat. The r10 seat
-        // weighed the Spotlight as a one-time purchase and met Chevreuse
-        // printing 7 again in fight 2 ((c) 1).
-        //
-        // "EACH TURN" PAID FOR IT, at the same 117 rendered characters as
-        // before and under the 120 relic ceiling. What went is the exact SITE
-        // of the grant, which the player sees anyway -- the card is in hand
-        // when the turn opens. What arrived is a rule no other surface stated.
-        // The card's own tip says it too (`FurinaRiderTips
-        // .ForSpotlightDuration`), because a relic is read once at the top of
-        // a run and the card is read on the turn the Encore is spent.
-        ("description",
-            "Each turn, add an [gold]Ethereal Spotlight[/gold] to your "
-          + "[gold]Hand[/gold]. It does nothing once your "
-          + "[gold]Companion[/gold] cards are lit for this combat."),
-#else
         ("description",
             "At the start of your turn, add an [gold]Ethereal Spotlight[/gold] "
           + "to your [gold]Hand[/gold]."),
-#endif
     };
 
-#if PROTOTYPE_CARDS
-    /// <summary>
-    /// `EB-553` (R260). THE RELIC SAYS THE RULE IT NOW CARRIES: under the
-    /// reframe this talent fields Mademoiselle Crabaletta at combat start, so
-    /// the Salon stage is never unlit and every Companion card has somebody to
-    /// perform from turn one.
-    ///
-    /// A TIP AND NOT A THIRD SENTENCE ON THE FACE. The arm face above is 117
-    /// rendered characters of the 120-character relic ceiling
-    /// (`docs/current/text-conventions.md`), and both sentences it already
-    /// carries are ruled ones -- the selector and `EB-485`'s duration. A third
-    /// clause could only land by deleting one of those, so the rule rides
-    /// beside them instead, in the tip table every other arm sentence is
-    /// written in and under the ceiling that table measures
-    /// (`ArmKeywordTips.ForOpeningStage`).
-    ///
-    /// ARM-GATED AT READ TIME rather than by the compile constant the face
-    /// uses, and the difference is real: a `Localization` is read ONCE at
-    /// registration, while `ExtraHoverTips` is read every time the relic is
-    /// hovered, so this can ask the live flag and a dev build running the
-    /// reframe off prints nothing.
-    /// </summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        Powers.FurinaReframe.Enabled
-            ? Cards.ArmKeywordTips.ForOpeningStage(base.ExtraHoverTips)
-            : base.ExtraHoverTips;
-#endif
 
     /// <summary>
     /// FALLBACK ICON, and the OUTLINE atlas entry we ship no asset for --
@@ -164,31 +104,6 @@ public sealed class EtherealSpotlightRelic : CustomRelicModel
     {
         if (side != CombatSide.Player) return;
         if (Owner is not { } player || player.Character is not Furina) return;
-#if PROTOTYPE_CARDS
-        // `EB-509`. ONCE THE SPOTLIGHT IS LIT THE SELECTOR HAS NOTHING LEFT TO
-        // CHOOSE, and this relic's own arm face already says so: "It does
-        // nothing once your Companion cards are lit for this combat." Under
-        // the reframe Center Stage is retired, so Guest Cast is the only
-        // target and a second copy is refused by the card's own `IsPlayable`
-        // -- which the Furina r11 seat met as five to seven dead Ethereal
-        // draws a fight, each one a hand slot and a hover that resolved into
-        // a refusal.
-        //
-        // THE PREDICATE IS THE CARD'S OWN REFUSAL, asked one broadcast early:
-        // `SpotlightSystem.DesignateOneModeIsRedundant` is exactly what
-        // `EtherealSpotlight.IsPlayable` reads, so the relic cannot start
-        // dealing a card the card would refuse and the two cannot disagree
-        // about when that is. Same shape as the price gate (`EB-364`), which
-        // asks `DesignateOneModeIsUnpayable` at the card's seam.
-        //
-        // NOT THE UNPAYABLE HALF, deliberately. A seat short of Encore this
-        // turn may have it next turn, so a refusal on price is temporary and
-        // the card belongs in hand; being lit lasts the rest of the combat.
-        if (SpotlightSystem.DesignateOneModeIsRedundant(player.Creature))
-        {
-            return;
-        }
-#endif
         var hand = CardPile.Get(PileType.Hand, player);
         if (hand == null || hand.Cards.Any(card => card is EtherealSpotlight))
         {

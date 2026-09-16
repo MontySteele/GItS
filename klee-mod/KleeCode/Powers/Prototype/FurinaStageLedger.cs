@@ -201,7 +201,7 @@ public readonly record struct StageBeat(
 /// behind the ledger's back. Every point a performer loses comes through
 /// <see cref="Absorb"/> or <see cref="Spend"/>.
 ///
-/// PER FURINA AND PER COMBAT, keyed the way <c>FurinaReframeLedger</c>,
+/// PER FURINA AND PER COMBAT, keyed the way
 /// <c>KleeOverhaulLedger</c> and <c>KokomiOverhaulLedger</c> are keyed and for
 /// their reason (R205): in co-op the other seat's stage is not hers, and pets
 /// live one combat (rule 1), so a table that outlived the combat would field a
@@ -446,7 +446,7 @@ public sealed class FurinaStageLedger
     /// have no cap.
     ///
     /// THE TURN NUMBER IS THE ARGUMENT rather than a counter of its own, for
-    /// <c>FurinaReframeOpening</c>'s reason one arm over: the seat's
+    /// the retired reframe's opening grant's reason: the seat's
     /// <c>PlayerCombatState.TurnNumber</c> is per-PLAYER, so a co-op partner's
     /// turn cannot pay hers, and an extra first turn cannot pay twice.
     ///
@@ -613,7 +613,7 @@ public sealed class FurinaStageLedger
     /// bar held, and every finding in that round is read through the hole.
     ///
     /// A PLAIN DICTIONARY OF PRIMITIVES, and the shape is
-    /// <see cref="FurinaReframeLedger.Snapshot"/>'s for the reason that one is:
+    /// <c>KokomiPlan.Snapshot</c>'s for the reason that one is:
     /// the bridge (<c>vendor/STS2_MCP/gits/GitsFurinaStage.cs</c>) reaches it
     /// by REFLECTION, because this file is Compile Remove'd from a release
     /// build and a compile-time reference would make the bridge refuse to load

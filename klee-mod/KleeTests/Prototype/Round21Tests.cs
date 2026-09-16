@@ -89,33 +89,6 @@ public class Round21Tests
         Assert.Contains("StrengthPower", mods);
         Assert.Contains("WeakPower", mods);
     }
-
-    // ==================================================================
-    // `EB-587` -- the Evoke is a performance and pays like one
-    // ==================================================================
-    //
-    // THE FIND (Furina r15 lane 1 (c) 1). At 0 Encore three performances
-    // printed and landed dry at three-quarters while the Evoke on the same
-    // turn delivered its full 14 -- the one act that also costs a member was
-    // the one act the economy did not price. The tip's explanation for that
-    // ("the card's Encore price pays for it", `F7` (1)) is FALSE on Curtain
-    // Rises, which Evokes by deploying onto a full stage and prints no Encore
-    // price at all.
-
-    [Fact]
-    public void An_evoke_pays_the_upkeep_through_the_performance_s_own_reads()
-    {
-        // ONE QUESTION, ONE OWNER. "Can this act afford the upkeep" is
-        // `PerformancePays`, and the Evoke asks IT rather than spelling the
-        // comparison a second time -- the same discipline that keeps a member
-        // performing to one implementation.
-        var bow = Il.Calls(Il.Method("SalonMemberPower", "Bow"));
-
-        Assert.Contains("SalonMemberPower.PerformancePays", bow);
-        Assert.Contains("FurinaResources.SpendEncore", bow);
-        Assert.Contains("SalonMemberPower.Dry", bow);
-    }
-
     [Fact]
     public void The_dry_cut_has_one_site_and_both_acts_read_it()
     {

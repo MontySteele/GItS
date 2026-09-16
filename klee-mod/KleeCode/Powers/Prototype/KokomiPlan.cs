@@ -1579,8 +1579,8 @@ public static class KokomiPlan
     /// </summary>
     /// <summary>The card's printed title, said once (`EB-503`): the morning's
     /// draw line names the card that promised it, and the page's own naming
-    /// rule is "by printed title" (`FurinaReframeLedger`'s replay list makes
-    /// the same choice). Sim twin: the `tide_chart_paid` row's own name.
+    /// rule is "by printed title". Sim twin: the `tide_chart_paid` row's own
+    /// name.
     /// </summary>
     private const string TideChartTitle = "Tide Chart";
 

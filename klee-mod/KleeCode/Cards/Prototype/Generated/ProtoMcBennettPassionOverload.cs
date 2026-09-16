@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -44,9 +43,6 @@ public sealed class ProtoMcBennettPassionOverload : CustomCardModel, ICompanionC
     public string? PersonalPool => null;
 
     public string? Nation => "mondstadt";
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCompanionPerform(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_bennett_passion_overload");
 
