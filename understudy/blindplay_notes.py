@@ -769,6 +769,31 @@ REACTION_CARRIED_CLAUSE = " *(since you ended your last turn)*"
 REACTION_CARRIED_ONLY = ("- Nothing has reacted yet this turn. These landed "
                          "after you ended your last turn:")
 
+# `EB-695`. WHAT A RELIC ANSWERED WITH, ON THE PATH THAT HAD NO RECEIPT.
+#
+# THE FIND (Kokomi r30 lane 2, debrief 1). The Tamakushi Casket answers a
+# debuff with a 2-damage Hydro strike from the jellyfish. Inside a PLAN
+# carry-out it is named -- "Inside the same beat: Tamakushi Casket 2 on Damp
+# Cultist", the clause `EB-453`/`EB-518` built -- because `KokomiPlan.NoteRider`
+# is standing there to catch it. Play the same debuff card FROM HAND and the
+# same strike lands with nothing naming it, and the seat subtracted it from HP
+# by hand on every such play.
+#
+# THE ROW IS THE RIDER CLAUSE'S OWN SHAPE -- source, number, body -- because a
+# reader meeting the two on different screens of one run is adding the same
+# kind of thing, and two spellings of one fact is the defect this page has
+# closed twice elsewhere.
+#
+# NO EMPTY LINE, unlike the reaction log beside it, and that is a difference
+# rather than an inconsistency: the reaction section prints "nothing reacted"
+# because a seat read the SILENCE as "may or may not have fired" (`EB-681`
+# lane 1), and no such question exists here -- a relic that answered nothing
+# answered nothing, and a page saying so on every screen of every run that
+# holds no such relic is noise.
+RELIC_ANSWERS_HEADING = "## What your relics answered with"
+RELIC_ANSWER_ROW = "- **{source}** {amount} on **{target}**."
+RELIC_ANSWER_ROW_NO_TARGET = "- **{source}** {amount}."
+
 # `EB-708`. A SIZE IS NOT A STATUS, AND THE PAGE HAD NO LEGEND FOR EITHER.
 #
 # THE FIND (Kokomi r31 lane 2, (c)). `Twig Slime (M)` and `Leaf Slime (S)` read

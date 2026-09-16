@@ -56,8 +56,20 @@ public static partial class McpMod
     private const string GitsReactionLogType = "KleeMod.Powers.ReactionLog";
     private const string GitsReactionLogMethod = "Snapshot";
 
+    // `EB-695`. THE RELIC-ANSWER LOG, on this file's seam and by the same
+    // reflection, because it is the same kind of fact one step over: what
+    // LANDED inside a beat that the beat's own number does not account for.
+    // Kokomi r30 lane 2 met the Tamakushi Casket's answering 2 named inside a
+    // Plan carry-out and named nowhere at all when the debuff card was played
+    // from hand -- "the seat subtracted it from HP on every such play".
+    private const string GitsRelicAnswerLogType =
+        "KleeMod.Powers.RelicAnswerLog";
+
     private static bool _gitsReactionsProbed;
     private static MethodInfo? _gitsReactionsSnapshot;
+
+    private static bool _gitsRelicAnswersProbed;
+    private static MethodInfo? _gitsRelicAnswersSnapshot;
 
     /// <summary>
     /// Locate the mod's reaction-log snapshot once. A null result is cached
@@ -107,6 +119,60 @@ public static partial class McpMod
         catch (Exception ex)
         {
             GD.PrintErr($"[STS2 MCP][GItS] reaction log snapshot failed: "
+                        + $"{ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Locate the mod's relic-answer snapshot once, on
+    /// <see cref="GitsReactionLogSnapshot"/>'s own terms and for its reasons.
+    /// `EB-695`.
+    /// </summary>
+    private static MethodInfo? GitsRelicAnswerLogSnapshot()
+    {
+        if (_gitsRelicAnswersProbed) return _gitsRelicAnswersSnapshot;
+        _gitsRelicAnswersProbed = true;
+        try
+        {
+            var type = AppDomain.CurrentDomain.GetAssemblies()
+                .Select(a =>
+                {
+                    try { return a.GetType(GitsRelicAnswerLogType, false); }
+                    catch { return null; }
+                })
+                .FirstOrDefault(t => t != null);
+            _gitsRelicAnswersSnapshot = type?.GetMethod(
+                GitsReactionLogMethod,
+                BindingFlags.Static | BindingFlags.Public);
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[STS2 MCP][GItS] relic answer log probe failed: "
+                        + $"{ex.Message}");
+            _gitsRelicAnswersSnapshot = null;
+        }
+        return _gitsRelicAnswersSnapshot;
+    }
+
+    /// <summary>
+    /// This turn's relic answers, in the order they landed, or NULL when this
+    /// build carries no log. `EB-695`, and the same absent / empty /
+    /// populated contract the reactions above keep: a relic that answered
+    /// nothing this turn is a fact, and no log at all is a different one.
+    /// </summary>
+    internal static List<Dictionary<string, object?>>? GitsRelicAnswerState()
+    {
+        var snapshot = GitsRelicAnswerLogSnapshot();
+        if (snapshot == null) return null;
+        try
+        {
+            return snapshot.Invoke(null, Array.Empty<object>())
+                   as List<Dictionary<string, object?>>;
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[STS2 MCP][GItS] relic answer snapshot failed: "
                         + $"{ex.Message}");
             return null;
         }

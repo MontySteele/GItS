@@ -208,6 +208,9 @@ public sealed class KleeElementalHooks : AbstractModel
     {
         if (side != CombatSide.Player) return;
         ReactionLog.MarkPlayerTurnEnd();
+        // `EB-695`: the relic-answer log takes the same mark from the same
+        // broadcast, so the two receipts on one page name one boundary.
+        RelicAnswerLog.MarkPlayerTurnEnd();
         foreach (var creature in participants)
         {
             if (creature.Player != null)

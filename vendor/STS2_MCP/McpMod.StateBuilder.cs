@@ -1335,6 +1335,17 @@ public static partial class McpMod
             state["spark_sources"] = sparkSources;
         }
 
+        // GItS LOCAL EDIT (`EB-695`). WHAT A RELIC ANSWERED WITH. The
+        // Tamakushi Casket's 2 is named inside a Plan carry-out (the rider
+        // clause `EB-453` built) and was named NOWHERE when the debuff card
+        // was played from hand -- Kokomi r30 lane 2 "subtracted it from HP on
+        // every such play". Same shape, same absent/empty/populated contract,
+        // same reflection seam: gits/GitsReactionLog.cs.
+        if (GitsRelicAnswerState() is { } relicAnswers)
+        {
+            state["relic_answers"] = relicAnswers;
+        }
+
         // Powers (status effects)
         state["status"] = BuildPowersState(creature);
 

@@ -532,6 +532,13 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     reactions = reaction_log(p)
     if reactions is not None:
         combat["reactions"] = reactions
+    # `EB-695`: and what a relic answered with on the played-card path, which
+    # the Plan carry-out's rider clause cannot reach. Absent on a build with
+    # no log; empty on a turn nothing answered, on which no section prints.
+    answers = relic_answers(p)
+    if answers:
+        name_answer_rows(answers, _enemies(state), combat["enemies"])
+        combat["relic_answers"] = answers
     # `EB-610`: and where each of this turn's Sparks came from, in printed
     # words. Absent on a build with no ledger; empty on a turn the bank has
     # not moved, on which the Spark row prints no source clause at all.
@@ -867,6 +874,64 @@ def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
             moved["target"] = (by_id.get(moved["combat_id"])
                                or remembered_enemy_name(moved["combat_id"],
                                                         moved["target"]))
+
+
+def relic_answers(player: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """What a relic answered with this turn, by name (`EB-695`).
+
+    THE FIND (Kokomi r30 lane 2, debrief 1). The Tamakushi Casket answers a
+    debuff with a 2-damage Hydro strike. Inside a PLAN carry-out that strike is
+    named -- "Inside the same beat: Tamakushi Casket 2" -- because
+    `KokomiPlan.NoteRider` is standing there to catch it. Play the same debuff
+    card FROM HAND and the same strike landed with nothing naming it anywhere,
+    and the seat subtracted it from HP by hand on every such play.
+
+    THE ASYMMETRY WAS AN ACCIDENT OF WHERE THE RECEIPT LIVED, not a rule, and
+    the mod now keeps the played-card half in `RelicAnswerLog` -- which files a
+    row only where the rider was NOT filed, so one strike is named once.
+
+    `carried` IS `reaction_log`'S, and means what it means there: a row that
+    landed after the player ended their turn and that no page has printed yet.
+
+    THE THREE STATES, this section's standing contract: `None` is a build with
+    no log, `[]` is a turn on which nothing answered (and no section prints --
+    unlike the reaction log, whose own empty line closes a finding of its own),
+    and a populated list is the strikes, in the order they landed.
+    """
+    rows = player.get("relic_answers")
+    if not isinstance(rows, list):
+        return None
+    return [{"source": _text(r.get("source")),
+             "amount": _int(r.get("amount")),
+             "target": _text(r.get("target")),
+             "combat_id": _text(r.get("combat_id")),
+             "carried": bool(r.get("carried"))}
+            for r in rows
+            if isinstance(r, dict) and _text(r.get("source"))
+            and _int(r.get("amount")) > 0]
+
+
+def name_answer_rows(answers: list[dict[str, Any]],
+                     wire: list[dict[str, Any]],
+                     printed: list[dict[str, Any]]) -> None:
+    """`name_moved_rows`' lookup, on the relic-answer rows (`EB-695`).
+
+    THE PAGE OWNS THE NAMES, and it has to here for `EB-518`'s reason: three
+    entries reading `Tamakushi Casket 2` divide among three enemies in more
+    than one way, and the r18 seat divided them the even way and concluded a
+    fourth strike was missing. A body named `Toadpole (2)` in this receipt must
+    be the same body as `Toadpole (2)` in the enemy list four lines down, and a
+    body that DIED to the strike keeps the title the mod recorded.
+    """
+    by_id = {_text(raw.get("combat_id")): face["name"]
+             for raw, face in zip(wire, printed)
+             if _text(raw.get("combat_id"))}
+    for row in answers:
+        if not row["combat_id"]:
+            continue
+        row["target"] = (by_id.get(row["combat_id"])
+                         or remembered_enemy_name(row["combat_id"],
+                                                  row["target"]))
 
 
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:

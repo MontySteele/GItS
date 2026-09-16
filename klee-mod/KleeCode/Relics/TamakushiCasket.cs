@@ -219,7 +219,19 @@ public sealed class TamakushiCasket : CustomRelicModel
         // `ElementalHit.Deal` resolves the reaction BEFORE the hit lands, so
         // the Plan's own Hydro froze that body and this relic answered the
         // Frozen as well as the Weak the same Plan applied.
-        KokomiPlan.NoteRider(SourceName, dealt, target);
+        //
+        // `EB-695`. AND THE OTHER HALF OF THE SAME SENTENCE, on the path the
+        // clause above cannot reach. `NoteRider` files against the Plan being
+        // resolved right now and drops the row where no Plan is running --
+        // which is a card PLAYED FROM HAND, and that is where the r30 lane-2
+        // seat met this strike with nothing naming it: "the seat subtracted it
+        // from HP on every such play". So where the rider was not filed, the
+        // strike goes in the per-turn relic-answer log the page prints. The
+        // return value is what keeps it from being named twice on one screen.
+        if (!KokomiPlan.NoteRider(SourceName, dealt, target))
+        {
+            RelicAnswerLog.Note(SourceName, (int)dealt, target);
+        }
         // `EB-335`. SHELL GUARD reads the STRIKE and not the debuff that caused
         // it, which is what keeps it separable from The Clouds Like Waves
         // Rippling (that card pays per debuff APPLIED). Hung here, at the one

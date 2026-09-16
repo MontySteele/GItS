@@ -52,6 +52,9 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         REACTION_CARRIED_CLAUSE,
                                         REACTION_CARRIED_ONLY, REACTION_ROW,
                                         REACTION_ROW_NO_SOURCE,
+                                        RELIC_ANSWER_ROW,
+                                        RELIC_ANSWER_ROW_NO_TARGET,
+                                        RELIC_ANSWERS_HEADING,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
                                         PLAN_CASKET_AURA_CLAUSE,
@@ -1648,6 +1651,21 @@ def render(obs: dict[str, Any]) -> str:
                 out.append(line)
             if not rows:
                 out.append(NO_REACTION_THIS_TURN)
+        # `EB-695`. AND WHAT A RELIC ANSWERED WITH, beside the reactions and
+        # for the same reason: it is a thing that LANDED inside a beat whose
+        # own number does not account for it. Inside a Plan carry-out the
+        # rider clause names the Casket's 2; played from hand it was named
+        # nowhere, and the r30 seat subtracted it from HP by hand every time.
+        # Printed only where something answered -- see `RELIC_ANSWERS_HEADING`
+        # for why this section has no empty line where the one above it does.
+        if c.get("relic_answers"):
+            out += ["", RELIC_ANSWERS_HEADING, ""]
+            for row in c["relic_answers"]:
+                line = (RELIC_ANSWER_ROW if row["target"]
+                        else RELIC_ANSWER_ROW_NO_TARGET).format(**row)
+                if row.get("carried"):
+                    line = line.rstrip(".") + "." + REACTION_CARRIED_CLAUSE
+                out.append(line)
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
