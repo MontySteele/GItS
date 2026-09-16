@@ -778,39 +778,10 @@ def clip_warnings(effective) -> list[str]:
 KNOWN_IDENTICAL = {
     frozenset({"catalytic_conversion", "spark_collection"}),   # also PENDING_RED_PEN
     frozenset({"crowd_work", "standing_ovation"}),
-    # ADDED by C3 (Serenitea Sweep), and it is the finding, not the fix.
-    # Turning L12 on against the SHIPPED files surfaced this immediately:
-    # klee/kaboom.png and klee/spark_knight_style.png are byte-identical
-    # (sha256 5649882009...). Both are auto-picks off "Klee Character Card",
-    # so the old candidates-only hash could never have seen them -- auto-picks
-    # get no candidates directory at all.
-    #
-    # It was already half-recorded: the pair sits in PENDING_RED_PEN above as
-    # a SOURCE collision ("ruled onto spark_knight_style, but it is ALSO
-    # kaboom's auto pick -- not 'only a model source' as the ruling assumed").
-    # Its two siblings there were also entered here; this one never was, which
-    # is the gap missed-requirements sec.4.6 names -- "unlike its two siblings,
-    # [it] is in no ledger". Now it is in both.
-    #
-    # RULED 2026-07-27 ([USER], Serenitea Sweep II D1). The ruling this entry
-    # was waiting for: KABOOM KEEPS the Character Card; spark_knight_style
-    # gets new art. Registered in art/plan.tsv -- its plan row is commented out
-    # with the ruling, and it now sits in the REHUNT PILE beside pop.
-    #
-    # THE ENTRY STAYS, and the reason it stays is the point of D1. The ruling
-    # fixed the PLAN; the two SHIPPED files are still byte-identical and stay
-    # that way until someone actually re-crops. So L12 still has a real finding
-    # here, and suppressing it is still correct -- for now.
-    #
-    # REMOVAL IS AUTOMATIC, not remembered: the day new art lands,
-    # `test_every_allowlisted_identical_pair_is_still_identical` fails on this
-    # pair and the entry has to come out. That is deliberate. An exemption
-    # outliving its reason is the B6 ledger lesson, and the fix for it is a
-    # test that breaks, not a note asking someone to check.
-    #
-    # Its PENDING_RED_PEN twin was removed in the same change, because that
-    # collision really is gone. Different registry, different fact.
-    frozenset({"kaboom", "spark_knight_style"}),
+    # kaboom / spark_knight_style left this set on 2026-09-16: #564 placed
+    # spark_knight_style's own art (the Serenitea Sweep II D1 re-hunt), the
+    # two shipped files stopped being byte-identical, and the pin that
+    # guards this set fired as designed.
 }
 
 
