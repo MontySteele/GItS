@@ -117,31 +117,57 @@ def test_the_shipped_bomb_is_not_touched_by_the_arm(overhaul):
 # RULE 5's OTHER HALF -- whose Attacks apply Pyro, and whose do not
 # ---------------------------------------------------------------------------
 
-def test_the_base_games_strike_applies_nothing_and_hers_still_do(overhaul):
+def test_an_off_sheet_card_applies_nothing_and_hers_still_do(overhaul):
     """[USER], 2026-09-02: "I think we actually SHOULD remove the elemental
     application from the basic Strikes for all characters. Those cards are
     supposed to be bad!" R242 put the base game's Strike and Defend into her
-    starter, and `_is_base_game_basic` is the exemption's two tests: `basic`
-    rarity AND no owning `character:`. `CatalystCadence.IsBaseGameBasic` is the
-    mod's twin.
+    starter and R244 ruled they apply nothing BECAUSE THEY PRINT NOTHING.
+
+    `EB-331` WIDENED THAT READING TO EVERY OFF-SHEET CARD. `Breakthrough`, an
+    Ironclad event card the sim does not carry a row for, put `Hydro Aura 2`
+    on three enemies in a Kokomi run
+    and the next Electro hit reacted with nothing on screen to predict it
+    (r4c act 2b finding 6). A face with no element on it promises none,
+    whatever rarity the run handed it over at.
 
     THE ARM'S OWN ATTACKS ARE UNMOVED, which is the half that matters here:
     `proto_ko_kapow` is `rarity: basic` too and it carries `character: klee`,
-    so it fails the second test and still applies her Pyro -- and an explosion
-    never asks the cadence at all, because it names Pyro outright."""
+    so it is on her sheet and still applies her Pyro -- and an explosion never
+    asks the cadence at all, because it names Pyro outright. An ANCIENT is the
+    mod's own card with no owning character, and it is named rather than swept.
+    `CatalystCadence.IsOffSheet` is the mod's twin.
+
+    Seen to FAIL: before this row every base card above Basic rarity applied
+    her element."""
     state = klee_state([make_enemy(hp=200)])
 
     strike, defend = load("strike"), load("defend")
-    assert effects._is_base_game_basic(strike) is True
+    assert effects._is_off_sheet_card(state, strike) is True
     assert effects._element_for(state, strike.effects[0], strike) is None
+    assert effects._is_off_sheet_card(state, defend) is True
+
+    # The widening itself: a base card that is NOT a Basic.
+    for off_sheet in ("squash", "exterminate", "heavy_blade_like",
+                      "inflame_like"):
+        card = load(off_sheet)
+        assert card.rarity != "basic", off_sheet
+        assert effects._is_off_sheet_card(state, card) is True, off_sheet
+        assert effects._element_for(
+            state, {"op": "damage", "amount": 4, "target": "enemy"},
+            card) is None, off_sheet
 
     kapow = load("proto_ko_kapow")
     assert (kapow.rarity, kapow.character) == ("basic", "klee")
-    assert effects._is_base_game_basic(kapow) is False
+    assert effects._is_off_sheet_card(state, kapow) is False
     assert effects._element_for(
         state, {"op": "damage", "amount": 4, "target": "enemy"},
         kapow) == "pyro"
-    assert effects._is_base_game_basic(defend) is True
+
+    # The mod's own Ancient has no owning character and stays inside.
+    omega = load("jumpy_dumpty_mk_omega")
+    assert omega.character is None and omega.rarity == "ancient"
+    assert effects._is_off_sheet_card(state, omega) is False
+    assert effects._element_for(state, omega.effects[0], omega) == "pyro"
 
 
 def test_kapow_retains_at_base_and_the_upgrade_moves_its_damage(overhaul):

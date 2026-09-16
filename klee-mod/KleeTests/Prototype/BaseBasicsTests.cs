@@ -236,17 +236,22 @@ public class BaseBasicsTests
     }
 
     [Fact]
-    public void The_exemption_is_the_base_games_basics_and_not_her_own_attacks()
+    public void The_exemption_is_every_off_sheet_card_and_not_her_own_attacks()
     {
         // THE CADENCE IS STILL A CHARACTER RULE. What the ruling removed is the
-        // base game's card from it, so the two tests that say "the base game
-        // wrote this basic" are what the exemption is made of -- and a card of
-        // this mod's own is untouched whether it declares an element or leans
-        // on the fallback.
+        // base game's card from it, and `EB-331` widened "the base game's
+        // basics" to "the base game's cards" -- `Breakthrough`, an Ironclad
+        // EVENT card, put `Hydro Aura 2` on three enemies in a Kokomi run and
+        // the next Electro hit reacted with nothing on screen to predict it
+        // (r4c act 2b finding 6). A face with no element on it promises none
+        // whatever rarity the run handed it over at. A card of this mod's own
+        // is untouched whether it declares an element or leans on the fallback.
         var klee = KleeOverhaul.Enabled;
+        var kokomi = KokomiOverhaul.Enabled;
         try
         {
             KleeOverhaul.Enabled = true;
+            KokomiOverhaul.Enabled = true;
             var seat = Seat.Klee().Creature;
 
             // Her own Attack, which declares Pyro through the codegen.
@@ -254,19 +259,29 @@ public class BaseBasicsTests
                 new ProtoKoFishFlavoredBait(), seat));
 
             // AND THE FALLBACK IS STILL THERE for a card this mod authored
-            // that names nothing: the Ancient is a `CustomCardModel` and not
-            // Basic, so neither test catches it. (It declares Pyro outright,
-            // which is why this asserts the predicate rather than the card.)
+            // that names nothing: the Ancient is a `CustomCardModel`, so the
+            // one test does not catch it. (It declares Pyro outright, which is
+            // why this asserts the predicate rather than the card.)
             Assert.IsAssignableFrom<CustomCardModel>(new JumpyDumptyMkOmega());
-            Assert.NotEqual(CardRarity.Basic, new JumpyDumptyMkOmega().Rarity);
 
-            // The base game's Strike is both, which is the whole exemption.
+            // The base game's Strike is not, which is the exemption ...
             Assert.IsNotAssignableFrom<CustomCardModel>(new StrikeIronclad());
-            Assert.Equal(CardRarity.Basic, new StrikeIronclad().Rarity);
+
+            // ... and so is a base card WELL above Basic rarity, which is the
+            // widening. Seen to FAIL: this returned Hydro before `EB-331`.
+            var breakthrough = new Breakthrough();
+            Assert.IsNotAssignableFrom<CustomCardModel>(breakthrough);
+            Assert.NotEqual(CardRarity.Basic, breakthrough.Rarity);
+            Assert.Equal(CardType.Attack, breakthrough.Type);
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+                breakthrough, Seat.Kokomi().Creature));
+            Assert.Equal(Element.None, CatalystCadence.PrintedElement(
+                breakthrough, seat));
         }
         finally
         {
             KleeOverhaul.Enabled = klee;
+            KokomiOverhaul.Enabled = kokomi;
         }
     }
 
