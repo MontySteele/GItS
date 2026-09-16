@@ -12306,3 +12306,45 @@ def test_a_reward_screen_with_no_card_offer_reads_as_it_always_did():
                                  if i["type"] != "card"]
     assert "is a card OFFER" not in blindplay.observe(state)
     assert "nothing here to skip" in blindplay.act(state, "skip")["refusal"]
+
+
+# ---------------- EB-662: a potion shelf is not bought onto a full belt ------
+
+def _full_belt_shop_state() -> dict:
+    """`shop_state` with a STOCKED potion shelf and the belt at 3 of 3."""
+    state = copy.deepcopy(shop_state())
+    state["shop"]["items"][2]["is_stocked"] = True
+    state["player"]["max_potion_slots"] = 3
+    state["player"]["potions"] = [
+        {"name": "Block Potion", "description": "Gain 12 Block."},
+        {"name": "Swift Potion", "description": "Draw 3 cards."},
+        {"name": "Weak Potion", "description": "Apply 3 Weak."}]
+    return state
+
+
+def test_a_potion_is_not_bought_onto_a_full_belt_and_the_count_is_printed():
+    """`EB-662`. Seen to FAIL: the buy was accepted at 3 of 3, the gold went
+    and the potion never appeared -- 77 gold lost with no line anywhere."""
+    res = blindplay.act(_full_belt_shop_state(), 'buy "Fire Potion"')
+    assert res["ok"] is False
+    assert res["post"] is None
+    assert "belt is full: 3 of 3" in res["refusal"]
+    assert "drop potion" in res["refusal"]
+
+
+def test_a_belt_with_a_free_slot_still_buys_the_potion():
+    """The gate is the belt and nothing else: one slot free and the buy
+    resolves exactly as it always did."""
+    state = _full_belt_shop_state()
+    state["player"]["potions"] = state["player"]["potions"][:2]
+    res = blindplay.act(state, 'buy "Fire Potion"')
+    assert res["ok"] is True
+    assert res["post"]["action"] == "shop_purchase"
+
+
+def test_a_full_belt_does_not_block_a_card_or_a_relic_shelf():
+    """A relic shelf is not a potion; the belt has nothing to say about it."""
+    state = _full_belt_shop_state()
+    state["player"]["gold"] = 400
+    assert blindplay.act(state, 'buy "Coral Guard"')["ok"] is True
+    assert blindplay.act(state, 'buy "Bottled Tide"')["ok"] is True

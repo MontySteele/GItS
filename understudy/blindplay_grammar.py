@@ -15,9 +15,9 @@ from understudy import qa_packet
 from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _event_options, _map_nodes,
                                         _map_options, _proceed_option,
-                                        _relic_options, _rest_options,
-                                        _reward_items, _screen_cards,
-                                        map_floor)
+                                        _potion_slots, _relic_options,
+                                        _rest_options, _reward_items,
+                                        _screen_cards, map_floor)
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
@@ -1115,6 +1115,29 @@ def _buy(state: dict[str, Any], cmd: Command) -> Resolution:
     if price is not None and price > gold:
         return _refuse(f"{options[idx]['name']!r} costs {price} gold and you "
                        f"have {gold}")
+    # `EB-662`. SEVENTY-SEVEN GOLD FOR NOTHING, AND NO SCREEN SAID A WORD.
+    #
+    # THE FIND (Kokomi r25 lane 1, item 6). The seat bought a potion with the
+    # belt at 3 of 3; the gold went, the potion never appeared, and no line on
+    # either screen connected the two.
+    #
+    # THE GAME'S OWN PATH TAKES IT. `ExecuteShopPurchase` checks stock and gold
+    # and nothing else, then fires `entry.OnTryPurchaseWrapper(inventory)` --
+    # the merchant's own purchase (`McpMod.Actions.cs:433-502`). Clicking the
+    # shelf in the real UI runs the same wrapper; what the tool does not have
+    # is the player looking at a full belt before clicking. So the refusal is
+    # this page's, and it is the same refusal `EB-341` already makes one screen
+    # over, where a potion REWARD onto a full belt is not claimed: same two
+    # numbers off the same two feed fields, same way out named.
+    if (_fold(options[idx].get("kind")) == "potion"
+            and _potion_slots(state)
+            and len(_potions(state)) >= _potion_slots(state)):
+        return _refuse(
+            f"your potion belt is full: {len(_potions(state))} of "
+            f"{_potion_slots(state)} slots. The game's purchase takes the gold "
+            f"whether or not the potion has anywhere to go, so this page will "
+            f"not buy {options[idx]['name']!r} until a slot is free -- drink "
+            f"one (`use potion`) or drop one (`drop potion`) first")
     return Resolution(True, "buy", {"action": "shop_purchase", "index": idx},
                       _bought(options[idx], price))
 
