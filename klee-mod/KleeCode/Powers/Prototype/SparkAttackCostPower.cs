@@ -64,7 +64,13 @@ public sealed class SparkAttackCostPower : PowerModel, ILocalizationProvider
 
     public List<(string, string)>? Localization => new()
     {
-        ("title", "True Spark Knight"),
+        // `EB-699`. THE POWER WEARS ITS OWN CARD'S NAME. The card that applies
+        // it prints "Spark Knight's Oath" (`ProtoTrueSparkKnight`); "True
+        // Spark Knight" is the SHIPPED rare's title, which applies a different
+        // power (`SparkThresholdDownPower`) -- so the arm's buff bar named a
+        // card the player had not drafted, the same way Sara's window named
+        // Bennett's. The class name is the sheet id and stays.
+        ("title", "Spark Knight's Oath"),
         ("description",
             "Your Attacks that do not already cost [gold]Spark[/gold] cost "
           + Price + " [gold]Spark[/gold] instead of their Energy cost."),

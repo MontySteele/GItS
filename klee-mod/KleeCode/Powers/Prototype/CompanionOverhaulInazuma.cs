@@ -144,11 +144,43 @@ internal static class InazumaCompanion
 /// preamble: "printed text only"), and the discrepancy is disclosed rather
 /// than resolved by moving a number nobody ruled.
 ///
-/// IT TAKES BACK ITS OWN TWO, not the stack: a banner that expires while a
-/// second one stands leaves that one's Dexterity alone.
+/// IT TAKES BACK WHAT IT GRANTED, not the stack: a banner that expires while
+/// somebody else's Dexterity stands leaves that alone.
+///
+/// `EB-415`. AND "WHAT IT GRANTED" IS REMEMBERED RATHER THAN ASSUMED. The
+/// take-back used to be this power's own constant, 2, while the card's grant
+/// is its `PowerAmount` -- which the upgrade moves to 3. So every play of the
+/// upgraded face leaked 1 permanent Dexterity, disclosed by the `EB-403` build
+/// and left standing there as "the shipped rule as written". It is not a rule
+/// anybody ruled; it is the two numbers having different authors. The power now
+/// banks the grant at the moment it is applied, in <see cref="Granted"/>, and
+/// hands THAT back.
 /// </summary>
 public sealed class WarBannerPower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The var name the badge writes and <see cref="Granted"/>
+    /// reads.</summary>
+    private const string GrantedVar = "Granted";
+
+    /// <summary>
+    /// `EB-415`. A DYNAMIC VAR AND NOT A FIELD, for the reason `PowerModel`
+    /// gives in its own doc comment: these are the data that survive a clone
+    /// and that a localization row may print, and this number is both -- the
+    /// smart badge below prints it, and a co-op clone that lost it would hand
+    /// back the wrong stack.
+    /// </summary>
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new DynamicVar(GrantedVar, 0m) };
+
+    /// <summary>What this banner has actually handed out. Zero only on a
+    /// power nothing applied through a card -- a test seat or the understudy's
+    /// `set_power` door -- where the card's own constant is the honest
+    /// fallback.</summary>
+    private int Granted =>
+        DynamicVars[GrantedVar].IntValue > 0
+            ? DynamicVars[GrantedVar].IntValue
+            : CompanionOverhaulLaw.WarBannerDexterity;
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "General's War Banner"),
@@ -156,19 +188,62 @@ public sealed class WarBannerPower : PowerModel, ILocalizationProvider
         // this grants is real `DexterityPower`, whose own gloss says it does
         // not decay -- true, and the reason the card face and that gloss read
         // as a contradiction on one screen. `Tick` below is this sentence's
-        // authority, and the number is this power's own constant rather than
-        // the card's (upgradeable) applied amount.
+        // authority.
+        //
+        // `EB-415` SPLIT THE ROW IN TWO. The number is no longer a constant,
+        // so it can only be printed by a var -- and `PowerModel.HoverTips`
+        // calls `DynamicVars.AddTo` on the SMART branch alone, so a `{Granted}`
+        // written on the static row would reach the screen as a placeholder
+        // (`EB-353`, `EB-754`). The static compendium row therefore says the
+        // clause without the number.
         ("description",
-            "You have [blue]" + CompanionOverhaulLaw.WarBannerDexterity
-          + "[/blue] more [gold]Dexterity[/gold]. "
+            "You have more [gold]Dexterity[/gold]. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}, then "
-          + "takes [blue]" + CompanionOverhaulLaw.WarBannerDexterity
-          + "[/blue] back."),
+          + "takes it back."),
+        ("smartDescription",
+            "You have [blue]{" + GrantedVar + "}[/blue] more "
+          + "[gold]Dexterity[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}, then "
+          + "takes [blue]{" + GrantedVar + "}[/blue] back."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>
+    /// `EB-415`. THE BANK, AND WHY IT IS THIS HOOK. `PowerCmd.Apply` sends a
+    /// SECOND banner through `ModifyAmount` rather than through `Apply`'s own
+    /// tail, so `AfterApplied` fires on the first play and never again --
+    /// `Hook.AfterPowerAmountChanged` "fans to every model in the combat and
+    /// fires on both `PowerCmd` paths" (<see cref="SparkPower"/>'s own note on
+    /// this hook), which is exactly the pair of doors a stacking counter comes
+    /// through. The guard is `power == this` for the reason that note gives:
+    /// the hook reaches the other seat's powers too.
+    ///
+    /// A NEGATIVE OFFSET IS THE CLOCK, not a grant -- `Tick` runs the counter
+    /// down through the same call -- so only gains are banked.
+    /// </summary>
+    public override Task AfterPowerAmountChanged(
+        PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
+        Creature? applier, CardModel? cardSource)
+    {
+        if (power != this || amount <= 0m) return Task.CompletedTask;
+
+        var granted = DynamicVars[GrantedVar];
+        granted.BaseValue += GrantOf(cardSource);
+        granted.ResetToBase();
+        InvokeDisplayAmountChanged();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The Dexterity the card that raised this banner handed out --
+    /// its own `PowerAmount`, which is 2 on the base face and 3 on the
+    /// upgraded one. Any other source falls back to the arm's constant.</summary>
+    private static int GrantOf(CardModel? cardSource) =>
+        cardSource is Cards.Prototype.Generated.ProtoMiGorouWarBanner banner
+            ? banner.DynamicVars["PowerAmount"].IntValue
+            : CompanionOverhaulLaw.WarBannerDexterity;
 
     internal async Task Tick(PlayerChoiceContext choiceContext)
     {
@@ -177,16 +252,17 @@ public sealed class WarBannerPower : PowerModel, ILocalizationProvider
             await PowerCmd.TickDownDuration(this);
             return;
         }
+        var owed = Granted;
         await PowerCmd.Remove(this);
         var dex = Owner.Powers.OfType<DexterityPower>().FirstOrDefault();
         if (dex == null) return;
-        if (dex.Amount <= CompanionOverhaulLaw.WarBannerDexterity)
+        if (dex.Amount <= owed)
         {
             await PowerCmd.Remove(dex);
             return;
         }
         await PowerCmd.ModifyAmount(
-            choiceContext, dex, -CompanionOverhaulLaw.WarBannerDexterity,
+            choiceContext, dex, -owed,
             applier: Owner, cardSource: null, silent: true);
     }
 }
@@ -829,13 +905,21 @@ public sealed class AurousBlazePower : PowerModel, ILocalizationProvider
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// Kamisato Ayaka, Soumetsu: "For 2 turns, at the end of your turn deal 8 Cryo
-/// damage to ALL enemies. After 2 turns, deal 16 Cryo damage to ALL
-/// enemies."
+/// Kamisato Ayaka, Soumetsu: "At the end of each of your next 2 turns, deal 8
+/// Cryo damage to ALL enemies. On the last of them, deal 16 more."
 ///
 /// FIRE, TICK, AND FIRE AGAIN AT ZERO -- both on the same turn when the clock
-/// runs out, because "then" is what happens after the two turns and the second
-/// turn's own 8 is one of them.
+/// runs out, because the last turn's own 8 is one of the two and the finale
+/// lands beside it. So the last turn pays 24.
+///
+/// `EB-698`. THE TEXT IS THE FIX AND THE NUMBERS ARE UNTOUCHED. Both surfaces
+/// used to say "after 2 turns, deal 16", which reads as a third event after
+/// the clock and says nothing about which of the turns in front of you pays
+/// which number; three plays and the seat never knew what was about to land
+/// (Kokomi r30 lane 1). The card and this badge now say the same sentence: 8
+/// on every one of them, 16 more on the last. The badge carries the live count
+/// on top, because `{Amount}` is TURNS REMAINING and is one of the three dumb
+/// variables `PowerModel.GetDumbHoverTip` binds on the static row.
 /// </summary>
 public sealed class SoumetsuPower : PowerModel, ILocalizationProvider
 {
@@ -845,9 +929,9 @@ public sealed class SoumetsuPower : PowerModel, ILocalizationProvider
         ("description",
             "At the end of your turn, deal "
           + $"[blue]{CompanionOverhaulLaw.SoumetsuDamage}[/blue] [gold]Cryo[/gold] "
-          + "damage to ALL enemies, then "
-          + $"[blue]{CompanionOverhaulLaw.SoumetsuFinale}[/blue] when it ends. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+          + "damage to ALL enemies. [blue]{Amount}[/blue] "
+          + "{Amount:plural:turn|turns} left; on the last, "
+          + $"[blue]{CompanionOverhaulLaw.SoumetsuFinale}[/blue] more."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -1026,7 +1110,18 @@ public sealed class TamotoPower
     public List<(string, string)>? Localization => new()
     {
         ("title", "Tamoto"),
+        // `EB-754`, and it is Amber's defect on Chiori's row -- the same
+        // construction, found on the same sweep. `PowerModel.HoverTips` binds
+        // `DynamicVars.AddTo` on the SMART branch alone, so `{Damage}` written
+        // on the static row was never filled and the placeholder reached the
+        // screen. `EB-353`'s split: the compendium row carries the CONSTANT
+        // the var is seeded from, the smart row the live number.
         ("description",
+            "At the end of your turn, deal "
+          + $"[blue]{CompanionOverhaulLaw.TamotoDamage}[/blue] [gold]Geo[/gold] "
+          + "damage to a random enemy, ignoring [gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+        ("smartDescription",
             "At the end of your turn, deal "
           + "[blue]{Damage}[/blue] [gold]Geo[/gold] "
           + "damage to a random enemy, ignoring [gold]Block[/gold]. "

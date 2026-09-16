@@ -2182,6 +2182,26 @@ at first, which nothing stripped, and the arm's starter reached the
 round-5 seat printing the tag).
 
 
+## proto_mi_ayaka_soumetsu
+
+`EB-698` (Kokomi round 30, lane 1, (c)). The card said "at the end of your
+turn, deal 8 Cryo damage to ALL enemies. After 2 turns, deal 16 Cryo damage to
+ALL enemies", and the buff said "8 ... then 16 when it ends, lasts 1 turn".
+Three plays, and the seat never knew which number was about to land: "after 2
+turns" reads as a third event happening AFTER the clock, and neither surface
+said how many 8s there are.
+
+What the code does -- `SoumetsuPower.FireVolley` and its twin
+`effects.inazuma_overhaul_turn_end` -- is one 8 at the end of each of the N
+turns and, on the LAST of them, the 16 beside it. So the last turn pays 24,
+which `test_soumetsu_sweeps_twice_then_ends_on_the_big_one` has measured all
+along. Both surfaces now say that sentence in that order; the badge carries
+the live turns-remaining count on top, because `{Amount}` is one of the three
+dumb variables `PowerModel.GetDumbHoverTip` binds on a static row. Neither
+number moved, and this supersedes `EB-379`'s wording for this row only --
+Kyouka keeps "after 2 turns", where the finale really is the only thing that
+happens then.
+
 ## proto_mi_gorou_war_banner
 
 `EB-403` (Kokomi round 10, run 1, (c) 1). The face printed "Gain 2 Dexterity
@@ -2192,12 +2212,28 @@ real `DexterityPower`, and the second effect it applies -- `mi_war_banner`,
 clock that takes 2 Dexterity back when it runs out, at the end of the turn its
 `Amount` reaches 1 (`CompanionOverhaulTurnEnd`, `AfterSideTurnEnd`).
 
-The take-back clause is now on both faces, in that power's own words. The
-number is the power's own constant, `CompanionOverhaulLaw.WarBannerDexterity`
-= 2, and NOT the card's `PowerAmount`, which the upgrade moves to 3 -- so an
-upgraded banner grants 3 and hands 2 back. That asymmetry is the shipped rule
-as written and is disclosed here rather than changed; the base Dexterity gloss
-stays the base rule and the exception is printed where the exception is made.
+The take-back clause is now on both faces, in that power's own words. The base
+Dexterity gloss stays the base rule and the exception is printed where the
+exception is made.
+
+`EB-415` then CLOSED the asymmetry this note used to disclose. The take-back
+was the power's own constant, `CompanionOverhaulLaw.WarBannerDexterity` = 2,
+while the grant is the card's `PowerAmount`, which the upgrade moves to 3 -- so
+an upgraded banner granted 3, handed 2 back, and left 1 permanent Dexterity
+behind every play. That was never ruled; it is two numbers with different
+authors, and it was recorded here as "the shipped rule as written" because the
+`EB-403` build found it and did not own it.
+
+The banner now BANKS what it granted and hands that back. In the mod that is a
+`Granted` DynamicVar written from `AfterPowerAmountChanged` -- the hook that
+fires on both `PowerCmd` paths, which matters because a second banner stacks
+through `ModifyAmount` and never through `Apply`'s own tail; in the sim it is
+`effects.war_banner_grant`, read off the card's own effects so the upgraded
+face banks 3. Neither face's printed numbers moved: the card says "gain 2
+Dexterity for 2 turns, then the banner takes it back", with no second number to
+disagree with the first, and the badge prints the live `{Granted}` on its smart
+row (a var on the static row would reach the screen as a placeholder --
+`EB-353`).
 
 ## before proto_fr_aria_of_recompense
 

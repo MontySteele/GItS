@@ -326,6 +326,104 @@ def test_the_war_banner_takes_back_only_its_own_two(overhaul):
     assert st.player.powers["dexterity"] == 5
 
 
+# ---- `EB-415`: the upgraded banner hands back what the upgrade granted -----
+
+
+def _upgraded(card_id: str):
+    from tier0.content import upgrades
+    return upgrades.apply_upgrade(loader.get_card(card_id))
+
+
+def test_the_upgraded_banner_grants_three_and_hands_three_back(overhaul):
+    """`EB-415` (disclosed by the `EB-403` build). The card's grant is its own
+    `PowerAmount`, which the upgrade moves 2 -> 3; the take-back was the arm's
+    constant, 2. So every play of the upgraded face left 1 permanent Dexterity
+    behind -- a number nobody ruled, arrived at by the two halves having
+    different authors. The banner banks what it granted now.
+    """
+    st = make_state()
+    effects.resolve_card(st, _upgraded("proto_mi_gorou_war_banner"))
+    assert st.player.powers["dexterity"] == 3
+
+    effects.inazuma_overhaul_turn_end(st)
+    effects.inazuma_overhaul_turn_end(st)
+    assert "dexterity" not in st.player.powers
+
+
+def test_the_upgraded_banner_leaves_somebody_elses_dexterity_alone(overhaul):
+    """The other half of the same sentence, on the face the row pins: what
+    goes back is the banner's own three and not the stack."""
+    st = make_state()
+    st.player.powers["dexterity"] = 5
+    effects.resolve_card(st, _upgraded("proto_mi_gorou_war_banner"))
+    assert st.player.powers["dexterity"] == 8
+
+    effects.inazuma_overhaul_turn_end(st)
+    effects.inazuma_overhaul_turn_end(st)
+    assert st.player.powers["dexterity"] == 5
+
+
+def test_two_banners_hand_back_both_grants(overhaul):
+    """A second banner is a longer clock and a bigger grant, and the ledger
+    accumulates: the merged power owes four, not two. The mod's twin reaches
+    the same total through `Hook.AfterPowerAmountChanged`, which is the door a
+    SECOND `PowerCmd.Apply` of a counter comes through."""
+    st = make_state()
+    _play(st, "proto_mi_gorou_war_banner")
+    _play(st, "proto_mi_gorou_war_banner")
+    assert st.player.powers["dexterity"] == 4
+    assert st.player.powers["mi_war_banner"] == 4
+
+    for _ in range(4):
+        effects.inazuma_overhaul_turn_end(st)
+    assert "dexterity" not in st.player.powers
+    assert "mi_war_banner" not in st.player.powers
+
+
+def test_the_ledger_leaves_with_the_banner(overhaul):
+    """A sidecar the expiry does not clear is an amount that pays again on the
+    next banner -- the field's own rule in `state.Player`."""
+    st = make_state()
+    _play(st, "proto_mi_gorou_war_banner")
+    assert st.player.timed_power_amounts[effects.WAR_BANNER][0][0] == 2
+
+    effects.inazuma_overhaul_turn_end(st)
+    effects.inazuma_overhaul_turn_end(st)
+    assert effects.WAR_BANNER not in st.player.timed_power_amounts
+
+
+def test_the_mods_banner_reads_the_same_two_numbers(overhaul):
+    """`EB-415`'s parity half. The mod has no PowerCmd on a headless seat, so
+    the take-back's own source is read here beside the sim's, the way this
+    module already reads the arm's turn-end ORDER off both engines."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
+    banner = src.split("class WarBannerPower")[1].split("class ")[0]
+
+    # The grant is the CARD's own amount, which the upgrade moves.
+    assert 'banner.DynamicVars["PowerAmount"].IntValue' in banner
+    assert "ProtoMiGorouWarBanner banner" in banner
+    # The take-back is what was banked, and no longer the arm's constant.
+    assert "var owed = Granted;" in banner
+    assert "dex.Amount <= owed" in banner
+    assert "choiceContext, dex, -owed," in banner
+    assert "-CompanionOverhaulLaw.WarBannerDexterity" not in banner
+    # The constant survives as the fallback for a banner nobody dealt --
+    # `war_banner_grant` above is the twin of that sentence.
+    assert "CompanionOverhaulLaw.WarBannerDexterity" in banner
+
+
+def test_a_banner_nobody_dealt_falls_back_to_the_arms_constant(overhaul):
+    """The understudy's power door and a test seat both raise a banner without
+    ever playing the card, so there is no grant to read; the constant is what
+    that banner would have granted."""
+    st = make_state()
+    st.player.powers["dexterity"] = 2
+    st.player.powers["mi_war_banner"] = 1
+    effects.inazuma_overhaul_turn_end(st)
+    assert "dexterity" not in st.player.powers
+
+
 def test_juuga_fires_three_turns_and_stops(overhaul):
     st = make_state(enemies=[make_enemy(hp=90)])
     _play(st, "proto_mi_gorou_juuga")
@@ -769,21 +867,61 @@ def test_the_two_delayed_finales_say_when_they_land(overhaul):
     not attribute it -- `test_kyouka_rides_your_attacks_then_pops` above is the
     rule, and it takes two turn ends.
 
-    Ayaka's Soumetsu carries the identical sentence one row over and is fixed
-    with it: the same word, the same two turn ends, the same misreading
-    available.
+    Ayaka's Soumetsu carried the identical sentence one row over and was fixed
+    with it; `EB-698` then rewrote HER face again, because "after 2 turns" was
+    still ambiguous about which of the turns in front of you pays which number
+    (see below). Kyouka's is the wording this row settled, and it stands.
     """
-    for card_id, finale in (("proto_mi_ayato_kyouka", "12"),
-                            ("proto_mi_ayaka_soumetsu", "16")):
-        face = _proto_face(card_id)
-        assert "Then deal" not in face, card_id
-        assert f"After 2 turns, deal {finale}" in face, card_id
-        # The window is stated ONCE, by the clause that says when the finale
-        # lands: "For 2 turns" and "After 2 turns" together ran both faces
-        # over the 120-character card ceiling
-        # (`tools/lint_text_conventions.py`), and the second sentence is the
-        # one a reader was missing.
-        assert "For 2 turns" not in face, card_id
+    face = _proto_face("proto_mi_ayato_kyouka")
+    assert "Then deal" not in face
+    assert "After 2 turns, deal 12" in face
+    # The window is stated ONCE, by the clause that says when the finale
+    # lands: "For 2 turns" and "After 2 turns" together ran the face over the
+    # 120-character card ceiling (`tools/lint_text_conventions.py`), and the
+    # second sentence is the one a reader was missing.
+    assert "For 2 turns" not in face
+
+
+# ------------------ `EB-698`: which turn pays 8 and which pays 16 ---------
+
+
+def test_soumetsus_face_says_which_turn_pays_which_number(overhaul):
+    """`EB-698` (Kokomi r30 lane 1). The card said "deal 8 at the end of your
+    turn" and "after 2 turns, deal 16"; the badge said "8 ... then 16 when it
+    ends, lasts 1 turn". Three plays, and the seat never knew which number was
+    about to land.
+
+    WHAT THE CODE DOES is one 8 at the end of each of the N turns and, on the
+    last of them, the 16 as well -- `test_soumetsu_sweeps_twice_then_ends_on_
+    the_big_one` above measures the 24. So the face says that, in that order,
+    and no number moved.
+    """
+    face = _proto_face("proto_mi_ayaka_soumetsu")
+    assert "At the end of each of your next 2 turns, deal 8" in face
+    assert "On the last of them, deal 16 more." in face
+    # The two readings the row named, both gone: a finale AFTER the clock, and
+    # a single anonymous end-of-turn volley.
+    assert "After 2 turns" not in face
+    assert "At the end of your turn, deal 8" not in face
+
+
+def test_soumetsus_badge_says_the_same_sentence_as_its_face(overhaul):
+    """`EB-698`'s other half -- "one text on both surfaces". The badge is where
+    the LIVE count lives (`{Amount}` is turns remaining, and it is one of the
+    three dumb variables `PowerModel.GetDumbHoverTip` binds on a static row),
+    so it carries that on top of the same two clauses."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
+    badge = src.split("class SoumetsuPower")[1].split("class ")[0]
+
+    assert "on the last, " in badge
+    assert "{Amount:plural:turn|turns} left" in badge
+    # The wording the seat could not read, and the one the face dropped.
+    assert "when it ends" not in badge
+    assert "Lasts for" not in badge
+    # Both numbers are the arm's constants on both surfaces, never literals.
+    assert "CompanionOverhaulLaw.SoumetsuDamage" in badge
+    assert "CompanionOverhaulLaw.SoumetsuFinale" in badge
 
 
 def test_the_badge_says_when_it_ends_rather_than_then(overhaul):

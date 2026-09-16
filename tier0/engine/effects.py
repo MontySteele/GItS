@@ -2110,6 +2110,48 @@ def _deploy_salon_members(state: CombatState, amount: int,
     p.powers["salon_member"] = len(p.salon)
 
 
+#: `EB-415`. The sidecar key the banner banks its grant under -- the same name
+#: as the power, exactly as `power_payloads` and `summon_damage` are keyed.
+WAR_BANNER = "mi_war_banner"
+
+
+def war_banner_grant(state: CombatState) -> int:
+    """How much Dexterity the standing banner(s) handed out.
+
+    The arm's constant is the fallback and not the rule: a banner raised by
+    anything but its own card -- a test seat, the understudy's power door --
+    never wrote the sidecar, and `C.MI_WAR_BANNER_DEXTERITY` is what that
+    banner would have granted.
+    """
+    banked = state.player.timed_power_amounts.get(WAR_BANNER)
+    if not banked:
+        return C.MI_WAR_BANNER_DEXTERITY
+    return banked[0][0] or C.MI_WAR_BANNER_DEXTERITY
+
+
+def _bank_war_banner_grant(state: CombatState, card: Card) -> None:
+    """Add the Dexterity THIS play granted to the standing banner's ledger.
+
+    The number is read off the card's own effects rather than off a constant,
+    which is the whole of `EB-415`: the row applies `dexterity` and then this
+    clock, the upgrade moves the FIRST of those to 3, and the take-back was
+    reading the second one's constant. A row that applies the clock without a
+    Dexterity grant beside it banks nothing and keeps the fallback.
+    """
+    granted = sum(int(eff.get("amount", 0))
+                  for eff in card.effects
+                  if eff.get("op") == "apply_power"
+                  and eff.get("power") == "dexterity"
+                  and eff.get("target", "self") == "self"
+                  and isinstance(eff.get("amount"), int))
+    if granted <= 0:
+        return
+    instances = state.player.timed_power_amounts.setdefault(
+        WAR_BANNER, [[0, 0]])
+    instances[0][0] += granted
+    instances[0][1] = state.player.powers.get(WAR_BANNER, 0)
+
+
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     cap = fx.get("max_stacks")
     # `never_reduces` (EB-26 D2, ruled 2026-08-10, option (d)): an opt-in apply
@@ -2186,6 +2228,17 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
             state.emit("kurage_refreshed", turns=turns)
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap, never_reduces=floor)
+        # `EB-415`. THE BANNER BANKS WHAT ITS CARD JUST GRANTED. `powers` is a
+        # name -> int map holding TURNS REMAINING for this clock, so the
+        # Dexterity it will owe back has nowhere else to live; the sidecar
+        # `timed_power_amounts` is the engine's one answer to "this power needs
+        # a field beside its stack count" and this is its second user. Read off
+        # the CARD's own effects, so the upgraded face (3 Dexterity) banks 3 --
+        # which is the whole defect: the take-back was the arm's constant, 2,
+        # and every upgraded play leaked the difference. The mod's twin banks
+        # the same number at `WarBannerPower.AfterPowerAmountChanged`.
+        if fx["power"] == "mi_war_banner":
+            _bank_war_banner_grant(state, card)
     else:
         # `times` re-picks the target EVERY pass. BouncingFlask throws three
         # separate flasks at three separately-rolled random enemies, so
@@ -7593,10 +7646,18 @@ def inazuma_overhaul_turn_end(state: CombatState) -> None:
     # Gorou, General's War Banner -- the clock, and at zero it TAKES BACK the
     # Dexterity it granted. Granting real Dexterity rather than a private
     # modifier is what makes "2 Dexterity" mean what every other Dexterity in
-    # the engine means; the stack it hands back is its own, so a banner that
-    # expires while a second one stands leaves that one's 2 alone.
+    # the engine means; the stack it hands back is ITS OWN, so a banner that
+    # expires beside somebody else's Dexterity leaves that alone.
+    #
+    # `EB-415`: "its own" is the amount it BANKED at play (`war_banner_grant`),
+    # not the arm's constant -- the upgraded face grants 3 and the constant is
+    # 2, so reading the constant here leaked 1 permanent Dexterity a play. The
+    # ledger goes with the power, because a sidecar a power's expiry does not
+    # clear is an amount that pays again on the next banner.
     if _mi_tick(p, "mi_war_banner"):
-        left = p.powers.get("dexterity", 0) - C.MI_WAR_BANNER_DEXTERITY
+        owed = war_banner_grant(state)
+        p.timed_power_amounts.pop(WAR_BANNER, None)
+        left = p.powers.get("dexterity", 0) - owed
         if left > 0:
             p.powers["dexterity"] = left
         else:

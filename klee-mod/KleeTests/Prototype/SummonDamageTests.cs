@@ -28,9 +28,13 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class SummonDamageTests
 {
-    private static string Face(PowerModel power) =>
+    private static string Face(PowerModel power) => Row(power, "description");
+
+    /// <summary>`EB-754` split these rows in two, so a reader names which one
+    /// it is asking about.</summary>
+    private static string Row(PowerModel power, string key) =>
         ((ILocalizationProvider)power).Localization!
-        .Single(entry => entry.Item1 == "description").Item2;
+        .Single(entry => entry.Item1 == key).Item2;
 
     [Fact]
     public void EB463_the_badge_prints_a_hole_seeded_from_the_constant()
@@ -41,8 +45,25 @@ public class SummonDamageTests
         // A HOLE AND NOT A LITERAL, which is the whole reason these two left
         // `Every_power_face_prints_the_number_it_pays`: the number the badge
         // shows is the one the play banked, so it cannot be typed here.
-        Assert.Contains("[blue]{Damage}[/blue] [gold]Geo[/gold]", Face(tamoto));
-        Assert.Contains("[blue]{Damage}[/blue] [gold]Pyro[/gold]", Face(bunny));
+        //
+        // `EB-754` MOVED THE HOLE ONE ROW DOWN and changed nothing else about
+        // it. `PowerModel.HoverTips` calls `DynamicVars.AddTo` on the SMART
+        // branch alone, so a hole on the STATIC row is a hole nothing fills --
+        // the Codex seat read the literal `{Damage}` off Amber's buff (Klee
+        // r27, fight 4). The live badge is the smart row; the compendium row
+        // prints the seed.
+        Assert.Contains("[blue]{Damage}[/blue] [gold]Geo[/gold]",
+                        Row(tamoto, "smartDescription"));
+        Assert.Contains("[blue]{Damage}[/blue] [gold]Pyro[/gold]",
+                        Row(bunny, "smartDescription"));
+        Assert.DoesNotContain("{Damage}", Face(tamoto));
+        Assert.DoesNotContain("{Damage}", Face(bunny));
+        Assert.Contains(
+            $"[blue]{CompanionOverhaulLaw.TamotoDamage}[/blue] [gold]Geo[/gold]",
+            Face(tamoto));
+        Assert.Contains(
+            $"[blue]{CompanionOverhaulLaw.BaronBunnyDamage}[/blue] [gold]Pyro[/gold]",
+            Face(bunny));
 
         // SEEDED FROM THE CONSTANT, so a power applied by anything but the
         // `summon_damage:` grammar is the number it always was, and a retune
