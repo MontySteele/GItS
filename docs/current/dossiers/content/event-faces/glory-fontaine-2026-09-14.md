@@ -171,7 +171,7 @@ Mechanics check: matches harvest and the shipped `self_help_book` row (each ench
 The pressure lift running down from Poisson to the Fortress of Meropide is rated to the ounce, and the Melusine attendant's brass ballast wheel says your kit is over it. She spins the wheel with one webbed hand; it ticks to a stop above a single item. Outside the porthole the water goes from green to black.
 
 - **Let the Wheel Decide** — {RandomCard} is removed from your deck.
-- **Spin Again** — Lose 3 HP as the cable lurches and the pressure squeezes your ears. The wheel selects a different item at random. Every further spin costs 1 more HP than the last, and the attendant will patiently re-offer both choices until you surrender something. The wheel skips anything bolted to the frame (Eternal) and will not land twice on the same item while others remain.
+- **Spin Again** — Lose {HpLoss} HP as the cable lurches and the pressure squeezes your ears. The wheel selects a different item at random. Every further spin costs 1 more HP than the last, and the attendant will patiently re-offer both choices until you surrender something. The wheel skips anything bolted to the frame (Eternal) and will not land twice on the same item while others remain.
 
 Mechanics check: matches harvest and the shipped `slippery_bridge` row (Overcome = remove_random 1; Hold On = hp -3, remove 1, escalating +1 HP per re-spin, Eternal cards skipped, no repeats while others remain).
 

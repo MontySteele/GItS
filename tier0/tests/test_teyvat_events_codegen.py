@@ -394,6 +394,51 @@ def test_the_card_the_bridge_takes_is_named_by_its_var_on_every_face():
                 f"{item.cls}.{suffix} does not name the card: {text!r}")
 
 
+def test_a_per_visit_price_is_never_spelled_as_a_literal_in_a_face():
+    """proofs-8a, 2026-09-16, pinned at the row.
+
+    Slippery Bridge charges `3 + NumberOfHoldOns` and carries that price as
+    `{HpLoss}` on all nine of its Hold On description keys. All six Teyvat
+    faces wrote the Hold On line once with the literal "Lose 3 HP" in it, the
+    generator copied that one line into all nine keys, and the second page
+    offered a 4 HP click while printing 3
+    (`TeyvatEventsGenerated.cs` HOLD_ON_0 byte-identical to INITIAL).
+
+    The pin is the general shape, not the one row: wherever ONE face line is
+    written to keys on MORE THAN ONE PAGE and the base row declares the same
+    var on more than one of them, the dressed line must carry the var. A
+    `_LOCKED` twin shares its page with the option it mirrors and is
+    deliberately not caught -- that cost really is one number.
+    """
+    module, plan = _real_plan()
+    index = module.load_index()
+    assert not module.reused_line_var_refusals(plan, index), \
+        "\n".join(module.reused_line_var_refusals(plan, index))
+
+    # The arm is live: the Bridge is the case it was written for, and it must
+    # still be a group that spans pages and still be checked.
+    bridges = [i for i in plan.items if i.base_class == "SlipperyBridge"]
+    assert len(bridges) == 6, "one Slippery Bridge dressing per face"
+    for item in bridges:
+        suffixes = module.reused_line_groups(item)["HOLD_ON_0"]
+        pages = {s.split(".options.", 1)[0] for s in suffixes}
+        assert len(pages) == 9, f"{item.cls}: {sorted(pages)}"
+        text = dict(item.rows())[f"{item.entry}.{suffixes[0]}"]
+        assert "{HpLoss}" in text, f"{item.cls}: {text!r}"
+
+
+def test_the_per_visit_pin_catches_a_face_that_spells_the_price_out(tmp_path):
+    """The negative arm: put the literal back and the generator refuses."""
+    module, plan = _real_plan()
+    index = module.load_index()
+    bridge = next(i for i in plan.items if i.base_class == "SlipperyBridge")
+    label, outcome = bridge.face_event.options[1]
+    bridge.face_event.options[1] = (label, outcome.replace("{HpLoss}", "3"))
+    refusals = module.reused_line_var_refusals(
+        type(plan)(items=[bridge]), index)
+    assert any("HpLoss" in r for r in refusals), refusals
+
+
 def test_every_var_a_dressed_row_uses_is_one_the_base_event_declares():
     """A var the base event does not declare is not substituted; it reaches
     the player as literal braces. `DynamicVars` belongs to the EventModel, so

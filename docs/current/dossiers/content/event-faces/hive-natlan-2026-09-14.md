@@ -327,7 +327,7 @@ Mechanics check: matches harvest and tier05/content/events.yaml (`self_help_book
 The rope-and-plank crossing above Coatepec Mountain has seen better seasons, and it groans under your kit the moment you commit to the middle span. A Night-Wind rider waiting on the far side calls out the wager the crossing always makes: let it take one thing from your pack now, clean, or hold on and let the wind decide which piece hangs loose next — at a steeper price every time you refuse to choose.
 
 - **Overcome** — {RandomCard} is removed from your Deck.
-- **Hold On** — Lose 3 HP. The card named in the above option is randomized, and the HP cost rises by 1 each further time you choose this option. (The card is drawn from all cards without Eternal; the first card offered is never Basic rarity unless every card you hold is; the same card is never offered twice while others remain unoffered.)
+- **Hold On** — Lose {HpLoss} HP. The card named in the above option is randomized, and the HP cost rises by 1 each further time you choose this option. (The card is drawn from all cards without Eternal; the first card offered is never Basic rarity unless every card you hold is; the same card is never offered twice while others remain unoffered.)
 
 Mechanics check: matches harvest.
 

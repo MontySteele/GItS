@@ -41,7 +41,7 @@ Mechanics check: matches harvest.
 Watatsumi's supply line to Yashiori crosses a plank causeway slung over Musoujin Gorge, and the storm has been chewing the ropes since nightfall. Your runner's load is lashed to the guide line with one hand and to you with the other. Below is only rain and Tatarigami haze.
 
 - **Cut It Loose (Overcome)** — {RandomCard} is removed from your deck.
-- **Grip the Rope (Hold On)** — Lose 3 HP as the line saws through your grip. The wind shifts the load, and the piece hanging over the drop is randomized. Each further grip costs 1 more HP than the one before, and the crossing keeps putting the same two choices to you until you cut something away. Gear tied down by the priestess's own order (Eternal) never swings out, and the wind will not pick the same bundle twice while others hang.
+- **Grip the Rope (Hold On)** — Lose {HpLoss} HP as the line saws through your grip. The wind shifts the load, and the piece hanging over the drop is randomized. Each further grip costs 1 more HP than the one before, and the crossing keeps putting the same two choices to you until you cut something away. Gear tied down by the priestess's own order (Eternal) never swings out, and the wind will not pick the same bundle twice while others hang.
 
 Mechanics check: matches harvest.
 
