@@ -134,7 +134,7 @@ public sealed class DeepBreathModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]"),
+        ("title", "Gain 1 Energy and 2 Encore"),
         ("description", "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]"),
     };
 }
@@ -155,7 +155,7 @@ public sealed class DeepBreathModeB : ModalOptionCard, IMeterPricedCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3 [gold]Encore[/gold]: draw 3 cards"),
+        ("title", "Spend 3 Encore: draw 3 cards"),
         ("description", "Spend 3 [gold]Encore[/gold]: draw 3 cards"),
     };
 

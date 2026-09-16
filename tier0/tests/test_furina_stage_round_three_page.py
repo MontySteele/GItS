@@ -48,22 +48,33 @@ def _chooser_state() -> dict:
                             "selection_known": True, "cards": [card]}}
 
 
-def test_the_chooser_note_names_both_ways_out():
+def test_the_chooser_note_says_one_choose_closes_it():
     # "about eight occurrences a run, two refusals spent on it": the seats said
-    # `confirm` because the page told them to, it was refused, and the pick was
-    # then taken by a second `choose`. The page names that second way out now,
-    # so neither command is learned from a refusal.
+    # `confirm` because the page told them to.
+    #
+    # `EB-779` (proofs-9 lane 1 sec.9) SETTLED WHICH PRESS THIS SCREEN TAKES,
+    # which the harness could not open the game to ask when #566 landed: one
+    # `choose` came back ok, the next state carried no `card_select` at all and
+    # the enemy had taken the mode's damage. So the page no longer names both
+    # ways out -- it names the one that is true here, and never prints the word
+    # that can only be refused on this screen.
     page = blindplay.observe(_chooser_state())
 
-    assert "Say `confirm` after `choose` to take it" in page
-    assert "say `choose` again on the same option" in page
+    assert "One `choose` takes your answer here and closes this screen" in page
+    assert "`confirm`" not in page
+    # And no line about a button this screen does not have.
+    assert "Confirm is" not in page
 
 
 def test_the_note_still_carries_eb674s_own_sentence():
-    # `EB-674`'s reading is not replaced: the potion chooser it was filed from
-    # really does take `confirm`, and that half is untouched.
+    # `EB-674`'s reading is not replaced: the chooser it was filed from is a
+    # card GRID, which really does take `confirm`, and that half is untouched.
     assert "arms a pick; it does not close the screen" in CHOOSER_CONFIRM_NOTE
-    assert "If `confirm` is refused" in CHOOSER_CONFIRM_NOTE
+    assert "Say `confirm` after `choose` to take it" in CHOOSER_CONFIRM_NOTE
+    # The second-`choose` fallback #566 added is gone with the question it was
+    # hedging: the mode chooser takes its answer on the FIRST `choose`, so that
+    # sentence was wrong about the one screen it was written for.
+    assert "choose` again on the same option" not in CHOOSER_CONFIRM_NOTE
 
 
 # --- the arm, held for the run ---------------------------------------------

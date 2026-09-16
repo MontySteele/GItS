@@ -530,13 +530,40 @@ ONE_USE_RIDER_NOTE = (
 #
 # WHAT THE PAGE OWES IS THEREFORE THE PROVENANCE, printed where a reader is
 # about to plan a block against a number that may or may not have moved.
-INTENT_SOURCE_NOTE = (
+#
+# `EB-779`'s companion find (proofs-9 lane 1, defect 2). The closing clause was
+# written when it was true and `EB-607`'s bridge half made it false: the feed
+# now carries `breakdown.base_damage`, `folded_damage`, `repeats`, `total` and
+# the game's own `modifiers` list, and `_breakdown_clauses` prints them an inch
+# above this paragraph. So the page said *"the game folded **Strength** into
+# that: it is 12 on the move and 15 after"* and then, at the foot of the same
+# section, *"the feed carries no base, no modifier list and no breakdown"*.
+#
+# TWO ENDINGS, ONE OPENING. The provenance half is unchanged and true on every
+# board -- the figure is the game's and this page does no arithmetic on it --
+# and only the sentence about what the feed carries moves, chosen off whether
+# THIS board's breakdown actually arrived. A bridge older than `EB-607` sends
+# none and reads exactly as it did.
+_INTENT_SOURCE_HEAD = (
     "*An intent's number is the one figure the game draws on that icon, taken "
     "off the data feed and printed here unchanged: this page has no second "
     "source for it and does no arithmetic on it. An enemy carrying Strength "
-    "whose figure does not move is the game's own figure not moving -- the "
-    "feed carries no base, no modifier list and no breakdown, so nothing here "
-    "can say which parts are inside a given number.*")
+    "whose figure does not move is the game's own figure not moving -- ")
+
+INTENT_SOURCE_NOTE = (
+    _INTENT_SOURCE_HEAD
+    + "the feed carries no base, no modifier list and no breakdown, so "
+      "nothing here can say which parts are inside a given number.*")
+
+#: The same note where `EB-607`'s breakdown DID arrive on this board: the
+#: parts are named above each intent, so the page stops denying it carries
+#: them (`EB-779`, proofs-9 lane 1 defect 2).
+INTENT_SOURCE_NOTE_BREAKDOWN = (
+    _INTENT_SOURCE_HEAD
+    + "and where the feed carries the game's own base, the figure its hooks "
+      "arrived at and the models it folded in, the clauses printed beside "
+      "that intent above name all three, so what is inside the number is "
+      "read off the game rather than guessed at here.*")
 
 #: `EB-607`, the fold. An icon figure and the hover sentence under it are two
 #: numbers from two wire fields, and the page printed them side by side with
@@ -679,12 +706,57 @@ FRONT_ENEMY_NOTE = (
 # branch), so the page does not pick between them -- it names both ways out,
 # which is what stops a refusal being the only teacher. The bridge half is a
 # live look and is NOT in this row.
+#
+# `EB-779`, AND THE LIVE LOOK SETTLED IT, SO THE PAGE STOPS NAMING BOTH.
+#
+# proofs-9 lane 1 sec.9 opened `Curtain Rise`'s mode chooser and sent ONE
+# `choose`: it came back ok, the next state carried no `card_select` at all
+# and the enemy had taken the mode's damage. No `confirm` was sent and none
+# was needed. So on `NChooseACardSelectionScreen` -- the wire's
+# `screen_type: "choose"`, which `BuildChooseCardState` hardwires
+# `can_confirm: false` on -- a pick is ONE command and the screen closes on
+# it, and the three clauses above ("it does not close the screen", "say
+# `confirm` after `choose`", "this chooser stays open") are all FALSE there.
+# They were printed on it anyway, because the note was one constant on every
+# chooser, and a seat reading top to bottom still spent the two refusals the
+# row was opened on.
+#
+# SO THE NOTE IS SPLIT BY THE SCREEN THE WIRE NAMES, not by a guess: the card
+# GRID choosers (`select`, `simple_select`, `upgrade`, `transform`,
+# `enchant`) and the bundle picker take `choose` then `confirm` and keep the
+# sentence they had, minus its now-pointless fallback clause; the mode
+# chooser gets a sentence that is true of it and never says `confirm`.
+# `chooser_note` below is the one place that choice is made.
 CHOOSER_CONFIRM_NOTE = (
     "*Choosing here arms a pick; it does not close the screen. Say `confirm` "
     "after `choose` to take it, and until you do this chooser stays open and "
-    "every other command is refused. If `confirm` is refused, say `choose` "
-    "again on the same option -- one chooser in the game takes its answer on "
-    "the second `choose` and has no confirm button at all.*")
+    "every other command is refused.*")
+
+#: The mode chooser (`screen_type: "choose"`), where one `choose` resolves.
+#: It never says `confirm`, because there is no confirm button on this screen
+#: and saying the word costs a refusal (`EB-779`).
+CHOOSER_ONE_CHOICE_NOTE = (
+    "*One `choose` takes your answer here and closes this screen: there is no "
+    "confirm button on this chooser and no second command to say. Read the "
+    "options before you choose -- the one you name resolves immediately.*")
+
+#: The wire's `screen_type` for the one-press chooser. `BuildChooseCardState`
+#: writes it for `NChooseACardSelectionScreen` and nothing else.
+ONE_PRESS_CHOOSER_KIND = "choose"
+
+
+def chooser_note(select_kind: str | None) -> str:
+    """The chooser sentence that is TRUE of this screen (`EB-779`).
+
+    One argument, the wire's own `screen_type`, because that is the only field
+    that tells the two choosers apart before a pick is made: `can_confirm` is
+    false on a grid with nothing picked yet AND on the mode chooser always, so
+    a split on the button's state would print the wrong sentence on the screen
+    the row was filed against.
+    """
+    if str(select_kind or "").strip().lower() == ONE_PRESS_CHOOSER_KIND:
+        return CHOOSER_ONE_CHOICE_NOTE
+    return CHOOSER_CONFIRM_NOTE
 
 # `EB-681`. EVERY REACTION IN A BEAT, BY NAME, IN ORDER.
 #

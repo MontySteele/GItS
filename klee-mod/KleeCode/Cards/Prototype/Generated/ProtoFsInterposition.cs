@@ -124,7 +124,7 @@ public sealed class ProtoFsInterpositionModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gain 5 [gold]Block[/gold]"),
+        ("title", "Gain 5 Block"),
         ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]"),
     };
 
@@ -158,7 +158,7 @@ public sealed class ProtoFsInterpositionModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "[gold]Spend[/gold] 2: gain 10 instead"),
+        ("title", "Spend 2: gain 10 instead"),
         ("description", "[gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead"),
     };
 

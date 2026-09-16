@@ -135,7 +135,7 @@ public sealed class ProtoSparkModeBombsModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Place 1 [gold]Bomb[/gold] dealing 5"),
+        ("title", "Place 1 Bomb dealing 5"),
         ("description", "Place 1 [gold]Bomb[/gold] dealing 5"),
     };
 }
@@ -156,7 +156,7 @@ public sealed class ProtoSparkModeBombsModeB : ModalOptionCard, IMeterPricedCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3 [gold]Sparks[/gold]: place 3 [gold]Bombs[/gold] dealing 5"),
+        ("title", "Spend 3 Sparks: place 3 Bombs dealing 5"),
         ("description", "Spend 3 [gold]Sparks[/gold]: place 3 [gold]Bombs[/gold] dealing 5"),
     };
 

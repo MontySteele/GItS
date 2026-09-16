@@ -168,7 +168,7 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "[gold]Spend[/gold] 2: deal 9 instead"),
+        ("title", "Spend 2: deal 9 instead"),
         ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead"),
     };
 
