@@ -132,6 +132,21 @@ public class KurageBeatTests
                         Il.Calls(Il.Method("TamakushiCasket", "Strike")));
     }
 
+    [Fact]
+    public void The_casket_names_itself_to_the_reaction_log_too()
+    {
+        // `EB-697`. The bubble over the pet already said "Tamakushi Casket"
+        // (the pin above); the REACTION the ping set off said "Bake-Kurage",
+        // because `ReactionLog` resolves a source as card-then-dealer and this
+        // hit has no card while its dealer is the pet on purpose. The r30
+        // lane-1 seat read a Vaporize credited to the jellyfish in a fight
+        // with no Plan written in it. The scope wraps the hit; the same
+        // constant names both surfaces.
+        var calls = Il.Calls(Il.Method("TamakushiCasket", "Strike"));
+
+        Assert.Contains("ReactionLog.Attribute", calls);
+    }
+
     // ---- THE MORNING (`EB-317`), structural -------------------------------
 
     [Fact]

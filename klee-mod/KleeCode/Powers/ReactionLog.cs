@@ -71,14 +71,59 @@ public static class ReactionLog
     /// keeps.</summary>
     public static void MarkTurnStart() => Rows.Clear();
 
+    /// <summary>
+    /// `EB-697`. THE SOURCE A HIT CANNOT NAME FOR ITSELF.
+    ///
+    /// THE FIND (Kokomi r30 lane 1 (c)). A Vaporize row named the
+    /// <c>Bake-Kurage</c> as its source in a fight with no Plan written in it
+    /// at all, and the hit was the Tamakushi Casket's answer to a Vulnerable.
+    /// The resolution below is right for every hit that carries a card or is
+    /// thrown by a creature acting for itself; it is wrong for the relic,
+    /// because the relic's ping has NO card and its dealer is the pet
+    /// (<see cref="KleeMod.Relics.TamakushiCasket.Strike"/> hands the pet in
+    /// deliberately, so the number and the lunge land on the jellyfish). So
+    /// the pet's name was the true dealer and the false SOURCE, and a seat
+    /// reading the panel was told a Plan had fired.
+    ///
+    /// A SCOPE AND NOT A PARAMETER. <c>ElementalHit.Deal</c> is between the
+    /// relic and this log and carries no source name; threading one through
+    /// would put a relic's word on every elemental hit in the mod. The scope
+    /// is the same shape <c>KokomiOverhaulKit.Answer</c> already uses one file
+    /// over -- set, do the beat, restore -- and the game loop is single
+    /// threaded, so it covers exactly the hit it wraps. It NESTS (the previous
+    /// value is restored, not cleared), so a relic answering inside a relic
+    /// leaves the outer name standing.
+    /// </summary>
+    public static Attribution Attribute(string source) => new(source);
+
+    /// <summary>The scope <see cref="Attribute"/> opens. A struct, so the
+    /// common path allocates nothing.</summary>
+    public readonly struct Attribution : System.IDisposable
+    {
+        private readonly string? _previous;
+
+        internal Attribution(string source)
+        {
+            _previous = _attributed;
+            _attributed = source;
+        }
+
+        public void Dispose() => _attributed = _previous;
+    }
+
+    /// <summary>The name an open <see cref="Attribution"/> puts on the rows
+    /// written inside it, or null.</summary>
+    private static string? _attributed;
+
     /// <summary>"This reaction happened, on this body, off this source."
     ///
-    /// THE SOURCE IS THE CARD WHERE THERE IS ONE and the dealer otherwise,
-    /// which is what separates the two procs of the r27 beat: Thundergrust
-    /// names itself, and the Casket's answering ping has no card and arrives
-    /// under the creature that threw it. An empty string is the honest answer
-    /// for a beat with neither -- a bomb detonating on nobody's turn -- and
-    /// the page prints the row without a source rather than inventing one.
+    /// THE SOURCE IS THE OPEN ATTRIBUTION where one is open (`EB-697`), the
+    /// CARD where there is one, and the dealer otherwise -- which is what
+    /// separates the two procs of the r27 beat: Thundergrust names itself,
+    /// and the Casket's answering ping has no card and arrives under the
+    /// creature that threw it. An empty string is the honest answer for a
+    /// beat with none of the three -- a bomb detonating on nobody's turn --
+    /// and the page prints the row without a source rather than inventing one.
     /// </summary>
     public static void Note(Reaction reaction, Creature? target,
                             Creature? dealer, CardModel? cardSource)
@@ -86,7 +131,9 @@ public static class ReactionLog
         if (reaction == Reaction.None) return;
         Rows.Add(new Reacted(
             PrintedName(reaction),
-            Named(cardSource) is { Length: > 0 } card ? card : Named(dealer),
+            _attributed is { Length: > 0 } named ? named
+                : Named(cardSource) is { Length: > 0 } card ? card
+                : Named(dealer),
             Named(target),
             Safe(() => target?.CombatId.ToString())));
     }

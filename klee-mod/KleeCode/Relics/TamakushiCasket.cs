@@ -187,9 +187,21 @@ public sealed class TamakushiCasket : CustomRelicModel
         var dealer = pet ?? kokomi;
         await Vfx.KurageBeat.Act(pet);
         Vfx.KurageBeat.Say(dealer, Vfx.KurageBeat.Line(SourceName, null));
-        var dealt = await ElementalHit.Deal(
-            choiceContext, target, Element.Hydro,
-            KokomiOverhaulLaw.CasketStrike, dealer);
+        // `EB-697`. AND THE REACTION LOG IS TOLD WHOSE HIT THIS IS. The
+        // dealer above is the PET on purpose -- the lunge, the bubble and the
+        // damage number all belong on the jellyfish -- but the SOURCE of a
+        // reaction this ping sets off is the relic, and `ReactionLog`'s
+        // card-then-dealer resolution has no card here to prefer. The r30
+        // lane-1 seat read "Bake-Kurage" against a Vaporize in a fight with no
+        // Plan written in it and could not tell where the hit came from. The
+        // scope covers exactly this hit and restores what it found.
+        int dealt;
+        using (ReactionLog.Attribute(SourceName))
+        {
+            dealt = await ElementalHit.Deal(
+                choiceContext, target, Element.Hydro,
+                KokomiOverhaulLaw.CasketStrike, dealer);
+        }
         // `EB-453`. THE STRIKE NAMES ITSELF TO THE PLAN IT LANDED INSIDE.
         // `KokomiPlan.MovedOn` is MEASURED across the whole beat, so a Plan
         // that applies a debuff shows this hit inside its total and could not
