@@ -19,6 +19,7 @@
 | [`klee-mod-cards.md`](klee-mod-cards.md) | The C# card layer and its codegen contract with the design sheets; manifests and the lints that gate them. | R20, R23, R24, R34, R36, R37, R52, R69, R85, R86, R87, R92-3b |
 | [`klee-mod-runtime.md`](klee-mod-runtime.md) | Powers, Elements, Vfx, Patches, Relics, Diagnostics — the in-game runtime layer. | R13, R52, R59, R60, R61, R69, R71, R72, R80, R85, R86 |
 | [`klee-mod-build-pck.md`](klee-mod-build-pck.md) | The build/ship pipeline: deploy, versioning, validate gates, bitecheck, the pck overlay. | R70, R13, D4, R66 |
+| [`kit-verbs-vs-base-triggers.md`](kit-verbs-vs-base-triggers.md) | `EB-495`: which base-game trigger sees which kit verb, and as what — Attack, damage-only, debuff or nothing — per cell in BOTH engines, with the seven disagreements listed. | R246, R248 |
 | [`tools.md`](tools.md) | Codegen, art pipeline, lints, canon extractors — and which CI gates run them. | R67, R68, R69, R70, R81, R85, R90, R91, R92, D4 |
 | [`understudy.md`](understudy.md) | The bot playtest apparatus driving the real game; Guardrail-7 and the no-fun rule. | R93, R94, R95, R96, R97, R87, R70, R68, D4 |
 | [`vendor-sts2-mcp.md`](vendor-sts2-mcp.md) | The vendored wire contract the understudy bridge speaks. | R70, R94, R95, R97 |
