@@ -181,6 +181,47 @@ public class InazumaCompanionOverhaulTests
     }
 
     [Fact]
+    public void The_banner_hands_back_what_it_granted()
+    {
+        // `EB-415`. The grant is the CARD's `PowerAmount` -- 2 on the base
+        // face, 3 on the upgraded one -- and the take-back was this power's
+        // own constant, 2. So an upgraded banner leaked 1 permanent Dexterity
+        // a play (disclosed by the `EB-403` build and left standing there as
+        // "the shipped rule as written"; nobody ruled it). The power banks the
+        // grant at apply and pays THAT back.
+        //
+        // STRUCTURAL, like every pin on this arm: the headless seat has no
+        // `PowerCmd`, so what is asserted is the SHAPE -- the ledger, the door
+        // it is written through, and the row it is printed on. The BEHAVIOUR
+        // is measured in the sim twin,
+        // `test_the_upgraded_banner_grants_three_and_hands_three_back`, and
+        // the take-back's own source is pinned beside it.
+        var banner = typeof(WarBannerPower);
+
+        // THE DOOR. `PowerCmd.Apply` sends a second banner through
+        // `ModifyAmount`, so `AfterApplied` fires once and never again;
+        // `AfterPowerAmountChanged` is the hook that fires on BOTH paths.
+        Assert.NotNull(banner.GetMethod("AfterPowerAmountChanged",
+                                        All | BindingFlags.DeclaredOnly));
+        Assert.Null(banner.GetMethod("AfterApplied",
+                                     All | BindingFlags.DeclaredOnly));
+
+        // THE LEDGER: a DynamicVar, so it survives a clone and can be printed.
+        var power = (PowerModel)Activator.CreateInstance(banner)!;
+        Assert.Equal(0, power.DynamicVars["Granted"].IntValue);
+
+        // AND IT IS PRINTED WHERE A VAR IS ACTUALLY BOUND. A `{Granted}` on
+        // the static row would reach the screen as a placeholder -- `EB-353`,
+        // and `EB-754` one file over.
+        var rows = ((ILocalizationProvider)power).Localization!
+            .ToDictionary(e => e.Item1, e => e.Item2);
+        Assert.DoesNotContain("{Granted}", rows["description"]);
+        Assert.Contains("{Granted}", rows["smartDescription"]);
+        // The static row still says the clause; it just names no number.
+        Assert.Contains("takes it back", rows["description"]);
+    }
+
+    [Fact]
     public void Shinobus_ring_is_paid_in_plain_hp_and_not_in_exert()
     {
         // "Lose 3 HP" is plain HP loss. This engine spells that
@@ -299,7 +340,12 @@ public class InazumaCompanionOverhaulTests
     }
 
     [Theory]
-    [InlineData(typeof(WarBannerPower), CompanionOverhaulLaw.WarBannerDexterity)]
+    // `EB-415` TOOK A THIRD ROW OFF THIS LIST, for the same reason as the two
+    // named below and without moving a number: `WarBannerPower` hands back
+    // WHAT IT GRANTED, which is the card's upgradeable amount and not this
+    // arm's constant, so its face prints `{Granted}` -- a var, on the smart
+    // row, because that is the only branch `DynamicVars.AddTo` reaches.
+    // `The_banner_hands_back_what_it_granted` below is where it is pinned.
     [InlineData(typeof(JuugaPower), CompanionOverhaulLaw.JuugaDamage)]
     [InlineData(typeof(MujiMujiDarumaPower), CompanionOverhaulLaw.DarumaDamage)]
     [InlineData(typeof(MujiMujiDarumaPower), CompanionOverhaulLaw.DarumaBlock)]

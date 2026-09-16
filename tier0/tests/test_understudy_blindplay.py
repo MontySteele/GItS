@@ -9163,6 +9163,10 @@ def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
 
     The base gloss is the base RULE and does not move. The face carries the
     exception now, so the two can be read on one screen.
+
+    `EB-415` dropped the take-back's own NUMBER from the face, because the
+    banner hands back what it granted and the upgraded face grants 3. The
+    exception clause is what this page needs and it is still here.
     """
     import yaml
     row = next(r for r in yaml.safe_load(
@@ -9173,7 +9177,7 @@ def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
     card["name"] = "Gorou - General's War Banner (proto)"
     card["description"] = row["description"]
     page = blindplay.render(blindplay.observation(state))
-    assert "then the banner takes 2 back" in page
+    assert "then the banner takes it back" in page
     assert "does not decay" in page          # the base rule, still printed
 
 

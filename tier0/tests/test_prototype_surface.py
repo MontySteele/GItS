@@ -1186,20 +1186,28 @@ def test_the_war_banner_face_says_the_banner_takes_the_dexterity_back():
 
     The clause is now on the card face and on the power's own tip, and the two
     say the same thing.
+
+    `EB-415` TOOK THE SECOND NUMBER OFF THE FACE, and moved no number at all.
+    The take-back used to be the POWER's constant while the grant is the CARD's
+    upgradeable amount, so an upgraded banner granted 3 and handed 2 back. It
+    hands back what it granted now, which is not a number a printed face can
+    carry -- so the clause names none, and the live figure is on the badge's
+    smart row, the one branch `DynamicVars.AddTo` actually binds.
     """
     row = _war_banner_row()
-    assert "takes 2 back" in row["description"]
+    assert "takes it back" in row["description"]
+    assert "takes 2 back" not in row["description"]
     emitted = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
                / "Generated" / "ProtoMiGorouWarBanner.cs").read_text(
                    encoding="utf-8")
-    assert "for 2 turns, then the banner takes 2 back." in emitted
+    assert "for 2 turns, then the banner takes it back." in emitted
     power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
              / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
     banner = power.split("class WarBannerPower")[1].split("class ")[0]
     assert '{Amount:plural:turn|turns}, then "' in banner
-    assert '+ "[/blue] back."' in banner
-    # ...and the number it hands back is the POWER's constant, not the card's
-    # upgradeable amount: an upgraded banner grants 3 and gives 2 back.
+    assert '+ "takes it back."' in banner       # the static compendium row
+    assert '[/blue] back."' in banner           # and the smart row's figure
+    # ...and the constant survives as the fallback for a banner nobody dealt.
     assert "CompanionOverhaulLaw.WarBannerDexterity" in banner
     assert row["upgrade"] is None if "upgrade" in row else True
 

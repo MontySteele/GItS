@@ -2212,12 +2212,28 @@ real `DexterityPower`, and the second effect it applies -- `mi_war_banner`,
 clock that takes 2 Dexterity back when it runs out, at the end of the turn its
 `Amount` reaches 1 (`CompanionOverhaulTurnEnd`, `AfterSideTurnEnd`).
 
-The take-back clause is now on both faces, in that power's own words. The
-number is the power's own constant, `CompanionOverhaulLaw.WarBannerDexterity`
-= 2, and NOT the card's `PowerAmount`, which the upgrade moves to 3 -- so an
-upgraded banner grants 3 and hands 2 back. That asymmetry is the shipped rule
-as written and is disclosed here rather than changed; the base Dexterity gloss
-stays the base rule and the exception is printed where the exception is made.
+The take-back clause is now on both faces, in that power's own words. The base
+Dexterity gloss stays the base rule and the exception is printed where the
+exception is made.
+
+`EB-415` then CLOSED the asymmetry this note used to disclose. The take-back
+was the power's own constant, `CompanionOverhaulLaw.WarBannerDexterity` = 2,
+while the grant is the card's `PowerAmount`, which the upgrade moves to 3 -- so
+an upgraded banner granted 3, handed 2 back, and left 1 permanent Dexterity
+behind every play. That was never ruled; it is two numbers with different
+authors, and it was recorded here as "the shipped rule as written" because the
+`EB-403` build found it and did not own it.
+
+The banner now BANKS what it granted and hands that back. In the mod that is a
+`Granted` DynamicVar written from `AfterPowerAmountChanged` -- the hook that
+fires on both `PowerCmd` paths, which matters because a second banner stacks
+through `ModifyAmount` and never through `Apply`'s own tail; in the sim it is
+`effects.war_banner_grant`, read off the card's own effects so the upgraded
+face banks 3. Neither face's printed numbers moved: the card says "gain 2
+Dexterity for 2 turns, then the banner takes it back", with no second number to
+disagree with the first, and the badge prints the live `{Granted}` on its smart
+row (a var on the static row would reach the screen as a placeholder --
+`EB-353`).
 
 ## before proto_fr_aria_of_recompense
 

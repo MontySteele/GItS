@@ -326,6 +326,104 @@ def test_the_war_banner_takes_back_only_its_own_two(overhaul):
     assert st.player.powers["dexterity"] == 5
 
 
+# ---- `EB-415`: the upgraded banner hands back what the upgrade granted -----
+
+
+def _upgraded(card_id: str):
+    from tier0.content import upgrades
+    return upgrades.apply_upgrade(loader.get_card(card_id))
+
+
+def test_the_upgraded_banner_grants_three_and_hands_three_back(overhaul):
+    """`EB-415` (disclosed by the `EB-403` build). The card's grant is its own
+    `PowerAmount`, which the upgrade moves 2 -> 3; the take-back was the arm's
+    constant, 2. So every play of the upgraded face left 1 permanent Dexterity
+    behind -- a number nobody ruled, arrived at by the two halves having
+    different authors. The banner banks what it granted now.
+    """
+    st = make_state()
+    effects.resolve_card(st, _upgraded("proto_mi_gorou_war_banner"))
+    assert st.player.powers["dexterity"] == 3
+
+    effects.inazuma_overhaul_turn_end(st)
+    effects.inazuma_overhaul_turn_end(st)
+    assert "dexterity" not in st.player.powers
+
+
+def test_the_upgraded_banner_leaves_somebody_elses_dexterity_alone(overhaul):
+    """The other half of the same sentence, on the face the row pins: what
+    goes back is the banner's own three and not the stack."""
+    st = make_state()
+    st.player.powers["dexterity"] = 5
+    effects.resolve_card(st, _upgraded("proto_mi_gorou_war_banner"))
+    assert st.player.powers["dexterity"] == 8
+
+    effects.inazuma_overhaul_turn_end(st)
+    effects.inazuma_overhaul_turn_end(st)
+    assert st.player.powers["dexterity"] == 5
+
+
+def test_two_banners_hand_back_both_grants(overhaul):
+    """A second banner is a longer clock and a bigger grant, and the ledger
+    accumulates: the merged power owes four, not two. The mod's twin reaches
+    the same total through `Hook.AfterPowerAmountChanged`, which is the door a
+    SECOND `PowerCmd.Apply` of a counter comes through."""
+    st = make_state()
+    _play(st, "proto_mi_gorou_war_banner")
+    _play(st, "proto_mi_gorou_war_banner")
+    assert st.player.powers["dexterity"] == 4
+    assert st.player.powers["mi_war_banner"] == 4
+
+    for _ in range(4):
+        effects.inazuma_overhaul_turn_end(st)
+    assert "dexterity" not in st.player.powers
+    assert "mi_war_banner" not in st.player.powers
+
+
+def test_the_ledger_leaves_with_the_banner(overhaul):
+    """A sidecar the expiry does not clear is an amount that pays again on the
+    next banner -- the field's own rule in `state.Player`."""
+    st = make_state()
+    _play(st, "proto_mi_gorou_war_banner")
+    assert st.player.timed_power_amounts[effects.WAR_BANNER][0][0] == 2
+
+    effects.inazuma_overhaul_turn_end(st)
+    effects.inazuma_overhaul_turn_end(st)
+    assert effects.WAR_BANNER not in st.player.timed_power_amounts
+
+
+def test_the_mods_banner_reads_the_same_two_numbers(overhaul):
+    """`EB-415`'s parity half. The mod has no PowerCmd on a headless seat, so
+    the take-back's own source is read here beside the sim's, the way this
+    module already reads the arm's turn-end ORDER off both engines."""
+    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+           / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
+    banner = src.split("class WarBannerPower")[1].split("class ")[0]
+
+    # The grant is the CARD's own amount, which the upgrade moves.
+    assert 'banner.DynamicVars["PowerAmount"].IntValue' in banner
+    assert "ProtoMiGorouWarBanner banner" in banner
+    # The take-back is what was banked, and no longer the arm's constant.
+    assert "var owed = Granted;" in banner
+    assert "dex.Amount <= owed" in banner
+    assert "choiceContext, dex, -owed," in banner
+    assert "-CompanionOverhaulLaw.WarBannerDexterity" not in banner
+    # The constant survives as the fallback for a banner nobody dealt --
+    # `war_banner_grant` above is the twin of that sentence.
+    assert "CompanionOverhaulLaw.WarBannerDexterity" in banner
+
+
+def test_a_banner_nobody_dealt_falls_back_to_the_arms_constant(overhaul):
+    """The understudy's power door and a test seat both raise a banner without
+    ever playing the card, so there is no grant to read; the constant is what
+    that banner would have granted."""
+    st = make_state()
+    st.player.powers["dexterity"] = 2
+    st.player.powers["mi_war_banner"] = 1
+    effects.inazuma_overhaul_turn_end(st)
+    assert "dexterity" not in st.player.powers
+
+
 def test_juuga_fires_three_turns_and_stops(overhaul):
     st = make_state(enemies=[make_enemy(hp=90)])
     _play(st, "proto_mi_gorou_juuga")
