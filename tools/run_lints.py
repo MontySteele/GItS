@@ -190,6 +190,16 @@ REGISTRY: tuple[Lint, ...] = (
     # list with a reason per entry and rot semantics, so it can only shrink.
     _ci("text-conventions",     "tools/lint_text_conventions.py"),
     _ci("pool-membership",      "tools/lint_pool_membership.py"),
+    # EB-790, beside pool-membership because it polices the other end of the
+    # same life: that one asks whether every live card is in a pool, this asks
+    # whether every card that has LEFT still answers to its id. A progress
+    # save holds ids forever and validates each against ModelDb at boot, so a
+    # retirement nobody recorded is a ValidationError in the log the crash-log
+    # discipline reads first -- on a save that is never to be edited. Checks
+    # the register against the live classes, the codegen manifests and the
+    # emitted aliases; the git-history sweep behind `--history` is out of the
+    # lane because CI clones shallow.
+    _ci("retired-card-ids",     "tools/lint_retired_card_ids.py"),
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
     # EB-255, beside pool-membership's family because it asks the other
     # question about the same two lists: that one asks whether every card is
