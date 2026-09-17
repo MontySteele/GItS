@@ -14,7 +14,11 @@ records a plate; what *wires* it is one table,
 `docs/current/dossiers/content/enemy-dressings.tsv`, whose row says which body
 dresses which base-game `Id.Entry` on which face, under which display name, at
 which size class (`regular` / `elite` / `boss`, scaling the plate and its
-bounds together). `tools/gen_teyvat_creature_scenes.py` reads that table and
+bounds together; a plate carrying two classes gets one scene per class).
+**A face keys only the zone it stands on** — Mondstadt replaces Overgrowth and
+Liyue replaces the Underdocks (`Patches/ModelDbActsPatch.Swaps`), so a row
+keyed outside its own zone never fires and reads in the game as no dressing at
+all. `tools/gen_teyvat_creature_scenes.py` reads that table and
 writes both halves together — the committed scene
 `klee-mod/pck-src/teyvat/creature_visuals/<body>.tscn` and the C# tables
 `TeyvatFrame.StillPortraits` and `MonsterNames`

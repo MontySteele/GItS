@@ -1,105 +1,108 @@
 body	face	base_entry	display_name	size_class	notes
-wooden_shield_hilichurl_guard	MONDSTADT	NIBBIT	Wooden Shield Hilichurl Guard	regular	
+ruin_guard	MONDSTADT	BYGONE_EFFIGY	Ruin Guard	elite	
+anemo_hilichurl_rogue	MONDSTADT	BYRDONIS	Anemo Hilichurl Rogue	elite	palette
+golden_wolflord	MONDSTADT	CEREMONIAL_BEAST	Golden Wolflord	boss	act-1 Table A's Mondstadt candidate (wolves are Mondstadt-exclusive); shares its plate with SUMERU/FABRICATOR at a different size class
+anemo_samachurl	MONDSTADT	FOGMOG	Anemo Samachurl	regular	palette
 hilichurl	MONDSTADT	INKLET	Hilichurl	regular	
+eremite_linebreaker	MONDSTADT	KIN_FOLLOWER	Eremite Linebreaker	regular	one plate, priest and followers
+eremite_linebreaker	MONDSTADT	KIN_PRIEST	Eremite Linebreaker	regular	act-1 Table A's Kin candidate
 dendro_slime	MONDSTADT	LEAF_SLIME_M	Dendro Slime	regular	
 dendro_slime	MONDSTADT	LEAF_SLIME_S	Dendro Slime	regular	one plate, both slime sizes
+rockfond_rifthound	MONDSTADT	MAWLER	Rockfond Rifthound	regular	palette; shares its plate with INAZUMA/CHOMPER
+wooden_shield_hilichurl_guard	MONDSTADT	NIBBIT	Wooden Shield Hilichurl Guard	regular	
 cryo_slime	MONDSTADT	TWIG_SLIME_M	Cryo Slime	regular	
 cryo_slime	MONDSTADT	TWIG_SLIME_S	Cryo Slime	regular	one plate, both slime sizes
-rockfond_rifthound	MONDSTADT	MAWLER	Rockfond Rifthound	regular	palette; shares its plate with INAZUMA/CHOMPER
-anemo_samachurl	MONDSTADT	FOGMOG	Anemo Samachurl	regular	palette
-fatui_hydrogunner_legionnaire	MONDSTADT	SEWER_CLAM	Fatui Hydrogunner Legionnaire	regular	palette; base enemy is Underdocks-only in v0.111.0; inert under this face
-anemo_hilichurl_rogue	MONDSTADT	BYRDONIS	Anemo Hilichurl Rogue	elite	palette
-ruin_guard	MONDSTADT	BYGONE_EFFIGY	Ruin Guard	elite	
-hydro_abyss_mage	MONDSTADT	PHANTASMAL_GARDENER	Hydro Abyss Mage	elite	four mage plates, one Id.Entry: hydro takes the row, pyro/electro/cryo are scene-only; base enemy is Underdocks-only in v0.111.0; inert under this face
 boreas	MONDSTADT	VANTOM	Andrius	boss	
-cryo_regisvine	MONDSTADT	LAGAVULIN_MATRIARCH	Cryo Regisvine	boss	base enemy is Underdocks-only in v0.111.0; inert under this face
-treasure_hoarder_handyman	LIYUE	NIBBIT	Treasure Hoarder Handyman	regular	base enemy is Overgrowth-only in v0.111.0; inert under this face
-treasure_hoarder_scout	LIYUE	INKLET	Treasure Hoarder Scout	regular	base enemy is Overgrowth-only in v0.111.0; inert under this face
-geo_slime	LIYUE	LEAF_SLIME_M	Geo Slime	regular	base enemy is Overgrowth-only in v0.111.0; inert under this face
-geo_slime	LIYUE	LEAF_SLIME_S	Geo Slime	regular	base enemy is Overgrowth-only in v0.111.0; inert under this face
-hydro_slime	LIYUE	TWIG_SLIME_M	Hydro Slime	regular	base enemy is Overgrowth-only in v0.111.0; inert under this face
-hydro_slime	LIYUE	TWIG_SLIME_S	Hydro Slime	regular	base enemy is Overgrowth-only in v0.111.0; inert under this face
-geovishap_hatchling	LIYUE	MAWLER	Geovishap Hatchling	regular	base enemy is Overgrowth-only in v0.111.0; inert under this face
-anemo_samachurl	LIYUE	FOGMOG	Anemo Samachurl	regular	palette; base enemy is Overgrowth-only in v0.111.0; inert under this face
-large_geo_slime	LIYUE	SEWER_CLAM	Large Geo Slime	regular	
-treasure_hoarder_marksman	LIYUE	BYRDONIS	Treasure Hoarder Marksman	elite	base enemy is Overgrowth-only in v0.111.0; inert under this face
-ruin_guard	LIYUE	BYGONE_EFFIGY	Ruin Guard	elite	base enemy is Overgrowth-only in v0.111.0; inert under this face
-hilichurl_fighter	LIYUE	PHANTASMAL_GARDENER	Hilichurl Fighter	elite	the camp is Fighters plus Guards but the elite is one Id.Entry: the Fighter takes the row
-kongamato	LIYUE	VANTOM	Kongamato	boss	palette; base enemy is Overgrowth-only in v0.111.0; inert under this face
-primo_geovishap	LIYUE	LAGAVULIN_MATRIARCH	Primo Geovishap	boss	
+pyro_abyss_mage	MONDSTADT		Pyro Abyss Mage	elite	scene only: PHANTASMAL_GARDENER is one Id.Entry, and it is Underdocks-side
+electro_abyss_mage	MONDSTADT		Electro Abyss Mage	elite	scene only: PHANTASMAL_GARDENER is one Id.Entry, and it is Underdocks-side
+cryo_abyss_mage	MONDSTADT		Cryo Abyss Mage	elite	scene only: PHANTASMAL_GARDENER is one Id.Entry, and it is Underdocks-side
+hydro_abyss_mage	MONDSTADT		Hydro Abyss Mage	elite	scene only: its row keyed PHANTASMAL_GARDENER, which only the Underdocks rolls; LIYUE's Gardener row is the Hilichurl Fighter
+fatui_hydrogunner_legionnaire	MONDSTADT		Fatui Hydrogunner Legionnaire	regular	scene only: its row keyed SEWER_CLAM, which only the Underdocks rolls; LIYUE's Sewer Clam row is the Rock Shield Hilichurl Guard
+cryo_regisvine	MONDSTADT		Cryo Regisvine	boss	scene only: its row keyed LAGAVULIN_MATRIARCH, which only the Underdocks rolls; LIYUE's Matriarch row is the Primo Geovishap
+hydro_slime	LIYUE	CORPSE_SLUG	Hydro Slime	regular	
+wooden_shield_hilichurl_guard	LIYUE	FAT_GREMLIN	Wooden Shield Hilichurl Guard	regular	one plate, two faces: it also dresses MONDSTADT/NIBBIT
+hydro_slime	LIYUE	GAS_BOMB	Hydro Slime	regular	one plate, the Living Fog's bombs and the Corpse Slugs
+treasure_hoarder_handyman	LIYUE	GREMLIN_MERC	Treasure Hoarder Handyman	regular	
+primo_geovishap	LIYUE	LAGAVULIN_MATRIARCH	Primo Geovishap	boss	Liyue-exclusive body
+anemo_samachurl	LIYUE	LIVING_FOG	Anemo Samachurl	regular	palette
+hilichurl_fighter	LIYUE	PHANTASMAL_GARDENER	Hilichurl Fighter	elite	the camp is Fighters plus Guards but the elite is one Id.Entry
+treasure_hoarder_marksman	LIYUE	SEAPUNK	Treasure Hoarder Marksman	regular	
+rock_shield_hilichurl_guard	LIYUE	SEWER_CLAM	Rock Shield Hilichurl Guard	elite	the camp's other half; large_geo_slime moved to the Sludge Spinner
+ruin_guard	LIYUE	SKULKING_COLONY	Ruin Guard	elite	
+large_geo_slime	LIYUE	SLUDGE_SPINNER	Large Geo Slime	regular	large_hydro_slime was vetoed
+treasure_hoarder_scout	LIYUE	SNEAKY_GREMLIN	Treasure Hoarder Scout	regular	the merc's gang, dressed as the Hoarders' gang
+geo_slime	LIYUE	TOADPOLE	Geo Slime	regular	
+geovishap_hatchling	LIYUE	TWO_TAILED_RAT	Geovishap Hatchling	regular	Liyue-exclusive body
+kongamato	LIYUE		Kongamato	boss	scene only: its row keyed VANTOM, an Overgrowth entry; the Underdocks bosses (Waterfall Giant, Soul Fysh) await their own portrait bill
 tepetlisaurus_warrior_rockbreaker_blade	NATLAN	BOWLBUG_ROCK	Tepetlisaurus Warrior: Rockbreaker Blade	regular	
 tepetlisaur_whelp	NATLAN	BOWLBUG_SILK	Tepetlisaur Whelp	regular	
-tepetlisaur_whelp	NATLAN	EXOSKELETON	Tepetlisaur Whelp	regular	one plate, pod and trio
-tepetlisaurus	NATLAN	TUNNELER	Tepetlisaurus	regular	
 koholasaurus	NATLAN	CHOMPER	Koholasaurus	regular	palette
+magatsu_mitake_narukami_no_mikoto	NATLAN	CRUSHER	Magatsu Mitake Narukami no Mikoto	boss	Natlan borrows Inazuma's body
+rock_shield_hilichurl_guard	NATLAN	DECIMILLIPEDE_SEGMENT_BACK	Rock Shield Hilichurl Guard	elite	palette; one plate, all three segments
+rock_shield_hilichurl_guard	NATLAN	DECIMILLIPEDE_SEGMENT_FRONT	Rock Shield Hilichurl Guard	elite	palette; one plate, all three segments
+rock_shield_hilichurl_guard	NATLAN	DECIMILLIPEDE_SEGMENT_MIDDLE	Rock Shield Hilichurl Guard	elite	palette; one plate, all three segments
+yumkasaurus_warrior_flowing_skyfire	NATLAN	ENTOMANCER	Yumkasaurus Warrior: Flowing Skyfire	elite	
+tepetlisaur_whelp	NATLAN	EXOSKELETON	Tepetlisaur Whelp	regular	one plate, pod and trio
 yumkasaurus	NATLAN	HUNTER_KILLER	Yumkasaurus	regular	palette
+rock_cavernous_wayob_manifestation	NATLAN	INFESTED_PRISM	Rock-Cavernous Wayob Manifestation	elite	
+everlasting_lord_of_arcane_wisdom	NATLAN	KNOWLEDGE_DEMON	Shouki no Kami	boss	Natlan borrows Sumeru's body
 tatankasaurus	NATLAN	LOUSE_PROGENITOR	Tatankasaurus	regular	palette
 yumkasaur_whelp	NATLAN	MYTE	Yumkasaur Whelp	regular	palette
 iktomisaurus	NATLAN	OVICOPTER	Iktomisaurus	regular	
-iktomisaurus_chick	NATLAN	TOUGH_EGG	Iktomisaurus Chick	regular	
-hydro_samachurl	NATLAN	THE_OBSCURA	Hydro Samachurl	regular	palette
 hydro_samachurl	NATLAN	PARAFRIGHT	Hydro Samachurl	regular	palette; one plate, both halves of the pair
-rock_shield_hilichurl_guard	NATLAN	DECIMILLIPEDE_SEGMENT_FRONT	Rock Shield Hilichurl Guard	elite	palette; one plate, all three segments
-rock_shield_hilichurl_guard	NATLAN	DECIMILLIPEDE_SEGMENT_MIDDLE	Rock Shield Hilichurl Guard	elite	palette; one plate, all three segments
-rock_shield_hilichurl_guard	NATLAN	DECIMILLIPEDE_SEGMENT_BACK	Rock Shield Hilichurl Guard	elite	palette; one plate, all three segments
-yumkasaurus_warrior_flowing_skyfire	NATLAN	ENTOMANCER	Yumkasaurus Warrior: Flowing Skyfire	elite	
-rock_cavernous_wayob_manifestation	NATLAN	INFESTED_PRISM	Rock-Cavernous Wayob Manifestation	elite	
-everlasting_lord_of_arcane_wisdom	NATLAN	KNOWLEDGE_DEMON	Shouki no Kami	boss	Natlan borrows Sumeru's body
-magatsu_mitake_narukami_no_mikoto	NATLAN	CRUSHER	Magatsu Mitake Narukami no Mikoto	boss	Natlan borrows Inazuma's body
 magatsu_mitake_narukami_no_mikoto	NATLAN	ROCKET	Magatsu Mitake Narukami no Mikoto	boss	one plate, both crab slots
+hydro_samachurl	NATLAN	THE_OBSCURA	Hydro Samachurl	regular	palette
+iktomisaurus_chick	NATLAN	TOUGH_EGG	Iktomisaurus Chick	regular	
+tepetlisaurus	NATLAN	TUNNELER	Tepetlisaurus	regular	
+chanca	NATLAN		Chanca	regular	scene only: the Ancient Tezcatara is an AncientEventModel, not a MonsterModel
 nobushi_kikouban	INAZUMA	BOWLBUG_ROCK	Nobushi: Kikouban	regular	palette
 nobushi_kikouban	INAZUMA	BOWLBUG_SILK	Nobushi: Kikouban	regular	palette; one plate, whole pod
-thundercraven_rifthound_whelp	INAZUMA	EXOSKELETON	Thundercraven Rifthound Whelp	regular	
-thundercraven_rifthound	INAZUMA	TUNNELER	Thundercraven Rifthound	regular	
 rockfond_rifthound	INAZUMA	CHOMPER	Rockfond Rifthound	regular	shares its plate with MONDSTADT/MAWLER
+magatsu_mitake_narukami_no_mikoto	INAZUMA	CRUSHER	Magatsu Mitake Narukami no Mikoto	boss	
+electro_specter	INAZUMA	DECIMILLIPEDE_SEGMENT_BACK	Electro Specter	elite	palette
+electro_specter	INAZUMA	DECIMILLIPEDE_SEGMENT_FRONT	Electro Specter	elite	palette
+electro_specter	INAZUMA	DECIMILLIPEDE_SEGMENT_MIDDLE	Electro Specter	elite	palette
+kairagi_fiery_might	INAZUMA	ENTOMANCER	Kairagi: Fiery Might	elite	palette
+thundercraven_rifthound_whelp	INAZUMA	EXOSKELETON	Thundercraven Rifthound Whelp	regular	
 primordial_bathysmal_vishap	INAZUMA	HUNTER_KILLER	Primordial Bathysmal Vishap	regular	
+electro_specter	INAZUMA	INFESTED_PRISM	Electro Specter	elite	palette; one plate, segments and prism
 wooden_shieldwall_mitachurl	INAZUMA	LOUSE_PROGENITOR	Wooden Shieldwall Mitachurl	regular	palette
 dendro_samachurl	INAZUMA	MYTE	Dendro Samachurl	regular	palette
 fatui_cryo_cicin_mage	INAZUMA	OVICOPTER	Fatui Cryo Cicin Mage	regular	palette
-fatui_cryo_cicin_mage	INAZUMA	TOUGH_EGG	Fatui Cryo Cicin Mage	regular	palette; one plate, mage and eggs
-hydro_samachurl	INAZUMA	THE_OBSCURA	Hydro Samachurl	regular	palette
 hydro_samachurl	INAZUMA	PARAFRIGHT	Hydro Samachurl	regular	palette
-electro_specter	INAZUMA	DECIMILLIPEDE_SEGMENT_FRONT	Electro Specter	elite	palette
-electro_specter	INAZUMA	DECIMILLIPEDE_SEGMENT_MIDDLE	Electro Specter	elite	palette
-electro_specter	INAZUMA	DECIMILLIPEDE_SEGMENT_BACK	Electro Specter	elite	palette
-kairagi_fiery_might	INAZUMA	ENTOMANCER	Kairagi: Fiery Might	elite	palette
-electro_specter	INAZUMA	INFESTED_PRISM	Electro Specter	elite	palette; one plate, segments and prism
-magatsu_mitake_narukami_no_mikoto	INAZUMA	CRUSHER	Magatsu Mitake Narukami no Mikoto	boss	
 magatsu_mitake_narukami_no_mikoto	INAZUMA	ROCKET	Magatsu Mitake Narukami no Mikoto	boss	one plate, both crab slots
-geo_samachurl	FONTAINE	DEVOTED_SCULPTOR	Geo Samachurl	regular	palette
-hydro_specter	FONTAINE	SCROLL_OF_BITING	Hydro Specter	regular	palette
-construction_specialist_mek	FONTAINE	LIVING_SHIELD	Construction Specialist Mek	regular	
-area_alert_mek	FONTAINE	TURRET_OPERATOR	Area Alert Mek	regular	
-assault_specialist_mek	FONTAINE	AXEBOT	Assault Specialist Mek	regular	
-suppression_specialist_mek	FONTAINE	PUNCH_CONSTRUCT	Suppression Specialist Mek	regular	
-overgrown_breacher_primus	FONTAINE	CUBEX_CONSTRUCT	Overgrown Breacher Primus	regular	
-annihilation_specialist_mek	FONTAINE	FABRICATOR	Annihilation Specialist Mek	regular	
-frostarm_lawachurl	FONTAINE	FROG_KNIGHT	Frostarm Lawachurl	regular	palette
-mirror_maiden	FONTAINE	MAGI_KNIGHT	Mirror Maiden	elite	palette; one plate anchors the whole gang
-mirror_maiden	FONTAINE	FLAIL_KNIGHT	Mirror Maiden	elite	palette; one plate anchors the whole gang
-mirror_maiden	FONTAINE	SPECTRAL_KNIGHT	Mirror Maiden	elite	palette; one plate anchors the whole gang
-shatterstone_breacher_primus	FONTAINE	MECHA_KNIGHT	Large Shatterstone Breacher Primus	elite	
-electro_regisvine	FONTAINE	SOUL_NEXUS	Electro Regisvine	elite	palette
-iniquitous_baptist	FONTAINE	TEST_SUBJECT	Iniquitous Baptist	boss	
+hydro_samachurl	INAZUMA	THE_OBSCURA	Hydro Samachurl	regular	palette
+fatui_cryo_cicin_mage	INAZUMA	TOUGH_EGG	Fatui Cryo Cicin Mage	regular	palette; one plate, mage and eggs
+thundercraven_rifthound	INAZUMA	TUNNELER	Thundercraven Rifthound	regular	
+hirayama	INAZUMA		Hirayama	regular	scene only: the Ancient Darv is an AncientEventModel, not a MonsterModel
 prototype_cal_breguet	FONTAINE	AEONGLASS	Prototype: Cal. Breguet	boss	
+assault_specialist_mek	FONTAINE	AXEBOT	Assault Specialist Mek	regular	
+overgrown_breacher_primus	FONTAINE	CUBEX_CONSTRUCT	Overgrown Breacher Primus	regular	
+geo_samachurl	FONTAINE	DEVOTED_SCULPTOR	Geo Samachurl	regular	palette
+annihilation_specialist_mek	FONTAINE	FABRICATOR	Annihilation Specialist Mek	regular	
+mirror_maiden	FONTAINE	FLAIL_KNIGHT	Mirror Maiden	elite	palette; one plate anchors the whole gang
+frostarm_lawachurl	FONTAINE	FROG_KNIGHT	Frostarm Lawachurl	regular	palette
+construction_specialist_mek	FONTAINE	LIVING_SHIELD	Construction Specialist Mek	regular	
+mirror_maiden	FONTAINE	MAGI_KNIGHT	Mirror Maiden	elite	palette; one plate anchors the whole gang
+shatterstone_breacher_primus	FONTAINE	MECHA_KNIGHT	Large Shatterstone Breacher Primus	elite	
+suppression_specialist_mek	FONTAINE	PUNCH_CONSTRUCT	Suppression Specialist Mek	regular	
+hydro_specter	FONTAINE	SCROLL_OF_BITING	Hydro Specter	regular	palette
+electro_regisvine	FONTAINE	SOUL_NEXUS	Electro Regisvine	elite	palette
+mirror_maiden	FONTAINE	SPECTRAL_KNIGHT	Mirror Maiden	elite	palette; one plate anchors the whole gang
+iniquitous_baptist	FONTAINE	TEST_SUBJECT	Iniquitous Baptist	boss	
+area_alert_mek	FONTAINE	TURRET_OPERATOR	Area Alert Mek	regular	
+everlasting_lord_of_arcane_wisdom	SUMERU	AEONGLASS	Shouki no Kami	boss	one plate, two bosses
 eremite_scorching_loremaster	SUMERU	DEVOTED_SCULPTOR	Eremite Scorching Loremaster	regular	
-eremite_linebreaker	SUMERU	SCROLL_OF_BITING	Eremite Linebreaker	regular	
-eremite_ravenbeak_halberdier	SUMERU	LIVING_SHIELD	Eremite Ravenbeak Halberdier	regular	
-eremite_crossbow	SUMERU	TURRET_OPERATOR	Eremite Crossbow	regular	
 golden_wolflord	SUMERU	FABRICATOR	Golden Wolflord	regular	
+eremite_sunfrost	SUMERU	FLAIL_KNIGHT	Eremite Sunfrost	elite	one plate anchors the whole war-band
 eremite_stone_enchanter	SUMERU	FROG_KNIGHT	Eremite Stone Enchanter	regular	
 eremite_daythunder	SUMERU	GLOBE_HEAD	Eremite Daythunder	regular	
-consecrated_horned_crocodile	SUMERU	SLIMED_BERSERKER	Consecrated Horned Crocodile	regular	
+eremite_ravenbeak_halberdier	SUMERU	LIVING_SHIELD	Eremite Ravenbeak Halberdier	regular	
 eremite_sunfrost	SUMERU	MAGI_KNIGHT	Eremite Sunfrost	elite	one plate anchors the whole war-band
-eremite_sunfrost	SUMERU	FLAIL_KNIGHT	Eremite Sunfrost	elite	one plate anchors the whole war-band
-eremite_sunfrost	SUMERU	SPECTRAL_KNIGHT	Eremite Sunfrost	elite	one plate anchors the whole war-band
 consecrated_red_vulture	SUMERU	MECHA_KNIGHT	Consecrated Red Vulture	elite	
+eremite_linebreaker	SUMERU	SCROLL_OF_BITING	Eremite Linebreaker	regular	
+consecrated_horned_crocodile	SUMERU	SLIMED_BERSERKER	Consecrated Horned Crocodile	regular	
+eremite_sunfrost	SUMERU	SPECTRAL_KNIGHT	Eremite Sunfrost	elite	one plate anchors the whole war-band
 warden_of_oasis_prime	SUMERU	TEST_SUBJECT	Apep's Guardian	boss	
-everlasting_lord_of_arcane_wisdom	SUMERU	AEONGLASS	Shouki no Kami	boss	one plate, two bosses
-pyro_abyss_mage	MONDSTADT		Pyro Abyss Mage	elite	scene only: PHANTASMAL_GARDENER is one Id.Entry and hydro_abyss_mage holds it
-electro_abyss_mage	MONDSTADT		Electro Abyss Mage	elite	scene only: PHANTASMAL_GARDENER is one Id.Entry and hydro_abyss_mage holds it
-cryo_abyss_mage	MONDSTADT		Cryo Abyss Mage	elite	scene only: PHANTASMAL_GARDENER is one Id.Entry and hydro_abyss_mage holds it
-rock_shield_hilichurl_guard	LIYUE		Rock Shield Hilichurl Guard	elite	the Liyue camp's second half; the plate's live rows are NATLAN's Decimillipede segments
-chanca	NATLAN		Chanca	regular	scene only: the Ancient Tezcatara is an AncientEventModel, not a MonsterModel
-hirayama	INAZUMA		Hirayama	regular	scene only: the Ancient Darv is an AncientEventModel, not a MonsterModel
+eremite_crossbow	SUMERU	TURRET_OPERATOR	Eremite Crossbow	regular	
 liloupar	SUMERU		Liloupar	regular	scene only: the Ancient Vakuu is an AncientEventModel, not a MonsterModel

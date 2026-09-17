@@ -9,7 +9,7 @@ nation's background or an act's music track belongs to the FRAME, not to one
 character, and the C# names these paths in full
 (`klee-mod/KleeCode/Teyvat/TeyvatFrame.StillPortraits`, `TeyvatMusic.Root`).
 
-## creature_visuals/*.tscn — GENERATED, 77 of them
+## creature_visuals/*.tscn — GENERATED, 78 of them for 77 plates
 
 **Do not hand-edit a file in this directory.** Every `.tscn` under
 `creature_visuals/` is written by `tools/gen_teyvat_creature_scenes.py` from
@@ -30,8 +30,16 @@ health bar, the block badge, the selection reticle, the intent marker and every
 hit VFX are placed off those, and a plate that grew while its bounds did not
 would put the intent inside the body. The three numbers, and the base-game
 `%Bounds` medians they land on, are derived in the generator's docstring:
-`regular` 1.0 (280 tall), `elite` 1.3 (364), `boss` 1.6 (448). **`Visuals.Scale`
-is never written** — `NCreature` owns it — so the scale rides the `Sprite2D`
+`regular` 1.0 (280 tall), `elite` 1.3 (364), `boss` 1.6 (448).
+
+A size class belongs to the **row**, not to the plate: the Golden Wolflord
+dresses Overgrowth's Ceremonial Beast (a boss) and Sumeru's Fabricator (a
+regular) and is the same picture either way. A scene fixes one scale, so such a
+body gets `<body>_<class>.tscn` per class over the same `<body>.png` — today
+that is `golden_wolflord` alone, which is why there are 78 scenes for 77
+plates.
+
+**`Visuals.Scale` is never written** — `NCreature` owns it — so the scale rides the `Sprite2D`
 under `%Visuals`, and `%Visuals` itself stays an identity `Node2D`.
 
 The rest of this section is the mechanism, written when the directory held one

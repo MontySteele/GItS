@@ -43,12 +43,31 @@ def test_the_committed_scenes_and_the_c_sharp_table_are_not_stale():
     assert problems == [], "\n".join(problems)
 
 
-def test_every_body_has_exactly_one_scene_and_the_directory_holds_no_other():
+def test_every_scene_is_the_tables_and_the_directory_holds_no_other():
     committed = {
         p.name for p in
         (ROOT / "klee-mod" / "pck-src" / "teyvat" / "creature_visuals").glob("*.tscn")
     }
-    assert committed == {f"{body}.tscn" for body in gen.bodies(ROWS)}
+    assert committed == {f"{name}.tscn" for name in gen.scenes(ROWS)}
+
+
+def test_a_scene_per_size_class_and_no_more():
+    """One scene per body, EXCEPT where the table gives a plate two classes.
+
+    A scene fixes one sprite scale, so a plate that dresses a boss on one face
+    and a regular on another cannot share one `.tscn` -- and a plate that does
+    not must not be split, or the directory doubles for nothing.
+    """
+    classes = {}
+    for row in ROWS:
+        classes.setdefault(row.body, set()).add(row.size_class)
+    for body, seen in classes.items():
+        ids = {r.scene_id for r in ROWS if r.body == body}
+        assert ids == ({body} if len(seen) == 1
+                       else {f"{body}_{c}" for c in seen}), body
+    # Every scene draws its body's own plate, whatever the scene is called.
+    for name, row in gen.scenes(ROWS).items():
+        assert f'path="{gen.RES_ROOT}/{row.body}.png"' in gen.scene_source(row), name
 
 
 def test_the_contract_fixture_names_the_same_bodies():
@@ -59,10 +78,8 @@ def test_the_contract_fixture_names_the_same_bodies():
     parsed = contract.parse(FIXTURE.read_text(encoding="utf-8"))
     prefix = "teyvat/creature_visuals/"
     rows = {r for r in parsed.resource_set if r.startswith(prefix)}
-    expected = set()
-    for body in gen.bodies(ROWS):
-        expected.add(f"{prefix}{body}.tscn")
-        expected.add(f"{prefix}{body}.png")
+    expected = {f"{prefix}{body}.png" for body in gen.bodies(ROWS)}
+    expected |= {f"{prefix}{name}.tscn" for name in gen.scenes(ROWS)}
     assert rows == expected
 
 
@@ -119,12 +136,58 @@ def test_the_three_size_classes_are_the_three_numbers_the_docstring_derives():
 
 
 def test_the_spikes_one_row_survives_the_generalisation():
-    """Nibbit is still the Wooden Shield Hilichurl Guard, in Mondstadt only."""
+    """Nibbit is still the Wooden Shield Hilichurl Guard, in Mondstadt only.
+
+    ONLY Mondstadt, and that is the re-keying: `NIBBIT` is an Overgrowth entry
+    and the Liyue face stands on the Underdocks, so a Liyue row keyed on it
+    could never fire.
+    """
     nibbit = [r for r in ROWS if r.base_entry == "NIBBIT"]
-    assert {r.face for r in nibbit} == {"MONDSTADT", "LIYUE"}
-    mondstadt = next(r for r in nibbit if r.face == "MONDSTADT")
-    assert mondstadt.body == "wooden_shield_hilichurl_guard"
-    assert mondstadt.display_name == "Wooden Shield Hilichurl Guard"
+    assert {r.face for r in nibbit} == {"MONDSTADT"}
+    assert nibbit[0].body == "wooden_shield_hilichurl_guard"
+    assert nibbit[0].display_name == "Wooden Shield Hilichurl Guard"
+
+
+#: The two act-1 zones, as `Acts/Overgrowth.cs` and `Acts/Underdocks.cs`
+#: roll them in v0.111.0. A face dresses the zone it REPLACES
+#: (`Patches/ModelDbActsPatch.Swaps`), so a row keyed outside its own zone can
+#: never fire -- which is exactly what the first pass shipped and the running
+#: game caught.
+OVERGROWTH = {
+    "BYGONE_EFFIGY", "BYRDONIS", "CEREMONIAL_BEAST", "CUBEX_CONSTRUCT",
+    "FLYCONID", "FOGMOG", "FUZZY_WURM_CRAWLER", "INKLET", "KIN_FOLLOWER",
+    "KIN_PRIEST", "LEAF_SLIME_M", "LEAF_SLIME_S", "MAWLER", "NIBBIT",
+    "PHROG_PARASITE", "SHRINKER_BEETLE", "SLITHERING_STRANGLER",
+    "SNAPPING_JAXFRUIT", "TWIG_SLIME_M", "TWIG_SLIME_S", "VANTOM",
+    "VINE_SHAMBLER",
+}
+UNDERDOCKS = {
+    "CALCIFIED_CULTIST", "CORPSE_SLUG", "DAMP_CULTIST", "FAT_GREMLIN",
+    "FOSSIL_STALKER", "GAS_BOMB", "GREMLIN_MERC", "HAUNTED_SHIP",
+    "LAGAVULIN_MATRIARCH", "LIVING_FOG", "PHANTASMAL_GARDENER",
+    "PUNCH_CONSTRUCT", "SEAPUNK", "SEWER_CLAM", "SKULKING_COLONY",
+    "SLUDGE_SPINNER", "SNEAKY_GREMLIN", "SOUL_FYSH", "TERROR_EEL", "TOADPOLE",
+    "TWO_TAILED_RAT", "WATERFALL_GIANT",
+}
+
+
+def test_each_act_one_face_keys_only_the_zone_it_stands_on():
+    """The defect this file was extended for.
+
+    Mondstadt replaces Overgrowth and Liyue replaces the Underdocks. The first
+    pass keyed every Liyue row on an Overgrowth entry, so a Liyue run drew
+    undressed fights and nothing failed anywhere -- a lookup that never fires
+    looks exactly like a lookup that is not needed.
+    """
+    for face, zone in (("MONDSTADT", OVERGROWTH), ("LIYUE", UNDERDOCKS)):
+        keyed = {r.base_entry for r in ROWS if r.face == face and r.live}
+        assert keyed <= zone, (face, sorted(keyed - zone))
+
+
+def test_no_surviving_row_calls_itself_inert():
+    """The re-keying's own acceptance: every live row can actually fire."""
+    for row in ROWS:
+        assert "inert" not in row.notes, row
 
 
 def test_one_id_entry_draws_one_body():
