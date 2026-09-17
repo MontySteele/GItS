@@ -1,0 +1,29 @@
+{
+  "canvas": [
+    240,
+    280
+  ],
+  "layers": {
+    "body": {
+      "file": "body.png",
+      "w": 240,
+      "h": 251,
+      "offset_x": 0.0,
+      "offset_y": 14.5
+    },
+    "tail": {
+      "file": "tail.png",
+      "w": 124,
+      "h": 120,
+      "offset_x": 58.0,
+      "offset_y": -80.0
+    },
+    "head": {
+      "file": "head.png",
+      "w": 172,
+      "h": 143,
+      "offset_x": -34.0,
+      "offset_y": 68.5
+    }
+  }
+}

@@ -1,0 +1,57 @@
+# The Golden Wolflord -- bespoke boss rig, motion pass two.
+#
+# Three layers. HEAD is the wolf's head in the lower left, its teal eye and
+# golden muzzle; BODY is the dark mane; SHARDS are the golden blades floating
+# off the top right and right, which drift in a slow orbit and scatter on
+# death.
+#
+# ONE PLATE, TWO SIZES: this body has a boss row (Mondstadt / Ceremonial
+# Beast) and a regular row (Sumeru / Fabricator), so it writes two scenes over
+# one cut. The layer offsets are plate-space, so one manifest serves both.
+#
+# Coordinates are specific to this plate revision
+# (ImageGen/images/teyvat/creature_visuals/golden_wolflord.png, 240x280). If
+# the plate is re-cut, re-digitize.
+
+character: golden_wolflord
+source: ImageGen/images/teyvat/creature_visuals/golden_wolflord.png
+out_dir: ImageGen/images/teyvat/creature_visuals/golden_wolflord/layers
+file_prefix: golden_wolflord
+layer_path: "{name}.png"
+manifest_path: tools/combat_layer_fences/teyvat/golden_wolflord.layers.json
+alpha_threshold: 16
+# The layers stack back up to the plate exactly (`--verify` gates on it).
+recompose_exact: true
+master_pad: 4
+
+layers:
+  - {id: 1, name: body,   dilate_priority: 1}
+  - {id: 2, name: shards, dilate_priority: 2}
+  - {id: 3, name: head,   dilate_priority: 3}
+
+fences:
+  width: 3
+  lines:
+    - name: body | shards (under the floating blades)
+      points: [[100, 30], [120, 40], [138, 58], [150, 80], [168, 95],
+               [195, 102], [220, 100], [239, 96]]
+    - name: body | head (over the brow and behind the jaw)
+      points: [[0, 190], [20, 186], [45, 190], [70, 198], [88, 208],
+               [100, 225], [102, 245], [98, 265], [95, 279]]
+
+seeds:
+  - {layer: head,   at: [30, 225]}
+  - {layer: body,   at: [80, 150]}
+  - {layer: shards, at: [180, 25]}
+
+unreached_layer: body
+
+# The two free-floating blades off the right edge are shards, so both arms of
+# the satellite rule name that layer and the threshold never decides anything.
+satellites:
+  low_saturation_layer: shards
+  saturation_threshold: 1000
+  other_layer: shards
+
+fill_behind:
+  - {layer: body, radius: 10, covered_by: [head, shards], min_cover_alpha: 255}

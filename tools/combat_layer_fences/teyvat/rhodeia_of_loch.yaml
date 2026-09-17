@@ -1,0 +1,50 @@
+# Rhodeia of Loch -- bespoke boss rig, motion pass two.
+#
+# Three layers. CROWN is the head, its horns and the halo ring above the
+# shoulders; BODY is the robed hydro figure; FINS are the two long tails
+# trailing away to the right.
+#
+# Coordinates are specific to this plate revision
+# (ImageGen/images/teyvat/creature_visuals/rhodeia_of_loch.png, 240x280). If
+# the plate is re-cut, re-digitize.
+
+character: rhodeia_of_loch
+source: ImageGen/images/teyvat/creature_visuals/rhodeia_of_loch.png
+out_dir: ImageGen/images/teyvat/creature_visuals/rhodeia_of_loch/layers
+file_prefix: rhodeia_of_loch
+layer_path: "{name}.png"
+manifest_path: tools/combat_layer_fences/teyvat/rhodeia_of_loch.layers.json
+alpha_threshold: 16
+# The layers stack back up to the plate exactly (`--verify` gates on it).
+recompose_exact: true
+master_pad: 4
+
+layers:
+  - {id: 1, name: body,  dilate_priority: 1}
+  - {id: 2, name: fins,  dilate_priority: 2}
+  - {id: 3, name: crown, dilate_priority: 3}
+
+fences:
+  width: 3
+  lines:
+    - name: body | crown (under the head and the ring)
+      points: [[30, 74], [56, 70], [80, 72], [104, 74], [128, 70],
+               [152, 66], [176, 72], [200, 80]]
+    - name: body | fins (the trailing tails' root)
+      points: [[130, 66], [136, 100], [142, 126], [146, 152], [152, 172],
+               [162, 188], [178, 196], [200, 202], [220, 205], [239, 207]]
+
+seeds:
+  - {layer: crown, at: [82, 40]}
+  - {layer: body,  at: [70, 150]}
+  - {layer: fins,  at: [200, 140]}
+
+unreached_layer: body
+
+satellites:
+  low_saturation_layer: body
+  saturation_threshold: 1000
+  other_layer: body
+
+fill_behind:
+  - {layer: body, radius: 10, covered_by: [crown, fins], min_cover_alpha: 255}

@@ -1,0 +1,29 @@
+{
+  "canvas": [
+    240,
+    280
+  ],
+  "layers": {
+    "halo": {
+      "file": "halo.png",
+      "w": 240,
+      "h": 141,
+      "offset_x": 0.0,
+      "offset_y": -69.5
+    },
+    "train": {
+      "file": "train.png",
+      "w": 57,
+      "h": 156,
+      "offset_x": 13.5,
+      "offset_y": 62.0
+    },
+    "body": {
+      "file": "body.png",
+      "w": 84,
+      "h": 111,
+      "offset_x": 18.0,
+      "offset_y": -57.5
+    }
+  }
+}

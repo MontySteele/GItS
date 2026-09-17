@@ -292,6 +292,23 @@ if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $te
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     $files = Select-PackablePngs $teyvatPortraits
     if ($files) { Copy-Item $files.FullName -Destination $to }
+
+    # MOTION PASS TWO's bespoke rigs. Select-PackablePngs is deliberately NOT
+    # recursive -- a surface directory is a flat list of plates everywhere else
+    # in this script -- so a bespoke body's cut layers, which live one level
+    # down at <body>\layers\<layer>.png, need this second walk. The layer set
+    # per body is the cut manifest's
+    # (tools\combat_layer_fences\teyvat\<body>.layers.json) and the scenes name
+    # every file in full, so a missing one is caught by the EXPORT log sweep
+    # rather than by a silent blank.
+    foreach ($dir in Get-ChildItem $teyvatPortraits -Directory -ErrorAction SilentlyContinue) {
+        $from = Join-Path $dir.FullName 'layers'
+        if (-not (Test-Path $from)) { continue }
+        $layerTo = Join-Path $to (Join-Path $dir.Name 'layers')
+        New-Item -ItemType Directory -Force -Path $layerTo | Out-Null
+        $layerFiles = Select-PackablePngs $from
+        if ($layerFiles) { Copy-Item $layerFiles.FullName -Destination $layerTo }
+    }
 }
 
 # THE ACT DRESSINGS' PLACEHOLDER ASSET SETS (tools/gen_act_placeholders.py,

@@ -1,7 +1,9 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
-[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/all_devouring_narwhal.png" id="1_all"]
-[ext_resource type="AnimationLibrary" path="res://teyvat/motion/loom.tres" id="2_motion"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/all_devouring_narwhal/layers/body.png" id="1_body"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/all_devouring_narwhal/layers/fluke.png" id="1_fluke"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/all_devouring_narwhal/layers/fin.png" id="1_fin"]
+[ext_resource type="AnimationLibrary" path="res://teyvat/motion/bespoke/all_devouring_narwhal.tres" id="2_motion"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
 animation = &"attack"
@@ -65,10 +67,20 @@ unique_name_in_owner = true
 
 [node name="Rig" type="Node2D" parent="Visuals"]
 
-[node name="Body" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(0, -224.0)
+[node name="body" type="Sprite2D" parent="Visuals/Rig"]
 scale = Vector2(1.6, 1.6)
-texture = ExtResource("1_all")
+offset = Vector2(0, -123.5)
+texture = ExtResource("1_body")
+
+[node name="fluke" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.6, 1.6)
+offset = Vector2(87, -226.5)
+texture = ExtResource("1_fluke")
+
+[node name="fin" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.6, 1.6)
+offset = Vector2(-7, -32.5)
+texture = ExtResource("1_fin")
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true

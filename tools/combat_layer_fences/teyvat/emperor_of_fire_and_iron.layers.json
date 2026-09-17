@@ -1,0 +1,29 @@
+{
+  "canvas": [
+    240,
+    280
+  ],
+  "layers": {
+    "body": {
+      "file": "body.png",
+      "w": 122,
+      "h": 280,
+      "offset_x": 15.0,
+      "offset_y": 0.0
+    },
+    "claw_r": {
+      "file": "claw_r.png",
+      "w": 103,
+      "h": 271,
+      "offset_x": -68.5,
+      "offset_y": 4.5
+    },
+    "claw_l": {
+      "file": "claw_l.png",
+      "w": 70,
+      "h": 254,
+      "offset_x": 85.0,
+      "offset_y": 13.0
+    }
+  }
+}

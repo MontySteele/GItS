@@ -1,0 +1,61 @@
+# Shouki no Kami, the Prodigal -- bespoke boss rig, motion pass two.
+#
+# Three layers. The HALO is everything outside the central figure: the purple
+# dome, the drifting cloud and the four ringed orbs, which read as one orbiting
+# ring and rotate together. The BODY is the armoured figure in the middle
+# column. The TRAIN is the long shard trailing below it.
+#
+# Coordinates are specific to this plate revision
+# (ImageGen/images/teyvat/creature_visuals/everlasting_lord_of_arcane_wisdom.png,
+# 240x280). If the plate is re-cut, re-digitize.
+
+character: everlasting_lord_of_arcane_wisdom
+source: ImageGen/images/teyvat/creature_visuals/everlasting_lord_of_arcane_wisdom.png
+out_dir: ImageGen/images/teyvat/creature_visuals/everlasting_lord_of_arcane_wisdom/layers
+file_prefix: everlasting_lord_of_arcane_wisdom
+layer_path: "{name}.png"
+manifest_path: tools/combat_layer_fences/teyvat/everlasting_lord_of_arcane_wisdom.layers.json
+alpha_threshold: 16
+# The layers stack back up to the plate exactly (`--verify` gates on it).
+recompose_exact: true
+master_pad: 4
+
+# Declared BACK TO FRONT: the generator writes one Sprite2D per layer in this
+# order and a Godot sibling drawn later is drawn in front.
+layers:
+  - {id: 1, name: halo,  dilate_priority: 1}
+  - {id: 2, name: train, dilate_priority: 2}
+  - {id: 3, name: body,  dilate_priority: 3}
+
+fences:
+  width: 3
+  lines:
+    - name: halo | body (the figure's column, capped under the ring)
+      points: [[100, 31], [175, 31]]
+    - name: halo | body (left flank)
+      points: [[100, 31], [102, 60], [104, 88], [106, 110], [108, 133]]
+    - name: halo | body (right flank)
+      points: [[175, 31], [173, 60], [171, 88], [169, 110], [167, 133]]
+    - name: body | train
+      points: [[108, 133], [140, 133], [167, 133]]
+
+seeds:
+  - {layer: halo,  at: [30, 90]}
+  - {layer: body,  at: [138, 100]}
+  - {layer: train, at: [138, 200]}
+
+unreached_layer: halo
+
+# The one free-floating island on this plate is a wisp of the cloud at
+# x[222,239] y[110,120); every satellite here is the halo's, so both arms of
+# the rule name it and the threshold never decides anything.
+satellites:
+  low_saturation_layer: halo
+  saturation_threshold: 1000
+  other_layer: halo
+
+# Sized for the worst-case relative idle amplitude in the bespoke library
+# (halo rotation over a ~110 px radius, body hover 4 px) plus AA slack.
+fill_behind:
+  - {layer: halo,  radius: 10, covered_by: [body, train], min_cover_alpha: 255}
+  - {layer: train, radius: 6,  covered_by: [body], min_cover_alpha: 255}

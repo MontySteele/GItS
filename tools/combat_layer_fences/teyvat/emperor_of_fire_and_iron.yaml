@@ -1,0 +1,51 @@
+# The Emperor of Fire and Iron -- bespoke boss rig, motion pass two.
+#
+# Three layers, and the naming is the CREATURE'S left and right, not the
+# viewer's: `claw_l` is the emperor's own left claw, which is on the right of
+# the plate, and `claw_r` is the one on the left. BODY is the shell and the
+# burning face between them.
+#
+# Coordinates are specific to this plate revision
+# (ImageGen/images/teyvat/creature_visuals/emperor_of_fire_and_iron.png,
+# 240x280). If the plate is re-cut, re-digitize.
+
+character: emperor_of_fire_and_iron
+source: ImageGen/images/teyvat/creature_visuals/emperor_of_fire_and_iron.png
+out_dir: ImageGen/images/teyvat/creature_visuals/emperor_of_fire_and_iron/layers
+file_prefix: emperor_of_fire_and_iron
+layer_path: "{name}.png"
+manifest_path: tools/combat_layer_fences/teyvat/emperor_of_fire_and_iron.layers.json
+alpha_threshold: 16
+# The layers stack back up to the plate exactly (`--verify` gates on it).
+recompose_exact: true
+master_pad: 4
+
+layers:
+  - {id: 1, name: body,   dilate_priority: 1}
+  - {id: 2, name: claw_r, dilate_priority: 2}
+  - {id: 3, name: claw_l, dilate_priority: 3}
+
+fences:
+  width: 3
+  lines:
+    - name: claw_r | body
+      points: [[86, 0], [88, 30], [92, 60], [96, 90], [98, 120], [96, 150],
+               [92, 180], [90, 210], [92, 240], [94, 279]]
+    - name: body | claw_l
+      points: [[186, 0], [184, 30], [180, 60], [176, 90], [174, 120],
+               [176, 150], [180, 180], [182, 210], [180, 240], [178, 279]]
+
+seeds:
+  - {layer: body,   at: [135, 100]}
+  - {layer: claw_r, at: [40, 180]}
+  - {layer: claw_l, at: [215, 200]}
+
+unreached_layer: body
+
+satellites:
+  low_saturation_layer: body
+  saturation_threshold: 1000
+  other_layer: body
+
+fill_behind:
+  - {layer: body, radius: 10, covered_by: [claw_l, claw_r], min_cover_alpha: 255}

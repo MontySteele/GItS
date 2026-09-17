@@ -1,0 +1,29 @@
+{
+  "canvas": [
+    240,
+    280
+  ],
+  "layers": {
+    "body": {
+      "file": "body.png",
+      "w": 202,
+      "h": 248,
+      "offset_x": -19.0,
+      "offset_y": 16.0
+    },
+    "shards": {
+      "file": "shards.png",
+      "w": 133,
+      "h": 215,
+      "offset_x": 53.5,
+      "offset_y": -32.5
+    },
+    "head": {
+      "file": "head.png",
+      "w": 107,
+      "h": 97,
+      "offset_x": -66.5,
+      "offset_y": 91.5
+    }
+  }
+}

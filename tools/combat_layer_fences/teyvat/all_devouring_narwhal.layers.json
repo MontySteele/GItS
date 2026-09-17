@@ -1,0 +1,29 @@
+{
+  "canvas": [
+    240,
+    280
+  ],
+  "layers": {
+    "body": {
+      "file": "body.png",
+      "w": 240,
+      "h": 201,
+      "offset_x": 0.0,
+      "offset_y": 16.5
+    },
+    "fluke": {
+      "file": "fluke.png",
+      "w": 66,
+      "h": 107,
+      "offset_x": 87.0,
+      "offset_y": -86.5
+    },
+    "fin": {
+      "file": "fin.png",
+      "w": 226,
+      "h": 65,
+      "offset_x": -7.0,
+      "offset_y": 107.5
+    }
+  }
+}

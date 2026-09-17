@@ -1,7 +1,9 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
-[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/golden_wolflord.png" id="1_golde"]
-[ext_resource type="AnimationLibrary" path="res://teyvat/motion/loom.tres" id="2_motion"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/golden_wolflord/layers/body.png" id="1_body"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/golden_wolflord/layers/shards.png" id="1_shards"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/golden_wolflord/layers/head.png" id="1_head"]
+[ext_resource type="AnimationLibrary" path="res://teyvat/motion/bespoke/golden_wolflord.tres" id="2_motion"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
 animation = &"attack"
@@ -65,10 +67,20 @@ unique_name_in_owner = true
 
 [node name="Rig" type="Node2D" parent="Visuals"]
 
-[node name="Body" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(0, -140.0)
+[node name="body" type="Sprite2D" parent="Visuals/Rig"]
 scale = Vector2(1.0, 1.0)
-texture = ExtResource("1_golde")
+offset = Vector2(-19, -124)
+texture = ExtResource("1_body")
+
+[node name="shards" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.0, 1.0)
+offset = Vector2(53.5, -172.5)
+texture = ExtResource("1_shards")
+
+[node name="head" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.0, 1.0)
+offset = Vector2(-66.5, -48.5)
+texture = ExtResource("1_head")
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true

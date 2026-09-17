@@ -31,7 +31,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools import gen_teyvat_creature_scenes as gen        # noqa: E402
-from tools.visual_qa import contract                        # noqa: E402
+from tools.visual_qa import contract, godot_scene            # noqa: E402
 
 FIXTURE = ROOT / "tools" / "visual_qa" / "fixtures" / "sample.contract.txt"
 GENERATED_CS = ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatCreaturesGenerated.cs"
@@ -83,9 +83,16 @@ def test_a_scene_per_size_class_and_no_more():
                 parts.append(motion)
             expected.add("_".join(parts))
         assert ids == expected, body
-    # Every scene draws its body's own plate, whatever the scene is called.
+    # Every scene draws its body's own art, whatever the scene is called: the
+    # whole plate for a shared-set row, that plate's own cut layers for a
+    # bespoke one -- and never another body's.
     for name, row in gen.scenes(ROWS).items():
-        assert f'path="{gen.RES_ROOT}/{row.body}.png"' in gen.scene_source(row), name
+        text = gen.scene_source(row)
+        if row.bespoke:
+            for layer in gen.manifests()[row.body]:
+                assert f'path="{gen.layer_res(row.body, layer)}"' in text, name
+        else:
+            assert f'path="{gen.RES_ROOT}/{row.body}.png"' in text, name
 
 
 def test_the_contract_fixture_names_the_same_bodies():
@@ -98,13 +105,21 @@ def test_the_contract_fixture_names_the_same_bodies():
     rows = {r for r in parsed.resource_set if r.startswith(prefix)}
     expected = {f"{prefix}{body}.png" for body in gen.bodies(ROWS)}
     expected |= {f"{prefix}{name}.tscn" for name in gen.scenes(ROWS)}
+    # Pass two: a bespoke body's CUT LAYERS are packed beside its plate, under
+    # a directory of the plate's own name. Which layers exist is a third
+    # question from "which plates" and "which scenes", and the cut manifest is
+    # what answers it.
+    expected |= set(gen.layer_resources(ROWS))
     assert rows == expected
 
     # And the motion libraries, which are a second producer under a second
     # prefix -- `build_pck.ps1` overlays `pck-src` verbatim, so a `.tres` packs
     # exactly as a `.tscn` does and the contract derives it the same way.
     motion = {r for r in parsed.resource_set if r.startswith("teyvat/motion/")}
-    assert motion == {f"teyvat/motion/{name}.tres" for name in gen.MOTIONS}
+    assert motion == (
+        {f"teyvat/motion/{name}.tres" for name in gen.MOTIONS}
+        | {f"teyvat/motion/{gen.BESPOKE}/{body}.tres"
+           for body in gen.BESPOKE_CLIPS})
 
 
 def test_a_picture_and_a_name_are_the_same_row():
@@ -262,6 +277,8 @@ BODY_TRANSFORM = {
 
 def test_the_body_transform_did_not_move_when_the_rig_went_in():
     for name, row in gen.scenes(ROWS).items():
+        if row.bespoke:
+            continue
         position, scale = BODY_TRANSFORM[row.size_class]
         body = gen.scene_source(row).split('[node name="Body"')[1].split("[node")[0]
         assert f"position = {position}" in body, name
@@ -279,7 +296,11 @@ def test_every_scene_carries_the_rig_the_player_and_the_tree():
     """
     for relative, text in gen.scene_sources(ROWS).items():
         assert '[node name="Rig" type="Node2D" parent="Visuals"]' in text, relative
-        assert '[node name="Body" type="Sprite2D" parent="Visuals/Rig"]' in text, relative
+        row = next(r for r in ROWS
+                   if relative.endswith(f"/{r.scene_id}.tscn"))
+        if not row.bespoke:
+            assert ('[node name="Body" type="Sprite2D" parent="Visuals/Rig"]'
+                    in text), relative
         assert ('[node name="AnimationPlayer" type="AnimationPlayer" parent="."]'
                 in text), relative
         assert ('[node name="AnimationTree" type="AnimationTree" parent="."]'
@@ -287,20 +308,23 @@ def test_every_scene_carries_the_rig_the_player_and_the_tree():
         assert 'anim_player = NodePath("../AnimationPlayer")' in text, relative
 
 
+MOTION_DIR = ROOT / "klee-mod" / "pck-src" / "teyvat" / "motion"
+
+
 def test_every_scene_names_a_motion_library_that_exists():
     for name, row in gen.scenes(ROWS).items():
-        assert row.motion in gen.MOTIONS, name
+        assert row.motion in gen.LEGAL_MOTIONS, name
         text = gen.scene_source(row)
         assert (f'[ext_resource type="AnimationLibrary" '
                 f'path="{row.motion_library}"') in text, name
-        committed = (ROOT / "klee-mod" / "pck-src" / "teyvat" / "motion"
-                     / f"{row.motion}.tres")
+        committed = MOTION_DIR / row.motion_library.split("teyvat/motion/")[1]
         assert committed.is_file(), name
 
 
 def test_every_row_names_a_legal_motion_and_load_refuses_anything_else():
-    assert {r.motion for r in ROWS} <= set(gen.MOTIONS)
+    assert {r.motion for r in ROWS} <= set(gen.LEGAL_MOTIONS)
     assert gen.MOTION_SETS == ("stand", "bounce", "hover", "loom", "mech")
+    assert gen.LEGAL_MOTIONS == gen.MOTION_SETS + ("bespoke",)
 
 
 def test_the_assignment_rule_still_answers_for_every_body():
@@ -323,10 +347,11 @@ def test_every_clip_keys_only_the_four_paths_a_creature_scene_carries():
             for track in clip.tracks:
                 assert track.path in allowed, (name, clip.name, track.path)
     # And the same read off the committed TEXT, not off the data that wrote it.
-    for relative, text in gen.motion_sources().items():
+    for name in gen.MOTIONS:
+        text = gen.motion_source(name)
         paths = set(re.findall(r'path = NodePath\("([^"]+)"\)', text))
-        assert paths <= allowed, (relative, sorted(paths - allowed))
-        assert paths, relative
+        assert paths <= allowed, (name, sorted(paths - allowed))
+        assert paths, name
 
 
 def test_every_set_carries_the_five_clips_the_router_needs():
@@ -368,6 +393,162 @@ def test_no_generated_file_carries_a_comment_line():
 
 
 def test_the_committed_motion_directory_is_exactly_the_five_sets():
-    directory = ROOT / "klee-mod" / "pck-src" / "teyvat" / "motion"
-    assert {p.name for p in directory.glob("*")} == {
-        f"{name}.tres" for name in gen.MOTIONS}
+    assert {p.name for p in MOTION_DIR.glob("*")} == (
+        {f"{name}.tres" for name in gen.MOTIONS} | {gen.BESPOKE})
+
+
+# ---------------------------------------------------------------------------
+# MOTION (pass two): bespoke layered rigs for six bosses
+# ---------------------------------------------------------------------------
+#
+# Everything pass one could get wrong silently, pass two can get wrong twice
+# over, because a bespoke body has more parts to disagree about:
+#
+#   * a clip can key `Visuals/Rig/<layer>` for a layer the cut never produced,
+#     and a track on a node that is not there never moves and never says so;
+#   * a scene can grow or shrink the box it occupies, which moves the HP bar
+#     and the intent marker off the body;
+#   * one plate with two size classes (the Golden Wolflord) shares ONE library,
+#     so a layer whose rest pose depended on the class would be right in one
+#     scene and wrong in the other;
+#   * a fence, a manifest or a library can go missing and leave a boss standing
+#     perfectly still in pass one's clothes.
+
+BESPOKE_ROWS = [r for r in ROWS if r.bespoke]
+
+
+def test_the_six_bespoke_bodies_are_the_six_the_table_names():
+    assert {r.body for r in BESPOKE_ROWS} == set(gen.BESPOKE_CLIPS)
+    assert set(gen.BESPOKE_CLIPS) == {
+        "azhdaha", "all_devouring_narwhal", "rhodeia_of_loch",
+        "emperor_of_fire_and_iron", "golden_wolflord",
+        "everlasting_lord_of_arcane_wisdom"}
+    # Every row of a bespoke body is bespoke -- a plate that looms on one face
+    # and rigs on another would split into two scenes for a reason nobody
+    # decided.
+    for row in ROWS:
+        if row.body in gen.BESPOKE_CLIPS:
+            assert row.bespoke, row
+
+
+def test_a_bespoke_row_has_a_fence_a_manifest_and_a_library():
+    """`check` refuses each of the three by name; this says so out loud."""
+    assert gen.bespoke_gaps(ROOT, ROWS) == []
+    for body in gen.BESPOKE_CLIPS:
+        assert (ROOT / gen.fence_relative(body)).is_file(), body
+        assert (ROOT / gen.manifest_relative(body)).is_file(), body
+        assert (MOTION_DIR / gen.BESPOKE / f"{body}.tres").is_file(), body
+
+
+def test_every_bespoke_layer_node_is_a_layer_of_that_bodys_cut():
+    """The scene's node names ARE the manifest's keys, in its order.
+
+    Not "a subset": the scene draws every layer the cut produced, or a piece
+    of the boss is simply missing from the arena, and it draws them in the
+    manifest's back-to-front order, which is the only thing that decides what
+    overlaps what.
+    """
+    for name, row in gen.scenes(ROWS).items():
+        if not row.bespoke:
+            continue
+        text = gen.scene_source(row)
+        drawn = re.findall(
+            r'\[node name="([^"]+)" type="Sprite2D" parent="Visuals/Rig"\]', text)
+        assert drawn == list(gen.manifests()[row.body]), name
+
+
+def test_every_bespoke_clip_keys_only_that_bodys_own_layers():
+    """A track on a node the scene does not have never moves and never says so."""
+    for body in gen.BESPOKE_CLIPS:
+        layers = tuple(gen.manifests()[body])
+        for clip in gen.bespoke_clips(ROOT, body):
+            for track in clip.tracks:
+                assert gen.legal_track(track.path, layers), (body, clip.name,
+                                                             track.path)
+        # And the same read off the committed TEXT, not off the data.
+        text = gen.bespoke_source(ROOT, body)
+        for path in re.findall(r'path = NodePath\("([^"]+)"\)', text):
+            assert gen.legal_track(path, layers), (body, path)
+
+
+def test_every_bespoke_set_carries_the_five_clips_and_resets_what_it_touches():
+    for body in gen.BESPOKE_CLIPS:
+        clips = gen.bespoke_clips(ROOT, body)
+        assert {c.name for c in clips} == set(gen.CLIP_NAMES), body
+        assert {c.name for c in clips if c.loop} == {"idle"}, body
+        reset = next(c for c in clips if c.name == "RESET")
+        touched = {t.path for c in clips for t in c.tracks}
+        assert touched <= {t.path for t in reset.tracks}, body
+        death = next(c for c in clips if c.name == "death")
+        assert 0.5 <= death.length <= 30.0, (body, death.length)
+
+
+def test_the_layers_occupy_exactly_the_box_the_single_body_did():
+    """The three markers are the whole reason this has to hold.
+
+    `%Bounds`, `%IntentPos` and `%CenterPos` are derived from the plate and the
+    size class and nothing else, so a bespoke scene that drew its layers at a
+    different scale would put the health bar somewhere the boss is not. The
+    check is that the three lines are byte-identical to the ones the SAME row
+    would have carried under a shared set, and that every layer sprite takes
+    the size class exactly as `Body` does.
+    """
+    for name, row in gen.scenes(ROWS).items():
+        if not row.bespoke:
+            continue
+        _, scale = BODY_TRANSFORM[row.size_class]
+        text = gen.scene_source(row)
+        shared = gen.scene_source(gen.replace(row, motion="loom"))
+        for marker in ('[node name="Bounds"', '[node name="IntentPos"',
+                       '[node name="CenterPos"'):
+            assert (text.split(marker)[1].split("[node")[0]
+                    == shared.split(marker)[1].split("[node")[0]), (name, marker)
+        for layer in gen.manifests()[row.body]:
+            block = text.split(f'[node name="{layer}"')[1].split("[node")[0]
+            assert f"scale = {scale}" in block, (name, layer)
+            # `position` is never written: it stays at the origin so a clip's
+            # keys are pure deltas, and the placement rides `offset`, which
+            # Godot applies inside the node transform.
+            assert "position =" not in block, (name, layer)
+            assert "offset = Vector2(" in block, (name, layer)
+
+
+def test_one_plate_with_two_classes_shares_one_library_and_one_offset_table():
+    """The Golden Wolflord, which is why `offset` carries the placement.
+
+    Its two scenes differ in the sprite SCALE and in the three markers, and in
+    nothing else -- same layer textures, same offsets, same library. A
+    `position`-based placement would have had to differ, and one library
+    cannot hold two rest poses.
+    """
+    boss = gen.scene_source(gen.scenes(ROWS)["golden_wolflord_boss"])
+    regular = gen.scene_source(gen.scenes(ROWS)["golden_wolflord_regular"])
+    for layer, entry in gen.manifests()["golden_wolflord"].items():
+        line = (f"offset = Vector2({gen._n(entry['offset_x'])}, "
+                f"{gen._n(entry['offset_y'] - gen.PLATE_H / 2)})")
+        assert line in boss, layer
+        assert line in regular, layer
+    library = 'path="res://teyvat/motion/bespoke/golden_wolflord.tres"'
+    assert library in boss and library in regular
+
+
+def test_every_committed_bespoke_library_parses_as_a_godot_resource():
+    """The pass-one parser, pointed at the new folder.
+
+    A `.tres` that does not parse is the quietest failure in this mechanism:
+    `AnimationPlayer.libraries` loads nothing, the tree's `Travel` becomes a
+    no-op, and the boss stands still looking exactly like pass one's stills.
+    """
+    directory = MOTION_DIR / gen.BESPOKE
+    files = godot_scene.iter_scene_files(directory)
+    assert {p.name for p in files} == {
+        f"{body}.tres" for body in gen.BESPOKE_CLIPS}
+    for path in files:
+        parsed = godot_scene.parse(path)
+        assert parsed.kind == "gd_resource", path
+        animations = {
+            section.attrs.get("id") for section in parsed.sub_resources.values()}
+        assert animations == {f"Animation_{c}" for c in gen.CLIP_NAMES}, path
+        # `load_steps` is what Godot writes and what a stale hand-edit gets
+        # wrong: five sub-resources plus the resource itself.
+        assert parsed.header_attrs["load_steps"] == "6", path

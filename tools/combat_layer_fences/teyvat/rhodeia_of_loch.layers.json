@@ -1,0 +1,29 @@
+{
+  "canvas": [
+    240,
+    280
+  ],
+  "layers": {
+    "body": {
+      "file": "body.png",
+      "w": 240,
+      "h": 223,
+      "offset_x": 0.0,
+      "offset_y": 28.5
+    },
+    "fins": {
+      "file": "fins.png",
+      "w": 113,
+      "h": 158,
+      "offset_x": 63.5,
+      "offset_y": -8.0
+    },
+    "crown": {
+      "file": "crown.png",
+      "w": 142,
+      "h": 78,
+      "offset_x": -21.0,
+      "offset_y": -101.0
+    }
+  }
+}
