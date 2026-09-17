@@ -283,8 +283,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R271 | 2026-09-14 | (2026-09-14): the Klee pool consolidation at its four defaults; two cuts, Booby Trap, Grounded on no Set off, Return to Sender capped, the shelf, Mines first | `d3739dd` |
 | R272 | 2026-09-14 | (2026-09-14): the Teyvat run frame; the freeze lifts for the non-mechanical layer, two nations per act with act 1 Mondstadt or Liyue, music as locally… | `40afdc6` |
 | R273 | 2026-09-14 | (2026-09-14): the Teyvat nation mapping at both defaults; | `22cdb50` |
+| R274 | 2026-09-16 | (2026-09-16): the fanout-picks slate at its defaults; pick 4 deferred | `4be0e02` |
 
-272 rows over the R1..R273 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 161 from a commit message, 0 unresolved.
+273 rows over the R1..R274 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 162 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
