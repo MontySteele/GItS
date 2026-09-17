@@ -416,3 +416,75 @@ a dialogue cell's line count disagrees with the compiled base, when a dialogue
 line has no speaker prefix, when a bare per-character cell is written for a
 dialogue whose five characters have different lengths, and when an `extra` key
 is not one the base entry has.
+
+## Codegen — Teyvat creature scenes and motion
+
+```sh
+.venv/Scripts/python.exe tools/gen_teyvat_creature_scenes.py            # generate
+.venv/Scripts/python.exe tools/gen_teyvat_creature_scenes.py --check    # verify, no write
+.venv/Scripts/python.exe tools/gen_teyvat_creature_scenes.py --list     # the res:// scenes
+.venv/Scripts/python.exe tools/gen_teyvat_creature_scenes.py --motions  # body -> motion
+```
+
+One table, `docs/current/dossiers/content/enemy-dressings.tsv`, columns `body
+face base_entry display_name size_class motion notes`. One run writes three
+things: the committed `.tscn` per scene under
+`klee-mod/pck-src/teyvat/creature_visuals/`, the five motion libraries under
+`klee-mod/pck-src/teyvat/motion/`, and the two C# tables in
+`klee-mod/KleeCode/Teyvat/TeyvatCreaturesGenerated.cs`. `--check` fails on any
+drift and `tier0/tests/test_teyvat_creature_scenes.py` rides it. Never
+hand-edit a file in either directory.
+
+### The scene shape, and the one node a clip may move
+
+    root (Node2D)
+      %Visuals (Node2D)        <- ENGINE-OWNED scale; nothing we author touches it
+        Rig (Node2D)           <- the ONLY node an animation keys
+          Body (Sprite2D)      <- carries the SIZE CLASS: position and scale
+      %Bounds / %IntentPos / %CenterPos
+      %AnimationPlayer         <- libraries = { "": the motion .tres }
+      %AnimationTree           <- the four-state machine the router travels
+
+`%Visuals.Scale` is `NCreature`'s (`ScaleTo`, `SetDefaultScaleTo`,
+`OstyScaleToSize` write it, `UpdateBounds` reads it back), and `Body`'s
+transform is what makes an elite bigger than a regular — so a clip that keyed
+either would fight the engine or flatten every body to one size. `Rig` exists
+to give the clips somewhere legal to write, and it is the same intermediate
+Furina's rig already has (`pck-src/furina/model/combat.tscn`). The four legal
+track paths are `Visuals/Rig:position`, `:scale`, `:rotation` and
+`Visuals/Rig/Body:modulate`, pinned in the test file and in `ALLOWED_TRACKS`.
+
+The state machine is Furina's, verbatim: Start auto-advances to idle; idle
+reaches attack, hurt and death on a `Travel`; attack and hurt return to idle at
+the end of the clip; death goes only to End and never returns.
+`Vfx/CreatureAnimationRouter` drives it with no per-creature code.
+
+### The motion column
+
+Five shared sets — `stand`, `bounce`, `hover`, `loom`, `mech` — each an
+`AnimationLibrary` `.tres` of five clips (`RESET`/`idle`/`attack`/`hurt`/
+`death`). The library is EXTERNAL because 123 scenes would otherwise carry the
+same ~200 lines of keyframes 25 times over; `build_pck.ps1` overlays
+`klee-mod/pck-src` verbatim (`:1092-1098`) and the pck contract is derived from
+that work directory after the copy, so a `.tres` packs and contracts exactly as
+a `.tscn` does with no change to either.
+
+`motion` is a property of the ROW, like `size_class`, and splits a body's
+scenes the same way when two rows disagree: the suffix names only the axis that
+varies, so `<body>_<class>`, `<body>_<motion>` or `<body>_<class>_<motion>`
+(`_assign_scene_ids`). Today only `golden_wolflord` splits, and on class alone.
+
+`default_motion()` is the rule that FILLED the column and is what gives a row
+added tomorrow a motion; it is a suggestion and never a gate, so vetoing one
+row is a one-cell edit.
+
+### Death timing
+
+`Vfx/ModdedPlayerDeathSeam` gained a second arm. The base's `StartDeathAnim`
+puts its clip measurement behind `if (_spineAnimator != null)`, so a spine-less
+body reports a death animation zero seconds long and `Hook.AfterDeath` tears it
+out of the arena before a frame draws. The new arm reports the real clip length
+for a DRESSED body only — gated on `TeyvatFrame.Enabled` and on the creature's
+registered visuals scene living under `res://teyvat/creature_visuals/` — plays
+no sound (the death sting is the player's), and hands back the base's own
+answer when there is no clip to measure. With the arm off nothing changes.

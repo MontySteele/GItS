@@ -1,7 +1,9 @@
 using System;
 using Godot;
 using HarmonyLib;
+using KleeMod.Teyvat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 
 namespace KleeMod.Vfx;
@@ -45,11 +47,34 @@ namespace KleeMod.Vfx;
 /// falls back to <see cref="FallbackDeathAnimLength"/>. The base's 30 s ceiling
 /// is kept as-is.
 ///
-/// SCOPE: MODDED PLAYER BODIES ONLY. <see cref="Covers"/> refuses a pet and
-/// refuses anything that is not the player, so Furina's performers and every
-/// enemy keep the death behaviour they have today (R213 froze enemy behaviour);
-/// it also refuses whenever the base already returned a length, so this can
-/// only ever fill a zero in, never shorten a real animation.
+/// SCOPE: MODDED PLAYER BODIES, AND SINCE THE MOTION PASS ALSO A DRESSED
+/// TEYVAT BODY. <see cref="Covers"/> is the player arm and is unchanged: it
+/// refuses a pet and refuses anything that is not the player, so Furina's
+/// performers keep the death behaviour they have today. <see
+/// cref="CoversDressedBody"/> is the second arm, and it is drawn as narrowly
+/// as the first.
+///
+/// WHY AN ENEMY ARM AT ALL, WHEN R213 FROZE ENEMY BEHAVIOUR. R213 froze what
+/// an enemy DOES -- its intents, its moves, its numbers. A dressed Teyvat body
+/// now carries a death CLIP (`pck-src/teyvat/motion/&lt;set&gt;.tres`), and
+/// with the base's spine gate false the game reports its death animation as
+/// zero seconds long, so <c>Hook.AfterDeath</c> tears the body out of the
+/// arena before one frame of that clip has drawn. Reporting the clip's real
+/// length is not a behaviour change; it is the same repair this file already
+/// makes for a player, applied where the same gate has the same effect.
+///
+/// AND IT IS OFF UNLESS THE ARM IS ON. The second arm is gated on
+/// <c>TeyvatFrame.Enabled</c> AND on the creature's dressed visuals scene
+/// living under <c>res://teyvat/creature_visuals/</c>. With the arm off
+/// <c>TeyvatFrame.CurrentActEntry</c> is null, the registry lookup cannot
+/// answer, and every calibration deploy and every release package takes
+/// exactly the path it takes today. An UNDRESSED enemy is refused on the same
+/// lookup even with the arm on.
+///
+/// Both arms also refuse whenever the base already returned a length, so this
+/// can only ever fill a zero in, never shorten a real animation; and the
+/// dressed arm reports the base's own zero rather than a fallback when there
+/// is no clip to measure, so a body with no motion is untouched.
 ///
 /// STILL OPEN, and reported rather than quietly left: the private
 /// <c>NCreature.AnimDie(bool, CancellationToken)</c> (<c>:1002-1018</c>) waits
@@ -94,6 +119,28 @@ internal static class ModdedPlayerDeathSeam
         => !hasSpineAnimation && isPlayer && !isPet && baseLength <= 0f;
 
     /// <summary>
+    /// The pck directory every dressed Teyvat body's visuals scene lives in
+    /// (<c>tools/gen_teyvat_creature_scenes.py</c>'s <c>RES_ROOT</c>). A scene
+    /// path under it is the definition of "dressed" here: the registry that
+    /// answers it is the same one <c>MonsterVisualsPathPatch</c> swaps the
+    /// path from, so the two cannot disagree.
+    /// </summary>
+    internal const string TeyvatVisualsRoot = "res://teyvat/creature_visuals/";
+
+    /// <summary>
+    /// The DRESSED-BODY arm. Pure, so the whole gate is headless-testable:
+    /// the arm is on, the base's spine gate was false, the base measured
+    /// nothing, and this creature draws through a Teyvat scene.
+    /// </summary>
+    internal static bool CoversDressedBody(
+        bool armEnabled, bool hasSpineAnimation, string? visualsScene, float baseLength)
+        => armEnabled
+            && !hasSpineAnimation
+            && baseLength <= 0f
+            && visualsScene != null
+            && visualsScene.StartsWith(TeyvatVisualsRoot, StringComparison.Ordinal);
+
+    /// <summary>
     /// The length to report given the clip we measured (<c>0</c> when there was
     /// no clip to measure). Pure, for the same reason.
     /// </summary>
@@ -101,6 +148,16 @@ internal static class ModdedPlayerDeathSeam
         => clipLength > 0f
             ? MathF.Min(clipLength, MaxDeathAnimLength)
             : FallbackDeathAnimLength;
+
+    /// <summary>
+    /// The same, for a dressed body -- except that with NO clip to measure it
+    /// hands back the base's own answer rather than a fallback. A player with
+    /// no tree is still a modded body and wants a wait; an enemy with no clip
+    /// is an enemy this pass has not touched, and the quietest thing to do
+    /// with it is nothing.
+    /// </summary>
+    internal static float DressedLengthFor(float clipLength, float baseLength)
+        => clipLength > 0f ? MathF.Min(clipLength, MaxDeathAnimLength) : baseLength;
 
     /// <summary>The "death" clip's length off the body's own
     /// <c>%AnimationPlayer</c>, or <c>0</c> when there is none to read.</summary>
@@ -123,6 +180,33 @@ internal static class ModdedPlayerDeathSeam
     }
 
     /// <summary>
+    /// The dressed scene this creature draws through, or <c>null</c>.
+    ///
+    /// READ OFF THE REGISTRY, not off <c>Node.SceneFilePath</c>. BaseLib's
+    /// <c>NCreatureVisualsFactory</c> builds a FRESH <c>NCreatureVisuals</c>
+    /// and reparents our children onto it (see
+    /// <c>Teyvat/TeyvatVisuals</c>), so the live node is not the node the
+    /// scene instantiated and its <c>SceneFilePath</c> is not ours to trust.
+    /// <c>TeyvatFrame.StillPortraits</c> is the same table
+    /// <c>MonsterVisualsPathPatch</c> swapped the path from, so it answers the
+    /// question the path was going to answer, and answers it the same way with
+    /// the arm off: <c>CurrentActEntry</c> is null and there is no lookup.
+    /// </summary>
+    private static string? DressedVisualsScene(Creature entity)
+    {
+        var dressing = TeyvatFrame.CurrentActEntry;
+        var entry = entity.Monster?.Id.Entry;
+        if (dressing == null || entry == null)
+        {
+            return null;
+        }
+
+        return TeyvatFrame.StillPortraits.TryGetValue((dressing, entry), out var scene)
+            ? scene
+            : null;
+    }
+
+    /// <summary>
     /// The seam itself: the base's death sound, and a real length in place of
     /// the zero. Returns <paramref name="baseLength"/> untouched for every
     /// creature this does not cover.
@@ -130,22 +214,36 @@ internal static class ModdedPlayerDeathSeam
     internal static float Cover(NCreature creature, float baseLength)
     {
         var entity = creature.Entity;
-        if (entity?.Player == null)
+        if (entity == null)
         {
             return baseLength;
         }
 
-        if (!Covers(
+        if (entity.Player != null
+            && Covers(
                 creature.HasSpineAnimation,
                 entity.IsPlayer,
                 entity.IsPet,
                 baseLength))
         {
-            return baseLength;
+            SfxCmd.PlayDeath(entity.Player);
+            return LengthFor(DeathClipLength(creature));
         }
 
-        SfxCmd.PlayDeath(entity.Player);
-        return LengthFor(DeathClipLength(creature));
+        // THE DRESSED-BODY ARM, AND NO SOUND ON IT. `SfxCmd.PlayDeath` takes a
+        // `Player` and is the PLAYER's death sting; a monster's death audio is
+        // the base game's own and is not on this path at all. All this arm
+        // does is stop reporting zero for a clip that exists.
+        if (CoversDressedBody(
+                TeyvatFrame.Enabled,
+                creature.HasSpineAnimation,
+                DressedVisualsScene(entity),
+                baseLength))
+        {
+            return DressedLengthFor(DeathClipLength(creature), baseLength);
+        }
+
+        return baseLength;
     }
 }
 

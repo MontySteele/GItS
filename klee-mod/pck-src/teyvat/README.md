@@ -9,13 +9,14 @@ nation's background or an act's music track belongs to the FRAME, not to one
 character, and the C# names these paths in full
 (`klee-mod/KleeCode/Teyvat/TeyvatFrame.StillPortraits`, `TeyvatMusic.Root`).
 
-## creature_visuals/*.tscn — GENERATED, 78 of them for 77 plates
+## creature_visuals/*.tscn — GENERATED, 123 of them for 122 plates
 
 **Do not hand-edit a file in this directory.** Every `.tscn` under
 `creature_visuals/` is written by `tools/gen_teyvat_creature_scenes.py` from
 one table, `docs/current/dossiers/content/enemy-dressings.tsv`, which says per
 row which Genshin body dresses which base-game `Id.Entry` on which face, under
-which display name, at which size class. The same run emits the two C# tables
+which display name, at which size class, moving in which motion set. The same
+run emits the five motion libraries under `motion/` and the two C# tables
 (`klee-mod/KleeCode/Teyvat/TeyvatCreaturesGenerated.cs`) that `TeyvatFrame`
 exposes as `StillPortraits` and `MonsterNames` — so a body cannot get its
 picture without its name, or the reverse. `--check` fails on any drift and
@@ -36,11 +37,33 @@ A size class belongs to the **row**, not to the plate: the Golden Wolflord
 dresses Overgrowth's Ceremonial Beast (a boss) and Sumeru's Fabricator (a
 regular) and is the same picture either way. A scene fixes one scale, so such a
 body gets `<body>_<class>.tscn` per class over the same `<body>.png` — today
-that is `golden_wolflord` alone, which is why there are 78 scenes for 77
-plates.
+that is `golden_wolflord` alone, which is why there are 123 scenes for 122
+plates. The `motion` column splits a body the same way and for the same reason;
+the suffix names only the axis that actually varies.
 
 **`Visuals.Scale` is never written** — `NCreature` owns it — so the scale rides the `Sprite2D`
 under `%Visuals`, and `%Visuals` itself stays an identity `Node2D`.
+
+## motion/*.tres — GENERATED, five shared AnimationLibraries
+
+`stand`, `bounce`, `hover`, `loom`, `mech`, each five clips
+(`RESET`/`idle`/`attack`/`hurt`/`death`), written by the same generator run.
+A scene loads one of them through `%AnimationPlayer`'s
+`libraries = { "": ExtResource(...) }`, which is why the clips live here once
+rather than inlined in 123 scenes.
+
+Every generated scene carries a `Rig` (`Node2D`, identity) between `%Visuals`
+and the `Sprite2D`, and **the clips key `Rig` and nothing else** —
+`Visuals/Rig:position`, `:scale`, `:rotation`, plus `Visuals/Rig/Body:modulate`
+for the hit flash and the death fade. That list is not stylistic:
+`%Visuals.Scale` is `NCreature`'s and `Body`'s transform IS the size class, so
+a clip touching either would fight the engine or flatten every elite and boss
+to regular size the first time it played. The pins are in
+`tier0/tests/test_teyvat_creature_scenes.py`; the shape and the state machine
+are documented in `docs/current/operations/codegen.md`.
+
+`build_pck.ps1` overlays this whole directory verbatim, so the `.tres` files
+pack and the derived pck contract lists them with no change to the script.
 
 The rest of this section is the mechanism, written when the directory held one
 hand-made file (Nibbit's, `hilichurl_guard.tscn`, retired into
@@ -116,6 +139,6 @@ dressing and nothing else.
 
 Each plate is a **240x280 RGBA PNG** — the size `docs/current/operations/media.md`
 §3 fixes for portraits, and the size the roster's own combat surface already
-uses. The 77 are produced by `art/plan.tsv`'s portrait block and recorded one
+uses. The 122 are produced by `art/plan.tsv`'s portrait block and recorded one
 row each in `media/PORTRAITS.tsv`, per the media pipeline's "the plan produces
 and the ledger records" rule (`operations/media.md` §1).

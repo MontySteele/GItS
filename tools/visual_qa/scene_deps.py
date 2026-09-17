@@ -58,12 +58,34 @@ def _rel(path: Path, root: Path) -> str:
         return path.as_posix()
 
 
+def external_library_names(
+    scene: Scene, library_index: dict[str, set[str]]
+) -> set[str]:
+    """Animation names this scene gets from an `ext_resource` AnimationLibrary.
+
+    `AnimationPlayer.libraries` takes an `ExtResource` as happily as a
+    `SubResource`, and the Teyvat creature scenes use that: 123 scenes share
+    five `res://teyvat/motion/<set>.tres` libraries. Without this the tree's
+    `AnimationNodeAnimation`s would every one look like SD-ANIM-MISSING --
+    a false error on the exact shape the pass shipped.
+    """
+    names: set[str] = set()
+    for section in scene.ext_resources.values():
+        if section.attrs.get("type") != "AnimationLibrary":
+            continue
+        path = section.attrs.get("path", "")
+        if path.startswith("res://"):
+            names |= library_index.get(path[len("res://"):], set())
+    return names
+
+
 def check_scene(
     scene: Scene,
     report: Report,
     where: str,
     universe: set[str] | None = None,
     require_states: tuple[str, ...] = (),
+    library_index: dict[str, set[str]] | None = None,
 ) -> None:
     """Every rule for one scene. Appends to `report`."""
     ext_ids = set(scene.ext_resources)
@@ -156,6 +178,8 @@ def check_scene(
 
     # --- animation --------------------------------------------------------
     names = scene.animation_names()
+    if library_index:
+        names |= external_library_names(scene, library_index)
     libraries = scene.animation_libraries()
     for lib_id, entries in sorted(libraries.items()):
         for anim_name, anim_sub in sorted(entries.items()):
@@ -233,6 +257,24 @@ def check_scene(
             )
 
     # --- animation track targets -----------------------------------------
+    #
+    # A STANDALONE `.tres` LIBRARY HAS NO NODE TREE TO CHECK AGAINST. Its
+    # tracks name nodes in whichever SCENE loads it, and one library is loaded
+    # by 123 of them, so "does this scene have that node" is not a question
+    # this file can ask. It is asked instead where the pairing is known --
+    # `tier0/tests/test_teyvat_creature_scenes.py` holds every Teyvat clip to
+    # the four paths the generated scenes carry. Saying so is the point: a
+    # gate that silently skipped would read as a pass.
+    if not scene.nodes:
+        if scene.animation_track_paths():
+            report.note(
+                "SD-TRACK-NOTREE", where,
+                f"{len(scene.animation_track_paths())} animation track(s) in a "
+                "file with no node tree (a standalone resource); their "
+                "NodePaths were not resolved here.",
+            )
+        return
+
     node_paths = scene.node_paths()
     unique = scene.unique_names()
     instanced = {node.path for node in scene.nodes if node.is_instance}
@@ -410,22 +452,33 @@ def run(
         )
         return report
 
+    # PARSE EVERYTHING FIRST. A scene may load its animations from a `.tres`
+    # library sitting elsewhere in the same tree, so "which names does this
+    # scene know" cannot be answered until every file has been read.
     scenes: dict[str, Scene] = {}
     for path in files:
         key = path.relative_to(pck_src).as_posix()
-        where = _rel(path, root)
         try:
-            scene = parse(path)
+            scenes[key] = parse(path)
         except (OSError, UnicodeDecodeError) as exc:
-            report.error("SD-UNREADABLE", where, f"{type(exc).__name__}: {exc}")
-            continue
-        scenes[key] = scene
+            report.error("SD-UNREADABLE", _rel(path, root),
+                         f"{type(exc).__name__}: {exc}")
+
+    library_index = {
+        key: scene.animation_names()
+        for key, scene in scenes.items()
+        if scene.resource_type == "AnimationLibrary"
+    }
+
+    for key, scene in scenes.items():
+        where = _rel(pck_src / key, root)
         wanted = (
             required_states
             if any(key.endswith(suffix) for suffix in require_states_in)
             else ()
         )
-        check_scene(scene, report, where, universe=universe, require_states=wanted)
+        check_scene(scene, report, where, universe=universe,
+                    require_states=wanted, library_index=library_index)
         for section in scene.unknown:
             report.note(
                 "SD-UNKNOWN-SECTION", f"{where}:{section.line}",
