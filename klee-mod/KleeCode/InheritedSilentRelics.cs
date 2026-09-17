@@ -12,7 +12,7 @@ namespace KleeMod;
 /// All three kits (Klee, Kokomi, Furina) resolve their relic pool to
 /// <c>ModelDb.RelicPool&lt;SilentRelicPool&gt;().AllRelics</c> plus their own
 /// starter — see the census
-/// <c>review/active/inherited-potions-relics-census-2026-09-16.md</c>, which
+/// <c>review/ruled/inherited-potions-relics-census-2026-09-16.md</c>, which
 /// counted that roster off the shipped DLL: 8 relics, identical membership for
 /// all three.
 ///

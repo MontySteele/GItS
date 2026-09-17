@@ -17,7 +17,7 @@ namespace KleeMod.Tests;
 /// 2026-09-16: the two misleading inherited Silent relics leave all three
 /// pools (Klee, Kokomi, Furina) and every other inherited relic and potion
 /// stays. The census the ruling reads is
-/// `review/active/inherited-potions-relics-census-2026-09-16.md`.
+/// `review/ruled/inherited-potions-relics-census-2026-09-16.md`.
 ///
 /// WHAT CAN AND CANNOT BE ASKED HERE. `ModelDb` is populated by the game's
 /// boot, so no pool can be BUILT in this process (README, the headless

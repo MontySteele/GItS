@@ -1,4 +1,4 @@
-Status: OPEN (pick 4 only; R274 ruled picks 1-3 and 5-8 at their defaults on 2026-09-16; nothing here is measured)
+Status: RULED R274 2026-09-16
 
 # The 2026-09-16 fan-outs: what landed, and eight picks
 
@@ -85,7 +85,7 @@ queue entry prints no derivation (`EB-809`).
 
 ## 4. Picks
 
-**R274 (2026-09-16):** picks 1, 2, 3, 5, 6, 7 and 8 were taken at their defaults. Pick 4 is deferred to a Fable design pass on 2026-09-17; [USER]'s lean is that Noelle's imprecise text is the defect and the groups still need settling. Of the mapping's carried items, the Wanderer collision on Knowledge Demon is accepted and Tanx waits for a reflavoring worth having.
+**R274 (2026-09-16):** picks 1, 2, 3, 5, 6, 7 and 8 were taken at their defaults. Pick 4 was deferred to a Fable design pass on 2026-09-17, [USER]'s lean being that Noelle's imprecise text was the defect and the groups still needed settling. **The pass (2026-09-17) found the pick already ruled.** The three words the r12 run-2 seat met on 2026-09-04 are two sets and a shelf fact: `Hexerei` is the family word, printed on every face whose play pays Klee a Spark (R265 pick 1, `EB-642`, every Hexerei card pays, Universals included, on [USER]'s own act-1 read that "the 'Klee's own' text on the Personals is not needed"); `Companion` is the keyword every companion card carries; and "Klee's own Companions" was the Spark tip as it stood before R265, retired with that ruling and printed nowhere since. Noelle's face today reads "Hexerei. Gain 6 Block. Whenever a Mine goes off this turn, gain 4 Block." (`ProtoMcNoelleIGotYourBack.cs`). `personal_pool` decides which character a card is offered to and never reaches a face. All thirteen of Klee's personal rows carry the Hexerei mark, so the family word covers every payer; `tier0/tests/test_hexerei_sets_pin.py` pins that and pins that no game-facing string says "Klee's own". The shipped arm still keys the personal pool in `KleeCompanionSpark.PaysKleesSpark` because no shipped row carries `hexerei` (R213 B); the overhaul replaces that surface when it ships. No sweep was needed: the face word is derived from the row by `gen_klee_cards`, so the mark and the payment cannot disagree. Of the mapping's carried items, the Wanderer collision on Knowledge Demon is accepted and Tanx waits for a reflavoring worth having.
 
 Defaults are marked. A pick not taken stands at its default.
 
@@ -102,7 +102,7 @@ Defaults are marked. A pick not taken stands at its default.
    a shipped card's strength. **(1) DEFAULT: leave it;** (2) multiply every
    granted rider too, one commit.
 3. **The inherited Silent relics and potions** (`EB-494`'s census,
-   `review/active/inherited-potions-relics-census-2026-09-16.md`): Helical
+   `review/ruled/inherited-potions-relics-census-2026-09-16.md`): Helical
    Dart and Snecko Skull mislead every kit (no Shiv, no Poison anywhere),
    Ring of the Snake never rolls. **(1) DEFAULT: drop Helical Dart and
    Snecko Skull from all three pools, leave the rest;** (2) drop nothing;
