@@ -20,8 +20,20 @@ media/MUSIC.tsv                                 tracked ledger
 media/PORTRAITS.tsv                             tracked ledger
 ```
 
-`<act-or-scene>`: `act1_mondstadt`, `act1_liyue`, `boss`, `rest`, `map`, `shop`.
+`<act-or-scene>`: one per face, `act<N>_<nation>` — `act1_mondstadt`,
+`act1_liyue`, `act2_natlan`, `act2_inazuma`, `act3_fontaine`, `act3_sumeru`
+(R273's layout 1, two faces per act) — plus `boss`, `rest`, `map`, `shop`.
 `<body>`: the enemy or NPC id as the mod names it, one directory per body.
+
+**These names are the spec and the reader resolves to them.**
+`TeyvatFrame.MediaScene` turns a dressing's `Id.Entry` into its scene name, so
+a track filed here is found without a packager-side rename — the packager
+copies the `scene` column through verbatim, because a rename there would be a
+second name for the same thing and the ledger would stop describing the pack.
+The six act scenes are pinned against the six faces in `KleeTests` and against
+the packager's own list in `tier0/tests/test_music_ledger_gate.py`. The other
+four have **no caller yet**: they are not acts, so nothing resolves to them,
+and wiring them is a room-type question rather than an act one.
 
 `media/out/` is what the packager reads; nothing else is packaged. **One
 producer per out-path** — exactly one ledger row may name a given `out`, and
@@ -42,11 +54,18 @@ act's id names where it goes. Until a real plate lands,
 gradients and takes no ledger row at all — it is a generator, on
 `gen_furina_stills.py`'s terms, not a media drop.
 
-Both ledgers are **UTF-8 + CRLF**, like `art/plan.tsv` and `art/SOURCES.tsv`:
-read with `encoding="utf-8", newline=""` and `rstrip("\r\n")`, or the last
-column silently stops matching. TSV and not CSV, and not by taste: `.gitignore`
-ignores `*.csv` repo-wide, so a `.csv` ledger would be untracked and the
-provenance record would not exist.
+Both ledgers are **UTF-8, no BOM**, like `art/plan.tsv` and `art/SOURCES.tsv`.
+**Line endings are LF and are not this page's to choose:** `.gitattributes` is
+`* text=auto eol=lf` repo-wide, so a CRLF ledger is converted on the way into
+the index and checked back out as LF — a machine that hand-wrote CRLF gets
+`git add`'s "CRLF will be replaced by LF" warning and a file that does not match
+itself after the next checkout. Read them the tolerant way regardless
+(`encoding="utf-8", newline=""` then `rstrip("\r\n")`, or .NET's
+`File.ReadAllLines`), because a ledger edited in a Windows editor arrives with
+CRLF until git normalises it, and split on TAB alone — a stray `\r` riding into
+`notes` makes the last column silently stop matching. TSV and not CSV, and not
+by taste: `.gitignore` ignores `*.csv` repo-wide, so a `.csv` ledger would be
+untracked and the provenance record would not exist.
 
 ### 2. Ledger columns
 
@@ -110,12 +129,39 @@ extension is one more copy block, gated on the ledger:
    build stays green and prints the gap, art never blocks the build.
 3. Write the `.import` loop settings for each audio file from `loop_start_s`.
 
-Nothing else changes: the preset is `export_filter="all_resources"`, so an
-imported `.ogg` is packed like a texture and the derived contract picks it up
-with no edit (it skips `.import` sidecars already). What makes this more than a
-one-line manifest addition is that the script is a list of literal blocks with
-no table to add a row to, and `Select-PackablePngs` / `$pckExclude` are
-PNG-only — audio needs its own enumeration.
+Nothing else changes in the preset — it stays `export_filter="all_resources"` —
+and the derived contract picks the track up with no edit, listing
+`res://teyvat/music/<scene>/<track>.ogg`, which is the path that loads. What
+makes this more than a one-line manifest addition is that the script is a list
+of literal blocks with no table to add a row to, and `Select-PackablePngs` /
+`$pckExclude` are PNG-only — audio needs its own enumeration.
+
+**What the pack holds is not the `.ogg`, and that is measured**, not assumed
+(MegaDot 4.5.1 headless, the packager's own `project.godot` and export preset).
+Importing and exporting `teyvat/music/act1_mondstadt/windborne_dreams.ogg`
+packs exactly two entries for it:
+
+```
+.godot/imported/windborne_dreams.ogg-<hash>.oggvorbisstr
+teyvat/music/act1_mondstadt/windborne_dreams.ogg.import
+```
+
+With that pack mounted, `DirAccess.get_files_at` of the directory returns
+`["windborne_dreams.ogg.import"]` and nothing else; `ResourceLoader.exists` is
+**true** for `.../windborne_dreams.ogg` and **false** for the `.import`. So a
+reader that enumerates a music directory must strip `.import` before it asks
+the loader — `TeyvatMusic.ImportSuffix` does, and `KleeTests` pins it. Same
+class of trap as the `.tscn.remap` stubs above, but the audio importers have no
+"ship it as source" switch, so this half of the repair is on the reader rather
+than in `project.godot`.
+
+The loop settings of step 3 are written **before** `--import`: Godot's audio
+importers read `[params]` out of an existing `.import` and keep them, filling
+in `[remap]path` and `[deps]` themselves. Measured the same way — a
+hand-written file carrying only `importer` and `[params]` came back with
+`loop=true` / `loop_offset=1.25` intact and the loaded `AudioStreamOggVorbis`
+reported `loop` true and `loop_offset` 1.25. A blank `loop_start_s` writes no
+`.import` at all, so the importer's defaults stand.
 
 Order is unchanged and non-negotiable: **`build_pck` before deploy**, on the
 art-bearing main checkout only (`operations/build-deploy.md`).
@@ -155,7 +201,9 @@ would distribute the track.
   with the FMOD music bus ducked is the default; an FMOD bank is the fallback
   if the duck cannot hold. The spike decides (run-frame §2, §4.4), and this
   page only says where the file lives.
-- **Where the packager puts media in the pck tree.** `res://klee/music/...`
-  versus a `teyvat/` namespace of its own is the spike's call, made once the
-  patch site is known. The ledger's `out` column is the stable name and the
-  pck path derives from it whichever way the spike goes.
+- **The four non-act scenes.** `boss`, `rest`, `map` and `shop` are §1 scenes
+  with nothing that resolves to them: `TeyvatFrame.MediaScene` answers for a
+  dressing, and those are room types rather than acts. A track filed under one
+  today is packed, sits in `res://teyvat/music/<scene>/`, and is never asked
+  for. Wiring them needs a room-type seam on the audio path, which is a
+  separate read from this one.

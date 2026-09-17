@@ -78,6 +78,40 @@ public static class TeyvatMusic
     /// </summary>
     public static readonly string[] Extensions = { ".ogg", ".mp3" };
 
+    /// <summary>
+    /// THE SUFFIX AN EXPORTED PACK ACTUALLY CARRIES, and the only thing a
+    /// `DirAccess` listing of a packed music directory shows.
+    ///
+    /// MEASURED, NOT ASSUMED (MegaDot 4.5.1 headless, with
+    /// `tools/build_pck.ps1`'s own `project.godot` and export preset).
+    /// Importing `teyvat/music/act1_mondstadt/tone.ogg` and exporting packs
+    /// exactly two entries for it --
+    /// `.godot/imported/tone.ogg-65b6e61f5da027ff5c3e1a48630c2f25.oggvorbisstr`
+    /// and `teyvat/music/act1_mondstadt/tone.ogg.import` -- and NOT the `.ogg`
+    /// itself. With that pack mounted:
+    /// <list type="bullet">
+    /// <item>`DirAccess.get_files_at(".../act1_mondstadt")` returns
+    /// `["tone.ogg.import"]`;</item>
+    /// <item>`ResourceLoader.exists(".../tone.ogg")` is TRUE and the load
+    /// returns an `AudioStreamOggVorbis`;</item>
+    /// <item>`ResourceLoader.exists(".../tone.ogg.import")` is FALSE.</item>
+    /// </list>
+    ///
+    /// So the name the enumeration hands back is never the name that loads, and
+    /// the first cut of <see cref="TrackFor"/> -- which tested the LISTED name's
+    /// extension against <see cref="Extensions"/> -- could not have matched a
+    /// packaged track at all. The packager solves the same class of problem for
+    /// `.tscn` with `export/convert_text_resources_to_binary=false`; the audio
+    /// importers have no equivalent "ship it as source" switch, so this half of
+    /// the repair belongs to the reader.
+    ///
+    /// Stripping is unconditional rather than guarded on "is this a pack",
+    /// because a file whose name really ends in `.import` is not a track under
+    /// any arrangement, and a loose `.ogg` (an editor run, or any future
+    /// loose-file route) passes through untouched.
+    /// </summary>
+    public const string ImportSuffix = ".import";
+
     /// <summary>Directory lookups are cached: these sit on a path the run
     /// music controller reaches on every room change, and a `DirAccess` walk
     /// per room would be a real cost for an answer that cannot change inside a
@@ -171,15 +205,27 @@ public static class TeyvatMusic
     /// because the ledger owns the track's name and this code must not.
     /// Sorted, so a directory that somehow holds two tracks picks the same one
     /// every boot instead of whichever the filesystem offered first.
+    ///
+    /// AND THE DIRECTORY IS THE LEDGER'S NAME, NOT THE ACT ID'S.
+    /// `operations/media.md` sec.1 files a track under `act1_mondstadt`;
+    /// `tools/build_pck.ps1` copies that `scene` column through VERBATIM, one
+    /// producer and one out-path, so the resolution is the reader's job. See
+    /// <see cref="TeyvatFrame.MediaScene"/> for the derivation and for why the
+    /// rename does not belong in the packager.
     /// </summary>
     public static string? TrackFor(string? actEntry)
     {
-        if (string.IsNullOrEmpty(actEntry))
+        // A base zone -- Overgrowth, or anything else that is not one of this
+        // arm's faces -- answers null and returns HERE, before any Godot call:
+        // an undressed run has no ledger scene and plays its own music. So does
+        // a null or empty entry, which is `CurrentActEntry` outside a run.
+        var scene = TeyvatFrame.MediaScene(actEntry);
+        if (scene == null)
         {
             return null;
         }
 
-        var dir = Root + actEntry!.ToLowerInvariant();
+        var dir = Root + scene;
         if (Cache.TryGetValue(dir, out var cached))
         {
             return cached;
@@ -201,12 +247,18 @@ public static class TeyvatMusic
                 {
                     foreach (var name in names)
                     {
-                        // An exported pck can present an imported audio file
-                        // under its source name or with a `.remap`/`.import`
-                        // sidecar; `ResourceLoader.Exists` is the only
-                        // trustworthy question about what will actually load.
-                        var candidate = dir + "/" + name;
-                        if (name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)
+                        // An exported pck presents an imported audio file ONLY
+                        // as its `.import` sidecar -- measured; see
+                        // ImportSuffix for the pack listing and the three
+                        // ResourceLoader answers. Strip it, then ask
+                        // `ResourceLoader.Exists`, which follows the import
+                        // remap and is the only trustworthy question about what
+                        // will actually load.
+                        var resource = name.EndsWith(ImportSuffix, StringComparison.OrdinalIgnoreCase)
+                            ? name.Substring(0, name.Length - ImportSuffix.Length)
+                            : name;
+                        var candidate = dir + "/" + resource;
+                        if (resource.EndsWith(ext, StringComparison.OrdinalIgnoreCase)
                             && ResourceExists(candidate))
                         {
                             found = candidate;
