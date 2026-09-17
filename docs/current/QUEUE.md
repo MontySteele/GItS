@@ -107,7 +107,7 @@ to buy, priced against Regent's Stars. The packet is in `review/ruled/`.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `fanout-picks-2026-09-16 4.4` | **CHOOSE** what the third companion set is after EB-504/642/663: Witches' Circle keys off 'a Hexerei card', Noelle prints 'Klee's own Companions', a plain Companion card says neither. (1) DEFAULT: one printed name per set from a Fable design pass, then the sweep and a lint; (2) leave the three words. | DEFERRED 2026-09-16 (R274) -- gated on the Fable design pass of 2026-09-17; [USER]'s lean: Noelle's imprecise text is the defect. | review/active/fanout-picks-2026-09-16.md |
+| `fanout-picks-2026-09-16 4.4` | **CHOOSE** what the third companion set is after EB-504/642/663: Witches' Circle keys off 'a Hexerei card', Noelle prints 'Klee's own Companions', a plain Companion card says neither. (1) DEFAULT: one name per set from a Fable design pass, then the sweep and a lint; (2) leave the three words. | HELD 2026-09-16 (R274, deferred) — gated on the Fable pass of 2026-09-17; [USER]'s lean: Noelle's text is the defect. | review/active/fanout-picks-2026-09-16.md |
 | `klee-opening-bank 5.1` | **CHOOSE** the opening Spark bank, round 26 finding the pass's Regent prices bind only on turn one where the bank is 1: (1, default) open every combat at 3 Sparks (Regent's Divine Right), rule 4 changes, [USER] plays; (2) reprice the six sinks to Klee's bank (1/1/1+1/2/2/4), rule 4 untouched; (3) as it is, one more lane. -> review/active/klee-overhaul-round-26-2026-09-08.md | HELD — gated on the consolidated pool's first read (R271 §3) | Klee r26; R270; R271 |
 
 → **`review/ruled/sitting-2026-08-30.md` is CLOSED by R224 (2026-08-30).**
