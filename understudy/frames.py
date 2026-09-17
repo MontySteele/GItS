@@ -28,9 +28,22 @@ WHAT IT CAPTURES, AND WHAT IT REFUSES TO
 The GAME WINDOW's rectangle, found from the process's own `MainWindowHandle` --
 never the whole desktop. A full-screen grab would sweep in whatever else the
 machine happens to be showing, which is somebody's private business and is not
-the material anybody asked for. Three refusals, each named: no window at all,
-a zero-size rectangle, and a MINIMISED window (Windows parks those at a
--32000 origin, which is a valid rectangle nowhere on screen).
+the material anybody asked for. Four refusals, each named: no window at all,
+a zero-size rectangle, a MINIMISED window (Windows parks those at a
+-32000 origin, which is a valid rectangle nowhere on screen), and -- `EB-806`
+-- a lane whose game this process cannot NAME.
+
+WHICH GAME, AND THE LANE ON THE ROW (`EB-806`)
+The window is selected by PROCESS ID, always. `capture` used to default
+`pid=None` and hand the script a process name instead, and with two lanes up a
+name lookup takes whichever the OS lists first: a lane-0 job framed lane 1's
+run (`#594`), and every manifest row carried the literal `lane0` whatever it
+was a picture of (`#595`). A caller that knows its pid passes it; a caller
+that does not gets the lane's pid off that lane's own embark sidecar
+(`lanewatch.lane_pid`, checked to be RUNNING because Windows reuses pids), and
+the row is labelled with the lane that pid came from. When no live pid can be
+named the capture REFUSES -- see `NO_LANE_PID`. A frame of the wrong game,
+labelled as this lane's, is worse than no frame.
 
 HOW IT CAPTURES, AND WHY IT CHANGED (2026-08-13, EB-97)
 
@@ -174,6 +187,78 @@ def route(env: dict[str, str] | None = None) -> str:
     env = os.environ if env is None else env
     want = (env.get(ROUTE_ENV) or "").strip().lower()
     return want if want in ROUTES else ROUTE_AUTO
+
+
+# --------------------------------------------------- which lane, and whose --
+
+#: `EB-806`. The refusal a capture that cannot name its lane's process makes.
+#: It is a refusal and not a fallback, and that is the whole fix: the fallback
+#: WAS `Get-Process -Name SlayTheSpire2`, which with two games up takes
+#: whichever the OS lists first -- so a lane-0 job photographed lane 1's run
+#: (`#594`) and the row said `lane0` (`#595`). A frame of the wrong game,
+#: labelled with the wrong lane, is worse than no frame: it is material a
+#: person reads as this lane's.
+NO_LANE_PID = (
+    "refusing to capture by image name. With more than one game up, a name "
+    "lookup takes whichever process the OS lists first, so the frame can be "
+    "of the other lane and nothing on the row would say so. Pass `pid=` "
+    "explicitly, or embark the lane so its sidecar names a live process"
+)
+
+
+def _lanewatch():
+    """`understudy.lanewatch`, imported lazily.
+
+    Lazily because this module is deliberately dependency-free and is imported
+    by `harness` at module scope; `lanewatch` reaches `hangwatch` and shells
+    out to `tasklist`, neither of which a capture that was handed a pid needs.
+    """
+    from understudy import lanewatch
+    return lanewatch
+
+
+def lane_label(lane: object = None) -> str:
+    """The lane label a capture belongs to -- `GITS_LANE`, or `lane0`."""
+    try:
+        return _lanewatch().lane_label(lane)
+    except Exception:                                        # noqa: BLE001
+        return "lane0"
+
+
+def resolve_lane(lane: object = None, reader=None,
+                 alive=None) -> tuple[str, int | None, str]:
+    """`(label, pid, why-not)` for the lane this capture belongs to.
+
+    The pid is the one `embark` wrote to the lane's sidecar when it launched
+    the game (`lanewatch.lane_pid`, the same ledger `--teardown` rebuilds a
+    kill from), and it is checked to be RUNNING before it is used: a pid off a
+    stale sidecar is a pid Windows may well have handed to something else.
+    `pid` comes back `None` with a sentence in `why-not` whenever the lane
+    cannot be named, and the caller refuses -- it never falls back to a name.
+    """
+    label = lane_label(lane)
+    try:
+        lw = _lanewatch()
+    except Exception as exc:                                 # noqa: BLE001
+        return label, None, f"the lane sidecar is unreadable ({exc})"
+    read = reader if reader is not None else lw.lane_pid
+    try:
+        pid = read(lane)
+    except Exception as exc:                                 # noqa: BLE001
+        return label, None, f"the lane sidecar is unreadable ({exc})"
+    if not pid:
+        return label, None, (
+            f"{label} has no launched game on its embark sidecar "
+            f"(understudy/logs/embark-*.json)")
+    check = alive if alive is not None else lw.working_set_bytes
+    try:
+        running = check(int(pid))
+    except Exception:                                        # noqa: BLE001
+        running = None
+    if running is None:
+        return label, None, (
+            f"{label}'s sidecar names pid {pid}, which is not running")
+    return label, int(pid), ""
 
 
 def frame_path(label: str, stamp: str | None = None,
@@ -641,7 +726,10 @@ def capture(label: str = "frame", note: str = "",
             runner=_run_powershell,
             stamp: str | None = None,
             pid: int | None = None,
-            instance: str = "") -> dict:
+            instance: str = "",
+            lane: object = None,
+            lane_reader=None,
+            lane_alive=None) -> dict:
     """Take one frame of the game window. Returns a report; never raises.
 
     `context` is whatever the caller knows about the moment -- screen, act,
@@ -652,6 +740,23 @@ def capture(label: str = "frame", note: str = "",
     if not enabled(env):
         return {"status": "disabled", "message": DISABLED_NOTE,
                 "guardrail": GUARDRAIL}
+
+    # EB-806. WHICH GAME, DECIDED BEFORE ANYTHING IS WRITTEN. A caller that
+    # knows its pid (the two-lane drivers) still passes it and nothing here
+    # runs; a caller that does not (`harness frame`, which is the lane's own
+    # shell and used to hand the script a process NAME) gets the lane's pid
+    # off its embark sidecar, and the lane it gets it from is the lane the row
+    # is labelled with. No pid, no frame -- see `NO_LANE_PID`.
+    if pid is None:
+        label_seen, pid, why = resolve_lane(lane, reader=lane_reader,
+                                            alive=lane_alive)
+        instance = instance or label_seen
+        if pid is None:
+            return {"status": "error",
+                    "message": f"{NO_LANE_PID}: {why}",
+                    "instance": label_seen, "guardrail": GUARDRAIL}
+    else:
+        instance = instance or lane_label(lane)
 
     out = frame_path(label, stamp=stamp, out_dir=out_dir)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -665,9 +770,8 @@ def capture(label: str = "frame", note: str = "",
     token = (stdout.splitlines() or [""])[0].strip()
     if code != 0 or not token.startswith("OK"):
         reason = {
-            "NO_WINDOW": (f"no visible window for pid {pid}" if pid is not None
-                          else f"no visible window for process '{image}'; the "
-                               f"game must be running"),
+            "NO_WINDOW": (f"no visible window for pid {pid} ({instance}); "
+                          f"the game must be running"),
             "EMPTY_RECT": "the window reported a zero-size rectangle",
             "MINIMISED": "the game window is minimised (parked off-screen at "
                          "a -32000 origin); restore it and capture again",
@@ -709,7 +813,9 @@ def capture(label: str = "frame", note: str = "",
         # lane on it is a frame nobody can attribute afterwards; `pid` is the
         # fact and `instance` is the label a reader can match to a record row.
         "pid": pid,
-        "instance": instance or "lane0",
+        # EB-806: `instance` is resolved above and is never a literal default
+        # again -- every row said `lane0` because this line invented one.
+        "instance": instance,
         "context": dict(context or {}),
         # ON EVERY ROW, not once at the top of the file. A manifest is read in
         # slices and concatenated with other manifests; a guardrail that lives

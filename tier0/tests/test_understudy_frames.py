@@ -14,6 +14,11 @@ import pytest
 
 from understudy import frames, harness
 
+# EB-806: a capture with no pid resolves one off the lane's embark
+# sidecar and REFUSES when there is none, so every take in this file
+# that is about naming, routes or the manifest hands one over.
+PID = 4242
+
 
 # -------------------------------------------------------- off by default ----
 
@@ -97,7 +102,7 @@ class _Runner:
 
 
 def test_a_missing_window_is_a_named_refusal_not_a_stack_trace(tmp_path):
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=_Runner(2, "NO_WINDOW"))
     assert report["status"] == "error"
@@ -106,7 +111,7 @@ def test_a_missing_window_is_a_named_refusal_not_a_stack_trace(tmp_path):
 
 
 def test_a_zero_size_window_is_its_own_refusal(tmp_path):
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=_Runner(3, "EMPTY_RECT"))
     assert report["status"] == "error" and "zero-size" in report["message"]
@@ -116,7 +121,7 @@ def test_a_minimised_window_is_refused_rather_than_captured(tmp_path):
     """A minimised window keeps its handle and reports a positive w/h -- it is
     just parked at a -32000 origin. Copying that rectangle would grab the
     top-left of the desktop, which is the one capture this leg refuses."""
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=_Runner(4, "MINIMISED"))
     assert report["status"] == "error" and "minimised" in report["message"]
@@ -130,7 +135,7 @@ def test_the_size_is_read_off_stdout_alone(tmp_path):
     the first `Add-Type` emits one. Folded into stdout, that blob became the
     `size` on the manifest row."""
     runner = _Runner(0, "OK 1920 1080", err="#< CLIXML <Objs>...</Objs>")
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=runner)
     assert report["status"] == "ok"
@@ -140,7 +145,7 @@ def test_the_size_is_read_off_stdout_alone(tmp_path):
 def test_a_runner_that_raises_is_a_report_not_an_exception(tmp_path):
     def boom(_script, timeout=60.0):
         raise OSError("powershell is not on this machine")
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, runner=boom)
     assert report["status"] == "error" and "OSError" in report["message"]
 
@@ -153,7 +158,7 @@ def test_every_manifest_row_carries_the_guardrail(tmp_path):
     header survives exactly one copy-paste."""
     manifest = tmp_path / "m.jsonl"
     for i in range(3):
-        frames.capture(f"take{i}", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+        frames.capture(f"take{i}", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                        out_dir=tmp_path, manifest=manifest, stamp=f"S{i}",
                        runner=_Runner(0, "OK 800 600"))
     rows = [json.loads(l) for l in
@@ -168,7 +173,7 @@ def test_the_context_is_copied_from_the_caller_and_never_inferred(tmp_path):
     guessed at afterwards is worse than a frame labelled with nothing."""
     manifest = tmp_path / "m.jsonl"
     frames.capture("x", context={"state_type": "monster", "floor": 7},
-                   env={"GITS_UNDERSTUDY_CAPTURE": "1"}, out_dir=tmp_path,
+                   pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"}, out_dir=tmp_path,
                    manifest=manifest, runner=_Runner(0, "OK 800 600"))
     row = json.loads(manifest.read_text(encoding="utf-8").splitlines()[0])
     assert row["context"] == {"state_type": "monster", "floor": 7}
@@ -318,7 +323,7 @@ def test_the_screen_route_raises_the_game_and_puts_it_back():
 def test_the_manifest_row_records_the_route_that_ran_and_the_one_asked_for(tmp_path):
     runner = _Runner(0, "OK 1920 1080 copyfromscreen-forced")
     report = frames.capture("x",
-                            env={"GITS_UNDERSTUDY_CAPTURE": "1",
+                            pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1",
                                  frames.ROUTE_ENV: "copyfromscreen"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=runner)
@@ -335,7 +340,7 @@ def test_the_guardrail_still_rides_a_forced_route_row(tmp_path):
     for env_route, ran in (("copyfromscreen", "copyfromscreen-forced"),
                            ("printwindow", "printwindow-forced")):
         report = frames.capture("x",
-                                env={"GITS_UNDERSTUDY_CAPTURE": "1",
+                                pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1",
                                      frames.ROUTE_ENV: env_route},
                                 out_dir=tmp_path,
                                 manifest=tmp_path / "m.jsonl",
@@ -383,7 +388,7 @@ def test_a_capture_that_reported_no_extent_is_not_called_complete():
 def test_the_manifest_row_carries_the_client_size_and_the_measured_scale(
         tmp_path):
     runner = _Runner(0, "OK 3841 2160 printwindow 5762 3240")
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=runner)
     row = json.loads((tmp_path / "m.jsonl").read_text(
@@ -398,7 +403,7 @@ def test_the_manifest_row_carries_the_client_size_and_the_measured_scale(
 
 
 def test_an_incomplete_frame_says_so_in_the_report_and_on_the_row(tmp_path):
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=_Runner(0, "OK 3841 2160 printwindow 2560 1440"))
     assert report["status"] == "ok", "an incomplete frame is still a frame"
@@ -411,7 +416,7 @@ def test_an_incomplete_frame_says_so_in_the_report_and_on_the_row(tmp_path):
 def test_an_old_success_line_without_an_extent_still_reads_back(tmp_path):
     """Manifests are concatenated across months. A row the old script wrote
     must not turn into a crash in the reader that replaced it."""
-    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+    report = frames.capture("x", pid=PID, env={"GITS_UNDERSTUDY_CAPTURE": "1"},
                             out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
                             runner=_Runner(0, "OK 1920 1080 printwindow"))
     assert report["status"] == "ok" and report["complete"] is False
@@ -501,3 +506,102 @@ def test_a_state_with_no_character_renders_a_neutral_label():
              "player": {"hp": 56, "max_hp": 70, "gold": 99}}
     out = harness.render(state)
     assert "Player 56/70 HP" in out
+
+
+# ------------------------------------------------- EB-806: which lane -------
+#
+# The camera framed the wrong lane and then mislabelled the picture: `capture`
+# defaulted `pid=None` and handed the script a process NAME, which with two
+# games up takes whichever the OS lists first (#594), and the manifest row's
+# `instance` fell back to the literal `"lane0"` (#595). A frame of the other
+# lane, labelled as this one, is material a person reads as evidence about a
+# run it is not a picture of.
+
+def _sidecar(tmp_path, label="lane1", pid=777):
+    """A fake embark sidecar and its fake ledger, as `embark` writes them."""
+    ledger = tmp_path / "ledger.json"
+    ledger.write_text(json.dumps([{"pid": pid}]), encoding="utf-8")
+    (tmp_path / f"embark-{label}.json").write_text(
+        json.dumps({"instance": label, "ledger": str(ledger)}),
+        encoding="utf-8")
+    return tmp_path
+
+
+def test_the_lane_pid_is_read_off_the_lanes_own_embark_sidecar(monkeypatch,
+                                                               tmp_path):
+    from understudy import lanewatch
+    monkeypatch.setattr(lanewatch, "LOG_DIR", _sidecar(tmp_path))
+    label, pid, why = frames.resolve_lane(
+        "1", alive=lambda p: 1_000_000)
+    assert (label, pid, why) == ("lane1", 777, "")
+
+
+def test_a_capture_with_no_pid_frames_that_lanes_process_and_says_which(
+        monkeypatch, tmp_path):
+    """The fix, both halves: the script selects by ID, and the row is `lane1`."""
+    from understudy import lanewatch
+    monkeypatch.setattr(lanewatch, "LOG_DIR", _sidecar(tmp_path))
+    runner = _Runner(0, "OK 800 600")
+    manifest = tmp_path / "m.jsonl"
+    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                            out_dir=tmp_path, manifest=manifest,
+                            lane="1", lane_alive=lambda p: 1_000_000,
+                            runner=runner)
+    assert report["status"] == "ok"
+    # the fake window list: the script asks for one process id, never a name
+    assert "Get-Process -Id 777" in runner.scripts[0]
+    assert "Get-Process -Name" not in runner.scripts[0]
+    row = json.loads(manifest.read_text(encoding="utf-8").splitlines()[0])
+    assert row["pid"] == 777
+    assert row["instance"] == "lane1"
+
+
+def test_a_lane_with_no_launched_game_is_refused_and_never_photographed(
+        monkeypatch, tmp_path):
+    """Refusal, not a fall back to the image name -- that fallback IS #594."""
+    from understudy import lanewatch
+    monkeypatch.setattr(lanewatch, "LOG_DIR", tmp_path)       # no sidecar
+
+    def _must_not_run(_script, timeout=0):
+        raise AssertionError("a lane-less capture took a picture anyway")
+
+    manifest = tmp_path / "m.jsonl"
+    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                            out_dir=tmp_path, manifest=manifest,
+                            lane="1", runner=_must_not_run)
+    assert report["status"] == "error"
+    assert "image name" in report["message"]
+    assert "lane1" in report["message"] and report["instance"] == "lane1"
+    assert not manifest.exists()
+    assert not list(tmp_path.glob("frame-*.png"))
+
+
+def test_a_stale_sidecar_pid_that_is_not_running_is_refused_too(monkeypatch,
+                                                               tmp_path):
+    """Windows reuses pids, so a pid off a dead lane may name something else
+    entirely -- which is the one way this could still photograph a stranger."""
+    from understudy import lanewatch
+    monkeypatch.setattr(lanewatch, "LOG_DIR", _sidecar(tmp_path))
+
+    def _must_not_run(_script, timeout=0):
+        raise AssertionError("a stale-pid capture took a picture anyway")
+
+    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                            out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
+                            lane="1", lane_alive=lambda p: None,
+                            runner=_must_not_run)
+    assert report["status"] == "error"
+    assert "777" in report["message"] and "not running" in report["message"]
+
+
+def test_an_explicit_pid_still_wins_and_still_labels_the_row(tmp_path):
+    """The two-lane drivers know their pid; nothing here reads a sidecar for
+    them, and an explicit `instance` is never overwritten."""
+    runner = _Runner(0, "OK 800 600")
+    manifest = tmp_path / "m.jsonl"
+    frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                   out_dir=tmp_path, manifest=manifest,
+                   pid=31337, instance="lane2", runner=runner)
+    row = json.loads(manifest.read_text(encoding="utf-8").splitlines()[0])
+    assert row["pid"] == 31337 and row["instance"] == "lane2"
+    assert "Get-Process -Id 31337" in runner.scripts[0]

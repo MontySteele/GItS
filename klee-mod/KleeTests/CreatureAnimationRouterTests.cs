@@ -323,6 +323,168 @@ public class CreatureAnimationRouterTests
         Assert.Equal("res://teyvat/creature_visuals/", root);
     }
 
+    // -----------------------------------------------------------------------
+    // EB-797: THE ENGINE'S OWN DEATH WAIT
+    // -----------------------------------------------------------------------
+    //
+    // `NCreature.AnimDie` (NCreature.cs:1002-1018) waits
+    // `min(GetCurrentAnimationTimeRemaining() + 0.5, 20)` behind the SAME
+    // spine gate `StartDeathAnim` put the SFX and the clip measurement behind,
+    // so for a spine-less body the engine's own wait was handed a zero and
+    // only the mod's `AfterDeath` length waited at all. `ModdedDeathWaitSeam`
+    // reports the body's own remaining -- on the death path and nowhere else,
+    // because `GetCurrentAnimationTimeRemaining` has other callers.
+
+    private static Type WaitSeam() => Patch("ModdedDeathWaitSeam");
+
+    private static bool WaitCovers(
+        bool deathInFlight, bool hasSpine, float baseRemaining, string? state)
+        => (bool)WaitSeam().GetMethod("Covers", All)!
+            .Invoke(null, new object?[]
+                { deathInFlight, hasSpine, baseRemaining, state })!;
+
+    private static float RemainingFor(
+        float clipLength, float playPosition, float baseRemaining)
+        => (float)WaitSeam().GetMethod("RemainingFor", All)!
+            .Invoke(null, new object[]
+                { clipLength, playPosition, baseRemaining })!;
+
+    [Fact]
+    public void The_engine_death_wait_has_a_door_of_its_own()
+    {
+        // STRUCTURAL PIN: the attribute is what arms the patch, and the method
+        // it names has to EXIST on the real NCreature -- a Harmony patch on a
+        // method that is not there takes the whole mod down at load.
+        //
+        // Seen to FAIL: there was no such patch class.
+        var (type, method) = Target(
+            "NCreature_GetCurrentAnimationTimeRemaining_DeathWaitSeam");
+
+        Assert.Equal(typeof(NCreature), type);
+        Assert.Equal("GetCurrentAnimationTimeRemaining", method);
+        Assert.NotNull(AccessTools.Method(typeof(NCreature), method));
+
+        // A POSTFIX taking `ref float __result`: the base answers first and
+        // this substitutes only where its gate left a zero.
+        var postfix = Patch("NCreature_GetCurrentAnimationTimeRemaining_DeathWaitSeam")
+            .GetMethod("Postfix", All);
+        Assert.NotNull(postfix);
+        Assert.NotNull(postfix!.GetCustomAttribute<HarmonyPostfix>());
+        Assert.Null(postfix.GetCustomAttribute<HarmonyPrefix>());
+        Assert.Contains(
+            postfix.GetParameters(),
+            p => p.Name == "__result" && p.ParameterType == typeof(float).MakeByRefType());
+    }
+
+    [Fact]
+    public void The_wait_seam_answers_on_the_death_path_and_nowhere_else()
+    {
+        // The one case it covers: this creature's death is in flight, the body
+        // is spine-less (the base's gate was false), the base measured
+        // nothing, and the tree is standing in the death state right now.
+        Assert.True(WaitCovers(
+            deathInFlight: true, hasSpine: false, baseRemaining: 0f, state: "death"));
+
+        // NOT MID-DEATH, and this is the whole answer to
+        // "GetCurrentAnimationTimeRemaining has other callers": an unmarked
+        // creature reads the base's own answer, so an idle body, a hurt body
+        // and every other caller are untouched.
+        Assert.False(WaitCovers(
+            deathInFlight: false, hasSpine: false, baseRemaining: 0f, state: "death"));
+
+        // A spine body's own animator already answered, and a base result that
+        // measured something is never overwritten -- the same two refusals the
+        // length seam makes.
+        Assert.False(WaitCovers(
+            deathInFlight: true, hasSpine: true, baseRemaining: 0f, state: "death"));
+        Assert.False(WaitCovers(
+            deathInFlight: true, hasSpine: false, baseRemaining: 1.4f, state: "death"));
+
+        // And the tree has to be playing the death state: a body that was
+        // revived travels back to "idle", and a tree standing nowhere answers
+        // nothing.
+        Assert.False(WaitCovers(
+            deathInFlight: true, hasSpine: false, baseRemaining: 0f, state: "idle"));
+        Assert.False(WaitCovers(
+            deathInFlight: true, hasSpine: false, baseRemaining: 0f, state: null));
+    }
+
+    [Fact]
+    public void The_remaining_wait_is_what_is_left_of_the_bodys_own_clip()
+    {
+        // Half of Klee's 1.0 s death clip played is half a second left.
+        Assert.Equal(0.5f, RemainingFor(clipLength: 1.0f, playPosition: 0.5f,
+                                        baseRemaining: 0f));
+        // Nothing played yet is the whole clip -- Furina 1.2 s, loom 1.6 s.
+        Assert.Equal(1.2f, RemainingFor(1.2f, 0f, 0f));
+        Assert.Equal(1.6f, RemainingFor(1.6f, 0f, 0f));
+
+        // AnimDie's own 20 s ceiling, kept rather than re-argued
+        // (NCreature.cs:1006-1010). The engine adds its own +0.5 pad on top of
+        // whatever this hands back, so the pad is not applied here.
+        var ceiling = (float)WaitSeam().GetField("MaxDeathWait", All)!.GetValue(null)!;
+        Assert.Equal(20f, ceiling);
+        Assert.Equal(ceiling, RemainingFor(90f, 0f, 0f));
+
+        // NO CLIP TO MEASURE, and a clip already finished, both hand back the
+        // BASE's own answer rather than a number of our invention: past the
+        // end there is nothing left to wait for.
+        Assert.Equal(0f, RemainingFor(0f, 0f, 0f));
+        Assert.Equal(0.3f, RemainingFor(0f, 0f, 0.3f));
+        Assert.Equal(0f, RemainingFor(1.0f, 1.0f, 0f));
+        Assert.Equal(0.3f, RemainingFor(1.0f, 4.0f, 0.3f));
+    }
+
+    [Fact]
+    public void Only_the_covered_branches_of_the_length_seam_arm_the_wait()
+    {
+        // SCOPE, AND IT IS THE POINT OF THE ROW. R213 froze base-enemy
+        // behaviour, so the engine's wait may reach modded players and dressed
+        // Teyvat bodies and NOTHING else. That is guaranteed by the mark being
+        // set in exactly the two covered branches of the length seam -- the
+        // player arm and the dressed arm -- and in no other method anywhere in
+        // the mod. Assembly-wide, so a third caller cannot appear quietly.
+        var armed = WaitSeam().Assembly.GetTypes()
+            .SelectMany(t => t.GetMethods(All))
+            .Where(m =>
+            {
+                try
+                {
+                    return !m.IsAbstract
+                        && Il.Calls(m).Any(
+                            c => c.EndsWith(".NoteDeathStarted", StringComparison.Ordinal));
+                }
+                catch
+                {
+                    return false;
+                }
+            })
+            .Select(m => $"{m.DeclaringType!.Name}.{m.Name}")
+            .Distinct()
+            .ToList();
+
+        Assert.Equal(new[] { "ModdedPlayerDeathSeam.Cover" }, armed);
+
+        // TWICE inside it: once on the player arm, once on the dressed arm.
+        var sequence = Il.CallSequence(Seam().GetMethod("Cover", All)!);
+        Assert.Equal(2, sequence.Count(c => c.Contains("NoteDeathStarted")));
+    }
+
+    [Fact]
+    public void A_revived_body_is_not_read_as_mid_death()
+    {
+        // `AnimTempRevive` brings a spine-less player back, and the router
+        // already returns its tree to idle there -- so that is where the mark
+        // is dropped. One door, not two.
+        var (type, method) = Target("NCreature_StartReviveAnim_DeathWaitSeam");
+        Assert.Equal(typeof(NCreature), type);
+        Assert.Equal(nameof(NCreature.StartReviveAnim), method);
+        Assert.Contains(
+            "ModdedDeathWaitSeam.Forget",
+            Il.Calls(Patch("NCreature_StartReviveAnim_DeathWaitSeam")
+                .GetMethod("Postfix", All)!));
+    }
+
     /// <summary>A repo-root-relative file, found by walking up from the test
     /// binary (the same walk `ResourceTexturePathTests.RepoFile` uses).</summary>
     private static string RepoFile(string relativePath)

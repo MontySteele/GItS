@@ -874,7 +874,7 @@ export line. **Lane 0 is the default and is every command exactly as it was**
 `python -m understudy.embark --character klee --lane 1`, then
 `$env:GITS_LANE = '1'` and `python -m understudy.blindplay session`, then
 `python -m understudy.embark --teardown --lane 1`, which picks that lane's
-newest sidecar and refuses another lane's. **Three hazards, and where each is
+newest sidecar and refuses another lane's. **Four hazards, and where each is
 enforced.** (1) A lane-1 run is **never a run of record**: its profile is
 disposable, and the sentence saying so is written into the embark sidecar
 (`lane_guardrail`, `run_of_record: false`) rather than left in a comment.
@@ -889,7 +889,14 @@ as pre-existing, so no lane rewrites a dll another lane's game holds, and no
 teardown removes one it did not install. (3) The `godot.log` cursor
 (`EB-292`'s `log_lacks`) reads **the lane's own log**, because `scenario`
 resolves it through `bridge.current_instance()` and `scenario run --lane`
-binds the thread BEFORE the `Runner` is built.
+binds the thread BEFORE the `Runner` is built. (4) **The camera is a lane
+hazard too** (`EB-806`): `understudy/frames.py` selects the window by PROCESS
+ID, never by image name — a name lookup takes whichever `SlayTheSpire2` the OS
+lists first, so a lane-0 job framed lane 1's run (`#594`) and every manifest
+row said `lane0` (`#595`). `harness frame` now takes the pid off the lane's
+own embark sidecar, checks it is still running, labels the row with that lane,
+and **REFUSES rather than guessing** when the lane names no live process. A
+frame you cannot attribute is not material; it is a picture of some other run.
 
 **PLAYING ALONGSIDE AN AGENT — the one-line procedure.** *The bridge mod is
 installed before the owner launches, with the game closed.* `deploy_proto.ps1`

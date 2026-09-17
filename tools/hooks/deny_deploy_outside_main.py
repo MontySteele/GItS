@@ -58,6 +58,13 @@ GUARDED = {"deploy_proto.ps1", "deploy.ps1", "deploy_bridge.ps1",
 #: The one legal invocation in a worktree, and the flag that makes it legal.
 BUILD_ONLY = {"-buildonly", "--buildonly"}
 
+#: Programs that RUN their script argument, so a guarded basename anywhere in
+#: THEIR arguments is still an execution: `powershell -File <path>`,
+#: `pwsh -NoProfile -File <path>`, `bash <path>`, `cmd /c <path>`.
+INTERPRETERS = {"powershell", "powershell.exe", "pwsh", "pwsh.exe",
+                "cmd", "cmd.exe", "bash", "bash.exe", "sh", "sh.exe",
+                "zsh", "dash", "start", "start-process"}
+
 
 def normalise(command: str) -> str:
     """Backslashes to forward slashes, before the line is lexed.
@@ -81,17 +88,56 @@ def _joined(base: Path, raw: str) -> Path:
     return Path(os.path.normpath(target))
 
 
-def guarded_script(tokens: list[str]) -> str:
-    """The guarded script this simple command runs, or `""`.
+def _basename(token: str) -> str:
+    """The lowercased basename of a path token, quotes and `&` stripped."""
+    text = str(token).strip().strip('"\'').lstrip("&").strip().strip('"\'')
+    return Path(text).name.lower()
 
-    Every token is examined rather than just the first: PowerShell spells it
-    `& '<path>'`, `powershell -File <path>` and bare `.\\x.ps1`, and all three
-    are in this repo's own documentation.
+
+def guarded_script(tokens: list[str]) -> str:
+    """The guarded script this simple command EXECUTES, or `""`.
+
+    THE DEFECT THIS FIXES (`EB-812`). This used to scan EVERY token for a
+    guarded basename, so a guarded path that was merely an ARGUMENT --
+    `git add tools/build_pck.ps1`, `cat tools/build_pck.ps1`,
+    `grep -n Tier tools/build_pck.ps1` -- was refused as a deploy from a
+    worktree, which is exactly where that `git add` has to happen. A file is
+    not a deploy; RUNNING it is. So only the execution positions count:
+
+      * the command word itself, after `VAR=value` prefixes and PowerShell's
+        `&` call operator -- `tools/build_pck.ps1`, `./tools/build_pck.ps1`,
+        `& "C:/.../deploy_proto.ps1"` (shlex splits `&` off as punctuation,
+        so the script lands in the command position either way);
+      * any argument of a program that runs its argument --
+        `powershell -File <path>`, `pwsh -NoProfile -File <path>`,
+        `bash <path>`, `cmd /c <path>` (`INTERPRETERS`).
+
+    Everything the old scan denied by execution it still denies; what changes
+    is a path handed to git, cat, grep, sed or ls.
     """
-    for token in tokens:
-        name = Path(token.strip('"\'&')).name.lower()
-        if name in GUARDED:
-            return name
+    index = 0
+    while index < len(tokens):
+        token = tokens[index].strip()
+        # PowerShell's call operator, and `VAR=value` environment prefixes,
+        # are not the command word.
+        if token.strip('"\'') in ("&", "call"):
+            index += 1
+            continue
+        if "=" in token and not token.startswith("-") and "/" not in token:
+            index += 1
+            continue
+        break
+    if index >= len(tokens):
+        return ""
+
+    head = _basename(tokens[index])
+    if head in GUARDED:
+        return head
+    if head in INTERPRETERS:
+        for token in tokens[index + 1:]:
+            name = _basename(token)
+            if name in GUARDED:
+                return name
     return ""
 
 
@@ -173,6 +219,8 @@ def self_test() -> int:
          ALLOW, "build_pck from the main checkout is allowed"),
         (bash_payload("git status", cwd=str(main)), ALLOW,
          "an unrelated command is allowed"),
+        (bash_payload("git add tools/build_pck.ps1", cwd=str(main)), ALLOW,
+         "staging the script from the main checkout is allowed"),
         (bash_payload("python tools/gates.py", cwd=str(main)), ALLOW,
          "a python command naming no script is allowed"),
         (bash_payload("klee-mod\\build\\deploy_bridge.ps1 -BuildOnly",
@@ -197,6 +245,44 @@ def self_test() -> int:
             (bash_payload(f"cd {main} && klee-mod\\build\\deploy_proto.ps1",
                           cwd=str(worktree)), ALLOW,
              "an inline cd to the main checkout is honoured"),
+            # EB-812: a guarded path as an ARGUMENT is a file, not a deploy.
+            (bash_payload("git add tools/build_pck.ps1",
+                          cwd=str(worktree)), ALLOW,
+             "git add of the script from a worktree is allowed"),
+            (bash_payload("git add tools\\build_pck.ps1",
+                          cwd=str(worktree)), ALLOW,
+             "git add of the script, Windows spelling, is allowed"),
+            (bash_payload("cat tools/build_pck.ps1",
+                          cwd=str(worktree)), ALLOW,
+             "reading the script from a worktree is allowed"),
+            (bash_payload("grep -n Tier tools/build_pck.ps1",
+                          cwd=str(worktree)), ALLOW,
+             "grepping the script from a worktree is allowed"),
+            (bash_payload("ls -l tools/build_pck.ps1 klee-mod/build/deploy.ps1",
+                          cwd=str(worktree)), ALLOW,
+             "listing the guarded scripts from a worktree is allowed"),
+            (bash_payload("git commit -m 'tools/build_pck.ps1: a fix'",
+                          cwd=str(worktree)), ALLOW,
+             "the script named in a commit message is allowed"),
+            # ... and every EXECUTION shape is still refused.
+            (bash_payload(".\\tools\\build_pck.ps1", "PowerShell",
+                          cwd=str(worktree)), 2,
+             "`.\\tools\\build_pck.ps1` from a worktree is refused"),
+            (bash_payload("& tools/build_pck.ps1", "PowerShell",
+                          cwd=str(worktree)), 2,
+             "`& tools/build_pck.ps1` from a worktree is refused"),
+            (bash_payload("powershell -File tools/build_pck.ps1",
+                          cwd=str(worktree)), 2,
+             "`powershell -File` from a worktree is refused"),
+            (bash_payload("pwsh -File .\\tools\\build_pck.ps1", "PowerShell",
+                          cwd=str(worktree)), 2,
+             "`pwsh -File .\\tools\\build_pck.ps1` from a worktree is refused"),
+            (bash_payload("tools/build_pck.ps1", "PowerShell",
+                          cwd=str(worktree)), 2,
+             "the bare leading token from a worktree is refused"),
+            (bash_payload("git status && .\\tools\\build_pck.ps1", "PowerShell",
+                          cwd=str(worktree)), 2,
+             "an execution after a separator is still refused"),
         ]
     return run_self_test(cases, decide)
 

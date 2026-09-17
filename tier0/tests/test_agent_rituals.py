@@ -575,6 +575,36 @@ def test_the_deploy_hook_refuses_a_worktree_and_allows_the_bridge_build():
     assert hook.decide(hook.read_payload(allowed)) == 0
 
 
+def test_the_deploy_hook_denies_an_execution_and_not_a_path_argument():
+    """`EB-812`: a guarded path handed to git/cat/grep is a FILE, not a deploy.
+
+    The matcher used to scan every token, so `git add tools/build_pck.ps1`
+    was refused from a worktree -- which is the only place that `git add` can
+    happen. Both halves are pinned here: the argument shapes pass anywhere,
+    and every execution shape still answers the worktree question.
+    """
+    hook = _module("deny_deploy_outside_main", TOOLS / "hooks")
+    worktree_denies = 0 if hook.is_main_checkout(REPO) else 2
+    arguments = ["git add tools/build_pck.ps1",
+                 "git add tools\\build_pck.ps1",
+                 "cat tools/build_pck.ps1",
+                 "grep -n Tier tools/build_pck.ps1",
+                 "sed -n 1,5p klee-mod/build/deploy.ps1"]
+    for command in arguments:
+        payload = hook.bash_payload(command, cwd=str(REPO))
+        assert hook.decide(hook.read_payload(payload)) == 0, command
+    executions = [".\\tools\\build_pck.ps1",
+                  "& tools/build_pck.ps1",
+                  "powershell -File tools/build_pck.ps1",
+                  "pwsh -File .\\tools\\build_pck.ps1",
+                  "bash tools/build_pck.ps1",
+                  "tools/build_pck.ps1"]
+    for command in executions:
+        payload = hook.bash_payload(command, "PowerShell", cwd=str(REPO))
+        assert hook.decide(hook.read_payload(payload)) == worktree_denies, (
+            command)
+
+
 def test_the_deploy_hook_is_registered_in_settings():
     settings = json.loads(
         (REPO / ".claude" / "settings.json").read_text(encoding="utf-8"))
