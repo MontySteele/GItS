@@ -76,13 +76,14 @@ namespace KleeMod.Vfx;
 /// dressed arm reports the base's own zero rather than a fallback when there
 /// is no clip to measure, so a body with no motion is untouched.
 ///
-/// STILL OPEN, and reported rather than quietly left: the private
+/// AND THE SECOND SEAM, CLOSED BY `EB-797`: the private
 /// <c>NCreature.AnimDie(bool, CancellationToken)</c> (<c>:1002-1018</c>) waits
 /// <c>min(GetCurrentAnimationTimeRemaining() + 0.5, 20)</c> behind the SAME
-/// spine gate, so the engine's own internal death wait is still skipped for a
-/// spine-less body. That is a second seam with a wider blast radius
-/// (<c>GetCurrentAnimationTimeRemaining</c> has other callers) and is not this
-/// row's fix, which is the sound and the reported length.
+/// spine gate, so the engine's own internal death wait was skipped for a
+/// spine-less body too. <see cref="ModdedDeathWaitSeam"/> reports that body's
+/// own remaining, on the death path only -- and the path is exactly this
+/// file's coverage, because the two covered branches of <see cref="Cover"/>
+/// are the only places the mark is ever set.
 /// </summary>
 internal static class ModdedPlayerDeathSeam
 {
@@ -227,7 +228,14 @@ internal static class ModdedPlayerDeathSeam
                 baseLength))
         {
             SfxCmd.PlayDeath(entity.Player);
-            return LengthFor(DeathClipLength(creature));
+            var clip = DeathClipLength(creature);
+            // `EB-797`. THE MARK, SET HERE AND NOWHERE ELSE. It is what scopes
+            // `ModdedDeathWaitSeam` -- the engine's own `AnimDie` wait -- to
+            // the bodies this file already covers, so no undressed enemy, no
+            // pet and no other caller of `GetCurrentAnimationTimeRemaining`
+            // can reach it.
+            ModdedDeathWaitSeam.NoteDeathStarted(creature, clip);
+            return LengthFor(clip);
         }
 
         // THE DRESSED-BODY ARM, AND NO SOUND ON IT. `SfxCmd.PlayDeath` takes a
@@ -240,7 +248,9 @@ internal static class ModdedPlayerDeathSeam
                 DressedVisualsScene(entity),
                 baseLength))
         {
-            return DressedLengthFor(DeathClipLength(creature), baseLength);
+            var clip = DeathClipLength(creature);
+            ModdedDeathWaitSeam.NoteDeathStarted(creature, clip);
+            return DressedLengthFor(clip, baseLength);
         }
 
         return baseLength;

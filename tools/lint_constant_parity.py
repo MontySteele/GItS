@@ -420,6 +420,15 @@ UNMIRRORED: dict[str, str] = {
         "(0.111.0 decompile, `NCreature.cs:945`), and the seam that fills in "
         "the length the spine gate skipped keeps the same cap so it can never "
         "report a longer death than the base could. tier0 has no counterpart.",
+    "ModdedDeathWaitSeam.MaxDeathWait":
+        "`EB-797`. THE BASE GAME'S OWN CEILING AGAIN, copied rather than "
+        "chosen: the private `NCreature.AnimDie` waits "
+        "`Math.Min(GetCurrentAnimationTimeRemaining() + 0.5f, 20f)` (0.111.0 "
+        "decompile, `NCreature.cs:1006-1010`), and the seam that reports a "
+        "spine-less body's remaining keeps the same cap so it can never hand "
+        "the engine a longer wait than the base could reach. The engine still "
+        "applies its own pad and its own ceiling on top. tier0 has no "
+        "animations, no clock the player sees and no counterpart.",
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
     "RosterArt.PortraitWidth":
