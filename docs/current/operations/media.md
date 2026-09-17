@@ -40,6 +40,21 @@ producer per out-path** — exactly one ledger row may name a given `out`, and
 only the media tool writes under `media/out/`; a hand-placed file there is a
 defect, the rule `art/plan.tsv` already runs under.
 
+**The enemy still portraits are the one surface where `art/plan.tsv` is the
+producer and this file is only the record** (ruled 2026-09-16,
+`research/teyvat-portrait-sources-2026-09-16.md` §3 addendum): their sources
+are wiki files, which is `plan.tsv`'s whole job, so an `art/plan.tsv` row
+fetches and cuts each one into
+`ImageGen/images/teyvat/creature_visuals/<body>.png` — the directory
+`tools/build_pck.ps1`'s Teyvat block already copies to
+`res://teyvat/creature_visuals/` — and the `media/PORTRAITS.tsv` row for that
+body records it, with `out` naming that produced path, `raw` the `art/raw/`
+file the fetch wrote, and `origin` the wiki `File:` page. That is not an
+exception to "one producer per out-path"; it is how the rule is kept, since
+routing the same pixels through `media/out/` as well would create the second
+producer. `media/raw/portraits/` and `media/out/portraits/` stay the route for
+a portrait [USER] supplies by hand.
+
 **Act plates take the same raw/out route.** A zone dressing's background
 layers, rest-site plate and three map backgrounds are Tier F pictures like the
 portraits above and land under `media/raw/act/<act-or-scene>/` →

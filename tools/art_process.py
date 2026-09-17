@@ -9,6 +9,12 @@
 - cover_autocrop: crop to the art's content first (splash/Wish sources float
   the figure in a large transparent void), then fit — focus carries
   `cover|contain[@margin]`, default cover@0.06
+- cut: REMOVE an opaque backdrop, then trim + fit. For the Enemy Archive
+  captures behind the Teyvat still portraits (docs/current/research/
+  teyvat-portrait-sources-2026-09-16.md): every one is a `truecolour` screen
+  capture of the in-game Archive page, and media.md §3 requires alpha because
+  a still portrait composites over the arena. focus carries
+  `cut[@tolerance][/fit-focus][:pocket]`, default `cut@48/top:0.004`.
 - raw: byte-for-byte copy (combat-model source art)
 - gif sources: extract the frame at frame_pct% through the clip
 - svg sources: render via macOS qlmanage; fall back to the wiki's same-name PNG
@@ -21,9 +27,17 @@ shortlist  -> art/candidates/<asset_id>/r<rank>.png at target dims,
 --apply-picks art/picks.tsv  (asset_id<TAB>rank per line) promotes selections.
 --assets a,b,c   render ONLY those ids' shortlist candidates; nothing placed,
                  manifest untouched (a gate review must not promote a rank 1).
---art-root PATH  read art/raw/ and write art/candidates/ under PATH instead of
-                 this checkout -- how a worktree reaches the main checkout's
-                 gitignored art WITHOUT linking it in (operations/worktrees.md).
+--art-root PATH  read art/raw/ and write art/candidates/ AND the ImageGen
+                 out-paths under PATH instead of this checkout -- how a
+                 worktree reaches the main checkout's gitignored art WITHOUT
+                 linking it in (operations/worktrees.md). All three move
+                 together on purpose: a run that read the main checkout's
+                 sources and then wrote the shipping pixels into the worktree's
+                 own ImageGen put them where build_pck.ps1 never looks, so the
+                 flag did half its job and said nothing about the other half.
+                 art/plan.tsv and art/SOURCES.tsv still come from THIS
+                 checkout, which is the point -- the branch's plan rendered
+                 against, and into, the main checkout's pixels.
 
 Derived extras: ui/select_portrait_locked.png (desaturated+darkened).
 Updates art/manifest.csv status/tier/source columns in place.
@@ -37,12 +51,15 @@ import sys
 import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageEnhance, ImageSequence
+from PIL import Image, ImageEnhance, ImageFilter, ImageSequence
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "art" / "raw"
 CAND = ROOT / "art" / "candidates"
 MANIFEST = ROOT / "art" / "manifest.csv"
+# Where a plan row's `out` column lands. Same as ROOT unless --art-root moves
+# the whole gitignored art tree to another checkout; see main().
+ART_OUT = ROOT
 
 sys.path.insert(0, str(ROOT / "tools"))
 from art_fetch import read_plan, rawname  # noqa: E402
@@ -229,6 +246,225 @@ def cover_autocrop(img, w, h, spec):
     return crop.crop((x, y, x + w, y + h))
 
 
+CUT_TOLERANCE = 48      # RGB euclidean distance from the seeded backdrop
+CUT_WORK_MAX = 900      # the matte is solved at this size, not on a 2880px plate
+CUT_FEATHER = 1.2       # gaussian sigma on the matte, in WORK pixels
+CUT_BORDER_ALPHA = 0.98  # border already this transparent => honour that alpha
+CUT_SPECK_FRAC = 0.0005  # foreground islands below this share of the frame go
+CUT_POCKET_FRAC = 0.004  # ENCLOSED backdrop at or above this share is removed
+
+
+def _cut_spec(spec):
+    """Parse the `cut` row's focus column: `cut[@tolerance][/fit-focus][:pocket]`.
+
+    Four things have to ride in one TSV column, so they are separated rather
+    than overloaded: `@` is the matte tolerance, `/` is the focus handed to the
+    FIT afterwards, and `:` is the enclosed-pocket threshold as a fraction of
+    the frame. `cut`, `cut@60`, `cut@60/center`, `cut/contain` and
+    `cut@60/top:0.01` are all legal; a bare focus keyword (`top`) is accepted
+    too, so a row that says nothing about the matte reads as "default matte,
+    this focus".
+
+    Returns (tolerance, fit, focus, pocket) with fit in {cover, contain}.
+    """
+    spec = (spec or "").strip() or "cut"
+    head, _, pocket = spec.partition(":")
+    head, _, focus = head.partition("/")
+    head, _, tol = head.partition("@")
+    head = head.strip() or "cut"
+    if head != "cut":
+        # `focus`-only spelling: `top`, `center`, `y0.30`, `contain`.
+        focus, head = head, "cut"
+    focus = (focus or "top").strip()
+    try:
+        tolerance = float(tol) if tol else CUT_TOLERANCE
+    except ValueError:
+        raise SystemExit(f"cut: bad tolerance {tol!r} (want cut[@tolerance])")
+    try:
+        pocket_frac = float(pocket) if pocket.strip() else CUT_POCKET_FRAC
+    except ValueError:
+        raise SystemExit(
+            f"cut: bad pocket fraction {pocket!r} (want cut[...][:fraction])")
+    fit = "cover"
+    if focus == "contain":
+        fit, focus = "contain", "center"
+    return tolerance, fit, focus, pocket_frac
+
+
+def _backdrop_alpha(img, tolerance, pocket_frac=CUT_POCKET_FRAC):
+    """Alpha for an Archive capture: opaque figure, transparent backdrop.
+
+    The backdrop is not flat and the naive thresholds both fail on it. It is a
+    dark navy vignette with a faint starfield and a reflective floor, so a
+    single global colour test keys holes through any dark part of the figure,
+    and a plain `getbbox` sees nothing at all because every pixel is opaque.
+    What works is the classic matte: seed on the FOUR CORNERS (which are
+    backdrop on every capture in the survey -- the Archive centres the body
+    with headroom), accept a pixel as backdrop when it is within `tolerance`
+    of a corner colour, and then keep only the part of that set REACHABLE FROM
+    THE BORDER. The reachability pass is what stops a dark navy belly or a
+    shadowed flank from being punched out: it is the same colour as the
+    backdrop but it is not connected to it. A second pass then removes the
+    backdrop POCKETS that rule traps -- keyed regions enclosed by the
+    silhouette -- by area; see the comment on that pass.
+
+    Solved at CUT_WORK_MAX, not at native size. The sources run to 2880x2880
+    and the target is 240x280, so a full-resolution flood fill would spend
+    8.3M pixels of Python to decide sub-pixel detail that the LANCZOS
+    downscale then averages away.
+
+    A source that ALREADY carries alpha (the handful of files a wiki editor
+    cut by hand -- `Enemy Ruin Guard.png`, the `NPC` portraits) is passed
+    through untouched: re-matting a cut-out would only be a second chance to
+    get it wrong.
+    """
+    import numpy as np
+
+    a = np.asarray(img.getchannel("A"), dtype=np.uint8)
+    border = np.concatenate([a[0], a[-1], a[:, 0], a[:, -1]])
+    if (border < 8).mean() >= CUT_BORDER_ALPHA:
+        return None                      # already cut out; keep its own matte
+
+    # int32, NOT int16: a squared channel difference reaches 255**2 = 65025,
+    # which wraps negative in int16 and hands `sqrt` a negative number. The
+    # warning is the symptom; the matte silently keeping a wrapped pixel is
+    # the defect.
+    rgb = np.asarray(img.convert("RGB"), dtype=np.int32)
+    h, w = rgb.shape[:2]
+    seeds = np.array([rgb[0, 0], rgb[0, w - 1], rgb[h - 1, 0], rgb[h - 1, w - 1]],
+                     dtype=np.int32)
+    # distance to the NEAREST corner colour: the vignette darkens toward the
+    # bottom, so the top corners and the bottom corners are different colours
+    # and one seed alone leaves a band of backdrop opaque.
+    d = np.sqrt(((rgb[:, :, None, :] - seeds[None, None, :, :]) ** 2)
+                .sum(axis=3).min(axis=2))
+    cand = d <= tolerance
+
+    seeds_xy = ([(0, x) for x in range(w)] + [(h - 1, x) for x in range(w)]
+                + [(y, 0) for y in range(h)] + [(y, w - 1) for y in range(h)])
+    background = _flood(cand, seeds_xy)
+
+    # ENCLOSED POCKETS. Border-reachability is the rule that saves a dark belly
+    # -- and it is also the rule that keeps a piece of sky trapped inside the
+    # silhouette. Found by eye on the first 81-row run: `hilichurl_fighter`
+    # kept a navy starfield block in the gap between its raised club and its
+    # head, and `hydro_abyss_mage` kept a dark arc against the bottom edge.
+    # Both are backdrop; neither touches the border; nothing in the first pass
+    # can reach either.
+    #
+    # So a second pass over the KEYED-BUT-UNREACHED set, by area. Area is the
+    # whole discriminator and it is the right one: a pocket of sky is a large
+    # keyed region, while a body's own shadow is small and -- the part that
+    # matters -- is not backdrop-coloured across a large area, or the first
+    # pass's tolerance would already be too wide to use. Small keyed regions
+    # are therefore LEFT ALONE, which is what keeps the rule from re-opening
+    # the hole that border-reachability was added to close.
+    #
+    # The threshold rides the spec column as the third field so a row can
+    # raise it (a body with a genuinely dark enclosed feature) or lower it (a
+    # capture with several small pockets) without moving the default.
+    if pocket_frac > 0:
+        enclosed = cand & ~background
+        min_pocket = max(16, int(pocket_frac * h * w))
+        ys, xs = np.nonzero(enclosed)
+        todo = np.ones_like(enclosed)
+        for y, x in zip(ys.tolist(), xs.tolist()):
+            if not todo[y, x]:
+                continue
+            comp = _flood(enclosed & todo, [(y, x)])
+            todo &= ~comp
+            if int(comp.sum()) >= min_pocket:
+                background |= comp
+
+    # THE STARFIELD. The Archive backdrop is sprinkled with faint stars, and a
+    # star is not backdrop-coloured, so the matte above keeps every one of
+    # them -- which leaves the alpha bbox equal to the whole frame and the
+    # content trim a no-op (measured: 100% of the frame still "opaque" on four
+    # of five samples). So drop foreground islands too small to be a body.
+    # The threshold is a fraction of the frame rather than a pixel count
+    # because the matte is solved at a fixed working size; at CUT_WORK_MAX it
+    # is ~20x20px, well under Boreas's floating ice shards and well over a
+    # star.
+    fg = ~background
+    keep = np.zeros_like(fg)
+    min_area = max(16, int(CUT_SPECK_FRAC * h * w))
+    ys, xs = np.nonzero(fg)
+    todo = np.ones_like(fg)
+    for y, x in zip(ys.tolist(), xs.tolist()):
+        if not todo[y, x]:
+            continue
+        comp = _flood(fg & todo, [(y, x)])
+        todo &= ~comp
+        if int(comp.sum()) >= min_area:
+            keep |= comp
+    if not keep.any():                    # nothing survived: keep the raw matte
+        keep = fg
+    return Image.fromarray(np.where(keep, 255, 0).astype("uint8"), "L")
+
+
+def _flood(mask, seeds):
+    """Breadth-first 4-connected reachable subset of `mask` from `seeds`.
+
+    numpy holds the arrays and python walks the frontier: without scipy there
+    is no `ndimage.label` here, and the alternatives (iterated dilation, a
+    raster/anti-raster reconstruction) are either O(diameter) passes over the
+    whole frame or not expressible as array ops at all. The walk is bounded by
+    the REACHABLE area, which is why the matte is solved at CUT_WORK_MAX.
+    """
+    import numpy as np
+    from collections import deque
+
+    h, w = mask.shape
+    seen = np.zeros((h, w), dtype=bool)
+    q = deque()
+    for y, x in seeds:
+        if mask[y, x] and not seen[y, x]:
+            seen[y, x] = True
+            q.append((y, x))
+    push = q.append
+    while q:
+        y, x = q.popleft()
+        for ny, nx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+            if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not seen[ny, nx]:
+                seen[ny, nx] = True
+                push((ny, nx))
+    return seen
+
+
+def cut(img, w, h, spec):
+    """Matte an opaque Archive capture, trim to the figure, then fit w*h.
+
+    The three steps are deliberately the three existing ones: the matte above,
+    `cover_autocrop`'s content trim (via `_alpha_box`, so faint FX at the
+    figure's edge are kept rather than clipped), and then `cover()` or
+    `contain()` -- the same fitters every other mode uses, with the row's own
+    focus. Nothing about framing is re-decided here.
+    """
+    tolerance, fit, focus, pocket_frac = _cut_spec(spec)
+    work = img
+    scale = CUT_WORK_MAX / max(img.width, img.height)
+    if scale < 1:
+        work = img.resize((max(1, round(img.width * scale)),
+                           max(1, round(img.height * scale))), Image.LANCZOS)
+    matte = _backdrop_alpha(work, tolerance, pocket_frac)
+    if matte is not None:
+        if CUT_FEATHER:
+            matte = matte.filter(ImageFilter.GaussianBlur(CUT_FEATHER))
+        work = work.copy()
+        work.putalpha(matte)
+
+    box = _alpha_box(work, INCLUDE_THRESH)
+    if box is None:
+        flags.append(f"cut@{tolerance:g} removed EVERYTHING -- tolerance too high")
+        return contain(img, w, h)
+    covered = ((box[2] - box[0]) * (box[3] - box[1])) / (work.width * work.height)
+    if covered > 0.97:
+        flags.append(f"cut@{tolerance:g} removed almost nothing "
+                     f"({covered:.0%} of the frame still opaque)")
+    work = work.crop(box)
+    return cover(work, w, h, focus) if fit == "cover" else contain(work, w, h)
+
+
 def sprite(img, w, h):
     """Combat/rest-site model sprites: trim to the alpha bbox, fit in W×H, and
     anchor the feet on the bottom edge -- the game positions these textures
@@ -283,6 +519,8 @@ def process(row, dest):
         out = cover(img, row["w"], row["h"], row["focus"])
     elif row["mode"] == "cover_autocrop":
         out = cover_autocrop(img, row["w"], row["h"], row["focus"])
+    elif row["mode"] == "cut":
+        out = cut(img, row["w"], row["h"], row["focus"])
     elif row["mode"] == "sprite":
         out = sprite(img, row["w"], row["h"])
     else:
@@ -321,7 +559,7 @@ def apply_picks(rows, picks_path):
     for r in rows:
         if r["pick"] == "shortlist" and picks.get(r["asset_id"]) == r["rank"]:
             src = CAND / r["asset_id"] / f"r{r['rank']}.png"
-            dest = ROOT / r["out"]
+            dest = ART_OUT / r["out"]
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(src, dest)
             print(f"pick applied: {r['asset_id']} <- r{r['rank']}")
@@ -376,7 +614,7 @@ def _take(argv, flag):
 
 
 def main():
-    global RAW, CAND, MANIFEST
+    global RAW, CAND, MANIFEST, ART_OUT
     argv = sys.argv[1:]
 
     # --art-root: read the pixels from ANOTHER checkout. `art/raw/` and
@@ -393,6 +631,7 @@ def main():
         RAW = art_root / "art" / "raw"
         CAND = art_root / "art" / "candidates"
         MANIFEST = art_root / "art" / "manifest.csv"
+        ART_OUT = art_root
 
     # --assets: render ONLY these asset ids' shortlist candidates. Nothing is
     # PLACED and the manifest is NOT touched -- a gate review renders crops to
@@ -439,10 +678,10 @@ def main():
         if r["pick"] == "shortlist":
             ok = process(r, CAND / r["asset_id"] / f"r{r['rank']}.png")
             if ok and r["rank"] == 1:
-                process(r, ROOT / r["out"])  # provisional pick
+                process(r, ART_OUT / r["out"])  # provisional pick
                 status[r["asset_id"]] = ("candidate", r["title"])
         else:
-            ok = process(r, ROOT / r["out"])
+            ok = process(r, ART_OUT / r["out"])
             if ok:
                 status[r["asset_id"]] = ("found", r["title"])
         if ok:
@@ -455,7 +694,7 @@ def main():
     # is ImageGen/images/ui/. Derive the locked variant next to EVERY
     # select_portrait a plan row produced, not just Klee's hardcoded path.
     sp_outs = {
-        (ROOT / r["out"]) for r in rows
+        (ART_OUT / r["out"]) for r in rows
         if Path(r["out"]).name == "select_portrait.png"
     }
     for sp in sorted(sp_outs):

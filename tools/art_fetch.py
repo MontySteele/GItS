@@ -6,6 +6,19 @@ into art/raw/ (gitignored — Tier F never ships), and writes art/SOURCES.tsv
 (filename → source_url → tier → replace_priority) as it goes.
 
 Usage: python3 tools/art_fetch.py            # stdlib only, no deps
+       python3 tools/art_fetch.py --art-root PATH
+
+--art-root PATH  write art/raw/ under PATH instead of this checkout, exactly as
+                 tools/art_process.py's flag of the same name does and for the
+                 same reason: `art/raw/` is gitignored Tier F that lives only on
+                 the art-bearing main checkout, and operations/worktrees.md
+                 forbids linking it into a worktree. art/plan.tsv still comes
+                 from THIS checkout -- the branch's plan fetched against the
+                 main checkout's pixels. art/SOURCES.tsv is the ONE exception
+                 and stays here on purpose: it is a TRACKED provenance ledger,
+                 so writing it into the main checkout would dirty a tracked
+                 file outside the branch that is adding the rows (which is
+                 exactly how a later pull broke on 2026-09-16).
 """
 import csv
 import json
@@ -138,7 +151,28 @@ def resolve_thumbs(titles, width):
     return out
 
 
+def _take(argv, flag):
+    """Pull `--flag VALUE` out of argv. Hand-rolled to match art_process._take:
+    this script's shipped invocation is the bare `python tools/art_fetch.py`,
+    and argparse would turn an unknown argument into an error where it is
+    currently ignored."""
+    if flag not in argv:
+        return None
+    i = argv.index(flag)
+    if i + 1 >= len(argv):
+        sys.exit(f"{flag} needs a value")
+    value = argv[i + 1]
+    del argv[i:i + 2]
+    return value
+
+
 def main():
+    global RAW
+    argv = sys.argv[1:]
+    art_root = _take(argv, "--art-root")
+    if art_root:
+        RAW = Path(art_root).resolve() / "art" / "raw"
+
     rows = read_plan()
     resolved = resolve([r["title"] for r in rows])
 
