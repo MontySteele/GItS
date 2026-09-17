@@ -1994,3 +1994,51 @@ portrait_consecrated_red_vulture	ImageGen/images/teyvat/creature_visuals/consecr
 portrait_warden_of_oasis_prime	ImageGen/images/teyvat/creature_visuals/warden_of_oasis_prime.png	240	280	cut	cut	auto	1	png	Enemy Warden of Oasis Prime.png		splash
 portrait_liloupar	ImageGen/images/teyvat/creature_visuals/liloupar.png	240	280	cut	cut	auto	1	png	Liloupar.png		splash
 portrait_katayoun	ImageGen/images/teyvat/creature_visuals/katayoun.png	240	280	cut	cut	auto	1	png	NPC Katayoun.png		splash
+
+# ---------------------------------------------------------------------------
+# TEYVAT ACT PLATES (docs/current/research/teyvat-act-art-sources-2026-09-17.md)
+# Six dressings x five surfaces. The plan PRODUCES into ImageGen/images/teyvat/
+# -- the directories tools/build_pck.ps1's Teyvat act blocks copy to
+# res://teyvat/backgrounds/, res://teyvat/rest_site/ and
+# res://images/packed/map/map_bgs/ -- and media/ACT.tsv RECORDS each one, the
+# same reconciliation the still portraits took (operations/media.md sec.1).
+# tools/gen_act_placeholders.py SKIPS every out-path listed here and writes the
+# transparent bg_01..04 / fg plates over a real bg_00, so there is still exactly
+# one producer per out-path.
+# Sources: in-game location stills from the Genshin wiki (File:<Location>.png).
+# focus is the WORDMARK RULE: those stills carry a burnt-in GENSHIN IMPACT mark
+# in the bottom-right corner, so a 1382x648 plate spends its whole spare height
+# off the bottom (`top`) and a 2035x1440 map plate, which fills the height
+# exactly on a 16:9 source, spends its spare width off the right (`x0.42`).
+# licence PLACEHOLDER-COPYRIGHTED, private build only.
+# ---------------------------------------------------------------------------
+act_bg_00_mondstadt	ImageGen/images/teyvat/backgrounds/mondstadt/mondstadt_bg_00.png	1382	648	cover	top	auto	1	png	Windrise.png		splash
+act_rest_site_mondstadt	ImageGen/images/teyvat/rest_site/mondstadt_rest_site_bg.png	1382	648	cover	top	auto	1	png	Angel's Share Interior 1F.png		splash
+act_map_top_mondstadt	ImageGen/images/teyvat/map_bgs/mondstadt/map_top_mondstadt.png	2035	1440	cover	x0.42	auto	1	png	Stormterror's Lair.png		splash
+act_map_middle_mondstadt	ImageGen/images/teyvat/map_bgs/mondstadt/map_middle_mondstadt.png	2035	1440	cover	x0.42	auto	1	png	Mondstadt City.png		splash
+act_map_bottom_mondstadt	ImageGen/images/teyvat/map_bgs/mondstadt/map_bottom_mondstadt.png	2035	1440	cover	x0.42	auto	1	png	Cider Lake.png		splash
+act_bg_00_liyue	ImageGen/images/teyvat/backgrounds/liyue/liyue_bg_00.png	1382	648	cover	top	auto	1	png	Guyun Stone Forest.png		splash
+act_rest_site_liyue	ImageGen/images/teyvat/rest_site/liyue_rest_site_bg.png	1382	648	cover	top	auto	1	png	Xinyue Kiosk Interior.png		splash
+act_map_top_liyue	ImageGen/images/teyvat/map_bgs/liyue/map_top_liyue.png	2035	1440	cover	x0.42	auto	1	png	Mt. Xuanlian.png		splash
+act_map_middle_liyue	ImageGen/images/teyvat/map_bgs/liyue/map_middle_liyue.png	2035	1440	cover	x0.42	auto	1	png	Liyue Harbor.png		splash
+act_map_bottom_liyue	ImageGen/images/teyvat/map_bgs/liyue/map_bottom_liyue.png	2035	1440	cover	x0.42	auto	1	png	Yaoguang Shoal.png		splash
+act_bg_00_natlan	ImageGen/images/teyvat/backgrounds/natlan/natlan_bg_00.png	1382	648	cover	top	auto	1	png	Tequemecan Valley.png		splash
+act_rest_site_natlan	ImageGen/images/teyvat/rest_site/natlan_rest_site_bg.png	1382	648	cover	top	auto	1	png	Weary Inn.png		splash
+act_map_top_natlan	ImageGen/images/teyvat/map_bgs/natlan/map_top_natlan.png	2035	1440	cover	x0.42	auto	1	png	Ancient Sacred Mountain.png		splash
+act_map_middle_natlan	ImageGen/images/teyvat/map_bgs/natlan/map_middle_natlan.png	2035	1440	cover	x0.42	auto	1	png	Stadium of the Sacred Flame.png		splash
+act_map_bottom_natlan	ImageGen/images/teyvat/map_bgs/natlan/map_bottom_natlan.png	2035	1440	cover	x0.42	auto	1	png	Toyac Springs.png		splash
+act_bg_00_inazuma	ImageGen/images/teyvat/backgrounds/inazuma/inazuma_bg_00.png	1382	648	cover	top	auto	1	png	Narukami Island.png		splash
+act_rest_site_inazuma	ImageGen/images/teyvat/rest_site/inazuma_rest_site_bg.png	1382	648	cover	top	auto	1	png	Uyuu Restaurant Interior.png		splash
+act_map_top_inazuma	ImageGen/images/teyvat/map_bgs/inazuma/map_top_inazuma.png	2035	1440	cover	x0.42	auto	1	png	Amakumo Peak.png		splash
+act_map_middle_inazuma	ImageGen/images/teyvat/map_bgs/inazuma/map_middle_inazuma.png	2035	1440	cover	x0.42	auto	1	png	Inazuma City.png		splash
+act_map_bottom_inazuma	ImageGen/images/teyvat/map_bgs/inazuma/map_bottom_inazuma.png	2035	1440	cover	x0.42	auto	1	png	Nazuchi Beach.png		splash
+act_bg_00_fontaine	ImageGen/images/teyvat/backgrounds/fontaine/fontaine_bg_00.png	1382	648	cover	top	auto	1	png	Belleau Region.png		splash
+act_rest_site_fontaine	ImageGen/images/teyvat/rest_site/fontaine_rest_site_bg.png	1382	648	cover	top	auto	1	png	Hotel Debord Interior.png		splash
+act_map_top_fontaine	ImageGen/images/teyvat/map_bgs/fontaine/map_top_fontaine.png	2035	1440	cover	x0.42	auto	1	png	West Slopes of Mont Automnequi.png		splash
+act_map_middle_fontaine	ImageGen/images/teyvat/map_bgs/fontaine/map_middle_fontaine.png	2035	1440	cover	x0.42	auto	1	png	Court of Fontaine.png		splash
+act_map_bottom_fontaine	ImageGen/images/teyvat/map_bgs/fontaine/map_bottom_fontaine.png	2035	1440	cover	x0.42	auto	1	png	Elynas.png		splash
+act_bg_00_sumeru	ImageGen/images/teyvat/backgrounds/sumeru/sumeru_bg_00.png	1382	648	cover	top	auto	1	png	Caravan Ribat.png		splash
+act_rest_site_sumeru	ImageGen/images/teyvat/rest_site/sumeru_rest_site_bg.png	1382	648	cover	top	auto	1	png	Lambad's Tavern Interior.png		splash
+act_map_top_sumeru	ImageGen/images/teyvat/map_bgs/sumeru/map_top_sumeru.png	2035	1440	cover	x0.42	auto	1	png	Mt. Damavand.png		splash
+act_map_middle_sumeru	ImageGen/images/teyvat/map_bgs/sumeru/map_middle_sumeru.png	2035	1440	cover	x0.42	auto	1	png	Sumeru City.png		splash
+act_map_bottom_sumeru	ImageGen/images/teyvat/map_bgs/sumeru/map_bottom_sumeru.png	2035	1440	cover	x0.42	auto	1	png	Sobek Oasis.png		splash

@@ -33,6 +33,7 @@ media/out/music/<act-or-scene>/<track>.ogg      gitignored, produced
 media/out/portraits/<body>/<name>.png           gitignored, produced
 media/MUSIC.tsv                                 tracked ledger
 media/PORTRAITS.tsv                             tracked ledger
+media/ACT.tsv                                   tracked ledger
 ```
 
 `<act-or-scene>`: one per face, `act<N>_<nation>` — `act1_mondstadt`,
@@ -70,19 +71,35 @@ routing the same pixels through `media/out/` as well would create the second
 producer. `media/raw/portraits/` and `media/out/portraits/` stay the route for
 a portrait [USER] supplies by hand.
 
-**Act plates take the same raw/out route.** A zone dressing's background
-layers, rest-site plate and three map backgrounds are Tier F pictures like the
-portraits above and land under `media/raw/act/<act-or-scene>/` →
-`media/out/act/<act-or-scene>/`, one ledger row each, `<act-or-scene>` being
-the same `act1_mondstadt` / `act1_liyue` the music column already uses. What is
-different — and the reason they have a page of their own,
+**Act plates: the plan produces and `media/ACT.tsv` records**, the same
+reconciliation the still portraits took, and for the same reason — their
+sources are wiki files, which is `art/plan.tsv`'s whole job (ruled 2026-09-17,
+`research/teyvat-act-art-sources-2026-09-17.md`). Thirty plan rows, six
+dressings by five surfaces, fetch and crop each plate into
+`ImageGen/images/teyvat/backgrounds/<id>/<id>_bg_00.png`,
+`ImageGen/images/teyvat/rest_site/<id>_rest_site_bg.png` and
+`ImageGen/images/teyvat/map_bgs/<id>/map_{top,middle,bottom}_<id>.png` — the
+directories `tools/build_pck.ps1`'s Teyvat act blocks already copy from — and
+`media/ACT.tsv` carries one row per plate recording it, columns
+`out raw dressing surface w h title origin licence notes` with `surface` one of
+`bg_00`, `rest_site`, `map_top`, `map_middle`, `map_bottom`. `out` names the
+produced path (not a `media/out/` path: the plan is the producer, and naming it
+is what keeps "one producer per out-path" true), `raw` the `art/raw/` file the
+fetch wrote, `title` the bare wiki file title and `origin` its
+`https://genshin-impact.fandom.com/wiki/File:…` page.
+`media/raw/act/` and `media/out/act/` stay the route for a plate [USER]
+supplies by hand.
+
+What is different — and the reason act plates have a page of their own,
 `operations/act-assets.md` — is that their `res://` paths are **not ours to
 choose**: `ActModel`'s five asset-path properties are non-virtual and derive
 every one of them from the act id, so the `out` column names the file and the
-act's id names where it goes. Until a real plate lands,
-`tools/gen_act_placeholders.py` fills all of those paths with nation-tinted
-gradients and takes no ledger row at all — it is a generator, on
-`gen_furina_stills.py`'s terms, not a media drop.
+act's id names where it goes. `tools/gen_act_placeholders.py` keeps every path
+no plan row claims, filling it with a nation-tinted gradient and taking no
+ledger row at all — it is a generator, on `gen_furina_stills.py`'s terms, not a
+media drop — and it reads `art/plan.tsv` to know which those are. Over a real
+`bg_00` it also writes the four layers and the foreground as fully TRANSPARENT
+plates, so the landscape underneath shows through.
 
 Both ledgers are **UTF-8, no BOM**, like `art/plan.tsv` and `art/SOURCES.tsv`.
 **Line endings are LF and are not this page's to choose:** `.gitattributes` is
@@ -111,9 +128,16 @@ out	raw	scene	title	origin	licence	loop_start_s	notes
 out	raw	body	surface	w	h	title	origin	licence	notes
 ```
 
+`media/ACT.tsv`:
+
+```
+out	raw	dressing	surface	w	h	title	origin	licence	notes
+```
+
 - `out` / `raw` — paths under `media/out/` and `media/raw/`. `out` is the
   packager's key and is unique across the file.
-- `scene` / `body` + `surface` — where it plays or who it draws.
+- `scene` / `body` + `surface` / `dressing` + `surface` — where it plays, who
+  it draws, or which plate of which dressing it is.
 - `title` — the source's own name ("Rage Beneath the Mountains", the wiki file
   title), never a paraphrase.
 - `origin` — the official OST album and track number, or a URL [USER] supplies;
