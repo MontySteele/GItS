@@ -742,6 +742,21 @@ public class TeyvatFrameTests : IDisposable
     }
 
     [Fact]
+    public void A_renamed_music_player_is_still_recognised_as_ours()
+    {
+        // The overlap the user heard on 2026-09-17: a slot change queued the
+        // old player free but left it in the tree until the end of the frame,
+        // so the new one was added as `TeyvatTrack2`, an exact-name lookup
+        // lost it, and two tracks played. Ownership is by prefix now.
+        Assert.True(TeyvatMusic.IsOurPlayerName(TeyvatMusic.PlayerNodeName));
+        Assert.True(TeyvatMusic.IsOurPlayerName(TeyvatMusic.PlayerNodeName + "2"));
+        Assert.True(TeyvatMusic.IsOurPlayerName(TeyvatMusic.PlayerNodeName + "17"));
+        Assert.False(TeyvatMusic.IsOurPlayerName("MusicPlayer"));
+        Assert.False(TeyvatMusic.IsOurPlayerName("teyvattrack"));
+        Assert.False(TeyvatMusic.IsOurPlayerName(string.Empty));
+    }
+
+    [Fact]
     public void The_music_root_is_the_frames_namespace_not_a_characters()
     {
         Assert.Equal("res://teyvat/music/", TeyvatMusic.Root);
