@@ -65,6 +65,29 @@ are documented in `docs/current/operations/codegen.md`.
 `build_pck.ps1` overlays this whole directory verbatim, so the `.tres` files
 pack and the derived pck contract lists them with no change to the script.
 
+## motion/bespoke/*.tres — GENERATED, six per-BODY libraries
+
+Pass two. Six bosses (`azhdaha`, `all_devouring_narwhal`, `rhodeia_of_loch`,
+`emperor_of_fire_and_iron`, `golden_wolflord`,
+`everlasting_lord_of_arcane_wisdom`) carry `motion = bespoke` and each gets its
+own five clips over its own cut layers, so a head can lead the body and a claw
+can answer the other claw — which one shared node can never do.
+
+Such a scene's `Rig` holds one `Sprite2D` per LAYER, named for the layer, in
+the cut's back-to-front order, and the clips key `Visuals/Rig:position`,
+`:scale`, `:rotation` plus `Visuals/Rig/<layer>:position|rotation|scale|
+modulate`. The layer sprites sit at the origin with `scale = (s, s)` and carry
+their place on the plate as a `Sprite2D.offset`, which is what lets ONE library
+serve the Golden Wolflord's boss and regular scenes; the three markers are
+byte-identical to what the same row would have had under a shared set.
+
+The cut lives outside the pack, in
+`tools/combat_layer_fences/teyvat/<body>.{yaml,layers.json}`; the layer PNGs
+are Tier F, produced by `tools/cut_combat_layers.py` into
+`ImageGen/images/teyvat/creature_visuals/<body>/layers/` and copied in by
+`build_pck.ps1`'s second walk of that directory. Full account:
+`docs/current/operations/codegen.md` §Bespoke rigs.
+
 The rest of this section is the mechanism, written when the directory held one
 hand-made file (Nibbit's, `hilichurl_guard.tscn`, retired into
 `wooden_shield_hilichurl_guard.tscn` when its real plate was cut). It is

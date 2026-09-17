@@ -109,8 +109,11 @@ def test_the_sample_contract_is_well_formed():
     # (`teyvat/motion/<set>.tres`): 123 creature scenes load their clips from
     # five files rather than inlining the same keyframes 25 times over, and
     # `build_pck.ps1` overlays `pck-src` verbatim so a `.tres` packs and
-    # contracts exactly as a `.tscn` does.
-    assert len(parsed.resources) == 394
+    # contracts exactly as a `.tscn` does. The last twenty-four are motion
+    # pass TWO: eighteen cut layers over six bespoke boss bodies (two or three
+    # each) and the six per-body libraries that move them
+    # (`teyvat/motion/bespoke/<body>.tres`).
+    assert len(parsed.resources) == 418
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -215,6 +218,7 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # draw them -- 2026-09-17 closed the last 52 act-1..3 face-slots), +108 for
     # the six act dressings' placeholder asset sets (eighteen each; see the
     # count's reason above the first assertion), +5 for the motion pass's
-    # shared AnimationLibraries.
-    assert report.checked["contract_resources"] == 394
+    # shared AnimationLibraries, +24 for pass two (eighteen cut layers over six
+    # bespoke boss bodies, and their six per-body libraries).
+    assert report.checked["contract_resources"] == 418
     assert report.checked["package_files"] == 3

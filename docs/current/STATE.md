@@ -209,7 +209,9 @@ ships OFF in a release package).
   `dossiers/content/event-faces/`, nothing parked), 38 death lines, one
   every enemy dressed and moving: 149 face-slots on 122 plates (`EB-811`)
   with five shared motion sets picked per row (`EB-816`; a still enemy proven
-  to animate, `review/records/teyvat-proofs-11-lane1-2026-09-17.md`), the eight Ancients
+  to animate, `review/records/teyvat-proofs-11-lane1-2026-09-17.md`) and six
+  bosses on bespoke layered rigs, two or three cut parts each (`EB-817`,
+  unproven in the running game), the eight Ancients
   dressed per face with Teyvat names, epithets and lines, boons untouched
   (R275, `dossiers/content/ancient-faces.tsv`, art pending), real act plates on all six dressings (30, `media/ACT.tsv`)
   (`operations/act-assets.md`), music packaged from `media/MUSIC.tsv` and

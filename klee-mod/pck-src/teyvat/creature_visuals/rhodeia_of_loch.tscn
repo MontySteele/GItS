@@ -1,7 +1,9 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
-[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/rhodeia_of_loch.png" id="1_rhode"]
-[ext_resource type="AnimationLibrary" path="res://teyvat/motion/loom.tres" id="2_motion"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/rhodeia_of_loch/layers/body.png" id="1_body"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/rhodeia_of_loch/layers/fins.png" id="1_fins"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/rhodeia_of_loch/layers/crown.png" id="1_crown"]
+[ext_resource type="AnimationLibrary" path="res://teyvat/motion/bespoke/rhodeia_of_loch.tres" id="2_motion"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
 animation = &"attack"
@@ -65,10 +67,20 @@ unique_name_in_owner = true
 
 [node name="Rig" type="Node2D" parent="Visuals"]
 
-[node name="Body" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(0, -224.0)
+[node name="body" type="Sprite2D" parent="Visuals/Rig"]
 scale = Vector2(1.6, 1.6)
-texture = ExtResource("1_rhode")
+offset = Vector2(0, -111.5)
+texture = ExtResource("1_body")
+
+[node name="fins" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.6, 1.6)
+offset = Vector2(63.5, -148)
+texture = ExtResource("1_fins")
+
+[node name="crown" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.6, 1.6)
+offset = Vector2(-21, -241)
+texture = ExtResource("1_crown")
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true

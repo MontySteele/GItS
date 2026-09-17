@@ -98,6 +98,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
+import math
 import sys
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -181,6 +183,31 @@ BODY_MODULATE = "Visuals/Rig/Body:modulate"
 #: not have simply never moves.
 ALLOWED_TRACKS = (RIG_POSITION, RIG_SCALE, RIG_ROTATION, BODY_MODULATE)
 
+#: PASS TWO extends the second half of that list, not the first. `Rig` still
+#: takes only these three, because `%Visuals` above it is the engine's; what
+#: changes is that a BESPOKE body has one `Sprite2D` per cut layer under `Rig`
+#: instead of one `Body`, and each of those may be moved on its own. `Body` is
+#: just the layer name a shared-set body happens to have, so one predicate
+#: covers both passes.
+RIG_PROPS = ("position", "scale", "rotation")
+LAYER_PROPS = ("position", "rotation", "scale", "modulate")
+
+
+def legal_track(path: str, layers: tuple[str, ...] = ()) -> bool:
+    """Is `path` a track a creature scene could actually follow?
+
+    A track on a node the scene does not have never moves and never says so,
+    which is the quietest defect in this whole mechanism -- so the node half of
+    every path is checked against the layers the scene really carries.
+    """
+    node, _, prop = path.partition(":")
+    if node == "Visuals/Rig":
+        return prop in RIG_PROPS
+    head, sep, leaf = node.rpartition("/")
+    if head == "Visuals/Rig" and sep and prop in LAYER_PROPS:
+        return leaf in layers if layers else True
+    return False
+
 #: The pck namespace the motion libraries land in.
 MOTION_RES_ROOT = "res://teyvat/motion"
 
@@ -215,8 +242,8 @@ class Track:
     transitions: tuple[float, ...] | None = None
 
     def __post_init__(self) -> None:
-        if self.path not in ALLOWED_TRACKS:
-            raise ValueError(f"{self.path} is not one of {ALLOWED_TRACKS}")
+        if not legal_track(self.path):
+            raise ValueError(f"{self.path} is not a track a creature scene has")
         if len(self.times) != len(self.values):
             raise ValueError(f"{self.path}: {len(self.times)} times, "
                              f"{len(self.values)} values")
@@ -384,6 +411,390 @@ MOTIONS: dict[str, tuple[Clip, ...]] = {
 MOTION_SETS = tuple(MOTIONS)
 
 
+# ---------------------------------------------------------------------------
+# MOTION -- pass two, BESPOKE LAYERED RIGS
+# ---------------------------------------------------------------------------
+#
+# A shared set can only move a body as one silhouette, because a shared set has
+# only one node to move. Six bosses earn more than that, so each of them is cut
+# into two or three LAYERS and gets clips of its own.
+#
+#   * `tools/combat_layer_fences/teyvat/<body>.yaml` is the cut: hand-digitized
+#     fences fed to `tools/cut_combat_layers.py`, which hard-partitions the
+#     plate so the layers recompose to it pixel-for-pixel.
+#   * `tools/combat_layer_fences/teyvat/<body>.layers.json` is that cut's
+#     MANIFEST -- one `{file, w, h, offset_x, offset_y}` per layer, in the
+#     back-to-front order the scene draws them. It is COMMITTED, and that is
+#     not a filing decision: the pixels live in the gitignored `ImageGen/`
+#     tree, which a worktree never has, so a manifest inside it would make
+#     `--check` unrunnable anywhere but the art checkout.
+#   * `klee-mod/pck-src/teyvat/motion/bespoke/<body>.tres` is the library, one
+#     per BODY rather than one per set.
+#
+# WHERE THE SIZE CLASS GOES, AND WHY IT IS AN `offset`. A shared-set scene puts
+# the class on `Body`: `position = (0, -height/2)`, `scale = (s, s)`. A layer
+# sprite cannot do the same, because the Golden Wolflord is a boss on one face
+# and a regular on another while its library is ONE file: a `position` track
+# would have to key two different rest values. So a layer carries `scale =
+# (s, s)` exactly as `Body` does, `position = (0, 0)`, and its place on the
+# plate as `offset = (ox, oy - PLATE_H/2)` -- which Godot applies INSIDE the
+# node transform, so the drawn result is identical and the numbers a clip
+# keys are pure deltas from zero in every size class.
+#
+# The layers together therefore occupy exactly the box the single `Body` did,
+# and `%Bounds`, `%IntentPos` and `%CenterPos` are written by the same three
+# lines as before.
+#
+# THE PIVOT IS THE RIG ORIGIN, which is the creature's feet: a layer's
+# `position` is zero, so its rotation and scale turn about that point and not
+# about the layer's own middle. That is what "a claw raises about its base"
+# wants and it is why every rotation here is small.
+
+BESPOKE = "bespoke"
+
+#: The legal `motion` values: the five shared sets plus `bespoke`.
+LEGAL_MOTIONS = tuple(MOTION_SETS) + (BESPOKE,)
+
+#: Where a bespoke body's fence and manifest live, repo-relative.
+FENCE_DIR = "tools/combat_layer_fences/teyvat"
+
+#: The pck directory the per-body libraries land in.
+BESPOKE_RES_ROOT = f"{MOTION_RES_ROOT}/{BESPOKE}"
+
+#: And the art directory the cutter writes, under the plate's own namespace.
+LAYER_DIR = "layers"
+
+
+def fence_relative(body: str) -> str:
+    return f"{FENCE_DIR}/{body}.yaml"
+
+
+def manifest_relative(body: str) -> str:
+    return f"{FENCE_DIR}/{body}.layers.json"
+
+
+def layer_res(body: str, layer: str) -> str:
+    return f"{RES_ROOT}/{body}/{LAYER_DIR}/{layer}.png"
+
+
+def load_manifest(root: Path, body: str) -> dict:
+    """One cut manifest, validated. Every failure here is a cut defect."""
+    path = root / manifest_relative(body)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    canvas = tuple(data["canvas"])
+    if canvas != (PLATE_W, PLATE_H):
+        raise ValueError(f"{path.name}: canvas {canvas} is not the plate")
+    layers = data["layers"]
+    if not layers:
+        raise ValueError(f"{path.name}: no layers")
+    for name, entry in layers.items():
+        if entry["file"] != f"{name}.png":
+            raise ValueError(f"{path.name}: {name} is stored as {entry['file']}")
+    return layers
+
+
+def manifests(root: Path = ROOT) -> dict[str, dict]:
+    """Every bespoke body's manifest, keyed by body. Loaded once per root."""
+    cached = _MANIFEST_CACHE.get(root)
+    if cached is None:
+        cached = {body: load_manifest(root, body) for body in BESPOKE_BODIES}
+        _MANIFEST_CACHE[root] = cached
+    return cached
+
+
+_MANIFEST_CACHE: dict[Path, dict[str, dict]] = {}
+
+
+# --- the clips -------------------------------------------------------------
+#
+# Amplitudes are the shared sets' own band and deliberately no larger: an idle
+# of two to six pixels and two to five hundredths of a radian, an attack of
+# 0.7 s that presses about 25 px toward the player, a 0.4 s hurt with a 0.05 s
+# flash, and a 1.6 s death. What a bespoke rig buys is not MORE motion, it is
+# motion that disagrees with itself -- a head that leads the body, a fluke that
+# swings against the swim, claws that alternate.
+
+def _layer(name: str, prop: str) -> str:
+    return f"Visuals/Rig/{name}:{prop}"
+
+
+def _flash_layers(layers, at: float = 0.05, back: float = 0.3):
+    """The hurt flash, on EVERY layer -- a body that flashes in pieces reads
+    as a bug, so the one colour goes on all of them at the same two times."""
+    return [Track(_layer(name, "modulate"), (0, at, back), (WHITE, FLASH, WHITE))
+            for name in layers]
+
+
+def _fade_layers(layers, start: float, end: float):
+    return [Track(_layer(name, "modulate"), (0, start, end),
+                  (WHITE, WHITE, FADED)) for name in layers]
+
+
+def _bespoke_reset(layers) -> Clip:
+    """RESET keys every property any clip in this body's set touches.
+
+    Not "every property one of them touches": all four, on every layer. A
+    death fade that is not reset leaves the NEXT body half-transparent, and
+    the cost of over-keying a resting pose is zero.
+    """
+    tracks = [
+        Track(RIG_POSITION, (0,), ((0, 0),)),
+        Track(RIG_SCALE, (0,), ((1, 1),)),
+        Track(RIG_ROTATION, (0,), (0.0,)),
+    ]
+    for name in layers:
+        tracks.append(Track(_layer(name, "position"), (0,), ((0, 0),)))
+        tracks.append(Track(_layer(name, "rotation"), (0,), (0.0,)))
+        tracks.append(Track(_layer(name, "scale"), (0,), ((1, 1),)))
+        tracks.append(Track(_layer(name, "modulate"), (0,), (WHITE,)))
+    return Clip("RESET", 0.001, tuple(tracks))
+
+
+def _bespoke_hurt(layers, shake: float = 5) -> Clip:
+    """One shudder and one flash. Bosses barely notice a hit, as `loom`'s
+    four-pixel shake already said."""
+    return Clip("hurt", 0.4, tuple([
+        Track(RIG_POSITION, (0, 0.07, 0.16, 0.26, 0.4),
+              ((0, 0), (shake, 0), (-shake * 0.6, 0), (shake * 0.4, 0), (0, 0))),
+    ] + _flash_layers(layers)))
+
+
+#: The forward press every bespoke attack rides. Enemies face LEFT, so toward
+#: the player is negative x (the module header's one sign).
+def _lunge(overshoot_y: float = 2.0):
+    return Track(RIG_POSITION, (0, 0.26, 0.46, 0.7),
+                 ((0, 0), (-25, -3), (4, overshoot_y), (0, 0)),
+                 transitions=(0.45, 1.5, 1, 1))
+
+
+TAU = round(2 * math.pi, 6)
+
+
+def _azhdaha(layers) -> tuple[Clip, ...]:
+    """Head leads, back breathes, tail answers the head."""
+    return (
+        _bespoke_reset(layers),
+        Clip("idle", 4.0, (
+            Track(_layer("head", "rotation"), (0, 2.0, 4.0),
+                  (0.0, 0.035, 0.0), interp=2),
+            Track(_layer("head", "position"), (0, 2.0, 4.0),
+                  ((0, 0), (0, -3), (0, 0)), interp=2),
+            Track(_layer("body", "scale"), (0, 2.0, 4.0),
+                  ((1, 1), (1.015, 1.015), (1, 1)), interp=2),
+            Track(_layer("tail", "rotation"), (0, 2.0, 4.0),
+                  (0.03, -0.03, 0.03), interp=2),
+        ), loop=True),
+        Clip("attack", 0.7, (
+            _lunge(),
+            # The head goes FURTHER than the rig: 15 px past the 25 the whole
+            # body presses, which is the entire read of a lunging jaw.
+            Track(_layer("head", "position"), (0, 0.26, 0.46, 0.7),
+                  ((0, 0), (-15, 2), (3, 0), (0, 0))),
+            Track(_layer("head", "rotation"), (0, 0.26, 0.7), (0.0, 0.05, 0.0)),
+        )),
+        _bespoke_hurt(layers, shake=4),
+        Clip("death", 1.6, tuple([
+            Track(RIG_POSITION, (0, 1.6), ((0, 0), (0, 20))),
+            Track(_layer("head", "position"), (0, 0.5, 1.6),
+                  ((0, 0), (2, 8), (6, 18))),
+            Track(_layer("head", "rotation"), (0, 1.6), (0.0, 0.12)),
+            Track(_layer("tail", "rotation"), (0, 1.6), (0.0, -0.14)),
+        ] + _fade_layers(layers, 0.3, 1.6))),
+    )
+
+
+def _narwhal(layers) -> tuple[Clip, ...]:
+    """A swim: the whole body rises and falls and the fluke swings against it."""
+    return (
+        _bespoke_reset(layers),
+        Clip("idle", 3.0, (
+            Track(RIG_POSITION, (0, 1.5, 3.0), ((0, 0), (0, -5), (0, 0)), interp=2),
+            Track(_layer("fluke", "rotation"), (0, 1.5, 3.0),
+                  (0.06, -0.06, 0.06), interp=2),
+            Track(_layer("fin", "rotation"), (0, 1.5, 3.0),
+                  (-0.03, 0.03, -0.03), interp=2),
+        ), loop=True),
+        Clip("attack", 0.7, (
+            _lunge(overshoot_y=-1.0),
+            # Nose down as it dives. Godot's positive rotation is clockwise on
+            # screen and this body's head is on the LEFT, so down is negative.
+            Track(RIG_ROTATION, (0, 0.26, 0.46, 0.7), (0.0, -0.05, 0.02, 0.0)),
+            Track(_layer("fluke", "rotation"), (0, 0.26, 0.7), (0.0, 0.1, 0.0)),
+        )),
+        _bespoke_hurt(layers, shake=5),
+        Clip("death", 1.6, tuple([
+            Track(RIG_POSITION, (0, 1.6), ((0, 0), (0, 24))),
+            # The fluke STILLS: one key at the rest angle and no second one.
+            Track(_layer("fluke", "rotation"), (0, 0.4, 1.6), (0.06, 0.0, 0.0)),
+            Track(_layer("fin", "rotation"), (0, 1.6), (0.0, 0.05)),
+        ] + _fade_layers(layers, 0.3, 1.6))),
+    )
+
+
+def _rhodeia(layers) -> tuple[Clip, ...]:
+    """A hover, a crown that turns slowly, and fins a half-second behind it."""
+    return (
+        _bespoke_reset(layers),
+        Clip("idle", 3.2, (
+            Track(RIG_POSITION, (0, 1.6, 3.2), ((0, 0), (0, -4), (0, 0)), interp=2),
+            Track(_layer("crown", "rotation"), (0, 0.8, 1.6, 2.4, 3.2),
+                  (0.0, 0.04, 0.0, -0.04, 0.0), interp=2),
+            # The SAME shape, started 0.5 s later, which is what makes the
+            # fins read as trailing the head rather than bolted to it.
+            Track(_layer("fins", "rotation"), (0, 0.5, 1.3, 2.1, 2.9, 3.2),
+                  (-0.012, 0.0, 0.035, 0.0, -0.035, -0.012), interp=2),
+        ), loop=True),
+        Clip("attack", 0.7, (
+            _lunge(overshoot_y=1.0),
+            Track(_layer("fins", "scale"), (0, 0.26, 0.46, 0.7),
+                  ((1, 1), (1.1, 1.1), (1.02, 1.02), (1, 1))),
+        )),
+        _bespoke_hurt(layers, shake=6),
+        Clip("death", 1.6, tuple([
+            Track(RIG_POSITION, (0, 1.6), ((0, 0), (0, 16))),
+            Track(_layer("fins", "scale"), (0, 0.6, 1.6),
+                  ((1, 1), (0.8, 0.8), (0.6, 0.6))),
+            Track(_layer("crown", "rotation"), (0, 1.6), (0.0, -0.1)),
+        ] + _fade_layers(layers, 0.3, 1.6))),
+    )
+
+
+def _emperor(layers) -> tuple[Clip, ...]:
+    """Two claws on opposite phases, and both of them in the swing."""
+    return (
+        _bespoke_reset(layers),
+        Clip("idle", 4.0, (
+            Track(_layer("body", "scale"), (0, 2.0, 4.0),
+                  ((1, 1), (1.015, 1.015), (1, 1)), interp=2),
+            Track(_layer("claw_l", "rotation"), (0, 1.0, 2.0, 3.0, 4.0),
+                  (0.0, 0.05, 0.0, -0.05, 0.0), interp=2),
+            Track(_layer("claw_r", "rotation"), (0, 1.0, 2.0, 3.0, 4.0),
+                  (0.0, -0.05, 0.0, 0.05, 0.0), interp=2),
+        ), loop=True),
+        Clip("attack", 0.7, (
+            _lunge(),
+            Track(_layer("claw_l", "rotation"), (0, 0.3, 0.5, 0.7),
+                  (0.0, -0.25, 0.1, 0.0)),
+            Track(_layer("claw_r", "rotation"), (0, 0.3, 0.5, 0.7),
+                  (0.0, -0.25, 0.1, 0.0)),
+        )),
+        _bespoke_hurt(layers, shake=4),
+        Clip("death", 1.6, tuple([
+            Track(RIG_POSITION, (0, 1.6), ((0, 0), (0, 22))),
+            Track(_layer("claw_l", "rotation"), (0, 1.6), (0.0, 0.22)),
+            Track(_layer("claw_r", "rotation"), (0, 1.6), (0.0, -0.22)),
+            Track(_layer("claw_l", "position"), (0, 1.6), ((0, 0), (0, 10))),
+            Track(_layer("claw_r", "position"), (0, 1.6), ((0, 0), (0, 10))),
+        ] + _fade_layers(layers, 0.3, 1.6))),
+    )
+
+
+def _wolflord(layers) -> tuple[Clip, ...]:
+    """A head that bobs and blades that orbit, snap out, then scatter."""
+    return (
+        _bespoke_reset(layers),
+        Clip("idle", 4.0, (
+            Track(_layer("head", "position"), (0, 2.0, 4.0),
+                  ((0, 0), (0, -3), (0, 0)), interp=2),
+            # A circle, four keys plus the closing one: a slow orbit, not a
+            # bob, which is the whole reason the shards are their own layer.
+            Track(_layer("shards", "position"), (0, 1.0, 2.0, 3.0, 4.0),
+                  ((0, -4), (4, 0), (0, 4), (-4, 0), (0, -4)), interp=2),
+        ), loop=True),
+        Clip("attack", 0.7, (
+            _lunge(),
+            Track(_layer("shards", "position"), (0, 0.26, 0.46, 0.7),
+                  ((0, 0), (-10, -6), (-2, -1), (0, 0))),
+            Track(_layer("shards", "scale"), (0, 0.26, 0.46, 0.7),
+                  ((1, 1), (1.15, 1.15), (1.02, 1.02), (1, 1))),
+        )),
+        _bespoke_hurt(layers, shake=5),
+        Clip("death", 1.6, (
+            Track(RIG_POSITION, (0, 1.6), ((0, 0), (0, 18))),
+            # The blades go FIRST and travel furthest -- they are what the
+            # wolflord is holding up, so they are what falls out of the air.
+            Track(_layer("shards", "position"), (0, 0.8), ((0, 0), (30, -12))),
+            Track(_layer("shards", "modulate"), (0, 0.1, 0.8),
+                  (WHITE, WHITE, FADED)),
+            Track(_layer("body", "modulate"), (0, 0.4, 1.6),
+                  (WHITE, WHITE, FADED)),
+            Track(_layer("head", "modulate"), (0, 0.4, 1.6),
+                  (WHITE, WHITE, FADED)),
+            Track(_layer("head", "rotation"), (0, 1.6), (0.0, 0.1)),
+        )),
+    )
+
+
+def _everlasting(layers) -> tuple[Clip, ...]:
+    """A ring that never stops turning, a body that hovers under it."""
+    return (
+        _bespoke_reset(layers),
+        Clip("idle", 12.0, (
+            # ONE continuous turn per loop, linear so the seam is invisible.
+            Track(_layer("halo", "rotation"), (0, 12.0), (0.0, TAU), interp=1),
+            Track(_layer("body", "position"),
+                  (0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0),
+                  ((0, 0), (0, -4), (0, 0), (0, -4), (0, 0), (0, -4), (0, 0)),
+                  interp=2),
+            Track(_layer("train", "rotation"), (0, 3.0, 6.0, 9.0, 12.0),
+                  (0.03, -0.03, 0.03, -0.03, 0.03), interp=2),
+        ), loop=True),
+        Clip("attack", 0.7, (
+            _lunge(),
+            Track(_layer("halo", "scale"), (0, 0.26, 0.46, 0.7),
+                  ((1, 1), (1.1, 1.1), (1.02, 1.02), (1, 1))),
+            Track(_layer("body", "position"), (0, 0.26, 0.46, 0.7),
+                  ((0, 0), (-8, 0), (2, 0), (0, 0))),
+        )),
+        _bespoke_hurt(layers, shake=4),
+        Clip("death", 1.6, (
+            Track(RIG_POSITION, (0, 1.6), ((0, 0), (0, 18))),
+            # The ring spins DOWN and goes out before the body does.
+            Track(_layer("halo", "rotation"), (0, 0.9), (0.0, 0.9), interp=2),
+            Track(_layer("halo", "scale"), (0, 0.9), ((1, 1), (0.85, 0.85))),
+            Track(_layer("halo", "modulate"), (0, 0.15, 0.9),
+                  (WHITE, WHITE, FADED)),
+            Track(_layer("body", "modulate"), (0, 0.5, 1.6),
+                  (WHITE, WHITE, FADED)),
+            Track(_layer("train", "modulate"), (0, 0.5, 1.6),
+                  (WHITE, WHITE, FADED)),
+            Track(_layer("train", "rotation"), (0, 1.6), (0.0, 0.12)),
+        )),
+    )
+
+
+#: The six, and the only place a body's name buys it its own clips. A seventh
+#: needs a fence, a manifest and a row here, and `--check` says so by name.
+BESPOKE_CLIPS = {
+    "azhdaha": _azhdaha,
+    "all_devouring_narwhal": _narwhal,
+    "rhodeia_of_loch": _rhodeia,
+    "emperor_of_fire_and_iron": _emperor,
+    "golden_wolflord": _wolflord,
+    "everlasting_lord_of_arcane_wisdom": _everlasting,
+}
+
+BESPOKE_BODIES = tuple(BESPOKE_CLIPS)
+
+
+def bespoke_clips(root: Path, body: str) -> tuple[Clip, ...]:
+    """One body's five clips, over the layer names its cut actually produced.
+
+    The layers come from the MANIFEST rather than from a list here, so a
+    re-cut that renames or drops a layer fails loudly (a `KeyError` on the
+    name, or `--check`'s node-name comparison) instead of writing a library
+    full of tracks that point at nodes the scene does not have.
+    """
+    layers = tuple(manifests(root)[body])
+    clips = BESPOKE_CLIPS[body](layers)
+    for clip in clips:
+        for track in clip.tracks:
+            if not legal_track(track.path, layers):
+                raise ValueError(f"{body}/{clip.name}: {track.path} names no "
+                                 f"layer of {layers}")
+    return clips
+
+
 #: The rule that FILLED the column, kept so a row added tomorrow can be given a
 #: motion the same way the 158 were. Order matters -- first match wins -- and
 #: every clause is a substring test on the body name except the size-class arm.
@@ -455,7 +866,13 @@ class Row:
         return f"{RES_ROOT}/{self.scene_id or self.body}.tscn"
 
     @property
+    def bespoke(self) -> bool:
+        return self.motion == BESPOKE
+
+    @property
     def motion_library(self) -> str:
+        if self.bespoke:
+            return f"{BESPOKE_RES_ROOT}/{self.body}.tres"
         return f"{MOTION_RES_ROOT}/{self.motion}.tres"
 
 
@@ -482,9 +899,13 @@ def load(path: Path = TABLE) -> list[Row]:
             raise ValueError(f"{where}: {row.face!r} is not one of {FACES}")
         if row.size_class not in SCALES:
             raise ValueError(f"{where}: {row.size_class!r} is not a size class")
-        if row.motion not in MOTIONS:
+        if row.motion not in LEGAL_MOTIONS:
             raise ValueError(
-                f"{where}: {row.motion!r} is not a motion set {MOTION_SETS}")
+                f"{where}: {row.motion!r} is not a motion {LEGAL_MOTIONS}")
+        if row.bespoke and row.body not in BESPOKE_CLIPS:
+            raise ValueError(
+                f"{where}: {row.body} is bespoke but has no clips; give it a "
+                f"row in BESPOKE_CLIPS, a fence and a cut manifest")
         if not row.display_name:
             raise ValueError(f"{where}: {row.body} has no display_name")
         rows.append(row)
@@ -652,15 +1073,13 @@ def _clip_source(clip: Clip) -> str:
         _track_source(i, track) for i, track in enumerate(clip.tracks))
 
 
-def motion_source(name: str) -> str:
-    """The `.tres` text for one motion set.
+def _library_source(clips: tuple[Clip, ...]) -> str:
+    """The `.tres` text for one `AnimationLibrary`.
 
-    A plain `AnimationLibrary` resource: five `Animation` sub-resources and the
-    `_data` dictionary that names them. NO COMMENT LINES, for the same reason
-    the scenes carry none -- a resource that fails to parse does not error
-    loudly, it just is not there.
+    Five `Animation` sub-resources and the `_data` dictionary that names them.
+    NO COMMENT LINES, for the same reason the scenes carry none -- a resource
+    that fails to parse does not error loudly, it just is not there.
     """
-    clips = MOTIONS[name]
     body = "\n".join(_clip_source(clip) for clip in clips)
     data = ",\n".join(
         f'&"{clip.name}": SubResource("Animation_{clip.name}")'
@@ -676,12 +1095,28 @@ def motion_source(name: str) -> str:
     )
 
 
-def motion_sources() -> dict[str, str]:
+def motion_source(name: str) -> str:
+    """One shared set's library."""
+    return _library_source(MOTIONS[name])
+
+
+def bespoke_source(root: Path, body: str) -> str:
+    """One bespoke body's library."""
+    return _library_source(bespoke_clips(root, body))
+
+
+def motion_sources(root: Path = ROOT) -> dict[str, str]:
     """Every committed motion library, repo-relative path -> exact text."""
-    return {
+    out = {
         f"klee-mod/pck-src/teyvat/motion/{name}.tres": motion_source(name)
         for name in sorted(MOTIONS)
     }
+    out.update({
+        f"klee-mod/pck-src/teyvat/motion/{BESPOKE}/{body}.tres":
+            bespoke_source(root, body)
+        for body in sorted(BESPOKE_CLIPS)
+    })
+    return out
 
 
 #: The state machine every generated scene carries, verbatim from the one
@@ -757,12 +1192,52 @@ transitions = ["Start", "idle", SubResource("Transition_start_idle"), \
 '''
 
 #: `ext` + `sub` + 1, which is what Godot writes and what the scene-deps gate
-#: checks. Two ext (the plate and the motion library) and fourteen sub (four
-#: `AnimationNodeAnimation`, nine transitions, one state machine).
-_LOAD_STEPS = 2 + 14 + 1
+#: checks. The fourteen sub-resources are fixed (four `AnimationNodeAnimation`,
+#: nine transitions, one state machine); the ext count is the motion library
+#: plus ONE texture for a shared-set body and one per LAYER for a bespoke one,
+#: so `scene_source` counts the lines it wrote rather than naming a number.
+_SUB_RESOURCES = 14
 
 
-def scene_source(row: Row) -> str:
+def _sprites(row: Row, root: Path) -> tuple[str, str]:
+    """The `ext_resource` lines and the `Sprite2D` nodes under `Rig`.
+
+    One `Body` over the whole plate for a shared-set row; one node per cut
+    layer, named for the layer, for a bespoke one. Both carry the SAME size
+    class -- `scale = (s, s)` -- and both fill exactly the plate's box, which
+    is what lets `%Bounds`, `%IntentPos` and `%CenterPos` below stay the three
+    lines they were.
+    """
+    scale = row.scale
+    feet_to_middle = -PLATE_H / 2 * scale
+    if not row.bespoke:
+        ident = row.scene_id.split("_")[0][:5] or "plate"
+        ext = (f'[ext_resource type="Texture2D" '
+               f'path="{RES_ROOT}/{row.body}.png" id="1_{ident}"]\n')
+        node = (f'[node name="Body" type="Sprite2D" parent="Visuals/Rig"]\n'
+                f"position = Vector2(0, {_f(feet_to_middle)})\n"
+                f"scale = Vector2({_f(scale)}, {_f(scale)})\n"
+                f'texture = ExtResource("1_{ident}")\n')
+        return ext, node
+
+    ext_lines, nodes = [], []
+    for name, entry in manifests(root)[row.body].items():
+        ext_lines.append(
+            f'[ext_resource type="Texture2D" '
+            f'path="{layer_res(row.body, name)}" id="1_{name}"]')
+        # `offset` and NOT `position`: it is applied inside the node transform,
+        # so the drawn place is identical while the node itself stays at the
+        # origin -- which is what keeps one library right for two size classes.
+        nodes.append(
+            f'[node name="{name}" type="Sprite2D" parent="Visuals/Rig"]\n'
+            f"scale = Vector2({_f(scale)}, {_f(scale)})\n"
+            f"offset = Vector2({_n(entry['offset_x'])}, "
+            f"{_n(entry['offset_y'] - PLATE_H / 2)})\n"
+            f'texture = ExtResource("1_{name}")\n')
+    return "\n".join(ext_lines) + "\n", "\n".join(nodes)
+
+
+def scene_source(row: Row, root: Path = ROOT) -> str:
     """The `.tscn` text for one body.
 
     Read it against `NCreatureVisuals._Ready` and `NCreatureVisualsFactory`:
@@ -778,7 +1253,8 @@ def scene_source(row: Row) -> str:
     half_w = PLATE_W / 2 * scale
     height = PLATE_H * scale
     feet_to_middle = -height / 2
-    ident = row.scene_id.split("_")[0][:5] or "plate"
+    textures, sprites = _sprites(row, root)
+    load_steps = textures.count("[ext_resource") + 1 + _SUB_RESOURCES + 1
     # NO COMMENT HEADER, deliberately. A `.tscn` is a Godot text resource, not
     # a `.cfg`: neither the base game's 127 `creature_visuals` scenes nor any
     # scene already committed under `pck-src/` carries a `;` or `#` line, and a
@@ -786,10 +1262,9 @@ def scene_source(row: Row) -> str:
     # in the pink fallback body, which "works" and looks like a bug. The
     # provenance lives in `pck-src/teyvat/README.md` and the staleness gate
     # lives in `--check`, neither of which has to survive a parser.
-    return f"""[gd_scene load_steps={_LOAD_STEPS} format=3]
+    return f"""[gd_scene load_steps={load_steps} format=3]
 
-[ext_resource type="Texture2D" path="{RES_ROOT}/{row.body}.png" id="1_{ident}"]
-[ext_resource type="AnimationLibrary" path="{row.motion_library}" id="2_motion"]
+{textures}[ext_resource type="AnimationLibrary" path="{row.motion_library}" id="2_motion"]
 
 {_STATE_MACHINE}
 [node name="{_node_name(row.scene_id)}" type="Node2D"]
@@ -799,11 +1274,7 @@ unique_name_in_owner = true
 
 [node name="Rig" type="Node2D" parent="Visuals"]
 
-[node name="Body" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(0, {_f(feet_to_middle)})
-scale = Vector2({_f(scale)}, {_f(scale)})
-texture = ExtResource("1_{ident}")
-
+{sprites}
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 3
@@ -837,12 +1308,26 @@ anim_player = NodePath("../AnimationPlayer")
 """
 
 
-def scene_sources(rows: list[Row]) -> dict[str, str]:
+def scene_sources(rows: list[Row], root: Path = ROOT) -> dict[str, str]:
     """Every committed `.tscn`, repo-relative path -> exact text."""
     return {
-        f"klee-mod/pck-src/teyvat/creature_visuals/{name}.tscn": scene_source(row)
+        f"klee-mod/pck-src/teyvat/creature_visuals/{name}.tscn":
+            scene_source(row, root)
         for name, row in sorted(scenes(rows).items())
     }
+
+
+def layer_resources(rows: list[Row]) -> list[str]:
+    """Every cut layer the pack must carry, as a pck-relative path.
+
+    `bodies()` answers which PLATES are packaged and this answers which LAYERS
+    are, which is a third question: a bespoke body's plate is still packaged
+    (the contract and `art/plan.tsv` both know it) and its layers are packaged
+    beside it, under a directory of the plate's own name.
+    """
+    wanted = sorted({r.body for r in rows if r.bespoke})
+    return [layer_res(body, name).replace("res://", "")
+            for body in wanted for name in manifests()[body]]
 
 
 def _cs_string(text: str) -> str:
@@ -948,7 +1433,7 @@ def write_all(root: Path, rows: list[Row]) -> list[str]:
     written: list[str] = []
     scene_dir = root / "klee-mod" / "pck-src" / "teyvat" / "creature_visuals"
     scene_dir.mkdir(parents=True, exist_ok=True)
-    for relative, text in sorted(scene_sources(rows).items()):
+    for relative, text in sorted(scene_sources(rows, root).items()):
         path = root / relative
         # LF, explicitly: `pck-src` is LF and a Windows run must not rewrite
         # seventy-seven committed scenes with CRLF.
@@ -958,7 +1443,8 @@ def write_all(root: Path, rows: list[Row]) -> list[str]:
 
     motion_dir = root / "klee-mod" / "pck-src" / "teyvat" / "motion"
     motion_dir.mkdir(parents=True, exist_ok=True)
-    for relative, text in sorted(motion_sources().items()):
+    (motion_dir / BESPOKE).mkdir(parents=True, exist_ok=True)
+    for relative, text in sorted(motion_sources(root).items()):
         with (root / relative).open("w", encoding="utf-8", newline="\n") as handle:
             handle.write(text)
         written.append(relative)
@@ -980,18 +1466,55 @@ def stale_scenes(root: Path, rows: list[Row]) -> list[str]:
 
 
 def stale_motion(root: Path) -> list[str]:
-    """Committed `.tres` under the motion directory that no set names."""
+    """Committed `.tres` under the motion tree that no set and no body names."""
     directory = root / "klee-mod" / "pck-src" / "teyvat" / "motion"
     if not directory.is_dir():
         return []
     planned = {f"{name}.tres" for name in MOTIONS}
-    return sorted(p.name for p in directory.glob("*.tres") if p.name not in planned)
+    planned |= {f"{BESPOKE}/{body}.tres" for body in BESPOKE_CLIPS}
+    return sorted(str(p.relative_to(directory)).replace("\\", "/")
+                  for p in directory.rglob("*.tres")
+                  if str(p.relative_to(directory)).replace("\\", "/")
+                  not in planned)
+
+
+def bespoke_gaps(root: Path, rows: list[Row]) -> list[str]:
+    """What a bespoke row OWES, checked before anything is written.
+
+    A bespoke row with no fence, no manifest or no clips would otherwise
+    generate a scene that loads an empty library and stands perfectly still --
+    the exact failure pass two exists to end, wearing pass one's face.
+    """
+    problems: list[str] = []
+    art = root / "ImageGen" / "images" / "teyvat" / "creature_visuals"
+    for body in sorted({r.body for r in rows if r.bespoke}):
+        if body not in BESPOKE_CLIPS:
+            problems.append(f"{body} is bespoke but BESPOKE_CLIPS has no row")
+        for relative in (fence_relative(body), manifest_relative(body)):
+            if not (root / relative).is_file():
+                problems.append(f"{body} is bespoke but {relative} is missing")
+        if not (root / manifest_relative(body)).is_file():
+            continue
+        # The PIXELS are Tier F and a worktree has none, so their absence is a
+        # note (`missing_plates`), not a gate -- but if the tree IS here the
+        # manifest and the directory must agree.
+        if art.is_dir():
+            for name in load_manifest(root, body):
+                png = art / body / LAYER_DIR / f"{name}.png"
+                if not png.is_file():
+                    problems.append(
+                        f"{body}: the manifest names layer {name!r} but "
+                        f"{png.relative_to(root)} is not cut; run "
+                        f"tools/cut_combat_layers.py teyvat/{body}")
+    return problems
 
 
 def check(root: Path, rows: list[Row]) -> list[str]:
-    problems: list[str] = []
+    problems = bespoke_gaps(root, rows)
+    if any("is missing" in p or "no row" in p for p in problems):
+        return problems
     for relative, text in sorted(
-            {**scene_sources(rows), **motion_sources()}.items()):
+            {**scene_sources(rows, root), **motion_sources(root)}.items()):
         path = root / relative
         if not path.exists():
             problems.append(f"missing committed file {relative}")
@@ -1020,8 +1543,8 @@ def check(root: Path, rows: list[Row]) -> list[str]:
             "table; delete it or give it a row")
     for name in stale_motion(root):
         problems.append(
-            f"klee-mod/pck-src/teyvat/motion/{name} is not a motion set; "
-            "delete it or add it to MOTIONS")
+            f"klee-mod/pck-src/teyvat/motion/{name} is not a motion set or a "
+            "bespoke body; delete it or add it to MOTIONS / BESPOKE_CLIPS")
     return problems
 
 
@@ -1066,9 +1589,9 @@ def main(argv: list[str] | None = None) -> int:
         for body in sorted(per_body):
             print(f"{body}\t{'/'.join(sorted(per_body[body]))}")
         counts = {name: sum(1 for r in rows if r.motion == name)
-                  for name in MOTION_SETS}
+                  for name in LEGAL_MOTIONS}
         print("")
-        for name in MOTION_SETS:
+        for name in LEGAL_MOTIONS:
             print(f"{name}\t{counts[name]} row(s)")
         return 0
 

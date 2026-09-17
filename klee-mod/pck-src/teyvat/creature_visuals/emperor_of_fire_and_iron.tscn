@@ -1,7 +1,9 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
-[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/emperor_of_fire_and_iron.png" id="1_emper"]
-[ext_resource type="AnimationLibrary" path="res://teyvat/motion/loom.tres" id="2_motion"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/emperor_of_fire_and_iron/layers/body.png" id="1_body"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/emperor_of_fire_and_iron/layers/claw_r.png" id="1_claw_r"]
+[ext_resource type="Texture2D" path="res://teyvat/creature_visuals/emperor_of_fire_and_iron/layers/claw_l.png" id="1_claw_l"]
+[ext_resource type="AnimationLibrary" path="res://teyvat/motion/bespoke/emperor_of_fire_and_iron.tres" id="2_motion"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
 animation = &"attack"
@@ -65,10 +67,20 @@ unique_name_in_owner = true
 
 [node name="Rig" type="Node2D" parent="Visuals"]
 
-[node name="Body" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(0, -224.0)
+[node name="body" type="Sprite2D" parent="Visuals/Rig"]
 scale = Vector2(1.6, 1.6)
-texture = ExtResource("1_emper")
+offset = Vector2(15, -140)
+texture = ExtResource("1_body")
+
+[node name="claw_r" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.6, 1.6)
+offset = Vector2(-68.5, -135.5)
+texture = ExtResource("1_claw_r")
+
+[node name="claw_l" type="Sprite2D" parent="Visuals/Rig"]
+scale = Vector2(1.6, 1.6)
+offset = Vector2(85, -127)
+texture = ExtResource("1_claw_l")
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true

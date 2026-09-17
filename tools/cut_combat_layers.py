@@ -8,12 +8,27 @@ third-instance-incoming signal that made generalizing worth it now.
 
     .venv/Scripts/python tools/cut_combat_layers.py klee
     .venv/Scripts/python tools/cut_combat_layers.py furina
-    .venv/Scripts/python tools/cut_combat_layers.py klee --check
+    .venv/Scripts/python tools/cut_combat_layers.py teyvat/azhdaha
+    .venv/Scripts/python tools/cut_combat_layers.py --all --check
+    .venv/Scripts/python tools/cut_combat_layers.py --all --verify
 
 `--check` re-cuts into a temp dir and diffs against what is on disk. Klee's
 output is byte-identical to the pre-generalization tool's, and that is the
 regression this flag exists to protect: the generalization must not have
-quietly changed the shipped art.
+quietly changed the shipped art. `--verify` asks the other question: stack the
+SHIPPED layers back up at their manifest offsets and diff against the source,
+which is what catches an offset that drifted from the PNG beside it.
+
+MOTION PASS TWO (2026-09-17) added configs #3-#8, the six bespoke boss rigs
+under `combat_layer_fences/teyvat/`, and with them four optional config keys:
+`layer_path` (where a layer lands inside `out_dir`), `manifest_path` (send the
+manifest somewhere COMMITTED, because `ImageGen/` is gitignored and a worktree
+has none of it), `combat_box: null` (skip the combat derivatives -- a 240x280
+enemy plate IS the combat plate), and `min_cover_alpha` on a `fill_behind`
+entry (stop the inpaint at pixels the mover does not fully hide, which is what
+makes a recomposition provably exact). `--art-root` points the source and the
+output at another checkout, so a worktree can cut against the main tree's art.
+Every default is what configs #1 and #2 already shipped.
 
 METHOD (unchanged from the Klee tool; the docstring there is the long form).
 Alpha connected components make every free-floating element its own island
@@ -50,15 +65,39 @@ CONFIG_DIR = Path(__file__).resolve().parent / "combat_layer_fences"
 class Config:
     """A per-character fence config. Validated on load, loudly."""
 
-    def __init__(self, name, raw):
+    def __init__(self, name, raw, art_root=None, repo_root=None):
+        art_root = Path(art_root or ROOT)
+        repo_root = Path(repo_root or ROOT)
         self.name = name
-        self.source = ROOT / raw["source"]
-        self.out_dir = ROOT / raw["out_dir"]
+        self.source = art_root / raw["source"]
+        self.out_dir = art_root / raw["out_dir"]
         self.file_prefix = raw["file_prefix"]
         self.alpha_threshold = int(raw.get("alpha_threshold", 16))
-        self.combat_box = tuple(raw["combat_box"])
+        # A config with NO `combat_box` skips the combat derivatives entirely.
+        # Klee's and Furina's sources are 1000-px masters that have to be
+        # resampled down to the combat box; a Teyvat boss plate IS already the
+        # 240x280 combat plate, so a derivative would be the same pixels under
+        # a second name and a second manifest nothing reads.
+        box = raw.get("combat_box")
+        self.combat_box = tuple(box) if box else None
         self.master_pad = int(raw.get("master_pad", 4))
         self.combat_pad = int(raw.get("combat_pad", 2))
+        # Where a layer PNG lands inside `out_dir`, and what the manifest is
+        # called. The defaults are exactly what configs #1 and #2 shipped.
+        self.layer_path = raw.get("layer_path", "{prefix}_layer_{name}.png")
+        # The manifest is the one output a WORKTREE needs: `ImageGen/` is
+        # gitignored and a worktree never has it, but
+        # `gen_teyvat_creature_scenes.py` has to know every layer's offset to
+        # write a scene. So a config may send it somewhere COMMITTED, outside
+        # the art tree, and `--check` diffs it there.
+        manifest = raw.get("manifest_path")
+        self.manifest_path = (repo_root / manifest) if manifest else None
+        # Does `--verify` GATE on the recomposition, or only report it?
+        # Configs #1 and #2 inpaint under semi-transparent cover
+        # (`min_cover_alpha` 0) and resample a second time for the combat box,
+        # so neither stacks back up to its master and neither ever claimed to.
+        # A config that sets this is promising that it does.
+        self.recompose_exact = bool(raw.get("recompose_exact", False))
 
         self.layers = list(raw["layers"])
         self.names = {int(l["id"]): l["name"] for l in self.layers}
@@ -95,9 +134,16 @@ class Config:
                 self._id(sat["other_layer"], "satellites"),
             )
 
+        # `min_cover_alpha` defaults to 0, which is exactly what configs #1 and
+        # #2 shipped: fill under every covered pixel. Raise it and the inpaint
+        # stops at pixels the mover does not FULLY hide -- which is the only
+        # place the fill can change what the plate looks like AT REST, because
+        # a semi-transparent cover pixel lets the new paint through. A config
+        # that wants a provably pixel-exact recomposition sets it to 255.
         self.fill_behind = [
             (self._id(f["layer"], "fill_behind"), int(f["radius"]),
-             [self._id(n, "fill_behind") for n in f["covered_by"]])
+             [self._id(n, "fill_behind") for n in f["covered_by"]],
+             int(f.get("min_cover_alpha", 0)))
             for f in raw.get("fill_behind", [])
         ]
 
@@ -109,12 +155,34 @@ class Config:
         return self.by_name[layer_name]
 
 
-def load_config(name):
-    path = CONFIG_DIR / f"{name}.yaml"
+def config_path(name):
+    return CONFIG_DIR / f"{name}.yaml"
+
+
+def load_config(name, art_root=None, repo_root=None):
+    path = config_path(name)
     if not path.exists():
-        have = sorted(p.stem for p in CONFIG_DIR.glob("*.yaml"))
+        have = sorted(str(p.relative_to(CONFIG_DIR).with_suffix(""))
+                      .replace("\\", "/") for p in CONFIG_DIR.rglob("*.yaml"))
         raise SystemExit(f"no fence config {path}; have: {have}")
-    return Config(name, yaml.safe_load(path.read_text(encoding="utf-8")))
+    return Config(name, yaml.safe_load(path.read_text(encoding="utf-8")),
+                  art_root=art_root, repo_root=repo_root)
+
+
+#: Every config the gate re-cuts, in the order `--check-all` walks them. A cut
+#: is only a gate if something runs it: a fence that nobody re-cuts is a
+#: comment, and the whole point of `--check` is that the shipped pixels are
+#: provably what the committed fences say.
+ALL_CONFIGS = (
+    "klee",
+    "furina",
+    "teyvat/azhdaha",
+    "teyvat/all_devouring_narwhal",
+    "teyvat/rhodeia_of_loch",
+    "teyvat/emperor_of_fire_and_iron",
+    "teyvat/golden_wolflord",
+    "teyvat/everlasting_lord_of_arcane_wisdom",
+)
 
 
 # ------------------------------------------------------------ primitives ---
@@ -260,7 +328,7 @@ def partition(cfg, rgba):
     return part
 
 
-def cut(cfg, out_dir):
+def cut(cfg, out_dir, manifest_path=None):
     rgba = np.asarray(Image.open(cfg.source).convert("RGBA")).astype(np.float64)
     H, W = rgba.shape[:2]
     part = partition(cfg, rgba)
@@ -272,16 +340,18 @@ def cut(cfg, out_dir):
         img[m] = rgba[m]
         layers[cfg.names[lid]] = (img, m)
 
-    for lid, radius, covered_by in cfg.fill_behind:
+    for lid, radius, covered_by, min_cover_alpha in cfg.fill_behind:
         name = cfg.names[lid]
         img, m = layers[name]
         cover = np.zeros_like(m)
         for other in covered_by:
             cover |= (part == other)
+        if min_cover_alpha:
+            cover &= rgba[..., 3] >= min_cover_alpha
         behind = dilate(m, radius) & cover
         layers[name] = (onion_fill(img, m, behind), m | behind)
 
-    os.makedirs(out_dir / "combat", exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
     pfx = cfg.file_prefix
     PAD = cfg.master_pad
     meta = {}
@@ -289,19 +359,30 @@ def cut(cfg, out_dir):
         ys, xs = np.nonzero(m)
         x0, x1 = max(0, xs.min() - PAD), min(W, xs.max() + 1 + PAD)
         y0, y1 = max(0, ys.min() - PAD), min(H, ys.max() + 1 + PAD)
+        relative = cfg.layer_path.format(prefix=pfx, name=name)
+        destination = out_dir / relative
+        os.makedirs(destination.parent, exist_ok=True)
         Image.fromarray(np.clip(img[y0:y1, x0:x1], 0, 255).astype(np.uint8),
-                        "RGBA").save(out_dir / f"{pfx}_layer_{name}.png")
-        meta[name] = {"file": f"{pfx}_layer_{name}.png",
+                        "RGBA").save(destination)
+        meta[name] = {"file": relative,
                       "w": int(x1 - x0), "h": int(y1 - y0),
                       "offset_x": round((x0 + x1) / 2 - W / 2, 1),
                       "offset_y": round((y0 + y1) / 2 - H / 2, 1)}
         print(f"{name:9s} {x1 - x0}x{y1 - y0} "
               f"offset=({meta[name]['offset_x']:+.1f},{meta[name]['offset_y']:+.1f})")
-    (out_dir / "layers.json").write_text(
-        json.dumps({"canvas": [W, H], "layers": meta}, indent=2),
-        encoding="utf-8")
+    manifest = json.dumps({"canvas": [W, H], "layers": meta}, indent=2) + "\n"
+    if manifest_path is None:
+        (out_dir / "layers.json").write_text(manifest[:-1], encoding="utf-8")
+    else:
+        os.makedirs(Path(manifest_path).parent, exist_ok=True)
+        with open(manifest_path, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(manifest)
+
+    if cfg.combat_box is None:
+        return
 
     # combat-scale derivatives: the same box the static model used
+    os.makedirs(out_dir / "combat", exist_ok=True)
     CW, CH = cfg.combat_box
     P = cfg.combat_pad
     cmeta = {}
@@ -335,13 +416,17 @@ def check(cfg):
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        cut(cfg, tmp)
+        art = tmp / "art"
+        manifest = (tmp / "manifest.json") if cfg.manifest_path else None
+        cut(cfg, art, manifest)
         bad, seen = [], 0
-        for produced in sorted(tmp.rglob("*")):
-            if produced.is_dir():
-                continue
-            rel = produced.relative_to(tmp)
-            shipped = cfg.out_dir / rel
+        pairs = [(p, cfg.out_dir / p.relative_to(art))
+                 for p in sorted(art.rglob("*")) if not p.is_dir()]
+        if manifest:
+            pairs.append((manifest, cfg.manifest_path))
+        for produced, shipped in pairs:
+            rel = shipped.name if produced is manifest else \
+                produced.relative_to(art)
             seen += 1
             if not shipped.exists():
                 bad.append(f"MISSING on disk: {rel}")
@@ -354,23 +439,99 @@ def check(cfg):
         return 1 if bad else 0
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("character", help="fence config stem in tools/combat_layer_fences/")
-    ap.add_argument("--check", action="store_true",
-                    help="re-cut to a temp dir and diff against shipped art")
-    args = ap.parse_args()
+def verify(cfg):
+    """Stack the shipped layers back up and diff against the source.
 
-    cfg = load_config(args.character)
+    The hard partition makes this exact BY CONSTRUCTION (`partition` asserts it
+    covers the foreground and no pixel twice), but "by construction" is an
+    argument and this is a measurement -- and it is the measurement that would
+    catch a manifest offset that drifted from the PNG beside it, which no
+    assertion inside the cut can see.
+
+    Composited in PREMULTIPLIED alpha, which is what the screen does; straight
+    "over" arithmetic gets a transparent destination wrong and would report a
+    fault that is not there.
+    """
+    manifest_path = cfg.manifest_path or (cfg.out_dir / "layers.json")
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    W, H = manifest["canvas"]
+    pre = np.zeros((H, W, 3))
+    acc = np.zeros((H, W))
+    for name, entry in manifest["layers"].items():
+        img = np.asarray(Image.open(cfg.out_dir / entry["file"]).convert("RGBA")
+                         ).astype(np.float64)
+        h, w = img.shape[:2]
+        if (w, h) != (entry["w"], entry["h"]):
+            raise SystemExit(f"[{cfg.name}] {name}: manifest says {entry['w']}x"
+                             f"{entry['h']}, the file is {w}x{h}")
+        x0 = int(round(entry["offset_x"] + W / 2 - w / 2))
+        y0 = int(round(entry["offset_y"] + H / 2 - h / 2))
+        sa = np.zeros((H, W))
+        sp = np.zeros((H, W, 3))
+        sa[y0:y0 + h, x0:x0 + w] = img[..., 3] / 255.0
+        sp[y0:y0 + h, x0:x0 + w] = img[..., :3] * (img[..., 3:4] / 255.0)
+        pre = sp + pre * (1 - sa)[..., None]
+        acc = sa + acc * (1 - sa)
+
+    source = np.asarray(Image.open(cfg.source).convert("RGBA")).astype(np.float64)
+    # The pixels the cut KEEPS. Anything at or below `alpha_threshold` is
+    # background by the config's own definition and is dropped on purpose.
+    keep = source[..., 3] > cfg.alpha_threshold
+    drgb = (np.abs(source[..., :3] * (source[..., 3:4] / 255.0) - pre)
+            .max(axis=2) * keep)
+    dalpha = np.abs(source[..., 3] / 255.0 - acc) * 255 * keep
+    print(f"recomposed {int(keep.sum())} kept px: rgb max {drgb.max():.4f}, "
+          f"alpha max {dalpha.max():.4f}, "
+          f"{int((~keep & (source[..., 3] > 0)).sum())} sub-threshold px dropped")
+    if drgb.max() > 0 or dalpha.max() > 0:
+        print("  NOT pixel-exact"
+              + ("" if cfg.recompose_exact else " (not claimed by this config)"))
+        return 1 if cfg.recompose_exact else 0
+    return 0
+
+
+def run(name, do_check, art_root, repo_root, do_verify=False):
+    cfg = load_config(name, art_root=art_root, repo_root=repo_root)
     if not cfg.source.exists():
         raise SystemExit(f"[{cfg.name}] source missing: {cfg.source}")
-    print(f"[{cfg.name}] {cfg.source.relative_to(ROOT)} -> "
-          f"{cfg.out_dir.relative_to(ROOT)}")
-
-    if args.check:
+    print(f"[{cfg.name}] {cfg.source} -> {cfg.out_dir}")
+    if do_verify:
+        return verify(cfg)
+    if do_check:
         return check(cfg)
-    cut(cfg, cfg.out_dir)
+    cut(cfg, cfg.out_dir, cfg.manifest_path)
     return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("character", nargs="?",
+                    help="fence config stem in tools/combat_layer_fences/ "
+                         "(a subdirectory is part of the stem: teyvat/azhdaha)")
+    ap.add_argument("--check", action="store_true",
+                    help="re-cut to a temp dir and diff against shipped art")
+    ap.add_argument("--verify", action="store_true",
+                    help="stack the shipped layers back up at their manifest "
+                         "offsets and diff against the source")
+    ap.add_argument("--all", action="store_true",
+                    help=f"every config: {', '.join(ALL_CONFIGS)}")
+    # THE ART TREE IS NOT IN A WORKTREE. `ImageGen/` is gitignored and lives
+    # only in the main checkout, so a worktree cutting a layer has to be told
+    # where the pixels are. The repo half -- the fences and the committed
+    # manifests -- always resolves against THIS checkout.
+    ap.add_argument("--art-root", default=str(ROOT),
+                    help="checkout holding ImageGen/ (default: this one)")
+    args = ap.parse_args()
+
+    if args.all == bool(args.character):
+        raise SystemExit("name one config, or pass --all; not both, not neither")
+
+    names = ALL_CONFIGS if args.all else (args.character,)
+    worst = 0
+    for name in names:
+        worst = max(worst, run(name, args.check, args.art_root, ROOT,
+                               do_verify=args.verify))
+    return worst
 
 
 if __name__ == "__main__":

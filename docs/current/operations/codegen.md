@@ -431,9 +431,10 @@ face base_entry display_name size_class motion notes`. One run writes three
 things: the committed `.tscn` per scene under
 `klee-mod/pck-src/teyvat/creature_visuals/`, the five motion libraries under
 `klee-mod/pck-src/teyvat/motion/`, and the two C# tables in
-`klee-mod/KleeCode/Teyvat/TeyvatCreaturesGenerated.cs`. `--check` fails on any
-drift and `tier0/tests/test_teyvat_creature_scenes.py` rides it. Never
-hand-edit a file in either directory.
+`klee-mod/KleeCode/Teyvat/TeyvatCreaturesGenerated.cs`, plus the six bespoke
+libraries under `motion/bespoke/`. `--check` fails on any drift and
+`tier0/tests/test_teyvat_creature_scenes.py` rides it. Never hand-edit a file
+in either directory.
 
 ### The scene shape, and the one node a clip may move
 
@@ -477,6 +478,54 @@ varies, so `<body>_<class>`, `<body>_<motion>` or `<body>_<class>_<motion>`
 `default_motion()` is the rule that FILLED the column and is what gives a row
 added tomorrow a motion; it is a suggestion and never a gate, so vetoing one
 row is a one-cell edit.
+
+### Bespoke rigs — the sixth motion value
+
+`motion = bespoke` is the sixth legal value and the one that is not shared.
+Six bosses carry it: `azhdaha`, `all_devouring_narwhal`, `rhodeia_of_loch`,
+`emperor_of_fire_and_iron`, `golden_wolflord`,
+`everlasting_lord_of_arcane_wisdom`. Such a row draws not one plate but the
+LAYERS that plate was cut into, and its library is its own:
+
+    Rig (Node2D)                 <- still the node the whole-body clips key
+      <layer> (Sprite2D) x2-3    <- one per cut layer, named for the layer
+    %AnimationPlayer             <- res://teyvat/motion/bespoke/<body>.tres
+
+Three artefacts make a bespoke body, and `--check` refuses the row by name if
+any is missing:
+
+| what | where | committed? |
+|---|---|---|
+| the fence | `tools/combat_layer_fences/teyvat/<body>.yaml` | yes |
+| the cut manifest | `tools/combat_layer_fences/teyvat/<body>.layers.json` | yes |
+| the layer PNGs | `ImageGen/images/teyvat/creature_visuals/<body>/layers/` | no (Tier F) |
+
+The manifest is committed on purpose: the pixels are gitignored and a worktree
+never has them, so a manifest living beside them would make `--check`
+unrunnable anywhere but the art checkout. It is produced by the cutter
+(`operations/art.md`), holds one `{file, w, h, offset_x, offset_y}` per layer
+in BACK-TO-FRONT order, and that order is the scene's node order.
+
+**The size class rides `scale`, the placement rides `offset`.** A layer sprite
+sits at `position = (0, 0)` with `scale = (s, s)` — the same `s` `Body` carries
+— and its place on the plate is a `Sprite2D.offset` of `(offset_x, offset_y −
+140)`, applied inside the node transform. The drawn result is identical to a
+`position`, and the reason for the swap is the Golden Wolflord: it is a boss on
+one face and a regular on another over ONE library, so a rest pose that
+depended on the class could not be keyed. With `position` at zero every clip
+key is a pure delta and the pivot is the rig origin — the creature's feet,
+which is what "a claw raises about its base" wants and why every rotation here
+is small. `%Bounds`, `%IntentPos` and `%CenterPos` are byte-identical to the
+shared-set row's, pinned that way.
+
+Legal track paths widen by exactly one step: `Visuals/Rig:position|scale|
+rotation` as before, plus `Visuals/Rig/<layer>:position|rotation|scale|
+modulate` for a layer the body actually has (`legal_track`). `Visuals/Rig/Body`
+is that rule read on a shared-set body, so one predicate covers both passes.
+
+Adding a seventh boss: cut it, commit the fence and the manifest, add a builder
+to `BESPOKE_CLIPS`, flip the row's `motion` cell, regenerate, and add the layer
+rows to the contract fixture.
 
 ### Death timing
 
