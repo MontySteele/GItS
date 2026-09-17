@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://teyvat/creature_visuals/golden_wolflord.png" id="1_golde"]
 
-[node name="GoldenWolflordVisuals" type="Node2D"]
+[node name="GoldenWolflordRegularVisuals" type="Node2D"]
 
 [node name="Visuals" type="Node2D" parent="."]
 unique_name_in_owner = true

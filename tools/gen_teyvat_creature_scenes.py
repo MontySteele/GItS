@@ -9,7 +9,8 @@ base-game `MonsterModel.Id.Entry`, under which DISPLAY NAME, at which SIZE
 CLASS. From it this generator writes two things and nothing else:
 
   * `klee-mod/pck-src/teyvat/creature_visuals/<body>.tscn` -- one committed
-    scene per body, cloned from the shape `EB-760` proved with Nibbit's
+    scene per body (see "one plate, two sizes" below for the exception),
+    cloned from the shape `EB-760` proved with Nibbit's
     `hilichurl_guard.tscn`: a script-less `Node2D` carrying `%Visuals` (a
     `Node2D` holding one `Sprite2D`), `%Bounds`, `%IntentPos` and `%CenterPos`,
     which `TeyvatVisuals.RegisterStillPortraits` hands to BaseLib's
@@ -56,6 +57,15 @@ engine reads them for the health bar, the block badge, the selection reticle,
 the intent marker and every hit VFX: a plate that grew while its bounds did not
 would put the intent inside the body and the HP bar across its waist.
 
+ONE PLATE, TWO SIZES. A size class belongs to the ROW, not to the plate: the
+Golden Wolflord dresses Overgrowth's Ceremonial Beast (base `%Bounds` 560, a
+boss) and Sumeru's Fabricator (331, a regular), and it is the same picture
+either way. A scene fixes ONE scale, so such a body gets `<body>_<class>.tscn`
+per class, both pointing at the same `<body>.png`. Every other body -- 76 of
+the 77 today -- keeps its plain name. `bodies()` answers "which plates are
+packaged" and `scenes()` answers "which .tscn files exist"; they are no longer
+the same question.
+
 `Visuals.Scale` IS NOT WRITTEN. `NCreature` owns it -- `ScaleTo`,
 `SetDefaultScaleTo` and `OstyScaleToSize` write it and `UpdateBounds` reads it
 back -- so the scale goes on the `Sprite2D` we own, under `%Visuals`, and
@@ -79,7 +89,7 @@ from __future__ import annotations
 import argparse
 import csv
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -141,9 +151,16 @@ class Row:
     def scale(self) -> float:
         return SCALES[self.size_class]
 
+    #: The scene this row draws through, WITHOUT the extension. Normally the
+    #: body; a body that dresses a regular on one face and a boss on another
+    #: gets one scene per class, because a scene is one plate at ONE scale.
+    #: Assigned by `load`, which is the only thing that can see the whole
+    #: table (a lone row cannot know whether its body is single-class).
+    scene_id: str = ""
+
     @property
     def scene(self) -> str:
-        return f"{RES_ROOT}/{self.body}.tscn"
+        return f"{RES_ROOT}/{self.scene_id or self.body}.tscn"
 
 
 def load(path: Path = TABLE) -> list[Row]:
@@ -185,24 +202,65 @@ def load(path: Path = TABLE) -> list[Row]:
                 f"{seen[key]} and {row.body}; one Id.Entry draws one body")
         seen[key] = row.body
 
-    # A body's size class and name are the body's, not the row's: two rows for
-    # one plate that disagreed would write two different scenes to one path.
-    for field in ("size_class", "display_name"):
-        by_body: dict[str, str] = {}
-        for row in rows:
-            value = getattr(row, field)
-            if by_body.setdefault(row.body, value) != value:
-                raise ValueError(
-                    f"{path.name}: {row.body} has two values for {field} "
-                    f"({by_body[row.body]!r} and {value!r})")
-    return rows
+    # A body's NAME is the body's, not the row's. Two rows calling one plate
+    # two different things is a table defect however you look at it: the plate
+    # is a picture of one creature.
+    by_body: dict[str, str] = {}
+    for row in rows:
+        if by_body.setdefault(row.body, row.display_name) != row.display_name:
+            raise ValueError(
+                f"{path.name}: {row.body} has two display names "
+                f"({by_body[row.body]!r} and {row.display_name!r})")
+
+    return _assign_scene_ids(rows)
+
+
+def _assign_scene_ids(rows: list[Row]) -> list[Row]:
+    """Give every row the scene it draws through.
+
+    A SIZE CLASS IS A PROPERTY OF THE ROW, NOT OF THE PLATE, and that is the
+    one thing this pass exists for. The Golden Wolflord dresses Overgrowth's
+    Ceremonial Beast (base `%Bounds` 560, a boss) and Sumeru's Fabricator (331,
+    a regular); the Genshin body is the same picture either way, but a scene
+    fixes ONE scale, so the two cannot share one `.tscn`.
+
+    So: a body whose rows all agree keeps its plain name -- which is every body
+    but one today, and keeps the whole directory readable -- and a body that
+    disagrees gets `<body>_<class>` per class instead. The texture is the same
+    `<body>.png` in both, because it is the same plate: what differs is the
+    sprite scale and the three markers derived from it.
+    """
+    classes: dict[str, set[str]] = {}
+    for row in rows:
+        classes.setdefault(row.body, set()).add(row.size_class)
+    return [
+        replace(row, scene_id=row.body if len(classes[row.body]) == 1
+                else f"{row.body}_{row.size_class}")
+        for row in rows
+    ]
 
 
 def bodies(rows: list[Row]) -> dict[str, Row]:
-    """One representative row per body, in first-seen order."""
+    """One representative row per body, in first-seen order.
+
+    Keyed by BODY, so it answers "which plates does the table want packaged".
+    `scenes` is the other question and they are no longer the same one.
+    """
     out: dict[str, Row] = {}
     for row in rows:
         out.setdefault(row.body, row)
+    return out
+
+
+def scenes(rows: list[Row]) -> dict[str, Row]:
+    """One representative row per SCENE, in first-seen order.
+
+    Which `.tscn` files exist. Differs from `bodies` only for a body that
+    carries more than one size class (`_assign_scene_ids`).
+    """
+    out: dict[str, Row] = {}
+    for row in rows:
+        out.setdefault(row.scene_id, row)
     return out
 
 
@@ -240,7 +298,7 @@ def scene_source(row: Row) -> str:
     half_w = PLATE_W / 2 * scale
     height = PLATE_H * scale
     feet_to_middle = -height / 2
-    ident = row.body.split("_")[0][:5] or "plate"
+    ident = row.scene_id.split("_")[0][:5] or "plate"
     # NO COMMENT HEADER, deliberately. A `.tscn` is a Godot text resource, not
     # a `.cfg`: neither the base game's 127 `creature_visuals` scenes nor any
     # scene already committed under `pck-src/` carries a `;` or `#` line, and a
@@ -252,7 +310,7 @@ def scene_source(row: Row) -> str:
 
 [ext_resource type="Texture2D" path="{RES_ROOT}/{row.body}.png" id="1_{ident}"]
 
-[node name="{_node_name(row.body)}" type="Node2D"]
+[node name="{_node_name(row.scene_id)}" type="Node2D"]
 
 [node name="Visuals" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -285,8 +343,8 @@ position = Vector2(0, {_f(feet_to_middle)})
 def scene_sources(rows: list[Row]) -> dict[str, str]:
     """Every committed `.tscn`, repo-relative path -> exact text."""
     return {
-        f"klee-mod/pck-src/teyvat/creature_visuals/{body}.tscn": scene_source(row)
-        for body, row in sorted(bodies(rows).items())
+        f"klee-mod/pck-src/teyvat/creature_visuals/{name}.tscn": scene_source(row)
+        for name, row in sorted(scenes(rows).items())
     }
 
 
@@ -413,7 +471,7 @@ def stale_scenes(root: Path, rows: list[Row]) -> list[str]:
     directory = root / "klee-mod" / "pck-src" / "teyvat" / "creature_visuals"
     if not directory.is_dir():
         return []
-    planned = {f"{body}.tscn" for body in bodies(rows)}
+    planned = {f"{name}.tscn" for name in scenes(rows)}
     return sorted(p.name for p in directory.glob("*.tscn") if p.name not in planned)
 
 
@@ -476,8 +534,8 @@ def main(argv: list[str] | None = None) -> int:
                 / "enemy-dressings.tsv")
 
     if args.list:
-        for body in sorted(bodies(rows)):
-            print(f"{RES_ROOT}/{body}.tscn")
+        for name in sorted(scenes(rows)):
+            print(f"{RES_ROOT}/{name}.tscn")
         return 0
 
     if args.check:
@@ -488,13 +546,14 @@ def main(argv: list[str] | None = None) -> int:
         if gaps:
             print(f"note: {len(gaps)} body/bodies have no plate on this "
                   f"checkout ({', '.join(gaps)})")
-        print(f"{len(bodies(rows))} body/bodies, {len(rows)} table row(s); "
-              f"{len(problems)} problem(s).")
+        print(f"{len(bodies(rows))} plate(s), {len(scenes(rows))} scene(s), "
+              f"{len(rows)} table row(s); {len(problems)} problem(s).")
         return 1 if problems else 0
 
     written = write_all(root, rows)
     live = sum(1 for r in rows if r.live)
-    print(f"Wrote {len(written)} file(s): {len(written) - 1} scene(s) under "
+    print(f"Wrote {len(written)} file(s): {len(written) - 1} scene(s) for "
+          f"{len(bodies(rows))} plate(s) under "
           f"klee-mod/pck-src/teyvat/creature_visuals and the C# table "
           f"({live} live (face, Id.Entry) row(s)).")
     for name in stale_scenes(root, rows):

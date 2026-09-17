@@ -27,8 +27,12 @@ namespace KleeMod.Teyvat;
 /// so only one of its plates can draw. Today those are:
 ///   * chanca
 ///   * cryo_abyss_mage
+///   * cryo_regisvine
 ///   * electro_abyss_mage
+///   * fatui_hydrogunner_legionnaire
 ///   * hirayama
+///   * hydro_abyss_mage
+///   * kongamato
 ///   * liloupar
 ///   * pyro_abyss_mage
 ///
@@ -56,12 +60,16 @@ internal static class TeyvatGeneratedCreatures
                 "res://teyvat/creature_visuals/ruin_guard.tscn",
             [(TeyvatFrame.Mondstadt, "BYRDONIS")] =
                 "res://teyvat/creature_visuals/anemo_hilichurl_rogue.tscn",
+            [(TeyvatFrame.Mondstadt, "CEREMONIAL_BEAST")] =
+                "res://teyvat/creature_visuals/golden_wolflord_boss.tscn",
             [(TeyvatFrame.Mondstadt, "FOGMOG")] =
                 "res://teyvat/creature_visuals/anemo_samachurl.tscn",
             [(TeyvatFrame.Mondstadt, "INKLET")] =
                 "res://teyvat/creature_visuals/hilichurl.tscn",
-            [(TeyvatFrame.Mondstadt, "LAGAVULIN_MATRIARCH")] =
-                "res://teyvat/creature_visuals/cryo_regisvine.tscn",
+            [(TeyvatFrame.Mondstadt, "KIN_FOLLOWER")] =
+                "res://teyvat/creature_visuals/eremite_linebreaker.tscn",
+            [(TeyvatFrame.Mondstadt, "KIN_PRIEST")] =
+                "res://teyvat/creature_visuals/eremite_linebreaker.tscn",
             [(TeyvatFrame.Mondstadt, "LEAF_SLIME_M")] =
                 "res://teyvat/creature_visuals/dendro_slime.tscn",
             [(TeyvatFrame.Mondstadt, "LEAF_SLIME_S")] =
@@ -70,10 +78,6 @@ internal static class TeyvatGeneratedCreatures
                 "res://teyvat/creature_visuals/rockfond_rifthound.tscn",
             [(TeyvatFrame.Mondstadt, "NIBBIT")] =
                 "res://teyvat/creature_visuals/wooden_shield_hilichurl_guard.tscn",
-            [(TeyvatFrame.Mondstadt, "PHANTASMAL_GARDENER")] =
-                "res://teyvat/creature_visuals/hydro_abyss_mage.tscn",
-            [(TeyvatFrame.Mondstadt, "SEWER_CLAM")] =
-                "res://teyvat/creature_visuals/fatui_hydrogunner_legionnaire.tscn",
             [(TeyvatFrame.Mondstadt, "TWIG_SLIME_M")] =
                 "res://teyvat/creature_visuals/cryo_slime.tscn",
             [(TeyvatFrame.Mondstadt, "TWIG_SLIME_S")] =
@@ -81,34 +85,34 @@ internal static class TeyvatGeneratedCreatures
             [(TeyvatFrame.Mondstadt, "VANTOM")] =
                 "res://teyvat/creature_visuals/boreas.tscn",
             // LIYUE
-            [(TeyvatFrame.Liyue, "BYGONE_EFFIGY")] =
-                "res://teyvat/creature_visuals/ruin_guard.tscn",
-            [(TeyvatFrame.Liyue, "BYRDONIS")] =
-                "res://teyvat/creature_visuals/treasure_hoarder_marksman.tscn",
-            [(TeyvatFrame.Liyue, "FOGMOG")] =
-                "res://teyvat/creature_visuals/anemo_samachurl.tscn",
-            [(TeyvatFrame.Liyue, "INKLET")] =
-                "res://teyvat/creature_visuals/treasure_hoarder_scout.tscn",
+            [(TeyvatFrame.Liyue, "CORPSE_SLUG")] =
+                "res://teyvat/creature_visuals/hydro_slime.tscn",
+            [(TeyvatFrame.Liyue, "FAT_GREMLIN")] =
+                "res://teyvat/creature_visuals/wooden_shield_hilichurl_guard.tscn",
+            [(TeyvatFrame.Liyue, "GAS_BOMB")] =
+                "res://teyvat/creature_visuals/hydro_slime.tscn",
+            [(TeyvatFrame.Liyue, "GREMLIN_MERC")] =
+                "res://teyvat/creature_visuals/treasure_hoarder_handyman.tscn",
             [(TeyvatFrame.Liyue, "LAGAVULIN_MATRIARCH")] =
                 "res://teyvat/creature_visuals/primo_geovishap.tscn",
-            [(TeyvatFrame.Liyue, "LEAF_SLIME_M")] =
-                "res://teyvat/creature_visuals/geo_slime.tscn",
-            [(TeyvatFrame.Liyue, "LEAF_SLIME_S")] =
-                "res://teyvat/creature_visuals/geo_slime.tscn",
-            [(TeyvatFrame.Liyue, "MAWLER")] =
-                "res://teyvat/creature_visuals/geovishap_hatchling.tscn",
-            [(TeyvatFrame.Liyue, "NIBBIT")] =
-                "res://teyvat/creature_visuals/treasure_hoarder_handyman.tscn",
+            [(TeyvatFrame.Liyue, "LIVING_FOG")] =
+                "res://teyvat/creature_visuals/anemo_samachurl.tscn",
             [(TeyvatFrame.Liyue, "PHANTASMAL_GARDENER")] =
                 "res://teyvat/creature_visuals/hilichurl_fighter.tscn",
+            [(TeyvatFrame.Liyue, "SEAPUNK")] =
+                "res://teyvat/creature_visuals/treasure_hoarder_marksman.tscn",
             [(TeyvatFrame.Liyue, "SEWER_CLAM")] =
+                "res://teyvat/creature_visuals/rock_shield_hilichurl_guard.tscn",
+            [(TeyvatFrame.Liyue, "SKULKING_COLONY")] =
+                "res://teyvat/creature_visuals/ruin_guard.tscn",
+            [(TeyvatFrame.Liyue, "SLUDGE_SPINNER")] =
                 "res://teyvat/creature_visuals/large_geo_slime.tscn",
-            [(TeyvatFrame.Liyue, "TWIG_SLIME_M")] =
-                "res://teyvat/creature_visuals/hydro_slime.tscn",
-            [(TeyvatFrame.Liyue, "TWIG_SLIME_S")] =
-                "res://teyvat/creature_visuals/hydro_slime.tscn",
-            [(TeyvatFrame.Liyue, "VANTOM")] =
-                "res://teyvat/creature_visuals/kongamato.tscn",
+            [(TeyvatFrame.Liyue, "SNEAKY_GREMLIN")] =
+                "res://teyvat/creature_visuals/treasure_hoarder_scout.tscn",
+            [(TeyvatFrame.Liyue, "TOADPOLE")] =
+                "res://teyvat/creature_visuals/geo_slime.tscn",
+            [(TeyvatFrame.Liyue, "TWO_TAILED_RAT")] =
+                "res://teyvat/creature_visuals/geovishap_hatchling.tscn",
             // NATLAN
             [(TeyvatFrame.Natlan, "BOWLBUG_ROCK")] =
                 "res://teyvat/creature_visuals/tepetlisaurus_warrior_rockbreaker_blade.tscn",
@@ -228,7 +232,7 @@ internal static class TeyvatGeneratedCreatures
             [(TeyvatFrame.Sumeru, "DEVOTED_SCULPTOR")] =
                 "res://teyvat/creature_visuals/eremite_scorching_loremaster.tscn",
             [(TeyvatFrame.Sumeru, "FABRICATOR")] =
-                "res://teyvat/creature_visuals/golden_wolflord.tscn",
+                "res://teyvat/creature_visuals/golden_wolflord_regular.tscn",
             [(TeyvatFrame.Sumeru, "FLAIL_KNIGHT")] =
                 "res://teyvat/creature_visuals/eremite_sunfrost.tscn",
             [(TeyvatFrame.Sumeru, "FROG_KNIGHT")] =
@@ -266,12 +270,16 @@ internal static class TeyvatGeneratedCreatures
                 "Ruin Guard",
             [(TeyvatFrame.Mondstadt, "BYRDONIS.name")] =
                 "Anemo Hilichurl Rogue",
+            [(TeyvatFrame.Mondstadt, "CEREMONIAL_BEAST.name")] =
+                "Golden Wolflord",
             [(TeyvatFrame.Mondstadt, "FOGMOG.name")] =
                 "Anemo Samachurl",
             [(TeyvatFrame.Mondstadt, "INKLET.name")] =
                 "Hilichurl",
-            [(TeyvatFrame.Mondstadt, "LAGAVULIN_MATRIARCH.name")] =
-                "Cryo Regisvine",
+            [(TeyvatFrame.Mondstadt, "KIN_FOLLOWER.name")] =
+                "Eremite Linebreaker",
+            [(TeyvatFrame.Mondstadt, "KIN_PRIEST.name")] =
+                "Eremite Linebreaker",
             [(TeyvatFrame.Mondstadt, "LEAF_SLIME_M.name")] =
                 "Dendro Slime",
             [(TeyvatFrame.Mondstadt, "LEAF_SLIME_S.name")] =
@@ -280,10 +288,6 @@ internal static class TeyvatGeneratedCreatures
                 "Rockfond Rifthound",
             [(TeyvatFrame.Mondstadt, "NIBBIT.name")] =
                 "Wooden Shield Hilichurl Guard",
-            [(TeyvatFrame.Mondstadt, "PHANTASMAL_GARDENER.name")] =
-                "Hydro Abyss Mage",
-            [(TeyvatFrame.Mondstadt, "SEWER_CLAM.name")] =
-                "Fatui Hydrogunner Legionnaire",
             [(TeyvatFrame.Mondstadt, "TWIG_SLIME_M.name")] =
                 "Cryo Slime",
             [(TeyvatFrame.Mondstadt, "TWIG_SLIME_S.name")] =
@@ -291,34 +295,34 @@ internal static class TeyvatGeneratedCreatures
             [(TeyvatFrame.Mondstadt, "VANTOM.name")] =
                 "Andrius",
             // LIYUE
-            [(TeyvatFrame.Liyue, "BYGONE_EFFIGY.name")] =
-                "Ruin Guard",
-            [(TeyvatFrame.Liyue, "BYRDONIS.name")] =
-                "Treasure Hoarder Marksman",
-            [(TeyvatFrame.Liyue, "FOGMOG.name")] =
-                "Anemo Samachurl",
-            [(TeyvatFrame.Liyue, "INKLET.name")] =
-                "Treasure Hoarder Scout",
+            [(TeyvatFrame.Liyue, "CORPSE_SLUG.name")] =
+                "Hydro Slime",
+            [(TeyvatFrame.Liyue, "FAT_GREMLIN.name")] =
+                "Wooden Shield Hilichurl Guard",
+            [(TeyvatFrame.Liyue, "GAS_BOMB.name")] =
+                "Hydro Slime",
+            [(TeyvatFrame.Liyue, "GREMLIN_MERC.name")] =
+                "Treasure Hoarder Handyman",
             [(TeyvatFrame.Liyue, "LAGAVULIN_MATRIARCH.name")] =
                 "Primo Geovishap",
-            [(TeyvatFrame.Liyue, "LEAF_SLIME_M.name")] =
-                "Geo Slime",
-            [(TeyvatFrame.Liyue, "LEAF_SLIME_S.name")] =
-                "Geo Slime",
-            [(TeyvatFrame.Liyue, "MAWLER.name")] =
-                "Geovishap Hatchling",
-            [(TeyvatFrame.Liyue, "NIBBIT.name")] =
-                "Treasure Hoarder Handyman",
+            [(TeyvatFrame.Liyue, "LIVING_FOG.name")] =
+                "Anemo Samachurl",
             [(TeyvatFrame.Liyue, "PHANTASMAL_GARDENER.name")] =
                 "Hilichurl Fighter",
+            [(TeyvatFrame.Liyue, "SEAPUNK.name")] =
+                "Treasure Hoarder Marksman",
             [(TeyvatFrame.Liyue, "SEWER_CLAM.name")] =
+                "Rock Shield Hilichurl Guard",
+            [(TeyvatFrame.Liyue, "SKULKING_COLONY.name")] =
+                "Ruin Guard",
+            [(TeyvatFrame.Liyue, "SLUDGE_SPINNER.name")] =
                 "Large Geo Slime",
-            [(TeyvatFrame.Liyue, "TWIG_SLIME_M.name")] =
-                "Hydro Slime",
-            [(TeyvatFrame.Liyue, "TWIG_SLIME_S.name")] =
-                "Hydro Slime",
-            [(TeyvatFrame.Liyue, "VANTOM.name")] =
-                "Kongamato",
+            [(TeyvatFrame.Liyue, "SNEAKY_GREMLIN.name")] =
+                "Treasure Hoarder Scout",
+            [(TeyvatFrame.Liyue, "TOADPOLE.name")] =
+                "Geo Slime",
+            [(TeyvatFrame.Liyue, "TWO_TAILED_RAT.name")] =
+                "Geovishap Hatchling",
             // NATLAN
             [(TeyvatFrame.Natlan, "BOWLBUG_ROCK.name")] =
                 "Tepetlisaurus Warrior: Rockbreaker Blade",
