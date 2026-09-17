@@ -129,20 +129,52 @@ class Scene:
                 return node
         return None
 
+    # -- resources ---------------------------------------------------------
+    @property
+    def resource_section(self) -> Section | None:
+        """The `[resource]` block of a `.tres`, if this file is one."""
+        for section in self.sections:
+            if section.kind == "resource":
+                return section
+        return None
+
+    @property
+    def resource_type(self) -> str:
+        """`[gd_resource type="X"]`'s X, or `""` for a scene."""
+        return self.header_attrs.get("type", "")
+
     # -- animation ---------------------------------------------------------
+    @staticmethod
+    def _library_entries(data: str) -> dict[str, str]:
+        return {
+            match.group(1): match.group(2)
+            for match in re.finditer(
+                r'&"((?:[^"\\]|\\.)*)"\s*:\s*SubResource\(\s*"([^"]+)"\s*\)', data)
+        }
+
+    #: The key `animation_libraries` files a STANDALONE `.tres` library under.
+    #: Not a sub-resource id, because it has none -- the library IS the file.
+    WHOLE_FILE = "<resource>"
+
     def animation_libraries(self) -> dict[str, dict[str, str]]:
-        """sub_resource id -> {animation name: sub_resource id of the Animation}."""
+        """library id -> {animation name: sub_resource id of the Animation}.
+
+        A library is usually a `sub_resource` inside a combat scene. It may
+        also BE the file: `klee-mod/pck-src/teyvat/motion/<set>.tres` is a
+        `[gd_resource type="AnimationLibrary"]` shared by 123 creature scenes,
+        because inlining five clips in each of them would carry the same
+        keyframes 25 times over. Such a file is filed under `WHOLE_FILE`.
+        """
         out: dict[str, dict[str, str]] = {}
         for sub_id, section in self.sub_resources.items():
             if section.attrs.get("type") != "AnimationLibrary":
                 continue
-            data = section.props.get("_data", "")
-            entries: dict[str, str] = {}
-            for match in re.finditer(
-                r'&"((?:[^"\\]|\\.)*)"\s*:\s*SubResource\(\s*"([^"]+)"\s*\)', data
-            ):
-                entries[match.group(1)] = match.group(2)
-            out[sub_id] = entries
+            out[sub_id] = self._library_entries(section.props.get("_data", ""))
+
+        whole = self.resource_section
+        if whole is not None and self.resource_type == "AnimationLibrary":
+            out[self.WHOLE_FILE] = self._library_entries(
+                whole.props.get("_data", ""))
         return out
 
     def animation_names(self) -> set[str]:

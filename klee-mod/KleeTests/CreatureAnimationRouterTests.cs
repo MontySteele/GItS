@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Nodes.Combat;
@@ -126,6 +128,16 @@ public class CreatureAnimationRouterTests
         => (float)Seam().GetMethod("LengthFor", All)!
             .Invoke(null, new object[] { clipLength })!;
 
+    private static bool CoversDressedBody(
+        bool armEnabled, bool hasSpine, string? visualsScene, float baseLength)
+        => (bool)Seam().GetMethod("CoversDressedBody", All)!
+            .Invoke(null, new object?[]
+                { armEnabled, hasSpine, visualsScene, baseLength })!;
+
+    private static float DressedLengthFor(float clipLength, float baseLength)
+        => (float)Seam().GetMethod("DressedLengthFor", All)!
+            .Invoke(null, new object[] { clipLength, baseLength })!;
+
     [Fact]
     public void The_death_seam_has_a_door_of_its_own()
     {
@@ -193,5 +205,137 @@ public class CreatureAnimationRouterTests
         Assert.Equal(1.0f, fallback);
         Assert.Equal(fallback, LengthFor(0f));
         Assert.True(LengthFor(0f) > 0f);
+    }
+
+    // -----------------------------------------------------------------------
+    // THE MOTION PASS: a dressed Teyvat body is the seam's second arm
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void The_dressed_body_arm_is_shut_unless_the_arm_is_on_and_the_scene_is_ours()
+    {
+        const string ours = "res://teyvat/creature_visuals/anemo_slime.tscn";
+
+        // The one case it covers: arm on, spine-less (the base's gate was
+        // false), the base measured nothing, and this body draws through a
+        // Teyvat scene.
+        Assert.True(CoversDressedBody(
+            armEnabled: true, hasSpine: false, visualsScene: ours, baseLength: 0f));
+
+        // ARM OFF IS THE ACCEPTANCE CONDITION. Every calibration deploy and
+        // every release package ships TeyvatFrame.Enabled false, and on that
+        // side the seam must be byte-for-byte what it was before this pass.
+        Assert.False(CoversDressedBody(
+            armEnabled: false, hasSpine: false, visualsScene: ours, baseLength: 0f));
+
+        // An UNDRESSED enemy, even with the arm on: the registry has no row
+        // for it, so DressedVisualsScene hands back null.
+        Assert.False(CoversDressedBody(
+            armEnabled: true, hasSpine: false, visualsScene: null, baseLength: 0f));
+
+        // A scene outside our namespace is not ours to animate.
+        Assert.False(CoversDressedBody(
+            armEnabled: true, hasSpine: false,
+            visualsScene: "res://scenes/creature_visuals/nibbit.tscn", baseLength: 0f));
+
+        // A spine body's own animator already answered, and a base result that
+        // measured something is never overwritten -- both the same refusals
+        // the player arm makes.
+        Assert.False(CoversDressedBody(
+            armEnabled: true, hasSpine: true, visualsScene: ours, baseLength: 0f));
+        Assert.False(CoversDressedBody(
+            armEnabled: true, hasSpine: false, visualsScene: ours, baseLength: 1.4f));
+    }
+
+    [Fact]
+    public void A_dressed_body_with_no_clip_to_measure_is_left_exactly_as_it_was()
+    {
+        // A measured clip is reported under the base's ceiling, as for a
+        // player. The five motion sets' death clips are 1.2 s (stand, bounce,
+        // hover, mech) and 1.6 s (loom) --
+        // tools/gen_teyvat_creature_scenes.py MOTIONS.
+        Assert.Equal(1.2f, DressedLengthFor(1.2f, 0f));
+        Assert.Equal(1.6f, DressedLengthFor(1.6f, 0f));
+        Assert.Equal(30f, DressedLengthFor(90f, 0f));
+
+        // But with NO clip it hands back the BASE's own answer rather than the
+        // player fallback: an enemy with no motion is an enemy this pass never
+        // touched, and R213 says leave it alone.
+        Assert.Equal(0f, DressedLengthFor(0f, 0f));
+        Assert.Equal(0.8f, DressedLengthFor(0f, 0.8f));
+    }
+
+    [Fact]
+    public void The_death_sting_stays_on_the_player_arm_only()
+    {
+        // `SfxCmd.PlayDeath` takes a Player and is the PLAYER's death sting;
+        // a monster's death audio is the base game's and is not on this path.
+        // ONE call site, so the dressed arm cannot have grown one.
+        var calls = Il.CallSequence(Seam().GetMethod("Cover", All)!);
+        Assert.Equal(1, calls.Count(c => c.Contains("PlayDeath")));
+
+        // And the dressed arm reads the arm switch itself, rather than
+        // trusting a caller to have checked.
+        Assert.Contains(calls, c => c.Contains("TeyvatFrame") && c.Contains("Enabled"));
+    }
+
+    [Fact]
+    public void The_router_finds_its_tree_on_a_generated_teyvat_scene()
+    {
+        // THE SHAPE THE ROUTER LOOKS FOR, read off a committed scene rather
+        // than described. `CreatureAnimationRouter.Route` does
+        // `visuals.GetNodeOrNull<AnimationTree>("%AnimationTree")`, so a
+        // generated body animates if and only if it declares a node called
+        // AnimationTree with unique_name_in_owner set.
+        //
+        // STRUCTURAL PIN, and it says so: resolving the lookup needs a live
+        // scene tree, which is process death in this host (README, the
+        // headless boundary). What the deploy still has to prove is that the
+        // unique name SURVIVES BaseLib's NCreatureVisualsFactory reparenting
+        // our children onto a fresh NCreatureVisuals.
+        var scene = RepoFile(
+            "klee-mod/pck-src/teyvat/creature_visuals/anemo_slime.tscn");
+
+        Assert.Contains(
+            "[node name=\"AnimationTree\" type=\"AnimationTree\" parent=\".\"]", scene);
+        Assert.Contains(
+            "[node name=\"AnimationPlayer\" type=\"AnimationPlayer\" parent=\".\"]",
+            scene);
+        // The tree reaches the player as a SIBLING, which is what keeps
+        // working after the reparent.
+        Assert.Contains("anim_player = NodePath(\"../AnimationPlayer\")", scene);
+        // Six unique names: the four NCreatureVisuals._Ready fetches, plus
+        // the two this layer fetches.
+        Assert.Equal(6, Regex.Matches(scene, "unique_name_in_owner = true").Count);
+
+        // The library is EXTERNAL and under the namespace the death seam gates
+        // on, and the four router states are the tree's four states.
+        Assert.Contains("[ext_resource type=\"AnimationLibrary\" "
+                        + "path=\"res://teyvat/motion/", scene);
+        foreach (var state in new[] { "idle", "attack", "hurt", "death" })
+        {
+            Assert.Contains($"states/{state}/node = SubResource(", scene);
+        }
+
+        // And the seam's own constant is the directory those scenes live in,
+        // so the gate and the generator cannot drift apart.
+        var root = (string)Seam().GetField("TeyvatVisualsRoot", All)!.GetValue(null)!;
+        Assert.Equal("res://teyvat/creature_visuals/", root);
+    }
+
+    /// <summary>A repo-root-relative file, found by walking up from the test
+    /// binary (the same walk `ResourceTexturePathTests.RepoFile` uses).</summary>
+    private static string RepoFile(string relativePath)
+    {
+        var relative = relativePath.Replace('/', Path.DirectorySeparatorChar);
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, relative);
+            if (File.Exists(candidate)) return File.ReadAllText(candidate);
+            dir = dir.Parent;
+        }
+
+        throw new FileNotFoundException(relative);
     }
 }

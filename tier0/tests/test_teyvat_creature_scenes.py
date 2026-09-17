@@ -22,6 +22,7 @@ headlessly instead.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -56,15 +57,32 @@ def test_a_scene_per_size_class_and_no_more():
 
     A scene fixes one sprite scale, so a plate that dresses a boss on one face
     and a regular on another cannot share one `.tscn` -- and a plate that does
-    not must not be split, or the directory doubles for nothing.
+    not must not be split, or the directory doubles for nothing. Motion splits
+    a body the same way and is checked in the same breath: a scene names ONE
+    library, so two rows wanting two motions are two scenes.
     """
-    classes = {}
+    variants = {}
     for row in ROWS:
-        classes.setdefault(row.body, set()).add(row.size_class)
-    for body, seen in classes.items():
+        variants.setdefault(row.body, set()).add((row.size_class, row.motion))
+    for body, seen in variants.items():
         ids = {r.scene_id for r in ROWS if r.body == body}
-        assert ids == ({body} if len(seen) == 1
-                       else {f"{body}_{c}" for c in seen}), body
+        if len(seen) == 1:
+            assert ids == {body}, body
+            continue
+        # The suffix names only the axis that varies, so a body that differs in
+        # class alone still reads `<body>_<class>` and a rename never happens
+        # for a reason nobody can see in the table.
+        classes = {c for c, _ in seen}
+        motions = {m for _, m in seen}
+        expected = set()
+        for klass, motion in seen:
+            parts = [body]
+            if len(classes) > 1:
+                parts.append(klass)
+            if len(motions) > 1:
+                parts.append(motion)
+            expected.add("_".join(parts))
+        assert ids == expected, body
     # Every scene draws its body's own plate, whatever the scene is called.
     for name, row in gen.scenes(ROWS).items():
         assert f'path="{gen.RES_ROOT}/{row.body}.png"' in gen.scene_source(row), name
@@ -81,6 +99,12 @@ def test_the_contract_fixture_names_the_same_bodies():
     expected = {f"{prefix}{body}.png" for body in gen.bodies(ROWS)}
     expected |= {f"{prefix}{name}.tscn" for name in gen.scenes(ROWS)}
     assert rows == expected
+
+    # And the motion libraries, which are a second producer under a second
+    # prefix -- `build_pck.ps1` overlays `pck-src` verbatim, so a `.tres` packs
+    # exactly as a `.tscn` does and the contract derives it the same way.
+    motion = {r for r in parsed.resource_set if r.startswith("teyvat/motion/")}
+    assert motion == {f"teyvat/motion/{name}.tres" for name in gen.MOTIONS}
 
 
 def test_a_picture_and_a_name_are_the_same_row():
@@ -104,9 +128,11 @@ def test_every_scene_carries_the_four_nodes_ncreaturevisuals_demands():
         for node in ('name="Visuals"', 'name="Bounds"',
                      'name="IntentPos"', 'name="CenterPos"'):
             assert node in text, (relative, node)
-        # `unique_name_in_owner` is what makes the `%` lookups resolve; four
-        # nodes, four declarations.
-        assert text.count("unique_name_in_owner = true") == 4, relative
+        # `unique_name_in_owner` is what makes the `%` lookups resolve; the
+        # four the engine fetches, plus `%AnimationPlayer` and `%AnimationTree`
+        # which `Vfx/CreatureAnimationRouter` and `Vfx/ModdedPlayerDeathSeam`
+        # look up by exactly that name.
+        assert text.count("unique_name_in_owner = true") == 6, relative
         # No script, per `pck-src/README.md` -- and load-bearing here, because
         # a scripted root is the wrong type for the cast in `CreateVisuals`.
         assert 'type="Script"' not in text, relative
@@ -206,3 +232,142 @@ def test_one_id_entry_draws_one_body():
 
 def test_every_face_in_the_table_is_a_face_teyvatframe_holds():
     assert {r.face for r in ROWS} <= set(gen.FACES)
+
+
+# ---------------------------------------------------------------------------
+# MOTION (pass one): five shared sets on a Rig node
+# ---------------------------------------------------------------------------
+#
+# The failure modes here are all silent in the running game, which is why they
+# are asked headlessly:
+#
+#   * a clip keying `Body` would flatten every elite and boss to regular size
+#     the first time it played, because `Body`'s scale IS the size class;
+#   * a clip keying `%Visuals` would fight `NCreature.ScaleTo` for a property
+#     the engine owns;
+#   * a track on a node the scene does not have never moves and never says so;
+#   * a scene whose `.tres` is not in the pack loads with an empty library and
+#     the tree's `Travel` becomes a no-op.
+
+#: The Body transform per size class, pinned as LITERALS rather than derived.
+#: The motion pass moved `Body` one level down the tree (under `Rig`) and had
+#: to leave these numbers untouched -- a plate that changed size while nobody
+#: was looking is exactly the drift a derived check would agree with.
+BODY_TRANSFORM = {
+    "regular": ("Vector2(0, -140.0)", "Vector2(1.0, 1.0)"),
+    "elite": ("Vector2(0, -182.0)", "Vector2(1.3, 1.3)"),
+    "boss": ("Vector2(0, -224.0)", "Vector2(1.6, 1.6)"),
+}
+
+
+def test_the_body_transform_did_not_move_when_the_rig_went_in():
+    for name, row in gen.scenes(ROWS).items():
+        position, scale = BODY_TRANSFORM[row.size_class]
+        body = gen.scene_source(row).split('[node name="Body"')[1].split("[node")[0]
+        assert f"position = {position}" in body, name
+        assert f"scale = {scale}" in body, name
+
+
+def test_every_scene_carries_the_rig_the_player_and_the_tree():
+    """The three nodes the motion pass added, and where each of them sits.
+
+    `Rig` is between `%Visuals` and `Body` and is the ONLY node a clip moves:
+    `%Visuals` is the engine's and `Body` carries the size class. The player
+    and the tree are root-level siblings, which is what makes
+    `anim_player = NodePath("../AnimationPlayer")` resolve after BaseLib's
+    factory reparents our children onto a fresh `NCreatureVisuals`.
+    """
+    for relative, text in gen.scene_sources(ROWS).items():
+        assert '[node name="Rig" type="Node2D" parent="Visuals"]' in text, relative
+        assert '[node name="Body" type="Sprite2D" parent="Visuals/Rig"]' in text, relative
+        assert ('[node name="AnimationPlayer" type="AnimationPlayer" parent="."]'
+                in text), relative
+        assert ('[node name="AnimationTree" type="AnimationTree" parent="."]'
+                in text), relative
+        assert 'anim_player = NodePath("../AnimationPlayer")' in text, relative
+
+
+def test_every_scene_names_a_motion_library_that_exists():
+    for name, row in gen.scenes(ROWS).items():
+        assert row.motion in gen.MOTIONS, name
+        text = gen.scene_source(row)
+        assert (f'[ext_resource type="AnimationLibrary" '
+                f'path="{row.motion_library}"') in text, name
+        committed = (ROOT / "klee-mod" / "pck-src" / "teyvat" / "motion"
+                     / f"{row.motion}.tres")
+        assert committed.is_file(), name
+
+
+def test_every_row_names_a_legal_motion_and_load_refuses_anything_else():
+    assert {r.motion for r in ROWS} <= set(gen.MOTIONS)
+    assert gen.MOTION_SETS == ("stand", "bounce", "hover", "loom", "mech")
+
+
+def test_the_assignment_rule_still_answers_for_every_body():
+    """`default_motion` is the rule that FILLED the column, not a gate on it.
+
+    It must keep answering -- a body added tomorrow is given a motion by it --
+    and its answer must be legal. It is deliberately NOT compared against the
+    committed column: a veto on one row is a one-cell edit and nothing here
+    argues back.
+    """
+    for row in ROWS:
+        assert gen.default_motion(row.body, row.size_class) in gen.MOTIONS, row
+
+
+def test_every_clip_keys_only_the_four_paths_a_creature_scene_carries():
+    """The one that would be invisible: a track on `Body` or on `%Visuals`."""
+    allowed = set(gen.ALLOWED_TRACKS)
+    for name, clips in gen.MOTIONS.items():
+        for clip in clips:
+            for track in clip.tracks:
+                assert track.path in allowed, (name, clip.name, track.path)
+    # And the same read off the committed TEXT, not off the data that wrote it.
+    for relative, text in gen.motion_sources().items():
+        paths = set(re.findall(r'path = NodePath\("([^"]+)"\)', text))
+        assert paths <= allowed, (relative, sorted(paths - allowed))
+        assert paths, relative
+
+
+def test_every_set_carries_the_five_clips_the_router_needs():
+    for name, clips in gen.MOTIONS.items():
+        assert {c.name for c in clips} == set(gen.CLIP_NAMES), name
+        # Only `idle` loops: attack, hurt and death each return to idle at the
+        # end of the clip (or, for death, do not return at all), and a looping
+        # one would never reach that end.
+        assert {c.name for c in clips if c.loop} == {"idle"}, name
+        # RESET keys every property any clip in the set touches, or a death
+        # fade leaves the next body half-transparent.
+        reset = next(c for c in clips if c.name == "RESET")
+        touched = {t.path for c in clips for t in c.tracks}
+        assert touched <= {t.path for t in reset.tracks}, name
+
+
+def test_the_death_clip_is_the_length_the_seam_will_report():
+    """`ModdedPlayerDeathSeam` reads this number off the clip at runtime.
+
+    Pinned so a set whose death clip grew past the base's 30 s ceiling, or
+    shrank to nothing, is a decision rather than a diff nobody reads.
+    """
+    for name, clips in gen.MOTIONS.items():
+        death = next(c for c in clips if c.name == "death")
+        assert 0.5 <= death.length <= 30.0, (name, death.length)
+
+
+def test_no_generated_file_carries_a_comment_line():
+    """A `.tscn`/`.tres` that fails to parse falls back SILENTLY.
+
+    `MonsterModel.CreateVisuals` swaps in the pink error body, which "works"
+    and looks like a bug -- so the provenance lives in the README and in
+    `--check`, neither of which has to survive a parser.
+    """
+    files = {**gen.scene_sources(ROWS), **gen.motion_sources()}
+    for relative, text in files.items():
+        for number, line in enumerate(text.splitlines(), start=1):
+            assert not line.lstrip().startswith((";", "#")), (relative, number)
+
+
+def test_the_committed_motion_directory_is_exactly_the_five_sets():
+    directory = ROOT / "klee-mod" / "pck-src" / "teyvat" / "motion"
+    assert {p.name for p in directory.glob("*")} == {
+        f"{name}.tres" for name in gen.MOTIONS}

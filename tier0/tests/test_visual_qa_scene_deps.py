@@ -142,14 +142,45 @@ def test_combat_scenes_carry_the_four_router_states():
         for states, _ in scene.state_machines().values():
             trees += 1
             assert set(scene_deps.CREATURE_STATES) <= states, path
-    assert trees == 6, (
+    assert trees == 129, (
         "klee's and furina's combat scenes drive a state machine, and so do "
         "the Bake-Kurage pet's (kokomi/model/bake_kurage.tscn) and the Furina "
         "stage's three performers (furina/model/{usher,chevalmarin,"
-        "crabaletta}.tscn, `EB-725`) -- one router, one four-state contract, "
-        "no per-creature code. THE COUNT IS THE POINT: a new creature scene "
-        "that skipped a state would pass the loop above by carrying no state "
-        "machine at all, and this is what notices")
+        "crabaletta}.tscn, `EB-725`) -- six -- plus the 123 dressed Teyvat "
+        "creature scenes, which since the motion pass each carry the SAME "
+        "state machine over one of five shared motion libraries "
+        "(tools/gen_teyvat_creature_scenes.py). One router, one four-state "
+        "contract, no per-creature code. THE COUNT IS THE POINT: a new "
+        "creature scene that skipped a state would pass the loop above by "
+        "carrying no state machine at all, and this is what notices")
+
+
+def test_a_scene_reads_its_animation_names_from_an_external_library():
+    """The motion pass's shape: the clips are in a `.tres`, not in the scene.
+
+    123 creature scenes share five `teyvat/motion/<set>.tres` libraries. Read
+    blind, every one of them looks like four SD-ANIM-MISSING errors -- the
+    tree's `AnimationNodeAnimation`s name clips the FILE does not declare --
+    so the index is what stops a true shape reading as a defect.
+    """
+    scene = godot_scene.parse(
+        PCK_SRC / "teyvat" / "creature_visuals" / "anemo_slime.tscn")
+
+    blind = Report(scene_deps.GATE)
+    scene_deps.check_scene(scene, blind, "anemo_slime.tscn")
+    assert "SD-ANIM-MISSING" in rules(blind, ERROR)
+
+    library = godot_scene.parse(PCK_SRC / "teyvat" / "motion" / "bounce.tres")
+    assert library.resource_type == "AnimationLibrary"
+    assert library.animation_names() == {
+        "RESET", "idle", "attack", "hurt", "death"}
+
+    seeing = Report(scene_deps.GATE)
+    scene_deps.check_scene(
+        scene, seeing, "anemo_slime.tscn",
+        library_index={"teyvat/motion/bounce.tres": library.animation_names()})
+    assert "SD-ANIM-MISSING" not in rules(seeing, ERROR)
+    assert seeing.errors == [], seeing.render(verbose=True)
 
 
 def test_empty_tree_fails_rather_than_passing(tmp_path):
