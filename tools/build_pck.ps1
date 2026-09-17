@@ -117,7 +117,7 @@ New-Item -ItemType Directory -Force -Path $work | Out-Null
 # `<name>.tscn.remap` stub at the original path. `ResourceLoader.Load` follows
 # a remap transparently, so a scene reached BY NAME still loads -- which is
 # why the background ROOT (`SceneHelper.GetScenePath`) and
-# `teyvat/creature_visuals/hilichurl_guard.tscn` always worked.
+# every `teyvat/creature_visuals/<body>.tscn` always worked.
 #
 # The background LAYERS are not reached by name. `Rooms/BackgroundAssets`'s
 # constructor `DirAccess.Open`s `res://scenes/backgrounds/<id>/layers` and
@@ -277,12 +277,15 @@ if (-not (Test-Path $modImageSrc)) { Note-Skip 'klee\mod_image.png' $modImageSrc
 # (klee-mod/KleeCode/Teyvat/TeyvatFrame.StillPortraits) names the path in full.
 #
 # Note-Skip and not an error, on every other block's terms: art never blocks a
-# build. On today's tree the source directory does not exist, the block prints
-# its gap, and klee-mod/pck-src/teyvat/creature_visuals/hilichurl_guard.tscn
-# overlays anyway with a dead texture reference -- which is why the C# asks
+# build. On a checkout with no ImageGen tree the block prints its gap and the
+# 77 committed scenes under klee-mod/pck-src/teyvat/creature_visuals overlay
+# anyway with dead texture references -- which is why the C# asks
 # ResourceLoader.Exists on the SCENE before it swaps a monster's visuals, and
-# would still be right to fall through if the scene loaded with no picture in
-# it.
+# would still be right to fall through if a scene loaded with no picture in it.
+#
+# 77 PLATES AND 77 SCENES, generated from one table by
+# tools/gen_teyvat_creature_scenes.py (EB-811); the scenes are committed and
+# the plates are Tier F, produced by art/plan.tsv's portrait block.
 $teyvatPortraits = Join-Path $src 'teyvat\creature_visuals'
 if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $teyvatPortraits } else {
     $to = Join-Path $work 'teyvat\creature_visuals'

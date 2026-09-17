@@ -9,10 +9,36 @@ nation's background or an act's music track belongs to the FRAME, not to one
 character, and the C# names these paths in full
 (`klee-mod/KleeCode/Teyvat/TeyvatFrame.StillPortraits`, `TeyvatMusic.Root`).
 
-## creature_visuals/hilichurl_guard.tscn
+## creature_visuals/*.tscn — GENERATED, 77 of them
 
-Nibbit's still portrait in the Mondstadt dressing, and the spike's proof that a
-picture can stand where the base game has a Spine rig.
+**Do not hand-edit a file in this directory.** Every `.tscn` under
+`creature_visuals/` is written by `tools/gen_teyvat_creature_scenes.py` from
+one table, `docs/current/dossiers/content/enemy-dressings.tsv`, which says per
+row which Genshin body dresses which base-game `Id.Entry` on which face, under
+which display name, at which size class. The same run emits the two C# tables
+(`klee-mod/KleeCode/Teyvat/TeyvatCreaturesGenerated.cs`) that `TeyvatFrame`
+exposes as `StillPortraits` and `MonsterNames` — so a body cannot get its
+picture without its name, or the reverse. `--check` fails on any drift and
+`tier0/tests/test_teyvat_creature_scenes.py` rides it (`EB-811`).
+
+    .venv\Scripts\python.exe tools\gen_teyvat_creature_scenes.py
+    .venv\Scripts\python.exe tools\gen_teyvat_creature_scenes.py --check
+
+**Sizing.** A 240x280 plate at scale 1 is a small body, so the row's size class
+scales the sprite and, with it, `%Bounds`, `%IntentPos` and `%CenterPos` — the
+health bar, the block badge, the selection reticle, the intent marker and every
+hit VFX are placed off those, and a plate that grew while its bounds did not
+would put the intent inside the body. The three numbers, and the base-game
+`%Bounds` medians they land on, are derived in the generator's docstring:
+`regular` 1.0 (280 tall), `elite` 1.3 (364), `boss` 1.6 (448). **`Visuals.Scale`
+is never written** — `NCreature` owns it — so the scale rides the `Sprite2D`
+under `%Visuals`, and `%Visuals` itself stays an identity `Node2D`.
+
+The rest of this section is the mechanism, written when the directory held one
+hand-made file (Nibbit's, `hilichurl_guard.tscn`, retired into
+`wooden_shield_hilichurl_guard.tscn` when its real plate was cut). It is
+unchanged by the generalisation, and every generated scene is the same four
+nodes it describes.
 
 ### The root is not an `NCreatureVisuals`, and it has to become one
 
@@ -72,21 +98,16 @@ C#, never from an `ext_resource type="Script"` line.
 
 ## The texture is NOT in this repository
 
-Pixels are Tier F. `res://teyvat/creature_visuals/hilichurl_guard.png` is
-produced into the gitignored `ImageGen/images/teyvat/creature_visuals/` on the
-art-bearing main checkout, and `tools/build_pck.ps1`'s Teyvat block copies it
-in; the block `Note-Skip`s when the directory is absent, so a build without it
-stays green and prints the gap.
+Pixels are Tier F. Every `res://teyvat/creature_visuals/<body>.png` is produced
+into the gitignored `ImageGen/images/teyvat/creature_visuals/` on the
+art-bearing main checkout, and `tools/build_pck.ps1`'s Teyvat block copies the
+whole directory in; the block `Note-Skip`s when it is absent, so a build
+without it stays green and prints the gap. Both readers ask
+`ResourceLoader.Exists` of the SCENE first, so a missing plate costs a body its
+dressing and nothing else.
 
-The spike's placeholder is a solid-colour **240x280 RGBA PNG** — the size
-`docs/current/operations/media.md` §3 fixes for portraits, and the size the
-roster's own combat surface already uses. To make one:
-
-```powershell
-# on the main checkout only
-New-Item -ItemType Directory -Force ImageGen\images\teyvat\creature_visuals
-.venv\Scripts\python.exe -c "from PIL import Image; Image.new('RGBA',(240,280),(96,120,72,255)).save(r'ImageGen\images\teyvat\creature_visuals\hilichurl_guard.png')"
-```
-
-A real portrait takes a `media/PORTRAITS.tsv` row and goes through the media
-pipeline; this one is scaffolding and takes neither.
+Each plate is a **240x280 RGBA PNG** — the size `docs/current/operations/media.md`
+§3 fixes for portraits, and the size the roster's own combat surface already
+uses. The 77 are produced by `art/plan.tsv`'s portrait block and recorded one
+row each in `media/PORTRAITS.tsv`, per the media pipeline's "the plan produces
+and the ledger records" rule (`operations/media.md` §1).

@@ -28,8 +28,12 @@ namespace KleeMod.Teyvat.Patches;
 /// scene whose root BECOMES an `NCreatureVisuals` -- the same route
 /// `pck-src/kokomi/model/bake_kurage.tscn` takes for a pet, and the same route
 /// `Vfx/StaticPortraitIdle` documents for our characters out of combat. The
-/// scene is `pck-src/teyvat/creature_visuals/hilichurl_guard.tscn` and its
-/// texture is a placeholder PNG.
+/// scenes are `pck-src/teyvat/creature_visuals/&lt;body&gt;.tscn` -- 77 of them,
+/// emitted with the C# table itself from
+/// `docs/current/dossiers/content/enemy-dressings.tsv` by
+/// `tools/gen_teyvat_creature_scenes.py` (`EB-811`), each at the size class
+/// its row declares -- and each texture is a 240x280 RGBA plate produced by
+/// `art/plan.tsv`'s portrait block.
 ///
 /// SWAPPING THE PATH IS ONLY HALF OF IT, and the missing half was EB-760.
 /// `MonsterModel.CreateVisuals` CASTS the instantiated root to

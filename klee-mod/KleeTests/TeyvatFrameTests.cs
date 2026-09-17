@@ -1061,6 +1061,31 @@ public class TeyvatFrameTests : IDisposable
         });
     }
 
+    /// <summary>
+    /// `EB-811`: A DRESSED BODY CARRIES ITS OWN NAME.
+    ///
+    /// A Genshin body announcing itself as a Nibbit is the defect the two
+    /// tables could produce between them while they were maintained
+    /// separately. They are not any more --
+    /// `tools/gen_teyvat_creature_scenes.py` emits both rows from one line of
+    /// `docs/current/dossiers/content/enemy-dressings.tsv` -- and this asserts
+    /// it from the C# side, where the game reads it, rather than only in the
+    /// generator's own pin.
+    ///
+    /// ONE DIRECTION, NOT AN EQUALITY. A name row without a portrait row is
+    /// legitimate: a dressing may rename an enemy whose plate was never cut or
+    /// was vetoed, and let it keep its Spine rig. A PORTRAIT without a name is
+    /// not -- the picture would change and the label would not.
+    /// </summary>
+    [Fact]
+    public void Every_still_portrait_has_a_dressed_name_row()
+    {
+        Assert.All(TeyvatFrame.StillPortraits.Keys, key =>
+            Assert.True(
+                TeyvatFrame.MonsterNames.ContainsKey((key.Dressing, key.Entry + ".name")),
+                $"{key.Dressing}/{key.Entry} would draw a dressed body under its Spire name"));
+    }
+
     // ---------------------------------------------------------------
     // EB-764 / EB-765: the two throws that made the converted event
     // unplayable the first time it was reached in a real run.
