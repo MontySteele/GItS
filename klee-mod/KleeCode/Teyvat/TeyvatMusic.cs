@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using MegaCrit.Sts2.Core.Logging;
+using MegaCrit.Sts2.Core.Rooms;
 
 namespace KleeMod.Teyvat;
 
@@ -77,6 +78,89 @@ public static class TeyvatMusic
     /// accepted, WAV is never placed.
     /// </summary>
     public static readonly string[] Extensions = { ".ogg", ".mp3" };
+
+    // ---------------------------------------------------------------
+    // EB-814: THE SLOT VOCABULARY, AND IT IS CLOSED.
+    // ---------------------------------------------------------------
+
+    /// <summary>A face-scoped slot, as a `&lt;face&gt;/&lt;slot&gt;` directory.
+    /// `combat` is also the FALLBACK for the other three -- see
+    /// <see cref="TrackFor(string?, string)"/>.</summary>
+    public const string SlotCombat = "combat";
+
+    /// <inheritdoc cref="SlotCombat"/>
+    public const string SlotElite = "elite";
+
+    /// <inheritdoc cref="SlotCombat"/>
+    public const string SlotBoss = "boss";
+
+    /// <summary>The out-of-combat face slot: the map screen, an event room, a
+    /// treasure room, and a combat room whose fight is over.</summary>
+    public const string SlotMap = "map";
+
+    /// <summary>The main menu. GLOBAL: there is no run and no act there, so it
+    /// is the slot that proves the grammar needs two shapes.</summary>
+    public const string SlotMenu = "menu";
+
+    /// <summary>The merchant. GLOBAL by choice, not by necessity: a shop
+    /// reading the same in every nation is the better default, and one row is
+    /// cheaper to veto than six.</summary>
+    public const string SlotShop = "shop";
+
+    /// <summary>The rest site. GLOBAL, for <see cref="SlotShop"/>'s reason.</summary>
+    public const string SlotRest = "rest";
+
+    /// <summary>
+    /// The four slots that hang under a face. Ordered as they are read rather
+    /// than alphabetically: the combat slot first because it is the fallback.
+    /// </summary>
+    public static readonly string[] FaceSlots = { SlotCombat, SlotElite, SlotBoss, SlotMap };
+
+    /// <summary>The three slots that resolve to a bare directory with no
+    /// dressing at all.</summary>
+    public static readonly string[] GlobalSlots = { SlotMenu, SlotShop, SlotRest };
+
+    /// <summary>Is this one of the bare-name slots? Asked by
+    /// <see cref="TeyvatFrame.MediaScene(string?, string?)"/> BEFORE it looks
+    /// for a face, which is how `menu` answers outside a run.</summary>
+    public static bool IsGlobalSlot(string? slot) =>
+        slot != null && Array.IndexOf(GlobalSlots, slot) >= 0;
+
+    /// <summary>Is this one of the `&lt;face&gt;/&lt;slot&gt;` slots?</summary>
+    public static bool IsFaceSlot(string? slot) =>
+        slot != null && Array.IndexOf(FaceSlots, slot) >= 0;
+
+    /// <summary>
+    /// WHICH SLOT A ROOM ASKS FOR, and this table is the arm's one room
+    /// decision (`research/sts2-music-map-2026-09-17.md` sec.4).
+    ///
+    /// IT IS DELIBERATELY NOT `NRunMusicController.GetTrack`. The game's table
+    /// has ten values because they are positions of ONE FMOD parameter on one
+    /// event -- a crossfade inside a track. Ours are seven separate files, so
+    /// the only distinctions worth making are the ones worth a different piece
+    /// of music.
+    ///
+    /// THE ONE PLACE THE TWO DELIBERATELY DISAGREE is a won fight. `GetTrack`
+    /// tests `IsCombatRoom() &amp;&amp; !CombatManager.IsInProgress` FIRST and
+    /// moves to `CombatEnd`; we hold the room's combat slot until the room
+    /// changes, because a parameter move is a crossfade and a slot move is a
+    /// file swap, and restarting the music under a player reading their card
+    /// rewards is worse than letting the loop run.
+    ///
+    /// A null room -- outside a run, mid-transition, or a reflection getter a
+    /// game patch renamed -- answers the out-of-combat slot, which is the safe
+    /// direction: the map loop under a boss is a shrug, the boss theme on the
+    /// map screen is a bug report.
+    /// </summary>
+    public static string SlotFor(RoomType? room) => room switch
+    {
+        RoomType.Boss => SlotBoss,
+        RoomType.Elite => SlotElite,
+        RoomType.Monster => SlotCombat,
+        RoomType.Shop => SlotShop,
+        RoomType.RestSite => SlotRest,
+        _ => SlotMap,
+    };
 
     /// <summary>
     /// THE SUFFIX AN EXPORTED PACK ACTUALLY CARRIES, and the only thing a
@@ -213,13 +297,55 @@ public static class TeyvatMusic
     /// <see cref="TeyvatFrame.MediaScene"/> for the derivation and for why the
     /// rename does not belong in the packager.
     /// </summary>
-    public static string? TrackFor(string? actEntry)
+    public static string? TrackFor(string? actEntry) => TrackFor(actEntry, SlotCombat);
+
+    /// <summary>
+    /// The packaged track for a face's slot, or null if the pack has none.
+    ///
+    /// THE FALLBACK CHAIN IS THE POINT, and it has exactly three links
+    /// (`EB-814`, media.md sec.1):
+    ///
+    ///   1. `&lt;face&gt;/&lt;slot&gt;` -- the filed track.
+    ///   2. `&lt;face&gt;/combat` -- for an elite or boss slot with nothing filed.
+    ///      Same nation, always.
+    ///   3. null -- so <see cref="Play"/> returns false, the patch never calls
+    ///      `StopMusic`, and THE GAME'S OWN FMOD TRACK PLAYS ON. Silence is
+    ///      never an outcome here; the base game's music is.
+    ///
+    /// **A GLOBAL SLOT HAS NO LINK 2.** `menu`, `shop` and `rest` are not a
+    /// nation's, and there is no face to fall back into -- `menu` has no run at
+    /// all. Nothing filed means the game's own merchant or campfire progress
+    /// plays, which is the right answer and not a gap.
+    ///
+    /// **NOTHING EVER FALLS ACROSS TO ANOTHER NATION.** That is the rule the
+    /// chain exists to state: link 2 is the SAME face's combat loop or it is
+    /// nothing.
+    /// </summary>
+    public static string? TrackFor(string? actEntry, string slot)
+    {
+        var found = Lookup(TeyvatFrame.MediaScene(actEntry, slot));
+        if (found != null || IsGlobalSlot(slot) || slot == SlotCombat)
+        {
+            return found;
+        }
+
+        // Link 2. `MediaScene` is asked again rather than the string being
+        // sliced, so the face's spelling has exactly one producer.
+        return Lookup(TeyvatFrame.MediaScene(actEntry, SlotCombat));
+    }
+
+    /// <summary>
+    /// One cached directory walk. Split out of <see cref="TrackFor"/> when the
+    /// fallback chain arrived, because the chain asks the same question of two
+    /// directories and the cache has to cover both.
+    /// </summary>
+    private static string? Lookup(string? scene)
     {
         // A base zone -- Overgrowth, or anything else that is not one of this
         // arm's faces -- answers null and returns HERE, before any Godot call:
         // an undressed run has no ledger scene and plays its own music. So does
-        // a null or empty entry, which is `CurrentActEntry` outside a run.
-        var scene = TeyvatFrame.MediaScene(actEntry);
+        // a null or empty entry, which is `CurrentActEntry` outside a run, and
+        // so does a slot outside the closed vocabulary.
         if (scene == null)
         {
             return null;
@@ -293,15 +419,16 @@ public static class TeyvatMusic
     /// acceptance condition of this item: with no file placed, the arm on, and
     /// the patches armed, the game's audio behaves exactly as it does today.
     ///
-    /// IDEMPOTENT. `UpdateMusic` runs on every room change, and re-creating
-    /// the player each time would restart the track at every campfire. If the
-    /// node is already there playing the same stream, this does nothing at
-    /// all, which is also the answer to "surviving a combat start, a rest site
-    /// and the map screen" -- those are room changes, not scene changes.
+    /// IDEMPOTENT, AND THAT IS WHAT MAKES THE SLOTS AFFORDABLE. Five separate
+    /// postfixes now call this (`Patches/RunMusicPatch`), several of them on
+    /// the same room change, and a sixth calls it for the menu. If the node is
+    /// already there playing the same stream, this does nothing at all -- so a
+    /// room that resolves to the slot already playing is free, and only a slot
+    /// CHANGE costs a new player.
     /// </summary>
-    public static bool Play(Node? host, string? actEntry)
+    public static bool Play(Node? host, string? actEntry, string slot)
     {
-        var track = TrackFor(actEntry);
+        var track = TrackFor(actEntry, slot);
         if (host == null || track == null)
         {
             return false;
@@ -343,8 +470,13 @@ public static class TeyvatMusic
 
             host.AddChild(player);
             player.Play();
-            Log.Info($"[{KleeMod.ModId}] teyvat: playing packaged track {track}; "
-                   + "the act's FMOD music is stopped for its duration.");
+            // The slot is in the line because `EB-814`'s acceptance is read off
+            // this log: "a boss track plays in a boss fight and godot.log names
+            // it". The resolved path alone would not say WHICH slot asked, and
+            // a fallback to the face's combat loop would read as a correct boss
+            // pick.
+            Log.Info($"[{KleeMod.ModId}] teyvat: slot '{slot}' -> playing packaged track "
+                   + $"{track}; the act's FMOD music is stopped for its duration.");
             return true;
         }
         catch (Exception e)

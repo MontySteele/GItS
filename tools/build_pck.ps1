@@ -381,9 +381,14 @@ if (-not (Test-Path $teyvatRest)) { Note-Skip 'teyvat\rest_site' $teyvatRest } e
 # faces in KleeTests, and against the list below in
 # tier0/tests/test_music_ledger_gate.py.
 #
-# `boss` / `rest` / `map` / `shop` are accepted and packed but have NO CALLER
-# yet -- they are room types rather than acts, so nothing resolves to them.
-# media.md sec.7 carries that as the open item.
+# AND EVERY SCENE NOW HAS A CALLER (EB-814). A scene is a SLOT: twenty-four
+# `<face>/<slot>` directories plus `menu`, `shop` and `rest` as bare names.
+# TeyvatMusic.SlotFor turns the current RoomType into one of them and
+# TeyvatFrame.MediaScene(entry, slot) spells it; the global three resolve with
+# no dressing at all, which is how `menu` works on a screen that has no run.
+# The three-way agreement -- this list, media.md sec.1's list, and the
+# resolver's own slot constants -- is pinned in
+# tier0/tests/test_music_ledger_gate.py.
 #
 # AND WHAT THE PACK ACTUALLY HOLDS WAS MEASURED, NOT ASSUMED. Importing
 # teyvat/music/act1_mondstadt/tone.ogg into a scratch project with THIS
@@ -439,13 +444,29 @@ bar_beats=4
 }
 
 $musicLedger = Join-Path $repo 'media\MUSIC.tsv'
-# media.md sec.1's vocabulary: one `act<N>_<nation>` per face (R273 layout 1,
-# two faces per act, and the exact strings TeyvatFrame.MediaScene derives),
-# plus the four room scenes that have no caller yet.
-$musicScenes = @('act1_mondstadt', 'act1_liyue',
-                 'act2_natlan', 'act2_inazuma',
-                 'act3_fontaine', 'act3_sumeru',
-                 'boss', 'rest', 'map', 'shop')
+# media.md sec.1's SLOT vocabulary, and it is closed (EB-814). Twenty-four
+# face-scoped scenes -- one `act<N>_<nation>` per face (R273 layout 1, two faces
+# per act) crossed with the four slots `combat` / `elite` / `boss` / `map` --
+# plus the three global ones. These are the exact strings
+# TeyvatFrame.MediaScene(entry, slot) derives, and the destination leaf below is
+# this column VERBATIM, so a nested scene lands at
+# teyvat\music\act1_mondstadt\combat and the reader finds it there.
+#
+# NESTING WAS MEASURED, not assumed (MegaDot 4.5.1 headless, this script's own
+# project.godot and export preset, 2026-09-17). A nested scene packs exactly the
+# two entries a flat one packs, a mounted pack answers
+# DirAccess.get_files_at("res://teyvat/music/act1_mondstadt/combat") with
+# ["music_combat_A.ogg.import"], get_directories_at of the parent with
+# ["boss", "combat"], and ResourceLoader.exists is true for the stripped .ogg
+# and false for the sidecar. media.md sec.1 carries the full reading.
+$musicScenes = @(
+    'act1_mondstadt/combat', 'act1_mondstadt/elite', 'act1_mondstadt/boss', 'act1_mondstadt/map',
+    'act1_liyue/combat',     'act1_liyue/elite',     'act1_liyue/boss',     'act1_liyue/map',
+    'act2_natlan/combat',    'act2_natlan/elite',    'act2_natlan/boss',    'act2_natlan/map',
+    'act2_inazuma/combat',   'act2_inazuma/elite',   'act2_inazuma/boss',   'act2_inazuma/map',
+    'act3_fontaine/combat',  'act3_fontaine/elite',  'act3_fontaine/boss',  'act3_fontaine/map',
+    'act3_sumeru/combat',    'act3_sumeru/elite',    'act3_sumeru/boss',    'act3_sumeru/map',
+    'menu', 'shop', 'rest')
 if (-not (Test-Path $musicLedger)) { Note-Skip 'media\MUSIC.tsv' $musicLedger } else {
     # sec.1's encoding rule, and it is not a formality: read as UTF-8 and split
     # on TAB alone, so a CRLF line ending cannot ride into the last column and
@@ -477,7 +498,14 @@ if (-not (Test-Path $musicLedger)) { Note-Skip 'media\MUSIC.tsv' $musicLedger } 
         }
         $from = Join-Path $repo (Join-Path 'media\out' $outRel)
         if (-not (Test-Path $from)) { Note-Skip "media\out\$outRel" $from; continue }
-        $to = Join-Path $work "teyvat\music\$scene"
+        # The ledger spells a face slot with a forward slash (`act1_liyue/boss`,
+        # which is what Godot's res:// path is). Windows tolerates the mixed
+        # separator, but a normalised one keeps every path this script prints
+        # and every -notcontains comparison downstream reading the same way. The
+        # LEAF IS STILL THE COLUMN VERBATIM: this changes the separator and
+        # never a name, so the ledger still describes the pack.
+        $sceneDir = $scene.Replace('/', '\')
+        $to = Join-Path $work "teyvat\music\$sceneDir"
         New-Item -ItemType Directory -Force -Path $to | Out-Null
         $name = [IO.Path]::GetFileName($outRel)
         Copy-Item $from -Destination (Join-Path $to $name) -Force

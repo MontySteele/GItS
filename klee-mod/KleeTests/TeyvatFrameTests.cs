@@ -11,6 +11,7 @@ using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Acts;
 using MegaCrit.Sts2.Core.Models.Events;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Settings;
 using Xunit;
 
@@ -60,6 +61,10 @@ public class TeyvatFrameTests : IDisposable
         // of a table that is not the engine's.
         TeyvatMusic.ResetProbes();
         TeyvatMusic.ClearCache();
+        // EB-814 adds a fourth probe, on `TeyvatFrame` rather than
+        // `TeyvatMusic`, because the room is the FRAME's question: the music
+        // reader never asks `RunManager` anything. Same discipline.
+        TeyvatFrame.ResetRoomProbe();
     }
 
     // ---------------------------------------------------------------
@@ -771,7 +776,7 @@ public class TeyvatFrameTests : IDisposable
         // `tools/build_pck.ps1` copies that `scene` column through verbatim, so
         // this is the directory the reader has to ask about or a track filed by
         // the book lands where nothing looks.
-        Assert.Equal(new[] { "res://teyvat/music/act1_mondstadt" }, probed);
+        Assert.Equal(new[] { "res://teyvat/music/act1_mondstadt/combat" }, probed);
     }
 
     /// <summary>
@@ -818,12 +823,12 @@ public class TeyvatFrameTests : IDisposable
         TeyvatMusic.ListFiles = _ => new[] { "theme.mp3", "theme.ogg" };
         TeyvatMusic.ResourceExists = _ => true;
 
-        Assert.Equal("res://teyvat/music/act1_mondstadt/theme.ogg",
+        Assert.Equal("res://teyvat/music/act1_mondstadt/combat/theme.ogg",
                      TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
 
         TeyvatMusic.ClearCache();
         TeyvatMusic.ResourceExists = path => path.EndsWith(".mp3", StringComparison.Ordinal);
-        Assert.Equal("res://teyvat/music/act1_mondstadt/theme.mp3",
+        Assert.Equal("res://teyvat/music/act1_mondstadt/combat/theme.mp3",
                      TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
     }
 
@@ -860,13 +865,13 @@ public class TeyvatFrameTests : IDisposable
             return path.EndsWith(".ogg", StringComparison.Ordinal);
         };
 
-        Assert.Equal("res://teyvat/music/act1_mondstadt/windborne_dreams.ogg",
+        Assert.Equal("res://teyvat/music/act1_mondstadt/combat/windborne_dreams.ogg",
                      TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
 
         // And the sidecar path is never offered to the loader at all, because
         // it is not a resource: the measurement says `ResourceLoader.exists`
         // on it is false.
-        Assert.DoesNotContain("res://teyvat/music/act1_mondstadt/windborne_dreams.ogg.import",
+        Assert.DoesNotContain("res://teyvat/music/act1_mondstadt/combat/windborne_dreams.ogg.import",
                               asked);
     }
 
@@ -916,6 +921,228 @@ public class TeyvatFrameTests : IDisposable
     {
         Assert.Equal(scene, TeyvatFrame.MediaScene(entry));
         Assert.Equal(TeyvatFrame.AssetAlias.Count, 6);
+
+        // EB-814: and each of the four face slots hangs one level below it,
+        // which is the whole of the nested half of the grammar.
+        foreach (var slot in TeyvatMusic.FaceSlots)
+        {
+            Assert.Equal($"{scene}/{slot}", TeyvatFrame.MediaScene(entry, slot));
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // EB-814: the slot grammar, the room table, and the fallback order.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// THE VOCABULARY IS CLOSED, and that is what keeps the packager and the
+    /// reader honest about each other. `tools/build_pck.ps1` THROWS on a ledger
+    /// scene outside its whitelist, so a slot this side would accept and that
+    /// side would not is a build failure on a by-the-book row; the reverse is a
+    /// directory packed and never asked for, which is the exact defect
+    /// `EB-814` closed. `tier0/tests/test_music_ledger_gate.py` holds the three
+    /// lists against each other; this holds the C# side's two halves apart.
+    /// </summary>
+    [Fact]
+    public void The_slot_vocabulary_is_four_face_slots_and_three_global_ones()
+    {
+        Assert.Equal(new[] { "combat", "elite", "boss", "map" }, TeyvatMusic.FaceSlots);
+        Assert.Equal(new[] { "menu", "shop", "rest" }, TeyvatMusic.GlobalSlots);
+
+        foreach (var slot in TeyvatMusic.FaceSlots)
+        {
+            Assert.True(TeyvatMusic.IsFaceSlot(slot), slot);
+            Assert.False(TeyvatMusic.IsGlobalSlot(slot), slot);
+        }
+
+        foreach (var slot in TeyvatMusic.GlobalSlots)
+        {
+            Assert.True(TeyvatMusic.IsGlobalSlot(slot), slot);
+            Assert.False(TeyvatMusic.IsFaceSlot(slot), slot);
+        }
+
+        // Neither question says yes to nothing, and an unknown slot is not
+        // quietly turned into a directory nobody packs.
+        Assert.False(TeyvatMusic.IsFaceSlot(null));
+        Assert.False(TeyvatMusic.IsGlobalSlot(null));
+        Assert.False(TeyvatMusic.IsFaceSlot("treasure"));
+        Assert.Null(TeyvatFrame.MediaScene(TeyvatFrame.Mondstadt, "treasure"));
+    }
+
+    /// <summary>
+    /// A GLOBAL SLOT RESOLVES WITH NO DRESSING AT ALL, which is not a
+    /// convenience: `menu` plays on a screen where there is no run, no act and
+    /// no `NRunMusicController` to patch. If `MediaScene` asked for a face
+    /// first, the main menu would be unreachable.
+    /// </summary>
+    [Theory]
+    [InlineData("menu")]
+    [InlineData("shop")]
+    [InlineData("rest")]
+    public void A_global_slot_is_its_own_bare_scene_with_or_without_a_face(string slot)
+    {
+        Assert.Equal(slot, TeyvatFrame.MediaScene(null, slot));
+        Assert.Equal(slot, TeyvatFrame.MediaScene("OVERGROWTH", slot));
+        Assert.Equal(slot, TeyvatFrame.MediaScene(TeyvatFrame.Sumeru, slot));
+    }
+
+    /// <summary>
+    /// THE ROOM TABLE (`research/sts2-music-map-2026-09-17.md` §4), including
+    /// the one place it deliberately differs from the game's own `GetTrack`: a
+    /// combat room keeps its combat slot after the fight, because a slot change
+    /// is a file swap and the game's is a crossfade inside one event.
+    ///
+    /// `Unassigned` and `Map` land on the out-of-combat slot with everything
+    /// else, and so does a null room -- the safe direction, since the map loop
+    /// under a boss is a shrug and the boss theme on the map screen is a bug
+    /// report.
+    /// </summary>
+    [Theory]
+    [InlineData(RoomType.Boss, "boss")]
+    [InlineData(RoomType.Elite, "elite")]
+    [InlineData(RoomType.Monster, "combat")]
+    [InlineData(RoomType.Shop, "shop")]
+    [InlineData(RoomType.RestSite, "rest")]
+    [InlineData(RoomType.Treasure, "map")]
+    [InlineData(RoomType.Event, "map")]
+    [InlineData(RoomType.Map, "map")]
+    [InlineData(RoomType.Unassigned, "map")]
+    [InlineData(null, "map")]
+    public void Every_room_asks_for_exactly_one_slot(RoomType? room, string slot)
+    {
+        Assert.Equal(slot, TeyvatMusic.SlotFor(room));
+    }
+
+    /// <summary>
+    /// THE FALLBACK ORDER, AND IT IS THE RULE THE WHOLE THING EXISTS FOR:
+    /// face slot → that face's combat loop → the game's own music. Never
+    /// another nation's track.
+    ///
+    /// The probe answers "there is a track here" only for the directories named
+    /// in <paramref name="filed"/>, so the assertion is about WHICH directory
+    /// was accepted rather than about whether anything was found.
+    /// </summary>
+    [Fact]
+    public void An_unfiled_elite_or_boss_falls_back_to_the_same_faces_combat_loop()
+    {
+        var filed = new HashSet<string>
+        {
+            "res://teyvat/music/act1_liyue/combat",
+            "res://teyvat/music/act1_liyue/boss",
+        };
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = filed.Contains;
+        TeyvatMusic.ListFiles = _ => new[] { "theme.ogg" };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        // Filed: itself.
+        Assert.Equal("res://teyvat/music/act1_liyue/boss/theme.ogg",
+                     TeyvatMusic.TrackFor(TeyvatFrame.Liyue, TeyvatMusic.SlotBoss));
+        // Unfiled: the SAME face's combat loop, not Mondstadt's boss theme.
+        Assert.Equal("res://teyvat/music/act1_liyue/combat/theme.ogg",
+                     TeyvatMusic.TrackFor(TeyvatFrame.Liyue, TeyvatMusic.SlotElite));
+        Assert.Equal("res://teyvat/music/act1_liyue/combat/theme.ogg",
+                     TeyvatMusic.TrackFor(TeyvatFrame.Liyue, TeyvatMusic.SlotMap));
+
+        // And a DIFFERENT face, with nothing filed at all, finds nothing --
+        // it does not reach across to the face that has tracks.
+        Assert.Null(TeyvatMusic.TrackFor(TeyvatFrame.Sumeru, TeyvatMusic.SlotBoss));
+        Assert.Null(TeyvatMusic.TrackFor(TeyvatFrame.Sumeru, TeyvatMusic.SlotCombat));
+    }
+
+    /// <summary>
+    /// A GLOBAL SLOT HAS NO LINK 2. There is no face to fall into -- `menu` has
+    /// no run at all -- so nothing filed means null, `Play` returns false, the
+    /// patch never calls `StopMusic`, and the game's own theme plays on.
+    ///
+    /// Pinned as the NEGATIVE it is: the face's combat loop is filed and
+    /// findable, and the global lookup still refuses it.
+    /// </summary>
+    [Fact]
+    public void A_global_slot_never_falls_back_into_a_face()
+    {
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = path => path == "res://teyvat/music/act1_liyue/combat";
+        TeyvatMusic.ListFiles = _ => new[] { "theme.ogg" };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        foreach (var slot in TeyvatMusic.GlobalSlots)
+        {
+            Assert.Null(TeyvatMusic.TrackFor(TeyvatFrame.Liyue, slot));
+            Assert.Null(TeyvatMusic.TrackFor(null, slot));
+        }
+
+        // The control: the same probe DOES find the face's combat loop.
+        Assert.Equal("res://teyvat/music/act1_liyue/combat/theme.ogg",
+                     TeyvatMusic.TrackFor(TeyvatFrame.Liyue, TeyvatMusic.SlotCombat));
+    }
+
+    /// <summary>
+    /// THE FOUR RUN SEAMS, AND WHY THERE ARE FOUR. `UpdateMusic` reads the act,
+    /// the act's bank list and the run seed, and nothing about the room
+    /// (`research/sts2-music-map-2026-09-17.md` §1), so a postfix there can
+    /// never answer "which room" -- which is precisely what made `EB-814` a row
+    /// rather than a ledger edit. `UpdateTrack()` is the room-aware one
+    /// (`CombatManager` calls it at combat start and combat end),
+    /// `PlayCustomMusic` is the only place the base game swaps the whole FMOD
+    /// event, and `StopCustomMusic` is where it swaps back. `StopMusic` is the
+    /// teardown the spike already had.
+    ///
+    /// PINNED AS ATTRIBUTES rather than as behaviour, because every one of
+    /// these is a Harmony binding and there is no Harmony in a headless suite:
+    /// what can go silently wrong is a postfix that stops being DECLARED, and
+    /// that is exactly what this reads. The zero-arg overload selector on
+    /// `UpdateTrack` is checked too -- without it Harmony cannot pick between
+    /// the two methods of that name.
+    /// </summary>
+    [Fact]
+    public void The_music_arm_patches_every_seam_the_room_slots_need()
+    {
+        var patch = typeof(TeyvatFrame).Assembly.GetType(
+            "KleeMod.Teyvat.Patches.NRunMusicController_TeyvatTrack_Patch",
+            throwOnError: true)!;
+
+        var bindings = patch
+            .GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
+            .SelectMany(m => m.GetCustomAttributes<HarmonyPatch>())
+            .Where(a => a.info.methodName != null)
+            .ToList();
+
+        Assert.Equal(
+            new[] { "PlayCustomMusic", "StopCustomMusic", "StopMusic", "UpdateMusic", "UpdateTrack" },
+            bindings.Select(a => a.info.methodName!)
+                    .OrderBy(n => n, StringComparer.Ordinal).ToArray());
+
+        // The overload selector, without which Harmony cannot bind UpdateTrack.
+        var updateTrack = bindings.Single(a => a.info.methodName == "UpdateTrack");
+        Assert.Equal(Array.Empty<Type>(), updateTrack.info.argumentTypes);
+
+        // And the menu is a SECOND class on a DIFFERENT type, because
+        // NRunMusicController does not exist on a screen with no run.
+        var menu = typeof(TeyvatFrame).Assembly.GetType(
+            "KleeMod.Teyvat.Patches.NAudioManager_TeyvatMenu_Patch", throwOnError: true)!;
+        Assert.Equal("event:/music/menu_update",
+            menu.GetField("MenuEvent", BindingFlags.Static | BindingFlags.NonPublic)!
+                .GetRawConstantValue());
+    }
+
+    /// <summary>
+    /// The room probe answers through `TeyvatFrame`, not through the music
+    /// controller's private `_runState`, and it is null-safe in the direction
+    /// that matters: with the arm off there is no room, so every patch stands
+    /// down before it resolves anything.
+    /// </summary>
+    [Fact]
+    public void The_room_probe_is_the_frames_and_answers_nothing_with_the_arm_off()
+    {
+        TeyvatFrame.RoomTypeProbe = () => RoomType.Boss;
+        Assert.Equal(RoomType.Boss, TeyvatFrame.CurrentRoomType);
+        Assert.Equal("boss", TeyvatMusic.SlotFor(TeyvatFrame.CurrentRoomType));
+
+        TeyvatFrame.ResetRoomProbe();
+        TeyvatFrame.Enabled = false;
+        Assert.Null(TeyvatFrame.CurrentRoomType);
+        Assert.Equal("map", TeyvatMusic.SlotFor(TeyvatFrame.CurrentRoomType));
     }
 
     /// <summary>
