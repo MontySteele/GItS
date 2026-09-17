@@ -266,4 +266,60 @@ public static class TeyvatFrame
     /// </summary>
     public static bool IsDressing(string? entry) =>
         entry != null && AssetAlias.ContainsKey(entry);
+
+    /// <summary>
+    /// WHICH ACT A BASE ZONE STANDS AT. Four rows, and they are the BASE
+    /// GAME's rather than this arm's: `ModelDb.Acts` ships two zones at index 0
+    /// (Overgrowth, Underdocks) and exactly one at each of index 1 and 2 (the
+    /// Hive, Glory) -- the fact `Patches/ModelDbActsPatch`'s `Swaps` table is
+    /// built around.
+    ///
+    /// KEYED ON THE ALIAS VALUE ON PURPOSE, so this is NOT a second dressing
+    /// table. <see cref="AssetAlias"/> stays the one registry of which faces
+    /// exist, and a seventh face added there gets its act for free from the
+    /// base zone it stands on. A parallel dressing-to-act dictionary would be
+    /// the drift risk this arm has already been bitten by.
+    /// </summary>
+    private static readonly IReadOnlyDictionary<string, int> BaseZoneAct =
+        new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["overgrowth"] = 1,
+            ["underdocks"] = 1,
+            ["hive"] = 2,
+            ["glory"] = 3,
+        };
+
+    /// <summary>
+    /// The media ledger's scene name for a dressing -- `act1_mondstadt` for
+    /// `MONDSTADT` -- or null for anything that is not one of this arm's faces.
+    ///
+    /// THE LEDGER'S NAMES ARE THE SPEC AND THE READER MOVES.
+    /// `docs/current/operations/media.md` sec.1 files a track under
+    /// `media/out/music/&lt;act-or-scene&gt;/`, and `&lt;act-or-scene&gt;` is
+    /// `act1_mondstadt`, not `mondstadt`. `tools/build_pck.ps1` copies that
+    /// `scene` column through VERBATIM -- one producer, one out-path, sec.1's
+    /// own rule -- so a packager-side rename would be a second name for the
+    /// same thing and the ledger would stop describing the pack. The
+    /// resolution therefore belongs here, where the act is already known.
+    ///
+    /// NULL FOR A BASE ZONE, which is the right answer and not a gap: a run
+    /// that rolled Overgrowth is not dressed, has no ledger scene, and must
+    /// play its own FMOD track. <see cref="TeyvatMusic.TrackFor"/> leads with
+    /// this, so an undressed act never reaches a `DirAccess` call at all.
+    ///
+    /// `boss`, `rest`, `map` and `shop` are sec.1 scenes with NO CALLER yet --
+    /// they are not acts, so nothing resolves to them. Wiring them is a
+    /// separate seam (a room-type question, not an act one).
+    /// </summary>
+    public static string? MediaScene(string? entry)
+    {
+        if (entry == null
+            || !AssetAlias.TryGetValue(entry, out var zone)
+            || !BaseZoneAct.TryGetValue(zone, out var act))
+        {
+            return null;
+        }
+
+        return $"act{act}_{entry.ToLowerInvariant()}";
+    }
 }

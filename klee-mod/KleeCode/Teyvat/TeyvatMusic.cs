@@ -205,15 +205,27 @@ public static class TeyvatMusic
     /// because the ledger owns the track's name and this code must not.
     /// Sorted, so a directory that somehow holds two tracks picks the same one
     /// every boot instead of whichever the filesystem offered first.
+    ///
+    /// AND THE DIRECTORY IS THE LEDGER'S NAME, NOT THE ACT ID'S.
+    /// `operations/media.md` sec.1 files a track under `act1_mondstadt`;
+    /// `tools/build_pck.ps1` copies that `scene` column through VERBATIM, one
+    /// producer and one out-path, so the resolution is the reader's job. See
+    /// <see cref="TeyvatFrame.MediaScene"/> for the derivation and for why the
+    /// rename does not belong in the packager.
     /// </summary>
     public static string? TrackFor(string? actEntry)
     {
-        if (string.IsNullOrEmpty(actEntry))
+        // A base zone -- Overgrowth, or anything else that is not one of this
+        // arm's faces -- answers null and returns HERE, before any Godot call:
+        // an undressed run has no ledger scene and plays its own music. So does
+        // a null or empty entry, which is `CurrentActEntry` outside a run.
+        var scene = TeyvatFrame.MediaScene(actEntry);
+        if (scene == null)
         {
             return null;
         }
 
-        var dir = Root + actEntry!.ToLowerInvariant();
+        var dir = Root + scene;
         if (Cache.TryGetValue(dir, out var cached))
         {
             return cached;

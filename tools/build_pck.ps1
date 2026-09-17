@@ -366,19 +366,21 @@ if (-not (Test-Path $teyvatRest)) { Note-Skip 'teyvat\rest_site' $teyvatRest } e
 # ship a run with no music and a green build.
 #
 # THE PCK PATH IS res://teyvat/music/<scene>/<file>: the namespace
-# klee-mod/KleeCode/Teyvat/TeyvatMusic.cs:Root names, the one media.md sec.7
-# left to the spike, with the ledger's `scene` column VERBATIM as the leaf.
+# klee-mod/KleeCode/Teyvat/TeyvatMusic.cs:Root names, with the ledger's `scene`
+# column VERBATIM as the leaf.
 #
-# AND THE LEAF IS WHERE A GAP IS LEFT ON PURPOSE. `TeyvatMusic.TrackFor` looks
-# up `Root + actEntry.ToLowerInvariant()`, which for the six faces is
-# `mondstadt` / `liyue` / ... -- NOT the ledger's `act1_mondstadt`. So an
-# `act1_mondstadt` row lands in a directory today's reader never asks about,
-# and `boss` / `rest` / `map` / `shop` have no caller at all. Closing that is a
-# naming decision between the ledger's vocabulary and the act id's, and it is
-# not this block's to make: the packager is where the rename WOULD go
-# (TeyvatMusic.cs's header says so), but a rename invented here would be a
-# guess dressed as a mapping. Placing a track is what proves which name the
-# frame wants; the block is deliberately a straight copy until then.
+# AND VERBATIM IS THE POINT. The ledger's names are the spec and the READER
+# resolves to them -- `TeyvatFrame.MediaScene` turns a dressing's Id.Entry into
+# `act1_mondstadt` and `TeyvatMusic.TrackFor` leads with it. A rename here would
+# be a second name for the same thing, and the ledger, which is the one tracked
+# record of what is in the pack and where it came from, would stop describing
+# the pack. So the six act scenes are pinned on BOTH sides: against the six
+# faces in KleeTests, and against the list below in
+# tier0/tests/test_music_ledger_gate.py.
+#
+# `boss` / `rest` / `map` / `shop` are accepted and packed but have NO CALLER
+# yet -- they are room types rather than acts, so nothing resolves to them.
+# media.md sec.7 carries that as the open item.
 #
 # AND WHAT THE PACK ACTUALLY HOLDS WAS MEASURED, NOT ASSUMED. Importing
 # teyvat/music/act1_mondstadt/tone.ogg into a scratch project with THIS
@@ -434,7 +436,13 @@ bar_beats=4
 }
 
 $musicLedger = Join-Path $repo 'media\MUSIC.tsv'
-$musicScenes = @('act1_mondstadt', 'act1_liyue', 'boss', 'rest', 'map', 'shop')
+# media.md sec.1's vocabulary: one `act<N>_<nation>` per face (R273 layout 1,
+# two faces per act, and the exact strings TeyvatFrame.MediaScene derives),
+# plus the four room scenes that have no caller yet.
+$musicScenes = @('act1_mondstadt', 'act1_liyue',
+                 'act2_natlan', 'act2_inazuma',
+                 'act3_fontaine', 'act3_sumeru',
+                 'boss', 'rest', 'map', 'shop')
 if (-not (Test-Path $musicLedger)) { Note-Skip 'media\MUSIC.tsv' $musicLedger } else {
     # sec.1's encoding rule, and it is not a formality: read as UTF-8 and split
     # on TAB alone, so a CRLF line ending cannot ride into the last column and

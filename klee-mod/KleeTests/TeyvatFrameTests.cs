@@ -763,10 +763,15 @@ public class TeyvatFrameTests : IDisposable
         TeyvatMusic.ListFiles = _ => { listed++; return Array.Empty<string>(); };
         TeyvatMusic.ResourceExists = _ => true;
 
-        Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+        Assert.Null(TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
 
         Assert.Equal(0, listed);
-        Assert.Equal(new[] { "res://teyvat/music/mondstadt" }, probed);
+        // THE LEDGER'S SCENE NAME, not the act id's lowercase. `media.md`
+        // sec.1 files Mondstadt's track under `act1_mondstadt` and
+        // `tools/build_pck.ps1` copies that `scene` column through verbatim, so
+        // this is the directory the reader has to ask about or a track filed by
+        // the book lands where nothing looks.
+        Assert.Equal(new[] { "res://teyvat/music/act1_mondstadt" }, probed);
     }
 
     /// <summary>
@@ -785,14 +790,14 @@ public class TeyvatFrameTests : IDisposable
 
         for (var i = 0; i < 5; i++)
         {
-            Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+            Assert.Null(TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
         }
 
         Assert.Equal(1, probes);
 
         // A DIFFERENT act is a different question, and must not read the first
         // one's answer: the entry is what the directory is named after.
-        Assert.Null(TeyvatMusic.TrackFor("Liyue"));
+        Assert.Null(TeyvatMusic.TrackFor(TeyvatFrame.Liyue));
         Assert.Equal(2, probes);
     }
 
@@ -813,13 +818,13 @@ public class TeyvatFrameTests : IDisposable
         TeyvatMusic.ListFiles = _ => new[] { "theme.mp3", "theme.ogg" };
         TeyvatMusic.ResourceExists = _ => true;
 
-        Assert.Equal("res://teyvat/music/mondstadt/theme.ogg",
-                     TeyvatMusic.TrackFor("Mondstadt"));
+        Assert.Equal("res://teyvat/music/act1_mondstadt/theme.ogg",
+                     TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
 
         TeyvatMusic.ClearCache();
         TeyvatMusic.ResourceExists = path => path.EndsWith(".mp3", StringComparison.Ordinal);
-        Assert.Equal("res://teyvat/music/mondstadt/theme.mp3",
-                     TeyvatMusic.TrackFor("Mondstadt"));
+        Assert.Equal("res://teyvat/music/act1_mondstadt/theme.mp3",
+                     TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
     }
 
     /// <summary>
@@ -855,13 +860,13 @@ public class TeyvatFrameTests : IDisposable
             return path.EndsWith(".ogg", StringComparison.Ordinal);
         };
 
-        Assert.Equal("res://teyvat/music/mondstadt/windborne_dreams.ogg",
-                     TeyvatMusic.TrackFor("Mondstadt"));
+        Assert.Equal("res://teyvat/music/act1_mondstadt/windborne_dreams.ogg",
+                     TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
 
         // And the sidecar path is never offered to the loader at all, because
         // it is not a resource: the measurement says `ResourceLoader.exists`
         // on it is false.
-        Assert.DoesNotContain("res://teyvat/music/mondstadt/windborne_dreams.ogg.import",
+        Assert.DoesNotContain("res://teyvat/music/act1_mondstadt/windborne_dreams.ogg.import",
                               asked);
     }
 
@@ -878,7 +883,72 @@ public class TeyvatFrameTests : IDisposable
         TeyvatMusic.ListFiles = _ => new[] { "readme.txt.import", "cover.png.import" };
         TeyvatMusic.ResourceExists = _ => true;
 
-        Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+        Assert.Null(TeyvatMusic.TrackFor(TeyvatFrame.Mondstadt));
+    }
+
+    // ---------------------------------------------------------------
+    // The ledger's scene names are the spec, and the READER resolves.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// ALL SIX FACES TO THEIR SIX LEDGER SCENES, because this is the seam where
+    /// a track filed exactly by the book would otherwise land where nothing
+    /// looks: `media.md` sec.1 names the directory `act1_mondstadt`, the
+    /// packager copies that `scene` column through verbatim (one producer, one
+    /// out-path), and before this the lookup asked for `mondstadt`.
+    ///
+    /// THE ACT NUMBER IS DERIVED AND NOT LISTED. `MediaScene` reads
+    /// <see cref="TeyvatFrame.AssetAlias"/> -- the arm's ONE registry of which
+    /// faces exist -- for the base zone, and the base zone's act index is a
+    /// fact about the BASE GAME (two zones at index 0, one each at 1 and 2).
+    /// So a seventh face costs a row in `AssetAlias` and nothing here, and
+    /// there is no parallel dressing-to-act table to drift out of step. The
+    /// expectations below are R273's layout 1 read back.
+    /// </summary>
+    [Theory]
+    [InlineData(TeyvatFrame.Mondstadt, "act1_mondstadt")]
+    [InlineData(TeyvatFrame.Liyue, "act1_liyue")]
+    [InlineData(TeyvatFrame.Natlan, "act2_natlan")]
+    [InlineData(TeyvatFrame.Inazuma, "act2_inazuma")]
+    [InlineData(TeyvatFrame.Fontaine, "act3_fontaine")]
+    [InlineData(TeyvatFrame.Sumeru, "act3_sumeru")]
+    public void Every_dressing_resolves_to_its_media_ledger_scene(string entry, string scene)
+    {
+        Assert.Equal(scene, TeyvatFrame.MediaScene(entry));
+        Assert.Equal(TeyvatFrame.AssetAlias.Count, 6);
+    }
+
+    /// <summary>
+    /// And nothing else resolves at all. A BASE zone is the case that will
+    /// actually happen -- a coin that came up Overgrowth is undressed, has no
+    /// ledger scene, and must play its own FMOD track -- and `TrackFor` leads
+    /// with this, so an undressed run never reaches a `DirAccess` call.
+    ///
+    /// The lowercase spelling is in here deliberately: `AssetAlias` is an
+    /// `Ordinal` dictionary keyed on `Id.Entry`, which is upper case, and
+    /// `IsDressing` has had exactly this property since the spike. Case is not
+    /// smoothed over here either, so the two questions cannot answer
+    /// differently about the same string.
+    /// </summary>
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("OVERGROWTH")]
+    [InlineData("HIVE")]
+    [InlineData("mondstadt")]
+    public void Anything_that_is_not_a_dressing_has_no_scene_and_no_track(string? entry)
+    {
+        Assert.Null(TeyvatFrame.MediaScene(entry));
+        Assert.Equal(TeyvatFrame.IsDressing(entry), TeyvatFrame.MediaScene(entry) != null);
+
+        var listed = 0;
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => { listed++; return true; };
+        TeyvatMusic.ListFiles = _ => { listed++; return new[] { "theme.ogg" }; };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        Assert.Null(TeyvatMusic.TrackFor(entry));
+        Assert.Equal(0, listed);
     }
 
     // NOT PINNED HERE, and for the boundary's reason rather than for want of

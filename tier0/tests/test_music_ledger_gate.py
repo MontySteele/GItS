@@ -39,8 +39,23 @@ LEDGER = ROOT / "media" / "MUSIC.tsv"
 # media.md sec.2's columns, in order.
 COLUMNS = ["out", "raw", "scene", "title", "origin", "licence", "loop_start_s", "notes"]
 
-# media.md sec.1's scene vocabulary.
-SCENES = ["act1_mondstadt", "act1_liyue", "boss", "rest", "map", "shop"]
+# media.md sec.1's scene vocabulary: one `act<N>_<nation>` per face (R273's
+# layout 1, two faces per act) plus the four room scenes that have no caller
+# yet. The act names are also exactly what `TeyvatFrame.MediaScene` derives --
+# see the cross-file pin below, which is what stops the two drifting.
+ACT_SCENES = [
+    "act1_mondstadt",
+    "act1_liyue",
+    "act2_natlan",
+    "act2_inazuma",
+    "act3_fontaine",
+    "act3_sumeru",
+]
+ROOM_SCENES = ["boss", "rest", "map", "shop"]
+SCENES = ACT_SCENES + ROOM_SCENES
+
+TEYVAT_FRAME = ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatFrame.cs"
+TEYVAT_MUSIC = ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatMusic.cs"
 
 # media.md sec.3: OGG Vorbis is the default, MP3 is accepted, WAV never.
 EXTENSIONS = (".ogg", ".mp3")
@@ -136,10 +151,58 @@ def test_the_destination_is_the_frames_own_namespace():
     block = music_code()
     assert 'Join-Path $work "teyvat\\music\\$scene"' in block
 
-    reader = (ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatMusic.cs").read_text(
-        encoding="utf-8"
-    )
+    reader = TEYVAT_MUSIC.read_text(encoding="utf-8")
     assert 'public const string Root = "res://teyvat/music/";' in reader
+
+
+def test_the_reader_resolves_to_the_ledgers_names_and_the_packager_does_not():
+    r"""The decision this file exists to keep: **the ledger's names are the
+    spec and the READER moves.**
+
+    A track filed exactly per media.md §1 under `act1_mondstadt` has to be the
+    one the reader asks for. Two ways that can break silently, and both are
+    pinned here:
+
+      * the packager grows a rename, so the ledger stops describing the pack;
+      * the reader goes back to `actEntry.ToLowerInvariant()`, so a
+        by-the-book track lands where nothing looks.
+
+    The six act names themselves are checked as a CROSS-FILE agreement:
+    `TeyvatFrame.MediaScene` builds them as `act{act}_{entry.ToLowerInvariant()}`
+    from the arm's one dressing registry, so the names never appear as literals
+    on the C# side and cannot be grepped for. What can be checked is that every
+    scene this packager accepts is one the six faces plus the four room scenes
+    account for, and that the four room scenes really have no resolver.
+    """
+    code = music_code()
+    frame = TEYVAT_FRAME.read_text(encoding="utf-8")
+    music = TEYVAT_MUSIC.read_text(encoding="utf-8")
+
+    # The packager copies `scene` through: it is the destination leaf, and no
+    # rewriting of it appears anywhere in the block.
+    assert 'Join-Path $work "teyvat\\music\\$scene"' in code
+    assert "$scene =" not in code.replace("$scene  = $cols[2].Trim()", "")
+
+    # The reader resolves, and the old spelling is gone.
+    assert "TeyvatFrame.MediaScene(actEntry)" in music
+    assert "actEntry.ToLowerInvariant()" not in music
+    assert 'return $"act{act}_{entry.ToLowerInvariant()}";' in frame
+
+    # The act number is derived from the base zone, so there is no parallel
+    # dressing-to-act table to drift: the arm's one registry stays AssetAlias.
+    assert "AssetAlias.TryGetValue(entry, out var zone)" in frame
+    assert "BaseZoneAct.TryGetValue(zone, out var act)" in frame
+
+    # Every scene the packager accepts is accounted for on the C# side, one way
+    # or the other.
+    for scene in ACT_SCENES:
+        act, nation = scene.split("_", 1)
+        assert act in {"act1", "act2", "act3"}, scene
+        assert f'public const string {nation.capitalize()} = "{nation.upper()}";' in frame
+    for scene in ROOM_SCENES:
+        # No caller yet, by media.md §7. If one is ever wired, this line is the
+        # reminder to move the note with it.
+        assert f'"{scene}"' not in frame
 
 
 def test_the_loop_point_travels_from_the_column_into_the_import_file():

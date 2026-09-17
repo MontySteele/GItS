@@ -20,8 +20,20 @@ media/MUSIC.tsv                                 tracked ledger
 media/PORTRAITS.tsv                             tracked ledger
 ```
 
-`<act-or-scene>`: `act1_mondstadt`, `act1_liyue`, `boss`, `rest`, `map`, `shop`.
+`<act-or-scene>`: one per face, `act<N>_<nation>` — `act1_mondstadt`,
+`act1_liyue`, `act2_natlan`, `act2_inazuma`, `act3_fontaine`, `act3_sumeru`
+(R273's layout 1, two faces per act) — plus `boss`, `rest`, `map`, `shop`.
 `<body>`: the enemy or NPC id as the mod names it, one directory per body.
+
+**These names are the spec and the reader resolves to them.**
+`TeyvatFrame.MediaScene` turns a dressing's `Id.Entry` into its scene name, so
+a track filed here is found without a packager-side rename — the packager
+copies the `scene` column through verbatim, because a rename there would be a
+second name for the same thing and the ledger would stop describing the pack.
+The six act scenes are pinned against the six faces in `KleeTests` and against
+the packager's own list in `tier0/tests/test_music_ledger_gate.py`. The other
+four have **no caller yet**: they are not acts, so nothing resolves to them,
+and wiring them is a room-type question rather than an act one.
 
 `media/out/` is what the packager reads; nothing else is packaged. **One
 producer per out-path** — exactly one ledger row may name a given `out`, and
@@ -189,12 +201,9 @@ would distribute the track.
   with the FMOD music bus ducked is the default; an FMOD bank is the fallback
   if the duck cannot hold. The spike decides (run-frame §2, §4.4), and this
   page only says where the file lives.
-- **Which name the scene leaf carries.** The pck path is settled —
-  `res://teyvat/music/<scene>/<track>.ogg`, a namespace of the frame's own
-  rather than `res://klee/`, because the frame's media is not one character's —
-  but the leaf is not. `TeyvatMusic.TrackFor` looks up
-  `Root + actEntry.ToLowerInvariant()`, which is `mondstadt` / `liyue` / … and
-  not the ledger's `act1_mondstadt`, and `boss` / `rest` / `map` / `shop` have
-  no caller at all. The packager copies `scene` through verbatim rather than
-  inventing a rename, so placing the first track is what decides whether the
-  ledger's vocabulary or the act id's wins.
+- **The four non-act scenes.** `boss`, `rest`, `map` and `shop` are §1 scenes
+  with nothing that resolves to them: `TeyvatFrame.MediaScene` answers for a
+  dressing, and those are room types rather than acts. A track filed under one
+  today is packed, sits in `res://teyvat/music/<scene>/`, and is never asked
+  for. Wiring them needs a room-type seam on the audio path, which is a
+  separate read from this one.
