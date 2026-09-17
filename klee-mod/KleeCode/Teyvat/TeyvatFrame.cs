@@ -131,16 +131,26 @@ public static class TeyvatFrame
     /// table serves both, because the read established that this static is
     /// the ONLY constructor of monster loc strings in the game.
     ///
-    /// SPIKE ITEM 3 IS ONE ROW. Nibbit becomes the Wooden Shield Hilichurl
-    /// Guard in Mondstadt and nowhere else; in Overgrowth, in Liyue, and with
-    /// the flag off, `L10NMonsterLookup` returns exactly what it returned
+    /// GENERATED (`TeyvatCreaturesGenerated.cs`'s `MonsterNames`), from the
+    /// SAME table row as the body's picture (`EB-811`):
+    /// `docs/current/dossiers/content/enemy-dressings.tsv` says in one line
+    /// which Genshin body dresses which `Id.Entry` on which face, and
+    /// `tools/gen_teyvat_creature_scenes.py` emits the name row and the
+    /// still-portrait row together. That is what makes "a dressed body wearing
+    /// the Spire's name" unrepresentable rather than merely unlikely.
+    ///
+    /// The spike's hand-written row is retired into it: Nibbit still becomes
+    /// the Wooden Shield Hilichurl Guard in Mondstadt and nowhere else, and
+    /// with the flag off `L10NMonsterLookup` returns exactly what it returned
     /// before.
+    ///
+    /// A BANTER key is the one thing this table can carry that the generator
+    /// does not: its key is whatever that monster's own class passes rather
+    /// than `Id.Entry + ".name"`, so it is per-move hand work. There is none
+    /// today; the day there is, it merges in beside the generated rows.
     /// </summary>
-    public static readonly IReadOnlyDictionary<(string Dressing, string Key), string> MonsterNames =
-        new Dictionary<(string, string), string>
-        {
-            [(Mondstadt, "NIBBIT.name")] = "Wooden Shield Hilichurl Guard",
-        };
+    public static IReadOnlyDictionary<(string Dressing, string Key), string> MonsterNames =>
+        TeyvatGeneratedCreatures.MonsterNames;
 
     /// <summary>
     /// THE INTENT TABLE: (dressing, the intent's loc key) -> the dressed
@@ -187,12 +197,15 @@ public static class TeyvatFrame
     /// Read by `Patches/MonsterVisualsPathPatch`, which falls through when the
     /// scene is not in the pack -- so a build whose pck was not rebuilt shows
     /// the base rig rather than a missing-resource crash.
+    ///
+    /// GENERATED (`TeyvatCreaturesGenerated.cs`'s `StillPortraits`), beside
+    /// <see cref="MonsterNames"/> and out of the same table row (`EB-811`).
+    /// The scene it names is written by the same generator, from the same row,
+    /// at the size class that row declares -- so there is no third place for a
+    /// body to be half-wired.
     /// </summary>
-    public static readonly IReadOnlyDictionary<(string Dressing, string Entry), string> StillPortraits =
-        new Dictionary<(string, string), string>
-        {
-            [(Mondstadt, "NIBBIT")] = "res://teyvat/creature_visuals/hilichurl_guard.tscn",
-        };
+    public static IReadOnlyDictionary<(string Dressing, string Entry), string> StillPortraits =>
+        TeyvatGeneratedCreatures.StillPortraits;
 
     /// <summary>
     /// The `Id.Entry` of the act the run is standing in, or null.

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using BaseLib.Extensions;
 using Godot;
 using MegaCrit.Sts2.Core.Logging;
@@ -11,8 +12,8 @@ namespace KleeMod.Teyvat;
 ///
 /// WHAT WENT WRONG. `MonsterModel.CreateVisuals` does
 /// `GetScene(VisualsPath).Instantiate&lt;NCreatureVisuals&gt;()` -- it CASTS
-/// the instantiated root, it does not adapt it. `pck-src/teyvat/
-/// creature_visuals/hilichurl_guard.tscn` is a script-less scene whose root is
+/// the instantiated root, it does not adapt it. Every `pck-src/teyvat/
+/// creature_visuals/&lt;body&gt;.tscn` is a script-less scene whose root is
 /// a plain `Node2D` (the pck-src standing rule: behaviour attaches from C#,
 /// never from an `ext_resource type="Script"` line), so the cast threw
 /// `InvalidCastException`, `CreateVisuals`'s own catch swallowed it, and the
@@ -91,7 +92,14 @@ public static class TeyvatVisuals
 
         try
         {
-            foreach (var scene in TeyvatFrame.StillPortraits.Values)
+            // DISTINCT, since `EB-811`: one plate legitimately dresses several
+            // `Id.Entry`s -- two slime sizes, three Decimillipede segments,
+            // both Kaiser Crab slots, a whole knight gang -- so the table has
+            // many more rows than scenes. Registering a path twice is
+            // harmless, but WARNING about a missing one once per row is log
+            // spam that hides how many bodies are actually absent.
+            var registered = 0;
+            foreach (var scene in TeyvatFrame.StillPortraits.Values.Distinct(StringComparer.Ordinal))
             {
                 if (!ResourceLoader.Exists(scene))
                 {
@@ -102,7 +110,11 @@ public static class TeyvatVisuals
                 }
 
                 scene.RegisterSceneForConversion<NCreatureVisuals>();
+                registered++;
             }
+
+            Log.Info($"[{KleeMod.ModId}] teyvat: {registered} still body/bodies registered for "
+                   + "auto-conversion.");
         }
         catch (Exception e)
         {

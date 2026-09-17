@@ -70,11 +70,14 @@ def test_the_sample_contract_is_well_formed():
     # SALON member sprites they draw -- which the pack already carried (the
     # salon copy block) but the fixture did not, because until these scenes
     # nothing referenced them from a scene and the universe is what
-    # `scene-deps` resolves an ext_resource against. Then +2 for the Teyvat run
-    # frame spike's first dressed body (`res://teyvat/creature_visuals/
-    # hilichurl_guard.{tscn,png}`, behind `-p:TeyvatFrame=true`): the scene is
-    # committed under `pck-src/teyvat/`, so PK-SRC-UNPACKED wants its row, and
-    # its texture is Tier F -- gitignored, produced into
+    # `scene-deps` resolves an ext_resource against. Then +154 for the Teyvat
+    # run frame's dressed bodies (`res://teyvat/creature_visuals/<body>.{tscn,
+    # png}`, behind `-p:TeyvatFrame=true`) -- 77 kept plates at two rows each,
+    # where the spike shipped one, generated from a single table by
+    # `tools/gen_teyvat_creature_scenes.py` (`EB-811`) and pinned against that
+    # generator in tier0/tests/test_teyvat_creature_scenes.py: the scenes are
+    # committed under `pck-src/teyvat/`, so PK-SRC-UNPACKED wants their rows,
+    # and their textures are Tier F -- gitignored, produced into
     # `ImageGen/images/teyvat/creature_visuals/` and copied in by the pck
     # build's Teyvat block. THERE IS NO SEPARATE TIER F SPELLING and a texture
     # row is one either way: a contract row asserts what reaches the PACK, not
@@ -100,7 +103,7 @@ def test_the_sample_contract_is_well_formed():
     # eighteen files whether its base zone has a sibling or not. The hundred
     # and eight rows are pinned against the generator's own plan in
     # tier0/tests/test_act_placeholder_plan.py, so neither side can move alone.
-    assert len(parsed.resources) == 146
+    assert len(parsed.resources) == 298
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -200,9 +203,9 @@ def test_end_to_end_on_a_staged_package(tmp_path):
                                         payload), payload)
     report = contract.run(None, ROOT, package_dir=package, pck_src=PCK_SRC)
     assert report.errors == [], report.render(verbose=True)
-    # +6 at EB-40, +2 for the pet, +6 for the stage, +2 for the Teyvat
-    # spike's Hilichurl Guard (scene + its Tier F texture), +108 for the six
-    # act dressings' placeholder asset sets (eighteen each; see the count's
-    # reason above the first assertion).
-    assert report.checked["contract_resources"] == 146
+    # +6 at EB-40, +2 for the pet, +6 for the stage, +154 for the Teyvat
+    # frame's 77 dressed bodies (a scene and its Tier F texture each), +108 for
+    # the six act dressings' placeholder asset sets (eighteen each; see the
+    # count's reason above the first assertion).
+    assert report.checked["contract_resources"] == 298
     assert report.checked["package_files"] == 3

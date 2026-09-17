@@ -9,6 +9,21 @@ copyright pass is owed before anything is public, so every row carries its
 provenance from the first file placed and the pass is a filter on one column.
 Character stills are NOT in scope — they stay with `operations/art.md`.
 
+**Where a portrait becomes a creature in the game (`EB-811`).** The ledger
+records a plate; what *wires* it is one table,
+`docs/current/dossiers/content/enemy-dressings.tsv`, whose row says which body
+dresses which base-game `Id.Entry` on which face, under which display name, at
+which size class (`regular` / `elite` / `boss`, scaling the plate and its
+bounds together). `tools/gen_teyvat_creature_scenes.py` reads that table and
+writes both halves together — the committed scene
+`klee-mod/pck-src/teyvat/creature_visuals/<body>.tscn` and the C# tables
+`TeyvatFrame.StillPortraits` and `MonsterNames`
+(`klee-mod/KleeCode/Teyvat/TeyvatCreaturesGenerated.cs`) — so a body cannot get
+its picture without its name. Run it with `--check` before a push;
+`tier0/tests/test_teyvat_creature_scenes.py` rides that gate. Dressing one more
+body is therefore a `plan.tsv` row, a `PORTRAITS.tsv` row and a table row, and
+no code change at all.
+
 ### 1. Layout
 
 ```
