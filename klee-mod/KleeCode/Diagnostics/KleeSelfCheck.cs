@@ -12,6 +12,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
+using MegaCrit.Sts2.Core.Models.RelicPools;
 
 namespace KleeMod.Diagnostics;
 
@@ -143,13 +144,13 @@ internal static class KleeSelfCheck
 
     // Distinct rule labels that can actually reach the log:
     //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11,
-    //   R12, R13, R19, R20
+    //   R12, R13, R19, R20, R21
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 20;
+    private const int RuleCount = 21;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -171,6 +172,48 @@ internal static class KleeSelfCheck
                      + "character select for a starter (SelectCharacter aborts "
                      + "mid-method, so the character looks selected but is not) "
                      + "and at the Touch of Orobas grant for an upgraded form.");
+        }
+    }
+
+    /// <summary>
+    /// R21's check. The character's relic pool must contain NEITHER dropped
+    /// relic, and must still contain every OTHER member of the borrowed
+    /// <c>SilentRelicPool</c> -- the count of inherited members it keeps is
+    /// exactly the source roster's size minus
+    /// <see cref="InheritedSilentRelics.Dropped"/>.Count, which is the
+    /// "moved by exactly two" half of the ruling.
+    /// </summary>
+    private static void CheckInheritedRelicCuration(CharacterModel character)
+    {
+        var pool = character.RelicPool?.AllRelics?.ToList();
+        if (pool == null || pool.Count == 0) return;   // R3/R7 own the empty case.
+
+        var source = ModelDb.RelicPool<SilentRelicPool>().AllRelics.ToList();
+        var ids = pool.Select(r => r.Id).ToHashSet();
+
+        foreach (var relic in source.Where(r => !InheritedSilentRelics.IsKept(r)))
+        {
+            if (ids.Contains(relic.Id))
+            {
+                Fail("R21", $"{character.GetType().Name}'s relic pool still "
+                          + $"contains {relic.GetType().Name}, which the ruling "
+                          + "on `fanout-picks-2026-09-16 4.3` drops from all "
+                          + "three pools -- some path is inheriting the "
+                          + "uncurated SilentRelicPool roster instead of "
+                          + "InheritedSilentRelics.Curated().");
+            }
+        }
+
+        var kept = source.Count(r => ids.Contains(r.Id));
+        var expected = source.Count - InheritedSilentRelics.Dropped.Count;
+        if (kept != expected)
+        {
+            Fail("R21", $"{character.GetType().Name}'s relic pool keeps {kept} "
+                      + $"of the {source.Count} inherited Silent relics; the "
+                      + $"ruling drops exactly "
+                      + $"{InheritedSilentRelics.Dropped.Count}, so it should "
+                      + $"keep {expected}. Everything the ruling did not name "
+                      + "stays.");
         }
     }
 
@@ -221,6 +264,20 @@ internal static class KleeSelfCheck
                     upgraded, $"upgraded form of {relic.GetType().Name}");
             }
         }
+
+        // R21. THE CURATION OF THE BORROWED SILENT ROSTER HELD, asked of the
+        // pool the game actually built rather than of the source that builds
+        // it. [USER] ruled QUEUE pick `fanout-picks-2026-09-16 4.3` at its
+        // default: Helical Dart and Snecko Skull leave all three pools and
+        // every other inherited relic stays. Both halves are checked, because
+        // only the pair says what the ruling said -- a pool that dropped the
+        // two AND half the roster with them would pass the first half alone.
+        //
+        // WHY IT IS HERE AND NOT ONLY IN THE HEADLESS SUITE. `ModelDb` is
+        // unpopulated in the test process, so `AllRelics` cannot be READ there
+        // (the README's headless boundary); the suite pins the CALL SITES and
+        // this pins the RESULT. The two together are the drop.
+        CheckInheritedRelicCuration(character);
 
         // R2. An empty starting deck means no draw pile and an immediate soft
         // lock on the first combat turn.
