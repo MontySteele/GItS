@@ -45,20 +45,56 @@ namespace KleeMod.Vfx;
 ///     MOVES THE ENERGY ORB OUT OF ITS WAY:
 ///     <c>EnergyCounterContainer.SetPosition(new Vector2(100f, 806f),
 ///     keepOffsets: true)</c>. The energy counter is created and parented after
-///     that line.
+///     that line, and then -- <b>unconditionally, for every character</b> --
+///     <c>_starCounter.Reparent(_energyCounter)</c>. THAT LAST LINE IS WHAT
+///     `EB-815` IS ABOUT; see below.
 ///   - The counter itself is a glyph with a number centred on it. It subscribes
 ///     to <c>PlayerCombatState.StarsChanged</c> -- no polling -- and
 ///     <c>SetStarCountText</c> paints the number <c>StsColors.red</c> at zero
 ///     and <c>StsColors.cream</c> otherwise. <c>RefreshVisibility</c> keeps it
 ///     on screen from turn one for a character that always shows it, even at 0.
 ///
-/// SO THAT IS WHAT IS MIRRORED, and the mirror is geometric rather than
-/// numeric. This does not hard-code where the star counter lives: it reads
-/// <c>%StarCounter</c>'s OWN anchors and offsets off the live scene and copies
-/// them, then applies the same energy-orb displacement the base game applies.
-/// A pixel constant would be a guess about a scene we do not ship; the node is
-/// the fact. The only literal taken from the assembly is
-/// <see cref="EnergyCounterOffset"/>, which is the game's own line.
+/// `EB-815`: WHY THE FIRST READING OF THAT LIST DREW THE BADGE ON THE ORB.
+/// The original build of this file mirrored <c>%StarCounter</c> by copying its
+/// four anchor/offset pairs and parenting into <c>star.GetParent()</c>, then
+/// applied the orb displacement above as its anti-overlap measure. Both halves
+/// are defeated by <c>Reparent</c>, which has already run by the time this
+/// file's <c>Activate</c> POSTFIX does:
+///
+///   1. <c>star.GetParent()</c> is <c>_energyCounter</c> -- the orb node ITSELF
+///      -- so the badge was added INSIDE the energy counter's subtree, and the
+///      offsets it copied were relative to the orb's own rect. It landed on the
+///      orb by construction.
+///   2. The displacement was therefore INERT. Moving
+///      <c>EnergyCounterContainer</c> translates every descendant, the badge
+///      included, by the same vector; the orb-to-badge delta never changed. It
+///      was self-cancelling at every window size, which is why the overlap was
+///      scale-INDEPENDENT rather than a scale or aspect bug.
+///
+/// SO THE MIRROR IS NOW OF THE ENERGY PANEL'S RECT, not of the star counter's
+/// box. <see cref="Place"/> puts the badge ABOVE <c>%EnergyCounterContainer</c>
+/// with <see cref="PanelMargin"/> clear of its top edge, and
+/// <see cref="Apply"/> hangs it off the panel's own PARENT -- a SIBLING of the
+/// panel, never a descendant -- carrying the panel's anchor pair. Sharing the
+/// anchors is what makes it survive a resize with no <c>_Process</c> and no
+/// resize hook: any viewport change moves panel and badge by the same vector,
+/// so the margin holds in the panel's own units. A pixel constant would be a
+/// guess about a scene we do not ship; the panel node is the fact. The star
+/// counter is still read, but only for its SIZE (<see cref="Build"/>), which is
+/// the one thing about it the reparent does not make a lie.
+///
+/// ABOVE RATHER THAN BESIDE, and that is a reading of the frame rather than a
+/// preference: at the bottom-left corner the space to the RIGHT of the orb is
+/// where the creature's own health bar runs, and the space above it is empty
+/// under every act dressing. The right of the panel is kept as the FALLBACK for
+/// a viewport with no room above, and both candidates are held inside the
+/// viewport.
+///
+/// THE DISPLACEMENT IS GONE, not repaired. With the badge out of the orb's
+/// subtree, moving the shipped energy orb for Klee would be a real eviction
+/// that nothing asked for -- the badge no longer needs the room.
+/// <see cref="EnergyCounterOffset"/> survives as the FALLBACK rect alone, for
+/// the case where the panel cannot be resolved at all.
 ///
 /// WHY NOT SIMPLY SHOW THE GAME'S STAR COUNTER. Because it would lie. Its
 /// glyph is a star, its hover tip is <c>STAR_COUNT.description</c>, and the
@@ -100,10 +136,23 @@ public static class SparkCounter
     /// <summary>
     /// The base game's own displacement of the energy orb when a star counter
     /// shares its corner (<c>NCombatUi.Activate</c>, v0.111.0). Copied as a
-    /// literal because it IS a literal there -- the one number in this file
-    /// that is not read off the live scene.
+    /// literal because it IS a literal there.
+    ///
+    /// `EB-815`: THIS IS NOW A FALLBACK ANCHOR AND NOTHING ELSE. The file no
+    /// longer applies the displacement -- see the class docstring for why it
+    /// was inert and why the badge no longer needs the room. The number stays
+    /// because it is still the best guess at where the energy corner IS when
+    /// <c>%EnergyCounterContainer</c> cannot be resolved at all.
     /// </summary>
     internal static readonly Vector2 EnergyCounterOffset = new(100f, 806f);
+
+    /// <summary>
+    /// The gap the badge keeps from the energy panel, IN THE PANEL'S OWN UNITS
+    /// (the game's 1920x1080 design resolution, which is the space the panel's
+    /// offsets are already in). Not a screen offset: <see cref="Apply"/> adds
+    /// it to the panel's own edge, so it is a margin rather than a position.
+    /// </summary>
+    internal const float PanelMargin = 12f;
 
     /// <summary>Fallback square when <c>%StarCounter</c> reports no size yet.
     /// Used for the CHILDREN only; the root's rect is always the star
@@ -147,21 +196,26 @@ public static class SparkCounter
         if (NCombatRoom.Instance?.Ui is not { } ui) return;
 
         // `%StarCounter` is in every character's combat scene -- Regent is the
-        // only one that SHOWS it -- so this resolves for Klee too, and it is
-        // the geometry we are mirroring rather than a widget we are borrowing.
+        // only one that SHOWS it -- so this resolves for Klee too. It is read
+        // for its SIZE alone: `NCombatUi.Activate` has already reparented it
+        // INTO the energy orb, so its anchors and offsets describe a box inside
+        // the orb and copying them is what drew the badge on the orb (`EB-815`).
         var star = ui.GetNodeOrNull<Control>("%StarCounter");
-        var parent = star?.GetParent() ?? (Node)ui;
+
+        // THE PANEL IS THE FACT WE MIRROR, and the badge is its SIBLING rather
+        // than its descendant -- that is the whole of the fix. A descendant
+        // rides every move of the panel, which is what made the old
+        // displacement self-cancelling.
+        var panel = ui.EnergyCounterContainer;
+        var parent = panel?.GetParent() ?? (Node)ui;
 
         Displays.Discard(me);
-        var root = Build(star);
+        var side = SideOf(star);
+        var root = Build(side);
         parent.AddChildSafely(root);
         Displays.Set(me, root);
 
-        // The base game's own second half: with a resource counter in the
-        // corner, the energy orb moves. Doing only the first half would stack
-        // the badge on the orb.
-        ui.EnergyCounterContainer?.SetPosition(EnergyCounterOffset,
-                                               keepOffsets: true);
+        Apply(root, panel, side, ui.GetViewportRect().Size);
 
         Paint(root, me.Creature);
     }
@@ -216,17 +270,118 @@ public static class SparkCounter
     // ----------------------------------------------------------- drawing --
 
     /// <summary>
-    /// The node tree: a glyph with the count centred on it, in the star
-    /// counter's own rect.
+    /// THE BADGE'S SIZE, and the one thing still taken from
+    /// <c>%StarCounter</c>. Its POSITION is a lie under the reparent (see the
+    /// class docstring) but its size is the base game's own answer to "how big
+    /// is a resource badge in this corner", which is a question we should not
+    /// re-answer. A star counter that has not been laid out yet reports no
+    /// size, and then the fallback square stands in.
     ///
-    /// THE RECT IS COPIED, NOT CHOSEN. Anchors and offsets are what a Godot
-    /// Control's position and size actually ARE, so copying those four pairs
-    /// reproduces <c>%StarCounter</c>'s box exactly and follows a resize the
-    /// same way it does. When the node cannot be found the badge falls back to
-    /// the bottom-left corner with the same displacement the energy orb takes,
-    /// which is the honest guess rather than nothing on screen.
+    /// Square by construction: the glyph is square and the count is centred on
+    /// it, so one number is the whole box and <see cref="Place"/> takes a
+    /// scalar rather than a vector.
     /// </summary>
-    private static Control Build(Control? star)
+    private static float SideOf(Control? star) =>
+        star != null && star.Size.X > 0f && star.Size.Y > 0f
+            ? Mathf.Min(star.Size.X, star.Size.Y)
+            : FallbackSide;
+
+    /// <summary>
+    /// WHERE THE BADGE GOES, as a pure function of the energy panel's rect, the
+    /// badge's side and the viewport -- no nodes, so it is the half of this file
+    /// the headless suite can actually hold (`EB-815`,
+    /// <c>SparkCounterPinTests</c>). The old geometry was pinned as SOURCE TEXT,
+    /// which is why a placement defect could sit under a green suite: a test
+    /// that asserts a line of code exists cannot fail on where a box lands.
+    ///
+    /// ABOVE the panel, left edges aligned, <see cref="PanelMargin"/> clear of
+    /// its top edge. If there is no room above -- a viewport shorter than the
+    /// panel's own top margin -- it falls to the RIGHT of the panel, vertically
+    /// centred on it. Both candidates are then held inside the viewport.
+    ///
+    /// Everything here is in the panel's own coordinate space, which is the
+    /// space its parent lays out in; the combat UI root spans the viewport, so
+    /// the containment check below is in the same units the viewport is.
+    /// </summary>
+    internal static Rect2 Place(Rect2 energy, float side, Vector2 viewport)
+    {
+        var box = new Vector2(side, side);
+
+        var above = new Vector2(energy.Position.X,
+                                energy.Position.Y - PanelMargin - side);
+        if (above.Y >= 0f)
+        {
+            return new Rect2(Hold(above, side, viewport), box);
+        }
+
+        var right = new Vector2(energy.End.X + PanelMargin,
+                                energy.Position.Y + (energy.Size.Y - side) / 2f);
+        return new Rect2(Hold(right, side, viewport), box);
+    }
+
+    /// <summary>
+    /// Keep the box on screen WITHOUT ever pushing it back across the panel:
+    /// each axis is clamped only where the viewport is actually big enough to
+    /// hold the box. A viewport smaller than the badge has no answer that is
+    /// both on screen and clear of the panel, and in that case staying clear of
+    /// the panel is the one that matters -- an unreadable number in the corner
+    /// beats a readable one painted over the energy cost.
+    /// </summary>
+    private static Vector2 Hold(Vector2 at, float side, Vector2 viewport) =>
+        new(viewport.X > side ? Mathf.Clamp(at.X, 0f, viewport.X - side) : at.X,
+            viewport.Y > side ? Mathf.Clamp(at.Y, 0f, viewport.Y - side) : at.Y);
+
+    /// <summary>
+    /// Put <see cref="Place"/>'s answer on the node, IN THE PANEL'S OWN ANCHOR
+    /// SPACE. The badge takes the panel's anchor pair and the panel's offsets
+    /// shifted by the placement delta, so the two are pinned to the same corner
+    /// of the viewport and a resize moves them by one vector. That is what makes
+    /// the margin hold at every window size with no <c>_Process</c> and no
+    /// resize hook -- and it is why the badge must be the panel's SIBLING: a
+    /// descendant would take the panel's motion TWICE.
+    ///
+    /// With no panel to read there is nothing to be relative TO, and the corner
+    /// literal is the honest guess rather than nothing on screen.
+    /// </summary>
+    private static void Apply(
+        Control root, Control? panel, float side, Vector2 viewport)
+    {
+        if (panel == null)
+        {
+            var guess = Place(
+                new Rect2(EnergyCounterOffset, new Vector2(side, side)),
+                side, viewport);
+            root.AnchorLeft = 0f;
+            root.AnchorTop = 0f;
+            root.AnchorRight = 0f;
+            root.AnchorBottom = 0f;
+            root.OffsetLeft = guess.Position.X;
+            root.OffsetTop = guess.Position.Y;
+            root.OffsetRight = guess.End.X;
+            root.OffsetBottom = guess.End.Y;
+            return;
+        }
+
+        var rect = new Rect2(panel.Position, panel.Size);
+        var delta = Place(rect, side, viewport).Position - rect.Position;
+
+        root.AnchorLeft = panel.AnchorLeft;
+        root.AnchorRight = panel.AnchorLeft;
+        root.AnchorTop = panel.AnchorTop;
+        root.AnchorBottom = panel.AnchorTop;
+        root.OffsetLeft = panel.OffsetLeft + delta.X;
+        root.OffsetTop = panel.OffsetTop + delta.Y;
+        root.OffsetRight = root.OffsetLeft + side;
+        root.OffsetBottom = root.OffsetTop + side;
+    }
+
+    /// <summary>
+    /// The node tree: a glyph with the count centred on it, in a square of
+    /// <paramref name="squareSide"/>. The GEOMETRY is <see cref="Apply"/>'s, so
+    /// the placement rule lives in one pure function rather than half here and
+    /// half at the call site.
+    /// </summary>
+    private static Control Build(float squareSide)
     {
         var root = new Control
         {
@@ -236,32 +391,7 @@ public static class SparkCounter
             FocusMode = Control.FocusModeEnum.None,
         };
 
-        if (star != null)
-        {
-            root.AnchorLeft = star.AnchorLeft;
-            root.AnchorTop = star.AnchorTop;
-            root.AnchorRight = star.AnchorRight;
-            root.AnchorBottom = star.AnchorBottom;
-            root.OffsetLeft = star.OffsetLeft;
-            root.OffsetTop = star.OffsetTop;
-            root.OffsetRight = star.OffsetRight;
-            root.OffsetBottom = star.OffsetBottom;
-        }
-        else
-        {
-            root.AnchorLeft = 0f;
-            root.AnchorTop = 0f;
-            root.AnchorRight = 0f;
-            root.AnchorBottom = 0f;
-            root.OffsetLeft = EnergyCounterOffset.X - FallbackSide;
-            root.OffsetTop = EnergyCounterOffset.Y;
-            root.OffsetRight = EnergyCounterOffset.X;
-            root.OffsetBottom = EnergyCounterOffset.Y + FallbackSide;
-        }
-
-        var side = star != null && star.Size.X > 0f && star.Size.Y > 0f
-            ? star.Size
-            : new Vector2(FallbackSide, FallbackSide);
+        var side = new Vector2(squareSide, squareSide);
 
         var icon = new TextureRect
         {

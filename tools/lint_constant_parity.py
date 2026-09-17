@@ -609,19 +609,25 @@ UNMIRRORED: dict[str, str] = {
         "Plans she may write -- and the overflow is printed as `+N`, so the "
         "sim has nothing to compare and no rule is hiding here.",
     # The Spark counter in the energy area (`EB-621`), on the same terms. Its
-    # RECT is deliberately not here: the element reads `%StarCounter`'s own
-    # anchors and offsets off the live scene rather than writing pixels down,
-    # and the one literal it does take -- the energy orb's displacement -- is
-    # the base game's own line, classified below. What is left is a font size
-    # and a fallback square for the case where that node cannot be found.
-    # The number the badge DRAWS is `SparkPower`'s stack, which is a rule and
-    # is mirrored as the Spark bank elsewhere in this file.
+    # A POSITION is deliberately not here: the element derives its placement
+    # from `%EnergyCounterContainer`'s own rect at runtime rather than writing
+    # a screen position down (`EB-815`). What is left is a font size, a
+    # fallback square for the case where the star counter cannot be measured,
+    # a margin expressed in the panel's own units, and the energy orb's
+    # displacement -- the base game's own line, kept as a fallback anchor and
+    # classified below. The number the badge DRAWS is `SparkPower`'s stack,
+    # which is a rule and is mirrored as the Spark bank elsewhere in this file.
     "SparkCounter.FallbackSide":
         "presentation: the badge's square in pixels when `%StarCounter` "
         "reports no size yet, so the element still lands somewhere rather "
         "than collapsing to nothing.",
     "SparkCounter.CountFontSize":
         "presentation: the Spark count's font size.",
+    "SparkCounter.PanelMargin":
+        "presentation: the gap the badge keeps from the energy panel, in the "
+        "panel's own units. It is a MARGIN rather than a position -- it is "
+        "added to the panel's own edge at runtime -- and the sim has no "
+        "energy panel, no viewport and nothing that could overlap.",
     # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
     # TIME. They decide how long an animation and a speech bubble occupy the
     # frame and nothing else: no hit is added, removed, resized or reordered by
