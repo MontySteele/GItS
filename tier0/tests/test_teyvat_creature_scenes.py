@@ -379,6 +379,50 @@ def test_the_death_clip_is_the_length_the_seam_will_report():
         assert 0.5 <= death.length <= 30.0, (name, death.length)
 
 
+def test_the_idle_tempo_is_the_one_the_user_look_asked_for():
+    """`EB-816`, [USER] on `0.2.3656` (2026-09-17): a pack of slimes "all
+    bobbing at the exact same time at high speed".
+
+    HIGH SPEED was `bounce`'s idle, a whole squash-and-stretch cycle in one
+    second. It is two seconds now, with a rest at the bottom of the squash;
+    `hover` went 2.4 -> 3.0 beside it. The other three sets were not the
+    complaint and did not move, and pinning THEM is the point of this test as
+    much as pinning the two: a tempo pass that quietly retuned `stand` would
+    have changed 72 rows nobody looked at.
+
+    Seen to FAIL: bounce was 1.0 and hover 2.4.
+    """
+    idles = {name: next(c for c in clips if c.name == "idle").length
+             for name, clips in gen.MOTIONS.items()}
+
+    assert idles["bounce"] == 2.0
+    assert idles["hover"] == 3.0
+    assert idles["stand"] == 2.6
+    assert idles["loom"] == 3.5
+    assert idles["mech"] == 1.0
+
+    # THE REST AT THE BOTTOM is the shape, not just the length: the squash
+    # value is held across two adjacent keys, which is what reads as weight.
+    bounce = next(c for c in gen.MOTIONS["bounce"] if c.name == "idle")
+    track = next(t for t in bounce.tracks if t.path == gen.RIG_SCALE)
+    assert track.times == (0, 0.5, 0.7, 1.2, 2.0)
+    assert track.values[1] == track.values[2]
+    assert 0.15 <= track.times[2] - track.times[1] <= 0.25
+
+    # And the amplitude eased down rather than up -- a slower body moving as
+    # far as it did would read as a pulse. 0.8x of what it was.
+    assert track.values[1] == (1.032, 0.976)
+    assert track.values[3] == (0.976, 1.032)
+
+    # Nothing but the two idles moved: attack, hurt and death are untouched
+    # across every set, so R213's freeze on what an enemy DOES is not even
+    # adjacent to this.
+    assert [c.length for c in gen.MOTIONS["bounce"] if c.name != "idle"] \
+        == [0.001, 0.5, 0.4, 1.2]
+    assert [c.length for c in gen.MOTIONS["hover"] if c.name != "idle"] \
+        == [0.001, 0.5, 0.4, 1.2]
+
+
 def test_no_generated_file_carries_a_comment_line():
     """A `.tscn`/`.tres` that fails to parse falls back SILENTLY.
 
