@@ -153,13 +153,21 @@ def test_the_spikes_one_row_survives_the_generalisation():
 #: (`Patches/ModelDbActsPatch.Swaps`), so a row keyed outside its own zone can
 #: never fire -- which is exactly what the first pass shipped and the running
 #: game caught.
+#:
+#: All 29 Overgrowth entries, not the 22 the first pass had names for: the
+#: 2026-09-17 census re-read `Acts/Overgrowth.cs`'s encounters through
+#: `AllPossibleMonsters` and every `ModelDb.Monster<>` reference, and found the
+#: five Ruby Raiders, the Wriggler and the Eye with Teeth, which the act-1
+#: mapping packet's Table A never scored.
 OVERGROWTH = {
-    "BYGONE_EFFIGY", "BYRDONIS", "CEREMONIAL_BEAST", "CUBEX_CONSTRUCT",
+    "ASSASSIN_RUBY_RAIDER", "AXE_RUBY_RAIDER", "BRUTE_RUBY_RAIDER",
+    "BYGONE_EFFIGY", "BYRDONIS", "CEREMONIAL_BEAST", "CROSSBOW_RUBY_RAIDER",
+    "CUBEX_CONSTRUCT", "EYE_WITH_TEETH",
     "FLYCONID", "FOGMOG", "FUZZY_WURM_CRAWLER", "INKLET", "KIN_FOLLOWER",
     "KIN_PRIEST", "LEAF_SLIME_M", "LEAF_SLIME_S", "MAWLER", "NIBBIT",
     "PHROG_PARASITE", "SHRINKER_BEETLE", "SLITHERING_STRANGLER",
-    "SNAPPING_JAXFRUIT", "TWIG_SLIME_M", "TWIG_SLIME_S", "VANTOM",
-    "VINE_SHAMBLER",
+    "SNAPPING_JAXFRUIT", "TRACKER_RUBY_RAIDER", "TWIG_SLIME_M",
+    "TWIG_SLIME_S", "VANTOM", "VINE_SHAMBLER", "WRIGGLER",
 }
 UNDERDOCKS = {
     "CALCIFIED_CULTIST", "CORPSE_SLUG", "DAMP_CULTIST", "FAT_GREMLIN",
