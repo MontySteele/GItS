@@ -282,6 +282,34 @@ before the veto: the four **Abyss Mages'** shield interiors *do* key at 48, so
 their discs draw as a glowing rim with the arena showing through rather than
 as a filled plate (rim and mage intact). `cut:0.2` on those four rows restores
 the filled disc if that is the wrong read.
+
+**RE-CUT 2026-09-17 ([USER] vetoed the first sheet; three defects, three
+fixes).** (1) *Black bodies were being eaten.* A flat 48 RGB from one corner
+colour also matches a neutral black, so `frostarm_lawachurl`, the Rifthounds,
+the Fatui and the Eremites came back full of holes wherever a hairline of keyed
+pixels let the border flood into the body. The matte now keys against a **local
+backdrop model** — a robust quadratic surface fit to the border ring, then
+inpainted with the backdrop's own local colour so the nebula is followed too —
+plus a **blue-chroma gate**: the Archive backdrop is navy (blueness +30 to +50)
+and a body's black is neutral (blueness near 0), which is the one axis the two
+separate on. Measured on the hard cases, the border ring's own 99th-percentile
+distance to the fitted surface is 9–12, so the default tolerance drops from 48
+to **30** and the reachability flood now runs on the key eroded by two pixels,
+which is what stops a hairline carrying it into a torso. (2) *The Abyss Mages
+lost their eyes.* The pocket pass removed enclosed regions by AREA alone, and a
+dark face is dark; it now also requires a pocket to MATCH the backdrop model
+(mean residual under 55% of the tolerance), so the haze goes and the face
+stays. With the tighter key the discs also come back **filled**, which is what
+the note above offered — one notch of each disc's upper right is still open,
+where the source's bubble interior is the backdrop colour exactly. (3) *Group
+captures framed half a second body.* A **figure-selection** step after the
+matte keeps the largest alpha component plus anything inside its bbox grown by
+8%, drops the rest and names each drop in the run's flags; `;figure=all` keeps
+every component (`fatui_cryo_cicin_mage`'s cicins take it). The spec column
+grew the two knobs as `;key=value` rather than a fifth punctuation mark:
+`cut[@tolerance][/fit-focus][:pocket][;chroma=N][;figure=main|all]`, default
+`cut@30/top:0.004;chroma=12;figure=main`. Still uncuttable and flagged on the
+sheet: `remus`, `katayoun` and `large_hydro_slime`.
 (b) **The plan produces and the ledger records:** 81 rows in `art/plan.tsv`
 write `ImageGen/images/teyvat/creature_visuals/<body>.png` — the directory
 `tools/build_pck.ps1`'s Teyvat block copies to `res://teyvat/creature_visuals/`

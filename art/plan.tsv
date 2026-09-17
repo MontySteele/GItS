@@ -1910,8 +1910,8 @@ relic_salon_solitaire	ImageGen/images/furina/relics/salon_solitaire.png	256	256	
 # -- act 1 Mondstadt --
 portrait_wooden_shield_hilichurl_guard	ImageGen/images/teyvat/creature_visuals/wooden_shield_hilichurl_guard.png	240	280	cut	cut	auto	1	png	Enemy Wooden Shield Hilichurl Guard.png		splash
 portrait_hilichurl	ImageGen/images/teyvat/creature_visuals/hilichurl.png	240	280	cut	cut	auto	1	png	Enemy Hilichurl.png		splash
-portrait_dendro_slime	ImageGen/images/teyvat/creature_visuals/dendro_slime.png	240	280	cut	cut	auto	1	png	Enemy Dendro Slime.png		splash
-portrait_cryo_slime	ImageGen/images/teyvat/creature_visuals/cryo_slime.png	240	280	cut	cut	auto	1	png	Enemy Cryo Slime.png		splash
+portrait_dendro_slime	ImageGen/images/teyvat/creature_visuals/dendro_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Dendro Slime.png		splash
+portrait_cryo_slime	ImageGen/images/teyvat/creature_visuals/cryo_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Cryo Slime.png		splash
 portrait_rockfond_rifthound	ImageGen/images/teyvat/creature_visuals/rockfond_rifthound.png	240	280	cut	cut	auto	1	png	Enemy Rockfond Rifthound.png		splash
 portrait_anemo_samachurl	ImageGen/images/teyvat/creature_visuals/anemo_samachurl.png	240	280	cut	cut	auto	1	png	Enemy Anemo Samachurl.png		splash
 portrait_fatui_hydrogunner_legionnaire	ImageGen/images/teyvat/creature_visuals/fatui_hydrogunner_legionnaire.png	240	280	cut	cut	auto	1	png	Enemy Fatui Hydrogunner Legionnaire.png		splash
@@ -1921,15 +1921,15 @@ portrait_hydro_abyss_mage	ImageGen/images/teyvat/creature_visuals/hydro_abyss_ma
 portrait_pyro_abyss_mage	ImageGen/images/teyvat/creature_visuals/pyro_abyss_mage.png	240	280	cut	cut	auto	1	png	Enemy Pyro Abyss Mage.png		splash
 portrait_electro_abyss_mage	ImageGen/images/teyvat/creature_visuals/electro_abyss_mage.png	240	280	cut	cut	auto	1	png	Enemy Electro Abyss Mage.png		splash
 portrait_cryo_abyss_mage	ImageGen/images/teyvat/creature_visuals/cryo_abyss_mage.png	240	280	cut	cut	auto	1	png	Enemy Cryo Abyss Mage.png		splash
-portrait_boreas	ImageGen/images/teyvat/creature_visuals/boreas.png	240	280	cut	cut@64	auto	1	png	Enemy Boreas.png		splash
+portrait_boreas	ImageGen/images/teyvat/creature_visuals/boreas.png	240	280	cut	cut@50	auto	1	png	Enemy Boreas.png		splash
 portrait_cryo_regisvine	ImageGen/images/teyvat/creature_visuals/cryo_regisvine.png	240	280	cut	cut	auto	1	png	Enemy Cryo Regisvine.png		splash
 # -- act 1 Liyue --
 portrait_treasure_hoarder_handyman	ImageGen/images/teyvat/creature_visuals/treasure_hoarder_handyman.png	240	280	cut	cut	auto	1	png	Enemy Treasure Hoarder Handyman.png		splash
 portrait_treasure_hoarder_scout	ImageGen/images/teyvat/creature_visuals/treasure_hoarder_scout.png	240	280	cut	cut	auto	1	png	Enemy Treasure Hoarder Scout.png		splash
-portrait_geo_slime	ImageGen/images/teyvat/creature_visuals/geo_slime.png	240	280	cut	cut	auto	1	png	Enemy Geo Slime.png		splash
-portrait_hydro_slime	ImageGen/images/teyvat/creature_visuals/hydro_slime.png	240	280	cut	cut	auto	1	png	Enemy Hydro Slime.png		splash
+portrait_geo_slime	ImageGen/images/teyvat/creature_visuals/geo_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Geo Slime.png		splash
+portrait_hydro_slime	ImageGen/images/teyvat/creature_visuals/hydro_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Hydro Slime.png		splash
 portrait_geovishap_hatchling	ImageGen/images/teyvat/creature_visuals/geovishap_hatchling.png	240	280	cut	cut	auto	1	png	Enemy Geovishap Hatchling.png		splash
-portrait_large_geo_slime	ImageGen/images/teyvat/creature_visuals/large_geo_slime.png	240	280	cut	cut	auto	1	png	Enemy Large Geo Slime.png		splash
+portrait_large_geo_slime	ImageGen/images/teyvat/creature_visuals/large_geo_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Large Geo Slime.png		splash
 portrait_treasure_hoarder_marksman	ImageGen/images/teyvat/creature_visuals/treasure_hoarder_marksman.png	240	280	cut	cut	auto	1	png	Enemy Treasure Hoarder Marksman.png		splash
 portrait_hilichurl_fighter	ImageGen/images/teyvat/creature_visuals/hilichurl_fighter.png	240	280	cut	cut	auto	1	png	Enemy Hilichurl Fighter.png		splash
 portrait_rock_shield_hilichurl_guard	ImageGen/images/teyvat/creature_visuals/rock_shield_hilichurl_guard.png	240	280	cut	cut	auto	1	png	Enemy Rock Shield Hilichurl Guard.png		splash
@@ -1950,15 +1950,15 @@ portrait_yumkasaurus_warrior_flowing_skyfire	ImageGen/images/teyvat/creature_vis
 portrait_rock_cavernous_wayob_manifestation	ImageGen/images/teyvat/creature_visuals/rock_cavernous_wayob_manifestation.png	240	280	cut	cut	auto	1	png	Enemy Rock-Cavernous Wayob Manifestation.png		splash
 portrait_everlasting_lord_of_arcane_wisdom	ImageGen/images/teyvat/creature_visuals/everlasting_lord_of_arcane_wisdom.png	240	280	cut	cut	auto	1	png	Enemy Everlasting Lord of Arcane Wisdom.png		splash
 portrait_magatsu_mitake_narukami_no_mikoto	ImageGen/images/teyvat/creature_visuals/magatsu_mitake_narukami_no_mikoto.png	240	280	cut	cut	auto	1	png	Enemy Magatsu Mitake Narukami no Mikoto.png		splash
-portrait_chanca	ImageGen/images/teyvat/creature_visuals/chanca.png	240	280	cut	cut	auto	1	png	NPC Chanca.png		splash
+portrait_chanca	ImageGen/images/teyvat/creature_visuals/chanca.png	240	280	cut	cut@70;chroma=60	auto	1	png	NPC Chanca.png		splash
 # -- act 2 Inazuma --
 portrait_nobushi_kikouban	ImageGen/images/teyvat/creature_visuals/nobushi_kikouban.png	240	280	cut	cut	auto	1	png	Enemy Nobushi - Kikouban.png		splash
-portrait_thundercraven_rifthound_whelp	ImageGen/images/teyvat/creature_visuals/thundercraven_rifthound_whelp.png	240	280	cut	cut	auto	1	png	Enemy Thundercraven Rifthound Whelp.png		splash
+portrait_thundercraven_rifthound_whelp	ImageGen/images/teyvat/creature_visuals/thundercraven_rifthound_whelp.png	240	280	cut	cut/contain	auto	1	png	Enemy Thundercraven Rifthound Whelp.png		splash
 portrait_thundercraven_rifthound	ImageGen/images/teyvat/creature_visuals/thundercraven_rifthound.png	240	280	cut	cut	auto	1	png	Enemy Thundercraven Rifthound.png		splash
 portrait_primordial_bathysmal_vishap	ImageGen/images/teyvat/creature_visuals/primordial_bathysmal_vishap.png	240	280	cut	cut	auto	1	png	Enemy Primordial Bathysmal Vishap.png		splash
 portrait_wooden_shieldwall_mitachurl	ImageGen/images/teyvat/creature_visuals/wooden_shieldwall_mitachurl.png	240	280	cut	cut	auto	1	png	Enemy Wooden Shieldwall Mitachurl.png		splash
 portrait_dendro_samachurl	ImageGen/images/teyvat/creature_visuals/dendro_samachurl.png	240	280	cut	cut	auto	1	png	Enemy Dendro Samachurl.png		splash
-portrait_fatui_cryo_cicin_mage	ImageGen/images/teyvat/creature_visuals/fatui_cryo_cicin_mage.png	240	280	cut	cut	auto	1	png	Enemy Fatui Cryo Cicin Mage.png		splash
+portrait_fatui_cryo_cicin_mage	ImageGen/images/teyvat/creature_visuals/fatui_cryo_cicin_mage.png	240	280	cut	cut;figure=all	auto	1	png	Enemy Fatui Cryo Cicin Mage.png		splash
 portrait_electro_specter	ImageGen/images/teyvat/creature_visuals/electro_specter.png	240	280	cut	cut	auto	1	png	Enemy Electro Specter.png		splash
 portrait_kairagi_fiery_might	ImageGen/images/teyvat/creature_visuals/kairagi_fiery_might.png	240	280	cut	cut	auto	1	png	Enemy Kairagi Fiery Might.png		splash
 portrait_hirayama	ImageGen/images/teyvat/creature_visuals/hirayama.png	240	280	cut	cut	auto	1	png	NPC Hirayama.png		splash
@@ -1972,8 +1972,8 @@ portrait_suppression_specialist_mek	ImageGen/images/teyvat/creature_visuals/supp
 portrait_overgrown_breacher_primus	ImageGen/images/teyvat/creature_visuals/overgrown_breacher_primus.png	240	280	cut	cut	auto	1	png	Enemy Overgrown Breacher Primus.png		splash
 portrait_annihilation_specialist_mek	ImageGen/images/teyvat/creature_visuals/annihilation_specialist_mek.png	240	280	cut	cut	auto	1	png	Enemy Annihilation Specialist Mek.png		splash
 portrait_frostarm_lawachurl	ImageGen/images/teyvat/creature_visuals/frostarm_lawachurl.png	240	280	cut	cut	auto	1	png	Enemy Frostarm Lawachurl.png		splash
-portrait_large_electro_slime	ImageGen/images/teyvat/creature_visuals/large_electro_slime.png	240	280	cut	cut	auto	1	png	Enemy Large Electro Slime.png		splash
-portrait_large_hydro_slime	ImageGen/images/teyvat/creature_visuals/large_hydro_slime.png	240	280	cut	cut	auto	1	png	Enemy Large Hydro Slime.png		splash
+portrait_large_electro_slime	ImageGen/images/teyvat/creature_visuals/large_electro_slime.png	240	280	cut	cut@60/contain	auto	1	png	Enemy Large Electro Slime.png		splash
+portrait_large_hydro_slime	ImageGen/images/teyvat/creature_visuals/large_hydro_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Large Hydro Slime.png		splash
 portrait_mirror_maiden	ImageGen/images/teyvat/creature_visuals/mirror_maiden.png	240	280	cut	cut	auto	1	png	Enemy Mirror Maiden.png		splash
 portrait_shatterstone_breacher_primus	ImageGen/images/teyvat/creature_visuals/shatterstone_breacher_primus.png	240	280	cut	cut	auto	1	png	Enemy Shatterstone Breacher Primus.png		splash
 portrait_electro_regisvine	ImageGen/images/teyvat/creature_visuals/electro_regisvine.png	240	280	cut	cut	auto	1	png	Enemy Electro Regisvine.png		splash

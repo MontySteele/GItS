@@ -14,7 +14,15 @@
   teyvat-portrait-sources-2026-09-16.md): every one is a `truecolour` screen
   capture of the in-game Archive page, and media.md §3 requires alpha because
   a still portrait composites over the arena. focus carries
-  `cut[@tolerance][/fit-focus][:pocket]`, default `cut@48/top:0.004`.
+  `cut[@tolerance][/fit-focus][:pocket][;key=value...]`, default
+  `cut@30/top:0.004;chroma=12;figure=main`. The matte keys against a LOCAL
+  backdrop MODEL (a robust quadratic surface fit to the border) rather than a
+  flat RGB distance from one corner colour, plus a blue-chroma gate, because
+  the Archive backdrop is navy and a flat 48 also matched black body pixels
+  (2026-09-17: frostarm_lawachurl, the Rifthounds and the Fatui came back full
+  of holes). `figure=main` then keeps the main body and drops the detached
+  flanking figures the Archive GROUP captures bring along (the slimes);
+  `figure=all` keeps every component.
 - raw: byte-for-byte copy (combat-model source art)
 - gif sources: extract the frame at frame_pct% through the clip
 - svg sources: render via macOS qlmanage; fall back to the wiki's same-name PNG
@@ -246,29 +254,41 @@ def cover_autocrop(img, w, h, spec):
     return crop.crop((x, y, x + w, y + h))
 
 
-CUT_TOLERANCE = 48      # RGB euclidean distance from the seeded backdrop
+CUT_TOLERANCE = 30      # RGB distance from the LOCAL backdrop model (see below)
+CUT_CHROMA = 12         # how much blue chroma a backdrop pixel may be missing
 CUT_WORK_MAX = 900      # the matte is solved at this size, not on a 2880px plate
 CUT_FEATHER = 1.2       # gaussian sigma on the matte, in WORK pixels
 CUT_BORDER_ALPHA = 0.98  # border already this transparent => honour that alpha
 CUT_SPECK_FRAC = 0.0005  # foreground islands below this share of the frame go
 CUT_POCKET_FRAC = 0.004  # ENCLOSED backdrop at or above this share is removed
+CUT_POCKET_RESID = 0.55  # ...and only if it matches the model this tightly
+CUT_BRIDGE = 2          # hairline leaks this thin do not carry the flood
+CUT_BORDER_BAND = 0.012  # share of the long edge sampled as "certainly backdrop"
+CUT_FIGURE_MARGIN = 0.08  # a satellite inside the main bbox grown by this stays
+CUT_FIGURE_TIE = 0.80   # components this close in area to the largest tie-break
 
 
 def _cut_spec(spec):
-    """Parse the `cut` row's focus column: `cut[@tolerance][/fit-focus][:pocket]`.
+    """Parse the `cut` row's focus column.
 
-    Four things have to ride in one TSV column, so they are separated rather
-    than overloaded: `@` is the matte tolerance, `/` is the focus handed to the
-    FIT afterwards, and `:` is the enclosed-pocket threshold as a fraction of
-    the frame. `cut`, `cut@60`, `cut@60/center`, `cut/contain` and
-    `cut@60/top:0.01` are all legal; a bare focus keyword (`top`) is accepted
-    too, so a row that says nothing about the matte reads as "default matte,
-    this focus".
+    `cut[@tolerance][/fit-focus][:pocket][;key=value][;key=value]`
 
-    Returns (tolerance, fit, focus, pocket) with fit in {cover, contain}.
+    The positional fields are separated rather than overloaded: `@` is the
+    matte tolerance, `/` is the focus handed to the FIT afterwards, and `:` is
+    the enclosed-pocket threshold as a fraction of the frame. Anything added
+    after those rides as `;key=value` so the grammar can grow without a fifth
+    punctuation mark; `chroma` and `figure` are the two keys today. `cut`,
+    `cut@60`, `cut@60/center`, `cut/contain`, `cut@60/top:0.01` and
+    `cut;figure=all` are all legal, and a bare focus keyword (`top`) is
+    accepted too, so a row that says nothing about the matte reads as "default
+    matte, this focus".
+
+    Returns (tolerance, fit, focus, pocket, chroma, figure) with fit in
+    {cover, contain} and figure in {main, all}.
     """
     spec = (spec or "").strip() or "cut"
-    head, _, pocket = spec.partition(":")
+    head, *extras = spec.split(";")
+    head, _, pocket = head.partition(":")
     head, _, focus = head.partition("/")
     head, _, tol = head.partition("@")
     head = head.strip() or "cut"
@@ -285,38 +305,228 @@ def _cut_spec(spec):
     except ValueError:
         raise SystemExit(
             f"cut: bad pocket fraction {pocket!r} (want cut[...][:fraction])")
+    chroma, figure = CUT_CHROMA, "main"
+    for extra in extras:
+        extra = extra.strip()
+        if not extra:
+            continue
+        key, _, value = extra.partition("=")
+        key, value = key.strip(), value.strip()
+        if key == "chroma":
+            try:
+                chroma = float(value)
+            except ValueError:
+                raise SystemExit(f"cut: bad chroma {value!r} (want ;chroma=N)")
+        elif key == "figure":
+            if value not in ("main", "all"):
+                raise SystemExit(
+                    f"cut: bad figure {value!r} (want ;figure=main|all)")
+            figure = value
+        else:
+            raise SystemExit(
+                f"cut: unknown option {extra!r} (want ;chroma=N or ;figure=main|all)")
     fit = "cover"
     if focus == "contain":
         fit, focus = "contain", "center"
-    return tolerance, fit, focus, pocket_frac
+    return tolerance, fit, focus, pocket_frac, chroma, figure
 
 
-def _backdrop_alpha(img, tolerance, pocket_frac=CUT_POCKET_FRAC):
+def _erode(mask, k):
+    """k iterations of a 4-connected erosion, treating OUTSIDE the frame as set.
+
+    Outside-is-set matters: the flood is seeded on the border, so eroding the
+    border ring away would leave the seed row empty and the matte would key
+    nothing at all.
+    """
+    import numpy as np
+    for _ in range(k):
+        p = np.pad(mask, 1, constant_values=True)
+        mask = (p[1:-1, 1:-1] & p[:-2, 1:-1] & p[2:, 1:-1]
+                & p[1:-1, :-2] & p[1:-1, 2:])
+    return mask
+
+
+def _dilate(mask, k):
+    import numpy as np
+    for _ in range(k):
+        p = np.pad(mask, 1, constant_values=False)
+        mask = (p[1:-1, 1:-1] | p[:-2, 1:-1] | p[2:, 1:-1]
+                | p[1:-1, :-2] | p[1:-1, 2:])
+    return mask
+
+
+def _components(mask):
+    """Every 4-connected component of `mask`, largest first, as bool arrays."""
+    import numpy as np
+    out = []
+    todo = mask.copy()
+    ys, xs = np.nonzero(mask)
+    for y, x in zip(ys.tolist(), xs.tolist()):
+        if not todo[y, x]:
+            continue
+        comp = _flood(todo, [(y, x)])
+        todo &= ~comp
+        out.append(comp)
+    out.sort(key=lambda c: -int(c.sum()))
+    return out
+
+
+def _backdrop_model(rgb, band):
+    """Robust quadratic surface fit to the border ring, per channel.
+
+    Why a MODEL and not a colour. The Archive backdrop is a smooth navy
+    vignette with a starfield and a reflective floor, so the shipped rule --
+    "within `tolerance` RGB of the nearest corner colour" -- had to run a wide
+    tolerance (48) just to cover the vignette's own swing from the top corners
+    to the bottom ones. At 48 a black body pixel is INSIDE the key: measured
+    2026-09-17, frostarm_lawachurl's shaded fur sits ~35-48 from the corner
+    navy, and the first 81-row cut came back with the body full of holes
+    wherever a hairline of keyed pixels let the border flood in. Fitting the
+    vignette instead removes that swing from the residual: the border ring's
+    own 99th-percentile distance to the fitted surface is 9-12 across the hard
+    cases, so a tolerance of 26 is still three sigma of real backdrop and no
+    longer reaches a neutral black.
+
+    Robust because the figure TOUCHES the border on some captures (the slimes,
+    Boreas): a plain least squares would drag the surface toward a green slime
+    and then key half the sky as figure. Four rounds of fit-and-reject on the
+    residual, keeping the pixels the surface already explains.
+    """
+    import numpy as np
+
+    h, w = rgb.shape[:2]
+    yy, xx = np.mgrid[0:h, 0:w]
+    X, Y = (xx / w).astype(np.float64), (yy / h).astype(np.float64)
+    basis = np.stack([np.ones_like(X), X, Y, X * X, Y * Y, X * Y], axis=-1)
+
+    k = max(2, int(band * max(h, w)))
+    m = np.zeros((h, w), dtype=bool)
+    m[:k] = m[-k:] = True
+    m[:, :k] = m[:, -k:] = True
+
+    model = None
+    for _ in range(4):
+        A = basis[m]
+        if len(A) < 60:
+            break
+        model = np.zeros(rgb.shape, dtype=np.float64)
+        for c in range(3):
+            coef, *_ = np.linalg.lstsq(A, rgb[:, :, c][m].astype(np.float64),
+                                       rcond=None)
+            model[:, :, c] = basis @ coef
+        r = np.sqrt(((rgb - model) ** 2).sum(axis=2))
+        keep = m & (r <= max(8.0, float(np.percentile(r[m], 70)) * 2.0))
+        if keep.sum() < 60 or keep.sum() == m.sum():
+            break
+        m = keep
+    return model
+
+
+def _box(a, r, axis):
+    """Unnormalised box sum of width 2r+1 along `axis`, edges clamped."""
+    import numpy as np
+    a = np.moveaxis(a, axis, 0)
+    pad = np.concatenate([np.repeat(a[:1], r, axis=0), a,
+                          np.repeat(a[-1:], r, axis=0)], axis=0)
+    c = np.cumsum(pad, axis=0)
+    c = np.concatenate([np.zeros_like(c[:1]), c], axis=0)
+    out = (c[2 * r + 1:] - c[:-(2 * r + 1)]) / (2 * r + 1)
+    return np.moveaxis(out, 0, axis)
+
+
+def _refine_model(rgb, model, tolerance):
+    """Inpaint the quadratic with the backdrop's own LOCAL colour.
+
+    A quadratic carries the vignette but not the nebula: several captures
+    (frostarm_lawachurl, rock_shield_hilichurl_guard) have a lighter cloud
+    washed across one corner, and a surface smooth enough to be robust cannot
+    follow it -- so the nebula sat 30-40 off the model and came through the cut
+    as a navy scarf draped over the body. This second pass takes the pixels the
+    quadratic ALREADY explains as certain backdrop, blurs them heavily with a
+    weighted (normalised-convolution) blur so the estimate spreads across the
+    figure from the sky around it, and keys against that. Where no confident
+    backdrop is near, the weight goes to zero and the quadratic stands.
+    """
+    import numpy as np
+
+    h, w = rgb.shape[:2]
+    conf = np.sqrt(((rgb - model) ** 2).sum(axis=2)) <= max(10.0, tolerance * 0.6)
+    if conf.mean() < 0.05:
+        return model
+    radius = max(4, int(0.06 * max(h, w)))
+
+    def _blur(arr):
+        # Three box passes ~= a gaussian, and a box pass is two cumsums --
+        # PIL's GaussianBlur will not take an "F" image and scipy is not a
+        # dependency of this repo.
+        a = arr.astype(np.float64)
+        for _ in range(3):
+            a = _box(_box(a, radius, 0), radius, 1)
+        return a
+
+    den = _blur(conf.astype(np.float64))
+    out = model.copy()
+    good = den > 0.02
+    for c in range(3):
+        num = _blur(rgb[:, :, c] * conf)
+        out[:, :, c] = np.where(good, num / np.maximum(den, 1e-6), model[:, :, c])
+    return out
+
+
+def _blueness(a):
+    """How blue a colour is, independent of how bright it is.
+
+    The Archive backdrop is navy: B runs 40-85 while R and G sit near 20, so
+    its blueness is +30 to +50. A body's black is NEUTRAL -- R, G and B within
+    a few points of each other, blueness near 0 -- even when its luminance is
+    the backdrop's. That is the one axis on which "dark body" and "dark sky"
+    separate at all, and it is the second half of the key.
+    """
+    return a[..., 2] - 0.5 * (a[..., 0] + a[..., 1])
+
+
+def _backdrop_alpha(img, tolerance=CUT_TOLERANCE, pocket_frac=CUT_POCKET_FRAC,
+                    chroma=CUT_CHROMA, figure="main", dropped=None):
     """Alpha for an Archive capture: opaque figure, transparent backdrop.
 
-    The backdrop is not flat and the naive thresholds both fail on it. It is a
-    dark navy vignette with a faint starfield and a reflective floor, so a
-    single global colour test keys holes through any dark part of the figure,
-    and a plain `getbbox` sees nothing at all because every pixel is opaque.
-    What works is the classic matte: seed on the FOUR CORNERS (which are
-    backdrop on every capture in the survey -- the Archive centres the body
-    with headroom), accept a pixel as backdrop when it is within `tolerance`
-    of a corner colour, and then keep only the part of that set REACHABLE FROM
-    THE BORDER. The reachability pass is what stops a dark navy belly or a
-    shadowed flank from being punched out: it is the same colour as the
-    backdrop but it is not connected to it. A second pass then removes the
-    backdrop POCKETS that rule traps -- keyed regions enclosed by the
-    silhouette -- by area; see the comment on that pass.
+    Five passes, each closing a defect the one before it opens:
+
+    1. KEY against the local backdrop model (`_backdrop_model`), not a flat
+       distance from a corner colour, and require the pixel to be as blue as
+       the model says the backdrop is there (`_blueness`, within `chroma`).
+       Distance alone cannot separate a shaded navy torso from the sky --
+       frostarm_lawachurl's belly reads (13,19,64) against a (7,20,63)
+       backdrop -- so the chroma gate is what saves neutral blacks, and
+       reachability below is what saves the rest.
+    2. REACHABILITY from the border, on the key ERODED by CUT_BRIDGE first.
+       Eroding is the fix for the leak that ate the bodies: a two-pixel
+       hairline of keyed colour between an arm and the frame carried the flood
+       into the torso and hollowed it out. The reached set is dilated back and
+       re-intersected with the key, so the matte keeps its true edge.
+    3. ENCLOSED POCKETS -- sky trapped inside the silhouette, which pass 2
+       cannot reach by construction (`hilichurl_fighter`'s raised club).
+       Removed by area AND by fit: a pocket only goes if it matches the
+       backdrop model TIGHTLY (mean residual under CUT_POCKET_RESID of the
+       tolerance). Area alone took electro_abyss_mage's EYES with the haze
+       inside his shield bubble; a face is dark but it is not the backdrop.
+    4. THE STARFIELD -- foreground islands too small to be a body are pruned,
+       or the alpha bbox is the whole frame and the content trim is a no-op.
+    5. FIGURE SELECTION (`figure=main`, the default) -- Archive GROUP captures
+       (the slimes: three bodies) left the flanking figures half in frame once
+       cover() fitted the whole bbox. Keep the largest component plus anything
+       inside its bbox grown by CUT_FIGURE_MARGIN; drop the rest. `figure=all`
+       keeps every component, for a body whose detached parts matter.
 
     Solved at CUT_WORK_MAX, not at native size. The sources run to 2880x2880
-    and the target is 240x280, so a full-resolution flood fill would spend
-    8.3M pixels of Python to decide sub-pixel detail that the LANCZOS
-    downscale then averages away.
+    and the target is 240x280.
 
-    A source that ALREADY carries alpha (the handful of files a wiki editor
-    cut by hand -- `Enemy Ruin Guard.png`, the `NPC` portraits) is passed
-    through untouched: re-matting a cut-out would only be a second chance to
-    get it wrong.
+    A source that ALREADY carries alpha (`Enemy Ruin Guard.png`, the `NPC`
+    portraits) is passed through untouched: re-matting a cut-out would only be
+    a second chance to get it wrong.
+
+    `dropped`, if given, is a list the figure pass appends one
+    "<area share> at <bbox>" line to per component it removed, so the run can
+    print what it threw away instead of losing it in silence.
     """
     import numpy as np
 
@@ -325,80 +535,80 @@ def _backdrop_alpha(img, tolerance, pocket_frac=CUT_POCKET_FRAC):
     if (border < 8).mean() >= CUT_BORDER_ALPHA:
         return None                      # already cut out; keep its own matte
 
-    # int32, NOT int16: a squared channel difference reaches 255**2 = 65025,
-    # which wraps negative in int16 and hands `sqrt` a negative number. The
-    # warning is the symptom; the matte silently keeping a wrapped pixel is
-    # the defect.
-    rgb = np.asarray(img.convert("RGB"), dtype=np.int32)
+    # float64, NOT int16: a squared channel difference reaches 255**2 = 65025,
+    # which wraps negative in int16 and hands `sqrt` a negative number.
+    rgb = np.asarray(img.convert("RGB"), dtype=np.float64)
     h, w = rgb.shape[:2]
-    seeds = np.array([rgb[0, 0], rgb[0, w - 1], rgb[h - 1, 0], rgb[h - 1, w - 1]],
-                     dtype=np.int32)
-    # distance to the NEAREST corner colour: the vignette darkens toward the
-    # bottom, so the top corners and the bottom corners are different colours
-    # and one seed alone leaves a band of backdrop opaque.
-    d = np.sqrt(((rgb[:, :, None, :] - seeds[None, None, :, :]) ** 2)
-                .sum(axis=3).min(axis=2))
-    cand = d <= tolerance
+    model = _backdrop_model(rgb, CUT_BORDER_BAND)
+    if model is None:                     # frame too small to fit anything
+        return None
+    model = _refine_model(rgb, model, tolerance)
+    resid = np.sqrt(((rgb - model) ** 2).sum(axis=2))
+    chroma_deficit = _blueness(model) - _blueness(rgb)
+    cand = (resid <= tolerance) & (chroma_deficit <= chroma)
 
     seeds_xy = ([(0, x) for x in range(w)] + [(h - 1, x) for x in range(w)]
                 + [(y, 0) for y in range(h)] + [(y, w - 1) for y in range(h)])
-    background = _flood(cand, seeds_xy)
+    if CUT_BRIDGE:
+        core = _erode(cand, CUT_BRIDGE)
+        background = _dilate(_flood(core, seeds_xy), CUT_BRIDGE) & cand
+    else:
+        background = _flood(cand, seeds_xy)
 
-    # ENCLOSED POCKETS. Border-reachability is the rule that saves a dark belly
-    # -- and it is also the rule that keeps a piece of sky trapped inside the
-    # silhouette. Found by eye on the first 81-row run: `hilichurl_fighter`
-    # kept a navy starfield block in the gap between its raised club and its
-    # head, and `hydro_abyss_mage` kept a dark arc against the bottom edge.
-    # Both are backdrop; neither touches the border; nothing in the first pass
-    # can reach either.
-    #
-    # So a second pass over the KEYED-BUT-UNREACHED set, by area. Area is the
-    # whole discriminator and it is the right one: a pocket of sky is a large
-    # keyed region, while a body's own shadow is small and -- the part that
-    # matters -- is not backdrop-coloured across a large area, or the first
-    # pass's tolerance would already be too wide to use. Small keyed regions
-    # are therefore LEFT ALONE, which is what keeps the rule from re-opening
-    # the hole that border-reachability was added to close.
-    #
-    # The threshold rides the spec column as the third field so a row can
-    # raise it (a body with a genuinely dark enclosed feature) or lower it (a
-    # capture with several small pockets) without moving the default.
     if pocket_frac > 0:
         enclosed = cand & ~background
         min_pocket = max(16, int(pocket_frac * h * w))
-        ys, xs = np.nonzero(enclosed)
-        todo = np.ones_like(enclosed)
-        for y, x in zip(ys.tolist(), xs.tolist()):
-            if not todo[y, x]:
+        for comp in _components(enclosed):
+            if int(comp.sum()) < min_pocket:
                 continue
-            comp = _flood(enclosed & todo, [(y, x)])
-            todo &= ~comp
-            if int(comp.sum()) >= min_pocket:
-                background |= comp
+            if float(resid[comp].mean()) > tolerance * CUT_POCKET_RESID:
+                continue                  # dark, but not the backdrop
+            background |= comp
 
-    # THE STARFIELD. The Archive backdrop is sprinkled with faint stars, and a
-    # star is not backdrop-coloured, so the matte above keeps every one of
-    # them -- which leaves the alpha bbox equal to the whole frame and the
-    # content trim a no-op (measured: 100% of the frame still "opaque" on four
-    # of five samples). So drop foreground islands too small to be a body.
-    # The threshold is a fraction of the frame rather than a pixel count
-    # because the matte is solved at a fixed working size; at CUT_WORK_MAX it
-    # is ~20x20px, well under Boreas's floating ice shards and well over a
-    # star.
     fg = ~background
     keep = np.zeros_like(fg)
     min_area = max(16, int(CUT_SPECK_FRAC * h * w))
-    ys, xs = np.nonzero(fg)
-    todo = np.ones_like(fg)
-    for y, x in zip(ys.tolist(), xs.tolist()):
-        if not todo[y, x]:
-            continue
-        comp = _flood(fg & todo, [(y, x)])
-        todo &= ~comp
-        if int(comp.sum()) >= min_area:
-            keep |= comp
-    if not keep.any():                    # nothing survived: keep the raw matte
-        keep = fg
+    comps = [c for c in _components(fg) if int(c.sum()) >= min_area]
+    for comp in comps:
+        keep |= comp
+    if not comps:                         # nothing survived: keep the raw matte
+        return Image.fromarray(np.where(fg, 255, 0).astype("uint8"), "L")
+
+    if figure == "main" and len(comps) > 1:
+        main = comps[0]
+        ys, xs = np.nonzero(main)
+        my0, my1, mx0, mx1 = ys.min(), ys.max(), xs.min(), xs.max()
+        gy = (my1 - my0 + 1) * CUT_FIGURE_MARGIN
+        gx = (mx1 - mx0 + 1) * CUT_FIGURE_MARGIN
+        # Tie-break on distance to the frame centre: the Archive centres the
+        # main body, so when two components are near the same size the centred
+        # one is the subject and the other is a flanking group member.
+        main_area = int(main.sum())
+        for comp in comps[1:]:
+            if int(comp.sum()) >= main_area * CUT_FIGURE_TIE:
+                cy, cx = np.nonzero(comp)
+                d_new = abs(cy.mean() - h / 2) + abs(cx.mean() - w / 2)
+                d_old = abs(ys.mean() - h / 2) + abs(xs.mean() - w / 2)
+                if d_new < d_old:
+                    main, comps[0] = comp, comp
+                    ys, xs = cy, cx
+                    my0, my1, mx0, mx1 = ys.min(), ys.max(), xs.min(), xs.max()
+                    gy = (my1 - my0 + 1) * CUT_FIGURE_MARGIN
+                    gx = (mx1 - mx0 + 1) * CUT_FIGURE_MARGIN
+                    main_area = int(main.sum())
+        keep = main.copy()
+        for comp in comps:
+            if comp is main:
+                continue
+            cy, cx = np.nonzero(comp)
+            inside = (cy.min() >= my0 - gy and cy.max() <= my1 + gy
+                      and cx.min() >= mx0 - gx and cx.max() <= mx1 + gx)
+            if inside:
+                keep |= comp
+            elif dropped is not None:
+                dropped.append(
+                    f"{int(comp.sum()) / (h * w):.1%} at "
+                    f"({cx.min()},{cy.min()})-({cx.max()},{cy.max()})")
     return Image.fromarray(np.where(keep, 255, 0).astype("uint8"), "L")
 
 
@@ -440,13 +650,17 @@ def cut(img, w, h, spec):
     `contain()` -- the same fitters every other mode uses, with the row's own
     focus. Nothing about framing is re-decided here.
     """
-    tolerance, fit, focus, pocket_frac = _cut_spec(spec)
+    tolerance, fit, focus, pocket_frac, chroma, figure = _cut_spec(spec)
     work = img
     scale = CUT_WORK_MAX / max(img.width, img.height)
     if scale < 1:
         work = img.resize((max(1, round(img.width * scale)),
                            max(1, round(img.height * scale))), Image.LANCZOS)
-    matte = _backdrop_alpha(work, tolerance, pocket_frac)
+    dropped = []
+    matte = _backdrop_alpha(work, tolerance, pocket_frac, chroma, figure,
+                            dropped)
+    for d in dropped:
+        flags.append(f"figure={figure} dropped a component: {d}")
     if matte is not None:
         if CUT_FEATHER:
             matte = matte.filter(ImageFilter.GaussianBlur(CUT_FEATHER))
