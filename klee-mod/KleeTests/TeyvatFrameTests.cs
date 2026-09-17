@@ -822,6 +822,65 @@ public class TeyvatFrameTests : IDisposable
                      TeyvatMusic.TrackFor("Mondstadt"));
     }
 
+    /// <summary>
+    /// THE PACKAGED CASE, WHICH IS THE ONLY CASE THAT WILL EVER HAPPEN IN THE
+    /// GAME, and which the pin above does not cover.
+    ///
+    /// `tools/build_pck.ps1` now packs [USER]'s ledgered tracks, and a Godot
+    /// export does NOT put the `.ogg` in the pack: measured on MegaDot 4.5.1
+    /// with the packager's own preset, `teyvat/music/act1_mondstadt/tone.ogg`
+    /// exports as `.godot/imported/tone.ogg-&lt;hash&gt;.oggvorbisstr` plus
+    /// `teyvat/music/act1_mondstadt/tone.ogg.import`, and a mounted pack
+    /// answers `DirAccess.get_files_at` with `["tone.ogg.import"]` alone. So
+    /// the listing this method is given at runtime looks like the one below,
+    /// and before <see cref="TeyvatMusic.ImportSuffix"/> the extension test ran
+    /// against `"tone.ogg.import"`, matched nothing, and the arm was silent
+    /// with the track sitting right there in the pack.
+    ///
+    /// The probes encode the other two measured answers exactly:
+    /// `ResourceLoader.Exists` is TRUE for the stripped `.ogg` and FALSE for
+    /// the sidecar. A reader that forgot to strip cannot pass this by asking
+    /// `ResourceExists` on the raw name.
+    /// </summary>
+    [Fact]
+    public void A_packed_track_is_found_through_its_import_sidecar()
+    {
+        var asked = new List<string>();
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => true;
+        TeyvatMusic.ListFiles = _ => new[] { "windborne_dreams.ogg.import" };
+        TeyvatMusic.ResourceExists = path =>
+        {
+            asked.Add(path);
+            return path.EndsWith(".ogg", StringComparison.Ordinal);
+        };
+
+        Assert.Equal("res://teyvat/music/mondstadt/windborne_dreams.ogg",
+                     TeyvatMusic.TrackFor("Mondstadt"));
+
+        // And the sidecar path is never offered to the loader at all, because
+        // it is not a resource: the measurement says `ResourceLoader.exists`
+        // on it is false.
+        Assert.DoesNotContain("res://teyvat/music/mondstadt/windborne_dreams.ogg.import",
+                              asked);
+    }
+
+    /// <summary>
+    /// The suffix strip must not turn a non-track into a track. `.import` is
+    /// removed and THEN the extension list decides, so a stray
+    /// `readme.txt.import` in a music directory is still nothing.
+    /// </summary>
+    [Fact]
+    public void Stripping_the_sidecar_does_not_widen_the_extension_list()
+    {
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => true;
+        TeyvatMusic.ListFiles = _ => new[] { "readme.txt.import", "cover.png.import" };
+        TeyvatMusic.ResourceExists = _ => true;
+
+        Assert.Null(TeyvatMusic.TrackFor("Mondstadt"));
+    }
+
     // NOT PINNED HERE, and for the boundary's reason rather than for want of
     // trying: that a throwing probe answers null instead of taking the run's
     // music controller down with it. `TrackFor`'s catch clause calls

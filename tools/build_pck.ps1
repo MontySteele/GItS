@@ -342,6 +342,142 @@ if (-not (Test-Path $teyvatRest)) { Note-Skip 'teyvat\rest_site' $teyvatRest } e
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
+# THE MEDIA LEDGER'S MUSIC (R272; docs/current/operations/media.md sec.1-4).
+#
+# The frame's tracks are Tier F exactly as the art is: [USER] puts them under
+# media\out\music\<scene>\ on the art-bearing main checkout, both media roots
+# are gitignored, and the only tracked thing is media\MUSIC.tsv -- the ledger
+# carrying each track's title, origin and licence, so the pre-public copyright
+# pass is `grep PLACEHOLDER-COPYRIGHTED media\*.tsv` and nothing else.
+#
+# THE LEDGER IS THE GATE, NOT THE DIRECTORY. sec.4 step 2: a file under
+# media\out with no ledger row is NEVER copied. So this block enumerates the
+# TSV and not the tree -- the opposite of every block above it, which is why
+# Select-PackablePngs and $pckExclude (both PNG-only, both tree-first) are no
+# help here. A drop with no row has no provenance, and a track with no
+# provenance must not reach a pack that may one day be public.
+#
+# A ROW WHOSE FILE IS ABSENT IS A Note-Skip, on every other block's terms: art
+# never blocks a build, and the gap is printed with the rest at the end. A
+# BROKEN LEDGER IS A THROW -- a duplicate `out` (sec.1's "one producer per
+# out-path"), an unknown scene, a `.wav` (sec.3 places .ogg or .mp3 and never
+# WAV), an unparseable loop_start_s. Those are not absent assets; they are
+# errors in a TRACKED file, always fixable, and silently skipping one would
+# ship a run with no music and a green build.
+#
+# THE PCK PATH IS res://teyvat/music/<scene>/<file>: the namespace
+# klee-mod/KleeCode/Teyvat/TeyvatMusic.cs:Root names, the one media.md sec.7
+# left to the spike, with the ledger's `scene` column VERBATIM as the leaf.
+#
+# AND THE LEAF IS WHERE A GAP IS LEFT ON PURPOSE. `TeyvatMusic.TrackFor` looks
+# up `Root + actEntry.ToLowerInvariant()`, which for the six faces is
+# `mondstadt` / `liyue` / ... -- NOT the ledger's `act1_mondstadt`. So an
+# `act1_mondstadt` row lands in a directory today's reader never asks about,
+# and `boss` / `rest` / `map` / `shop` have no caller at all. Closing that is a
+# naming decision between the ledger's vocabulary and the act id's, and it is
+# not this block's to make: the packager is where the rename WOULD go
+# (TeyvatMusic.cs's header says so), but a rename invented here would be a
+# guess dressed as a mapping. Placing a track is what proves which name the
+# frame wants; the block is deliberately a straight copy until then.
+#
+# AND WHAT THE PACK ACTUALLY HOLDS WAS MEASURED, NOT ASSUMED. Importing
+# teyvat/music/act1_mondstadt/tone.ogg into a scratch project with THIS
+# script's own project.godot and export preset, then exporting, packs exactly
+# two entries for it:
+#
+#     .godot/imported/tone.ogg-65b6e61f5da027ff5c3e1a48630c2f25.oggvorbisstr
+#     teyvat/music/act1_mondstadt/tone.ogg.import
+#
+# and NOT the .ogg. A mounted pack then answers
+# `DirAccess.get_files_at("res://teyvat/music/act1_mondstadt")` with
+# `["tone.ogg.import"]`, `ResourceLoader.exists(".../tone.ogg")` with TRUE and
+# `ResourceLoader.exists(".../tone.ogg.import")` with FALSE. That is the same
+# class of trap as the .tscn.remap stubs documented at the top of this file --
+# met this time by an importer with no "ship it as source" switch to turn off,
+# so the repair is on the READER: TeyvatMusic.TrackFor strips the `.import`
+# suffix off each listed name before it asks ResourceLoader. The derived
+# contract below lists the .ogg, which is the path that loads, and is right for
+# the same reason.
+function Write-AudioImport([string]$path, [string]$ext, [string]$loopStart) {
+    # Godot 4's audio importers read [params] out of an EXISTING .import and
+    # keep them: writing this file before `--import` and letting the importer
+    # fill in [remap]path / [deps] is how a loop point is set headlessly.
+    # Measured on MegaDot 4.5.1: a hand-written file carrying only `importer`
+    # and [params] came back with loop=true / loop_offset=1.25 intact, and the
+    # loaded AudioStreamOggVorbis reported Loop true and LoopOffset 1.25.
+    $seconds = 0.0
+    if (-not [double]::TryParse($loopStart, [Globalization.NumberStyles]::Float,
+                                [Globalization.CultureInfo]::InvariantCulture, [ref]$seconds)) {
+        throw "media\MUSIC.tsv: loop_start_s '$loopStart' is not a number."
+    }
+    if ($seconds -lt 0) { throw "media\MUSIC.tsv: loop_start_s '$loopStart' is negative." }
+    # InvariantCulture on the way out as well as in: a machine with a
+    # comma-decimal locale would otherwise write loop_offset=12,4, which Godot
+    # parses as 12 and loops a minute early with nothing to show for it.
+    $offset = $seconds.ToString([Globalization.CultureInfo]::InvariantCulture)
+    if ($ext -eq '.mp3') { $importer = 'mp3'; $type = 'AudioStreamMP3' }
+    else                 { $importer = 'oggvorbisstr'; $type = 'AudioStreamOggVorbis' }
+    [IO.File]::WriteAllText($path, @"
+[remap]
+
+importer="$importer"
+type="$type"
+
+[params]
+
+loop=true
+loop_offset=$offset
+bpm=0
+beat_count=0
+bar_beats=4
+"@)
+}
+
+$musicLedger = Join-Path $repo 'media\MUSIC.tsv'
+$musicScenes = @('act1_mondstadt', 'act1_liyue', 'boss', 'rest', 'map', 'shop')
+if (-not (Test-Path $musicLedger)) { Note-Skip 'media\MUSIC.tsv' $musicLedger } else {
+    # sec.1's encoding rule, and it is not a formality: read as UTF-8 and split
+    # on TAB alone, so a CRLF line ending cannot ride into the last column and
+    # a `notes` field with spaces in it stays one field. ReadAllLines strips
+    # both line endings and the BOM.
+    $musicRows = @([IO.File]::ReadAllLines($musicLedger, [Text.Encoding]::UTF8))
+    $musicSeen = @{}
+    $musicCopied = 0
+    for ($i = 1; $i -lt $musicRows.Count; $i++) {
+        $line = $musicRows[$i]
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $cols = $line -split "`t"
+        if ($cols.Count -lt 7) {
+            throw "media\MUSIC.tsv line $($i + 1): expected the 8 columns of media.md sec.2, got $($cols.Count)."
+        }
+        $outRel = $cols[0].Trim()
+        $scene  = $cols[2].Trim()
+        $loopAt = $cols[6].Trim()
+        if ($musicSeen.ContainsKey($outRel)) {
+            throw "media\MUSIC.tsv: '$outRel' has more than one row (sec.1: one producer per out-path)."
+        }
+        $musicSeen[$outRel] = $true
+        if ($musicScenes -notcontains $scene) {
+            throw "media\MUSIC.tsv: '$outRel' names scene '$scene'; sec.1 lists $($musicScenes -join ', ')."
+        }
+        $ext = [IO.Path]::GetExtension($outRel).ToLowerInvariant()
+        if ($ext -ne '.ogg' -and $ext -ne '.mp3') {
+            throw "media\MUSIC.tsv: '$outRel' is '$ext'; sec.3 places .ogg or .mp3 and never WAV."
+        }
+        $from = Join-Path $repo (Join-Path 'media\out' $outRel)
+        if (-not (Test-Path $from)) { Note-Skip "media\out\$outRel" $from; continue }
+        $to = Join-Path $work "teyvat\music\$scene"
+        New-Item -ItemType Directory -Force -Path $to | Out-Null
+        $name = [IO.Path]::GetFileName($outRel)
+        Copy-Item $from -Destination (Join-Path $to $name) -Force
+        if ($loopAt) { Write-AudioImport (Join-Path $to "$name.import") $ext $loopAt }
+        $musicCopied++
+    }
+    if ($musicCopied -gt 0) {
+        Write-Host "Packed $musicCopied ledgered track(s) into teyvat\music." -ForegroundColor Cyan
+    }
+}
+
 # Animation sprint 1 (Track B): pre-scaled combat layer sprites for the
 # animated combat scene. Full-res layer masters live in ImageGen/images/model
 # /layers; only the combat-scale derivatives in layers/combat ship, matching
