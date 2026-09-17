@@ -126,7 +126,10 @@ public class KeywordTitleRowTests
 
         Assert.Contains(Il.Calls(run),
                         c => c.EndsWith("CheckKeywordTitleRows", StringComparison.Ordinal));
-        Assert.Equal(20, (int)SelfCheck
+        // 21 since R21, the inherited-relic curation ([USER]'s ruling on QUEUE
+        // pick `fanout-picks-2026-09-16 4.3`, which drops Helical Dart and
+        // Snecko Skull from all three pools).
+        Assert.Equal(21, (int)SelfCheck
             .GetField("RuleCount", HeadlessGame.All)!.GetValue(null)!);
     }
 }

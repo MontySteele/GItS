@@ -46,7 +46,10 @@ public sealed class KokomiRelicPool : RelicPoolModel
     }
 
     private static IEnumerable<RelicModel> Shipped() =>
-        ModelDb.RelicPool<SilentRelicPool>().AllRelics
+        // The borrowed roster MINUS Helical Dart and Snecko Skull (the ruling
+        // on QUEUE pick `fanout-picks-2026-09-16 4.3`, at its default). See
+        // InheritedSilentRelics for why the two go and why the drop is safe.
+        InheritedSilentRelics.Curated()
             .Append(ModelDb.Relic<Relics.PearlOfWisdomRelic>())
             // EPOCH 2 / D1 (audit sec.1.2). The UPGRADED starter was in no pool at
             // all. RelicModel.Pool is a non-virtual First() over AllRelicPools
