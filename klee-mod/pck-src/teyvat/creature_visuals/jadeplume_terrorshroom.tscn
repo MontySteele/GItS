@@ -1,7 +1,7 @@
 [gd_scene load_steps=17 format=3]
 
 [ext_resource type="Texture2D" path="res://teyvat/creature_visuals/jadeplume_terrorshroom.png" id="1_jadep"]
-[ext_resource type="AnimationLibrary" path="res://teyvat/motion/bounce.tres" id="2_motion"]
+[ext_resource type="AnimationLibrary" path="res://teyvat/motion/loom.tres" id="2_motion"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
 animation = &"attack"
