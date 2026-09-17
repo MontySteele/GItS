@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Nodes.Audio;
 
@@ -63,16 +64,23 @@ internal static class NRunMusicController_TeyvatTrack_Patch
     /// </summary>
     private static bool _inArmedStop;
 
-    [HarmonyPostfix]
-    [HarmonyPatch(nameof(NRunMusicController.UpdateMusic))]
-    private static void UpdateMusicPostfix(NRunMusicController __instance)
+    /// <summary>
+    /// THE ONE BODY ALL FOUR ENTRY POINTS SHARE (`EB-814`): resolve the slot
+    /// the current room asks for, play it if it is filed, and stop the game's
+    /// music only once ours is actually running.
+    ///
+    /// Idempotent through <see cref="TeyvatMusic.Play"/>, which is what makes
+    /// four postfixes on one room change cost one track change and not four.
+    /// </summary>
+    private static void Reassert(NRunMusicController __instance)
     {
         if (!TeyvatFrame.Enabled || __instance == null)
         {
             return;
         }
 
-        if (!TeyvatMusic.Play(__instance, TeyvatFrame.CurrentActEntry))
+        var slot = TeyvatMusic.SlotFor(TeyvatFrame.CurrentRoomType);
+        if (!TeyvatMusic.Play(__instance, TeyvatFrame.CurrentActEntry, slot))
         {
             return;
         }
@@ -90,6 +98,56 @@ internal static class NRunMusicController_TeyvatTrack_Patch
             _inArmedStop = false;
         }
     }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(NRunMusicController.UpdateMusic))]
+    private static void UpdateMusicPostfix(NRunMusicController __instance) => Reassert(__instance);
+
+    /// <summary>
+    /// THE ROOM-AWARE SEAM, and the whole reason `EB-814` was a row rather than
+    /// a ledger edit. `UpdateMusic` reads the act, the act's bank list and the
+    /// run seed, and NOTHING about the room
+    /// (`research/sts2-music-map-2026-09-17.md` sec.1) -- so a postfix there can
+    /// answer "which nation" and can never answer "which room".
+    ///
+    /// `UpdateTrack()` is where the game asks. Its body is
+    /// `UpdateTrack("Progress", (float)GetTrack(_runState.CurrentRoom.RoomType))`,
+    /// and `CombatManager` calls it in exactly two places: `StartCombatInternal`
+    /// right after `CombatBegan`, and the combat-won path. Those are the two
+    /// moments a room's music character changes in the base game, so they are
+    /// the two moments ours has to.
+    ///
+    /// THE ZERO-ARG OVERLOAD ONLY. `UpdateTrack` is overloaded -- there is a
+    /// private `(string, float)` sibling that this one ends up calling -- so
+    /// the empty `Type[]` is load-bearing: without it Harmony cannot tell which
+    /// method is meant.
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(NRunMusicController.UpdateTrack), new Type[0])]
+    private static void UpdateTrackPostfix(NRunMusicController __instance) => Reassert(__instance);
+
+    /// <summary>
+    /// A boss encounter's own event starting. `CombatManager.StartCombatInternal`
+    /// calls this when `EncounterModel.HasBgm`, which is the ONLY place the base
+    /// game swaps the whole FMOD event rather than moving a parameter -- ten
+    /// encounters ship a `CustomBgm` (`act3_boss_queen` serves both Queen and
+    /// Aeonglass). It fires BEFORE `UpdateTrack` in that method, so without this
+    /// postfix the base game's boss theme would play for the gap between them.
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(NRunMusicController.PlayCustomMusic))]
+    private static void PlayCustomMusicPostfix(NRunMusicController __instance) => Reassert(__instance);
+
+    /// <summary>
+    /// The same event ending. Nothing in the managed assembly calls it today,
+    /// which is exactly why it is patched: it is public, it restores the act
+    /// track at `Progress` 7, and a game version that starts calling it would
+    /// otherwise put the base music back underneath ours with nothing in any
+    /// log to say so.
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(NRunMusicController.StopCustomMusic))]
+    private static void StopCustomMusicPostfix(NRunMusicController __instance) => Reassert(__instance);
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(NRunMusicController.StopMusic))]

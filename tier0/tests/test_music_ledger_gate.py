@@ -39,11 +39,13 @@ LEDGER = ROOT / "media" / "MUSIC.tsv"
 # media.md sec.2's columns, in order.
 COLUMNS = ["out", "raw", "scene", "title", "origin", "licence", "loop_start_s", "notes"]
 
-# media.md sec.1's scene vocabulary: one `act<N>_<nation>` per face (R273's
-# layout 1, two faces per act) plus the four room scenes that have no caller
-# yet. The act names are also exactly what `TeyvatFrame.MediaScene` derives --
-# see the cross-file pin below, which is what stops the two drifting.
-ACT_SCENES = [
+# media.md sec.1's SLOT vocabulary (EB-814), and it is closed: six faces
+# (R273's layout 1, two per act) crossed with four face slots, plus three
+# global ones -- twenty-seven scenes. The face names are exactly what
+# `TeyvatFrame.MediaScene` derives and the slot names are exactly
+# `TeyvatMusic`'s own constants; see the three-way cross-file pin below, which
+# is what stops any of them drifting.
+FACES = [
     "act1_mondstadt",
     "act1_liyue",
     "act2_natlan",
@@ -51,11 +53,14 @@ ACT_SCENES = [
     "act3_fontaine",
     "act3_sumeru",
 ]
-ROOM_SCENES = ["boss", "rest", "map", "shop"]
-SCENES = ACT_SCENES + ROOM_SCENES
+FACE_SLOTS = ["combat", "elite", "boss", "map"]
+GLOBAL_SLOTS = ["menu", "shop", "rest"]
+ACT_SCENES = [f"{face}/{slot}" for face in FACES for slot in FACE_SLOTS]
+SCENES = ACT_SCENES + GLOBAL_SLOTS
 
 TEYVAT_FRAME = ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatFrame.cs"
 TEYVAT_MUSIC = ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatMusic.cs"
+MEDIA_MD = ROOT / "docs" / "current" / "operations" / "media.md"
 
 # media.md sec.3: OGG Vorbis is the default, MP3 is accepted, WAV never.
 EXTENSIONS = (".ogg", ".mp3")
@@ -133,12 +138,13 @@ def test_a_broken_ledger_throws_on_each_of_its_four_shapes():
 
 
 def test_the_scene_vocabulary_and_the_two_formats_are_the_documented_ones():
-    """sec.1's six scenes and sec.3's two formats, named in the script.
+    """sec.1's twenty-seven scenes and sec.3's two formats, named in the script.
 
-    A seventh scene costs a word here, exactly as a seventh act dressing costs
-    one in `test_act_placeholder_plan.py`.
+    A twenty-eighth scene costs a word here, exactly as a seventh act dressing
+    costs one in `test_act_placeholder_plan.py`.
     """
     block = music_code()
+    assert len(SCENES) == 27
     for scene in SCENES:
         assert f"'{scene}'" in block, scene
     assert "$ext -ne '.ogg' -and $ext -ne '.mp3'" in block
@@ -147,12 +153,50 @@ def test_the_scene_vocabulary_and_the_two_formats_are_the_documented_ones():
 def test_the_destination_is_the_frames_own_namespace():
     """`res://teyvat/music/<scene>/`, which is `TeyvatMusic.Root` plus the
     ledger's own `scene` column. Not `res://klee/`: the frame's media is not one
-    character's."""
+    character's.
+
+    A face scene is nested one level (`act1_liyue/boss`), so the destination
+    takes the column with its separator normalised for Windows and its NAME
+    untouched -- see the verbatim pin below.
+    """
     block = music_code()
-    assert 'Join-Path $work "teyvat\\music\\$scene"' in block
+    assert 'Join-Path $work "teyvat\\music\\$sceneDir"' in block
+    assert "$sceneDir = $scene.Replace('/', '\\')" in block
 
     reader = TEYVAT_MUSIC.read_text(encoding="utf-8")
     assert 'public const string Root = "res://teyvat/music/";' in reader
+
+
+def test_the_slot_vocabulary_agrees_across_all_three_files():
+    r"""EB-814's three-way pin, and the reason it is one test rather than three.
+
+    A slot name lives in three places that cannot see each other: the packager's
+    ``$musicScenes`` whitelist (which THROWS on anything outside it), `media.md`
+    §1 (which is what a human files a track against), and `TeyvatMusic`'s own
+    `Slot*` constants (which are what the resolver actually asks `DirAccess`
+    for). Any two of them agreeing is not enough: a slot missing from the
+    whitelist is a build that throws on a by-the-book ledger row; a slot missing
+    from the constants is a directory that is packed and never asked for --
+    exactly the failure `EB-814` existed to close; a slot missing from the page
+    is a grammar nobody can file against.
+    """
+    code = music_code()
+    music = TEYVAT_MUSIC.read_text(encoding="utf-8")
+    page = MEDIA_MD.read_text(encoding="utf-8")
+
+    # The constants ARE the slot names, spelled once each.
+    for slot in FACE_SLOTS + GLOBAL_SLOTS:
+        assert f'Slot{slot.capitalize()} = "{slot}";' in music, slot
+
+    # And the two arrays that group them are the two shapes of the grammar.
+    assert ("FaceSlots = { SlotCombat, SlotElite, SlotBoss, SlotMap };") in music
+    assert ("GlobalSlots = { SlotMenu, SlotShop, SlotRest };") in music
+
+    # The page names every one of them, and the whitelist is checked above.
+    for slot in FACE_SLOTS:
+        assert f"`{slot}`" in page, slot
+    for scene in SCENES:
+        assert f"'{scene}'" in code, scene
 
 
 def test_the_reader_resolves_to_the_ledgers_names_and_the_packager_does_not():
@@ -167,42 +211,52 @@ def test_the_reader_resolves_to_the_ledgers_names_and_the_packager_does_not():
       * the reader goes back to `actEntry.ToLowerInvariant()`, so a
         by-the-book track lands where nothing looks.
 
-    The six act names themselves are checked as a CROSS-FILE agreement:
+    The six face names themselves are checked as a CROSS-FILE agreement:
     `TeyvatFrame.MediaScene` builds them as `act{act}_{entry.ToLowerInvariant()}`
     from the arm's one dressing registry, so the names never appear as literals
     on the C# side and cannot be grepped for. What can be checked is that every
-    scene this packager accepts is one the six faces plus the four room scenes
-    account for, and that the four room scenes really have no resolver.
+    scene this packager accepts is one the six faces and seven slots account
+    for, and that every one of them now HAS a resolver -- the note EB-814
+    closed.
     """
     code = music_code()
     frame = TEYVAT_FRAME.read_text(encoding="utf-8")
     music = TEYVAT_MUSIC.read_text(encoding="utf-8")
 
-    # The packager copies `scene` through: it is the destination leaf, and no
-    # rewriting of it appears anywhere in the block.
-    assert 'Join-Path $work "teyvat\\music\\$scene"' in code
+    # The packager copies `scene` through: it is the destination leaf, and the
+    # only thing done to it anywhere in the block is the separator swap.
+    assert "$sceneDir = $scene.Replace('/', '\\')" in code
     assert "$scene =" not in code.replace("$scene  = $cols[2].Trim()", "")
 
     # The reader resolves, and the old spelling is gone.
-    assert "TeyvatFrame.MediaScene(actEntry)" in music
+    assert "TeyvatFrame.MediaScene(actEntry, slot)" in music
     assert "actEntry.ToLowerInvariant()" not in music
-    assert 'return $"act{act}_{entry.ToLowerInvariant()}";' in frame
+    assert 'var face = $"act{act}_{entry.ToLowerInvariant()}";' in frame
+    # The nested scene is the face, a slash, and the slot -- built here and
+    # nowhere else, so the packager never has to know the shape.
+    assert 'face + "/" + slot' in frame
 
     # The act number is derived from the base zone, so there is no parallel
     # dressing-to-act table to drift: the arm's one registry stays AssetAlias.
     assert "AssetAlias.TryGetValue(entry, out var zone)" in frame
     assert "BaseZoneAct.TryGetValue(zone, out var act)" in frame
 
-    # Every scene the packager accepts is accounted for on the C# side, one way
-    # or the other.
-    for scene in ACT_SCENES:
-        act, nation = scene.split("_", 1)
-        assert act in {"act1", "act2", "act3"}, scene
+    # Every face the packager accepts is a dressing constant on the C# side.
+    for face in FACES:
+        act, nation = face.split("_", 1)
+        assert act in {"act1", "act2", "act3"}, face
         assert f'public const string {nation.capitalize()} = "{nation.upper()}";' in frame
-    for scene in ROOM_SCENES:
-        # No caller yet, by media.md §7. If one is ever wired, this line is the
-        # reminder to move the note with it.
-        assert f'"{scene}"' not in frame
+
+    # EB-814: every scene has a caller now. The room slots reach `DirAccess`
+    # through `SlotFor`, which is the room table media.md §1 documents, and the
+    # global three short-circuit the dressing in `MediaScene`.
+    assert "public static string SlotFor(RoomType? room)" in music
+    assert "if (TeyvatMusic.IsGlobalSlot(slot))" in frame
+    for room, slot in (("Boss", "SlotBoss"), ("Elite", "SlotElite"),
+                       ("Monster", "SlotCombat"), ("Shop", "SlotShop"),
+                       ("RestSite", "SlotRest")):
+        assert f"RoomType.{room} => {slot}," in music, room
+    assert "_ => SlotMap," in music
 
 
 def test_the_loop_point_travels_from_the_column_into_the_import_file():
