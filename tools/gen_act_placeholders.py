@@ -16,9 +16,10 @@ set per face -- act 1's Mondstadt and Liyue, act 2's Natlan and Inazuma, act
 3's Fontaine and Sumeru -- so the loaders are satisfied by our own files. The
 alias table stays, and stays right, as the fallback for a build whose pck
 predates a set. Nothing here is art:
-every picture is a two-stop vertical gradient in the nation's colours, and a
-real asset replaces it through `docs/current/operations/media.md`'s raw/out
-ledger with no code change at all.
+every picture it still writes is a two-stop vertical gradient in the nation's
+colours, and a real plate replaces it through an `art/plan.tsv` row recorded in
+`media/ACT.tsv` (`docs/current/operations/media.md` sec.1) with no scene
+re-authored and no `res://` path moved.
 
 WHAT IT WRITES, AND WHERE. Two trees and only two:
 
@@ -37,6 +38,24 @@ command line. Run it with the venv python by absolute path:
 `--check` writes nothing and exits non-zero if any planned file is missing or
 any committed scene source differs from what this file would write; that is
 the staleness gate `tier0/tests/test_act_placeholder_plan.py` rides.
+
+REAL ART STANDS THIS GENERATOR DOWN, PATH BY PATH. `art/plan.tsv` is the
+producer for any plate a bill claims (`docs/current/research/
+teyvat-act-art-sources-2026-09-17.md`), so `plan_owned()` reads that file and
+every out-path it names under `ImageGen/images/teyvat/backgrounds|rest_site|
+map_bgs` is skipped here -- by `write_all`, so a generator run cannot overwrite
+a fetched picture, and by `check`, so `--check` does not demand a file this
+file no longer produces. ONE PRODUCER PER OUT-PATH, the rule `art/plan.tsv`
+already runs under.
+
+The five plates BESIDE a real `bg_00` stay this generator's job, and they turn
+TRANSPARENT rather than gradient: `NCombatBackground` stacks `Layer_00` ..
+`Layer_04` and the foreground over one another, so an opaque gradient on
+`bg_01` would simply hide the landscape underneath it. Transparency is the
+generator's rather than five more plan rows because a transparent plate is not
+art -- there is no source to pick, no crop to judge and nothing for a veto to
+look at, which is the line `gen_furina_stills.py` and the salon glyphs already
+sit on.
 """
 
 from __future__ import annotations
@@ -191,6 +210,60 @@ def plan() -> list[Planned]:
 
 
 # --------------------------------------------------------------------------
+# who produces what
+# --------------------------------------------------------------------------
+
+#: The three repo directories a dressing's PNGs live in. A plan row claiming an
+#: out-path under one of these is claiming a plate this file would otherwise
+#: write, and that is the whole test: the surface is decided by the path,
+#: because the path is the only thing `ActModel` lets us choose.
+PLAN_OWNABLE = (
+    "ImageGen/images/teyvat/backgrounds/",
+    "ImageGen/images/teyvat/rest_site/",
+    "ImageGen/images/teyvat/map_bgs/",
+)
+
+
+def plan_owned() -> set[str]:
+    """Repo-relative act plates that `art/plan.tsv` produces, not this file.
+
+    THE BILL IS READ FROM THIS CHECKOUT, never from `--root`. That is the same
+    split `tools/art_process.py`'s `--art-root` already runs under and for the
+    same reason: a branch adding plan rows renders them against, and into, the
+    ART-BEARING checkout's gitignored tree, so the pixels move and the tracked
+    plan does not. Reading the bill from `--root` would make a worktree run
+    consult main's plan, find no act rows, and paint gradients over the
+    landscapes it had just fetched.
+
+    Read tolerantly and by hand rather than through `tools/art_fetch.read_plan`:
+    that function `sys.exit`s on a short row and imports nothing this file
+    needs, and the only column wanted here is the second one. Same encoding and
+    line-ending rules as every other ledger reader in the repo -- UTF-8,
+    `newline=""` then strip `\\r`, split on TAB alone.
+
+    A missing `art/plan.tsv` returns the empty set, which is the right answer
+    and not a silent one: with no bill, this generator owns every path, exactly
+    as it did before any real art existed.
+    """
+    plan = ROOT / "art" / "plan.tsv"
+    if not plan.exists():
+        return set()
+    owned: set[str] = set()
+    with plan.open("r", encoding="utf-8", newline="") as handle:
+        for line in handle:
+            line = line.rstrip("\r\n")
+            if not line.strip() or line.startswith("#"):
+                continue
+            parts = line.split("\t")
+            if len(parts) < 2:
+                continue
+            out = parts[1].strip().replace("\\", "/")
+            if out.startswith(PLAN_OWNABLE):
+                owned.add(out)
+    return owned
+
+
+# --------------------------------------------------------------------------
 # the pictures
 # --------------------------------------------------------------------------
 
@@ -225,6 +298,20 @@ def _write_png(path: Path, size: tuple[int, int], top: tuple[int, int, int],
                bottom: tuple[int, int, int]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     _gradient(size, top, bottom).save(path, "PNG")
+
+
+def _write_clear_png(path: Path, size: tuple[int, int]) -> None:
+    """A fully transparent plate: what a layer OVER a real `bg_00` must be.
+
+    Not "no file": the layer scene's `ExtResource` names this path and a
+    dangling texture is a load error, and `BackgroundAssets` counts the groups
+    in the `layers` directory to keep a dressing's rng draw equal to the base
+    zone's. So the plate exists, is the right size, and draws nothing.
+    """
+    from PIL import Image
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    Image.new("RGBA", size, (0, 0, 0, 0)).save(path, "PNG")
 
 
 def _layer_stops(nation: Nation, depth: float) -> tuple[tuple[int, int, int],
@@ -408,31 +495,49 @@ def write_all(root: Path) -> list[str]:
             handle.write(text)
         written.append(relative)
 
+    owned = plan_owned()
     for nation in NATIONS:
         i = nation.id
+        # A dressing whose bg_00 comes from the bill has a real landscape on
+        # the far plate, so the four layers and the foreground over it stop
+        # being gradients and become transparent -- see the module docstring.
+        real_bg = (f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_00.png"
+                   in owned)
         for group in range(BG_GROUPS):
-            depth = group / max(1, BG_GROUPS)  # 0.0 .. 0.8
-            top, bottom = _layer_stops(nation, depth)
             relative = f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_{group:02d}.png"
-            _write_png(root / relative, LAYER_PNG, top, bottom)
+            if relative in owned:
+                continue
+            if real_bg:
+                _write_clear_png(root / relative, LAYER_PNG)
+            else:
+                depth = group / max(1, BG_GROUPS)  # 0.0 .. 0.8
+                top, bottom = _layer_stops(nation, depth)
+                _write_png(root / relative, LAYER_PNG, top, bottom)
             written.append(relative)
-        top, bottom = _layer_stops(nation, 1.0)
         relative = f"ImageGen/images/teyvat/backgrounds/{i}/{i}_fg.png"
-        _write_png(root / relative, LAYER_PNG, top, bottom)
-        written.append(relative)
+        if relative not in owned:
+            if real_bg:
+                _write_clear_png(root / relative, LAYER_PNG)
+            else:
+                top, bottom = _layer_stops(nation, 1.0)
+                _write_png(root / relative, LAYER_PNG, top, bottom)
+            written.append(relative)
 
         relative = f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png"
-        _write_png(root / relative, REST_PNG,
-                   _scale(_mix(nation.sky, nation.ground, 0.55), 0.45),
-                   _scale(nation.ground, 0.35))
-        written.append(relative)
+        if relative not in owned:
+            _write_png(root / relative, REST_PNG,
+                       _scale(_mix(nation.sky, nation.ground, 0.55), 0.45),
+                       _scale(nation.ground, 0.35))
+            written.append(relative)
 
         # The three map plates read top -> bottom as one continuous wall, so
         # each takes a third of the nation's ramp rather than the whole of it.
         for index, slot in enumerate(("top", "middle", "bottom")):
+            relative = f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png"
+            if relative in owned:
+                continue
             a = _mix(nation.sky, nation.ground, index / 3)
             b = _mix(nation.sky, nation.ground, (index + 1) / 3)
-            relative = f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png"
             _write_png(root / relative, MAP_PNG, a, b)
             written.append(relative)
     return written
@@ -451,8 +556,15 @@ def check(root: Path) -> list[str]:
             problems.append(
                 f"{relative} differs from what tools/gen_act_placeholders.py "
                 "would write; re-run the generator or move the change into it")
+    owned = plan_owned()
     for row in plan():
-        if row.kind == "png" and not (root / row.repo).exists():
+        if row.kind != "png" or row.repo in owned:
+            # A plan-owned plate is art_process's to write and art_process's
+            # to be missing; asking for it here would make this gate fail on
+            # any checkout that has not run the art pass, and would make it
+            # fail for a reason this file cannot fix.
+            continue
+        if not (root / row.repo).exists():
             problems.append(
                 f"missing placeholder texture {row.repo} (gitignored; run the "
                 "generator on the art-bearing checkout)")

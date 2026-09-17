@@ -157,18 +157,40 @@ One consequence to know: `AssetCache`'s failed-asset set is never cleared for
 the process lifetime, so a client that has already hit this must be
 **restarted**, not merely re-deployed into.
 
-### Real art later: the raw/out rule
+### Real art: the plan produces, `media/ACT.tsv` records
 
-A real act asset is a media-ledger item, not a code change.
-`docs/current/operations/media.md` §1 is the layout and §3 the formats; act
-plates take the same `media/raw/…` → `media/out/…` route as music and
-portraits, with `<act-or-scene>` already reserved as `act1_mondstadt`, `act1_liyue`,
-`act2_natlan`, `act2_inazuma`, `act3_fontaine` and `act3_sumeru`. Drop the
-file, add the row, and `build_pck.ps1`'s Teyvat act blocks copy it in at the
-same `res://` path the placeholder occupied — one
-producer per out-path, exactly as `art/plan.tsv` requires. Nothing in
-`klee-mod/KleeCode` changes and no scene is re-authored: the scene names the
-path, the ledger names the file.
+**Landed 2026-09-17.** The thirty pictures a dressing actually shows — `bg_00`,
+the rest site and the three map plates, six dressings by five surfaces — are
+real wiki landscape stills now, fetched and cropped by thirty `art/plan.tsv`
+rows and recorded one-for-one in `media/ACT.tsv` (`operations/media.md` §1, §2;
+the survey is `research/teyvat-act-art-sources-2026-09-17.md`). No scene is
+re-authored and nothing in `klee-mod/KleeCode` changes: the scene names the
+path, the plan names the picture, the ledger names where it came from.
+
+The generator keeps every path the plan does not claim. `plan_owned()` reads
+`art/plan.tsv` for out-paths under
+`ImageGen/images/teyvat/backgrounds|rest_site|map_bgs`, and both `write_all`
+and `--check` skip them, so there is still exactly one producer per out-path.
+What it still writes for a dressed face is the four layers and the foreground
+over a real `bg_00`, as **fully transparent** plates: `NCombatBackground`
+stacks `Layer_00`..`Layer_04` and the foreground over one another, so a
+gradient on `bg_01` would hide the landscape underneath it. Transparency is the
+generator's job rather than five more plan rows because a transparent plate is
+not art — no source to pick, no crop to judge, nothing for a veto to look at.
+Parallax is not attempted.
+
+A plate [USER] supplies by hand still takes the `media/raw/act/…` →
+`media/out/act/…` route of `operations/media.md` §1, with `<act-or-scene>`
+reserved as `act1_mondstadt`, `act1_liyue`, `act2_natlan`, `act2_inazuma`,
+`act3_fontaine` and `act3_sumeru`.
+
+One thing the sources make you crop around: the wiki's in-game location stills
+carry a burnt-in **GENSHIN IMPACT wordmark in the bottom-right corner**, and
+the plan's `focus` column is the rule that removes it. A 1382×648 plate off a
+16:9 source has 130 scaled pixels of spare height, so `top` spends all of it
+off the bottom; a 2035×1440 map plate fills the height exactly on a 16:9
+source, so its only spare strip is horizontal and `x0.42` spends it off the
+right.
 
 ### The alias patch, and when it still fires
 

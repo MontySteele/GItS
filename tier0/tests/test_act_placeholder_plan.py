@@ -202,3 +202,97 @@ def test_build_pck_copies_every_directory_the_generator_writes():
         # in its own loop, so the check is on the stable leading segments.
         head = directory.split("/")[0:2]
         assert "\\".join(head) in script, (directory, head)
+
+
+# --------------------------------------------------------------------------
+# One producer per out-path: art/plan.tsv vs the generator (2026-09-17)
+# --------------------------------------------------------------------------
+
+def test_the_bill_claims_every_dressings_five_real_surfaces():
+    """Thirty rows, and they are the five surfaces a dressing actually shows.
+
+    The other thirteen files a dressing owns are scenes and the four layers
+    plus the foreground over `bg_00` -- nothing a picture can be picked for.
+    """
+    owned = gen.plan_owned()
+    assert len(owned) == 30, sorted(owned)
+    for nation in gen.NATIONS:
+        i = nation.id
+        assert {
+            f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_00.png",
+            f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png",
+            f"ImageGen/images/teyvat/map_bgs/{i}/map_top_{i}.png",
+            f"ImageGen/images/teyvat/map_bgs/{i}/map_middle_{i}.png",
+            f"ImageGen/images/teyvat/map_bgs/{i}/map_bottom_{i}.png",
+        } <= owned, i
+
+
+def test_the_generator_never_writes_what_the_bill_produces(tmp_path):
+    """The reconciliation, measured rather than asserted about.
+
+    Two producers for one path means whichever runs last wins -- the defect
+    art_lint's L11 exists to stop, and the one that would have painted a
+    nation-tinted gradient over a fetched landscape on the next `--check`
+    repair run.
+    """
+    written = set(gen.write_all(tmp_path))
+    owned = gen.plan_owned()
+    assert not (written & owned), sorted(written & owned)
+    for relative in sorted(owned):
+        assert not (tmp_path / relative).exists(), relative
+
+
+def test_a_layer_over_a_real_background_is_transparent(tmp_path):
+    """bg_01..04 and the foreground must not hide the landscape on bg_00.
+
+    `NCombatBackground` stacks Layer_00..Layer_04 and the foreground over one
+    another, so the only correct plate over a real far layer is one that draws
+    nothing at all.
+    """
+    from PIL import Image
+
+    gen.write_all(tmp_path)
+    owned = gen.plan_owned()
+    for nation in gen.NATIONS:
+        i = nation.id
+        if f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_00.png" not in owned:
+            continue
+        for name in [f"{i}_bg_{n:02d}" for n in range(1, gen.BG_GROUPS)] + [f"{i}_fg"]:
+            path = tmp_path / f"ImageGen/images/teyvat/backgrounds/{i}/{name}.png"
+            with Image.open(path) as img:
+                assert img.size == gen.LAYER_PNG, (name, img.size)
+                assert img.convert("RGBA").getchannel("A").getextrema() == (0, 0), name
+
+
+def test_the_check_gate_does_not_demand_a_plate_it_stopped_producing(tmp_path):
+    """`--check` on a fresh tree must report only the files it owns.
+
+    Otherwise the staleness gate fails for a reason running the generator
+    cannot fix, which is the same as having no gate.
+    """
+    gen.write_all(tmp_path)
+    missing = [p for p in gen.check(tmp_path)
+               if p.startswith("missing placeholder texture")]
+    assert missing == [], "\n".join(missing)
+
+
+def test_every_bill_row_has_a_ledger_row():
+    """media/ACT.tsv records what art/plan.tsv produces (media.md sec.1)."""
+    ledger = ROOT / "media" / "ACT.tsv"
+    with ledger.open("r", encoding="utf-8", newline="") as handle:
+        lines = [line.rstrip("\r\n") for line in handle if line.strip()]
+    header = lines[0].split("\t")
+    assert header == ["out", "raw", "dressing", "surface", "w", "h",
+                      "title", "origin", "licence", "notes"], header
+    rows = [dict(zip(header, line.split("\t"))) for line in lines[1:]]
+    outs = [r["out"] for r in rows]
+    assert len(outs) == len(set(outs)), "an out-path is recorded twice"
+    assert set(outs) == gen.plan_owned()
+    for row in rows:
+        # The pre-public pass is `grep PLACEHOLDER-COPYRIGHTED media/*.tsv`,
+        # and a row that forgets the column would pass it silently.
+        assert row["licence"] == "PLACEHOLDER-COPYRIGHTED", row["out"]
+        assert row["origin"].startswith(
+            "https://genshin-impact.fandom.com/wiki/File:"), row["out"]
+        assert row["surface"] in {"bg_00", "rest_site", "map_top",
+                                  "map_middle", "map_bottom"}, row["surface"]
