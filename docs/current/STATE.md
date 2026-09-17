@@ -73,8 +73,8 @@ hand-written kit machinery.
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**. Deploy stamps
-**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3608+proto`**
-(2026-09-17, main after #604, arms `klee,companion,kokomi,furina-stage,teyvat`:
+**`MAJOR.AUTO`** with the `+proto` dev mark. **Installed: `0.2.3615+proto`**
+(2026-09-17, main after #606, arms `klee,companion,kokomi,furina-stage,teyvat`:
 the prototype rows behind `-p:PrototypeCards=true`, the Stage behind
 `-p:FurinaStage=true`, the Teyvat frame behind `-p:TeyvatFrame=true` and ON
 for the deploy proofs, OFF again on the next calibration deploy; the reframe
@@ -210,7 +210,7 @@ ships OFF in a release package).
   wired still-portrait enemy and 81 cut Archive portraits awaiting the veto
   sheet (`EB-811`), placeholder act art per dressing
   (`operations/act-assets.md`), music packaged from `media/MUSIC.tsv` and
-  proven to play (no track filed yet)
+  playing: six E-default combat loops, one per act face (#606)
   (`operations/media.md`). Proven in the running game: act 1 both faces,
   combat backgrounds, rest site, six dressed act-1 events
   (`review/records/teyvat-proofs-4-2026-09-15.md`, `-5-`); and acts 2 and 3
