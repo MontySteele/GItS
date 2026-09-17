@@ -309,11 +309,24 @@ MOTIONS: dict[str, tuple[Clip, ...]] = {
         )),
     ),
     # Slimes, whelps, fungus. Squash and stretch; ends as a puddle.
+    #
+    # THE IDLE'S TEMPO IS A [USER] LOOK, 2026-09-17 (`EB-816`): "a group of
+    # slimes ... all bobbing at the exact same time at high speed". HIGH SPEED
+    # was this clip -- a full squash-and-stretch cycle in one second, which
+    # reads as a twitch rather than a breath. It is TWO seconds now, and the
+    # shape is no longer a metronome: fall into the squash (0.5), SIT THERE
+    # ~0.2 s (0.5 -> 0.7), rise through the stretch (1.2), settle back (2.0).
+    # The rest at the bottom is what makes it read as weight. Amplitude is
+    # eased down to 0.8x of what it was (0.04 -> 0.032, 0.03 -> 0.024) for the
+    # same reason: a slower body that moved just as far would read as a pulse.
+    # AT THE EXACT SAME TIME was the other half, and it is not a clip problem
+    # -- see `KleeCode/Vfx/IdleDesync`.
     "bounce": (
         _reset(),
-        Clip("idle", 1.0, (
-            Track(RIG_SCALE, (0, 0.25, 0.5, 0.75, 1.0),
-                  ((1, 1), (1.04, 0.97), (1, 1), (0.97, 1.04), (1, 1)), interp=2),
+        Clip("idle", 2.0, (
+            Track(RIG_SCALE, (0, 0.5, 0.7, 1.2, 2.0),
+                  ((1, 1), (1.032, 0.976), (1.032, 0.976), (0.976, 1.032),
+                   (1, 1)), interp=2),
         ), loop=True),
         Clip("attack", 0.5, (
             Track(RIG_POSITION, (0, 0.12, 0.28, 0.4, 0.5),
@@ -335,8 +348,12 @@ MOTIONS: dict[str, tuple[Clip, ...]] = {
     # Specters, cicins, anything with no feet. Floats; darts; drops when killed.
     "hover": (
         _reset(),
-        Clip("idle", 2.4, (
-            Track(RIG_POSITION, (0, 1.2, 2.4), ((0, 0), (0, -4), (0, 0)), interp=2),
+        # 3.0 s rather than 2.4 on the same [USER] look: a float is the one
+        # motion that can afford to be slow, and the four pixels now take a
+        # second and a half to travel rather than a second and a fifth.
+        # Amplitude is unchanged -- it was never the complaint.
+        Clip("idle", 3.0, (
+            Track(RIG_POSITION, (0, 1.5, 3.0), ((0, 0), (0, -4), (0, 0)), interp=2),
         ), loop=True),
         Clip("attack", 0.5, (
             Track(RIG_POSITION, (0, 0.1, 0.5), ((0, 0), (-35, -6), (0, 0)),

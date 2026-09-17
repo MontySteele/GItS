@@ -429,6 +429,17 @@ UNMIRRORED: dict[str, str] = {
         "the engine a longer wait than the base could reach. The engine still "
         "applies its own pad and its own ceiling on top. tier0 has no "
         "animations, no clock the player sees and no counterpart.",
+    "IdleDesync.MinSpeedScale":
+        "`EB-816`. A PRESENTATION BAND, not balance: the slowest an individual "
+        "dressed enemy's idle may run so that a pack of identical bodies does "
+        "not read as one metronome ([USER] look, 2026-09-17). It scales a clip "
+        "the eye sees and nothing else -- no intent, no number, no timing any "
+        "rule reads (the death seams read the clip's own length and the tree's "
+        "own remaining, so both follow it). tier0 has no animations, no clock "
+        "the player sees and no counterpart.",
+    "IdleDesync.MaxSpeedScale":
+        "`EB-816`. The other end of the same presentation band, and UNMIRRORED "
+        "for the same reason as `IdleDesync.MinSpeedScale` directly above.",
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
     "RosterArt.PortraitWidth":
