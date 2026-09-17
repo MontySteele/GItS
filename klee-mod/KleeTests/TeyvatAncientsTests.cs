@@ -252,15 +252,19 @@ public class TeyvatAncientsTests : IDisposable
         TeyvatFrame.Enabled = true;
         var rows = TeyvatAncients.RowsFor(FakeAncients());
 
-        // The faces file writes only the name today, so every other row of
-        // Neow's family reaches the dressed entry as the game's own words.
-        Assert.Equal("BASE EPITHET", rows["DVALIN_MONDSTADT.epithet"]);
+        // The faces file leaves Neow's `extra` cell and every `.next` empty,
+        // so those rows reach the dressed entry as the game's own words...
         Assert.Equal("BASE PREFIX", rows["DVALIN_MONDSTADT.results.prefix"]);
         Assert.Equal("BASE DONE", rows["DVALIN_MONDSTADT.pages.DONE.description"]);
-        Assert.Equal("BASE HELLO",
-            rows["DVALIN_MONDSTADT.talk.firstVisitEver.0-0.ancient"]);
-        Assert.Equal("BASE REPEAT", rows["DVALIN_MONDSTADT.talk.ANY.0-0r.ancient"]);
         Assert.Equal("BASE NEXT", rows["DVALIN_MONDSTADT.talk.ANY.0-0r.next"]);
+
+        // ...while the cells it fills (R275 pass one) lay the face's words
+        // over the alias, keyed by the live table's stem.
+        Assert.Equal("Dragon of the East", rows["DVALIN_MONDSTADT.epithet"]);
+        Assert.StartsWith("You carry the scent of the wind",
+            rows["DVALIN_MONDSTADT.talk.firstVisitEver.0-0.ancient"]);
+        Assert.StartsWith("The storm has passed over Mondstadt",
+            rows["DVALIN_MONDSTADT.talk.ANY.0-0r.ancient"]);
     }
 
     [Fact]

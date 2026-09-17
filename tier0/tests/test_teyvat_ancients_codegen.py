@@ -196,9 +196,14 @@ def test_the_generator_refuses_a_bad_line_count(tmp_path) -> None:
     # cannot add a second, so a two-line cell is a refusal rather than a row
     # nothing reads.
     kept = FACES.read_text(encoding="utf-8")
-    broken = kept.replace(
-        "NEOW\tMONDSTADT\tDvalin\t\t\t",
-        "NEOW\tMONDSTADT\tDvalin\t\tA: one | A: two\t")
+    # Swap the Dvalin row's first_visit cell (column 5) for a two-line one,
+    # whatever the row says today.
+    lines = kept.split("\n")
+    idx = next(i for i, l in enumerate(lines) if l.startswith("NEOW\tMONDSTADT\t"))
+    cells = lines[idx].split("\t")
+    cells[4] = "A: one | A: two"
+    lines[idx] = "\t".join(cells)
+    broken = "\n".join(lines)
     assert broken != kept
     try:
         FACES.write_text(broken, encoding="utf-8")

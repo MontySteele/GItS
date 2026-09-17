@@ -110,40 +110,76 @@ namespace KleeMod.Teyvat
             {
                 ["ALICE_FONTAINE.title"] =
                     "Alice",
+                ["ALICE_FONTAINE.epithet"] =
+                    "Author of the Teyvat Travel Guide",
                 ["ALICE_INAZUMA.title"] =
                     "Alice",
+                ["ALICE_INAZUMA.epithet"] =
+                    "Author of the Teyvat Travel Guide",
                 ["ALICE_NATLAN.title"] =
                     "Alice",
+                ["ALICE_NATLAN.epithet"] =
+                    "Author of the Teyvat Travel Guide",
                 ["ALICE_SUMERU.title"] =
                     "Alice",
+                ["ALICE_SUMERU.epithet"] =
+                    "Author of the Teyvat Travel Guide",
                 ["MOON_CARVER_LIYUE.title"] =
                     "Moon Carver",
+                ["MOON_CARVER_LIYUE.epithet"] =
+                    "Adeptus of Mt. Aocang",
                 ["DVALIN_MONDSTADT.title"] =
                     "Dvalin",
+                ["DVALIN_MONDSTADT.epithet"] =
+                    "Dragon of the East",
                 ["EGERIA_FONTAINE.title"] =
                     "Egeria",
+                ["EGERIA_FONTAINE.epithet"] =
+                    "The First Hydro Archon",
                 ["GREATER_LORD_RUKKHADEVATA_SUMERU.title"] =
                     "Greater Lord Rukkhadevata",
+                ["GREATER_LORD_RUKKHADEVATA_SUMERU.epithet"] =
+                    "Dendro Archon of Old",
                 ["THE_SACRED_SAKURA_INAZUMA.title"] =
                     "the Sacred Sakura",
+                ["THE_SACRED_SAKURA_INAZUMA.epithet"] =
+                    "Guardian Tree of Narukami",
                 ["XBALANQUE_NATLAN.title"] =
                     "Xbalanque",
+                ["XBALANQUE_NATLAN.epithet"] =
+                    "First of the Pyro Archons",
                 ["OROBASHI_INAZUMA.title"] =
                     "Orobashi",
+                ["OROBASHI_INAZUMA.epithet"] =
+                    "Serpent God of Watatsumi",
                 ["OCH_KAN_NATLAN.title"] =
                     "Och-Kan",
+                ["OCH_KAN_NATLAN.epithet"] =
+                    "The Dragonlord",
                 ["ELYNAS_FONTAINE.title"] =
                     "Elynas",
+                ["ELYNAS_FONTAINE.epithet"] =
+                    "The Sleeping Giant",
                 ["APEP_SUMERU.title"] =
                     "Apep",
+                ["APEP_SUMERU.epithet"] =
+                    "Dendro Dragon of the Desert",
                 ["IOROI_INAZUMA.title"] =
                     "Ioroi",
+                ["IOROI_INAZUMA.epithet"] =
+                    "Tanuki Chief of Chinju Forest",
                 ["TEZCATARA_NATLAN.title"] =
                     "Tezcatara",
+                ["TEZCATARA_NATLAN.epithet"] =
+                    "A Wayob of the Night Kingdom",
                 ["REMUS_FONTAINE.title"] =
                     "Remus",
+                ["REMUS_FONTAINE.epithet"] =
+                    "King of Remuria",
                 ["KING_DESHRET_SUMERU.title"] =
                     "King Deshret",
+                ["KING_DESHRET_SUMERU.epithet"] =
+                    "Lord of the Red Sands",
             };
 
         /// <summary>
@@ -171,6 +207,68 @@ namespace KleeMod.Teyvat
         public static readonly IReadOnlyList<AncientLine> Lines =
             new List<AncientLine>
             {
+                new AncientLine("ALICE_FONTAINE", "firstVisitEver", 0, 0, true, "Oh, a climber! Let me find my notes. I have been meaning to add a chapter on this place, and you look like the kind of footnote that survives."),
+                new AncientLine("ALICE_FONTAINE", "ANY", 0, 0, true, "If you meet a small girl with a backpack full of bombs, tell her Mother says to do her homework. Now, what does the Travel Guide recommend for someone in your position?"),
+                new AncientLine("ALICE_FONTAINE", "ANY", 1, 0, true, "The Fontaine chapter is mostly notes on the courthouse, which I recommend viewing from outside. Choose from the parts that got me arrested."),
+                new AncientLine("ALICE_INAZUMA", "firstVisitEver", 0, 0, true, "Oh, a climber! Let me find my notes. I have been meaning to add a chapter on this place, and you look like the kind of footnote that survives."),
+                new AncientLine("ALICE_INAZUMA", "ANY", 0, 0, true, "If you meet a small girl with a backpack full of bombs, tell her Mother says to do her homework. Now, what does the Travel Guide recommend for someone in your position?"),
+                new AncientLine("ALICE_INAZUMA", "ANY", 1, 0, true, "I was banned from Inazuma once. Twice, actually. The chapter is excellent regardless. Pick a page."),
+                new AncientLine("ALICE_NATLAN", "firstVisitEver", 0, 0, true, "Oh, a climber! Let me find my notes. I have been meaning to add a chapter on this place, and you look like the kind of footnote that survives."),
+                new AncientLine("ALICE_NATLAN", "ANY", 0, 0, true, "If you meet a small girl with a backpack full of bombs, tell her Mother says to do her homework. Now, what does the Travel Guide recommend for someone in your position?"),
+                new AncientLine("ALICE_NATLAN", "ANY", 1, 0, true, "The Natlan chapter took three rewrites and one volcano. Take something from it; the volcano cannot have been for nothing."),
+                new AncientLine("ALICE_SUMERU", "firstVisitEver", 0, 0, true, "Oh, a climber! Let me find my notes. I have been meaning to add a chapter on this place, and you look like the kind of footnote that survives."),
+                new AncientLine("ALICE_SUMERU", "ANY", 0, 0, true, "If you meet a small girl with a backpack full of bombs, tell her Mother says to do her homework. Now, what does the Travel Guide recommend for someone in your position?"),
+                new AncientLine("ALICE_SUMERU", "ANY", 1, 0, true, "The Akademiya banned the Travel Guide, which doubled its sales. Here is a page they especially hated."),
+                new AncientLine("MOON_CARVER_LIYUE", "firstVisitEver", 0, 0, true, "Hm. A mortal at the foot of the mountain, and the tea not yet cool. Very well. Choose your provision."),
+                new AncientLine("MOON_CARVER_LIYUE", "ANY", 0, 0, true, "The adepti keep a contract with Liyue, and I keep mine with any who climb. Choose, then."),
+                new AncientLine("MOON_CARVER_LIYUE", "ANY", 1, 0, true, "Mt. Aocang has watched a thousand ascents. Most were foolish. Some were not. Which are you?"),
+                new AncientLine("MOON_CARVER_LIYUE", "ANY", 2, 0, true, "Do not thank me. A gift given at the foot of a climb is only the mountain's toll paid forward."),
+                new AncientLine("MOON_CARVER_LIYUE", "ANY", 3, 0, true, "I have sat still for centuries and learned little. Perhaps motion teaches better. Go and see."),
+                new AncientLine("MOON_CARVER_LIYUE", "ANY", 4, 0, true, "Rex Lapis is gone, and still the contracts hold. Here is mine: one gift, then the road."),
+                new AncientLine("DVALIN_MONDSTADT", "firstVisitEver", 0, 0, true, "You carry the scent of the wind that woke me. Take what a wounded sky can spare, and go."),
+                new AncientLine("DVALIN_MONDSTADT", "ANY", 0, 0, true, "The storm has passed over Mondstadt, and I remain. Choose, traveler, before the wind changes."),
+                new AncientLine("DVALIN_MONDSTADT", "ANY", 1, 0, true, "Once I feared every hand that reached for me. Reach anyway. The choice is yours to make."),
+                new AncientLine("DVALIN_MONDSTADT", "ANY", 2, 0, true, "The Spire is not the sky, but it climbs the same way. Take your first breath of it here."),
+                new AncientLine("DVALIN_MONDSTADT", "ANY", 3, 0, true, "I have lain beneath Stormterror's Lair long enough to know a beginning when it walks in."),
+                new AncientLine("DVALIN_MONDSTADT", "ANY", 4, 0, true, "A dragon's gift is a small wind at your back. It is all I have, and it is enough."),
+                new AncientLine("EGERIA_FONTAINE", "firstVisitEver", 0, 0, true, "Every river in Fontaine began as a gift I was not permitted to give. I give it anyway. Take your share."),
+                new AncientLine("EGERIA_FONTAINE", "ANY", 0, 0, true, "Abundance was my sin and my reason. Let some of it fall on you before the judgment falls on me."),
+                new AncientLine("EGERIA_FONTAINE", "ANY", 1, 0, true, "My Melusines were born from a giant's tears. From what shall your fortune be born? Choose."),
+                new AncientLine("GREATER_LORD_RUKKHADEVATA_SUMERU", "firstVisitEver", 0, 0, true, "The forest remembers what the city forgot. Come. What grows here grows for everyone who climbs."),
+                new AncientLine("GREATER_LORD_RUKKHADEVATA_SUMERU", "ANY", 0, 0, true, "Wisdom is not withheld, only offered to those who arrive. You have arrived. Take what the branches carry."),
+                new AncientLine("GREATER_LORD_RUKKHADEVATA_SUMERU", "ANY", 1, 0, true, "I gave away everything, even my name, so the forest might keep growing. One more gift will not hurt."),
+                new AncientLine("THE_SACRED_SAKURA_INAZUMA", "firstVisitEver", 0, 0, true, "The petals fall and I remain. Lay your burden at my roots; what you hold will leave stronger than it came."),
+                new AncientLine("THE_SACRED_SAKURA_INAZUMA", "ANY", 0, 0, true, "The shrine is quiet tonight. Set down what you carry, and let the roots refine it."),
+                new AncientLine("THE_SACRED_SAKURA_INAZUMA", "ANY", 1, 0, true, "A blade is polished a thousand times before it is trusted. Your thousand times begin here."),
+                new AncientLine("XBALANQUE_NATLAN", "firstVisitEver", 0, 0, true, "The flame does not care what you were. It cares what you become. Show me what you carry, and I will make it burn hotter."),
+                new AncientLine("XBALANQUE_NATLAN", "ANY", 0, 0, true, "A warrior who stops sharpening is already dead. Give me your blade."),
+                new AncientLine("XBALANQUE_NATLAN", "ANY", 1, 0, true, "Natlan was not built by the strong. It was built by those who kept fighting after strength ran out."),
+                new AncientLine("OROBASHI_INAZUMA", "firstVisitEver", 0, 0, true, "I chose my ending long ago, beneath Yashiori. Whatever remains of me is yours, if you can carry it."),
+                new AncientLine("OROBASHI_INAZUMA", "ANY", 0, 0, true, "The Tatarigami whisper that a god should keep what is his. I never listened. Take what you need."),
+                new AncientLine("OROBASHI_INAZUMA", "ANY", 1, 0, true, "Watatsumi still eats because I stopped breathing. Let a little of that bargain feed you as well."),
+                new AncientLine("OCH_KAN_NATLAN", "firstVisitEver", 0, 0, true, "The Night Kingdom is claiming me, piece by piece. Before it takes the last, let me give some of it to you."),
+                new AncientLine("OCH_KAN_NATLAN", "ANY", 0, 0, true, "A dragon does not die all at once. Take a piece of me, then, and make it count."),
+                new AncientLine("OCH_KAN_NATLAN", "ANY", 1, 0, true, "My scales bought Natlan its dawn. One more will buy you yours."),
+                new AncientLine("ELYNAS_FONTAINE", "firstVisitEver", 0, 0, true, "I dreamed of the sea before Fontaine had a name. Come, little one. The dreaming body has strength to spare."),
+                new AncientLine("ELYNAS_FONTAINE", "ANY", 0, 0, true, "The Melusines grew from my wounds. So can you. Take from me, and be whole."),
+                new AncientLine("ELYNAS_FONTAINE", "ANY", 1, 0, true, "They tell me I fell from the sky. I only remember the ground, and the small ones who tended it. Let me tend you."),
+                new AncientLine("APEP_SUMERU", "firstVisitEver", 0, 0, true, "The sands have swallowed kingdoms, and I have swallowed the sands. What is one more mortal, taken in and returned stronger?"),
+                new AncientLine("APEP_SUMERU", "ANY", 0, 0, true, "Enter, mortal. Nothing that passes through me leaves unchanged."),
+                new AncientLine("APEP_SUMERU", "ANY", 1, 0, true, "Deshret tried to build a paradise on my back. You want only a boon. That much I can grant."),
+                new AncientLine("IOROI_INAZUMA", "firstVisitEver", 0, 0, true, "Ha! A guest who did not get lost in my forest. That deserves a drink. Or a meal. Or both. Pick."),
+                new AncientLine("IOROI_INAZUMA", "ANY", 0, 0, true, "The kitsune host with ceremony. We tanuki host with sake. Choose whichever you find on the table."),
+                new AncientLine("IOROI_INAZUMA", "ANY", 1, 0, true, "Nothing in Chinju Forest is what it seems, except the food. The food is real. Eat."),
+                new AncientLine("TEZCATARA_NATLAN", "firstVisitEver", 0, 0, true, "Sit. Eat. The Night Kingdom has long tables and few guests, and you look like one who forgets to rest."),
+                new AncientLine("TEZCATARA_NATLAN", "ANY", 0, 0, true, "Hospitality is the oldest law of the tribes. Take a seat by the fire, and take something for the road."),
+                new AncientLine("TEZCATARA_NATLAN", "ANY", 1, 0, true, "The living pass through the Night Kingdom too quickly to taste anything. You will not make that mistake."),
+                new AncientLine("REMUS_FONTAINE", "firstVisitEver", 0, 0, true, "Every gift I gave Remuria carried a debt. None of them refused. Will you?"),
+                new AncientLine("REMUS_FONTAINE", "ANY", 0, 0, true, "Power arrives with its price already written. Read the terms, then sign."),
+                new AncientLine("REMUS_FONTAINE", "ANY", 1, 0, true, "I raised a golden city on borrowed harmony, and the sea collected. Choose carefully what you borrow."),
+                new AncientLine("REMUS_FONTAINE", "ANY", 2, 0, true, "The symphony was worth the drowning. I still believe that. Perhaps you will believe it too."),
+                new AncientLine("KING_DESHRET_SUMERU", "firstVisitEver", 0, 0, true, "I sought forbidden knowledge and paid for it with my kingdom. Take a smaller lesson. It still costs."),
+                new AncientLine("KING_DESHRET_SUMERU", "ANY", 0, 0, true, "The desert keeps every bargain. So do I. Choose what you will give up."),
+                new AncientLine("KING_DESHRET_SUMERU", "ANY", 1, 0, true, "Gurabad, Ay-Khanoum, Sabzeruz. Names of things I bought too dearly. Buy something smaller from me."),
+                new AncientLine("KING_DESHRET_SUMERU", "ANY", 2, 0, true, "Knowledge is never free. The Eremites learned that from my sands. You will learn it here."),
             };
 
         /// <summary>Dressed `Id.Entry` -> the base Ancient's `Id.Entry`. The
