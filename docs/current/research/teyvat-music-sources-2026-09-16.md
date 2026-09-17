@@ -221,3 +221,19 @@ through the JSON API; whether any Legal FAQ clause draws the
 stream/embed/redistribute distinction, since the HoYoLAB mirror renders only
 client-side; and track-level scene mapping for Liyue, Natlan, Fontaine and
 Sumeru, given at disc level instead.
+
+## 6. Addendum 2026-09-17: extracted
+
+Phase 1 ran on [USER]'s own install (`C:\Program Files\HoYoPlay\games\Genshin
+Impact game`, read-only). The 32 `Music*.pck` packages (10.3 GB) hold 1,804
+entries; AnimeWwise's `hk4e.map` names 1,214 of them; 419 named tracks of 60 s
+or more were rebuilt as standard Ogg Vorbis with ww2ogg 0.24 + ReVorb (no
+re-encode, no WAV) into `%LOCALAPPDATA%\gits-media\genshin-extract\ogg\<scene>\`
+(2.8 GB, outside the repo by design), with `INVENTORY.tsv` and a `README.md`
+beside them and the tooling sandboxed under `%LOCALAPPDATA%\gits-media\tools\`.
+Names are the game's internal ones (`music_combat_LiYue_A_Loop`), never OST
+titles; the nation tokens are MengDe, LiYue, DaoQi, XuMi, FengDan, NaTa. Loop
+points are absent by construction (Wwise segments loop, the wems carry no
+`smpl`), so `loop_start_s` stays blank. Six E-default rows went into
+`media/MUSIC.tsv` the same day, one combat loop per act face; [USER] vetoes by
+ear. `boss`, `rest`, `map` and `shop` wait on their resolvers (`EB-814`).
