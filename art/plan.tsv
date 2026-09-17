@@ -2055,31 +2055,37 @@ portrait_pyro_specter	ImageGen/images/teyvat/creature_visuals/pyro_specter.png	2
 # ---------------------------------------------------------------------------
 act_bg_00_mondstadt	ImageGen/images/teyvat/backgrounds/mondstadt/mondstadt_bg_00.png	1382	648	cover	top	auto	1	png	Windrise.png		splash
 act_rest_site_mondstadt	ImageGen/images/teyvat/rest_site/mondstadt_rest_site_bg.png	1382	648	cover	top	auto	1	png	Angel's Share Interior 1F.png		splash
-act_map_top_mondstadt	ImageGen/images/teyvat/map_bgs/mondstadt/map_top_mondstadt.png	2035	1440	cover	x0.42	auto	1	png	Stormterror's Lair.png		splash
-act_map_middle_mondstadt	ImageGen/images/teyvat/map_bgs/mondstadt/map_middle_mondstadt.png	2035	1440	cover	x0.42	auto	1	png	Mondstadt City.png		splash
-act_map_bottom_mondstadt	ImageGen/images/teyvat/map_bgs/mondstadt/map_bottom_mondstadt.png	2035	1440	cover	x0.42	auto	1	png	Cider Lake.png		splash
 act_bg_00_liyue	ImageGen/images/teyvat/backgrounds/liyue/liyue_bg_00.png	1382	648	cover	top	auto	1	png	Guyun Stone Forest.png		splash
 act_rest_site_liyue	ImageGen/images/teyvat/rest_site/liyue_rest_site_bg.png	1382	648	cover	top	auto	1	png	Xinyue Kiosk Interior.png		splash
-act_map_top_liyue	ImageGen/images/teyvat/map_bgs/liyue/map_top_liyue.png	2035	1440	cover	x0.42	auto	1	png	Mt. Xuanlian.png		splash
-act_map_middle_liyue	ImageGen/images/teyvat/map_bgs/liyue/map_middle_liyue.png	2035	1440	cover	x0.42	auto	1	png	Liyue Harbor.png		splash
-act_map_bottom_liyue	ImageGen/images/teyvat/map_bgs/liyue/map_bottom_liyue.png	2035	1440	cover	x0.42	auto	1	png	Yaoguang Shoal.png		splash
 act_bg_00_natlan	ImageGen/images/teyvat/backgrounds/natlan/natlan_bg_00.png	1382	648	cover	top	auto	1	png	Tequemecan Valley.png		splash
 act_rest_site_natlan	ImageGen/images/teyvat/rest_site/natlan_rest_site_bg.png	1382	648	cover	top	auto	1	png	Weary Inn.png		splash
-act_map_top_natlan	ImageGen/images/teyvat/map_bgs/natlan/map_top_natlan.png	2035	1440	cover	x0.42	auto	1	png	Ancient Sacred Mountain.png		splash
-act_map_middle_natlan	ImageGen/images/teyvat/map_bgs/natlan/map_middle_natlan.png	2035	1440	cover	x0.42	auto	1	png	Stadium of the Sacred Flame.png		splash
-act_map_bottom_natlan	ImageGen/images/teyvat/map_bgs/natlan/map_bottom_natlan.png	2035	1440	cover	x0.42	auto	1	png	Toyac Springs.png		splash
 act_bg_00_inazuma	ImageGen/images/teyvat/backgrounds/inazuma/inazuma_bg_00.png	1382	648	cover	top	auto	1	png	Narukami Island.png		splash
 act_rest_site_inazuma	ImageGen/images/teyvat/rest_site/inazuma_rest_site_bg.png	1382	648	cover	top	auto	1	png	Uyuu Restaurant Interior.png		splash
-act_map_top_inazuma	ImageGen/images/teyvat/map_bgs/inazuma/map_top_inazuma.png	2035	1440	cover	x0.42	auto	1	png	Amakumo Peak.png		splash
-act_map_middle_inazuma	ImageGen/images/teyvat/map_bgs/inazuma/map_middle_inazuma.png	2035	1440	cover	x0.42	auto	1	png	Inazuma City.png		splash
-act_map_bottom_inazuma	ImageGen/images/teyvat/map_bgs/inazuma/map_bottom_inazuma.png	2035	1440	cover	x0.42	auto	1	png	Nazuchi Beach.png		splash
 act_bg_00_fontaine	ImageGen/images/teyvat/backgrounds/fontaine/fontaine_bg_00.png	1382	648	cover	top	auto	1	png	Belleau Region.png		splash
 act_rest_site_fontaine	ImageGen/images/teyvat/rest_site/fontaine_rest_site_bg.png	1382	648	cover	top	auto	1	png	Hotel Debord Interior.png		splash
-act_map_top_fontaine	ImageGen/images/teyvat/map_bgs/fontaine/map_top_fontaine.png	2035	1440	cover	x0.42	auto	1	png	West Slopes of Mont Automnequi.png		splash
-act_map_middle_fontaine	ImageGen/images/teyvat/map_bgs/fontaine/map_middle_fontaine.png	2035	1440	cover	x0.42	auto	1	png	Court of Fontaine.png		splash
-act_map_bottom_fontaine	ImageGen/images/teyvat/map_bgs/fontaine/map_bottom_fontaine.png	2035	1440	cover	x0.42	auto	1	png	Elynas.png		splash
 act_bg_00_sumeru	ImageGen/images/teyvat/backgrounds/sumeru/sumeru_bg_00.png	1382	648	cover	top	auto	1	png	Caravan Ribat.png		splash
 act_rest_site_sumeru	ImageGen/images/teyvat/rest_site/sumeru_rest_site_bg.png	1382	648	cover	top	auto	1	png	Lambad's Tavern Interior.png		splash
-act_map_top_sumeru	ImageGen/images/teyvat/map_bgs/sumeru/map_top_sumeru.png	2035	1440	cover	x0.42	auto	1	png	Mt. Damavand.png		splash
-act_map_middle_sumeru	ImageGen/images/teyvat/map_bgs/sumeru/map_middle_sumeru.png	2035	1440	cover	x0.42	auto	1	png	Sumeru City.png		splash
-act_map_bottom_sumeru	ImageGen/images/teyvat/map_bgs/sumeru/map_bottom_sumeru.png	2035	1440	cover	x0.42	auto	1	png	Sobek Oasis.png		splash
+# TEYVAT MAP OVERLAY (replaces the eighteen map_bgs rows, 2026-09-17).
+# [USER]: "the map is harder to read than the normal Slay the Spire 2 map"
+# -- so the six faces no longer OVERRIDE the map ground (the game's own
+# draws again, KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs) and the nation
+# is carried by an overlay above it instead: a white loading-screen emblem
+# in a transparent 900x160 strip, and the face's own location still as a
+# DARK VIGNETTE whose alpha is zero across the central 70% width / 80%
+# height, where the nodes, the path lines and the legend are drawn.
+# Both land in ImageGen/images/teyvat/map/ -> res://teyvat/map/ and are
+# recorded in media/ACT.tsv as surfaces map_wordmark and map_vignette.
+# The vignette reuses the still the retired map_middle row fetched, so this
+# change adds six downloads and not twelve.
+act_wordmark_mondstadt	ImageGen/images/teyvat/map/mondstadt_wordmark.png	900	160	contain	center	auto	1	png	Emblem Mondstadt White.png		splash
+act_wordmark_liyue	ImageGen/images/teyvat/map/liyue_wordmark.png	900	160	contain	center	auto	1	png	Emblem Liyue White.png		splash
+act_wordmark_natlan	ImageGen/images/teyvat/map/natlan_wordmark.png	900	160	contain	center	auto	1	png	Emblem Natlan White.png		splash
+act_wordmark_inazuma	ImageGen/images/teyvat/map/inazuma_wordmark.png	900	160	contain	center	auto	1	png	Emblem Inazuma White.png		splash
+act_wordmark_fontaine	ImageGen/images/teyvat/map/fontaine_wordmark.png	900	160	contain	center	auto	1	png	Emblem Fontaine White.png		splash
+act_wordmark_sumeru	ImageGen/images/teyvat/map/sumeru_wordmark.png	900	160	contain	center	auto	1	png	Emblem Sumeru White.png		splash
+act_vignette_mondstadt	ImageGen/images/teyvat/map/mondstadt_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Mondstadt City.png		splash
+act_vignette_liyue	ImageGen/images/teyvat/map/liyue_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Liyue Harbor.png		splash
+act_vignette_natlan	ImageGen/images/teyvat/map/natlan_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Stadium of the Sacred Flame.png		splash
+act_vignette_inazuma	ImageGen/images/teyvat/map/inazuma_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Inazuma City.png		splash
+act_vignette_fontaine	ImageGen/images/teyvat/map/fontaine_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Court of Fontaine.png		splash
+act_vignette_sumeru	ImageGen/images/teyvat/map/sumeru_vignette.png	2035	1440	vignette	x0.42	auto	1	png	Sumeru City.png		splash

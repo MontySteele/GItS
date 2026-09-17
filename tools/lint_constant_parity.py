@@ -761,6 +761,30 @@ UNMIRRORED: dict[str, str] = {
     "TurnEndPreviewBridge.SpriteScaleMax":
         "presentation: the largest scale a docket entity is drawn at. A "
         "rendering ratio; the sim has no sprites.",
+    # ------------------------------------------------------------------
+    # The Teyvat map overlay (2026-09-17). Three numbers about where a
+    # decoration is DRAWN, on a screen the sim has never modelled -- tier0.5
+    # generates a map graph and has no map SCREEN at all, so none of the three
+    # can be mirrored and none of them prices anything.
+    # ------------------------------------------------------------------
+    "MapOverlay.TintAlpha":
+        "`EB-818`. The alpha of the nation colour grade drawn over the map "
+        "screen: a look, chosen against [USER]'s read that the dressed map was "
+        "harder to read than the base game's, and held in the 10-15% band by "
+        "`KleeTests/TeyvatMapOverlayTests`. Nothing a card, a rule, a reward or "
+        "a route reads is priced in it; the sim has no map screen to draw it "
+        "on.",
+    "MapOverlay.WordmarkTopMargin":
+        "`EB-818`. Pixels of clear air between the top of the map screen and "
+        "the nation emblem strip, so the mark sits under the act banner the "
+        "screen draws for itself rather than on it. A layout offset in screen "
+        "pixels; tier0 has no counterpart and could not have one.",
+    "MapOverlay.GroundChildIndex":
+        "`EB-818`. The child index the overlay is moved to when it hangs off "
+        "the map screen's root -- 1, i.e. directly above whatever is drawn "
+        "first. A Godot draw-order position and not a quantity: `game_ref/` "
+        "holds no decompile of `NMapScreen`, so this is the one number the "
+        "arm's `teyvat:maptree` log line exists to confirm or move.",
 }
 
 CLASS_RE = re.compile(

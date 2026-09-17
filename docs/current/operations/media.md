@@ -118,21 +118,31 @@ a portrait [USER] supplies by hand.
 **Act plates: the plan produces and `media/ACT.tsv` records**, the same
 reconciliation the still portraits took, and for the same reason — their
 sources are wiki files, which is `art/plan.tsv`'s whole job (ruled 2026-09-17,
-`research/teyvat-act-art-sources-2026-09-17.md`). Thirty plan rows, six
-dressings by five surfaces, fetch and crop each plate into
+`research/teyvat-act-art-sources-2026-09-17.md`). Twenty-four plan rows, six
+dressings by four surfaces, fetch and crop each plate into
 `ImageGen/images/teyvat/backgrounds/<id>/<id>_bg_00.png`,
 `ImageGen/images/teyvat/rest_site/<id>_rest_site_bg.png` and
-`ImageGen/images/teyvat/map_bgs/<id>/map_{top,middle,bottom}_<id>.png` — the
+`ImageGen/images/teyvat/map/<id>_{wordmark,vignette}.png` — the
 directories `tools/build_pck.ps1`'s Teyvat act blocks already copy from — and
 `media/ACT.tsv` carries one row per plate recording it, columns
 `out raw dressing surface w h title origin licence notes` with `surface` one of
-`bg_00`, `rest_site`, `map_top`, `map_middle`, `map_bottom`. `out` names the
+`bg_00`, `rest_site`, `map_wordmark`, `map_vignette`. `out` names the
 produced path (not a `media/out/` path: the plan is the producer, and naming it
 is what keeps "one producer per out-path" true), `raw` the `art/raw/` file the
 fetch wrote, `title` the bare wiki file title and `origin` its
 `https://genshin-impact.fandom.com/wiki/File:…` page.
 `media/raw/act/` and `media/out/act/` stay the route for a plate [USER]
 supplies by hand.
+
+**It was thirty rows and five surfaces for one morning.** The three retired
+surfaces are `map_top`, `map_middle` and `map_bottom` — the face's own map
+GROUND — and they came out the same day they landed, on [USER]'s read that the
+dressed map was harder to read than the base game's. The map ground is the base
+zone's again and the nation is carried by an overlay drawn over it, whose two
+pictures are the `map_wordmark` and `map_vignette` rows above;
+`operations/act-assets.md` has the patch, the overlay and the mask. The vignette
+reuses the still the retired `map_middle` row already fetched, so the ledger
+grew by six rows and six downloads rather than twelve.
 
 What is different — and the reason act plates have a page of their own,
 `operations/act-assets.md` — is that their `res://` paths are **not ours to
