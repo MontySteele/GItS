@@ -730,8 +730,10 @@ def _everlasting(layers) -> tuple[Clip, ...]:
     return (
         _bespoke_reset(layers),
         Clip("idle", 12.0, (
-            # ONE continuous turn per loop, linear so the seam is invisible.
-            Track(_layer("halo", "rotation"), (0, 12.0), (0.0, TAU), interp=1),
+            # A slow rock, not a turn: the rig pivots at the feet, so a full
+            # turn would swing the dome under the body (vetoed on the PR).
+            Track(_layer("halo", "rotation"), (0, 6.0, 12.0), (0.0, 0.05, 0.0),
+                  interp=2),
             Track(_layer("body", "position"),
                   (0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0),
                   ((0, 0), (0, -4), (0, 0), (0, -4), (0, 0), (0, -4), (0, 0)),
