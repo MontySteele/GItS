@@ -269,11 +269,19 @@ the wiki title; that is a process call for [USER].
 re-asked).** (a) The background cut is **option (a)**: `tools/art_process.py`
 gained `mode=cut` — a corner-seeded flood fill on colour distance, kept to the
 part of that set reachable from the border (so a backdrop-coloured shadow
-inside a body is not punched out), small foreground islands pruned (so the
-starfield does not survive as specks and leave the content trim a no-op), a
-light feather, then the existing content trim and `cover()`/`contain()` with
-the row's own focus. The tolerance rides the focus column as `cut[@tolerance]`,
-default `cut@48/top`, the way `cover_autocrop` carries `cover|contain[@margin]`.
+inside a body is not punched out), then a second pass removing by area the
+backdrop POCKETS that first rule traps — keyed regions enclosed by the
+silhouette, such as the sky between a Hilichurl Fighter's raised club and its
+head — then small foreground islands pruned (so the starfield does not survive
+as specks and leave the content trim a no-op), a light feather, and finally
+the existing content trim and `cover()`/`contain()` with the row's own focus.
+Tolerance and the pocket threshold ride the focus column as
+`cut[@tolerance][/fit-focus][:pocket]`, default `cut@48/top:0.004`, the way
+`cover_autocrop` carries `cover|contain[@margin]`. One consequence to know
+before the veto: the four **Abyss Mages'** shield interiors *do* key at 48, so
+their discs draw as a glowing rim with the arena showing through rather than
+as a filled plate (rim and mage intact). `cut:0.2` on those four rows restores
+the filled disc if that is the wrong read.
 (b) **The plan produces and the ledger records:** 81 rows in `art/plan.tsv`
 write `ImageGen/images/teyvat/creature_visuals/<body>.png` — the directory
 `tools/build_pck.ps1`'s Teyvat block copies to `res://teyvat/creature_visuals/`

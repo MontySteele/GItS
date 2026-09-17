@@ -14,7 +14,7 @@
   teyvat-portrait-sources-2026-09-16.md): every one is a `truecolour` screen
   capture of the in-game Archive page, and media.md §3 requires alpha because
   a still portrait composites over the arena. focus carries
-  `cut[@tolerance][/fit-focus]`, default `cut@48/top`.
+  `cut[@tolerance][/fit-focus][:pocket]`, default `cut@48/top:0.004`.
 - raw: byte-for-byte copy (combat-model source art)
 - gif sources: extract the frame at frame_pct% through the clip
 - svg sources: render via macOS qlmanage; fall back to the wiki's same-name PNG
@@ -251,22 +251,25 @@ CUT_WORK_MAX = 900      # the matte is solved at this size, not on a 2880px plat
 CUT_FEATHER = 1.2       # gaussian sigma on the matte, in WORK pixels
 CUT_BORDER_ALPHA = 0.98  # border already this transparent => honour that alpha
 CUT_SPECK_FRAC = 0.0005  # foreground islands below this share of the frame go
+CUT_POCKET_FRAC = 0.004  # ENCLOSED backdrop at or above this share is removed
 
 
 def _cut_spec(spec):
-    """Parse the `cut` row's focus column: `cut[@tolerance][/fit-focus]`.
+    """Parse the `cut` row's focus column: `cut[@tolerance][/fit-focus][:pocket]`.
 
-    Three things have to ride in one TSV column, so they are separated rather
-    than overloaded: `@` is the tolerance (the only knob the matte has) and
-    `/` is the focus handed to the FIT afterwards. `cut`, `cut@60`,
-    `cut@60/center` and `cut/contain` are all legal; a bare focus keyword
-    (`top`) is accepted too, so a row that says nothing about the matte reads
-    as "default tolerance, this focus".
+    Four things have to ride in one TSV column, so they are separated rather
+    than overloaded: `@` is the matte tolerance, `/` is the focus handed to the
+    FIT afterwards, and `:` is the enclosed-pocket threshold as a fraction of
+    the frame. `cut`, `cut@60`, `cut@60/center`, `cut/contain` and
+    `cut@60/top:0.01` are all legal; a bare focus keyword (`top`) is accepted
+    too, so a row that says nothing about the matte reads as "default matte,
+    this focus".
 
-    Returns (tolerance, fit, focus) with fit in {cover, contain}.
+    Returns (tolerance, fit, focus, pocket) with fit in {cover, contain}.
     """
     spec = (spec or "").strip() or "cut"
-    head, _, focus = spec.partition("/")
+    head, _, pocket = spec.partition(":")
+    head, _, focus = head.partition("/")
     head, _, tol = head.partition("@")
     head = head.strip() or "cut"
     if head != "cut":
@@ -277,13 +280,18 @@ def _cut_spec(spec):
         tolerance = float(tol) if tol else CUT_TOLERANCE
     except ValueError:
         raise SystemExit(f"cut: bad tolerance {tol!r} (want cut[@tolerance])")
+    try:
+        pocket_frac = float(pocket) if pocket.strip() else CUT_POCKET_FRAC
+    except ValueError:
+        raise SystemExit(
+            f"cut: bad pocket fraction {pocket!r} (want cut[...][:fraction])")
     fit = "cover"
     if focus == "contain":
         fit, focus = "contain", "center"
-    return tolerance, fit, focus
+    return tolerance, fit, focus, pocket_frac
 
 
-def _backdrop_alpha(img, tolerance):
+def _backdrop_alpha(img, tolerance, pocket_frac=CUT_POCKET_FRAC):
     """Alpha for an Archive capture: opaque figure, transparent backdrop.
 
     The backdrop is not flat and the naive thresholds both fail on it. It is a
@@ -296,7 +304,9 @@ def _backdrop_alpha(img, tolerance):
     of a corner colour, and then keep only the part of that set REACHABLE FROM
     THE BORDER. The reachability pass is what stops a dark navy belly or a
     shadowed flank from being punched out: it is the same colour as the
-    backdrop but it is not connected to it.
+    backdrop but it is not connected to it. A second pass then removes the
+    backdrop POCKETS that rule traps -- keyed regions enclosed by the
+    silhouette -- by area; see the comment on that pass.
 
     Solved at CUT_WORK_MAX, not at native size. The sources run to 2880x2880
     and the target is 240x280, so a full-resolution flood fill would spend
@@ -333,6 +343,38 @@ def _backdrop_alpha(img, tolerance):
     seeds_xy = ([(0, x) for x in range(w)] + [(h - 1, x) for x in range(w)]
                 + [(y, 0) for y in range(h)] + [(y, w - 1) for y in range(h)])
     background = _flood(cand, seeds_xy)
+
+    # ENCLOSED POCKETS. Border-reachability is the rule that saves a dark belly
+    # -- and it is also the rule that keeps a piece of sky trapped inside the
+    # silhouette. Found by eye on the first 81-row run: `hilichurl_fighter`
+    # kept a navy starfield block in the gap between its raised club and its
+    # head, and `hydro_abyss_mage` kept a dark arc against the bottom edge.
+    # Both are backdrop; neither touches the border; nothing in the first pass
+    # can reach either.
+    #
+    # So a second pass over the KEYED-BUT-UNREACHED set, by area. Area is the
+    # whole discriminator and it is the right one: a pocket of sky is a large
+    # keyed region, while a body's own shadow is small and -- the part that
+    # matters -- is not backdrop-coloured across a large area, or the first
+    # pass's tolerance would already be too wide to use. Small keyed regions
+    # are therefore LEFT ALONE, which is what keeps the rule from re-opening
+    # the hole that border-reachability was added to close.
+    #
+    # The threshold rides the spec column as the third field so a row can
+    # raise it (a body with a genuinely dark enclosed feature) or lower it (a
+    # capture with several small pockets) without moving the default.
+    if pocket_frac > 0:
+        enclosed = cand & ~background
+        min_pocket = max(16, int(pocket_frac * h * w))
+        ys, xs = np.nonzero(enclosed)
+        todo = np.ones_like(enclosed)
+        for y, x in zip(ys.tolist(), xs.tolist()):
+            if not todo[y, x]:
+                continue
+            comp = _flood(enclosed & todo, [(y, x)])
+            todo &= ~comp
+            if int(comp.sum()) >= min_pocket:
+                background |= comp
 
     # THE STARFIELD. The Archive backdrop is sprinkled with faint stars, and a
     # star is not backdrop-coloured, so the matte above keeps every one of
@@ -398,13 +440,13 @@ def cut(img, w, h, spec):
     `contain()` -- the same fitters every other mode uses, with the row's own
     focus. Nothing about framing is re-decided here.
     """
-    tolerance, fit, focus = _cut_spec(spec)
+    tolerance, fit, focus, pocket_frac = _cut_spec(spec)
     work = img
     scale = CUT_WORK_MAX / max(img.width, img.height)
     if scale < 1:
         work = img.resize((max(1, round(img.width * scale)),
                            max(1, round(img.height * scale))), Image.LANCZOS)
-    matte = _backdrop_alpha(work, tolerance)
+    matte = _backdrop_alpha(work, tolerance, pocket_frac)
     if matte is not None:
         if CUT_FEATHER:
             matte = matte.filter(ImageFilter.GaussianBlur(CUT_FEATHER))
