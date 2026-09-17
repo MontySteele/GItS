@@ -1929,7 +1929,7 @@ portrait_anemo_specter	ImageGen/images/teyvat/creature_visuals/anemo_specter.png
 portrait_tangled_vines_frostnight_scion	ImageGen/images/teyvat/creature_visuals/tangled_vines_frostnight_scion.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Tangled Vines Frostnight Scion.png		splash
 portrait_rugged_elder_leshy	ImageGen/images/teyvat/creature_visuals/rugged_elder_leshy.png	240	280	cut	cut@90	auto	1	png	Enemy Rugged Elder Leshy.png		splash
 portrait_sternshield_crab	ImageGen/images/teyvat/creature_visuals/sternshield_crab.png	240	280	cut	cut@90	auto	1	png	Enemy Sternshield Crab.png		splash
-portrait_anemo_slime	ImageGen/images/teyvat/creature_visuals/anemo_slime.png	240	280	cut	cut	auto	1	png	Enemy Anemo Slime.png		splash
+portrait_anemo_slime	ImageGen/images/teyvat/creature_visuals/anemo_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Anemo Slime.png		splash
 portrait_jadeplume_terrorshroom	ImageGen/images/teyvat/creature_visuals/jadeplume_terrorshroom.png	240	280	cut	cut@90	auto	1	png	Enemy Jadeplume Terrorshroom.png		splash
 portrait_hydro_cicin	ImageGen/images/teyvat/creature_visuals/hydro_cicin.png	240	280	cut	cut@90	auto	1	png	Enemy Hydro Cicin.png		splash
 portrait_fatui_electrohammer_vanguard	ImageGen/images/teyvat/creature_visuals/fatui_electrohammer_vanguard.png	240	280	cut	cut@90	auto	1	png	Enemy Fatui Electrohammer Vanguard.png		splash
