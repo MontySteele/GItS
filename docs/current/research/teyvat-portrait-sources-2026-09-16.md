@@ -265,6 +265,41 @@ is the opposite of what `media.md` was written for. The cheap reconciliation
 is that `plan.tsv` produces and `PORTRAITS.tsv` records, with `origin` holding
 the wiki title; that is a process call for [USER].
 
+**APPLIED 2026-09-16 ([USER]'s calls on this section, recorded rather than
+re-asked).** (a) The background cut is **option (a)**: `tools/art_process.py`
+gained `mode=cut` — a corner-seeded flood fill on colour distance, kept to the
+part of that set reachable from the border (so a backdrop-coloured shadow
+inside a body is not punched out), small foreground islands pruned (so the
+starfield does not survive as specks and leave the content trim a no-op), a
+light feather, then the existing content trim and `cover()`/`contain()` with
+the row's own focus. The tolerance rides the focus column as `cut[@tolerance]`,
+default `cut@48/top`, the way `cover_autocrop` carries `cover|contain[@margin]`.
+(b) **The plan produces and the ledger records:** 81 rows in `art/plan.tsv`
+write `ImageGen/images/teyvat/creature_visuals/<body>.png` — the directory
+`tools/build_pck.ps1`'s Teyvat block copies to `res://teyvat/creature_visuals/`
+— and `media/PORTRAITS.tsv` carries one row per body recording it. In those
+rows `out` names that produced path (not a `media/out/` path: the plan is the
+producer, and naming it is what keeps "one producer per out-path" true), `raw`
+names **the `art/raw/` file the fetch actually wrote**, `title` is the bare
+wiki file title and `origin` is its
+`https://genshin-impact.fandom.com/wiki/File:…` page. `operations/media.md` §1
+carries the same sentence. (c) The Knowledge Demon / Wanderer-model collision is
+**accepted**, so `Enemy Everlasting Lord of Arcane Wisdom.png` is in the bill
+(it dresses the Aeonglass boss on the Sumeru face too). **Tanx** is out — it
+waits on a reflavouring, and §4 already records that no image search can close
+it. **Coral Defenders** is out: it has no Archive still at all, only a mechanics
+screenshot, and it is not either ruled act-2 face's pick. The act-3 Sumeru Soul
+Nexus **Abyss Lector** reading is out with them, because R273 §3 reserves the
+Abyss for act 4.
+
+Two of the 81 are **fetched but not cut**, and `art_process` said so itself
+(`cut@48 removed almost nothing`): `NPC Remus.webp` and `NPC Katayoun.png` are
+in-world screenshots rather than Archive captures — a statue in a ruin, an NPC
+in the Akademiya — so masonry, ivy, bookshelves and planters are all
+foreground and no corner-seeded matte can separate them. Both are on the
+contact sheet under that warning; each needs a hand cut or a different source,
+and neither is a sourcing gap in §4's sense.
+
 ## 4. The gaps
 
 **Image gaps: one.** After the name corrections in §1, every Genshin body
