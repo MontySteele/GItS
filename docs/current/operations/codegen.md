@@ -256,3 +256,163 @@ marks
 ids in `FACES` at the top of the generator; acts 2 and 3 are listed there and
 inactive — their acts exist since R273, so what they wait on now is their own
 mirrors, not their sibling acts.
+
+## Codegen — Teyvat dressed Ancients
+
+```sh
+.venv/Scripts/python.exe tools/gen_teyvat_ancients.py            # generate
+.venv/Scripts/python.exe tools/gen_teyvat_ancients.py --check    # verify, no write
+.venv/Scripts/python.exe tools/gen_teyvat_ancients.py --refresh  # rebuild
+                                       # tools/data/sts2_base_ancients.json
+```
+
+R275 (2026-09-17): one body per Ancient per face, Darv is Alice on every face,
+first pass is name / image / flavour and never a boon, art second.
+
+### THE C# SHAPE, and why it is NOT the events pipeline's
+
+The dressed EVENTS surface next door needs a hand-written abstract MIRROR per
+base event, for two reasons that both fail here:
+
+1. **The Ancients are the unsealed eight.** Sixty of the sixty-eight classes in
+   `MegaCrit.Sts2.Core.Models.Events` are `sealed`; the exceptions are exactly
+   `Neow`, `Darv`, `Pael`, `Orobas`, `Tanx`, `Tezcatara`, `Vakuu` and
+   `Nonupeipe`. `class DvalinMondstadt : Neow` compiles.
+2. **An Ancient's keys are DERIVED, not literals.** `AncientEventModel`
+   overrides `LocTable => "ancients"`, and every string it shows hangs off
+   `Id.Entry`, which `ModelDb.GetEntry` takes from
+   `StringHelper.Slugify(type.Name)`:
+
+   | what | member | key |
+   | --- | --- | --- |
+   | name | `EventModel.Title` | `<ENTRY>.title` |
+   | epithet | `AncientEventModel.Epithet` | `<ENTRY>.epithet` |
+   | dialogue | `AncientEventModel.DialogueSet` → `AncientDialogueSet.PopulateLocKeys(Id.Entry)` | `<ENTRY>.talk.<CHAR>.<X>-<Y>[r].ancient` / `.char`, plus `.next` |
+   | the DONE page | `AncientEventModel.Done` | `<ENTRY>.pages.DONE.description` |
+
+   None of the four is `virtual`, so there is nothing to override and nothing
+   to re-implement: the subclass re-keys its whole text surface by existing.
+
+**So the shape is one generated one-line subclass per (Ancient, face) and no
+mirror at all** — `public sealed class DvalinMondstadt : Neow { }`.
+`DefineDialogues()` and `AllPossibleOptions` are inherited untouched, so not one
+mechanic is restated. `ModelDb.GetCategoryType` walks `BaseType` to
+`AbstractModel`'s direct child, so the extra level still resolves to `event`,
+and `ReflectionHelper.GetSubtypesInMods` registers the non-abstract dressings
+the way it registers the dressed events.
+
+### THE DIALOGUE, and who reads it
+
+`AncientDialogueSet` is uniform across all eight: one `FirstVisitEverDialogue`,
+five `CharacterDialogues` keyed by
+`CharKey<Ironclad/Silent/Defect/Necrobinder/Regent>()` at `VisitIndex` 0 / 1 / 4,
+and an `AgnosticDialogues` list (two for most, three for Vakuu, five for Neow).
+A dialogue's LENGTH is `new AncientDialogue(params string[] sfxPaths)` in
+compiled C# and no loc row can change it, which is what the index records and
+the generator checks.
+
+**Our roster reads the AGNOSTIC lines and nothing else.**
+`GetValidDialogues` tries `CharacterDialogues.TryGetValue(characterId.Entry)`;
+Klee, Kokomi and Furina are not keys there, so the lookup misses and the call
+falls to the agnostic list (and, from visit two on, the repeating pool). A
+`firstVisitEver` line is shown once per Ancient regardless of character. One
+dialogue is shown per visit; its lines are paged with a Next button whose text
+is the derived `<stem>.next`.
+
+`IsRepeating` is derived from an `r` suffix on the line-0 key, and that is a
+fact about the shipped loc PACK, not about any C# this repo reads — so a
+dressed line is carried as COORDINATES (`TeyvatGeneratedAncients.AncientLine`)
+and the stem is resolved against the live table at merge time.
+
+### THE PICTURE
+
+`EventModel.BackgroundScenePath` is `private`,
+`SceneHelper.GetScenePath("events/background_scenes/" + Id.Entry.ToLowerInvariant())`,
+and `NAncientEventLayout` instantiates it into `%AncientBgContainer`.
+`EventModel.GetAssetPaths` also PRELOADS it for every `EventLayoutType.Ancient`,
+so the getter is the patch target and `CreateBackgroundScene` is not — the same
+argument `EventPortraitPatch` makes. Four more derived paths ride along:
+`AncientEventModel.MapIconPath` / `MapIconOutlinePath`
+(`packed/map/ancients/ancient_node_<entry>[_outline].png`),
+`RunHistoryIconOutlinePath`, and
+`ImageHelper.GetRoomIconPath(MapPointType.Ancient, RoomType.Event, Id)`, whose
+suffix is `GetRoomIconSuffix`'s `modelId.Entry.ToLowerInvariant()`.
+
+`Patches/AncientPicturePatch` postfixes all five and borrows the BASE Ancient's
+file, but only when the dressed path does not exist (`ResourceLoader.Exists`) —
+so the art bill R275 defers lands on that seam and the patch stands down per
+entry, with no code change.
+
+### THE POOLS, AND DARV
+
+A face act answers `AllAncients` and `GetUnlockedAncients` by handing the BASE
+act's own answer through `TeyvatGeneratedAncients.Dress`, a `Select`. Equal
+length and equal order by construction, every epoch filter preserved (the Hive
+removes Orobas behind `OrobasEpoch`), and the identity with the arm off.
+
+Darv is not in any act. `ModelDb.AllSharedAncients` holds him alone,
+`UnlockState.SharedAncients` gates him on `DarvEpoch`, and
+`RunManager.GenerateRooms` shuffles the survivors on `Rng.UpFront` and deals
+slices to `State.Acts.Skip(1)` through `ActModel.SetSharedAncientSubset`.
+`Patches/AncientSharedPoolPatch` prefixes that hand-off — the one call that
+knows both which Ancients were dealt and which act they were dealt to — and
+swaps each for that face's dressing. Every rng draw is spent before the patch is
+reached, so the deal is bit-identical to an undressed run's. Act 1 is never
+dealt one (`Skip(1)`), so the two act-1 faces have no Darv body.
+
+### THE LOC, AND WHY AN EMPTY FIELD IS AN ALIAS
+
+`TeyvatAncients.RowsFor(LocTable)` builds the merge in two passes.
+
+**Pass one is the ALIAS.** Every live row under `<BASE>.` is copied to
+`<DRESSED>.` with the same suffix, through `GetLocStringsWithPrefix` (which
+unions the table's own keys with its English fallback's) and `GetRawText`. That
+is how an empty faces-file cell keeps the game's own line, in every language,
+with no base-game prose in the repo.
+
+**And it is why the BOONS stay the game's.** An Ancient's options are
+`RelicOption<T>()`, and `EventOption.FromRelic` is
+`eventModel.GetOptionTitle(textKey) ?? relic.Title` — `LocString.GetIfExists`,
+so an absent row falls through to the RELIC's own rows. The generator has no
+path that writes an option row, and a pin asserts it both ways.
+
+**Pass two is the face's rows**, laid over the alias: the flat rows, then the
+dialogue lines by coordinate. When a face moves a line from one speaker to the
+other, the alias's copy of the OTHER suffix is dropped — leaving both would let
+`AncientDialogue.PopulateLines` read the stale one, since it picks `.ancient`
+over `.char` by existence.
+
+### THE FACES FILE
+
+`docs/current/dossiers/content/ancient-faces.tsv`, one row per (Ancient, face),
+columns `ancient face name epithet first_visit dialogue_1 dialogue_2 dialogue_3
+agnostic_1 agnostic_2 extra`. **A TSV and not one `.md` per face**, because an
+Ancient's face is a short fixed list of fields rather than the events pipeline's
+per-event prose sections — eighteen rows of fielded data, where the events
+grammar's positional-bullet pairing would have nothing to pair against.
+
+`name` is required; every other column may be empty and today every one is.
+A dialogue cell's lines are `|`-separated and each carries a speaker prefix
+(`A: ` the Ancient, `C: ` the character); `dialogue_1/2/3` take a per-character
+form `IRONCLAD= ... ;; SILENT= ...` because the five characters' line counts
+differ; `agnostic_2` carries every agnostic dialogue after the first,
+`;;`-separated; `extra` is `key= text ;; key= text` over the suffixes the
+index's `extra_keys` declares — `results.prefix` (Neow), `loss` (Vakuu),
+`pages.INITIAL.options.OPTION_POOL_3_LOCKED.title` (Orobas).
+
+`tools/data/sts2_base_ancients.json` is the structural index: per Ancient the
+class name, the entry, that it is not sealed, the dialogue line counts and the
+loc-key suffixes it spells. **Identifiers and counts only** — `--check` and CI
+need neither the game nor a decompile.
+
+### THE REFUSALS
+
+The generator exits nonzero, naming the body, when the faces file is missing a
+(Ancient, face) R275 owes, when a row names a face R273 did not rule or an
+Ancient the game does not have, when a row has no name, when two rows claim one
+body, when a dressed entry collides with another dressing's or with a BASE
+Ancient's (which would make the merge rewrite the shipped game's own text), when
+a dialogue cell's line count disagrees with the compiled base, when a dialogue
+line has no speaker prefix, when a bare per-character cell is written for a
+dialogue whose five characters have different lengths, and when an `extra` key
+is not one the base entry has.

@@ -82,12 +82,34 @@ public sealed class Mondstadt : ActModel
     /// </summary>
     public override IEnumerable<EventModel> AllEvents => Base.AllEvents;
 
-    /// <inheritdoc cref="AllEvents"/>
-    public override IEnumerable<AncientEventModel> AllAncients => Base.AllAncients;
+    /// <summary>
+    /// THE DRESSED ANCIENTS (R275). The base zone's own pool, in the base
+    /// zone's own order, handed through `TeyvatGeneratedAncients.Dress` --
+    /// which SWAPS each base Ancient for this face's dressed body and swaps
+    /// nothing else.
+    ///
+    /// EQUAL LENGTH BY CONSTRUCTION, for the reason `AllEvents` gives: the
+    /// pool's length is read by `ActModel.GenerateRooms`, and a map that drew
+    /// a different number of items would move every later roll. `Dress` is a
+    /// `Select`, so it cannot add or drop one, and a pin counts it anyway.
+    /// With the arm off it is the identity and this property is
+    /// `Base.AllAncients` exactly as it was.
+    ///
+    /// DARV IS NOT IN HERE and must not be: he is a SHARED Ancient, dealt to
+    /// acts 2 and 3 at run start, and `Patches/AncientSharedPoolPatch` is what
+    /// makes him Alice. Adding him here would give one act two chances at him.
+    /// </summary>
+    public override IEnumerable<AncientEventModel> AllAncients =>
+        TeyvatGeneratedAncients.Dress(TeyvatFrame.Mondstadt, Base.AllAncients);
 
-    /// <inheritdoc cref="AllEvents"/>
+    /// <summary>
+    /// The base zone's own unlocked pool, dressed. `Dress` is downstream of
+    /// the filter, so every epoch gate the base act applies still applies --
+    /// the Hive removes Orobas behind `OrobasEpoch`, and a face act hides
+    /// Xbalanque / the Sacred Sakura on exactly the same save.
+    /// </summary>
     public override IEnumerable<AncientEventModel> GetUnlockedAncients(UnlockState state) =>
-        Base.GetUnlockedAncients(state);
+        TeyvatGeneratedAncients.Dress(TeyvatFrame.Mondstadt, Base.GetUnlockedAncients(state));
 
     /// <inheritdoc cref="GenerateAllEncounters"/>
     public override IEnumerable<EncounterModel> BossDiscoveryOrder => Base.BossDiscoveryOrder;

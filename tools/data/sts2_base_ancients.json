@@ -1,0 +1,355 @@
+{
+  "DARV": {
+    "agnostic_lines": [
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        2,
+        1,
+        3
+      ],
+      "IRONCLAD": [
+        1,
+        1,
+        3
+      ],
+      "NECROBINDER": [
+        3,
+        1,
+        3
+      ],
+      "REGENT": [
+        3,
+        1,
+        3
+      ],
+      "SILENT": [
+        1,
+        1,
+        3
+      ]
+    },
+    "class": "Darv",
+    "entry": "DARV",
+    "extra_keys": [
+      "epithet",
+      "pages.DONE.description",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  },
+  "NEOW": {
+    "agnostic_lines": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        1,
+        1,
+        3
+      ],
+      "IRONCLAD": [
+        1,
+        1,
+        3
+      ],
+      "NECROBINDER": [
+        3,
+        1,
+        2
+      ],
+      "REGENT": [
+        2,
+        1,
+        3
+      ],
+      "SILENT": [
+        1,
+        1,
+        3
+      ]
+    },
+    "class": "Neow",
+    "entry": "NEOW",
+    "extra_keys": [
+      "epithet",
+      "pages.DONE.CURSED.description",
+      "pages.DONE.POSITIVE.description",
+      "pages.DONE.description",
+      "results.prefix",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  },
+  "NONUPEIPE": {
+    "agnostic_lines": [
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        1,
+        1,
+        2
+      ],
+      "IRONCLAD": [
+        1,
+        1,
+        1
+      ],
+      "NECROBINDER": [
+        2,
+        1,
+        2
+      ],
+      "REGENT": [
+        2,
+        1,
+        2
+      ],
+      "SILENT": [
+        3,
+        1,
+        3
+      ]
+    },
+    "class": "Nonupeipe",
+    "entry": "NONUPEIPE",
+    "extra_keys": [
+      "epithet",
+      "pages.DONE.description",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  },
+  "OROBAS": {
+    "agnostic_lines": [
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        1,
+        1,
+        3
+      ],
+      "IRONCLAD": [
+        1,
+        1,
+        1
+      ],
+      "NECROBINDER": [
+        3,
+        1,
+        3
+      ],
+      "REGENT": [
+        3,
+        1,
+        3
+      ],
+      "SILENT": [
+        2,
+        1,
+        1
+      ]
+    },
+    "class": "Orobas",
+    "entry": "OROBAS",
+    "extra_keys": [
+      "epithet",
+      "pages.DONE.description",
+      "pages.INITIAL.options.OPTION_POOL_3_LOCKED",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  },
+  "PAEL": {
+    "agnostic_lines": [
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        1,
+        1,
+        1
+      ],
+      "IRONCLAD": [
+        1,
+        1,
+        1
+      ],
+      "NECROBINDER": [
+        3,
+        1,
+        3
+      ],
+      "REGENT": [
+        2,
+        1,
+        3
+      ],
+      "SILENT": [
+        1,
+        1,
+        1
+      ]
+    },
+    "class": "Pael",
+    "entry": "PAEL",
+    "extra_keys": [
+      "epithet",
+      "pages.DONE.description",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  },
+  "TANX": {
+    "agnostic_lines": [
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        1,
+        1,
+        3
+      ],
+      "IRONCLAD": [
+        1,
+        1,
+        3
+      ],
+      "NECROBINDER": [
+        3,
+        1,
+        3
+      ],
+      "REGENT": [
+        3,
+        1,
+        3
+      ],
+      "SILENT": [
+        1,
+        1,
+        3
+      ]
+    },
+    "class": "Tanx",
+    "entry": "TANX",
+    "extra_keys": [
+      "epithet",
+      "pages.DONE.description",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  },
+  "TEZCATARA": {
+    "agnostic_lines": [
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        2,
+        1,
+        3
+      ],
+      "IRONCLAD": [
+        1,
+        1,
+        1
+      ],
+      "NECROBINDER": [
+        3,
+        1,
+        3
+      ],
+      "REGENT": [
+        3,
+        1,
+        3
+      ],
+      "SILENT": [
+        3,
+        1,
+        3
+      ]
+    },
+    "class": "Tezcatara",
+    "entry": "TEZCATARA",
+    "extra_keys": [
+      "epithet",
+      "pages.DONE.description",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  },
+  "VAKUU": {
+    "agnostic_lines": [
+      1,
+      1,
+      1
+    ],
+    "base": "AncientEventModel",
+    "character_dialogues": {
+      "DEFECT": [
+        1,
+        1,
+        3
+      ],
+      "IRONCLAD": [
+        3,
+        1,
+        3
+      ],
+      "NECROBINDER": [
+        2,
+        1,
+        3
+      ],
+      "REGENT": [
+        3,
+        1,
+        3
+      ],
+      "SILENT": [
+        3,
+        1,
+        3
+      ]
+    },
+    "class": "Vakuu",
+    "entry": "VAKUU",
+    "extra_keys": [
+      "epithet",
+      "loss",
+      "pages.DONE.description",
+      "title"
+    ],
+    "first_visit_lines": 1,
+    "sealed": false
+  }
+}
