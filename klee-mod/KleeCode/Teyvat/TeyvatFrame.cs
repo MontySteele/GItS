@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace KleeMod.Teyvat;
@@ -248,6 +249,68 @@ public static class TeyvatFrame
     }
 
     /// <summary>
+    /// The `RoomType` the run is standing in, or null outside a run.
+    ///
+    /// WHY THIS IS HERE AND NOT READ OFF THE MUSIC CONTROLLER. `UpdateMusic`'s
+    /// own `_runState` is a private field on `NRunMusicController`, and the
+    /// whole point of the room slots (`EB-814`) is that the method the arm
+    /// patches never asks about the room at all — it reads the act, the act's
+    /// bank list and the run seed, and nothing else
+    /// (`research/sts2-music-map-2026-09-17.md` §1). So the room is fetched the
+    /// same way the act already is: through <see cref="RunStateGetter"/>, one
+    /// cached reflection getter, one registry.
+    ///
+    /// `RunState.CurrentRoom` is public (`_currentRooms.LastOrDefault()`), so
+    /// only the `State` property itself needs the private getter.
+    ///
+    /// NULL IS A SUPPORTED ANSWER, exactly as it is for
+    /// <see cref="CurrentActEntry"/>: outside a run, between rooms, or with the
+    /// getter renamed by a game patch, this is null and every caller falls back
+    /// to the out-of-combat slot rather than throwing inside a Harmony postfix
+    /// on the audio path.
+    /// </summary>
+    public static RoomType? CurrentRoomType => RoomTypeProbe();
+
+    /// <summary>
+    /// The room question, behind a delegate for the same reason
+    /// <see cref="TeyvatMusic.DirectoryExists"/> is: `RunManager.Instance` is
+    /// outside `KleeTests`' headless boundary, so the only way a suite can pin
+    /// the slot table is to hand the resolver a room it can set. Default-wired
+    /// to the engine; a test that moves it restores it with
+    /// <see cref="ResetRoomProbe"/>.
+    /// </summary>
+    public static Func<RoomType?> RoomTypeProbe { get; set; } = GodotCurrentRoomType;
+
+    private static RoomType? GodotCurrentRoomType()
+    {
+        if (!Enabled)
+        {
+            return null;
+        }
+
+        try
+        {
+            var manager = RunManager.Instance;
+            if (manager == null || !manager.IsInProgress)
+            {
+                return null;
+            }
+
+            return (RunStateGetter?.Invoke(manager, null) as RunState)?.CurrentRoom?.RoomType;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Put the room probe back on the engine. For tests only.</summary>
+    public static void ResetRoomProbe()
+    {
+        RoomTypeProbe = GodotCurrentRoomType;
+    }
+
+    /// <summary>
     /// `RunManager.State`'s getter, resolved once by reflection.
     ///
     /// THE READ'S DESIGN SAID `RunManager.Instance.State.Act.Id.Entry` AND
@@ -320,12 +383,30 @@ public static class TeyvatFrame
     /// play its own FMOD track. <see cref="TeyvatMusic.TrackFor"/> leads with
     /// this, so an undressed act never reaches a `DirAccess` call at all.
     ///
-    /// `boss`, `rest`, `map` and `shop` are sec.1 scenes with NO CALLER yet --
-    /// they are not acts, so nothing resolves to them. Wiring them is a
-    /// separate seam (a room-type question, not an act one).
+    /// A SLOT IS A DIRECTORY BELOW THE FACE (`EB-814`, media.md sec.1's
+    /// grammar): `act1_mondstadt/combat`, `act1_mondstadt/boss`. The nesting
+    /// is measured, not hoped for -- an exported pack carries
+    /// `teyvat/music/act1_mondstadt/combat/&lt;name&gt;.ogg.import` and
+    /// `DirAccess.get_files_at` of that directory lists it, exactly as the flat
+    /// case did (media.md sec.1, the 2026-09-17 measurement).
+    ///
+    /// A GLOBAL SLOT SHORT-CIRCUITS THE FACE ENTIRELY and answers its own bare
+    /// name, dressing or no dressing. `menu` is the reason the signature has to
+    /// allow it: the main menu is not a run, has no act, and would otherwise be
+    /// unreachable from a function whose first question is "which face".
     /// </summary>
-    public static string? MediaScene(string? entry)
+    public static string? MediaScene(string? entry) => MediaScene(entry, null);
+
+    /// <inheritdoc cref="MediaScene(string?)"/>
+    public static string? MediaScene(string? entry, string? slot)
     {
+        // The global slots are not act-scoped and never consult the dressing;
+        // see the header. Asked first so `menu` answers outside a run.
+        if (TeyvatMusic.IsGlobalSlot(slot))
+        {
+            return slot;
+        }
+
         if (entry == null
             || !AssetAlias.TryGetValue(entry, out var zone)
             || !BaseZoneAct.TryGetValue(zone, out var act))
@@ -333,6 +414,19 @@ public static class TeyvatFrame
             return null;
         }
 
-        return $"act{act}_{entry.ToLowerInvariant()}";
+        var face = $"act{act}_{entry.ToLowerInvariant()}";
+
+        // A null slot is the bare face, which is what the ledger's `scene`
+        // column held before the slots landed and what a caller asking only
+        // "which nation" still wants.
+        if (slot == null)
+        {
+            return face;
+        }
+
+        // An unknown slot is not silently turned into a directory nobody
+        // packs: the vocabulary is closed and the packager throws on a scene
+        // outside it, so answering null here keeps the two ends agreeing.
+        return TeyvatMusic.IsFaceSlot(slot) ? face + "/" + slot : null;
     }
 }

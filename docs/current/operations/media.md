@@ -27,29 +27,69 @@ no code change at all.
 ### 1. Layout
 
 ```
-media/raw/music/<act-or-scene>/<track>.ogg      gitignored, [USER] fills
+media/raw/music/<scene>/<track>.ogg              gitignored, [USER] fills
 media/raw/portraits/<body>/<name>.png           gitignored, [USER] fills
-media/out/music/<act-or-scene>/<track>.ogg      gitignored, produced
+media/out/music/<scene>/<track>.ogg             gitignored, produced
 media/out/portraits/<body>/<name>.png           gitignored, produced
 media/MUSIC.tsv                                 tracked ledger
 media/PORTRAITS.tsv                             tracked ledger
 media/ACT.tsv                                   tracked ledger
 ```
 
-`<act-or-scene>`: one per face, `act<N>_<nation>` — `act1_mondstadt`,
-`act1_liyue`, `act2_natlan`, `act2_inazuma`, `act3_fontaine`, `act3_sumeru`
-(R273's layout 1, two faces per act) — plus `boss`, `rest`, `map`, `shop`.
 `<body>`: the enemy or NPC id as the mod names it, one directory per body.
 
+**`<scene>` is a SLOT, and the grammar has exactly two shapes** (2026-09-17,
+`research/sts2-music-map-2026-09-17.md`):
+
+```
+<face>/<slot>     face-scoped, nested one level
+menu | shop | rest    global, a bare name
+```
+
+`<face>` is one per face, `act<N>_<nation>` — `act1_mondstadt`, `act1_liyue`,
+`act2_natlan`, `act2_inazuma`, `act3_fontaine`, `act3_sumeru` (R273's layout 1,
+two faces per act). `<slot>` is one of **`combat`, `elite`, `boss`, `map`** —
+twenty-four face scenes, plus the three global ones, twenty-seven in all, and
+that list is the packager's whitelist verbatim.
+
+**Why those four and not the game's ten.** `NRunMusicController.UpdateMusic`
+reads only the act: it draws one FMOD event out of `ActModel.BgMusicOptions`
+against the run seed and nothing else. Room variation in the base game is a
+**parameter** (`Progress`, ten values) on that one event, moved by
+`UpdateTrack()`, and the only place the game swaps the whole event is a boss
+encounter's `EncounterModel.CustomBgm`. Our replacement is a whole file, so a
+slot is a file: the four are the four room characters worth a different piece
+of music, and `Treasure`, `Event` and a won combat all take the face's `map`
+loop. The event list and the full trigger table are in the research page.
+
+**Global means no dressing resolves it.** `menu` plays over the main menu,
+where there is no run and no act at all; `shop` and `rest` are deliberately
+one track each across all six nations, so a merchant reads as a merchant
+everywhere. A global slot has **no fallback** — nothing filed means the game's
+own music plays on.
+
 **These names are the spec and the reader resolves to them.**
-`TeyvatFrame.MediaScene` turns a dressing's `Id.Entry` into its scene name, so
-a track filed here is found without a packager-side rename — the packager
-copies the `scene` column through verbatim, because a rename there would be a
-second name for the same thing and the ledger would stop describing the pack.
-The six act scenes are pinned against the six faces in `KleeTests` and against
-the packager's own list in `tier0/tests/test_music_ledger_gate.py`. The other
-four have **no caller yet**: they are not acts, so nothing resolves to them,
-and wiring them is a room-type question rather than an act one.
+`TeyvatFrame.MediaScene(entry, slot)` turns a dressing's `Id.Entry` and a slot
+into the scene name, so a track filed here is found without a packager-side
+rename — the packager copies the `scene` column through verbatim, because a
+rename there would be a second name for the same thing and the ledger would
+stop describing the pack. The twenty-seven scenes are pinned against the six
+faces and the seven slots in `KleeTests`, and against the packager's own list
+in `tier0/tests/test_music_ledger_gate.py`, which holds the three sides —
+whitelist, this page's list, and the resolver's own slot set — against each
+other.
+
+**Nesting is measured, not assumed** (MegaDot 4.5.1 headless, the packager's
+own `project.godot` and export preset, 2026-09-17). Exporting
+`teyvat/music/act1_mondstadt/combat/music_combat_A.ogg` packs exactly the two
+entries a flat scene packs — `.godot/imported/<name>.ogg-<hash>.oggvorbisstr`
+and `teyvat/music/act1_mondstadt/combat/<name>.ogg.import` — and with that pack
+mounted, `DirAccess.get_files_at` of the nested directory returns
+`["music_combat_A.ogg.import"]`, `get_directories_at` of the parent returns
+`["boss", "combat"]`, `ResourceLoader.exists` is true for the stripped `.ogg`
+and false for the sidecar, and the load returns an `AudioStreamOggVorbis`.
+`DirAccess.dir_exists_absolute` of a nested scene with nothing filed answers
+false and prints nothing, which is the silence `EB-758` bought.
 
 `media/out/` is what the packager reads; nothing else is packaged. **One
 producer per out-path** — exactly one ledger row may name a given `out`, and
@@ -234,11 +274,12 @@ media/out/
 
 ```powershell
 # 1. roots (main checkout only; gitignored, never committed)
-New-Item -ItemType Directory -Force media\raw\music\act1_mondstadt, media\out\music\act1_mondstadt
-# 2. drop media\raw\music\act1_mondstadt\windborne_dreams.ogg
-# 3. ONE row in media\MUSIC.tsv (UTF-8 + CRLF, tab-separated), e.g.
-#    music/act1_mondstadt/windborne_dreams.ogg <TAB> (same) <TAB> act1_mondstadt
-#    <TAB> Windborne Dreams <TAB> City of Winds and Idylls d1 t3
+New-Item -ItemType Directory -Force media\raw\music\act1_mondstadt\combat, media\out\music\act1_mondstadt\combat
+# 2. drop media\raw\music\act1_mondstadt\combat\windborne_dreams.ogg
+# 3. ONE row in media\MUSIC.tsv (UTF-8, LF, tab-separated), e.g.
+#    music/act1_mondstadt/combat/windborne_dreams.ogg <TAB> (same)
+#    <TAB> act1_mondstadt/combat <TAB> Windborne Dreams
+#    <TAB> City of Winds and Idylls d1 t3
 #    <TAB> PLACEHOLDER-COPYRIGHTED <TAB> 12.4 <TAB>
 # 4. INVISIBLE to git -- prints nothing:
 git status --porcelain media/raw media/out
@@ -255,9 +296,17 @@ would distribute the track.
   with the FMOD music bus ducked is the default; an FMOD bank is the fallback
   if the duck cannot hold. The spike decides (run-frame §2, §4.4), and this
   page only says where the file lives.
-- **The four non-act scenes.** `boss`, `rest`, `map` and `shop` are §1 scenes
-  with nothing that resolves to them: `TeyvatFrame.MediaScene` answers for a
-  dressing, and those are room types rather than acts. A track filed under one
-  today is packed, sits in `res://teyvat/music/<scene>/`, and is never asked
-  for. Wiring them needs a room-type seam on the audio path, which is a
-  separate read from this one.
+- **Which counterpart, per slot.** The twenty-seven picks are E defaults under
+  the R212 ladder, disclosed in the PR that filed them and vetoed by ear; the
+  reason for each is its ledger row's `notes`. What is NOT decided here is
+  whether a given face wants a *different* track — that is [USER]'s ear, one
+  row at a time, and costs a file swap and one `notes` edit.
+- **Loop points.** Every row's `loop_start_s` is blank, because Genshin's music
+  wems carry no `smpl` chunk (`research/teyvat-music-sources-2026-09-16.md` §6)
+  and most of these are seamless-at-zero loop bodies already. A track that
+  audibly restarts wrong gets a hand-measured number in that column and nothing
+  else changes.
+- **Stingers.** `event:/temp/sfx/game_over` is the game's own and stays: there
+  is no clean short counterpart in the extraction, and the run frame has no
+  reason to own a death sound. There is no victory or credits music in the
+  managed assembly to replace.
