@@ -1910,7 +1910,7 @@ relic_salon_solitaire	ImageGen/images/furina/relics/salon_solitaire.png	256	256	
 # -- act 1 Mondstadt --
 portrait_wooden_shield_hilichurl_guard	ImageGen/images/teyvat/creature_visuals/wooden_shield_hilichurl_guard.png	240	280	cut	cut	auto	1	png	Enemy Wooden Shield Hilichurl Guard.png		splash
 portrait_hilichurl	ImageGen/images/teyvat/creature_visuals/hilichurl.png	240	280	cut	cut	auto	1	png	Enemy Hilichurl.png		splash
-portrait_dendro_slime	ImageGen/images/teyvat/creature_visuals/dendro_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Dendro Slime.png		splash
+portrait_dendro_slime	ImageGen/images/teyvat/creature_visuals/dendro_slime.png	240	280	cut	cut/contain;split=16	auto	1	png	Enemy Dendro Slime.png		splash
 portrait_cryo_slime	ImageGen/images/teyvat/creature_visuals/cryo_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Cryo Slime.png		splash
 portrait_rockfond_rifthound	ImageGen/images/teyvat/creature_visuals/rockfond_rifthound.png	240	280	cut	cut	auto	1	png	Enemy Rockfond Rifthound.png		splash
 portrait_anemo_samachurl	ImageGen/images/teyvat/creature_visuals/anemo_samachurl.png	240	280	cut	cut	auto	1	png	Enemy Anemo Samachurl.png		splash
