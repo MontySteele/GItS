@@ -1,4 +1,4 @@
-Status: OPEN (picks for [USER]; nothing here is measured)
+Status: OPEN (pick 4 only; R274 ruled picks 1-3 and 5-8 at their defaults on 2026-09-16; nothing here is measured)
 
 # The 2026-09-16 fan-outs: what landed, and eight picks
 
@@ -84,6 +84,8 @@ create-mode Muster never stamps its recruit's discount (`EB-808`), and a free
 queue entry prints no derivation (`EB-809`).
 
 ## 4. Picks
+
+**R274 (2026-09-16):** picks 1, 2, 3, 5, 6, 7 and 8 were taken at their defaults. Pick 4 is deferred to a Fable design pass on 2026-09-17; [USER]'s lean is that Noelle's imprecise text is the defect and the groups still need settling. Of the mapping's carried items, the Wanderer collision on Knowledge Demon is accepted and Tanx waits for a reflavoring worth having.
 
 Defaults are marked. A pick not taken stands at its default.
 

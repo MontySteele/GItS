@@ -1739,3 +1739,5 @@ EB-794 RETIRED 2026-09-16: live: the shop removal grid marked the picked row `se
 EB-795 RETIRED 2026-09-16: live: `Written:` printed Noelle's 6 and 4 (#595).
 EB-796 RETIRED 2026-09-16: live: `+1 your opening bank, +3 an explosion` on turn 2 (#595).
 EB-804 RETIRED 2026-09-16: the proofs-10 list ran on 0.2.3581: lane 0 (#594) and lane 1 (#595); every item PASS or narrowed with the reason.
+EB-388 RETIRED 2026-09-16: R274 pick 2 at its default: Kujou Sara's granted rider stays unmultiplied under Guest Cast; the delayed and conditional legs print the multiplied number (#567).
+EB-441 RETIRED 2026-09-16: R274 pick 1 at its default: the game's rule stands, a Skill's attack-door hit consumes Vigor; face and hit agree (#567, #570).
