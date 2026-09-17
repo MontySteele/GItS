@@ -1,4 +1,4 @@
-Status: OPEN (census for EB-494; curation is the main session's)
+Status: RULED R274 2026-09-16
 
 # Inherited Silent potions and relics — a census, not a curation
 
