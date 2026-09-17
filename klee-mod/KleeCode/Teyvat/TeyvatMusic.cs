@@ -436,20 +436,35 @@ public static class TeyvatMusic
 
         try
         {
-            var existing = host.GetNodeOrNull<AudioStreamPlayer>(PlayerNodeName);
-            if (existing != null)
+            // Every player we ever made under this host, by name prefix rather
+            // than exact name: a `QueueFree` on a slot change used to leave the
+            // old node IN the tree until the end of the frame, so the new node
+            // added under the same name was renamed by Godot (`TeyvatTrack2`),
+            // the next lookup by exact name missed it, a third player was
+            // added, and the renamed one kept playing underneath -- the map
+            // track and the combat track together, from the second slot change
+            // on (user look, 2026-09-17). Detaching synchronously keeps the
+            // name free, and the prefix sweep reaps anything already leaked.
+            AudioStreamPlayer? keep = null;
+            foreach (var ours in OurPlayers(host))
             {
-                if (existing.Stream?.ResourcePath == track)
+                if (keep == null && ours.Stream?.ResourcePath == track)
                 {
-                    if (!existing.Playing)
-                    {
-                        existing.Play();
-                    }
-
-                    return true;
+                    keep = ours;
+                    continue;
                 }
 
-                existing.QueueFree();
+                Detach(host, ours);
+            }
+
+            if (keep != null)
+            {
+                if (!keep.Playing)
+                {
+                    keep.Play();
+                }
+
+                return true;
             }
 
             var stream = ResourceLoader.Load<AudioStream>(track);
@@ -500,11 +515,47 @@ public static class TeyvatMusic
 
         try
         {
-            host.GetNodeOrNull<AudioStreamPlayer>(PlayerNodeName)?.QueueFree();
+            foreach (var ours in OurPlayers(host))
+            {
+                Detach(host, ours);
+            }
         }
         catch (Exception e)
         {
             Log.Warn($"[{KleeMod.ModId}] teyvat: could not stop the packaged track: {e.Message}");
         }
+    }
+
+    /// <summary>Is this node one of ours? By NAME PREFIX, because Godot
+    /// renames a child added under a name that is still taken
+    /// (`TeyvatTrack` -> `TeyvatTrack2`), and an exact match would lose it.
+    /// Pure, so the pin can run without a tree.</summary>
+    public static bool IsOurPlayerName(string name) =>
+        name.StartsWith(PlayerNodeName, StringComparison.Ordinal);
+
+    /// <summary>Every `AudioStreamPlayer` under the host whose name is ours,
+    /// snapshotted so the caller may detach while iterating.</summary>
+    private static List<AudioStreamPlayer> OurPlayers(Node host)
+    {
+        var found = new List<AudioStreamPlayer>();
+        foreach (var child in host.GetChildren())
+        {
+            if (child is AudioStreamPlayer player && IsOurPlayerName(player.Name))
+            {
+                found.Add(player);
+            }
+        }
+
+        return found;
+    }
+
+    /// <summary>Stop it, take it out of the tree NOW so its name is free, then
+    /// free it. `QueueFree` alone leaves the node in the tree until the end of
+    /// the frame, which is the leak this file's history records.</summary>
+    private static void Detach(Node host, AudioStreamPlayer player)
+    {
+        player.Stop();
+        host.RemoveChild(player);
+        player.QueueFree();
     }
 }
