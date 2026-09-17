@@ -179,45 +179,160 @@ public class SparkCounterPinTests
             c => c.EndsWith("SparkCounter.Setup", StringComparison.Ordinal));
     }
 
-    // --- the geometry, as source text -------------------------------------
+    // --- the geometry, as geometry ----------------------------------------
+    //
+    // `EB-815`. THESE TWO TESTS REPLACE TWO SOURCE-TEXT PINS, and the swap is
+    // the lesson rather than a tidy-up. The old pair asserted that the file
+    // CONTAINED the four `root.Anchor{edge} = star.Anchor{edge};` lines and the
+    // `EnergyCounterContainer?.SetPosition(...)` call. Both lines were the
+    // defect -- `NCombatUi.Activate` reparents `%StarCounter` INTO the energy
+    // orb before this mod's postfix runs, so copying its box put the badge on
+    // the orb, and the displacement then moved badge and orb together because
+    // the badge was inside the orb's own subtree. The suite was green the whole
+    // time [USER] was looking at the overlap, because a test that asserts a
+    // line of code EXISTS can never fail on where a box LANDS.
+    //
+    // So the placement is now a pure function over rects and the pins are
+    // arithmetic. `Place` takes no nodes, which is what lets the headless host
+    // hold it at all (KleeTests README, the headless boundary).
+
+    /// <summary>The badge's own square, as `SideOf` resolves it when the star
+    /// counter has not been laid out. Any side would do; this is the shipped
+    /// one.</summary>
+    private const float Side = 72f;
+
+    /// <summary>The game's design resolution -- the space the panel's offsets
+    /// are already in (`KurageMemoryCard`, the same constant).</summary>
+    private static readonly Godot.Vector2 Design = new(1920f, 1080f);
+
+    private static Godot.Rect2 Place(
+        Godot.Rect2 energy, float side, Godot.Vector2 viewport) =>
+        (Godot.Rect2)typeof(SparkCounter)
+            .GetMethod(nameof(Place), All)!
+            .Invoke(null, new object[] { energy, side, viewport })!;
 
     [Fact]
-    public void The_rect_is_read_off_the_live_star_counter_and_not_guessed()
+    public void The_badge_never_lands_on_the_energy_panel()
     {
-        var source = Source("Vfx/Prototype/SparkCounter.cs").Replace("\r\n", "\n");
-
-        // `%StarCounter` is in EVERY character's combat scene -- `NCombatUi`
-        // binds it in `_Ready` and only SHOWS it for a character whose
-        // `ShouldAlwaysShowStarCounter` is true -- so it resolves for Klee and
-        // is the fact this mirrors. A pixel constant would be a guess about a
-        // scene we do not ship.
-        Assert.Contains("GetNodeOrNull<Control>(\"%StarCounter\")", source);
-        foreach (var edge in new[] { "Left", "Top", "Right", "Bottom" })
-        {
-            Assert.Contains($"root.Anchor{edge} = star.Anchor{edge};", source);
-            Assert.Contains($"root.Offset{edge} = star.Offset{edge};", source);
-        }
-    }
-
-    [Fact]
-    public void The_energy_orb_takes_the_base_game_s_own_displacement()
-    {
-        // `NCombatUi.Activate`, v0.111.0, for a character that always shows a
-        // star counter:
-        //     EnergyCounterContainer.SetPosition(new Vector2(100f, 806f),
-        //                                        keepOffsets: true);
-        // Doing the first half of the base game's layout and not the second
-        // would stack the badge on the orb.
+        // The two rects the energy panel actually takes: its shipped corner,
+        // and the displaced corner the base game gives it for a character that
+        // always shows a star counter (`NCombatUi.Activate`, v0.111.0,
+        // `new Vector2(100f, 806f)`). The badge must clear BOTH -- the second
+        // because the base game may still displace the panel around us.
         var offset = (Godot.Vector2)typeof(SparkCounter)
             .GetField("EnergyCounterOffset", All)!
             .GetValue(null)!;
         Assert.Equal(100f, offset.X);
         Assert.Equal(806f, offset.Y);
 
+        var panels = new[]
+        {
+            new Godot.Rect2(new Godot.Vector2(60f, 860f), new(140f, 140f)),
+            new Godot.Rect2(offset, new Godot.Vector2(140f, 140f)),
+        };
+
+        foreach (var panel in panels)
+        {
+            var badge = Place(panel, Side, Design);
+
+            // THE WHOLE ACCEPTANCE CONDITION, and the thing [USER] saw fail:
+            // the flower must not sit on the hexagon.
+            Assert.False(badge.Intersects(panel),
+                         $"badge {badge} intersects the energy panel {panel}");
+
+            // And it must be on screen to be read at all.
+            Assert.True(new Godot.Rect2(Godot.Vector2.Zero, Design)
+                            .Encloses(badge),
+                        $"badge {badge} is off a {Design} viewport");
+
+            // ABOVE, left edges aligned, and exactly the declared margin clear
+            // -- not merely "somewhere that happens not to touch".
+            var margin = (float)typeof(SparkCounter)
+                .GetField("PanelMargin", All)!.GetValue(null)!;
+            Assert.Equal(12f, margin);
+            Assert.Equal(panel.Position.X, badge.Position.X);
+            Assert.Equal(panel.Position.Y - margin, badge.End.Y);
+        }
+    }
+
+    [Fact]
+    public void The_placement_holds_at_every_viewport_and_panel_position()
+    {
+        // THE POINT OF THE ROW. The old overlap was scale-INDEPENDENT -- a
+        // fixed delta inside one shared subtree -- so a single-viewport pin
+        // would have proved nothing about it. This sweeps the panel around the
+        // frame and the frame around its own sizes, and asserts the same two
+        // properties every time: clear of the panel, inside the viewport.
+        var viewports = new[]
+        {
+            Design,
+            new Godot.Vector2(1280f, 720f),      // the small window
+            new Godot.Vector2(2560f, 1440f),     // a large one
+            new Godot.Vector2(1920f, 800f),      // ultrawide-ish, short
+        };
+
+        var corners = new[]
+        {
+            new Godot.Vector2(0f, 0f),           // flush top-left: no room ABOVE
+            new Godot.Vector2(100f, 806f),       // the game's own corner
+            new Godot.Vector2(60f, 300f),
+            new Godot.Vector2(600f, 40f),        // near the top edge
+        };
+
+        foreach (var viewport in viewports)
+        {
+            foreach (var corner in corners)
+            {
+                var panel = new Godot.Rect2(corner, new Godot.Vector2(140f, 140f));
+                var badge = Place(panel, Side, viewport);
+
+                Assert.False(badge.Intersects(panel),
+                             $"badge {badge} intersects panel {panel} "
+                             + $"at viewport {viewport}");
+                Assert.True(new Godot.Rect2(Godot.Vector2.Zero, viewport)
+                                .Encloses(badge),
+                            $"badge {badge} escapes viewport {viewport} "
+                            + $"with panel {panel}");
+            }
+        }
+    }
+
+    [Fact]
+    public void The_badge_is_a_sibling_of_the_energy_panel_and_not_its_child()
+    {
         var source = Source("Vfx/Prototype/SparkCounter.cs").Replace("\r\n", "\n");
-        Assert.Contains("EnergyCounterContainer?.SetPosition(EnergyCounterOffset",
-                        source);
-        Assert.Contains("keepOffsets: true", source);
+
+        // THE ROOT CAUSE, pinned as the one thing about the tree that source
+        // text CAN hold: the parent is the energy panel's parent. Parenting
+        // into `star.GetParent()` is what put the badge inside the orb, because
+        // `Activate` has already reparented the star counter into it.
+        Assert.Contains("var panel = ui.EnergyCounterContainer;", source);
+        Assert.Contains("var parent = panel?.GetParent() ?? (Node)ui;", source);
+        Assert.DoesNotContain("star?.GetParent()", source);
+
+        // The displacement is GONE rather than repaired: with the badge out of
+        // the orb's subtree it would be a real eviction of the shipped orb that
+        // nothing asked for. The CALL is what must be absent -- the docstring
+        // still quotes the base game's own line, and should, because that line
+        // is the fact the rest of the file is reasoning about.
+        Assert.DoesNotContain("ui.EnergyCounterContainer?.SetPosition", source);
+        Assert.DoesNotContain("SetPosition(EnergyCounterOffset", source);
+
+        // `%StarCounter` is still read -- for its SIZE, which the reparent does
+        // not make a lie -- and its anchors are never copied again.
+        Assert.Contains("GetNodeOrNull<Control>(\"%StarCounter\")", source);
+        foreach (var edge in new[] { "Left", "Top", "Right", "Bottom" })
+        {
+            Assert.DoesNotContain($"root.Anchor{edge} = star.Anchor{edge};",
+                                  source);
+            Assert.DoesNotContain($"root.Offset{edge} = star.Offset{edge};",
+                                  source);
+        }
+
+        // And the badge carries the PANEL's anchor pair, which is what makes a
+        // resize move the two by one vector with no `_Process`.
+        Assert.Contains("root.AnchorLeft = panel.AnchorLeft;", source);
+        Assert.Contains("root.AnchorTop = panel.AnchorTop;", source);
     }
 
     [Fact]
