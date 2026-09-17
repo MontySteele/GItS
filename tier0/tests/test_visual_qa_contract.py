@@ -105,7 +105,7 @@ def test_the_sample_contract_is_well_formed():
     # eighteen files whether its base zone has a sibling or not. The hundred
     # and eight rows are pinned against the generator's own plan in
     # tier0/tests/test_act_placeholder_plan.py, so neither side can move alone.
-    assert len(parsed.resources) == 299
+    assert len(parsed.resources) == 389
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -205,10 +205,10 @@ def test_end_to_end_on_a_staged_package(tmp_path):
                                         payload), payload)
     report = contract.run(None, ROOT, package_dir=package, pck_src=PCK_SRC)
     assert report.errors == [], report.render(verbose=True)
-    # +6 at EB-40, +2 for the pet, +6 for the stage, +155 for the Teyvat
-    # frame's 77 dressed bodies (77 Tier F plates and the 78 scenes that draw
-    # them), +108 for
+    # +6 at EB-40, +2 for the pet, +6 for the stage, +245 for the Teyvat
+    # frame's 122 dressed bodies (122 Tier F plates and the 123 scenes that
+    # draw them -- 2026-09-17 closed the last 52 act-1..3 face-slots), +108 for
     # the six act dressings' placeholder asset sets (eighteen each; see the
     # count's reason above the first assertion).
-    assert report.checked["contract_resources"] == 299
+    assert report.checked["contract_resources"] == 389
     assert report.checked["package_files"] == 3

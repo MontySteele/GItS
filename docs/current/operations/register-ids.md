@@ -1741,3 +1741,4 @@ EB-796 RETIRED 2026-09-16: live: `+1 your opening bank, +3 an explosion` on turn
 EB-804 RETIRED 2026-09-16: the proofs-10 list ran on 0.2.3581: lane 0 (#594) and lane 1 (#595); every item PASS or narrowed with the reason.
 EB-388 RETIRED 2026-09-16: R274 pick 2 at its default: Kujou Sara's granted rider stays unmultiplied under Guest Cast; the delayed and conditional legs print the multiplied number (#567).
 EB-441 RETIRED 2026-09-16: R274 pick 1 at its default: the game's rule stands, a Skill's attack-door hit consumes Vigor; face and hit agree (#567, #570).
+EB-813 RETIRED 2026-09-17: moot. Its whole scope was Remus and Katayoun, the two bodies whose in-world screenshots mode=cut could not separate; [USER] VETOED both plates, so the enemy-completion pass dropped their rows from art/plan.tsv and media/PORTRAITS.tsv and deleted the PNGs. There is nothing left to hand-cut, and neither body was ever in enemy-dressings.tsv.
