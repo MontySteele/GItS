@@ -42,12 +42,18 @@ public sealed class Liyue : ActModel
     /// <inheritdoc cref="Mondstadt.AllEvents"/>
     public override IEnumerable<EventModel> AllEvents => Base.AllEvents;
 
-    /// <inheritdoc cref="Mondstadt.AllEvents"/>
-    public override IEnumerable<AncientEventModel> AllAncients => Base.AllAncients;
+    /// <inheritdoc cref="Mondstadt.AllAncients"/>
+    public override IEnumerable<AncientEventModel> AllAncients =>
+        TeyvatGeneratedAncients.Dress(TeyvatFrame.Liyue, Base.AllAncients);
 
-    /// <inheritdoc cref="Mondstadt.AllEvents"/>
+    /// <summary>
+    /// The base zone's own unlocked pool, dressed. `Dress` is downstream of
+    /// the filter, so every epoch gate the base act applies still applies --
+    /// the Hive removes Orobas behind `OrobasEpoch`, and a face act hides
+    /// Xbalanque / the Sacred Sakura on exactly the same save.
+    /// </summary>
     public override IEnumerable<AncientEventModel> GetUnlockedAncients(UnlockState state) =>
-        Base.GetUnlockedAncients(state);
+        TeyvatGeneratedAncients.Dress(TeyvatFrame.Liyue, Base.GetUnlockedAncients(state));
 
     /// <inheritdoc cref="Mondstadt.GenerateAllEncounters"/>
     public override IEnumerable<EncounterModel> BossDiscoveryOrder => Base.BossDiscoveryOrder;

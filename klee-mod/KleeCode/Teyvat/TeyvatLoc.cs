@@ -133,9 +133,17 @@ internal static partial class TeyvatLoc
             LocManager.Instance.GetTable("events")
                 .MergeWith(new Dictionary<string, string>(EventRows, StringComparer.Ordinal));
 
+            // The dressed Ancients' rows. LAST, and separately, because the
+            // derivation reads the `ancients` table it then writes to -- see
+            // `TeyvatAncients` for why an empty faces-file cell is an ALIAS
+            // rather than a missing row.
+            var ancients = TeyvatAncients.RowsFor(LocManager.Instance.GetTable("ancients"));
+            LocManager.Instance.GetTable("ancients").MergeWith(ancients);
+
             Log.Info($"[{KleeMod.ModId}] teyvat: loc merged ({monsters.Count} dressed enemy "
                    + $"name(s), {intents.Count} dressed intent word(s), {EventRows.Count} "
-                   + $"converted-event row(s)).");
+                   + $"converted-event row(s), {ancients.Count} dressed-Ancient row(s) "
+                   + $"across {TeyvatGeneratedAncients.BaseEntries.Count} bodies).");
         }
         catch (Exception e)
         {

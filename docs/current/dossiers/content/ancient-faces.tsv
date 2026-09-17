@@ -1,0 +1,64 @@
+# THE ANCIENTS, DRESSED PER FACE -- R275 (2026-09-17).
+#
+# One row per (Ancient, face); `tools/gen_teyvat_ancients.py` reads this file
+# and writes `klee-mod/KleeCode/Teyvat/TeyvatAncientsGenerated.cs`. The shape
+# and the decompiled facts behind it are `docs/current/operations/codegen.md`,
+# "Codegen -- Teyvat dressed Ancients".
+#
+# EVERY TEXT COLUMN MAY BE EMPTY AND TODAY EVERY ONE OF THEM IS. An empty cell
+# means KEEP THE GAME'S OWN LINE: `TeyvatLoc.Inject` copies the live row from
+# the base Ancient's key onto the dressed key before laying the face's own
+# rows over the top, so a name-only pass ships with the game's words intact,
+# in every language, with no base-game prose in this repo. Filling a cell in
+# later changes no code.
+#
+# THE COLUMNS
+#   ancient      the base Ancient's Id.Entry (NEOW, OROBAS, PAEL, TEZCATARA,
+#                NONUPEIPE, TANX, VAKUU, DARV)
+#   face         MONDSTADT LIYUE (act 1) | NATLAN INAZUMA (act 2) |
+#                FONTAINE SUMERU (act 3)
+#   name         REQUIRED. The dressed name. The C# class, the Id.Entry, the
+#                title row and every asset path derive from it.
+#   epithet      the line under the name on the banner (`<ENTRY>.epithet`)
+#   first_visit  the once-ever dialogue, shown the first time ANY character
+#                meets this Ancient. Lines separated by `|`, each line
+#                prefixed `A: ` (the Ancient speaks) or `C: ` (the player
+#                character speaks). The line COUNT is fixed by compiled C#
+#                and is checked against tools/data/sts2_base_ancients.json.
+#   dialogue_1/2/3
+#                the per-character dialogues at visit 0, visit 1 and visit 4.
+#                NOTHING IN OUR ROSTER READS THESE: `CharacterDialogues` is
+#                keyed by IRONCLAD/SILENT/DEFECT/NECROBINDER/REGENT, so Klee,
+#                Kokomi and Furina miss the lookup and fall through to the
+#                agnostic list. Written per character when they are written:
+#                `IRONCLAD= A: ... | C: ... ;; SILENT= A: ...`.
+#   agnostic_1   the ANY-character dialogue 0 -- what a Teyvat run reads.
+#   agnostic_2   every REMAINING ANY dialogue, `;;`-separated in index order.
+#                Two for most Ancients, three for Vakuu, five for Neow.
+#   extra        flat rows under the dressed entry, `key= text ;; key= text`.
+#                This is where Neow's `results.prefix`, Vakuu's `loss` and
+#                Orobas's `pages.INITIAL.options.OPTION_POOL_3_LOCKED.title`
+#                go when a face wants to restate them.
+#
+# NO BOON IS WRITTEN HERE, EVER. An Ancient's options are RelicOption<T>() and
+# `EventOption.FromRelic` falls through to the relic's own rows when the event
+# has none, so the boon a player reads is the game's whatever this file says.
+ancient	face	name	epithet	first_visit	dialogue_1	dialogue_2	dialogue_3	agnostic_1	agnostic_2	extra
+DARV	FONTAINE	Alice								
+DARV	INAZUMA	Alice								
+DARV	NATLAN	Alice								
+DARV	SUMERU	Alice								
+NEOW	LIYUE	Moon Carver								
+NEOW	MONDSTADT	Dvalin								
+NONUPEIPE	FONTAINE	Egeria								
+NONUPEIPE	SUMERU	Greater Lord Rukkhadevata								
+OROBAS	INAZUMA	the Sacred Sakura								
+OROBAS	NATLAN	Xbalanque								
+PAEL	INAZUMA	Orobashi								
+PAEL	NATLAN	Och-Kan								
+TANX	FONTAINE	Elynas								
+TANX	SUMERU	Apep								
+TEZCATARA	INAZUMA	Ioroi								
+TEZCATARA	NATLAN	Tezcatara								
+VAKUU	FONTAINE	Remus								
+VAKUU	SUMERU	King Deshret								

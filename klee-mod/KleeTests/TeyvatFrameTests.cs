@@ -315,6 +315,13 @@ public class TeyvatFrameTests : IDisposable
         Assert.Contains(dressing.Name + ".get_Base", calls);
         Assert.Contains("ActModel.get_AllAncients", calls);
         Assert.DoesNotContain("ModelDb.AncientEvent", calls);
+
+        // R275 put `TeyvatGeneratedAncients.Dress` between the base zone's
+        // answer and the caller. It is a `Select`, so the pool is still the
+        // base zone's in LENGTH and in ORDER -- which is the property this pin
+        // was written for -- and the only thing it changes is which body each
+        // slot holds. `TeyvatAncientsTests` carries the rest.
+        Assert.Contains("TeyvatGeneratedAncients.Dress", calls);
     }
 
     [Theory]
