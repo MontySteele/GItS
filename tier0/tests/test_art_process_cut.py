@@ -172,34 +172,46 @@ def test_an_already_cut_source_is_passed_through_untouched():
 
 def test_the_spec_column_parses_tolerance_fit_focus_and_pocket():
     tol, pock = art_process.CUT_TOLERANCE, art_process.CUT_POCKET_FRAC
-    chr_, fig = art_process.CUT_CHROMA, "main"
-    assert art_process._cut_spec("cut") == (tol, "cover", "top", pock, chr_, fig)
-    assert art_process._cut_spec("cut@64") == (64.0, "cover", "top", pock, chr_, fig)
+    chr_, fig, spl = art_process.CUT_CHROMA, "main", art_process.CUT_SPLIT
+    assert art_process._cut_spec("cut") == (
+        tol, "cover", "top", pock, chr_, fig, spl)
+    assert art_process._cut_spec("cut@64") == (
+        64.0, "cover", "top", pock, chr_, fig, spl)
     assert art_process._cut_spec("cut@64/center") == (
-        64.0, "cover", "center", pock, chr_, fig)
+        64.0, "cover", "center", pock, chr_, fig, spl)
     assert art_process._cut_spec("cut/contain") == (
-        tol, "contain", "center", pock, chr_, fig)
+        tol, "contain", "center", pock, chr_, fig, spl)
     assert art_process._cut_spec("cut@64/top:0.01") == (
-        64.0, "cover", "top", 0.01, chr_, fig)
-    assert art_process._cut_spec("cut:0") == (tol, "cover", "top", 0.0, chr_, fig)
+        64.0, "cover", "top", 0.01, chr_, fig, spl)
+    assert art_process._cut_spec("cut:0") == (
+        tol, "cover", "top", 0.0, chr_, fig, spl)
     # A bare focus keyword is the "default matte, this framing" spelling.
     assert art_process._cut_spec("center") == (
-        tol, "cover", "center", pock, chr_, fig)
+        tol, "cover", "center", pock, chr_, fig, spl)
 
 
 def test_the_spec_column_takes_the_keyword_options_too():
     """`;key=value` is how the grammar grows without a fifth punctuation mark."""
     tol, pock = art_process.CUT_TOLERANCE, art_process.CUT_POCKET_FRAC
+    chr_, spl = art_process.CUT_CHROMA, art_process.CUT_SPLIT
     assert art_process._cut_spec("cut;figure=all") == (
-        tol, "cover", "top", pock, art_process.CUT_CHROMA, "all")
+        tol, "cover", "top", pock, chr_, "all", spl)
     assert art_process._cut_spec("cut@70;chroma=60") == (
-        70.0, "cover", "top", pock, 60.0, "main")
+        70.0, "cover", "top", pock, 60.0, "main", spl)
     assert art_process._cut_spec("cut@50/center:0.01;chroma=20;figure=all") == (
-        50.0, "cover", "center", 0.01, 20.0, "all")
+        50.0, "cover", "center", 0.01, 20.0, "all", spl)
+    assert art_process._cut_spec("cut/contain;split=16") == (
+        tol, "contain", "center", pock, chr_, "main", 16)
+    # OFF unless a row asks: a staff handle is a thin bridge too.
+    assert art_process.CUT_SPLIT == 0
     with pytest.raises(SystemExit):
         art_process._cut_spec("cut;figure=biggest")
     with pytest.raises(SystemExit):
         art_process._cut_spec("cut;nonesuch=1")
+    with pytest.raises(SystemExit):
+        art_process._cut_spec("cut;split=wide")
+    with pytest.raises(SystemExit):
+        art_process._cut_spec("cut;split=-2")
 
 
 def test_a_hopeless_cut_is_flagged_rather_than_placed_in_silence():
@@ -331,4 +343,53 @@ def test_figure_all_keeps_every_body():
     assert matte.getpixel((180, 120)) == 255
     assert matte.getpixel((45, 150)) == 255
     assert matte.getpixel((325, 150)) == 255
+    assert dropped == []
+
+
+def _plate_bridged_pair():
+    """Two bodies JOINED by a 3px strand, on the backdrop gradient.
+
+    `dendro_slime` is this: the flanking slime's leaves overlap the subject's,
+    so the pair is ONE alpha component and `figure=main` cannot reach it --
+    component selection has nothing to select between. `split=N` opens the
+    matte first, so a bridge thinner than 2N+1 parts while the bodies, which
+    are far thicker than that, survive whole.
+    """
+    w, h = 360, 240
+    img = Image.new("RGB", (w, h))
+    px = img.load()
+    for y in range(h):
+        t = y / (h - 1)
+        row = tuple(round(a + (b - a) * t)
+                    for a, b in zip(BACKDROP_TOP, BACKDROP_BOTTOM))
+        for x in range(w):
+            px[x, y] = row
+    for x0, y0, x1, y1 in [(120, 60, 230, 190),      # the subject, centred
+                           (280, 130, 340, 190)]:    # the flanker, off to the side
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                px[x, y] = FIGURE
+    for y in range(158, 161):                        # the 3px strand between them
+        for x in range(230, 280):
+            px[x, y] = FIGURE
+    return img.convert("RGBA")
+
+
+def test_split_parts_two_bodies_joined_by_a_thin_bridge():
+    dropped = []
+    matte = art_process._backdrop_alpha(_plate_bridged_pair(), split=4,
+                                        dropped=dropped)
+    assert matte.getpixel((175, 120)) == 255    # the subject stays, whole
+    assert matte.getpixel((125, 185)) == 255    # ...including its far corner
+    assert matte.getpixel((310, 160)) == 0      # the flanker is gone
+    assert len(dropped) == 1
+
+
+def test_split_is_off_unless_the_row_asks_for_it():
+    """A staff handle and a whip are thin bridges too -- default OFF."""
+    dropped = []
+    matte = art_process._backdrop_alpha(_plate_bridged_pair(), dropped=dropped)
+    assert matte.getpixel((175, 120)) == 255
+    assert matte.getpixel((310, 160)) == 255    # still joined, so still kept
+    assert matte.getpixel((255, 159)) == 255    # and the bridge with it
     assert dropped == []

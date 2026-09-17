@@ -309,7 +309,18 @@ every component (`fatui_cryo_cicin_mage`'s cicins take it). The spec column
 grew the two knobs as `;key=value` rather than a fifth punctuation mark:
 `cut[@tolerance][/fit-focus][:pocket][;chroma=N][;figure=main|all]`, default
 `cut@30/top:0.004;chroma=12;figure=main`. Still uncuttable and flagged on the
-sheet: `remus`, `katayoun` and `large_hydro_slime`.
+sheet: `remus`, `katayoun` and `large_hydro_slime`. **Follow-up the same day:**
+`dendro_slime`'s second slime survived that pass because it is *joined* to the
+subject through the overlapping leaves — one alpha component, so there was
+nothing for figure selection to select between — so the spec gained
+`;split=N`, which opens the matte (erode N, dilate N) before the figure is
+chosen, parting two bodies bridged by anything thinner than 2N+1 while every
+thick part survives. It is **off by default and on for one row**
+(`dendro_slime`, at `split=16`): a scan of all 81 at that N showed the same
+rule would cut `hilichurl_fighter`'s raised club and
+`rock_shield_hilichurl_guard`'s shield haft, which are thin bridges to real
+features, and no other row holds two bodies in one component
+(`iktomisaurus_chick` holds two whole chicks, which is what that row dresses).
 (b) **The plan produces and the ledger records:** 81 rows in `art/plan.tsv`
 write `ImageGen/images/teyvat/creature_visuals/<body>.png` — the directory
 `tools/build_pck.ps1`'s Teyvat block copies to `res://teyvat/creature_visuals/`

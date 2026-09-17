@@ -15,14 +15,17 @@
   capture of the in-game Archive page, and media.md §3 requires alpha because
   a still portrait composites over the arena. focus carries
   `cut[@tolerance][/fit-focus][:pocket][;key=value...]`, default
-  `cut@30/top:0.004;chroma=12;figure=main`. The matte keys against a LOCAL
+  `cut@30/top:0.004;chroma=12;figure=main;split=0`. The matte keys against a
+  LOCAL
   backdrop MODEL (a robust quadratic surface fit to the border) rather than a
   flat RGB distance from one corner colour, plus a blue-chroma gate, because
   the Archive backdrop is navy and a flat 48 also matched black body pixels
   (2026-09-17: frostarm_lawachurl, the Rifthounds and the Fatui came back full
   of holes). `figure=main` then keeps the main body and drops the detached
   flanking figures the Archive GROUP captures bring along (the slimes);
-  `figure=all` keeps every component.
+  `figure=all` keeps every component, and `;split=N` parts two bodies joined
+  by a bridge thinner than 2N+1 (the slimes overlap at the leaves) before the
+  figure is chosen -- off by default, because a staff handle is thin too.
 - raw: byte-for-byte copy (combat-model source art)
 - gif sources: extract the frame at frame_pct% through the clip
 - svg sources: render via macOS qlmanage; fall back to the wiki's same-name PNG
@@ -266,6 +269,9 @@ CUT_BRIDGE = 2          # hairline leaks this thin do not carry the flood
 CUT_BORDER_BAND = 0.012  # share of the long edge sampled as "certainly backdrop"
 CUT_FIGURE_MARGIN = 0.08  # a satellite inside the main bbox grown by this stays
 CUT_FIGURE_TIE = 0.80   # components this close in area to the largest tie-break
+CUT_SPLIT = 0           # `;split=N` parts figures joined by a bridge thinner
+                        # than 2N+1. OFF by default: a staff handle is a thin
+                        # bridge too, and splitting one loses a real feature.
 
 
 def _cut_spec(spec):
@@ -277,13 +283,13 @@ def _cut_spec(spec):
     matte tolerance, `/` is the focus handed to the FIT afterwards, and `:` is
     the enclosed-pocket threshold as a fraction of the frame. Anything added
     after those rides as `;key=value` so the grammar can grow without a fifth
-    punctuation mark; `chroma` and `figure` are the two keys today. `cut`,
+    punctuation mark; `chroma`, `figure` and `split` are the keys today. `cut`,
     `cut@60`, `cut@60/center`, `cut/contain`, `cut@60/top:0.01` and
     `cut;figure=all` are all legal, and a bare focus keyword (`top`) is
     accepted too, so a row that says nothing about the matte reads as "default
     matte, this focus".
 
-    Returns (tolerance, fit, focus, pocket, chroma, figure) with fit in
+    Returns (tolerance, fit, focus, pocket, chroma, figure, split) with fit in
     {cover, contain} and figure in {main, all}.
     """
     spec = (spec or "").strip() or "cut"
@@ -305,7 +311,7 @@ def _cut_spec(spec):
     except ValueError:
         raise SystemExit(
             f"cut: bad pocket fraction {pocket!r} (want cut[...][:fraction])")
-    chroma, figure = CUT_CHROMA, "main"
+    chroma, figure, split = CUT_CHROMA, "main", CUT_SPLIT
     for extra in extras:
         extra = extra.strip()
         if not extra:
@@ -322,13 +328,21 @@ def _cut_spec(spec):
                 raise SystemExit(
                     f"cut: bad figure {value!r} (want ;figure=main|all)")
             figure = value
+        elif key == "split":
+            try:
+                split = int(value)
+            except ValueError:
+                raise SystemExit(f"cut: bad split {value!r} (want ;split=N)")
+            if split < 0:
+                raise SystemExit(f"cut: split must not be negative ({value!r})")
         else:
             raise SystemExit(
-                f"cut: unknown option {extra!r} (want ;chroma=N or ;figure=main|all)")
+                f"cut: unknown option {extra!r} "
+                f"(want ;chroma=N, ;figure=main|all or ;split=N)")
     fit = "cover"
     if focus == "contain":
         fit, focus = "contain", "center"
-    return tolerance, fit, focus, pocket_frac, chroma, figure
+    return tolerance, fit, focus, pocket_frac, chroma, figure, split
 
 
 def _erode(mask, k):
@@ -486,7 +500,8 @@ def _blueness(a):
 
 
 def _backdrop_alpha(img, tolerance=CUT_TOLERANCE, pocket_frac=CUT_POCKET_FRAC,
-                    chroma=CUT_CHROMA, figure="main", dropped=None):
+                    chroma=CUT_CHROMA, figure="main", dropped=None,
+                    split=CUT_SPLIT):
     """Alpha for an Archive capture: opaque figure, transparent backdrop.
 
     Five passes, each closing a defect the one before it opens:
@@ -574,42 +589,91 @@ def _backdrop_alpha(img, tolerance=CUT_TOLERANCE, pocket_frac=CUT_POCKET_FRAC,
     if not comps:                         # nothing survived: keep the raw matte
         return Image.fromarray(np.where(fg, 255, 0).astype("uint8"), "L")
 
-    if figure == "main" and len(comps) > 1:
-        main = comps[0]
-        ys, xs = np.nonzero(main)
-        my0, my1, mx0, mx1 = ys.min(), ys.max(), xs.min(), xs.max()
-        gy = (my1 - my0 + 1) * CUT_FIGURE_MARGIN
-        gx = (mx1 - mx0 + 1) * CUT_FIGURE_MARGIN
-        # Tie-break on distance to the frame centre: the Archive centres the
-        # main body, so when two components are near the same size the centred
-        # one is the subject and the other is a flanking group member.
-        main_area = int(main.sum())
-        for comp in comps[1:]:
-            if int(comp.sum()) >= main_area * CUT_FIGURE_TIE:
-                cy, cx = np.nonzero(comp)
-                d_new = abs(cy.mean() - h / 2) + abs(cx.mean() - w / 2)
-                d_old = abs(ys.mean() - h / 2) + abs(xs.mean() - w / 2)
-                if d_new < d_old:
-                    main, comps[0] = comp, comp
-                    ys, xs = cy, cx
-                    my0, my1, mx0, mx1 = ys.min(), ys.max(), xs.min(), xs.max()
-                    gy = (my1 - my0 + 1) * CUT_FIGURE_MARGIN
-                    gx = (mx1 - mx0 + 1) * CUT_FIGURE_MARGIN
-                    main_area = int(main.sum())
-        keep = main.copy()
-        for comp in comps:
-            if comp is main:
-                continue
-            cy, cx = np.nonzero(comp)
-            inside = (cy.min() >= my0 - gy and cy.max() <= my1 + gy
-                      and cx.min() >= mx0 - gx and cx.max() <= mx1 + gx)
-            if inside:
-                keep |= comp
-            elif dropped is not None:
-                dropped.append(
-                    f"{int(comp.sum()) / (h * w):.1%} at "
-                    f"({cx.min()},{cy.min()})-({cx.max()},{cy.max()})")
+    if figure == "main":
+        # THE UNITS a figure is chosen among. Normally the alpha components
+        # themselves -- but `dendro_slime` showed that a flanking body can be
+        # JOINED to the subject through a couple of overlapping leaves, which
+        # makes the pair one component and puts it out of this pass's reach.
+        # `split=N` opens the matte (erode N, dilate N) first, so a bridge
+        # thinner than 2N+1 parts while every thick part survives, and the
+        # figure is chosen among the THICK regions instead. It is OFF by
+        # default because a staff handle, a whip and a leash are thin bridges
+        # too, and cutting one of those loses a real feature.
+        units = comps
+        if split > 0:
+            opened = _dilate(_erode(keep, split), split) & keep
+            thick = [c for c in _components(opened) if int(c.sum()) >= min_area]
+            if len(thick) > 1:
+                units = thick
+        if len(units) > 1:
+            main = _pick_figure(units, h, w)
+            mbox = _mask_box(main)
+            kept_units, drops = [main], []
+            for comp in units:
+                if comp is main:
+                    continue
+                (kept_units if _box_inside(_mask_box(comp), mbox) else
+                 drops).append(comp)
+            if drops:
+                removed = np.zeros_like(keep)
+                for comp in drops:
+                    removed |= comp
+                    if dropped is not None:
+                        y0, y1, x0, x1 = _mask_box(comp)
+                        dropped.append(f"{int(comp.sum()) / (h * w):.1%} at "
+                                       f"({x0},{y0})-({x1},{y1})")
+                # Re-grow through what is LEFT, seeded on the units we keep:
+                # with the dropped bodies excised, the bridge stub that joined
+                # them stays attached to the subject (the subject's own leaf),
+                # and with `split=0` this is exactly the old union of kept
+                # components, because those are disconnected by construction.
+                survivors = keep & ~removed
+                seeds = []
+                for comp in kept_units:
+                    sy, sx = np.nonzero(comp & survivors)
+                    seeds.extend(zip(sy.tolist(), sx.tolist()))
+                if seeds:
+                    keep = _flood(survivors, seeds)
     return Image.fromarray(np.where(keep, 255, 0).astype("uint8"), "L")
+
+
+def _mask_box(mask):
+    """(y0, y1, x0, x1) of a boolean mask's set pixels."""
+    import numpy as np
+    ys, xs = np.nonzero(mask)
+    return int(ys.min()), int(ys.max()), int(xs.min()), int(xs.max())
+
+
+def _box_inside(box, outer, margin=CUT_FIGURE_MARGIN):
+    """Is `box` inside `outer` grown by `margin` of its own size?"""
+    oy0, oy1, ox0, ox1 = outer
+    gy = (oy1 - oy0 + 1) * margin
+    gx = (ox1 - ox0 + 1) * margin
+    y0, y1, x0, x1 = box
+    return (y0 >= oy0 - gy and y1 <= oy1 + gy
+            and x0 >= ox0 - gx and x1 <= ox1 + gx)
+
+
+def _pick_figure(units, h, w):
+    """The largest unit, tie-broken toward the frame centre.
+
+    The Archive centres the main body, so when two units are near the same
+    size the centred one is the subject and the other is a flanking group
+    member.
+    """
+    import numpy as np
+    best = max(units, key=lambda c: int(c.sum()))
+    best_area = int(best.sum())
+    by, bx = np.nonzero(best)
+    best_d = abs(by.mean() - h / 2) + abs(bx.mean() - w / 2)
+    for comp in units:
+        if comp is best or int(comp.sum()) < best_area * CUT_FIGURE_TIE:
+            continue
+        cy, cx = np.nonzero(comp)
+        d = abs(cy.mean() - h / 2) + abs(cx.mean() - w / 2)
+        if d < best_d:
+            best, best_d = comp, d
+    return best
 
 
 def _flood(mask, seeds):
@@ -650,7 +714,7 @@ def cut(img, w, h, spec):
     `contain()` -- the same fitters every other mode uses, with the row's own
     focus. Nothing about framing is re-decided here.
     """
-    tolerance, fit, focus, pocket_frac, chroma, figure = _cut_spec(spec)
+    tolerance, fit, focus, pocket_frac, chroma, figure, split = _cut_spec(spec)
     work = img
     scale = CUT_WORK_MAX / max(img.width, img.height)
     if scale < 1:
@@ -658,7 +722,7 @@ def cut(img, w, h, spec):
                            max(1, round(img.height * scale))), Image.LANCZOS)
     dropped = []
     matte = _backdrop_alpha(work, tolerance, pocket_frac, chroma, figure,
-                            dropped)
+                            dropped, split)
     for d in dropped:
         flags.append(f"figure={figure} dropped a component: {d}")
     if matte is not None:
