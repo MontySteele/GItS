@@ -39,8 +39,7 @@ def act_rows(resources: set[str]) -> set[str]:
     prefixes = tuple(
         f"{p}{nation.id}" for nation in gen.NATIONS
         for p in ("scenes/backgrounds/", "scenes/rest_site/",
-                  "teyvat/backgrounds/", "teyvat/rest_site/",
-                  "images/packed/map/map_bgs/")
+                  "teyvat/backgrounds/", "teyvat/rest_site/")
     )
     return {r for r in resources if r.startswith(prefixes)}
 
@@ -52,11 +51,18 @@ def test_the_plan_and_the_contract_fixture_name_the_same_files():
 
 
 def test_each_dressing_carries_the_whole_set():
-    """Eighteen rows a nation, and the split is the engine's, not a taste."""
+    """Fifteen rows a nation, and the split is the engine's, not a taste.
+
+    It was eighteen until 2026-09-17: the three map plates left, because the
+    face's map ground is the base zone's again
+    (`KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs`) and the map's dressing is
+    an overlay whose pictures are optional -- so nothing in THIS list, every
+    row of which is a file whose absence throws, corresponds to them.
+    """
     for nation in gen.NATIONS:
         rows = [r.repo for r in gen.plan() if f"/{nation.id}/" in r.repo
                 or f"/{nation.id}_" in r.repo]
-        assert len(rows) == 18, (nation.id, rows)
+        assert len(rows) == 15, (nation.id, rows)
 
         # `BackgroundAssets` groups by `_bg_NN` and draws one per group, then
         # once over the `_fg_` list -- so the GROUP COUNT is what keeps a
@@ -65,9 +71,9 @@ def test_each_dressing_carries_the_whole_set():
         assert len(layers) == gen.BG_GROUPS + 1
         assert sum(1 for r in layers if "_fg_" in r) == 1
 
-        # The three map plates, at the engine's own non-negotiable path.
-        maps = [r for r in rows if "map_bgs" in r]
-        assert len(maps) == 3
+        # And NO map plate: overriding the game's map ground is the thing
+        # this generator stopped doing.
+        assert [r for r in rows if "map_bgs" in r] == []
 
         assert sum(1 for r in rows if r.endswith("_background.tscn")) == 1
         assert sum(1 for r in rows if r.endswith("_rest_site.tscn")) == 1
@@ -208,23 +214,26 @@ def test_build_pck_copies_every_directory_the_generator_writes():
 # One producer per out-path: art/plan.tsv vs the generator (2026-09-17)
 # --------------------------------------------------------------------------
 
-def test_the_bill_claims_every_dressings_five_real_surfaces():
-    """Thirty rows, and they are the five surfaces a dressing actually shows.
+def test_the_bill_claims_every_dressings_four_real_surfaces():
+    """Twenty-four rows: the four pictures a dressing actually shows.
 
-    The other thirteen files a dressing owns are scenes and the four layers
-    plus the foreground over `bg_00` -- nothing a picture can be picked for.
+    Thirty until 2026-09-17. The three map plates a face used to draw as its
+    map GROUND are gone, and two overlay pictures drawn OVER the game's own
+    ground replace them -- so the bill shrank by six rather than by eighteen.
+    The other files a dressing owns are scenes and the four layers plus the
+    foreground over `bg_00`: nothing a picture can be picked for.
     """
     owned = gen.plan_owned()
-    assert len(owned) == 30, sorted(owned)
+    assert len(owned) == 24, sorted(owned)
     for nation in gen.NATIONS:
         i = nation.id
         assert {
             f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_00.png",
             f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png",
-            f"ImageGen/images/teyvat/map_bgs/{i}/map_top_{i}.png",
-            f"ImageGen/images/teyvat/map_bgs/{i}/map_middle_{i}.png",
-            f"ImageGen/images/teyvat/map_bgs/{i}/map_bottom_{i}.png",
+            f"ImageGen/images/teyvat/map/{i}_wordmark.png",
+            f"ImageGen/images/teyvat/map/{i}_vignette.png",
         } <= owned, i
+        assert not any(f"map_bgs/{i}/" in o for o in owned), i
 
 
 def test_the_generator_never_writes_what_the_bill_produces(tmp_path):
@@ -294,5 +303,5 @@ def test_every_bill_row_has_a_ledger_row():
         assert row["licence"] == "PLACEHOLDER-COPYRIGHTED", row["out"]
         assert row["origin"].startswith(
             "https://genshin-impact.fandom.com/wiki/File:"), row["out"]
-        assert row["surface"] in {"bg_00", "rest_site", "map_top",
-                                  "map_middle", "map_bottom"}, row["surface"]
+        assert row["surface"] in {"bg_00", "rest_site",
+                                  "map_wordmark", "map_vignette"}, row["surface"]

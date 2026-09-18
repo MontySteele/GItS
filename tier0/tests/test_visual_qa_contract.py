@@ -113,7 +113,11 @@ def test_the_sample_contract_is_well_formed():
     # pass TWO: eighteen cut layers over six bespoke boss bodies (two or three
     # each) and the six per-body libraries that move them
     # (`teyvat/motion/bespoke/<body>.tres`).
-    assert len(parsed.resources) == 418
+    # 2026-09-17, second pass: a face lost its three map plates (-18) because
+    # the map GROUND is the base zone's again, and gained the overlay drawn
+    # over it (+12, a wordmark and a vignette a face). So a dressing costs
+    # fifteen files plus two optional pictures, and the six of them 102 rows.
+    assert len(parsed.resources) == 412
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -216,9 +220,11 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # +6 at EB-40, +2 for the pet, +6 for the stage, +245 for the Teyvat
     # frame's 122 dressed bodies (122 Tier F plates and the 123 scenes that
     # draw them -- 2026-09-17 closed the last 52 act-1..3 face-slots), +108 for
-    # the six act dressings' placeholder asset sets (eighteen each; see the
-    # count's reason above the first assertion), +5 for the motion pass's
-    # shared AnimationLibraries, +24 for pass two (eighteen cut layers over six
-    # bespoke boss bodies, and their six per-body libraries).
-    assert report.checked["contract_resources"] == 418
+    # the six act dressings' placeholder asset sets, -18 for the map plates
+    # they stopped overriding the ground with and +12 for the overlay that
+    # replaced them (see the count's reason above the first assertion), +5 for
+    # the motion pass's shared AnimationLibraries, +24 for pass two (eighteen
+    # cut layers over six bespoke boss bodies, and their six per-body
+    # libraries).
+    assert report.checked["contract_resources"] == 412
     assert report.checked["package_files"] == 3

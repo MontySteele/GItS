@@ -33,12 +33,15 @@ move a single one of them: the file is at the derived path, or it is nowhere.
 | Background root scene | `res://scenes/backgrounds/<id>/<id>_background.tscn` | 1 | — | **`NCombatBackground`** | **none — cast throws** |
 | Rest-site scene | `res://scenes/rest_site/<id>_rest_site.tscn` | 1 | — | `Control`, must carry `%RestSiteLighting` | **none — throws** |
 | Rest-site plate | `res://teyvat/rest_site/<id>_rest_site_bg.png` | 1 | 1382×648 | — | dangling `ExtResource` |
-| Map backgrounds | `res://images/packed/map/map_bgs/<id>/map_{top,middle,bottom}_<id>.png` | 3 | 2035×1440 | — | **none — throws** |
+| Map ground | **the BASE ZONE's** `res://images/packed/map/map_bgs/<zone>/map_{top,middle,bottom}_<zone>.png` | 0 of ours | 2035×1440 | — | **none — throws**, which is why the patch below exists |
+| Map overlay | `res://teyvat/map/<id>_wordmark.png`, `<id>_vignette.png` | 2 | 900×160, 2035×1440 | `TextureRect` | **absent is fine** — the overlay stands down |
 | Act title | loc table `acts`, key `<Id.Entry>.title` | 1 row | — | — | renders the raw key |
 | Map colours | `MapTraveledColor` / `MapUntraveledColor` / `MapBgColor`, `abstract` on `ActModel` | 3 | — | — | compile error |
 
-Eighteen files a dressing, plus one loc row and three colours that live in
-C#. Six dressings, so 108 rows and six loc rows.
+Fifteen files a dressing, plus one loc row and three colours that live in
+C#. Six dressings, so 90 rows and six loc rows. The two overlay pictures are
+counted separately because they are OPTIONAL: every one of the fifteen throws
+when it is missing, and neither of the two does.
 
 **The five rules underneath the table**, each of them a throw if broken:
 
@@ -63,7 +66,9 @@ C#. Six dressings, so 108 rows and six loc rows.
    with that name and `unique_name_in_owner = true`.
 5. `ActModel.AssetPaths` hands the background scene and all three map PNGs to
    `PreloadManager.LoadActAssets`, so a missing one fails the act's preload
-   rather than the screen that draws it.
+   rather than the screen that draws it. That is exactly why the map ground had
+   to be *redirected* rather than merely un-filled (the section below): an
+   emptied `map_bgs/<id>/` directory is a failed preload, not a blank screen.
 
 ### The root scene is the only one that needs BaseLib
 
@@ -94,12 +99,71 @@ ImageGen` prints nothing after a run; the forty-eight scene sources are
 committed and `--check` fails if one drifts from what the generator would
 write.
 
+### The map ground is the game's own, and the dressing sits over it
+
+**Reverted 2026-09-17**, on [USER]'s read of the shipped frame: *"the map is
+harder to read than the normal Slay the Spire 2 map; I like the basic idea but
+perhaps we went off the rails replacing the map background with Genshin images
+and we should instead try to come up with a Genshin-themed map overlay that
+keeps the basic idea of the map intact."*
+
+What shipped on 2026-09-17 morning was eighteen real location stills — three a
+face, 2035×1440, at `res://images/packed/map/map_bgs/<id>/` — **overriding** the
+base game's painted map wall. The map's node icons, its travelled and
+untravelled path lines and its legend are all drawn against that wall's low
+contrast, so a bright city plate underneath them takes contrast away everywhere
+at once; Sumeru's teal icons over a bright plate and Natlan's top reading
+celestial were both named on sight.
+
+**The revert is a patch, not a deletion**, and the reason is rule 5 above.
+`MapTopBgPath`, `MapMidBgPath` and `MapBotBgPath` derive from
+`FilePathIdentifier` and are non-virtual, so emptying the directory leaves three
+derived paths that the act's *preload* then fails on.
+`KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs` postfixes all three getters and
+swaps the face's id for the base zone's inside whatever string the getter built
+— `mondstadt` → `overgrowth`, `natlan` → `hive` — which is the same mapping
+`TeyvatFrame.AssetAlias` already holds. A string swap rather than a rebuilt path
+because the only part of that string that is ours is the identifier, and it
+appears twice; the prefix and the extension are the game's and nothing here
+wants to depend on them. `AncientPicture.Borrow` still guards it, so a face that
+one day ships a *readable* ground of its own wins on `ResourceLoader.Exists`
+with no code change.
+
+**What dresses the map now** is `KleeCode/Teyvat/MapOverlay.cs`, attached by a
+Harmony postfix on `NMapScreen.Open`
+(`review/dispatch3/s12-public-patterns/s12c-act-map.md`, the "Map-screen
+overlay" row, is the pinned precedent), and it is three children of one
+`MouseFilter = Ignore` `Control`:
+
+| Child | What | Where it comes from |
+|---|---|---|
+| `NationTint` | `ColorRect`, the nation's hue at **12%** | `MapOverlay.Tints`, one hex a face |
+| `NationVignette` | the face's own location still, darkened to 35% and alpha-masked **clear across the central 70% width / 80% height** | `art/plan.tsv`, mode `vignette` |
+| `NationWordmark` | the nation's white loading-screen emblem, in a transparent 900×160 strip at the top centre | `art/plan.tsv`, mode `contain` |
+
+The clear box is the design: the overlay may not touch the part of the frame
+where nodes, paths and the legend are drawn, so the still exists only in the
+margins. `tools/art_process.py`'s `vignette` mode is the three constants
+(`VIGNETTE_DARKEN`, `VIGNETTE_CLEAR`, `VIGNETTE_EDGE_ALPHA`) and
+`tier0/tests/test_map_overlay_plan.py` measures both ends of the ramp off them.
+
+**Everything about the overlay is optional and the arm-off build is
+byte-identical.** `MapOverlay.ShouldAttach` leads with `TeyvatFrame.Enabled`; a
+base zone reached with the arm on dresses nothing; each picture is asked of
+`ResourceLoader.Exists` before it is loaded, so a pack that predates the art
+draws the base map; and the insertion point is reached with `GetNodeOrNull`
+through a candidate list, falling back to the screen itself at child index 1.
+That last part is a **guess** — `game_ref/` holds no decompile of `NMapScreen` —
+and the first attach of a run logs two levels of the screen's child tree to
+`godot.log` behind the arm so it stops being one. Grep `teyvat:maptree`.
+
 Sizes are the engine's, not a taste. The layer `TextureRect`'s rect is
 2764.8 × 1296 with `expand_mode = 1`, which **scales** the texture to the rect,
 so the plate is authored at half that on exact aspect. The map screen's three
 `TextureRect`s are `expand_mode = 1`, `stretch_mode = 5`
-(KEEP_ASPECT_CENTERED), so **aspect** is what must be right and the plate
-matches the base game's own 2035 × 1440 exactly.
+(KEEP_ASPECT_CENTERED), so **aspect** is what must be right — and the vignette
+is authored at the base game's own 2035 × 1440 for exactly that reason, so its
+clear centre lands over the ground it covers.
 
 ### The layer scenes must ship as `.tscn`, not as `.tscn.remap`
 
@@ -159,17 +223,20 @@ the process lifetime, so a client that has already hit this must be
 
 ### Real art: the plan produces, `media/ACT.tsv` records
 
-**Landed 2026-09-17.** The thirty pictures a dressing actually shows — `bg_00`,
-the rest site and the three map plates, six dressings by five surfaces — are
-real wiki landscape stills now, fetched and cropped by thirty `art/plan.tsv`
-rows and recorded one-for-one in `media/ACT.tsv` (`operations/media.md` §1, §2;
+**Landed 2026-09-17, revised the same day.** The twenty-four pictures a
+dressing actually shows — `bg_00`, the rest site, the map wordmark and the map
+vignette, six dressings by four surfaces — are real wiki files now, fetched and
+cropped by twenty-four `art/plan.tsv` rows and recorded one-for-one in
+`media/ACT.tsv` (the three map-ground rows a face used to carry are the revert
+above; the vignette reuses the still the retired `map_middle` row fetched, so
+the change cost six new downloads and not twelve) (`operations/media.md` §1, §2;
 the survey is `research/teyvat-act-art-sources-2026-09-17.md`). No scene is
 re-authored and nothing in `klee-mod/KleeCode` changes: the scene names the
 path, the plan names the picture, the ledger names where it came from.
 
 The generator keeps every path the plan does not claim. `plan_owned()` reads
 `art/plan.tsv` for out-paths under
-`ImageGen/images/teyvat/backgrounds|rest_site|map_bgs`, and both `write_all`
+`ImageGen/images/teyvat/backgrounds|rest_site|map`, and both `write_all`
 and `--check` skip them, so there is still exactly one producer per out-path.
 What it still writes for a dressed face is the four layers and the foreground
 over a real `bg_00`, as **fully transparent** plates: `NCombatBackground`
@@ -188,9 +255,10 @@ One thing the sources make you crop around: the wiki's in-game location stills
 carry a burnt-in **GENSHIN IMPACT wordmark in the bottom-right corner**, and
 the plan's `focus` column is the rule that removes it. A 1382×648 plate off a
 16:9 source has 130 scaled pixels of spare height, so `top` spends all of it
-off the bottom; a 2035×1440 map plate fills the height exactly on a 16:9
+off the bottom; a 2035×1440 vignette fills the height exactly on a 16:9
 source, so its only spare strip is horizontal and `x0.42` spends it off the
-right.
+right. The wordmarks are `Emblem <Nation> White.png`, which carry no such
+mark.
 
 ### The alias patch, and when it still fires
 
