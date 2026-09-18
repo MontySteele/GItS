@@ -73,6 +73,35 @@ public static class TeyvatMusic
     public const string PlayerNodeName = "TeyvatTrack";
 
     /// <summary>
+    /// IS ONE OF OUR PLAYERS RUNNING RIGHT NOW? The single gate every crash
+    /// guard in `Patches/RunMusicPatch` reads.
+    ///
+    /// It means exactly one thing: **the arm has stopped the game's FMOD music
+    /// event and is playing a packaged track over the silence, so the game's
+    /// music event instance has been RELEASED, and any later call that
+    /// forwards a parameter to that instance is a native crash.** The patch's
+    /// header carries the measured proxy surface and the three methods that
+    /// forward one.
+    ///
+    /// NOT the same question as <see cref="TeyvatFrame.Enabled"/>, and the
+    /// guards must never be gated on the arm instead: a session that turns the
+    /// arm off mid-run still has our player in the tree and the game's event
+    /// still released until the next teardown. A crash guard never sits behind
+    /// the flag that created the thing being guarded -- the rule the
+    /// `StopMusic` postfix already follows.
+    ///
+    /// Set by <see cref="Play"/> on a true return and cleared by
+    /// <see cref="Stop"/>. A plain static because the whole audio path is
+    /// Godot's main thread.
+    /// </summary>
+    public static bool IsArmedPlaying { get; private set; }
+
+    /// <summary>Put <see cref="IsArmedPlaying"/> back to false without a tree.
+    /// For tests only, beside <see cref="ResetProbes"/>; the mod reaches it
+    /// through <see cref="Stop"/>.</summary>
+    public static void ClearArmedPlaying() => IsArmedPlaying = false;
+
+    /// <summary>
     /// The extensions the packager may produce, in preference order.
     /// `operations/media.md` sec.3: OGG Vorbis is the default, MP3 is
     /// accepted, WAV is never placed.
@@ -464,6 +493,7 @@ public static class TeyvatMusic
                     keep.Play();
                 }
 
+                IsArmedPlaying = true;
                 return true;
             }
 
@@ -485,6 +515,7 @@ public static class TeyvatMusic
 
             host.AddChild(player);
             player.Play();
+            IsArmedPlaying = true;
             // The slot is in the line because `EB-814`'s acceptance is read off
             // this log: "a boss track plays in a boss fight and godot.log names
             // it". The resolved path alone would not say WHICH slot asked, and
@@ -508,6 +539,14 @@ public static class TeyvatMusic
     /// </summary>
     public static void Stop(Node? host)
     {
+        // CLEARED FIRST AND UNCONDITIONALLY, ahead of the null check and ahead
+        // of the sweep. The flag says "the game's music event is released
+        // because ours is playing over it"; the moment the arm gives up that
+        // claim -- even on a host it cannot reach to tidy -- the guards must
+        // stop biting, or a session would silently lose the campfire ambience
+        // and every boss parameter for good.
+        IsArmedPlaying = false;
+
         if (host == null)
         {
             return;

@@ -53,10 +53,18 @@ and `GetTrack` is the whole room table (private enum `MusicProgressTrack`):
 | 8 | `Elite2` | not from `GetTrack`; `TriggerEliteSecondPhase()` writes 8 directly |
 | 9 | `MerchantEnd` | not from `GetTrack`; `ToggleMerchantTrack()` writes 9 when `NMapScreen.Instance.IsVisible()` |
 
-`UpdateTrack()` has exactly two managed callers, both in `CombatManager`:
-`StartCombatInternal` (right after `CombatBegan`) and the combat-won path. So
-the two moments a room's music character changes are **combat start** and
-**combat end**, and they are reachable.
+**Corrected 2026-09-17 under `EB-821`:** `UpdateTrack()` has **four** managed
+callers, not two. `CombatManager` has two — `StartCombatInternal` (right after
+`CombatBegan`) and the combat-won path — and `RunManager` has two more:
+immediately after `await room.Enter(...)` on every room entry, and again in
+`ResumePreviousRoom`. So the seam fires at **combat start, combat end and every
+room entry**, and all four are reachable. The missing pair is also the crash
+path: `UpdateTrack()`'s body ends with
+`if (_runState.CurrentRoom is RestSiteRoom) _proxy.Call("update_campfire_ambience", 0)`,
+which lands on a released FMOD event instance once the arm has called
+`StopMusic` — [USER]'s 2026-09-17 rest-site crash.
+`klee-mod/KleeCode/Teyvat/Patches/RunMusicPatch.cs` carries the mechanism, the
+proxy's measured method surface and the route taken.
 
 `RoomType` itself is `Unassigned, Monster, Elite, Boss, Treasure, Shop, Event,
 RestSite, Map`, and `IsCombatRoom()` is `(uint)(room - 1) <= 2u` — Monster,
@@ -94,6 +102,19 @@ outside `NAudioManager` itself, the main menu and the game-over stinger.
 And there is no FMOD bus, snapshot or duck anywhere in managed code — the
 finding `TeyvatMusic`'s header already carries — so the only lever remains
 `StopMusic()`, and the arm's "duck" is still total.
+
+**Amended 2026-09-17 under `EB-821`, having read the GDScript side.** Buses do
+exist, one level below managed code: `res://src/gdscript/audio_manager_proxy.gd`
+names four — `bus:/master`, `/sfx`, `/ambience`, `/music` — and sets each with
+`FmodServer.get_bus(...).set_volume(v)` behind `set_bgm_volume` and its three
+siblings, which are the options screen's own sliders. The **music controller's**
+proxy, `res://src/gdscript/music_controller_proxy.gd`, has no bus, no pause and
+no volume at all: its nine methods are `update_music`, `stop_music`,
+`update_music_parameter`, `update_global_parameter`, `update_ambience`,
+`stop_ambience`, `update_campfire_ambience`, `load_act_bank`,
+`unload_act_banks`. So the conclusion stands and is now measured rather than
+inferred — with the sharper reason that no getter for a bus volume exists
+anywhere, so a borrowed slider could never be handed back.
 
 ## 3. The counterpart picks
 
