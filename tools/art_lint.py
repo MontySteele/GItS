@@ -922,9 +922,18 @@ EDGE_PLATE_PREFIX = "ImageGen/images/teyvat/creature_visuals/"
 #     preserve a clipped source but cannot invent the missing pixels, and on
 #     several it makes the flat edge WIDER (area_alert_mek's bottom run went
 #     61px -> 131px) precisely because `cover` used to crop part of the clip
-#     away. 33 of the 46 are a BOTTOM edge -- the capture cut the figure off at
-#     its feet -- so the fix is a re-hunt for an uncropped capture, and which
-#     capture is a taste call. Measured 2026-09-17 on the post-re-cut plates.
+#     away. The fix is a re-hunt for an uncropped capture, and which capture is
+#     a taste call.
+#
+# 32 entries in kind 2, measured 2026-09-18 after the nebula re-key
+# (`;rekey=1`, `art_process.CUT_REKEY`, `EB-822`): 31 are a BOTTOM edge -- the
+# capture cut the figure off at its feet, accepted by ruling -- and
+# `portrait_liloupar` is a TOP clip. The 12 entries that left the set on that
+# pass were not clipped sources at all: they were the Archive backdrop's own
+# nebula keyed as figure, and a better backdrop model took it off. That is why
+# this set is a work list and not an exemption -- an entry's premise is
+# testable, and eleven of these turned out to be a matte defect wearing a
+# sourcing defect's clothes.
 PENDING_EDGE_REPICK = {
     # 1. bespoke boss rigs (EB-817): report only, never re-fit.
     "portrait_all_devouring_narwhal",
@@ -934,40 +943,28 @@ PENDING_EDGE_REPICK = {
     "portrait_golden_wolflord",
     "portrait_rhodeia_of_loch",
     # 2. already `/contain`, source clipped: needs a re-picked capture.
-    "portrait_anemo_hilichurl_rogue",
     "portrait_anemo_samachurl",
     "portrait_area_alert_mek",
     "portrait_construction_specialist_mek",
-    "portrait_cryo_abyss_mage",
-    "portrait_cryo_regisvine",
     "portrait_cryo_whopperflower",
     "portrait_dendro_samachurl",
     "portrait_eremite_crossbow",
-    "portrait_eremite_daythunder",
     "portrait_eremite_linebreaker",
     "portrait_eremite_sunfrost",
-    "portrait_fatui_anemoboxer_vanguard",
-    "portrait_fatui_cryo_cicin_mage",
     "portrait_fatui_geochanter_bracer",
-    "portrait_fatui_hydrogunner_legionnaire",
     "portrait_fatui_pyro_agent",
-    "portrait_frostarm_lawachurl",
     "portrait_geo_samachurl",
-    "portrait_geovishap_hatchling",
     "portrait_hilichurl",
     "portrait_hirayama",
     "portrait_hydro_samachurl",
     "portrait_kairagi_dancing_thunder",
     "portrait_kairagi_fiery_might",
-    "portrait_large_geo_slime",
     "portrait_liloupar",
-    "portrait_mirror_maiden",
     "portrait_nobushi_kikouban",
     "portrait_qucusaurus",
     "portrait_qucusaurus_chick",
     "portrait_rugged_elder_leshy",
     "portrait_setekh_wenut",
-    "portrait_tainted_water_spouting_phantasm",
     "portrait_tepetlisaur_whelp",
     "portrait_tepetlisaurus",
     "portrait_tepetlisaurus_warrior_rockbreaker_blade",

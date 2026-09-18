@@ -61,6 +61,30 @@ why the two bodies with an `Enemy <name> Full Artwork.png` render
 (`jadeplume_terrorshroom`, `warden_of_oasis_prime`) came back clean on all four
 edges from a title change alone, with every other knob untouched.
 
+**The nebula re-key (`;rekey=N`, `art_process.CUT_REKEY`, measured 2026-09-18).**
+The nebula above was not a sourcing defect and not a tolerance the row set too
+low: it is `_refine_model` keying against a backdrop estimate that is wrong in
+exactly the place it matters. That pass takes as certain backdrop the pixels
+"within `max(10, 0.6×tolerance)` of the QUADRATIC" — which is precisely the set
+that EXCLUDES a nebula cloud, since a cloud is what a quadratic cannot follow —
+so the local estimate near a cloud is averaged from the plain sky around it and
+lands 36–41 RGB off the cloud's real colour against a tolerance of 30. Measured
+on six captures: the survivors are backdrop-BLUE (chroma deficit +2 to +10
+against a gate of 12, so the gate is NOT the leak), the border ring itself fits
+at 3–4, and the cloud's FRINGE keys normally while its core does not — which is
+also the fix. After the first flood the run knows 47–75% of the frame to be
+backdrop, the nebula's fringe included, so `;rekey=1` re-estimates the local
+backdrop from THAT set and keys again; pixels the better model explains join the
+background, and where no proven backdrop is within the radius the previous model
+stands, so a body cannot be eaten from the inside. It converts 1.8–6.0 points of
+frame per capture, 0.03–0.8 on bodies that were already clean. **Off by default**
+(`CUT_REKEY = 0`), so a row without it renders byte-identically; 112 Archive-
+capture rows carry it, 105 plates moved, and 12 `PENDING_EDGE_REPICK` entries —
+every one of the 11 side/top rows above plus one bottom — went clean. The six
+bespoke bosses and the four alpha cut-outs are excluded, and `rekey=2` starts
+eating real FX (`mirror_maiden`'s aura), so 1 is the value. Sheet:
+`art/contact_sheet_matte_2026-09-18.html`.
+
 `art/plan.tsv` is UTF-8, LF in the index (`.gitattributes` normalises) — read with `encoding="utf-8", newline=""` and
 `rstrip("\r\n")`, or the last column silently stops matching. Depth:
 `docs/current/art/` and `docs/current/atlas/tools.md`.

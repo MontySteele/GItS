@@ -173,37 +173,43 @@ def test_an_already_cut_source_is_passed_through_untouched():
 def test_the_spec_column_parses_tolerance_fit_focus_and_pocket():
     tol, pock = art_process.CUT_TOLERANCE, art_process.CUT_POCKET_FRAC
     chr_, fig, spl = art_process.CUT_CHROMA, "main", art_process.CUT_SPLIT
+    rk = art_process.CUT_REKEY
     assert art_process._cut_spec("cut") == (
-        tol, "cover", "top", pock, chr_, fig, spl)
+        tol, "cover", "top", pock, chr_, fig, spl, rk)
     assert art_process._cut_spec("cut@64") == (
-        64.0, "cover", "top", pock, chr_, fig, spl)
+        64.0, "cover", "top", pock, chr_, fig, spl, rk)
     assert art_process._cut_spec("cut@64/center") == (
-        64.0, "cover", "center", pock, chr_, fig, spl)
+        64.0, "cover", "center", pock, chr_, fig, spl, rk)
     assert art_process._cut_spec("cut/contain") == (
-        tol, "contain", "center", pock, chr_, fig, spl)
+        tol, "contain", "center", pock, chr_, fig, spl, rk)
     assert art_process._cut_spec("cut@64/top:0.01") == (
-        64.0, "cover", "top", 0.01, chr_, fig, spl)
+        64.0, "cover", "top", 0.01, chr_, fig, spl, rk)
     assert art_process._cut_spec("cut:0") == (
-        tol, "cover", "top", 0.0, chr_, fig, spl)
+        tol, "cover", "top", 0.0, chr_, fig, spl, rk)
     # A bare focus keyword is the "default matte, this framing" spelling.
     assert art_process._cut_spec("center") == (
-        tol, "cover", "center", pock, chr_, fig, spl)
+        tol, "cover", "center", pock, chr_, fig, spl, rk)
 
 
 def test_the_spec_column_takes_the_keyword_options_too():
     """`;key=value` is how the grammar grows without a fifth punctuation mark."""
     tol, pock = art_process.CUT_TOLERANCE, art_process.CUT_POCKET_FRAC
     chr_, spl = art_process.CUT_CHROMA, art_process.CUT_SPLIT
+    rk = art_process.CUT_REKEY
     assert art_process._cut_spec("cut;figure=all") == (
-        tol, "cover", "top", pock, chr_, "all", spl)
+        tol, "cover", "top", pock, chr_, "all", spl, rk)
     assert art_process._cut_spec("cut@70;chroma=60") == (
-        70.0, "cover", "top", pock, 60.0, "main", spl)
+        70.0, "cover", "top", pock, 60.0, "main", spl, rk)
     assert art_process._cut_spec("cut@50/center:0.01;chroma=20;figure=all") == (
-        50.0, "cover", "center", 0.01, 20.0, "all", spl)
+        50.0, "cover", "center", 0.01, 20.0, "all", spl, rk)
     assert art_process._cut_spec("cut/contain;split=16") == (
-        tol, "contain", "center", pock, chr_, "main", 16)
-    # OFF unless a row asks: a staff handle is a thin bridge too.
+        tol, "contain", "center", pock, chr_, "main", 16, rk)
+    assert art_process._cut_spec("cut/contain;rekey=1") == (
+        tol, "contain", "center", pock, chr_, "main", spl, 1)
+    # OFF unless a row asks: a staff handle is a thin bridge too, and a
+    # re-key moves the shipped pixels of every row that carries it.
     assert art_process.CUT_SPLIT == 0
+    assert art_process.CUT_REKEY == 0
     with pytest.raises(SystemExit):
         art_process._cut_spec("cut;figure=biggest")
     with pytest.raises(SystemExit):
@@ -212,6 +218,10 @@ def test_the_spec_column_takes_the_keyword_options_too():
         art_process._cut_spec("cut;split=wide")
     with pytest.raises(SystemExit):
         art_process._cut_spec("cut;split=-2")
+    with pytest.raises(SystemExit):
+        art_process._cut_spec("cut;rekey=lots")
+    with pytest.raises(SystemExit):
+        art_process._cut_spec("cut;rekey=-1")
 
 
 def test_a_hopeless_cut_is_flagged_rather_than_placed_in_silence():
@@ -393,3 +403,104 @@ def test_split_is_off_unless_the_row_asks_for_it():
     assert matte.getpixel((310, 160)) == 255    # still joined, so still kept
     assert matte.getpixel((255, 159)) == 255    # and the bridge with it
     assert dropped == []
+
+
+# --------------------------------------------------------------------------
+# THE NEBULA RE-KEY (`;rekey=N`, EB-822, 2026-09-18). The Archive backdrop is a
+# navy nebula, and `_refine_model`'s confidence set -- "within max(10,
+# 0.6*tolerance) of the QUADRATIC" -- is exactly the set that excludes a nebula
+# cloud, because a cloud is what a quadratic cannot follow. So the local
+# estimate near a cloud comes from the plain sky around it and lands ~37 RGB
+# off the cloud's real colour, just over a tolerance of 30, and the cloud's
+# CORE survives the key as figure while its fringe keys normally. Under
+# `contain` that surviving band runs to the plate edge as a dark blob.
+#
+# The fixture reproduces the measurement: a soft cloud on the left edge whose
+# core sits 36.4 from the model with a NEGATIVE chroma deficit (it is bluer
+# than the model, so the chroma gate passes it -- the gate is not the leak),
+# and a near-neutral black limb at the same edge whose residual is only 12.6
+# but whose chroma deficit is +14.8, over the gate of 12. The re-key must take
+# the first and leave the second.
+# --------------------------------------------------------------------------
+
+NEBULA_LIFT = 46.0       # peak brightening of the cloud over the plain sky
+NEBULA_SIGMA = 22.0      # its vertical falloff, in rows
+
+
+def _plate_with_nebula():
+    """Backdrop gradient, gold body, a soft navy CLOUD running off the left
+    edge, and a near-neutral black limb running off the same edge lower down.
+    """
+    import math
+
+    img = _plate()
+    px = img.load()
+    for y in range(H):
+        g = math.exp(-((y - 120) ** 2) / (2 * NEBULA_SIGMA ** 2))
+        for x in range(0, 150):
+            fx = 1.0 if x < 110 else max(0.0, (150 - x) / 40)
+            lift = NEBULA_LIFT * g * fx
+            if lift < 0.5:
+                continue
+            r, gg, b, a = px[x, y]
+            px[x, y] = (min(255, round(r + lift * 0.30)),
+                        min(255, round(gg + lift * 0.45)),
+                        min(255, round(b + lift * 1.00)), a)
+    for y in range(185, 215):
+        for x in range(0, FIG[0] + 10):
+            px[x, y] = BODY_BLACK + (255,)
+    return img
+
+
+def test_the_nebula_smear_is_kept_without_the_knob():
+    """The defect itself: today's matte keeps the cloud as figure."""
+    matte = art_process._backdrop_alpha(_plate_with_nebula())
+    assert matte.getpixel((5, 120)) == 255      # cloud core, at the frame edge
+    assert matte.getpixel((60, 120)) == 255     # ...and inward
+    assert matte.getpixel((5, 20)) == 0         # plain sky still goes
+
+
+def test_rekey_drops_the_backdrop_coloured_smear_at_the_edge():
+    matte = art_process._backdrop_alpha(_plate_with_nebula(), rekey=1)
+    assert matte.getpixel((5, 120)) == 0        # the cloud is backdrop now
+    assert matte.getpixel((60, 120)) == 0
+    assert matte.getpixel((120, 60)) == 255     # and the body is untouched
+
+
+def test_rekey_keeps_a_dark_limb_of_figure_chroma_at_the_same_edge():
+    """Same darkness, same edge, FIGURE chroma -- the thing that must survive.
+
+    This is the property that makes the re-key safe: the second pass only adds
+    what the better backdrop model explains, and it still has to pass the blue
+    chroma gate, which a near-neutral black fails by construction.
+    """
+    matte = art_process._backdrop_alpha(_plate_with_nebula(), rekey=1)
+    assert matte.getpixel((5, 200)) == 255      # limb at the frame edge
+    assert matte.getpixel((60, 200)) == 255     # limb mid-way in
+    assert matte.getpixel((120, 120)) == 255    # and the body it feeds
+
+
+def test_the_knob_is_off_by_default_and_inert_when_off():
+    """Unchanged rows re-render byte-identically: the default is 0, and asking
+    for 0 explicitly is the same call, on every fixture this module owns.
+    """
+    assert art_process.CUT_REKEY == 0
+    for plate in (_plate(), _plate(hole=44), _plate(star=True),
+                  _plate_with_black_limb(), _plate_with_bubble(),
+                  _plate_group(), _plate_bridged_pair(), _plate_with_nebula()):
+        default = art_process._backdrop_alpha(plate)
+        explicit = art_process._backdrop_alpha(plate, rekey=0)
+        assert default.tobytes() == explicit.tobytes()
+        assert (art_process.cut(plate, 240, 280, "cut").tobytes()
+                == art_process.cut(plate, 240, 280, "cut;rekey=0").tobytes())
+
+
+def test_rekey_actually_moves_the_pixels_it_claims_to():
+    """...and the test above is not vacuous: rekey=1 IS a different matte."""
+    plate = _plate_with_nebula()
+    off = art_process._backdrop_alpha(plate, rekey=0)
+    on = art_process._backdrop_alpha(plate, rekey=1)
+    assert off.tobytes() != on.tobytes()
+    # it only ever REMOVES: the re-key grows the background, never the figure
+    off_px, on_px = off.tobytes(), on.tobytes()
+    assert all(b <= a for a, b in zip(off_px, on_px))
