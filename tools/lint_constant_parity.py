@@ -429,6 +429,17 @@ UNMIRRORED: dict[str, str] = {
         "the engine a longer wait than the base could reach. The engine still "
         "applies its own pad and its own ceiling on top. tier0 has no "
         "animations, no clock the player sees and no counterpart.",
+    "IdleDesync.MinSpeedScale":
+        "`EB-816`. A PRESENTATION BAND, not balance: the slowest an individual "
+        "dressed enemy's idle may run so that a pack of identical bodies does "
+        "not read as one metronome ([USER] look, 2026-09-17). It scales a clip "
+        "the eye sees and nothing else -- no intent, no number, no timing any "
+        "rule reads (the death seams read the clip's own length and the tree's "
+        "own remaining, so both follow it). tier0 has no animations, no clock "
+        "the player sees and no counterpart.",
+    "IdleDesync.MaxSpeedScale":
+        "`EB-816`. The other end of the same presentation band, and UNMIRRORED "
+        "for the same reason as `IdleDesync.MinSpeedScale` directly above.",
     "KleeOverhaulLedger.LineCap":
         "`EB-318`. A MEMORY BOUND on a diagnostic, not balance: how many lines the arm's per-combat log holds before it drops the oldest. Nothing a card, a rule or a face reads is priced in it -- the lines are prose written for a run record and mirrored to `godot.log`, and the only thing the number can change is how far back a long fight's log reaches. tier0 keeps its own events in `CombatState.log`, which is a per-run list with no cap and no counterpart to this.",
     "RosterArt.PortraitWidth":
@@ -761,6 +772,30 @@ UNMIRRORED: dict[str, str] = {
     "TurnEndPreviewBridge.SpriteScaleMax":
         "presentation: the largest scale a docket entity is drawn at. A "
         "rendering ratio; the sim has no sprites.",
+    # ------------------------------------------------------------------
+    # The Teyvat map overlay (2026-09-17). Three numbers about where a
+    # decoration is DRAWN, on a screen the sim has never modelled -- tier0.5
+    # generates a map graph and has no map SCREEN at all, so none of the three
+    # can be mirrored and none of them prices anything.
+    # ------------------------------------------------------------------
+    "MapOverlay.TintAlpha":
+        "`EB-818`. The alpha of the nation colour grade drawn over the map "
+        "screen: a look, chosen against [USER]'s read that the dressed map was "
+        "harder to read than the base game's, and held in the 10-15% band by "
+        "`KleeTests/TeyvatMapOverlayTests`. Nothing a card, a rule, a reward or "
+        "a route reads is priced in it; the sim has no map screen to draw it "
+        "on.",
+    "MapOverlay.WordmarkTopMargin":
+        "`EB-818`. Pixels of clear air between the top of the map screen and "
+        "the nation emblem strip, so the mark sits under the act banner the "
+        "screen draws for itself rather than on it. A layout offset in screen "
+        "pixels; tier0 has no counterpart and could not have one.",
+    "MapOverlay.GroundChildIndex":
+        "`EB-818`. The child index the overlay is moved to when it hangs off "
+        "the map screen's root -- 1, i.e. directly above whatever is drawn "
+        "first. A Godot draw-order position and not a quantity: `game_ref/` "
+        "holds no decompile of `NMapScreen`, so this is the one number the "
+        "arm's `teyvat:maptree` log line exists to confirm or move.",
 }
 
 CLASS_RE = re.compile(

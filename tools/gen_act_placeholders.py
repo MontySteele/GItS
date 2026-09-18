@@ -2,7 +2,9 @@
 
 WHY THIS EXISTS. `ActModel.FilePathIdentifier` is `Id.Entry.ToLowerInvariant()`
 and five NON-VIRTUAL properties derive every act-dressing path from it: the
-combat background scene, the rest-site scene and the three map background PNGs
+combat background scene and -- until 2026-09-17 -- the rest-site scene and the
+three map background PNGs, neither of which this file authors any more (see
+`plan`, and the two paragraphs below)
 (`MegaCrit.Sts2.Core.Models/ActModel.cs:52-64`, `:248`).
 `Rooms/BackgroundAssets`'s constructor THROWS rather than falls back on a
 missing `layers` directory and on a layer file matching neither `_bg_NN` nor
@@ -55,7 +57,7 @@ REAL ART STANDS THIS GENERATOR DOWN, PATH BY PATH. `art/plan.tsv` is the
 producer for any plate a bill claims (`docs/current/research/
 teyvat-act-art-sources-2026-09-17.md`), so `plan_owned()` reads that file and
 every out-path it names under `ImageGen/images/teyvat/backgrounds|rest_site|
-map_bgs` is skipped here -- by `write_all`, so a generator run cannot overwrite
+map` is skipped here -- by `write_all`, so a generator run cannot overwrite
 a fetched picture, and by `check`, so `--check` does not demand a file this
 file no longer produces. ONE PRODUCER PER OUT-PATH, the rule `art/plan.tsv`
 already runs under.
@@ -103,8 +105,10 @@ LAYER_PNG = (1382, 648)
 
 #: The map screen's three `TextureRect`s are `expand_mode = 1`,
 #: `stretch_mode = 5` (KEEP_ASPECT_CENTERED) with `custom_minimum_size`
-#: (0, 1080), so ASPECT is what has to be right. The base game's four acts all
-#: ship 2035x1440 and the placeholder matches them exactly.
+#: (0, 1080), so ASPECT is what has to be right; the base game's four acts all
+#: ship 2035x1440. KEPT AS A FACT AND NOT AS A PRODUCER: since 2026-09-17 no
+#: dressing writes a map plate at all (see `plan`), and the overlay's vignette
+#: is authored at this size so that it lines up with the ground it covers.
 MAP_PNG = (2035, 1440)
 
 #: The rest-site background sits in `rest_site_room.tscn`'s `BgContainer` at
@@ -140,7 +144,7 @@ class Nation:
 #: faces on it -- the Hive as Natlan or Inazuma, Glory as Fontaine or Sumeru
 #: (`review/ruled/teyvat-nation-mapping-2026-09-14.md` sec.1). Nothing in this
 #: file knows or cares which: a face is an id and two stops, and it gets the
-#: same seventeen files either way, because every path derives from
+#: same fourteen files either way, because every path derives from
 #: `FilePathIdentifier` and not from the zone underneath it.
 NATIONS = (
     Nation(id="mondstadt", entry="MONDSTADT", sky=(122, 176, 214), ground=(96, 138, 74)),
@@ -221,12 +225,20 @@ def plan() -> list[Planned]:
             "png",
             f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png",
             f"res://teyvat/rest_site/{i}_rest_site_bg.png"))
-        # --- map screen ---------------------------------------------------
-        for slot in ("top", "middle", "bottom"):
-            rows.append(Planned(
-                "png",
-                f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png",
-                f"res://images/packed/map/map_bgs/{i}/map_{slot}_{i}.png"))
+        # --- map screen: NOTHING, since 2026-09-17 -------------------------
+        # A face used to own three 2035x1440 plates at
+        # `res://images/packed/map/map_bgs/<id>/`, and [USER] read them as the
+        # defect they were: "the map is harder to read than the normal Slay
+        # the Spire 2 map". The map ground is the GAME's again --
+        # `KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs` sends the three
+        # non-virtual getters back to the base zone's files -- so there is no
+        # map path for this generator to fill and no gradient that would help.
+        # What dresses the map now is an OVERLAY drawn over it
+        # (`KleeCode/Teyvat/MapOverlay.cs`), whose two pictures are art/plan.tsv
+        # rows under `ImageGen/images/teyvat/map/`; they are optional by
+        # construction (the overlay stands down when they are not in the pack),
+        # which is why they are not in this list, whose every row is a file
+        # whose absence THROWS.
     return rows
 
 
@@ -241,7 +253,13 @@ def plan() -> list[Planned]:
 PLAN_OWNABLE = (
     "ImageGen/images/teyvat/backgrounds/",
     "ImageGen/images/teyvat/rest_site/",
-    "ImageGen/images/teyvat/map_bgs/",
+    # The map OVERLAY's two pictures (2026-09-17). This generator writes
+    # nothing here and never will -- an emblem and a masked landscape are art,
+    # not a gradient -- but the prefix belongs in the list all the same,
+    # because `plan_owned()` is what `media/ACT.tsv` is reconciled against
+    # (`tier0/tests/test_act_placeholder_plan.py`): a ledger row with no bill
+    # row, or a bill row with no ledger row, is caught here or nowhere.
+    "ImageGen/images/teyvat/map/",
 )
 
 
@@ -490,16 +508,7 @@ def write_all(root: Path) -> list[str]:
                        _scale(nation.ground, 0.35))
             written.append(relative)
 
-        # The three map plates read top -> bottom as one continuous wall, so
-        # each takes a third of the nation's ramp rather than the whole of it.
-        for index, slot in enumerate(("top", "middle", "bottom")):
-            relative = f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png"
-            if relative in owned:
-                continue
-            a = _mix(nation.sky, nation.ground, index / 3)
-            b = _mix(nation.sky, nation.ground, (index + 1) / 3)
-            _write_png(root / relative, MAP_PNG, a, b)
-            written.append(relative)
+        # No map plate. The map ground is the game's own again (see `plan`).
     return written
 
 

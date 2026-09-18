@@ -318,12 +318,13 @@ if (-not (Test-Path $teyvatPortraits)) { Note-Skip 'teyvat\creature_visuals' $te
 #   * background layer plates and the rest-site plate go to res://teyvat/...,
 #     a namespace of the frame's own, because the SCENES that reference them
 #     are ours and name the path in full;
-#   * the three map backgrounds go to res://images/packed/map/map_bgs/<id>/,
-#     which is NOT a choice -- `ActModel.MapTopBgPath` and its two siblings are
-#     non-virtual expression-bodied properties over `FilePathIdentifier`
-#     (`ActModel.cs:52-64`), so the file is at that path or the map screen
-#     draws nothing. The committed `.tscn` sources land at the engine's
-#     `res://scenes/...` paths the same way, through the pck-src overlay below.
+#   * the map ground is NOT ours any more (2026-09-17): `ActModel.MapTopBgPath`
+#     and its two siblings are non-virtual expression-bodied properties over
+#     `FilePathIdentifier` (`ActModel.cs:52-64`), and a face's own plates at
+#     that derived path read worse than the game's, so the three getters are
+#     sent back to the base zone and the map's dressing is the overlay block
+#     below. The committed `.tscn` sources land at the engine's
+#     `res://scenes/...` paths through the pck-src overlay, as before.
 #
 # Note-Skip and not an error, like every other block: art never blocks a build.
 # With the textures absent the scenes still export, and the EXPORT log sweep
@@ -345,13 +346,26 @@ foreach ($dressing in 'mondstadt', 'liyue', 'natlan', 'inazuma', 'fontaine', 'su
         if ($files) { Copy-Item $files.FullName -Destination $to }
     }
 
-    $mapSrc = Join-Path $src "teyvat\map_bgs\$dressing"
-    if (-not (Test-Path $mapSrc)) { Note-Skip "teyvat\map_bgs\$dressing" $mapSrc } else {
-        $to = Join-Path $work "images\packed\map\map_bgs\$dressing"
-        New-Item -ItemType Directory -Force -Path $to | Out-Null
-        $files = Select-PackablePngs $mapSrc
-        if ($files) { Copy-Item $files.FullName -Destination $to }
-    }
+}
+
+# THE MAP OVERLAY (2026-09-17). A face used to ship three 2035x1440 plates to
+# res://images/packed/map/map_bgs/<id>/ and OVERRIDE the game's map ground;
+# [USER] read the result as unreadable ("the map is harder to read than the
+# normal Slay the Spire 2 map"), so that block is gone, the game's own ground
+# draws again (KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs) and the nation is
+# carried by two pictures drawn OVER it instead: <id>_wordmark.png and
+# <id>_vignette.png, both art/plan.tsv rows recorded in media/ACT.tsv.
+#
+# res://teyvat/map/ and not the engine's packed/map path, because unlike the
+# ground these paths are OURS: KleeCode/Teyvat/MapOverlay.cs names them in full
+# and asks ResourceLoader.Exists before it draws either, so a pack without them
+# shows the base map rather than an error.
+$teyvatMap = Join-Path $src 'teyvat\map'
+if (-not (Test-Path $teyvatMap)) { Note-Skip 'teyvat\map' $teyvatMap } else {
+    $to = Join-Path $work 'teyvat\map'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Select-PackablePngs $teyvatMap
+    if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
 $teyvatRest = Join-Path $src 'teyvat\rest_site'

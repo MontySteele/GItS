@@ -193,7 +193,7 @@ internal static class ModdedPlayerDeathSeam
     /// question the path was going to answer, and answers it the same way with
     /// the arm off: <c>CurrentActEntry</c> is null and there is no lookup.
     /// </summary>
-    private static string? DressedVisualsScene(Creature entity)
+    internal static string? DressedVisualsScene(Creature entity)
     {
         var dressing = TeyvatFrame.CurrentActEntry;
         var entry = entity.Monster?.Id.Entry;

@@ -26,6 +26,9 @@
   `figure=all` keeps every component, and `;split=N` parts two bodies joined
   by a bridge thinner than 2N+1 (the slimes overlap at the leaves) before the
   figure is chosen -- off by default, because a staff handle is thin too.
+- vignette: cover-crop, darken, then multiply alpha by a radial mask that is
+  fully clear across the central 70% width / 80% height -- the Teyvat map
+  overlay's margin picture (docs/current/operations/act-assets.md)
 - raw: byte-for-byte copy (combat-model source art)
 - gif sources: extract the frame at frame_pct% through the clip
 - svg sources: render via macOS qlmanage; fall back to the wiki's same-name PNG
@@ -62,7 +65,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageEnhance, ImageFilter, ImageSequence
+from PIL import Image, ImageChops, ImageEnhance, ImageFilter, ImageSequence
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "art" / "raw"
@@ -762,6 +765,68 @@ def sprite(img, w, h):
     return canvas
 
 
+# --------------------------------------------------------------------------
+# vignette: a location still that exists only in the margins (2026-09-17)
+# --------------------------------------------------------------------------
+# The six Teyvat faces stopped OVERRIDING the map ground with a location still
+# ([USER]: "the map is harder to read than the normal Slay the Spire 2 map"),
+# and the still comes back as a vignette drawn OVER the game's own map instead:
+# darkened, and multiplied by a radial mask that is FULLY TRANSPARENT across
+# the middle of the frame, where the nodes, the path lines and the legend are.
+#
+# Three numbers are the whole recipe, so they are named rather than spelled
+# inline -- `tier0/tests/test_map_overlay_plan.py` asserts both ends of the
+# ramp against these very constants.
+VIGNETTE_DARKEN = 0.35          # brightness multiplier on the still
+VIGNETTE_CLEAR = (0.70, 0.80)   # half-extents of the clear box, as fractions
+VIGNETTE_EDGE_ALPHA = 0.60      # alpha at the very edge of the frame
+
+
+def _ramp(n, clear):
+    """0 inside the clear half-extent, rising to 255 at the frame edge.
+
+    One axis, as a length-`n` byte string. Separable on purpose: the 2-D mask
+    is the per-axis MAX (`ImageChops.lighter`), which makes the clear region a
+    RECTANGLE rather than an ellipse -- and a rectangle is what the map is,
+    since nodes fill a wide band rather than a disc.
+    """
+    out = bytearray(n)
+    for i in range(n):
+        u = abs((i / (n - 1)) * 2 - 1) if n > 1 else 0.0
+        r = 0.0 if u <= clear else (u - clear) / (1.0 - clear)
+        out[i] = min(255, max(0, round(r * 255)))
+    return bytes(out)
+
+
+def vignette(img, w, h, focus):
+    """A cover-cropped still, darkened, alpha-masked clear in the centre.
+
+    `focus` is `cover`'s own -- the map stills carry a burnt-in GENSHIN IMPACT
+    mark bottom-right and `x0.42` is what spends the spare width off the right
+    (`research/teyvat-act-art-sources-2026-09-17.md` §1).
+
+    PILLOW ONLY, and separably, because the alternative is 2.9 million pixels
+    of Python loop per plate. Two 1-pixel ramps are stretched to the frame and
+    combined with `lighter`; the ease is a lookup table over the result.
+    """
+    base = cover(img, w, h, focus).convert("RGB")
+    base = ImageEnhance.Brightness(base).enhance(VIGNETTE_DARKEN)
+
+    cx, cy = VIGNETTE_CLEAR
+    row = Image.frombytes("L", (w, 1), _ramp(w, cx)).resize((w, h), Image.NEAREST)
+    col = Image.frombytes("L", (1, h), _ramp(h, cy)).resize((w, h), Image.NEAREST)
+    radial = ImageChops.lighter(row, col)
+
+    # smoothstep, so the margin darkens into the frame instead of banding.
+    def _ease(t):
+        s = t / 255.0
+        return round(VIGNETTE_EDGE_ALPHA * 255 * s * s * (3.0 - 2.0 * s))
+
+    out = base.convert("RGBA")
+    out.putalpha(radial.point(_ease))
+    return out
+
+
 def contain(img, w, h, bg=(0, 0, 0, 0)):
     scale = min(w / img.width, h / img.height)
     if scale > UPSCALE_FLAG:
@@ -799,6 +864,8 @@ def process(row, dest):
         out = cover_autocrop(img, row["w"], row["h"], row["focus"])
     elif row["mode"] == "cut":
         out = cut(img, row["w"], row["h"], row["focus"])
+    elif row["mode"] == "vignette":
+        out = vignette(img, row["w"], row["h"], row["focus"])
     elif row["mode"] == "sprite":
         out = sprite(img, row["w"], row["h"])
     else:
