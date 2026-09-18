@@ -296,3 +296,124 @@ def test_every_bill_row_has_a_ledger_row():
             "https://genshin-impact.fandom.com/wiki/File:"), row["out"]
         assert row["surface"] in {"bg_00", "rest_site", "map_top",
                                   "map_middle", "map_bottom"}, row["surface"]
+
+
+# --------------------------------------------------------------------------
+# The combat feet line: a bg_00 plate is registered, not framed (2026-09-17)
+# --------------------------------------------------------------------------
+
+def test_ground_focus_lands_the_named_row_on_the_feet_line():
+    """A synthetic source with a known ground row lands it on the feet line.
+
+    The whole `ground` focus is this one sentence, so the pin is a picture
+    whose ground row is unambiguous rather than a re-statement of the formula:
+    black above source row 756 (0.70 of 1080), white below it, and the seam
+    must come out of the crop on COMBAT_FEET_ROW.
+    """
+    from PIL import Image
+
+    from tools.art_process import COMBAT_FEET_ROW, cover
+
+    source = Image.new("RGB", (1920, 1080), (0, 0, 0))
+    source.paste(Image.new("RGB", (1920, 1080 - 756), (255, 255, 255)), (0, 756))
+    plate = cover(source, 1382, 648, "ground0.70@1.32").convert("L")
+    column = [plate.getpixel((691, y)) for y in range(648)]
+    seam = next(y for y, v in enumerate(column) if v > 128)
+    assert abs(seam - COMBAT_FEET_ROW) <= 1, seam
+
+
+def test_ground_focus_flags_a_source_that_cannot_reach():
+    """A clamped ground row is the defect this focus exists to catch.
+
+    Under plain `cover` a 16:9 source has 130 scaled pixels of slack, so a
+    ground row near the bottom edge is simply unreachable without a zoom. The
+    wrong answer is to clamp and say nothing -- that is `top` again, wearing a
+    new spelling.
+    """
+    from PIL import Image
+
+    from tools import art_process
+
+    art_process.flags.clear()
+    try:
+        art_process.cover(Image.new("RGB", (1920, 1080)), 1382, 648, "ground0.98")
+        assert any("clamped" in f for f in art_process.flags), art_process.flags
+    finally:
+        art_process.flags.clear()
+
+
+def test_the_legacy_focus_spellings_are_untouched():
+    """`top` / `center` / `x<f>` must not move because `ground` was added.
+
+    `_ground` returns None for every one of them, and shipped Klee art depends
+    on that: the thirty map and rest-site rows still run under `x0.42`.
+    """
+    from PIL import Image
+
+    from tools.art_process import cover
+
+    source = Image.new("RGB", (1920, 1080), (0, 0, 0))
+    # 60 source rows of white: 43 rows once scaled to cover, so the band
+    # survives `top` whole and falls entirely above `center`'s 64-row offset.
+    source.paste(Image.new("RGB", (1920, 60), (255, 255, 255)), (0, 0))
+    top = cover(source, 1382, 648, "top").convert("L")
+    assert top.getpixel((691, 0)) > 128          # the white band is kept
+    centre = cover(source, 1382, 648, "center").convert("L")
+    assert centre.getpixel((691, 0)) < 128       # the middle is not
+
+
+def test_the_zoom_runs_to_the_next_comma_not_to_the_end():
+    """`ground0.70@1.32,x0.46` must parse, and legacy `center@1.5` must too.
+
+    `cover` used to take everything after the `@` as the zoom, which was
+    invisible for as long as every spelling put the zoom last. The first focus
+    that did not -- the combined ground-and-anchor one the six bg_00 rows use
+    -- sent `float("1.32,x0.46")` into a ValueError, and the run wrote a plate
+    off a fallback path instead of failing loudly.
+    """
+    from PIL import Image
+
+    from tools.art_process import COMBAT_FEET_ROW, cover
+
+    source = Image.new("RGB", (1920, 1080), (0, 0, 0))
+    source.paste(Image.new("RGB", (1920, 1080 - 756), (255, 255, 255)), (0, 756))
+    plate = cover(source, 1382, 648, "ground0.70@1.32,x0.46").convert("L")
+    column = [plate.getpixel((691, y)) for y in range(648)]
+    assert abs(next(y for y, v in enumerate(column) if v > 128)
+               - COMBAT_FEET_ROW) <= 1
+    # And the anchor half really reached the crop: x0.46 shifts it left of
+    # centre, which is what keeps the wordmark out now that `top` cannot.
+    marked = Image.new("RGB", (1920, 1080), (0, 0, 0))
+    marked.paste(Image.new("RGB", (400, 1080), (255, 255, 255)), (1520, 0))
+    def brightness(focus):
+        strip = cover(marked, 1382, 648, focus).convert("L").resize((1382, 1))
+        return sum(strip.getpixel((x, 0)) for x in range(1382))
+
+    white = [brightness("ground0.70@1.32"), brightness("ground0.70@1.32,x0.46")]
+    assert white[1] < white[0], white
+
+    # The legacy spelling, unchanged: the zoom is the whole tail when there is
+    # no comma after it.
+    assert cover(source, 1382, 648, "center@1.5").size == (1382, 648)
+    assert cover(source, 1382, 648, "x0.3,y0.4@1.2").size == (1382, 648)
+
+
+def test_every_bg_00_row_is_registered_to_the_feet_line():
+    """The six combat plates answer to `ground`, and only they do.
+
+    A rest-site or map plate has no creature standing on it, so it keeps the
+    wordmark rule (`top`, `x0.42`) and must NOT acquire a feet line.
+    """
+    from tools.art_fetch import read_plan
+
+    rows = [r for r in read_plan() if r["asset_id"].startswith("act_")]
+    combat = [r for r in rows if r["asset_id"].startswith("act_bg_00_")]
+    assert len(combat) == 6, [r["asset_id"] for r in combat]
+    for row in combat:
+        assert row["focus"].startswith("ground"), row["asset_id"]
+        # The zoom is what buys the reach, and the x anchor is what keeps the
+        # GENSHIN IMPACT wordmark out now that `top` no longer can.
+        assert "@" in row["focus"] and ",x" in row["focus"], row["focus"]
+    for row in rows:
+        if row not in combat:
+            assert not row["focus"].startswith("ground"), row["asset_id"]
