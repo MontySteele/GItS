@@ -873,10 +873,245 @@ def identical_crops() -> list[str]:
     return problems
 
 
+# --------------------------------------------------------------------------
+# L13: a plate CLIPPED against its own canvas edge (2026-09-17)
+# --------------------------------------------------------------------------
+# [USER], looking at 0.2.3674: "many of our images have weirdly clipped assets
+# around the edge of the image that weren't obvious on a contact sheet but do
+# show up as the edge of the in-game model."
+#
+# That is `cover`'s failure mode read in the one place a contact sheet cannot
+# show it. A contact sheet draws every plate inside a rectangle, so a figure
+# sliced flat against the canvas edge reads as a FRAME. In the game there is no
+# frame: the plate composites straight onto the arena, and the flat edge reads
+# as the model's own silhouette -- a hilichurl with a ruler-straight shoulder.
+# `cover` scales the trimmed figure to FILL 240x280 and crops whatever
+# overflows, so it produces that edge by construction whenever the figure's
+# aspect differs from the plate's. `contain` fits instead and leaves margins,
+# which is why the Anemo Slime was fixed by moving its row to `cut/contain`
+# (#626) and why `contain` is the right default for a figure.
+#
+# Not L6's question. L6 measures the SOURCE aspect against the card and warns
+# that a crop is probably coming; this measures the SHIPPED PIXELS and says a
+# crop landed. L6 is a pointer before the run, L13 is a verdict after it.
+EDGE_ALPHA_OPAQUE = 40   # a pixel this opaque reads as model, not as soft FX
+EDGE_RUN_PX = 12         # a contiguous straight edge this long reads as a cut
+EDGE_FRACTION = 0.10     # ...as does this much of an edge, however broken up
+
+# The plate register this rule owns: the Teyvat enemy plates, which are the
+# surfaces that composite over the arena with no frame around them (media.md
+# sec.3). Keyed on the out-path prefix rather than on the asset_id, because the
+# path is what the game loads.
+EDGE_PLATE_PREFIX = "ImageGen/images/teyvat/creature_visuals/"
+
+# L13, AWAITING A RE-PICK (the PENDING_RED_PEN / curated-DEBT pattern). The
+# rule binds from this commit forward; these are the rows failing on the day it
+# was written, and they are a WORK LIST rather than an exemption. An entry that
+# has become clean fails the pin below, so the set can only shrink.
+#
+# Two kinds, and neither is fixable by a fit:
+#
+#  1. THE SIX BESPOKE BOSSES. Their layer cuts (`tools/combat_layer_fences/
+#     teyvat/<body>.yaml`) are hand-digitized against the COMPOSITE plate's
+#     geometry, so re-fitting the plate invalidates every fence and every
+#     manifest offset. They are reported and left alone; fixing one is a
+#     bespoke-rig job, not a plan-row edit.
+#  2. THE SOURCE IS ITSELF CLIPPED. These rows are already `/contain` -- the
+#     fit leaves margins and they STILL touch the edge, which can only mean the
+#     Archive capture crops the figure at its own frame border. `contain` can
+#     preserve a clipped source but cannot invent the missing pixels, and on
+#     several it makes the flat edge WIDER (area_alert_mek's bottom run went
+#     61px -> 131px) precisely because `cover` used to crop part of the clip
+#     away. 33 of the 46 are a BOTTOM edge -- the capture cut the figure off at
+#     its feet -- so the fix is a re-hunt for an uncropped capture, and which
+#     capture is a taste call. Measured 2026-09-17 on the post-re-cut plates.
+PENDING_EDGE_REPICK = {
+    # 1. bespoke boss rigs (EB-817): report only, never re-fit.
+    "portrait_all_devouring_narwhal",
+    "portrait_azhdaha",
+    "portrait_emperor_of_fire_and_iron",
+    "portrait_everlasting_lord_of_arcane_wisdom",
+    "portrait_golden_wolflord",
+    "portrait_rhodeia_of_loch",
+    # 2. already `/contain`, source clipped: needs a re-picked capture.
+    "portrait_anemo_hilichurl_rogue",
+    "portrait_anemo_samachurl",
+    "portrait_area_alert_mek",
+    "portrait_construction_specialist_mek",
+    "portrait_cryo_abyss_mage",
+    "portrait_cryo_regisvine",
+    "portrait_cryo_whopperflower",
+    "portrait_dendro_samachurl",
+    "portrait_eremite_crossbow",
+    "portrait_eremite_daythunder",
+    "portrait_eremite_linebreaker",
+    "portrait_eremite_sunfrost",
+    "portrait_fatui_anemoboxer_vanguard",
+    "portrait_fatui_cryo_cicin_mage",
+    "portrait_fatui_geochanter_bracer",
+    "portrait_fatui_hydrogunner_legionnaire",
+    "portrait_fatui_pyro_agent",
+    "portrait_frostarm_lawachurl",
+    "portrait_geo_samachurl",
+    "portrait_geovishap_hatchling",
+    "portrait_hilichurl",
+    "portrait_hirayama",
+    "portrait_hydro_samachurl",
+    "portrait_jadeplume_terrorshroom",
+    "portrait_kairagi_dancing_thunder",
+    "portrait_kairagi_fiery_might",
+    "portrait_large_geo_slime",
+    "portrait_liloupar",
+    "portrait_mirror_maiden",
+    "portrait_nobushi_kikouban",
+    "portrait_qucusaurus",
+    "portrait_qucusaurus_chick",
+    "portrait_rugged_elder_leshy",
+    "portrait_setekh_wenut",
+    "portrait_tainted_water_spouting_phantasm",
+    "portrait_tepetlisaur_whelp",
+    "portrait_tepetlisaurus",
+    "portrait_tepetlisaurus_warrior_rockbreaker_blade",
+    "portrait_tepetlisaurus_warrior_shard_striker",
+    "portrait_treasure_hoarder_handyman",
+    "portrait_treasure_hoarder_marksman",
+    "portrait_treasure_hoarder_scout",
+    "portrait_warden_of_oasis_prime",
+    "portrait_wooden_shieldwall_mitachurl",
+    "portrait_yumkasaur_whelp",
+    "portrait_yumkasaurus",
+}
+
+
+def _edge_runs(strip):
+    """(longest contiguous opaque run, opaque fraction) for one edge strip.
+
+    `strip` is a flat sequence of alpha bytes along the edge. Both numbers are
+    wanted because the two failures look different: a figure sliced flat gives
+    one long run, while a spray of FX crossing the edge gives many short ones
+    and only the fraction sees it.
+    """
+    best = run = hits = 0
+    for value in strip:
+        if value >= EDGE_ALPHA_OPAQUE:
+            run += 1
+            hits += 1
+            if run > best:
+                best = run
+        else:
+            run = 0
+    total = len(strip)
+    return best, (hits / total if total else 0.0)
+
+
+def plate_edges(path) -> dict:
+    """Measure all four canvas edges of one plate.
+
+    Returns {edge: (run, fraction)} for the edges that FLAG, empty when clean.
+    """
+    from PIL import Image
+
+    with Image.open(path) as img:
+        alpha = img.convert("RGBA").getchannel("A")
+        w, h = alpha.size
+        # tobytes(), not getdata(): mode "L" is one byte per pixel row-major,
+        # so this IS the alpha plane, and getdata() is deprecated in Pillow 14.
+        px = alpha.tobytes()
+    strips = {
+        "top":    px[0:w],
+        "bottom": px[(h - 1) * w: h * w],
+        "left":   [px[y * w] for y in range(h)],
+        "right":  [px[y * w + (w - 1)] for y in range(h)],
+    }
+    flagged = {}
+    for edge, strip in strips.items():
+        run, frac = _edge_runs(strip)
+        if run >= EDGE_RUN_PX or frac >= EDGE_FRACTION:
+            flagged[edge] = (run, frac)
+    return flagged
+
+
+def edge_clipping(rows, *, art_root=None, verbose: bool = False) -> list[str]:
+    """L13 over every enemy plate the plan declares.
+
+    Reads the PLAN for its rows -- the plan is what says which out-paths are
+    plates -- and the shipped pixels for its verdict. The six bespoke bosses
+    also keep cut parts under `<body>/layers/`; only the composite plate is
+    linted, because the layers are cut FROM it and inherit its geometry.
+
+    SKIPS, with a note, when the art tree or Pillow is absent: `ImageGen/` is
+    gitignored Tier F, so CI has no pixels to measure and a rule that failed
+    there would fail on every runner forever.
+    """
+    root = Path(art_root) if art_root else Path(__file__).resolve().parent.parent
+    try:
+        from PIL import Image  # noqa: F401
+    except ImportError:
+        print("L13 SKIP: Pillow is not installed -- no plate edges measured")
+        return []
+    plates = [r for r in rows if r["out"].startswith(EDGE_PLATE_PREFIX)]
+    present = [(r, root / r["out"]) for r in plates]
+    present = [(r, p) for r, p in present if p.is_file()]
+    if not present:
+        print(f"L13 SKIP: no enemy plates under "
+              f"{root / EDGE_PLATE_PREFIX} ({len(plates)} plan rows) -- "
+              f"gitignored Tier F, absent on a runner")
+        return []
+    problems = []
+    healed = []
+    for r, p in sorted(present, key=lambda rp: rp[0]["asset_id"]):
+        flagged = plate_edges(p)
+        if not flagged:
+            if r["asset_id"] in PENDING_EDGE_REPICK:
+                healed.append(r["asset_id"])
+            if verbose:
+                print(f"  ok      {r['asset_id']}  ({r['focus']})")
+            continue
+        detail = ", ".join(
+            f"{edge} run={run}px frac={frac:.0%}"
+            for edge, (run, frac) in sorted(flagged.items()))
+        msg = (f"L13 {r['asset_id']}: plate CLIPPED at the canvas edge "
+               f"[{detail}] (focus '{r['focus']}'). In the game there is no "
+               f"frame, so a flat edge reads as the model's silhouette -- move "
+               f"the row to `/contain`, or re-pick a source that is not itself "
+               f"cropped.")
+        if r["asset_id"] in PENDING_EDGE_REPICK:
+            print(f"PENDING RE-PICK (edge clip, allowlisted): {msg}")
+        else:
+            problems.append(msg)
+    # The DEBT set can only SHRINK. An entry that measures clean is suppressing
+    # a finding that can no longer occur, so it must be deleted rather than
+    # left guarding nothing -- the same rot direction as APPROVED_FAMILY_
+    # EXCEPTIONS and KNOWN_IDENTICAL.
+    for asset_id in sorted(healed):
+        problems.append(
+            f"L13 {asset_id}: PENDING_EDGE_REPICK lists this plate, but its "
+            f"edges are now CLEAN. Delete the entry so the lint guards the fix."
+        )
+    print(f"L13: {len(present)} plate(s) measured, {len(problems)} flagged")
+    return problems
+
+
 def main() -> int:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from art_fetch import read_plan
-    problems = lint(read_plan())        # includes L12 since C3
+    argv = sys.argv[1:]
+    art_root = None
+    if "--art-root" in argv:
+        i = argv.index("--art-root")
+        if i + 1 >= len(argv):
+            sys.exit("--art-root needs a value")
+        art_root = Path(argv[i + 1]).resolve()
+        del argv[i:i + 2]
+    rows = read_plan()
+    if "--edges" in argv:
+        # The standalone edge report: L13 alone, every plate listed.
+        problems = edge_clipping(rows, art_root=art_root, verbose=True)
+        for p in problems:
+            print("LINT: " + p, file=sys.stderr)
+        return 1 if problems else 0
+    problems = lint(rows)               # includes L12 since C3
+    problems.extend(edge_clipping(rows, art_root=art_root))
     if problems:
         for p in problems:
             print("LINT: " + p, file=sys.stderr)
