@@ -18,23 +18,45 @@ namespace KleeMod.Teyvat;
 /// wore the base zone's clothes
 /// (`review/records/teyvat-spike-build-2026-09-15.md` item 1).
 ///
-/// THIS CLASS IS HOW THAT ALIAS RETIRES. `tools/gen_act_placeholders.py`
+/// THIS CLASS IS HOW THAT ALIAS RETIRES -- FOR THE COMBAT BACKGROUND AND THE
+/// MAP, AND FOR NOTHING ELSE. `tools/gen_act_placeholders.py`
 /// writes a complete placeholder set per dressing, for all six of them --
-/// five `_bg_NN_a` layer scenes, one `_fg_a`, a background root, a rest site
+/// five `_bg_NN_a` layer scenes, one `_fg_a`, a background root
 /// and three map PNGs each --
 /// and <see cref="HasDressedAssets"/> is the single boolean that decides
 /// whether the identifier is left alone (our files are there) or aliased
 /// (they are not). `docs/current/operations/act-assets.md` is the shape.
 ///
+/// THE REST SITE IS NO LONGER PART OF THAT QUESTION (2026-09-17). We shipped
+/// our own rest-site scene until then: a `RestSiteBG` `TextureRect` over our
+/// plate plus an EMPTY `%RestSiteLighting` `Control`, which is all
+/// `NRestSiteRoom._Ready`'s `GetNode&lt;Control&gt;("%RestSiteLighting")` asks
+/// for. The base game keeps its WHOLE campfire inside that node -- ground
+/// lighting particles, seven wall lights, `SteppedFire`, sparks, the log
+/// highlights -- and a BASE character's campfire figure
+/// (`Nodes.RestSite/NRestSiteCharacter._Ready`, which plays
+/// `"&lt;zone&gt;_loop"` on a Spine rig by act index) evidently reaches into it.
+/// Against our empty node the game HARD-CRASHED: native, no managed trace,
+/// the log ending at "Preloading 'RestSite Room' Complete". [USER] reproduced
+/// it twice on 2026-09-17 with the Silent at her first campfire; Klee never
+/// crashed there, which is why it survived every proof we ran.
+///
+/// So a dressing now wears the base zone's ENTIRE rest scene
+/// (`Patches/TeyvatRestSitePatch` aliases `RestSiteBackgroundPath`
+/// unconditionally, whatever the rest of the set looks like) and only the
+/// PLATE is ours, swapped into that scene's own `RestSiteBG` by a postfix on
+/// `ActModel.CreateRestSiteBackground`. The plate is a texture, not a
+/// completeness question: a missing one costs a picture, not a boot, so
+/// <see cref="HasDressedAssets"/> does not ask about it either.
+///
 /// ALL-OR-NOTHING, DELIBERATELY. `Rooms/BackgroundAssets`'s constructor throws
 /// `InvalidOperationException` on a missing `layers` directory AND on a layer
-/// file matching neither `_bg_NN` nor `_fg_`; the map PNGs and the rest-site
-/// scene have no fallback at all. So a HALF-landed set must still take the
+/// file matching neither `_bg_NN` nor `_fg_`; the map PNGs have no fallback at
+/// all. So a HALF-landed set must still take the
 /// alias rather than half of each -- which is why the probe below ands its
 /// questions, and why it asks the questions a broken set fails: the first
 /// LAYER scene (the file `BackgroundAssets` scans for), the background ROOT
-/// (the scene `NCombatBackground.Create` casts), the REST SITE (the scene
-/// `CreateRestSiteBackground` instantiates), and -- as a belt, see
+/// (the scene `NCombatBackground.Create` casts), and -- as a belt, see
 /// <see cref="FirstLayerRemapPath"/> -- that the pack carries no `.tscn.remap`
 /// stub where that first layer should be.
 ///
@@ -62,9 +84,102 @@ public static class TeyvatActAssets
     public static string FirstLayerPath(string id) =>
         $"res://scenes/backgrounds/{id}/layers/{id}_bg_00_a.tscn";
 
-    /// <summary>`ActModel.RestSiteBackgroundPath`'s spelling.</summary>
+    /// <summary>
+    /// `ActModel.RestSiteBackgroundPath`'s spelling. NOTHING WE SHIP LIVES AT
+    /// THIS PATH FOR A DRESSING any more -- it is here so the alias postfix
+    /// can build the BASE zone's spelling (`overgrowth`, `hive`, `glory`), and
+    /// so the tests can say in one line which scene a face gets.
+    /// </summary>
     public static string RestSiteScenePath(string id) =>
         $"res://scenes/rest_site/{id}_rest_site.tscn";
+
+    /// <summary>
+    /// THE REST SCENE A FACE ACTUALLY GETS: always the base zone's, for every
+    /// dressing, regardless of what else is in the pack.
+    ///
+    /// Returns null for anything that is not a dressing (every base zone,
+    /// always), which is the postfix's "leave it alone". Pure, so both
+    /// directions are pinned headlessly.
+    /// </summary>
+    public static string? BaseRestSiteScenePath(string? dressingEntry)
+    {
+        if (dressingEntry == null
+            || !TeyvatFrame.AssetAlias.TryGetValue(dressingEntry, out var zone))
+        {
+            return null;
+        }
+
+        return RestSiteScenePath(zone);
+    }
+
+    /// <summary>
+    /// OUR PLATE, the one thing a face still owns at a rest site. Written by
+    /// `art/plan.tsv` (or `tools/gen_act_placeholders.py` as a gradient) at
+    /// 1382x648, and swapped into the base scene's `RestSiteBG` whose rect is
+    /// 2764.8 x 1296 with `expand_mode = 1` -- exactly the scaling our own
+    /// scene did before it was deleted.
+    /// </summary>
+    public static string RestSitePlatePath(string id) =>
+        $"res://teyvat/rest_site/{id}_rest_site_bg.png";
+
+    /// <summary>
+    /// THE NODE NAME THE PLATE GOES INTO, in the base game's own rest scenes.
+    /// A direct child of the scene root in Overgrowth, Underdocks, the Hive
+    /// and Glory alike. Reached with `GetNodeOrNull`: a zone that ever renames
+    /// it costs us a picture, never a room.
+    /// </summary>
+    public const string RestSiteBgNode = "RestSiteBG";
+
+    /// <summary>
+    /// ROOT-LEVEL DECORATION THAT FIGHTS A FOREIGN PLATE, by name prefix.
+    ///
+    /// Overgrowth hangs six `Foliage*` `TextureRect`s and two
+    /// `RestSiteForeground*` layers in front of its own background; Glory adds
+    /// `stars*` particles and a `water_reflection*` sprite keyed to ITS
+    /// horizon. Over a Mondstadt plate they are somebody else's trees.
+    ///
+    /// WHAT IS NOT ON THIS LIST IS THE POINT. `%RestSiteLighting` and
+    /// everything under it stays -- that subtree IS the campfire and the thing
+    /// the base character's Spine rig reaches into, which is the whole defect
+    /// this file was rewritten for -- and so do `RestSiteLLog`, `RestSiteRLog`
+    /// and `RestSiteFireLogs`, the logs the fire sits on. The hide pass walks
+    /// the root's DIRECT children only, so it cannot reach into the lighting
+    /// tree even by accident.
+    /// </summary>
+    public static readonly string[] PlateHidePrefixes =
+    {
+        "Foliage",
+        "RestSiteForeground",
+        "stars",
+        "water_reflection",
+    };
+
+    /// <summary>
+    /// THE HIDE DECISION as a pure function of a node name, so the list above
+    /// and the thing it must never match are one assertion in
+    /// `KleeTests/TeyvatFrameTests`.
+    ///
+    /// Ordinal and case-sensitive: these are scene node names dumped from the
+    /// game's own pck, not user input, and a loose match here would put the
+    /// campfire out.
+    /// </summary>
+    public static bool HiddenForPlate(string? nodeName)
+    {
+        if (string.IsNullOrEmpty(nodeName))
+        {
+            return false;
+        }
+
+        foreach (var prefix in PlateHidePrefixes)
+        {
+            if (nodeName!.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// THE REMAP STUB, whose PRESENCE is a disqualification.
@@ -133,9 +248,11 @@ public static class TeyvatActAssets
             return false;
         }
 
+        // THE REST SITE IS NOT ASKED ABOUT. It was, until 2026-09-17; the
+        // scene it asked for is deleted and a face wears the base zone's
+        // campfire whatever this answers. See the class remarks.
         return exists(FirstLayerPath(id))
-            && exists(BackgroundScenePath(id))
-            && exists(RestSiteScenePath(id));
+            && exists(BackgroundScenePath(id));
     }
 
     /// <summary>
