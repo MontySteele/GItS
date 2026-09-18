@@ -44,6 +44,23 @@ pixels from a worktree. 104 plate rows moved to `cut.../contain` under it;
 `PENDING_EDGE_REPICK` carries the residue, where the SOURCE capture is itself
 cropped and no fit can invent the missing pixels, and that set can only shrink.
 
+**What a side/top flag actually is (measured 2026-09-17 on all 13).** A bottom
+flag is the capture cutting the figure off at its feet; a SIDE or TOP flag is
+two different things and only one of them is a sourcing question. On 3 of the 13
+the model or its FX really does run off the capture's frame (`frostarm_lawachurl`'s
+ice arm, `mirror_maiden`'s aura glow, `tainted_water_spouting_phantasm`'s left
+bubble). On the other 8 the pixels touching the edge are **the Archive backdrop's
+own nebula**, which the matte keys as figure where its local colour sits inside
+the tolerance, and that haze reaches the capture's border — so the plate carries a
+dark blob to the canvas edge and L13 reads it as a cut. Re-picking cannot fix
+those: every Archive capture is shot on the same nebula. The lever is the matte
+(tolerance, the blue-chroma gate, or a post-trim margin), not the source. Only an
+**alpha cut-out** source escapes it — `_backdrop_alpha` returns `None` when the
+border ring is already transparent and the file's own matte is kept — which is
+why the two bodies with an `Enemy <name> Full Artwork.png` render
+(`jadeplume_terrorshroom`, `warden_of_oasis_prime`) came back clean on all four
+edges from a title change alone, with every other knob untouched.
+
 `art/plan.tsv` is UTF-8, LF in the index (`.gitattributes` normalises) — read with `encoding="utf-8", newline=""` and
 `rstrip("\r\n")`, or the last column silently stops matching. Depth:
 `docs/current/art/` and `docs/current/atlas/tools.md`.

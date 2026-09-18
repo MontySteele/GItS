@@ -1930,7 +1930,7 @@ portrait_tangled_vines_frostnight_scion	ImageGen/images/teyvat/creature_visuals/
 portrait_rugged_elder_leshy	ImageGen/images/teyvat/creature_visuals/rugged_elder_leshy.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Rugged Elder Leshy.png		splash
 portrait_sternshield_crab	ImageGen/images/teyvat/creature_visuals/sternshield_crab.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Sternshield Crab.png		splash
 portrait_anemo_slime	ImageGen/images/teyvat/creature_visuals/anemo_slime.png	240	280	cut	cut/contain	auto	1	png	Enemy Anemo Slime.png		splash
-portrait_jadeplume_terrorshroom	ImageGen/images/teyvat/creature_visuals/jadeplume_terrorshroom.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Jadeplume Terrorshroom.png		splash
+portrait_jadeplume_terrorshroom	ImageGen/images/teyvat/creature_visuals/jadeplume_terrorshroom.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Jadeplume Terrorshroom Full Artwork.png		splash
 portrait_hydro_cicin	ImageGen/images/teyvat/creature_visuals/hydro_cicin.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Hydro Cicin.png		splash
 portrait_fatui_electrohammer_vanguard	ImageGen/images/teyvat/creature_visuals/fatui_electrohammer_vanguard.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Fatui Electrohammer Vanguard.png		splash
 portrait_fatui_anemoboxer_vanguard	ImageGen/images/teyvat/creature_visuals/fatui_anemoboxer_vanguard.png	240	280	cut	cut/contain	auto	1	png	Enemy Fatui Anemoboxer Vanguard.png		splash
@@ -2025,7 +2025,7 @@ portrait_eremite_daythunder	ImageGen/images/teyvat/creature_visuals/eremite_dayt
 portrait_consecrated_horned_crocodile	ImageGen/images/teyvat/creature_visuals/consecrated_horned_crocodile.png	240	280	cut	cut/contain	auto	1	png	Enemy Consecrated Horned Crocodile.png		splash
 portrait_eremite_sunfrost	ImageGen/images/teyvat/creature_visuals/eremite_sunfrost.png	240	280	cut	cut/contain	auto	1	png	Enemy Eremite Sunfrost.png		splash
 portrait_consecrated_red_vulture	ImageGen/images/teyvat/creature_visuals/consecrated_red_vulture.png	240	280	cut	cut/contain	auto	1	png	Enemy Consecrated Red Vulture.png		splash
-portrait_warden_of_oasis_prime	ImageGen/images/teyvat/creature_visuals/warden_of_oasis_prime.png	240	280	cut	cut/contain	auto	1	png	Enemy Warden of Oasis Prime.png		splash
+portrait_warden_of_oasis_prime	ImageGen/images/teyvat/creature_visuals/warden_of_oasis_prime.png	240	280	cut	cut/contain	auto	1	png	Enemy Warden of Oasis Prime Full Artwork.png		splash
 portrait_liloupar	ImageGen/images/teyvat/creature_visuals/liloupar.png	240	280	cut	cut/contain	auto	1	png	Liloupar.png		splash
 
 portrait_primal_construct_reshaper	ImageGen/images/teyvat/creature_visuals/primal_construct_reshaper.png	240	280	cut	cut@90/contain	auto	1	png	Enemy Primal Construct Reshaper.png		splash
