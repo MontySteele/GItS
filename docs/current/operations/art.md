@@ -24,6 +24,26 @@ for a config declaring `recompose_exact: true` — which the six do and configs
 main tree's `ImageGen/`, which is the only supported way to reach it (never
 link an asset tree into a worktree).
 
+**The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for
+a figure. It scales the trimmed subject to FILL the plate and crops the
+overflow, so whenever the figure's aspect differs from the canvas it slices the
+body flat against the edge — and a contact sheet cannot show that, because a
+contact sheet draws every plate inside a rectangle and the slice reads as the
+frame. In the game there is no frame: the plate composites onto the arena and
+the flat edge reads as the model's own silhouette ([USER] on 0.2.3674,
+2026-09-17: "many of our images have weirdly clipped assets around the edge of
+the image ... [that] show up as the edge of the in-game model"). L13 measures
+the shipped pixels rather than the plan — for each of the four canvas edges,
+the longest contiguous run at alpha ≥ 40 and the opaque fraction — and flags a
+run ≥ 12px or a fraction ≥ 0.10. It reads `plan.tsv` for its rows, lints the
+composite plate only (the six bespoke bosses' layers are cut from it and
+inherit its geometry), and SKIPS with a note where `ImageGen/` or Pillow is
+absent, so it never fails on a runner; `main()` runs it, so the local
+`art-lint` lane covers it, and `--art-root` points it at the main checkout's
+pixels from a worktree. 104 plate rows moved to `cut.../contain` under it;
+`PENDING_EDGE_REPICK` carries the residue, where the SOURCE capture is itself
+cropped and no fit can invent the missing pixels, and that set can only shrink.
+
 `art/plan.tsv` is UTF-8, LF in the index (`.gitattributes` normalises) — read with `encoding="utf-8", newline=""` and
 `rstrip("\r\n")`, or the last column silently stops matching. Depth:
 `docs/current/art/` and `docs/current/atlas/tools.md`.
