@@ -289,7 +289,67 @@ the plan's `focus` column is the rule that removes it. A 1382×648 plate off a
 off the bottom; a 2035×1440 vignette fills the height exactly on a 16:9
 source, so its only spare strip is horizontal and `x0.42` spends it off the
 right. The wordmarks are `Emblem <Nation> White.png`, which carry no such
-mark.
+mark. The six `bg_00` rows answer to a second rule as well and spend their
+spare height on it instead — the section below.
+
+### The combat feet line, and the `ground` knob
+
+A combat background is not framed, it is **registered**. Every creature in a
+fight stands on one row of the `bg_00` plate — **row 425 of 648** (0.6559) —
+and a plate whose ground plane does not fall there draws characters in midair,
+which is what [USER] reported on 2026-09-17 ("the Mondstadt battle map places
+the characters and enemies in what looks like midair above the ground").
+
+The row is a property of the layer geometry, not of the window. The layer
+`TextureRect` is 2764.8 × 1296 anchored to its parent's **centre**, so the plate
+is drawn at 2× and centred and then scaled with the canvas; the feet sit a fixed
+**202 design pixels** below that centre, which is 101 plate rows below row 324.
+Measured off two captures at different window aspects by locating the creature
+HP-bar widget, whose top edge is the creature's floor (Klee's boots land 10–12
+view pixels above it, the Sternshield Crab 3):
+
+| capture | window | bar top | view centre | canvas scale | design px below centre |
+|---|---|---|---|---|---|
+| `frame-20260917-173303-p15-idle-a.png` | 2160×1620, 4:3 | 1069 | 810 | 1.2855 | 201.5 |
+| `frame-20260825-202947-klee-spark-sinks-playable-3sparks.png` | 3840×2160, 16:9 | 1483 | 1080 | 1.986 | 202.9 |
+
+The second is a pre-Teyvat capture, so it is the **base game's own** Overgrowth
+layout answering the same question. As a fraction of the *window* the feet line
+is 0.660 and 0.687 respectively, which is why the constant is a plate row and
+never a window fraction. On Overgrowth the far edge of the ground plane sits
+around plate row 320 and creatures stand about a third of the way down the
+ground band, with near ground continuing to the bottom edge — that is the
+composition a crop is aimed at.
+
+`art/plan.tsv`'s `focus` column carries the knob: **`ground<f>[@zoom][,x<f>]`**,
+where `f` is the fraction of the SOURCE height whose ground must land on row
+425 (`tools/art_process.py:COMBAT_FEET_ROW`). `y<f>` cannot say this — it
+centres the named row at 324. The zoom is not decoration: a 16:9 source under
+plain `cover` has only 130 scaled pixels of vertical slack, so reaching a ground
+row below about 0.71 requires scaling the source up. A source that still cannot
+reach is **flagged `ground <f> clamped`** rather than silently mis-framed, which
+would be `top` again wearing a new spelling.
+
+The `x<f>` half is the wordmark rule above, taken over. The mark starts at
+source x 0.843 (0.921 on a 3840 source), and at these zooms the crop is about
+70% of the source width, so `x0.46` puts its right edge at 0.839 and the mark
+stays out. `top` used to do that job with the spare height; at a ground zoom
+there is no spare height left. The rest-site plates and the map overlay's
+vignettes have no creature standing on them and keep `top` / `x0.42`
+unchanged — the feet line is the combat plate's alone.
+
+**The sourcing consequence, which is the larger half.** The wiki's location
+stills are viewpoint vistas: the camera looks DOWN at the place from above.
+Five of the six original picks have no ground plane at any row, so the knob
+alone could not save them and the still was re-picked — Guyun Stone Forest and
+Belleau Region are aerial shots over water, Narukami Island aerial over sea
+haze, Tequemecan Valley a canyon rim whose bottom is treetops, Caravan Ribat
+looks down into a cleft (its ground needs a 2.4× zoom, so a 1.7× upscale).
+Only Windrise had a real ground plane and was kept; the six knobs live in
+`art/plan.tsv` and the five new stills in `media/ACT.tsv`. **When picking a
+`bg_00`, pick an eye-level shot whose ground plane reaches the bottom edge** —
+a harder filter than "looks like the nation", and the one that decides whether
+a fight reads as standing on the ground.
 
 ### The alias patch, and when it still fires
 

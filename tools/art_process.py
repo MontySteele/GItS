@@ -5,6 +5,9 @@
   for TCG card art and full-body renders; center otherwise). focus may instead
   be a fractional anchor `x<f>`, `y<f>` or `x<f>,y<f>` naming where in the
   SOURCE the crop should centre — see cover() for why top/center is not enough.
+  `ground<f>[,x<f>]` is the third spelling: it lands SOURCE row `f` on the
+  plate's COMBAT FEET LINE rather than at the crop's centre, which is what a
+  combat background needs — see COMBAT_FEET_ROW.
 - contain: fit inside W×H, pad to exact size on transparency (icons)
 - cover_autocrop: crop to the art's content first (splash/Wish sources float
   the figure in a large transparent void), then fit — focus carries
@@ -80,6 +83,23 @@ from art_fetch import read_plan, rawname  # noqa: E402
 
 UPSCALE_FLAG = 1.6  # source-to-target scale factor above which we warn
 
+# THE COMBAT FEET LINE. Every creature in a fight stands on one row of the
+# bg_00 plate, and it is a property of the layer geometry, not of the window:
+# the layer TextureRect is 2764.8x1296 anchored to its parent's CENTRE
+# (klee-mod/pck-src/scenes/backgrounds/<id>/layers/<id>_bg_00_a.tscn), so a
+# 1382x648 plate is drawn at 2x, centred, and scaled with the canvas. Measured
+# 2026-09-17 off two captures at DIFFERENT window aspects by locating the
+# creature HP-bar widget, whose top edge is the creature's floor:
+#   4:3  (2160x1620) bar top view row 1069, centre 810,  scale 1.2855
+#        -> 201.5 design px below centre
+#   16:9 (3840x2160) bar top view row 1483, centre 1080, scale 1.986
+#        -> 202.9 design px below centre
+# 202 design px = 101 plate rows below the plate's own centre (324). The
+# fraction of the WINDOW is 0.660 and 0.687 respectively, which is why this is
+# a plate row and never a window fraction. See operations/act-assets.md.
+COMBAT_PLATE_H = 648
+COMBAT_FEET_ROW = 425            # 0.6559 of the plate; NOT of the window
+
 # Flat backing for item renders on card portraits (taste-pass directive 1):
 # transparent renders under `cover` smear their edge pixels across the frame,
 # and transparent padding reads as a hole in the card. Warm parchment, close
@@ -154,28 +174,78 @@ def _anchor(focus):
     return None if (ax is None and ay is None) else (ax, ay)
 
 
+def _ground(focus):
+    """Parse `ground<f>` (optionally with `,x<f>`) into (gy, ax), else None.
+
+    Returns None for every legacy spelling, which keeps `top` / `center` /
+    `x<f>` / `y<f>` on their original code path byte-for-byte -- shipped Klee
+    art must not shift because a new spelling was added.
+    """
+    gy = ax = None
+    for part in focus.split(","):
+        part = part.strip()
+        try:
+            if part.startswith("ground"):
+                gy = float(part[len("ground"):])
+            elif part.startswith("x"):
+                ax = float(part[1:])
+            else:
+                return None
+        except ValueError:
+            return None
+    return None if gy is None else (gy, ax)
+
+
 def cover(img, w, h, focus):
     """Scale to fill w*h and crop.
 
-    focus is `top`, `center`, or a fractional anchor `x<f>[,y<f>]` naming the
-    point in the SOURCE the crop centres on. Either may carry `@zoom`.
+    focus is `top`, `center`, a fractional anchor `x<f>[,y<f>]` naming the
+    point in the SOURCE the crop centres on, or `ground<f>[,x<f>]` naming the
+    SOURCE row that must land on the plate's COMBAT FEET LINE. Any of them may
+    carry `@zoom`.
 
     The anchor exists because top/center cannot express the common case
     (2026-07-23 taste pass): official portrait art puts the face ~25-33% down
     and parks the GENSHIN IMPACT / HOYOVERSE wordmarks on the top and bottom
     edges. `center` cropped 500x380 out of the middle and returned a headless
     torso; `top` would have returned the wordmark. `y0.28` returns the face.
+
+    `ground` exists because a combat background is not framed, it is REGISTERED
+    (2026-09-17): the picture is wrong unless the ground plane in it falls on
+    the one row the engine stands creatures on. `y<f>` cannot say that, because
+    it centres the named row at h/2 and the feet line is lower. Under `top` all
+    six Teyvat faces put the feet line on far terrain, open sea or rooftops,
+    which is the "characters in midair" the report of 2026-09-17 named.
     """
     # focus "center@1.5" punches the crop 1.5x into the frame (taste-pass
     # directive 2: VFX gif frames want the blast, not the whole battlefield).
+    # The zoom runs to the NEXT COMMA, not to the end of the string: it used to
+    # take everything after the `@`, which was invisible while every spelling
+    # put the zoom last, and broke the moment one did not
+    # (`ground0.70@1.32,x0.46` -> float("1.32,x0.46")).
     zoom = 1.0
     if "@" in focus:
-        focus, z = focus.split("@", 1)
-        zoom = float(z)
+        head, _, tail = focus.partition("@")
+        number, comma, rest = tail.partition(",")
+        zoom = float(number)
+        focus = head + (comma + rest if comma else "")
     scale = max(w / img.width, h / img.height) * zoom
     if scale > UPSCALE_FLAG:
         flags.append(f"upscale x{scale:.1f}")
     img = img.resize((round(img.width * scale), round(img.height * scale)), Image.LANCZOS)
+    ground = _ground(focus)
+    if ground is not None:
+        gy, ax = ground
+        y = round(gy * img.height - h * COMBAT_FEET_ROW / COMBAT_PLATE_H)
+        if not 0 <= y <= img.height - h:
+            # The source cannot deliver the asked-for ground at this zoom. Say
+            # so: a silently clamped ground row is exactly the defect this
+            # focus exists to catch.
+            flags.append(f"ground {gy} clamped (raise @zoom)")
+        y = max(0, min(img.height - h, y))
+        x = ((img.width - w) // 2 if ax is None
+             else max(0, min(img.width - w, round(ax * img.width - w / 2))))
+        return img.crop((x, y, x + w, y + h))
     anchor = _anchor(focus)
     if anchor is None:
         x = (img.width - w) // 2
