@@ -65,6 +65,10 @@ public class TeyvatFrameTests : IDisposable
         // `TeyvatMusic`, because the room is the FRAME's question: the music
         // reader never asks `RunManager` anything. Same discipline.
         TeyvatFrame.ResetRoomProbe();
+        // `EB-821` adds a fifth process-wide static: the flag every crash guard
+        // in `RunMusicPatch` reads. A pin that left it set would arm three
+        // prefixes for the rest of the suite.
+        TeyvatMusic.ClearArmedPlaying();
     }
 
     // ---------------------------------------------------------------
@@ -1124,20 +1128,36 @@ public class TeyvatFrameTests : IDisposable
             "KleeMod.Teyvat.Patches.NRunMusicController_TeyvatTrack_Patch",
             throwOnError: true)!;
 
-        var bindings = patch
+        var bound = patch
             .GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
-            .SelectMany(m => m.GetCustomAttributes<HarmonyPatch>())
-            .Where(a => a.info.methodName != null)
+            .SelectMany(m => m.GetCustomAttributes<HarmonyPatch>().Select(a => (m, a)))
+            .Where(p => p.a.info.methodName != null)
             .ToList();
 
+        // The FIVE POSTFIXES are the slot seams: which nation, which room, a
+        // boss event starting and ending, and the teardown.
         Assert.Equal(
             new[] { "PlayCustomMusic", "StopCustomMusic", "StopMusic", "UpdateMusic", "UpdateTrack" },
-            bindings.Select(a => a.info.methodName!)
-                    .OrderBy(n => n, StringComparer.Ordinal).ToArray());
+            bound.Where(p => p.m.GetCustomAttribute<HarmonyPostfix>() != null)
+                 .Select(p => p.a.info.methodName!)
+                 .OrderBy(n => n, StringComparer.Ordinal).ToArray());
 
-        // The overload selector, without which Harmony cannot bind UpdateTrack.
-        var updateTrack = bindings.Single(a => a.info.methodName == "UpdateTrack");
-        Assert.Equal(Array.Empty<Type>(), updateTrack.info.argumentTypes);
+        // The THREE PREFIXES are `EB-821`'s crash guards: every controller
+        // method that forwards a parameter to the RELEASED FMOD event instance.
+        Assert.Equal(
+            new[] { "TriggerCampfireGoingOut", "UpdateMusicParameter", "UpdateTrack" },
+            bound.Where(p => p.m.GetCustomAttribute<HarmonyPrefix>() != null)
+                 .Select(p => p.a.info.methodName!)
+                 .OrderBy(n => n, StringComparer.Ordinal).ToArray());
+
+        // The overload selector, without which Harmony cannot bind UpdateTrack
+        // -- and BOTH of its patches carry it, the room seam and the guard.
+        var updateTrack = bound.Where(p => p.a.info.methodName == "UpdateTrack").ToList();
+        Assert.Equal(2, updateTrack.Count);
+        foreach (var (_, attribute) in updateTrack)
+        {
+            Assert.Equal(Array.Empty<Type>(), attribute.info.argumentTypes);
+        }
 
         // And the menu is a SECOND class on a DIFFERENT type, because
         // NRunMusicController does not exist on a screen with no run.
@@ -2374,6 +2394,218 @@ public class TeyvatFrameTests : IDisposable
     /// classes. Asserting rather than returning null so a rename reads as a
     /// named failure instead of an NRE three lines later.
     /// </summary>
+    // ===================================================================
+    // `EB-821` -- THE FMOD CRASH GUARDS.
+    // ===================================================================
+
+    private const string RunMusicPatchType =
+        "KleeMod.Teyvat.Patches.NRunMusicController_TeyvatTrack_Patch";
+
+    /// <summary>The three prefixes, and the game method each one guards.</summary>
+    public static readonly string[][] CrashGuards =
+    {
+        new[] { "UpdateTrackPrefix", "UpdateTrack" },
+        new[] { "TriggerCampfireGoingOutPrefix", "TriggerCampfireGoingOut" },
+        new[] { "UpdateMusicParameterPrefix", "UpdateMusicParameter" },
+    };
+
+    /// <summary>
+    /// EVERY GUARDED METHOD RESOLVES ON THE REAL `NRunMusicController`, asked of
+    /// the installed `sts2.dll` through `AccessTools` -- the same lookup Harmony
+    /// makes at boot. A game patch that renames or re-signs one of these fails
+    /// here instead of silently un-arming a prefix and putting [USER]'s
+    /// 2026-09-17 rest-site crash back.
+    ///
+    /// The overloads are load-bearing and are pinned as such. `UpdateTrack` has
+    /// a public zero-arg form (the one that forwards `update_campfire_ambience`
+    /// to the released instance) and a private `(string, float)` sibling that
+    /// only reaches `update_global_parameter` and must NOT be guarded; if the
+    /// two ever merged, this pin is where it shows.
+    /// </summary>
+    [Fact]
+    public void The_music_crash_guard_targets_resolve_on_the_real_controller()
+    {
+        var controller = typeof(MegaCrit.Sts2.Core.Nodes.Audio.NRunMusicController);
+
+        var updateTrack = AccessTools.Method(controller, "UpdateTrack", Type.EmptyTypes);
+        Assert.NotNull(updateTrack);
+        Assert.Empty(updateTrack!.GetParameters());
+        Assert.True(updateTrack.IsPublic);
+        Assert.False(updateTrack.IsStatic);
+
+        // The sibling that stays unguarded, and is why the empty Type[] above
+        // is not decoration.
+        var progressWrite = AccessTools.Method(
+            controller, "UpdateTrack", new[] { typeof(string), typeof(float) });
+        Assert.NotNull(progressWrite);
+        Assert.NotEqual(updateTrack, progressWrite);
+
+        var campfire = AccessTools.Method(controller, "TriggerCampfireGoingOut");
+        Assert.NotNull(campfire);
+        Assert.Empty(campfire!.GetParameters());
+        Assert.True(campfire.IsPublic);
+
+        var parameter = AccessTools.Method(
+            controller, "UpdateMusicParameter", new[] { typeof(string), typeof(float) });
+        Assert.NotNull(parameter);
+        Assert.True(parameter!.IsPublic);
+
+        // And the idempotence key: the controller's own record of the live FMOD
+        // event, which `ShouldStop` reads instead of remembering a slot.
+        var currentTrack = AccessTools.Field(controller, "_currentTrack");
+        Assert.NotNull(currentTrack);
+        Assert.Equal(typeof(string), currentTrack!.FieldType);
+        Assert.False(currentTrack.IsStatic);
+
+        var resolved = InArm(RunMusicPatchType)
+            .GetField("CurrentTrackField", BindingFlags.NonPublic | BindingFlags.Static)
+            ?.GetValue(null);
+        Assert.Equal(currentTrack, resolved);
+
+        // Each prefix names its own target and carries the prefix attribute.
+        foreach (var guard in CrashGuards)
+        {
+            var method = StaticMethod(InArm(RunMusicPatchType), guard[0]);
+            Assert.NotNull(method.GetCustomAttribute<HarmonyPrefix>());
+            var patch = method.GetCustomAttribute<HarmonyPatch>();
+            Assert.NotNull(patch);
+            Assert.Equal(guard[1], patch!.info.methodName);
+            Assert.Equal(typeof(bool), ((MethodInfo)method).ReturnType);
+            Assert.Empty(method.GetParameters());
+        }
+    }
+
+    /// <summary>
+    /// THE GUARDS BITE EXACTLY WHILE OUR TRACK IS PLAYING, AND NEVER OTHERWISE.
+    /// The three prefixes take no arguments and return a bool, so the whole
+    /// decision is reachable headlessly -- which is the reason they were written
+    /// that way rather than each reading the flag inline.
+    ///
+    /// The arm flag is moved BOTH WAYS around the gate on purpose: the guards
+    /// must not be gated on <see cref="TeyvatFrame.Enabled"/>, because a session
+    /// that turns the arm off mid-run still has our player in the tree and the
+    /// game's FMOD instance still released.
+    /// </summary>
+    [Fact]
+    public void The_music_crash_guards_run_the_original_unless_our_track_is_playing()
+    {
+        var prefixes = CrashGuards
+            .Select(g => (MethodInfo)StaticMethod(InArm(RunMusicPatchType), g[0]))
+            .ToArray();
+
+        foreach (var armed in new[] { false, true })
+        {
+            TeyvatFrame.Enabled = armed;
+
+            // Nothing of ours playing: every guard is a no-op, arm or no arm.
+            TeyvatMusic.ClearArmedPlaying();
+            foreach (var prefix in prefixes)
+            {
+                Assert.True((bool)prefix.Invoke(null, null)!, prefix.Name);
+            }
+
+            // Our track playing: every guard skips the original, arm or no arm.
+            SetArmedPlaying(true);
+            foreach (var prefix in prefixes)
+            {
+                Assert.False((bool)prefix.Invoke(null, null)!, prefix.Name);
+            }
+        }
+    }
+
+    /// <summary>
+    /// THE FLAG IS CLEARED BY `Stop` EVEN WITH NO HOST TO TIDY, which is the
+    /// property that keeps a session from losing its campfire ambience and every
+    /// boss parameter for good. `Play` is pinned from the other side: with no
+    /// host, or with no track filed, it returns false and arms nothing.
+    ///
+    /// The set half goes through the private setter rather than through `Play`,
+    /// because arming for real needs a Godot `Node` to hang an
+    /// `AudioStreamPlayer` under and `KleeTests` is headless by construction.
+    /// </summary>
+    [Fact]
+    public void The_armed_playing_flag_clears_through_Stop_with_no_host()
+    {
+        TeyvatMusic.ClearArmedPlaying();
+        Assert.False(TeyvatMusic.IsArmedPlaying);
+
+        // No host: `Play` returns before it ever touches the tree.
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => true;
+        TeyvatMusic.ListFiles = _ => new[] { "theme.ogg" };
+        TeyvatMusic.ResourceExists = _ => true;
+        Assert.False(TeyvatMusic.Play(null, TeyvatFrame.Mondstadt, TeyvatMusic.SlotCombat));
+        Assert.False(TeyvatMusic.IsArmedPlaying);
+
+        // No track filed: the same answer by the other door.
+        TeyvatMusic.ClearCache();
+        TeyvatMusic.DirectoryExists = _ => false;
+        Assert.False(TeyvatMusic.Play(null, TeyvatFrame.Mondstadt, TeyvatMusic.SlotCombat));
+        Assert.False(TeyvatMusic.IsArmedPlaying);
+
+        SetArmedPlaying(true);
+        Assert.True(TeyvatMusic.IsArmedPlaying);
+        TeyvatMusic.Stop(null);
+        Assert.False(TeyvatMusic.IsArmedPlaying);
+    }
+
+    /// <summary>
+    /// THE HEADER STATES THE ROUTE AND THE REASON IT IS NOT THE OTHER ONE.
+    /// `EB-821` was a choice between two shapes -- silence the FMOD event
+    /// without releasing it, or keep the release and guard the parameter calls
+    /// -- and the next reader of this file has to be able to see which was taken
+    /// and what was measured to take it, without re-reading the game pck.
+    /// </summary>
+    [Fact]
+    public void The_run_music_patch_header_states_the_route()
+    {
+        var header = RepoFile("klee-mod/KleeCode/Teyvat/Patches/RunMusicPatch.cs");
+        foreach (var phrase in new[]
+                 {
+                     "EB-821",
+                     "ROUTE (b)",
+                     "MusicControllerProxy",
+                     "update_campfire_ambience",
+                     "set_parameter_by_name",
+                     "set_global_parameter_by_name",
+                     "bus:/master/music",
+                 })
+        {
+            Assert.Contains(phrase, header);
+        }
+    }
+
+    /// <summary>Arm the flag the way <see cref="TeyvatMusic.Play"/> does. Its
+    /// setter is private because the mod has exactly one place that may arm it;
+    /// a headless pin has no `Node` to arm it with.</summary>
+    private static void SetArmedPlaying(bool value)
+    {
+        var setter = AccessTools.PropertySetter(typeof(TeyvatMusic), nameof(TeyvatMusic.IsArmedPlaying));
+        Assert.NotNull(setter);
+        setter!.Invoke(null, new object[] { value });
+    }
+
+    /// <summary>A repo-root-relative file, found by walking up from the test
+    /// binary -- `CreatureAnimationRouterTests.RepoFile`'s walk exactly.</summary>
+    private static string RepoFile(string relativePath)
+    {
+        var relative = relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar);
+        var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = System.IO.Path.Combine(dir.FullName, relative);
+            if (System.IO.File.Exists(candidate))
+            {
+                return System.IO.File.ReadAllText(candidate);
+            }
+
+            dir = dir.Parent;
+        }
+
+        Assert.Fail($"could not find {relativePath} above {AppContext.BaseDirectory}");
+        return string.Empty;
+    }
+
     private static Type InArm(string fullName)
     {
         var type = typeof(TeyvatFrame).Assembly.GetType(fullName, throwOnError: false);
