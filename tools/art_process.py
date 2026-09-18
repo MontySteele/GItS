@@ -29,6 +29,9 @@
   `figure=all` keeps every component, and `;split=N` parts two bodies joined
   by a bridge thinner than 2N+1 (the slimes overlap at the leaves) before the
   figure is chosen -- off by default, because a staff handle is thin too.
+  `;rekey=N` runs N extra key passes against a backdrop re-estimated from the
+  pixels the first flood PROVED were backdrop, which is what takes the nebula
+  halo off an Archive capture (CUT_REKEY); off by default.
 - vignette: cover-crop, darken, then multiply alpha by a radial mask that is
   fully clear across the central 70% width / 80% height -- the Teyvat map
   overlay's margin picture (docs/current/operations/act-assets.md)
@@ -346,6 +349,32 @@ CUT_SPLIT = 0           # `;split=N` parts figures joined by a bridge thinner
                         # than 2N+1. OFF by default: a staff handle is a thin
                         # bridge too, and splitting one loses a real feature.
 
+# THE NEBULA RE-KEY (`;rekey=N`, EB-822, 2026-09-18). OFF by default -- every
+# row without it renders byte-for-byte as before. What it is and why, measured:
+#
+# The Archive backdrop is a navy nebula, and `_refine_model`'s confidence set
+# is "within max(10, 0.6*tolerance) of the QUADRATIC" -- which is exactly the
+# set that EXCLUDES a nebula cloud, because a cloud is what the quadratic
+# cannot follow. So the estimate near a cloud is averaged from the plain sky
+# around it and lands 36-41 RGB off the cloud's real colour, just over a
+# tolerance of 30, and a band of cloud survives the key as figure. Measured
+# 2026-09-17 on six captures: the surviving pixels are backdrop-BLUE (chroma
+# deficit +2 to +10 against a gate of 12, so the chroma gate is NOT the leak),
+# they sit 36-41 from the model where the border ring itself sits at 3-4, and
+# they form a halo pushed to the plate edge under `contain` -- the dark blob
+# L13 reads as a cut, and the game reads as a halo round the model.
+#
+# The fix is not a wider tolerance and not a tighter chroma gate; it is a
+# better model. After the first flood the run KNOWS a great deal more about
+# what is backdrop than the quadratic did -- 47-75% of the frame, the nebula
+# included -- so pass N+1 re-estimates the local backdrop colour from THAT set
+# and keys again. Only pixels the model can now explain are added, and only
+# where the border flood reaches them, so the figure is unaffected where no
+# proven backdrop is near. Converts 1.8-6.0 points of frame from figure to
+# backdrop on the six, and 0.03-0.8 on the controls that were already clean.
+CUT_REKEY = 0           # `;rekey=N`: N extra key passes against the proven
+                        # backdrop. 1 is the whole effect; 0 is today's matte.
+
 
 def _cut_spec(spec):
     """Parse the `cut` row's focus column.
@@ -356,14 +385,14 @@ def _cut_spec(spec):
     matte tolerance, `/` is the focus handed to the FIT afterwards, and `:` is
     the enclosed-pocket threshold as a fraction of the frame. Anything added
     after those rides as `;key=value` so the grammar can grow without a fifth
-    punctuation mark; `chroma`, `figure` and `split` are the keys today. `cut`,
-    `cut@60`, `cut@60/center`, `cut/contain`, `cut@60/top:0.01` and
-    `cut;figure=all` are all legal, and a bare focus keyword (`top`) is
+    punctuation mark; `chroma`, `figure`, `split` and `rekey` are the keys
+    today. `cut`, `cut@60`, `cut@60/center`, `cut/contain`, `cut@60/top:0.01`
+    and `cut;figure=all` are all legal, and a bare focus keyword (`top`) is
     accepted too, so a row that says nothing about the matte reads as "default
     matte, this focus".
 
-    Returns (tolerance, fit, focus, pocket, chroma, figure, split) with fit in
-    {cover, contain} and figure in {main, all}.
+    Returns (tolerance, fit, focus, pocket, chroma, figure, split, rekey) with
+    fit in {cover, contain} and figure in {main, all}.
     """
     spec = (spec or "").strip() or "cut"
     head, *extras = spec.split(";")
@@ -384,7 +413,7 @@ def _cut_spec(spec):
     except ValueError:
         raise SystemExit(
             f"cut: bad pocket fraction {pocket!r} (want cut[...][:fraction])")
-    chroma, figure, split = CUT_CHROMA, "main", CUT_SPLIT
+    chroma, figure, split, rekey = CUT_CHROMA, "main", CUT_SPLIT, CUT_REKEY
     for extra in extras:
         extra = extra.strip()
         if not extra:
@@ -408,14 +437,21 @@ def _cut_spec(spec):
                 raise SystemExit(f"cut: bad split {value!r} (want ;split=N)")
             if split < 0:
                 raise SystemExit(f"cut: split must not be negative ({value!r})")
+        elif key == "rekey":
+            try:
+                rekey = int(value)
+            except ValueError:
+                raise SystemExit(f"cut: bad rekey {value!r} (want ;rekey=N)")
+            if rekey < 0:
+                raise SystemExit(f"cut: rekey must not be negative ({value!r})")
         else:
             raise SystemExit(
                 f"cut: unknown option {extra!r} "
-                f"(want ;chroma=N, ;figure=main|all or ;split=N)")
+                f"(want ;chroma=N, ;figure=main|all, ;split=N or ;rekey=N)")
     fit = "cover"
     if focus == "contain":
         fit, focus = "contain", "center"
-    return tolerance, fit, focus, pocket_frac, chroma, figure, split
+    return tolerance, fit, focus, pocket_frac, chroma, figure, split, rekey
 
 
 def _erode(mask, k):
@@ -521,6 +557,35 @@ def _box(a, r, axis):
     return np.moveaxis(out, 0, axis)
 
 
+def _inpaint_from(rgb, conf, radius, fallback):
+    """Normalised-convolution estimate of the backdrop, from `conf` outward.
+
+    The blur spreads the colour of the pixels `conf` marks as certain backdrop
+    across everything near them; where the weight collapses (no certain
+    backdrop within the radius) `fallback` stands. Factored out of
+    `_refine_model` so the re-key pass below can drive the SAME estimator from
+    a different, and much better, confidence set.
+    """
+    import numpy as np
+
+    def _blur(arr):
+        # Three box passes ~= a gaussian, and a box pass is two cumsums --
+        # PIL's GaussianBlur will not take an "F" image and scipy is not a
+        # dependency of this repo.
+        a = arr.astype(np.float64)
+        for _ in range(3):
+            a = _box(_box(a, radius, 0), radius, 1)
+        return a
+
+    den = _blur(conf.astype(np.float64))
+    out = fallback.copy()
+    good = den > 0.02
+    for c in range(3):
+        num = _blur(rgb[:, :, c] * conf)
+        out[:, :, c] = np.where(good, num / np.maximum(den, 1e-6), fallback[:, :, c])
+    return out
+
+
 def _refine_model(rgb, model, tolerance):
     """Inpaint the quadratic with the backdrop's own LOCAL colour.
 
@@ -540,24 +605,11 @@ def _refine_model(rgb, model, tolerance):
     conf = np.sqrt(((rgb - model) ** 2).sum(axis=2)) <= max(10.0, tolerance * 0.6)
     if conf.mean() < 0.05:
         return model
-    radius = max(4, int(0.06 * max(h, w)))
+    return _inpaint_from(rgb, conf, _inpaint_radius(h, w), model)
 
-    def _blur(arr):
-        # Three box passes ~= a gaussian, and a box pass is two cumsums --
-        # PIL's GaussianBlur will not take an "F" image and scipy is not a
-        # dependency of this repo.
-        a = arr.astype(np.float64)
-        for _ in range(3):
-            a = _box(_box(a, radius, 0), radius, 1)
-        return a
 
-    den = _blur(conf.astype(np.float64))
-    out = model.copy()
-    good = den > 0.02
-    for c in range(3):
-        num = _blur(rgb[:, :, c] * conf)
-        out[:, :, c] = np.where(good, num / np.maximum(den, 1e-6), model[:, :, c])
-    return out
+def _inpaint_radius(h, w):
+    return max(4, int(0.06 * max(h, w)))
 
 
 def _blueness(a):
@@ -574,7 +626,7 @@ def _blueness(a):
 
 def _backdrop_alpha(img, tolerance=CUT_TOLERANCE, pocket_frac=CUT_POCKET_FRAC,
                     chroma=CUT_CHROMA, figure="main", dropped=None,
-                    split=CUT_SPLIT):
+                    split=CUT_SPLIT, rekey=CUT_REKEY):
     """Alpha for an Archive capture: opaque figure, transparent backdrop.
 
     Five passes, each closing a defect the one before it opens:
@@ -586,6 +638,11 @@ def _backdrop_alpha(img, tolerance=CUT_TOLERANCE, pocket_frac=CUT_POCKET_FRAC,
        frostarm_lawachurl's belly reads (13,19,64) against a (7,20,63)
        backdrop -- so the chroma gate is what saves neutral blacks, and
        reachability below is what saves the rest.
+    1b. RE-KEY (`;rekey=N`, off by default). Pass 2 re-estimates the local
+       backdrop colour from the pixels pass 2's flood PROVED were backdrop --
+       a set the quadratic's own confidence test excludes precisely where the
+       nebula is -- and adds whatever that better model explains. See
+       CUT_REKEY.
     2. REACHABILITY from the border, on the key ERODED by CUT_BRIDGE first.
        Eroding is the fix for the leak that ate the bodies: a two-pixel
        hairline of keyed colour between an arm and the frame carried the flood
@@ -637,11 +694,35 @@ def _backdrop_alpha(img, tolerance=CUT_TOLERANCE, pocket_frac=CUT_POCKET_FRAC,
 
     seeds_xy = ([(0, x) for x in range(w)] + [(h - 1, x) for x in range(w)]
                 + [(y, 0) for y in range(h)] + [(y, w - 1) for y in range(h)])
-    if CUT_BRIDGE:
-        core = _erode(cand, CUT_BRIDGE)
-        background = _dilate(_flood(core, seeds_xy), CUT_BRIDGE) & cand
-    else:
-        background = _flood(cand, seeds_xy)
+
+    def _reach(key):
+        if CUT_BRIDGE:
+            core = _erode(key, CUT_BRIDGE)
+            return _dilate(_flood(core, seeds_xy), CUT_BRIDGE) & key
+        return _flood(key, seeds_xy)
+
+    background = _reach(cand)
+
+    # THE NEBULA RE-KEY. The flood has just proved a large, nebula-INCLUSIVE
+    # set of pixels to be backdrop; re-estimate the local backdrop colour from
+    # that set and key again. Only additive, and only where the estimator has
+    # proven backdrop within its radius -- deep inside a figure the weight
+    # collapses and the previous model stands, so a body cannot be eaten from
+    # the inside. Stops early when a pass adds nothing.
+    for _ in range(rekey):
+        if not background.any():
+            break
+        model2 = _inpaint_from(rgb, background, _inpaint_radius(h, w), model)
+        resid2 = np.sqrt(((rgb - model2) ** 2).sum(axis=2))
+        grown = cand | ((resid2 <= tolerance)
+                        & (_blueness(model2) - _blueness(rgb) <= chroma))
+        if int(grown.sum()) == int(cand.sum()):
+            break
+        cand = grown
+        # The pocket pass below asks how well a region matches THE BACKDROP;
+        # with two estimates in hand that is the better of the two.
+        resid = np.minimum(resid, resid2)
+        background = _reach(cand)
 
     if pocket_frac > 0:
         enclosed = cand & ~background
@@ -787,7 +868,8 @@ def cut(img, w, h, spec):
     `contain()` -- the same fitters every other mode uses, with the row's own
     focus. Nothing about framing is re-decided here.
     """
-    tolerance, fit, focus, pocket_frac, chroma, figure, split = _cut_spec(spec)
+    tolerance, fit, focus, pocket_frac, chroma, figure, split, rekey = \
+        _cut_spec(spec)
     work = img
     scale = CUT_WORK_MAX / max(img.width, img.height)
     if scale < 1:
@@ -795,7 +877,7 @@ def cut(img, w, h, spec):
                            max(1, round(img.height * scale))), Image.LANCZOS)
     dropped = []
     matte = _backdrop_alpha(work, tolerance, pocket_frac, chroma, figure,
-                            dropped, split)
+                            dropped, split, rekey)
     for d in dropped:
         flags.append(f"figure={figure} dropped a component: {d}")
     if matte is not None:
