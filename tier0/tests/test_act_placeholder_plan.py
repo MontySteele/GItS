@@ -39,8 +39,7 @@ def act_rows(resources: set[str]) -> set[str]:
     prefixes = tuple(
         f"{p}{nation.id}" for nation in gen.NATIONS
         for p in ("scenes/backgrounds/", "scenes/rest_site/",
-                  "teyvat/backgrounds/", "teyvat/rest_site/",
-                  "images/packed/map/map_bgs/")
+                  "teyvat/backgrounds/", "teyvat/rest_site/")
     )
     return {r for r in resources if r.startswith(prefixes)}
 
@@ -52,11 +51,23 @@ def test_the_plan_and_the_contract_fixture_name_the_same_files():
 
 
 def test_each_dressing_carries_the_whole_set():
-    """Eighteen rows a nation, and the split is the engine's, not a taste."""
+    """Fourteen rows a nation, and the split is the engine's, not a taste.
+
+    It was eighteen until 2026-09-17, and the day took four rows off it in two
+    unrelated fixes:
+
+      * the three MAP plates left, because the face's map ground is the base
+        zone's again (`KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs`) and the
+        map's dressing is an overlay whose pictures are optional -- so nothing
+        in THIS list, every row of which is a file whose absence throws,
+        corresponds to them;
+      * the rest-site SCENE left, and only its plate remains. See
+        `test_no_dressing_ships_a_rest_site_scene` below for why.
+    """
     for nation in gen.NATIONS:
         rows = [r.repo for r in gen.plan() if f"/{nation.id}/" in r.repo
                 or f"/{nation.id}_" in r.repo]
-        assert len(rows) == 18, (nation.id, rows)
+        assert len(rows) == 14, (nation.id, rows)
 
         # `BackgroundAssets` groups by `_bg_NN` and draws one per group, then
         # once over the `_fg_` list -- so the GROUP COUNT is what keeps a
@@ -65,12 +76,15 @@ def test_each_dressing_carries_the_whole_set():
         assert len(layers) == gen.BG_GROUPS + 1
         assert sum(1 for r in layers if "_fg_" in r) == 1
 
-        # The three map plates, at the engine's own non-negotiable path.
-        maps = [r for r in rows if "map_bgs" in r]
-        assert len(maps) == 3
+        # And NO map plate: overriding the game's map ground is the thing
+        # this generator stopped doing.
+        assert [r for r in rows if "map_bgs" in r] == []
 
         assert sum(1 for r in rows if r.endswith("_background.tscn")) == 1
-        assert sum(1 for r in rows if r.endswith("_rest_site.tscn")) == 1
+
+        # The rest-site PLATE, and no rest-site scene.
+        assert sum(1 for r in rows if r.endswith("_rest_site_bg.png")) == 1
+        assert sum(1 for r in rows if r.endswith("_rest_site.tscn")) == 0
 
 
 def test_every_committed_scene_matches_the_generator():
@@ -95,12 +109,46 @@ def test_the_committed_scenes_carry_no_script_and_the_right_nodes():
             assert f'name="Layer_{index:02d}"' in root
         assert 'name="Foreground"' in root
 
-        rest = sources[
-            f"klee-mod/pck-src/scenes/rest_site/{nation.id}_rest_site.tscn"]
-        # `NRestSiteRoom._Ready` fetches this one with GetNode, not
-        # GetNodeOrNull, so its absence throws before the campfire is drawn.
-        assert 'name="RestSiteLighting"' in rest
-        assert "unique_name_in_owner = true" in rest
+
+def test_no_dressing_ships_a_rest_site_scene():
+    r"""The rest-site scene is the game's, and ours is deleted (2026-09-17).
+
+    We shipped one per face until [USER] took a BASE character -- the Silent --
+    into her first campfire on a dressed act and the game HARD-CRASHED:
+    native, no managed trace, the log ending at
+    `Preloading 'RestSite Room' Complete`. Reproduced twice; Klee never crashed
+    there, which is why every deploy proof missed it.
+
+    Our scene was a `RestSiteBG` `TextureRect` plus an EMPTY
+    `%RestSiteLighting` `Control` -- all `NRestSiteRoom._Ready`'s
+    `GetNode<Control>("%RestSiteLighting")` asks for. The base game keeps the
+    WHOLE campfire inside that node (ground-lighting particles, seven wall
+    lights, `SteppedFire`, sparks, the log highlights) and a base character's
+    campfire figure is a Spine rig whose `_Ready` reaches into it.
+
+    So a face wears the base zone's ENTIRE rest scene -- the alias in
+    `KleeCode/Teyvat/Patches/TeyvatRestSitePatch.cs` is unconditional, unlike
+    the combat background's and the map's -- and only the PLATE is ours,
+    swapped into that scene's own `RestSiteBG` by a postfix on
+    `ActModel.CreateRestSiteBackground`. This pin is that nothing puts the
+    scenes back: not the generator, not the contract, not a stray file.
+    """
+    assert not any(r.repo.startswith("klee-mod/pck-src/scenes/rest_site/")
+                   for r in gen.plan())
+    assert not any(k.startswith("klee-mod/pck-src/scenes/rest_site/")
+                   for k in gen.scene_sources())
+
+    directory = ROOT / "klee-mod" / "pck-src" / "scenes" / "rest_site"
+    assert not directory.exists() or not list(directory.glob("*.tscn")), directory
+
+    parsed = contract.parse(FIXTURE.read_text(encoding="utf-8"))
+    assert not [r for r in parsed.resource_set
+                if r.startswith("scenes/rest_site/")]
+
+    # The plate is untouched: it is what the postfix writes into the base
+    # scene, one a face, still produced and still contracted.
+    plates = {r.res for r in gen.plan() if r.res.endswith("_rest_site_bg.png")}
+    assert len(plates) == len(gen.NATIONS)
 
 
 def test_build_pck_names_every_dressing_in_its_copy_loop():
@@ -208,23 +256,26 @@ def test_build_pck_copies_every_directory_the_generator_writes():
 # One producer per out-path: art/plan.tsv vs the generator (2026-09-17)
 # --------------------------------------------------------------------------
 
-def test_the_bill_claims_every_dressings_five_real_surfaces():
-    """Thirty rows, and they are the five surfaces a dressing actually shows.
+def test_the_bill_claims_every_dressings_four_real_surfaces():
+    """Twenty-four rows: the four pictures a dressing actually shows.
 
-    The other thirteen files a dressing owns are scenes and the four layers
-    plus the foreground over `bg_00` -- nothing a picture can be picked for.
+    Thirty until 2026-09-17. The three map plates a face used to draw as its
+    map GROUND are gone, and two overlay pictures drawn OVER the game's own
+    ground replace them -- so the bill shrank by six rather than by eighteen.
+    The other files a dressing owns are scenes and the four layers plus the
+    foreground over `bg_00`: nothing a picture can be picked for.
     """
     owned = gen.plan_owned()
-    assert len(owned) == 30, sorted(owned)
+    assert len(owned) == 24, sorted(owned)
     for nation in gen.NATIONS:
         i = nation.id
         assert {
             f"ImageGen/images/teyvat/backgrounds/{i}/{i}_bg_00.png",
             f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png",
-            f"ImageGen/images/teyvat/map_bgs/{i}/map_top_{i}.png",
-            f"ImageGen/images/teyvat/map_bgs/{i}/map_middle_{i}.png",
-            f"ImageGen/images/teyvat/map_bgs/{i}/map_bottom_{i}.png",
+            f"ImageGen/images/teyvat/map/{i}_wordmark.png",
+            f"ImageGen/images/teyvat/map/{i}_vignette.png",
         } <= owned, i
+        assert not any(f"map_bgs/{i}/" in o for o in owned), i
 
 
 def test_the_generator_never_writes_what_the_bill_produces(tmp_path):
@@ -294,8 +345,8 @@ def test_every_bill_row_has_a_ledger_row():
         assert row["licence"] == "PLACEHOLDER-COPYRIGHTED", row["out"]
         assert row["origin"].startswith(
             "https://genshin-impact.fandom.com/wiki/File:"), row["out"]
-        assert row["surface"] in {"bg_00", "rest_site", "map_top",
-                                  "map_middle", "map_bottom"}, row["surface"]
+        assert row["surface"] in {"bg_00", "rest_site",
+                                  "map_wordmark", "map_vignette"}, row["surface"]
 
 
 # --------------------------------------------------------------------------

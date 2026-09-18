@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using KleeMod.Tests.Harness;
@@ -483,6 +484,200 @@ public class CreatureAnimationRouterTests
             "ModdedDeathWaitSeam.Forget",
             Il.Calls(Patch("NCreature_StartReviveAnim_DeathWaitSeam")
                 .GetMethod("Postfix", All)!));
+    }
+
+    // -----------------------------------------------------------------------
+    // EB-816: THE IDLE DESYNC
+    // -----------------------------------------------------------------------
+    //
+    // [USER] on `0.2.3656` (2026-09-17): a pack of slimes "all bobbing at the
+    // exact same time at high speed". *High speed* was the clip and lives in
+    // `tools/gen_teyvat_creature_scenes.py`; *the exact same time* is this --
+    // every dressed body is a fresh instance of the same scene playing the
+    // same shared library from the same zero at the same frame.
+
+    private static Type Desync() => Patch("IdleDesync");
+
+    private static (float Phase, float Speed) DesyncFor(int seed)
+    {
+        var tuple = (ValueTuple<float, float>)
+            Desync().GetMethod("For", All)!.Invoke(null, new object[] { seed })!;
+        return (tuple.Item1, tuple.Item2);
+    }
+
+    private static bool DesyncCovers(bool armEnabled, string? visualsScene)
+        => (bool)Desync().GetMethod("Covers", All)!
+            .Invoke(null, new object?[] { armEnabled, visualsScene })!;
+
+    private static float PhaseSecondsFor(float idleLength, float phaseFraction)
+        => (float)Desync().GetMethod("PhaseSecondsFor", All)!
+            .Invoke(null, new object[] { idleLength, phaseFraction })!;
+
+    [Fact]
+    public void The_offset_and_the_speed_stay_inside_the_band_the_row_claims()
+    {
+        // A phase is a FRACTION of the idle, so it is in [0, 1) by contract --
+        // the caller multiplies by the clip's own length, and a fraction of 1
+        // or more would be a wrap nobody asked for.
+        //
+        // The speed band is the row's whole timing claim: +/-10% on every clip
+        // the player drives, idle and attack and hurt and death alike
+        // (AnimationPlayer.SpeedScale is a global multiplier, not a per-state
+        // one). A wider band would start to read as a wrong animation.
+        for (var seed = -500; seed < 2000; seed++)
+        {
+            var (phase, speed) = DesyncFor(seed);
+            Assert.InRange(phase, 0f, 0.9999999f);
+            Assert.InRange(speed, 0.90f, 1.10f);
+        }
+
+        // The band's two ends are the file's own constants, so a widened band
+        // is a decision rather than a diff nobody reads.
+        Assert.Equal(0.90f, (float)Desync().GetField("MinSpeedScale", All)!.GetValue(null)!);
+        Assert.Equal(1.10f, (float)Desync().GetField("MaxSpeedScale", All)!.GetValue(null)!);
+    }
+
+    [Fact]
+    public void The_same_slot_draws_the_same_offset_every_time()
+    {
+        // DETERMINISM IS THE POINT OF A PURE FUNCTION HERE. A random draw
+        // would do the visual job just as well and would make every [USER]
+        // look unrepeatable: "the middle one is wrong" has to be a claim
+        // somebody can go back and see.
+        foreach (var seed in new[] { 0, 1, 7, 42, -3 })
+        {
+            Assert.Equal(DesyncFor(seed), DesyncFor(seed));
+        }
+    }
+
+    [Fact]
+    public void Two_bodies_side_by_side_are_never_the_same_body_twice()
+    {
+        // THE CASE THE ROW EXISTS FOR: slots 0, 1 and 2 of one slime pack.
+        // The golden-ratio sequence puts ADJACENT seeds 0.382 or 0.618 of a
+        // cycle apart, always -- the three-distance theorem -- so a third of
+        // the cycle is a floor this cannot fall under.
+        for (var seed = -200; seed < 200; seed++)
+        {
+            var (a, _) = DesyncFor(seed);
+            var (b, _) = DesyncFor(seed + 1);
+            Assert.True(Math.Abs(a - b) > 0.33f, $"seeds {seed}/{seed + 1}: {a} vs {b}");
+        }
+
+        // AND NO TWO OF EIGHT ARE CLOSE, which a uniform hash could not
+        // promise: eight uniform draws land a pair within a fiftieth of each
+        // other about as often as not, and two slimes a fiftieth of a cycle
+        // apart are two slimes in lockstep. Measured floor 0.090.
+        foreach (var start in new[] { -4, 0, 1, 100 })
+        {
+            var window = Enumerable.Range(start, 8)
+                .Select(s => DesyncFor(s).Phase).ToList();
+            for (var i = 0; i < window.Count; i++)
+            {
+                for (var j = i + 1; j < window.Count; j++)
+                {
+                    Assert.True(Math.Abs(window[i] - window[j]) > 0.08f,
+                        $"{start}: slots {i}/{j} at {window[i]} / {window[j]}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void Eight_bodies_cover_most_of_the_cycle_rather_than_one_corner_of_it()
+    {
+        // A fight tops out at a handful of bodies, so the distribution that
+        // matters is the one over the FIRST FEW seeds, not the asymptotic one.
+        // Eight slots have to land spread across the cycle; all eight in the
+        // first third would still read as a group.
+        var phases = Enumerable.Range(0, 8).Select(s => DesyncFor(s).Phase).ToList();
+        Assert.True(phases.Max() - phases.Min() > 0.60f,
+            $"span {phases.Max() - phases.Min()}: {string.Join(", ", phases)}");
+
+        // Speeds too: eight bodies must not all be fast or all be slow.
+        var speeds = Enumerable.Range(0, 8).Select(s => DesyncFor(s).Speed).ToList();
+        Assert.Contains(speeds, s => s < 1.0f);
+        Assert.Contains(speeds, s => s > 1.0f);
+
+        // AND PHASE AND SPEED ARE INDEPENDENT DRAWS. If they moved together
+        // the slowest body would always be the least advanced one, which is a
+        // pattern an eye finds.
+        Assert.NotEqual(phases.IndexOf(phases.Max()), speeds.IndexOf(speeds.Max()));
+    }
+
+    [Fact]
+    public void The_phase_is_read_in_the_clips_own_seconds()
+    {
+        // Half of a 2 s bounce idle is one second in; the same fraction of the
+        // Everlasting Lord's 12 s halo is six. The function never knows either
+        // number -- that is why it returns a fraction.
+        Assert.Equal(1.0f, PhaseSecondsFor(2.0f, 0.5f));
+        Assert.Equal(6.0f, PhaseSecondsFor(12.0f, 0.5f));
+        Assert.Equal(0f, PhaseSecondsFor(3.0f, 0f));
+
+        // A clip that could not be measured gets NO advance rather than a
+        // guessed one -- the same discipline the death seams keep.
+        Assert.Equal(0f, PhaseSecondsFor(0f, 0.9f));
+        Assert.Equal(0f, PhaseSecondsFor(-1f, 0.9f));
+    }
+
+    [Fact]
+    public void The_desync_is_shut_unless_the_arm_is_on_and_the_scene_is_ours()
+    {
+        const string ours = "res://teyvat/creature_visuals/anemo_slime.tscn";
+
+        Assert.True(DesyncCovers(armEnabled: true, visualsScene: ours));
+
+        // ARM OFF IS THE ACCEPTANCE CONDITION, exactly as it is for the death
+        // seam: every calibration deploy and every release package ships
+        // TeyvatFrame.Enabled false, and on that side no node is touched at
+        // all -- base enemies, the three player bodies and Furina's performers
+        // are what they are today.
+        Assert.False(DesyncCovers(armEnabled: false, visualsScene: ours));
+
+        // An UNDRESSED enemy with the arm on: the registry has no row for it.
+        Assert.False(DesyncCovers(armEnabled: true, visualsScene: null));
+
+        // A scene outside our namespace is not ours to offset.
+        Assert.False(DesyncCovers(
+            armEnabled: true,
+            visualsScene: "res://scenes/creature_visuals/nibbit.tscn"));
+
+        // The gate reads the death seam's OWN constant, so the two cannot
+        // drift apart.
+        var root = (string)Seam().GetField("TeyvatVisualsRoot", All)!.GetValue(null)!;
+        Assert.Equal("res://teyvat/creature_visuals/", root);
+        Assert.False(DesyncCovers(armEnabled: true, visualsScene: root.TrimEnd('/')));
+    }
+
+    [Fact]
+    public void The_attach_runs_once_per_instance_off_the_routers_first_trigger()
+    {
+        // WHY THE ROUTER. The mod never sees a dressed body instantiated --
+        // MonsterVisualsPathPatch rewrites a path STRING and BaseLib's
+        // NCreatureVisualsFactory does the instantiate and the reparent -- so
+        // the router's first trigger is the earliest moment both the creature
+        // and its %AnimationTree are in our hands.
+        //
+        // STRUCTURAL PIN: calling it needs a live scene tree, which is process
+        // death in this host (README, the headless boundary).
+        var route = Il.Method("CreatureAnimationRouter", "Route");
+        var calls = Il.CallSequence(route).ToList();
+        Assert.Equal(1, calls.Count(c => c.Contains("IdleDesync") && c.Contains("Apply")));
+
+        // ONCE PER INSTANCE, not once per trigger: the mark is a weak table
+        // keyed on the node, so it dies with the body and a fight that spawns
+        // forty leaves nothing behind.
+        var offset = Desync().GetField("Offset", All)!;
+        Assert.Equal(
+            typeof(ConditionalWeakTable<NCreature, object>), offset.FieldType);
+
+        // ABOVE THE TRIGGER LOOKUP: an unknown trigger returns early, and a
+        // body that only ever heard unknown triggers would otherwise stay in
+        // lockstep with its neighbours.
+        var lookup = calls.FindIndex(c => c.Contains("TryGetValue"));
+        var apply = calls.FindIndex(c => c.Contains("IdleDesync"));
+        Assert.True(apply >= 0 && apply < lookup, $"{apply} vs {lookup}");
     }
 
     /// <summary>A repo-root-relative file, found by walking up from the test

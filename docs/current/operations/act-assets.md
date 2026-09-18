@@ -18,7 +18,7 @@ There are **six dressings**, two a face for each of the three acts (R273
 layout 1): act 1 as Mondstadt or Liyue, act 2 as Natlan or Inazuma, act 3 as
 Fontaine or Sumeru. Act 1's pair dresses two base zones; acts 2 and 3 have one
 base zone each (the Hive, Glory) with two faces standing on it. **None of that
-reaches this page** — a face costs the same eighteen files either way, because
+reaches this page** — a face costs the same fourteen files either way, because
 every path derives from `ActModel.FilePathIdentifier`, which is
 `Id.Entry.ToLowerInvariant()` — `MONDSTADT` → `mondstadt`, `NATLAN` →
 `natlan`. The five properties
@@ -31,14 +31,23 @@ move a single one of them: the file is at the derived path, or it is nowhere.
 | Foreground layer scene | `res://scenes/backgrounds/<id>/layers/<id>_fg_x.tscn` | ≥1 | — | `Control` | none (fg may be absent, but a *badly named* file throws) |
 | Layer plate | `res://teyvat/backgrounds/<id>/<id>_bg_NN.png`, `…_fg.png` | 6 | 1382×648 | — | dangling `ExtResource` |
 | Background root scene | `res://scenes/backgrounds/<id>/<id>_background.tscn` | 1 | — | **`NCombatBackground`** | **none — cast throws** |
-| Rest-site scene | `res://scenes/rest_site/<id>_rest_site.tscn` | 1 | — | `Control`, must carry `%RestSiteLighting` | **none — throws** |
-| Rest-site plate | `res://teyvat/rest_site/<id>_rest_site_bg.png` | 1 | 1382×648 | — | dangling `ExtResource` |
-| Map backgrounds | `res://images/packed/map/map_bgs/<id>/map_{top,middle,bottom}_<id>.png` | 3 | 2035×1440 | — | **none — throws** |
+| Rest-site scene | **none of ours** — the BASE zone's `res://scenes/rest_site/{overgrowth,underdocks,hive,glory}_rest_site.tscn` | 0 of ours | — | the game's own | n/a (always the base zone's) |
+| Rest-site plate | `res://teyvat/rest_site/<id>_rest_site_bg.png` | 1 | 1382×648 | swapped into the base scene's `RestSiteBG` by a postfix | base zone's own art, logged once |
+| Map ground | **the BASE ZONE's** `res://images/packed/map/map_bgs/<zone>/map_{top,middle,bottom}_<zone>.png` | 0 of ours | 2035×1440 | — | **none — throws**, which is why the patch below exists |
+| Map overlay | `res://teyvat/map/<id>_wordmark.png`, `<id>_vignette.png` | 2 | 900×160, 2035×1440 | `TextureRect` | **absent is fine** — the overlay stands down |
 | Act title | loc table `acts`, key `<Id.Entry>.title` | 1 row | — | — | renders the raw key |
 | Map colours | `MapTraveledColor` / `MapUntraveledColor` / `MapBgColor`, `abstract` on `ActModel` | 3 | — | — | compile error |
 
-Eighteen files a dressing, plus one loc row and three colours that live in
-C#. Six dressings, so 108 rows and six loc rows.
+Fourteen files a dressing, plus one loc row and three colours that live in
+C#. Six dressings, so 84 rows and six loc rows. The two overlay pictures are
+counted separately because they are OPTIONAL: every one of the fourteen throws
+when it is missing, and neither of the two does.
+
+**It was eighteen files until 2026-09-17**, and that day took four off it in
+two unrelated fixes: the three map plates went when the map ground became the
+base zone's again (rule 5), and the rest-site scene went when it turned out to
+crash base characters (rule 4). Both are the same move — stop overriding a
+surface the game already draws well, and dress it instead.
 
 **The five rules underneath the table**, each of them a throw if broken:
 
@@ -58,12 +67,39 @@ C#. Six dressings, so 108 rows and six loc rows.
    to `NCombatBackground`, then calls `GetNodeOrNull("Layer_00")` ..
    `Layer_{n-1}` for the chosen layers and `"Foreground"` for the fg, throwing
    on a miss. The root scene needs those six child nodes by plain name.
-4. `NRestSiteRoom._Ready` does `control.GetNode<Control>("%RestSiteLighting")`
-   — `GetNode`, not `GetNodeOrNull` — so the rest-site scene must carry a node
-   with that name and `unique_name_in_owner = true`.
+4. The rest site is **the game's zone scene plus our plate**, and that is a
+   fix rather than a convenience. We shipped our own scene per face until
+   2026-09-17: a `RestSiteBG` `TextureRect` over our plate and an EMPTY
+   `%RestSiteLighting` `Control`, which satisfied the only thing we knew to
+   satisfy — `NRestSiteRoom._Ready` does
+   `control.GetNode<Control>("%RestSiteLighting")`, `GetNode` and not
+   `GetNodeOrNull`. The base game keeps the WHOLE campfire inside that node
+   (ground-lighting particles, seven wall lights, the log shadows and
+   highlights, `FireLight`, `SteppedFire` running `NRestSiteFireVfx`, sparks),
+   and a base character's campfire figure is a Spine rig whose
+   `NRestSiteCharacter._Ready` plays `<zone>_loop` by act index and reaches
+   into it. Against our empty node the game **hard-crashed** — native, no
+   managed trace, the log ending at `Preloading 'RestSite Room' Complete` —
+   the first time [USER] took the Silent into a dressed campfire (2026-09-17,
+   reproduced twice). Klee never crashed there, which is why every proof
+   missed it. So `klee-mod/KleeCode/Teyvat/Patches/TeyvatRestSitePatch.cs`
+   sends `RestSiteBackgroundPath` to the base zone's scene
+   **unconditionally** — not behind `HasDressedAssets` like the combat
+   background and the map, because no state of the pack is one where we would
+   rather have our own — and a postfix on `ActModel.CreateRestSiteBackground`
+   (`public Godot.Control CreateRestSiteBackground()`, verified through
+   `AccessTools` in a `KleeTests` pin) puts our plate into that scene's own
+   `RestSiteBG` with `expand_mode = 1` / stretch Scale and its anchors and
+   offsets untouched. Zone decoration in front of the plate is hidden by a
+   name-prefix list that is a pure function pinned in tests — `Foliage*`,
+   `RestSiteForeground*`, `stars*`, `water_reflection*`, over the root's
+   direct children only. **Nothing under `%RestSiteLighting` is touched, and
+   `RestSiteLLog` / `RestSiteRLog` / `RestSiteFireLogs` stay.**
 5. `ActModel.AssetPaths` hands the background scene and all three map PNGs to
    `PreloadManager.LoadActAssets`, so a missing one fails the act's preload
-   rather than the screen that draws it.
+   rather than the screen that draws it. That is exactly why the map ground had
+   to be *redirected* rather than merely un-filled (the section below): an
+   emptied `map_bgs/<id>/` directory is a failed preload, not a blank screen.
 
 ### The root scene is the only one that needs BaseLib
 
@@ -76,9 +112,9 @@ still portrait already uses, with one extra step: **BaseLib ships six node
 factories and none of them is for this type**, so
 `klee-mod/KleeCode/Teyvat/NCombatBackgroundFactory.cs` supplies the missing one
 and `TeyvatActAssets.RegisterActBackgrounds` builds it and registers every
-dressing's root scene at `[ModInitializer]` time. Everything else in the table — layer scenes,
-the rest site — is instantiated as a plain `Control` and needs no conversion at
-all.
+dressing's root scene at `[ModInitializer]` time. Everything else in the table —
+the layer scenes — is instantiated as a plain `Control` and needs no conversion
+at all, and the rest site is the game's own scene, which needs nothing from us.
 
 ### The placeholder recipe
 
@@ -90,16 +126,75 @@ foreground so five flat plates read as five planes. It writes **only** under
 `ImageGen/images/teyvat/` (gitignored, Tier F) and `klee-mod/pck-src/scenes/` (committed, because a `.tscn` is text
 and because `pck-src` overlays the export work directory verbatim, which is the
 only thing that can put a file at `res://scenes/...`). `git status --short
-ImageGen` prints nothing after a run; the forty-eight scene sources are
+ImageGen` prints nothing after a run; the forty-two scene sources are
 committed and `--check` fails if one drifts from what the generator would
 write.
+
+### The map ground is the game's own, and the dressing sits over it
+
+**Reverted 2026-09-17**, on [USER]'s read of the shipped frame: *"the map is
+harder to read than the normal Slay the Spire 2 map; I like the basic idea but
+perhaps we went off the rails replacing the map background with Genshin images
+and we should instead try to come up with a Genshin-themed map overlay that
+keeps the basic idea of the map intact."*
+
+What shipped on 2026-09-17 morning was eighteen real location stills — three a
+face, 2035×1440, at `res://images/packed/map/map_bgs/<id>/` — **overriding** the
+base game's painted map wall. The map's node icons, its travelled and
+untravelled path lines and its legend are all drawn against that wall's low
+contrast, so a bright city plate underneath them takes contrast away everywhere
+at once; Sumeru's teal icons over a bright plate and Natlan's top reading
+celestial were both named on sight.
+
+**The revert is a patch, not a deletion**, and the reason is rule 5 above.
+`MapTopBgPath`, `MapMidBgPath` and `MapBotBgPath` derive from
+`FilePathIdentifier` and are non-virtual, so emptying the directory leaves three
+derived paths that the act's *preload* then fails on.
+`KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs` postfixes all three getters and
+swaps the face's id for the base zone's inside whatever string the getter built
+— `mondstadt` → `overgrowth`, `natlan` → `hive` — which is the same mapping
+`TeyvatFrame.AssetAlias` already holds. A string swap rather than a rebuilt path
+because the only part of that string that is ours is the identifier, and it
+appears twice; the prefix and the extension are the game's and nothing here
+wants to depend on them. `AncientPicture.Borrow` still guards it, so a face that
+one day ships a *readable* ground of its own wins on `ResourceLoader.Exists`
+with no code change.
+
+**What dresses the map now** is `KleeCode/Teyvat/MapOverlay.cs`, attached by a
+Harmony postfix on `NMapScreen.Open`
+(`review/dispatch3/s12-public-patterns/s12c-act-map.md`, the "Map-screen
+overlay" row, is the pinned precedent), and it is three children of one
+`MouseFilter = Ignore` `Control`:
+
+| Child | What | Where it comes from |
+|---|---|---|
+| `NationTint` | `ColorRect`, the nation's hue at **12%** | `MapOverlay.Tints`, one hex a face |
+| `NationVignette` | the face's own location still, darkened to 35% and alpha-masked **clear across the central 70% width / 80% height** | `art/plan.tsv`, mode `vignette` |
+| `NationWordmark` | the nation's white loading-screen emblem, in a transparent 900×160 strip at the top centre | `art/plan.tsv`, mode `contain` |
+
+The clear box is the design: the overlay may not touch the part of the frame
+where nodes, paths and the legend are drawn, so the still exists only in the
+margins. `tools/art_process.py`'s `vignette` mode is the three constants
+(`VIGNETTE_DARKEN`, `VIGNETTE_CLEAR`, `VIGNETTE_EDGE_ALPHA`) and
+`tier0/tests/test_map_overlay_plan.py` measures both ends of the ramp off them.
+
+**Everything about the overlay is optional and the arm-off build is
+byte-identical.** `MapOverlay.ShouldAttach` leads with `TeyvatFrame.Enabled`; a
+base zone reached with the arm on dresses nothing; each picture is asked of
+`ResourceLoader.Exists` before it is loaded, so a pack that predates the art
+draws the base map; and the insertion point is reached with `GetNodeOrNull`
+through a candidate list, falling back to the screen itself at child index 1.
+That last part is a **guess** — `game_ref/` holds no decompile of `NMapScreen` —
+and the first attach of a run logs two levels of the screen's child tree to
+`godot.log` behind the arm so it stops being one. Grep `teyvat:maptree`.
 
 Sizes are the engine's, not a taste. The layer `TextureRect`'s rect is
 2764.8 × 1296 with `expand_mode = 1`, which **scales** the texture to the rect,
 so the plate is authored at half that on exact aspect. The map screen's three
 `TextureRect`s are `expand_mode = 1`, `stretch_mode = 5`
-(KEEP_ASPECT_CENTERED), so **aspect** is what must be right and the plate
-matches the base game's own 2035 × 1440 exactly.
+(KEEP_ASPECT_CENTERED), so **aspect** is what must be right — and the vignette
+is authored at the base game's own 2035 × 1440 for exactly that reason, so its
+clear centre lands over the ground it covers.
 
 ### The layer scenes must ship as `.tscn`, not as `.tscn.remap`
 
@@ -118,8 +213,8 @@ original path.
 
 `ResourceLoader` follows a remap transparently, so anything reached **by name**
 loads either way: the background root
-(`SceneHelper.GetScenePath("backgrounds/<id>/<id>_background")`), the rest site,
-the still portraits. The **layers** are not reached by name.
+(`SceneHelper.GetScenePath("backgrounds/<id>/<id>_background")`) and the still
+portraits. The **layers** are not reached by name.
 `Rooms/BackgroundAssets`'s constructor `DirAccess.Open`s
 `res://scenes/backgrounds/<id>/layers` and takes each `GetNext()` filename
 **verbatim** (`text + "/" + next`), so on a remapped pack it builds
@@ -159,17 +254,20 @@ the process lifetime, so a client that has already hit this must be
 
 ### Real art: the plan produces, `media/ACT.tsv` records
 
-**Landed 2026-09-17.** The thirty pictures a dressing actually shows — `bg_00`,
-the rest site and the three map plates, six dressings by five surfaces — are
-real wiki landscape stills now, fetched and cropped by thirty `art/plan.tsv`
-rows and recorded one-for-one in `media/ACT.tsv` (`operations/media.md` §1, §2;
+**Landed 2026-09-17, revised the same day.** The twenty-four pictures a
+dressing actually shows — `bg_00`, the rest site, the map wordmark and the map
+vignette, six dressings by four surfaces — are real wiki files now, fetched and
+cropped by twenty-four `art/plan.tsv` rows and recorded one-for-one in
+`media/ACT.tsv` (the three map-ground rows a face used to carry are the revert
+above; the vignette reuses the still the retired `map_middle` row fetched, so
+the change cost six new downloads and not twelve) (`operations/media.md` §1, §2;
 the survey is `research/teyvat-act-art-sources-2026-09-17.md`). No scene is
 re-authored and nothing in `klee-mod/KleeCode` changes: the scene names the
 path, the plan names the picture, the ledger names where it came from.
 
 The generator keeps every path the plan does not claim. `plan_owned()` reads
 `art/plan.tsv` for out-paths under
-`ImageGen/images/teyvat/backgrounds|rest_site|map_bgs`, and both `write_all`
+`ImageGen/images/teyvat/backgrounds|rest_site|map`, and both `write_all`
 and `--check` skip them, so there is still exactly one producer per out-path.
 What it still writes for a dressed face is the four layers and the foreground
 over a real `bg_00`, as **fully transparent** plates: `NCombatBackground`
@@ -188,9 +286,10 @@ One thing the sources make you crop around: the wiki's in-game location stills
 carry a burnt-in **GENSHIN IMPACT wordmark in the bottom-right corner**, and
 the plan's `focus` column is the rule that removes it. A 1382×648 plate off a
 16:9 source has 130 scaled pixels of spare height, so `top` spends all of it
-off the bottom; a 2035×1440 map plate fills the height exactly on a 16:9
+off the bottom; a 2035×1440 vignette fills the height exactly on a 16:9
 source, so its only spare strip is horizontal and `x0.42` spends it off the
-right. The six `bg_00` rows answer to a second rule as well and spend their
+right. The wordmarks are `Emblem <Nation> White.png`, which carry no such
+mark. The six `bg_00` rows answer to a second rule as well and spend their
 spare height on it instead — the section below.
 
 ### The combat feet line, and the `ground` knob
@@ -235,8 +334,9 @@ The `x<f>` half is the wordmark rule above, taken over. The mark starts at
 source x 0.843 (0.921 on a 3840 source), and at these zooms the crop is about
 70% of the source width, so `x0.46` puts its right edge at 0.839 and the mark
 stays out. `top` used to do that job with the spare height; at a ground zoom
-there is no spare height left. The rest-site and map plates have no creature
-standing on them and keep `top` / `x0.42` unchanged.
+there is no spare height left. The rest-site plates and the map overlay's
+vignettes have no creature standing on them and keep `top` / `x0.42`
+unchanged — the feet line is the combat plate's alone.
 
 **The sourcing consequence, which is the larger half.** The wiki's location
 stills are viewpoint vistas: the camera looks DOWN at the place from above.
@@ -256,12 +356,15 @@ a fight reads as standing on the ground.
 `KleeCode/Teyvat/Patches/ActFilePathIdentifierPatch.cs` rewrites the identifier
 so a dressing wears the base zone's clothes. With this set landed it **stands
 down for every dressing**: `TeyvatActAssets.HasDressedAssetsCached` asks
-`ResourceLoader.Exists` for the first layer scene, the background root and the
-rest-site scene — and `FileAccess.FileExists` that no `.tscn.remap` stub stands
+`ResourceLoader.Exists` for the first layer scene and the background root — and
+`FileAccess.FileExists` that no `.tscn.remap` stub stands
 where that first layer should be (the section above) — and the postfix returns
-untouched when all four answers agree.
+untouched when all three answers agree.
+**The rest site is not one of the questions** (2026-09-17, rule 4 above): it
+aliases to the base zone unconditionally, in its own postfix, whatever this one
+answers.
 It still fires — and must — for a dressing with no set of its own and for a
 build whose pck predates one, because the set is **all-or-nothing**: there is
-no engine state in which two of the three files are used and the third falls
+no engine state in which one of the two files is used and the other falls
 back. (A directory is not a resource, which is why the probe asks for the first
 layer *scene* rather than for the `layers` path.)

@@ -67,6 +67,16 @@ internal static class CreatureAnimationRouter
             return;
         }
 
+        // `EB-816`. THE FIRST SIGHT OF THIS CREATURE IS THE ATTACH POINT for
+        // the per-instance idle offset, and it sits ABOVE the trigger lookup
+        // on purpose: an unknown trigger is ignored below, and a body that
+        // only ever heard unknown triggers would otherwise stay in lockstep
+        // with its neighbours. Gated on the Teyvat arm and on a dressed scene
+        // inside `IdleDesync.Apply`, and marked per instance there, so this
+        // is once per creature rather than once per trigger and is inert for
+        // every body the arm does not cover.
+        IdleDesync.Apply(creature, tree);
+
         if (!TriggerToState.TryGetValue(trigger, out var state))
         {
             return;

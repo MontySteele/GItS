@@ -2,12 +2,13 @@
 
 WHY THIS EXISTS. `ActModel.FilePathIdentifier` is `Id.Entry.ToLowerInvariant()`
 and five NON-VIRTUAL properties derive every act-dressing path from it: the
-combat background scene, the rest-site scene and the three map background PNGs
-(`MegaCrit.Sts2.Core.Models/ActModel.cs:52-64`, `:248`). Two of the loaders
-under those paths THROW rather than fall back -- `Rooms/BackgroundAssets`'s
-constructor on a missing `layers` directory and on a layer file matching
-neither `_bg_NN` nor `_fg_`, and `PreloadManager.Cache.GetScene` on the rest
-site. The spike therefore shipped a Harmony postfix on
+combat background scene and -- until 2026-09-17 -- the rest-site scene and the
+three map background PNGs, neither of which this file authors any more (see
+`plan`, and the two paragraphs below)
+(`MegaCrit.Sts2.Core.Models/ActModel.cs:52-64`, `:248`).
+`Rooms/BackgroundAssets`'s constructor THROWS rather than falls back on a
+missing `layers` directory and on a layer file matching neither `_bg_NN` nor
+`_fg_`. The spike therefore shipped a Harmony postfix on
 `get_FilePathIdentifier` that aliased MONDSTADT to `overgrowth` and LIYUE to
 `underdocks` (`review/records/teyvat-spike-build-2026-09-15.md` item 1).
 
@@ -15,7 +16,20 @@ This generator retires that alias for every dressing by producing a COMPLETE
 set per face -- act 1's Mondstadt and Liyue, act 2's Natlan and Inazuma, act
 3's Fontaine and Sumeru -- so the loaders are satisfied by our own files. The
 alias table stays, and stays right, as the fallback for a build whose pck
-predates a set. Nothing here is art:
+predates a set.
+
+THE REST SITE IS THE ONE PATH THIS FILE DOES NOT AUTHOR A SCENE FOR, and that
+is a fix rather than a gap. We shipped one until 2026-09-17: a `RestSiteBG`
+plus an EMPTY `%RestSiteLighting`, which is all `NRestSiteRoom._Ready`'s
+`GetNode<Control>("%RestSiteLighting")` asks for. A BASE character's Spine
+campfire figure asks for much more, and the game died NATIVELY -- no managed
+trace, the log ending at "Preloading 'RestSite Room' Complete" -- the first
+time [USER] took the Silent into a Mondstadt campfire. A dressing now wears the
+BASE zone's whole campfire scene (`Patches/TeyvatRestSitePatch` aliases
+`RestSiteBackgroundPath` unconditionally) and only its PLATE is ours, swapped
+into that scene's own `RestSiteBG` by a postfix on
+`ActModel.CreateRestSiteBackground`. So the rest-site row below is a PNG and
+nothing else. Nothing here is art:
 every picture it still writes is a two-stop vertical gradient in the nation's
 colours, and a real plate replaces it through an `art/plan.tsv` row recorded in
 `media/ACT.tsv` (`docs/current/operations/media.md` sec.1) with no scene
@@ -43,7 +57,7 @@ REAL ART STANDS THIS GENERATOR DOWN, PATH BY PATH. `art/plan.tsv` is the
 producer for any plate a bill claims (`docs/current/research/
 teyvat-act-art-sources-2026-09-17.md`), so `plan_owned()` reads that file and
 every out-path it names under `ImageGen/images/teyvat/backgrounds|rest_site|
-map_bgs` is skipped here -- by `write_all`, so a generator run cannot overwrite
+map` is skipped here -- by `write_all`, so a generator run cannot overwrite
 a fetched picture, and by `check`, so `--check` does not demand a file this
 file no longer produces. ONE PRODUCER PER OUT-PATH, the rule `art/plan.tsv`
 already runs under.
@@ -91,12 +105,16 @@ LAYER_PNG = (1382, 648)
 
 #: The map screen's three `TextureRect`s are `expand_mode = 1`,
 #: `stretch_mode = 5` (KEEP_ASPECT_CENTERED) with `custom_minimum_size`
-#: (0, 1080), so ASPECT is what has to be right. The base game's four acts all
-#: ship 2035x1440 and the placeholder matches them exactly.
+#: (0, 1080), so ASPECT is what has to be right; the base game's four acts all
+#: ship 2035x1440. KEPT AS A FACT AND NOT AS A PRODUCER: since 2026-09-17 no
+#: dressing writes a map plate at all (see `plan`), and the overlay's vignette
+#: is authored at this size so that it lines up with the ground it covers.
 MAP_PNG = (2035, 1440)
 
 #: The rest-site background sits in `rest_site_room.tscn`'s `BgContainer` at
-#: the same 2764.8 x 1296 rect as a combat layer, with `expand_mode = 1`.
+#: the same 2764.8 x 1296 rect as a combat layer, with `expand_mode = 1` --
+#: and the plate now lands in the BASE zone scene's own `RestSiteBG`, whose
+#: rect is the same, so the size is unchanged by the 2026-09-17 fix.
 REST_PNG = (1382, 648)
 
 
@@ -126,7 +144,7 @@ class Nation:
 #: faces on it -- the Hive as Natlan or Inazuma, Glory as Fontaine or Sumeru
 #: (`review/ruled/teyvat-nation-mapping-2026-09-14.md` sec.1). Nothing in this
 #: file knows or cares which: a face is an id and two stops, and it gets the
-#: same eighteen files either way, because every path derives from
+#: same fourteen files either way, because every path derives from
 #: `FilePathIdentifier` and not from the zone underneath it.
 NATIONS = (
     Nation(id="mondstadt", entry="MONDSTADT", sky=(122, 176, 214), ground=(96, 138, 74)),
@@ -191,21 +209,36 @@ def plan() -> list[Planned]:
             "scene",
             f"klee-mod/pck-src/scenes/backgrounds/{i}/{i}_background.tscn",
             f"res://scenes/backgrounds/{i}/{i}_background.tscn"))
-        # --- rest site ----------------------------------------------------
+        # --- rest site: the PLATE only, never a scene ----------------------
+        # A dressing ships NO rest-site scene. It wears the BASE zone's --
+        # `Patches/TeyvatRestSitePatch` aliases `RestSiteBackgroundPath`
+        # unconditionally -- and a Harmony postfix on
+        # `ActModel.CreateRestSiteBackground` swaps this plate into that
+        # scene's own `RestSiteBG` TextureRect. Our own scene was a
+        # `RestSiteBG` plus an EMPTY `%RestSiteLighting`: it satisfied
+        # `NRestSiteRoom._Ready` and then HARD-CRASHED the game -- native, no
+        # managed trace, the log ending at "Preloading 'RestSite Room'
+        # Complete" -- the moment a BASE character's Spine campfire figure
+        # reached for the lighting tree that was not there ([USER],
+        # 2026-09-17, the Silent at her first campfire).
         rows.append(Planned(
             "png",
             f"ImageGen/images/teyvat/rest_site/{i}_rest_site_bg.png",
             f"res://teyvat/rest_site/{i}_rest_site_bg.png"))
-        rows.append(Planned(
-            "scene",
-            f"klee-mod/pck-src/scenes/rest_site/{i}_rest_site.tscn",
-            f"res://scenes/rest_site/{i}_rest_site.tscn"))
-        # --- map screen ---------------------------------------------------
-        for slot in ("top", "middle", "bottom"):
-            rows.append(Planned(
-                "png",
-                f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png",
-                f"res://images/packed/map/map_bgs/{i}/map_{slot}_{i}.png"))
+        # --- map screen: NOTHING, since 2026-09-17 -------------------------
+        # A face used to own three 2035x1440 plates at
+        # `res://images/packed/map/map_bgs/<id>/`, and [USER] read them as the
+        # defect they were: "the map is harder to read than the normal Slay
+        # the Spire 2 map". The map ground is the GAME's again --
+        # `KleeCode/Teyvat/Patches/ActMapBgPathPatch.cs` sends the three
+        # non-virtual getters back to the base zone's files -- so there is no
+        # map path for this generator to fill and no gradient that would help.
+        # What dresses the map now is an OVERLAY drawn over it
+        # (`KleeCode/Teyvat/MapOverlay.cs`), whose two pictures are art/plan.tsv
+        # rows under `ImageGen/images/teyvat/map/`; they are optional by
+        # construction (the overlay stands down when they are not in the pack),
+        # which is why they are not in this list, whose every row is a file
+        # whose absence THROWS.
     return rows
 
 
@@ -220,7 +253,13 @@ def plan() -> list[Planned]:
 PLAN_OWNABLE = (
     "ImageGen/images/teyvat/backgrounds/",
     "ImageGen/images/teyvat/rest_site/",
-    "ImageGen/images/teyvat/map_bgs/",
+    # The map OVERLAY's two pictures (2026-09-17). This generator writes
+    # nothing here and never will -- an emblem and a masked landscape are art,
+    # not a gradient -- but the prefix belongs in the list all the same,
+    # because `plan_owned()` is what `media/ACT.tsv` is reconciled against
+    # (`tier0/tests/test_act_placeholder_plan.py`): a ledger row with no bill
+    # row, or a bill row with no ledger row, is caught here or nowhere.
+    "ImageGen/images/teyvat/map/",
 )
 
 
@@ -396,64 +435,6 @@ anchors_preset = 0
 """
 
 
-def _rest_site_scene(nation: Nation, texture_res: str) -> str:
-    """The rest site, mirroring the base scene's shape at its two load-bearing points.
-
-    `ActModel.CreateRestSiteBackground` instantiates it as a plain `Control`
-    (`ActModel.cs:251`) -- no script, no conversion -- and
-    `NRestSiteRoom._Ready` then does `control.GetNode<Control>("%RestSiteLighting")`
-    (`NRestSiteRoom.cs:325`) with `GetNode` and not `GetNodeOrNull`, so a scene
-    without that node throws before the campfire is drawn. `RestSiteLighting`
-    is empty here: the base game fills it with fire VFX, particles and log
-    lights, and the arm's own `Visible = false` write (`NRestSiteRoom.cs:646`)
-    is happy with an empty `Control`.
-
-    The art node is a `TextureRect` and not a `Sprite2D` because that is what
-    the base scenes carry -- `RestSiteBG` in both `overgrowth_rest_site.tscn`
-    and `underdocks_rest_site.tscn` -- and mirroring the shape means mirroring
-    the node type, at the base scene's own anchors and offsets.
-    """
-    return f"""[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Texture2D" path="{texture_res}" id="1_tex"]
-
-[node name="{nation.entry.capitalize()}RestSite" type="Control"]
-layout_mode = 3
-anchors_preset = 0
-
-[node name="RestSiteBG" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -444.0
-offset_top = -139.0
-offset_right = 2320.8
-offset_bottom = 1157.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("1_tex")
-expand_mode = 1
-
-[node name="RestSiteLighting" type="Control" parent="."]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -942.0
-offset_top = -507.0
-offset_right = -942.0
-offset_bottom = -507.0
-grow_horizontal = 2
-grow_vertical = 2
-"""
-
-
 def scene_sources() -> dict[str, str]:
     """Every committed `.tscn`, repo-relative path -> exact text.
 
@@ -472,9 +453,6 @@ def scene_sources() -> dict[str, str]:
                 nation, f"res://teyvat/backgrounds/{i}/{i}_fg.png")
         out[f"klee-mod/pck-src/scenes/backgrounds/{i}/"
             f"{i}_background.tscn"] = _background_scene(nation)
-        out[f"klee-mod/pck-src/scenes/rest_site/"
-            f"{i}_rest_site.tscn"] = _rest_site_scene(
-                nation, f"res://teyvat/rest_site/{i}_rest_site_bg.png")
     return out
 
 
@@ -530,16 +508,7 @@ def write_all(root: Path) -> list[str]:
                        _scale(nation.ground, 0.35))
             written.append(relative)
 
-        # The three map plates read top -> bottom as one continuous wall, so
-        # each takes a third of the nation's ramp rather than the whole of it.
-        for index, slot in enumerate(("top", "middle", "bottom")):
-            relative = f"ImageGen/images/teyvat/map_bgs/{i}/map_{slot}_{i}.png"
-            if relative in owned:
-                continue
-            a = _mix(nation.sky, nation.ground, index / 3)
-            b = _mix(nation.sky, nation.ground, (index + 1) / 3)
-            _write_png(root / relative, MAP_PNG, a, b)
-            written.append(relative)
+        # No map plate. The map ground is the game's own again (see `plan`).
     return written
 
 
