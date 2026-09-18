@@ -89,12 +89,20 @@ def test_the_sample_contract_is_well_formed():
     # nobody added to the fixture universe fails HERE, beside the file, and not
     # only in the scene-deps gate downstream that resolves against it.
     #
-    # Then +108 for the SIX dressings' complete placeholder asset sets,
-    # eighteen rows each (`tools/gen_act_placeholders.py`;
-    # `docs/current/operations/act-assets.md` is the shape in one table): eight
-    # committed scene sources -- five `_bg_NN_a` layers, one `_fg_a`, the
-    # background root and the rest site -- and ten Tier F textures, six layer
-    # plates, one rest-site plate and the three map backgrounds. The scenes sit
+    # Then +102 for the SIX dressings' complete placeholder asset sets,
+    # seventeen rows each (`tools/gen_act_placeholders.py`;
+    # `docs/current/operations/act-assets.md` is the shape in one table): seven
+    # committed scene sources -- five `_bg_NN_a` layers, one `_fg_a` and the
+    # background root -- and ten Tier F textures, six layer
+    # plates, one rest-site plate and the three map backgrounds.
+    #
+    # SEVENTEEN AND NOT EIGHTEEN since 2026-09-17: the rest-site SCENE is gone.
+    # We shipped one per face until a base character (the Silent) hard-crashed
+    # the game at a dressed campfire -- our `%RestSiteLighting` was an empty
+    # `Control` and the base campfire figure's Spine rig reaches into it. A
+    # face now wears the base zone's whole rest scene and only the PLATE row
+    # above is ours, swapped into that scene's `RestSiteBG` by a postfix on
+    # `ActModel.CreateRestSiteBackground`. The scenes sit
     # under `pck-src/scenes/...` rather than a `teyvat/` namespace because
     # `ActModel`'s five asset-path properties are NON-VIRTUAL and derive
     # `res://scenes/backgrounds/<id>/...` and `res://scenes/rest_site/...` from
@@ -113,7 +121,7 @@ def test_the_sample_contract_is_well_formed():
     # pass TWO: eighteen cut layers over six bespoke boss bodies (two or three
     # each) and the six per-body libraries that move them
     # (`teyvat/motion/bespoke/<body>.tres`).
-    assert len(parsed.resources) == 418
+    assert len(parsed.resources) == 412
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -215,10 +223,11 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     assert report.errors == [], report.render(verbose=True)
     # +6 at EB-40, +2 for the pet, +6 for the stage, +245 for the Teyvat
     # frame's 122 dressed bodies (122 Tier F plates and the 123 scenes that
-    # draw them -- 2026-09-17 closed the last 52 act-1..3 face-slots), +108 for
-    # the six act dressings' placeholder asset sets (eighteen each; see the
-    # count's reason above the first assertion), +5 for the motion pass's
+    # draw them -- 2026-09-17 closed the last 52 act-1..3 face-slots), +102 for
+    # the six act dressings' placeholder asset sets (seventeen each, the
+    # rest-site scene gone since 2026-09-17; see the count's reason above the
+    # first assertion), +5 for the motion pass's
     # shared AnimationLibraries, +24 for pass two (eighteen cut layers over six
     # bespoke boss bodies, and their six per-body libraries).
-    assert report.checked["contract_resources"] == 418
+    assert report.checked["contract_resources"] == 412
     assert report.checked["package_files"] == 3

@@ -1719,9 +1719,13 @@ public class TeyvatFrameTests : IDisposable
     /// The direction that matters is the FALSE one. A dressing whose set is
     /// half-landed must take the alias whole: `BackgroundAssets`'s constructor
     /// throws on a missing `layers` directory AND on a layer file matching
-    /// neither prefix, and the map PNGs and the rest-site scene have no
-    /// fallback, so "use the two files that did arrive" is not a state the
-    /// engine has.
+    /// neither prefix, and the map PNGs have no fallback, so "use the one file
+    /// that did arrive" is not a state the engine has.
+    ///
+    /// THE REST SITE IS NOT IN THIS SET any more (2026-09-17). We ship no
+    /// rest-site scene at all: a face wears the base zone's whole campfire,
+    /// unconditionally, and only the plate is ours. See
+    /// `The_rest_site_always_answers_the_base_zones_scene` below.
     /// </summary>
     [Fact]
     public void A_dressing_takes_its_own_assets_only_when_the_whole_set_is_there()
@@ -1730,13 +1734,12 @@ public class TeyvatFrameTests : IDisposable
         {
             TeyvatActAssets.FirstLayerPath("mondstadt"),
             TeyvatActAssets.BackgroundScenePath("mondstadt"),
-            TeyvatActAssets.RestSiteScenePath("mondstadt"),
         };
 
         Assert.True(TeyvatActAssets.HasDressedAssets(
             TeyvatFrame.Mondstadt, complete.Contains));
 
-        // Any ONE of the three missing puts the dressing back on the alias.
+        // Any ONE of the two missing puts the dressing back on the alias.
         foreach (var path in complete.ToArray())
         {
             var partial = new HashSet<string>(complete, StringComparer.Ordinal);
@@ -1761,8 +1764,8 @@ public class TeyvatFrameTests : IDisposable
     /// headlessly. A
     /// Godot export with `editor/export/convert_text_resources_to_binary` left
     /// at its default packs every `.tscn` as a binary `.scn` plus a
-    /// `&lt;name&gt;.tscn.remap` stub. `ResourceLoader` follows the stub, so all
-    /// three completeness questions answer TRUE and the alias stands down --
+    /// `&lt;name&gt;.tscn.remap` stub. `ResourceLoader` follows the stub, so both
+    /// completeness questions answer TRUE and the alias stands down --
     /// and then `Rooms/BackgroundAssets` scans the layers directory with
     /// `DirAccess`, reads the literal name `..._bg_00_a.tscn.remap`, and
     /// `NCombatBackground.AddLayer`'s `GetScene` throws inside
@@ -1780,7 +1783,6 @@ public class TeyvatFrameTests : IDisposable
         {
             TeyvatActAssets.FirstLayerPath("mondstadt"),
             TeyvatActAssets.BackgroundScenePath("mondstadt"),
-            TeyvatActAssets.RestSiteScenePath("mondstadt"),
         };
 
         // The stub is the `.tscn` path plus the suffix, and nothing else.
@@ -1790,7 +1792,7 @@ public class TeyvatFrameTests : IDisposable
             "res://scenes/backgrounds/liyue/layers/liyue_bg_00_a.tscn.remap",
             TeyvatActAssets.FirstLayerRemapPath("liyue"));
 
-        // A remapped pack: ResourceLoader says yes to all three, and the
+        // A remapped pack: ResourceLoader says yes to both, and the
         // packed filesystem shows the stub. The alias must stay.
         Assert.False(TeyvatActAssets.HasDressedAssets(
             TeyvatFrame.Mondstadt,
@@ -1857,6 +1859,214 @@ public class TeyvatFrameTests : IDisposable
         // pack about `overgrowth`. (`AssetAlias` itself is an `ldsfld`, not a
         // call, so the lookup through it is what the IL can show.)
         Assert.Contains(calls, c => c.EndsWith("TryGetValue", StringComparison.Ordinal));
+    }
+
+    // ---------------------------------------------------------------
+    // THE REST SITE: the base zone's campfire, wearing our plate.
+    //
+    // THE DEFECT (2026-09-17, [USER], reproduced twice). A BASE character --
+    // the Silent -- entering a rest site on a Teyvat face act hard-crashed the
+    // game: native, no managed trace, the log ending at "Preloading 'RestSite
+    // Room' Complete". Klee never crashed there.
+    //
+    // Our own rest-site scene was a `RestSiteBG` TextureRect over our plate
+    // plus an EMPTY `%RestSiteLighting` Control -- everything
+    // `NRestSiteRoom._Ready`'s `GetNode<Control>("%RestSiteLighting")` asks
+    // for, and nothing a base character's Spine campfire figure
+    // (`NRestSiteCharacter._Ready`, playing the zone's loop by act index)
+    // needs. The base game keeps the WHOLE campfire inside that node.
+    //
+    // So the six scenes are deleted and the fix is two postfixes: the rest
+    // scene always aliases to the base zone, and our plate is swapped into
+    // that scene's own `RestSiteBG`. These are the pins that keep both halves
+    // honest headlessly -- the one thing no headless suite can say is whether
+    // the Silent survives the campfire, which is lane 1's proof.
+    // ---------------------------------------------------------------
+
+    /// <summary>
+    /// THE ALIAS, FOR ALL SIX FACES AND WITH NO CONDITION ON IT. Unlike the
+    /// combat background and the map -- which stand their alias down the
+    /// moment `HasDressedAssets` answers true -- the rest scene is the base
+    /// zone's in every state of the pack, because there is no pack state in
+    /// which we would rather have our own.
+    /// </summary>
+    [Fact]
+    public void The_rest_site_always_answers_the_base_zones_scene()
+    {
+        foreach (var pair in TeyvatFrame.AssetAlias)
+        {
+            Assert.Equal(TeyvatActAssets.RestSiteScenePath(pair.Value),
+                         TeyvatActAssets.BaseRestSiteScenePath(pair.Key));
+
+            // And never its own: the file at that path is deleted.
+            Assert.NotEqual(TeyvatActAssets.RestSiteScenePath(pair.Key.ToLowerInvariant()),
+                            TeyvatActAssets.BaseRestSiteScenePath(pair.Key));
+        }
+
+        // The three base zones the six faces stand on, written out: act 1's
+        // pair dresses two zones, acts 2 and 3 one each.
+        Assert.Equal("res://scenes/rest_site/overgrowth_rest_site.tscn",
+                     TeyvatActAssets.BaseRestSiteScenePath(TeyvatFrame.Mondstadt));
+        Assert.Equal("res://scenes/rest_site/underdocks_rest_site.tscn",
+                     TeyvatActAssets.BaseRestSiteScenePath(TeyvatFrame.Liyue));
+        Assert.Equal("res://scenes/rest_site/hive_rest_site.tscn",
+                     TeyvatActAssets.BaseRestSiteScenePath(TeyvatFrame.Natlan));
+        Assert.Equal("res://scenes/rest_site/hive_rest_site.tscn",
+                     TeyvatActAssets.BaseRestSiteScenePath(TeyvatFrame.Inazuma));
+        Assert.Equal("res://scenes/rest_site/glory_rest_site.tscn",
+                     TeyvatActAssets.BaseRestSiteScenePath(TeyvatFrame.Fontaine));
+        Assert.Equal("res://scenes/rest_site/glory_rest_site.tscn",
+                     TeyvatActAssets.BaseRestSiteScenePath(TeyvatFrame.Sumeru));
+
+        // A base zone reached while the flag is on has no row, and the postfix
+        // must leave its own path alone.
+        Assert.Null(TeyvatActAssets.BaseRestSiteScenePath("OVERGROWTH"));
+        Assert.Null(TeyvatActAssets.BaseRestSiteScenePath(null));
+
+        // The plate, which is the one thing a face still owns here.
+        Assert.Equal("res://teyvat/rest_site/mondstadt_rest_site_bg.png",
+                     TeyvatActAssets.RestSitePlatePath("mondstadt"));
+    }
+
+    /// <summary>
+    /// THE HIDE LIST IS EXACTLY THE DECORATION, AND NEVER THE CAMPFIRE.
+    ///
+    /// The plate pass may hide zone art that fights a foreign landscape --
+    /// Overgrowth's foliage and foregrounds, Glory's stars and water
+    /// reflection. It must never hide `%RestSiteLighting` (which IS the
+    /// campfire, and the subtree the base character's rig reaches into: the
+    /// whole defect), the `RestSiteBG` it just wrote to, or the three log
+    /// TextureRects the fire sits on. The names below are the base scenes'
+    /// own, dumped from the game pck.
+    /// </summary>
+    [Fact]
+    public void The_plate_hide_list_is_the_decoration_and_never_the_campfire()
+    {
+        Assert.Equal(new[] { "Foliage", "RestSiteForeground", "stars", "water_reflection" },
+                     TeyvatActAssets.PlateHidePrefixes);
+
+        foreach (var hidden in new[]
+                 {
+                     "Foliage1", "Foliage6", "RestSiteForeground1", "RestSiteForeground2",
+                     "RestSiteForegroundDither", "stars", "stars big", "water_reflection",
+                 })
+        {
+            Assert.True(TeyvatActAssets.HiddenForPlate(hidden), hidden);
+        }
+
+        foreach (var kept in new[]
+                 {
+                     "RestSiteLighting", "RestSiteBG", "RestSiteBG2", "RestSiteLLog",
+                     "RestSiteRLog", "RestSiteFireLogs", "RestSiteLLogShadow2",
+                     "SteppedFire", "FireLight", "WallLight1", "overlay_vfx",
+                     "RestSiteGroundLighting", "sparks big", "light_front", "",
+                 })
+        {
+            Assert.False(TeyvatActAssets.HiddenForPlate(kept), kept);
+        }
+
+        Assert.False(TeyvatActAssets.HiddenForPlate(null));
+    }
+
+    /// <summary>
+    /// BOTH PATCH TARGETS RESOLVE ON THE REAL `ActModel`, asked of the
+    /// installed `sts2.dll` through `AccessTools` -- the same lookup Harmony
+    /// makes at boot. A game patch that renames or re-signs either one fails
+    /// here instead of silently un-arming a postfix and putting the crash
+    /// back.
+    /// </summary>
+    [Fact]
+    public void The_rest_site_patch_targets_resolve_on_the_real_ActModel()
+    {
+        var getter = AccessTools.PropertyGetter(typeof(ActModel), "RestSiteBackgroundPath");
+        Assert.NotNull(getter);
+        Assert.Equal(typeof(string), getter!.ReturnType);
+        Assert.False(getter.IsVirtual);
+
+        // `public Godot.Control CreateRestSiteBackground()`, instance, no
+        // parameters -- the signature the postfix's `Control __result` is
+        // written against.
+        var create = AccessTools.Method(typeof(ActModel), "CreateRestSiteBackground");
+        Assert.NotNull(create);
+        Assert.Empty(create!.GetParameters());
+        Assert.False(create.IsStatic);
+        Assert.False(create.IsVirtual);
+        Assert.Equal("Godot.Control", create.ReturnType.FullName);
+
+        // And the two patch classes name those two members and not something
+        // adjacent.
+        var targets = new[]
+        {
+            new[]
+            {
+                "KleeMod.Teyvat.Patches.ActModel_RestSiteBackgroundPath_TeyvatAlias_Patch",
+                "get_RestSiteBackgroundPath",
+            },
+            new[]
+            {
+                "KleeMod.Teyvat.Patches.ActModel_CreateRestSiteBackground_TeyvatPlate_Patch",
+                "CreateRestSiteBackground",
+            },
+        };
+        foreach (var target in targets)
+        {
+            var attribute = InArm(target[0]).GetCustomAttribute<HarmonyPatch>();
+            Assert.NotNull(attribute);
+            Assert.Equal(typeof(ActModel), attribute!.info.declaringType);
+            Assert.Equal(target[1], attribute.info.methodName);
+        }
+    }
+
+    /// <summary>
+    /// WITH THE ARM OFF BOTH POSTFIXES ARE A NO-OP, and with no dressing the
+    /// plate pass never runs. Structural, through `Il`, for the same reason
+    /// the alias pin above is: neither postfix can be invoked without an
+    /// `ActModel`, and the thing that would go wrong silently is the check
+    /// being DROPPED.
+    /// </summary>
+    [Fact]
+    public void With_the_arm_off_the_rest_site_postfixes_do_nothing()
+    {
+        foreach (var typeName in new[]
+                 {
+                     "KleeMod.Teyvat.Patches.ActModel_RestSiteBackgroundPath_TeyvatAlias_Patch",
+                     "KleeMod.Teyvat.Patches.ActModel_CreateRestSiteBackground_TeyvatPlate_Patch",
+                 })
+        {
+            var armCheck = Il.Calls(StaticMethod(InArm(typeName), "Postfix"));
+            Assert.Contains("TeyvatFrame.get_Enabled", armCheck);
+        }
+
+        // The plate pass is scoped to the dressing table as well as to the
+        // flag: a base zone reached while the arm is on keeps its own art.
+        Assert.Contains("TeyvatFrame.IsDressing", Il.Calls(StaticMethod(
+            InArm("KleeMod.Teyvat.Patches.ActModel_CreateRestSiteBackground_TeyvatPlate_Patch"),
+            "Postfix")));
+    }
+
+    /// <summary>
+    /// THE PLATE PASS CANNOT REACH THE CAMPFIRE, by construction rather than
+    /// by care: it walks the root's DIRECT children (`GetChildren`) and asks
+    /// <see cref="TeyvatActAssets.HiddenForPlate"/> about each name. Nothing
+    /// recurses, so nothing under `%RestSiteLighting` is reachable at all --
+    /// and the node it writes to is fetched with `GetNodeOrNull`, so a zone
+    /// that ever renames `RestSiteBG` costs a picture, never a room.
+    /// </summary>
+    [Fact]
+    public void The_plate_pass_walks_only_the_roots_own_children()
+    {
+        var dressCalls = Il.Calls(StaticMethod(
+            InArm("KleeMod.Teyvat.Patches.TeyvatRestSite"), "Dress"));
+
+        Assert.Contains("TeyvatActAssets.HiddenForPlate", dressCalls);
+        Assert.Contains(dressCalls, c => c.EndsWith("GetChildren", StringComparison.Ordinal));
+        Assert.Contains(dressCalls, c => c.EndsWith("GetNodeOrNull", StringComparison.Ordinal));
+
+        // `GetNode` throws; `FindChild` recurses. Neither belongs here.
+        Assert.DoesNotContain(dressCalls,
+                              c => c.EndsWith("Node.GetNode", StringComparison.Ordinal));
+        Assert.DoesNotContain(dressCalls,
+                              c => c.Contains("FindChild", StringComparison.Ordinal));
     }
 
     /// <summary>
