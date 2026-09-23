@@ -1,15 +1,11 @@
-# WORKSTREAMS, IN DETAIL
+# WORKSTREAMS, IN DETAIL (frozen 2026-09-23)
 
-> The per-workstream status narrative, the build-environment detail and the
-> pointer pile that `STATE.md` used to carry inline. Moved here 2026-09-01
-> under the prose diet (machinery review, change 5): `STATE.md` is a
-> ~150-line snapshot and this file is where its detail went. Nothing was
-> deleted in the move.
->
-> Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering
-> tasks in [`BACKLOG.md`](BACKLOG.md); rules in [`LAW.md`](LAW.md);
-> measurement law and registrations in [`EXPERIMENTS.md`](EXPERIMENTS.md);
-> stamp history in [`STAMPS.md`](STAMPS.md).
+> **Frozen, not maintained.** This was the per-workstream narrative behind
+> `STATE.md`, last updated 2026-09-08. The process trim of 2026-09-23 (R276,
+> `review/ruled/process-review-2026-09-23.md`) stopped maintaining it:
+> `STATE.md` says what ships and what is next, and each character's brief is
+> its design record. Read this only for history; it may be stale in every
+> section. The same text is at `git show 2b73880a:docs/current/workstreams.md`.
 
 ---
 

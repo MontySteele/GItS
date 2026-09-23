@@ -23,7 +23,6 @@ the one your task reaches; never all of them. Depth for any subsystem is in
 | run a scenario, a staged round, a seat or blind play | `operations/understudy-seats.md` |
 | brief an agent, or work out what it should read | `operations/briefing.md` |
 | repeat a ritual every sitting does by hand | `operations/agent-rituals.md` |
-| mint or retire a register id | `operations/register-ids.md` |
 | brief an Opus seat for a blind lane | `operations/seat-brief.md` |
 | run the lints, or add one | `operations/lints.md` |
 | add or retire a worktree | `operations/worktrees.md` |
@@ -57,11 +56,11 @@ Regenerate the cards. The generator writes the C# from the YAML sheets, and
 .venv/bin/python tools/gen_roster_cards.py --check    # verify, no write
 ```
 
-Run the lints. `run_lints.py` is the one entry point; its `ci` lane is what the
-`lints` job in `.github/workflows/repo.yml` invokes.
+Run the lints. `run_lints.py` is the one entry point; the `lints` job in
+`.github/workflows/repo.yml` and the pre-push hook run exactly its `ci` lane.
 
 ```sh
-python tools/run_lints.py --lane ci      # the softlock gates CI runs
+python tools/run_lints.py --lane ci      # exactly what CI runs
 python tools/run_lints.py --list         # every lint, by lane
 ```
 

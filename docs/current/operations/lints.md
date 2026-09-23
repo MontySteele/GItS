@@ -1,69 +1,59 @@
 ## Lints
 
-CI's `lints` job invokes these directly (the softlock gates):
+`tools/run_lints.py` is the one entry point. It runs the battery concurrently,
+prints one row per tool with its exit code, and fails the run if a
+`tools/lint_*.py` exists that no registry row names.
 
 ```sh
-python3 tools/lint_handwritten_parity.py   tools/lint_constant_parity.py   tools/lint_op_parity.py
-python3 tools/gen_roster_cards.py --check
-python3 tools/lint_pool_membership.py       tools/lint_ancient_coverage.py
-python3 tools/suggest_role_tempo_tags.py --check    tools/lint_role_tempo_coverage.py --gate
-python3 tools/lint_roster_registry.py       tools/lint_upgrade_suffix_appends.py
-python3 tools/lint_vendor_pin.py            tools/art_coverage.py
+python tools/run_lints.py --lane ci      # the gate: CI and the pre-push hook run exactly this
+python tools/run_lints.py                # ci + local lanes
+python tools/run_lints.py --list         # every lint, by lane
+python tools/run_lints.py --only op-parity,stamp-rows
 ```
 
-Correction D added five more to `run_lints`'s `ci` lane that `repo.yml` does
-not yet name (`lint_register_shape.py`, `lint_stamp_rows.py`,
-`lint_sheet_stamp.py`, `lint_experiments_active.py`,
-`tools/hooks/selftest_all.py`) — see Mechanisms. `lint_sheet_stamp.py
---update` is the one that re-pins `SHEET_DIGEST` after a sheet edit, and it
-belongs in the same commit as the edit.
+Lanes (the registry in `run_lints.py` is the only list):
 
-`lint_prototype_patch_scope.py` (`EB-225`, R225 item 6) is in that same `ci`
-lane and walks the three `Compile Remove` prototype directories: every Harmony
-patch there must be character-scoped and seat-guarded (`LocalContext.GetMe`
-THROWS on a seatless combat — `d217b4f`), and the only exemption is a
-`// lint: no-seat: <reason>` marker, which the tool prints on every run.
+- **`ci`**: the gate. The `lints` job in `.github/workflows/repo.yml` runs
+  `--lane ci` and nothing else, and so does `tools/hooks/pre_push_gate.py`.
+  Every row must pass on a fresh shallow clone with no `game_ref/`, no art and
+  no game. To add a lint to CI, add a `_ci(...)` row; there is no second list.
+- **`local`**: needs art, `game_ref/` or the game (`text-encoding`,
+  `generated-structure`, `art-lint`, `card-distinctness --gate`,
+  `game-ref-backup`, `game-assemblies-backup`).
+- **`suite`**: already run inside pytest; `--all` includes them.
+- **`library`**: registered for the coverage check, never run bare.
 
-`lint_text_conventions.py` (2026-09-02) is in the `ci` lane too: every
-prototype-arm face, keyword tip, power badge, relic and prompt against the
-length ceilings measured on the base game's own loc tables and the spellings
-`docs/current/text-conventions.md` fixes, with a curated exception list (a
-reason per entry, rot semantics). `--self-test` fails it on a fixture,
-`--shipped` reports the shipped sheets without gating them, `--census` prints
-every string with its length.
+`tools/README.md` maps which tool is gated by what.
 
-Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
-`art_lint.py`, `card_distinctness_report.py --gate`,
-`lint_game_ref_backup.py`, `dump_claimed_sources.py`.
-`tools/README.md` is the authoritative map of which tool is gated by what.
+Notes on individual lints:
 
-`tools/run_lints.py` runs the whole battery concurrently and prints one row per
-tool with its exit code — see the parallel-suite section. It carries the
-registry those two lists describe, and fails the run if a `tools/lint_*.py`
-appears that no registry row names, so the list above cannot go stale in
-silence.
+- `lint_sheet_stamp.py --update` re-pins `SHEET_DIGEST` after a sheet edit, in
+  the same commit as the edit. It guards Balance-stage measurement: a sheet
+  edit must move a stamp.
+- `lint_prototype_patch_scope.py` (`EB-225`) walks the three `Compile Remove`
+  prototype directories: every Harmony patch there must be character-scoped and
+  seat-guarded (`LocalContext.GetMe` THROWS on a seatless combat, `d217b4f`);
+  the only exemption is a `// lint: no-seat: <reason>` marker, printed on
+  every run.
+- `lint_text_conventions.py` checks every prototype-arm face, keyword tip,
+  power badge, relic and prompt against the ceilings measured on the base
+  game's own loc tables and the spellings `docs/current/text-conventions.md`
+  fixes, with a curated exception list. `--self-test`, `--shipped` (report the
+  shipped sheets without gating), `--census`.
+- `lint_recall_exhaust.py` (`EB-118`) is suite-gated through
+  `tier0/tests/test_eb118_recall_exhaust.py`; its three sweeps and why leg (a)
+  is vacuous are in its docstring.
 
-Suite-gated (runs under `pytest`, not in the CI `lints` job):
-`lint_recall_exhaust.py` (`EB-118`, merged **inert** 2026-08-23; gate
-`tier0/tests/test_eb118_recall_exhaust.py`).
+A lint that ships green over existing debt carries a curated `DEBT` set: an
+entry that has since become clean FAILS, so the set only shrinks.
 
-```sh
-python3 tools/lint_recall_exhaust.py       # exit 1 with findings on stdout
-```
+Retired 2026-09-23 with the register and ruling machinery: `r-numbers`,
+`rulings-index`, `register-ids`, `register-shape`, `experiments-active`,
+`review-status`, `packet-holds`, and the tools `gen_rulings_index`,
+`mint_row`, `row`, `register_io`. Retrieve any of them with
+`git show 2b73880a:tools/<file>`.
 
-Three sweeps in one tool — card shape, engine closure, a structural C# pin —
-all enforcing `EB-118` §6.4's six constraints on `recall_to_draw` with
-`from: exhaust`. Each leg, and why leg (a) is deliberately vacuous until a
-committed sheet row ships `from: exhaust`, is in the tool's own docstring.
-
-Encoding rule is repo-wide and structural: **every text read/write declares
-`encoding=`** (an omitted encoding is cp1252 on Windows, UTF-8 on CI). The
-content path carries zero encoding debt.
-
-**The rule extends to `sys.stdout`** (EB-93, 2026-08-13). A console's encoding
-is chosen by the terminal, not by the file that prints, so a tool that echoes
-shipped content — card titles carry `♪` — raises `UnicodeEncodeError` on a
-default Windows console and takes the process exit code with it. Any entry
-point that prints content declares the console too:
-`understudy.report.console_safe()` at the top of `main` (UTF-8, falling back to
-`backslashreplace`, never raising).
+**Encoding rule, repo-wide:** every text read/write declares `encoding=` (an
+omitted encoding is cp1252 on Windows, UTF-8 on CI). The rule extends to
+`sys.stdout` (EB-93): an entry point that prints shipped content (card titles
+carry `♪`) calls `understudy.report.console_safe()` at the top of `main`.
