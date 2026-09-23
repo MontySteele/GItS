@@ -178,24 +178,28 @@ def test_the_index_is_identifiers_and_shapes_only() -> None:
 
 
 def test_the_generator_refuses_a_missing_slate_row(tmp_path) -> None:
-    kept = FACES.read_text(encoding="utf-8")
+    raw = FACES.read_bytes()
+    kept = raw.decode("utf-8")
     lines = kept.splitlines()
     dropped = [line for line in lines
                if not line.startswith("NEOW\tMONDSTADT\t")]
     try:
-        FACES.write_text("\n".join(dropped) + "\n", encoding="utf-8")
+        FACES.write_bytes(("\n".join(dropped) + "\n").encode("utf-8"))
         result = run("--check")
         assert result.returncode != 0
         assert "NEOW/MONDSTADT" in result.stderr
     finally:
-        FACES.write_text(kept, encoding="utf-8")
+        # Restore the exact bytes: write_text translates LF to CRLF on
+        # Windows and would leave the tracked file dirty.
+        FACES.write_bytes(raw)
 
 
 def test_the_generator_refuses_a_bad_line_count(tmp_path) -> None:
     # `NEOW`'s `firstVisitEver` dialogue is one line in compiled C#; a loc row
     # cannot add a second, so a two-line cell is a refusal rather than a row
     # nothing reads.
-    kept = FACES.read_text(encoding="utf-8")
+    raw = FACES.read_bytes()
+    kept = raw.decode("utf-8")
     # Swap the Dvalin row's first_visit cell (column 5) for a two-line one,
     # whatever the row says today.
     lines = kept.split("\n")
@@ -206,9 +210,11 @@ def test_the_generator_refuses_a_bad_line_count(tmp_path) -> None:
     broken = "\n".join(lines)
     assert broken != kept
     try:
-        FACES.write_text(broken, encoding="utf-8")
+        FACES.write_bytes(broken.encode("utf-8"))
         result = run("--check")
         assert result.returncode != 0
         assert "first_visit" in result.stderr
     finally:
-        FACES.write_text(kept, encoding="utf-8")
+        # Restore the exact bytes: write_text translates LF to CRLF on
+        # Windows and would leave the tracked file dirty.
+        FACES.write_bytes(raw)
