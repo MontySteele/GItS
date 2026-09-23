@@ -14374,6 +14374,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         for attach in base_keyword_tip_calls(desc):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
+    # R276 (Alice's Detonator). A card that ADDS a card previews it, the base
+    # game's Blade Dance / Infinite Blades shape (`HoverTipFactory.FromCard`)
+    # -- and the upgraded card previews the upgraded Ka-pow!, off IsUpgraded.
+    if any(eff.get("op") == "grant_kapow_each_turn"
+           for eff in card.get("effects", [])):
+        tips_expr = ("KleeExpansion.WithKapowPreview("
+                     f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:
         tooltip_member = (
             "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"

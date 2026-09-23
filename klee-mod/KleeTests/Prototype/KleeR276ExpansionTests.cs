@@ -611,6 +611,32 @@ public class KleeR276ExpansionTests
         Assert.DoesNotContain(turn, c => c.StartsWith("CardSelectCmd"));
     }
 
+    [Fact]
+    public void Alices_detonator_previews_the_kapow_it_adds_upgraded_on_the_plus()
+    {
+        // STRUCTURAL: `HoverTipFactory.FromCard` resolves through `ModelDb`,
+        // which is outside the headless boundary. The card's tips end in the
+        // one preview helper, and the helper previews Ka-pow! upgraded exactly
+        // when the card is (Blade Dance's Shiv, the base game's shape).
+        var tips = typeof(ProtoKoAlicesDetonator)
+            .GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
+        Assert.Contains("KleeExpansion.WithKapowPreview", Il.Calls(tips));
+        var preview = Il.Calls(Il.Method("KleeExpansion", "WithKapowPreview"));
+        Assert.Contains("HoverTipFactory.FromCard", preview);
+        Assert.Contains("CardModel.get_IsUpgraded", preview);
+
+        // And the Power's badge previews the same card, upgraded on the Plus
+        // twin -- the Ka-pow! it actually adds.
+        var badge = typeof(AlicesDetonatorBasePower)
+            .GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
+        var calls = Il.Calls(badge);
+        Assert.Contains("HoverTipFactory.FromCard", calls);
+        Assert.Contains("AlicesDetonatorBasePower.get_Upgraded", calls);
+
+        // The face stays plain: the preview carries the card, not a gold word.
+        Assert.DoesNotContain("[gold]Ka-pow![/gold]", Face(new ProtoKoAlicesDetonator()));
+    }
+
     // ---- the explosion's charge-aware door ----------------------------------
 
     [Fact]

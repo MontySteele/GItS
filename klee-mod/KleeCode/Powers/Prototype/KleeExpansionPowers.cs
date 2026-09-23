@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -542,6 +543,11 @@ public abstract class AlicesDetonatorBasePower : PowerModel, ILocalizationProvid
 {
     /// <summary>Do this Power's Ka-pow!s arrive upgraded?</summary>
     public abstract bool Upgraded { get; }
+
+    /// <summary>The badge previews the Ka-pow! it adds, as the card does
+    /// (Infinite Blades' Shiv), upgraded on the Plus twin.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        new[] { HoverTipFactory.FromCard<ProtoKoKapow>(Upgraded) };
 
     public abstract List<(string, string)>? Localization { get; }
 

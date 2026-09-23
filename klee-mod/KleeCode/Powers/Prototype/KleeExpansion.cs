@@ -8,7 +8,9 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 
@@ -60,6 +62,20 @@ public static class KleeExpansion
     /// </summary>
     public static bool IsCompanionCard(CardModel? card) =>
         CompanionHexerei.CountsAsCompanion(card);
+
+    /// <summary>
+    /// R276 (Alice's Detonator): the card it adds, previewed as a hover tip,
+    /// the base game's shape for a card that makes another (Blade Dance and
+    /// Infinite Blades show a Shiv through <c>HoverTipFactory.FromCard</c>).
+    /// The upgraded Detonator previews the upgraded Ka-pow!, which is the one
+    /// its Power adds. Appended after <paramref name="tips"/>.
+    /// </summary>
+    public static IEnumerable<IHoverTip> WithKapowPreview(
+        IEnumerable<IHoverTip> tips, CardModel card)
+    {
+        foreach (var tip in tips) yield return tip;
+        yield return HoverTipFactory.FromCard<ProtoKoKapow>(card.IsUpgraded);
+    }
 
     /// <summary>Does this card say Set off? The stamp, read. PURE.</summary>
     public static bool IsSetOffCard(CardModel? card) => card is ISetOffCard;
