@@ -309,13 +309,13 @@ def test_a_plan_line_reaches_the_tempo_and_block_classifiers():
 # ---------------------------------------------------------------------------
 
 def test_mend_prices_one_for_one_with_block():
-    """The Moon, A Ship: Mend now, more Mend planned. Every point of it is one
-    point of Block."""
+    """The Moon, A Ship (R276 pick 1): Block now, Mend planned. Every point of
+    the Mend is one point of Block, so the card prices as its two numbers."""
     assert draft.STATIC_MEND_VALUE == 1.0
     card = _proto("proto_kk_the_moon_a_ship")
     now = card.effects[0]
     planned = card.plan[0]
-    assert now["op"] == planned["op"] == "mend"
+    assert now["op"] == "block" and planned["op"] == "mend"
     assert draft._static_power(card) == (
         now["amount"] + planned["amount"] * C.PLAN_DELAY_DISCOUNT) / card.cost
 

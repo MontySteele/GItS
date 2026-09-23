@@ -2312,40 +2312,30 @@ had to branch. With both numbers printed and folded, a tip restating the
 SHEET's 7 and 10 would be `EB-441`'s own defect arriving on the other surface:
 two numbers on one screen computed to two conventions.
 
-## `proto_kk_well_laid` -- the face is the total, the rule is the tip (`EB-539`)
+## Kokomi, the halves rewrite (R276 pick 1, 2026-09-23)
 
-The row's face carried the rule as well as the number: "Deal
-{CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} for
-each Plan carried out this morning". On a BARE morning that renders "Deal 2
-damage, already including 3 for each Plan carried out this morning", and the
-r19 lane-2 seat read it as self-contradictory -- 2 cannot already include a 3
-that nothing paid.
+The rule, now in the brief: **the now-line answers this turn; the Plan line
+buys something only a head start can buy. The two halves are never the same
+effect at two sizes.** Twelve Plan cards and the starter's Kurage's Oath were
+the now-line made bigger, so a safe turn had one right play (write
+everything). They were rewritten to the rule: `proto_kk_kurages_oath`,
+`proto_kk_feint`, `proto_kk_riptide`, `proto_kk_pincer`, `proto_kk_ambush`,
+`proto_kk_exposed_flank`, `proto_kk_coral_bulwark`, `proto_kk_vanguard`,
+`proto_kk_stolen_chapter`, `proto_kk_feigned_retreat`, `proto_kk_war_council`,
+`proto_kk_battle_plan` and `proto_kk_the_moon_a_ship`. Two per-Plan payoffs
+were re-aimed off Plan volume: `proto_kk_well_laid` pays per debuff on the
+enemy and has no Plan line, and `proto_kk_tide_wall`'s Plan blocks the front
+enemy's intent. The design is `review/ruled/kokomi-review-2026-09-23.md`.
 
-Nothing is wrong with the number. It is `EB-441`'s clause working exactly as
-written, on the one board where the fold is zero: the face's total IS live and
-the count IS folded into it. What the sentence needs is to disappear at count 0
-and reappear above it, and a card has exactly ONE face -- `Localization` is
-read once at registration, neither description getter on the shipped
-`CardModel` is virtual, and BaseLib's only runtime swap is `{IfUpgraded:show:}`,
-which asks about the card and not the board.
-
-So the split is Undertow's, one count over (`EB-484`,
-`KokomiRiderTips.ForDebuffRider`): the FACE prints the live total and nothing
-else, and the RULE goes on the rider tip, which is the surface that can carry a
-rule and a live count at once -- "2, plus 3 for each Plan the Bake-Kurage
-carried out this morning; this morning: 0". Out of combat the rule stands
-without the count, which is the `FurinaRiderTips` rule every tip in that file
-keeps: a shop shelf has no morning, and "this morning: 0" printed there would be
-the same false certainty the row was filed on. The tip is handed the same `base`
-and `per` the rider emits the vars from, so it cannot quote a number the hit
-does not use.
-
-THE WORD MOVED WITH THE RULE. The arm-keyword attach is derived from the words
-a face PRINTS, and this split took `Plan` off the face -- so the generator now
-carries a rider's own printed words into that scan (`rider_printed`), and the
-row keeps `ArmKeywordTips.ForPlan`. Without it the card would have gone on
-saying `Plan` in its tip with nothing on screen defining it, which is the exact
-silence that rule exists to make impossible.
+Five new Plan clauses carry it, each Plan-only: `first_attack_twice` (Pincer),
+`first_card_free` (Stolen Chapter), `attack_damage_this_turn` (Battle Plan,
+the shipped Attack Up window), `damage_if_unhurt` (Feigned Retreat; the entry
+records her HP when written and compares at carry-out) and
+`block_front_intent` (Tide Wall; the intent is read at carry-out, every hit of
+it, and `amount` is the upgrade's flat bonus). Feint's and Coral Bulwark's
+Plan lines drop the design's "to the front enemy" and Tide Wall's says "the
+enemy", because a card line never names the front enemy
+(`tools/lint_text_conventions.py`); the Plan tip says which enemy a Plan hits.
 
 ## proto_ko_jumpy_dumpty, `innate: true` (R261, `EB-557`, 2026-09-05)
 

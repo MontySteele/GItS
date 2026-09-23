@@ -374,6 +374,13 @@ def _runtime_count(state: CombatState, token: str,
         # is the printed difference between "this turn" and "this morning".
         # The C# twin is `KokomiOverhaulLedger.PlansThisMorning`.
         return state.kk_plans_this_morning
+    if token == "debuffs_on_target":
+        # QUARANTINED USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
+        # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
+        # card's single target is the default aim when it resolves. DISTINCT
+        # debuffs, not stacks -- `kokomi_plan.debuff_count`, the twin of
+        # `KokomiOverhaulKit.DebuffCount`.
+        return kokomi_plan.debuff_count(_default_target(state))
     if token == "plans_held":
         # QUARANTINED USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
         # Tide Chart, "draw 1 card for each Plan the Bake-Kurage holds".
@@ -3998,6 +4005,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # resolved in `_runtime_count` for this registry's own reason: the loader
     # validates every count token at LOAD off this set.
     "plans_carried_out_this_morning",
+    # QUARANTINED USE ONLY (R276) -- Well Laid's "for each debuff on the
+    # enemy". Same registry reason as the two above.
+    "debuffs_on_target",
     # QUARANTINED USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -6378,6 +6388,12 @@ OPS = {
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
     # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
     "next_attack_damage": _op_kokomi_plan_only,
+    # R276 PICK 1, the halves rewrite: five Plan-only clauses.
+    "first_attack_twice": _op_kokomi_plan_only,
+    "first_card_free": _op_kokomi_plan_only,
+    "damage_if_unhurt": _op_kokomi_plan_only,
+    "attack_damage_this_turn": _op_kokomi_plan_only,
+    "block_front_intent": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
     # and re-aim what is already written (Converging Tide). They are the

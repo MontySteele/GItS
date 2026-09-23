@@ -299,55 +299,34 @@ def test_a_planned_hit_is_the_jellyfishs_and_applies_hydro(overhaul):
     assert enemy.aura == "hydro"
 
 
-def test_the_oaths_now_line_applies_hydro_like_its_carry_out(overhaul):
-    """`EB-462` (D default, Kokomi r14 packet sec.4), the sim half.
+def test_a_skills_now_line_applies_hydro_and_reacts(overhaul):
+    """`EB-462`'s finding, and R276 pick 2's rule: a Skill of hers that hits
+    face-up applies Hydro like her Attacks, so an Electro aura standing in
+    front of it reacts. The row the finding was filed on (Kurage's Oath) gains
+    Block face-up since R276 pick 1, so the pin rides Opening Gambit's hit.
 
-    "Kurage's Oath prints [Hydro] in its title while a rider says its own hit
-    applies no aura and only the carry-out is a Hydro hit; a seat built a turn
-    on the tag, and the same Electro-then-Hydro sequence reacted with Deep
-    Current and not with the Oath's now-line."
-
-    The row declares `applies_element` on its own damage clause, which beats
-    the cadence -- the cadence elements her ATTACKS and this is a Skill -- and
-    `_element_for` falls back to the CHARACTER's element for a character row,
-    which carries none of its own. The mod's twin is the `IElementalCard` the
-    generator now emits on this class.
-
-    Seen to FAIL: the enemy was bare after the now-line, and the Electro aura
-    below survived it.
+    Seen to FAIL before R276 pick 2: the enemy was bare after the now-line,
+    and the Electro aura below survived it.
     """
     enemy = make_enemy(hp=40)
     st = kokomi_state(enemies=[enemy])
-    effects.resolve_card(st, loader.get_card("proto_kk_kurages_oath"))
-    assert enemy.hp == 40 - 3
+    effects.resolve_card(st, loader.get_card("proto_kk_opening_gambit"))
+    assert enemy.hp == 40 - 5
     assert enemy.aura == "hydro"
 
-    # AND IT REACTS, which is the thing the seat was denied: an Electro aura
-    # standing in front of the now-line is consumed rather than ignored.
     charged = make_enemy(hp=40)
     charged.aura = "electro"
     charged.aura_turns_left = 3
     st2 = kokomi_state(enemies=[charged])
-    effects.resolve_card(st2, loader.get_card("proto_kk_kurages_oath"))
+    effects.resolve_card(st2, loader.get_card("proto_kk_opening_gambit"))
     assert charged.aura != "electro"
 
 
 def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
-    """`EB-561`. THE FIND (Kokomi r20 lane 1): "War Council's face contradicts
-    itself -- 'Its own hit applies no aura' above the generic 'Applies Hydro:
-    no aura, applies Hydro for 2 turns' rider", and four Wrigglers came out
-    wearing Hydro after a direct play.
-
-    THE FACE WAS THE DEFECT AND THE HIT WAS NOT. Played directly the card
-    applies Weak to every enemy and NOTHING ELSE -- no damage, no element -- so
-    the aura the seat saw did not come from it (the Tamakushi Casket's
-    answering strike did, `EB-562`).
-
-    THE FACE HALF IS `EB-713`'s, landed while this row was open: the generic
-    `Applies Hydro` keyword came OFF these rows entirely -- the gem was itself
-    telling a reader "this face applies Hydro" -- leaving the `ForPlanElement`
-    rider as the one aura statement, which is exactly this row's acceptance.
-    What is left to pin is the statement against the HIT, and that is this.
+    """`EB-561`. Played directly the card applies Weak to every enemy and
+    NOTHING ELSE -- no damage, no element -- so it leaves no aura and eats
+    none. Since R276 pick 1 its Plan line is Energy, so neither half hits and
+    the face carries no aura statement at all: no gem, no Plan-element rider.
     """
     bare = make_enemy(hp=40)
     st = kokomi_state(enemies=[bare])
@@ -356,8 +335,6 @@ def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
     assert bare.hp == 40, "the now-line deals no damage"
     assert bare.aura is None, "the now-line leaves no aura"
 
-    # AND IT DOES NOT EAT ONE EITHER: a standing aura is untouched by a play
-    # that applies no element, which is the other half of "applies no aura".
     charged = make_enemy(hp=40)
     charged.aura = "electro"
     charged.aura_turns_left = 3
@@ -365,19 +342,19 @@ def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
     effects.resolve_card(st2, loader.get_card("proto_kk_war_council"))
     assert charged.aura == "electro"
 
-    # THE CARRY-OUT IS THE HALF THAT DOES, which is the rider's second clause.
+    # THE CARRY-OUT IS ENERGY (R276 pick 1): two, and no aura.
     planned = make_enemy(hp=40)
     st3 = kokomi_state(enemies=[planned])
+    energy = st3.player.energy
     carry_out(st3, loader.get_card("proto_kk_war_council").plan)
-    assert planned.aura == "hydro"
+    assert planned.aura is None
+    assert st3.player.energy == energy + 2
 
-    # AND THE FACE CARRIES ONE AURA STATEMENT: the rider, and no generic
-    # element keyword beside it to contradict it (`EB-713`).
     import pathlib
     repo = pathlib.Path(__file__).resolve().parents[2]
     face = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
             / "Generated" / "ProtoKkWarCouncil.cs").read_text(encoding="utf-8")
-    assert "ArmKeywordTips.ForPlanElement(" in face
+    assert "ArmKeywordTips.ForPlanElement(" not in face
     assert "KleeKeywords.AppliesHydro" not in face
 
 
@@ -498,52 +475,43 @@ def test_an_attack_buff_on_kokomi_reaches_the_line_she_wrote_it_under(
     assert enemy.hp == 40 - 12
 
 
-def test_eb545_a_planned_feigned_retreat_pays_both_halves(overhaul):
-    """`EB-545`. THE TWO HALVES THAT LOOKED LIKE THEY POINTED APART.
-
-    Kokomi r19 lane 1 read Feigned Retreat's Plan as adding damage but not
-    Block, while the face says "Plan: Gain 4 Block and deal 6 damage" -- so
-    either the Block clause was not carried out or the morning block did not
-    print it. THE BLOCK LANDS: the carry-out pays 4 Block and 6 damage, both
-    clauses, and this is the pin that says so from the sheet's own row rather
-    than from a probe card.
-
-    The seat's own sentence is about the FACE, not the payment: "the Plan adds
-    damage but not block, so the block half is strictly worse for waiting". The
-    now-line and the Plan line print the same 4, which is the card's shape and
-    a design reading, not a defect. Nothing in the payment moves here.
-    """
-    enemy = make_enemy(hp=200)
-    st = kokomi_state(enemies=[enemy])
-    st.player.block = 0
-
+def test_r276_feigned_retreat_hits_harder_if_she_was_not_hurt(overhaul):
+    """R276 pick 1. "Plan: Deal 9 damage. If you lost no HP since you wrote
+    this, deal 14 instead." Her HP is recorded when the Plan is written and
+    read at carry-out."""
     card = loader.get_card("proto_kk_feigned_retreat")
+
+    unhurt = make_enemy(hp=200)
+    st = kokomi_state(enemies=[unhurt])
     kokomi_plan.schedule(st, card)
+    assert st.kk_plan_queue[0].clauses[0][kokomi_plan.HP_AT_WRITE] == \
+        st.player.hp
     kokomi_plan.resolve_all(st)
+    assert unhurt.hp == 200 - 14
 
-    assert st.player.block == 4, "the planned Block is paid"
-    assert enemy.hp == 200 - 6
-    # BOTH CLAUSES SAY SO IN THE LOG, in the order the card prints them --
-    # which is what the morning block's line and its HP rows are built from.
-    said = [ev for ev in st.log
-            if ev["event"] in ("block", "damage")]
-    assert [ev["event"] for ev in said] == ["block", "damage"]
-    assert said[0]["amount"] == 4 and said[1]["amount"] == 6
+    hurt = make_enemy(hp=200)
+    st = kokomi_state(enemies=[hurt])
+    kokomi_plan.schedule(st, card)
+    st.player.hp -= 1                       # the enemy's swing got through
+    kokomi_plan.resolve_all(st)
+    assert hurt.hp == 200 - 9
 
 
-def test_eb545_the_upgrade_moves_both_planned_halves(overhaul):
-    """And the `+` card pays 6 and 8, which is the other half of the sheet's
-    own claim: `plan_block` and `plan_damage` are separate deltas and a card
-    that upgraded one of them would be the defect the row suspected."""
+def test_r276_feigned_retreats_upgrade_moves_both_numbers(overhaul):
+    """8 Block now; Plan 12, or 18 unhurt."""
+    up = loader.get_card("proto_kk_feigned_retreat+")
+    assert up.effects == [{"op": "block", "amount": 8}]
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
-    st.player.block = 0
-
-    kokomi_plan.schedule(st, loader.get_card("proto_kk_feigned_retreat+"))
+    kokomi_plan.schedule(st, up)
     kokomi_plan.resolve_all(st)
-
-    assert st.player.block == 6
-    assert enemy.hp == 200 - 8
+    assert enemy.hp == 200 - 18
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, up)
+    st.player.hp -= 1
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 12
 
 
 def test_skittish_does_not_fire_on_a_carry_out(overhaul):
@@ -721,17 +689,18 @@ def test_the_shell_guard_window_closes_on_a_morning_with_no_plans(overhaul):
 
 
 def test_both_defensive_rows_load_and_smith(overhaul):
-    """The two rows themselves, off the sheet: R246's 4/3 and 5/3, upgrading
-    to 6/4 and 7/4."""
+    """The two rows themselves, off the sheet. Tide Wall since R276 pick 1:
+    4 Block now, Plan Block equal to the intent, upgrading to 6 and intent + 3.
+    Shell Guard: R246's 5/3, upgrading to 7/4."""
     from tier0.content import upgrades
 
     wall = loader.get_card("proto_kk_tide_wall")
     assert wall.rarity == "uncommon" and wall.cost == 1
     assert wall.effects == [{"op": "block", "amount": 4}]
-    assert wall.plan == [{"op": kokomi_plan.BLOCK_PER_PLAN, "amount": 3}]
+    assert wall.plan == [{"op": "block_front_intent", "amount": 0}]
     up = upgrades.apply_upgrade(wall)
     assert up.effects[0]["amount"] == 6
-    assert up.plan[0]["amount"] == 4
+    assert up.plan[0]["amount"] == 3
 
     guard = loader.get_card("proto_kk_shell_guard")
     assert guard.rarity == "uncommon" and guard.cost == 1
@@ -2890,7 +2859,8 @@ def test_feint_pays_the_planned_number_after_a_carry_out(overhaul):
     """Sango Isshin's shape at Common. The branch reads the same
     `plan_carried_out_this_turn` predicate the Rare's condition does, so "a
     Plan was carried out this turn" has one definition in the arm.
-    `ProtoKkFeint.OnPlay` is the twin."""
+    `ProtoKkFeint.OnPlay` is the twin. R276 pick 1: the Plan line applies
+    Vulnerable rather than repeating the hit."""
     row = _row("proto_kk_feint")
     branch = row.effects[0]
     assert branch["op"] == "conditional"
@@ -2898,39 +2868,33 @@ def test_feint_pays_the_planned_number_after_a_carry_out(overhaul):
     assert branch["then"] == [{"op": "damage", "amount": 10,
                                "target": "enemy"}]
     assert branch["else"] == [{"op": "damage", "amount": 5, "target": "enemy"}]
-    assert row.plan == [{"op": "damage", "amount": 10,
-                         "target": "front_enemy"}]
+    assert row.plan == [{"op": "apply_power", "power": "vulnerable",
+                         "amount": 1, "target": "front_enemy"}]
 
 
 def test_feints_two_printed_numbers_upgrade_by_different_amounts(overhaul):
     """5 -> 7 and 10 -> 13, which is what `conditional_then_damage` exists for:
     `conditional_damage` moves both branches and the then-branch takes one
-    more. Read off the SMITHED card, so the sheet's two keys and the applier
-    agree."""
+    more; the Plan's Vulnerable goes 1 -> 2. Read off the SMITHED card."""
     from tier0.content import upgrades
 
     row = _row("proto_kk_feint")
     assert row.upgrade == {"conditional_damage": 2,
-                           "conditional_then_damage": 1, "plan_damage": 3}
+                           "conditional_then_damage": 1,
+                           "plan_power_amount": 1}
     up = upgrades.apply_upgrade(_row("proto_kk_feint"))
     branch = up.effects[0]
     assert branch["then"][0]["amount"] == 13
     assert branch["else"][0]["amount"] == 7
-    assert up.plan[0]["amount"] == 13
+    assert up.plan[0]["amount"] == 2
 
 
 def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
-    """`EB-660`. "Feint's face prints no Plan line although it can be written;
-    the seat found it by testing and did not know what it had written" (round
-    25 lane 1, fight 2). Every other Plan-capable row prints its line and this
-    one had a `plan:` list all along, so the silence was the face's and not
-    the rule's. The number is the Plan's own, printed live, so a Smithed copy
-    prints 13 without a second string.
-    """
+    """`EB-660`: the face prints its Plan line. Since R276 pick 1 the line is
+    a debuff ready before the enemy's next swing, not the hit made bigger."""
     faces = _faces()
     assert faces["proto_kk_feint"].endswith(
-        "[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.")
-    assert _row("proto_kk_feint").plan[0]["amount"] == 10
+        "[gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].")
 
 
 def test_read_the_field_bottoms_the_costliest_of_the_top_two(overhaul):
@@ -3057,26 +3021,29 @@ def test_riptide_adds_its_rider_per_debuffed_body(overhaul):
 
 
 def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
-    """12 / 6 more / Plan 17: the `damage` key moves the base it rides on and
-    `bonus_vs_debuff` moves the rider's own number."""
+    """12 / 6 more: the `damage` key moves the base it rides on and
+    `bonus_vs_debuff` moves the rider's own number. The Plan line (R276 pick
+    1: 1 Energy and a card) does not upgrade."""
     from tier0.content import upgrades
 
     up = upgrades.apply_upgrade(_row("proto_kk_riptide"))
     assert up.effects[0]["amount"] == 12
     assert up.effects[0]["bonus_vs_debuff"] == 6
-    assert up.plan[0]["amount"] == 17
+    assert up.plan == [{"op": "energy", "amount": 1},
+                       {"op": "draw", "amount": 1}]
 
 
-def test_battle_plan_writes_a_draw_and_the_rider_and_no_energy(overhaul):
-    """The `energy` clause paid the write back its own cost, so writing was
-    free and the now-line was a strictly smaller card. It is gone, and what
-    replaced it is DAMAGE rather than a discount (`EB-668`)."""
+def test_battle_plan_writes_this_turns_attack_bonus(overhaul):
+    """R276 pick 1. Draw 2 now; Plan: "This turn, your Attacks deal 3
+    additional damage." Upgraded: draw 3, Plan 4."""
+    from tier0.content import upgrades
+
     row = _row("proto_kk_battle_plan")
-    assert row.effects == [{"op": "draw", "amount": 1}]
-    assert row.plan == [{"op": "draw", "amount": 2},
-                        {"op": "next_attack_damage"}]
-    assert not any(fx["op"] == "energy" for fx in row.plan)
-    assert row.upgrade == {"draw": 1, "plan_draw": 1}
+    assert row.effects == [{"op": "draw", "amount": 2}]
+    assert row.plan == [{"op": "attack_damage_this_turn", "amount": 3}]
+    up = upgrades.apply_upgrade(_row("proto_kk_battle_plan"))
+    assert up.effects == [{"op": "draw", "amount": 3}]
+    assert up.plan == [{"op": "attack_damage_this_turn", "amount": 4}]
 
 
 def test_the_rider_pays_a_face_up_attack_and_not_a_write(overhaul):
@@ -3262,13 +3229,12 @@ def _arm_card(cid):
 
 
 def test_r276_her_damaging_skills_apply_hydro_face_up(overhaul):
-    """R276 pick 2. Ambush, Chain of Command and Opening Gambit are Skills
-    whose face-up half deals damage; under the arm that hit applies Hydro, as
-    her Attacks' always did. `CatalystCadence.EveryDamagingCardCarriesElement`
-    is the twin."""
+    """R276 pick 2. Chain of Command and Opening Gambit are Skills whose
+    face-up half deals damage; under the arm that hit applies Hydro, as her
+    Attacks' always did. `CatalystCadence.EveryDamagingCardCarriesElement` is
+    the twin."""
     st = kokomi_state()
-    for cid in ("proto_kk_ambush", "proto_kk_chain_of_command",
-                "proto_kk_opening_gambit"):
+    for cid in ("proto_kk_chain_of_command", "proto_kk_opening_gambit"):
         card = _arm_card(cid)
         assert card.type == "skill", cid
         hit = next(fx for fx in card.effects if fx["op"] == "damage")
@@ -3329,3 +3295,101 @@ def test_r276_princess_upgrades_to_three_block():
     amounts = {fx["power"]: fx["amount"] for fx in up.effects}
     assert amounts == {"charge_per_turn": 4,
                        kokomi_plan.PRINCESS_OF_WATATSUMI: 3}
+
+
+# --- R276 pick 1: the halves rewrite's five new Plan clauses ---------------
+
+def _attack(amount=5, cid="proto_kk_probe_attack"):
+    return Card(id=cid, name="a", cost=1, type="attack",
+                effects=[{"op": "damage", "amount": amount,
+                          "target": "enemy"}])
+
+
+def test_r276_pincer_plays_the_first_face_up_attack_twice(overhaul):
+    """Pincer's Plan: "This turn, your first Attack is played twice." A write
+    neither takes nor spends it; the first face-up Attack does."""
+    from tier0.engine import combat
+    enemy = make_enemy(hp=200, intents=ATTACKER)
+    st = kokomi_state(enemies=[enemy])
+    carry_out(st, _arm_card("proto_kk_pincer").plan)
+    assert st.player.powers[kokomi_plan.FIRST_ATTACK_TWICE] == 1
+
+    # A WRITE: an Attack with no now-line goes onto the Bake-Kurage.
+    written = Card(id="proto_kk_w", name="w", cost=0, type="attack",
+                   effects=[], plan=[{"op": "draw", "amount": 1}])
+    st.player.hand.append(written)
+    st.player.energy = 9
+    combat.play_card(st, written)
+    assert len(st.kk_plan_queue) == 1, "one write, not two"
+    assert st.player.powers[kokomi_plan.FIRST_ATTACK_TWICE] == 1
+
+    attack = _attack(5)
+    st.player.hand.append(attack)
+    combat.play_card(st, attack)
+    assert enemy.hp == 200 - 2 * 5
+    assert kokomi_plan.FIRST_ATTACK_TWICE not in st.player.powers
+
+    second = _attack(5, cid="proto_kk_probe_attack_2")
+    st.player.hand.append(second)
+    combat.play_card(st, second)
+    assert enemy.hp == 200 - 3 * 5, "only the FIRST Attack is doubled"
+
+
+def test_r276_stolen_chapter_makes_the_first_card_free(overhaul):
+    """Stolen Chapter's Plan: "This turn, the first card you play costs 0."
+    Pure at the cost seam, spent by the first card paid for."""
+    from tier0.engine import combat
+    st = kokomi_state(enemies=[make_enemy(hp=200)])
+    carry_out(st, _arm_card("proto_kk_stolen_chapter").plan)
+    first = Card(id="proto_kk_c1", name="c1", cost=2, type="skill",
+                 effects=[{"op": "block", "amount": 1}])
+    second = Card(id="proto_kk_c2", name="c2", cost=2, type="skill",
+                  effects=[{"op": "block", "amount": 1}])
+    assert combat.card_cost(st, first) == 0
+    assert combat.card_cost(st, first) == 0, "asking does not spend it"
+    st.player.hand += [first, second]
+    st.player.energy = 3
+    combat.play_card(st, first)
+    assert st.player.energy == 3
+    assert combat.card_cost(st, second) == 2
+    combat.play_card(st, second)
+    assert st.player.energy == 1
+
+
+def test_r276_battle_plan_raises_every_attack_this_turn(overhaul):
+    """Battle Plan's Plan: "This turn, your Attacks deal 3 additional
+    damage." Every face-up Attack, per hit; a carry-out is not a play."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    carry_out(st, _arm_card("proto_kk_battle_plan").plan)
+    assert st.player.powers["attack_up_this_turn"] == 3
+    effects.resolve_card(st, _attack(5))
+    effects.resolve_card(st, _attack(5))
+    assert enemy.hp == 200 - 2 * (5 + 3)
+
+    planned = make_enemy(hp=200)
+    st2 = kokomi_state(enemies=[planned])
+    st2.player.powers["attack_up_this_turn"] = 3
+    carry_out(st2, [{"op": "damage", "amount": 5, "target": "front_enemy"}])
+    assert planned.hp == 200 - 5, "the jellyfish's hit takes no Attack bonus"
+
+
+def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
+    """Tide Wall's Plan: Block equal to the damage the front enemy intends to
+    deal -- every hit of a multi-hit intent -- plus the upgrade's 3. A
+    non-attack intent is 0."""
+    front = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 6,
+                                        "times": 2}])
+    behind = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 20}])
+    st = kokomi_state(enemies=[front, behind])
+    st.player.block = 0
+    assert kokomi_plan.front_intent_damage(st) == 12
+    carry_out(st, _arm_card("proto_kk_tide_wall").plan)
+    assert st.player.block == 12
+
+    from tier0.content import upgrades
+    up = upgrades.apply_upgrade(_arm_card("proto_kk_tide_wall"))
+    st = kokomi_state(enemies=[make_enemy(hp=40, intents=BLOCKER)])
+    st.player.block = 0
+    carry_out(st, up.plan)
+    assert st.player.block == 3, "a non-attack intent reads 0, plus 3"

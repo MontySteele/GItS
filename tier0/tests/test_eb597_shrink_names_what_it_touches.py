@@ -39,13 +39,15 @@ from tier0.engine import effects, powers
 from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import kokomi_state, overhaul  # noqa: F401
 
-OATH = "proto_kk_kurages_oath"
+# R276 pick 1 took Kurage's Oath's now-line off damage (it gains Block now),
+# so the pin is asked of the Skill that still prints a face-up hit.
+OATH = "proto_kk_opening_gambit"
 
 
 def test_a_skills_printed_damage_takes_the_dealers_cut(overhaul):
-    """THE ROW'S ACCEPTANCE, sim side: *Kurage's Oath* is a SKILL, its own
-    line prints 3, and a percentage debuff on her cuts it to 2 -- the seat's
-    own arithmetic, one debuff over."""
+    """THE ROW'S ACCEPTANCE, sim side: a SKILL's own printed hit (the row was
+    found on Kurage's Oath; Opening Gambit carries it since R276) takes a
+    percentage debuff on her -- the seat's own arithmetic, one debuff over."""
     enemy = make_enemy(hp=40)
     state = kokomi_state(enemies=[enemy])
     card = loader.get_card(OATH)

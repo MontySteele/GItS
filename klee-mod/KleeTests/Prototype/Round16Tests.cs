@@ -60,12 +60,13 @@ public class Round16Tests
     [Fact]
     public void A_skills_damage_clause_is_read_by_vulnerable_as_an_attack_hit()
     {
-        // THE CARD IS A SKILL, and it is the exact card the seat watched take
-        // the 1.5x -- the same one `EB-469` watched lose 25%.
-        var oath = new ProtoKkKuragesOath();
+        // THE CARD IS A SKILL. The seat watched Kurage's Oath take the 1.5x;
+        // since R276 pick 1 the Oath gains Block face-up, so the pin rides
+        // Opening Gambit, the Skill that still prints a face-up hit.
+        var oath = new ProtoKkOpeningGambit();
         Assert.Equal(CardType.Skill, oath.Type);
 
-        var vars = ((IEnumerable<DynamicVar>)typeof(ProtoKkKuragesOath)
+        var vars = ((IEnumerable<DynamicVar>)typeof(ProtoKkOpeningGambit)
             .GetProperty("CanonicalVars", All)!.GetValue(oath)!).ToList();
         var damage = vars.OfType<DamageVar>().Single();
         Assert.Equal(ValueProp.Move, damage.Props);
@@ -83,8 +84,8 @@ public class Round16Tests
         Assert.Equal(1.5m, vulnerable.ModifyDamageMultiplicative(
             wearer.Creature, 0m, damage.Props, attacker.Creature, null, null));
 
-        // 3 x 1.5 = 4.5, and the seat read the whole 1.5x off the body.
-        Assert.Equal(3m, damage.BaseValue);
+        // 5 x 1.5 = 7.5, and the seat read the whole 1.5x off the body.
+        Assert.Equal(5m, damage.BaseValue);
     }
 
     [Fact]

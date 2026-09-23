@@ -47,13 +47,21 @@ public class Round14Tests
     // before it asks whether the card is an Attack, so a Skill that declares
     // one elements its own hit.
 
+    // R276 MOVED BOTH HALVES OF THIS. Pick 1 gave Kurage's Oath a Block
+    // now-line, so its face-up half no longer hits and it is a Plan-only-hit
+    // row; pick 2 made every damaging card of hers elemental under the arm,
+    // so a Skill's own hit is Hydro without a per-row declaration. The pins
+    // below are the finding's rule on the rows that carry it now.
+
     [Fact]
-    public void The_oaths_now_line_declares_hydro()
+    public void A_skills_face_up_hit_declares_hydro()
     {
-        var card = new ProtoKkKuragesOath();
+        var card = new ProtoKkOpeningGambit();
 
         Assert.IsAssignableFrom<IElementalCard>(card);
         Assert.Equal(Element.Hydro, ((IElementalCard)card).Element);
+        // The Oath's face-up half is Block now, and declares nothing.
+        Assert.IsNotAssignableFrom<IElementalCard>(new ProtoKkKuragesOath());
     }
 
     [Fact]
@@ -63,22 +71,23 @@ public class Round14Tests
         // `IElementalCard` before it asks anything about the card's type, so
         // this Skill's own hit is a Hydro hit at the aura funnel.
         Assert.Equal(Element.Hydro,
-            CatalystCadence.PrintedElement(new ProtoKkKuragesOath(), null));
+            CatalystCadence.PrintedElement(new ProtoKkOpeningGambit(), null));
     }
 
     [Fact]
-    public void The_no_aura_rider_is_off_this_face()
+    public void The_plan_element_rider_rides_the_plan_only_hits()
     {
-        // `ForPlanElement` explains a disagreement that no longer exists here.
-        // Since R276 pick 2 it rides only the rows whose Plan is their only
-        // hit -- War Council, Feigned Retreat -- so the pin is that this one
-        // is not among them.
-        var tips = Il.Calls(
-            Il.Method("ProtoKkKuragesOath", "get_ExtraHoverTips"));
-
-        Assert.DoesNotContain(tips, c => c.Contains("ForPlanElement"));
+        // `ForPlanElement` rides the rows whose Plan is their only hit: the
+        // Oath (Block now, Plan 7 to ALL) and Feigned Retreat. A row whose
+        // face-up half hits carries the gem instead.
+        Assert.Contains(
+            Il.Calls(Il.Method("ProtoKkKuragesOath", "get_ExtraHoverTips")),
+            c => c.Contains("ForPlanElement"));
         Assert.Contains(
             Il.Calls(Il.Method("ProtoKkFeignedRetreat", "get_ExtraHoverTips")),
+            c => c.Contains("ForPlanElement"));
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method("ProtoKkOpeningGambit", "get_ExtraHoverTips")),
             c => c.Contains("ForPlanElement"));
     }
 
@@ -86,37 +95,22 @@ public class Round14Tests
     public void EB561_war_councils_hit_obeys_its_one_aura_statement()
     {
         // `EB-561`. THE FIND (Kokomi r20 lane 1): the face said "Its own hit
-        // applies no aura" and, above it, the generic `Applies Hydro` keyword
-        // said "No aura: applies Hydro for 2 turns" -- and four Wrigglers came
-        // out of a direct play wearing Hydro.
-        //
-        // THE FACE HALF IS `EB-713`'s, landed while this row was open: the
-        // generic keyword came OFF these rows entirely, leaving the rider as
-        // the one aura statement. This is that statement checked against the
-        // HIT, which is the half nothing had checked.
+        // applies no aura" and four Wrigglers came out of a direct play
+        // wearing Hydro -- the Tamakushi Casket's answering strike (`EB-562`).
         //
         // THE HIT WAS NEVER THE DEFECT. Played directly the card applies Weak
         // to every enemy and nothing else: no damage, no elemental call, so no
-        // aura and no reaction. (The Hydro the seat saw was the Tamakushi
-        // Casket's answering strike, `EB-562`.)
+        // aura and no reaction. R276 pick 1 made its Plan Energy, so neither
+        // half hits and the face carries no aura statement at all.
         var play = Il.Calls(Il.Method("ProtoKkWarCouncil", "OnPlay"));
         Assert.DoesNotContain(play, c => c.Contains("ElementalHit"));
         Assert.DoesNotContain(play, c => c.Contains("Aura"));
         Assert.Contains(play, c => c.Contains("PowerCmd.Apply"));
 
-        // ONE STATEMENT ON THE FACE: the rider, and no generic element keyword
-        // beside it to contradict it.
-        Assert.Contains(
+        Assert.DoesNotContain(
             Il.Calls(Il.Method("ProtoKkWarCouncil", "get_ExtraHoverTips")),
             c => c.Contains("ForPlanElement"));
-
-        // And the Plan's carry-out is the half that DOES apply Hydro, the
-        // rider's second clause: `KokomiPlan.ResolveAll` deals every damaging
-        // clause as a Hydro hit, so the card's own declaration is the Plan
-        // clause it prints.
-        Assert.Contains(
-            Il.Calls(Il.Method("ProtoKkWarCouncil", "get_PlanClauses")),
-            c => c.Contains("Planned..ctor"));
+        Assert.IsNotAssignableFrom<IElementalCard>(new ProtoKkWarCouncil());
     }
     [Fact]
     public void Klees_mint_keeps_the_gate_the_performance_lost()

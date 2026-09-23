@@ -863,8 +863,9 @@ public static class ArmKeywordTips
     /// included (<see cref="CatalystCadence.EveryDamagingCardCarriesElement"/>),
     /// so a row with a face-up hit carries the gem and no sentence.
     ///
-    /// ATTACHED ONLY WHERE THE PLAN IS THE CARD'S ONLY HIT -- War Council and
-    /// Feigned Retreat today: the face-up half blocks or debuffs, so the gem
+    /// ATTACHED ONLY WHERE THE PLAN IS THE CARD'S ONLY HIT -- Kurage's Oath,
+    /// Ambush and Feigned Retreat since R276 pick 1: the face-up half blocks,
+    /// so the gem
     /// (which means "this face-up hit applies the element", `EB-713`) is not
     /// theirs to wear, and this says the carry-out still lands Hydro.
     /// `gen_klee_cards.emit` raises it from <c>plan_applies_element</c> and

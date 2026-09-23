@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 
 namespace KleeMod.Powers;
 
@@ -59,6 +60,59 @@ public static class KokomiOverhaulKit
     }
 
     /// <summary>
+    /// PINCER's carry-out (R276): "This turn, your first Attack is played
+    /// twice." ONE STACK, ALWAYS -- "your first Attack" is one Attack however
+    /// many Pincers are carried out.
+    /// </summary>
+    public static async Task FirstAttackTwice(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Powers.OfType<FirstAttackTwicePower>().Any()) return;
+        await PowerCmd.Apply<FirstAttackTwicePower>(
+            choiceContext, kokomi, 1, applier: kokomi, cardSource: null);
+    }
+
+    /// <summary>
+    /// STOLEN CHAPTER's carry-out (R276): "This turn, the first card you play
+    /// costs 0." ONE STACK, ALWAYS, for the same reason.
+    /// </summary>
+    public static async Task FirstCardFree(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Powers.OfType<FirstCardFreePower>().Any()) return;
+        await PowerCmd.Apply<FirstCardFreePower>(
+            choiceContext, kokomi, 1, applier: kokomi, cardSource: null);
+    }
+
+    /// <summary>
+    /// TIDE WALL's read (R276): the total damage <paramref name="enemy"/>'s
+    /// current intent would deal <paramref name="kokomi"/>, every hit counted
+    /// -- the game's own <c>AttackIntent.GetTotalDamage</c>, which is the
+    /// number the intent badge shows (its Strength and Weak, her Vulnerable).
+    /// 0 for no enemy, a sleeping one or a non-attack intent. A state read
+    /// must never throw, so a failing intent reads 0. Sim twin:
+    /// <c>kokomi_plan.front_intent_damage</c>.
+    /// </summary>
+    public static int IntendedDamage(Creature? enemy, Creature? kokomi)
+    {
+        if (enemy == null || kokomi == null) return 0;
+        if (!CurtainCallHooks.IntendsAttack(enemy)) return 0;
+        try
+        {
+            var targets = new[] { kokomi };
+            return enemy.Monster?.NextMove?.Intents
+                .OfType<AttackIntent>()
+                .Sum(intent => intent.GetTotalDamage(targets, enemy)) ?? 0;
+        }
+        catch (System.Exception)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>
     /// Cleansing Wave: "Remove a debuff from yourself."
     ///
     /// A READING, recorded because the card says "a debuff" and not "the worst
@@ -90,6 +144,18 @@ public static class KokomiOverhaulKit
     /// </summary>
     public static bool HasDebuff(Creature? creature) =>
         creature != null && creature.Powers.Any(p => p.Type == PowerType.Debuff);
+
+    /// <summary>
+    /// Well Laid's "for each debuff on the enemy" (R276 pick 1): DISTINCT
+    /// debuffs, not stacks -- Weak 2 is one -- by <see cref="HasDebuff"/>'s own
+    /// definition. Null-safe because the calculated var's preview hands it a
+    /// null target whenever nothing is hovered. Sim twin:
+    /// <c>kokomi_plan.debuff_count</c>.
+    /// </summary>
+    public static int DebuffCount(Creature? creature) =>
+        creature == null
+            ? 0
+            : creature.Powers.Count(p => p.Type == PowerType.Debuff);
 
     /// <summary>
     /// Re-entrancy latch for <see cref="IsHerDebuffOnEnemy"/>'s consumers.

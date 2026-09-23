@@ -487,11 +487,12 @@
       "draw": 1
     },
     "proto_kk_ambush": {
+      "block": 2,
       "plan_damage": 3
     },
     "proto_kk_battle_plan": {
       "draw": 1,
-      "plan_draw": 1
+      "plan_attack_bonus": 1
     },
     "proto_kk_breakwater": {
       "plan_block": 2
@@ -508,25 +509,23 @@
     },
     "proto_kk_coral_bulwark": {
       "block": 3,
-      "plan_block": 3,
       "plan_power_amount": 1
     },
     "proto_kk_deep_current": {
       "damage": 3
     },
     "proto_kk_exposed_flank": {
-      "power_amount": 1,
-      "plan_power_amount": 1
+      "power_amount": 1
     },
     "proto_kk_feigned_retreat": {
       "block": 2,
-      "plan_block": 2,
-      "plan_damage": 2
+      "plan_damage": 3,
+      "plan_unhurt_damage": 4
     },
     "proto_kk_feint": {
       "conditional_damage": 2,
       "conditional_then_damage": 1,
-      "plan_damage": 3
+      "plan_power_amount": 1
     },
     "proto_kk_flank": {
       "damage": 3,
@@ -545,8 +544,7 @@
       "damage": 2
     },
     "proto_kk_pincer": {
-      "damage": 1,
-      "plan_damage": 1
+      "damage": 1
     },
     "proto_kk_rally": {
       "power_amount": 1
@@ -560,8 +558,7 @@
     },
     "proto_kk_riptide": {
       "damage": 3,
-      "bonus_vs_debuff": 2,
-      "plan_damage": 4
+      "bonus_vs_debuff": 2
     },
     "proto_kk_salt_line": {
       "block": 3
@@ -597,8 +594,7 @@
       "power_amount": 1
     },
     "proto_kk_stolen_chapter": {
-      "draw": 1,
-      "plan_draw": 1
+      "draw": 1
     },
     "proto_kk_the_clouds_like_waves": {
       "power_amount": 1
@@ -607,7 +603,7 @@
       "innate": true
     },
     "proto_kk_the_moon_a_ship": {
-      "mend": 2,
+      "block": 4,
       "plan_mend": 2
     },
     "proto_kk_tide_chart": {
@@ -615,7 +611,7 @@
     },
     "proto_kk_tide_wall": {
       "block": 2,
-      "plan_block": 1
+      "plan_block": 3
     },
     "proto_kk_treatise": {
       "innate": true
@@ -624,10 +620,10 @@
       "damage": 3
     },
     "proto_kk_vanguard": {
-      "plan_power_amount": 1
+      "power_amount": 1
     },
     "proto_kk_war_council": {
-      "plan_damage": 3
+      "power_amount": 1
     },
     "proto_kk_well_laid": {
       "formula_base": 1,

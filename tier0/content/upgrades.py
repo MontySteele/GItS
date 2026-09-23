@@ -247,7 +247,9 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #: `gen_klee_cards.PLAN_UPGRADE_VARS`; the three move together or a smithed
 #: prototype is two different cards.
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
-    "plan_damage": ("damage", "damage_per_companion_last_turn"),
+    "plan_damage": ("damage", "damage_per_companion_last_turn",
+                    # R276, Feigned Retreat's hit when she WAS hurt.
+                    "damage_if_unhurt"),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
     # exactly as `damage_per_companion_last_turn` is a damage clause wearing
     # one, so it takes `plan_block`'s key rather than a sixth key of its own --
@@ -257,11 +259,22 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     # never touches (`EB-685`): a rate that smithed would scale with a deck the
     # offer screen cannot see.
     "plan_block": ("block", "block_per_plan_this_morning",
-                   "block_per_plan_held"),
+                   "block_per_plan_held",
+                   # R276, Tide Wall: the flat bonus on top of the intent.
+                   "block_front_intent"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
     "plan_draw": ("draw",),
+    # R276. Feigned Retreat's SECOND printed number ("deal 14 instead") is the
+    # same clause's `unhurt_amount` field, not its `amount` --
+    # `PLAN_DELTA_FIELDS` names the field, and both appliers read it.
+    "plan_unhurt_damage": ("damage_if_unhurt",),
+    # R276, Battle Plan: "your Attacks deal N more damage" this turn.
+    "plan_attack_bonus": ("attack_damage_this_turn",),
 }
+
+#: The field a `plan_*` key bumps when it is not `amount` (R276).
+PLAN_DELTA_FIELDS: dict[str, str] = {"plan_unhurt_damage": "unhurt_amount"}
 
 
 def _plan_default_delta(plan: list[dict]) -> dict:
@@ -889,9 +902,10 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # nested spelling would be a row neither engine can load.
             plan_line = list(getattr(card, "plan", None) or [])
             ok = False
+            field = PLAN_DELTA_FIELDS.get(key, "amount")
             for plan_op in PLAN_DELTA_OPS[key]:
                 ok = _bump_first((fx for fx in plan_line
-                                  if fx.get("op") == plan_op), "amount", val)
+                                  if fx.get("op") == plan_op), field, val)
                 if ok:
                     break
         elif key == "block":

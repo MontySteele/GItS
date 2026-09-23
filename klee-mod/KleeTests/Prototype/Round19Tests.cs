@@ -306,24 +306,25 @@ public class Round19Tests
     // waiting buys the damage and nothing more. That is the card's shape and a
     // design reading, and no payment moves for it.
 
+    // R276 PICK 1 REWROTE THE CARD to the halves rule: 6 Block now, and the
+    // Plan is one hit whose size reads whether she was hurt since writing it.
+
     [Fact]
-    public void Feigned_retreats_plan_carries_both_clauses_in_printed_order()
+    public void Feigned_retreats_plan_is_one_hit_that_reads_her_hp()
     {
         var card = new ProtoKkFeignedRetreat();
-        var clauses = card.PlanClauses;
+        var clause = Assert.Single(card.PlanClauses);
 
-        Assert.Equal(2, clauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Block, clauses[0].Kind);
-        Assert.Equal(4, clauses[0].Amount);
-        Assert.Equal(KokomiPlan.Kind.Damage, clauses[1].Kind);
-        Assert.Equal(6, clauses[1].Amount);
+        Assert.Equal(KokomiPlan.Kind.DamageIfUnhurt, clause.Kind);
+        Assert.Equal(9, clause.Amount);
+        Assert.Equal(14, clause.Alt);
+        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
+        // Stamped when WRITTEN, never on the card's own list.
+        Assert.Null(clause.WrittenHp);
 
-        // AND THE FACE PRINTS WHAT THE CLAUSES DO, which is the half the seat
-        // was reading: the same 4 now and planned, plus the damage.
         var face = string.Join(" ", Il.Strings(
             Il.Method("ProtoKkFeignedRetreat", "get_Localization")));
-        Assert.Contains("[gold]Plan[/gold]: Gain", face);
-        Assert.Contains("[gold]Block[/gold] and deal", face);
+        Assert.Contains("If you lost no HP since you wrote this", face);
     }
 
     [Fact]
@@ -533,77 +534,42 @@ public class Round19Tests
         // refuses.
         Assert.True(ValueProp.Move.IsPoweredAttack());
 
-        var vars = ((IEnumerable<DynamicVar>)typeof(ProtoKkKuragesOath)
+        // Opening Gambit carries the Skill hit since R276 pick 1 (the Oath
+        // gains Block face-up now).
+        var vars = ((IEnumerable<DynamicVar>)typeof(ProtoKkOpeningGambit)
             .GetProperty("CanonicalVars", All)!
-            .GetValue(new ProtoKkKuragesOath())!).ToList();
+            .GetValue(new ProtoKkOpeningGambit())!).ToList();
         var damage = vars.OfType<DamageVar>().Single();
 
-        Assert.Equal(CardType.Skill, new ProtoKkKuragesOath().Type);
+        Assert.Equal(CardType.Skill, new ProtoKkOpeningGambit().Type);
         Assert.Equal(ValueProp.Move, damage.Props);
     }
 
     // ==================================================================
-    // `EB-539` -- Well Laid's bare face, and the rider-tip split
+    // R276 pick 1 -- Well Laid, re-aimed off the morning
     // ==================================================================
     //
-    // THE FIND (Kokomi r19 lane 2). On a bare morning `Well Laid` printed
-    // "Deal 2 damage, already including 3 for each Plan carried out this
-    // morning", and the seat read it as self-contradictory: 2 cannot already
-    // include a 3 that nothing paid.
-    //
-    // IT IS `EB-441`'s CLAUSE WORKING EXACTLY AS WRITTEN, on the one board
-    // where the fold is zero -- the face's number IS live and the count IS
-    // folded into it. What the row asked for is a face that says one thing at
-    // count 0 and another above it, and the engine does not have one
-    // (`Round16Tests.A_card_cannot_print_one_face_in_a_shop_and_another_in_a_fight`
-    // checks that against the shipped `sts2.dll`).
-    //
-    // THE REMEDY IS THE CODEBASE'S OWN FOR THIS SHAPE: Undertow's
-    // `ForDebuffRider` (`EB-484`), one count over. The FACE prints the live
-    // total and nothing else; the RULE and the live count go on the rider tip.
+    // `EB-539` split Well Laid's morning rule off its face onto a rider tip
+    // because the count was invisible on a bare morning. R276 pick 1 re-aimed
+    // the card at the enemy's debuffs, a count the board shows, so the face
+    // prints the rule and both numbers and the morning rider is off the card.
+    // (`KokomiRiderTips.MorningDamageBody` stays, attached to no row today.)
 
     [Fact]
-    public void EB539_well_laids_face_is_the_live_total_and_nothing_else()
+    public void Well_laid_prints_its_rule_and_reads_the_targets_debuffs()
     {
         var card = Source(
             "Cards/Prototype/Generated/ProtoKkWellLaid.cs");
 
         Assert.Contains(
-            "(\"description\", \"Deal {CalculatedDamage:diff()} damage.\")",
+            "(\"description\", \"Deal {CalculationBase:diff()} damage, plus "
+          + "{ExtraDamage:diff()} for each debuff on the enemy.\")",
             card);
-        Assert.DoesNotContain("already including", card);
-        // The var triple is untouched: the number is still the live fold, and
-        // 2 on a bare morning is still what a bare morning pays.
-        Assert.Contains("new CalculationBaseVar(2m)", card);
+        Assert.Contains("new CalculationBaseVar(3m)", card);
         Assert.Contains("new ExtraDamageVar(3m)", card);
-        Assert.Contains("PlansThisMorning", card);
-    }
-
-    [Fact]
-    public void EB539_the_rule_and_the_live_count_are_on_the_rider_tip()
-    {
-        var card = Source(
-            "Cards/Prototype/Generated/ProtoKkWellLaid.cs");
-        // Handed the SAME base and per the rider emits the vars from, so the
-        // sentence cannot quote a number the hit does not use.
-        Assert.Contains(
-            "KokomiRiderTips.ForMorningDamageRider(", card);
-        Assert.Contains(", this, 2, 3)", card);
-
-        var body = Printed(typeof(KokomiRiderTips), "MorningDamageBody");
-        Assert.Contains(", plus ", body);
-        // `EB-623`: the clause says WHEN in the base game's timing words.
-        Assert.Contains("for each [gold]Plan[/gold] the "
-                      + "[gold]Bake-Kurage[/gold] carried out at the start of "
-                      + "this turn",
-                        body);
-        Assert.Contains("; it carried out ", body);
-
-        Assert.Equal("KLEEMOD-MORNING_DAMAGE_RIDER",
-                     KokomiRiderTips.MorningDamageKey);
-        Assert.Contains(
-            "[Cards.KokomiRiderTips.MorningDamageKey + \".title\"]",
-            Source("KleeMod.cs"));
+        Assert.Contains("KokomiOverhaulKit.DebuffCount(target)", card);
+        Assert.DoesNotContain("PlansThisMorning", card);
+        Assert.DoesNotContain("ForMorningDamageRider", card);
     }
 
     [Fact]
@@ -618,19 +584,6 @@ public class Round19Tests
         Assert.Contains(calls, c => c.Contains("CreatureOf"));
         Assert.Contains(calls, c => c.Contains("get_CombatState"));
         Assert.Contains(calls, c => c.Contains("get_PlansThisMorning"));
-    }
-
-    [Fact]
-    public void EB539_the_word_moved_with_the_rule_and_kept_its_definition()
-    {
-        // The arm-keyword attach is derived from the words the card PRINTS,
-        // and this split took `Plan` off the face. Without the generator
-        // carrying the rider's own word into that scan the row would have gone
-        // on saying `Plan` with nothing on screen defining it -- the silence
-        // the attach rule exists to make impossible.
-        Assert.Contains(
-            "ArmKeywordTips.ForPlan(",
-            Source("Cards/Prototype/Generated/ProtoKkWellLaid.cs"));
     }
 
     // ==================================================================

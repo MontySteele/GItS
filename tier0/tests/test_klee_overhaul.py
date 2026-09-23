@@ -584,7 +584,11 @@ def test_the_prototype_rule_states_the_rows_own_numbers():
     # shared Block and Mend clauses -- which is the whole point of a rule
     # written over ops rather than over characters.
     assert delta("proto_kk_coral_bulwark") == {"block": 3}
-    assert delta("proto_kk_the_moon_a_ship") == {"mend": 2}
+    # R276 pick 1 gave The Moon a Block now-line, so no row's face-up half is
+    # a bare Mend any more; the Mend clause of the rule is asked of the op.
+    assert upgrades.prototype_default_delta(
+        "proto_kk_the_moon_a_ship", 2, [{"op": "mend", "amount": 3}]) == {
+            "mend": 2}
 
 
 def test_the_cost_clause_is_the_last_resort_and_only_at_two():

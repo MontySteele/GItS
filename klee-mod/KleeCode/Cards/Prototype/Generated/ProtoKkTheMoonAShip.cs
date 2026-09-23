@@ -48,7 +48,7 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Moon, A Ship O'er the Seas"),
-        ("description", "[gold]Mend[/gold] {Mend:diff()}. [gold]Plan[/gold]: [gold]Mend[/gold] {PlanMend:diff()}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: [gold]Mend[/gold] {PlanMend:diff()}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -63,7 +63,7 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Mend", 3m),
+            new BlockVar(12m, ValueProp.Move),
             new DynamicVar("PlanMend", 6m)
         };
 
@@ -81,12 +81,12 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await KokomiRules.Mend(choiceContext, Owner.Creature, DynamicVars["Mend"].IntValue);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Mend"].UpgradeValueBy(2m);
+        DynamicVars.Block.UpgradeValueBy(4m);
         DynamicVars["PlanMend"].UpgradeValueBy(2m);
     }
 }

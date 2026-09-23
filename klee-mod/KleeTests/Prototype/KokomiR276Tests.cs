@@ -50,8 +50,7 @@ public class KokomiR276Tests
         // card of hers whose face-up half deals damage, Skills included.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoKkAmbush(), new ProtoKkChainOfCommand(),
-                     new ProtoKkOpeningGambit(), new ProtoKkKuragesOath(),
+                     new ProtoKkChainOfCommand(), new ProtoKkOpeningGambit(),
                  })
         {
             Assert.Equal(MegaCrit.Sts2.Core.Entities.Cards.CardType.Skill,
@@ -153,6 +152,78 @@ public class KokomiR276Tests
             c => c.Contains("PrincessOfWatatsumiPlanPower"));
         var charge = applies.FindIndex(c => c.Contains("ChargePerTurnPower"));
         Assert.True(live >= 0 && plan > live && charge > plan);
+    }
+
+    // ---- pick 1: the halves rewrite's five new Plan clauses -----------------
+
+    [Fact]
+    public void The_new_clauses_resolve_through_their_own_seams()
+    {
+        var resolve = Il.CallSequence(Il.Method("KokomiPlan", "ResolveOne"));
+        Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.FirstAttackTwice"));
+        Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.FirstCardFree"));
+        Assert.Contains(resolve, c => c.Contains("PowerCmd.Apply<AttackUpThisTurnPower>"));
+        Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.IntendedDamage"));
+        Assert.Contains(resolve, c => c.Contains("KokomiPlan.UnhurtAmount"));
+        // Feigned Retreat's HP is stamped when the Plan is WRITTEN.
+        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
+                        c => c.Contains("get_CurrentHp"));
+    }
+
+    [Fact]
+    public void Feigned_retreat_reads_her_hp_against_the_written_hp()
+    {
+        var kokomi = Seat.Kokomi().Creature;
+        var hp = kokomi.CurrentHp;
+        var method = typeof(KokomiPlan).GetMethod("UnhurtAmount",
+                                                  HeadlessGame.All)!;
+        int Pay(int? written) => (int)method.Invoke(null, new object[]
+        {
+            kokomi,
+            new KokomiPlan.Planned(KokomiPlan.Kind.DamageIfUnhurt, 9,
+                                   KokomiPlan.Aim.FrontEnemy, Alt: 14,
+                                   WrittenHp: written),
+        })!;
+        Assert.Equal(14, Pay(hp));          // unhurt since writing
+        Assert.Equal(9, Pay(hp + 1));       // lost HP since writing
+        Assert.Equal(14, Pay(null));        // unstamped reads as unhurt
+    }
+
+    [Fact]
+    public void Pincers_switch_skips_a_write_and_ends_with_the_turn()
+    {
+        Assert.Contains(
+            Il.Calls(Il.Method("FirstAttackTwicePower", "ModifyCardPlayCount")),
+            c => c.Contains("BakeKuragePet.Is"));
+        var spent = Il.Calls(Il.Method("FirstAttackTwicePower",
+                                       "AfterCardPlayed"));
+        Assert.Contains(spent, c => c.Contains("KokomiPlan.PlayedOnPet"));
+        Assert.Contains(spent, c => c.Contains("PowerCmd.Remove"));
+        Assert.Contains(Il.Calls(Il.Method("FirstAttackTwicePower",
+                                           "AfterSideTurnEnd")),
+                        c => c.Contains("PowerCmd.Remove"));
+    }
+
+    [Fact]
+    public void Stolen_chapters_switch_zeroes_a_cost_and_is_spent_by_a_real_play()
+    {
+        Assert.Contains(
+            Il.Calls(Il.Method("FirstCardFreePower", "AfterCardPlayed")),
+            c => c.Contains("get_IsAutoPlay"));
+        Assert.Contains(Il.Calls(Il.Method("FirstCardFreePower",
+                                           "AfterSideTurnEnd")),
+                        c => c.Contains("PowerCmd.Remove"));
+        Assert.NotNull(typeof(FirstCardFreePower).GetMethod(
+            "TryModifyEnergyCostInCombat", HeadlessGame.All));
+    }
+
+    [Fact]
+    public void Tide_walls_intent_read_is_null_safe()
+    {
+        Assert.Equal(0, KokomiOverhaulKit.IntendedDamage(null, null));
+        Assert.Contains(
+            Il.Calls(Il.Method("KokomiOverhaulKit", "IntendedDamage")),
+            c => c.Contains("AttackIntent.GetTotalDamage"));
     }
 
     [Fact]

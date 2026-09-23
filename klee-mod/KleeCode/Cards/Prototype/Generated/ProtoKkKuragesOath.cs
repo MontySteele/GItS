@@ -32,26 +32,20 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkKuragesOath : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
+public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlannedCard
 {
-    /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
-    public Element Element => Element.Hydro;
-
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesHydro };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_kurages_oath");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Oath"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -66,7 +60,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(3m, ValueProp.Move),
+            new BlockVar(4m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(7m)
         };
 
@@ -84,12 +78,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, IElementalCard, IChara
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .SpawningHitVfxOnEachCreature()
-            .Execute(choiceContext);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 
     protected override void OnUpgrade()

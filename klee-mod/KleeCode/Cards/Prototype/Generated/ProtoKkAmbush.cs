@@ -32,26 +32,20 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkAmbush : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
+public sealed class ProtoKkAmbush : CustomCardModel, ICharacterCard, IPlannedCard
 {
-    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
-    public Element Element => Element.Hydro;
-
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesHydro };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_ambush");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ambush"),
-        ("description", "Deal {Damage:diff()} damage. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -66,14 +60,14 @@ public sealed class ProtoKkAmbush : CustomCardModel, IElementalCard, ICharacterC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move),
+            new BlockVar(5m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(12m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkAmbush()
-        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrEnemy, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrSelf, autoAdd: false)
     {
     }
 
@@ -84,16 +78,12 @@ public sealed class ProtoKkAmbush : CustomCardModel, IElementalCard, ICharacterC
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             return;
         }
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .Execute(choiceContext);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Block.UpgradeValueBy(2m);
         DynamicVars["PlanDamage"].UpgradeValueBy(3m);
     }
 }

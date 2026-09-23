@@ -992,7 +992,10 @@ def aura_elements_for(card: dict, profile: "CharacterProfile",
 #: reach `ElementalHit.Deal`. A closed set for `PLAN_CLAUSE_KINDS`' reason: a
 #: clause that starts hitting must come here deliberately.
 PLAN_DAMAGE_OPS = frozenset({
-    "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn"})
+    "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn",
+    # R276, Feigned Retreat: `KokomiPlan.Kind.DamageIfUnhurt` hits through
+    # the same `Hit`.
+    "damage_if_unhurt"})
 
 
 def element_tag_elements_for(card: dict, profile: "CharacterProfile",
@@ -2165,6 +2168,18 @@ PLAN_CLAUSE_KINDS = {
     # size is the RULE's (`NextAttackDamagePower.Bonus`), so the clause carries
     # no amount, exactly as the two riders above carry none.
     "next_attack_damage": "NextAttackDamage",
+    # R276 PICK 1, THE HALVES REWRITE: Plan lines that buy what only a head
+    # start can buy. Pincer's "your first Attack is played twice", Stolen
+    # Chapter's "the first card you play costs 0" and Battle Plan's "your
+    # Attacks deal N more damage" all mean THIS TURN, the turn the Plan is
+    # carried out on. Feigned Retreat's hit reads whether she lost HP since
+    # the Plan was written (the entry records her HP then), and Tide Wall's
+    # Block reads the front enemy's intent at carry-out.
+    "first_attack_twice": "FirstAttackTwice",
+    "first_card_free": "FirstCardFree",
+    "damage_if_unhurt": "DamageIfUnhurt",
+    "attack_damage_this_turn": "AttackDamageThisTurn",
+    "block_front_intent": "BlockFrontIntent",
     "apply_power": None,
 }
 
@@ -2177,7 +2192,9 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "next_plan_double_damage",
                        "next_plan_extra_carry_out",
                        # `EB-655`, Battle Plan's rider: the size is the rule's.
-                       "next_attack_damage"}
+                       "next_attack_damage",
+                       # R276: two switches, "the first ..." has no size.
+                       "first_attack_twice", "first_card_free"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2198,7 +2215,9 @@ PLAN_AIM_CS = {
     "enemies_intending_attack": "KokomiPlan.Aim.EnemiesIntendingAttack",
 }
 PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
-                  "damage_per_companion_last_turn", "apply_power"}
+                  "damage_per_companion_last_turn", "apply_power",
+                  # R276, Feigned Retreat.
+                  "damage_if_unhurt"}
 #: The clauses a `times:` may repeat -- the flat hit, and nothing else
 #: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
 PLAN_TIMES_OPS = {"damage"}
@@ -2215,7 +2234,20 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  "next_plan_double_damage",
                  "next_plan_extra_carry_out",
                  # `EB-655`, Battle Plan's rider.
-                 "next_attack_damage"}
+                 "next_attack_damage",
+                 # R276. Each names the carry-out turn or the writing, so a
+                 # now-line spelling would be a different, unpriced card.
+                 "first_attack_twice", "first_card_free", "damage_if_unhurt",
+                 "attack_damage_this_turn", "block_front_intent"}
+
+#: R276. Feigned Retreat's second printed number ("deal 14 instead") -- the
+#: hit when she lost no HP since the Plan was written. The twin of
+#: `kokomi_plan.UNHURT_FIELD`.
+PLAN_UNHURT_FIELD = "unhurt_amount"
+
+#: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
+#: on top of a number read off the board, and the base card prints none.
+PLAN_ZERO_AMOUNT_OPS = {"block_front_intent"}
 
 
 def plan_reason(card: dict) -> str | None:
@@ -2251,6 +2283,8 @@ def plan_reason(card: dict) -> str | None:
         # beat is two stacks -- an `amount` -- rather than two applications.
         if op in PLAN_TIMES_OPS:
             allowed.add("times")
+        if op == "damage_if_unhurt":
+            allowed.add(PLAN_UNHURT_FIELD)
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
@@ -2262,9 +2296,16 @@ def plan_reason(card: dict) -> str | None:
                         "or more")
         if op not in PLAN_AMOUNTLESS_OPS:
             amount = eff.get("amount")
+            floor = 0 if op in PLAN_ZERO_AMOUNT_OPS else 1
             if not isinstance(amount, int) or isinstance(amount, bool) \
-                    or amount <= 0:
+                    or amount < floor:
                 return f"plan clause {op} amount must be a positive literal int"
+        if op == "damage_if_unhurt":
+            unhurt = eff.get(PLAN_UNHURT_FIELD)
+            if not isinstance(unhurt, int) or isinstance(unhurt, bool) \
+                    or unhurt <= 0:
+                return (f"plan clause {op} {PLAN_UNHURT_FIELD} must be a "
+                        "positive literal int")
         if op in PLAN_AIMED_OPS and eff.get("target") not in PLAN_AIM_CS:
             return (f"plan clause {op} target {eff.get('target')!r} -- a "
                     f"planned clause lands {sorted(PLAN_AIM_CS)}")
@@ -2286,6 +2327,16 @@ PLAN_UPGRADE_VARS = {
     "plan_mend": "PlanMend",
     "plan_power_amount": "PlanPowerAmount",
     "plan_draw": "PlanCards",
+    # R276, Battle Plan's per-Attack bonus.
+    "plan_attack_bonus": "PlanAttackBonus",
+}
+
+#: R276. A `plan_*` key that moves a SECOND number on a clause another key
+#: already owns the var of -- Feigned Retreat's "deal 14 instead" beside its 9.
+#: `{key: (op, field, var)}`; `upgrades.PLAN_DELTA_FIELDS` is the sim's half.
+PLAN_ALT_UPGRADE_VARS = {
+    "plan_unhurt_damage": ("damage_if_unhurt", PLAN_UNHURT_FIELD,
+                           "PlanUnhurtDamage"),
 }
 
 
@@ -2319,7 +2370,28 @@ def plan_var_effects(card: dict) -> dict[int, tuple[str, str]]:
     return out
 
 
-def plan_clause_cs(eff: dict, var: str | None = None) -> str:
+def plan_alt_var_effects(card: dict) -> dict[int, tuple[str, str, str]]:
+    """`{index in plan: (delta key, field, var name)}` for a clause's SECOND
+    upgraded number (R276, `PLAN_ALT_UPGRADE_VARS`). The first clause of the
+    key's op owns it, `plan_var_effects`' rule."""
+    plan = card.get("plan") or []
+    if not plan:
+        return {}
+    deltas = upgrade_plan(card)[0]
+    out: dict[int, tuple[str, str, str]] = {}
+    for key, (op, field, var) in PLAN_ALT_UPGRADE_VARS.items():
+        if key not in deltas:
+            continue
+        idx = next((i for i, fx in enumerate(plan)
+                    if fx.get("op") == op
+                    and isinstance(fx.get(field), int)), None)
+        if idx is not None:
+            out[idx] = (key, field, var)
+    return out
+
+
+def plan_clause_cs(eff: dict, var: str | None = None,
+                   alt_var: str | None = None) -> str:
     """One `KokomiPlan.Planned` literal for one plan clause.
 
     `var` is the DynamicVar this clause's amount rides when the card's upgrade
@@ -2344,6 +2416,11 @@ def plan_clause_cs(eff: dict, var: str | None = None) -> str:
     # key existed emits exactly the literal it always did.
     times = eff.get("times")
     tail = f", Times: {int(times)}" if isinstance(times, int) else ""
+    # R276. Feigned Retreat's hit when she lost no HP since writing it.
+    if op == "damage_if_unhurt":
+        alt = (f'DynamicVars["{alt_var}"].IntValue' if alt_var
+               else str(int(eff[PLAN_UNHURT_FIELD])))
+        tail += f", Alt: {alt}"
     return (f"new KokomiPlan.Planned(KokomiPlan.Kind.{kind}, {amount}, "
             f"{aim}{tail})")
 
@@ -3758,6 +3835,7 @@ def blocked_reason(
                 and companions_played_calc_rider(card, effect) is None
                 and kokomi_companions_this_turn_calc_rider(card, effect) is None
                 and plans_carried_out_morning_rider(card, effect) is None
+                and debuffs_on_target_calc_rider(card, effect) is None
                 and plans_held_draw_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
                 and fanfare_drained_calc_rider(card, effect) is None
@@ -4890,6 +4968,30 @@ def plans_carried_out_morning_rider(
             "card.Owner.Creature).PlansThisMorning")
 
 
+def debuffs_on_target_calc_rider(
+        card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: debuffs_on_target}` -- Well Laid
+    (R276 pick 1), "Deal 3 damage, plus 3 for each debuff on the enemy".
+
+    A DISTINCT DEBUFF, NOT A STACK: Weak 2 is one debuff. The count is
+    `KokomiOverhaulKit.DebuffCount`, the same `PowerType.Debuff` read
+    `HasDebuff` makes (an aura is a Buff and does not count); the sim's twin is
+    `kokomi_plan.debuff_count`. Read off the TARGET the calculated var is
+    handed, so it is AIMED ONLY -- an all-enemies form would print one number
+    for a board that takes several -- and null-guarded for `aura_calc_rider`'s
+    reason: preview calls `Calculate(null)` whenever nothing is hovered.
+    """
+    if eff.get("op") != "damage" or eff.get("target") != "enemy":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    if formula.get("count") != "debuffs_on_target":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (_, target) => KokomiOverhaulKit.DebuffCount(target)")
+
+
 def plans_held_draw_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: plans_held}` on a DRAW -- Tide
     Chart (the tempo shelf, round 9 pick 1), "draw 1 card for each Plan the
@@ -5984,6 +6086,10 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     plans_morning = plans_carried_out_morning_rider(card, eff)
     if plans_morning is not None:
         return plans_morning
+    # R276, Well Laid: per distinct debuff on the aimed enemy.
+    debuffs_on_target = debuffs_on_target_calc_rider(card, eff)
+    if debuffs_on_target is not None:
+        return debuffs_on_target
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn
@@ -6472,6 +6578,8 @@ def build_vars(card: dict) -> list[str]:
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
+    for index, (_key, field, var) in sorted(plan_alt_var_effects(card).items()):
+        out.append(f'new DynamicVar("{var}", {int(plan_line[index][field])}m)')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore
@@ -6789,6 +6897,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or companions_played_calc_rider(card, e) is not None
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or plans_carried_out_morning_rider(card, e) is not None
+            or debuffs_on_target_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             # QUARANTINED (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
@@ -6810,6 +6919,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or companions_played_calc_rider(card, e) is not None
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or plans_carried_out_morning_rider(card, e) is not None
+            or debuffs_on_target_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             # QUARANTINED (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
@@ -10825,6 +10935,7 @@ def _authored_face_numbers(card: dict):
     # unkeyed number above does: the cursor has to step past it or a later
     # literal gets mistaken for it.
     plan_vars = plan_var_effects(card)
+    alt_vars = plan_alt_var_effects(card)
     for index, eff in enumerate(card.get("plan") or []):
         amount = eff.get("amount")
         if not isinstance(amount, int):
@@ -10834,6 +10945,14 @@ def _authored_face_numbers(card: dict):
             yield key, var, amount
         else:
             yield None, None, amount
+        # R276. Feigned Retreat prints a SECOND number on the same clause.
+        unhurt = eff.get(PLAN_UNHURT_FIELD)
+        if isinstance(unhurt, int):
+            if index in alt_vars:
+                key, _field, var = alt_vars[index]
+                yield key, var, unhurt
+            else:
+                yield None, None, unhurt
 
 
 # `EB-315`. The vars whose printed number is a CARD COUNT, so the face has to
@@ -12706,6 +12825,12 @@ def build_upgrade(card: dict) -> list[str]:
             done.add(plan_key)
             lines.append(f'DynamicVars["{plan_var}"].UpgradeValueBy('
                          f'{int(deltas[plan_key])}m);')
+    for _index, (plan_key, _field, plan_var) in sorted(
+            plan_alt_var_effects(card).items()):
+        if plan_key in deltas and plan_key not in done:
+            done.add(plan_key)
+            lines.append(f'DynamicVars["{plan_var}"].UpgradeValueBy('
+                         f'{int(deltas[plan_key])}m);')
     if "copy_cost_override" in deltas:
         done.add("copy_cost_override")
         lines.append(
@@ -13134,9 +13259,11 @@ def emit(
     plan_member = ""
     if plan_body:
         plan_vars = plan_var_effects(card)
+        alt_vars = plan_alt_var_effects(card)
         clauses = (",\n" + " " * 12).join(
             plan_clause_cs(clause,
-                           plan_vars[i][1] if i in plan_vars else None)
+                           plan_vars[i][1] if i in plan_vars else None,
+                           alt_vars[i][2] if i in alt_vars else None)
             for i, clause in enumerate(plan_body))
         interfaces += ", IPlannedCard"
         plan_member = (

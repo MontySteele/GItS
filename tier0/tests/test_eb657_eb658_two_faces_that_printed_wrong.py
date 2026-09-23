@@ -51,13 +51,15 @@ def test_feints_face_prints_both_branches_as_folded_vars():
     # write and never printed. The two folded branch vars are unchanged.
     assert face == ("Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] "
                     "was carried out this turn, deal {BranchDamage:diff()} "
-                    "damage instead. [gold]Plan[/gold]: Deal "
-                    "{PlanDamage:diff()} damage.")
+                    "damage instead. [gold]Plan[/gold]: Apply 1 "
+                    "[gold]Vulnerable[/gold].")
     # The static swap the seat read is gone from this row entirely.
     assert "{IfUpgraded:show:" not in face
 
     src = (GENERATED / "ProtoKkFeint.cs").read_text(encoding="utf-8")
-    assert face in src
+    # R276 pick 1: the Plan's Vulnerable upgrades (1 -> 2), so the generated
+    # face carries its token where the sheet prints the literal.
+    assert face.replace("Apply 1 ", "Apply {PlanPowerAmount:diff()} ") in src
     # `EB-670` (the live look of 2026-09-16) MOVED THE HEADLINE'S CLASS and
     # nothing else: on a morning a Plan HAD carried out, the else-arm number
     # was the first number a reader met and was not the number the card would

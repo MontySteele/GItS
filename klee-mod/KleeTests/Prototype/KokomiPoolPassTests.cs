@@ -97,28 +97,31 @@ public class KokomiPoolPassTests
     // ======================================================================
 
     [Fact]
-    public void Riptide_hits_all_enemies_on_both_halves()
+    public void Riptide_hits_all_enemies_now_and_plans_energy_and_a_card()
     {
+        // R276 pick 1: the now-line is the AoE; the Plan line is what only a
+        // head start buys, 1 Energy and a card on the carry-out turn.
         var card = new ProtoKkRiptide();
         Assert.Equal(2, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(CardRarity.Common, card.Rarity);
 
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.Damage, clause.Kind);
-        Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
-        Assert.Equal(13, clause.Amount);
-        Assert.Equal(1, clause.Times);      // the default, said out loud
+        var clauses = card.PlanClauses;
+        Assert.Equal(2, clauses.Count);
+        Assert.Equal(KokomiPlan.Kind.Energy, clauses[0].Kind);
+        Assert.Equal(KokomiPlan.Kind.Draw, clauses[1].Kind);
+        Assert.All(clauses, c => Assert.Equal(KokomiPlan.Aim.Self, c.Aim));
     }
 
     [Fact]
-    public void Riptide_prints_both_numbers_and_the_smith_moves_both()
+    public void Riptide_prints_both_now_numbers_and_the_smith_moves_both()
     {
-        // The row's two printed numbers are its two halves, so the face prints
-        // each as a var and `OnUpgrade` moves those same vars (`EB-283`).
+        // The now-line's two printed numbers are vars and `OnUpgrade` moves
+        // them (`EB-283`); the Plan line does not upgrade.
         var card = new ProtoKkRiptide();
         Assert.Contains("{Damage:diff()}", Face(card));
-        Assert.Contains("{PlanDamage:diff()}", Face(card));
+        Assert.Contains("{ExtraDamage:diff()}", Face(card));
+        Assert.DoesNotContain("{PlanDamage", Face(card));
 
         var moves = Il.Calls(Il.Method("ProtoKkRiptide", "OnUpgrade"));
         Assert.Contains(moves, c => c.Contains("UpgradeValueBy"));
@@ -129,19 +132,17 @@ public class KokomiPoolPassTests
     // ======================================================================
 
     [Fact]
-    public void Pincers_plan_is_three_separate_hits()
+    public void Pincers_plan_plays_the_first_attack_twice()
     {
-        // `Times` on the clause, not a bigger `Amount`: three hits of 3 and
-        // one hit of 9 are different against an aura, against anything hung
-        // off a strike, and against a body that dies partway.
+        // R276 pick 1: "This turn, your first Attack is played twice." A
+        // switch with no size, applied at carry-out.
         var card = new ProtoKkPincer();
         Assert.Equal(1, card.EnergyCost.Canonical);
 
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.Damage, clause.Kind);
-        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
-        Assert.Equal(3, clause.Amount);
-        Assert.Equal(3, clause.Times);
+        Assert.Equal(KokomiPlan.Kind.FirstAttackTwice, clause.Kind);
+        Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
+        Assert.Equal(0, clause.Amount);
     }
 
     [Fact]
@@ -249,10 +250,10 @@ public class KokomiPoolPassTests
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(CardRarity.Common, card.Rarity);
 
-        // The `CalculatedDamageVar` TRIPLE: the base is the floor a morning
-        // with no Plan pays, the extra is the per-Plan term.
+        // The `CalculatedDamageVar` TRIPLE (R276 pick 1): the base is what a
+        // clean enemy takes, the extra is the per-debuff term.
         var vars = Vars(card);
-        Assert.Equal(2m, vars.Single(v => v.Name == "CalculationBase").BaseValue);
+        Assert.Equal(3m, vars.Single(v => v.Name == "CalculationBase").BaseValue);
         Assert.Equal(3m, vars.Single(v => v.Name == "ExtraDamage").BaseValue);
         Assert.Contains(vars, v => v.Name == "CalculatedDamage");
     }
@@ -260,32 +261,24 @@ public class KokomiPoolPassTests
     [Fact]
     public void Well_laid_prints_no_plan_line()
     {
-        // It reads the morning; it is not part of one. A Plan line here would
-        // make the card pay for a morning it had just postponed.
         Assert.False(typeof(IPlannedCard)
                          .IsAssignableFrom(typeof(ProtoKkWellLaid)));
-        // `EB-539`: the morning clause left the FACE for the rider tip -- a
-        // card has one face, and "already including 3" is a contradiction on a
-        // bare morning -- so the face is the live total alone and the rule is
-        // read one surface over (`Round19Tests`, `EB-539`).
-        Assert.Equal("Deal {CalculatedDamage:diff()} damage.",
+        Assert.Equal("Deal {CalculationBase:diff()} damage, plus "
+                   + "{ExtraDamage:diff()} for each debuff on the enemy.",
                      Face(new ProtoKkWellLaid()));
     }
 
     [Fact]
-    public void Well_laid_reads_the_same_morning_tide_wall_reads()
+    public void Well_laid_counts_distinct_debuffs_on_its_target()
     {
-        // ONE FACT AND NOT TWO COUNTS. `PlansThisMorning` is written once, at
-        // the drain, before the first clause runs, and cleared on the turn
-        // boundary -- so the morning a now-line sees and the morning Tide
-        // Wall's planned Block multiplies are the same number.
+        // R276 pick 1 re-aimed it off Plan volume: the count is the target's
+        // debuffs, the same `PowerType.Debuff` read `HasDebuff` makes.
         var mine = Il.Calls(Il.Method("ProtoKkWellLaid", "get_CanonicalVars"))
             .Concat(NestedCalls(typeof(ProtoKkWellLaid)))
             .ToList();
-        Assert.Contains(mine, c => c.Contains("PlansThisMorning"));
-
-        var one = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
-        Assert.Contains(Il.Calls(one), c => c.Contains("PlansThisMorning"));
+        Assert.Contains(mine, c => c.Contains("DebuffCount"));
+        Assert.DoesNotContain(mine, c => c.Contains("PlansThisMorning"));
+        Assert.Equal(0, KokomiOverhaulKit.DebuffCount(null));
     }
 
     // ======================================================================
@@ -293,21 +286,19 @@ public class KokomiPoolPassTests
     // ======================================================================
 
     [Fact]
-    public void Feigned_retreat_plans_block_and_then_damage()
+    public void Feigned_retreat_plans_one_hit_that_reads_her_hp()
     {
-        // TWO CLAUSES AND THE ORDER IS THE FACE. "Gain 4 Block and deal 6
-        // damage" is read top to bottom, and the Block is what guards the turn
-        // the hit is taken on.
+        // R276 pick 1: 6 Block now; Plan 9 damage, or 14 if she lost no HP
+        // since writing it.
         var card = new ProtoKkFeignedRetreat();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Skill, card.Type);
 
-        var clauses = card.PlanClauses;
-        Assert.Equal(2, clauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Block, clauses[0].Kind);
-        Assert.Equal(KokomiPlan.Aim.Self, clauses[0].Aim);
-        Assert.Equal(KokomiPlan.Kind.Damage, clauses[1].Kind);
-        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clauses[1].Aim);
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal(KokomiPlan.Kind.DamageIfUnhurt, clause.Kind);
+        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
+        Assert.Equal(9, clause.Amount);
+        Assert.Equal(14, clause.Alt);
     }
 
     // ======================================================================

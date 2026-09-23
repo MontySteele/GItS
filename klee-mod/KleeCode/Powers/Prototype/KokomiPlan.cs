@@ -172,6 +172,21 @@ public static class KokomiPlan
         // the shape this pass exists to undo; `EB-668` then made it DAMAGE,
         // because a cost seam cannot tell a face-up play from a write.
         NextAttackDamage,
+        // R276 PICK 1, THE HALVES REWRITE: Plan lines that buy what only a
+        // head start can buy. The three switches mean THIS TURN, the turn the
+        // Plan is carried out on:
+        //   Pincer: "This turn, your first Attack is played twice."
+        //   Stolen Chapter: "This turn, the first card you play costs 0."
+        //   Battle Plan: "This turn, your Attacks deal N more damage."
+        // Feigned Retreat hits harder when she lost no HP since the Plan was
+        // WRITTEN (<see cref="Planned.WrittenHp"/>, stamped by
+        // <see cref="Schedule"/>), and Tide Wall blocks the front enemy's
+        // intent, read at carry-out. Sim twins: `kokomi_plan`, same names.
+        FirstAttackTwice,
+        FirstCardFree,
+        DamageIfUnhurt,
+        AttackDamageThisTurn,
+        BlockFrontIntent,
     }
 
     /// <summary>
@@ -230,9 +245,14 @@ public static class KokomiPlan
     /// written into a board of Defends is written and carries out nothing --
     /// and null is "this clause does not aim that way".
     /// </summary>
+    /// <para><paramref name="Alt"/> (R276) is Feigned Retreat's second
+    /// printed number, the hit when she lost no HP since the Plan was
+    /// written; <paramref name="WrittenHp"/> is her HP at that moment,
+    /// stamped by <see cref="Schedule"/> and null until then.</para>
     public readonly record struct Planned(
         Kind Kind, int Amount, Aim Aim, CardModel? Card = null,
-        int Times = 1, IReadOnlyList<string>? Targets = null);
+        int Times = 1, IReadOnlyList<string>? Targets = null,
+        int Alt = 0, int? WrittenHp = null);
 
     /// <summary>
     /// ONE PLAN: the card that wrote it and the clauses it wrote. The card is
@@ -884,6 +904,18 @@ public static class KokomiPlan
                 body[i] = body[i] with
                 {
                     Amount = Hers(kokomi, source, body[i].Amount),
+                };
+            }
+            // R276, FEIGNED RETREAT. Both printed hits are hers and take the
+            // fold; "since you wrote this" is a fact about NOW, so her HP is
+            // stamped on the clause. `kokomi_plan.schedule` does the same.
+            if (body[i].Kind == Kind.DamageIfUnhurt)
+            {
+                body[i] = body[i] with
+                {
+                    Amount = Hers(kokomi, source, body[i].Amount),
+                    Alt = Hers(kokomi, source, body[i].Alt),
+                    WrittenHp = kokomi.CurrentHp,
                 };
             }
         }
@@ -2149,6 +2181,43 @@ public static class KokomiPlan
                     choiceContext, kokomi, null);
                 return null;
 
+            case Kind.FirstAttackTwice:
+                // R276, PINCER. A switch; no number on the beat.
+                await KokomiOverhaulKit.FirstAttackTwice(choiceContext, kokomi);
+                return null;
+
+            case Kind.FirstCardFree:
+                // R276, STOLEN CHAPTER. A switch; no number on the beat.
+                await KokomiOverhaulKit.FirstCardFree(choiceContext, kokomi);
+                return null;
+
+            case Kind.AttackDamageThisTurn:
+                // R276, BATTLE PLAN: "This turn, your Attacks deal N more
+                // damage." The shipped <see cref="AttackUpThisTurnPower"/> is
+                // that sentence exactly -- every Attack she plays, per hit,
+                // removed at her turn's end. A carry-out is not a play: a
+                // planned hit is dealt by the Bake-Kurage, so the power's
+                // `dealer != Owner` test keeps Plans out of it.
+                await PowerCmd.Apply<AttackUpThisTurnPower>(
+                    choiceContext, kokomi, plan.Amount, applier: kokomi,
+                    cardSource: null);
+                return null;
+
+            case Kind.BlockFrontIntent:
+                // R276, TIDE WALL. POWERED, the flat planned Block's funnel.
+                // The front enemy's intent is read NOW, at carry-out, after
+                // the coming enemy turn's intents are up.
+                return (int)await CreatureCmd.GainBlock(
+                    kokomi,
+                    KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
+                        + plan.Amount,
+                    ValueProp.Move, null);
+
+            case Kind.DamageIfUnhurt:
+                return await Hit(choiceContext, kokomi, plan,
+                                 UnhurtAmount(kokomi, plan), entry,
+                                 doubleDamage);
+
             case Kind.Draw:
                 await CardPileCmd.Draw(choiceContext, plan.Amount, player);
                 return plan.Amount;
@@ -2271,7 +2340,9 @@ public static class KokomiPlan
             or Kind.BlockPerPlanHeld => "Block",
         Kind.Mend => "HP healed",
         Kind.Damage or Kind.DamageQuarterMaxHp
-            or Kind.DamagePerCompanionLastTurn => "damage",
+            or Kind.DamagePerCompanionLastTurn
+            or Kind.DamageIfUnhurt => "damage",
+        Kind.BlockFrontIntent => "Block",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
         // `EB-643`. The whole-drain draw's figure is cards, the same word
@@ -2329,8 +2400,25 @@ public static class KokomiPlan
             plan.Amount * KokomiOverhaulLedger.For(kokomi)
                               .CompanionsPlayedLastTurn,
         Kind.DamageQuarterMaxHp => KokomiRules.QuarterOfMaxHp(kokomi),
+        // R276. Feigned Retreat asks for whichever of its two hits her HP
+        // earns, and Tide Wall for the intent plus its bonus.
+        Kind.DamageIfUnhurt => UnhurtAmount(kokomi, plan),
+        Kind.BlockFrontIntent =>
+            KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
+                + plan.Amount,
         _ => plan.Amount,
     };
+
+    /// <summary>
+    /// FEIGNED RETREAT's hit (R276): <see cref="Planned.Alt"/> if she lost no
+    /// HP since the Plan was written -- her HP now against the HP
+    /// <see cref="Schedule"/> stamped -- and <see cref="Planned.Amount"/>
+    /// otherwise. An unstamped clause reads as unhurt. Sim twin:
+    /// `kokomi_plan._resolve_clause`'s `damage_if_unhurt` branch.
+    /// </summary>
+    internal static int UnhurtAmount(Creature kokomi, Planned plan) =>
+        kokomi.CurrentHp >= (plan.WrittenHp ?? kokomi.CurrentHp)
+            ? plan.Alt : plan.Amount;
 
     /// <summary>
     /// The front enemy: leftmost alive, SKIPPING A MINION (`R250`, round-5
@@ -2708,7 +2796,10 @@ public static class KokomiPlan
         var damage = entry.Clauses.Where(clause =>
             clause.Kind == Kind.Damage
             || clause.Kind == Kind.DamageQuarterMaxHp
-            || clause.Kind == Kind.DamagePerCompanionLastTurn).ToList();
+            || clause.Kind == Kind.DamagePerCompanionLastTurn
+            // R276, Feigned Retreat: its size is read at carry-out, so it
+            // adds no written number above, but it does land at the front.
+            || clause.Kind == Kind.DamageIfUnhurt).ToList();
         if (damage.Count == 0) return "";
         if (entry.AimOverride != null) return "other";
         if (damage.Any(clause => clause.Aim == Aim.AllEnemies)) return "all";

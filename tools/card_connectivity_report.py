@@ -599,6 +599,18 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Converging Tide stamps an aim onto entries already written: the queue's
     # DEPTH does not move and what it will do does, which is a write.
     "redirect_queued_plans": [_hook("private", "kurage", "write")],
+    # R276 PICK 1, the halves rewrite. Pincer's replay and Stolen Chapter's
+    # free card change what the next play IS, which is where `cost_mod` and
+    # `next_attack_damage` are filed; Battle Plan's per-Attack bonus is filed
+    # with `next_attack_damage` for the same reason. Feigned Retreat is damage
+    # that READS her HP ledger since the writing, and Tide Wall reads the
+    # front enemy's intent, which this vocabulary has no state for -- EMPTY
+    # and disclosed, `remove_debuff`'s argument.
+    "first_attack_twice": [_hook("shared", "card_identity", "write")],
+    "first_card_free": [_hook("shared", "card_identity", "write")],
+    "attack_damage_this_turn": [_hook("shared", "card_identity", "write")],
+    "damage_if_unhurt": [_hook("shared", "hp_ledger", "read")],
+    "block_front_intent": [],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

@@ -1151,6 +1151,16 @@ CO_TENANCY_LEDGER = {
             "same-turn boundary. Removes itself and touches nothing else, so "
             "it shares no resource with any co-tenant and its order among "
             "them cannot matter",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs",
+         "FirstAttackTwicePower"):
+            "QUARANTINED (the Kokomi overhaul, R276). Pincer's carry-out, "
+            "\"this turn\", on NextAttackDamagePower's boundary above. "
+            "Removes itself and touches nothing else",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs",
+         "FirstCardFreePower"):
+            "QUARANTINED (the Kokomi overhaul, R276). Stolen Chapter's "
+            "carry-out, \"this turn\", on the same boundary. Removes itself "
+            "and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "CompanionCostThisTurnPower"):

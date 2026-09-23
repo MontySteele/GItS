@@ -398,6 +398,12 @@ def card_cost(state: CombatState, card: Card) -> int:
             and state.player.powers.get(
                 kokomi_plan.NEXT_COMPANION_DISCOUNT, 0)):
         cost = max(0, cost - C.KOKOMI_OVERHAUL_RALLY_DISCOUNT)
+    # QUARANTINED (C.KOKOMI_OVERHAUL). R276, STOLEN CHAPTER's carry-out: "This
+    # turn, the first card you play costs 0." PURE here, like Rally's line
+    # above; `play_card` spends it. `FirstCardFreePower` is the C# twin.
+    if (C.KOKOMI_OVERHAUL
+            and state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0)):
+        cost = 0
     # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
     # carry-out used to discount the next face-up Attack, and the mod could
     # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
@@ -505,6 +511,9 @@ def play_card(state: CombatState, card: Card) -> None:
         state.current_x = cost                # X = energy actually spent
     state.current_card_cost = cost
     p.energy -= cost
+    if C.KOKOMI_OVERHAUL:
+        # R276. Stolen Chapter's switch is spent by the first card paid for.
+        kokomi_plan.spend_first_card_free(state, card)
     if card.encore_cost:
         # Gated playable -- the "Spend N Encore:" cost line, which is a
         # different sink from the spend_encore OP and is kept apart in the
@@ -680,6 +689,10 @@ def _finish_play(state: CombatState, card: Card,
     # per play index -- so a doubled attack pays Rage twice, counts twice for
     # Juggling, and burns two FreeAttack stacks.
     replays += refpowers.extra_replays(state, card)
+    if C.KOKOMI_OVERHAUL:
+        # R276, PINCER's carry-out: the first face-up Attack this turn is
+        # played twice. `FirstAttackTwicePower.ModifyCardPlayCount`.
+        replays += kokomi_plan.spend_first_attack_twice(state, card)
     for replay_index in range(replays):
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
@@ -1311,6 +1324,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # ITS TURN, beside Rally's and for its reason: the clause says "this turn".
     # Its C# twin is `NextAttackDamagePower.AfterSideTurnEnd`.
     state.player.powers.pop(kokomi_plan.NEXT_ATTACK_BONUS, None)
+    # QUARANTINED (C.KOKOMI_OVERHAUL). R276: Pincer's and Stolen Chapter's
+    # switches say "this turn" and die with it, on the same boundary.
+    state.player.powers.pop(kokomi_plan.FIRST_ATTACK_TWICE, None)
+    state.player.powers.pop(kokomi_plan.FIRST_CARD_FREE, None)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never
