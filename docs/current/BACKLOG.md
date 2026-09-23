@@ -12,12 +12,9 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
-- Furina, round three: the Spend mode chooser needs `choose` twice; one call should resolve it (a scenario asserts one choose closes it).
-- Furina, round three: reader faces print a literal 0 outside combat (Let the People Rejoice at Neow, Ousia Surge at a reward); print the rule outside combat, the number inside.
-- Furina, round three: the Companion glossary alternates between the Stage's sentence and the shipped one on consecutive screens; hold one sentence per arm for the whole run.
-- Furina, round three: mode-chooser option faces print sheet literals (unupgraded, unfolded under Weak); they should read the parent's folded, upgraded numbers, and the chooser should accept the hand's wording.
-- Furina, round three: two copies of one arm card in hand print with no (1)/(2) numbering.
-- Furina, round three: Let the People Rejoice's forecast can show a stale earlier spend; read the live bars at hand time.
+- Klee: the shipped Companion cards give her 1-3 Sparks (R276) but no face says so; add the rider line to each Companion card's text.
+- Klee: dead engine code for the cut cards (Explosives Workshop, Catalytic Converter, Kindling) still compiles; delete it with its tests.
+- Kokomi: engine pieces the halves rewrite left unused (`NextAttackDamage`, `BlockPerPlanThisMorning`, `plans_carried_out_this_morning`, the morning-damage tip); delete them in C# and the sim.
 - `EB-809` `KurageMemory.PriceText` prints bare `free` at price 0; print the derivation (`cost 0 x 3`) like every other price.
 - `EB-808` a create-mode Muster never stamps its recruit's discount (`KokomiConscript.cs` `NoteMusterRecruit` is in the sacrifice branch only); stamp both branches.
 - `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot: widen the retired-id alias register from cards to relics and arm-gated ids.
