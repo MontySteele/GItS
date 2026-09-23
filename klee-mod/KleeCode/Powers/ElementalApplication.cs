@@ -92,8 +92,8 @@ public sealed class KleeElementalHooks : AbstractModel
         {
             CompanionPlays.Record(cardPlay.Card.CombatState, cardPlay.Card);
         }
-        // "Little Hexenzirkul" (EB-219 / LAW:145, retargeted by EB-642):
-        // Klee's kit answering a HEXEREI play, armed here and settled in
+        // "Little Hexenzirkul" (EB-219 / LAW:145, retargeted by EB-642 and
+        // R276): Klee's kit answering a COMPANION play, armed here and settled in
         // AfterCardPlayed. Same IsFirstInSeries gate as the ledger above,
         // and for the same reason -- once per play_card call, never once
         // per replay. The sim's twin brackets the same span
@@ -101,7 +101,7 @@ public sealed class KleeElementalHooks : AbstractModel
         // combat._finish_play after the FIRST resolution).
         //
         // OUTSIDE THE COMPANION BRANCH SINCE `EB-663`: under the arm a Klee
-        // card carrying the Hexerei mark pays too, so WHICH plays pay is
+        // card Alice's Introduction Magic marked pays too, so WHICH plays pay is
         // KleeCompanionSpark.PaysKleesSpark's question and not this line's.
         // Arm is a no-op for every play it answers no to, and Settle clears
         // the snapshot whether or not it mints.

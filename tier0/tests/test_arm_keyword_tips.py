@@ -199,39 +199,33 @@ def test_the_attach_is_scoped_to_the_quarantined_surface():
         assert proto._profile_for(character).arm_keyword_tips is True
 
 
-def test_every_hexerei_companion_carries_the_kits_spark_rider():
-    """`EB-418`, the committed tree, retargeted by `EB-642`. Every Companion row
-    on the quarantined sheet carrying the HEXEREI mark carries `ForCovenSpark`,
-    and no other row does.
+def test_every_klee_companion_carries_the_kits_spark_rider():
+    """`EB-418`, the committed tree, retargeted by R276 pick 2. Every Companion
+    row on Klee's profile carries `ForCovenSpark`, and no other row does.
 
-    THE DENOMINATOR IS THE POINT. The trigger is keyed on the MARK and not on
-    one card (`effects.klee_companion_spark`, `KleeCompanionSpark`), so the
-    sentence has to reach the same set by the same read, or the next row to
-    join the family is the r11 seat's finding again.
-
-    R265 PICK 1 MOVED THE SET, both halves of it. Thirteen Universals that
-    print the word gained the rider; eight coven Personals that print no word
-    lost it, because they no longer pay. A row that pays and says nothing, or
-    says something and does not pay, is the r20 defect in one direction or the
-    other.
+    THE DENOMINATOR IS THE POINT. The trigger is keyed on the SET
+    (`effects.klee_companion_spark`, `KleeCompanionSpark`), and R276 made the
+    set "any Companion card", so the sentence has to reach every companion row
+    Klee's profile emits, or the next row added is the r11 seat's finding
+    again.
 
     GOROU IS THE NEGATIVE CASE, and he is a real one: he is a Personal
-    Companion of KOKOMI'S on this same sheet, he carries no mark, and Sparks
-    are Klee's resource with no surface of Kokomi's to read them off. The
-    sentence is scoped to the kit that declared it.
+    Companion of KOKOMI'S on this same sheet, and Sparks are Klee's resource
+    with no surface of Kokomi's to read them off. The sentence is scoped to the
+    kit that declared it.
     """
     owed, carried = set(), set()
     for row in proto._rows():
         if not gen.is_companion(row):
             continue
         cls = gen.pascal(row["id"])
-        if row.get("character") == "klee" and row.get("hexerei"):
+        if row.get("character") == "klee":
             owed.add(cls)
         path = PROTOTYPE_DIR / f"{cls}.cs"
         if path.exists() and "ForCovenSpark" in path.read_text(encoding="utf-8"):
             carried.add(cls)
 
-    assert owed, "no Hexerei Companion on the sheet is not a read"
+    assert owed, "no Klee Companion on the sheet is not a read"
     assert owed == carried
     assert "ProtoMiGorouCrystalCollapse" in {
         gen.pascal(r["id"]) for r in proto._rows()
@@ -239,108 +233,21 @@ def test_every_hexerei_companion_carries_the_kits_spark_rider():
     assert "ProtoMiGorouCrystalCollapse" not in carried
 
 
-def test_every_hexerei_companion_prints_the_family_tag():
-    """`EB-392`, the committed tree. Every Companion row the sheet marks
-    `hexerei` prints the word on its own face, and no row that is not marked
-    does.
-
-    THE DEFECT. `hexerei: true` emitted `IHexereiCard` and nothing a player
-    could see, so the family was readable only from the three cards that ASK
-    about it -- and those ask about a set whose members never said they were
-    in it. The r12 run-2 seat held Witches' Circle for four fights: "I owned no
-    Hexerei card and the reminder text does not say which of my cards are
-    Hexerei", and found the answer "only by counting bombs on the enemy badge,
-    because Fischl's own face never prints the word Hexerei".
-
-    THE DENOMINATOR IS THE POINT, exactly as it is for the Spark rider above:
-    the tag is DERIVED from the sheet key (`gen._family_tags`), so a row that
-    joins the family carries the mark because it joined. The negative case is
-    every unmarked Companion on the same sheet.
-
-    THE READERS ARE NOT MEMBERS. Coven Errand and Witches' Circle are Klee's
-    own cards and carry no `hexerei` key; Alice's Introduction Magic carries
-    it and already prints the word in its body, which is why the tag is
-    skipped where the face has said it.
-    """
-    marked, printed = set(), set()
-    for row in proto._rows():
-        if not gen.is_companion(row):
-            continue
-        cls = gen.pascal(row["id"])
-        if row.get("hexerei"):
-            marked.add(cls)
-        path = PROTOTYPE_DIR / f"{cls}.cs"
-        if not path.exists():
-            continue
-        if any("[gold]Hexerei[/gold]" in face
-               for face in _descriptions(path.read_text(encoding="utf-8"))):
-            printed.add(cls)
-
-    assert marked, "no Hexerei Companion on the sheet is not a read"
-    assert marked == printed
-    # ... and the definition rides the printed word, which is `EB-272`'s
-    # attach rule doing the work rather than a second list to maintain.
-    for cls in sorted(marked):
-        assert "ForHexerei" in (PROTOTYPE_DIR / f"{cls}.cs").read_text(
-            encoding="utf-8"), cls
-
-
-def test_the_only_family_mark_on_a_face_is_the_printed_word():
-    """`EB-554` retired by `EB-642`, on the committed tree. Every Companion row
-    carrying `hexerei:` prints the word on its own face, no face prints "Klee's
-    own" any more, and the two sets are the same set.
-
-    THE DEFECT `EB-554` ANSWERED (Klee r20 lane 1, (c) 1). Albedo+ and Razor
-    were played in one turn, both printing `Hexerei`, and Spark stayed at 1:
-    "Nothing on either card face distinguishes 'hers' from not-hers, so as a
-    reader I have no way to predict which Companion pays a Spark." R265 pick 1
-    answered it the other way round -- both pay now -- so the distinction the
-    second mark drew is gone and the mark goes with it. [USER], on his own
-    act-1 run: "the 'Klee's own' text on the Personals is not needed."
-
-    THE DENOMINATOR IS THE POINT, `EB-392`'s test unchanged: the mark is
-    derived from the row's own `hexerei` key, which is the SAME read both
-    engines' payment gates make under the arm, so the face and the Spark cannot
-    disagree and a row joining the family tomorrow is marked the day it joins.
-    """
-    marked, printed, owned = set(), set(), set()
-    for row in proto._rows():
-        if not gen.is_companion(row):
-            continue
-        cls = gen.pascal(row["id"])
-        if row.get("hexerei"):
-            marked.add(cls)
-        path = PROTOTYPE_DIR / f"{cls}.cs"
-        if not path.exists():
-            continue
-        faces = _descriptions(path.read_text(encoding="utf-8"))
-        if any("[gold]Hexerei[/gold]" in face for face in faces):
-            printed.add(cls)
-        if any("Klee's own" in face for face in faces):
-            owned.add(cls)
-
-    assert marked, "no Hexerei Companion on the sheet is not a read"
-    assert marked == printed
-    assert not owned, owned
-    # And the pair the r20 seat could not tell apart now reads the same, which
-    # is the whole of the ruling: Razor the Universal and Sinful Hex the
-    # Personal print one word and pay one Spark.
-    for cls in ("ProtoMcRazorClawAndThunder", "ProtoMcFischlSinfulHex"):
-        faces = _descriptions((PROTOTYPE_DIR / f"{cls}.cs")
-                              .read_text(encoding="utf-8"))
-        assert faces and all(f.lstrip('"').startswith("[gold]Hexerei[/gold].")
-                             for f in faces), cls
-
-
-def test_the_hexerei_readers_are_not_tagged_as_members():
-    """Klee's own three read the word; none of them is a Companion, so none of
-    them takes the tag. Named rather than derived, because the point is that
-    the tag's guard is `is_companion` and these are the rows it excludes."""
-    for cls in ("ProtoKoCovenErrand", "ProtoKoWitchesCircle"):
+def test_no_face_prints_a_family_mark():
+    """R276 pick 2 retired the Hexerei mark, and `EB-642` had retired "Klee's
+    own" before it: no generated prototype face prints either, and no card
+    attaches a Hexerei tip. The readers print "Companion" instead."""
+    for path in sorted(PROTOTYPE_DIR.glob("*.cs")):
+        text = path.read_text(encoding="utf-8")
+        faces = _descriptions(text)
+        assert not any("Hexerei" in face for face in faces), path.name
+        assert not any("Klee's own" in face for face in faces), path.name
+        assert "ForHexerei" not in text, path.name
+    for cls in ("ProtoKoCovenErrand", "ProtoKoWitchesCircle",
+                "ProtoKoAlicesIntroductionMagic"):
         face, = _descriptions(
             (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8"))[:1]
-        assert "[gold]Hexerei[/gold]" in face
-        assert not face.startswith("[gold]Hexerei[/gold]. "), cls
+        assert "[gold]Companion[/gold]" in face, cls
 
 
 def test_no_shipped_generated_card_reaches_the_arm_tips():
@@ -415,10 +322,10 @@ def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
     card, so the row's own `spend_spark` raises the tip instead."""
     # `EB-749` re-pointed two of the seven: Fwoosh! was cut and Powder Charge
     # became Booby Trap. Pocket Match is the same Spark-priced Set off shape
-    # Fwoosh! was, so the rule is still asked of seven rows.
+    # Fwoosh! was. R276 cut Sugar Rush, so Bottomless Bag takes the seventh.
     for stem in ("ProtoKoPocketMatch", "ProtoKoTinderToss", "ProtoKoQuickFuse",
                  "ProtoKoBangBang", "ProtoKoBoobyTrap", "ProtoKoDigIn",
-                 "ProtoKoSugarRush"):
+                 "ProtoKoBottomlessBag"):
         text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         # The FACE, not the file: `SparkPower.CanSpend` is in every one of
         # these bodies and always was.
@@ -571,8 +478,10 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     blanks = {rid for rid in readers if not gen.empty_field_tip_arg(rows[rid])}
     # `EB-749`: Fireworks Show was CUT and merged into Tinder Toss, which has a
     # damage line of its own and is therefore not blank.
+    # R276's Hair Trigger reads the field and does nothing on a bare board:
+    # its whole body is turning Bombs into Mines.
     assert blanks == {"proto_ko_careful_arrangement", "proto_ko_the_big_one",
-                      "proto_ko_quick_fuse"}
+                      "proto_ko_quick_fuse", "proto_ko_hair_trigger"}
     # AND THE ATTACH REACHED THE EMITTED C#, with the derived argument on it.
     merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
         encoding="utf-8")
@@ -710,11 +619,13 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # fourteen characters: "Attack trigger" reads as something on the
             # player's own side of the board, and the r16 seat read it that
             # way beside a Block clause pointing the other direction.
-            "The target's [gold]Bombs[/gold] go off first, oldest first, each ",
+            # `EB-755` (R276): "in the order placed" says which of two Bombs
+            # placed in one turn goes first, which "oldest first" did not.
+            "The target's [gold]Bombs[/gold] go off first, in the order placed, ",
             # `EB-516` ADDED THE AIM, and it is on the WORD because the two
             # rows that roll (Tinder Toss, Rapid Fire) print only "a random
             # enemy" and cannot say where it lands.
-            "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power ",
+            "each a Pyro hit. [gold]Block[/gold] stops them, no when-hit power ",
             "fires, the first takes the aura. A random one picks a Bombed ",
             "enemy first.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
@@ -875,9 +786,9 @@ EXERT_TIP = {
 #: before it commits the energy.
 COVEN_SPARK_TIP = {
     "name": "Sparks from your Companion",
-    "description": ("Playing one of Klee's own Companions makes 1 Spark, 1 "
-                    "more if it triggered an Elemental Reaction and 1 more if "
-                    "it is upgraded."),
+    "description": ("Playing a Companion card gives Klee 1 Spark, 1 more if "
+                    "it triggered an Elemental Reaction and 1 more if it is "
+                    "upgraded."),
 }
 
 
@@ -1135,7 +1046,8 @@ def _word_owner(word: str) -> str:
     """Whose run is this printed word's own? (`EB-504`, `EB-753`)
 
     Two tables answer it and they answer different questions. `EB-504`'s says
-    whose RULE a universally printed word states (`Hexerei`, `Oz`);
+    whose RULE a universally printed word states (`Oz`; `Hexerei` until
+    R276);
     `EB-753`'s says which kit OWNS the word outright, and a word another kit
     owns has no glossary row on this run at all. Either way the census has to
     ask its question on the run the word belongs to: the recorded fixture is a
@@ -1166,8 +1078,8 @@ def _page_for_word(word: str) -> str:
     about the card is deliberately bare, so a definition on the page came from
     the glossary and not from a tip that happened to ride along.
 
-    `EB-504`. THE RUN IS THE WORD'S OWN WHERE THE RULE HAS ONE. Two rows --
-    `Hexerei` and `Oz` -- state a rule that belongs to Klee and printed it on
+    `EB-504`. THE RUN IS THE WORD'S OWN WHERE THE RULE HAS ONE. One row --
+    `Oz` (and `Hexerei` until R276) -- states a rule that belongs to Klee and printed it on
     every character's screens, because the faces carrying the words are
     drafted by the whole roster. Since that row they print their NAME alone on
     a run that cannot use them, so this census asks the question on the run

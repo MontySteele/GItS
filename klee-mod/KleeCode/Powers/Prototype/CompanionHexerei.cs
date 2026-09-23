@@ -18,63 +18,35 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE FAMILY MARK, AS A TYPE. A generated card whose sheet row carries
-/// <c>hexerei: true</c> implements this and nothing else does.
-///
-/// A MARKER WITH NO MEMBERS, because the mark decides exactly one question --
-/// "is the card you just played in the family" -- and three readers now ask
-/// it: Nicole's <see cref="LadderOfAscentPower"/>, R244's
-/// <see cref="WitchesCirclePower"/> and R244's Coven Errand (through the
-/// ledger). Its element comes off
-/// <see cref="ICompanionCard.CompanionElement"/>, which every Hexerei row
-/// already carries as a Universal or a stand-in; a Klee pool row that joins
-/// the family carries none and deals plain damage (R236 pick 6).
-///
-/// THE TYPE IS THE PRINTED HALF OF THE ANSWER AND NOT THE WHOLE OF IT since
-/// R244: Alice's Introduction Magic widens the family to a hand for one turn,
-/// so every reader asks <see cref="CompanionHexerei.IsHexerei"/> rather than
-/// testing this interface itself.
-///
-/// BY INTERFACE RATHER THAN BY A LIST OF IDS, for
-/// <see cref="CompanionStandIns"/>' reason: the compiler owns the
-/// correspondence, so a row deleted from the surface takes its class with it
-/// and this arm stops building, where a table of id strings would fail
-/// silently. The sim answers the same question with <c>Card.hexerei</c>, off
-/// the same sheet key, and `tier0/tests/test_companion_overhaul.py` names the
-/// one module allowed to read it.
-///
-/// IT LIVES UNDER Powers/Prototype, which a release build removes -- and every
-/// row carrying the mark is a `proto_` row compiled under the same switch, so a
-/// shipped card can never implement it.
-/// </summary>
-public interface IHexereiCard
-{
-}
-
-/// <summary>
-/// THE HEXEREI MARK AND ITS READERS (QUARANTINED, two arms).
+/// THE COMPANION READERS AND THE WITCH FAMILY STAND-INS (QUARANTINED, two arms).
 ///
 /// Four stand-ins on the seam <see cref="CompanionStandIns"/> opened, and this
 /// file exists for that file's reason: a quarantined arm's whole behaviour
 /// should be greppable in one place. That one holds the SEAM (the pair table,
 /// the hand-off) and the four CARETAKERS' rules; this one holds the four FAMILY
-/// stand-ins' rules, THE FAMILY MARK ITSELF, and nothing else.
+/// stand-ins' rules and the one question every reader of a Companion play
+/// asks.
 ///
 /// WHAT A FAMILY STAND-IN IS. The caretakers read the Klee overhaul's explosion
 /// ledger, which is what a caretaker is for. These four read the REACTION,
-/// because Hexerei is the reaction family (the approved Mondstadt workshop
-/// sec.1; R236 sec.3). Each is handed to Klee in place of one Hexerei Universal
-/// and wears its art; each is Hexerei-tagged itself, which is why Nicole's
-/// power pays for the other three.
+/// because the witches are the reaction family (the approved Mondstadt
+/// workshop sec.1; R236 sec.3). Each is handed to Klee in place of one
+/// Universal and wears its art.
 ///
-/// THE MARK IS SHARED AND THE READERS ARE NOT (R244). Until the ruled packet
-/// `review/ruled/klee-hexerei-readers-2026-09-02.md` the family had exactly one
-/// reader, Nicole's Ladder, on <c>COMPANION_OVERHAUL</c>. Its three Klee
-/// readers sit on <c>KLEE_OVERHAUL</c> instead, so "is this play a Hexerei
-/// card?" is a question two arms ask -- and <see cref="IsHexerei"/> is where it
-/// is answered, once, with each reader gated on its own flag afterwards.
-/// <see cref="IntroductionMagicPower"/> is the one rule that WIDENS the answer,
-/// and it lives here for the same reason.
+/// R276 PICK 2 RETIRED THE HEXEREI MARK. The printed word and the
+/// <c>hexerei:</c> sheet key are gone; every reader that paid for a "Hexerei
+/// card" -- Klee's Spark, Coven Errand, Witches' Circle, Nicole's Ladder --
+/// now pays for ANY Companion card, and Alice's Introduction Magic makes a
+/// hand count as Companion cards for a turn. The file keeps its name because
+/// the four family stand-ins still live here.
+///
+/// THE QUESTION IS SHARED AND THE READERS ARE NOT (R244). Nicole's Ladder is on
+/// <c>COMPANION_OVERHAUL</c> and Klee's readers on <c>KLEE_OVERHAUL</c>, so
+/// "does this play count as a Companion card?" is a question two arms ask --
+/// and <see cref="CountsAsCompanion"/> is where it is answered, once, with each
+/// reader gated on its own flag afterwards. <see cref="IntroductionMagicPower"/>
+/// is the one rule that WIDENS the answer, and it lives here for the same
+/// reason.
 ///
 /// SIM TWIN: <c>tier0.engine.companion_hexerei</c>, called from the same two
 /// mouths -- the one site a reaction resolves, and the card-played site.
@@ -109,27 +81,26 @@ internal static class CompanionHexerei
         ElectroReactions.Contains(reaction) || aura == Element.Electro;
 
     /// <summary>
-    /// IS THIS CARD IN THE HEXEREI FAMILY RIGHT NOW? The mark's ONE reader,
-    /// and every rule that pays for a witch asks it (R244).
+    /// DOES THIS CARD COUNT AS A COMPANION CARD RIGHT NOW? The one reader, and
+    /// every rule that pays for a Companion play asks it (R244, R276).
     ///
     /// TWO WAYS IN, and they are deliberately different kinds of thing: the
-    /// PRINTED mark is the <see cref="IHexereiCard"/> interface the codegen
-    /// puts on a row carrying <c>hexerei: true</c>, and the this-turn window is
-    /// <see cref="IntroductionMagicPower"/>'s set of card INSTANCES -- so a
-    /// second copy of the same card drawn after the spell is not counted, which
-    /// is the ruling's own derived reading and the reason its upgrade is
-    /// Retain.
+    /// card IS a Companion (<see cref="ICompanionCard"/>, which the codegen
+    /// puts on every companion row), or it is in
+    /// <see cref="IntroductionMagicPower"/>'s this-turn set of card INSTANCES
+    /// -- so a second copy of the same card drawn after the spell is not
+    /// counted, which is the ruling's own derived reading and the reason its
+    /// upgrade is Retain.
     ///
     /// UNGATED BY EITHER ARM'S FLAG, because it is a question about a card
-    /// rather than a rule that pays out: with the arms off no row implements
-    /// the interface and no power grants the window, so the answer is false by
-    /// construction. Every reader below is gated on its own flag. Sim twin:
-    /// <c>tier0.engine.companion_hexerei.is_hexerei</c>.
+    /// rather than a rule that pays out: every reader below is gated on its
+    /// own flag. Sim twin:
+    /// <c>tier0.engine.companion_hexerei.counts_as_companion</c>.
     /// </summary>
-    internal static bool IsHexerei(CardModel? card)
+    internal static bool CountsAsCompanion(CardModel? card)
     {
         if (card == null) return false;
-        if (card is IHexereiCard) return true;
+        if (card is ICompanionCard) return true;
         var owner = card.Owner?.Creature;
         if (owner == null) return false;
         return owner.Powers.OfType<IntroductionMagicPower>()
@@ -137,18 +108,17 @@ internal static class CompanionHexerei
     }
 
     /// <summary>
-    /// Alice's Introduction Magic (R244): every card in hand joins the family
-    /// for this turn.
+    /// Alice's Introduction Magic (R244, R276): every card in hand counts as a
+    /// Companion card for this turn.
     ///
     /// THE CARDS IN HAND WHEN IT RESOLVES, and no others. The card marks the
     /// hand it was played from, so the way to hold it for a big hand is the
     /// upgrade's Retain and not a later draw.
     ///
-    /// THE SPELL COUNTS ITSELF, which is the ruling's second derived reading,
-    /// and it needs no line here: its row carries <c>hexerei: true</c>, so it
-    /// is in the family printed rather than by this set -- and a card being
-    /// played has already left the hand, so marking the hand could not reach
-    /// it.
+    /// THE SPELL NO LONGER COUNTS ITSELF (R276). R244's derived reading rode
+    /// the Hexerei key its row carried; the key is retired, the face says
+    /// "all cards in your hand", and a card being played has already left the
+    /// hand, so the literal reading is the one built.
     ///
     /// ONE POWER, RE-ENTERED: <see cref="PowerCmd.Apply"/> stacks onto the
     /// standing instance, so a second cast adds its hand to the same set rather
@@ -175,7 +145,8 @@ internal static class CompanionHexerei
     }
 
     /// <summary>
-    /// A card was played: if it is Hexerei, the arm's ledger counts it.
+    /// A card was played: if it counts as a Companion card, the arm's ledger
+    /// counts it (Coven Errand's "if you played a Companion card this turn").
     ///
     /// Called from <c>KleeOverhaulSweepHooks.AfterCardPlayed</c>, which is this
     /// arm's ONE standing card-play listener -- a second
@@ -185,16 +156,16 @@ internal static class CompanionHexerei
     /// <see cref="WitchesCirclePower"/> each hook themselves, which is this
     /// mod's idiom and what keeps a power that is not on the board from being
     /// asked about. The sim has one sequential site and does both there
-    /// (<c>klee_overhaul.note_hexerei_played</c>), the same arrangement its
+    /// (<c>klee_overhaul.note_companion_played</c>), the same arrangement its
     /// explosion bus already has.
     /// </summary>
     internal static void NoteCardPlayed(CardPlay cardPlay)
     {
         if (!KleeOverhaul.Enabled) return;
-        if (!IsHexerei(cardPlay.Card)) return;
+        if (!CountsAsCompanion(cardPlay.Card)) return;
         var owner = cardPlay.Card?.Owner?.Creature;
         if (owner == null) return;
-        KleeOverhaulLedger.For(owner).NoteHexereiPlayed();
+        KleeOverhaulLedger.For(owner).NoteCompanionPlayed();
     }
 
     /// <summary>
@@ -372,17 +343,16 @@ public sealed class MollisFavoniusPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Nicole, Ladder of Divine Ascent: "Whenever you play a Hexerei card, deal 6
-/// damage of that card's element to a random enemy."
+/// Nicole, Ladder of Divine Ascent: "Whenever you play a Companion card, deal
+/// 6 damage of that card's element to a random enemy." (R276 pick 2 retired
+/// the Hexerei mark it used to read; it reads the Companion question every
+/// other reader asks.)
 ///
-/// THE FAMILY MARK'S FIRST READER IN THIS ENGINE, and it reads a TYPE
-/// (<see cref="IHexereiCard"/>) rather than a list of ids -- see that
-/// interface for why. The sim reads <c>Card.hexerei</c> off the same sheet key.
+/// A CARD WITH NO ELEMENT DEALS PLAIN DAMAGE (R236 pick 6), which is
+/// <c>Element.None</c> here and <c>element=None</c> in the sim -- a Klee card
+/// Alice's Introduction Magic marked, for one.
 ///
-/// A HEXEREI CARD WITH NO ELEMENT DEALS PLAIN DAMAGE (R236 pick 6), which is
-/// <c>Element.None</c> here and <c>element=None</c> in the sim.
-///
-/// NICOLE'S OWN CARD IS HEXEREI, so playing it pays once for itself. That is
+/// NICOLE'S OWN CARD IS A COMPANION, so playing it pays once for itself. That is
 /// not a special case: <c>AfterCardPlayed</c> reaches a power the card just
 /// applied -- the contract Diona's stand-in already leans on
 /// (<c>ShakenNotPurredPower.AfterCardPlayed</c>) -- and the sim's site runs
@@ -394,7 +364,7 @@ public sealed class LadderOfAscentPower : PowerModel, ILocalizationProvider
     {
         ("title", "Ladder of Divine Ascent"),
         ("description",
-            "Whenever you play a [gold]Hexerei[/gold] card, deal "
+            "Whenever you play a [gold]Companion[/gold] card, deal "
           + "[blue]{Amount}[/blue] damage of that card's element to a random "
           + "enemy."),
     };
@@ -408,11 +378,10 @@ public sealed class LadderOfAscentPower : PowerModel, ILocalizationProvider
     {
         if (Owner == null) return;
         if (cardPlay.Card?.Owner?.Creature != Owner) return;
-        // THROUGH THE MARK'S ONE READER since R244, not the interface: Alice's
-        // Introduction Magic widens the family for a turn, and a Ladder that
-        // tested the type itself would be the second definition of "Hexerei"
-        // this file exists to prevent.
-        if (!CompanionHexerei.IsHexerei(cardPlay.Card)) return;
+        // THROUGH THE ONE READER, not the interface: Alice's Introduction
+        // Magic widens the set for a turn, and a Ladder that tested the type
+        // itself would be a second definition of "a Companion card".
+        if (!CompanionHexerei.CountsAsCompanion(cardPlay.Card)) return;
         var element = (cardPlay.Card as ICompanionCard)?.CompanionElement
                       ?? Element.None;
         var target = CompanionOverhaulTargeting.RandomEnemy(CombatState);
@@ -428,32 +397,24 @@ public sealed class LadderOfAscentPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Alice's Introduction Magic (R244, the ruled packet's sec.2): "All cards in
-/// your hand count as Hexerei cards this turn."
+/// Alice's Introduction Magic (R244, R276): "All cards in your hand count as
+/// Companion cards this turn."
 ///
 /// KLEE'S OWN RARE, not a companion stand-in, and it is the enabler the three
-/// readers are priced against: played first, every card after it this turn is a
-/// witch's card, so <see cref="WitchesCirclePower"/> plants a Bomb per play,
-/// Coven Errand goes wide, Nicole's Ladder fires per card, and the coven bonus
-/// lines on the Personals read as met.
+/// readers are priced against: played first, every card that was in hand is a
+/// Companion card for the turn, so <see cref="WitchesCirclePower"/> plants a
+/// Bomb per play, Coven Errand goes wide, Klee's Spark pays, and Nicole's
+/// Ladder fires per card.
 ///
-/// THE WINDOW IS OVER CARD INSTANCES, WHICH IS WHY THE POWER HOLDS A SET. The
-/// ruling's two derived readings are exactly the two things this shape gives:
-/// the window covers the cards that WERE in hand when it resolved (a card drawn
+/// THE WINDOW IS OVER CARD INSTANCES, WHICH IS WHY THE POWER HOLDS A SET: the
+/// window covers the cards that WERE in hand when it resolved (a card drawn
 /// later this turn is not counted, so Retain on the upgrade is the way to hold
-/// it for the big hand), and the spell counts as Hexerei itself -- which its
-/// row's own <c>hexerei: true</c> says, so it does not need a second witch to
-/// start a circle.
+/// it for the big hand). A SET AND NOT A LIST OF IDS: two copies of one card
+/// in hand are two instances, and only the ones the spell saw count.
 ///
-/// A SET AND NOT A LIST OF IDS: two copies of one card in hand are two
-/// instances, and only the ones the spell saw are in the family. Reference
-/// identity is the right comparison and the default one.
-///
-/// THE WINDOW ENDS WITH THE POWER, at <c>AfterSideTurnEnd</c> -- the shipped
-/// <c>AttackUpThisTurnPower</c>'s own window, and the same one the two Hexerei
-/// stand-ins above take. Removing the power drops the set, so no mark can
-/// outlive the turn that wrote it on a card sitting in the discard pile. Sim
-/// twin: <c>CombatState.ko_hexerei_marked</c>, dropped at
+/// THE WINDOW ENDS WITH THE POWER, at <c>AfterSideTurnEnd</c>. Removing the
+/// power drops the set, so no mark can outlive the turn that wrote it. Sim
+/// twin: <c>CombatState.ko_companion_marked</c>, dropped at
 /// <c>klee_overhaul.turn_end</c>.
 /// </summary>
 public sealed class IntroductionMagicPower : PowerModel, ILocalizationProvider
@@ -464,7 +425,7 @@ public sealed class IntroductionMagicPower : PowerModel, ILocalizationProvider
     {
         ("title", "Introduction Magic"),
         ("description",
-            "The cards that were in your hand count as [gold]Hexerei[/gold] "
+            "The cards that were in your hand count as [gold]Companion[/gold] "
           + "cards this turn."),
     };
 

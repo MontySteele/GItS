@@ -66,14 +66,6 @@ SHATTER_DAMAGE = 6
 #: glossary quoting a retired number while the mod's hover tip moves.
 CASKET_STRIKE = 2
 
-#: `EB-535`. THE COMPANION SPARK, on the two numbers the Hexerei row prints.
-#: `KleeCompanionSpark.Base` and `.MaxPerPlay` in the mod, which are the kit
-#: declaration LAW:145 obliges Klee's kit to make, mirrored here for
-#: `BOMB_GROWTH`'s reason: this module may not import `tier0` at all, so the
-#: numbers are held in step from the test side and a retune goes red there.
-COMPANION_SPARK = 1
-COMPANION_SPARK_MAX = 3
-
 #: `EB-560`. THE SPARK A KLEE COMBAT OPENS WITH, `KleeOverhaulLaw.OpeningSpark`
 #: in the mod and `C.KLEE_OVERHAUL_OPENING_SPARK` in the sim, mirrored here for
 #: `BOMB_GROWTH`'s reason and held in step from the test side. R242 pick 1 put

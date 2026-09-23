@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcAlbedoTectonicTide : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcAlbedoTectonicTide : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,14 +46,14 @@ public sealed class ProtoMcAlbedoTectonicTide : CustomCardModel, ICompanionCard,
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_albedo_tectonic_tide");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Tectonic Tide"),
-        ("description", "[gold]Hexerei[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
+        ("description", "Whenever an [gold]Elemental Reaction[/gold] happens, deal {PowerAmount:diff()} damage to that enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

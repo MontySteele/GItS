@@ -81,20 +81,56 @@ public static class ScryTake
     /// THE MOVE ITSELF IS STILL EMITTED. This owns the CHOICE alone, so where
     /// the taken card lands and where the rest are bottomed stays in one
     /// place, exactly as it was.
+    ///
+    /// <paramref name="setOffOnly"/> IS R276's (Where Did I Put It?) and it
+    /// narrows what may be TAKEN, never what was seen: the grid holds only the
+    /// Set off cards among <paramref name="top"/>, one of them is taken without
+    /// a screen and said out loud, and none means nothing is taken -- the
+    /// emitted arm then bottoms every card it looked at. Prototype builds only,
+    /// because the Set off mark (<c>ISetOffCard</c>) is the Klee arm's.
     /// </summary>
     public static async Task<List<CardModel>> Choose(
-        PlayerChoiceContext choiceContext, List<CardModel> top, Player owner)
+        PlayerChoiceContext choiceContext, List<CardModel> top, Player owner,
+        bool setOffOnly = false)
     {
-        if (top.Count == 0) return new List<CardModel>();
-        if (top.Count == 1)
+        var offer = top;
+#if PROTOTYPE_CARDS
+        if (setOffOnly)
         {
-            Announce(owner, top[0]);
-            return new List<CardModel> { top[0] };
+            offer = top.Where(card => card is ISetOffCard).ToList();
+            if (offer.Count == 0)
+            {
+                Say(owner, NoSetOffLine);
+                return new List<CardModel>();
+            }
+            if (offer.Count == 1 && top.Count > 1)
+            {
+                Say(owner, OneSetOffLine(Named(offer[0])));
+                return new List<CardModel> { offer[0] };
+            }
+        }
+#endif
+        if (offer.Count == 0) return new List<CardModel>();
+        if (offer.Count == 1)
+        {
+            Announce(owner, offer[0]);
+            return new List<CardModel> { offer[0] };
         }
         return (await CardSelectCmd.FromSimpleGrid(
-            choiceContext, top, owner,
+            choiceContext, offer, owner,
             new CardSelectorPrefs(Prompt, 1))).ToList();
     }
+
+    /// <summary>R276: the filtered look found no Set off card, so everything
+    /// it saw goes to the bottom. Said, for `EB-686`'s reason: a look that
+    /// takes nothing and one that took something are the same silence.</summary>
+    public const string NoSetOffLine =
+        "No Set off card on top: all of them go to the bottom.";
+
+    /// <summary>R276: exactly one Set off card among several seen, taken with
+    /// no screen.</summary>
+    public static string OneSetOffLine(string title) =>
+        $"The only Set off card on top: {title} taken.";
 
     /// <summary>The line the auto-take says, built in ONE place so the pin and
     /// the screen read the same words. <c>KurageBeat.Line</c>'s bargain and
@@ -106,10 +142,15 @@ public static class ScryTake
 
     /// <summary>Over the player's head, and silent headless -- by the engine's
     /// own guards rather than ours (<c>KurageBeat.Say</c>).</summary>
-    private static void Announce(Player owner, CardModel card)
+    private static void Announce(Player owner, CardModel card) =>
+        Say(owner, AutoTakeLine(Named(card)));
+
+    /// <summary>One line over the player's head; silent headless and in a
+    /// release build.</summary>
+    private static void Say(Player owner, string line)
     {
 #if PROTOTYPE_CARDS
-        Vfx.KurageBeat.Say(owner.Creature, AutoTakeLine(Named(card)));
+        Vfx.KurageBeat.Say(owner.Creature, line);
 #endif
     }
 

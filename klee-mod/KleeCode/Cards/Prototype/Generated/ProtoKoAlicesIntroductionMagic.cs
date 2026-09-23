@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,17 +31,14 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoAlicesIntroductionMagic : CustomCardModel, IHexereiCard
+public sealed class ProtoKoAlicesIntroductionMagic : CustomCardModel
 {
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(base.ExtraHoverTips, this);
-
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_alices_introduction_magic");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Introduction Magic"),
-        ("description", "All cards in your hand count as [gold]Hexerei[/gold] cards this turn."),
+        ("description", "All cards in your hand count as [gold]Companion[/gold] cards this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

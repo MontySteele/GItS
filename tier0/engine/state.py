@@ -194,17 +194,6 @@ class Card:
     replaces: Optional[str] = None
     requires: Optional[str] = None        # e.g. burst_energy_full
     nation: Optional[str] = None          # set by the loader from the sheet name
-    # THE HEXEREI FAMILY MARK -- ONE WORD, NO EFFECT (the approved Mondstadt
-    # companion workshop, sec.1 pick 2: "Hexerei is one word on a Universal.
-    # It does nothing by itself. Klee's own readers and any future Hexerei
-    # character's carry the payoff"). NOTHING in either engine reads this
-    # field today; it is carried so a later reader can see which rows the
-    # family owns without the mark having to be re-derived from a character
-    # list. A field rather than a `tags:` entry because `tags` is already read
-    # by four unrelated predicates (`is_companion`, `is_ethereal`, the sly
-    # view, the skill_tag rail) and adding an inert word to a list that four
-    # things filter is how an inert word stops being inert.
-    hexerei: bool = False
     # `EB-703`. WHICH BASE-GAME BASIC A PROTOTYPE ROW IS (no row declares one
     # since passes six and seven were withdrawn, 2026-09-08):
     # "strike" or "defend". Read by `gen_klee_cards` alone -- it emits
@@ -405,19 +394,6 @@ class Card:
     cost_delta_this_turn: int = 0
     cost_delta_this_combat: int = 0
     free_this_turn: bool = False
-    # QUARANTINED (`C.KLEE_OVERHAUL`) -- THE RISING HAND COST, `EB-491`. Long
-    # Fuse's second rule: "Costs 1 more each turn it stays in your hand."
-    # `rising_cost` is the ROW's printed number (how much per turn held) and
-    # `rising_cost_risen` is the accumulated modifier:
-    # `klee_overhaul.roll_rising_costs` adds to it at end of turn, `card_cost`
-    # reads it, `combat._finish_play` clears it when the card is played, and
-    # `run_fight` zeroes it at fight start. That lifetime is the base game's
-    # own `CardEnergyCost.AddUntilPlayed`, which the C# twin uses directly --
-    # it accumulates, it survives the turn boundary, it clears on play and it
-    # is combat-scoped. Both are 0 on every shipped card, so the frozen battery
-    # is byte-identical.
-    rising_cost: int = 0
-    rising_cost_risen: int = 0
     # EB-83, the on-draw hook. `EnergyCost.SetThisCombat` is the base game's
     # ABSOLUTE combat-scoped cost modifier -- the one Slither writes when the
     # card is drawn -- where every field above it is RELATIVE. Kept as its own
@@ -1526,16 +1502,16 @@ class CombatState:
     # post-reaction, post-Vulnerable (`EB-270`) -- never the charge sizes.
     ko_damage_set_off_this_play: int = 0
     ko_set_off_multiplier: int = 1          # The Big One arms N, a Set off spends it
-    # QUARANTINED (`C.KLEE_OVERHAUL`, R244). Coven Errand's read: how many
-    # Hexerei cards have been played this turn. A COUNTER on the arm's ledger
-    # rather than a scan of the play log, for rule 7's two counters' reason --
-    # it is written at the ONE site a Hexerei play is noticed
-    # (`klee_overhaul.note_hexerei_played`), so the card and the Power beside
-    # it cannot disagree about what a witch is. Rolled by `roll_to`, the twin
-    # of `KleeOverhaulLedger.HexereiPlayedThisTurn`.
-    ko_hexerei_this_turn: int = 0
+    # QUARANTINED (`C.KLEE_OVERHAUL`, R244, R276). Coven Errand's read: how
+    # many cards that count as Companion cards have been played this turn. A
+    # COUNTER on the arm's ledger rather than a scan of the play log, for rule
+    # 7's two counters' reason -- it is written at the ONE site such a play is
+    # noticed (`klee_overhaul.note_companion_played`), so the card and the
+    # Power beside it cannot disagree about what counts. Rolled by `roll_to`,
+    # the twin of `KleeOverhaulLedger.CompanionPlayedThisTurn`.
+    ko_companion_this_turn: int = 0
     # QUARANTINED (`C.KLEE_OVERHAUL`, R244). Alice's Introduction Magic: "All
-    # cards in your hand count as Hexerei cards this turn." The window is over
+    # cards in your hand count as Companion cards this turn." The window is over
     # the cards that WERE in hand when it resolved, so the mark is on the card
     # INSTANCES and not on their ids -- a second copy of the same card drawn
     # later this turn is not counted, which is the ruling's own derived
@@ -1544,7 +1520,7 @@ class CombatState:
     # (`companion_hexerei.roll_hand_marks`), so no stamp can outlive the turn
     # that wrote it on a card sitting in the discard pile. Empty on every tree
     # with the arm off; the twin is `IntroductionMagicPower.Marked`.
-    ko_hexerei_marked: list["Card"] = field(default_factory=list)
+    ko_companion_marked: list["Card"] = field(default_factory=list)
     # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-732`). Blast Shield's whole rule, as
     # a fact about THIS play rather than about the card: the `return_to_hand`
     # op raises it while the card resolves and `combat._finish_play` reads it

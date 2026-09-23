@@ -148,3 +148,18 @@ public static class KleeOverhaulLaw
     /// </summary>
     public const int SparkSeedFloors = 3;
 }
+
+/// <summary>
+/// A SET OFF CARD, AS A TYPE (R276). The codegen puts this on every row whose
+/// body prints a Set off, anywhere in it, and nothing else implements it.
+///
+/// A MARKER WITH NO MEMBERS, because it answers exactly one question -- "is
+/// this a Set off card" -- and Where Did I Put It? asks it of every card it
+/// looks at (<c>ScryTake.Choose</c>'s <c>setOffOnly</c>). By interface rather
+/// than by a list of ids, so a row deleted from the surface takes its class
+/// with it. Sim twin: <c>klee_overhaul.is_set_off_card</c>, off the same
+/// <c>set_off</c> op.
+/// </summary>
+public interface ISetOffCard
+{
+}

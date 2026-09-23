@@ -372,15 +372,8 @@ def card_cost(state: CombatState, card: Card) -> int:
     # modifier and floored at 0 like they are.
     if card.free_this_turn:
         return 0
-    # QUARANTINED (C.KLEE_OVERHAUL). THE RISING HAND COST (`EB-491`, Long
-    # Fuse), on the same line and floored the same way as the two deltas beside
-    # it, because it is the same kind of thing: a per-instance modifier that
-    # accumulates, which the base game spells `AddUntilPlayed`. It is 0 on
-    # every card but that one, so this adds an integer to an integer
-    # everywhere else and the frozen battery is byte-identical.
     cost = max(0, cost + card.cost_delta_this_turn
-               + card.cost_delta_this_combat
-               + card.rising_cost_risen)
+               + card.cost_delta_this_combat)
     if card.cost_reduction_per_attack_this_turn:
         cost = max(0, cost - (card.cost_reduction_per_attack_this_turn
                               * state.attacks_played_this_turn))
@@ -626,14 +619,6 @@ def _finish_play(state: CombatState, card: Card,
     # twice -- a replay is one card being resolved again, not a second play.
     if C.KURAGE_MEMORY:
         effects.note_kurage_play(state, card)
-    # QUARANTINED (C.KLEE_OVERHAUL). THE FUSE IS SPENT WHEN THE CARD IS PLAYED
-    # (`EB-491`, Long Fuse): "each turn it stays in your hand" stops being true
-    # the moment it leaves, so the accumulated modifier clears here. It is the
-    # `AfterCardPlayedCleanup` half of the base game's `AddUntilPlayed`, at the
-    # one shared half of a play both callers enter -- and it is unconditional
-    # for the reason the two lines around it are: the field is 0 on every card
-    # that never prints the rule.
-    card.rising_cost_risen = 0
     # QUARANTINED (C.KOKOMI_OVERHAUL). "YOU PLAYED A COMPANION CARD", at the
     # same shared half of a play and for the same structural reason: a manual
     # play and an auto-play both enter here and nothing else does, so The
@@ -712,18 +697,18 @@ def _finish_play(state: CombatState, card: Card,
         # played AFTER the Bomb pays at once instead of arming a watcher for a
         # turn that has already spent its explosion.
         companion_standins.on_played(state, card)
-        # THE HEXEREI FAMILY, same broadcast: Nicole's Ladder of Divine
-        # Ascent pays on every Hexerei card played, and reads the mark
-        # off the card. `tier0.engine.companion_hexerei`.
+        # THE COMPANION READERS, same broadcast: Nicole's Ladder of Divine
+        # Ascent and Klee's Coven Errand / Witches' Circle pay on every card
+        # that counts as a Companion (R276; the Hexerei mark until then).
+        # `tier0.engine.companion_hexerei`.
         companion_hexerei.note_card_played(state, card)
         if replay_index == 0 and (card.is_companion or C.KLEE_OVERHAUL):
-            # "Little Hexenzirkul" (EB-219, retargeted by EB-642): Klee's kit
-            # answering a HEXEREI play, which is where LAW:145 puts
-            # the grant now that Prune's face may not carry it. Which cards
-            # answer is the function's own question, not this line's -- the
-            # printed mark under the arm (`EB-663`: Companion or not, because
-            # a Klee card Alice marked prints the word and fires its readers),
-            # the shipped Personal Companion pool off it.
+            # "Little Hexenzirkul" (EB-219, retargeted by EB-642 and R276):
+            # Klee's kit answering a COMPANION play, which is where LAW:145
+            # puts the grant now that Prune's face may not carry it. Which
+            # cards answer is the function's own question, not this line's --
+            # any card that counts as a Companion under the arm (a Klee card
+            # Alice marked included), the shipped Personal Companion pool off it.
             # INSIDE the loop but gated to the
             # first pass, for two reasons that pull in opposite directions and
             # meet exactly here: the mint has to be ONCE PER PLAY (a replay is
@@ -1870,12 +1855,6 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
         # Cleared on the same walk rather than a second pass, for the same
         # reason the two placements share `surface_innate`.
         c.cost_set_this_combat = None
-        # QUARANTINED (C.KLEE_OVERHAUL). The rising hand cost (`EB-491`) is
-        # combat-scoped like the line above it and for the same reason: the
-        # base game's `AddUntilPlayed` is a LOCAL modifier and does not survive
-        # the fight, so a Long Fuse held to the end of one combat must not open
-        # the next one three energy dearer. Cleared on the same walk.
-        c.rising_cost_risen = 0
     # Combat-side relics: clear per-combat counters at true fight start. Dead
     # branch on the battery (relic_effects empty); the combat_start_* effects
     # themselves fire on the first player turn (see _player_turn).

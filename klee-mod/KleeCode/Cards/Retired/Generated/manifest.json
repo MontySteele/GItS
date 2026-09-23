@@ -182,8 +182,18 @@
       "owner": "kokomi"
     },
     {
+      "id": "KLEEMOD-PROTO_KO_CATALYTIC_CONVERTER",
+      "class": "RetiredProtoKoCatalyticConverter",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_KO_DUCK_AND_COVER",
       "class": "RetiredProtoKoDuckAndCover",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KO_EXPLOSIVES_WORKSHOP",
+      "class": "RetiredProtoKoExplosivesWorkshop",
       "owner": "klee"
     },
     {
@@ -207,6 +217,16 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_KO_KINDLING",
+      "class": "RetiredProtoKoKindling",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KO_LONG_FUSE",
+      "class": "RetiredProtoKoLongFuse",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_KO_POWDER_CHARGE",
       "class": "RetiredProtoKoPowderCharge",
       "owner": "klee"
@@ -214,6 +234,11 @@
     {
       "id": "KLEEMOD-PROTO_KO_SAFETY_LESSON",
       "class": "RetiredProtoKoSafetyLesson",
+      "owner": "klee"
+    },
+    {
+      "id": "KLEEMOD-PROTO_KO_SUGAR_RUSH",
+      "class": "RetiredProtoKoSugarRush",
       "owner": "klee"
     },
     {

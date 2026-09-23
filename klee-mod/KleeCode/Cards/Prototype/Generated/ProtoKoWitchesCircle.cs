@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoWitchesCircle : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_witches_circle");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Witches' Circle"),
-        ("description", "Whenever you play a [gold]Hexerei[/gold] card, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
+        ("description", "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

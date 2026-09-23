@@ -351,8 +351,10 @@ public class KleeOverhaulRoundFourTests
         // `EB-432` rewrote that sentence and kept the claim: the SUBJECT is
         // now "the target's Bombs", all of them, and the order they go off in
         // is printed beside it.
+        // `EB-755` (R276): "in the order placed", which no two Bombs placed
+        // in one turn can tie on.
         Assert.Contains("The target's [gold]Bombs[/gold] go off first, "
-                        + "oldest first", setOff);
+                        + "in the order placed", setOff);
     }
 
     [Fact]

@@ -168,7 +168,9 @@ public class ArmKeywordTipTests
         // `EB-432` traded "one at a time" for the order it leaves out: an
         // order that names a first and a rest IS one at a time, and the pile
         // resolves in placement order with the aura going to the oldest.
-        Assert.Contains("oldest first", printed);
+        // `EB-755` (R276): "in the order placed" says which of two Bombs
+        // placed in one turn goes first, which "oldest first" did not.
+        Assert.Contains("in the order placed", printed);
         Assert.Contains("go off first", printed);
         Assert.Contains("the first takes the aura", printed);
     }
@@ -378,15 +380,15 @@ public class ArmKeywordTipTests
     {
         // `EB-418`. The r11 seat's one unreadable number: Spark 1 to 2 with no
         // Bomb going off, because `KleeCompanionSpark` mints on any play of a
-        // Hexerei Companion and LAW:145 keeps that grant off
+        // Companion (R276; a Hexerei one before) and LAW:145 keeps that grant off
         // the Companion's own face. All three limbs print -- a sentence saying
         // only "makes a Spark" would leave a reacted upgraded play as
         // unreadable as the plain one was.
         var body = Printed("ForCovenSpark");
-        // `EB-642`: the rider names the MARK, not the pool -- R265 pick 1 made
-        // the printed word the whole rule, so the sentence points at the same
-        // word the face above it prints.
-        Assert.Contains("Hexerei", body);
+        // R276 pick 2: the rider names any Companion card, the set the
+        // payment reads; the Hexerei mark is retired.
+        Assert.Contains("Companion", body);
+        Assert.DoesNotContain("Hexerei", body);
         Assert.DoesNotContain("Klee's own", body);
         Assert.Contains("Spark", body);
         Assert.Contains("more if it triggered", body);
@@ -544,7 +546,10 @@ public class ArmKeywordTipTests
         // injected once at boot. It goes through the same `With`, four times
         // over: which of its four rules a row gets is derived from the
         // multiplier `EB-747` picked for that row's payoff.
-        Assert.Equal(26, attaches.Count);
+        //
+        // TWENTY-FIVE SINCE R276: pick 2 retired `Hexerei` and `ForHexerei`
+        // left with it (the Companion Spark rider stays).
+        Assert.Equal(25, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForStageReader");
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
@@ -717,9 +722,9 @@ public class ArmKeywordTipTests
         // what is paid, by whom, or whether it applies to me at all, so I
         // refused both cards partly on that."
         //
-        // THE WORD IS EVERYONE'S AND THE RULE IS KLEE'S. `Hexerei` rides
-        // eighteen companion faces the whole roster can draft and its rule is
-        // her Spark rider; `Oz` is named by Fischl's face, which every
+        // THE WORD IS EVERYONE'S AND THE RULE IS KLEE'S. The Companion Spark
+        // rider rides companion faces the whole roster can draft (it was the
+        // `Hexerei` word until R276); `Oz` is named by Fischl's face, which every
         // character meets, and the Power that fields him is hers. So the tag
         // reaches every run and the rule reaches one -- which is what
         // `blindplay_notes._ARM_KEYWORD_CHARACTER` gates on the page side, and
@@ -746,7 +751,7 @@ public class ArmKeywordTipTests
 
         var inherited = System.Array.Empty<IHoverTip>();
         Assert.Equal(!printed,
-            ReferenceEquals(inherited, ArmKeywordTips.ForHexerei(inherited, card)));
+            ReferenceEquals(inherited, ArmKeywordTips.ForCovenSpark(inherited, card)));
         Assert.Equal(!printed,
             ReferenceEquals(inherited, ArmKeywordTips.ForOz(inherited, card)));
     }
@@ -769,7 +774,7 @@ public class ArmKeywordTipTests
         // Structural, `Every_keyword_goes_through_the_one_attach_point`'s
         // shape: two words, one predicate, so a third word whose rule belongs
         // to one character cannot arrive with its own copy of the question.
-        foreach (var word in new[] { "ForHexerei", "ForOz" })
+        foreach (var word in new[] { "ForCovenSpark", "ForOz" })
         {
             Assert.Contains("ArmKeywordTips.KleesRuleBelongsHere",
                             Il.Calls(Il.Method("ArmKeywordTips", word)));

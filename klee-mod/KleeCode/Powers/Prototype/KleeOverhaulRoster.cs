@@ -137,11 +137,20 @@ internal static class KleeOverhaulRoster
     /// same order; the compiler holds the correspondence, because a deleted row
     /// takes its type with it and this file stops building.
     ///
-    /// FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`), and the TEN that
+    /// FORTY-EIGHT SINCE R276 (2026-09-23, `review/ruled/klee-review-2026-09-23.md`
+    /// pick 1): five rows of R271's lower-value shelf CUT (Long Fuse,
+    /// Explosives Workshop, Sugar Rush, Kindling, Catalytic Converter) and
+    /// four ARRIVED as one block at the end (Hair Trigger, Explosive Frags,
+    /// Where Did I Put It?, Big Bounce). R276 also says 48 is not a finished
+    /// pool: it grows toward 78 before Balance.
+    ///
+    /// FORTY-NINE AT R271 STAGE ONE, and FIFTY-TWO before it (Fwoosh!,
+    /// Fireworks Show and Powder Charge left; Booby Trap arrived).
+    ///
+    /// FORTY-FIVE AT THE POOL PASS (2026-09-05, `EB-491`), and the TEN that
     /// arrived are the readings of rounds 13 to 16 made into cards: three for
     /// Cook, three for Spray, three for React and one bridge between Cook and
-    /// Spray. Their own block at the end, in the sim's order. The pool is 8
-    /// Rares, which is the brief's count.
+    /// Spray. Their own block, in the sim's order.
     ///
     /// THIRTY-FIVE BEFORE THAT (the round-11 pool pass, 2026-09-04), and the
     /// one that arrived is <c>ProtoKoStokeTheFuse</c>: the arm's Spark SINK, the
@@ -175,15 +184,13 @@ internal static class KleeOverhaulRoster
     /// THIRTY-ONE BEFORE THAT (R244), and the three that arrived are a SECOND
     /// slice rather than a redraft of this one: the ruled packet
     /// `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three
-    /// Hexerei readers, the cards in her own pool that pay for the coven's
-    /// one-word mark. They are listed in their own block at the end.
+    /// readers, the cards in her own pool that pay for a Companion play (the
+    /// coven's Hexerei mark until R276). They are listed in their own block.
     ///
-    /// TWENTY-EIGHT AT DRAFT 4, and only ONE row is absent now. Dig In had left
-    /// the OFFER pool at draft 3 to be the starter's Spark sink; the canonical
-    /// starter has no room for it, so it comes back, and Pop! comes with it as
-    /// a Common. Vermillion Pact is the one that stays out, on the packet's own
-    /// sec.5 escape (see <c>VermillionPactNotBuilt</c>), so there is no row and
-    /// no type to name.
+    /// TWENTY-EIGHT AT DRAFT 4. Dig In had left the OFFER pool at draft 3 to be
+    /// the starter's Spark sink; the canonical starter has no room for it, so
+    /// it came back, and Pop! came with it as a Common. Vermillion Pact was
+    /// held out of slice one and arrived with the pool pass (`EB-491`).
     ///
     /// THE ANCIENTS ARE HERE, AND THEY HAVE TO BE (`EB-284`). This list is
     /// what `KleeCardPool.FilterThroughEpochs` returns under the arm, which IS
@@ -212,7 +219,6 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoFishFlavoredBait>(),
         ModelDb.Card<ProtoKoPocketFireworks>(),
         ModelDb.Card<ProtoKoChainFuse>(),
-        ModelDb.Card<ProtoKoExplosivesWorkshop>(),
         ModelDb.Card<ProtoKoCarefulArrangement>(),
         ModelDb.Card<ProtoKoBigBaddaBoom>(),
         ModelDb.Card<ProtoKoTheBigOne>(),
@@ -228,12 +234,11 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoRapidFire>(),
         ModelDb.Card<ProtoKoChainedReactions>(),
         ModelDb.Card<ProtoKoSparksNSplash>(),
-        // React (4)
+        // React (3)
         ModelDb.Card<ProtoKoSizzle>(),
         ModelDb.Card<ProtoKoPerfectTiming>(),
         ModelDb.Card<ProtoKoFlameDance>(),
-        ModelDb.Card<ProtoKoCatalyticConverter>(),
-        // Currencies and defence (7 of 7; Dig In is back in the pool at draft 4)
+        // Currencies and defence (6; Dig In is back in the pool at draft 4)
         ModelDb.Card<ProtoKoAmmoScavenging>(),
         // R271 sec.4 item 3: Powder Charge's SHAPE kept and its body
         // redesigned -- this is BOOBY TRAP, the pool's only single-target
@@ -241,7 +246,6 @@ internal static class KleeOverhaulRoster
         // placer bought from the bank.
         ModelDb.Card<ProtoKoBoobyTrap>(),
         ModelDb.Card<ProtoKoDigIn>(),
-        ModelDb.Card<ProtoKoSugarRush>(),
         ModelDb.Card<ProtoKoRunAway>(),
         ModelDb.Card<ProtoKoGrounded>(),
         ModelDb.Card<ProtoKoSorryJean>(),
@@ -253,10 +257,10 @@ internal static class KleeOverhaulRoster
         // `C.KLEE_OVERHAUL_POOL_IDS`'s order, which is the sheet's.
         ModelDb.Card<ProtoKoDodocoCover>(),
         ModelDb.Card<ProtoKoCarefulNow>(),
-        // The Hexerei readers (3 -- R244, the ruled packet's sec.2). One per
-        // rarity, which is the ruling's own shape: a Common that reads the
-        // turn, an Uncommon Power that is DEAD ALONE by ruling, and a Rare
-        // that makes the hand a coven for one turn.
+        // The Companion readers (3 -- R244, the ruled packet's sec.2; they
+        // read Hexerei until R276). One per rarity: a Common that reads the
+        // turn, an Uncommon Power that pays per Companion play, and a Rare
+        // that makes the hand count as Companion cards for one turn.
         ModelDb.Card<ProtoKoCovenErrand>(),
         ModelDb.Card<ProtoKoWitchesCircle>(),
         ModelDb.Card<ProtoKoAlicesIntroductionMagic>(),
@@ -272,23 +276,18 @@ internal static class KleeOverhaulRoster
         // this gives the bank somewhere to go, and it pays only if a Bomb is
         // already cooking.
         ModelDb.Card<ProtoKoStokeTheFuse>(),
-        // THE POOL PASS (2026-09-05, `EB-491`). TEN rows off the readings of
-        // rounds 13 to 16, in the sim's order: Cook's three (a Retained
-        // detonator whose price rises while it waits, a second pile the size
-        // of the first, and the lore card's AoE with a cost), Spray's three
-        // (the Spark-paid Retained detonator, the Attack placer the Smoggy
-        // reading asked for, and the board-wide Set off), React's three (an
-        // aura-keyed grow with a floor, a tempo rider on the reaction, and the
-        // Pact that breaks the one-aura rule for her chain), and the bridge
-        // that splits a cooked pile in two.
-        ModelDb.Card<ProtoKoLongFuse>(),
+        // THE POOL PASS (2026-09-05, `EB-491`), in the sim's order: a second
+        // pile the size of the first and the lore card's AoE with a cost,
+        // the Spark-paid Retained detonator, the Attack placer and the
+        // board-wide Set off, a tempo rider on the reaction, the Pact that
+        // breaks the one-aura rule for her chain, and the bridge that splits
+        // a cooked pile in two. (Long Fuse and Kindling were cut at R276.)
         ModelDb.Card<ProtoKoAllOfMyTreasures>(),
         ModelDb.Card<ProtoKoFishBlasting>(),
         ModelDb.Card<ProtoKoPocketMatch>(),
         ModelDb.Card<ProtoKoBombsAway>(),
         // `ProtoKoFireworksShow` was CUT by R271 sec.4 item 2 and MERGED into
         // Tinder Toss, which prints its line at 1 Spark with 3 damage behind.
-        ModelDb.Card<ProtoKoKindling>(),
         ModelDb.Card<ProtoKoFlashPoint>(),
         ModelDb.Card<ProtoKoVermillionPact>(),
         ModelDb.Card<ProtoKoSplitCharge>(),
@@ -307,5 +306,12 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoOnceMore>(),
         ModelDb.Card<ProtoKoSparklingBurst>(),
         ModelDb.Card<ProtoKoBlazingDelight>(),
+        // R276 (`review/ruled/klee-review-2026-09-23.md` pick 1). R271 sec.7's
+        // Mines batch and slice two, built together: a Bomb made a Mine, the
+        // Mine deck's Power, the detonator finder and the overkill carrier.
+        ModelDb.Card<ProtoKoHairTrigger>(),
+        ModelDb.Card<ProtoKoExplosiveFrags>(),
+        ModelDb.Card<ProtoKoWhereDidIPutIt>(),
+        ModelDb.Card<ProtoKoBigBounce>(),
     };
 }

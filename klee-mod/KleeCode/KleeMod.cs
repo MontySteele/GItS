@@ -493,10 +493,7 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SetOffKey + ".title"] = "Set off",
                     [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
                     [Cards.ArmKeywordTips.MineKey + ".title"] = "Mine",
-                    // R244, Klee's fifth: the coven's one-word family mark.
-                    // Eighteen faces printed it and nothing defined it, because
-                    // until her three readers existed it had no rule to state.
-                    [Cards.ArmKeywordTips.HexereiKey + ".title"] = "Hexerei",
+                    // Klee's fifth, Hexerei, was retired by R276 pick 2.
                     // `EB-372`, Klee's sixth: a Power of hers that Kaeya's
                     // Cold-Blooded Strike is written against, so the word
                     // reaches a player who may never have drafted it.

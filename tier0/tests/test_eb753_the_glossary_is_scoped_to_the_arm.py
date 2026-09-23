@@ -106,19 +106,26 @@ def test_a_run_reads_no_other_kits_words(character):
 
 
 def test_the_universal_words_are_scoped_to_nobody():
-    """`Companion`, `Swirl`, `Grounded`, `Hexerei` and `Oz` ride faces the
-    whole roster drafts, so none of them is owned and each keeps the treatment
-    it already had."""
-    for word in ("Companion", "Swirl", "Grounded", "Hexerei", "Oz"):
+    """`Companion`, `Swirl`, `Grounded` and `Oz` ride faces the whole roster
+    drafts, so none of them is owned and each keeps the treatment it already
+    had. (`Hexerei` was the fifth until R276 pick 2 retired it.)"""
+    for word in ("Companion", "Swirl", "Grounded", "Oz"):
         assert word not in blindplay_notes._ARM_KEYWORD_ARM, word
 
 
-def test_hexerei_still_prints_its_off_arm_sentence_on_another_run():
+def test_oz_still_prints_its_off_arm_sentence_on_another_run():
     """`EB-583` is untouched: that word IS on a face this run can draft, so
     the row says it is inert here rather than vanishing."""
-    page = _reward("Kokomi", "A Hexerei card. Deal 6 damage.")
-    assert "**Hexerei**" in page
-    assert "on this face it is decoration" in page
+    page = _reward("Kokomi", "Deal 7 damage. If Oz is out, he deals 5 more.")
+    assert "**Oz**" in page
+    assert "the clause never fires" in page
+
+
+def test_the_retired_hexerei_word_has_no_row():
+    """R276 pick 2: the word is on no face, so a stale feed that still prints
+    it gets no definition of a rule that no longer exists."""
+    page = _reward("Klee", "A Hexerei card. Deal 6 damage.")
+    assert "**Hexerei**" not in page
 
 
 def test_a_feed_that_does_not_name_the_character_gets_every_row():

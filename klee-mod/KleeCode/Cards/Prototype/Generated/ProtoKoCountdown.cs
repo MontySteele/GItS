@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoCountdown : CustomCardModel
+public sealed class ProtoKoCountdown : CustomCardModel, ISetOffCard
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, true), this);

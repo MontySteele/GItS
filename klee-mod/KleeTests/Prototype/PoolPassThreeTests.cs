@@ -17,12 +17,12 @@ namespace KleeMod.Tests.Prototype;
 /// (2026-09-05, <c>EB-491</c>; the packet is
 /// <c>review/active/klee-pool-pass-2026-09-05.md</c>).
 ///
-/// FOUR NEW RULES ARRIVE WITH THEM and they are what this file is about: a
-/// hand cost that RISES while the card waits (built for Long Fuse; its
-/// escalation came off on the comparison pass of 2026-09-06, and the rule is
-/// still wired with no row printing it), a Bomb COPIED at the size of the
-/// largest one on the board (All of My Treasures!), a grow keyed to
-/// the enemy's AURA with a floor under it (Kindling), a Bomb SPLIT into two
+/// FOUR NEW RULES ARRIVED WITH THEM and they are what this file is about: a
+/// hand cost that RISES while the card waits (built for Long Fuse; deleted at
+/// R276 with the row), a Bomb COPIED at the size of the largest one on the
+/// board (All of My Treasures!), a grow keyed to the enemy's AURA with a
+/// floor under it (Kindling; the card was cut at R276 and the engine verb is
+/// still pinned below), a Bomb SPLIT into two
 /// halves on random enemies (Split Charge), and the VERMILLION PACT, which
 /// hands back the aura an explosion consumed so the Attack behind it reacts
 /// too. The other five rows are new spellings of shapes the arm already had.
@@ -145,26 +145,6 @@ public class PoolPassThreeTests
         ProtoBombPower.GrowOffAura(klee.Creature, amount: 4, floor: 2);
     }
 
-    [Fact]
-    public void Kindling_prints_both_numbers_and_moves_both()
-    {
-        // TWO printed numbers on one face, which no other row on the surface
-        // carries: the per-Bomb growth rides the `Grow` var and the FLOOR
-        // rides the base game's own `{IfUpgraded:show:up|base}` swap, read at
-        // play time off `IsUpgraded`. A var for the second would render the
-        // same number twice, which is how the two come to disagree.
-        var card = new ProtoKoKindling();
-
-        Assert.Contains("{Grow:diff()}", Face(card));
-        Assert.Contains("{IfUpgraded:show:3|2}", Face(card));
-        Assert.Equal(4m, Vars(card).Single().BaseValue);
-
-        var play = Il.Calls(Il.Method("ProtoKoKindling", "OnPlay"));
-        Assert.Contains(play, c => c.Contains("ProtoBombPower.GrowOffAura"));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKoKindling", "OnUpgrade")),
-                        c => c.Contains("UpgradeValueBy"));
-    }
-
     // ---- All of My Treasures!: the copy -----------------------------------
 
     [Fact]
@@ -283,56 +263,6 @@ public class PoolPassThreeTests
                          .IsAssignableFrom(typeof(ProtoKoTinderToss)));
     }
 
-    // ---- Long Fuse, and the rising hand cost no row prints ----------------
-
-    [Fact]
-    public void Long_fuse_retains_and_prints_no_escalation()
-    {
-        // THE ESCALATION CAME OFF on the comparison pass of 2026-09-06
-        // (`review/active/klee-pool-comparison-pass-2026-09-06.md` sec.3 item
-        // 1), on three seat readings against "Retain plus an escalating cost".
-        // RETAIN STAYS and is not decoration: it is what the card is, Pocket
-        // Match's twin one Energy over, and the frame renders it off the
-        // keyword rail rather than the face -- `ProtoKoPocketMatch`'s
-        // spelling. The row declares no fuse at all now, so it carries the
-        // interface no more than any other Attack does. Twin:
-        // `test_long_fuse_retains_and_no_longer_escalates`.
-        var card = new ProtoKoLongFuse();
-
-        Assert.False(typeof(IRisingHandCostCard)
-                         .IsAssignableFrom(typeof(ProtoKoLongFuse)));
-        Assert.Contains(card.CanonicalKeywords, k => k == CardKeyword.Retain);
-        Assert.Equal("[gold]Set off[/gold]. Deal {Damage:diff()} damage.",
-                     Face(card));
-    }
-
-    [Fact]
-    public void The_fuse_burns_at_the_end_of_klees_turn_and_only_in_hand()
-    {
-        // STRUCTURAL (the hand is a `CardPile` on a live combat). The rule is
-        // read off the compiled roller: it walks the HAND and nothing else,
-        // and what it writes is `AddUntilPlayed` -- the base game's own
-        // modifier, which accumulates, survives the turn boundary, clears when
-        // the card is played and does not outlive the combat. `AddThisTurn`
-        // or `SetThisCombat` here would each be a different card. THE RULE IS
-        // WIRED WITH NO ROW PRINTING IT since Long Fuse's escalation came off
-        // (2026-09-06), and it stays pinned here for the same reason the sim
-        // pins it through a synthetic row. Twins:
-        // `test_a_rising_cost_card_costs_one_more_for_every_turn_it_is_held`,
-        // `test_a_rising_cost_resets_when_the_card_is_played`.
-        var roll = Il.Calls(Il.Method("KleeOverhaulRisingCost", "RollHand"));
-
-        Assert.Contains(roll, c => c.Contains("CardPile.Get"));
-        Assert.Contains(roll, c => c.Contains("AddUntilPlayed"));
-        Assert.DoesNotContain(roll, c => c.Contains("AddThisTurn"));
-        Assert.DoesNotContain(roll, c => c.Contains("SetThisCombat"));
-
-        var hook = Il.Calls(
-            Il.Method("KleeOverhaulSweepHooks", "BeforeSideTurnEnd"));
-        Assert.Contains(hook, c => c.Contains("KleeOverhaul.get_Enabled"));
-        Assert.Contains(hook, c => c.Contains("KleeOverhaulRisingCost.RollHand"));
-    }
-
     // ---- the Vermillion Pact ----------------------------------------------
 
     [Fact]
@@ -408,10 +338,10 @@ public class PoolPassThreeTests
 
         foreach (var row in new[]
                  {
-                     "ProtoKoLongFuse", "ProtoKoAllOfMyTreasures",
+                     // Long Fuse and Kindling were cut at R276.
+                     "ProtoKoAllOfMyTreasures",
                      "ProtoKoFishBlasting", "ProtoKoPocketMatch",
-                     "ProtoKoBombsAway",
-                     "ProtoKoKindling", "ProtoKoFlashPoint",
+                     "ProtoKoBombsAway", "ProtoKoFlashPoint",
                      "ProtoKoVermillionPact", "ProtoKoSplitCharge",
                  })
         {

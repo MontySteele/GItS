@@ -8,7 +8,8 @@ seam's own file makes per stand-in and this slice must make again:
 
   1. EACH RULE FIRES ON ITS OWN EVENT AND ON NO OTHER. Albedo pays on any
      reaction, Sucrose only on one that deals damage, Fischl only on an Electro
-     one, Nicole only on a Hexerei card.
+     one, Nicole only on a card that counts as a Companion (a Hexerei card
+     until R276 pick 2).
   2. KLEE IS HANDED EACH ONE IN PLACE OF ITS UNIVERSAL, and nobody else is.
   3. FLAG OFF, NOTHING HAPPENS -- checked on each function rather than assumed
      from the callers.
@@ -89,9 +90,8 @@ def test_the_four_are_stand_ins_on_the_seam(overhaul):
         card = loader.peek_card(cid)
         assert card.personal_pool == "klee", cid
         assert card.replaces == universal, cid
-        assert card.hexerei, cid                    # the family, not a guest
+        assert card.is_companion, cid
         replaced = loader.peek_card(universal)
-        assert replaced.hexerei, universal
         assert card.rarity == replaced.rarity, cid
         assert card.cost == replaced.cost, cid
         assert card.nation == replaced.nation, cid
@@ -268,15 +268,22 @@ def test_fischl_is_silent_with_the_flag_off():
 
 # --- Nicole, Ladder of Divine Ascent -----------------------------------------
 
-def test_nicole_pays_on_a_hexerei_card_and_on_no_other(overhaul):
+def test_nicole_pays_on_any_companion_card_and_on_no_other(overhaul):
+    """R276 pick 2: the Ladder reads "a Companion card". Diona's Icy Paws,
+    which carried no Hexerei mark, pays now; a plain Klee card does not."""
+    from tier0.engine.state import Card
+
     state = _state()
     state.player.powers[hexerei.LADDER_OF_ASCENT] = 6
     hexerei.note_card_played(
-        state, loader.peek_card("proto_mc_sucrose_astable"))     # tagged
+        state, loader.peek_card("proto_mc_sucrose_astable"))
     assert len(_paid(state, "mc_ladder_of_ascent")) == 1
     hexerei.note_card_played(
-        state, loader.peek_card("proto_mc_diona_icy_paws"))      # untagged
-    assert len(_paid(state, "mc_ladder_of_ascent")) == 1
+        state, loader.peek_card("proto_mc_diona_icy_paws"))
+    assert len(_paid(state, "mc_ladder_of_ascent")) == 2
+    hexerei.note_card_played(
+        state, Card(id="proto_ko_plain", name="x", cost=1, type="skill"))
+    assert len(_paid(state, "mc_ladder_of_ascent")) == 2
 
 
 def test_nicole_deals_the_played_cards_element(overhaul):
@@ -288,7 +295,7 @@ def test_nicole_deals_the_played_cards_element(overhaul):
     assert state.enemies[0].aura == "electro"
 
 
-def test_a_hexerei_card_with_no_element_deals_plain_damage(overhaul):
+def test_a_companion_card_with_no_element_deals_plain_damage(overhaul):
     """R236 pick 6's own sentence. Read off a Card built for the test rather
     than off a row, so the claim survives every row on the sheet carrying one.
     """
@@ -297,15 +304,14 @@ def test_a_hexerei_card_with_no_element_deals_plain_damage(overhaul):
     state = _state()
     state.player.powers[hexerei.LADDER_OF_ASCENT] = 6
     hexerei.note_card_played(state, Card(
-        id="proto_mc_x", name="x", cost=1, type="skill", hexerei=True))
+        id="proto_mc_x", name="x", cost=1, type="skill", tags=["companion"]))
     assert _paid(state, "mc_ladder_of_ascent")[0]["element"] == "none"
     assert state.enemies[0].aura is None
 
 
-def test_nicoles_own_card_is_in_the_family(overhaul):
-    """She pays for herself once, and the sheet is why: her stand-in carries
-    the mark like the Universal it replaces."""
-    assert loader.peek_card("proto_mc_nicole_ladder_of_ascent").hexerei
+def test_nicoles_own_card_is_a_companion(overhaul):
+    """She pays for herself once, because her stand-in is a Companion card."""
+    assert loader.peek_card("proto_mc_nicole_ladder_of_ascent").is_companion
 
 
 def test_nicole_is_silent_with_the_flag_off():
@@ -318,7 +324,7 @@ def test_nicole_is_silent_with_the_flag_off():
     state.player.powers[hexerei.LADDER_OF_ASCENT] = 6
     hexerei.note_card_played(state, Card(
         id="proto_mc_x", name="x", cost=1, type="skill", element="anemo",
-        hexerei=True))
+        tags=["companion"]))
     assert not _paid(state, "mc_ladder_of_ascent")
 
 

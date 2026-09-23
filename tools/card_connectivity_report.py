@@ -412,18 +412,22 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                          _hook("shared", "hand_contents", "write")],
     # R244's Alice's Introduction Magic. It moves no meter and no pile: it
     # READS the hand and WRITES what those cards ARE -- "all cards in your hand
-    # count as Hexerei cards this turn" is a change of card identity, which is
-    # a shared state this vocabulary already has a name for. Filing it under
-    # `bombs` because a witch may later plant one would classify the payoff
-    # rather than the op.
-    "hexerei_mark_hand": [_hook("shared", "hand_contents", "read"),
-                          _hook("shared", "card_identity", "write")],
+    # count as Companion cards this turn" is a change of card identity, which
+    # is a shared state this vocabulary already has a name for. Filing it under
+    # `bombs` because a Companion play may later plant one would classify the
+    # payoff rather than the op.
+    "companion_mark_hand": [_hook("shared", "hand_contents", "read"),
+                            _hook("shared", "card_identity", "write")],
+    # R276's Hair Trigger reads and writes the pile alone: its charges change
+    # kind (Bomb to Mine) and nothing moves.
+    "mine_bombs": [_hook("private", "bombs", "read"),
+                   _hook("private", "bombs", "write")],
     # POOL PASS TWO's two (`EB-732`), and neither touches a Bomb. Blast Shield
     # sends its own play to the hand instead of the discard pile, which is a
     # WRITE of the hand and nothing else; Once More! reads the discard pile for
     # one named card and writes it into the hand. Filed by what they move --
     # cards between piles -- rather than by the Set off they name, for the
-    # reason `hexerei_mark_hand` above is filed by the mark and not the payoff.
+    # reason `companion_mark_hand` above is filed by the mark and not the payoff.
     "return_to_hand": [_hook("shared", "hand_contents", "write")],
     "return_last_set_off": [_hook("shared", "discard_pile", "use"),
                             _hook("shared", "hand_contents", "write")],

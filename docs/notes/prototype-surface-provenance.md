@@ -2394,23 +2394,12 @@ A FIELD AND NOT AN UPGRADE DELTA, so both faces carry it: an upgrade is a
 different card, and a player who smiths the placer must not lose the opening
 the ruling gave it.
 
-## the coven's Hexerei mark (`EB-642`, 2026-09-07)
+## the coven's Hexerei mark (`EB-642`, 2026-09-07) -- retired at R276
 
-R265 pick 1 made the printed word the whole rule, and the one-word rule would
-otherwise have cut the grant from Klee's OWN coven -- eight Personals that
-paid a Spark and printed no family word -- which the pick did not name as a
-cost.
-
-The family is the coven plus the marked Universals: `hexerei: true` now sits on
-`proto_mc_barbara_front_row_seat`, `proto_mc_diona_shaken_not_purred`,
-`proto_mc_noelle_i_got_your_back`, `proto_mc_kaeya_cold_blooded_strike`,
-`proto_mc_jean_lions_fang`, `proto_mc_sayu_silencers_secret`,
-`proto_mc_qiqi_herald_of_frost` and `proto_mc_yaoyao_yuegui_throwing_mode`,
-so every Companion face of Klee's prints the word and pays it.
-
-The readers (Coven Errand, Witches' Circle, Venti's stand-in) therefore fire on
-a wider set than R244 wrote them against; that widening is read at the audit
-door in pool pass two, not assumed here.
+R276 pick 2 replaced the mark with "Companion": Klee's Spark, Coven Errand,
+Witches' Circle, Alice's Introduction Magic and Nicole's Ladder read any
+Companion card, so the `hexerei:` key left every row (and its reader left both
+engines). See the R276 section at the end of this file.
 
 ## Kokomi pool pass two -- the queue as something you operate on (`EB-643`, R265, 2026-09-07)
 
@@ -3194,3 +3183,46 @@ to standing Block on the way in and shrunk by whatever each hit absorbed), so
 the repair is the PLANT reading the mark: `min(blocked, mark)` in both engines.
 An 8-mark eating a 20 plants 8 and is spent; two hits of 6 into the same
 8-mark plant 6 and then 2. The face keeps "this Block" and is now true.
+
+## R276 -- the Mines batch and slice two together, and Hexerei becomes Companion (2026-09-23)
+
+`review/ruled/klee-review-2026-09-23.md`, all three picks at their defaults.
+The designs are R271 sec.7's (`review/ruled/klee-pool-consolidation-2026-09-09.md`);
+every number below is a starting value.
+
+**Cut (pick 1):** `proto_ko_long_fuse`, `proto_ko_explosives_workshop`,
+`proto_ko_sugar_rush`, `proto_ko_kindling`, `proto_ko_catalytic_converter`.
+Rapid Fire stays. The rising hand cost Long Fuse once carried had no row left,
+so `KleeOverhaulRisingCost` and its sim twin are deleted.
+
+**`proto_ko_hair_trigger`** (R271's "Tripwire", renamed: a shipped card "Trip
+Wire" exists). Common Skill, 1 Energy, "Your Bombs on this enemy become a
+Mine.", upgrade cost 0. Every charge on the aimed enemy is flagged a Mine at its
+own size (`ProtoBombPower.MineAllOn`, `klee_overhaul.mine_all_on`); nothing
+moves, merges or goes off, so the pile keeps its order and riders.
+
+**`proto_ko_explosive_frags`**. Uncommon Power, 1 Energy, "Whenever a Mine goes
+off, apply 2 Vulnerable to that enemy.", upgrade 3. Read at the one site a
+charge goes off, AFTER the Mine's own hit, for any Mine of hers whatever set it
+off (`MineFragsPower`, `klee_overhaul.MINE_FRAGS`). The shipped Rare of the
+same name is hidden by the arm's whole-pool swap.
+
+**`proto_ko_where_did_i_put_it`**. Common Skill, 1 Energy, "Look at the top 4
+cards of your draw pile. Put a Set off card from them into your hand and the
+rest on the bottom.", upgrade 6. `scry_take` with `filter: set_off`; a Set off
+card is any row whose body carries a `set_off` op (`ISetOffCard`,
+`klee_overhaul.is_set_off_card`). With none among them, all go to the bottom.
+
+**`proto_ko_big_bounce`**. Uncommon Attack, 1 Energy, "Set off. Deal 5 damage.
+Explosion damage past the enemy's HP is dealt to a random other enemy.",
+upgrade 8. `set_off` with `overflow: bounce`: the explosions' damage past the
+kill is summed and dealt as ONE plain Pyro hit to a random other living enemy,
+before the card's own hit. It does not Set off and does not bounce again; the
+destination's Vulnerable is not applied (it was paid at the source).
+
+**Hexerei becomes Companion (pick 2).** Coven Errand reads
+`companion_played_this_turn`, Witches' Circle pays per Companion play, Alice's
+Introduction Magic (`companion_mark_hand`) makes the hand count as Companion
+cards -- and, with its `hexerei:` key gone, no longer counts itself. The Spark
+rider (`ForCovenSpark`) rides every companion face on Klee's profile.
+

@@ -19,7 +19,6 @@ from understudy.blindplay_faces import remember_elements
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         CASKET_STRIKE,
-                                        COMPANION_SPARK, COMPANION_SPARK_MAX,
                                         CRYSTALLIZE_BLOCK, OPENING_SPARK,
                                         SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
@@ -1401,9 +1400,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # and the two rows that do it (Tinder Toss, Rapid Fire) print "a random
     # enemy" and cannot say where it lands -- so the rule lives on the word,
     # the one surface both rows carry.
-    "Set off": ("The target's Bombs go off first, oldest first, each a Pyro "
-                "hit. Block stops them, no when-hit power fires, the first "
-                "takes the aura. A random one picks a Bombed enemy first."),
+    # `EB-755` (R276 hygiene): "oldest first" did not say which of two Bombs
+    # placed in one turn goes first; "in the order placed" does.
+    "Set off": ("The target's Bombs go off first, in the order placed, each a "
+                "Pyro hit. Block stops them, no when-hit power fires, the "
+                "first takes the aura. A random one picks a Bombed enemy "
+                "first."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same
@@ -1505,67 +1507,10 @@ ARM_KEYWORDS: dict[str, str] = {
     "Tamakushi Casket": (
         f"Your relic. Each debuff you apply is a {CASKET_STRIKE} Hydro hit on "
         f"that enemy: it reacts, takes its Vulnerable, and re-arms Hydro."),
-    # `EB-377` ADDED THESE TWO, and their absence was the same defect one row
-    # over rather than a decision: both have had an `ArmKeywordTips` twin since
-    # R244, and neither had a page row -- so the mod defined them on a hover
-    # and the blind page defined them nowhere. `Hexerei` rides eighteen faces
-    # and `Swirl` is printed as a VERB by ten Universals.
-    # `EB-392`: "from the witches' circle" was doing silent work -- the r12
-    # run-2 seat "could not tell from any card face whether MY Companion
-    # qualified" and then met a third word on the same screen. Every Hexerei
-    # Companion prints the tag now, so the first sentence is a test a player
-    # can run; the second names the overlap with "Klee's own", which is the
-    # Spark rider's phrase.
-    # `EB-535` PUT THE PAYMENT IN THE SENTENCE. "Cards of hers pay when you
-    # play one" -- "pay what, to whom, and when? I played Razor four times and
-    # never saw anything I could attribute to Hexerei" (Klee r19 lane 2). The
-    # rule was on a different screen all along, the Companion Spark rider, and
-    # the seat found it late and still could not tell whether Razor was one of
-    # Klee's own. The reader clause gave up its room to the payment; the family
-    # test and the ownership split stay, because those are what answer the
-    # Razor question. Same sentence as `ArmKeywordTips.ForHexerei`, with the
-    # two numerals the C# lifts from `KleeCompanionSpark` written out -- this
-    # page has no access to the mod's constants and
-    # `test_the_hexerei_line_names_the_payment_the_kit_declares` holds them in
-    # step from this side.
-    # `EB-554` MADE THE OWNERSHIP CLAUSE POINT AT A MARK. "Some are Klee's own,
-    # some are not" told a reader the split exists and gave them no way to run
-    # it: Klee r20 lane 1 played Albedo+ and Razor in one turn, both printing
-    # the word, and Spark stayed at 1 -- "nothing on either card face
-    # distinguishes 'hers' from not-hers, so as a reader I have no way to
-    # predict which Companion pays a Spark". The faces carry the mark now
-    # (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked ones
-    # pay and names the mark it points at.
-    # `EB-596` REWROTE IT AS WHO IS PAID, HOW MUCH, AND WHAT THE CAP COUNTS.
-    # The r22 lane-2 and r23 lane-1 seats read "pay" as a SURCHARGE Klee
-    # pays -- Jean at "cost 2" read as 2 Energy and a hidden Spark -- and
-    # could not tell whether "up to 3" capped Sparks, plays or turns; and
-    # "and Klee herself" read as a rule making every Klee card satisfy Coven
-    # Errand, which no engine implements (only a card carrying the mark
-    # counts, `companion_hexerei.is_hexerei`). So: the family test is the
-    # face; the Spark is a GAIN, bounded per play; and the clause that
-    # carried no rule is gone.
-    # `EB-619` DROPPED "it never costs Spark" ([USER]'s act-1 run: "shouldn't
-    # the card's own cost section say that?"). A price a card does not charge
-    # belongs on the cost line or nowhere -- denying it on the keyword page is
-    # what raised the doubt. Held in step with `ArmKeywordTips.ForHexerei`.
-    # `EB-642` DROPPED THE OWNERSHIP CLAUSE, because R265 pick 1 dropped the
-    # distinction it pointed at: every Hexerei card gives Klee a Spark now,
-    # Universals included, so the first sentence's test IS the payer set and
-    # "marked Klee's own" would narrow it falsely. The mark leaves the faces in
-    # the same commit -- one word, one rule.
-    # `EB-663` TOOK "COMPANION" OUT OF THE TEST. Alice's Introduction Magic
-    # marks a HAND, so a Klee card can count as Hexerei without being a
-    # Companion at all -- and it fires the family's readers and, since
-    # `EB-663`, pays the Spark. The old opening also read to the r24 seat as
-    # "Companion" and "Hexerei" being one set, which the eight coven Personals
-    # that print no word are the counterexample to; the last sentence says so.
-    # SAID IN 133 OF 135, so the word carries no length exception: the two ways
-    # in share one subject, the spell is named by its owner, and the denial is
-    # four words. Held in step with `ArmKeywordTips.ForHexerei`.
-    "Hexerei": ("Printed on a card's face, or marked by Alice's this turn. "
-                f"Playing one gives Klee {COMPANION_SPARK} Spark, up to "
-                f"{COMPANION_SPARK_MAX} a play. Not every Companion has it."),
+    # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
+    # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three
+    # readers read any Companion play now, so the word and its row left the
+    # page with the tip (`ArmKeywordTips`).
     "Swirl": ("The enemy's aura is consumed and copied onto ALL enemies. No "
               "aura, no effect."),
     # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
@@ -1845,7 +1790,7 @@ def _stage_arm(obs: dict[str, object]) -> bool:
 # is true, which is that this run has no rule for it. A feed that does not say
 # who is playing gets the rule, `absent is not zero`'s direction: silence
 # about the character is not evidence it is somebody else's.
-_ARM_KEYWORD_CHARACTER: dict[str, str] = {"Hexerei": "klee", "Oz": "klee"}
+_ARM_KEYWORD_CHARACTER: dict[str, str] = {"Oz": "klee"}
 
 # `EB-753`. AND THE OTHER KIND OF OFF-ARM WORD, WHICH IS NOT THAT ONE.
 #
@@ -1905,8 +1850,6 @@ def _arm_owns(word: str, who: str) -> bool:
 # it is one line. The ON-arm row is untouched and is still the sentence held
 # in step with the C# tip.
 _OFF_ARM_KEYWORD: dict[str, str] = {
-    "Hexerei": ("A Companion family mark. No card you can draft in this run "
-                "reads it, so on this face it is decoration."),
     "Oz": ("A summoned raven another kit's Power fields. Nothing you can "
            "draft in this run puts him out, so the clause never fires."),
 }
@@ -1925,10 +1868,8 @@ _ARM_KEYWORD_RE = {
     # that print it and on the strip line a queued Dusk entry draws.
     "Dusk": re.compile(r"\bDusk\b"),
     "Mend": re.compile(r"\bMends?\b"),
-    # `EB-377`'s two. `Hexerei` takes no plural -- the word is a family name
-    # and every face that prints it prints "a Hexerei card" -- and `Swirl` is
-    # printed as a verb, so it conjugates the way `Mend` does.
-    "Hexerei": re.compile(r"\bHexerei\b"),
+    # `EB-377`'s `Swirl` is printed as a verb, so it conjugates the way
+    # `Mend` does. (Its sibling `Hexerei` was retired by R276 pick 2.)
     "Swirl": re.compile(r"\bSwirls?\b"),
     # `EB-372`. NO PLURAL: the word names one Power. It fires on Kaeya's face,
     # on the Cold-Blooded buff it leaves behind, and on the Power card itself

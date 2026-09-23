@@ -110,31 +110,29 @@ public sealed class ChainedReactionsPower
 }
 
 /// <summary>
-/// Witches' Circle (R244): "Whenever you play a Hexerei card, place a Bomb 3
-/// on a random enemy."
+/// Witches' Circle (R244, R276): "Whenever you play a Companion card, place a
+/// Bomb 3 on a random enemy."
 ///
-/// CHAINED REACTIONS' SHAPE WITH A RARER TRIGGER, which is why the ruled packet
-/// files it one rarity down. The stack is the Bomb SIZE, so a second copy is a
-/// second Bomb per witch, and the printed number is the row's -- which is what
-/// lets its declared <c>power_amount</c> delta move it.
+/// CHAINED REACTIONS' SHAPE WITH A RARER TRIGGER. The stack is the Bomb SIZE,
+/// so a second copy is a second Bomb per Companion play, and the printed
+/// number is the row's -- which is what lets its declared
+/// <c>power_amount</c> delta move it.
 ///
-/// DEAD ALONE, AND THAT IS THE CARD. The packet's pick 2 was taken at its
-/// default: a deck with no Hexerei card in it never sets this off, and it is
-/// drafted only by a deck that already holds witches. Klee is herself Hexerei
-/// (the brief's sec.7.4), so "two witches make a circle" is her plus any one
-/// Hexerei card -- and Alice's Introduction Magic can make a whole hand one.
+/// R276 pick 2 WIDENED THE TRIGGER from the retired Hexerei mark to any
+/// Companion card, because under the arm Klee starts with no companion and a
+/// reader that waited on two lucky offers rarely fired. Alice's Introduction
+/// Magic still widens it for a turn, through the one question every reader
+/// asks (<c>CompanionHexerei.CountsAsCompanion</c>).
 ///
 /// IT HOOKS ITSELF, like <see cref="LadderOfAscentPower"/> and unlike this
 /// arm's explosion listeners: <c>AfterCardPlayed</c> reaches a power the card
-/// just applied, and asking the mark's one reader
-/// (<c>CompanionHexerei.IsHexerei</c>) is what lets the this-turn window widen
-/// the family without this power learning about it.
+/// just applied.
 ///
 /// THE BOMB IS PLACED THROUGH THE SAME <c>Place</c> every other source uses, so
 /// it registers, can be set off and can jump -- and, being a plain Bomb rather
 /// than a Mine, it cannot answer an attack by itself. Nothing fires by itself
 /// (rule 7): this places, it does not detonate. Sim twin:
-/// <c>klee_overhaul.note_hexerei_played</c>.
+/// <c>klee_overhaul.note_companion_played</c>.
 /// </summary>
 public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
 {
@@ -142,7 +140,7 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
     {
         ("title", "Witches' Circle"),
         ("description",
-            "Whenever you play a [gold]Hexerei[/gold] card, place a "
+            "Whenever you play a [gold]Companion[/gold] card, place a "
           + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
     };
 
@@ -154,7 +152,7 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
     {
         if (!KleeOverhaul.Enabled || Owner == null) return;
         if (cardPlay.Card?.Owner?.Creature != Owner) return;   // co-op: yours
-        if (!CompanionHexerei.IsHexerei(cardPlay.Card)) return;
+        if (!CompanionHexerei.CountsAsCompanion(cardPlay.Card)) return;
         var combat = Owner.CombatState;
         if (combat == null) return;
 
@@ -165,6 +163,49 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
 
         await ProtoBombPower.Place(choiceContext, dest, Amount, isMine: false,
                                    payloadMineAll: 0, Owner, cardSource: null);
+    }
+}
+
+/// <summary>
+/// Explosive Frags (R276): "Whenever a Mine goes off, apply 2 Vulnerable to
+/// that enemy."
+///
+/// READ AT THE ONE SITE A CHARGE GOES OFF (<c>ProtoBombPower.Explode</c>),
+/// after the Mine's own hit, so the Vulnerable is on the enemy for whatever
+/// comes next and never for the Mine that applied it. ANY Mine of hers, and
+/// whatever set it off: the enemy's attack or a card's Set off. The stack is
+/// the Vulnerable, so a second copy applies twice as much and the upgrade
+/// moves it. A corpse takes nothing. Sim twin: <c>klee_overhaul.MINE_FRAGS</c>.
+///
+/// NOT THE SHIPPED <see cref="DetonationVulnPower"/>, which answers a shipped
+/// Bomb's detonation; this one answers the arm's Mine and nothing else.
+/// </summary>
+public sealed class MineFragsPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Explosive Frags"),
+        ("description",
+            "Whenever a [gold]Mine[/gold] goes off, apply "
+          + "[blue]{Amount}[/blue] [gold]Vulnerable[/gold] to that enemy."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>One of <paramref name="applier"/>'s Mines just went off on
+    /// <paramref name="target"/>: every copy of the power applies its
+    /// stack.</summary>
+    public static async Task OnMineWentOff(
+        PlayerChoiceContext choiceContext, Creature applier, Creature target)
+    {
+        foreach (var frags in applier.Powers.OfType<MineFragsPower>().ToList())
+        {
+            if (target.IsDead || frags.Amount <= 0) return;
+            await PowerCmd.Apply<VulnerablePower>(
+                choiceContext, target, frags.Amount, applier: applier,
+                cardSource: null);
+        }
     }
 }
 

@@ -727,16 +727,17 @@ def _max_hp_hit(card: Card, fx: dict) -> float:
     return max_hp * _max_hp_fraction(fx)
 
 
-#: The Klee overhaul's fourteen verbs (slice one, plus R244's
-#: `hexerei_mark_hand`, R252's `block_largest_bomb` and the round-11 pool
-#: pass's `grow_largest_bomb`; QUARANTINED behind `C.KLEE_OVERHAUL`).
+#: The Klee overhaul's verbs (slice one, plus R244's `companion_mark_hand`,
+#: R252's `block_largest_bomb`, the round-11 pool pass's `grow_largest_bomb`
+#: and R276's `mine_bombs`; QUARANTINED behind `C.KLEE_OVERHAUL`).
 #: Named as a set rather than eleven `if op ==` arms because they take ONE
 #: pricing decision between them -- see `_op_price`.
 KLEE_OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
-    "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand",
+    "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
+    "mine_bombs",
     # THE POOL PASS's three (`EB-491`): All of My Treasures!, Kindling and
     # Split Charge. Same pricing decision as the eleven above.
     "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
@@ -2453,7 +2454,7 @@ STATIC_OP_PRICING: dict[str, str] = {
     # One rationale, ten ops, because it is ONE decision: the arm is C#
     # first, tier0 refuses to resolve any of them off the arm, and a price is
     # an estimate of behaviour the published world does not have. See
-    # `_op_price`. `hexerei_mark_hand` is R244's, `block_largest_bomb` is
+    # `_op_price`. `companion_mark_hand` is R244's, `block_largest_bomb` is
     # R252's and `grow_largest_bomb` is the round-11 pool pass's; all three
     # take the same zero for the same reason, and a per-op price for any of
     # them would be a `DRAFTER_VERSION` bump bought for a quarantined row no
@@ -2466,7 +2467,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "remove_bomb_for_block", "block_largest_bomb",
                   "grow_largest_bomb", "damage_set_off_total",
                   "multiply_set_off", "draw_per_set_off",
-                  "hexerei_mark_hand",
+                  "companion_mark_hand", "mine_bombs",
                   "plant_bomb_copy_largest", "grow_bombs_off_aura",
                   "split_largest_bomb",
                   "return_to_hand", "return_last_set_off")},

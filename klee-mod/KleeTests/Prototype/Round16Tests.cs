@@ -154,10 +154,12 @@ public class Round16Tests
         // overage because the two rows that roll (Tinder Toss, Rapid Fire)
         // print only "a random enemy" and cannot say where it lands, and
         // `tools/lint_text_conventions.py` carries `SetOffKey` as a named
-        // exception with that reason.
+        // exception with that reason. `EB-755` (R276) paid seven more
+        // characters for "in the order placed" over "oldest first", which did
+        // not say which of two Bombs placed in one turn goes first.
         var rendered = SetOffTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(173, rendered.Length);
+        Assert.Equal(180, rendered.Length);
         Assert.EndsWith("A random one picks a Bombed enemy first.", rendered);
     }
 

@@ -68,6 +68,11 @@ internal static class KleePowerIcons
         VermillionPactPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // R276's Explosive Frags borrows the shipped Explosive Frags badge,
+        // whose job it takes over for the arm's Mine (Vulnerable per charge
+        // gone off). Its own illustration stays owed until Balance.
+        MineFragsPower =>
+            KleePck.Path("klee/powers/detonation_vuln.png"),
         // POOL PASS TWO's two (`EB-732`), on the block above's terms verbatim.
         // Return to Sender borrows the BOMB-PER-TRIGGER badge, because that is
         // what it is -- a Bomb placed off an event, one trigger along from
@@ -88,8 +93,8 @@ internal static class KleePowerIcons
         // R244's TWO COVEN READERS, on the block above's terms verbatim: the
         // Circle borrows the icon of the arm power whose job it takes over
         // (Chained Reactions -- a Bomb per trigger, one trigger over), and the
-        // Introduction Magic borrows the Hexerei family's own badge, because
-        // what it does is turn a hand into witches. The three rows' own
+        // Introduction Magic borrows the witch family's badge, because what it
+        // does is turn a hand into Companion cards (R276). The three rows' own
         // illustrations stay owed until the slice is accepted.
         WitchesCirclePower =>
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),

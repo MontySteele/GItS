@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcYaoyaoYueguiThrowingMode : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcYaoyaoYueguiThrowingMode : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,14 +49,14 @@ public sealed class ProtoMcYaoyaoYueguiThrowingMode : CustomCardModel, ICompanio
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_yaoyao_yuegui_throwing_mode");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yaoyao — Yuegui: Throwing Mode"),
-        ("description", "[gold]Hexerei[/gold]. For {PowerAmount:diff()} turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

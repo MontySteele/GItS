@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoCovenErrand : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_coven_errand");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coven Errand"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. If you played a [gold]Hexerei[/gold] card this turn, place it on ALL enemies instead."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. If you played a [gold]Companion[/gold] card this turn, place it on ALL enemies instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -61,7 +61,7 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        if (KleeOverhaulLedger.For(Owner.Creature).HexereiPlayedThisTurn > 0)
+        if (KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0)
             await ProtoBombPower.PlaceOnAll(choiceContext, Owner.Creature, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, cardSource: this);
         else
             await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, Owner.Creature, this);

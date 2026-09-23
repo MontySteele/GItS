@@ -79,11 +79,17 @@ internal static class ElementalHit
     /// `deal_damage_to_enemy(..., powered=False)` keeps the applier and
     /// drops `modify_damage_dealt`, and tier0 has no pet object to hand
     /// over.
+    ///
+    /// <paramref name="targetMods"/> is QUARANTINED and has one caller, the
+    /// Klee overhaul's Big Bounce (R276): its hit carries damage whose
+    /// Vulnerable was already paid on the enemy it came from, so false skips
+    /// <see cref="SimDamagePipeline.TargetMods"/> and changes nothing else.
+    /// Defaulted true, so every other caller is byte-identical.
     /// </summary>
     public static async Task<int> Deal(
         PlayerChoiceContext choiceContext, Creature target, Element element,
         decimal baseDamage, Creature? applier, bool ignoreBlock = false,
-        bool powered = true)
+        bool powered = true, bool targetMods = true)
     {
         var dealt = powered
             ? SimDamagePipeline.DealerMods(applier, baseDamage)
@@ -116,7 +122,9 @@ internal static class ElementalHit
         // `Resolve`: `tier0/tests/test_reaction_phase_parity.py` pins the
         // TargetMods read as happening after `ReactionEffects.Resolve`, which
         // is what makes a Superconduct's Vulnerable amplify this same hit.
-        var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
+        var landed = targetMods
+            ? (int)SimDamagePipeline.TargetMods(target, dealt)
+            : (int)dealt;
         await CreatureCmd.Damage(
             choiceContext, target, landed,
             ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable

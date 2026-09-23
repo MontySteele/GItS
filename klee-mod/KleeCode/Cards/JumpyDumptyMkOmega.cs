@@ -30,6 +30,16 @@ namespace KleeMod.Cards;
 /// outside the ratified sheets: the sim models neither events nor relics,
 /// so Ancient cards are game-side-only content (DECISIONS entry 2026-07-23).
 /// Title pending the naming/lore audit.
+///
+/// UNDER THE KLEE OVERHAUL (R276 hygiene) it is the arm's card too: Dusty
+/// Tome draws it from the arm's own offerable pool (`EB-284`), and a shipped
+/// Bomb -- which detonates by itself -- has no business in a run playing
+/// rule 7. So under the arm it places the arm's Bomb (a plain
+/// <see cref="ProtoBombPower"/> charge of the same size on every enemy) and
+/// its face and tip say so in the arm's words. The flag is read twice, the
+/// way <c>PoundingSurprise</c> reads it: the face and the tip on the compile
+/// constant the deploy line sets (a loc row is registered once at boot), the
+/// play on the runtime switch every other arm seam reads.
 /// </summary>
 public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkillTagCard
 {
@@ -40,7 +50,13 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+#if KLEE_OVERHAUL
+        ArmKeywordTips.ForBomb(
+            KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro,
+                                     includesBombRules: false), this);
+#else
         KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: true);
+#endif
 
     // Art: deliberate family reuse of the Mk.II portrait until the art pass
     // assigns the ancient its own crop (look-pass item, not a blocker).
@@ -49,7 +65,11 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty Mk.Omega"),
+#if KLEE_OVERHAUL
+        ("description", "Deal {Damage:diff()} damage to a random enemy 3 times. Place a [gold]Bomb[/gold] {BombDamage:diff()} on ALL enemies."),
+#else
         ("description", "Deal {Damage:diff()} damage to random enemies 3 times. Place a [gold]Bomb[/gold] on EVERY enemy dealing {BombDamage:diff()} damage."),
+#endif
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -77,6 +97,18 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+#if PROTOTYPE_CARDS
+        if (KleeOverhaul.Enabled)
+        {
+            // The arm's Bomb, the arm's placer: a plain charge on every living
+            // enemy, which never goes off by itself (rule 7).
+            await ProtoBombPower.PlaceOnAll(
+                choiceContext, Owner.Creature,
+                (int)DynamicVars["BombDamage"].BaseValue, isMine: false,
+                payloadMineAll: 0, cardSource: this);
+            return;
+        }
+#endif
         foreach (var enemy in CombatState!.HittableEnemies.ToList())
         {
             await BombPower.Place(

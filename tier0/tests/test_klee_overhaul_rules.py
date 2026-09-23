@@ -1770,26 +1770,27 @@ def test_the_ops_all_resolve_through_the_module(overhaul):
 
 
 # ---------------------------------------------------------------------------
-# THE HEXEREI READERS -- R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`)
+# THE COMPANION READERS -- R244, R276
 # ---------------------------------------------------------------------------
 #
-# Three rows in Klee's own pool that read the coven's one-word family mark.
-# The C# twins are `klee-mod/KleeTests/Prototype/HexereiReaderTests.cs`, case
-# for case; where a case is structural there (the headless harness cannot play
-# a card) it is a real board here, which is the whole point of the twin.
+# Three rows in Klee's own pool that read a Companion play (the coven's
+# Hexerei mark until R276 pick 2). The C# twins are
+# `klee-mod/KleeTests/Prototype/HexereiReaderTests.cs`, case for case; where a
+# case is structural there (the headless harness cannot play a card) it is a
+# real board here, which is the whole point of the twin.
 
 
-def witch(cid="proto_mc_witch", ctype="skill"):
-    """A Hexerei card by the PRINTED mark -- the sheet key, not an id list."""
+def companion(cid="proto_mc_friend", ctype="skill"):
+    """A Companion card, by the `companion` tag `is_companion` reads."""
     card = probe([], cid=cid, ctype=ctype)
-    card.hexerei = True
+    card.tags = ["companion"]
+    assert card.is_companion
     return card
 
 
-def test_coven_errand_places_one_bomb_with_no_witch_played(overhaul):
-    """"Place a Bomb 5." The else arm, and the honest read of the card alone:
-    a Pop! that costs 1, which the ruled packet calls "a little under the
-    Common bar ... the price of the upside"."""
+def test_coven_errand_places_one_bomb_with_no_companion_played(overhaul):
+    """"Place a Bomb 5." The else arm, and the honest read of the card
+    alone."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
@@ -1798,14 +1799,13 @@ def test_coven_errand_places_one_bomb_with_no_witch_played(overhaul):
     assert sizes(b) == []
 
 
-def test_coven_errand_goes_wide_after_a_witch(overhaul):
-    """"If you played a Hexerei card this turn, place it on ALL enemies
+def test_coven_errand_goes_wide_after_a_companion(overhaul):
+    """"If you played a Companion card this turn, place it on ALL enemies
     instead." INSTEAD is the load-bearing word: the aimed enemy holds ONE
-    Bomb, not two, which is what makes the widening a target change rather
-    than a second placement."""
+    Bomb, not two."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
-    combat._finish_play(state, witch())
+    combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
     assert sizes(a) == [5]
@@ -1814,8 +1814,7 @@ def test_coven_errand_goes_wide_after_a_witch(overhaul):
 
 def test_coven_errands_upgrade_moves_both_arms(overhaul):
     """"Upgrade: Bomb 7." ONE printed number, so the wide arm and the aimed
-    arm cannot upgrade to different Bombs -- which is the reason the widening
-    is a field on the op rather than two `plant_bomb`s in a conditional."""
+    arm cannot upgrade to different Bombs."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
@@ -1824,42 +1823,36 @@ def test_coven_errands_upgrade_moves_both_arms(overhaul):
 
     state = klee_state([a := make_enemy(hp=200, name="a"),
                         b := make_enemy(hp=200, name="b")])
-    combat._finish_play(state, witch())
+    combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
     assert sizes(a) == [7]
     assert sizes(b) == [7]
 
 
-def test_the_hexerei_count_is_per_turn(overhaul):
+def test_the_companion_count_is_per_turn(overhaul):
     """The window is the TURN, and the ledger rolls with it -- the same stamp
     rule rule 7's two counters take."""
     state = klee_state([make_enemy(hp=200)])
     klee_overhaul.roll_to(state, 1)
-    combat._finish_play(state, witch())
-    assert klee_overhaul.played_hexerei_this_turn(state) is True
+    combat._finish_play(state, companion())
+    assert klee_overhaul.played_companion_this_turn(state) is True
     klee_overhaul.roll_to(state, 2)
-    assert klee_overhaul.played_hexerei_this_turn(state) is False
+    assert klee_overhaul.played_companion_this_turn(state) is False
 
 
-def test_witches_circle_plants_per_witch_and_is_dead_alone(overhaul):
-    """"Whenever you play a Hexerei card, place a Bomb 3 on a random enemy."
-
-    DEAD ALONE IS THE CARD, not a defect: the ruled packet's pick 2 was taken
-    at its default, so a deck with no witch in it never sets this off. Both
-    halves are asserted, because the second is the one a future "fix" would
-    quietly remove."""
+def test_witches_circle_plants_per_companion_and_nothing_for_her_own(overhaul):
+    """"Whenever you play a Companion card, place a Bomb 3 on a random
+    enemy." A plain Klee card pays nothing; a Companion pays once per play."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     effects.resolve_card(state, load("proto_ko_witches_circle"))
     assert state.player.powers[klee_overhaul.WITCHES_CIRCLE] == 3
 
-    # A plain card pays nothing.
     combat._finish_play(state, probe([], cid="proto_ko_plain"))
     assert sizes(enemy) == []
-    # A witch pays once, per play.
-    combat._finish_play(state, witch())
-    combat._finish_play(state, witch())
+    combat._finish_play(state, companion())
+    combat._finish_play(state, companion())
     assert sizes(enemy) == [3, 3]
 
 
@@ -1868,20 +1861,14 @@ def test_witches_circle_upgrades_the_bomb_it_plants(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     effects.resolve_card(state, load("proto_ko_witches_circle+"))
-    combat._finish_play(state, witch())
+    combat._finish_play(state, companion())
     assert sizes(enemy) == [5]
 
 
-def test_alices_introduction_magic_makes_the_hand_a_coven_for_one_turn(
+def test_alices_introduction_magic_makes_the_hand_companions_for_one_turn(
         overhaul):
-    """THE ROW'S OWN ACCEPTANCE: a card that is NOT Hexerei counts as one for
-    the rest of this turn, and does not next turn.
-
-    Both readers are watched through one board, because the point of the card
-    is that every reader sees the same widened family: Witches' Circle plants
-    for the marked card while the window is open and plants nothing for it
-    after the window shuts.
-    """
+    """THE ROW'S OWN ACCEPTANCE: a card that is NOT a Companion counts as one
+    for the rest of this turn, and does not next turn."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
     plain = probe([], cid="proto_ko_plain", ctype="skill")
@@ -1890,22 +1877,21 @@ def test_alices_introduction_magic_makes_the_hand_a_coven_for_one_turn(
     effects.resolve_card(state, load("proto_ko_alices_introduction_magic"))
 
     from tier0.engine import companion_hexerei
-    assert plain.hexerei is False           # the PRINTED mark never moved
-    assert companion_hexerei.is_hexerei(state, plain) is True
+    assert plain.is_companion is False      # the card itself never moved
+    assert companion_hexerei.counts_as_companion(state, plain) is True
     combat._finish_play(state, plain)
     assert sizes(enemy) == [3]
 
     # ... AND NOT THE NEXT TURN. The window closes at the arm's turn end.
     klee_overhaul.turn_end(state)
-    assert companion_hexerei.is_hexerei(state, plain) is False
+    assert companion_hexerei.counts_as_companion(state, plain) is False
     combat._finish_play(state, plain)
     assert sizes(enemy) == [3]
 
 
 def test_alices_window_covers_the_hand_it_saw_and_not_a_later_draw(overhaul):
     """The ruling's first derived reading, and the reason the upgrade is
-    Retain: "the window is this turn, over the cards in hand when it is
-    played (a card drawn later this turn is not counted)"."""
+    Retain: a card drawn later this turn is not counted."""
     state = klee_state([make_enemy(hp=200)])
     held = probe([], cid="proto_ko_held", ctype="skill")
     later = probe([], cid="proto_ko_later", ctype="skill")
@@ -1914,21 +1900,177 @@ def test_alices_window_covers_the_hand_it_saw_and_not_a_later_draw(overhaul):
     state.player.hand.append(later)
 
     from tier0.engine import companion_hexerei
-    assert companion_hexerei.is_hexerei(state, held) is True
-    assert companion_hexerei.is_hexerei(state, later) is False
+    assert companion_hexerei.counts_as_companion(state, held) is True
+    assert companion_hexerei.counts_as_companion(state, later) is False
 
 
-def test_alices_introduction_magic_is_itself_hexerei_and_upgrades_to_retain(
+def test_alices_introduction_magic_does_not_count_itself_and_upgrades_to_retain(
         overhaul):
-    """The ruling's second derived reading ("it counts as Hexerei itself, so
-    it does not need a second witch to start a circle") and the upgrade the
-    packet names."""
+    """R276: the spell is not a Companion and marks only the hand it was
+    played from, so it does not count itself (the Hexerei key that made it do
+    so is retired). The upgrade the packet names is Retain."""
+    from tier0.engine import companion_hexerei
+
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    effects.resolve_card(state, load("proto_ko_witches_circle"))
     card = load("proto_ko_alices_introduction_magic")
-    assert card.hexerei is True
+    assert card.is_companion is False
     assert card.retain is False
+    combat._finish_play(state, card)
+    assert companion_hexerei.counts_as_companion(state, card) is False
+    assert sizes(enemy) == []
     upgraded = load("proto_ko_alices_introduction_magic+")
-    assert upgraded.hexerei is True
     assert upgraded.retain is True
+
+
+# ---------------------------------------------------------------------------
+# R276 -- THE FOUR NEW ROWS (Hair Trigger, Explosive Frags, Where Did I Put It?,
+# Big Bounce). C# twins: `klee-mod/KleeTests/Prototype/KleeR276BatchTests.cs`.
+# ---------------------------------------------------------------------------
+
+def test_hair_trigger_makes_every_bomb_on_the_enemy_a_mine(overhaul):
+    """"Your Bombs on this enemy become a Mine." Every charge keeps its size
+    and order; another enemy's pile is untouched."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 6)
+    klee_overhaul.place(state, a, 4)
+    klee_overhaul.place(state, b, 5)
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_hair_trigger"))
+    assert sizes(a) == [6, 4]
+    assert all(c.is_mine for c in a.ko_charges)
+    assert not any(c.is_mine for c in b.ko_charges)
+
+
+def test_hair_triggers_mines_answer_the_enemys_attack(overhaul):
+    """The Mines it made go off before the enemy's hit, like any Mine."""
+    a = make_enemy(hp=200, name="a")
+    state = klee_state([a])
+    klee_overhaul.place(state, a, 9)
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_hair_trigger"))
+    klee_overhaul.mines_answer_attack(state, a)
+    assert a.hp == 191
+    assert sizes(a) == []
+
+
+def test_hair_trigger_upgrades_to_cost_zero(overhaul):
+    assert load("proto_ko_hair_trigger").cost == 1
+    assert load("proto_ko_hair_trigger+").cost == 0
+
+
+def test_explosive_frags_applies_vulnerable_after_a_mine_goes_off(overhaul):
+    """"Whenever a Mine goes off, apply 2 Vulnerable to that enemy." AFTER
+    the Mine's own hit, so that hit is not multiplied; a plain Bomb applies
+    nothing."""
+    a = make_enemy(hp=200, name="a")
+    state = klee_state([a])
+    effects.resolve_card(state, load("proto_ko_explosive_frags"))
+    assert state.player.powers[klee_overhaul.MINE_FRAGS] == 2
+    klee_overhaul.place(state, a, 10, is_mine=True)
+    klee_overhaul.mines_answer_attack(state, a)
+    assert a.hp == 190
+    assert a.powers.get("vulnerable", 0) == 2
+
+    b = make_enemy(hp=200, name="b")
+    state = klee_state([b])
+    effects.resolve_card(state, load("proto_ko_explosive_frags"))
+    klee_overhaul.place(state, b, 10)
+    klee_overhaul.set_off(state, b)
+    assert b.powers.get("vulnerable", 0) == 0
+
+
+def test_explosive_frags_pays_for_a_mine_a_card_set_off(overhaul):
+    """ANY Mine that goes off, whatever set it off: a Set off card's too."""
+    a = make_enemy(hp=200, name="a")
+    state = klee_state([a])
+    effects.resolve_card(state, load("proto_ko_explosive_frags+"))
+    klee_overhaul.place(state, a, 5, is_mine=True)
+    klee_overhaul.set_off(state, a)
+    assert a.powers.get("vulnerable", 0) == 3
+
+
+def test_where_did_i_put_it_takes_a_set_off_card_and_bottoms_the_rest(
+        overhaul):
+    """"Look at the top 4 cards of your draw pile. Put a Set off card from
+    them into your hand and the rest on the bottom." The sim's stand-in for
+    the choice is the cheapest Set off card."""
+    state = klee_state([make_enemy(hp=200)])
+    kapow = load("proto_ko_kapow")
+    fillers = [probe([], cid=f"filler{i}", ctype="skill") for i in range(4)]
+    under = probe([], cid="under", ctype="skill")
+    state.player.draw_pile = [fillers[0], kapow, fillers[1], fillers[2],
+                              under]
+    state.player.hand = []
+    effects.resolve_card(state, load("proto_ko_where_did_i_put_it"))
+    assert state.player.hand == [kapow]
+    assert [c.id for c in state.player.draw_pile] == [
+        "under", "filler0", "filler1", "filler2"]
+
+
+def test_where_did_i_put_it_with_no_set_off_card_bottoms_everything(overhaul):
+    state = klee_state([make_enemy(hp=200)])
+    fillers = [probe([], cid=f"filler{i}", ctype="skill") for i in range(5)]
+    state.player.draw_pile = list(fillers)
+    state.player.hand = []
+    effects.resolve_card(state, load("proto_ko_where_did_i_put_it"))
+    assert state.player.hand == []
+    assert [c.id for c in state.player.draw_pile] == [
+        "filler4", "filler0", "filler1", "filler2", "filler3"]
+
+
+def test_where_did_i_put_it_upgraded_looks_at_six(overhaul):
+    state = klee_state([make_enemy(hp=200)])
+    fillers = [probe([], cid=f"filler{i}", ctype="skill") for i in range(5)]
+    kapow = load("proto_ko_kapow")
+    state.player.draw_pile = [*fillers, kapow]
+    state.player.hand = []
+    effects.resolve_card(state, load("proto_ko_where_did_i_put_it+"))
+    assert state.player.hand == [kapow]
+
+
+def test_is_set_off_card_reads_the_row(overhaul):
+    assert klee_overhaul.is_set_off_card(load("proto_ko_kapow"))
+    assert klee_overhaul.is_set_off_card(load("proto_ko_perfect_timing"))
+    assert not klee_overhaul.is_set_off_card(load("proto_ko_pop"))
+
+
+def test_big_bounce_carries_the_overkill_to_another_enemy(overhaul):
+    """"Explosion damage past the enemy's HP is dealt to a random other
+    enemy." One plain Pyro hit for the sum of the overkill."""
+    a, b = make_enemy(hp=10, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 25)
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_big_bounce"))
+    assert not a.alive
+    assert b.hp == 200 - 15
+    # It does not Set off the destination: b's pile is untouched.
+    assert state.ko_set_off_this_turn == 1
+
+
+def test_big_bounce_does_not_reapply_vulnerable_at_the_destination(overhaul):
+    """Vulnerable is applied once, at the source: a Vulnerable destination
+    takes the overflow as it was measured."""
+    a, b = make_enemy(hp=10, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    b.powers["vulnerable"] = 2
+    klee_overhaul.place(state, a, 20)
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_big_bounce"))
+    assert b.hp == 190
+
+
+def test_big_bounce_with_no_kill_bounces_nothing(overhaul):
+    a, b = make_enemy(hp=100, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 20)
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_big_bounce"))
+    assert b.hp == 200
+    assert a.hp == 100 - 20 - 5
 
 
 # ---------------------------------------------------------------------------
@@ -2207,113 +2349,6 @@ def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
 
 # --- Kindling: an aura-keyed grow with a floor -----------------------------
 
-def test_kindling_grows_every_bomb_on_a_foreign_aura(overhaul):
-    """"Each Bomb on an enemy with an aura other than Pyro grows by 4." EVERY
-    charge
-    on EVERY such enemy: `grow_bombs`'s spread over Flame Dance's filter."""
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    a.aura, b.aura = "hydro", "cryo"
-    klee_overhaul.place(state, a, 6)
-    klee_overhaul.place(state, a, 2)
-    klee_overhaul.place(state, b, 5)
-
-    effects.resolve_card(state, load("proto_ko_kindling"))
-
-    assert sizes(a) == [10, 6]
-    assert sizes(b) == [9]
-
-
-def test_kindling_skips_pyro_and_aura_less_enemies(overhaul):
-    """"An aura other than Pyro" is the enemy's CARRIED aura and no aura does
-    not count --
-    `_op_set_off`'s `non_pyro` filter, read the same way. With no match at all
-    the floor pays instead."""
-    pyro, bare = make_enemy(hp=200, name="p"), make_enemy(hp=200, name="q")
-    state = klee_state([pyro, bare])
-    pyro.aura = "pyro"
-    klee_overhaul.place(state, pyro, 6)
-    klee_overhaul.place(state, bare, 9)
-
-    effects.resolve_card(state, load("proto_ko_kindling"))
-
-    assert sizes(pyro) == [6]
-    assert sizes(bare) == [9 + 2]        # the floor, on the largest
-
-
-def test_kindling_floor_pays_the_largest_charge_only(overhaul):
-    """The floor is ONE charge, board-wide: Stoke the Fuse's scope, not Chain
-    Fuse's spread."""
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 4)
-    klee_overhaul.place(state, a, 11)
-    klee_overhaul.place(state, b, 7)
-
-    effects.resolve_card(state, load("proto_ko_kindling"))
-
-    assert sizes(a) == [4, 13]
-    assert sizes(b) == [7]
-
-
-def test_kindling_takes_the_floor_when_the_aura_holds_no_bomb(overhaul):
-    """The face counts BOMBS, not enemies: an aura'd but Bomb-less enemy is
-    not a match, so the board takes the floor."""
-    aura, bombed = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([aura, bombed])
-    aura.aura = "electro"
-    klee_overhaul.place(state, bombed, 8)
-
-    effects.resolve_card(state, load("proto_ko_kindling"))
-
-    assert sizes(aura) == []
-    assert sizes(bombed) == [8 + 2]
-
-
-def test_kindling_on_a_bare_enemy_takes_the_floor_alone(overhaul):
-    """A BARE ENEMY IS NOT A MATCH, which is the case the round-25 seat read
-    the face against: no aura at all is not "an aura other than Pyro", so two
-    Bombs on one bare enemy grow by the floor on the LARGEST and nothing
-    else."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    klee_overhaul.place(state, enemy, 5)
-    klee_overhaul.place(state, enemy, 9)
-
-    effects.resolve_card(state, load("proto_ko_kindling"))
-
-    assert sizes(enemy) == [5, 9 + 2]
-
-
-def test_kindling_upgraded_moves_both_numbers(overhaul):
-    """`upgrade: {grow: +2, grow_floor: +1}` -- two printed numbers, two keys,
-    and the row is the only one on the surface that carries both."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    enemy.aura = "hydro"
-    klee_overhaul.place(state, enemy, 5)
-
-    effects.resolve_card(state, load("proto_ko_kindling+"))
-    assert sizes(enemy) == [11]
-
-    enemy.aura = None
-    effects.resolve_card(state, load("proto_ko_kindling+"))
-    assert sizes(enemy) == [14]
-
-
-def test_kindling_on_an_empty_board_does_nothing(overhaul):
-    """No Bomb anywhere is no growth anywhere: the floor has nothing to land
-    on."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-
-    effects.resolve_card(state, load("proto_ko_kindling"))
-
-    assert sizes(enemy) == []
-
-
-# --- Split Charge: the bridge ----------------------------------------------
-
 def test_split_charge_halves_the_largest_bomb(overhaul):
     """"Split your largest Bomb into two halves on random enemies." On a
     one-enemy board both halves land on it, which is the row's printed losing
@@ -2502,119 +2537,6 @@ def test_bombs_away_hits_and_places_on_every_enemy(overhaul):
     assert sizes(a) == [2] and sizes(b) == [2]
 
 
-# --- The rising hand cost: a synthetic row ---------------------------------
-#
-# NO SHEET ROW CARRIES `rising_cost:` any more. Long Fuse was the one, and the
-# comparison pass of 2026-09-06 took the escalation off it -- three seat
-# readings against "Retain plus an escalating cost", in
-# `review/records/klee-pool-comparison-pass-2026-09-06.md` sec.3 item 1.
-# THE RULE STAYS WIRED in both engines (`klee_overhaul.roll_rising_costs`, the
-# `card_cost` addend, the `_finish_play` clear, `run_fight`'s per-combat
-# zeroing; C#: `IRisingHandCostCard` and `KleeOverhaulRisingCost.RollHand`), so
-# it stays covered -- through a probe built here rather than through a card,
-# which is the honest instrument for machinery no row prints. C# twin:
-# `PoolPassThreeTests.The_fuse_burns_at_the_end_of_klees_turn_and_only_in_hand`,
-# structural for its own reasons.
-
-
-def fuse(cid="proto_ko_fuse_probe", rise=1):
-    """A synthetic rising-cost row: Retained, and dearer per turn held. Nothing
-    loads it through the sheet, exactly like every other `probe`."""
-    card = probe([{"op": "damage", "amount": 6, "target": "enemy"}],
-                 cid=cid, cost=1)
-    card.retain = True
-    card.rising_cost = rise
-    return card
-
-
-def test_a_rising_cost_card_costs_one_more_for_every_turn_it_is_held(overhaul):
-    """"Costs 1 more each turn it stays in your hand." NEVER DOWNWARD, and it
-    accumulates: the base game's `AddUntilPlayed` in this engine's spelling."""
-    state = klee_state([make_enemy(hp=200)])
-    card = fuse()
-    state.player.hand.append(card)
-    assert combat.card_cost(state, card) == 1
-
-    klee_overhaul.turn_end(state)
-    assert combat.card_cost(state, card) == 2
-    klee_overhaul.turn_end(state)
-    assert combat.card_cost(state, card) == 3
-
-
-def test_a_rising_cost_burns_only_while_it_is_in_hand(overhaul):
-    """A card in the draw pile is not staying in your hand, so its fuse does
-    not burn."""
-    state = klee_state([make_enemy(hp=200)])
-    card = fuse()
-    state.player.draw_pile.append(card)
-
-    klee_overhaul.turn_end(state)
-
-    assert card.rising_cost_risen == 0
-
-
-def test_a_rising_cost_resets_when_the_card_is_played(overhaul):
-    """The `AfterCardPlayedCleanup` half: "each turn it stays in your hand"
-    stops being true the moment it leaves, so the accumulated modifier goes."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    card = fuse()
-    state.player.hand.append(card)
-    klee_overhaul.turn_end(state)
-    klee_overhaul.turn_end(state)
-    assert combat.card_cost(state, card) == 3
-
-    state.player.energy = 5
-    aimed(state, enemy)
-    combat.play_card(state, card)
-
-    assert card.rising_cost_risen == 0
-    assert combat.card_cost(state, card) == 1
-
-
-def test_two_rising_cost_cards_burn_separately(overhaul):
-    """The fuse is the CARD's and not the board's: a copy drawn a turn later is
-    a turn behind."""
-    state = klee_state([make_enemy(hp=200)])
-    first, second = fuse(cid="proto_ko_fuse_first"), fuse(
-        cid="proto_ko_fuse_second")
-    state.player.hand.append(first)
-    klee_overhaul.turn_end(state)
-    state.player.hand.append(second)
-    klee_overhaul.turn_end(state)
-
-    assert combat.card_cost(state, first) == 3
-    assert combat.card_cost(state, second) == 2
-
-
-def test_a_card_with_no_fuse_never_burns(overhaul):
-    """`rising_cost <= 0` is the roller's whole filter, and it is what makes
-    the walk free on every hand in the game: the field is 0 on every row on
-    every sheet since the escalation came off Long Fuse."""
-    state = klee_state([make_enemy(hp=200)])
-    plain = probe([], cid="proto_ko_plain_fuse", ctype="skill", cost=1)
-    plain.retain = True
-    state.player.hand.append(plain)
-
-    klee_overhaul.turn_end(state)
-    klee_overhaul.turn_end(state)
-
-    assert plain.rising_cost_risen == 0
-    assert combat.card_cost(state, plain) == 1
-
-
-def test_long_fuse_retains_and_no_longer_escalates(overhaul):
-    """THE ROW, as adjusted on the comparison pass of 2026-09-06: Retain stays
-    -- it is the whole point of the card, and Pocket Match's twin one Energy
-    over -- and the escalation the three seats read as the reason not to keep
-    the card is off. The face is pinned on the C# side
-    (`PoolPassThreeTests.Long_fuse_retains_and_prints_no_escalation`); the sim
-    Card carries no face at all."""
-    card = load("proto_ko_long_fuse")
-    assert card.retain is True
-    assert card.rising_cost == 0
-
-
 # --- The Vermillion Pact ---------------------------------------------------
 
 def pact(state):
@@ -2632,7 +2554,7 @@ def test_the_pact_hands_back_the_aura_a_bomb_consumed(overhaul):
     klee_overhaul.place(state, enemy, 6)
     aimed(state, enemy)
 
-    effects.resolve_card(state, load("proto_ko_long_fuse"))
+    effects.resolve_card(state, load("proto_ko_kapow"))
 
     assert state.reactions_this_turn == 2
 
@@ -2646,7 +2568,7 @@ def test_without_the_pact_the_aura_is_spent_by_the_first_hit(overhaul):
     klee_overhaul.place(state, enemy, 6)
     aimed(state, enemy)
 
-    effects.resolve_card(state, load("proto_ko_long_fuse"))
+    effects.resolve_card(state, load("proto_ko_kapow"))
 
     assert state.reactions_this_turn == 1
 
@@ -2695,7 +2617,7 @@ def test_the_pact_does_nothing_when_the_explosion_did_not_react(overhaul):
     klee_overhaul.place(state, enemy, 6)
     aimed(state, enemy)
 
-    effects.resolve_card(state, load("proto_ko_long_fuse"))
+    effects.resolve_card(state, load("proto_ko_kapow"))
 
     assert state.reactions_this_turn == 0
 
@@ -2709,7 +2631,7 @@ def test_the_pact_is_dead_on_an_aura_less_board(overhaul):
     klee_overhaul.place(state, enemy, 6)
     aimed(state, enemy)
 
-    effects.resolve_card(state, load("proto_ko_long_fuse"))
+    effects.resolve_card(state, load("proto_ko_kapow"))
 
     assert state.reactions_this_turn == 0
     assert counts(state)["ko_vermillion_pact"] == 0
