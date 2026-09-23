@@ -535,8 +535,11 @@ public class ArmKeywordTipTests
         // TWENTY-FIVE SINCE R276: pick 2 retired `Hexerei` and `ForHexerei`
         // left with it (the Companion Spark rider stays). TWENTY-FOUR with
         // R276's Furina hygiene: `ForEncore` attached to no card and left
-        // with its body.
-        Assert.Equal(24, attaches.Count);
+        // with its body. TWENTY-SIX with R276's Stage batch two: `ForOusia`
+        // and `ForPneuma`, Arkhe Alignment's two halves.
+        Assert.Equal(26, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForOusia");
+        Assert.Contains(attaches, m => m.Name == "ForPneuma");
         Assert.DoesNotContain(attaches, m => m.Name == "ForEncore");
         Assert.Contains(attaches, m => m.Name == "ForStageReader");
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");

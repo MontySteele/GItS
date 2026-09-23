@@ -127,6 +127,15 @@ public sealed class StageSeat
     /// front seat's bar to the back seat's body on the turn one of them left.
     /// </summary>
     public Creature? Pet { get; internal set; }
+
+    /// <summary>
+    /// R276 batch two, <i>A Five-Century Act</i>: a performer that took its
+    /// Bow and came straight back "re-enters without acting that turn". True
+    /// from that return until the end-of-turn sweep has passed it by
+    /// (<see cref="FurinaStage.EndOfTurnActs"/> skips a resting seat and then
+    /// clears the flag). Nothing else sets it.
+    /// </summary>
+    public bool Resting { get; internal set; }
 }
 
 /// <summary>
@@ -535,6 +544,102 @@ public sealed class FurinaStageLedger
                            front.Fanfare, 0, ""));
     }
 
+    // ---- R276 batch two ----------------------------------------------
+
+    /// <summary>
+    /// <i>Step Forward</i>: the BACK performer moves to the front seat, bar
+    /// and all, and the others shift back one seat -- Scene Change run the
+    /// other way. With one performer on stage nothing moves.
+    /// </summary>
+    public void StepForward()
+    {
+        if (_seats.Count < 2) return;
+        var back = _seats[^1];
+        _seats.RemoveAt(_seats.Count - 1);
+        _seats.Insert(0, back);
+        Note(new StageBeat("rotate", back.Who, 0, back.Fanfare, 0, ""));
+    }
+
+    /// <summary><i>Hold Your Places</i>: Raise N on the LEAD performer, the
+    /// shield -- the one card that raises the front seat. Returns what landed
+    /// (0 on an empty stage).</summary>
+    public int RaiseLead(int amount)
+    {
+        if (amount <= 0 || Lead is not { } lead) return 0;
+        lead.Fanfare += amount;
+        return amount;
+    }
+
+    /// <summary><i>Gala Dinner</i>: Raise N on EVERY performer. Returns the
+    /// total that landed.</summary>
+    public int RaiseAll(int amount)
+    {
+        if (amount <= 0) return 0;
+        foreach (var seat in _seats) seat.Fanfare += amount;
+        return amount * _seats.Count;
+    }
+
+    /// <summary>
+    /// <i>Bravura</i>: spend ALL of the back performer's Fanfare. The bar is
+    /// emptied exactly, so the performer always leaves with a Bow (rule 9).
+    /// On an empty stage nothing is spent and the card deals 0.
+    /// </summary>
+    public StageSpend SpendAllOfBack()
+    {
+        if (Back is not { } back) return new StageSpend(false, 0, null);
+        var paid = back.Fanfare;
+        back.Fanfare = 0;
+        SpentThisPlay = paid;
+        _seats.RemoveAt(_seats.Count - 1);
+        Note(new StageBeat("leave", back.Who, -1, 0, paid, "spend"));
+        return new StageSpend(
+            true, paid, new StageExit(back.Who, StageDeparture.Spent));
+    }
+
+    /// <summary>
+    /// <i>A Five-Century Act</i>: a performer that took its Bow returns to
+    /// the back-most empty seat at <see cref="FurinaStageLaw.SummonFanfare"/>
+    /// and RESTS -- it does not act at the end of this turn. False (and
+    /// nothing moves) on a full stage.
+    /// </summary>
+    public bool ReturnToBack(StagePerformer who)
+    {
+        if (IsFull) return false;
+        _seats.Add(new StageSeat(who, FurinaStageLaw.SummonFanfare)
+        {
+            Resting = true,
+        });
+        Note(new StageBeat("arrive", who, _seats.Count - 1,
+                           FurinaStageLaw.SummonFanfare, 0, ""));
+        return true;
+    }
+
+    /// <summary>
+    /// <i>Arkhe Alignment</i>'s two halves: this turn's multipliers on the
+    /// performers' act DAMAGE (Ousia) and act BLOCK (Pneuma). 1 is "no
+    /// Alignment this turn"; each choice doubles its half, so two copies that
+    /// both choose Ousia make it 4. Reset at the end of her turn, after the
+    /// sweep they are for.
+    /// </summary>
+    public int ActDamageMultiplier { get; set; } = 1;
+
+    /// <inheritdoc cref="ActDamageMultiplier"/>
+    public int ActBlockMultiplier { get; set; } = 1;
+
+    /// <summary>The end of the turn the multipliers were for.</summary>
+    public void ResetActMultipliers()
+    {
+        ActDamageMultiplier = 1;
+        ActBlockMultiplier = 1;
+    }
+
+    /// <summary>A resting performer has sat out one sweep and is a performer
+    /// like any other again.</summary>
+    public void EndRest()
+    {
+        foreach (var seat in _seats) seat.Resting = false;
+    }
+
     // ---- the per-play spend record -----------------------------------
     //
     // WHY A RECORD AND NOT A LIVE READ: by the time <i>Final Bow</i>'s Block
@@ -644,6 +749,7 @@ public sealed class FurinaStageLedger
     /// in <see cref="For"/> is what does this in a real run.</summary>
     public void Clear()
     {
+        ResetActMultipliers();
         _seats.Clear();
         _pendingCurtainCall.Clear();
         _beats.Clear();

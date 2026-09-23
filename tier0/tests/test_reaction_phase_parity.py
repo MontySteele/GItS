@@ -806,6 +806,16 @@ CO_TENANCY_LEDGER = {
             "the same number. It deals no damage, grants no Block and touches "
             "no element. NO SIM TWIN ORDERS IT: the sim models the shipped "
             "Ancient only",
+        ("Powers/Prototype/FurinaStagePowers.cs", "ArkheAlignmentPower"):
+            "QUARANTINED (the Furina stage, FURINA_STAGE; R276 batch two). "
+            "Arkhe Alignment's turn-start choice: Ousia doubles this turn's "
+            "act damage, Pneuma this turn's act Block and Raises 2 on the "
+            "LEAD. THE ORDERING QUESTION, answered: the multipliers are read "
+            "only by the acts, which fire at the END of the turn, so no "
+            "co-tenant of this broadcast reads them; Pneuma's Raise is an "
+            "ADDITION to the lead's bar, as `FurinaStageHooks`' regen is, so "
+            "either order leaves the same number. The sim runs it after the "
+            "regen (`furina_stage.turn_start_powers`)",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
             "resolution point: the Plans she wrote last turn happen here, in "

@@ -188,6 +188,11 @@ public static class FurinaStage
     public static int BackFanfare(CardModel? card) =>
         BackFanfare(card?.Owner?.Creature);
 
+    /// <summary>R276 batch two: how many performers are on stage, for the
+    /// `stage_count` count (<i>Ensemble Piece</i>).</summary>
+    public static int Count(CardModel? card) =>
+        Of(card?.Owner?.Creature).Count;
+
     /// <summary>A fresh, empty per-play spend record.</summary>
     public static void BeginPlay(Creature? owner)
     {
@@ -358,6 +363,110 @@ public static class FurinaStage
         return raised;
     }
 
+    /// <summary>R276 batch two, <i>Hold Your Places</i>: Raise on the LEAD
+    /// performer, the one Raise in the kit that lands on the shield.</summary>
+    public static int RaiseLead(Creature? owner, int amount)
+    {
+        if (!LiveFor(owner)) return 0;
+        var raised = FurinaStageLedger.For(owner!).RaiseLead(amount);
+        if (raised > 0)
+        {
+            FurinaStagePets.SyncBars(owner);
+            Vfx.FurinaStageStrip.Refresh(owner);
+        }
+        return raised;
+    }
+
+    /// <summary>R276 batch two, <i>Gala Dinner</i>: Raise on EVERY
+    /// performer.</summary>
+    public static int RaiseAll(Creature? owner, int amount)
+    {
+        if (!LiveFor(owner)) return 0;
+        var raised = FurinaStageLedger.For(owner!).RaiseAll(amount);
+        if (raised > 0)
+        {
+            FurinaStagePets.SyncBars(owner);
+            Vfx.FurinaStageStrip.Refresh(owner);
+        }
+        return raised;
+    }
+
+    /// <summary>R276 batch two, <i>Step Forward</i>: the back performer takes
+    /// the front seat -- Scene Change run the other way.</summary>
+    public static void StepForward(Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        FurinaStageLedger.For(owner!).StepForward();
+        FurinaStagePlacement.Reflow(owner);
+        Vfx.FurinaStageStrip.Refresh(owner);
+    }
+
+    /// <summary>
+    /// R276 batch two, <i>Bravura</i>: spend ALL of the back performer's
+    /// Fanfare. The bar is emptied exactly, so the performer takes its Bow.
+    /// Returns what was spent (0 on an empty stage), which the card's damage
+    /// reads through `stage_spent`.
+    /// </summary>
+    public static async Task<int> SpendAllOfBack(
+        PlayerChoiceContext choiceContext, Creature? owner)
+    {
+        if (!LiveFor(owner)) return 0;
+        var result = FurinaStageLedger.For(owner!).SpendAllOfBack();
+        if (!result.Fired) return 0;
+        if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
+        await FurinaStagePets.Sync(owner);
+        Vfx.FurinaStageStrip.Refresh(owner);
+        return result.Paid;
+    }
+
+    /// <summary>R276 batch two, <i>Tutti!</i>: every performer performs its
+    /// act now, front first. The cast is snapshotted, as the end-of-turn
+    /// sweep's is. A Five-Century Act's returnee "re-enters without acting
+    /// that turn", so a resting performer sits this out too.</summary>
+    public static async Task PerformAll(PlayerChoiceContext choiceContext,
+                                        Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        foreach (var seat in Of(owner).ToList())
+        {
+            if (owner!.IsDead) return;
+            if (seat.Resting) continue;
+            await Perform(choiceContext, owner, Name(seat.Who));
+        }
+        Vfx.FurinaStageStrip.Refresh(owner);
+    }
+
+    /// <summary>
+    /// Rule 6's middle term with <i>A Rapt Audience</i> on it (R276 batch
+    /// two). The ledger absorbs as it always has; then, if an ENEMY's hit
+    /// took Fanfare off a lead that was not also the back performer, each
+    /// Rapt Audience Raises its share of what the lead lost on the back
+    /// performer -- half rounded up, or all of it upgraded
+    /// (<see cref="RaptAudiencePower"/>'s Amount is the percentage).
+    /// Synchronous, for <see cref="FurinaStageLedger.Absorb"/>'s reason; the
+    /// bars reach the bodies at the flush that follows every hit.
+    /// </summary>
+    public static int AbsorbHit(Creature target, int incoming,
+                                Creature? dealer)
+    {
+        var ledger = FurinaStageLedger.For(target);
+        var twoOrMore = ledger.Seats.Count >= 2;
+        var result = ledger.Absorb(incoming);
+        if (!twoOrMore || result.Absorbed <= 0
+            || dealer is not { IsEnemy: true })
+        {
+            return result.ReachedFurina;
+        }
+        foreach (var rapt in target.Powers.OfType<RaptAudiencePower>()
+                     .ToList())
+        {
+            var raise = (int)System.Math.Ceiling(
+                result.Absorbed * rapt.Amount / 100m);
+            ledger.Raise(raise);
+        }
+        return result.ReachedFurina;
+    }
+
     /// <summary>
     /// Rule 8's payment leg, for a Spend mode the chooser offered (its gate
     /// asked <see cref="CanSpend"/>). The BACK performer pays the whole price;
@@ -404,8 +513,12 @@ public static class FurinaStage
         var company = ledger.TakePendingCurtainCall();
         foreach (var who in company)
         {
+            // R276 batch two: the card's own "then returns at 1" is the
+            // return, so A Five-Century Act does not return them a second
+            // time -- a performer returns once.
             await Bow(choiceContext, owner!,
-                      new StageExit(who, StageDeparture.Spent));
+                      new StageExit(who, StageDeparture.Spent),
+                      mayReturn: false);
         }
         foreach (var who in company) ledger.Summon(who);
         await FurinaStagePets.Sync(owner);
@@ -456,11 +569,17 @@ public static class FurinaStage
         // the 5 sends a reader looking for two damage nothing accounts for.
         var before = Ledger(owner);
         Creature? hit = null;
+        // R276 batch two, ARKHE ALIGNMENT: this turn's doubling of the acts'
+        // printed numbers (Ousia the damage, Pneuma the Block). 1 and 1 on
+        // every turn nobody chose.
+        var stage = FurinaStageLedger.For(owner!);
+        var dmg = stage.ActDamageMultiplier;
+        var blk = stage.ActBlockMultiplier;
         switch (Parse(member))
         {
             case StagePerformer.Usher:
                 await CreatureCmd.GainBlock(
-                    owner!, FurinaStageLaw.ActUsherBlock,
+                    owner!, FurinaStageLaw.ActUsherBlock * blk,
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case StagePerformer.Chevalmarin:
@@ -468,7 +587,7 @@ public static class FurinaStage
                 {
                     await ElementalHit.Deal(
                         choiceContext, enemy, Elements.Element.Hydro,
-                        FurinaStageLaw.ActChevalmarinDamage, owner,
+                        FurinaStageLaw.ActChevalmarinDamage * dmg, owner,
                         powered: false);
                 }
                 break;
@@ -482,7 +601,7 @@ public static class FurinaStage
                     hit = target;
                     await ElementalHit.Deal(
                         choiceContext, target, Elements.Element.Hydro,
-                        FurinaStageLaw.ActCrabalettaDamage, owner,
+                        FurinaStageLaw.ActCrabalettaDamage * dmg, owner,
                         powered: false);
                 }
                 break;
@@ -495,7 +614,8 @@ public static class FurinaStage
     public static async Task PerformLead(PlayerChoiceContext choiceContext,
                                          Creature? owner)
     {
-        if (Lead(owner) is { } lead)
+        // A resting returnee does not act this turn (R276 batch two).
+        if (Lead(owner) is { Resting: false } lead)
         {
             await Perform(choiceContext, owner, Name(lead.Who));
         }
@@ -508,13 +628,29 @@ public static class FurinaStage
                                            Creature? owner)
     {
         if (!LiveFor(owner)) return;
-        foreach (var who in Of(owner).Select(s => s.Who).ToList())
+        var ledger = FurinaStageLedger.For(owner!);
+        // R276 batch two, FULL HOUSE: with all three seats filled each
+        // performer acts once more per copy (its Amount), every repeat
+        // resolving in full before the next performer's.
+        var times = 1 + (ledger.IsFull ? FullHouseActs(owner!) : 0);
+        foreach (var seat in Of(owner).ToList())
         {
-            if (owner!.IsDead) return;
-            await Perform(choiceContext, owner, Name(who));
+            // A Five-Century Act's returnee re-enters without acting.
+            if (seat.Resting) continue;
+            for (var i = 0; i < times; i++)
+            {
+                if (owner!.IsDead) return;
+                await Perform(choiceContext, owner, Name(seat.Who));
+            }
         }
+        ledger.EndRest();
+        ledger.ResetActMultipliers();
         Vfx.FurinaStageStrip.Refresh(owner);
     }
+
+    /// <summary>Full House's extra acts: the sum of its stacks.</summary>
+    private static int FullHouseActs(Creature owner) =>
+        (int)owner.Powers.OfType<FullHousePower>().Sum(p => p.Amount);
 
     /// <summary>
     /// Rule 9, the curtain call: performed ONCE by a performer emptied by a
@@ -524,7 +660,8 @@ public static class FurinaStage
     /// departure that earned no bow returns here without paying.
     /// </summary>
     public static async Task Bow(PlayerChoiceContext choiceContext,
-                                 Creature owner, StageExit exit)
+                                 Creature owner, StageExit exit,
+                                 bool mayReturn = true)
     {
         if (!exit.Bows || !LiveFor(owner)) return;
         var before = Ledger(owner);
@@ -555,6 +692,43 @@ public static class FurinaStage
                 break;
         }
         NoteBeat(owner, "bow", exit.Who, before, hit);
+        await AfterBow(choiceContext, owner, exit.Who, mayReturn);
+    }
+
+    /// <summary>
+    /// R276 batch two: what a Bow sets off, after the bowing performer has
+    /// left and its departure effect has resolved.
+    ///
+    ///   * <see cref="ThunderousApplausePower"/>, each copy: draw 1 card and
+    ///     Raise its Amount on the back performer (nothing is raised on an
+    ///     empty stage; the draw still happens).
+    ///   * <see cref="FiveCenturyActPower"/>, any number of copies: the
+    ///     performer returns to the back-most empty seat at 1 and rests
+    ///     through this turn's acts. Once -- and not at all from <i>Let the
+    ///     People Rejoice</i>, whose own return is the return.
+    ///
+    /// THE ORDER IS APPLAUSE THEN RETURN, so the applause's Raise lands on the
+    /// stage the bow left; a returnee arrives after it at 1.
+    /// </summary>
+    private static async Task AfterBow(PlayerChoiceContext choiceContext,
+                                       Creature owner, StagePerformer who,
+                                       bool mayReturn)
+    {
+        foreach (var applause in owner.Powers
+                     .OfType<ThunderousApplausePower>().ToList())
+        {
+            if (owner.Player is { } player)
+            {
+                await CardPileCmd.Draw(choiceContext, 1m, player);
+            }
+            Raise(owner, (int)applause.Amount);
+        }
+        if (mayReturn && owner.Powers.OfType<FiveCenturyActPower>().Any()
+            && FurinaStageLedger.For(owner).ReturnToBack(who))
+        {
+            await FurinaStagePets.Sync(owner);
+            Vfx.FurinaStageStrip.Refresh(owner);
+        }
     }
 
     /// <summary>Furina's Block and the board's total HP, as one pair, taken

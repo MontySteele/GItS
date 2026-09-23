@@ -382,6 +382,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "stage_summon", "stage_raise", "stage_scene_change",
                   "stage_perform_lead", "stage_spend", "stage_spend_all",
                   "stage_curtain_call", "stage_final_bow",
+                  # R276 batch two: three more single calls.
+                  "stage_step_forward", "stage_perform_all",
+                  "stage_spend_back_all",
                   "generate_guest_star",
                   "copy_spotlighted_in_hand",
                   "heal",
@@ -817,6 +820,10 @@ ARM_KEYWORDS = (
     ArmKeyword("back performer", ("back performer",),
                "ArmKeywordTips.ForBackPerformer"),
     ArmKeyword("Rotate", ("Rotate", "Rotates"), "ArmKeywordTips.ForRotate"),
+    # R276 batch two: Arkhe Alignment's two halves, the Genshin Ousia/Pneuma
+    # pair. Each names the half of the choice it is.
+    ArmKeyword("Ousia", ("Ousia",), "ArmKeywordTips.ForOusia"),
+    ArmKeyword("Pneuma", ("Pneuma",), "ArmKeywordTips.ForPneuma"),
 )
 
 
@@ -1408,6 +1415,9 @@ PREDICATES_CS = {
     # whether the back performer can pay the full price, and that gate is
     # `MODE_RULE_OPS`', built off the mode's own `stage_spend` amount.
     "stage_occupied": "FurinaStage.Occupied(Owner.Creature)",
+    # R276 batch two: the empty-stage answers (Improvised Number, Between
+    # Acts) ask the opposite question, at play time.
+    "stage_empty": "!FurinaStage.Occupied(Owner.Creature)",
     "spotlight_moved_this_turn":
         "SpotlightSystem.MovedThisTurn(Owner.Creature)",
     # Curtain Call ("Take a Bow"). Both read through CurtainCallHooks rather
@@ -1493,6 +1503,7 @@ PREDICATE_TEXT = {
     # its own face with `description:`, because rule 8's rider is printed as
     # "Spend N: <the big number> instead" and no generic clause can say that.
     "stage_occupied": "If a performer is on stage",
+    "stage_empty": "If the stage is empty",
     "spotlight_moved_this_turn":
         "If you moved the [gold]Spotlight[/gold] this turn",
     "enemy_intends_attack": "If an enemy intends to attack",
@@ -1803,6 +1814,9 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # single awaited call with no locals, which is the whole
               # branch-legality criterion.
               "stage_spend",
+              # R276 batch two: Improvised Number's "If the stage is empty,
+              # summon a random performer" -- one awaited call, no locals.
+              "stage_summon",
               # R213 E1, QUARANTINED. A single awaited call with no locals,
               # which is the whole branch-legality criterion -- and a mode
               # body is the one place a Charge price can go that the
@@ -1889,6 +1903,7 @@ BRANCH_FIELDS = {
     # unlike the two salon verbs above: a Spend with no number is not a rider
     # any face could print.
     "stage_spend": {"op", "amount"},
+    "stage_summon": {"op", "member", "if_present_raise"},
 }
 
 # EB-137. The two branch ops whose `amount` is optional; see the note in
@@ -1963,6 +1978,12 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
         amount = eff.get("amount", 1)
         if not isinstance(amount, int) or amount <= 0:
             return f"branch {eff['op']} amount must be a positive literal int"
+        return None
+    if eff["op"] == "stage_summon":
+        # R276 batch two. A summon carries no amount: its argument is the
+        # member, a closed set checked here as at the top level.
+        if eff.get("member", "random") not in FURINA_STAGE_MEMBERS:
+            return f"branch stage_summon member {eff.get('member')!r}"
         return None
     if not isinstance(eff.get("amount", eff.get("bomb_damage")), int):
         return f"branch {eff['op']} amount must be a literal int"
@@ -2585,6 +2606,25 @@ APPLY_POWERS = {
     # the family mark instead of the Klee arm's explosion ledger -- which is
     # what a family stand-in is for. The {X} templates are for form; every row
     # carries its own `description:` (EB-215).
+    # FURINA, THE STAGE -- BATCH TWO (QUARANTINED, R276 pick 3). Every class
+    # lives in klee-mod/KleeCode/Powers/Prototype/FurinaStagePowers.cs and is
+    # compiled only under `-p:PrototypeCards=true`; the rules they switch on
+    # live in `FurinaStage`. Every row states its own face (`EB-215`).
+    "fs_full_house": ("FullHousePower", None,
+        "At the end of your turn, if all three seats are filled, your "
+        "performers act {X} more time."),
+    "fs_thunderous_applause": ("ThunderousApplausePower", None,
+        "Whenever a performer takes a [gold]Bow[/gold], draw 1 card and "
+        "[gold]Raise[/gold] {X} [gold]Fanfare[/gold] on the back performer."),
+    "fs_rapt_audience": ("RaptAudiencePower", None,
+        "Whenever an enemy hits the lead performer, [gold]Raise[/gold] {X}% "
+        "of the [gold]Fanfare[/gold] it lost on the back performer."),
+    "fs_five_century_act": ("FiveCenturyActPower", None,
+        "Whenever a performer takes a [gold]Bow[/gold], it returns to the "
+        "back seat with 1 [gold]Fanfare[/gold]."),
+    "fs_arkhe_alignment": ("ArkheAlignmentPower", None,
+        "At the start of your turn, choose [gold]Ousia[/gold] or "
+        "[gold]Pneuma[/gold]."),
     "mc_tectonic_tide": ("TectonicTidePower", None,
         "Whenever an [gold]Elemental Reaction[/gold] happens, deal {X} damage "
         "to that enemy."),
@@ -3328,6 +3368,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                       # keys had no campfire path at all, which is EB-277 read
                       # from the other side.
                       | {"bomb_size", "payload_mine", "grow", "mend",
+                         # R276 batch two: a Stage Raise's printed N (Hold
+                         # Your Places, Gala Dinner).
+                         "stage_raise",
                          # R252, and the same argument one row on: Careful Now
                          # prints a CEILING and no payout ("Block equal to
                          # your largest Bomb, up to 10"), so the cap is the
@@ -5130,10 +5173,20 @@ def _stage_summon_stmt(eff: dict) -> str:
 STAGE_STMT_OPS = {
     "stage_summon", "stage_raise", "stage_scene_change", "stage_perform_lead",
     "stage_spend", "stage_spend_all", "stage_curtain_call", "stage_final_bow",
+    # R276 batch two.
+    "stage_step_forward", "stage_perform_all", "stage_spend_back_all",
+}
+
+#: `stage_raise`'s `seat:` -> the C# verb. The back performer is the rule-5
+#: default; `lead` is Hold Your Places, `all` is Gala Dinner (R276 batch two).
+STAGE_RAISE_VERBS = {
+    "back": "FurinaStage.Raise",
+    "lead": "FurinaStage.RaiseLead",
+    "all": "FurinaStage.RaiseAll",
 }
 
 
-def stage_stmt(eff: dict) -> str:
+def stage_stmt(eff: dict, amount: str | None = None) -> str:
     """One stage op -> the one statement it emits.
 
     The two SPENDS and the two BOW-shaped ops are awaited because a bow and an
@@ -5146,8 +5199,16 @@ def stage_stmt(eff: dict) -> str:
     if op == "stage_summon":
         return _stage_summon_stmt(eff)
     if op == "stage_raise":
-        return ("FurinaStage.Raise(Owner.Creature, "
-                f"{int(eff.get('amount', 1))});")
+        verb = STAGE_RAISE_VERBS[str(eff.get("seat", "back"))]
+        n = amount if amount is not None else str(int(eff.get("amount", 1)))
+        return f"{verb}(Owner.Creature, {n});"
+    if op == "stage_step_forward":
+        return "FurinaStage.StepForward(Owner.Creature);"
+    if op == "stage_perform_all":
+        return "await FurinaStage.PerformAll(choiceContext, Owner.Creature);"
+    if op == "stage_spend_back_all":
+        return ("await FurinaStage.SpendAllOfBack(choiceContext, "
+                "Owner.Creature);")
     if op == "stage_scene_change":
         return "FurinaStage.SceneChange(Owner.Creature);"
     if op == "stage_perform_lead":
@@ -5174,6 +5235,8 @@ STAGE_COUNT_CS = {
     "stage_spent": "static (card, _) => FurinaStage.Spent(card)",
     "stage_lead_fanfare": "static (card, _) => FurinaStage.LeadFanfare(card)",
     "stage_back_fanfare": "static (card, _) => FurinaStage.BackFanfare(card)",
+    # R276 batch two, Ensemble Piece: how many performers are on stage.
+    "stage_count": "static (card, _) => FurinaStage.Count(card)",
 }
 
 
@@ -5194,7 +5257,7 @@ def _stage_spender_before(card: dict, eff: dict) -> str | None:
         if other is eff:
             return None
         if other.get("op") in {"stage_spend", "stage_spend_all",
-                               "stage_final_bow"}:
+                               "stage_final_bow", "stage_spend_back_all"}:
             return str(other["op"])
     return None
 
@@ -5216,7 +5279,8 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
     key is invented for a fact the body already states.
     """
     spender = _stage_spender_before(card, eff)
-    if spender == "stage_final_bow":
+    if spender in ("stage_final_bow", "stage_spend_back_all"):
+        # Both take the back performer's whole bar (Final Bow, Bravura).
         return "static (card, _) => FurinaStage.SpentOrBackFanfare(card)"
     if spender == "stage_spend_all":
         return "static (card, _) => FurinaStage.SpentOrTotalFanfare(card)"
@@ -5309,6 +5373,11 @@ def stage_reader_source(card: dict) -> str | None:
         rider = (stage_count_calc_rider(card, eff)
                  or stage_count_block_rider(card, eff))
         if rider is None:
+            continue
+        # R276 batch two: only a number that IS the bar -- `base 0, per 1`.
+        # Bravura's "3 damage for each point spent" reads the same forecast
+        # and is three times it, so the sentence would be false there.
+        if rider[0] != 0 or rider[1] != 1:
             continue
         for needle, source in _STAGE_READER_SOURCE:
             if needle in rider[2]:
@@ -6237,6 +6306,13 @@ def build_vars(card: dict) -> list[str]:
             out.append(f'new DynamicVar("BombCap", {int(eff["cap"])}m)')
         elif op == "mend" and mend_upgrade(card):
             out.append(f'new DynamicVar("Mend", {int(eff["amount"])}m)')
+        elif (op == "stage_raise" and stage_raise_upgrade(card)
+              and eff is stage_raise_var_effect(card)):
+            # R276 batch two, the Mend idiom: a var ONLY when the upgrade has
+            # to render. A plain DynamicVar -- a Raise is a performer's bar,
+            # which no Dexterity or Frail touches.
+            out.append(
+                f'new DynamicVar("RaiseAmount", {int(eff.get("amount", 1))}m)')
         elif op == "draw" and plans_held_draw_rider(card, eff) is not None:
             # Tide Chart. NO VAR: the number is computed inline from the
             # queue (see `plans_held_draw_rider`), and declaring a `CardsVar`
@@ -6641,7 +6717,13 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # one-owner rule every key here keeps.
         "conditional_then_damage": any(
             _then_first_damage(c) is not None
-            for c in non_repeat_conditionals),
+            for c in non_repeat_conditionals) or any(
+            # R276 batch two (Quick Cue): a Spend MODE is the then-arm of the
+            # same claim (`_is_then_first_damage`), so a modal row whose two
+            # numbers upgrade by different amounts can say so.
+            _then_first_damage({"then": m.get("effects")}) is not None
+            for c in effects if c.get("op") == "choose_one"
+            for m in (c.get("modes") or [])[1:]),
         # `EB-655` (Riptide). The AoE rider's own number; it renders through
         # the ExtraDamage var the AoE emitter reads.
         "bonus_vs_debuff": any(
@@ -6717,6 +6799,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # rule every key above it keeps.
         "cap": any(e["op"] == "block_largest_bomb" for e in effects),
         "mend": any(e["op"] == "mend" for e in effects),
+        # R276 batch two. Binds to the first top-level `stage_raise`, the
+        # one-owner rule; tier0 bumps that op's `amount`.
+        "stage_raise": any(e["op"] == "stage_raise" for e in effects),
         # `EB-478`. Binds to the op that OWES the draw, the same one-owner rule
         # every key here keeps; tier0 bumps that op's `amount` and nothing else.
         "tide_draw": any(e["op"] == "draw_after_plans" for e in effects),
@@ -8093,6 +8178,27 @@ def mend_upgrade(card: dict) -> int:
     return int(upgrade_plan(card)[0].get("mend", 0))
 
 
+def stage_raise_upgrade(card: dict) -> int:
+    """`stage_raise: +N` -- a Stage row's printed Raise (R276 batch two)."""
+    return int(upgrade_plan(card)[0].get("stage_raise", 0))
+
+
+def stage_raise_var_effect(card: dict) -> dict | None:
+    """The ONE `stage_raise` a `stage_raise` delta binds to: the first
+    top-level one, mirroring tier0's `_bump_first`."""
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == "stage_raise"), None)
+
+
+def stage_raise_amount(card: dict, eff: dict) -> str | None:
+    """The C# amount a top-level `stage_raise` passes: the `RaiseAmount` var
+    where the row upgrades it, else None (the literal)."""
+    if (eff.get("op") == "stage_raise" and stage_raise_upgrade(card)
+            and eff is stage_raise_var_effect(card)):
+        return 'DynamicVars["RaiseAmount"].IntValue'
+    return None
+
+
 def cap_upgrade(card: dict) -> int:
     """`cap: +N` -- Careful Now's printed ceiling (R252). The card's only
     number: its payout is read off the board, so the cap is what the face
@@ -8996,7 +9102,7 @@ def build_body(
             # `salon_bow` shape above it -- and what the two SPENDS buy is the
             # effect AFTER them, through the ordinary `amount_formula` grammar
             # (`stage_spent`).
-            lines.append(stage_stmt(eff))
+            lines.append(stage_stmt(eff, stage_raise_amount(card, eff)))
 
         elif op == "salon_rotate":
             # EB-118 §5.5. A reorder and nothing else: no tick, no Encore, no
@@ -10374,7 +10480,7 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
                 f"{salon_member_aim(eff)});")
         elif op in STAGE_STMT_OPS:
-            body.append(stage_stmt(eff))
+            body.append(stage_stmt(eff, stage_raise_amount(card, eff)))
         elif op == "salon_rotate":
             body.append(
                 "SalonMemberPower.RotateLeftmost("
@@ -10767,6 +10873,10 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "mend" and isinstance(eff.get("amount"), int):
             yield "mend", "Mend", eff["amount"]
+        elif op == "stage_raise" and isinstance(eff.get("amount"), int):
+            owns = eff is stage_raise_var_effect(card)
+            yield ("stage_raise", "RaiseAmount", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
         elif op == "energy" and isinstance(eff.get("amount"), int):
             # An `energy: +N` delta binds to the FIRST energy op (tier0's
             # `energy` branch), whose amount the emitter already reads back
@@ -12342,6 +12452,8 @@ def build_upgrade(card: dict) -> list[str]:
                # (`grow_floor`) and never reaches this table.
                "grow_bombs_off_aura": "grow",
                "mend": "mend",
+               # R276 batch two, a Stage Raise's printed N.
+               "stage_raise": "stage_raise",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
                # `EB-679`, Read the Field's look count.
@@ -12353,6 +12465,7 @@ def build_upgrade(card: dict) -> list[str]:
                "grow_largest_bomb": 'DynamicVars["Grow"]',
                "grow_bombs_off_aura": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
+               "stage_raise": 'DynamicVars["RaiseAmount"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',

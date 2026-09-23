@@ -14,7 +14,8 @@ WHAT IS PINNED, in the order the rules are numbered:
   * a summon fills the back-most empty seat at 1, does NOT act on arrival
     (`EB-738`), and rotates the front out WITH ITS BAR on a full stage;
   * the damage order, per attack, and that it never runs on to the middle seat;
-  * Spend fires in full off a short bar and the payer bows; a hit earns none;
+  * Spend takes the back performer's full price and an exact emptying bows
+    (R276); a hit earns none;
   * the acts, the bows, and that Furina's own HP is touched by nothing;
   * the fight-one script, line A then the damage line on turn 3.
 
@@ -643,7 +644,7 @@ def test_with_the_flag_off_the_printed_starter_is_dealt():
     assert "aria_of_recompense" in ids and "salon_debut" in ids
 
 
-def test_the_pool_seam_swaps_fourteen_rows_at_the_same_rarity(arm):
+def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     """RARITY FOR RARITY, so the offer odds do not move -- which is the one
     thing `rewards.character_pool` refuses a substitution over.
 
@@ -652,7 +653,7 @@ def test_the_pool_seam_swaps_fourteen_rows_at_the_same_rarity(arm):
     that flips a module constant cannot reach behind it. What is being asked
     here is a question about two committed files anyway."""
     subs = loader.pool_substitutions("furina")
-    assert len(subs) == 14
+    assert len(subs) == 14 + 15          # batch one, and R276's batch two
     rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
     rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
     for shipped, proto in subs.items():
@@ -663,7 +664,7 @@ def test_with_the_flag_off_the_pool_seam_is_empty():
     assert loader.pool_substitutions("furina") == {}
 
 
-def test_every_batch_one_row_is_named_by_one_of_the_two_maps():
+def test_every_stage_row_is_named_by_one_of_the_two_maps():
     """The sheet's `replaces:` key and the arm's maps, compared in BOTH
     directions, so a row nobody named is a red test rather than a card no
     surface ever deals."""
@@ -671,7 +672,7 @@ def test_every_batch_one_row_is_named_by_one_of_the_two_maps():
     named = {**FS.POOL_SUBS, **FS.STARTER_SUBS}
     assert set(named.values()) == set(on_sheet)
     assert {p: s for s, p in named.items()} == on_sheet
-    assert len(on_sheet) == 17
+    assert len(on_sheet) == 17 + 15      # batch one, and R276's batch two
 
 
 # ---------------------------------------------------------------------------
@@ -848,3 +849,177 @@ def test_the_turn_census_is_emitted_even_at_zero(arm):
     FS.note_turn_census(st)
     rows = [e for e in st.log if e["event"] == "stage_census"]
     assert [r["performers"] for r in rows] == [0, 2]
+
+
+# ---------------------------------------------------------------------------
+# R276 BATCH TWO -- the fifteen rows' rules, in the sim twin.
+# ---------------------------------------------------------------------------
+
+def test_step_forward_brings_the_back_performer_to_the_front(arm):
+    st = _state()
+    st.player.stage = [["usher", 2], ["chevalmarin", 4], ["crabaletta", 9]]
+    FS.step_forward(st)
+    assert st.player.stage == [["crabaletta", 9], ["usher", 2],
+                               ["chevalmarin", 4]]
+    alone = _state()
+    alone.player.stage = [["usher", 3]]
+    FS.step_forward(alone)
+    assert alone.player.stage == [["usher", 3]]
+
+
+def test_a_raise_can_name_the_lead_or_every_performer(arm):
+    st = _state()
+    st.player.stage = [["usher", 2], ["crabaletta", 4]]
+    assert FS.raise_fanfare(st, 2, FS.SEAT_LEAD) == 2
+    assert st.player.stage == [["usher", 4], ["crabaletta", 4]]
+    assert FS.raise_fanfare(st, 3, FS.SEAT_ALL) == 6
+    assert st.player.stage == [["usher", 7], ["crabaletta", 7]]
+
+
+def test_bravura_spends_the_whole_back_bar_and_bows(arm):
+    st = _state()
+    st.player.stage = [["chevalmarin", 4], ["usher", 6]]
+    effects.resolve_card(st, _card(type="attack", effects=[
+        {"op": "stage_spend_back_all"},
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 0, "per": 3, "count": "stage_spent"}}]))
+    assert st.enemies[0].hp == 99 - 18
+    assert st.player.stage == [["chevalmarin", 4]]
+    assert st.player.block == FS.BOW_USHER_BLOCK
+    empty = _state()
+    assert FS.spend_all_of_back(empty) == 0
+
+
+def test_the_empty_stage_answers_read_the_stage(arm):
+    st = _state()
+    card = _card(effects=[{"op": "block", "amount": 5},
+                          {"op": "conditional", "if": "stage_empty",
+                           "then": [{"op": "stage_summon",
+                                     "member": "random"}]}])
+    effects.resolve_card(st, card)
+    assert FS.count(st.player) == 1
+    effects.resolve_card(st, card)
+    assert FS.count(st.player) == 1        # not empty the second time
+
+
+def test_ensemble_piece_counts_the_performers(arm):
+    st = _state()
+    st.player.stage = [["usher", 1], ["chevalmarin", 1], ["crabaletta", 1]]
+    effects.resolve_card(st, _card(type="attack", effects=[
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 0, "per": 4, "count": "stage_count"}}]))
+    assert st.enemies[0].hp == 99 - 12
+
+
+def test_full_house_doubles_the_acts_on_a_full_stage_only(arm):
+    st = _state()
+    st.player.powers[FS.FULL_HOUSE] = 1
+    st.player.stage = [["usher", 1], ["chevalmarin", 1], ["crabaletta", 1]]
+    FS.end_of_turn_acts(st)
+    assert st.player.block == 2 * FS.ACT_USHER_BLOCK
+    two = _state()
+    two.player.powers[FS.FULL_HOUSE] = 1
+    two.player.stage = [["usher", 1], ["chevalmarin", 1]]
+    FS.end_of_turn_acts(two)
+    assert two.player.block == FS.ACT_USHER_BLOCK
+
+
+def test_thunderous_applause_draws_and_raises_after_the_bow(arm):
+    st = _state()
+    st.player.draw_pile = [_card(cid="a"), _card(cid="b")]
+    effects.resolve_card(st, _card(type="power", effects=[
+        {"op": "apply_power", "power": FS.THUNDEROUS_APPLAUSE, "amount": 2,
+         "target": "self"}]))
+    st.player.stage = [["chevalmarin", 4], ["usher", 3]]
+    FS.spend(st, 3)                       # Usher emptied exactly: a Bow
+    assert len(st.player.hand) == 1
+    assert st.player.stage == [["chevalmarin", 6]]
+
+
+def test_a_five_century_act_returns_the_performer_to_rest(arm):
+    st = _state()
+    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
+    st.player.stage = [["chevalmarin", 4], ["usher", 3]]
+    FS.spend(st, 3)
+    assert st.player.stage == [["chevalmarin", 4], ["usher", FS.SUMMON_FANFARE]]
+    block = st.player.block                # the bow's 4
+    FS.end_of_turn_acts(st)
+    assert st.player.block == block        # the returnee did not act
+    assert st.player.stage_resting == []
+
+
+def test_a_five_century_act_does_not_double_the_rares_return(arm):
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
+    st.player.stage = [["usher", 5], ["crabaletta", 2]]
+    FS.collect_all(st)
+    FS.bow_and_return(st)
+    assert st.player.stage == [["usher", 1], ["crabaletta", 1]]
+
+
+def test_a_rapt_audience_banks_half_of_what_the_lead_lost(arm):
+    st = _state()
+    st.player.powers[FS.RAPT_AUDIENCE] = 50
+    st.player.stage = [["usher", 9], ["crabaletta", 1]]
+    FS.absorb(st, 5)
+    assert st.player.stage == [["usher", 4], ["crabaletta", 4]]   # 1 + ceil(2.5)
+    alone = _state()
+    alone.player.powers[FS.RAPT_AUDIENCE] = 50
+    alone.player.stage = [["usher", 9]]
+    FS.absorb(alone, 5)
+    assert alone.player.stage == [["usher", 4]]
+
+
+def test_arkhe_alignment_doubles_one_half_of_the_acts(arm):
+    attack = _state(enemies=[_enemy(intents=[{"kind": "attack",
+                                              "amount": 9}])])
+    attack.player.stage_power_copies[FS.ARKHE_ALIGNMENT] = 1
+    attack.player.stage = [["usher", 3]]
+    FS.turn_start_powers(attack)
+    assert attack.player.stage == [["usher", 3 + FS.PNEUMA_LEAD_REGAIN]]
+    FS.end_of_turn_acts(attack)
+    assert attack.player.block == 2 * FS.ACT_USHER_BLOCK
+    assert attack.player.stage_act_block_mult == 1            # reset
+    quiet = _state()
+    quiet.player.stage_power_copies[FS.ARKHE_ALIGNMENT] = 1
+    quiet.player.stage = [["crabaletta", 3]]
+    FS.turn_start_powers(quiet)
+    FS.end_of_turn_acts(quiet)
+    assert quiet.enemies[0].hp == 99 - 2 * FS.ACT_CRABALETTA_DAMAGE
+
+
+def test_the_batch_two_upgrades_bind(arm, monkeypatch):
+    """Quick Cue's two numbers move by different amounts (3/8 to 4/10), and a
+    Stage Raise's printed N moves by its own key. Applied through the one
+    applier both engines' deltas meet in, off the rows' own `upgrade:` blocks
+    (the delta index is cached at the flag's value, so it is handed the rows
+    directly)."""
+    import copy
+    from tier0.content import upgrades
+    rows = {r["id"]: r for r in _proto_rows()}
+    monkeypatch.setattr(upgrades, "_upgrade_index", lambda: {
+        cid: dict(rows[cid]["upgrade"])
+        for cid in ("proto_fs_quick_cue", "proto_fs_hold_your_places")})
+    cue = upgrades.apply_upgrade(
+        copy.deepcopy(loader.get_card("proto_fs_quick_cue")))
+    modes = cue.effects[0]["modes"]
+    assert modes[0]["effects"][0]["amount"] == 4
+    assert modes[1]["effects"][1]["amount"] == 10
+    hold = upgrades.apply_upgrade(
+        copy.deepcopy(loader.get_card("proto_fs_hold_your_places")))
+    assert hold.effects == [{"op": "block", "amount": 7},
+                            {"op": "stage_raise", "amount": 3,
+                             "seat": "lead"}]
+
+
+def test_a_resting_returnee_sits_out_tutti_and_bis(arm):
+    """A Five-Century Act's returnee "re-enters without acting that turn" --
+    not at the sweep, and not through Tutti! or Bis! either."""
+    st = _state()
+    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
+    st.player.stage = [["usher", 3]]
+    FS.spend(st, 3)                          # Usher bows and returns at 1
+    block = st.player.block
+    FS.perform_all(st)
+    FS.perform_lead(st)
+    assert st.player.block == block

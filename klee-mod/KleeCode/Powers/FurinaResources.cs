@@ -1316,7 +1316,7 @@ public sealed class FurinaResourceHooks : AbstractModel
         if (FurinaStage.LiveFor(target))
         {
             var incoming = (int)System.Math.Ceiling(amount);
-            return FurinaStageLedger.For(target).Absorb(incoming).ReachedFurina;
+            return FurinaStage.AbsorbHit(target, incoming, dealer);
         }
 #endif
         return FurinaResources.AbsorbDamage(target, amount);

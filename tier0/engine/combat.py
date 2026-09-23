@@ -1067,6 +1067,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # point the brief spends a paragraph refusing it ("the first hand sees 3").
     furina_stage.open_combat(state)
     furina_stage.turn_start_regen(state)
+    # R276 batch two: Arkhe Alignment's choice, after the regen it may add to.
+    furina_stage.turn_start_powers(state)
 
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.

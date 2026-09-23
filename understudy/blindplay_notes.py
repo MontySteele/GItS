@@ -1596,6 +1596,11 @@ ARM_KEYWORDS: dict[str, str] = {
                        "stage it is the lead. " + STAGE_ACTS),
     "Rotate": ("Seats change order and every bar comes with them. Nobody "
                "leaves and nobody takes a Bow."),
+    # R276 batch two: Arkhe Alignment's two halves, in
+    # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
+    "Ousia": "This turn, your performers' acts deal double damage.",
+    "Pneuma": ("This turn, your performers' acts give double Block, and the "
+               "lead performer regains 2 Fanfare."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1832,6 +1837,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Spend": "furina", "Fanfare": "furina", "Raise": "furina", "Bow": "furina",
     "lead performer": "furina", "back performer": "furina",
     "Rotate": "furina", "Encore": "furina", "Spotlighted": "furina",
+    "Ousia": "furina", "Pneuma": "furina",
 }
 
 
@@ -1909,6 +1915,9 @@ _ARM_KEYWORD_RE = {
     "lead performer": re.compile(r"\blead performer\b"),
     "back performer": re.compile(r"\bback performer\b"),
     "Rotate": re.compile(r"\bRotates?\b"),
+    # R276 batch two: Arkhe Alignment's two halves.
+    "Ousia": re.compile(r"\bOusia\b"),
+    "Pneuma": re.compile(r"\bPneuma\b"),
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
     # faces before the meter exists, and every Furina row the Stage does not

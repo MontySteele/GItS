@@ -6740,6 +6740,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                            "it is the "],
         "Rotate": ["Seats change order and every bar comes with them. Nobody "
                    "leaves "],
+        # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
+        # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
+        # anchors are the prose either side of it.
+        "Ousia": ["This turn, your performers' acts deal double damage."],
+        "Pneuma": ["This turn, your performers' acts give double ",
+                   " regains "],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
         # own words. The strike number is interpolated on both sides -- the
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off

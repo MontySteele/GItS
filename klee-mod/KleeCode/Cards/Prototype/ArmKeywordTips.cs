@@ -88,6 +88,9 @@ public static class ArmKeywordTips
     public const string LeadPerformerKey = "KLEEMOD-ARM_STAGE_LEAD";
     public const string BackPerformerKey = "KLEEMOD-ARM_STAGE_BACK";
     public const string RotateKey = "KLEEMOD-ARM_STAGE_ROTATE";
+    // R276 batch two: Arkhe Alignment's two halves.
+    public const string OusiaKey = "KLEEMOD-ARM_STAGE_OUSIA";
+    public const string PneumaKey = "KLEEMOD-ARM_STAGE_PNEUMA";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -1259,6 +1262,24 @@ public static class ArmKeywordTips
         With(inherited, RotateKey,
             "Seats change order and every bar comes with them. Nobody leaves "
           + "and nobody takes a [gold]Bow[/gold].");
+
+    /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
+    /// choice a player makes at the start of each turn.</summary>
+    public static IEnumerable<IHoverTip> ForOusia(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, OusiaKey,
+            "This turn, your performers' acts deal double damage.");
+
+    /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s Block half. The
+    /// numeral is <see cref="Powers.ArkheAlignmentPower.PneumaLeadRegain"/>'s
+    /// (`EB-89`).</summary>
+    public static IEnumerable<IHoverTip> ForPneuma(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PneumaKey,
+            "This turn, your performers' acts give double [gold]Block[/gold], "
+          + "and the [gold]lead performer[/gold] regains "
+          + Powers.ArkheAlignmentPower.PneumaLeadRegain
+          + " [gold]Fanfare[/gold].");
 
     /// <summary>
     /// WHICH BAR A READER'S NUMBER IS. One value per reader, and the four are

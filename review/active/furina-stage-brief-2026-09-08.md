@@ -359,6 +359,57 @@ combat, Usher takes the front seat with 3 Fanfare.
 Tips the faces need: Spend, Fanfare (the bar), Raise, Bow, the lead, the
 back performer, Rotate.
 
+### Batch two (R276)
+
+Fifteen cards on the rules R276 set: the lead is the shield, the back
+performer the bank, and a Spend pays its full price. Numbers are starting
+values; names are provisional. Upgrades in brackets.
+
+**Commons (six)**
+
+| card | cost | type | text |
+|---|---|---|---|
+| Improvised Number | 1 | Attack | Deal 6 damage. If the stage is empty, summon a random performer. [Deal 9] |
+| Between Acts | 1 | Skill | Gain 5 Block. If the stage is empty, draw 2 cards. [8 Block] |
+| Ensemble Piece | 1 | Attack | Deal 4 damage for each performer on stage. [5 each] |
+| Hold Your Places | 1 | Skill | Gain 5 Block. Raise 2 Fanfare on the lead performer. [7 Block, Raise 3] |
+| Quick Cue | 0 | Attack | Choose one: Deal 3 damage, or Spend 2: deal 8 instead. [4 / 10] |
+| Step Forward | 0 | Skill | The back performer moves to the front seat. Gain 3 Block. [5 Block] |
+
+**Uncommons (seven)**
+
+| card | cost | type | text |
+|---|---|---|---|
+| Gala Dinner | 1 | Skill | Raise 3 Fanfare on every performer. [Raise 4] |
+| Double Casting | 1 | Skill | Summon two random performers who are not on stage. [cost 0] |
+| Tutti! | 2 | Skill | Every performer performs its act now. [cost 1] |
+| Bravura | 1 | Attack | Spend all of the back performer's Fanfare. Deal 3 damage for each point spent. [4 per point] |
+| Full House | 2 | Power | At the end of your turn, if all three seats are filled, your performers act twice. [cost 1] |
+| Thunderous Applause | 1 | Power | Whenever a performer takes a Bow, draw 1 card and Raise 2 Fanfare on the back performer. [Raise 3] |
+| A Rapt Audience | 1 | Power | Whenever an enemy hits the lead performer, Raise half the Fanfare it lost, rounded up, on the back performer. [the full amount] |
+
+**Rares (two)**
+
+| card | cost | type | text |
+|---|---|---|---|
+| Arkhe Alignment | 2 | Power | At the start of your turn, choose one. Ousia: this turn your performers' acts deal double damage. Pneuma: this turn your performers' acts give double Block, and the lead performer regains 2 Fanfare. [cost 1] |
+| A Five-Century Act | 2 | Power | Whenever a performer takes a Bow, it returns to the back seat with 1 Fanfare. [cost 1] |
+
+How the edges resolve: Improvised Number and Between Acts check the stage
+when played. Step Forward moves the back performer to the front and shifts
+the others back one; with one performer it only gives Block. Bravura empties
+the back performer exactly, so it always bows; on an empty stage it deals 0.
+Double Casting with one open seat summons one. Full House: each performer's
+act resolves twice, and each further copy adds one more act. Thunderous
+Applause raises after the bowing performer has left, so an empty stage gets
+nothing and the draw still happens. A Rapt Audience does nothing while one
+performer is both lead and back. Arkhe Alignment's "double" multiplies the
+act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
+10). A Five-Century Act's returnee takes the back-most empty seat and does not
+act that turn; after Let the People Rejoice a performer returns once.
+
+Tips added: Ousia and Pneuma.
+
 ## 13. What the sim reports, and what round one asks
 
 The sim, per run and per fight, under `FURINA_STAGE`:

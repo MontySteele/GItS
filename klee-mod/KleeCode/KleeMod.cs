@@ -568,6 +568,9 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
                         "Back performer",
                     [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
+                    // R276 batch two: Arkhe Alignment's two halves.
+                    [Cards.ArmKeywordTips.OusiaKey + ".title"] = "Ousia",
+                    [Cards.ArmKeywordTips.PneumaKey + ".title"] = "Pneuma",
                     // A Stage round-three defect, and a RIDER rather than a
                     // keyword: the four readers multiply a live bar, so off a
                     // board their faces print a literal 0. The title names

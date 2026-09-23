@@ -861,6 +861,15 @@ class Player(Fighter):
     # shipped run, for every character, forever: `furina_stage.stage` returns
     # `[]` with the flag off whatever is in here.
     stage: list[list] = field(default_factory=list)
+    # R276 batch two (QUARANTINED with the stage). Performers resting after A
+    # Five-Century Act returned them (they skip this turn's acts); this turn's
+    # Arkhe Alignment multipliers on the acts; and how many copies of each
+    # instanced Stage power are in play (a copy count the `powers` map, which
+    # sums amounts, cannot carry).
+    stage_resting: list = field(default_factory=list)
+    stage_act_damage_mult: int = 1
+    stage_act_block_mult: int = 1
+    stage_power_copies: dict = field(default_factory=dict)
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The

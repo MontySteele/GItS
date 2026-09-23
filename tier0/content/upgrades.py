@@ -890,6 +890,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "mend":
             ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
                              "amount", val)
+        elif key == "stage_raise":
+            # R276 batch two (Hold Your Places, Gala Dinner): a Stage Raise's
+            # printed N, the first top-level `stage_raise` -- codegen's
+            # `stage_raise_var_effect` binds the same one.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "stage_raise"),
+                             "amount", val)
         elif key in PLAN_DELTA_OPS:
             # `EB-315`. The PLAN line's own numbers, one key per op, bound to
             # the FIRST clause of that op -- the same one-owner rule every key
@@ -1029,14 +1036,24 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # prints through `_branch_amount_text`.
             hits = []
             for fx in everywhere:
-                if fx.get("op") != "conditional":
+                if fx.get("op") == "choose_one":
+                    # R276 batch two (Quick Cue): a SPEND MODE is the then-arm
+                    # of the same claim, exactly as codegen's
+                    # `_is_then_first_damage` reads it -- every mode after the
+                    # first, its first damage clause.
+                    arms = [m.get("effects") or []
+                            for m in (fx.get("modes") or [])[1:]]
+                elif fx.get("op") == "conditional":
+                    arms = [fx.get("then", [])]
+                else:
                     continue
-                first = next((e for e in fx.get("then", [])
-                              if e.get("op") == "damage"
-                              and e.get("target") != "self"
-                              and isinstance(e.get("amount"), int)), None)
-                if first is not None:
-                    hits.append(first)
+                for arm in arms:
+                    first = next((e for e in arm
+                                  if e.get("op") == "damage"
+                                  and e.get("target") != "self"
+                                  and isinstance(e.get("amount"), int)), None)
+                    if first is not None:
+                        hits.append(first)
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)

@@ -227,8 +227,10 @@ public class FurinaStageRuleTests
         var calls = Il.CallSequence(
             Il.Method("FurinaResourceHooks", "ModifyHpLostBeforeOsty"));
 
+        // R276 batch two: the ledger's absorb is reached through
+        // `FurinaStage.AbsorbHit`, which adds A Rapt Audience's Raise.
         var stage = calls.ToList().FindIndex(
-            c => c.EndsWith("FurinaStageLedger.Absorb", StringComparison.Ordinal));
+            c => c.EndsWith("FurinaStage.AbsorbHit", StringComparison.Ordinal));
         var encore = calls.ToList().FindIndex(
             c => c.EndsWith("FurinaResources.AbsorbDamage",
                             StringComparison.Ordinal));

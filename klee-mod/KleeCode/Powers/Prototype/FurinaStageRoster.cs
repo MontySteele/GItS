@@ -80,16 +80,18 @@ public static class FurinaStageRoster
     };
 
     /// <summary>
-    /// THE POOL SEAM. Fourteen named shipped rows leave the offer and the
-    /// arm's fourteen are appended -- batch one minus the three starters above
-    /// (eight Commons, five Uncommons, one Rare). The pairing is the sheet's
-    /// own `replaces:` and the sim's <c>furina_stage.POOL_SUBS</c>.
+    /// THE POOL SEAM. Named shipped rows leave the offer and the arm's rows
+    /// are appended: batch one's fourteen (its seventeen minus the three
+    /// starters above -- eight Commons, five Uncommons, one Rare) and R276's
+    /// batch two, fifteen more (six Commons, seven Uncommons, two Rares). The
+    /// pairing is the sheet's own `replaces:` and the sim's
+    /// <c>furina_stage.POOL_SUBS</c>.
     ///
     /// NOT A ONE-FOR-ONE SWAP ANY MORE, and the offer odds DO move.
     /// <see cref="DropRetiredRows"/> (`EB-736`) runs first and drops every
-    /// shipped row printing a retired word -- 65 of them, of which only three
-    /// are on the named list below -- so the arm's pool is the 14 Stage rows
-    /// plus the dozen shipped rows that survive the filter, about 26 cards,
+    /// shipped row printing a retired word -- 65 of them, which include
+    /// every batch-two replacement -- so the arm's pool is the 29 Stage rows
+    /// plus the dozen shipped rows that survive the filter, about 41 cards,
     /// not the ~76 a one-for-one swap would leave. The sim does not model the
     /// filter, so its pool is the swap's.
     ///
@@ -122,7 +124,25 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.ManyWatersMelody
                         && card is not FurinaGen.ChangeTheBill
                         && card is not FurinaGen.TakeYourBow
-                        && card is not FurinaGen.UniversalRevelry)
+                        && card is not FurinaGen.UniversalRevelry
+                        // R276 batch two's fifteen `replaces:` -- every one
+                        // already dropped by the text filter above, named here
+                        // so the sheet's pairing and this list stay one table.
+                        && card is not FurinaGen.Breathless
+                        && card is not FurinaGen.GracefulRetreat
+                        && card is not FurinaGen.HouseCall
+                        && card is not FurinaGen.LastingImpression
+                        && card is not FurinaGen.ApplauseLine
+                        && card is not FurinaGen.SwellingOverture
+                        && card is not FurinaGen.DressRehearsal
+                        && card is not FurinaGen.MatineePerformance
+                        && card is not FurinaGen.FullEnsemble
+                        && card is not FurinaGen.DramaticEntrance
+                        && card is not FurinaGen.FortissimoGuard
+                        && card is not FurinaGen.StandingOvation
+                        && card is not FurinaGen.CrowdWork
+                        && card is not FurinaGen.EndlessWaltz
+                        && card is not FurinaGen.PrimaDonna)
             .Concat(new CardModel[]
             {
                 // Commons (eight).
@@ -142,6 +162,24 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsFinalBow>(),
                 // Rare (one).
                 ModelDb.Card<ProtoFsLetThePeopleRejoice>(),
+                // R276 BATCH TWO. Commons (six).
+                ModelDb.Card<ProtoFsImprovisedNumber>(),
+                ModelDb.Card<ProtoFsBetweenActs>(),
+                ModelDb.Card<ProtoFsEnsemblePiece>(),
+                ModelDb.Card<ProtoFsHoldYourPlaces>(),
+                ModelDb.Card<ProtoFsQuickCue>(),
+                ModelDb.Card<ProtoFsStepForward>(),
+                // Uncommons (seven).
+                ModelDb.Card<ProtoFsGalaDinner>(),
+                ModelDb.Card<ProtoFsDoubleCasting>(),
+                ModelDb.Card<ProtoFsTutti>(),
+                ModelDb.Card<ProtoFsBravura>(),
+                ModelDb.Card<ProtoFsFullHouse>(),
+                ModelDb.Card<ProtoFsThunderousApplause>(),
+                ModelDb.Card<ProtoFsRaptAudience>(),
+                // Rares (two).
+                ModelDb.Card<ProtoFsArkheAlignment>(),
+                ModelDb.Card<ProtoFsFiveCenturyAct>(),
             });
     }
 

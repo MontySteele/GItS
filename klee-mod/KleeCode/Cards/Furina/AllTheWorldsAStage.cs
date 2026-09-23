@@ -46,13 +46,13 @@ public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All the World's a Stage"),
-        ("description", Description),
+        ("description", Face),
     };
 
     /// <summary>The face. Read once at boot, when the arm's switch is already
     /// set for the build, so a Stage build prints the Stage's sentence.
     /// </summary>
-    private static string Description =>
+    private static string Face =>
 #if PROTOTYPE_CARDS
         FurinaStage.Enabled
             ? "At the start of your turn, [gold]Raise[/gold] "

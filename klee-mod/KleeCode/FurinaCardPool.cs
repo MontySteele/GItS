@@ -105,6 +105,12 @@ public static class FurinaOffPoolCards
         // GetUnlockedCards must not see it or a reward roll could offer a
         // card nobody ruled. See KleeMod.PrototypeCards.
         cards.AddRange(PrototypeCards.For("furina"));
+#if PROTOTYPE_CARDS
+        // R276 batch two: Arkhe Alignment's two hand-written choice faces,
+        // on the Ethereal Spotlight options' footing above.
+        cards.Add(ModelDb.Card<Cards.Prototype.ArkheOusiaOption>());
+        cards.Add(ModelDb.Card<Cards.Prototype.ArkhePneumaOption>());
+#endif
         return cards;
     }
 }
