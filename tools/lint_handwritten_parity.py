@@ -652,11 +652,13 @@ ANCIENT_WITNESS: dict[str, dict] = {
                "Charge per turn, +1 on upgrade. 3 rather than 5 because Charge "
                "is banked and never spent, so it compounds against the Kurage "
                "pulse multiplier instead of adding to a total (its docstring "
-               "carries the argument).",
+               "carries the argument). Under Kokomi's arm (R276) it pays "
+               "PlanBlock instead: 2 Block and a card per Plan carried out, "
+               "+1 Block on upgrade -- the second var.",
         "cost": [1],
-        "vars": [3],
+        "vars": [3, 2],
         "hits": [],
-        "upgrade_vars": [1],
+        "upgrade_vars": [1, 1],
         "upgrade_cost": [],
         "encore": [],
         "fanfare_div": [],

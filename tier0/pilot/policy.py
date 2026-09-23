@@ -937,6 +937,12 @@ def _card_element(state: CombatState, card: Card) -> Optional[str]:
         return card.element
     if card.type == "attack" and state.player.cadence == "catalyst":
         return state.player.element
+    # R276 pick 2: under Kokomi's arm her damaging Skills apply Hydro too
+    # (`effects._every_damaging_card_carries_element`, the engine's rule).
+    if (state.player.cadence == "catalyst" and not card.is_companion
+            and effects._every_damaging_card_carries_element(state)
+            and any(fx.get("op") == "damage" for fx in card.effects)):
+        return state.player.element
     return None
 
 

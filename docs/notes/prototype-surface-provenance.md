@@ -134,32 +134,6 @@ deletion.
 # `or []`. Append list rows directly under this header.
 ```
 
-## before proto_pearl_barrage_turn
-
-```
-# ---------- ARM 1: Pearl Barrage's counting basis (R215 C) -------------------
-# Shipped twin: `pearl_barrage` (docs/kokomi-cards.yaml). That card reads the
-# cost of THE ONE CARD you chose to Exhaust. This one reads how many cards have
-# been Exhausted THIS TURN -- the reading [USER] expected it to have. It still
-# Exhausts one chosen card itself, and that card is in its own count, so the
-# floor of the two shapes is the same number on a turn with one rotation in it.
-# Base 5 and per 3 are the shipped numbers, UNMOVED: the counting basis is the
-# question, and moving a number too would make the answer unattributable.
-```
-
-## before proto_pearl_barrage_turn
-
-```
-# ---------- ARM 1: Pearl Barrage's counting basis (R215 C) -------------------
-# Shipped twin: `pearl_barrage` (docs/kokomi-cards.yaml). That card reads the
-# cost of THE ONE CARD you chose to Exhaust. This one reads how many cards have
-# been Exhausted THIS TURN -- the reading [USER] expected it to have. It still
-# Exhausts one chosen card itself, and that card is in its own count, so the
-# floor of the two shapes is the same number on a turn with one rotation in it.
-# Base 5 and per 3 are the shipped numbers, UNMOVED: the counting basis is the
-# question, and moving a number too would make the answer unattributable.
-```
-
 ## before proto_shinobu_sanctifying_ring_either
 
 ```

@@ -214,6 +214,17 @@ class CharacterProfile:
             return False
         if self.cadence == "catalyst_attack":
             return card.get("type") == "attack"
+        if self.cadence == CATALYST_EVERY_CARD:
+            # R276 pick 2 (Kokomi's arm): EVERY damaging card of hers applies
+            # Hydro, Skills included. An Attack is elemental as before; any
+            # other type is elemental when its FACE-UP half deals damage to an
+            # enemy. The `plan:` list is not read here -- the carry-out is the
+            # jellyfish's hit and `plan_applies_element` answers it.
+            return card.get("type") == "attack" or any(
+                effect.get("op") == "damage"
+                and effect.get("target") != "self"
+                for effect in _effects_everywhere(card)
+            )
         if self.cadence == "skill_grade":
             tags = set(card.get("tags", []))
             # `EB-378`: BRANCHES INCLUDED, because the SIM decides per EFFECT
@@ -236,6 +247,20 @@ class CharacterProfile:
         raise ValueError(
             f"{self.character_id}: unknown elemental cadence {self.cadence!r}"
         )
+
+
+#: `R276` pick 2. The Kokomi ARM's cadence: every damaging card of hers applies
+#: Hydro, whatever its type, and the base game's cards still apply nothing
+#: (`_is_off_sheet_card` / `CatalystCadence.IsOffSheet`). Only the prototype
+#: surface's Kokomi profile carries it (`gen_prototype_cards.ARM_CADENCE`): the
+#: shipped Kokomi sheet and Klee's arm stay `catalyst_attack`. Its engine twins
+#: are `CatalystCadence.EveryDamagingCardCarriesElement` and
+#: `effects._every_damaging_card_carries_element`.
+CATALYST_EVERY_CARD = "catalyst_every_card"
+
+#: The cadences in which a character's own ATTACKS carry her element -- every
+#: catalyst cadence, which is also every cadence a Plan's carry-out is asked of.
+CATALYST_CADENCES = frozenset({"catalyst_attack", CATALYST_EVERY_CARD})
 
 
 KLEE_PROFILE = CharacterProfile(
@@ -1031,7 +1056,7 @@ def plan_applies_element(card: dict, profile: "CharacterProfile") -> bool:
     the card, and a profile whose native element leaves no aura in this engine
     answers no.
     """
-    if profile.cadence != "catalyst_attack":
+    if profile.cadence not in CATALYST_CADENCES:
         return False
     if profile.native_element not in AURA_KEYWORD_BY_ELEMENT:
         return False
@@ -13402,6 +13427,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         elif profile.cadence == "catalyst_attack":
             sentence = (f"Sheet: all {char} attacks apply {elem} "
                         "(catalyst-grade cadence).")
+        elif profile.cadence == CATALYST_EVERY_CARD:
+            sentence = (f"Arm cadence (R276): every damaging {char} card "
+                        f"applies {elem}, Skills included.")
         else:
             sentence = ("Sheet cadence: damaging Skills, Burst-tagged cards, "
                         f"and skill-tagged cards apply {elem}.")

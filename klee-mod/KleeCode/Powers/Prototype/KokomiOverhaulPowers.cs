@@ -115,6 +115,51 @@ public sealed class SongOfPearlsPower
 }
 
 /// <summary>
+/// Princess of Watatsumi, her Ancient, UNDER THE ARM (R276 hygiene):
+/// "Whenever the Bake-Kurage carries out a Plan, gain 2 Block and draw 1
+/// card." The shipped card grants Charge every turn, a resource this arm turns
+/// off, so a Dusty Tome handed an arm run a dead pick.
+/// <see cref="KleeMod.Cards.Kokomi.PrincessOfWatatsumi"/> applies this instead
+/// of <see cref="ChargePerTurnPower"/> while the arm is live for her, and the
+/// shipped behaviour is untouched off the arm.
+///
+/// EVERY PLAN, NOT ONCE A TURN. Treatise and Song of Pearls are capped at a
+/// turn by [USER]'s 2026-09-02 ruling because they were Uncommons stacking
+/// with each other; this is the one Ancient, the Tome's single grant, and its
+/// printed text says "Whenever". The Block is POWERED for Song of Pearls'
+/// reason (rule 3: her Dexterity counts on what a Plan pays).
+///
+/// <see cref="PowerModel.Amount"/> is the Block; the draw is always 1.
+/// Sim twin: <c>kokomi_plan.PRINCESS_OF_WATATSUMI</c>.
+/// </summary>
+public sealed class PrincessOfWatatsumiPlanPower
+    : PowerModel, ILocalizationProvider, IKokomiPlanListener
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Princess of Watatsumi"),
+        ("description",
+            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+          + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold] "
+          + "and draw 1 card."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public async Task OnPlanResolved(
+        PlayerChoiceContext choiceContext, Creature kokomi)
+    {
+        if (kokomi != Owner) return;                 // co-op: your plans only
+        var player = Owner?.Player;
+        if (Owner == null || player == null || Amount <= 0) return;
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
+        await CardPileCmd.Draw(choiceContext, 1, player);
+    }
+}
+
+/// <summary>
 /// The Clouds Like Waves Rippling (Rare): "Whenever you apply a debuff to an
 /// enemy, gain 2 Block."
 ///

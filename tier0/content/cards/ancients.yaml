@@ -80,6 +80,14 @@
     # never spent, so it compounds against the Kurage pulse multiplier
     # instead of adding to a total.
     - {op: apply_power, power: charge_per_turn, amount: 3, target: self}
+    # R276: UNDER KOKOMI'S ARM the card pays on the Plan instead -- "Whenever
+    # the Bake-Kurage carries out a Plan, gain 2 Block and draw 1 card." The
+    # arm turns Charge off, so the drip above was a dead pick there. Both
+    # powers are applied and each is read on its own side of the arm only:
+    # `charge_per_turn`'s tick is skipped under the arm, and this one is read
+    # by the Plan bus, which exists only under it. (The C# applies exactly one
+    # of the two; the other one here is an inert entry, never read.)
+    - {op: apply_power, power: kk_princess_of_watatsumi, amount: 2, target: self}
 
 - id: all_the_worlds_a_stage
   name: "All the World's a Stage"

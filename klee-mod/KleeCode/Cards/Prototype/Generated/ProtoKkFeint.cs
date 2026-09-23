@@ -34,7 +34,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
-    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
+    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>

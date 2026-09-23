@@ -88,11 +88,11 @@ touching the basics.
 | Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies. | 1 |
 
 The basics are the base game's Strike and Defend (R242) and apply no
-element ([USER], 2026-09-02); her own Attacks apply Hydro the way every
-catalyst character's do, which is what a companion's Pyro, Electro or Cryo
-card reacts with. Kurage's Oath gained a now-line under R250 pick 1 (round
-4d), so writing it is a trade rather than the only play; its now-line does
-not upgrade. Slack Water's Plan is a **morning** Plan: the Weak lands the
+element ([USER], 2026-09-02); every damaging card of her own applies Hydro,
+Skills included (R276 pick 2), which is what a companion's Pyro, Electro or
+Cryo card reacts with. Kurage's Oath gained a now-line under R250 pick 1
+(round 4d), so writing it is a trade rather than the only play; its now-line
+does not upgrade. Slack Water's Plan is a **morning** Plan: the Weak lands the
 next turn, after the swing it was written against, and that delay is the
 point (R267 pick 1). Its numbers are the R243 audit's (Weak 1 now, Weak 1
 to ALL written; upgrade 7 damage and 2 Weak written).

@@ -3253,3 +3253,79 @@ def test_an_auto_play_never_aims_at_the_pet(overhaul):
     assert kokomi_plan.plan_aimed_at_pet(st, card) is False
     st.kurage_autoplaying = False
     assert kokomi_plan.plan_aimed_at_pet(st, card) is True
+
+
+# --- R276: pick 2 (her damaging Skills apply Hydro) and her Ancient ---------
+
+def _arm_card(cid):
+    return next(c for c in loader.prototype_cards() if c.id == cid)
+
+
+def test_r276_her_damaging_skills_apply_hydro_face_up(overhaul):
+    """R276 pick 2. Ambush, Chain of Command and Opening Gambit are Skills
+    whose face-up half deals damage; under the arm that hit applies Hydro, as
+    her Attacks' always did. `CatalystCadence.EveryDamagingCardCarriesElement`
+    is the twin."""
+    st = kokomi_state()
+    for cid in ("proto_kk_ambush", "proto_kk_chain_of_command",
+                "proto_kk_opening_gambit"):
+        card = _arm_card(cid)
+        assert card.type == "skill", cid
+        hit = next(fx for fx in card.effects if fx["op"] == "damage")
+        assert effects._element_for(st, hit, card) == "hydro", cid
+
+
+def test_r276_the_base_strike_and_klee_are_outside_it(overhaul):
+    """Scoped to her arm and her own cards: the base game's Strike still
+    applies nothing, and a damaging Skill in Klee's seat applies nothing
+    (her cadence is still Attack-only)."""
+    st = kokomi_state()
+    strike = loader.get_card("strike")
+    assert effects._element_for(st, strike.effects[0], strike) is None
+
+    klee = make_state()
+    klee.player.character_id = "klee"
+    klee.player.element = "pyro"
+    klee.player.cadence = "catalyst"
+    skill = Card(id="probe_skill", name="probe", cost=1, type="skill",
+                 effects=[{"op": "damage", "amount": 3, "target": "enemy"}])
+    assert effects._element_for(klee, skill.effects[0], skill) is None
+
+
+def test_r276_the_skill_split_is_unchanged_off_the_arm():
+    """Flag off, her damaging Skill applies nothing, exactly as before."""
+    st = kokomi_state()
+    skill = Card(id="probe_skill", name="probe", cost=1, type="skill",
+                 effects=[{"op": "damage", "amount": 3, "target": "enemy"}],
+                 character="kokomi")
+    assert effects._element_for(st, skill.effects[0], skill) is None
+
+
+def test_r276_princess_of_watatsumi_pays_on_every_plan_under_the_arm(overhaul):
+    """Her Ancient under the arm: "Whenever the Bake-Kurage carries out a
+    Plan, gain 2 Block and draw 1 card." Every Plan, not once a turn; and the
+    shipped Charge drip is not paid, because the arm turns Charge off."""
+    st = kokomi_state()
+    st.player.draw_pile = [loader.get_card("defend") for _ in range(5)]
+    princess = loader.get_card("princess_of_watatsumi")
+    effects.resolve_card(st, princess)
+    assert st.player.powers[kokomi_plan.PRINCESS_OF_WATATSUMI] == 2
+
+    clause = [{"op": "block", "amount": 1}]
+    kokomi_plan.schedule(st, plan_card(clause))
+    kokomi_plan.schedule(st, plan_card(clause))
+    hand, block = len(st.player.hand), st.player.block
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == block + 2 * (1 + 2)
+    assert len(st.player.hand) == hand + 2
+
+    charge = st.player.charge
+    effects.player_turn_start_triggers(st)
+    assert st.player.charge == charge, "no Charge drip under the arm"
+
+
+def test_r276_princess_upgrades_to_three_block():
+    up = loader.get_card("princess_of_watatsumi+")
+    amounts = {fx["power"]: fx["amount"] for fx in up.effects}
+    assert amounts == {"charge_per_turn": 4,
+                       kokomi_plan.PRINCESS_OF_WATATSUMI: 3}

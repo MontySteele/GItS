@@ -750,6 +750,21 @@ def _is_off_sheet_card(state: CombatState, card: Card) -> bool:
     return owner != mine
 
 
+def _every_damaging_card_carries_element(state: CombatState) -> bool:
+    """R276 pick 2: KOKOMI'S ARM ELEMENTS EVERY DAMAGING CARD OF HERS.
+
+    Her Attacks applied Hydro and five of her Skills dealt damage face-up and
+    applied nothing (Ambush, War Council, Opening Gambit, Chain of Command,
+    Kurage's Oath's now-line); the split was a trap when reading a card. Under
+    the arm the catalyst cadence reaches every type of card of hers that deals
+    damage. The base game's cards are still outside it (`_is_off_sheet_card`),
+    and Klee's arm keeps the Attack-only rule.
+
+    Twins: `CatalystCadence.EveryDamagingCardCarriesElement` (C#) and the
+    codegen's `gen_klee_cards.CATALYST_EVERY_CARD`."""
+    return kokomi_plan.live(state)
+
+
 def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     """Cadence dial (design doc §2.3; Furina kickoff §1).
 
@@ -797,7 +812,10 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
             return None
         return (card.element if card.element != "none"
                 else state.player.element)
-    if (card.type == "attack" and fx["op"] == "damage"
+    if ((card.type == "attack"
+         or (_every_damaging_card_carries_element(state)
+             and not card.is_companion))
+            and fx["op"] == "damage"
             and state.player.cadence == "catalyst"
             and not _is_off_sheet_card(state, card)):
         return card.element if card.element != "none" else state.player.element
@@ -6802,7 +6820,10 @@ def player_turn_start_triggers(state: CombatState) -> None:
     # hook already sat -- and it is inert either way, because neither power
     # reads the hand, the deck or the energy: each only moves a meter.
     n = p.powers.get("charge_per_turn", 0)         # Princess of Watatsumi
-    if n:
+    # R276: under Kokomi's arm the card pays on the Plan instead
+    # (`kokomi_plan.PRINCESS_OF_WATATSUMI`); the mod applies no
+    # ChargePerTurnPower there, so this entry is never read.
+    if n and not kokomi_plan.live(state):
         resources.gain_charge(state, n, "charge_per_turn")
     n = p.powers.get("encore_per_turn", 0)         # All the World's a Stage
     if n:

@@ -115,10 +115,21 @@ DIR_PROFILE = replace(
 )
 
 
+#: `R276` pick 2: THE ONE OWNER FIELD THIS SURFACE OVERRIDES, and only for
+#: Kokomi. Her arm's rule is that every damaging card of hers applies Hydro,
+#: Skills included; her shipped sheet keeps "every Attack of hers" (R52), and so
+#: does Klee's arm. Every Kokomi row on this surface is her arm's -- a
+#: `proto_kk_` id cannot resolve with the arm off -- and a companion row is
+#: exempt from the cadence one branch up, so the override reaches exactly the
+#: arm. Engine twins: `CatalystCadence.EveryDamagingCardCarriesElement` and
+#: `effects._every_damaging_card_carries_element`.
+ARM_CADENCE = {"kokomi": gen.CATALYST_EVERY_CARD}
+
+
 def _profile_for(character_id: str) -> gen.CharacterProfile:
     """The owning character's profile, redirected at the prototype surface.
 
-    `character_id`, `native_element`, `cadence`, `art_loader` and
+    `character_id`, `native_element`, `art_loader` and
     `emit_character_identity` are the OWNER's and are not overridden: they are
     what make the emitted card the character's card rather than a generic one.
     Only the four location fields move -- and `arm_keyword_tips`, which is a
@@ -127,10 +138,14 @@ def _profile_for(character_id: str) -> gen.CharacterProfile:
     `Surge`, `Exert`, `Mend`, `Plan`, `Garment` and the `Swirl` verb, and only
     a row on this sheet can mean the arm's rule by printing one. The same word
     on a shipped sheet means the shipped rule and keeps the shipped tip.
+
+    `cadence` is the owner's too, EXCEPT where `ARM_CADENCE` names the arm's
+    own rule (R276: Kokomi's arm elements her damaging Skills as well).
     """
     owner = gen.PROFILES[character_id]
     return replace(
         owner,
+        cadence=ARM_CADENCE.get(character_id, owner.cadence),
         sheet=SHEET,
         out_dir=OUT_DIR,
         manifest=MANIFEST,
@@ -251,7 +266,6 @@ UPGRADE_DEBT: dict[str, str] = {
     "proto_itto_superlative_superstrength_either": _DEBT_SPARK_ARM,
     "proto_itto_superlative_superstrength_priced": _DEBT_SPARK_ARM,
     "proto_muster_subsidy_funnel": _DEBT_SPARK_ARM,
-    "proto_pearl_barrage_turn": _DEBT_SPARK_ARM,
     "proto_shinobu_sanctifying_ring_either": _DEBT_SPARK_ARM,
     "proto_shinobu_sanctifying_ring_priced": _DEBT_SPARK_ARM,
     "proto_spark_burst_conversion": _DEBT_SPARK_ARM,

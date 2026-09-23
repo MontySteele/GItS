@@ -1768,8 +1768,6 @@ proto_kk_tide_chart	ImageGen/images/cards/kokomi/proto_kk_tide_chart.png	500	380
 proto_kk_well_laid	ImageGen/images/cards/kokomi/proto_kk_well_laid.png	500	380	cover	y0.72	shortlist	1	png	Sangonomiya Kokomi Character Card Showcase.png		splash	kokomi_pool
 # proto_kurages_oath_memory <- the pearl: the memory the Oath leaves behind
 proto_kurages_oath_memory	ImageGen/images/cards/kokomi/proto_kurages_oath_memory.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sango Pearl.png		item	kokomi_pool
-# proto_pearl_barrage_turn 'Tidal Barrage' <- the multi-wish banner: many at once
-proto_pearl_barrage_turn	ImageGen/images/cards/kokomi/proto_pearl_barrage_turn.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
 # proto_muster_subsidy_funnel 'Bounty of the Isles' <- the Deep item render; the isles' own bounty
 proto_muster_subsidy_funnel	ImageGen/images/cards/kokomi/proto_muster_subsidy_funnel.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sangonomiya Kokomi The Deep.png		item	kokomi_pool
 # ---------- Companion overhaul round 3 (the nine remaining keys) ----------

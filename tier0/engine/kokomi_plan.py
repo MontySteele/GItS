@@ -250,6 +250,13 @@ QUARTER = 4
 #: Every one of them is applied by an ordinary `apply_power` op off a card row.
 TREATISE = "kk_treatise"                     # draw N once a turn, on a Plan
 SONG_OF_PEARLS = "kk_song_of_pearls"         # N Block once a turn, on a Plan
+#: R276: her Ancient under the arm, "Whenever the Bake-Kurage carries out a
+#: Plan, gain N Block and draw 1 card." EVERY Plan, uncapped -- the card prints
+#: "Whenever" and is the Dusty Tome's single grant. Applied by the second effect
+#: on `princess_of_watatsumi` (`content/cards/ancients.yaml`);
+#: `PrincessOfWatatsumiPlanPower` is the twin.
+PRINCESS_OF_WATATSUMI = "kk_princess_of_watatsumi"
+PRINCESS_OF_WATATSUMI_DRAW = 1
 CLOUDS_LIKE_WAVES = "kk_clouds_like_waves"   # Block per debuff she applies
 GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
@@ -1275,6 +1282,15 @@ def _note_plan_resolved(state: CombatState) -> None:
         p.block += amount
         state.emit("block", amount=amount)
         state.emit("plan_song_of_pearls", amount=amount)
+    n = p.powers.get(PRINCESS_OF_WATATSUMI, 0)
+    if n:
+        # Block first, then the card: `PrincessOfWatatsumiPlanPower`'s order.
+        # POWERED for Song of Pearls' reason, one block up.
+        amount = powers.modify_block_gained(p, n)
+        p.block += amount
+        state.emit("block", amount=amount)
+        state.draw(PRINCESS_OF_WATATSUMI_DRAW)
+        state.emit("plan_princess_of_watatsumi", amount=amount)
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,

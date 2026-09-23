@@ -11,12 +11,6 @@
 # STATE. How to write a row: docs/current/operations/prototype.md. Why each
 # row below exists: docs/notes/prototype-surface-provenance.md, by row id.
 
-- {id: proto_pearl_barrage_turn, name: "Tidal Barrage", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   effects: [{op: exhaust_from, amount: 1, select: chosen},
-             {op: damage, amount_formula: {base: 5, per: 3, count: exhausts_this_turn}, target: enemy}]}
-
 - {id: proto_shinobu_sanctifying_ring_either, name: "Shinobu - Warding Ring", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 2, type: skill,
@@ -890,7 +884,7 @@
    description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card.",
    effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}]}
 
-# THE KOKOMI OVERHAUL, SLICE ONE, DRAFT 6 (the Plan). Under
+# THE KOKOMI OVERHAUL, BRIEF DRAFT 7 (the Plan). Under
 # `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. The `plan:`
 # key, the targets and every row: docs/notes/prototype-surface-provenance.md.
 

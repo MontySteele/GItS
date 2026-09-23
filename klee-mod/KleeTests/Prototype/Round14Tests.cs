@@ -70,15 +70,15 @@ public class Round14Tests
     public void The_no_aura_rider_is_off_this_face()
     {
         // `ForPlanElement` explains a disagreement that no longer exists here.
-        // It still rides the rows whose now-line really does apply nothing --
-        // Ambush, Chain of Command, War Council -- so the pin is that this one
+        // Since R276 pick 2 it rides only the rows whose Plan is their only
+        // hit -- War Council, Feigned Retreat -- so the pin is that this one
         // is not among them.
         var tips = Il.Calls(
             Il.Method("ProtoKkKuragesOath", "get_ExtraHoverTips"));
 
         Assert.DoesNotContain(tips, c => c.Contains("ForPlanElement"));
         Assert.Contains(
-            Il.Calls(Il.Method("ProtoKkAmbush", "get_ExtraHoverTips")),
+            Il.Calls(Il.Method("ProtoKkFeignedRetreat", "get_ExtraHoverTips")),
             c => c.Contains("ForPlanElement"));
     }
 

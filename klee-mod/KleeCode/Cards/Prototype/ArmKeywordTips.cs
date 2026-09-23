@@ -856,24 +856,25 @@ public static class ArmKeywordTips
     /// act-1 seat watched that aura appear "from a card whose face says nothing
     /// about an element", and priced no reaction off it.
     ///
-    /// THE CARD NOW DECLARES THE ELEMENT (the gem and the reaction rule, from
-    /// <c>gen_klee_cards.aura_elements_for</c>) AND THIS SAYS WHEN. Both halves
-    /// are needed and neither is enough: a gem alone would tell a player the
-    /// card's own hit applies Hydro, which it does not -- <see
-    /// cref="CatalystCadence.PrintedElement"/> answers <c>Element.None</c> for
-    /// a Skill and this row deliberately did not change that.
+    /// R276 PICK 2 RETIRED THE SPLIT THIS SENTENCE USED TO EXPLAIN. It read
+    /// "Its own hit applies no aura; the Bake-Kurage carries out the Plan as a
+    /// Hydro hit, which does", because her damaging Skills applied nothing
+    /// face-up. Under the arm every damaging card of hers applies Hydro, Skills
+    /// included (<see cref="CatalystCadence.EveryDamagingCardCarriesElement"/>),
+    /// so a row with a face-up hit carries the gem and no sentence.
     ///
-    /// ATTACHED ONLY WHERE THE TWO DISAGREE. A row whose own damage already
-    /// carries the element (every Attack of hers) needs no such sentence, so
-    /// `gen_klee_cards.emit` raises this one only where the Plan is the sole
-    /// source.
+    /// ATTACHED ONLY WHERE THE PLAN IS THE CARD'S ONLY HIT -- War Council and
+    /// Feigned Retreat today: the face-up half blocks or debuffs, so the gem
+    /// (which means "this face-up hit applies the element", `EB-713`) is not
+    /// theirs to wear, and this says the carry-out still lands Hydro.
+    /// `gen_klee_cards.emit` raises it from <c>plan_applies_element</c> and
+    /// not <c>elemental</c>.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlanElement(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanElementKey,
-            "Its own hit applies no aura; the [gold]Bake-Kurage[/gold] carries "
-          + "out the [gold]Plan[/gold] as a [gold]Hydro[/gold] hit, which "
-          + "does.");
+            "The [gold]Bake-Kurage[/gold] carries out this [gold]Plan[/gold] "
+          + "as a [gold]Hydro[/gold] hit: it applies [gold]Hydro[/gold].");
 
     /// <summary>
     /// `EB-709`: HOW MANY PLANS A DOUBLED CARRY-OUT IS, on the card that

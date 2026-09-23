@@ -122,6 +122,10 @@ internal static class KleePowerIcons
         // that counts something waiting to arrive.
         PendingPlansPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
+        // R276: her Ancient under the arm keeps its own shipped sigil -- it
+        // is the same card, paying on the Plan instead of in Charge.
+        PrincessOfWatatsumiPlanPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
         TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
         NextCompanionDiscountPower =>
