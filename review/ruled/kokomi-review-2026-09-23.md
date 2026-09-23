@@ -1,4 +1,4 @@
-Status: OPEN (two picks, §4)
+Status: RULED R276 2026-09-23
 
 # Kokomi: why Plan plays itself, and the fix in the cards
 
@@ -108,3 +108,9 @@ that split is a trap when reading a card.
 1. **(default)** Every damaging card of hers applies Hydro, Skills
    included. The base Strike and Defend still apply nothing.
 2. Attacks only, as now. The Skills' faces say so.
+
+## Ruled (R276, 2026-09-23)
+
+Both picks at their defaults. [USER]: "If they do the same thing with
+different numbers, then it's 'can I afford a good turn later or do I take a
+bad turn now', which is generally not a choice so much as a math problem."

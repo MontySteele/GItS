@@ -1,4 +1,4 @@
-Status: OPEN (three picks, §4)
+Status: RULED R276 2026-09-23
 
 # Klee: a design pass, and a finish line
 
@@ -115,3 +115,13 @@ which part, and we fix that part.
 1. **(default)** Two seats, then one full run by you. Fun through act 3
    means Balance.
 2. Keep the calibration gate as written in `operations/stage-gate.md`.
+
+## Ruled (R276, 2026-09-23)
+
+All three picks at their defaults, with one correction from [USER]: "Klee's
+overall pool is still incomplete (the target for each pool is 78 standard
+cards + the ancient rewards + multiplayer cards), which skews the balance
+discussion somewhat (small pools are more reliable)." So pick 1's cuts and
+four cards land, but 48 is not a finished pool: the pool grows to 78
+draftable cards before Klee moves to Balance, and pick 3's full run is read
+on a pool that is at or near that size.

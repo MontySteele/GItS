@@ -1,4 +1,4 @@
-Status: OPEN (three picks, §4; replaces the open picks on PR #476)
+Status: RULED R276 2026-09-23
 
 # Furina: the Stage is promising and too thin, and you have not played it yet
 
@@ -102,3 +102,9 @@ pick 3. Until that is ruled, I would make Furina match the brief.
    then your first Stage run.
 2. Build picks 1 and 2 only, and you play first. The pool pass follows
    your notes.
+
+## Ruled (R276, 2026-09-23)
+
+All three picks at their defaults; they replace the open picks on PR #476.
+[USER]: "let's finish out the Stage draft to the playtest level and then
+I'll give it a shot."

@@ -1,4 +1,4 @@
-Status: OPEN (four picks, §5)
+Status: RULED R276 2026-09-23
 
 # Process review: keep the safety rails, drop the paperwork
 
@@ -152,3 +152,9 @@ simplification already does.
    rewritten, the delegation ladder in one sentence, the contradictions
    fixed, and the frozen files marked. You read the PR and veto.
 2. Do picks 1 to 3 only, and leave the documents alone for now.
+
+## Ruled (R276, 2026-09-23)
+
+All four picks at their defaults. R276 is the last R number: from here a
+decision is recorded in the commit message in [USER]'s words and in the
+document it changes.

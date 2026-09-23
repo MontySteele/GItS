@@ -1,4 +1,4 @@
-Status: OPEN (three picks, §4)
+Status: RULED R276 2026-09-23
 
 # Direction: what "the Genshin experience" needs, and the Teyvat frame
 
@@ -96,3 +96,7 @@ from fight one.
 2. Open a bigger structural brief now: a run as a lead character plus a
    drafted party, with companions central instead of a side slot.
 3. No change to the companion layer's scope.
+
+## Ruled (R276, 2026-09-23)
+
+All three picks at their defaults.
