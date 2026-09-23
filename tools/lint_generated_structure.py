@@ -131,7 +131,11 @@ _TEXT_REF = re.compile(r"\{([A-Za-z]\w*)[:}]")
 
 # `{IfUpgraded:show:a|b}` is BaseLib's runtime upgrade-swap token, not a var --
 # it is resolved by SimpleLoc and has no CanonicalVars declaration.
-PSEUDO_TOKENS = frozenset({"IfUpgraded"})
+# `{InCombat:a|b}` is the GAME's own flag, handed to every card description
+# (the base game's Body Slam: "Deal damage equal to your [gold]Block[/gold].
+# {InCombat:<break>(Deals {CalculatedDamage:diff()} damage)|}"). R276's Stage
+# readers print their rule off the board and their number in combat with it.
+PSEUDO_TOKENS = frozenset({"IfUpgraded", "InCombat"})
 
 # `EB-486`. A MOD VAR MAY NOT BE NAMED AFTER ITS TOKEN, and both of the ones
 # that are not say so out loud.

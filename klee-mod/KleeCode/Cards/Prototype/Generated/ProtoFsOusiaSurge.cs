@@ -38,14 +38,14 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Lead), this), this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Back), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_ousia_surge");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ousia Surge"),
-        ("description", "Deal {CalculatedDamage:diff()} damage, the [gold]lead performer[/gold]'s [gold]Fanfare[/gold]."),
+        ("description", "Deal damage equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -53,7 +53,7 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.LeadFanfare(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.BackFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

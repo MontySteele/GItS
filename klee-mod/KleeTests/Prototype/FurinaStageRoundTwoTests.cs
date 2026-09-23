@@ -371,7 +371,9 @@ public class FurinaStageRoundTwoTests
         stage.OpenWith(StagePerformer.Usher);        // the relic's arrival
         stage.SceneChange();                         // a pure reorder
         stage.Summon(StagePerformer.Chevalmarin);
-        stage.Spend(99);                             // empties the lead: a bow
+        // R276: Spend draws from the BACK performer (Chevalmarin at 1) and
+        // only in full, so a Spend 1 empties her exactly: a bow.
+        stage.Spend(FurinaStageLaw.SummonFanfare);
 
         var log = FurinaStageLedger.Snapshot(seat.Player)["log"];
         var rows = ((IEnumerable<object?>)log!)
@@ -383,7 +385,7 @@ public class FurinaStageRoundTwoTests
         // bow is earned by Spend and by nothing else, and the page prints the
         // difference.
         Assert.Equal("spend", rows[^1]["reason"]);
-        Assert.Equal("usher", rows[^1]["member"]);
+        Assert.Equal("chevalmarin", rows[^1]["member"]);
     }
 
     [Fact]

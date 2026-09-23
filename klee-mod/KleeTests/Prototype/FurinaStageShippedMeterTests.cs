@@ -32,7 +32,7 @@ namespace KleeMod.Tests.Prototype;
 ///     play." Her reader faces compute from the bars through
 ///     <see cref="FurinaStage"/>, so the number the face prints and the number
 ///     asserted here are one expression (see the row's header on
-///     <c>SpentOrLeadFanfare</c>). The FACE's own render is out of reach
+///     <c>SpentOrBackFanfare</c>). The FACE's own render is out of reach
 ///     headless -- <c>DynamicVar.UpdateCardPreview</c> reaches
 ///     <c>CardModel.CombatState</c> (KleeTests/README.md) -- so the multiplier
 ///     the generated card declares is pinned as source beside the arithmetic.
@@ -185,9 +185,10 @@ public class FurinaStageShippedMeterTests
     /// THE ACCEPTANCE SENTENCE: an empty-stage board prints <i>Ousia
     /// Surge</i> as 0 before the play.
     ///
-    /// The face's multiplier IS <c>FurinaStage.LeadFanfare(card)</c> (pinned
-    /// as source below), so this is the number the card prints, asked at the
-    /// moment the preview asks it -- before anything has been spent.
+    /// The face's multiplier IS <c>FurinaStage.BackFanfare(card)</c> since
+    /// R276 (pinned as source below), so this is the number the card prints,
+    /// asked at the moment the preview asks it -- before anything has been
+    /// spent.
     /// </summary>
     [Fact]
     public void An_empty_stage_prints_ousia_surge_as_zero()
@@ -197,7 +198,7 @@ public class FurinaStageShippedMeterTests
         var card = Held<ProtoFsOusiaSurge>(seat);
 
         Assert.False(FurinaStage.Occupied(seat.Creature));
-        Assert.Equal(0, FurinaStage.LeadFanfare(card));
+        Assert.Equal(0, FurinaStage.BackFanfare(card));
     }
 
     /// <summary>
@@ -219,13 +220,15 @@ public class FurinaStageShippedMeterTests
         stage.Summon(StagePerformer.Usher);
         stage.Raise(7 - FurinaStageLaw.SummonFanfare);
 
-        Assert.Equal(7, FurinaStage.LeadFanfare(card));
+        // One performer: the lead IS the back performer, so both reads agree.
+        Assert.Equal(7, FurinaStage.BackFanfare(card));
         Assert.Equal(7, FurinaStage.LeadFanfare(seat.Creature));
     }
 
     /// <summary>
     /// THE OTHER TWO READERS, at the same two moments. <i>Final Bow</i> reads
-    /// the lead's bar and <i>Let the People Rejoice</i> the whole company's,
+    /// the BACK performer's bar (R276) and <i>Let the People Rejoice</i> the
+    /// whole company's,
     /// and each answers with what the play TOOK once it has taken it -- one
     /// expression, so the previewed number and the resolved number cannot
     /// differ. 0 on an empty stage in both moments is the row's own wording.
@@ -243,7 +246,7 @@ public class FurinaStageShippedMeterTests
 
         // Empty stage, nothing spent: both print 0.
         stage.BeginPlay();
-        Assert.Equal(0, FurinaStage.SpentOrLeadFanfare(bow));
+        Assert.Equal(0, FurinaStage.SpentOrBackFanfare(bow));
         Assert.Equal(0, FurinaStage.SpentOrTotalFanfare(rejoice));
 
         stage.Summon(StagePerformer.Usher);
@@ -251,10 +254,11 @@ public class FurinaStageShippedMeterTests
         stage.Summon(StagePerformer.Chevalmarin);
         stage.Raise(3 - FurinaStageLaw.SummonFanfare);
 
-        // BEFORE THE PLAY. The lead is the first seat (5) and the company is
-        // both bars (8) -- the numbers the two faces are ABOUT to take.
+        // BEFORE THE PLAY. The back performer is the last seat (3) and the
+        // company is both bars (8) -- the numbers the two faces are ABOUT to
+        // take.
         stage.BeginPlay();
-        Assert.Equal(5, FurinaStage.SpentOrLeadFanfare(bow));
+        Assert.Equal(3, FurinaStage.SpentOrBackFanfare(bow));
         Assert.Equal(8, FurinaStage.SpentOrTotalFanfare(rejoice));
 
         // DURING THE PLAY. The bars are gone and the record is what the card
@@ -277,17 +281,18 @@ public class FurinaStageShippedMeterTests
     [Fact]
     public void The_reader_faces_ask_the_stage_for_their_number()
     {
+        // R276 pick 2: Ousia Surge reads the bank, Pneuma Refrain the shield.
         Assert.Contains(
-            "FurinaStage.LeadFanfare(card)",
+            "FurinaStage.BackFanfare(card)",
             Generated("ProtoFsOusiaSurge"));
         Assert.Contains(
-            "FurinaStage.SpentOrLeadFanfare(card)",
+            "FurinaStage.SpentOrBackFanfare(card)",
             Generated("ProtoFsFinalBow"));
         Assert.Contains(
             "FurinaStage.SpentOrTotalFanfare(card)",
             Generated("ProtoFsLetThePeopleRejoice"));
         Assert.Contains(
-            "FurinaStage.BackFanfare(card)",
+            "FurinaStage.LeadFanfare(card)",
             Generated("ProtoFsPneumaRefrain"));
     }
 }

@@ -38,14 +38,14 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Back), this), this);
+        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Lead), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_pneuma_refrain");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pneuma Refrain"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold], the [gold]back performer[/gold]'s [gold]Fanfare[/gold]."),
+        ("description", "Gain [gold]Block[/gold] equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -53,7 +53,7 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.BackFanfare(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.LeadFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

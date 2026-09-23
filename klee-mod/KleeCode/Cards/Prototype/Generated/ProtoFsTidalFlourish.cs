@@ -84,8 +84,8 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.Occupied(Owner.Creature),
-                                "needs a performer on stage, the stage is empty"),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 2),
+                                "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 2: deal 9 instead" }[modeIndex]);

@@ -104,11 +104,20 @@ def test_every_number_matches_the_c_sharp_witness(cid):
     base = loader.get_card(cid)
     up = loader.get_card(cid + upgrades.SUFFIX)
 
+    # A prototype arm's own var (R276: the Ancient's Stage-arm Raise) is
+    # declared inside `#if PROTOTYPE_CARDS` and has no sim twin -- the sheet
+    # models the shipped card -- so the pin names it and it is set aside here.
+    def shipped(key):
+        out = list(pin[key])
+        for n in pin.get("arm_only_" + key, []):
+            out.remove(n)
+        return out
+
     assert [base.cost] == pin["cost"]
-    assert _printed_vars(base) == pin["vars"]
+    assert _printed_vars(base) == shipped("vars")
     assert _hits(base) == pin["hits"]
     assert [u - b for b, u in zip(_printed_vars(base), _printed_vars(up))] \
-        == pin["upgrade_vars"]
+        == shipped("upgrade_vars")
     delta_cost = up.cost - base.cost
     assert ([delta_cost] if delta_cost else []) == pin["upgrade_cost"]
 

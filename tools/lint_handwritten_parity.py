@@ -634,11 +634,19 @@ ANCIENT_WITNESS: dict[str, dict] = {
         "why": "Furina's Ancient, the Encore engine (user ruling 2026-07-23, "
                "act-2 Darv softlock fix). +5 Encore at the start of each turn, "
                "+2 on the Tome's upgrade. Read at its upgraded numbers, since "
-               "DustyTome.AfterObtained upgrades what it grants.",
+               "DustyTome.AfterObtained upgrades what it grants. Under the "
+               "Stage arm (R276 hygiene) it Raises 2 Fanfare on the back "
+               "performer instead, +1 upgraded: the second var and delta.",
         "cost": [1],
-        "vars": [5],
+        "vars": [5, 2],
         "hits": [],
-        "upgrade_vars": [2],
+        "upgrade_vars": [2, 1],
+        # The Stage arm's var and delta, declared inside `#if
+        # PROTOTYPE_CARDS`. The sim twin (tier0/content/cards/ancients.yaml)
+        # models the SHIPPED card, so `test_eb30m_ancients` compares it
+        # against the pin less these two.
+        "arm_only_vars": [2],
+        "arm_only_upgrade_vars": [1],
         "upgrade_cost": [],
         # The Encore drip is applied by EncorePerTurnPower, not by a
         # GainEncore call on the card, so this stays empty: the 5 above IS the

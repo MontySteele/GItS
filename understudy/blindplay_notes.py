@@ -1300,7 +1300,8 @@ COMPANION_SLOT_SENTENCE = (
 #: constants and a seat needs the number rather than the name of the constant.
 STAGE_ACTS = ("Every performer acts at the end of your turn, from any seat: "
               "Usher gives you 3 Block, Chevalmarin deals 2 to every enemy "
-              "and applies Hydro, Crabaletta deals 5 to a random enemy.")
+              "and applies Hydro, Crabaletta deals 5 Hydro damage to a random "
+              "enemy.")
 
 ARM_KEYWORDS: dict[str, str] = {
     # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
@@ -1555,12 +1556,14 @@ ARM_KEYWORDS: dict[str, str] = {
     # difference IS turn one's wager (sec.7, line B against line C).
     # `EB-746`: the word names a MODE now, not a rider. The page adds the
     # sentence the 135-character tip has no room for, which is what the
-    # choose-a-card screen shows a player and a blind seat has to be told: an
-    # empty stage offers the base mode alone.
-    "Spend": ("Chosen on play, never automatic. Pays the lead performer, "
-              "fires in full even if the bar is short, and an emptied "
-              "performer takes a Bow. On an empty stage the Spend mode is "
-              "not offered at all."),
+    # choose-a-card screen shows a player and a blind seat has to be told: a
+    # Spend the back performer cannot pay is not offered.
+    # R276 picks 1 and 2: the BACK performer pays, in full or not at all, and
+    # a performer the Spend empties exactly takes its Bow.
+    "Spend": ("Chosen on play. The back performer pays the full price or you "
+              "can't choose it. Emptied exactly, it takes a Bow. If the back "
+              "performer holds less than the price, or the stage is empty, "
+              "the Spend mode is not offered at all."),
     "Fanfare": ("A performer's own bar. Attacks hit your Block, then the lead "
                 "performer's Fanfare, then you. No cap."),
     "Raise": ("Adds Fanfare to the back performer. With one performer on "
@@ -1572,21 +1575,24 @@ ARM_KEYWORDS: dict[str, str] = {
     # the CONTRAST that turn one's wager is (sec.7, line B against line C): a
     # Spend earns one and a hit does not.
     "Bow": ("A departure effect a Spend earns and a hit does not. Usher: 4 "
-            "Block. Chevalmarin: Hydro on all. Crabaletta: 8 damage."),
+            "Block. Chevalmarin: Hydro on all. Crabaletta: 8 Hydro damage."),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. Two round-two seats found
     # that the reserve performs -- "Crabaletta performed from the back seat.
     # It moved 11" was more damage than any card in the hand -- and a third
     # wanted no second performer at all; both reads were right, and both were
     # legibility. The acts go on BOTH seat rows because a seat may meet either
     # word alone, and a reader who has met one has met the rule.
-    "lead performer": ("The front seat: the one attacks reach and the only "
-                       "one that regains 1 Fanfare each turn. " + STAGE_ACTS),
+    # R276: the front seat is the SHIELD.
+    "lead performer": ("The front seat, the shield: attacks reach it, and "
+                       "only it regains 1 Fanfare each turn. " + STAGE_ACTS),
     # `EB-744`. "NOTHING HITS IT" WHERE A FLURRY DOES. The lead absorbs one
     # attack up to its bar and then leaves at 0, so the next attack of the same
     # turn meets whoever stepped forward -- which is the reserve. The rule is
     # per ATTACK, and the sentence now says so.
-    "back performer": ("The back seat, the reserve: no single attack reaches "
-                       "it. It leads once the front seat empties. Alone on "
+    # R276: the back seat is the BANK -- Raise fills it and Spend draws from
+    # it.
+    "back performer": ("The back seat, the bank: Raise fills it, Spend draws "
+                       "from it, and no single attack reaches it. Alone on "
                        "stage it is the lead. " + STAGE_ACTS),
     "Rotate": ("Seats change order and every bar comes with them. Nobody "
                "leaves and nobody takes a Bow."),
@@ -1619,8 +1625,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # on the Neow screen and on opening-hand faces, and the only surface that
     # stated its rule was the METER LINE -- which needs the meter to be on the
     # board. The Furina round-4 seat made the run's first decision without the
-    # word (run 1, (c) 5). The sentence is `ArmKeywordTips.ForEncore`'s, and
-    # the ORDER clause is the half nothing printed: the buffer
+    # word (run 1, (c) 5). The sentence was `ArmKeywordTips.ForEncore`'s until
+    # R276's hygiene took that unattached tip out of the mod; it now stands
+    # here alone, for the SHIPPED kit (the Stage arm hides the row). The
+    # ORDER clause is the half nothing printed: the buffer
     # (`FurinaResources.AbsorbDamage`), a card's price
     # (`FurinaResourceHooks.BeforeCardPlayed`, before resolution) and a
     # member's 1 (`SalonPowers.PerformMember`, or 3/4 when it cannot pay) all

@@ -417,9 +417,9 @@ def _runtime_count(state: CombatState, token: str,
     # `fanfare_drained_this_card`.
     #
     # The other two are LIVE BAR READS and not per-card memory, which is the
-    # difference between *Ousia Surge* ("damage equal to the lead performer's
-    # Fanfare", brief sec.12) and the Rare: those two cards read a bar they do
-    # not spend. Both are 0 on an empty stage and both are 0 with the flag off,
+    # difference between *Ousia Surge* ("damage equal to the back performer's
+    # Fanfare", R276) or *Pneuma Refrain* (the lead's) and the Rare: those two
+    # cards read a bar they do not spend. Both are 0 on an empty stage and both are 0 with the flag off,
     # so a shipped row that ever named one would print zero rather than raise.
     if token == "stage_spent":
         return state.stage_spent_this_card
@@ -6173,18 +6173,14 @@ def _op_stage_perform_lead(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_spend(state: CombatState, fx: dict, card: Card) -> None:
-    """Brief sec.3 rule 8, the Spend rider's payment leg.
+    """Brief sec.3 rule 8, the Spend mode's payment leg.
 
-    THE CALLER HAS ALREADY DECIDED THE RIDER FIRES. Every Spend face is written
-    as `conditional {if: stage_occupied, then: [stage_spend, <the big
-    number>], else: [<the base number>]}`, which is rule 8's two sentences
-    printed as two branches: with a performer on stage the rider fires IN FULL
-    and the lead pays what it has (bowing if that empties it), and with none it
-    cannot fire at all.
-
-    WHAT IS RECORDED IS WHAT WAS PAID, not what was asked, because sec.13's
-    first report buckets on "the lead's bar at the moment of Spend" and the
-    difference between the two is exactly the Expend deck's whole argument.
+    THE CHOOSER HAS ALREADY DECIDED THE MODE FIRES. Every Spend face is a
+    `choose_one` whose Spend mode opens with this op, and since R276 that mode
+    is offered only when the BACK performer can pay the whole price
+    (`furina_stage.mode_offered`); a performer the payment empties exactly
+    bows. What is recorded is what was paid, which a payoff on the same card
+    reads as `stage_spent`.
     """
     paid = furina_stage.spend(state, _amount(state, fx.get("amount", 1)))
     state.stage_spent_this_card = paid
@@ -6213,7 +6209,7 @@ def _op_stage_curtain_call(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_final_bow(state: CombatState, fx: dict, card: Card) -> None:
-    """*Final Bow* (sec.12): "The lead performer takes a bow and leaves." The
+    """*Final Bow* (R276): "The back performer takes a Bow and leaves." The
     Block the card then gains is `amount_formula: {count: stage_spent}`, the
     same token every other spend writes, so the face's second sentence is an
     ordinary `block` op reading an ordinary count."""

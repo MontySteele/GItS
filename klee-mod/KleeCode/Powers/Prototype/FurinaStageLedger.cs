@@ -40,8 +40,8 @@ public readonly struct StageExit
 }
 
 /// <summary>What a Spend did. <see cref="Fired"/> is the rider's own question
-/// -- rule 8 says a rider fires IN FULL whenever anybody is on stage, however
-/// little they can pay, and cannot fire at all on an empty one.</summary>
+/// -- R276: a rider fires only when the back performer can pay the whole
+/// price, and never on an empty stage.</summary>
 public readonly struct StageSpend
 {
     public StageSpend(bool fired, int paid, StageExit? exit)
@@ -53,8 +53,8 @@ public readonly struct StageSpend
 
     public bool Fired { get; }
 
-    /// <summary>What the lead actually had. Never more than the ask, often
-    /// less, and never the reason the rider does or does not fire.</summary>
+    /// <summary>What the back performer paid: the whole ask when the rider
+    /// fired, 0 when it did not.</summary>
     public int Paid { get; }
 
     public StageExit? Exit { get; }
@@ -187,8 +187,8 @@ public readonly record struct StageBeat(
 /// (KleeTests/README.md, "the headless boundary"). A rule written against the
 /// pet would have been a rule no pin could ask a question of, and this arm's
 /// whole acceptance is questions about rules: does a 12 through Block 6 kill a
-/// 3-bar lead and land 3 on her, does a 3x2 flurry leave her whole, does a
-/// Spend 3 from a 1-bar lead fire in full.
+/// 3-bar lead and land 3 on her, does a 3x2 flurry leave her whole, is a
+/// Spend 3 from a 1-bar back performer refused.
 ///
 /// SO THE LEDGER IS CANONICAL AND THE PET MIRRORS IT.
 /// <see cref="FurinaStagePets"/> pushes each seat's <see cref="StageSeat.Fanfare"/>
@@ -288,13 +288,13 @@ public sealed class FurinaStageLedger
     /// for a fact the list already carries (`EB-506`, one arm over).</summary>
     public IReadOnlyList<StageSeat> Seats => _seats;
 
-    /// <summary>The front performer: the one that absorbs (rule 6), the one
-    /// that Spend pays from (rule 8) and the one that regenerates (rule 4).
-    /// </summary>
+    /// <summary>The front performer, the SHIELD: the one that absorbs
+    /// (rule 6) and the one that regenerates (rule 4).</summary>
     public StageSeat? Lead => _seats.Count > 0 ? _seats[0] : null;
 
-    /// <summary>The back-most performer, which is the LEAD when it is alone
-    /// (rule 5's second sentence).</summary>
+    /// <summary>The back-most performer, the BANK: where a Raise lands
+    /// (rule 5) and what Spend and the readers draw from (rule 8, R276). The
+    /// LEAD when it is alone.</summary>
     public StageSeat? Back => _seats.Count > 0 ? _seats[^1] : null;
 
     public bool IsEmpty => _seats.Count == 0;
@@ -366,39 +366,46 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>
-    /// RULE 8. Spend N pays from the LEAD. Three clauses, and the second is
-    /// the one that surprises:
+    /// RULE 8, as R276 ruled it (picks 1 and 2). Spend N pays from the BACK
+    /// performer -- the bank, the seat a Raise fills -- and only IN FULL:
     ///
     ///   * enough on the bar: pays N, the rider fires, the performer stays;
-    ///   * NOT enough: THE RIDER STILL FIRES IN FULL, the lead pays what it
-    ///     has, and it leaves with a BOW (rule 7 second clause, rule 9).
-    ///     `Paid` is what it had, and no caller may price the rider off it --
-    ///     that is sec.10 default 4, "as [USER] said";
-    ///   * empty stage: the rider CANNOT fire, and the card plays at its base
-    ///     number. Not a refusal and not a whiff: the card is fine, the rider
-    ///     is not there.
+    ///   * EXACTLY enough: pays N, the rider fires, and the emptied performer
+    ///     leaves with a BOW (rule 7 second clause, rule 9);
+    ///   * NOT enough, or an empty stage: the rider CANNOT fire, nothing is
+    ///     paid, and the card plays at its base number. The chooser never
+    ///     offers the mode on such a board (<see cref="CanSpend"/>), so this
+    ///     branch is the ledger's own refusal rather than a path a play takes.
     ///
-    /// A lead emptied EXACTLY by a Spend that it could afford still bows: it
-    /// was emptied by Spend, which is the whole of rule 7's test.
+    /// THE BACK AND NOT THE LEAD. Three rounds found the bank a player builds
+    /// with Raise was never the bar Spend took from; the lead is the shield
+    /// (rule 6) and the back is the bank. With one performer on stage it is
+    /// both, and the list's last seat is its first.
     /// </summary>
     public StageSpend Spend(int amount)
     {
-        if (Lead is not { } lead) return new StageSpend(false, 0, null);
+        if (Back is not { } back) return new StageSpend(false, 0, null);
         if (amount <= 0) return new StageSpend(true, 0, null);
+        if (back.Fanfare < amount) return new StageSpend(false, 0, null);
 
-        var paid = lead.Fanfare < amount ? lead.Fanfare : amount;
-        lead.Fanfare -= paid;
+        back.Fanfare -= amount;
         // The per-play record, written where the payment happens rather than
         // by the caller: `stage_spent` is what a payoff on the SAME card
         // multiplies, and by the time it resolves the bar is gone.
-        SpentThisPlay = paid;
-        if (lead.Fanfare > 0) return new StageSpend(true, paid, null);
+        SpentThisPlay = amount;
+        if (back.Fanfare > 0) return new StageSpend(true, amount, null);
 
-        _seats.RemoveAt(0);
-        Note(new StageBeat("leave", lead.Who, -1, 0, paid, "spend"));
+        _seats.RemoveAt(_seats.Count - 1);
+        Note(new StageBeat("leave", back.Who, -1, 0, amount, "spend"));
         return new StageSpend(
-            true, paid, new StageExit(lead.Who, StageDeparture.Spent));
+            true, amount, new StageExit(back.Who, StageDeparture.Spent));
     }
+
+    /// <summary>R276 pick 1: can the back performer pay N IN FULL? The one
+    /// question a Spend mode's gate asks, and false on an empty stage.
+    /// </summary>
+    public bool CanSpend(int amount) =>
+        Back is { } back && back.Fanfare >= amount;
 
     /// <summary>
     /// RULE 6, the middle term of the damage order: Furina's Block, then the
@@ -534,7 +541,7 @@ public sealed class FurinaStageLedger
     // or <i>Let the People Rejoice</i>'s damage resolves, the bar it is
     // measuring is GONE -- the card emptied it a statement earlier. So what
     // the payoff multiplies is what this play TOOK, written here as it is
-    // taken. `FurinaDrain.Amount` is the same shape one arm over.
+    // taken.
 
     /// <summary>What this play has taken off the bars so far. 0 at every
     /// moment no card is in flight, which is what makes the readers' faces a
@@ -614,21 +621,22 @@ public sealed class FurinaStageLedger
     private List<StagePerformer> _pendingCurtainCall = new();
 
     /// <summary>
-    /// <i>Final Bow</i>: the lead leaves AND BOWS, with no Spend to earn it.
-    /// The one card that grants a bow outright -- rule 9 buys a bow with a
-    /// Spend, and this face pays for it with a card and an Exhaust instead.
+    /// <i>Final Bow</i>: the BACK performer leaves AND BOWS, with no Spend to
+    /// earn it (R276: the readers draw from the bank, as Spend does). The one
+    /// card that grants a bow outright -- rule 9 buys a bow with a Spend, and
+    /// this face pays for it with a card and an Exhaust instead.
     /// <paramref name="bar"/> is what it left with, which is the Block the
     /// card gains.
     /// </summary>
     public StageExit? FinalBow(out int bar)
     {
         bar = 0;
-        if (Lead is not { } lead) return null;
-        bar = lead.Fanfare;
-        _seats.RemoveAt(0);
+        if (Back is not { } back) return null;
+        bar = back.Fanfare;
+        _seats.RemoveAt(_seats.Count - 1);
         SpentThisPlay = bar;
-        Note(new StageBeat("leave", lead.Who, -1, 0, bar, "final_bow"));
-        return new StageExit(lead.Who, StageDeparture.Spent);
+        Note(new StageBeat("leave", back.Who, -1, 0, bar, "final_bow"));
+        return new StageExit(back.Who, StageDeparture.Spent);
     }
 
     /// <summary>Test and teardown seam: the stage is empty at the end of a

@@ -48,7 +48,7 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Let the People Rejoice"),
-        ("description", "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal {CalculatedDamage:diff()} damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1."),
+        ("description", "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage and deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

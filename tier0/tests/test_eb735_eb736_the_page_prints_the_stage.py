@@ -411,8 +411,8 @@ def test_the_stage_scenario_asserts_the_block_and_parses():
     assert "page_contains" in named
     assert "page_lacks" in named
     body = path.read_text(encoding="utf-8")
-    assert "lead: Chevalmarin" in body
-    assert "back: Crabaletta" in body
+    assert "lead: Usher" in body            # R276: the Spend takes the back
+    assert "back: Chevalmarin" in body
     assert "took a Bow" in body
 
 
@@ -473,7 +473,7 @@ def test_the_seat_rows_say_what_a_performers_act_is():
         page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                      hand=[_card(f"Deal damage equal to the {word}'s bar.")])
         assert "Every performer acts at the end of your turn" in page
-        assert "Crabaletta deals 5 to a random enemy" in page
+        assert "Crabaletta deals 5 Hydro damage to a random enemy" in page
 
 
 def test_the_back_performer_row_says_no_single_attack_rather_than_nothing():

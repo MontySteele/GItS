@@ -366,11 +366,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # Fanfare rework (2026-07-28): the Hyperbeam settle
                   # (Track C.2) and the on-demand bow probe (Track D).
                   "crash_fanfare", "salon_bow",
-                  # QUARANTINED (R213 B): the Furina reframe's drain, slice
-                  # two. One call, no locals, no arguments -- the salon_bow
-                  # shape again; what it BUYS is the effect after it, through
-                  # the ordinary `amount_formula` grammar.
-                  "drain_fanfare",
+                  # (`drain_fanfare`, the retired reframe's drain, left with
+                  # its C# half, `FurinaDrain`, under R276's hygiene: no row
+                  # printed it, and a row that tried now fails as an unknown
+                  # op rather than emitting a call to a deleted class.)
                   # EB-118 §5.5 (staged): the queue verbs. Both are a
                   # single call into SalonMemberPower, the salon_bow
                   # shape, so they carry no locals and no new grammar.
@@ -1404,11 +1403,10 @@ PREDICATES_CS = {
     # the bar is authored per card and moves at red-pen, so a literal map
     # turned every new threshold into a codegen KeyError.
     "has_salon_members": "SalonMemberPower.Count(Owner.Creature) > 0",
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-723`). THE STAGE's one
-    # predicate, and it is deliberately the only one: brief sec.3 rule 8 makes
-    # a Spend rider ask about OCCUPANCY and never about size, because a bar of
-    # any size pays the whole rider. A `stage_fanfare_at_least_N` beside it
-    # would be a row printing a rule this kit does not have.
+    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-723`). Is anybody on
+    # stage. A Spend mode's own gate is NOT this predicate: since R276 it asks
+    # whether the back performer can pay the full price, and that gate is
+    # `MODE_RULE_OPS`', built off the mode's own `stage_spend` amount.
     "stage_occupied": "FurinaStage.Occupied(Owner.Creature)",
     "spotlight_moved_this_turn":
         "SpotlightSystem.MovedThisTurn(Owner.Creature)",
@@ -3621,8 +3619,12 @@ def pascal(card_id: str) -> str:
 
 def cs_escape(text: str) -> str:
     """A sheet string as a C# literal body. Backslash first, or the quote
-    escape this adds would be escaped a second time."""
-    return text.replace("\\", "\\\\").replace('"', '\\"')
+    escape this adds would be escaped a second time. A line break becomes
+    the two characters backslash-n: the base game's own reader faces put
+    their live number on a line of its own (`{InCombat:<break>(Deals ...)|}`),
+    and a raw break inside a C# string literal does not compile."""
+    return (text.replace("\\", "\\\\").replace('"', '\\"')
+            .replace("\n", "\\n"))
 
 
 _sheet_cards_cache: dict[Path, list] = {}
@@ -3838,8 +3840,6 @@ def blocked_reason(
                 and debuffs_on_target_calc_rider(card, effect) is None
                 and plans_held_draw_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
-                and fanfare_drained_calc_rider(card, effect) is None
-                and fanfare_drained_block_rider(card, effect) is None
                 # QUARANTINED (`EB-723`): the Stage's three counts, on the
                 # same rail and refused on the same terms.
                 and stage_count_calc_rider(card, effect) is None
@@ -4190,15 +4190,6 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
         if op in PLAN_ONLY_OPS:
             return f"{op} outside a `plan:` list"
-        if op == "drain_fanfare":
-            # QUARANTINED (R213 B). NO FIELDS AT ALL, and that is the rule
-            # rather than an omission: the op takes the whole held meter, so
-            # an `amount:` would be a number the card could not honour and a
-            # `target:` a creature it does not have. What the drain is WORTH
-            # is printed by the effect after it.
-            unknown = set(eff) - {"op"}
-            if unknown:
-                return f"drain_fanfare field(s) {sorted(unknown)} not understood"
         if op in {"salon_rotate", "salon_perform"}:
             # EB-118 §5.5. Same field discipline as the meter ops above,
             # with `amount` OPTIONAL: one rotation and one act are the
@@ -5108,32 +5099,6 @@ def exhausts_turn_calc_rider(card: dict,
             "KokomiResources.ExhaustsThisTurn(card.Owner)")
 
 
-def _drain_before(card: dict, eff: dict) -> bool:
-    """Does this card `drain_fanfare` BEFORE `eff` resolves?
-
-    Structural and identity-based, exactly like `_exhausts_before` below and
-    for the same reason: two effects on one row can be equal dicts, and the
-    question is about a POSITION in the emitted `OnPlay` body, which runs the
-    effects in sheet order. A row that reads `fanfare_drained` before it has
-    drained anything would print a number it cannot pay, so the rider refuses
-    to render rather than emitting a var that reads zero.
-    """
-    for other in card.get("effects") or []:
-        if other is eff:
-            return False
-        if other.get("op") == "drain_fanfare":
-            return True
-    return False
-
-
-#: The count both drain riders read, and the ONE C# expression they read it
-#: with. `FurinaDrain.Amount` answers "what did this play drain?" while a play
-#: is resolving and "what WOULD it drain?" before one starts -- which is what
-#: makes the hover preview and the resolved number the same number, the whole
-#: point of routing a computed amount through a CalculatedVar at all.
-FANFARE_DRAINED_CS = "static (card, _) => FurinaDrain.Amount(card)"
-
-
 #: THE STAGE's own member names, as the C# verb spells them (`EB-723`). A
 #: closed set, checked at emit rather than passed through, for
 #: `salon_member_aim`'s reason: a typo that degraded quietly into "somebody"
@@ -5222,8 +5187,8 @@ def _stage_spender_before(card: dict, eff: dict) -> str | None:
 
     `EB-747` made it return the OP rather than a boolean, because the C# side
     now needs to know which spend is coming: <i>Final Bow</i> forecasts the
-    LEAD's bar and <i>Let the People Rejoice</i> the whole stage's, and the op
-    standing in front of the payoff is what says which.
+    BACK performer's bar (R276) and <i>Let the People Rejoice</i> the whole
+    stage's, and the op standing in front of the payoff is what says which.
     """
     for other in card.get("effects") or []:
         if other is eff:
@@ -5252,7 +5217,7 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
     """
     spender = _stage_spender_before(card, eff)
     if spender == "stage_final_bow":
-        return "static (card, _) => FurinaStage.SpentOrLeadFanfare(card)"
+        return "static (card, _) => FurinaStage.SpentOrBackFanfare(card)"
     if spender == "stage_spend_all":
         return "static (card, _) => FurinaStage.SpentOrTotalFanfare(card)"
     return STAGE_COUNT_CS["stage_spent"]
@@ -5288,7 +5253,7 @@ def stage_count_block_rider(card: dict,
 
     `base: 0` is legal and is what both rows print: "Block equal to X" is a
     pure slope with no printed floor, which is the shape
-    `fanfare_drained_block_rider` opened this rail with.
+    the retired reframe's drain rider opened this rail with.
     """
     if eff.get("op") != "block":
         return None
@@ -5306,10 +5271,10 @@ def stage_count_block_rider(card: dict,
 
 
 #: The four readers' C# multipliers, and the order matters: the substring
-#: `LeadFanfare` is INSIDE `SpentOrLeadFanfare`, so the two spend forecasts
+#: `BackFanfare` is INSIDE `SpentOrBackFanfare`, so the two spend forecasts
 #: are tested first and the live bar reads second.
 _STAGE_READER_SOURCE = (
-    ("SpentOrLeadFanfare", "SpendLead"),
+    ("SpentOrBackFanfare", "SpendBack"),
     ("SpentOrTotalFanfare", "SpendAll"),
     ("LeadFanfare", "Lead"),
     ("BackFanfare", "Back"),
@@ -5349,60 +5314,6 @@ def stage_reader_source(card: dict) -> str | None:
             if needle in rider[2]:
                 return source
     return None
-
-
-def fanfare_drained_calc_rider(card: dict,
-                               eff: dict) -> tuple[int, int, str] | None:
-    """`amount_formula: {base, per, count: fanfare_drained}` on a DAMAGE op --
-    QUARANTINED (R213 B), the Furina reframe's Rare drain (§4.6, `F11` (1)).
-
-    Same CalculatedDamageVar triple as the six riders above it, and the same
-    idiom the base game's own MementoMori uses. What is different is the
-    COUNT, and it is the only count on this rail that is not a live board
-    read: `drain_fanfare` empties the meter, so by the time this hit resolves
-    `ReadableFanfare` is 0 and a meter-reading multiplier would pay nothing.
-    `FurinaDrain.Amount` is the per-play number instead, and it falls back to
-    the live meter when no play is in flight so the card in hand previews the
-    hit it is about to make.
-
-    Refused unless the card actually drains FIRST (`_drain_before`): a row
-    that read the count without the op would render a promise nothing fills.
-    """
-    if eff.get("op") != "damage" or eff.get("target") == "self":
-        return None
-    formula = eff.get("amount_formula")
-    if not isinstance(formula, dict)             or formula.get("count") != "fanfare_drained":
-        return None
-    if not _drain_before(card, eff):
-        return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            FANFARE_DRAINED_CS)
-
-
-def fanfare_drained_block_rider(card: dict,
-                                eff: dict) -> tuple[int, int, str] | None:
-    """The same count on a BLOCK op -- the survival twin (`F12` (1)).
-
-    THE FIRST `amount_formula` BLOCK RIDER, and the four damage-side riders
-    above say in as many words why there was none: "a block-side reader needs
-    `block_calc_rider`'s CalculationBase plumbing and has no card yet". This
-    is that card. The rail itself is unchanged -- `block_calc_rider` already
-    renders three `bonus_formula` shapes through `CalculatedBlockVar` -- so
-    what is added is a predicate reading the OTHER key, not a mechanism.
-
-    `base: 0` is legal here and is what the row prints: "Gain Block equal to
-    the Fanfare drained" is a pure slope with no printed floor, which the
-    damage side has no example of because a hit with base 0 is a blank card.
-    """
-    if eff.get("op") != "block":
-        return None
-    formula = eff.get("amount_formula")
-    if not isinstance(formula, dict)             or formula.get("count") != "fanfare_drained":
-        return None
-    if not _drain_before(card, eff):
-        return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            FANFARE_DRAINED_CS)
 
 
 def _exhausts_before(card: dict, eff: dict) -> bool:
@@ -5956,22 +5867,14 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     # so the card would have rendered and paid a flat 6 -- which is why
     # `blocked_reason` refused to emit it rather than ship a wrong number.
     charge = re.fullmatch(r"(\d+)_per_(\d+)_charge", formula)
-    # QUARANTINED (R213 B): the FIFTH shape on this rail, and the first that
-    # reads the OTHER key. `amount_formula: {base, per, count: fanfare_drained}`
-    # is the count grammar both engines already speak on a block op
-    # (`effects._op_block` resolves it); what was missing on this side was a
-    # predicate, which is the whole reason the four damage riders above each
-    # say "a block-side reader needs block_calc_rider's CalculationBase
-    # plumbing and has no card yet". Resolved here rather than in its own
-    # branch so it inherits every guard below -- one CalculationBase per card
-    # is the invariant this function exists to keep.
-    # QUARANTINED (`EB-723`): the Stage's counts on the block rail, tried
-    # FIRST because they are refused on a card that carries any other
-    # conversion and so cannot mask one.
+    # QUARANTINED (`EB-723`): the Stage's counts on the block rail -- the
+    # first shapes on this rail to read `amount_formula` rather than
+    # `bonus_formula`, resolved here rather than in their own branch so they
+    # inherit every guard below: one CalculationBase per card is the
+    # invariant this function exists to keep.
     staged = stage_count_block_rider(card, eff)
-    drained = fanfare_drained_block_rider(card, eff)
     if (not m and not members and not companions and not charge
-            and drained is None and staged is None):
+            and staged is None):
         return None
     if salon_deploy_card(card):
         return None
@@ -5987,8 +5890,6 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         return None
     if staged is not None:
         return staged
-    if drained is not None:
-        return drained
     if members:
         return int(eff["amount"]), int(members.group(1)), (
             f"static (card, _) => {SALON_MEMBER_COUNT_CS}")
@@ -6093,15 +5994,10 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn
-    # QUARANTINED USE ONLY (R213 B), and the one count on this rail that is
-    # NOT a live board read -- see `fanfare_drained_calc_rider`.
     # QUARANTINED (`EB-723`): the Stage's counts on the damage rail.
     staged = stage_count_calc_rider(card, eff)
     if staged is not None:
         return staged
-    drained = fanfare_drained_calc_rider(card, eff)
-    if drained is not None:
-        return drained
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -8636,17 +8532,17 @@ def mode_prices(card: dict) -> list[tuple[str, int] | None] | None:
 
 
 #: `EB-746`. THE OPS WHOSE PRESENCE AT THE HEAD OF A MODE BODY IS A RULE GATE
-#: rather than a price: `{C# predicate: the rule, in the words the refusal
-#: prints}`. One entry, and it is the Stage's Spend.
+#: rather than a meter price: `{op: (C# predicate, the refusal's words)}`,
+#: the predicate a format string over the op's `amount`. One entry, and it is
+#: the Stage's Spend.
 #:
-#: WHY NOT A PRICE (`MODE_PRICE_OPS`). Rule 8 fires the rider IN FULL out of a
-#: bar of any size and cannot fire at all on an empty stage, so the question is
-#: OCCUPANCY and the amount never enters it -- a price of N would refuse the
-#: mode on exactly the boards rule 8's second clause exists for. Sim twin:
-#: `furina_stage.mode_offered`.
+#: R276 pick 1: the rider needs the FULL price from the BACK performer, so the
+#: gate is "the back performer holds at least N". Still a rule gate and not a
+#: `MODE_PRICE_OPS` price, because the bar is a performer's and not a meter the
+#: cost badge can read. Sim twin: `furina_stage.mode_offered`.
 MODE_RULE_OPS = {
-    "stage_spend": ("FurinaStage.Occupied(Owner.Creature)",
-                    "needs a performer on stage, the stage is empty"),
+    "stage_spend": ("FurinaStage.CanSpend(Owner.Creature, {amount})",
+                    "needs its full price from the back performer"),
 }
 
 
@@ -8664,7 +8560,14 @@ def mode_requirements(card: dict) -> list[tuple[str, str] | None] | None:
     for mode in eff["modes"]:
         body = mode.get("effects") or []
         head = body[0] if body else {}
-        rules.append(MODE_RULE_OPS.get(head.get("op")))
+        rule = MODE_RULE_OPS.get(head.get("op"))
+        if rule is not None:
+            amount = int(head.get("amount", 1))
+            # The refusal names the RULE and not the number: the price is
+            # on the mode's own label, and a numeral typed here would be a
+            # second copy of it (`lint_prose_constants`).
+            rule = (rule[0].format(amount=amount), rule[1])
+        rules.append(rule)
     return rules if any(r is not None for r in rules) else None
 
 
@@ -9086,14 +8989,6 @@ def build_body(
                 "await SalonMemberPower.BowLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
                 f"{salon_member_aim(eff)});")
-
-        elif op == "drain_fanfare":
-            # QUARANTINED (R213 B): the Furina reframe's drain, slice two.
-            # ONE synchronous call, and everything the drain is worth is
-            # printed by the effect after it -- which reads the number this
-            # returns through `FurinaDrain.Amount`, not through the meter the
-            # call has just emptied.
-            lines.append("FurinaDrain.Drain(Owner.Creature);")
 
         elif op in STAGE_STMT_OPS:
             # QUARANTINED (`EB-723` / `EB-725`, R269): THE STAGE's eight, each
@@ -10478,8 +10373,6 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
                 "await SalonMemberPower.BowLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))}"
                 f"{salon_member_aim(eff)});")
-        elif op == "drain_fanfare":
-            body.append("FurinaDrain.Drain(Owner.Creature);")
         elif op in STAGE_STMT_OPS:
             body.append(stage_stmt(eff))
         elif op == "salon_rotate":
@@ -11676,13 +11569,6 @@ def build_description(card: dict, *,
                 "bow." if n == 1 else
                 f"The leftmost {n} members of your [gold]Salon[/gold] take "
                 "their bows.")
-
-        elif op == "drain_fanfare":
-            # QUARANTINED (R213 B). Every row that carries the op states its
-            # own face with `description:` -- what the drain BUYS is the next
-            # sentence, and only the row knows it -- so this is the fallback
-            # a rendered row would get and not the shipped wording of anything.
-            parts.append("[gold]Drain[/gold] your [gold]Fanfare[/gold].")
 
         elif op == "salon_rotate":
             # "Moves to the back" and not "rotates": the player is told what
@@ -13120,10 +13006,14 @@ def emit(
         is_companion(card)
         and any(eff.get("op") == "burst_energy"
                 for eff in (card.get("effects") or ())))
-    desc_expr = f'"{desc}"'
+    # A face may carry a line break (the base game's `{InCombat:<break>...|}`
+    # reader line), and a raw break inside a C# literal does not compile.
+    desc_cs = desc.replace("\n", "\\n")
+    desc_expr = f'"{desc_cs}"'
     if blanks_burst:
         arm_desc = build_description(card, include_burst_rider=False)
-        desc_expr = f'FurinaBurstRider.Face("{arm_desc}", "{desc}")'
+        arm_cs = arm_desc.replace("\n", "\\n")
+        desc_expr = f'FurinaBurstRider.Face("{arm_cs}", "{desc_cs}")'
 
     # `EB-703`: A ROW THAT DECLARES NO ELEMENT STILL CARRIES THE INTERFACE,
     # returning `Element.None`. See `declares_no_element` -- without it the

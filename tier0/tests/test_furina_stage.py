@@ -299,34 +299,32 @@ def test_the_hit_loop_spends_block_then_the_lead_then_her(arm):
 # 8-9. SPEND AND THE BOW.
 # ---------------------------------------------------------------------------
 
-def test_a_spend_pays_from_the_lead(arm):
+def test_a_spend_pays_from_the_back_performer(arm):
+    """R276 pick 2: the back performer is the bank, the lead the shield."""
     st = _state()
     st.player.stage = [["usher", 8], ["crabaletta", 4]]
     assert FS.spend(st, 3) == 3
-    assert st.player.stage == [["usher", 5], ["crabaletta", 4]]
+    assert st.player.stage == [["usher", 8], ["crabaletta", 1]]
 
 
-def test_a_short_bar_pays_what_it_has_and_leaves_with_a_bow(arm):
-    """Sec.10 default 4, [USER]'s own words: the rider still fires in full."""
+def test_a_short_bar_cannot_pay_and_nothing_moves(arm):
+    """R276 pick 1: the rider needs the full price. A bar short of it pays
+    nothing, bows nothing, and is never offered the mode."""
     st = _state()
     st.player.stage = [["usher", 1]]
-    assert FS.spend(st, 3) == 1
-    assert st.player.stage == []
+    assert FS.can_pay(st.player, 3) is False
+    assert FS.spend(st, 3) == 0
+    assert st.player.stage == [["usher", 1]]
+    assert st.player.block == 0
+
+
+def test_a_back_performer_emptied_exactly_takes_its_bow(arm):
+    """R276 pick 1's second sentence: a bow comes from an EXACT emptying."""
+    st = _state()
+    st.player.stage = [["chevalmarin", 5], ["usher", 3]]
+    assert FS.spend(st, 3) == 3
+    assert st.player.stage == [["chevalmarin", 5]]
     assert st.player.block == FS.BOW_USHER_BLOCK
-
-
-def test_a_performer_at_one_is_the_cheapest_spend_there_is(arm):
-    """Sec.4, stated as a comparison because that is what the Expend deck is:
-    the same rider costs one point off a bar of 1 and three off a bar of 8, and
-    the small bar earns a bow the large one does not."""
-    small = _state()
-    small.player.stage = [["usher", 1]]
-    large = _state()
-    large.player.stage = [["usher", 8]]
-    assert FS.spend(small, 3) == 1
-    assert FS.spend(large, 3) == 3
-    assert small.player.block == FS.BOW_USHER_BLOCK
-    assert large.player.block == 0
 
 
 def test_with_no_performer_the_rider_cannot_fire(arm):
@@ -358,6 +356,15 @@ def test_final_bow_takes_the_bar_and_the_bow(arm):
     st.player.stage = [["usher", 6]]
     assert FS.final_bow(st) == 6
     assert st.player.stage == []
+    assert st.player.block == FS.BOW_USHER_BLOCK
+
+
+def test_final_bow_takes_the_back_performer_and_leaves_the_shield(arm):
+    """R276 pick 2: the readers draw from the bank, and Final Bow is one."""
+    st = _state()
+    st.player.stage = [["chevalmarin", 2], ["usher", 6]]
+    assert FS.final_bow(st) == 6
+    assert st.player.stage == [["chevalmarin", 2]]
     assert st.player.block == FS.BOW_USHER_BLOCK
 
 
@@ -490,25 +497,33 @@ def test_the_same_card_on_an_empty_stage_plays_at_its_base_number(arm):
     modes = card.effects[0]["modes"]
     assert effects.offered_modes(st, modes) == [0]
     assert effects.mode_refusal(st, modes[0]) is None
-    assert "needs a performer on stage" in effects.mode_refusal(st, modes[1])
+    assert ("needs its full price from the back performer"
+            in effects.mode_refusal(st, modes[1]))
     effects.resolve_card(st, card)
     assert st.enemies[0].hp == 53
 
 
-def test_a_bar_of_any_size_is_still_offered_the_spend_mode(arm):
-    """`can_spend`'s whole sentence, one layer up: the question is OCCUPANCY
-    and never size, so a lead at 1 is offered a Spend asking for 3 and rule
-    8's second clause resolves it -- which is the entire Expend deck."""
+def test_a_short_back_performer_is_not_offered_the_spend_mode(arm):
+    """R276 pick 1, one layer up: a back performer at 2 is not offered a Spend
+    asking for 3 -- however fat the lead is -- and the card plays its base
+    mode. At exactly 3 it is offered."""
     st = _state(enemies=[_enemy(hp=60)])
-    st.player.stage = [["usher", 1]]
-    modes = _curtain_rise().effects[0]["modes"]
+    st.player.stage = [["usher", 9], ["crabaletta", 2]]
+    card = _curtain_rise()
+    modes = card.effects[0]["modes"]
+    assert effects.offered_modes(st, modes) == [0]
+    effects.resolve_card(st, card)
+    assert st.enemies[0].hp == 53
+    assert st.player.stage == [["usher", 9], ["crabaletta", 2]]
+    st.player.stage = [["usher", 9], ["crabaletta", 3]]
     assert effects.offered_modes(st, modes) == [0, 1]
 
 
 # ---------------------------------------------------------------------------
 # `EB-746`. THE PILOT'S SPEND POLICY, written out in
-# `furina_stage.spend_mode_index`: spend when the lead survives the payment,
-# or when the payment kills; otherwise keep.
+# `furina_stage.spend_mode_index`: spend when the payer (the back performer,
+# R276; alone on stage it is the lead) survives the payment, or when the
+# payment kills; otherwise keep.
 # ---------------------------------------------------------------------------
 
 def test_the_pilot_spends_when_the_lead_survives_the_payment(arm):
@@ -562,8 +577,9 @@ def test_a_random_summon_only_ever_fields_somebody_not_on_stage(arm):
 
 
 def test_the_readers_read_the_seat_they_name(arm):
-    """*Ousia Surge* reads the LEAD, *Pneuma Refrain* the BACK, and neither
-    spends what it reads."""
+    """The two live counts read the seat they name, and neither spends what it
+    reads. R276: *Pneuma Refrain* is the `stage_lead_fanfare` row (the
+    shield) and *Ousia Surge* the `stage_back_fanfare` one (the bank)."""
     st = _state(enemies=[_enemy(hp=60)])
     st.player.stage = [["usher", 9], ["crabaletta", 4]]
     effects.resolve_card(st, _card(type="attack", effects=[
@@ -762,13 +778,17 @@ def test_fight_one_turn_one_line_c_loses_usher_for_nothing(arm):
     assert not [e for e in st.log if e["event"] == "stage_bow"]
 
 
-def test_fight_one_runs_to_the_curtain_on_line_a_and_the_damage_line(arm):
+def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
     """The whole script the row asks for: sec.7's line A on turn one, then the
-    DAMAGE line on turn three, which sec.7 says is the better of the two.
+    REFILL line on turn three.
 
-    Every number below is the brief's own. What this pins is that an engine
-    playing the brief's plays reaches the brief's board -- not that the plays
-    are good, which is the seats' question (sec.13).
+    R276 MOVED TURN THREE. Sec.7's damage line spent 3 off the Usher at 7; the
+    Spend now draws from the BACK performer and only in full, and the back
+    performer is Crabaletta at 1, so that mode is not offered at all. The
+    Refill line is the one that pays: Rising Applause raises Crabaletta to 6,
+    and Curtain Rise spends 3 of it for 13. Every other number is the brief's
+    own; what this pins is that an engine playing the brief's plays reaches
+    the brief's board, not that the plays are good (sec.13).
     """
     st = _open_fight_one()
 
@@ -799,23 +819,24 @@ def test_fight_one_runs_to_the_curtain_on_line_a_and_the_damage_line(arm):
     combat._enemy_turn(st, st.enemies[0])                # Hiss: +2 Strength
     assert st.enemies[0].powers.get("strength") == 2
 
-    # --- turn 3, the DAMAGE line ---------------------------------------
+    # --- turn 3, the REFILL line ---------------------------------------
     st.turn = 3
     st.player.block = 0
     FS.turn_start_regen(st)                                # Usher 6 -> 7
     st.player.block += 6                                   # Stage Presence
-    # `EB-746`: the DAMAGE line takes the Spend mode, and here the pilot's own
-    # policy takes it unprompted -- the Usher is at 7 and survives the 3.
-    assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) == 1
-    effects.resolve_card(st, _curtain_rise())              # Curtain Rise
-    effects.deal_damage_to_enemy(st, st.enemies[0], 6)     # Solicitation
+    # R276: the Spend is the BACK performer's, and Crabaletta at 1 cannot pay
+    # 3 -- the mode is not offered, whatever the Usher holds.
+    modes = _curtain_rise().effects[0]["modes"]
+    assert effects.offered_modes(st, modes) == [0]
+    FS.raise_fanfare(st, FS.REFILL_AMOUNT)                 # Crab 1 -> 6
+    assert FS.spend_mode_index(st, modes) == 1             # 6 - 3 survives
+    effects.resolve_card(st, _curtain_rise())              # Spend 3: 13
     FS.end_of_turn_acts(st)                                # Usher 3, Crab 5
     assert st.player.block == 9
-    # 27, less the turn's 19, less Crabaletta's 5: sec.7's damage line, "with
-    # Crabaletta's 5, Nibbit is at 3", and sec.7's turn four kills it with two
-    # Solicitations.
-    assert st.enemies[0].hp == 3
-    assert FS.lead_fanfare(st.player) == 4
+    # 27, less 13, less Crabaletta's 5: sec.7's Refill line, "With
+    # Crabaletta's 5, Nibbit is at 9".
+    assert st.enemies[0].hp == 9
+    assert FS.stage(st.player) == [["usher", 7], ["crabaletta", 3]]
 
 
 def test_the_turn_census_is_emitted_even_at_zero(arm):

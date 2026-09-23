@@ -241,6 +241,9 @@ internal static class KleePowerIcons
         // asking for art a prototype may not keep.
         FanfareAttackPer5Power =>
             KleePck.Path("furina/powers/rising_ovation.png"),
+        // R276: the Ancient's Stage-arm power wears the Ancient's own icon.
+        StageRaisePerTurnPower =>
+            KleePck.Path("furina/powers/all_the_worlds_a_stage.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

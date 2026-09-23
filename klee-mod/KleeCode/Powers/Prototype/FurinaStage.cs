@@ -166,19 +166,25 @@ public static class FurinaStage
 
     public static int BackFanfare(Creature? owner) => Back(owner)?.Fanfare ?? 0;
 
-    /// <summary>Rule 8's one refusal, and the predicate every Spend card's
-    /// `conditional` branches on: with no performer on stage the rider cannot
-    /// fire and the card plays at its base number. The question is OCCUPANCY
-    /// and never size -- a bar of any size pays the whole rider.</summary>
+    /// <summary>Is anybody on stage? The `stage_occupied` predicate.</summary>
     public static bool Occupied(Creature? owner) => Of(owner).Count > 0;
 
+    /// <summary>
+    /// R276 pick 1, and the gate every Spend mode asks: can the BACK performer
+    /// pay <paramref name="amount"/> IN FULL? False on an empty stage and on a
+    /// bar short of the price, and in both cases the chooser does not offer the
+    /// Spend mode and the card plays its base mode.
+    /// </summary>
+    public static bool CanSpend(Creature? owner, int amount) =>
+        LiveFor(owner) && FurinaStageLedger.For(owner!).CanSpend(amount);
+
     /// <summary>The live lead bar, for the `stage_lead_fanfare` count
-    /// (<i>Ousia Surge</i>).</summary>
+    /// (<i>Pneuma Refrain</i>, the shield reader).</summary>
     public static int LeadFanfare(CardModel? card) =>
         LeadFanfare(card?.Owner?.Creature);
 
-    /// <summary>The live back bar, for `stage_back_fanfare` (<i>Pneuma
-    /// Refrain</i>).</summary>
+    /// <summary>The live back bar, for `stage_back_fanfare` (<i>Ousia
+    /// Surge</i>, the bank reader).</summary>
     public static int BackFanfare(CardModel? card) =>
         BackFanfare(card?.Owner?.Creature);
 
@@ -226,7 +232,7 @@ public static class FurinaStage
     ///
     /// SO THE READER ANSWERS THE SAME QUESTION AT TWO MOMENTS. Before the
     /// play, nothing has been spent and the number the card is ABOUT to take
-    /// is the lead's live bar; during the play, the bar is gone and what the
+    /// is the back performer's live bar (R276: the bow comes from the bank); during the play, the bar is gone and what the
     /// card took is the record. One expression, so the previewed number and
     /// the resolved number cannot differ -- which is what a CalculatedVar is
     /// for.
@@ -234,16 +240,15 @@ public static class FurinaStage
     /// IT NEEDS <see cref="BeginPlay"/> TO BE CALLED, and until this row it
     /// was not: the record was written by each spending op and never reset, so
     /// a stale amount from an earlier card would have been previewed as this
-    /// card's forecast. `FurinaStageHooks.BeforeCardPlayed` clears it now,
-    /// which is `FurinaDrain.BeginPlay`'s site one arm over.
+    /// card's forecast. `FurinaStageHooks.BeforeCardPlayed` clears it now.
     ///
     /// 0 ON AN EMPTY STAGE, in both moments, which is the row's own
     /// acceptance.
     /// </summary>
-    public static int SpentOrLeadFanfare(CardModel? card)
+    public static int SpentOrBackFanfare(CardModel? card)
     {
         var spent = Spent(card);
-        return spent > 0 ? spent : LeadFanfare(card);
+        return spent > 0 ? spent : BackFanfare(card);
     }
 
     /// <summary>`EB-747`, <i>Let the People Rejoice</i>'s half of the same
@@ -354,13 +359,12 @@ public static class FurinaStage
     }
 
     /// <summary>
-    /// Rule 8's payment leg, for a rider the CARD has already decided fires
-    /// (its `conditional` asked <see cref="Occupied"/>). The lead pays what it
-    /// has; if that empties it, it bows.
+    /// Rule 8's payment leg, for a Spend mode the chooser offered (its gate
+    /// asked <see cref="CanSpend"/>). The BACK performer pays the whole price;
+    /// if that empties it exactly, it bows (R276 picks 1 and 2).
     ///
-    /// <para>Returns WHAT WAS PAID and not what was asked, which is the number
-    /// the brief's sec.13 report buckets on -- and never a reason to scale the
-    /// rider down (sec.10 default 4).</para>
+    /// <para>Returns what was paid: the price, or 0 where the ledger refused
+    /// a bar short of it.</para>
     /// </summary>
     public static async Task<int> Spend(PlayerChoiceContext choiceContext,
                                         Creature? owner, int amount)
@@ -408,8 +412,8 @@ public static class FurinaStage
         Vfx.FurinaStageStrip.Refresh(owner);
     }
 
-    /// <summary><i>Final Bow</i>: the lead takes a bow and leaves. A BOW
-    /// WITHOUT A SPEND, and the one card that grants one -- rule 9 earns a bow
+    /// <summary><i>Final Bow</i>: the back performer takes a bow and leaves
+    /// (R276: readers draw from the bank). A BOW WITHOUT A SPEND, and the one card that grants one -- rule 9 earns a bow
     /// with a Spend, and this face pays for it with a card and an Exhaust
     /// instead. Returns the bar it left with, which is the Block the card
     /// gains.</summary>

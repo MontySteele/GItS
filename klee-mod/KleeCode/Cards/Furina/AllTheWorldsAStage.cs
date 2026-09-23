@@ -26,6 +26,13 @@ namespace KleeMod.Cards.Furina;
 /// Encore-trickle ban that kept it unmodelled gained its Ancient carve-out
 /// (R127, 2026-08-07) and the sim twin is filed as EB-30m.
 /// Title pending the naming/lore audit.
+///
+/// R276 HYGIENE, UNDER THE STAGE ARM: Encore is retired there (`EB-745`), so
+/// the card prints and does the Stage's version instead -- "At the start of
+/// your turn, Raise 2 Fanfare on the back performer" (3 upgraded), through
+/// <c>StageRaisePerTurnPower</c>. It stays exempt from the arm's offer filter
+/// (`EB-363`; <c>FurinaStageRoster.DropRetiredRows</c> never drops an
+/// Ancient). With the arm off every line below is the shipped card.
 /// </summary>
 public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
 {
@@ -39,15 +46,31 @@ public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All the World's a Stage"),
-        ("description",
-            "At the start of your turn, gain {PowerAmount:diff()} "
-          + "[gold]Encore[/gold]."),
+        ("description", Description),
     };
+
+    /// <summary>The face. Read once at boot, when the arm's switch is already
+    /// set for the build, so a Stage build prints the Stage's sentence.
+    /// </summary>
+    private static string Description =>
+#if PROTOTYPE_CARDS
+        FurinaStage.Enabled
+            ? "At the start of your turn, [gold]Raise[/gold] "
+            + "{StageRaise:diff()} [gold]Fanfare[/gold] on the "
+            + "[gold]back performer[/gold]."
+            :
+#endif
+            "At the start of your turn, gain {PowerAmount:diff()} "
+          + "[gold]Encore[/gold].";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 5m),
+#if PROTOTYPE_CARDS
+            // R276: the Stage arm's Raise, 2 and 3 upgraded.
+            new DynamicVar("StageRaise", 2m),
+#endif
         };
 
     // autoAdd: false -- RosterAncientCards.Furina owns membership (concat
@@ -59,6 +82,16 @@ public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+#if PROTOTYPE_CARDS
+        if (FurinaStage.LiveFor(Owner.Creature))
+        {
+            await PowerCmd.Apply<StageRaisePerTurnPower>(
+                choiceContext, Owner.Creature,
+                DynamicVars["StageRaise"].IntValue,
+                applier: Owner.Creature, cardSource: this);
+            return;
+        }
+#endif
         await PowerCmd.Apply<EncorePerTurnPower>(
             choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue,
             applier: Owner.Creature, cardSource: this);
@@ -67,5 +100,8 @@ public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
     protected override void OnUpgrade()
     {
         DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+#if PROTOTYPE_CARDS
+        DynamicVars["StageRaise"].UpgradeValueBy(1m);
+#endif
     }
 }

@@ -548,8 +548,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see
-                    // `ArmKeywordTips`'s Furina section.
-                    [Cards.ArmKeywordTips.EncoreKey + ".title"] = "Encore",
+                    // `ArmKeywordTips`'s Furina section. Encore's title
+                    // went with its last body (R276 hygiene).
                     // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's
                     // sec.12 names them; each is a rule the SHIPPED engine
                     // does not have, so none collides with a shipped keyword.

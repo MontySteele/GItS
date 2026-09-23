@@ -9,9 +9,10 @@ WHAT THE ARM IS, in one paragraph. Furina's party is three seats -- front,
 middle, back -- and a performer standing in one is a creature on her side with
 its own bar, called Fanfare on the faces. Enemies hit her Block, then the LEAD
 performer's bar, then her (rule 6, per attack, never running on to the middle
-seat). Her cards SPEND that bar for bigger numbers (rule 8), and a bar emptied
-by a Spend earns a bow (rule 9) while one emptied by a hit earns nothing
-(rule 7). Every performer performs a flat act at the end of her turn (rule 10),
+seat). Her cards SPEND the BACK performer's bar for bigger numbers, and only at
+the full price (rule 8 as R276 ruled it: the lead is the shield, the back is
+the bank), and a bar emptied by a Spend earns a bow (rule 9) while one emptied
+by a hit earns nothing (rule 7). Every performer performs a flat act at the end of her turn (rule 10),
 and her own HP is touched by nothing in the kit (rule 11).
 
 WHY THE FLAGS LIVE HERE AND NOT IN `constants.py`, and it is `furina_reframe`'s
@@ -112,9 +113,12 @@ STARTER_SUBS: dict[str, str] = {
 # THE POOL SEAM (`EB-723`). `{shipped id: prototype id}`, read by
 # `loader._pool_substitutions` under `FURINA_STAGE` and nowhere else. Fourteen
 # rows -- the brief's sec.12 batch one minus the three starters above -- each
-# swapped ONE FOR ONE AT THE SAME RARITY, so the offer odds do not move
-# (`rewards.character_pool` refuses a substitution that would change a card's
-# tier).
+# swapped at the same rarity (`rewards.character_pool` refuses a substitution
+# that would change a card's tier). The GAME's offer is not this one-for-one
+# swap any more: `EB-736`'s text filter
+# (`FurinaStageRoster.DropRetiredRows`) drops every shipped row printing a
+# retired word first, which this sim does not model, so the live pool is far
+# smaller than the sim's.
 #
 # WHY A SWAP AND NOT A SHEET EDIT, for `furina_reframe.POOL_SUBS`'s reason
 # verbatim: the shipped sheet is Balance-stage content and does not move for a
@@ -383,11 +387,16 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK) -> int:
 
 
 def can_spend(player) -> bool:
-    """Rule 8's one refusal: "With no performer on stage the rider cannot fire
-    and the card plays at its base number." A bar of ANY size can pay -- one
-    point buys the whole rider -- so the question is occupancy and never
-    size."""
+    """Is anybody on stage? The `stage_occupied` predicate. A Spend MODE asks
+    the stricter `can_pay` below (R276)."""
     return active(player) and bool(stage(player))
+
+
+def can_pay(player, amount: int) -> bool:
+    """R276 pick 1: can the BACK performer pay `amount` IN FULL? False on an
+    empty stage and on a bar short of the price. C# twin:
+    `FurinaStage.CanSpend`."""
+    return can_spend(player) and back_fanfare(player) >= int(amount)
 
 
 #: `EB-746`. THE HEAD OP OF A SPEND MODE, which is what makes a `choose_one`
@@ -410,20 +419,14 @@ def spend_mode_amount(mode: dict):
 
 
 def mode_offered(player, mode: dict) -> bool:
-    """Rule 8's refusal, per MODE (`EB-746`).
+    """Rule 8's refusal, per MODE (`EB-746`, R276 pick 1).
 
-    "With no performer on stage the rider cannot fire and the card plays at its
-    base number." As a `conditional` that was a branch the engine took for the
-    player; as a CHOICE it is a mode that must not be offered, because offering
-    "Spend 3: deal 13 instead" on an empty stage offers a line the rule refuses.
-
-    A BAR OF ANY SIZE STILL PAYS, which is `can_spend`'s whole sentence and the
-    reason this is not a price: the question is OCCUPANCY and never size, so a
-    lead at 1 is offered the Spend on a card asking for 5 and rule 8's second
-    clause resolves it. C# twin: `FurinaStage.Occupied` through the generated
-    `ModeRequirements`.
+    A Spend mode is offered only when the BACK performer can pay its whole
+    price; on an empty stage or a short bar the card plays its base mode. C#
+    twin: `FurinaStage.CanSpend` through the generated `ModeRequirements`.
     """
-    return spend_mode_amount(mode) is None or can_spend(player)
+    amount = spend_mode_amount(mode)
+    return amount is None or can_pay(player, amount)
 
 
 def mode_refusal(player, mode: dict):
@@ -432,7 +435,7 @@ def mode_refusal(player, mode: dict):
     if mode_offered(player, mode):
         return None
     label = mode.get("label") or "(unlabelled mode)"
-    return f"{label!r} needs a performer on stage, the stage is empty"
+    return f"{label!r} needs its full price from the back performer"
 
 
 # ----------------------------------------------------------------------
@@ -447,10 +450,11 @@ def mode_refusal(player, mode: dict):
 # which is a different character from the one the seats play.
 #
 # THE POLICY, IN ONE SENTENCE, and it is deliberately the simplest rule that
-# reproduces the brief's own turn-one wager: SPEND WHEN THE LEAD SURVIVES THE
-# PAYMENT, OR WHEN THE PAYMENT KILLS. Written out:
+# reproduces the brief's own turn-one wager: SPEND WHEN THE PAYER SURVIVES THE
+# PAYMENT, OR WHEN THE PAYMENT KILLS. The payer is the BACK performer since
+# R276, and a mode it cannot pay in full is never offered. Written out:
 #
-#   * the lead's bar stays above 0 after paying -- the performer keeps
+#   * the back performer's bar stays above 0 after paying -- the performer keeps
 #     standing, so the extra damage costs a number and not a body (brief
 #     sec.7's line A against line B, where the whole wager is whether the
 #     Usher survives the turn);
@@ -488,9 +492,9 @@ def spend_mode_index(state, modes: list):
         return None
     index, amount = spends[0]
     keep = next((i for i in range(len(modes)) if i != index), 0)
-    if not can_spend(state.player):
+    if not can_pay(state.player, amount):
         return keep                       # rule 8's refusal, as a choice
-    if lead_fanfare(state.player) - amount > 0:
+    if back_fanfare(state.player) - amount > 0:
         return index
     return index if _mode_kills(state, modes[index]) else keep
 
@@ -516,30 +520,29 @@ def _mode_kills(state, mode: dict) -> bool:
 
 
 def spend(state, amount: int) -> int:
-    """Rule 8. Pay N from the LEAD's bar for a rider that has already been
-    decided to fire. "If the lead has less than N, the rider STILL fires in
-    full, the lead pays what it has and leaves with a bow" (sec.10 default 4,
-    [USER]'s own words).
+    """Rule 8 as R276 ruled it (picks 1 and 2). Pay N from the BACK
+    performer's bar -- the bank -- and only IN FULL. A performer the payment
+    empties EXACTLY leaves with a bow. A bar short of N pays nothing: the
+    chooser never offers such a mode (`mode_offered`), so this is the engine's
+    own refusal rather than a path a play takes.
 
-    Returns what was actually paid, which is the number sec.13's first report
-    is bucketed on -- NOT the printed N. The caller has already checked
-    `can_spend`; this refuses an empty stage rather than inventing a payment.
+    Returns what was paid: N, or 0 where it refused.
     """
     p = state.player
     if not active(p):
         return 0
-    pair = lead(p)
-    if pair is None:
+    pair = back(p)
+    if pair is None or pair[1] < int(amount):
         state.emit("stage_spend_whiffed", amount=amount)
         return 0
     member, bar = pair
-    paid = min(int(amount), bar)
+    paid = int(amount)
     pair[1] = bar - paid
     state.emit("stage_spend", member=member, asked=int(amount), paid=paid,
                bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
                enemies_alive=len(state.living_enemies))
     if pair[1] <= 0:
-        _leave(state, 0, bowed=True, reason="spend")
+        _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend")
     return paid
 
 
@@ -605,8 +608,8 @@ def bow_and_return(state) -> None:
 
 
 def final_bow(state) -> int:
-    """*Final Bow* (sec.12): "The lead performer takes a bow and leaves. Gain
-    Block equal to its Fanfare."
+    """*Final Bow* (sec.12, R276): "The back performer takes a Bow and leaves.
+    Gain Block equal to its Fanfare."
 
     A BOW WITHOUT A SPEND, and the one card that grants one. Rule 9 says a bow
     is earned by Spend; this face pays for it with a card and an Exhaust
@@ -616,12 +619,12 @@ def final_bow(state) -> int:
     p = state.player
     if not active(p):
         return 0
-    pair = lead(p)
+    pair = back(p)
     if pair is None:
         state.emit("stage_final_bow_whiffed")
         return 0
     bar = pair[1]
-    _leave(state, 0, bowed=True, reason="final_bow")
+    _leave(state, len(_seats(p)) - 1, bowed=True, reason="final_bow")
     return bar
 
 

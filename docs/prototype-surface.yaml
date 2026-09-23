@@ -1771,9 +1771,9 @@
    authored_by: [claude],
    replaces: crescendo,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculatedDamage:diff()} damage, the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].",
+   description: "Deal damage equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_lead_fanfare},
+              amount_formula: {base: 0, per: 1, count: stage_back_fanfare},
               target: enemy}]}
 
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
@@ -1781,9 +1781,9 @@
    authored_by: [claude],
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold], the [gold]back performer[/gold]'s [gold]Fanfare[/gold].",
+   description: "Gain [gold]Block[/gold] equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
-              amount_formula: {base: 0, per: 1, count: stage_back_fanfare}}]}
+              amount_formula: {base: 0, per: 1, count: stage_lead_fanfare}}]}
 
 - {id: proto_fs_bis, name: "Bis!", character: furina,
    upgrade: {cost: -1},
@@ -1798,7 +1798,7 @@
    authored_by: [claude],
    replaces: take_your_bow,
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain {CalculatedBlock:diff()} [gold]Block[/gold], its [gold]Fanfare[/gold]. Exhaust.",
+   description: "The [gold]back performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: stage_final_bow},
              {op: block,
               amount_formula: {base: 0, per: 1, count: stage_spent}}]}
@@ -1811,7 +1811,7 @@
    replaces: universal_revelry,
    register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
    art_of: let_the_people_rejoice,
-   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal {CalculatedDamage:diff()} damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1. Exhaust.",
+   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage and deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},
