@@ -617,9 +617,9 @@ public sealed class FurinaStageLedger
     /// <summary>
     /// <i>Arkhe Alignment</i>'s two halves: this turn's multipliers on the
     /// performers' act DAMAGE (Ousia) and act BLOCK (Pneuma). 1 is "no
-    /// Alignment this turn"; each choice doubles its half, so two copies that
-    /// both choose Ousia make it 4. Reset at the end of her turn, after the
-    /// sweep they are for.
+    /// Alignment this turn"; the one choice a turn sets its half to 1 plus
+    /// the copy count (one copy x2, two x3). Reset at the end of her turn,
+    /// after the sweep they are for.
     /// </summary>
     public int ActDamageMultiplier { get; set; } = 1;
 
@@ -798,6 +798,10 @@ public sealed class FurinaStageLedger
         }
         var ledger = For(creature);
         snapshot["live"] = true;
+        // R276 batch two: the Block the end-of-turn acts will give, with this
+        // turn's Arkhe multiple and Full House's extra acts in it -- the page's
+        // "after the acts" line reads this rather than assuming 3 per Usher.
+        snapshot["act_block"] = FurinaStage.ForecastActBlock(creature);
         snapshot["seats"] = ledger.Seats
             .Select((seat, index) => (object?)new Dictionary<string, object?>
             {

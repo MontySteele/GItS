@@ -392,7 +392,7 @@ values; names are provisional. Upgrades in brackets.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Arkhe Alignment | 2 | Power | At the start of your turn, choose one. Ousia: this turn your performers' acts deal double damage. Pneuma: this turn your performers' acts give double Block, and the lead performer regains 2 Fanfare. [cost 1] |
+| Arkhe Alignment | 2 | Power | At the start of your turn, choose: Ousia (acts deal double damage) or Pneuma (acts give double Block; the lead regains 2 Fanfare). [cost 1] |
 | A Five-Century Act | 2 | Power | Whenever a performer takes a Bow, it returns to the back seat with 1 Fanfare. [cost 1] |
 
 How the edges resolve: Improvised Number and Between Acts check the stage
@@ -405,7 +405,8 @@ Applause raises after the bowing performer has left, so an empty stage gets
 nothing and the draw still happens. A Rapt Audience does nothing while one
 performer is both lead and back. Arkhe Alignment's "double" multiplies the
 act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
-10). A Five-Century Act's returnee takes the back-most empty seat and does not
+10). One question a turn however many copies are in play: copies add (two
+copies x3), and Pneuma's lead regain is 2 per copy. A Five-Century Act's returnee takes the back-most empty seat and does not
 act that turn; after Let the People Rejoice a performer returns once.
 
 Tips added: Ousia and Pneuma.

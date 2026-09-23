@@ -112,10 +112,9 @@ public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// <i>Arkhe Alignment</i>: "At the start of your turn, choose one. Ousia: this
-/// turn your performers' acts deal double damage. Pneuma: this turn your
-/// performers' acts give double Block, and the lead performer regains 2
-/// Fanfare."
+/// <i>Arkhe Alignment</i>: "At the start of your turn, choose: Ousia (acts
+/// deal double damage) or Pneuma (acts give double Block; the lead regains 2
+/// Fanfare)."
 ///
 /// THE GAME'S OWN CHOOSE-A-CARD SCREEN, the Ethereal Spotlight's pattern: two
 /// combat-scoped option cards (<see cref="ArkheOusiaOption"/>,
@@ -124,8 +123,11 @@ public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
 /// owner. The choice sets this turn's multipliers on the ledger, which
 /// <see cref="FurinaStage.Perform"/> reads and the end-of-turn sweep resets.
 ///
-/// INSTANCED: each copy asks its own question, and two doublings of one half
-/// multiply.
+/// ONE QUESTION A TURN, HOWEVER MANY COPIES. The player is asked once, and
+/// copies ADD: the Amount is the copy count, and each copy adds one more
+/// multiple of the act's printed number (one copy x2, two x3). Pneuma's lead
+/// regain is 2 per copy. A prompt per copy would be per-turn friction for no
+/// decision the single question does not already carry.
 /// </summary>
 public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
 {
@@ -144,9 +146,6 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override PowerInstanceType InstanceType =>
-        PowerInstanceType.Instanced;
-
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -161,24 +160,25 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
         };
         var selected = await CardSelectCmd.FromChooseACardScreen(
             choiceContext, options, player, canSkip: false);
-        Choose(Owner, selected is ArkhePneumaOption);
+        Choose(Owner, selected is ArkhePneumaOption, (int)Amount);
     }
 
     /// <summary>The choice's effect, separate from the screen so a headless
-    /// pin can ask it. Pneuma: double Block and the lead regains 2. Ousia:
-    /// double damage.</summary>
+    /// pin can ask it. With <paramref name="copies"/> in play the chosen half
+    /// is x(1 + copies); Pneuma's lead regains 2 per copy.</summary>
     public static void Choose(MegaCrit.Sts2.Core.Entities.Creatures.Creature owner,
-                              bool pneuma)
+                              bool pneuma, int copies = 1)
     {
+        if (copies <= 0) return;
         var ledger = FurinaStageLedger.For(owner);
         if (pneuma)
         {
-            ledger.ActBlockMultiplier *= 2;
-            FurinaStage.RaiseLead(owner, PneumaLeadRegain);
+            ledger.ActBlockMultiplier = 1 + copies;
+            FurinaStage.RaiseLead(owner, PneumaLeadRegain * copies);
         }
         else
         {
-            ledger.ActDamageMultiplier *= 2;
+            ledger.ActDamageMultiplier = 1 + copies;
         }
     }
 }

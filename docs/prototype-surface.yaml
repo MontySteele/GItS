@@ -1956,7 +1956,7 @@
    authored_by: [claude],
    replaces: endless_waltz,
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, choose one. [gold]Ousia[/gold]: this turn your performers' acts deal double damage. [gold]Pneuma[/gold]: this turn your performers' acts give double [gold]Block[/gold], and the [gold]lead performer[/gold] regains 2 [gold]Fanfare[/gold].",
+   description: "At the start of your turn, choose: [gold]Ousia[/gold] (acts deal double damage) or [gold]Pneuma[/gold] (acts give double [gold]Block[/gold]; the lead regains 2 [gold]Fanfare[/gold]).",
    effects: [{op: apply_power, power: fs_arkhe_alignment, amount: 1,
               target: self}]}
 

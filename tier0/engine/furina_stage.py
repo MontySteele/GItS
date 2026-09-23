@@ -903,16 +903,17 @@ def spend_all_of_back(state) -> int:
 
 def note_power_applied(state, power: str) -> None:
     """How many copies of an instanced Stage power are in play. Thunderous
-    Applause draws once PER COPY and Arkhe Alignment asks once per copy, and
-    the `powers` map sums amounts, so the copy count lives beside it."""
-    if power in (THUNDEROUS_APPLAUSE, ARKHE_ALIGNMENT):
+    Applause draws once PER COPY, and the `powers` map sums amounts, so the
+    copy count lives beside it. (Arkhe Alignment applies 1 a copy, so its
+    `powers` amount IS the copy count.)"""
+    if power == THUNDEROUS_APPLAUSE:
         copies = state.player.stage_power_copies
         copies[power] = int(copies.get(power, 0)) + 1
 
 
 def arkhe_choice(state) -> str:
-    """The PILOT's Arkhe Alignment pick: Pneuma (double act Block, the lead
-    regains 2) when an enemy intends to attack, else Ousia (double act
+    """The PILOT's Arkhe Alignment pick: Pneuma (act Block multiplied, the
+    lead regains 2 a copy) when an enemy intends to attack, else Ousia (double act
     damage). The player's own choice in the game; a simple, stated policy
     here, in the arm and not in `pilot/policy.py`."""
     for enemy in state.living_enemies:
@@ -926,18 +927,23 @@ def arkhe_choice(state) -> str:
 
 
 def turn_start_powers(state) -> None:
-    """R276 batch two's turn-start power: Arkhe Alignment, once per copy."""
+    """R276 batch two's turn-start power: Arkhe Alignment. ONE choice a turn
+    however many copies are in play; copies ADD, so the chosen half is
+    x(1 + copies) and Pneuma's lead regains 2 a copy. C# twin:
+    `ArkheAlignmentPower.Choose`."""
     p = state.player
     if not active(p):
         return
-    for _ in range(int(p.stage_power_copies.get(ARKHE_ALIGNMENT, 0))):
-        choice = arkhe_choice(state)
-        if choice == "pneuma":
-            p.stage_act_block_mult *= 2
-            raise_fanfare(state, PNEUMA_LEAD_REGAIN, SEAT_LEAD)
-        else:
-            p.stage_act_damage_mult *= 2
-        state.emit("stage_arkhe", choice=choice)
+    copies = int(p.powers.get(ARKHE_ALIGNMENT, 0))
+    if copies <= 0:
+        return
+    choice = arkhe_choice(state)
+    if choice == "pneuma":
+        p.stage_act_block_mult = 1 + copies
+        raise_fanfare(state, PNEUMA_LEAD_REGAIN * copies, SEAT_LEAD)
+    else:
+        p.stage_act_damage_mult = 1 + copies
+    state.emit("stage_arkhe", choice=choice, copies=copies)
 
 
 # ----------------------------------------------------------------------

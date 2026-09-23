@@ -808,9 +808,9 @@ CO_TENANCY_LEDGER = {
             "Ancient only",
         ("Powers/Prototype/FurinaStagePowers.cs", "ArkheAlignmentPower"):
             "QUARANTINED (the Furina stage, FURINA_STAGE; R276 batch two). "
-            "Arkhe Alignment's turn-start choice: Ousia doubles this turn's "
-            "act damage, Pneuma this turn's act Block and Raises 2 on the "
-            "LEAD. THE ORDERING QUESTION, answered: the multipliers are read "
+            "Arkhe Alignment's turn-start choice, asked once a turn: Ousia "
+            "multiplies this turn's act damage, Pneuma this turn's act Block "
+            "and Raises 2 a copy on the LEAD. THE ORDERING QUESTION, answered: the multipliers are read "
             "only by the acts, which fire at the END of the turn, so no "
             "co-tenant of this broadcast reads them; Pneuma's Raise is an "
             "ADDITION to the lead's bar, as `FurinaStageHooks`' regen is, so "

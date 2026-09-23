@@ -648,6 +648,24 @@ public static class FurinaStage
         Vfx.FurinaStageStrip.Refresh(owner);
     }
 
+    /// <summary>
+    /// What the end-of-turn sweep will give her in Block, forecast off the
+    /// same rules the sweep runs: every Usher not resting acts
+    /// <see cref="FurinaStageLaw.ActUsherBlock"/> times this turn's Arkhe
+    /// multiple, once plus Full House's extra acts on a full stage. The seat
+    /// page prints it as "after the acts" (the wire's `act_block`).
+    /// </summary>
+    public static int ForecastActBlock(Creature? owner)
+    {
+        if (!LiveFor(owner)) return 0;
+        var ledger = FurinaStageLedger.For(owner!);
+        var times = 1 + (ledger.IsFull ? FullHouseActs(owner!) : 0);
+        var ushers = ledger.Seats.Count(
+            s => s.Who == StagePerformer.Usher && !s.Resting);
+        return ushers * FurinaStageLaw.ActUsherBlock
+               * ledger.ActBlockMultiplier * times;
+    }
+
     /// <summary>Full House's extra acts: the sum of its stacks.</summary>
     private static int FullHouseActs(Creature owner) =>
         (int)owner.Powers.OfType<FullHousePower>().Sum(p => p.Amount);

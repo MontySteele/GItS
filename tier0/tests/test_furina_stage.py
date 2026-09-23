@@ -973,7 +973,7 @@ def test_a_rapt_audience_banks_half_of_what_the_lead_lost(arm):
 def test_arkhe_alignment_doubles_one_half_of_the_acts(arm):
     attack = _state(enemies=[_enemy(intents=[{"kind": "attack",
                                               "amount": 9}])])
-    attack.player.stage_power_copies[FS.ARKHE_ALIGNMENT] = 1
+    attack.player.powers[FS.ARKHE_ALIGNMENT] = 1
     attack.player.stage = [["usher", 3]]
     FS.turn_start_powers(attack)
     assert attack.player.stage == [["usher", 3 + FS.PNEUMA_LEAD_REGAIN]]
@@ -981,7 +981,7 @@ def test_arkhe_alignment_doubles_one_half_of_the_acts(arm):
     assert attack.player.block == 2 * FS.ACT_USHER_BLOCK
     assert attack.player.stage_act_block_mult == 1            # reset
     quiet = _state()
-    quiet.player.stage_power_copies[FS.ARKHE_ALIGNMENT] = 1
+    quiet.player.powers[FS.ARKHE_ALIGNMENT] = 1
     quiet.player.stage = [["crabaletta", 3]]
     FS.turn_start_powers(quiet)
     FS.end_of_turn_acts(quiet)
@@ -1023,3 +1023,22 @@ def test_a_resting_returnee_sits_out_tutti_and_bis(arm):
     FS.perform_all(st)
     FS.perform_lead(st)
     assert st.player.block == block
+
+
+def test_arkhe_asks_once_and_copies_add(arm):
+    """One question a turn however many copies are in play; copies ADD (two
+    copies x3), and Pneuma's lead regain is 2 per copy."""
+    st = _state(enemies=[_enemy(intents=[{"kind": "attack", "amount": 9}])])
+    effects.resolve_card(st, _card(type="power", effects=[
+        {"op": "apply_power", "power": FS.ARKHE_ALIGNMENT, "amount": 1,
+         "target": "self"}]))
+    effects.resolve_card(st, _card(type="power", effects=[
+        {"op": "apply_power", "power": FS.ARKHE_ALIGNMENT, "amount": 1,
+         "target": "self"}]))
+    st.player.stage = [["usher", 3]]
+    FS.turn_start_powers(st)
+    assert len([e for e in st.log if e["event"] == "stage_arkhe"]) == 1
+    assert st.player.stage_act_block_mult == 3
+    assert st.player.stage == [["usher", 3 + 2 * FS.PNEUMA_LEAD_REGAIN]]
+    FS.end_of_turn_acts(st)
+    assert st.player.block == 3 * FS.ACT_USHER_BLOCK

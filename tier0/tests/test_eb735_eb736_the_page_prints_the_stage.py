@@ -170,6 +170,18 @@ def test_the_block_line_says_what_the_sweep_will_add():
         {"live": True, "seats": THREE_SEATS[1:], "log": []})
 
 
+def test_the_block_line_reads_the_mods_forecast_when_the_wire_sends_one():
+    """R276 batch two. Arkhe Alignment's Pneuma multiplies the act's Block and
+    Full House adds acts, so a flat 3 per Usher is wrong on exactly the turns
+    a seat plans around. The mod sends its own forecast (`act_block`, off
+    `FurinaStage.ForecastActBlock`) and the page prints it; a 0 forecast (a
+    resting Usher) prints no clause."""
+    assert "after the acts: Block 27" in _page(
+        {"live": True, "seats": THREE_SEATS, "log": [], "act_block": 18})
+    assert "after the acts" not in _page(
+        {"live": True, "seats": THREE_SEATS, "log": [], "act_block": 0})
+
+
 def test_three_named_bars_stand_in_seat_order():
     """The row's own acceptance. Round one's seats read the cast as "one
     anonymous pool with three names"; this is the page naming all three, each

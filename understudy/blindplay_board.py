@@ -747,7 +747,13 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             "target": _text(row.get("target")),
             "combat_id": _text(row.get("target_id")),
         })
-    return {"seats": seats, "log": log}
+    # R276 batch two: the mod's forecast of the end-of-turn acts' Block, with
+    # Arkhe Alignment's multiple and Full House's extra acts folded in. None
+    # on a build that does not send it, and the render then falls back to the
+    # flat per-Usher sum.
+    act_block = raw.get("act_block")
+    return {"seats": seats, "log": log,
+            "act_block": None if act_block is None else _int(act_block)}
 
 
 def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],

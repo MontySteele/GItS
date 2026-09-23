@@ -212,6 +212,73 @@ public class FurinaStageBatchTwoTests
         Assert.Equal(1, stage.ActBlockMultiplier);
     }
 
+    [Fact]
+    public void Two_copies_add_to_times_three_and_regain_two_each()
+    {
+        using var _ = new Arm();
+        var (seat, stage) = Stage((StagePerformer.Usher, 3));
+
+        ArkheAlignmentPower.Choose(seat.Creature, pneuma: true, copies: 2);
+
+        Assert.Equal(3, stage.ActBlockMultiplier);
+        Assert.Equal(3 + 2 * ArkheAlignmentPower.PneumaLeadRegain,
+                     stage.Lead!.Fanfare);
+
+        stage.ResetActMultipliers();
+        ArkheAlignmentPower.Choose(seat.Creature, pneuma: false, copies: 2);
+        Assert.Equal(3, stage.ActDamageMultiplier);
+    }
+
+    [Fact]
+    public void Arkhe_asks_one_question_a_turn()
+    {
+        // Not instanced: a second copy stacks onto the first, so the power
+        // has ONE turn-start hook and asks once, with Amount as the copies.
+        Assert.Equal(MegaCrit.Sts2.Core.Entities.Powers.PowerInstanceType.None,
+                     new ArkheAlignmentPower().InstanceType);
+        var calls = Il.Calls(
+            Il.Method("ArkheAlignmentPower", "AfterPlayerTurnStart"));
+        Assert.Contains("PowerModel.get_Amount", calls);
+    }
+
+    // ---- the seat page's forecast ------------------------------------------
+
+    [Fact]
+    public void The_act_block_forecast_reads_arkhe_full_house_and_rest()
+    {
+        using var _ = new Arm();
+        var (seat, stage) = Stage(
+            (StagePerformer.Usher, 3), (StagePerformer.Chevalmarin, 1));
+
+        Assert.Equal(FurinaStageLaw.ActUsherBlock,
+                     FurinaStage.ForecastActBlock(seat.Creature));
+
+        ArkheAlignmentPower.Choose(seat.Creature, pneuma: true);
+        Assert.Equal(2 * FurinaStageLaw.ActUsherBlock,
+                     FurinaStage.ForecastActBlock(seat.Creature));
+
+        // A full stage with Full House: each act twice.
+        seat.WithPower<FullHousePower>(1);
+        stage.Summon(StagePerformer.Crabaletta);
+        Assert.Equal(2 * 2 * FurinaStageLaw.ActUsherBlock,
+                     FurinaStage.ForecastActBlock(seat.Creature));
+
+        // A resting Usher pays nothing this turn.
+        Seat.Set(stage.Lead!, "Resting", true);
+        Assert.Equal(0, FurinaStage.ForecastActBlock(seat.Creature));
+    }
+
+    [Fact]
+    public void The_wire_snapshot_carries_the_forecast()
+    {
+        using var _ = new Arm();
+        var (seat, _) = Stage((StagePerformer.Usher, 3));
+
+        var snapshot = FurinaStageLedger.Snapshot(seat.Player);
+
+        Assert.Equal(FurinaStageLaw.ActUsherBlock, snapshot["act_block"]);
+    }
+
     // ---- Full House ---------------------------------------------------------
 
     [Fact]
