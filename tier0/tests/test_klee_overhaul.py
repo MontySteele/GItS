@@ -296,8 +296,8 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     Put It?, Big Bounce). Both halves pinned, for the cut rows' reason above.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 48
-    assert len(set(ids)) == 48
+    assert len(ids) == 78
+    assert len(set(ids)) == 78
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
     # R244's three, and only three: `Hex and Wick` is the packet's sec.3
@@ -347,6 +347,24 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     assert {"proto_ko_hair_trigger", "proto_ko_explosive_frags",
             "proto_ko_where_did_i_put_it",
             "proto_ko_big_bounce"} <= set(ids)
+    # THE POOL EXPANSION's thirty (R276), by name and for the same reason,
+    # in their own block at the end of the tuple.
+    assert list(ids[-30:]) == [
+        "proto_ko_hiding_spot", "proto_ko_playdate",
+        "proto_ko_jumpy_dumpty_mk_iii", "proto_ko_spinning_sparkler",
+        "proto_ko_mine_all_mine", "proto_ko_team_effort",
+        "proto_ko_fish_fry", "proto_ko_one_more_charge",
+        "proto_ko_sit_tight", "proto_ko_treasure_map",
+        "proto_ko_tag_along", "proto_ko_come_back_and_play",
+        "proto_ko_boom_badge", "proto_ko_wait_for_it",
+        "proto_ko_duck_and_run", "proto_ko_party_poppers",
+        "proto_ko_look_out", "proto_ko_patience_klee",
+        "proto_ko_friendship_bracelet", "proto_ko_secret_base",
+        "proto_ko_half_a_mountain", "proto_ko_favonius_escort",
+        "proto_ko_adventure_club", "proto_ko_windblume_fireworks",
+        "proto_ko_fireworks_finale", "proto_ko_dodoco",
+        "proto_ko_aftershock", "proto_ko_spark_knight",
+        "proto_ko_alices_detonator", "proto_ko_second_surprise"]
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -481,10 +499,14 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     TWO Uncommons (Explosives Workshop, Catalytic Converter) and ONE Rare
     (Sugar Rush), and adds TWO Commons (Hair Trigger, Where Did I Put It?) and
     TWO Uncommons (Explosive Frags, Big Bounce) -- so the Rare count is back
-    at the brief's eight."""
+    at the brief's eight.
+
+    THE POOL EXPANSION (R276) adds TWO Commons, EIGHTEEN Uncommons and TEN
+    Rares toward the 78-card pool R276 ruled, which is where 24 / 36 / 18
+    comes from. R276 is the ruling the Rare count moves with."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 22, "uncommon": 18, "rare": 8}
+        "common": 24, "uncommon": 36, "rare": 18}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):

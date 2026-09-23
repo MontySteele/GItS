@@ -404,6 +404,11 @@ def card_cost(state: CombatState, card: Card) -> int:
     if (C.KOKOMI_OVERHAUL
             and state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0)):
         cost = 0
+    # QUARANTINED (R276): Playdate's discount on the next Companion card.
+    # `PlaydatePower.TryModifyEnergyCostInCombat`'s twin; 0 with the arm off.
+    discount = klee_overhaul.playdate_discount(state, card)
+    if discount:
+        cost = max(0, cost - discount)
     # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
     # carry-out used to discount the next face-up Attack, and the mod could
     # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
@@ -643,7 +648,11 @@ def _finish_play(state: CombatState, card: Card,
         # has to survive until `flat_attack_bonus` has read it --
         # `effects._resolve_card_bound` spends it one line after that read,
         # beside `next_attack_up`'s own consuming pop.
-    replays = 1
+    # QUARANTINED (R276): the Klee arm's Playdate is spent by the Companion
+    # card it discounted, and Boom Badge's second play is counted here with
+    # every other replay source. Both are no-ops with the arm off.
+    klee_overhaul.spend_playdate(state, card)
+    replays = 1 + klee_overhaul.take_boom_badge(state, card)
     if card.is_companion:
         # BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same
         # pool entry as its base, so `foo` and `foo+` are ONE entry in the
@@ -715,6 +724,7 @@ def _finish_play(state: CombatState, card: Card,
         # that counts as a Companion (R276; the Hexerei mark until then).
         # `tier0.engine.companion_hexerei`.
         companion_hexerei.note_card_played(state, card)
+        klee_overhaul.note_card_played(state, card)
         if replay_index == 0 and (card.is_companion or C.KLEE_OVERHAUL):
             # "Little Hexenzirkul" (EB-219, retargeted by EB-642 and R276):
             # Klee's kit answering a COMPANION play, which is where LAW:145

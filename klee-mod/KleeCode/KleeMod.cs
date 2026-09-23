@@ -213,6 +213,12 @@ public static class KleeMod
                 // release build.
                 [Powers.KokomiPlan.ReflectionPromptKey] =
                     Powers.KokomiPlan.ReflectionPromptText,
+                // R276, the Klee pool expansion's two discard-pile picks
+                // (Treasure Map, Come Back and Play!), on the same terms.
+                [Powers.KleeExpansion.SetOffPromptKey] =
+                    Powers.KleeExpansion.SetOffPromptText,
+                [Powers.KleeExpansion.CompanionPromptKey] =
+                    Powers.KleeExpansion.CompanionPromptText,
 #endif
             });
 

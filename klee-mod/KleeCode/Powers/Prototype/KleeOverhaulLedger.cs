@@ -193,6 +193,39 @@ public sealed class KleeOverhaulLedger
     /// The ONE write site, for <see cref="NoteExplosion"/>'s reason.</summary>
     public void NoteCompanionPlayed() => CompanionPlayedThisTurn++;
 
+    private bool _aftershockSpent;
+
+    /// <summary>
+    /// R276, Aftershock's once-per-turn latch: true the FIRST time it is asked
+    /// in a turn, false after, reset with the turn. On the ledger rather than
+    /// on the Power so "each turn" is the same boundary every counter here
+    /// rolls on.
+    /// </summary>
+    public bool TakeAftershock()
+    {
+        if (_aftershockSpent) return false;
+        _aftershockSpent = true;
+        return true;
+    }
+
+    private bool _turnStartPlacementsDone;
+
+    /// <summary>
+    /// R276, the start-of-turn placements' latch: true the FIRST time it is
+    /// asked in a turn. Klee's Secret Base and Dodoco share one
+    /// <c>AfterPlayerTurnStart</c> broadcast with no guaranteed relative order,
+    /// and Secret Base reads the board Dodoco writes -- so whichever of the two
+    /// is called first runs BOTH, in one fixed order
+    /// (<c>KleeExpansion.RunTurnStartPlacements</c>), and the other finds the
+    /// latch taken.
+    /// </summary>
+    public bool TakeTurnStartPlacements()
+    {
+        if (_turnStartPlacementsDone) return false;
+        _turnStartPlacementsDone = true;
+        return true;
+    }
+
     /// <summary>A card play begins: the play-scoped size memory starts empty.
     /// Emitted at the top of the body of any card that reads it.</summary>
     public void BeginPlay() => DamageSetOffThisPlay = 0;
@@ -308,6 +341,8 @@ public sealed class KleeOverhaulLedger
         SetOffThisTurn = 0;
         ReactedThisTurn = 0;
         CompanionPlayedThisTurn = 0;
+        _aftershockSpent = false;
+        _turnStartPlacementsDone = false;
         DamageSetOffThisPlay = 0;
         _setOffMultiplier = 1;
         _round = round;

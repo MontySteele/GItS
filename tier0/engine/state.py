@@ -1538,6 +1538,10 @@ class CombatState:
     # resolves off a card (`effects._op_set_off`); the twin is
     # `KleeOverhaulLedger.LastSetOffCard`.
     ko_last_set_off_card: "Card | None" = None
+    # QUARANTINED (`C.KLEE_OVERHAUL`, R276). Aftershock's once-per-turn latch,
+    # rolled by `roll_to` beside the counters above; the twin of
+    # `KleeOverhaulLedger.TakeAftershock`.
+    ko_aftershock_spent: bool = False
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.

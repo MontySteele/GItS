@@ -3190,3 +3190,109 @@ Introduction Magic (`companion_mark_hand`) makes the hand count as Companion
 cards -- and, with its `hexerei:` key gone, no longer counts itself. The Spark
 rider (`ForCovenSpark`) rides every companion face on Klee's profile.
 
+
+## R276 -- the pool expansion to 78 (2026-09-23)
+
+Thirty rows designed by the main session (2 Common, 18 Uncommon, 10 Rare),
+built C# first and twinned in tier0, taking the pool from 48 to 78. The
+readings below are the builder's where the spec left a choice; each is pinned
+in `klee-mod/KleeTests/Prototype/KleeR276ExpansionTests.cs` and
+`tier0/tests/test_klee_r276_expansion.py`.
+
+**"Your largest Bomb"** (One More Charge, Treasure Map, Half a Mountain,
+Patience, Klee!, Friendship Bracelet, Favonius Escort) is the arm's one
+existing reading, `ProtoBombPower.LargestCharge`: the largest single charge of
+hers on the living board, the first found on a tie (board order, then
+placement order inside a pile -- so the older of two equal charges in one
+pile). The spec's "ties: the older one" holds inside a pile; across two
+enemies the tie goes to board order, because no charge carries a placement
+stamp.
+
+**`proto_ko_hiding_spot`** is the spec's Hide and Seek, renamed on the clash
+with the shipped `hide_and_seek`. Block 6, then a Mine 3 on a random enemy.
+
+**`proto_ko_playdate`**: `PlaydatePower`, Rally's construction under Klee's
+reading of a Companion card (`CountsAsCompanion`). Two copies take 2 off the
+same next card. Expires at the end of the turn.
+
+**`proto_ko_jumpy_dumpty_mk_iii`** is the spec's Jumpy Dumpty Mk.II, renamed
+on the clash with the shipped `jumpy_dumpty_mk2`. A `damage` op with the
+`plant_on_hit` rider: each hit rolls a living enemy and plants on it; a hit
+that kills sends its Bomb to a survivor (`PlaceOrJump`).
+
+**`proto_ko_spinning_sparkler`**: the `grow_on_hit` rider. "Grows that Bomb"
+grows the enemy's LARGEST charge of hers by the printed number, so the pile's
+total rises by exactly 2 per hit.
+
+**`proto_ko_mine_all_mine`**: `only_if: mined`, the enemies holding a Mine of
+hers read once before the first hit.
+
+**`proto_ko_team_effort`**: `set_off` with `wide_if:
+companion_played_this_turn` -- every enemy's Bombs go off one enemy at a time,
+then the 6 lands on the aimed enemy only (`SetOffAllThenHit`).
+
+**`proto_ko_fish_fry`**: the shipped `bonus_vs_bombed` field, legal on a
+`proto_ko_` all-enemies hit and read once before the first hit; the sim's
+reader now counts `ko_charges` as well as shipped Bombs.
+
+**`proto_ko_one_more_charge`**: `grow_largest` with the bar measured on the
+grown Bomb. **`proto_ko_treasure_map`**: `fetch_from_discard` then
+`grow_largest`; a lone candidate is taken without a screen (`ScryTake`'s
+rule), none and the growth still happens.
+
+**`proto_ko_sit_tight`**: 1 Spark, Retain, Block 5, and 4 more when
+`no_bomb_went_off_this_turn`. The upgrade (7 and +5) is `block: +1,
+conditional_block: +1`: the second key moves both numbers by one, the first
+moves the top Block by one more.
+
+**`proto_ko_tag_along`** / **`proto_ko_adventure_club`**: `add_random_companion`
+draws uniformly from the run's companion pool less other characters'
+Personals, with the stand-in hand-off, and sets each to cost 0 this turn.
+
+**`proto_ko_come_back_and_play`**: `fetch_from_discard` of a Companion card;
+the upgrade appends a draw.
+
+**`proto_ko_boom_badge`**: `BoomBadgePower` on the game's replay surface
+(`ModifyCardPlayCount`, Study Buddy's construction) keyed on `ISetOffCard`.
+Each copy doubles one Set off card. Expires at the end of the turn.
+
+**`proto_ko_wait_for_it`**: a one-shot on the charge-aware explosion door; it
+pays 2 cards and 1 Energy per copy on her first reacting explosion this turn
+and is gone at the end of the turn.
+
+**`proto_ko_duck_and_run`**: Block 7, then an aimed Set off.
+
+**`proto_ko_party_poppers`**: "costs Sparks" is the cost badge
+(`SparkCost.PriceOf > 0`), so the X-priced Fireworks Finale and Stoke the Fuse
+count. Every play counts, a replayed one included.
+
+**`proto_ko_look_out`**, **`proto_ko_second_surprise`**, **`proto_ko_aftershock`**:
+the charge-aware door `KleeExpansion.AfterChargeExploded`, after the explosion
+bus in `Explode`. Look Out! and Second Surprise answer a Mine however it went
+off. Second Surprise's half is of the Mine's own size (not a multiplied hit),
+and jumps if the enemy died. Aftershock's copy is of the charge's size, once
+per turn per Klee on the ledger's latch, one Bomb per copy.
+
+**`proto_ko_patience_klee`**: grows at `AfterSideTurnEnd`, strictly after
+Sparks 'n' Splash's echo at `BeforeSideTurnEnd`, so the two never race.
+
+**`proto_ko_secret_base`** and **`proto_ko_dodoco`**: both at
+`AfterPlayerTurnStart` (after the draw and the growth) through one sequencer,
+`KleeExpansion.RunTurnStartPlacements`, so Secret Base reads the board before
+Dodoco's Mine lands. Dodoco's Mine joins any pile there as a Mine charge.
+
+**`proto_ko_half_a_mountain`** / **`proto_ko_favonius_escort`**: repeatable
+doubling; Sorry, Jean...'s removal with the Block times 2.
+
+**`proto_ko_windblume_fireworks`**: Set off ALL, then 10 to ALL, then a Bomb 6
+on ALL -- three existing ops in the printed order.
+
+**`proto_ko_fireworks_finale`**: the all-in Spark price and `times:
+sparks_spent`, one hit of 5 to ALL enemies per Spark spent.
+
+**`proto_ko_spark_knight`**: rides `SparkPower.Gain` (the sim's
+`gain_sparks`), one Pyro hit per Spark that LANDED, from any source.
+
+**`proto_ko_alices_detonator`**: two Power twins, `AlicesDetonatorPower` and
+`AlicesDetonatorPlusPower`, installed by the card's upgrade; each adds one
+Ka-pow! (upgraded on the Plus twin) per stack after the turn's draw.

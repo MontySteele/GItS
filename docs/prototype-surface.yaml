@@ -549,6 +549,234 @@
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 5, overflow: bounce}]}
 
+# THE POOL EXPANSION (R276, 2026-09-23): thirty rows toward the 78-card pool,
+# designed by the main session and built as specified. Why each exists:
+# docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_hiding_spot, name: "Hiding Spot", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 6 [gold]Block[/gold]. Place a [gold]Mine[/gold] 3 on a random enemy.",
+   upgrade: {block: +2, bomb_size: +2},
+   effects: [{op: block, amount: 6},
+             {op: plant_bomb, target: random_enemy, size: 3, mine: true}]}
+
+- {id: proto_ko_playdate, name: "Playdate", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "The next [gold]Companion[/gold] card you play this turn costs 1 less. Place a [gold]Bomb[/gold] 3.",
+   upgrade: {bomb_size: +2},
+   effects: [{op: apply_power, power: ko_playdate, amount: 1, target: self},
+             {op: plant_bomb, target: enemy, size: 3}]}
+
+- {id: proto_ko_jumpy_dumpty_mk_iii, name: "Jumpy Dumpty Mk.III", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 3 damage to a random enemy 3 times. Each hit places a [gold]Bomb[/gold] 2 on that enemy.",
+   upgrade: {damage: +1, bomb_size: +1},
+   effects: [{op: damage, amount: 3, target: random_enemy, times: 3,
+              plant_on_hit: 2}]}
+
+- {id: proto_ko_spinning_sparkler, name: "Spinning Sparkler", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 5 damage twice. Each hit on an enemy with a [gold]Bomb[/gold] grows that [gold]Bomb[/gold] by 2.",
+   upgrade: {damage: +1, grow: +1},
+   effects: [{op: damage, amount: 5, target: enemy, times: 2,
+              grow_on_hit: 2}]}
+
+- {id: proto_ko_mine_all_mine, name: "Mine, All Mine!", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 8 damage to each enemy with a [gold]Mine[/gold].",
+   upgrade: {damage: +3},
+   effects: [{op: damage, amount: 8, target: all_enemies, only_if: mined}]}
+
+- {id: proto_ko_team_effort, name: "Team Effort", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Set off[/gold]. Deal 6 damage. If you played a [gold]Companion[/gold] card this turn, [gold]Set off[/gold] ALL enemies instead.",
+   upgrade: {damage: +3},
+   effects: [{op: set_off, target: enemy, damage: 6,
+              wide_if: companion_played_this_turn}]}
+
+- {id: proto_ko_fish_fry, name: "Fish Fry", character: klee,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal 7 damage to ALL enemies, and 5 more to each enemy with a [gold]Bomb[/gold].",
+   upgrade: {damage: +3, bonus_vs_bombed: +2},
+   effects: [{op: damage, amount: 7, target: all_enemies, bonus_vs_bombed: 5}]}
+
+- {id: proto_ko_one_more_charge, name: "One More Charge", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Your largest [gold]Bomb[/gold] grows by 5. If it is now 20 or more, draw 1 card.",
+   upgrade: {grow: +3},
+   effects: [{op: grow_largest, amount: 5, draw_if_at_least: 20, draw: 1}]}
+
+- {id: proto_ko_sit_tight, name: "Sit Tight", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, retain: true,
+   description: "Gain 5 [gold]Block[/gold]. If no [gold]Bomb[/gold] went off this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
+   upgrade: {block: +1, conditional_block: +1},
+   effects: [{op: spend_spark, amount: 1},
+             {op: block, amount: 5},
+             {op: conditional, if: no_bomb_went_off_this_turn,
+              then: [{op: block, amount: 4}]}]}
+
+- {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Put a [gold]Set off[/gold] card from your discard pile into your hand. Your largest [gold]Bomb[/gold] grows by 3.",
+   upgrade: {cost: -1},
+   effects: [{op: fetch_from_discard, filter: set_off},
+             {op: grow_largest, amount: 3}]}
+
+- {id: proto_ko_tag_along, name: "Tag Along", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Add a random [gold]Companion[/gold] card to your hand. It costs 0 this turn.",
+   upgrade: {remove: exhaust},
+   effects: [{op: add_random_companion, amount: 1}]}
+
+- {id: proto_ko_come_back_and_play, name: "Come Back and Play!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Put a [gold]Companion[/gold] card from your discard pile into your hand.",
+   upgrade: {add: {op: draw, amount: 1}},
+   effects: [{op: fetch_from_discard, filter: companion}]}
+
+- {id: proto_ko_boom_badge, name: "Boom Badge", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Your next [gold]Set off[/gold] card this turn is played twice.",
+   upgrade: {spark_price: -1},
+   effects: [{op: spend_spark, amount: 3},
+             {op: apply_power, power: ko_boom_badge, amount: 1, target: self}]}
+
+- {id: proto_ko_wait_for_it, name: "Wait For It...", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, retain: true,
+   description: "This turn, the next time one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], draw 2 cards and gain 1 [gold]Energy[/gold].",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: ko_wait_for_it, amount: 1, target: self}]}
+
+- {id: proto_ko_duck_and_run, name: "Duck and Run", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 7 [gold]Block[/gold]. [gold]Set off[/gold].",
+   upgrade: {block: +3},
+   effects: [{op: block, amount: 7},
+             {op: set_off, target: enemy}]}
+
+- {id: proto_ko_party_poppers, name: "Party Poppers", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you play a card that costs [gold]Sparks[/gold], place a [gold]Bomb[/gold] 2 on a random enemy.",
+   upgrade: {power_amount: +1},
+   effects: [{op: apply_power, power: ko_party_poppers, amount: 2, target: self}]}
+
+- {id: proto_ko_look_out, name: "Look Out!", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever one of your [gold]Mines[/gold] goes off, gain 3 [gold]Block[/gold].",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_look_out, amount: 3, target: self}]}
+
+- {id: proto_ko_patience_klee, name: "Patience, Klee!", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the end of your turn, if you played no [gold]Set off[/gold] card this turn, your largest [gold]Bomb[/gold] grows by 4.",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_patience, amount: 4, target: self}]}
+
+- {id: proto_ko_friendship_bracelet, name: "Friendship Bracelet", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you play a [gold]Companion[/gold] card, your largest [gold]Bomb[/gold] grows by 3.",
+   upgrade: {power_amount: +1},
+   effects: [{op: apply_power, power: ko_friendship_bracelet, amount: 3, target: self}]}
+
+- {id: proto_ko_secret_base, name: "Klee's Secret Base", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of yours, place a [gold]Bomb[/gold] 5 on a random enemy.",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_secret_base, amount: 5, target: self}]}
+
+- {id: proto_ko_half_a_mountain, name: "Half a Mountain", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare,
+   description: "Your largest [gold]Bomb[/gold] doubles in size.",
+   upgrade: {retain: true},
+   effects: [{op: multiply_largest_bomb, factor: 2}]}
+
+- {id: proto_ko_favonius_escort, name: "Favonius Escort", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare,
+   description: "Remove your largest [gold]Bomb[/gold]. Gain [gold]Block[/gold] equal to twice its size.",
+   upgrade: {retain: true},
+   effects: [{op: remove_bomb_for_block, multiplier: 2}]}
+
+- {id: proto_ko_adventure_club, name: "Adventure Club", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Add 2 random [gold]Companion[/gold] cards to your hand. They cost 0 this turn.",
+   upgrade: {cost: -1},
+   effects: [{op: add_random_companion, amount: 2}]}
+
+- {id: proto_ko_windblume_fireworks, name: "Windblume Fireworks", character: klee,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   description: "[gold]Set off[/gold] ALL enemies. Deal 10 damage to ALL enemies. Place a [gold]Bomb[/gold] 6 on ALL enemies.",
+   upgrade: {damage: +4, bomb_size: +2},
+   effects: [{op: set_off, target: all_enemies},
+             {op: damage, amount: 10, target: all_enemies},
+             {op: plant_bomb, target: all_enemies, size: 6}]}
+
+- {id: proto_ko_fireworks_finale, name: "Fireworks Finale", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: rare,
+   description: "Spend all your [gold]Sparks[/gold]. Deal 5 damage to ALL enemies for each [gold]Spark[/gold] spent.",
+   upgrade: {damage: +2},
+   effects: [{op: spend_spark, amount: all},
+             {op: damage, amount: 5, target: all_enemies, times: sparks_spent}]}
+
+- {id: proto_ko_dodoco, name: "Dodoco", character: klee,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, place a [gold]Mine[/gold] 4 on a random enemy.",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: ko_dodoco, amount: 4, target: self}]}
+
+- {id: proto_ko_aftershock, name: "Aftershock", character: klee,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "The first time each turn a [gold]Bomb[/gold] of yours triggers an [gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that size on a random enemy.",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: ko_aftershock, amount: 1, target: self}]}
+
+- {id: proto_ko_spark_knight, name: "Spark Knight", character: klee,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever you gain a [gold]Spark[/gold], deal 2 [gold]Pyro[/gold] damage to a random enemy.",
+   upgrade: {power_amount: +1},
+   effects: [{op: apply_power, power: ko_spark_knight, amount: 2, target: self}]}
+
+- {id: proto_ko_alices_detonator, name: "Alice's Detonator", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "At the start of your turn, add {IfUpgraded:show:an upgraded|a} Ka-pow! to your hand.",
+   upgrade: {upgraded_grant: true},
+   effects: [{op: grant_kapow_each_turn}]}
+
+- {id: proto_ko_second_surprise, name: "Second Surprise", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "Whenever one of your [gold]Mines[/gold] goes off, place a [gold]Bomb[/gold] half its size, rounded down, on that enemy.",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: ko_second_surprise, amount: 1, target: self}]}
+
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.

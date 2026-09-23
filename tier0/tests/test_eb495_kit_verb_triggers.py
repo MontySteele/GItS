@@ -70,6 +70,7 @@ KIT_SOURCES = (
     "bomb",                 # V4  shipped Bomb detonation
     "set_off",              # V5  Klee-overhaul explosion, and V6 a Mine
     "bomb_echo",            # V8  Sparks 'n' Splash echo
+    "spark_knight",         # V8b R276's Spark Knight, a Power's Pyro hit
     "plan",                 # V9  Kokomi planned hit
     "casket",               # V11 Tamakushi Casket strike
     "salon",                # V12 Salon performance
@@ -282,6 +283,9 @@ SIM_CALL_SITES = {
     # R276's Big Bounce: the overflow is an explosion's damage carried on, so
     # it keeps the explosion's source and its unpowered posture.
     ('klee_overhaul.py', 3): ('EXPLOSION_SOURCE', 'False', "'pyro'"),
+    # R276's Spark Knight: a Power's Pyro hit per Spark gained, the echo's
+    # shape (not an Attack, Klee's own terms), under its own source.
+    ('klee_overhaul.py', 4): ("'spark_knight'", None, "'pyro'"),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
     ('kokomi_plan.py', 2): ("'casket'", 'False', "'hydro'"),
 }

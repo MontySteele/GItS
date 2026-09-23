@@ -215,11 +215,10 @@ public class PoolCellCoverageTests
 
         var expected = (arm switch
         {
-            // Rare/Attack holds one row (Fish Blasting). Seamed at rung 2: a
-            // Rare potion still buys three Rares. Rare/Skill joined it at R276
-            // (Sugar Rush cut; All of My Treasures! and Alice's Introduction
-            // Magic are left), seamed the same way.
-            "klee-overhaul" => new[] { "Rare/Attack", "Rare/Skill" },
+            // NONE SINCE THE R276 POOL EXPANSION: Rare/Attack and Rare/Skill
+            // were the two short cells, and the expansion's ten Rares (two
+            // Attacks, three Skills, five Powers) fill both.
+            "klee-overhaul" => System.Array.Empty<string>(),
 
             // The four `EB-363` was raised on, plus the Rare shelf being
             // thinner than Sea Glass's five-card draw -- which no widening can

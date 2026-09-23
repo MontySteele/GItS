@@ -84,6 +84,30 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         BlazingDelightPower =>
             KleePck.Path("klee/powers/spark_per_turn.png"),
+        // THE POOL EXPANSION (R276), on the block above's terms verbatim: each
+        // borrows the icon of the arm power whose job it is nearest to, and
+        // its own illustration stays owed until the slice is accepted.
+        PlaydatePower => KleePck.Path("klee/powers/friendly_visit.png"),
+        FriendshipBraceletPower =>
+            KleePck.Path("klee/powers/friendly_visit.png"),
+        BoomBadgePower => KleePck.Path("klee/powers/study_buddy.png"),
+        WaitForItPower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        AftershockPower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        PartyPoppersPower =>
+            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        SecretBasePower =>
+            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        SecondSurprisePower =>
+            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        LookOutPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        PatienceKleePower => KleePck.Path("klee/powers/bomb_damage_up.png"),
+        DodocoPower => KleePck.Path("klee/powers/bomb.png"),
+        SparkKnightPower =>
+            KleePck.Path("klee/powers/spark_threshold_down.png"),
+        AlicesDetonatorBasePower =>
+            KleePck.Path("klee/powers/witchs_flame.png"),
         // R252's DEFENCE-SHELF POWER, on the block above's terms verbatim: it
         // borrows Grounded's icon, because Grounded is the power whose job it
         // takes over one trigger along -- both pay Block off the arm's own

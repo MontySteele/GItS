@@ -267,6 +267,28 @@ on the *first* one, which is why Careful Arrangement is a React card.
 Every currency reaches every other one somewhere in the pool, at the rarity
 that keeps it a discovery rather than a default.
 
+### 5.6 Pool expansion (R276)
+
+R276 set Klee's pool target at 78 draftable cards. The batch before this one
+left 48 (22 Common, 18 Uncommon, 8 Rare); these thirty take it to 78 (24
+Common, 36 Uncommon, 18 Rare). No new keyword: every card uses Bomb, Mine,
+Set off, Spark, Companion, Retain and Exhaust. Numbers are starting values.
+
+- **Cook (6):** One More Charge, Sit Tight, Patience, Klee!, Half a Mountain,
+  Favonius Escort, Klee's Secret Base.
+- **Spray (9):** Jumpy Dumpty Mk.III, Spinning Sparkler, Fish Fry, Duck and
+  Run, Party Poppers, Boom Badge, Windblume Fireworks, Fireworks Finale,
+  Spark Knight.
+- **React (2):** Wait For It..., Aftershock.
+- **Mines (5):** Hiding Spot, Mine, All Mine!, Look Out!, Dodoco, Second
+  Surprise.
+- **The Companion route (6):** Playdate, Team Effort, Tag Along, Come Back
+  and Play!, Friendship Bracelet, Adventure Club.
+- **Retrieval (2):** Treasure Map, Alice's Detonator.
+
+Two names moved on a clash with shipped cards: Hide and Seek is **Hiding
+Spot**, and Jumpy Dumpty Mk.II is **Jumpy Dumpty Mk.III**.
+
 ## 6. The intended weakness, and how she survives anyway
 
 **She cannot stall, and she cannot block on demand.** Her only plain Block is
@@ -485,11 +507,11 @@ band:
 
 | Layer | Count | What it is | What it costs |
 |---|---|---|---|
-| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 9 Rares including the three rule-breakers (8 until R270 added Blazing Delight) | authoring, art |
+| Klee's own pool | 78 draftable since R276 (about 60 before) | 2 basics of her own; Cook, Spray, React, Mines and the Companion route; 18 Rares including the rule-breakers (§5.6) | authoring, art |
 | Personals | 4, up to 5 | The coven, one card each; an imaginary friend as the fifth | reward-slot share, art |
 | Caretaker stand-ins | 4 to 6 | Klee-only cards standing in for Diona, Kaeya, Barbara, Albedo today; Noelle and Jean once they have a Universal | authoring only |
 | Hexerei stand-ins | as many as earn one, 6 to 10 | Family-generic cards standing in for Fischl, Sucrose, Albedo, Durin, Nicole today, and Razor, Mona, Venti, Varka once they have Universals; inherited by future Hexerei characters | authoring only |
-| Klee-side readers | 3 to 4 | Inside the 60, keyed to the Hexerei tag and the Mondstadt nation tag | counted above |
+| Klee-side readers | 9 since R276 | Inside the pool, keyed to a Companion play: Coven Errand, Witches' Circle, Alice's Introduction Magic, and R276's Playdate, Team Effort, Friendship Bracelet, Come Back and Play!, Tag Along, Adventure Club | counted above |
 
 Stand-ins cost no art and no share of the reward slot, because a stand-in
 replaces the Universal only when Klee is the one dealt it. That is why the

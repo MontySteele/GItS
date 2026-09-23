@@ -462,6 +462,17 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # `CardPileCmd.Add(card, PileType.Hand, ...)`, the same
                   # verified door `KokomiPlan.Replay` takes.
                   "return_to_hand", "return_last_set_off",
+                  # THE POOL EXPANSION's five (R276). Each is one awaited call
+                  # into `ProtoBombPower` or `KleeExpansion`
+                  # (Powers/Prototype/KleeExpansion.cs): a flat growth of the
+                  # largest Bomb (One More Charge, Treasure Map), the largest
+                  # Bomb multiplied (Half a Mountain), a filtered pick out of
+                  # the discard pile (Treasure Map, Come Back and Play!), a
+                  # random Companion card made free this turn (Tag Along,
+                  # Adventure Club), and Alice's Detonator's install.
+                  "grow_largest", "multiply_largest_bomb",
+                  "fetch_from_discard", "add_random_companion",
+                  "grant_kapow_each_turn",
                   # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
@@ -1440,6 +1451,10 @@ PREDICATES_CS = {
     # beside it cannot disagree about what counts.
     "companion_played_this_turn":
         "KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0",
+    # R276 pool expansion: Sit Tight's quiet-turn Block, rule 7's first
+    # counter read the other way round.
+    "no_bomb_went_off_this_turn":
+        "KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn == 0",
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). tier0's own
     # `target_has_aura` predicate, which had no C# read until a companion row
     # printed it (Rosaria's Ravaging Confession).
@@ -1505,6 +1520,7 @@ PREDICATE_TEXT = {
         "this turn",
     "companion_played_this_turn":
         "If you played a [gold]Companion[/gold] card this turn",
+    "no_bomb_went_off_this_turn": "If no [gold]Bomb[/gold] went off this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
     "plan_carried_out_this_turn":
@@ -2065,7 +2081,11 @@ DETONATE_FIELDS = {"op", "target", "bonus"}
 # The Klee overhaul's own, same discipline (QUARANTINED, C.KLEE_OVERHAUL).
 #: `overflow` is R276's (Big Bounce): `bounce` sends the explosions' damage
 #: past the target's HP to a random other enemy as one plain Pyro hit.
-SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura", "overflow"}
+#: `wide_if` is R276's too (Team Effort), Coven Errand's field one verb
+#: over: the aimed Set off WIDENS to every enemy when the predicate holds,
+#: and the card's own hit stays on the aimed body.
+SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura", "overflow",
+                  "wide_if"}
 #: `wide_if` is R244's (Coven Errand): the printed target WIDENS to ALL enemies
 #: when the named predicate holds. A field on the op rather than a
 #: `conditional` around two `plant_bomb`s, because the card prints ONE Bomb
@@ -2098,6 +2118,24 @@ SPLIT_LARGEST_BOMB_FIELDS = {"op", "growth"}
 #: was -- there is nothing on either for a field to carry.
 RETURN_TO_HAND_FIELDS = {"op"}
 RETURN_LAST_SET_OFF_FIELDS = {"op"}
+#: THE POOL EXPANSION's five (R276), same discipline.
+#: One More Charge and Treasure Map: a FLAT growth of the largest Bomb, with
+#: One More Charge's optional draw when the grown Bomb reaches a bar.
+GROW_LARGEST_FIELDS = {"op", "amount", "draw_if_at_least", "draw"}
+#: Half a Mountain: the largest Bomb's size times `factor`.
+MULTIPLY_LARGEST_BOMB_FIELDS = {"op", "factor"}
+#: Treasure Map and Come Back and Play!: one card of a KIND out of the discard
+#: pile into the hand, the player choosing among the kind.
+FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
+FETCH_FROM_DISCARD_FILTERS = {"set_off", "companion"}
+#: Tag Along and Adventure Club: `amount` random Companion cards, free this turn.
+ADD_RANDOM_COMPANION_FIELDS = {"op", "amount"}
+#: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
+#: arrives upgraded is the card's own upgrade (`upgraded_grant`).
+GRANT_KAPOW_EACH_TURN_FIELDS = {"op"}
+#: Favonius Escort: `remove_bomb_for_block`'s Block is the removed size times
+#: this (Sorry, Jean... is the implicit 1).
+REMOVE_BOMB_FOR_BLOCK_FIELDS = {"op", "multiplier"}
 #: The one non-literal a `spend_spark` price may be spelled with: X, "spend
 #: all your Sparks". tier0's twin is `effects.SPEND_ALL`, and the two engines
 #: charge the same gate price for it (1) through their own readers.
@@ -2555,6 +2593,46 @@ APPLY_POWERS = {
     "ko_blazing_delight": ("BlazingDelightPower", None,
         "At the start of your turn, gain {X} [gold]Energy[/gold] and draw "
         "that many cards."),
+    # THE POOL EXPANSION (R276). Every class lives in
+    # klee-mod/KleeCode/Powers/Prototype/KleeExpansionPowers.cs, on the same
+    # quarantine as the block above. The {X} templates are for form; every row
+    # carries its own `description:` (EB-215).
+    "ko_playdate": ("PlaydatePower", None,
+        "The next [gold]Companion[/gold] card you play this turn costs 1 "
+        "less."),
+    "ko_boom_badge": ("BoomBadgePower", None,
+        "Your next [gold]Set off[/gold] card this turn is played twice."),
+    "ko_wait_for_it": ("WaitForItPower", None,
+        "This turn, the next time one of your [gold]Bombs[/gold] triggers an "
+        "[gold]Elemental Reaction[/gold], draw 2 cards and gain 1 "
+        "[gold]Energy[/gold]."),
+    "ko_party_poppers": ("PartyPoppersPower", None,
+        "Whenever you play a card that costs [gold]Sparks[/gold], place a "
+        "[gold]Bomb[/gold] {X} on a random enemy."),
+    "ko_look_out": ("LookOutPower", None,
+        "Whenever one of your [gold]Mines[/gold] goes off, gain {X} Block."),
+    "ko_patience": ("PatienceKleePower", None,
+        "At the end of your turn, if you played no [gold]Set off[/gold] card "
+        "this turn, your largest [gold]Bomb[/gold] grows by {X}."),
+    "ko_friendship_bracelet": ("FriendshipBraceletPower", None,
+        "Whenever you play a [gold]Companion[/gold] card, your largest "
+        "[gold]Bomb[/gold] grows by {X}."),
+    "ko_secret_base": ("SecretBasePower", None,
+        "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of "
+        "yours, place a [gold]Bomb[/gold] {X} on a random enemy."),
+    "ko_dodoco": ("DodocoPower", None,
+        "At the start of your turn, place a [gold]Mine[/gold] {X} on a "
+        "random enemy."),
+    "ko_aftershock": ("AftershockPower", None,
+        "The first time each turn a [gold]Bomb[/gold] of yours triggers an "
+        "[gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that "
+        "size on a random enemy."),
+    "ko_spark_knight": ("SparkKnightPower", None,
+        "Whenever you gain a [gold]Spark[/gold], deal {X} [gold]Pyro[/gold] "
+        "damage to a random enemy."),
+    "ko_second_surprise": ("SecondSurprisePower", None,
+        "Whenever one of your [gold]Mines[/gold] goes off, place a "
+        "[gold]Bomb[/gold] half its size on that enemy."),
     # THE COMPANION STAND-INS' FOUR (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs and is
     # compiled only under `-p:PrototypeCards=true`, so the only rows that may
@@ -3272,6 +3350,11 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # `EB-655` (Riptide). The `bonus_vs_debuff` RIDER's own
                        # number, where `damage` moves the base it rides on.
                        "bonus_vs_debuff",
+                       # R276 (Fish Fry): the proto all-enemies Bomb rider's
+                       # own number, `bonus_vs_debuff`'s twin; and Alice's
+                       # Detonator's upgraded Ka-pow!, a play-time IsUpgraded
+                       # read the face states in its own swap.
+                       "bonus_vs_bombed", "upgraded_grant",
                        "bonus_per_detonation", "bonus_slope",
                        # Fanfare rework Track C.2 (2026-07-28): the
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
@@ -3679,6 +3762,9 @@ def _x_formula_reason(card: dict, val) -> str | None:
 # scaling, which is the worst failure this generator has.
 RUNTIME_TIMES = {
     "salon_members": "SalonMemberPower.Count(Owner.Creature)",
+    # R276 (Fireworks Finale): the Sparks the all-in price just spent, the
+    # local `_stmt_spend_spark` declares ahead of the body.
+    "sparks_spent": "sparksSpent",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -3686,6 +3772,7 @@ RUNTIME_TIMES = {
 # happens to mirror it.
 RUNTIME_TIMES_TEXT = {
     "salon_members": " once per [gold]Salon Member[/gold]",
+    "sparks_spent": " for each [gold]Spark[/gold] spent",
 }
 
 
@@ -3912,8 +3999,45 @@ def blocked_reason(
                         # a big turn is three or four plays, not a pool.
                         r"\d+_per_companion_played_this_turn", bf):
                 return f"bonus_formula '{bf}'"
-            if "bonus_vs_bombed" in eff:
+            rider = damage_rider(card, eff)
+            if "bonus_vs_bombed" in eff and rider != "bonus_vs_bombed":
                 return "conditional damage bonus (needs bomb system)"
+            if rider is not None:
+                # R276, the prototype riders (`DAMAGE_RIDERS`). Each is ONE
+                # target spelling and literal numbers, because each is one
+                # awaited call into `ProtoBombPower` with the number handed in.
+                shape = {"plant_on_hit": "random_enemy",
+                         "grow_on_hit": "enemy",
+                         "only_if": "all_enemies",
+                         "bonus_vs_bombed": "all_enemies"}[rider]
+                if eff.get("target") != shape:
+                    return (f"damage {rider} rides a '{shape}' hit only "
+                            f"(target '{eff.get('target')}')")
+                if sum(1 for k in DAMAGE_RIDERS + ("bonus_vs_bombed",)
+                       if k in eff) > 1:
+                    return "damage carries two riders"
+                if rider == "only_if":
+                    if eff["only_if"] != "mined":
+                        return f"damage only_if '{eff['only_if']}'"
+                else:
+                    value = eff[rider]
+                    if not isinstance(value, int) or isinstance(value, bool)                             or value <= 0:
+                        return f"damage {rider} must be a positive literal int"
+                if not isinstance(eff.get("amount"), int):
+                    return f"damage {rider} needs a literal amount"
+                if not isinstance(eff.get("times", 1), int):
+                    return f"damage {rider} needs a literal times"
+                if rider in ("only_if", "bonus_vs_bombed")                         and eff.get("times", 1) != 1:
+                    return f"damage {rider} is one hit per enemy"
+            if eff.get("times") == "sparks_spent":
+                # R276 (Fireworks Finale): one hit per Spark the cost line
+                # spent, which is the bank at play only behind an all-in price
+                # paid FIRST -- `grow_largest_bomb`'s ordering rule.
+                head = card["effects"][0] if card["effects"] else {}
+                if (head.get("op") != "spend_spark"
+                        or head.get("amount") != SPEND_ALL):
+                    return ("damage times sparks_spent needs a `spend_spark: "
+                            "all` price as the row's FIRST effect")
             if "bonus_vs_aura" in eff:
                 if eff.get("target") not in {"enemy", "all_enemies"} \
                         or not isinstance(eff["bonus_vs_aura"], int):
@@ -3974,6 +4098,16 @@ def blocked_reason(
                 # random enemies. On an aimed or all-enemies Set off it would
                 # mean something else on each engine, so it is refused.
                 return "set_off times is random_enemy only"
+            wide = eff.get("wide_if")
+            if wide is not None:
+                # R276 (Team Effort): Coven Errand's widening, one verb over,
+                # read through the same predicate reader and the aimed
+                # spelling only, for plant_bomb's own reasons below.
+                if predicate_cs(wide) is None:
+                    return f"set_off wide_if predicate '{wide}'"
+                if eff.get("target") != "enemy":
+                    return ("set_off wide_if is the aimed spelling only "
+                            f"(target '{eff.get('target')}')")
         if op == "plant_bomb":
             unknown = set(eff) - PLANT_BOMB_FIELDS
             if unknown:
@@ -4027,7 +4161,55 @@ def blocked_reason(
                 return f"mine_bombs field(s) {sorted(unknown)} not understood"
             if eff.get("target") != "enemy":
                 return f"mine_bombs target '{eff.get('target')}'"
-        if op in {"remove_bomb_for_block", "draw_per_set_off",
+        if op == "remove_bomb_for_block":
+            # Sorry, Jean... carries no field; Favonius Escort (R276) carries
+            # the one number its face prints, "twice its size".
+            unknown = set(eff) - REMOVE_BOMB_FOR_BLOCK_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            mult = eff.get("multiplier", 1)
+            if not isinstance(mult, int) or isinstance(mult, bool)                     or mult < 1:
+                return ("remove_bomb_for_block multiplier must be a literal "
+                        "int >= 1")
+        # THE POOL EXPANSION's five (R276), same UNPARSEABLE discipline.
+        if op == "grow_largest":
+            unknown = set(eff) - GROW_LARGEST_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            for key in ("amount", "draw_if_at_least", "draw"):
+                value = eff.get(key)
+                if key != "amount" and value is None:
+                    continue
+                if not isinstance(value, int) or isinstance(value, bool)                         or value <= 0:
+                    return f"grow_largest {key} must be a positive literal int"
+            if ("draw" in eff) != ("draw_if_at_least" in eff):
+                return ("grow_largest draw and draw_if_at_least come as a "
+                        "pair: the draw is the bar's payout")
+        if op == "multiply_largest_bomb":
+            unknown = set(eff) - MULTIPLY_LARGEST_BOMB_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            factor = eff.get("factor")
+            if not isinstance(factor, int) or isinstance(factor, bool)                     or factor < 2:
+                return "multiply_largest_bomb factor must be a literal int >= 2"
+        if op == "fetch_from_discard":
+            unknown = set(eff) - FETCH_FROM_DISCARD_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("filter") not in FETCH_FROM_DISCARD_FILTERS:
+                return f"fetch_from_discard filter '{eff.get('filter')}'"
+        if op == "add_random_companion":
+            unknown = set(eff) - ADD_RANDOM_COMPANION_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount")
+            if not isinstance(amount, int) or isinstance(amount, bool)                     or amount <= 0:
+                return "add_random_companion amount must be a positive literal int"
+        if op == "grant_kapow_each_turn":
+            unknown = set(eff) - GRANT_KAPOW_EACH_TURN_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        if op in {"draw_per_set_off",
                   # R244's Alice's Introduction Magic: the window is a rule and
                   # the hand is whatever the hand is, so there is nothing for
                   # the row to say.
@@ -6255,6 +6437,23 @@ def build_vars(card: dict) -> list[str]:
                 if "bonus_formula" in eff and bonus_per_upgrade(card):
                     n = int(eff["bonus_formula"].partition("_per_")[0])
                     out.append(f'new DynamicVar("BonusPer", {n}m)')
+                # R276, the damage op's prototype riders. Each rider's own
+                # number takes the var its key already names elsewhere --
+                # `BombSize` for a per-hit Bomb, `Grow` for a per-hit growth,
+                # `ExtraDamage` for the Bomb bonus -- declared only when the
+                # upgrade must render it, the Sparks idiom.
+                rider = damage_rider(card, eff)
+                if (rider == "plant_on_hit" and bomb_size_upgrade(card)
+                        and eff is plant_bomb_var_effect(card)):
+                    out.append('new DynamicVar("BombSize", '
+                               f'{int(eff["plant_on_hit"])}m)')
+                if (rider == "grow_on_hit" and grow_upgrade(card)
+                        and eff is grow_var_effect(card)):
+                    out.append('new DynamicVar("Grow", '
+                               f'{int(eff["grow_on_hit"])}m)')
+                if rider == "bonus_vs_bombed":
+                    out.append(
+                        f'new ExtraDamageVar({eff["bonus_vs_bombed"]}m)')
             # An upgradeable HIT COUNT is independent of the damage var: A5's
             # Undercurrent upgrades times (3 -> 5) and leaves the per-hit 2
             # alone, so this is not an `elif` on the branches above.
@@ -6794,7 +6993,21 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         # EB-283. Each binds to the op that PRINTS the number, so a delta on a
         # row without that op is reported unexpressible rather than dropped.
-        "bomb_size": any(e["op"] == "plant_bomb" for e in effects),
+        "bomb_size": any(e["op"] == "plant_bomb"
+                         or (e["op"] == "damage" and "plant_on_hit" in e)
+                         for e in effects),
+        # R276 (Fish Fry): the proto all-enemies rider's own number, rendered
+        # through the ExtraDamage var its loop reads.
+        "bonus_vs_bombed": any(
+            e["op"] == "damage" and "bonus_vs_bombed" in e
+            and e.get("target") == "all_enemies"
+            and str(card.get("id") or "").startswith("proto_ko_")
+            for e in effects),
+        # R276 (Alice's Detonator): the granted Ka-pow! arrives upgraded, read
+        # at play time off `IsUpgraded` -- no var, and the face carries its own
+        # `{IfUpgraded:show:...}` swap.
+        "upgraded_grant": any(e["op"] == "grant_kapow_each_turn"
+                              for e in effects),
         "payload_mine": any(e["op"] == "plant_bomb"
                             and int(e.get("payload_mine_all", 0)) > 0
                             for e in effects),
@@ -8225,7 +8438,39 @@ def plant_bomb_var_effect(card: dict) -> dict | None:
     the var, for the reason `damage_var_effect` states -- two effects sharing
     one var name is a `DynamicVarSet` throw on the reward screen."""
     return next((fx for fx in card.get("effects", [])
-                 if fx.get("op") == "plant_bomb"), None)
+                 if fx.get("op") == "plant_bomb"
+                 # R276 (Jumpy Dumpty Mk.III): a `damage` op's per-hit Bomb
+                 # prints its size in the same slot and takes the same key.
+                 or (fx.get("op") == "damage" and "plant_on_hit" in fx)),
+                None)
+
+
+#: R276. THE DAMAGE OP'S PROTOTYPE RIDERS, each a per-hit clause that turns
+#: the plain `DamageCmd` into ONE awaited call into `ProtoBombPower`:
+#:   plant_on_hit: N -- each hit (a fresh random enemy per hit) places a
+#:                      Bomb N on the enemy it hit (Jumpy Dumpty Mk.III);
+#:   grow_on_hit:  N -- each hit on an enemy holding a Bomb grows that enemy's
+#:                      largest Bomb by N (Spinning Sparkler);
+#:   only_if: mined  -- the all-enemies hit lands only on enemies holding a
+#:                      Mine (Mine, All Mine!);
+#:   bonus_vs_bombed -- on an all-enemies proto hit, N more to each enemy
+#:                      holding a Bomb (Fish Fry), the shipped field's name.
+#: `proto_` rows only: the shipped sheets keep every refusal they had.
+DAMAGE_RIDERS = ("plant_on_hit", "grow_on_hit", "only_if")
+
+
+def damage_rider(card: dict, eff: dict) -> str | None:
+    """Which prototype rider this `damage` op carries, or None."""
+    if eff.get("op") != "damage":
+        return None
+    if not str(card.get("id") or "").startswith("proto_ko_"):
+        return None
+    for key in DAMAGE_RIDERS:
+        if key in eff:
+            return key
+    if "bonus_vs_bombed" in eff and eff.get("target") == "all_enemies":
+        return "bonus_vs_bombed"
+    return None
 
 
 def bomb_size_expr(card: dict, eff: dict) -> str:
@@ -8259,17 +8504,28 @@ def grow_var_effect(card: dict) -> dict | None:
                  or (fx.get("op") == "grow_largest_bomb"
                      and "per_spark" in fx)
                  or (fx.get("op") == "grow_bombs_off_aura"
-                     and "amount" in fx)), None)
+                     and "amount" in fx)
+                 # R276: One More Charge's flat growth, and Spinning
+                 # Sparkler's per-hit rider.
+                 or (fx.get("op") == "grow_largest" and "amount" in fx)
+                 or (fx.get("op") == "damage" and "grow_on_hit" in fx)),
+                None)
 
 
 #: Which field each of the four grow ops prints its number in.
 GROW_FIELD = {"grow_bombs": "amount", "merge_bombs": "growth",
               "grow_largest_bomb": "per_spark",
-              "grow_bombs_off_aura": "amount"}
+              "grow_bombs_off_aura": "amount",
+              # R276 (One More Charge, Treasure Map): a FLAT growth of the
+              # largest Bomb.
+              "grow_largest": "amount"}
 
 
 def grow_literal(eff: dict) -> int:
     """The printed grow number on whichever of the three ops carries it."""
+    if eff["op"] == "damage":
+        # R276 (Spinning Sparkler): the per-hit rider's number.
+        return int(eff.get("grow_on_hit", 0))
     return int(eff.get(GROW_FIELD[eff["op"]], 0))
 
 
@@ -8912,6 +9168,46 @@ def build_body(
                              f'(int)DynamicVars["{bomb_var(card)}"].BaseValue')
 
         elif op == "damage":
+            rider = damage_rider(card, eff)
+            if rider is not None:
+                # R276, the prototype riders (`DAMAGE_RIDERS`). ONE awaited
+                # call into `ProtoBombPower`, which owns the per-hit rule and
+                # deals each hit through the same `DamageCmd.Attack` a plain
+                # row takes -- so Strength, Vulnerable and the Pyro cadence
+                # land exactly as they do on any other hit of hers.
+                dmg = ("DynamicVars.Damage.BaseValue"
+                       if eff is damage_var_effect(card)
+                       else f"{int(eff['amount'])}m")
+                hits = int(eff.get("times", 1))
+                if rider == "plant_on_hit":
+                    size = _var_or_literal(
+                        bomb_size_upgrade(card)
+                        and eff is plant_bomb_var_effect(card),
+                        "BombSize", eff["plant_on_hit"])
+                    lines.append(
+                        "await ProtoBombPower.HitRandomAndPlant("
+                        "choiceContext, Owner.Creature, this, cardPlay, "
+                        f"{dmg}, {hits}, {size});")
+                elif rider == "grow_on_hit":
+                    _target_guard(lines, ctx)
+                    grow = _var_or_literal(
+                        grow_upgrade(card) and eff is grow_var_effect(card),
+                        "Grow", eff["grow_on_hit"])
+                    lines.append(
+                        "await ProtoBombPower.HitAndGrow("
+                        "choiceContext, cardPlay.Target, Owner.Creature, "
+                        f"this, cardPlay, {dmg}, {hits}, {grow});")
+                elif rider == "only_if":
+                    lines.append(
+                        "await ProtoBombPower.HitMined("
+                        "choiceContext, Owner.Creature, this, cardPlay, "
+                        f"{dmg});")
+                else:   # bonus_vs_bombed
+                    lines.append(
+                        "await ProtoBombPower.HitAllBombedBonus("
+                        "choiceContext, Owner.Creature, this, cardPlay, "
+                        f"{dmg}, DynamicVars.ExtraDamage.BaseValue);")
+                continue
             if calc_rider(card, eff) is not None:
                 # Face/preview and hit both route through the one var.
                 _emit_damage(card, eff, lines, ctx,
@@ -9320,6 +9616,21 @@ def build_body(
                     "await ProtoBombPower.SetOffAimedBouncing("
                     "choiceContext, cardPlay.Target, Owner.Creature, this, "
                     f"cardPlay, {damage});")
+            elif eff["target"] == "enemy" and eff.get("wide_if"):
+                # R276 (Team Effort). The predicate widens WHICH bodies go
+                # off; the card's own hit stays on the aimed one either way,
+                # so both arms hand in the same damage expression.
+                _target_guard(lines, ctx)
+                lines.append(f"if ({predicate_cs(eff['wide_if'])})")
+                lines.append(
+                    "    await ProtoBombPower.SetOffAllThenHit("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                    f"cardPlay, {damage});")
+                lines.append("else")
+                lines.append(
+                    "    await ProtoBombPower.SetOffAimed("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                    f"cardPlay, {damage});")
             elif eff["target"] == "enemy":
                 _target_guard(lines, ctx)
                 lines.append(
@@ -9407,9 +9718,13 @@ def build_body(
             # The Block IS the removed Bomb's own size, so the two halves are
             # one call and cannot disagree; there is no printed number here for
             # a face to get wrong.
+            # Favonius Escort (R276) prints "twice its size"; Sorry, Jean...
+            # prints no multiplier and keeps the call it always emitted.
+            mult = int(eff.get("multiplier", 1))
+            tail = f", {mult}" if mult != 1 else ""
             lines.append(
                 "await ProtoBombPower.RemoveLargestForBlockAndGain("
-                "choiceContext, Owner.Creature);")
+                f"choiceContext, Owner.Creature{tail});")
 
         elif op == "block_largest_bomb":
             # R252 (Careful Now). ONE call, so the number read and the number
@@ -9493,6 +9808,51 @@ def build_body(
             lines.append(
                 "await KleeOverhaulLedger.ReturnLastSetOff("
                 "Owner);")
+
+        # ---- THE POOL EXPANSION (R276) -----------------------------------
+        # Same discipline as the arm's block above: ONE awaited call per op,
+        # into `ProtoBombPower` or `KleeExpansion`, so the rule lives in the
+        # engine and a card cannot express a variant of it.
+        elif op == "grow_largest":
+            # One More Charge and Treasure Map. The growth, the bar and the
+            # draw are one call, so "if it is NOW 20 or more" reads the Bomb
+            # the growth just landed on and no other.
+            lines.append(
+                "await ProtoBombPower.GrowLargestBy(choiceContext, Owner, "
+                f"{grow_expr(card, eff)}, "
+                f"{int(eff.get('draw_if_at_least', 0))}, "
+                f"{int(eff.get('draw', 0))});")
+
+        elif op == "multiply_largest_bomb":
+            # Half a Mountain: the largest Bomb's current size, times the row.
+            lines.append(
+                "ProtoBombPower.MultiplyLargest(Owner.Creature, "
+                f"{int(eff['factor'])});")
+
+        elif op == "fetch_from_discard":
+            # Treasure Map and Come Back and Play!: the player picks one card
+            # of the KIND out of the discard pile; none of the kind, and the
+            # card plays on without it.
+            kind = {"set_off": "KleeExpansion.FetchKind.SetOff",
+                    "companion": "KleeExpansion.FetchKind.Companion"}[
+                        eff["filter"]]
+            lines.append(
+                "await KleeExpansion.FetchFromDiscard(choiceContext, Owner, "
+                f"{kind});")
+
+        elif op == "add_random_companion":
+            # Tag Along and Adventure Club: random Companion cards, free this
+            # turn.
+            lines.append(
+                "await KleeExpansion.AddRandomCompanions(choiceContext, "
+                f"Owner, {int(eff['amount'])});")
+
+        elif op == "grant_kapow_each_turn":
+            # Alice's Detonator. Whether the Ka-pow!s arrive upgraded is the
+            # CARD's upgrade, read here at install time (`upgraded_grant`).
+            lines.append(
+                "await AlicesDetonatorBasePower.Install(choiceContext, "
+                "Owner.Creature, IsUpgraded, this);")
 
         elif op == "companion_mark_hand":
             # R244 (Alice's Introduction Magic), R276 wording. ONE awaited call
@@ -10838,6 +11198,24 @@ def _authored_face_numbers(card: dict):
             yield ("damage", _authored_face_var(card, eff, "Damage"),
                    eff["amount"]) if owns \
                 else (None, None, eff["amount"])
+            # R276, the prototype riders' own numbers, in print order. A hit
+            # COUNT of 3 or more is printed ("3 times") and must be stepped
+            # past; a count of 2 prints "twice" and no digit, so it is not.
+            rider = damage_rider(card, eff)
+            times = eff.get("times", 1)
+            if rider and isinstance(times, int) and times >= 3:
+                yield (None, None, times)
+            if rider == "plant_on_hit":
+                mine = eff is plant_bomb_var_effect(card)
+                yield (("bomb_size", "BombSize", int(eff["plant_on_hit"]))
+                       if mine else (None, None, int(eff["plant_on_hit"])))
+            elif rider == "grow_on_hit":
+                mine = eff is grow_var_effect(card)
+                yield (("grow", "Grow", int(eff["grow_on_hit"]))
+                       if mine else (None, None, int(eff["grow_on_hit"])))
+            elif rider == "bonus_vs_bombed":
+                yield ("bonus_vs_bombed", "ExtraDamage",
+                       int(eff["bonus_vs_bombed"]))
         elif op == "set_off" and int(eff.get("damage", 0) or 0):
             owns = eff is set_off_damage_var_effect(card)
             yield ("damage", "Damage", int(eff["damage"])) if owns \
@@ -12455,6 +12833,8 @@ def build_upgrade(card: dict) -> list[str]:
                # for the same reason; its FLOOR is a play-time IsUpgraded read
                # (`grow_floor`) and never reaches this table.
                "grow_bombs_off_aura": "grow",
+               # R276, One More Charge's flat growth.
+               "grow_largest": "grow",
                "mend": "mend",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
@@ -12466,6 +12846,7 @@ def build_upgrade(card: dict) -> list[str]:
                "merge_bombs": 'DynamicVars["Grow"]',
                "grow_largest_bomb": 'DynamicVars["Grow"]',
                "grow_bombs_off_aura": 'DynamicVars["Grow"]',
+               "grow_largest": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
@@ -12593,6 +12974,33 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "DynamicVars.ExtraDamage.UpgradeValueBy("
             f'{int(deltas["bonus_vs_debuff"])}m);')
+    # R276, the damage op's prototype riders: each rider's own number moves
+    # through the var `build_vars` declared for it, on the key that already
+    # names that number elsewhere (see `DAMAGE_RIDERS`).
+    for eff in card["effects"]:
+        rider = damage_rider(card, eff)
+        if (rider == "plant_on_hit" and "bomb_size" in deltas
+                and "bomb_size" not in done
+                and eff is plant_bomb_var_effect(card)):
+            done.add("bomb_size")
+            lines.append('DynamicVars["BombSize"].UpgradeValueBy('
+                         f'{int(deltas["bomb_size"])}m);')
+        if (rider == "grow_on_hit" and "grow" in deltas
+                and "grow" not in done and eff is grow_var_effect(card)):
+            done.add("grow")
+            lines.append('DynamicVars["Grow"].UpgradeValueBy('
+                         f'{int(deltas["grow"])}m);')
+        if (rider == "bonus_vs_bombed" and "bonus_vs_bombed" in deltas
+                and "bonus_vs_bombed" not in done):
+            done.add("bonus_vs_bombed")
+            lines.append("DynamicVars.ExtraDamage.UpgradeValueBy("
+                         f'{int(deltas["bonus_vs_bombed"])}m);')
+    if "upgraded_grant" in deltas:
+        # R276 (Alice's Detonator). A play-time `IsUpgraded` read on the
+        # install, the `generate_cost_override` shape: nothing to bump here.
+        done.add("upgraded_grant")
+        lines.append("// upgraded_grant: the granted Ka-pow! arrives upgraded, "
+                     "read off IsUpgraded when the Power is installed.")
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
         # expressibility gated in upgrade_plan/conditional_bonus_upgrade).

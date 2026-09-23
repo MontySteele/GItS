@@ -217,6 +217,8 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # hand the arm owns.
     "bomb_went_off_this_turn",
     "bomb_reacted_this_turn",
+    # R276, Sit Tight: the same counter read the other way round.
+    "no_bomb_went_off_this_turn",
     # `EB-712`, the parameterised names -- and they are listed ONE BY ONE
     # rather than as prefixes, which is the conservative half of this row.
     # A prefix here would teach the pilot every member of its family at once,

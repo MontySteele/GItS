@@ -85,8 +85,10 @@ public class KleeOverhaulRoundThreeTests
         // FORTY-EIGHT SINCE R276 (2026-09-23, pick 1): five of the shelf cut,
         // four new rows (Hair Trigger, Explosive Frags, Where Did I Put It?,
         // Big Bounce).
+        // SEVENTY-EIGHT SINCE THE R276 POOL EXPANSION (2026-09-23): thirty
+        // rows toward the 78-card pool R276 ruled, in their own block.
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(48, slice.Count);
+        Assert.Equal(78, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
@@ -167,7 +169,10 @@ public class KleeOverhaulRoundThreeTests
         // Trap, a placer that carries a BombSize var and no Damage.
         // STILL ELEVEN AT R276: Long Fuse left and Big Bounce arrived, a Set
         // off with a hit of its own.
-        Assert.Equal(11, carriers.Count);
+        // THIRTEEN SINCE THE R276 POOL EXPANSION: Team Effort (a Set off with
+        // its own hit) and Windblume Fireworks (a Set off ALL whose AoE hit
+        // owns the var, Flame Dance's shape).
+        Assert.Equal(13, carriers.Count);
         foreach (var card in carriers)
         {
             Assert.Contains("{Damage:diff()}", Face(card));

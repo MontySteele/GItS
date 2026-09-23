@@ -78,7 +78,7 @@ namespace KleeMod.Powers;
 /// the tooltip now name every modifier folded into them
 /// (<see cref="Localization"/>), rather than the one that used to be named.
 /// </summary>
-public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
+public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 {
     /// <summary>
     /// BaseLib's AddModelLoc keys off Id.Entry for any model implementing this
@@ -1737,6 +1737,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         }
 
         await NotifyExplosionListeners(choiceContext, applier, target, size, reacted);
+        // R276, THE CHARGE-AWARE DOOR, after the bus so rule 4's Spark has
+        // landed first. Look Out! and Second Surprise need to know this was a
+        // MINE, Aftershock needs the charge's own size, and Wait For It...
+        // closes its one-shot window here -- none of which the bus carries.
+        await KleeExpansion.AfterChargeExploded(
+            choiceContext, applier, target, charge, reacted);
     }
 
     /// <summary>The body a log line names. `Monster.Title` is what the seat's
@@ -2290,12 +2296,25 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// twin: <c>klee_overhaul.remove_largest_for_block</c>, through
     /// <c>powers.modify_block_gained</c>.</summary>
     public static async Task RemoveLargestForBlockAndGain(
-        PlayerChoiceContext choiceContext, Creature applier)
+        PlayerChoiceContext choiceContext, Creature applier,
+        int multiplier = 1)
     {
         var size = await RemoveLargestForBlock(choiceContext, applier);
         if (size <= 0) return;
+        // R276 (Favonius Escort): "Gain Block equal to twice its size". The
+        // multiplier is the row's; Sorry, Jean... passes none and gains the
+        // size itself, exactly as before.
+        size = BlockForRemoved(size, multiplier);
         await CreatureCmd.GainBlock(applier, size, ValueProp.Move, null);
     }
+
+    /// <summary>R276. The Block a removed Bomb of <paramref name="size"/>
+    /// pays at <paramref name="multiplier"/> -- PURE, the half of
+    /// <see cref="RemoveLargestForBlockAndGain"/> a headless pin can read.
+    /// A multiplier below 1 reads as 1: the card can print no smaller one.
+    /// </summary>
+    public static int BlockForRemoved(int size, int multiplier) =>
+        size <= 0 ? 0 : size * System.Math.Max(1, multiplier);
 
     /// <summary>
     /// Careful Now (<c>R252</c>): gain Block equal to your largest Bomb, up to

@@ -835,6 +835,27 @@ CO_TENANCY_LEDGER = {
             "and being re-granted later cannot happen: nothing at this "
             "broadcast applies the mark, only a card play does, and a card "
             "play is strictly later",
+        ("Powers/Prototype/KleeExpansionPowers.cs", "SecretBasePower"):
+            "QUARANTINED (the Klee overhaul, R276). Klee's Secret Base reads "
+            "the board and places a Bomb. THE ORDERING QUESTION, answered: "
+            "its one co-tenant that writes the board is DodocoPower, so the "
+            "two do not run independently -- both call "
+            "KleeExpansion.RunTurnStartPlacements, whose per-turn ledger latch "
+            "runs Secret Base's check and then Dodoco's Mine in one fixed "
+            "order however the broadcast orders the two, the sim's "
+            "klee_overhaul._turn_start_expansion order",
+        ("Powers/Prototype/KleeExpansionPowers.cs", "DodocoPower"):
+            "QUARANTINED (the Klee overhaul, R276). Dodoco's Mine, placed "
+            "through the same sequencer as SecretBasePower above and AFTER "
+            "its check, so the one resource they share has one order. It "
+            "reads nothing else of this broadcast's",
+        ("Powers/Prototype/KleeExpansionPowers.cs", "AlicesDetonatorBasePower"):
+            "QUARANTINED (the Klee overhaul, R276). Alice's Detonator adds a "
+            "Ka-pow! (upgraded on the Plus twin) to the hand per stack. THE "
+            "ORDERING QUESTION, answered: it reads nothing but its own "
+            "Amount, and its one write is the hand, the write NaptimePower, "
+            "LionsFangPower and BlazingDelightPower already make here on the "
+            "same terms -- no co-tenant reads the hand's contents",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BlazingDelightPower"):
             "QUARANTINED (the Klee overhaul, `EB-732`). Per-turn Energy plus "
             "one draw per stack. THE ORDERING QUESTION, answered: it reads "
@@ -1136,6 +1157,28 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/KleeExpansionPowers.cs", "PlaydatePower"):
+            "QUARANTINED (the Klee overhaul, R276). Playdate's discount "
+            "expiring at the end of the turn that wrote it, "
+            "NextCompanionDiscountPower's shape and boundary exactly. Removes "
+            "itself and touches nothing a co-tenant reads",
+        ("Powers/Prototype/KleeExpansionPowers.cs", "BoomBadgePower"):
+            "QUARANTINED (the Klee overhaul, R276). Boom Badge's replay grant "
+            "expiring at the end of its turn, ReplayNextCompanionPower's "
+            "shape. Removes itself and touches nothing a co-tenant reads",
+        ("Powers/Prototype/KleeExpansionPowers.cs", "WaitForItPower"):
+            "QUARANTINED (the Klee overhaul, R276). Wait For It...'s "
+            "one-shot window closing unspent, SinfulHexPower's shape: what "
+            "pays it is a reacting explosion during the turn, never this "
+            "broadcast. Removes itself and touches nothing a co-tenant reads",
+        ("Powers/Prototype/KleeExpansionPowers.cs", "PatienceKleePower"):
+            "QUARANTINED (the Klee overhaul, R276). Patience, Klee!'s growth "
+            "of the largest Bomb on a turn with no Set off card. THE "
+            "ORDERING QUESTION, answered: it is HERE rather than at "
+            "BeforeSideTurnEnd precisely because BombEchoPower reads the "
+            "largest Bomb there, so the growth lands strictly after the echo "
+            "pays -- the sim's order in klee_overhaul.turn_end. No co-tenant "
+            "of this broadcast reads or writes a charge",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "NextCompanionDiscountPower"):
             "QUARANTINED (the Kokomi overhaul, draft 6). Rally's grant, "
