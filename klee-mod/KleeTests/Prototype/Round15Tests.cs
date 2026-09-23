@@ -82,15 +82,16 @@ public class Round15Tests
     [Fact]
     public void A_skills_damage_clause_is_a_powered_attack_and_weak_reads_it()
     {
-        // THE CARD IS A SKILL. Not incidentally: this is the exact card the
-        // seat watched go 3 -> 2, and its type is what it read as protection.
-        var oath = new ProtoKkKuragesOath();
+        // THE CARD IS A SKILL. The seat watched Kurage's Oath go 3 -> 2; since
+        // R276 pick 1 the Oath gains Block face-up, so the pin rides the Skill
+        // that still prints a face-up hit, Opening Gambit (5).
+        var oath = new ProtoKkOpeningGambit();
         Assert.Equal(CardType.Skill, oath.Type);
 
         // AND ITS DAMAGE CLAUSE IS A POWERED ATTACK. `CanonicalVars` is
         // protected, so it is read the way every other pin in this suite reads
         // it, and the `Props` on the emitted `DamageVar` is what the hook sees.
-        var vars = ((IEnumerable<DynamicVar>)typeof(ProtoKkKuragesOath)
+        var vars = ((IEnumerable<DynamicVar>)typeof(ProtoKkOpeningGambit)
             .GetProperty("CanonicalVars", All)!.GetValue(oath)!).ToList();
         var damage = vars.OfType<DamageVar>().Single();
 
@@ -107,9 +108,9 @@ public class Round15Tests
         Assert.Equal(0.75m, weak.ModifyDamageMultiplicative(
             enemy, 0m, damage.Props, wearer.Creature, null, null));
 
-        // 3 x 0.75 = 2.25, truncated by the printer to the 2 the seat read.
-        Assert.Equal(3m, damage.BaseValue);
-        Assert.Equal(2, new DynamicVar("x", damage.BaseValue * 0.75m).IntValue);
+        // 5 x 0.75 = 3.75, truncated by the printer to 3.
+        Assert.Equal(5m, damage.BaseValue);
+        Assert.Equal(3, new DynamicVar("x", damage.BaseValue * 0.75m).IntValue);
     }
 
     // ==================================================================

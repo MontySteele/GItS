@@ -93,21 +93,23 @@ public class KokomiPoolPassThreeTests
     }
 
     [Fact]
-    public void Feints_plan_still_deals_ten_and_upgrades_to_thirteen()
+    public void Feints_plan_applies_vulnerable_and_upgrades_to_two()
     {
+        // R276 pick 1: the Plan line is a debuff ready before the enemy's
+        // next swing, not the now-line's hit made bigger.
         var card = new ProtoKkFeint();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(CardRarity.Common, card.Rarity);
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.Damage, clause.Kind);
-        Assert.Equal(10, clause.Amount);
-        Assert.Contains("PlanDamage\"].UpgradeValueBy(3m)", Source("ProtoKkFeint"));
-        // `EB-660`: AND THE FACE SAYS SO. The row had a Plan clause and no
-        // printed Plan line, so the round-25 seat wrote a Plan with Feint,
-        // found the 10 by testing, and "did not know what it had written".
-        // Printed live off the Plan's own var, so a Smithed copy says 13.
-        Assert.Contains("[gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.",
+        Assert.Equal(KokomiPlan.Kind.ApplyVulnerable, clause.Kind);
+        Assert.Equal(1, clause.Amount);
+        Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
+        Assert.Contains("PlanPowerAmount\"].UpgradeValueBy(1m)",
+                        Source("ProtoKkFeint"));
+        // `EB-660`: AND THE FACE SAYS SO, live off the Plan's own var.
+        Assert.Contains("[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} "
+                      + "[gold]Vulnerable[/gold].",
                         Face(new ProtoKkFeint()));
     }
 
@@ -200,8 +202,13 @@ public class KokomiPoolPassThreeTests
         Assert.Contains("new ExtraDamageVar(4m)", source);
         Assert.Contains("DynamicVars.Damage.UpgradeValueBy(3m)", source);
         Assert.Contains("DynamicVars.ExtraDamage.UpgradeValueBy(2m)", source);
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(13, clause.Amount);
+        // R276 pick 1: the Plan line is Energy and a card, not a bigger hit.
+        var clauses = card.PlanClauses;
+        Assert.Equal(2, clauses.Count);
+        Assert.Equal(KokomiPlan.Kind.Energy, clauses[0].Kind);
+        Assert.Equal(1, clauses[0].Amount);
+        Assert.Equal(KokomiPlan.Kind.Draw, clauses[1].Kind);
+        Assert.Equal(1, clauses[1].Amount);
     }
 
     // ======================================================================
@@ -209,23 +216,22 @@ public class KokomiPoolPassThreeTests
     // ======================================================================
 
     [Fact]
-    public void Battle_plans_plan_is_a_draw_and_the_rider_and_no_energy()
+    public void Battle_plans_plan_raises_every_attack_this_turn()
     {
-        // THE ENERGY CLAUSE IS GONE. It paid the write back its own cost, so
-        // writing was free and the now-line was a strictly smaller card. What
-        // replaced it is DAMAGE and not a discount (`EB-668`).
+        // R276 pick 1: "This turn, your Attacks deal 3 additional damage."
+        // The shipped Attack Up window, applied at carry-out; 4 upgraded.
         var card = new ProtoKkBattlePlan();
-        var clauses = card.PlanClauses;
-        Assert.Equal(2, clauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Draw, clauses[0].Kind);
-        Assert.Equal(2, clauses[0].Amount);
-        Assert.Equal(KokomiPlan.Kind.NextAttackDamage, clauses[1].Kind);
-        // A RIDER AND NOT A NUMBER: the size is the rule's, so the clause
-        // carries none -- `PLAN_AMOUNTLESS_OPS`.
-        Assert.Equal(0, clauses[1].Amount);
-        Assert.Equal(KokomiPlan.Aim.Self, clauses[1].Aim);
-        Assert.DoesNotContain(clauses, c => c.Kind == KokomiPlan.Kind.Energy);
-        Assert.Contains("deals 4 additional damage", Face(card));
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal(KokomiPlan.Kind.AttackDamageThisTurn, clause.Kind);
+        Assert.Equal(3, clause.Amount);
+        Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
+        Assert.Contains("DynamicVars[\"PlanAttackBonus\"].UpgradeValueBy(1m)",
+                        Source("ProtoKkBattlePlan"));
+        Assert.Contains("your Attacks deal {PlanAttackBonus:diff()} additional "
+                      + "damage", Face(card));
+        Assert.Contains(
+            Il.CallSequence(Il.Method("KokomiPlan", "ResolveOne")),
+            c => c.Contains("PowerCmd.Apply<AttackUpThisTurnPower>"));
     }
 
     [Fact]

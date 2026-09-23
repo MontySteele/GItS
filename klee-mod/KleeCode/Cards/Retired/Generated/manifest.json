@@ -242,6 +242,11 @@
       "owner": "klee"
     },
     {
+      "id": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+      "class": "RetiredProtoPearlBarrageTurn",
+      "owner": "klee"
+    },
+    {
       "id": "KLEEMOD-PROTO_POP_SPARK",
       "class": "RetiredProtoPopSpark",
       "owner": "klee"

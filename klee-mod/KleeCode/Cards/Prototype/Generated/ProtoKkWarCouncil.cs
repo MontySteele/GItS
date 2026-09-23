@@ -38,14 +38,14 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_war_council");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "War Council"),
-        ("description", "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage and apply 1 [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,14 +54,13 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.AllEnemies),
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 2, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new KokomiPlan.PlanDamageVar(5m)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,12 +79,12 @@ public sealed class ProtoKkWarCouncil : CustomCardModel, ICharacterCard, IPlanne
         }
         foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
         {
-            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
+            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanDamage"].UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

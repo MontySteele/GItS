@@ -45,7 +45,7 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feigned Retreat"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] and deal {PlanDamage:diff()} damage."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage. If you lost no HP since you wrote this, deal {PlanUnhurtDamage:diff()} instead."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,16 +54,15 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Block, DynamicVars["PlanBlock"].IntValue, KokomiPlan.Aim.Self),
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.DamageIfUnhurt, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy, Alt: DynamicVars["PlanUnhurtDamage"].IntValue),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move),
-            new UnsourcedBlockVar("PlanBlock", 4m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(6m)
+            new BlockVar(6m, ValueProp.Move),
+            new DynamicVar("PlanDamage", 9m),
+            new DynamicVar("PlanUnhurtDamage", 14m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -86,7 +85,7 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(2m);
-        DynamicVars["PlanBlock"].UpgradeValueBy(2m);
-        DynamicVars["PlanDamage"].UpgradeValueBy(2m);
+        DynamicVars["PlanDamage"].UpgradeValueBy(3m);
+        DynamicVars["PlanUnhurtDamage"].UpgradeValueBy(4m);
     }
 }

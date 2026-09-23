@@ -178,16 +178,10 @@ public class Round17Tests
     [Fact]
     public void The_three_readers_still_ask_the_one_ledger()
     {
-        // What makes the fix a fix rather than three: Well Laid's face var,
-        // Tide Wall's clause and Tide Chart's promise all read the same
-        // property, so moving the property moved all three.
-        var wellLaid = System.IO.File.ReadAllText(
-            System.IO.Path.Combine(Repo(), "klee-mod", "KleeCode", "Cards",
-                                   "Prototype", "Generated",
-                                   "ProtoKkWellLaid.cs"));
-
-        Assert.Contains("KokomiOverhaulLedger.For(card.Owner.Creature)"
-                      + ".PlansThisMorning", wellLaid);
+        // What makes the fix a fix rather than three: the per-Plan clause and
+        // Tide Chart's promise read the same property. (R276 pick 1 re-aimed
+        // Well Laid and Tide Wall off the morning; the property and its two
+        // readers stand.)
         Assert.Contains(
             Il.Calls(Il.Method("KokomiPlan", "PromisedDraw")),
             c => c.Contains("PlansThisMorning"));
@@ -199,18 +193,15 @@ public class Round17Tests
     [Fact]
     public void Well_laids_face_reads_as_a_result_and_not_a_promise()
     {
-        // `EB-539` (r19 lane 2) TOOK THE RULE OFF THIS FACE and left the
-        // result. The clause was written here so the face would read as a
-        // result rather than a promise ("already including", never "Deals N
-        // more"), and on a BARE morning that reading broke the other way: 2
-        // cannot already include a 3 that nothing paid. A card has one face,
-        // so the rule went to the rider tip and the number stayed. The
-        // ORIGINAL requirement -- a result, not a promise -- is stricter now
-        // than it was: the face is the total and nothing else.
+        // R276 pick 1 re-aimed Well Laid off the morning onto the enemy's
+        // debuffs, a count the reader can see on the board, so the face
+        // prints its rule and both of its numbers.
         var face = Face(new ProtoKkWellLaid());
 
-        Assert.Equal("Deal {CalculatedDamage:diff()} damage.", face);
-        Assert.DoesNotContain("Deals", face);
+        Assert.Equal("Deal {CalculationBase:diff()} damage, plus "
+                   + "{ExtraDamage:diff()} for each debuff on the enemy.",
+                     face);
+        Assert.DoesNotContain("Plan", face);
     }
 
     [Fact]

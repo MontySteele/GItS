@@ -128,7 +128,11 @@ def test_the_depth_is_read_once_at_the_drain():
     assert body.index("kk_plans_this_morning") < body.index("_drain")
 
 
-# ---- EB-501: what Well Laid pays -----------------------------------------
+# ---- R276: what Well Laid pays now ----------------------------------------
+#
+# R276 pick 1 RE-AIMED Well Laid off Plan volume: "Deal 3 damage, plus 3 for
+# each debuff on the enemy." The morning count above still stands for the
+# rules that read it (Tide Chart); the card no longer does.
 
 def _well_laid_damage(state) -> int:
     row = _row("proto_kk_well_laid")
@@ -138,50 +142,34 @@ def _well_laid_damage(state) -> int:
     return before - state.enemies[0].hp
 
 
-def test_well_laid_pays_its_floor_on_an_empty_morning():
+def test_well_laid_pays_its_floor_on_a_clean_enemy():
     state = _state()
-    kokomi_plan.resolve_all(state)
-
-    assert _well_laid_damage(state) == 2
+    assert _well_laid_damage(state) == 3
 
 
-def test_well_laid_pays_three_per_carry_out():
+def test_well_laid_pays_three_per_distinct_debuff():
+    state = _state()
+    state.enemies[0].powers["weak"] = 3          # one debuff, three stacks
+    assert _well_laid_damage(state) == 3 + 3
+    state = _state()
+    state.enemies[0].powers["weak"] = 1
+    state.enemies[0].powers["vulnerable"] = 1
+    # Vulnerable multiplies the hit as it always does: (3 + 6) * 1.5.
+    assert _well_laid_damage(state) == int((3 + 6) * C.VULNERABLE_TAKEN_MULT)
+
+
+def test_well_laid_ignores_the_morning():
     state = _state()
     _write(state, [{"op": "draw", "amount": 1}])
     kokomi_plan.resolve_all(state)
-
-    assert _well_laid_damage(state) == 2 + 3
-
-
-def test_a_doubled_morning_pays_well_laid_six():
-    """The row's acceptance."""
-    state = _state(ascension=True)
-    _write(state, [{"op": "draw", "amount": 1}])
-    kokomi_plan.resolve_all(state)
-
-    assert _well_laid_damage(state) == 2 + 6
+    assert _well_laid_damage(state) == 3
 
 
-def test_well_laids_face_prints_the_live_total_and_nothing_else():
-    """`EB-539` (Kokomi r19 lane 2, a D default). The face used to carry the
-    rule as well as the number -- "Deal 2 damage, already including 3 for each
-    Plan carried out this morning" -- and on a BARE morning the seat read that
-    as self-contradictory: 2 cannot already include a 3 that nothing paid. It
-    was `EB-441`'s clause working exactly as written, on the one board where
-    the fold is zero.
-
-    A card has ONE face and no runtime branch can print two live numbers
-    (`CardModel.Description` is not virtual; BaseLib's only runtime swap is
-    `{IfUpgraded:show:}`, which asks about the card and not the board), so the
-    remedy is the codebase's own for this shape -- Undertow's `ForDebuffRider`
-    (`EB-484`), one count over. The FACE prints the live total; the RULE and
-    the live count go on the rider tip
-    (`KokomiRiderTips.ForMorningDamageRider`)."""
+def test_well_laids_face_prints_its_rule():
     face = _face("proto_kk_well_laid")
-
-    assert face == "Deal {CalculatedDamage:diff()} damage."
-    assert "already including" not in face
-    assert "Deals" not in face
+    assert face == ("Deal {CalculationBase:diff()} damage, plus "
+                    "{ExtraDamage:diff()} for each debuff on the enemy.")
+    assert "Plan" not in face
 
 
 # ---- EB-503: Tide Chart --------------------------------------------------

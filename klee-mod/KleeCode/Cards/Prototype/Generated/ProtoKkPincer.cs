@@ -34,7 +34,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
-    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
+    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
@@ -51,7 +51,7 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pincer"),
-        ("description", "Deal {Damage:diff()} damage twice. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage three times."),
+        ("description", "Deal {Damage:diff()} damage twice. [gold]Plan[/gold]: This turn, your first Attack is played twice."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,14 +60,13 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy, Times: 3),
+            new KokomiPlan.Planned(KokomiPlan.Kind.FirstAttackTwice, 0, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(3m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(3m)
+            new DamageVar(3m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -96,6 +95,5 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(1m);
-        DynamicVars["PlanDamage"].UpgradeValueBy(1m);
     }
 }

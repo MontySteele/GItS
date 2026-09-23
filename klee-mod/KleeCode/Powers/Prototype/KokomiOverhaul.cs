@@ -3,7 +3,7 @@ namespace KleeMod.Powers;
 /// <summary>
 /// THE KOKOMI OVERHAUL SWITCH, C# side. Twin of tier0's <c>C.KOKOMI_OVERHAUL</c>.
 ///
-/// The ruled brief (<c>review/active/kokomi-brief-2026-09-01.md</c> DRAFT 6,
+/// The ruled brief (<c>review/active/kokomi-brief-2026-09-01.md</c> DRAFT 7,
 /// direction ruled R240 and approved R241) replaces her whole rule set with ONE
 /// idea: the <b>Bake-Kurage</b> is a pet on her side of the field for the whole
 /// combat that enemies cannot touch; a card with a <b>Plan</b> line can be
@@ -12,8 +12,10 @@ namespace KleeMod.Powers;
 /// line; a planned hit lands on the front enemy unless the line says every
 /// enemy, and her Strength and Dexterity count; nothing happens by itself.
 /// <b>Mend</b> heals and never above the HP she entered the fight with. Slice
-/// one (<c>kokomi-overhaul-slice-1-2026-09-01.md</c> draft 6) is the ten-card
-/// starter, 26 pool rows, Tamakushi Casket and the engine list in its sec.5.
+/// one (<c>kokomi-overhaul-slice-1-2026-09-01.md</c> draft 6) was the ten-card
+/// starter, 26 pool rows, Tamakushi Casket and the engine list in its sec.5;
+/// the pool passes since have made it 39 rows
+/// (<c>KokomiOverhaulRoster.Slice()</c>).
 ///
 /// DRAFT 2's RULES ARE GONE, NOT OFF. Tide, Surge, Exert, the pulse and its
 /// budget, the Garment, Strength-to-Tide, Orders and Tactics are cut by the
@@ -43,7 +45,7 @@ namespace KleeMod.Powers;
 ///   * <c>Kokomi.StartingRelics</c> -- Tamakushi Casket instead of the Pearl
 ///     of Wisdom, because the Pearl IS the exhaust funnel this arm retires.
 ///   * <c>KokomiCardPool.FilterThroughEpochs</c> -- her whole offerable pool is
-///     the slice's 26 rows (<see cref="KokomiOverhaulRoster.OfferablePool"/>).
+///     the slice's 39 rows (<see cref="KokomiOverhaulRoster.OfferablePool"/>).
 ///   * <see cref="ArmStarterBasics"/> -- which pair of basics is HERS when a
 ///     base-game effect asks the character rather than reading her deck.
 ///     `EB-351` added it: Large Capsule reads `CardPool.AllCards`, which the

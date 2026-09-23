@@ -406,7 +406,8 @@ public class KleeOverhaulRoundThreeTests
         // Water's Edge, the row `EB-277` was found on, is GONE (R242): her
         // basics are the base game's Strike and Defend, whose +3 the base game
         // owns. Coral Bulwark carries the Block half of the same pin.
-        AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 6m, 9m);
+        // R276 pick 1: Coral Bulwark gains 7, 10 upgraded.
+        AssertUpgradeMoves<ProtoKkCoralBulwark>("Block", 7m, 10m);
         // Ka-pow! carries the `set_off`-hit clause again: round 5 pick 1 moved
         // Retain onto the BASE card, which handed its upgrade back to the
         // default rule. Fwoosh! prints the same clause beside it: aimed and
@@ -435,7 +436,9 @@ public class KleeOverhaulRoundThreeTests
         // Mend 3 since 2026-09-02 ([USER]: "15 is a lot. Maybe 3 (6 on
         // Plan)"), and the +2 rides the new base like every other delta in
         // this pass.
-        AssertUpgradeMoves<ProtoKkTheMoonAShip>("Mend", 3m, 5m);
+        // R276 pick 1 moved The Moon's Mend onto its Plan line (6, 8
+        // upgraded) and gave it a Block now-line.
+        AssertUpgradeMoves<ProtoKkTheMoonAShip>("PlanMend", 6m, 8m);
         // The multi-hit clause: +1 PER HIT rather than +3 once.
         AssertUpgradeMoves<ProtoKoRapidFire>("Damage", 3m, 4m);
     }

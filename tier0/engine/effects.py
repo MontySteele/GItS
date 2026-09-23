@@ -374,6 +374,13 @@ def _runtime_count(state: CombatState, token: str,
         # is the printed difference between "this turn" and "this morning".
         # The C# twin is `KokomiOverhaulLedger.PlansThisMorning`.
         return state.kk_plans_this_morning
+    if token == "debuffs_on_target":
+        # QUARANTINED USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
+        # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
+        # card's single target is the default aim when it resolves. DISTINCT
+        # debuffs, not stacks -- `kokomi_plan.debuff_count`, the twin of
+        # `KokomiOverhaulKit.DebuffCount`.
+        return kokomi_plan.debuff_count(_default_target(state))
     if token == "plans_held":
         # QUARANTINED USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
         # Tide Chart, "draw 1 card for each Plan the Bake-Kurage holds".
@@ -750,6 +757,21 @@ def _is_off_sheet_card(state: CombatState, card: Card) -> bool:
     return owner != mine
 
 
+def _every_damaging_card_carries_element(state: CombatState) -> bool:
+    """R276 pick 2: KOKOMI'S ARM ELEMENTS EVERY DAMAGING CARD OF HERS.
+
+    Her Attacks applied Hydro and five of her Skills dealt damage face-up and
+    applied nothing (Ambush, War Council, Opening Gambit, Chain of Command,
+    Kurage's Oath's now-line); the split was a trap when reading a card. Under
+    the arm the catalyst cadence reaches every type of card of hers that deals
+    damage. The base game's cards are still outside it (`_is_off_sheet_card`),
+    and Klee's arm keeps the Attack-only rule.
+
+    Twins: `CatalystCadence.EveryDamagingCardCarriesElement` (C#) and the
+    codegen's `gen_klee_cards.CATALYST_EVERY_CARD`."""
+    return kokomi_plan.live(state)
+
+
 def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     """Cadence dial (design doc §2.3; Furina kickoff §1).
 
@@ -797,7 +819,10 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
             return None
         return (card.element if card.element != "none"
                 else state.player.element)
-    if (card.type == "attack" and fx["op"] == "damage"
+    if ((card.type == "attack"
+         or (_every_damaging_card_carries_element(state)
+             and not card.is_companion))
+            and fx["op"] == "damage"
             and state.player.cadence == "catalyst"
             and not _is_off_sheet_card(state, card)):
         return card.element if card.element != "none" else state.player.element
@@ -3980,6 +4005,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # resolved in `_runtime_count` for this registry's own reason: the loader
     # validates every count token at LOAD off this set.
     "plans_carried_out_this_morning",
+    # QUARANTINED USE ONLY (R276) -- Well Laid's "for each debuff on the
+    # enemy". Same registry reason as the two above.
+    "debuffs_on_target",
     # QUARANTINED USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -6360,6 +6388,12 @@ OPS = {
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
     # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
     "next_attack_damage": _op_kokomi_plan_only,
+    # R276 PICK 1, the halves rewrite: five Plan-only clauses.
+    "first_attack_twice": _op_kokomi_plan_only,
+    "first_card_free": _op_kokomi_plan_only,
+    "damage_if_unhurt": _op_kokomi_plan_only,
+    "attack_damage_this_turn": _op_kokomi_plan_only,
+    "block_front_intent": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
     # and re-aim what is already written (Converging Tide). They are the
@@ -6802,7 +6836,10 @@ def player_turn_start_triggers(state: CombatState) -> None:
     # hook already sat -- and it is inert either way, because neither power
     # reads the hand, the deck or the energy: each only moves a meter.
     n = p.powers.get("charge_per_turn", 0)         # Princess of Watatsumi
-    if n:
+    # R276: under Kokomi's arm the card pays on the Plan instead
+    # (`kokomi_plan.PRINCESS_OF_WATATSUMI`); the mod applies no
+    # ChargePerTurnPower there, so this entry is never read.
+    if n and not kokomi_plan.live(state):
         resources.gain_charge(state, n, "charge_per_turn")
     n = p.powers.get("encore_per_turn", 0)         # All the World's a Stage
     if n:

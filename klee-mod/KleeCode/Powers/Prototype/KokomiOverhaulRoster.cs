@@ -42,7 +42,8 @@ namespace KleeMod.Powers;
 /// Muster that transforms, a Burst that gates. Slice one's own scope statement
 /// is that the 26 rows are her only reward pool for the prototype run; R246
 /// pick 2 added the two defensive rows `EB-335` builds, making it 28, and
-/// round 9 pick 1's tempo shelf added two more, making it 30.
+/// round 9 pick 1's tempo shelf added two more, making it 30, and the pool
+/// passes since have made it 39.
 ///
 /// THE OVERHAUL WINS WHERE IT MEETS THE KURAGE'S MEMORY. A dev build compiles
 /// this arm AND that one, and both want her starter. They are alternatives, not

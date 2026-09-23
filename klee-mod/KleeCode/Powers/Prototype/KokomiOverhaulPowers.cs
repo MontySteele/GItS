@@ -115,6 +115,51 @@ public sealed class SongOfPearlsPower
 }
 
 /// <summary>
+/// Princess of Watatsumi, her Ancient, UNDER THE ARM (R276 hygiene):
+/// "Whenever the Bake-Kurage carries out a Plan, gain 2 Block and draw 1
+/// card." The shipped card grants Charge every turn, a resource this arm turns
+/// off, so a Dusty Tome handed an arm run a dead pick.
+/// <see cref="KleeMod.Cards.Kokomi.PrincessOfWatatsumi"/> applies this instead
+/// of <see cref="ChargePerTurnPower"/> while the arm is live for her, and the
+/// shipped behaviour is untouched off the arm.
+///
+/// EVERY PLAN, NOT ONCE A TURN. Treatise and Song of Pearls are capped at a
+/// turn by [USER]'s 2026-09-02 ruling because they were Uncommons stacking
+/// with each other; this is the one Ancient, the Tome's single grant, and its
+/// printed text says "Whenever". The Block is POWERED for Song of Pearls'
+/// reason (rule 3: her Dexterity counts on what a Plan pays).
+///
+/// <see cref="PowerModel.Amount"/> is the Block; the draw is always 1.
+/// Sim twin: <c>kokomi_plan.PRINCESS_OF_WATATSUMI</c>.
+/// </summary>
+public sealed class PrincessOfWatatsumiPlanPower
+    : PowerModel, ILocalizationProvider, IKokomiPlanListener
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Princess of Watatsumi"),
+        ("description",
+            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+          + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold] "
+          + "and draw 1 card."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public async Task OnPlanResolved(
+        PlayerChoiceContext choiceContext, Creature kokomi)
+    {
+        if (kokomi != Owner) return;                 // co-op: your plans only
+        var player = Owner?.Player;
+        if (Owner == null || player == null || Amount <= 0) return;
+        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
+        await CardPileCmd.Draw(choiceContext, 1, player);
+    }
+}
+
+/// <summary>
 /// The Clouds Like Waves Rippling (Rare): "Whenever you apply a debuff to an
 /// enemy, gain 2 Block."
 ///
@@ -351,6 +396,109 @@ public sealed class NextAttackDamagePower : PowerModel, ILocalizationProvider
         // none of its now-line resolves, so it is not "an Attack you played"
         // in the sense the face means, and the rider waits for one that is.
         if (KokomiPlan.PlayedOnPet(cardPlay)) return;
+        if (!cardPlay.IsLastInSeries) return;
+        await PowerCmd.Remove(this);
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
+/// PINCER's carry-out (R276 pick 1): "This turn, your first Attack is played
+/// twice." The base game's replay surface (<c>ModifyCardPlayCount</c>), the
+/// shape <see cref="ReplayNextCompanionPower"/> takes one card type over.
+///
+/// A WRITE NEITHER TAKES NOR SPENDS IT, Battle Plan's old rider's rule: a card
+/// dragged onto the Bake-Kurage resolves none of its face, so it is not "an
+/// Attack played" in the sense the face means -- and doubling a write would
+/// queue the same Plan twice. Removed by the face-up Attack that spends it,
+/// and at the end of her turn either way ("this turn"). Sim twin:
+/// <c>kokomi_plan.FIRST_ATTACK_TWICE</c>.
+/// </summary>
+public sealed class FirstAttackTwicePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Pincer"),
+        ("description",
+            "This turn, your first Attack is played twice."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override int ModifyCardPlayCount(
+        CardModel card, Creature? target, int playCount)
+    {
+        if (card.Type != CardType.Attack) return playCount;
+        if (card.Owner?.Creature != Owner) return playCount;
+        if (BakeKuragePet.Is(target)) return playCount;
+        return playCount + 1;
+    }
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (cardPlay.Card.Type != CardType.Attack) return;
+        if (cardPlay.Card.Owner?.Creature != Owner) return;
+        if (KokomiPlan.PlayedOnPet(cardPlay)) return;
+        if (!cardPlay.IsLastInSeries) return;
+        await PowerCmd.Remove(this);
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
+/// STOLEN CHAPTER's carry-out (R276 pick 1): "This turn, the first card you
+/// play costs 0." The cost seam Rally's discount rides
+/// (<see cref="NextCompanionDiscountPower"/>), which is handed no
+/// <c>CardPlay</c> -- and needs none here: a card written on the Bake-Kurage IS
+/// played and paid for, so the first card is the first card either way. An
+/// auto-play pays nothing and does not spend it. Removed at the end of her
+/// turn either way. Sim twin: <c>kokomi_plan.FIRST_CARD_FREE</c>.
+/// </summary>
+public sealed class FirstCardFreePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Stolen Chapter"),
+        ("description",
+            "This turn, the first card you play costs 0."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override bool TryModifyEnergyCostInCombat(
+        CardModel card, decimal originalCost, out decimal modifiedCost)
+    {
+        modifiedCost = originalCost;
+        if (card.Owner?.Creature != Owner) return false;
+        if (originalCost <= 0m) return false;
+        modifiedCost = 0m;
+        return true;
+    }
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (cardPlay.Card.Owner?.Creature != Owner) return;
+        if (cardPlay.IsAutoPlay) return;
         if (!cardPlay.IsLastInSeries) return;
         await PowerCmd.Remove(this);
     }

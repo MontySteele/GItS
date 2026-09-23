@@ -256,7 +256,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKuragesOathMemory>(),
             ModelDb.Card<ProtoMiGorouCrystalCollapse>(),
             ModelDb.Card<ProtoMusterSubsidyFunnel>(),
-            ModelDb.Card<ProtoPearlBarrageTurn>(),
         };
 
     /// <summary>Prototype rows owned by one character, or none.</summary>

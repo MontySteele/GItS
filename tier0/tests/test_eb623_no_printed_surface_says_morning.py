@@ -121,10 +121,14 @@ def test_the_engine_still_names_the_morning():
     strings rather than a grep on the tree: the ops, the counters and the
     accessors keep the word, because renaming them would move a rule while
     pretending to move a sentence."""
-    surface = (REPO / "docs" / "prototype-surface.yaml").read_text(
+    # R276 took both spellings off the SHEET (Tide Wall and Well Laid were
+    # re-aimed), and the engine keeps them registered.
+    plan = (REPO / "tier0" / "engine" / "kokomi_plan.py").read_text(
         encoding="utf-8")
-    assert "block_per_plan_this_morning" in surface
-    assert "plans_carried_out_this_morning" in surface
+    assert "block_per_plan_this_morning" in plan
+    engine = (REPO / "tier0" / "engine" / "effects.py").read_text(
+        encoding="utf-8")
+    assert "plans_carried_out_this_morning" in engine
 
     state = (REPO / "tier0" / "engine" / "state.py").read_text(encoding="utf-8")
     assert "kk_plans_this_morning" in state

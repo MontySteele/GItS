@@ -1,4 +1,4 @@
-Status: OPEN (draft 7; the live Paper artefact for the Prototype build, carrying R241, R242, R250, R265, R266, R267 and R268)
+Status: OPEN (draft 7; the live Paper artefact for the Prototype build, carrying R241, R242, R250, R265, R266, R267, R268 and R276)
 
 # Kokomi overhaul brief, draft 7: the Plan
 
@@ -62,11 +62,23 @@ cards, as the healing law already has it (`LAW.md`, card-sheet rules).
 
 ## 3. The decision, and why the old drafts had none
 
-Every Plan card in hand asks the same question: now, or next turn for
-more. The enemy's intent this turn is the price of waiting, the plain
-basics are what you spend while the plan cooks, what lands next turn is
-the reward, and three Plans written on one turn land together the next
-morning, after you draw, which is the moment the kit is built around.
+Every Plan card in hand asks the same question: answer this turn, or
+buy something only a head start can buy. The enemy's intent this turn is
+the price of waiting, the plain basics are what you spend while the plan
+cooks, what lands next turn is the reward, and three Plans written on one
+turn land together the next morning, after you draw, which is the moment
+the kit is built around.
+
+**The halves rule (R276 pick 1).** The now-line answers this turn; the
+Plan line buys something only a head start can buy. The two halves are
+never the same effect at two sizes. When "later" was the same thing but
+bigger, the only reason to play a card now was this turn's incoming
+damage, so a safe turn had one right play: write everything ([USER],
+2026-09-23: "generally not a choice so much as a math problem"). A
+now-line does what matters this turn (draw or filter, a debuff that
+multiplies this turn's plays, Block, a kill); a Plan line does what is
+worth more for being early (Energy or cards for tomorrow, a debuff up
+before the next swing, Block sized to the next attack, a board read).
 Drafts 2 to 5 had a bank (Tide), a second "later" (the exhaust row), and a
 healing pillar the law forbids, and each took a keyword and gave no
 decision. They are gone.
@@ -84,15 +96,16 @@ touching the basics.
 |---|---|---|---|---|
 | Strike | 1 | Attack | Deal 6. | 4 |
 | Defend | 1 | Skill | Gain 5 Block. | 4 |
-| Kurage's Oath | 1 | Skill | Deal 3 damage to ALL enemies. Plan: Deal 7 damage to ALL enemies. | 1 |
+| Kurage's Oath | 1 | Skill | Gain 4 Block. Plan: Deal 7 damage to ALL enemies. | 1 |
 | Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies. | 1 |
 
 The basics are the base game's Strike and Defend (R242) and apply no
-element ([USER], 2026-09-02); her own Attacks apply Hydro the way every
-catalyst character's do, which is what a companion's Pyro, Electro or Cryo
-card reacts with. Kurage's Oath gained a now-line under R250 pick 1 (round
-4d), so writing it is a trade rather than the only play; its now-line does
-not upgrade. Slack Water's Plan is a **morning** Plan: the Weak lands the
+element ([USER], 2026-09-02); every damaging card of her own applies Hydro,
+Skills included (R276 pick 2), which is what a companion's Pyro, Electro or
+Cryo card reacts with. Kurage's Oath gained a now-line under R250 pick 1
+(round 4d), so writing it is a trade rather than the only play; R276 pick 1
+made that line 4 Block, a different job from the Plan's 7 to ALL (the
+halves rule, §3). Its now-line does not upgrade; the Plan goes to 10. Slack Water's Plan is a **morning** Plan: the Weak lands the
 next turn, after the swing it was written against, and that delay is the
 point (R267 pick 1). Its numbers are the R243 audit's (Weak 1 now, Weak 1
 to ALL written; upgrade 7 damage and 2 Weak written).
@@ -104,10 +117,10 @@ for 2 Hydro damage.
 Fight one, turn one: three energy, Strike twice, Defend, Kurage's Oath,
 Slack Water; the enemy intends 8. Slack Water on the enemy: 4, Weak, and
 the jellyfish's 2, the relic's lesson. Defend, 5 Block against a Weakened
-6. Kurage's Oath on the jellyfish. Turn two opens with the jellyfish
-hitting every enemy for 7 once you have drawn. Slack Water was the decision:
-blunt this turn's hit now, or Weak on everyone at dawn with the jellyfish
-striking each of them. That is the whole kit, on turn one.
+6. Kurage's Oath on the jellyfish, or 4 more Block now. Turn two opens
+with the jellyfish hitting every enemy for 7 once you have drawn. Slack
+Water and the Oath were the decisions: blunt this turn's hit now, or Weak
+on everyone and 7 to everyone at dawn. That is the whole kit, on turn one.
 
 ## 5. The payoff moment
 
@@ -162,8 +175,10 @@ a losing line the kit is meant to keep instead of pricing it; C2 a benefit
 carries a binding price; C3 the card's value is decided by a choice the
 player makes; C5 nothing fires by itself; C6 no row is strictly better than
 a pool row or a base-game card at its rarity and cost; C7 a Common never
-increases deck size. Both halves of a two-half card must be worth playing
-on some turn. Passes four and five went to the door on 2026-09-08 under
+increases deck size; C8 the two halves of a Plan card are never the
+same effect at two sizes: the now-line answers this turn and the Plan
+line buys what only a head start can buy (R276 pick 1, §3). Both halves of
+a two-half card must be worth playing on some turn. Passes four and five went to the door on 2026-09-08 under
 R267 (`review/records/kokomi-pass-four-audit-2026-09-08.md`, `-five-`).
 
 ## 9. Applied defaults (D/E/F, disclosed, yours to veto)

@@ -38,14 +38,14 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_exposed_flank");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Exposed Flank"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,14 +54,13 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyVulnerable, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyVulnerable, 2, KokomiPlan.Aim.AllEnemies),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 1m),
-            new DynamicVar("PlanPowerAmount", 2m)
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,12 +78,11 @@ public sealed class ProtoKkExposedFlank : CustomCardModel, ICharacterCard, IPlan
             return;
         }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars["PowerAmount"].UpgradeValueBy(1m);
-        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

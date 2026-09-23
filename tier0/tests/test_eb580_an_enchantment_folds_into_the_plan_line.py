@@ -31,7 +31,10 @@ from tier0.engine import kokomi_plan
 from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import kokomi_state, overhaul  # noqa: F401
 
-RIPTIDE = "proto_kk_riptide"
+# R276 pick 1 took Riptide's Plan off damage (it pays Energy and a card now),
+# so the fold is pinned on the row whose Plan line still prints a flat hit to
+# ALL enemies: Kurage's Oath. The finding and the rule are unchanged.
+RIPTIDE = "proto_kk_kurages_oath"
 SHARP = 2
 
 

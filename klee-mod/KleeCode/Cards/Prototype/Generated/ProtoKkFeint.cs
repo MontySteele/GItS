@@ -34,7 +34,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
-    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
+    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
@@ -44,14 +44,14 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_feint");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feint"),
-        ("description", "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage."),
+        ("description", "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead. [gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyVulnerable, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -68,7 +68,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
         {
             new PlanCarriedDamageVar("PlainDamage", 5m, "BranchDamage", ValueProp.Move),
             new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(10m)
+            new DynamicVar("PlanPowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -113,6 +113,6 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
         // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
         DynamicVars["PlainDamage"].UpgradeValueBy(2m);
         DynamicVars["BranchDamage"].UpgradeValueBy(3m);
-        DynamicVars["PlanDamage"].UpgradeValueBy(3m);
+        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

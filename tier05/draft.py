@@ -774,7 +774,11 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "next_plan_extra_carry_out",
     # POOL PASS THREE (`EB-655`). Battle Plan's rider, a plan clause with its
     # own branch in `_op_price` on the same terms.
-    "next_attack_damage"))
+    "next_attack_damage",
+    # R276 PICK 1, the halves rewrite: five plan clauses, each with its own
+    # branch in `_op_price` on the same terms.
+    "first_attack_twice", "first_card_free", "damage_if_unhurt",
+    "attack_damage_this_turn", "block_front_intent"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1113,6 +1117,29 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # discount.
         return (C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS
                 * STATIC_NEXT_ATTACK_SHARE)
+    # R276 PICK 1 (QUARANTINED). The halves rewrite's five plan clauses. The
+    # `plan:` list they live in already takes the delay discount.
+    if op == "first_attack_twice":
+        # Pincer: one Attack played again -- `replay_next_companion`'s rule,
+        # one replay at STATIC_CARD_COPY_VALUE.
+        return STATIC_CARD_COPY_VALUE
+    if op == "first_card_free":
+        # Stolen Chapter: energy in another costume, so `cost_mod`'s rule and
+        # its measured dead dial.
+        return STATIC_ENERGY_VALUE
+    if op == "damage_if_unhurt":
+        # Feigned Retreat: priced at the HURT number, the one it deals whatever
+        # happens; whether she takes a hit before it lands is a fight fact an
+        # offer screen cannot read.
+        return _neutral_amount(fx, 0) * aoe
+    if op == "attack_damage_this_turn":
+        # Battle Plan: `next_attack_damage`'s rule for ONE Attack -- how many
+        # Attacks the turn holds is a hand fact an offer screen cannot read.
+        return _neutral_amount(fx, 0) * STATIC_NEXT_ATTACK_SHARE
+    if op == "block_front_intent":
+        # Tide Wall: the flat bonus only. The intent is a board fact an offer
+        # screen cannot read, so that part is a deliberate ZERO.
+        return _neutral_amount(fx, 0)
     if op == "remove_debuff":
         # Cleansing Wave: one debuff off HER. The mirror of putting one onto an
         # enemy, at the same rate -- `STATIC_DEBUFF_VALUE` is what this table
@@ -2536,6 +2563,18 @@ STATIC_OP_PRICING: dict[str, str] = {
                           "STATIC_NEXT_ATTACK_SHARE",
     "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
                      "of putting one onto an enemy, at the same rate",
+    # --- R276 pick 1, the Kokomi halves rewrite (QUARANTINED) ---
+    "first_attack_twice": "STATIC_CARD_COPY_VALUE, one Attack played again -- "
+                          "replay_next_companion's rule",
+    "first_card_free": "ZERO: energy in another costume, so cost_mod's rule "
+                       "and cost_mod's measured dead dial (STATIC_ENERGY_VALUE)",
+    "damage_if_unhurt": "its HURT number at face, the hit it deals whatever "
+                        "happens -- whether she is hit first is a fight fact",
+    "attack_damage_this_turn": "next_attack_damage's price for ONE Attack, at "
+                               "STATIC_NEXT_ATTACK_SHARE -- the hand is a fact "
+                               "an offer screen cannot read",
+    "block_front_intent": "its flat bonus only; ZERO for the intent part, a "
+                          "board fact an offer screen cannot read",
     # --- the Furina reframe (QUARANTINED, furina_reframe.FURINA_REFRAME) ---
     "drain_fanfare": "ZERO: it SPENDS the meter, and what the spend buys is "
                      "printed by the effect after it as an `amount_formula` "

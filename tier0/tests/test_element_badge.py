@@ -303,8 +303,17 @@ def test_the_plan_half_never_elements_the_cards_own_hit():
     oath = {"id": "x", "type": "skill",
             "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}],
             "plan": [{"op": "damage", "amount": 7, "target": "all_enemies"}]}
+    # Her SHIPPED sheet's cadence is still Attack-only (R52).
     assert gen.KOKOMI_PROFILE.damage_applies_element(oath) is False
-    text = (proto.OUT_DIR / "ProtoKkAmbush.cs").read_text(encoding="utf-8")
+    # R276 pick 2 moved the ARM: a Skill whose FACE-UP half deals damage is
+    # elemental there. The Plan half is still never what elements it -- a
+    # Skill whose only hit is its Plan stays non-elemental.
+    arm = proto._profile_for("kokomi")
+    assert arm.damage_applies_element(oath) is True
+    plan_only = dict(oath, effects=[{"op": "block", "amount": 4}])
+    assert arm.damage_applies_element(plan_only) is False
+    text = (proto.OUT_DIR / "ProtoKkFeignedRetreat.cs").read_text(
+        encoding="utf-8")
     assert "IElementalCard" not in text
     # `EB-713`: AND NO GEM EITHER. The gem said "this face applies Hydro" on a
     # face that applies nothing until the jellyfish carries it out, and the r32
@@ -315,32 +324,52 @@ def test_the_plan_half_never_elements_the_cards_own_hit():
     assert "ArmKeywordTips.ForPlanElement(" in text
 
 
-def test_the_oaths_now_line_applies_hydro_like_its_carry_out():
-    """`EB-462` (D default, Kokomi r14 packet sec.4).
+def test_r276_every_damaging_skill_of_hers_applies_hydro_on_the_arm():
+    """R276 pick 2, the generator's half. Five of her Skills dealt damage
+    face-up and applied nothing while her Attacks applied Hydro; under the arm
+    every damaging card of hers applies it, so each carries `IElementalCard`
+    and the gem, and none carries the old "its own hit applies no aura" rider.
 
-    The card prints `[Hydro]` in its title and a rider said its own hit applied
-    no aura -- "a seat built a turn on the tag, and the same Electro-then-Hydro
-    sequence reacted with Deep Current and not with the Oath's now-line". Tag
-    and rider agree now: the row declares `applies_element` on its own damage,
-    a declaration beats the cadence in BOTH engines, and the rider that
-    explained the disagreement is off this face.
+    SCOPED TO HER ARM: her shipped profile and Klee's arm keep the Attack-only
+    cadence, and the base game's Strike and Defend are off-sheet in both
+    engines (`_is_off_sheet_card`, `CatalystCadence.IsOffSheet`)."""
+    assert proto._profile_for("kokomi").cadence == gen.CATALYST_EVERY_CARD
+    assert gen.KOKOMI_PROFILE.cadence == "catalyst_attack"
+    assert proto._profile_for("klee").cadence == "catalyst_attack"
+    for stem in ("ProtoKkChainOfCommand", "ProtoKkOpeningGambit"):
+        text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
+        assert "public Element Element => Element.Hydro;" in text, stem
+        assert "KleeKeywords.AppliesHydro" in text, stem
+        assert "ArmKeywordTips.ForPlanElement(" not in text, stem
+    # A Klee Skill that deals damage is still outside her cadence.
+    klee_skill = {"id": "x", "type": "skill",
+                  "effects": [{"op": "damage", "amount": 3,
+                               "target": "enemy"}]}
+    assert proto._profile_for("klee").damage_applies_element(
+        klee_skill) is False
 
-    Seen to FAIL: the class carried no `IElementalCard` and did carry
-    `ForPlanElement`.
-    """
-    row = next(c for c in proto._rows()
-               if c["id"] == "proto_kk_kurages_oath")
-    assert [e for e in row["effects"] if e["op"] == "damage"]
-    assert all(e.get("applies_element") for e in row["effects"]
-               if e["op"] == "damage")
+
+def test_a_declared_element_still_beats_the_cadence():
+    """`EB-462`. A row may declare `applies_element` on its own damage, and a
+    declaration beats the cadence in BOTH engines. The row it was filed on
+    (Kurage's Oath) gains Block face-up since R276 pick 1 and so declares
+    nothing, and R276 pick 2 makes a Skill's own hit elemental under the arm
+    anyway -- so the rule is pinned on a probe row against her SHIPPED
+    profile, whose cadence is still Attack-only."""
+    row = {"id": "x", "type": "skill",
+           "effects": [{"op": "damage", "amount": 3, "target": "all_enemies",
+                        "applies_element": True}]}
     assert gen.KOKOMI_PROFILE.damage_applies_element(row) is True
 
+    oath = next(c for c in proto._rows()
+                if c["id"] == "proto_kk_kurages_oath")
+    assert not [e for e in oath["effects"] if e["op"] == "damage"]
     text = (proto.OUT_DIR / "ProtoKkKuragesOath.cs").read_text(
         encoding="utf-8")
-    assert "IElementalCard" in text
-    assert "public Element Element => Element.Hydro;" in text
-    assert "KleeKeywords.AppliesHydro" in text
-    assert "ArmKeywordTips.ForPlanElement(" not in text
+    # Its Plan still hits, as Hydro, and its face-up half does not hit: the
+    # Plan-only rows' rider, and no gem.
+    assert "ArmKeywordTips.ForPlanElement(" in text
+    assert "KleeKeywords.AppliesHydro" not in text
 
 
 def test_a_plan_is_not_a_furina_rule():
@@ -393,7 +422,9 @@ def test_a_character_row_may_not_declare_both_ways_at_once():
 def test_the_rows_the_finding_names_carry_the_gem():
     """`Kurage's Oath` and `Sango Isshin` by name, beside the three the seat
     read as correct."""
-    for stem in ("ProtoKkKuragesOath", "ProtoKkSangoIsshin",
+    # R276 pick 1: Kurage's Oath gains Block face-up now, so the Oath left
+    # this list; Opening Gambit's face-up hit carries the gem since pick 2.
+    for stem in ("ProtoKkOpeningGambit", "ProtoKkSangoIsshin",
                  "ProtoKkSlackWater", "ProtoKkUndertow", "ProtoKkFeint"):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "KleeKeywords.AppliesHydro" in text, stem
@@ -492,9 +523,12 @@ def test_a_row_declaring_no_element_prints_no_tag_and_no_glossary():
         {"op": "apply_aura", "element": "hydro", "target": "enemy"}]}
     assert gen.aura_elements_for(applier, gen.KOKOMI_PROFILE, False) == ["hydro"]
 
-    # And every row that lost the gem kept the sentence, on disk.
-    for stem in ("ProtoKkAmbush", "ProtoKkChainOfCommand",
-                 "ProtoKkFeignedRetreat", "ProtoKkWarCouncil"):
+    # And every row whose only hit is its Plan keeps the sentence, on disk.
+    # (R276 moved the list: Chain of Command's face-up hit applies Hydro and
+    # wears the gem, War Council's Plan is Energy, and Kurage's Oath and
+    # Ambush gain Block face-up and hit only when carried out.)
+    for stem in ("ProtoKkFeignedRetreat", "ProtoKkAmbush",
+                 "ProtoKkKuragesOath"):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         assert "KleeKeywords.AppliesHydro" not in text, stem
         assert "ArmKeywordTips.ForPlanElement(" in text, stem

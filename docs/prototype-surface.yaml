@@ -11,12 +11,6 @@
 # STATE. How to write a row: docs/current/operations/prototype.md. Why each
 # row below exists: docs/notes/prototype-surface-provenance.md, by row id.
 
-- {id: proto_pearl_barrage_turn, name: "Tidal Barrage", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   effects: [{op: exhaust_from, amount: 1, select: chosen},
-             {op: damage, amount_formula: {base: 5, per: 3, count: exhausts_this_turn}, target: enemy}]}
-
 - {id: proto_shinobu_sanctifying_ring_either, name: "Shinobu - Warding Ring", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 2, type: skill,
@@ -890,7 +884,7 @@
    description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card.",
    effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}]}
 
-# THE KOKOMI OVERHAUL, SLICE ONE, DRAFT 6 (the Plan). Under
+# THE KOKOMI OVERHAUL, BRIEF DRAFT 7 (the Plan). Under
 # `C.KOKOMI_OVERHAUL` these ARE her starter and her whole pool. The `plan:`
 # key, the targets and every row: docs/notes/prototype-surface-provenance.md.
 
@@ -901,14 +895,12 @@
 - {id: proto_kk_kurages_oath, name: "Kurage's Oath (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "Deal 3 damage to ALL enemies. [gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
-   # EB-462 (D default, r14 packet sec.4): the now-line applies Hydro like the
-   # carry-out. Per effect, and it beats the cadence.
-   effects: [{op: damage, amount: 3, target: all_enemies,
-              applies_element: true}],
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 7 damage to ALL enemies.",
+   effects: [{op: block, amount: 4}],
    plan: [{op: damage, amount: 7, target: all_enemies}],
-   # R250 pick 1 (round 4d sec.6, default): a now-line makes writing this
-   # card a trade, Feint's shape; the now-line does not upgrade.
+   # Plan 10; the now-line does not upgrade.
    upgrade: {plan_damage: 3}}
 
 - {id: proto_kk_slack_water, name: "Slack Water (proto)", character: kokomi,
@@ -932,27 +924,28 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # `EB-660`: AND THE PLAN LINE, which this row could always write and never
-   # printed. The finding and the reasoning: the provenance note.
-   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage.",
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] was carried out this turn, deal {BranchDamage:diff()} damage instead. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].",
    effects: [{op: conditional, if: plan_carried_out_this_turn,
               then: [{op: damage, amount: 10, target: enemy}],
               else: [{op: damage, amount: 5, target: enemy}]}],
-   plan: [{op: damage, amount: 10, target: front_enemy}],
-   # 7 / 13 / Plan 13, by two keys: `conditional_damage` moves both branches
-   # and `conditional_then_damage` moves the carry-out branch alone.
+   plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy}],
+   # 7 / 13 / Plan 2 Vulnerable. `conditional_damage` moves both branches
+   # and `conditional_then_damage` the carry-out branch alone.
    upgrade: {conditional_damage: 2, conditional_then_damage: 1,
-             plan_damage: 3}}
+             plan_power_amount: 1}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Deal 5 damage. [gold]Plan[/gold]: Deal 12 damage.",
-   effects: [{op: damage, amount: 5, target: enemy}],
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Gain 5 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 12 damage.",
+   effects: [{op: block, amount: 5}],
    plan: [{op: damage, amount: 12, target: front_enemy}],
-   # R250 pick 1 (round 4d sec.6, default): a now-line makes writing this
-   # card a trade, Feint's shape; the now-line does not upgrade.
-   upgrade: {plan_damage: 3}}
+   # 7 Block; Plan 15.
+   upgrade: {block: 2, plan_damage: 3}}
 
 # POOL PASS FOUR (`EB-679`): the now-line is SELECTION and the 5 Block is
 # gone. r26's lane made no decision off the look-and-bury and the Block was a
@@ -969,9 +962,13 @@
 - {id: proto_kk_exposed_flank, name: "Exposed Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Apply 1 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
-   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}],
-   plan: [{op: apply_power, power: vulnerable, amount: 2, target: all_enemies}]}
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: enemy}],
+   plan: [{op: apply_power, power: vulnerable, amount: 2, target: all_enemies}],
+   # now 3 Weak; the Plan line does not upgrade.
+   upgrade: {power_amount: 1}}
 
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
@@ -990,14 +987,13 @@
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Deal 5 damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold].",
    effects: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
-   plan: [{op: damage, amount: 5, target: all_enemies},
-          {op: apply_power, power: weak, amount: 1, target: all_enemies}],
-   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
-   # R250 pick 1 (round 4d sec.6, default): now-line added, the now-line
-   # does not upgrade -- the delta below stays on the Plan half.
-   upgrade: {plan_damage: 3}}
+   plan: [{op: energy, amount: 2}],
+   # now 2 Weak; the Plan line does not upgrade.
+   upgrade: {power_amount: 1}}
 
 # `EB-492`. THE RARE, REDESIGNED: it was a Plan itself, so the kit's payoff
 # spent the morning it was meant to pay for. Now a Power, for the fight.
@@ -1030,10 +1026,13 @@
 - {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 8 [gold]Block[/gold] and apply 1 [gold]Weak[/gold].",
-   effects: [{op: block, amount: 6}],
-   plan: [{op: block, amount: 8},
-          {op: apply_power, power: weak, amount: 1, target: front_enemy}]}
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 2 [gold]Weak[/gold].",
+   effects: [{op: block, amount: 7}],
+   plan: [{op: apply_power, power: weak, amount: 2, target: front_enemy}],
+   # 10 Block; Plan 3 Weak.
+   upgrade: {block: 3, plan_power_amount: 1}}
 
 - {id: proto_kk_cleansing_wave, name: "Cleansing Wave", character: kokomi,
    authored_by: [claude],
@@ -1049,14 +1048,13 @@
 - {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # `EB-623`: "morning" is retired from every printed surface. The clause is
-   # paid out of the same drain as the Plans it counts, and "carried out with
-   # it" says so without a word the base game never taught.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 3 [gold]Block[/gold] for each [gold]Plan[/gold] carried out with it.",
+   # R276 pick 1: RE-AIMED off Plan volume onto the intent, read at carry-out
+   # (next turn's intents are up by then). `amount` is the flat bonus.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain [gold]Block[/gold] equal to the damage the enemy intends to deal{IfUpgraded:show:, plus 3|}.",
    effects: [{op: block, amount: 4}],
-   plan: [{op: block_per_plan_this_morning, amount: 3}],
-   # R246: 4 and 3, upgrading to 6 and 4.
-   upgrade: {block: 2, plan_block: 1}}
+   plan: [{op: block_front_intent, amount: 0}],
+   # now 6; Plan +3.
+   upgrade: {block: 2, plan_block: 3}}
 
 - {id: proto_kk_shell_guard, name: "Shell Guard", character: kokomi,
    authored_by: [claude],
@@ -1076,9 +1074,13 @@
 - {id: proto_kk_the_moon_a_ship, name: "The Moon, A Ship O'er the Seas", character: kokomi,
    authored_by: [claude],
    cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Exhaust. [gold]Mend[/gold] 3. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
-   effects: [{op: mend, amount: 3}],
-   plan: [{op: mend, amount: 6}]}
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Exhaust. Gain 12 [gold]Block[/gold]. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
+   effects: [{op: block, amount: 12}],
+   plan: [{op: mend, amount: 6}],
+   # 16 Block; Mend 8.
+   upgrade: {block: 4, plan_mend: 2}}
 
 - {id: proto_kk_sango_isshin, name: "Sango Isshin (proto)", character: kokomi,
    authored_by: [claude],
@@ -1100,13 +1102,14 @@
 - {id: proto_kk_vanguard, name: "Vanguard", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "Exhaust. Apply 1 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] and 1 [gold]Weak[/gold].",
-   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}],
-   plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy},
-          {op: apply_power, power: weak, amount: 1, target: front_enemy}],
-   # R250 pick 1 (round 4d sec.6, default): a now-line makes writing this
-   # card a trade, Feint's shape; the now-line does not upgrade.
-   upgrade: {plan_power_amount: 1}}
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Exhaust. Apply 1 [gold]Vulnerable[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold].",
+   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy},
+             {op: draw, amount: 1}],
+   plan: [{op: energy, amount: 1}],
+   # now 2 Vulnerable; the Plan line does not upgrade.
+   upgrade: {power_amount: 1}}
 
 - {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
    authored_by: [claude],
@@ -1133,11 +1136,13 @@
 - {id: proto_kk_stolen_chapter, name: "Stolen Chapter (proto)", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw 4 cards.",
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: This turn, the first card you play costs 0.",
    effects: [{op: draw, amount: 2}],
-   plan: [{op: draw, amount: 4}],
-   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
-   upgrade: {draw: 1, plan_draw: 1}}
+   plan: [{op: first_card_free}],
+   # now draw 3; the Plan line does not upgrade.
+   upgrade: {draw: 1}}
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
@@ -1164,15 +1169,14 @@
 - {id: proto_kk_battle_plan, name: "Battle Plan", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # POOL PASS THREE (`EB-655`), the energy clause off; `EB-668`, the rider
-   # made DAMAGE because a cost seam cannot tell a face-up play from a write.
-   # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards; the next Attack you play face-up this turn deals 4 additional damage.",
-   effects: [{op: draw, amount: 1}],
-   plan: [{op: draw, amount: 2},
-          {op: next_attack_damage}],
-   # draw 2 / Plan draw 3.
-   upgrade: {draw: 1, plan_draw: 1}}
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   # Every Attack played face-up this turn; a carry-out is not a play.
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: This turn, your Attacks deal 3 additional damage.",
+   effects: [{op: draw, amount: 2}],
+   plan: [{op: attack_damage_this_turn, amount: 3}],
+   # now draw 3; Plan 4 more.
+   upgrade: {draw: 1, plan_attack_bonus: 1}}
 
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
@@ -1212,26 +1216,24 @@
 - {id: proto_kk_riptide, name: "Riptide", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: common,
-   # POOL PASS THREE (`EB-655`): the now-line reads the BOARD instead of
-   # reading smaller -- her own debuff layer decides which half to play.
-   description: "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a debuff. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies.",
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a debuff. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 1 card.",
    effects: [{op: damage, amount: 9, target: all_enemies, bonus_vs_debuff: 4}],
-   plan: [{op: damage, amount: 13, target: all_enemies}],
-   # Priced off Deep Current (1: 6 to ALL) with the brief's four-point Plan
-   # premium; the 1-energy draft was a strictly better Kurage's Oath.
-   # 12 / 6 more / Plan 17.
-   upgrade: {damage: 3, bonus_vs_debuff: 2, plan_damage: 4}}
+   plan: [{op: energy, amount: 1}, {op: draw, amount: 1}],
+   # 12 / 6 more; the Plan line does not upgrade.
+   upgrade: {damage: 3, bonus_vs_debuff: 2}}
 
 - {id: proto_kk_pincer, name: "Pincer", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 3 damage twice. [gold]Plan[/gold]: Deal 3 damage three times.",
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   description: "Deal 3 damage twice. [gold]Plan[/gold]: This turn, your first Attack is played twice.",
    effects: [{op: damage, amount: 3, target: enemy, times: 2}],
-   plan: [{op: damage, amount: 3, target: front_enemy, times: 3}],
-   # `EB-492`, the multi-hit Plan clause. Worse into Block, better under
-   # Vulnerable, three Casket-sized hits the morning after; the upgrade moves
-   # the per-hit number on both halves, which is the multi-hit idiom.
-   upgrade: {damage: 1, plan_damage: 1}}
+   plan: [{op: first_attack_twice}],
+   # now 4 twice; the Plan line does not upgrade.
+   upgrade: {damage: 1}}
 
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
@@ -1246,26 +1248,27 @@
 - {id: proto_kk_well_laid, name: "Well Laid", character: kokomi,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   # `EB-492`, the morning read from the damage side: Tide Wall's count on a
-   # hit instead of Block, at 0 energy, with a floor of 2. With no Plan
-   # carried out it is a worse Strike; with three it is 11 for free.
-   description: "Deal {CalculatedDamage:diff()} damage.",
-   # `EB-539`: the face is the live total ALONE; the morning rule rides the tip.
+   # R276 pick 1: RE-AIMED off Plan volume onto her debuff layer. No Plan
+   # line. A "debuff" is a distinct debuff on the enemy, not a stack.
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each debuff on the enemy.",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 2, per: 3,
-                               count: plans_carried_out_this_morning}}],
+              amount_formula: {base: 3, per: 3,
+                               count: debuffs_on_target}}],
+   # 4, plus 4.
    upgrade: {formula_base: 1, formula_per: 1}}
 
 - {id: proto_kk_feigned_retreat, name: "Feigned Retreat", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 4 [gold]Block[/gold] and deal 6 damage.",
-   effects: [{op: block, amount: 4}],
-   plan: [{op: block, amount: 4},
-          {op: damage, amount: 6, target: front_enemy}],
-   # Against Read the Field (1: 5 Block, Plan 10 Block) and Ambush (1: 5
-   # damage, Plan 12): less of either, both at once, and only when planned.
-   upgrade: {block: 2, plan_block: 2, plan_damage: 2}}
+   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
+   # Plan line buys what only a head start can buy.
+   # "Since you wrote this": the entry records her HP when it is written.
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 9 damage. If you lost no HP since you wrote this, deal 14 instead.",
+   effects: [{op: block, amount: 6}],
+   plan: [{op: damage_if_unhurt, amount: 9, unhurt_amount: 14,
+           target: front_enemy}],
+   # 8 Block; Plan 12 / 18.
+   upgrade: {block: 2, plan_damage: 3, plan_unhurt_damage: 4}}
 
 # --- POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
 # operates on. Eight rows, LAST in the sheet's own order. The finding, the

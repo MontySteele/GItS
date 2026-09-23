@@ -34,7 +34,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKkWellLaid : CustomCardModel, IElementalCard, ICharacterCard
 {
-    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
+    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
@@ -44,22 +44,22 @@ public sealed class ProtoKkWellLaid : CustomCardModel, IElementalCard, ICharacte
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KokomiRiderTips.ForGarmentAttack(KokomiRiderTips.ForMorningDamageRider(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, 2, 3), this), this);
+        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_well_laid");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Well Laid"),
-        ("description", "Deal {CalculatedDamage:diff()} damage."),
+        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each debuff on the enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(2m),
+            new CalculationBaseVar(3m),
             new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansThisMorning)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => KokomiOverhaulKit.DebuffCount(target))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

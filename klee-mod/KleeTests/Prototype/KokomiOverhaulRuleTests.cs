@@ -355,6 +355,13 @@ public class KokomiOverhaulRuleTests
         // cost seam cannot tell a face-up play from a write. A RIDER AND NOT A
         // NUMBER -- the size is the rule's -- so it joins the amountless kinds
         // rather than printing one.
+        //
+        // TWENTY-THREE SINCE R276 PICK 1, the halves rewrite: Pincer's
+        // `FirstAttackTwice`, Stolen Chapter's `FirstCardFree`, Feigned
+        // Retreat's `DamageIfUnhurt`, Battle Plan's `AttackDamageThisTurn`
+        // and Tide Wall's `BlockFrontIntent`. `NextAttackDamage` and
+        // `BlockPerPlanThisMorning` are KEPT with no row spelling them, the
+        // `DrawPerPlanThisTurn` precedent above.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
@@ -363,7 +370,9 @@ public class KokomiOverhaulRuleTests
                     "BlockPerPlanThisMorning", "BlockPerPlanHeld",
                     "DrawPerPlanAfter", "DrawPerPlanThisTurn",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
-                    "NextAttackDamage" },
+                    "NextAttackDamage", "FirstAttackTwice", "FirstCardFree",
+                    "DamageIfUnhurt", "AttackDamageThisTurn",
+                    "BlockFrontIntent" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -1408,7 +1417,6 @@ public class KokomiOverhaulRuleTests
     // ==================================================================
 
     [Theory]
-    [InlineData("ProtoKkCoralBulwark", 8)]
     [InlineData("ProtoKkReadTheField", 10)]
     [InlineData("ProtoKkBreakwater", 5)]
     public void A_planned_blocks_printed_number_is_a_block_var(

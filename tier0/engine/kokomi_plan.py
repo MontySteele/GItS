@@ -72,6 +72,10 @@ PLAN_KINDS = frozenset((
     "next_plan_extra_carry_out",
     # `EB-655` (pool pass three), BATTLE PLAN. See `NEXT_ATTACK_BONUS`.
     "next_attack_damage",
+    # R276 PICK 1, THE HALVES REWRITE. See `FIRST_ATTACK_TWICE` and the four
+    # beside it.
+    "first_attack_twice", "first_card_free", "damage_if_unhurt",
+    "attack_damage_this_turn", "block_front_intent",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -88,6 +92,9 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     # exactly as Rally's is, so the clause carries no `amount` for a sheet to
     # move.
     "next_attack_damage",
+    # R276. Two switches: "your first Attack" and "the first card" have no
+    # size to print.
+    "first_attack_twice", "first_card_free",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -108,7 +115,19 @@ PLAN_AIMS = frozenset(("front_enemy", "all_enemies",
 #: The clauses that take an aim. Everything else is self-facing.
 PLAN_AIMED_OPS = frozenset((
     "damage", "damage_quarter_max_hp", "damage_per_companion_last_turn",
-    "apply_power"))
+    "apply_power",
+    # R276, Feigned Retreat.
+    "damage_if_unhurt"))
+
+#: R276. Feigned Retreat's second printed number, "deal 14 instead": the hit
+#: when she lost no HP since the Plan was written. `schedule` records her HP at
+#: writing under `HP_AT_WRITE`. `gen_klee_cards.PLAN_UNHURT_FIELD` is the twin.
+UNHURT_FIELD = "unhurt_amount"
+HP_AT_WRITE = "hp_at_write"
+
+#: R276. The clauses whose `amount` may be zero: Tide Wall's is a flat bonus on
+#: top of the front enemy's intent, and the base card prints none.
+PLAN_ZERO_AMOUNT_OPS = frozenset(("block_front_intent",))
 
 #: The clauses a `times:` may repeat: the FLAT hit, and nothing else
 #: (`EB-492`, Pincer's "Plan: Deal 3 damage three times"). The two scaled
@@ -145,7 +164,14 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            # carry-out pays: a now-line spelling would be a
                            # different, unpriced card that buffed an Attack on
                            # the turn it was played.
-                           "next_attack_damage"))
+                           "next_attack_damage",
+                           # R276. Each names the carry-out turn ("this
+                           # turn", "the first ...") or the writing ("since
+                           # you wrote this"), so a now-line spelling would be
+                           # a different, unpriced card.
+                           "first_attack_twice", "first_card_free",
+                           "damage_if_unhurt", "attack_damage_this_turn",
+                           "block_front_intent"))
 
 #: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
 #: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
@@ -250,6 +276,13 @@ QUARTER = 4
 #: Every one of them is applied by an ordinary `apply_power` op off a card row.
 TREATISE = "kk_treatise"                     # draw N once a turn, on a Plan
 SONG_OF_PEARLS = "kk_song_of_pearls"         # N Block once a turn, on a Plan
+#: R276: her Ancient under the arm, "Whenever the Bake-Kurage carries out a
+#: Plan, gain N Block and draw 1 card." EVERY Plan, uncapped -- the card prints
+#: "Whenever" and is the Dusty Tome's single grant. Applied by the second effect
+#: on `princess_of_watatsumi` (`content/cards/ancients.yaml`);
+#: `PrincessOfWatatsumiPlanPower` is the twin.
+PRINCESS_OF_WATATSUMI = "kk_princess_of_watatsumi"
+PRINCESS_OF_WATATSUMI_DRAW = 1
 CLOUDS_LIKE_WAVES = "kk_clouds_like_waves"   # Block per debuff she applies
 GENERALS_BANNER = "kk_generals_banner"       # Weak to the front, once a turn
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
@@ -274,6 +307,17 @@ NEXT_COMPANION_DISCOUNT = "kk_next_companion_discount"
 #: `ModifyDamageAdditive` there) instead of at a cost seam the mod cannot make
 #: target-aware. `NextAttackDamagePower` is the twin.
 NEXT_ATTACK_BONUS = "kk_battle_plan_rider"
+#: R276 PICK 1. PINCER's carry-out: "This turn, your first Attack is played
+#: twice." A SWITCH on the player, consumed by the first Attack played
+#: FACE-UP (`spend_first_attack_twice`) and dropped at her turn's end. A card
+#: written on the Bake-Kurage is not a play of its face, so it neither takes
+#: nor spends it -- Battle Plan's old rider's rule. `FirstAttackTwicePower`.
+FIRST_ATTACK_TWICE = "kk_first_attack_twice"
+#: R276 PICK 1. STOLEN CHAPTER's carry-out: "This turn, the first card you
+#: play costs 0." Read at the pure cost seam (`combat.card_cost`) and consumed
+#: by the first card she pays for (`combat.play_card`) -- a WRITE included,
+#: because a written card is played and paid for. `FirstCardFreePower`.
+FIRST_CARD_FREE = "kk_first_card_free"
 #: Shell Guard's window (`EB-335`). THE AMOUNT IS THE BLOCK PER STRIKE, not a
 #: number of turns: "until your next turn, whenever the Tamakushi Casket
 #: strikes, gain 3 Block". `close_shell_guard` is the one place it ends, and
@@ -340,10 +384,18 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             allowed.add("power")
         if op in PLAN_TIMES_OPS:
             allowed.add("times")
+        if op == "damage_if_unhurt":
+            allowed.add(UNHURT_FIELD)
         unknown = set(eff) - allowed
         if unknown:
             return (f"plan clause {op} field(s) {sorted(unknown)} "
                     "not understood")
+        if op == "damage_if_unhurt":
+            unhurt = eff.get(UNHURT_FIELD)
+            if not isinstance(unhurt, int) or isinstance(unhurt, bool) \
+                    or unhurt <= 0:
+                return (f"plan clause {op} {UNHURT_FIELD} must be a positive "
+                        "literal int")
         if op not in PLAN_AMOUNTLESS_OPS:
             amount = eff.get("amount")
             # A LITERAL POSITIVE INT, the `spend_spark_amount` /
@@ -351,8 +403,9 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
             # turn after it was written, so a formula resolved against combat
             # state would be printed text that means something different every
             # time it is carried out.
+            floor = 0 if op in PLAN_ZERO_AMOUNT_OPS else 1
             if not isinstance(amount, int) or isinstance(amount, bool) \
-                    or amount <= 0:
+                    or amount < floor:
                 return f"plan clause {op} amount must be a positive literal int"
         if "times" in eff:
             times = eff["times"]
@@ -730,6 +783,17 @@ def schedule(state: CombatState, card: Card,
     owner = enchanted_by or card
     body = [dict(c, amount=hers(state, owner, int(c.get("amount", 0))))
             if c.get("op") == "damage" else c
+            for c in body]
+    # R276, FEIGNED RETREAT. Both of its printed hits are hers, so both take
+    # the fold above; and "since you wrote this" is a fact about THIS moment,
+    # so her HP is recorded on the copied clause now. `KokomiPlan.Schedule`
+    # stamps `Planned.WrittenHp` the same way.
+    body = [dict(c,
+                 amount=hers(state, owner, int(c.get("amount", 0))),
+                 **{UNHURT_FIELD: hers(state, owner,
+                                       int(c.get(UNHURT_FIELD, 0))),
+                    HP_AT_WRITE: int(state.player.hp)})
+            if c.get("op") == "damage_if_unhurt" else c
             for c in body]
     # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card. "The
     # last other Companion card you played THIS TURN" is a fact about the turn
@@ -1275,6 +1339,15 @@ def _note_plan_resolved(state: CombatState) -> None:
         p.block += amount
         state.emit("block", amount=amount)
         state.emit("plan_song_of_pearls", amount=amount)
+    n = p.powers.get(PRINCESS_OF_WATATSUMI, 0)
+    if n:
+        # Block first, then the card: `PrincessOfWatatsumiPlanPower`'s order.
+        # POWERED for Song of Pearls' reason, one block up.
+        amount = powers.modify_block_gained(p, n)
+        p.block += amount
+        state.emit("block", amount=amount)
+        state.draw(PRINCESS_OF_WATATSUMI_DRAW)
+        state.emit("plan_princess_of_watatsumi", amount=amount)
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,
@@ -1399,6 +1472,45 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # carries out two Battle Plans still buffs one Attack. See
         # `next_attack_bonus`.
         next_attack_bonus(state)
+    elif op == "first_attack_twice":
+        # R276, PINCER: "This turn, your first Attack is played twice." One
+        # switch however many are carried out -- "your first Attack" is one
+        # Attack. Spent by `spend_first_attack_twice`, dropped at turn end.
+        p.powers[FIRST_ATTACK_TWICE] = 1
+        state.emit("plan_first_attack_twice")
+    elif op == "first_card_free":
+        # R276, STOLEN CHAPTER: "This turn, the first card you play costs 0."
+        # One switch; `combat.card_cost` reads it, `combat.play_card` spends it.
+        p.powers[FIRST_CARD_FREE] = 1
+        state.emit("plan_first_card_free")
+    elif op == "attack_damage_this_turn":
+        # R276, BATTLE PLAN: "This turn, your Attacks deal N more damage."
+        # The shipped `attack_up_this_turn` window, which is exactly that
+        # sentence: every Attack she plays this turn, per hit, popped at the
+        # end of her turn. A carry-out is not a play (`_hit` is unpowered and
+        # never reads `flat_attack_bonus`), so Plans do not take it.
+        # `AttackUpThisTurnPower` is the C# twin.
+        powers.apply_power(state, p, "attack_up_this_turn", amount)
+        state.emit("plan_battle_plan", bonus=amount)
+    elif op == "block_front_intent":
+        # R276, TIDE WALL: "Gain Block equal to the damage the enemy intends
+        # to deal" (+ the upgrade's flat bonus). The FRONT enemy's intent read
+        # AT CARRY-OUT, which is after the coming enemy turn's intents are up;
+        # a multi-hit intent counts every hit and a non-attack intent is 0.
+        # POWERED, the flat planned Block's funnel.
+        intended = front_intent_damage(state)
+        gained = powers.modify_block_gained(p, intended + amount)
+        if gained:
+            p.block += gained
+            state.emit("block", amount=gained)
+        state.emit("plan_tide_wall", amount=gained, intended=intended)
+    elif op == "damage_if_unhurt":
+        # R276, FEIGNED RETREAT: "Deal 9 damage. If you lost no HP since you
+        # wrote this, deal 14 instead." Her HP now against her HP at writing,
+        # both folded numbers written by `schedule`.
+        unhurt = p.hp >= int(clause.get(HP_AT_WRITE, p.hp))
+        hit = int(clause.get(UNHURT_FIELD, amount)) if unhurt else amount
+        _hit(state, clause, hit, entry=entry, double=double_damage)
     elif op == "mend":
         effects.mend(state, amount)
     elif op == "damage":
@@ -1832,6 +1944,16 @@ def has_debuff(enemy: Optional[Enemy]) -> bool:
     return any(enemy.powers.get(n, 0) > 0 for n in ENEMY_DEBUFFS)
 
 
+def debuff_count(enemy: Optional[Enemy]) -> int:
+    """Well Laid's "for each debuff on the enemy" (R276): DISTINCT debuffs,
+    not stacks, with Frozen's field counted for `has_debuff`'s reason.
+    `KokomiOverhaulKit.DebuffCount` is the twin."""
+    if enemy is None:
+        return 0
+    count = sum(1 for n in ENEMY_DEBUFFS if enemy.powers.get(n, 0) > 0)
+    return count + (1 if enemy.frozen > 0 else 0)
+
+
 def cancel_last_plan(state: CombatState) -> None:
     """SECOND THOUGHTS (`EB-643`): "cancel your last Plan: its card returns to
     your hand and you regain its cost."
@@ -2010,6 +2132,45 @@ def spend_attack_bonus(state: CombatState, card: Card) -> None:
         return
     if state.player.powers.pop(NEXT_ATTACK_BONUS, 0):
         state.emit("plan_battle_plan_spent", card=card.id)
+
+
+def front_intent_damage(state: CombatState) -> int:
+    """Tide Wall's read (R276): the total damage the FRONT enemy's current
+    intent would deal her, every hit counted, through the same estimate the
+    potions use (`potions._intent_damage`: its Strength and Weak, her
+    Vulnerable). 0 for no front enemy or a non-attack intent. The C# twin is
+    `KokomiOverhaulKit.IntendedDamage`, which asks the game's own
+    `AttackIntent.GetTotalDamage` -- the number the intent badge shows."""
+    from tier0.engine import potions               # late import: cycle
+    front = front_enemy(state)
+    if front is None or not _intends_to_attack(front):
+        return 0
+    return int(potions._intent_damage(state, front))
+
+
+def spend_first_attack_twice(state: CombatState, card: Card) -> int:
+    """PINCER's switch (R276), spent by the first Attack played FACE-UP: the
+    extra play count it adds, 1 or 0. A card written on the Bake-Kurage is
+    not a play of its face, so it neither takes nor spends it --
+    `FirstAttackTwicePower`'s `ModifyCardPlayCount` asks the pet target the
+    same way."""
+    if not live(state) or card.type != "attack":
+        return 0
+    if plan_aimed_at_pet(state, card):
+        return 0
+    if state.player.powers.pop(FIRST_ATTACK_TWICE, 0):
+        state.emit("plan_first_attack_twice_spent", card=card.id)
+        return 1
+    return 0
+
+
+def spend_first_card_free(state: CombatState, card: Card) -> None:
+    """STOLEN CHAPTER's switch (R276), spent by the first card she pays for
+    this turn -- a write included, since a written card is played."""
+    if not live(state):
+        return
+    if state.player.powers.pop(FIRST_CARD_FREE, 0):
+        state.emit("plan_first_card_free_spent", card=card.id)
 
 
 def next_companion_discount(state: CombatState) -> None:

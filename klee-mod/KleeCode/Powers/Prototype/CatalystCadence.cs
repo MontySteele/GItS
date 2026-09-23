@@ -43,6 +43,10 @@ namespace KleeMod.Powers;
 ///     no <see cref="IElementalCard"/> from the codegen -- so without this
 ///     second guard the fallback would hand it Klee's Pyro.
 ///
+/// R276 PICK 2 WIDENED KOKOMI'S HALF TO EVERY DAMAGING CARD OF HERS, Skills
+/// included; Klee's stays Attack-only. See
+/// <see cref="EveryDamagingCardCarriesElement"/>.
+///
 /// SCOPED TO THE TWO ARMS AND TO THEIR OWN CHARACTERS. The fallback reads
 /// <c>KleeOverhaul.Enabled</c> / <c>KokomiOverhaul.Enabled</c> and the DEALER's
 /// identity interface, so a flag-off build -- and any build's Furina, who is
@@ -81,10 +85,34 @@ public static class CatalystCadence
     {
         if (cardSource is IElementalCard elemental) return elemental.Element;
         if (cardSource is ICompanionCard) return Element.None;
-        if (cardSource is not { Type: CardType.Attack }) return Element.None;
+        if (cardSource is null) return Element.None;
+        if (cardSource.Type != CardType.Attack
+            && !EveryDamagingCardCarriesElement(dealer)) return Element.None;
         if (IsOffSheet(cardSource)) return Element.None;
         return NativeElementOf(dealer);
     }
+
+    /// <summary>
+    /// R276 PICK 2: KOKOMI'S ARM ELEMENTS EVERY DAMAGING CARD OF HERS, Skills
+    /// included, not only her Attacks. Five of her Skills dealt damage face-up
+    /// and applied nothing (Ambush, War Council, Opening Gambit, Chain of
+    /// Command, Kurage's Oath's now-line) while her Attacks applied Hydro, and
+    /// the split was a trap when reading a card. The base game's cards still
+    /// apply nothing -- <see cref="IsOffSheet"/> is asked after this -- and a
+    /// companion is answered above.
+    ///
+    /// SCOPED TO HER ARM AND TO HER. Klee's arm keeps the Attack-only rule
+    /// (her cadence is unmoved), and a flag-off build never reaches the
+    /// Kokomi branch. The call sites only ask about a DAMAGE hit, so "any
+    /// type" here means "any card of hers that deals damage".
+    ///
+    /// Twins: <c>tier0/engine/effects._every_damaging_card_carries_element</c>
+    /// and the codegen's <c>gen_klee_cards.CATALYST_EVERY_CARD</c>, which puts
+    /// <see cref="IElementalCard"/> (and the gem) on the same rows.
+    /// </summary>
+    public static bool EveryDamagingCardCarriesElement(Creature? dealer) =>
+        KokomiOverhaul.Enabled
+        && dealer?.Player?.Character is IKokomiCharacter;
 
     /// <summary>
     /// A card this mod did not write: the base game's own, at any rarity --

@@ -368,9 +368,13 @@ public class ArmKeywordTipTests
         // type, so a SKILL's Plan leaves a Hydro aura -- and the r9 act-1 seat
         // watched one appear from "a card whose face says nothing about an
         // element". The card now declares the element; this says WHEN, which
-        // is the half a gem cannot carry.
+        // is the half a gem cannot carry. R276 pick 2 retired the old first
+        // clause ("Its own hit applies no aura"): every damaging card of hers
+        // applies Hydro now, so the rider rides only a card whose Plan is its
+        // only hit, and says just that.
         var body = Printed("ForPlanElement");
-        Assert.Contains("Its own hit applies no aura", body);
+        Assert.DoesNotContain("applies no aura", body);
+        Assert.Contains("carries out this [gold]Plan[/gold]", body);
         Assert.Contains("Bake-Kurage", body);
         Assert.Contains("Hydro", body);
     }

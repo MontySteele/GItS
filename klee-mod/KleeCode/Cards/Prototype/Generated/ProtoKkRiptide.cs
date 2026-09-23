@@ -34,7 +34,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
-    /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
+    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
     public Element Element => Element.Hydro;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
@@ -51,7 +51,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a debuff. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies, and {ExtraDamage:diff()} more to each enemy with a debuff. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold] and draw 1 card."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,15 +60,15 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 1, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, 1, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(9m, ValueProp.Move),
-            new ExtraDamageVar(4m),
-            new KokomiPlan.PlanDamageVar(13m)
+            new ExtraDamageVar(4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -99,6 +99,5 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
         DynamicVars.ExtraDamage.UpgradeValueBy(2m);
-        DynamicVars["PlanDamage"].UpgradeValueBy(4m);
     }
 }

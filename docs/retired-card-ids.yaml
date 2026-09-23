@@ -83,3 +83,4 @@ retired:
   - {id: KLEEMOD-PROTO_KO_KINDLING, owner: klee, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_KO_LONG_FUSE, owner: klee, left: "left the prototype codegen"}
   - {id: KLEEMOD-PROTO_KO_SUGAR_RUSH, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_PEARL_BARRAGE_TURN, owner: klee, left: "left the prototype codegen"}

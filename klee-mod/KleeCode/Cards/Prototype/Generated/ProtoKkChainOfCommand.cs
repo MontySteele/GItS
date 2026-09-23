@@ -32,13 +32,19 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkChainOfCommand : CustomCardModel, ICharacterCard, IPlannedCard
+public sealed class ProtoKkChainOfCommand : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard
 {
+    /// <summary>Arm cadence (R276): every damaging Kokomi card applies Hydro, Skills included.</summary>
+    public Element Element => Element.Hydro;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_chain_of_command");
 
