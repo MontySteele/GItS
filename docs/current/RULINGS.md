@@ -285,8 +285,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R273 | 2026-09-14 | (2026-09-14): the Teyvat nation mapping at both defaults; | `22cdb50` |
 | R274 | 2026-09-16 | (2026-09-16): the fanout-picks slate at its defaults; pick 4 deferred | `4be0e02` |
 | R275 | 2026-09-17 | (2026-09-17): the Ancients dressed per face; Darv is Alice; names, faces and words first, boons untouched | `da1672e` |
+| R276 | 2026-09-23 | is the last R number (process review pick 1). | `d7afee5` |
 
-274 rows over the R1..R275 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 163 from a commit message, 0 unresolved.
+275 rows over the R1..R276 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 164 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
