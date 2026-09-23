@@ -3038,6 +3038,31 @@ what they carry is a rule about WHICH SEAT. `Fanfare` collides by spelling with
 the shipped meter and not by meaning; nothing on the blind-play page can tell
 them apart today, and the round packet owes that finding.
 
+## Furina, the Stage — batch two (R276 pick 3, 2026-09-23)
+
+Fifteen rows designed by the main session on the rules R276's picks 1 and 2
+set: the lead performer is the shield (it absorbs and regenerates), the back
+performer is the bank (Raise fills it; Spend and the readers draw from it), and
+a Spend needs its full price. The faces are the design's, word for word, save
+two base-game spellings: *A Rapt Audience* prints "rounded up" between commas
+rather than in parentheses, and it states its upgrade as an
+`{IfUpgraded:show:...}` swap ("the" Fanfare it lost, for "half the").
+
+**Which shipped row each replaces** is a D default on batch one's terms: the
+same rarity always, the same type and cost where the sheet had one, and every
+one of the fifteen is a row the arm's `EB-736` text filter already drops from
+the game's offer. So the mod's appended rows and the sim's one-for-one
+`furina_stage.POOL_SUBS` name the same fifteen, and no card a Stage run could
+be offered today leaves the offer.
+
+**New machinery, both engines**: the `stage_empty` predicate, the
+`stage_count` count, three ops (`stage_step_forward`, `stage_perform_all`,
+`stage_spend_back_all`), `stage_raise`'s `seat: lead | all`, the `stage_raise`
+upgrade key, `conditional_then_damage` on a Spend mode (Quick Cue's 3/8 to
+4/10), and five powers (`fs_full_house`, `fs_thunderous_applause`,
+`fs_rapt_audience`, `fs_five_century_act`, `fs_arkhe_alignment`) whose rules
+live in `FurinaStage` beside the rule each bends.
+
 ## Pool pass two: six Spark sinks on Regent's ladder (`EB-732`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income

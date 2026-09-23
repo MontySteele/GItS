@@ -84,8 +84,8 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.Occupied(Owner.Creature),
-                                "needs a performer on stage, the stage is empty"),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
+                                "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 7 damage", "[gold]Spend[/gold] 3: deal 13 instead" }[modeIndex]);

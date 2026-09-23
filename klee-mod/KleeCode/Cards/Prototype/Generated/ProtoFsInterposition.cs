@@ -84,8 +84,8 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.Occupied(Owner.Creature),
-                                "needs a performer on stage, the stage is empty"),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 2),
+                                "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 2: gain 10 instead" }[modeIndex]);

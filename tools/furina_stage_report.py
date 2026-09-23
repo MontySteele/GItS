@@ -8,7 +8,7 @@ WHAT THIS IS. `review/active/furina-stage-brief-2026-09-08.md` sec.13 lists
 five things the sim has to report under the arm, and this prints all five from
 ONE run so a round packet can quote them together instead of assembling them:
 
-  1. Spend fires, split by the lead's bar AT THE MOMENT OF SPEND (1-2, 3-5,
+  1. Spend fires, split by the paying (back) bar AT THE MOMENT OF SPEND (1-2, 3-5,
      6 and up) and by whether the target died.
   2. Performers lost by a hit, by a bow, and by rotation.
   3. Turns with one, two and three performers on stage.

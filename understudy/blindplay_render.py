@@ -1509,6 +1509,8 @@ STAGE_UNNAMED_TARGET = "an enemy"
 #: rather than a reading: the acts have not fired. Only the Usher's act pays
 #: Block (rule 10) and it is FLAT -- it does not read the bar -- so the sum is
 #: 3 for every Usher standing, and a stage with none prints no clause at all.
+#: THE FALLBACK ONLY since R276's batch two: the wire's `act_block` is the
+#: mod's forecast with Arkhe Alignment and Full House in it.
 STAGE_ACT_BLOCK = {"usher": 3}
 
 
@@ -1532,7 +1534,12 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     lead = seats[0] if seats else None
     head = [f"Block {you['block']}"]
     # `EB-743`: and what it will be once the acts fire, where an act pays any.
-    after = sum(STAGE_ACT_BLOCK.get(row["member"], 0) for row in seats)
+    # R276 batch two: the mod's own forecast when the wire carries it -- Arkhe
+    # Alignment's multiple and Full House's extra acts move it -- and the flat
+    # per-Usher sum only on a build that does not send one.
+    after = stage.get("act_block")
+    if after is None:
+        after = sum(STAGE_ACT_BLOCK.get(row["member"], 0) for row in seats)
     if after:
         head.append(f"after the acts: Block {you['block'] + after}")
     if lead is not None:

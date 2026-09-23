@@ -23,8 +23,9 @@ namespace KleeMod.Tests.Prototype;
 /// THE FOUR ACCEPTANCE QUESTIONS the row names are the four in section 2, and
 /// they are the numbers a later live deploy has to reproduce on screen:
 /// a 12 through Block 6 kills a 3-bar lead and lands 3 on her; a 3x2 flurry
-/// kills a 6-bar lead and leaves her whole; a Spend 3 from a 1-bar lead pays
-/// in full and bows; and three bars stand on the stage at once.
+/// kills a 6-bar lead and leaves her whole; a Spend 3 from a 1-bar back
+/// performer is refused (R276 pick 1, which replaced "pays in full and
+/// bows"); and three bars stand on the stage at once.
 ///
 /// NOTHING MEASURED HERE IS QUOTABLE (R215 B): a prototype arm's arithmetic,
 /// not a number about a game.
@@ -226,8 +227,10 @@ public class FurinaStageRuleTests
         var calls = Il.CallSequence(
             Il.Method("FurinaResourceHooks", "ModifyHpLostBeforeOsty"));
 
+        // R276 batch two: the ledger's absorb is reached through
+        // `FurinaStage.AbsorbHit`, which adds A Rapt Audience's Raise.
         var stage = calls.ToList().FindIndex(
-            c => c.EndsWith("FurinaStageLedger.Absorb", StringComparison.Ordinal));
+            c => c.EndsWith("FurinaStage.AbsorbHit", StringComparison.Ordinal));
         var encore = calls.ToList().FindIndex(
             c => c.EndsWith("FurinaResources.AbsorbDamage",
                             StringComparison.Ordinal));
@@ -246,33 +249,33 @@ public class FurinaStageRuleTests
     // ==================================================================
 
     /// <summary>
-    /// ACCEPTANCE 3. "Spend 3 from a 1-bar lead pays in full and bows."
-    ///
-    /// IN FULL means the RIDER, not the payment: sec.10 default 4, "as [USER]
-    /// said". The lead pays the 1 it has, the card's bigger number still
-    /// happens, and the lead leaves with a bow.
+    /// ACCEPTANCE 3, as R276 pick 1 rewrote it: the rider needs the FULL
+    /// price. A back performer at 1 cannot pay 3, so nothing fires, nothing is
+    /// paid and nobody bows -- and the chooser never offers the mode on such a
+    /// board (<see cref="FurinaStageLedger.CanSpend"/>).
     /// </summary>
     [Fact]
-    public void A_short_lead_still_fires_the_rider_in_full_and_bows()
+    public void A_short_back_performer_cannot_pay_and_nothing_moves()
     {
         using var _ = new Arm();
         var (_, stage) = Stage((StagePerformer.Usher, 1));
 
+        Assert.False(stage.CanSpend(3));
         var result = stage.Spend(3);
 
-        Assert.True(result.Fired);
-        Assert.Equal(1, result.Paid);
-        Assert.True(stage.IsEmpty);
-        Assert.Equal(StageDeparture.Spent, result.Exit!.Value.Cause);
-        Assert.True(result.Exit!.Value.Bows);
+        Assert.False(result.Fired);
+        Assert.Equal(0, result.Paid);
+        Assert.Null(result.Exit);
+        Assert.Equal(1, stage.Lead!.Fanfare);
     }
 
     [Fact]
-    public void A_lead_that_can_afford_it_pays_and_stays()
+    public void A_performer_that_can_afford_it_pays_and_stays()
     {
         using var _ = new Arm();
         var (_, stage) = Stage((StagePerformer.Crabaletta, 8));
 
+        Assert.True(stage.CanSpend(3));
         var result = stage.Spend(3);
 
         Assert.True(result.Fired);
@@ -281,15 +284,21 @@ public class FurinaStageRuleTests
         Assert.Null(result.Exit);
     }
 
+    /// <summary>R276 pick 1's second sentence: a bow comes from an EXACT
+    /// emptying.</summary>
     [Fact]
-    public void A_lead_emptied_exactly_by_a_spend_still_bows()
+    public void A_performer_emptied_exactly_by_a_spend_bows()
     {
         using var _ = new Arm();
         var (_, stage) = Stage((StagePerformer.Usher, 3));
 
+        Assert.True(stage.CanSpend(3));
         var result = stage.Spend(3);
 
+        Assert.True(result.Fired);
         Assert.Equal(3, result.Paid);
+        Assert.True(stage.IsEmpty);
+        Assert.Equal(StageDeparture.Spent, result.Exit!.Value.Cause);
         Assert.True(result.Exit!.Value.Bows);
     }
 
@@ -299,31 +308,74 @@ public class FurinaStageRuleTests
         using var _ = new Arm();
         var (_, stage) = Stage();
 
+        Assert.False(stage.CanSpend(1));
         var result = stage.Spend(3);
 
-        // NOT a refusal and NOT a whiff: the card is fine and plays at its
-        // base number (rule 8's third clause). `Fired` false is how a card
-        // asks that question, and `Paid` is not the question.
+        // The card plays at its base number (rule 8's third clause). `Fired`
+        // false is how a card asks that question.
         Assert.False(result.Fired);
         Assert.Equal(0, result.Paid);
         Assert.Null(result.Exit);
     }
 
+    /// <summary>
+    /// R276 pick 2: THE BACK PERFORMER IS THE BANK. Spend draws from the back
+    /// seat and never from the lead, however fat the lead is -- the lead is
+    /// the shield that absorbs and regenerates.
+    /// </summary>
     [Fact]
-    public void Spend_pays_from_the_lead_and_never_from_the_reserve()
+    public void Spend_pays_from_the_back_and_never_from_the_lead()
     {
         using var _ = new Arm();
         var (_, stage) = Stage(
-            (StagePerformer.Usher, 1),
-            (StagePerformer.Chevalmarin, 9));
+            (StagePerformer.Chevalmarin, 9),
+            (StagePerformer.Usher, 5));
 
-        stage.Spend(5);
+        var result = stage.Spend(5);
 
-        // The lead paid its 1 and left. The reserve is untouched and is now
-        // the lead -- which is the turn-after-a-rotation weakness sec.6 names.
+        // The back performer paid all 5, was emptied exactly and bowed; the
+        // lead is untouched.
+        Assert.True(result.Fired);
+        Assert.Equal(StagePerformer.Usher, result.Exit!.Value.Who);
+        Assert.True(result.Exit!.Value.Bows);
         Assert.Single(stage.Seats);
         Assert.Equal(StagePerformer.Chevalmarin, stage.Lead!.Who);
         Assert.Equal(9, stage.Lead!.Fanfare);
+    }
+
+    /// <summary>R276 pick 1 from the other side: the lead's bar is not the
+    /// price's. A fat lead and a thin back cannot pay.</summary>
+    [Fact]
+    public void A_fat_lead_does_not_pay_for_a_thin_back()
+    {
+        using var _ = new Arm();
+        var (_, stage) = Stage(
+            (StagePerformer.Chevalmarin, 9),
+            (StagePerformer.Usher, 2));
+
+        Assert.False(stage.CanSpend(3));
+        Assert.False(stage.Spend(3).Fired);
+        Assert.Equal(9, stage.Lead!.Fanfare);
+        Assert.Equal(2, stage.Back!.Fanfare);
+    }
+
+    /// <summary><i>Final Bow</i> takes the BACK performer (R276): the readers
+    /// draw from the bank, as Spend does.</summary>
+    [Fact]
+    public void Final_bow_takes_the_back_performer()
+    {
+        using var _ = new Arm();
+        var (_, stage) = Stage(
+            (StagePerformer.Chevalmarin, 2),
+            (StagePerformer.Crabaletta, 7));
+
+        var exit = stage.FinalBow(out var bar);
+
+        Assert.Equal(7, bar);
+        Assert.Equal(StagePerformer.Crabaletta, exit!.Value.Who);
+        Assert.True(exit!.Value.Bows);
+        Assert.Single(stage.Seats);
+        Assert.Equal(StagePerformer.Chevalmarin, stage.Lead!.Who);
     }
 
     // ==================================================================
@@ -555,6 +607,52 @@ public class FurinaStageRuleTests
         // the LAW's constants and nothing computed from a seat.
         var strings = Il.Calls(Il.Method("FurinaStage", "Perform"));
         Assert.DoesNotContain(strings, c => c.Contains("StageSeat.get_Fanfare"));
+    }
+
+    /// <summary>
+    /// R276 hygiene: UNDER THE ARM HER STARTER IS THE BRIEF'S TEN. The
+    /// shipped starting-companion roll swapped a Solicitation and a Stage
+    /// Presence for two Fontaine companions in every Stage run; it now asks
+    /// the arm first and stands down. A structural pin (the patch needs a
+    /// run seed and a deck this harness has no game for).
+    /// </summary>
+    [Fact]
+    public void The_starter_companion_roll_stands_down_under_the_arm()
+    {
+        var calls = Il.Calls(
+            Il.Method("KleeStartingCompanionsPatch", "ResolveFurina"));
+        Assert.Contains("FurinaStage.get_Enabled", calls);
+    }
+
+    /// <summary>
+    /// R276 hygiene: HER ANCIENT UNDER THE ARM. "Gain N Encore" printed a
+    /// retired meter; under the arm the face is the Stage's own Raise on the
+    /// back performer, 2 and 3 upgraded. With the arm off it is the shipped
+    /// card, word for word.
+    /// </summary>
+    [Fact]
+    public void The_ancient_raises_the_back_performer_under_the_arm()
+    {
+        string Face()
+        {
+            var card = new global::KleeMod.Cards.Furina.AllTheWorldsAStage();
+            return card.Localization!.First(row => row.Item1 == "description")
+                .Item2;
+        }
+
+        using (new Arm())
+        {
+            var face = Face();
+            Assert.Equal(
+                "At the start of your turn, [gold]Raise[/gold] "
+              + "{StageRaise:diff()} [gold]Fanfare[/gold] on the "
+              + "[gold]back performer[/gold].", face);
+            Assert.DoesNotContain("Encore", face);
+        }
+        using (new Arm(on: false))
+        {
+            Assert.Contains("[gold]Encore[/gold]", Face());
+        }
     }
 
     [Fact]

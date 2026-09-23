@@ -170,6 +170,18 @@ def test_the_block_line_says_what_the_sweep_will_add():
         {"live": True, "seats": THREE_SEATS[1:], "log": []})
 
 
+def test_the_block_line_reads_the_mods_forecast_when_the_wire_sends_one():
+    """R276 batch two. Arkhe Alignment's Pneuma multiplies the act's Block and
+    Full House adds acts, so a flat 3 per Usher is wrong on exactly the turns
+    a seat plans around. The mod sends its own forecast (`act_block`, off
+    `FurinaStage.ForecastActBlock`) and the page prints it; a 0 forecast (a
+    resting Usher) prints no clause."""
+    assert "after the acts: Block 27" in _page(
+        {"live": True, "seats": THREE_SEATS, "log": [], "act_block": 18})
+    assert "after the acts" not in _page(
+        {"live": True, "seats": THREE_SEATS, "log": [], "act_block": 0})
+
+
 def test_three_named_bars_stand_in_seat_order():
     """The row's own acceptance. Round one's seats read the cast as "one
     anonymous pool with three names"; this is the page naming all three, each
@@ -411,8 +423,8 @@ def test_the_stage_scenario_asserts_the_block_and_parses():
     assert "page_contains" in named
     assert "page_lacks" in named
     body = path.read_text(encoding="utf-8")
-    assert "lead: Chevalmarin" in body
-    assert "back: Crabaletta" in body
+    assert "lead: Usher" in body            # R276: the Spend takes the back
+    assert "back: Chevalmarin" in body
     assert "took a Bow" in body
 
 
@@ -473,7 +485,7 @@ def test_the_seat_rows_say_what_a_performers_act_is():
         page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                      hand=[_card(f"Deal damage equal to the {word}'s bar.")])
         assert "Every performer acts at the end of your turn" in page
-        assert "Crabaletta deals 5 to a random enemy" in page
+        assert "Crabaletta deals 5 Hydro damage to a random enemy" in page
 
 
 def test_the_back_performer_row_says_no_single_attack_rather_than_nothing():

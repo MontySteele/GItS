@@ -479,6 +479,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "stage_spend_all": [_hook("private", "stage", "use")],
     "stage_curtain_call": [_hook("private", "stage", "write")],
     "stage_final_bow": [_hook("private", "stage", "use")],
+    # R276 batch two.
+    "stage_step_forward": [_hook("private", "stage", "write")],
+    "stage_perform_all": [_hook("private", "stage", "use")],
+    "stage_spend_back_all": [_hook("private", "stage", "use")],
     "salon_bow": [_hook("private", "salon", "use")],
     # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a
     # write to the private board (which performer the FIFO end offers next)

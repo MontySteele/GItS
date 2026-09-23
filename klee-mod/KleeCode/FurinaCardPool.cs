@@ -42,9 +42,11 @@ public sealed class FurinaCardPool : CardPoolModel
         // here reaches every surface that can offer her a card and no list of
         // surfaces has to be kept in step.
         //
-        // Fourteen shipped rows leave the offer and the
-        // arm's fourteen `proto_fs_` rows take their slots, one for one at the
-        // same rarity, so the offer odds do not move. Sim twin:
+        // Every shipped row that prints a retired word leaves the offer first
+        // (`EB-736`, `FurinaStageRoster.DropRetiredRows`), then fourteen named
+        // shipped rows are swapped for the arm's fourteen `proto_fs_` rows.
+        // The filter removes far more than the swap adds, so the offer odds
+        // DO move: the arm's pool is about 26 cards. Sim twin (the swap only):
         // `furina_stage.POOL_SUBS`, read at the one door
         // `tier05.rewards.character_pool` already reads.
         //
@@ -103,6 +105,12 @@ public static class FurinaOffPoolCards
         // GetUnlockedCards must not see it or a reward roll could offer a
         // card nobody ruled. See KleeMod.PrototypeCards.
         cards.AddRange(PrototypeCards.For("furina"));
+#if PROTOTYPE_CARDS
+        // R276 batch two: Arkhe Alignment's two hand-written choice faces,
+        // on the Ethereal Spotlight options' footing above.
+        cards.Add(ModelDb.Card<Cards.Prototype.ArkheOusiaOption>());
+        cards.Add(ModelDb.Card<Cards.Prototype.ArkhePneumaOption>());
+#endif
         return cards;
     }
 }

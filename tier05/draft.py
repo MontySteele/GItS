@@ -2445,7 +2445,10 @@ def prints_attack_body(card: Card) -> bool:
 #: for the same reason and a per-op branch would invite eight different ones.
 FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_scene_change",
                     "stage_perform_lead", "stage_spend", "stage_spend_all",
-                    "stage_curtain_call", "stage_final_bow")
+                    "stage_curtain_call", "stage_final_bow",
+                    # R276 batch two.
+                    "stage_step_forward", "stage_perform_all",
+                    "stage_spend_back_all")
 
 #: Their shared rationale, written once. `STATIC_OP_PRICING` is prose the
 #: parity lint reads as a key set, and eight copies of one sentence would rot
@@ -2602,6 +2605,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "stage_spend_all": _STAGE_ZERO,
     "stage_curtain_call": _STAGE_ZERO,
     "stage_final_bow": _STAGE_ZERO,
+    "stage_step_forward": _STAGE_ZERO,
+    "stage_perform_all": _STAGE_ZERO,
+    "stage_spend_back_all": _STAGE_ZERO,
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "

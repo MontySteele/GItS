@@ -265,6 +265,20 @@ internal static class KleePowerIcons
         // asking for art a prototype may not keep.
         FanfareAttackPer5Power =>
             KleePck.Path("furina/powers/rising_ovation.png"),
+        // R276: the Ancient's Stage-arm power wears the Ancient's own icon.
+        StageRaisePerTurnPower =>
+            KleePck.Path("furina/powers/all_the_worlds_a_stage.png"),
+        // R276 batch two: the Stage's five powers borrow the shipped Furina
+        // sigil nearest their job, on the terms every borrow above takes.
+        FullHousePower => KleePck.Path("furina/powers/grand_salon.png"),
+        ThunderousApplausePower =>
+            KleePck.Path("furina/powers/standing_ovation.png"),
+        RaptAudiencePower =>
+            KleePck.Path("furina/powers/the_gallery_stirs.png"),
+        FiveCenturyActPower =>
+            KleePck.Path("furina/powers/unheard_confession.png"),
+        ArkheAlignmentPower =>
+            KleePck.Path("furina/powers/star_of_the_show.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

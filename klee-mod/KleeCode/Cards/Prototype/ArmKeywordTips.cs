@@ -81,15 +81,6 @@ public static class ArmKeywordTips
     // spelling and not by meaning -- there it is a meter, here it is a
     // performer's own bar -- so it takes its own key rather than reusing one
     // that would render the retired arm's sentence.
-    // `EB-407`, and it SURVIVED the reframe's retirement (`EB-723`) while
-    // `Deploy`, `Evoke` and `Drain` did not. Those three named rules that
-    // left with their rows; Encore is SHIPPED machinery whose only
-    // statement of itself is a badge that needs the meter on the board, and
-    // every Furina row the Stage does not swap still prints the word. It
-    // titles no ARM KEYWORD any more -- no prototype face prints it -- so it
-    // is a rider like `PlanElementKey`, reached by the blind-play page
-    // rather than by a card's golded span.
-    public const string EncoreKey = "KLEEMOD-ARM_ENCORE";
     public const string SpendKey = "KLEEMOD-ARM_STAGE_SPEND";
     public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
     public const string RaiseKey = "KLEEMOD-ARM_STAGE_RAISE";
@@ -97,6 +88,9 @@ public static class ArmKeywordTips
     public const string LeadPerformerKey = "KLEEMOD-ARM_STAGE_LEAD";
     public const string BackPerformerKey = "KLEEMOD-ARM_STAGE_BACK";
     public const string RotateKey = "KLEEMOD-ARM_STAGE_ROTATE";
+    // R276 batch two: Arkhe Alignment's two halves.
+    public const string OusiaKey = "KLEEMOD-ARM_STAGE_OUSIA";
+    public const string PneumaKey = "KLEEMOD-ARM_STAGE_PNEUMA";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -1062,44 +1056,14 @@ public static class ArmKeywordTips
     //
     // THE REFRAME'S FOUR ARE GONE (`EB-723`, R269). `Deploy`, `Evoke`, `Drain`
     // and `Encore` left this class with the eleven `proto_fr_` rows that
-    // printed them: the Stage brief's sec.2 retires that arm by name, R213 B's
+    // printed them (Encore's last body with R276's hygiene, once nothing
+    // called it): the Stage brief's sec.2 retires that arm by name, R213 B's
     // deletion rule took its rows off `docs/prototype-surface.yaml`, and a
     // tooltip for a word no row prints is a definition of a mechanic that is
     // not there (draft 6's precedent, one character over). The rest of the
     // reframe's C# stands until the branch that owns both halves takes it.
     //
     // WHAT REPLACED THEM is the STAGE's seven, at the foot of this class.
-
-    /// <summary>
-    /// `EB-479` (R258): THE OPENING JOINS THE SENTENCE THAT DEFINES THE WORD,
-    /// and only under the arm that grants it -- <see cref="SparkBody"/>'s
-    /// shape one character over, for its reason.
-    ///
-    /// Rounds 5 to 8 each read the reframe's turn one as no decision at 0
-    /// Encore, and round 9 called the opening "by construction its own weakest
-    /// version". The tip is where a player meets the word, and an opening bank
-    /// nobody is told about is one the first turn cannot be planned around.
-    /// The shipped kit grants none, so the release sentence stands untouched
-    /// with the arm off.
-    ///
-    /// THE THIRD CLAUSE PAID FOR IT. "As each lands" became "in order" and the
-    /// two "to resolve" / "to perform" tails went, which keeps all three
-    /// spenders AND the ordering fact inside the 135-character ceiling: 133
-    /// rendered under the arm, 134 with it off. The AMOUNT is interpolated
-    /// from the arm's own law (`EB-89`'s rule, one meter over), so a retune
-    /// cannot leave this sentence quoting a number nothing grants.
-    /// </summary>
-    private static string EncoreBody()
-    {
-        // NOT `word`, which is <see cref="SparkBody"/>'s name for its own
-        // half: `lint_text_conventions.tip_rows` reads these two bodies out of
-        // the SOURCE by const name, and a second `word` in the same file would
-        // have it measure the Spark tip's opening twice and this one never.
-        const string absorbs =
-            "After [gold]Block[/gold] it absorbs damage before HP. ";
-        return absorbs + "One pool, as each lands: a card pays to "
-             + "resolve, a member spends 1 to perform or acts at 3/4.";
-    }
 
     /// <summary>
     /// One tip, appended after whatever the card already carries.
@@ -1194,11 +1158,9 @@ public static class ArmKeywordTips
     // so a retune cannot leave one of these sentences quoting a retired number.
 
     /// <summary>
-    /// Brief sec.3 rule 8, both sentences, because the second is the half a
-    /// player cannot infer and the one the whole Expend deck is built on: a
-    /// rider fires IN FULL whatever the bar holds, so a performer at 1 buys
-    /// the same big number a performer at 8 does and takes a bow for it. The
-    /// only refusal is an empty stage.
+    /// Brief sec.3 rule 8 as R276 ruled it: the BACK performer pays, the
+    /// price is paid in full or the Spend mode is not offered, and a
+    /// performer the Spend empties EXACTLY takes a bow.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -1210,9 +1172,10 @@ public static class ArmKeywordTips
             // rider: an empty stage does not refuse a Spend now, it simply
             // does not OFFER the mode, which the player meets on the
             // choose-a-card screen rather than in a tip.
-            "Chosen on play, never automatic. Pays the lead performer, "
-          + "fires in full even if the bar is short, and an emptied "
-          + "performer takes a [gold]Bow[/gold].");
+            // R276 picks 1 and 2: the bank pays, and only in full.
+            "Chosen on play. The [gold]back performer[/gold] pays the full "
+          + "price or you can't choose it. Emptied exactly, it takes a "
+          + "[gold]Bow[/gold].");
 
     /// <summary>
     /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter
@@ -1256,24 +1219,25 @@ public static class ArmKeywordTips
           + "not. Usher: " + FurinaStageLaw.BowUsherBlock
           + " [gold]Block[/gold]. Chevalmarin: Hydro on all. "
           + "Crabaletta: " + FurinaStageLaw.BowCrabalettaDamage
-          + " damage.");
+          + " Hydro damage.");
 
     /// <summary>
     /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates
-    /// and the one that is hit, and both facts are about the same seat, which
-    /// is why one sentence can carry them.
+    /// and the one that is hit -- the SHIELD, in R276's words -- and both
+    /// facts are about the same seat, which is why one sentence can carry
+    /// them.
     /// </summary>
     public static IEnumerable<IHoverTip> ForLeadPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LeadPerformerKey,
-            "The front seat: the one attacks reach and the only one that "
+            "The front seat, the shield: attacks reach it, and only it "
           + "regains " + FurinaStageLaw.LeadRegen + " [gold]Fanfare[/gold] "
           + "each turn.");
 
     /// <summary>
-    /// Brief sec.3 rules 5 and 6, from the other end. The back seat is the
-    /// reserve: nothing hits it, so what is banked there survives until
-    /// rotation or a summon brings it forward.
+    /// Brief sec.3 rules 5, 6 and 8, from the other end. The back seat is the
+    /// BANK (R276): a Raise fills it, a Spend draws from it, and no single
+    /// attack reaches it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBackPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -1283,8 +1247,8 @@ public static class ArmKeywordTips
             // at 0, so the next attack of the same turn meets whoever stepped
             // forward. Round two's seats read the old sentence as a promise
             // the reserve was safe for the turn.
-            "The back seat, the reserve: no single attack reaches it. It "
-          + "leads once the front seat empties. Alone on stage it is the "
+            "The back seat, the bank: Raise fills it, Spend draws from it, "
+          + "and no single attack reaches it. Alone on stage it is the "
           + "lead.");
 
     /// <summary>
@@ -1299,11 +1263,29 @@ public static class ArmKeywordTips
             "Seats change order and every bar comes with them. Nobody leaves "
           + "and nobody takes a [gold]Bow[/gold].");
 
+    /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
+    /// choice a player makes at the start of each turn.</summary>
+    public static IEnumerable<IHoverTip> ForOusia(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, OusiaKey,
+            "This turn, your performers' acts deal double damage.");
+
+    /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s Block half. The
+    /// numeral is <see cref="Powers.ArkheAlignmentPower.PneumaLeadRegain"/>'s
+    /// (`EB-89`).</summary>
+    public static IEnumerable<IHoverTip> ForPneuma(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PneumaKey,
+            "This turn, your performers' acts give double [gold]Block[/gold], "
+          + "and the [gold]lead performer[/gold] regains "
+          + Powers.ArkheAlignmentPower.PneumaLeadRegain
+          + " [gold]Fanfare[/gold].");
+
     /// <summary>
     /// WHICH BAR A READER'S NUMBER IS. One value per reader, and the four are
-    /// the four the sheet declares: <i>Ousia Surge</i> reads the lead's bar,
-    /// <i>Pneuma Refrain</i> the back's, <i>Final Bow</i> the lead's as it
-    /// bows, and <i>Let the People Rejoice</i> the whole company's.
+    /// the four the sheet declares (R276): <i>Pneuma Refrain</i> reads the
+    /// lead's bar, <i>Ousia Surge</i> the back's, <i>Final Bow</i> the back's
+    /// as it bows, and <i>Let the People Rejoice</i> the whole company's.
     ///
     /// DERIVED AND NEVER DECLARED. `gen_klee_cards.stage_reader_source` reads
     /// the value off the multiplier `EB-747` already picked for the row's
@@ -1313,12 +1295,12 @@ public static class ArmKeywordTips
     /// </summary>
     public enum StageReader
     {
-        /// <summary>`stage_lead_fanfare` -- <i>Ousia Surge</i>.</summary>
+        /// <summary>`stage_lead_fanfare` -- <i>Pneuma Refrain</i>.</summary>
         Lead,
-        /// <summary>`stage_back_fanfare` -- <i>Pneuma Refrain</i>.</summary>
+        /// <summary>`stage_back_fanfare` -- <i>Ousia Surge</i>.</summary>
         Back,
-        /// <summary>`SpentOrLeadFanfare` -- <i>Final Bow</i>.</summary>
-        SpendLead,
+        /// <summary>`SpentOrBackFanfare` -- <i>Final Bow</i>.</summary>
+        SpendBack,
         /// <summary>`SpentOrTotalFanfare` -- the Rare.</summary>
         SpendAll,
     }
@@ -1327,56 +1309,29 @@ public static class ArmKeywordTips
     // `tools/lint_text_conventions.tip_rows` reads THIS file for its census
     // and a body built by a method reaches it as an empty string -- the
     // silence `EB-343` was filed on. The lint parses these four by name and
-    // measures each against the ceiling with `ReaderNoStage` appended, which
-    // is the longest the tip is ever rendered.
+    // measures each against the ceiling.
     private const string ReaderLeadRule =
         "The number is the [gold]lead performer[/gold]'s "
       + "[gold]Fanfare[/gold].";
     private const string ReaderBackRule =
         "The number is the [gold]back performer[/gold]'s "
       + "[gold]Fanfare[/gold].";
-    private const string ReaderSpendLeadRule =
-        "The number is the [gold]lead performer[/gold]'s "
+    private const string ReaderSpendBackRule =
+        "The number is the [gold]back performer[/gold]'s "
       + "[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends.";
     private const string ReaderSpendAllRule =
         "The number is every performer's [gold]Fanfare[/gold] added up and "
       + "spent.";
-    private const string ReaderNoStage =
-        " There is no stage outside combat, so the number above reads 0.";
 
     /// <summary>
-    /// A STAGE ROUND-THREE DEFECT: THE READERS PRINT A LITERAL 0 OFF THE
-    /// BOARD.
+    /// WHICH BAR THIS READER'S NUMBER IS, as a hover tip.
     ///
-    /// THE FIND (round three). <i>Let the People Rejoice</i> read "Deal 0
-    /// damage to ALL enemies" on the Neow screen and <i>Ousia Surge</i> read
-    /// "Deal 0 damage" at a card reward, and two seats turned the Rare down on
-    /// it. The number is correct in combat and correct at resolution -- that
-    /// is `EB-747`, and its tests stand -- but every reader multiplies a LIVE
-    /// BAR, and off a board there are no bars, so a CalculatedVar honestly
-    /// reports nothing and the face prints the nothing.
-    ///
-    /// THE DESCRIPTION CANNOT SAY IT. A face is a loc string injected once at
-    /// boot (`LocManager_Initialize_Patch`) with no runtime seam, and the only
-    /// expression that would switch on the board is a nested
-    /// `{CalculatedDamage:choose(0):...}` -- the repo's first, with no
-    /// headless renderer to pin it against. So the rule goes where this mod
-    /// already puts a rule a number cannot carry: the HOVER TIP, which is
-    /// `FurinaRiderTips.FanfareBody`'s posture one arm over ("out of combat
-    /// the rate stands alone rather than printing a misleading zero") and
-    /// `KokomiRiderTips`'.
-    ///
-    /// THE RULE ALWAYS, THE DISCLAIMER ONLY OFF THE BOARD. In combat the face
-    /// is already right and a sentence about an absent stage would be false,
-    /// so the tip says which bar the number is and stops. Off the board --
-    /// Neow, a reward, a shop, the deck view, the blind-play page -- it adds
-    /// the one fact the screen is lying about: the 0 is the absence of a
-    /// stage and not the card's damage.
-    ///
-    /// THE OWNER'S COMBAT AND NOT THE CARD'S, <see cref="FieldIsEmptyFor"/>'s
-    /// read verbatim and for its reason: `CardModel.CombatState` walks the
-    /// card's pile and throws off a board, which is the exact case this guard
-    /// exists for.
+    /// Round three found the four readers printing a literal 0 off the board
+    /// ("Deal 0 damage to ALL enemies" on the Rare at Neow). The FACES now
+    /// carry the base game's own answer -- Body Slam's shape: the rule in
+    /// words, and the live number on a line of its own only in combat
+    /// (`{InCombat:...|}`) -- so no screen prints a misleading 0 any more,
+    /// and this tip stays as the one-line statement of which seat is read.
     /// </summary>
     public static IEnumerable<IHoverTip> ForStageReader(
         IEnumerable<IHoverTip> inherited, CardModel card, StageReader source)
@@ -1384,44 +1339,10 @@ public static class ArmKeywordTips
         var rule = source switch
         {
             StageReader.Back => ReaderBackRule,
-            StageReader.SpendLead => ReaderSpendLeadRule,
+            StageReader.SpendBack => ReaderSpendBackRule,
             StageReader.SpendAll => ReaderSpendAllRule,
             _ => ReaderLeadRule,
         };
-        return With(inherited, ReaderKey,
-            OnAStage(card) ? rule : rule + ReaderNoStage);
+        return With(inherited, ReaderKey, rule);
     }
-
-    /// <summary>Is this card being read with a combat behind it? False on
-    /// every screen that has no board, which is where the 0 is printed.
-    /// </summary>
-    private static bool OnAStage(CardModel? card) =>
-        TipOwner.CreatureOf(card)?.CombatState != null;
-
-    /// <summary>
-    /// `EB-407`. THE WORD IS PRINTED BEFORE THE PLAYER HOLDS ANY. Encore is
-    /// named on the Neow screen and on opening-hand faces, and the shipped
-    /// surface that states its rule is `EncoreMeterPower`'s badge -- which
-    /// only ever renders once the meter is on the board. The Furina round-4
-    /// seat made the run's first decision without the word (run 1, (c) 5).
-    ///
-    /// THREE FACTS, EACH READ OFF ITS OWN SITE, no fourth invented:
-    ///   * the buffer, <see cref="KleeMod.Powers.FurinaResources.AbsorbDamage"/>
-    ///     -- damage remaining after Block consumes Encore before HP;
-    ///   * a card's price, <c>FurinaResourceHooks.BeforeCardPlayed</c> --
-    ///     spent immediately after the energy debit and BEFORE resolution;
-    ///   * a member's 1, <see cref="KleeMod.Powers.SalonMemberPower"/>'s
-    ///     <c>PerformMember</c> -- it pays <c>TickEncoreCost</c> if it can and
-    ///     performs at <c>DryDamageMultiplier</c> (3/4) if it cannot.
-    ///
-    /// AND THE ORDER, WHICH IS THE HALF NOTHING PRINTED. All three draw on one
-    /// amount, in the order the events reach it: there is no reservation and
-    /// no priority anywhere in those three sites, so a hit that lands first
-    /// leaves a member performing dry, and a member that performs first leaves
-    /// less buffer for the hit. "One pool, as each lands" is that, in the
-    /// space the 135-character tip ceiling leaves.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForEncore(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, EncoreKey, EncoreBody());
 }

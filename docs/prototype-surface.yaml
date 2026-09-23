@@ -1999,9 +1999,9 @@
    authored_by: [claude],
    replaces: crescendo,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculatedDamage:diff()} damage, the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].",
+   description: "Deal damage equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_lead_fanfare},
+              amount_formula: {base: 0, per: 1, count: stage_back_fanfare},
               target: enemy}]}
 
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
@@ -2009,9 +2009,9 @@
    authored_by: [claude],
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold], the [gold]back performer[/gold]'s [gold]Fanfare[/gold].",
+   description: "Gain [gold]Block[/gold] equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
-              amount_formula: {base: 0, per: 1, count: stage_back_fanfare}}]}
+              amount_formula: {base: 0, per: 1, count: stage_lead_fanfare}}]}
 
 - {id: proto_fs_bis, name: "Bis!", character: furina,
    upgrade: {cost: -1},
@@ -2026,7 +2026,7 @@
    authored_by: [claude],
    replaces: take_your_bow,
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain {CalculatedBlock:diff()} [gold]Block[/gold], its [gold]Fanfare[/gold]. Exhaust.",
+   description: "The [gold]back performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: stage_final_bow},
              {op: block,
               amount_formula: {base: 0, per: 1, count: stage_spent}}]}
@@ -2039,9 +2039,160 @@
    replaces: universal_revelry,
    register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
    art_of: let_the_people_rejoice,
-   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage. Deal {CalculatedDamage:diff()} damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1. Exhaust.",
+   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage and deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},
               target: all_enemies},
              {op: stage_curtain_call}]}
+
+# FURINA, THE STAGE -- BATCH TWO (R276 pick 3). Fifteen rows on picks 1-2's
+# rules; each `replaces:` is a same-rarity shipped row the EB-736 filter already
+# drops. Provenance: docs/notes/prototype-surface-provenance.md.
+
+# --- the Commons (six) ---
+
+- {id: proto_fs_improvised_number, name: "Improvised Number", character: furina,
+   upgrade: {damage: +3},
+   authored_by: [claude],
+   replaces: breathless,
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Deal 6 damage. If the stage is empty, summon a random performer.",
+   effects: [{op: damage, amount: 6, target: enemy},
+             {op: conditional, if: stage_empty,
+              then: [{op: stage_summon, member: random}]}]}
+
+- {id: proto_fs_between_acts, name: "Between Acts", character: furina,
+   upgrade: {block: +3},
+   authored_by: [claude],
+   replaces: graceful_retreat,
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain 5 [gold]Block[/gold]. If the stage is empty, draw 2 cards.",
+   effects: [{op: block, amount: 5},
+             {op: conditional, if: stage_empty,
+              then: [{op: draw, amount: 2}]}]}
+
+- {id: proto_fs_ensemble_piece, name: "Ensemble Piece", character: furina,
+   upgrade: {formula_per: +1},
+   authored_by: [claude],
+   replaces: house_call,
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Deal {ExtraDamage:diff()} damage for each performer on stage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage,
+              amount_formula: {base: 0, per: 4, count: stage_count},
+              target: enemy}]}
+
+- {id: proto_fs_hold_your_places, name: "Hold Your Places", character: furina,
+   upgrade: {block: +2, stage_raise: +1},
+   authored_by: [claude],
+   replaces: lasting_impression,
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain 5 [gold]Block[/gold]. [gold]Raise[/gold] 2 [gold]Fanfare[/gold] on the [gold]lead performer[/gold].",
+   effects: [{op: block, amount: 5},
+             {op: stage_raise, amount: 2, seat: lead}]}
+
+- {id: proto_fs_quick_cue, name: "Quick Cue", character: furina,
+   upgrade: {conditional_damage: +1, conditional_then_damage: +1},
+   authored_by: [claude],
+   replaces: applause_line,
+   register: salon, cost: 0, type: attack, rarity: common,
+   description: "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead.",
+   effects: [{op: choose_one, modes: [
+              {label: "Deal 3 damage",
+               effects: [{op: damage, amount: 3, target: enemy}]},
+              {label: "[gold]Spend[/gold] 2: deal 8 instead",
+               effects: [{op: stage_spend, amount: 2},
+                         {op: damage, amount: 8, target: enemy}]}]}]}
+
+- {id: proto_fs_step_forward, name: "Step Forward", character: furina,
+   upgrade: {block: +2},
+   authored_by: [claude],
+   replaces: swelling_overture,
+   register: salon, cost: 0, type: skill, rarity: common,
+   description: "The [gold]back performer[/gold] moves to the front seat. Gain 3 [gold]Block[/gold].",
+   effects: [{op: stage_step_forward},
+             {op: block, amount: 3}]}
+
+# --- the Uncommons (seven) ---
+
+- {id: proto_fs_gala_dinner, name: "Gala Dinner", character: furina,
+   upgrade: {stage_raise: +1},
+   authored_by: [claude],
+   replaces: dress_rehearsal,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Raise[/gold] 3 [gold]Fanfare[/gold] on every performer.",
+   effects: [{op: stage_raise, amount: 3, seat: all}]}
+
+- {id: proto_fs_double_casting, name: "Double Casting", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: matinee_performance,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Summon two random performers who are not on stage.",
+   effects: [{op: stage_summon, member: random},
+             {op: stage_summon, member: random}]}
+
+- {id: proto_fs_tutti, name: "Tutti!", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: full_ensemble,
+   register: salon, cost: 2, type: skill, rarity: uncommon,
+   description: "Every performer performs its act now.",
+   effects: [{op: stage_perform_all}]}
+
+- {id: proto_fs_bravura, name: "Bravura", character: furina,
+   upgrade: {formula_per: +1},
+   authored_by: [claude],
+   replaces: dramatic_entrance,
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Spend[/gold] all of the [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage for each point spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_back_all},
+             {op: damage,
+              amount_formula: {base: 0, per: 3, count: stage_spent},
+              target: enemy}]}
+
+- {id: proto_fs_full_house, name: "Full House", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: fortissimo_guard,
+   register: salon, cost: 2, type: power, rarity: uncommon,
+   description: "At the end of your turn, if all three seats are filled, your performers act twice.",
+   effects: [{op: apply_power, power: fs_full_house, amount: 1, target: self}]}
+
+- {id: proto_fs_thunderous_applause, name: "Thunderous Applause", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   replaces: standing_ovation,
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "Whenever a performer takes a [gold]Bow[/gold], draw 1 card and [gold]Raise[/gold] 2 [gold]Fanfare[/gold] on the [gold]back performer[/gold].",
+   effects: [{op: apply_power, power: fs_thunderous_applause, amount: 2,
+              target: self}]}
+
+- {id: proto_fs_rapt_audience, name: "A Rapt Audience", character: furina,
+   upgrade: {power_amount: +50},
+   authored_by: [claude],
+   replaces: crowd_work,
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "Whenever an enemy hits the [gold]lead performer[/gold], [gold]Raise[/gold] {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] it lost{IfUpgraded:show:|, rounded up,} on the [gold]back performer[/gold].",
+   effects: [{op: apply_power, power: fs_rapt_audience, amount: 50,
+              target: self}]}
+
+# --- the Rares (two) ---
+
+- {id: proto_fs_arkhe_alignment, name: "Arkhe Alignment", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: endless_waltz,
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, choose: [gold]Ousia[/gold] (acts deal double damage) or [gold]Pneuma[/gold] (acts give double [gold]Block[/gold]; the lead regains 2 [gold]Fanfare[/gold]).",
+   effects: [{op: apply_power, power: fs_arkhe_alignment, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_five_century_act, name: "A Five-Century Act", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: prima_donna,
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "Whenever a performer takes a [gold]Bow[/gold], it returns to the back seat with 1 [gold]Fanfare[/gold].",
+   effects: [{op: apply_power, power: fs_five_century_act, amount: 1,
+              target: self}]}

@@ -47,8 +47,9 @@ seed: YVKF7957EUFG
 
 notes: |
   The damage order proved from Furina's side of it: a fat lead and her Block
-  answer a hallway intent whole, a Spend rider fires in full out of a lead that
-  cannot pay it, and a bow lands its Block. `EB-735` adds the PAGE: three named
+  answer a hallway intent whole, a Spend draws its full price from the BACK
+  performer and a performer it empties exactly takes its bow (R276 picks 1 and
+  2), and a back performer short of the price is not offered the Spend mode. `EB-735` adds the PAGE: three named
   bars in seat order and the bow line, asserted rather than eyeballed, with the
   three retired meter lines asserted gone (`EB-736`). Round two adds four more:
   Curtain Rise played BOTH WAYS from one board (`EB-746`), an act line that
@@ -80,7 +81,8 @@ assumptions:
      intent is not a failure of the rule, it is a different fight -- rerun on
      a hallway."
   - "Curtain Rise is a CHOOSE-ONE face since `EB-746`: mode 0 deals 7 and mode
-     1 pays the lead 3 for 13. Both are run into a bare body, so the deltas
+     1 pays the BACK performer 3 for 13 (R276), offered only when the back
+     performer holds at least 3. Both are run into a bare body, so the deltas
      below are the printed numbers before Vulnerable or a reaction moves
      them."
   - "Both plays take `highest_hp` and NOT `first`. A delta is only readable off
@@ -91,9 +93,9 @@ assumptions:
   - "The modes are answered BY LABEL, `deep-breath-modal-choice.yaml`'s rule:
      the generator emits each label into the option card's title and its
      description, so a label edit on the sheet is an edit to this file too. On
-     an empty stage the Spend mode is NOT OFFERED at all (rule 8, as a choice),
-     so a play there opens no screen -- which is why both plays below stand on
-     an occupied stage."
+     an empty stage, or with a back performer short of the price, the Spend
+     mode is NOT OFFERED at all (rule 8, as a choice) and the screen shows the
+     base mode alone -- which the last play below stands on."
   - "A hand does not survive `end_turn`. Both plays are in round two, so each
      is of its OWN copy, granted in the step above it; the setup copy is the
      round-one preview's subject and is discarded unplayed."
@@ -156,12 +158,13 @@ steps:
   - expect:
       player_hp_delta: {amount: 0}
 
-  # ------------------------------------------------ Spend in full, RULE 8/9 -
-  # Curtain Rise asks the lead for 3 and the lead has less than that. RULE 8's
-  # second clause: the rider fires IN FULL whatever the lead can pay, the lead
-  # pays what it has, and it leaves with a bow. So the enemy takes the full 13
-  # and not a scaled-down number, which is the assertion that would fail if
-  # the shortfall rule ever came back.
+  # --------------------------------------- Spend from the bank, RULE 8/9 -
+  # R276 picks 1 and 2: Curtain Rise's Spend draws its FULL price from the
+  # BACK performer, Crabaletta, who arrived at 1 -- so Rising Applause banks
+  # 5 on her first (1 + 5 = 6). The first Spend 3 leaves her at 3 and bows
+  # nobody, so its 13 is the whole delta on the fattest body; the second
+  # empties her EXACTLY, and she takes her bow (8 Hydro to a random enemy,
+  # rule 9), which is why that play's delta is not asserted.
   - set_energy: {amount: 5}
   # A COPY PER PLAY, and why a `give` stands before each. `end_turn` above
   # discarded the whole hand and the setup copies with it, so a play written
@@ -169,23 +172,8 @@ steps:
   # 0.2.3181 run reported (`'Curtain Rise' is not in hand`). Every play below
   # is of its OWN copy, so each opens its own choice screen from the board
   # this turn actually produced rather than from a survivor of the last one.
-  #
-  # TWO DRAINS FIRST, and they are the only reason this file reads the same on
-  # every hallway. The prose used to have the ENEMY TURN leave the lead short,
-  # which is true only for an intent between 12 and 14: the 0.2.3181-era runs
-  # rolled a slime hallway, the Block ate the whole intent, and the lead came
-  # into this turn at 9 -- fat enough to pay 3 in full, so no bow, so no
-  # rotation and none of the page lines below. Two unasserted Spends take the
-  # bar down by 6, which leaves the asserted play a lead holding between 1 and
-  # 3. Nothing is asserted about these two: they are board setup written in
-  # the card's own verbs.
-  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
-  - play: {card: "Curtain Rise", target: highest_hp}
-  - select: {cards: ["Spend 3: deal 13 instead"]}
-  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
-  - play: {card: "Curtain Rise", target: highest_hp}
-  - select: {cards: ["Spend 3: deal 13 instead"]}
-  - set_energy: {amount: 5}
+  - give: {card: KLEEMOD-PROTO_FS_STANDING_OVATION, pile: hand, upgraded: false}
+  - play: {card: "Rising Applause"}
   - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
   - play: {card: "Curtain Rise", target: highest_hp}
   - expect:
@@ -193,12 +181,10 @@ steps:
   - select: {cards: ["Spend 3: deal 13 instead"]}
   - expect:
       enemy_hp_block_delta: {who: highest_hp, amount: -13}
+  - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
+  - play: {card: "Curtain Rise", target: highest_hp}
+  - select: {cards: ["Spend 3: deal 13 instead"]}
 
-  # THE BOW, machine-checked where it can be: the Usher's departure effect is
-  # 4 Block to Furina (rule 9). It is asserted as a floor rather than an
-  # equality because the turn's own Block is on the board too and the acts have
-  # not fired yet -- what is being pinned is that a bow PAID, which is the
-  # difference between rule 7's two departures.
   - read: {what: player}
 
   # ------------------------------------------------- THE PAGE, and `EB-735` -
@@ -213,14 +199,16 @@ steps:
   # performer and the seat word it stands under.
   - expect:
       page_contains: {text: "## Your stage"}
+  # R276: the Spend emptied the BACK performer, so the Usher is still the
+  # lead and Chevalmarin is the back performer now.
   - expect:
-      page_contains: {text: "lead: Chevalmarin"}
+      page_contains: {text: "lead: Usher"}
   - expect:
-      page_contains: {text: "back: Crabaletta"}
+      page_contains: {text: "back: Chevalmarin"}
   - expect:
       page_contains: {text: "took a Bow"}
   - expect:
-      page_contains: {text: "**Usher** left the stage: emptied by a Spend"}
+      page_contains: {text: "**Crabaletta** left the stage: emptied by a Spend"}
 
   # ------------------------------------------------ THE HEADER, and `EB-736` -
   # The three shipped meter lines the brief retires are gone from the header
@@ -262,17 +250,11 @@ steps:
 
   - wait: {seconds: 20}
 
-  # ---------------------------------------------- the empty-stage fallback --
-  # EYES-ON and read from the strip: after the bow the middle performer has
-  # stepped up, so the rider still has somebody to pay it. The claim the frame
-  # settles is that the line RE-FLOWED -- the survivors closed the gap and the
-  # new front bar is the one the strip names -- which is the placement pass
-  # doing its job (`FurinaStagePlacement`).
-  #
-  # `EB-746`: AND THIS PLAY TAKES THE OTHER MODE, from the same board and the
-  # same card, which is the row's own acceptance. The base mode deals 7 and
-  # leaves every bar where it stood -- the verb to decline that round two's
-  # seats could not find.
+  # ------------------------------------------ the short-bank refusal, R276 -
+  # The back performer is Chevalmarin at 1 now, short of Curtain Rise's 3, so
+  # the Spend mode is NOT OFFERED (R276 pick 1): the chooser shows the base
+  # mode alone, however fat the Usher in front is, and the card deals its 7
+  # and leaves every bar where it stood.
   - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
   - play: {card: "Curtain Rise", target: highest_hp}
   - expect:

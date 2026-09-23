@@ -794,6 +794,28 @@ CO_TENANCY_LEDGER = {
             "and Encore) or with the Companion powers beside it. NO SIM TWIN "
             "ORDERS IT, because the arm is C# FIRST by "
             "`docs/current/operations/prototype.md` and tier0 has no stage",
+        ("Powers/Prototype/StageRaisePerTurnPower.cs",
+         "StageRaisePerTurnPower"):
+            "QUARANTINED (the Furina stage, FURINA_STAGE; R276 hygiene). Her "
+            "Ancient under the arm: Raise N Fanfare on the BACK performer at "
+            "the start of her turn. THE ORDERING QUESTION, answered: its one "
+            "co-tenant on the same resource is `FurinaStageHooks`' regen, "
+            "which adds 1 to the LEAD's bar. With two or more performers the "
+            "two write different seats; with one they write the same bar, "
+            "and both are ADDITIONS that read nothing, so either order leaves "
+            "the same number. It deals no damage, grants no Block and touches "
+            "no element. NO SIM TWIN ORDERS IT: the sim models the shipped "
+            "Ancient only",
+        ("Powers/Prototype/FurinaStagePowers.cs", "ArkheAlignmentPower"):
+            "QUARANTINED (the Furina stage, FURINA_STAGE; R276 batch two). "
+            "Arkhe Alignment's turn-start choice, asked once a turn: Ousia "
+            "multiplies this turn's act damage, Pneuma this turn's act Block "
+            "and Raises 2 a copy on the LEAD. THE ORDERING QUESTION, answered: the multipliers are read "
+            "only by the acts, which fire at the END of the turn, so no "
+            "co-tenant of this broadcast reads them; Pneuma's Raise is an "
+            "ADDITION to the lead's bar, as `FurinaStageHooks`' regen is, so "
+            "either order leaves the same number. The sim runs it after the "
+            "regen (`furina_stage.turn_start_powers`)",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
             "resolution point: the Plans she wrote last turn happen here, in "
