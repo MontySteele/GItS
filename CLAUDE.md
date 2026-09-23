@@ -96,8 +96,8 @@ git show <commit>:<path>
   `review/active/` for `review/ruled/`, and a measurement record or
   registration for `review/records/`.
 - **Model routing.** Design work (briefs, card design, loops and archetypes,
-  any taste judgement) is the main Claude session's (Fable) and is never
-  delegated. Opus subagents do coding, builds and tests and author no card
+  any taste judgement) is the main Claude session's (Fable or Opus 5.5) and
+  is never delegated. Subagents do coding, builds and tests and author no card
   designs. Sonnet does simple exploratory work such as assembling a packet or a
   census from files named in advance. Haiku does single-value lookups.
 - **Two registers, and nothing else mints ids.** `BACKLOG.md` is the one
