@@ -417,9 +417,9 @@ def _runtime_count(state: CombatState, token: str,
     # `fanfare_drained_this_card`.
     #
     # The other two are LIVE BAR READS and not per-card memory, which is the
-    # difference between *Ousia Surge* ("damage equal to the lead performer's
-    # Fanfare", brief sec.12) and the Rare: those two cards read a bar they do
-    # not spend. Both are 0 on an empty stage and both are 0 with the flag off,
+    # difference between *Ousia Surge* ("damage equal to the back performer's
+    # Fanfare", R276) or *Pneuma Refrain* (the lead's) and the Rare: those two
+    # cards read a bar they do not spend. Both are 0 on an empty stage and both are 0 with the flag off,
     # so a shipped row that ever named one would print zero rather than raise.
     if token == "stage_spent":
         return state.stage_spent_this_card
@@ -427,6 +427,8 @@ def _runtime_count(state: CombatState, token: str,
         return furina_stage.lead_fanfare(p)
     if token == "stage_back_fanfare":
         return furina_stage.back_fanfare(p)
+    if token == "stage_count":
+        return furina_stage.count(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -2292,6 +2294,8 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
             state.emit("kurage_refreshed", turns=turns)
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap, never_reduces=floor)
+        # R276 batch two: an instanced Stage power's copy count.
+        furina_stage.note_power_applied(state, fx["power"])
         # `EB-415`. THE BANNER BANKS WHAT ITS CARD JUST GRANTED. `powers` is a
         # name -> int map holding TURNS REMAINING for this clock, so the
         # Dexterity it will owe back has nowhere else to live; the sidecar
@@ -3875,6 +3879,9 @@ PREDICATE_NAMES = frozenset({
     # deliberately no `stage_fanfare_at_least_N` beside it: a row that asked
     # one would be printing a rule this kit does not have.
     "stage_occupied",
+    # R276 batch two: the empty-stage answers (Improvised Number, Between
+    # Acts) ask the opposite question.
+    "stage_empty",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3965,6 +3972,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     "stage_spent",
     "stage_lead_fanfare",
     "stage_back_fanfare",
+    # R276 batch two, Ensemble Piece: how many performers are on stage.
+    "stage_count",
     "exhaust_pile",
     "player_block",
     "attacks_in_hand",
@@ -4258,6 +4267,9 @@ def _predicate(state: CombatState, name: str) -> bool:
     # --- the Furina STAGE's one (QUARANTINED, `furina_stage.FURINA_STAGE`) ---
     if name == "stage_occupied":
         return furina_stage.can_spend(state.player)
+    if name == "stage_empty":
+        return furina_stage.active(state.player) \
+            and not furina_stage.can_spend(state.player)
     if name == "spotlight_set":
         return state.player.spotlight is not None
     if name == "spotlight_moved_this_turn":
@@ -6173,18 +6185,14 @@ def _op_stage_perform_lead(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_spend(state: CombatState, fx: dict, card: Card) -> None:
-    """Brief sec.3 rule 8, the Spend rider's payment leg.
+    """Brief sec.3 rule 8, the Spend mode's payment leg.
 
-    THE CALLER HAS ALREADY DECIDED THE RIDER FIRES. Every Spend face is written
-    as `conditional {if: stage_occupied, then: [stage_spend, <the big
-    number>], else: [<the base number>]}`, which is rule 8's two sentences
-    printed as two branches: with a performer on stage the rider fires IN FULL
-    and the lead pays what it has (bowing if that empties it), and with none it
-    cannot fire at all.
-
-    WHAT IS RECORDED IS WHAT WAS PAID, not what was asked, because sec.13's
-    first report buckets on "the lead's bar at the moment of Spend" and the
-    difference between the two is exactly the Expend deck's whole argument.
+    THE CHOOSER HAS ALREADY DECIDED THE MODE FIRES. Every Spend face is a
+    `choose_one` whose Spend mode opens with this op, and since R276 that mode
+    is offered only when the BACK performer can pay the whole price
+    (`furina_stage.mode_offered`); a performer the payment empties exactly
+    bows. What is recorded is what was paid, which a payoff on the same card
+    reads as `stage_spent`.
     """
     paid = furina_stage.spend(state, _amount(state, fx.get("amount", 1)))
     state.stage_spent_this_card = paid
@@ -6213,11 +6221,29 @@ def _op_stage_curtain_call(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_final_bow(state: CombatState, fx: dict, card: Card) -> None:
-    """*Final Bow* (sec.12): "The lead performer takes a bow and leaves." The
+    """*Final Bow* (R276): "The back performer takes a Bow and leaves." The
     Block the card then gains is `amount_formula: {count: stage_spent}`, the
     same token every other spend writes, so the face's second sentence is an
     ordinary `block` op reading an ordinary count."""
     state.stage_spent_this_card = furina_stage.final_bow(state)
+
+
+def _op_stage_step_forward(state: CombatState, fx: dict, card: Card) -> None:
+    """*Step Forward* (R276 batch two): the back performer takes the front
+    seat."""
+    furina_stage.step_forward(state)
+
+
+def _op_stage_perform_all(state: CombatState, fx: dict, card: Card) -> None:
+    """*Tutti!* (R276 batch two): every performer performs its act now."""
+    furina_stage.perform_all(state)
+
+
+def _op_stage_spend_back_all(state: CombatState, fx: dict,
+                             card: Card) -> None:
+    """*Bravura* (R276 batch two): spend all of the back performer's Fanfare;
+    the damage after it reads what was spent as `stage_spent`."""
+    state.stage_spent_this_card = furina_stage.spend_all_of_back(state)
 
 OPS = {
     "damage": _op_damage,
@@ -6254,6 +6280,9 @@ OPS = {
     "stage_spend_all": _op_stage_spend_all,
     "stage_curtain_call": _op_stage_curtain_call,
     "stage_final_bow": _op_stage_final_bow,
+    "stage_step_forward": _op_stage_step_forward,
+    "stage_perform_all": _op_stage_perform_all,
+    "stage_spend_back_all": _op_stage_spend_back_all,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,

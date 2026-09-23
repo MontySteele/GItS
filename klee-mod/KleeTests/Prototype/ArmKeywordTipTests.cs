@@ -127,24 +127,6 @@ public class ArmKeywordTipTests
         }
     }
 
-    [Fact]
-    public void The_encore_tip_names_what_spends_the_pool()
-    {
-        // `EB-407`'s sentence, and no opening bank in it: the shipped kit
-        // grants none, and the arm that did is retired (`EB-726`).
-        var body = (string)(Tips.GetMethod("EncoreBody", HeadlessGame.All)
-            ?? throw new System.InvalidOperationException(
-                "ArmKeywordTips.EncoreBody is gone."))
-            .Invoke(null, System.Array.Empty<object>())!;
-
-        Assert.DoesNotContain("Start each combat", body);
-        Assert.Contains("After [gold]Block[/gold] it absorbs damage "
-                        + "before HP.", body);
-        Assert.Contains("One pool, as each lands: a card pays to resolve, "
-                        + "a member spends 1 to perform or acts at 3/4.",
-                        body);
-    }
-
     // ---- the two sentences the row names ----------------------------------
 
     [Fact]
@@ -546,14 +528,19 @@ public class ArmKeywordTipTests
         // bar, so off a board their faces print a literal 0 -- "Deal 0 damage
         // to ALL enemies" on the Rare at Neow, "Deal 0 damage" on `Ousia
         // Surge` at a reward -- and two round-three seats turned the Rare down
-        // on it. The face cannot say otherwise: a description is a loc string
-        // injected once at boot. It goes through the same `With`, four times
-        // over: which of its four rules a row gets is derived from the
-        // multiplier `EB-747` picked for that row's payoff.
+        // on it. It goes through the same `With`, four times over: which of
+        // its four rules a row gets is derived from the multiplier `EB-747`
+        // picked for that row's payoff.
         //
         // TWENTY-FIVE SINCE R276: pick 2 retired `Hexerei` and `ForHexerei`
-        // left with it (the Companion Spark rider stays).
-        Assert.Equal(25, attaches.Count);
+        // left with it (the Companion Spark rider stays). TWENTY-FOUR with
+        // R276's Furina hygiene: `ForEncore` attached to no card and left
+        // with its body. TWENTY-SIX with R276's Stage batch two: `ForOusia`
+        // and `ForPneuma`, Arkhe Alignment's two halves.
+        Assert.Equal(26, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForOusia");
+        Assert.Contains(attaches, m => m.Name == "ForPneuma");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForEncore");
         Assert.Contains(attaches, m => m.Name == "ForStageReader");
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
@@ -788,15 +775,13 @@ public class ArmKeywordTipTests
     // --- a Stage round-three defect: the readers' 0 off the board ----------
 
     [Fact]
-    public void The_stage_readers_tip_states_each_rule_and_the_absent_stage()
+    public void The_stage_readers_tip_states_each_rule()
     {
         // THE FIND (round three). The four readers multiply a LIVE bar, so
-        // off a board their faces print a literal 0 -- "Deal 0 damage to ALL
-        // enemies" on the Rare at Neow, "Deal 0 damage" on `Ousia Surge` at a
-        // reward -- and two seats turned the Rare down on it. The number is
-        // right in combat and right at resolution (`EB-747`); what is wrong
-        // is the screen with no stage behind it, and a description cannot fix
-        // itself because it is a loc string injected once at boot.
+        // off a board their faces printed a literal 0. R276 fixed the FACES
+        // the base game's way (`{InCombat:...|}`: the rule in words, the
+        // number only in combat), so the tip's off-board disclaimer left: it
+        // would now be false on every screen.
         //
         // THE SENTENCES OFF THE COMPILED METHOD, this file's own rule: a
         // materialised `HoverTip` resolves a `LocString` through a
@@ -812,18 +797,13 @@ public class ArmKeywordTipTests
             "The number is the [gold]back performer[/gold]'s "
           + "[gold]Fanfare[/gold].", body);
         Assert.Contains(
-            "The number is the [gold]lead performer[/gold]'s "
+            "The number is the [gold]back performer[/gold]'s "
           + "[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends.", body);
         Assert.Contains(
             "The number is every performer's [gold]Fanfare[/gold] added up "
           + "and spent.", body);
 
-        // And the clause that IS the defect, which the rule carries only
-        // where there is no combat behind the card: in a fight the face is
-        // already right and this sentence would be false.
-        Assert.Contains(
-            " There is no stage outside combat, so the number above reads 0.",
-            body);
+        Assert.DoesNotContain("no stage outside combat", body);
     }
 
     [Fact]
@@ -836,11 +816,11 @@ public class ArmKeywordTipTests
         var none = System.Linq.Enumerable.Empty<IHoverTip>();
         var offTheBoard = new ProtoFsOusiaSurge();
         Assert.NotSame(none, ArmKeywordTips.ForStageReader(
-            none, offTheBoard, ArmKeywordTips.StageReader.Lead));
+            none, offTheBoard, ArmKeywordTips.StageReader.Back));
 
         var furina = Seat.Furina();
         var inPlay = Owned<ProtoFsOusiaSurge>(furina);
         Assert.NotSame(none, ArmKeywordTips.ForStageReader(
-            none, inPlay, ArmKeywordTips.StageReader.Lead));
+            none, inPlay, ArmKeywordTips.StageReader.Back));
     }
 }

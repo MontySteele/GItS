@@ -41,14 +41,14 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendLead), this), this), this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendBack), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_final_bow");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Final Bow"),
-        ("description", "The [gold]lead performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain {CalculatedBlock:diff()} [gold]Block[/gold], its [gold]Fanfare[/gold]."),
+        ("description", "The [gold]back performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -56,7 +56,7 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrLeadFanfare(card))
+            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrBackFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

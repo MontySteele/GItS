@@ -9,10 +9,12 @@ WHAT THE ARM IS, in one paragraph. Furina's party is three seats -- front,
 middle, back -- and a performer standing in one is a creature on her side with
 its own bar, called Fanfare on the faces. Enemies hit her Block, then the LEAD
 performer's bar, then her (rule 6, per attack, never running on to the middle
-seat). Her cards SPEND that bar for bigger numbers (rule 8), and a bar emptied
-by a Spend earns a bow (rule 9) while one emptied by a hit earns nothing
-(rule 7). Every performer performs a flat act at the end of her turn (rule 10),
-and her own HP is touched by nothing in the kit (rule 11).
+seat). Her cards SPEND the BACK performer's bar for bigger numbers, and only at
+the full price (rule 8 as R276 ruled it: the lead is the shield, the back is
+the bank), and a bar emptied by a Spend earns a bow (rule 9) while one emptied
+by a hit earns nothing (rule 7). Every performer performs a flat act at the
+end of her turn (rule 10), and her own HP is touched by nothing in the kit
+(rule 11).
 
 WHY THE FLAGS LIVE HERE AND NOT IN `constants.py`, and it is `furina_reframe`'s
 argument inherited rather than re-made: a flag in `constants.py` is read by the
@@ -84,8 +86,21 @@ BOW_CRABALETTA_DAMAGE = 8    # to a random enemy. Chevalmarin's bow is Hydro
 
 #: Where a Raise lands. Rule 5: the BACK-MOST performer, which is the lead when
 #: it is alone. Written out as words so a row and a face say the same thing.
+#: `all` is R276 batch two's Gala Dinner.
 SEAT_BACK = "back"
 SEAT_LEAD = "lead"
+SEAT_ALL = "all"
+
+# R276 batch two's five powers (their C# twins are in
+# `Powers/Prototype/FurinaStagePowers.cs`).
+FULL_HOUSE = "fs_full_house"
+THUNDEROUS_APPLAUSE = "fs_thunderous_applause"
+RAPT_AUDIENCE = "fs_rapt_audience"
+FIVE_CENTURY_ACT = "fs_five_century_act"
+ARKHE_ALIGNMENT = "fs_arkhe_alignment"
+#: Arkhe Alignment's Pneuma half: what the lead regains. C# twin:
+#: `ArkheAlignmentPower.PneumaLeadRegain`.
+PNEUMA_LEAD_REGAIN = 2
 
 
 # ----------------------------------------------------------------------
@@ -111,10 +126,14 @@ STARTER_SUBS: dict[str, str] = {
 # ----------------------------------------------------------------------
 # THE POOL SEAM (`EB-723`). `{shipped id: prototype id}`, read by
 # `loader._pool_substitutions` under `FURINA_STAGE` and nowhere else. Fourteen
-# rows -- the brief's sec.12 batch one minus the three starters above -- each
-# swapped ONE FOR ONE AT THE SAME RARITY, so the offer odds do not move
-# (`rewards.character_pool` refuses a substitution that would change a card's
-# tier).
+# rows -- the brief's sec.12 batch one minus the three starters above -- and
+# R276's batch two, fifteen more, each
+# swapped at the same rarity (`rewards.character_pool` refuses a substitution
+# that would change a card's tier). The GAME's offer is not this one-for-one
+# swap any more: `EB-736`'s text filter
+# (`FurinaStageRoster.DropRetiredRows`) drops every shipped row printing a
+# retired word first, which this sim does not model, so the live pool is far
+# smaller than the sim's.
 #
 # WHY A SWAP AND NOT A SHEET EDIT, for `furina_reframe.POOL_SUBS`'s reason
 # verbatim: the shipped sheet is Balance-stage content and does not move for a
@@ -156,6 +175,26 @@ POOL_SUBS: dict[str, str] = {
     "take_your_bow": "proto_fs_final_bow",             # 0 Skill -> a 1 Skill
     # --- Rare (one) ---
     "universal_revelry": "proto_fs_let_the_people_rejoice",   # 2 Attack, 2 Attack
+    # --- R276 BATCH TWO. Each replaced row is one the game's EB-736 filter
+    # already drops, at the same rarity, so the mod's appended rows and this
+    # swap name the same fifteen. Commons (six). ---
+    "breathless": "proto_fs_improvised_number",         # 1 Attack for 1 Attack
+    "graceful_retreat": "proto_fs_between_acts",        # 1 Skill for 1 Skill
+    "house_call": "proto_fs_ensemble_piece",            # 1 Attack for 1 Attack
+    "lasting_impression": "proto_fs_hold_your_places",  # 1 Skill for 1 Skill
+    "applause_line": "proto_fs_quick_cue",              # 0 Attack for 0 Attack
+    "swelling_overture": "proto_fs_step_forward",       # 1 Skill -> a 0 Skill
+    # --- Uncommons (seven) ---
+    "dress_rehearsal": "proto_fs_gala_dinner",          # 1 Skill for 1 Skill
+    "matinee_performance": "proto_fs_double_casting",   # 1 Skill for 1 Skill
+    "full_ensemble": "proto_fs_tutti",                  # 2 Skill for 2 Skill
+    "dramatic_entrance": "proto_fs_bravura",            # 1 Attack for 1 Attack
+    "fortissimo_guard": "proto_fs_full_house",          # 2 Power for 2 Power
+    "standing_ovation": "proto_fs_thunderous_applause", # 1 Power for 1 Power
+    "crowd_work": "proto_fs_rapt_audience",             # 1 Power for 1 Power
+    # --- Rares (two) ---
+    "endless_waltz": "proto_fs_arkhe_alignment",        # 2 Power for 2 Power
+    "prima_donna": "proto_fs_five_century_act",         # 2 Power for 2 Power
 }
 
 
@@ -309,10 +348,33 @@ def _leave(state, index: int, *, bowed: bool, reason: str) -> None:
     p = state.player
     seats = _seats(p)
     member, remaining = seats.pop(index)
+    if member in p.stage_resting:
+        p.stage_resting.remove(member)
     state.emit("stage_leave", member=member, bowed=bowed, reason=reason,
                fanfare=remaining)
     if bowed:
         _bow(state, member)
+        _after_bow(state, member, may_return=True)
+
+
+def _after_bow(state, member: str, *, may_return: bool) -> None:
+    """R276 batch two: what a Bow sets off once the performer has left and
+    its departure effect has resolved -- `FurinaStage.AfterBow`'s twin.
+    Thunderous Applause (each copy draws 1 and Raises its share on the back
+    performer), then A Five-Century Act (the performer returns to the back
+    seat at 1 and rests through this turn's acts; once, and never from Let
+    the People Rejoice, whose own return is the return)."""
+    p = state.player
+    copies = int(p.stage_power_copies.get(THUNDEROUS_APPLAUSE, 0))
+    raise_total = int(p.powers.get(THUNDEROUS_APPLAUSE, 0))
+    if copies > 0:
+        state.draw(copies)
+        raise_fanfare(state, raise_total)
+    if (may_return and p.powers.get(FIVE_CENTURY_ACT, 0)
+            and len(_seats(p)) < SEATS):
+        _seats(p).append([member, SUMMON_FANFARE])
+        p.stage_resting.append(member)
+        state.emit("stage_return", member=member, fanfare=SUMMON_FANFARE)
 
 
 def _bow(state, member: str) -> None:
@@ -372,6 +434,16 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK) -> int:
     p = state.player
     if not active(p) or amount <= 0:
         return 0
+    if seat == SEAT_ALL:
+        seats = stage(p)
+        if not seats:
+            state.emit("stage_raise_whiffed", amount=amount, seat=seat)
+            return 0
+        for pair in seats:
+            pair[1] += int(amount)
+            state.emit("stage_raise", member=pair[0], amount=int(amount),
+                       seat=seat, fanfare=pair[1])
+        return int(amount) * len(seats)
     pair = lead(p) if seat == SEAT_LEAD else back(p)
     if pair is None:
         state.emit("stage_raise_whiffed", amount=amount, seat=seat)
@@ -383,11 +455,16 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK) -> int:
 
 
 def can_spend(player) -> bool:
-    """Rule 8's one refusal: "With no performer on stage the rider cannot fire
-    and the card plays at its base number." A bar of ANY size can pay -- one
-    point buys the whole rider -- so the question is occupancy and never
-    size."""
+    """Is anybody on stage? The `stage_occupied` predicate. A Spend MODE asks
+    the stricter `can_pay` below (R276)."""
     return active(player) and bool(stage(player))
+
+
+def can_pay(player, amount: int) -> bool:
+    """R276 pick 1: can the BACK performer pay `amount` IN FULL? False on an
+    empty stage and on a bar short of the price. C# twin:
+    `FurinaStage.CanSpend`."""
+    return can_spend(player) and back_fanfare(player) >= int(amount)
 
 
 #: `EB-746`. THE HEAD OP OF A SPEND MODE, which is what makes a `choose_one`
@@ -410,20 +487,14 @@ def spend_mode_amount(mode: dict):
 
 
 def mode_offered(player, mode: dict) -> bool:
-    """Rule 8's refusal, per MODE (`EB-746`).
+    """Rule 8's refusal, per MODE (`EB-746`, R276 pick 1).
 
-    "With no performer on stage the rider cannot fire and the card plays at its
-    base number." As a `conditional` that was a branch the engine took for the
-    player; as a CHOICE it is a mode that must not be offered, because offering
-    "Spend 3: deal 13 instead" on an empty stage offers a line the rule refuses.
-
-    A BAR OF ANY SIZE STILL PAYS, which is `can_spend`'s whole sentence and the
-    reason this is not a price: the question is OCCUPANCY and never size, so a
-    lead at 1 is offered the Spend on a card asking for 5 and rule 8's second
-    clause resolves it. C# twin: `FurinaStage.Occupied` through the generated
-    `ModeRequirements`.
+    A Spend mode is offered only when the BACK performer can pay its whole
+    price; on an empty stage or a short bar the card plays its base mode. C#
+    twin: `FurinaStage.CanSpend` through the generated `ModeRequirements`.
     """
-    return spend_mode_amount(mode) is None or can_spend(player)
+    amount = spend_mode_amount(mode)
+    return amount is None or can_pay(player, amount)
 
 
 def mode_refusal(player, mode: dict):
@@ -432,7 +503,7 @@ def mode_refusal(player, mode: dict):
     if mode_offered(player, mode):
         return None
     label = mode.get("label") or "(unlabelled mode)"
-    return f"{label!r} needs a performer on stage, the stage is empty"
+    return f"{label!r} needs its full price from the back performer"
 
 
 # ----------------------------------------------------------------------
@@ -447,10 +518,11 @@ def mode_refusal(player, mode: dict):
 # which is a different character from the one the seats play.
 #
 # THE POLICY, IN ONE SENTENCE, and it is deliberately the simplest rule that
-# reproduces the brief's own turn-one wager: SPEND WHEN THE LEAD SURVIVES THE
-# PAYMENT, OR WHEN THE PAYMENT KILLS. Written out:
+# reproduces the brief's own turn-one wager: SPEND WHEN THE PAYER SURVIVES THE
+# PAYMENT, OR WHEN THE PAYMENT KILLS. The payer is the BACK performer since
+# R276, and a mode it cannot pay in full is never offered. Written out:
 #
-#   * the lead's bar stays above 0 after paying -- the performer keeps
+#   * the back performer's bar stays above 0 after paying -- the performer keeps
 #     standing, so the extra damage costs a number and not a body (brief
 #     sec.7's line A against line B, where the whole wager is whether the
 #     Usher survives the turn);
@@ -488,9 +560,9 @@ def spend_mode_index(state, modes: list):
         return None
     index, amount = spends[0]
     keep = next((i for i in range(len(modes)) if i != index), 0)
-    if not can_spend(state.player):
+    if not can_pay(state.player, amount):
         return keep                       # rule 8's refusal, as a choice
-    if lead_fanfare(state.player) - amount > 0:
+    if back_fanfare(state.player) - amount > 0:
         return index
     return index if _mode_kills(state, modes[index]) else keep
 
@@ -516,30 +588,29 @@ def _mode_kills(state, mode: dict) -> bool:
 
 
 def spend(state, amount: int) -> int:
-    """Rule 8. Pay N from the LEAD's bar for a rider that has already been
-    decided to fire. "If the lead has less than N, the rider STILL fires in
-    full, the lead pays what it has and leaves with a bow" (sec.10 default 4,
-    [USER]'s own words).
+    """Rule 8 as R276 ruled it (picks 1 and 2). Pay N from the BACK
+    performer's bar -- the bank -- and only IN FULL. A performer the payment
+    empties EXACTLY leaves with a bow. A bar short of N pays nothing: the
+    chooser never offers such a mode (`mode_offered`), so this is the engine's
+    own refusal rather than a path a play takes.
 
-    Returns what was actually paid, which is the number sec.13's first report
-    is bucketed on -- NOT the printed N. The caller has already checked
-    `can_spend`; this refuses an empty stage rather than inventing a payment.
+    Returns what was paid: N, or 0 where it refused.
     """
     p = state.player
     if not active(p):
         return 0
-    pair = lead(p)
-    if pair is None:
+    pair = back(p)
+    if pair is None or pair[1] < int(amount):
         state.emit("stage_spend_whiffed", amount=amount)
         return 0
     member, bar = pair
-    paid = min(int(amount), bar)
+    paid = int(amount)
     pair[1] = bar - paid
     state.emit("stage_spend", member=member, asked=int(amount), paid=paid,
                bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
                enemies_alive=len(state.living_enemies))
     if pair[1] <= 0:
-        _leave(state, 0, bowed=True, reason="spend")
+        _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend")
     return paid
 
 
@@ -596,6 +667,7 @@ def bow_and_return(state) -> None:
         state.emit("stage_leave", member=member, bowed=True,
                    reason="spend_all", fanfare=0)
         _bow(state, member)
+        _after_bow(state, member, may_return=False)
     seats = _seats(p)
     for member in company:
         if len(seats) < SEATS:
@@ -605,8 +677,8 @@ def bow_and_return(state) -> None:
 
 
 def final_bow(state) -> int:
-    """*Final Bow* (sec.12): "The lead performer takes a bow and leaves. Gain
-    Block equal to its Fanfare."
+    """*Final Bow* (sec.12, R276): "The back performer takes a Bow and leaves.
+    Gain Block equal to its Fanfare."
 
     A BOW WITHOUT A SPEND, and the one card that grants one. Rule 9 says a bow
     is earned by Spend; this face pays for it with a card and an Exhaust
@@ -616,12 +688,12 @@ def final_bow(state) -> int:
     p = state.player
     if not active(p):
         return 0
-    pair = lead(p)
+    pair = back(p)
     if pair is None:
         state.emit("stage_final_bow_whiffed")
         return 0
     bar = pair[1]
-    _leave(state, 0, bowed=True, reason="final_bow")
+    _leave(state, len(_seats(p)) - 1, bowed=True, reason="final_bow")
     return bar
 
 
@@ -645,12 +717,19 @@ def absorb(state, incoming: int) -> int:
     if pair is None:
         return 0
     member, bar = pair
+    two_or_more = count(p) >= 2
     eaten = min(int(incoming), bar)
     pair[1] = bar - eaten
     state.emit("stage_absorb", member=member, amount=eaten,
                incoming=int(incoming), fanfare=pair[1])
     if pair[1] <= 0:
         _leave(state, 0, bowed=False, reason="hit")
+    # R276 batch two, A RAPT AUDIENCE: the percentage of what the lead lost,
+    # rounded up, on the back performer -- and nothing when the lead was also
+    # the back performer. Every caller here is an enemy's hit.
+    pct = int(p.powers.get(RAPT_AUDIENCE, 0))
+    if pct and two_or_more and eaten > 0:
+        raise_fanfare(state, -(-eaten * pct // 100))
     return eaten
 
 
@@ -698,12 +777,16 @@ def perform(state, member: str) -> None:
     if not active(p):
         return
     state.emit("stage_act", member=member)
+    # R276 batch two, ARKHE ALIGNMENT: this turn's doubling of the acts'
+    # printed numbers.
+    dmg = int(p.stage_act_damage_mult)
+    blk = int(p.stage_act_block_mult)
     if member == "usher":
-        p.block += ACT_USHER_BLOCK
+        p.block += ACT_USHER_BLOCK * blk
     elif member == "chevalmarin":
         for enemy in list(state.living_enemies):
             effects.deal_damage_to_enemy(state, enemy,
-                                         ACT_CHEVALMARIN_DAMAGE,
+                                         ACT_CHEVALMARIN_DAMAGE * dmg,
                                          element="hydro",
                                          powered=False,
                                          source="furina_stage/act")
@@ -719,7 +802,8 @@ def perform(state, member: str) -> None:
     elif member == "crabaletta":
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
-            effects.deal_damage_to_enemy(state, enemy, ACT_CRABALETTA_DAMAGE,
+            effects.deal_damage_to_enemy(state, enemy,
+                                         ACT_CRABALETTA_DAMAGE * dmg,
                                          element="hydro",
                                          powered=False,
                                          source="furina_stage/act")
@@ -731,7 +815,7 @@ def perform_lead(state) -> None:
     if not active(p):
         return
     pair = lead(p)
-    if pair is None:
+    if pair is None or pair[0] in p.stage_resting:
         state.emit("stage_act_whiffed")
         return
     perform(state, pair[0])
@@ -749,13 +833,117 @@ def end_of_turn_acts(state) -> None:
     if not active(p):
         return
     company = [m for m, _f in stage(p)]
-    if not company:
+    if company:
+        # R276 batch two, FULL HOUSE: with all three seats filled each
+        # performer acts once more per copy.
+        times = 1 + (int(p.powers.get(FULL_HOUSE, 0))
+                     if len(company) >= SEATS else 0)
+        state.emit("stage_acts", company=list(company), times=times)
+        for member in company:
+            if member in p.stage_resting:
+                continue        # A Five-Century Act: re-enters without acting
+            for _ in range(times):
+                if state.over or not p.alive or not state.living_enemies:
+                    break
+                perform(state, member)
+    p.stage_resting.clear()
+    p.stage_act_damage_mult = 1
+    p.stage_act_block_mult = 1
+
+
+# ----------------------------------------------------------------------
+# R276 BATCH TWO's verbs.
+# ----------------------------------------------------------------------
+def step_forward(state) -> None:
+    """*Step Forward*: the BACK performer moves to the front seat and the
+    others shift back one -- Scene Change run the other way. With one
+    performer nothing moves."""
+    p = state.player
+    if not active(p):
         return
-    state.emit("stage_acts", company=list(company))
-    for member in company:
+    seats = _seats(p)
+    if len(seats) < 2:
+        state.emit("stage_step_forward_whiffed")
+        return
+    seats.insert(0, seats.pop())
+    state.emit("stage_step_forward", company=[m for m, _f in seats])
+
+
+def perform_all(state) -> None:
+    """*Tutti!*: every performer performs its act now, front first."""
+    p = state.player
+    if not active(p):
+        return
+    for member in [m for m, _f in stage(p)]:
         if state.over or not p.alive or not state.living_enemies:
             break
+        if member in p.stage_resting:
+            continue            # A Five-Century Act's returnee rests
         perform(state, member)
+
+
+def spend_all_of_back(state) -> int:
+    """*Bravura*: spend ALL of the back performer's Fanfare. The bar is
+    emptied exactly, so the performer bows. 0 on an empty stage."""
+    p = state.player
+    if not active(p):
+        return 0
+    pair = back(p)
+    if pair is None:
+        state.emit("stage_spend_whiffed", amount="all_of_back")
+        return 0
+    member, bar = pair
+    pair[1] = 0
+    state.emit("stage_spend", member=member, asked=bar, paid=bar,
+               bar_at_spend=bar, fanfare=0, turn=state.turn,
+               enemies_alive=len(state.living_enemies))
+    _leave(state, len(_seats(p)) - 1, bowed=True, reason="spend")
+    return bar
+
+
+def note_power_applied(state, power: str) -> None:
+    """How many copies of an instanced Stage power are in play. Thunderous
+    Applause draws once PER COPY, and the `powers` map sums amounts, so the
+    copy count lives beside it. (Arkhe Alignment applies 1 a copy, so its
+    `powers` amount IS the copy count.)"""
+    if power == THUNDEROUS_APPLAUSE:
+        copies = state.player.stage_power_copies
+        copies[power] = int(copies.get(power, 0)) + 1
+
+
+def arkhe_choice(state) -> str:
+    """The PILOT's Arkhe Alignment pick: Pneuma (act Block multiplied, the
+    lead regains 2 a copy) when an enemy intends to attack, else Ousia (double act
+    damage). The player's own choice in the game; a simple, stated policy
+    here, in the arm and not in `pilot/policy.py`."""
+    for enemy in state.living_enemies:
+        intents = getattr(enemy, "intents", None) or []
+        idx = getattr(enemy, "intent_index", 0) or 0
+        if intents:
+            nxt = intents[idx % len(intents)]
+            if isinstance(nxt, dict) and nxt.get("kind") == "attack":
+                return "pneuma"
+    return "ousia"
+
+
+def turn_start_powers(state) -> None:
+    """R276 batch two's turn-start power: Arkhe Alignment. ONE choice a turn
+    however many copies are in play; copies ADD, so the chosen half is
+    x(1 + copies) and Pneuma's lead regains 2 a copy. C# twin:
+    `ArkheAlignmentPower.Choose`."""
+    p = state.player
+    if not active(p):
+        return
+    copies = int(p.powers.get(ARKHE_ALIGNMENT, 0))
+    if copies <= 0:
+        return
+    choice = arkhe_choice(state)
+    if choice == "pneuma":
+        p.stage_act_block_mult = 1 + copies
+        raise_fanfare(state, PNEUMA_LEAD_REGAIN * copies, SEAT_LEAD)
+    else:
+        p.stage_act_damage_mult = 1 + copies
+    state.emit("stage_arkhe", choice=choice, copies=copies)
 
 
 # ----------------------------------------------------------------------

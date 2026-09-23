@@ -351,6 +351,8 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
     "FurinaStageLaw.BowUsherBlock": _stage("BOW_USHER_BLOCK"),
     "FurinaStageLaw.BowCrabalettaDamage": _stage("BOW_CRABALETTA_DAMAGE"),
+    # R276 batch two: Arkhe Alignment's Pneuma half.
+    "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one
     # whole printed clause), so the number lives on the power and is
     # mirrored like every other rule number.

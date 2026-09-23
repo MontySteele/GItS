@@ -410,13 +410,12 @@ def tip_rows() -> list[Row]:
     # the prose is allowed to contain.
     for name, body in re.findall(
             r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
-        if "SparkBody()" in body or "EncoreBody()" in body:
+        if "SparkBody()" in body:
             continue
         # A Stage round-three defect: the readers' tip picks one of four
-        # `const string` rules and appends a fifth off the board, so the call
-        # carries no literal at all and reaches this census as an empty
-        # string. Parsed out by name below, `EncoreKey`'s bargain exactly.
-        if "ReaderNoStage" in body:
+        # `const string` rules, so the call carries no literal at all and
+        # reaches this census as an empty string. Parsed out by name below.
+        if "ReaderKey" in name:
             continue
         rows.append(Row("tip", name, csharp_text(body), where))
     concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
@@ -426,35 +425,17 @@ def tip_rows() -> list[Row]:
     rows.append(Row("tip", "SparkKey", word + "Start each combat with "
                     + csharp_text(arm.group(1)) + shared, where))
     rows.append(Row("tip", "SparkKey.sparks-arm", word + shared, where))
-    # `EB-479`'s SECOND BODY LEFT WITH THE REFRAME (`EB-726`): the Encore tip
-    # has one face again, and it is still parsed out by name because a
-    # `With(...)` call whose body is a method reaches this file as an empty
-    # string -- the silence `EB-343` was filed on.
-    #
-    # THE CAPTURE STARTS AT THE OPENING QUOTE, unlike the Spark pair above,
-    # whose own capture begins after one: `csharp_text` reads LITERALS, so a
-    # group that starts INSIDE a string hands it ` + ` as if that were the
-    # prose.
-    absorbs = csharp_text(
-        re.search(r"const string absorbs =\s*" + concat + ";", src).group(1))
-    off = re.search(r'return absorbs \+ ("One pool(?:[^;])*);', src)
-    rows.append(Row("tip", "EncoreKey",
-                    absorbs + csharp_text(off.group(1)), where))
-    # A Stage round-three defect. THE READERS' FOUR RULES, each measured AS
-    # RENDERED OFF THE BOARD -- rule plus the no-stage clause -- because that
-    # is the longest the tip is ever printed and the screen it was filed on.
-    # Four rows and not one, for `SparkKey`'s reason two blocks up: a switch
-    # with four arms is four faces, and a ceiling met by the shortest of them
-    # is no ceiling at all.
-    no_stage = csharp_text(
-        re.search(r"const string ReaderNoStage =\s*" + concat + ";",
-                  src).group(1))
+    # A Stage round-three defect. THE READERS' FOUR RULES. Four rows and not
+    # one, for `SparkKey`'s reason two blocks up: a switch with four arms is
+    # four faces, and a ceiling met by the shortest of them is no ceiling at
+    # all. (The off-board clause each once carried left with R276: the faces
+    # print the rule outside combat now, so no screen reads 0.)
     for rule in ("ReaderLeadRule", "ReaderBackRule",
-                 "ReaderSpendLeadRule", "ReaderSpendAllRule"):
+                 "ReaderSpendBackRule", "ReaderSpendAllRule"):
         body = csharp_text(
             re.search(rf"const string {rule} =\s*" + concat + ";",
                       src).group(1))
-        rows.append(Row("tip", f"ReaderKey.{rule}", body + no_stage, where))
+        rows.append(Row("tip", f"ReaderKey.{rule}", body, where))
     return rows
 
 

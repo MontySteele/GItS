@@ -84,8 +84,8 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
         var modeRules = new ModeRequirement?[]
         {
             null,
-            new ModeRequirement(FurinaStage.Occupied(Owner.Creature),
-                                "needs a performer on stage, the stage is empty"),
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 5),
+                                "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 10 damage", "[gold]Spend[/gold] 5: deal 20 instead" }[modeIndex]);

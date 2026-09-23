@@ -6717,8 +6717,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # that are whole.
         # `EB-746`: the word names a MODE the player chooses, not a rider the
         # engine fires.
-        "Spend": ["Chosen on play, never automatic. Pays the lead ",
-                  "if the bar is short, and an emptied "],
+        # R276 picks 1 and 2: the back performer pays, in full.
+        "Spend": ["Chosen on play. The ", " pays the full ",
+                  "price or you can't choose it. Emptied exactly, it takes a "],
         "Fanfare": ["A performer's own bar. Attacks hit your ",
                     "'s Fanfare, then you. No cap."],
         "Raise": ["With one performer on stage, that is the lead."],
@@ -6727,26 +6728,24 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Final Bow face on the same screen contradicts.
         "Bow": ["A departure effect a ", " earns and a hit does ",
                 "not. Usher: ", "Hydro on all. "],
-        "lead performer": ["The front seat: the one attacks reach and the "
-                           "only one that "],
+        "lead performer": ["The front seat, the shield: attacks reach it, "
+                           "and only it "],
         # `EB-744`: rule 6 is per ATTACK, so a flurry does reach the reserve
         # once the front seat empties -- "nothing hits it" was a promise the
         # rule does not make.
-        "back performer": ["The back seat, the reserve: no single attack "
-                           "reaches it. It ",
-                           "leads once the front seat empties. Alone on "],
+        # R276: the back seat is the bank.
+        "back performer": ["The back seat, the bank: Raise fills it, Spend "
+                           "draws from it, ",
+                           "and no single attack reaches it. Alone on stage "
+                           "it is the "],
         "Rotate": ["Seats change order and every bar comes with them. Nobody "
                    "leaves "],
-        # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is
-        # shipped machinery and every Furina row the Stage does not swap
-        # still prints the word. It titles no arm KEYWORD any more -- no
-        # prototype face prints it -- but the sentence is still the mod's,
-        # so it is still held in step from this side. The clauses straddle
-        # the `[gold]Block[/gold]` span, so the anchors are the literals
-        # either side of it.
-        "Encore": ["it absorbs damage before HP. ",
-                   "One pool, as each lands: a card pays to ",
-                   "resolve, a member spends 1 to perform or acts at 3/4."],
+        # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
+        # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
+        # anchors are the prose either side of it.
+        "Ousia": ["This turn, your performers' acts deal double damage."],
+        "Pneuma": ["This turn, your performers' acts give double ",
+                   " regains "],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
         # own words. The strike number is interpolated on both sides -- the
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
@@ -6769,7 +6768,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # and none says which card is one. Its sentence is read off
     # `SpotlightSystem.IsSpotlighted` -- there is no tip to be in step with,
     # which is the finding and not an exemption from it.
-    assert (set(anchors) | {"Companion", "Spotlighted"}
+    #
+    # `Encore` joined them with R276's hygiene: its C# tip was attached to no
+    # card and left the mod, and the row stays for the SHIPPED kit (the Stage
+    # arm hides it), read off `FurinaResources.AbsorbDamage` and its
+    # neighbours rather than off a tip.
+    assert (set(anchors) | {"Companion", "Spotlighted", "Encore"}
             == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "SpendKey", "FanfareKey", "BowKey", "RaiseKey",
@@ -6937,16 +6941,12 @@ def test_the_glossary_carries_no_markup_and_no_id():
             assert not qa_packet.leaks(body), word
 
 
-def test_the_spend_row_says_a_short_bar_still_pays_in_full():
-    """`EB-723`. THE HALF THE WHOLE EXPEND DECK IS BUILT ON.
-
-    `EB-368`'s Deploy row retired with the reframe; this is that row's
-    discipline one arm over, on the word the Stage's own findings turn on.
-    Brief sec.3 rule 8: a Spend rider fires IN FULL whatever the lead's bar
-    holds, the lead pays what it has and leaves with a bow -- so a performer
-    at 1 buys the same big number a performer at 8 does, which sec.4 calls
-    "the cheapest Spend there is, and that is intended". A word that said only
-    "pays N from the lead" would price the rider as a cost and hide the deck.
+def test_the_spend_row_says_the_back_performer_pays_in_full():
+    """`EB-723`, as R276 ruled it (picks 1 and 2). The Spend is paid by the
+    BACK performer -- the bank -- and only in full: a bar short of the price
+    is not offered the mode, and a performer the Spend empties exactly takes
+    its Bow. Six of nine seats had called the old over-sized Spend a
+    loophole.
 
     Held in step with `ArmKeywordTips.ForSpend` from this side, the discipline
     every row in that table is under.
@@ -6958,10 +6958,9 @@ def test_the_spend_row_says_a_short_bar_still_pays_in_full():
     # round-two seats said the card spent for them. "No stage, no rider" left
     # the row with the rider: an empty stage does not refuse a Spend now, it
     # does not offer the mode, and the page says that in its own last sentence.
-    for clause in ("Chosen on play, never automatic",
-                   "Pays the lead performer",
-                   "fires in full even if the bar is short",
-                   "an emptied performer takes a Bow",
+    for clause in ("Chosen on play",
+                   "The back performer pays the full price",
+                   "Emptied exactly, it takes a Bow",
                    "the Spend mode is not offered at all"):
         assert clause in page, clause
         assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
@@ -6970,10 +6969,9 @@ def test_the_spend_row_says_a_short_bar_still_pays_in_full():
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     # The tip's own [gold] spans split the sentence across concatenated
     # literals, so the anchors are the runs that do not straddle a `+`.
-    for phrase in ("Chosen on play, never automatic. Pays the lead "
-                   "performer, ",
-                   "fires in full even if the bar is short, and an emptied ",
-                   "performer takes a "):
+    for phrase in ("Chosen on play. The ",
+                   " pays the full ",
+                   "price or you can't choose it. Emptied exactly, it takes a "):
         assert phrase in src, phrase
 
 
@@ -12453,31 +12451,29 @@ def _stage_reader_reward_state() -> dict:
     sends the face with a literal 0 in it. `keywords` is the card's own hover
     tips resolved by the game (`BuildCardInfo`, `McpMod.StateBuilder.cs:1452`,
     the same field `BuildCardRewardState` sends for every offered card), and
-    that is the channel the rule arrives on -- rendered here as the mod
-    renders it off a board, rule plus the no-stage clause.
+    that is the channel the rule arrives on. Since R276 the FACE prints the
+    rule off the board too (the base game's `{InCombat:...|}` line, which the
+    game resolves before the wire), so no 0 reaches the reward screen.
     """
     return {"state_type": "card_reward",
             "player": {"character": "Furina", "hp": 61, "max_hp": 78},
             "card_reward": {"can_skip": True, "cards": [
                 {"name": "Let the People Rejoice", "cost": "2",
                  "type": "Attack",
-                 "description": "Spend all Fanfare on stage. Deal 0 damage "
-                                "to ALL enemies. Every performer takes a Bow, "
-                                "then returns at 1. Exhaust.",
+                 "description": "Spend all Fanfare on stage and deal that "
+                                "much damage to ALL enemies. Every performer "
+                                "takes a Bow, then returns at 1. Exhaust.",
                  "keywords": [
                      {"name": "What this number is",
                       "description": "The number is every performer's Fanfare "
-                                     "added up and spent. There is no stage "
-                                     "outside combat, so the number above "
-                                     "reads 0."}]},
+                                     "added up and spent."}]},
                 {"name": "Ousia Surge", "cost": "1", "type": "Attack",
-                 "description": "Deal 0 damage, the lead performer's Fanfare.",
+                 "description": "Deal damage equal to the back performer's "
+                                "Fanfare.",
                  "keywords": [
                      {"name": "What this number is",
-                      "description": "The number is the lead performer's "
-                                     "Fanfare. There is no stage outside "
-                                     "combat, so the number above reads "
-                                     "0."}]}]}}
+                      "description": "The number is the back performer's "
+                                     "Fanfare."}]}]}}
 
 
 def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
@@ -12496,15 +12492,14 @@ def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
     """
     page = blindplay.observe(_stage_reader_reward_state())
 
-    # The face the game prints, zero and all, unchanged.
-    assert "Deal 0 damage to ALL enemies." in page
-    # And directly under it, on both offers, what that number actually is.
+    # The face the game prints: the rule, and no 0 (R276).
+    assert "deal that much damage to ALL enemies." in page
+    assert "Deal 0 damage" not in page
+    # And directly under it, on both offers, which bar the number is.
     assert ("    *What this number is* — The number is every performer's "
-            "Fanfare added up and spent. There is no stage outside combat, "
-            "so the number above reads 0.") in page
-    assert ("    *What this number is* — The number is the lead performer's "
-            "Fanfare. There is no stage outside combat, so the number above "
-            "reads 0.") in page
+            "Fanfare added up and spent.") in page
+    assert ("    *What this number is* — The number is the back performer's "
+            "Fanfare.") in page
 
 
 def test_the_reader_fixture_is_the_mods_own_sentence():
@@ -12524,7 +12519,7 @@ def test_the_reader_fixture_is_the_mods_own_sentence():
             "The number is every performer's Fanfare added up and spent.",
             "The number is the lead performer's Fanfare.",
             "The number is the back performer's Fanfare.",
-            "The number is the lead performer's Fanfare, which this Bow "
-            "spends.",
-            " There is no stage outside combat, so the number above reads 0."):
+            "The number is the back performer's Fanfare, which this Bow "
+            "spends."):
         assert sentence in plain, sentence
+    assert "no stage outside combat" not in plain

@@ -548,8 +548,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
                     // The Furina reframe's four title rows went
                     // with its keywords (`EB-723`); see
-                    // `ArmKeywordTips`'s Furina section.
-                    [Cards.ArmKeywordTips.EncoreKey + ".title"] = "Encore",
+                    // `ArmKeywordTips`'s Furina section. Encore's title
+                    // went with its last body (R276 hygiene).
                     // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's
                     // sec.12 names them; each is a rule the SHIPPED engine
                     // does not have, so none collides with a shipped keyword.
@@ -568,6 +568,9 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
                         "Back performer",
                     [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
+                    // R276 batch two: Arkhe Alignment's two halves.
+                    [Cards.ArmKeywordTips.OusiaKey + ".title"] = "Ousia",
+                    [Cards.ArmKeywordTips.PneumaKey + ".title"] = "Pneuma",
                     // A Stage round-three defect, and a RIDER rather than a
                     // keyword: the four readers multiply a live bar, so off a
                     // board their faces print a literal 0. The title names

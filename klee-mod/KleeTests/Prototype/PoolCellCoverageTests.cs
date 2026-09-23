@@ -232,12 +232,16 @@ public class PoolCellCoverageTests
             // coverage -- but `DropRetiredRows`, the arm's TEXT filter, then
             // takes every remaining shipped row that still prints Encore,
             // Spotlight, Center Stage, Salon, Fanfare or Burst, and that is
-            // most of the sheet: her offer pool is 29 rows, not 84. The Rare
-            // shelf is three rows and holds no Power at all.
+            // most of the sheet: her offer pool was 29 rows, not 84.
+            //
+            // R276's BATCH TWO filled two of the five: fifteen Stage rows
+            // (three Uncommon Powers, two Rare Powers) make the Rare shelf five
+            // deep and give the Uncommon Powers a cell. The Rare cells by TYPE
+            // are still short -- one Attack, two Powers, two Skills -- and are
+            // seamed by the widening ladder.
             "furina-stage" => new[]
             {
-                "Rare/*", "Rare/Attack", "Rare/Power", "Rare/Skill",
-                "Uncommon/Power",
+                "Rare/Attack", "Rare/Power", "Rare/Skill",
             },
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();

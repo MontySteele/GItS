@@ -168,6 +168,9 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # pilot that could not read it would score the whole batch's attacks at
     # their base number and never learn the rider exists.
     "stage_occupied",
+    # R276 batch two: its opposite, the empty-stage answers' question --
+    # the same pure current-state read.
+    "stage_empty",
     "spotlight_moved_this_turn",
     # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state

@@ -399,22 +399,12 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # states its rate truthfully; what no face said is that a
                     # card can make the queue longer than the queue looks.
                     "KLEEMOD-ARM_PLAN_TWICE",
-                    # `EB-723`: `Encore` became the SIXTH of these when the
-                    # reframe's rows left. Nothing on the prototype surface
-                    # prints the word any more, so it is no longer an arm
-                    # keyword -- but the word is shipped machinery, it is
-                    # printed on the Neow screen and on opening-hand faces
-                    # before the meter exists, and every Furina row the Stage
-                    # does not swap still carries it. `EB-407`'s finding is
-                    # unchanged; only the door it comes through is.
-                    "KLEEMOD-ARM_ENCORE",
+                    # (`Encore` was the sixth until R276's hygiene: no card
+                    # attached its tip, so the body and its key left.)
                     # A Stage round-three defect: WHICH BAR a reader's number
-                    # is. The seventh of these, and the second whose sentence
-                    # changes with the screen -- beside
-                    # `KLEEMOD-ARM_EMPTY_FIELD`. The four readers multiply a
-                    # LIVE bar, so off a board their faces print a literal 0,
-                    # and a hover tip is the only surface that can say why: a
-                    # description is a loc string injected once at boot.
+                    # is. The four readers multiply a LIVE bar; the faces
+                    # print the rule and, in combat only, the number, and this
+                    # tip names the seat the number is read off.
                     "KLEEMOD-ARM_STAGE_READER"}
 
 
@@ -693,9 +683,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # one performer that is the lead", rules 7-and-9's difference
             # between a bow and a death, and rotation's refusal of both.
             # `EB-746`: a mode the player chooses, not a rider the engine
-            # fires whenever a lead stands.
-            "Chosen on play, never automatic. Pays the lead performer, ",
-            "fires in full even if the bar is short, and an emptied ",
+            # fires whenever a lead stands. R276 picks 1 and 2: the BACK
+            # performer pays, in full or not at all, and an exact emptying
+            # bows.
+            "Chosen on play. The [gold]back performer[/gold] pays the full ",
+            "price or you can't choose it. Emptied exactly, it takes a ",
             "A performer's own bar. Attacks hit your [gold]Block[/gold], then ",
             "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.",
             "Adds [gold]Fanfare[/gold] to the [gold]back performer[/gold]. ",
@@ -704,11 +696,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Final Bow's whole card is a bow bought with a card and an
             # Exhaust -- so the row states the CONTRAST instead.
             "A departure effect a [gold]Spend[/gold] earns and a hit does ",
-            "The front seat: the one attacks reach and the only one that ",
+            # R276: the front seat is the SHIELD, the back seat the BANK.
+            "The front seat, the shield: attacks reach it, and only it ",
             # `EB-744`: rule 6 is per ATTACK, so a flurry reaches the
-            # reserve once the front seat empties.
-            "The back seat, the reserve: no single attack reaches it. It ",
-            "leads once the front seat empties. Alone on ",
+            # reserve once the front seat empties -- hence "single".
+            "The back seat, the bank: Raise fills it, Spend draws from it, ",
+            "and no single attack reaches it. Alone on stage it is the ",
             "Seats change order and every bar comes with them. Nobody leaves ",
             "and nobody takes a [gold]Bow[/gold].",
     ):
@@ -1349,19 +1342,20 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
 # every reader multiplies a LIVE bar and off a board there are no bars, so a
 # CalculatedVar honestly reports nothing and the face prints the nothing.
 #
-# THE FACE CANNOT SAY IT. A description is a loc string injected once at boot
-# (`LocManager_Initialize_Patch`), with no runtime seam; the only expression
-# that would switch on the board is a nested `{CalculatedDamage:choose(0):...}`,
-# which would be the repo's first and has no headless renderer to pin. So the
-# rule goes on the HOVER TIP, the house route: `FurinaRiderTips.FanfareBody`
-# already says "out of combat the rate stands alone rather than printing a
-# misleading zero", and `KokomiRiderTips` takes the same posture.
+# R276 FIXED IT ON THE FACE, the base game's own way. Body Slam's loc row is
+# "Deal damage equal to your [gold]Block[/gold].{InCombat:\n(Deals
+# {CalculatedDamage:diff()} damage)|}" -- the game hands every description an
+# `InCombat` flag -- so each reader now prints its RULE in words and its live
+# number on a line of its own only in combat. The hover tip stays, as the
+# one-line statement of which seat the number is read off, without the
+# off-board disclaimer it carried while the face printed 0.
 
 #: Each reader, the bar its number is, and the sentence it owes.
 STAGE_READERS = {
-    "proto_fs_ousia_surge": ("Lead", "ProtoFsOusiaSurge"),
-    "proto_fs_pneuma_refrain": ("Back", "ProtoFsPneumaRefrain"),
-    "proto_fs_final_bow": ("SpendLead", "ProtoFsFinalBow"),
+    # R276 pick 2: the bank reader and the shield reader swapped seats.
+    "proto_fs_ousia_surge": ("Back", "ProtoFsOusiaSurge"),
+    "proto_fs_pneuma_refrain": ("Lead", "ProtoFsPneumaRefrain"),
+    "proto_fs_final_bow": ("SpendBack", "ProtoFsFinalBow"),
     "proto_fs_let_the_people_rejoice": ("SpendAll",
                                         "ProtoFsLetThePeopleRejoice"),
 }
@@ -1392,13 +1386,10 @@ def test_every_reader_carries_the_rule_its_number_obeys(rid):
             f"ArmKeywordTips.StageReader.{source})") in src
 
 
-def test_the_readers_tip_states_each_rule_and_the_absent_stage():
-    """THE RULE ALWAYS, THE DISCLAIMER ONLY OFF THE BOARD.
-
-    In combat the face is already right and a sentence about an absent stage
-    would be false, so the tip says which bar the number is and stops. Off the
-    board it adds the one fact the screen is lying about.
-    """
+def test_the_readers_tip_states_each_rule():
+    """The rule, on every screen. The off-board disclaimer ("the number above
+    reads 0") left with R276: the faces print the rule outside combat now, so
+    the sentence would be false everywhere."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert 'const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";' in tips
     # The four rules, each read off its own reader's code.
@@ -1408,22 +1399,19 @@ def test_the_readers_tip_states_each_rule_and_the_absent_stage():
             in tips)
     assert ("The number is every performer's [gold]Fanfare[/gold] added up and"
             in tips)
-    # And the clause that is the whole defect, appended only off a board.
-    assert ("\" There is no stage outside combat, so the number above reads "
-            "0.\"" in tips)
-    assert "OnAStage(card) ? rule : rule + ReaderNoStage" in tips
+    assert "no stage outside combat" not in tips
+    assert "return With(inherited, ReaderKey, rule);" in tips
     # The title row is registered, or the tip renders with a raw loc key.
     assert 'ArmKeywordTips.ReaderKey + ".title"' in MOD_CS.read_text(
         encoding="utf-8")
 
 
-def test_the_readers_rules_are_measured_as_they_render_off_the_board():
-    """The census sees all four, at their LONGEST rendering.
+def test_the_readers_rules_are_measured():
+    """The census sees all four.
 
     A `With(...)` call whose body is built by a switch reaches
     `lint_text_conventions.tip_rows` as an empty string -- the silence
-    `EB-343` was filed on -- so the four are parsed out by name, each with the
-    no-stage clause appended, which is the longest the tip is ever printed.
+    `EB-343` was filed on -- so the four are parsed out by name.
     """
     sys.path.insert(0, str(REPO / "tools"))
     import lint_text_conventions as lint       # noqa: E402
@@ -1432,5 +1420,4 @@ def test_the_readers_rules_are_measured_as_they_render_off_the_board():
             if row.ident.startswith("ReaderKey.")}
     assert len(rows) == 4
     for ident, raw in rows.items():
-        assert "no stage outside combat" in raw, ident
         assert len(lint.render(raw)) <= lint.CEILING["tip"], ident

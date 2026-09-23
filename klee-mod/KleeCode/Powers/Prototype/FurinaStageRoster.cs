@@ -33,12 +33,15 @@ public static class FurinaStageRoster
     /// THE STARTER (brief sec.7's named deck, sec.12's first table): the base
     /// game's seven basics untouched, and her three kit slots replaced.
     ///
-    /// THE BASICS DO NOT MOVE, and that is a standing rule rather than a
-    /// choice made here: a starter change is an A pick, never an E default,
-    /// and the six/seven passes that moved a character's basics were reverted
-    /// on 2026-09-08 for exactly that. Soloist's Solicitation x3, Stage
-    /// Presence x3 and Regal Bearing are the shipped seven, in the shipped
-    /// order.
+    /// THE BASICS ARE THE SHIPPED SEVEN, and that is a standing rule rather
+    /// than a choice made here: a starter change is an A pick, never an E
+    /// default, and the six/seven passes that moved a character's basics were
+    /// reverted on 2026-09-08 for exactly that. Soloist's Solicitation x3,
+    /// Stage Presence x3 and Regal Bearing, in the shipped order. They ARRIVE
+    /// as printed only since R276's hygiene: the shipped starting-companion
+    /// roll (<c>KleeStartingCompanionsPatch.ResolveFurina</c>) used to swap a
+    /// Solicitation and a Presence for two Fontaine companions in every Stage
+    /// run, and it now stands down under the arm.
     ///
     /// THREE KIT SLOTS FOR THREE, which is why this replaces the deck rather
     /// than a slot in it: the shipped Furina's three kit cards are <i>Aria of
@@ -77,17 +80,20 @@ public static class FurinaStageRoster
     };
 
     /// <summary>
-    /// THE POOL SEAM. Fourteen shipped rows leave the offer and the arm's
-    /// fourteen take their slots -- batch one minus the three starters above.
+    /// THE POOL SEAM. Named shipped rows leave the offer and the arm's rows
+    /// are appended: batch one's fourteen (its seventeen minus the three
+    /// starters above -- eight Commons, five Uncommons, one Rare) and R276's
+    /// batch two, fifteen more (six Commons, seven Uncommons, two Rares). The
+    /// pairing is the sheet's own `replaces:` and the sim's
+    /// <c>furina_stage.POOL_SUBS</c>.
     ///
-    /// ONE FOR ONE AT THE SAME RARITY, which is what keeps the offer odds
-    /// untouched: eight Commons, five Uncommons and one Rare out, the same
-    /// counts in. The pairing is the sheet's own `replaces:` and the sim's
-    /// <c>furina_stage.POOL_SUBS</c>, and it is a D default disclosed rather
-    /// than a design act -- same rarity always, same type and cost where her
-    /// sheet had one to spare, and the three named summons landing on the
-    /// three shipped rows of the same NAME, which is the cleanest swap on the
-    /// sheet.
+    /// NOT A ONE-FOR-ONE SWAP ANY MORE, and the offer odds DO move.
+    /// <see cref="DropRetiredRows"/> (`EB-736`) runs first and drops every
+    /// shipped row printing a retired word -- 65 of them, which include
+    /// every batch-two replacement -- so the arm's pool is the 29 Stage rows
+    /// plus the dozen shipped rows that survive the filter, about 41 cards,
+    /// not the ~76 a one-for-one swap would leave. The sim does not model the
+    /// filter, so its pool is the swap's.
     ///
     /// THE DOOR IS <c>FurinaCardPool.FilterThroughEpochs</c>, the same one the
     /// reframe's swap used and for its reason: it feeds
@@ -96,13 +102,9 @@ public static class FurinaStageRoster
     /// surface that can offer her a card and no list of surfaces has to be
     /// kept in step.
     ///
-    /// A PARTIAL SWAP, AND IT SAYS SO. Fourteen rows move; the rest of her
-    /// pool still prints Encore, the shipped Fanfare meter and the shipped
-    /// Salon, so a run under the arm drafts a MIXED sheet by construction.
-    /// Batch one is "enough to play Preserve and Expend against each other"
-    /// (sec.12) and not a whole pool. That is a known limitation of round one
-    /// rather than an oversight, and it belongs in the round packet's own
-    /// "what this round cannot see".
+    /// WHAT SURVIVES THE FILTER is a dozen plain shipped rows (Commanding
+    /// Gaze, Undercurrent, the Companion feeders and so on); they stay in the
+    /// offer until the Stage's own pool passes replace them.
     /// </summary>
     public static IEnumerable<CardModel> SwapOfferedRows(
         IEnumerable<CardModel> offered)
@@ -122,7 +124,25 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.ManyWatersMelody
                         && card is not FurinaGen.ChangeTheBill
                         && card is not FurinaGen.TakeYourBow
-                        && card is not FurinaGen.UniversalRevelry)
+                        && card is not FurinaGen.UniversalRevelry
+                        // R276 batch two's fifteen `replaces:` -- every one
+                        // already dropped by the text filter above, named here
+                        // so the sheet's pairing and this list stay one table.
+                        && card is not FurinaGen.Breathless
+                        && card is not FurinaGen.GracefulRetreat
+                        && card is not FurinaGen.HouseCall
+                        && card is not FurinaGen.LastingImpression
+                        && card is not FurinaGen.ApplauseLine
+                        && card is not FurinaGen.SwellingOverture
+                        && card is not FurinaGen.DressRehearsal
+                        && card is not FurinaGen.MatineePerformance
+                        && card is not FurinaGen.FullEnsemble
+                        && card is not FurinaGen.DramaticEntrance
+                        && card is not FurinaGen.FortissimoGuard
+                        && card is not FurinaGen.StandingOvation
+                        && card is not FurinaGen.CrowdWork
+                        && card is not FurinaGen.EndlessWaltz
+                        && card is not FurinaGen.PrimaDonna)
             .Concat(new CardModel[]
             {
                 // Commons (eight).
@@ -142,6 +162,24 @@ public static class FurinaStageRoster
                 ModelDb.Card<ProtoFsFinalBow>(),
                 // Rare (one).
                 ModelDb.Card<ProtoFsLetThePeopleRejoice>(),
+                // R276 BATCH TWO. Commons (six).
+                ModelDb.Card<ProtoFsImprovisedNumber>(),
+                ModelDb.Card<ProtoFsBetweenActs>(),
+                ModelDb.Card<ProtoFsEnsemblePiece>(),
+                ModelDb.Card<ProtoFsHoldYourPlaces>(),
+                ModelDb.Card<ProtoFsQuickCue>(),
+                ModelDb.Card<ProtoFsStepForward>(),
+                // Uncommons (seven).
+                ModelDb.Card<ProtoFsGalaDinner>(),
+                ModelDb.Card<ProtoFsDoubleCasting>(),
+                ModelDb.Card<ProtoFsTutti>(),
+                ModelDb.Card<ProtoFsBravura>(),
+                ModelDb.Card<ProtoFsFullHouse>(),
+                ModelDb.Card<ProtoFsThunderousApplause>(),
+                ModelDb.Card<ProtoFsRaptAudience>(),
+                // Rares (two).
+                ModelDb.Card<ProtoFsArkheAlignment>(),
+                ModelDb.Card<ProtoFsFiveCenturyAct>(),
             });
     }
 

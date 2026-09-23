@@ -74,6 +74,25 @@ internal static class KleeStartingCompanionsPatch
 
     private static void ResolveFurina(Player player, string seed, int slot)
     {
+#if PROTOTYPE_CARDS
+        // R276 hygiene. UNDER THE STAGE ARM HER STARTER IS THE BRIEF'S TEN,
+        // exactly (`FurinaStageRoster.StartingDeck`): seven basics and three
+        // kit cards. This patch used to run under the arm too and swap a
+        // Soloist's Solicitation and a Stage Presence for two Fontaine
+        // companions in every Stage run, which the brief never printed --
+        // Klee's and Kokomi's arms already start with none, because their
+        // rosters replace the whole starter and this swap finds no slot.
+        // Whether a character starts with a companion at all is the direction
+        // document's own open question; until it is ruled the Stage plays the
+        // brief's deck.
+        if (Powers.FurinaStage.Enabled)
+        {
+            Log.Info($"[{KleeMod.ModId}] Furina's starter Companion slots "
+                   + "are not rolled: the Stage arm is on and its starter is "
+                   + "the brief's ten cards.");
+            return;
+        }
+#endif
         // v0.111.0 (`EB-171`): ulong seeds, see ResolveKlee above.
         var playerSeed =
             StringHelper.GetDeterministicHashCode(seed) + (ulong)slot;
