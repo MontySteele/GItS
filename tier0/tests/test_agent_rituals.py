@@ -48,8 +48,8 @@ def _run(argv: list[str], cwd: Path = REPO) -> subprocess.CompletedProcess:
                           text=True, cwd=str(cwd), env=env, errors="replace")
 
 
-SCRIPTS = ("gates", "row", "mint_row", "agent_worktree", "open_pr", "land_pr",
-           "seat", "deploy_round")
+SCRIPTS = ("gates", "agent_worktree", "open_pr", "land_pr", "seat",
+           "deploy_round")
 
 
 # --- the contract every one of them owes ----------------------------------
@@ -97,10 +97,10 @@ def test_gates_summarises_the_lint_battery_both_ways():
     gates = _module("gates")
     ok = "run_lints: 35 tool(s)\n\nOK: 35 lint(s) passed\n"
     assert gates.summarise(gates.Gate("lints", []), ok, 0) == ("35 passed", [])
-    bad = "FAILED: register-ids, register-shape\n"
+    bad = "FAILED: op-parity, stamp-rows\n"
     summary, names = gates.summarise(gates.Gate("lints", []), bad, 1)
     assert summary == "2 FAILED"
-    assert names == ["register-ids", "register-shape"]
+    assert names == ["op-parity", "stamp-rows"]
 
 
 def test_gates_default_lane_is_fast_and_says_so(tmp_path):
@@ -218,68 +218,6 @@ def test_a_machine_without_the_game_skips_the_csharp_gate_rather_than_passing(
 
 class _FastArgs:
     fast, full, serial, dotnet, codegen, only = True, False, False, False, False, set()
-
-
-# --- row.py and mint_row.py ------------------------------------------------
-
-def test_row_prints_one_row_and_finds_its_register():
-    """Against a live id, chosen from the register rather than hard-coded --
-    a row closes and leaves HEAD, and this test must not close with it."""
-    register_io = _module("register_io")
-    cid = sorted(register_io.defined_ids("BACKLOG"))[0]
-    res = _run(["tools/row.py", cid, "--oneline"])
-    assert res.returncode == 0, res.stdout + res.stderr
-    assert cid in res.stdout and "BACKLOG.md:" in res.stdout
-
-
-def test_row_exits_1_on_an_id_that_defines_nothing():
-    res = _run(["tools/row.py", "EB-99999"])
-    assert res.returncode == 1
-    assert "no row" in res.stdout
-
-
-def test_mint_row_derives_the_next_id_above_the_ceiling_and_writes_nothing():
-    lint = _module("lint_register_ids")
-    register_io = _module("register_io")
-    series, number = register_io.next_free("BACKLOG")
-    assert series == "EB"
-    ceiling, _ = lint.derive(lint._committed())
-    assert number == ceiling["EB"] + 1
-
-    res = _run(["tools/mint_row.py", "BACKLOG", "tools", "--scope", "s.",
-                "--next-action", "n.", "--gate", "none.",
-                "--acceptance", "a.", "--oneline"])
-    assert res.returncode == 0, res.stdout + res.stderr
-    assert f"EB-{number}" in res.stdout and "dry run" in res.stdout
-    # and the register is untouched
-    assert register_io.next_free("BACKLOG") == (series, number)
-
-
-def test_mint_row_refuses_a_backlog_row_missing_one_of_the_four_fields():
-    res = _run(["tools/mint_row.py", "BACKLOG", "tools", "--scope", "s.",
-                "--gate", "none.", "--acceptance", "a."])
-    assert res.returncode != 0
-    assert "--next-action" in (res.stdout + res.stderr)
-
-
-def test_mint_row_counts_the_row_against_the_shape_lint_s_own_limit():
-    mint = _module("mint_row")
-    shape = _module("lint_register_shape")
-    assert mint._shape_limits() == {"BACKLOG": shape.BACKLOG_MAX,
-                                    "QUEUE": shape.QUEUE_MAX}
-    res = _run(["tools/mint_row.py", "BACKLOG", "tools", "--scope",
-                "x" * 700, "--next-action", "n.", "--gate", "none.",
-                "--acceptance", "a."])
-    assert res.returncode == 1
-    assert "TOO LONG" in res.stdout
-
-
-def test_register_io_finds_a_table_by_prefix_and_refuses_an_ambiguous_one():
-    register_io = _module("register_io")
-    text = register_io.read("BACKLOG")
-    assert register_io.find_table(text, "tools").section.startswith("tools")
-    with pytest.raises(KeyError):
-        register_io.find_table(text, "no such section")
 
 
 # --- agent_worktree.py -----------------------------------------------------
@@ -630,7 +568,7 @@ def test_the_deploy_hook_self_test_passes():
 
 # --- the skills and the page ----------------------------------------------
 
-SKILLS = ("gates", "open-pr", "land-pr", "mint-row", "agent-worktree", "seat",
+SKILLS = ("gates", "open-pr", "land-pr", "agent-worktree", "seat",
           "deploy-round")
 
 
@@ -654,5 +592,4 @@ def test_the_rituals_page_names_every_script_and_is_in_the_index():
     index = (REPO / "docs" / "current" / "OPERATIONS.md").read_text(
         encoding="utf-8")
     assert "operations/agent-rituals.md" in index
-    assert "operations/register-ids.md" in index
     assert "operations/seat-brief.md" in index

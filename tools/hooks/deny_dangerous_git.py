@@ -16,11 +16,12 @@ chosen because each one has already cost this repo something:
      tree that cannot be committed and cannot be regenerated (`EB-128`).
      `python -m tools.purge_worktree` asks the question git does not.
   3. **`git push` at `main`, or any forced push.** `main` is push-protected by
-     ratified workflow -- a branch goes up, and the PR merge is [USER]'s -- and
-     a force-push is the one git operation that destroys published history.
-     `--force-with-lease` is refused with the rest: a lease makes a force
-     safer, never non-destructive, and the rule here is about WHO merges to
-     `main`, not about racing.
+     ratified workflow -- a branch goes up and lands through a PR (Claude
+     merges one that asks nothing of [USER], on green CI; one carrying a pick
+     for [USER] is his) -- and a force-push is the one git operation that
+     destroys published history. `--force-with-lease` is refused with the
+     rest: a lease makes a force safer, never non-destructive, and the rule
+     here is about HOW code reaches `main`, not about racing.
   4. **`--no-verify`.** On `commit` or on `push` it is the switch that turns
      off the hook layer this correction is building. A gate with a documented
      bypass is a suggestion.

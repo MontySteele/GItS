@@ -47,8 +47,6 @@ where CI cannot look.
    `--acknowledge` is the flag you type **after reading that list**, never one
    you set in advance.
 
-6. **A phase's content does not merge to `main` until the prior phase's
-   required read is complete (R206).** Build it, test it, push the branch —
-   merging is the act that is sequenced, not the work. A branch waiting on a
-   read is INERT, not blocked, and merging one IS the pull. Pushes to `main`
-   and forced pushes are refused by the hook; the PR merge is [USER]'s.
+6. **Land through a PR.** Pushes to `main` and forced pushes are refused by
+   the hook. Claude merges a PR that asks nothing of [USER] once CI is green
+   (the `land-pr` skill); a PR carrying a pick for [USER] stays open for him.

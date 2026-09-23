@@ -6,14 +6,15 @@ or grade a board holding one. Every entry cites the `BACKLOG.md` row that owns
 the defect. This lint joins the two: an entry whose EB id is not an OPEN row in
 `docs/current/BACKLOG.md` is STALE, and stale means the defect was fixed, the
 row left HEAD (house norm: closed items leave HEAD) and nobody deleted the
-entry beside it.
+entry beside it. `BACKLOG.md` is a plain to-do list since 2026-09-23;
+an item that carries an id starts its line with it (`- `EB-123` ...`), and
+the old table-row form still reads.
 
 WHY THAT DIRECTION IS THE DANGEROUS ONE. A register that over-refuses looks
 like a working register: every packet naming the card is refused, the refusal
 names a card that is fine, and the only symptom is a slice that cannot stage
 the board it needs. The failure is silent and it argues for itself. So the
-closing discipline is mechanical rather than remembered -- exactly the rot
-semantics `tools/lint_register_ids.py` puts on `OPEN_IDS`.
+closing discipline is mechanical rather than remembered.
 
 WHAT IT DOES NOT ASSERT. Not that a defect is real, not that the card is
 misprinted today, not that the register is COMPLETE -- no tool can know what
@@ -40,11 +41,12 @@ from understudy import face_defects   # noqa: E402
 
 BACKLOG = REPO / "docs" / "current" / "BACKLOG.md"
 
-# A register row: a leading pipe, then the id in backticks. The same shape
-# `lint_register_ids` reads, kept narrow on purpose -- a prose MENTION of an id
-# is not a row, and a register whose ids resolve against prose would keep an
-# entry alive on the strength of a sentence in somebody's rationale.
-ROW = re.compile(r"^\|\s*`([A-Z][A-Z0-9]*-?\d+)`\s*\|")
+# A to-do item: a list bullet (or, in the old form, a table pipe) and then
+# the id in backticks, at the START of the line. Kept narrow on purpose -- a
+# prose MENTION of an id is not an item, and a register whose ids resolve
+# against prose would keep an entry alive on the strength of a sentence in
+# somebody's rationale.
+ROW = re.compile(r"^(?:[-*]|\|)\s*`([A-Z][A-Z0-9]*-?\d+)`")
 
 
 def open_rows(path: Path = BACKLOG) -> set[str]:

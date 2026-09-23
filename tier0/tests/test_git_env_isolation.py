@@ -6,7 +6,7 @@ and none passes `env` — correct, right up until the process they inherit
 carries `GIT_DIR`, which OUTRANKS `cwd` absolutely. The push gate runs the
 fast lane as a child of the harness, that environment carried a `GIT_DIR`
 pointing at the session's own worktree, and sixteen xdist workers each ran
-`test_rulings_index.py`'s seven fixture commits into it: twenty-eight tests
+`test_rulings_index.py`'s (retired 2026-09-23) seven fixture commits into it: twenty-eight tests
 failed on `index.lock` contention, and the workers that won the lock left the
 branch on *"R16 landed: the sixteenth ruling, as ruled"* with an empty index.
 The reflog had the real commits and a mixed reset put them back — but the

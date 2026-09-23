@@ -61,7 +61,7 @@ the seat's named clause and setting each `authored_by:` back to `[claude]`.
 With no contributing family left on either row, check (2) stops finding those
 four turns at all, and the debt set's own staleness rule then REQUIRED their
 deletion: an entry that has stopped tripping FAILS, exactly as
-`lint_register_shape`'s and `lint_face_defects`' debt sets do, and
+`lint_face_defects`' debt set does, and
 `tier0/tests/test_prototype_authorship.py` pins `offenders == set(DEBT)`.
 
 Deleting the entries is NOT deleting the records (R101b): rounds 1 and 2's

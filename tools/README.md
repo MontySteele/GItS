@@ -67,14 +67,11 @@ instead of a canon comparison. Gated by
 red fixture, the op table pinned against `effects.OPS`, and the canon reader
 exercised against a synthetic decompiled tree.)
 
-## Agent rituals (the seven a sitting repeats — `operations/agent-rituals.md`)
+## Agent rituals (the six a sitting repeats — `operations/agent-rituals.md`)
 Each takes `--help` and `--oneline`; each has a `.claude/skills/` entry.
 `gates.py` (run the gate wall and print ONE LINE per gate with the counts and
 the failing test names, raw output to `.gates/<stamp>.log` — the token saver;
 `--fast` is the inner loop and never the pre-push gate),
-`row.py` (print one register row instead of opening a 170-line register),
-`mint_row.py` (mint a row: the derived id, the pipe syntax, the 600-char gate,
-both register lints) over `register_io.py` (the shared table reader/writer),
 `agent_worktree.py` (sibling worktree + `local.props` + CLAUDE.md's read order
 for the task; refuses while a seat is live), `open_pr.py` (the `gh` full path
 and the mandatory footer; prints the number and URL only), `land_pr.py` (a
