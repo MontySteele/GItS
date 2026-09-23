@@ -154,9 +154,21 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         // Rare Power card of that name. See the class summary.
         ("title", "Dodoco Tales"),
         ("description",
+#if KLEE_OVERHAUL
+            // R276 hygiene: under the arm the opening bank is gated OFF
+            // (`AfterPlayerTurnStart` below), so the face says only what the
+            // relic does there -- the per-explosion Spark, in Pounding
+            // Surprise's own words. A loc row is registered once at boot, so
+            // the switch is the compile constant the deploy line sets, the
+            // same one Pounding Surprise's face reads.
+            "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
+          + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]."
+#else
             $"Start each combat with [blue]{OpeningSparks}[/blue] "
           + "[gold]Sparks[/gold]. Whenever a [gold]Bomb[/gold] detonates, "
-          + $"gain [blue]{SparksPerDetonation}[/blue] [gold]Spark[/gold]."),
+          + $"gain [blue]{SparksPerDetonation}[/blue] [gold]Spark[/gold]."
+#endif
+            ),
     };
 
     protected override string IconBaseName => "burning_blood";

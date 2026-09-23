@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,14 +46,14 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_mollis_favonius");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Mollis Favonius"),
-        ("description", "[gold]Hexerei[/gold]. [gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal {PowerAmount:diff()} additional damage."),
+        ("description", "[gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

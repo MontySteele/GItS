@@ -47,7 +47,8 @@ SEED = 7
 OVERHAUL_OPS = ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                 "remove_bomb_for_block", "block_largest_bomb",
                 "grow_largest_bomb", "damage_set_off_total",
-                "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand")
+                "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
+                "mine_bombs")
 
 
 @pytest.fixture
@@ -288,10 +289,15 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     Mine. Three names go and one arrives. The two cut ids are pinned ABSENT
     below for the reason Fire Safety's absence is: a cut row staged as a live
     card would be a face nobody ruled.
+
+    FORTY-EIGHT SINCE R276 (2026-09-23, pick 1): five of R271's shelf CUT
+    (Long Fuse, Explosives Workshop, Sugar Rush, Kindling, Catalytic
+    Converter) and four ARRIVED (Hair Trigger, Explosive Frags, Where Did I
+    Put It?, Big Bounce). Both halves pinned, for the cut rows' reason above.
     """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 49
-    assert len(set(ids)) == 49
+    assert len(ids) == 48
+    assert len(set(ids)) == 48
     assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
     # R244's three, and only three: `Hex and Wick` is the packet's sec.3
@@ -317,10 +323,9 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # THE POOL PASS's ten (`EB-491`), by name, for the reason every block above
     # names its own: the packet's scope statement is "ten", and an eleventh
     # arriving without one is what this catches.
-    assert {"proto_ko_long_fuse", "proto_ko_all_of_my_treasures",
+    assert {"proto_ko_all_of_my_treasures",
             "proto_ko_fish_blasting", "proto_ko_pocket_match",
-            "proto_ko_bombs_away",
-            "proto_ko_kindling", "proto_ko_flash_point",
+            "proto_ko_bombs_away", "proto_ko_flash_point",
             "proto_ko_vermillion_pact", "proto_ko_split_charge"} <= set(ids)
     # R271 STAGE ONE's two cuts and its one redesign (`EB-749`), pinned both
     # ways: the cut ids are on no surface, and Booby Trap stands in Powder
@@ -334,6 +339,14 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
             "proto_ko_bottomless_bag", "proto_ko_once_more",
             "proto_ko_sparkling_burst",
             "proto_ko_blazing_delight"} <= set(ids)
+    # R276's five cuts and four arrivals.
+    for cut in ("proto_ko_long_fuse", "proto_ko_explosives_workshop",
+                "proto_ko_sugar_rush", "proto_ko_kindling",
+                "proto_ko_catalytic_converter"):
+        assert cut not in ids, cut
+    assert {"proto_ko_hair_trigger", "proto_ko_explosive_frags",
+            "proto_ko_where_did_i_put_it",
+            "proto_ko_big_bounce"} <= set(ids)
 
 
 def test_the_numbers_are_the_briefs_placeholders():
@@ -462,10 +475,16 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     Common (Booby Trap, Powder Charge's shape at Common because the ruled row
     says Common Skill). The Common count is therefore unmoved and the Uncommon
     count falls by two, which is what a consolidation looks like in this
-    table."""
+    table.
+
+    R276 takes it to 22 / 18 / 8. It cuts TWO Commons (Long Fuse, Kindling),
+    TWO Uncommons (Explosives Workshop, Catalytic Converter) and ONE Rare
+    (Sugar Rush), and adds TWO Commons (Hair Trigger, Where Did I Put It?) and
+    TWO Uncommons (Explosive Frags, Big Bounce) -- so the Rare count is back
+    at the brief's eight."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 22, "uncommon": 18, "rare": 9}
+        "common": 22, "uncommon": 18, "rare": 8}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -806,101 +825,62 @@ def test_the_shipped_klee_opening_is_untouched_by_the_row():
     assert not any(c.innate for c in player.draw_pile)
 
 
-# --- `EB-554`: WHICH HEXEREI CARDS ARE KLEE'S OWN --------------------------
+# --- R276 pick 2: ANY COMPANION PLAY PAYS KLEE'S SPARK ----------------------
 
-def test_every_hexerei_play_pays_and_an_unmarked_companion_does_not(
-        overhaul):
-    """`EB-554`'s pair, re-read under `EB-642`. THE SEAT COULD NOT TELL THEM
-    APART; R265 pick 1 made them the same.
+def test_every_companion_play_pays_klees_spark(overhaul):
+    """R276 pick 2, "Hexerei becomes Companion": any Companion card gives Klee
+    the Spark under the arm, Universal or Personal, Mondstadt or not.
 
-    Klee r20 lane 1 played Albedo+ and Razor in one turn -- "both print
-    Hexerei" -- and Spark stayed at 1: "Nothing on either card face
-    distinguishes 'hers' from not-hers, so as a reader I have no way to predict
-    which Companion pays a Spark." The rule was right and unreadable, and
-    [USER]'s own act-1 run ruled the rule away instead of the reading: every
-    Hexerei card gives Klee a Spark, Universals included.
-
-    SO THE PRINTED WORD IS NECESSARY AND SUFFICIENT, which is both halves of
-    this test: Razor the Universal pays, and Gorou's War Banner -- an Inazuma
-    Universal outside the family -- does not. A row that pays without saying
-    so is the r20 defect pointing the other way, which is also why Klee's own
-    coven carries the mark now (`EB-642`'s follow-up): a Personal of hers that
-    paid and printed nothing would be the same silence.
+    `EB-554` / `EB-642` had drawn the line at the printed Hexerei word, and
+    Gorou's War Banner -- an Inazuma Universal outside that family -- paid
+    nothing. It is the case that moved, so it is the case pinned.
     """
     from tier0.engine.combat import play_card
     from tier0.tests.conftest import make_state
 
-    universal = loader.get_card("proto_mc_razor_claw_and_thunder")
-    personal = loader.get_card("proto_mc_fischl_sinful_hex")
-    unmarked = loader.get_card("proto_mi_gorou_war_banner")
-    assert universal.is_companion and personal.is_companion
-    assert universal.personal_pool is None
-    assert personal.personal_pool == "klee"
-    assert unmarked.is_companion and unmarked.personal_pool is None
-    assert not unmarked.hexerei
-    # ...and a coven Personal, which used to be the negative case here, pays.
-    coven = loader.get_card("proto_mc_noelle_i_got_your_back")
-    assert coven.personal_pool == "klee" and coven.hexerei
-
-    state = make_state()
-    state.player.character_id = "klee"
-    state.player.hand = [universal]
-    play_card(state, universal)
-    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
-
-    state.player.sparks = 0
-    state.player.hand = [personal]
-    play_card(state, personal)
-    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
-
-    state.player.sparks = 0
-    state.player.hand = [coven]
-    play_card(state, coven)
-    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
-
-    state.player.sparks = 0
-    state.player.hand = [unmarked]
-    play_card(state, unmarked)
-    assert state.player.sparks == 0
+    for cid in ("proto_mc_razor_claw_and_thunder",      # a Universal
+                "proto_mc_fischl_sinful_hex",           # a family stand-in
+                "proto_mc_noelle_i_got_your_back",      # a coven Personal
+                "proto_mi_gorou_war_banner"):           # outside the old family
+        card = loader.get_card(cid)
+        assert card.is_companion, cid
+        state = make_state()
+        state.player.character_id = "klee"
+        state.player.hand = [card]
+        play_card(state, card)
+        assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE, cid
 
 
-def test_the_mark_pays_whether_or_not_the_card_is_a_companion(overhaul):
-    """`EB-663` (Klee r24 lane 1). THE COMPANION GATE MADE ONE WORD TWO SETS.
+def test_alices_marked_cards_pay_and_the_spell_itself_does_not(overhaul):
+    """`EB-663`'s pin, re-read under R276. The Spark asks the readers' own
+    question (`companion_hexerei.counts_as_companion`), so the three Klee cards
+    Alice's Introduction Magic marked each pay one.
 
-    The rule tested COMPANION *and* Hexerei, so Alice's Introduction Magic --
-    a Klee skill carrying `hexerei: true` -- printed the keyword, satisfied
-    Coven Errand and Witches' Circle, and paid nothing; so did every card its
-    this-turn window marks. Under the arm the test is now exactly
-    `companion_hexerei.is_hexerei`, which is the readers' own question.
-
-    THE PIN THE ROW ASKS FOR: Alice's, then three marked Klee cards, is FOUR
-    grants of one. Seen to FAIL: one grant, and that one only after the
-    Companion gate came out.
+    THE SPELL NO LONGER COUNTS ITSELF: its `hexerei: true` key was the only
+    thing that made it, the key is retired, and the face says "all cards in
+    your hand" -- which the spell is not in once it is being played.
     """
     from tier0.engine.combat import play_card
     from tier0.tests.conftest import make_state
 
     alices = loader.get_card("proto_ko_alices_introduction_magic")
     marked = [loader.get_card("proto_ko_careful_now") for _ in range(3)]
-    assert alices.hexerei and not alices.is_companion
-    assert not any(card.hexerei or card.is_companion for card in marked)
+    assert not alices.is_companion
+    assert not any(card.is_companion for card in marked)
 
     state = make_state()
     state.player.character_id = "klee"
     state.player.hand = [alices, *marked]
     play_card(state, alices)
-    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
-    # The window is over the INSTANCES that were in hand, which is what makes
-    # the next three plays the ruling's own reading (R244).
-    assert len(state.ko_hexerei_marked) == 3
+    assert state.player.sparks == 0
+    # The window is over the INSTANCES that were in hand (R244).
+    assert len(state.ko_companion_marked) == 3
 
-    for i, card in enumerate(marked, start=2):
+    for i, card in enumerate(marked, start=1):
         play_card(state, card)
         assert state.player.sparks == i * C.KLEE_COMPANION_SPARK_BASE
-    assert state.player.sparks == 4 * C.KLEE_COMPANION_SPARK_BASE
 
-    # AND AN UNMARKED KLEE CARD STILL PAYS NOTHING, which is the bound: the
-    # rule reads the family, not the character's whole deck.
+    # AND AN UNMARKED KLEE CARD STILL PAYS NOTHING, which is the bound.
     state.player.sparks = 0
     plain = loader.get_card("proto_ko_careful_now")
     state.player.hand = [plain]
@@ -909,8 +889,7 @@ def test_the_mark_pays_whether_or_not_the_card_is_a_companion(overhaul):
 
 
 def test_the_companion_gate_still_stands_off_the_arm():
-    """`EB-663`'s other half, and R213 B rather than taste: no SHIPPED row
-    carries the family key, so OFF the arm the rule stays the Companion +
+    """R213 B rather than taste: OFF the arm the rule stays the Companion +
     Personal-pool test `EB-219` moved into the kit at parity. Written against
     the effect directly, because a prototype row is not loadable with the flag
     down -- which is the quarantine doing its job."""
@@ -921,10 +900,10 @@ def test_the_companion_gate_still_stands_off_the_arm():
     assert not C.KLEE_OVERHAUL
     state = make_state()
     state.player.character_id = "klee"
-    # A marked NON-Companion: pays under the arm, pays nothing without it.
-    marked = Card(id="x_marked", name="Marked", cost=1, type="skill",
-                  hexerei=True)
-    effects.klee_companion_spark(state, marked)
+    # A Universal Companion: pays under the arm, pays nothing without it.
+    universal = Card(id="x_universal", name="Universal", cost=1,
+                     type="skill", tags=["companion"])
+    effects.klee_companion_spark(state, universal)
     assert state.player.sparks == 0
     # And the shipped rule's own row still pays, untouched.
     personal = Card(id="x_personal", name="Personal", cost=1, type="skill",
@@ -951,37 +930,22 @@ def test_only_klee_is_paid_by_her_own_kit(overhaul):
     assert state.player.sparks == 0
 
 
-def test_the_face_prints_the_family_word_and_nothing_about_ownership(overhaul):
-    """`EB-642`: one mark, and it is the one the payment reads.
+def test_no_face_prints_the_retired_hexerei_mark():
+    """R276 pick 2 retired the Hexerei mark: no prototype row carries the
+    `hexerei:` key, no face prints the word, and the codegen no longer has a
+    family tag to add. `_family_tags` is gone rather than switched off."""
+    import yaml
 
-    The ownership lead is gone from every face -- both the bare "Klee's own."
-    and the adjective form -- because the distinction it drew is gone with it.
-    """
     from tools import gen_klee_cards as gen
 
-    universal = dict(id="proto_mc_x", star=4, hexerei=True)
-    personal = dict(id="proto_mc_y", star=4, hexerei=True,
-                    personal_pool=["klee"])
-    plain_own = dict(id="proto_mc_z", star=4, personal_pool="klee")
-
-    assert gen._family_tags(universal, "Deal 8 damage.") == (
-        "[gold]Hexerei[/gold]. Deal 8 damage.")
-    # A Personal that carries the mark reads exactly as the Universal does,
-    # which is the ruling.
-    assert gen._family_tags(personal, "Deal 8 damage.") == (
-        "[gold]Hexerei[/gold]. Deal 8 damage.")
-    # ...and one that does not carry it says nothing, because it pays nothing.
-    assert gen._family_tags(plain_own, "Deal 8 damage.") == "Deal 8 damage."
-    # A Universal with no mark is untouched, which is what keeps the tag a
-    # statement rather than decoration.
-    assert gen._family_tags(dict(id="proto_mc_w", star=4), "Deal 8 damage.") == (
-        "Deal 8 damage.")
-    # AND A SHIPPED ROW DOES NOT MOVE, which is R213 B and not taste: no
-    # shipped sheet carries the family key at all, so the shipped Prune keeps
-    # her printed face and her Spark stays the kit's declaration (`EB-219`).
-    assert gen._family_tags(dict(id="prune_witch_hunt", star=4,
-                                 personal_pool="klee"), "Deal 8 damage.") == (
-        "Deal 8 damage.")
+    rows = yaml.safe_load(
+        (gen.REPO / "docs" / "prototype-surface.yaml").read_text(
+            encoding="utf-8"))
+    assert not [r["id"] for r in rows if "hexerei" in r]
+    assert not [r["id"] for r in rows
+                if "Hexerei" in str(r.get("description", ""))]
+    assert not hasattr(gen, "_family_tags")
+    assert "Hexerei" not in {k.word for k in gen.ARM_KEYWORDS}
 
 
 # ---------------------------------------------------------------------------

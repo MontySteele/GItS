@@ -68,7 +68,6 @@ public static class ArmKeywordTips
     public const string SetOffKey = "KLEEMOD-ARM_SET_OFF";
     public const string SparkKey = "KLEEMOD-ARM_SPARK";
     public const string MineKey = "KLEEMOD-ARM_MINE";
-    public const string HexereiKey = "KLEEMOD-ARM_HEXEREI";
     public const string GroundedKey = "KLEEMOD-ARM_GROUNDED";
     public const string OzKey = "KLEEMOD-ARM_OZ";
     public const string MendKey = "KLEEMOD-ARM_MEND";
@@ -375,8 +374,8 @@ public static class ArmKeywordTips
             // say where it lands -- so the rule lives on the word, which is the
             // one surface both rows carry. Over the tip ceiling and excepted
             // by name in `tools/lint_text_conventions.py`.
-            "The target's [gold]Bombs[/gold] go off first, oldest first, each "
-          + "a Pyro hit. [gold]Block[/gold] stops them, no when-hit power "
+            "The target's [gold]Bombs[/gold] go off first, in the order placed, "
+          + "each a Pyro hit. [gold]Block[/gold] stops them, no when-hit power "
           + "fires, the first takes the aura. A random one picks a Bombed "
           + "enemy first.");
 
@@ -521,131 +520,6 @@ public static class ArmKeywordTips
           + "If the enemy dies with it on, it moves to a survivor.");
 
     /// <summary>
-    /// KLEE'S FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`
-    /// sec.4, which asks for this tip by name).
-    ///
-    /// THE WORD WAS ALREADY ON EIGHTEEN FACES AND EXPLAINED NOWHERE. `Hexerei`
-    /// is a one-word family mark carried by thirteen Mondstadt Universals,
-    /// Prune's Personal and the four family stand-ins, and it does nothing by
-    /// itself -- so until the readers existed there was nothing to read and
-    /// nothing to say. Now three cards in Klee's own pool pay for it, and a
-    /// player who meets the word on a reward screen has to be able to find out
-    /// which cards are in the family.
-    ///
-    /// THE SECOND SENTENCE IS THE HALF A PLAYER CANNOT INFER, and it is the
-    /// brief's sec.7.4 refinement: Klee is herself Hexerei, so a circle is her
-    /// plus one witch rather than two cards. Without it, a player holding
-    /// Witches' Circle and one Universal would have no way to know the card
-    /// was live.
-    /// </summary>
-    /// `EB-392` REWROTE IT, because "from the witches' circle" was doing
-    /// silent work and the r12 run-2 seat said so: "I could not tell from any
-    /// card face whether MY Companion qualified. I found out by counting bombs
-    /// on an enemy badge." Then it met a second word on the same screen and
-    /// had three: "there is apparently a distinction between `Companion`,
-    /// `Hexerei`, and `Klee's own Companion`, and none of the three cards
-    /// involved prints which one it is."
-    ///
-    /// THE FIRST SENTENCE IS ANSWERABLE NOW, and it was not before: every
-    /// Hexerei Companion prints the word on its own face
-    /// (`gen_klee_cards._hexerei_tag`), so "a Companion card that prints the
-    /// word" is a test a player can run on the card in their hand. "And Klee
-    /// herself" is the brief's sec.7.4 refinement, unchanged.
-    ///
-    /// THE SECOND SENTENCE IS THE THIRD WORD, and it is stated as the OVERLAP
-    /// it really is rather than as an exclusion. Five rows carry both marks
-    /// and thirteen carry only one, so "a different set" would be a lie in
-    /// both directions; "some are Klee's own, some are not" is what the sheet
-    /// says. `Klee's own` is the exact phrase the Spark rider uses
-    /// (<see cref="ForCovenSpark"/>), so the two words meet under one
-    /// spelling.
-    ///
-    /// "IT DOES NOTHING BY ITSELF" LEFT and is not missed: it was true of a
-    /// word with no readers, and three cards in Klee's pool have paid for it
-    /// since R244. The last sentence says that instead.
-    ///
-    /// `EB-504`, REOPENED 2026-09-05: THE RULE IS KLEE'S AND THE WORD IS
-    /// EVERYONE'S. See <see cref="KleesRuleBelongsHere"/>. The page glossary
-    /// was gated on the r17 finding and this tip was the second source, so
-    /// Razor's own face still printed the whole sentence on a Kokomi run.
-    /// `EB-535`: AND THE LAST SENTENCE NOW SAYS WHAT THE PAYMENT IS.
-    ///
-    /// THE FIND (Klee r19 lane 2). "I read this a dozen times across five
-    /// fights and I still do not know what it does. 'Cards of hers pay' -- pay
-    /// what, to whom, and when? I played Razor four times and never saw
-    /// anything I could attribute to Hexerei." The rule was on a DIFFERENT
-    /// screen the whole time -- <see cref="ForCovenSpark"/>, which rides Klee's
-    /// own Personal Companions and not the family tag -- and the seat found it
-    /// late and still could not tell whether Razor was one of Klee's own.
-    ///
-    /// SO THE READER CLAUSE GAVE UP ITS ROOM. "Cards of hers pay when you play
-    /// one" is the sentence the seat could extract nothing from, and the cards
-    /// it is about print their own rule on their own faces; the family test and
-    /// the ownership split stay, because "some are Klee's own, some are not" is
-    /// the half that answers the Razor question. 135 of 135 rendered.
-    ///
-    /// `EB-554` MADE THE OWNERSHIP CLAUSE POINT AT A MARK. "Some are Klee's
-    /// own, some are not" told a reader the split exists and gave them no way
-    /// to run it: Klee r20 lane 1 played Albedo+ and Razor in one turn, both
-    /// printing the word, and Spark stayed at 1 -- "nothing on either card
-    /// face distinguishes 'hers' from not-hers, so as a reader I have no way to
-    /// predict which Companion pays a Spark. This is the clearest thing I could
-    /// not resolve all round." The faces carry the mark now
-    /// (`gen_klee_cards._family_tags`), so the sentence says ONLY the marked
-    /// ones pay and names the mark it is pointing at. "A play" replaces the
-    /// bare cap's grammar and pays for the change.
-    ///
-    /// THE NUMBERS ARE LIFTED, not typed (`EB-89`'s rule): they are
-    /// <see cref="KleeMod.Powers.KleeCompanionSpark"/>'s own, which is the
-    /// declaration LAW:145 obliges the KIT to make, so a retune cannot leave
-    /// this sentence quoting a retired figure. The BOUND is printed here and
-    /// deliberately not on <see cref="ForCovenSpark"/>, where it would state a
-    /// ceiling no single clause reaches; here it is the whole of what a player
-    /// asking "how much" needs.
-    ///
-    /// `EB-619` DROPPED THE LAST CLAUSE. "It never costs Spark" was the answer
-    /// to `EB-596`'s surcharge misread, and [USER]'s own act-1 run read it as
-    /// the wrong screen for that answer -- "shouldn't the card's own cost
-    /// section say that?" A price a card does not charge is not a rule the
-    /// keyword page owes: the cost line is where a player looks for what a
-    /// card costs, and a keyword that denies a price no face prints invites
-    /// the doubt it was written to settle. The sentence ends at "a play."
-    ///
-    /// `EB-642` DROPPED THE OWNERSHIP CLAUSE, because R265 pick 1 dropped the
-    /// distinction it pointed at. [USER] read "one marked Klee's own" off his
-    /// own act-1 run as noise, and the rule now pays every Hexerei card,
-    /// Universals included -- so the first sentence's test IS the payer set and
-    /// a second clause narrowing it would be false. One word, one rule: the
-    /// face prints `Hexerei` if and only if playing it pays.
-    ///
-    /// `EB-663` (Klee r24 lane 1) TOOK THE WORD "COMPANION" OUT OF THE TEST.
-    /// The sentence opened "A [gold]Companion[/gold] card whose face prints
-    /// the word", and two things were wrong with it at once: Alice's
-    /// Introduction Magic marks a HAND, so a Klee card can count as Hexerei
-    /// without being a Companion at all, and the sentence read to the r24 seat
-    /// as "Companion" and "Hexerei" being one set -- which they are not, since
-    /// eight coven Personals print no word and pay nothing. So the definition
-    /// is the family membership test the readers themselves run
-    /// (<c>CompanionHexerei.IsHexerei</c>, both of its two ways in), and the
-    /// last sentence says out loud the thing the old opening implied the
-    /// opposite of.
-    ///
-    /// AND IT FITS, at 133 of 135. The first draft said the same three things
-    /// in 193 characters and carried a length exception for them; the two ways
-    /// in are a subject the word already has ("Printed... or marked on by"),
-    /// the spell is the one Alice a Klee run holds, and the denial is four
-    /// words. A keyword page that needs an exception to state its own
-    /// membership test is a page saying it twice.
-    public static IEnumerable<IHoverTip> ForHexerei(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        !KleesRuleBelongsHere(card) ? inherited :
-        With(inherited, HexereiKey,
-            "Printed on a card's face, or marked by Alice's this turn. "
-          + "Playing one gives Klee [blue]" + KleeCompanionSpark.Base
-          + "[/blue] [gold]Spark[/gold], up to [blue]" + KleeCompanionSpark.MaxPerPlay
-          + "[/blue] a play. Not every [gold]Companion[/gold] has it.");
-
-    /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
     ///
     /// THE GAP. <i>Fischl -- Nightrider</i> prints "If Oz is out, he deals 5
@@ -755,19 +629,19 @@ public static class ArmKeywordTips
     /// (<see cref="KleeMod.Powers.KleeCompanionSpark.MaxPerPlay"/>), so a
     /// fourth clause would state a bound no reachable play can meet.
     /// </summary>
-    /// `EB-642`: THE RIDER NAMES THE MARK, NOT THE POOL. R265 pick 1 made the
-    /// printed word the whole rule, so this sentence says "a Hexerei card" --
-    /// the same set the face above it prints and the same set
-    /// <see cref="KleeMod.Powers.KleeCompanionSpark.PaysKleesSpark"/> tests.
-    /// AND IT NOW ASKS <see cref="KleesRuleBelongsHere"/>, which it did not
-    /// have to while it rode only Klee's own Personals: a Hexerei Universal is
+    /// R276 PICK 2: THE RIDER NAMES ANY COMPANION. `EB-642` had pointed it at
+    /// the printed Hexerei word; R276 retired the word and every Companion card
+    /// pays, so the sentence says "a Companion card" -- the same set
+    /// <see cref="KleeMod.Powers.KleeCompanionSpark.PaysKleesSpark"/> tests
+    /// under the arm -- and it rides every companion face on Klee's profile.
+    /// IT ASKS <see cref="KleesRuleBelongsHere"/>, because a Universal is
     /// drafted by every character, and Klee's rule on a Kokomi shop screen is
     /// `EB-504` exactly.
     public static IEnumerable<IHoverTip> ForCovenSpark(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, CovenSparkKey,
-            "Playing a [gold]Hexerei[/gold] card makes [blue]"
+            "Playing a [gold]Companion[/gold] card gives Klee [blue]"
           + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold], [blue]"
           + KleeCompanionSpark.ReactionBonus + "[/blue] more if it triggered "
           + "an [gold]Elemental Reaction[/gold] and [blue]"
@@ -1244,8 +1118,8 @@ public static class ArmKeywordTips
     /// `EB-504`. IS THERE A KLEE IN THIS RUN FOR KLEE'S RULE TO BE ABOUT?
     ///
     /// THE ROW WAS CLOSED ONCE ON THE PAGE GLOSSARY AND REOPENED ON THE CARD.
-    /// `Hexerei` rides eighteen companion faces the whole roster can draft and
-    /// its rule is Klee's Spark rider; `Oz` is named by Fischl's face, which
+    /// The Companion Spark rider rides companion faces the whole roster can
+    /// draft (it was the `Hexerei` word until R276); `Oz` is named by Fischl's face, which
     /// every character meets, and the Power that fields him is hers. So the
     /// WORD reaches every run and the RULE reaches one.
     /// `blindplay_notes._ARM_KEYWORD_CHARACTER` gated the page's own glossary

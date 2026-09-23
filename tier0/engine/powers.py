@@ -64,8 +64,11 @@ def modify_damage_dealt(attacker: Fighter, base: float) -> float:
 
 def modify_damage_taken(defender: Fighter, dmg: float,
                         attacker: Fighter | None = None,
-                        from_card: bool = False) -> float:
-    if defender.powers.get("vulnerable", 0) > 0:
+                        from_card: bool = False,
+                        vulnerable: bool = True) -> float:
+    # `vulnerable=False` is Big Bounce's (R276): a hit whose Vulnerable was
+    # already paid on another body. Defaulted, so every caller is unchanged.
+    if vulnerable and defender.powers.get("vulnerable", 0) > 0:
         dmg *= C.VULNERABLE_TAKEN_MULT
     # `attacker` exists for the base-game parity powers that key off the
     # DEALER rather than the target (Cruelty scales the Vulnerable multiplier

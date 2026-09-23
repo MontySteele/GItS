@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoQuickFuse : CustomCardModel, ISparkPricedCard, IUnplayableReasonCard
+public sealed class ProtoKoQuickFuse : CustomCardModel, ISetOffCard, ISparkPricedCard, IUnplayableReasonCard
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this), this), this);

@@ -279,6 +279,9 @@ SIM_CALL_SITES = {
     ('furina_stage.py', 3): ("'furina_stage/act'", 'False', "'hydro'"),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     ('klee_overhaul.py', 2): ('ECHO_SOURCE', None, "'pyro'"),
+    # R276's Big Bounce: the overflow is an explosion's damage carried on, so
+    # it keeps the explosion's source and its unpowered posture.
+    ('klee_overhaul.py', 3): ('EXPLOSION_SOURCE', 'False', "'pyro'"),
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
     ('kokomi_plan.py', 2): ("'casket'", 'False', "'hydro'"),
 }

@@ -82,8 +82,11 @@ public class KleeOverhaulRoundThreeTests
         // FORTY-NINE SINCE R271 STAGE ONE (`EB-749`, 2026-09-14): the
         // consolidation CUT Fwoosh! and Fireworks Show and turned Powder
         // Charge into Booby Trap -- three names out, one in.
+        // FORTY-EIGHT SINCE R276 (2026-09-23, pick 1): five of the shelf cut,
+        // four new rows (Hair Trigger, Explosive Frags, Where Did I Put It?,
+        // Big Bounce).
         var slice = Cards("KleeOverhaulRoster", "Slice");
-        Assert.Equal(49, slice.Count);
+        Assert.Equal(48, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
         Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
@@ -162,6 +165,8 @@ public class KleeOverhaulRoundThreeTests
         // ELEVEN SINCE `EB-749`, which CUT Fwoosh! (a Damage carrier) and
         // Fireworks Show (never one), and turned Powder Charge into Booby
         // Trap, a placer that carries a BombSize var and no Damage.
+        // STILL ELEVEN AT R276: Long Fuse left and Big Bounce arrived, a Set
+        // off with a hit of its own.
         Assert.Equal(11, carriers.Count);
         foreach (var card in carriers)
         {
@@ -199,7 +204,8 @@ public class KleeOverhaulRoundThreeTests
                      new ProtoKoPocketMatch(), new ProtoKoTinderToss(),
                      new ProtoKoQuickFuse(), new ProtoKoBangBang(),
                      new ProtoKoBoobyTrap(), new ProtoKoDigIn(),
-                     new ProtoKoSugarRush(),
+                     // R276 cut Sugar Rush; Bottomless Bag is the seventh.
+                     new ProtoKoBottomlessBag(),
                  })
         {
             Assert.DoesNotContain("Spend", Face(card));
@@ -416,13 +422,9 @@ public class KleeOverhaulRoundThreeTests
         // damage to be and takes a Strike's +3, where the rule's default +1
         // was an upgrade nobody could see.
         AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 9m);
-        // The same audit's other three levers, one pin each. A power whose
-        // printed number IS 1 moves that number (the rule read it as a
-        // switch and appended a draw); an `energy:` delta moves the Energy
-        // var the authored face now prints; Sorry, Jean...'s upgrade is a
-        // keyword, not a number.
-        AssertUpgradeMoves<ProtoKoExplosivesWorkshop>("PowerAmount", 1m, 2m);
-        AssertUpgradeMoves<ProtoKoSugarRush>("Energy", 2m, 3m);
+        // The same audit's third lever: Sorry, Jean...'s upgrade is a keyword,
+        // not a number. (Its other two pins rode Explosives Workshop and Sugar
+        // Rush, both cut at R276.)
         var sorryJean = new ProtoKoSorryJean();
         Assert.False(sorryJean.Keywords.Contains(CardKeyword.Retain));
         Upgrade(sorryJean);

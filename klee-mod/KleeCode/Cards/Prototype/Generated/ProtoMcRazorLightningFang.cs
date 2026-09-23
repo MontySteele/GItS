@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcRazorLightningFang : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcRazorLightningFang : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,14 +49,14 @@ public sealed class ProtoMcRazorLightningFang : CustomCardModel, ICompanionCard,
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_razor_lightning_fang");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Lightning Fang"),
-        ("description", "[gold]Hexerei[/gold]. For {PowerAmount:diff()} turns, your Attacks apply [gold]Electro[/gold] and deal 3 additional damage."),
+        ("description", "For {PowerAmount:diff()} turns, your Attacks apply [gold]Electro[/gold] and deal 3 additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

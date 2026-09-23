@@ -151,13 +151,6 @@
    upgrade: {grow: +3},
    effects: [{op: grow_bombs, target: enemy, amount: 6}]}
 
-- {id: proto_ko_explosives_workshop, name: "Explosives Workshop", character: klee,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, your [gold]Bombs[/gold] grow by 1 more.",
-   upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_bomb_growth_up, amount: 1, target: self}]}
-
 - {id: proto_ko_careful_arrangement, name: "Careful Arrangement", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
@@ -280,13 +273,6 @@
    effects: [{op: set_off, target: all_enemies, aura: non_pyro},
              {op: damage, amount: 5, target: all_enemies}]}
 
-- {id: proto_ko_catalytic_converter, name: "Catalytic Converter", character: klee,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "Whenever one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], gain 1 additional [gold]Spark[/gold].",
-   upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_bomb_reaction_spark, amount: 1, target: self}]}
-
 # --- currencies and defence (packet sec.4) ---
 
 - {id: proto_ko_ammo_scavenging, name: "Ammo Scavenging", character: klee,
@@ -314,15 +300,6 @@
    description: "Gain 8 [gold]Block[/gold].",
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 8}]}
-
-- {id: proto_ko_sugar_rush, name: "Sugar Rush", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: rare, exhaust: true,
-   description: "Gain 2 [gold]Energy[/gold]. Draw 1 card. Exhaust.",
-   upgrade: {energy: +1},
-   effects: [{op: spend_spark, amount: 2},
-             {op: energy, amount: 2},
-             {op: draw, amount: 1}]}
 
 - {id: proto_ko_run_away, name: "Run Away!", character: klee,
    authored_by: [claude],
@@ -366,7 +343,7 @@
    effects: [{op: block_largest_bomb, cap: 10}]}
 
 - {id: proto_mc_barbara_front_row_seat, name: "Barbara — Front Row Seat", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill,
    personal_pool: [klee],
@@ -378,31 +355,30 @@
              {op: apply_aura, element: hydro, target: enemy},
              {op: apply_power, power: mc_front_row_seat, amount: 3, target: self}]}
 
-# the coven readers, PR: eb326-hexerei-readers. R244 sec.2: Klee's three
-# Hexerei readers, in her OWN pool.
-# Per-row reasoning: docs/notes/prototype-surface-provenance.md.
+# the coven readers (R244 sec.2), in her OWN pool; since R276 pick 2 they read
+# any Companion play. Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_ko_coven_errand, name: "Coven Errand", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    upgrade: {bomb_size: +2},
-   description: "Place a [gold]Bomb[/gold] 5. If you played a [gold]Hexerei[/gold] card this turn, place it on ALL enemies instead.",
+   description: "Place a [gold]Bomb[/gold] 5. If you played a [gold]Companion[/gold] card this turn, place it on ALL enemies instead.",
    effects: [{op: plant_bomb, target: enemy, size: 5,
-              wide_if: hexerei_played_this_turn}]}
+              wide_if: companion_played_this_turn}]}
 
 - {id: proto_ko_witches_circle, name: "Witches' Circle", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    upgrade: {power_amount: +2},
-   description: "Whenever you play a [gold]Hexerei[/gold] card, place a [gold]Bomb[/gold] 3 on a random enemy.",
+   description: "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] 3 on a random enemy.",
    effects: [{op: apply_power, power: ko_witches_circle, amount: 3, target: self}]}
 
 - {id: proto_ko_alices_introduction_magic, name: "Alice's Introduction Magic", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
    upgrade: {retain: true},
-   description: "All cards in your hand count as [gold]Hexerei[/gold] cards this turn.",
-   effects: [{op: hexerei_mark_hand}]}
+   description: "All cards in your hand count as [gold]Companion[/gold] cards this turn.",
+   effects: [{op: companion_mark_hand}]}
 
 # the pool pass, round 10 (2026-09-04): the arm's one energy-priced plain
 # detonator, beside Sizzle's reaction-keyed one. Why it exists:
@@ -431,13 +407,6 @@
 # THE POOL PASS, rounds 13 to 16 (2026-09-05, `EB-491`): ten rows, three
 # shelves and a bridge. Why each exists and what the rounds said:
 # docs/notes/prototype-surface-provenance.md.
-
-- {id: proto_ko_long_fuse, name: "Long Fuse", character: klee,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common, retain: true,
-   description: "[gold]Set off[/gold]. Deal 6 damage.",
-   upgrade: {damage: +3},
-   effects: [{op: set_off, target: enemy, damage: 6}]}
 
 - {id: proto_ko_all_of_my_treasures, name: "All of My Treasures! (proto)", character: klee,
    authored_by: [claude],
@@ -471,13 +440,6 @@
 
 # R271 sec.4 item 2: Fireworks Show is CUT and MERGED into Tinder Toss, which
 # now prints "Set off ALL enemies. Deal 3 damage to ALL enemies." at 1 Spark.
-
-- {id: proto_ko_kindling, name: "Kindling", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] on an enemy with an aura other than [gold]Pyro[/gold] grows by 4. If there is none, your largest [gold]Bomb[/gold] grows by {IfUpgraded:show:3|2}.",
-   upgrade: {grow: +2, grow_floor: +1},
-   effects: [{op: grow_bombs_off_aura, amount: 4, floor: 2}]}
 
 - {id: proto_ko_flash_point, name: "Flash Point", character: klee,
    authored_by: [claude],
@@ -561,6 +523,38 @@
              {op: apply_power, power: ko_blazing_delight, amount: 1,
               target: self}]}
 
+# R276 (`review/ruled/klee-review-2026-09-23.md` pick 1): R271 sec.7's Mines
+# batch and slice two built together. Numbers are starting values. Why each
+# exists: docs/notes/prototype-surface-provenance.md.
+
+- {id: proto_ko_hair_trigger, name: "Hair Trigger", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold].",
+   upgrade: {cost: -1},
+   effects: [{op: mine_bombs, target: enemy}]}
+
+- {id: proto_ko_explosive_frags, name: "Explosive Frags", character: klee,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever a [gold]Mine[/gold] goes off, apply 2 [gold]Vulnerable[/gold] to that enemy.",
+   upgrade: {power_amount: +1},
+   effects: [{op: apply_power, power: ko_mine_frags, amount: 2, target: self}]}
+
+- {id: proto_ko_where_did_i_put_it, name: "Where Did I Put It?", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Look at the top {Scry:diff()} cards of your draw pile. Put a [gold]Set off[/gold] card from them into your hand and the rest on the bottom.",
+   upgrade: {scry: 2},
+   effects: [{op: scry_take, amount: 4, filter: set_off}]}
+
+- {id: proto_ko_big_bounce, name: "Big Bounce", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Set off[/gold]. Deal 5 damage. Explosion damage past the enemy's HP is dealt to a random other enemy.",
+   upgrade: {damage: +3},
+   effects: [{op: set_off, target: enemy, damage: 5, overflow: bounce}]}
+
 # THE MONDSTADT COMPANION OVERHAUL. Under `C.COMPANION_OVERHAUL` these ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and
 # which 13 of the workshop's 34 are absent: docs/notes/prototype-surface-provenance.md.
@@ -606,7 +600,7 @@
              {op: apply_aura, element: hydro, target: enemy}]}
 
 - {id: proto_mc_albedo_solar_isotoma, name: "Albedo — Solar Isotoma (proto)", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: power,
    description: "At the end of your turn, if any enemy has an aura, deal 8 damage to that enemy and gain 4 [gold]Block[/gold].",
@@ -628,7 +622,7 @@
    effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 1, target: self}]}
 
 - {id: proto_mc_fischl_nightrider, name: "Fischl — Nightrider (proto)", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
    description: "Deal 7 damage. If [gold]Oz[/gold] is out, he deals 5 [gold]Electro[/gold] damage to a random enemy.",
@@ -637,14 +631,14 @@
               then: [{op: damage, amount: 5, target: random_enemy, applies_element: true}]}]}
 
 - {id: proto_mc_fischl_oz, name: "Fischl — Oz, at Your Side (proto)", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: power,
    description: "At the end of your turn, [gold]Oz[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mc_oz, amount: 1, target: self}]}
 
 - {id: proto_mc_sucrose_gust, name: "Sucrose — Wind Spirit Creation (proto)", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill,
    no_upgrade: "the row prints two numbers and the Prototype-stage rule may
@@ -657,14 +651,14 @@
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
 
 - {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis (proto)", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill, exhaust: true,
    description: "[gold]Swirl[/gold] ALL enemies.",
    effects: [{op: swirl, target: all_enemies}]}
 
 - {id: proto_mc_sucrose_catalyst_conversion, name: "Sucrose — Catalyst Conversion (proto)", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill, exhaust: true,
    description: "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
@@ -681,14 +675,14 @@
               else: [{op: block, amount: 10}]}]}
 
 - {id: proto_mc_nicole_revelation, name: "Nicole — Revelation, Uncreated Light", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: pyro,
    cost: 2, type: power,
    description: "At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold].",
    effects: [{op: apply_power, power: mc_revelation, amount: 1, target: self}]}
 
 - {id: proto_mc_mona_stellaris_phantasm, name: "Mona — Stellaris Phantasm", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: applier, element: hydro,
    cost: 2, type: skill, exhaust: true,
    description: "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
@@ -696,7 +690,7 @@
              {op: apply_power, power: mc_omen, amount: 2, target: self}]}
 
 - {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: skill, exhaust: true,
    description: "Deal 8 damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] ALL enemies.",
@@ -791,7 +785,7 @@
              {op: apply_power, power: mc_favonian_favor, amount: 3, target: self}]}
 
 - {id: proto_mc_durin_binary_form, name: "Durin — Binary Form", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
    description: "Deal 10 damage to ALL enemies, then choose one for the combat. [gold]White[/gold]: enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: your [gold]Pyro[/gold] Attacks that react deal 8 additional damage.",
@@ -803,7 +797,7 @@
                effects: [{op: apply_power, power: mc_binary_dark, amount: 8, target: self}]}]}]}
 
 - {id: proto_mc_razor_claw_and_thunder, name: "Razor — Claw and Thunder", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
    description: "Deal 8 damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold].",
@@ -812,14 +806,14 @@
               then: [{op: energy, amount: 1}]}]}
 
 - {id: proto_mc_razor_lightning_fang, name: "Razor — Lightning Fang", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: skill, exhaust: true,
    description: "For 2 turns, your Attacks apply [gold]Electro[/gold] and deal 3 additional damage.",
    effects: [{op: apply_power, power: mc_lightning_fang, amount: 2, target: self}]}
 
 - {id: proto_mc_varka_sturm_und_drang, name: "Varka — Sturm und Drang", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: power,
    description: "Whenever a [gold]Swirl[/gold] happens, your next Attack deals 6 additional damage of the swirled element.",
@@ -853,7 +847,7 @@
 # `EB-778` gave each its own art. In NO pool -- docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_mc_diona_shaken_not_purred, name: "Diona — Shaken, Not Purred", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill,
    personal_pool: [klee],
@@ -865,7 +859,7 @@
              {op: apply_power, power: mc_shaken_not_purred, amount: 5, target: self}]}
 
 - {id: proto_mc_noelle_i_got_your_back, name: "Noelle — I Got Your Back", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
    personal_pool: [klee],
@@ -877,7 +871,7 @@
 # The marker's stack is a FLAG, so this row states its own upgrade rather than
 # letting the Prototype-stage rule move an amount nothing reads.
 - {id: proto_mc_kaeya_cold_blooded_strike, name: "Kaeya — Cold-Blooded Strike", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
    personal_pool: [klee],
@@ -888,7 +882,7 @@
              {op: apply_power, power: mc_cold_blooded, amount: 1, target: self}]}
 
 - {id: proto_mc_jean_lions_fang, name: "Jean — Lion's Fang, Fair Protector", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: anemo,
    cost: 2, type: power,
    personal_pool: [klee],
@@ -1547,7 +1541,7 @@
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_mc_prune_hexhunter_chime, name: "Prune — Ring-A-Ding-Ding! Hexhunter Chime", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack, personal_pool: klee,
    upgrade: {damage: +3},
@@ -1557,7 +1551,7 @@
              {op: apply_power, power: cvn_hexhunter_chime, amount: 1, target: self}]}
 
 - {id: proto_mc_sayu_silencers_secret, name: "Sayu — Yoohoo Art: Silencer's Secret", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 0, type: skill, personal_pool: klee,
    description: "[gold]Swirl[/gold] a random enemy. Gain 4 [gold]Block[/gold]. If a [gold]Bomb[/gold] went off this turn, draw 1 card.",
@@ -1567,14 +1561,14 @@
               then: [{op: draw, amount: 1}]}]}
 
 - {id: proto_mc_qiqi_herald_of_frost, name: "Qiqi — Herald of Frost", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: liyue, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: skill, exhaust: true, personal_pool: klee,
    description: "For 3 turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: cvn_herald_of_frost, amount: 3, target: self}]}
 
 - {id: proto_mc_yaoyao_yuegui_throwing_mode, name: "Yaoyao — Yuegui: Throwing Mode", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: liyue, star: 4, rarity: uncommon, role_c: trigger,
    cost: 1, type: skill, exhaust: true, personal_pool: klee,
    description: "For 3 turns, at the end of your turn place a [gold]Bomb[/gold] 3 on a random enemy.",
@@ -1592,12 +1586,12 @@
    plan: [{op: play_copy_of_companion}],
    upgrade: {cost: -1}}
 
-# stand-ins (Hexerei family), PR: hexerei-standins
-# The FAMILY half of the seam, Hexerei-tagged like the Universal each replaces.
+# stand-ins (the Hexerei family), PR: hexerei-standins
+# The FAMILY half of the seam. R276 retired the printed Hexerei mark.
 # R236 sec.3; reasoning in docs/notes/prototype-surface-provenance.md.
 
 - {id: proto_mc_albedo_tectonic_tide, name: "Albedo — Tectonic Tide", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: power,
    personal_pool: [klee],
@@ -1606,7 +1600,7 @@
    effects: [{op: apply_power, power: mc_tectonic_tide, amount: 4, target: self}]}
 
 - {id: proto_mc_fischl_sinful_hex, name: "Fischl — Undone Be Thy Sinful Hex", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: trigger, element: electro,
    cost: 1, type: attack,
    personal_pool: [klee],
@@ -1616,7 +1610,7 @@
              {op: apply_power, power: mc_sinful_hex, amount: 5, target: self}]}
 
 - {id: proto_mc_sucrose_mollis_favonius, name: "Sucrose — Mollis Favonius", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill,
    personal_pool: [klee],
@@ -1627,12 +1621,12 @@
              {op: apply_power, power: mc_mollis_favonius, amount: 4, target: self}]}
 
 - {id: proto_mc_nicole_ladder_of_ascent, name: "Nicole — Ladder of Divine Ascent", character: klee,
-   authored_by: [claude], hexerei: true,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
    personal_pool: [klee],
    replaces: proto_mc_nicole_revelation,
-   description: "Whenever you play a [gold]Hexerei[/gold] card, deal 6 damage of that card's element to a random enemy.",
+   description: "Whenever you play a [gold]Companion[/gold] card, deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
 
 # FURINA, THE STAGE -- BATCH ONE (`EB-723`, R269 2026-09-08). The seventeen

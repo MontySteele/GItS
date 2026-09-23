@@ -400,10 +400,14 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "damage_set_off_total",
                   "multiply_set_off", "draw_per_set_off",
-                  # R244's Hexerei reader (Alice's Introduction Magic). The one
-                  # arm verb that touches no Bomb: it widens the family mark
-                  # for a turn, and the cards that READ the mark are Klee's.
-                  "hexerei_mark_hand",
+                  # R244's reader (Alice's Introduction Magic), renamed at R276
+                  # when the Hexerei mark became "Companion": it makes every
+                  # card in hand count as a Companion card for a turn, and the
+                  # cards that READ that are Klee's.
+                  "companion_mark_hand",
+                  # R276's Hair Trigger: the target's Bombs become Mines, one
+                  # call into `ProtoBombPower.MineAllOn`.
+                  "mine_bombs",
                   # R252's defence-shelf verb (Careful Now). It READS the pile
                   # -- `ProtoBombPower.BlockForLargestBomb`, off the same
                   # `LargestPlacedBy` the Splash reads since R250 -- and spends
@@ -714,13 +718,10 @@ ARM_KEYWORDS = (
                "ArmKeywordTips.ForSetOff"),
     ArmKeyword("Spark", ("Spark", "Sparks"), "ArmKeywordTips.ForSpark"),
     ArmKeyword("Mine", ("Mine", "Mines"), "ArmKeywordTips.ForMine"),
-    # Klee's FIFTH, R244 (`review/ruled/klee-hexerei-readers-2026-09-02.md`
-    # sec.4). `Hexerei` is a one-word family mark printed on companion rows
-    # and paid for by three cards in Klee's own pool -- the word a player meets
-    # on a Universal, on a coven Personal and on the readers, with no rule
-    # anywhere on screen until now. NO PLURAL: the word is a family name, and
-    # every face that prints it prints "a Hexerei card".
-    ArmKeyword("Hexerei", ("Hexerei",), "ArmKeywordTips.ForHexerei"),
+    # Klee's FIFTH was `Hexerei` (R244), and R276 pick 2 retired it: the
+    # Spark and the three readers read any Companion play now, and
+    # `Companion` is a word every face already golds, so the row and its tip
+    # left together.
     # Klee's SIXTH, `EB-372`. `Grounded` is a Power of hers, and Kaeya's
     # Cold-Blooded Strike is written against it by name -- so a player who
     # drafted Kaeya without ever drafting Grounded met the word with nothing
@@ -1097,7 +1098,7 @@ def arm_keyword_tip_calls(description: str,
 #: of nothing but these (plus its own price) does nothing whatever on a bare
 #: board; a row with anything else still does that other thing.
 BOMB_ONLY_OPS = frozenset({"set_off", "merge_bombs", "grow_bombs",
-                           "multiply_set_off"})
+                           "multiply_set_off", "mine_bombs"})
 #: A PRICE IS NOT A LINE. `spend_spark` is what the card costs, not what it
 #: does, so a Spark-priced Set off with nothing else is still a blank -- and
 #: the fact that it charged the Spark anyway is the whole of the r21 finding.
@@ -1110,7 +1111,7 @@ def reads_the_field(card: dict) -> bool:
     Through `iter_effects`, the repo's one walk, so a `set_off` inside a
     conditional or a mode body counts exactly as a top-level one does.
     """
-    return any(fx.get("op") in ("set_off", "merge_bombs")
+    return any(fx.get("op") in ("set_off", "merge_bombs", "mine_bombs")
                for fx in iter_effects(card.get("effects") or []))
 
 
@@ -1334,7 +1335,9 @@ ADD_CARD_FIELDS = {
 }
 GUEST_STAR_FIELDS = {"op", "rarity", "amount", "to", "cost_override"}
 ENERGY_FIELDS = {"op", "amount"}
-SCRY_FIELDS = {"op", "amount"}
+#: `filter` is R276's (Where Did I Put It?) and `scry_take`'s only: `set_off`
+#: offers only the Set off cards among the cards seen.
+SCRY_FIELDS = {"op", "amount", "filter"}
 # exhaust_from: dodge_roll's shape only -- a random Status from hand. The
 # filterless form (kit-exempt any-card) blocks until a card needs it.
 EXHAUST_FROM_FIELDS = {"op", "zone", "filter", "amount",
@@ -1403,12 +1406,12 @@ PREDICATES_CS = {
     "bomb_reacted_this_turn":
         "KleeOverhaulLedger.For(Owner.Creature).ReactedThisTurn > 0",
     # R244's third, off the same ledger and for the same reason: Coven Errand
-    # asks "did a witch go first this turn?", and the count is written at the
-    # ONE site a Hexerei play is noticed (`CompanionHexerei.NoteCardPlayed`),
-    # so the card and Witches' Circle beside it cannot disagree about what a
-    # Hexerei card is.
-    "hexerei_played_this_turn":
-        "KleeOverhaulLedger.For(Owner.Creature).HexereiPlayedThisTurn > 0",
+    # asks "did a Companion go first this turn?" (R276 pick 2; it was Hexerei),
+    # and the count is written at the ONE site such a play is noticed
+    # (`CompanionHexerei.NoteCardPlayed`), so the card and Witches' Circle
+    # beside it cannot disagree about what counts.
+    "companion_played_this_turn":
+        "KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0",
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). tier0's own
     # `target_has_aura` predicate, which had no C# read until a companion row
     # printed it (Rosaria's Ravaging Confession).
@@ -1472,8 +1475,8 @@ PREDICATE_TEXT = {
     "bomb_reacted_this_turn":
         "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
         "this turn",
-    "hexerei_played_this_turn":
-        "If you played a [gold]Hexerei[/gold] card this turn",
+    "companion_played_this_turn":
+        "If you played a [gold]Companion[/gold] card this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
     "plan_carried_out_this_turn":
@@ -2032,7 +2035,9 @@ UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
 # field encodes a mechanic; block loudly, never approximate).
 DETONATE_FIELDS = {"op", "target", "bonus"}
 # The Klee overhaul's own, same discipline (QUARANTINED, C.KLEE_OVERHAUL).
-SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura"}
+#: `overflow` is R276's (Big Bounce): `bounce` sends the explosions' damage
+#: past the target's HP to a random other enemy as one plain Pyro hit.
+SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura", "overflow"}
 #: `wide_if` is R244's (Coven Errand): the printed target WIDENS to ALL enemies
 #: when the named predicate holds. A field on the op rather than a
 #: `conditional` around two `plant_bomb`s, because the card prints ONE Bomb
@@ -2420,8 +2425,14 @@ APPLY_POWERS = {
     # sets this off, which is what makes it the bridge card rather than a
     # fourth loop.
     "ko_witches_circle": ("WitchesCirclePower", None,
-        "Whenever you play a [gold]Hexerei[/gold] card, place a {X} "
+        "Whenever you play a [gold]Companion[/gold] card, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
+    # R276's Mine signpost (Explosive Frags). The stack IS the Vulnerable, so
+    # the upgrade moves it; read at the one site a charge goes off
+    # (`ProtoBombPower.Explode`), after the hit.
+    "ko_mine_frags": ("MineFragsPower", None,
+        "Whenever a [gold]Mine[/gold] goes off, apply {X} "
+        "[gold]Vulnerable[/gold] to that enemy."),
     # THE POOL PASS's Rare (`EB-491`), the brief's sec.5.3 rule-breaker and the
     # one row slice one deferred: the aura an explosion CONSUMES is handed back
     # before the Attack behind it lands, so the Attack reacts too. NO {X} in
@@ -2485,7 +2496,7 @@ APPLY_POWERS = {
         "This turn, [gold]Elemental Reactions[/gold] deal {X} additional "
         "damage."),
     "mc_ladder_of_ascent": ("LadderOfAscentPower", None,
-        "Whenever you play a [gold]Hexerei[/gold] card, deal {X} damage of "
+        "Whenever you play a [gold]Companion[/gold] card, deal {X} damage of "
         "that card's element to a random enemy."),
     # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
@@ -3276,6 +3287,8 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # these would otherwise emit `TargetType.Self` and throw on
               # every play.
               "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+              # R276's Hair Trigger: "Your Bombs on this enemy".
+              "mine_bombs",
               # The pool pass's one aimed verb (`EB-491`, All of My
               # Treasures!): it READS the board for the size and PLACES on the
               # enemy the player picked, so it dereferences `cardPlay.Target`
@@ -3376,18 +3389,6 @@ CARD_FIELDS = {
     # without this entry the first card ruled Ethereal from print would BLOCK
     # with "card field(s) ['ethereal'] not understood".
     "ethereal",
-    # `EB-491` (Long Fuse), and the A9 / Track-C.1 story a fourth time -- with
-    # the difference that this keyword rail did not exist yet. The card's
-    # ENERGY COST RISES by this much for every turn it stays in hand, which is
-    # the base game's own `CardEnergyCost.AddUntilPlayed` modifier (it
-    # accumulates, it survives the turn boundary, it is cleared when the card
-    # is played and it is combat-scoped). A PROPERTY OF THE CARD and not an
-    # effect, because nothing is resolved when the card is played: it is what
-    # the card costs while it waits. The emitted class declares
-    # `IRisingHandCostCard` and the arm's one standing listener rolls the hand
-    # at end of turn. Sim twin: `Card.rising_cost`, rolled by
-    # `klee_overhaul.roll_rising_costs`.
-    "rising_cost",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -3431,21 +3432,12 @@ CARD_FIELDS = {
     # card's face with it. See `build_description`; the no-shipped-carrier
     # rule is pinned in tier0/tests/test_prototype_surface.py.
     "description",
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED), and it is READ NOW --
-    # the workshop's sec.1 pick 2 was "Hexerei is one word on a Universal. It
-    # does nothing by itself. Klee's own readers and any future Hexerei
-    # character's carry the payoff", and R236 sec.3 authored the first of those
-    # readers (Nicole's Ladder of Divine Ascent, "whenever you play a Hexerei
-    # card"). So the mark is no longer inert: a row carrying it emits the
-    # `IHexereiCard` marker, which is how THIS engine answers a question the
-    # sim answers with `Card.hexerei`. By interface rather than by a bool
-    # property or a list of ids, for `CompanionStandIns`' reason -- the
-    # compiler owns the correspondence, and a deleted row takes its class with
-    # it instead of leaving a string behind.
-    "hexerei",
+    # `hexerei` (the Mondstadt workshop's family mark) LEFT at R276 pick 2:
+    # every reader asks "is it a Companion card" now, so a row carrying the
+    # key would be declaring a mark nothing reads, and it is refused.
     # THE COMPANION STAND-IN SEAM (QUARANTINED), and the two halves differ.
     #
-    # `replaces` is INERT here, like `register` and `hexerei` above: which
+    # `replaces` is INERT here, like `register` above: which
     # Universal a row stands in for is an OFFER rule, carried out at each
     # engine's hand-off (`KleeMod.Powers.CompanionStandIns`,
     # `tier0.engine.companion_standins`), and there is nothing on the card
@@ -3500,26 +3492,6 @@ def card_level_reason(
         if not card.get("plan"):
             return ("plan_dusk on a row with no `plan:` line -- Dusk says "
                     "WHEN a Plan is carried out, so there has to be one")
-    # `EB-491`. THE RISING HAND COST IS QUARANTINED, AND IT ONLY MEANS
-    # ANYTHING ON A CARD THAT STAYS. `KleeOverhaulRisingCost` is Compile
-    # Remove'd out of a release build, so a shipped row naming it would emit an
-    # interface that does not exist there; and a card without Retain is
-    # discarded at the end of the turn it was drawn, so its fuse could never
-    # burn -- the row would print a rule that cannot fire, which is the
-    # face-that-lies defect one field over.
-    rising = card.get("rising_cost")
-    if rising is not None:
-        if not isinstance(rising, int) or isinstance(rising, bool) \
-                or rising <= 0:
-            return "rising_cost must be a positive literal int"
-        if not str(card["id"]).startswith("proto_"):
-            return ("`rising_cost:` is the KLEE_OVERHAUL arm's rule "
-                    "(KleeOverhaulRisingCost, Compile Remove'd out of a "
-                    "release build) -- prototype rows only")
-        if not card.get("retain"):
-            return ("`rising_cost:` needs `retain: true` -- a card discarded "
-                    "at end of turn can never stay in your hand, so the fuse "
-                    "would print a rule that cannot fire")
     # `EB-732` (Blast Shield). `return_to_hand` IS A FACT ABOUT THE WHOLE PLAY
     # and not a line in the body: the C# spells it as a
     # `GetResultLocationForCardPlay` override, which the game asks once and
@@ -3888,6 +3860,12 @@ def blocked_reason(
                     return f"set_off {key} must be a positive literal int"
             if eff.get("aura") not in (None, "non_pyro"):
                 return f"set_off aura filter '{eff.get('aura')}'"
+            if eff.get("overflow") not in (None, "bounce"):
+                return f"set_off overflow '{eff.get('overflow')}'"
+            if eff.get("overflow") and eff.get("target") != "enemy":
+                # Big Bounce's "the enemy's HP" is ONE enemy's: the aimed
+                # spelling is the only one the sentence is true of.
+                return "set_off overflow is the aimed spelling only"
             if eff.get("times", 1) > 1 and eff.get("target") != "random_enemy":
                 # `times` is a re-ROLL, not a repeat: Tinder Toss hits two
                 # random enemies. On an aimed or all-enemies Set off it would
@@ -3938,11 +3916,19 @@ def blocked_reason(
             growth = eff.get("growth", 0)
             if not isinstance(growth, int) or growth < 0:
                 return "merge_bombs growth must be a literal int >= 0"
+        if op == "mine_bombs":
+            # R276's Hair Trigger: every Bomb on the aimed enemy becomes a
+            # Mine at its own size. The aimed spelling is the only one.
+            unknown = set(eff) - {"op", "target"}
+            if unknown:
+                return f"mine_bombs field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return f"mine_bombs target '{eff.get('target')}'"
         if op in {"remove_bomb_for_block", "draw_per_set_off",
                   # R244's Alice's Introduction Magic: the window is a rule and
                   # the hand is whatever the hand is, so there is nothing for
                   # the row to say.
-                  "hexerei_mark_hand"}:
+                  "companion_mark_hand"}:
             # No fields at all: each is one whole printed clause, and any
             # number they might carry is a rule's, not a card's.
             unknown = set(eff) - {"op"}
@@ -4367,6 +4353,9 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if not isinstance(eff.get("amount"), int):
                 return f"{op} amount must be a literal int"
+            if eff.get("filter") is not None and (
+                    op != "scry_take" or eff["filter"] != "set_off"):
+                return f"{op} filter '{eff.get('filter')}'"
         if op == "exhaust_from":
             unknown = set(eff) - EXHAUST_FROM_FIELDS
             if unknown:
@@ -9187,7 +9176,16 @@ def build_body(
                 else str(int(eff.get("damage", 0))))
             times = int(eff.get("times", 1))
             aura = "true" if eff.get("aura") == "non_pyro" else "false"
-            if eff["target"] == "enemy":
+            if eff["target"] == "enemy" and eff.get("overflow") == "bounce":
+                # R276 (Big Bounce). The same aimed Set off with the overflow
+                # tallied and bounced; one call, so the tally and the bounce
+                # cannot be separated by a card that forgets one.
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.SetOffAimedBouncing("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                    f"cardPlay, {damage});")
+            elif eff["target"] == "enemy":
                 _target_guard(lines, ctx)
                 lines.append(
                     "await ProtoBombPower.SetOffAimed("
@@ -9255,6 +9253,13 @@ def build_body(
             lines.append(
                 "ProtoBombPower.GrowLargestPerSpark(Owner.Creature, "
                 f"{grow_expr(card, eff)}, sparksSpent);")
+
+        elif op == "mine_bombs":
+            # R276 (Hair Trigger). Pure and synchronous, `GrowOn`'s shape: the
+            # charges change a flag and nothing is dealt.
+            _target_guard(lines, ctx)
+            lines.append(
+                "ProtoBombPower.MineAllOn(cardPlay.Target, Owner.Creature);")
 
         elif op == "merge_bombs":
             _target_guard(lines, ctx)
@@ -9354,11 +9359,11 @@ def build_body(
                 "await KleeOverhaulLedger.ReturnLastSetOff("
                 "Owner);")
 
-        elif op == "hexerei_mark_hand":
-            # R244 (Alice's Introduction Magic). ONE awaited call into
-            # `CompanionHexerei`, which is where the family mark lives -- the
-            # widening is the mark's rule and not this card's, so the two arms
-            # that read the family read one definition of it.
+        elif op == "companion_mark_hand":
+            # R244 (Alice's Introduction Magic), R276 wording. ONE awaited call
+            # into `CompanionHexerei`, which is where "counts as a Companion
+            # card" is answered -- the widening is that rule's and not this
+            # card's, so every reader reads one definition of it.
             lines.append(
                 "await CompanionHexerei.MarkHand("
                 "choiceContext, Owner);")
@@ -9910,13 +9915,18 @@ def build_body(
             # picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
+            # R276 (Where Did I Put It?). A filter narrows what may be TAKEN
+            # and nothing else: every card seen still goes to the bottom if it
+            # is not taken, so a look with no Set off card in it buries all.
+            take_filter = (", setOffOnly: true"
+                           if eff.get("filter") == "set_off" else "")
             lines.append(
                 "{" + "\n" +
                 f"            var top = CardPile.Get(PileType.Draw, Owner)?.Cards.Take({n}).ToList();" + "\n" +
                 "            if (top != null && top.Count > 0)" + "\n" +
                 "            {" + "\n" +
                 "                var takePick = await ScryTake.Choose(" + "\n" +
-                "                    choiceContext, top, Owner);" + "\n" +
+                f"                    choiceContext, top, Owner{take_filter});" + "\n" +
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
@@ -10364,8 +10374,10 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             times = int(eff.get("times", 1))
             aura = "true" if eff.get("aura") == "non_pyro" else "false"
             if eff["target"] == "enemy":
+                method = ("SetOffAimedBouncing"
+                          if eff.get("overflow") == "bounce" else "SetOffAimed")
                 body.append(
-                    "await ProtoBombPower.SetOffAimed(choiceContext, "
+                    f"await ProtoBombPower.{method}(choiceContext, "
                     f"cardPlay.Target, Owner.Creature, this, cardPlay, {damage});")
             elif eff["target"] == "all_enemies":
                 body.append(
@@ -11794,6 +11806,10 @@ def build_description(card: dict, *,
             n = ("{Scry:diff()}" if scry_upgrade(card)
                  else str(int(eff["amount"])))
             parts.append(
+                f"Look at the top {n} cards of your draw pile. Put a "
+                "[gold]Set off[/gold] card from them into your hand and the "
+                "rest on the bottom."
+                if eff.get("filter") == "set_off" else
                 f"Look at the top {n} cards of your draw pile; put one into "
                 "your hand and the rest on the bottom.")
 
@@ -12137,69 +12153,9 @@ def _face_riders(card: dict, text: str) -> str:
     defect the next rendered row inherits.
 
     `EB-293`. Both are live defects from [USER]'s own play of the arm.
-    `EB-392` made it three for the same reason.
+    (`EB-392` made it three with the Hexerei family tag; R276 retired the tag.)
     """
-    return _family_tags(
-        card, _plan_only_line(card, _dedupe_printed_exhaust(card, text)))
-
-
-def _family_tags(card: dict, text: str) -> str:
-    """`EB-392`: a Companion says what FAMILY it is in, on its own face -- the
-    Hexerei mark, and since `EB-642` that is the whole of it.
-
-    THE WORD WAS ON EIGHTEEN ROWS AND PRINTED ON FOUR. `hexerei: true` emitted
-    `IHexereiCard` and nothing a player could see, so the family mark was
-    readable only from the cards that ASK about it -- and those ask about a set
-    whose members never identified themselves. The r12 run-2 seat held Witches'
-    Circle for four fights and called it dead: "Witches' Circle was
-    unplayable-in-practice: I owned no Hexerei card and the reminder text does
-    not say which of my cards are Hexerei." It learned the answer by counting
-    Bombs on an enemy badge, and then learned there were THREE words:
-    "there is apparently a distinction between `Companion`, `Hexerei`, and
-    `Klee's own Companion`, and none of the three cards involved prints which
-    one it is."
-
-    DERIVED FROM THE ROW, never remembered. The tag is the sheet's own
-    `hexerei` key, so a row that joins the family carries the mark because it
-    joined -- and the keyword tip comes with it for free, because
-    `arm_keyword_tip_calls` reads the golded tokens out of THIS text
-    (`EB-272`'s attach rule). One field, one printed word, one definition.
-
-    COMPANIONS ONLY, which is the row's own scope. The three READERS are Klee's
-    own cards: Coven Errand and Witches' Circle carry no `hexerei` key at all,
-    and Alice's Introduction Magic carries it while printing the word in its
-    body already -- so the guard below skips a face that has said it, and a
-    reader is never mistaken for a member.
-
-    IT LEADS, like `_plan_only_line`. What a card IS is read before what it
-    does, and a trailing tag reads as a clause of the last effect sentence.
-
-    `EB-554` ADDED A SECOND MARK AND `EB-642` TOOK IT BACK OFF. The ownership
-    lead ("Klee's own", alone or as the adjective in "Klee's own Hexerei") was
-    the r20 seat's missing discriminator: Albedo+ and Razor were played in one
-    turn, both printing Hexerei, and Spark stayed at 1. It was the right answer
-    to a rule that has since been retired. R265 pick 1 ruled the RULE instead
-    -- every Hexerei card gives Klee a Spark, Universals included -- on
-    [USER]'s own act-1 read: "the 'Klee's own' text on the Personals is not
-    needed". With one payer set there is one mark, and the printed word is
-    necessary and sufficient: a face prints `Hexerei` if and only if playing it
-    pays. The ownership half is not a shorter sentence, it is a distinction the
-    game no longer draws.
-
-    DERIVED FROM THE ROW, from the same field the ENGINES ask: `hexerei` is
-    exactly what `KleeCompanionSpark.PaysKleesSpark` and
-    `effects.klee_companion_spark` test under the arm, and the same key that
-    decides whether `ArmKeywordTips.ForCovenSpark` rides the face. So the mark
-    and the payment cannot disagree, and a row joining the family tomorrow
-    carries both the day its row exists.
-    """
-    if not is_companion(card):
-        return text
-    if not card.get("hexerei") or "[gold]Hexerei[/gold]" in text:
-        # ...the guard being the readers: Alice's Introduction Magic carries
-        # the key and prints the word in its body already.
-        return text
-    return ("[gold]Hexerei[/gold]. " + text).strip()
+    return _plan_only_line(card, _dedupe_printed_exhaust(card, text))
 
 
 def _dedupe_printed_exhaust(card: dict, text: str) -> str:
@@ -13038,15 +12994,16 @@ def emit(
     # same figure `WillReplace` is asked with.
     if salon_deploy_card(card):
         interfaces += ", ISalonDeployCard"
-    # QUARANTINED (the Mondstadt companion overhaul, R236 sec.3). Sheet
-    # `hexerei` -> IHexereiCard, a MARKER with no members: the family mark
-    # decides one rule, Nicole's Ladder of Divine Ascent, and that power asks
-    # "is the played card in the family" and nothing else. The interface is
-    # declared in Powers/Prototype, which a release build removes -- and every
-    # row that carries the mark is a `proto_` row, compiled under the same
-    # switch, so a shipped card can never implement it.
-    if card.get("hexerei"):
-        interfaces += ", IHexereiCard"
+    # QUARANTINED (R276, Where Did I Put It?). A row that prints a Set off
+    # declares it on the class: `ISetOffCard` is a MARKER with no members, and
+    # the one question it answers is "is this a Set off card", which the look
+    # at the top of the draw pile asks of every card it sees. DERIVED from the
+    # row's own `set_off` op, anywhere in its body, so a Set off row carries
+    # the mark the day it exists. Declared in Powers/Prototype, which a release
+    # build removes; only `proto_` rows print the verb.
+    if any(fx.get("op") == "set_off"
+           for fx in iter_effects(card.get("effects") or [])):
+        interfaces += ", ISetOffCard"
     # Sheet `skill_tag` -> ISkillTagCard: worth BURST_PER_SKILL_TAG burst
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
@@ -13119,14 +13076,6 @@ def emit(
     if any(eff.get("op") == "spend_charge" for eff in card["effects"]):
         interfaces += ", IMeterPricedCard"
 
-    # `EB-491` (Long Fuse), and the same rule a third time, on a cost that is
-    # not a meter: a row printing `rising_cost:` declares the number on
-    # `IRisingHandCostCard`, and the arm's one standing turn-end listener reads
-    # it back rather than carrying a literal per card. It is on the CARD
-    # because the fuse is the card's: two Long Fuses in one hand burn
-    # separately, and a card that is not in hand is not burning at all.
-    if int(card.get("rising_cost", 0)):
-        interfaces += ", IRisingHandCostCard"
 
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
@@ -13841,8 +13790,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # emitted on her profile, and `ArmKeywordTips.ForCovenSpark` asks
         # `KleesRuleBelongsHere` a second time at runtime -- which it now must,
         # because a Hexerei Universal is drafted by every character (`EB-504`).
-        if (is_companion(card) and profile.character_id == "klee"
-                and card.get("hexerei")):
+        #
+        # R276 pick 2 WIDENED IT TO EVERY COMPANION, with the rule: any
+        # Companion card gives Klee the Spark now, so every companion face on
+        # her profile carries the sentence.
+        if is_companion(card) and profile.character_id == "klee":
             tips_expr = (
                 "ArmKeywordTips.ForCovenSpark("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
@@ -14079,24 +14031,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # unplayable, exactly as a card below a top-level price is -- the two
     # gates above, one nesting level down. Sim twin: `combat.modal_refusal`
     # reached through `card_playable`.
-    # `EB-491` (Long Fuse): the row's own fuse length, declared where the arm's
-    # turn-end listener reads it. A PROPERTY and not a var, because the face
-    # states the rule in words ("Costs 1 more each turn it stays in your hand")
-    # and the number the player watches move is the COST BADGE's, which the
-    # base game's own `AddUntilPlayed` modifier already keeps.
-    rising = int(card.get("rising_cost", 0))
-    rising_cost_member = (
-        "\n\n    // `EB-491`, the rising hand cost: this card"
-        " costs this much more\n"
-        "    // for every turn it stays in hand, applied by\n"
-        "    // `KleeOverhaulRisingCost.RollHand` through the base"
-        " game's own\n"
-        "    // `CardEnergyCost.AddUntilPlayed` -- which accumulates,"
-        " survives the\n"
-        "    // turn boundary, clears when the card is played and is"
-        " combat-scoped.\n"
-        f"    public int HandCostRise => {rising};"
-        if rising else "")
 
     # `EB-732` (Blast Shield): "Return this card to your hand."
     #
@@ -14281,7 +14215,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{rising_cost_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -1189,6 +1189,17 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
 
     /// <summary>Add one charge. PURE -- the APPLY that creates the pile is the
     /// caller's.</summary>
+    /// <summary>Every charge here becomes a Mine (R276, Hair Trigger).</summary>
+    public void MakeAllMines()
+    {
+        if (_charges.Count == 0) return;
+        for (var i = 0; i < _charges.Count; i++)
+        {
+            _charges[i] = _charges[i] with { IsMine = true };
+        }
+        SyncDisplay();
+    }
+
     public void AddCharge(ProtoCharge charge)
     {
         _charges.Add(charge);
@@ -1327,6 +1338,54 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// an enemy whose aura an earlier explosion in the same play consumed is
     /// no longer eligible -- which is what "each enemy that HAS" says.
     /// </summary>
+    /// <summary>
+    /// R276, BIG BOUNCE: the aimed Set off, with the explosions' damage past
+    /// the target's HP summed and dealt as ONE plain Pyro hit to a random
+    /// OTHER living enemy.
+    ///
+    /// THE BOUNCE IS NOT A SET OFF AND DOES NOT BOUNCE AGAIN: it is one
+    /// <see cref="ElementalHit.Deal"/> with neither Klee's terms nor the
+    /// destination's Vulnerable (both were settled at the source, where the
+    /// overflow was measured). A Bomb that jumps off the dead target is rule
+    /// 3's and untouched; the two do not overlap, because a jump moves a charge
+    /// that did NOT go off. Sim twin: <c>klee_overhaul.bounce_overflow</c>.
+    /// </summary>
+    public static async Task SetOffAimedBouncing(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel cardSource, CardPlay cardPlay, decimal damage)
+    {
+        KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        if (target == null) return;
+        var overflow = new List<int>();
+        await SetOff(choiceContext, target, applier, cardSource, overflow);
+        await BounceOverflow(choiceContext, target, applier, overflow.Sum());
+        await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
+    }
+
+    /// <summary>Big Bounce's second half: <paramref name="amount"/> as one
+    /// plain Pyro hit on a random living enemy other than
+    /// <paramref name="from"/>. Nothing to do with no overflow or no other
+    /// enemy.</summary>
+    public static async Task BounceOverflow(
+        PlayerChoiceContext choiceContext, Creature from, Creature applier,
+        int amount)
+    {
+        if (amount <= 0) return;
+        var combat = applier.CombatState;
+        if (combat == null) return;
+        var candidates = combat.HittableEnemies
+            .Where(e => e != from && !e.IsDead).ToList();
+        if (candidates.Count == 0) return;
+        var dest = combat.RunState.Rng.CombatTargets.NextItem(candidates);
+        if (dest == null) return;
+        KleeOverhaulLedger.For(applier).NoteLine(
+            amount + " damage bounced to " + NameOf(dest));
+        await ElementalHit.Deal(choiceContext, dest, Element.Pyro, amount,
+                                applier, ignoreBlock: false, powered: false,
+                                targetMods: false);
+        await SweepJumps(choiceContext, combat);
+    }
+
     public static async Task SetOffAll(
         PlayerChoiceContext choiceContext, Creature applier,
         CardModel cardSource, CardPlay cardPlay, decimal damage,
@@ -1484,7 +1543,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static async Task<int> SetOff(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
-        CardModel? cardSource)
+        CardModel? cardSource, List<int>? overflow = null)
     {
         if (target == null) return 0;
 
@@ -1520,7 +1579,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
                 break;
             }
             await Explode(choiceContext, target, taken[i], applier, cardSource,
-                          multiplier);
+                          multiplier, overflow);
             exploded++;
         }
 
@@ -1542,7 +1601,8 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private static async Task Explode(
         PlayerChoiceContext choiceContext, Creature target, ProtoCharge charge,
-        Creature applier, CardModel? cardSource, int multiplier)
+        Creature applier, CardModel? cardSource, int multiplier,
+        List<int>? overflow = null)
     {
         var ledger = KleeOverhaulLedger.For(applier);
         var size = charge.Size * multiplier;
@@ -1580,9 +1640,20 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // that is the target's: the aura, the reaction, the Vulnerable and the
         // per-hit cap. It is the ONE caller of this entry point; the echo two
         // files over is a card's own damage and keeps hers.
+        // R276 (Big Bounce): what stood between this hit and the kill, read
+        // BEFORE the hit spends it. Only a caller that passes `overflow` reads
+        // it, and every other Set off is byte-identical.
+        var standingBefore = target.CurrentHp + target.Block;
         var dealt = await ElementalHit.DealWithoutDealerMods(
             choiceContext, target, element, size, applier);
         var reacted = ReactionEffects.TotalResolved > reactionsBefore;
+        // THE OVERFLOW IS THE HIT PAST THE KILL, after the target's own terms
+        // (Vulnerable is already in `dealt`), so the bounce carries it without
+        // applying them a second time. A hit that did not kill has none.
+        if (overflow != null && target.IsDead && dealt > standingBefore)
+        {
+            overflow.Add(dealt - standingBefore);
+        }
 
         ledger.NoteExplosion(reacted, dealt);
         // `EB-450`, the log half. The badge printed 7 and 12 landed, with the
@@ -1607,6 +1678,14 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         // Skill's Set off carry no hit behind them for the aura to feed.
         await VermillionPactPower.Restore(choiceContext, applier, target,
                                           auraBefore, reacted);
+        // R276, EXPLOSIVE FRAGS: a Mine that went off leaves Vulnerable on its
+        // enemy, AFTER its own hit (the face's order), whatever set it off --
+        // the enemy's attack or a card's Set off. Sim twin:
+        // `klee_overhaul._explode`'s `MINE_FRAGS` read.
+        if (charge.IsMine)
+        {
+            await MineFragsPower.OnMineWentOff(choiceContext, applier, target);
+        }
         // THE COMPANION STAND-INS' two this-turn watchers (QUARANTINED,
         // COMPANION_OVERHAUL): Diona's Bomb and Noelle's Mine. Here rather than
         // on `NotifyExplosionListeners` below, because that bus carries no Mine
@@ -2104,6 +2183,21 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     ///   * it carries the payloads of every merged charge, summed, for the same
     ///     reason: a merge is a move, and a move loses nothing.
     /// </summary>
+    /// <summary>
+    /// R276, HAIR TRIGGER: every charge of <paramref name="applier"/>'s on
+    /// <paramref name="target"/> becomes a Mine at its own size. Pure, like
+    /// <see cref="GrowOn"/>: no charge moves, merges or goes off, so the pile
+    /// keeps its order and its riders. Sim twin: <c>klee_overhaul.mine_all_on</c>.
+    /// </summary>
+    public static void MineAllOn(Creature? target, Creature applier)
+    {
+        if (target == null) return;
+        foreach (var pile in target.Powers.OfType<ProtoBombPower>().ToList())
+        {
+            if (pile.Applier == applier) pile.MakeAllMines();
+        }
+    }
+
     public static async Task MergeAllTo(
         PlayerChoiceContext choiceContext, Creature? dest, Creature applier,
         int growth, CardModel? cardSource)

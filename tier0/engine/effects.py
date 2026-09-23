@@ -476,7 +476,9 @@ AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
                         # aiming op dereferences `cardPlay.Target` wherever it
                         # sits). No shipped row prints one, so this widening is
                         # unreachable outside the arm.
-                        "set_off", "plant_bomb", "grow_bombs", "merge_bombs"))
+                        "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                        # R276's Hair Trigger, on the same terms.
+                        "mine_bombs"))
 
 # Ops whose aimed target may be a CORPSE. C#'s dead-target rule is op-dependent
 # and this frozenset is that asymmetry, written down once:
@@ -927,9 +929,16 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                          element: Optional[str] = None,
                          source: str = "card",
                          ignore_block: bool = False,
-                         powered: bool = True) -> float:
+                         powered: bool = True,
+                         vulnerable: bool = True) -> float:
     """Full damage pipeline: strength/weak -> reaction amp -> vulnerable ->
     block -> hp. Returns damage actually dealt to HP (for metrics).
+
+    `vulnerable` is QUARANTINED (C.KLEE_OVERHAUL) and has one caller, Big
+    Bounce's overflow hit (R276, `klee_overhaul.bounce_overflow`): its damage
+    already paid the SOURCE enemy's Vulnerable, so False skips the target's
+    Vulnerable multiplier and nothing else. C# twin:
+    `ElementalHit.Deal(..., targetMods: false)`.
 
     `ignore_block` is QUARANTINED (C.COMPANION_OVERHAUL) and has exactly one
     caller: Chiori's Tamoto, whose printed text is "deal 6 Geo damage to a
@@ -1015,7 +1024,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # `source` names what dealt it; "card" and "attack" are the two card
     # sources, everything else (bombs, summon pulses, shatter, splash) is
     # the base game's `cardSource == null` case.
-    dmg = powers.modify_damage_taken(enemy, dmg, from_card=from_card)
+    dmg = powers.modify_damage_taken(enemy, dmg, from_card=from_card,
+                                     vulnerable=vulnerable)
     # Slow (§10.9 promotion): +N% damage from Attacks per card played this
     # turn BEFORE this one. `EB-532`: the live read (`EB-525`, Furina r12
     # lane 1) is that the attacking card does not count itself -- "it counts
@@ -1083,7 +1093,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         # landed. An amp whose whole contribution was overkill (or eaten by
         # block) therefore reports 0, which is the same clamp `_splash` and
         # the `damage` emit already use.
-        un = powers.modify_damage_taken(enemy, unamped, from_card=from_card)
+        un = powers.modify_damage_taken(enemy, unamped, from_card=from_card,
+                                        vulnerable=vulnerable)
         if slow_mult != 1.0:
             un *= slow_mult
         un = int(un)
@@ -1311,7 +1322,12 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
 
 
 def klee_companion_spark(state: CombatState, card: Card) -> None:
-    """"Little Hexenzirkul" -- Klee's kit answering a HEXEREI play.
+    """"Little Hexenzirkul" -- Klee's kit answering a COMPANION play.
+
+    R276 PICK 2: under the arm ANY card that counts as a Companion pays
+    (`companion_hexerei.counts_as_companion`, the readers' own question); the
+    Hexerei mark the paragraphs below describe is retired. The amounts and the
+    bound are unchanged.
 
     THE DECLARATION LAW:145 REQUIRES, and the ONLY place a Companion play mints
     Sparks. The clause (countersigned R224, 2026-08-30) reads: "Companion cards
@@ -1359,11 +1375,11 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
     Spark -- and the fix, if the coven is meant to pay, is to mark those rows
     as family on the sheet, which is a design call and not this build's.
 
-    WHY `companion_hexerei.is_hexerei` AND NOT THE FIELD DIRECTLY: the readers
-    (Coven Errand, Witches' Circle) ask that function, and Alice's Introduction
-    Magic's this-turn window is part of the family for them. A rule that paid
-    on a narrower "Hexerei" than the readers count would be a second definition
-    of one word, which is what R244 put `is_hexerei` there to prevent.
+    WHY `companion_hexerei.counts_as_companion` AND NOT `is_companion`
+    DIRECTLY: the readers (Coven Errand, Witches' Circle) ask that function,
+    and Alice's Introduction Magic's this-turn window is part of the set for
+    them. A rule that paid on a narrower set than the readers count would be a
+    second definition of one question.
 
     WHY THE CALL SITE IS WHERE IT IS (`combat._finish_play`, after the FIRST
     resolution of the play):
@@ -1388,9 +1404,8 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
         # the player, so Gorou paid Kokomi.
         return
     if C.KLEE_OVERHAUL:
-        # `EB-663`: the mark alone, Companion or not. `is_hexerei` is the
-        # readers' own question and now the payer's too.
-        if not companion_hexerei.is_hexerei(state, card):
+        # `EB-663`, R276: the readers' own question, and the payer's too.
+        if not companion_hexerei.counts_as_companion(state, card):
             return
     else:
         if not card.is_companion:
@@ -3536,14 +3551,23 @@ def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
     top = state.player.draw_pile[:n]
     if not top:
         return
-    pick = min(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
+    # R276 (Where Did I Put It?): `filter: set_off` narrows what may be TAKEN
+    # and nothing else. With no Set off card among the N nothing is taken and
+    # every card seen goes to the bottom. C# twin: `ScryTake.Choose`'s
+    # `setOffOnly`.
+    offer = ([c for c in top if klee_overhaul.is_set_off_card(c)]
+             if fx.get("filter") == "set_off" else top)
+    pick = (min(offer, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
+            if offer else None)
     for seen in top:
         remove_instance(state.player.draw_pile, seen)
-    state.player.hand.append(pick)
+    if pick is not None:
+        state.player.hand.append(pick)
     for seen in top:
         if seen is not pick:
             state.player.draw_pile.append(seen)
-    state.emit("scry_take", card=pick.id, seen=len(top))
+    state.emit("scry_take", card=pick.id if pick is not None else None,
+               seen=len(top))
 
 
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
@@ -3799,10 +3823,11 @@ PREDICATE_NAMES = frozenset({
     "bomb_went_off_this_turn",
     "bomb_reacted_this_turn",
     # R244's third, on the same gate and for the same reason: Coven Errand's
-    # "if you played a Hexerei card this turn". Reachable from a `conditional`
+    # "if you played a Companion card this turn" (Hexerei until R276).
+    # Reachable from a `conditional`
     # like its two neighbours AND from `plant_bomb`'s `wide_if:`, which is one
     # vocabulary read at two doors rather than two vocabularies.
-    "hexerei_played_this_turn",
+    "companion_played_this_turn",
     # The Kokomi overhaul's own per-turn read (QUARANTINED,
     # C.KOKOMI_OVERHAUL): Sango Isshin's "if the Bake-Kurage carried out a
     # Plan this turn". Unlike the two above this one IS answered -- draft 6
@@ -4090,21 +4115,21 @@ def _predicate(state: CombatState, name: str) -> bool:
         return (state.ko_set_off_this_turn > 0
                 if name == "bomb_went_off_this_turn"
                 else state.ko_reacted_this_turn > 0)
-    if name == "hexerei_played_this_turn":
+    if name == "companion_played_this_turn":
         # COVEN ERRAND's read (R244), on the same gate its two neighbours take
         # and for the same reason: the row is unreachable off the arm, so a
         # False would be a game this engine never played rather than an answer.
-        # The counter is the arm's ledger, written at the one site a Hexerei
-        # play is noticed -- `klee_overhaul.note_hexerei_played`, which is what
+        # The counter is the arm's ledger, written at the one site such a
+        # play is noticed -- `klee_overhaul.note_companion_played`, which is what
         # `companion_hexerei.note_card_played` calls once it has asked the
         # mark's one question.
         if not klee_overhaul.live(state):
             raise NotImplementedError(
-                "predicate 'hexerei_played_this_turn' belongs to the "
+                "predicate 'companion_played_this_turn' belongs to the "
                 "KLEE_OVERHAUL arm. It is answered only with "
                 "`C.KLEE_OVERHAUL` on and Klee in the seat -- the mod answers "
                 "it off `KleeOverhaulLedger` behind `-p:PrototypeCards=true`.")
-        return klee_overhaul.played_hexerei_this_turn(state)
+        return klee_overhaul.played_companion_this_turn(state)
     if name == "plan_carried_out_this_turn":
         # SANGO ISSHIN's condition (QUARANTINED, C.KOKOMI_OVERHAUL). Written
         # at the ONE place a Plan is carried out (`kokomi_plan._resolve_entry`)
@@ -5658,6 +5683,17 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
             hit(enemy)
         return
 
+    if fx.get("overflow") == "bounce":
+        # R276, BIG BOUNCE: the aimed Set off with its overkill tallied and
+        # carried to a random OTHER enemy as one plain Pyro hit, before the
+        # card's own hit (`ProtoBombPower.SetOffAimedBouncing`).
+        for enemy in _pick_targets(state, spec, allow_dead=True):
+            overflow: list = []
+            klee_overhaul.set_off(state, enemy, card, overflow)
+            klee_overhaul.bounce_overflow(state, enemy, sum(overflow))
+            hit(enemy)
+        return
+
     # `allow_dead=True`, and it is rule 3 rather than a shrug: `SetOff` takes
     # the pile before it looks at anything, and its per-charge death test then
     # sends every charge to `JumpCharges`. A Set off aimed at a body that died
@@ -5679,8 +5715,8 @@ def _op_plant_bomb(state: CombatState, fx: dict, card: Card) -> None:
     doc says dead creatures can still have powers applied to them. The sweep is
     what moves it off the corpse again.
 
-    `wide_if:` -- COVEN ERRAND (R244). "Place a Bomb 5. If you played a Hexerei
-    card this turn, place it on ALL enemies instead." The widening is a FIELD ON
+    `wide_if:` -- COVEN ERRAND (R244, R276). "Place a Bomb 5. If you played a
+    Companion card this turn, place it on ALL enemies instead." The widening is a FIELD ON
     THE OP rather than a `conditional` wrapping two `plant_bomb`s, and the
     printed face is the argument: there is ONE Bomb here and one printed size,
     so there must be one op owning one upgradable number. Two ops would need a
@@ -5837,18 +5873,29 @@ def _op_draw_per_set_off(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.draw_per_set_off(state)
 
 
-def _op_hexerei_mark_hand(state: CombatState, fx: dict, card: Card) -> None:
-    """Alice's Introduction Magic (R244): "All cards in your hand count as
-    Hexerei cards this turn." `IntroductionMagicPower`'s twin.
+def _op_companion_mark_hand(state: CombatState, fx: dict, card: Card) -> None:
+    """Alice's Introduction Magic (R244, R276): "All cards in your hand count as
+    Companion cards this turn." `IntroductionMagicPower`'s twin.
 
-    THE ONLY ARM VERB THAT TOUCHES NO BOMB, and it is Klee's anyway: the family
-    mark is printed on companion rows, but every card that READS it is hers.
-    The rule itself lives in `companion_hexerei` beside the mark; this is the
-    op, and `klee_overhaul.mark_hand_hexerei` is the arm's gate between them.
+    AN ARM VERB THAT TOUCHES NO BOMB, and it is Klee's anyway: every card that
+    READS "a Companion card was played" is hers. The rule itself lives in
+    `companion_hexerei`; this is the op, and
+    `klee_overhaul.mark_hand_companion` is the arm's gate between them.
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.mark_hand_hexerei(state)
+    klee_overhaul.mark_hand_companion(state)
+
+
+def _op_mine_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """Hair Trigger (R276): "Your Bombs on this enemy become a Mine." One call
+    into the arm, `ProtoBombPower.MineAllOn`'s twin. A corpse is aimable for
+    `_op_grow_bombs`' reason: the pile is on the creature, corpse or not."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    for enemy in _pick_targets(state, fx.get("target", "enemy"),
+                               allow_dead=True):
+        klee_overhaul.mine_all_on(state, enemy)
 
 
 def _op_return_to_hand(state: CombatState, fx: dict, card: Card) -> None:
@@ -6243,10 +6290,12 @@ OPS = {
     "damage_set_off_total": _op_damage_set_off_total,
     "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,
-    # R244's one new verb, the coven readers' enabler. It touches no Bomb and
-    # is still the arm's, because the cards that READ the Hexerei family are
-    # Klee's -- see `_op_hexerei_mark_hand`.
-    "hexerei_mark_hand": _op_hexerei_mark_hand,
+    # R244's one new verb, the readers' enabler (renamed at R276). It touches
+    # no Bomb and is still the arm's, because the cards that READ a Companion
+    # play are Klee's -- see `_op_companion_mark_hand`.
+    "companion_mark_hand": _op_companion_mark_hand,
+    # R276's Hair Trigger -- see `_op_mine_bombs`.
+    "mine_bombs": _op_mine_bombs,
     # POOL PASS TWO's two (`EB-732`), and both are about a CARD rather than a
     # charge: Blast Shield routes its own play to the hand, Once More! takes
     # the last Set off card back out of the discard pile.

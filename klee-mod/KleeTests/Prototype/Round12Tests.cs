@@ -110,8 +110,9 @@ public class Round12Tests
         // appended them ("Charges in placement order"). The r11 run-2 seat
         // could get that only by arithmetic: "Bombs go off in placement
         // order, and the first one is the one that eats the Melt -- a rule
-        // nothing printed."
-        Assert.Contains("oldest first", SetOffTip());
+        // nothing printed." `EB-755` (R276) made the words unambiguous for two
+        // Bombs placed in one turn.
+        Assert.Contains("in the order placed", SetOffTip());
     }
 
     [Fact]
@@ -233,51 +234,22 @@ public class Round12Tests
         }
     }
 
-    // ---- EB-392: three words on one screen -------------------------------
-
-    private static string HexereiTip() =>
-        string.Concat(Il.Strings(typeof(ArmKeywordTips)
-            .GetMethod("ForHexerei", HeadlessGame.All)!));
+    // ---- EB-392: three words on one screen, now one (R276) ---------------
 
     [Fact]
-    public void The_hexerei_tip_gives_a_test_a_player_can_run()
+    public void The_spark_rider_names_the_one_set_a_player_can_see()
     {
-        // "From the witches' circle" was doing silent work: the r12 run-2
-        // seat "could not tell from any card face whether MY Companion
-        // qualified" and found out by counting Bombs on an enemy badge. Every
-        // member prints the word now, so the definition can point at it.
-        // `EB-596` reworded it to "whose face prints the word", and `EB-663`
-        // made that ONE of the family's two ways in: the tip is the membership
-        // test both engines run, so the printed word is a clause of it rather
-        // than the whole sentence -- and both clauses fit under the ceiling,
-        // which is why this word carries no length exception.
-        Assert.Contains("Printed on a card's face", HexereiTip());
-        Assert.Contains("marked by Alice's this turn", HexereiTip());
-        Assert.Contains("Not every [gold]Companion[/gold] has it",
-                        HexereiTip());
-        Assert.DoesNotContain("witches' circle", HexereiTip());
-    }
-
-    [Fact]
-    public void The_hexerei_tip_names_the_other_word_on_the_screen()
-    {
-        // The seat met three: "there is apparently a distinction between
-        // `Companion`, `Hexerei`, and `Klee's own Companion`, and none of the
-        // three cards involved prints which one it is." `Klee's own` is the
-        // Spark rider's exact phrase, so the two meet under one spelling --
-        // and the relation is stated as the OVERLAP it is, five rows carrying
-        // both marks and thirteen carrying one.
-        // `EB-554` MADE THE CLAUSE RUNNABLE AND `EB-642` RETIRED IT. R265
-        // pick 1 pays every Hexerei card, so the third word the seat met is
-        // not a set any more and neither surface names it.
-        Assert.Contains("Playing one gives Klee", HexereiTip());
-        Assert.DoesNotContain("Klee's own", HexereiTip());
-        // ONE SPELLING FOR THE ONE WORD: the Spark rider names `Hexerei` too,
-        // so a player who has met that rider recognises the set this sentence
-        // is pointing at rather than meeting a second phrase for it.
-        Assert.Contains("Hexerei", string.Concat(Il.Strings(
-            typeof(ArmKeywordTips)
-                .GetMethod("ForCovenSpark", HeadlessGame.All)!)));
+        // The r12 run-2 seat met three words -- `Companion`, `Hexerei` and
+        // "Klee's own Companion" -- and none of the cards said which it was.
+        // `EB-642` retired "Klee's own"; R276 pick 2 retired `Hexerei`, so
+        // the rider names the one word every companion face already is.
+        var rider = string.Concat(Il.Strings(typeof(ArmKeywordTips)
+            .GetMethod("ForCovenSpark", HeadlessGame.All)!));
+        Assert.Contains("[gold]Companion[/gold]", rider);
+        Assert.DoesNotContain("Hexerei", rider);
+        Assert.DoesNotContain("Klee's own", rider);
+        Assert.Null(typeof(ArmKeywordTips).GetMethod("ForHexerei",
+                                                     HeadlessGame.All));
     }
     // `EB-723` RETIRED THE SECOND HALF OF THIS PAIR. It asserted that
     // `ArmKeywordTips.ForDeploy` was at its ceiling and so could not have

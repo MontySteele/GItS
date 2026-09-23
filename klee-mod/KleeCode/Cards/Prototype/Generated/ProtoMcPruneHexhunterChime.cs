@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard
+public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Anemo;
@@ -52,14 +52,14 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForBomb(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_prune_hexhunter_chime");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prune — Ring-A-Ding-Ding! Hexhunter Chime"),
-        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

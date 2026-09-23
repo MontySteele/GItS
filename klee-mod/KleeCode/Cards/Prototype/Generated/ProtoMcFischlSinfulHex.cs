@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard
+public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Electro;
@@ -52,14 +52,14 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_sinful_hex");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Undone Be Thy Sinful Hex"),
-        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals {PowerAmount:diff()} [gold]Electro[/gold] damage to a random enemy."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals {PowerAmount:diff()} [gold]Electro[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

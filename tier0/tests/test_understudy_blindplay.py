@@ -6643,8 +6643,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # clause pointing the other way.
         # `EB-516` added the aim, on the word rather than on the two rows
         # that roll: they print only "a random enemy".
-        "Set off": ["go off first, oldest first, each ",
-                    "a Pyro hit. ", " stops them, no when-hit power ",
+        # `EB-755` (R276): "in the order placed", which no two Bombs tie on.
+        "Set off": ["go off first, in the order placed, ",
+                    "each a Pyro hit. ", " stops them, no when-hit power ",
                     "fires, the first takes the aura. A random one picks a ",
                     "enemy first."],
         "Spark": ["instead of Energy, with no cap", "Gone after combat"],
@@ -6683,27 +6684,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  " out at the end of this turn, before enemies "],
         "Mend": [": heal N HP, never above the HP you entered",
                  "the fight with"],
-        # `EB-377` ADDED THESE TWO ROWS to the page, and their absence was the
-        # same defect the row is about: both have had an `ArmKeywordTips` twin
-        # since R244 and neither had a page row, so the mod defined them on a
-        # hover and the blind page defined them nowhere.
-        # `EB-392` rewrote the word once every member could print it.
-        # `EB-535`: the last sentence names the PAYMENT now. "Cards of hers
-        # pay" was the clause the r19 lane-2 seat could extract nothing from,
-        # and the rule was on a different screen the whole time.
-        # `EB-554`: the ownership clause pointed at the mark the faces then
-        # carried. `EB-642` retired both -- R265 pick 1 pays every Hexerei
-        # card, so the first sentence's test IS the payer set.
-        # `EB-619`: the sentence ends at "a play" -- a price the card does
-        # not charge is not the keyword page's to deny.
-        # `EB-663`: the definition is the MEMBERSHIP TEST both engines run --
-        # the printed word, or the hand Alice's Introduction Magic marks --
-        # and the last sentence denies the reading the r24 seat took off the
-        # old opening. The anchors stay inside one C# literal each.
-        "Hexerei": ["Printed on a card's face, or marked by Alice's this "
-                    "turn. ",
-                    "Playing one gives Klee ", ", up to ",
-                    " a play. Not every "],
+        # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276
+        # pick 2 retired with its tip.
         "Swirl": ["The enemy's aura is consumed and copied onto ALL enemies. "
                   "No ", "aura, no effect."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
@@ -6792,9 +6774,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "SpendKey", "FanfareKey", "BowKey", "RaiseKey",
                 "RotateKey", "LeadPerformerKey", "BackPerformerKey",
-                "HexereiKey", "SwirlKey", "GroundedKey"):
+                "SwirlKey", "GroundedKey"):
         assert f"public const string {key}" in src
     assert "CompanionKey" not in src
+    assert "HexereiKey" not in src
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
@@ -7875,50 +7858,6 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     assert "each grows 9 a turn" in live_tip
 
 
-def test_the_hexerei_line_names_the_payment_the_kit_declares():
-    """`EB-535`. WHAT "CARDS OF HERS PAY" NEVER SAID.
-
-    Klee r19 lane 2: "I read this a dozen times across five fights and I still
-    do not know what it does. 'Cards of hers pay' -- pay what, to whom, and
-    when? I played Razor four times and never saw anything I could attribute to
-    Hexerei." The rule was on a DIFFERENT screen the whole time -- the Companion
-    Spark rider, which rides Klee's own Personals and not the family tag.
-
-    So the row names the payment and its bound, and the two numerals are held
-    in step from THIS side, the way `BOMB_GROWTH` is: this module may not import
-    `tier0` at all, and the mod lifts them from `KleeCompanionSpark`, which is
-    the declaration LAW:145 obliges Klee's kit to make.
-    """
-    src = (REPO / "klee-mod" / "KleeCode" / "Powers"
-           / "KleeCompanionSpark.cs").read_text(encoding="utf-8")
-    assert re.search(rf"Base\s*=\s*{blindplay_notes.COMPANION_SPARK}\b", src)
-    assert re.search(
-        rf"MaxPerPlay\s*=\s*{blindplay_notes.COMPANION_SPARK_MAX}\b", src)
-
-    row = blindplay_notes.ARM_KEYWORDS["Hexerei"]
-    assert (f"gives Klee {blindplay_notes.COMPANION_SPARK} Spark, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in row
-    # `EB-642`: the seat's OTHER question -- whether Razor is one of Klee's
-    # own -- is not a question any more. Every Hexerei card pays, so the
-    # ownership clause is gone from both surfaces and the sentence would be
-    # false with it.
-    # `EB-596`: and the verb is a gain, not a price, because two seats read
-    # "pay" the other way round.
-    assert "Playing one gives Klee" in row
-    assert "Klee's own" not in row
-    # `EB-619`: [USER]'s act-1 run read the price denial as belonging on the
-    # card's own cost section, so the clause is gone from both surfaces.
-    assert "never costs" not in row
-    # `EB-663` PUT THE MEMBERSHIP TEST ON IT, in both engines' surfaces in one
-    # commit: the family has two ways in and the old opening named neither
-    # correctly. Both are said INSIDE the ceiling -- 133 of 135, no length
-    # exception -- because a keyword page that needs one to state its own
-    # membership test is a page saying it twice.
-    assert "marked by Alice's this turn" in row
-    assert "Not every Companion has it" in row
-    assert len(row) <= 135
-
-
 def _shattering_pressure_reward_state() -> dict:
     """The r19 lane-2 offer, as the seat met it (`EB-537`).
 
@@ -8955,8 +8894,8 @@ _R12_SMITH = (
     ("KLEEMOD-AN_INVITATION",
      "Add 1 random Common Companion card to your hand."),
     ("KLEEMOD-PROTO_MC_FISCHL_OZ",
-     "Hexerei. At the end of your turn, Oz deals 5 Electro damage to a "
-     "random enemy."),
+     "At the end of your turn, Oz deals 5 Electro damage to a random "
+     "enemy."),
 )
 
 
@@ -8981,8 +8920,8 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     # rule, so the clause LEADS -- appended, the page told a seat deciding a
     # Smith that the draw happened at the end of the turn.
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
-        "Hexerei. Draw 1 card. At the end of your turn, Oz deals 5 Electro "
-        "damage to a random enemy.")
+        "Draw 1 card. At the end of your turn, Oz deals 5 Electro damage to "
+        "a random enemy.")
 
 
 def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
@@ -10557,139 +10496,89 @@ def test_a_hand_driven_read_settles_the_bodies_the_way_the_session_does():
 # --- `EB-504`: A RULE ABOUT A CHARACTER WHO IS NOT IN THE RUN ----------------
 
 
-def _hexerei_shop_state(character: str) -> dict:
+def _fischl_shop_state(character: str) -> dict:
     """A shop shelf holding the Fischl companion both seats met, on one run.
 
-    A SHOP and not a fight, deliberately: `Hexerei` reached the Kokomi seat on
-    a shop glossary and `Oz` reached the Furina seat on a reward, and both are
-    screens the arm cannot be read off the board on -- which is why the row's
-    answer asks the wire's `character` rather than looking at what is out.
+    A SHOP and not a fight, deliberately: `Oz` reached the Furina seat on a
+    reward, a screen the arm cannot be read off the board on -- which is why
+    the row's answer asks the wire's `character` rather than looking at what
+    is out. (`Hexerei`, the other word this fixture carried, was retired by
+    R276 pick 2.)
     """
     return {"state_type": "shop",
             "player": {"character": character, "gold": 120},
             "shop": {"items": [
                 {"name": "Fischl - Nightrider", "price": 74, "cost": "1",
                  "type": "Skill", "is_available": True,
-                 "description": "A Hexerei card. Deal 7 Electro damage. "
+                 "description": "Deal 7 Electro damage. "
                                 "If Oz is out, he deals 5 more."}]}}
 
 
 def test_a_kokomi_shop_prints_no_klee_rule():
-    """`EB-504`. THE ROW'S OWN ACCEPTANCE.
-
-    "*Hexerei -- A Companion card that prints the word, and Klee herself. Some
-    are Klee's own, some are not. Cards of hers pay when you play one.* I could
-    not extract a rule from that sentence, and it names a character who is not
-    in this run" (Kokomi r17 lane 2).
-
-    The word is still on the screen -- eighteen companion faces print it and
-    the whole roster drafts them -- so the page still lists it. What it does
-    not do is state a rule this run has no way to use.
-
-    Seen to FAIL: the whole Klee sentence printed on a Kokomi shop.
-    """
-    page = blindplay.observe(_hexerei_shop_state("Kokomi"))
+    """`EB-504`. THE ROW'S OWN ACCEPTANCE: the word is still on the screen, so
+    the page still lists it, and it does not state a rule this run has no way
+    to use. Seen to FAIL: the whole Klee sentence printed on a Kokomi shop."""
+    page = blindplay.observe(_fischl_shop_state("Kokomi"))
     glossary = page.split("## Words on this screen")[1]
-    assert "- **Hexerei**" in glossary
+    assert "- **Oz**" in glossary
     assert "Klee" not in glossary
-    assert "Cards of hers pay" not in page
+    assert "Fischl's raven" not in page
 
 
-def test_a_furina_run_gets_neither_the_hexerei_nor_the_oz_rule():
-    """The second seat, and the second word. `Fischl -- Nightrider` printed
-    both rules on a Furina run: "I have no Klee cards, no way to obtain that
-    Power, and no idea what 'pay' means or what it would cost me ... half its
-    rules text was noise" (Furina r11 lane 2)."""
-    page = blindplay.observe(_hexerei_shop_state("Furina"))
+def test_a_furina_run_does_not_get_the_oz_rule():
+    """The second seat: `Fischl -- Nightrider` printed Klee's rule on a Furina
+    run: "I have no Klee cards, no way to obtain that Power ... half its rules
+    text was noise" (Furina r11 lane 2)."""
+    page = blindplay.observe(_fischl_shop_state("Furina"))
     glossary = page.split("## Words on this screen")[1]
-    assert "- **Hexerei**" in glossary and "- **Oz**" in glossary
+    assert "- **Oz**" in glossary
     assert "Fischl's raven" not in page
     assert "Klee" not in glossary
 
 
 def test_no_keyword_row_prints_an_empty_definition():
-    """`EB-583`, and it is the row.
-
-    THE FIND (Furina r15 lane 1 (c) 7). `Hexerei` printed on Sucrose's face
-    and on Razor's under the Furina arm, and the Words block answered with the
-    name and nothing after it -- "an empty definition". `EB-504`'s own
-    reasoning is what condemns that: "a word on the screen with no entry at
-    all reads as a word the page failed to define", and a bare name in a block
-    of definitions reads as precisely that.
-
-    WHAT WAS MISSING WAS THE SENTENCE SAYING WHY THERE IS NO RULE, not the
-    off-arm rule itself. `EB-504`'s finding is kept whole -- the line names no
-    character and prices no resource of somebody else's kit -- and what it
-    adds is the fact a reader of THIS run needs: the mark is inert here.
-    """
-    page = blindplay.observe(_hexerei_shop_state("Furina"))
+    """`EB-583`: an off-arm word prints the sentence saying WHY there is no
+    rule, never a bare name -- and names no character and prices no resource of
+    somebody else's kit (`EB-504` unmoved)."""
+    page = blindplay.observe(_fischl_shop_state("Furina"))
     glossary = page.split("## Words on this screen")[1]
 
     for line in glossary.splitlines():
         if line.startswith("- **"):
             assert " — " in line, line
 
-    assert "- **Hexerei** — A Companion family mark." in glossary
     assert "- **Oz** — A summoned raven another kit's Power fields." in glossary
-    # `EB-504` UNMOVED: no character named, no rule of another kit stated.
     assert "Klee" not in glossary
     assert "Fischl's raven" not in page
-    assert "Cards of hers pay" not in page
+    assert "Hexerei" not in page
 
 
-def test_the_two_faces_the_seat_read_it_off_carry_the_row():
-    """Sucrose and Razor, the two Furina-arm faces the r15 seat met the bare
-    word on. The attach is derived from the printed face, so what this pins is
-    that a face carrying the word reaches the block at all -- the state the
-    seat was in was a row that arrived and said nothing."""
-    for title, face in (("Sucrose - Astable Invention",
-                         "A Hexerei card. Deal 6 Anemo damage."),
-                        ("Razor - Claw and Thunder",
-                         "A Hexerei card. Deal 9 Electro damage.")):
-        state = _hexerei_shop_state("Furina")
-        state["shop"]["items"][0]["name"] = title
-        state["shop"]["items"][0]["description"] = face
-
-        glossary = blindplay.observe(state).split(
-            "## Words on this screen")[1]
-
-        assert "- **Hexerei** — A Companion family mark." in glossary, title
-
-
-def test_a_klee_run_reads_both_rules_in_full():
-    """The other side, and the reason the rows exist at all: on the run whose
-    kit the words belong to, nothing about them has changed."""
-    page = blindplay.observe(_hexerei_shop_state("Klee"))
-    assert ("- **Hexerei** — Printed on a card's face, or marked by Alice's "
-            "this turn. Playing one gives Klee") in page
+def test_a_klee_run_reads_the_rule_in_full():
+    """The other side, and the reason the row exists at all: on the run whose
+    kit the word belongs to, nothing about it has changed."""
+    page = blindplay.observe(_fischl_shop_state("Klee"))
     assert "- **Oz** — Fischl's raven, out while you hold the Power" in page
 
 
 def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():
     """`absent is not zero`, in this table's direction: silence about the
-    character is not evidence that it is somebody else's, and a page that
-    stripped a rule on a feed that never answered would be withholding it from
-    the one run that needs it."""
-    state = _hexerei_shop_state("Klee")
+    character is not evidence that it is somebody else's."""
+    state = _fischl_shop_state("Klee")
     del state["player"]["character"]
-    assert ("Playing one gives Klee "
-            f"{blindplay_notes.COMPANION_SPARK} Spark, up to "
-            f"{blindplay_notes.COMPANION_SPARK_MAX} a play.") in blindplay.observe(state)
+    assert "Fischl's raven" in blindplay.observe(state)
 
 
-def test_the_off_arm_sentence_is_exactly_two_rows_wide():
+def test_the_off_arm_sentence_is_exactly_one_row_wide():
     """`EB-504`'s gate -- the one that prints a sentence INSTEAD of the rule --
-    is still the two words that ride faces every run can draft.
+    is the one word that rides a face every run can draft (it was two until
+    R276 retired `Hexerei`).
 
-    `EB-753` added a second, different gate beside it (`_ARM_KEYWORD_ARM`), and
-    the two are not the same rule: a word another kit OWNS does not print at
-    all, because the match is a false positive in ordinary English rather than
-    an off-arm tag on a card the reader is holding. `Companion` keeps its
-    definition on every run and answers the arm only for its stage CLAUSE
-    (`EB-460`).
+    `EB-753`'s gate beside it (`_ARM_KEYWORD_ARM`) is a different rule: a word
+    another kit OWNS does not print at all. `Companion` keeps its definition
+    on every run and answers the arm only for its stage CLAUSE (`EB-460`).
     """
-    assert set(blindplay_notes._ARM_KEYWORD_CHARACTER) == {
-        "Hexerei", "Oz"}
+    assert set(blindplay_notes._ARM_KEYWORD_CHARACTER) == {"Oz"}
+    assert set(blindplay_notes._OFF_ARM_KEYWORD) == {"Oz"}
     assert "Companion" not in blindplay_notes._ARM_KEYWORD_ARM
     assert "Swirl" not in blindplay_notes._ARM_KEYWORD_ARM
 
@@ -10894,7 +10783,7 @@ def test_a_smith_row_prints_one_upgrade_line_and_not_two():
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KO_ALICES_INTRODUCTION_MAGIC",
          "name": "Alice's Introduction Magic", "cost": "1", "type": "Skill",
-         "description": "All cards in your hand count as Hexerei cards "
+         "description": "All cards in your hand count as Companion cards "
                         "this turn."})
     page = blindplay.observe(smith)
     assert "    Upgraded, and gains Retain." in page
@@ -12385,7 +12274,7 @@ def placer_power_state(name: str = "Witches' Circle",
     state["player"]["status"] = [
         {"id": "KLEEMOD-WITCHES_CIRCLE", "name": name, "amount": amount,
          "type": "Buff",
-         "description": (f"Whenever you play a Hexerei card, place a Bomb "
+         "description": (f"Whenever you play a Companion card, place a Bomb "
                          f"{size} on a random enemy.")}]
     return state
 

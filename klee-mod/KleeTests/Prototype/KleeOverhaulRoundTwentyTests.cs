@@ -184,60 +184,40 @@ public class KleeOverhaulRoundTwentyTests
                                            StringComparison.Ordinal))
         .Select(row => (row.Item1, row.Item2))
         .ToList();
-    // ---- `EB-554`: which Hexerei cards are Klee's own ---------------------
+    // ---- `EB-554` / `EB-642`, closed by R276: no family mark on any face -
 
     [Fact]
-    public void A_universal_hexerei_companion_prints_the_word_and_not_the_owner()
+    public void A_companion_prints_no_family_mark_and_no_owner()
     {
-        // Klee r20 lane 1, (c) 1: Albedo+ and Razor were played in one turn,
-        // both printing `Hexerei`, and Spark stayed at 1. "Nothing on either
-        // card face distinguishes 'hers' from not-hers, so as a reader I have
-        // no way to predict which Companion pays a Spark."
-        var razor = Face(new ProtoMcRazorClawAndThunder());
-        Assert.Contains("[gold]Hexerei[/gold].", razor);
-        Assert.DoesNotContain("Klee's own", razor);
-
-        // `EB-642` ANSWERED IT BY MOVING THE RULE. Razor is the Universal half
-        // of the pair and he pays now, exactly as the Personal half does, so
-        // the face saying only the family word is the whole truth about him.
+        // Klee r20 lane 1, (c) 1: Albedo+ and Razor, both printing `Hexerei`,
+        // and Spark stayed at 1 -- "Nothing on either card face distinguishes
+        // 'hers' from not-hers". `EB-642` made both pay; R276 pick 2 made
+        // EVERY Companion pay and retired the mark, so a Universal, a family
+        // stand-in and a coven Personal all read as plain companion faces.
+        foreach (var face in new[]
+                 {
+                     Face(new ProtoMcRazorClawAndThunder()),
+                     Face(new ProtoMcFischlSinfulHex()),
+                     Face(new ProtoMcNoelleIGotYourBack()),
+                 })
+        {
+            Assert.DoesNotContain("Hexerei", face);
+            Assert.DoesNotContain("Klee's own", face);
+        }
         Assert.Null(new ProtoMcRazorClawAndThunder().PersonalPool);
-    }
-
-    [Fact]
-    public void A_personal_companion_of_klees_reads_exactly_as_a_universal_does()
-    {
-        // `EB-642`: one payer set, one mark. The adjective form ("Klee's own
-        // Hexerei.") and the bare ownership lead are both gone, because the
-        // distinction they drew is gone -- [USER], on his own act-1 run: "the
-        // 'Klee's own' text on the Personals is not needed."
-        var fischl = Face(new ProtoMcFischlSinfulHex());
-        Assert.StartsWith("[gold]Hexerei[/gold].", fischl);
-        Assert.DoesNotContain("Klee's own", fischl);
         Assert.Equal("klee", new ProtoMcFischlSinfulHex().PersonalPool);
-
-        // And so does a coven Personal that carried no family word before
-        // `EB-642`'s follow-up: the coven IS the family, so Noelle prints the
-        // one mark too and the eight rows R265's one-word rule would have cut
-        // the grant from keep it.
-        var noelle = Face(new ProtoMcNoelleIGotYourBack());
-        Assert.StartsWith("[gold]Hexerei[/gold].", noelle);
-        Assert.DoesNotContain("Klee's own", noelle);
     }
 
     [Fact]
-    public void The_hexerei_tip_says_every_marked_card_pays()
+    public void The_spark_rider_says_every_companion_pays()
     {
-        // "Some are Klee's own, some are not" told a reader the split exists
-        // and gave them no way to run it. `EB-642` removed the split instead:
-        // the first sentence's test IS the payer set.
-        var tip = Printed("ForHexerei");
-        Assert.Contains("Playing one gives Klee", tip);
+        // The rule's one sentence, on the face that pays: any Companion card.
+        var tip = Printed("ForCovenSpark");
+        Assert.Contains("Playing a [gold]Companion[/gold] card gives Klee", tip);
         Assert.DoesNotContain("Klee's own", tip);
-        // `EB-619`: and the price-denial clause is gone -- a card's cost line
-        // is where a cost belongs, and the keyword page denying one raised the
-        // doubt it was meant to settle.
+        Assert.DoesNotContain("Hexerei", tip);
+        // `EB-619`: no price-denial clause.
         Assert.DoesNotContain("it never costs", tip);
-        Assert.DoesNotContain("Some are Klee's own, some are not.", tip);
     }
 
     /// <summary>The card's printed description.</summary>

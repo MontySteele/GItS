@@ -7,16 +7,14 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// "Little Hexenzirkul" -- Klee's kit answering a HEXEREI Companion play, and
-/// the only place in this assembly where a Companion play mints Sparks.
+/// "Little Hexenzirkul" -- Klee's kit answering a Companion play, and the only
+/// place in this assembly where a Companion play mints Sparks.
 ///
-/// `EB-642`, R265 pick 1: WHAT THE KIT DECLARES IS THE PRINTED WORD. [USER]
-/// played act 1 and read the second mark as noise -- "the 'Klee's own' text on
-/// the Personals is not needed" -- so a Universal printing <c>Hexerei</c> now
-/// grants exactly as a Personal printing it does, and the ownership mark leaves
-/// the faces in the same commit (<c>gen_klee_cards._family_tags</c>). One word,
-/// one rule: the mark and the payment say the same thing, or the r20 defect
-/// returns pointing the other way.
+/// R276 PICK 2: ANY COMPANION CARD PAYS, under the arm. `EB-642` (R265 pick 1)
+/// had made the printed Hexerei word the whole rule; R276 retired the word,
+/// because under the arm Klee starts with no companion and a mark that needed
+/// the companion slot to offer the right family rarely came together. The
+/// amounts and the bound are unchanged.
 ///
 /// LAW:145, countersigned R224 (2026-08-30): "Companion cards may not
 /// themselves grant signature resources. A character-owned engine may respond
@@ -79,29 +77,22 @@ public static class KleeCompanionSpark
     /// the sim asks it in the same three steps
     /// (<c>effects.klee_companion_spark</c>).
     ///
-    /// A COMPANION ONLY OFF THE ARM (`EB-663`, r24 lane 1). The old test was
-    /// COMPANION *and* Hexerei, so a Klee card carrying the mark -- Alice's
-    /// Introduction Magic itself, or any card her this-turn window marks --
-    /// printed the keyword, fired the family's readers (Coven Errand, Witches'
-    /// Circle) and paid nothing. One word cannot mean two sets on one screen,
-    /// so under the arm the test is exactly
-    /// <c>CompanionHexerei.IsHexerei</c>. Off the arm the Companion gate
-    /// stays, because that is the world LAW:145's clause was countersigned
-    /// over. The character gate below is untouched either way.
+    /// UNDER THE ARM THE TEST IS THE READERS' OWN (`EB-663`, R276):
+    /// <c>CompanionHexerei.CountsAsCompanion</c> -- a Companion card, or any
+    /// card Alice's Introduction Magic marked this turn -- so the Spark and
+    /// Coven Errand / Witches' Circle can never disagree about a play. Off the
+    /// arm the shipped Personal-Companion gate stays, because that is the world
+    /// LAW:145's clause was countersigned over. The character gate below is
+    /// untouched either way.
     ///
     /// PLAYED BY KLEE (`EB-434`). The old spelling asked the CARD's pool
     /// against its owner and named no character, so Kokomi playing Gorou banked
     /// a Spark she has no surface to read. Sparks are Klee's resource and the
     /// tip says "gives Klee"; nobody else is paid.
     ///
-    /// AND CARRYING THE MARK (`EB-642`) -- under the arm. The Hexerei family is
-    /// <c>CompanionHexerei.IsHexerei</c>, the readers' own
-    /// question, so the word means one thing on every surface that asks it. OFF
-    /// the arm the shipped Personal pool answers instead, and that is R213 B
-    /// rather than taste: no shipped sheet row carries <c>hexerei:</c> at all,
-    /// so a Hexerei-only rule would silently retire the grant <c>EB-219</c>
-    /// moved into the kit at parity. The Balance surface does not move for a
-    /// prototype arm.
+    /// OFF THE ARM the shipped Personal pool answers, and that is R213 B
+    /// rather than taste: the Balance surface does not move for a prototype
+    /// arm.
     /// </summary>
     public static bool PaysKleesSpark(CardModel? card)
     {
@@ -111,7 +102,7 @@ public static class KleeCompanionSpark
         if (CompanionPool.CharacterId(owner) != "klee") return false;
 #if PROTOTYPE_CARDS
         if (KleeOverhaul.Enabled)
-            return CompanionHexerei.IsHexerei(card);
+            return CompanionHexerei.CountsAsCompanion(card);
 #endif
         return card is ICompanionCard comp && comp.PersonalPool == "klee";
     }

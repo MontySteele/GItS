@@ -216,8 +216,10 @@ public class PoolCellCoverageTests
         var expected = (arm switch
         {
             // Rare/Attack holds one row (Fish Blasting). Seamed at rung 2: a
-            // Rare potion still buys three Rares.
-            "klee-overhaul" => new[] { "Rare/Attack" },
+            // Rare potion still buys three Rares. Rare/Skill joined it at R276
+            // (Sugar Rush cut; All of My Treasures! and Alice's Introduction
+            // Magic are left), seamed the same way.
+            "klee-overhaul" => new[] { "Rare/Attack", "Rare/Skill" },
 
             // The four `EB-363` was raised on, plus the Rare shelf being
             // thinner than Sea Glass's five-card draw -- which no widening can

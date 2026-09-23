@@ -242,11 +242,16 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
 # same single door.
 #
-# FORTY-FIVE SINCE THE POOL PASS (2026-09-05, `EB-491`), and the TEN that
-# arrived are the readings of rounds 13 to 16 made into cards: three for Cook,
-# three for Spray, three for React and one bridge between Cook and Spray. Their
-# own block at the end of the tuple, like the slices below it. The pool is 8
-# Rares, which is the brief's count.
+# FORTY-EIGHT SINCE R276 (2026-09-23, `review/ruled/klee-review-2026-09-23.md`
+# pick 1): five rows of R271's lower-value shelf CUT (Long Fuse, Explosives
+# Workshop, Sugar Rush, Kindling, Catalytic Converter) and four ARRIVED as one
+# block at the end (Hair Trigger, Explosive Frags, Where Did I Put It?, Big
+# Bounce). R276 also says 48 is not a finished pool: it grows toward 78 before
+# Balance.
+#
+# FORTY-NINE AT R271 STAGE ONE, and FORTY-FIVE AT THE POOL PASS (2026-09-05,
+# `EB-491`), when the TEN that arrived were the readings of rounds 13 to 16
+# made into cards.
 #
 # THIRTY-FIVE BEFORE THAT (the round-11 pool pass, 2026-09-04), and the one
 # that arrived is `proto_ko_stoke_the_fuse`: the arm's Spark SINK, the other half
@@ -275,36 +280,23 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 #
 # THIRTY-ONE BEFORE THAT (R244), and the three that arrived were a SECOND slice
 # rather than a redraft of the first: the ruled packet
-# `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three Hexerei
-# readers, the cards in her own pool that pay for the coven's one-word mark.
+# `review/ruled/klee-hexerei-readers-2026-09-02.md` adds Klee's three readers,
+# the cards in her own pool that pay for a Companion play (the coven's Hexerei
+# mark until R276).
 # They are listed in their own block at the end of the tuple, so the packet
 # each row belongs to is readable off the file.
 #
-# TWENTY-EIGHT OF THE PACKET'S TWENTY-NINE before that, and the count moved at
-# DRAFT 4
-# (R242). Draft 3 had taken `proto_ko_dig_in` out of the offer pool and into the
-# starter; the canonical starter has no room for it, so it comes BACK as the
-# Spark sink it was, and `proto_ko_pop` joins it as a Common for the same
-# reason. Only Vermillion Pact is now absent, and
-# the packet's own sec.5 is what leaves it out: "Vermillion Pact is the one item
-# on this list that touches shared reaction code; if it costs more than a day it
-# drops out of slice one and is tested in slice two." It does. Its rule is not
-# "react twice", it is "the aura the explosion CONSUMED is still there for the
-# Attack behind it", and every reaction in the mod runs through one funnel that
-# removes the aura and pays out Burst, Courtroom Drama and the amplifier
-# multiplier on the way past -- so making one hit not consume means either
-# re-applying between the explosion and the card's damage (which moves what a
-# third hit sees and re-fires every on-apply hook) or threading a flag through
-# shared code every character's reactions would have to be re-checked against.
-# The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
-# surface rather than staged as a card whose face would lie. The pool is
-# therefore 16 Common, 12 Uncommon, 6 Rare.
+# TWENTY-EIGHT AT DRAFT 4 (R242). Draft 3 had taken `proto_ko_dig_in` out of
+# the offer pool and into the starter; the canonical starter has no room for
+# it, so it came BACK as the Spark sink it was, and `proto_ko_pop` joined it as
+# a Common for the same reason. Vermillion Pact was held out of slice one (it
+# touches the shared reaction funnel) and arrived with the pool pass
+# (`EB-491`), in the block below.
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8)
     "proto_ko_fish_flavored_bait",
     "proto_ko_pocket_fireworks",
     "proto_ko_chain_fuse",
-    "proto_ko_explosives_workshop",
     "proto_ko_careful_arrangement",
     "proto_ko_big_badda_boom",
     "proto_ko_the_big_one",
@@ -319,12 +311,11 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_rapid_fire",
     "proto_ko_chained_reactions",
     "proto_ko_sparks_n_splash",
-    # React (4 of 5; Vermillion Pact is out, see above)
+    # React (3; Vermillion Pact arrived with the pool pass, below)
     "proto_ko_sizzle",
     "proto_ko_perfect_timing",
     "proto_ko_flame_dance",
-    "proto_ko_catalytic_converter",
-    # Currencies and defence (7 of 7; Dig In is back in the pool at draft 4)
+    # Currencies and defence (6; Dig In is back in the pool at draft 4)
     "proto_ko_ammo_scavenging",
     # R271 sec.4 item 3: Powder Charge's SHAPE kept and its body redesigned --
     # this is BOOBY TRAP, the pool's only single-target Mine (sec.7 batch one,
@@ -332,7 +323,6 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # because it is still the 0-Energy placer bought from the bank.
     "proto_ko_booby_trap",
     "proto_ko_dig_in",
-    "proto_ko_sugar_rush",
     "proto_ko_run_away",
     "proto_ko_grounded",
     "proto_ko_sorry_jean",
@@ -343,10 +333,10 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # of the pile that asks for a deck around it.
     "proto_ko_dodoco_cover",
     "proto_ko_careful_now",
-    # THE HEXEREI READERS (3 -- R244, the ruled packet's sec.2). One per
-    # rarity, which is the ruling's own shape: a Common that reads the turn, an
-    # Uncommon Power that is DEAD ALONE by ruling (pick 2 at its default), and
-    # a Rare that makes the hand a coven for one turn.
+    # THE COMPANION READERS (3 -- R244, the ruled packet's sec.2; Hexerei
+    # readers until R276). One per rarity: a Common that reads the turn, an
+    # Uncommon Power that pays per Companion play, and a Rare that makes the
+    # hand count as Companion cards for one turn.
     "proto_ko_coven_errand",
     "proto_ko_witches_circle",
     "proto_ko_alices_introduction_magic",
@@ -362,7 +352,6 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # THE POOL PASS (2026-09-05, `EB-491`). Rounds 13 to 16, in the order the
     # packet reads them: Cook, Spray, React, bridge. Why each exists:
     # review/records/klee-pool-pass-2026-09-05.md sec.2.
-    "proto_ko_long_fuse",
     "proto_ko_all_of_my_treasures",
     "proto_ko_fish_blasting",
     "proto_ko_pocket_match",
@@ -370,7 +359,6 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # `proto_ko_fireworks_show` was CUT by R271 sec.4 item 2 and MERGED into
     # Tinder Toss, which now prints "Set off ALL enemies. Deal 3 damage to ALL
     # enemies." at 1 Spark.
-    "proto_ko_kindling",
     "proto_ko_flash_point",
     "proto_ko_vermillion_pact",
     "proto_ko_split_charge",
@@ -395,6 +383,12 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_once_more",
     "proto_ko_sparkling_burst",
     "proto_ko_blazing_delight",
+    # R276 (`review/ruled/klee-review-2026-09-23.md` pick 1): R271 sec.7's
+    # Mines batch and slice two, built together.
+    "proto_ko_hair_trigger",
+    "proto_ko_explosive_frags",
+    "proto_ko_where_did_i_put_it",
+    "proto_ko_big_bounce",
 )
 
 # =============================================================================

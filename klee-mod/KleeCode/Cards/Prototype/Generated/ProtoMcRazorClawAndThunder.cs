@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard
+public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Electro;
@@ -52,14 +52,14 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this), this);
+        ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_razor_claw_and_thunder");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Claw and Thunder"),
-        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

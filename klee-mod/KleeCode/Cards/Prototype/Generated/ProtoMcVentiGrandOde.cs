@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard
+public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Anemo;
@@ -52,14 +52,14 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_venti_grand_ode");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Venti — Wind's Grand Ode"),
-        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

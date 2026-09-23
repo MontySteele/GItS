@@ -68,9 +68,11 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 
 #: The arm's ten verbs. Registered in `effects.OPS`, priced in
 #: `draft.STATIC_OP_PRICING`, and resolved by this module and nothing else.
-#: `hexerei_mark_hand` is R244's (Alice's Introduction Magic) and is the only
-#: one that touches no Bomb -- it widens the Hexerei family for one turn, which
-#: is a Klee rule because the cards that READ the family are hers.
+#: `companion_mark_hand` is R244's (Alice's Introduction Magic; renamed at
+#: R276 when the Hexerei mark became "Companion") and touches no Bomb -- it
+#: makes a hand count as Companion cards for one turn, which is a Klee rule
+#: because the cards that READ it are hers. `mine_bombs` is R276's (Hair
+#: Trigger).
 #: `block_largest_bomb` is R252's (Careful Now, the defence shelf): it READS the
 #: pile and spends nothing, which is what separates it from
 #: `remove_bomb_for_block` beside it.
@@ -83,14 +85,15 @@ OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
-    "multiply_set_off", "draw_per_set_off", "hexerei_mark_hand",
+    "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
+    "mine_bombs",
     "plant_bomb_copy_largest", "grow_bombs_off_aura", "split_largest_bomb",
     #: POOL PASS TWO's two (`EB-732`), and both are about a CARD rather than a
     #: charge -- which is why they are the arm's first two verbs that touch no
-    #: Bomb since `hexerei_mark_hand`. `return_to_hand` (Blast Shield) routes
+    #: Bomb since `companion_mark_hand`. `return_to_hand` (Blast Shield) routes
     #: the played card to the hand instead of the discard; `return_last_set_off`
     #: (Once More!) takes the last Set off card back out of the discard pile.
-    #: They are the arm's anyway, for `hexerei_mark_hand`'s reason: the rule
+    #: They are the arm's anyway, for `companion_mark_hand`'s reason: the rule
     #: "the last SET OFF card" is a fact about her vocabulary and nobody else's.
     "return_to_hand", "return_last_set_off"))
 
@@ -104,8 +107,8 @@ CHAINED_REACTIONS = "ko_chained_reactions"    # re-Bomb per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
 BOMB_REACTION_SPARK = "ko_bomb_reaction_spark"   # Catalytic Converter
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
-#: R244's Uncommon Power, the coven's second reader: "Whenever you play a
-#: Hexerei card, place a Bomb N on a random enemy." Stacks are the Bomb SIZE,
+#: R244's Uncommon Power, the second reader: "Whenever you play a Companion
+#: card, place a Bomb N on a random enemy." (Hexerei until R276.) Stacks are the Bomb SIZE,
 #: Chained Reactions' grammar one trigger over -- and the ruling says in as
 #: many words that it is DEAD ALONE, drafted only by a deck that already holds
 #: witches (pick 2, taken at its default). That is the card, not a defect.
@@ -136,6 +139,10 @@ RETURN_TO_SENDER = "ko_return_to_sender"
 #: and 2 -- so the stack is the RATE, which is what the upgrade moves. Read at
 #: exactly one place, `turn_start_late`, beside Grounded and on the same hook.
 BLAZING_DELIGHT = "ko_blazing_delight"
+#: R276's Explosive Frags: "Whenever a Mine goes off, apply 2 Vulnerable to that
+#: enemy." Stacks are the Vulnerable. Read at exactly one place, `_explode`,
+#: after the Mine's own hit. C# twin: `MineFragsPower`.
+MINE_FRAGS = "ko_mine_frags"
 
 #: Pounding Surprise, in this engine's spelling. THE RELIC IS RULE 4 (the brief
 #: sec.8), and tier 0 already carries the relic as a hook name on the player --
@@ -350,7 +357,7 @@ def roll_to(state: CombatState, round_: int) -> None:
     state.ko_set_off_cards_this_turn = 0
     state.ko_set_off_this_turn = 0
     state.ko_reacted_this_turn = 0
-    state.ko_hexerei_this_turn = 0
+    state.ko_companion_this_turn = 0
     state.ko_damage_set_off_this_play = 0
     state.ko_set_off_multiplier = 1
     state.ko_round = round_
@@ -415,7 +422,8 @@ def peek_multiplier(state: CombatState) -> int:
 # ---------------------------------------------------------------------------
 
 def set_off(state: CombatState, enemy: Optional[Enemy],
-            card: Optional[Card] = None) -> int:
+            card: Optional[Card] = None,
+            overflow: Optional[list] = None) -> int:
     """RULE 2. Every Bomb on `enemy` goes off, ONE AT A TIME, each a Pyro hit
     for its own size. Returns how many charges went off. `SetOff`'s twin.
 
@@ -438,6 +446,9 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
     hit behind the explosion for the aura to feed. A Mine answering an intent
     passes None, and every Skill passes a Skill. The C# reads the same fact off
     `cardSource` at `ProtoBombPower.Explode`.
+
+    `overflow` is R276's (Big Bounce): a list each killing explosion appends
+    its damage past the kill to. None everywhere else, which is byte-identical.
     """
     if enemy is None or not live(state):
         return 0
@@ -452,7 +463,7 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
         if not enemy.alive:
             jump_charges(state, enemy, taken[index:])
             break
-        _explode(state, enemy, charge, multiplier, card)
+        _explode(state, enemy, charge, multiplier, card, overflow)
         exploded += 1
         if state.over or not state.player.alive:
             break
@@ -509,7 +520,8 @@ def _pact_restore(state: CombatState, enemy: Enemy, aura: Optional[str],
 
 
 def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
-             multiplier: int, card: Optional[Card] = None) -> None:
+             multiplier: int, card: Optional[Card] = None,
+             overflow: Optional[list] = None) -> None:
     """ONE explosion, which is the unit every other rule is priced in: one Pyro
     hit for the charge's size, one Spark, one payload, one entry in both of
     rule 7's counters. `Explode`'s twin.
@@ -559,15 +571,28 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # (no hit behind it for the aura to feed). C# twin:
     # `VermillionPactPower.AuraToRestore`.
     pact_aura = _pact_aura_to_restore(state, enemy, card)
+    was_alive = enemy.alive
     dealt = effects.deal_damage_to_enemy(state, enemy, size, element=element,
                                          source=EXPLOSION_SOURCE,
                                          powered=False)
     reacted = state.reactions_this_turn > before
+    # R276 (Big Bounce): the swing past the kill, after the target's own terms.
+    # This engine lets HP go below zero by exactly the overkill, so that is the
+    # overflow. C# twin: `dealt - (hp + block)` at `ProtoBombPower.Explode`.
+    if overflow is not None and was_alive and not enemy.alive and enemy.hp < 0:
+        overflow.append(-enemy.hp)
     # THE PACT, PAID. Before the card's own hit, which is the ordering the face
     # states -- `_op_set_off` resolves every explosion first and lands the
     # printed damage after, so an aura handed back here is standing when that
     # hit arrives. C# twin: `VermillionPactPower.Restore`.
     _pact_restore(state, enemy, pact_aura, reacted)
+    # R276, EXPLOSIVE FRAGS: a Mine that went off leaves Vulnerable on its
+    # enemy, AFTER its own hit, whatever set it off. C# twin:
+    # `MineFragsPower.OnMineWentOff`.
+    frags = state.player.powers.get(MINE_FRAGS, 0)
+    if charge.is_mine and frags and enemy.alive:
+        state.emit("ko_mine_frags", target=enemy.name, amount=frags)
+        powers.apply_power(state, enemy, "vulnerable", frags)
     # `dealt` is the number the hit LANDED for, straight off the funnel that
     # computed it (`EB-270`): Big Badda Boom's face says "the damage the Bombs
     # dealt", and under the target's Vulnerable that is not `size`.
@@ -891,7 +916,7 @@ def turn_start_late(state: CombatState) -> None:
 
 
 def turn_end(state: CombatState) -> None:
-    """The end of Klee's turn: the Hexerei window closes, then Sparks 'n'
+    """The end of Klee's turn: Alice's window closes, then Sparks 'n'
     Splash's ECHO. `BombEchoPower.BeforeSideTurnEnd`'s twin.
 
     THE WINDOW CLOSES FIRST AND UNCONDITIONALLY (R244), ahead of every early
@@ -943,12 +968,6 @@ def turn_end(state: CombatState) -> None:
     if not live(state):
         return
     companion_hexerei.roll_hand_marks(state)
-    # THE RISING HAND COST (`EB-491`, Long Fuse), on the same line and ahead of
-    # every early return below it for the same reason the window is: "it stayed
-    # in your hand" is true of the turn just played whether or not the board
-    # happens to hold an echo. C# twin:
-    # `KleeOverhaulSweepHooks.BeforeSideTurnEnd`.
-    roll_rising_costs(state)
     copies = state.player.powers.get(BOMB_ECHO, 0)
     if not copies:
         return
@@ -966,7 +985,7 @@ def turn_end(state: CombatState) -> None:
 
 
 # ---------------------------------------------------------------------------
-# THE HEXEREI READERS -- R244
+# THE COMPANION READERS -- R244, R276
 # ---------------------------------------------------------------------------
 #
 # `review/ruled/klee-hexerei-readers-2026-09-02.md`: Hexerei is one word on a
@@ -979,39 +998,33 @@ def turn_end(state: CombatState) -> None:
 # family is precisely what the sheet field exists to prevent.
 
 
-def played_hexerei_this_turn(state: CombatState) -> bool:
-    """Coven Errand's read: has a Hexerei card been played this turn?
-
-    `KleeOverhaulLedger.HexereiPlayedThisTurn`'s twin, off the arm's own
-    per-turn ledger rather than off a scan of what was played -- the same
-    argument rule 7's two counters make. The counter is written at the ONE
-    site a Hexerei play is noticed (`note_hexerei_played`), so the card and
-    the Power beside it cannot disagree about what a witch is.
+def played_companion_this_turn(state: CombatState) -> bool:
+    """Coven Errand's read: has a card that counts as a Companion been played
+    this turn? `KleeOverhaulLedger.CompanionPlayedThisTurn`'s twin, off the
+    arm's own per-turn ledger. The counter is written at the ONE site such a
+    play is noticed (`note_companion_played`), so the card and the Power beside
+    it cannot disagree about what counts.
     """
-    return state.ko_hexerei_this_turn > 0
+    return state.ko_companion_this_turn > 0
 
 
-def note_hexerei_played(state: CombatState, card: Card) -> None:
-    """A HEXEREI CARD WAS PLAYED. Count it, then pay Witches' Circle.
+def note_companion_played(state: CombatState, card: Card) -> None:
+    """A CARD THAT COUNTS AS A COMPANION WAS PLAYED (R244, R276). Count it,
+    then pay Witches' Circle.
 
-    Called from `companion_hexerei.note_card_played`, which is the one mouth
-    both arms' readers speak through -- the packet's sec.4 ("a Hexerei-play
-    trigger, which the Nicole stand-in already needs, so it lands once").
-    `AfterCardPlayed` is the mod's site for both.
+    Called from `companion_hexerei.note_card_played`, the one mouth both arms'
+    readers speak through. `AfterCardPlayed` is the mod's site for both.
 
     THE COUNT IS WRITTEN BEFORE THE PAYOUT, and it is why Coven Errand played
-    AFTER a witch goes wide: the ledger is the card's own memory of the turn,
-    not of the play. It is REPLAY-COUNTED like the payout, for the reason
-    `combat._finish_play` counts Rage per play index -- a replayed card is a
-    card played again.
+    AFTER a Companion goes wide. It is REPLAY-COUNTED like the payout -- a
+    replayed card is a card played again.
 
     A RANDOM ENEMY, and a plain Bomb rather than a Mine: this PLACES, it does
-    not detonate (rule 7). Through the same `place` every other source uses, so
-    the new charge can be set off and can jump.
+    not detonate (rule 7).
     """
     if not live(state):
         return
-    state.ko_hexerei_this_turn += 1
+    state.ko_companion_this_turn += 1
     n = state.player.powers.get(WITCHES_CIRCLE, 0)
     if not n:
         return
@@ -1023,7 +1036,7 @@ def note_hexerei_played(state: CombatState, card: Card) -> None:
     place(state, dest, n)
 
 
-def mark_hand_hexerei(state: CombatState) -> int:
+def mark_hand_companion(state: CombatState) -> int:
     """Alice's Introduction Magic, resolved. Returns how many cards were
     marked. The rule itself is `companion_hexerei.mark_hand`; this is the arm's
     gate in front of it, so an op that is Klee's cannot fire on another seat.
@@ -1033,6 +1046,69 @@ def mark_hand_hexerei(state: CombatState) -> int:
     from tier0.engine import companion_hexerei      # late import: cycle
 
     return companion_hexerei.mark_hand(state)
+
+
+# ---------------------------------------------------------------------------
+# R276's TWO NEW RULES -- Hair Trigger and Big Bounce
+# ---------------------------------------------------------------------------
+
+def mine_all_on(state: CombatState, enemy: Optional[Enemy]) -> int:
+    """Hair Trigger: "Your Bombs on this enemy become a Mine." Every charge on
+    `enemy` becomes a Mine at its own size; nothing moves, merges or goes off.
+    Returns how many charges it touched. `ProtoBombPower.MineAllOn`'s twin.
+    """
+    if enemy is None or not live(state):
+        return 0
+    for charge in enemy.ko_charges:
+        charge.is_mine = True
+    if enemy.ko_charges:
+        state.emit("ko_bombs_mined", target=enemy.name,
+                   count=len(enemy.ko_charges))
+    return len(enemy.ko_charges)
+
+
+def bounce_overflow(state: CombatState, from_enemy: Optional[Enemy],
+                    amount: int) -> None:
+    """Big Bounce's second half: `amount` as ONE plain Pyro hit on a random
+    living enemy other than `from_enemy`. Not a Set off, no second bounce,
+    neither Klee's terms (`powered=False`) nor the destination's Vulnerable
+    (`vulnerable=False`), because both were settled where the overflow was
+    measured. `ProtoBombPower.BounceOverflow`'s twin.
+    """
+    from tier0.engine import effects                # late import: cycle
+
+    if amount <= 0 or not live(state):
+        return
+    candidates = [e for e in state.living_enemies if e is not from_enemy]
+    if not candidates:
+        return
+    dest = state.rng.choice(candidates)
+    state.emit("ko_big_bounce", target=dest.name, amount=int(amount))
+    effects.deal_damage_to_enemy(state, dest, int(amount), element="pyro",
+                                 source=EXPLOSION_SOURCE, powered=False,
+                                 vulnerable=False)
+    sweep_jumps(state)
+
+
+def is_set_off_card(card: Card) -> bool:
+    """Is this a Set off card? Where Did I Put It?'s filter (R276), off the
+    row's own `set_off` op anywhere in its body. C# twin: `ISetOffCard`,
+    emitted off the same op."""
+    return any(fx.get("op") == "set_off" for fx in _walk(card.effects))
+
+
+def _walk(effects) -> Iterator[dict]:
+    """Every effect in a body, nested ones included (`conditional` branches and
+    `choose_one` modes) -- the sheet-side `tools.effect_walk.iter_effects`'s
+    reach, which the codegen's `ISetOffCard` is derived with."""
+    for fx in effects or []:
+        if not isinstance(fx, dict):
+            continue
+        yield fx
+        for key in ("then", "else", "effects"):
+            yield from _walk(fx.get(key))
+        for mode in fx.get("modes") or []:
+            yield from _walk(mode.get("effects"))
 
 
 # ---------------------------------------------------------------------------
@@ -1490,39 +1566,6 @@ def split_largest(state: CombatState, growth: int) -> int:
         dest = state.rng.choice(living)
         place(state, dest, half + growth)
     return size
-
-
-# ---------------------------------------------------------------------------
-# THE RISING HAND COST -- `EB-491`
-# ---------------------------------------------------------------------------
-
-
-def roll_rising_costs(state: CombatState) -> None:
-    """Long Fuse's second rule: "Costs 1 more each turn it stays in your hand."
-    `KleeOverhaulRisingCost.RollHand`'s twin.
-
-    THE SITE IS THE END OF KLEE'S TURN, before the hand flush, which is the one
-    moment "it stayed in your hand" becomes true for the turn just played.
-
-    IT RIDES `Card.rising_cost_risen`, which `combat.card_cost` adds and
-    `combat._finish_play` clears -- the base game's own `AddUntilPlayed`
-    modifier, in this engine's spelling: it accumulates, it survives the turn
-    boundary, it is cleared when the card is played, and `run_fight` zeroes it
-    at fight start so it is combat-scoped. NEVER DOWNWARD, which is the printed
-    rule.
-
-    A CARD-LEVEL FIELD AND NOT A POWER, because the fuse is the card's: two
-    Long Fuses in one hand burn separately, and a card that is not in hand is
-    not burning at all.
-    """
-    if not live(state):
-        return
-    for card in list(state.player.hand):
-        if card.rising_cost <= 0:
-            continue
-        card.rising_cost_risen += card.rising_cost
-        state.emit("ko_fuse_burned", card=card.id,
-                   amount=card.rising_cost, total=card.rising_cost_risen)
 
 
 def draw_per_set_off(state: CombatState) -> None:

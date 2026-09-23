@@ -14,22 +14,16 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// KLEE'S THREE HEXEREI READERS (R244, the ruled packet
-/// `review/ruled/klee-hexerei-readers-2026-09-02.md`).
-///
-/// Hexerei is one word on a companion row with no effect of its own -- the
-/// approved Mondstadt workshop's sec.1 pick 2 -- and the payoff was always
-/// meant to live in Klee's own pool. Until this row it did not: eighteen faces
-/// printed the word and exactly one card read it (Nicole's stand-in). These
-/// three are the readers:
+/// KLEE'S THREE COMPANION READERS (R244, the ruled packet
+/// `review/ruled/klee-hexerei-readers-2026-09-02.md`; R276 pick 2 made them
+/// read any Companion card instead of the retired Hexerei mark).
 ///
 ///   * <b>Coven Errand</b> (Common Skill 1) -- "Place a Bomb 5. If you played a
-///     Hexerei card this turn, place it on ALL enemies instead."
+///     Companion card this turn, place it on ALL enemies instead."
 ///   * <b>Witches' Circle</b> (Uncommon Power 1) -- "Whenever you play a
-///     Hexerei card, place a Bomb 3 on a random enemy." DEAD ALONE by the
-///     packet's own pick 2, taken at its default; that is the card.
+///     Companion card, place a Bomb 3 on a random enemy."
 ///   * <b>Alice's Introduction Magic</b> (Rare Skill 1) -- "All cards in your
-///     hand count as Hexerei cards this turn." Upgrade: Retain.
+///     hand count as Companion cards this turn." Upgrade: Retain.
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, said once, on
 /// <see cref="KleeOverhaulRuleTests"/>'s own terms. A card PLAY,
@@ -95,34 +89,34 @@ public class HexereiReaderTests
     // ---- the ledger's third counter --------------------------------------
 
     [Fact]
-    public void The_hexerei_count_is_per_turn()
+    public void The_companion_count_is_per_turn()
     {
         // REAL arithmetic: Coven Errand's whole read is this counter, and it
         // rolls on the same round stamp rule 7's two counters take.
         var ledger = NewLedger();
         ledger.RollTo(1);
-        Assert.Equal(0, (int)ledger.HexereiPlayedThisTurn);
+        Assert.Equal(0, (int)ledger.CompanionPlayedThisTurn);
 
-        ledger.NoteHexereiPlayed();
-        ledger.NoteHexereiPlayed();
-        Assert.Equal(2, (int)ledger.HexereiPlayedThisTurn);
+        ledger.NoteCompanionPlayed();
+        ledger.NoteCompanionPlayed();
+        Assert.Equal(2, (int)ledger.CompanionPlayedThisTurn);
 
         ledger.RollTo(2);
-        Assert.Equal(0, (int)ledger.HexereiPlayedThisTurn);
+        Assert.Equal(0, (int)ledger.CompanionPlayedThisTurn);
     }
 
     [Fact]
-    public void The_count_is_written_at_one_site_and_it_asks_the_mark()
+    public void The_count_is_written_at_one_site_and_it_asks_the_one_question()
     {
         // STRUCTURAL, and labelled. The count has to be answerable whether or
         // not any power is on the board, so it cannot ride one -- it lands on
         // the arm's ONE standing card-play listener. What COUNTS is
-        // `CompanionHexerei.IsHexerei`'s answer and nobody else's, which is
-        // what lets Alice widen the family without either reader learning
-        // about her.
+        // `CompanionHexerei.CountsAsCompanion`'s answer and nobody else's,
+        // which is what lets Alice widen the set without either reader
+        // learning about her.
         var calls = Il.Calls(Il.Method("CompanionHexerei", "NoteCardPlayed"));
-        Assert.Contains("CompanionHexerei.IsHexerei", calls);
-        Assert.Contains("KleeOverhaulLedger.NoteHexereiPlayed", calls);
+        Assert.Contains("CompanionHexerei.CountsAsCompanion", calls);
+        Assert.Contains("KleeOverhaulLedger.NoteCompanionPlayed", calls);
         Assert.Contains("KleeOverhaul.get_Enabled", calls);
 
         var hook = typeof(KleeOverhaulSweepHooks)
@@ -155,7 +149,7 @@ public class HexereiReaderTests
         // checkable is the SHAPE the ruling asks for -- the ledger decides,
         // both arms exist, and both read the same var.
         var calls = Il.Calls(Il.Method("ProtoKoCovenErrand", "OnPlay"));
-        Assert.Contains("KleeOverhaulLedger.get_HexereiPlayedThisTurn", calls);
+        Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn", calls);
         Assert.Contains("ProtoBombPower.PlaceOnAll", calls);
         Assert.Contains("ProtoBombPower.Place", calls);
         Assert.Contains("DynamicVarSet.get_Item", calls);
@@ -183,17 +177,15 @@ public class HexereiReaderTests
     }
 
     [Fact]
-    public void The_circle_pays_only_for_a_hexerei_card_and_only_places()
+    public void The_circle_pays_only_for_a_companion_card_and_only_places()
     {
-        // STRUCTURAL, and labelled, for `Place`'s reason above. THE DEAD-ALONE
-        // HALF IS THE `IsHexerei` GATE: a deck with no witch in it never gets
-        // past it, which is the packet's pick 2 taken at its default and the
-        // card rather than a defect. The co-op clause is the one every other
-        // reader in the arm carries (R205): another Klee's plays are not hers.
+        // STRUCTURAL, and labelled, for `Place`'s reason above. The gate is
+        // `CountsAsCompanion`. The co-op clause is the one every other reader
+        // in the arm carries (R205): another Klee's plays are not hers.
         var hook = typeof(WitchesCirclePower)
             .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
         var calls = Il.Calls(hook);
-        Assert.Contains("CompanionHexerei.IsHexerei", calls);
+        Assert.Contains("CompanionHexerei.CountsAsCompanion", calls);
         Assert.Contains("KleeOverhaul.get_Enabled", calls);
         Assert.Contains("ProtoBombPower.Place", calls);
         // It places a plain Bomb and never sets one off.
@@ -205,18 +197,18 @@ public class HexereiReaderTests
     // ---- Alice's Introduction Magic --------------------------------------
 
     [Fact]
-    public void The_spell_is_itself_hexerei_and_upgrades_to_retain()
+    public void The_spell_is_not_a_companion_and_upgrades_to_retain()
     {
-        // The ruling's second derived reading ("it counts as Hexerei itself,
-        // so it does not need a second witch to start a circle") is the row's
-        // own `hexerei: true`, which the codegen turns into the interface --
-        // and the upgrade is the one the packet names.
+        // R276: the spell is Klee's own card, not a Companion, and it marks
+        // only the hand it was played from -- so it does not count itself any
+        // more (the `hexerei: true` key that made it was retired). The
+        // upgrade is the one the packet names.
         var card = new ProtoKoAlicesIntroductionMagic();
-        Assert.IsAssignableFrom<IHexereiCard>(card);
+        Assert.IsNotAssignableFrom<ICompanionCard>(card);
         Assert.DoesNotContain(CardKeyword.Retain, card.Keywords);
+        Assert.Contains("[gold]Companion[/gold]", Face(card));
 
         var upgraded = Upgraded<ProtoKoAlicesIntroductionMagic>();
-        Assert.IsAssignableFrom<IHexereiCard>(upgraded);
         Assert.Contains(CardKeyword.Retain, upgraded.Keywords);
     }
 
@@ -261,13 +253,12 @@ public class HexereiReaderTests
     }
 
     [Fact]
-    public void Every_reader_asks_the_marks_rather_than_the_interface()
+    public void Every_reader_asks_the_one_question_rather_than_the_interface()
     {
-        // THE POINT OF HAVING ONE READER. Alice widens the family for a turn,
-        // so a payoff that tested `is IHexereiCard` itself would be a second
-        // definition of "Hexerei" -- and it would be the one that disagreed.
-        // Nicole's Ladder is here because R244 MOVED it: it tested the type
-        // before this row.
+        // THE POINT OF HAVING ONE READER. Alice widens the set for a turn, so
+        // a payoff that tested `is ICompanionCard` itself would be a second
+        // definition of "a Companion card" -- and it would be the one that
+        // disagreed.
         foreach (var hook in new[]
                  {
                      typeof(LadderOfAscentPower)
@@ -276,19 +267,20 @@ public class HexereiReaderTests
                          .GetMethod("AfterCardPlayed", HeadlessGame.All)!,
                  })
         {
-            Assert.Contains("CompanionHexerei.IsHexerei", Il.Calls(hook));
+            Assert.Contains("CompanionHexerei.CountsAsCompanion",
+                            Il.Calls(hook));
         }
 
-        // And the reader itself consults BOTH halves: the printed mark
-        // (`is IHexereiCard`, an isinst rather than a call) and the this-turn
+        // And the reader itself consults BOTH halves: the card's own kind
+        // (`is ICompanionCard`, an isinst rather than a call) and the this-turn
         // window, which it reaches through the owner's power list.
         var reader = Il.CallSequence(
-            Il.Method("CompanionHexerei", "IsHexerei"));
+            Il.Method("CompanionHexerei", "CountsAsCompanion"));
         Assert.Contains(reader, c => c.Contains("IntroductionMagicPower"));
         Assert.Contains("Creature.get_Powers", reader);
     }
 
-    // ---- `EB-663`: the mark pays, Companion or not -----------------------
+    // ---- `EB-663`, R276: the Spark asks the readers' own question ---------
 
     /// <summary>Put an already-constructed power on a seat's creature. The
     /// harness's own <c>WithPower</c> allocates uninitialised -- correct for a
@@ -317,13 +309,11 @@ public class HexereiReaderTests
     }
 
     [Fact]
-    public void The_mark_pays_the_spark_whether_or_not_the_card_is_a_companion()
+    public void The_spark_pays_for_a_companion_and_for_a_card_alice_marked()
     {
-        // `EB-663` (Klee r24 lane 1). The grant tested COMPANION *and*
-        // Hexerei, so Alice's own spell -- and every card her window marks --
-        // printed the word, fired the two readers above and paid nothing. One
-        // word cannot mean two sets on one screen, so under the arm the
-        // payment asks the readers' own question.
+        // `EB-663` (Klee r24 lane 1), re-read under R276 pick 2: under the arm
+        // the payment asks the readers' own question, `CountsAsCompanion` --
+        // any Companion card, or a card Alice's window marked.
         //
         // REAL: `PaysKleesSpark` on real cards against a real Klee seat. The
         // MINT is `Settle`, which needs a PlayerChoiceContext and is outside
@@ -335,9 +325,16 @@ public class HexereiReaderTests
             var seat = Seat.Klee();
             var window = Window(seat);
 
+            // Any Companion pays -- including one that never carried the old
+            // Hexerei mark (Diona's Icy Paws).
+            var companion = Held<ProtoMcDionaIcyPaws>(seat);
+            Assert.IsAssignableFrom<ICompanionCard>(companion);
+            Assert.True(KleeCompanionSpark.PaysKleesSpark(companion));
+
+            // The spell itself is Klee's own card and pays nothing.
             var spell = Held<ProtoKoAlicesIntroductionMagic>(seat);
             Assert.IsNotAssignableFrom<ICompanionCard>(spell);
-            Assert.True(KleeCompanionSpark.PaysKleesSpark(spell));
+            Assert.False(KleeCompanionSpark.PaysKleesSpark(spell));
 
             // A card the window marks: no printed word, no Companion tag, and it
             // pays -- the half the r24 lane lost a coven turn to.
@@ -354,14 +351,14 @@ public class HexereiReaderTests
 
             // Nobody else is paid: `EB-434` is untouched by the widening.
             var kokomi = Seat.Kokomi();
-            var hers = Held<ProtoKoAlicesIntroductionMagic>(kokomi);
+            var hers = Held<ProtoMcDionaIcyPaws>(kokomi);
             Assert.False(KleeCompanionSpark.PaysKleesSpark(hers));
 
-            // OFF THE ARM the same spell pays nothing at all, which is R213 B:
-            // the Companion gate is the shipped rule and does not move for a
-            // prototype.
+            // OFF THE ARM a Universal and a marked card pay nothing at all,
+            // which is R213 B: the Personal-pool gate is the shipped rule and
+            // does not move for a prototype.
             KleeOverhaul.Enabled = false;
-            Assert.False(KleeCompanionSpark.PaysKleesSpark(spell));
+            Assert.False(KleeCompanionSpark.PaysKleesSpark(companion));
             Assert.False(KleeCompanionSpark.PaysKleesSpark(marked));
         }
         finally
@@ -373,12 +370,11 @@ public class HexereiReaderTests
     [Fact]
     public void The_arm_is_the_only_place_the_companion_gate_comes_off()
     {
-        // `EB-663`'s other half, and R213 B rather than taste: no SHIPPED row
-        // carries `hexerei:` at all, so off the arm the rule stays the
-        // Companion + Personal-pool test `EB-219` moved into the kit at
-        // parity. Structural, because the OFF world is a different build of
-        // this method: the family read is reached only under the flag, and the
-        // Companion test is what remains below it.
+        // `EB-663`'s other half, and R213 B rather than taste: off the arm the
+        // rule stays the Companion + Personal-pool test `EB-219` moved into
+        // the kit at parity. Structural, because the OFF world is a different
+        // build of this method: the readers' question is reached only under
+        // the flag, and the Personal-pool test is what remains below it.
         var body = Il.CallSequence(
             Il.Method("KleeCompanionSpark", "PaysKleesSpark")).ToList();
         var overhaul = body.FindIndex(c => c.Contains("KleeOverhaul"));

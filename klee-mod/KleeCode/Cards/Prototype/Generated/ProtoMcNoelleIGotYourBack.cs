@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,14 +46,14 @@ public sealed class ProtoMcNoelleIGotYourBack : CustomCardModel, ICompanionCard,
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForHexerei(ArmKeywordTips.ForMine(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForMine(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_noelle_i_got_your_back");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — I Got Your Back"),
-        ("description", "[gold]Hexerei[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever a [gold]Mine[/gold] goes off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

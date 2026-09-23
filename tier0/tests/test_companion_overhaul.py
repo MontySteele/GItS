@@ -194,77 +194,24 @@ def test_the_banner_roster_moves_with_the_pool(overhaul):
 
 
 # ---------------------------------------------------------------------------
-# HEXEREI: ONE WORD, NO EFFECT
+# HEXEREI: RETIRED (R276 pick 2)
 # ---------------------------------------------------------------------------
-
-#: The rows in the Hexerei family: the ones the workshop's sec.3 marks, across
-#: all thirty-four, plus Klee's own coven (`EB-642`).
-HEXEREI_ROWS = {
-    "proto_mc_albedo_solar_isotoma",
-    "proto_mc_fischl_nightrider",
-    "proto_mc_fischl_oz",
-    "proto_mc_sucrose_gust",
-    "proto_mc_sucrose_astable",
-    "proto_mc_sucrose_catalyst_conversion",
-    "proto_mc_nicole_revelation",
-    "proto_mc_mona_stellaris_phantasm",
-    "proto_mc_venti_grand_ode",
-    # The second wave's four, off the same sec.3 lines: Durin, Razor twice,
-    # and Varka are all tagged characters in the workshop's own list.
-    "proto_mc_durin_binary_form",
-    "proto_mc_razor_claw_and_thunder",
-    "proto_mc_razor_lightning_fang",
-    "proto_mc_varka_sturm_und_drang",
-    # The coven Personal off the same sec.3 line as the shipped Prune row it
-    # supersedes: Prune is a tagged character in the workshop's own list.
-    "proto_mc_prune_hexhunter_chime",
-    # THE FAMILY STAND-INS (R236 sec.3), each tagged like the Universal it is
-    # handed out in place of -- which is what lets Nicole's own stand-in pay
-    # for the other three.
-    "proto_mc_albedo_tectonic_tide",
-    "proto_mc_fischl_sinful_hex",
-    "proto_mc_nicole_ladder_of_ascent",
-    "proto_mc_sucrose_mollis_favonius",
-    # THE COVEN, `EB-642`'s follow-up (a D default, disclosed): the eight
-    # Personals of Klee's that carried no mark. R265 pick 1 made the printed
-    # word the payer set, and the workshop's tagged list would have cut the
-    # grant from her own coven -- which the pick did not name as a cost -- so
-    # the coven joins the family it was always the middle of. They are the
-    # rows carrying `personal_pool: klee`, and no other row moved.
-    "proto_mc_barbara_front_row_seat",
-    "proto_mc_diona_shaken_not_purred",
-    "proto_mc_noelle_i_got_your_back",
-    "proto_mc_kaeya_cold_blooded_strike",
-    "proto_mc_jean_lions_fang",
-    "proto_mc_sayu_silencers_secret",
-    "proto_mc_qiqi_herald_of_frost",
-    "proto_mc_yaoyao_yuegui_throwing_mode",
-}
+#
+# The workshop's family mark had one word and, by R265, five readers (Klee's
+# Spark, Coven Errand, Witches' Circle, Alice's Introduction Magic, Nicole's
+# Ladder). R276 pick 2 made every one of them read "a Companion card" instead,
+# so the mark is on no row and no module of the engine reads it.
 
 
-def test_the_hexerei_mark_is_on_exactly_the_rows_the_workshop_names():
-    marked = {c.id for c in loader.prototype_cards()
-              if c.id.startswith("proto_mc_") and c.hexerei}
-    assert marked == HEXEREI_ROWS
+def test_no_companion_row_carries_the_retired_hexerei_mark():
+    import yaml
+
+    rows = yaml.safe_load(
+        (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
+    assert not [r["id"] for r in rows if isinstance(r, dict) and "hexerei" in r]
 
 
-#: THE FILES ALLOWED TO NAME THE FAMILY MARK, and the list is the whole point.
-#:
-#: Pick 2's words were "It does nothing by itself", and this test was the gate
-#: that kept it so: the field's own declaration, and nothing else. R236 sec.3
-#: MOVED IT, which is exactly what the gate was built to force -- Nicole's
-#: family stand-in, "whenever you play a Hexerei card", is the Klee reader pick
-#: 2 said would carry the payoff. So the mark is mechanical now and the gate is
-#: a list of ONE reader rather than of none. A second reader is still a
-#: deliberate change: adding a file here means somebody answered "does this
-#: row's FAMILY really decide a rule?" out loud, in a diff.
-HEXEREI_READERS = [
-    "tier0/engine/companion_hexerei.py",     # Nicole's Ladder of Divine Ascent
-    "tier0/engine/state.py",                 # the field's own declaration
-]
-
-
-def test_only_the_declared_readers_name_the_hexerei_mark():
+def test_no_engine_module_reads_a_hexerei_field():
     readers = []
     for path in sorted((REPO / "tier0").rglob("*.py")):
         if "tests" in path.parts:
@@ -273,8 +220,7 @@ def test_only_the_declared_readers_name_the_hexerei_mark():
         for hit in re.finditer(r"\.hexerei\b|\bhexerei\s*[:=]", text):
             line = text[:hit.start()].count("\n") + 1
             readers.append(f"{path.relative_to(REPO).as_posix()}:{line}")
-    assert sorted({r.split(":")[0] for r in readers}) == HEXEREI_READERS, \
-        readers
+    assert not readers, readers
 
 
 # ---------------------------------------------------------------------------

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoBangBang : CustomCardModel, IElementalCard, ISparkPricedCard
+public sealed class ProtoKoBangBang : CustomCardModel, IElementalCard, ISetOffCard, ISparkPricedCard
 {
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;

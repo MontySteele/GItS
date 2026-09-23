@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalCard, ICompanionCard, IHexereiCard
+public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Cryo;
@@ -52,14 +52,14 @@ public sealed class ProtoMcKaeyaColdBloodedStrike : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForGrounded(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this), this), this);
+        ArmKeywordTips.ForGrounded(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, includesBombRules: false), this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_kaeya_cold_blooded_strike");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya — Cold-Blooded Strike"),
-        ("description", "[gold]Hexerei[/gold]. Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] pays even if you played a [gold]Set off[/gold] card."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Apply [gold]Cryo[/gold]. Next turn, [gold]Grounded[/gold] pays even if you played a [gold]Set off[/gold] card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

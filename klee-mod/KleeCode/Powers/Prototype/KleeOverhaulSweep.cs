@@ -108,8 +108,8 @@ public sealed class KleeOverhaulSweepHooks : AbstractModel
     /// any owner -- a companion card is played by the same player and reaches
     /// this hook exactly as her own cards do.
     ///
-    /// AND, SINCE R244, THE ARM'S HEXEREI COUNT. Coven Errand reads "did you
-    /// play a Hexerei card this turn", which has to be answerable whether or
+    /// AND, SINCE R244, THE ARM'S COMPANION COUNT. Coven Errand reads "did
+    /// you play a Companion card this turn", which has to be answerable whether or
     /// not any power is on the board -- so it cannot ride a power the way
     /// Witches' Circle's payout does, and it lands on the arm's ONE standing
     /// card-play listener rather than on a second <c>AbstractModel</c>
@@ -123,34 +123,6 @@ public sealed class KleeOverhaulSweepHooks : AbstractModel
         CompanionHexerei.NoteCardPlayed(cardPlay);
         await ProtoBombPower.SweepJumps(
             choiceContext, cardPlay.Card?.CombatState);
-    }
-
-    /// <summary>
-    /// THE RISING HAND COST (the pool pass, `EB-491`), and it is here for the
-    /// reason the Hexerei count above is: the arm already keeps ONE standing
-    /// listener, and a second <c>AbstractModel</c> subscription registered for
-    /// one card's rule would be a second thing to keep wired.
-    ///
-    /// THE END OF KLEE'S SIDE TURN is the moment "it stayed in your hand"
-    /// becomes true for the turn just played, and it is the site
-    /// <c>BombEchoPower</c> already takes for the other end-of-turn rule this
-    /// arm has. The whole rule is <see cref="KleeOverhaulRisingCost.RollHand"/>;
-    /// this is only the mouth. Sim twin: <c>klee_overhaul.turn_end</c>, which
-    /// rolls the fuses on the same line it rolls the Hexerei window.
-    /// </summary>
-    public override Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
-    {
-        if (!KleeOverhaul.Enabled || side != CombatSide.Player)
-        {
-            return Task.CompletedTask;
-        }
-        foreach (var creature in participants)
-        {
-            KleeOverhaulRisingCost.RollHand(creature.Player);
-        }
-        return Task.CompletedTask;
     }
 
     /// <summary>

@@ -78,3 +78,8 @@ retired:
   - {id: KLEEMOD-PROTO_TRUE_SPARK_KNIGHT,            owner: klee,   left: "KLEESPARK arm deleted (EB-750)"}
   - {id: KLEEMOD-RISING_TIDE,                        owner: furina, left: "cut from the Furina sheet"}
   - {id: KLEEMOD-SWIFT_CURRENTS,                     owner: kokomi, left: "cut from the Kokomi sheet"}
+  - {id: KLEEMOD-PROTO_KO_CATALYTIC_CONVERTER, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KO_EXPLOSIVES_WORKSHOP, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KO_KINDLING, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KO_LONG_FUSE, owner: klee, left: "left the prototype codegen"}
+  - {id: KLEEMOD-PROTO_KO_SUGAR_RUSH, owner: klee, left: "left the prototype codegen"}

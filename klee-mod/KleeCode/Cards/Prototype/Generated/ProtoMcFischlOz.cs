@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcFischlOz : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcFischlOz : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,14 +46,14 @@ public sealed class ProtoMcFischlOz : CustomCardModel, ICompanionCard, IHexereiC
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOz(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForOz(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_oz");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fischl — Oz, at Your Side"),
-        ("description", "[gold]Hexerei[/gold]. {IfUpgraded:show:Draw 1 card. |}At the end of your turn, [gold]Oz[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy."),
+        ("description", "{IfUpgraded:show:Draw 1 card. |}At the end of your turn, [gold]Oz[/gold] deals 5 [gold]Electro[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

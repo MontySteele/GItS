@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,14 +49,14 @@ public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCa
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this), this), this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_mona_stellaris_phantasm");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mona — Stellaris Phantasm"),
-        ("description", "[gold]Hexerei[/gold]. Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply {PowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Next turn, apply {PowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

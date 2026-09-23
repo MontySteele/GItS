@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,14 +49,14 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IHe
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCovenSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, includesBombRules: false, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_astable");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Astable Anemohypostasis"),
-        ("description", "[gold]Hexerei[/gold]. [gold]Swirl[/gold] ALL enemies."),
+        ("description", "[gold]Swirl[/gold] ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

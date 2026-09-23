@@ -98,7 +98,7 @@ the cook-or-cash decision, and none of them is "the bomb is a shield."
 Seven sentences. If a rule is not here, it is a card.
 
 1. **Bomb.** A numbered charge on an enemy. At the start of Klee's turn every
-   Bomb grows by **3** (placeholder). A Bomb never goes off on its own.
+   Bomb grows by **4** (placeholder). A Bomb never goes off on its own.
 2. **Set off.** Only a card that says *Set off* makes Bombs go off. It sets
    off every Bomb on the target, **one at a time, before the rest of the card
    resolves**, each dealing its number as Pyro damage. Plain Attacks, a co-op
@@ -114,10 +114,11 @@ Seven sentences. If a rule is not here, it is a card.
 5. **Pyro.** Every Klee Attack applies Pyro, except the base game's Strike,
    which applies nothing ([USER], 2026-09-02: the basic cards are supposed
    to be bad), and so does every explosion. An
-   explosion is an ordinary Pyro hit: Vulnerable and Weak on the enemy,
-   Strength on Klee, and every reaction in the element table apply to a
-   cooked bomb without a word printed on her cards. Off-element auras come
-   from companions, as the law says now.
+   explosion is an ordinary Pyro hit: the enemy's Vulnerable, its per-hit
+   cap and every reaction in the element table apply to a cooked bomb
+   without a word printed on her cards. Klee's own Strength and Weak do not:
+   a Bomb carries the target's modifiers only (`EB-343`, R248). Off-element
+   auras come from companions, as the law says now.
 6. **Mine.** A Mine is a Bomb that *also* goes off when its enemy attacks
    Klee, before the attack lands. It cooks like any Bomb. Mines come from
    Jumpy Dumpty and from cards that say so.
@@ -444,23 +445,21 @@ Your refinement, taken: **Klee is herself Hexerei**, so the source game's
 makes Hexerei a *family* rather than a path, and it changes the shape of
 §7.2 and §7.3 for the better in three ways.
 
-1. **Hexerei is a one-word tag on companion cards, with no effect of its
-   own.** Fischl, Sucrose, Albedo, Razor, Mona, Venti, Durin, Nicole, Varka
-   and Prune carry it because they carry it in the source game. A tag is not
-   an engine interaction, so the Universal contract (R234 §1.2) is untouched
-   and Kokomi and Furina see the same card with a dead trait, exactly as a
-   Natlan tag would be dead for a Mondstadt character in the source game.
-2. **Klee's own cards read the tag.** This is where the Klee-specific payoff
-   lives, and it is the Prune mechanism generalized: her kit already mints
-   Sparks in response to a Personal play (`KLEE_COMPANION_SPARK_*`); it can
-   respond to a Hexerei play the same way. Three or four readers, no more,
-   as a bridge into the companion layer and not a fourth loop: a Common
-   ("if you played a Hexerei card this turn, plant a Bomb"), an Uncommon
-   Power ("whenever you play a Hexerei card, plant a Bomb 3 on a random
-   enemy" or "…gain a Spark"), a Rare ("Alice's Letters: Hexerei cards cost
-   1 less; when one triggers a reaction, the next Bomb set off this turn
-   deals that element"). Varka, Nicole or Durin, when they ship, write their
-   own readers against the same tag, and inherit every tagged card for free.
+1. **The tag became "Companion" (R276 pick 2).** Hexerei was a one-word
+   tag on the source game's Hexerei characters' companion cards. Under the
+   prototype arm Klee starts with no companion, so a reader that waited on
+   the companion slot to offer the right family and her reward to offer a
+   reader rarely came together; R276 made every reader read any Companion
+   card instead, and the printed tag left every face.
+2. **Klee's own cards read a Companion play.** This is where the
+   Klee-specific payoff lives, and it is the Prune mechanism generalized:
+   her kit mints Sparks in response to a Companion play (1, +1 if it
+   reacted, +1 if upgraded, at most 3; `KLEE_COMPANION_SPARK_*`). Three
+   readers, as a bridge into the companion layer and not a fourth loop:
+   Coven Errand ("if you played a Companion card this turn, place it on ALL
+   enemies instead"), Witches' Circle ("whenever you play a Companion card,
+   place a Bomb 3 on a random enemy") and Alice's Introduction Magic ("all
+   cards in your hand count as Companion cards this turn").
 3. **Hexerei stand-ins are the exception, not the rule.** A Universal gets
    a Hexerei stand-in (its own name and text, dealt to Klee and to future
    Hexerei characters in place of the Universal, by the same swap as §7.1)

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard, IHexereiCard
+public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,14 +46,14 @@ public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard, I
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(ArmKeywordTips.ForHexerei(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForCovenSpark(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_nicole_revelation");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nicole — Revelation, Uncreated Light"),
-        ("description", "[gold]Hexerei[/gold]. At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold]."),
+        ("description", "At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
