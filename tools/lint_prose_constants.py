@@ -185,6 +185,16 @@ CONTEXT_CHARS = 60    # window each side of the numeral
 # finding with it.
 RARE_FRACTION = 0.02
 
+# THE TWO CARD-FACE STAPLES, common by fiat and not by measurement. `block`
+# and `damage` are the base game's two numbered nouns, printed on most cards;
+# `damage` has always cleared RARE_FRACTION, and `block` sat within a string
+# or two of it (26 of 1,332 displayed strings when the Klee pool expansion and
+# Furina's Stage batch two landed together, 2026-09-23), so its verdict on
+# every "Gain N Block" face flipped whenever the corpus grew elsewhere -- the
+# EXCLUDED_DIRS finding one word over. A lone shared word on either is never
+# enough to tie a numeral to a constant.
+ALWAYS_COMMON = frozenset({"block", "damage"})
+
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z'-]*")
 NUM_RE = re.compile(r"(?<![\w.])(\d+(?:\.\d+)?)(?![\w.])")
 CAMEL_RE = re.compile(r"[A-Z]+(?![a-z])|[A-Z][a-z]*|[a-z]+|\d+")
@@ -571,7 +581,7 @@ def common_words(corpus: list[tuple[str, int, str]]) -> set[str]:
         for w in prose_words(text):
             counts[w] = counts.get(w, 0) + 1
     cap = max(1, RARE_FRACTION * len(corpus))
-    return {w for w, c in counts.items() if c > cap}
+    return {w for w, c in counts.items() if c > cap} | ALWAYS_COMMON
 
 
 def loc_corpus() -> tuple[list[tuple[str, int, str]], list[str]]:

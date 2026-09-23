@@ -431,6 +431,18 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "return_to_hand": [_hook("shared", "hand_contents", "write")],
     "return_last_set_off": [_hook("shared", "discard_pile", "use"),
                             _hook("shared", "hand_contents", "write")],
+    # THE POOL EXPANSION's five (R276), filed by what they move. The two
+    # growths read and write the pile; the discard pick moves a card between
+    # piles as Once More! does; the companion grant writes the hand; and
+    # Alice's Detonator's install writes the hand every turn it stands.
+    "grow_largest": [_hook("private", "bombs", "read"),
+                     _hook("private", "bombs", "write")],
+    "multiply_largest_bomb": [_hook("private", "bombs", "read"),
+                              _hook("private", "bombs", "write")],
+    "fetch_from_discard": [_hook("shared", "discard_pile", "use"),
+                           _hook("shared", "hand_contents", "write")],
+    "add_random_companion": [_hook("shared", "hand_contents", "write")],
+    "grant_kapow_each_turn": [_hook("shared", "hand_contents", "write")],
     "gain_spark": [_hook("private", "sparks", "write")],
     # A competing use for the bank, mirroring spend_encore: the Sparks paid
     # here are Sparks the threshold cash-out no longer reaches (packet 4.5).

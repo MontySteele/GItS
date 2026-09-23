@@ -202,6 +202,12 @@ KLEE_OVERHAUL_GROUNDED_SPARK = 1
 # the deck has no reader at all. C# twin `KleeOverhaulLaw.SparkSeedFloors`.
 KLEE_OVERHAUL_SPARK_SEED_FLOORS = 3
 
+# R276, Wait For It...'s payout per copy: "draw 2 cards and gain 1 Energy" the
+# next time one of her Bombs reacts this turn. Mirrored by value from
+# `WaitForItPower.PayoutHand` / `.ReactionEnergy`.
+KLEE_OVERHAUL_WAIT_FOR_IT_CARDS = 2
+KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY = 1
+
 # THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, in the
 # printed order.
 #
@@ -389,6 +395,45 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_explosive_frags",
     "proto_ko_where_did_i_put_it",
     "proto_ko_big_bounce",
+    # THE POOL EXPANSION (R276, 2026-09-23): THIRTY rows toward the 78-card
+    # pool R276 ruled (2 Common, 18 Uncommon, 10 Rare), in the sheet's order.
+    # Designed by the main session: the Companion route (Playdate, Team
+    # Effort, Tag Along, Come Back and Play!, Friendship Bracelet, Adventure
+    # Club), the Spark-supported Cook (One More Charge, Sit Tight, Boom Badge,
+    # Wait For It..., Patience, Klee!, Half a Mountain, Favonius Escort),
+    # retrieval and mischief (Treasure Map, Party Poppers, Klee's Secret Base,
+    # Alice's Detonator), and more Mines and Spray (the rest). Its own block
+    # at the end of the tuple, like the slices above it.
+    "proto_ko_hiding_spot",
+    "proto_ko_playdate",
+    "proto_ko_jumpy_dumpty_mk_iii",
+    "proto_ko_spinning_sparkler",
+    "proto_ko_mine_all_mine",
+    "proto_ko_team_effort",
+    "proto_ko_fish_fry",
+    "proto_ko_one_more_charge",
+    "proto_ko_sit_tight",
+    "proto_ko_treasure_map",
+    "proto_ko_tag_along",
+    "proto_ko_come_back_and_play",
+    "proto_ko_boom_badge",
+    "proto_ko_wait_for_it",
+    "proto_ko_duck_and_run",
+    "proto_ko_party_poppers",
+    "proto_ko_look_out",
+    "proto_ko_patience_klee",
+    "proto_ko_friendship_bracelet",
+    "proto_ko_secret_base",
+    "proto_ko_half_a_mountain",
+    "proto_ko_favonius_escort",
+    "proto_ko_adventure_club",
+    "proto_ko_windblume_fireworks",
+    "proto_ko_fireworks_finale",
+    "proto_ko_dodoco",
+    "proto_ko_aftershock",
+    "proto_ko_spark_knight",
+    "proto_ko_alices_detonator",
+    "proto_ko_second_surprise",
 )
 
 # =============================================================================

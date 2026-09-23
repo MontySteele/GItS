@@ -154,6 +154,13 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
             source ?? SourceOf(cardSource), Bank(player) - before, before);
         SyncGauge(player);
+#if PROTOTYPE_CARDS
+        // R276, SPARK KNIGHT, and it rides this chokepoint for the ledger's
+        // reason: every Spark any source grants passes here, so "whenever you
+        // gain a Spark" has one door. The Sparks that LANDED, not the ask.
+        await SparkKnightPower.AfterSparksGained(
+            choiceContext, player, Bank(player) - before);
+#endif
     }
 
     /// <summary>

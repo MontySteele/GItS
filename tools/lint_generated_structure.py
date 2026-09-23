@@ -215,12 +215,28 @@ def _effects(card: dict) -> list[dict]:
     return list(iter_effects(card.get("effects")))
 
 
+#: R276. The Klee arm's per-hit damage riders: the hit count is an ARGUMENT
+#: to one `ProtoBombPower` call that loops the hits itself (each hit has its
+#: own rider), so the marker to look for is that call, not `WithHitCount`.
+_DAMAGE_RIDERS = ("plant_on_hit", "grow_on_hit")
+
+
 def _has_literal_times(card: dict) -> bool:
     """A multi-hit attack whose hit count is a plain integer on the sheet."""
     return any(
         isinstance(e.get("times"), int) and e["times"] > 1
         for e in _effects(card)
         if e.get("op") == "damage"
+        and not any(k in e for k in _DAMAGE_RIDERS)
+    )
+
+
+def _has_rider_times(card: dict) -> bool:
+    """R276: a multi-hit rider attack, whose count rides the helper call."""
+    return any(
+        isinstance(e.get("times"), int) and e["times"] > 1
+        for e in _effects(card)
+        if e.get("op") == "damage" and any(k in e for k in _DAMAGE_RIDERS)
     )
 
 
@@ -259,6 +275,16 @@ MECHANICS = (
         why=(
             "A5: hit count lives on the command, not in the sentence. Drop "
             "WithHitCount and a 3x2 attack quietly becomes a 2"
+        ),
+    ),
+    Mechanic(
+        name="rider_times",
+        applies=_has_rider_times,
+        markers=("ProtoBombPower.HitRandomAndPlant", "ProtoBombPower.HitAndGrow"),
+        why=(
+            "R276: a per-hit rider's hit count is the argument to the one "
+            "ProtoBombPower call that loops the hits; lose the call and the "
+            "rider and the count go with it"
         ),
     ),
     Mechanic(

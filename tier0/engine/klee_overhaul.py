@@ -95,7 +95,14 @@ OVERHAUL_OPS = frozenset((
     #: (Once More!) takes the last Set off card back out of the discard pile.
     #: They are the arm's anyway, for `companion_mark_hand`'s reason: the rule
     #: "the last SET OFF card" is a fact about her vocabulary and nobody else's.
-    "return_to_hand", "return_last_set_off"))
+    "return_to_hand", "return_last_set_off",
+    #: THE POOL EXPANSION's five (R276): a flat growth of the largest Bomb
+    #: (One More Charge, Treasure Map), the largest Bomb multiplied (Half a
+    #: Mountain), a pick out of the discard pile (Treasure Map, Come Back and
+    #: Play!), random Companion cards made free this turn (Tag Along,
+    #: Adventure Club) and Alice's Detonator's install.
+    "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
+    "add_random_companion", "grant_kapow_each_turn"))
 
 #: The player-side powers this arm reads, named here rather than spelled at
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
@@ -358,6 +365,7 @@ def roll_to(state: CombatState, round_: int) -> None:
     state.ko_set_off_this_turn = 0
     state.ko_reacted_this_turn = 0
     state.ko_companion_this_turn = 0
+    state.ko_aftershock_spent = False
     state.ko_damage_set_off_this_play = 0
     state.ko_set_off_multiplier = 1
     state.ko_round = round_
@@ -613,6 +621,9 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
             place(state, other, charge.payload_mine_all, is_mine=True)
 
     _notify_explosion(state, enemy, size, reacted)
+    # R276: the charge-aware door, after the bus (`KleeExpansion
+    # .AfterChargeExploded`, called at the same place in `Explode`).
+    _after_charge_exploded(state, enemy, charge, reacted)
 
 
 def _notify_explosion(state: CombatState, enemy: Enemy, size: int,
@@ -891,6 +902,11 @@ def turn_start_late(state: CombatState) -> None:
     # not for `EB-516` and not for `EB-749` -- and what moves with the
     # condition is the stand-in's printed clause, which now reads "Next turn,
     # Grounded pays even if you played a Set off card."
+    # R276: Klee's Secret Base, Dodoco and Alice's Detonator, on the same
+    # `AfterPlayerTurnStart` beat as Blazing Delight and ahead of Grounded's
+    # early return.
+    _turn_start_expansion(state)
+
     from tier0.engine import companion_standins    # late import: cycle
 
     # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the
@@ -968,9 +984,8 @@ def turn_end(state: CombatState) -> None:
     if not live(state):
         return
     companion_hexerei.roll_hand_marks(state)
+    # R276: Patience, Klee!, and the three one-turn windows close.
     copies = state.player.powers.get(BOMB_ECHO, 0)
-    if not copies:
-        return
     for _ in range(copies):
         candidates = [e for e in state.living_enemies if e.ko_charges]
         if not candidates:
@@ -982,6 +997,10 @@ def turn_end(state: CombatState) -> None:
         state.emit("ko_bomb_echo", target=target.name, amount=size)
         effects.deal_damage_to_enemy(state, target, size, element="pyro",
                                      source=ECHO_SOURCE)
+    # R276: Patience, Klee!, AFTER the echo -- the mod grows at the strictly
+    # later `AfterSideTurnEnd`, so the echo never pays a Patience growth the
+    # same turn -- and the three one-turn windows close.
+    _turn_end_expansion(state)
 
 
 # ---------------------------------------------------------------------------
@@ -1668,3 +1687,448 @@ def aimed_at(state: CombatState, enemy: Optional[Enemy]) -> Iterator[None]:
         yield
     finally:
         state.card_aim, state.card_aim_bound = previous, previously_bound
+
+
+# ---------------------------------------------------------------------------
+# THE POOL EXPANSION (R276, 2026-09-23) -- the thirty rows' twins
+# ---------------------------------------------------------------------------
+#
+# C# FIRST, and these mirror it clause for clause: `KleeExpansion.cs`,
+# `KleeExpansionPowers.cs` and `ProtoBombPowerExpansion.cs` under
+# `klee-mod/KleeCode/Powers/Prototype/`. Every reader below is gated on `live`
+# exactly as the arm's other rules are.
+
+#: The expansion's player-side powers, each applied by an ordinary
+#: `apply_power` row (Alice's Detonator by its own install op).
+PLAYDATE = "ko_playdate"                  # next Companion card costs N less
+BOOM_BADGE = "ko_boom_badge"              # next N Set off cards played twice
+WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw 2, +1 Energy
+PARTY_POPPERS = "ko_party_poppers"        # Spark-priced play: Bomb N
+LOOK_OUT = "ko_look_out"                  # a Mine goes off: N Block
+PATIENCE = "ko_patience"                  # quiet turn: largest grows N
+FRIENDSHIP_BRACELET = "ko_friendship_bracelet"   # Companion play: grows N
+SECRET_BASE = "ko_secret_base"            # empty board at turn start: Bomb N
+DODOCO = "ko_dodoco"                      # turn start: Mine N
+AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
+SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N Pyro
+SECOND_SURPRISE = "ko_second_surprise"    # a Mine goes off: half-size Bomb
+ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Ka-pow!
+ALICES_DETONATOR_PLUS = "ko_alices_detonator_plus"  # ... an upgraded one
+
+#: Wait For It...'s printed payout, per copy. `WaitForItPower.Cards/Energy`.
+WAIT_FOR_IT_CARDS = int(C.KLEE_OVERHAUL_WAIT_FOR_IT_CARDS)
+WAIT_FOR_IT_ENERGY = int(C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY)
+
+#: The one Ka-pow! Alice's Detonator hands over -- the starter's own row.
+KAPOW_ID = "proto_ko_kapow"
+
+
+def is_companion_card(state: CombatState, card: Optional[Card]) -> bool:
+    """A Companion card, R276's reading: `companion_hexerei.counts_as_companion`
+    and nobody else's, so the pool expansion's readers and Coven Errand cannot
+    disagree about what counts."""
+    if card is None:
+        return False
+    from tier0.engine import companion_hexerei      # late import: cycle
+
+    return companion_hexerei.counts_as_companion(state, card)
+
+
+def is_set_off_card(card: Optional[Card]) -> bool:
+    """Does this card say Set off anywhere on its face? `ISetOffCard`'s twin,
+    read off the same effect tree the codegen stamps the interface from."""
+    if card is None:
+        return False
+    from tier0.engine import effects                # late import: cycle
+
+    return any(fx.get("op") == "set_off"
+               for fx in effects._walk_effects(card.effects))
+
+
+def costs_sparks(card: Optional[Card]) -> bool:
+    """Party Poppers' "a card that costs Sparks": the cost line's price, so an
+    X-priced card counts. `KleeExpansion.CostsSparks`'s twin."""
+    if card is None:
+        return False
+    from tier0.engine import effects                # late import: cycle
+
+    return any(fx.get("op") == "spend_spark"
+               and effects.spend_spark_price(fx) > 0 for fx in card.effects)
+
+
+def note_card_played(state: CombatState, card: Card) -> None:
+    """R276's card-play listener, once per play index (the replay-counted
+    shape `note_companion_played` takes): Friendship Bracelet's growth and
+    Party Poppers' Bomb, the two Powers' `AfterCardPlayed` twins. The
+    Companion COUNT Team Effort reads is `note_companion_played`'s."""
+    if not live(state):
+        return
+    if is_companion_card(state, card):
+        n = state.player.powers.get(FRIENDSHIP_BRACELET, 0)
+        if n:
+            grown = grow_largest(state, n)
+            state.emit("ko_friendship_bracelet", amount=n, size=grown)
+    n = state.player.powers.get(PARTY_POPPERS, 0)
+    if n and costs_sparks(card):
+        living = list(state.living_enemies)
+        if living:
+            dest = state.rng.choice(living)
+            state.emit("ko_party_poppers", target=dest.name, size=n)
+            place(state, dest, n)
+
+
+def playdate_discount(state: CombatState, card: Card) -> int:
+    """What Playdate takes off this card's cost right now, 0 if nothing.
+    `PlaydatePower.TryModifyEnergyCostInCombat`'s twin."""
+    if not live(state) or not is_companion_card(state, card):
+        return 0
+    return int(state.player.powers.get(PLAYDATE, 0))
+
+
+def spend_playdate(state: CombatState, card: Card) -> None:
+    """The next Companion card played spends the whole discount."""
+    if playdate_discount(state, card):
+        state.player.powers.pop(PLAYDATE, None)
+        state.emit("ko_playdate_spent", card=card.id)
+
+
+def take_boom_badge(state: CombatState, card: Card) -> int:
+    """Boom Badge: the extra plays this card is owed -- 1 for the next Set off
+    card while a badge is up, spending one badge. `ModifyCardPlayCount` plus
+    the badge's `AfterCardPlayed`."""
+    if not live(state) or not is_set_off_card(card):
+        return 0
+    n = state.player.powers.get(BOOM_BADGE, 0)
+    if n <= 0:
+        return 0
+    if n > 1:
+        state.player.powers[BOOM_BADGE] = n - 1
+    else:
+        state.player.powers.pop(BOOM_BADGE, None)
+    state.emit("ko_boom_badge", card=card.id)
+    return 1
+
+
+def grow_largest(state: CombatState, amount: int) -> int:
+    """Her single largest Bomb grows by `amount`; returns its NEW size, 0 if
+    she has none. `ProtoBombPower.GrowLargest`'s twin, off `largest_charge`
+    (the one reading of "your largest Bomb")."""
+    enemy, index, size = largest_charge(state)
+    if enemy is None or size <= 0:
+        return 0
+    charge = enemy.ko_charges[index]
+    charge.size += int(amount)
+    state.emit("ko_grow_largest", amount=int(amount), target=enemy.name,
+               size=charge.size)
+    return charge.size
+
+
+def grow_largest_by(state: CombatState, amount: int, draw_if_at_least: int,
+                    draw: int) -> int:
+    """One More Charge and Treasure Map. `ProtoBombPower.GrowLargestBy`."""
+    if not live(state):
+        return 0
+    grown = grow_largest(state, amount)
+    if draw_if_at_least > 0 and draw > 0 and grown >= draw_if_at_least:
+        state.draw(draw)
+    return grown
+
+
+def multiply_largest(state: CombatState, factor: int) -> int:
+    """Half a Mountain: the largest Bomb's current size times `factor`.
+    `ProtoBombPower.MultiplyLargest`'s twin."""
+    if not live(state):
+        return 0
+    size = largest_charge(state)[2]
+    if size <= 0 or factor <= 1:
+        return size
+    return grow_largest(state, size * (int(factor) - 1))
+
+
+def grow_largest_on(enemy: Enemy, amount: int) -> bool:
+    """Spinning Sparkler: THIS enemy's largest charge grows by `amount`.
+    `ProtoBombPower.GrowLargestOn`'s twin (first largest on a tie)."""
+    if not enemy.ko_charges or amount <= 0:
+        return False
+    best = max(range(len(enemy.ko_charges)),
+               key=lambda i: (enemy.ko_charges[i].size, -i))
+    enemy.ko_charges[best].size += int(amount)
+    return True
+
+
+def half_of(size: int) -> int:
+    """Second Surprise's Bomb: half, rounded down. `HalfOf`'s twin."""
+    return int(size) // 2 if size > 0 else 0
+
+
+def place_or_jump(state: CombatState, enemy: Enemy, size: int,
+                  is_mine: bool = False) -> None:
+    """Place on `enemy`, or -- if it has died -- on a random OTHER living
+    enemy (rule 3). `ProtoBombPower.PlaceOrJump`'s twin."""
+    if size <= 0:
+        return
+    if enemy.alive:
+        place(state, enemy, size, is_mine)
+        return
+    candidates = [e for e in state.living_enemies if e is not enemy]
+    if not candidates:
+        return
+    place(state, state.rng.choice(candidates), size, is_mine)
+
+
+def remove_largest_for_block_times(state: CombatState, multiplier: int) -> int:
+    """Favonius Escort: Sorry, Jean...'s removal, with the Block the removed
+    size times `multiplier`. Returns the size removed. The Block goes through
+    the same card-Block funnel (`EB-390`)."""
+    if not live(state):
+        return 0
+    enemy, index, size = largest_charge(state)
+    if enemy is None:
+        return 0
+    removed = enemy.ko_charges.pop(index)
+    gained = powers.modify_block_gained(
+        state.player, removed.size * max(1, int(multiplier)))
+    state.player.block += gained
+    state.emit("block", amount=gained)
+    state.emit("ko_bomb_removed", target=enemy.name, size=removed.size)
+    return removed.size
+
+
+#: The damage op's prototype riders (`gen_klee_cards.DAMAGE_RIDERS`).
+DAMAGE_RIDERS = ("plant_on_hit", "grow_on_hit", "only_if")
+
+
+def damage_rider(fx: dict) -> Optional[str]:
+    """Which R276 rider this `damage` op carries, or None. `bonus_vs_bombed`
+    is not one here: it keeps the shipped per-target branch in
+    `effects._op_damage`, which now reads her charges too."""
+    for key in DAMAGE_RIDERS:
+        if key in fx:
+            return key
+    return None
+
+
+def resolve_damage_rider(state: CombatState, fx: dict, card: Card) -> None:
+    """Jumpy Dumpty Mk.III, Spinning Sparkler and Mine, All Mine!, one hit at
+    a time, each through the ordinary damage op aimed at its body -- the way
+    `_op_set_off` hands its own hit back to `_op_damage`, so Strength, the Pyro
+    cadence and Vulnerable land exactly as on any hit of hers."""
+    from tier0.engine import effects                # late import: cycle
+
+    amount = int(fx["amount"])
+    hits = int(fx.get("times", 1))
+    rider = damage_rider(fx)
+
+    def hit(enemy: Enemy) -> None:
+        with aimed_at(state, enemy):
+            effects._op_damage(state, {"op": "damage", "amount": amount,
+                                       "target": "enemy"}, card)
+
+    if rider == "plant_on_hit":
+        size = int(fx["plant_on_hit"])
+        for _ in range(hits):
+            living = list(state.living_enemies)
+            if not living:
+                return
+            enemy = state.rng.choice(living)
+            hit(enemy)
+            place_or_jump(state, enemy, size)
+        return
+    if rider == "grow_on_hit":
+        grow = int(fx["grow_on_hit"])
+        targets = effects._pick_targets(state, "enemy")
+        if not targets:
+            return
+        enemy = targets[0]
+        for _ in range(hits):
+            if not enemy.alive:
+                return
+            hit(enemy)
+            if enemy.alive:
+                grow_largest_on(enemy, grow)
+        return
+    # only_if: mined -- the bodies read once, before the first hit.
+    for enemy in [e for e in state.living_enemies if mine_count(e) > 0]:
+        hit(enemy)
+
+
+def fetch_from_discard(state: CombatState, kind: str) -> Optional[Card]:
+    """Treasure Map and Come Back and Play!: one card of `kind` out of the
+    discard pile into the hand. The mod asks the player; the sim's pilot takes
+    its best card of the kind (`effects._best_card`, the recall pick). None of
+    the kind and nothing moves. `KleeExpansion.FetchFromDiscard`'s twin."""
+    if not live(state):
+        return None
+    from tier0.engine import effects                # late import: cycle
+
+    pile = state.player.discard_pile
+    eligible = [c for c in pile
+                if (is_set_off_card(c) if kind == "set_off"
+                    else is_companion_card(state, c))]
+    if not eligible:
+        return None
+    pick = effects._best_card(eligible)
+    for index, held in enumerate(pile):
+        if held is pick:
+            pile.pop(index)
+            state.player.hand.append(pick)
+            state.emit("ko_fetch_from_discard", card=pick.id, kind=kind)
+            return pick
+    return None
+
+
+def random_companion_pool(state: CombatState) -> list[Card]:
+    """The Companion cards a random draw may produce: the run's companion
+    roster, less someone else's Personals. `RandomCompanionPool`'s twin."""
+    from tier0.content import loader                # late import: cycle
+
+    roster = loader.companion_roster_replacement()
+    if roster is None:
+        roster = [c for c in loader._card_index().values() if c.is_companion]
+    who = state.player.character_id
+    return sorted((c for c in roster
+                   if c.is_companion and not c.guest_star and not c.kit_card
+                   and c.personal_pool in (None, who)
+                   and c.rarity in C.RARITY_ODDS),
+                  key=lambda c: c.id)
+
+
+def add_random_companions(state: CombatState, amount: int) -> int:
+    """Tag Along and Adventure Club: `amount` random Companion cards into the
+    hand, free this turn. `KleeExpansion.AddRandomCompanions`'s twin (the
+    stand-in hand-off included). Returns how many arrived."""
+    if not live(state) or amount <= 0:
+        return 0
+    import copy                                     # stdlib, local by habit
+    from tier0.content import loader                # late import: cycle
+    from tier0.engine import companion_standins     # late import: cycle
+
+    pool = random_companion_pool(state)
+    if not pool:
+        return 0
+    arrived = 0
+    for _ in range(int(amount)):
+        if len(state.player.hand) >= C.MAX_HAND_SIZE:
+            break
+        pick = state.rng.choice(pool)
+        cid = companion_standins.hand_off(pick.id, state.player.character_id)
+        card = copy.deepcopy(loader.get_card(cid) if cid != pick.id else pick)
+        card.free_this_turn = True
+        state.player.hand.append(card)
+        state.emit("ko_random_companion", card=card.id)
+        arrived += 1
+    return arrived
+
+
+def install_detonator(state: CombatState, upgraded: bool) -> None:
+    """Alice's Detonator: one of the two twins, as the card's upgrade names.
+    `AlicesDetonatorBasePower.Install`'s twin."""
+    if not live(state):
+        return
+    key = ALICES_DETONATOR_PLUS if upgraded else ALICES_DETONATOR
+    state.player.powers[key] = state.player.powers.get(key, 0) + 1
+    state.emit("ko_alices_detonator", upgraded=bool(upgraded))
+
+
+def _turn_start_expansion(state: CombatState) -> None:
+    """The expansion's three start-of-turn Powers, after the draw and after
+    rule 1's growth (`AfterPlayerTurnStart`): Klee's Secret Base, Dodoco and
+    Alice's Detonator."""
+    import copy                                     # stdlib, local by habit
+    from tier0.content import loader                # late import: cycle
+
+    p = state.player
+    # THE ORDER IS THE MOD'S ONE SEQUENCER (`KleeExpansion
+    # .RunTurnStartPlacements`): Secret Base reads the board BEFORE Dodoco's
+    # Mine lands, so the two Powers cannot race.
+    n = p.powers.get(SECRET_BASE, 0)
+    if n and not any_bomb_placed(state):
+        living = list(state.living_enemies)
+        if living:
+            dest = state.rng.choice(living)
+            state.emit("ko_secret_base", target=dest.name, size=n)
+            place(state, dest, n)
+    n = p.powers.get(DODOCO, 0)
+    if n:
+        living = list(state.living_enemies)
+        if living:
+            dest = state.rng.choice(living)
+            state.emit("ko_dodoco", target=dest.name, size=n)
+            place(state, dest, n, is_mine=True)
+    for key, cid in ((ALICES_DETONATOR, KAPOW_ID),
+                     (ALICES_DETONATOR_PLUS, KAPOW_ID + "+")):
+        for _ in range(p.powers.get(key, 0)):
+            if len(p.hand) >= C.MAX_HAND_SIZE:
+                break
+            p.hand.append(copy.deepcopy(loader.get_card(cid)))
+            state.emit("ko_kapow_added", card=cid)
+
+
+def _turn_end_expansion(state: CombatState) -> None:
+    """Patience, Klee!'s growth, then the three one-turn windows close.
+    Called AFTER Sparks 'n' Splash's echo (`PatienceKleePower` grows at the
+    strictly later `AfterSideTurnEnd`)."""
+    p = state.player
+    n = p.powers.get(PATIENCE, 0)
+    if n and state.ko_set_off_cards_this_turn == 0:
+        grown = grow_largest(state, n)
+        state.emit("ko_patience", amount=n, size=grown)
+    for key in (PLAYDATE, BOOM_BADGE, WAIT_FOR_IT):
+        p.powers.pop(key, None)
+
+
+def _after_charge_exploded(state: CombatState, enemy: Enemy,
+                           charge: KleeCharge, reacted: bool) -> None:
+    """The charge-aware door (`KleeExpansion.AfterChargeExploded`): Look Out!,
+    Second Surprise, Aftershock and Wait For It..., after the explosion bus."""
+    p = state.player
+    if charge.is_mine:
+        n = p.powers.get(LOOK_OUT, 0)
+        if n:
+            p.block += n
+            state.emit("block", amount=n)
+            state.emit("ko_look_out", amount=n)
+        n = p.powers.get(SECOND_SURPRISE, 0)
+        half = half_of(charge.size)
+        if n and half:
+            for _ in range(n):
+                state.emit("ko_second_surprise", target=enemy.name, size=half)
+                place_or_jump(state, enemy, half)
+    if not reacted:
+        return
+    n = p.powers.get(AFTERSHOCK, 0)
+    if n and charge.size > 0 and not state.ko_aftershock_spent:
+        state.ko_aftershock_spent = True
+        for _ in range(n):
+            living = list(state.living_enemies)
+            if not living:
+                break
+            dest = state.rng.choice(living)
+            state.emit("ko_aftershock", target=dest.name, size=charge.size)
+            place(state, dest, charge.size)
+    n = p.powers.pop(WAIT_FOR_IT, 0)
+    if n:
+        p.energy += WAIT_FOR_IT_ENERGY * n
+        state.emit("ko_wait_for_it", cards=WAIT_FOR_IT_CARDS * n,
+                   energy=WAIT_FOR_IT_ENERGY * n)
+        state.draw(WAIT_FOR_IT_CARDS * n)
+
+
+def spark_knight(state: CombatState, landed: int) -> None:
+    """Spark Knight: each Spark that landed is its own Pyro hit on a random
+    living enemy. `SparkKnightPower.AfterSparksGained`'s twin."""
+    if not live(state) or landed <= 0:
+        return
+    n = state.player.powers.get(SPARK_KNIGHT, 0)
+    if not n:
+        return
+    from tier0.engine import effects                # late import: cycle
+
+    for _ in range(int(landed)):
+        living = list(state.living_enemies)
+        if not living:
+            return
+        target = state.rng.choice(living)
+        state.emit("ko_spark_knight", target=target.name, amount=n)
+        effects.deal_damage_to_enemy(state, target, n, element="pyro",
+                                     source="spark_knight")

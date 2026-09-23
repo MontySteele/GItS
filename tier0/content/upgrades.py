@@ -817,6 +817,22 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # `place_bomb.bomb_damage` -- two ops, two fields, two arms.
             ok = _bump_first((fx for fx in top if fx.get("op") == "plant_bomb"),
                              "size", val)
+            if not ok:
+                # R276 (Jumpy Dumpty Mk.III): a damage op's per-hit Bomb
+                # prints its size in the same slot and takes the same key --
+                # the codegen's `plant_bomb_var_effect` binds it the same way.
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "damage"),
+                                 "plant_on_hit", val)
+        elif key == "upgraded_grant":
+            # R276 (Alice's Detonator): the granted Ka-pow! arrives upgraded.
+            # A flag on the install op, read when the Power is installed --
+            # the codegen's play-time `IsUpgraded` read, one engine over.
+            hit = next((fx for fx in top
+                        if fx.get("op") == "grant_kapow_each_turn"), None)
+            ok = hit is not None and val is True
+            if ok:
+                hit["upgraded"] = True
         elif key == "payload_mine":
             ok = _bump_first((fx for fx in top if fx.get("op") == "plant_bomb"),
                              "payload_mine_all", val)
@@ -853,6 +869,16 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                 ok = _bump_first((fx for fx in top
                                   if fx.get("op") == "grow_bombs_off_aura"),
                                  "amount", val)
+            # R276: One More Charge's flat growth, and Spinning Sparkler's
+            # per-hit rider -- the codegen's `grow_var_effect` order.
+            if not ok:
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "grow_largest"),
+                                 "amount", val)
+            if not ok:
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "damage"),
+                                 "grow_on_hit", val)
         elif key == "grow_floor":
             # `EB-491` (Kindling). Its SECOND printed number: what the largest
             # Bomb grows by when no enemy carries an off-element aura. A key of

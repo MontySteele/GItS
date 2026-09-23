@@ -318,6 +318,12 @@ def _runtime_count(state: CombatState, token: str,
         # Skewer: hit count = the energy actually spent, the same number
         # `amount: X` resolves. Spelled with the same token deliberately.
         return state.current_x
+    if token == "sparks_spent":
+        # QUARANTINED (R276, Fireworks Finale): one hit per Spark the all-in
+        # price spent -- the bank at play, which is what such a price spends
+        # (`grow_largest_bomb`'s reading). The mod's twin is the `sparksSpent`
+        # local its X-price line declares.
+        return int(state.sparks_at_play)
     if token == "exhausted_this_card":
         return state.exhausted_this_card
     # Coverage pass 4 (2026-07-27). Each is a count the base game takes off
@@ -1346,6 +1352,9 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
     state.spark_ledger.append({"source": source, "amount": n,
                                "before": before, "total": state.player.sparks})
     state.emit("gain_spark", amount=n, total=state.player.sparks)
+    # QUARANTINED (R276): Spark Knight rides this chokepoint, as its C# twin
+    # rides `SparkPower.Gain` -- every Spark any source grants passes here.
+    klee_overhaul.spark_knight(state, state.player.sparks - before)
 
 
 def klee_companion_spark(state: CombatState, card: Card) -> None:
@@ -1591,6 +1600,12 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         resources.note_player_hp_loss(state, fx["amount"])  # cost stays paid
         return
 
+    # QUARANTINED (R276): the Klee arm's per-hit riders. Each hit comes back
+    # through this op aimed at its body, so nothing below is bypassed.
+    if klee_overhaul.damage_rider(fx) and klee_overhaul.live(state):
+        klee_overhaul.resolve_damage_rider(state, fx, card)
+        return
+
     times = fx.get("times", 1)
     if "times_formula" in fx:
         formula = fx["times_formula"]
@@ -1681,7 +1696,11 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     # already consumed made the rider partly unreachable, the same failure
     # Sizzle's aura predicate avoids. Taken once per cast, so a replay
     # re-snapshots -- which is correct, a replay IS a new cast.
-    bombed_at_cast = ({id(e) for e in state.enemies if e.bombs}
+    # R276 (Fish Fry): under the Klee overhaul a Bomb is a charge on
+    # `ko_charges`, so the snapshot reads both lists -- with the arm off the
+    # second is always empty and the shipped read is unchanged.
+    bombed_at_cast = ({id(e) for e in state.enemies
+                       if e.bombs or e.ko_charges}
                       if fx.get("bonus_vs_bombed") else frozenset())
 
     # A POWER THAT REWRITES THIS ROW'S TargetType. FanOfKnivesPower does
@@ -3857,6 +3876,9 @@ PREDICATE_NAMES = frozenset({
     # like its two neighbours AND from `plant_bomb`'s `wide_if:`, which is one
     # vocabulary read at two doors rather than two vocabularies.
     "companion_played_this_turn",
+    # R276's pool expansion, on the same gate: Sit Tight's "if no Bomb went
+    # off this turn" (rule 7's first counter, read the other way round).
+    "no_bomb_went_off_this_turn",
     # The Kokomi overhaul's own per-turn read (QUARANTINED,
     # C.KOKOMI_OVERHAUL): Sango Isshin's "if the Bake-Kurage carried out a
     # Plan this turn". Unlike the two above this one IS answered -- draft 6
@@ -3964,6 +3986,8 @@ def is_known_predicate(name: str) -> bool:
 # would make the validator reject valid content; a token here the chain
 # ignores documents a spelling nothing reads.
 RUNTIME_COUNT_NAMES = frozenset({
+    # QUARANTINED USE ONLY (R276) -- Fireworks Finale's "for each Spark spent".
+    "sparks_spent",
     # QUARANTINED USE ONLY (`EB-732`) -- the FURINA STAGE's three. Registered
     # here as well as resolved in `_runtime_count` for this registry's own
     # reason: the loader validates every count token at LOAD off this set, so a
@@ -4167,6 +4191,16 @@ def _predicate(state: CombatState, name: str) -> bool:
                 "`C.KLEE_OVERHAUL` on and Klee in the seat -- the mod answers "
                 "it off `KleeOverhaulLedger` behind `-p:PrototypeCards=true`.")
         return klee_overhaul.played_companion_this_turn(state)
+    if name == "no_bomb_went_off_this_turn":
+        # R276's Sit Tight, on the gate its neighbours take and for their
+        # reason.
+        if not klee_overhaul.live(state):
+            raise NotImplementedError(
+                f"predicate {name!r} belongs to the KLEE_OVERHAUL arm. It is "
+                "answered only with `C.KLEE_OVERHAUL` on and Klee in the "
+                "seat -- the mod answers it off `KleeOverhaulLedger` behind "
+                "`-p:PrototypeCards=true`.")
+        return state.ko_set_off_this_turn == 0
     if name == "plan_carried_out_this_turn":
         # SANGO ISSHIN's condition (QUARANTINED, C.KOKOMI_OVERHAUL). Written
         # at the ONE place a Plan is carried out (`kokomi_plan._resolve_entry`)
@@ -5741,7 +5775,18 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
     # which is the case R210's bind makes reachable (one creature for the whole
     # play, dead or alive). The card's own hit still fizzles on the corpse,
     # because `_op_damage` picks its targets with `allow_dead` False.
-    for enemy in _pick_targets(state, spec, allow_dead=True):
+    targets = _pick_targets(state, spec, allow_dead=True)
+    wide = fx.get("wide_if")
+    if wide and _predicate(state, wide):
+        # R276 (Team Effort): EVERY enemy's Bombs go off, one enemy at a time
+        # and before the damage, and the card's own hit stays on the aimed
+        # body. `ProtoBombPower.SetOffAllThenHit`'s twin.
+        for enemy in list(state.living_enemies):
+            klee_overhaul.set_off(state, enemy, card)
+        for enemy in targets:
+            hit(enemy)
+        return
+    for enemy in targets:
         klee_overhaul.set_off(state, enemy, card)
         hit(enemy)
 
@@ -5844,6 +5889,11 @@ def _op_remove_bomb_for_block(state: CombatState, fx: dict,
     size. ONE call, so the number removed and the number gained cannot drift."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
+    multiplier = int(fx.get("multiplier", 1))
+    if multiplier != 1:
+        # R276 (Favonius Escort): "Gain Block equal to twice its size."
+        klee_overhaul.remove_largest_for_block_times(state, multiplier)
+        return
     klee_overhaul.remove_largest_for_block(state)
 
 
@@ -5983,6 +6033,52 @@ def _op_return_last_set_off(state: CombatState, fx: dict, card: Card) -> None:
 #     `kokomi_plan` and by nothing else; a top-level spelling would be a
 #     different, unpriced card. `gen_klee_cards.PLAN_ONLY_OPS` refuses the same
 #     two in an `effects:` list on the other side.
+# THE POOL EXPANSION's five (R276). One call each into `klee_overhaul`,
+# the arm's discipline; C# twins in `KleeExpansion` and `ProtoBombPower`.
+def _op_grow_largest(state: CombatState, fx: dict, card: Card) -> None:
+    """One More Charge and Treasure Map: the largest Bomb grows by `amount`,
+    and with a bar the grown Bomb is measured AFTER the growth."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.grow_largest_by(state, int(fx["amount"]),
+                                  int(fx.get("draw_if_at_least", 0)),
+                                  int(fx.get("draw", 0)))
+
+
+def _op_multiply_largest_bomb(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """Half a Mountain: the largest Bomb's current size times `factor`."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.multiply_largest(state, int(fx["factor"]))
+
+
+def _op_fetch_from_discard(state: CombatState, fx: dict, card: Card) -> None:
+    """Treasure Map and Come Back and Play!: one card of the kind out of the
+    discard pile into the hand; none of the kind and the card plays on."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.fetch_from_discard(state, fx["filter"])
+
+
+def _op_add_random_companion(state: CombatState, fx: dict,
+                             card: Card) -> None:
+    """Tag Along and Adventure Club: random Companion cards, free this
+    turn."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.add_random_companions(state, int(fx["amount"]))
+
+
+def _op_grant_kapow_each_turn(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """Alice's Detonator: install the twin the card's upgrade names
+    (`upgraded_grant`, written onto the effect by the upgrade applier)."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    klee_overhaul.install_detonator(state, bool(fx.get("upgraded", False)))
+
+
 def _op_kokomi_overhaul_off(state: CombatState, fx: dict,
                             card: Card) -> None:
     raise NotImplementedError(
@@ -6358,6 +6454,12 @@ OPS = {
     # the last Set off card back out of the discard pile.
     "return_to_hand": _op_return_to_hand,
     "return_last_set_off": _op_return_last_set_off,
+    # R276, the pool expansion's five.
+    "grow_largest": _op_grow_largest,
+    "multiply_largest_bomb": _op_multiply_largest_bomb,
+    "fetch_from_discard": _op_fetch_from_discard,
+    "add_random_companion": _op_add_random_companion,
+    "grant_kapow_each_turn": _op_grant_kapow_each_turn,
     # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.
