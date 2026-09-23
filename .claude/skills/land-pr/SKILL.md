@@ -16,10 +16,9 @@ now is.
 
 ## Only for plumbing
 
-A PR is [USER]'s only when it carries an open A/B/C pick, amends `LAW.md` or
-`EXPERIMENTS.md` text, or moves a shipped-sheet number or balance constant
-(R259). Everything else is plumbing, round packets with no pick and built rows
-included, and Claude lands it on green CI. That judgement is yours, not the
+A PR is [USER]'s only when it carries an open pick for him, amends `LAW.md` or
+`EXPERIMENTS.md` text, or moves a shipped-sheet number or balance constant.
+Everything else is plumbing, and Claude lands it on green CI. That judgement is yours, not the
 tool's; a [USER] PR is left open and said so.
 
 ## What it refuses, and why each refusal is real

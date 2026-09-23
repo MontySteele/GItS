@@ -9,8 +9,8 @@ from tier0.engine.state import CombatState, Enemy, Player
 # --- THE GIT ENVIRONMENT IS SCRUBBED BEFORE ANY TEST RUNS ------------------
 # WHAT HAPPENED, 2026-09-02. Five files in this directory build throwaway git
 # repositories under `tmp_path` -- `test_rulings_index.py`'s ruling-history
-# fixture, `test_purge_worktree_guard.py`, `test_register_ids_lint.py`'s merge
-# cases, `test_agent_rituals.py`, `test_understudy_seat.py`. Every one of them
+# fixture and `test_register_ids_lint.py`'s merge cases (both retired
+# 2026-09-23), `test_purge_worktree_guard.py`, `test_agent_rituals.py`, `test_understudy_seat.py`. Every one of them
 # passes `cwd=<the temp repo>` and none of them passes `env`, which is correct
 # right up until the process they inherit carries `GIT_DIR`.
 #

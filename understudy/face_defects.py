@@ -32,7 +32,7 @@ THE CLOSING DISCIPLINE
 An entry's `eb` MUST be an open row in BACKLOG. When the defect is fixed the
 row leaves HEAD, and an entry pointing at a row that is gone is STALE -- the
 lint fails, and the fix is to delete the entry in the same commit as the row.
-Exactly the rot semantics `tools/lint_register_ids.py` puts on `OPEN_IDS`, and
+The same rot semantics the old register-id lint put on its open ids, and
 for the same reason: a register nobody is forced to empty fills up with lies.
 
 WHAT DOES *NOT* BELONG HERE

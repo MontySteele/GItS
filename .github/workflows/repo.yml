@@ -1,7 +1,7 @@
 # ADOPTED 2026-07-27 -- Serenitea Sweep II, track B1. All three jobs kept.
 # The original ledger check retired with the ledgers (2026-08-06
-# simplification); its successor is the R-number namespace lint below. The
-# argument, and the recorded NOT-doing list -- no Windows runner, no pck
+# simplification), and the R-number / register lints that succeeded it
+# retired in the 2026-09-23 process trim. The argument, and the recorded NOT-doing list -- no Windows runner, no pck
 # build, no deploy automation, no coverage number, no scheduled runs -- live
 # in docs/current/rationale/serenitea-g3-ci-proposal.md. Read that before
 # adding a job here; each refusal is a decision, not an oversight.
@@ -109,44 +109,55 @@ jobs:
         if: steps.scope.outputs.docs_only != 'true'
         run: python -m pytest tier0/tests tier05/tests -q -n auto --dist loadscope
 
-      # The docs-only arm. These nine modules are not a guess: they are every
-      # module in tier0/tests + tier05/tests observed opening a committed .md
-      # file that tools/ci_changed_paths.py classifies as a doc, audited over
-      # a full run on 2026-08-29, plus test_r_numbers_lint (which enumerates
-      # the docs/current page set without opening it). What each one reads:
-      #   test_rulings_index            every .md under docs/current/
-      #   test_register_ids_lint        docs/current/QUEUE.md, BACKLOG.md
-      #   test_r_numbers_lint           the docs/current page set it scans
-      #   test_reaction_phase_parity    docs/current/BACKLOG.md (row open?)
-      #   test_staged_turn              docs/current/BACKLOG.md
-      #   test_pulse_multiplier_claims  docs/current/playtest/*.md
+      # The docs-only arm: every module in tier0/tests + tier05/tests that
+      # opens a committed .md file tools/ci_changed_paths.py classifies as a
+      # doc (audited 2026-08-29, re-listed 2026-09-23 when the register and
+      # ruling-index tests retired). What each one reads:
+      #   test_staged_turn              docs/current/BACKLOG.md (face-defect ids)
+      #   test_reaction_phase_parity    docs/current/operations/prototype.md
       #   test_prototype_surface        review/active/*.md
       #   test_prototype_authorship     review/qa/*/packet.md
       #   test_understudy_seat          review/qa/kokomi-first-turn-example/packet.md
+      #   test_understudy_blindplay     docs/current/operations/understudy-seats.md
+      #   test_eb157_baselib_pin        docs/current/STATE.md (the BaseLib pin)
+      #   test_agent_rituals            docs/current/OPERATIONS.md, operations/*.md
+      #   test_arm_keyword_tips, test_inazuma_companion_overhaul
+      #                                 docs/current/text-conventions.md
+      #   test_music_ledger_gate        docs/current/operations/media.md
+      #   test_teyvat_ancients_codegen, test_teyvat_events_codegen
+      #                                 docs/current/operations/codegen.md
+      #   test_visual_qa_contract       docs/current/operations/act-assets.md
+      #   test_eb495_kit_verb_triggers, test_lane_d_enemy_seam
+      #                                 docs/current/atlas/*.md
       # Add a module here the moment a test starts reading one of those trees.
-      # The `lints` job below still runs IN FULL on a docs-only change -- the
-      # register, stamp and namespace gates are lints, and they are the other
-      # half of what a markdown edit can break.
+      # The `lints` job below still runs IN FULL on a docs-only change.
       - name: docs-only -- the markdown-reading tests only
         if: steps.scope.outputs.docs_only == 'true'
         run: |
           echo "::notice title=docs-only fast path::Every changed path is markdown under docs/current, review/, or the repo root. SKIPPING the full tier0+tier05 suite; running only the markdown-reading tests, plus the FULL lints job. The push gate ran the whole fast lane locally before this push."
           python -m pytest -q \
-            tier0/tests/test_rulings_index.py \
-            tier0/tests/test_register_ids_lint.py \
-            tier0/tests/test_r_numbers_lint.py \
-            tier0/tests/test_reaction_phase_parity.py \
             tier0/tests/test_staged_turn.py \
-            tier0/tests/test_pulse_multiplier_claims.py \
+            tier0/tests/test_reaction_phase_parity.py \
             tier0/tests/test_prototype_surface.py \
             tier0/tests/test_prototype_authorship.py \
-            tier0/tests/test_understudy_seat.py
+            tier0/tests/test_understudy_seat.py \
+            tier0/tests/test_understudy_blindplay.py \
+            tier0/tests/test_eb157_baselib_pin.py \
+            tier0/tests/test_agent_rituals.py \
+            tier0/tests/test_arm_keyword_tips.py \
+            tier0/tests/test_inazuma_companion_overhaul.py \
+            tier0/tests/test_music_ledger_gate.py \
+            tier0/tests/test_teyvat_ancients_codegen.py \
+            tier0/tests/test_teyvat_events_codegen.py \
+            tier0/tests/test_visual_qa_contract.py \
+            tier0/tests/test_eb495_kit_verb_triggers.py \
+            tier0/tests/test_lane_d_enemy_seam.py
 
-  # (b) The softlock-preventing lints, invoked DIRECTLY.
-  #
-  # These live behind validate.ps1 today, which makes them Windows-only -- and
-  # the population that pushes most will never run a Windows lint. The wrapper
-  # is what makes them unreachable; it is not what makes them correct.
+  # (b) The lints: exactly `run_lints --lane ci`, the same list the git
+  # pre-push hook runs, so there is one source of truth for what CI checks
+  # (tools/run_lints.py's REGISTRY). Every ci-lane lint must pass on this
+  # fresh, shallow clone -- no game_ref/, no art, no game. Local-only lints
+  # stay in run_lints's `local` lane and never run here.
   lints:
     runs-on: ubuntu-latest
     steps:
@@ -158,138 +169,9 @@ jobs:
           cache-dependency-path: .github/requirements-ci.txt
       # Same file as the other two jobs, so all three share one cache key.
       - run: pip install -r .github/requirements-ci.txt
-      # This job runs UNCONDITIONALLY, docs-only change or not. Several of the
-      # lints below read the markdown registers -- r-numbers, register row-id
-      # uniqueness, rulings index, register row shape, STATE stamp rows,
-      # EXPERIMENTS active registrations -- so it is exactly the half of the
-      # gate a markdown-only pull request most needs.
-      - name: hand-written parity
-        run: python tools/lint_handwritten_parity.py
-      - name: constant parity
-        run: python tools/lint_constant_parity.py
-      # EB-89 (2026-08-25). The half the line above structurally cannot see:
-      # constant parity compares constants to constants and never reads the
-      # PROSE a player is shown, so a repricing could leave a tooltip quoting
-      # a retired number with every gate green. Pinned by
-      # tier0/tests/test_eb89_prose_constants.py.
-      - name: prose constants
-        run: python tools/lint_prose_constants.py
-      # Sim-hygiene sprint 2026-07-29. The sibling of the line above, pointed
-      # at the sim's own internal correspondence instead of the C# mirrors:
-      # an engine op with no offer-time price is a card the drafter cannot
-      # see, silently. Also wired into pytest (test_sheet_lints).
-      - name: op parity
-        run: python tools/lint_op_parity.py
-      # EB-71 (2026-08-12). The codegen guard for the unified Sly grammar:
-      # `Card.sly` is the one field and the base-game keyword rides it as the
-      # reserved `{op: sly_autoplay}` rider, so a sheet or generator that
-      # revives `sly_keyword` / `sly_this_turn` must fail loudly rather than
-      # generate a class that silently means something else. Pinned by
-      # tier0/tests/test_eb71_cs_parity.py; wired here beside the other
-      # parity lints because that is where a codegen guard belongs.
-      - name: sly grammar
-        run: python tools/lint_sly_grammar.py
-      # ALREADY THE GATE Y-8 ASKED FOR (verified 2026-08-06, Track Y). The
-      # second sitting's Y-8 asked that `gen_roster_cards.py --check` become
-      # "CI job 4" so that the class "sheet changed, generated C# didn't" fails
-      # loudly. It has run here, in the blocking `lints` job, since the
-      # sim-hygiene sprint -- so the reply's outcome was already in force and
-      # this workflow gained no new job. Deliberately NOT duplicated as a
-      # separate job: two invocations of one check would double the failure
-      # noise and halve the trust, and the recorded NOT-doing list at the head
-      # of this file exists precisely so job additions stay decisions rather
-      # than reflexes.
-      #
-      # Exercised for real the same day: Y-4 deleted an upgrade delta from
-      # docs/furina-upgrades.yaml, this check went red on the stale generated
-      # card and manifest, and stayed red until the generator was re-run.
-      - name: codegen staleness
-        run: python tools/gen_roster_cards.py --check
-      - name: pool membership
-        run: python tools/lint_pool_membership.py
-      - name: ancient coverage
-        run: python tools/lint_ancient_coverage.py
-      # Axis-Validity Track A, 2026-08-04. Both run on a fresh clone by
-      # construction: the floors are a committed percentages-only file and the
-      # tags are a committed review file, so neither needs game_ref/. The
-      # coverage gate runs in --gate mode against the pinned debt list while
-      # P1's binding null is open -- see the retired sprint log, §0 and §5:
-      # git show pre-simplification-2026-08-06:docs/archive/sprint-axis-validity-track-a-log-2026-08-04.md
-      - name: role/tempo review artifacts current
-        run: python tools/suggest_role_tempo_tags.py --check
-      - name: role/tempo coverage (floors only, against the debt list)
-        run: python tools/lint_role_tempo_coverage.py --gate
-      - name: roster registry
-        run: python tools/lint_roster_registry.py
-      # Successor to the ledger check (retired 2026-08-06 with the ledgers).
-      # The R/D namespace is frozen at tag pre-simplification-2026-08-06; this
-      # guards docs/current against citing unissued numbers or re-declaring
-      # frozen ones. Runs from committed state only -- no tags needed.
-      - name: R-number namespace
-        run: python tools/lint_r_numbers.py
-      # EB-127. The other half of the same namespace question: r-numbers
-      # guards R/D, this guards the ROW ids -- no two rows in QUEUE.md or
-      # BACKLOG.md may define the same id, no id may define a row in both, and
-      # no number at or below its series' frozen ceiling may be re-minted once
-      # its row has closed. Two collisions reached review in two weeks
-      # (EB-119/EB-120, and M38 minted twice off one base) and neither was
-      # caught by anything mechanical. Citations are out of scope AS
-      # DEFINITIONS by design. The retired-id half reads committed constants
-      # rather than git history, for the reason r-numbers does the same: this
-      # checkout is depth-1 with no tags.
-      - name: register row-id uniqueness
-        run: python tools/lint_register_ids.py
-      # Governance correction C, 2026-08-26. The third R-namespace question:
-      # r-numbers says a citation is IN RANGE, this says it can be RESOLVED --
-      # every R-number cited under docs/current/ has a row in
-      # docs/current/RULINGS.md, the on-demand index. That half reads two files
-      # and no history, so it runs here. The staleness half (is the index what
-      # the generator produces?) needs the retired ledgers, which this depth-1
-      # no-tags checkout does not have -- it skips itself and says so, rather
-      # than diffing against an all-unresolved regeneration.
-      - name: rulings index
-        run: python tools/lint_rulings_index.py
-      # EB-109. An enchanted id (`x@sharp-2`) became reachable at RUNTEMPLATE
-      # 10, and the upgrade suffix rides INSIDE the decoration, so every
-      # `<id> + upgrades.SUFFIX` site silently changed meaning without being
-      # edited. This holds the reachability answer beside each site and fails
-      # on a new site nobody has answered for.
-      - name: upgrade-suffix append sites
-        run: python tools/lint_upgrade_suffix_appends.py
-      # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
-      # exact upstream commit; this asserts the tree still is what the
-      # provenance note says it is, in both directions. Cheap, and the one
-      # failure it prevents (running a pre-v0.107 bridge against a v0.107.1
-      # game) is invisible until the game is already booting.
-      - name: vendor pin
-        run: python tools/lint_vendor_pin.py
-      # art_coverage runs WITHOUT --strict: ImageGen/ is gitignored Tier F and
-      # absent here, so the bill is empty by construction. It is present to
-      # prove the tool still runs, not to assert coverage -- asserting coverage
-      # on a tree with no art is the vacuum this sprint spent Track A on.
-      - name: art coverage (runs; asserts nothing about art)
-        run: python tools/art_coverage.py
-      # Governance correction D, 2026-08-26. Four register/stamp gates plus the
-      # hook self-tests, all reading committed files only. register-shape and
-      # experiments-active carry a curated DEBT set of the rows that failed
-      # when the gate was born; a DEBT entry that has since become clean FAILS,
-      # so the sets only shrink. sheet-stamp asserts the six content sheets
-      # digest to SHEET_DIGEST in tier0/constants.py (a sheet edit that bumped
-      # no stamp fails here). hook-self-tests runs the allow/deny cases of the
-      # PreToolUse/PostToolUse hooks in tools/hooks/ -- a deny hook that has
-      # never refused anything is indistinguishable from one that cannot.
-      - name: register row shape
-        run: python tools/lint_register_shape.py
-      - name: STATE live-cell stamp rows
-        run: python tools/lint_stamp_rows.py
-      - name: sheet digest pinned beside CONSTANTS_VERSION
-        run: python tools/lint_sheet_stamp.py
-      - name: EXPERIMENTS active registrations
-        run: python tools/lint_experiments_active.py
-      - name: review tree status and citations
-        run: python tools/lint_review_status.py
-      - name: hook self-tests
-        run: python tools/hooks/selftest_all.py
+      # Runs UNCONDITIONALLY, docs-only change or not.
+      - name: run_lints --lane ci
+        run: python tools/run_lints.py --lane ci
       # 2026-09-02. THE DEPLOY GATE'S SOURCE-ONLY RULES, HERE AT LAST.
       #
       # klee-mod/build/validate.ps1 holds rules that read committed text and

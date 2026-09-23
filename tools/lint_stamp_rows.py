@@ -16,11 +16,9 @@ its whole scope in 379 characters and passes today.
 WHAT IS CHECKED. Every data row of the `## Live cell` table is at most
 `MAX_ROW` characters of row text. Nothing else -- not the value, not the
 source, not the wording. This lint is deliberately one rule: the four stamps
-are gated for VERSION correctness by `lint_r_numbers.py` and by the suite's
-constant pins, and duplicating that here would be a second thing to keep true.
+are gated for VERSION correctness by the suite's constant pins, and duplicating that here would be a second thing to keep true.
 
-**HOW IT SHIPS GREEN.** `DEBT` names the rows that fail today. As in
-`lint_register_shape.py`, the set is a work list and not an exemption: a debt
+**HOW IT SHIPS GREEN.** `DEBT` names the rows that fail today. The set is a work list and not an exemption: a debt
 row that has since been trimmed FAILS until its entry is deleted, so the set
 can only shrink. A row not in `DEBT` -- including any row added later -- is
 gated from this commit forward.

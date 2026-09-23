@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Run the repo's lint battery CONCURRENTLY and report every result.
 
-The battery is fifteen CI invocations plus five that only ever run locally,
-and until now the only way to run it was to paste twenty lines from
-`docs/current/operations/lints.md` / `.github/workflows/repo.yml` one at a
-time. Pasted serially
-they cost the sum of their runtimes; run as separate processes they cost the
-slowest one, because each is an independent short-lived Python process with no
-shared state -- they read committed files and exit.
+The battery is the `ci` lane (what CI and the pre-push hook run) plus a few
+that only ever run locally. Pasted serially they cost the sum of their
+runtimes; run as separate processes they cost the slowest one, because each is
+an independent short-lived Python process with no shared state -- they read
+committed files and exit.
 
 Three properties this wrapper has that a pasted list does not:
 
@@ -55,14 +53,11 @@ from understudy.report import console_safe          # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 
 # Lanes:
-#   ci      -- the PRE-PUSH gate. The `lints` job in
-#              .github/workflows/repo.yml invokes the original sixteen
-#              directly; the Correction-D rows added 2026-08-26 (the four
-#              register/stamp shape lints and the hook self-tests) are gated
-#              HERE and by `tools/hooks/push_gate.py`, which runs exactly
-#              `--lane ci`. Putting them in repo.yml is [USER]'s edit, not this
-#              branch's -- so this lane is a SUPERSET of that job today, and
-#              the divergence is written down rather than assumed away.
+#   ci      -- the gate. The `lints` job in .github/workflows/repo.yml runs
+#              exactly `--lane ci`, and so does the git pre-push hook
+#              (tools/hooks/pre_push_gate.py), so there is one list of what CI
+#              runs and it is this one. Every row here must pass on a fresh
+#              clone: no game_ref/, no art, no game, a shallow checkout.
 #   local   -- operations/lints.md "Local-only (not in CI)"; a runner has no art and
 #              no game, so these answer questions CI structurally cannot ask
 #   suite   -- already exercised by pytest (tools/README.md "Suite-gated");
@@ -107,9 +102,8 @@ def _library(name: str, script: str, note: str) -> Lint:
     return Lint(name, "library", (script,), note)
 
 
-# Order is the CI file's order, then operations/lints.md's local list, then the
-# suite-gated remainder. Concurrency makes the order cosmetic; it is kept
-# readable so this table can be diffed against repo.yml by eye.
+# Order: the ci lane, then the local lane, then the suite-gated remainder.
+# Concurrency makes the order cosmetic.
 REGISTRY: tuple[Lint, ...] = (
     _ci("handwritten-parity",   "tools/lint_handwritten_parity.py"),
     _ci("constant-parity",      "tools/lint_constant_parity.py"),
@@ -149,8 +143,7 @@ REGISTRY: tuple[Lint, ...] = (
     # built by string concatenation) has no case for anyone to forget.
     _ci("power-icons",          "tools/lint_power_icons.py"),
     # 2026-08-30: three marker lines shipped to main inside BACKLOG.md when a
-    # fold fixed a DUPLICATE-row finding without reading its context. Markers
-    # are invisible to every register lint, so they get their own gate.
+    # fold fixed a DUPLICATE-row finding without reading its context.
     _ci("conflict-markers",     "tools/lint_conflict_markers.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
@@ -233,17 +226,6 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),
     _ci("role-tempo-coverage",  "tools/lint_role_tempo_coverage.py", "--gate"),
     _ci("roster-registry",      "tools/lint_roster_registry.py"),
-    _ci("r-numbers",            "tools/lint_r_numbers.py"),
-    # EB-127. Beside r-numbers deliberately: same question (an id namespace
-    # with no gate), the other series.
-    _ci("register-ids",         "tools/lint_register_ids.py"),
-    # Governance correction C, 2026-08-26. Third of the R-namespace trio:
-    # r-numbers says a citation is IN RANGE, this says the citation can be
-    # RESOLVED -- every cited id has a row in docs/current/RULINGS.md. CI lane
-    # because the half that bites there reads two files and no history; the
-    # staleness half needs the retired ledgers, so on the depth-1 checkout it
-    # skips itself and says so on stdout rather than failing blind.
-    _ci("rulings-index",        "tools/lint_rulings_index.py"),
     # EB-109. Structural, over committed source, so it runs where the other
     # invisible-seam gates run: an enchanted id became reachable at
     # RUNTEMPLATE 10 and turned correct `+ SUFFIX` sites wrong without anyone
@@ -252,23 +234,13 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("vendor-pin",           "tools/lint_vendor_pin.py"),
     _ci("art-coverage",         "tools/art_coverage.py"),
 
-    # --- Correction D (2026-08-26): the governance rules that were prose ---
-    # Each ships GREEN by carrying a curated DEBT set of the rows failing
-    # today, the structurally-invisible-defects pattern: the gate binds from
-    # this commit forward while the existing rows are a work list. A DEBT
-    # entry that has since become clean FAILS, so the sets can only shrink.
-    _ci("register-shape",       "tools/lint_register_shape.py"),
+    # --- Correction D (2026-08-26) ---
+    # The two stamp gates that guard Balance-stage measurement: a sheet edit
+    # must re-pin its digest, and STATE.md's live-cell rows stay short. The
+    # register/ruling/packet shape lints that sat here retired under the
+    # 2026-09-23 process trim (retrieve at `git show 2b73880a:tools/<name>`).
     _ci("stamp-rows",           "tools/lint_stamp_rows.py"),
     _ci("sheet-stamp",          "tools/lint_sheet_stamp.py"),
-    _ci("experiments-active",   "tools/lint_experiments_active.py"),
-    # The review tree's three directories, and the paths that cite them.
-    _ci("review-status",        "tools/lint_review_status.py"),
-    # EB-228, and the other half of review-status's question: that one asks
-    # whether a packet SAYS what it is, this asks whether a packet that HOLDS
-    # live work on a pick ever reached a register. Kokomi slice 2 sec.9 PICK 2
-    # held round-2 staging and minted no QUEUE row, so STATE.md read clean and
-    # a round-2 run was scheduled and stopped at the door on 2026-08-30.
-    _ci("packet-holds",         "tools/lint_packet_holds.py"),
     # The hooks under tools/hooks/ are the only code here that no test imports
     # and no lint reads -- they run out of process, on stdin JSON. A refusal
     # that quietly stopped refusing looks exactly like a session that never

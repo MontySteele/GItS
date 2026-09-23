@@ -45,8 +45,8 @@ REPO = Path(__file__).resolve().parent.parent
 ALWAYS = ("CLAUDE.md", "docs/current/STATE.md")
 READ_LISTS: dict[str, tuple[str, ...]] = {
     "build": (
-        "docs/current/BACKLOG.md -- the one engineering register (the row you "
-        "are building)",
+        "docs/current/BACKLOG.md -- the to-do list (the item you are "
+        "building)",
         "docs/current/operations/test.md -- the suite, the fast lane, the "
         "parallel lanes",
         "docs/current/operations/lints.md -- run_lints and how to add one",
@@ -57,9 +57,8 @@ READ_LISTS: dict[str, tuple[str, ...]] = {
     ),
     "packet": (
         "docs/current/LAW.md -- the governing constraints",
-        "docs/current/QUEUE.md -- [USER]'s open A/B/C picks, and nothing else",
+        "docs/current/QUEUE.md -- [USER]'s open picks, and nothing else",
         "docs/current/kit-checklist.md -- the yes/no checks a kit sheet meets",
-        "docs/current/RULINGS.md -- to close a re-ask by its ruling id",
         "docs/current/operations/stage-gate.md -- Paper / Prototype / Balance",
         "the packet in review/active/ this work belongs to",
     ),
@@ -73,13 +72,10 @@ READ_LISTS: dict[str, tuple[str, ...]] = {
         "docs/current/operations/prototype.md -- the arm door for a +proto run",
     ),
     "audit": (
-        "docs/current/BACKLOG.md and docs/current/QUEUE.md -- the two "
-        "registers a finding triages into",
+        "docs/current/BACKLOG.md and docs/current/QUEUE.md -- where a "
+        "finding goes (a defect, or a pick for [USER])",
         "docs/current/LAW.md -- before calling anything a defect",
-        "docs/current/RULINGS.md -- a question already ruled is closed by its "
-        "id, not re-asked",
         "docs/current/operations/mechanisms.md -- what is enforced, and by what",
-        "docs/current/operations/register-ids.md -- before minting a row",
     ),
 }
 

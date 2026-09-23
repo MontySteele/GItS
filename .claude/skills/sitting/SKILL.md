@@ -52,11 +52,11 @@ literally. Commands run from the repo root.
    prediction section, never over it (R101b), and quote percentages rather than
    the instrument's own hardcoded "IN BAND" word.
 
-7. **Registers, after the grade and only after it.** `EXPERIMENTS.md` pointer →
+7. **Record, after the grade and only after it.** `EXPERIMENTS.md` pointer →
    `RUN AND GRADED <date>` plus the tally and whether the packet stays in HEAD;
-   `QUEUE.md` row rewritten in place (measurement half done, design call left
-   standing); `BACKLOG.md` only if a gated row unblocks. **`STATE.md` is not
-   touched by a grade commit** — a grade moves no stamp.
+   a design call the grade feeds goes to [USER] as a numbered pick
+   (`QUEUE.md`); a `BACKLOG.md` line only if a gated item unblocks.
+   **`STATE.md` is not touched by a grade commit** — a grade moves no stamp.
 
 8. **Gate, then commit.** `python -m pytest tier0/tests tier05/tests -q -n auto
    --dist loadscope` and `python tools/run_lints.py --lane ci`. The grade is its

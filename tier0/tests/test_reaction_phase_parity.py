@@ -1384,28 +1384,13 @@ def test_broadcast_co_tenancy_is_registered(hook):
         "Before registering: does the sim order this tenant against any "
         "co-tenant it shares a resource with? If yes, stage it into a "
         "strictly earlier/later broadcast (the in-repo fix idiom) or file "
-        "the race in BACKLOG; then add the row with that answer as its "
-        "annotation.")
+        "the race as a BACKLOG to-do line; then add the row with that "
+        "answer as its annotation.")
     stale = ledger - found
     assert not stale, (
         f"ledger row(s) for {hook} match no override: {sorted(stale)}.\n"
         "The tenant moved or died. If it staged out of the broadcast to fix "
-        "a filed race, retire that BACKLOG row in the same commit.")
-
-
-def test_filed_race_citations_in_the_ledger_are_live():
-    """A ledger row citing a race that BACKLOG no longer files is stale --
-    either the race was fixed (then the tenant should have moved and the
-    sweep test above should be failing too) or the row id is wrong."""
-    backlog = (ROOT / "docs" / "current" / "BACKLOG.md")\
-        .read_text(encoding="utf-8")
-    for rows in CO_TENANCY_LEDGER.values():
-        for key, note in rows.items():
-            for row_id in re.findall(r"EB-19/races-[a-z]|EB-2(?![0-9])",
-                                     note):
-                assert f"`{row_id}`" in backlog, (
-                    f"{key} cites {row_id}, which BACKLOG.md no longer "
-                    "files")
+        "a filed race, delete its BACKLOG line in the same commit.")
 
 
 # --- the turn-end sequence, pinned ------------------------------------------

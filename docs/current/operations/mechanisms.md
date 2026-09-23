@@ -44,17 +44,12 @@ to narrate: **`sitting`** — a registered experiment's run, world-check to
 commit; **`deploy`** — `build_pck` → `deploy` → `validate`; **`worktree`** —
 add, the no-link rule, purge.
 
-Lints, all registered in `run_lints`'s `ci` lane: `register-shape`,
-`stamp-rows`, `sheet-stamp`, `experiments-active`, `hook-self-tests`. The
-register/stamp lints ship **green** by carrying a curated `DEBT` set of the
-rows that failed when the gate was born, so it binds from that commit forward
-while the old rows stay a work list. Each lint prints its own DEBT count — the
-number is not repeated here because it only shrinks: a `DEBT` entry that has
-since become clean FAILS, and an emptied set makes the lint ordinary.
+Lints: the correctness battery in `run_lints`'s `ci` lane (see
+`operations/lints.md`), including `stamp-rows`, `sheet-stamp` and
+`hook-self-tests`. The register, ruling-index and packet-shape lints retired
+on 2026-09-23 (`git show 2b73880a:tools/<file>`).
 
 **What a mechanism cannot reach.** A hook sees a tool call, not an intention:
-nothing here can tell that a *sitting* skipped its blind grade, that a `QUEUE`
-row was answered by Claude rather than by [USER], or that a design call was
-settled without being asked. Those stay norms in `CLAUDE.md`, and the lints
-above gate only their SHAPE — that a row has an ask and a gate, never that the
-ask was honoured.
+nothing here can tell that a *sitting* skipped its blind grade, that a pick
+was answered by Claude rather than by [USER], or that a design call was
+settled without being asked. Those stay norms in `CLAUDE.md`.

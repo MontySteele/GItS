@@ -14,7 +14,7 @@ python tools/agent_worktree.py <name> --task audit --dry-run
 Creates `../GItS-<name>` on a new branch from `origin/main` (fetched first),
 copies `klee-mod/local.props` **from the main checkout** — a worktree has none
 and half the build refuses without it — and prints the read list. Read those
-files and nothing else: the read order stops a session bulk-loading the repo.
+files and nothing else. Mint no ids; in `BACKLOG.md`, delete what you built.
 
 ## The rules it enforces so you do not have to remember them
 
@@ -35,5 +35,4 @@ pck builds are refused from a worktree by
 `tools/hooks/deny_deploy_outside_main.py`; the one legal build here is
 `klee-mod\build\deploy_bridge.ps1 -BuildOnly`.
 
-Retire it with `python -m tools.purge_worktree ../GItS-<name>`, never
-`git worktree remove`.
+Retire it with `python -m tools.purge_worktree ../GItS-<name>`, never `git worktree remove`.

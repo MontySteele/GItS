@@ -1,10 +1,9 @@
-# Agent rituals — the seven things every sitting does by hand
+# Agent rituals — the things every sitting does by hand
 
-A sitting of twelve parallel agents does the same seven things twelve times
-each, and every one of them costs its raw output in tokens: a 35-row lint
-table, four hundred lines of pytest, a `gh` paragraph, a 170-line register
-opened to read one row. **The work was never the expensive part; reading the
-output was.** Each ritual below now has a script that runs it exactly as before
+A sitting of twelve parallel agents does the same few things twelve times
+each, and every one of them costs its raw output in tokens: a 30-row lint
+table, four hundred lines of pytest, a `gh` paragraph. **The work was never
+the expensive part; reading the output was.** Each ritual below now has a script that runs it exactly as before
 and prints the answer instead of the transcript.
 
 Every script takes `--help`, and every one takes `--oneline` — one line, for
@@ -15,8 +14,6 @@ page.
 | Ritual | Script | Skill | What it saves |
 |---|---|---|---|
 | run the gates | `tools/gates.py` | `gates` | ~400 lines of pytest / lint / dotnet output → one line per gate plus the failing test names; the rest goes to `.gates/<stamp>.log` |
-| read one register row | `tools/row.py` | `mint-row` | opening a 170-line register, or a truncated grep, to read one of ~100 rows |
-| mint a register row | `tools/mint_row.py` | `mint-row` | the id lookup, the pipe syntax, the character count against the 600 gate, and both lints — and since the ceiling is derived, the edit to `lint_register_ids.py` is gone entirely |
 | open a worktree | `tools/agent_worktree.py` | `agent-worktree` | the fetch + add + `local.props` copy, and re-deriving CLAUDE.md's read order for the task by hand |
 | open a PR | `tools/open_pr.py` | `open-pr` | the `gh` full path, the mandatory footer, and a paragraph of output for one number |
 | land a plumbing PR | `tools/land_pr.py` | `land-pr` | the check-run read, the merge, the purge, the fast-forward, and the untracked-file trap that stopped two lands this week |

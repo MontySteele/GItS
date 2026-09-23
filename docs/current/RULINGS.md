@@ -1,13 +1,15 @@
-# Rulings index
+# Rulings index (frozen 2026-09-23)
 
-**On-demand.** CLAUDE.md's read order does not load this file; open it when a
-ruling is cited by number and you need to know which ruling it is.
+**Historical, R1 to R276, and no longer maintained.** R276 (2026-09-23,
+`review/ruled/process-review-2026-09-23.md`) is the last R number. A decision
+since then is recorded in the commit message, in [USER]'s words, and in the
+document it changes; it is named by that document and its pick number.
 
-**Generated -- do not hand-edit.** Regenerate with
-`python -m tools.gen_rulings_index`; `tools/lint_rulings_index.py` gates it.
-
-A row is a POINTER, never the ruling and never law: the last column is the
-RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
+Open this file only when an old citation names an R number. A row is a
+pointer, never the ruling and never law: the last column is the retrieval
+point (`git show <hash>`, or `git show <hash>:<ledger path>`). The generator
+and the two lints that kept this index in step retired with it
+(`git show 2b73880a:tools/gen_rulings_index.py`).
 
 | ruling | date | what it settled | retrieval point |
 | --- | --- | --- | --- |
@@ -285,7 +287,7 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R273 | 2026-09-14 | (2026-09-14): the Teyvat nation mapping at both defaults; | `22cdb50` |
 | R274 | 2026-09-16 | (2026-09-16): the fanout-picks slate at its defaults; pick 4 deferred | `4be0e02` |
 | R275 | 2026-09-17 | (2026-09-17): the Ancients dressed per face; Darv is Alice; names, faces and words first, boons untouched | `da1672e` |
-| R276 | 2026-09-23 | is the last R number (process review pick 1). | `d7afee5` |
+| R276 | 2026-09-23 | the 2026-09-23 design and process review, all fifteen picks at their defaults; the last R number | `d7afee5` |
 
 275 rows over the R1..R276 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 164 from a commit message, 0 unresolved.
 

@@ -1,7 +1,9 @@
 ## CI (`.github/workflows/repo.yml`)
 
 Three jobs, all on `ubuntu-latest`: **(a) `pytest`** — the fresh-clone gate;
-**(b) `lints`** — the softlock lints above, invoked directly; **(c)
+**(b) `lints`** — exactly `python tools/run_lints.py --lane ci` (the same list
+the pre-push hook runs; `operations/lints.md`) plus the deploy gate's static
+rules; **(c)
 `patch-sentinel`** — advisory, `continue-on-error`, never blocks a merge (a
 runner has no game, so it prints `skipped` by design). Set the `repo` check as
 required on `main` in branch protection ([USER]'s to click). **Those three job
@@ -59,12 +61,10 @@ Three changes, no jobs added or renamed:
    `docs/current/`, `review/`, or the repo root. Anything else — a card sheet,
    a `review/qa` JSON, a `.py`, a `.cs`, the workflow itself — is `false`, and
    so is an empty or unreadable diff (it **fails safe** to the full run). On
-   `true`, the `pytest` job runs only the nine modules that read committed
-   markdown (named in the workflow, audited over a full run) and prints a
+   `true`, the `pytest` job runs only the modules that read committed
+   markdown (named in the workflow) and prints a
    loud notice saying what it skipped; `patch-sentinel` skips its two steps.
-   The **`lints` job always runs in full** — the register, stamp and
-   namespace gates are lints, and they are the other half of what a markdown
-   edit can break.
+   The **`lints` job always runs in full**.
 3. **pip cache** — `cache: 'pip'` keyed on `.github/requirements-ci.txt`,
    which all three jobs install from.
 

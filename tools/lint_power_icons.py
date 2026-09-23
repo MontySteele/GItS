@@ -32,7 +32,7 @@ Tier F art), not that an icon is the RIGHT icon, and not that `ICON_DEBT` is
 complete -- no tool knows about a power nobody has written down. It checks the
 one mechanical property: nothing is missing from all three lists at once.
 
-`ICON_DEBT` ROTS ON PURPOSE, the semantics `lint_register_ids.OPEN_IDS` and
+`ICON_DEBT` ROTS ON PURPOSE, the semantics the old register-id lint and
 `lint_face_defects` already carry: an entry that has SINCE been given a case or
 an exemption FAILS and must be deleted. The set can only shrink, so it cannot
 become cover for the next missing icon. It ships non-empty, which is the honest

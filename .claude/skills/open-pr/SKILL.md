@@ -31,8 +31,8 @@ would send, so you can check the footer without opening anything.
 ## Who merges
 
 Claude merges every PR that asks nothing of [USER] itself on green CI
-(`tools/land_pr.py`, or `gh pr merge <n> --merge`) and says so in the turn
-(R259). **A PR is [USER]'s only when it carries an open A/B/C pick, amends
+(`tools/land_pr.py`, or `gh pr merge <n> --merge`) and says so in the turn.
+**A PR is [USER]'s only when it carries an open pick for him, amends
 `LAW.md` / `EXPERIMENTS.md` text, or moves a shipped-sheet number** — open it
 and stop; do not end a turn waiting on the merge, stack the next branch and
 keep going.
