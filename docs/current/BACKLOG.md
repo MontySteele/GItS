@@ -14,7 +14,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 - Beetle Juice's Shrink on an enemy prints "While is alive, you deal 30% less damage": the name is blank and it speaks in the player's voice (Klee seat, 2026-09-23).
 - Rosaria's Melt on Klee's board printed "Deal 15" from a written 9, which no printed multiplier explains; show the reaction's factor on the face.
-- Klee: the shipped Companion cards give her 1-3 Sparks (R276) but no face says so; add the rider line to each Companion card's text.
 - Klee: dead engine code for the cut cards (Explosives Workshop, Catalytic Converter, Kindling) still compiles; delete it with its tests.
 - Kokomi: engine pieces the halves rewrite left unused (`NextAttackDamage`, `BlockPerPlanThisMorning`, `plans_carried_out_this_morning`, the morning-damage tip); delete them in C# and the sim.
 - `EB-809` `KurageMemory.PriceText` prints bare `free` at price 0; print the derivation (`cost 0 x 3`) like every other price.

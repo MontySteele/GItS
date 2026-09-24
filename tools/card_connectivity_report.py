@@ -899,6 +899,7 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "card_exhausted_this_turn": [_hook("shared", "exhaust_pile", "read")],
     "exhausted_this_card": [_hook("shared", "exhaust_pile", "read")],
     "hp_lost_this_turn": [_hook("shared", "hp_ledger", "read")],
+    "hp_lost_since_last_turn": [_hook("shared", "hp_ledger", "read")],
     "has_salon_members": [_hook("private", "salon", "read")],
     # EB-118 6.3. The yes/no and closed-vocabulary forms of the selection
     # read; the two integer forms live in PREDICATE_PREFIXES above.

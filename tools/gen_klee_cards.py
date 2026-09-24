@@ -1442,6 +1442,11 @@ PREDICATES_CS = {
         "CurtainCallHooks.EnemyIntendsAttack(Owner.Creature)",
     "hp_lost_this_turn":
         "CurtainCallHooks.HpLostThisTurn(Owner.Creature)",
+    # Grass Ring of Sanctification (2026-09-23). Any player's HP, not only
+    # Furina's: `HpLossWindow` is fed from `KleeElementalHooks`, the global
+    # listener, and opens at the end of the player's previous turn.
+    "hp_lost_since_last_turn":
+        "HpLossWindow.LostSinceLastTurn(Owner.Creature)",
     # THE KLEE OVERHAUL's two per-turn reads (QUARANTINED). Both come off
     # `KleeOverhaulLedger`, which is the ONE place the arm's counters are
     # written, so a card and the power that feeds it cannot disagree about
@@ -1524,6 +1529,7 @@ PREDICATE_TEXT = {
         "If you moved the [gold]Spotlight[/gold] this turn",
     "enemy_intends_attack": "If an enemy intends to attack",
     "hp_lost_this_turn": "If you have lost HP this turn",
+    "hp_lost_since_last_turn": "If you lost HP since your last turn",
     "bomb_went_off_this_turn": "If a [gold]Bomb[/gold] went off this turn",
     "bomb_reacted_this_turn":
         "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
@@ -14365,6 +14371,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # R276 pick 2 WIDENED IT TO EVERY COMPANION, with the rule: any
         # Companion card gives Klee the Spark now, so every companion face on
         # her profile carries the sentence.
+        #
+        # 2026-09-23: under the Klee overhaul arm no Companion play pays, so
+        # `ForCovenSpark` itself returns the inherited tips there. The call
+        # stays emitted because off the arm the shipped rule still pays.
         if is_companion(card) and profile.character_id == "klee":
             tips_expr = (
                 "ArmKeywordTips.ForCovenSpark("

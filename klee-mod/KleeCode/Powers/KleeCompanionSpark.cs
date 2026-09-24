@@ -10,11 +10,12 @@ namespace KleeMod.Powers;
 /// "Little Hexenzirkul" -- Klee's kit answering a Companion play, and the only
 /// place in this assembly where a Companion play mints Sparks.
 ///
-/// R276 PICK 2: ANY COMPANION CARD PAYS, under the arm. `EB-642` (R265 pick 1)
-/// had made the printed Hexerei word the whole rule; R276 retired the word,
-/// because under the arm Klee starts with no companion and a mark that needed
-/// the companion slot to offer the right family rarely came together. The
-/// amounts and the bound are unchanged.
+/// UNDER THE ARM IT PAYS NOTHING (2026-09-23). R276 pick 2 had widened it to
+/// any Companion card, Alice-marked plays included, and [USER] turned it off:
+/// "It sounds like we've massively increased the Spark generation and it's
+/// worth decreasing now to go back to the old levels and then see if play is
+/// Spark-constrained." Off the arm the shipped Personal-Companion gate and the
+/// amounts below are unchanged.
 ///
 /// LAW:145, countersigned R224 (2026-08-30): "Companion cards may not
 /// themselves grant signature resources. A character-owned engine may respond
@@ -77,13 +78,11 @@ public static class KleeCompanionSpark
     /// the sim asks it in the same three steps
     /// (<c>effects.klee_companion_spark</c>).
     ///
-    /// UNDER THE ARM THE TEST IS THE READERS' OWN (`EB-663`, R276):
+    /// UNDER THE ARM THE ANSWER IS NO (2026-09-23). The readers still ask
     /// <c>CompanionHexerei.CountsAsCompanion</c> -- a Companion card, or any
-    /// card Alice's Introduction Magic marked this turn -- so the Spark and
-    /// Coven Errand / Witches' Circle can never disagree about a play. Off the
-    /// arm the shipped Personal-Companion gate stays, because that is the world
-    /// LAW:145's clause was countersigned over. The character gate below is
-    /// untouched either way.
+    /// card Alice's Introduction Magic marked this turn -- but no play pays a
+    /// Spark. Off the arm the shipped Personal-Companion gate stays, because
+    /// that is the world LAW:145's clause was countersigned over.
     ///
     /// PLAYED BY KLEE (`EB-434`). The old spelling asked the CARD's pool
     /// against its owner and named no character, so Kokomi playing Gorou banked
@@ -101,8 +100,14 @@ public static class KleeCompanionSpark
         if (owner == null) return false;
         if (CompanionPool.CharacterId(owner) != "klee") return false;
 #if PROTOTYPE_CARDS
+        // 2026-09-23: UNDER THE ARM NO COMPANION PLAY PAYS. [USER]: "It sounds
+        // like we've massively increased the Spark generation and it's worth
+        // decreasing now to go back to the old levels and then see if play is
+        // Spark-constrained." The readers (Coven Errand, Witches' Circle and
+        // the rest) still ask `CompanionHexerei.CountsAsCompanion`; only the
+        // Spark stops.
         if (KleeOverhaul.Enabled)
-            return CompanionHexerei.CountsAsCompanion(card);
+            return false;
 #endif
         return card is ICompanionCard comp && comp.PersonalPool == "klee";
     }

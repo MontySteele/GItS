@@ -489,9 +489,16 @@ makes Hexerei a *family* rather than a path, and it changes the shape of
    reader rarely came together; R276 made every reader read any Companion
    card instead, and the printed tag left every face.
 2. **Klee's own cards read a Companion play.** This is where the
-   Klee-specific payoff lives, and it is the Prune mechanism generalized:
-   her kit mints Sparks in response to a Companion play (1, +1 if it
-   reacted, +1 if upgraded, at most 3; `KLEE_COMPANION_SPARK_*`). Three
+   Klee-specific payoff lives. Her kit used to mint Sparks in response to a
+   Companion play too (the Prune mechanism generalized: 1, +1 if it
+   reacted, +1 if upgraded, at most 3; `KLEE_COMPANION_SPARK_*`), and R276
+   pick 2 widened that to any Companion card. **Under the arm this was
+   turned off on 2026-09-23:** a Companion play, or a card Alice's
+   Introduction Magic marked, mints no Sparks. [USER]: "It sounds like
+   we've massively increased the Spark generation and it's worth decreasing
+   now to go back to the old levels and then see if play is
+   Spark-constrained." Off the arm the shipped Personal-Companion rule is
+   unchanged. The payoff is now the readers alone. Three
    readers, as a bridge into the companion layer and not a fourth loop:
    Coven Errand ("if you played a Companion card this turn, place it on ALL
    enemies instead"), Witches' Circle ("whenever you play a Companion card,

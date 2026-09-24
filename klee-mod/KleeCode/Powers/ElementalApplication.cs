@@ -226,6 +226,31 @@ public sealed class KleeElementalHooks : AbstractModel
         IEnumerable<Creature> participants)
     {
         if (side == CombatSide.Enemy) ReactionEffects.MarkTurnStart();
+        // Grass Ring of Sanctification (2026-09-23): the player's turn has
+        // ended, after every end-of-turn effect, so the "since your last
+        // turn" window opens here. Sim: the end of `combat._player_turn`.
+        if (side == CombatSide.Player)
+        {
+            foreach (var creature in participants)
+            {
+                if (creature.Player != null) HpLossWindow.ResetAtTurnEnd(creature);
+            }
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Feeds <see cref="HpLossWindow"/> for EVERY player, whatever the
+    /// character (Furina's own funnel feeds only her). True HP loss only:
+    /// a negative delta on a player creature. Sim twin:
+    /// <c>resources.note_player_hp_loss</c>.
+    /// </summary>
+    public override Task AfterCurrentHpChanged(Creature creature, decimal delta)
+    {
+        if (delta < 0m && creature.Player != null)
+        {
+            HpLossWindow.Note(creature, (int)System.Math.Ceiling(-delta));
+        }
         return Task.CompletedTask;
     }
 
@@ -253,6 +278,9 @@ public sealed class KleeElementalHooks : AbstractModel
     public override Task BeforeCombatStart()
     {
         ReactionEffects.MarkTurnStart();
+        // And the Grass Ring's window: turn one counts from the start of
+        // combat, never from the last fight's final turn.
+        HpLossWindow.ClearAll();
         return Task.CompletedTask;
     }
 

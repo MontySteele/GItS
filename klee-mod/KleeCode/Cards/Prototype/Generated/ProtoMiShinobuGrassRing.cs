@@ -53,7 +53,7 @@ public sealed class ProtoMiShinobuGrassRing : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Grass Ring of Sanctification"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you lost HP this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you lost HP since your last turn, gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -75,7 +75,7 @@ public sealed class ProtoMiShinobuGrassRing : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
-        if (CurtainCallHooks.HpLostThisTurn(Owner.Creature))
+        if (HpLossWindow.LostSinceLastTurn(Owner.Creature))
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 4m), ValueProp.Move), cardPlay);
         }

@@ -260,6 +260,7 @@ SCORABLE_PREDICATES = frozenset({
     "target_has_aura",
     "card_exhausted_this_turn",
     "hp_lost_this_turn",
+    "hp_lost_since_last_turn",
     "reaction_triggered_this_turn",
     "this_cost_zero",
 }) | _ENGINE_LIVE_PREDICATES
@@ -429,6 +430,8 @@ def _active_effects(state: CombatState, effect_list: list[dict],
                 ready = state.cards_exhausted_this_turn > 0
             elif name == "hp_lost_this_turn":
                 ready = state.hp_lost_this_turn > 0
+            elif name == "hp_lost_since_last_turn":
+                ready = state.hp_lost_since_last_turn > 0
             elif name.startswith("fanfare_at_least_"):
                 # Same clamp the engine's own predicate uses, so the pilot's
                 # forecast of which branch fires cannot disagree with the

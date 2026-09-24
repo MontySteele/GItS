@@ -209,6 +209,11 @@ def test_every_klee_companion_carries_the_kits_spark_rider():
     Klee's profile emits, or the next row added is the r11 seat's finding
     again.
 
+    2026-09-23: UNDER THE ARM THE RIDER PRINTS NOTHING, because no Companion
+    play pays there any more; `ForCovenSpark` returns its inherited tips at
+    runtime (`HexereiReaderTests`), so the call is still emitted on every
+    row for the off-arm world this test pins.
+
     GOROU IS THE NEGATIVE CASE, and he is a real one: he is a Personal
     Companion of KOKOMI'S on this same sheet, and Sparks are Klee's resource
     with no surface of Kokomi's to read them off. The sentence is scoped to the

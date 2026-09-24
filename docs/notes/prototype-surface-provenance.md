@@ -3214,6 +3214,9 @@ destination's Vulnerable is not applied (it was paid at the source).
 Introduction Magic (`companion_mark_hand`) makes the hand count as Companion
 cards -- and, with its `hexerei:` key gone, no longer counts itself. The Spark
 rider (`ForCovenSpark`) rides every companion face on Klee's profile.
+2026-09-23: under the arm a Companion play mints no Spark any more, so
+`ForCovenSpark` returns its inherited tips unchanged there; the readers are
+untouched.
 
 
 ## R276 -- the pool expansion to 78 (2026-09-23)

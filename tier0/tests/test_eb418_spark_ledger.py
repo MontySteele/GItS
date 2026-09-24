@@ -142,66 +142,31 @@ def test_the_sources_a_klee_fight_mints_are_the_arms_own_rules(overhaul):
 
 # --- the grant the seat could not read --------------------------------------
 
-def test_a_hexerei_play_is_the_gain_that_had_no_name(overhaul):
-    """The r11 find, reproduced: Spark 1 to 2 with no Bomb going off.
-
-    `EB-642` MOVED THE PAYER SET AND THE READ MOVES WITH IT. The seat played
-    Diona, one of Klee's coven Personals, and R265 pick 1 keyed the grant on the
-    printed word instead -- so the card that reproduces the gain is a Hexerei
-    row, and the ruling's own headline is that a UNIVERSAL one does it too.
-    Razor prints the word, carries no `personal_pool`, and pays.
+def test_under_the_arm_a_companion_play_is_no_gain_at_all(overhaul):
+    """The r11 find was a Spark arriving with no Bomb going off, paid by a
+    Companion play. On 2026-09-23 [USER] turned that income off under the arm
+    ("worth decreasing now to go back to the old levels and then see if play
+    is Spark-constrained"), so the three cards that used to reproduce it -- a
+    Universal (Razor), the coven Personal the seat played (Diona) and a card
+    outside the old family (Gorou's War Banner) -- now leave the bank and the
+    ledger untouched. The ledger name below still stands for the off-arm
+    world.
     """
-    razor = loader.get_card("proto_mc_razor_claw_and_thunder")
-    assert razor.is_companion and razor.personal_pool is None
+    for cid in ("proto_mc_razor_claw_and_thunder",
+                "proto_mc_diona_shaken_not_purred",
+                "proto_mi_gorou_war_banner"):
+        card = loader.get_card(cid)
+        assert card.is_companion, cid
 
-    state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
-    state.player.sparks = 1
-    state.player.hand = [razor]
+        state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
+        state.player.sparks = 1
+        state.player.hand = [card]
 
-    play_card(state, razor)
+        play_card(state, card)
 
-    assert state.player.sparks == 2, "the seat's 1 to 2"
-    assert [row["source"] for row in _gains(state)] == [
-        "companion:personal/play"]
-    # ...and no Bomb went off to pay for it, which is how the seat KNEW the
-    # relic had not.
-    assert not any(e["event"] == "ko_explosion" for e in state.log)
-
-
-def test_a_coven_personal_pays(overhaul):
-    """Diona, the card the r11 seat actually played, pays -- as every
-    Companion card does since R276 pick 2."""
-    diona = loader.get_card("proto_mc_diona_shaken_not_purred")
-    assert diona.is_companion and diona.personal_pool == "klee"
-
-    state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
-    state.player.hand = [diona]
-
-    play_card(state, diona)
-
-    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
-    assert [row["source"] for row in _gains(state)] == [
-        "companion:personal/play"]
-
-
-def test_a_companion_outside_the_old_family_pays_too(overhaul):
-    """R276 pick 2, on the card that used to be the negative case.
-
-    Gorou's War Banner is an Inazuma Universal that never carried the Hexerei
-    mark, and it paid nothing until R276. Any Companion card pays now, under
-    the same ledger name.
-    """
-    banner = loader.get_card("proto_mi_gorou_war_banner")
-    assert banner.is_companion and banner.personal_pool is None
-
-    state = _klee_state(enemies=[make_enemy(hp=39, name="spinner")])
-    state.player.hand = [banner]
-
-    play_card(state, banner)
-
-    assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE
-    assert [row["source"] for row in _gains(state)] == [
-        "companion:personal/play"]
+        assert state.player.sparks == 1, cid
+        assert "companion:personal/play" not in [
+            row["source"] for row in _gains(state)], cid
 
 
 def test_the_name_is_the_rules_and_not_one_companions(overhaul):

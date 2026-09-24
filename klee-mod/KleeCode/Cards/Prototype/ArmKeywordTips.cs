@@ -631,9 +631,16 @@ public static class ArmKeywordTips
     /// IT ASKS <see cref="KleesRuleBelongsHere"/>, because a Universal is
     /// drafted by every character, and Klee's rule on a Kokomi shop screen is
     /// `EB-504` exactly.
+    ///
+    /// 2026-09-23: UNDER THE ARM IT PRINTS NOTHING, because under the arm a
+    /// Companion play no longer pays (<see cref="KleeMod.Powers.KleeCompanionSpark"/>,
+    /// [USER]: "...worth decreasing now to go back to the old levels and then
+    /// see if play is Spark-constrained"). A rider promising income the kit
+    /// does not pay is the `EB-418` defect turned inside out. Off the arm it
+    /// is unchanged.
     public static IEnumerable<IHoverTip> ForCovenSpark(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        !KleesRuleBelongsHere(card) ? inherited :
+        KleeOverhaul.Enabled || !KleesRuleBelongsHere(card) ? inherited :
         With(inherited, CovenSparkKey,
             "Playing a [gold]Companion[/gold] card gives Klee [blue]"
           + KleeCompanionSpark.Base + "[/blue] [gold]Spark[/gold], [blue]"

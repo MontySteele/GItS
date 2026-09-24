@@ -1374,6 +1374,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
                by_source=dict(state.charge_reads_this_turn))
     powers.on_turn_end(state, p)
     _revive_player_if_needed(state)
+    # `hp_lost_since_last_turn` (Grass Ring of Sanctification, 2026-09-23):
+    # the window opens where the player's turn ENDS, after every end-of-turn
+    # effect above, so the enemy turn and the next player turn both count.
+    # The C# twin resets at `AfterSideTurnEnd(Player)` (`HpLossWindow`).
+    state.hp_lost_since_last_turn = 0
 
 
 def _enemy_turn(state: CombatState, enemy: Enemy) -> None:

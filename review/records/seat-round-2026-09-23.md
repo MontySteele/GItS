@@ -94,12 +94,11 @@ Three seats misread intents under Weak, which printed two possible numbers. The 
 counts Weak and Strength, so the page now prints that one number. Killing hits now log as "killed" instead of
 "nothing this page can count".
 
-## Picks
+## Ruled (2026-09-23)
 
-1. **Klee's Spark supply against her sinks** (Klee review, new). a) Wait for GPT's Klee seat and your play
-   before changing anything (default). b) Give a few Commons a Spark mode now. c) Lower the Companion gift
-   from 1 to 3 Sparks to 1.
-2. **Shinobu, Grass Ring of Sanctification** (a shipped companion card). a) Change the clause to "if you
-   lost HP since your last turn" (default). b) Leave it.
-3. **Kokomi's safe turns.** a) Keep the rewrite and watch safe turns in your own play (default). b) Give
-   Ambush and Kurage's Oath now-halves that are worth something on a turn with no attack.
+1. **Spark supply.** Companion plays mint no Sparks under the arm. [USER]: "It sounds like we've massively
+   increased the Spark generation and it's worth decreasing now to go back to the old levels and then see if
+   play is Spark-constrained."
+2. **Shinobu, Grass Ring of Sanctification.** a), "agreed on a)": the clause now reads "if you lost HP since
+   your last turn".
+3. **Kokomi's safe turns.** a), "a) is fine for now".

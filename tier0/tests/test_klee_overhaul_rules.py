@@ -1865,6 +1865,41 @@ def test_witches_circle_upgrades_the_bomb_it_plants(overhaul):
     assert sizes(enemy) == [5]
 
 
+def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
+    """2026-09-23, [USER]: "It sounds like we've massively increased the Spark
+    generation and it's worth decreasing now to go back to the old levels and
+    then see if play is Spark-constrained." Under the arm a Companion play --
+    and a card Alice's Introduction Magic marked -- pays Klee no Spark, while
+    the readers (Witches' Circle here, Coven Errand's window below) still
+    fire on both."""
+    from tier0.engine import companion_hexerei
+    a = make_enemy(hp=400, name="a")
+    state = klee_state([a])
+    plain = probe([], cid="proto_ko_plain", ctype="skill")
+    state.player.hand = [plain]
+    effects.resolve_card(state, load("proto_ko_witches_circle"))
+    effects.resolve_card(state, load("proto_ko_alices_introduction_magic"))
+    assert companion_hexerei.counts_as_companion(state, plain) is True
+
+    combat._finish_play(state, companion())
+    combat._finish_play(state, plain)
+    assert sizes(a) == [3, 3]                       # the reader fired twice
+    assert klee_overhaul.played_companion_this_turn(state) is True
+    assert state.player.sparks == 0
+    assert "companion:personal/play" not in [
+        row["source"] for row in state.spark_ledger]
+    assert counts(state)["klee_companion_spark"] == 0
+
+    # Coven Errand reads the same window and still goes wide.
+    state = klee_state([a := make_enemy(hp=200, name="a"),
+                        b := make_enemy(hp=200, name="b")])
+    combat._finish_play(state, companion())
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_coven_errand"))
+    assert sizes(a) == [5] and sizes(b) == [5]
+    assert state.player.sparks == 0
+
+
 def test_alices_introduction_magic_makes_the_hand_companions_for_one_turn(
         overhaul):
     """THE ROW'S OWN ACCEPTANCE: a card that is NOT a Companion counts as one
