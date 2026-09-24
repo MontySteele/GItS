@@ -473,10 +473,10 @@ def test_a_set_off_row_on_a_bare_board_says_so():
     blanks = {rid for rid in readers if not gen.empty_field_tip_arg(rows[rid])}
     # `EB-749`: Fireworks Show was CUT and merged into Tinder Toss, which has a
     # damage line of its own and is therefore not blank.
-    # R276's Hair Trigger reads the field and does nothing on a bare board:
-    # its whole body is turning Bombs into Mines.
+    # Hair Trigger reads the field but draws a card of its own (2026-09-23),
+    # so it is no longer blank on a bare board.
     assert blanks == {"proto_ko_careful_arrangement", "proto_ko_the_big_one",
-                      "proto_ko_quick_fuse", "proto_ko_hair_trigger"}
+                      "proto_ko_quick_fuse"}
     # AND THE ATTACH REACHED THE EMITTED C#, with the derived argument on it.
     merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
         encoding="utf-8")

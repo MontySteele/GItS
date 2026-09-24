@@ -523,10 +523,10 @@
 
 - {id: proto_ko_hair_trigger, name: "Hair Trigger", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold].",
-   upgrade: {cost: -1},
-   effects: [{op: mine_bombs, target: enemy}]}
+   cost: 0, type: skill, rarity: common,
+   description: "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   upgrade: {draw: 1},
+   effects: [{op: mine_bombs, target: enemy}, {op: draw, amount: 1}]}
 
 - {id: proto_ko_explosive_frags, name: "Explosive Frags", character: klee,
    authored_by: [claude],
