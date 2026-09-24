@@ -45,7 +45,7 @@ public sealed class ProtoKkBattlePlan : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Battle Plan"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: This turn, your Attacks deal {PlanAttackBonus:diff()} additional damage."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Next turn, your Attacks deal {PlanAttackBonus:diff()} additional damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

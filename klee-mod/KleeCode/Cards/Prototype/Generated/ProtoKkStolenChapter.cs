@@ -45,7 +45,7 @@ public sealed class ProtoKkStolenChapter : CustomCardModel, ICharacterCard, IPla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stolen Chapter"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: This turn, the first card you play costs 0."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Next turn, the first card you play costs 0."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
