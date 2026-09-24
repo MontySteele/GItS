@@ -889,7 +889,7 @@
       "power_amount": 2
     },
     "proto_ko_hair_trigger": {
-      "cost": -1
+      "draw": 1
     },
     "proto_ko_half_a_mountain": {
       "retain": true

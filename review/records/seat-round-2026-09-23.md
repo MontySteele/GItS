@@ -88,6 +88,29 @@ skipped Pincer because it could not tell which turn "This turn" meant.
 **What changed (PR #652).** The Bomb tip now reads "a second Bomb stacks beside the first, and a Mine among
 them goes off alone".
 
+## Klee, GPT's seat (added 2026-09-24)
+
+Build `0.2.3730+proto`, which has no Companion Sparks. The seat ran on `gpt-6-sol` (`20260924-045324`): 150 actions and
+seven fights through the act-1 elite, and it stayed inside the usage window.
+
+**What played well.** "When to detonate" came back in almost every fight, and it had outside pressures:
+- enemies gaining Block;
+- the Colony's 20-HP-per-turn Shell, which made Bomb timing exact;
+- Mines killing enemies in range before they hit.
+
+Barbara's Vaporize Bomb plus Block was its best turn.
+
+**What did not.**
+- Hair Trigger was dead in every fight (NEVER AGAIN): nobody spent 1 Energy turning a Bomb into a Mine.
+- The opening was the same most fights: Jumpy Dumpty, wait, Ka-pow!.
+- Grounded never paid, because it Set off every turn.
+
+**Sparks without the Companion income.** It went both ways: once it held 3 Sparks with nothing to spend them
+on, and once it could not pay Bang Bang!+ (1 of 2). Pop! into Bang Bang!+ spent them well. That is closer to
+a constraint, as intended.
+
+**What changed.** Hair Trigger now costs 0 and draws a card (2 upgraded).
+
 ## The tester's page (PR #650)
 
 Three seats misread intents under Weak, which printed two possible numbers. The game's intent number already

@@ -1991,8 +1991,10 @@ def test_hair_triggers_mines_answer_the_enemys_attack(overhaul):
     assert sizes(a) == []
 
 
-def test_hair_trigger_upgrades_to_cost_zero(overhaul):
-    assert load("proto_ko_hair_trigger").cost == 1
+def test_hair_trigger_is_free_and_draws(overhaul):
+    # Seat round 2026-09-23: the GPT seat's NEVER AGAIN at 1 Energy; now 0 and
+    # a card, upgraded two.
+    assert load("proto_ko_hair_trigger").cost == 0
     assert load("proto_ko_hair_trigger+").cost == 0
 
 

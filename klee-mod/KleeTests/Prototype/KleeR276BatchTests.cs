@@ -70,18 +70,19 @@ public class KleeR276BatchTests
     }
 
     [Fact]
-    public void Hair_trigger_is_a_one_energy_common_that_aims_and_upgrades_to_zero()
+    public void Hair_trigger_is_a_free_common_that_aims_and_draws()
     {
+        // Seat round 2026-09-23: 0 Energy and a card (2 upgraded).
         var card = new ProtoKoHairTrigger();
         Assert.Equal(CardRarity.Common, card.Rarity);
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(
-            "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold].",
+        Assert.Equal(0, card.EnergyCost.Canonical);
+        Assert.StartsWith(
+            "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold]. Draw ",
             Face(card));
         Assert.Contains(Il.Calls(Il.Method("ProtoKoHairTrigger", "OnUpgrade")),
-                        c => c.Contains("EnergyCost.UpgradeBy"));
+                        c => c.Contains("UpgradeValueBy"));
         Assert.Contains("ProtoBombPower.MineAllOn",
                         Il.Calls(Il.Method("ProtoKoHairTrigger", "OnPlay")));
     }
