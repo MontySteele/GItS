@@ -510,7 +510,9 @@ public static class KleeMod
                     // `EB-418`. The second rider, not a keyword: the Spark her
                     // KIT mints on a play of one of her own Companions, which
                     // LAW:145 keeps off the Companion's own face and which
-                    // therefore had no surface at all.
+                    // therefore had no surface at all. Since 2026-09-23 it
+                    // never prints under the Klee overhaul arm, where a
+                    // Companion play mints no Spark.
                     [Cards.ArmKeywordTips.CovenSparkKey + ".title"] =
                         "Sparks from your Companion",
                     // `EB-575`. The fourth rider here that titles no keyword,

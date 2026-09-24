@@ -1360,10 +1360,14 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
 def klee_companion_spark(state: CombatState, card: Card) -> None:
     """"Little Hexenzirkul" -- Klee's kit answering a COMPANION play.
 
-    R276 PICK 2: under the arm ANY card that counts as a Companion pays
-    (`companion_hexerei.counts_as_companion`, the readers' own question); the
-    Hexerei mark the paragraphs below describe is retired. The amounts and the
-    bound are unchanged.
+    UNDER THE ARM IT PAYS NOTHING (2026-09-23). R276 pick 2 had widened it to
+    any card that counts as a Companion, Alice-marked plays included, and
+    [USER] turned it off: "It sounds like we've massively increased the Spark
+    generation and it's worth decreasing now to go back to the old levels and
+    then see if play is Spark-constrained." The readers still ask
+    `companion_hexerei.counts_as_companion`; only the Spark stops. Off the arm
+    the shipped Personal-Companion gate and the amounts are unchanged, so the
+    paragraphs below now describe the off-arm world and the history.
 
     THE DECLARATION LAW:145 REQUIRES, and the ONLY place a Companion play mints
     Sparks. The clause (countersigned R224, 2026-08-30) reads: "Companion cards
@@ -1440,14 +1444,13 @@ def klee_companion_spark(state: CombatState, card: Card) -> None:
         # the player, so Gorou paid Kokomi.
         return
     if C.KLEE_OVERHAUL:
-        # `EB-663`, R276: the readers' own question, and the payer's too.
-        if not companion_hexerei.counts_as_companion(state, card):
-            return
-    else:
-        if not card.is_companion:
-            return
-        if card.personal_pool != "klee":
-            return
+        # 2026-09-23: no Companion play mints a Spark under the arm. The
+        # readers (`companion_hexerei.counts_as_companion`) are untouched.
+        return
+    if not card.is_companion:
+        return
+    if card.personal_pool != "klee":
+        return
     n = C.KLEE_COMPANION_SPARK_BASE
     if state.reactions_this_card > 0:
         n += C.KLEE_COMPANION_SPARK_REACTION_BONUS

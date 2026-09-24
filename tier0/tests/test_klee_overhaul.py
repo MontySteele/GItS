@@ -851,15 +851,16 @@ def test_the_shipped_klee_opening_is_untouched_by_the_row():
     assert not any(c.innate for c in player.draw_pile)
 
 
-# --- R276 pick 2: ANY COMPANION PLAY PAYS KLEE'S SPARK ----------------------
+# --- 2026-09-23: NO COMPANION PLAY PAYS KLEE'S SPARK UNDER THE ARM ---------
 
-def test_every_companion_play_pays_klees_spark(overhaul):
-    """R276 pick 2, "Hexerei becomes Companion": any Companion card gives Klee
-    the Spark under the arm, Universal or Personal, Mondstadt or not.
+def test_no_companion_play_pays_klees_spark_under_the_arm(overhaul):
+    """R276 pick 2 had made any Companion card pay Klee the Spark under the
+    arm; [USER] turned it off on 2026-09-23: "It sounds like we've massively
+    increased the Spark generation and it's worth decreasing now to go back to
+    the old levels and then see if play is Spark-constrained."
 
-    `EB-554` / `EB-642` had drawn the line at the printed Hexerei word, and
-    Gorou's War Banner -- an Inazuma Universal outside that family -- paid
-    nothing. It is the case that moved, so it is the case pinned.
+    The four cases R276 pinned as paying -- a Universal, a family stand-in, a
+    coven Personal and a card outside the old family -- now pay nothing.
     """
     from tier0.engine.combat import play_card
     from tier0.tests.conftest import make_state
@@ -874,18 +875,16 @@ def test_every_companion_play_pays_klees_spark(overhaul):
         state.player.character_id = "klee"
         state.player.hand = [card]
         play_card(state, card)
-        assert state.player.sparks == C.KLEE_COMPANION_SPARK_BASE, cid
+        assert state.player.sparks == 0, cid
+        assert not any(e["event"] == "klee_companion_spark"
+                       for e in state.log), cid
 
 
-def test_alices_marked_cards_pay_and_the_spell_itself_does_not(overhaul):
-    """`EB-663`'s pin, re-read under R276. The Spark asks the readers' own
-    question (`companion_hexerei.counts_as_companion`), so the three Klee cards
-    Alice's Introduction Magic marked each pay one.
-
-    THE SPELL NO LONGER COUNTS ITSELF: its `hexerei: true` key was the only
-    thing that made it, the key is retired, and the face says "all cards in
-    your hand" -- which the spell is not in once it is being played.
-    """
+def test_alices_marked_cards_pay_no_spark_under_the_arm(overhaul):
+    """`EB-663`'s pin, re-read on 2026-09-23. The marked cards still count as
+    Companion cards (the readers' question), but no play of one pays a
+    Spark, and neither does the spell itself."""
+    from tier0.engine import companion_hexerei
     from tier0.engine.combat import play_card
     from tier0.tests.conftest import make_state
 
@@ -902,16 +901,10 @@ def test_alices_marked_cards_pay_and_the_spell_itself_does_not(overhaul):
     # The window is over the INSTANCES that were in hand (R244).
     assert len(state.ko_companion_marked) == 3
 
-    for i, card in enumerate(marked, start=1):
+    for card in marked:
+        assert companion_hexerei.counts_as_companion(state, card)
         play_card(state, card)
-        assert state.player.sparks == i * C.KLEE_COMPANION_SPARK_BASE
-
-    # AND AN UNMARKED KLEE CARD STILL PAYS NOTHING, which is the bound.
-    state.player.sparks = 0
-    plain = loader.get_card("proto_ko_careful_now")
-    state.player.hand = [plain]
-    play_card(state, plain)
-    assert state.player.sparks == 0
+        assert state.player.sparks == 0
 
 
 def test_the_companion_gate_still_stands_off_the_arm():
@@ -926,7 +919,8 @@ def test_the_companion_gate_still_stands_off_the_arm():
     assert not C.KLEE_OVERHAUL
     state = make_state()
     state.player.character_id = "klee"
-    # A Universal Companion: pays under the arm, pays nothing without it.
+    # A Universal Companion pays nothing off the arm (and nothing under it
+    # since 2026-09-23).
     universal = Card(id="x_universal", name="Universal", cost=1,
                      type="skill", tags=["companion"])
     effects.klee_companion_spark(state, universal)

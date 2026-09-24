@@ -14365,6 +14365,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # R276 pick 2 WIDENED IT TO EVERY COMPANION, with the rule: any
         # Companion card gives Klee the Spark now, so every companion face on
         # her profile carries the sentence.
+        #
+        # 2026-09-23: under the Klee overhaul arm no Companion play pays, so
+        # `ForCovenSpark` itself returns the inherited tips there. The call
+        # stays emitted because off the arm the shipped rule still pays.
         if is_companion(card) and profile.character_id == "klee":
             tips_expr = (
                 "ArmKeywordTips.ForCovenSpark("
