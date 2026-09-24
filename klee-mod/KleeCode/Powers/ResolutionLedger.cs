@@ -88,9 +88,15 @@ public static class ResolutionLedger
     /// and `Blocked` is `DamageResult.BlockedDamage`, without which a hit that
     /// landed entirely on Block would read as a hit that did not happen. The
     /// game's own doc comments on those two properties are the definitions.
+    ///
+    /// `Killed` marks the entry <see cref="NoteKill(Creature?)"/> files for a
+    /// body that DIED inside the play. The game never hands the killing hit to
+    /// `AfterDamageReceived` (`CreatureCmd.Damage` skips that broadcast for a
+    /// creature the hit killed), so a kill arrives with no numbers at all, and
+    /// the flag is what keeps the page from printing it as a zero.
     /// </summary>
     public readonly record struct Hit(string Target, int Amount, int Blocked,
-                                      string CombatId);
+                                      string CombatId, bool Killed = false);
 
     /// <summary>One resolved card.
     ///
@@ -229,6 +235,47 @@ public static class ResolutionLedger
                                Safe(() => target?.CombatId.ToString())));
     }
 
+    /// <summary>
+    /// "This body died inside the card that is resolving."
+    ///
+    /// THE KILLING HIT NEVER REACHES <see cref="NoteHit"/>: the base game
+    /// skips `AfterDamageReceived` for a creature the hit killed (the kill
+    /// gate in `CreatureCmd.Damage`; `docs/current/atlas/
+    /// kit-verbs-vs-base-triggers.md`, D5). So a Strike that killed its target
+    /// filed no hit, and the page printed "Nothing this page can count landed
+    /// off it" under the card that emptied the board. `Hook.AfterDeath` is the
+    /// broadcast that does fire, before the corpse is removed, and this is its
+    /// mouth: one entry in HIT ORDER, where the killing hit would have been,
+    /// carrying the body and no number.
+    ///
+    /// ENEMIES ONLY, and the caller checks it: a pet or a player dying inside
+    /// a play is not a card killing its target. Dropped where no play is open,
+    /// <see cref="NoteHit"/>'s rule and its reason.
+    /// </summary>
+    public static void NoteKill(Creature? target)
+    {
+        if (target == null) return;
+        NoteKill(Named(target), Safe(() => target.CombatId.ToString()));
+    }
+
+    /// <summary>The same kill, taking the two facts rather than the game
+    /// object -- <see cref="OpenPlay(string, string, bool)"/>'s bargain and
+    /// its reason: a dead <c>Creature</c> cannot be built in <c>KleeTests</c>,
+    /// and the behaviour worth pinning (the order, the cap, one entry per
+    /// body) is this file's. The overload above is the only shipped caller.
+    /// </summary>
+    public static void NoteKill(string target, string combatId)
+    {
+        if (_open == null) return;
+        if (_open.Hits.Exists(h => h.Killed && h.CombatId == combatId)) return;
+        if (_open.Hits.Count >= MaxHits)
+        {
+            _open.Overflowed = true;
+            return;
+        }
+        _open.Hits.Add(new Hit(target, 0, 0, combatId, Killed: true));
+    }
+
     /// <summary>"That card has finished." Closes the row.</summary>
     public static void ClosePlay() => _open = null;
 
@@ -278,6 +325,7 @@ public static class ResolutionLedger
                     ["amount"] = hit.Amount,
                     ["blocked"] = hit.Blocked,
                     ["combat_id"] = hit.CombatId,
+                    ["killed"] = hit.Killed,
                 }),
         });
 }

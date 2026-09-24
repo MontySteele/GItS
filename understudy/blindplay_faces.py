@@ -1248,7 +1248,7 @@ _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "numbered": set(), "names": {},
                                  "handles": {}, "elements": set(),
                                  "round": None, "hp": {}, "reborn": {},
-                                 "replaced": {}}
+                                 "replaced": {}, "kills": {}}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -1282,7 +1282,8 @@ def _load_fight() -> None:
     # `EB-672`: `hp`, `reborn` and `replaced` join them, and each is absent
     # from a store written before that row -- absent being the same answer an
     # unread body gives, so an older store simply mints no replacement.
-    for key in ("ordinals", "names", "handles", "hp", "reborn", "replaced"):
+    for key in ("ordinals", "names", "handles", "hp", "reborn", "replaced",
+                "kills"):
         value = held.get(key)
         if isinstance(value, dict):
             _FIGHT_MEMORY[key] = dict(value)
@@ -1309,6 +1310,7 @@ def _save_fight() -> None:
            "hp": dict(_FIGHT_MEMORY["hp"]),
            "reborn": dict(_FIGHT_MEMORY["reborn"]),
            "replaced": dict(_FIGHT_MEMORY["replaced"]),
+           "kills": dict(_FIGHT_MEMORY["kills"]),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
            "elements": sorted(_FIGHT_MEMORY["elements"]),
            "round": _FIGHT_MEMORY["round"]}
@@ -1331,6 +1333,7 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["hp"] = {}
     _FIGHT_MEMORY["reborn"] = {}
     _FIGHT_MEMORY["replaced"] = {}
+    _FIGHT_MEMORY["kills"] = {}
     _FIGHT_LOADED[0] = True
     try:
         _fight_store().unlink()
@@ -1387,6 +1390,47 @@ def remembered_enemy_name(combat_id: Any, title: str) -> str:
     if _fold(name) in _FIGHT_MEMORY["numbered"] and key in _FIGHT_MEMORY["ordinals"]:
         return f"{name} ({_FIGHT_MEMORY['ordinals'][key]})"
     return name
+
+
+def remember_kills(rows: int, standing: list[str],
+                   round_: int | None) -> dict[int, list[str]]:
+    """Which bodies each of this turn's resolution rows killed, by combat id.
+
+    THE KILLING HIT IS NOT ON THE WIRE. The base game skips
+    `AfterDamageReceived` for a creature the hit killed, so a mod ledger fed
+    by that hook files no hit for it, and the page printed "Nothing this page
+    can count landed off it" under a Strike that had just emptied its target
+    (three seats, 2026-09-24). A build whose ledger also hears `AfterDeath`
+    files the kill itself; this is what a build without it still gets.
+
+    WHAT IT READS IS THE BOARD, AND ONLY ACROSS ONE CARD. A body standing on
+    the screen before and gone from this one, on the same round, where exactly
+    ONE resolution row was filed in between, died inside that row's card --
+    nothing else on the player's turn resolves between two such screens. Any
+    other gap (a new round, two rows at once, a potion, which files no row)
+    attributes nothing, because the page could no longer say which card it
+    was.
+
+    Kept in the fight's memory, keyed by row place, so the kill still prints
+    under the same row on every later screen of the turn.
+    """
+    _load_fight()
+    held = _FIGHT_MEMORY["kills"]
+    by_row = {int(k): list(v) for k, v in (held.get("by_row") or {}).items()}
+    same_round = round_ is not None and held.get("round") == round_
+    if not same_round or rows < _int(held.get("rows")):
+        by_row = {}
+    elif rows == _int(held.get("rows")) + 1:
+        gone = [i for i in held.get("standing") or [] if i not in standing]
+        if gone:
+            place = by_row.setdefault(rows - 1, [])
+            place += [i for i in gone if i not in place]
+    row = {"round": round_, "rows": rows, "standing": list(standing),
+           "by_row": {str(k): v for k, v in by_row.items()}}
+    if row != held:
+        _FIGHT_MEMORY["kills"] = row
+        _save_fight()
+    return by_row
 
 
 # `EB-496`, THE SECOND HANDLE ON THE OTHER SIDE OF THE BOARD.

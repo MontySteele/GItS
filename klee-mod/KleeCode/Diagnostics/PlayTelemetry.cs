@@ -1298,4 +1298,23 @@ public sealed class PlayTelemetryHooks : AbstractModel
                                  (int)result.BlockedDamage);
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// THE KILLING HIT, which the hook above never hears: `CreatureCmd.Damage`
+    /// skips `AfterDamageReceived` for a creature the hit killed. A Strike
+    /// that killed its target therefore filed nothing, and the blind page said
+    /// "Nothing this page can count landed off it" under it (three seats,
+    /// 2026-09-24). `AfterDeath` fires before the corpse is removed; a death
+    /// the game PREVENTED is not a kill, and a pet or a player dying is not a
+    /// card killing its target, so both are declined.
+    /// </summary>
+    public override Task AfterDeath(PlayerChoiceContext choiceContext,
+        Creature creature, bool wasRemovalPrevented, float deathAnimLength)
+    {
+        if (!wasRemovalPrevented && creature is { IsEnemy: true })
+        {
+            ResolutionLedger.NoteKill(creature);
+        }
+        return Task.CompletedTask;
+    }
 }

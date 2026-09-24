@@ -2959,6 +2959,18 @@ RESOLUTION_HIT_ROW = "  {n}. **{target}** -- {amount}"
 RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
 RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
+#: A body that DIED inside the play. The game never hands a killing hit to the
+#: damage hook the ledger reads, so a kill arrives with no number, and the
+#: first wording printed it as "Nothing this page can count landed off it"
+#: under the Strike that had just emptied its target (three seats,
+#: 2026-09-24). The ledger's own entry sits in hit order.
+RESOLUTION_HIT_KILLED = ("  {n}. **{target}** -- killed (the feed carries no "
+                         "number for a killing hit)")
+#: The same fact read off the board, where the ledger did not file it: the
+#: body stood on the screen before this card and is gone from the one after.
+#: No place in the hit order is claimed, because none is known.
+RESOLUTION_KILLED = ("  Killed {targets}: standing on the screen before this "
+                     "card, gone after it.")
 NO_RESOLUTIONS_THIS_TURN = (
     "- Nothing has resolved on your turn yet. A card you played would be "
     "listed here with what each of its hits did.")

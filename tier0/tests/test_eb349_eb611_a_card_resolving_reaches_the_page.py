@@ -166,7 +166,7 @@ def test_the_reader_carries_the_keys_the_mod_sends():
     assert rows and sorted(rows[0]) == sorted(
         ["card", "auto_played", "carried", "overflowed", "hits"])
     assert sorted(rows[0]["hits"][0]) == sorted(
-        ["target", "amount", "blocked", "combat_id"])
+        ["target", "amount", "blocked", "combat_id", "killed"])
 
 
 def test_the_internal_id_never_crosses_onto_the_page():
@@ -180,3 +180,101 @@ def test_the_internal_id_never_crosses_onto_the_page():
     assert blindplay_board.resolutions(
         {"resolutions": [{"card": "", "card_id": "rapid_fire",
                           "hits": []}]}) == []
+
+
+# ------------------------------------------------ a killing hit is a kill ---
+#
+# THE FIND (2026-09-24, three seats). "Strike -- Nothing this page can count
+# landed off it", under the Strike that had just killed Toadpole (2), and the
+# same under a Strike+ that took a 3-HP Gardener off the board. The base game
+# skips `AfterDamageReceived` for a creature the hit killed, so the ledger fed
+# by that hook filed nothing. A build whose ledger hears `AfterDeath` files the
+# kill in hit order (`killed`); a build without it has the kill read off the
+# board, across exactly one new row.
+
+
+def _two_body_state(*rows: dict, toadpole: bool = True,
+                    round_: int = 2) -> dict:
+    """The recorded board plus a 6-HP Toadpole (combat id 2) beside Nibbit."""
+    state = _state(*rows)
+    state["battle"]["round"] = round_
+    enemies = state["battle"]["enemies"]
+    if toadpole:
+        body = copy.deepcopy(enemies[0])
+        body.update({"name": "Toadpole", "combat_id": 2, "hp": 6,
+                     "max_hp": 21, "entity_id": "TOADPOLE"})
+        enemies.append(body)
+    return state
+
+
+def test_a_kill_the_ledger_filed_prints_as_a_kill_in_hit_order():
+    page = blindplay.observe(_state(_resolved("Kurage's Oath", hits=[
+        _hit("Nibbit", 7), dict(_hit("Toadpole", 0), killed=True),
+        _hit("Nibbit", 7)])))
+    assert ("  2. **Toadpole** -- killed (the feed carries no number for a "
+            "killing hit)") in page
+    assert "1. **Nibbit** -- 7" in page and "3. **Nibbit** -- 7" in page
+    assert "Nothing this page can count landed off it." not in page
+
+
+def test_a_lone_filed_kill_is_not_nothing():
+    page = blindplay.observe(_state(_resolved("Strike", hits=[
+        dict(_hit("Toadpole", 0), killed=True)])))
+    assert "1. **Toadpole** -- killed" in page
+    assert "Nothing this page can count" not in page
+
+
+def test_the_red_one_a_strike_that_emptied_its_target_says_it_killed_it():
+    """Seen to FAIL on the 2026-09-24 transcripts: the recorded ledger filed no
+    hit for the kill and the page printed "Nothing this page can count landed
+    off it". The body stood on the screen before the Strike and is gone from
+    the one after, with one row filed between."""
+    blindplay.observe(_two_body_state())
+    page = blindplay.observe(_two_body_state(_resolved("Strike"),
+                                             toadpole=False))
+    assert ("  Killed **Toadpole**: standing on the screen before this card, "
+            "gone after it.") in page
+    assert "Nothing this page can count landed off it." not in page
+
+    # And it stays under that row for the rest of the turn, while a Block
+    # card played after it still says it landed nothing.
+    page = blindplay.observe(_two_body_state(
+        _resolved("Strike"), _resolved("Defend"), toadpole=False))
+    lines = page.splitlines()
+    at = lines.index("- **Strike**")
+    assert lines[at + 1].startswith("  Killed **Toadpole**")
+    assert lines[at + 2] == "- **Defend**"
+    assert lines[at + 3] == "  Nothing this page can count landed off it."
+
+
+def test_an_all_enemies_card_lists_the_body_it_killed():
+    blindplay.observe(_two_body_state())
+    page = blindplay.observe(_two_body_state(
+        _resolved("Kurage's Oath", hits=[_hit("Nibbit", 7, combat_id="1")]),
+        toadpole=False))
+    assert "1. **Nibbit** -- 7" in page
+    assert "  Killed **Toadpole**: standing on the screen before" in page
+
+
+def test_a_kill_the_ledger_filed_is_not_said_twice():
+    blindplay.observe(_two_body_state())
+    page = blindplay.observe(_two_body_state(
+        _resolved("Strike", hits=[dict(_hit("Toadpole", 0, combat_id="2"),
+                                       killed=True)]),
+        toadpole=False))
+    assert "1. **Toadpole** -- killed" in page
+    assert "Killed **Toadpole**" not in page
+
+
+def test_no_card_is_named_for_a_death_it_cannot_be_tied_to():
+    """Two rows at once, or a new round, and the page no longer knows which
+    card it was -- so it names none."""
+    blindplay.observe(_two_body_state())
+    page = blindplay.observe(_two_body_state(
+        _resolved("Strike"), _resolved("Defend"), toadpole=False))
+    assert "Killed **Toadpole**" not in page
+
+    blindplay.observe(_two_body_state(round_=2))
+    page = blindplay.observe(_two_body_state(_resolved("Strike"),
+                                             toadpole=False, round_=3))
+    assert "Killed **Toadpole**" not in page
