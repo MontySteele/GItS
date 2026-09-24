@@ -1320,6 +1320,11 @@ class CombatState:
     # generators). Reset at player turn start.
     cards_created_this_turn: int = 0
     hp_lost_this_turn: int = 0             # Spite's live history predicate
+    # Grass Ring of Sanctification (2026-09-23): HP lost since the END of the
+    # player's previous turn, so the enemy turn counts. Zeroed at the very end
+    # of `combat._player_turn`; a fresh combat starts at 0, so turn one counts
+    # from the start of combat. C# twin: `HpLossWindow`.
+    hp_lost_since_last_turn: int = 0
     player_damage_events: int = 0          # TearAsunder hit-count history
     # Free-play machinery (Havoc / Cascade / HowlFromBeyond). The depth
     # counter backstops the seen_states guard in combat._player_turn, which

@@ -233,6 +233,72 @@ public class InazumaCompanionOverhaulTests
         Assert.DoesNotContain(calls, c => c.Contains("KokomiRules.Exert"));
     }
 
+    // --- Grass Ring of Sanctification: "since your last turn" (2026-09-23) --
+
+    [Fact]
+    public void The_grass_ring_reads_hp_lost_since_your_last_turn()
+    {
+        // [USER] 2026-09-23: "agreed on a)". "If you lost HP this turn" read a
+        // window that opened at the top of the player's turn, so the enemy
+        // turn was wiped before any card could ask and the clause never paid
+        // on the player's own turn. The face and the read both moved.
+        var card = new ProtoMiShinobuGrassRing();
+        var face = card.Localization!.First(r => r.Item1 == "description").Item2;
+        Assert.Contains("If you lost HP since your last turn", face);
+        Assert.DoesNotContain("this turn", face);
+
+        var calls = Il.Calls(typeof(ProtoMiShinobuGrassRing).GetMethod("OnPlay", All)!);
+        Assert.Contains(calls, c => c.EndsWith("HpLossWindow.LostSinceLastTurn",
+                                               StringComparison.Ordinal));
+        Assert.DoesNotContain(calls, c => c.Contains("HpLostThisTurn"));
+    }
+
+    [Fact]
+    public void The_window_counts_the_enemy_turn_and_opens_when_your_turn_ends()
+    {
+        // REAL: the window on a real Klee seat, through the listener's own
+        // hook (any character, not only Furina, whose funnel fed the old
+        // read). The hook touches no instance state, so an uninitialised
+        // instance is the canonical one for this purpose.
+        var hooks = (KleeElementalHooks)System.Runtime.CompilerServices
+            .RuntimeHelpers.GetUninitializedObject(typeof(KleeElementalHooks));
+        var klee = Seat.Klee().Creature;
+        HpLossWindow.ResetAtTurnEnd(klee);                 // her turn ended
+        Assert.False(HpLossWindow.LostSinceLastTurn(klee));
+
+        // The enemy turn hits her for 5: a negative HP delta.
+        hooks.AfterCurrentHpChanged(klee, -5m).GetAwaiter().GetResult();
+        Assert.True(HpLossWindow.LostSinceLastTurn(klee));
+        Assert.Equal(5, HpLossWindow.LostAmount(klee));
+
+        // Healing is not loss.
+        hooks.AfterCurrentHpChanged(klee, 3m).GetAwaiter().GetResult();
+        Assert.Equal(5, HpLossWindow.LostAmount(klee));
+
+        // Her next turn ends: the next window opens empty.
+        HpLossWindow.ResetAtTurnEnd(klee);
+        Assert.False(HpLossWindow.LostSinceLastTurn(klee));
+    }
+
+    [Fact]
+    public void The_window_resets_at_the_players_turn_end_and_at_combat_start()
+    {
+        // STRUCTURAL: the lifecycle broadcasts need a live combat. Reset at
+        // AfterSideTurnEnd (after every end-of-turn effect), cleared at
+        // BeforeCombatStart so turn one counts from the start of combat, and
+        // fed from AfterCurrentHpChanged. Sim twin: the end of
+        // `combat._player_turn`, and `resources.note_player_hp_loss`.
+        Assert.Contains(Il.Calls(Il.Method("KleeElementalHooks", "AfterSideTurnEnd")),
+                        c => c.EndsWith("HpLossWindow.ResetAtTurnEnd",
+                                        StringComparison.Ordinal));
+        Assert.Contains(Il.Calls(Il.Method("KleeElementalHooks", "BeforeCombatStart")),
+                        c => c.EndsWith("HpLossWindow.ClearAll",
+                                        StringComparison.Ordinal));
+        Assert.Contains(Il.Calls(Il.Method("KleeElementalHooks", "AfterCurrentHpChanged")),
+                        c => c.EndsWith("HpLossWindow.Note",
+                                        StringComparison.Ordinal));
+    }
+
     [Fact]
     public void Mizukis_snack_is_the_one_row_that_mends()
     {

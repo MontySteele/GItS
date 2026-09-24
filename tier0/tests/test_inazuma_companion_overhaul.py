@@ -27,7 +27,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import combat, effects
+from tier0.engine import combat, effects, resources
 from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 from tier05 import rewards
@@ -507,13 +507,56 @@ def test_the_ring_sweeps_the_board_and_guards_for_three_turns(overhaul):
 
 
 def test_the_grass_ring_pays_double_after_the_ring_bites(overhaul):
+    """Its own turn: the Sanctifying Ring's HP cost is HP lost since your
+    last turn too."""
     st = make_state(hp=80)
     _play(st, "proto_mi_shinobu_grass_ring")
     assert st.player.block == 4
     st = make_state(hp=80)
-    st.hp_lost_this_turn = 3
+    _play(st, "proto_mi_shinobu_sanctifying_ring")      # Lose 3 HP
+    st.player.block = 0
     _play(st, "proto_mi_shinobu_grass_ring")
     assert st.player.block == 8
+
+
+def test_the_grass_ring_counts_the_enemy_turn(overhaul):
+    """2026-09-23, [USER]: "agreed on a)". "If you lost HP this turn" never
+    paid on the player's own turn, because the window opened at the top of
+    that turn and the enemy turn -- where HP is lost -- was already wiped. The
+    face now reads "if you lost HP since your last turn": from the END of the
+    player's previous turn until now."""
+    from tier0.engine import refpowers
+    st = make_state(hp=80, enemies=[make_enemy(
+        hp=200, intents=[{"kind": "attack", "amount": 5}])])
+    combat._player_turn(st, lambda s: None)          # turn one ends
+    assert st.hp_lost_since_last_turn == 0
+    combat._enemy_turn(st, st.enemies[0])            # the enemy hits for 5
+    assert st.player.hp == 75
+    # The next player turn opens: the old window is wiped, the new one is not.
+    refpowers.reset_turn_counters(st)
+    assert st.hp_lost_this_turn == 0
+    assert st.hp_lost_since_last_turn == 5
+    st.player.block = 0
+    _play(st, "proto_mi_shinobu_grass_ring")
+    assert st.player.block == 8
+
+
+def test_the_grass_ring_window_opens_at_the_end_of_your_turn(overhaul):
+    """HP lost BEFORE your last turn ended does not carry into the next one,
+    and on the first turn of combat the window counts from combat start."""
+    st = make_state(hp=80)
+    resources.note_player_hp_loss(st, 3)             # before turn one
+    assert st.hp_lost_since_last_turn == 3
+    _play(st, "proto_mi_shinobu_grass_ring")
+    assert st.player.block == 8
+
+    st = make_state(hp=80, enemies=[make_enemy(hp=200)])
+    resources.note_player_hp_loss(st, 3)
+    combat._player_turn(st, lambda s: None)          # the turn ends
+    assert st.hp_lost_since_last_turn == 0
+    st.player.block = 0
+    _play(st, "proto_mi_shinobu_grass_ring")
+    assert st.player.block == 4
 
 
 def test_thundergrust_hits_harder_under_half(overhaul):

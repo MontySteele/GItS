@@ -3857,6 +3857,9 @@ PREDICATE_NAMES = frozenset({
     "drew_skill_this_card",
     "card_exhausted_this_turn",
     "hp_lost_this_turn",
+    # Grass Ring of Sanctification (2026-09-23): HP lost since the end of the
+    # player's previous turn, the enemy turn included.
+    "hp_lost_since_last_turn",
     "enemy_intends_attack",
     "has_salon_members",
     "spotlight_set",
@@ -4286,6 +4289,8 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.cards_exhausted_this_turn > 0
     if name == "hp_lost_this_turn":
         return state.hp_lost_this_turn > 0
+    if name == "hp_lost_since_last_turn":
+        return state.hp_lost_since_last_turn > 0
     if name == "enemy_intends_attack":
         # Frozen enemies still attack under v1.5 (at -50%), so they count.
         return any(e.current_intent()["kind"] == "attack"

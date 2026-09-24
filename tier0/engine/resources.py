@@ -611,5 +611,6 @@ def note_player_hp_loss(state: CombatState, n: int) -> None:
     if n <= 0:
         return
     state.hp_lost_this_turn += n
+    state.hp_lost_since_last_turn += n
     state.player_damage_events += 1
     gain_fanfare(state, n * C.FANFARE_PER_HP_LOST, "hp_lost")

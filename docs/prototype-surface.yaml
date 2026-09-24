@@ -1632,9 +1632,9 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. If you lost HP this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
+   description: "Gain 4 [gold]Block[/gold]. If you lost HP since your last turn, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 4},
-             {op: conditional, if: hp_lost_this_turn,
+             {op: conditional, if: hp_lost_since_last_turn,
               then: [{op: block, amount: 4}]}]}
 
 - {id: proto_mi_shinobu_thundergrust, name: "Shinobu — Thundergrust (proto)", character: klee,
