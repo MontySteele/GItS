@@ -196,7 +196,7 @@ public class ArmKeywordTipTests
         // Bomb plan turns on. A CLAUSE and not a sentence, because the tip is
         // at the base game's four-sentence cap and a fifth would displace one
         // of the ruled findings read back below.
-        Assert.Contains("; a second Bomb joins the first. ", printed);
+        Assert.Contains("; a second Bomb stacks beside the first, and a Mine among them goes off alone. ", printed);
         // `EB-373` REWROTE THE FOURTH RULE'S CLAUSE. The fold is `FoldedMods`
         // and it reads two things off the target -- Vulnerable, and whichever
         // power sets the lowest damage cap -- so "takes the enemy's debuffs"

@@ -78,7 +78,7 @@ public class LiveLooks8bTests
         // built a pile yet -- was never told a second placer ADDS.
         var tip = Source(Path.Combine("klee-mod", "KleeCode", "Cards",
                                       "Prototype", "ArmKeywordTips.cs"));
-        Assert.Contains("a second Bomb joins the first", tip);
+        Assert.Contains("a second Bomb stacks beside the first", tip);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class LiveLooks8bTests
         // three ruled findings below it. It rides the clause it belongs to.
         var tip = Source(Path.Combine("klee-mod", "KleeCode", "Cards",
                                       "Prototype", "ArmKeywordTips.cs"));
-        Assert.Contains("\"; a second Bomb joins the first. \"", tip);
+        Assert.Contains("\"; a second Bomb stacks beside the first, and a Mine among them goes off alone. \"", tip);
     }
 
     // ==================================================================
