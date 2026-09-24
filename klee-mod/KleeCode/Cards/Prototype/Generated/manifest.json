@@ -965,8 +965,8 @@
       "power_amount": 2
     },
     "proto_ko_sit_tight": {
-      "block": 1,
-      "conditional_block": 1
+      "block": 2,
+      "power_amount": 1
     },
     "proto_ko_sizzle": {
       "damage": 3

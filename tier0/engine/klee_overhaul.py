@@ -1710,7 +1710,8 @@ FRIENDSHIP_BRACELET = "ko_friendship_bracelet"   # Companion play: grows N
 SECRET_BASE = "ko_secret_base"            # empty board at turn start: Bomb N
 DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
-SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N Pyro
+SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N damage
+SIT_TIGHT = "ko_sit_tight"                # held turn: N Block at turn end
 SECOND_SURPRISE = "ko_second_surprise"    # a Mine goes off: half-size Bomb
 ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Ka-pow!
 ALICES_DETONATOR_PLUS = "ko_alices_detonator_plus"  # ... an upgraded one
@@ -2077,6 +2078,31 @@ def _turn_end_expansion(state: CombatState) -> None:
         p.powers.pop(key, None)
 
 
+def sit_tight_turn_end(state: CombatState) -> None:
+    """Sit Tight's delayed half: "At the end of this turn, if no Bomb of yours
+    went off this turn, gain 4 Block." `SitTightPower.BeforeSideTurnEnd`'s
+    twin.
+
+    "WENT OFF" IS RULE 7'S FIRST COUNTER, `ko_set_off_this_turn`, written once
+    per explosion by `note_explosion` -- any charge of hers, Bomb or Mine, for
+    any reason, a Mine answering an attack included. The stack is the sum of
+    the copies' numbers, so each copy pays. A Power's Block: raw, no Dexterity
+    or Frail (Look Out!'s line). The power is spent whether or not it paid.
+
+    CALLED AHEAD OF `effects.player_turn_end_triggers`, not from `turn_end`:
+    the mod pays it as a POWER tenant of `BeforeSideTurnEnd`, which the game
+    runs before the model-driven `TurnEndSequencer` -- so Arlecchino's Bond of
+    Life counts it as Block gained this turn in both engines."""
+    if not live(state):
+        return
+    p = state.player
+    n = p.powers.pop(SIT_TIGHT, 0)
+    if n and state.ko_set_off_this_turn == 0:
+        p.block += n
+        state.emit("block", amount=n)
+        state.emit("ko_sit_tight", amount=n)
+
+
 def _after_charge_exploded(state: CombatState, enemy: Enemy,
                            charge: KleeCharge, reacted: bool) -> None:
     """The charge-aware door (`KleeExpansion.AfterChargeExploded`): Look Out!,
@@ -2115,8 +2141,12 @@ def _after_charge_exploded(state: CombatState, enemy: Enemy,
 
 
 def spark_knight(state: CombatState, landed: int) -> None:
-    """Spark Knight: each Spark that landed is its own Pyro hit on a random
-    living enemy. `SparkKnightPower.AfterSparksGained`'s twin."""
+    """Spark Knight: each Spark that landed is its own hit on a random living
+    enemy. `SparkKnightPower.AfterSparksGained`'s twin.
+
+    NO ELEMENT (`element=None`, the mod's `ElementalHit.DealUnelemented`): the
+    hit applies no aura and consumes none, so it cannot spend the Hydro a
+    companion just laid down before her cooked Bomb reacts with it."""
     if not live(state) or landed <= 0:
         return
     n = state.player.powers.get(SPARK_KNIGHT, 0)
@@ -2130,5 +2160,5 @@ def spark_knight(state: CombatState, landed: int) -> None:
             return
         target = state.rng.choice(living)
         state.emit("ko_spark_knight", target=target.name, amount=n)
-        effects.deal_damage_to_enemy(state, target, n, element="pyro",
+        effects.deal_damage_to_enemy(state, target, n, element=None,
                                      source="spark_knight")

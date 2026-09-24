@@ -42,7 +42,7 @@ public sealed class ProtoKoSparkKnight : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spark Knight"),
-        ("description", "Whenever you gain a [gold]Spark[/gold], deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to a random enemy."),
+        ("description", "Whenever you gain a [gold]Spark[/gold], deal {PowerAmount:diff()} damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

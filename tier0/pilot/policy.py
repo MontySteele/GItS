@@ -220,7 +220,8 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # hand the arm owns.
     "bomb_went_off_this_turn",
     "bomb_reacted_this_turn",
-    # R276, Sit Tight: the same counter read the other way round.
+    # R276: the same counter read the other way round (no row prints it since
+    # Sit Tight moved its check to the end of the turn, 2026-09-23).
     "no_bomb_went_off_this_turn",
     # `EB-712`, the parameterised names -- and they are listed ONE BY ONE
     # rather than as prefixes, which is the conservative half of this row.

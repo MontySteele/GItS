@@ -3265,10 +3265,15 @@ grown Bomb. **`proto_ko_treasure_map`**: `fetch_from_discard` then
 `grow_largest`; a lone candidate is taken without a screen (`ScryTake`'s
 rule), none and the growth still happens.
 
-**`proto_ko_sit_tight`**: 1 Spark, Retain, Block 5, and 4 more when
-`no_bomb_went_off_this_turn`. The upgrade (7 and +5) is `block: +1,
-conditional_block: +1`: the second key moves both numbers by one, the first
-moves the top Block by one more.
+**`proto_ko_sit_tight`**: 1 Spark, Retain, Block 5, then `apply_power
+ko_sit_tight 4` (`SitTightPower`), which pays its 4 Block at
+`BeforeSideTurnEnd` if rule 7's first counter (`SetOffThisTurn`: any Bomb or
+Mine of hers went off, for any reason) is still 0, and is spent either way.
+The sim pays it in `klee_overhaul.sit_tight_turn_end`, ahead of
+`effects.player_turn_end_triggers`. The upgrade (7 and 5) is `block: +2,
+power_amount: +1`. Before 2026-09-23 the 4 was a play-time `conditional` on
+`no_bomb_went_off_this_turn`, which only rewarded playing it before a
+detonator.
 
 **`proto_ko_tag_along`** / **`proto_ko_adventure_club`**: `add_random_companion`
 draws uniformly from the run's companion pool less other characters'
@@ -3316,7 +3321,9 @@ on ALL -- three existing ops in the printed order.
 sparks_spent`, one hit of 5 to ALL enemies per Spark spent.
 
 **`proto_ko_spark_knight`**: rides `SparkPower.Gain` (the sim's
-`gain_sparks`), one Pyro hit per Spark that LANDED, from any source.
+`gain_sparks`), one hit per Spark that LANDED, from any source. The hit has no
+element (`ElementalHit.DealUnelemented`; the sim's `element=None`) since
+2026-09-23, so it cannot spend an aura a companion laid down.
 
 **`proto_ko_alices_detonator`**: two Power twins, `AlicesDetonatorPower` and
 `AlicesDetonatorPlusPower`, installed by the card's upgrade; each adds one
