@@ -66,6 +66,19 @@ public class ResolutionLedgerTests
             Il.Calls(Il.Method("KleeElementalHooks", "BeforeSideTurnEnd")));
     }
 
+    /// <summary>The killing hit never reaches `AfterDamageReceived` (the
+    /// game's own kill gate in `CreatureCmd.Damage`), so the death broadcast
+    /// is the hook that has to file it. Seen to fail: three seats on
+    /// 2026-09-24 read "Nothing this page can count landed off it" under a
+    /// Strike that killed its target.</summary>
+    [Fact]
+    public void A_death_inside_a_play_reaches_the_ledger()
+    {
+        var calls = Il.Calls(Il.Method("PlayTelemetryHooks", "AfterDeath"));
+
+        Assert.Contains("ResolutionLedger.NoteKill", calls);
+    }
+
     [Fact]
     public void A_fight_does_not_inherit_the_last_ones_rows()
     {
@@ -152,6 +165,58 @@ public class ResolutionLedgerTests
 
         Assert.Empty((List<Dictionary<string, object?>>)
                      ResolutionLedger.Snapshot()[0]["hits"]!);
+    }
+
+    // ---------------------------------------------------------- the kills ---
+
+    /// <summary>A kill is an entry IN HIT ORDER, where the killing hit would
+    /// have been, carrying the body and no number -- so an all-enemies card
+    /// that killed one body of three still names it between the other two.
+    /// </summary>
+    [Fact]
+    public void A_kill_is_filed_in_hit_order_with_no_number()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("kurages_oath", "Kurage's Oath", false);
+        ResolutionLedger.NoteHit(null, 7, 0);
+        ResolutionLedger.NoteKill("Toadpole", "2");
+        ResolutionLedger.NoteHit(null, 7, 0);
+        ResolutionLedger.ClosePlay();
+
+        var hits = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["hits"]!;
+
+        Assert.Equal(3, hits.Count);
+        Assert.Equal(new object?[] { false, true, false },
+                     hits.ConvertAll(h => h["killed"]).ToArray());
+        Assert.Equal("Toadpole", hits[1]["target"]);
+        Assert.Equal("2", hits[1]["combat_id"]);
+        Assert.Equal(0, hits[1]["amount"]);
+        Assert.Equal(0, hits[1]["blocked"]);
+    }
+
+    [Fact]
+    public void One_body_dies_once()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("strike", "Strike", false);
+        ResolutionLedger.NoteKill("Toadpole", "2");
+        ResolutionLedger.NoteKill("Toadpole", "2");
+
+        Assert.Single((List<Dictionary<string, object?>>)
+                      ResolutionLedger.Snapshot()[0]["hits"]!);
+    }
+
+    /// <summary>An enemy dying on its own turn, or to a bomb on nobody's
+    /// turn, is not a card killing it: `NoteHit`'s rule, one hook over.
+    /// </summary>
+    [Fact]
+    public void A_death_outside_a_play_is_filed_nowhere()
+    {
+        Fresh();
+        ResolutionLedger.NoteKill("Toadpole", "2");
+
+        Assert.Empty(ResolutionLedger.Snapshot());
     }
 
     // --------------------------------------------------------- the window ---
@@ -244,8 +309,10 @@ public class ResolutionLedgerTests
                      new List<string>(row.Keys).ToArray());
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
-        Assert.Equal(new[] { "target", "amount", "blocked", "combat_id" },
+        Assert.Equal(new[] { "target", "amount", "blocked", "combat_id",
+                             "killed" },
                      new List<string>(hit.Keys).ToArray());
+        Assert.Equal(false, hit["killed"]);
     }
 
     /// <summary>PRESENT AND EMPTY ON A TURN NOTHING RESOLVED, which is a fact

@@ -12164,6 +12164,62 @@ def test_a_multi_hit_telegraph_folds_per_hit_and_prints_the_total():
     assert "it lands as 18 in all" in page
 
 
+def _breakdown(base: int, folded: int, repeats: int = 1,
+               modifiers: tuple = ("Weak",)) -> dict:
+    """The bridge's `EB-607` block, as `GitsIntentBreakdown.Compose` sends it."""
+    return {"base_damage": base, "folded_damage": folded, "repeats": repeats,
+            "total_damage": folded * repeats, "modifiers": list(modifiers)}
+
+
+def test_the_red_one_a_telegraph_the_game_folded_prints_one_number():
+    """Seen to FAIL on the 2026-09-24 transcripts: "the game folded **Weak**
+    into that: it is 6 on the move and 4 after", then "Folded through the
+    **Weak 1** on this body, 4 lands as 3. If the figure above already counts
+    it, it lands as 4." Every seat that checked took the headline. The
+    breakdown IS the game's fold, so the figure already counts the Weak and a
+    second landing is Weak counted twice."""
+    state = _weak_intent_state("4", weak=1)
+    state["battle"]["enemies"][0]["intents"][0]["breakdown"] = _breakdown(6, 4)
+    page = blindplay.observe(state)
+    assert "the game folded **Weak** into that: it is 6 on the move and 4 "            "after" in page
+    assert "Folded through" not in page
+    assert "lands as 3" not in page
+    assert "on any other frame it returns the move's raw damage" not in page
+
+
+def test_strength_and_weak_folded_together_print_one_number():
+    """The Kokomi Opus seat's "11 on the move and 10 after" under Weak 2: the
+    Sludge Spinner also wore Strength 3, and (11 + 3) x 0.75 truncates to 10.
+    The page prints the game's figure and the models it folded, and no
+    arithmetic of its own."""
+    state = _weak_intent_state("10", weak=2)
+    state["battle"]["enemies"][0]["intents"][0]["breakdown"] = _breakdown(
+        11, 10, modifiers=("Strength", "Weak"))
+    page = blindplay.observe(state)
+    assert "the game folded **Strength** and **Weak** into that: it is 11 on "            "the move and 10 after" in page
+    assert "Folded through" not in page
+
+
+def test_a_folded_multi_hit_prints_one_total():
+    """"1 each lands as 0 each, 0 in all ... it lands as 4 in all" was a
+    `1x4` the game had already folded from 2 each."""
+    state = _weak_intent_state("1x4", weak=1)
+    state["battle"]["enemies"][0]["intents"][0]["breakdown"] = _breakdown(
+        2, 1, repeats=4)
+    page = blindplay.observe(state)
+    assert "1 x 4 is 4 if every hit lands" in page
+    assert "Folded through" not in page
+    assert "0 in all" not in page
+
+
+def test_vulnerable_under_a_breakdown_prints_one_number_too():
+    state = _weak_intent_state("12", weak=0, vulnerable=1)
+    state["battle"]["enemies"][0]["intents"][0]["breakdown"] = _breakdown(
+        8, 12, modifiers=("Vulnerable",))
+    page = blindplay.observe(state)
+    assert "Folded through" not in page
+
+
 def test_a_board_with_no_multiplier_prints_no_fold_line():
     """The gate is a multiplier standing on the board. Nothing up, nothing
     said -- the page does no arithmetic on a number nobody is checking."""

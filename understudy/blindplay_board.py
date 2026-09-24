@@ -17,7 +17,8 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _number_faces, _powers,
                                         enemy_replacements, relic_faces,
-                                        remember_deck, remembered_deck,
+                                        remember_deck, remember_kills,
+                                        remembered_deck,
                                         remembered_enemy_name)
 from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _label, _listing, _player, _potions,
@@ -617,6 +618,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     resolved = resolutions(p)
     if resolved is not None:
         name_resolution_rows(resolved, _enemies(state), combat["enemies"])
+        # And the bodies a row KILLED, which the game never hands the damage
+        # hook -- read off the board where the ledger did not file them.
+        name_resolution_kills(resolved, _enemies(state),
+                              combat["round"] or None)
         combat["resolutions"] = resolved
     memory = kurage_memory(p)
     if memory is not None:
@@ -952,10 +957,14 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
         card = _text(row.get("card"))
         if not card:
             continue
+        # `killed` is the ledger's entry for a body that DIED inside the play
+        # (`ResolutionLedger.NoteKill`): the game skips the damage hook for a
+        # killing hit, so it carries the body and no number.
         hits = [{"target": _text(h.get("target")),
                  "amount": _int(h.get("amount")),
                  "blocked": _int(h.get("blocked")),
-                 "combat_id": _text(h.get("combat_id"))}
+                 "combat_id": _text(h.get("combat_id")),
+                 "killed": bool(h.get("killed"))}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
         out.append({"card": card,
@@ -987,6 +996,32 @@ def name_resolution_rows(rows: list[dict[str, Any]],
             hit["target"] = (by_id.get(hit["combat_id"])
                              or remembered_enemy_name(hit["combat_id"],
                                                       hit["target"]))
+
+
+def name_resolution_kills(rows: list[dict[str, Any]],
+                          wire: list[dict[str, Any]],
+                          round_: int | None) -> None:
+    """The bodies each row killed that the ledger did not file itself.
+
+    A killing hit never reaches the game's damage hook, so on a build whose
+    ledger does not also hear the death, the row that emptied a body filed
+    nothing and printed "Nothing this page can count landed off it".
+    `remember_kills` reads the kill off the board instead (a body standing on
+    the screen before one new row and gone after it); this names each one the
+    way the enemy list named it and drops any the ledger already filed, so a
+    build with both says it once. `row["killed"]` is the list, in board order.
+    """
+    standing = [_text(e.get("combat_id")) for e in wire
+                if _text(e.get("combat_id")) and _is_alive(
+                    {"hp": e.get("hp"),
+                     "phase_flip": is_phase_flip_hp(
+                         _int(e.get("hp")),
+                         _int(e.get("max_hp", e.get("hp"))))})]
+    by_row = remember_kills(len(rows), standing, round_)
+    for place, row in enumerate(rows):
+        filed = {h["combat_id"] for h in row["hits"] if h.get("killed")}
+        row["killed"] = [remembered_enemy_name(i, "an enemy")
+                         for i in by_row.get(place, []) if i not in filed]
 
 
 def name_answer_rows(answers: list[dict[str, Any]],

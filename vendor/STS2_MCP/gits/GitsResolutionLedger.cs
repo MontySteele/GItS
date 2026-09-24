@@ -50,8 +50,8 @@
 // THE CONTRACT. `KleeMod.Powers.ResolutionLedger.Snapshot()` returns a
 // List<Dictionary<string, object?>> of primitives -- `card_id`, `card`,
 // `auto_played`, `carried`, `hits` (itself a list of `{target, amount,
-// combat_id}` dictionaries) -- and this file hands it straight to the wire
-// under `player.resolutions`. An ABSENT key means "no resolution ledger in
+// blocked, combat_id, killed}` dictionaries) -- and this file hands it
+// straight to the wire under `player.resolutions`. An ABSENT key means "no resolution ledger in
 // this build"; an EMPTY list means "the ledger is here and nothing resolved
 // this turn". Those are different facts and
 // `understudy/blindplay_board.resolutions` tells them apart.

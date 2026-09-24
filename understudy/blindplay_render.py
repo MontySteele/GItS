@@ -56,6 +56,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_BLOCKED,
                                         RESOLUTION_HIT_ALL_BLOCKED,
                                         RESOLUTION_NO_HITS,
+                                        RESOLUTION_HIT_KILLED,
+                                        RESOLUTION_KILLED,
                                         RESOLUTION_AUTO_CLAUSE,
                                         RESOLUTION_CARRIED_CLAUSE,
                                         RESOLUTION_OVERFLOW_CLAUSE,
@@ -1092,6 +1094,19 @@ def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
 # are both live, both have been seen, and a page that picks one is guessing on
 # the seat's behalf.
 #
+# BUT ONLY WHERE THE WIRE CANNOT SAY WHICH, and since `EB-607`'s bridge half
+# it usually can. The intent's `breakdown` is `GetSingleDamage` call for call
+# -- the same `Hook.ModifyDamage(..., ModifyDamageHookType.All, ...)` under
+# the same `LocalContext.GetMe` guard -- so where it arrived, the figure is
+# the folded one and its `modifiers` list names Weak and Vulnerable when they
+# were counted. Every Weak line three seats read on 2026-09-24 sat under a
+# breakdown saying so ("the game folded **Weak** into that: it is 6 on the
+# move and 4 after") and then offered 3 as a second landing; the seats took
+# the headline each time, and the second landing was Weak counted twice. So a
+# part carrying a breakdown prints one number, the game's, and no fold line;
+# the two-landing line is left for a part that arrived without one (a bridge
+# older than `EB-607`, or the frame where `GetMe` answered null).
+#
 # THE MULTIPLIERS ARE THE GAME'S OWN CONSTANTS. `WeakPower.CanonicalVars` is
 # `DamageDecrease 0.75`, `VulnerablePower.CanonicalVars` is `DamageIncrease
 # 1.5`, and both truncate to an int at the end (`(int)num`). Both can be moved
@@ -1101,13 +1116,14 @@ def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
 INTENT_FOLD_NOTE = (
     "*An intent's figure is the game's own `GetIntentLabel`, and that getter "
     "folds the board's multipliers in only on a frame where it can resolve the "
-    "local player; on any other frame it returns the move's raw damage. Both "
-    "have been seen on this wire under one field name, and nothing on the feed "
-    "says which one a given read is -- so where a multiplier is standing, the "
-    "line above prints both landings and this page picks neither. The "
-    "multipliers used are the game's own constants (Weak x0.75, Vulnerable "
-    "x1.5, truncated); a relic or power that moves either -- Paper Krane, "
-    "Debilitate, Paper Phrog, Cruelty -- is not in this arithmetic.*")
+    "local player; on any other frame it returns the move's raw damage. Where "
+    "the game also sends how it arrived at the figure, the line says what it "
+    "folded and that figure is the one to read. A part marked `Folded "
+    "through` arrived without that, so nothing on the feed says which of the "
+    "two it is, and the line prints both landings and this page picks "
+    "neither. The multipliers used are the game's own constants (Weak x0.75, "
+    "Vulnerable x1.5, truncated); a relic or power that moves either -- Paper "
+    "Krane, Debilitate, Paper Phrog, Cruelty -- is not in this arithmetic.*")
 
 _WEAK_MULTIPLIER = 0.75
 _VULNERABLE_MULTIPLIER = 1.5
@@ -1129,6 +1145,12 @@ def _intent_fold_lines(enemy: dict[str, Any],
     Empty on every board where neither Weak nor Vulnerable is up, which is
     most of them, and empty for a part whose label is not a plain number or a
     plain `NxM` -- the two shapes this page can take apart without guessing.
+
+    AND EMPTY FOR A PART THAT CARRIES THE GAME'S BREAKDOWN. That block is the
+    game's own fold of every modifier on the board, so its figure already
+    counts the Weak and the Vulnerable this line would fold a second time; the
+    breakdown clause on the intent line says what was folded, and one number
+    is the whole answer (2026-09-24, three seats).
     """
     weak = _stacks_of(enemy, "weak")
     vulnerable = _stacks_of(you, "vulnerable")
@@ -1142,6 +1164,8 @@ def _intent_fold_lines(enemy: dict[str, Any],
     out: list[str] = []
     for intent in enemy.get("intents") or []:
         if _fold(intent.get("type")) != "attack":
+            continue
+        if (intent.get("breakdown") or {}).get("repeats"):
             continue
         label = str(intent.get("label") or "").strip()
         multi = _MULTI_HIT_LABEL.match(label)
@@ -1194,11 +1218,17 @@ def _resolution_lines(rows: list[dict[str, Any]]) -> list[str]:
         if row.get("overflowed"):
             clauses += RESOLUTION_OVERFLOW_CLAUSE
         out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
-        if not row["hits"]:
+        killed = row.get("killed") or []
+        if not row["hits"] and not killed:
             out.append(RESOLUTION_NO_HITS)
             continue
         for n, hit in enumerate(row["hits"], start=1):
             target = hit["target"] or "an enemy"
+            # A body that died inside the play: the game hands the killing hit
+            # to no damage hook, so the ledger files the death with no number.
+            if hit.get("killed"):
+                out.append(RESOLUTION_HIT_KILLED.format(n=n, target=target))
+                continue
             if hit["amount"] <= 0 and hit["blocked"] > 0:
                 out.append(RESOLUTION_HIT_ALL_BLOCKED.format(
                     n=n, target=target, blocked=hit["blocked"]))
@@ -1208,6 +1238,11 @@ def _resolution_lines(rows: list[dict[str, Any]]) -> list[str]:
             if hit["blocked"] > 0:
                 line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
             out.append(line)
+        # And a kill the ledger did not file, read off the board: after the
+        # numbered hits, because no place in their order is known.
+        if killed:
+            out.append(RESOLUTION_KILLED.format(
+                targets=_and_list([f"**{k}**" for k in killed])))
     if all(row.get("auto_played") for row in rows):
         out += ["", RESOLUTION_AUTO_TURN_NOTE]
     return out
