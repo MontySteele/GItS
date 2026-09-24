@@ -679,6 +679,18 @@ STAGE_LEAVE_REASONS = {
 STAGE_LEFT_UNSAID = "left the stage"
 
 
+def _each(raw: Any) -> int | None:
+    """A log row's per-enemy figure (round four): a whole number of 0 or
+    more, else None. The mod sends -1 for "no single figure"."""
+    if isinstance(raw, bool) or not isinstance(raw, (int, float, str)):
+        return None
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return value if value >= 0 else None
+
+
 def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
     """The Stage as the observed board sees it (`EB-735`).
 
@@ -751,6 +763,11 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # numbered name by `name_stage_targets` below.
             "target": _text(row.get("target")),
             "combat_id": _text(row.get("target_id")),
+            # Round four: what EACH enemy lost to Chevalmarin's act, where
+            # every enemy lost the same. None where the wire has no such
+            # figure (-1, or an older build), and the page then prints the
+            # total as a total.
+            "each": _each(row.get("each")),
         })
     # R276 batch two: the mod's forecast of the end-of-turn acts' Block, with
     # Arkhe Alignment's multiple and Full House's extra acts folded in. None

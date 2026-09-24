@@ -6722,7 +6722,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   "price or you can't choose it. Emptied exactly, it takes a "],
         "Fanfare": ["A performer's own bar. Attacks hit your ",
                     "'s Fanfare, then you. No cap."],
-        "Raise": ["With one performer on stage, that is the lead."],
+        # Round four: generic on WHERE, and the empty-stage summon.
+        "Raise": ["Adds ", " where the card says, else to the ",
+                  ". On an empty stage, a random ",
+                  "performer arrives holding it instead."],
         # `EB-744` rewrote the first clause: a bow is what a Spend earns and
         # a hit does not, which is the contrast rather than an "only" the
         # Final Bow face on the same screen contradicts.
@@ -6734,10 +6737,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # once the front seat empties -- "nothing hits it" was a promise the
         # rule does not make.
         # R276: the back seat is the bank.
+        # Round four: plainly where hits go.
         "back performer": ["The back seat, the bank: Raise fills it, Spend "
-                           "draws from it, ",
-                           "and no single attack reaches it. Alone on stage "
-                           "it is the "],
+                           "draws from it. ",
+                           "Hits go to the lead first and reach it once "
+                           "every seat ahead is "],
         "Rotate": ["Seats change order and every bar comes with them. Nobody "
                    "leaves "],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is

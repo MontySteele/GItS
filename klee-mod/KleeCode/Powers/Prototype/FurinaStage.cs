@@ -311,12 +311,8 @@ public static class FurinaStage
         StagePerformer who;
         if (member == "random")
         {
-            var seated = ledger.Company.ToHashSet();
-            var free = Performers.Select(Parse)
-                .Where(p => !seated.Contains(p)).ToList();
-            if (free.Count == 0) return;
-            var roll = owner!.Player?.RunState.Rng.CombatTargets;
-            who = roll != null ? roll.NextItem(free) : free[0];
+            if (RollFree(owner!, ledger) is not { } rolled) return;
+            who = rolled;
         }
         else
         {
@@ -349,11 +345,47 @@ public static class FurinaStage
         Vfx.FurinaStageStrip.Refresh(owner);
     }
 
+    /// <summary>A random performer who is not on stage, or null with all
+    /// three seated; on an empty stage, any of the three. One roll for the
+    /// random summons and the empty-stage Raise.</summary>
+    private static StagePerformer? RollFree(Creature owner,
+                                            FurinaStageLedger ledger)
+    {
+        var seated = ledger.Company.ToHashSet();
+        var free = Performers.Select(Parse)
+            .Where(p => !seated.Contains(p)).ToList();
+        if (free.Count == 0) return null;
+        var roll = owner.Player?.RunState.Rng.CombatTargets;
+        return roll != null ? roll.NextItem(free) : free[0];
+    }
+
+    /// <summary>
+    /// ROUND FOUR: RAISE ON AN EMPTY STAGE SUMMONS. Asked first by every
+    /// Raise verb below, so the rule is one door whichever seat a face names:
+    /// with nobody on stage, a random performer arrives holding
+    /// <paramref name="amount"/> and nothing else is raised (Gala Dinner on an
+    /// empty stage fields ONE performer at 3). True when it summoned, and the
+    /// caller then returns without raising. The arrival performs at the end of
+    /// the turn with the others, never on arrival (rule 3, `EB-738`).
+    /// </summary>
+    private static async Task<bool> SummonForRaise(Creature owner, int amount)
+    {
+        var ledger = FurinaStageLedger.For(owner);
+        if (amount <= 0 || !ledger.IsEmpty) return false;
+        if (RollFree(owner, ledger) is not { } who) return false;
+        if (ledger.SummonOnEmpty(who, amount) == null) return false;
+        await FurinaStagePets.Sync(owner);
+        Vfx.FurinaStageStrip.Refresh(owner);
+        return true;
+    }
+
     /// <summary>Rule 5. Raise lands on the back-most performer, which is the
-    /// lead when it is alone. Returns what landed.</summary>
-    public static int Raise(Creature? owner, int amount)
+    /// lead when it is alone; on an empty stage it summons (round four).
+    /// Returns what landed.</summary>
+    public static async Task<int> Raise(Creature? owner, int amount)
     {
         if (!LiveFor(owner)) return 0;
+        if (await SummonForRaise(owner!, amount)) return amount;
         var raised = FurinaStageLedger.For(owner!).Raise(amount);
         if (raised > 0)
         {
@@ -364,8 +396,26 @@ public static class FurinaStage
     }
 
     /// <summary>R276 batch two, <i>Hold Your Places</i>: Raise on the LEAD
-    /// performer, the one Raise in the kit that lands on the shield.</summary>
-    public static int RaiseLead(Creature? owner, int amount)
+    /// performer, the one Raise in the kit that lands on the shield. On an
+    /// empty stage it summons (round four).</summary>
+    public static async Task<int> RaiseLead(Creature? owner, int amount)
+    {
+        if (!LiveFor(owner)) return 0;
+        if (await SummonForRaise(owner!, amount)) return amount;
+        var raised = FurinaStageLedger.For(owner!).RaiseLead(amount);
+        if (raised > 0)
+        {
+            FurinaStagePets.SyncBars(owner);
+            Vfx.FurinaStageStrip.Refresh(owner);
+        }
+        return raised;
+    }
+
+    /// <summary>Arkhe Alignment's Pneuma: "the lead REGAINS N". A regain like
+    /// rule 4's and not a Raise, so it does NOT summon on an empty stage --
+    /// there is no lead to regain anything (round four; flagged in the PR).
+    /// </summary>
+    public static int RegainLead(Creature? owner, int amount)
     {
         if (!LiveFor(owner)) return 0;
         var raised = FurinaStageLedger.For(owner!).RaiseLead(amount);
@@ -378,10 +428,12 @@ public static class FurinaStage
     }
 
     /// <summary>R276 batch two, <i>Gala Dinner</i>: Raise on EVERY
-    /// performer.</summary>
-    public static int RaiseAll(Creature? owner, int amount)
+    /// performer. On an empty stage it summons ONE performer holding the
+    /// amount (round four).</summary>
+    public static async Task<int> RaiseAll(Creature? owner, int amount)
     {
         if (!LiveFor(owner)) return 0;
+        if (await SummonForRaise(owner!, amount)) return amount;
         var raised = FurinaStageLedger.For(owner!).RaiseAll(amount);
         if (raised > 0)
         {
@@ -520,7 +572,15 @@ public static class FurinaStage
                       new StageExit(who, StageDeparture.Spent),
                       mayReturn: false);
         }
-        foreach (var who in company) ledger.Summon(who);
+        // "Then returns at 1": to an EMPTY seat, and a returnee that finds
+        // none does not return. Round four made that reachable -- Thunderous
+        // Applause's Raise between the bows now summons onto the stage this
+        // card emptied -- and a return that ROTATED would push that performer
+        // off. The sim's `bow_and_return` has always read the clause this way.
+        foreach (var who in company)
+        {
+            if (!ledger.IsFull) ledger.Summon(who);
+        }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
@@ -575,6 +635,7 @@ public static class FurinaStage
         var stage = FurinaStageLedger.For(owner!);
         var dmg = stage.ActDamageMultiplier;
         var blk = stage.ActBlockMultiplier;
+        var each = -1;
         switch (Parse(member))
         {
             case StagePerformer.Usher:
@@ -583,13 +644,19 @@ public static class FurinaStage
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case StagePerformer.Chevalmarin:
-                foreach (var enemy in Enemies(owner!))
+                // Round four: what EACH enemy lost, so the page prints "2 to
+                // every enemy" and not the total of four hits as one number.
+                var targets = Enemies(owner!).ToList();
+                var hpBefore = targets.Select(e => e.CurrentHp).ToList();
+                foreach (var enemy in targets)
                 {
                     await ElementalHit.Deal(
                         choiceContext, enemy, Elements.Element.Hydro,
                         FurinaStageLaw.ActChevalmarinDamage * dmg, owner,
                         powered: false);
                 }
+                each = EvenLoss(hpBefore,
+                                targets.Select(e => e.CurrentHp).ToList());
                 break;
             case StagePerformer.Crabaletta:
                 if (RandomEnemy(owner!) is { } target)
@@ -606,7 +673,23 @@ public static class FurinaStage
                 }
                 break;
         }
-        NoteBeat(owner!, "act", Parse(member), before, hit);
+        NoteBeat(owner!, "act", Parse(member), before, hit, each);
+    }
+
+    /// <summary>Round four: the one loss every enemy took, or -1 where there
+    /// were none or they differ (a Vulnerable, a kill). Measured, as every
+    /// beat's number is (`EB-511`); the page prints the total on a -1.
+    /// </summary>
+    public static int EvenLoss(IReadOnlyList<int> before,
+                               IReadOnlyList<int> after)
+    {
+        if (before.Count == 0 || before.Count != after.Count) return -1;
+        var first = before[0] - after[0];
+        for (var i = 1; i < before.Count; i++)
+        {
+            if (before[i] - after[i] != first) return -1;
+        }
+        return first;
     }
 
     /// <summary><i>Bis!</i>: the lead performer performs its act now.
@@ -718,8 +801,8 @@ public static class FurinaStage
     /// left and its departure effect has resolved.
     ///
     ///   * <see cref="ThunderousApplausePower"/>, each copy: draw 1 card and
-    ///     Raise its Amount on the back performer (nothing is raised on an
-    ///     empty stage; the draw still happens).
+    ///     Raise its Amount on the back performer (round four: on an empty
+    ///     stage the Raise summons a random performer holding it).
     ///   * <see cref="FiveCenturyActPower"/>, any number of copies: the
     ///     performer returns to the back-most empty seat at 1 and rests
     ///     through this turn's acts. Once -- and not at all from <i>Let the
@@ -739,7 +822,9 @@ public static class FurinaStage
             {
                 await CardPileCmd.Draw(choiceContext, 1m, player);
             }
-            Raise(owner, (int)applause.Amount);
+            // Round four: on the empty stage a bow can leave, this Raise
+            // summons a random performer holding the amount.
+            await Raise(owner, (int)applause.Amount);
         }
         if (mayReturn && owner.Powers.OfType<FiveCenturyActPower>().Any()
             && FurinaStageLedger.For(owner).ReturnToBack(who))
@@ -769,7 +854,7 @@ public static class FurinaStage
     private static void NoteBeat(Creature owner, string what,
                                  StagePerformer who,
                                  (int Block, int EnemyHp) before,
-                                 Creature? hit = null)
+                                 Creature? hit = null, int each = -1)
     {
         var after = Ledger(owner);
         var moved = (after.Block - before.Block)
@@ -786,7 +871,8 @@ public static class FurinaStage
             // by, and the title is the fallback for one this beat KILLED,
             // which is off the next board entirely.
             hit?.Monster?.Title.ToString() ?? "",
-            hit?.CombatId.ToString() ?? ""));
+            hit?.CombatId.ToString() ?? "",
+            each));
     }
 
     /// <summary>Rule 6's flush: the ledger moved synchronously inside

@@ -187,7 +187,7 @@ POOL_SUBS: dict[str, str] = {
     # --- Uncommons (seven) ---
     "dress_rehearsal": "proto_fs_gala_dinner",          # 1 Skill for 1 Skill
     "matinee_performance": "proto_fs_double_casting",   # 1 Skill for 1 Skill
-    "full_ensemble": "proto_fs_tutti",                  # 2 Skill for 2 Skill
+    "full_ensemble": "proto_fs_tutti",                  # 2 Skill -> a 1 Skill
     "dramatic_entrance": "proto_fs_bravura",            # 1 Attack for 1 Attack
     "fortissimo_guard": "proto_fs_full_house",          # 2 Power for 2 Power
     "standing_ovation": "proto_fs_thunderous_applause", # 1 Power for 1 Power
@@ -361,7 +361,8 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
     """R276 batch two: what a Bow sets off once the performer has left and
     its departure effect has resolved -- `FurinaStage.AfterBow`'s twin.
     Thunderous Applause (each copy draws 1 and Raises its share on the back
-    performer), then A Five-Century Act (the performer returns to the back
+    performer -- round four: on an empty stage that Raise summons a random
+    performer holding it), then A Five-Century Act (the performer returns to the back
     seat at 1 and rests through this turn's acts; once, and never from Let
     the People Rejoice, whose own return is the return)."""
     p = state.player
@@ -423,17 +424,35 @@ def turn_start_regen(state) -> None:
                fanfare=pair[1])
 
 
-def raise_fanfare(state, amount: int, seat: str = SEAT_BACK) -> int:
+def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
+                  summon_on_empty: bool = True) -> int:
     """Rule 5. "Raise N Fanfare on the back performer" lands on the BACK-MOST
     performer, which is the lead when it is alone. `seat=SEAT_LEAD` is the
     other spelling, for a face that names the lead instead.
 
-    Returns what landed -- 0 on an empty stage, which the caller emits rather
-    than swallowing, for the reason `rotate` gives above.
+    ROUND FOUR: RAISE ON AN EMPTY STAGE SUMMONS. With nobody on stage a random
+    performer arrives HOLDING THE RAISE AMOUNT (not rule 3's 1) and nothing
+    else is raised -- for every seat a face names, and for the Raise powers.
+    Gala Dinner on an empty stage fields ONE performer at 3. The arrival
+    performs at the end of the turn with the others (rule 3, `EB-738`). C#
+    twin: `FurinaStage.SummonForRaise`.
+
+    `summon_on_empty=False` is Arkhe Alignment's Pneuma, which prints "the
+    lead REGAINS" -- a regain like rule 4's, with no lead to regain on an
+    empty stage (C# twin: `FurinaStage.RegainLead`).
+
+    Returns what landed -- 0 on an empty stage that does not summon, which the
+    caller emits rather than swallowing, for the reason `rotate` gives above.
     """
     p = state.player
     if not active(p) or amount <= 0:
         return 0
+    if summon_on_empty and not stage(p):
+        member = state.rng.choice(PERFORMERS)
+        _seats(p).append([member, int(amount)])
+        state.emit("stage_summon", member=member, fanfare=int(amount),
+                   seats=1, rotated=False, via="raise")
+        return int(amount)
     if seat == SEAT_ALL:
         seats = stage(p)
         if not seats:
@@ -940,7 +959,9 @@ def turn_start_powers(state) -> None:
     choice = arkhe_choice(state)
     if choice == "pneuma":
         p.stage_act_block_mult = 1 + copies
-        raise_fanfare(state, PNEUMA_LEAD_REGAIN * copies, SEAT_LEAD)
+        # A REGAIN, not a Raise: no summon on an empty stage (round four).
+        raise_fanfare(state, PNEUMA_LEAD_REGAIN * copies, SEAT_LEAD,
+                      summon_on_empty=False)
     else:
         p.stage_act_damage_mult = 1 + copies
     state.emit("stage_arkhe", choice=choice, copies=copies)

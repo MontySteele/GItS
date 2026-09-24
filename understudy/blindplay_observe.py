@@ -113,6 +113,23 @@ def _offer_drop(state: dict[str, Any], obs: dict[str, Any]) -> None:
 # settled it: the HUD carries the row through every screen of a run, so the
 # page does too, under the same heading, on every screen that is not a fight.
 # The combat header is untouched.
+#: The Stage arm's starting relic, by its printed title and by its model id.
+#: Only a Stage-arm Furina holds it (`FurinaStageRoster`: it replaces the
+#: Ethereal Spotlight; Starter rarity keeps it off every reward roll).
+STAGE_RELIC_TITLE = "Salon Solitaire"
+STAGE_RELIC_ID = "SALON_SOLITAIRE"
+
+
+def _holds_stage_relic(state: dict[str, Any]) -> bool:
+    """Does this run's player hold the Stage arm's starting relic?"""
+    for relic in _relics(state):
+        name = _text(relic.get("name"))
+        rid = _text(relic.get("id")).upper()
+        if name == STAGE_RELIC_TITLE or rid.endswith(STAGE_RELIC_ID):
+            return True
+    return False
+
+
 def _show_relics(state: dict[str, Any], obs: dict[str, Any]) -> None:
     """Print the relic row on the screens the combat header does not cover."""
     if obs["blocked"] or obs["screen"] == "combat":
@@ -644,6 +661,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         live: bool | None = combat_block.get("stage") is not None
     else:
         live = None
+    # ROUND FOUR: AND THE RELIC ANSWERS ON EVERY SCREEN. Fanfare was still
+    # defined two ways -- the shipped meter outside combat, a performer's bar
+    # inside it -- because a screen before the first fight, or one the latch
+    # had lost, could not answer. The Stage's starting relic can: it is the
+    # arm's alone (it replaces the Ethereal Spotlight and is never rolled as a
+    # reward), and the wire carries the relic row on every screen of the run.
+    if live is not True and _holds_stage_relic(state):
+        live = True
     held = stage_arm(state, live)
     if held is not None:
         obs["stage_arm"] = held

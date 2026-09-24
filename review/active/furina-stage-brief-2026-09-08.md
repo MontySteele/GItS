@@ -72,7 +72,15 @@ performers with their own bars, and Fanfare is that bar.**
    back performer." With one performer on stage, that is the lead. The
    front performer is the shield and the back performer is the bank
    (R276): Raise fills the bank, and Spend and the Fanfare readers draw
-   from it (rule 8).
+   from it (rule 8). A face may name another seat (the lead, every
+   performer); a bare Raise means the back performer. **Raise on an empty
+   stage summons** (round four): when a Raise finds no performer on stage,
+   a random performer arrives holding the Raise amount, not the usual 1,
+   and nothing else is raised. This holds for every Raise, whichever seat
+   it names, and for the Raise powers (the Ancient's turn-start Raise,
+   Thunderous Applause), so Gala Dinner on an empty stage summons one
+   performer at 3 (4 upgraded). Arkhe Alignment's Pneuma is a regain, not a
+   Raise, and summons nobody.
 6. **Damage order, per attack: Furina's Block, then the lead performer's
    Fanfare, then Furina.** The lead absorbs what one attack puts through
    her Block, up to its bar; the rest reaches Furina. It never runs on to
@@ -382,7 +390,7 @@ values; names are provisional. Upgrades in brackets.
 |---|---|---|---|
 | Gala Dinner | 1 | Skill | Raise 3 Fanfare on every performer. [Raise 4] |
 | Double Casting | 1 | Skill | Summon two random performers who are not on stage. [cost 0] |
-| Tutti! | 2 | Skill | Every performer performs its act now. [cost 1] |
+| Tutti! | 1 | Skill | Every performer performs its act now. [cost 0] (Round four: was 2, 1 upgraded.) |
 | Bravura | 1 | Attack | Spend all of the back performer's Fanfare. Deal 3 damage for each point spent. [4 per point] |
 | Full House | 2 | Power | At the end of your turn, if all three seats are filled, your performers act twice. [cost 1] |
 | Thunderous Applause | 1 | Power | Whenever a performer takes a Bow, draw 1 card and Raise 2 Fanfare on the back performer. [Raise 3] |
@@ -401,15 +409,18 @@ the others back one; with one performer it only gives Block. Bravura empties
 the back performer exactly, so it always bows; on an empty stage it deals 0.
 Double Casting with one open seat summons one. Full House: each performer's
 act resolves twice, and each further copy adds one more act. Thunderous
-Applause raises after the bowing performer has left, so an empty stage gets
-nothing and the draw still happens. A Rapt Audience does nothing while one
+Applause raises after the bowing performer has left, so on an empty stage
+its Raise summons a random performer holding the amount (round four), and the
+draw still happens. Let the People Rejoice's performers return to empty seats
+only, so one that finds none (an applause summon took it) does not return. A Rapt Audience does nothing while one
 performer is both lead and back. Arkhe Alignment's "double" multiplies the
 act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
 10). One question a turn however many copies are in play: copies add (two
 copies x3), and Pneuma's lead regain is 2 per copy. A Five-Century Act's returnee takes the back-most empty seat and does not
 act that turn; after Let the People Rejoice a performer returns once.
 
-Tips added: Ousia and Pneuma.
+Tips added: Ousia and Pneuma, on Arkhe Alignment and its power only (round
+four: they had ridden Ousia Surge and Pneuma Refrain by name).
 
 ## 13. What the sim reports, and what round one asks
 

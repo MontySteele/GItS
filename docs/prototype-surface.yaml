@@ -2135,7 +2135,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    replaces: full_ensemble,
-   register: salon, cost: 2, type: skill, rarity: uncommon,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
    description: "Every performer performs its act now.",
    effects: [{op: stage_perform_all}]}
 

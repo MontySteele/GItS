@@ -17,7 +17,8 @@ namespace KleeMod.Powers;
 /// an empty Ancient cell ends the run at the act-two door), so it gets the
 /// Stage's own version of the same idea: at the start of her turn, Raise
 /// <see cref="PowerModel.Amount"/> Fanfare on the BACK performer (rule 5 --
-/// the bank; alone on stage, the lead). An empty stage raises nothing.
+/// the bank; alone on stage, the lead). On an empty stage the Raise summons a
+/// random performer holding the amount (round four).
 ///
 /// AFTER THE TURN START, beside the lead's regen (<c>FurinaStageHooks</c>):
 /// both are "at the start of your turn" moves on the bars, and neither reads
@@ -38,11 +39,12 @@ public sealed class StageRaisePerTurnPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override Task AfterPlayerTurnStart(
+    public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
-        if (Owner == null || player?.Creature != Owner) return Task.CompletedTask;
-        FurinaStage.Raise(Owner, (int)Amount);
-        return Task.CompletedTask;
+        if (Owner == null || player?.Creature != Owner) return;
+        // Round four: on an empty stage this Raise summons a random performer
+        // holding the amount, as every Raise does.
+        await FurinaStage.Raise(Owner, (int)Amount);
     }
 }

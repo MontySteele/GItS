@@ -1566,8 +1566,14 @@ ARM_KEYWORDS: dict[str, str] = {
               "the Spend mode is not offered at all."),
     "Fanfare": ("A performer's own bar. Attacks hit your Block, then the lead "
                 "performer's Fanfare, then you. No cap."),
-    "Raise": ("Adds Fanfare to the back performer. With one performer on "
-              "stage, that is the lead."),
+    # ROUND FOUR. Generic on WHERE -- the old row said "to the back performer"
+    # beside Hold Your Places (the lead) and Gala Dinner (every performer) --
+    # and it carries the empty-stage rule: a Raise with nobody on stage
+    # summons a random performer holding the amount, and nothing else is
+    # raised. `ArmKeywordTips.ForRaise`'s words.
+    "Raise": ("Adds Fanfare where the card says, else to the back performer. "
+              "On an empty stage, a random performer arrives holding it "
+              "instead."),
     # `EB-744`. "EARNED BY SPEND ONLY" WAS NOT TRUE ON THE SCREEN PRINTING IT.
     # The clause was rule 9 read off sec.3 and it sat beside `Final Bow`, whose
     # whole face is a bow bought with a card and an Exhaust, and beside `Let
@@ -1591,9 +1597,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # per ATTACK, and the sentence now says so.
     # R276: the back seat is the BANK -- Raise fills it and Spend draws from
     # it.
+    # ROUND FOUR: "no single attack reaches it" was still read as "the back is
+    # safe", and seats lost the back performer to a second attack in one
+    # enemy turn. The row says plainly where hits go.
     "back performer": ("The back seat, the bank: Raise fills it, Spend draws "
-                       "from it, and no single attack reaches it. Alone on "
-                       "stage it is the lead. " + STAGE_ACTS),
+                       "from it. Hits go to the lead first and reach it once "
+                       "every seat ahead is empty. " + STAGE_ACTS),
     "Rotate": ("Seats change order and every bar comes with them. Nobody "
                "leaves and nobody takes a Bow."),
     # R276 batch two: Arkhe Alignment's two halves, in
@@ -1845,6 +1854,30 @@ def _arm_owns(word: str, who: str) -> bool:
     """May this run's character be shown this kit word's rule? (`EB-753`)"""
     owner = _ARM_KEYWORD_ARM.get(word)
     return not (owner and who and owner != who)
+
+
+# ROUND FOUR. TWO WORDS THAT BELONG TO ONE CARD.
+#
+# `Ousia` and `Pneuma` are the two halves of Arkhe Alignment's choice, and the
+# rows were matched on the word alone -- so they rode Ousia Surge and Pneuma
+# Refrain too, whose names merely share it, and a seat read the Arkhe meaning
+# as those cards' meaning. The rows now print only on a screen that shows
+# Arkhe Alignment itself: the card, or its Power's badge (both print the
+# name). The C# side is the same rule: the tips ride the Arkhe card's golded
+# face and `ArkheAlignmentPower`'s own hover, and nothing else.
+_ARM_KEYWORD_ANCHOR: dict[str, str] = {
+    "Ousia": "Arkhe Alignment", "Pneuma": "Arkhe Alignment",
+}
+
+
+def _anchored(word: str, obs: dict[str, Any]) -> bool:
+    """Is the card this word belongs to on the screen? True for every word
+    that belongs to no one card. TITLES INCLUDED (`_every_string`, not
+    `_body_strings`): the anchor is the card's own name."""
+    anchor = _ARM_KEYWORD_ANCHOR.get(word)
+    if not anchor:
+        return True
+    return any(anchor in text for text in _every_string(obs))
 
 # `EB-583`. WHAT AN OFF-ARM WORD SAYS INSTEAD, and it is the correction to the
 # paragraph above rather than a second rule.
@@ -2817,6 +2850,8 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             # English word `Spend` in a Spark sink's own prose, not the Stage's
             # keyword, so there is no off-arm sentence to print either.
             and _arm_owns(word, who)
+            # Round four: Ousia and Pneuma print only beside Arkhe Alignment.
+            and _anchored(word, obs)
             and pattern.search(_bomb_hay(word, hay, obs))]
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()
