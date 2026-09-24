@@ -617,12 +617,11 @@
 - {id: proto_ko_sit_tight, name: "Sit Tight", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, retain: true,
-   description: "Gain 5 [gold]Block[/gold]. If no [gold]Bomb[/gold] went off this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold].",
-   upgrade: {block: +1, conditional_block: +1},
+   description: "Gain 5 [gold]Block[/gold]. At the end of this turn, if no [gold]Bomb[/gold] of yours went off this turn, gain 4 [gold]Block[/gold].",
+   upgrade: {block: +2, power_amount: +1},
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 5},
-             {op: conditional, if: no_bomb_went_off_this_turn,
-              then: [{op: block, amount: 4}]}]}
+             {op: apply_power, power: ko_sit_tight, amount: 4, target: self}]}
 
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
    authored_by: [claude],
@@ -759,7 +758,7 @@
 - {id: proto_ko_spark_knight, name: "Spark Knight", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "Whenever you gain a [gold]Spark[/gold], deal 2 [gold]Pyro[/gold] damage to a random enemy.",
+   description: "Whenever you gain a [gold]Spark[/gold], deal 2 damage to a random enemy.",
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_spark_knight, amount: 2, target: self}]}
 

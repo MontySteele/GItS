@@ -303,6 +303,62 @@ public sealed class PatienceKleePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
+/// Sit Tight: "At the end of this turn, if no Bomb of yours went off this turn,
+/// gain 4 Block." The card's delayed half, applied by the card with its printed
+/// number. It rewards a TURN where she holds her Bombs, so it is read at the end
+/// of the turn and not when the card is played: a Set off before or after it,
+/// or a Mine answering an attack, switches it off alike.
+///
+/// "WENT OFF" IS RULE 7'S FIRST COUNTER
+/// (<see cref="KleeOverhaulLedger.SetOffThisTurn"/>), written once per
+/// explosion at <c>ProtoBombPower.Explode</c> -- any of her charges, Bomb or
+/// Mine, for any reason. Not <see cref="KleeOverhaulLedger.SetOffCardsThisTurn"/>,
+/// Patience's read, which a Mine answering an attack does not move.
+///
+/// EACH COPY PAYS: the stack is the sum of the copies' numbers, so two copies
+/// are 4 and 4. A Power's Block, so it takes no card-Block modifier
+/// (<see cref="LookOutPower"/>'s line, and <c>BlockNextTurnPower</c>'s).
+///
+/// <c>BeforeSideTurnEnd</c>, before the discard flush, so the Block stands for
+/// the enemy turn. A POWER TENANT OF THAT BROADCAST, so it runs ahead of the
+/// model-driven <see cref="TurnEndSequencer"/> -- which is what makes
+/// Arlecchino's Bond of Life count it as Block gained this turn, the sim's
+/// order (<c>klee_overhaul.sit_tight_turn_end</c>, called ahead of
+/// <c>effects.player_turn_end_triggers</c>). It removes itself once it has been
+/// asked, paid or not.
+/// </summary>
+public sealed class SitTightPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Sit Tight"),
+        ("description",
+            "At the end of this turn, if no [gold]Bomb[/gold] of yours went "
+          + "off this turn, gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Does the held turn pay? PURE, off the ledger.</summary>
+    public static bool Pays(KleeOverhaulLedger ledger) =>
+        ledger.SetOffThisTurn == 0;
+
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player || Owner == null) return;
+        var amount = Amount;
+        await PowerCmd.Remove(this);
+        if (amount > 0 && Pays(KleeOverhaulLedger.For(Owner)))
+        {
+            await CreatureCmd.GainBlock(Owner, amount, ValueProp.Unpowered, null);
+        }
+    }
+}
+
+/// <summary>
 /// Friendship Bracelet: "Whenever you play a Companion card, your largest Bomb
 /// grows by 3." One growth per play, on the one reading of "your largest
 /// Bomb" the arm has (<see cref="ProtoBombPower.GrowLargest"/>).
@@ -476,13 +532,18 @@ public sealed class SecondSurprisePower
 }
 
 /// <summary>
-/// Spark Knight: "Whenever you gain a Spark, deal 2 Pyro damage to a random
-/// enemy." EACH SPARK IS ITS OWN HIT (the spec's note): a gain of 3 is three
-/// rolls and three Pyro hits. Fired from the Spark chokepoint
-/// (<c>SparkPower.Gain</c>) with the Sparks that LANDED, so every source --
-/// an explosion, the companion rule, Grounded, the opening Spark -- counts.
-/// PYRO THROUGH <c>ElementalHit.Deal</c>, Sparks 'n' Splash's door, so it
-/// reacts with an aura and carries her Strength; it is not an Attack.
+/// Spark Knight: "Whenever you gain a Spark, deal 2 damage to a random enemy."
+/// EACH SPARK IS ITS OWN HIT (the spec's note): a gain of 3 is three rolls and
+/// three hits. Fired from the Spark chokepoint (<c>SparkPower.Gain</c>) with
+/// the Sparks that LANDED, so every source -- an explosion, the companion rule,
+/// Grounded, the opening Spark -- counts.
+///
+/// NO ELEMENT, through <see cref="ElementalHit.DealUnelemented"/>: it applies no
+/// aura and consumes none, so it cannot spend the Hydro a companion just laid
+/// down before her cooked Bomb reacts with it. It carries her Strength and
+/// Weak and the target's Vulnerable (NC-1, a power's damage runs the
+/// pipeline); it is not an Attack. Sim twin: <c>klee_overhaul.spark_knight</c>,
+/// <c>deal_damage_to_enemy(..., element=None)</c>.
 /// </summary>
 public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
 {
@@ -491,7 +552,7 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
         ("title", "Spark Knight"),
         ("description",
             "Whenever you gain a [gold]Spark[/gold], deal [blue]{Amount}[/blue] "
-          + "[gold]Pyro[/gold] damage to a random enemy."),
+          + "damage to a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -519,8 +580,8 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
                 if (living.Count == 0) return;
                 var target = combat.RunState.Rng.CombatTargets.NextItem(living);
                 if (target == null) return;
-                await ElementalHit.Deal(choiceContext, target, Element.Pyro,
-                                        knight.Amount, klee);
+                await ElementalHit.DealUnelemented(choiceContext, target,
+                                                   knight.Amount, klee);
             }
         }
     }

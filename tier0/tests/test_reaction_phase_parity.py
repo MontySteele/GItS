@@ -1130,6 +1130,20 @@ CO_TENANCY_LEDGER = {
             "in (the overhaul arm's pool holds neither). If one ever could, "
             "the interaction is a dead enemy dropping out of this power's own "
             "candidate list, which it re-reads",
+        ("Powers/Prototype/KleeExpansionPowers.cs", "SitTightPower"):
+            "QUARANTINED (the Klee overhaul, R276). Sit Tight's delayed "
+            "Block: 4 per copy if rule 7's first counter is still 0, then the "
+            "power removes itself. THE ORDERING QUESTION, answered: what it "
+            "READS is the arm's explosion ledger, and nothing in this "
+            "broadcast sets a charge off -- the echo above reads the pile and "
+            "does not spend it, and the sequencer's volleys and the Furina "
+            "and Kokomi tenants never touch Klee's charges. What it WRITES is "
+            "Block, and the one co-tenant that reads Block is the "
+            "sequencer's Bond of Life (Arlecchino, draftable beside the "
+            "arm). A POWER tenant runs ahead of the model-driven sequencer, "
+            "so the Bond counts this Block as gained this turn -- and the sim "
+            "pays it at the same point, `klee_overhaul.sit_tight_turn_end` "
+            "called ahead of `effects.player_turn_end_triggers`",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). DUSK "
             "(`EB-643`, R265): every dusk entry in the Plan queue is carried "

@@ -45,7 +45,7 @@ public sealed class ProtoKoSitTight : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sit Tight"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If no [gold]Bomb[/gold] went off this turn, gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the end of this turn, if no [gold]Bomb[/gold] of yours went off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -66,7 +66,7 @@ public sealed class ProtoKoSitTight : CustomCardModel, ISparkPricedCard
         new List<DynamicVar>
         {
             new BlockVar(5m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 4m, ValueProp.Move)
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,17 +80,12 @@ public sealed class ProtoKoSitTight : CustomCardModel, ISparkPricedCard
     {
         await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        if (KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn == 0)
-        {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 5m : 4m), ValueProp.Move), cardPlay);
-        }
+        await PowerCmd.Apply<SitTightPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(1m);
-        DynamicVars.Block.UpgradeValueBy(1m);
-        // conditional_block: the branch amount swaps on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["BranchBlock"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

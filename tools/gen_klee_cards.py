@@ -1459,8 +1459,9 @@ PREDICATES_CS = {
     # beside it cannot disagree about what counts.
     "companion_played_this_turn":
         "KleeOverhaulLedger.For(Owner.Creature).CompanionPlayedThisTurn > 0",
-    # R276 pool expansion: Sit Tight's quiet-turn Block, rule 7's first
-    # counter read the other way round.
+    # R276 pool expansion: rule 7's first counter read the other way round.
+    # No row prints it since Sit Tight moved its check to the end of the turn
+    # (`SitTightPower`, 2026-09-23).
     "no_bomb_went_off_this_turn":
         "KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn == 0",
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). tier0's own
@@ -2647,8 +2648,11 @@ APPLY_POWERS = {
         "[gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that "
         "size on a random enemy."),
     "ko_spark_knight": ("SparkKnightPower", None,
-        "Whenever you gain a [gold]Spark[/gold], deal {X} [gold]Pyro[/gold] "
-        "damage to a random enemy."),
+        "Whenever you gain a [gold]Spark[/gold], deal {X} damage to a random "
+        "enemy."),
+    "ko_sit_tight": ("SitTightPower", None,
+        "At the end of this turn, if no [gold]Bomb[/gold] of yours went off "
+        "this turn, gain {X} [gold]Block[/gold]."),
     "ko_second_surprise": ("SecondSurprisePower", None,
         "Whenever one of your [gold]Mines[/gold] goes off, place a "
         "[gold]Bomb[/gold] half its size on that enemy."),

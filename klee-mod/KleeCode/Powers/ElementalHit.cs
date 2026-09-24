@@ -158,6 +158,33 @@ internal static class ElementalHit
              ignoreBlock: false, powered: false);
 
     /// <summary>
+    /// A NON-ATTACK HIT WITH NO ELEMENT: tier0 <c>deal_damage_to_enemy(...,
+    /// element=None)</c>, whose <c>resolve_hit</c> returns the damage untouched.
+    /// <see cref="Deal"/>'s pipeline less its aura step -- the dealer's
+    /// Strength and Weak, then the target's Vulnerable, ONE truncation,
+    /// Unpowered damage -- so the hit applies no aura, consumes none and
+    /// triggers no reaction. Witch's Flame's hit
+    /// (<c>CompanionPowers.WitchsFlamePower</c>) is the same arithmetic written
+    /// inline.
+    ///
+    /// QUARANTINED CALLER, one: the Klee overhaul's Spark Knight (R276). A
+    /// named door rather than <c>Element.None</c> passed to <see cref="Deal"/>,
+    /// which would hand <c>None</c> to the reaction table as a trigger, and
+    /// because a call site is what the headless suite can pin.
+    /// </summary>
+    public static async Task<int> DealUnelemented(
+        PlayerChoiceContext choiceContext, Creature target,
+        decimal baseDamage, Creature? applier)
+    {
+        var dealt = SimDamagePipeline.DealerMods(applier, baseDamage);
+        var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
+        await CreatureCmd.Damage(
+            choiceContext, target, landed, ValueProp.Unpowered,
+            dealer: null, cardSource: null, cardPlay: null);
+        return landed;
+    }
+
+    /// <summary>
     /// Damage-less element application: tier0 resolve_hit(enemy, element, 0)
     /// -- the apply_aura and swirl ops. Identical lifecycle, no damage call
     /// (the sim deals 0; amplifiers of 0 are 0). Anemo/Geo never stick

@@ -289,6 +289,21 @@ Set off, Spark, Companion, Retain and Exhaust. Numbers are starting values.
 Two names moved on a clash with shipped cards: Hide and Seek is **Hiding
 Spot**, and Jumpy Dumpty Mk.II is **Jumpy Dumpty Mk.III**.
 
+Two faces changed after the batch landed (2026-09-23):
+
+- **Sit Tight** reads "Gain 5 Block. At the end of this turn, if no Bomb of
+  yours went off this turn, gain 4 Block. Retain." It still costs 0 Energy
+  and 1 Spark; upgraded it is 7 Block and 5 at the end of the turn. It used to
+  pay the 4 if nothing had gone off yet when it was played, which only
+  rewarded playing it before a detonator. It now rewards a turn where she
+  holds her Bombs: any Bomb or Mine of hers going off that turn, for any
+  reason (a Mine answering an attack included), cancels it, whether before or
+  after the card. Each copy pays on its own.
+- **Spark Knight** reads "Whenever you gain a Spark, deal 2 damage to a
+  random enemy." (3 upgraded). The hit has no element: as a Pyro hit it could
+  use up the Hydro a companion had just applied before the cooked Bomb
+  reacted with it.
+
 ## 6. The intended weakness, and how she survives anyway
 
 **She cannot stall, and she cannot block on demand.** Her only plain Block is

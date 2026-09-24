@@ -1202,6 +1202,11 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # "We do this in early so that it triggers before end-of-turn damage
     # effects" -- which is precisely what player_turn_end_triggers holds.
     refpowers.before_side_turn_end_early(state)
+    # QUARANTINED (C.KLEE_OVERHAUL). Sit Tight's end-of-turn Block, AHEAD of
+    # the shipped triggers: the mod pays it as a power tenant of
+    # `BeforeSideTurnEnd`, before the model-driven `TurnEndSequencer`, so
+    # Arlecchino's Bond of Life counts it (`klee_overhaul.sit_tight_turn_end`).
+    klee_overhaul.sit_tight_turn_end(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     # QUARANTINED (C.KLEE_OVERHAUL). The OVERHAUL's Sparks 'n' Splash -- "at
     # the end of your turn, deal Pyro damage to a random enemy equal to its

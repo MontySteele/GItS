@@ -491,17 +491,48 @@ public class KleeR276ExpansionTests
     }
 
     [Fact]
-    public void Sit_tight_pays_the_quiet_turn_bonus_off_rule_sevens_first_counter()
+    public void Sit_tight_leaves_its_bonus_to_the_end_of_the_turn()
     {
         var card = new ProtoKoSitTight();
         Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
         Assert.Equal(1, card.PrintedSparkPrice);
         Assert.Equal(5m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(4m, card.DynamicVars["BranchBlock"].BaseValue);
+        Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
         var up = Upgraded<ProtoKoSitTight>();
         Assert.Equal(7m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5m, up.DynamicVars["BranchBlock"].BaseValue);
-        Assert.Contains("KleeOverhaulLedger.get_SetOffThisTurn", Play("ProtoKoSitTight"));
+        Assert.Equal(5m, up.DynamicVars["PowerAmount"].BaseValue);
+        // The play reads no ledger: it gains its 5 and installs the power.
+        var play = Play("ProtoKoSitTight");
+        Assert.DoesNotContain("KleeOverhaulLedger.get_SetOffThisTurn", play);
+        Assert.Contains("PowerCmd.Apply", play);
+        Assert.Equal(
+            "Gain {Block:diff()} [gold]Block[/gold]. At the end of this turn, "
+          + "if no [gold]Bomb[/gold] of yours went off this turn, gain "
+          + "{PowerAmount:diff()} [gold]Block[/gold].",
+            Face(card));
+    }
+
+    [Fact]
+    public void Sit_tight_pays_only_on_a_turn_where_nothing_went_off()
+    {
+        // REAL: the ledger read is the whole condition, and it is rule 7's
+        // first counter -- ANY explosion this turn, before or after the card.
+        var klee = Seat.Klee().Creature;
+        KleeOverhaulLedger.ResetAll();
+        var ledger = KleeOverhaulLedger.For(klee);
+        Assert.True(SitTightPower.Pays(ledger));
+        // A Mine answering an attack passes no card but still went off.
+        ledger.NoteExplosion(reacted: false, damageDealt: 3);
+        Assert.False(SitTightPower.Pays(ledger));
+        KleeOverhaulLedger.ResetAll();
+
+        // STRUCTURAL: before the discard flush, it asks the ledger, pays
+        // Block and removes itself.
+        var turnEnd = Il.CallSequence(Il.Method("SitTightPower", "BeforeSideTurnEnd"))
+            .ToList();
+        Assert.Contains("SitTightPower.Pays", turnEnd);
+        Assert.Contains("CreatureCmd.GainBlock", turnEnd);
+        Assert.Contains("PowerCmd.Remove", turnEnd);
     }
 
     [Fact]
@@ -704,8 +735,24 @@ public class KleeR276ExpansionTests
         Assert.Equal(0, SparkKnightPower.HitsFor(-2));
         Assert.Contains("SparkKnightPower.AfterSparksGained",
                         Il.Calls(Il.Method("SparkPower", "Gain")));
-        Assert.Contains("ElementalHit.Deal",
-                        Il.Calls(Il.Method("SparkKnightPower", "AfterSparksGained")));
         Assert.Equal(3m, Upgraded<ProtoKoSparkKnight>().DynamicVars["PowerAmount"].BaseValue);
+    }
+
+    [Fact]
+    public void Spark_knight_hit_carries_no_element()
+    {
+        // STRUCTURAL (a hit needs a live combat): the hit goes out through the
+        // element-less door, never the aura-resolving one, so a companion's
+        // Hydro survives it and nothing reacts. The real board is the sim
+        // twin's `test_spark_knight_hit_leaves_hydro_standing`.
+        var hit = Il.Calls(Il.Method("SparkKnightPower", "AfterSparksGained"));
+        Assert.Contains("ElementalHit.DealUnelemented", hit);
+        Assert.DoesNotContain("ElementalHit.Deal", hit);
+        var door = Il.Calls(Il.Method("ElementalHit", "DealUnelemented"));
+        Assert.DoesNotContain(door, c => c.StartsWith("AuraCmd."));
+        Assert.DoesNotContain(door, c => c.StartsWith("ReactionEffects."));
+        Assert.DoesNotContain(door, c => c.StartsWith("ReactionTable."));
+        Assert.Contains("CreatureCmd.Damage", door);
+        Assert.DoesNotContain("[gold]Pyro[/gold]", Face(new ProtoKoSparkKnight()));
     }
 }

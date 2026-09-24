@@ -392,23 +392,78 @@ def test_boom_badge_plays_the_next_set_off_card_twice(overhaul):
     assert before - enemy.hp == 5 + 4 + 4
 
 
-def test_sit_tight_pays_the_quiet_turn(overhaul):
+def sit_tight_board():
+    """One enemy holding a Bomb 5, and a bank for Sit Tight's Spark."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.sparks = 2
-    play(state, load("proto_ko_sit_tight"))
-    assert state.player.block == 9
-    state.ko_set_off_this_turn = 1
-    state.player.block = 0
+    klee_overhaul.place(state, enemy, 5)
+    return state, enemy
+
+
+def test_sit_tight_then_kapow_pays_no_bonus(overhaul):
+    state, enemy = sit_tight_board()
     play(state, load("proto_ko_sit_tight"))
     assert state.player.block == 5
+    play(state, load("proto_ko_kapow"), aim=enemy)
+    klee_overhaul.sit_tight_turn_end(state)
+    assert state.player.block == 5
+    assert klee_overhaul.SIT_TIGHT not in state.player.powers
+
+
+def test_kapow_then_sit_tight_pays_no_bonus(overhaul):
+    state, enemy = sit_tight_board()
+    play(state, load("proto_ko_kapow"), aim=enemy)
+    play(state, load("proto_ko_sit_tight"))
+    klee_overhaul.sit_tight_turn_end(state)
+    assert state.player.block == 5
+
+
+def test_sit_tight_with_no_detonation_pays_at_the_end_of_the_turn(overhaul):
+    state, enemy = sit_tight_board()
+    play(state, load("proto_ko_sit_tight"))
+    # The bonus is not paid at play time any more.
+    assert state.player.block == 5
+    klee_overhaul.sit_tight_turn_end(state)
+    assert state.player.block == 5 + 4
+    assert klee_overhaul.SIT_TIGHT not in state.player.powers
+    assert sizes(enemy) == [5]
+
+
+def test_sit_tight_is_switched_off_by_a_mine_answering_an_attack(overhaul):
+    state, enemy = sit_tight_board()
+    klee_overhaul.place(state, enemy, 3, is_mine=True)
+    play(state, load("proto_ko_sit_tight"))
+    klee_overhaul.mines_answer_attack(state, enemy)
+    klee_overhaul.sit_tight_turn_end(state)
+    assert state.player.block == 5
+
+
+def test_sit_tight_copies_each_pay(overhaul):
+    state, _ = sit_tight_board()
+    play(state, load("proto_ko_sit_tight"))
+    play(state, load("proto_ko_sit_tight"))
+    klee_overhaul.sit_tight_turn_end(state)
+    assert state.player.block == 5 + 5 + 4 + 4
 
 
 def test_sit_tight_upgraded_is_seven_and_five(overhaul):
     state = klee_state()
     state.player.sparks = 1
     play(state, load("proto_ko_sit_tight+"))
+    assert state.player.block == 7
+    klee_overhaul.sit_tight_turn_end(state)
     assert state.player.block == 12
+
+
+def test_sit_tight_pays_before_the_shipped_turn_end_triggers():
+    """The mod pays it as a POWER tenant of `BeforeSideTurnEnd`, ahead of the
+    model-driven `TurnEndSequencer`; the sim's call sits ahead of
+    `player_turn_end_triggers` for the same reason."""
+    import inspect
+    body = inspect.getsource(combat._player_turn)
+    assert (body.index("klee_overhaul.sit_tight_turn_end(state)")
+            < body.index("effects.player_turn_end_triggers(state)"))
 
 
 def test_wait_for_it_pays_once_on_a_reacting_bomb(overhaul):
@@ -551,3 +606,26 @@ def test_spark_knight_hits_once_per_spark_gained(overhaul):
     state.player.powers[klee_overhaul.SPARK_KNIGHT] = 2
     effects.gain_sparks(state, 3, source="test")
     assert 200 - enemy.hp == 6
+
+
+def test_spark_knight_hit_leaves_hydro_standing(overhaul):
+    """No element: the Hydro a companion laid down survives the hit, applies
+    no Pyro and triggers no reaction (a Vaporize would have amplified it)."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    enemy.aura = "hydro"
+    enemy.aura_turns_left = 2
+    state.player.powers[klee_overhaul.SPARK_KNIGHT] = 2
+    effects.gain_sparks(state, 1, source="test")
+    assert enemy.aura == "hydro"
+    assert 200 - enemy.hp == 2
+    assert not any(e.get("event") == "reaction" for e in state.log
+                   if isinstance(e, dict))
+
+
+def test_spark_knight_hit_applies_no_aura(overhaul):
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.SPARK_KNIGHT] = 2
+    effects.gain_sparks(state, 1, source="test")
+    assert enemy.aura is None

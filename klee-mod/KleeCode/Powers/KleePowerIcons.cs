@@ -103,6 +103,9 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         LookOutPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         PatienceKleePower => KleePck.Path("klee/powers/bomb_damage_up.png"),
+        // Sit Tight's quiet-turn Block borrows Grounded's badge: both pay
+        // Block off the arm's explosion ledger for a turn nothing went off.
+        SitTightPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         DodocoPower => KleePck.Path("klee/powers/bomb.png"),
         SparkKnightPower =>
             KleePck.Path("klee/powers/spark_threshold_down.png"),

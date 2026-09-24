@@ -3876,8 +3876,9 @@ PREDICATE_NAMES = frozenset({
     # like its two neighbours AND from `plant_bomb`'s `wide_if:`, which is one
     # vocabulary read at two doors rather than two vocabularies.
     "companion_played_this_turn",
-    # R276's pool expansion, on the same gate: Sit Tight's "if no Bomb went
-    # off this turn" (rule 7's first counter, read the other way round).
+    # R276's pool expansion, on the same gate: "if no Bomb went off this
+    # turn" (rule 7's first counter, read the other way round). No row prints
+    # it since Sit Tight moved its check to the end of the turn (2026-09-23).
     "no_bomb_went_off_this_turn",
     # The Kokomi overhaul's own per-turn read (QUARANTINED,
     # C.KOKOMI_OVERHAUL): Sango Isshin's "if the Bake-Kurage carried out a
@@ -4192,8 +4193,9 @@ def _predicate(state: CombatState, name: str) -> bool:
                 "it off `KleeOverhaulLedger` behind `-p:PrototypeCards=true`.")
         return klee_overhaul.played_companion_this_turn(state)
     if name == "no_bomb_went_off_this_turn":
-        # R276's Sit Tight, on the gate its neighbours take and for their
-        # reason.
+        # R276's Sit Tight printed it at play time; since 2026-09-23 the card
+        # pays at the end of the turn (`klee_overhaul.sit_tight_turn_end`) and
+        # no row prints this. Kept as vocabulary, on its neighbours' gate.
         if not klee_overhaul.live(state):
             raise NotImplementedError(
                 f"predicate {name!r} belongs to the KLEE_OVERHAUL arm. It is "
