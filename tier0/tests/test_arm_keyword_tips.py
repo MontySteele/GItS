@@ -690,8 +690,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "price or you can't choose it. Emptied exactly, it takes a ",
             "A performer's own bar. Attacks hit your [gold]Block[/gold], then ",
             "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.",
-            "Adds [gold]Fanfare[/gold] to the [gold]back performer[/gold]. ",
-            "With one performer on stage, that is the lead.",
+            # Round four: generic on WHERE, and the empty-stage summon.
+            "Adds [gold]Fanfare[/gold] where the card says, else to the ",
+            "[gold]back performer[/gold]. On an empty stage, a random ",
+            "performer arrives holding it instead.",
             # `EB-744`: the "only" was false on the faces printing it --
             # Final Bow's whole card is a bow bought with a card and an
             # Exhaust -- so the row states the CONTRAST instead.
@@ -699,9 +701,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # R276: the front seat is the SHIELD, the back seat the BANK.
             "The front seat, the shield: attacks reach it, and only it ",
             # `EB-744`: rule 6 is per ATTACK, so a flurry reaches the
-            # reserve once the front seat empties -- hence "single".
-            "The back seat, the bank: Raise fills it, Spend draws from it, ",
-            "and no single attack reaches it. Alone on stage it is the ",
+            # reserve once the front seat empties. Round four: the sentence
+            # says plainly where hits go.
+            "The back seat, the bank: Raise fills it, Spend draws from it. ",
+            "Hits go to the lead first and reach it once every seat ahead is ",
             "Seats change order and every bar comes with them. Nobody leaves ",
             "and nobody takes a [gold]Bow[/gold].",
     ):
@@ -1086,8 +1089,13 @@ def _page_for_word(word: str) -> str:
     owner = _word_owner(word)
     if owner:
         state["player"]["character"] = owner.capitalize()
+    # Round four: a word that belongs to ONE card (Ousia and Pneuma, Arkhe
+    # Alignment's) is defined only beside that card, and that card is the only
+    # face golding it -- so the probe wears its name.
+    from understudy.blindplay_notes import _ARM_KEYWORD_ANCHOR
     state["player"]["hand"] = [{
-        "id": "KLEEMOD-PROTO_GOLD_PROBE", "name": "Probe", "type": "Skill",
+        "id": "KLEEMOD-PROTO_GOLD_PROBE",
+        "name": _ARM_KEYWORD_ANCHOR.get(word, "Probe"), "type": "Skill",
         "cost": "1", "can_play": True, "index": 0, "target_type": "AnyEnemy",
         "is_upgraded": False,
         "keywords": [{"name": "Applies Pyro",

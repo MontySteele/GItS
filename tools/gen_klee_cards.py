@@ -5376,10 +5376,11 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
     """One stage op -> the one statement it emits.
 
     The two SPENDS and the two BOW-shaped ops are awaited because a bow and an
-    act resolve real effects (Block, a Hydro hit, a reaction); `stage_raise`
-    and `stage_scene_change` move a number and a seat order and are
-    synchronous, which is the same split `salon_rotate` and `salon_perform`
-    already take one arm over.
+    act resolve real effects (Block, a Hydro hit, a reaction);
+    `stage_scene_change` moves a seat order and is synchronous, which is the
+    same split `salon_rotate` and `salon_perform` already take one arm over.
+    `stage_raise` is AWAITED since round four: a Raise on an empty stage
+    summons a performer, and a summon fields a body.
     """
     op = eff["op"]
     if op == "stage_summon":
@@ -5387,7 +5388,7 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
     if op == "stage_raise":
         verb = STAGE_RAISE_VERBS[str(eff.get("seat", "back"))]
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
-        return f"{verb}(Owner.Creature, {n});"
+        return f"await {verb}(Owner.Creature, {n});"
     if op == "stage_step_forward":
         return "FurinaStage.StepForward(Owner.Creature);"
     if op == "stage_perform_all":

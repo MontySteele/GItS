@@ -63,7 +63,7 @@ public sealed class ProtoFsGalaDinner : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaStage.RaiseAll(Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
+        await FurinaStage.RaiseAll(Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
     }
 
     protected override void OnUpgrade()

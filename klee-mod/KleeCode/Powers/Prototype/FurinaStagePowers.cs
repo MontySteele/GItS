@@ -146,6 +146,18 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>Round four: the Ousia and Pneuma tips belong to THIS power
+    /// and its card, and to nothing that merely shares a word with them
+    /// (<i>Ousia Surge</i>, <i>Pneuma Refrain</i>). The card gets them off its
+    /// golded face; the badge gets them here. Neither tip reads the card.
+    /// </summary>
+    protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip>
+        ExtraHoverTips =>
+        global::KleeMod.Cards.ArmKeywordTips.ForPneuma(
+            global::KleeMod.Cards.ArmKeywordTips.ForOusia(
+                base.ExtraHoverTips, null!),
+            null!);
+
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -174,7 +186,7 @@ public sealed class ArkheAlignmentPower : PowerModel, ILocalizationProvider
         if (pneuma)
         {
             ledger.ActBlockMultiplier = 1 + copies;
-            FurinaStage.RaiseLead(owner, PneumaLeadRegain * copies);
+            FurinaStage.RegainLead(owner, PneumaLeadRegain * copies);
         }
         else
         {

@@ -180,9 +180,14 @@ public sealed class StageSeat
 /// verbatim: the page names a live body with its own numbered name and one
 /// this beat KILLED with the title recorded here, since a dead body is off
 /// the next board entirely.</param>
+/// <param name="Each">Round four: WHAT EACH ENEMY LOST, for the one act that
+/// hits every enemy (Chevalmarin's). A seat read "8 across every enemy" as
+/// one 8 when it was 2 to each of four. Filled only where every enemy lost
+/// the same amount, measured as <paramref name="Moved"/> is; -1 on every other
+/// beat and on an uneven sweep, where the page falls back to the total.</param>
 public readonly record struct StageBeat(
     string Event, StagePerformer Who, int Seat, int Fanfare, int Moved,
-    string Reason, string Target = "", string TargetId = "");
+    string Reason, string Target = "", string TargetId = "", int Each = -1);
 
 
 /// <summary>
@@ -372,6 +377,33 @@ public sealed class FurinaStageLedger
         if (amount <= 0 || Back is not { } seat) return 0;
         seat.Fanfare += amount;
         return amount;
+    }
+
+    /// <summary>
+    /// ROUND FOUR: RAISE ON AN EMPTY STAGE SUMMONS. When a Raise finds nobody
+    /// on stage, a performer arrives HOLDING THE RAISE AMOUNT -- not rule 3's
+    /// 1 -- and nothing else is raised. It is the same for every Raise,
+    /// whichever seat the face names (the back, the lead, every performer),
+    /// and for the Raise powers; <paramref name="who"/> is the caller's random
+    /// roll, since an empty stage leaves all three free.
+    ///
+    /// THE LEDGER HALF ONLY. <see cref="Raise"/>, <see cref="RaiseLead"/> and
+    /// <see cref="RaiseAll"/> stay "0 on an empty stage", because two callers
+    /// must not summon: Arkhe Alignment's Pneuma prints "the lead REGAINS",
+    /// which presumes a lead, and A Rapt Audience can never meet an empty
+    /// stage. The summoning door is <see cref="FurinaStage.Raise"/> and its two
+    /// siblings, which ask this first.
+    ///
+    /// Returns the seat, or null (and nothing moves) on an occupied stage or a
+    /// Raise of nothing.
+    /// </summary>
+    public StageSeat? SummonOnEmpty(StagePerformer who, int amount)
+    {
+        if (amount <= 0 || !IsEmpty) return null;
+        var seat = new StageSeat(who, amount);
+        _seats.Add(seat);
+        Note(new StageBeat("arrive", who, 0, amount, 0, ""));
+        return seat;
     }
 
     /// <summary>
@@ -830,6 +862,9 @@ public sealed class FurinaStageLedger
                 // beat named no body".
                 ["target"] = beat.Target,
                 ["target_id"] = beat.TargetId,
+                // Round four: the per-enemy figure of Chevalmarin's act, -1
+                // where there is none (see `StageBeat.Each`).
+                ["each"] = beat.Each,
             })
             .ToList();
         return snapshot;

@@ -63,7 +63,7 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaStage.Raise(Owner.Creature, 5);
+        await FurinaStage.Raise(Owner.Creature, 5);
     }
 
     protected override void OnUpgrade()

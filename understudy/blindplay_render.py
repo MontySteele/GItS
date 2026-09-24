@@ -1442,7 +1442,9 @@ STAGE_LOG_HEADING = ("- Since you ended your last turn, in order (the "
                      "played this turn):")
 
 STAGE_EMPTY_LINE = ("- The stage is empty. A Spend rider cannot "
-                    "fire at all, so those cards play at their base number.")
+                    "fire at all, so those cards play at their base number. "
+                    # Round four: Raise on an empty stage summons.
+                    "A Raise summons a random performer holding its amount.")
 
 
 # `EB-743`. THE ACTS, IN THE PAGE'S OWN WORDS.
@@ -1472,11 +1474,20 @@ STAGE_EMPTY_LINE = ("- The stage is empty. A Spend rider cannot "
 # `joined the stage at 3 [gold]Fanfare[/gold]`, `Furina gains 3
 # [gold]Block[/gold]` and `took a [gold]Bow[/gold]` verbatim. The words the
 # page writes itself are already folded, so they are written folded.
+#
+# ROUND FOUR: CHEVALMARIN PRINTS WHAT EACH ENEMY TOOK. "8 across every enemy"
+# was read as one 8 when it was 2 to each of four. `{each}` is the mod's
+# measured per-enemy loss, sent only where every enemy lost the same; an
+# uneven sweep (a Vulnerable, a kill) or an older build has none, and the line
+# then says the figure is a total, in `STAGE_ACT_SPREAD`'s words.
 STAGE_ACT_EFFECTS = {
     "usher": "Furina gains {n} Block",
-    "chevalmarin": "{n} across every enemy, and Hydro on each",
+    "chevalmarin": "{each} to every enemy, and Hydro on each",
     "crabaletta": "{n} to {who}",
 }
+
+#: Chevalmarin's act where no single per-enemy figure exists.
+STAGE_ACT_SPREAD = "{n} in total, split across the enemies, and Hydro on each"
 
 #: The bows, rule 9. Chevalmarin's leaves an aura and moves no number at all,
 #: so it is the one row with no `{n}` in it -- the beat files 0 and a line
@@ -1571,9 +1582,17 @@ def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
     text = table.get(row["member"])
     if not text:
         return ""
+    if "{each}" in text:
+        # Round four: the per-enemy figure where there is one, else the
+        # total said as a total.
+        each = row.get("each")
+        if not row["moved"]:
+            return STAGE_NOTHING_LANDED
+        if each is None or each <= 0:
+            text = STAGE_ACT_SPREAD
     if "{n}" in text and not row["moved"]:
         return STAGE_NOTHING_LANDED
-    return text.format(n=row["moved"],
+    return text.format(n=row["moved"], each=row.get("each"),
                        who=row["target"] or STAGE_UNNAMED_TARGET)
 
 

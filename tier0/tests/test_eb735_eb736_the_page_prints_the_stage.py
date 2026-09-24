@@ -46,12 +46,16 @@ THREE_SEATS = [
 
 
 def _beat(event, member, name, seat=0, bar=0, moved=0, reason="",
-          target="", combat_id=""):
-    return {"event": event, "member": member, "name": name, "seat": seat,
-            "fanfare": bar, "moved": moved, "reason": reason,
-            # `EB-743`: the body a Crabaletta act or bow picked, already
-            # renamed by `blindplay_board.name_stage_targets`.
-            "target": target, "combat_id": combat_id}
+          target="", combat_id="", each=None):
+    row = {"event": event, "member": member, "name": name, "seat": seat,
+           "fanfare": bar, "moved": moved, "reason": reason,
+           # `EB-743`: the body a Crabaletta act or bow picked, already
+           # renamed by `blindplay_board.name_stage_targets`.
+           "target": target, "combat_id": combat_id}
+    if each is not None:
+        # Round four: the mod's per-enemy figure for Chevalmarin's act.
+        row["each"] = each
+    return row
 
 
 def _state(stage=None, resources=None, hand=None,
@@ -249,15 +253,18 @@ def test_each_performers_act_says_what_it_did():
     no seat's arithmetic closed for a whole run. Each act names its own effect,
     and Crabaletta names the body it picked -- by the page's own numbered name,
     since it picks its own."""
-    def line(member, name, moved, target=""):
+    def line(member, name, moved, target="", each=None):
         return _page({"live": True, "seats": THREE_SEATS,
                       "log": [_beat("act", member, name, moved=moved,
-                                    target=target, combat_id="4")]})
+                                    target=target, combat_id="4",
+                                    each=each)]})
 
     assert "performed: Furina gains 3 Block." in line(
         "usher", "Gentilhomme Usher", 3)
-    assert ("performed: 4 across every enemy, and Hydro on "
-            "each.") in line("chevalmarin", "Surintendante Chevalmarin", 4)
+    # Round four: the PER-ENEMY figure, not the four hits' total.
+    assert ("performed: 2 to every enemy, and Hydro on "
+            "each.") in line("chevalmarin", "Surintendante Chevalmarin", 8,
+                             each=2)
     assert "performed: 5 to Corpse Slug (2)." in line(
         "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
 
@@ -488,10 +495,39 @@ def test_the_seat_rows_say_what_a_performers_act_is():
         assert "Crabaletta deals 5 Hydro damage to a random enemy" in page
 
 
-def test_the_back_performer_row_says_no_single_attack_rather_than_nothing():
+def test_the_back_performer_row_says_where_hits_go():
     """Rule 6 is per ATTACK: the lead absorbs one hit up to its bar and leaves
-    at 0, so the next attack of the same turn meets whoever stepped forward."""
+    at 0, so the next attack of the same turn meets whoever stepped forward.
+    ROUND FOUR: "no single attack reaches it" was still read as "the back is
+    safe", so the row says plainly where hits go."""
     page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                  hand=[_card("Gain Block equal to the back performer's bar.")])
-    assert "no single attack reaches it" in page
+    assert ("Hits go to the lead first and reach it once every seat ahead "
+            "is empty.") in page
+    assert "no single attack reaches it" not in page
     assert "nothing hits it" not in page
+
+
+def test_chevalmarins_act_prints_the_per_enemy_figure_or_says_total():
+    """ROUND FOUR. "8 across every enemy" was read as one 8 when it was 2 to
+    each of four. The per-enemy figure where the mod sends one; a sweep with
+    none (uneven, or an older build) prints the total AS a total."""
+    def line(**kw):
+        return _page({"live": True, "seats": THREE_SEATS,
+                      "log": [_beat("act", "chevalmarin",
+                                    "Surintendante Chevalmarin", **kw)]})
+
+    assert "performed: 2 to every enemy, and Hydro on each." in line(
+        moved=8, each=2)
+    uneven = line(moved=9, each=-1)
+    assert ("performed: 9 in total, split across the enemies, and Hydro on "
+            "each.") in uneven
+    assert "to every enemy" not in uneven
+    assert "9 in total" in line(moved=9)                 # an older build
+    assert "performed: nothing landed." in line(moved=0, each=0)
+
+
+def test_the_empty_stage_line_says_a_raise_summons():
+    """ROUND FOUR: Raise on an empty stage summons."""
+    page = _page({"live": True, "seats": [], "log": []})
+    assert "A Raise summons a random performer holding its amount." in page

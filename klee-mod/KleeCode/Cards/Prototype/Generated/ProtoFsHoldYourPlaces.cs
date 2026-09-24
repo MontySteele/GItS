@@ -65,7 +65,7 @@ public sealed class ProtoFsHoldYourPlaces : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        FurinaStage.RaiseLead(Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
+        await FurinaStage.RaiseLead(Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
     }
 
     protected override void OnUpgrade()

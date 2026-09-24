@@ -63,7 +63,7 @@ public sealed class ProtoFsWarmReception : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaStage.Raise(Owner.Creature, 3);
+        await FurinaStage.Raise(Owner.Creature, 3);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 

@@ -230,10 +230,46 @@ def test_with_one_performer_the_back_seat_is_the_lead(arm):
     assert st.player.stage == [["usher", 8]]
 
 
-def test_a_raise_onto_an_empty_stage_says_so_rather_than_going_silent(arm):
+@pytest.mark.parametrize("seat", [FS.SEAT_BACK, FS.SEAT_LEAD, FS.SEAT_ALL])
+def test_a_raise_onto_an_empty_stage_summons_one_performer_holding_it(arm,
+                                                                     seat):
+    """ROUND FOUR. With nobody on stage a Raise summons a random performer
+    HOLDING THE RAISE AMOUNT -- not rule 3's 1 -- and nothing else is raised,
+    whichever seat the face names. Gala Dinner (`SEAT_ALL`) on an empty stage
+    fields ONE performer at 3, not three."""
     st = _state()
-    assert FS.raise_fanfare(st, 5) == 0
+    assert FS.raise_fanfare(st, 3, seat) == 3
+    assert len(st.player.stage) == 1
+    member, bar = st.player.stage[0]
+    assert member in FS.PERFORMERS
+    assert bar == 3
+    assert [e for e in st.log if e["event"] == "stage_summon"
+            and e.get("via") == "raise"]
+    assert not [e for e in st.log if e["event"] == "stage_raise_whiffed"]
+
+
+def test_the_empty_stage_summon_does_not_act_on_arrival(arm):
+    """Rule 3 / `EB-738`: the arrival performs at the end of the turn with the
+    others, never on arrival."""
+    st = _state()
+    FS.raise_fanfare(st, 5)
+    assert st.enemies[0].hp == 99 and st.player.block == 0
+
+
+def test_a_pneuma_regain_onto_an_empty_stage_summons_nobody(arm):
+    """Arkhe Alignment's Pneuma prints "the lead REGAINS": a regain, like
+    rule 4's, with no lead to regain on. It says so rather than going
+    silent."""
+    st = _state()
+    assert FS.raise_fanfare(st, 2, FS.SEAT_LEAD, summon_on_empty=False) == 0
+    assert st.player.stage == []
     assert [e for e in st.log if e["event"] == "stage_raise_whiffed"]
+    pneuma = _state(enemies=[_enemy(intents=[{"kind": "attack",
+                                              "amount": 9}])])
+    pneuma.player.powers[FS.ARKHE_ALIGNMENT] = 1
+    FS.turn_start_powers(pneuma)
+    assert pneuma.player.stage == []
+    assert pneuma.player.stage_act_block_mult == 2
 
 
 # ---------------------------------------------------------------------------
@@ -936,6 +972,39 @@ def test_thunderous_applause_draws_and_raises_after_the_bow(arm):
     assert st.player.stage == [["chevalmarin", 6]]
 
 
+def test_thunderous_applause_on_the_stage_a_bow_emptied_summons(arm):
+    """ROUND FOUR. The applause Raises after the bowing performer has left,
+    so a bow that empties the stage now summons a random performer holding
+    the Raise; the draw still happens."""
+    st = _state()
+    st.player.draw_pile = [_card(cid="a"), _card(cid="b")]
+    effects.resolve_card(st, _card(type="power", effects=[
+        {"op": "apply_power", "power": FS.THUNDEROUS_APPLAUSE, "amount": 2,
+         "target": "self"}]))
+    st.player.stage = [["usher", 3]]
+    FS.spend(st, 3)
+    assert len(st.player.hand) == 1
+    assert len(st.player.stage) == 1 and st.player.stage[0][1] == 2
+
+
+def test_the_rares_curtain_call_with_applause_returns_only_to_empty_seats(arm):
+    """ROUND FOUR made this reachable: Let the People Rejoice empties the
+    stage, the first bow's applause Raise summons onto it, and the company
+    then returns at 1 to the EMPTY seats only -- nobody rotates off."""
+    st = _state(enemies=[_enemy(hp=200)])
+    st.player.draw_pile = [_card(cid=str(i)) for i in range(5)]
+    effects.resolve_card(st, _card(type="power", effects=[
+        {"op": "apply_power", "power": FS.THUNDEROUS_APPLAUSE, "amount": 2,
+         "target": "self"}]))
+    st.player.stage = [["usher", 5], ["chevalmarin", 2], ["crabaletta", 2]]
+    FS.collect_all(st)
+    FS.bow_and_return(st)
+    assert len(st.player.stage) == FS.SEATS
+    # The summoned performer holds all three bows' applause (2 + 2 + 2).
+    assert st.player.stage[0][1] == 6
+    assert [f for _m, f in st.player.stage[1:]] == [1, 1]
+
+
 def test_a_five_century_act_returns_the_performer_to_rest(arm):
     st = _state()
     st.player.powers[FS.FIVE_CENTURY_ACT] = 1
@@ -1042,3 +1111,10 @@ def test_arkhe_asks_once_and_copies_add(arm):
     assert st.player.stage == [["usher", 3 + 2 * FS.PNEUMA_LEAD_REGAIN]]
     FS.end_of_turn_acts(st)
     assert st.player.block == 3 * FS.ACT_USHER_BLOCK
+
+
+def test_tutti_costs_one_and_zero_upgraded():
+    """ROUND FOUR: Tutti! costs 1, and 0 upgraded (was 2 and 1)."""
+    row = {r["id"]: r for r in _proto_rows()}["proto_fs_tutti"]
+    assert row["cost"] == 1
+    assert row["upgrade"] == {"cost": -1}

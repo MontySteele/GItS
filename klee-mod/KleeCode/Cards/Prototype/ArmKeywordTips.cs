@@ -1190,15 +1190,19 @@ public static class ArmKeywordTips
           + "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.");
 
     /// <summary>
-    /// Brief sec.3 rule 5. The second sentence is the rule a face cannot say
-    /// in its own space: with one performer on stage the back seat IS the
-    /// lead, so a Raise on a lone Usher lands where the hits do.
+    /// Brief sec.3 rule 5, and round four's two fixes. GENERIC ON WHERE: the
+    /// old sentence said "to the back performer" on <i>Hold Your Places</i>
+    /// (the lead) and <i>Gala Dinner</i> (every performer), so the card now
+    /// says where and a bare Raise means the back. AND THE EMPTY STAGE: a
+    /// Raise with nobody on stage summons a random performer holding the
+    /// amount, for every Raise and every Raise power.
     /// </summary>
     public static IEnumerable<IHoverTip> ForRaise(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, RaiseKey,
-            "Adds [gold]Fanfare[/gold] to the [gold]back performer[/gold]. "
-          + "With one performer on stage, that is the lead.");
+            "Adds [gold]Fanfare[/gold] where the card says, else to the "
+          + "[gold]back performer[/gold]. On an empty stage, a random "
+          + "performer arrives holding it instead.");
 
     /// <summary>
     /// Brief sec.3 rules 7 and 9 together, because the word only means
@@ -1236,8 +1240,8 @@ public static class ArmKeywordTips
 
     /// <summary>
     /// Brief sec.3 rules 5, 6 and 8, from the other end. The back seat is the
-    /// BANK (R276): a Raise fills it, a Spend draws from it, and no single
-    /// attack reaches it.
+    /// BANK (R276): a Raise fills it, a Spend draws from it, and hits reach
+    /// it only once every seat ahead of it is empty.
     /// </summary>
     public static IEnumerable<IHoverTip> ForBackPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -1245,11 +1249,13 @@ public static class ArmKeywordTips
             // `EB-744`: "nothing hits it" WHERE A FLURRY DOES. Rule 6 is
             // per ATTACK -- the lead absorbs one hit up to its bar and leaves
             // at 0, so the next attack of the same turn meets whoever stepped
-            // forward. Round two's seats read the old sentence as a promise
-            // the reserve was safe for the turn.
-            "The back seat, the bank: Raise fills it, Spend draws from it, "
-          + "and no single attack reaches it. Alone on stage it is the "
-          + "lead.");
+            // forward. ROUND FOUR: "no single attack reaches it" was still
+            // read as "the back is safe", and seats lost the back performer
+            // to a second attack in one enemy turn. So the sentence says
+            // plainly where hits go, and when they reach the back.
+            "The back seat, the bank: Raise fills it, Spend draws from it. "
+          + "Hits go to the lead first and reach it once every seat ahead is "
+          + "empty.");
 
     /// <summary>
     /// Brief sec.3 rule 3 and sec.5.2. THE SECOND SENTENCE IS THE REFUSAL,
