@@ -1365,7 +1365,7 @@
    cost: 1, type: skill, rarity: common,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: This turn, the first card you play costs 0.",
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Next turn, the first card you play costs 0.",
    effects: [{op: draw, amount: 2}],
    plan: [{op: first_card_free}],
    # now draw 3; the Plan line does not upgrade.
@@ -1399,7 +1399,7 @@
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
    # Every Attack played face-up this turn; a carry-out is not a play.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: This turn, your Attacks deal 3 additional damage.",
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Next turn, your Attacks deal 3 additional damage.",
    effects: [{op: draw, amount: 2}],
    plan: [{op: attack_damage_this_turn, amount: 3}],
    # now draw 3; Plan 4 more.
@@ -1456,7 +1456,7 @@
    cost: 1, type: attack, rarity: common,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal 3 damage twice. [gold]Plan[/gold]: This turn, your first Attack is played twice.",
+   description: "Deal 3 damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
    effects: [{op: damage, amount: 3, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}],
    # now 4 twice; the Plan line does not upgrade.

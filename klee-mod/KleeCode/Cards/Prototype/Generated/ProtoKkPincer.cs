@@ -51,7 +51,7 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pincer"),
-        ("description", "Deal {Damage:diff()} damage twice. [gold]Plan[/gold]: This turn, your first Attack is played twice."),
+        ("description", "Deal {Damage:diff()} damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
