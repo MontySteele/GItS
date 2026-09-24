@@ -505,7 +505,7 @@ def test_the_merge_clause_is_on_the_tip_and_the_page():
     from tools import lint_text_conventions as ltc
     from understudy import blindplay_notes
 
-    clause = "; a second Bomb joins the first. "
+    clause = "; a second Bomb stacks beside the first, and a Mine among them goes off alone. "
     tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
     assert clause in tips["BombKey"]
     # The same words in the same place on the page: the clause hangs off what
@@ -586,7 +586,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # and not a sentence, because the tip is at the base game's
             # four-sentence cap and a fifth would displace a ruled finding.
             "[gold]Mine[/gold]",
-            "; a second Bomb joins the first. ",
+            "; a second Bomb stacks beside the first, and a Mine among them goes off alone. ",
             # `EB-555` defined the cap inside the clause that names it.
             # `EB-400`: Block, named in the clause that read as a list of
             # the only two things that touch the hit.

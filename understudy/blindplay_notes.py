@@ -1372,7 +1372,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # reads the clause out of `ArmKeywordTips.cs` and out of this dict and
     # refuses a drift in either direction.
     "Bomb": ("A charge on an enemy: each grows {growth} a turn, and goes off "
-             "when Set off or as a Mine; a second Bomb joins the first. "
+             "when Set off or as a Mine; a second Bomb stacks beside the "
+             "first, and a Mine among them goes off alone. "
              "Block stops it. Only Vulnerable "
              "and the HP cap move it. If the enemy dies with it on, it moves "
              "to a survivor."),

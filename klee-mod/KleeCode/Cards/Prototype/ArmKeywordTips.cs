@@ -267,7 +267,7 @@ public static class ArmKeywordTips
           // (`lint_text_conventions`, MAX_SENTENCES). It rides the clause it
           // belongs to -- what a charge IS and how it behaves on the body --
           // rather than displacing one of the three ruled findings below.
-          + "; a second Bomb joins the first. "
+          + "; a second Bomb stacks beside the first, and a Mine among them goes off alone. "
           // `EB-400`: BLOCK, NAMED. "Not an Attack: only Vulnerable and a
           // cap move it" is a true sentence that reads as a false one -- a
           // list of the only two things that touch the hit, with Block
