@@ -180,7 +180,9 @@ TIMEOUT_S = 600
 # (calibration build one, `review/qa/blindplay/20260914-233423/`). The
 # `model_reasoning_effort="low"` override stays: it is a CLI config key, not
 # a model flag, and the first Sol seat of build two smokes it.
-DEFAULT_MODEL = "gpt-5.6-sol"
+# 2026-09-23 ([USER]): GPT-6 Sol, released the day before and listed by
+# codex-cli 0.156.1 (`codex debug models`): "Let's make sure we're on Sol."
+DEFAULT_MODEL = "gpt-6-sol"
 DEFAULT_REASONING = "low"
 
 
