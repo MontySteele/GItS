@@ -68,9 +68,19 @@ public static class FurinaStageStrip
         [StagePerformer.Usher] = "Usher",
         [StagePerformer.Chevalmarin] = "Cheval",
         [StagePerformer.Crabaletta] = "Crab",
+        // THE GUEST CAST (2026-09-25): a guest's name is short already.
+        [StagePerformer.Neuvillette] = "Neuvillette",
+        [StagePerformer.Clorinde] = "Clorinde",
+        [StagePerformer.Navia] = "Navia",
+        [StagePerformer.Chevreuse] = "Chevreuse",
+        [StagePerformer.Wriothesley] = "Wriothesley",
+        [StagePerformer.Sigewinne] = "Sigewinne",
+        [StagePerformer.Charlotte] = "Charlotte",
+        [StagePerformer.Lynette] = "Lynette",
     };
 
-    public static string NameOf(StagePerformer who) => Short[who];
+    public static string NameOf(StagePerformer who) =>
+        Short.TryGetValue(who, out var name) ? name : who.ToString();
 
     /// <summary>
     /// The strip's whole text.
@@ -85,11 +95,6 @@ public static class FurinaStageStrip
     /// there is none. It is the Ovation plan's board (sec.5.2 reads the back
     /// performer) and the Refill's target (rule 5), so it prints the same
     /// numbers in the same order the Raise will find them in.
-    ///
-    /// AND ONE LINE PER BOW WAITING FOR HER TURN (rule 7, 2026-09-25
-    /// evening): a performer a hit emptied on the enemy's turn takes its Bow
-    /// at the start of hers, and the strip is the one thing on screen during
-    /// the enemy's turn that can say so.
     /// </summary>
     public static string Label(Creature creature)
     {
@@ -113,16 +118,42 @@ public static class FurinaStageStrip
                 "  ",
                 seats.Skip(1).Select(s => $"{NameOf(s.Who)} {s.Fanfare}")));
         }
-        foreach (var owed in ledger.OwedBows)
-        {
-            line.Append('\n').Append(Waiting(owed.Who));
-        }
+        foreach (var more in ForecastLines(creature)) line.Append('\n').Append(more);
         return line.ToString();
     }
 
-    /// <summary>The strip's line for one Bow waiting for her turn.</summary>
-    public static string Waiting(StagePerformer who) =>
-        $"{NameOf(who)}'s Bow waits for your turn.";
+    /// <summary>
+    /// THE GUEST CAST's RULE 7 (2026-09-25): "You can see the end of the turn
+    /// before you end it." One line of each performer's bar after this
+    /// turn's acts, payments and fade (<c>Neuvillette 6 → 3</c>), and one of
+    /// the posted attacks' split, given her Block after the acts. Read off
+    /// <see cref="FurinaStage.Forecast"/>, which does the arithmetic once for
+    /// the strip and the page alike; a forecast that throws draws nothing.
+    /// </summary>
+    public static IEnumerable<string> ForecastLines(Creature creature)
+    {
+        StageForecast? forecast;
+        try
+        {
+            forecast = FurinaStage.Forecast(creature);
+        }
+        catch (System.Exception)
+        {
+            yield break;
+        }
+        if (forecast == null || forecast.Seats.Count == 0) yield break;
+        var rows = forecast.Seats
+            .Select(r => $"{NameOf(r.Who)} {r.Now} → {r.After}"
+                         + (r.Leaves ? " (leaves)" : ""))
+            .Concat(forecast.Arrivals
+                .Select(r => $"{NameOf(r.Who)} back at {r.After}"));
+        yield return "End: " + string.Join("  ", rows);
+        if (forecast.IntentKnown)
+        {
+            yield return $"Hits: front {forecast.FrontTakes}, you "
+                         + $"{forecast.ReachesFurina}";
+        }
+    }
 
     /// <summary>Her Block, the FIRST term of the damage order and the engine's
     /// own number.</summary>

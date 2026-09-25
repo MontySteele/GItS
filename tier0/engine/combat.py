@@ -1045,18 +1045,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         return
 
     p.energy = refpowers.energy_for_turn(state)      # site C, + Pyre
-    # QUARANTINED (`furina_stage.FURINA_STAGE`). RULE 4 AND RULE 7'S WAITING
-    # BOWS, at the mod's `BeforeHandDraw` (2026-09-25 evening): the lead's
-    # regen, then every Bow a hit on the enemy's turn left waiting -- after
-    # her Block clears and the front's regen, before her draw. The regen
-    # moved here from the post-draw site below so both halves hold. A Bow
-    # can kill (Chevalmarin, Crabaletta), so the settle and the over-check
-    # follow.
-    furina_stage.turn_start_regen(state)
-    furina_stage.pay_owed_bows(state)
-    _settle_phases(state)
-    if not p.alive or state.over:
-        return
     # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
@@ -1084,11 +1072,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE STAGE, at the
     # same site and for the same reason as the two lines above: her starting
     # relic Salon Solitaire puts Usher in the front seat at 3 on turn one
-    # (brief sec.3 rule 2). The LEAD's regen (rule 4), from her second turn
-    # on, runs before the draw since 2026-09-25 evening (above, with the
-    # waiting Bows); on turn one it pays nothing, so the relic's 3 is still
-    # the first hand's ("the first hand sees 3").
+    # (brief sec.3 rule 2), and the LEAD's regen (rule 4) runs at the start of
+    # every turn from her second on. Both are one call each, in this order,
+    # because a stage that regenerated before it existed would pay turn one a
+    # point the brief spends a paragraph refusing it ("the first hand sees 3").
     furina_stage.open_combat(state)
+    furina_stage.turn_start_regen(state)
     # R276 batch two: Arkhe Alignment's choice, after the regen it may add to.
     furina_stage.turn_start_powers(state)
 
@@ -1582,10 +1571,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             refpowers.on_damage_received(state, state.player,
                                          unblocked=dmg - blocked, dealer=enemy,
                                          powered_attack=True)
-            # QUARANTINED (`furina_stage.FURINA_STAGE`). RULE 7: a lead this
-            # hit emptied owes its Bow to the start of her next turn
-            # (2026-09-25 evening, `pay_owed_bows`); what is owed is dropped
-            # when the hit killed her or ended the combat.
+            # QUARANTINED (`furina_stage.FURINA_STAGE`). RULE 7, 2026-09-25:
+            # a lead this hit emptied takes its Bow NOW -- after the hit is
+            # dealt and before the next hit of the intent, the mod's
+            # `AfterDamageReceived` flush. Nothing when the hit killed her.
             furina_stage.settle_hit(state)
             if not state.player.alive:
                 # Fairy in a Bottle (dead branch on the battery: potions
@@ -1888,6 +1877,8 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.stage_resting = []
     player.stage_act_damage_mult = 1
     player.stage_act_block_mult = 1
+    player.stage_lost = {}
+    player.stage_energy_next = 0
     # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
     # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
     # rather than a separate card". The jellyfish is installed HERE, at true

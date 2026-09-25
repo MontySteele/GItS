@@ -161,7 +161,8 @@ public class FurinaStageRoundFourTests
     public void The_empty_stage_summon_fields_a_random_body()
     {
         var calls = Il.Calls(Il.Method("FurinaStage", "SummonForRaise"));
-        Assert.Contains("FurinaStage.RollFree", calls);
+        // 2026-09-25: a uniform roll over the trio, since it can be cloned.
+        Assert.Contains("FurinaStage.RollAny", calls);
         Assert.Contains("FurinaStageLedger.SummonOnEmpty", calls);
         Assert.Contains("FurinaStagePets.Sync", calls);
     }

@@ -87,7 +87,7 @@ namespace KleeMod.Powers;
 /// its seat rounds the brief's sec.2 retirement was taken whole, and this is
 /// the only Furina arm in the tree.
 /// </summary>
-public static class FurinaStage
+public static partial class FurinaStage
 {
     /// <summary>
     /// The arm's default: <c>-p:FurinaStage=true</c> turns it on, and a
@@ -142,6 +142,14 @@ public static class FurinaStage
     {
         "chevalmarin" => StagePerformer.Chevalmarin,
         "crabaletta" => StagePerformer.Crabaletta,
+        "neuvillette" => StagePerformer.Neuvillette,
+        "clorinde" => StagePerformer.Clorinde,
+        "navia" => StagePerformer.Navia,
+        "chevreuse" => StagePerformer.Chevreuse,
+        "wriothesley" => StagePerformer.Wriothesley,
+        "sigewinne" => StagePerformer.Sigewinne,
+        "charlotte" => StagePerformer.Charlotte,
+        "lynette" => StagePerformer.Lynette,
         _ => StagePerformer.Usher,
     };
 
@@ -297,19 +305,26 @@ public static class FurinaStage
 
     /// <summary>
     /// Rule 3. Fill the back-most empty seat at
-    /// <see cref="FurinaStageLaw.SummonFanfare"/>; on a FULL stage rotate, the
-    /// front leaving with no bow and the newcomer taking its bar.
+    /// <see cref="FurinaStageLaw.SummonFanfare"/>; on a FULL stage recast
+    /// (<see cref="RecastFromFront"/>): the front Bows and leaves, and the
+    /// newcomer takes the back seat holding its Fanfare. Named and random
+    /// alike since the trio can be cloned (2026-09-25): a named summon used to
+    /// rotate the front off with no Bow, which [USER]'s "Stage members bow
+    /// out when they are destroyed or replaced" had already ruled out.
     ///
-    /// <para><paramref name="ifPresentRaise"/> is the three named Commons'
-    /// second clause -- "Summon Usher. If he is already on stage, Raise 3 on
-    /// him instead" -- and it is the ONE Raise in the kit that does not go to
-    /// the back seat, which is why it is written on the face.</para>
+    /// <para>THE TRIO CAN BE CLONED (2026-09-25; [USER]: "Let's allow for
+    /// copies and then check the balance."). A named summon always summons,
+    /// even when that performer is already on stage -- the old "if he's
+    /// already on stage, he gains 3 Fanfare" clause is gone from the faces and
+    /// from here.</para>
     ///
-    /// <para><paramref name="member"/> of <c>"random"</c> rolls one who is not
-    /// on stage. ON A FULL STAGE the lead takes a Bow and moves to the back
-    /// seat keeping its Fanfare (<see cref="RecastFromFront"/>, 2026-09-25):
-    /// before that rule a random summon with all three seated summoned
-    /// nobody, and a first-time player read the card as doing nothing.</para>
+    /// <para><paramref name="member"/> of <c>"random"</c> rolls uniformly
+    /// from all three of the trio (<see cref="RollAny"/>), on stage or not.
+    /// ON A FULL STAGE the lead takes a Bow and leaves, and the roll arrives
+    /// at the back holding its Fanfare (<see cref="RecastFromFront"/>,
+    /// 2026-09-25): before that rule a random summon with all three seated
+    /// summoned nobody, and a first-time player read the card as doing
+    /// nothing.</para>
     ///
     /// <para>AND THE NEWCOMER DOES NOT ACT ON ARRIVAL (`EB-738`, round one's
     /// one E default). Rule 3 reads "a newcomer performs with the others at
@@ -322,38 +337,20 @@ public static class FurinaStage
     /// standing there once. It stays awaited because the bodies are.</para>
     /// </summary>
     public static async Task Summon(PlayerChoiceContext choiceContext,
-                                    Creature? owner, string member,
-                                    int ifPresentRaise = 0)
+                                    Creature? owner, string member)
     {
         if (!LiveFor(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
 
-        StagePerformer who;
-        if (member == "random")
+        var random = member == "random";
+        if (ledger.IsFull)
         {
-            if (ledger.IsFull)
-            {
-                await RecastFromFront(choiceContext, owner!);
-                return;
-            }
-            if (RollFree(owner!, ledger) is not { } rolled) return;
-            who = rolled;
-            NoteSummoned(rolled);
+            await RecastFromFront(choiceContext, owner!,
+                                  random ? null : Parse(member));
+            return;
         }
-        else
-        {
-            who = Parse(member);
-            if (ledger.SeatOf(who) is { } already)
-            {
-                if (ifPresentRaise > 0)
-                {
-                    ledger.RaiseSeat(already, ifPresentRaise);
-                    FurinaStagePets.SyncBars(owner);
-                    Vfx.FurinaStageStrip.Refresh(owner);
-                }
-                return;
-            }
-        }
+        var who = random ? RollAny(owner!) : Parse(member);
+        if (random) NoteSummoned(who);
 
         ledger.Summon(who);
         await FurinaStagePets.Sync(owner);
@@ -371,12 +368,13 @@ public static class FurinaStage
     ///   2. the Bow is a real one: its departure effect fires, and so does
     ///      every Bow reader -- Thunderous Applause draws and Raises -- but
     ///      A FIVE-CENTURY ACT DOES NOT RETURN IT (<c>mayReturn: false</c>),
-    ///      because the summon is already bringing it back;
-    ///   3. the newcomer enters the back seat holding the lead's remaining
-    ///      Fanfare (<see cref="FurinaStageLedger.RecastToBack"/>). Three
-    ///      performers stand in three seats, so the one free to arrive is the
-    ///      one who just bowed: in play the lead takes its Bow and moves to
-    ///      the back seat, keeping its Fanfare, and keeps its body too.
+    ///      because the summon is filling the seat it would return to;
+    ///   3. the newcomer -- a uniform roll over the trio since the trio can be
+    ///      cloned (2026-09-25) -- enters the back seat holding the lead's
+    ///      remaining Fanfare. Where the roll lands on the performer who just
+    ///      bowed, the same seat goes back (<see cref="FurinaStageLedger.RecastToBack"/>)
+    ///      and keeps its body; otherwise a new body arrives
+    ///      (<see cref="FurinaStageLedger.ArriveAtBack"/>).
     ///
     /// THE ORDER IS BOW, THEN READERS, THEN ARRIVAL -- <see cref="AfterBow"/>'s
     /// own order ("applause then return") -- so Thunderous Applause's Raise
@@ -388,16 +386,34 @@ public static class FurinaStage
     /// of the turn with everyone else. <i>Double Casting</i> on a full stage
     /// runs this twice, so two performers bow.
     /// </summary>
+    /// <remarks>THE RECAST ADDS (2026-09-25, the Guest Cast's review): the
+    /// newcomer arrives holding its OWN arrival Fanfare
+    /// (<paramref name="arrival"/>: 1 for the trio, a Guest Star's N) plus
+    /// the leaver's remaining Fanfare. Otherwise a guest cast onto a front
+    /// at 1 would arrive unable to pay.</remarks>
     private static async Task RecastFromFront(
-        PlayerChoiceContext choiceContext, Creature owner)
+        PlayerChoiceContext choiceContext, Creature owner,
+        StagePerformer? named = null,
+        int arrival = FurinaStageLaw.SummonFanfare)
     {
         var ledger = FurinaStageLedger.For(owner);
         if (ledger.BowFromFront() is not { } leaver) return;
-        NoteSummoned(leaver.Who);
+        var who = named ?? RollAny(owner);
+        if (named == null) NoteSummoned(who);
+        // The leaver bows HOLDING its bar (Navia reads it), which then goes to
+        // the newcomer: a recast moves Fanfare, it does not spend it.
         await Bow(choiceContext, owner,
-                  new StageExit(leaver.Who, StageDeparture.Spent),
+                  new StageExit(leaver.Who, StageDeparture.Spent,
+                                leaver.Fanfare, 0, leaver.LostSinceAct),
                   mayReturn: false);
-        ledger.RecastToBack(leaver);
+        if (who == leaver.Who)
+        {
+            ledger.RecastToBack(leaver, arrival);
+        }
+        else
+        {
+            ledger.ArriveAtBack(who, leaver.Fanfare + arrival);
+        }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
@@ -424,18 +440,15 @@ public static class FurinaStage
         ResolutionLedger.NoteSummon(Name(who),
                                     FurinaStageLedger.DisplayName(who));
 
-    /// <summary>A random performer who is not on stage, or null with all
-    /// three seated; on an empty stage, any of the three. One roll for the
-    /// random summons and the empty-stage Raise.</summary>
-    private static StagePerformer? RollFree(Creature owner,
-                                            FurinaStageLedger ledger)
+    /// <summary>A uniform roll over the three of the trio, on stage or not
+    /// (2026-09-25: the trio can be cloned; [USER]: "Let's allow for copies
+    /// and then check the balance."). One roll for the random summons, the
+    /// full-stage recast and the empty-stage Raise.</summary>
+    private static StagePerformer RollAny(Creature owner)
     {
-        var seated = ledger.Company.ToHashSet();
-        var free = Performers.Select(Parse)
-            .Where(p => !seated.Contains(p)).ToList();
-        if (free.Count == 0) return null;
+        var trio = Performers.Select(Parse).ToList();
         var roll = owner.Player?.RunState.Rng.CombatTargets;
-        return roll != null ? roll.NextItem(free) : free[0];
+        return roll != null ? roll.NextItem(trio) : trio[0];
     }
 
     /// <summary>
@@ -451,7 +464,7 @@ public static class FurinaStage
     {
         var ledger = FurinaStageLedger.For(owner);
         if (amount <= 0 || !ledger.IsEmpty) return false;
-        if (RollFree(owner, ledger) is not { } who) return false;
+        var who = RollAny(owner);
         if (ledger.SummonOnEmpty(who, amount) == null) return false;
         NoteSummoned(who);
         await FurinaStagePets.Sync(owner);
@@ -597,8 +610,9 @@ public static class FurinaStage
         {
             if (owner!.IsDead) return;
             if (seat.Resting) continue;
-            await Perform(choiceContext, owner, Name(seat.Who));
+            await Perform(choiceContext, owner, seat);
         }
+        await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
 
@@ -620,12 +634,9 @@ public static class FurinaStage
         var twoOrMore = ledger.Seats.Count >= 2;
         // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
         // combat id, the pair `NoteBeat` files for the body an act lands on.
-        // 2026-09-25 evening: and WHOSE TURN it is. A lead emptied on the
-        // enemy's turn owes its Bow to the start of hers (rule 7).
         var result = ledger.Absorb(
             incoming, dealer?.Monster?.Title.ToString() ?? "",
-            dealer?.CombatId.ToString() ?? "",
-            waitsForTurn: OnEnemyTurn(target));
+            dealer?.CombatId.ToString() ?? "");
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {
@@ -640,13 +651,6 @@ public static class FurinaStage
         }
         return result.ReachedFurina;
     }
-
-    /// <summary>Is it the enemies' turn? The side the combat says is acting
-    /// -- an extra player turn keeps it the player's. False with no combat,
-    /// which is every headless pin.</summary>
-    public static bool OnEnemyTurn(Creature? owner) =>
-        owner?.CombatState?.CurrentSide
-        == MegaCrit.Sts2.Core.Combat.CombatSide.Enemy;
 
     /// <summary>
     /// WHAT OF A HIT GOT PAST HER BLOCK, AS THE ENGINE WILL COUNT IT
@@ -729,24 +733,22 @@ public static class FurinaStage
     {
         if (!LiveFor(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
-        var company = ledger.TakePendingCurtainCall();
-        foreach (var who in company)
+        var exits = ledger.TakePendingCurtainExits();
+        var company = exits.Select(exit => exit.Who).ToList();
+        foreach (var exit in exits)
         {
             // R276 batch two: the card's own "then returns at 1" is the
             // return, so A Five-Century Act does not return them a second
             // time -- a performer returns once.
-            await Bow(choiceContext, owner!,
-                      new StageExit(who, StageDeparture.Spent),
-                      mayReturn: false);
+            await Bow(choiceContext, owner!, exit, mayReturn: false);
         }
         // "Then returns at 1": to an EMPTY seat, and a returnee that finds
         // none does not return. Round four made that reachable -- Thunderous
         // Applause's Raise between the bows now summons onto the stage this
         // card emptied -- and a return that ROTATED would push that performer
         // off. The sim's `bow_and_return` has always read the clause this way.
-        // And never a second copy (2026-09-25): Usher's Bow summons a random
-        // performer onto that same empty stage, and one it picked is already
-        // back (`FurinaStageLedger.ReturnCompany`).
+        // One of each GUEST (2026-09-25): a guest already back does not
+        // return twice (`FurinaStageLedger.ReturnCompany`).
         ledger.ReturnCompany(company);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
@@ -786,11 +788,18 @@ public static class FurinaStage
     /// bar. ONE implementation for every caller -- the end-of-turn sweep,
     /// <i>Bis!</i>, <i>Tutti!</i> and, since draft 3 (2026-09-25), the
     /// <see cref="Bow"/> -- so an act cannot mean two things.</summary>
+    /// <remarks>BY SEAT and not by name since the trio can be cloned
+    /// (2026-09-25): two Ushers are two seats, and the beat files the one
+    /// that acted.</remarks>
     public static async Task Perform(PlayerChoiceContext choiceContext,
-                                     Creature? owner, string member)
+                                     Creature? owner, StageSeat seat)
     {
         if (!LiveFor(owner)) return;
-        await Act(choiceContext, owner!, Parse(member), "act");
+        // A seat that left mid-sweep (a guest's payment emptied it, and it
+        // took its Bow) does not also act.
+        if (!FurinaStageLedger.For(owner!).Holds(seat)) return;
+        await Act(choiceContext, owner!, seat.Who,
+                  FurinaStageLedger.ActEvent, seat);
     }
 
     /// <summary>
@@ -806,8 +815,27 @@ public static class FurinaStage
     /// </summary>
     private static async Task Act(PlayerChoiceContext choiceContext,
                                   Creature owner, StagePerformer who,
-                                  string beat)
+                                  string beat, StageSeat? seat = null,
+                                  StageExit? exit = null)
     {
+        // THE GUEST CAST (2026-09-25), rule 4: EVERY ACT PAYS, first. The
+        // Fanfare half is the ledger's (so the forecast runs the same move);
+        // an act that cannot pay does nothing. A Bow is free (rule 5): the
+        // ledger is handed no seat and takes no payment. The trio never pay.
+        var owed = new List<StageExit>();
+        var bowing = seat == null;
+        if (!FurinaStageLedger.For(owner).ActFanfare(
+                who, bowing ? null : seat, exit, owed))
+        {
+            Vfx.FurinaStageStrip.Refresh(owner);
+            return;
+        }
+        if (IsGuest(who))
+        {
+            await GuestAct(choiceContext, owner, who, beat, seat, exit);
+            await BowTheOwed(choiceContext, owner, owed);
+            return;
+        }
         // `EB-735`, and `EB-511`'s lesson: the beat files WHAT THE BOARD LOST,
         // measured across the act, and never the clause's own printed figure.
         // Crabaletta prints 5 and a Vulnerable makes it 7; a receipt quoting
@@ -866,7 +894,10 @@ public static class FurinaStage
                 }
                 break;
         }
-        NoteBeat(owner, beat, who, before, hit, each, struck);
+        // Rule 6 of the Guest Cast: every act resets the performer's loss
+        // count (only Wriothesley reads it).
+        if (seat != null) seat.LostSinceAct = 0;
+        NoteBeat(owner, beat, who, before, hit, each, struck, seat);
     }
 
     /// <summary>2026-09-25 evening: the one figure every enemy was dealt, or
@@ -891,7 +922,7 @@ public static class FurinaStage
         // A resting returnee does not act this turn (R276 batch two).
         if (Lead(owner) is { Resting: false } lead)
         {
-            await Perform(choiceContext, owner, Name(lead.Who));
+            await Perform(choiceContext, owner, lead);
         }
     }
 
@@ -914,9 +945,13 @@ public static class FurinaStage
             for (var i = 0; i < times; i++)
             {
                 if (owner!.IsDead) return;
-                await Perform(choiceContext, owner, Name(seat.Who));
+                // A guest that paid its last Fanfare, or was taxed out, has
+                // left and Bowed; it does not act again (rule 4).
+                if (!ledger.Holds(seat)) break;
+                await Perform(choiceContext, owner, seat);
             }
         }
+        await FurinaStagePets.Sync(owner);
         ledger.EndRest();
         ledger.ResetActMultipliers();
         // Rule 12 (draft 3, 2026-09-25): THE APPLAUSE FADES, after the acts.
@@ -948,10 +983,9 @@ public static class FurinaStage
 
     /// <summary>
     /// Rule 9, the curtain call: performed ONCE by a performer that reached 0
-    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at the start of
-    /// her next turn when the hit came on the enemy's turn,
-    /// <see cref="PayOwedBows"/>; at <see cref="Flush"/>, after the hit, on
-    /// her own), or a summon on a full stage. It
+    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at
+    /// <see cref="Flush"/>, right after the hit), or a summon on a full
+    /// stage. It
     /// takes the EXIT rather than the performer so a rotation cannot be
     /// mistaken for a departure at a call site --
     /// <see cref="StageExit.Bows"/> is the ledger's own read of rule 7, and a
@@ -964,15 +998,18 @@ public static class FurinaStage
     /// a random enemy -- <see cref="Act"/> itself, filed as a <c>bow</c>.
     /// ONE act: Ousia and Pneuma double it like any act, and Full House does
     /// not repeat it (only <see cref="EndOfTurnActs"/> loops). A hit's Bow on
-    /// the enemy's turn waits for the start of hers (2026-09-25 evening), so
-    /// Usher's Block lands after her Block clears and lasts her turn.
+    /// the enemy's turn is paid then, between that enemy's hits ([USER],
+    /// 2026-09-25: "I think it would be better to have the performer bow
+    /// immediately (during the opponent's turn) instead of at the start of
+    /// your turn").
     /// </summary>
     public static async Task Bow(PlayerChoiceContext choiceContext,
                                  Creature owner, StageExit exit,
                                  bool mayReturn = true)
     {
         if (!exit.Bows || !LiveFor(owner)) return;
-        await Act(choiceContext, owner, exit.Who, "bow");
+        await Act(choiceContext, owner, exit.Who,
+                  FurinaStageLedger.BowEvent, null, exit);
         await AfterBow(choiceContext, owner, exit.Who, mayReturn);
     }
 
@@ -1035,13 +1072,17 @@ public static class FurinaStage
                                  StagePerformer who,
                                  (int Block, int EnemyHp) before,
                                  Creature? hit = null, int each = -1,
-                                 int struck = -1)
+                                 int struck = -1, StageSeat? acting = null)
     {
         var after = Ledger(owner);
         var moved = (after.Block - before.Block)
                     + (before.EnemyHp - after.EnemyHp);
         var ledger = FurinaStageLedger.For(owner);
-        var seat = ledger.SeatIndexOf(who);
+        // The seat that acted, where the caller knows it (two Ushers are two
+        // seats since the trio can be cloned); else the first of that name.
+        var seat = acting != null
+            ? IndexOfSeat(ledger, acting)
+            : ledger.SeatIndexOf(who);
         ledger.Note(new StageBeat(
             what, who, seat,
             seat >= 0 ? ledger.Seats[seat].Fanfare : 0,
@@ -1056,21 +1097,31 @@ public static class FurinaStage
             each, Struck: struck));
     }
 
+    private static int IndexOfSeat(FurinaStageLedger ledger, StageSeat seat)
+    {
+        for (var i = 0; i < ledger.Seats.Count; i++)
+        {
+            if (ReferenceEquals(ledger.Seats[i], seat)) return i;
+        }
+        return -1;
+    }
+
     /// <summary>
     /// Rule 6's flush: the ledger moved synchronously inside
     /// <c>ModifyHpLostBeforeOsty</c> because the engine wanted a number back,
     /// and this is where the bodies catch up.
     ///
-    /// AND WHERE A HIT ON HER OWN TURN PAYS ITS BOW (rule 7, 2026-09-25:
-    /// "Stage members bow out when they are destroyed or replaced, not just
-    /// when you deliberately spend them down to 0"). The engine calls
-    /// <c>AfterDamageReceived</c> once per hit, inside
-    /// <c>CreatureCmd.Damage</c>, after that hit's HP loss, so the bow cannot
-    /// soften the hit that emptied the performer. A hit on the ENEMY'S turn
-    /// queues nothing here: its Bow waits for the start of her next turn
-    /// (<see cref="PayOwedBows"/>, 2026-09-25 evening), which replaced
-    /// paying it between the enemy's hits -- two seats watched that Block
-    /// expire unused before her turn in every fight.
+    /// AND WHERE A HIT'S BOW IS PAID (rule 7, 2026-09-25: "Stage members bow
+    /// out when they are destroyed or replaced, not just when you deliberately
+    /// spend them down to 0"). The engine calls <c>AfterDamageReceived</c>
+    /// once per hit, inside <c>CreatureCmd.Damage</c>, after that hit's HP
+    /// loss and before <c>AttackCommand</c> deals the next hit. So the bow
+    /// lands BETWEEN the hits of a multi-hit attack, on the enemy's turn: it
+    /// cannot soften the hit that emptied the performer, and the performer
+    /// Usher's Fanfare lands on meets the next one. [USER], 2026-09-25
+    /// evening, overruling the start-of-turn wait #676 built: "I think it
+    /// would be better to have the performer bow immediately (during the
+    /// opponent's turn) instead of at the start of your turn."
     /// The bow is the same <see cref="Bow"/> a Spend takes, readers and A
     /// Five-Century Act's return included.
     ///
@@ -1094,32 +1145,6 @@ public static class FurinaStage
                     await Bow(choiceContext, owner, exit);
                 }
             }
-        }
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
-    }
-
-    /// <summary>
-    /// RULE 7, 2026-09-25 evening: THE BOWS A HIT ON THE ENEMY'S TURN LEFT
-    /// WAITING, paid at the start of her turn in the order they were earned.
-    /// Called from <c>FurinaStageHooks.BeforeHandDraw</c>: after her Block
-    /// clears and after the front's regen, before her draw. Each is the
-    /// ordinary <see cref="Bow"/> -- the performer's act, then Thunderous
-    /// Applause and A Five-Century Act -- so a returnee arrives on her turn.
-    ///
-    /// DROPPED, NOT KEPT, when she is dead or the combat is over: the list is
-    /// taken first either way, so nothing owed outlives this call.
-    /// </summary>
-    public static async Task PayOwedBows(PlayerChoiceContext choiceContext,
-                                         Creature? owner)
-    {
-        if (owner == null || !LiveFor(owner)) return;
-        var owed = FurinaStageLedger.For(owner).TakeOwedBows();
-        if (owed.Count == 0) return;
-        foreach (var exit in owed)
-        {
-            if (owner.IsDead || CombatOver()) break;
-            await Bow(choiceContext, owner, exit);
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
@@ -1160,4 +1185,16 @@ public enum StagePerformer
     Usher,
     Chevalmarin,
     Crabaletta,
+
+    // THE GUEST CAST (2026-09-25, review/active/furina-guest-batch-2026-09-25.md):
+    // eight Fontaine characters who reach the Stage through Furina's own
+    // Guest Star cards. Performers in every other way; one of each on stage.
+    Neuvillette,
+    Clorinde,
+    Navia,
+    Chevreuse,
+    Wriothesley,
+    Sigewinne,
+    Charlotte,
+    Lynette,
 }

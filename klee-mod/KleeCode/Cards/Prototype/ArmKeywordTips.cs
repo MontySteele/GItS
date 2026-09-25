@@ -108,6 +108,20 @@ public static class ArmKeywordTips
     public const string UsherKey = "KLEEMOD-ARM_STAGE_USHER";
     public const string ChevalmarinKey = "KLEEMOD-ARM_STAGE_CHEVALMARIN";
     public const string CrabalettaKey = "KLEEMOD-ARM_STAGE_CRABALETTA";
+    // THE GUEST CAST (2026-09-25): the Guest Star keyword and one tip per
+    // guest, attached off the row's `stage_guest` op
+    // (`gen_klee_cards.stage_guest_tip_calls`) the way the trio's are. A key
+    // of its own, not the shipped Guest Star generator's: that is another
+    // rule under the same two words.
+    public const string GuestStarKey = "KLEEMOD-ARM_STAGE_GUEST_STAR";
+    public const string NeuvilletteKey = "KLEEMOD-ARM_STAGE_NEUVILLETTE";
+    public const string ClorindeKey = "KLEEMOD-ARM_STAGE_CLORINDE";
+    public const string NaviaKey = "KLEEMOD-ARM_STAGE_NAVIA";
+    public const string ChevreuseKey = "KLEEMOD-ARM_STAGE_CHEVREUSE";
+    public const string WriothesleyKey = "KLEEMOD-ARM_STAGE_WRIOTHESLEY";
+    public const string SigewinneKey = "KLEEMOD-ARM_STAGE_SIGEWINNE";
+    public const string CharlotteKey = "KLEEMOD-ARM_STAGE_CHARLOTTE";
+    public const string LynetteKey = "KLEEMOD-ARM_STAGE_LYNETTE";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -820,10 +834,11 @@ public static class ArmKeywordTips
             // Draft 3 (2026-09-25, the Stage review's pick 1): the Bow is the
             // performer's own act once more, so the tip says that and no
             // performer's tip carries a separate Bow. Rule 7's trigger (any
-            // exit at 0 Fanfare) is unchanged. 2026-09-25 evening: a Bow
-            // earned on the enemy's turn waits for the start of hers.
-            "A leaving performer acts one last time. On the enemy's turn, "
-          + "that waits for the start of yours.");
+            // exit at 0 Fanfare) is unchanged. THE GUEST CAST (2026-09-25):
+            // a guest's act may pay, and its Bow does not -- stated once,
+            // here, for every performer.
+            "A performer that leaves the stage acts one last time on its way "
+          + "out, without paying.");
 
     /// <summary>
     /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates
@@ -878,38 +893,22 @@ public static class ArmKeywordTips
           + " [gold]Fanfare[/gold].");
 
     /// <summary>
-    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons, in TWO
-    /// variants chosen by the row (<c>gen_klee_cards.stage_summon_tip_calls</c>
-    /// passes <paramref name="random"/>):
-    ///
-    ///   * a RANDOM summon states the full-stage rule ruled the same day, the
-    ///     Defect-orb shape -- the lead bows and moves to the back
-    ///     (<c>FurinaStage.RecastFromFront</c>);
-    ///   * a NAMED summon states the arrival, and nothing about a full stage: the named
-    ///     Commons' own face says what happens when the performer is already
-    ///     there ("he gains 3 Fanfare"), and a tip saying the front
-    ///     performer bows would contradict it.
-    ///
-    /// TWO STATEMENTS AND NOT A TERNARY, because
-    /// <c>lint_text_conventions.tip_rows</c> measures each <c>With(...);</c>
-    /// call to its own <c>);</c>, and a ternary's two literals would reach it
-    /// as one string.
+    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons. ONE
+    /// sentence since the trio can be cloned (2026-09-25; [USER]: "Let's
+    /// allow for copies and then check the balance."): a named summon always
+    /// summons, so named and random summons meet a full stage the same way --
+    /// the front performer Bows and leaves and the newcomer ADDS its own
+    /// arrival Fanfare to the leaver's (<c>FurinaStage.RecastFromFront</c>). Until then a named Common's face
+    /// said what a performer already on stage did, and this tip came in two
+    /// variants so as not to contradict it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSummon(
-        IEnumerable<IHoverTip> inherited, CardModel card, bool random)
-    {
-        if (random)
-        {
-            return With(inherited, SummonKey,
-                "A performer joins at the back with "
-              + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. If the "
-              + "stage is full, your front performer [gold]Bow[/gold]s and "
-              + "moves to the back instead.");
-        }
-        return With(inherited, SummonKey,
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, SummonKey,
             "A performer joins at the back with "
-          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold].");
-    }
+          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a full "
+          + "stage, the front one [gold]Bow[/gold]s and leaves, and the "
+          + "newcomer adds its Fanfare.");
 
     /// <summary>
     /// 2026-09-25. GENTILHOMME USHER'S ACT, on every card that names him and
@@ -940,4 +939,78 @@ public static class ArmKeywordTips
         With(inherited, CrabalettaKey,
             "End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage
           + " damage to a random enemy.");
+
+    // ------------------------------------------- the Guest Cast -----------
+    //
+    // 2026-09-25, review/active/furina-guest-batch-2026-09-25.md. A Guest Star
+    // card prints "<Name> joins the stage with N Fanfare." and its act lives
+    // on the performer's tip and badge, Defect-orb style, not on the face.
+    // Each tip below is word for word the build table's, numerals from
+    // `FurinaStageLaw` (`EB-89`), and the same sentence as the guest's badge.
+
+    /// <summary>The Guest Star keyword: a guest is a performer, one of each
+    /// on stage, and a second copy makes it Bow and return with the new
+    /// Fanfare added ([USER], 2026-09-25: "only one Neuvillette allowed -
+    /// repeats trigger a Bow and then resummon them, carrying over unused
+    /// Fanfare").</summary>
+    public static IEnumerable<IHoverTip> ForGuestStar(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, GuestStarKey,
+            "A performer who joins the stage, one of each. A second copy "
+          + "makes it Bow, then return with the new Fanfare added.");
+
+    public static IEnumerable<IHoverTip> ForNeuvillette(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, NeuvilletteKey,
+            "End of your turn: pay " + FurinaStageLaw.ActNeuvillettePrice
+          + " of his Fanfare to deal " + FurinaStageLaw.ActNeuvilletteDamage
+          + " [gold]Hydro[/gold] damage to ALL enemies.");
+
+    public static IEnumerable<IHoverTip> ForClorinde(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, ClorindeKey,
+            "End of your turn: take " + FurinaStageLaw.ActClorindeTax
+          + " Fanfare from each other performer to deal "
+          + FurinaStageLaw.ActClorindeDamage
+          + " [gold]Electro[/gold] damage to a random enemy.");
+
+    public static IEnumerable<IHoverTip> ForNavia(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, NaviaKey,
+            "End of your turn: deal [gold]Geo[/gold] damage equal to her "
+          + "Fanfare to a random enemy.");
+
+    public static IEnumerable<IHoverTip> ForChevreuse(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, ChevreuseKey,
+            "End of your turn: [gold]Spend[/gold] "
+          + FurinaStageLaw.ActChevreusePrice + " to gain "
+          + FurinaStageLaw.ActChevreuseEnergy
+          + " [gold]Energy[/gold] next turn.");
+
+    public static IEnumerable<IHoverTip> ForWriothesley(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, WriothesleyKey,
+            "End of your turn: deal [gold]Cryo[/gold] damage to a random "
+          + "enemy equal to twice the Fanfare he lost to hits since his "
+          + "last act.");
+
+    public static IEnumerable<IHoverTip> ForSigewinne(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, SigewinneKey,
+            "End of your turn: give " + FurinaStageLaw.ActSigewinneGift
+          + " of her Fanfare to the performer behind her, or to your front "
+          + "performer if she is at the back.");
+
+    public static IEnumerable<IHoverTip> ForCharlotte(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, CharlotteKey,
+            "End of your turn: each other performer gains "
+          + FurinaStageLaw.ActCharlotteGift + " [gold]Fanfare[/gold].");
+
+    public static IEnumerable<IHoverTip> ForLynette(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, LynetteKey,
+            "End of your turn: [gold]Swirl[/gold] a random enemy with an "
+          + "aura.");
 }

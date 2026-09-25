@@ -1903,8 +1903,8 @@
    replaces: gentilhomme_usher,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: gentilhomme_usher,
-   description: "Summon Usher. If he's already on stage, he gains 3 [gold]Fanfare[/gold].",
-   effects: [{op: stage_summon, member: usher, if_present_raise: 3}]}
+   description: "Summon Usher.",
+   effects: [{op: stage_summon, member: usher}]}
 
 - {id: proto_fs_surintendante_chevalmarin, name: "Surintendante Chevalmarin",
    upgrade: {cost: -1},
@@ -1912,9 +1912,9 @@
    replaces: surintendante_chevalmarin,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: surintendante_chevalmarin,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin. If she's already on stage, she gains 3 [gold]Fanfare[/gold].",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin.",
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
-             {op: stage_summon, member: chevalmarin, if_present_raise: 3}]}
+             {op: stage_summon, member: chevalmarin}]}
 
 - {id: proto_fs_mademoiselle_crabaletta, name: "Mademoiselle Crabaletta",
    upgrade: {cost: -1},
@@ -1922,8 +1922,8 @@
    replaces: mademoiselle_crabaletta,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: mademoiselle_crabaletta,
-   description: "Summon Crabaletta. If she's already on stage, she gains 3 [gold]Fanfare[/gold].",
-   effects: [{op: stage_summon, member: crabaletta, if_present_raise: 3}]}
+   description: "Summon Crabaletta.",
+   effects: [{op: stage_summon, member: crabaletta}]}
 
 - {id: proto_fs_understudy, name: "Understudy", character: furina,
    upgrade: {remove: exhaust},
@@ -2195,6 +2195,74 @@
    description: "Whenever a performer [gold]Bow[/gold]s, it returns at the back with 1 [gold]Fanfare[/gold].",
    effects: [{op: apply_power, power: fs_five_century_act, amount: 1,
               target: self}]}
+
+# FURINA, THE STAGE -- THE GUEST CAST (2026-09-25). Eight Guest Star cards,
+# review/active/furina-guest-batch-2026-09-25.md; each `replaces:` a same-rarity
+# shipped Skill the EB-736 filter drops. Provenance: prototype-surface-provenance.md.
+
+- {id: proto_fs_guest_star_neuvillette, name: "Guest Star: Neuvillette", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   replaces: reginas_mercy,
+   register: salon, cost: 2, type: skill, rarity: rare,
+   description: "Neuvillette joins the stage with 6 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: neuvillette, amount: 6}]}
+
+- {id: proto_fs_guest_star_clorinde, name: "Guest Star: Clorinde", character: furina,
+   upgrade: {stage_guest: +2},
+   authored_by: [claude],
+   replaces: thunderous_ovation,
+   register: salon, cost: 1, type: skill, rarity: rare,
+   description: "Clorinde joins the stage with 4 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: clorinde, amount: 4}]}
+
+- {id: proto_fs_guest_star_navia, name: "Guest Star: Navia", character: furina,
+   upgrade: {stage_guest: +2},
+   authored_by: [claude],
+   replaces: encore_performance,
+   register: salon, cost: 1, type: skill, rarity: rare,
+   description: "Navia joins the stage with 4 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: navia, amount: 4}]}
+
+- {id: proto_fs_guest_star_chevreuse, name: "Guest Star: Chevreuse", character: furina,
+   upgrade: {stage_guest: +2},
+   authored_by: [claude],
+   replaces: audience_participation,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Chevreuse joins the stage with 4 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: chevreuse, amount: 4}]}
+
+- {id: proto_fs_guest_star_wriothesley, name: "Guest Star: Wriothesley", character: furina,
+   upgrade: {stage_guest: +2},
+   authored_by: [claude],
+   replaces: deep_breath,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Wriothesley joins the stage with 8 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: wriothesley, amount: 8}]}
+
+- {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,
+   upgrade: {stage_guest: +2},
+   authored_by: [claude],
+   replaces: standing_room_only,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Sigewinne joins the stage with 8 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: sigewinne, amount: 8}]}
+
+- {id: proto_fs_guest_star_charlotte, name: "Guest Star: Charlotte", character: furina,
+   upgrade: {stage_guest: +2},
+   authored_by: [claude],
+   replaces: limelight,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Charlotte joins the stage with 4 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: charlotte, amount: 4}]}
+
+- {id: proto_fs_guest_star_lynette, name: "Guest Star: Lynette", character: furina,
+   upgrade: {stage_guest: +2},
+   authored_by: [claude],
+   replaces: take_it_from_the_top,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Lynette joins the stage with 8 [gold]Fanfare[/gold].",
+   effects: [{op: stage_guest, member: lynette, amount: 8}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

@@ -598,6 +598,34 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.CrabalettaKey + ".title"] =
                         Powers.FurinaStageLedger.DisplayName(
                             Powers.StagePerformer.Crabaletta),
+                    // THE GUEST CAST (2026-09-25): the keyword, and each
+                    // guest titled by its own name (the ledger's, as above).
+                    [Cards.ArmKeywordTips.GuestStarKey + ".title"] =
+                        "Guest Star",
+                    [Cards.ArmKeywordTips.NeuvilletteKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Neuvillette),
+                    [Cards.ArmKeywordTips.ClorindeKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Clorinde),
+                    [Cards.ArmKeywordTips.NaviaKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Navia),
+                    [Cards.ArmKeywordTips.ChevreuseKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Chevreuse),
+                    [Cards.ArmKeywordTips.WriothesleyKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Wriothesley),
+                    [Cards.ArmKeywordTips.SigewinneKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Sigewinne),
+                    [Cards.ArmKeywordTips.CharlotteKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Charlotte),
+                    [Cards.ArmKeywordTips.LynetteKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Lynette),
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

@@ -282,6 +282,12 @@ SIM_CALL_SITES = {
                              'False', 'None'),
     ('furina_stage.py', 2): ("'furina_stage/bow' if bow else 'furina_stage/act'",
                              'False', 'None'),
+    # THE GUEST CAST (2026-09-25): Neuvillette's hit on ALL, and the one
+    # random-enemy door Clorinde, Navia and Wriothesley share. Unpowered like
+    # the trio's, and each carries its guest's element (the LAW amendment:
+    # a guest on Furina's stage may carry its element).
+    ('furina_stage.py', 3): ('source', 'False', 'element'),
+    ('furina_stage.py', 4): ('source', 'False', 'element'),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     # Sparks 'n' Splash, since 2026-09-25 on a Bomb's own terms (the
     # explosion's unpowered door), at the start of the turn.
@@ -414,31 +420,43 @@ def test_the_stage_refuses_the_dealers_terms_in_both_engines():
     neither engine. The behavioural half is
     `test_eb495_d3_a_performance_carries_no_strength.py`."""
     assert _cs("Powers/Prototype/FurinaStage.cs").count("powered: false") == 2
+    # THE GUEST CAST (2026-09-25): two more sites, the same refusal.
+    assert _cs("Powers/Prototype/FurinaStageGuests.cs").count(
+        "powered: false") == 2
 
     stage = [flags for (name, _i), flags in sorted(_sim_call_sites().items())
              if name == "furina_stage.py"]
-    assert len(stage) == 2, stage
-    assert [powered for _s, powered, _e in stage] == ["False"] * 2
+    assert len(stage) == 4, stage
+    assert [powered for _s, powered, _e in stage] == ["False"] * 4
 
 
-def test_no_stage_act_carries_an_element_in_either_engine():
+def test_no_trio_act_carries_an_element_in_either_engine():
     """DISAGREEMENT D4, SUPERSEDED BY A RULE (Furina Stage draft 3,
     2026-09-25; [USER]: "removing the Hydro application from the end-of-turn
     effects on Chevalmarin and Crabaletta"). D4 had made Crabaletta's hit
-    Hydro in both engines; the ruling takes the element off every act, so
-    both engines now deal plain damage: the C# through the element-less door
-    and the sim with `element=None`. The behavioural half is
-    `test_eb495_d4_crabaletta_hits_hydro.py`, flipped."""
+    Hydro in both engines; the ruling takes the element off the trio's acts,
+    so both engines deal plain damage there: the C# through the element-less
+    door and the sim with `element=None`. The behavioural half is
+    `test_eb495_d4_crabaletta_hits_hydro.py`, flipped.
+
+    THE GUEST CAST (2026-09-25) is the other half of the same ruling: a
+    guest on Furina's stage carries its element (the LAW amendment), so its
+    acts go through `ElementalHit.Deal` in `FurinaStageGuests.cs`, never in
+    `FurinaStage.cs`, and the sim's guest sites pass their element."""
     cs = _cs("Powers/Prototype/FurinaStage.cs")
     assert cs.count("Elements.Element.Hydro") == 0
     assert cs.count("await ElementalHit.DealUnelemented(") == 2
     assert "ElementalHit.Deal(" not in cs
+    guests = _cs("Powers/Prototype/FurinaStageGuests.cs")
+    assert "ElementalHit.DealUnelemented(" not in guests
+    assert guests.count("ElementalHit.Deal(") == 2
 
     sites = _sim_call_sites()
     stage = [flags for (name, _i), flags in sorted(sites.items())
              if name == "furina_stage.py"]
-    assert len(stage) == 2, stage
-    assert [element for _s, _p, element in stage] == ["None"] * 2
+    assert len(stage) == 4, stage
+    assert [element for _s, _p, element in stage] == [
+        "None", "None", "element", "element"]
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():

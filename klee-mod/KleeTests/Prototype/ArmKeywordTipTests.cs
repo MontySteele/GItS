@@ -435,7 +435,13 @@ public class ArmKeywordTipTests
         // TWENTY-EIGHT with the Furina afternoon seats (2026-09-25): the Stage
         // readers' `ForStageReader` left. Let the People Rejoice, its last
         // row, deals twice its Fanfare now and says so on its face.
-        Assert.Equal(28, attaches.Count);
+        //
+        // THIRTY-SEVEN with the Guest Cast (2026-09-25): `ForGuestStar` and
+        // the eight guests' tips, attached off a row's `stage_guest` op.
+        Assert.Equal(37, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForGuestStar");
+        Assert.Contains(attaches, m => m.Name == "ForNeuvillette");
+        Assert.Contains(attaches, m => m.Name == "ForLynette");
         Assert.Contains(attaches, m => m.Name == "ForCompanion");
         Assert.Contains(attaches, m => m.Name == "ForSummon");
         Assert.Contains(attaches, m => m.Name == "ForUsher");

@@ -17,7 +17,8 @@ ONE run so a round packet can quote them together instead of assembling them:
      the Refill-as-prevention price the LAW clause R269 added asks for.
   5. A granted PRESERVE deck against a granted EXPEND deck, on the same seeds.
 
-and one more, which the brief did not list and draft 3's fade asks for:
+and one more, which the brief did not list and draft 3's fade asks for,
+and the Guest Cast's three (2026-09-25) after it:
 
   6. THE FANFARE ECONOMY, per fight (mean) and summed over the arm's fights:
      the back performer's bar at the end of each of Furina's turns, after the
@@ -30,6 +31,11 @@ and one more, which the brief did not list and draft 3's fade asks for:
      `state.stage_ledger`), and the line `start + gained - paid - left -
      faded - hit = end` is checked per fight and printed. `--per-fight` adds
      one line per fight.
+  7. THE GUEST CAST (2026-09-25; `review/active/furina-guest-batch-2026-09-25.md`,
+     "Measuring it"): per guest, the acts that could not pay, the turns it
+     spent on stage, and the Fanfare its acts paid (the `paid_other` hook);
+     per fight, the damage that reached Furina, the damage dealt to the
+     enemies and the turns; and how often Full House fired.
 
 WHY A REPORT TOOL AND NOT A TEST. `tools/klee_survival_sprint.py`'s shape and
 its reason: a measurement grid is not a gate. Nothing here asserts anything and
@@ -92,7 +98,47 @@ EXPEND = STARTER_KIT + [
     "proto_fs_final_bow",
 ]
 
-ARMS = (("natural", None), ("preserve", PRESERVE), ("expend", EXPEND))
+#: THE GUEST CAST's decks (2026-09-25). The batch's own two: a STAR deck
+#: (Neuvillette and Charlotte fed by Refills) and a TANK deck (Wriothesley
+#: and Sigewinne behind Block). Then the balance check [USER] asked for after
+#: the trio could be cloned ("Let's allow for copies and then check the
+#: balance"): three Crabalettas, three Crabalettas with Full House, three
+#: Ushers; and three guests, alone and with Full House, to spot a runaway.
+STAR = STARTER_KIT + [
+    "proto_fs_guest_star_neuvillette", "proto_fs_guest_star_charlotte",
+    "proto_fs_standing_ovation", "proto_fs_standing_ovation",
+    "proto_fs_warm_reception", "proto_fs_warm_reception",
+    "proto_fs_gala_dinner",
+]
+TANK = STARTER_KIT + [
+    "proto_fs_guest_star_wriothesley", "proto_fs_guest_star_sigewinne",
+    "proto_fs_interposition", "proto_fs_interposition",
+    "proto_fs_hold_your_places", "proto_fs_hold_your_places",
+    "proto_fs_between_acts",
+]
+THREE_CRABS = STARTER_KIT + ["proto_fs_mademoiselle_crabaletta"] * 3
+THREE_CRABS_FULL_HOUSE = THREE_CRABS + ["proto_fs_full_house"]
+THREE_USHERS = STARTER_KIT + ["proto_fs_gentilhomme_usher"] * 3
+THREE_SUPPORTS = STARTER_KIT + [
+    "proto_fs_guest_star_charlotte", "proto_fs_guest_star_sigewinne",
+    "proto_fs_guest_star_wriothesley", "proto_fs_standing_ovation",
+    "proto_fs_interposition", "proto_fs_hold_your_places",
+]
+THREE_STARS_FULL_HOUSE = STARTER_KIT + [
+    "proto_fs_guest_star_neuvillette", "proto_fs_guest_star_clorinde",
+    "proto_fs_guest_star_navia", "proto_fs_full_house",
+    "proto_fs_standing_ovation", "proto_fs_standing_ovation",
+]
+THREE_SUPPORTS_FULL_HOUSE = THREE_SUPPORTS + ["proto_fs_full_house"]
+
+ARMS = (("natural", None), ("preserve", PRESERVE), ("expend", EXPEND),
+        ("guest star", STAR), ("guest tank", TANK),
+        ("3 crabalettas", THREE_CRABS),
+        ("3 crabalettas + full house", THREE_CRABS_FULL_HOUSE),
+        ("3 ushers", THREE_USHERS),
+        ("3 guests (supports)", THREE_SUPPORTS),
+        ("3 guests (supports) + full house", THREE_SUPPORTS_FULL_HOUSE),
+        ("3 guests (stars) + full house", THREE_STARS_FULL_HOUSE))
 
 #: The buckets sec.13 names, in its own order.
 BARS = ((1, 2, "1-2"), (3, 5, "3-5"), (6, 10 ** 9, "6+"))
@@ -268,13 +314,64 @@ def report(states, label, out=sys.stdout, per_fight=False):
     # 5. is the comparison across arms; `main` prints it once at the foot.
     economy(states, out=out, per_fight=per_fight)
 
+    guests = guest_cast(states, out=out)
+
     won = sum(1 for st in states if not st.living_enemies and st.player.alive)
     print(f"   winrate: {100 * won / len(states):.1f}%  "
           f"(HP left, mean: "
           f"{sum(max(0, st.player.hp) for st in states) / len(states):.1f})",
           file=out)
     return {"label": label, "fights": len(states), "won": won,
-            "spends": total, "absorbed": absorbed}
+            "spends": total, "absorbed": absorbed, **guests}
+
+
+def _dealt(st) -> int:
+    """What the enemies lost this fight: each body's max HP less what it
+    kept (a kill counts its whole bar, overkill nothing)."""
+    return sum(e.max_hp - max(0, e.hp) for e in st.enemies)
+
+
+def _turns(st) -> int:
+    return sum(1 for row in st.log if row.get("event") == "stage_census")
+
+
+def guest_cast(states, out=sys.stdout) -> dict:
+    """Report 7, THE GUEST CAST (2026-09-25): per guest, acts that could not
+    pay, turns on stage, and the Fanfare its acts paid; per fight, the
+    damage that reached Furina and the damage dealt; Full House's uptime."""
+    n = len(states) or 1
+    unpaid = collections.Counter()
+    turns_on = collections.Counter()
+    paid = collections.Counter()
+    for st in states:
+        led = st.stage_ledger or furina_stage.ledger(st)
+        unpaid.update(led.get("unpaid", {}))
+        turns_on.update(led.get("guest_turns", {}))
+        paid.update({k: v for k, v in led["paid_other"].items()
+                     if k in furina_stage.GUESTS})
+    to_her = [sum(row["amount"] for row in st.log
+                  if row.get("event") == "player_hit") for st in states]
+    dealt = [_dealt(st) for st in states]
+    turns = [_turns(st) for st in states]
+    sweeps = [row for st in states for row in st.log
+              if row.get("event") == "stage_acts"]
+    fired = sum(1 for row in sweeps if int(row.get("times", 1)) > 1)
+    print("7. The Guest Cast:", file=out)
+    print(f"     per fight: damage reaching Furina {sum(to_her) / n:.1f}, "
+          f"damage dealt {sum(dealt) / n:.1f}, turns {sum(turns) / n:.1f}, "
+          f"dealt per turn {sum(dealt) / max(1, sum(turns)):.1f}", file=out)
+    print(f"     Full House fired on {fired} of {sum(turns)} turns "
+          f"({100 * fired / max(1, sum(turns)):.0f}%)", file=out)
+    seen = sorted(set(unpaid) | set(turns_on) | set(paid))
+    if not seen:
+        print("     no guest took the stage", file=out)
+    for guest in seen:
+        print(f"     {guest:<12} turns on stage {turns_on[guest]:5d}  "
+              f"acts unpaid {unpaid[guest]:4d}  Fanfare paid {paid[guest]:5d}",
+              file=out)
+    return {"to_her": sum(to_her) / n, "dealt": sum(dealt) / n,
+            "turns": sum(turns) / n, "fh_fired": fired,
+            "fh_turns": sum(turns)}
 
 
 def main(argv=None) -> int:
@@ -307,12 +404,15 @@ def main(argv=None) -> int:
         states = _run(deck, args.encounter, args.fights, args.seed)
         summary.append(report(states, label, per_fight=args.per_fight))
 
-    # 5. The two granted decks, on the same seeds.
-    print("\n=== 5. Preserve against Expend, same seeds ===")
+    # 5. The two granted decks, on the same seeds -- and every other deck.
+    print("\n=== 5. Every deck, same seeds ===")
     for row in summary:
-        print(f"  {row['label']:<9} wins {row['won']:4d}/{row['fights']}   "
+        print(f"  {row['label']:<34} wins {row['won']:4d}/{row['fights']}   "
               f"Spend fires {row['spends']:5d}   "
-              f"Fanfare absorbed {row['absorbed']:6d}")
+              f"Fanfare absorbed {row['absorbed']:6d}   "
+              f"dealt/fight {row['dealt']:6.1f}   "
+              f"to Furina/fight {row['to_her']:5.1f}   "
+              f"Full House {row['fh_fired']}/{row['fh_turns']} turns")
     return 0
 
 

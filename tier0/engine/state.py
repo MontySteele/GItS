@@ -870,6 +870,11 @@ class Player(Fighter):
     stage_act_damage_mult: int = 1
     stage_act_block_mult: int = 1
     stage_power_copies: dict = field(default_factory=dict)
+    # THE GUEST CAST (2026-09-25, QUARANTINED with the stage): each guest's
+    # Fanfare lost since its last act (Wriothesley's reading), and Energy a
+    # Chevreuse act owes the next turn.
+    stage_lost: dict = field(default_factory=dict)
+    stage_energy_next: int = 0
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The

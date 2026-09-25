@@ -1317,28 +1317,11 @@ COMPANION_DEFINITION = ("A card titled with a character's name, a dash, then "
 #: acts are not documented". The numerals are `FurinaStageLaw`'s, written out
 #: for `ARM_KEYWORDS`' standing reason: this page has no access to the mod's
 #: constants and a seat needs the number rather than the name of the constant.
-#: 2026-09-25. A NAMED summon's Summon row -- `ArmKeywordTips.ForSummon`'s
-#: `random: false` variant. Nothing about a full stage: the named Commons' own
-#: face says what a performer already on stage does ("he gains 3
-#: Fanfare"), and the full-stage sentence would contradict it.
-SUMMON_NAMED_ROW = "A performer joins at the back with 1 Fanfare."
-
-#: Which Summon variant a face prints: a random summon (Take the Stage,
-#: Understudy, Double Casting, Improvised Number's lowercase clause) or a named
-#: one (the three Commons).
-_SUMMON_RANDOM_RE = re.compile(r"\b[Ss]ummon (?:a|2|two) random performer")
-_SUMMON_NAMED_RE = re.compile(r"\b[Ss]ummon (?:Usher|Chevalmarin|Crabaletta)\b")
-
-
 def _summon_row(hay: str) -> str:
-    """The Summon row for THIS screen: the random variant, the named one, or
-    both labelled where the screen prints both kinds of summon."""
-    random = bool(_SUMMON_RANDOM_RE.search(hay))
-    named = bool(_SUMMON_NAMED_RE.search(hay))
-    if random and named:
-        return ("Random: " + ARM_KEYWORDS["Summon"] + " Named: "
-                + SUMMON_NAMED_ROW)
-    return SUMMON_NAMED_ROW if named else ARM_KEYWORDS["Summon"]
+    """The Summon row. ONE variant since the trio can be cloned (2026-09-25;
+    [USER]: "Let's allow for copies and then check the balance."): named and
+    random summons meet a full stage the same way, as the tip says once."""
+    return ARM_KEYWORDS["Summon"]
 
 
 #: 2026-09-25 (opus-furina-l2b, (c) 3): the SEAT COUNT, in step with The
@@ -1470,9 +1453,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
     # Bows whatever emptied it -- a Spend, a hit or a full-stage summon.
     # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-    # 2026-09-25 evening: a Bow earned on the enemy's turn waits for hers.
-    "Bow": ("A leaving performer acts one last time. On the enemy's turn, "
-            "that waits for the start of yours."),
+    # 2026-09-25 evening, [USER]: "I think it would be better to have the
+    # performer bow immediately (during the opponent's turn) instead of at
+    # the start of your turn." The waiting Bow is gone.
+    # THE GUEST CAST (2026-09-25): a guest's act may pay, and its Bow does
+    # not -- stated once, here, for every performer.
+    "Bow": ("A performer that leaves the stage acts one last time on its "
+            "way out, without paying."),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
     # because a seat may meet either word alone -- the page's one addendum to
     # the tip, `STAGE_ACTS`, which also carries the seat count (the
@@ -1495,13 +1482,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # did". `ArmKeywordTips.ForSummon`, `ForUsher`, `ForChevalmarin` and
     # `ForCrabaletta`'s words, with `FurinaStageLaw`'s numerals written out;
     # the performer rows are also each body's badge in game
-    # (`StagePerformerBadge`). The Summon row has TWO variants, as the tip
-    # does: this one is a RANDOM summon's (the full-stage rule ruled the same
-    # day), and `SUMMON_NAMED_ROW` is a named one's; `_summon_row` picks by
-    # what the screen prints.
-    "Summon": ("A performer joins at the back with 1 Fanfare. If the stage is "
-               "full, your front performer Bows and moves to the back "
-               "instead."),
+    # (`StagePerformerBadge`). One Summon row since the trio can be cloned
+    # (2026-09-25): named and random summons meet a full stage the same way.
+    "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
+               "stage, the front one Bows and leaves, and the newcomer adds "
+               "its Fanfare."),
     # Draft 3 (2026-09-25): no Bow clause (a Bow is the act once more) and
     # no Hydro (no act applies it).
     "Gentilhomme Usher": "End of your turn: gain 3 Block.",
@@ -1509,6 +1494,29 @@ ARM_KEYWORDS: dict[str, str] = {
                                   "enemies."),
     "Mademoiselle Crabaletta": ("End of your turn: deal 5 damage to a random "
                                 "enemy."),
+    # THE GUEST CAST (2026-09-25): `ArmKeywordTips.ForGuestStar` and the eight
+    # guests' tips, word for word with the numerals written out. Each is also
+    # the guest's badge on its body in game. The act lives here and on the
+    # badge, not on the card's face ("<Name> joins the stage with N
+    # Fanfare.").
+    "Guest Star": ("A performer who joins the stage, one of each. A second "
+                   "copy makes it Bow, then return with the new Fanfare "
+                   "added."),
+    "Neuvillette": ("End of your turn: pay 3 of his Fanfare to deal 8 Hydro "
+                    "damage to ALL enemies."),
+    "Clorinde": ("End of your turn: take 1 Fanfare from each other performer "
+                 "to deal 8 Electro damage to a random enemy."),
+    "Navia": ("End of your turn: deal Geo damage equal to her Fanfare to a "
+              "random enemy."),
+    "Chevreuse": "End of your turn: Spend 2 to gain 1 Energy next turn.",
+    "Wriothesley": ("End of your turn: deal Cryo damage to a random enemy "
+                    "equal to twice the Fanfare he lost to hits since his "
+                    "last act."),
+    "Sigewinne": ("End of your turn: give 3 of her Fanfare to the performer "
+                  "behind her, or to your front performer if she is at the "
+                  "back."),
+    "Charlotte": "End of your turn: each other performer gains 1 Fanfare.",
+    "Lynette": "End of your turn: Swirl a random enemy with an aura.",
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1669,7 +1677,11 @@ _STAGE_RETIRED_KEYWORDS = frozenset({"Encore"})
 # `EB-728`'s Fanfare finding one table over.
 _STAGE_ONLY_KEYWORDS = frozenset({
     "Gentilhomme Usher", "Surintendante Chevalmarin",
-    "Mademoiselle Crabaletta"})
+    "Mademoiselle Crabaletta",
+    # THE GUEST CAST (2026-09-25): a shipped Fontaine Companion shares a
+    # guest's name, and off the arm its face means that Companion.
+    "Guest Star", "Neuvillette", "Clorinde", "Navia", "Chevreuse",
+    "Wriothesley", "Sigewinne", "Charlotte", "Lynette"})
 
 # `EB-728`. AND THE ROW THE SHIPPED KIT STILL OWNS.
 #
@@ -1759,6 +1771,16 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Ousia": "furina", "Pneuma": "furina",
     "Summon": "furina", "Gentilhomme Usher": "furina",
     "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
+    # THE GUEST CAST (2026-09-25).
+    "Guest Star": "furina",
+    "Neuvillette": "furina",
+    "Clorinde": "furina",
+    "Navia": "furina",
+    "Chevreuse": "furina",
+    "Wriothesley": "furina",
+    "Sigewinne": "furina",
+    "Charlotte": "furina",
+    "Lynette": "furina",
 }
 
 
@@ -1879,6 +1901,20 @@ _ARM_KEYWORD_RE = {
         r"\bChevalmarin\b|\b[Ss]ummon (?:a|2|two) random performer"),
     "Mademoiselle Crabaletta": re.compile(
         r"\bCrabaletta\b|\b[Ss]ummon (?:a|2|two) random performer"),
+    # THE GUEST CAST (2026-09-25). The keyword on a Guest Star's title or
+    # face, and each guest by its name -- but never a shipped Companion's
+    # dashed title ("Neuvillette — O Tears, I Shall Repay"), which is that
+    # Companion and not the guest.
+    "Guest Star": re.compile(r"\bGuest Star\b|\bjoins the stage with\b"),
+    "Neuvillette": re.compile(r"\bNeuvillette\b(?!\s*[—–-])"),
+    "Clorinde": re.compile(r"\bClorinde\b(?!\s*[—–-])"),
+    "Navia": re.compile(r"\bNavia\b(?!\s*[—–-])"),
+    "Chevreuse": re.compile(r"\bChevreuse\b(?!\s*[—–-])"),
+    "Wriothesley": re.compile(r"\bWriothesley\b(?!\s*[—–-])"),
+    "Sigewinne": re.compile(r"\bSigewinne\b(?!\s*[—–-])"),
+    "Charlotte": re.compile(r"\bCharlotte\b(?!\s*[—–-])"),
+    "Lynette": re.compile(r"\bLynette\b(?!\s*[—–-])"),
+
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
     # faces before the meter exists, and every Furina row the Stage does not

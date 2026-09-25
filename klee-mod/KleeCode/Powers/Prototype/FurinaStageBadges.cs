@@ -127,22 +127,45 @@ public abstract class StagePerformerBadge : PowerModel
         switch (who)
         {
             case StagePerformer.Chevalmarin:
-                await PowerCmd.Apply<ChevalmarinBadgePower>(
-                    context, pet, 1, applier: null, cardSource: null,
-                    silent: true);
+                await Apply<ChevalmarinBadgePower>(context, pet);
                 break;
             case StagePerformer.Crabaletta:
-                await PowerCmd.Apply<CrabalettaBadgePower>(
-                    context, pet, 1, applier: null, cardSource: null,
-                    silent: true);
+                await Apply<CrabalettaBadgePower>(context, pet);
+                break;
+            case StagePerformer.Neuvillette:
+                await Apply<NeuvilletteBadgePower>(context, pet);
+                break;
+            case StagePerformer.Clorinde:
+                await Apply<ClorindeBadgePower>(context, pet);
+                break;
+            case StagePerformer.Navia:
+                await Apply<NaviaBadgePower>(context, pet);
+                break;
+            case StagePerformer.Chevreuse:
+                await Apply<ChevreuseBadgePower>(context, pet);
+                break;
+            case StagePerformer.Wriothesley:
+                await Apply<WriothesleyBadgePower>(context, pet);
+                break;
+            case StagePerformer.Sigewinne:
+                await Apply<SigewinneBadgePower>(context, pet);
+                break;
+            case StagePerformer.Charlotte:
+                await Apply<CharlotteBadgePower>(context, pet);
+                break;
+            case StagePerformer.Lynette:
+                await Apply<LynetteBadgePower>(context, pet);
                 break;
             default:
-                await PowerCmd.Apply<UsherBadgePower>(
-                    context, pet, 1, applier: null, cardSource: null,
-                    silent: true);
+                await Apply<UsherBadgePower>(context, pet);
                 break;
         }
     }
+
+    private static Task Apply<T>(PlayerChoiceContext context, Creature pet)
+        where T : PowerModel =>
+        PowerCmd.Apply<T>(context, pet, 1, applier: null, cardSource: null,
+                          silent: true);
 }
 
 /// <summary>Gentilhomme Usher's badge: Block at the end of her turn (brief
@@ -201,6 +224,177 @@ public sealed class CrabalettaBadgePower
           + " damage to a random enemy."),
         ("smartDescription",
             "End of your turn: deal {Act} damage to a random enemy."),
+    };
+}
+
+// ---- THE GUEST CAST (2026-09-25) -----------------------------------------
+//
+// One badge per guest, each the same sentence as that guest's tip
+// (`ArmKeywordTips.ForNeuvillette` and the seven beside it), numerals from
+// `FurinaStageLaw` (`EB-89`). A damage act's number is live under Ousia
+// (`{Act}`), as the trio's is; the others print no number that moves.
+
+public sealed class NeuvilletteBadgePower : StagePerformerBadge,
+                                            ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Neuvillette;
+
+    protected override int BaseAct => FurinaStageLaw.ActNeuvilletteDamage;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: pay " + FurinaStageLaw.ActNeuvillettePrice
+          + " of his Fanfare to deal " + FurinaStageLaw.ActNeuvilletteDamage
+          + " [gold]Hydro[/gold] damage to ALL enemies."),
+        ("smartDescription",
+            "End of your turn: pay " + FurinaStageLaw.ActNeuvillettePrice
+          + " of his Fanfare to deal {Act} [gold]Hydro[/gold] damage to ALL "
+          + "enemies."),
+    };
+}
+
+public sealed class ClorindeBadgePower : StagePerformerBadge,
+                                         ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Clorinde;
+
+    protected override int BaseAct => FurinaStageLaw.ActClorindeDamage;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: take " + FurinaStageLaw.ActClorindeTax
+          + " Fanfare from each other performer to deal "
+          + FurinaStageLaw.ActClorindeDamage
+          + " [gold]Electro[/gold] damage to a random enemy."),
+        ("smartDescription",
+            "End of your turn: take " + FurinaStageLaw.ActClorindeTax
+          + " Fanfare from each other performer to deal {Act} "
+          + "[gold]Electro[/gold] damage to a random enemy."),
+    };
+}
+
+public sealed class NaviaBadgePower : StagePerformerBadge, ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Navia;
+
+    protected override int BaseAct => 0;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: deal [gold]Geo[/gold] damage equal to her "
+          + "Fanfare to a random enemy."),
+        ("smartDescription",
+            "End of your turn: deal [gold]Geo[/gold] damage equal to her "
+          + "Fanfare to a random enemy."),
+    };
+}
+
+public sealed class ChevreuseBadgePower : StagePerformerBadge,
+                                          ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Chevreuse;
+
+    protected override int BaseAct => 0;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: [gold]Spend[/gold] "
+          + FurinaStageLaw.ActChevreusePrice + " to gain "
+          + FurinaStageLaw.ActChevreuseEnergy
+          + " [gold]Energy[/gold] next turn."),
+        ("smartDescription",
+            "End of your turn: [gold]Spend[/gold] "
+          + FurinaStageLaw.ActChevreusePrice + " to gain "
+          + FurinaStageLaw.ActChevreuseEnergy
+          + " [gold]Energy[/gold] next turn."),
+    };
+}
+
+public sealed class WriothesleyBadgePower : StagePerformerBadge,
+                                            ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Wriothesley;
+
+    protected override int BaseAct => 0;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: deal [gold]Cryo[/gold] damage to a random "
+          + "enemy equal to twice the Fanfare he lost to hits since his "
+          + "last act."),
+        ("smartDescription",
+            "End of your turn: deal [gold]Cryo[/gold] damage to a random "
+          + "enemy equal to twice the Fanfare he lost to hits since his "
+          + "last act."),
+    };
+}
+
+public sealed class SigewinneBadgePower : StagePerformerBadge,
+                                          ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Sigewinne;
+
+    protected override int BaseAct => 0;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: give " + FurinaStageLaw.ActSigewinneGift
+          + " of her Fanfare to the performer behind her, or to your front "
+          + "performer if she is at the back."),
+        ("smartDescription",
+            "End of your turn: give " + FurinaStageLaw.ActSigewinneGift
+          + " of her Fanfare to the performer behind her, or to your front "
+          + "performer if she is at the back."),
+    };
+}
+
+public sealed class CharlotteBadgePower : StagePerformerBadge,
+                                          ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Charlotte;
+
+    protected override int BaseAct => 0;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: each other performer gains "
+          + FurinaStageLaw.ActCharlotteGift + " [gold]Fanfare[/gold]."),
+        ("smartDescription",
+            "End of your turn: each other performer gains "
+          + FurinaStageLaw.ActCharlotteGift + " [gold]Fanfare[/gold]."),
+    };
+}
+
+public sealed class LynetteBadgePower : StagePerformerBadge,
+                                        ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Lynette;
+
+    protected override int BaseAct => 0;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description",
+            "End of your turn: [gold]Swirl[/gold] a random enemy with an "
+          + "aura."),
+        ("smartDescription",
+            "End of your turn: [gold]Swirl[/gold] a random enemy with an "
+          + "aura."),
     };
 }
 

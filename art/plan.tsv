@@ -1984,6 +1984,44 @@ proto_fs_step_forward	ImageGen/images/cards/furina/proto_fs_step_forward.png	500
 proto_fs_thunderous_applause	ImageGen/images/cards/furina/proto_fs_thunderous_applause.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	FCFH Applause and Cheer.png		sticker	
 # proto_fs_tutti <- salon_debut: all three Salon Members in one frame -- everyone plays at once
 proto_fs_tutti	ImageGen/images/cards/furina/proto_fs_tutti.png	500	380	cover	center	shortlist	1	png	Salon Members Summon.png		tcg	
+# ---------- The Guest Cast 2026-09-25: eight Guest Star cards ----------
+# review/active/furina-guest-batch-2026-09-25.md. Each guest wears its own
+# Wish splash, whole (cover_autocrop, the Companion wish rows' crop), with its
+# full-wish art and its character card behind it. PLANNED, NOT FETCHED: the
+# main session's art pass runs art_fetch and picks. Blank source_group keeps
+# strict L1 inside the prototype partition.
+# proto_fs_guest_star_neuvillette <- Neuvillette's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_neuvillette	ImageGen/images/cards/furina/proto_fs_guest_star_neuvillette.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Neuvillette Wish.png		splash	
+proto_fs_guest_star_neuvillette	ImageGen/images/cards/furina/proto_fs_guest_star_neuvillette.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Neuvillette Full Wish.png		splash	
+proto_fs_guest_star_neuvillette	ImageGen/images/cards/furina/proto_fs_guest_star_neuvillette.png	500	380	cover	y0.16	shortlist	3	png	Neuvillette Character Card.png		tcg	
+# proto_fs_guest_star_clorinde <- Clorinde's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_clorinde	ImageGen/images/cards/furina/proto_fs_guest_star_clorinde.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Clorinde Wish.png		splash	
+proto_fs_guest_star_clorinde	ImageGen/images/cards/furina/proto_fs_guest_star_clorinde.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Clorinde Full Wish.png		splash	
+proto_fs_guest_star_clorinde	ImageGen/images/cards/furina/proto_fs_guest_star_clorinde.png	500	380	cover	y0.16	shortlist	3	png	Clorinde Character Card.png		tcg	
+# proto_fs_guest_star_navia <- Navia's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_navia	ImageGen/images/cards/furina/proto_fs_guest_star_navia.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Navia Wish.png		splash	
+proto_fs_guest_star_navia	ImageGen/images/cards/furina/proto_fs_guest_star_navia.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Navia Full Wish.png		splash	
+proto_fs_guest_star_navia	ImageGen/images/cards/furina/proto_fs_guest_star_navia.png	500	380	cover	y0.16	shortlist	3	png	Navia Character Card.png		tcg	
+# proto_fs_guest_star_chevreuse <- Chevreuse's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_chevreuse	ImageGen/images/cards/furina/proto_fs_guest_star_chevreuse.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Chevreuse Wish.png		splash	
+proto_fs_guest_star_chevreuse	ImageGen/images/cards/furina/proto_fs_guest_star_chevreuse.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Chevreuse Full Wish.png		splash	
+proto_fs_guest_star_chevreuse	ImageGen/images/cards/furina/proto_fs_guest_star_chevreuse.png	500	380	cover	y0.16	shortlist	3	png	Chevreuse Character Card.png		tcg	
+# proto_fs_guest_star_wriothesley <- Wriothesley's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_wriothesley	ImageGen/images/cards/furina/proto_fs_guest_star_wriothesley.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Wriothesley Wish.png		splash	
+proto_fs_guest_star_wriothesley	ImageGen/images/cards/furina/proto_fs_guest_star_wriothesley.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Wriothesley Full Wish.png		splash	
+proto_fs_guest_star_wriothesley	ImageGen/images/cards/furina/proto_fs_guest_star_wriothesley.png	500	380	cover	y0.16	shortlist	3	png	Wriothesley Character Card.png		tcg	
+# proto_fs_guest_star_sigewinne <- Sigewinne's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_sigewinne	ImageGen/images/cards/furina/proto_fs_guest_star_sigewinne.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sigewinne Wish.png		splash	
+proto_fs_guest_star_sigewinne	ImageGen/images/cards/furina/proto_fs_guest_star_sigewinne.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Sigewinne Full Wish.png		splash	
+proto_fs_guest_star_sigewinne	ImageGen/images/cards/furina/proto_fs_guest_star_sigewinne.png	500	380	cover	y0.16	shortlist	3	png	Sigewinne Character Card.png		tcg	
+# proto_fs_guest_star_charlotte <- Charlotte's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_charlotte	ImageGen/images/cards/furina/proto_fs_guest_star_charlotte.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Charlotte Wish.png		splash	
+proto_fs_guest_star_charlotte	ImageGen/images/cards/furina/proto_fs_guest_star_charlotte.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Charlotte Full Wish.png		splash	
+proto_fs_guest_star_charlotte	ImageGen/images/cards/furina/proto_fs_guest_star_charlotte.png	500	380	cover	y0.16	shortlist	3	png	Charlotte Character Card.png		tcg	
+# proto_fs_guest_star_lynette <- Lynette's own Wish splash: the guest who joins the stage
+proto_fs_guest_star_lynette	ImageGen/images/cards/furina/proto_fs_guest_star_lynette.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Lynette Wish.png		splash	
+proto_fs_guest_star_lynette	ImageGen/images/cards/furina/proto_fs_guest_star_lynette.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Lynette Full Wish.png		splash	
+proto_fs_guest_star_lynette	ImageGen/images/cards/furina/proto_fs_guest_star_lynette.png	500	380	cover	y0.16	shortlist	3	png	Lynette Character Card.png		tcg	
 # ---------- Co-op set 2026-09-25: the nine multiplayer-only cards ----------
 # Each card reaches another player, so each face shows the character WITH
 # someone: Klee with Jean, Albedo and her friends, Furina with

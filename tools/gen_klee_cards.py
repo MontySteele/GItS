@@ -382,6 +382,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "stage_summon", "stage_raise", "stage_scene_change",
                   "stage_perform_lead", "stage_spend", "stage_spend_all",
                   "stage_curtain_call", "stage_final_bow",
+                  # THE GUEST CAST (2026-09-25): a Guest Star card, one call
+                  # into `FurinaStage.GuestStar`.
+                  "stage_guest",
                   # R276 batch two: three more single calls.
                   "stage_step_forward", "stage_perform_all",
                   "stage_spend_back_all",
@@ -1203,12 +1206,10 @@ def stage_summon_tip_calls(card: dict) -> list[str]:
     one carries all three, because any of them may arrive. A row that gains a
     summon gains the tips the day its row exists.
 
-    ONE SUMMON TIP, IN ONE OF TWO VARIANTS: a row with any RANDOM summon gets
-    the full-stage sentence (the lead bows and moves to the back), and a row
-    whose summons are all NAMED gets the arrival sentence alone, because the
-    named Commons' own face says what a performer already on stage does. The
-    variant rides as the call's third argument, so each entry here is
-    `(call, extra arguments)`.
+    ONE SUMMON TIP since the trio can be cloned (2026-09-25; [USER]: "Let's
+    allow for copies and then check the balance."): a named summon always
+    summons, so named and random summons meet a full stage the same way and
+    the tip says it once. Each entry here is `(call, extra arguments)`.
     """
     members: set[str] = set()
     for fx in iter_effects(card.get("effects") or []):
@@ -1217,8 +1218,7 @@ def stage_summon_tip_calls(card: dict) -> list[str]:
     if not members:
         return []
     random = "random" in members
-    calls = [("ArmKeywordTips.ForSummon",
-              ", true" if random else ", false")]
+    calls = [("ArmKeywordTips.ForSummon", "")]
     for member, call in _STAGE_PERFORMER_TIPS:
         if member in members or random:
             calls.append((call, ""))
@@ -1996,7 +1996,7 @@ BRANCH_FIELDS = {
     # unlike the two salon verbs above: a Spend with no number is not a rider
     # any face could print.
     "stage_spend": {"op", "amount"},
-    "stage_summon": {"op", "member", "if_present_raise"},
+    "stage_summon": {"op", "member"},
     "apply_aura": {"op", "element", "target"},
 }
 
@@ -3580,6 +3580,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                          # R276 batch two: a Stage Raise's printed N (Hold
                          # Your Places, Gala Dinner).
                          "stage_raise",
+                         # THE GUEST CAST (2026-09-25): what a Guest Star
+                         # arrives with.
+                         "stage_guest",
                          # R252, and the same argument one row on: Careful Now
                          # prints a CEILING and no payout ("Block equal to
                          # your largest Bomb, up to 10"), so the cap is the
@@ -4185,6 +4188,17 @@ def blocked_reason(
         # THE CO-OP SET's `target: ally`, refused everywhere it is not built.
         if eff.get("target") == "ally" and op not in COOP_ALLY_OPS:
             return f"op '{op}' cannot aim at another player (target 'ally')"
+        if op == "stage_guest":
+            # THE GUEST CAST (2026-09-25). A closed set, checked here for
+            # `FURINA_STAGE_MEMBERS`' reason: a typo must not degrade into
+            # Usher.
+            unknown = set(eff) - {"op", "member", "amount"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("member") not in FURINA_STAGE_GUESTS:
+                return f"stage_guest member {eff.get('member')!r}"
+            if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+                return "stage_guest amount must be a positive literal int"
         if op == "stage_share_spotlight":
             unknown = set(eff) - {"op", "target"}
             if unknown:
@@ -5559,15 +5573,20 @@ def exhausts_turn_calc_rider(card: dict,
 #: is the one failure a named summon could hide for a whole round.
 FURINA_STAGE_MEMBERS = ("usher", "chevalmarin", "crabaletta", "random")
 
+#: THE GUEST CAST (2026-09-25): the eight guests a `stage_guest` row may
+#: name, as `FurinaStage.Guests` spells them. A closed set, for the reason
+#: above.
+FURINA_STAGE_GUESTS = ("neuvillette", "clorinde", "navia", "chevreuse",
+                       "wriothesley", "sigewinne", "charlotte", "lynette")
+
 
 def _stage_summon_stmt(eff: dict) -> str:
     """`stage_summon` -> the one awaited call. `member: random` is the printed
-    default (*Salon Début*, *Understudy*); a NAMED member carries the
-    `if_present_raise` clause the three Commons print."""
+    default (*Salon Début*, *Understudy*); a NAMED member always summons,
+    since the trio can be cloned (2026-09-25)."""
     member = eff.get("member", "random")
-    bump = int(eff.get("if_present_raise", 0) or 0)
     return ("await FurinaStage.Summon(choiceContext, Owner.Creature, "
-            f'"{member}", {bump});')
+            f'"{member}");')
 
 
 #: THE STAGE's eight statement ops, each a single call into `FurinaStage` with
@@ -5586,6 +5605,8 @@ STAGE_STMT_OPS = {
     "stage_spend", "stage_spend_all", "stage_curtain_call", "stage_final_bow",
     # R276 batch two.
     "stage_step_forward", "stage_perform_all", "stage_spend_back_all",
+    # THE GUEST CAST (2026-09-25).
+    "stage_guest",
 }
 
 #: `stage_raise`'s `seat:` -> the C# verb. The back performer is the rule-5
@@ -5610,6 +5631,10 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
     op = eff["op"]
     if op == "stage_summon":
         return _stage_summon_stmt(eff)
+    if op == "stage_guest":
+        n = amount if amount is not None else str(int(eff["amount"]))
+        return ("await FurinaStage.GuestStar(choiceContext, Owner.Creature, "
+                f'"{eff["member"]}", {n});')
     if op == "stage_raise":
         verb = STAGE_RAISE_VERBS[str(eff.get("seat", "back"))]
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
@@ -6684,6 +6709,12 @@ def build_vars(card: dict) -> list[str]:
             out.append(f'new DynamicVar("BombCap", {int(eff["cap"])}m)')
         elif op == "mend" and mend_upgrade(card):
             out.append(f'new DynamicVar("Mend", {int(eff["amount"])}m)')
+        elif (op == "stage_guest" and stage_guest_upgrade(card)
+              and eff is stage_guest_var_effect(card)):
+            # THE GUEST CAST (2026-09-25): what the guest arrives with, the
+            # Raise idiom -- a var only when the upgrade has to render.
+            out.append(
+                f'new DynamicVar("GuestFanfare", {int(eff["amount"])}m)')
         elif (op == "stage_raise" and stage_raise_upgrade(card)
               and eff is stage_raise_var_effect(card)):
             # R276 batch two, the Mend idiom: a var ONLY when the upgrade has
@@ -7194,6 +7225,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # R276 batch two. Binds to the first top-level `stage_raise`, the
         # one-owner rule; tier0 bumps that op's `amount`.
         "stage_raise": any(e["op"] == "stage_raise" for e in effects),
+        # THE GUEST CAST (2026-09-25): the first top-level `stage_guest`.
+        "stage_guest": any(e["op"] == "stage_guest" for e in effects),
         # `EB-478`. Binds to the op that OWES the draw, the same one-owner rule
         # every key here keeps; tier0 bumps that op's `amount` and nothing else.
         "tide_draw": any(e["op"] == "draw_after_plans" for e in effects),
@@ -8590,11 +8623,44 @@ def stage_raise_var_effect(card: dict) -> dict | None:
 
 def stage_raise_amount(card: dict, eff: dict) -> str | None:
     """The C# amount a top-level `stage_raise` passes: the `RaiseAmount` var
-    where the row upgrades it, else None (the literal)."""
+    where the row upgrades it, else None (the literal). THE GUEST CAST
+    (2026-09-25): a `stage_guest`'s arrival Fanfare the same way, through
+    `GuestFanfare`."""
     if (eff.get("op") == "stage_raise" and stage_raise_upgrade(card)
             and eff is stage_raise_var_effect(card)):
         return 'DynamicVars["RaiseAmount"].IntValue'
+    if (eff.get("op") == "stage_guest" and stage_guest_upgrade(card)
+            and eff is stage_guest_var_effect(card)):
+        return 'DynamicVars["GuestFanfare"].IntValue'
     return None
+
+
+def stage_guest_upgrade(card: dict) -> int:
+    """`stage_guest: +N` -- a Guest Star's arrival Fanfare (2026-09-25)."""
+    return int(upgrade_plan(card)[0].get("stage_guest", 0))
+
+
+def stage_guest_var_effect(card: dict) -> dict | None:
+    """The ONE `stage_guest` a `stage_guest` delta binds to: the first
+    top-level one, mirroring tier0's `_bump_first`."""
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == "stage_guest"), None)
+
+
+def stage_guest_tip_calls(card: dict) -> list[str]:
+    """THE GUEST CAST (2026-09-25). The Guest Star tip and the guest's own
+    tip a row owes, off its `stage_guest` op -- `stage_summon_tip_calls`'
+    shape: the face prints the guest's name ungolded ("Neuvillette joins the
+    stage with 6 Fanfare."), and its act lives on the performer's tip and
+    badge, Defect-orb style, not on the face."""
+    guests = [str(fx.get("member")) for fx in iter_effects(
+        card.get("effects") or []) if fx.get("op") == "stage_guest"]
+    if not guests:
+        return []
+    calls = ["ArmKeywordTips.ForGuestStar"]
+    for member in dict.fromkeys(guests):
+        calls.append(f"ArmKeywordTips.For{member.capitalize()}")
+    return calls
 
 
 def cap_upgrade(card: dict) -> int:
@@ -11566,6 +11632,10 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "mend" and isinstance(eff.get("amount"), int):
             yield "mend", "Mend", eff["amount"]
+        elif op == "stage_guest" and isinstance(eff.get("amount"), int):
+            owns = eff is stage_guest_var_effect(card)
+            yield ("stage_guest", "GuestFanfare", eff["amount"]) if owns \
+                else (None, None, eff["amount"])
         elif op == "stage_raise" and isinstance(eff.get("amount"), int):
             owns = eff is stage_raise_var_effect(card)
             yield ("stage_raise", "RaiseAmount", eff["amount"]) if owns \
@@ -13170,6 +13240,8 @@ def build_upgrade(card: dict) -> list[str]:
                "mend": "mend",
                # R276 batch two, a Stage Raise's printed N.
                "stage_raise": "stage_raise",
+               # THE GUEST CAST (2026-09-25), a Guest Star's arrival Fanfare.
+               "stage_guest": "stage_guest",
                # R252, Careful Now's ceiling.
                "block_largest_bomb": "cap",
                # `EB-679`, Read the Field's look count.
@@ -13183,6 +13255,7 @@ def build_upgrade(card: dict) -> list[str]:
                "grow_largest": 'DynamicVars["Grow"]',
                "mend": 'DynamicVars["Mend"]',
                "stage_raise": 'DynamicVars["RaiseAmount"]',
+               "stage_guest": 'DynamicVars["GuestFanfare"]',
                "block_largest_bomb": 'DynamicVars["BombCap"]',
                "burst_energy": 'DynamicVars["BurstEnergy"]', "apply_power": 'DynamicVars["PowerAmount"]',
                "buff_next_attack": 'DynamicVars["PowerAmount"]',
@@ -14720,6 +14793,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         for attach, extra in stage_summon_tip_calls(card):
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this{extra})")
+        # THE GUEST CAST (2026-09-25): the Guest Star tip and the guest's.
+        for attach in stage_guest_tip_calls(card):
+            tips_expr = (
+                f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc + rider_printed,

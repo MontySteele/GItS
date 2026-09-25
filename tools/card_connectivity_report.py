@@ -483,6 +483,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "stage_step_forward": [_hook("private", "stage", "write")],
     "stage_perform_all": [_hook("private", "stage", "use")],
     "stage_spend_back_all": [_hook("private", "stage", "use")],
+    # THE GUEST CAST (2026-09-25): a Guest Star fields a performer, a write.
+    "stage_guest": [_hook("private", "stage", "write")],
     # THE CO-OP SET: Share the Spotlight takes the back bar away, a use.
     "stage_share_spotlight": [_hook("private", "stage", "use")],
     "salon_bow": [_hook("private", "salon", "use")],

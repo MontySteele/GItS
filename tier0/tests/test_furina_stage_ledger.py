@@ -64,7 +64,7 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     FS.end_of_turn_acts(st)                 # crab 8 -> 7         faded  1
     assert FS.final_bow(st) == 7            # crab leaves with 7  left   7
     assert FS.absorb(st, 5) == 2            # usher emptied       hit    2
-    FS.pay_owed_bows(st)                    # his bow: Block, no Fanfare
+    FS.settle_hit(st)                       # his bow: Block, no Fanfare
     assert FS.stage(st.player) == [["chevalmarin", 1]]
     assert FS.collect_all(st) == 1          # the Rare            spent  1
     FS.bow_and_return(st)                   # chev back at 1      return +1
@@ -80,7 +80,8 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     assert led["start"] == 0
     assert led["gained"] == {
         "opening": 3, "regen": 1, "card": 14, "bow": 0, "power": 0,
-        "summon": 2, "empty_summon": 4, "return": 1}
+        "summon": 2, "empty_summon": 4, "return": 1, "guest": 0,
+        "gift": 0}
     assert led["spent"] == 7
     assert led["paid_other"] == {"guest": 2}
     assert led["left"] == 7
@@ -111,7 +112,12 @@ def test_the_bow_and_power_doors_book_where_they_raise(arm):
     assert _balances(st)
 
 
-@pytest.mark.parametrize("deck", ["natural", "preserve", "expend"])
+@pytest.mark.parametrize("deck", ["natural", "preserve", "expend",
+                                  # THE GUEST CAST (2026-09-25): payments,
+                                  # taxes, gifts and repeats balance too.
+                                  "guest star", "guest tank",
+                                  "3 guests (stars) + full house",
+                                  "3 guests (supports) + full house"])
 def test_real_fights_balance_every_time(arm, deck):
     from tools import furina_stage_report as report
 
