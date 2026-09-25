@@ -3550,7 +3550,28 @@ BANNER_FEATURED_SLOTS = 3
 # decision waits on its size, and no registered experiment attaches to this
 # window.
 # ---------------------------------------------------------------------------
-CONSTANTS_VERSION = 21
+# v22 (2026-09-25). UNDERCURRENT COSTS 1. [USER]: "Furina's Undercurrent is
+# currently underpowered", then "Undercurrent, pick a": the shipped Common
+# `undercurrent` (docs/furina-cards.yaml) goes from cost 2 to cost 1. Its body
+# (2 damage to ALL enemies, 3 times) and its ruled upgrade (`times: +2`,
+# docs/furina-upgrades.yaml) are untouched.
+#
+# A SHIPPED-SHEET NUMBER, so a stamp moves: LAW's material-edit clause names
+# effect-number changes, and a cost is the number every Furina arm's hand pays.
+# `SHEET_DIGEST` below is re-pinned in the same commit.
+#
+# `RT`, `D` and `P` ARE UNTOUCHED. No run-layer content moved (`RT`). No
+# drafter or pilot CODE moved (`D`, `P`); what moves is one row's input to the
+# drafter's existing price -- `draft._static_power` divides by cost, so
+# Undercurrent's static price doubles (6.0 -> 12.0, pinned in
+# `tier05/tests/test_pin_tier05_draft.py`), and the role-tempo classifier now
+# reads its fight tempo as early, so the row's `tempo_band` was re-landed
+# `{fight: [mid]}` -> `{fight: [early]}` by `suggest_role_tempo_tags.py
+# --land` (its `--check` refuses a landed tag the classifier disagrees with).
+# The shipped-price digest (`tier05/tests/test_eb311_plan_pricing.py`) is
+# re-pinned with its proof: only Undercurrent's two faces moved.
+# Every Furina arm's numbers are stale across this bump.
+CONSTANTS_VERSION = 22
 
 # Correction D (2026-08-26). The content sheets carry no version integer of
 # their own, and a sheet edit moves every measured arm: a pool that grows by
@@ -3582,7 +3603,7 @@ CONSTANTS_VERSION = 21
 # `tools/lint_sheet_comment_blocks.py` now caps what may grow back. The rows
 # were checked byte-for-byte before and after, so no row, number or field
 # moved and `CONSTANTS_VERSION` does not bump.
-SHEET_DIGEST = "fdc64ba537f2de75531ea3d28a496d85db496ce48a03461d0f587c4f605b17c9"
+SHEET_DIGEST = "659c424cca41bcf2558fa920ffc8f6bc4fc2361ecd292e3dcdd0fa493b57e041"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
