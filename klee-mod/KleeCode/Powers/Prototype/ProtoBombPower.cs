@@ -28,7 +28,8 @@ namespace KleeMod.Powers;
 /// when it does, every Bomb on the target goes off ONE AT A TIME, each a Pyro
 /// hit for its own size, BEFORE the rest of the card resolves. A Bomb whose
 /// enemy dies JUMPS to a random living enemy at its current size. A MINE is a
-/// Bomb that ALSO goes off when its enemy attacks Klee, before the hit lands.
+/// Bomb that ALSO goes off when its enemy attacks a player, before the hit
+/// lands (any player since 2026-09-25: see <see cref="BeforeDamageReceived"/>).
 ///
 /// WHY THIS IS A SEPARATE POWER AND NOT A MODE ON <see cref="BombPower"/>.
 /// Rule 7 is "nothing fires by itself", and the shipped Bomb's whole lifecycle
@@ -1223,7 +1224,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>Empty only the MINES, leaving plain Bombs where they are.
-    /// Rule 6: an attack on Klee pops the Mines and nothing else. PURE.</summary>
+    /// Rule 6: an attack on a player pops the Mines and nothing else.
+    /// PURE.</summary>
     public List<ProtoCharge>? TakeMines()
     {
         var mines = _charges.Where(c => c.IsMine).ToList();
@@ -1231,6 +1233,22 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         _charges.RemoveAll(c => c.IsMine);
         SyncDisplay();
         return mines;
+    }
+
+    /// <summary>The index of this pile's single largest charge, the OLDEST
+    /// (first in placement order) on a tie, or -1 on an empty pile. Pocket
+    /// Match's pick (<see cref="SetOffLargest"/>); the same first-found
+    /// tie-break <see cref="GrowLargestChargeBy"/> takes. PURE. Sim twin:
+    /// <c>klee_overhaul.largest_index</c>.</summary>
+    public int LargestIndex()
+    {
+        if (_charges.Count == 0) return -1;
+        var best = 0;
+        for (var i = 1; i < _charges.Count; i++)
+        {
+            if (_charges[i].Size > _charges[best].Size) best = i;
+        }
+        return best;
     }
 
     /// <summary>Remove ONE charge by index and hand it back. Sorry, Jean...'s
@@ -1325,9 +1343,93 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // one with no card at all. Sim twin: `klee_overhaul.note_set_off_card`
         // at the head of `effects._op_set_off`.
         KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        // BOOM BADGE (playtest 2026-09-24), spent beside the note and for its
+        // reason: the doubling belongs to the next Set off CARD, so it is
+        // taken once per entry point and handed to every pile it reaches.
+        var badge = await BoomBadgePower.Spend(applier);
         if (target == null) return;
-        await SetOff(choiceContext, target, applier, cardSource);
+        await SetOff(choiceContext, target, applier, cardSource, badge: badge);
         await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
+    }
+
+    /// <summary>
+    /// POCKET MATCH (playtest 2026-09-24): "Set off only your largest Bomb on
+    /// the enemy. Deal N damage." <see cref="SetOffAimed"/> with ONE charge
+    /// taken instead of the pile (<see cref="SetOffLargest"/>); the card's own
+    /// hit lands after it, and the note and the Boom Badge are taken the same
+    /// way, so it is a Set off card to every reader. Sim twin: the
+    /// `charge: largest` arm of <c>effects._op_set_off</c>.
+    /// </summary>
+    public static async Task SetOffLargestAimed(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel cardSource, CardPlay cardPlay, decimal damage)
+    {
+        KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        var badge = await BoomBadgePower.Spend(applier);
+        if (target == null) return;
+        await SetOffLargest(choiceContext, target, applier, cardSource, badge);
+        await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
+    }
+
+    /// <summary>
+    /// Pocket Match's rule: this placer's SINGLE LARGEST charge on
+    /// <paramref name="target"/> -- the OLDEST on a tie -- leaves the pile and
+    /// goes off; every other charge stays where it is and keeps growing.
+    /// Returns 1 if a charge went off.
+    ///
+    /// THE SHAPE OF A MINE ANSWERING AN ATTACK (<see cref="BeforeDamageReceived"/>):
+    /// a PURE take of part of the pile, then the one <see cref="Explode"/> every
+    /// rule is priced in -- so it pays its Spark, answers Explosive Frags and
+    /// Second Surprise if the charge was a Mine, and a kill leaves the charges
+    /// behind it to <see cref="SweepJumps"/>. Unlike the Mine it is a card's Set
+    /// off, so it SPENDS The Big One's multiplier (and Boom Badge's
+    /// <paramref name="badge"/>, multiplied in) rather than peeking it.
+    ///
+    /// A charge aimed at a body that is already dead jumps instead, the rule
+    /// <see cref="SetOff"/> keeps for a corpse. Sim twin:
+    /// <c>klee_overhaul.set_off_largest</c>.
+    /// </summary>
+    public static async Task<int> SetOffLargest(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel? cardSource, int badge = 1)
+    {
+        if (target == null) return 0;
+
+        ProtoBombPower? bestPile = null;
+        var bestIndex = -1;
+        var bestSize = 0;
+        foreach (var pile in target.Powers.OfType<ProtoBombPower>().ToList())
+        {
+            if (pile.Applier != applier) continue;   // R205: your pile only
+            var index = pile.LargestIndex();
+            if (index < 0) continue;
+            var size = pile._charges[index].Size;
+            if (bestPile != null && size <= bestSize) continue;
+            bestPile = pile;
+            bestIndex = index;
+            bestSize = size;
+        }
+        if (bestPile == null || bestPile.TakeAt(bestIndex) is not { } charge)
+        {
+            return 0;
+        }
+        if (bestPile._charges.Count == 0) await PowerCmd.Remove(bestPile);
+
+        var multiplier = KleeOverhaulLedger.For(applier).TakeMultiplier() * badge;
+        var exploded = 0;
+        if (target.IsDead)
+        {
+            await JumpCharges(choiceContext, target, new[] { charge }, applier,
+                              cardSource);
+        }
+        else
+        {
+            await Explode(choiceContext, target, charge, applier, cardSource,
+                          multiplier);
+            exploded = 1;
+        }
+        await SweepJumps(choiceContext, applier.CombatState);
+        return exploded;
     }
 
     /// <summary>
@@ -1355,9 +1457,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         CardModel cardSource, CardPlay cardPlay, decimal damage)
     {
         KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        var badge = await BoomBadgePower.Spend(applier);
         if (target == null) return;
         var overflow = new List<int>();
-        await SetOff(choiceContext, target, applier, cardSource, overflow);
+        await SetOff(choiceContext, target, applier, cardSource, overflow, badge);
         await BounceOverflow(choiceContext, target, applier, overflow.Sum());
         await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
     }
@@ -1399,6 +1502,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // one with no card at all. Sim twin: `klee_overhaul.note_set_off_card`
         // at the head of `effects._op_set_off`.
         KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        var badge = await BoomBadgePower.Spend(applier);
         var combat = applier.CombatState;
         if (combat == null) return;
 
@@ -1410,7 +1514,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 var aura = AuraCmd.Find(enemy);
                 if (aura == null || aura.Element == Element.Pyro) continue;
             }
-            await SetOff(choiceContext, enemy, applier, cardSource);
+            await SetOff(choiceContext, enemy, applier, cardSource, badge: badge);
             await DealCardDamage(choiceContext, enemy, damage, cardSource, cardPlay);
         }
     }
@@ -1449,6 +1553,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // one with no card at all. Sim twin: `klee_overhaul.note_set_off_card`
         // at the head of `effects._op_set_off`.
         KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        var badge = await BoomBadgePower.Spend(applier);
         var combat = applier.CombatState;
         if (combat == null) return;
 
@@ -1460,7 +1565,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             var target = combat.RunState.Rng.CombatTargets.NextItem(candidates);
             if (target == null) return;
 
-            await SetOff(choiceContext, target, applier, cardSource);
+            await SetOff(choiceContext, target, applier, cardSource, badge: badge);
             await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
         }
     }
@@ -1540,10 +1645,15 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     ///
     /// TAKE-THEN-RESOLVE: the whole pile leaves the power first (EB-138's
     /// discipline), so the loop below owns charges that no teardown can take.
+    ///
+    /// <paramref name="badge"/> is Boom Badge's factor
+    /// (<see cref="BoomBadgePower.Spend"/>), taken ONCE by the card-facing
+    /// entry point and handed to every pile that clause reaches. It MULTIPLIES
+    /// The Big One's armed multiplier, so x4 and x2 meet at x8.
     /// </summary>
     public static async Task<int> SetOff(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
-        CardModel? cardSource, List<int>? overflow = null)
+        CardModel? cardSource, List<int>? overflow = null, int badge = 1)
     {
         if (target == null) return 0;
 
@@ -1563,7 +1673,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (taken.Count == 0) return 0;
 
         var ledger = KleeOverhaulLedger.For(applier);
-        var multiplier = ledger.TakeMultiplier();
+        var multiplier = ledger.TakeMultiplier() * badge;
         var exploded = 0;
 
         for (var i = 0; i < taken.Count; i++)
@@ -1864,8 +1974,27 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     // ---- rule 6: the Mine ----------------------------------------------
 
     /// <summary>
-    /// RULE 6. When this enemy's attack is about to land on the Klee who placed
-    /// the Mine, every Mine here goes off first; plain Bombs stay put.
+    /// RULE 6. When this enemy's attack is about to land on ANY PLAYER, every
+    /// Mine here goes off first; plain Bombs stay put.
+    ///
+    /// ANY PLAYER, NOT ONLY HER (the owner, 2026-09-25, "Mines in co-op, pick
+    /// a": "a Mine goes off just before ITS enemy's attack lands on ANY player,
+    /// not only on the Klee who placed it"). The co-op clause this replaced was
+    /// <c>target != Applier</c>, so in the 2026-09-24 co-op run an enemy that
+    /// swung at Furina walked through Hair Trigger's Mines untouched. What is
+    /// still HERS is everything after the trigger: the explosion is dealt by
+    /// the placing Klee (<see cref="Explode"/> with the pile's
+    /// <c>Applier</c>), so its Spark, Look Out!'s Block, Explosive Frags and
+    /// every other reader pay the Klee who placed it -- and it is still THIS
+    /// enemy's hit (<c>dealer == Owner</c>), and still a powered attack.
+    ///
+    /// "A PLAYER" IS <c>Creature.IsPlayer</c>, the base game's own reading:
+    /// an enemy move only ever sees <c>CombatState.PlayerCreatures</c>, which
+    /// is <c>Where(c =&gt; c.IsPlayer)</c>. A pet is never the target of an
+    /// enemy's attack -- Furina's performers ABSORB a hit aimed at Furina in
+    /// her own damage pipeline (<c>FurinaResourceHooks.ModifyHpLostBeforeOsty</c>),
+    /// which runs AFTER this hook, so the target here is Furina and the Mine
+    /// goes off before her lead performer takes anything.
     ///
     /// <c>BeforeDamageReceived</c> is the hook because it is the one that fires
     /// before the hit lands AND carries a <c>PlayerChoiceContext</c> -- an
@@ -1878,8 +2007,9 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// the Mines are CONSUMED, so the second hit of a multi-hit intent finds
     /// none. The rule is self-limiting.
     ///
-    /// <c>target != Applier</c> is the co-op clause and it falls out of R205:
-    /// this pile belongs to one Klee, and it is her attack to answer.
+    /// R205 STILL HOLDS FOR THE PILE: it belongs to one Klee, and only her
+    /// charges answer here; another Klee's Mines on the same enemy answer the
+    /// same attack from their own pile, each paying its own placer.
     ///
     /// <c>EB-336</c>: A LETHAL MINE PRE-EMPTS ITS OWN HIT. See
     /// <see cref="Preempted"/> for the whole of why the kill alone was not
@@ -1890,8 +2020,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature target, decimal amount,
         ValueProp props, Creature? dealer, CardModel? cardSource)
     {
-        if (dealer != Owner || target != Applier) return;
-        if (!props.IsPoweredAttack()) return;
+        if (!AnswersAttack(Owner, Applier, target, dealer, props)) return;
         if (Applier == null) return;
 
         var mines = TakeMines();
@@ -1919,6 +2048,22 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (enemy.IsDead) Preempted.Note(target, enemy);
         await SweepJumps(choiceContext, Applier.CombatState);
     }
+
+    /// <summary>
+    /// RULE 6's TRIGGER, the whole of it and PURE, so a headless pin can ask
+    /// it: a Mine on <paramref name="enemy"/>, placed by
+    /// <paramref name="applier"/>, answers a hit on <paramref name="target"/>
+    /// from <paramref name="dealer"/> when the hit is THIS enemy's own powered
+    /// attack and lands on a PLAYER -- any player, the placing Klee or an ally
+    /// (the owner, 2026-09-25, "Mines in co-op, pick a").
+    /// </summary>
+    public static bool AnswersAttack(
+        Creature enemy, Creature? applier, Creature target, Creature? dealer,
+        ValueProp props) =>
+        applier != null
+        && ReferenceEquals(dealer, enemy)
+        && target.IsPlayer
+        && props.IsPoweredAttack();
 
     // ---- EB-336: the hit a lethal Mine pre-empts -------------------------
 

@@ -373,14 +373,17 @@ public class KleeOverhaulRuleTests
     {
         // `BeforeDamageReceived` is the one pre-hit hook that carries a choice
         // context, and dealing damage needs one. The guards are the rule: this
-        // enemy's own attack, on the Klee who placed the pile, and a real
-        // Attack rather than a bomb's Unpowered hit. Structural: the hit needs
-        // a combat.
+        // enemy's own attack, on a player (any player since 2026-09-25, "Mines
+        // in co-op, pick a"), and a real Attack rather than a bomb's Unpowered
+        // hit -- all of them in the one pure predicate `AnswersAttack`.
+        // Structural: the hit needs a combat.
         var hook = Method("BeforeDamageReceived");
         var calls = Il.Calls(hook);
+        Assert.Contains("ProtoBombPower.AnswersAttack", calls);
         Assert.Contains("ProtoBombPower.TakeMines", calls);
         Assert.Contains("ProtoBombPower.Explode", calls);
-        Assert.Contains(calls, c => c.Contains("IsPoweredAttack"));
+        Assert.Contains(Il.Calls(Method("AnswersAttack")),
+                        c => c.Contains("IsPoweredAttack"));
     }
 
     // ---- THE PAYLOAD (Jumpy Dumpty) --------------------------------------

@@ -991,7 +991,7 @@
       "split_grow": 2
     },
     "proto_ko_stoke_the_fuse": {
-      "grow": 1
+      "grow": 2
     },
     "proto_ko_tag_along": {
       "remove": "exhaust"
@@ -1012,7 +1012,7 @@
       "cost": -1
     },
     "proto_ko_wait_for_it": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_ko_where_did_i_put_it": {
       "scry": 2
@@ -1124,6 +1124,9 @@
     "proto_mc_lisa_lightning_rose": {
       "power_amount": 1
     },
+    "proto_mc_lisa_violet_arc": {
+      "draw": 1
+    },
     "proto_mc_mika_starfrost_swirl": {
       "damage": 3
     },
@@ -1168,6 +1171,9 @@
       "remove": "exhaust"
     },
     "proto_mc_sucrose_catalyst_conversion": {
+      "draw": 1
+    },
+    "proto_mc_sucrose_gust": {
       "draw": 1
     },
     "proto_mc_sucrose_mollis_favonius": {
@@ -1268,8 +1274,5 @@
       "power_amount": 1
     }
   },
-  "no_upgrade": {
-    "proto_mc_lisa_violet_arc": "the same shape as Sucrose's Gust one arm over: the aura carries no amount, and the printed draw is the one number the Prototype-stage rule refuses to bump (its last clause ADDS a draw, and both appliers bind that to the same Cards var). At cost 1 the row is under the rule's cost floor, so a real upgrade here is a ruled `upgrade:` block.",
-    "proto_mc_sucrose_gust": "the row prints two numbers and the Prototype-stage rule may move neither. Swirl carries no amount, and the printed draw is the one number the rule refuses to bump: its last clause ADDS a draw, both appliers bind an added draw to the same Cards var, and a second one is a collision the codegen names outright. At cost 0 the cost clause cannot reach the row either. A real upgrade here is a ruled `upgrade:` block."
-  }
+  "no_upgrade": {}
 }

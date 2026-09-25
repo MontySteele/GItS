@@ -251,12 +251,13 @@ public sealed partial class ProtoBombPower
         CardModel cardSource, CardPlay cardPlay, decimal damage)
     {
         KleeOverhaulLedger.For(applier).NoteSetOffCardPlayed(cardSource);
+        var badge = await BoomBadgePower.Spend(applier);
         var combat = applier.CombatState;
         if (combat == null) return;
         foreach (var enemy in combat.HittableEnemies.ToList())
         {
             if (enemy.IsDead) continue;
-            await SetOff(choiceContext, enemy, applier, cardSource);
+            await SetOff(choiceContext, enemy, applier, cardSource, badge: badge);
         }
         if (target == null) return;
         await DealCardDamage(choiceContext, target, damage, cardSource,

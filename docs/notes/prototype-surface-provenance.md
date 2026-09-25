@@ -2151,6 +2151,16 @@ one less damage; no new rule. R271 sec.4 item 1 then CUT Fwoosh! on exactly
 that reading -- Retain is what the seats drafted the pair for, and one point of
 damage is not a decision -- so this row is the whole of that shape now.
 
+**A NEW DESIGN, 2026-09-24** ([USER]'s co-op playtest: "Pocket Match is
+redundant with Ka-pow!"). 0 Energy, no Spark price, Retain: "Set off only your
+largest Bomb on the enemy. Deal 3 damage." (5 upgraded). ONE charge goes off
+-- the largest, the oldest on a tie -- as a normal explosion (its Spark,
+Explosive Frags and Second Surprise if it was a Mine, a jump for the rest on a
+kill), and every other charge stays and keeps growing. It is still a `set_off`
+op, with the field `charge: largest`, so every reader of a Set off card sees
+it. C# `ProtoBombPower.SetOffLargestAimed` / `SetOffLargest`; sim
+`klee_overhaul.set_off_largest`.
+
 **`proto_ko_bombs_away` -- the placer that is not a Skill.**
 Round 13's Smoggy reading: one Skill per turn against a kit whose placers are
 Skills by rule. Fish-Flavored Bait and Bang Bang! are already Attacks that
@@ -3285,11 +3295,20 @@ Personals, with the stand-in hand-off, and sets each to cost 0 this turn.
 **`proto_ko_come_back_and_play`**: `fetch_from_discard` of a Companion card;
 the upgrade appends a draw.
 
-**`proto_ko_boom_badge`**: `BoomBadgePower` on the game's replay surface
-(`ModifyCardPlayCount`, Study Buddy's construction) keyed on `ISetOffCard`.
-Each copy doubles one Set off card. Expires at the end of the turn.
+**`proto_ko_boom_badge`**: since the 2026-09-24 playtest ([USER]: "seems
+weak") "The next time you Set off this turn, your Bombs deal double damage", 2
+Sparks (1 upgraded). It was the game's replay surface, and the second play
+found the Bombs already gone. Now each card-facing Set off entry point spends
+the badge once (`BoomBadgePower.Spend`; sim `take_boom_badge`) and hands its
+factor to every pile that clause reaches, multiplied with The Big One's armed
+multiplier (x8 together). Two badges double the same next Set off twice (x4).
+A Mine answering an attack is not a Set off and never spends it. Expires at
+the end of the turn.
 
-**`proto_ko_wait_for_it`**: a one-shot on the charge-aware explosion door; it
+**`proto_ko_wait_for_it`** (Klee balance review, pick 4a, 2026-09-25: cost 0,
+and the upgrade draws 3 instead of cutting the cost -- so the power's stack is
+now the cards drawn and the Energy is 1 per payout): a one-shot on the
+charge-aware explosion door; it
 pays 2 cards and 1 Energy per copy on her first reacting explosion this turn
 and is gone at the end of the turn.
 
@@ -3324,7 +3343,9 @@ on ALL -- three existing ops in the printed order.
 sparks_spent`, one hit of 5 to ALL enemies per Spark spent.
 
 **`proto_ko_spark_knight`**: rides `SparkPower.Gain` (the sim's
-`gain_sparks`), one hit per Spark that LANDED, from any source. The hit has no
+`gain_sparks`), one hit per Spark that LANDED, from any source. Since the
+2026-09-24 playtest ([USER]: "seems underpowered") it costs 1 and each hit is 3
+damage to ALL enemies (4 upgraded), where it was 2 to a random one. The hit has no
 element (`ElementalHit.DealUnelemented`; the sim's `element=None`) since
 2026-09-23, so it cannot spend an aura a companion laid down.
 

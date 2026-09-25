@@ -326,9 +326,9 @@ def test_a_spark_priced_row_keeps_its_tip_without_the_sentence():
     word they charge in. A price shown as a badge is still the keyword on the
     card, so the row's own `spend_spark` raises the tip instead."""
     # `EB-749` re-pointed two of the seven: Fwoosh! was cut and Powder Charge
-    # became Booby Trap. Pocket Match is the same Spark-priced Set off shape
-    # Fwoosh! was. R276 cut Sugar Rush, so Bottomless Bag takes the seventh.
-    for stem in ("ProtoKoPocketMatch", "ProtoKoTinderToss", "ProtoKoQuickFuse",
+    # became Booby Trap. R276 cut Sugar Rush, so Bottomless Bag takes the
+    # seventh. Pocket Match lost its price on 2026-09-24; six remain.
+    for stem in ("ProtoKoTinderToss", "ProtoKoQuickFuse",
                  "ProtoKoBangBang", "ProtoKoBoobyTrap", "ProtoKoDigIn",
                  "ProtoKoBottomlessBag"):
         text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")

@@ -649,10 +649,11 @@ def _finish_play(state: CombatState, card: Card,
         # `effects._resolve_card_bound` spends it one line after that read,
         # beside `next_attack_up`'s own consuming pop.
     # QUARANTINED (R276): the Klee arm's Playdate is spent by the Companion
-    # card it discounted, and Boom Badge's second play is counted here with
-    # every other replay source. Both are no-ops with the arm off.
+    # card it discounted. A no-op with the arm off. (Boom Badge no longer
+    # replays a card: since the 2026-09-24 playtest it doubles the Bombs of
+    # the next Set off, spent at `effects._op_set_off`.)
     klee_overhaul.spend_playdate(state, card)
-    replays = 1 + klee_overhaul.take_boom_badge(state, card)
+    replays = 1
     if card.is_companion:
         # BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same
         # pool entry as its base, so `foo` and `foo+` are ONE entry in the

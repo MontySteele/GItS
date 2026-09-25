@@ -589,7 +589,8 @@ def test_rule4_a_spark_priced_row_spends_sparks_and_not_energy(overhaul):
     enemy = make_enemy(hp=100)
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 6)
-    card = load("proto_ko_pocket_match")
+    # Pocket Match lost its price on 2026-09-24; Quick Fuse still charges 1.
+    card = load("proto_ko_quick_fuse")
     assert combat.spark_cost(card) == 1
     assert combat.card_cost(state, card) == 0
 
@@ -1540,12 +1541,14 @@ def test_countdown_sets_off_the_whole_pile_and_then_draws(overhaul):
 
     assert sizes(enemy) == [], "every Bomb on the target went off"
     assert enemy.hp < 400
-    assert len(state.player.hand) == hand_before + 1
+    # Klee balance review, pick 4a, 2026-09-25: draw 1 -> 2.
+    assert len(state.player.hand) == hand_before + 2
 
 
-def test_countdown_upgraded_draws_two(overhaul):
+def test_countdown_upgraded_draws_three(overhaul):
     """The row's only printed number is its draw, so that is what the smith
-    moves (`upgrade: {draw: 1}`, the `Cards` var on the C# side)."""
+    moves (`upgrade: {draw: 1}`, the `Cards` var on the C# side). 2 -> 3 since
+    the Klee balance review (pick 4a, 2026-09-25)."""
     enemy = make_enemy(hp=400)
     state = klee_state([enemy])
     state.player.draw_pile = [probe([], cid=f"filler{i}", ctype="skill")
@@ -1553,13 +1556,13 @@ def test_countdown_upgraded_draws_two(overhaul):
     klee_overhaul.place(state, enemy, 5)
 
     card = load("proto_ko_countdown+")
-    assert card.effects[1] == {"op": "draw", "amount": 2}
+    assert card.effects[1] == {"op": "draw", "amount": 3}
 
     hand_before = len(state.player.hand)
     effects.resolve_card(state, card)
 
     assert sizes(enemy) == []
-    assert len(state.player.hand) == hand_before + 2
+    assert len(state.player.hand) == hand_before + 3
 
 
 def test_countdown_still_draws_on_a_bomb_less_board(overhaul):
@@ -1580,7 +1583,7 @@ def test_countdown_still_draws_on_a_bomb_less_board(overhaul):
     hand_before = len(state.player.hand)
     effects.resolve_card(state, card)
 
-    assert len(state.player.hand) == hand_before + 1
+    assert len(state.player.hand) == hand_before + 2
     assert enemy.hp == 200
 
 
@@ -2246,7 +2249,8 @@ def test_stoke_the_fuse_is_unplayable_at_zero_sparks(overhaul):
 
 
 def test_stoke_the_fuse_spends_the_whole_bank_and_grows_per_spark(overhaul):
-    """Three Sparks grow the Bomb by 9 (3 per Spark) and leave the bank at 0.
+    """Three Sparks grow the Bomb by 15 (5 per Spark since the Klee balance
+    review, pick 4a, 2026-09-25) and leave the bank at 0.
 
     The bank is EMPTIED, not decremented by a printed price: the row's price
     is X, so what it pays is whatever it holds -- and what it pays is what the
@@ -2257,21 +2261,21 @@ def test_stoke_the_fuse_spends_the_whole_bank_and_grows_per_spark(overhaul):
 
     stoke(state, [enemy], 3)
 
-    assert sizes(enemy) == [6 + 9]
+    assert sizes(enemy) == [6 + 15]
     assert state.player.sparks == 0
     assert state.player.energy == 3        # a 0-energy row
 
 
-def test_stoke_the_fuse_upgraded_pays_four_per_spark(overhaul):
-    """`upgrade: {grow: +1}` -- the rate is the row's one printed number and
-    the only thing the smith moves, so three Sparks buy 12 instead of 9."""
+def test_stoke_the_fuse_upgraded_pays_seven_per_spark(overhaul):
+    """`upgrade: {grow: +2}` -- the rate is the row's one printed number and
+    the only thing the smith moves, so three Sparks buy 21 instead of 15."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 6)
 
     stoke(state, [enemy], 3, cid="proto_ko_stoke_the_fuse+")
 
-    assert sizes(enemy) == [6 + 12]
+    assert sizes(enemy) == [6 + 21]
     assert state.player.sparks == 0
 
 
@@ -2287,7 +2291,7 @@ def test_stoke_the_fuse_grows_the_largest_of_two_bombs(overhaul):
 
     stoke(state, [a, b], 2)
 
-    assert sizes(a) == [4, 9 + 6]          # the 9 took all of it
+    assert sizes(a) == [4, 9 + 10]         # the 9 took all of it
     assert sizes(b) == [7]
 
 
@@ -2302,7 +2306,7 @@ def test_stoke_the_fuse_sets_nothing_off(overhaul):
     stoke(state, [enemy], 4)
 
     assert enemy.hp == 200
-    assert sizes(enemy) == [6 + 12]
+    assert sizes(enemy) == [6 + 20]
     assert counts(state)["ko_bomb_exploded"] == 0
 
 
@@ -2518,11 +2522,12 @@ def test_once_more_upgraded_charges_one_spark_less(overhaul):
     until `EB-749` cut that row; three rows still spell it and this is one."""
     base = load("proto_ko_once_more")
     up = load("proto_ko_once_more+")
-    assert effects.spend_spark_price(base.effects[0]) == 3
-    assert effects.spend_spark_price(up.effects[0]) == 2
+    # Klee balance review, pick 4a, 2026-09-25: 3 -> 2, upgraded 1.
+    assert effects.spend_spark_price(base.effects[0]) == 2
+    assert effects.spend_spark_price(up.effects[0]) == 1
 
     state = klee_state([make_enemy(hp=200)])
-    state.player.sparks = 2
+    state.player.sparks = 1
     assert combat.card_playable(state, base) is False
     assert combat.card_playable(state, up) is True
 
@@ -2540,7 +2545,7 @@ def test_fish_blasting_shuffles_a_confiscated_into_the_draw_pile(overhaul):
 
     effects.resolve_card(state, load("proto_ko_fish_blasting"))
 
-    assert (a.hp, b.hp) == (195, 195)
+    assert (a.hp, b.hp) == (192, 192)      # 8 to ALL since the balance review
     assert [c.id for c in state.player.draw_pile].count("confiscated") == 1
     assert not any(c.id == "confiscated" for c in state.player.discard_pile)
 
@@ -2757,8 +2762,9 @@ def test_eb516_rapid_fire_takes_the_same_aim(overhaul):
 
 
 def test_eb512_stoke_the_fuse_leaves_the_counter_at_zero(overhaul):
-    """`EB-512`, the r18 seat's own board: Spark 2, the Mine 4 grows to 10, and
-    the counter reads 0 afterwards.
+    """`EB-512`, the r18 seat's own board: Spark 2, the Mine 4 grows (to 10
+    then; to 14 at the balance review's 5 per Spark), and the counter reads 0
+    afterwards.
 
     THE MOD IS WHERE THE DEFECT WAS -- `SparkPower.Spend` reported a payment
     `PowerCmd.ModifyAmount` never made -- and this is the reading the sim has
@@ -2771,5 +2777,5 @@ def test_eb512_stoke_the_fuse_leaves_the_counter_at_zero(overhaul):
 
     stoke(state, [enemy], 2)
 
-    assert sizes(enemy) == [10]
+    assert sizes(enemy) == [14]
     assert state.player.sparks == 0

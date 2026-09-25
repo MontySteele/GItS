@@ -81,16 +81,27 @@ public sealed class PlaydatePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Boom Badge: "Your next Set off card this turn is played twice."
-/// <c>ReplayNextCompanionPower</c>'s construction (Study Buddy), keyed on a
-/// Set off card (<see cref="ISetOffCard"/>) rather than a Companion one: the
-/// game's own replay surface (<c>ModifyCardPlayCount</c>), so the second play
-/// is a real second resolution of the whole card -- and, as the spec says,
-/// usually finds the Bombs already gone and is the card's own effect again.
+/// Boom Badge (playtest 2026-09-24, [USER]: "seems weak"): "The next time you
+/// Set off this turn, your Bombs deal double damage."
 ///
-/// EACH COPY DOUBLES ONE CARD: the stack is how many Set off cards are still
-/// owed a second play, and each doubled card spends one. Expires at the end of
-/// the turn it was played on.
+/// THE DEFECT IT REPLACES. The old face was "your next Set off card this turn
+/// is played twice", on the game's replay surface -- and the replay ran after
+/// the first play had already emptied the Bombs, so the second play only
+/// repeated the card's own small hit.
+///
+/// NOW IT RIDES THE EXPLOSION MULTIPLIER, The Big One's machinery: each
+/// card-facing Set off entry point in <see cref="ProtoBombPower"/> calls
+/// <see cref="Spend"/> once, beside its Once More! note, and hands the factor
+/// to every pile that clause reaches -- Tinder Toss doubles the Bombs on every
+/// enemy, Rapid Fire every roll, Pocket Match its one charge. The factor
+/// MULTIPLIES the ledger's armed multiplier, so with The Big One it is x8.
+///
+/// EVERY COPY DOUBLES THE SAME NEXT SET OFF (<see cref="FactorFor"/>),
+/// Playdate's reading: two badges are two sentences about one Set off. Spent
+/// whether or not the aimed enemy held a Bomb, because that card was the next
+/// Set off. A Mine answering an attack is not a Set off and never reads it.
+/// Expires at the end of the turn it was played on. Sim twin:
+/// <c>klee_overhaul.take_boom_badge</c>.
 /// </summary>
 public sealed class BoomBadgePower : PowerModel, ILocalizationProvider
 {
@@ -98,38 +109,30 @@ public sealed class BoomBadgePower : PowerModel, ILocalizationProvider
     {
         ("title", "Boom Badge"),
         ("description",
-            "Your next [blue]{Amount}[/blue] [gold]Set off[/gold] "
-          + "{Amount:plural:card|cards} this turn {Amount:plural:is|are} "
-          + "played twice."),
+            "The next time you [gold]Set off[/gold] this turn, your "
+          + "[gold]Bombs[/gold] deal double damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override int ModifyCardPlayCount(
-        CardModel card, Creature? target, int playCount)
-    {
-        if (Amount <= 0 || !KleeExpansion.IsSetOffCard(card)) return playCount;
-        if (card.Owner?.Creature != Owner) return playCount;
-        return playCount + 1;
-    }
+    /// <summary>What <paramref name="copies"/> badges multiply the next Set
+    /// off's Bombs by: x2 per copy, 1 with none. PURE.</summary>
+    public static int FactorFor(int copies) =>
+        copies <= 0 ? 1 : 1 << System.Math.Min(copies, 20);
 
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    /// <summary>
+    /// A Set off is happening: take every badge on <paramref name="klee"/> and
+    /// return the factor its Bombs are multiplied by (1 with none up).
+    /// </summary>
+    public static async Task<int> Spend(Creature? klee)
     {
-        if (!KleeExpansion.IsSetOffCard(cardPlay.Card)) return;
-        if (cardPlay.Card?.Owner?.Creature != Owner) return;
-        if (!cardPlay.IsLastInSeries) return;
-        if (Amount > 1)
-        {
-            await PowerCmd.ModifyAmount(choiceContext, this, -1,
-                                        applier: Owner, cardSource: null,
-                                        silent: true);
-        }
-        else
-        {
-            await PowerCmd.Remove(this);
-        }
+        if (klee == null) return 1;
+        var badge = klee.Powers.OfType<BoomBadgePower>().FirstOrDefault();
+        if (badge == null || badge.Amount <= 0) return 1;
+        var factor = FactorFor(badge.Amount);
+        await PowerCmd.Remove(badge);
+        return factor;
     }
 
     public override async Task AfterSideTurnEnd(
@@ -145,16 +148,18 @@ public sealed class BoomBadgePower : PowerModel, ILocalizationProvider
 /// Wait For It...: "This turn, the next time one of your Bombs triggers an
 /// Elemental Reaction, draw 2 cards and gain 1 Energy." A ONE-SHOT: the first
 /// reacting explosion of hers spends the whole power, and the end of the turn
-/// removes it unspent. Each copy is one payout, so two copies waiting on the
-/// same explosion pay twice. The card's Retain keeps the CARD; the window this
-/// power is lasts the turn the card was played.
+/// removes it unspent. The card's Retain keeps the CARD; the window this power
+/// is lasts the turn the card was played.
+///
+/// THE STACK IS THE CARDS DRAWN (Klee balance review, pick 4a, 2026-09-25:
+/// the upgrade draws 3 instead of costing 0), so the row's number is the one
+/// the upgrade moves and the face prints. The Energy is one per payout: two
+/// copies waiting on the same explosion draw their cards summed and gain
+/// <see cref="ReactionEnergy"/> once.
 /// </summary>
 public sealed class WaitForItPower
     : PowerModel, ILocalizationProvider, IProtoChargeListener
 {
-    /// <summary>The printed payout, per copy.</summary>
-    public const int PayoutHand = 2;
-
     public const int ReactionEnergy = 1;
 
     public List<(string, string)>? Localization => new()
@@ -162,8 +167,8 @@ public sealed class WaitForItPower
         ("title", "Wait For It..."),
         ("description",
             "This turn, the next time one of your [gold]Bombs[/gold] triggers "
-          + "an [gold]Elemental Reaction[/gold], draw [blue]" + PayoutHand
-          + "[/blue] cards and gain [blue]" + ReactionEnergy + "[/blue] "
+          + "an [gold]Elemental Reaction[/gold], draw [blue]{Amount}[/blue] "
+          + "cards and gain [blue]" + ReactionEnergy + "[/blue] "
           + "[gold]Energy[/gold]."),
     };
 
@@ -176,11 +181,11 @@ public sealed class WaitForItPower
     {
         if (applier != Owner || !reacted || Amount <= 0) return;
         var player = Owner.Player;
-        var copies = Amount;
+        var cards = Amount;
         await PowerCmd.Remove(this);
         if (player == null) return;
-        await PlayerCmd.GainEnergy(ReactionEnergy * copies, player);
-        await CardPileCmd.Draw(choiceContext, PayoutHand * copies, player);
+        await PlayerCmd.GainEnergy(ReactionEnergy, player);
+        await CardPileCmd.Draw(choiceContext, cards, player);
     }
 
     public override async Task AfterSideTurnEnd(
@@ -532,9 +537,10 @@ public sealed class SecondSurprisePower
 }
 
 /// <summary>
-/// Spark Knight: "Whenever you gain a Spark, deal 2 damage to a random enemy."
-/// EACH SPARK IS ITS OWN HIT (the spec's note): a gain of 3 is three rolls and
-/// three hits. Fired from the Spark chokepoint (<c>SparkPower.Gain</c>) with
+/// Spark Knight: "Whenever you gain a Spark, deal 3 damage to ALL enemies."
+/// (Playtest 2026-09-24, [USER]: "seems underpowered": cost 2 to 1, and a
+/// random enemy for 2 became ALL enemies for 3.) EACH SPARK IS ITS OWN VOLLEY:
+/// a gain of 3 is three hits on every enemy. Fired from the Spark chokepoint (<c>SparkPower.Gain</c>) with
 /// the Sparks that LANDED, so every source -- an explosion, the companion rule,
 /// Grounded, the opening Spark -- counts.
 ///
@@ -552,7 +558,7 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
         ("title", "Spark Knight"),
         ("description",
             "Whenever you gain a [gold]Spark[/gold], deal [blue]{Amount}[/blue] "
-          + "damage to a random enemy."),
+          + "damage to ALL enemies."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -578,10 +584,12 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
                 var living = combat.HittableEnemies
                     .Where(e => !e.IsDead).ToList();
                 if (living.Count == 0) return;
-                var target = combat.RunState.Rng.CombatTargets.NextItem(living);
-                if (target == null) return;
-                await ElementalHit.DealUnelemented(choiceContext, target,
-                                                   knight.Amount, klee);
+                foreach (var target in living)
+                {
+                    if (target.IsDead) continue;
+                    await ElementalHit.DealUnelemented(choiceContext, target,
+                                                       knight.Amount, klee);
+                }
             }
         }
     }

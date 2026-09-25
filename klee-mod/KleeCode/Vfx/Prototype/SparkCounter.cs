@@ -23,12 +23,15 @@ namespace KleeMod.Vfx;
 ///
 /// WHAT THIS IS NOT. It is not a second reading of `EB-281`. That row moved
 /// the bank OFF the status strip and onto an OVERHEAD gauge on Klee's own
-/// creature (<see cref="SparkGauge"/>, the `klee_spark` spec in
-/// <see cref="GaugeBridge"/>), which is where a Burst meter goes. The finding
-/// here is about WHERE THE EYE IS: a price is paid at the bottom-left corner,
-/// beside the energy orb, and that is where the base game puts a resource that
-/// buys cards. The overhead gauge and the badge both stay; nothing is removed
-/// by this file, exactly as the row says ("the buff icon may stay").
+/// creature, which is where a Burst meter goes. The finding here is about
+/// WHERE THE EYE IS: a price is paid at the bottom-left corner, beside the
+/// energy orb, and that is where the base game puts a resource that buys
+/// cards.
+///
+/// THIS IS NOW THE BANK'S ONE DISPLAY. The 2026-09-24 playtest deleted the
+/// overhead gauge ([USER]: "Klee also still has a spark counter over her head,
+/// which is redundant with the main UI gauge"); the status-strip badge stays
+/// suppressed (<see cref="SparkGauge"/>).
 ///
 /// WHAT THE BASE GAME ACTUALLY DOES, read off the pinned v0.111.0 assembly
 /// (`docs/current/research/regent-stars-economy.md` §5.2, and the type itself
@@ -107,13 +110,13 @@ namespace KleeMod.Vfx;
 /// fires on every mutation of the bank -- the gains, the spends and the
 /// <c>AfterPowerAmountChanged</c> net for a bank moved by something that is not
 /// this mod -- and calls <see cref="SparkGauge.Refresh"/>, which now calls
-/// <see cref="Refresh"/>. One funnel, so the badge, the overhead gauge and the
-/// `spark` meter ledger cannot come from different reads. There is no
+/// <see cref="Refresh"/>. One funnel, so this badge and the `spark` meter
+/// ledger cannot come from different reads. There is no
 /// <c>_Process</c> anywhere in this file.
 ///
 /// KLEE'S SEAT, UNDER THE ARM, AND NOBODY ELSE'S. The scope is
-/// <see cref="SparkGauge.AppliesTo"/> verbatim -- one predicate for the gauge
-/// and the badge rather than two that can drift -- which is
+/// <see cref="SparkGauge.AppliesTo"/> verbatim -- one predicate for this
+/// counter and the strip-badge suppression rather than two that can drift -- which is
 /// <c>KleeOverhaul.Enabled &amp;&amp; character is IKleeCharacter</c>. And the
 /// element is built for the LOCAL seat only: a co-op partner's screen is their
 /// own energy area and must not gain Klee's bank.
@@ -178,9 +181,9 @@ public static class SparkCounter
         creature != null && SparkGauge.AppliesTo(creature);
 
     /// <summary>The number the badge draws: the bank, right now, through the
-    /// same accessor the overhead gauge reads
+    /// arm's one read
     /// (<see cref="SparkGauge.Read"/> -> <see cref="SparkPower.SparksAtPlay"/>).
-    /// The two displays are one read.</summary>
+    /// </summary>
     public static int Read(Creature creature) => SparkGauge.Read(creature);
 
     /// <summary>

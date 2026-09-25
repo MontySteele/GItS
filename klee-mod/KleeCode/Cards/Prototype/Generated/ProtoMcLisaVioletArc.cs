@@ -56,7 +56,7 @@ public sealed class ProtoMcLisaVioletArc : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lisa — Violet Arc"),
-        ("description", "Apply [gold]Electro[/gold] to ALL enemies. Draw 1 card."),
+        ("description", "Apply [gold]Electro[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -83,6 +83,6 @@ public sealed class ProtoMcLisaVioletArc : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

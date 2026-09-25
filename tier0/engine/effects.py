@@ -5716,6 +5716,11 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
     # C# twin: the same note at the head of `ProtoBombPower.SetOffAimed`,
     # `SetOffAll` and `SetOffRandom`, the three card-facing entry points.
     klee_overhaul.note_set_off_card(state, card)
+    # BOOM BADGE (playtest 2026-09-24), spent HERE, once per Set off clause
+    # and beside the note above, so every enemy this clause reaches shares the
+    # one doubling. C# twin: `BoomBadgePower.Spend` at the head of each
+    # card-facing entry point in `ProtoBombPower`.
+    badge = klee_overhaul.take_boom_badge(state, card)
     damage = int(fx.get("damage", 0) or 0)
     spec = fx.get("target", "enemy")
 
@@ -5737,7 +5742,7 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
             if fx.get("aura") == "non_pyro" and (
                     enemy.aura is None or enemy.aura == "pyro"):
                 continue
-            klee_overhaul.set_off(state, enemy, card)
+            klee_overhaul.set_off(state, enemy, card, badge=badge)
             hit(enemy)
         return
 
@@ -5763,7 +5768,16 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
                 return
             bombed = [e for e in living if klee_overhaul.holds_charge(e)]
             enemy = state.rng.choice(bombed or living)
-            klee_overhaul.set_off(state, enemy, card)
+            klee_overhaul.set_off(state, enemy, card, badge=badge)
+            hit(enemy)
+        return
+
+    if fx.get("charge") == "largest":
+        # POCKET MATCH (playtest 2026-09-24): only the single largest charge
+        # on the aimed enemy goes off, before the card's own hit
+        # (`ProtoBombPower.SetOffLargestAimed`).
+        for enemy in _pick_targets(state, spec, allow_dead=True):
+            klee_overhaul.set_off_largest(state, enemy, card, badge=badge)
             hit(enemy)
         return
 
@@ -5773,7 +5787,7 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
         # card's own hit (`ProtoBombPower.SetOffAimedBouncing`).
         for enemy in _pick_targets(state, spec, allow_dead=True):
             overflow: list = []
-            klee_overhaul.set_off(state, enemy, card, overflow)
+            klee_overhaul.set_off(state, enemy, card, overflow, badge=badge)
             klee_overhaul.bounce_overflow(state, enemy, sum(overflow))
             hit(enemy)
         return
@@ -5792,12 +5806,12 @@ def _op_set_off(state: CombatState, fx: dict, card: Card) -> None:
         # and before the damage, and the card's own hit stays on the aimed
         # body. `ProtoBombPower.SetOffAllThenHit`'s twin.
         for enemy in list(state.living_enemies):
-            klee_overhaul.set_off(state, enemy, card)
+            klee_overhaul.set_off(state, enemy, card, badge=badge)
         for enemy in targets:
             hit(enemy)
         return
     for enemy in targets:
-        klee_overhaul.set_off(state, enemy, card)
+        klee_overhaul.set_off(state, enemy, card, badge=badge)
         hit(enemy)
 
 

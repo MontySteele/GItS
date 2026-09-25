@@ -148,7 +148,8 @@ public class KleeR276BatchTests
         // and did not take.
         var card = new ProtoKoWhereDidIPutIt();
         Assert.Equal(CardRarity.Common, card.Rarity);
-        Assert.Equal(1, card.EnergyCost.Canonical);
+        // Klee balance review, pick 4a, 2026-09-25. 1 -> 0 Energy.
+        Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Equal(4m, card.DynamicVars["Scry"].BaseValue);
         Assert.Equal(6m, Upgraded<ProtoKoWhereDidIPutIt>()
                              .DynamicVars["Scry"].BaseValue);

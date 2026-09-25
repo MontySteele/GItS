@@ -268,7 +268,6 @@ MIRRORED: dict[str, object] = {
     "KleeOverhaulLaw.GroundedSpark": C.KLEE_OVERHAUL_GROUNDED_SPARK,
     "KleeOverhaulLaw.SparkSeedFloors": C.KLEE_OVERHAUL_SPARK_SEED_FLOORS,
     # R276, Wait For It...'s printed payout, on the same terms.
-    "WaitForItPower.PayoutHand": C.KLEE_OVERHAUL_WAIT_FOR_IT_CARDS,
     "WaitForItPower.ReactionEnergy": C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY,
     # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, `C.COMPANION_OVERHAUL`).
     # Same terms as the four above and for the same reason: quarantined is not

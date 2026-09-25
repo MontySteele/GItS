@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoBoomBadge : CustomCardModel, ISparkPricedCard
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_boom_badge");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Boom Badge"),
-        ("description", "Your next [gold]Set off[/gold] card this turn is played twice."),
+        ("description", "The next time you [gold]Set off[/gold] this turn, your [gold]Bombs[/gold] deal double damage."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -54,7 +54,7 @@ public sealed class ProtoKoBoomBadge : CustomCardModel, ISparkPricedCard
     // that already prints a price is unaffected by the strict Rare
     // Power, which is why PriceOf returns this number unchanged
     // here (tier0 twin: combat.spark_price, sub-pick (a)).
-    public int PrintedSparkPrice => (IsUpgraded ? 2 : 3);
+    public int PrintedSparkPrice => (IsUpgraded ? 1 : 2);
 
     protected override bool IsPlayable =>
         SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
@@ -74,7 +74,7 @@ public sealed class ProtoKoBoomBadge : CustomCardModel, ISparkPricedCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await SparkPower.Spend(choiceContext, Owner.Creature, (IsUpgraded ? 2 : 3), this);
+        await SparkPower.Spend(choiceContext, Owner.Creature, (IsUpgraded ? 1 : 2), this);
         await PowerCmd.Apply<BoomBadgePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 

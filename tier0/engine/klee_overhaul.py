@@ -431,7 +431,7 @@ def peek_multiplier(state: CombatState) -> int:
 
 def set_off(state: CombatState, enemy: Optional[Enemy],
             card: Optional[Card] = None,
-            overflow: Optional[list] = None) -> int:
+            overflow: Optional[list] = None, badge: int = 1) -> int:
     """RULE 2. Every Bomb on `enemy` goes off, ONE AT A TIME, each a Pyro hit
     for its own size. Returns how many charges went off. `SetOff`'s twin.
 
@@ -457,6 +457,10 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
 
     `overflow` is R276's (Big Bounce): a list each killing explosion appends
     its damage past the kill to. None everywhere else, which is byte-identical.
+
+    `badge` is Boom Badge's factor (`take_boom_badge`), taken once per Set off
+    clause by the caller and handed to every enemy that clause reaches. It
+    MULTIPLIES The Big One's armed multiplier: x4 and x2 meet at x8.
     """
     if enemy is None or not live(state):
         return 0
@@ -465,7 +469,7 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
         return 0
     state.emit("ko_set_off", target=enemy.name, charges=len(taken),
                size=sum(c.size for c in taken))
-    multiplier = take_multiplier(state)
+    multiplier = take_multiplier(state) * int(badge)
     exploded = 0
     for index, charge in enumerate(taken):
         if not enemy.alive:
@@ -697,6 +701,48 @@ def jump_charges(state: CombatState, from_enemy: Optional[Enemy],
               charge.payload_mine_all)
 
 
+def largest_index(enemy: Enemy) -> int:
+    """The index of the single largest charge on this pile, the OLDEST on a
+    tie (placement order, first found), or -1 on an empty pile.
+    `ProtoBombPower.LargestIndex`'s twin."""
+    best = -1
+    for index, charge in enumerate(enemy.ko_charges):
+        if best < 0 or charge.size > enemy.ko_charges[best].size:
+            best = index
+    return best
+
+
+def set_off_largest(state: CombatState, enemy: Optional[Enemy],
+                    card: Optional[Card] = None, badge: int = 1) -> int:
+    """POCKET MATCH (playtest 2026-09-24): "Set off only your largest Bomb on
+    the enemy." ONE charge -- the largest, the oldest on a tie -- leaves the
+    pile and goes off; every other charge stays and keeps growing.
+    `ProtoBombPower.SetOffLargest`'s twin, and `mines_answer_attack`'s shape:
+    a take of part of the pile, then the one `_explode` every rule is priced
+    in, so it pays its Spark, answers Explosive Frags and Second Surprise if
+    it was a Mine, and a kill sends the charges left behind to jump.
+
+    It spends The Big One's multiplier and Boom Badge's factor exactly as
+    `set_off` does, because it IS a Set off. Returns 1 if a charge went off.
+    """
+    if enemy is None or not live(state):
+        return 0
+    index = largest_index(enemy)
+    if index < 0:
+        return 0
+    charge = enemy.ko_charges.pop(index)
+    state.emit("ko_set_off", target=enemy.name, charges=1, size=charge.size)
+    multiplier = take_multiplier(state) * int(badge)
+    exploded = 0
+    if not enemy.alive:
+        jump_charges(state, enemy, [charge])
+    else:
+        _explode(state, enemy, charge, multiplier, card)
+        exploded = 1
+    sweep_jumps(state)
+    return exploded
+
+
 def sweep_jumps(state: CombatState) -> None:
     """RULE 3 for the death this arm did NOT cause: "A partner or a poison
     killed the enemy: all of them jump." `SweepJumps`' twin.
@@ -728,8 +774,13 @@ def sweep_jumps(state: CombatState) -> None:
 # ---------------------------------------------------------------------------
 
 def mines_answer_attack(state: CombatState, enemy: Enemy) -> None:
-    """RULE 6. This enemy's attack is about to land on Klee, so every Mine here
-    goes off first; plain Bombs stay put. `BeforeDamageReceived`'s twin.
+    """RULE 6. This enemy's attack is about to land on a player, so every Mine
+    here goes off first; plain Bombs stay put. `BeforeDamageReceived`'s twin.
+
+    ANY PLAYER, not only the Klee who placed it (the owner, 2026-09-25, "Mines
+    in co-op, pick a"). tier 0 seats one player, so every enemy attack is on
+    her and this twin needed no change for the ruling; the C# dropped its
+    `target != Applier` clause, and the explosion still pays its placer.
 
     THE SITE IS THE ONE THE MOD NAMES. `combat._enemy_turn` already carries a
     pre-hit hook at exactly this moment -- after the hit's number is settled
@@ -1701,8 +1752,8 @@ def aimed_at(state: CombatState, enemy: Optional[Enemy]) -> Iterator[None]:
 #: The expansion's player-side powers, each applied by an ordinary
 #: `apply_power` row (Alice's Detonator by its own install op).
 PLAYDATE = "ko_playdate"                  # next Companion card costs N less
-BOOM_BADGE = "ko_boom_badge"              # next N Set off cards played twice
-WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw 2, +1 Energy
+BOOM_BADGE = "ko_boom_badge"              # next Set off: Bombs deal x2 per copy
+WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw N, +1 Energy
 PARTY_POPPERS = "ko_party_poppers"        # Spark-priced play: Bomb N
 LOOK_OUT = "ko_look_out"                  # a Mine goes off: N Block
 PATIENCE = "ko_patience"                  # quiet turn: largest grows N
@@ -1710,14 +1761,13 @@ FRIENDSHIP_BRACELET = "ko_friendship_bracelet"   # Companion play: grows N
 SECRET_BASE = "ko_secret_base"            # empty board at turn start: Bomb N
 DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
-SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N damage
+SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N to ALL
 SIT_TIGHT = "ko_sit_tight"                # held turn: N Block at turn end
 SECOND_SURPRISE = "ko_second_surprise"    # a Mine goes off: half-size Bomb
 ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Ka-pow!
 ALICES_DETONATOR_PLUS = "ko_alices_detonator_plus"  # ... an upgraded one
 
 #: Wait For It...'s printed payout, per copy. `WaitForItPower.Cards/Energy`.
-WAIT_FOR_IT_CARDS = int(C.KLEE_OVERHAUL_WAIT_FOR_IT_CARDS)
 WAIT_FOR_IT_ENERGY = int(C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY)
 
 #: The one Ka-pow! Alice's Detonator hands over -- the starter's own row.
@@ -1793,21 +1843,36 @@ def spend_playdate(state: CombatState, card: Card) -> None:
         state.emit("ko_playdate_spent", card=card.id)
 
 
-def take_boom_badge(state: CombatState, card: Card) -> int:
-    """Boom Badge: the extra plays this card is owed -- 1 for the next Set off
-    card while a badge is up, spending one badge. `ModifyCardPlayCount` plus
-    the badge's `AfterCardPlayed`."""
-    if not live(state) or not is_set_off_card(card):
-        return 0
-    n = state.player.powers.get(BOOM_BADGE, 0)
+def boom_badge_factor(copies: int) -> int:
+    """What `copies` Boom Badges multiply the next Set off's Bombs by: x2 per
+    copy, 1 with none. `BoomBadgePower.FactorFor`'s twin.
+
+    EVERY COPY DOUBLES THE SAME NEXT SET OFF, Playdate's reading: two badges
+    are two sentences about one Set off, so they stack to x4 there rather than
+    queueing onto the Set off after it."""
+    return 2 ** int(copies) if copies > 0 else 1
+
+
+def take_boom_badge(state: CombatState, card: Optional[Card] = None) -> int:
+    """Boom Badge (playtest 2026-09-24): "The next time you Set off this turn,
+    your Bombs deal double damage." Spend every badge and return the factor
+    this Set off's explosions are multiplied by, 1 when none is up.
+    `BoomBadgePower.Spend`'s twin.
+
+    SPENT BY THE SET OFF CLAUSE, not by one enemy's pile: `_op_set_off` takes
+    it once at its head, so Tinder Toss doubles the Bombs on EVERY enemy and
+    Rapid Fire every roll, and a Perfect Timing replay finds it gone. It
+    MULTIPLIES with The Big One's armed x4 (`set_off`), so the two meet at x8.
+    Taken whether or not the aimed enemy holds a Bomb: the card was the next
+    Set off. A Mine answering an attack is not a Set off and never reads it.
+    """
+    if not live(state):
+        return 1
+    n = state.player.powers.pop(BOOM_BADGE, 0)
     if n <= 0:
-        return 0
-    if n > 1:
-        state.player.powers[BOOM_BADGE] = n - 1
-    else:
-        state.player.powers.pop(BOOM_BADGE, None)
-    state.emit("ko_boom_badge", card=card.id)
-    return 1
+        return 1
+    state.emit("ko_boom_badge", card=card.id if card else None, copies=n)
+    return boom_badge_factor(n)
 
 
 def grow_largest(state: CombatState, amount: int) -> int:
@@ -2132,17 +2197,20 @@ def _after_charge_exploded(state: CombatState, enemy: Enemy,
             dest = state.rng.choice(living)
             state.emit("ko_aftershock", target=dest.name, size=charge.size)
             place(state, dest, charge.size)
+    # Wait For It...: the stack IS the cards drawn (Klee balance review,
+    # pick 4a, 2026-09-25: the upgrade draws 3), and the Energy is one per
+    # payout. `WaitForItPower.AfterChargeExploded`'s twin.
     n = p.powers.pop(WAIT_FOR_IT, 0)
     if n:
-        p.energy += WAIT_FOR_IT_ENERGY * n
-        state.emit("ko_wait_for_it", cards=WAIT_FOR_IT_CARDS * n,
-                   energy=WAIT_FOR_IT_ENERGY * n)
-        state.draw(WAIT_FOR_IT_CARDS * n)
+        p.energy += WAIT_FOR_IT_ENERGY
+        state.emit("ko_wait_for_it", cards=n, energy=WAIT_FOR_IT_ENERGY)
+        state.draw(n)
 
 
 def spark_knight(state: CombatState, landed: int) -> None:
-    """Spark Knight: each Spark that landed is its own hit on a random living
-    enemy. `SparkKnightPower.AfterSparksGained`'s twin.
+    """Spark Knight: each Spark that landed is its own hit on EVERY living
+    enemy (playtest 2026-09-24: "deal 3 damage to ALL enemies", was a random
+    one). `SparkKnightPower.AfterSparksGained`'s twin.
 
     NO ELEMENT (`element=None`, the mod's `ElementalHit.DealUnelemented`): the
     hit applies no aura and consumes none, so it cannot spend the Hydro a
@@ -2158,7 +2226,9 @@ def spark_knight(state: CombatState, landed: int) -> None:
         living = list(state.living_enemies)
         if not living:
             return
-        target = state.rng.choice(living)
-        state.emit("ko_spark_knight", target=target.name, amount=n)
-        effects.deal_damage_to_enemy(state, target, n, element=None,
-                                     source="spark_knight")
+        for target in living:
+            if not target.alive:
+                continue
+            state.emit("ko_spark_knight", target=target.name, amount=n)
+            effects.deal_damage_to_enemy(state, target, n, element=None,
+                                         source="spark_knight")

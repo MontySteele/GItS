@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoPocketMatch : CustomCardModel, IElementalCard, ISetOffCard, ISparkPricedCard
+public sealed class ProtoKoPocketMatch : CustomCardModel, IElementalCard, ISetOffCard
 {
     /// <summary>Sheet: all Klee attacks apply Pyro (catalyst-grade cadence).</summary>
     public Element Element => Element.Pyro;
@@ -41,34 +41,20 @@ public sealed class ProtoKoPocketMatch : CustomCardModel, IElementalCard, ISetOf
         new[] { CardKeyword.Retain, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this), this);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_pocket_match");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pocket Match"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage."),
+        ("description", "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal {Damage:diff()} damage."),
     };
-
-    // The Spark cost line (EB-118): unplayable below the price,
-    // which is how the cost is shown rather than silently failing.
-    // The printed price is declared ONCE here, on ISparkPricedCard,
-    // and the gate reads it back through SparkCost.PriceOf -- the
-    // same sum the Spark cost BADGE renders (PICK 8 option 2), so
-    // the price shown and the price charged cannot drift. A card
-    // that already prints a price is unaffected by the strict Rare
-    // Power, which is why PriceOf returns this number unchanged
-    // here (tier0 twin: combat.spark_price, sub-pick (a)).
-    public int PrintedSparkPrice => 1;
-
-    protected override bool IsPlayable =>
-        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(3m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,9 +66,8 @@ public sealed class ProtoKoPocketMatch : CustomCardModel, IElementalCard, ISetOf
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.SetOffAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
+        await ProtoBombPower.SetOffLargestAimed(choiceContext, cardPlay.Target, Owner.Creature, this, cardPlay, DynamicVars.Damage.BaseValue);
     }
 
     protected override void OnUpgrade()

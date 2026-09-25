@@ -72,9 +72,10 @@ public class KleeOverhaulPoolPassTwoTests
         // would be an infinite Block engine; the Spark price is what makes the
         // second play a decision, and it is spent in `OnPlay` -- which a
         // returned card runs again from the top.
+        // Klee balance review, pick 4a, 2026-09-25: 2 Sparks -> 1.
         var card = new ProtoKoBlastShield();
-        Assert.Equal(2, card.PrintedSparkPrice);
-        Assert.Equal(2, SparkCost.PriceOf(card));
+        Assert.Equal(1, card.PrintedSparkPrice);
+        Assert.Equal(1, SparkCost.PriceOf(card));
 
         var play = Il.Calls(Il.Method("ProtoKoBlastShield", "OnPlay"));
         Assert.Contains(play, c => c.Contains("SparkPower.Spend"));
@@ -170,8 +171,9 @@ public class KleeOverhaulPoolPassTwoTests
         Assert.Contains(tick, c => c.Contains("BlockMark.ClearIfSpent"));
 
         // AND THE BADGE IS THE LIVE NUMBER, not the raw stack (`EB-337`).
+        // Klee balance review, pick 4a, 2026-09-25: no Spark price any more.
         var card = new ProtoKoReturnToSender();
-        Assert.Equal(2, card.PrintedSparkPrice);
+        Assert.False(card is ISparkPricedCard);
         var play = Il.Calls(Il.Method("ProtoKoReturnToSender", "OnPlay"));
         Assert.Contains(play, c => c.Contains("CreatureCmd.GainBlock"));
         Assert.Contains(play, c => c.Contains("PowerCmd.Apply"));
@@ -328,9 +330,10 @@ public class KleeOverhaulPoolPassTwoTests
         Assert.DoesNotContain(play, c => c.Contains("CardSelectCmd"));
 
         var source = Printed("Cards/Prototype/Generated/ProtoKoOnceMore.cs");
-        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 2 : 3)", source);
+        // Klee balance review, pick 4a, 2026-09-25: 3 Sparks -> 2 (1 upgraded).
+        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 1 : 2)", source);
         Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
-                        + "(IsUpgraded ? 2 : 3), this)", source);
+                        + "(IsUpgraded ? 1 : 2), this)", source);
     }
 
     // ---- Row 5, Sparkling Burst: Run Away!'s predicate, paid in Energy ----
@@ -368,7 +371,8 @@ public class KleeOverhaulPoolPassTwoTests
                               k => k == CardKeyword.Exhaust);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
         Assert.Equal(0, CanonicalCost(card));
-        Assert.Equal(3, card.PrintedSparkPrice);
+        // Klee balance review, pick 4a, 2026-09-25: 3 Sparks -> 2.
+        Assert.Equal(2, card.PrintedSparkPrice);
     }
 
     // ---- Row 6, Blazing Delight: the arm's first Energy engine -------------
@@ -419,7 +423,8 @@ public class KleeOverhaulPoolPassTwoTests
         Assert.Equal(CardRarity.Rare, card.Rarity);
         Assert.Equal(CardType.Power, card.Type);
         Assert.Equal(2, CanonicalCost(card));
-        Assert.Equal(5, card.PrintedSparkPrice);
+        // Klee balance review, pick 4a, 2026-09-25: 5 Sparks -> 3.
+        Assert.Equal(3, card.PrintedSparkPrice);
 
         var play = Il.Calls(Il.Method("ProtoKoBlazingDelight", "OnPlay"));
         Assert.Contains(play, c => c.Contains("SparkPower.Spend"));
@@ -440,9 +445,9 @@ public class KleeOverhaulPoolPassTwoTests
         var source = Printed(
             "Cards/Prototype/Generated/ProtoKoBlazingDelight.cs");
         Assert.DoesNotContain("EnergyCost.UpgradeBy", source);
-        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 4 : 5)", source);
+        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 2 : 3)", source);
         Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
-                        + "(IsUpgraded ? 4 : 5), this)", source);
+                        + "(IsUpgraded ? 2 : 3), this)", source);
     }
 
     // ---- The six are offered, and the roster says so ----------------------

@@ -42,7 +42,8 @@ replay below reads POCKET MATCH in its place -- the same shape and the same
 trap: 0 Energy on the wire, 1 Spark on the row, a Set off with a printed hit
 behind it. What is pinned is the RULE ("a Spark price is not Energy 0"), not
 the cut card, and the header above is left as the record of where it was
-found.
+found. It moved again on 2026-09-24, when Pocket Match lost its Spark price:
+TINDER TOSS is the Common Spark-priced Set off Attack now.
 """
 
 from __future__ import annotations
@@ -57,10 +58,11 @@ from understudy import adapter, policy_v1
 #: The three offers, verbatim from the soak's `defect` record `state_dump`.
 #: `EB-749` re-pointed the first offer off the cut Fwoosh! and onto Pocket
 #: Match, which is the same Spark-priced Set off shape at 5 with Retain.
-SPARK_ROW = {"id": "KLEEMOD-PROTO_KO_POCKET_MATCH", "name": "Pocket Match",
+SPARK_ROW = {"id": "KLEEMOD-PROTO_KO_TINDER_TOSS", "name": "Tinder Toss",
              "type": "Attack", "cost": "0", "star_cost": None,
              "rarity": "Common", "is_upgraded": False, "index": 0,
-             "description": "Set off. Deal 5 damage."}
+             "description": "Set off ALL enemies. Deal 3 damage to ALL "
+                            "enemies."}
 RUN_AWAY = {"id": "KLEEMOD-PROTO_KO_RUN_AWAY", "name": "Run Away!",
             "type": "Skill", "cost": "0", "star_cost": None,
             "rarity": "Common", "is_upgraded": False, "index": 1,
@@ -110,7 +112,7 @@ def _select_screen(cards, screen_type, prompt=""):
 # --- 1. THE ROWS RESOLVE, AND A SPARK PRICE IS NOT ENERGY 0 ----------------
 
 def test_every_offer_on_that_screen_resolves_to_its_sheet_row_exactly():
-    for entry, sid in ((SPARK_ROW, "proto_ko_pocket_match"),
+    for entry, sid in ((SPARK_ROW, "proto_ko_tinder_toss"),
                        (RUN_AWAY, "proto_ko_run_away"),
                        (FLAME_DANCE, "proto_ko_flame_dance")):
         card, approx = adapter.resolve_card(entry)
@@ -166,11 +168,11 @@ def test_the_same_screen_twice_is_the_same_action():
 
 def test_read_exactly_the_spark_row_is_not_the_best_card_on_the_screen():
     """Not a taste claim -- a claim about WHICH ROW WAS SCORED. Approximated,
-    Fwoosh! was a free 6-damage Attack and won the screen at 2.8, and Pocket
-    Match below is the same reading. Its real row spends a Spark the deck
+    Fwoosh! was a free 6-damage Attack and won the screen at 2.8, and Tinder
+    Toss below is the same reading. Its real row spends a Spark the deck
     cannot yet make."""
     decision = policy_v1.decide(copy.deepcopy(REWARD))
-    assert "Pocket Match" in decision.rationale
+    assert "Tinder Toss" in decision.rationale
     assert decision.action != {"action": "select_card_reward", "card_index": 0}
 
 
@@ -180,7 +182,7 @@ def test_with_the_surface_unreachable_it_is_the_soaks_own_reading(monkeypatch):
     monkeypatch.setattr(loader, "_prototype_index", lambda: {})
     decision = policy_v1.decide(copy.deepcopy(REWARD))
     assert sorted((decision.notes or {}).get("approximate_offers") or []) == [
-        "Flame Dance", "Pocket Match", "Run Away!"]
+        "Flame Dance", "Run Away!", "Tinder Toss"]
 
 
 # --- 3. KOKOMI'S THREE FORCED DEFAULTS -------------------------------------
