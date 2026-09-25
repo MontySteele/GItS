@@ -6777,13 +6777,15 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Tamakushi Casket": [
             "Your relic. Each debuff you apply is a ",
             " hit on that ", "enemy: it reacts, takes its "],
+        # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
+        # and the page's row opens with its sentence word for word, then
+        # keeps the reward-slot sentence the tip does not carry. Until then
+        # it was `EB-329`'s row with no tooltip to be held in step with.
+        "Companion": ["A card titled with a character's name, a dash, then "
+                      "its ", "own."],
     }
-    # `EB-329`: `Companion` is the one row with NO tooltip to be held in step
-    # with, because the game hangs no tip on the word at all -- which is the
-    # finding. Its own source is pinned one test down.
-    #
-    # `Spotlighted` (2026-09-06) is the SECOND of exactly that kind and is
-    # named for the same reason rather than a new one: five Furina surfaces
+    # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
+    # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces
     # print the word, every one of them says what a Spotlighted card gains,
     # and none says which card is one. Its sentence is read off
     # `SpotlightSystem.IsSpotlighted` -- there is no tip to be in step with,
@@ -6793,14 +6795,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # card and left the mod, and the row stays for the SHIPPED kit (the Stage
     # arm hides it), read off `FurinaResources.AbsorbDamage` and its
     # neighbours rather than off a tip.
-    assert (set(anchors) | {"Companion", "Spotlighted", "Encore"}
+    assert (set(anchors) | {"Spotlighted", "Encore"}
             == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "SpendKey", "FanfareKey", "BowKey",
                 "FrontPerformerKey", "BackPerformerKey",
-                "SwirlKey", "GroundedKey"):
+                "SwirlKey", "GroundedKey", "CompanionKey"):
         assert f"public const string {key}" in src
-    assert "CompanionKey" not in src
     assert "HexereiKey" not in src
     # The text pass (2026-09-25) retired these three keys with their words.
     for key in ("RaiseKey", "RotateKey", "LeadPerformerKey"):

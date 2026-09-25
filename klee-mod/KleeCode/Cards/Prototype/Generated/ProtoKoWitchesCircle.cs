@@ -35,7 +35,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoWitchesCircle : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_witches_circle");
 

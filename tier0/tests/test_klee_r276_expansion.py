@@ -506,20 +506,27 @@ def test_party_poppers_pays_a_bomb_per_spark_priced_play(overhaul):
     assert sizes(enemy) == [3, 3]
 
 
-def test_patience_grows_on_a_turn_with_no_set_off_card_after_the_echo(
-        overhaul):
+def test_patience_grows_on_a_turn_with_no_set_off_card(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.powers[klee_overhaul.PATIENCE] = 4
-    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
     klee_overhaul.place(state, enemy, 5)
     klee_overhaul.turn_end(state)
-    # The echo paid the 5, THEN Patience grew it.
-    assert 200 - enemy.hp == 5
     assert sizes(enemy) == [9]
     state.ko_set_off_cards_this_turn = 1
     klee_overhaul.turn_end(state)
     assert sizes(enemy) == [9]
+
+
+def test_the_echo_left_the_end_of_the_turn(overhaul):
+    """2026-09-25: Sparks 'n' Splash fires at the start of the turn now, so
+    the end of the turn pays nothing even with a Bomb on the board."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.player.powers[klee_overhaul.BOMB_ECHO] = 1
+    klee_overhaul.place(state, enemy, 5)
+    klee_overhaul.turn_end(state)
+    assert enemy.hp == 200
 
 
 # ---------------------------------------------------------------------------

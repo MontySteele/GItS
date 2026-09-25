@@ -54,7 +54,7 @@ public sealed class ProtoKoBottomlessBag : CustomCardModel, ISparkPricedCard
     // that already prints a price is unaffected by the strict Rare
     // Power, which is why PriceOf returns this number unchanged
     // here (tier0 twin: combat.spark_price, sub-pick (a)).
-    public int PrintedSparkPrice => 2;
+    public int PrintedSparkPrice => 1;
 
     protected override bool IsPlayable =>
         SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
@@ -74,7 +74,7 @@ public sealed class ProtoKoBottomlessBag : CustomCardModel, ISparkPricedCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await SparkPower.Spend(choiceContext, Owner.Creature, 2, this);
+        await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 

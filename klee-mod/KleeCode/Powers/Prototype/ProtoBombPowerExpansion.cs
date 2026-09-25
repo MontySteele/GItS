@@ -59,6 +59,17 @@ public sealed partial class ProtoBombPower
     public static int LargestSizeFor(Creature applier) =>
         LargestCharge(applier).Size;
 
+    /// <summary>Sparks 'n' Splash's pick (2026-09-25): her single largest
+    /// Bomb on the living board and the enemy it is on, (null, 0) if she has
+    /// none. <see cref="LargestCharge"/>'s read, so the tie-break is the same
+    /// first-found one every "your largest Bomb" card takes. PURE. Sim twin:
+    /// <c>klee_overhaul.largest_charge</c>.</summary>
+    public static (Creature? Enemy, int Size) LargestBombFor(Creature applier)
+    {
+        var (pile, _, size) = LargestCharge(applier);
+        return pile == null || size <= 0 ? (null, 0) : (pile.Owner, size);
+    }
+
     // ---- the pure mutations (no commands, nothing that can kill) -------
 
     /// <summary>

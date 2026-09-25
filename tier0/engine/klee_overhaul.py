@@ -261,12 +261,9 @@ def total_size(enemy: Enemy) -> int:
 
 
 def largest_size(enemy: Enemy) -> int:
-    """The single largest charge on this pile -- what Sparks 'n' Splash's
-    echo pays here (R250, `klee-overhaul-round-8-2026-09-04.md` sec.6 pick 1
-    default (1)). `total_size`'s twin: the raw SUM every other rule inside the
-    arm is priced in (growth, jumps, Sorry Jean's Block, a Set off) survives
-    beside it untouched -- only the echo's own payout moved off the sum.
-    `LargestPlacedBy`'s twin.
+    """The single largest charge on this pile. `total_size`'s twin: the raw
+    SUM every other rule inside the arm is priced in (growth, jumps, Sorry
+    Jean's Block, a Set off). `LargestPlacedBy`'s twin.
     """
     return max((c.size for c in enemy.ko_charges), default=0)
 
@@ -983,75 +980,68 @@ def turn_start_late(state: CombatState) -> None:
 
 
 def turn_end(state: CombatState) -> None:
-    """The end of Klee's turn: Alice's window closes, then Sparks 'n'
-    Splash's ECHO. `BombEchoPower.BeforeSideTurnEnd`'s twin.
+    """The end of Klee's turn: Alice's window closes, then Patience, Klee! and
+    the one-turn windows (`_turn_end_expansion`).
 
-    THE WINDOW CLOSES FIRST AND UNCONDITIONALLY (R244), ahead of every early
-    return below it: Alice's Introduction Magic promises "this turn", and a
-    promise that expired only on a board that happened to hold an echo would be
-    a different card on two boards. Nothing between here and the enemy's half
-    reads the mark, so the order costs nothing and the guarantee is total.
+    THE WINDOW CLOSES FIRST AND UNCONDITIONALLY (R244): Alice's Introduction
+    Magic promises "this turn", and nothing between here and the enemy's half
+    reads the mark.
 
-    "At the end of your turn, deal Pyro damage to a random enemy equal to its
-    largest Bomb." R250 (2026-09-04), replacing the sum this row paid before:
-    the seats' round 8 found that once the echo lands the sum makes banking
-    always right and every Set off card "deletes my engine" -- the largest
-    single charge keeps hold-or-cash a decision after the Power lands, since a
-    Set off still cashes the WHOLE pile and a reaction still multiplies
-    whichever one hit is dealt.
-
-    Before that, [USER]'s OWN DESIGN, 2026-09-02: "I think auto-detonation on
-    Sparks n' Splash completely bricks the growth build. How about instead 'a
-    random enemy takes damage equal to the amount of Bomb on them'?" The row
-    printed an automatic Set off before that, and the Rare the growth deck most
-    wants was the one card that cashed its pile without being asked.
-
-    IT READS THE PILE AND DOES NOT SPEND IT, which is the whole card, and it is
-    why rule 7 is untouched by it. Nothing is taken, so:
-      * the Bombs stay and keep growing -- the echo pays again next turn, and
-        bigger;
-      * NO SPARK, because rule 4 pays one per EXPLOSION and nothing exploded;
-      * no Mine answers, no explosion bus, and NEITHER of rule 7's counters
-        moves -- the ledger is not touched at all. This is not a Set off.
-
-    PYRO THROUGH THE SHARED HIT FUNNEL, so the echo reacts with an aura exactly
-    as an explosion does and carries her Strength the same way; and NOT an
-    Attack, because no card is being played.
-
-    A RANDOM BOMBED ENEMY, unlike the auto-detonation it replaces: an echo of
-    nothing is not a printed effect, so the roll is over the enemies that
-    actually hold a charge, and a board with none does nothing at all.
-
-    EACH COPY IS ITS OWN HIT (`EB-358`, default applied): a second Sparks 'n'
-    Splash used to badge 2 and pay the pile once. The Power's stack count is
-    how many copies are live, and the badge and the payout now read the same
-    number -- the loop below runs once per stack, each iteration rolling its
-    OWN random target (so two copies can hit the same enemy twice or two
-    different ones) and paying that target's largest Bomb, independently.
+    SPARKS 'N' SPLASH LEFT THIS SITE ON 2026-09-25: at the end of the turn it
+    fired after Klee had set her Bombs off, so it hit for nothing. It fires at
+    the start of her turn now (`bomb_echo`, from `_turn_start_expansion`).
     """
     from tier0.engine import companion_hexerei      # late import: cycle
-    from tier0.engine import effects                # late import: cycle
 
     if not live(state):
         return
     companion_hexerei.roll_hand_marks(state)
     # R276: Patience, Klee!, and the three one-turn windows close.
-    copies = state.player.powers.get(BOMB_ECHO, 0)
-    for _ in range(copies):
-        candidates = [e for e in state.living_enemies if e.ko_charges]
-        if not candidates:
+    _turn_end_expansion(state)
+
+
+def bomb_echo(state: CombatState) -> int:
+    """Sparks 'n' Splash (2026-09-25): "At the start of your turn, your largest
+    Bomb deals its size in Pyro damage without going off."
+    `BombEchoPower.Fire`'s twin. Returns the number of hits.
+
+    AFTER GROWTH: it runs from `_turn_start_expansion`, at the mod's
+    `AfterPlayerTurnStart`, strictly after `turn_start` grew the piles -- and
+    FIRST in that sequencer, before Klee's Secret Base and Dodoco place
+    anything, so it reads the board as the growth left it.
+
+    WHICH BOMB: `largest_charge`, the one reading of "your largest Bomb" every
+    such card shares (the first found on a tie). It hits the enemy it is on.
+
+    IT READS THE PILE AND DOES NOT SPEND IT: the Bomb stays and keeps growing,
+    no Spark is minted (rule 4 pays per explosion), no Mine answers, nothing
+    that reads "a Bomb goes off" fires, and rule 7's counters do not move.
+
+    A BOMB'S OWN DAMAGE TERMS (`powered=False`, the door `_explode` takes):
+    Pyro, the aura, the reaction and the target's Vulnerable, and not Klee's
+    Strength or Weak. Not an Attack, so nothing that keys off one sees it.
+
+    EACH COPY IS ITS OWN HIT (`EB-358`), the largest Bomb re-read per copy;
+    a kill sends that enemy's Bombs jumping before the next copy looks (the
+    mod's death sweep, `KleeOverhaulSweepHooks.AfterDeath`).
+    """
+    from tier0.engine import effects                # late import: cycle
+
+    if not live(state):
+        return 0
+    hits = 0
+    for _ in range(state.player.powers.get(BOMB_ECHO, 0)):
+        target, _index, size = largest_charge(state)
+        if target is None or size <= 0:
             break
-        target = state.rng.choice(candidates)
-        size = largest_size(target)
-        if size <= 0:
-            continue
         state.emit("ko_bomb_echo", target=target.name, amount=size)
         effects.deal_damage_to_enemy(state, target, size, element="pyro",
-                                     source=ECHO_SOURCE)
-    # R276: Patience, Klee!, AFTER the echo -- the mod grows at the strictly
-    # later `AfterSideTurnEnd`, so the echo never pays a Patience growth the
-    # same turn -- and the three one-turn windows close.
-    _turn_end_expansion(state)
+                                     source=ECHO_SOURCE, powered=False)
+        hits += 1
+        sweep_jumps(state)
+        if state.over or not state.player.alive:
+            break
+    return hits
 
 
 # ---------------------------------------------------------------------------
@@ -1228,7 +1218,7 @@ def note_set_off_card(state: CombatState, card: Optional[Card]) -> None:
     played no Set off CARD last turn" and "the last Set off card you played"
     are two readings of ONE act, so they are counted in one place and cannot
     disagree: the Mine declined above is the ruling's first stated exception,
-    and Sparks 'n' Splash -- a Power's end-of-turn hit, which never reaches
+    and Sparks 'n' Splash -- a Power's start-of-turn hit, which never reaches
     `_op_set_off` -- is its second, excepted by construction rather than by a
     clause here. Twin: `KleeOverhaulLedger.NoteSetOffCardPlayed`.
     """
@@ -2105,8 +2095,10 @@ def _turn_start_expansion(state: CombatState) -> None:
 
     p = state.player
     # THE ORDER IS THE MOD'S ONE SEQUENCER (`KleeExpansion
-    # .RunTurnStartPlacements`): Secret Base reads the board BEFORE Dodoco's
-    # Mine lands, so the two Powers cannot race.
+    # .RunTurnStartPlacements`): Sparks 'n' Splash's echo reads the grown
+    # Bombs first (2026-09-25), then Secret Base reads the board BEFORE
+    # Dodoco's Mine lands, so none of the three can race.
+    bomb_echo(state)
     n = p.powers.get(SECRET_BASE, 0)
     if n and not any_bomb_placed(state):
         living = list(state.living_enemies)
@@ -2132,8 +2124,7 @@ def _turn_start_expansion(state: CombatState) -> None:
 
 def _turn_end_expansion(state: CombatState) -> None:
     """Patience, Klee!'s growth, then the three one-turn windows close.
-    Called AFTER Sparks 'n' Splash's echo (`PatienceKleePower` grows at the
-    strictly later `AfterSideTurnEnd`)."""
+    `PatienceKleePower` grows at `AfterSideTurnEnd`."""
     p = state.player
     n = p.powers.get(PATIENCE, 0)
     if n and state.ko_set_off_cards_this_turn == 0:

@@ -38,7 +38,7 @@ public sealed class ProtoKkRally : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForCompanion(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_rally");
 

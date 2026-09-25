@@ -41,7 +41,7 @@ public sealed class ProtoKoTeamEffort : CustomCardModel, IElementalCard, ISetOff
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this);
+        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false), this, true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_team_effort");
 

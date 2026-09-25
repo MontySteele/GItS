@@ -529,6 +529,33 @@ def test_the_klee_tips_and_the_page_say_the_same_three_rules():
         assert gone not in page["Bomb"] + page["Mine"], gone
 
 
+def test_the_companion_tip_and_the_page_open_with_one_sentence():
+    """2026-09-25, the afternoon Klee seats: "Companion is never defined on
+    screen, yet three offered cards trigger on it." The card now carries the
+    tip, and the seat page's row opens with the same sentence word for word,
+    then keeps its reward-slot sentence. The tip names the dash in words and
+    prints no dash character (text-conventions rule 14)."""
+    import sys
+    sys.path.insert(0, str(REPO))
+    from tools import lint_text_conventions as ltc
+    from understudy import blindplay_notes
+    tips = {row.ident: ltc.render(row.raw) for row in ltc.tip_rows()}
+    tip = tips["CompanionKey"]
+    assert tip == blindplay_notes.COMPANION_DEFINITION
+    assert blindplay_notes.ARM_KEYWORDS["Companion"] == (
+        tip + " " + blindplay_notes.COMPANION_SLOT_SENTENCE)
+    assert tip == "A card titled with a character's name, a dash, then its own."
+
+    # And the tip reaches every face that prints the word, on every arm.
+    printed = [path.stem for path in _prototype_files()
+               if "[gold]Companion[/gold]" in path.read_text(encoding="utf-8")]
+    assert {"ProtoKoWitchesCircle", "ProtoKoFriendshipBracelet",
+            "ProtoKoComeBackAndPlay", "ProtoKkRally"} <= set(printed)
+    for stem in printed:
+        text = (PROTOTYPE_DIR / f"{stem}.cs").read_text(encoding="utf-8")
+        assert "ArmKeywordTips.ForCompanion(" in text, stem
+
+
 def test_the_ruled_sentences_are_the_ones_that_ship():
     """The wording pin. Every clause below is quoted from the ruled slice
     packets; `Mend`'s bound is the one `EB-272` names outright."""

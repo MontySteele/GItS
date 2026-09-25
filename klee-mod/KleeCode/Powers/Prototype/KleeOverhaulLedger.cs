@@ -212,11 +212,11 @@ public sealed class KleeOverhaulLedger
 
     /// <summary>
     /// R276, the start-of-turn placements' latch: true the FIRST time it is
-    /// asked in a turn. Klee's Secret Base and Dodoco share one
-    /// <c>AfterPlayerTurnStart</c> broadcast with no guaranteed relative order,
-    /// and Secret Base reads the board Dodoco writes -- so whichever of the two
-    /// is called first runs BOTH, in one fixed order
-    /// (<c>KleeExpansion.RunTurnStartPlacements</c>), and the other finds the
+    /// asked in a turn. Sparks 'n' Splash, Klee's Secret Base and Dodoco share
+    /// one <c>AfterPlayerTurnStart</c> broadcast with no guaranteed relative
+    /// order, and each reads or writes the board the others touch -- so
+    /// whichever is called first runs ALL of them, in one fixed order
+    /// (<c>KleeExpansion.RunTurnStartPlacements</c>), and the others find the
     /// latch taken.
     /// </summary>
     public bool TakeTurnStartPlacements()

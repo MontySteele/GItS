@@ -127,7 +127,7 @@ Every C# call site below is the *shared helper*, not a per-card copy.
 | V5 | Bomb explosion / Set off (overhaul) | `ProtoBombPower.Explode` → `ElementalHit.DealWithoutDealerMods`, `:1463` | `klee_overhaul._explode`, `source="set_off"`, `powered=False`, `klee_overhaul.py:562` |
 | V6 | Mine trigger | `ProtoBombPower.BeforeDamageReceived:1684` → `Explode` | `klee_overhaul.mines_answer_attack:694` → `_explode`; fired from `combat.py:1516` |
 | V7 | the Set-off card's OWN hit | `ProtoBombPower.DealCardDamage`, `:1315` | `_op_set_off` delegates back to `_op_damage`, `effects.py:5665` |
-| V8 | Bomb echo (Sparks 'n' Splash) | `KleeOverhaulPowers.cs:259` → `ElementalHit.Deal` | `klee_overhaul.py:964`, `source="bomb_echo"` |
+| V8 | Bomb echo (Sparks 'n' Splash; start of turn since 2026-09-25) | `BombEchoPower.Fire` → `ElementalHit.DealWithoutDealerMods` | `klee_overhaul.bomb_echo`, `source="bomb_echo"`, `powered=False` |
 | V9 | Planned hit / Plan carry-out | `KokomiPlan.Hit` → `ElementalHit.Deal(..., powered: false)`, `KokomiPlan.cs:2477` | `kokomi_plan._hit`, `source="plan"`, `powered=False`, `kokomi_plan.py:1494` |
 | V10 | Plan debuff | `KokomiPlan.Debuff<T>` → `PowerCmd.Apply(applier: kokomi, cardSource: null)`, `:2497` | `kokomi_plan._debuff` → `powers.apply_power(applier=player)`, `:1499` |
 | V11 | Tamakushi Casket strike (relic) | `TamakushiCasket.Strike` → `ElementalHit.Deal`, `:190` | `kokomi_plan.casket_strike`, `source="casket"`, `powered=False`, `:1749` |

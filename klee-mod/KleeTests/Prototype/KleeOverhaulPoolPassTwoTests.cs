@@ -230,7 +230,9 @@ public class KleeOverhaulPoolPassTwoTests
         var card = new ProtoKoBottomlessBag();
 
         Assert.Equal(CardRarity.Common, card.Rarity);
-        Assert.Equal(2, card.PrintedSparkPrice);
+        // 2026-09-25 afternoon seats: the price went 2 Sparks -> 1 (the Codex
+        // seat held it dead in two opening hands at 1 Spark).
+        Assert.Equal(1, card.PrintedSparkPrice);
         Assert.Equal("Draw {Cards:diff()} card{Cards:plural:|s}.", Face(card));
         Assert.Equal(2m, Vars(card).Single().BaseValue);
 

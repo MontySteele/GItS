@@ -38,7 +38,7 @@ public sealed class ProtoKkTheGeneralsBanner : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForCompanion(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_the_generals_banner");
 

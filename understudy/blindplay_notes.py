@@ -1303,6 +1303,11 @@ MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
 COMPANION_SLOT_SENTENCE = (
     "About one card reward in twenty offers a fourth, Companion, choice.")
 
+#: 2026-09-25. What a Companion IS, word for word the in-game tip
+#: (`ArmKeywordTips.ForCompanion`).
+COMPANION_DEFINITION = ("A card titled with a character's name, a dash, then "
+                        "its own.")
+
 #: `EB-744`. WHAT AN ACT IS, in one sentence, shared by the two seat rows.
 #:
 #: Rule 10: each performer performs a FLAT act at the end of her turn, from any
@@ -1542,14 +1547,16 @@ ARM_KEYWORDS: dict[str, str] = {
     "Encore": ("After Block it absorbs damage before HP. One pool, as each "
                "lands: a card pays to resolve, a member spends 1 to perform "
                "or acts at 3/4."),
-    # `EB-329`. THE ONE WORD IN THIS TABLE THE GAME DEFINES NOWHERE, and that
-    # is the finding rather than an oversight here: two cards price themselves
-    # on it -- Chain of Command counts the Companion cards you played last
-    # turn, The General's Banner triggers on one -- and the round-5 act-1 seat
-    # met both, one on a reward and one on a shelf at 76 gold, across
-    # seventeen floors on which "no screen defines" the term. So this row has
-    # no `ArmKeywordTips` twin to be held in step with, and it is written
-    # instead out of the two things the game does print:
+    # `EB-329`. THE WORD THE GAME DEFINED NOWHERE until 2026-09-25: two cards
+    # price themselves on it -- Chain of Command counts the Companion cards you
+    # played last turn, The General's Banner triggers on one -- and the
+    # round-5 act-1 seat met both across seventeen floors on which "no screen
+    # defines" the term. SINCE 2026-09-25 IT HAS A TWIN: the afternoon Klee
+    # seats met the same gap on the card, and `ArmKeywordTips.ForCompanion`
+    # now carries this row's FIRST SENTENCE word for word
+    # (`COMPANION_DEFINITION`; `tier0/tests/test_arm_keyword_tips.py` holds
+    # the two in step). The row is written out of the two things the game
+    # prints:
     #
     #   the TITLE. A companion row is "<Character> — <Card>"
     #     (`docs/<nation>-companions.yaml`, and `KokomiPlan.Label` splits a
@@ -1582,8 +1589,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # meets on a reward screen, which is where the seat needed them.
     # `EB-744`, second half: the fourth slot is a ROLL and the row read as a
     # promise. See `COMPANION_SLOT_SENTENCE`.
-    "Companion": ("A card titled with a character's name, a dash, then its "
-                  "own. " + COMPANION_SLOT_SENTENCE),
+    "Companion": (COMPANION_DEFINITION + " " + COMPANION_SLOT_SENTENCE),
 }
 
 # `EB-460`. THE QUALIFIER WAS NOT ENOUGH, AND THE ROW SAID SO ITSELF.
