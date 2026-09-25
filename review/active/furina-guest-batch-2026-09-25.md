@@ -1,97 +1,121 @@
-Status: PAPER, open picks at the end. Ruled so far: the guests are Furina's own cards, separate from the Companion pool.
+Status: PAPER, draft 2, open picks at the end. Ruled so far: guests are Furina's own cards, separate from the Companion pool.
 
-# Furina: the Guest Cast batch (paper, 2026-09-25)
+# Furina: the Guest Cast batch (paper, 2026-09-25, draft 2)
 
-**What this is.** This is the first batch of the Stage's pool expansion. Fontaine characters step onto the Stage as performers.
+**What this is.** The first batch of the Stage's pool expansion: Fontaine characters step onto the Stage as performers.
 
-**Where it comes from.** [USER]: "my vision on Furina is to move away from merely summoning her Hydro summons and allow for character-effect cards to reach the Stage as well … you could play a 'Neuvillette' card and Neuvillette would actually be summoned to the stage, with some stronger effects than the normal minions."
+**Where it comes from.** [USER]: "my vision on Furina is to move away from merely summoning her Hydro summons and allow for character-effect cards to reach the Stage as well."
 
-**What it builds on.** It rests on the draft-3 rules (brief `furina-stage-brief-2026-09-08.md`, rules 9 to 12):
-- the Bow is the performer's act, once more;
-- no act applies Hydro;
-- the applause fades.
+**What it builds on.** The draft-3 rules in `furina-stage-brief-2026-09-08.md`, now on this branch:
+- rule 9: the Bow is the act, once more;
+- rule 10: no act applies Hydro;
+- rule 12: performers behind the front lose half their Fanfare above 5 at the end of the turn.
 
-It waits for the seat round on those rules before it is built.
+**What changed in draft 2.** It answers [USER]'s notes and GPT's read of draft 1:
+- the Bow promise;
+- the payment order on replacement;
+- repeated acts;
+- a Fanfare-hungry stars against Fanfare-neutral support split;
+- guests that do more than "5 damage of X";
+- a visible forecast;
+- the LAW question on elements;
+- an outline of the supporting pool.
 
-## How [USER] framed the kit
+## The kit's shape
 
-"Similarly to Defect, the most common thrust of a run might generally revolve around what the Stage is doing, with additional paths for Furina-focused gameplay … if you happen to draw into them."
+[USER]: "Similarly to Defect, the most common thrust of a run might generally revolve around what the Stage is doing, with additional paths for Furina-focused gameplay … if you happen to draw into them."
 
-Guests are the Stage's power path. The Salon trio (Usher, Chevalmarin, Crabaletta) are the Stage's floor.
+- Guests are the Stage's power path.
+- The Salon trio (Usher, Chevalmarin, Crabaletta) is the floor.
+- Furina's own paths (below) are the side routes, as Claw and status decks are for Defect.
 
-## The frame: seven rules
+## The frame
 
-1. **A guest card** is a Furina Skill titled with the guest's name alone, such as "Neuvillette". A Companion card's title is a name, a dash, then its own. So the two read apart on sight, and the Companion tip already says so.
-2. **Playing it summons the guest to the back-most empty seat,** holding the Fanfare the card prints. On a full stage it is a recast (rule 3): the front performer Bows and leaves, and the guest arrives at the back holding that performer's Fanfare. This recast is where the carry-over ruled this morning pays off. Your shield becomes your star's fuel.
-3. **One guest at a time.** A second guest replaces the first. The first Bows and leaves, and the newcomer takes its seat and its Fanfare. The trio fill the other seats.
-4. **A guest is a performer in every other way.** Fanfare is its health. It takes hits at the front and fades behind it. It Bows (acts once more) when it leaves. Full House, Ensemble Piece and the rest count it.
-5. **Each guest's act says who pays.** [USER]: "We could also let different Guests pay in different ways … a big DPS card only drains themself, one drains a trickle from all members, Healers actually restore the member behind them." There are five ways to pay:
+1. **A guest card** is a Furina Skill titled with the guest's name alone. Its face says **Summon**: "Summon Neuvillette with 6 Fanfare." A Companion card is titled "name, a dash, then its own", so the two read apart.
+2. **It summons to the back-most empty seat.** On a full stage it is a recast: the front performer Bows, and the guest arrives at the back holding that performer's Fanfare.
+3. **Guests are performers in every other way.** A guest's Fanfare is its health. It takes hits in front, fades behind the front, and counts for Full House and the rest.
+4. **Every act pays.** A repeated act (Full House, Tutti!, Bis!) pays again. So Full House makes Neuvillette burn out twice as fast for the same total output, and Tutti! taxes the cast through Clorinde a second time. That is a tempo choice, and it is meant.
+5. **The Bow is free.** A guest's Bow is its act without the payment. For a guest with a Spend mode, the Bow gets the paid version free. The promise "acts one last time" therefore always delivers, and burning a guest out ends in a finale.
+   - This settles the replacement order: the leaver's Bow costs nothing, so the newcomer inherits all of the leaver's remaining Fanfare. The Bow happens first, then the arrival.
+6. **A guest that reads something resets it when it acts.** Wriothesley reads the Fanfare he lost since his last act, so a repeated act reads 0 and Full House does not double him. His Bow on a hit reads the hit that took him down.
+7. **You can see the end of the turn before you end it.** In game and on the seat page, the Stage strip shows each performer's bar after the acts, the payments and the fade. The enemy's intent shows how much reaches Furina.
+   - Both seat rounds today misjudged the damage that reached her, and guests add two more moving parts.
+   - This ships with the batch, not after it. GPT: "A report helps the designer; a visible forecast helps the player."
 
-   | Way | Who pays | Guests |
-   |---|---|---|
-   | Self | the guest's own Fanfare; it burns out | Neuvillette |
-   | Bank | an ordinary Spend from the back performer | Navia, Chevreuse |
-   | Tithe | 1 from each other performer | Clorinde |
-   | Wound | nothing; the act reads the Fanfare it lost to hits | Wriothesley |
-   | Gift | it gives its own Fanfare away | Sigewinne, Charlotte |
+## Two kinds of guest
 
-6. **A guest pays at the end of the turn if it can, and never asks.** Guests act before the fade, so a guest is the natural answer to a fat bank.
-7. **Guests bring the elements.** Since draft 3 the trio apply none, so reactions come from guests and from Furina's cards.
+[USER]: "make the premium 5 star guest cards relatively Fanfare-hungry but with powerful outputs … a natural challenge between 'keep up your Fanfare generation to make sure they stay fed' vs 'do I draft somewhat-weaker Guests which might be Fanfare-neutral or positive?'"
 
-## The first seven guests (opening numbers, for seats and the sim)
+- **Stars (Rare)** tax Fanfare for high-impact acts.
+- **Supports (Uncommon)** arrive with plenty of Fanfare, or make it, and do something other than damage.
 
-| Guest | Rarity, cost | Arrives with | Act (end of your turn) | Pays by |
-|---|---|---|---|---|
-| **Neuvillette** (Hydro) | Rare, 2 | 6 | Pay 3 of his Fanfare: deal 8 [gold]Hydro[/gold] damage to ALL enemies. | Self |
-| **Clorinde** (Electro) | Rare, 2 | 4 | Take 1 Fanfare from each other performer. Deal 4 [gold]Electro[/gold] damage to a random enemy for each point taken. | Tithe |
-| **Wriothesley** (Cryo) | Rare, 1 | 6 | Deal [gold]Cryo[/gold] damage to a random enemy equal to twice the Fanfare he lost to hits since your last turn. | Wound |
-| **Navia** (Geo) | Uncommon, 1 | 4 | Deal 5 [gold]Geo[/gold] damage to a random enemy. [gold]Spend[/gold] 3: deal 14 instead. | Bank |
-| **Sigewinne** (Hydro) | Uncommon, 1 | 6 | Give 3 of her Fanfare to your front performer. | Gift |
-| **Charlotte** (Cryo) | Uncommon, 1 | 3 | Each other performer gains 1 Fanfare. | Gift, free |
-| **Chevreuse** (Pyro) | Uncommon, 1 | 3 | [gold]Spend[/gold] 2: deal 5 [gold]Pyro[/gold] damage to ALL enemies. | Bank |
+On the Defect comparison [USER] drew (Lightning, Frost, Glass, Dark, Plasma), each guest has a different job, not a different element on the same hit:
 
-**What each one is for:**
-- **Neuvillette is the burst star.** He arrives at 6: two acts, then his Bow. A recast of a thick front performer gives him more. His rate (8 to every enemy per 3 Fanfare) is above a Spend card's 2 per Fanfare because he pays with his own body.
-- **Clorinde drains the cast.** She costs the shield 1 a turn, which its own regain of 1 covers, and the bank 1. She fits a deck that Refills.
-- **Wriothesley wants the front.** He turns the Necrobinder problem inside out: the more the shield is hit, the harder he answers. Behind the front he does nothing, so Step Forward and Scene Change decide his turn.
-- **Navia is the plain Spend guest.** Her Geo on an aura Crystallizes, which is Block.
-- **Sigewinne heals the shield by draining herself.** This is the Fontaine healer's own shape (her bubbles cost her HP). It is also the Block-poor answer the Osty problem needs.
-- **Charlotte is the small, free healer.**
-- **Chevreuse is the second element for reactions.** Her Pyro with Clorinde's Electro Overloads, and with the Hydro cards it Vaporizes.
+| Guest | Kind | Arrives with | Act (end of your turn) | Pays by | Defect's cousin |
+|---|---|---|---|---|---|
+| **Neuvillette** (Hydro) | Star | 6 | Pay 3 of his Fanfare: deal 8 [gold]Hydro[/gold] damage to ALL enemies. | himself; he burns out | Glass |
+| **Clorinde** (Electro) | Star | 4 | Take 1 Fanfare from each other performer: deal 8 [gold]Electro[/gold] damage to a random enemy. | the rest of the cast | Lightning, taxed |
+| **Navia** (Geo) | Star | 4 | Deal [gold]Geo[/gold] damage to a random enemy equal to her Fanfare. | nothing; she wants feeding, and behind the front she fades | Dark |
+| **Chevreuse** (Pyro) | Support | 4 | [gold]Spend[/gold] 2: next turn, gain 1 [gold]Energy[/gold]. | the back performer | Plasma |
+| **Wriothesley** (Cryo) | Support | 8 | Deal [gold]Cryo[/gold] damage to a random enemy equal to twice the Fanfare he lost since his last act. | nothing; he wants the front | none: retaliation |
+| **Sigewinne** (Hydro) | Support | 8 | Give 3 of her Fanfare to your front performer (or to the one behind her if she is the front). | herself | Frost, for the shield |
+| **Charlotte** (Cryo) | Support | 4 | Each other performer gains 1 Fanfare. | free | Frost, spread thin |
+| **Lynette** (Anemo) | Support | 8 | Swirl a random enemy: its aura spreads to ALL enemies. | free | none: a reaction enabler |
 
-**Every guest's Bow is its act, once more.** A self-paying guest spent to exactly 0 therefore acts one last time as it leaves. When its Bow cannot pay, the act does nothing.
+- **Navia's fade tension.** Her damage grows with her bar, and behind the front the fade caps her near 5. So she wants to be the shield, or to be fed every turn.
+- **Wriothesley and Sigewinne answer the Necrobinder problem as a pair.** GPT: "Wriothesley makes taking a hit productive … Sigewinne moves existing Fanfare into the shield." Wriothesley is Uncommon so ordinary drafts meet him, rather than Rare as in draft 1.
+- **Lynette** is [USER]'s example of a guest who "arrives with extra Fanfare on deck".
 
-## Tuning: three dials, several rounds
+## The supporting pool: where the depth lives
 
-[USER] expects "a few rounds of tuning" between how much Fanfare drains, how much is restored and how much is spent. The Stage report (`tools/furina_stage_report.py`) should print these per fight before the first guest round:
-- the bank's size at the end of each turn;
-- Fanfare lost to the fade;
-- Fanfare paid by Spend cards and by guests;
-- Fanfare restored.
+[USER]: "we need to make sure that the supporting pool has enough depth that the overall effect is not just 'do 5 damage of x element.'"
 
-The dials are:
-- the fade line (5);
-- each guest's price and arrival number;
-- the Refill amount (5).
+About 30 cards, in seven families. This batch names the families; their cards follow the seat round on the guests.
 
-## Not in this batch
+1. **Arranging the stage.** Swap two seats, bring a guest forward, send the shield back. Which seat a guest stands in now decides who pays, who fades and who is hit.
+2. **Feeding.** Refills that name a guest, commons that leave a net gain of Fanfare, "each guest gains".
+3. **Bending the fade.** "This turn, nothing fades." "Fanfare that fades goes to your front performer."
+4. **Cashing out.** Expend cards that cash any seat, not only the back. A card that calls a guest's Bow without it leaving.
+5. **Encores, now priced.** Bis!, Tutti! and Full House: with rule 4 a repeat is a tempo decision, not free damage.
+6. **Hydro and reactions.** Furina's own Hydro cards and the payoffs that read an aura (Crashing Waves).
+7. **Furina's side paths,** found when drawn into:
+   - **the Spend deck:** attacks that grow with what they Spend;
+   - **the Solo:** no one on stage, grown from Improvised Number and Between Acts;
+   - **Arkhe:** Ousia and Pneuma.
 
-The rest of the expansion toward 78 cards, about 30 Stage-management commons and uncommons, is written after the seats read the guests. Cards that play with the fade, move Fanfare between seats or read a guest are wanted, but only once there is play to fit them to.
+## The LAW question
+
+`LAW.md`, elements: "No character card applies an off-element aura; off-element access comes only from companions or a co-op partner." Seven of the eight guests are off-element for Furina. The amendment would read: "…from companions, a co-op partner, or a guest on Furina's stage, which pays for it with a seat and Fanfare." GPT: "Stage setup can provide a meaningful price … but it changes the role of the Companion pool." That amendment is [USER]'s (pick 5).
+
+## Measuring it
+
+The Stage report (`tools/furina_stage_report.py`, which has the economy columns since #673) adds three measures before the first guest round. GPT: "A healthy-looking bank can coexist with an underfunded shield or a guest that rarely performs."
+- how often each guest could not pay for its act;
+- how many turns each guest lasted;
+- damage that reached Furina, per fight.
+
+The three dials [USER] expects to tune over a few rounds:
+- drain: the fade line, and the stars' prices;
+- restore: Refill, and the supports' gifts;
+- spend: the Spend cards.
 
 ## Picks for [USER]
 
-1. **Guest card titles.**
-   - (a) *Default:* the bare name ("Neuvillette").
-   - (b) A prefix ("Guest Star: Neuvillette").
-2. **Where Sigewinne's Fanfare goes.**
-   - (a) *Default:* the front performer, the one taking hits.
-   - (b) The performer behind her, as you first put it. That refills the bank rather than the shield.
-3. **A guest's own Companion cards.** Neuvillette, Navia, Clorinde, Charlotte and Chevreuse already have "Name — ability" Companion cards in the shared pool.
-   - (a) *Default:* no interaction in this batch, to keep it readable.
-   - (b) A Companion card of the guest on stage gets a bonus, for example "costs 0".
+1. **Titles.**
+   - (a) *Default:* the bare name, with "Summon" on the face.
+   - (b) A prefix, "Guest Star: Neuvillette".
+2. **Sigewinne.**
+   - (a) *Default:* she gives to the front performer, or to the one behind her if she is the front.
+   - (b) She gives to the performer behind her, always.
+3. **A guest's own Companion cards.**
+   - (a) *Default:* no interaction at first.
+   - (b) They get a bonus while that guest is on stage.
 4. **How many guests at once.**
-   - (a) *Default:* one.
-   - (b) Two, still one per character.
-5. **The seven.**
-   - (a) *Default:* build these seven as written, after the draft-3 seat round.
-   - (b) Change the list, by name.
+   - (b) *Default, changed from draft 1:* two. Your stars-and-supports split is a pairing: Charlotte feeding Neuvillette, Sigewinne keeping Wriothesley standing. GPT leaned the same way.
+   - (a) One star at a time.
+5. **The LAW amendment above, so guests carry their elements.**
+   - (a) *Default:* amend.
+   - (b) Guests act without elements, and off-element access stays with the Companion cards.
+6. **The roster.**
+   - (a) *Default:* build these eight on frame rules 1 to 7, with the forecast, after the draft-3 seat round.
+   - (b) Change the list.
