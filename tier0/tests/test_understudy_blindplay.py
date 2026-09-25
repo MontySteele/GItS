@@ -6252,21 +6252,53 @@ def test_an_enemy_keeps_its_number_when_a_body_leaves():
     assert again["post"]["target"] == "SEA_SLUG_0"
 
 
-def test_a_pair_that_becomes_one_keeps_the_number_it_had():
-    """Down to a single survivor the number is KEPT, not withdrawn.
+def test_a_pair_that_becomes_one_prints_bare_and_the_old_handle_still_works():
+    """Down to a single survivor the number is WITHDRAWN, and the handle the
+    tester was using still resolves.
 
-    The stale-number retry above would have found it either way; this is the
-    difference between a tester's handle staying good and a tester's handle
-    working by apology.
+    2026-09-25 (opus-furina-l2b, (c) 5) reversed this pin. It used to keep
+    `Sea Slug (2)` on a lone survivor, which is how a lone Gas Bomb printed as
+    `Gas Bomb (2)` after its twin died -- against the seat brief and the
+    prompt, which both promise "a name that appears only once is never
+    numbered". The stale-number retry keeps the old handle good: with one copy
+    left, `(2)` can only mean that one.
     """
     blindplay.forget_fight()
     blindplay.observe(slug_fight([1, 2]))
     page = blindplay.observe(slug_fight([2]))
-    assert "Sea Slug (2)" in page
+    assert "Sea Slug (2)" not in page and "Sea Slug (1)" not in page
+    assert "Sea Slug" in page
     res = blindplay.act(slug_fight([2]),
                         'play "Pearl Barrage" on "Sea Slug (2)"')
     assert res["ok"], res["refusal"]
     assert res["post"]["target"] == "SEA_SLUG_0"
+    bare = blindplay.act(slug_fight([2]), 'play "Pearl Barrage" on "Sea Slug"')
+    assert bare["ok"], bare["refusal"]
+    assert bare["post"]["target"] == "SEA_SLUG_0"
+
+
+def test_a_lone_summon_after_its_twin_died_is_not_numbered():
+    """THE FIND (opus-furina-l2b, fight 4 turn 5): Living Fog summoned a Gas
+    Bomb, the bomb died and left the feed, the Fog summoned another -- and the
+    lone second bomb printed as `Gas Bomb (2)`. Seen to FAIL before the fix:
+    the name stayed numbered for the fight."""
+    blindplay.forget_fight()
+    blindplay.observe(slug_fight([1]))
+    blindplay.observe(slug_fight([]))
+    page = blindplay.observe(slug_fight([2]))
+    assert "Sea Slug (2)" not in page and "Sea Slug (1)" not in page
+
+
+def test_two_survivors_of_three_keep_their_numbers():
+    """The ordinal is still minted once for the fight (`EB-271`): only the
+    SUFFIX waits for a second copy on the screen, so two survivors never
+    renumber under the reader."""
+    blindplay.forget_fight()
+    blindplay.observe(slug_fight([1, 2, 3]))
+    page = blindplay.observe(slug_fight([2, 3]))
+    assert "Sea Slug (2)" in page and "Sea Slug (3)" in page
+    page = blindplay.observe(slug_fight([3]))
+    assert "Sea Slug (3)" not in page and "Sea Slug" in page
 
 
 def test_a_summoned_enemy_takes_the_next_number():
@@ -10081,12 +10113,13 @@ def test_a_body_whose_hp_rose_mints_a_new_letter_and_says_it_was_replaced():
     blindplay.observe(_fogmog_board(2, round_=2))
     _new_process()
     page = blindplay.observe(_fogmog_board(6, round_=3))
-    # The name is numbered because this fight has now seen two bodies wearing
-    # it, which is `_enemy_names`' own rule and the honest reading: the dead
-    # one and the replacement are two creatures.
-    assert "- **Eye with Teeth (2)** [C] — HP 6/6" in page
+    # The LETTER says the dead one and the replacement are two creatures.
+    # The name carries no number: 2026-09-25 (opus-furina-l2b, (c) 5), a name
+    # printed once on the screen is never numbered -- this is the lone
+    # `Gas Bomb (2)` the seat read, one enemy over.
+    assert "- **Eye with Teeth** [C] — HP 6/6" in page
     assert "It took the place of [B], which is dead" in page
-    assert "Teeth (2)** [B]" not in page
+    assert "Teeth** [B]" not in page and "Teeth (2)" not in page
 
 
 def test_the_replacement_line_survives_into_the_next_process():
@@ -10099,7 +10132,7 @@ def test_the_replacement_line_survives_into_the_next_process():
     blindplay.observe(_fogmog_board(6, round_=3))
     _new_process()
     page = blindplay.observe(_fogmog_board(4, round_=4))
-    assert "- **Eye with Teeth (2)** [C] — HP 4/6" in page
+    assert "- **Eye with Teeth** [C] — HP 4/6" in page
     assert "It took the place of [B]" in page
 
 
@@ -11361,30 +11394,30 @@ def test_a_one_use_rider_that_is_not_a_price_says_it_pays_for_one_card():
     assert "pays for ONE card" not in blindplay.observe(wide)
 
 
-def test_the_last_copy_of_a_pair_keeps_the_number_it_was_given():
-    """`EB-427`, the two-copy case the row asks for by name. Three copies and a
-    death is pinned above; a PAIR and a death is the other half of the rule --
-    "a name that has ever repeated in this fight stays numbered even when one
-    body is left", because the number is the handle the seat has been aiming
-    with and taking it back is the stale-number refusal the row is about."""
+def test_the_last_copy_of_a_pair_prints_bare_and_keeps_its_handles():
+    """`EB-427`, the two-copy case, under the 2026-09-25 rule (opus-furina-l2b,
+    (c) 5): a name that appears once on the screen is never numbered, which
+    is what the seat brief and the prompt promise. The pin used to keep
+    `Nibbit (2)` on the lone survivor; that is how a lone `Gas Bomb (2)`
+    reached a seat. What the old rule protected -- the handle the seat had
+    been aiming with -- still resolves, through `EB-271`'s stale-number rule,
+    and the receipt names the body the way the page now prints it."""
     blindplay.forget_fight()
     state = two_body_state(morning_of())
     first = blindplay.render(blindplay.observation(state))
     assert "**Nibbit (1)**" in first and "**Nibbit (2)**" in first
-    # The FIRST body dies and leaves the feed; the survivor is still (2).
+    # The FIRST body dies and leaves the feed; the survivor prints bare.
     alone = copy.deepcopy(state)
     alone["battle"]["enemies"] = [alone["battle"]["enemies"][1]]
     after = blindplay.render(blindplay.observation(alone))
-    assert "**Nibbit (2)**" in after
-    assert "**Nibbit (1)**" not in after and "- **Nibbit**" not in after
-    # And the grammar aims by the number the page just printed. A tester who
-    # types the DEAD body's number falls through `EB-271`'s stale-number rule
-    # to the one body left, and the receipt says which body that was -- so the
-    # number on the page and the number in the answer cannot disagree.
+    assert "**Nibbit (2)**" not in after and "**Nibbit (1)**" not in after
+    assert "**Nibbit**" in after
+    # Both old handles still land on the one body left, and the receipt says
+    # which body that was in the page's own words.
     aimed = blindplay.act(alone, 'play "Pearl Barrage" on "Nibbit (2)"')
-    assert aimed["ok"] and aimed["printed"]["target"] == "Nibbit (2)"
+    assert aimed["ok"] and aimed["printed"]["target"] == "Nibbit"
     stale = blindplay.act(alone, 'play "Pearl Barrage" on "Nibbit (1)"')
-    assert stale["ok"] and stale["printed"]["target"] == "Nibbit (2)"
+    assert stale["ok"] and stale["printed"]["target"] == "Nibbit"
 
 
 def test_the_map_deck_holds_neither_the_dazed_nor_the_played_power():

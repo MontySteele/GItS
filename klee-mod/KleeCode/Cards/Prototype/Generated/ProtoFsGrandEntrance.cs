@@ -133,9 +133,14 @@ public sealed class ProtoFsGrandEntranceModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Deal 10 damage"),
+        ("title", "Deal damage"),
         ("description", "Deal {PlainDamage:diff()} damage"),
     };
+
+    public ProtoFsGrandEntranceModeA()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -167,9 +172,14 @@ public sealed class ProtoFsGrandEntranceModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 5: deal 20 instead"),
+        ("title", "Spend 5"),
         ("description", "[gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead"),
     };
+
+    public ProtoFsGrandEntranceModeB()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -9044,6 +9044,41 @@ def modal_option_faces(card: dict, modes: list) -> list[str] | None:
     return parts
 
 
+#: One `{Var...}` token of a face, the live number the board folds.
+_FACE_VAR_TOKEN = re.compile(r"\{[^{}]*\}")
+
+
+def stage_mode_title(card: dict, index: int,
+                     faces: list[str] | None) -> str | None:
+    """A Stage Spend card's mode TITLE, with no number the board can fold.
+
+    2026-09-25 (opus-furina-l2b, (c) 2). The option's TITLE was the sheet's
+    label, so under Weak the chooser read "Deal 7 damage" over a body reading
+    "Deal 5 damage": the body folds (round three's fix) and a title cannot,
+    because a card title carries no vars. So the title drops the number:
+
+      * a mode behind a rule gate (the Stage's Spend) is titled by its PRICE,
+        the part of the label before the colon ("Spend 3") -- the one number
+        on it that nothing on the board moves;
+      * every other mode is its own face with the var tokens taken out
+        ("Deal damage", "Gain Block"), which is the live body's wording
+        minus the figure the body prints under it.
+
+    None for every card with no rule gate, which keeps its authored label
+    and so its bytes: the row was filed against the Spend cards.
+    """
+    rules = mode_requirements(card)
+    eff = modal_effect(card)
+    if rules is None or eff is None or index >= len(eff["modes"]):
+        return None
+    label = strip_markup(str(eff["modes"][index].get("label") or ""))
+    if index < len(rules) and rules[index] is not None:
+        return label.split(":", 1)[0].strip() or label
+    source = (_FACE_VAR_TOKEN.sub("", faces[index]) if faces
+              else re.sub(r"\b\d+\b", "", label))
+    return re.sub(r"\s+", " ", strip_markup(source)).strip() or label
+
+
 def modal_effect(card: dict) -> dict | None:
     """The card's `choose_one` effect, or None. One per card by construction."""
     return next((eff for eff in card.get("effects", [])
@@ -14028,9 +14063,19 @@ def emit(
             # sheet's own spelling. Invisible to a seat, because the blind
             # page strips tags of its own, which is why three seat rounds
             # walked past it.
-            label = cs_escape(strip_markup(mode["label"]))
+            label = cs_escape(stage_mode_title(card, i, option_faces)
+                              or strip_markup(mode["label"]))
             face = cs_escape(option_faces[i] if option_faces
                              else mode["label"])
+            # 2026-09-25 (opus-furina-l2b, (c) 2): a Stage Spend card's
+            # options wear the PARENT's type and no energy orb -- see
+            # `ModalOptionCard(CardType)`. Every other modal card keeps the
+            # parameterless base and its bytes.
+            option_ctor = (
+                f"\n\n    public {modal_option_class(card, i)}()\n"
+                f"        : base({TYPE_CS[card['type']]})\n"
+                "    {\n    }"
+                if mode_requirements(card) is not None else "")
             option_vars = (
                 "\n\n    protected override IEnumerable<DynamicVar> "
                 "CanonicalVars =>\n        new List<DynamicVar>\n        {\n"
@@ -14093,7 +14138,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     {{
         ("title", "{label}"),
         ("description", "{face}"),
-    }};{option_vars}{option_upgrade_member}{face_price_member}
+    }};{option_ctor}{option_vars}{option_upgrade_member}{face_price_member}
 }}
 '''
 

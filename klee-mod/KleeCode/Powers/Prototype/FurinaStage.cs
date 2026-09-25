@@ -484,7 +484,7 @@ public static class FurinaStage
     public static int RegainLead(Creature? owner, int amount)
     {
         if (!LiveFor(owner)) return 0;
-        var raised = FurinaStageLedger.For(owner!).RaiseLead(amount);
+        var raised = FurinaStageLedger.For(owner!).RaiseLead(amount, "regain");
         if (raised > 0)
         {
             FurinaStagePets.SyncBars(owner);
@@ -603,7 +603,11 @@ public static class FurinaStage
     {
         var ledger = FurinaStageLedger.For(target);
         var twoOrMore = ledger.Seats.Count >= 2;
-        var result = ledger.Absorb(incoming);
+        // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
+        // combat id, the pair `NoteBeat` files for the body an act lands on.
+        var result = ledger.Absorb(
+            incoming, dealer?.Monster?.Title.ToString() ?? "",
+            dealer?.CombatId.ToString() ?? "");
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {

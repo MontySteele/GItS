@@ -257,6 +257,10 @@ public static class ModalChoice
         {
             return await SelectMode(choiceContext, owner, options);
         }
+        if (TakenWithoutAsking(offered, requirements) is { } only)
+        {
+            return only;
+        }
         var shown = new List<CardModel>();
         foreach (int i in offered)
         {
@@ -266,6 +270,27 @@ public static class ModalChoice
             choiceContext, shown, owner, canSkip: false);
         return offered[ResolveIndex(shown, selected)];
     }
+
+    /// <summary>
+    /// 2026-09-25 (opus-furina-l2b, (c) 2): A BOARD-REFUSED MODE LEAVES NO
+    /// QUESTION. With the stage empty, or the back performer short of the
+    /// price, Curtain Rise still opened its chooser with ONE row -- a screen
+    /// that asks nothing, costs a command, and refused the seat's next two
+    /// commands while it stood open. So where a RULE gate
+    /// (<see cref="ModeRequirement"/>, the Stage's Spend) leaves exactly one
+    /// mode, that mode is taken without opening the screen: its sheet index,
+    /// or null where the screen still has a question to ask.
+    ///
+    /// SCOPED TO THE RULE GATE ON PURPOSE. A card gated only by meter PRICES
+    /// (the shipped <c>deep_breath</c>) keeps its one-row screen, which is
+    /// release-build behaviour this row was not asked to move. Both co-op
+    /// seats compute <paramref name="offered"/> off the same synced board, so
+    /// the screen is skipped on both and no choice is left to sync.
+    /// </summary>
+    public static int? TakenWithoutAsking(
+        IReadOnlyList<int> offered,
+        IReadOnlyList<ModeRequirement?>? requirements) =>
+        offered.Count == 1 && requirements != null ? offered[0] : null;
 
     /// <summary>
     /// Why each priced mode was refused, naming the price and the bank. The
@@ -504,6 +529,31 @@ public abstract class ModalOptionCard : CustomCardModel
 {
     protected ModalOptionCard()
         : base(0, CardType.Skill, CardRarity.Token, TargetType.Self,
+               autoAdd: false)
+    {
+    }
+
+    /// <summary>
+    /// 2026-09-25 (opus-furina-l2b, (c) 2): A MODE WEARS ITS PARENT'S TYPE AND
+    /// NO ENERGY ORB. The chooser drew every mode as "cost 0, Skill" -- a
+    /// price the play does not charge (the parent's cost is paid when the card
+    /// is played, before the screen opens) and a type the play does not have
+    /// (Curtain Rise's modes are an Attack), and the seat read it while
+    /// Smoggy was limiting Skills.
+    ///
+    /// THE COST IS HIDDEN THE BASE GAME'S OWN WAY: a negative canonical cost
+    /// is what every unplayable curse and status carries, and
+    /// <c>NCard.UpdateEnergyCostVisuals</c> hides the orb for any cost below
+    /// 0 (0.111.0 decompile). The TYPE PLAQUE cannot be hidden -- the card
+    /// frame draws <c>Model.Type</c> unconditionally, and the base game has
+    /// no choose-one option card with a neutral plaque to copy -- so it is
+    /// made TRUE instead: the parent's type.
+    ///
+    /// Emitted for the Stage's Spend cards only; every other modal card keeps
+    /// the parameterless constructor above.
+    /// </summary>
+    protected ModalOptionCard(CardType parentType)
+        : base(-1, parentType, CardRarity.Token, TargetType.Self,
                autoAdd: false)
     {
     }

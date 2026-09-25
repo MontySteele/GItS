@@ -133,9 +133,14 @@ public sealed class ProtoFsCurtainRiseModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Deal 7 damage"),
+        ("title", "Deal damage"),
         ("description", "Deal {PlainDamage:diff()} damage"),
     };
+
+    public ProtoFsCurtainRiseModeA()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -167,9 +172,14 @@ public sealed class ProtoFsCurtainRiseModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3: deal 13 instead"),
+        ("title", "Spend 3"),
         ("description", "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead"),
     };
+
+    public ProtoFsCurtainRiseModeB()
+        : base(CardType.Attack)
+    {
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -97,6 +97,58 @@ public class ModalChoicePinTests
         Assert.Contains("ModalChoice.ResolveIndex", calls);
     }
 
+    // ---------------------------------------------------------------
+    // 2026-09-25 (opus-furina-l2b, (c) 2): a RULE gate that leaves one mode
+    // opens no screen. Priced-only cards keep theirs.
+    // ---------------------------------------------------------------
+
+    private const string SpendRule =
+        "needs its full price from the back performer";
+
+    [Fact]
+    public void A_refused_spend_mode_plays_the_plain_mode_without_a_screen()
+    {
+        var requirements = new ModeRequirement?[]
+        {
+            null, new ModeRequirement(false, SpendRule),
+        };
+        var offered = ModalChoice.Offered(
+            null!, System.Array.Empty<ModePrice?>(), requirements);
+
+        Assert.Equal(new[] { 0 }, offered);
+        Assert.Equal(0, ModalChoice.TakenWithoutAsking(offered, requirements));
+    }
+
+    [Fact]
+    public void An_offered_spend_mode_still_asks()
+    {
+        var requirements = new ModeRequirement?[]
+        {
+            null, new ModeRequirement(true, SpendRule),
+        };
+        var offered = ModalChoice.Offered(
+            null!, System.Array.Empty<ModePrice?>(), requirements);
+
+        Assert.Equal(new[] { 0, 1 }, offered);
+        Assert.Null(ModalChoice.TakenWithoutAsking(offered, requirements));
+    }
+
+    [Fact]
+    public void A_price_gated_card_keeps_its_one_row_screen()
+    {
+        // The shipped `deep_breath` declares prices and no requirements; its
+        // release-build behaviour is not this row's to move.
+        Assert.Null(ModalChoice.TakenWithoutAsking(new[] { 0 }, null));
+    }
+
+    [Fact]
+    public void The_affordable_path_asks_before_it_opens_the_screen()
+    {
+        var calls = Il.Calls(Il.Method("ModalChoice", "SelectAffordableMode"));
+
+        Assert.Contains("ModalChoice.TakenWithoutAsking", calls);
+    }
+
     [Fact]
     public void Option_cards_are_combat_scoped_owned_instances()
     {

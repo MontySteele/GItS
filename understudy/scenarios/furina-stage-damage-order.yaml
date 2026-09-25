@@ -172,18 +172,20 @@ steps:
   # 0.2.3181 run reported (`'Curtain Rise' is not in hand`). Every play below
   # is of its OWN copy, so each opens its own choice screen from the board
   # this turn actually produced rather than from a survivor of the last one.
+  # 2026-09-25 (opus-furina-l2b): a Spend mode's option is titled by its
+  # PRICE ("Spend 3"), so no number the board folds sits in its title.
   - give: {card: KLEEMOD-PROTO_FS_STANDING_OVATION, pile: hand, upgraded: false}
   - play: {card: "Rising Applause"}
   - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
   - play: {card: "Curtain Rise", target: highest_hp}
   - expect:
       prompt_contains: "Choose"
-  - select: {cards: ["Spend 3: deal 13 instead"]}
+  - select: {cards: ["Spend 3"]}
   - expect:
       enemy_hp_block_delta: {who: highest_hp, amount: -13}
   - give: {card: KLEEMOD-PROTO_FS_CURTAIN_RISE, pile: hand, upgraded: false}
   - play: {card: "Curtain Rise", target: highest_hp}
-  - select: {cards: ["Spend 3: deal 13 instead"]}
+  - select: {cards: ["Spend 3"]}
 
   - read: {what: player}
 

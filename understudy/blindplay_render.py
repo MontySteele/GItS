@@ -12,7 +12,8 @@ import re
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
+from understudy.blindplay_board import (PHASE_FLIP_LINE,
+                                        STAGE_LEAVE_REASONS, _pulse_phrase,
                                         enchant_moves_line, stage_seat_name)
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
@@ -56,6 +57,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_BLOCKED,
                                         RESOLUTION_HIT_ALL_BLOCKED,
                                         RESOLUTION_NO_HITS,
+                                        RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_HIT_KILLED,
                                         RESOLUTION_KILLED,
                                         RESOLUTION_AUTO_CLAUSE,
@@ -138,6 +140,12 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     price = qa_packet.cost_label(c)
     bits = [b for b in (f"cost {price}" if price != "-" else "",
                         c["kind"].lower() if c["kind"] else "") if b]
+    # 2026-09-25 (opus-furina-l2b, (c) 2): a MODE row on a chooser prints no
+    # cost and no type. "Deal 7 damage -- cost 0, skill" was the option card's
+    # placeholder: the play's cost was paid when the card was played, and its
+    # type is the card's, printed in the hand one screen earlier.
+    if c.get("mode_face"):
+        bits = []
     if bits:
         head += f" — {', '.join(bits)}"
     if mark:
@@ -1189,7 +1197,8 @@ def _intent_fold_lines(enemy: dict[str, Any],
     return out
 
 
-def _resolution_lines(rows: list[dict[str, Any]]) -> list[str]:
+def _resolution_lines(rows: list[dict[str, Any]],
+                      stage: bool = False) -> list[str]:
     """`EB-349` / `EB-611`. The turn's resolutions, with their hits numbered.
 
     ONE ROW PER CARD, ONE NUMBERED LINE PER HIT. The numbering is the point:
@@ -1220,7 +1229,12 @@ def _resolution_lines(rows: list[dict[str, Any]]) -> list[str]:
         out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
         killed = row.get("killed") or []
         if not row["hits"] and not killed:
-            out.append(RESOLUTION_NO_HITS)
+            # 2026-09-25 (opus-furina-l2b): on a board with a stage, a card
+            # that hit nothing may still have moved a bar, and the stage log
+            # above now files every Raise -- so the line points there rather
+            # than saying nothing countable happened.
+            out.append(RESOLUTION_NO_HITS_STAGE if stage
+                       else RESOLUTION_NO_HITS)
             continue
         for n, hit in enumerate(row["hits"], start=1):
             target = hit["target"] or "an enemy"
@@ -1631,8 +1645,40 @@ def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
                        who=row["target"] or STAGE_UNNAMED_TARGET)
 
 
+#: 2026-09-25 (opus-furina-l2b, (c) 4). A BAR GOING UP, AND A HIT ON THE LEAD.
+#: The page printed "Nothing this page can count landed off it" under Rising
+#: Applause and the log carried no line for an enemy's hit on the lead unless
+#: it emptied it, so the seat reconstructed every Fanfare change by
+#: arithmetic. Each line carries the bar before and after (`a → b`): the mod
+#: files what landed and the bar after it, and the page subtracts.
+STAGE_RAISE_LINE = "  - Raise {n} on **{who}**: {before} → {after}."
+STAGE_REGAIN_LINE = ("  - **{who}** regained {n} Fanfare as the lead: "
+                     "{before} → {after}.")
+STAGE_HIT_LINE = "  - {dealer} hit **{who}** for {n}: {before} → {after}"
+#: The hit that EMPTIED the lead: the departure rides the same line, and the
+#: separate `leave` row the mod files after it is not printed twice.
+STAGE_HIT_LEAVES = ", and it leaves the stage: emptied by a hit, so no Bow"
+#: A hit whose dealer the mod could not name (no enemy behind it).
+STAGE_HIT_UNNAMED_LINE = "  - **{who}** was hit for {n}: {before} → {after}"
+
+
+def _stage_hit_line(row: dict[str, Any], log: list[dict[str, Any]],
+                    at: int) -> tuple[str, bool]:
+    """The hit beat's line, and whether the NEXT row is the departure it
+    caused (and is therefore folded into this one)."""
+    line = (STAGE_HIT_LINE if row["target"] else STAGE_HIT_UNNAMED_LINE).format(
+        dealer=f"**{row['target']}**", who=row["name"], n=row["moved"],
+        before=row["fanfare"] + row["moved"], after=row["fanfare"])
+    nxt = log[at + 1] if at + 1 < len(log) else None
+    left = (row["fanfare"] <= 0 and nxt is not None
+            and nxt["event"] == "leave" and nxt["member"] == row["member"]
+            and nxt["why"] == STAGE_LEAVE_REASONS["hit"])
+    return line + (STAGE_HIT_LEAVES if left else "") + ".", left
+
+
 def _render_stage_log(stage: dict[str, Any]) -> list[str]:
-    """One line per arrival, act, bow, departure and rotation."""
+    """One line per arrival, act, bow, departure and rotation -- and, since
+    2026-09-25, per Raise, regain and hit on the lead."""
     out: list[str] = []
     seats = stage["seats"]
     standing = len(seats)
@@ -1652,11 +1698,28 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
     where_now: dict[str, str] = {}
     for i, seat_row in enumerate(seats):
         where_now.setdefault(seat_row["name"], stage_seat_name(i, standing))
-    for row in stage["log"]:
+    log = stage["log"]
+    folded = -1
+    for at, row in enumerate(log):
+        if at == folded:
+            continue
         who = f"**{row['name']}**"
         seat = where_now.get(row["name"], "")
         where = f" the {seat} seat" if seat else ""
-        if row["event"] == "arrive":
+        if row["event"] == "raise":
+            out.append(STAGE_RAISE_LINE.format(
+                n=row["moved"], who=row["name"],
+                before=row["fanfare"] - row["moved"], after=row["fanfare"]))
+        elif row["event"] == "regain":
+            out.append(STAGE_REGAIN_LINE.format(
+                n=row["moved"], who=row["name"],
+                before=row["fanfare"] - row["moved"], after=row["fanfare"]))
+        elif row["event"] == "hit":
+            line, left = _stage_hit_line(row, log, at)
+            out.append(line)
+            if left:
+                folded = at + 1
+        elif row["event"] == "arrive":
             out.append(f"  - {who} joined the stage at {row['fanfare']} "
                        "Fanfare"
                        + (f", and stands in{where}." if where else "."))
@@ -2060,7 +2123,8 @@ def render(obs: dict[str, Any]) -> str:
         # the finding.
         if c.get("resolutions") is not None:
             out += ["", RESOLUTIONS_HEADING, ""]
-            out += _resolution_lines(c["resolutions"])
+            out += _resolution_lines(c["resolutions"],
+                                     stage=c.get("stage") is not None)
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page

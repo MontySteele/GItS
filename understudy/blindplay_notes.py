@@ -747,10 +747,24 @@ CHOOSER_CONFIRM_NOTE = (
 #: The mode chooser (`screen_type: "choose"`), where one `choose` resolves.
 #: It never says `confirm`, because there is no confirm button on this screen
 #: and saying the word costs a refusal (`EB-779`).
+#:
+#: 2026-09-25 (opus-furina-l2b, Fight 1 T2): AND IT SAYS THE SCREEN BLOCKS.
+#: The seat chained `play` and `end turn` behind a Curtain Rise whose chooser
+#: had opened, and both were refused ("a card chooser is open and has to be
+#: answered first") -- two refusals in a row, one short of the stop. The note
+#: said how to answer and never that nothing else would be taken until then.
 CHOOSER_ONE_CHOICE_NOTE = (
-    "*One `choose` takes your answer here and closes this screen: there is no "
-    "confirm button on this chooser and no second command to say. Read the "
-    "options before you choose -- the one you name resolves immediately.*")
+    "*A chooser is open, and until you answer it every other command, "
+    "`end turn` included, is refused. One `choose` takes your answer here and "
+    "closes this screen: there is no confirm button on this chooser and no "
+    "second command to say. Read the options before you choose -- the one you "
+    "name resolves immediately.*")
+
+#: 2026-09-25 (opus-furina-l2b, (c) 2). The heading of a chooser whose every
+#: row is a MODE of the card just played. The bridge hardwires "Choose a
+#: card." on this screen, and a mode chooser is not choosing a card.
+MODE_CHOOSER_PROMPT = ("The card you just played asks which way to resolve. "
+                       "Choose one:")
 
 #: The wire's `screen_type` for the one-press chooser. `BuildChooseCardState`
 #: writes it for `NChooseACardSelectionScreen` and nothing else.
@@ -1323,10 +1337,14 @@ def _summon_row(hay: str) -> str:
     return SUMMON_NAMED_ROW if named else ARM_KEYWORDS["Summon"]
 
 
-STAGE_ACTS = ("Every performer acts at the end of your turn, from any seat: "
-              "Usher gives you 3 Block, Chevalmarin deals 2 to every enemy "
-              "and applies Hydro, Crabaletta deals 5 Hydro damage to a random "
-              "enemy.")
+#: 2026-09-25 (opus-furina-l2b, (c) 3): the SEAT COUNT, in step with The
+#: Stage badge (`StageSummaryPower`), which now opens "Up to 3 performers act
+#: at the end of your turn" off `FurinaStageLaw.Seats`. The seat never dared a
+#: third summon because nothing printed how many seats there are.
+STAGE_ACTS = ("Up to 3 performers act at the end of your turn, from any "
+              "seat: Usher gives you 3 Block, Chevalmarin deals 2 to every "
+              "enemy and applies Hydro, Crabaletta deals 5 Hydro damage to a "
+              "random enemy.")
 
 ARM_KEYWORDS: dict[str, str] = {
     # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
@@ -3075,6 +3093,11 @@ RESOLUTION_HIT_ROW = "  {n}. **{target}** -- {amount}"
 RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
 RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
+#: 2026-09-25 (opus-furina-l2b, (c) 4). The same line on a board with a
+#: stage, where "nothing countable" was false under every Raise: what a card
+#: did to a performer's bar is filed on the stage log, and this says where.
+RESOLUTION_NO_HITS_STAGE = ("  No hit on an enemy landed off it. What it did "
+                            "to your stage is on the stage log above.")
 #: A body that DIED inside the play. The game never hands a killing hit to the
 #: damage hook the ledger reads, so a kill arrives with no number, and the
 #: first wording printed it as "Nothing this page can count landed off it"

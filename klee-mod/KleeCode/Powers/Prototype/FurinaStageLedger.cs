@@ -159,7 +159,9 @@ public sealed class StageSeat
 /// </summary>
 /// <param name="Event">`arrive`, `act`, `bow`, `leave` or `rotate` -- the
 /// five moments the row names, in the page's own vocabulary rather than in
-/// this file's method names.</param>
+/// this file's method names -- and, since 2026-09-25, `raise`, `regain` and
+/// `hit`: a bar going up, and an attack the lead absorbed (whose DEALER rides
+/// in <paramref name="Target"/> / <paramref name="TargetId"/>).</param>
 /// <param name="Who">The performer. `Name` is the sheet name; the page prints
 /// the display name it gets from the seat list.</param>
 /// <param name="Seat">The seat this happened in, front = 0, or -1 where the
@@ -431,7 +433,24 @@ public sealed class FurinaStageLedger
     {
         if (amount <= 0 || Back is not { } seat) return 0;
         seat.Fanfare += amount;
+        NoteRaise(seat, amount);
         return amount;
+    }
+
+    /// <summary>
+    /// 2026-09-25 (opus-furina-l2b, (c) 4). EVERY BAR THAT GOES UP IS A BEAT.
+    /// The page printed "Nothing this page can count landed off it" under
+    /// Rising Applause and filed nothing on the stage log, so the seat read
+    /// every Raise off the stage line and did the arithmetic itself. The beat
+    /// carries what landed (<see cref="StageBeat.Moved"/>) and the bar after
+    /// it (<see cref="StageBeat.Fanfare"/>), and the page prints "a -> b"
+    /// from the two. <paramref name="what"/> is <c>raise</c>, or
+    /// <c>regain</c> for rule 4's regen and Pneuma, which are not Raises.
+    /// </summary>
+    private void NoteRaise(StageSeat seat, int amount, string what = "raise")
+    {
+        Note(new StageBeat(what, seat.Who, _seats.IndexOf(seat),
+                           seat.Fanfare, amount, ""));
     }
 
     /// <summary>
@@ -524,7 +543,8 @@ public sealed class FurinaStageLedger
     /// flushed a hook later, in <c>AfterDamageReceived</c>, exactly as
     /// <c>FlushFanfareDeltaBlock</c> already defers the shipped kit's Block.
     /// </summary>
-    public StageAbsorb Absorb(int incoming)
+    public StageAbsorb Absorb(int incoming, string dealer = "",
+                              string dealerId = "")
     {
         if (incoming <= 0 || Lead is not { } lead)
         {
@@ -534,6 +554,18 @@ public sealed class FurinaStageLedger
         var absorbed = lead.Fanfare < incoming ? lead.Fanfare : incoming;
         lead.Fanfare -= absorbed;
         var reached = incoming - absorbed;
+        // 2026-09-25 (opus-furina-l2b, (c) 4). THE HIT ITSELF IS A BEAT, and
+        // not only the departure it may cause. The log filed a `leave` when a
+        // hit emptied the lead and nothing when it merely drained it, so the
+        // seat reconstructed every Fanfare change across the enemies' turn by
+        // arithmetic. Filed BEFORE the leave, which is the order it happened
+        // in; `Target` / `TargetId` name the DEALER here, the handle-and-title
+        // pair the act beats use for the body they hit.
+        if (absorbed > 0)
+        {
+            Note(new StageBeat("hit", lead.Who, 0, lead.Fanfare, absorbed, "",
+                               dealer, dealerId));
+        }
         if (lead.Fanfare > 0) return new StageAbsorb(absorbed, reached, null);
 
         _seats.RemoveAt(0);
@@ -568,6 +600,7 @@ public sealed class FurinaStageLedger
         if (turnNumber < 2) return 0;
         if (Lead is not { } lead) return 0;
         lead.Fanfare += FurinaStageLaw.LeadRegen;
+        NoteRaise(lead, FurinaStageLaw.LeadRegen, "regain");
         return FurinaStageLaw.LeadRegen;
     }
 
@@ -609,6 +642,7 @@ public sealed class FurinaStageLedger
     {
         if (amount <= 0) return 0;
         seat.Fanfare += amount;
+        NoteRaise(seat, amount);
         return amount;
     }
 
@@ -650,10 +684,11 @@ public sealed class FurinaStageLedger
     /// <summary><i>Hold Your Places</i>: Raise N on the LEAD performer, the
     /// shield -- the one card that raises the front seat. Returns what landed
     /// (0 on an empty stage).</summary>
-    public int RaiseLead(int amount)
+    public int RaiseLead(int amount, string what = "raise")
     {
         if (amount <= 0 || Lead is not { } lead) return 0;
         lead.Fanfare += amount;
+        NoteRaise(lead, amount, what);
         return amount;
     }
 
@@ -662,7 +697,11 @@ public sealed class FurinaStageLedger
     public int RaiseAll(int amount)
     {
         if (amount <= 0) return 0;
-        foreach (var seat in _seats) seat.Fanfare += amount;
+        foreach (var seat in _seats)
+        {
+            seat.Fanfare += amount;
+            NoteRaise(seat, amount);
+        }
         return amount * _seats.Count;
     }
 
