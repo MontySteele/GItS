@@ -897,8 +897,8 @@ public static class ArmKeywordTips
     /// sentence since the trio can be cloned (2026-09-25; [USER]: "Let's
     /// allow for copies and then check the balance."): a named summon always
     /// summons, so named and random summons meet a full stage the same way --
-    /// the front performer Bows and leaves and the newcomer takes its Fanfare
-    /// (<c>FurinaStage.RecastFromFront</c>). Until then a named Common's face
+    /// the front performer Bows and leaves and the newcomer ADDS its own
+    /// arrival Fanfare to the leaver's (<c>FurinaStage.RecastFromFront</c>). Until then a named Common's face
     /// said what a performer already on stage did, and this tip came in two
     /// variants so as not to contradict it.
     /// </summary>
@@ -908,7 +908,7 @@ public static class ArmKeywordTips
             "A performer joins at the back with "
           + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a full "
           + "stage, the front one [gold]Bow[/gold]s and leaves, and the "
-          + "newcomer takes its Fanfare.");
+          + "newcomer adds its Fanfare.");
 
     /// <summary>
     /// 2026-09-25. GENTILHOMME USHER'S ACT, on every card that names him and
@@ -992,7 +992,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, WriothesleyKey,
             "End of your turn: deal [gold]Cryo[/gold] damage to a random "
-          + "enemy equal to twice the Fanfare he lost since his last act.");
+          + "enemy equal to twice the Fanfare he lost to hits since his "
+          + "last act.");
 
     public static IEnumerable<IHoverTip> ForSigewinne(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

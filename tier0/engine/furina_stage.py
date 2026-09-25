@@ -468,7 +468,8 @@ def summon(state, member: str) -> None:
                    seats=len(seats), rotated=True)
 
 
-def recast_front(state, newcomer: str | None = None) -> None:
+def recast_front(state, newcomer: str | None = None,
+                 arrival: int = SUMMON_FANFARE) -> None:
     """A SUMMON ON A FULL STAGE (2026-09-25) -- `FurinaStage.
     RecastFromFront`'s twin. [USER]: "treat this like a Defect orb summon? the
     stage members rotate, ... bows, and their remaining fanfare transfers to
@@ -508,9 +509,13 @@ def recast_front(state, newcomer: str | None = None) -> None:
         # loss here, where the bar is finally gone.
         book_loss(state, LOSS_LEFT, kept)
         return
-    seats.append([member, kept])
-    state.emit("stage_summon", member=member, fanfare=kept, seats=len(seats),
-               rotated=True, via="recast")
+    # THE RECAST ADDS (2026-09-25): the newcomer's own arrival Fanfare (1
+    # for the trio, a Guest Star's N) on top of what the leaver left with.
+    book_gain(state, GAIN_GUEST if member in GUESTS else GAIN_SUMMON,
+              int(arrival))
+    seats.append([member, kept + int(arrival)])
+    state.emit("stage_summon", member=member, fanfare=kept + int(arrival),
+               seats=len(seats), rotated=True, via="recast")
 
 
 def rotate(state) -> None:
@@ -577,9 +582,11 @@ def _exit(player, member: str, index: int, held: int) -> dict:
 
 
 def _lose(player, member: str, amount: int) -> None:
-    """A bar went down: count it for Wriothesley's reading (rule 6). Guests
-    only -- one of each, so the name is the seat. C# twin:
-    `FurinaStageLedger.Drain`."""
+    """An enemy's HIT took Fanfare: count it for Wriothesley's reading
+    (rule 6). HITS ONLY (2026-09-25: "he is the tank, not a Spend engine"):
+    Spends, payments, taxes, gifts, cash-outs and the fade do not count.
+    Guests only -- one of each, so the name is the seat. C# twin:
+    `FurinaStageLedger.Absorb`."""
     if amount > 0 and member in GUESTS:
         player.stage_lost[member] = int(player.stage_lost.get(member, 0)) + int(amount)
 
@@ -895,7 +902,6 @@ def spend(state, amount: int) -> int:
     member, bar = pair
     paid = int(amount)
     book_paid(state, paid)
-    _lose(p, member, paid)
     pair[1] = bar - paid
     state.emit("stage_spend", member=member, asked=int(amount), paid=paid,
                bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
@@ -933,8 +939,6 @@ def collect_all(state) -> int:
     company = [m for m, _f in seats]
     total = sum(f for _m, f in seats)
     book_paid(state, total)
-    for member, bar in seats:
-        _lose(p, member, bar)
     exits = [_exit(p, member, i, held=0) for i, (member, _f) in
              enumerate(seats)]
     seats.clear()
@@ -1000,9 +1004,8 @@ def final_bow(state) -> int:
         state.emit("stage_final_bow_whiffed")
         return 0
     bar = pair[1]
-    # A CASH-OUT: the card is paid for the whole bar, so it is lost (rule 6)
-    # and the Bow holds nothing (`_leave` passes held=0).
-    _lose(p, pair[0], bar)
+    # A CASH-OUT: the card is paid for the whole bar, so the Bow holds
+    # nothing (`_leave` passes held=0).
     _leave(state, len(_seats(p)) - 1, bowed=True, reason="final_bow")
     return bar
 
@@ -1196,7 +1199,6 @@ def fade(state) -> None:
             continue
         before = pair[1]
         book_loss(state, LOSS_FADED, loss)
-        _lose(p, pair[0], loss)
         pair[1] = before - loss
         state.emit("stage_fade", member=pair[0], amount=loss,
                    before=before, fanfare=pair[1])
@@ -1249,7 +1251,6 @@ def spend_all_of_back(state) -> int:
         return 0
     member, bar = pair
     book_paid(state, bar)
-    _lose(p, member, bar)
     pair[1] = 0
     state.emit("stage_spend", member=member, asked=bar, paid=bar,
                bar_at_spend=bar, fanfare=0, turn=state.turn,
@@ -1385,7 +1386,7 @@ def guest_star(state, member: str, amount: int) -> None:
             book_loss(state, LOSS_LEFT, pair[1])
         return
     if len(seats) >= SEATS:
-        recast_front(state, member)
+        recast_front(state, member, int(amount))
         return
     book_gain(state, GAIN_GUEST, int(amount))
     seats.append([member, int(amount)])
@@ -1401,7 +1402,6 @@ def _pay(state, pair, amount: int, actor: str, owed: list) -> None:
     if amount <= 0:
         return
     book_paid(state, amount, payer=actor)
-    _lose(p, pair[0], amount)
     before = pair[1]
     pair[1] = before - amount
     state.emit("stage_pay", member=pair[0], by=actor, amount=int(amount),

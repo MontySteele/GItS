@@ -328,20 +328,24 @@ public class FurinaGuestCastTests
     // ---- Wriothesley's reading -------------------------------------------------
 
     [Fact]
-    public void Every_loss_counts_and_an_act_resets_it()
+    public void Only_hits_count_and_an_act_resets_it()
     {
+        // 2026-09-25: Wriothesley counts only what enemy hits took ("he is
+        // the tank, not a Spend engine"). Spends, payments, taxes, gifts,
+        // cash-outs and the fade take Fanfare and do not count.
         using var _ = new Arm();
         var (_, stage) = Stage(("wriothesley", 10), ("usher", 3));
         var wrio = stage.Seats[0];
         stage.Absorb(3);
         Assert.Equal(3, wrio.LostSinceAct);
         stage.StepForward();                       // Usher to the front
-        stage.Fade();                              // wrio 7 -> 6, loses 1
-        Assert.Equal(4, wrio.LostSinceAct);
+        stage.Fade();                              // wrio 7 -> 6: not a hit
+        stage.Spend(2);                            // wrio 6 -> 4: not a hit
+        Assert.Equal(3, wrio.LostSinceAct);
         // The hit that takes him down is in his Bow's reading.
         stage.StepForward();
         var hit = stage.Absorb(20);
-        Assert.Equal(4 + 6, hit.Exit!.Value.Lost);
+        Assert.Equal(3 + 4, hit.Exit!.Value.Lost);
         // An act resets it (FurinaStage.Act and the forecast's replay).
         Assert.Contains("StageSeat.set_LostSinceAct",
                         Il.Calls(Il.Method("FurinaStage", "GuestAct")));
@@ -374,7 +378,7 @@ public class FurinaGuestCastTests
         B("full house pays twice",
           new[] { ("neuvillette", 6), ("usher", 3), ("crabaletta", 4) }, 1,
           new int[0], new int?[] { null, 3, 4 }, 6, 0, 0),
-        B("the fade counts as lost",
+        B("the fade is not a hit",
           new[] { ("usher", 3), ("wriothesley", 10) }, 0, new int[0],
           new int?[] { 3, 8 }, 3, 0, 0),
         B("two hits through the front",

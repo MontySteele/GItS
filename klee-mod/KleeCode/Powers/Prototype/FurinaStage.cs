@@ -386,9 +386,15 @@ public static partial class FurinaStage
     /// of the turn with everyone else. <i>Double Casting</i> on a full stage
     /// runs this twice, so two performers bow.
     /// </summary>
+    /// <remarks>THE RECAST ADDS (2026-09-25, the Guest Cast's review): the
+    /// newcomer arrives holding its OWN arrival Fanfare
+    /// (<paramref name="arrival"/>: 1 for the trio, a Guest Star's N) plus
+    /// the leaver's remaining Fanfare. Otherwise a guest cast onto a front
+    /// at 1 would arrive unable to pay.</remarks>
     private static async Task RecastFromFront(
         PlayerChoiceContext choiceContext, Creature owner,
-        StagePerformer? named = null)
+        StagePerformer? named = null,
+        int arrival = FurinaStageLaw.SummonFanfare)
     {
         var ledger = FurinaStageLedger.For(owner);
         if (ledger.BowFromFront() is not { } leaver) return;
@@ -402,11 +408,11 @@ public static partial class FurinaStage
                   mayReturn: false);
         if (who == leaver.Who)
         {
-            ledger.RecastToBack(leaver);
+            ledger.RecastToBack(leaver, arrival);
         }
         else
         {
-            ledger.ArriveAtBack(who, leaver.Fanfare);
+            ledger.ArriveAtBack(who, leaver.Fanfare + arrival);
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);

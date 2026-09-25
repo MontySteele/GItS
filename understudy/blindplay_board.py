@@ -687,10 +687,10 @@ STAGE_LEAVE_REASONS = {
     # 2026-09-25: a random summon on a full stage. The lead bows and moves to
     # the back seat keeping its bar; the arrival line that follows says where.
     # 2026-09-25: a summon on a full stage. The front Bows and leaves; the
-    # newcomer takes the back seat holding its Fanfare, which the arrival line
-    # that follows says (since the trio can be cloned, it may be anyone).
+    # newcomer takes the back seat and ADDS its own Fanfare to the leaver's,
+    # which the arrival line that follows says (it may be anyone).
     "recast": ("took its Bow to make room for a summon, which takes the back "
-               "seat with its Fanfare"),
+               "seat and adds its Fanfare"),
     # THE GUEST CAST (2026-09-25): a guest's act paid its last Fanfare (its
     # own, or a tax), and a second Guest Star for a guest on stage.
     "paid": "paid its last Fanfare, so it takes a Bow",

@@ -1485,7 +1485,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # (`StagePerformerBadge`). One Summon row since the trio can be cloned
     # (2026-09-25): named and random summons meet a full stage the same way.
     "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
-               "stage, the front one Bows and leaves, and the newcomer takes "
+               "stage, the front one Bows and leaves, and the newcomer adds "
                "its Fanfare."),
     # Draft 3 (2026-09-25): no Bow clause (a Bow is the act once more) and
     # no Hydro (no act applies it).
@@ -1510,7 +1510,8 @@ ARM_KEYWORDS: dict[str, str] = {
               "random enemy."),
     "Chevreuse": "End of your turn: Spend 2 to gain 1 Energy next turn.",
     "Wriothesley": ("End of your turn: deal Cryo damage to a random enemy "
-                    "equal to twice the Fanfare he lost since his last act."),
+                    "equal to twice the Fanfare he lost to hits since his "
+                    "last act."),
     "Sigewinne": ("End of your turn: give 3 of her Fanfare to the performer "
                   "behind her, or to your front performer if she is at the "
                   "back."),

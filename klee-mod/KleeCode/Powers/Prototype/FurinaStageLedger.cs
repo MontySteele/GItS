@@ -168,10 +168,11 @@ public sealed class StageSeat
 
     /// <summary>
     /// THE GUEST CAST (2026-09-25), rule 6: the Fanfare this performer has
-    /// LOST since its last act -- to a hit, a Spend, a payment, a tax, the
-    /// fade or a cash-out. Wriothesley reads it; every act and every Bow
-    /// resets it, so a repeated act reads 0. Moved only by
-    /// <see cref="FurinaStageLedger.Drain"/> and reset by the act.
+    /// LOST TO ENEMY HITS since its last act. Wriothesley reads it; every act
+    /// and every Bow resets it, so a repeated act reads 0. Spends, payments,
+    /// taxes, gifts, cash-outs and the fade do not count (2026-09-25: "he is
+    /// the tank, not a Spend engine"). Moved only by
+    /// <see cref="FurinaStageLedger.Absorb"/> and reset by the act.
     /// </summary>
     public int LostSinceAct { get; internal set; }
 
@@ -495,10 +496,13 @@ public sealed class FurinaStageLedger
     /// between the two halves can cause today: the Bow's readers Raise on a
     /// stage of two and summon nobody.
     /// </summary>
-    public bool RecastToBack(StageSeat seat)
+    public bool RecastToBack(StageSeat seat, int added = 0)
     {
         if (IsFull) return false;
         seat.Resting = false;
+        // The recast ADDS (2026-09-25): the newcomer's own arrival Fanfare
+        // on top of what the leaver left with.
+        if (added > 0) seat.Fanfare += added;
         _seats.Add(seat);
         Note(new StageBeat("arrive", seat.Who, _seats.Count - 1, seat.Fanfare,
                            0, ""));
@@ -515,14 +519,14 @@ public sealed class FurinaStageLedger
     // the end-of-turn forecast (rule 7) runs the SAME moves on a clone.
 
     /// <summary>
-    /// THE ONE WRITER OF A LOSS: the bar goes down and the loss is counted
-    /// for Wriothesley's reading (<see cref="StageSeat.LostSinceAct"/>).
+    /// A bar going down. Only a HIT counts toward Wriothesley's reading
+    /// (<see cref="StageSeat.LostSinceAct"/>), and <see cref="Absorb"/> adds
+    /// it there itself (2026-09-25: he counts hits only).
     /// </summary>
     internal static void Drain(StageSeat seat, int amount)
     {
         if (amount <= 0) return;
         seat.Fanfare -= amount;
-        seat.LostSinceAct += amount;
     }
 
     /// <summary>The exit a departure earns, with what its Bow reads.</summary>
@@ -907,6 +911,8 @@ public sealed class FurinaStageLedger
 
         var absorbed = lead.Fanfare < incoming ? lead.Fanfare : incoming;
         Drain(lead, absorbed);
+        // Wriothesley's reading: only what a HIT took counts.
+        lead.LostSinceAct += absorbed;
         var reached = incoming - absorbed;
         // 2026-09-25 (opus-furina-l2b, (c) 4). THE HIT ITSELF IS A BEAT, and
         // not only the departure it may cause. The log filed a `leave` when a

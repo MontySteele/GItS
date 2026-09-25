@@ -290,7 +290,7 @@ def test_a_departure_says_why_because_that_is_rules_seven_and_nine():
         "final_bow": "took its Bow and left",
         # 2026-09-25: a summon on a full stage.
         "recast": ("took its Bow to make room for a summon, which takes the "
-                   "back seat with its Fanfare"),
+                   "back seat and adds its Fanfare"),
         # The Guest Cast (2026-09-25): a paying act, and a repeat Guest Star.
         "paid": "paid its last Fanfare, so it takes a Bow",
         "repeat": ("took its Bow for a second Guest Star, and comes back to "

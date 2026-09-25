@@ -1426,8 +1426,9 @@ def test_a_random_summon_on_a_full_stage_bows_the_lead_to_the_back(arm):
     st = _full_stage()
     effects.resolve_card(st, _random_summon())
     assert st.player.block == FS.ACT_USHER_BLOCK
+    # The recast ADDS (2026-09-25): the newcomer's own 1 on the leaver's 5.
     assert st.player.stage == [["chevalmarin", 2],
-                               ["crabaletta", 4], ["usher", 5]]
+                               ["crabaletta", 4], ["usher", 6]]
     leave = [e for e in st.log if e["event"] == "stage_leave"]
     assert leave and leave[0]["bowed"] is True
     assert leave[0]["reason"] == "recast"
@@ -1442,7 +1443,7 @@ def test_a_random_recast_may_field_a_different_performer(arm):
     effects.resolve_card(st, _random_summon())
     assert st.player.block == FS.ACT_USHER_BLOCK
     assert st.player.stage == [["chevalmarin", 2],
-                               ["crabaletta", 4], ["crabaletta", 5]]
+                               ["crabaletta", 4], ["crabaletta", 6]]
 
 
 def test_the_recast_does_not_act_on_arrival(arm):
@@ -1466,8 +1467,8 @@ def test_double_casting_on_a_full_stage_bows_twice(arm):
     bows = [e["member"] for e in st.log if e["event"] == "stage_bow"]
     assert bows == ["usher", "chevalmarin"]
     assert st.player.block == FS.ACT_USHER_BLOCK
-    assert st.player.stage == [["crabaletta", 4], ["usher", 5],
-                               ["chevalmarin", 2]]
+    assert st.player.stage == [["crabaletta", 4], ["usher", 6],
+                               ["chevalmarin", 3]]
     # Chevalmarin's Bow is her act once more: 2 to every enemy.
     assert st.enemies[0].hp == hp - FS.ACT_CHEVALMARIN_DAMAGE
 
@@ -1484,8 +1485,9 @@ def test_a_five_century_act_does_not_return_the_recast_performer_twice(arm):
     st = _full_stage()
     st.player.powers[FS.FIVE_CENTURY_ACT] = 1
     effects.resolve_card(st, _random_summon())
+    # The recast ADDS (2026-09-25): the newcomer's own 1 on the leaver's 5.
     assert st.player.stage == [["chevalmarin", 2],
-                               ["crabaletta", 4], ["usher", 5]]
+                               ["crabaletta", 4], ["usher", 6]]
     assert st.player.stage_resting == []
     assert not [e for e in st.log if e["event"] == "stage_return"]
 
@@ -1504,7 +1506,7 @@ def test_thunderous_applause_fires_on_the_recast_bow_before_the_arrival(arm):
     # Usher's own act first (3 Block), then the applause's 2 on the back.
     assert st.player.block == FS.ACT_USHER_BLOCK
     assert st.player.stage == [["chevalmarin", 2],
-                               ["crabaletta", 6], ["usher", 5]]
+                               ["crabaletta", 6], ["usher", 6]]
 
 
 def test_a_named_summon_on_a_full_stage_recasts_too(arm):
@@ -1517,7 +1519,7 @@ def test_a_named_summon_on_a_full_stage_recasts_too(arm):
         {"op": "stage_summon", "member": "crabaletta"}]))
     assert st.player.block == FS.ACT_USHER_BLOCK
     assert st.player.stage == [["chevalmarin", 2], ["crabaletta", 4],
-                               ["crabaletta", 5]]
+                               ["crabaletta", 6]]
 
 
 # ---------------------------------------------------------------------------

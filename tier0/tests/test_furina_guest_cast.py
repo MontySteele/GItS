@@ -139,12 +139,17 @@ def test_guests_may_fill_all_three_seats(arm):
 
 def test_a_guest_on_a_full_stage_recasts_the_front(arm):
     """The front Bows (its act) and leaves; the guest arrives at the back
-    holding the front's Fanfare, like any summon. Its own N is not added."""
+    holding its own N PLUS the front's remaining Fanfare, like any summon
+    (2026-09-25: the recast adds, so a guest cast onto a front at 1 does not
+    arrive unable to pay)."""
     st = _state([["usher", 5], ["chevalmarin", 2], ["crabaletta", 4]])
     effects.resolve_card(st, _guest("navia", 4))
     assert st.player.block == FS.ACT_USHER_BLOCK          # Usher's Bow
     assert st.player.stage == [["chevalmarin", 2], ["crabaletta", 4],
-                               ["navia", 5]]
+                               ["navia", 4 + 5]]
+    st = _state([["usher", 1], ["chevalmarin", 2], ["crabaletta", 4]])
+    effects.resolve_card(st, _guest("neuvillette", 6))
+    assert st.player.stage[-1] == ["neuvillette", 6 + 1]
 
 
 def test_a_second_copy_bows_the_guest_and_returns_it_with_the_fanfare_added(
@@ -300,6 +305,21 @@ def test_wriothesley_reads_what_he_lost_and_a_repeat_reads_zero(arm):
     assert st.enemies[0].hp == 100 - 2 * 3
 
 
+def test_wriothesley_counts_hits_only(arm):
+    """2026-09-25: he is the tank, not a Spend engine. A Spend off his bar
+    and the fade take Fanfare and do not count; a hit does."""
+    st = _state([["usher", 3], ["wriothesley", 10]],
+                enemies=[_enemy(hp=100)])
+    FS.spend(st, 2)                                # he is the back: 10 -> 8
+    FS.fade(st)                                    # 8 -> 7
+    FS.perform(st, "wriothesley")
+    assert st.enemies[0].hp == 100
+    st.player.stage.reverse()                      # he steps to the front
+    FS.absorb(st, 2)
+    FS.perform(st, "wriothesley")
+    assert st.enemies[0].hp == 100 - 2 * 2
+
+
 def test_wriothesleys_bow_on_a_hit_reads_the_hit_that_took_him_down(arm):
     st = _state([["wriothesley", 4], ["usher", 3]], enemies=[_enemy(hp=100)])
     FS.absorb(st, 9)
@@ -333,7 +353,7 @@ BOARDS = [
     ("full house pays twice",
      [["neuvillette", 6], ["usher", 3], ["crabaletta", 4]], 1, [],
      [None, 3, 4], 6, 0, 0),
-    ("the fade counts as lost", [["usher", 3], ["wriothesley", 10]], 0, [],
+    ("the fade is not a hit", [["usher", 3], ["wriothesley", 10]], 0, [],
      [3, 8], 3, 0, 0),
     ("two hits through the front",
      [["usher", 3], ["crabaletta", 4]], 0, [7, 7], [3, 4], 3, 7, 1),

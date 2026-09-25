@@ -6763,7 +6763,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # One sentence since the trio can be cloned (2026-09-25).
         "Summon": ["A performer joins at the back with ",
                    "stage, the front one ",
-                   "newcomer takes its Fanfare."],
+                   "newcomer adds its Fanfare."],
         # Draft 3 (2026-09-25): one sentence each, no Hydro, no Bow clause.
         "Gentilhomme Usher": ["End of your turn: gain "],
         "Surintendante Chevalmarin": ["End of your turn: deal ",
@@ -6802,8 +6802,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   "Fanfare to a random enemy."],
         "Chevreuse": ["End of your turn: ", " to gain ", " next turn."],
         "Wriothesley": ["End of your turn: deal ", " damage to a random ",
-                        "enemy equal to twice the Fanfare he lost since his "
-                        "last act."],
+                        "enemy equal to twice the Fanfare he lost to hits "
+                        "since his ", "last act."],
         "Sigewinne": ["End of your turn: give ",
                       " of her Fanfare to the performer behind her, or to "
                       "your front ", "performer if she is at the back."],

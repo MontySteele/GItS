@@ -230,7 +230,7 @@ public class FurinaStageLegibilityTests
         Assert.Contains("A performer joins at the back with ", body);
         Assert.Contains(" [gold]Fanfare[/gold]. On a full stage, the front "
                       + "one [gold]Bow[/gold]s and leaves, and the newcomer "
-                      + "takes its Fanfare.", body);
+                      + "adds its Fanfare.", body);
         Assert.DoesNotContain("the lead", body);
         var parameters = typeof(ArmKeywordTips).GetMethod("ForSummon")!
             .GetParameters();

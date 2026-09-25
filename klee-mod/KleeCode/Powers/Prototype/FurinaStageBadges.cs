@@ -330,10 +330,12 @@ public sealed class WriothesleyBadgePower : StagePerformerBadge,
         ("title", FurinaStageLedger.DisplayName(Performer)),
         ("description",
             "End of your turn: deal [gold]Cryo[/gold] damage to a random "
-          + "enemy equal to twice the Fanfare he lost since his last act."),
+          + "enemy equal to twice the Fanfare he lost to hits since his "
+          + "last act."),
         ("smartDescription",
             "End of your turn: deal [gold]Cryo[/gold] damage to a random "
-          + "enemy equal to twice the Fanfare he lost since his last act."),
+          + "enemy equal to twice the Fanfare he lost to hits since his "
+          + "last act."),
     };
 }
 

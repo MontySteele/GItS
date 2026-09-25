@@ -65,8 +65,11 @@ performers with their own bars, and Fanfare is that bar.**
    members rotate, … bows, and their remaining fanfare transfers to the
    newest member", and the seat that leaves is the lead): the lead
    performer takes a Bow and leaves, the other two step forward, and the
-   newcomer takes the back seat holding the lead's remaining Fanfare. The
-   Bow is a real one (its effect and every Bow reader fire, Thunderous
+   newcomer takes the back seat and adds its Fanfare: its own arrival
+   Fanfare (1, or a Guest Star's N) plus the lead's remaining Fanfare
+   (2026-09-25, so a guest cast onto a front at 1 does not arrive unable to
+   pay). The Summon tip: "On a full stage, the front one Bows and leaves,
+   and the newcomer adds its Fanfare." The Bow is a real one (its effect and every Bow reader fire, Thunderous
    Applause included), in the order bow, readers, arrival; A Five-Century
    Act does not also return it. This replaced the rotation that retired the
    front WITHOUT a bow, which a first-time co-op player met as a summon that

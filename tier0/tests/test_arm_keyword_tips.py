@@ -1312,7 +1312,7 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             # One sentence since the trio can be cloned (2026-09-25).
             '" [gold]Fanfare[/gold]. On a full "',
             '"stage, the front one [gold]Bow[/gold]s and leaves, and the "',
-            '"newcomer takes its Fanfare.");',
+            '"newcomer adds its Fanfare.");',
             # Draft 3 (2026-09-25): one sentence each -- no Bow clause (a
             # Bow is the act once more) and no Hydro (no act applies it).
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
@@ -1343,7 +1343,7 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
         "A performer joins at the back with 1 Fanfare. On a full stage, the "
-        "front one Bows and leaves, and the newcomer takes its Fanfare.")
+        "front one Bows and leaves, and the newcomer adds its Fanfare.")
     assert rows["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
     assert rows["Surintendante Chevalmarin"] == (
         "End of your turn: deal 2 damage to ALL enemies.")

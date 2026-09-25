@@ -64,8 +64,9 @@ public static partial class FurinaStage
     ///     every Bow reader but no Five-Century return, and comes back to the
     ///     same seat holding its unused Fanfare plus <paramref name="fanfare"/>;
     ///   * a full stage: the front Bows and leaves, and the guest arrives at
-    ///     the back holding the front's Fanfare (<see cref="RecastFromFront"/>,
-    ///     "like any summon");
+    ///     the back holding <paramref name="fanfare"/> plus the front's
+    ///     remaining Fanfare (<see cref="RecastFromFront"/>, "like any
+    ///     summon"; the recast adds, 2026-09-25);
     ///   * otherwise: the back-most empty seat, holding <paramref name="fanfare"/>.
     ///
     /// It does not act on arrival (`EB-738`): it acts at the end of the turn
@@ -89,7 +90,7 @@ public static partial class FurinaStage
         }
         else if (ledger.IsFull)
         {
-            await RecastFromFront(choiceContext, owner!, who);
+            await RecastFromFront(choiceContext, owner!, who, fanfare);
             return;
         }
         else
