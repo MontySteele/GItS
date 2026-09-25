@@ -1208,9 +1208,13 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForFanfare(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FanfareKey,
-            "A performer's health. Hits land on your [gold]Block[/gold], then "
-          + "your [gold]front performer[/gold]'s Fanfare, then you. At 0 it "
-          + "leaves.");
+            // The text pass's follow-up (2026-09-25): the EMPTY-STAGE
+            // summon lives here, on the word every Fanfare-giving face
+            // prints -- Hold Your Places and Gala Dinner carry no back
+            // performer tip. "At 0 it leaves" is dropped on purpose.
+            "A performer's health. Hits take your [gold]Block[/gold], then "
+          + "the front performer's, then you. Gained on an empty stage, it "
+          + "summons a performer.");
 
     /// <summary>
     /// Brief sec.3 rules 7 and 9 together, because the word only means
@@ -1261,12 +1265,9 @@ public static class ArmKeywordTips
             // read as "the back is safe", and seats lost the back performer
             // to a second attack in one enemy turn. So the sentence says
             // plainly where hits go, and when they reach the back.
-            // The text pass (2026-09-25): and the EMPTY STAGE, which the
-            // retired Raise tip used to carry -- Fanfare the back would gain
-            // on an empty stage summons a random performer holding it.
-            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last. With "
-          + "no one on stage, Fanfare it would gain summons a random "
-          + "performer instead.");
+            // The text pass (2026-09-25): the empty-stage summon the
+            // retired Raise tip carried is the Fanfare tip's now.
+            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last.");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
     /// choice a player makes at the start of each turn.</summary>

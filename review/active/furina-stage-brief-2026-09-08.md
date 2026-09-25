@@ -421,7 +421,7 @@ values; names are provisional. Upgrades in brackets.
 | Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 3 damage per point. [4 per point] |
 | Full House | 2 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 1] |
 | Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 2 Fanfare. [gains 3] |
-| A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains half the Fanfare lost, rounded up. Needs 2 performers. [gains the Fanfare lost] |
+| A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains half the Fanfare lost. Needs 2 performers. [gains the Fanfare lost] (The face drops "rounded up"; the rule still rounds up.) |
 
 **Rares (two)**
 

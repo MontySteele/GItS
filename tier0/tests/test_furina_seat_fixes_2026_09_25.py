@@ -61,6 +61,8 @@ def test_a_rapt_audience_face_says_it_needs_two_performers():
     face = _surface_row("proto_fs_rapt_audience")["description"]
     # The text pass (2026-09-25) shortened the clause, and kept it.
     assert face.endswith(" Needs 2 performers.")
+    # The follow-up dropped "rounded up" from both variants.
+    assert "rounded up" not in face
     emitted = (GENERATED / "ProtoFsRaptAudience.cs").read_text(
         encoding="utf-8")
     assert "Needs 2 performers." in emitted

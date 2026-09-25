@@ -2168,7 +2168,7 @@
    authored_by: [claude],
    replaces: crowd_work,
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever an enemy hits your [gold]front performer[/gold], your [gold]back performer[/gold] gains {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] lost{IfUpgraded:show:|, rounded up}. Needs 2 performers.",
+   description: "Whenever an enemy hits your [gold]front performer[/gold], your [gold]back performer[/gold] gains {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] lost. Needs 2 performers.",
    effects: [{op: apply_power, power: fs_rapt_audience, amount: 50,
               target: self}]}
 

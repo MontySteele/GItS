@@ -703,17 +703,16 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # every Stage tip reworded in [USER]'s words.
             "Pay Fanfare from your [gold]back performer[/gold]. Offered only ",
             "if it can pay in full. If that empties it exactly, it ",
-            "A performer's health. Hits land on your [gold]Block[/gold], then ",
-            "your [gold]front performer[/gold]'s Fanfare, then you. At 0 it ",
+            "A performer's health. Hits take your [gold]Block[/gold], then ",
+            "the front performer's, then you. Gained on an empty stage, it ",
+            "summons a performer.",
             # `EB-744`: the CONTRAST -- a Spend earns a Bow, a hit does not.
             "A performer's parting effect, shown on each performer. Spending ",
             "its last Fanfare triggers it; losing it to a hit doesn't.",
             "Takes hits first. Regains ",
             " [gold]Fanfare[/gold] at the start of your turn.",
-            # Round four's empty-stage summon, carried by the back seat now
-            # that the Raise tip that held it is gone.
-            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last. With ",
-            "no one on stage, Fanfare it would gain summons a random ",
+            # Round four's empty-stage summon is the Fanfare tip's (above).
+            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last.",
     ):
         assert clause in tips, clause
 

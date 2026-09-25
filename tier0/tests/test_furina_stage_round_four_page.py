@@ -71,11 +71,12 @@ def test_a_run_without_the_relic_keeps_the_shipped_reading():
     assert FANFARE_SHIPPED_ROW in page
 
 
-def test_the_back_performer_row_carries_the_empty_stage_summon():
+def test_the_fanfare_row_carries_the_empty_stage_summon():
+    """The text pass's follow-up: on the Fanfare row, which every
+    Fanfare-giving face prints (Hold Your Places, Gala Dinner)."""
     page = blindplay.observe(_reward_state([SALON_SOLITAIRE]))
 
-    assert ("With no one on stage, Fanfare it would gain summons a random "
-            "performer instead.") in page
+    assert "Gained on an empty stage, it summons a performer." in page
     assert "**Raise**" not in page
 
 

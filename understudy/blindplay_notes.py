@@ -1608,8 +1608,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # page-only sentence ("not offered at all") is the tip's own clause now.
     "Spend": ("Pay Fanfare from your back performer. Offered only if it can "
               "pay in full. If that empties it exactly, it Bows."),
-    "Fanfare": ("A performer's health. Hits land on your Block, then your "
-                "front performer's Fanfare, then you. At 0 it leaves."),
+    # The follow-up: the empty-stage summon rides the Fanfare row, which
+    # every Fanfare-giving face prints.
+    "Fanfare": ("A performer's health. Hits take your Block, then the front "
+                "performer's, then you. Gained on an empty stage, it summons "
+                "a performer."),
     # `EB-744`. The CONTRAST that turn one's wager is (sec.7, line B against
     # line C): a Spend earns a Bow and a hit does not. The text pass points at
     # each performer's own row for what its Bow does.
@@ -1621,11 +1624,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # opus-furina-l2b seat's (c) 3).
     "front performer": ("Takes hits first. Regains 1 Fanfare at the start of "
                         "your turn. " + STAGE_ACTS),
-    # `EB-744` and round four: the back is reached LAST, per attack, and the
-    # text pass carries the empty-stage rule the retired Raise row held.
-    "back performer": ("Gains and Spends Fanfare. Hits reach it last. With no "
-                       "one on stage, Fanfare it would gain summons a random "
-                       "performer instead. " + STAGE_ACTS),
+    # `EB-744` and round four: the back is reached LAST, per attack.
+    "back performer": ("Gains and Spends Fanfare. Hits reach it last. "
+                       + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
     "Ousia": "This turn, your performers' acts deal double damage.",

@@ -6754,17 +6754,15 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # lead renamed the FRONT performer, every row in [USER]'s words.
         "Spend": ["Pay Fanfare from your ", ". Offered only ",
                   "if it can pay in full. If that empties it exactly, it "],
-        "Fanfare": ["A performer's health. Hits land on your ",
-                    "'s Fanfare, then you. At 0 it "],
+        "Fanfare": ["A performer's health. Hits take your ",
+                    "the front performer's, then you. Gained on an empty "
+                    "stage, it "],
         # `EB-744`: the contrast -- a Spend earns a Bow, a hit does not.
         "Bow": ["A performer's parting effect, shown on each performer. ",
                 "its last Fanfare triggers it; losing it to a hit doesn't."],
         "front performer": ["Takes hits first. Regains "],
-        # `EB-744` and round four: the back is reached last, and the
-        # empty-stage summon the retired Raise row carried.
-        "back performer": ["Gains and Spends ", ". Hits reach it last. With ",
-                           "no one on stage, Fanfare it would gain summons a "
-                           "random "],
+        # `EB-744` and round four: the back is reached last.
+        "back performer": ["Gains and Spends ", ". Hits reach it last."],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
         # anchors are the prose either side of it.
