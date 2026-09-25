@@ -1276,7 +1276,10 @@ public sealed class FurinaResourceHooks : AbstractModel
         // and the strip redraws -- and it fires per damage instance, so the
         // board is settled before the NEXT hit of the same flurry. A lead that
         // hit emptied takes its Bow here, after the hit is dealt and before
-        // the next one (rule 7, 2026-09-25).
+        // the next one (rule 7, 2026-09-25). The part of the hit that
+        // reached HER is filed on the stage log first, so the log reads the
+        // hit, the departure, what reached her, then the Bow.
+        FurinaStage.NoteHitOnFurina(target, result, dealer);
         await FurinaStage.Flush(choiceContext, target);
         Vfx.FurinaStageStrip.Refresh(target);
 #endif
@@ -1324,12 +1327,13 @@ public sealed class FurinaResourceHooks : AbstractModel
         // charge one hit to two buffers. Inert with the arm off -- one flag
         // read -- and absent from a release build.
         //
-        // CEILING, matching `AbsorbDamage`'s own cast one method below: a
-        // fractional remainder costs the lead a whole point, the way it costs
-        // the shipped buffer one.
+        // TRUNCATED, AS THE ENGINE COUNTS IT (2026-09-25): a Weakened 11
+        // into 6 Block arrives here as 2.25, the engine's `LoseHpInternal`
+        // would take 2 of her HP, and the ceiling this used to take made the
+        // lead pay 3. `FurinaStage.HpLossThroughBlock` carries the finding.
         if (FurinaStage.LiveFor(target))
         {
-            var incoming = (int)System.Math.Ceiling(amount);
+            var incoming = FurinaStage.HpLossThroughBlock(amount);
             return FurinaStage.AbsorbHit(target, incoming, dealer);
         }
 #endif

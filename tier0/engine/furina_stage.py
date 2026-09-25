@@ -78,9 +78,11 @@ ACT_USHER_BLOCK = 3
 ACT_CHEVALMARIN_DAMAGE = 2   # to EVERY enemy, and applies Hydro.
 ACT_CRABALETTA_DAMAGE = 5    # to a random enemy.
 
-# Rule 9, the BOWS -- earned by a Spend that empties the bar, and by nothing
-# else. Death by a hit, and leaving by rotation, earn none (sec.10 default 5).
-BOW_USHER_BLOCK = 4
+# Rule 9, the BOWS -- performed once by a performer that reached 0 Fanfare,
+# whatever emptied it (rule 7, 2026-09-25). Leaving by rotation earns none.
+# Usher's is Fanfare to the FRONT performer, not Block to Furina (2026-09-25:
+# his Block expired unused when a hit made him bow on the enemy's turn).
+BOW_USHER_FANFARE = 4
 BOW_CRABALETTA_DAMAGE = 8    # to a random enemy. Chevalmarin's bow is Hydro
                              # on every enemy and carries no number.
 
@@ -413,8 +415,9 @@ def settle_hit(state) -> None:
     destroyed or replaced, not just when you deliberately spend them down to
     0"): a performer a hit emptied takes its Bow AFTER that hit is dealt --
     `FurinaStage.Flush`'s twin, which the mod runs at `AfterDamageReceived`,
-    once per hit and before the next hit of the same attack. So Usher's Block
-    never softens the hit that emptied him, and does meet the next one.
+    once per hit and before the next hit of the same attack. So Usher's
+    Fanfare never softens the hit that emptied him, and the performer it lands
+    on does meet the next one.
 
     NO BOW when that hit killed Furina or ended the combat; what is owed is
     dropped, never kept for a later hit."""
@@ -453,8 +456,16 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
 
 def _bow(state, member: str) -> None:
     """Rule 9, the curtain call, performed ONCE by a performer that reached 0
-    Fanfare, whatever emptied it (rule 7). Usher: Furina gains 4 Block. Chevalmarin: Hydro on every enemy.
-    Crabaletta: deal 8 Hydro to a random enemy.
+    Fanfare, whatever emptied it (rule 7). Usher: the front performer gains
+    4 Fanfare -- a Raise like any other, so on the stage his leaving emptied a
+    random performer arrives holding it (2026-09-25; his 4 Block had expired
+    unused when a hit made him bow on the enemy's turn). Chevalmarin: Hydro on
+    every enemy. Crabaletta: deal 8 Hydro to a random enemy.
+
+    He has already LEFT when this runs, so "the front performer" is whoever
+    stands in front now: the old middle after a hit or a recast, the lead
+    after a Spend from the back. A Five-Century Act's return comes after it
+    (`_after_bow`), so it never lands on him.
 
     `EB-495` D3/D4: Crabaletta's bow is `powered=False` and Hydro, which is
     what `FurinaStage.Bow` has always passed (`FurinaStage.cs:542`, `:544`).
@@ -465,7 +476,7 @@ def _bow(state, member: str) -> None:
     p = state.player
     state.emit("stage_bow", member=member)
     if member == "usher":
-        p.block += BOW_USHER_BLOCK
+        raise_fanfare(state, BOW_USHER_FANFARE, SEAT_LEAD)
     elif member == "chevalmarin":
         for enemy in list(state.living_enemies):
             reactions.resolve_hit(state, enemy, "hydro", 0,

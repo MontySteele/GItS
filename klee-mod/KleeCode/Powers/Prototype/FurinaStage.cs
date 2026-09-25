@@ -625,6 +625,44 @@ public static class FurinaStage
     }
 
     /// <summary>
+    /// WHAT OF A HIT GOT PAST HER BLOCK, AS THE ENGINE WILL COUNT IT
+    /// (2026-09-25, the afternoon seat round's Weak off-by-one).
+    ///
+    /// THE FIND. A Weakened 11 against 6 Block was filed as 3 on Usher where
+    /// the seat computed 2. The seat was right. The engine does not round a
+    /// modified hit: <c>Hook.ModifyDamage</c> hands back 11 x 0.75 = 8.25,
+    /// Block takes 6, and <c>ModifyHpLostBeforeOsty</c> is handed 2.25 -- and
+    /// the engine's own <c>Creature.LoseHpInternal</c> then TRUNCATES that
+    /// (<c>(int)Math.Clamp(amount, 0, ...)</c>), so without a stage she would
+    /// have lost 2. This seam rounded the 2.25 UP, and Usher paid 3.
+    ///
+    /// SO THE STAGE COUNTS THE HIT THE WAY THE ENGINE DOES: truncated, and
+    /// never below 0. A fractional remainder costs the front performer
+    /// nothing, as it would have cost Furina nothing.
+    /// </summary>
+    public static int HpLossThroughBlock(decimal amount) =>
+        amount <= 0m ? 0 : (int)System.Math.Floor(amount);
+
+    /// <summary>
+    /// 2026-09-25: file the part of an enemy's hit that reached Furina's HP on
+    /// the stage log (<see cref="FurinaStageLedger.NoteHitOnFurina"/>), off the
+    /// engine's own result for that hit. Called from
+    /// <c>AfterDamageReceived</c>, once per hit, BEFORE the flush pays any
+    /// Bow that hit earned -- so the log reads the hit on the performer, its
+    /// leaving, the part that reached her, then the Bow.
+    /// </summary>
+    public static void NoteHitOnFurina(Creature target, DamageResult result,
+                                       Creature? dealer)
+    {
+        if (!LiveFor(target) || dealer is not { IsEnemy: true }) return;
+        if (!ReferenceEquals(result.Receiver, target)) return;
+        FurinaStageLedger.For(target).NoteHitOnFurina(
+            result.UnblockedDamage, target.CurrentHp,
+            dealer.Monster?.Title.ToString() ?? "",
+            dealer.CombatId.ToString());
+    }
+
+    /// <summary>
     /// Rule 8's payment leg, for a Spend mode the chooser offered (its gate
     /// asked <see cref="CanSpend"/>). The BACK performer pays the whole price;
     /// if that empties it exactly, it bows (R276 picks 1 and 2).
@@ -877,10 +915,17 @@ public static class FurinaStage
         switch (exit.Who)
         {
             case StagePerformer.Usher:
-                await CreatureCmd.GainBlock(
-                    owner, FurinaStageLaw.BowUsherBlock,
-                    ValueProp.Unpowered, null, fast: true);
-                break;
+                // 2026-09-25: Fanfare to the FRONT performer, not Block to
+                // Furina -- a hit made him bow on the enemy's turn and the
+                // Block expired unused. He has already left, so the front is
+                // whoever stands there now, and on the stage he emptied the
+                // Raise summons a random performer holding it (round four's
+                // rule, the door Thunderous Applause uses). The bow beat is
+                // filed FIRST so the log reads the bow, then the gain it paid.
+                NoteBeat(owner, "bow", exit.Who, before);
+                await RaiseLead(owner, FurinaStageLaw.BowUsherFanfare);
+                await AfterBow(choiceContext, owner, exit.Who, mayReturn);
+                return;
             case StagePerformer.Chevalmarin:
                 foreach (var enemy in Enemies(owner))
                 {
@@ -993,7 +1038,8 @@ public static class FurinaStage
     /// once per hit, inside <c>CreatureCmd.Damage</c>, after that hit's HP
     /// loss and before <c>AttackCommand</c> deals the next hit. So the bow
     /// lands BETWEEN the hits of a multi-hit attack: it cannot soften the hit
-    /// that emptied the performer, and Usher's Block meets the next one.
+    /// that emptied the performer, and the performer Usher's Fanfare lands
+    /// on meets the next one.
     /// The bow is the same <see cref="Bow"/> a Spend takes, readers and A
     /// Five-Century Act's return included.
     ///

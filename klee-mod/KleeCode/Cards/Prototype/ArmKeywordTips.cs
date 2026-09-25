@@ -928,8 +928,9 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, UsherKey,
             "End of your turn: gain " + FurinaStageLaw.ActUsherBlock
-          + " [gold]Block[/gold]. [gold]Bow[/gold]: gain "
-          + FurinaStageLaw.BowUsherBlock + " [gold]Block[/gold].");
+          + " [gold]Block[/gold]. [gold]Bow[/gold]: your front performer "
+          + "gains " + FurinaStageLaw.BowUsherFanfare
+          + " [gold]Fanfare[/gold].");
 
     /// <summary>2026-09-25. SURINTENDANTE CHEVALMARIN'S ACT AND BOW, the
     /// same two sentences as <c>ChevalmarinBadgePower</c>.</summary>

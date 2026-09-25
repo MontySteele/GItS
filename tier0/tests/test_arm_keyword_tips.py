@@ -647,7 +647,7 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     # (R215 B, the brief's sec.10 default 3), which makes a retune likelier
     # here than anywhere else on this list. `EB-723` replaced the reframe's
     # Evoke pair, which left with that arm's rows.
-    assert "FurinaStageLaw.BowUsherBlock" in tips
+    assert "FurinaStageLaw.BowUsherFanfare" in tips
     assert "FurinaStageLaw.BowCrabalettaDamage" in tips
     assert "FurinaStageLaw.LeadRegen" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
@@ -1189,10 +1189,13 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
 #: performer": Ousia Surge, Pneuma Refrain and Final Bow print "your back
 #: performer's" / "your front performer's", and only the Rare -- "all your
 #: performers' Fanfare" -- keeps its sentence.
-STAGE_READERS = {
-    "proto_fs_let_the_people_rejoice": ("SpendAll",
-                                        "ProtoFsLetThePeopleRejoice"),
-}
+#: 2026-09-25 (the afternoon seat round): NONE. Let the People Rejoice was the
+#: last row whose number IS a bar; it now deals twice the Fanfare it spends,
+#: so the reader sentence ("The number is every performer's Fanfare added up
+#: and spent") would be false on it, and `stage_reader_source` drops it the
+#: way it drops Bravura's "3 per point". Its face says "twice your
+#: performers' Fanfare" in words.
+STAGE_READERS: dict[str, tuple[str, str]] = {}
 
 #: The three readers whose face names the seat, and so carry no reader tip.
 STAGE_READERS_NAMED_ON_THE_FACE = {
@@ -1218,13 +1221,22 @@ def test_the_four_readers_are_the_rows_whose_number_is_a_bar():
     assert found == {rid: src for rid, (src, _) in STAGE_READERS.items()}
 
 
-@pytest.mark.parametrize("rid", sorted(STAGE_READERS))
-def test_every_reader_carries_the_rule_its_number_obeys(rid):
+def test_every_reader_carries_the_rule_its_number_obeys():
     """The attach is committed, with the right one of the four sentences."""
-    source, cls = STAGE_READERS[rid]
-    src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
-    assert ("ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, "
-            f"ArmKeywordTips.StageReader.{source})") in src
+    for source, cls in STAGE_READERS.values():
+        src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
+        assert ("ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, "
+                f"ArmKeywordTips.StageReader.{source})") in src
+
+
+def test_the_rare_at_twice_the_fanfare_carries_no_reader_tip():
+    """2026-09-25: its number is twice the bar, so the one-bar sentence is
+    gone from it and the face states the rule in words."""
+    src = (PROTOTYPE_DIR / "ProtoFsLetThePeopleRejoice.cs").read_text(
+        encoding="utf-8")
+    assert "ForStageReader" not in src
+    row = {r["id"]: r for r in proto._rows()}["proto_fs_let_the_people_rejoice"]
+    assert "twice your performers' [gold]Fanfare[/gold]" in row["description"]
 
 
 @pytest.mark.parametrize("rid", sorted(STAGE_READERS_NAMED_ON_THE_FACE))
@@ -1349,8 +1361,9 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             '" [gold]Fanfare[/gold].");',
             "if (random)",
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
-            '" [gold]Block[/gold]. [gold]Bow[/gold]: gain "',
-            "FurinaStageLaw.BowUsherBlock",
+            '" [gold]Block[/gold]. [gold]Bow[/gold]: your front performer "',
+            '"gains " + FurinaStageLaw.BowUsherFanfare',
+            '" [gold]Fanfare[/gold].");',
             '"End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage',
             '" [gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "',
             '"apply [gold]Hydro[/gold] to ALL enemies."',
@@ -1380,7 +1393,8 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     assert blindplay_notes.SUMMON_NAMED_ROW == (
         "A performer joins at the back with 1 Fanfare.")
     assert rows["Gentilhomme Usher"] == (
-        "End of your turn: gain 3 Block. Bow: gain 4 Block.")
+        "End of your turn: gain 3 Block. Bow: your front performer gains 4 "
+        "Fanfare.")
     assert rows["Surintendante Chevalmarin"] == (
         "End of your turn: deal 2 Hydro damage to ALL enemies. Bow: apply "
         "Hydro to ALL enemies.")

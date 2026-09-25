@@ -41,21 +41,21 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendAll), this), this);
+        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("let_the_people_rejoice");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Let the People Rejoice"),
-        ("description", "Deal damage to ALL enemies equal to all your performers' [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal damage to ALL enemies equal to twice your performers' [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(1m),
+            new ExtraDamageVar(2m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrTotalFanfare(card))
         };
 

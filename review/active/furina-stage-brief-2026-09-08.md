@@ -106,7 +106,7 @@ performers with their own bars, and Fanfare is that bar.**
    and 2). If the back performer has less than N, or no performer is on
    stage, the Spend mode cannot be chosen and the card plays its base mode.
    A performer the Spend empties exactly leaves with a bow.
-9. **The curtain call.** A performer that Bows performs its departure effect once. Usher: Furina gains 4 Block. Chevalmarin: Hydro
+9. **The curtain call.** A performer that Bows performs its departure effect once. Usher: the front performer gains 4 Fanfare (2026-09-25: his Block expired unused when a hit made him bow on the enemy's turn). Chevalmarin: Hydro
    on every enemy. Crabaletta: deal 8 Hydro damage to a random enemy.
 10. **Each performer performs at the end of Furina's turn**, from any
     seat, a flat act that does not read its bar: Usher gives Furina 3
@@ -182,7 +182,9 @@ Companions in hand; the back seat is her safest, since only the lead is
 exposed and a summon on a full stage removes the front.
 
 The Rare all three aim at: **Let the People Rejoice**, 2 Energy, Exhaust.
-Spend all Fanfare on stage. Deal that much damage to every enemy. Every
+Spend all Fanfare on stage. Deal twice that much damage to every enemy
+(2026-09-25: it paid 1 per Fanfare, and a seat found performers never held
+enough to make 2 Energy worth it; Spend's nominal rate, §4, is 2). Every
 performer takes a bow, then returns at 1. Worth nothing on an empty stage.
 
 ## 6. The intended weakness
@@ -215,7 +217,7 @@ Rising Applause. Intent Butt 12.
 | B, wager | Presence, Curtain Rise with Spend 3 (Usher 3 to 0, bows: Block 4), Solicitation | 10 | 19 | 25 | empty | 76 |
 | C, plain | Presence, Curtain Rise unspent, Solicitation; Usher performs Block 3 | 9 | 13 | 31 | Usher 3, takes 3, dies, no bow | 78 |
 
-Line C now ends in Usher's Bow: Furina gains 4 Block after the hit (rule 7, 2026-09-25). The numbers above predate it.
+Lines B and C now end differently. Line C ends in Usher's Bow after the hit (rule 7, 2026-09-25), and since the same day his Bow gives the front performer 4 Fanfare rather than Furina 4 Block (rule 9); on the stage he leaves empty in lines B and C, that is a random performer arriving with 4. Line B's "bows: Block 4" and its Block of 10 are the old Bow. The numbers above predate both changes.
 
 All three are legitimate. A keeps the show and Furina whole for the least
 damage. B takes 13 more damage than A for 2 HP and an empty stage. C sits
@@ -385,7 +387,7 @@ Names are provisional.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Let the People Rejoice | 2 | Attack | Deal damage to ALL enemies equal to all your performers' Fanfare. They all Bow, then return with 1. Exhaust. |
+| Let the People Rejoice | 2 | Attack | Deal damage to ALL enemies equal to twice your performers' Fanfare. They all Bow, then return with 1. Exhaust. (2026-09-25: was once their Fanfare.) |
 
 The relic: **Salon Solitaire**, Furina's starting relic. Start each combat
 with Usher in front with 3 Fanfare.
@@ -439,7 +441,7 @@ act resolves twice, and each further copy adds one more act. Thunderous
 Applause gives its Fanfare after the bowing performer has left, so on an
 empty stage it summons a random performer holding the amount (round four), and the
 draw still happens. Let the People Rejoice's performers return to empty seats
-only, so one that finds none (an applause summon took it) does not return. A Rapt Audience does nothing while one
+only, so one that finds none (an applause summon or Usher's Bow took it) does not return. A Rapt Audience does nothing while one
 performer is both front and back. Arkhe Alignment's "double" multiplies the
 act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
 10). One question a turn however many copies are in play: copies add (two

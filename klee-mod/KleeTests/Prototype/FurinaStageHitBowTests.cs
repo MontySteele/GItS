@@ -105,8 +105,9 @@ public class FurinaStageHitBowTests
         Assert.True(exit.Bows);
         // Paid once: a second flush finds nothing owed.
         Assert.Empty(stage.TakePendingHitBows());
-        // Usher's Bow is his 4 Block (rule 9).
-        Assert.Equal(4, FurinaStageLaw.BowUsherBlock);
+        // Usher's Bow is 4 Fanfare to the front performer (rule 9,
+        // 2026-09-25).
+        Assert.Equal(4, FurinaStageLaw.BowUsherFanfare);
     }
 
     [Fact]

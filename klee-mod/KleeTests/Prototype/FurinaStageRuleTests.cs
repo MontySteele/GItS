@@ -678,7 +678,7 @@ public class FurinaStageRuleTests
         Assert.Equal(3, FurinaStageLaw.ActUsherBlock);
         Assert.Equal(2, FurinaStageLaw.ActChevalmarinDamage);
         Assert.Equal(5, FurinaStageLaw.ActCrabalettaDamage);
-        Assert.Equal(4, FurinaStageLaw.BowUsherBlock);
+        Assert.Equal(4, FurinaStageLaw.BowUsherFanfare);
         Assert.Equal(8, FurinaStageLaw.BowCrabalettaDamage);
     }
 

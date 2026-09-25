@@ -711,6 +711,9 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
                f"this turn"
     elif placed:
         line = f"{indent}{power['name']}: {placed} {power['stacks']}"
+    elif power.get("numbered") is False:
+        # A `Single` power: the game draws no number on its icon (2026-09-25).
+        line = f"{indent}{power['name']}"
     else:
         line = f"{indent}{power['name']} {power['stacks']}{_folded_reaction(power)}"
     kind = str(power.get("kind") or "").strip().lower()
@@ -1544,7 +1547,10 @@ STAGE_ACT_SPREAD = "{n} in total, split across the enemies, and Hydro on each"
 #: so it is the one row with no `{n}` in it -- the beat files 0 and a line
 #: reading "0 to every enemy" would be describing a hit that did not happen.
 STAGE_BOW_EFFECTS = {
-    "usher": "Furina gains {n} Block",
+    # 2026-09-25: his Bow is Fanfare for the front performer, not Block. The
+    # gain is its own line right after this one (a Raise, or an arrival where
+    # his leaving emptied the stage), so this sentence carries no number.
+    "usher": "your front performer gains 4 Fanfare",
     "chevalmarin": "Hydro on every enemy",
     "crabaletta": "{n} to {who}",
 }
@@ -1666,6 +1672,13 @@ STAGE_HIT_LEAVES = (", and it leaves the stage: emptied by a hit, so it "
                     "takes a Bow")
 #: A hit whose dealer the mod could not name (no enemy behind it).
 STAGE_HIT_UNNAMED_LINE = "  - **{who}** was hit for {n}: {before} → {after}"
+#: 2026-09-25 (the afternoon seat round): THE PART OF A HIT THAT REACHED HER.
+#: The log listed hits on performers and never on Furina, and both seats
+#: misjudged how much of an attack got through. The mod files what her HP
+#: actually lost once her Block and the front performer's bar had taken
+#: theirs, and her HP after it; the line is the performer hit line's shape.
+STAGE_HIT_FURINA_LINE = ("  - {dealer} hit **Furina** for {n} past your "
+                         "Block and front performer: {before} → {after} HP.")
 
 
 def _stage_hit_line(row: dict[str, Any], log: list[dict[str, Any]],
@@ -1725,6 +1738,14 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(line)
             if left:
                 folded = at + 1
+        elif row["event"] == "hit_furina":
+            if row.get("hp") is None:
+                continue
+            out.append(STAGE_HIT_FURINA_LINE.format(
+                dealer=(f"**{row['target']}**" if row["target"]
+                        else "An enemy"),
+                n=row["moved"], before=row["hp"] + row["moved"],
+                after=row["hp"]))
         elif row["event"] == "arrive":
             out.append(f"  - {who} joined the stage at {row['fanfare']} "
                        "Fanfare"

@@ -192,9 +192,14 @@ public sealed class StageSeat
 /// one 8 when it was 2 to each of four. Filled only where every enemy lost
 /// the same amount, measured as <paramref name="Moved"/> is; -1 on every other
 /// beat and on an uneven sweep, where the page falls back to the total.</param>
+/// <param name="Hp">2026-09-25: FURINA'S HP AFTER the one beat that is about
+/// her rather than a performer, <see cref="FurinaStageLedger.HitFurinaEvent"/>
+/// -- the part of an enemy's hit that got past her Block and the front
+/// performer's bar. -1 on every other beat.</param>
 public readonly record struct StageBeat(
     string Event, StagePerformer Who, int Seat, int Fanfare, int Moved,
-    string Reason, string Target = "", string TargetId = "", int Each = -1);
+    string Reason, string Target = "", string TargetId = "", int Each = -1,
+    int Hp = -1);
 
 
 /// <summary>
@@ -290,6 +295,33 @@ public sealed class FurinaStageLedger
 
     /// <summary>The turn boundary, and the only one this log has.</summary>
     public void ClearBeats() => _beats.Clear();
+
+    /// <summary>The event name of <see cref="NoteHitOnFurina"/>'s beat.
+    /// </summary>
+    public const string HitFurinaEvent = "hit_furina";
+
+    /// <summary>
+    /// 2026-09-25 (the afternoon seat round). THE PART OF A HIT THAT REACHED
+    /// HER. The log filed every hit on a performer and none on Furina, so
+    /// both seats misjudged how much of an attack got through: "the stage log
+    /// lists hits on performers only, never hits on Furina, so every HP loss
+    /// I had to infer". This beat is the last step of the damage order --
+    /// her Block, then the front performer's bar, then her HP -- filed with
+    /// what her HP actually lost (<paramref name="lost"/>) and where it ended
+    /// (<paramref name="hpAfter"/>), and the dealer the way a performer's
+    /// hit beat names it. Nothing filed for a hit that took no HP.
+    ///
+    /// <see cref="StageBeat.Who"/> carries no meaning on this beat (the
+    /// wire's view prints Furina); it is Usher only because the field has no
+    /// empty value.
+    /// </summary>
+    public void NoteHitOnFurina(int lost, int hpAfter, string dealer = "",
+                                string dealerId = "")
+    {
+        if (lost <= 0) return;
+        Note(new StageBeat(HitFurinaEvent, StagePerformer.Usher, -1, 0, lost,
+                           "", dealer, dealerId, -1, hpAfter));
+    }
 
     /// <summary>The seat this performer is standing in, front = 0, or -1.
     /// </summary>
@@ -543,8 +575,8 @@ public sealed class FurinaStageLedger
     /// been dealt, and a bow is awaited work -- so the exit is QUEUED here and
     /// paid by <c>FurinaStage.Flush</c> at <c>AfterDamageReceived</c>, which
     /// the engine fires once per hit, after that hit's HP loss and before the
-    /// next hit of the same attack. Usher's Block therefore never reduces the
-    /// hit that emptied him, and does meet the next one.
+    /// next hit of the same attack. Usher's Fanfare therefore never reduces
+    /// the hit that emptied him, and does meet the next one.
     ///
     /// SYNCHRONOUS ON PURPOSE. Its caller is
     /// <c>FurinaResourceHooks.ModifyHpLostBeforeOsty</c>, which the engine
@@ -971,8 +1003,11 @@ public sealed class FurinaStageLedger
             .Select(beat => (object?)new Dictionary<string, object?>
             {
                 ["event"] = beat.Event,
-                ["member"] = FurinaStage.Name(beat.Who),
-                ["name"] = DisplayName(beat.Who),
+                // 2026-09-25: the hit beat that is about HER, not a performer.
+                ["member"] = beat.Event == HitFurinaEvent
+                    ? "furina" : FurinaStage.Name(beat.Who),
+                ["name"] = beat.Event == HitFurinaEvent
+                    ? "Furina" : DisplayName(beat.Who),
                 ["seat"] = beat.Seat,
                 ["fanfare"] = beat.Fanfare,
                 ["moved"] = beat.Moved,
@@ -985,6 +1020,9 @@ public sealed class FurinaStageLedger
                 // Round four: the per-enemy figure of Chevalmarin's act, -1
                 // where there is none (see `StageBeat.Each`).
                 ["each"] = beat.Each,
+                // 2026-09-25: her HP after a hit that reached her; -1 on
+                // every other beat (see `StageBeat.Hp`).
+                ["hp"] = beat.Hp,
             })
             .ToList();
         return snapshot;

@@ -1843,6 +1843,13 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
     for power, row in zip(out, rows):
         kind = _text(row.get("type"))
         power["kind"] = "aura" if _is_aura(power["name"]) else kind
+        # 2026-09-25 (the Furina seat round): "The Stage 1 (buff) prints a
+        # number I never saw change". The game draws a number on the icon only
+        # for a `Counter` power; a `Single` one shows none, and the wire's
+        # `amount` is a constant 1 for it. The bridge now sends `stack`, and
+        # the page prints no number where it says `Single`. Absent (an older
+        # bridge) prints the number as before.
+        power["numbered"] = _text(row.get("stack")) != "Single"
         # `EB-340`: the tips the wire hangs on the status row, carried through
         # so the glossary can define a word an enemy's buff line announced.
         # `Galvanic 6 -- Powers are afflicted with Galvanized` reached a blind

@@ -243,11 +243,13 @@ public class FurinaStageLegibilityTests
         var usher = Badge<UsherBadgePower>("description");
         Assert.Equal(
             $"End of your turn: gain {FurinaStageLaw.ActUsherBlock} "
-          + "[gold]Block[/gold]. [gold]Bow[/gold]: gain "
-          + $"{FurinaStageLaw.BowUsherBlock} [gold]Block[/gold].", usher);
+          + "[gold]Block[/gold]. [gold]Bow[/gold]: your front performer "
+          + $"gains {FurinaStageLaw.BowUsherFanfare} [gold]Fanfare[/gold].",
+            usher);
         Assert.Contains("End of your turn: gain ", Printed("ForUsher"));
-        Assert.Contains(" [gold]Block[/gold]. [gold]Bow[/gold]: gain ",
-                        Printed("ForUsher"));
+        Assert.Contains(" [gold]Block[/gold]. [gold]Bow[/gold]: your front "
+                        + "performer ", Printed("ForUsher"));
+        Assert.Contains(" [gold]Fanfare[/gold].", Printed("ForUsher"));
 
         var cheval = Badge<ChevalmarinBadgePower>("description");
         Assert.Equal(
