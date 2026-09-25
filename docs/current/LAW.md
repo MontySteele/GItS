@@ -37,8 +37,10 @@ combat grammar comes with us. (principles §1)
 ## Combat — elements & reactions
 
 - **Reactions are earned, not given.** No character card applies an off-element
-  aura; off-element access comes only from companions or a co-op partner.
-  (principles Pillar 2 / Guardrail 2)
+  aura; off-element access comes only from companions, a co-op partner, or a
+  guest on Furina's stage, which pays for it with a seat and Fanfare.
+  (principles Pillar 2 / Guardrail 2; the guest clause 2026-09-25, [USER]: "I
+  think amending is fine", `review/active/furina-guest-batch-2026-09-25.md`)
 - **Amplifiers are per-hit and consume the aura.** No reaction ever produces a
   persistent or compounding damage multiplier — this is the iron rule and the
   balance governor. (Whether a particular card's scaling that happens to get
