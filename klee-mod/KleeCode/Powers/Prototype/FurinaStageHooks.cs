@@ -48,36 +48,17 @@ public sealed class FurinaStageHooks : AbstractModel
     }
 
     /// <summary>
-    /// RULE 4, AND RULE 7'S WAITING BOWS (2026-09-25 evening), at
-    /// <c>BeforeHandDraw</c>: after the block clear and the energy reset,
-    /// before the hand draw (<c>CombatManager.SetupPlayerTurn</c>; the order
-    /// is <c>tier0/tests/test_reaction_phase_parity.TURN_START_BROADCAST_ORDER</c>).
-    ///
-    /// THE LEAD'S REGEN FIRST, THEN THE BOWS, in the order the brief states
-    /// them: a performer a hit emptied on the enemy's turn takes its Bow
-    /// "after her Block clears and after the front's regen, before her draw".
-    /// The regen moved here from <c>AfterPlayerTurnStart</c> so that both
-    /// halves of that sentence can hold; nothing reads the lead's bar between
-    /// the two sites, and the regen is still from her second turn on.
-    /// A Bow paid here is her act, so Usher's Block survives to her turn --
-    /// what two seats saw expire, paid between the enemy's hits, in every
-    /// fight they played.
+    /// RULE 4. The site is the retired reframe's opening grant's and its
+    /// argument carries over whole: this engine's turn-start effects fire on
+    /// <c>AfterPlayerTurnStart</c>, after the block clear, the energy reset and
+    /// the draw -- the moment the sim's <c>_player_turn</c> fires its own, and
+    /// the moment the blind-play page renders its first line of the turn.
     /// </summary>
-    public override async Task BeforeHandDraw(
-        Player player, PlayerChoiceContext choiceContext,
-        ICombatState combatState)
-    {
-        await FurinaStage.RegenLead(player.Creature);
-        await FurinaStage.PayOwedBows(choiceContext, player.Creature);
-        Vfx.FurinaStageStrip.Refresh(player.Creature);
-    }
-
-    /// <summary>The Stage badge, re-asked every turn start
-    /// (<see cref="FurinaStage.InstallBadge"/>).</summary>
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
         await FurinaStage.InstallBadge(player.Creature);
+        await FurinaStage.RegenLead(player.Creature);
         Vfx.FurinaStageStrip.Refresh(player.Creature);
     }
 
@@ -157,8 +138,7 @@ public sealed class FurinaStageHooks : AbstractModel
     /// Rule 7 (2026-09-25): THE HIT THAT KILLS FURINA EARNS NO BOW. A lead
     /// emptied by a hit queues its Bow for the flush after the hit, and the
     /// engine skips that flush for a target the hit killed. Dropped here, so a
-    /// revived Furina's next hit cannot pay a Bow left over from this one --
-    /// and so are the Bows waiting for her turn (2026-09-25 evening).
+    /// revived Furina's next hit cannot pay a Bow left over from this one.
     /// </summary>
     public override Task AfterDeath(
         PlayerChoiceContext choiceContext, Creature creature,
@@ -166,9 +146,7 @@ public sealed class FurinaStageHooks : AbstractModel
     {
         if (FurinaStage.LiveFor(creature))
         {
-            var stage = FurinaStageLedger.For(creature);
-            stage.TakePendingHitBows();
-            stage.TakeOwedBows();
+            FurinaStageLedger.For(creature).TakePendingHitBows();
         }
         return Task.CompletedTask;
     }

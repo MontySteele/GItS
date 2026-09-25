@@ -612,9 +612,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "the front performer's, then you. Gained on an empty stage, it ",
             "summons a performer.",
             # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-            # 2026-09-25 evening: a Bow earned on the enemy's turn waits.
-            "A leaving performer acts one last time. On the enemy's turn, ",
-            "that waits for the start of yours.\");",
+            "A performer that leaves the stage acts one last time on its way ",
+            "out.\");",
             "Takes hits first. Regains ",
             " [gold]Fanfare[/gold] at the start of your turn.",
             # Round four's empty-stage summon is the Fanfare tip's (above).
@@ -1352,8 +1351,8 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     assert rows["Mademoiselle Crabaletta"] == (
         "End of your turn: deal 5 damage to a random enemy.")
     assert rows["Bow"] == (
-        "A leaving performer acts one last time. On the enemy's turn, that "
-        "waits for the start of yours.")
+        "A performer that leaves the stage acts one last time on its way "
+        "out.")
 
 
 # ---------------------------------------------------------------------------

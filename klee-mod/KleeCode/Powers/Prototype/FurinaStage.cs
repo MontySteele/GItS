@@ -620,12 +620,9 @@ public static class FurinaStage
         var twoOrMore = ledger.Seats.Count >= 2;
         // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
         // combat id, the pair `NoteBeat` files for the body an act lands on.
-        // 2026-09-25 evening: and WHOSE TURN it is. A lead emptied on the
-        // enemy's turn owes its Bow to the start of hers (rule 7).
         var result = ledger.Absorb(
             incoming, dealer?.Monster?.Title.ToString() ?? "",
-            dealer?.CombatId.ToString() ?? "",
-            waitsForTurn: OnEnemyTurn(target));
+            dealer?.CombatId.ToString() ?? "");
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {
@@ -640,13 +637,6 @@ public static class FurinaStage
         }
         return result.ReachedFurina;
     }
-
-    /// <summary>Is it the enemies' turn? The side the combat says is acting
-    /// -- an extra player turn keeps it the player's. False with no combat,
-    /// which is every headless pin.</summary>
-    public static bool OnEnemyTurn(Creature? owner) =>
-        owner?.CombatState?.CurrentSide
-        == MegaCrit.Sts2.Core.Combat.CombatSide.Enemy;
 
     /// <summary>
     /// WHAT OF A HIT GOT PAST HER BLOCK, AS THE ENGINE WILL COUNT IT
@@ -948,10 +938,9 @@ public static class FurinaStage
 
     /// <summary>
     /// Rule 9, the curtain call: performed ONCE by a performer that reached 0
-    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at the start of
-    /// her next turn when the hit came on the enemy's turn,
-    /// <see cref="PayOwedBows"/>; at <see cref="Flush"/>, after the hit, on
-    /// her own), or a summon on a full stage. It
+    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at
+    /// <see cref="Flush"/>, right after the hit), or a summon on a full
+    /// stage. It
     /// takes the EXIT rather than the performer so a rotation cannot be
     /// mistaken for a departure at a call site --
     /// <see cref="StageExit.Bows"/> is the ledger's own read of rule 7, and a
@@ -964,8 +953,10 @@ public static class FurinaStage
     /// a random enemy -- <see cref="Act"/> itself, filed as a <c>bow</c>.
     /// ONE act: Ousia and Pneuma double it like any act, and Full House does
     /// not repeat it (only <see cref="EndOfTurnActs"/> loops). A hit's Bow on
-    /// the enemy's turn waits for the start of hers (2026-09-25 evening), so
-    /// Usher's Block lands after her Block clears and lasts her turn.
+    /// the enemy's turn is paid then, between that enemy's hits ([USER],
+    /// 2026-09-25: "I think it would be better to have the performer bow
+    /// immediately (during the opponent's turn) instead of at the start of
+    /// your turn").
     /// </summary>
     public static async Task Bow(PlayerChoiceContext choiceContext,
                                  Creature owner, StageExit exit,
@@ -1061,16 +1052,17 @@ public static class FurinaStage
     /// <c>ModifyHpLostBeforeOsty</c> because the engine wanted a number back,
     /// and this is where the bodies catch up.
     ///
-    /// AND WHERE A HIT ON HER OWN TURN PAYS ITS BOW (rule 7, 2026-09-25:
-    /// "Stage members bow out when they are destroyed or replaced, not just
-    /// when you deliberately spend them down to 0"). The engine calls
-    /// <c>AfterDamageReceived</c> once per hit, inside
-    /// <c>CreatureCmd.Damage</c>, after that hit's HP loss, so the bow cannot
-    /// soften the hit that emptied the performer. A hit on the ENEMY'S turn
-    /// queues nothing here: its Bow waits for the start of her next turn
-    /// (<see cref="PayOwedBows"/>, 2026-09-25 evening), which replaced
-    /// paying it between the enemy's hits -- two seats watched that Block
-    /// expire unused before her turn in every fight.
+    /// AND WHERE A HIT'S BOW IS PAID (rule 7, 2026-09-25: "Stage members bow
+    /// out when they are destroyed or replaced, not just when you deliberately
+    /// spend them down to 0"). The engine calls <c>AfterDamageReceived</c>
+    /// once per hit, inside <c>CreatureCmd.Damage</c>, after that hit's HP
+    /// loss and before <c>AttackCommand</c> deals the next hit. So the bow
+    /// lands BETWEEN the hits of a multi-hit attack, on the enemy's turn: it
+    /// cannot soften the hit that emptied the performer, and the performer
+    /// Usher's Fanfare lands on meets the next one. [USER], 2026-09-25
+    /// evening, overruling the start-of-turn wait #676 built: "I think it
+    /// would be better to have the performer bow immediately (during the
+    /// opponent's turn) instead of at the start of your turn."
     /// The bow is the same <see cref="Bow"/> a Spend takes, readers and A
     /// Five-Century Act's return included.
     ///
@@ -1094,32 +1086,6 @@ public static class FurinaStage
                     await Bow(choiceContext, owner, exit);
                 }
             }
-        }
-        await FurinaStagePets.Sync(owner);
-        Vfx.FurinaStageStrip.Refresh(owner);
-    }
-
-    /// <summary>
-    /// RULE 7, 2026-09-25 evening: THE BOWS A HIT ON THE ENEMY'S TURN LEFT
-    /// WAITING, paid at the start of her turn in the order they were earned.
-    /// Called from <c>FurinaStageHooks.BeforeHandDraw</c>: after her Block
-    /// clears and after the front's regen, before her draw. Each is the
-    /// ordinary <see cref="Bow"/> -- the performer's act, then Thunderous
-    /// Applause and A Five-Century Act -- so a returnee arrives on her turn.
-    ///
-    /// DROPPED, NOT KEPT, when she is dead or the combat is over: the list is
-    /// taken first either way, so nothing owed outlives this call.
-    /// </summary>
-    public static async Task PayOwedBows(PlayerChoiceContext choiceContext,
-                                         Creature? owner)
-    {
-        if (owner == null || !LiveFor(owner)) return;
-        var owed = FurinaStageLedger.For(owner).TakeOwedBows();
-        if (owed.Count == 0) return;
-        foreach (var exit in owed)
-        {
-            if (owner.IsDead || CombatOver()) break;
-            await Bow(choiceContext, owner, exit);
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);

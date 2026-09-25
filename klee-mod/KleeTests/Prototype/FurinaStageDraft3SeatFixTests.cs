@@ -14,7 +14,7 @@ namespace KleeMod.Tests.Prototype;
 /// the mod's halves of the page fixes: a Spend is a beat on the stage log,
 /// Chevalmarin's act says what each enemy was dealt and how many it struck,
 /// and a random summon names who it rolled on the card's own resolution row.
-/// The waiting Bow is <c>FurinaStageHitBowTests</c>'. The page's halves are
+/// The hit's Bow is <c>FurinaStageHitBowTests</c>'. The page's halves are
 /// <c>tier0/tests/test_furina_draft3_seat_fixes.py</c>.
 ///
 /// NOTHING MEASURED HERE IS QUOTABLE (R215 B): a prototype arm's arithmetic.

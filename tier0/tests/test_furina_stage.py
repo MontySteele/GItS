@@ -311,12 +311,11 @@ def test_a_flurry_kills_the_lead_and_leaves_furina_untouched(arm):
     assert st.player.stage == [["crabaletta", 7]]
 
 
-def test_a_hit_on_the_enemys_turn_owes_its_bow_to_her_turn(arm):
-    """Rule 7 ([USER], 2026-09-25: "Stage members bow out when they are
+def test_a_hit_bows_after_the_hit_is_dealt(arm):
+    """Rule 7, 2026-09-25 ([USER]: "Stage members bow out when they are
     destroyed or replaced, not just when you deliberately spend them down to
-    0"), as the evening's seat round moved it: a hit on the enemy's turn owes
-    the Bow, `settle_hit` keeps it waiting, and `pay_owed_bows` pays it at the
-    start of her turn -- `FurinaStage.PayOwedBows`'s twin."""
+    0"). The absorb only owes the Bow; `settle_hit` pays it once the hit is
+    dealt, `FurinaStage.Flush`'s twin."""
     st = _state()
     st.player.stage = [["usher", 2]]
     FS.absorb(st, 2)
@@ -326,49 +325,40 @@ def test_a_hit_on_the_enemys_turn_owes_its_bow_to_her_turn(arm):
     leave = [e for e in st.log if e["event"] == "stage_leave"]
     assert leave[-1]["bowed"] is True and leave[-1]["reason"] == "hit"
     FS.settle_hit(st)
-    assert st.player.block == 0                 # nothing paid between hits
-    assert FS.owed_bows(st) == ["usher"]
-    FS.pay_owed_bows(st)
     # Draft 3 (2026-09-25): his Bow is his act once more, 3 Block.
     assert st.player.block == FS.ACT_USHER_BLOCK
     assert [e for e in st.log if e["event"] == "stage_bow"]
     assert st.player.stage == []
-    assert FS.owed_bows(st) == []
-    FS.pay_owed_bows(st)                        # paid once, never twice
+    FS.settle_hit(st)                           # paid once, never twice
     assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_a_hit_that_empties_a_lone_usher_lands_in_full_then_he_bows(arm):
-    """The overflow reaches her first, and the Bow never softens it: a 10 into
-    a lone Usher at 3 costs her 7 HP. His Bow -- his act once more (draft 3)
-    -- waits for her turn (2026-09-25 evening) and gives her 3 Block then."""
+    """The overflow reaches her first, and the Bow comes after it: a 10 into a
+    lone Usher at 3 costs her 7 HP, then his Bow -- his act once more (draft
+    3, 2026-09-25) -- gives her 3 Block, which helps only against later
+    hits."""
     player = _furina(hp=78, max_hp=78)
     player.stage = [["usher", 3]]
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 10}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.hp == 78 - 7
-    assert player.block == 0
-    assert player.stage == []
-    FS.pay_owed_bows(st)
     assert player.block == FS.ACT_USHER_BLOCK
+    assert player.stage == []
 
 
-def test_a_hit_bow_on_the_enemys_turn_waits_for_hers(arm):
-    """2026-09-25 evening: a hit empties him on the enemy's turn, and his Bow
-    -- his act once more, 3 Block -- waits for the start of her turn, where
-    the Block lasts her turn. Two seats had watched it land between the
-    enemy's hits and expire unused, seven times. The front performer's bar is
-    untouched."""
+def test_a_hit_bow_on_the_enemys_turn_gives_ushers_block_then(arm):
+    """Draft 3 (2026-09-25): a hit empties him on the enemy's turn and his Bow
+    is his act once more -- 3 Block, then, which helps only against later
+    hits that turn ([USER]: the plain exit is the minimum). The front
+    performer's bar is untouched."""
     player = _furina(hp=78, max_hp=78)
     player.stage = [["usher", 2], ["chevalmarin", 3]]
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 2}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.hp == 78
-    assert player.block == 0
-    assert player.stage == [["chevalmarin", 3]]
-    FS.pay_owed_bows(st)
     assert player.block == FS.ACT_USHER_BLOCK
     assert player.stage == [["chevalmarin", 3]]
 
@@ -380,34 +370,26 @@ def test_a_hit_that_empties_crabaletta_deals_her_bow(arm):
         _enemy(hp=40, intents=[{"kind": "attack", "amount": 5}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.stage == []
-    assert st.enemies[0].hp == 40               # the Bow waits for her turn
-    FS.pay_owed_bows(st)
     # Draft 3: her act once more -- 5, plain damage, no Hydro.
     assert st.enemies[0].hp == 40 - FS.ACT_CRABALETTA_DAMAGE
     assert st.enemies[0].aura is None
 
 
-def test_a_multi_hit_attacks_bows_wait_and_pay_in_the_order_earned(arm):
-    """2026-09-25 evening, which REPLACED paying the Bow between hits. 3 hits
-    of 2 into Usher at 2 with Crabaletta at 1 behind him and no Block: hit
-    one empties him (his Bow waits); hit two meets Crabaletta, who eats 1 and
-    empties (hers waits), and 1 reaches Furina; hit three finds an empty
-    stage and lands 2. At her turn the two Bows pay in the order earned:
-    Usher's 3 Block, then Crabaletta's 5."""
+def test_a_multi_hit_attack_meets_ushers_bow_block_on_the_next_hit(arm):
+    """The Bow fires BETWEEN hits, as the mod's does (`AfterDamageReceived`
+    runs once per hit, before the next). 3 hits of 2 into Usher at 2 with
+    Crabaletta at 1 behind him and no Block: hit one empties him and his Bow
+    (his act once more, draft 3) gives her 3 Block; hit two takes 2 of it;
+    hit three takes the last 1 and puts 1 through onto Crabaletta, who
+    empties and Bows for her 5. Nothing reaches Furina."""
     player = _furina(hp=78, max_hp=78)
     player.stage = [["usher", 2], ["crabaletta", 1]]
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 2, "times": 3}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.stage == []
-    assert player.hp == 78 - 3
+    assert player.hp == 78
     assert player.block == 0
-    assert st.enemies[0].hp == 44
-    assert FS.owed_bows(st) == ["usher", "crabaletta"]
-    FS.pay_owed_bows(st)
-    bows = [e["member"] for e in st.log if e["event"] == "stage_bow"]
-    assert bows == ["usher", "crabaletta"]
-    assert player.block == FS.ACT_USHER_BLOCK
     assert st.enemies[0].hp == 44 - FS.ACT_CRABALETTA_DAMAGE
 
 
@@ -418,14 +400,11 @@ def test_a_hit_killed_performer_returns_with_a_five_century_act(arm):
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 3}])])
     combat._enemy_turn(st, st.enemies[0])
-    assert player.stage == [["crabaletta", 5]]  # his Bow waits for her turn
-    FS.pay_owed_bows(st)
     # The order inside a Bow is act, readers, arrival: his 3 Block, THEN he
-    # returns at the back -- on her turn, so he rests through its acts.
+    # returns at the back.
     assert player.stage == [["crabaletta", 5],
                             ["usher", FS.SUMMON_FANFARE]]
     assert player.block == FS.ACT_USHER_BLOCK
-    assert "usher" in player.stage_resting
 
 
 def _applause_state(stage):
@@ -442,15 +421,10 @@ def _applause_state(stage):
 def test_thunderous_applause_reads_a_hits_bow(arm):
     """Draws 1, and the Raise lands on the back performer. Usher's own Bow
     comes first -- act, then readers -- so his 3 Block lands, and on the stage
-    he empties the applause's 2 is a random performer arriving holding it.
-    All of it when the Bow is paid at her turn (2026-09-25 evening), not when
-    the hit emptied him."""
+    he empties the applause's 2 is a random performer arriving holding it."""
     st = _applause_state([["usher", 3], ["crabaletta", 1]])
     hand = len(st.player.hand)
     combat._enemy_turn(st, st.enemies[0])
-    assert len(st.player.hand) == hand
-    assert st.player.stage == [["crabaletta", 1]]
-    FS.pay_owed_bows(st)
     assert len(st.player.hand) == hand + 1
     assert st.player.stage == [["crabaletta", 1 + 2]]
     assert st.player.block == FS.ACT_USHER_BLOCK
@@ -458,7 +432,6 @@ def test_thunderous_applause_reads_a_hits_bow(arm):
     empty = _applause_state([["usher", 3]])
     hand = len(empty.player.hand)
     combat._enemy_turn(empty, empty.enemies[0])
-    FS.pay_owed_bows(empty)
     assert len(empty.player.hand) == hand + 1
     assert len(empty.player.stage) == 1
     assert empty.player.stage[0][1] == 2
@@ -473,36 +446,8 @@ def test_the_hit_that_kills_furina_earns_no_bow(arm):
     assert not player.alive
     assert player.block == 0
     assert not [e for e in st.log if e["event"] == "stage_bow"]
-    assert FS.owed_bows(st) == []               # dropped, not kept
-    FS.pay_owed_bows(st)                        # nothing left owed
+    FS.settle_hit(st)                           # nothing left owed
     assert player.block == 0
-
-
-def test_the_waiting_bows_pay_after_the_regen_and_before_the_draw(arm):
-    """2026-09-25 evening: the turn-start site, `BeforeHandDraw`'s twin. The
-    lead's regen, then the waiting Bows, then the hand draw -- all after the
-    Block clear, so Usher's Bow Block lasts her turn."""
-    import inspect
-    src = inspect.getsource(combat._player_turn)
-    clear = src.index("p.block = 0")
-    regen = src.index("furina_stage.turn_start_regen(state)")
-    bows = src.index("furina_stage.pay_owed_bows(state)")
-    draw = src.index("state.draw(C.CARDS_DRAWN_PER_TURN")
-    assert clear < regen < bows < draw
-    assert src.count("furina_stage.turn_start_regen(state)") == 1
-
-
-def test_a_waiting_bow_is_dropped_when_the_combat_ends_first(arm):
-    """No enemy left at her turn: nothing is paid, and nothing stays owed."""
-    st = _state()
-    st.player.stage = [["usher", 2]]
-    FS.absorb(st, 2)
-    assert FS.owed_bows(st) == ["usher"]
-    st.enemies[0].hp = 0
-    FS.settle_hit(st)
-    assert FS.owed_bows(st) == []
-    FS.pay_owed_bows(st)
-    assert st.player.block == 0
 
 
 def test_the_hit_loop_spends_block_then_the_lead_then_her(arm):
@@ -515,11 +460,10 @@ def test_the_hit_loop_spends_block_then_the_lead_then_her(arm):
                                 intents=[{"kind": "attack", "amount": 12}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.hp == 78          # 9 of the 12 ate the Block, 3 emptied Usher
-    # and nothing reached her. His Bow (rule 7) waits for her turn
-    # (2026-09-25 evening): his act once more, 3 Block, paid then.
-    assert player.block == 0
+    # and nothing reached her. Then his Bow, after the hit (rule 7): his act
+    # once more, 3 Block (draft 3, 2026-09-25).
+    assert player.block == FS.ACT_USHER_BLOCK
     assert player.stage == []
-    assert FS.owed_bows(st) == ["usher"]
 
 
 # ---------------------------------------------------------------------------
@@ -1082,8 +1026,7 @@ def test_fight_one_turn_one_line_c_ends_in_ushers_bow(arm):
     """Line C, the line sec.7 says a player takes who has not yet seen that
     Usher dies either way: Curtain Rise UNSPENT for 7, Usher performs, and the
     3 that survives her Block empties him. Since 2026-09-25 (rule 7) he Bows
-    for it: his act once more (draft 3), 3 Block, at the start of her next
-    turn (the evening's seat round).
+    after that hit: his act once more (draft 3), 3 Block.
 
     `EB-746` FIXED A NUMBER HERE, and it is a defect this row exposed rather
     than a rule it moved. While Spend was a rider the engine fired, the card
@@ -1107,11 +1050,8 @@ def test_fight_one_turn_one_line_c_ends_in_ushers_bow(arm):
     assert st.enemies[0].hp == 31
     combat._enemy_turn(st, st.enemies[0])
     assert st.player.hp == 78
-    assert FS.stage(st.player) == []
-    # 2026-09-25 evening: his Bow waits for her turn.
-    assert not [e for e in st.log if e["event"] == "stage_bow"]
-    FS.pay_owed_bows(st)
     assert [e for e in st.log if e["event"] == "stage_bow"]
+    assert FS.stage(st.player) == []
     assert st.player.block == FS.ACT_USHER_BLOCK
 
 

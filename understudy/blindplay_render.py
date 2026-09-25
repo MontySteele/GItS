@@ -1569,10 +1569,6 @@ STAGE_ACT_SPREAD_STRUCK = "{n} in total across {struck} enemies"
 #: Raise that built a bar and never the Spend that took it back down.
 STAGE_SPEND_LINE = "  - Spent {n} of **{who}**'s Fanfare: {before} → {after}."
 
-#: 2026-09-25 evening: a Bow a hit on the enemy's turn left waiting for her
-#: turn (rule 7), on the stage block.
-STAGE_BOW_WAITS_LINE = "- {who}'s Bow waits for your turn."
-
 #: The bows, rule 9. Since draft 3 (2026-09-25) a Bow IS the performer's act
 #: once more, so the bow lines are the act lines, measured the same way.
 STAGE_BOW_EFFECTS = dict(STAGE_ACT_EFFECTS)
@@ -1650,8 +1646,6 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         out.append("- " + " · ".join(reserve))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
-    out += [STAGE_BOW_WAITS_LINE.format(who=who)
-            for who in stage.get("owed_bows") or []]
     return out
 
 

@@ -672,9 +672,6 @@ STAGE_SHORT_NAMES = {
 #: observation carries the SENTENCE, so nothing downstream holds the token.
 STAGE_LEAVE_REASONS = {
     "hit": "emptied by a hit, so it takes a Bow",
-    # 2026-09-25 evening: a hit on the enemy's turn owes its Bow to the start
-    # of hers (rule 7). The mod's `FurinaStageLedger.HitWaitsReason`.
-    "hit_waits": "emptied by a hit; its Bow waits for your turn",
     "spend": "emptied by a Spend, so it takes a Bow",
     "rotated": "rotated off the front to make room, so no Bow",
     "final_bow": "took its Bow and left",
@@ -816,14 +813,8 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
     # on a build that does not send it, and the render then falls back to the
     # flat per-Usher sum.
     act_block = raw.get("act_block")
-    # 2026-09-25 evening: the Bows a hit on the enemy's turn left waiting for
-    # her turn, oldest first, under the page's short names. Empty on a build
-    # that does not send them.
-    owed = [STAGE_SHORT_NAMES.get(_text(member), "")
-            for member in (raw.get("owed_bows") or [])]
     return {"seats": seats, "log": log,
-            "act_block": None if act_block is None else _int(act_block),
-            "owed_bows": [name for name in owed if name]}
+            "act_block": None if act_block is None else _int(act_block)}
 
 
 def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],

@@ -820,10 +820,9 @@ public static class ArmKeywordTips
             // Draft 3 (2026-09-25, the Stage review's pick 1): the Bow is the
             // performer's own act once more, so the tip says that and no
             // performer's tip carries a separate Bow. Rule 7's trigger (any
-            // exit at 0 Fanfare) is unchanged. 2026-09-25 evening: a Bow
-            // earned on the enemy's turn waits for the start of hers.
-            "A leaving performer acts one last time. On the enemy's turn, "
-          + "that waits for the start of yours.");
+            // exit at 0 Fanfare) is unchanged.
+            "A performer that leaves the stage acts one last time on its way "
+          + "out.");
 
     /// <summary>
     /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates

@@ -494,10 +494,8 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
     that empties the bar, a Spend that does, and Final Bow), so "a performer
     at 0 Fanfare bows" (rule 7, 2026-09-25) cannot drift between them.
 
-    `pay_now=False` is the hit's: the bow is owed. Every hit this engine
-    deals to her lands on the enemy's turn, so it waits for the start of her
-    next turn (`pay_owed_bows`, 2026-09-25 evening) -- the mod's
-    `FurinaStageLedger.OwedBows`."""
+    `pay_now=False` is the hit's: the bow is owed, and `settle_hit` pays it
+    once the hit has been dealt -- `FurinaStage.Flush`'s twin."""
     p = state.player
     seats = _seats(p)
     book_loss(state, LOSS_LEFT, seats[index][1])   # Final Bow's bar; else 0
@@ -515,43 +513,23 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
         _after_bow(state, member, may_return=True)
 
 
-#: The bows hits have emptied performers into, waiting for the start of her
-#: next turn (`pay_owed_bows`), oldest first. On the STATE, as `_PENDING` is:
-#: one combat's list, and nothing else reads it.
+#: The bows hits have emptied performers into, waiting for `settle_hit`. On
+#: the STATE, as `_PENDING` is: one hit's two halves, and nothing else reads it.
 _HIT_BOWS = "_stage_hit_bows"
-
-
-def owed_bows(state) -> list:
-    """The performers whose Bow waits for her turn, oldest first."""
-    return list(getattr(state, _HIT_BOWS, []) or [])
 
 
 def settle_hit(state) -> None:
     """RULE 7 (2026-09-25; [USER]: "Stage members bow out when they are
     destroyed or replaced, not just when you deliberately spend them down to
-    0"), after each hit is dealt. Since 2026-09-25 evening a hit's Bow is NOT
-    paid here: every hit this engine deals her lands on the enemy's turn, and
-    two seats watched Usher's Block, paid between the enemy's hits, expire
-    before her turn in every fight. The Bow waits for `pay_owed_bows`.
+    0"): a performer a hit emptied takes its Bow AFTER that hit is dealt --
+    `FurinaStage.Flush`'s twin, which the mod runs at `AfterDamageReceived`,
+    once per hit and before the next hit of the same attack. So Usher's
+    Fanfare never softens the hit that emptied him, and the performer it lands
+    on does meet the next one.
 
-    What this still does is the drop: NO BOW when that hit killed Furina or
-    ended the combat -- what is owed is dropped, never kept."""
-    if not owed_bows(state):
-        return
-    p = state.player
-    if not active(p) or not p.alive or not state.living_enemies:
-        setattr(state, _HIT_BOWS, [])
-
-
-def pay_owed_bows(state) -> None:
-    """RULE 7, 2026-09-25 evening: THE BOWS A HIT ON THE ENEMY'S TURN LEFT
-    WAITING, paid at the start of her next turn in the order they were earned
-    -- after her Block clears and after the front's regen, before her draw.
-    `FurinaStage.PayOwedBows`'s twin, which the mod calls at
-    `BeforeHandDraw`. Each is the ordinary Bow: the performer's act, then
-    Thunderous Applause and A Five-Century Act, so a returnee arrives on her
-    turn. Dropped when she is dead or the combat is over."""
-    owed = owed_bows(state)
+    NO BOW when that hit killed Furina or ended the combat; what is owed is
+    dropped, never kept for a later hit."""
+    owed = list(getattr(state, _HIT_BOWS, []) or [])
     if not owed:
         return
     setattr(state, _HIT_BOWS, [])
@@ -595,8 +573,8 @@ def _bow(state, member: str) -> None:
 
     ONE ACT: Arkhe Alignment's Ousia and Pneuma double it like any act (the
     multipliers `perform` reads), and Full House does NOT repeat it (only the
-    end-of-turn sweep loops). A hit's Bow waits for the start of her next
-    turn, before Arkhe Alignment's choice, so there it is the printed act. A
+    end-of-turn sweep loops). A hit's Bow lands on the enemy's turn, after the
+    sweep has reset the multipliers, so there it is the printed act. A
     Five-Century Act's return comes after it (`_after_bow`). C# twin:
     `FurinaStage.Bow`.
     """
@@ -944,9 +922,8 @@ def absorb(state, incoming: int) -> int:
     lead and lands on her; a flurry can kill the lead and leave her untouched,
     because the call site is per HIT and rule 7 empties the seat between them.
 
-    A performer emptied HERE leaves now and BOWS AT THE START OF HER NEXT
-    TURN (rule 7, 2026-09-25 evening): every caller is an enemy's hit, and
-    `pay_owed_bows` pays it after her Block clears and the front's regen.
+    A performer emptied HERE leaves now and BOWS AFTER THE HIT (rule 7,
+    2026-09-25): the caller runs `settle_hit` once the hit is dealt.
     """
     p = state.player
     if not active(p) or incoming <= 0:

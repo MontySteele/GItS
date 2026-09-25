@@ -1,13 +1,12 @@
 """Furina, the Stage -- the draft-3 seat round (two Opus seats, 0.2.3778).
 
 This file pins the PAGE halves; the mod halves are
-`klee-mod/KleeTests/Prototype/FurinaStageHitBowTests.cs` (the waiting Bow) and
-`FurinaStageDraft3SeatFixTests.cs`, and the sim's are in
-`test_furina_stage.py`.
+`klee-mod/KleeTests/Prototype/FurinaStageDraft3SeatFixTests.cs`, and the
+sim's are in `test_furina_stage.py`.
 
-  1. A performer a hit empties on the enemy's turn Bows at the start of her
-     next turn. The leave line says the Bow waits, and the stage block lists
-     every Bow still waiting.
+  1. A hit's Bow is paid right after the hit, on the enemy's turn too ([USER],
+     2026-09-25 evening, overruling the wait #676 built), so the hit line
+     folds the Bow in and nothing on the page says a Bow is waiting.
   2. A Spend is a line on the stage log.
   3. Chevalmarin's act says what each enemy was dealt and how many it struck
      ("2 damage to each of 4 enemies"), and by how much their HP fell where a
@@ -47,15 +46,13 @@ def _row(event, member="usher", name="Gentilhomme Usher", **kw):
     return row
 
 
-def _stage(*log, seats=(), owed=()):
+def _stage(*log, seats=()):
     return furina_stage({"furina_stage": {
-        "live": True, "seats": list(seats), "log": list(log),
-        "owed_bows": list(owed)}})
+        "live": True, "seats": list(seats), "log": list(log)}})
 
 
-def _state(log, owed=(), resolved=None):
-    """A Furina combat screen with a stage, this log and these Bows waiting.
-    """
+def _state(log, resolved=None):
+    """A Furina combat screen with a stage and this log."""
     player = {
         "character": "Furina", "hp": 60, "max_hp": 78, "block": 0,
         "energy": 3, "max_energy": 3, "gold": 0,
@@ -67,7 +64,7 @@ def _state(log, owed=(), resolved=None):
         "exhaust_pile": [], "relics": [], "potions": [], "status": [],
         "resources": {}, "pets": [],
         "furina_stage": {
-            "live": True, "log": log, "owed_bows": list(owed),
+            "live": True, "log": log,
             "seats": [{"member": "chevalmarin",
                        "name": "Surintendante Chevalmarin", "seat": 0,
                        "fanfare": 4, "entity_id": "7"}]},
@@ -85,21 +82,10 @@ def _state(log, owed=(), resolved=None):
 
 
 # ---------------------------------------------------------------------------
-# 1. THE BOW THAT WAITS FOR HER TURN.
+# 1. A HIT'S BOW IS PAID RIGHT AFTER THE HIT.
 # ---------------------------------------------------------------------------
 
-def test_the_leave_says_the_bow_waits():
-    stage = _stage(
-        _row("hit", fanfare=0, moved=3, target="Seapunk", target_id="1"),
-        _row("leave", seat=-1, moved=3, reason="hit_waits"))
-    lines = _render_stage_log(stage)
-    assert lines[-1] == ("  - **Usher** left the stage: emptied by a hit; "
-                         "its Bow waits for your turn.")
-    # The hit line stands alone: the fold is for a Bow paid there and then.
-    assert lines[0] == "  - **Seapunk** hit **Usher** for 3: 3 → 0."
-
-
-def test_a_hit_on_her_own_turn_still_folds_its_bow_into_the_hit_line():
+def test_a_hits_bow_folds_into_the_hit_line():
     stage = _stage(
         _row("hit", fanfare=0, moved=3, target="Seapunk", target_id="1"),
         _row("leave", seat=-1, moved=3, reason="hit"))
@@ -108,18 +94,18 @@ def test_a_hit_on_her_own_turn_still_folds_its_bow_into_the_hit_line():
         "stage: emptied by a hit, so it takes a Bow."]
 
 
-def test_the_stage_block_lists_every_bow_still_waiting():
-    stage = _stage(owed=["usher", "crabaletta"])
-    assert stage["owed_bows"] == ["Usher", "Crabaletta"]
+def test_nothing_on_the_stage_block_says_a_bow_waits():
+    stage = _stage(seats=[{"member": "usher", "name": "Gentilhomme Usher",
+                           "seat": 0, "fanfare": 3}])
+    assert "owed_bows" not in stage
     lines = _render_stage(stage, {"block": 0, "hp": 50, "max_hp": 78})
-    assert lines[-2:] == ["- Usher's Bow waits for your turn.",
-                          "- Crabaletta's Bow waits for your turn."]
+    assert not [line for line in lines if "waits" in line]
 
 
-def test_the_bow_row_says_when_it_waits():
+def test_the_bow_row_is_the_plain_exit():
     assert ARM_KEYWORDS["Bow"] == (
-        "A leaving performer acts one last time. On the enemy's turn, that "
-        "waits for the start of yours.")
+        "A performer that leaves the stage acts one last time on its way "
+        "out.")
 
 
 # ---------------------------------------------------------------------------
@@ -203,9 +189,8 @@ def test_the_new_beats_cross_the_packet_and_print():
     state = _state(
         [_row("spend", fanfare=5, moved=3),
          _row("hit", fanfare=0, moved=3, target="Seapunk", target_id="1"),
-         _row("leave", seat=-1, moved=3, reason="hit_waits"),
+         _row("leave", seat=-1, moved=3, reason="hit"),
          _cheval(moved=6, each=2, struck=4)],
-        owed=["usher"],
         resolved=[_resolved("Understudy",
                             [{"member": "crabaletta",
                               "name": "Mademoiselle Crabaletta"}])])
@@ -213,8 +198,8 @@ def test_the_new_beats_cross_the_packet_and_print():
     page = blindplay.observe(state)
     assert qa_packet.leaks(page) == []
     assert "Spent 3 of **Usher**'s Fanfare: 8 → 5." in page
-    assert "its Bow waits for your turn." in page
-    assert "- Usher's Bow waits for your turn." in page
+    assert "emptied by a hit, so it takes a Bow." in page
+    assert "waits for your turn" not in page
     assert "2 damage to each of 4 enemies (their HP fell by 6 in all)" in page
     assert "It summoned **Crabaletta**." in page
 

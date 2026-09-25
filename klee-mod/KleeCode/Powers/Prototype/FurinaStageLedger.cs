@@ -16,12 +16,10 @@ public enum StageDeparture
 
     /// <summary>Emptied by an enemy's hit (rule 7). BOWS since 2026-09-25
     /// ([USER]: "Stage members bow out when they are destroyed or replaced,
-    /// not just when you deliberately spend them down to 0"). A hit on the
-    /// ENEMY'S turn owes its bow to the start of her next turn
-    /// (<see cref="FurinaStageLedger.TakeOwedBows"/>, 2026-09-25 evening); a
-    /// hit on her own turn pays after the hit is dealt
-    /// (<see cref="FurinaStageLedger.TakePendingHitBows"/>). Either way it
-    /// never softens the hit that caused it.</summary>
+    /// not just when you deliberately spend them down to 0"). The bow is paid
+    /// right after the hit is dealt, on the enemy's turn too
+    /// (<see cref="FurinaStageLedger.TakePendingHitBows"/>), so it never
+    /// softens the hit that caused it.</summary>
     Struck,
 
     /// <summary>Emptied by Spend, Final Bow, Let the People Rejoice or a
@@ -582,15 +580,15 @@ public sealed class FurinaStageLedger
     /// resolved hit by hit and can kill the lead while leaving her whole.
     /// Nothing in this method loops, and that absence is the rule.
     ///
-    /// A LEAD EMPTIED HERE BOWS, AFTER THE HIT (rule 7). This method runs
-    /// inside the engine's damage modifier, before the hit has been dealt,
-    /// and a bow is awaited work -- so the exit is QUEUED here. On the
-    /// ENEMY'S turn (<paramref name="waitsForTurn"/>, 2026-09-25 evening) it
-    /// waits for the start of her next turn (<see cref="OwedBows"/>): Usher's
-    /// Block paid between the enemy's hits had expired by her turn in every
-    /// fight two seats played. On her own turn it is paid by
-    /// <c>FurinaStage.Flush</c> at <c>AfterDamageReceived</c>, after the hit
-    /// is dealt.
+    /// A LEAD EMPTIED HERE BOWS, AFTER THE HIT (rule 7, 2026-09-25). This
+    /// method runs inside the engine's damage modifier, before the hit has
+    /// been dealt, and a bow is awaited work -- so the exit is QUEUED here and
+    /// paid by <c>FurinaStage.Flush</c> at <c>AfterDamageReceived</c>, which
+    /// the engine fires once per hit, after that hit's HP loss and before the
+    /// next hit of the same attack -- on the enemy's turn too ([USER],
+    /// 2026-09-25 evening: "I think it would be better to have the performer
+    /// bow immediately (during the opponent's turn) instead of at the start
+    /// of your turn").
     ///
     /// SYNCHRONOUS ON PURPOSE. Its caller is
     /// <c>FurinaResourceHooks.ModifyHpLostBeforeOsty</c>, which the engine
@@ -600,7 +598,7 @@ public sealed class FurinaStageLedger
     /// <c>FlushFanfareDeltaBlock</c> already defers the shipped kit's Block.
     /// </summary>
     public StageAbsorb Absorb(int incoming, string dealer = "",
-                              string dealerId = "", bool waitsForTurn = false)
+                              string dealerId = "")
     {
         if (incoming <= 0 || Lead is not { } lead)
         {
@@ -625,28 +623,13 @@ public sealed class FurinaStageLedger
         if (lead.Fanfare > 0) return new StageAbsorb(absorbed, reached, null);
 
         _seats.RemoveAt(0);
+        Note(new StageBeat("leave", lead.Who, -1, 0, absorbed, "hit"));
         var exit = new StageExit(lead.Who, StageDeparture.Struck);
-        if (waitsForTurn)
-        {
-            // The leave says the Bow waits, so the page can say so.
-            Note(new StageBeat("leave", lead.Who, -1, 0, absorbed,
-                               HitWaitsReason));
-            _owedBows.Add(exit);
-        }
-        else
-        {
-            Note(new StageBeat("leave", lead.Who, -1, 0, absorbed, "hit"));
-            _pendingHitBows.Add(exit);
-        }
+        _pendingHitBows.Add(exit);
         return new StageAbsorb(absorbed, reached, exit);
     }
 
     private readonly List<StageExit> _pendingHitBows = new();
-
-    /// <summary>The leave reason of a hit on the enemy's turn, whose Bow waits
-    /// for hers. The page translates it; the token never reaches a seat.
-    /// </summary>
-    public const string HitWaitsReason = "hit_waits";
 
     /// <summary>The event name of the Spend beat (2026-09-25 evening).
     /// </summary>
@@ -665,43 +648,16 @@ public sealed class FurinaStageLedger
                            seat.Fanfare, paid, ""));
     }
 
-    /// <summary>The bows owed by hits ON HER OWN TURN since the last flush,
-    /// oldest first, taken once (rule 7). <c>FurinaStage.Flush</c> pays them
-    /// after the hit is dealt, or drops them when that hit killed Furina or
-    /// ended the combat. A hit on the enemy's turn owes its bow to
-    /// <see cref="TakeOwedBows"/> instead.</summary>
+    /// <summary>The bows owed by hits since the last flush, oldest first, taken
+    /// once (rule 7, 2026-09-25). <c>FurinaStage.Flush</c> pays them after
+    /// the hit is dealt, or drops them when that hit killed Furina or ended
+    /// the combat. Usually one; an attack on Furina and a Guest of Honor ally
+    /// in the same damage call can leave two.</summary>
     public IReadOnlyList<StageExit> TakePendingHitBows()
     {
         if (_pendingHitBows.Count == 0) return System.Array.Empty<StageExit>();
         var owed = _pendingHitBows.ToList();
         _pendingHitBows.Clear();
-        return owed;
-    }
-
-    private readonly List<StageExit> _owedBows = new();
-
-    /// <summary>
-    /// RULE 7, 2026-09-25 evening. THE BOWS THAT WAIT FOR HER TURN, in the
-    /// order they were earned. Both seats of the draft-3 round (and the
-    /// afternoon seat before them) watched Usher's Bow -- "Furina gains 3
-    /// Block" -- land after the killing hit on the enemy's turn and expire
-    /// before hers, seven times in all: a Block card that did nothing. So a
-    /// performer a hit empties ON THE ENEMY'S TURN owes its Bow to the start
-    /// of her next turn, after her Block clears and after the front's regen
-    /// (<c>FurinaStageHooks.BeforeHandDraw</c>). What the strip and the seat
-    /// page print as waiting.
-    /// </summary>
-    public IReadOnlyList<StageExit> OwedBows => _owedBows;
-
-    /// <summary>The waiting bows, oldest first, taken once:
-    /// <c>FurinaStage.PayOwedBows</c> pays them at her turn start, and her
-    /// death drops them (<c>FurinaStageHooks.AfterDeath</c>). A combat that
-    /// ends first drops them with the ledger.</summary>
-    public IReadOnlyList<StageExit> TakeOwedBows()
-    {
-        if (_owedBows.Count == 0) return System.Array.Empty<StageExit>();
-        var owed = _owedBows.ToList();
-        _owedBows.Clear();
         return owed;
     }
 
@@ -1068,7 +1024,6 @@ public sealed class FurinaStageLedger
         _seats.Clear();
         _pendingCurtainCall.Clear();
         _pendingHitBows.Clear();
-        _owedBows.Clear();
         _beats.Clear();
         _spendStack.Clear();
         SpentThisPlay = 0;
@@ -1119,11 +1074,6 @@ public sealed class FurinaStageLedger
         // turn's Arkhe multiple and Full House's extra acts in it -- the page's
         // "after the acts" line reads this rather than assuming 3 per Usher.
         snapshot["act_block"] = FurinaStage.ForecastActBlock(creature);
-        // 2026-09-25 evening: the Bows a hit on the enemy's turn left waiting
-        // for her turn, oldest first, by sheet name.
-        snapshot["owed_bows"] = ledger.OwedBows
-            .Select(exit => (object?)FurinaStage.Name(exit.Who))
-            .ToList();
         snapshot["seats"] = ledger.Seats
             .Select((seat, index) => (object?)new Dictionary<string, object?>
             {

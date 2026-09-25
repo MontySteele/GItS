@@ -1470,9 +1470,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
     # Bows whatever emptied it -- a Spend, a hit or a full-stage summon.
     # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-    # 2026-09-25 evening: a Bow earned on the enemy's turn waits for hers.
-    "Bow": ("A leaving performer acts one last time. On the enemy's turn, "
-            "that waits for the start of yours."),
+    # 2026-09-25 evening, [USER]: "I think it would be better to have the
+    # performer bow immediately (during the opponent's turn) instead of at
+    # the start of your turn." The waiting Bow is gone.
+    "Bow": ("A performer that leaves the stage acts one last time on its "
+            "way out."),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
     # because a seat may meet either word alone -- the page's one addendum to
     # the tip, `STAGE_ACTS`, which also carries the seat count (the

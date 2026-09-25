@@ -85,11 +85,6 @@ public static class FurinaStageStrip
     /// there is none. It is the Ovation plan's board (sec.5.2 reads the back
     /// performer) and the Refill's target (rule 5), so it prints the same
     /// numbers in the same order the Raise will find them in.
-    ///
-    /// AND ONE LINE PER BOW WAITING FOR HER TURN (rule 7, 2026-09-25
-    /// evening): a performer a hit emptied on the enemy's turn takes its Bow
-    /// at the start of hers, and the strip is the one thing on screen during
-    /// the enemy's turn that can say so.
     /// </summary>
     public static string Label(Creature creature)
     {
@@ -113,16 +108,8 @@ public static class FurinaStageStrip
                 "  ",
                 seats.Skip(1).Select(s => $"{NameOf(s.Who)} {s.Fanfare}")));
         }
-        foreach (var owed in ledger.OwedBows)
-        {
-            line.Append('\n').Append(Waiting(owed.Who));
-        }
         return line.ToString();
     }
-
-    /// <summary>The strip's line for one Bow waiting for her turn.</summary>
-    public static string Waiting(StagePerformer who) =>
-        $"{NameOf(who)}'s Bow waits for your turn.";
 
     /// <summary>Her Block, the FIRST term of the damage order and the engine's
     /// own number.</summary>
