@@ -1518,8 +1518,9 @@ proto_ko_the_big_one	ImageGen/images/cards/klee/proto_ko_the_big_one.png	500	380
 # proto_ko_alices_recipe <- alchemical_curiosity: a written alchemy note -- Alice's Recipe is a formula on paper
 proto_ko_alices_recipe	ImageGen/images/cards/klee/proto_ko_alices_recipe.png	500	380	contain	center	shortlist	1	png	Item Naganohara Fireworks Note.png		item	
 proto_ko_mine_toss	ImageGen/images/cards/klee/proto_ko_mine_toss.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item	
-# proto_ko_spinning_sparkler <- proto_ko_fwoosh (spare): a sky of streaking, wheeling fireworks: the sparkler spun twice. The spare painted for the cut Fwoosh!, reused as painted
-proto_ko_spinning_sparkler	ImageGen/images/cards/klee/proto_ko_spinning_sparkler.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 9.png		splash	
+# proto_ko_spinning_sparkler <- NEW: Klee in a burst of sparkles, the Sparkling Steps short. Was the fwoosh spare
+#   (Starlit Sky Firework Card 9), which showed Tighnari, not Klee; that painting is now worn by no card.
+proto_ko_spinning_sparkler	ImageGen/images/cards/klee/proto_ko_spinning_sparkler.png	500	380	cover	x0.63,y0.50@1.7	shortlist	1	png	Sparkling Steps 2022-07-13 - Klee Shorts.png		splash	
 # proto_ko_tinder_toss <- combustion_study: the thrown explosive charge itself
 proto_ko_tinder_toss	ImageGen/images/cards/klee/proto_ko_tinder_toss.png	500	380	contain	center	shortlist	1	png	Item Klee Explosive.png		item	
 proto_ko_quick_fuse	ImageGen/images/cards/klee/proto_ko_quick_fuse.png	500	380	contain	center	shortlist	1	png	Item Special Jumpy Dumpty Dodoco.png		item	
@@ -1886,8 +1887,10 @@ proto_fs_bis	ImageGen/images/cards/furina/proto_fs_bis.png	500	380	cover	top	sho
 proto_fs_final_bow	ImageGen/images/cards/furina/proto_fs_final_bow.png	500	380	cover	center	shortlist	1	png	Starlit Letter Wallpaper Furina.png		splash	
 # ---------- Blank-portrait pass 2026-09-24: every prototype card gets a face ----------
 # art_coverage listed 49 prototype cards with no portrait (KleeArt.CardPortrait
-# returned Blank()). Seven Klee rows above wear the spares painted for cut cards
-# (renamed in place, source and crop unchanged). The rows below are the rest.
+# returned Blank()). Six Klee rows above wear the spares painted for cut cards
+# (renamed in place, source and crop unchanged); a seventh, spinning_sparkler,
+# was renamed from the fwoosh spare and then re-sourced because that painting
+# shows Tighnari. The rows below are the rest.
 # Same law as the blocks above: blank source_group = strict L1 inside the
 # prototype partition, and a row that shares a source with a SHIPPED card takes a
 # different crop wherever the source allows one. Two groups are new, each a
