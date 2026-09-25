@@ -1304,9 +1304,9 @@ COMPANION_SLOT_SENTENCE = (
     "About one card reward in twenty offers a fourth, Companion, choice.")
 
 #: 2026-09-25. What a Companion IS, word for word the in-game tip
-#: (`ArmKeywordTips.ForCompanion`). The example is a real card in the pool.
+#: (`ArmKeywordTips.ForCompanion`).
 COMPANION_DEFINITION = ("A card titled with a character's name, a dash, then "
-                        "its own, like Amber — Explosive Puppet.")
+                        "its own.")
 
 #: `EB-744`. WHAT AN ACT IS, in one sentence, shared by the two seat rows.
 #:

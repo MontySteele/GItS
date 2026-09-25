@@ -533,11 +533,8 @@ def test_the_companion_tip_and_the_page_open_with_one_sentence():
     """2026-09-25, the afternoon Klee seats: "Companion is never defined on
     screen, yet three offered cards trigger on it." The card now carries the
     tip, and the seat page's row opens with the same sentence word for word,
-    then keeps its reward-slot sentence.
-
-    THE EXAMPLE IS A REAL CARD: the title the tip quotes is a Companion row
-    on the prototype surface, so the definition cannot drift onto a name the
-    pool does not hold."""
+    then keeps its reward-slot sentence. The tip names the dash in words and
+    prints no dash character (text-conventions rule 14)."""
     import sys
     sys.path.insert(0, str(REPO))
     from tools import lint_text_conventions as ltc
@@ -547,12 +544,7 @@ def test_the_companion_tip_and_the_page_open_with_one_sentence():
     assert tip == blindplay_notes.COMPANION_DEFINITION
     assert blindplay_notes.ARM_KEYWORDS["Companion"] == (
         tip + " " + blindplay_notes.COMPANION_SLOT_SENTENCE)
-
-    example = ltc.QUOTED_TITLES["CompanionKey"]
-    assert example in tip
-    rows = {row["name"]: row for row in proto._rows()}
-    card = rows[example]
-    assert gen.is_companion(card), example
+    assert tip == "A card titled with a character's name, a dash, then its own."
 
     # And the tip reaches every face that prints the word, on every arm.
     printed = [path.stem for path in _prototype_files()

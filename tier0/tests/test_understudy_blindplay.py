@@ -6782,8 +6782,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # keeps the reward-slot sentence the tip does not carry. Until then
         # it was `EB-329`'s row with no tooltip to be held in step with.
         "Companion": ["A card titled with a character's name, a dash, then "
-                      "its own, ",
-                      "like Amber \u2014 Explosive Puppet."],
+                      "its ", "own."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

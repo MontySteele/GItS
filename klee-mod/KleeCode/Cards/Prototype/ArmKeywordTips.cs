@@ -664,16 +664,14 @@ public static class ArmKeywordTips
     /// never defined on screen, yet three offered cards trigger on it"
     /// (Witches' Circle, Come Back and Play!, Friendship Bracelet). The word is
     /// golded on every face that prints it, so the tip attaches off the
-    /// printed word like every row in this class. The example is a real
-    /// Companion in the pool, and its title's dash is the card's own name
-    /// (the one quoted title `tools/lint_text_conventions.py` allows). The
-    /// seat page's `Companion` row opens with the same sentence.
+    /// printed word like every row in this class. The seat page's
+    /// `Companion` row opens with the same sentence.
     /// </summary>
     public static IEnumerable<IHoverTip> ForCompanion(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CompanionKey,
-            "A card titled with a character's name, a dash, then its own, "
-          + "like Amber — Explosive Puppet.");
+            "A card titled with a character's name, a dash, then its "
+          + "own.");
 
     // ---------------------------------------------------- Furina ----------
     //
