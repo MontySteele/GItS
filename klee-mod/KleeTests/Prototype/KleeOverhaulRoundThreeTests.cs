@@ -206,7 +206,8 @@ public class KleeOverhaulRoundThreeTests
         // blind page's cost slot.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoKoPocketMatch(), new ProtoKoTinderToss(),
+                     // Pocket Match lost its price on 2026-09-24.
+                     new ProtoKoTinderToss(),
                      new ProtoKoQuickFuse(), new ProtoKoBangBang(),
                      new ProtoKoBoobyTrap(), new ProtoKoDigIn(),
                      // R276 cut Sugar Rush; Bottomless Bag is the seventh.
@@ -420,7 +421,7 @@ public class KleeOverhaulRoundThreeTests
         AssertUpgradeMoves<ProtoKoKapow>("Damage", 4m, 7m);
         // `EB-749` cut Fwoosh!; Pocket Match is the same shape and its
         // delta is the one the Prototype-stage rule gives a `damage` row.
-        AssertUpgradeMoves<ProtoKoPocketMatch>("Damage", 5m, 7m);
+        AssertUpgradeMoves<ProtoKoPocketMatch>("Damage", 3m, 5m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
         // Chain Fuse grows by 6 since the 2026-09-02 balance pass. Its
         // upgrade is the row's OWN `grow: +3` (the Klee card audit of the

@@ -21,12 +21,13 @@ namespace KleeMod.Vfx;
 ///
 /// TWO HALVES, AND THE BANK ITSELF DOES NOT MOVE.
 ///
-///   1. <b>The gauge.</b> A <c>GaugeBridge</c> spec (<c>klee_spark</c>) at the
-///      overhead slot, carrying Klee's own <c>klee/powers/spark.png</c> glyph
-///      as its cap icon. BAR-LESS, like Kokomi's Charge and for the same
-///      reason: Sparks have no ceiling, so there is no honest span to draw and
-///      a bar would invent one. It renders as a glyph and a climbing number,
-///      which is the Regent's star counter's own shape.
+///   1. <b>The counter.</b> <c>SparkCounter</c>, the glyph and number beside
+///      the energy orb (`EB-621`), is the bank's ONE display. There USED to be
+///      a second, a <c>GaugeBridge</c> spec (<c>klee_spark</c>) over her head;
+///      the 2026-09-24 playtest deleted it ([USER]: "Klee also still has a
+///      spark counter over her head, which is redundant with the main UI
+///      gauge"). The class keeps its name because the badge half below and the
+///      arm's scope predicate still live here.
 ///   2. <b>The badge.</b> <see cref="HidesBadge"/> plus the Harmony prefix at
 ///      the bottom of this file keep <c>SparkPower</c> out of the status strip
 ///      while the arm is live.
@@ -79,10 +80,10 @@ public static class SparkGauge
     public const string GlyphPath = "klee/powers/spark.png";
 
     /// <summary>
-    /// Does this creature get the Spark gauge? Klee, and only while the arm is
-    /// live. OFF THE ARM THIS IS FALSE AND NOTHING ELSE IN THE FILE RUNS: the
-    /// gauge is not built, the badge is not suppressed, and the shipped display
-    /// is what it was.
+    /// Does this creature get the arm's Spark display? Klee, and only while the
+    /// arm is live. OFF THE ARM THIS IS FALSE AND NOTHING ELSE IN THE FILE
+    /// RUNS: the counter is not built, the badge is not suppressed, and the
+    /// shipped display is what it was.
     ///
     /// The arm is the same runtime read <c>Klee.StartingDeck</c> and
     /// <c>KleeCardPool.FilterThroughEpochs</c> take, for the reason
@@ -102,7 +103,7 @@ public static class SparkGauge
         KleeOverhaul.Enabled && creature.Player?.Character is IKleeCharacter;
 
     /// <summary>
-    /// The number the gauge draws: the bank, right now.
+    /// The number the counter draws: the bank, right now.
     ///
     /// <see cref="SparkPower.SparksAtPlay"/> rather than
     /// <see cref="SparkPower.SparksAsResolved"/> because it is the PLAIN read
@@ -119,14 +120,19 @@ public static class SparkGauge
         SparkPower.SparksAtPlay(creature);
 
     /// <summary>
-    /// Redraw Klee's gauges. Called from <c>SparkPower</c>'s mutation funnels
-    /// -- the same chokepoints the <c>spark</c> meter ledger rides -- so the
-    /// number on screen and the number in the ledger can never come from
-    /// different reads.
+    /// Redraw Klee's Spark display. Called from <c>SparkPower</c>'s mutation
+    /// funnels -- the same chokepoints the <c>spark</c> meter ledger rides --
+    /// so the number on screen and the number in the ledger can never come
+    /// from different reads.
     ///
     /// Arm-gated HERE rather than at each call site: with the arm off there is
-    /// no Spark gauge to redraw, and a release build must not gain a gauge
+    /// no Spark display to redraw, and a release build must not gain a
     /// refresh on a code path that never had one.
+    ///
+    /// ONLY THE ENERGY-AREA COUNTER (`EB-621`) since the 2026-09-24 playtest:
+    /// the overhead gauge this used to redraw first is gone, so there is no
+    /// <c>GaugeBridge.Refresh</c> here. The counter scopes itself to the LOCAL
+    /// seat.
     /// </summary>
     public static void Refresh(Creature? creature)
     {
@@ -135,11 +141,6 @@ public static class SparkGauge
             return;
         }
 
-        GaugeBridge.Refresh(creature);
-        // `EB-621`: the SECOND display of the same bank -- the badge in the
-        // energy area -- rides the same funnel, so the two can never come from
-        // different reads. It scopes itself to the LOCAL seat; the overhead
-        // gauge is drawn on the creature and both seats see it.
         SparkCounter.Refresh(creature);
     }
 
@@ -147,8 +148,9 @@ public static class SparkGauge
     /// Is this the power whose badge the arm suppresses? Exactly
     /// <c>SparkPower</c>, exactly while the arm is live, and asked of the
     /// power's own owner rather than of the local seat -- in co-op a Klee
-    /// under the arm hides her bank badge on either screen, because the gauge
-    /// that replaces it is drawn on her creature and is visible to both.
+    /// under the arm hides her bank badge on either screen. (Since the overhead
+    /// gauge went, a partner's screen shows no Spark count for her at all: the
+    /// energy-area counter is the local seat's.)
     ///
     /// Nothing else Klee carries is touched. Bombs, the reaction badges and
     /// True Spark Knight keep their status-strip badges: they are STATUSES, and

@@ -202,10 +202,10 @@ KLEE_OVERHAUL_GROUNDED_SPARK = 1
 # the deck has no reader at all. C# twin `KleeOverhaulLaw.SparkSeedFloors`.
 KLEE_OVERHAUL_SPARK_SEED_FLOORS = 3
 
-# R276, Wait For It...'s payout per copy: "draw 2 cards and gain 1 Energy" the
-# next time one of her Bombs reacts this turn. Mirrored by value from
-# `WaitForItPower.PayoutHand` / `.ReactionEnergy`.
-KLEE_OVERHAUL_WAIT_FOR_IT_CARDS = 2
+# R276, Wait For It...'s Energy: "draw 2 cards and gain 1 Energy" the next
+# time one of her Bombs reacts this turn. Mirrored by value from
+# `WaitForItPower.ReactionEnergy`. The cards are the row's own number since
+# the Klee balance review (pick 4a, 2026-09-25), which the upgrade moves.
 KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY = 1
 
 # THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, in the

@@ -1295,6 +1295,19 @@ public sealed class FurinaResourceHooks : AbstractModel
             return amount;
         }
 #if PROTOTYPE_CARDS
+        // QUARANTINED: A HIT A LETHAL MINE ALREADY ANSWERED IS NOT ABSORBED
+        // (`EB-336`, and since 2026-09-25 a Klee's Mine answers an attack on
+        // Furina too: "Mines in co-op, pick a"). The attacker died to the Mine
+        // before this hit, so the hit is owed nothing -- not Furina's HP, and
+        // not her performers' Fanfare or the shipped Encore buffer either.
+        // `KleeOverhaulSweepHooks` zeroes the HP half at this same hook; this
+        // keeps the listeners' order from deciding whether a performer pays
+        // for a hit that never happened. Pure: three references and a flag.
+        if (ProtoBombPower.Preempted.Covers(target, dealer)
+            && props.IsPoweredAttack())
+        {
+            return 0m;
+        }
         // QUARANTINED (R213 B): THE STAGE'S DAMAGE ORDER, brief sec.3 rule 6.
         // "Furina's Block, then the lead performer's Fanfare, then Furina."
         //

@@ -470,6 +470,11 @@ public static class KleeCardTooltips
     /// FALSE FOR EVERY CARD THAT IS NOT ONE OF OURS, and false for a row whose
     /// Set off comes AFTER its damage: there the card's own hit does meet the
     /// aura and the amplified body is right as it stands.
+    ///
+    /// TWO OPENINGS SINCE THE 2026-09-24 PLAYTEST: the bare "Set off." and
+    /// Pocket Match's "Set off only your largest Bomb on the enemy." Both put
+    /// one aimed explosion ahead of the card's own hit, so the first charge
+    /// takes the aura either way.
     /// </summary>
     public static bool SetsOffFirst(CardModel card)
     {
@@ -480,6 +485,8 @@ public static class KleeCardTooltips
         {
             if (row.Item1 != "description" || row.Item2 == null) continue;
             return row.Item2.StartsWith("[gold]Set off[/gold].",
+                                        System.StringComparison.Ordinal)
+                || row.Item2.StartsWith("[gold]Set off[/gold] only your largest ",
                                         System.StringComparison.Ordinal);
         }
         return false;

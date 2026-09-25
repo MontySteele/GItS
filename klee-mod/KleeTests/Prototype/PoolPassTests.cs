@@ -68,8 +68,10 @@ public class PoolPassTests
 
         Assert.False(typeof(ISparkPricedCard)
                          .IsAssignableFrom(typeof(ProtoKoCountdown)));
+        // Pocket Match lost its Spark price on 2026-09-24; Quick Fuse is the
+        // Spark-priced plain detonator the comparison is made against now.
         Assert.True(typeof(ISparkPricedCard)
-                        .IsAssignableFrom(typeof(ProtoKoPocketMatch)),
+                        .IsAssignableFrom(typeof(ProtoKoQuickFuse)),
                     "the comparison is only worth making if the twin has one");
         Assert.Equal(CardRarity.Common, card.Rarity);
     }
@@ -98,7 +100,8 @@ public class PoolPassTests
         var card = new ProtoKoCountdown();
 
         Assert.Contains("{Cards:diff()}", Face(card));
-        Assert.Equal(1m, Vars(card).Single().BaseValue);
+        // Klee balance review, pick 4a, 2026-09-25. Draw 1 -> 2.
+        Assert.Equal(2m, Vars(card).Single().BaseValue);
         Assert.Contains(Il.Calls(Il.Method("ProtoKoCountdown", "OnUpgrade")),
                         c => c.Contains("UpgradeValueBy"));
     }

@@ -164,65 +164,26 @@ public static class GaugeBridge
                 && current >= BurstConstants.KleeMax,
         },
 #if PROTOTYPE_CARDS
-        // KLEE'S SPARK BANK, under the overhaul arm only (`EB-281`). It takes
-        // the OVERHEAD SLOT rather than the second row, and that is a reading
-        // of the C1 convention rather than a breach of it: the slot means "this
-        // creature's primary meter", it has meant Burst for everybody because
-        // Burst was everybody's, and under this arm Klee has no Burst to put
-        // there (the spec above now stands down). Leaving the slot empty and
-        // hanging her ONE meter in the row above it would put the number where
-        // the eye does not go, to protect a convention from a character who no
-        // longer has the resource it names.
-        //
-        // BAR-LESS, on `kokomi_charge`'s argument verbatim: Sparks are uncapped,
-        // so there is no ceiling to draw against and a bar would invent a
-        // target. What renders is the glyph and the number -- which is exactly
-        // the shape the base game gives a character resource in the Regent's
-        // star counter, and the shape [USER] asked for.
-        //
-        // NO FLASH, and it is a deliberate omission rather than a default. The
-        // shared scene's flash overlay is a BAR-SHAPED ColorRect sized to the
-        // track; with no bar drawn, a mint would strobe a white rectangle where
-        // the player has never seen a bar. A glyph-shaped overlay is scene work
-        // (`pck-src/shared/gauge.tscn`, shared with every other gauge), so the
-        // beat waits for eyes-on rather than shipping an artefact nobody
-        // reviewed.
-        new()
-        {
-            Key = "klee_spark",
-            Skin = new GaugeSkin
-            {
-                // Neither rect is drawn while VisualSpan is null; the colours
-                // are the ones a Spark bar WOULD wear -- Klee's warm ember,
-                // one step brighter and yellower than the fuse orange the
-                // Burst bar carries -- and they exist so a future ceiling does
-                // not have to invent a palette at the same time.
-                FillColor = new Color(1.0f, 0.78f, 0.28f),
-                TrackColor = new Color(0.10f, 0.07f, 0.05f, 0.0f),
-                CapIconPath = SparkGauge.GlyphPath,
-            },
-            AnchorOffset = OverheadBurstAnchor,
-            VisualSpan = null,
-            LabelMax = null,
-            AppliesTo = SparkGauge.AppliesTo,
-            ReadValue = SparkGauge.Read,
-            ShouldFlash = static (_, _) => false,
-        },
+        // KLEE'S SPARK BANK HAS NO OVERHEAD GAUGE (playtest 2026-09-24,
+        // [USER]: "Klee also still has a spark counter over her head, which is
+        // redundant with the main UI gauge"). The `klee_spark` spec that stood
+        // here (`EB-281`) is deleted; the bank's one display is the
+        // energy-area counter (`Vfx/Prototype/SparkCounter.cs`), and its
+        // status-strip badge stays suppressed (`Vfx/Prototype/SparkGauge.cs`).
         // FURINA'S STAGE STRIP, under the stage arm only. It takes the SECOND
         // ROW rather than the overhead slot, and that is a reading of the C1
         // convention rather than a breach: the overhead slot means "this
         // creature's primary meter", and the stage is not a meter of hers at
         // all -- it is three bars that are NOT hers, standing in front of her.
         //
-        // BAR-LESS, on `klee_spark`'s argument verbatim: a performer's bar has
+        // BAR-LESS, on `kokomi_charge`'s argument: a performer's bar has
         // no cap (brief sec.3 rule 4), so there is no ceiling to draw against
         // and a bar would invent a target. What renders is the LABEL, which is
         // the damage order in three terms -- see `FurinaStageStrip.Label` for
         // why that is the whole design.
         //
-        // NO FLASH, for `klee_spark`'s reason: the shared scene's flash
-        // overlay is a bar-shaped ColorRect sized to a track this gauge does
-        // not draw.
+        // NO FLASH: the shared scene's flash overlay is a bar-shaped
+        // ColorRect sized to a track this gauge does not draw.
         new()
         {
             Key = "furina_stage",

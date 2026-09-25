@@ -229,14 +229,15 @@ public class PoolPassThreeTests
         // gated on and the price charged are one expression. It rode Fireworks
         // Show until `EB-749` cut that row; Once More! spells the same delta.
         // Twin: `test_once_more_upgraded_charges_one_spark_less`.
+        // Klee balance review, pick 4a, 2026-09-25. 3 Sparks -> 2.
         var card = new ProtoKoOnceMore();
-        Assert.Equal(3, card.PrintedSparkPrice);
-        Assert.Equal(3, SparkCost.PriceOf(card));
+        Assert.Equal(2, card.PrintedSparkPrice);
+        Assert.Equal(2, SparkCost.PriceOf(card));
 
         var source = Printed("Cards/Prototype/Generated/ProtoKoOnceMore.cs");
-        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 2 : 3)", source);
+        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 1 : 2)", source);
         Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
-                        + "(IsUpgraded ? 2 : 3), this)", source);
+                        + "(IsUpgraded ? 1 : 2), this)", source);
     }
 
     [Fact]
@@ -385,18 +386,19 @@ public class PoolPassThreeTests
     }
 
     [Fact]
-    public void Pocket_match_is_the_retained_spark_priced_detonator()
+    public void Pocket_match_is_the_retained_single_charge_detonator()
     {
-        // Round 16's turn one -- Bang Bang! unplayable at 1 Spark and no Set
-        // off in hand -- is what this row is for: the starting Spark pays it,
-        // and Retain means it is there on the turn the pile is worth cashing.
+        // Playtest 2026-09-24 ([USER]: "Pocket Match is redundant with
+        // Ka-pow!"): no Spark price any more, and it sets off ONLY the largest
+        // charge on the enemy. The rule's own pins are in
+        // `KleePlaytest20260924Tests`.
         var card = new ProtoKoPocketMatch();
 
-        Assert.Equal(1, card.PrintedSparkPrice);
+        Assert.False(card is ISparkPricedCard);
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Contains(card.CanonicalKeywords, k => k == CardKeyword.Retain);
         Assert.Contains(Il.Calls(Il.Method("ProtoKoPocketMatch", "OnPlay")),
-                        c => c.Contains("ProtoBombPower.SetOffAimed"));
+                        c => c.Contains("ProtoBombPower.SetOffLargestAimed"));
     }
 
     [Fact]

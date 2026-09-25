@@ -62,7 +62,7 @@ public sealed class ProtoKoStokeTheFuse : CustomCardModel, ISparkPricedCard, ISp
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Grow", 3m)
+            new DynamicVar("Grow", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,6 +81,6 @@ public sealed class ProtoKoStokeTheFuse : CustomCardModel, ISparkPricedCard, ISp
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Grow"].UpgradeValueBy(1m);
+        DynamicVars["Grow"].UpgradeValueBy(2m);
     }
 }

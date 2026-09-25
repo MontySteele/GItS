@@ -131,18 +131,19 @@ def test_the_largest_bomb_is_the_largest_charge_and_the_older_on_a_tie(
     assert sizes(a) == [12, 7] and sizes(b) == [5]
 
 
-def test_one_more_charge_grows_five_and_draws_at_twenty(overhaul):
+def test_one_more_charge_grows_eight_and_draws_at_twenty(overhaul):
+    # Klee balance review, pick 4a, 2026-09-25: 5 -> 8 (11 upgraded).
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.draw_pile = filler()
-    klee_overhaul.place(state, enemy, 14)
+    klee_overhaul.place(state, enemy, 10)
     play(state, load("proto_ko_one_more_charge"))
-    assert sizes(enemy) == [19] and len(state.player.hand) == 0
+    assert sizes(enemy) == [18] and len(state.player.hand) == 0
     play(state, load("proto_ko_one_more_charge"))
-    assert sizes(enemy) == [24] and len(state.player.hand) == 1
-    # Upgraded: grows 8.
+    assert sizes(enemy) == [26] and len(state.player.hand) == 1
+    # Upgraded: grows 11.
     play(state, load("proto_ko_one_more_charge+"))
-    assert sizes(enemy) == [32]
+    assert sizes(enemy) == [37]
 
 
 def test_one_more_charge_with_no_bomb_grows_nothing_and_draws_nothing(
@@ -374,10 +375,12 @@ def test_friendship_bracelet_grows_the_largest_bomb_per_companion_play(
 # THE SPARK-SUPPORTED COOK
 # ---------------------------------------------------------------------------
 
-def test_boom_badge_plays_the_next_set_off_card_twice(overhaul):
+def test_boom_badge_doubles_the_bombs_of_the_next_set_off_card(overhaul):
+    # Playtest 2026-09-24 ([USER]: "seems weak"): the old replay found the
+    # Bombs gone; the badge now doubles them, and costs 2 Sparks.
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
-    state.player.sparks = 3
+    state.player.sparks = 2
     state.player.hand = [load("proto_ko_boom_badge"), load("proto_ko_pop"),
                          load("proto_ko_kapow")]
     combat.play_card(state, state.player.hand[0])
@@ -388,8 +391,8 @@ def test_boom_badge_plays_the_next_set_off_card_twice(overhaul):
     before = enemy.hp
     combat.play_card(state, state.player.hand[0])
     assert klee_overhaul.BOOM_BADGE not in state.player.powers
-    # The Bomb 5 went off once; Ka-pow!'s own 4 landed twice.
-    assert before - enemy.hp == 5 + 4 + 4
+    # The Bomb 5 went off doubled, once; Ka-pow!'s own 4 landed once.
+    assert before - enemy.hp == 5 * 2 + 4
 
 
 def sit_tight_board():
@@ -494,11 +497,13 @@ def test_wait_for_it_ignores_a_plain_explosion_and_expires(overhaul):
 def test_party_poppers_pays_a_bomb_per_spark_priced_play(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
-    state.player.powers[klee_overhaul.PARTY_POPPERS] = 2
-    klee_overhaul.note_card_played(state, load("proto_ko_pocket_match"))
+    state.player.powers[klee_overhaul.PARTY_POPPERS] = 3
+    # Pocket Match lost its price on 2026-09-24; Tinder Toss still charges 1.
+    klee_overhaul.note_card_played(state, load("proto_ko_tinder_toss"))
     klee_overhaul.note_card_played(state, load("proto_ko_fireworks_finale"))
     klee_overhaul.note_card_played(state, load("proto_ko_pop"))
-    assert sizes(enemy) == [2, 2]
+    klee_overhaul.note_card_played(state, load("proto_ko_pocket_match"))
+    assert sizes(enemy) == [3, 3]
 
 
 def test_patience_grows_on_a_turn_with_no_set_off_card_after_the_echo(

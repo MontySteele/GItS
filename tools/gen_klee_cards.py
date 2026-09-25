@@ -2110,8 +2110,12 @@ DETONATE_FIELDS = {"op", "target", "bonus"}
 #: `wide_if` is R276's too (Team Effort), Coven Errand's field one verb
 #: over: the aimed Set off WIDENS to every enemy when the predicate holds,
 #: and the card's own hit stays on the aimed body.
+#: `charge` is the 2026-09-24 playtest's (Pocket Match): `largest` sets off
+#: ONLY the single largest charge on the aimed enemy (ties to the oldest), and
+#: the rest of the pile stays. Still a `set_off`, so every reader of "a Set
+#: off card" (Once More!, Grounded, Treasure Map, Boom Badge...) sees it.
 SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura", "overflow",
-                  "wide_if"}
+                  "wide_if", "charge"}
 #: `wide_if` is R244's (Coven Errand): the printed target WIDENS to ALL enemies
 #: when the named predicate holds. A field on the op rather than a
 #: `conditional` around two `plant_bomb`s, because the card prints ONE Bomb
@@ -4146,6 +4150,14 @@ def blocked_reason(
                 # Big Bounce's "the enemy's HP" is ONE enemy's: the aimed
                 # spelling is the only one the sentence is true of.
                 return "set_off overflow is the aimed spelling only"
+            if eff.get("charge") not in (None, "largest"):
+                return f"set_off charge '{eff.get('charge')}'"
+            if eff.get("charge") and (
+                    eff.get("target") != "enemy" or eff.get("overflow")
+                    or eff.get("wide_if") or eff.get("aura")):
+                # Pocket Match's "your largest Bomb on the enemy" is ONE
+                # enemy's largest charge; no other spelling composes with it.
+                return "set_off charge is the plain aimed spelling only"
             if eff.get("times", 1) > 1 and eff.get("target") != "random_enemy":
                 # `times` is a re-ROLL, not a repeat: Tinder Toss hits two
                 # random enemies. On an aimed or all-enemies Set off it would
@@ -9619,7 +9631,15 @@ def build_body(
                 else str(int(eff.get("damage", 0))))
             times = int(eff.get("times", 1))
             aura = "true" if eff.get("aura") == "non_pyro" else "false"
-            if eff["target"] == "enemy" and eff.get("overflow") == "bounce":
+            if eff["target"] == "enemy" and eff.get("charge") == "largest":
+                # Pocket Match (playtest 2026-09-24): only the single largest
+                # charge on the aimed enemy goes off; the rest stay.
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.SetOffLargestAimed("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                    f"cardPlay, {damage});")
+            elif eff["target"] == "enemy" and eff.get("overflow") == "bounce":
                 # R276 (Big Bounce). The same aimed Set off with the overflow
                 # tallied and bounced; one call, so the tally and the bounce
                 # cannot be separated by a card that forgets one.
@@ -10879,7 +10899,9 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             times = int(eff.get("times", 1))
             aura = "true" if eff.get("aura") == "non_pyro" else "false"
             if eff["target"] == "enemy":
-                method = ("SetOffAimedBouncing"
+                method = ("SetOffLargestAimed"
+                          if eff.get("charge") == "largest"
+                          else "SetOffAimedBouncing"
                           if eff.get("overflow") == "bounce" else "SetOffAimed")
                 body.append(
                     f"await ProtoBombPower.{method}(choiceContext, "

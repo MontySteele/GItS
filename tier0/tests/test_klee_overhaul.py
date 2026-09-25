@@ -998,8 +998,9 @@ def test_blast_shield_comes_back_to_hand_and_can_be_played_again(overhaul):
     mod answers at, with `GetResultLocationForCardPlay` returning
     `PileType.Hand`. So the assertion is about the PILES and not about a log.
 
-    AND IT REALLY IS PLAYABLE AGAIN, for another 2 Sparks: a second play is a
-    second Block and a second price, which is the whole card.
+    AND IT REALLY IS PLAYABLE AGAIN, for another Spark (1 since the Klee
+    balance review, pick 4a, 2026-09-25): a second play is a second Block and
+    a second price, which is the whole card.
     """
     from tier0.engine.combat import play_card
 
@@ -1010,13 +1011,13 @@ def test_blast_shield_comes_back_to_hand_and_can_be_played_again(overhaul):
 
     play_card(state, card)
     assert state.player.block == 6
-    assert state.player.sparks == 3
+    assert state.player.sparks == 4
     assert card in state.player.hand, "the card came back"
     assert card not in state.player.discard_pile
 
     play_card(state, card)
     assert state.player.block == 12, "played twice, paid twice"
-    assert state.player.sparks == 1
+    assert state.player.sparks == 3
     assert card in state.player.hand
 
     # AND THE UPGRADE MOVES THE BLOCK AND NOTHING ELSE.
@@ -1199,7 +1200,7 @@ def test_once_more_takes_the_last_set_off_card_out_of_the_discard(overhaul):
 
     assert detonator in state.player.hand
     assert detonator not in state.player.discard_pile
-    assert state.player.sparks == 3, "3 Sparks paid"
+    assert state.player.sparks == 4, "2 Sparks paid (balance review 4a)"
 
     # PLAYED AGAIN WITH NOTHING IN THE DISCARD: the detonator is in HAND now,
     # so the row moves nothing and the Sparks are still gone.
@@ -1207,11 +1208,11 @@ def test_once_more_takes_the_last_set_off_card_out_of_the_discard(overhaul):
     state.player.hand.append(once2)
     play_card(state, once2)
     assert detonator in state.player.hand
-    assert state.player.sparks == 0
+    assert state.player.sparks == 2
 
     # AND NONE PLAYED AT ALL is the same silence, on a fresh combat.
     fresh = _pass_two_state()
-    fresh.player.sparks = 3
+    fresh.player.sparks = 2
     solo = loader.get_card("proto_ko_once_more")
     fresh.player.hand = [solo]
     play_card(fresh, solo)
@@ -1250,9 +1251,10 @@ def test_sparkling_burst_pays_one_energy_or_two_by_the_predicate(overhaul):
     assert state2.player.energy == 2
 
     # THE UPGRADE MOVES THE SPARK PRICE and nothing on the face.
+    # (2 Sparks, 1 upgraded, since the Klee balance review, pick 4a.)
     state3 = _pass_two_state()
     up = loader.get_card("proto_ko_sparkling_burst+")
-    state3.player.sparks = 2
+    state3.player.sparks = 1
     state3.player.energy = 0
     state3.player.hand = [up]
     play_card(state3, up)
@@ -1302,16 +1304,17 @@ def test_blazing_delight_pays_energy_and_a_card_at_turn_start(overhaul):
     assert len(state.player.hand) == 2
 
     # THE UPGRADE CUTS THE SPARK PRICE, Once More!'s and Sparkling Burst's
-    # rail: the `+` card is the SAME body for 4 Sparks and the same 2 Energy.
+    # rail: the `+` card is the SAME body for 2 Sparks and the same 2 Energy
+    # (3 and 2 since the Klee balance review, pick 4a, 2026-09-25).
     # Authored on the row rather than left to the Prototype rule, which would
     # have fallen through to its cost clause and sold a 1-energy Rare instead
     # (`amount: 1` on a Power reads as "this row prints no power number").
     up = loader.get_card("proto_ko_blazing_delight+")
     assert up.cost == 2
     assert [fx for fx in up.effects
-            if fx["op"] == "spend_spark"][0]["amount"] == 4
+            if fx["op"] == "spend_spark"][0]["amount"] == 2
     state4 = _pass_two_state()
-    state4.player.sparks = 4
+    state4.player.sparks = 2
     state4.player.draw_pile = fodder(3)
     state4.player.hand = [up]
     play_card(state4, up)

@@ -61,9 +61,13 @@ public class KitVerbBaseTriggerProtoPinTests
         // predicate the base game's own retaliation powers read -- so a Mine
         // answers what Thorns answers. The EFFECT side: what it then deals is
         // an explosion, not an attack, so its own row is `Explode`'s row.
+        // The trigger lives in the pure `AnswersAttack` since 2026-09-25 (a
+        // Mine answers an attack on ANY player: "Mines in co-op, pick a").
         var calls = Il.Calls(Il.Method("ProtoBombPower", "BeforeDamageReceived"));
 
-        Assert.Contains("ValuePropExtensions.IsPoweredAttack", calls);
+        Assert.Contains("ProtoBombPower.AnswersAttack", calls);
+        Assert.Contains("ValuePropExtensions.IsPoweredAttack",
+                        Il.Calls(Il.Method("ProtoBombPower", "AnswersAttack")));
         Assert.Contains("ProtoBombPower.Explode", calls);
     }
 

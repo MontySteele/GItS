@@ -32,10 +32,10 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoReturnToSender : CustomCardModel, ISparkPricedCard
+public sealed class ProtoKoReturnToSender : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_return_to_sender");
 
@@ -44,20 +44,6 @@ public sealed class ProtoKoReturnToSender : CustomCardModel, ISparkPricedCard
         ("title", "Return to Sender"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. This turn, damage this [gold]Block[/gold] absorbs is placed on the attacker as a [gold]Bomb[/gold]."),
     };
-
-    // The Spark cost line (EB-118): unplayable below the price,
-    // which is how the cost is shown rather than silently failing.
-    // The printed price is declared ONCE here, on ISparkPricedCard,
-    // and the gate reads it back through SparkCost.PriceOf -- the
-    // same sum the Spark cost BADGE renders (PICK 8 option 2), so
-    // the price shown and the price charged cannot drift. A card
-    // that already prints a price is unaffected by the strict Rare
-    // Power, which is why PriceOf returns this number unchanged
-    // here (tier0 twin: combat.spark_price, sub-pick (a)).
-    public int PrintedSparkPrice => 2;
-
-    protected override bool IsPlayable =>
-        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -75,7 +61,6 @@ public sealed class ProtoKoReturnToSender : CustomCardModel, ISparkPricedCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await SparkPower.Spend(choiceContext, Owner.Creature, 2, this);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         await PowerCmd.Apply<ReturnToSenderPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }

@@ -131,8 +131,7 @@ public class SparkCounterPinTests
         Assert.Equal(1, SparkCounter.Read(banked.Creature));
 
         // THE ACCEPTANCE CONDITION FROM THE ROW: "the count matches the power's
-        // stack." It is the same read the overhead gauge and the rules take,
-        // not a display copy.
+        // stack." It is the same read the rules take, not a display copy.
         Assert.Equal(SparkPower.SparksAtPlay(banked.Creature),
                      SparkCounter.Read(banked.Creature));
         Assert.Equal(SparkGauge.Read(banked.Creature),
@@ -145,13 +144,14 @@ public class SparkCounterPinTests
     public void The_badge_rides_the_funnel_the_bank_already_has()
     {
         // `SparkPower`'s three mutation funnels call `SparkGauge.Refresh`; that
-        // is where the second display hangs, so the badge, the overhead gauge
-        // and the `spark` meter ledger cannot come from different reads.
+        // is where this display hangs, so the badge and the `spark` meter
+        // ledger cannot come from different reads. (The overhead gauge it used
+        // to redraw beside this one is gone: playtest 2026-09-24.)
         var calls = Il.Calls(typeof(SparkGauge)
             .GetMethod(nameof(SparkGauge.Refresh), All)!);
         Assert.Contains(calls,
             c => c.EndsWith("SparkCounter.Refresh", StringComparison.Ordinal));
-        Assert.Contains(calls,
+        Assert.DoesNotContain(calls,
             c => c.EndsWith("GaugeBridge.Refresh", StringComparison.Ordinal));
 
         // And `SparkPower` still calls that one funnel rather than reaching the
@@ -340,9 +340,8 @@ public class SparkCounterPinTests
     {
         var source = Source("Vfx/Prototype/SparkCounter.cs").Replace("\r\n", "\n");
 
-        // Klee's own Spark icon -- the one the status-strip badge wore, the one
-        // the overhead gauge caps with, and the one the meter cost badge paints
-        // on a priced card. Same resource, same glyph, wherever it appears.
+        // Klee's own Spark icon -- the one the status-strip badge wore and the
+        // one the meter cost badge paints on a priced card. Same resource, same glyph, wherever it appears.
         Assert.Contains("KleePck.Path(SparkGauge.GlyphPath)", source);
         Assert.Equal("klee/powers/spark.png", SparkGauge.GlyphPath);
 

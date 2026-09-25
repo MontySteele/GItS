@@ -53,7 +53,7 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Wind Spirit Creation"),
-        ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card."),
+        ("description", "[gold]Swirl[/gold] the enemy. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -78,6 +78,6 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- no ratified delta in klee-upgrades.yaml. Flagged in manifest.
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

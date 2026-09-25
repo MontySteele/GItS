@@ -83,7 +83,7 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoTagAlong), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoComeBackAndPlay), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoBoomBadge), CardRarity.Uncommon, CardType.Skill, 0 },
-        new object[] { typeof(ProtoKoWaitForIt), CardRarity.Uncommon, CardType.Skill, 1 },
+        new object[] { typeof(ProtoKoWaitForIt), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoDuckAndRun), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoPartyPoppers), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoLookOut), CardRarity.Uncommon, CardType.Power, 1 },
@@ -97,7 +97,7 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoFireworksFinale), CardRarity.Rare, CardType.Attack, 0 },
         new object[] { typeof(ProtoKoDodoco), CardRarity.Rare, CardType.Power, 2 },
         new object[] { typeof(ProtoKoAftershock), CardRarity.Rare, CardType.Power, 2 },
-        new object[] { typeof(ProtoKoSparkKnight), CardRarity.Rare, CardType.Power, 2 },
+        new object[] { typeof(ProtoKoSparkKnight), CardRarity.Rare, CardType.Power, 1 },
         new object[] { typeof(ProtoKoAlicesDetonator), CardRarity.Rare, CardType.Power, 1 },
         new object[] { typeof(ProtoKoSecondSurprise), CardRarity.Rare, CardType.Power, 1 },
     };
@@ -176,8 +176,9 @@ public class KleeR276ExpansionTests
         Assert.Contains("CardPileCmd.Draw", grow);
 
         var card = new ProtoKoOneMoreCharge();
-        Assert.Equal(5m, card.DynamicVars["Grow"].BaseValue);
-        Assert.Equal(8m, Upgraded<ProtoKoOneMoreCharge>().DynamicVars["Grow"].BaseValue);
+        // Klee balance review, pick 4a, 2026-09-25. 5 -> 8, upgrade still +3.
+        Assert.Equal(8m, card.DynamicVars["Grow"].BaseValue);
+        Assert.Equal(11m, Upgraded<ProtoKoOneMoreCharge>().DynamicVars["Grow"].BaseValue);
         Assert.Contains("If it is now 20 or more, draw 1 card.", Face(card));
     }
 
@@ -473,21 +474,14 @@ public class KleeR276ExpansionTests
     // ---- the Spark-supported Cook -----------------------------------------
 
     [Fact]
-    public void Boom_badge_doubles_the_next_set_off_card_only()
+    public void Boom_badge_is_priced_two_and_one_upgraded()
     {
-        var seat = Seat.Klee().WithPower<BoomBadgePower>(1);
-        var badge = seat.Creature.Powers.OfType<BoomBadgePower>().Single();
-        Assert.Equal(2, badge.ModifyCardPlayCount(Owned<ProtoKoKapow>(seat), null, 1));
-        Assert.Equal(1, badge.ModifyCardPlayCount(Owned<ProtoKoPop>(seat), null, 1));
-        // Another player's Set off card is not hers to double.
-        Assert.Equal(1, badge.ModifyCardPlayCount(Owned<ProtoKoKapow>(Seat.Klee()), null, 1));
-        // The doubled card spends one badge.
-        Assert.Contains(Il.Calls(Il.Method("BoomBadgePower", "AfterCardPlayed")),
-                        c => c.Contains("PowerCmd"));
-
+        // Playtest 2026-09-24: the price went 3 -> 2, and the upgrade to 1.
+        // The rule's own pins are in `KleePlaytest20260924Tests`.
         var card = new ProtoKoBoomBadge();
-        Assert.Equal(3, card.PrintedSparkPrice);
-        Assert.Equal(2, Upgraded<ProtoKoBoomBadge>().PrintedSparkPrice);
+        Assert.Equal(0, card.EnergyCost.Canonical);
+        Assert.Equal(2, card.PrintedSparkPrice);
+        Assert.Equal(1, Upgraded<ProtoKoBoomBadge>().PrintedSparkPrice);
     }
 
     [Fact]
@@ -581,12 +575,13 @@ public class KleeR276ExpansionTests
     [Fact]
     public void Party_poppers_reads_the_cost_badge()
     {
-        Assert.True(KleeExpansion.CostsSparks(new ProtoKoPocketMatch()));
+        Assert.True(KleeExpansion.CostsSparks(new ProtoKoTinderToss()));
+        Assert.False(KleeExpansion.CostsSparks(new ProtoKoPocketMatch()));
         Assert.True(KleeExpansion.CostsSparks(new ProtoKoFireworksFinale()));
         Assert.False(KleeExpansion.CostsSparks(new ProtoKoPop()));
         Assert.Contains("KleeExpansion.CostsSparks",
                         Il.Calls(Il.Method("PartyPoppersPower", "AfterCardPlayed")));
-        Assert.Equal(3m, Upgraded<ProtoKoPartyPoppers>()
+        Assert.Equal(4m, Upgraded<ProtoKoPartyPoppers>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 
@@ -695,7 +690,7 @@ public class KleeR276ExpansionTests
         var surprise = Il.Calls(Il.Method("SecondSurprisePower", "AfterChargeExploded"));
         Assert.Contains("ProtoBombPower.HalfOf", surprise);
         Assert.Contains("ProtoBombPower.PlaceOrJump", surprise);
-        Assert.Equal(5m, Upgraded<ProtoKoLookOut>().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(6m, Upgraded<ProtoKoLookOut>().DynamicVars["PowerAmount"].BaseValue);
     }
 
     [Fact]
@@ -735,7 +730,8 @@ public class KleeR276ExpansionTests
         Assert.Equal(0, SparkKnightPower.HitsFor(-2));
         Assert.Contains("SparkKnightPower.AfterSparksGained",
                         Il.Calls(Il.Method("SparkPower", "Gain")));
-        Assert.Equal(3m, Upgraded<ProtoKoSparkKnight>().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(3m, new ProtoKoSparkKnight().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(4m, Upgraded<ProtoKoSparkKnight>().DynamicVars["PowerAmount"].BaseValue);
     }
 
     [Fact]

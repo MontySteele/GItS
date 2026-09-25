@@ -618,9 +618,9 @@ public class ArmKeywordTipTests
     {
         // THE ATTACH IS THE GENERATOR'S and it is derived from the row's
         // effects, so the pin is that the two faces the seat played carry it.
-        // `EB-749` cut Fwoosh! and Fireworks Show; Pocket Match is the same
-        // Spark-priced Set off shape, and Tinder Toss carries Fireworks Show's
-        // board-wide line.
+        // `EB-749` cut Fwoosh! and Fireworks Show; Pocket Match is an aimed
+        // Set off (a single-charge one since 2026-09-24), and Tinder Toss
+        // carries Fireworks Show's board-wide line.
         foreach (var card in new[] { "ProtoKoCarefulArrangement", "ProtoKoPocketMatch",
                                      "ProtoKoTheBigOne", "ProtoKoTinderToss" })
         {

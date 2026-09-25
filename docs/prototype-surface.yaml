@@ -192,8 +192,8 @@
    upgrade: {bomb_size: +3},
    effects: [{op: plant_bomb, target: all_enemies, size: 4, mine: true}]}
 
-# R271 sec.4, item 1: Fwoosh! is CUT. Pocket Match is the same card at 5 with
-# Retain, and Retain is what the seats drafted it for.
+# R271 sec.4, item 1: Fwoosh! is CUT. (Pocket Match, the Retain twin it was
+# cut for, became a single-charge Set off on 2026-09-24.)
 
 # R271 sec.5.3: Tinder Toss takes the brief's shape and Fireworks Show's slot.
 # Set off resolves on EVERY enemy first, then the 3 lands on all of them, which
@@ -384,7 +384,7 @@
    description: "[gold]Set off[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    upgrade: {draw: 1},
    effects: [{op: set_off, target: enemy},
-             {op: draw, amount: 1}]}
+             {op: draw, amount: 2}]}
 
 # the pool pass, round 11 (2026-09-04): the arm's Spark SINK, and the first
 # X price on any sheet -- `spend_spark: all`, gated at one Spark. Why it
@@ -393,10 +393,10 @@
 - {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 3 per [gold]Spark[/gold] spent.",
-   upgrade: {grow: +1},
+   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 5 per [gold]Spark[/gold] spent.",
+   upgrade: {grow: +2},
    effects: [{op: spend_spark, amount: all},
-             {op: grow_largest_bomb, per_spark: 3}]}
+             {op: grow_largest_bomb, per_spark: 5}]}
 
 # THE POOL PASS, rounds 13 to 16 (2026-09-05, `EB-491`): ten rows, three
 # shelves and a bridge. Why each exists and what the rounds said:
@@ -411,18 +411,19 @@
 - {id: proto_ko_fish_blasting, name: "Fish Blasting (proto)", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 5 damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile.",
+   description: "Deal 8 damage to ALL enemies. Add a [gold]Confiscated[/gold] to your draw pile.",
    upgrade: {damage: +3},
-   effects: [{op: damage, amount: 5, target: all_enemies},
+   effects: [{op: damage, amount: 8, target: all_enemies},
              {op: add_card, card: confiscated, zone: draw, amount: 1}]}
 
+# Playtest 2026-09-24 ([USER]: "Pocket Match is redundant with Ka-pow!"): a
+# new design. Only the single largest charge goes off; the rest stay and grow.
 - {id: proto_ko_pocket_match, name: "Pocket Match", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common, retain: true,
-   description: "[gold]Set off[/gold]. Deal 5 damage.",
+   description: "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal 3 damage.",
    upgrade: {damage: +2},
-   effects: [{op: spend_spark, amount: 1},
-             {op: set_off, target: enemy, damage: 5}]}
+   effects: [{op: set_off, target: enemy, damage: 3, charge: largest}]}
 
 - {id: proto_ko_bombs_away, name: "Bombs Away! (proto)", character: klee,
    authored_by: [claude],
@@ -468,7 +469,7 @@
    cost: 0, type: skill, rarity: uncommon,
    description: "Gain 6 [gold]Block[/gold]. Return this card to your hand.",
    upgrade: {block: +2},
-   effects: [{op: spend_spark, amount: 2},
+   effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 6},
              {op: return_to_hand}]}
 
@@ -477,8 +478,7 @@
    cost: 1, type: skill, rarity: uncommon,
    description: "Gain 8 [gold]Block[/gold]. This turn, damage this [gold]Block[/gold] absorbs is placed on the attacker as a [gold]Bomb[/gold].",
    upgrade: {block: +3, power_amount: +3},
-   effects: [{op: spend_spark, amount: 2},
-             {op: block, amount: 8},
+   effects: [{op: block, amount: 8},
              {op: apply_power, power: ko_return_to_sender, amount: 8,
               target: self}]}
 
@@ -495,7 +495,7 @@
    cost: 0, type: skill, rarity: uncommon,
    description: "Return the last [gold]Set off[/gold] card you played this combat to your hand.",
    upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 3},
+   effects: [{op: spend_spark, amount: 2},
              {op: return_last_set_off}]}
 
 - {id: proto_ko_sparkling_burst, name: "Sparkling Burst", character: klee,
@@ -503,7 +503,7 @@
    cost: 0, type: skill, rarity: uncommon,
    description: "Gain 1 [gold]Energy[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 1 more.",
    upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 3},
+   effects: [{op: spend_spark, amount: 2},
              {op: energy, amount: 1},
              {op: conditional, if: bomb_went_off_this_turn,
               then: [{op: energy, amount: 1}]}]}
@@ -513,7 +513,7 @@
    cost: 2, type: power, rarity: rare,
    description: "At the start of your turn, gain 1 [gold]Energy[/gold] and draw 1 card.",
    upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 5},
+   effects: [{op: spend_spark, amount: 3},
              {op: apply_power, power: ko_blazing_delight, amount: 1,
               target: self}]}
 
@@ -537,7 +537,7 @@
 
 - {id: proto_ko_where_did_i_put_it, name: "Where Did I Put It?", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
+   cost: 0, type: skill, rarity: common,
    description: "Look at the top {Scry:diff()} cards of your draw pile. Put a [gold]Set off[/gold] card from them into your hand and the rest on the bottom.",
    upgrade: {scry: 2},
    effects: [{op: scry_take, amount: 4, filter: set_off}]}
@@ -548,6 +548,9 @@
    description: "[gold]Set off[/gold]. Deal 5 damage. Explosion damage past the enemy's HP is dealt to a random other enemy.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 5, overflow: bounce}]}
+
+# Klee balance review, pick 4a, 2026-09-25 (review/records/klee-balance-2026-09-25.md)
+# moved numbers on thirteen rows across this section and the one above it.
 
 # THE POOL EXPANSION (R276, 2026-09-23): thirty rows toward the 78-card pool,
 # designed by the main session and built as specified. Why each exists:
@@ -610,9 +613,9 @@
 - {id: proto_ko_one_more_charge, name: "One More Charge", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Your largest [gold]Bomb[/gold] grows by 5. If it is now 20 or more, draw 1 card.",
+   description: "Your largest [gold]Bomb[/gold] grows by 8. If it is now 20 or more, draw 1 card.",
    upgrade: {grow: +3},
-   effects: [{op: grow_largest, amount: 5, draw_if_at_least: 20, draw: 1}]}
+   effects: [{op: grow_largest, amount: 8, draw_if_at_least: 20, draw: 1}]}
 
 - {id: proto_ko_sit_tight, name: "Sit Tight", character: klee,
    authored_by: [claude],
@@ -645,20 +648,22 @@
    upgrade: {add: {op: draw, amount: 1}},
    effects: [{op: fetch_from_discard, filter: companion}]}
 
+# Playtest 2026-09-24 ([USER]: "seems weak"): "played twice" replayed a Set
+# off card after its first play had emptied the Bombs. It now doubles them.
 - {id: proto_ko_boom_badge, name: "Boom Badge", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Your next [gold]Set off[/gold] card this turn is played twice.",
+   description: "The next time you [gold]Set off[/gold] this turn, your [gold]Bombs[/gold] deal double damage.",
    upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 3},
+   effects: [{op: spend_spark, amount: 2},
              {op: apply_power, power: ko_boom_badge, amount: 1, target: self}]}
 
 - {id: proto_ko_wait_for_it, name: "Wait For It...", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, retain: true,
+   cost: 0, type: skill, rarity: uncommon, retain: true,
    description: "This turn, the next time one of your [gold]Bombs[/gold] triggers an [gold]Elemental Reaction[/gold], draw 2 cards and gain 1 [gold]Energy[/gold].",
-   upgrade: {cost: -1},
-   effects: [{op: apply_power, power: ko_wait_for_it, amount: 1, target: self}]}
+   upgrade: {power_amount: +1},
+   effects: [{op: apply_power, power: ko_wait_for_it, amount: 2, target: self}]}
 
 - {id: proto_ko_duck_and_run, name: "Duck and Run", character: klee,
    authored_by: [claude],
@@ -671,16 +676,16 @@
 - {id: proto_ko_party_poppers, name: "Party Poppers", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a card that costs [gold]Sparks[/gold], place a [gold]Bomb[/gold] 2 on a random enemy.",
+   description: "Whenever you play a card that costs [gold]Sparks[/gold], place a [gold]Bomb[/gold] 3 on a random enemy.",
    upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_party_poppers, amount: 2, target: self}]}
+   effects: [{op: apply_power, power: ko_party_poppers, amount: 3, target: self}]}
 
 - {id: proto_ko_look_out, name: "Look Out!", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever one of your [gold]Mines[/gold] goes off, gain 3 [gold]Block[/gold].",
+   description: "Whenever one of your [gold]Mines[/gold] goes off, gain 4 [gold]Block[/gold].",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_look_out, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: ko_look_out, amount: 4, target: self}]}
 
 - {id: proto_ko_patience_klee, name: "Patience, Klee!", character: klee,
    authored_by: [claude],
@@ -755,12 +760,13 @@
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_aftershock, amount: 1, target: self}]}
 
+# Playtest 2026-09-24 ([USER]: "seems underpowered"): cost 1, and ALL enemies.
 - {id: proto_ko_spark_knight, name: "Spark Knight", character: klee,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   description: "Whenever you gain a [gold]Spark[/gold], deal 2 damage to a random enemy.",
+   cost: 1, type: power, rarity: rare,
+   description: "Whenever you gain a [gold]Spark[/gold], deal 3 damage to ALL enemies.",
    upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_spark_knight, amount: 2, target: self}]}
+   effects: [{op: apply_power, power: ko_spark_knight, amount: 3, target: self}]}
 
 - {id: proto_ko_alices_detonator, name: "Alice's Detonator", character: klee,
    authored_by: [claude],
@@ -862,13 +868,8 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 0, type: skill,
-   no_upgrade: "the row prints two numbers and the Prototype-stage rule may
-     move neither. Swirl carries no amount, and the printed draw is the one
-     number the rule refuses to bump: its last clause ADDS a draw, both
-     appliers bind an added draw to the same Cards var, and a second one is a
-     collision the codegen names outright. At cost 0 the cost clause cannot
-     reach the row either. A real upgrade here is a ruled `upgrade:` block.",
-   description: "[gold]Swirl[/gold] the enemy. Draw 1 card.",
+   upgrade: {draw: 1},
+   description: "[gold]Swirl[/gold] the enemy. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: swirl, target: enemy}, {op: draw, amount: 1}]}
 
 - {id: proto_mc_sucrose_astable, name: "Sucrose — Astable Anemohypostasis (proto)", character: klee,
@@ -929,13 +930,8 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: skill,
-   no_upgrade: "the same shape as Sucrose's Gust one arm over: the aura
-     carries no amount, and the printed draw is the one number the
-     Prototype-stage rule refuses to bump (its last clause ADDS a draw, and
-     both appliers bind that to the same Cards var). At cost 1 the row is
-     under the rule's cost floor, so a real upgrade here is a ruled
-     `upgrade:` block.",
-   description: "Apply [gold]Electro[/gold] to ALL enemies. Draw 1 card.",
+   upgrade: {draw: 1},
+   description: "Apply [gold]Electro[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: apply_aura, element: electro, target: all_enemies},
              {op: draw, amount: 1}]}
 

@@ -13,7 +13,10 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// `EB-281`: the Spark bank as a DEDICATED RESOURCE DISPLAY under the Klee
-/// overhaul arm, and as the status-strip badge everywhere else.
+/// overhaul arm, and as the status-strip badge everywhere else. Since the
+/// 2026-09-24 playtest that display is the energy-area counter alone
+/// (<c>SparkCounterPinTests</c>); the overhead gauge is gone, and
+/// <see cref="Klee_has_no_overhead_spark_gauge"/> pins the absence.
 ///
 /// WHAT IS REAL HERE. Every DECISION the change takes is a pure read off a
 /// creature or a power and runs for real: who gets the gauge, what number it
@@ -21,7 +24,7 @@ namespace KleeMod.Tests.Prototype;
 /// with the arm off nothing at all moves. The Klee Burst gauge's new predicate
 /// is exercised on both sides of the same switch.
 ///
-/// WHAT IS STRUCTURAL, and labelled: the gauge's own SPEC is read out of
+/// WHAT IS STRUCTURAL, and labelled: the gauge SPEC TABLE is read out of
 /// <c>GaugeBridge</c> by reflection rather than drawn (drawing is Godot nodes,
 /// which are process death in this host -- README, the headless boundary), and
 /// the refresh funnels are pinned as call sets for the same reason: calling
@@ -209,65 +212,39 @@ public class SparkGaugePinTests
         spec.GetType().GetProperty(name, All)!.GetValue(spec);
 
     [Fact]
-    public void The_spark_spec_is_a_bar_less_counter_with_the_spark_glyph()
+    public void Klee_has_no_overhead_spark_gauge()
     {
-        var spark = Spec("klee_spark");
+        // Playtest 2026-09-24, [USER]: "Klee also still has a spark counter
+        // over her head, which is redundant with the main UI gauge." The
+        // `klee_spark` spec (`EB-281`) is deleted, so nothing draws the bank
+        // over her head; the energy-area counter (`SparkCounter`) is its one
+        // display and the strip badge stays suppressed (pinned above).
+        var keys = ((IEnumerable)typeof(GaugeBridge).GetField("Specs", All)!
+                .GetValue(null)!)
+            .Cast<object>()
+            .Select(s => (string)s.GetType().GetProperty("Key", All)!.GetValue(s)!)
+            .ToList();
+        Assert.DoesNotContain("klee_spark", keys);
+        Assert.Contains("burst", keys);
 
-        // BAR-LESS. Sparks are uncapped, so there is no honest span to draw;
-        // `GaugeBridge.RefreshDisplay` hides the track and the fill on a null
-        // span and the label falls back to the bare count. Same shape as
-        // Kokomi's Charge, and the same shape as the Regent's star counter.
-        Assert.Null(Prop(spark, "VisualSpan"));
-        Assert.Null(Prop(spark, "LabelMax"));
+        // And no spec draws off the Spark bank under some other key.
+        foreach (var spec in ((IEnumerable)typeof(GaugeBridge)
+                     .GetField("Specs", All)!.GetValue(null)!).Cast<object>())
+        {
+            var read = (Delegate)Prop(spec, "ReadValue")!;
+            Assert.NotEqual(typeof(SparkGauge), read.Method.DeclaringType);
+            var applies = (Delegate)Prop(spec, "AppliesTo")!;
+            Assert.NotEqual(typeof(SparkGauge), applies.Method.DeclaringType);
+        }
 
-        // A GLYPH, which is the half a bare counter does not have. It is Klee's
-        // own Spark icon -- the one the suppressed badge wore and the one the
-        // meter cost badge paints on a priced card -- so the resource looks the
-        // same everywhere it appears.
-        var skin = Prop(spark, "Skin")!;
-        Assert.Equal(SparkGauge.GlyphPath,
-                     skin.GetType().GetProperty("CapIconPath", All)!.GetValue(skin));
-        Assert.Equal("klee/powers/spark.png", SparkGauge.GlyphPath);
-
-        // No flash: the shared scene's flash overlay is bar-shaped, and a bar
-        // that is not drawn must not strobe.
-        var flash = (Func<int, int, bool>)Prop(spark, "ShouldFlash")!;
-        Assert.False(flash(0, 1));
-        Assert.False(flash(3, 0));
-    }
-
-    [Fact]
-    public void The_spark_gauge_reads_and_gates_through_SparkGauge()
-    {
-        // The spec must not carry its own copy of either decision: the number
-        // it draws is the bank the rules charge, and the creature it draws on
-        // is the arm's own predicate.
-        var spark = Spec("klee_spark");
-
-        var applies = (Func<Creature, bool>)Prop(spark, "AppliesTo")!;
-        Assert.Equal(typeof(SparkGauge), applies.Method.DeclaringType);
-        Assert.Equal(nameof(SparkGauge.AppliesTo), applies.Method.Name);
-
-        var read = (Func<Creature, int>)Prop(spark, "ReadValue")!;
-        Assert.Equal(typeof(SparkGauge), read.Method.DeclaringType);
-        Assert.Equal(nameof(SparkGauge.Read), read.Method.Name);
-    }
-
-    [Fact]
-    public void The_spark_gauge_takes_the_overhead_slot_the_arm_frees()
-    {
-        // The overhead slot is the C1 convention for "this creature's primary
-        // meter" and has meant Burst for everybody because Burst was
-        // everybody's. Under this arm Klee has none, so her one meter goes
-        // where the eye already looks rather than into the second row above it.
-        var overhead = typeof(GaugeBridge)
-            .GetField("OverheadBurstAnchor", All)!.GetValue(null);
-        var secondRow = typeof(GaugeBridge)
-            .GetField("SecondRowAnchor", All)!.GetValue(null);
-
-        Assert.Equal(overhead, Prop(Spec("klee_spark"), "AnchorOffset"));
-        Assert.Equal(overhead, Prop(Spec("burst"), "AnchorOffset"));
-        Assert.NotEqual(secondRow, Prop(Spec("klee_spark"), "AnchorOffset"));
+        // The refresh no longer reaches the gauge bridge at all: it redraws
+        // the energy-area counter and nothing else.
+        var refresh = Il.Calls(typeof(SparkGauge)
+            .GetMethod(nameof(SparkGauge.Refresh), All)!);
+        Assert.DoesNotContain(refresh,
+            c => c.EndsWith("GaugeBridge.Refresh", StringComparison.Ordinal));
+        Assert.Contains(refresh,
+            c => c.EndsWith("SparkCounter.Refresh", StringComparison.Ordinal));
     }
 
     // --- Burst stands down under the arm ---------------------------------
@@ -342,7 +319,7 @@ public class SparkGaugePinTests
     {
         // REAL, and it is the one call into the gauge that is safe to make
         // headlessly BECAUSE it declines: every path below returns before
-        // `GaugeBridge.Refresh`, which would reach Godot nodes. That is also the
+        // `SparkCounter.Refresh`, which would reach Godot nodes. That is also the
         // acceptance condition for the release build -- a shipped Spark gain
         // gains no gauge work.
         var klee = Seat.Klee();

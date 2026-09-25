@@ -1346,7 +1346,9 @@ def test_the_printed_spark_index_reads_the_shipped_face():
     """
     from tier0.content import loader
     index = qa_packet.printed_spark_index(REPO)
-    assert index["PROTO_KO_POCKET_MATCH"] == 1   # `EB-749`: was Fwoosh!
+    # `EB-749`: was Fwoosh!, then Pocket Match until it lost its price.
+    assert index["PROTO_KO_TINDER_TOSS"] == 1
+    assert "PROTO_KO_POCKET_MATCH" not in index
     assert index["PROTO_KO_BANG_BANG"] == 2
     # A card with no Spark price has NO row -- silence, never a zero.
     assert "KABOOM" not in index
@@ -1438,10 +1440,10 @@ def test_the_rendered_page_shows_a_spark_priced_card_at_its_price():
     energy, and before this it read as free."""
     state = banked_state(0)
     state["player"]["hand"] = [
-        {"id": "KLEEMOD-PROTO_KO_POCKET_MATCH", "name": "Pocket Match",
+        {"id": "KLEEMOD-PROTO_KO_TINDER_TOSS", "name": "Tinder Toss",
          "type": "Attack", "cost": "0", "can_play": True,
          "is_upgraded": False,
-         "description": "Set off. Deal 5 damage."},
+         "description": "Set off ALL enemies. Deal 3 damage to ALL enemies."},
     ]
     page = qa_packet.render(qa_packet.build(state, "t", repo=REPO))
     assert "- Cost: 1 Spark" in page

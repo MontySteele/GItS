@@ -54,9 +54,11 @@ public interface IKleeCharacter
 ///
 /// DISPLAY. This power IS the bank on every build, and off the Klee overhaul
 /// arm it is also its own display -- the status-strip badge, with the rule text
-/// below on its hover tip. UNDER THE ARM (`EB-281`) the bank is drawn instead as
-/// a dedicated resource gauge over Klee's head, glyph and number, and the badge
-/// is suppressed at the one container that makes it (<c>Vfx.SparkGauge</c>).
+/// below on its hover tip. UNDER THE ARM the bank is drawn instead as a
+/// dedicated resource counter beside the energy orb, glyph and number
+/// (`EB-621`, <c>Vfx.SparkCounter</c>; the overhead gauge `EB-281` put over her
+/// head was deleted by the 2026-09-24 playtest), and the badge is suppressed at
+/// the one container that makes it (<c>Vfx.SparkGauge</c>).
 /// Nothing about the resource moves: the model stays visible -- which is what
 /// keeps it on the understudy wire under the name "Spark" -- and every rule,
 /// price, refusal and ledger row below still reads and moves this power.
@@ -164,7 +166,8 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Redraw the Spark gauge (`EB-281`). Called from every funnel that MOVES
+    /// Redraw the Spark display (`EB-281`, now the energy-area counter
+    /// `EB-621` alone). Called from every funnel that MOVES
     /// the bank -- the same three chokepoints the <c>spark</c> meter ledger
     /// rides, and nothing else -- so the number on screen and the number in the
     /// ledger cannot come from different reads. The fourth call site is
