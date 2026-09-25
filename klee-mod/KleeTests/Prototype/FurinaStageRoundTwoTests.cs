@@ -379,7 +379,12 @@ public class FurinaStageRoundTwoTests
         var rows = ((IEnumerable<object?>)log!)
             .Cast<Dictionary<string, object?>>().ToList();
 
-        Assert.Equal(new object?[] { "arrive", "rotate", "arrive", "leave" },
+        // 2026-09-25 evening: the Spend is a beat of its own, filed before
+        // the leave it causes.
+        Assert.Equal(new object?[]
+                     {
+                         "arrive", "rotate", "arrive", "spend", "leave",
+                     },
                      rows.Select(row => row["event"]).ToArray());
         // A DEPARTURE SAYS WHY, because that is the whole of rules 7 and 9: a
         // bow is earned by Spend and by nothing else, and the page prints the

@@ -164,7 +164,8 @@ def test_the_reader_carries_the_keys_the_mod_sends():
     rows = blindplay_board.resolutions(
         {"resolutions": [_resolved(hits=[_hit()])]})
     assert rows and sorted(rows[0]) == sorted(
-        ["card", "auto_played", "carried", "overflowed", "hits"])
+        ["card", "auto_played", "carried", "overflowed", "hits",
+         "summoned"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed"])
 

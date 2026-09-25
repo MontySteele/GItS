@@ -672,6 +672,9 @@ STAGE_SHORT_NAMES = {
 #: observation carries the SENTENCE, so nothing downstream holds the token.
 STAGE_LEAVE_REASONS = {
     "hit": "emptied by a hit, so it takes a Bow",
+    # 2026-09-25 evening: a hit on the enemy's turn owes its Bow to the start
+    # of hers (rule 7). The mod's `FurinaStageLedger.HitWaitsReason`.
+    "hit_waits": "emptied by a hit; its Bow waits for your turn",
     "spend": "emptied by a Spend, so it takes a Bow",
     "rotated": "rotated off the front to make room, so no Bow",
     "final_bow": "took its Bow and left",
@@ -708,8 +711,9 @@ def stage_event(raw: Any) -> str:
 
 
 def _each(raw: Any) -> int | None:
-    """A log row's per-enemy figure (round four): a whole number of 0 or
-    more, else None. The mod sends -1 for "no single figure"."""
+    """A log row's per-enemy figure (round four), or its count of enemies
+    struck (2026-09-25 evening): a whole number of 0 or more, else None. The
+    mod sends -1 for "no single figure"."""
     if isinstance(raw, bool) or not isinstance(raw, (int, float, str)):
         return None
     try:
@@ -792,11 +796,15 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # numbered name by `name_stage_targets` below.
             "target": _text(row.get("target")),
             "combat_id": _text(row.get("target_id")),
-            # Round four: what EACH enemy lost to Chevalmarin's act, where
-            # every enemy lost the same. None where the wire has no such
-            # figure (-1, or an older build), and the page then prints the
-            # total as a total.
+            # Round four: what EACH enemy was dealt by Chevalmarin's act
+            # (before its Block, since 2026-09-25 evening), where every enemy
+            # was dealt the same. None where the wire has no such figure (-1,
+            # or an older build), and the page then prints the total as a
+            # total.
             "each": _each(row.get("each")),
+            # 2026-09-25 evening: how many enemies that act struck. None on
+            # every other beat and on an older build.
+            "struck": _each(row.get("struck")),
             # 2026-09-25: Furina's HP after a hit that reached her (the
             # `hurt` beat, the wire's `hit_furina`); None on every other
             # beat and on an older build.
@@ -808,8 +816,14 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
     # on a build that does not send it, and the render then falls back to the
     # flat per-Usher sum.
     act_block = raw.get("act_block")
+    # 2026-09-25 evening: the Bows a hit on the enemy's turn left waiting for
+    # her turn, oldest first, under the page's short names. Empty on a build
+    # that does not send them.
+    owed = [STAGE_SHORT_NAMES.get(_text(member), "")
+            for member in (raw.get("owed_bows") or [])]
     return {"seats": seats, "log": log,
-            "act_block": None if act_block is None else _int(act_block)}
+            "act_block": None if act_block is None else _int(act_block),
+            "owed_bows": [name for name in owed if name]}
 
 
 def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],
@@ -1018,11 +1032,19 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                  "killed": bool(h.get("killed"))}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
+        # 2026-09-25 evening: who a random summon inside the card rolled, in
+        # the stage's short names. The wire's `member` is an id and stops
+        # here; a name the page does not know falls back to the printed one.
+        summoned = [STAGE_SHORT_NAMES.get(_text(s.get("member")),
+                                          _text(s.get("name")))
+                    for s in (row.get("summoned") or [])
+                    if isinstance(s, dict)]
         out.append({"card": card,
                     "auto_played": bool(row.get("auto_played")),
                     "carried": bool(row.get("carried")),
                     "overflowed": bool(row.get("overflowed")),
-                    "hits": hits})
+                    "hits": hits,
+                    "summoned": [name for name in summoned if name]})
     return out
 
 

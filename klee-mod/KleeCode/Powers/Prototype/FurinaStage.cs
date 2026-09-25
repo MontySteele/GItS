@@ -338,6 +338,7 @@ public static class FurinaStage
             }
             if (RollFree(owner!, ledger) is not { } rolled) return;
             who = rolled;
+            NoteSummoned(rolled);
         }
         else
         {
@@ -392,6 +393,7 @@ public static class FurinaStage
     {
         var ledger = FurinaStageLedger.For(owner);
         if (ledger.BowFromFront() is not { } leaver) return;
+        NoteSummoned(leaver.Who);
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent),
                   mayReturn: false);
@@ -410,6 +412,17 @@ public static class FurinaStage
         FurinaStagePlacement.Reflow(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
+
+    /// <summary>
+    /// 2026-09-25 evening: WHO A RANDOM SUMMON ROLLED, on the card's own
+    /// resolution row. The seat page's "What you played" section printed Take
+    /// the Stage, Understudy and Double Casting with no performer, and the
+    /// seat had to find the arrival on the stage log. Filed only while a card
+    /// is resolving (<see cref="ResolutionLedger.NoteSummon"/>'s rule).
+    /// </summary>
+    private static void NoteSummoned(StagePerformer who) =>
+        ResolutionLedger.NoteSummon(Name(who),
+                                    FurinaStageLedger.DisplayName(who));
 
     /// <summary>A random performer who is not on stage, or null with all
     /// three seated; on an empty stage, any of the three. One roll for the
@@ -440,6 +453,7 @@ public static class FurinaStage
         if (amount <= 0 || !ledger.IsEmpty) return false;
         if (RollFree(owner, ledger) is not { } who) return false;
         if (ledger.SummonOnEmpty(who, amount) == null) return false;
+        NoteSummoned(who);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
         return true;
@@ -606,9 +620,12 @@ public static class FurinaStage
         var twoOrMore = ledger.Seats.Count >= 2;
         // 2026-09-25: WHO hit the lead, for the log's hit beat -- title and
         // combat id, the pair `NoteBeat` files for the body an act lands on.
+        // 2026-09-25 evening: and WHOSE TURN it is. A lead emptied on the
+        // enemy's turn owes its Bow to the start of hers (rule 7).
         var result = ledger.Absorb(
             incoming, dealer?.Monster?.Title.ToString() ?? "",
-            dealer?.CombatId.ToString() ?? "");
+            dealer?.CombatId.ToString() ?? "",
+            waitsForTurn: OnEnemyTurn(target));
         if (!twoOrMore || result.Absorbed <= 0
             || dealer is not { IsEnemy: true })
         {
@@ -623,6 +640,13 @@ public static class FurinaStage
         }
         return result.ReachedFurina;
     }
+
+    /// <summary>Is it the enemies' turn? The side the combat says is acting
+    /// -- an extra player turn keeps it the player's. False with no combat,
+    /// which is every headless pin.</summary>
+    public static bool OnEnemyTurn(Creature? owner) =>
+        owner?.CombatState?.CurrentSide
+        == MegaCrit.Sts2.Core.Combat.CombatSide.Enemy;
 
     /// <summary>
     /// WHAT OF A HIT GOT PAST HER BLOCK, AS THE ENGINE WILL COUNT IT
@@ -797,6 +821,7 @@ public static class FurinaStage
         var dmg = stage.ActDamageMultiplier;
         var blk = stage.ActBlockMultiplier;
         var each = -1;
+        var struck = -1;
         switch (who)
         {
             case StagePerformer.Usher:
@@ -805,19 +830,26 @@ public static class FurinaStage
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case StagePerformer.Chevalmarin:
-                // Round four: what EACH enemy lost, so the page prints "2 to
-                // every enemy" and not the total of four hits as one number.
+                // Round four: what EACH enemy was dealt, so the page prints
+                // "2 damage to each of 4 enemies" and not the total of four
+                // hits as one number. 2026-09-25 evening: DEALT, before the
+                // enemy's Block, and not what its HP lost -- against four
+                // Phantasmal Gardeners a Skittish Block ate one Gardener's 2
+                // and the page printed "6 in total, split across the
+                // enemies", which a seat could not tell from a bug. The act
+                // did hit all four for 2; the beat's `Moved` still says what
+                // their HP lost.
                 var targets = Enemies(owner).ToList();
-                var hpBefore = targets.Select(e => e.CurrentHp).ToList();
+                var dealt = new List<int>(targets.Count);
                 foreach (var enemy in targets)
                 {
-                    await ElementalHit.DealUnelemented(
+                    dealt.Add(await ElementalHit.DealUnelemented(
                         choiceContext, enemy,
                         FurinaStageLaw.ActChevalmarinDamage * dmg, owner,
-                        powered: false);
+                        powered: false));
                 }
-                each = EvenLoss(hpBefore,
-                                targets.Select(e => e.CurrentHp).ToList());
+                each = Even(dealt);
+                struck = targets.Count;
                 break;
             case StagePerformer.Crabaletta:
                 if (RandomEnemy(owner) is { } target)
@@ -834,23 +866,21 @@ public static class FurinaStage
                 }
                 break;
         }
-        NoteBeat(owner, beat, who, before, hit, each);
+        NoteBeat(owner, beat, who, before, hit, each, struck);
     }
 
-    /// <summary>Round four: the one loss every enemy took, or -1 where there
-    /// were none or they differ (a Vulnerable, a kill). Measured, as every
-    /// beat's number is (`EB-511`); the page prints the total on a -1.
-    /// </summary>
-    public static int EvenLoss(IReadOnlyList<int> before,
-                               IReadOnlyList<int> after)
+    /// <summary>2026-09-25 evening: the one figure every enemy was dealt, or
+    /// -1 where there were none or they differ (a Vulnerable on one of them).
+    /// Measured off each hit, as every beat's number is (`EB-511`); the page
+    /// prints the total on a -1.</summary>
+    public static int Even(IReadOnlyList<int> dealt)
     {
-        if (before.Count == 0 || before.Count != after.Count) return -1;
-        var first = before[0] - after[0];
-        for (var i = 1; i < before.Count; i++)
+        if (dealt.Count == 0) return -1;
+        foreach (var figure in dealt)
         {
-            if (before[i] - after[i] != first) return -1;
+            if (figure != dealt[0]) return -1;
         }
-        return first;
+        return dealt[0];
     }
 
     /// <summary><i>Bis!</i>: the lead performer performs its act now.
@@ -918,8 +948,10 @@ public static class FurinaStage
 
     /// <summary>
     /// Rule 9, the curtain call: performed ONCE by a performer that reached 0
-    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at
-    /// <see cref="Flush"/>, after the hit), or a summon on a full stage. It
+    /// Fanfare, whatever emptied it -- a Spend, a hit (paid at the start of
+    /// her next turn when the hit came on the enemy's turn,
+    /// <see cref="PayOwedBows"/>; at <see cref="Flush"/>, after the hit, on
+    /// her own), or a summon on a full stage. It
     /// takes the EXIT rather than the performer so a rotation cannot be
     /// mistaken for a departure at a call site --
     /// <see cref="StageExit.Bows"/> is the ledger's own read of rule 7, and a
@@ -932,8 +964,8 @@ public static class FurinaStage
     /// a random enemy -- <see cref="Act"/> itself, filed as a <c>bow</c>.
     /// ONE act: Ousia and Pneuma double it like any act, and Full House does
     /// not repeat it (only <see cref="EndOfTurnActs"/> loops). A hit's Bow on
-    /// the enemy's turn gives Usher's Block then, which helps only against
-    /// later hits that turn ([USER]: the plain exit is the minimum).
+    /// the enemy's turn waits for the start of hers (2026-09-25 evening), so
+    /// Usher's Block lands after her Block clears and lasts her turn.
     /// </summary>
     public static async Task Bow(PlayerChoiceContext choiceContext,
                                  Creature owner, StageExit exit,
@@ -1002,7 +1034,8 @@ public static class FurinaStage
     private static void NoteBeat(Creature owner, string what,
                                  StagePerformer who,
                                  (int Block, int EnemyHp) before,
-                                 Creature? hit = null, int each = -1)
+                                 Creature? hit = null, int each = -1,
+                                 int struck = -1)
     {
         var after = Ledger(owner);
         var moved = (after.Block - before.Block)
@@ -1020,7 +1053,7 @@ public static class FurinaStage
             // which is off the next board entirely.
             hit?.Monster?.Title.ToString() ?? "",
             hit?.CombatId.ToString() ?? "",
-            each));
+            each, Struck: struck));
     }
 
     /// <summary>
@@ -1028,14 +1061,16 @@ public static class FurinaStage
     /// <c>ModifyHpLostBeforeOsty</c> because the engine wanted a number back,
     /// and this is where the bodies catch up.
     ///
-    /// AND WHERE A HIT'S BOW IS PAID (rule 7, 2026-09-25: "Stage members bow
-    /// out when they are destroyed or replaced, not just when you deliberately
-    /// spend them down to 0"). The engine calls <c>AfterDamageReceived</c>
-    /// once per hit, inside <c>CreatureCmd.Damage</c>, after that hit's HP
-    /// loss and before <c>AttackCommand</c> deals the next hit. So the bow
-    /// lands BETWEEN the hits of a multi-hit attack: it cannot soften the hit
-    /// that emptied the performer, and the performer Usher's Fanfare lands
-    /// on meets the next one.
+    /// AND WHERE A HIT ON HER OWN TURN PAYS ITS BOW (rule 7, 2026-09-25:
+    /// "Stage members bow out when they are destroyed or replaced, not just
+    /// when you deliberately spend them down to 0"). The engine calls
+    /// <c>AfterDamageReceived</c> once per hit, inside
+    /// <c>CreatureCmd.Damage</c>, after that hit's HP loss, so the bow cannot
+    /// soften the hit that emptied the performer. A hit on the ENEMY'S turn
+    /// queues nothing here: its Bow waits for the start of her next turn
+    /// (<see cref="PayOwedBows"/>, 2026-09-25 evening), which replaced
+    /// paying it between the enemy's hits -- two seats watched that Block
+    /// expire unused before her turn in every fight.
     /// The bow is the same <see cref="Bow"/> a Spend takes, readers and A
     /// Five-Century Act's return included.
     ///
@@ -1059,6 +1094,32 @@ public static class FurinaStage
                     await Bow(choiceContext, owner, exit);
                 }
             }
+        }
+        await FurinaStagePets.Sync(owner);
+        Vfx.FurinaStageStrip.Refresh(owner);
+    }
+
+    /// <summary>
+    /// RULE 7, 2026-09-25 evening: THE BOWS A HIT ON THE ENEMY'S TURN LEFT
+    /// WAITING, paid at the start of her turn in the order they were earned.
+    /// Called from <c>FurinaStageHooks.BeforeHandDraw</c>: after her Block
+    /// clears and after the front's regen, before her draw. Each is the
+    /// ordinary <see cref="Bow"/> -- the performer's act, then Thunderous
+    /// Applause and A Five-Century Act -- so a returnee arrives on her turn.
+    ///
+    /// DROPPED, NOT KEPT, when she is dead or the combat is over: the list is
+    /// taken first either way, so nothing owed outlives this call.
+    /// </summary>
+    public static async Task PayOwedBows(PlayerChoiceContext choiceContext,
+                                         Creature? owner)
+    {
+        if (owner == null || !LiveFor(owner)) return;
+        var owed = FurinaStageLedger.For(owner).TakeOwedBows();
+        if (owed.Count == 0) return;
+        foreach (var exit in owed)
+        {
+            if (owner.IsDead || CombatOver()) break;
+            await Bow(choiceContext, owner, exit);
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);

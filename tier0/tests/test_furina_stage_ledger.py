@@ -64,7 +64,7 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     FS.end_of_turn_acts(st)                 # crab 8 -> 7         faded  1
     assert FS.final_bow(st) == 7            # crab leaves with 7  left   7
     assert FS.absorb(st, 5) == 2            # usher emptied       hit    2
-    FS.settle_hit(st)                       # his bow: Block, no Fanfare
+    FS.pay_owed_bows(st)                    # his bow: Block, no Fanfare
     assert FS.stage(st.player) == [["chevalmarin", 1]]
     assert FS.collect_all(st) == 1          # the Rare            spent  1
     FS.bow_and_return(st)                   # chev back at 1      return +1

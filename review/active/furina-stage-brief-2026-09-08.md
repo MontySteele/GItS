@@ -98,7 +98,7 @@ performers with their own bars, and Fanfare is that bar.**
    the middle seat. A big single hit rips through the lead and lands on
    her; a flurry can kill the lead and leave her untouched; each is
    answered differently and the intent shows which is coming.
-7. **A performer at 0 Fanfare takes a Bow and leaves,** whatever emptied it: a Spend, a hit, or a summon on a full stage (2026-09-25; [USER]: "Stage members bow out when they are destroyed or replaced, not just when you deliberately spend them down to 0"). A hit's Bow comes after that hit is dealt, so it never softens the hit that caused it.
+7. **A performer at 0 Fanfare takes a Bow and leaves,** whatever emptied it: a Spend, a hit, or a summon on a full stage (2026-09-25; [USER]: "Stage members bow out when they are destroyed or replaced, not just when you deliberately spend them down to 0"). A hit's Bow never softens the hit that caused it. A performer a hit empties on the enemy's turn takes its Bow at the start of Furina's next turn, after her Block clears and after the front's regen, before her draw; several pay in the order they were earned, and Thunderous Applause and A Five-Century Act fire then. If the combat ends first, or Furina dies, those Bows are dropped. Bows earned on her own turn stay immediate. (2026-09-25 evening: both seats of the draft-3 round, and the afternoon seat before them, saw Usher's Bow Block land after the killing hit on the enemy's turn and expire before hers, seven times in all. This replaced paying the Bow between the enemy's hits.)
 8. **Spend N** is a choice on her cards, made when the card is played:
    "Deal 7" or "Spend 3: deal 13 instead" (round two, `EB-746`: both engines
    had fired the rider whenever a lead stood, and four seats asked for the

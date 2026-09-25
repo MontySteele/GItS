@@ -108,6 +108,11 @@ public static class ResolutionLedger
     public sealed record Resolved(string CardId, string Card, bool AutoPlayed)
     {
         public List<Hit> Hits { get; } = new();
+
+        /// <summary>Who a random summon inside this card rolled, in order:
+        /// the member id and its printed name (<see cref="NoteSummon"/>).
+        /// </summary>
+        public List<(string Member, string Name)> Summoned { get; } = new();
         public bool Carried { get; set; }
         public bool Overflowed { get; set; }
     }
@@ -276,6 +281,27 @@ public static class ResolutionLedger
         _open.Hits.Add(new Hit(target, 0, 0, combatId, Killed: true));
     }
 
+    /// <summary>
+    /// "A random summon inside the card that is resolving brought THIS
+    /// performer on" (2026-09-25 evening). The section listed Take the Stage,
+    /// Understudy and Double Casting with no performer at all, and the seat
+    /// had to find the arrival on the stage log. <paramref name="member"/> is
+    /// the id (the page translates it; it never reaches a seat) and
+    /// <paramref name="name"/> the printed name. Dropped where no play is
+    /// open, <see cref="NoteHit"/>'s rule and its reason: a Bow's summon at
+    /// the start of her turn is not a card resolving.
+    /// </summary>
+    public static void NoteSummon(string member, string name)
+    {
+        if (_open == null || string.IsNullOrEmpty(member)) return;
+        if (_open.Summoned.Count >= MaxHits)
+        {
+            _open.Overflowed = true;
+            return;
+        }
+        _open.Summoned.Add((member, name ?? string.Empty));
+    }
+
     /// <summary>"That card has finished." Closes the row.</summary>
     public static void ClosePlay() => _open = null;
 
@@ -326,6 +352,12 @@ public static class ResolutionLedger
                     ["blocked"] = hit.Blocked,
                     ["combat_id"] = hit.CombatId,
                     ["killed"] = hit.Killed,
+                }),
+            ["summoned"] = row.Summoned.ConvertAll(s =>
+                new Dictionary<string, object?>
+                {
+                    ["member"] = s.Member,
+                    ["name"] = s.Name,
                 }),
         });
 }
