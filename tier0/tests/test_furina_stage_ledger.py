@@ -112,7 +112,12 @@ def test_the_bow_and_power_doors_book_where_they_raise(arm):
     assert _balances(st)
 
 
-@pytest.mark.parametrize("deck", ["natural", "preserve", "expend"])
+@pytest.mark.parametrize("deck", ["natural", "preserve", "expend",
+                                  # THE GUEST CAST (2026-09-25): payments,
+                                  # taxes, gifts and repeats balance too.
+                                  "guest star", "guest tank",
+                                  "3 guests (stars) + full house",
+                                  "3 guests (supports) + full house"])
 def test_real_fights_balance_every_time(arm, deck):
     from tools import furina_stage_report as report
 
