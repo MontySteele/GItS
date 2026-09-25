@@ -6753,10 +6753,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # 2026-09-25: what a summon does and what each performer does. The
         # numerals are interpolated on the mod side, so the anchors are the
         # prose either side of them.
-        "Summon": ["Puts a performer in the back seat with ",
-                   "the end of your turn. On a full stage, the lead performer "
-                   "takes a ",
-                   " and moves to the back seat instead, keeping its "],
+        "Summon": ["A performer joins at the back with ",
+                   "full stage, the lead takes a ",
+                   " and moves to ", "the back instead."],
         "Gentilhomme Usher": ["End of your turn: gain "],
         "Surintendante Chevalmarin": ["End of your turn: deal ",
                                       " damage to ALL enemies. ",

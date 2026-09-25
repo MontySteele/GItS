@@ -1184,6 +1184,13 @@ def stage_summon_tip_calls(card: dict) -> list[str]:
     `ForSummon`, a NAMED member carries that performer's tip, and a `random`
     one carries all three, because any of them may arrive. A row that gains a
     summon gains the tips the day its row exists.
+
+    ONE SUMMON TIP, IN ONE OF TWO VARIANTS: a row with any RANDOM summon gets
+    the full-stage sentence (the lead bows and moves to the back), and a row
+    whose summons are all NAMED gets the arrival sentence alone, because the
+    named Commons' own face says what a performer already on stage does. The
+    variant rides as the call's third argument, so each entry here is
+    `(call, extra arguments)`.
     """
     members: set[str] = set()
     for fx in iter_effects(card.get("effects") or []):
@@ -1191,10 +1198,12 @@ def stage_summon_tip_calls(card: dict) -> list[str]:
             members.add(str(fx.get("member", "random")))
     if not members:
         return []
-    calls = ["ArmKeywordTips.ForSummon"]
+    random = "random" in members
+    calls = [("ArmKeywordTips.ForSummon",
+              ", true" if random else ", false")]
     for member, call in _STAGE_PERFORMER_TIPS:
-        if member in members or "random" in members:
-            calls.append(call)
+        if member in members or random:
+            calls.append((call, ""))
     return calls
 
 
@@ -14443,9 +14452,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # field does. Words a face prints UNGOLDED ("Summon Usher"), so they
         # attach off the op (`stage_summon_tip_calls`) and sit just above the
         # golded words, which are read after them.
-        for attach in stage_summon_tip_calls(card):
+        for attach, extra in stage_summon_tip_calls(card):
             tips_expr = (
-                f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
+                f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this{extra})")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc + rider_printed,

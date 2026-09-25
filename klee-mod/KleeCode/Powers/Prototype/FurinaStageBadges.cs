@@ -216,7 +216,7 @@ public sealed class CrabalettaBadgePower
 }
 
 /// <summary>
-/// THE STAGE, ON FURINA: the whole board's rules in four sentences, on the
+/// THE STAGE, ON FURINA: when the cast acts and the damage order, on the
 /// body a player hovers first. Applied at combat open and re-asked every turn
 /// start (<see cref="FurinaStage.InstallBadge"/>), so a fight never runs
 /// without it. It moves nothing.
@@ -233,11 +233,9 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
     {
         ("title", "The Stage"),
         ("description",
-            "Up to " + FurinaStageLaw.Seats + " performers. Each acts at the "
-          + "end of your turn. Attacks hit your [gold]Block[/gold], then the "
-          + "lead performer's [gold]Fanfare[/gold], then you. "
-          + "[gold]Raise[/gold] fills the back performer and "
-          + "[gold]Spend[/gold] pays from it."),
+            "Performers act at the end of your turn. Attacks hit your "
+          + "[gold]Block[/gold], then the lead performer's "
+          + "[gold]Fanfare[/gold], then you."),
     };
 
     public override PowerType Type => PowerType.Buff;

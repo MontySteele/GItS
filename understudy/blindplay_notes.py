@@ -1298,6 +1298,31 @@ COMPANION_SLOT_SENTENCE = (
 #: acts are not documented". The numerals are `FurinaStageLaw`'s, written out
 #: for `ARM_KEYWORDS`' standing reason: this page has no access to the mod's
 #: constants and a seat needs the number rather than the name of the constant.
+#: 2026-09-25. A NAMED summon's Summon row -- `ArmKeywordTips.ForSummon`'s
+#: `random: false` variant. Nothing about a full stage: the named Commons' own
+#: face says what a performer already on stage does ("Raise 3 on him
+#: instead"), and the full-stage sentence would contradict it.
+SUMMON_NAMED_ROW = ("A performer joins at the back with 1 Fanfare and acts at "
+                    "the end of your turn.")
+
+#: Which Summon variant a face prints: a random summon (Take the Stage,
+#: Understudy, Double Casting, Improvised Number's lowercase clause) or a named
+#: one (the three Commons).
+_SUMMON_RANDOM_RE = re.compile(r"\b[Ss]ummon (?:a|two) random performer")
+_SUMMON_NAMED_RE = re.compile(r"\b[Ss]ummon (?:Usher|Chevalmarin|Crabaletta)\b")
+
+
+def _summon_row(hay: str) -> str:
+    """The Summon row for THIS screen: the random variant, the named one, or
+    both labelled where the screen prints both kinds of summon."""
+    random = bool(_SUMMON_RANDOM_RE.search(hay))
+    named = bool(_SUMMON_NAMED_RE.search(hay))
+    if random and named:
+        return ("Random: " + ARM_KEYWORDS["Summon"] + " Named: "
+                + SUMMON_NAMED_ROW)
+    return SUMMON_NAMED_ROW if named else ARM_KEYWORDS["Summon"]
+
+
 STAGE_ACTS = ("Every performer acts at the end of your turn, from any seat: "
               "Usher gives you 3 Block, Chevalmarin deals 2 to every enemy "
               "and applies Hydro, Crabaletta deals 5 Hydro damage to a random "
@@ -1617,13 +1642,12 @@ ARM_KEYWORDS: dict[str, str] = {
     # did". `ArmKeywordTips.ForSummon`, `ForUsher`, `ForChevalmarin` and
     # `ForCrabaletta`'s words, with `FurinaStageLaw`'s numerals written out;
     # the performer rows are also each body's badge in game
-    # (`StagePerformerBadge`). The Summon row's last sentence is the
-    # full-stage rule ruled the same day: a random summon on a full stage
-    # bows the lead, which moves to the back keeping its bar.
-    "Summon": ("Puts a performer in the back seat with 1 Fanfare. It acts at "
-               "the end of your turn. On a full stage, the lead performer "
-               "takes a Bow and moves to the back seat instead, keeping its "
-               "Fanfare."),
+    # (`StagePerformerBadge`). The Summon row has TWO variants, as the tip
+    # does: this one is a RANDOM summon's (the full-stage rule ruled the same
+    # day), and `SUMMON_NAMED_ROW` is a named one's; `_summon_row` picks by
+    # what the screen prints.
+    "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
+               "stage, the lead takes a Bow and moves to the back instead."),
     "Gentilhomme Usher": ("End of your turn: gain 3 Block. Bow: gain 4 "
                           "Block."),
     "Surintendante Chevalmarin": ("End of your turn: deal 2 Hydro damage to "
@@ -2903,6 +2927,10 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             # Round four: Ousia and Pneuma print only beside Arkhe Alignment.
             and _anchored(word, obs)
             and pattern.search(_bomb_hay(word, hay, obs))]
+    # 2026-09-25: the Summon row is the variant this screen's faces owe.
+    for row in rows:
+        if row["name"] == "Summon" and _arm_owns("Summon", who):
+            row["text"] = _summon_row(hay)
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()
              if pattern.search(hay)]

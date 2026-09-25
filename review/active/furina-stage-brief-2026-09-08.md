@@ -344,7 +344,7 @@ Names are provisional.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Take the Stage | 1 | Skill | Summon a random performer who is not on stage. (Was Salon Début; renamed under R179 in round one, `EB-739`, since a shipped card carries that name.) |
+| Take the Stage | 1 | Skill | Summon a random performer. (2026-09-25: the face follows the full-stage ruling, rule 3.) (Was Salon Début; renamed under R179 in round one, `EB-739`, since a shipped card carries that name.) |
 | Curtain Rise | 1 | Attack | Deal 7. Spend 3: deal 13 instead. |
 | Rising Applause | 1 | Skill | Raise 5 Fanfare on the back performer. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
 
@@ -355,7 +355,7 @@ Names are provisional.
 | Gentilhomme Usher | 1 | Skill | Summon Usher. If he is already on stage, Raise 3 on him instead. |
 | Surintendante Chevalmarin | 1 | Skill | Summon Chevalmarin. If she is already on stage, Raise 3 on her instead. |
 | Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. If she is already on stage, Raise 3 on her instead. |
-| Understudy | 0 | Skill | Summon a random performer who is not on stage. Exhaust. |
+| Understudy | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Warm Reception | 1 | Skill | Raise 3 Fanfare on the back performer. Draw 1. |
 | Tidal Flourish | 1 | Attack | Deal 5 to every enemy. Spend 2: deal 9 instead. |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
@@ -405,7 +405,7 @@ values; names are provisional. Upgrades in brackets.
 | card | cost | type | text |
 |---|---|---|---|
 | Gala Dinner | 1 | Skill | Raise 3 Fanfare on every performer. [Raise 4] |
-| Double Casting | 1 | Skill | Summon two random performers who are not on stage. [cost 0] |
+| Double Casting | 1 | Skill | Summon two random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Tutti! | 1 | Skill | Every performer performs its act now. [cost 0] (Round four: was 2, 1 upgraded.) |
 | Bravura | 1 | Attack | Spend all of the back performer's Fanfare. Deal 3 damage for each point spent. [4 per point] |
 | Full House | 2 | Power | At the end of your turn, if all three seats are filled, your performers act twice. [cost 1] |

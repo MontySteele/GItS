@@ -1305,25 +1305,40 @@ public static class ArmKeywordTips
           + " [gold]Fanfare[/gold].");
 
     /// <summary>
-    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons. The first
-    /// two sentences are brief sec.3 rule 3 and `EB-738` (a newcomer arrives
-    /// at <see cref="FurinaStageLaw.SummonFanfare"/> and acts with the others
-    /// at the end of the turn, never on arrival); the third is the full-stage
-    /// rule ruled the same day, the Defect-orb shape: a random summon on a
-    /// full stage bows the lead, which moves to the back keeping its bar
-    /// (<c>FurinaStage.RecastFromFront</c>).
+    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons, in TWO
+    /// variants chosen by the row (<c>gen_klee_cards.stage_summon_tip_calls</c>
+    /// passes <paramref name="random"/>):
     ///
-    /// OVER THE TIP CEILING, and carried in <c>lint_text_conventions</c>'
-    /// exceptions rather than reworded: the text is [USER]'s ruled wording.
+    ///   * a RANDOM summon states the full-stage rule ruled the same day, the
+    ///     Defect-orb shape -- the lead bows and moves to the back
+    ///     (<c>FurinaStage.RecastFromFront</c>);
+    ///   * a NAMED summon states the arrival and when it acts (brief sec.3
+    ///     rule 3, `EB-738`), and nothing about a full stage: the named
+    ///     Commons' own face says what happens when the performer is already
+    ///     there ("Raise 3 on him instead"), and a tip saying the lead bows
+    ///     would contradict it.
+    ///
+    /// TWO STATEMENTS AND NOT A TERNARY, because
+    /// <c>lint_text_conventions.tip_rows</c> measures each <c>With(...);</c>
+    /// call to its own <c>);</c>, and a ternary's two literals would reach it
+    /// as one string.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSummon(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, SummonKey,
-            "Puts a performer in the back seat with "
-          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. It acts at "
-          + "the end of your turn. On a full stage, the lead performer takes a "
-          + "[gold]Bow[/gold] and moves to the back seat instead, keeping its "
-          + "Fanfare.");
+        IEnumerable<IHoverTip> inherited, CardModel card, bool random)
+    {
+        if (random)
+        {
+            return With(inherited, SummonKey,
+                "A performer joins at the back with "
+              + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a "
+              + "full stage, the lead takes a [gold]Bow[/gold] and moves to "
+              + "the back instead.");
+        }
+        return With(inherited, SummonKey,
+            "A performer joins at the back with "
+          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold] and acts at "
+          + "the end of your turn.");
+    }
 
     /// <summary>
     /// 2026-09-25. GENTILHOMME USHER'S ACT AND BOW, on every card that names

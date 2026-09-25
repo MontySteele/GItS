@@ -217,14 +217,21 @@ public class FurinaStageLegibilityTests
         Il.Strings(typeof(ArmKeywordTips).GetMethod(method, HeadlessGame.All)!));
 
     [Fact]
-    public void The_summon_tip_is_the_ruled_sentence()
+    public void The_summon_tip_has_a_random_and_a_named_variant()
     {
+        // A random summon states the full-stage rule; a named one states only
+        // the arrival, because the named Commons' face says what a performer
+        // already on stage does ("Raise 3 on him instead").
         var body = Printed("ForSummon");
-        Assert.Contains("Puts a performer in the back seat with ", body);
-        Assert.Contains(" [gold]Fanfare[/gold]. It acts at the end of your "
-                      + "turn. On a full stage, the lead performer takes a "
-                      + "[gold]Bow[/gold] and moves to the back seat instead, "
-                      + "keeping its Fanfare.", body);
+        Assert.Contains("A performer joins at the back with ", body);
+        Assert.Contains(" [gold]Fanfare[/gold]. On a full stage, the lead "
+                      + "takes a [gold]Bow[/gold] and moves to the back "
+                      + "instead.", body);
+        Assert.Contains(" [gold]Fanfare[/gold] and acts at the end of your "
+                      + "turn.", body);
+        var parameters = typeof(ArmKeywordTips).GetMethod("ForSummon")!
+            .GetParameters();
+        Assert.Equal("random", parameters.Last().Name);
     }
 
     [Fact]
@@ -278,10 +285,9 @@ public class FurinaStageLegibilityTests
     public void The_stage_badge_is_the_ruled_text()
     {
         Assert.Equal(
-            $"Up to {FurinaStageLaw.Seats} performers. Each acts at the end of "
-          + "your turn. Attacks hit your [gold]Block[/gold], then the lead "
-          + "performer's [gold]Fanfare[/gold], then you. [gold]Raise[/gold] "
-          + "fills the back performer and [gold]Spend[/gold] pays from it.",
+            "Performers act at the end of your turn. Attacks hit your "
+          + "[gold]Block[/gold], then the lead performer's "
+          + "[gold]Fanfare[/gold], then you.",
             Badge<StageSummaryPower>("description"));
     }
 

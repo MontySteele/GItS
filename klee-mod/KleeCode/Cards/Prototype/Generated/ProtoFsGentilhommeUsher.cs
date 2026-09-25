@@ -38,7 +38,7 @@ public sealed class ProtoFsGentilhommeUsher : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRaise(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForRaise(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("gentilhomme_usher");
 

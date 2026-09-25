@@ -41,14 +41,14 @@ public sealed class ProtoFsUnderstudy : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
+        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, true), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_understudy");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Understudy"),
-        ("description", "Summon a random performer who is not on stage."),
+        ("description", "Summon a random performer."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

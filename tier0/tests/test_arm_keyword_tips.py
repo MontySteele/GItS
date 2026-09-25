@@ -1465,6 +1465,14 @@ STAGE_SUMMONERS = {
 }
 
 
+#: The rows whose summons are all NAMED, and so take the Summon tip's named
+#: variant: no full-stage sentence, because their face says what a performer
+#: already on stage does.
+NAMED_SUMMONERS = {"proto_fs_gentilhomme_usher",
+                   "proto_fs_surintendante_chevalmarin",
+                   "proto_fs_mademoiselle_crabaletta"}
+
+
 def test_every_summoning_row_and_no_other_owes_the_summon_tips():
     """DERIVED FROM THE OP, never a list of ids: a row that gains a summon
     gains the tips the day its row exists."""
@@ -1472,8 +1480,9 @@ def test_every_summoning_row_and_no_other_owes_the_summon_tips():
     found = {rid: gen.stage_summon_tip_calls(row)
              for rid, row in rows.items()
              if gen.stage_summon_tip_calls(row)}
-    expected = {rid: ["ArmKeywordTips.ForSummon"]
-                + [f"ArmKeywordTips.For{who}" for who in cast]
+    expected = {rid: [("ArmKeywordTips.ForSummon",
+                       ", false" if rid in NAMED_SUMMONERS else ", true")]
+                + [(f"ArmKeywordTips.For{who}", "") for who in cast]
                 for rid, cast in STAGE_SUMMONERS.items()}
     assert found == expected
 
@@ -1485,7 +1494,9 @@ def test_every_summoning_row_carries_the_summon_and_performer_tips(rid):
     cls = "ProtoFs" + "".join(
         part.capitalize() for part in rid.removeprefix("proto_fs_").split("_"))
     src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
-    assert "ArmKeywordTips.ForSummon(base.ExtraHoverTips, this)" in src
+    variant = "false" if rid in NAMED_SUMMONERS else "true"
+    assert (f"ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, {variant})"
+            in src)
     for who in STAGE_SUMMONERS[rid]:
         assert f"ArmKeywordTips.For{who}(" in src
     for who in {"Usher", "Chevalmarin", "Crabaletta"} - set(
@@ -1498,11 +1509,14 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
     `FurinaStageLaw` (`EB-89`)."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     for clause in (
-            '"Puts a performer in the back seat with "\n'
-            '          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. '
-            'It acts at "',
-            "the end of your turn. On a full stage, the lead performer takes a ",
-            "[gold]Bow[/gold] and moves to the back seat instead, keeping its ",
+            '"A performer joins at the back with "',
+            "FurinaStageLaw.SummonFanfare",
+            '" [gold]Fanfare[/gold]. On a "',
+            '"full stage, the lead takes a [gold]Bow[/gold] and moves to "',
+            '"the back instead."',
+            '" [gold]Fanfare[/gold] and acts at "',
+            '"the end of your turn."',
+            "if (random)",
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
             '" [gold]Block[/gold]. [gold]Bow[/gold]: gain "',
             "FurinaStageLaw.BowUsherBlock",
@@ -1529,9 +1543,12 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     the numerals written out."""
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
-        "Puts a performer in the back seat with 1 Fanfare. It acts at the end "
-        "of your turn. On a full stage, the lead performer takes a Bow and "
-        "moves to the back seat instead, keeping its Fanfare.")
+        "A performer joins at the back with 1 Fanfare. On a full stage, the "
+        "lead takes a Bow and moves to the back instead.")
+    from understudy import blindplay_notes
+    assert blindplay_notes.SUMMON_NAMED_ROW == (
+        "A performer joins at the back with 1 Fanfare and acts at the end of "
+        "your turn.")
     assert rows["Gentilhomme Usher"] == (
         "End of your turn: gain 3 Block. Bow: gain 4 Block.")
     assert rows["Surintendante Chevalmarin"] == (

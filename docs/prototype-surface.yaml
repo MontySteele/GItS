@@ -1870,7 +1870,7 @@
    authored_by: [claude],
    replaces: salon_debut,
    register: salon, cost: 1, type: skill, rarity: basic,
-   description: "Summon a random performer who is not on stage.",
+   description: "Summon a random performer.",
    effects: [{op: stage_summon, member: random}]}
 
 - {id: proto_fs_curtain_rise, name: "Curtain Rise", character: furina,
@@ -1928,7 +1928,7 @@
    authored_by: [claude],
    replaces: suffering_for_art,
    register: salon, cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "Summon a random performer who is not on stage. Exhaust.",
+   description: "Summon a random performer. Exhaust.",
    effects: [{op: stage_summon, member: random}]}
 
 - {id: proto_fs_warm_reception, name: "Warm Reception", character: furina,
