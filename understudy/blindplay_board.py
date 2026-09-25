@@ -683,6 +683,30 @@ STAGE_LEAVE_REASONS = {
 STAGE_LEFT_UNSAID = "left the stage"
 
 
+#: The wire's name for a stage-log beat -> the observation's. The same rule
+#: as `STAGE_LEAVE_REASONS` above, for the same reason: the observation IS
+#: the packet `qa_packet.assert_blind` walks, every string value in it, so a
+#: snake_case event name the mod sends (`hit_furina`, 2026-09-25) is refused
+#: as an internal id and the seat is stopped with `observation_leak` -- a
+#: Codex seat was, the first time a hit reached her. Every other beat is
+#: already one plain word and crosses unchanged.
+STAGE_EVENT_WORDS = {
+    "hit_furina": "hurt",
+}
+_PLAIN_WORD = re.compile(r"[a-z]+")
+
+
+def stage_event(raw: Any) -> str:
+    """The observation's one-word name for a wire beat, or `""`.
+
+    A name the table above does not know and that is not one plain lowercase
+    word (a newer build's beat) becomes `""`: the render prints nothing for
+    it, which is the page's standing answer to a beat it does not know, and
+    the packet stays blind rather than stopping the seat."""
+    word = STAGE_EVENT_WORDS.get(_text(raw), _text(raw))
+    return word if _PLAIN_WORD.fullmatch(word) else ""
+
+
 def _each(raw: Any) -> int | None:
     """A log row's per-enemy figure (round four): a whole number of 0 or
     more, else None. The mod sends -1 for "no single figure"."""
@@ -722,7 +746,8 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
         the body's `entity_id`.
       log -- what the stage has done since she last ended a turn, in order.
         Each row is an `event` (`arrive`, `act`, `bow`, `leave`, `rotate`,
-        and `raise`, `regain`, `hit` and `hit_furina` since 2026-09-25), the
+        `fade`, and `raise`, `regain`, `hit` and `hit_furina` since
+        2026-09-25; `hit_furina` is carried as `hurt`, `stage_event`), the
         performer, the seat it happened in, the bar afterwards, what the board
         `moved`, and for a departure the `reason` it left by (rules 7 and 9:
         every departure at 0 Fanfare bows, a rotation does not).
@@ -754,7 +779,7 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             continue
         member = _text(row.get("member"))
         log.append({
-            "event": _text(row.get("event")),
+            "event": stage_event(row.get("event")),
             "member": member,
             "name": STAGE_SHORT_NAMES.get(member, _text(row.get("name"))),
             "seat": _int(row.get("seat")),
@@ -773,8 +798,8 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # total as a total.
             "each": _each(row.get("each")),
             # 2026-09-25: Furina's HP after a hit that reached her (the
-            # `hit_furina` beat); None on every other beat and on an older
-            # build.
+            # `hurt` beat, the wire's `hit_furina`); None on every other
+            # beat and on an older build.
             "hp": (None if row.get("hp") is None or _int(row.get("hp")) < 0
                    else _int(row.get("hp"))),
         })

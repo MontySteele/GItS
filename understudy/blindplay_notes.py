@@ -1345,10 +1345,11 @@ def _summon_row(hay: str) -> str:
 #: Stage badge (`StageSummaryPower`), which now opens "Up to 3 performers act
 #: at the end of your turn" off `FurinaStageLaw.Seats`. The seat never dared a
 #: third summon because nothing printed how many seats there are.
+#: Draft 3 (2026-09-25): no act applies Hydro, so the act list is plain
+#: damage.
 STAGE_ACTS = ("Up to 3 performers act at the end of your turn, from any "
               "seat: Usher gives you 3 Block, Chevalmarin deals 2 to every "
-              "enemy and applies Hydro, Crabaletta deals 5 Hydro damage to a "
-              "random enemy.")
+              "enemy, Crabaletta deals 5 damage to a random enemy.")
 
 ARM_KEYWORDS: dict[str, str] = {
     # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and
@@ -1467,10 +1468,10 @@ ARM_KEYWORDS: dict[str, str] = {
                 "performer's, then you. Gained on an empty stage, it summons "
                 "a performer."),
     # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
-    # Bows whatever emptied it -- a Spend, a hit or a full-stage summon. The
-    # text pass points at each performer's own row for what its Bow does.
-    "Bow": ("A performer's parting effect, shown on each performer. It "
-            "triggers when the performer's Fanfare runs out."),
+    # Bows whatever emptied it -- a Spend, a hit or a full-stage summon.
+    # Draft 3 (2026-09-25): the Bow is the performer's act once more.
+    "Bow": ("A performer that leaves the stage acts one last time on its "
+            "way out."),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
     # because a seat may meet either word alone -- the page's one addendum to
     # the tip, `STAGE_ACTS`, which also carries the seat count (the
@@ -1478,7 +1479,9 @@ ARM_KEYWORDS: dict[str, str] = {
     "front performer": ("Takes hits first. Regains 1 Fanfare at the start of "
                         "your turn. " + STAGE_ACTS),
     # `EB-744` and round four: the back is reached LAST, per attack.
-    "back performer": ("Gains and Spends Fanfare. Hits reach it last. "
+    # Draft 3 (2026-09-25): rule 12, the fade.
+    "back performer": ("Gains and Spends Fanfare. Hits reach it last. At the "
+                       "end of your turn, it loses half its Fanfare above 5. "
                        + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
@@ -1498,14 +1501,13 @@ ARM_KEYWORDS: dict[str, str] = {
     "Summon": ("A performer joins at the back with 1 Fanfare. If the stage is "
                "full, your front performer Bows and moves to the back "
                "instead."),
-    "Gentilhomme Usher": ("End of your turn: gain 3 Block. Bow: your front "
-                          "performer gains 4 Fanfare."),
-    "Surintendante Chevalmarin": ("End of your turn: deal 2 Hydro damage to "
-                                  "ALL enemies. Bow: apply Hydro to ALL "
+    # Draft 3 (2026-09-25): no Bow clause (a Bow is the act once more) and
+    # no Hydro (no act applies it).
+    "Gentilhomme Usher": "End of your turn: gain 3 Block.",
+    "Surintendante Chevalmarin": ("End of your turn: deal 2 damage to ALL "
                                   "enemies."),
-    "Mademoiselle Crabaletta": ("End of your turn: deal 5 Hydro damage to a "
-                                "random enemy. Bow: deal 8 Hydro damage to a "
-                                "random enemy."),
+    "Mademoiselle Crabaletta": ("End of your turn: deal 5 damage to a random "
+                                "enemy."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -2560,6 +2562,10 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
     yours or theirs, is one half of a pair already standing on the board.
     """
     found: set[str] = set()
+    # Draft 3 (2026-09-25): on the Stage arm no performer applies Hydro, so a
+    # performer's NAME supplies no element there; the Hydro now comes from
+    # cards, which answer through their own faces.
+    members_supply = not _stage_arm(obs)
     # `EB-707`: THE DECK'S AND THE POWERS', off the observation's own carried
     # field. `blindplay_faces.deck_elements` reads the four piles and every
     # status row on the board -- the deck a card will be drawn from, and a
@@ -2589,7 +2595,7 @@ def _reachable_elements(obs: dict[str, Any]) -> set[str]:
             # the element she performs with, because a deploy performs the
             # member it fields at once.
             for name, pattern in _SALON_MEMBER_RE.items():
-                if pattern.search(blob):
+                if members_supply and pattern.search(blob):
                     found.add(SALON_MEMBER_ELEMENTS[name])
 
     walk(obs)

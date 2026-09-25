@@ -341,6 +341,24 @@ def budget_refusal(count: int, cap: int) -> str:
             f"({count} taken). The round stops here; nothing was posted.")
 
 
+#: What `act` prints when a refusal carried no sentence of its own.
+ACT_UNRESOLVED = "the command did not resolve against this screen"
+#: What `act` prints when the POST went out and nothing came back in words.
+ACT_SENT_SILENT = ("Sent. The game's answer carried no words; `observe` shows "
+                   "the board.")
+_BRIDGE_ERROR = bridge.BridgeError
+
+
+def act_unanswered(exc: BaseException) -> str:
+    """The line for a POST the game did not answer. The error's own text is
+    kept only where it leaks nothing; a bridge error names a URL."""
+    detail = str(exc)
+    why = f" ({detail})" if detail and not qa_packet.leaks(detail) else ""
+    return (f"NO ANSWER: the command was sent and the game did not answer"
+            f"{why}. It may or may not have landed; `observe` before the "
+            f"next act.")
+
+
 def cmd_act(args) -> int:
     # `EB-691` FIRST, ahead of the budget: a dead lane reported as "budget
     # reached" is a true sentence about the wrong problem, and the seat's
@@ -376,18 +394,34 @@ def cmd_act(args) -> int:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 1
     print(json.dumps(res, indent=1, default=str))
+    # 2026-09-25. AN ACT NEVER ENDS ON THE JSON'S CLOSING BRACE. An Opus seat
+    # on lane 2 typed `play "Stage Presence (1)"` in a Furina fight and read
+    # back a bare `}` with no refusal and no result: the resolution dump ends
+    # in `}`, and a refusal and a failed POST both stopped there, the refusal
+    # with its sentence buried inside the dump and the POST with a traceback.
+    # Every exit below now closes on one line of words on stdout.
     if not res["ok"]:
+        print(f"REFUSED: {_text(res.get('refusal')) or ACT_UNRESOLVED}")
         return 1
     if not live:
         return 0
     post = dict(res["post"] or {})
     action = post.pop("action")
-    result = bridge.post(action, **post)
+    try:
+        result = bridge.post(action, **post)
+    except _BRIDGE_ERROR as exc:
+        # Not charged: nobody knows whether the wire saw it.
+        print(act_unanswered(exc))
+        dead = lanewatch.guard()
+        if dead:
+            print(dead)
+            return lanewatch.EXIT_LANE_DEAD
+        return 1
     # `EB-341`: the row that was taken, then the game's answer -- the same two
     # lines, in the same order, the session hands its seat.
-    for line in (taken_line(res), _result_line(result)):
-        if line:
-            print(line)
+    said = [line for line in (taken_line(res), _result_line(result)) if line]
+    for line in said or [ACT_SENT_SILENT]:
+        print(line)
     # `EB-456`: charged AFTER the post, so an act the wire never saw is not
     # billed for. The line is printed only on a lane that has a cap, so a
     # round run without one reads exactly as it always did.

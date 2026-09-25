@@ -275,9 +275,13 @@ SIM_CALL_SITES = {
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
     ('effects.py', 27): ("'companion'", None, "'pyro'"),
     ('effects.py', 28): ("'companion'", None, "'pyro'"),
-    ('furina_stage.py', 1): ("'furina_stage/bow'", 'False', "'hydro'"),
-    ('furina_stage.py', 2): ("'furina_stage/act'", 'False', "'hydro'"),
-    ('furina_stage.py', 3): ("'furina_stage/act'", 'False', "'hydro'"),
+    # Furina Stage draft 3 (2026-09-25): the Bow IS the act once more, so
+    # the two damage acts are the only sites and each carries both sources;
+    # and no act applies Hydro, so neither carries an element.
+    ('furina_stage.py', 1): ("'furina_stage/bow' if bow else 'furina_stage/act'",
+                             'False', 'None'),
+    ('furina_stage.py', 2): ("'furina_stage/bow' if bow else 'furina_stage/act'",
+                             'False', 'None'),
     ('klee_overhaul.py', 1): ('EXPLOSION_SOURCE', 'False', 'element'),
     # Sparks 'n' Splash, since 2026-09-25 on a Bomb's own terms (the
     # explosion's unpowered door), at the start of the turn.
@@ -368,8 +372,10 @@ CS_VERB_DOORS = {
         ("Relics/TamakushiCasket.cs", "ElementalHit.Deal", None),
     "V12 Salon performance":
         ("Powers/SalonPowers.cs", "ElementalHit.Deal", "powered: false"),
+    # Draft 3 (2026-09-25): no act carries an element, so the element-less
+    # door; the Bow is the act once more and goes through the same one.
     "V14/V15 Stage act and bow":
-        ("Powers/Prototype/FurinaStage.cs", "ElementalHit.Deal",
+        ("Powers/Prototype/FurinaStage.cs", "ElementalHit.DealUnelemented",
          "powered: false"),
 }
 
@@ -401,33 +407,38 @@ def test_the_stage_refuses_the_dealers_terms_in_both_engines():
     """DISAGREEMENT D3, REPAIRED, and still pinned from both sides in one
     place so a later move on either side has to come here and decide.
 
-    `FurinaStage.Perform` and `.Bow` pass `powered: false` three times; the
-    sim's `furina_stage.perform` and `._bow` now pass `powered=False` at the
-    same three places, so Furina's Strength and Weak scale a performance in
+    Since draft 3 (2026-09-25) the Bow is the act once more, so there are
+    two damage sites in each engine (Chevalmarin's and Crabaletta's), shared
+    by the act and the Bow, and each passes `powered: false` /
+    `powered=False`, so Furina's Strength and Weak scale a performance in
     neither engine. The behavioural half is
     `test_eb495_d3_a_performance_carries_no_strength.py`."""
-    assert _cs("Powers/Prototype/FurinaStage.cs").count("powered: false") == 3
+    assert _cs("Powers/Prototype/FurinaStage.cs").count("powered: false") == 2
 
     stage = [flags for (name, _i), flags in sorted(_sim_call_sites().items())
              if name == "furina_stage.py"]
-    assert len(stage) == 3, stage
-    assert [powered for _s, powered, _e in stage] == ["False"] * 3
+    assert len(stage) == 2, stage
+    assert [powered for _s, powered, _e in stage] == ["False"] * 2
 
 
-def test_crabaletta_carries_hydro_in_both_engines():
-    """DISAGREEMENT D4, REPAIRED, the same shape as D3 one argument over. The
-    C# act and bow both name `Elements.Element.Hydro`, and the sim's two
-    Crabaletta legs now do too, so a Crabaletta hit sets an aura and consumes
-    one in both engines. The behavioural half is
-    `test_eb495_d4_crabaletta_hits_hydro.py`."""
+def test_no_stage_act_carries_an_element_in_either_engine():
+    """DISAGREEMENT D4, SUPERSEDED BY A RULE (Furina Stage draft 3,
+    2026-09-25; [USER]: "removing the Hydro application from the end-of-turn
+    effects on Chevalmarin and Crabaletta"). D4 had made Crabaletta's hit
+    Hydro in both engines; the ruling takes the element off every act, so
+    both engines now deal plain damage: the C# through the element-less door
+    and the sim with `element=None`. The behavioural half is
+    `test_eb495_d4_crabaletta_hits_hydro.py`, flipped."""
     cs = _cs("Powers/Prototype/FurinaStage.cs")
-    assert cs.count("Elements.Element.Hydro") == 4   # 2 acts, 2 bows
+    assert cs.count("Elements.Element.Hydro") == 0
+    assert cs.count("await ElementalHit.DealUnelemented(") == 2
+    assert "ElementalHit.Deal(" not in cs
 
     sites = _sim_call_sites()
     stage = [flags for (name, _i), flags in sorted(sites.items())
              if name == "furina_stage.py"]
-    assert len(stage) == 3, stage
-    assert [element for _s, _p, element in stage] == ["'hydro'"] * 3
+    assert len(stage) == 2, stage
+    assert [element for _s, _p, element in stage] == ["None"] * 2
 
 
 def test_the_one_door_is_unpowered_with_no_dealer_and_no_card_source():

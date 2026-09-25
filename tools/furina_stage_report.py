@@ -17,6 +17,20 @@ ONE run so a round packet can quote them together instead of assembling them:
      the Refill-as-prevention price the LAW clause R269 added asks for.
   5. A granted PRESERVE deck against a granted EXPEND deck, on the same seeds.
 
+and one more, which the brief did not list and draft 3's fade asks for:
+
+  6. THE FANFARE ECONOMY, per fight (mean) and summed over the arm's fights:
+     the back performer's bar at the end of each of Furina's turns, after the
+     fade (mean and max); what the fade took; what was PAID, by Spend cards
+     and by any other payer (the guests, later -- 0 until one exists); what
+     came on, by door (the relic, regen, cards' Raises, Bows' effects, powers,
+     summons at 1, empty-stage summons at the Raise amount, returns); what
+     hits took; and what walked off with a performer (Final Bow's bar). The
+     sim counts every one at its source (`furina_stage.book_*`, the fight's
+     `state.stage_ledger`), and the line `start + gained - paid - left -
+     faded - hit = end` is checked per fight and printed. `--per-fight` adds
+     one line per fight.
+
 WHY A REPORT TOOL AND NOT A TEST. `tools/klee_survival_sprint.py`'s shape and
 its reason: a measurement grid is not a gate. Nothing here asserts anything and
 nothing here is a balance claim -- under R215 B no number measured on a
@@ -119,7 +133,75 @@ def _rows(states, event):
                 yield st, row
 
 
-def report(states, label, out=sys.stdout):
+def _economy_row(st) -> dict:
+    """One fight's ledger, flattened, with its end read off the stage."""
+    led = st.stage_ledger or furina_stage.ledger(st)
+    backs = led["back_at_turn_end"]
+    return {
+        "start": led["start"],
+        "gained": dict(led["gained"]),
+        "spent": led["spent"],
+        "paid_other": sum(led["paid_other"].values()),
+        "left": led["left"],
+        "faded": led["faded"],
+        "hit": led["hit"],
+        "end": furina_stage.total_fanfare(st.player),
+        "balanced": furina_stage.ledger_expected_end(led)
+                    == furina_stage.total_fanfare(st.player),
+        "backs": list(backs),
+    }
+
+
+def economy(states, out=sys.stdout, per_fight=False):
+    """Report 6, the Fanfare economy, for one arm."""
+    rows = [_economy_row(st) for st in states]
+    n = len(rows) or 1
+    backs = [b for r in rows for b in r["backs"]]
+    print("6. Fanfare economy (per fight mean / summed over the fights):",
+          file=out)
+    if backs:
+        print(f"     back bar at turn end, after the fade: mean "
+              f"{sum(backs) / len(backs):.2f}, max {max(backs)} "
+              f"({len(backs)} turns)", file=out)
+    else:
+        print("     back bar at turn end: -- (no turns sampled)", file=out)
+
+    def line(name, total):
+        print(f"     {name:<30} {total / n:7.2f}  {total:7d}", file=out)
+
+    gained = collections.Counter()
+    for r in rows:
+        gained.update(r["gained"])
+    line("gained, all doors", sum(gained.values()))
+    for source in furina_stage.GAIN_SOURCES:
+        line(f"  {source}", gained[source])
+    line("paid by Spend cards", sum(r["spent"] for r in rows))
+    line("paid by other payers", sum(r["paid_other"] for r in rows))
+    line("lost to the fade", sum(r["faded"] for r in rows))
+    line("lost to hits", sum(r["hit"] for r in rows))
+    line("left with a performer", sum(r["left"] for r in rows))
+    line("on stage at the end", sum(r["end"] for r in rows))
+    unbalanced = sum(1 for r in rows if not r["balanced"])
+    print(f"     start + gained - paid - left - faded - hit = end: "
+          f"{'holds in every fight' if not unbalanced else f'FAILS in {unbalanced} fight(s)'}",
+          file=out)
+    if per_fight:
+        print("     fight  gained  spent  other  faded    hit   left    end"
+              "   back mean/max", file=out)
+        for i, r in enumerate(rows):
+            b = r["backs"]
+            bm = f"{sum(b) / len(b):.1f}/{max(b)}" if b else "--"
+            print(f"     {i:5d} {sum(r['gained'].values()):7d} {r['spent']:6d} "
+                  f"{r['paid_other']:6d} {r['faded']:6d} {r['hit']:6d} "
+                  f"{r['left']:6d} {r['end']:6d}   {bm}", file=out)
+    return {"gained": sum(gained.values()),
+            "spent": sum(r["spent"] for r in rows),
+            "faded": sum(r["faded"] for r in rows),
+            "hit": sum(r["hit"] for r in rows),
+            "unbalanced": unbalanced}
+
+
+def report(states, label, out=sys.stdout, per_fight=False):
     """The five reports, in sec.13's order, for one arm."""
     print(f"\n=== {label} ({len(states)} fights) ===", file=out)
 
@@ -184,6 +266,8 @@ def report(states, label, out=sys.stdout):
               f"through her Block", file=out)
 
     # 5. is the comparison across arms; `main` prints it once at the foot.
+    economy(states, out=out, per_fight=per_fight)
+
     won = sum(1 for st in states if not st.living_enemies and st.player.alive)
     print(f"   winrate: {100 * won / len(states):.1f}%  "
           f"(HP left, mean: "
@@ -194,10 +278,14 @@ def report(states, label, out=sys.stdout):
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--fights", type=int, default=200)
     ap.add_argument("--seed", type=int, default=11)
     ap.add_argument("--encounter", default="attrition")
+    ap.add_argument("--per-fight", action="store_true",
+                    help="report 6: one Fanfare-economy line per fight")
     args = ap.parse_args(argv)
 
     from understudy.report import console_safe
@@ -217,7 +305,7 @@ def main(argv=None) -> int:
     summary = []
     for label, deck in ARMS:
         states = _run(deck, args.encounter, args.fights, args.seed)
-        summary.append(report(states, label))
+        summary.append(report(states, label, per_fight=args.per_fight))
 
     # 5. The two granted decks, on the same seeds.
     print("\n=== 5. Preserve against Expend, same seeds ===")

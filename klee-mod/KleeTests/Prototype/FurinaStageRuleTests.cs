@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.ValueProps;
 using Xunit;
@@ -678,8 +679,9 @@ public class FurinaStageRuleTests
         Assert.Equal(3, FurinaStageLaw.ActUsherBlock);
         Assert.Equal(2, FurinaStageLaw.ActChevalmarinDamage);
         Assert.Equal(5, FurinaStageLaw.ActCrabalettaDamage);
-        Assert.Equal(4, FurinaStageLaw.BowUsherFanfare);
-        Assert.Equal(8, FurinaStageLaw.BowCrabalettaDamage);
+        // Draft 3 (2026-09-25): the two bow numbers left (a Bow is the act
+        // once more) and the fade's threshold arrived.
+        Assert.Equal(5, FurinaStageLaw.FadeThreshold);
     }
 
     // ==================================================================
@@ -716,6 +718,32 @@ public class FurinaStageRuleTests
         // a posted intent needs, so the middle term is a dash and not a gap.
         Assert.Equal("0 > -- > 60",
                      Vfx.FurinaStageStrip.Label(seat.Creature));
+    }
+
+    /// <summary>Rule 1: the performers are pets and live one combat. The
+    /// ledger is keyed to the combat, so a second combat opens on an empty
+    /// stage and the relic fields Usher alone at 3 -- never last fight's cast.
+    /// </summary>
+    [Fact]
+    public void A_second_combat_opens_with_usher_alone_at_three()
+    {
+        using var _ = new Arm();
+        var seat = Seat.Furina().WithCombatState();
+
+        seat.Creature.CombatState = new CombatState();
+        var first = FurinaStageLedger.For(seat.Creature);
+        Assert.NotNull(first.OpenWith(StagePerformer.Usher));
+        first.Summon(StagePerformer.Chevalmarin);
+        first.Raise(4);
+        Assert.Equal(2, first.Seats.Count);
+
+        seat.Creature.CombatState = new CombatState();
+        var second = FurinaStageLedger.For(seat.Creature);
+        Assert.Empty(second.Seats);
+        Assert.NotNull(second.OpenWith(StagePerformer.Usher));
+        var only = Assert.Single(second.Seats);
+        Assert.Equal(StagePerformer.Usher, only.Who);
+        Assert.Equal(FurinaStageLaw.OpeningFanfare, only.Fanfare);
     }
 
     [Fact]

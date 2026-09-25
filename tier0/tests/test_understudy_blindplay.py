@@ -6742,12 +6742,15 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Fanfare": ["A performer's health. Hits take your ",
                     "the front performer's, then you. Gained on an empty "
                     "stage, it "],
-        # Rule 7, 2026-09-25: every performer at 0 Fanfare Bows.
-        "Bow": ["A performer's parting effect, shown on each performer. It ",
-                "triggers when the performer's Fanfare runs out."],
+        # Draft 3 (2026-09-25): the Bow is the performer's act once more.
+        "Bow": ["A performer that leaves the stage acts one last time on "
+                "its way "],
         "front performer": ["Takes hits first. Regains "],
-        # `EB-744` and round four: the back is reached last.
-        "back performer": ["Gains and Spends ", ". Hits reach it last."],
+        # `EB-744` and round four: the back is reached last. Draft 3: the
+        # fade, whose threshold is interpolated on the mod side.
+        "back performer": ["Gains and Spends ", ". Hits reach it last. At ",
+                           "the end of your turn, it loses half its Fanfare "
+                           "above "],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
         # anchors are the prose either side of it.
@@ -6760,12 +6763,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Summon": ["A performer joins at the back with ",
                    "stage is full, your front performer ",
                    "moves to the back instead."],
+        # Draft 3 (2026-09-25): one sentence each, no Hydro, no Bow clause.
         "Gentilhomme Usher": ["End of your turn: gain "],
         "Surintendante Chevalmarin": ["End of your turn: deal ",
-                                      " damage to ALL enemies. ",
-                                      " to ALL enemies."],
+                                      " damage to ALL enemies."],
         "Mademoiselle Crabaletta": ["End of your turn: deal ",
-                                    " damage to a random enemy. "],
+                                    " damage to a random enemy."],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
         # own words. The strike number is interpolated on both sides -- the
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off

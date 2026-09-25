@@ -11,8 +11,9 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// FURINA, THE STAGE -- the 2026-09-25 afternoon seat round (build
-/// 0.2.3768), the mod's halves. Usher's Bow is Fanfare for the front
-/// performer; a hit is counted the way the engine counts it (the Weak
+/// 0.2.3768), the mod's halves. Usher's Bow was Fanfare for the front
+/// performer until draft 3 (2026-09-25) made every Bow the performer's act
+/// once more; a hit is counted the way the engine counts it (the Weak
 /// off-by-one); and the part of a hit that reaches Furina is a beat on the
 /// stage log. The sim twin is <c>tier0/tests/test_furina_stage.py</c> and the
 /// page's halves are <c>tier0/tests/test_furina_seat_round_b_2026_09_25.py</c>.
@@ -53,44 +54,29 @@ public class FurinaStageSeatRoundBTests
         return (seat, stage);
     }
 
-    // ---- 1. Usher's Bow: 4 Fanfare to the front performer --------------------
+    // ---- 1. Usher's Bow: since draft 3, his act once more ------------------
 
     [Fact]
-    public void Ushers_bow_raises_the_front_performer_and_gives_no_block()
+    public void Ushers_bow_is_his_act_and_raises_nobody()
     {
-        // The payout awaits the pets, so it is read off IL; the sim twin runs
-        // the four cases (hit-bow, lone Usher, Spend-bow, recast) for real.
+        // Draft 3 (2026-09-25) superseded round B's Fanfare Bow. The payout
+        // awaits the pets, so it is read off IL; the sim twin runs the cases
+        // (hit-bow, lone Usher, Spend-bow, recast) for real.
         var bow = Il.CallSequence(Il.Method("FurinaStage", "Bow")).ToList();
-        Assert.Contains("FurinaStage.RaiseLead", bow);
-        Assert.DoesNotContain("CreatureCmd.GainBlock", bow);
-        // The bow beat is filed BEFORE the Raise it pays, so the log reads
-        // "Usher took a Bow" and then the gain.
-        var note = bow.IndexOf("FurinaStage.NoteBeat");
-        var raise = bow.IndexOf("FurinaStage.RaiseLead");
-        Assert.True(note >= 0 && raise > note, string.Join(", ", bow));
-        Assert.Equal(4, FurinaStageLaw.BowUsherFanfare);
+        Assert.Contains("FurinaStage.Act", bow);
+        Assert.DoesNotContain("FurinaStage.RaiseLead", bow);
+        // The act, then the readers.
+        var act = bow.IndexOf("FurinaStage.Act");
+        var after = bow.IndexOf("FurinaStage.AfterBow");
+        Assert.True(act >= 0 && after > act, string.Join(", ", bow));
     }
 
     [Fact]
-    public void The_raise_his_bow_takes_summons_on_an_empty_stage()
+    public void The_raise_lead_door_still_summons_on_an_empty_stage()
     {
-        // Rule 5's empty-stage summon, the door Thunderous Applause uses.
+        // Rule 5's empty-stage summon, the door Hold Your Places uses.
         var raiseLead = Il.Calls(Il.Method("FurinaStage", "RaiseLead"));
         Assert.Contains("FurinaStage.SummonForRaise", raiseLead);
-    }
-
-    [Fact]
-    public void On_a_stage_he_left_the_front_is_whoever_stands_there_now()
-    {
-        using var _ = new Arm();
-        // A hit emptied Usher at the front; Chevalmarin stepped up.
-        var (_, stage) = Stage((StagePerformer.Usher, 2),
-                               (StagePerformer.Chevalmarin, 3));
-        stage.Absorb(2);
-        Assert.Equal(StagePerformer.Chevalmarin, stage.Lead!.Who);
-
-        Assert.Equal(4, stage.RaiseLead(FurinaStageLaw.BowUsherFanfare));
-        Assert.Equal(7, stage.Lead!.Fanfare);
     }
 
     // ---- 1b. Let the People Rejoice never leaves two of one performer -------
@@ -108,8 +94,10 @@ public class FurinaStageSeatRoundBTests
                                (StagePerformer.Crabaletta, 2));
         stage.CollectAll();
         var company = stage.TakePendingCurtainCall();
-        // Usher's Bow on the stage the card emptied: a random arrival at 4.
-        stage.SummonOnEmpty(picked, FurinaStageLaw.BowUsherFanfare);
+        // A Thunderous Applause Raise on the stage the card emptied: a random
+        // arrival holding it (Usher's own Bow is Block since draft 3).
+        const int applause = 2;
+        stage.SummonOnEmpty(picked, applause);
 
         Assert.Equal(2, stage.ReturnCompany(company));
 
@@ -117,7 +105,7 @@ public class FurinaStageSeatRoundBTests
         Assert.Equal(standing.Count, standing.Distinct().Count());
         Assert.Equal(FurinaStageLaw.Seats, standing.Count);
         Assert.Equal(picked, standing[0]);
-        Assert.Equal(FurinaStageLaw.BowUsherFanfare, stage.Seats[0].Fanfare);
+        Assert.Equal(applause, stage.Seats[0].Fanfare);
         Assert.All(stage.Seats.Skip(1),
                    s => Assert.Equal(FurinaStageLaw.SummonFanfare, s.Fanfare));
     }

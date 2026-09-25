@@ -1865,6 +1865,18 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # Same line, same reason: Varka's swirled element is per-combat, and a
     # reused Player must not carry one fight's Swirl into the next.
     player.mc_swirl_element = ""
+    # QUARANTINED (`furina_stage.FURINA_STAGE`). Same line, same reason: the
+    # performers are pets and live one combat (the Stage's rule 1), so every
+    # fight opens with Usher alone at 3. Every run path in this repo builds a
+    # fresh Player per fight today; this is what keeps a caller that reuses
+    # one from opening fight two on fight one's cast, since `open_combat`
+    # fields Usher only onto an empty stage. The C# twin is
+    # `FurinaStageLedger.For`'s combat-identity clear. Empty lists on every
+    # shipped run, so clearing them there changes nothing.
+    player.stage = []
+    player.stage_resting = []
+    player.stage_act_damage_mult = 1
+    player.stage_act_block_mult = 1
     # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
     # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
     # rather than a separate card". The jellyfish is installed HERE, at true

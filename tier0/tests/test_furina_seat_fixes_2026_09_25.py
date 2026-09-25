@@ -190,7 +190,10 @@ def test_the_glossary_says_up_to_three_perform():
 def test_the_stage_badge_interpolates_the_law():
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    assert '"Up to " + FurinaStageLaw.Seats + " performers act' in src
+    # Draft 3 (2026-09-25): the badge is the seat count and the fade, both
+    # off the law.
+    assert '"Up to " + FurinaStageLaw.Seats + " performers. At the end of "' in src
+    assert '"above " + FurinaStageLaw.FadeThreshold + "."' in src
 
 
 # ---------------------------------------------------------------------------

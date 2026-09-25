@@ -235,39 +235,39 @@ public class FurinaStageLegibilityTests
     }
 
     [Fact]
-    public void Each_performer_tip_and_its_badge_say_the_same_two_sentences()
+    public void Each_performer_tip_and_its_badge_say_the_same_sentence()
     {
         // The tip is read in hand, the badge on the body; a player must not be
-        // told two things. The badge's canonical face and the tip's literals
-        // are compared piece by piece, with the law's numbers between them.
+        // told two things. Draft 3 (2026-09-25): one sentence each -- no Bow
+        // clause (a Bow is the act once more) and no Hydro (no act applies
+        // it).
         var usher = Badge<UsherBadgePower>("description");
         Assert.Equal(
             $"End of your turn: gain {FurinaStageLaw.ActUsherBlock} "
-          + "[gold]Block[/gold]. [gold]Bow[/gold]: your front performer "
-          + $"gains {FurinaStageLaw.BowUsherFanfare} [gold]Fanfare[/gold].",
-            usher);
+          + "[gold]Block[/gold].", usher);
         Assert.Contains("End of your turn: gain ", Printed("ForUsher"));
-        Assert.Contains(" [gold]Block[/gold]. [gold]Bow[/gold]: your front "
-                        + "performer ", Printed("ForUsher"));
-        Assert.Contains(" [gold]Fanfare[/gold].", Printed("ForUsher"));
+        Assert.Contains(" [gold]Block[/gold].", Printed("ForUsher"));
 
         var cheval = Badge<ChevalmarinBadgePower>("description");
         Assert.Equal(
             $"End of your turn: deal {FurinaStageLaw.ActChevalmarinDamage} "
-          + "[gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "
-          + "apply [gold]Hydro[/gold] to ALL enemies.", cheval);
-        Assert.Contains(" [gold]Hydro[/gold] damage to ALL enemies. "
-                      + "[gold]Bow[/gold]: apply [gold]Hydro[/gold] to ALL "
-                      + "enemies.", Printed("ForChevalmarin"));
+          + "damage to ALL enemies.", cheval);
+        Assert.Contains(" damage to ALL enemies.", Printed("ForChevalmarin"));
 
         var crab = Badge<CrabalettaBadgePower>("description");
         Assert.Equal(
             $"End of your turn: deal {FurinaStageLaw.ActCrabalettaDamage} "
-          + "[gold]Hydro[/gold] damage to a random enemy. [gold]Bow[/gold]: "
-          + $"deal {FurinaStageLaw.BowCrabalettaDamage} [gold]Hydro[/gold] "
           + "damage to a random enemy.", crab);
-        Assert.Contains(" [gold]Hydro[/gold] damage to a random enemy. "
-                      + "[gold]Bow[/gold]: deal ", Printed("ForCrabaletta"));
+        Assert.Contains(" damage to a random enemy.", Printed("ForCrabaletta"));
+
+        foreach (var text in new[] { usher, cheval, crab,
+                                     Printed("ForUsher"),
+                                     Printed("ForChevalmarin"),
+                                     Printed("ForCrabaletta") })
+        {
+            Assert.DoesNotContain("Hydro", text);
+            Assert.DoesNotContain("[gold]Bow[/gold]", text);
+        }
     }
 
     [Fact]
@@ -286,10 +286,10 @@ public class FurinaStageLegibilityTests
     [Fact]
     public void The_stage_badge_is_the_ruled_text()
     {
+        // Draft 3 (2026-09-25): the seat count and rule 12, the fade.
         Assert.Equal(
-            "Up to 3 performers act at the end of your turn. Hits land on "
-          + "your [gold]Block[/gold], then your front performer's "
-          + "[gold]Fanfare[/gold], then you.",
+            "Up to 3 performers. At the end of your turn, those behind the "
+          + "front lose half their Fanfare above 5.",
             Badge<StageSummaryPower>("description"));
     }
 
@@ -299,7 +299,7 @@ public class FurinaStageLegibilityTests
     [Fact]
     public void The_stage_badge_names_the_seat_count_from_the_law()
     {
-        Assert.StartsWith($"Up to {FurinaStageLaw.Seats} performers ",
+        Assert.StartsWith($"Up to {FurinaStageLaw.Seats} performers.",
                           Badge<StageSummaryPower>("description"));
     }
 

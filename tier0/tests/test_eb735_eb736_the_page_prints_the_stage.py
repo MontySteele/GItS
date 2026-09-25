@@ -226,7 +226,7 @@ def test_one_line_per_arrival_act_bow_departure_and_rotation():
               seat=1, bar=1),
         _beat("act", "usher", "Gentilhomme Usher", seat=0, bar=5, moved=3),
         _beat("leave", "usher", "Gentilhomme Usher", seat=-1, reason="spend"),
-        _beat("bow", "usher", "Gentilhomme Usher", seat=-1, moved=4),
+        _beat("bow", "usher", "Gentilhomme Usher", seat=-1, moved=3),
         _beat("rotate", "crabaletta", "Mademoiselle Crabaletta", seat=2, bar=6),
     ]
     page = _page({"live": True, "seats": THREE_SEATS, "log": log})
@@ -244,8 +244,8 @@ def test_one_line_per_arrival_act_bow_departure_and_rotation():
     assert "**Usher** acted: Furina gains 3 Block." in page
     assert "**Usher** left the stage: emptied by a Spend, so it takes a Bow." \
         in page
-    assert ("**Usher** took a Bow: your front performer gains 4 Fanfare."
-            in page)
+    # Draft 3 (2026-09-25): a Bow is the act once more, so it prints as one.
+    assert "**Usher** took a Bow: Furina gains 3 Block." in page
     assert "**Crabaletta** moved from the front seat to the back" in page
 
 
@@ -263,9 +263,9 @@ def test_each_performers_act_says_what_it_did():
     assert "acted: Furina gains 3 Block." in line(
         "usher", "Gentilhomme Usher", 3)
     # Round four: the PER-ENEMY figure, not the four hits' total.
-    assert ("acted: 2 to every enemy, and Hydro on "
-            "each.") in line("chevalmarin", "Surintendante Chevalmarin", 8,
-                             each=2)
+    # Draft 3 (2026-09-25): no act applies Hydro, so no line says it does.
+    assert "acted: 2 to every enemy." in line(
+        "chevalmarin", "Surintendante Chevalmarin", 8, each=2)
     assert "acted: 5 to Corpse Slug (2)." in line(
         "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
 
@@ -300,14 +300,40 @@ def test_a_departure_says_why_because_that_is_rules_seven_and_nine():
 
 
 def test_a_beat_that_moved_nothing_prints_no_number():
-    """Chevalmarin's bow only leaves an aura. A page saying "it moved 0" would
-    be answering a question the beat did not raise."""
+    """A Bow into a dead board, or one Block ate whole. A page saying "it
+    moved 0" would be answering a question the beat did not raise."""
     page = _page({"live": True, "seats": THREE_SEATS,
                   "log": [_beat("bow", "chevalmarin",
                                 "Surintendante Chevalmarin", seat=-1)]})
-    assert ("**Chevalmarin** took a Bow: Hydro on "
-            "every enemy.") in page
+    assert "**Chevalmarin** took a Bow: nothing landed." in page
     assert "It moved" not in page
+
+
+def test_a_bow_prints_as_the_act_once_more():
+    """Draft 3 (2026-09-25): the Bow is the performer's act one more time,
+    so its line is the act's line, measured the same way."""
+    def line(member, name, moved, target="", each=None):
+        return _page({"live": True, "seats": THREE_SEATS,
+                      "log": [_beat("bow", member, name, seat=-1,
+                                    moved=moved, target=target,
+                                    combat_id="4", each=each)]})
+
+    assert "took a Bow: Furina gains 3 Block." in line(
+        "usher", "Gentilhomme Usher", 3)
+    assert "took a Bow: 2 to every enemy." in line(
+        "chevalmarin", "Surintendante Chevalmarin", 4, each=2)
+    assert "took a Bow: 5 to Corpse Slug (2)." in line(
+        "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
+
+
+def test_the_fade_prints_one_line_per_performer_it_took_from():
+    """Draft 3 (2026-09-25), rule 12: "The applause fades: Chevalmarin 9 →
+    7." The mod files the loss and the bar after it."""
+    page = _page({"live": True, "seats": THREE_SEATS,
+                  "log": [_beat("fade", "chevalmarin",
+                                "Surintendante Chevalmarin", seat=1, bar=7,
+                                moved=2)]})
+    assert "The applause fades: **Chevalmarin** 9 → 7." in page
 
 
 def test_the_log_names_the_window_it_covers():
@@ -495,7 +521,8 @@ def test_the_seat_rows_say_what_a_performers_act_is():
         page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                      hand=[_card(f"Deal damage equal to the {word}'s bar.")])
         assert "Up to 3 performers act at the end of your turn" in page
-        assert "Crabaletta deals 5 Hydro damage to a random enemy" in page
+        # Draft 3 (2026-09-25): plain damage, no Hydro.
+        assert "Crabaletta deals 5 damage to a random enemy" in page
 
 
 def test_the_back_performer_row_says_where_hits_go():
@@ -520,11 +547,9 @@ def test_chevalmarins_act_prints_the_per_enemy_figure_or_says_total():
                       "log": [_beat("act", "chevalmarin",
                                     "Surintendante Chevalmarin", **kw)]})
 
-    assert "acted: 2 to every enemy, and Hydro on each." in line(
-        moved=8, each=2)
+    assert "acted: 2 to every enemy." in line(moved=8, each=2)
     uneven = line(moved=9, each=-1)
-    assert ("acted: 9 in total, split across the enemies, and Hydro on "
-            "each.") in uneven
+    assert "acted: 9 in total, split across the enemies." in uneven
     assert "to every enemy" not in uneven
     assert "9 in total" in line(moved=9)                 # an older build
     assert "acted: nothing landed." in line(moved=0, each=0)

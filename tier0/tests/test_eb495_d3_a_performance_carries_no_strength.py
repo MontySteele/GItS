@@ -1,7 +1,7 @@
 """`EB-495` D3 — the Stage's acts and bows are Unpowered in BOTH engines.
 
-`FurinaStage.Perform` passes `powered: false` twice (`FurinaStage.cs:463`,
-`:477`) and `.Bow` a third time (`:544`) — the same refusal the Salon's
+`FurinaStage.Perform` passes `powered: false` twice (one per damage act; since
+draft 3, 2026-09-25, the Bow is the act once more and shares them) — the same refusal the Salon's
 `PerformMember` makes at `SalonPowers.cs:981`, and the same one the sim's own
 Salon twin already made at `effects.salon_member_act`. The sim's three Stage
 call sites passed no `powered=` at all, so the signature's `True` applied and
@@ -71,13 +71,14 @@ def test_chevalmarins_act_deals_its_printed_number(arm, modifier):
 @pytest.mark.parametrize("modifier", [{}, {"strength": 5}, {"weak": 2},
                                       {"strength": 5, "weak": 2}])
 def test_crabalettas_bow_deals_its_printed_number(arm, modifier):
-    """The third `powered: false`, reached the way a player reaches it: a
-    Spend that empties the bar earns the curtain call (rule 9)."""
+    """Reached the way a player reaches it: a Spend that empties the bar
+    earns the curtain call (rule 9), which since draft 3 (2026-09-25) is the
+    act once more -- the same unpowered hit."""
     st = _state(**modifier)
     st.player.stage = [["crabaletta", 1]]
     FS.spend(st, 1)
     assert st.player.stage == []
-    assert st.enemies[0].hp == 99 - FS.BOW_CRABALETTA_DAMAGE
+    assert st.enemies[0].hp == 99 - FS.ACT_CRABALETTA_DAMAGE
 
 
 def test_furinas_own_card_still_takes_her_strength(arm):

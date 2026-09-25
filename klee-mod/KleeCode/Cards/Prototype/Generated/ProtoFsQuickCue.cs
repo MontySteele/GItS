@@ -37,15 +37,18 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_quick_cue");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Cue"),
-        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -55,7 +58,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 3 damage", "[gold]Spend[/gold] 2: deal 8 instead" };
+        new[] { "Deal 3 damage", "[gold]Spend[/gold] 2: deal 8 and apply [gold]Hydro[/gold] instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -88,7 +91,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage", "[gold]Spend[/gold] 2: deal 8 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage", "[gold]Spend[/gold] 2: deal 8 and apply [gold]Hydro[/gold] instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -106,6 +109,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);
+            await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
         }
     }
 
@@ -176,7 +180,7 @@ public sealed class ProtoFsQuickCueModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spend 2"),
-        ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead"),
+        ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] instead"),
     };
 
     public ProtoFsQuickCueModeB()

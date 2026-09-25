@@ -6292,6 +6292,8 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
         for pair in furina_stage.stage(p):
             if pair[0] == named:
                 if bump:
+                    furina_stage.book_gain(state, furina_stage.GAIN_CARD,
+                                           bump)
                     pair[1] += bump
                     state.emit("stage_raise", member=named, amount=bump,
                                seat="named", fanfare=pair[1])

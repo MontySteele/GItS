@@ -44,11 +44,12 @@ def _combat_state() -> dict:
 # 1. USHER'S BOW.
 # ---------------------------------------------------------------------------
 
-def test_the_glossary_and_the_log_say_his_bow_feeds_the_front():
-    assert ARM_KEYWORDS["Gentilhomme Usher"] == (
-        "End of your turn: gain 3 Block. Bow: your front performer gains 4 "
-        "Fanfare.")
-    assert STAGE_BOW_EFFECTS["usher"] == "your front performer gains 4 Fanfare"
+def test_the_glossary_and_the_log_say_his_bow_is_his_act():
+    """Draft 3 (2026-09-25) superseded round B's Fanfare Bow: a Bow is the
+    performer's act once more, so his row is the act alone and the log's Bow
+    line is the act's."""
+    assert ARM_KEYWORDS["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
+    assert STAGE_BOW_EFFECTS["usher"] == "Furina gains {n} Block"
 
 
 # ---------------------------------------------------------------------------
@@ -108,15 +109,14 @@ def test_a_hit_that_reached_her_prints_in_the_performer_hit_style():
         _row("leave", "usher", "Gentilhomme Usher", moved=3, reason="hit"),
         _row("hit_furina", "furina", "Furina", moved=6, hp=55,
              target="Seapunk"),
-        _row("bow", "usher", "Gentilhomme Usher")))
+        _row("bow", "usher", "Gentilhomme Usher", moved=3)))
     lines = _render_stage_log(stage)
     assert lines[0] == (
         "  - **Seapunk** hit **Usher** for 3: 3 → 0, and it leaves the "
         "stage: emptied by a hit, so it takes a Bow.")
     assert lines[1] == ("  - **Seapunk** hit **Furina** for 6 past your Block "
                         "and front performer: 61 → 55 HP.")
-    assert lines[2].startswith("  - **Usher** took a Bow: your front "
-                               "performer gains 4 Fanfare")
+    assert lines[2] == "  - **Usher** took a Bow: Furina gains 3 Block."
 
 
 def test_an_older_build_with_no_hp_prints_no_furina_line():
@@ -215,8 +215,9 @@ def test_a_settled_board_still_costs_one_read(monkeypatch):
 def test_the_brief_records_both_changes():
     brief = (REPO / "review" / "active"
              / "furina-stage-brief-2026-09-08.md").read_text(encoding="utf-8")
-    assert ("Usher: the front performer gains 4 Fanfare (2026-09-25: his "
-            "Block expired unused when a hit made him bow on the enemy's "
-            "turn).") in brief
+    # Draft 3 (2026-09-25) superseded round B's Fanfare Bow: rule 9 is now
+    # "the Bow is the performer's act, once more".
+    assert "**The Bow is the performer's act, once more**" in brief
+    assert "Usher: the front performer gains 4 Fanfare" not in brief
     assert "Usher: Furina gains 4 Block" not in brief
     assert "equal to twice your performers' Fanfare" in brief

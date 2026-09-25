@@ -1,4 +1,4 @@
-Status: OPEN (picks 1-3 ruled R269; rules 5, 8 and the readers amended by R276; the live Paper artefact through the Prototype build)
+Status: OPEN (picks 1-3 ruled R269; rules 5, 8 and the readers amended by R276; draft 3 rules (the Bow is the act, no Hydro acts, the fade) ruled 2026-09-25; the live Paper artefact through the Prototype build)
 
 # Furina — character brief, the Stage: draft 2
 
@@ -106,15 +106,13 @@ performers with their own bars, and Fanfare is that bar.**
    and 2). If the back performer has less than N, or no performer is on
    stage, the Spend mode cannot be chosen and the card plays its base mode.
    A performer the Spend empties exactly leaves with a bow.
-9. **The curtain call.** A performer that Bows performs its departure effect once. Usher: the front performer gains 4 Fanfare (2026-09-25: his Block expired unused when a hit made him bow on the enemy's turn). Chevalmarin: Hydro
-   on every enemy. Crabaletta: deal 8 Hydro damage to a random enemy.
+9. **The Bow is the performer's act, once more** (2026-09-25; [USER] ruled the Stage review's pick 1: one effect per performer, since Chevalmarin's Bow was "strictly worse than the end-of-turn effect"). A performer that Bows acts one last time as it leaves. Ousia and Pneuma double it like any act; Full House does not repeat it.
 10. **Each performer performs at the end of Furina's turn**, from any
-    seat, a flat act that does not read its bar: Usher gives Furina 3
-    Block, Chevalmarin deals 2 to every enemy and applies Hydro, Crabaletta
-    deals 5 Hydro damage to a random enemy. Scaling on Fanfare lives in payoff cards
+    seat, a flat act that does not read its bar: Usher gives Furina 3 Block, Chevalmarin deals 2 to every enemy, Crabaletta deals 5 damage to a random enemy. No act applies Hydro (2026-09-25; [USER]: "we may need to do the same here, removing the Hydro application from the end-of-turn effects on Chevalmarin and Crabaletta", as Klee's Pyro became a payoff). Hydro comes from cards: Tidal Flourish and Quick Cue apply it in their Spend modes, and Chevalmarin's card applies it on play. Scaling on Fanfare lives in payoff cards
     (§5.2), never in the performer.
 11. **Furina's own bar is touched by nothing in the kit.** No Restore, no
     Spend from it, no reader on it. Her sustain is the cast.
+12. **The applause fades.** At the end of Furina's turn, after the acts, each performer behind the front loses half of its Fanfare above 5, rounded down. The front never fades, and the fade never empties a performer. Why: the bank had no cost to hold, so spending it had no cost either; the fade makes a fat bank a choice (spend it, cash it out, or move it forward where it stops fading and becomes the shield). [USER] ruled out a flat halving ("hard to build up fanfare"); the threshold keeps a Refill of 5 whole and caps a hoard near 10 at one Refill a turn. The 5 is the knob seat rounds tune.
 
 What is not in this batch, by decision: Spend as an Energy-free cost,
 Fontaine Companions that summon a character with its own act (held until
@@ -154,6 +152,8 @@ which deck wins and by how much, not to set one rate (§13). Until R276 the
 rider fired in full off a bar of any size, and six of nine seats called
 spending a 1-Fanfare body for the full rider a loophole; the full-price
 rule closes it.
+
+**Three ways out (2026-09-25).** A performer knocked out by a hit or a Spend gets only its Bow. One recast off a full stage Bows too, and the newcomer arrives holding its Fanfare. One cashed out by an Expend card (Bravura, Final Bow, Let the People Rejoice) is paid for all its Fanfare at a scaling rate, then Bows. The recast pays off once the guest batch gives the newcomer a different body.
 
 ## 5. Her plans, three, separated by card slots
 
@@ -365,11 +365,11 @@ Names are provisional.
 | card | cost | type | text |
 |---|---|---|---|
 | Gentilhomme Usher | 1 | Skill | Summon Usher. If he's already on stage, he gains 3 Fanfare. |
-| Surintendante Chevalmarin | 1 | Skill | Summon Chevalmarin. If she's already on stage, she gains 3 Fanfare. |
+| Surintendante Chevalmarin | 1 | Skill | Apply Hydro to ALL enemies. Summon Chevalmarin. If she's already on stage, she gains 3 Fanfare. (2026-09-25, draft 3: Hydro comes from cards.) |
 | Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. If she's already on stage, she gains 3 Fanfare. |
 | Understudy | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Warm Reception | 1 | Skill | Your back performer gains 3 Fanfare. Draw 1 card. |
-| Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 instead. |
+| Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 and apply Hydro to ALL instead. (2026-09-25, draft 3.) |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
 | Scene Change | 0 | Skill | Move your front performer to the back. |
 
@@ -410,7 +410,7 @@ values; names are provisional. Upgrades in brackets.
 | Between Acts | 1 | Skill | Gain 5 Block. If no one is on stage, draw 2 cards. [8 Block] |
 | Ensemble Piece | 1 | Attack | Deal 4 damage for each performer on stage. [5 each] |
 | Hold Your Places | 1 | Skill | Gain 5 Block. Your front performer gains 2 Fanfare. [7 Block, gains 3] |
-| Quick Cue | 0 | Attack | Deal 3 damage. Spend 2: deal 8 instead. [4 / 10] |
+| Quick Cue | 0 | Attack | Deal 3 damage. Spend 2: deal 8 and apply Hydro instead. [4 / 10] (2026-09-25, draft 3.) |
 | Step Forward | 0 | Skill | Move your back performer to the front. Gain 3 Block. [5 Block] |
 
 **Uncommons (seven)**

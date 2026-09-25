@@ -823,6 +823,40 @@ public sealed class FurinaStageLedger
         foreach (var seat in _seats) seat.Resting = false;
     }
 
+    /// <summary>The event name of <see cref="Fade"/>'s beat.</summary>
+    public const string FadeEvent = "fade";
+
+    /// <summary>
+    /// RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
+    /// Furina's turn, AFTER the acts, each performer behind the front (the
+    /// middle and back seats) loses <see cref="FurinaStageLaw.FadeLoss"/> of
+    /// its bar: half of its Fanfare above
+    /// <see cref="FurinaStageLaw.FadeThreshold"/>, rounded down. The front
+    /// never fades, so a lone performer never does; the loss never takes a
+    /// bar below the threshold, so it never empties a performer and never
+    /// causes a Bow. [USER] ruled out a flat halving ("taking away half from
+    /// the back means it's hard to build up fanfare").
+    ///
+    /// One beat per performer that lost Fanfare, carrying the loss
+    /// (<see cref="StageBeat.Moved"/>) and the bar after it, so the seat page
+    /// prints "The applause fades: Chevalmarin 9 → 7". Returns the total lost.
+    /// Sim twin: <c>furina_stage.fade</c>.
+    /// </summary>
+    public int Fade()
+    {
+        var total = 0;
+        for (var i = 1; i < _seats.Count; i++)
+        {
+            var seat = _seats[i];
+            var loss = FurinaStageLaw.FadeLoss(seat.Fanfare);
+            if (loss <= 0) continue;
+            seat.Fanfare -= loss;
+            total += loss;
+            Note(new StageBeat(FadeEvent, seat.Who, i, seat.Fanfare, loss, ""));
+        }
+        return total;
+    }
+
     // ---- the per-play spend record -----------------------------------
     //
     // WHY A RECORD AND NOT A LIVE READ: by the time <i>Final Bow</i>'s Block

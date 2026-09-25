@@ -105,9 +105,10 @@ public class FurinaStageHitBowTests
         Assert.True(exit.Bows);
         // Paid once: a second flush finds nothing owed.
         Assert.Empty(stage.TakePendingHitBows());
-        // Usher's Bow is 4 Fanfare to the front performer (rule 9,
-        // 2026-09-25).
-        Assert.Equal(4, FurinaStageLaw.BowUsherFanfare);
+        // Usher's Bow is his act once more (draft 3, 2026-09-25): 3 Block,
+        // through the one act.
+        Assert.Contains("FurinaStage.Act",
+                        Il.Calls(Il.Method("FurinaStage", "Bow")));
     }
 
     [Fact]
@@ -121,10 +122,13 @@ public class FurinaStageHitBowTests
         var exit = Assert.Single(stage.TakePendingHitBows());
         Assert.Equal(StagePerformer.Crabaletta, exit.Who);
         Assert.True(exit.Bows);
-        Assert.Equal(8, FurinaStageLaw.BowCrabalettaDamage);
-        // Her Bow is a Hydro hit on a random enemy, through the one Bow.
+        // Her Bow is her act once more (draft 3, 2026-09-25): a plain hit on
+        // a random enemy, through the one act the sweep also uses.
         var bow = Il.Calls(Il.Method("FurinaStage", "Bow"));
-        Assert.Contains("ElementalHit.Deal", bow);
+        Assert.Contains("FurinaStage.Act", bow);
+        var act = Il.Calls(Il.Method("FurinaStage", "Act"));
+        Assert.Contains("ElementalHit.DealUnelemented", act);
+        Assert.DoesNotContain("ElementalHit.Deal", act);
     }
 
     [Fact]

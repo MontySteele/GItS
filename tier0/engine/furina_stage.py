@@ -73,18 +73,23 @@ PERFORMERS = ("usher", "chevalmarin", "crabaletta")
 RELIC = "salon_solitaire"
 
 # Rule 10, the ACTS -- flat, from any seat, at the end of Furina's turn, and
-# they do not read the bar.
+# they do not read the bar. NO ACT APPLIES HYDRO (draft 3, 2026-09-25; [USER]:
+# "removing the Hydro application from the end-of-turn effects on Chevalmarin
+# and Crabaletta"): the two damage acts are plain damage, and Hydro comes from
+# cards (Tidal Flourish and Quick Cue's Spend modes, Chevalmarin's card).
 ACT_USHER_BLOCK = 3
-ACT_CHEVALMARIN_DAMAGE = 2   # to EVERY enemy, and applies Hydro.
+ACT_CHEVALMARIN_DAMAGE = 2   # to EVERY enemy.
 ACT_CRABALETTA_DAMAGE = 5    # to a random enemy.
 
-# Rule 9, the BOWS -- performed once by a performer that reached 0 Fanfare,
-# whatever emptied it (rule 7, 2026-09-25). Leaving by rotation earns none.
-# Usher's is Fanfare to the FRONT performer, not Block to Furina (2026-09-25:
-# his Block expired unused when a hit made him bow on the enemy's turn).
-BOW_USHER_FANFARE = 4
-BOW_CRABALETTA_DAMAGE = 8    # to a random enemy. Chevalmarin's bow is Hydro
-                             # on every enemy and carries no number.
+# Rule 9, the BOW, is the performer's own act ONE MORE TIME as it leaves
+# (draft 3, 2026-09-25, the Stage review's pick 1). It has no numbers of its
+# own: `_bow` calls `perform`.
+
+# Rule 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of Furina's
+# turn, after the acts, each performer BEHIND THE FRONT loses half of its
+# Fanfare above this, rounded down (`fade_loss`). The front never fades. The
+# threshold is the knob seat rounds tune.
+FADE_THRESHOLD = 5
 
 #: Where a Raise lands. Rule 5: the BACK-MOST performer, which is the lead when
 #: it is alone. Written out as words so a row and a face say the same thing.
@@ -259,6 +264,101 @@ def _seats(player) -> list:
 
 
 # ----------------------------------------------------------------------
+# THE FANFARE LEDGER. INSTRUMENT ONLY, the fence `state.spark_ledger` carries
+# one arm over: nothing reads it back to decide anything, and it is not on the
+# event stream, so no log digest moves. Every writer below that moves a bar
+# books the move HERE, at the source, so the report never has to reconstruct
+# the economy by diffing bars:
+#
+#     start + gained - spent - paid_other - left - faded - hit == end
+#
+# where `end` is `total_fanfare` whenever it is read. `gained` is split by the
+# door it came through (`GAIN_*`). `left` is Fanfare that walks off the stage
+# with its performer -- Final Bow's bar, which becomes Block and is not a
+# Spend. Rotation carries a bar from one performer to another and books
+# nothing. `back_at_turn_end` is the back performer's bar at the end of each
+# of Furina's turns, after the fade (0 on an empty stage).
+# ----------------------------------------------------------------------
+GAIN_OPENING = "opening"        # the relic's Usher at 3
+GAIN_REGEN = "regen"            # rule 4, the lead's 1
+GAIN_CARD = "card"              # a card's Raise (and a named summon's bump)
+GAIN_BOW = "bow"                # what a Bow sets off (Thunderous Applause)
+GAIN_POWER = "power"            # Rapt Audience, Arkhe Alignment's Pneuma
+GAIN_SUMMON = "summon"          # rule 3, a newcomer at 1
+GAIN_EMPTY_SUMMON = "empty_summon"   # a Raise onto an empty stage, at the amount
+GAIN_RETURN = "return"          # A Five-Century Act, the Rare's return at 1
+GAIN_SOURCES = (GAIN_OPENING, GAIN_REGEN, GAIN_CARD, GAIN_BOW, GAIN_POWER,
+                GAIN_SUMMON, GAIN_EMPTY_SUMMON, GAIN_RETURN)
+
+#: The losses that are not a payment.
+LOSS_FADED = "faded"
+LOSS_HIT = "hit"
+LOSS_LEFT = "left"
+
+#: WHO PAID. `PAYER_SPEND` is a Spend card (a Spend mode, Bravura, the Rare);
+#: any other payer -- the guests, when they land -- books under its own name
+#: in `paid_other` through `book_paid`, which is the one hook they need.
+PAYER_SPEND = "spend"
+
+
+def ledger(state) -> dict:
+    """This fight's ledger, created on first use with `start` = the Fanfare on
+    stage at that moment. `open_combat` touches it before the relic fields
+    anybody, so on a real fight `start` is what the stage held at combat start
+    (0 on a fresh fight)."""
+    led = getattr(state, "stage_ledger", None)
+    if led is None:
+        led = {}
+        state.stage_ledger = led
+    if not led:
+        led.update(start=total_fanfare(state.player),
+                   gained={s: 0 for s in GAIN_SOURCES},
+                   spent=0, paid_other={}, left=0, faded=0, hit=0,
+                   back_at_turn_end=[])
+    return led
+
+
+def book_gain(state, source: str, amount: int) -> None:
+    """Fanfare that came onto a bar. Call BEFORE the bar moves, so a ledger
+    first opened here reads the stage it found."""
+    if amount <= 0 or not active(state.player):
+        return
+    if source not in GAIN_SOURCES:
+        raise ValueError(f"unknown Fanfare source {source!r}")
+    ledger(state)["gained"][source] += int(amount)
+
+
+def book_loss(state, kind: str, amount: int) -> None:
+    """Fanfare that left a bar other than by a payment. Call BEFORE the bar
+    moves."""
+    if amount <= 0 or not active(state.player):
+        return
+    if kind not in (LOSS_FADED, LOSS_HIT, LOSS_LEFT):
+        raise ValueError(f"unknown Fanfare loss {kind!r}")
+    ledger(state)[kind] += int(amount)
+
+
+def book_paid(state, amount: int, payer: str = PAYER_SPEND) -> None:
+    """Fanfare a PAYMENT took. A Spend card books under `spent`; any other
+    payer (the guests, later) under `paid_other[payer]`. Call BEFORE the bar
+    moves."""
+    if amount <= 0 or not active(state.player):
+        return
+    led = ledger(state)
+    if payer == PAYER_SPEND:
+        led["spent"] += int(amount)
+    else:
+        led["paid_other"][payer] = led["paid_other"].get(payer, 0) + int(amount)
+
+
+def ledger_expected_end(led: dict) -> int:
+    """What the ledger says the stage should hold now."""
+    return (led["start"] + sum(led["gained"].values()) - led["spent"]
+            - sum(led["paid_other"].values()) - led["left"] - led["faded"]
+            - led["hit"])
+
+
+# ----------------------------------------------------------------------
 # Arrivals and departures.
 # ----------------------------------------------------------------------
 def open_combat(state) -> None:
@@ -277,9 +377,11 @@ def open_combat(state) -> None:
     """
     if not active(state.player) or state.turn != 1:
         return
+    ledger(state)               # `start` is the stage as combat found it
     seats = _seats(state.player)
     if seats:
         return
+    book_gain(state, GAIN_OPENING, OPENING_FANFARE)
     seats.append([OPENING_MEMBER, OPENING_FANFARE])
     state.emit("stage_open", member=OPENING_MEMBER, fanfare=OPENING_FANFARE)
 
@@ -312,6 +414,7 @@ def summon(state, member: str) -> None:
         raise ValueError(f"unknown performer {member!r}")
     seats = _seats(p)
     if len(seats) < SEATS:
+        book_gain(state, GAIN_SUMMON, SUMMON_FANFARE)
         seats.append([member, SUMMON_FANFARE])
         state.emit("stage_summon", member=member, fanfare=SUMMON_FANFARE,
                    seats=len(seats), rotated=False)
@@ -356,6 +459,10 @@ def recast_front(state) -> None:
     _bow(state, member)
     _after_bow(state, member, may_return=False)
     if len(seats) >= SEATS:
+        # No seat to come back to: the bar walks off with the performer.
+        # The ledger booked nothing when it left the front, so it books the
+        # loss here, where the bar is finally gone.
+        book_loss(state, LOSS_LEFT, kept)
         return
     seats.append([member, kept])
     state.emit("stage_summon", member=member, fanfare=kept, seats=len(seats),
@@ -391,6 +498,7 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
     once the hit has been dealt -- `FurinaStage.Flush`'s twin."""
     p = state.player
     seats = _seats(p)
+    book_loss(state, LOSS_LEFT, seats[index][1])   # Final Bow's bar; else 0
     member, remaining = seats.pop(index)
     if member in p.stage_resting:
         p.stage_resting.remove(member)
@@ -446,48 +554,32 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
     raise_total = int(p.powers.get(THUNDEROUS_APPLAUSE, 0))
     if copies > 0:
         state.draw(copies)
-        raise_fanfare(state, raise_total)
+        raise_fanfare(state, raise_total, source=GAIN_BOW)
     if (may_return and p.powers.get(FIVE_CENTURY_ACT, 0)
             and len(_seats(p)) < SEATS):
+        book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         _seats(p).append([member, SUMMON_FANFARE])
         p.stage_resting.append(member)
         state.emit("stage_return", member=member, fanfare=SUMMON_FANFARE)
 
 
 def _bow(state, member: str) -> None:
-    """Rule 9, the curtain call, performed ONCE by a performer that reached 0
-    Fanfare, whatever emptied it (rule 7). Usher: the front performer gains
-    4 Fanfare -- a Raise like any other, so on the stage his leaving emptied a
-    random performer arrives holding it (2026-09-25; his 4 Block had expired
-    unused when a hit made him bow on the enemy's turn). Chevalmarin: Hydro on
-    every enemy. Crabaletta: deal 8 Hydro to a random enemy.
+    """Rule 9, the curtain call: THE PERFORMER'S OWN ACT, ONE MORE TIME, as it
+    leaves (draft 3, 2026-09-25; [USER] ruled the Stage review's pick 1, one
+    effect per performer, since Chevalmarin's old Bow was "strictly worse than
+    the end-of-turn effect"). Usher 3 Block, Chevalmarin 2 to every enemy,
+    Crabaletta 5 to a random enemy -- `perform` itself, so the two cannot
+    drift.
 
-    He has already LEFT when this runs, so "the front performer" is whoever
-    stands in front now: the old middle after a hit or a recast, the lead
-    after a Spend from the back. A Five-Century Act's return comes after it
-    (`_after_bow`), so it never lands on him.
-
-    `EB-495` D3/D4: Crabaletta's bow is `powered=False` and Hydro, which is
-    what `FurinaStage.Bow` has always passed (`FurinaStage.cs:542`, `:544`).
-    See `perform` below for the whole argument; the two methods are twins and
-    move together.
+    ONE ACT: Arkhe Alignment's Ousia and Pneuma double it like any act (the
+    multipliers `perform` reads), and Full House does NOT repeat it (only the
+    end-of-turn sweep loops). A hit's Bow lands on the enemy's turn, after the
+    sweep has reset the multipliers, so there it is the printed act. A
+    Five-Century Act's return comes after it (`_after_bow`). C# twin:
+    `FurinaStage.Bow`.
     """
-    from tier0.engine import effects, reactions       # late: avoids the cycle
-    p = state.player
     state.emit("stage_bow", member=member)
-    if member == "usher":
-        raise_fanfare(state, BOW_USHER_FANFARE, SEAT_LEAD)
-    elif member == "chevalmarin":
-        for enemy in list(state.living_enemies):
-            reactions.resolve_hit(state, enemy, "hydro", 0,
-                                  "furina_stage/bow")
-    elif member == "crabaletta":
-        if state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
-            effects.deal_damage_to_enemy(state, enemy, BOW_CRABALETTA_DAMAGE,
-                                         element="hydro",
-                                         powered=False,
-                                         source="furina_stage/bow")
+    perform(state, member, bow=True)
 
 
 # ----------------------------------------------------------------------
@@ -503,13 +595,15 @@ def turn_start_regen(state) -> None:
     pair = lead(p)
     if pair is None:
         return
+    book_gain(state, GAIN_REGEN, LEAD_REGEN)
     pair[1] += LEAD_REGEN
     state.emit("stage_regen", member=pair[0], amount=LEAD_REGEN,
                fanfare=pair[1])
 
 
 def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
-                  summon_on_empty: bool = True) -> int:
+                  summon_on_empty: bool = True,
+                  source: str = GAIN_CARD) -> int:
     """Rule 5. "Raise N Fanfare on the back performer" lands on the BACK-MOST
     performer, which is the lead when it is alone. `seat=SEAT_LEAD` is the
     other spelling, for a face that names the lead instead.
@@ -527,12 +621,17 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
 
     Returns what landed -- 0 on an empty stage that does not summon, which the
     caller emits rather than swallowing, for the reason `rotate` gives above.
+
+    `source` is the ledger's door (`GAIN_*`): a card's Raise by default, a
+    Bow's or a power's where those call. An empty-stage summon books as
+    `GAIN_EMPTY_SUMMON` whoever raised.
     """
     p = state.player
     if not active(p) or amount <= 0:
         return 0
     if summon_on_empty and not stage(p):
         member = state.rng.choice(PERFORMERS)
+        book_gain(state, GAIN_EMPTY_SUMMON, int(amount))
         _seats(p).append([member, int(amount)])
         state.emit("stage_summon", member=member, fanfare=int(amount),
                    seats=1, rotated=False, via="raise")
@@ -543,6 +642,7 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
             state.emit("stage_raise_whiffed", amount=amount, seat=seat)
             return 0
         for pair in seats:
+            book_gain(state, source, int(amount))
             pair[1] += int(amount)
             state.emit("stage_raise", member=pair[0], amount=int(amount),
                        seat=seat, fanfare=pair[1])
@@ -551,6 +651,7 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
     if pair is None:
         state.emit("stage_raise_whiffed", amount=amount, seat=seat)
         return 0
+    book_gain(state, source, int(amount))
     pair[1] += int(amount)
     state.emit("stage_raise", member=pair[0], amount=int(amount), seat=seat,
                fanfare=pair[1])
@@ -708,6 +809,7 @@ def spend(state, amount: int) -> int:
         return 0
     member, bar = pair
     paid = int(amount)
+    book_paid(state, paid)
     pair[1] = bar - paid
     state.emit("stage_spend", member=member, asked=int(amount), paid=paid,
                bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
@@ -744,6 +846,7 @@ def collect_all(state) -> int:
         return 0
     company = [m for m, _f in seats]
     total = sum(f for _m, f in seats)
+    book_paid(state, total)
     seats.clear()
     setattr(state, _PENDING, list(company))
     state.emit("stage_spend_all", total=total, company=list(company))
@@ -781,6 +884,7 @@ def bow_and_return(state) -> None:
             break
         if any(m == member for m, _f in seats):
             continue
+        book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         seats.append([member, SUMMON_FANFARE])
     state.emit("stage_encore_return", company=[m for m, _f in seats],
                fanfare=SUMMON_FANFARE)
@@ -830,6 +934,7 @@ def absorb(state, incoming: int) -> int:
     member, bar = pair
     two_or_more = count(p) >= 2
     eaten = min(int(incoming), bar)
+    book_loss(state, LOSS_HIT, eaten)
     pair[1] = bar - eaten
     state.emit("stage_absorb", member=member, amount=eaten,
                incoming=int(incoming), fanfare=pair[1])
@@ -840,19 +945,20 @@ def absorb(state, incoming: int) -> int:
     # the back performer. Every caller here is an enemy's hit.
     pct = int(p.powers.get(RAPT_AUDIENCE, 0))
     if pct and two_or_more and eaten > 0:
-        raise_fanfare(state, -(-eaten * pct // 100))
+        raise_fanfare(state, -(-eaten * pct // 100), source=GAIN_POWER)
     return eaten
 
 
 # ----------------------------------------------------------------------
 # The acts.
 # ----------------------------------------------------------------------
-def perform(state, member: str) -> None:
+def perform(state, member: str, *, bow: bool = False) -> None:
     """Rule 10: one performer's flat act, from any seat, reading no bar.
 
-    ONE implementation, two callers -- the end-of-turn sweep and *Bis!*
-    (sec.12) -- so an act cannot mean two things. A newcomer's arrival was the
-    third until `EB-738` removed it: a summon performs at the END of the turn,
+    ONE implementation for every caller -- the end-of-turn sweep, *Bis!*,
+    *Tutti!* and, since draft 3 (2026-09-25), the Bow -- so an act cannot
+    mean two things. A newcomer's arrival was once another,
+    until `EB-738` removed it: a summon performs at the END of the turn,
     with the others, and reaches this function through the sweep.
 
     `EB-495` D3, REPAIRED HERE. This function called `deal_damage_to_enemy`
@@ -870,24 +976,19 @@ def perform(state, member: str) -> None:
     Stage inherited from the Salon is "a performance is not an Attack and not
     a hit" (`EB-588`).
 
-    `EB-495` D4, the same omission one argument over. `FurinaStage.cs:461`
-    (the act) and `:542` (the bow) both pass `Elements.Element.Hydro`;
-    Crabaletta's two sim legs passed no `element=`, so the hit set no aura and
-    consumed none, and every reaction off a Crabaletta hit existed in the game
-    and nowhere here. THE BRIEF IS SILENT: it names Chevalmarin's Hydro in
-    rules 9 and 10 in as many words and says only "Crabaletta deals 5 to a
-    random enemy", so there is no rule for the C# to contradict and the game
-    is the answer. No second `resolve_hit` pass is added: Chevalmarin's leg
-    has one because rule 10 reads "deals 2 to every enemy AND APPLIES HYDRO"
-    and the clause has to hold against a body the hit loop skips. Crabaletta
-    aims at one living enemy, and the element travels with the hit ahead of
-    Block in both engines, so the single argument is the whole of it.
+    NO ACT CARRIES AN ELEMENT (draft 3, 2026-09-25). `EB-495` D4 had given
+    Crabaletta's hit the game's Hydro; [USER] then ruled the Hydro off both
+    damage acts ("removing the Hydro application from the end-of-turn effects
+    on Chevalmarin and Crabaletta"), so both are plain damage in both engines
+    (`element=None` here, `ElementalHit.DealUnelemented` in the mod): no aura
+    set, none consumed, no reaction.
     """
-    from tier0.engine import effects, reactions       # late: avoids the cycle
+    from tier0.engine import effects                  # late: avoids the cycle
     p = state.player
     if not active(p):
         return
-    state.emit("stage_act", member=member)
+    if not bow:                       # a Bow files its own `stage_bow`
+        state.emit("stage_act", member=member)
     # R276 batch two, ARKHE ALIGNMENT: this turn's doubling of the acts'
     # printed numbers.
     dmg = int(p.stage_act_damage_mult)
@@ -898,26 +999,19 @@ def perform(state, member: str) -> None:
         for enemy in list(state.living_enemies):
             effects.deal_damage_to_enemy(state, enemy,
                                          ACT_CHEVALMARIN_DAMAGE * dmg,
-                                         element="hydro",
+                                         element=None,
                                          powered=False,
-                                         source="furina_stage/act")
-        # The Hydro is the ACT's, not the hit's: sec.3 rule 10 reads "deals 2
-        # to every enemy AND APPLIES HYDRO", so a dead body or a zero that
-        # Block ate still leaves the aura the Guest Cast plan (sec.5.3) reacts
-        # off. `deal_damage_to_enemy` with an element already applies on a
-        # landing hit; this second pass is what makes the clause hold when it
-        # does not land.
-        for enemy in list(state.living_enemies):
-            reactions.resolve_hit(state, enemy, "hydro", 0,
-                                  "furina_stage/act")
+                                         source=("furina_stage/bow" if bow
+                                                 else "furina_stage/act"))
     elif member == "crabaletta":
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy,
                                          ACT_CRABALETTA_DAMAGE * dmg,
-                                         element="hydro",
+                                         element=None,
                                          powered=False,
-                                         source="furina_stage/act")
+                                         source=("furina_stage/bow" if bow
+                                                 else "furina_stage/act"))
 
 
 def perform_lead(state) -> None:
@@ -960,6 +1054,42 @@ def end_of_turn_acts(state) -> None:
     p.stage_resting.clear()
     p.stage_act_damage_mult = 1
     p.stage_act_block_mult = 1
+    fade(state)
+
+
+def fade_loss(fanfare: int) -> int:
+    """Rule 12's arithmetic: half of the Fanfare above `FADE_THRESHOLD`,
+    rounded down. 5 -> 0, 6 -> 0, 7 -> 1, 9 -> 2, 15 -> 5, 25 -> 10. ONE
+    function, so the threshold (and the halving) is tuned in one place. C#
+    twin: `FurinaStageLaw.FadeLoss`."""
+    return max(0, int(fanfare) - FADE_THRESHOLD) // 2
+
+
+def fade(state) -> None:
+    """RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
+    Furina's turn, AFTER the acts, each performer behind the front (the middle
+    and back seats) loses `fade_loss` of its bar. The front never fades, so a
+    lone performer never does. The loss is half of what stands ABOVE the
+    threshold, so it never takes a bar below the threshold, never empties a
+    performer and never causes a Bow. [USER] ruled out a flat halving
+    ("taking away half from the back means it's hard to build up fanfare").
+    C# twin: `FurinaStageLedger.Fade`."""
+    p = state.player
+    if not active(p):
+        return
+    for pair in stage(p)[1:]:
+        loss = fade_loss(pair[1])
+        if loss <= 0:
+            continue
+        before = pair[1]
+        book_loss(state, LOSS_FADED, loss)
+        pair[1] = before - loss
+        state.emit("stage_fade", member=pair[0], amount=loss,
+                   before=before, fanfare=pair[1])
+    # THE LEDGER'S SAMPLE (a): the back performer's bar at the end of her
+    # turn, after the fade, and 0 on an empty stage -- a distribution that
+    # omits its zeros is not a distribution.
+    ledger(state)["back_at_turn_end"].append(back_fanfare(p))
 
 
 # ----------------------------------------------------------------------
@@ -1004,6 +1134,7 @@ def spend_all_of_back(state) -> int:
         state.emit("stage_spend_whiffed", amount="all_of_back")
         return 0
     member, bar = pair
+    book_paid(state, bar)
     pair[1] = 0
     state.emit("stage_spend", member=member, asked=bar, paid=bar,
                bar_at_spend=bar, fanfare=0, turn=state.turn,
@@ -1053,7 +1184,7 @@ def turn_start_powers(state) -> None:
         p.stage_act_block_mult = 1 + copies
         # A REGAIN, not a Raise: no summon on an empty stage (round four).
         raise_fanfare(state, PNEUMA_LEAD_REGAIN * copies, SEAT_LEAD,
-                      summon_on_empty=False)
+                      summon_on_empty=False, source=GAIN_POWER)
     else:
         p.stage_act_damage_mult = 1 + copies
     state.emit("stage_arkhe", choice=choice, copies=copies)
