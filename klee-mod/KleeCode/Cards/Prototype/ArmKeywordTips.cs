@@ -91,6 +91,16 @@ public static class ArmKeywordTips
     // R276 batch two: Arkhe Alignment's two halves.
     public const string OusiaKey = "KLEEMOD-ARM_STAGE_OUSIA";
     public const string PneumaKey = "KLEEMOD-ARM_STAGE_PNEUMA";
+    // 2026-09-25: WHAT A SUMMON DOES AND WHAT EACH PERFORMER DOES. A
+    // first-time co-op player "found it very hard to understand ... what each
+    // summoned actor actually did". Not golded words: a face prints "Summon
+    // Usher", so these attach off the row's `stage_summon` op
+    // (`gen_klee_cards.stage_summon_tip_calls`), the way the readers' rider
+    // attaches off its multiplier.
+    public const string SummonKey = "KLEEMOD-ARM_STAGE_SUMMON";
+    public const string UsherKey = "KLEEMOD-ARM_STAGE_USHER";
+    public const string ChevalmarinKey = "KLEEMOD-ARM_STAGE_CHEVALMARIN";
+    public const string CrabalettaKey = "KLEEMOD-ARM_STAGE_CRABALETTA";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -1293,6 +1303,59 @@ public static class ArmKeywordTips
           + "and the [gold]lead performer[/gold] regains "
           + Powers.ArkheAlignmentPower.PneumaLeadRegain
           + " [gold]Fanfare[/gold].");
+
+    /// <summary>
+    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons. The first
+    /// two sentences are brief sec.3 rule 3 and `EB-738` (a newcomer arrives
+    /// at <see cref="FurinaStageLaw.SummonFanfare"/> and acts with the others
+    /// at the end of the turn, never on arrival); the third is the full-stage
+    /// rule ruled the same day, the Defect-orb shape: a random summon on a
+    /// full stage bows the lead, which moves to the back keeping its bar
+    /// (<c>FurinaStage.RecastFromFront</c>).
+    ///
+    /// OVER THE TIP CEILING, and carried in <c>lint_text_conventions</c>'
+    /// exceptions rather than reworded: the text is [USER]'s ruled wording.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForSummon(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, SummonKey,
+            "Puts a performer in the back seat with "
+          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. It acts at "
+          + "the end of your turn. On a full stage, the lead performer takes a "
+          + "[gold]Bow[/gold] and moves to the back seat instead, keeping its "
+          + "Fanfare.");
+
+    /// <summary>
+    /// 2026-09-25. GENTILHOMME USHER'S ACT AND BOW, on every card that names
+    /// him and on every random summon. The same two sentences his body's
+    /// badge carries (<c>UsherBadgePower</c>), numbers from
+    /// <see cref="FurinaStageLaw"/> (`EB-89`).
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForUsher(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, UsherKey,
+            "End of your turn: gain " + FurinaStageLaw.ActUsherBlock
+          + " [gold]Block[/gold]. [gold]Bow[/gold]: gain "
+          + FurinaStageLaw.BowUsherBlock + " [gold]Block[/gold].");
+
+    /// <summary>2026-09-25. SURINTENDANTE CHEVALMARIN'S ACT AND BOW, the
+    /// same two sentences as <c>ChevalmarinBadgePower</c>.</summary>
+    public static IEnumerable<IHoverTip> ForChevalmarin(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, ChevalmarinKey,
+            "End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage
+          + " [gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "
+          + "apply [gold]Hydro[/gold] to ALL enemies.");
+
+    /// <summary>2026-09-25. MADEMOISELLE CRABALETTA'S ACT AND BOW, the same
+    /// two sentences as <c>CrabalettaBadgePower</c>.</summary>
+    public static IEnumerable<IHoverTip> ForCrabaletta(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, CrabalettaKey,
+            "End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage
+          + " [gold]Hydro[/gold] damage to a random enemy. [gold]Bow[/gold]: "
+          + "deal " + FurinaStageLaw.BowCrabalettaDamage
+          + " [gold]Hydro[/gold] damage to a random enemy.");
 
     /// <summary>
     /// WHICH BAR A READER'S NUMBER IS. One value per reader, and the four are

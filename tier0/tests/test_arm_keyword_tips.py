@@ -410,7 +410,14 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # is. The four readers multiply a LIVE bar; the faces
                     # print the rule and, in combat only, the number, and this
                     # tip names the seat the number is read off.
-                    "KLEEMOD-ARM_STAGE_READER"}
+                    "KLEEMOD-ARM_STAGE_READER",
+                    # 2026-09-25: what a summon does and what each performer
+                    # does. Faces print these words UNGOLDED ("Summon
+                    # Usher"), so they attach off the `stage_summon` op
+                    # (`gen.stage_summon_tip_calls`), not off the table.
+                    "KLEEMOD-ARM_STAGE_SUMMON", "KLEEMOD-ARM_STAGE_USHER",
+                    "KLEEMOD-ARM_STAGE_CHEVALMARIN",
+                    "KLEEMOD-ARM_STAGE_CRABALETTA"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -1434,3 +1441,102 @@ def test_the_readers_rules_are_measured():
     assert len(rows) == 4
     for ident, raw in rows.items():
         assert len(lint.render(raw)) <= lint.CEILING["tip"], ident
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-25. WHAT A SUMMON DOES, AND WHAT EACH PERFORMER DOES.
+#
+# THE FIND. A first-time co-op player on 0.2.3737+proto "found it very hard to
+# understand what was going on from the tooltips, such as what each summoned
+# actor actually did". No card said what a summon puts on the board, and no
+# card or body said what a performer does.
+# ---------------------------------------------------------------------------
+
+#: Every row that summons, and the performer tips it owes, in attach order.
+STAGE_SUMMONERS = {
+    "proto_fs_salon_debut": ("Usher", "Chevalmarin", "Crabaletta"),
+    "proto_fs_understudy": ("Usher", "Chevalmarin", "Crabaletta"),
+    "proto_fs_double_casting": ("Usher", "Chevalmarin", "Crabaletta"),
+    # A summon inside a conditional's branch owes the same tips.
+    "proto_fs_improvised_number": ("Usher", "Chevalmarin", "Crabaletta"),
+    "proto_fs_gentilhomme_usher": ("Usher",),
+    "proto_fs_surintendante_chevalmarin": ("Chevalmarin",),
+    "proto_fs_mademoiselle_crabaletta": ("Crabaletta",),
+}
+
+
+def test_every_summoning_row_and_no_other_owes_the_summon_tips():
+    """DERIVED FROM THE OP, never a list of ids: a row that gains a summon
+    gains the tips the day its row exists."""
+    rows = {row["id"]: row for row in proto._rows()}
+    found = {rid: gen.stage_summon_tip_calls(row)
+             for rid, row in rows.items()
+             if gen.stage_summon_tip_calls(row)}
+    expected = {rid: ["ArmKeywordTips.ForSummon"]
+                + [f"ArmKeywordTips.For{who}" for who in cast]
+                for rid, cast in STAGE_SUMMONERS.items()}
+    assert found == expected
+
+
+@pytest.mark.parametrize("rid", sorted(STAGE_SUMMONERS))
+def test_every_summoning_row_carries_the_summon_and_performer_tips(rid):
+    """The attach is committed: the generated card wraps its tips in the Summon
+    tip first and then each performer it can field."""
+    cls = "ProtoFs" + "".join(
+        part.capitalize() for part in rid.removeprefix("proto_fs_").split("_"))
+    src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
+    assert "ArmKeywordTips.ForSummon(base.ExtraHoverTips, this)" in src
+    for who in STAGE_SUMMONERS[rid]:
+        assert f"ArmKeywordTips.For{who}(" in src
+    for who in {"Usher", "Chevalmarin", "Crabaletta"} - set(
+            STAGE_SUMMONERS[rid]):
+        assert f"ArmKeywordTips.For{who}(" not in src
+
+
+def test_the_summon_and_performer_tips_state_the_ruled_sentences():
+    """[USER]'s wording, wired exactly, the numerals interpolated from
+    `FurinaStageLaw` (`EB-89`)."""
+    tips = TIPS_CS.read_text(encoding="utf-8")
+    for clause in (
+            '"Puts a performer in the back seat with "\n'
+            '          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. '
+            'It acts at "',
+            "the end of your turn. On a full stage, the lead performer takes a ",
+            "[gold]Bow[/gold] and moves to the back seat instead, keeping its ",
+            '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
+            '" [gold]Block[/gold]. [gold]Bow[/gold]: gain "',
+            "FurinaStageLaw.BowUsherBlock",
+            '"End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage',
+            '" [gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "',
+            '"apply [gold]Hydro[/gold] to ALL enemies."',
+            '"End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage',
+            '" [gold]Hydro[/gold] damage to a random enemy. [gold]Bow[/gold]: "',
+            "FurinaStageLaw.BowCrabalettaDamage"):
+        assert clause in tips, clause
+    mod = MOD_CS.read_text(encoding="utf-8")
+    assert 'ArmKeywordTips.SummonKey + ".title"] = "Summon"' in mod
+    # The performer titles are the LEDGER'S display names (`EB-735`), the
+    # names the body and its badge print.
+    for who in ("Usher", "Chevalmarin", "Crabaletta"):
+        assert (f"ArmKeywordTips.{who}Key + \".title\"] =\n"
+                f"                        Powers.FurinaStageLedger.DisplayName("
+                f"\n                            Powers.StagePerformer.{who})"
+                ) in mod
+
+
+def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
+    """The seat glossary is held in step from this side: the same sentences,
+    the numerals written out."""
+    rows = blindplay.ARM_KEYWORDS
+    assert rows["Summon"] == (
+        "Puts a performer in the back seat with 1 Fanfare. It acts at the end "
+        "of your turn. On a full stage, the lead performer takes a Bow and "
+        "moves to the back seat instead, keeping its Fanfare.")
+    assert rows["Gentilhomme Usher"] == (
+        "End of your turn: gain 3 Block. Bow: gain 4 Block.")
+    assert rows["Surintendante Chevalmarin"] == (
+        "End of your turn: deal 2 Hydro damage to ALL enemies. Bow: apply "
+        "Hydro to ALL enemies.")
+    assert rows["Mademoiselle Crabaletta"] == (
+        "End of your turn: deal 5 Hydro damage to a random enemy. Bow: deal 8 "
+        "Hydro damage to a random enemy.")

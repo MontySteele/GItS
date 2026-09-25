@@ -1160,6 +1160,44 @@ def reads_the_field(card: dict) -> bool:
                for fx in iter_effects(card.get("effects") or []))
 
 
+#: 2026-09-25. Each performer's act-and-bow tip, in the order the brief prints
+#: the cast. A `random` summon may field any of the three, so it owes all three.
+_STAGE_PERFORMER_TIPS = (
+    ("usher", "ArmKeywordTips.ForUsher"),
+    ("chevalmarin", "ArmKeywordTips.ForChevalmarin"),
+    ("crabaletta", "ArmKeywordTips.ForCrabaletta"),
+)
+
+
+def stage_summon_tip_calls(card: dict) -> list[str]:
+    """2026-09-25. THE SUMMON TIP AND THE PERFORMER TIPS A ROW OWES, in order.
+
+    THE FIND. A first-time co-op player on 0.2.3737+proto "found it very hard
+    to understand what was going on from the tooltips, such as what each
+    summoned actor actually did". Nothing on any card said what a summon puts
+    on the board or what a performer does: the faces print "Summon Usher" and
+    "Summon a random performer", neither word golded, so `ARM_KEYWORDS` -- the
+    golded-span attach -- could never reach them.
+
+    DERIVED FROM THE OP, `reads_the_field`'s shape: a row with a `stage_summon`
+    anywhere (a conditional's branch included -- Improvised Number) carries
+    `ForSummon`, a NAMED member carries that performer's tip, and a `random`
+    one carries all three, because any of them may arrive. A row that gains a
+    summon gains the tips the day its row exists.
+    """
+    members: set[str] = set()
+    for fx in iter_effects(card.get("effects") or []):
+        if fx.get("op") == "stage_summon":
+            members.add(str(fx.get("member", "random")))
+    if not members:
+        return []
+    calls = ["ArmKeywordTips.ForSummon"]
+    for member, call in _STAGE_PERFORMER_TIPS:
+        if member in members or "random" in members:
+            calls.append(call)
+    return calls
+
+
 def merges_bombs(card: dict) -> bool:
     """Does this row merge Bombs into one? (`EB-573`.)
 
@@ -14401,6 +14439,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForCovenSpark("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # 2026-09-25: what a summon does, and what each performer it can
+        # field does. Words a face prints UNGOLDED ("Summon Usher"), so they
+        # attach off the op (`stage_summon_tip_calls`) and sit just above the
+        # golded words, which are read after them.
+        for attach in stage_summon_tip_calls(card):
+            tips_expr = (
+                f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc + rider_printed,

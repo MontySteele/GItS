@@ -2123,7 +2123,7 @@
    authored_by: [claude],
    replaces: matinee_performance,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon two random performers who are not on stage.",
+   description: "Summon two random performers.",
    effects: [{op: stage_summon, member: random},
              {op: stage_summon, member: random}]}
 

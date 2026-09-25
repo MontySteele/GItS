@@ -57,6 +57,7 @@ public sealed class FurinaStageHooks : AbstractModel
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
+        await FurinaStage.InstallBadge(player.Creature);
         await FurinaStage.RegenLead(player.Creature);
         Vfx.FurinaStageStrip.Refresh(player.Creature);
     }

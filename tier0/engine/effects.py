@@ -6247,9 +6247,10 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
 
     `member:` names one of the three; `member: random` (the default, and what
     *Salon Début* and *Understudy* print) rolls one who is NOT ON STAGE, which
-    is sec.10 default 2. A roll with every performer already seated summons
-    nobody and says so -- there is no "random including duplicates" reading of
-    the printed text.
+    is sec.10 default 2. ON A FULL STAGE a random summon runs
+    `furina_stage.recast_front` (2026-09-25): the lead takes a Bow and moves to
+    the back seat keeping its Fanfare, the Defect-orb rule [USER] ruled. Before
+    it, a roll with every performer seated summoned nobody.
 
     `if_present_raise: N` is the named summons' second clause: "Summon Usher.
     If he is already on stage, Raise 3 on him instead" (sec.10 default 2, E:
@@ -6262,6 +6263,9 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
         return
     named = fx.get("member", "random")
     if named == "random":
+        if len(furina_stage.stage(p)) >= furina_stage.SEATS:
+            furina_stage.recast_front(state)
+            return
         seated = {m for m, _f in furina_stage.stage(p)}
         options = [m for m in furina_stage.PERFORMERS if m not in seated]
         if not options:

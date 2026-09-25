@@ -277,7 +277,7 @@ public static class FurinaStagePets
             var type = ModelFor(who);
             if (!ModelDb.Contains(type)) ModelDb.Inject(type);
             EnsureVisualsConverted(who);
-            return who switch
+            Creature pet = who switch
             {
                 StagePerformer.Usher =>
                     await PlayerCmd.AddPet<UsherMonster>(player),
@@ -285,6 +285,12 @@ public static class FurinaStagePets
                     await PlayerCmd.AddPet<ChevalmarinMonster>(player),
                 _ => await PlayerCmd.AddPet<CrabalettaMonster>(player),
             };
+            // 2026-09-25: the body SAYS WHAT IT DOES. Hovering a creature
+            // shows its powers' tips, and the base game gives Osty a quiet
+            // badge the same way (`OstyCmd.Summon`, `DieForYouPower`); a
+            // first-time player could not tell what any performer did.
+            await StagePerformerBadge.Pin(pet, who);
+            return pet;
         }
         catch (Exception e)
         {

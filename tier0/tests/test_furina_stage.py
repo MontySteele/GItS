@@ -1118,3 +1118,105 @@ def test_tutti_costs_one_and_zero_upgraded():
     row = {r["id"]: r for r in _proto_rows()}["proto_fs_tutti"]
     assert row["cost"] == 1
     assert row["upgrade"] == {"cost": -1}
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-25. A RANDOM SUMMON ON A FULL STAGE WORKS LIKE A DEFECT ORB.
+#
+# [USER]: "treat this like a Defect orb summon? the stage members rotate, ...
+# bows, and their remaining fanfare transfers to the newest member", and the
+# seat that leaves is the lead. Filed off a first-time co-op player's "if the
+# stage is full, then summoning a new actor doesn't do anything".
+# ---------------------------------------------------------------------------
+
+def _full_stage():
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [["usher", 5], ["chevalmarin", 2], ["crabaletta", 4]]
+    return st
+
+
+def _random_summon(times=1):
+    return _card(effects=[{"op": "stage_summon", "member": "random"}] * times)
+
+
+def test_a_random_summon_on_a_full_stage_bows_the_lead_to_the_back(arm):
+    """The lead's Bow fires (Usher: 4 Block), the other two step forward, and
+    the lead comes back to the back seat with the bar it left with."""
+    st = _full_stage()
+    effects.resolve_card(st, _random_summon())
+    assert st.player.block == FS.BOW_USHER_BLOCK
+    assert st.player.stage == [["chevalmarin", 2], ["crabaletta", 4],
+                               ["usher", 5]]
+    leave = [e for e in st.log if e["event"] == "stage_leave"]
+    assert leave and leave[0]["bowed"] is True
+    assert leave[0]["reason"] == "recast"
+    assert not [e for e in st.log if e["event"] == "stage_summon_whiffed"]
+
+
+def test_the_recast_does_not_act_on_arrival(arm):
+    """`EB-738` stands: the returning performer acts once, at the end of the
+    turn, with everyone else."""
+    st = _full_stage()
+    effects.resolve_card(st, _random_summon())
+    after_bow = st.player.block
+    assert not [e for e in st.log if e["event"] == "stage_act"]
+    FS.end_of_turn_acts(st)
+    assert st.player.block == after_bow + FS.ACT_USHER_BLOCK
+
+
+def test_double_casting_on_a_full_stage_bows_twice(arm):
+    """Two random summons on a full stage: the lead bows and moves back, and
+    then the NEW lead does the same. Intended."""
+    st = _full_stage()
+    hp = st.enemies[0].hp
+    effects.resolve_card(st, _random_summon(times=2))
+    bows = [e["member"] for e in st.log if e["event"] == "stage_bow"]
+    assert bows == ["usher", "chevalmarin"]
+    assert st.player.block == FS.BOW_USHER_BLOCK
+    assert st.player.stage == [["crabaletta", 4], ["usher", 5],
+                               ["chevalmarin", 2]]
+    assert st.enemies[0].hp == hp          # Chevalmarin's bow is Hydro only
+
+
+def test_the_double_casting_row_is_two_random_summons():
+    row = next(r for r in _proto_rows()
+               if r["id"] == "proto_fs_double_casting")
+    assert row["effects"] == [{"op": "stage_summon", "member": "random"}] * 2
+    assert row["description"] == "Summon two random performers."
+
+
+def test_a_five_century_act_does_not_return_the_recast_performer_twice(arm):
+    """The summon is already bringing it back, so the Act must not also."""
+    st = _full_stage()
+    st.player.powers[FS.FIVE_CENTURY_ACT] = 1
+    effects.resolve_card(st, _random_summon())
+    assert st.player.stage == [["chevalmarin", 2], ["crabaletta", 4],
+                               ["usher", 5]]
+    assert st.player.stage_resting == []
+    assert not [e for e in st.log if e["event"] == "stage_return"]
+
+
+def test_thunderous_applause_fires_on_the_recast_bow_before_the_arrival(arm):
+    """A real Bow: the applause draws and Raises -- on the stage of two the
+    bow left, whose back performer is then Crabaletta -- and only then does
+    the lead arrive at the back holding its own bar, untouched."""
+    st = _full_stage()
+    st.player.draw_pile = [_card(cid="a"), _card(cid="b")]
+    effects.resolve_card(st, _card(type="power", effects=[
+        {"op": "apply_power", "power": FS.THUNDEROUS_APPLAUSE, "amount": 2,
+         "target": "self"}]))
+    effects.resolve_card(st, _random_summon())
+    assert len(st.player.hand) == 1
+    assert st.player.stage == [["chevalmarin", 2], ["crabaletta", 6],
+                               ["usher", 5]]
+
+
+def test_a_named_summon_on_a_full_stage_still_raises_instead(arm):
+    """Named summons are unchanged: the named performer is on stage, so the
+    printed clause Raises 3 on him where he sits, and nobody bows."""
+    st = _full_stage()
+    effects.resolve_card(st, _card(effects=[
+        {"op": "stage_summon", "member": "usher", "if_present_raise": 3}]))
+    assert st.player.stage == [["usher", 8], ["chevalmarin", 2],
+                               ["crabaletta", 4]]
+    assert st.player.block == 0

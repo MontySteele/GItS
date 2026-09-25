@@ -6750,6 +6750,19 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Ousia": ["This turn, your performers' acts deal double damage."],
         "Pneuma": ["This turn, your performers' acts give double ",
                    " regains "],
+        # 2026-09-25: what a summon does and what each performer does. The
+        # numerals are interpolated on the mod side, so the anchors are the
+        # prose either side of them.
+        "Summon": ["Puts a performer in the back seat with ",
+                   "the end of your turn. On a full stage, the lead performer "
+                   "takes a ",
+                   " and moves to the back seat instead, keeping its "],
+        "Gentilhomme Usher": ["End of your turn: gain "],
+        "Surintendante Chevalmarin": ["End of your turn: deal ",
+                                      " damage to ALL enemies. ",
+                                      " to ALL enemies."],
+        "Mademoiselle Crabaletta": ["End of your turn: deal ",
+                                    " damage to a random enemy. "],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
         # own words. The strike number is interpolated on both sides -- the
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off

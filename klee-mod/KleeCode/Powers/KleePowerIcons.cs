@@ -282,6 +282,15 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/unheard_confession.png"),
         ArkheAlignmentPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
+        // 2026-09-25: the Stage's four badges -- each performer's own, and
+        // The Stage on Furina -- borrow the shipped Salon sigils on the same
+        // terms: the member's for a member, Center Stage's for the board.
+        UsherBadgePower => KleePck.Path("furina/powers/salon_member.png"),
+        ChevalmarinBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        CrabalettaBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        StageSummaryPower => KleePck.Path("furina/powers/center_stage.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

@@ -579,6 +579,20 @@ public static class KleeMod
                     // R276 batch two: Arkhe Alignment's two halves.
                     [Cards.ArmKeywordTips.OusiaKey + ".title"] = "Ousia",
                     [Cards.ArmKeywordTips.PneumaKey + ".title"] = "Pneuma",
+                    // 2026-09-25: what a summon does, and what each performer
+                    // does. The three performer titles are the LEDGER'S
+                    // display names -- the name the body, its badge and the
+                    // seat page all print (`EB-735`).
+                    [Cards.ArmKeywordTips.SummonKey + ".title"] = "Summon",
+                    [Cards.ArmKeywordTips.UsherKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Usher),
+                    [Cards.ArmKeywordTips.ChevalmarinKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Chevalmarin),
+                    [Cards.ArmKeywordTips.CrabalettaKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Crabaletta),
                     // A Stage round-three defect, and a RIDER rather than a
                     // keyword: the four readers multiply a live bar, so off a
                     // board their faces print a literal 0. The title names

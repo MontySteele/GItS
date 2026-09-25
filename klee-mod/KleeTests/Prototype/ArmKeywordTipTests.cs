@@ -537,7 +537,17 @@ public class ArmKeywordTipTests
         // R276's Furina hygiene: `ForEncore` attached to no card and left
         // with its body. TWENTY-SIX with R276's Stage batch two: `ForOusia`
         // and `ForPneuma`, Arkhe Alignment's two halves.
-        Assert.Equal(26, attaches.Count);
+        //
+        // THIRTY with the Stage legibility pass (2026-09-25): `ForSummon`
+        // and the three performers' `ForUsher`, `ForChevalmarin` and
+        // `ForCrabaletta`. A first-time co-op player could not tell what a
+        // summon did or what any performer did. The faces print these words
+        // ungolded, so they attach off the row's `stage_summon` op.
+        Assert.Equal(30, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForSummon");
+        Assert.Contains(attaches, m => m.Name == "ForUsher");
+        Assert.Contains(attaches, m => m.Name == "ForChevalmarin");
+        Assert.Contains(attaches, m => m.Name == "ForCrabaletta");
         Assert.Contains(attaches, m => m.Name == "ForOusia");
         Assert.Contains(attaches, m => m.Name == "ForPneuma");
         Assert.DoesNotContain(attaches, m => m.Name == "ForEncore");

@@ -38,7 +38,7 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, ICharacte
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRaise(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRaise(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("surintendante_chevalmarin");
 

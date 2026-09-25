@@ -170,6 +170,23 @@ EXCEPTIONS = {
         "binds and prints nowhere is not a rule a round can read. The prose "
         "is the kit's, not this lint's, and EB-777 is a tooling row: the "
         "trim, if one is wanted, is a Kokomi text pass"),
+    # 2026-09-25, the Stage legibility pass. BOTH ARE [USER]'S RULED WORDING,
+    # wired as given and carried here rather than reworded, with the trim
+    # left to the main session: a first-time co-op player could not tell what
+    # a summon or a performer did, and the texts are the answer as ruled.
+    "SummonKey": (
+        "2026-09-25. The Summon tip is [USER]'s ruled text, 187 of 135: where "
+        "a summon puts a performer and at what bar, that it acts at the end "
+        "of the turn and never on arrival (EB-738), and the full-stage rule "
+        "ruled the same day (a random summon on a full stage bows the lead, "
+        "which moves to the back keeping its Fanfare). Carried, not "
+        "reworded; a trim is the main session's call"),
+    "StageSummaryPower.description": (
+        "2026-09-25. The Stage badge on Furina is [USER]'s ruled text, 178 "
+        "of 125: the cast size, when the acts fire, the damage order and "
+        "where Raise and Spend land -- the four rules a first-time co-op "
+        "player could not find on any screen. Carried, not reworded; a trim "
+        "is the main session's call"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.

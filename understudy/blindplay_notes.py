@@ -1611,6 +1611,27 @@ ARM_KEYWORDS: dict[str, str] = {
     "Ousia": "This turn, your performers' acts deal double damage.",
     "Pneuma": ("This turn, your performers' acts give double Block, and the "
                "lead performer regains 2 Fanfare."),
+    # 2026-09-25. WHAT A SUMMON DOES, AND WHAT EACH PERFORMER DOES. A
+    # first-time co-op player "found it very hard to understand what was
+    # going on from the tooltips, such as what each summoned actor actually
+    # did". `ArmKeywordTips.ForSummon`, `ForUsher`, `ForChevalmarin` and
+    # `ForCrabaletta`'s words, with `FurinaStageLaw`'s numerals written out;
+    # the performer rows are also each body's badge in game
+    # (`StagePerformerBadge`). The Summon row's last sentence is the
+    # full-stage rule ruled the same day: a random summon on a full stage
+    # bows the lead, which moves to the back keeping its bar.
+    "Summon": ("Puts a performer in the back seat with 1 Fanfare. It acts at "
+               "the end of your turn. On a full stage, the lead performer "
+               "takes a Bow and moves to the back seat instead, keeping its "
+               "Fanfare."),
+    "Gentilhomme Usher": ("End of your turn: gain 3 Block. Bow: gain 4 "
+                          "Block."),
+    "Surintendante Chevalmarin": ("End of your turn: deal 2 Hydro damage to "
+                                  "ALL enemies. Bow: apply Hydro to ALL "
+                                  "enemies."),
+    "Mademoiselle Crabaletta": ("End of your turn: deal 5 Hydro damage to a "
+                                "random enemy. Bow: deal 8 Hydro damage to a "
+                                "random enemy."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1762,6 +1783,16 @@ _STAGE_CHARACTER = "furina"
 # combat block stays the reading; the latch is only what carries it.
 _STAGE_RETIRED_KEYWORDS = frozenset({"Encore"})
 
+# 2026-09-25. AND THE ROWS ONLY THE ARM HAS. The three performers carry the
+# shipped Salon members' names, and the shipped members' rules are not these
+# (a shipped member deploys and performs on a Companion play). So their rows
+# print on an arm page and on no other: a shipped seat reading "End of your
+# turn: gain 3 Block" beside a Salon Usher would be two rules for one name,
+# `EB-728`'s Fanfare finding one table over.
+_STAGE_ONLY_KEYWORDS = frozenset({
+    "Gentilhomme Usher", "Surintendante Chevalmarin",
+    "Mademoiselle Crabaletta"})
+
 # `EB-728`. AND THE ROW THE SHIPPED KIT STILL OWNS.
 #
 # `Fanfare` is a word BOTH kits print and they do not mean the same thing by
@@ -1848,6 +1879,8 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "lead performer": "furina", "back performer": "furina",
     "Rotate": "furina", "Encore": "furina", "Spotlighted": "furina",
     "Ousia": "furina", "Pneuma": "furina",
+    "Summon": "furina", "Gentilhomme Usher": "furina",
+    "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
 }
 
 
@@ -1952,6 +1985,19 @@ _ARM_KEYWORD_RE = {
     # R276 batch two: Arkhe Alignment's two halves.
     "Ousia": re.compile(r"\bOusia\b"),
     "Pneuma": re.compile(r"\bPneuma\b"),
+    # 2026-09-25. `Summon` in either case: Improvised Number prints it
+    # mid-sentence ("summon a random performer"), and the mod attaches the
+    # tip off the op, not the capital. A PERFORMER is matched on its name --
+    # the short one a face prints ("Summon Usher") ends the full one the stage
+    # lines print -- and on a RANDOM summon's face, which may field any of the
+    # three and so carries all three tips in game.
+    "Summon": re.compile(r"\b[Ss]ummon\b"),
+    "Gentilhomme Usher": re.compile(
+        r"\bUsher\b|\b[Ss]ummon (?:a|two) random performer"),
+    "Surintendante Chevalmarin": re.compile(
+        r"\bChevalmarin\b|\b[Ss]ummon (?:a|two) random performer"),
+    "Mademoiselle Crabaletta": re.compile(
+        r"\bCrabaletta\b|\b[Ss]ummon (?:a|two) random performer"),
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
     # faces before the meter exists, and every Furina row the Stage does not
@@ -2846,6 +2892,9 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             # (brief sec.2, R269) and since `EB-745` nothing grants it -- and a
             # rule for a meter that cannot move is the noise round two filed.
             if not (arm and word in _STAGE_RETIRED_KEYWORDS)
+            # 2026-09-25: and a word only the ARM defines prints on an arm
+            # page alone -- the performers share the shipped members' names.
+            and (arm or word not in _STAGE_ONLY_KEYWORDS)
             # `EB-753`: and a word another kit OWNS is not defined at all on
             # this run's screens. The match on a Klee reward screen was the
             # English word `Spend` in a Spark sink's own prose, not the Stage's
