@@ -941,7 +941,9 @@ def test_soumetsus_face_says_which_turn_pays_which_number(overhaul):
     """
     face = _proto_face("proto_mi_ayaka_soumetsu")
     assert "At the end of each of your next 2 turns, deal 8" in face
-    assert "On the last of them, deal 16 more." in face
+    # THE 2026-09-25 TEXT PASS: the finale in rule 8's spelling, "N
+    # additional damage", on both surfaces.
+    assert "The last one deals 16 additional damage." in face
     # The two readings the row named, both gone: a finale AFTER the clock, and
     # a single anonymous end-of-turn volley.
     assert "After 2 turns" not in face
@@ -957,7 +959,8 @@ def test_soumetsus_badge_says_the_same_sentence_as_its_face(overhaul):
            / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
     badge = src.split("class SoumetsuPower")[1].split("class ")[0]
 
-    assert "on the last, " in badge
+    assert "The last deals " in badge
+    assert "additional " in badge
     assert "{Amount:plural:turn|turns} left" in badge
     # The wording the seat could not read, and the one the face dropped.
     assert "when it ends" not in badge

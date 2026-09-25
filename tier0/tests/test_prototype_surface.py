@@ -1192,7 +1192,7 @@ def _war_banner_row() -> dict:
         if r["id"] == "proto_mi_gorou_war_banner")
 
 
-def test_the_war_banner_face_says_the_banner_takes_the_dexterity_back():
+def test_the_war_banner_badge_says_the_banner_takes_the_dexterity_back():
     """`EB-403`, and the twin, C# side.
 
     The face printed "Gain 2 Dexterity for 2 turns" on a screen whose Dexterity
@@ -1210,14 +1210,20 @@ def test_the_war_banner_face_says_the_banner_takes_the_dexterity_back():
     hands back what it granted now, which is not a number a printed face can
     carry -- so the clause names none, and the live figure is on the badge's
     smart row, the one branch `DynamicVars.AddTo` actually binds.
+
+    THE 2026-09-25 TEXT PASS took the clause off the CARD: "Gain 2 Dexterity
+    for 2 turns." is the base game's duration idiom ("for N turns",
+    `PANIC_BUTTON`, `STABLE_SERUM`) on its temporary-stat shape ("Gain N
+    Dexterity this turn", `ANTICIPATE`). The take-back stays on the badge,
+    which is on the player for exactly as long as the Dexterity is.
     """
     row = _war_banner_row()
-    assert "takes it back" in row["description"]
-    assert "takes 2 back" not in row["description"]
+    assert row["description"] == (
+        "Gain 2 [gold]Dexterity[/gold] for 2 turns.")
     emitted = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
                / "Generated" / "ProtoMiGorouWarBanner.cs").read_text(
                    encoding="utf-8")
-    assert "for 2 turns, then the banner takes it back." in emitted
+    assert "[gold]Dexterity[/gold] for 2 turns.\")" in emitted
     power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
              / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
     banner = power.split("class WarBannerPower")[1].split("class ")[0]

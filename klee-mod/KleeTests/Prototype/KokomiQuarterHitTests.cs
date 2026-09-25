@@ -102,10 +102,13 @@ public class KokomiQuarterHitTests
         // Bake-Kurage holds, and the seat wrote ONE at a time for four
         // fights. Three r4c seats read the `Plan` badge's number as a
         // capacity for the same reason. `KokomiPlan` caps nothing on an
-        // unconfigured build. The row's acceptance sentence is this box's.
+        // unconfigured build. The row's acceptance sentence was this box's
+        // until the 2026-09-25 text pass cut the box to two plain facts; the
+        // "any number" sentence is the panel's (`PLAN_COUNT_NOTE`) now, and
+        // the box still speaks of the queue in the plural.
         var body = Description<ProtoBakeKuragePower>();
 
-        Assert.Contains("Holds any number of [gold]Plans[/gold]", body);
+        Assert.Contains("It holds your [gold]Plans[/gold]", body);
         // "Plans" when more than one, which is the row's other half: the
         // count badge pluralizes off its own amount, so it prints `Plan` at 1
         // and `Plans` above it, and the box -- which speaks of the whole queue
@@ -117,18 +120,16 @@ public class KokomiQuarterHitTests
     [Fact]
     public void The_box_still_says_what_the_jellyfish_is_and_when_it_acts()
     {
-        // Nothing was dropped to make room except a sentence boundary: the
-        // untargetable rule, the lifetime and both carry-out timings are all
-        // still on the badge. "Play a Plan card on it" is the one clause that
-        // went, and `EB-293`'s half is not lost with it -- the `Plan` keyword
-        // leads with "On the Bake-Kurage" and a Plan-only row's own face leads
-        // with "Play on the Bake-Kurage."
+        // THE 2026-09-25 TEXT PASS: two plain facts, the untargetable rule
+        // and when the held Plans are carried out. The Dusk timing is the
+        // `Dusk` tip's alone, and `EB-293`'s "where" is on the `Plan` word
+        // ("Play the card on the Bake-Kurage") and on a Plan-only row's own
+        // face ("Play on the Bake-Kurage.").
         var body = Description<ProtoBakeKuragePower>();
 
-        Assert.Contains("Enemies cannot target it", body);
-        Assert.Contains("all combat", body);
-        Assert.Contains("carried out next turn", body);
-        Assert.Contains("this turn's end if [gold]Dusk[/gold]", body);
+        Assert.StartsWith("Enemies can't target it. It holds your "
+                        + "[gold]Plans[/gold] until your next turn.", body);
+        Assert.DoesNotContain("Dusk", body);
     }
 
     private static string Description<T>() where T : notnull

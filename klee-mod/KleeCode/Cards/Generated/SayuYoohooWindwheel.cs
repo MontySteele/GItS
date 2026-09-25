@@ -52,7 +52,7 @@ public sealed class SayuYoohooWindwheel : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Yoohoo Art: Fuuin Dash"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. [gold]Swirl[/gold] an enemy's aura onto ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. [gold]Swirl[/gold] the enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

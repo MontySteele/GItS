@@ -45,7 +45,7 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Breakwater"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] is holding."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold]. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], and 3 more for each Plan waiting."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

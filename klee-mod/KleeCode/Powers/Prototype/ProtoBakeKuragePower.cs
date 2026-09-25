@@ -54,45 +54,15 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         ("title", "Bake-Kurage"),
         ("description",
-            // `EB-680`. THE TIMING, BOTH OF THEM, ON THE BADGE THAT STATES
-            // IT. R265's Dusk lines land at the END of the turn they are
-            // written on, and this face said "at the start of your next turn"
-            // flat -- so a Dusk Plan's timing printed three ways at once (the
-            // card, this badge and the queue) and the r27 lane-2 seat had no
-            // way to tell which was the rule. Bought inside the 125-character
-            // power ceiling by dropping "the [gold]Plan[/gold]" and "at the
-            // start of", which the sentence's own subject already carries:
-            // 124 of 125.
-            //
-            // `EB-563`. AND HOW MANY IT HOLDS, which is the row's own
-            // acceptance sentence ("the box says the jellyfish holds any
-            // number of Plans"). No screen said it: the r20 lane-2 seat wrote
-            // ONE Plan at a time for four fights, and three r4c seats read the
-            // `Plan` badge's number as a capacity. `KokomiPlan` caps nothing
-            // on an unconfigured build, and under a declared cap the sentence
-            // is still true -- the jellyfish HOLDS them all and
-            // `KokomiPlan.CapSentence` below says how many it carries out.
-            //
-            // BOUGHT BY MERGING THE FIRST TWO SENTENCES ("Enemies cannot
-            // target it, all combat"), which costs no fact, and by letting
-            // "Holds ... Plans" carry the where in place of "Play a Plan card
-            // on it". `EB-293`'s half is not lost with it: the `Plan` keyword
-            // tip still leads with "On the [gold]Bake-Kurage[/gold]" and a
-            // Plan-only row's own face still leads with "Play on the
-            // Bake-Kurage." (`gen_klee_cards._plan_only_line`), so the player
-            // meets the where on the card in their hand as well as here.
-            // 123 of 125. Page twin: `blindplay_notes.PLAN_COUNT_NOTE`.
-            //
-            // NO SEMICOLON IN THIS STRING, and it is not a style
-            // choice: `lint_text_conventions.loc_rows` matches a
-            // power's localization body with a character class
-            // that excludes `;`, so a face carrying one is not
-            // measured at all -- the silence that shape of lint
-            // is worst at. ", each carried out" says the same
-            // thing the semicolon said.
-            "Enemies cannot target it, all combat. Holds any number of "
-          + "[gold]Plans[/gold], each carried out next turn, or at "
-          + "this turn's end if [gold]Dusk[/gold]."
+            // THE 2026-09-25 TEXT PASS ("the existing text is often very
+            // verbose and unintuitive"). Two plain facts: enemies cannot
+            // reach it, and it holds the Plans until her next turn. The Dusk
+            // timing it used to restate is stated once, on the `Dusk` tip
+            // (`ArmKeywordTips.ForDusk`), and "any number" lives on the
+            // blind-play panel (`blindplay_notes.PLAN_COUNT_NOTE`). Spec:
+            // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.
+            "Enemies can't target it. It holds your [gold]Plans[/gold] "
+          + "until your next turn."
           // `EB-653` (round 24). THE CAP PRINTS WHERE IT BINDS. The r24 cap
           // lane carried out two of four written Plans four mornings running
           // with no surface saying a cap existed, and read the rule as a wall.

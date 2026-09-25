@@ -670,166 +670,32 @@ public static class ArmKeywordTips
     // Exert and Garment left with the rules they named.
 
     /// <summary>
-    /// RULE 2, THE WHOLE KIT, IN TWO SENTENCES AND UNDER THE CEILING. Five
-    /// clauses have to fit: where the card is played, that its cost is paid
-    /// now, when the line happens, what it aims at, and who deals its damage.
+    /// THE 2026-09-25 TEXT PASS, and it is the owner's ask in so many words:
+    /// "the existing text is often very verbose and unintuitive". This tip was
+    /// the worst string in the kit -- 292 rendered characters against the
+    /// 135-character ceiling, four sentences, read under every Kokomi card --
+    /// and it carried six seats' edge cases (Strength folding, Vulnerable
+    /// timing, "a carry-out is not a hit", non-Minion targeting, standing
+    /// Block, the badge as a count). They LEFT the tip and nothing replaced
+    /// them: the word now says what a Plan is and in what order Plans happen.
+    /// The long forms stay where there is room for them, on the blind-play
+    /// panel (`blindplay_notes.PLAN_AIM_NOTE`, `PLAN_BLOCK_NOTE`,
+    /// `PLAN_COUNT_NOTE`, `PLAN_WRITTEN_NUMBER_NOTE`), and the history of each
+    /// clause is in git. The Dusk timing is stated only on
+    /// <see cref="ForDusk"/>. Spec and census:
+    /// `review/records/text-pass-2026-09-25/`.
     ///
-    /// THE FIFTH CLAUSE IS `EB-334`, and R246 pick 1 asks for it in as many
-    /// words. Three seats derived the Plan's arithmetic from the board and got
-    /// three different answers, because the rule was stated nowhere: one found
-    /// that Plans keep their full number while she is Weak, one that they pay
-    /// x0.75 against a Strategic enemy, and one that Vulnerable did not
-    /// multiply a Plan at all
-    /// (`review/ruled/kokomi-overhaul-round-4c-2026-09-02.md` sec.2). The rule
-    /// is now the honest one -- the Bake-Kurage deals it -- and this is where
-    /// the player reads it, beside the word it belongs to.
-    ///
-    /// THE PROSE IS COMPRESSED RATHER THAN EXEMPTED. The four older clauses
-    /// used the whole 135-character tip ceiling on their own, so the fifth
-    /// briefly took a named exception in `tools/lint_text_conventions.py`.
-    /// That was the wrong trade and it was reverted: the ceiling is the base
-    /// game's own longest tip (CHANNELING, 134) and THIS tip is read every
-    /// turn, so the sentences were rewritten to carry all five clauses in 134
-    /// characters instead. Nothing was dropped -- "on the Bake-Kurage" is
-    /// still where it is played, "paid now" is still the cost, "lands next
-    /// turn" is still the delay, "on the front enemy" is still the aim, and
-    /// the second sentence is the new rule.
-    ///
-    /// "OR ALL IF IT SAYS SO" IS `EB-329`, AND THE OLD CLAUSE WAS WRONG.
-    /// The aim clause said "on the front enemy" and stopped there, while
-    /// Kurage's Oath -- a starter -- reads "Deal 7 damage to ALL enemies" and
-    /// took two Toadpoles in fight 1 and four Phantasmal Gardeners at the
-    /// first elite of the round-5 act-1 run. This tip is reprinted on every
-    /// battle screen, so it was the most-read wrong sentence in the build.
-    /// The card face is and was correct; the word's definition now defers to
-    /// it, which is the same shape `docs/current/text-conventions.md` already
-    /// states ("a Plan hits the front enemy unless it says ALL").
-    ///
-    /// "COUNTS" REPLACES "RAISES IT" for room, and loses nothing: the clause
-    /// is about WHOSE modifiers are read, and the pair "enemy Vulnerable
-    /// counts; your Weak does not" says that in fewer characters than "raises
-    /// it". "First thing" left for the same reason and is the only thing that
-    /// did -- 144 characters with it, 132 without, against a ceiling of 135.
-    ///
-    /// "ON THE BAKE-KURAGE" IS STILL `EB-293`'s ANSWER, and it is still the
-    /// load-bearing half: a player who has never read the brief has to be able
-    /// to find "play it on the jellyfish" from the card in their hand, which is
-    /// the slice's own first acceptance sentence (sec.1). The r2 Opus seat
-    /// could not tell -- "Plan-only cards never say what happens if you play
-    /// them normally... I never risked finding out" -- so a Plan-only row's own
-    /// face also leads with "Play on the Bake-Kurage." (the codegen's
-    /// <c>_plan_only_line</c>), and this definition is why some rows carry that
-    /// line and others do not.
-    ///
-    /// "NEVER A MINION" IS `R250`, round-5 sec.6 pick 1 at its default. The
-    /// front enemy was leftmost alive, full stop, and two round-5 formations
-    /// put a decoy there on purpose -- The Kin's Followers absorbed a Feint
-    /// Plan meant for the Priest, and Queen's Torch Head Amalgam took every
-    /// single-target Plan for a whole fight (round-5 packet sec.2). The
-    /// sixth clause cost room, so "lands next turn on" compressed to "next
-    /// turn:" -- nothing else in the first four clauses moved.
-    ///
-    /// `EB-380` FIXED THAT CLAUSE, WHICH WAS FLAT AND THE RULE IS NOT. "Never
-    /// a Minion" is true of a SINGLE-TARGET Plan only: <see cref="Aim"/>
-    /// <c>.AllEnemies</c> walks <c>HittableEnemies</c> and takes every living
-    /// body, decoys included, and the round-9 act-1 seat watched an
-    /// `Exposed Flank+` Plan land on `Eye With Teeth` while this line said it
-    /// could not. Both halves are now stated, in the order a reader needs
-    /// them: the aim, then the exception the word ALL makes.
-    ///
-    /// AND `STRENGTH` JOINED THE MODIFIER CLAUSE. The clause named Vulnerable
-    /// and Weak and stopped, which reads as a complete list, and the seat
-    /// priced `Kurage's Oath+` face 4 under Vajra at Plan 10 expecting her
-    /// Strength to ride it (r9 run 2, act 1, (c) 5).
-    ///
-    /// `EB-599` REVERSED WHICH SIDE THAT CLAUSE NAMES, and it is a rule change
-    /// rather than a rewording: the Plan line now folds HER Strength at
-    /// writing time (<see cref="KokomiPlan.Hers"/>) and nothing of the
-    /// target's, because a Plan resolves next morning against whatever the
-    /// body wears then. The r22 lane-2 seat paid for a "Plan: Deal 10" that
-    /// arrived as 7 once the Vulnerable it was folding had expired: "the
-    /// committed number moving is the sharpest contradiction in the kit."
-    /// The clause says WHEN each side is read, which is the half the old
-    /// two-item list could not carry.
-    ///
-    /// `EB-623` RETIRED "the morning" FROM THE PRINTED CLAUSE: the enemy's
-    /// Vulnerable "counts next turn", which is the same fact in the base
-    /// game's own timing words and five characters cheaper.
-    ///
-    /// 135 CHARACTERS RENDERED WHEN THAT CLAUSE STILL SAID "morning", at the
-    /// ceiling and not over it: "the front
-    /// enemy" compressed to "front non-Minion" and "or ALL if it says so"
-    /// to "or ALL", which is what paid for the two new facts. The
-    /// all-Minions board is the one corner left unsaid -- `FrontTarget`
-    /// falls back to the leftmost body when every enemy is a Minion -- and it
-    /// is a board on which the compressed clause and the full one aim at the
-    /// same creature.
-    ///
-    /// `EB-538` TOOK IT OVER THE CEILING, and it is <see cref="ForSetOff"/>'s
-    /// overage for <see cref="ForSetOff"/>'s reason. THE FIND (Kokomi r19 lane
-    /// 2): Skittish gave no Block to a body hit by Oath's and Ambush's
-    /// carry-outs and then 6 Block to a plain Strike on the same enemy in the
-    /// same fight, and the seat could not tell "a defect or a large
-    /// undocumented advantage of planning into blockers". It is the second: a
-    /// carry-out goes out through <see cref="ElementalHit.Deal"/>, which
-    /// reaches <c>CreatureCmd.Damage</c> as <c>ValueProp.Unpowered</c> with
-    /// <c>dealer: null</c>, so a power keyed on being HIT has neither an
-    /// attacker nor a powered hit to answer.
-    ///
-    /// SET OFF'S SENTENCE, WORD FOR WORD ("no when-hit power fires"), because
-    /// it is the same rule at the same call one kit over and `EB-490` already
-    /// paid for the wording: "when-hit power" is what a player calls the thing
-    /// on the enemy's status bar, and "Attack trigger" reads as something on
-    /// the player's own side of the board. Nothing above it is droppable --
-    /// every clause there is a seat's finding -- so the tip is carried in
-    /// `tools/lint_text_conventions.py` as a named exception with its reason,
-    /// which is the bargain `SetOffKey` already makes.
-    ///
-    /// `EB-330` / `EB-563` / `EB-411`: THE THREE FACTS THE PAGE CARRIED AND
-    /// THE WORD DID NOT, added in ONE rewrite, because the tip had no room for
-    /// any of them separately and three separate trims would have been three
-    /// separate arguments about which finding to drop.
-    ///
-    /// "ANY NUMBER WAIT, IN ORDER, AND THE BADGE IS THEIR COUNT" is `EB-563`
-    /// and `EB-330`, which are one sentence and were filed as two. The r4c
-    /// seats read `Plan 1` as a CAPACITY -- the old tip printed "Carries out N
-    /// Plans" and nothing said N was a tally -- and the r20 lane-2 seat wrote
-    /// one Plan at a time for four fights on the same reading.
-    /// <see cref="KokomiPlan"/> holds no cap on an unconfigured build; the
-    /// page has said so since `EB-648`
-    /// (`blindplay_notes.PLAN_COUNT_NOTE`) and this is its twin on the word.
-    /// "Any number" is the no-limit half and "their count" is the badge half,
-    /// in that order, because a reader who has already misread the badge needs
-    /// the rule before the gloss.
-    ///
-    /// "INTO BLOCK STILL STANDING" IS `EB-411`, the twin of
-    /// `blindplay_notes.PLAN_BLOCK_NOTE` ("lands in whatever Block the enemy
-    /// is still standing in from its own turn"). The morning resolves before
-    /// the player has played a card and an enemy's Block falls at ITS turn
-    /// start, so a Plating 8 Sewer Clam ate a whole Plan and no surface in the
-    /// game said it would (Kokomi r10 run 2 (c) 4). It sits on the AIM clause
-    /// rather than in a sentence of its own because it is a fact about where
-    /// the carry-out lands, which is what that clause is already about.
-    ///
-    /// WHAT THE REWRITE PAID WITH, and it dropped no finding: "folds in as you
-    /// write it" lost its "in", and the rest of the overage is carried on
-    /// `PlanKey`'s existing named exception in
-    /// `tools/lint_text_conventions.py`, whose reason now names all six
-    /// findings. That is the bargain `SetOffKey` and `BombKey` already make,
-    /// and it is `EB-330`'s "a clause must go" answered the other way round:
-    /// no clause here is droppable, because every one of them is a seat that
-    /// read the board wrong without it.
+    /// NO "INSTEAD", on the coordinator's follow-up: a Plan-only row has no
+    /// normal play to be instead of (the r2 seat's finding, `EB-293`), and
+    /// "carried out" is the kit's own verb for a Plan where "goes off" is the
+    /// Bomb's.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "On the [gold]Bake-Kurage[/gold], paid now; any number wait, in "
-          + "order, and the badge is their count. Next turn: front "
-          + "non-[gold]Minion[/gold], or ALL, [gold]Minions[/gold] too, into "
-          + "[gold]Block[/gold] still standing. "
-          + "Your [gold]Strength[/gold] folds as you write it; the "
-          + "enemy's [gold]Vulnerable[/gold] counts next turn. A "
-          + "carry-out is not a hit: no when-hit power fires.");
+            "Play the card on the [gold]Bake-Kurage[/gold] and this happens "
+          + "at the start of your next turn. Plans are carried out in the "
+          + "order you made them.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about
@@ -838,9 +704,9 @@ public static class ArmKeywordTips
     /// her next one.
     ///
     /// A WORD OF ITS OWN RATHER THAN A CLAUSE ON <see cref="ForPlan"/>, for
-    /// two reasons and either would do. The Plan tip is AT its 135-character
-    /// ceiling and carries five seats' findings, so a sixth clause would have
-    /// to displace one of them -- the trade `EB-334` already refused once. And
+    /// two reasons and either would do. The Plan tip was at its 135-character
+    /// ceiling when this word was added, and since the 2026-09-25 text pass
+    /// this tip is the ONE place the Dusk timing is stated. And
     /// the two rows that print the word print it in place of "Plan:", so the
     /// player meets `Dusk` where a definition can sit beside it.
     ///

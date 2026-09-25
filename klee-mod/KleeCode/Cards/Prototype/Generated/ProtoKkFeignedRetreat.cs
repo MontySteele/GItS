@@ -45,7 +45,7 @@ public sealed class ProtoKkFeignedRetreat : CustomCardModel, ICharacterCard, IPl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feigned Retreat"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage. If you lost no HP since you wrote this, deal {PlanUnhurtDamage:diff()} instead."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage, or {PlanUnhurtDamage:diff()} if you lost no HP since playing this."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -150,7 +150,7 @@ def test_jeans_printed_condition_is_its_own(arms):
 def test_kaeyas_printed_condition_is_the_rule_the_engine_has(arms):
     face = _row(KAEYA)["description"]
 
-    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
             "[gold]Set off[/gold] card.") in face
     assert "counts nothing as having gone off" not in face
 

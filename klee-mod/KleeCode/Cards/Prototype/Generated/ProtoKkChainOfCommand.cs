@@ -51,7 +51,7 @@ public sealed class ProtoKkChainOfCommand : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain of Command"),
-        ("description", "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage for each [gold]Companion[/gold] you played last turn."),
+        ("description", "Deal 3 damage for each [gold]Companion[/gold] you played this turn. [gold]Plan[/gold]: Deal {PlanDamage:diff()} damage for each Companion you play this turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

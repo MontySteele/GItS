@@ -235,6 +235,38 @@ public class KokomiPoolPassThreeTests
     }
 
     [Fact]
+    public void Battle_plans_bonus_rides_two_attacks_in_one_turn()
+    {
+        // THE 2026-09-25 TEXT PASS checked the ruled face (PR #649, "Plan:
+        // Next turn, your Attacks deal 3 additional damage.") against the
+        // code. The carry-out applies the shipped Attack Up window, which
+        // pays EVERY Attack of the turn and not only the first: it has no
+        // `AfterCardPlayed` of its own, so an Attack does not spend it, and
+        // it leaves at the end of the player's turn. Sim twin:
+        // `test_kokomi_plan.test_r276_battle_plan_raises_every_attack_this_turn`.
+        var clause = Assert.Single(new ProtoKkBattlePlan().PlanClauses);
+        var kokomi = Seat.Kokomi()
+            .WithPower<AttackUpThisTurnPower>(clause.Amount);
+        var enemy = Seat.Klee(30).Creature;
+        var move = MegaCrit.Sts2.Core.ValueProps.ValueProp.Move;
+
+        Assert.Equal(4m + 3m, HitOrder.Compose(
+            kokomi.Creature, enemy, 4m, move, new global::KleeMod.Cards.Kaboom()));
+        Assert.Equal(4m + 3m, HitOrder.Compose(
+            kokomi.Creature, enemy, 4m, move, new global::KleeMod.Cards.Kaboom()));
+
+        // DECLARED, not inherited: `PowerModel` gives every power the hook,
+        // so the question is whether THIS class overrides it, and it does
+        // not -- nothing spends the bonus on the first Attack.
+        var spend = typeof(AttackUpThisTurnPower)
+            .GetMethod("AfterCardPlayed", All);
+        Assert.NotEqual(typeof(AttackUpThisTurnPower), spend?.DeclaringType);
+        Assert.Contains("PowerCmd.Remove",
+                        Il.Calls(typeof(AttackUpThisTurnPower)
+                            .GetMethod("AfterSideTurnEnd", All)!));
+    }
+
+    [Fact]
     public void The_new_kind_is_the_one_the_codegen_maps()
     {
         // `gen_klee_cards.PLAN_CLAUSE_KINDS` maps the sheet's spelling onto

@@ -45,7 +45,7 @@ public sealed class ProtoKkTideWall : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tide Wall"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain [gold]Block[/gold] equal to the damage the enemy intends to deal{IfUpgraded:show:, plus 3|}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: Gain [gold]Block[/gold] equal to the damage the enemy intends next turn{IfUpgraded:show:, plus 3|}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

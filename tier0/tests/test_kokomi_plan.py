@@ -2106,9 +2106,9 @@ def test_a_damageless_follower_is_unchanged_and_the_face_says_so(overhaul):
                                        cid="proto_kk_coral_bulwark"))
     kokomi_plan.resolve_all(st)
     assert st.player.block == 8
+    # THE 2026-09-25 TEXT PASS: the clause still names what it doubles.
     assert _faces()["proto_kk_opening_gambit"].endswith(
-        "Doubles the damage of the next [gold]Plan[/gold] carried out with "
-        "this one.")
+        "The Plan after this one deals double damage.")
 
 
 def test_a_rider_with_no_follower_says_so(overhaul):
@@ -2736,21 +2736,22 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     this one IN THIS DRAIN, and a face that did not say so read as a promise
     about the whole fight."""
     faces = _faces()
+    # THE 2026-09-25 TEXT PASS retired "carried out with this one", the
+    # census's example of undefined jargon. "The Plan after this one" is the
+    # same window in plain words on all three rider faces -- the next entry in
+    # the drain, and the entries behind this one in it -- where "your next
+    # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`).
     assert faces["proto_kk_second_wave"] == (
-        "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The next "
-        "[gold]Plan[/gold] carried out with this one is carried out twice.")
-    # `EB-687` moved the verb to the front so the clause names WHAT it
-    # doubles; the window itself -- "the next ... carried out with this one"
-    # -- is the half this pin is about and is unchanged.
+        "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: The Plan after this "
+        "one is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
-        "Doubles the damage of the next [gold]Plan[/gold] carried out with "
-        "this one.")
+        "The Plan after this one deals double damage.")
     # R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a window
-    # on the drain again, and "later" is the position rule printed -- the one
-    # word a seat needs to read the ordering decision off the face.
+    # on the drain again, and "after this one" is the position rule printed.
     assert faces["proto_kk_scout_ahead"].endswith(
-        "Draw 1 card for each later [gold]Plan[/gold] carried out with this "
-        "one.")
+        "Draw 1 card for each Plan after this one.")
+    for face in faces.values():
+        assert "carried out with this one" not in face
 
 
 def test_ebb_tide_is_off_the_sheet_and_out_of_the_pool(overhaul):

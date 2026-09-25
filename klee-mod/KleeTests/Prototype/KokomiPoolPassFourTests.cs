@@ -73,10 +73,9 @@ public class KokomiPoolPassFourTests
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.DrawPerPlanAfter, clause.Kind);
         Assert.Equal(1, clause.Amount);
-        Assert.EndsWith(
-            "Draw 1 card for each later [gold]Plan[/gold] carried out with "
-            + "this one.",
-            Face(card));
+        // The 2026-09-25 text pass: "after this one" is the position rule.
+        Assert.EndsWith("Draw 1 card for each Plan after this one.",
+                        Face(card));
     }
 
     [Fact]

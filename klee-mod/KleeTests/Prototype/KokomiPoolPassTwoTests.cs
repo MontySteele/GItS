@@ -120,11 +120,16 @@ public class KokomiPoolPassTwoTests
         // promise about the next Plan whatever that Plan was. The verb moved
         // to the front, so the object -- damage -- is on the card before the
         // energy is spent, and a Plan that deals none has nothing to double.
+        //
+        // THE 2026-09-25 TEXT PASS reworded it to "The Plan after this one
+        // deals double damage." -- the object is still DAMAGE, named on the
+        // card; "carried out with this one" (the census's undefined-jargon
+        // example) is gone; and "after this one" keeps `EB-645`'s window
+        // where "your next Plan" would have read as the next one WRITTEN.
         var face = Face(new ProtoKkOpeningGambit());
-        Assert.Contains(
-            "Doubles the damage of the next [gold]Plan[/gold] carried out "
-            + "with this one.", face);
-        Assert.DoesNotContain("deals double damage", face);
+        Assert.EndsWith("The Plan after this one deals double damage.", face);
+        Assert.DoesNotContain("next Plan", face);
+        Assert.DoesNotContain("carried out with this one", face);
     }
 
     [Fact]
@@ -550,24 +555,23 @@ public class KokomiPoolPassTwoTests
         // spent by the entry carried out immediately after it IN THE SAME
         // DRAIN. The faces now say which drain. Twin:
         // `test_the_three_rider_faces_print_the_window_the_rider_lives_in`.
+        //
+        // THE 2026-09-25 TEXT PASS retired "carried out with this one", the
+        // census's example of undefined jargon. "The Plan after this one"
+        // names the same window in plain words on all three rider faces --
+        // "your next Plan" was ambiguous between the next carried out and the
+        // next written (`EB-687`, `EB-645`).
         Assert.Equal(
             "Gain {Block:diff()} [gold]Block[/gold]. [gold]Plan[/gold]: The "
-          + "next [gold]Plan[/gold] carried out with this one is carried out "
-          + "twice.",
+          + "Plan after this one is carried out twice.",
             Face(new ProtoKkSecondWave()));
-        // `EB-687` moved the verb to the front so the clause names WHAT it
-        // doubles; the window -- "the next ... carried out with this one" --
-        // is the half this pin is about and is unchanged.
-        Assert.EndsWith(
-            "Doubles the damage of the next [gold]Plan[/gold] carried out "
-          + "with this one.",
-            Face(new ProtoKkOpeningGambit()));
+        Assert.EndsWith("The Plan after this one deals double damage.",
+                        Face(new ProtoKkOpeningGambit()));
         // R267 pick 3 PUT SCOUT AHEAD BACK IN THIS FAMILY: its count is a
-        // window on the drain again, and "later" is the position rule printed.
-        Assert.EndsWith(
-            "Draw 1 card for each later [gold]Plan[/gold] carried out with "
-          + "this one.",
-            Face(new ProtoKkScoutAhead()));
+        // window on the drain again, and "after this one" is the position
+        // rule printed.
+        Assert.EndsWith("Draw 1 card for each Plan after this one.",
+                        Face(new ProtoKkScoutAhead()));
     }
 
     [Fact]
@@ -592,23 +596,21 @@ public class KokomiPoolPassTwoTests
     }
 
     [Fact]
-    public void The_plan_badge_says_the_written_number_does_not_move()
+    public void The_plan_badge_says_the_count_and_the_order_and_nothing_else()
     {
-        // `EB-647`. Under Shrink the hand reprinted `Kurage's Oath` as 2 and
-        // the jellyfish carried it out for 7 -- `KokomiPlan.Hers` as ruled,
-        // with nothing printing the rule. It goes on the badge because the
-        // `Plan` keyword tip is at its 135-character ceiling. Page twin:
-        // `blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`.
-        //
-        // `EB-680` TRIMMED THE WORDS AND NOT THE RULE: the Dusk clause was
-        // bought inside the 125-character power ceiling by cutting "on you"
-        // and "the numbers" out of this sentence and "at the start of" out of
-        // the one above it. Both rules still print, on one badge, and the cap
-        // face came back under the ceiling on the same trim.
+        // THE 2026-09-25 TEXT PASS ("the existing text is often very verbose
+        // and unintuitive"). `EB-647`'s written-number rule and `EB-680`'s
+        // Dusk clause left the badge: the Dusk timing is stated once, on the
+        // `Dusk` tip, and the written number is the panel's
+        // (`blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`). What is left is the
+        // count and the order the Plans are carried out in.
         var face = new PendingPlansPower().Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.EndsWith("Later debuffs do not change what you wrote.", face);
-        Assert.Contains("a [gold]Dusk[/gold] Plan at this turn's end", face);
+        Assert.StartsWith(
+            "Carries out [blue]{Amount}[/blue] [gold]Plan{Amount:plural:|s}"
+          + "[/gold] at the start of your next turn, in order.", face);
+        Assert.DoesNotContain("Dusk", face);
+        Assert.DoesNotContain("Later debuffs", face);
     }
 
     [Fact]

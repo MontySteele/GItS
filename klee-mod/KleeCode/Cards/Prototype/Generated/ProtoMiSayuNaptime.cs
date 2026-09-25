@@ -53,7 +53,7 @@ public sealed class ProtoMiSayuNaptime : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sayu — Naptime"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, draw {PowerAmount:diff()} cards if you play no Attacks this turn."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you play no Attacks this turn, draw {PowerAmount:diff()} cards next turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

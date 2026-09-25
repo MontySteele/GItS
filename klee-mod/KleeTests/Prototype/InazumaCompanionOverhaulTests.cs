@@ -428,7 +428,10 @@ public class InazumaCompanionOverhaulTests
     [InlineData(typeof(CrimsonOoyoroiPower), CompanionOverhaulLaw.OoyoroiDamage)]
     [InlineData(typeof(TenguStormcallPower), CompanionOverhaulLaw.StormcallBonus)]
     [InlineData(typeof(SesshouSakuraPower), CompanionOverhaulLaw.SakuraDamage)]
-    [InlineData(typeof(SesshouSakuraPower), CompanionOverhaulLaw.SakuraBonus)]
+    // The 2026-09-25 text pass prints the later Sakura's whole hit (base
+    // plus bonus, which is what `FireVolley` deals) rather than the bonus.
+    [InlineData(typeof(SesshouSakuraPower),
+                CompanionOverhaulLaw.SakuraDamage + CompanionOverhaulLaw.SakuraBonus)]
     [InlineData(typeof(AurousBlazePower), CompanionOverhaulLaw.AurousBlazeDamage)]
     [InlineData(typeof(SoumetsuPower), CompanionOverhaulLaw.SoumetsuDamage)]
     [InlineData(typeof(SoumetsuPower), CompanionOverhaulLaw.SoumetsuFinale)]
@@ -643,7 +646,11 @@ public class InazumaCompanionOverhaulTests
             .Localization!.First(r => r.Item1 == "description").Item2;
 
         Assert.Contains("Deal {CalculatedDamage:diff()} damage.", face);
-        Assert.Contains("made before it this turn", face);
+        // THE 2026-09-25 TEXT PASS put the rate in rule 8's spelling ("Deals
+        // 4 additional damage for each Swirl this turn"); the live total
+        // above is still the number the hit pays.
+        Assert.Contains("additional damage for each [gold]Swirl[/gold] this "
+                      + "turn.", face);
         Assert.DoesNotContain("Deal 6 damage", face);
     }
 }

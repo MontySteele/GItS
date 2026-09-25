@@ -53,7 +53,7 @@ public sealed class ProtoMiYaeSesshouSakura : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yae Miko — Sesshou Sakura"),
-        ("description", "Place a [gold]Sakura[/gold], up to 3. At the end of your turn each deals 4 [gold]Electro[/gold] damage to a random enemy, plus 3 after the first. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Place a [gold]Sakura[/gold], up to 3. At the end of your turn, each deals 4 [gold]Electro[/gold] damage to a random enemy, or 7 after the first. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

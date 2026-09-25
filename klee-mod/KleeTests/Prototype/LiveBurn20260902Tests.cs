@@ -212,14 +212,14 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForPlan", HeadlessGame.All)!));
 
+        // THE 2026-09-25 TEXT PASS kept "instead" off: "Play the card on the
+        // Bake-Kurage and this happens at the start of your next turn." A
+        // plan-only row still leads its own face with "Play on the
+        // Bake-Kurage." (the codegen's `_plan_only_line`). What this pin is
+        // about is unchanged -- the tip says WHERE a Plan card goes, which is
+        // the whole of `EB-293`.
         Assert.DoesNotContain("instead", body);
-        // THE WORDING WAS COMPRESSED BY `EB-334` and the anchor moved with it:
-        // the fifth clause (who deals a Plan's damage) had to fit under the
-        // same 135-character tip ceiling, so "Play this on the Bake-Kurage:"
-        // became "On the Bake-Kurage,". What this pin is about is unchanged --
-        // the tip still says WHERE a Plan card goes, which is the whole of
-        // `EB-293`.
-        Assert.Contains("On the [gold]Bake-Kurage[/gold]", body);
+        Assert.Contains("Play the card on the [gold]Bake-Kurage[/gold]", body);
     }
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------

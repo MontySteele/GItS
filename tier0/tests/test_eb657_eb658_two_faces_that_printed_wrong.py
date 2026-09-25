@@ -49,9 +49,11 @@ def test_feints_face_prints_both_branches_as_folded_vars():
     face = row["description"]
     # `EB-660` added the third sentence: the Plan line this row could always
     # write and never printed. The two folded branch vars are unchanged.
-    assert face == ("Deal {PlainDamage:diff()} damage. If a [gold]Plan[/gold] "
-                    "was carried out this turn, deal {BranchDamage:diff()} "
-                    "damage instead. [gold]Plan[/gold]: Apply 1 "
+    # THE 2026-09-25 TEXT PASS folded the branch into one sentence ("Deal X,
+    # or Y if ..."); both folded vars are still printed.
+    assert face == ("Deal {PlainDamage:diff()} damage, or "
+                    "{BranchDamage:diff()} if a [gold]Plan[/gold] was carried "
+                    "out this turn. [gold]Plan[/gold]: Apply 1 "
                     "[gold]Vulnerable[/gold].")
     # The static swap the seat read is gone from this row entirely.
     assert "{IfUpgraded:show:" not in face

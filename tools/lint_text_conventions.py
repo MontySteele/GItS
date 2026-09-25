@@ -126,35 +126,17 @@ EXCEPTIONS = {
         "2026-09-08 trim ([USER]'s run 2, an E default) took the prose "
         "around those findings off this tip and off the badge together, and "
         "every one of them is still on the word"),
-    "PlanKey": (
-        "`EB-538` added the CLASS a carry-out belongs to, to a tip already at "
-        "135 of 135. Skittish gave no Block to a body hit by two carry-outs "
-        "and 6 Block to a plain Strike on the same enemy in the same fight "
-        "(Kokomi r19 lane 2), and the seat could not tell a defect from a "
-        "large undocumented advantage. The clause is `SetOffKey`'s own "
-        "sentence at the same call one kit over, and every clause above it is "
-        "a seat's finding: the aim, the ALL exception, and whose modifiers a "
-        "carry-out reads (EB-329, R250, EB-380, EB-538). None is droppable to "
-        "make room. `EB-330` / `EB-563` / `EB-411` then added the three facts "
-        "the blind-play page carried and the word did not, in one rewrite: "
-        "that any number of Plans wait in order and the badge is their COUNT "
-        "and not a cap (three r4c seats read `Plan 1` as a capacity and the "
-        "r20 lane-2 seat wrote one Plan at a time for four fights), and that a "
-        "carry-out lands in the Block the enemy is still standing in from its "
-        "own turn (a Plating 8 Sewer Clam ate a whole Plan, Kokomi r10 run 2). "
-        "Six findings on one word, twinned to `PLAN_COUNT_NOTE` and "
-        "`PLAN_BLOCK_NOTE`; the ceiling buys nothing a seat has not already "
-        "paid for by reading the board wrong"),
     "ProtoBakeKuragePower.descriptionCapped": (
         "`EB-653` (Kokomi r24). The cap lane's face, and it exists only under "
         "`GITS_KOKOMI_PLAN_CAP` -- a default build prints the row above it, "
-        "at 124 of 125. Under the lane rule the jellyfish carried out two of "
+        "at 66 of 125 since the 2026-09-25 text pass, and the capped face is "
+        "139. Under the lane rule the jellyfish carried out two of "
         "four written Plans four mornings running and NO SURFACE SAID SO, so "
         "the seat read the rule as a wall for three of the four occurrences "
         "and then reverse-engineered it off the badge. A rule that binds and "
-        "prints nowhere is not a rule a round can read; every clause above it "
-        "is what the jellyfish IS (untargetable, all combat, what a Plan does "
-        "on it) and none is droppable to make room"),
+        "prints nowhere is not a rule a round can read, and the two short "
+        "sentences in front of it are what the jellyfish IS (untargetable, "
+        "holding the Plans until the next turn)"),
     "PendingPlansPower.descriptionCapped": (
         "`EB-777`. The cap lane's Plan badge, and it is on this list because "
         "the lint could not SEE it until now: the badge's own prose carries a "
@@ -166,10 +148,10 @@ EXCEPTIONS = {
         "and it was wrong: the face is 188 of 125. It is carried rather than "
         "rewritten for `ProtoBakeKuragePower.descriptionCapped`'s reason, "
         "word for word -- it prints only under `GITS_KOKOMI_PLAN_CAP`, a "
-        "default build shows the row above it at 118 of 125, and a rule that "
-        "binds and prints nowhere is not a rule a round can read. The prose "
-        "is the kit's, not this lint's, and EB-777 is a tooling row: the "
-        "trim, if one is wanted, is a Kokomi text pass"),
+        "default build shows the row above it, and a rule that binds and "
+        "prints nowhere is not a rule a round can read. The 2026-09-25 Kokomi "
+        "text pass took the default face to 61 of 125 and the capped one to "
+        "134; what is left over is the cap's own sentence"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.

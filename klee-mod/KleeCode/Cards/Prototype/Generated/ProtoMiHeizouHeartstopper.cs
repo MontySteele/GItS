@@ -59,7 +59,7 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shikanoin Heizou — Heartstopper Strike"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Counts 4 for each [gold]Swirl[/gold] made before it this turn. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

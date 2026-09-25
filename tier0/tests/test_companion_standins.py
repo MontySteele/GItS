@@ -405,7 +405,7 @@ def test_kaeyas_face_names_the_rule_grounded_has(arms):
     repo = Path(__file__).resolve().parents[2]
     sheet = (repo / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
             "[gold]Set off[/gold] card." in sheet)
     assert "counts nothing as having gone off" not in sheet
     assert "counts a Bomb as on the field" not in sheet
@@ -414,7 +414,7 @@ def test_kaeyas_face_names_the_rule_grounded_has(arms):
     card = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
             / "Generated" / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
         encoding="utf-8")
-    assert ("Next turn, [gold]Grounded[/gold] pays even if you played a "
+    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
             "[gold]Set off[/gold] card." in card)
 
 
