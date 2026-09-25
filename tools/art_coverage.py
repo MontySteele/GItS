@@ -112,41 +112,11 @@ CARD_DIRS = tuple(dict.fromkeys(outdir for _p, outdir, _l in SHEETS))
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
-    "proto_ko_catalytic_converter": (
-        "R276 (2026-09-23) CUT Catalytic Converter from the Klee overhaul pool (PR #642). "
-        "Kept: a painted, cleared Klee-out-path asset, a candidate for the "
-        "thirty expansion rows' art pass (PR #646). NOT coverage."),
-    "proto_ko_explosives_workshop": (
-        "R276 (2026-09-23) CUT Explosives Workshop from the Klee overhaul pool (PR #642). "
-        "Kept: a painted, cleared Klee-out-path asset, a candidate for the "
-        "thirty expansion rows' art pass (PR #646). NOT coverage."),
-    "proto_ko_kindling": (
-        "R276 (2026-09-23) CUT Kindling from the Klee overhaul pool (PR #642). "
-        "Kept: a painted, cleared Klee-out-path asset, a candidate for the "
-        "thirty expansion rows' art pass (PR #646). NOT coverage."),
-    "proto_ko_long_fuse": (
-        "R276 (2026-09-23) CUT Long Fuse from the Klee overhaul pool (PR #642). "
-        "Kept: a painted, cleared Klee-out-path asset, a candidate for the "
-        "thirty expansion rows' art pass (PR #646). NOT coverage."),
-    "proto_ko_sugar_rush": (
-        "R276 (2026-09-23) CUT Sugar Rush from the Klee overhaul pool (PR #642). "
-        "Kept: a painted, cleared Klee-out-path asset, a candidate for the "
-        "thirty expansion rows' art pass (PR #646). NOT coverage."),
-    "proto_pearl_barrage_turn": (
-        "R276 (2026-09-23) DELETED the dead row with its art rows and "
-        "provenance (PR #643). The local crop is residue a deploy does not "
-        "pack; safe to delete by hand. NOT coverage."),
-    "proto_ko_fwoosh": (
-        "R271 (2026-09-14) CUT Fwoosh! from the Klee overhaul pool (EB-749): "
-        "Pocket Match is the same card at 5 with Retain. Kept rather than "
-        "deleted as the rows below are: a painted Klee-out-path asset on disk "
-        "for a future Klee Common. It is NOT coverage for anything."),
-    "proto_ko_powder_charge": (
-        "R271 (2026-09-14) redesigned Powder Charge as Booby Trap "
-        "(proto_ko_booby_trap, EB-749), a new id on the art bill. Kept: the "
-        "painting is a placed charge and is the natural candidate when Booby "
-        "Trap's art pass runs (art_of or a re-fetch, the pass decides). It is "
-        "NOT coverage for anything."),
+    # RETIRED 2026-09-24 (blank-portrait pass): the seven spare Klee paintings
+    # kept here for the cut cards now wear new card ids with the same source
+    # and crop (art/plan.tsv -- aftershock, dodoco, half_a_mountain,
+    # party_poppers, patience_klee, spinning_sparkler, tag_along), and the
+    # stale files plus proto_pearl_barrage_turn.png were deleted by hand.
     "proto_kk_the_moon_overlooks_the_waters": (
         "EB-570 (2026-09-05) WITHDREW The Moon Overlooks the Waters from the "
         "Kokomi arm: the doctrine audit returned REQUIRES_MODIFICATION on C1 "

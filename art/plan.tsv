@@ -1510,15 +1510,16 @@ proto_ko_jumpy_dumpty	ImageGen/images/cards/klee/proto_ko_jumpy_dumpty.png	500	3
 proto_ko_fish_flavored_bait	ImageGen/images/cards/klee/proto_ko_fish_flavored_bait.png	500	380	contain	center	shortlist	1	png	Item Fish-Flavored Toast.png		item	
 proto_ko_pocket_fireworks	ImageGen/images/cards/klee/proto_ko_pocket_fireworks.png	500	380	contain	center	shortlist	1	png	Item Fizzy Fireworks.png		item	
 proto_ko_chain_fuse	ImageGen/images/cards/klee/proto_ko_chain_fuse.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 3.png		splash	
-proto_ko_explosives_workshop	ImageGen/images/cards/klee/proto_ko_explosives_workshop.png	500	380	cover	center	shortlist	1	png	Namecard Background Klee Explosive.png		splash	
+# proto_ko_aftershock <- proto_ko_explosives_workshop (spare): the Klee Explosive namecard's faded blast: the after-image a second Bomb rises from. The spare painted for the cut Explosives Workshop, reused as painted
+proto_ko_aftershock	ImageGen/images/cards/klee/proto_ko_aftershock.png	500	380	cover	center	shortlist	1	png	Namecard Background Klee Explosive.png		splash	
 proto_ko_careful_arrangement	ImageGen/images/cards/klee/proto_ko_careful_arrangement.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 4.png		splash	
 proto_ko_big_badda_boom	ImageGen/images/cards/klee/proto_ko_big_badda_boom.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Klee Wish.png		splash	
 proto_ko_the_big_one	ImageGen/images/cards/klee/proto_ko_the_big_one.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 8.png		splash	
 # proto_ko_alices_recipe <- alchemical_curiosity: a written alchemy note -- Alice's Recipe is a formula on paper
 proto_ko_alices_recipe	ImageGen/images/cards/klee/proto_ko_alices_recipe.png	500	380	contain	center	shortlist	1	png	Item Naganohara Fireworks Note.png		item	
 proto_ko_mine_toss	ImageGen/images/cards/klee/proto_ko_mine_toss.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item	
-# proto_ko_fwoosh <- tail_of_flame: a firework streak, which is what a Fwoosh looks like
-proto_ko_fwoosh	ImageGen/images/cards/klee/proto_ko_fwoosh.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 9.png		splash	
+# proto_ko_spinning_sparkler <- proto_ko_fwoosh (spare): a sky of streaking, wheeling fireworks: the sparkler spun twice. The spare painted for the cut Fwoosh!, reused as painted
+proto_ko_spinning_sparkler	ImageGen/images/cards/klee/proto_ko_spinning_sparkler.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 9.png		splash	
 # proto_ko_tinder_toss <- combustion_study: the thrown explosive charge itself
 proto_ko_tinder_toss	ImageGen/images/cards/klee/proto_ko_tinder_toss.png	500	380	contain	center	shortlist	1	png	Item Klee Explosive.png		item	
 proto_ko_quick_fuse	ImageGen/images/cards/klee/proto_ko_quick_fuse.png	500	380	contain	center	shortlist	1	png	Item Special Jumpy Dumpty Dodoco.png		item	
@@ -1530,12 +1531,15 @@ proto_ko_sparks_n_splash	ImageGen/images/cards/klee/proto_ko_sparks_n_splash.png
 proto_ko_sizzle	ImageGen/images/cards/klee/proto_ko_sizzle.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Dodo Stove.png		item	
 proto_ko_perfect_timing	ImageGen/images/cards/klee/proto_ko_perfect_timing.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 3.png		sticker	
 proto_ko_flame_dance	ImageGen/images/cards/klee/proto_ko_flame_dance.png	500	380	contain	center	shortlist	1	png	Item Fireworks Dance Amidst a Snowy Sky.png		item	
-proto_ko_catalytic_converter	ImageGen/images/cards/klee/proto_ko_catalytic_converter.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item	
+# proto_ko_dodoco <- proto_ko_catalytic_converter (spare): Dodoco himself, in his magician's hat -- the friend who plants a Mine every turn. The spare painted for the cut Catalytic Converter, reused as painted
+proto_ko_dodoco	ImageGen/images/cards/klee/proto_ko_dodoco.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Marvelous Magic.png		item	
 proto_ko_ammo_scavenging	ImageGen/images/cards/klee/proto_ko_ammo_scavenging.png	500	380	contain	center	shortlist	1	png	Item Dodoco's Travel Bag.png		item	
-proto_ko_powder_charge	ImageGen/images/cards/klee/proto_ko_powder_charge.png	500	380	cover	y0.44	shortlist	1	png	Klee Portrait.png		splash	
+# proto_ko_tag_along <- proto_ko_powder_charge (spare): Klee on the move with Dodoco riding her backpack: the friend who tags along. The spare painted for Powder Charge (now Booby Trap), reused as painted
+proto_ko_tag_along	ImageGen/images/cards/klee/proto_ko_tag_along.png	500	380	cover	y0.44	shortlist	1	png	Klee Portrait.png		splash	
 # proto_ko_dig_in <- hold_the_line: the statue that holds its ground; Dig In is the overhaul's basic Block
 proto_ko_dig_in	ImageGen/images/cards/klee/proto_ko_dig_in.png	500	380	cover	y0.45	shortlist	1	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash	
-proto_ko_sugar_rush	ImageGen/images/cards/klee/proto_ko_sugar_rush.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		sticker	
+# proto_ko_patience_klee <- proto_ko_sugar_rush (spare): teary, pouting Klee, told to wait: Patience, Klee! The spare painted for the cut Sugar Rush, reused as painted
+proto_ko_patience_klee	ImageGen/images/cards/klee/proto_ko_patience_klee.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sparkling Steps 2021-06-09 - Klee Emoji 1.png		sticker	
 proto_ko_run_away	ImageGen/images/cards/klee/proto_ko_run_away.png	500	380	cover	center	shortlist	1	png	Icon Emoji Paimon's Paintings 46 Klee 1.png		sticker	
 # proto_ko_grounded <- hide_and_seek: Klee tucked into a corner; Grounded is the confinement Power
 proto_ko_grounded	ImageGen/images/cards/klee/proto_ko_grounded.png	500	380	cover	center	shortlist	1	png	Namecard Background Celebration Peekaboo!.png		splash	
@@ -1724,10 +1728,10 @@ proto_ko_countdown	ImageGen/images/cards/klee/proto_ko_countdown.png	500	380	con
 proto_ko_dodoco_cover	ImageGen/images/cards/klee/proto_ko_dodoco_cover.png	500	380	contain	center	shortlist	1	png	Item Imaginary Friend Dodoco.png		item	
 # proto_ko_flash_point <- the birthday illustration's burst of light
 proto_ko_flash_point	ImageGen/images/cards/klee/proto_ko_flash_point.png	500	380	cover	center	shortlist	1	png	Klee Birthday 2023.png		splash	
-# proto_ko_kindling <- the small, slow firework: kindling rather than the blast
-proto_ko_kindling	ImageGen/images/cards/klee/proto_ko_kindling.png	500	380	contain	center	shortlist	1	png	Item Leisurely Fireworks.png		item	
-# proto_ko_long_fuse <- the oversized firework that takes its time
-proto_ko_long_fuse	ImageGen/images/cards/klee/proto_ko_long_fuse.png	500	380	contain	center	shortlist	1	png	Item Supersized Firework.png		item	
+# proto_ko_party_poppers <- proto_ko_kindling (spare): the little red firecracker tube: a party popper, set off whenever a Spark card is played. The spare painted for the cut Kindling, reused as painted
+proto_ko_party_poppers	ImageGen/images/cards/klee/proto_ko_party_poppers.png	500	380	contain	center	shortlist	1	png	Item Leisurely Fireworks.png		item	
+# proto_ko_half_a_mountain <- proto_ko_long_fuse (spare): the Supersized Firework: the largest Bomb, doubled. The spare painted for the cut Long Fuse, reused as painted
+proto_ko_half_a_mountain	ImageGen/images/cards/klee/proto_ko_half_a_mountain.png	500	380	contain	center	shortlist	1	png	Item Supersized Firework.png		item	
 # proto_ko_once_more <- a second shell going up over the first
 proto_ko_once_more	ImageGen/images/cards/klee/proto_ko_once_more.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 2.png		splash	
 # proto_ko_pocket_match <- the struck light; Pocket Match is R271's Fwoosh at 5 with Retain
@@ -1808,7 +1812,7 @@ proto_ko_coven_errand	ImageGen/images/cards/klee/proto_ko_coven_errand.png	500	3
 # proto_ko_witches_circle <- the Hexerei themselves: the circle of witches
 proto_ko_witches_circle	ImageGen/images/cards/klee/proto_ko_witches_circle.png	500	380	contain	center	shortlist	1	png	Hexerei.png		sticker	
 # proto_ko_alices_introduction_magic <- Alice herself; the card is named for her
-proto_ko_alices_introduction_magic	ImageGen/images/cards/klee/proto_ko_alices_introduction_magic.png	500	380	cover	top	shortlist	1	png	Alice.png		splash	
+proto_ko_alices_introduction_magic	ImageGen/images/cards/klee/proto_ko_alices_introduction_magic.png	500	380	cover	top	shortlist	1	png	Alice.png		splash	alice
 # Kokomi: the two bulwarks.
 # proto_kk_shell_guard <- the Tamakushi Casket, the summon the card's own text names
 proto_kk_shell_guard	ImageGen/images/cards/kokomi/proto_kk_shell_guard.png	500	380	cover	top	shortlist	1	png	Tamakushi Casket Equipment Card.png		tcg	kokomi_pool
@@ -1880,6 +1884,103 @@ proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png
 proto_fs_bis	ImageGen/images/cards/furina/proto_fs_bis.png	500	380	cover	top	shortlist	1	png	Furina Card 2.png		tcg	
 # proto_fs_final_bow <- the Starlit Letter wallpaper: the last look, house lights down
 proto_fs_final_bow	ImageGen/images/cards/furina/proto_fs_final_bow.png	500	380	cover	center	shortlist	1	png	Starlit Letter Wallpaper Furina.png		splash	
+# ---------- Blank-portrait pass 2026-09-24: every prototype card gets a face ----------
+# art_coverage listed 49 prototype cards with no portrait (KleeArt.CardPortrait
+# returned Blank()). Seven Klee rows above wear the spares painted for cut cards
+# (renamed in place, source and crop unchanged). The rows below are the rest.
+# Same law as the blocks above: blank source_group = strict L1 inside the
+# prototype partition, and a row that shares a source with a SHIPPED card takes a
+# different crop wherever the source allows one. Two groups are new, each a
+# pair of prototype rows on one painting at clearly different crops (L7):
+# 'alice' (Alice's Detonator is a close crop of Alice's Introduction Magic's
+# picture) and 'klee_birthday_2020_2' (Big Bounce is Klee's leap, Explosive
+# Frags the blasts in the water below her).
+# -- Klee overhaul --
+# proto_ko_adventure_club <- best_friends_forever: Klee and a friend setting off by boat -- the club's adventure
+proto_ko_adventure_club	ImageGen/images/cards/klee/proto_ko_adventure_club.png	500	380	cover	x0.62	shortlist	1	png	Let's Go Dodoco! Illustration 1.png		splash	
+# proto_ko_alices_detonator <- alices_introduction_magic: Alice close up, handing over her note -- the card is named for her
+proto_ko_alices_detonator	ImageGen/images/cards/klee/proto_ko_alices_detonator.png	500	380	cover	x0.55,y0.32@1.7	shortlist	1	png	Alice.png		splash	alice
+# proto_ko_big_bounce <- skip_and_hop: Klee in mid-leap over the lake, bombs bouncing round her
+proto_ko_big_bounce	ImageGen/images/cards/klee/proto_ko_big_bounce.png	500	380	cover	x0.58,y0.45@1.4	shortlist	1	png	Klee Birthday 2020 2.png		splash	klee_birthday_2020_2
+# proto_ko_boom_badge <- patched_dress: Klee's own card-face, worn like a badge
+proto_ko_boom_badge	ImageGen/images/cards/klee/proto_ko_boom_badge.png	500	380	contain	center	shortlist	1	png	Klee Item.png		item	
+# proto_ko_come_back_and_play <- da_da_da: Klee calling through a megaphone for her friends to come back
+proto_ko_come_back_and_play	ImageGen/images/cards/klee/proto_ko_come_back_and_play.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 1.png		sticker	
+# proto_ko_duck_and_run <- duck_and_cover: Klee bolting with a bomb on her back; the shipped Duck and Cover's own sticker
+proto_ko_duck_and_run	ImageGen/images/cards/klee/proto_ko_duck_and_run.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 2.png		sticker	
+# proto_ko_explosive_frags <- skip_and_hop: the blasts in the lake below big_bounce's leap -- spray and splinters flying
+proto_ko_explosive_frags	ImageGen/images/cards/klee/proto_ko_explosive_frags.png	500	380	cover	x0.15,y0.55@1.5	shortlist	1	png	Klee Birthday 2020 2.png		splash	klee_birthday_2020_2
+# proto_ko_favonius_escort <- NEW: Amber, Outrider of the Knights of Favonius, with Klee in hand -- the escort
+proto_ko_favonius_escort	ImageGen/images/cards/klee/proto_ko_favonius_escort.png	500	380	cover	x0.55,y0.52@1.2	shortlist	1	png	Klee Birthday 2023 - Shorts.png		splash	
+# proto_ko_fireworks_finale <- controlled_demolition: a whole sky of bursts at once
+proto_ko_fireworks_finale	ImageGen/images/cards/klee/proto_ko_fireworks_finale.png	500	380	cover	y0.40	shortlist	1	png	Starlit Sky Firework Card 6.png		splash	
+# proto_ko_fish_fry <- jumpy_dumpty_mk2: a Jumpy Dumpty lands in the water and a fish comes flying out
+proto_ko_fish_fry	ImageGen/images/cards/klee/proto_ko_fish_fry.png	500	380	cover	x0.60	shortlist	1	png	JTP Encounter Jumpy Dumpty.png		splash	
+# proto_ko_friendship_bracelet <- hot_hands: Klee holding out a gift in both hands, Dodocos round her
+proto_ko_friendship_bracelet	ImageGen/images/cards/klee/proto_ko_friendship_bracelet.png	500	380	cover	x0.55,y0.42@1.3	shortlist	1	png	Klee Birthday 2020.png		splash	
+# proto_ko_hair_trigger <- NEW: Klee startled, mouth open -- jumpy
+proto_ko_hair_trigger	ImageGen/images/cards/klee/proto_ko_hair_trigger.png	500	380	cover	y0.50	shortlist	1	png	Klee Expression 3.png		sticker	
+# proto_ko_hiding_spot <- elemental_ecstasy: Klee curled up asleep with Dodoco, tucked out of sight
+proto_ko_hiding_spot	ImageGen/images/cards/klee/proto_ko_hiding_spot.png	500	380	cover	x0.35,y0.40@1.2	shortlist	1	png	Klee Birthday 2025.png		splash	
+# proto_ko_jumpy_dumpty_mk_iii <- spooked: Klee leaping with Jumpy Dumpties flying round her
+proto_ko_jumpy_dumpty_mk_iii	ImageGen/images/cards/klee/proto_ko_jumpy_dumpty_mk_iii.png	500	380	cover	x0.35,y0.45@1.3	shortlist	1	png	App Store Event Character Wallpaper Klee Version 3.8.png		splash	
+# proto_ko_look_out <- snap: Klee pointing -- look out!
+proto_ko_look_out	ImageGen/images/cards/klee/proto_ko_look_out.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 25 Klee 1.png		sticker	
+# proto_ko_mine_all_mine <- gleeful_barrage: Klee with her arms flung wide -- all mine
+proto_ko_mine_all_mine	ImageGen/images/cards/klee/proto_ko_mine_all_mine.png	500	380	cover	x0.50,y0.35@1.25	shortlist	1	png	Klee Birthday 2024.png		splash	
+# proto_ko_one_more_charge <- no_holding_back: Klee's arm up for one more throw
+proto_ko_one_more_charge	ImageGen/images/cards/klee/proto_ko_one_more_charge.png	500	380	cover	y0.30	shortlist	1	png	Klee Multi Wish.png		splash	
+# proto_ko_playdate <- smoke_and_sparks: a beach day with balloons and a slime
+proto_ko_playdate	ImageGen/images/cards/klee/proto_ko_playdate.png	500	380	cover	x0.45,y0.50@1.2	shortlist	1	png	Klee Shorts 2023-06-12.png		splash	
+# proto_ko_second_surprise <- NEW: Klee springing out of a pop-up book -- the surprise inside the surprise
+proto_ko_second_surprise	ImageGen/images/cards/klee/proto_ko_second_surprise.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Klee Blossoming Starlight Full Wish.png		splash	
+# proto_ko_secret_base <- cant_catch_me: Klee in her den of letters, crabs and Dodocos
+proto_ko_secret_base	ImageGen/images/cards/klee/proto_ko_secret_base.png	500	380	cover	x0.40,y0.45@1.3	shortlist	1	png	Klee Birthday 2021.png		splash	
+# proto_ko_sit_tight <- dodge_roll: Klee sitting out the rain under her own little cloud
+proto_ko_sit_tight	ImageGen/images/cards/klee/proto_ko_sit_tight.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 07 Klee 4.png		sticker	
+# proto_ko_spark_knight <- true_spark_knight: the Spark Knight's own golden card, a lower crop
+proto_ko_spark_knight	ImageGen/images/cards/klee/proto_ko_spark_knight.png	500	380	cover	y0.26	shortlist	1	png	Klee Character Card Golden.png		tcg	
+# proto_ko_team_effort <- borrowed_brilliance: Klee walking arm in arm with her friends
+proto_ko_team_effort	ImageGen/images/cards/klee/proto_ko_team_effort.png	500	380	cover	center	shortlist	1	png	Let's Go Dodoco! Illustration 4.png		splash	
+# proto_ko_treasure_map <- NEW: Klee skipping past a signpost marked with a treasure chest
+proto_ko_treasure_map	ImageGen/images/cards/klee/proto_ko_treasure_map.png	500	380	cover	y0.45	shortlist	1	png	Klee Birthday 2021 - Shorts.png		splash	
+# proto_ko_wait_for_it <- NEW: Klee cradling a Dodoco bomb with a knowing smile -- wait for it
+proto_ko_wait_for_it	ImageGen/images/cards/klee/proto_ko_wait_for_it.png	500	380	cover	center	shortlist	1	png	Klee Best Cutie.png		splash	
+# proto_ko_where_did_i_put_it <- confiscated: teary Klee, her treasure chained up and out of reach
+proto_ko_where_did_i_put_it	ImageGen/images/cards/klee/proto_ko_where_did_i_put_it.png	500	380	cover	x0.62,y0.45@1.3	shortlist	1	png	Klee Birthday 2022 - Shorts.png		splash	
+# proto_ko_windblume_fireworks <- study_buddy: Klee and her friends under a festival night of fireworks
+proto_ko_windblume_fireworks	ImageGen/images/cards/klee/proto_ko_windblume_fireworks.png	500	380	cover	center	shortlist	1	png	Let's Go Dodoco! Illustration 5.png		splash	
+# -- Furina: the Stage --
+# proto_fs_arkhe_alignment <- waters_embrace: the two Furinas of the 4.2 wallpaper, whole -- Ousia and Pneuma side by side
+proto_fs_arkhe_alignment	ImageGen/images/cards/furina/proto_fs_arkhe_alignment.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 2.png		splash	
+# proto_fs_between_acts <- curtain_up: the empty stage between acts, pushed in
+proto_fs_between_acts	ImageGen/images/cards/furina/proto_fs_between_acts.png	500	380	cover	center@1.25	shortlist	1	png	Opera Epiclese - After The Forgotten Thief.png		splash	
+# proto_fs_bravura <- star_of_the_show: Furina at the heart of her whirl of water, pushed in
+proto_fs_bravura	ImageGen/images/cards/furina/proto_fs_bravura.png	500	380	cover	center@1.6	shortlist	1	png	Furina Wish.png		splash	
+# proto_fs_double_casting <- rain_of_roses: Furina with two of her Salon at her side
+proto_fs_double_casting	ImageGen/images/cards/furina/proto_fs_double_casting.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2024.png		splash	
+# proto_fs_ensemble_piece <- swelling_overture: Furina and the Salon round one table
+proto_fs_ensemble_piece	ImageGen/images/cards/furina/proto_fs_ensemble_piece.png	500	380	cover	x0.62,y0.50@1.3	shortlist	1	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	
+# proto_fs_five_century_act <- usher_the_waves: Furina's back to the prophecy -- the end of a five-hundred-year role
+proto_fs_five_century_act	ImageGen/images/cards/furina/proto_fs_five_century_act.png	500	380	cover	x0.30	shortlist	1	png	Archon Quest When All Return to the Waters.png		splash	
+# proto_fs_full_house <- courtroom_drama: the Opera Epiclese gallery, row on row of seats
+proto_fs_full_house	ImageGen/images/cards/furina/proto_fs_full_house.png	500	380	cover	x0.50,y0.70@1.3	shortlist	1	png	Opera Epiclese Courtroom.png		splash	
+# proto_fs_gala_dinner <- matinee_performance: Furina at a table laden with cakes
+proto_fs_gala_dinner	ImageGen/images/cards/furina/proto_fs_gala_dinner.png	500	380	cover	y0.62	shortlist	1	png	Furina Shorts 2023-11-21.png		splash	
+# proto_fs_hold_your_places <- unused Furina sticker: her gloved hand out -- places, everyone!
+proto_fs_hold_your_places	ImageGen/images/cards/furina/proto_fs_hold_your_places.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 28 Furina 4.png		sticker	
+# proto_fs_improvised_number <- spotlight_center_stage: Furina with a lute, playing something made up on the spot
+proto_fs_improvised_number	ImageGen/images/cards/furina/proto_fs_improvised_number.png	500	380	cover	x0.50,y0.50@1.3	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	
+# proto_fs_quick_cue <- unused Furina sticker: Furina pointing, laughing -- the cue given
+proto_fs_quick_cue	ImageGen/images/cards/furina/proto_fs_quick_cue.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 28 Furina 3.png		sticker	
+# proto_fs_rapt_audience <- unused Furina sticker: chin on hand, watching intently
+proto_fs_rapt_audience	ImageGen/images/cards/furina/proto_fs_rapt_audience.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 26 Furina 1.png		sticker	
+# proto_fs_step_forward <- encore_performance: Furina striding forward, arm out
+proto_fs_step_forward	ImageGen/images/cards/furina/proto_fs_step_forward.png	500	380	cover	x0.55,y0.45@1.25	shortlist	1	png	Furina Wallpaper without Watermark.png		splash	
+# proto_fs_thunderous_applause <- rapturous_applause: the Fontainians cheering -- the card's own name
+proto_fs_thunderous_applause	ImageGen/images/cards/furina/proto_fs_thunderous_applause.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	FCFH Applause and Cheer.png		sticker	
+# proto_fs_tutti <- salon_debut: all three Salon Members in one frame -- everyone plays at once
+proto_fs_tutti	ImageGen/images/cards/furina/proto_fs_tutti.png	500	380	cover	center	shortlist	1	png	Salon Members Summon.png		tcg	
 # ---------- EB-776: the Stage arm's opening relic ----------
 # Salon Solitaire draws nothing because nothing was ever planned for
 # res://furina/relics/salon_solitaire.png (EB-776, PR #584: the C# wiring and
