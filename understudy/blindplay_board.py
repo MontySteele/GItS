@@ -721,7 +721,8 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
         long `name`, the `seat` index (front = 0), the `fanfare` on the bar and
         the body's `entity_id`.
       log -- what the stage has done since she last ended a turn, in order.
-        Each row is an `event` (`arrive`, `act`, `bow`, `leave`, `rotate`), the
+        Each row is an `event` (`arrive`, `act`, `bow`, `leave`, `rotate`,
+        and `raise`, `regain`, `hit` and `hit_furina` since 2026-09-25), the
         performer, the seat it happened in, the bar afterwards, what the board
         `moved`, and for a departure the `reason` it left by (rules 7 and 9:
         every departure at 0 Fanfare bows, a rotation does not).
@@ -771,6 +772,11 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # figure (-1, or an older build), and the page then prints the
             # total as a total.
             "each": _each(row.get("each")),
+            # 2026-09-25: Furina's HP after a hit that reached her (the
+            # `hit_furina` beat); None on every other beat and on an older
+            # build.
+            "hp": (None if row.get("hp") is None or _int(row.get("hp")) < 0
+                   else _int(row.get("hp"))),
         })
     # R276 batch two: the mod's forecast of the end-of-turn acts' Block, with
     # Arkhe Alignment's multiple and Full House's extra acts folded in. None

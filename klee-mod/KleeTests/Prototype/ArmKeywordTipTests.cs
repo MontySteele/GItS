@@ -410,16 +410,6 @@ public class ArmKeywordTipTests
         // lane 2). It counts as two, and the card that bends the count is
         // where the count is explained.
         //
-        // THE TWENTY-SEVENTH IS THE STAGE READERS' `ForStageReader`, a RIDER
-        // and the SECOND whose sentence comes and goes with the screen
-        // (`ForEmptyField` is the first). The four readers multiply a LIVE
-        // bar, so off a board their faces print a literal 0 -- "Deal 0 damage
-        // to ALL enemies" on the Rare at Neow, "Deal 0 damage" on `Ousia
-        // Surge` at a reward -- and two round-three seats turned the Rare down
-        // on it. It goes through the same `With`, four times over: which of
-        // its four rules a row gets is derived from the multiplier `EB-747`
-        // picked for that row's payoff.
-        //
         // TWENTY-FIVE SINCE R276: pick 2 retired `Hexerei` and `ForHexerei`
         // left with it (the Companion Spark rider stays). TWENTY-FOUR with
         // R276's Furina hygiene: `ForEncore` attached to no card and left
@@ -441,7 +431,11 @@ public class ArmKeywordTipTests
         // golded on Klee's readers and the other arms' faces and defined
         // nowhere on screen ("Companion is never defined on screen, yet three
         // offered cards trigger on it").
-        Assert.Equal(29, attaches.Count);
+        //
+        // TWENTY-EIGHT with the Furina afternoon seats (2026-09-25): the Stage
+        // readers' `ForStageReader` left. Let the People Rejoice, its last
+        // row, deals twice its Fanfare now and says so on its face.
+        Assert.Equal(28, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForCompanion");
         Assert.Contains(attaches, m => m.Name == "ForSummon");
         Assert.Contains(attaches, m => m.Name == "ForUsher");
@@ -450,7 +444,7 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForOusia");
         Assert.Contains(attaches, m => m.Name == "ForPneuma");
         Assert.DoesNotContain(attaches, m => m.Name == "ForEncore");
-        Assert.Contains(attaches, m => m.Name == "ForStageReader");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForStageReader");
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
         Assert.Contains(attaches, m => m.Name == "ForFanfare");
@@ -682,49 +676,4 @@ public class ArmKeywordTipTests
         }
     }
 
-    // --- a Stage round-three defect: the readers' 0 off the board ----------
-
-    [Fact]
-    public void The_stage_readers_tip_states_each_rule()
-    {
-        // THE FIND (round three). The four readers multiply a LIVE bar, so
-        // off a board their faces printed a literal 0. R276 fixed the FACES
-        // the base game's way (`{InCombat:...|}`: the rule in words, the
-        // number only in combat), so the tip's off-board disclaimer left: it
-        // would now be false on every screen.
-        //
-        // THE SENTENCES OFF THE COMPILED METHOD, this file's own rule: a
-        // materialised `HoverTip` resolves a `LocString` through a
-        // `LocManager` that is null until the game boots, so what is
-        // reachable here is the text each branch would print.
-        var body = Printed("ForStageReader");
-
-        // THE TEXT PASS (2026-09-25) deleted the tip wherever the face now
-        // names the performer: only the Rare's rule is left.
-        Assert.Contains(
-            "The number is every performer's [gold]Fanfare[/gold] added up "
-          + "and spent.", body);
-        Assert.DoesNotContain("lead performer", body);
-        Assert.DoesNotContain("back performer", body);
-
-        Assert.DoesNotContain("no stage outside combat", body);
-    }
-
-    [Fact]
-    public void The_readers_rider_yields_on_and_off_a_board_alike()
-    {
-        // UNLIKE `ForEmptyField`, WHICH GOES SILENT. That rider is a sentence
-        // about a board in a particular state; this one is about what the
-        // card's number IS, which is true on every screen -- and the screen
-        // it was filed on is the one with no board at all.
-        var none = System.Linq.Enumerable.Empty<IHoverTip>();
-        var offTheBoard = new ProtoFsLetThePeopleRejoice();
-        Assert.NotSame(none, ArmKeywordTips.ForStageReader(
-            none, offTheBoard, ArmKeywordTips.StageReader.SpendAll));
-
-        var furina = Seat.Furina();
-        var inPlay = Owned<ProtoFsLetThePeopleRejoice>(furina);
-        Assert.NotSame(none, ArmKeywordTips.ForStageReader(
-            none, inPlay, ArmKeywordTips.StageReader.SpendAll));
-    }
 }

@@ -3074,6 +3074,14 @@ public static partial class McpMod
                     ["id"] = power.Id.Entry,
                     ["name"] = SafeGetText(() => power.Title),
                     ["amount"] = power.DisplayAmount,
+                    // GItS LOCAL EDIT (2026-09-25, the Furina seat round). HOW
+                    // THE GAME DRAWS THE AMOUNT. `NPower` prints a number on
+                    // the icon only for a `Counter` power; a `Single` one (The
+                    // Stage badge, Osty's Die For You) shows none, while
+                    // `DisplayAmount` above still reads 1 -- and the blind page
+                    // printed "The Stage 1" off it. The page hides the number
+                    // where this says `Single`.
+                    ["stack"] = power.StackType.ToString(),
                     ["type"] = power.Type.ToString(),
                     ["description"] = resolvedDesc,
                     ["keywords"] = BuildHoverTips(extraTips)

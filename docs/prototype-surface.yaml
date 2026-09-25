@@ -2035,10 +2035,10 @@
    replaces: universal_revelry,
    register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
    art_of: let_the_people_rejoice,
-   description: "Deal damage to ALL enemies equal to all your performers' [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal damage to ALL enemies equal to twice your performers' [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_spent},
+              amount_formula: {base: 0, per: 2, count: stage_spent},
               target: all_enemies},
              {op: stage_curtain_call}]}
 

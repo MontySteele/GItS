@@ -330,11 +330,6 @@ def tip_rows() -> list[Row]:
             r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
         if "SparkBody()" in body:
             continue
-        # A Stage round-three defect: the readers' tip picks one of four
-        # `const string` rules, so the call carries no literal at all and
-        # reaches this census as an empty string. Parsed out by name below.
-        if "ReaderKey" in name:
-            continue
         rows.append(Row("tip", name, csharp_text(body), where))
     concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
     word = csharp_text(re.search(r"const string word =\s*" + concat + ";", src).group(1))
@@ -343,14 +338,6 @@ def tip_rows() -> list[Row]:
     rows.append(Row("tip", "SparkKey", word + "Start each combat with "
                     + csharp_text(arm.group(1)) + shared, where))
     rows.append(Row("tip", "SparkKey.sparks-arm", word + shared, where))
-    # A Stage round-three defect. THE READER'S RULE, parsed by name because
-    # the call carries no literal. Four rules until the text pass
-    # (2026-09-25) deleted the three whose face now names the performer.
-    for rule in ("ReaderSpendAllRule",):
-        body = csharp_text(
-            re.search(rf"const string {rule} =\s*" + concat + ";",
-                      src).group(1))
-        rows.append(Row("tip", f"ReaderKey.{rule}", body, where))
     return rows
 
 

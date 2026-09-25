@@ -12553,15 +12553,14 @@ def _stage_reader_reward_state() -> dict:
             "card_reward": {"can_skip": True, "cards": [
                 # The text pass (2026-09-25): only the Rare keeps the
                 # rider -- Ousia Surge's face names the seat outright.
+                # 2026-09-25: the Rare's reader rider left; its face states
+                # the rate ("twice your performers' Fanfare") in words.
                 {"name": "Let the People Rejoice", "cost": "2",
                  "type": "Attack",
-                 "description": "Deal damage to ALL enemies equal to all "
+                 "description": "Deal damage to ALL enemies equal to twice "
                                 "your performers' Fanfare. They all Bow, "
                                 "then return with 1. Exhaust.",
-                 "keywords": [
-                     {"name": "What this number is",
-                      "description": "The number is every performer's Fanfare "
-                                     "added up and spent."}]},
+                 "keywords": []},
                 {"name": "Ousia Surge", "cost": "1", "type": "Attack",
                  "description": "Deal damage equal to your back performer's "
                                 "Fanfare.",
@@ -12584,13 +12583,11 @@ def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
     """
     page = blindplay.observe(_stage_reader_reward_state())
 
-    # The face the game prints: the rule, and no 0 (R276).
-    assert "equal to all your performers' Fanfare." in page
+    # The face the game prints: the rule, and no 0 (R276). Since
+    # 2026-09-25 the face states the whole rule and no rider rides under it.
+    assert "equal to twice your performers' Fanfare." in page
     assert "Deal 0 damage" not in page
-    # And directly under the Rare, which bar the number is. Ousia Surge's
-    # face says "your back performer's" itself (the text pass).
-    assert ("    *What this number is* — The number is every performer's "
-            "Fanfare added up and spent.") in page
+    assert "What this number is" not in page
     assert "Deal damage equal to your back performer's Fanfare." in page
 
 
@@ -12607,10 +12604,10 @@ def test_the_reader_fixture_is_the_mods_own_sentence():
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     plain = re.sub(r'"\s*\+\s*"', "", src)
     plain = plain.replace("[gold]", "").replace("[/gold]", "")
-    for sentence in (
-            "The number is every performer's Fanfare added up and spent.",):
-        assert sentence in plain, sentence
-    # The three the text pass deleted, gone from the mod as from the fixture.
+    # 2026-09-25: the last reader sentence left with the rider, so the
+    # fixture carries none; the three the text pass deleted stay gone.
+    assert "The number is every performer's Fanfare added up and spent." \
+        not in plain
     assert "The number is the lead performer's Fanfare." not in plain
     assert "The number is the back performer's Fanfare" not in plain
     assert "no stage outside combat" not in plain

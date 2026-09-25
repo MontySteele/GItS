@@ -145,8 +145,9 @@ public abstract class StagePerformerBadge : PowerModel
     }
 }
 
-/// <summary>Gentilhomme Usher's badge: Block at the end of her turn, Block
-/// when he bows (brief sec.3 rules 9 and 10).</summary>
+/// <summary>Gentilhomme Usher's badge: Block at the end of her turn, and
+/// Fanfare for the front performer when he bows (brief sec.3 rules 9 and 10;
+/// the Bow was Block until 2026-09-25).</summary>
 public sealed class UsherBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Usher;
@@ -158,12 +159,13 @@ public sealed class UsherBadgePower : StagePerformerBadge, ILocalizationProvider
         ("title", FurinaStageLedger.DisplayName(StagePerformer.Usher)),
         ("description",
             "End of your turn: gain " + FurinaStageLaw.ActUsherBlock
-          + " [gold]Block[/gold]. [gold]Bow[/gold]: gain "
-          + FurinaStageLaw.BowUsherBlock + " [gold]Block[/gold]."),
+          + " [gold]Block[/gold]. [gold]Bow[/gold]: your front performer "
+          + "gains " + FurinaStageLaw.BowUsherFanfare
+          + " [gold]Fanfare[/gold]."),
         ("smartDescription",
             "End of your turn: gain {Act} [gold]Block[/gold]. "
-          + "[gold]Bow[/gold]: gain " + FurinaStageLaw.BowUsherBlock
-          + " [gold]Block[/gold]."),
+          + "[gold]Bow[/gold]: your front performer gains "
+          + FurinaStageLaw.BowUsherFanfare + " [gold]Fanfare[/gold]."),
     };
 }
 

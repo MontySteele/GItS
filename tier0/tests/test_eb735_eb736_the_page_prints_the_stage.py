@@ -244,7 +244,8 @@ def test_one_line_per_arrival_act_bow_departure_and_rotation():
     assert "**Usher** acted: Furina gains 3 Block." in page
     assert "**Usher** left the stage: emptied by a Spend, so it takes a Bow." \
         in page
-    assert "**Usher** took a Bow: Furina gains 4 Block." in page
+    assert ("**Usher** took a Bow: your front performer gains 4 Fanfare."
+            in page)
     assert "**Crabaletta** moved from the front seat to the back" in page
 
 

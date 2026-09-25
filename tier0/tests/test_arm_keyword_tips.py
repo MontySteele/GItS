@@ -406,10 +406,9 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     "KLEEMOD-ARM_PLAN_TWICE",
                     # (`Encore` was the sixth until R276's hygiene: no card
                     # attached its tip, so the body and its key left.)
-                    # A Stage round-three defect: WHICH BAR a reader's number
-                    # is. Since the text pass only the Rare carries it: the
-                    # other readers' faces name the seat outright.
-                    "KLEEMOD-ARM_STAGE_READER",
+                    # (`KLEEMOD-ARM_STAGE_READER`, which bar a Stage
+                    # reader's number is, left on 2026-09-25 with its last
+                    # row: Let the People Rejoice deals twice its Fanfare.)
                     # 2026-09-25: what a summon does and what each performer
                     # does. Faces print these words UNGOLDED ("Summon
                     # Usher"), so they attach off the `stage_summon` op
@@ -647,7 +646,7 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     # (R215 B, the brief's sec.10 default 3), which makes a retune likelier
     # here than anywhere else on this list. `EB-723` replaced the reframe's
     # Evoke pair, which left with that arm's rows.
-    assert "FurinaStageLaw.BowUsherBlock" in tips
+    assert "FurinaStageLaw.BowUsherFanfare" in tips
     assert "FurinaStageLaw.BowCrabalettaDamage" in tips
     assert "FurinaStageLaw.LeadRegen" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
@@ -1180,19 +1179,11 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
 # "Deal damage equal to your [gold]Block[/gold].{InCombat:\n(Deals
 # {CalculatedDamage:diff()} damage)|}" -- the game hands every description an
 # `InCombat` flag -- so each reader now prints its RULE in words and its live
-# number on a line of its own only in combat. The hover tip stays, as the
-# one-line statement of which seat the number is read off, without the
-# off-board disclaimer it carried while the face printed 0.
-
-#: Each reader, the bar its number is, and the sentence it owes. THE TEXT
-#: PASS (2026-09-25) deleted the tip "wherever the face now names the
-#: performer": Ousia Surge, Pneuma Refrain and Final Bow print "your back
-#: performer's" / "your front performer's", and only the Rare -- "all your
-#: performers' Fanfare" -- keeps its sentence.
-STAGE_READERS = {
-    "proto_fs_let_the_people_rejoice": ("SpendAll",
-                                        "ProtoFsLetThePeopleRejoice"),
-}
+# number on a line of its own only in combat. The hover tip that said which
+# seat the number is read off is gone: the text pass (2026-09-25) deleted it
+# wherever the face names the performer, and the afternoon seat round the
+# same day deleted the last one, the Rare's, whose face now reads "twice your
+# performers' Fanfare".
 
 #: The three readers whose face names the seat, and so carry no reader tip.
 STAGE_READERS_NAMED_ON_THE_FACE = {
@@ -1202,29 +1193,16 @@ STAGE_READERS_NAMED_ON_THE_FACE = {
 }
 
 
-def test_the_four_readers_are_the_rows_whose_number_is_a_bar():
-    """DERIVED FROM THE MULTIPLIER, never a list of ids.
-
-    `stage_reader_source` reads the C# expression `EB-747` already picked for
-    the row's `amount_formula`, so a fifth reader carries the sentence the day
-    its row exists and a row that stops reading a bar loses it the same day.
-
-    Seen to FAIL before the rider: no row on the surface attached one.
-    """
-    rows = {row["id"]: row for row in proto._rows()}
-    found = {rid: gen.stage_reader_source(row)
-             for rid, row in rows.items()
-             if gen.stage_reader_source(row)}
-    assert found == {rid: src for rid, (src, _) in STAGE_READERS.items()}
 
 
-@pytest.mark.parametrize("rid", sorted(STAGE_READERS))
-def test_every_reader_carries_the_rule_its_number_obeys(rid):
-    """The attach is committed, with the right one of the four sentences."""
-    source, cls = STAGE_READERS[rid]
-    src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
-    assert ("ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, "
-            f"ArmKeywordTips.StageReader.{source})") in src
+def test_the_rare_at_twice_the_fanfare_carries_no_reader_tip():
+    """2026-09-25: its number is twice the bar, so the one-bar sentence is
+    gone from it and the face states the rule in words."""
+    src = (PROTOTYPE_DIR / "ProtoFsLetThePeopleRejoice.cs").read_text(
+        encoding="utf-8")
+    assert "ForStageReader" not in src
+    row = {r["id"]: r for r in proto._rows()}["proto_fs_let_the_people_rejoice"]
+    assert "twice your performers' [gold]Fanfare[/gold]" in row["description"]
 
 
 @pytest.mark.parametrize("rid", sorted(STAGE_READERS_NAMED_ON_THE_FACE))
@@ -1239,40 +1217,16 @@ def test_a_reader_whose_face_names_the_seat_carries_no_reader_tip(rid):
             or "[gold]front performer[/gold]" in row["description"])
 
 
-def test_the_readers_tip_states_each_rule():
-    """The rule, on every screen. The off-board disclaimer ("the number above
-    reads 0") left with R276: the faces print the rule outside combat now, so
-    the sentence would be false everywhere."""
+def test_the_readers_tip_is_gone():
+    """2026-09-25: the Stage readers' rider left with its last row. Let the
+    People Rejoice deals twice its Fanfare, so the one-bar sentence would be
+    false on it, and its face states the rate in words."""
     tips = TIPS_CS.read_text(encoding="utf-8")
-    assert 'const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";' in tips
-    # The one rule left (the text pass deleted the three whose face names
-    # the seat), and none of the three it deleted.
-    assert ("The number is every performer's [gold]Fanfare[/gold] added up and"
-            in tips)
-    assert "The number is the [gold]lead performer[/gold]'s " not in tips
-    assert "The number is the [gold]back performer[/gold]'s " not in tips
-    assert "no stage outside combat" not in tips
-    assert "return With(inherited, ReaderKey, rule);" in tips
-    # The title row is registered, or the tip renders with a raw loc key.
-    assert 'ArmKeywordTips.ReaderKey + ".title"' in MOD_CS.read_text(
-        encoding="utf-8")
-
-
-def test_the_readers_rules_are_measured():
-    """The census sees the one rule left (four before the text pass).
-
-    A `With(...)` call whose body is a named const reaches
-    `lint_text_conventions.tip_rows` as an empty string -- the silence
-    `EB-343` was filed on -- so the rule is parsed out by name.
-    """
-    sys.path.insert(0, str(REPO / "tools"))
-    import lint_text_conventions as lint       # noqa: E402
-
-    rows = {row.ident: row.raw for row in lint.tip_rows()
-            if row.ident.startswith("ReaderKey.")}
-    assert len(rows) == 1
-    for ident, raw in rows.items():
-        assert len(lint.render(raw)) <= lint.CEILING["tip"], ident
+    for gone in ("ReaderKey", "KLEEMOD-ARM_STAGE_READER", "ForStageReader",
+                 "ReaderSpendAllRule", "added up and"):
+        assert gone not in tips, gone
+    assert "ReaderKey" not in MOD_CS.read_text(encoding="utf-8")
+    assert not hasattr(gen, "stage_reader_source")
 
 
 # ---------------------------------------------------------------------------
@@ -1349,8 +1303,9 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             '" [gold]Fanfare[/gold].");',
             "if (random)",
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
-            '" [gold]Block[/gold]. [gold]Bow[/gold]: gain "',
-            "FurinaStageLaw.BowUsherBlock",
+            '" [gold]Block[/gold]. [gold]Bow[/gold]: your front performer "',
+            '"gains " + FurinaStageLaw.BowUsherFanfare',
+            '" [gold]Fanfare[/gold].");',
             '"End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage',
             '" [gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "',
             '"apply [gold]Hydro[/gold] to ALL enemies."',
@@ -1380,7 +1335,8 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     assert blindplay_notes.SUMMON_NAMED_ROW == (
         "A performer joins at the back with 1 Fanfare.")
     assert rows["Gentilhomme Usher"] == (
-        "End of your turn: gain 3 Block. Bow: gain 4 Block.")
+        "End of your turn: gain 3 Block. Bow: your front performer gains 4 "
+        "Fanfare.")
     assert rows["Surintendante Chevalmarin"] == (
         "End of your turn: deal 2 Hydro damage to ALL enemies. Bow: apply "
         "Hydro to ALL enemies.")

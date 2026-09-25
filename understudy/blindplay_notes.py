@@ -1498,8 +1498,8 @@ ARM_KEYWORDS: dict[str, str] = {
     "Summon": ("A performer joins at the back with 1 Fanfare. If the stage is "
                "full, your front performer Bows and moves to the back "
                "instead."),
-    "Gentilhomme Usher": ("End of your turn: gain 3 Block. Bow: gain 4 "
-                          "Block."),
+    "Gentilhomme Usher": ("End of your turn: gain 3 Block. Bow: your front "
+                          "performer gains 4 Fanfare."),
     "Surintendante Chevalmarin": ("End of your turn: deal 2 Hydro damage to "
                                   "ALL enemies. Bow: apply Hydro to ALL "
                                   "enemies."),

@@ -68,9 +68,12 @@ public static class FurinaStageLaw
     /// <c>furina_stage.ACT_CRABALETTA_DAMAGE</c>.</summary>
     public const int ActCrabalettaDamage = 5;
 
-    /// <summary>Usher's bow: Block to Furina, once, when a Spend empties him
-    /// (sec.3 rule 9). Mirrors <c>furina_stage.BOW_USHER_BLOCK</c>.</summary>
-    public const int BowUsherBlock = 4;
+    /// <summary>Usher's bow: Fanfare to the FRONT performer, once, when his
+    /// bar runs out (sec.3 rule 9) -- a Raise, so on the stage he left empty a
+    /// random performer arrives holding it. It was 4 Block to Furina until
+    /// 2026-09-25, when a hit made him bow on the enemy's turn and the Block
+    /// expired unused. Mirrors <c>furina_stage.BOW_USHER_FANFARE</c>.</summary>
+    public const int BowUsherFanfare = 4;
 
     /// <summary>Crabaletta's bow: damage to a random enemy. Chevalmarin's bow
     /// is Hydro on every enemy and carries no number, which is why there are

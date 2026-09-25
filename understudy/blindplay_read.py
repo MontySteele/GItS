@@ -434,6 +434,16 @@ def settle_board(state: dict[str, Any], wire: Any = bridge,
     COMBAT ONLY. Off a battle screen there are no bodies to settle and the
     extra read would buy nothing; a state that LEAVES combat mid-poll is handed
     back as it is, because the fight ending is the answer to the question.
+
+    AND NOT WHILE THE GAME SAYS AN ACTION IS STILL RUNNING (2026-09-25, the
+    Furina Codex seat, fight 6). Two back-to-back reads can agree while a
+    Power card is still resolving: nothing on the bodies moves until its
+    `PowerCmd.Apply` lands, so both reads showed the board without Full House
+    and the stage's "after the acts" line printed 3 Block where Usher then
+    gave 6. The bridge already publishes the engine's own answer --
+    `player.hp_settled` is false while `ActionExecutor` is running
+    (`gits/GitsSettledHp.cs`) -- so a read that says so is not a board at
+    rest, however still it looks. Missing (an older bridge) is not false.
     """
     if _screen(state) not in COMBAT_SCREENS:
         return state
@@ -443,11 +453,17 @@ def settle_board(state: dict[str, Any], wire: Any = bridge,
         if _screen(nxt) not in COMBAT_SCREENS:
             return nxt
         moved = board_signature(nxt)
-        if moved == signature:
+        if moved == signature and not _in_flight(nxt):
             return nxt
         state, signature = nxt, moved
         time.sleep(delay)
     return state
+
+
+def _in_flight(state: dict[str, Any]) -> bool:
+    """Does the feed say an action is still running? Only an explicit
+    `hp_settled: false` counts; an absent key is an older bridge."""
+    return _player(state).get("hp_settled") is False
 
 def _player(state: dict[str, Any]) -> dict[str, Any]:
     p = state.get("player")
