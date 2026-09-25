@@ -30,6 +30,10 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
+- `prune_witch_hunt`'s only upgrade (`kit_spark` +1) does nothing under the Klee arm, because Companion plays pay no Spark.
+- A co-op partner cannot see Klee's Spark count: the overhead gauge left in #658, the strip badge is hidden, and the energy-area counter is local only.
+- The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
+- The Smith preview for a Spark-price upgrade (Sparkling Burst, Once More!, Boom Badge, Blazing Delight) says it "changes nothing this face prints".
 
 ## Harness, bridge and tools
 
@@ -47,6 +51,9 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-193` `role_tempo_canon.json` predates the int-var reader fix; regenerate it (46 cards gain `has_body`).
 - `EB-667` the Smith shows no upgrade for Ultimate Strike; its numbers are published nowhere the repo reads.
 - `EB-71` no committed sheet prints `sly_autoplay`, so the `CardKeyword.Sly` rail has never run in game; whoever prints the first one checks it live.
+- Seat page: Ka-pow!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
+- Seat glossary: the Bomb entry's "Only Vulnerable and the HP cap move it" and the Set off entry's "A random one picks a Bombed enemy first" read as unclear to a seat.
+- Seats share the coordinator's scratchpad, so a seat's notes file can hold an earlier seat's notes; give each seat its own notes path.
 
 ## Sim and measurement (Balance stage; nothing here runs on a prototype)
 
@@ -57,6 +64,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-32` the pilot block-panic rung; lands under its own `POLICY_VERSION` bump and window.
 - `M13` `ROUTE_REGRET_MARGIN` has no derivation (Option D, no margin, stands); draft the slate and build `C2` (`review/records/regret-margin-registration-2026-08-12.md`).
 - `EB-84` enchant eligibility live smoke: three of four shapes watched; the `souls_power` to local Exhaust shape still needs a door (an Exhaust-enchant grantor with a Power in the deck).
+- The pilot heuristic (`tier0/pilot/policy.py`) does not price the full-stage Bow, and it still counts an arrival act.
 
 ## Parked: start only when the named trigger fires
 

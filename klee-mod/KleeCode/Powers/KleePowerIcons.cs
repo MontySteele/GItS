@@ -291,6 +291,18 @@ internal static class KleePowerIcons
         CrabalettaBadgePower =>
             KleePck.Path("furina/powers/salon_member.png"),
         StageSummaryPower => KleePck.Path("furina/powers/center_stage.png"),
+        // THE CO-OP SET (review/records/coop-set-2026-09-25.md): five powers,
+        // each borrowing the shipped sigil nearest its job on the terms every
+        // borrow above takes -- the Bomb for the two that set Klee's Bombs
+        // off, the Stage's board for the lead that shields an ally, an
+        // ovation for the crowd, and the Casket's for the Plan payoff.
+        PassTheMatchPower => KleePck.Path("klee/powers/bomb.png"),
+        KnightsOfFavoniusPower => KleePck.Path("klee/powers/bomb_damage_up.png"),
+        GuestOfHonorPower => KleePck.Path("furina/powers/center_stage.png"),
+        PeopleOfFontainePower =>
+            KleePck.Path("furina/powers/standing_ovation.png"),
+        SangonomiyasCounselPower =>
+            KleePck.Path("kokomi/powers/kurages_oath.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

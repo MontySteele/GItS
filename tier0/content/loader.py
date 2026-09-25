@@ -520,8 +520,16 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # `Card` would be one the engine carries and nothing reads.
         # `replaces:` is KEPT, because the sim's stand-in hand-off is a rule
         # and reads it (`tier0.engine.companion_standins`).
+        # THE CO-OP SET: `multiplayer:` is stripped for `description:`'s
+        # reason -- it is a fact about who the GAME may offer the card to
+        # (`CardMultiplayerConstraint.MultiplayerOnly`), and tier 0 seats one
+        # player and offers from no multiplayer tier. It is CHECKED first
+        # (`_validate_multiplayer`, the emitter's twin), and read back off the
+        # sheet by `multiplayer_ids` for the parity gates.
+        _validate_multiplayer(path.name, d)
         row = {k: v for k, v in d.items()
-               if k not in ("authored_by", "description", "art_of")}
+               if k not in ("authored_by", "description", "art_of",
+                            "multiplayer")}
         # `EB-322`: the sheet declares the shadow, the ENGINE carries the
         # title. This is the sim's half of "both engines print the same
         # title" and it is one line here rather than a strip at every
@@ -577,6 +585,61 @@ def _validate_plan_shape(card: Card) -> None:
     reason = _plan.plan_shape_reason(card.plan)
     if reason:
         raise ValueError(f"card {card.id!r}: {reason}")
+
+
+#: The three overhaul arms with a multiplayer tier (the co-op set,
+#: review/records/coop-set-2026-09-25.md). `gen_klee_cards.COOP_ARM_PREFIXES`
+#: is the twin.
+MULTIPLAYER_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_")
+
+
+def _validate_multiplayer(sheet_name: str, d: dict) -> None:
+    """The co-op set's two rules, AT LOAD, the emitter's twin
+    (`gen_klee_cards.card_level_reason`).
+
+    `multiplayer:` is a ruling, so it is literally `True`, and only an overhaul
+    arm's row carries one. A row that aims at ANOTHER PLAYER (`target: ally`)
+    must carry it: the base game refuses an ally-aimed play with nobody else
+    alive, so a single-player offer of one would be a dead card.
+    """
+    from tier0.engine import coop                  # late: engine cycle
+    card_id = d.get("id")
+    flag = d.get("multiplayer")
+    if flag is not None:
+        if flag is not True:
+            raise ValueError(
+                f"{sheet_name}: {card_id!r}: `multiplayer:` must be true -- a "
+                "ruling, not a switch")
+        if not str(card_id).startswith(MULTIPLAYER_ARM_PREFIXES):
+            raise ValueError(
+                f"{sheet_name}: {card_id!r}: `multiplayer:` on a row outside "
+                f"the three overhaul arms {MULTIPLAYER_ARM_PREFIXES}")
+
+    def _walk(effects):
+        for fx in effects or []:
+            yield fx
+            for branch in ("then", "else"):
+                yield from _walk(fx.get(branch))
+            for mode in fx.get("modes") or []:
+                yield from _walk(mode.get("effects"))
+
+    if flag is not True and any(fx.get("target") == coop.ALLY
+                                for fx in _walk(d.get("effects"))):
+        raise ValueError(
+            f"{sheet_name}: {card_id!r}: aims at another player "
+            "(`target: ally`) and is not `multiplayer: true`")
+
+
+@lru_cache(maxsize=1)
+def multiplayer_ids() -> frozenset[str]:
+    """The prototype rows the GAME offers only in co-op (`multiplayer: true`),
+    read straight off the sheet. Tier 0 offers none of them; this is what the
+    parity tests ask so that "no sim pool holds one" is checked rather than
+    assumed."""
+    if not PROTOTYPE_SHEET.exists():
+        return frozenset()
+    raw = yaml.safe_load(PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+    return frozenset(d["id"] for d in raw if d.get("multiplayer") is True)
 
 
 def _validate_plan_dusk(card: Card) -> None:
@@ -1754,7 +1817,9 @@ def reset_caches() -> None:
                   # clear this too, or `_card_prototype`'s flagged branch and
                   # `understudy.adapter` both read rows from a tree that is
                   # gone.
-                  _prototype_index):
+                  _prototype_index,
+                  # The co-op set's multiplayer ids, read off the same sheet.
+                  multiplayer_ids):
         cache.cache_clear()
     # EB-213: the merged upgrade index is derived from `_substituted_card_index`
     # (a prototype row's `upgrade:` block registers only while a live door

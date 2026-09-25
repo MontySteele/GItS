@@ -436,6 +436,21 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_second_surprise",
 )
 
+# THE CO-OP SET (review/records/coop-set-2026-09-25.md): each overhaul arm's
+# MULTIPLAYER TIER, three cards the GAME offers only in co-op -- they declare
+# `CardMultiplayerConstraint.MultiplayerOnly` and `GetUnlockedCards` drops them
+# from a one-player run. OUTSIDE the pool counts above ("78 standard cards plus
+# Ancients plus multiplayer cards"), so nothing here touches
+# `KLEE_OVERHAUL_POOL_IDS` or its twins, and the sim, which seats ONE player,
+# never offers them: these lists are the mirrors
+# `tools/lint_arm_pool_parity.py` holds the rosters' `MultiplayerSlice()` /
+# `MultiplayerRows()` to, and nothing in tier 0 or 0.5 deals from them.
+KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
+    "proto_ko_pass_the_match",
+    "proto_ko_hide_here",
+    "proto_ko_knights_of_favonius",
+)
+
 # =============================================================================
 # THE MONDSTADT COMPANION OVERHAUL -- QUARANTINED (R213 B, BACKLOG EB-147).
 #
@@ -946,6 +961,20 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_scout_ahead",
     "proto_kk_second_thoughts",
     "proto_kk_breakwater",
+)
+
+# THE CO-OP SET's Kokomi and Furina tiers, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s
+# terms (above): offered only in co-op, outside every pool count, and never
+# dealt by the one-seat sim.
+KOKOMI_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
+    "proto_kk_joint_orders",
+    "proto_kk_coordinated_strike",
+    "proto_kk_sangonomiyas_counsel",
+)
+FURINA_STAGE_MULTIPLAYER_IDS: tuple[str, ...] = (
+    "proto_fs_guest_of_honor",
+    "proto_fs_share_the_spotlight",
+    "proto_fs_people_of_fontaine",
 )
 
 # THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF

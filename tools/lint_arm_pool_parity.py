@@ -48,6 +48,16 @@ the old type argument stops resolving.
 Adding an arm means adding an ARMS row; a `*OverhaulRoster.cs` with a `Slice`
 that this table does not name is a FINDING, not a skip.
 
+THE MULTIPLAYER TIER (the co-op set, review/records/coop-set-2026-09-25.md).
+A row carrying `multiplayer: true` is offered only in co-op and OUTSIDE the
+pool's count, so it is NOT a `Slice()` row: claims (1)-(3) above read the
+sheet's non-basic, non-multiplayer rows. The tier has its own three claims, on
+the same terms and for every arm that has one (`MULTIPLAYER_ARMS`, Furina's
+Stage included): the ids its roster method names are exactly the sheet's
+multiplayer rows with the arm's prefix, in the sheet's order, and exactly the
+sim's `C.*_MULTIPLAYER_IDS` mirror -- and no multiplayer row may sit in a
+`Slice()`, where a count would take it for a standard card.
+
 Usage: python tools/lint_arm_pool_parity.py
 Exit 1 with findings on stdout.
 """
@@ -78,6 +88,26 @@ ARMS: tuple[tuple[str, Path, str, str], ...] = (
      ARM_DIR / "KokomiOverhaulRoster.cs", "proto_kk_",
      "KOKOMI_OVERHAUL_POOL_IDS"),
 )
+# The co-op set's multiplayer tiers: arm label -> (roster file, method name,
+# sheet id prefix, sim mirror constant). The method is parsed with
+# `TIER_RE_FOR` below; Furina's Stage has no `Slice()`, only this tier.
+MULTIPLAYER_ARMS: tuple[tuple[str, Path, str, str, str], ...] = (
+    ("klee_overhaul", ARM_DIR / "KleeOverhaulRoster.cs", "MultiplayerSlice",
+     "proto_ko_", "KLEE_OVERHAUL_MULTIPLAYER_IDS"),
+    ("kokomi_overhaul", ARM_DIR / "KokomiOverhaulRoster.cs",
+     "MultiplayerSlice", "proto_kk_", "KOKOMI_OVERHAUL_MULTIPLAYER_IDS"),
+    ("furina_stage", ARM_DIR / "FurinaStageRoster.cs", "MultiplayerRows",
+     "proto_fs_", "FURINA_STAGE_MULTIPLAYER_IDS"),
+)
+
+
+def tier_re_for(method: str) -> re.Pattern:
+    """`<type> <method>() => new CardModel[] { ... };`, the tier's own list."""
+    return re.compile(
+        r"\b" + method + r"\s*\(\s*\)\s*=>\s*new\s+CardModel\[\]\s*\{(.*?)\n\s*\};",
+        re.S)
+
+
 # The `*OverhaulRoster.cs` files that own no character reward pool, so have no
 # `Slice` for this gate to read. The companion overhaul replaces a NATION's
 # Universal roster, which is a different surface with its own gate
@@ -186,10 +216,12 @@ def main() -> int:
                 continue
             roster_ids.append(cid)
 
-        # (1) and (2), by id and in the sheet's own order.
+        # (1) and (2), by id and in the sheet's own order. A multiplayer row
+        # is the tier's (below), never the slice's.
         sheet_ids = [row["id"] for row in rows
                      if row["id"].startswith(prefix)
-                     and row.get("rarity") != "basic"]
+                     and row.get("rarity") != "basic"
+                     and not row.get("multiplayer")]
         for cid in sheet_ids:
             if cid not in roster_ids:
                 findings.append(
@@ -210,6 +242,11 @@ def main() -> int:
                 findings.append(
                     f"{arm}: {path.name} offers {cid}, a `rarity: basic` row "
                     f"-- a starter card the reward screen would also sell.")
+            elif row.get("multiplayer"):
+                findings.append(
+                    f"{arm}: {path.name}'s Slice() offers {cid}, a "
+                    f"`multiplayer: true` row -- it belongs to the "
+                    f"multiplayer tier, outside the pool's count.")
         if len(set(roster_ids)) != len(roster_ids):
             duplicates = sorted({c for c in roster_ids
                                  if roster_ids.count(c) > 1})
@@ -246,6 +283,49 @@ def main() -> int:
                 f"different order than the sheet prints them.")
 
         checked.append(f"{arm}={len(roster_ids)}")
+
+    # THE MULTIPLAYER TIER, the same three claims on its own list.
+    for arm, path, method, prefix, constant in MULTIPLAYER_ARMS:
+        if not path.is_file():
+            findings.append(f"{arm}: roster missing: {path.relative_to(REPO)}")
+            continue
+        body = tier_re_for(method).search(path.read_text(encoding="utf-8"))
+        tier_sheet = [row["id"] for row in rows
+                      if row["id"].startswith(prefix) and row.get("multiplayer")]
+        if body is None:
+            if tier_sheet:
+                findings.append(
+                    f"{arm}: the sheet has multiplayer rows "
+                    f"({', '.join(tier_sheet)}) and {path.name} has no "
+                    f"`{method}() => new CardModel[] {{...}}` to offer them.")
+            continue
+        tier_ids: list[str] = []
+        for name in MEMBER_RE.findall(body.group(1)):
+            cid = mapping.get(name)
+            if cid is None:
+                findings.append(
+                    f"{arm}: {path.name}'s {method}() offers {name}, which is "
+                    f"not a generated prototype card.")
+                continue
+            tier_ids.append(cid)
+        for cid in tier_ids:
+            row = by_id.get(cid)
+            if row is None or not row.get("multiplayer"):
+                findings.append(
+                    f"{arm}: {path.name}'s {method}() offers {cid}, which is "
+                    f"not a `multiplayer: true` row -- a standard card offered "
+                    f"only in co-op.")
+        if tier_ids != tier_sheet:
+            findings.append(
+                f"{arm}: {path.name}'s {method}() holds "
+                f"{tier_ids} and the sheet's multiplayer rows are "
+                f"{tier_sheet} -- same ids, sheet order.")
+        mirror = list(getattr(C, constant, ()) or ())
+        if mirror != tier_ids:
+            findings.append(
+                f"{arm}: `C.{constant}` is {mirror} and {path.name}'s "
+                f"{method}() is {tier_ids} -- the sim's mirror moved.")
+        checked.append(f"{arm} multiplayer={len(tier_ids)}")
 
     for finding in findings:
         print(f"FINDING: {finding}")

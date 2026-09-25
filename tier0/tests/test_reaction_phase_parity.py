@@ -711,6 +711,13 @@ def test_no_doc_reasserts_the_refuted_pre_draw_order():
 
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
+        ("Powers/Prototype/CoopSet.cs", "GuestOfHonorPower"):
+            "QUARANTINED (the co-op set, review/records/coop-set-2026-09-25.md). "
+            "Guest of Honor's 'until your next turn' closing: it removes itself "
+            "at the next player turn and touches nothing a co-tenant reads -- "
+            "the lead's bar it redirects hits into is only written at "
+            "ModifyHpLostBeforeOsty, on the enemy's turn. No sim twin: tier 0 "
+            "seats one player (engine/coop.py)",
         ("Powers/Prototype/ProtoBombPower.cs", "ProtoBombPower"):
             "QUARANTINED (the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
             "and it GROWS rather than detonating -- rule 7 of the ruled brief "
@@ -1193,6 +1200,11 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/CoopSet.cs", "PassTheMatchPower"):
+            "QUARANTINED (the co-op set). Pass the Match's 'this turn' "
+            "expiring at the end of the player turn, Playdate's shape below. "
+            "Removes itself and touches nothing a co-tenant reads. No sim "
+            "twin: tier 0 seats one player (engine/coop.py)",
         ("Powers/Prototype/KleeExpansionPowers.cs", "PlaydatePower"):
             "QUARANTINED (the Klee overhaul, R276). Playdate's discount "
             "expiring at the end of the turn that wrote it, "

@@ -338,3 +338,29 @@ def test_every_coven_row_carries_an_upgrade(overhaul):
         assert declared or derived, cid
     prune = loader.peek_card(PRUNE)
     assert prune.upgrade == {"damage": upgrades.PROTOTYPE_DAMAGE_DELTA}
+
+
+def test_every_personal_is_smithable_in_the_sim(overhaul):
+    """The sim's upgrade index must answer for every PERSONAL the arm can
+    offer. `upgrades._prototype_deltas` built its reachable set from the two
+    nations' Universals and the stand-ins and left the five Personals out, so
+    the sim drafted them and `has_upgrade` said no to all five -- while the
+    C# upgrades every one. A rest site with nothing to smith on a card the
+    other engine smiths is the two engines playing different runs."""
+    from tier0.content import upgrades
+    personals = C.COVEN_PERSONAL_POOL_IDS + C.INAZUMA_OVERHAUL_PERSONAL_IDS
+    assert len(personals) == 5
+    for cid in personals:
+        assert upgrades.has_upgrade(cid), cid
+        plus = upgrades.apply_upgrade(loader.get_card(cid))
+        assert plus.id != cid, cid
+
+
+def test_flag_off_no_personal_is_smithable():
+    """The other side of the line above: with the arm off the five are not
+    reachable, so the index registers none of them and stays byte-identical
+    to the shipped tree's."""
+    from tier0.content import upgrades
+    _caches_clear()
+    for cid in C.COVEN_PERSONAL_POOL_IDS + C.INAZUMA_OVERHAUL_PERSONAL_IDS:
+        assert not upgrades.has_upgrade(cid), cid

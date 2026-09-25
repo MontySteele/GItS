@@ -560,6 +560,14 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     if C.COMPANION_OVERHAUL:
         reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
         reachable |= set(C.INAZUMA_OVERHAUL_POOL_IDS)
+        # THE PERSONALS ride the same replacement roster -- Gorou's Crystal
+        # Collapse and Klee's four coven rows join it beside the two nations'
+        # Universals (`loader.companion_roster_replacement`) -- so a draft can
+        # put one in a deck and a rest site must be able to smith it. Left out,
+        # the sim offered all five and could upgrade none, while the C#
+        # upgrades every one.
+        reachable |= set(C.INAZUMA_OVERHAUL_PERSONAL_IDS)
+        reachable |= set(C.COVEN_PERSONAL_POOL_IDS)
         # The stand-ins are in NO pool by design (see `COMPANION_STANDIN_IDS`),
         # and they are still REACHABLE: the hand-off puts one in a deck, and a
         # card in a deck must have a campfire answer like any other.

@@ -2191,3 +2191,79 @@
    description: "Whenever a performer takes a [gold]Bow[/gold], it returns to the back seat with 1 [gold]Fanfare[/gold].",
    effects: [{op: apply_power, power: fs_five_century_act, amount: 1,
               target: self}]}
+
+# --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
+# outside every pool count. Why each row reads as it does:
+# docs/notes/prototype-surface-provenance.md, "The co-op set".
+
+# --- Klee (KleeOverhaulRoster.MultiplayerSlice) ---
+
+- {id: proto_ko_pass_the_match, name: "Pass the Match", character: klee,
+   authored_by: [claude], multiplayer: true,
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Choose another player. This turn, their next Attack [gold]Sets off[/gold] your [gold]Bombs[/gold] on each enemy it hits. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   upgrade: {draw: 1},
+   effects: [{op: apply_power, power: ko_pass_the_match, amount: 1, target: ally},
+             {op: draw, amount: 1}]}
+
+- {id: proto_ko_hide_here, name: "Hide Here!", character: klee,
+   authored_by: [claude], multiplayer: true,
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Another player gains [gold]Block[/gold] equal to your largest [gold]Bomb[/gold], up to 12.",
+   upgrade: {cap: 4},
+   effects: [{op: block_largest_bomb, cap: 12, target: ally}]}
+
+- {id: proto_ko_knights_of_favonius, name: "Knights of Favonius", character: klee,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever another player plays an Attack, it [gold]Sets off[/gold] your [gold]Bombs[/gold] on each enemy it hits.",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: ko_knights_of_favonius, amount: 1, target: self}]}
+
+# --- Furina's Stage (FurinaStageRoster.MultiplayerRows) ---
+
+- {id: proto_fs_guest_of_honor, name: "Guest of Honor", character: furina,
+   authored_by: [claude], multiplayer: true,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Until your next turn, attacks on another player hit their [gold]Block[/gold], then your [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then them.",
+   upgrade: {cost: -1},
+   effects: [{op: apply_power, power: fs_guest_of_honor, amount: 1, target: ally}]}
+
+- {id: proto_fs_share_the_spotlight, name: "Share the Spotlight", character: furina,
+   authored_by: [claude], multiplayer: true,
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Your [gold]back performer[/gold] gives all its [gold]Fanfare[/gold] to another player as [gold]Block[/gold], then takes a [gold]Bow[/gold].",
+   upgrade: {cost: -1},
+   effects: [{op: stage_share_spotlight, target: ally}]}
+
+- {id: proto_fs_people_of_fontaine, name: "The People of Fontaine", character: furina,
+   authored_by: [claude], multiplayer: true,
+   register: salon, cost: 1, type: power, rarity: rare,
+   description: "Whenever another player plays an Attack, [gold]Raise[/gold] 1.",
+   upgrade: {power_amount: 1},
+   effects: [{op: apply_power, power: fs_people_of_fontaine, amount: 1, target: self}]}
+
+# --- Kokomi (KokomiOverhaulRoster.MultiplayerSlice) ---
+
+- {id: proto_kk_joint_orders, name: "Joint Orders", character: kokomi,
+   authored_by: [claude], multiplayer: true,
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Another player gains 6 [gold]Block[/gold]. [gold]Plan[/gold]: They draw 2 cards.",
+   upgrade: {block: 3},
+   effects: [{op: block, amount: 6, target: ally}],
+   plan: [{op: ally_draw, amount: 2}]}
+
+- {id: proto_kk_coordinated_strike, name: "Coordinated Strike", character: kokomi,
+   authored_by: [claude], multiplayer: true,
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 6 damage. [gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage.",
+   upgrade: {damage: 3},
+   effects: [{op: damage, amount: 6, target: enemy}],
+   plan: [{op: others_attack_damage_this_turn, amount: 3}]}
+
+- {id: proto_kk_sangonomiyas_counsel, name: "Sangonomiya's Counsel", character: kokomi,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], each other player gains 3 [gold]Block[/gold].",
+   upgrade: {power_amount: 1},
+   effects: [{op: apply_power, power: kk_sangonomiyas_counsel, amount: 3, target: self}]}

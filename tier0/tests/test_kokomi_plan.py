@@ -109,7 +109,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # now-lines that operate on the queue and print none.
     # TWENTY-FIVE after pool pass five (`EB-685`): Night Watch is retired and
     # Slack Water's Plan line, already counted, moved to Dusk.
-    assert len(planned) == 25
+    # TWENTY-SEVEN with the co-op set (review/records/coop-set-2026-09-25.md):
+    # Joint Orders and Coordinated Strike, the multiplayer tier's two Plans.
+    assert len(planned) == 27
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 

@@ -385,6 +385,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # R276 batch two: three more single calls.
                   "stage_step_forward", "stage_perform_all",
                   "stage_spend_back_all",
+                  # THE CO-OP SET (`COOP_ALLY_OPS`): Share the Spotlight, one
+                  # call into `FurinaStage.ShareTheSpotlight`.
+                  "stage_share_spotlight",
                   "generate_guest_star",
                   "copy_spotlighted_in_hand",
                   "heal",
@@ -2295,6 +2298,11 @@ PLAN_CLAUSE_KINDS = {
     "damage_if_unhurt": "DamageIfUnhurt",
     "attack_damage_this_turn": "AttackDamageThisTurn",
     "block_front_intent": "BlockFrontIntent",
+    # THE CO-OP SET. Joint Orders' "They draw 2 cards" (the player captured
+    # when the Plan is written) and Coordinated Strike's "each other player's
+    # Attacks deal 3 additional damage" (Battle Plan's clause, mirrored).
+    "ally_draw": "AllyDraw",
+    "others_attack_damage_this_turn": "OthersAttackDamageThisTurn",
     "apply_power": None,
 }
 
@@ -2353,7 +2361,10 @@ PLAN_ONLY_OPS = {"damage_per_companion_last_turn",
                  # R276. Each names the carry-out turn or the writing, so a
                  # now-line spelling would be a different, unpriced card.
                  "first_attack_twice", "first_card_free", "damage_if_unhurt",
-                 "attack_damage_this_turn", "block_front_intent"}
+                 "attack_damage_this_turn", "block_front_intent",
+                 # THE CO-OP SET: both name the carry-out turn, and the first
+                 # a player captured at writing.
+                 "ally_draw", "others_attack_damage_this_turn"}
 
 #: R276. Feigned Retreat's second printed number ("deal 14 instead") -- the
 #: hit when she lost no HP since the Plan was written. The twin of
@@ -2764,6 +2775,26 @@ APPLY_POWERS = {
     "fs_arkhe_alignment": ("ArkheAlignmentPower", None,
         "At the start of your turn, choose [gold]Ousia[/gold] or "
         "[gold]Pneuma[/gold]."),
+    # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
+    # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
+    # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
+    # two in `COOP_ALLY_POWERS` go ON another player; the other three sit on
+    # the card's owner and watch the other players.
+    "ko_pass_the_match": ("PassTheMatchPower", None,
+        "This turn, your next Attack [gold]Sets off[/gold] Klee's "
+        "[gold]Bombs[/gold] on each enemy it hits."),
+    "ko_knights_of_favonius": ("KnightsOfFavoniusPower", None,
+        "Whenever another player plays an Attack, it [gold]Sets off[/gold] "
+        "your [gold]Bombs[/gold] on each enemy it hits."),
+    "fs_guest_of_honor": ("GuestOfHonorPower", None,
+        "Until Furina's next turn, attacks on you hit your [gold]Block[/gold], "
+        "then her [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then "
+        "you."),
+    "fs_people_of_fontaine": ("PeopleOfFontainePower", None,
+        "Whenever another player plays an Attack, [gold]Raise[/gold] {X}."),
+    "kk_sangonomiyas_counsel": ("SangonomiyasCounselPower", None,
+        "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+        "[gold]Plan[/gold], each other player gains {X} [gold]Block[/gold]."),
     "mc_tectonic_tide": ("TectonicTidePower", None,
         "Whenever an [gold]Elemental Reaction[/gold] happens, deal {X} damage "
         "to that enemy."),
@@ -3560,7 +3591,34 @@ TARGET_CS = {
     "random_enemy": "TargetType.AllEnemies",
     "random_enemies": "TargetType.AllEnemies",
     "self": "TargetType.Self",
+    # THE CO-OP SET: "another player", the base game's own ally target (Lift,
+    # Believe In You, Intercept) -- a living player who is not you.
+    "ally": "TargetType.AnyAlly",
 }
+
+# --- THE CO-OP SET (review/records/coop-set-2026-09-25.md) -------------------
+#
+# NINE MULTIPLAYER-ONLY CARDS, three per character. "Another player" is the
+# `target: ally` spelling (`TARGET_CS["ally"]`, `TargetType.AnyAlly`); "each
+# other player" takes no target and lives in the POWER or the Plan clause that
+# prints it (`KleeMod.Powers.CoopSet.OtherPlayers`). The ops that may aim at
+# an ally, and nothing else may:
+COOP_ALLY_OPS = frozenset(("apply_power", "block", "block_largest_bomb",
+                           "stage_share_spotlight"))
+#: The powers a card may place ON another player. Each is placed by the card's
+#: owner (`applier: Owner.Creature`) and reads its applier back: Pass the
+#: Match sets off the APPLIER's Bombs, Guest of Honor spends the APPLIER's lead.
+COOP_ALLY_POWERS = frozenset(("ko_pass_the_match", "fs_guest_of_honor"))
+#: The three arms with a multiplayer tier -- the only rows `multiplayer:` may
+#: sit on (`card_level_reason`).
+COOP_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_")
+
+
+def _aims_at_ally(card: dict) -> bool:
+    """Does any effect this row prints -- now-line or branch -- aim at another
+    player? The Plan line never does: a Plan is written on the Bake-Kurage."""
+    return any(eff.get("target") == "ally"
+               for eff in iter_effects(card.get("effects") or []))
 
 # The ops whose `target: enemy` spelling means "the player picks one", and
 # therefore reads `cardPlay.Target` at resolution. Kept beside TARGET_CS so
@@ -3738,6 +3796,14 @@ CARD_FIELDS = {
     # `tools/art_coverage.py` derives the art bill from the very literals this
     # emits, so a stand-in adds no debt, needs no plan.tsv row and no new image.
     "replaces", "art_of",
+    # THE CO-OP SET (review/records/coop-set-2026-09-25.md): a MULTIPLAYER
+    # card, emitted as the base game's own
+    # `CardMultiplayerConstraint.MultiplayerOnly` (Tank, Demonic Shield,
+    # Flanking, Sneaky), which `GetUnlockedCards` and
+    # `CardFactory.FilterForPlayerCount` read to keep it out of every
+    # single-player offer. Prototype arm rows only, and `True` only -- see
+    # `card_level_reason`.
+    "multiplayer",
 }
 
 
@@ -3748,6 +3814,32 @@ def card_level_reason(
     unknown = set(card) - CARD_FIELDS
     if unknown:
         return f"card field(s) {sorted(unknown)} not understood"
+    # THE CO-OP SET. `multiplayer:` is a ruling, so it is literally `True`
+    # (the `innate:` precedent), and it is an ARM row's: the three overhaul
+    # arms' offer seams are the only place a multiplayer tier is read
+    # (`KleeOverhaulRoster.MultiplayerSlice` and its two twins). A row that
+    # aims at ANOTHER PLAYER must be one, because the base game refuses an
+    # ally-targeted play with nobody else alive (`UnplayableReason
+    # .NoLivingAllies`) and a single-player offer of it would be a dead card.
+    # `loader._validate_multiplayer` is the twin.
+    multiplayer = card.get("multiplayer")
+    if multiplayer is not None:
+        if multiplayer is not True:
+            return ("multiplayer must be true -- it is a ruling and not a "
+                    "switch, the way `innate:` is")
+        if not str(card.get("id", "")).startswith(COOP_ARM_PREFIXES):
+            return (f"multiplayer on {card.get('id')!r} -- only an overhaul "
+                    f"arm's row {COOP_ARM_PREFIXES} has a multiplayer tier "
+                    "to be offered through")
+    if _aims_at_ally(card) and multiplayer is not True:
+        return ("a row that aims at another player (`target: ally`) must "
+                "be `multiplayer: true` -- with nobody else alive the base "
+                "game refuses the play")
+    if _aims_at_ally(card) and any(
+            _aims_at_chosen_enemy(e)
+            for e in iter_effects(card.get("effects") or [])):
+        return ("a row that aims at another player AND at an enemy -- one "
+                "TargetType cannot say both")
     # THE PLAN IS KOKOMI'S ALONE (QUARANTINED, C.KOKOMI_OVERHAUL). The clauses
     # emit `KokomiPlan` calls and the row declares a pet-accepting TargetType,
     # so a `plan:` on anybody else's row would be a rule that character does
@@ -4056,6 +4148,28 @@ def blocked_reason(
         op = eff.get("op")
         if op not in MECHANICAL_OPS:
             return f"op '{op}'"
+        # THE CO-OP SET's `target: ally`, refused everywhere it is not built.
+        if eff.get("target") == "ally" and op not in COOP_ALLY_OPS:
+            return f"op '{op}' cannot aim at another player (target 'ally')"
+        if op == "stage_share_spotlight":
+            unknown = set(eff) - {"op", "target"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "ally":
+                return ("stage_share_spotlight gives to another player -- "
+                        "its target is 'ally'")
+        if op == "block" and eff.get("target", "self") != "self":
+            # Joint Orders' now-line: "Another player gains 6 Block." The
+            # plain printed number and nothing else -- no rider, formula or
+            # repeat has a spelling on an ally's Block yet.
+            extra = sorted(set(eff) - {"op", "amount", "target"})
+            if eff.get("target") != "ally":
+                return f"block target '{eff.get('target')}'"
+            if extra:
+                return ("an ally's block takes a literal amount and nothing "
+                        f"else, got {extra}")
+            if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+                return "an ally's block amount must be a positive literal int"
         # EB-132: hoisted out of the damage arm so it covers every op that
         # honours `times:` -- see _times_reason for which op gets which answer.
         times_reason = _times_reason(card, eff)
@@ -4336,9 +4450,13 @@ def blocked_reason(
             # read off the board and the ceiling is the only number the face
             # prints, so a row that carried an `amount` would be printing a
             # promise the rule does not make.
-            unknown = set(eff) - {"op", "cap"}
+            # THE CO-OP SET's Hide Here! adds the one other field: the
+            # player the Block goes to (`target: ally`); absent is Klee.
+            unknown = set(eff) - {"op", "cap", "target"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("target", "self") not in ("self", "ally"):
+                return f"block_largest_bomb target '{eff.get('target')}'"
             if not isinstance(eff.get("cap"), int) or eff["cap"] <= 0:
                 return "block_largest_bomb cap must be a positive literal int"
         if op == "grow_largest_bomb":
@@ -4605,6 +4723,14 @@ def blocked_reason(
                         "enemy", "all_enemies", "random_enemy"):
                     return (f"apply_power target '{eff.get('target')}' "
                             f"for enemy debuff '{power}'")
+            elif power in COOP_ALLY_POWERS:
+                # THE CO-OP SET: a power placed ON another player, and only
+                # there -- each reads its applier back, so on its own caster
+                # it would be a different rule.
+                if eff.get("target") != "ally":
+                    return (f"apply_power target '{eff.get('target')}' for "
+                            f"co-op ally power '{power}' (it goes on another "
+                            "player)")
             elif eff.get("target") != "self":
                 return f"apply_power target '{eff.get('target')}' (self power aimed at enemies)"
             unknown = set(eff) - APPLY_POWER_FIELDS
@@ -9176,6 +9302,16 @@ def build_body(
             lines.extend(_upgrade_add_lines(card, salon_deploy_present))
 
         if op == "block":
+            if eff.get("target") == "ally":
+                # THE CO-OP SET (Joint Orders): "Another player gains 6
+                # Block." The base game's Lift, verbatim -- the card's own
+                # BlockVar, the play attached, so it is the caster's
+                # Dexterity that folds in.
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await CreatureCmd.GainBlock(cardPlay.Target, "
+                    "DynamicVars.Block, cardPlay);")
+                continue
             if salon_calc_rider(card, eff) is not None:
                 lines.append(
                     "await CreatureCmd.GainBlock(Owner.Creature, "
@@ -9470,6 +9606,15 @@ def build_body(
             # (`stage_spent`).
             lines.append(stage_stmt(eff, stage_raise_amount(card, eff)))
 
+        elif op == "stage_share_spotlight":
+            # THE CO-OP SET (Share the Spotlight): the back performer's whole
+            # bar to the aimed player as Block, then its Bow. One call; an
+            # empty stage does nothing.
+            _target_guard(lines, ctx)
+            lines.append(
+                "await FurinaStage.ShareTheSpotlight(choiceContext, "
+                "Owner.Creature, cardPlay.Target, cardPlay);")
+
         elif op == "salon_rotate":
             # EB-118 §5.5. A reorder and nothing else: no tick, no Encore, no
             # bow. Synchronous by signature, which is what guarantees it.
@@ -9564,6 +9709,15 @@ def build_body(
                         f"{amount}, applier: Owner.Creature, cardSource: this);\n"
                         "        }"
                     )
+            elif eff.get("target") == "ally":
+                # THE CO-OP SET: a power placed ON the player the card was
+                # aimed at, by this card's owner -- Pass the Match and Guest
+                # of Honor both read their applier back.
+                _target_guard(lines, ctx)
+                lines.append(
+                    f"await PowerCmd.Apply<{cls}>(choiceContext, "
+                    f"cardPlay.Target, {amount}, applier: Owner.Creature, "
+                    "cardSource: this);")
             else:
                 lines.append(
                     f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
@@ -9812,9 +9966,18 @@ def build_body(
             cap = _var_or_literal(
                 cap_upgrade(card) and eff is cap_var_effect(card),
                 "BombCap", eff["cap"])
-            lines.append(
-                "await ProtoBombPower.BlockForLargestBomb("
-                f"choiceContext, Owner.Creature, {cap});")
+            if eff.get("target") == "ally":
+                # THE CO-OP SET (Hide Here!): the same read, paid to the
+                # player the card was aimed at.
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.BlockAllyForLargestBomb("
+                    f"choiceContext, Owner.Creature, {cap}, cardPlay.Target, "
+                    "cardPlay);")
+            else:
+                lines.append(
+                    "await ProtoBombPower.BlockForLargestBomb("
+                    f"choiceContext, Owner.Creature, {cap});")
 
         elif op == "damage_set_off_total":
             _target_guard(lines, ctx)
@@ -13485,8 +13648,13 @@ def emit(
     # exactly as tier0's single aim policy binds one creature for the whole
     # card play (C18). `lint_generated_structure` now fails the shape outright.
     aimed = any(_aims_at_chosen_enemy(e) for e in _effects_everywhere(card))
-    target_type = TARGET_CS["enemy"] if aimed else "TargetType.Self"
-    for eff in ([] if aimed else card["effects"]):
+    # THE CO-OP SET. A row that aims at ANOTHER PLAYER takes the base game's
+    # ally target and nothing else; `blocked_reason` has already refused a row
+    # that would aim at an enemy AND a player, which one TargetType cannot say.
+    aims_ally = _aims_at_ally(card)
+    target_type = (TARGET_CS["ally"] if aims_ally
+                   else TARGET_CS["enemy"] if aimed else "TargetType.Self")
+    for eff in ([] if aimed or aims_ally else card["effects"]):
         if eff["op"] == "damage" and eff["target"] != "self":
             target_type = TARGET_CS[eff["target"]]
             break
@@ -13550,6 +13718,9 @@ def emit(
             target_type = "KokomiTargets.PetOnly"
         elif target_type == TARGET_CS["enemy"]:
             target_type = "KokomiTargets.PetOrEnemy"
+        elif target_type == TARGET_CS["ally"]:
+            # THE CO-OP SET (Joint Orders): another player, or the jellyfish.
+            target_type = "KokomiTargets.PetOrAlly"
         else:
             target_type = "KokomiTargets.PetOrSelf"
 
@@ -14840,6 +15011,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # `art_id` above is.
     title_cs = cs_escape(display_name(card["name"]))
 
+    # THE CO-OP SET: the base game's own constraint, the line Tank, Demonic
+    # Shield, Flanking and Sneaky carry. `GetUnlockedCards` and
+    # `CardFactory.FilterForPlayerCount` read it, so no single-player reward,
+    # shop or transform can produce this card.
+    multiplayer_member = (
+        "\n    /// <summary>Multiplayer only: the base game's own constraint,"
+        " so a\n    /// single-player run is never offered this card."
+        "</summary>\n"
+        "    public override CardMultiplayerConstraint MultiplayerConstraint"
+        " =>\n        CardMultiplayerConstraint.MultiplayerOnly;\n"
+        if card.get("multiplayer") else "")
+
     return f'''// <auto-generated>
 {source_header.rstrip()}
 //     DO NOT EDIT. Edits are lost on the next regen -- change the sheet instead.
@@ -14872,7 +15055,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace {profile.namespace};
 
 public sealed class {cls} : {interfaces}
-{{{gains_block_member}{element_member}{keywords_member}{tooltip_member}
+{{{multiplayer_member}{gains_block_member}{element_member}{keywords_member}{tooltip_member}
     public override Texture2D? CustomPortrait => {profile.art_loader}.CardPortrait("{art_id}");
 
     public override List<(string, string)>? Localization => new()

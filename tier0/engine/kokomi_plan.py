@@ -33,7 +33,7 @@ from __future__ import annotations
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import powers
+from tier0.engine import coop, powers
 from tier0.engine.state import Card, CombatState, Enemy, PlanEntry
 
 # ---------------------------------------------------------------------------
@@ -76,6 +76,10 @@ PLAN_KINDS = frozenset((
     # beside it.
     "first_attack_twice", "first_card_free", "damage_if_unhurt",
     "attack_damage_this_turn", "block_front_intent",
+    # THE CO-OP SET: Joint Orders' "They draw 2 cards" and Coordinated
+    # Strike's "each other player's Attacks deal 3 additional damage". Both
+    # are about ANOTHER player, and tier 0 seats one (`engine/coop.py`).
+    "ally_draw", "others_attack_damage_this_turn",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -171,7 +175,11 @@ PLAN_ONLY_OPS = frozenset(("damage_per_companion_last_turn",
                            # a different, unpriced card.
                            "first_attack_twice", "first_card_free",
                            "damage_if_unhurt", "attack_damage_this_turn",
-                           "block_front_intent"))
+                           "block_front_intent",
+                           # THE CO-OP SET: the player is the one captured
+                           # when the Plan was written, and "next turn" is the
+                           # carry-out turn.
+                           "ally_draw", "others_attack_damage_this_turn"))
 
 #: Tide Wall's clause (`EB-335`, R246 pick 2): "Gain N Block for each Plan the
 #: Bake-Kurage carries out this morning." PLAN-ONLY by construction -- the
@@ -1492,6 +1500,13 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # `AttackUpThisTurnPower` is the C# twin.
         powers.apply_power(state, p, "attack_up_this_turn", amount)
         state.emit("plan_battle_plan", bonus=amount)
+    elif op in coop.PLAN_OPS:
+        # THE CO-OP SET: Joint Orders' ally draws, Coordinated Strike's other
+        # players hit harder. Nobody else is at a one-seat table, so the
+        # clause is carried out and lands on no one -- the C# half,
+        # `KokomiPlan.Kind.AllyDraw` / `OthersAttackDamageThisTurn`, is where
+        # the rule lives.
+        coop.no_other_player(state, op)
     elif op == "block_front_intent":
         # R276, TIDE WALL: "Gain Block equal to the damage the enemy intends
         # to deal" (+ the upgrade's flat bonus). The FRONT enemy's intent read

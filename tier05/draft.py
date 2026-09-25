@@ -783,7 +783,10 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # R276 PICK 1, the halves rewrite: five plan clauses, each with its own
     # branch in `_op_price` on the same terms.
     "first_attack_twice", "first_card_free", "damage_if_unhurt",
-    "attack_damage_this_turn", "block_front_intent"))
+    "attack_damage_this_turn", "block_front_intent",
+    # THE CO-OP SET: two plan clauses about ANOTHER player, priced ZERO in
+    # `_op_price` -- the one-seat drafter has nobody for them to pay.
+    "ally_draw", "others_attack_damage_this_turn"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -1141,6 +1144,10 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Battle Plan: `next_attack_damage`'s rule for ONE Attack -- how many
         # Attacks the turn holds is a hand fact an offer screen cannot read.
         return _neutral_amount(fx, 0) * STATIC_NEXT_ATTACK_SHARE
+    if op in ("ally_draw", "others_attack_damage_this_turn"):
+        # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
+        # multiplayer-only row is never offered to this drafter anyway.
+        return 0.0
     if op == "block_front_intent":
         # Tide Wall: the flat bonus only. The intent is a board fact an offer
         # screen cannot read, so that part is a deliberate ZERO.
@@ -2448,7 +2455,9 @@ FURINA_STAGE_OPS = ("stage_summon", "stage_raise", "stage_scene_change",
                     "stage_curtain_call", "stage_final_bow",
                     # R276 batch two.
                     "stage_step_forward", "stage_perform_all",
-                    "stage_spend_back_all")
+                    "stage_spend_back_all",
+                    # THE CO-OP SET.
+                    "stage_share_spotlight")
 
 #: Their shared rationale, written once. `STATIC_OP_PRICING` is prose the
 #: parity lint reads as a key set, and eight copies of one sentence would rot
@@ -2586,6 +2595,13 @@ STATIC_OP_PRICING: dict[str, str] = {
                                "an offer screen cannot read",
     "block_front_intent": "its flat bonus only; ZERO for the intent part, a "
                           "board fact an offer screen cannot read",
+    # --- the co-op set (review/records/coop-set-2026-09-25.md) ---
+    "ally_draw": "ZERO: cards drawn by ANOTHER player, and tier 0.5 seats "
+                 "one; a multiplayer-only row is never offered here",
+    "others_attack_damage_this_turn": "ZERO: damage dealt by OTHER players, "
+                                      "and tier 0.5 seats one; a "
+                                      "multiplayer-only row is never offered "
+                                      "here",
     # --- the Furina reframe (QUARANTINED, furina_reframe.FURINA_REFRAME) ---
     "drain_fanfare": "ZERO: it SPENDS the meter, and what the spend buys is "
                      "printed by the effect after it as an `amount_formula` "
@@ -2608,6 +2624,7 @@ STATIC_OP_PRICING: dict[str, str] = {
     "stage_step_forward": _STAGE_ZERO,
     "stage_perform_all": _STAGE_ZERO,
     "stage_spend_back_all": _STAGE_ZERO,
+    "stage_share_spotlight": _STAGE_ZERO,
     # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "

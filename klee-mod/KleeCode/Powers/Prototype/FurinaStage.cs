@@ -537,6 +537,40 @@ public static class FurinaStage
         return result.Paid;
     }
 
+    /// <summary>
+    /// THE CO-OP SET, <i>Share the Spotlight</i>: "Your back performer gives
+    /// all its Fanfare to another player as Block, then takes a Bow."
+    ///
+    /// <see cref="SpendAllOfBack"/>'s move with the payout in the middle: the
+    /// bar leaves EXACTLY, so this is an exact emptying and the performer
+    /// takes a real Bow -- its departure effect, Thunderous Applause, and A
+    /// Five-Century Act's return all fire (<see cref="Bow"/>). The Block lands
+    /// FIRST, because the face prints it first. It is the card's Block
+    /// (<c>ValueProp.Move</c> with the play attached), the same pipeline Final
+    /// Bow's "Block equal to its Fanfare" and the base game's Lift take, so her
+    /// Dexterity is what folds into it.
+    ///
+    /// AN EMPTY STAGE DOES NOTHING, and the card is still playable (the
+    /// design's own words). Returns what was given.
+    /// </summary>
+    public static async Task<int> ShareTheSpotlight(
+        PlayerChoiceContext choiceContext, Creature? owner, Creature? ally,
+        CardPlay? cardPlay)
+    {
+        if (!LiveFor(owner)) return 0;
+        var result = FurinaStageLedger.For(owner!).SpendAllOfBack();
+        if (!result.Fired) return 0;
+        if (ally is { IsAlive: true } && result.Paid > 0)
+        {
+            await CreatureCmd.GainBlock(
+                ally, result.Paid, ValueProp.Move, cardPlay);
+        }
+        if (result.Exit is { } exit) await Bow(choiceContext, owner!, exit);
+        await FurinaStagePets.Sync(owner);
+        Vfx.FurinaStageStrip.Refresh(owner);
+        return result.Paid;
+    }
+
     /// <summary>R276 batch two, <i>Tutti!</i>: every performer performs its
     /// act now, front first. The cast is snapshotted, as the end-of-turn
     /// sweep's is. A Five-Century Act's returnee "re-enters without acting
