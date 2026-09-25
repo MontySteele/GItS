@@ -31,7 +31,7 @@ Status: RULED 2026-09-25 evening (picks at the end); build after the draft-3 fix
 
 ## The frame
 
-1. **A guest card** is a Furina Skill titled with the guest's name alone. Its face opens with the keyword **Guest Star**, not Summon ([USER], pick 1: "'Summon' doesn't sound quite right here - I think 'Guest Star' is better"). For example: "Guest Star, with 6 Fanfare. End of your turn: …". The Guest Star tip says what a guest is: a performer that joins the stage, one of at most two. A Companion card is titled "name, a dash, then its own", so the two read apart.
+1. **A guest card is titled "Guest Star: <name>"**, for example "Guest Star: Neuvillette". [USER], pick 1: "I did actually mean the card's title (so you can see at a glance if the card is summoning someone or if it's a regular companion card)". The face says what arrives: "Neuvillette joins the stage with 6 Fanfare. End of your turn: …". The keyword Guest Star carries the tip: a performer who joins the stage, at most two at once.
 2. **It summons to the back-most empty seat.** On a full stage it is a recast: the front performer Bows, and the guest arrives at the back holding that performer's Fanfare.
 3. **Guests are performers in every other way.** A guest's Fanfare is its health. It takes hits in front, fades behind the front, and counts for Full House and the rest.
 4. **Every act pays.** A repeated act (Full House, Tutti!, Bis!) pays again. So Full House makes Neuvillette burn out twice as fast for the same total output, and Tutti! taxes the cast through Clorinde a second time. That is a tempo choice, and it is meant.
@@ -101,7 +101,7 @@ The three dials [USER] expects to tune over a few rounds:
 
 ## Ruled, 2026-09-25 evening
 
-1. **Titles: the bare name, and the face keyword is Guest Star, not Summon.** [USER]: "'Summon' doesn't sound quite right here - I think 'Guest Star' is better."
+1. **Titles: "Guest Star: <name>".** [USER]: "'Summon' doesn't sound quite right here - I think 'Guest Star' is better", then: "I did actually mean the card's title (so you can see at a glance if the card is summoning someone or if it's a regular companion card)."
 2. **Sigewinne gives to the performer behind her. From the back seat, "behind" wraps to the front.** [USER]: "I'd say 'the one behind her' and if she's in the back then the one 'behind' is the frontmost one. But I think that might make for confusing card text... might need a clearer explanation." The face spells the wrap out instead of leaning on the word: "Give 3 of her Fanfare to the performer behind her, or to your front performer if she is at the back." From the middle she feeds the bank; from the back she feeds the shield. Where she stands is the choice.
 3. **No Companion bonus for now.** [USER]: "we can revisit if that becomes an interesting idea later (e.g. grabbing all of the cards related to a specific character to chase some mini-payoff)."
 4. **Two guests at once.** [USER]: "Sounds good."
