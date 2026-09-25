@@ -659,6 +659,15 @@ STAGE_SHORT_NAMES = {
     "usher": "Usher",
     "chevalmarin": "Chevalmarin",
     "crabaletta": "Crabaletta",
+    # THE GUEST CAST (2026-09-25): a guest's name is its whole name.
+    "neuvillette": "Neuvillette",
+    "clorinde": "Clorinde",
+    "navia": "Navia",
+    "chevreuse": "Chevreuse",
+    "wriothesley": "Wriothesley",
+    "sigewinne": "Sigewinne",
+    "charlotte": "Charlotte",
+    "lynette": "Lynette",
 }
 
 
@@ -677,8 +686,16 @@ STAGE_LEAVE_REASONS = {
     "final_bow": "took its Bow and left",
     # 2026-09-25: a random summon on a full stage. The lead bows and moves to
     # the back seat keeping its bar; the arrival line that follows says where.
-    "recast": ("took its Bow to make room for a summon, and comes back to "
-               "the back seat with its Fanfare"),
+    # 2026-09-25: a summon on a full stage. The front Bows and leaves; the
+    # newcomer takes the back seat holding its Fanfare, which the arrival line
+    # that follows says (since the trio can be cloned, it may be anyone).
+    "recast": ("took its Bow to make room for a summon, which takes the back "
+               "seat with its Fanfare"),
+    # THE GUEST CAST (2026-09-25): a guest's act paid its last Fanfare (its
+    # own, or a tax), and a second Guest Star for a guest on stage.
+    "paid": "paid its last Fanfare, so it takes a Bow",
+    "repeat": ("took its Bow for a second Guest Star, and comes back to the "
+               "same seat with the new Fanfare added"),
 }
 STAGE_LEFT_UNSAID = "left the stage"
 
@@ -807,6 +824,10 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # beat and on an older build.
             "hp": (None if row.get("hp") is None or _int(row.get("hp")) < 0
                    else _int(row.get("hp"))),
+            # THE GUEST CAST (2026-09-25): on a `pay` beat, whose act took
+            # the Fanfare (the page's short name). Empty elsewhere.
+            "by": STAGE_SHORT_NAMES.get(_text(row.get("by_member")),
+                                        _text(row.get("by"))),
         })
     # R276 batch two: the mod's forecast of the end-of-turn acts' Block, with
     # Arkhe Alignment's multiple and Full House's extra acts folded in. None
@@ -814,7 +835,38 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
     # flat per-Usher sum.
     act_block = raw.get("act_block")
     return {"seats": seats, "log": log,
-            "act_block": None if act_block is None else _int(act_block)}
+            "act_block": None if act_block is None else _int(act_block),
+            "forecast": _stage_forecast(raw.get("forecast"))}
+
+
+def _stage_forecast(raw: Any) -> dict[str, Any] | None:
+    """RULE 7 OF THE GUEST CAST (2026-09-25): the mod's forecast of the end of
+    this turn -- each performer's bar after the acts, their payments and the
+    fade, and the posted attacks split between the front performer and
+    Furina. `FurinaStage.Forecast`, carried as the mod computes it: this page
+    does no arithmetic of its own on it. None on a build that sends none."""
+    if not isinstance(raw, dict):
+        return None
+
+    def rows(key):
+        out = []
+        for row in (raw.get(key) or []):
+            if not isinstance(row, dict):
+                continue
+            member = _text(row.get("member"))
+            out.append({"name": STAGE_SHORT_NAMES.get(
+                            member, _text(row.get("name"))),
+                        "now": _int(row.get("now")),
+                        "after": _int(row.get("after")),
+                        "leaves": bool(row.get("leaves"))})
+        return out
+
+    return {"seats": rows("seats"), "arrivals": rows("arrivals"),
+            "block": _int(raw.get("block_after_acts")),
+            "intent_known": bool(raw.get("intent_known")),
+            "front_takes": _int(raw.get("front_takes")),
+            "reaches_furina": _int(raw.get("reaches_furina")),
+            "unknown": bool(raw.get("unknown"))}
 
 
 def name_stage_targets(stage: dict[str, Any], wire: list[dict[str, Any]],

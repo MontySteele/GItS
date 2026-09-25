@@ -415,7 +415,18 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # (`gen.stage_summon_tip_calls`), not off the table.
                     "KLEEMOD-ARM_STAGE_SUMMON", "KLEEMOD-ARM_STAGE_USHER",
                     "KLEEMOD-ARM_STAGE_CHEVALMARIN",
-                    "KLEEMOD-ARM_STAGE_CRABALETTA"}
+                    "KLEEMOD-ARM_STAGE_CRABALETTA",
+                    # THE GUEST CAST (2026-09-25): the Guest Star keyword and
+                    # the eight guests' tips, attached off the `stage_guest`
+                    # op (`gen.stage_guest_tip_calls`) the same way.
+                    "KLEEMOD-ARM_STAGE_GUEST_STAR",
+                    "KLEEMOD-ARM_STAGE_NEUVILLETTE",
+                    "KLEEMOD-ARM_STAGE_CLORINDE", "KLEEMOD-ARM_STAGE_NAVIA",
+                    "KLEEMOD-ARM_STAGE_CHEVREUSE",
+                    "KLEEMOD-ARM_STAGE_WRIOTHESLEY",
+                    "KLEEMOD-ARM_STAGE_SIGEWINNE",
+                    "KLEEMOD-ARM_STAGE_CHARLOTTE",
+                    "KLEEMOD-ARM_STAGE_LYNETTE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -613,7 +624,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "summons a performer.",
             # Draft 3 (2026-09-25): the Bow is the performer's act once more.
             "A performer that leaves the stage acts one last time on its way ",
-            "out.\");",
+            # The Guest Cast (2026-09-25): a guest's Bow does not pay.
+            "out, without paying.\");",
             "Takes hits first. Regains ",
             " [gold]Fanfare[/gold] at the start of your turn.",
             # Round four's empty-stage summon is the Fanfare tip's (above).
@@ -1339,7 +1351,7 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
         "End of your turn: deal 5 damage to a random enemy.")
     assert rows["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out.")
+        "out, without paying.")
 
 
 # ---------------------------------------------------------------------------

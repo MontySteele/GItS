@@ -1456,8 +1456,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # 2026-09-25 evening, [USER]: "I think it would be better to have the
     # performer bow immediately (during the opponent's turn) instead of at
     # the start of your turn." The waiting Bow is gone.
+    # THE GUEST CAST (2026-09-25): a guest's act may pay, and its Bow does
+    # not -- stated once, here, for every performer.
     "Bow": ("A performer that leaves the stage acts one last time on its "
-            "way out."),
+            "way out, without paying."),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
     # because a seat may meet either word alone -- the page's one addendum to
     # the tip, `STAGE_ACTS`, which also carries the seat count (the
@@ -1492,6 +1494,28 @@ ARM_KEYWORDS: dict[str, str] = {
                                   "enemies."),
     "Mademoiselle Crabaletta": ("End of your turn: deal 5 damage to a random "
                                 "enemy."),
+    # THE GUEST CAST (2026-09-25): `ArmKeywordTips.ForGuestStar` and the eight
+    # guests' tips, word for word with the numerals written out. Each is also
+    # the guest's badge on its body in game. The act lives here and on the
+    # badge, not on the card's face ("<Name> joins the stage with N
+    # Fanfare.").
+    "Guest Star": ("A performer who joins the stage, one of each. A second "
+                   "copy makes it Bow, then return with the new Fanfare "
+                   "added."),
+    "Neuvillette": ("End of your turn: pay 3 of his Fanfare to deal 8 Hydro "
+                    "damage to ALL enemies."),
+    "Clorinde": ("End of your turn: take 1 Fanfare from each other performer "
+                 "to deal 8 Electro damage to a random enemy."),
+    "Navia": ("End of your turn: deal Geo damage equal to her Fanfare to a "
+              "random enemy."),
+    "Chevreuse": "End of your turn: Spend 2 to gain 1 Energy next turn.",
+    "Wriothesley": ("End of your turn: deal Cryo damage to a random enemy "
+                    "equal to twice the Fanfare he lost since his last act."),
+    "Sigewinne": ("End of your turn: give 3 of her Fanfare to the performer "
+                  "behind her, or to your front performer if she is at the "
+                  "back."),
+    "Charlotte": "End of your turn: each other performer gains 1 Fanfare.",
+    "Lynette": "End of your turn: Swirl a random enemy with an aura.",
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1652,7 +1676,11 @@ _STAGE_RETIRED_KEYWORDS = frozenset({"Encore"})
 # `EB-728`'s Fanfare finding one table over.
 _STAGE_ONLY_KEYWORDS = frozenset({
     "Gentilhomme Usher", "Surintendante Chevalmarin",
-    "Mademoiselle Crabaletta"})
+    "Mademoiselle Crabaletta",
+    # THE GUEST CAST (2026-09-25): a shipped Fontaine Companion shares a
+    # guest's name, and off the arm its face means that Companion.
+    "Guest Star", "Neuvillette", "Clorinde", "Navia", "Chevreuse",
+    "Wriothesley", "Sigewinne", "Charlotte", "Lynette"})
 
 # `EB-728`. AND THE ROW THE SHIPPED KIT STILL OWNS.
 #
@@ -1742,6 +1770,16 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Ousia": "furina", "Pneuma": "furina",
     "Summon": "furina", "Gentilhomme Usher": "furina",
     "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
+    # THE GUEST CAST (2026-09-25).
+    "Guest Star": "furina",
+    "Neuvillette": "furina",
+    "Clorinde": "furina",
+    "Navia": "furina",
+    "Chevreuse": "furina",
+    "Wriothesley": "furina",
+    "Sigewinne": "furina",
+    "Charlotte": "furina",
+    "Lynette": "furina",
 }
 
 
@@ -1862,6 +1900,20 @@ _ARM_KEYWORD_RE = {
         r"\bChevalmarin\b|\b[Ss]ummon (?:a|2|two) random performer"),
     "Mademoiselle Crabaletta": re.compile(
         r"\bCrabaletta\b|\b[Ss]ummon (?:a|2|two) random performer"),
+    # THE GUEST CAST (2026-09-25). The keyword on a Guest Star's title or
+    # face, and each guest by its name -- but never a shipped Companion's
+    # dashed title ("Neuvillette — O Tears, I Shall Repay"), which is that
+    # Companion and not the guest.
+    "Guest Star": re.compile(r"\bGuest Star\b|\bjoins the stage with\b"),
+    "Neuvillette": re.compile(r"\bNeuvillette\b(?!\s*[—–-])"),
+    "Clorinde": re.compile(r"\bClorinde\b(?!\s*[—–-])"),
+    "Navia": re.compile(r"\bNavia\b(?!\s*[—–-])"),
+    "Chevreuse": re.compile(r"\bChevreuse\b(?!\s*[—–-])"),
+    "Wriothesley": re.compile(r"\bWriothesley\b(?!\s*[—–-])"),
+    "Sigewinne": re.compile(r"\bSigewinne\b(?!\s*[—–-])"),
+    "Charlotte": re.compile(r"\bCharlotte\b(?!\s*[—–-])"),
+    "Lynette": re.compile(r"\bLynette\b(?!\s*[—–-])"),
+
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
     # faces before the meter exists, and every Furina row the Stage does not

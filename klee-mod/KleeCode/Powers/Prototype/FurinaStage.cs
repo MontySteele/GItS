@@ -87,7 +87,7 @@ namespace KleeMod.Powers;
 /// its seat rounds the brief's sec.2 retirement was taken whole, and this is
 /// the only Furina arm in the tree.
 /// </summary>
-public static class FurinaStage
+public static partial class FurinaStage
 {
     /// <summary>
     /// The arm's default: <c>-p:FurinaStage=true</c> turns it on, and a
@@ -142,6 +142,14 @@ public static class FurinaStage
     {
         "chevalmarin" => StagePerformer.Chevalmarin,
         "crabaletta" => StagePerformer.Crabaletta,
+        "neuvillette" => StagePerformer.Neuvillette,
+        "clorinde" => StagePerformer.Clorinde,
+        "navia" => StagePerformer.Navia,
+        "chevreuse" => StagePerformer.Chevreuse,
+        "wriothesley" => StagePerformer.Wriothesley,
+        "sigewinne" => StagePerformer.Sigewinne,
+        "charlotte" => StagePerformer.Charlotte,
+        "lynette" => StagePerformer.Lynette,
         _ => StagePerformer.Usher,
     };
 
@@ -386,8 +394,11 @@ public static class FurinaStage
         if (ledger.BowFromFront() is not { } leaver) return;
         var who = named ?? RollAny(owner);
         if (named == null) NoteSummoned(who);
+        // The leaver bows HOLDING its bar (Navia reads it), which then goes to
+        // the newcomer: a recast moves Fanfare, it does not spend it.
         await Bow(choiceContext, owner,
-                  new StageExit(leaver.Who, StageDeparture.Spent),
+                  new StageExit(leaver.Who, StageDeparture.Spent,
+                                leaver.Fanfare, 0, leaver.LostSinceAct),
                   mayReturn: false);
         if (who == leaver.Who)
         {
@@ -595,6 +606,7 @@ public static class FurinaStage
             if (seat.Resting) continue;
             await Perform(choiceContext, owner, seat);
         }
+        await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
 
@@ -715,24 +727,22 @@ public static class FurinaStage
     {
         if (!LiveFor(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
-        var company = ledger.TakePendingCurtainCall();
-        foreach (var who in company)
+        var exits = ledger.TakePendingCurtainExits();
+        var company = exits.Select(exit => exit.Who).ToList();
+        foreach (var exit in exits)
         {
             // R276 batch two: the card's own "then returns at 1" is the
             // return, so A Five-Century Act does not return them a second
             // time -- a performer returns once.
-            await Bow(choiceContext, owner!,
-                      new StageExit(who, StageDeparture.Spent),
-                      mayReturn: false);
+            await Bow(choiceContext, owner!, exit, mayReturn: false);
         }
         // "Then returns at 1": to an EMPTY seat, and a returnee that finds
         // none does not return. Round four made that reachable -- Thunderous
         // Applause's Raise between the bows now summons onto the stage this
         // card emptied -- and a return that ROTATED would push that performer
         // off. The sim's `bow_and_return` has always read the clause this way.
-        // And never a second copy (2026-09-25): Usher's Bow summons a random
-        // performer onto that same empty stage, and one it picked is already
-        // back (`FurinaStageLedger.ReturnCompany`).
+        // One of each GUEST (2026-09-25): a guest already back does not
+        // return twice (`FurinaStageLedger.ReturnCompany`).
         ledger.ReturnCompany(company);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
@@ -779,6 +789,9 @@ public static class FurinaStage
                                      Creature? owner, StageSeat seat)
     {
         if (!LiveFor(owner)) return;
+        // A seat that left mid-sweep (a guest's payment emptied it, and it
+        // took its Bow) does not also act.
+        if (!FurinaStageLedger.For(owner!).Holds(seat)) return;
         await Act(choiceContext, owner!, seat.Who,
                   FurinaStageLedger.ActEvent, seat);
     }
@@ -796,8 +809,27 @@ public static class FurinaStage
     /// </summary>
     private static async Task Act(PlayerChoiceContext choiceContext,
                                   Creature owner, StagePerformer who,
-                                  string beat, StageSeat? seat = null)
+                                  string beat, StageSeat? seat = null,
+                                  StageExit? exit = null)
     {
+        // THE GUEST CAST (2026-09-25), rule 4: EVERY ACT PAYS, first. The
+        // Fanfare half is the ledger's (so the forecast runs the same move);
+        // an act that cannot pay does nothing. A Bow is free (rule 5): the
+        // ledger is handed no seat and takes no payment. The trio never pay.
+        var owed = new List<StageExit>();
+        var bowing = seat == null;
+        if (!FurinaStageLedger.For(owner).ActFanfare(
+                who, bowing ? null : seat, exit, owed))
+        {
+            Vfx.FurinaStageStrip.Refresh(owner);
+            return;
+        }
+        if (IsGuest(who))
+        {
+            await GuestAct(choiceContext, owner, who, beat, seat, exit);
+            await BowTheOwed(choiceContext, owner, owed);
+            return;
+        }
         // `EB-735`, and `EB-511`'s lesson: the beat files WHAT THE BOARD LOST,
         // measured across the act, and never the clause's own printed figure.
         // Crabaletta prints 5 and a Vulnerable makes it 7; a receipt quoting
@@ -856,6 +888,9 @@ public static class FurinaStage
                 }
                 break;
         }
+        // Rule 6 of the Guest Cast: every act resets the performer's loss
+        // count (only Wriothesley reads it).
+        if (seat != null) seat.LostSinceAct = 0;
         NoteBeat(owner, beat, who, before, hit, each, struck, seat);
     }
 
@@ -904,9 +939,13 @@ public static class FurinaStage
             for (var i = 0; i < times; i++)
             {
                 if (owner!.IsDead) return;
+                // A guest that paid its last Fanfare, or was taxed out, has
+                // left and Bowed; it does not act again (rule 4).
+                if (!ledger.Holds(seat)) break;
                 await Perform(choiceContext, owner, seat);
             }
         }
+        await FurinaStagePets.Sync(owner);
         ledger.EndRest();
         ledger.ResetActMultipliers();
         // Rule 12 (draft 3, 2026-09-25): THE APPLAUSE FADES, after the acts.
@@ -963,7 +1002,8 @@ public static class FurinaStage
                                  bool mayReturn = true)
     {
         if (!exit.Bows || !LiveFor(owner)) return;
-        await Act(choiceContext, owner, exit.Who, "bow");
+        await Act(choiceContext, owner, exit.Who,
+                  FurinaStageLedger.BowEvent, null, exit);
         await AfterBow(choiceContext, owner, exit.Who, mayReturn);
     }
 
@@ -1139,4 +1179,16 @@ public enum StagePerformer
     Usher,
     Chevalmarin,
     Crabaletta,
+
+    // THE GUEST CAST (2026-09-25, review/active/furina-guest-batch-2026-09-25.md):
+    // eight Fontaine characters who reach the Stage through Furina's own
+    // Guest Star cards. Performers in every other way; one of each on stage.
+    Neuvillette,
+    Clorinde,
+    Navia,
+    Chevreuse,
+    Wriothesley,
+    Sigewinne,
+    Charlotte,
+    Lynette,
 }

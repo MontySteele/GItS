@@ -110,5 +110,5 @@ def test_another_characters_run_is_not_taught_the_stages_summon():
 
 def test_the_full_stage_bow_says_why_the_lead_left():
     assert STAGE_LEAVE_REASONS["recast"] == (
-        "took its Bow to make room for a summon, and comes back to the back "
-        "seat with its Fanfare")
+        "took its Bow to make room for a summon, which takes the back seat "
+        "with its Fanfare")

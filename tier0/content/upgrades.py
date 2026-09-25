@@ -924,6 +924,13 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "mend":
             ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
                              "amount", val)
+        elif key == "stage_guest":
+            # THE GUEST CAST (2026-09-25): what a Guest Star arrives with, the
+            # first top-level `stage_guest` -- codegen's
+            # `stage_guest_var_effect` binds the same one.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "stage_guest"),
+                             "amount", val)
         elif key == "stage_raise":
             # R276 batch two (Hold Your Places, Gala Dinner): a Stage Raise's
             # printed N, the first top-level `stage_raise` -- codegen's

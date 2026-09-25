@@ -238,9 +238,12 @@ public class PoolCellCoverageTests
             // deep and give the Uncommon Powers a cell. The Rare cells by TYPE
             // are still short -- one Attack, two Powers, two Skills -- and are
             // seamed by the widening ladder.
+            //
+            // THE GUEST CAST (2026-09-25) filled Rare/Skill: three Rare Guest
+            // Stars (Neuvillette, Clorinde, Navia).
             "furina-stage" => new[]
             {
-                "Rare/Attack", "Rare/Power", "Rare/Skill",
+                "Rare/Attack", "Rare/Power",
             },
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();

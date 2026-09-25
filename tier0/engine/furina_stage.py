@@ -85,6 +85,29 @@ ACT_CRABALETTA_DAMAGE = 5    # to a random enemy.
 # (draft 3, 2026-09-25, the Stage review's pick 1). It has no numbers of its
 # own: `_bow` calls `perform`.
 
+# THE GUEST CAST (2026-09-25, review/active/furina-guest-batch-2026-09-25.md,
+# ruled that evening; then no guest cap, and one of each guest). Eight Fontaine
+# characters reach the Stage through Furina's own Guest Star cards; each is a
+# performer in every other way. What a guest ARRIVES with is its card's; the
+# acts' numbers are these, mirrored by `FurinaStageLaw`. C# twin:
+# `Powers/Prototype/FurinaStageGuests.cs`.
+GUESTS = ("neuvillette", "clorinde", "navia", "chevreuse", "wriothesley",
+          "sigewinne", "charlotte", "lynette")
+ACT_NEUVILLETTE_PRICE = 3     # of his own Fanfare ...
+ACT_NEUVILLETTE_DAMAGE = 8    # ... for Hydro damage to ALL enemies.
+ACT_CLORINDE_TAX = 1          # from each other performer ...
+ACT_CLORINDE_DAMAGE = 8       # ... for Electro damage to a random enemy.
+ACT_CHEVREUSE_PRICE = 2       # Spent from the back performer ...
+ACT_CHEVREUSE_ENERGY = 1      # ... for Energy next turn.
+ACT_WRIOTHESLEY_RATE = 2      # Cryo damage per Fanfare lost since his act.
+ACT_SIGEWINNE_GIFT = 3        # to the performer behind her.
+ACT_CHARLOTTE_GIFT = 1        # to each other performer.
+
+#: The elements the guests' damage acts carry (the Guest Cast's LAW
+#: amendment: a guest on Furina's stage may carry its element).
+GUEST_ELEMENTS = {"neuvillette": "hydro", "clorinde": "electro",
+                  "navia": "geo", "wriothesley": "cryo"}
+
 # Rule 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of Furina's
 # turn, after the acts, each performer BEHIND THE FRONT loses half of its
 # Fanfare above this, rounded down (`fade_loss`). The front never fades. The
@@ -202,6 +225,18 @@ POOL_SUBS: dict[str, str] = {
     # --- Rares (two) ---
     "endless_waltz": "proto_fs_arkhe_alignment",        # 2 Power for 2 Power
     "prima_donna": "proto_fs_five_century_act",         # 2 Power for 2 Power
+    # --- THE GUEST CAST (2026-09-25): eight Guest Star Skills, each for a
+    # same-rarity shipped Skill the game's EB-736 filter already drops.
+    # Rares (three). ---
+    "reginas_mercy": "proto_fs_guest_star_neuvillette",       # Skill, Skill
+    "thunderous_ovation": "proto_fs_guest_star_clorinde",     # Skill, Skill
+    "encore_performance": "proto_fs_guest_star_navia",        # Skill, Skill
+    # --- Uncommons (five) ---
+    "audience_participation": "proto_fs_guest_star_chevreuse",
+    "deep_breath": "proto_fs_guest_star_wriothesley",
+    "standing_room_only": "proto_fs_guest_star_sigewinne",
+    "limelight": "proto_fs_guest_star_charlotte",
+    "take_it_from_the_top": "proto_fs_guest_star_lynette",
 }
 
 
@@ -287,8 +322,11 @@ GAIN_POWER = "power"            # Rapt Audience, Arkhe Alignment's Pneuma
 GAIN_SUMMON = "summon"          # rule 3, a newcomer at 1
 GAIN_EMPTY_SUMMON = "empty_summon"   # a Raise onto an empty stage, at the amount
 GAIN_RETURN = "return"          # A Five-Century Act, the Rare's return at 1
+GAIN_GUEST = "guest"            # a Guest Star's arrival (or its repeat's add)
+GAIN_GIFT = "gift"              # Sigewinne's and Charlotte's gifts
 GAIN_SOURCES = (GAIN_OPENING, GAIN_REGEN, GAIN_CARD, GAIN_BOW, GAIN_POWER,
-                GAIN_SUMMON, GAIN_EMPTY_SUMMON, GAIN_RETURN)
+                GAIN_SUMMON, GAIN_EMPTY_SUMMON, GAIN_RETURN, GAIN_GUEST,
+                GAIN_GIFT)
 
 #: The losses that are not a payment.
 LOSS_FADED = "faded"
@@ -314,7 +352,10 @@ def ledger(state) -> dict:
         led.update(start=total_fanfare(state.player),
                    gained={s: 0 for s in GAIN_SOURCES},
                    spent=0, paid_other={}, left=0, faded=0, hit=0,
-                   back_at_turn_end=[])
+                   back_at_turn_end=[],
+                   # THE GUEST CAST's measures (2026-09-25): per guest, acts
+                   # that could not pay and turns on stage (at turn close).
+                   unpaid={}, guest_turns={})
     return led
 
 
@@ -456,9 +497,10 @@ def recast_front(state, newcomer: str | None = None) -> None:
     pair = seats.pop(0)
     leaver, kept = pair
     _unrest(p, pair)
+    exit_ = _exit(p, leaver, 0, held=kept)
     state.emit("stage_leave", member=leaver, bowed=True, reason="recast",
                fanfare=kept)
-    _bow(state, leaver)
+    _bow(state, leaver, exit_)
     _after_bow(state, leaver, may_return=False)
     if len(seats) >= SEATS:
         # No seat to come back to: the bar walks off with the performer.
@@ -491,28 +533,55 @@ def rotate(state) -> None:
 
 
 def _leave(state, index: int, *, bowed: bool, reason: str,
-           pay_now: bool = True) -> None:
-    """A performer leaves the stage. ONE implementation, three callers (a hit
-    that empties the bar, a Spend that does, and Final Bow), so "a performer
-    at 0 Fanfare bows" (rule 7, 2026-09-25) cannot drift between them.
+           pay_now: bool = True, owed: list | None = None) -> dict:
+    """A performer leaves the stage. ONE implementation, every caller (a hit
+    that empties the bar, a Spend that does, Final Bow, a guest's payment),
+    so "a performer at 0 Fanfare bows" (rule 7, 2026-09-25) cannot drift
+    between them.
 
     `pay_now=False` is the hit's: the bow is owed, and `settle_hit` pays it
-    once the hit has been dealt -- `FurinaStage.Flush`'s twin."""
+    once the hit has been dealt -- `FurinaStage.Flush`'s twin. `owed` is a
+    guest act's: the Bow is appended there and paid after the act's effect
+    (rule 4). Returns the exit, which is what the Bow reads (`_exit`)."""
     p = state.player
     seats = _seats(p)
     book_loss(state, LOSS_LEFT, seats[index][1])   # Final Bow's bar; else 0
     pair = seats.pop(index)
     member, remaining = pair
     _unrest(p, pair)
+    exit_ = _exit(p, member, index, held=0)
     state.emit("stage_leave", member=member, bowed=bowed, reason=reason,
                fanfare=remaining)
-    if bowed and not pay_now:
-        owed = list(getattr(state, _HIT_BOWS, []) or [])
-        owed.append(member)
-        setattr(state, _HIT_BOWS, owed)
+    if bowed and owed is not None:
+        owed.append(exit_)
+    elif bowed and not pay_now:
+        pending = list(getattr(state, _HIT_BOWS, []) or [])
+        pending.append(exit_)
+        setattr(state, _HIT_BOWS, pending)
     elif bowed:
-        _bow(state, member)
+        _bow(state, member, exit_)
         _after_bow(state, member, may_return=True)
+    return exit_
+
+
+def _exit(player, member: str, index: int, held: int) -> dict:
+    """What a Bow reads, taken as the performer leaves (the Guest Cast,
+    2026-09-25): the Fanfare it still HELD (Navia; 0 at 0 Fanfare and for a
+    cash-out), the seat it stood in (Sigewinne gives to the one behind), and
+    what it LOST since its last act (Wriothesley, the hit that took him down
+    included). A guest's loss count leaves the stage with it. C# twin:
+    `StageExit`."""
+    lost = int(player.stage_lost.pop(member, 0)) if member in GUESTS else 0
+    return {"member": member, "held": int(held), "former": int(index),
+            "lost": lost}
+
+
+def _lose(player, member: str, amount: int) -> None:
+    """A bar went down: count it for Wriothesley's reading (rule 6). Guests
+    only -- one of each, so the name is the seat. C# twin:
+    `FurinaStageLedger.Drain`."""
+    if amount > 0 and member in GUESTS:
+        player.stage_lost[member] = int(player.stage_lost.get(member, 0)) + int(amount)
 
 
 #: The bows hits have emptied performers into, waiting for `settle_hit`. On
@@ -536,11 +605,11 @@ def settle_hit(state) -> None:
         return
     setattr(state, _HIT_BOWS, [])
     p = state.player
-    for member in owed:
+    for exit_ in owed:
         if not active(p) or not p.alive or not state.living_enemies:
             return
-        _bow(state, member)
-        _after_bow(state, member, may_return=True)
+        _bow(state, exit_["member"], exit_)
+        _after_bow(state, exit_["member"], may_return=True)
 
 
 def is_resting(player, pair) -> bool:
@@ -579,7 +648,7 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
         state.emit("stage_return", member=member, fanfare=SUMMON_FANFARE)
 
 
-def _bow(state, member: str) -> None:
+def _bow(state, member: str, exit_: dict | None = None) -> None:
     """Rule 9, the curtain call: THE PERFORMER'S OWN ACT, ONE MORE TIME, as it
     leaves (draft 3, 2026-09-25; [USER] ruled the Stage review's pick 1, one
     effect per performer, since Chevalmarin's old Bow was "strictly worse than
@@ -595,7 +664,7 @@ def _bow(state, member: str) -> None:
     `FurinaStage.Bow`.
     """
     state.emit("stage_bow", member=member)
-    perform(state, member, bow=True)
+    perform(state, member, bow=True, exit_=exit_)
 
 
 # ----------------------------------------------------------------------
@@ -826,6 +895,7 @@ def spend(state, amount: int) -> int:
     member, bar = pair
     paid = int(amount)
     book_paid(state, paid)
+    _lose(p, member, paid)
     pair[1] = bar - paid
     state.emit("stage_spend", member=member, asked=int(amount), paid=paid,
                bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
@@ -863,8 +933,12 @@ def collect_all(state) -> int:
     company = [m for m, _f in seats]
     total = sum(f for _m, f in seats)
     book_paid(state, total)
+    for member, bar in seats:
+        _lose(p, member, bar)
+    exits = [_exit(p, member, i, held=0) for i, (member, _f) in
+             enumerate(seats)]
     seats.clear()
-    setattr(state, _PENDING, list(company))
+    setattr(state, _PENDING, exits)
     state.emit("stage_spend_all", total=total, company=list(company))
     return total
 
@@ -881,23 +955,28 @@ def bow_and_return(state) -> None:
     p = state.player
     if not active(p):
         return
-    company = list(getattr(state, _PENDING, []) or [])
+    exits = [e if isinstance(e, dict) else _exit(p, e, -1, held=0)
+             for e in (getattr(state, _PENDING, []) or [])]
     setattr(state, _PENDING, [])
-    if not company:
+    if not exits:
         return
-    for member in company:
-        state.emit("stage_leave", member=member, bowed=True,
+    company = [e["member"] for e in exits]
+    for exit_ in exits:
+        state.emit("stage_leave", member=exit_["member"], bowed=True,
                    reason="spend_all", fanfare=0)
-        _bow(state, member)
-        _after_bow(state, member, may_return=False)
+        _bow(state, exit_["member"], exit_)
+        _after_bow(state, exit_["member"], may_return=False)
     seats = _seats(p)
     for member in company:
         # To an EMPTY seat only. Since the trio can be cloned (2026-09-25) a
         # trio member returns even where a Thunderous Applause Raise summoned
-        # another of its name onto the stage the card emptied.
+        # another of its name onto the stage the card emptied; one of each
+        # GUEST, so a guest already back does not return twice.
         # `FurinaStageLedger.ReturnCompany`'s twin.
         if len(seats) >= SEATS:
             break
+        if member in GUESTS and any(m == member for m, _f in seats):
+            continue
         book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         seats.append([member, SUMMON_FANFARE])
     state.emit("stage_encore_return", company=[m for m, _f in seats],
@@ -921,6 +1000,9 @@ def final_bow(state) -> int:
         state.emit("stage_final_bow_whiffed")
         return 0
     bar = pair[1]
+    # A CASH-OUT: the card is paid for the whole bar, so it is lost (rule 6)
+    # and the Bow holds nothing (`_leave` passes held=0).
+    _lose(p, pair[0], bar)
     _leave(state, len(_seats(p)) - 1, bowed=True, reason="final_bow")
     return bar
 
@@ -949,6 +1031,7 @@ def absorb(state, incoming: int) -> int:
     two_or_more = count(p) >= 2
     eaten = min(int(incoming), bar)
     book_loss(state, LOSS_HIT, eaten)
+    _lose(p, member, eaten)
     pair[1] = bar - eaten
     state.emit("stage_absorb", member=member, amount=eaten,
                incoming=int(incoming), fanfare=pair[1])
@@ -966,7 +1049,8 @@ def absorb(state, incoming: int) -> int:
 # ----------------------------------------------------------------------
 # The acts.
 # ----------------------------------------------------------------------
-def perform(state, member: str, *, bow: bool = False) -> None:
+def perform(state, member: str, *, bow: bool = False, pair=None,
+            exit_: dict | None = None) -> None:
     """Rule 10: one performer's flat act, from any seat, reading no bar.
 
     ONE implementation for every caller -- the end-of-turn sweep, *Bis!*,
@@ -1000,6 +1084,16 @@ def perform(state, member: str, *, bow: bool = False) -> None:
     from tier0.engine import effects                  # late: avoids the cycle
     p = state.player
     if not active(p):
+        return
+    if member in GUESTS:
+        # THE GUEST CAST (2026-09-25): every act pays, and a Bow is free. A
+        # caller that names a guest and no seat means the one on stage (one
+        # of each); one that is not on stage has nothing to act with.
+        if not bow and pair is None:
+            pair = next((s for s in stage(p) if s[0] == member), None)
+            if pair is None:
+                return
+        _guest_act(state, member, pair=None if bow else pair, exit_=exit_)
         return
     if not bow:                       # a Bow files its own `stage_bow`
         state.emit("stage_act", member=member)
@@ -1037,7 +1131,7 @@ def perform_lead(state) -> None:
     if pair is None or is_resting(p, pair):
         state.emit("stage_act_whiffed")
         return
-    perform(state, pair[0])
+    perform(state, pair[0], pair=pair)
 
 
 def end_of_turn_acts(state) -> None:
@@ -1065,7 +1159,11 @@ def end_of_turn_acts(state) -> None:
             for _ in range(times):
                 if state.over or not p.alive or not state.living_enemies:
                     break
-                perform(state, pair[0])
+                # A guest that paid its last Fanfare, or was taxed out, has
+                # left and Bowed; it does not act again (the Guest Cast).
+                if not _holds(p, pair):
+                    break
+                perform(state, pair[0], pair=pair)
     p.stage_resting.clear()
     p.stage_act_damage_mult = 1
     p.stage_act_block_mult = 1
@@ -1098,6 +1196,7 @@ def fade(state) -> None:
             continue
         before = pair[1]
         book_loss(state, LOSS_FADED, loss)
+        _lose(p, pair[0], loss)
         pair[1] = before - loss
         state.emit("stage_fade", member=pair[0], amount=loss,
                    before=before, fanfare=pair[1])
@@ -1133,9 +1232,9 @@ def perform_all(state) -> None:
     for pair in list(stage(p)):
         if state.over or not p.alive or not state.living_enemies:
             break
-        if is_resting(p, pair):
+        if is_resting(p, pair) or not _holds(p, pair):
             continue            # A Five-Century Act's returnee rests
-        perform(state, pair[0])
+        perform(state, pair[0], pair=pair)
 
 
 def spend_all_of_back(state) -> int:
@@ -1150,6 +1249,7 @@ def spend_all_of_back(state) -> int:
         return 0
     member, bar = pair
     book_paid(state, bar)
+    _lose(p, member, bar)
     pair[1] = 0
     state.emit("stage_spend", member=member, asked=bar, paid=bar,
                bar_at_spend=bar, fanfare=0, turn=state.turn,
@@ -1191,6 +1291,12 @@ def turn_start_powers(state) -> None:
     p = state.player
     if not active(p):
         return
+    # THE GUEST CAST (2026-09-25): Chevreuse's Energy, next turn (the mod's
+    # `EnergyNextTurnPower`).
+    if p.stage_energy_next:
+        p.energy += int(p.stage_energy_next)
+        state.emit("stage_energy", amount=int(p.stage_energy_next))
+        p.stage_energy_next = 0
     copies = int(p.powers.get(ARKHE_ALIGNMENT, 0))
     if copies <= 0:
         return
@@ -1220,3 +1326,243 @@ def note_turn_census(state) -> None:
     state.emit("stage_census", performers=count(p), lead_fanfare=lead_fanfare(p),
                total_fanfare=total_fanfare(p),
                company=[m for m, _f in stage(p)])
+    # THE GUEST CAST's measure: turns each guest spent on stage.
+    turns = ledger(state)["guest_turns"]
+    for member, _f in stage(p):
+        if member in GUESTS:
+            turns[member] = int(turns.get(member, 0)) + 1
+
+
+# ----------------------------------------------------------------------
+# THE GUEST CAST (2026-09-25). C# twin: `FurinaStageGuests.cs` and
+# `FurinaStageLedger.ActFanfare`.
+# ----------------------------------------------------------------------
+def _holds(player, pair) -> bool:
+    """Is THIS seat still on the stage? By identity (two Ushers are two
+    seats)."""
+    return any(s is pair for s in stage(player))
+
+
+def guest_star(state, member: str, amount: int) -> None:
+    """A GUEST STAR CARD: "<Name> joins the stage with N Fanfare."
+
+      * already on stage (one of each; [USER]: "only one Neuvillette allowed -
+        repeats trigger a Bow and then resummon them, carrying over unused
+        Fanfare"): it steps out holding its bar, Bows (its act, free), with
+        every Bow reader but no Five-Century return, and comes back to the
+        same seat holding its unused Fanfare plus N;
+      * a full stage (no guest cap: "why not just let the Stage be filled
+        with guest stars if the player wants?"): the front Bows and leaves,
+        and the guest arrives at the back holding the front's Fanfare, like
+        any summon (`recast_front`);
+      * otherwise the back-most empty seat, holding N.
+
+    It does not act on arrival (`EB-738`). C# twin: `FurinaStage.GuestStar`.
+    """
+    p = state.player
+    if not active(p):
+        return
+    if member not in GUESTS:
+        raise ValueError(f"unknown guest {member!r}")
+    seats = _seats(p)
+    for index, pair in enumerate(seats):
+        if pair[0] != member:
+            continue
+        seats.pop(index)
+        _unrest(p, pair)
+        exit_ = _exit(p, member, index, held=pair[1])
+        state.emit("stage_leave", member=member, bowed=True, reason="repeat",
+                   fanfare=pair[1])
+        _bow(state, member, exit_)
+        _after_bow(state, member, may_return=False)
+        if len(seats) < SEATS:
+            book_gain(state, GAIN_GUEST, int(amount))
+            pair[1] += int(amount)
+            seats.insert(min(index, len(seats)), pair)
+            state.emit("stage_summon", member=member, fanfare=pair[1],
+                       seats=len(seats), rotated=False, via="repeat")
+        else:
+            book_loss(state, LOSS_LEFT, pair[1])
+        return
+    if len(seats) >= SEATS:
+        recast_front(state, member)
+        return
+    book_gain(state, GAIN_GUEST, int(amount))
+    seats.append([member, int(amount)])
+    state.emit("stage_summon", member=member, fanfare=int(amount),
+               seats=len(seats), rotated=False, via="guest")
+
+
+def _pay(state, pair, amount: int, actor: str, owed: list) -> None:
+    """One payment off one bar, by `actor`'s act (rule 4). Booked under the
+    actor in `paid_other` (the ledger's guest hook); a payer emptied leaves
+    and its Bow joins `owed`, paid after the act's effect."""
+    p = state.player
+    if amount <= 0:
+        return
+    book_paid(state, amount, payer=actor)
+    _lose(p, pair[0], amount)
+    before = pair[1]
+    pair[1] = before - amount
+    state.emit("stage_pay", member=pair[0], by=actor, amount=int(amount),
+               before=before, fanfare=pair[1])
+    if pair[1] <= 0:
+        index = next(i for i, s in enumerate(_seats(p)) if s is pair)
+        _leave(state, index, bowed=True, reason="paid", owed=owed)
+
+
+def _gain(state, pair, amount: int, actor: str) -> None:
+    """A gift onto a bar (Sigewinne, Charlotte)."""
+    if amount <= 0:
+        return
+    book_gain(state, GAIN_GIFT, amount)
+    pair[1] += int(amount)
+    state.emit("stage_raise", member=pair[0], amount=int(amount),
+               seat="gift", fanfare=pair[1], by=actor)
+
+
+def _unpaid(state, member: str) -> None:
+    """An act that could not pay does nothing (rule 4), and is counted."""
+    counts = ledger(state)["unpaid"]
+    counts[member] = int(counts.get(member, 0)) + 1
+    state.emit("stage_unpaid", member=member)
+
+
+def guest_fanfare(state, member: str, pair, exit_, owed: list) -> bool:
+    """A GUEST'S ACT, ITS FANFARE HALF: pay what the act costs and move the
+    Fanfare it moves. False where it could not pay. A Bow (`pair` None) is
+    free: no payment, and the gifts land in full. C# twin:
+    `FurinaStageLedger.ActFanfare`."""
+    p = state.player
+    seats = _seats(p)
+    bow = pair is None
+    if member == "neuvillette":
+        if bow:
+            return True
+        if pair[1] < ACT_NEUVILLETTE_PRICE:
+            _unpaid(state, member)
+            return False
+        _pay(state, pair, ACT_NEUVILLETTE_PRICE, member, owed)
+        return True
+    if member == "clorinde":
+        if bow:
+            return True
+        others = [s for s in seats if s is not pair]
+        if not others:
+            _unpaid(state, member)
+            return False
+        for other in others:
+            _pay(state, other, ACT_CLORINDE_TAX, member, owed)
+        return True
+    if member == "chevreuse":
+        if bow:
+            return True
+        bank = seats[-1] if seats else None
+        if bank is None or bank[1] < ACT_CHEVREUSE_PRICE:
+            _unpaid(state, member)
+            return False
+        _pay(state, bank, ACT_CHEVREUSE_PRICE, member, owed)
+        return True
+    if member == "sigewinne":
+        if bow:
+            index = (exit_ or {}).get("former", -1)
+            if seats and index >= 0:
+                heir = seats[index] if index < len(seats) else seats[0]
+                _gain(state, heir, ACT_SIGEWINNE_GIFT, member)
+            return True
+        others = [s for s in seats if s is not pair]
+        if not others:
+            return True
+        at = next(i for i, s in enumerate(seats) if s is pair)
+        to = seats[at + 1] if at + 1 < len(seats) else seats[0]
+        gift = min(ACT_SIGEWINNE_GIFT, pair[1])
+        _pay(state, pair, gift, member, owed)
+        _gain(state, to, gift, member)
+        return True
+    if member == "charlotte":
+        for other in [s for s in seats if s is not pair]:
+            _gain(state, other, ACT_CHARLOTTE_GIFT, member)
+        return True
+    return True
+
+
+def _guest_act(state, member: str, *, pair, exit_) -> None:
+    """A guest's act or Bow: its Fanfare half, then its effect on the board,
+    then the Bows its payment earned. Ousia doubles the damage number and
+    never the payment. C# twin: `FurinaStage.GuestAct`."""
+    from tier0.engine import effects, reactions        # late: the cycle
+    p = state.player
+    owed: list = []
+    if pair is not None:
+        state.emit("stage_act", member=member)
+    if not guest_fanfare(state, member, pair, exit_, owed):
+        return
+    dmg = int(p.stage_act_damage_mult)
+    source = "furina_stage/bow" if pair is None else "furina_stage/act"
+    element = GUEST_ELEMENTS.get(member)
+    if member == "neuvillette":
+        for enemy in list(state.living_enemies):
+            effects.deal_damage_to_enemy(state, enemy,
+                                         ACT_NEUVILLETTE_DAMAGE * dmg,
+                                         element=element, powered=False,
+                                         source=source)
+    elif member in ("clorinde", "navia", "wriothesley"):
+        if member == "clorinde":
+            amount = ACT_CLORINDE_DAMAGE
+        elif member == "navia":
+            amount = pair[1] if pair is not None else (exit_ or {}).get("held", 0)
+        else:
+            lost = (int(p.stage_lost.get(member, 0)) if pair is not None
+                    else int((exit_ or {}).get("lost", 0)))
+            amount = ACT_WRIOTHESLEY_RATE * lost
+        if amount > 0 and state.living_enemies:
+            enemy = state.rng.choice(state.living_enemies)
+            effects.deal_damage_to_enemy(state, enemy, amount * dmg,
+                                         element=element, powered=False,
+                                         source=source)
+    elif member == "chevreuse":
+        p.stage_energy_next = int(p.stage_energy_next) + ACT_CHEVREUSE_ENERGY
+    elif member == "lynette":
+        wearing = [e for e in state.living_enemies if e.aura]
+        if wearing:
+            reactions.resolve_hit(state, state.rng.choice(wearing), "anemo",
+                                  0, "stage_act")
+    # Rule 6: every act resets the reading, so a repeat reads 0.
+    if pair is not None:
+        p.stage_lost[member] = 0
+    for gone in owed:
+        if state.over or not p.alive:
+            break
+        _bow(state, gone["member"], gone)
+        _after_bow(state, gone["member"], may_return=True)
+
+
+def forecast(state) -> dict:
+    """RULE 7, THE FORECAST, sim side: the end of this turn on a COPY of the
+    fight -- the acts, their payments and the fade -- and the enemies' posted
+    attacks on it, given her Block after the acts. PURE: the real state is
+    never touched (the copy carries its own rng). Returns each seat's bar now
+    and after, the Block after the acts, what the front performers take and
+    what reaches her. The mod prints the same (`FurinaStage.Forecast`).
+    """
+    import copy
+    from tier0.engine import combat
+    p = state.player
+    if not active(p):
+        return {}
+    now = [[m, f] for m, f in stage(p)]
+    ghost = copy.deepcopy(state)
+    ghost.log = []
+    end_of_turn_acts(ghost)
+    after = [[m, f] for m, f in stage(ghost.player)]
+    block = int(ghost.player.block)
+    hp = int(ghost.player.hp)
+    for enemy in list(ghost.living_enemies):
+        if ghost.over or not ghost.player.alive:
+            break
+        combat._enemy_turn(ghost, enemy)
+    front = sum(e.get("amount", 0) for e in ghost.log
+                if e.get("event") == "stage_absorb")
+    return {"now": now, "after": after, "block_after_acts": block,
+            "front_takes": int(front),
+            "reaches_furina": max(0, hp - int(ghost.player.hp))}

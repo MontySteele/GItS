@@ -80,7 +80,8 @@ def test_a_scripted_fight_adds_up_door_by_door(arm):
     assert led["start"] == 0
     assert led["gained"] == {
         "opening": 3, "regen": 1, "card": 14, "bow": 0, "power": 0,
-        "summon": 2, "empty_summon": 4, "return": 1}
+        "summon": 2, "empty_summon": 4, "return": 1, "guest": 0,
+        "gift": 0}
     assert led["spent"] == 7
     assert led["paid_other"] == {"guest": 2}
     assert led["left"] == 7

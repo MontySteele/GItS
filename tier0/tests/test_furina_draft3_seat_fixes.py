@@ -103,9 +103,10 @@ def test_nothing_on_the_stage_block_says_a_bow_waits():
 
 
 def test_the_bow_row_is_the_plain_exit():
+    # The Guest Cast (2026-09-25): and a guest's Bow does not pay.
     assert ARM_KEYWORDS["Bow"] == (
         "A performer that leaves the stage acts one last time on its way "
-        "out.")
+        "out, without paying.")
 
 
 # ---------------------------------------------------------------------------

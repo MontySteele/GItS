@@ -3073,6 +3073,30 @@ upgrade key, `conditional_then_damage` on a Spend mode (Quick Cue's 3/8 to
 `fs_rapt_audience`, `fs_five_century_act`, `fs_arkhe_alignment`) whose rules
 live in `FurinaStage` beside the rule each bends.
 
+## Furina, the Stage — the Guest Cast (2026-09-25)
+
+Eight Guest Star Skills, `proto_fs_guest_star_<name>`, as ruled in
+`review/active/furina-guest-batch-2026-09-25.md` that evening and amended by
+two rulings after it: no guest cap ("why not just let the Stage be filled
+with guest stars if the player wants?"), and one of each guest ("only one
+Neuvillette allowed - repeats trigger a Bow and then resummon them, carrying
+over unused Fanfare"). The faces, rarities, costs and arrival Fanfare are the
+build table's; each guest's act lives on its tip and its badge, not on the
+face.
+
+**Which shipped row each replaces** is a D default on batch two's terms: a
+same-rarity shipped Skill the `EB-736` text filter already drops. Rares:
+Neuvillette for `reginas_mercy`, Clorinde for `thunderous_ovation`, Navia for
+`encore_performance`. Uncommons: Chevreuse for `audience_participation`,
+Wriothesley for `deep_breath`, Sigewinne for `standing_room_only`, Charlotte
+for `limelight`, Lynette for `take_it_from_the_top`.
+
+**New machinery, both engines**: the `stage_guest` op and its upgrade key
+(`stage_guest: +N`, what the guest arrives with), eight performers, their acts
+(`FurinaStageLedger.ActFanfare` / `furina_stage.guest_fanfare` for the
+payments and gifts, `FurinaStage.GuestAct` / `_guest_act` for the board), the
+per-guest loss count Wriothesley reads, and the end-of-turn forecast.
+
 ## Pool pass two: six Spark sinks on Regent's ladder (`EB-732`, R270, 2026-09-08)
 
 R270 ruled the round-25 pick at option 1: Spark is a currency, its income

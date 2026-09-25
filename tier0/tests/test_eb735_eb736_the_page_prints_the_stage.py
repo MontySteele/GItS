@@ -288,9 +288,13 @@ def test_a_departure_says_why_because_that_is_rules_seven_and_nine():
         "spend": "emptied by a Spend, so it takes a Bow",
         "rotated": "rotated off the front to make room, so no Bow",
         "final_bow": "took its Bow and left",
-        # 2026-09-25: a random summon on a full stage.
-        "recast": ("took its Bow to make room for a summon, and comes back "
-                   "to the back seat with its Fanfare"),
+        # 2026-09-25: a summon on a full stage.
+        "recast": ("took its Bow to make room for a summon, which takes the "
+                   "back seat with its Fanfare"),
+        # The Guest Cast (2026-09-25): a paying act, and a repeat Guest Star.
+        "paid": "paid its last Fanfare, so it takes a Bow",
+        "repeat": ("took its Bow for a second Guest Star, and comes back to "
+                   "the same seat with the new Fanfare added"),
     }
     for reason, sentence in reasons.items():
         page = _page({"live": True, "seats": THREE_SEATS,

@@ -290,6 +290,24 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/salon_member.png"),
         CrabalettaBadgePower =>
             KleePck.Path("furina/powers/salon_member.png"),
+        // THE GUEST CAST (2026-09-25): each guest's badge borrows the same
+        // member sigil until the art pass gives a guest its own.
+        NeuvilletteBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        ClorindeBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        NaviaBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        ChevreuseBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        WriothesleyBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        SigewinneBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        CharlotteBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
+        LynetteBadgePower =>
+            KleePck.Path("furina/powers/salon_member.png"),
         StageSummaryPower => KleePck.Path("furina/powers/center_stage.png"),
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md): five powers,
         // each borrowing the shipped sigil nearest its job on the terms every

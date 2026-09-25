@@ -353,6 +353,17 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActChevalmarinDamage": _stage("ACT_CHEVALMARIN_DAMAGE"),
     "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
     "FurinaStageLaw.FadeThreshold": _stage("FADE_THRESHOLD"),
+    # THE GUEST CAST (2026-09-25): the eight guests' act numbers. What a guest
+    # ARRIVES with is its card's, on its row, and is not mirrored here.
+    "FurinaStageLaw.ActNeuvillettePrice": _stage("ACT_NEUVILLETTE_PRICE"),
+    "FurinaStageLaw.ActNeuvilletteDamage": _stage("ACT_NEUVILLETTE_DAMAGE"),
+    "FurinaStageLaw.ActClorindeTax": _stage("ACT_CLORINDE_TAX"),
+    "FurinaStageLaw.ActClorindeDamage": _stage("ACT_CLORINDE_DAMAGE"),
+    "FurinaStageLaw.ActChevreusePrice": _stage("ACT_CHEVREUSE_PRICE"),
+    "FurinaStageLaw.ActChevreuseEnergy": _stage("ACT_CHEVREUSE_ENERGY"),
+    "FurinaStageLaw.ActWriothesleyRate": _stage("ACT_WRIOTHESLEY_RATE"),
+    "FurinaStageLaw.ActSigewinneGift": _stage("ACT_SIGEWINNE_GIFT"),
+    "FurinaStageLaw.ActCharlotteGift": _stage("ACT_CHARLOTTE_GIFT"),
     # R276 batch two: Arkhe Alignment's Pneuma half.
     "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one

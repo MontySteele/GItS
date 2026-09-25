@@ -142,7 +142,17 @@ public static class FurinaStageRoster
                         && card is not FurinaGen.StandingOvation
                         && card is not FurinaGen.CrowdWork
                         && card is not FurinaGen.EndlessWaltz
-                        && card is not FurinaGen.PrimaDonna)
+                        && card is not FurinaGen.PrimaDonna
+                        // THE GUEST CAST (2026-09-25): the eight `replaces:`,
+                        // each already dropped by the text filter too.
+                        && card is not FurinaGen.ReginasMercy
+                        && card is not FurinaGen.ThunderousOvation
+                        && card is not FurinaGen.EncorePerformance
+                        && card is not FurinaGen.AudienceParticipation
+                        && card is not FurinaGen.DeepBreath
+                        && card is not FurinaGen.StandingRoomOnly
+                        && card is not FurinaGen.Limelight
+                        && card is not FurinaGen.TakeItFromTheTop)
             .Concat(new CardModel[]
             {
                 // Commons (eight).
@@ -180,6 +190,16 @@ public static class FurinaStageRoster
                 // Rares (two).
                 ModelDb.Card<ProtoFsArkheAlignment>(),
                 ModelDb.Card<ProtoFsFiveCenturyAct>(),
+                // THE GUEST CAST (2026-09-25). Rares (three).
+                ModelDb.Card<ProtoFsGuestStarNeuvillette>(),
+                ModelDb.Card<ProtoFsGuestStarClorinde>(),
+                ModelDb.Card<ProtoFsGuestStarNavia>(),
+                // Uncommons (five).
+                ModelDb.Card<ProtoFsGuestStarChevreuse>(),
+                ModelDb.Card<ProtoFsGuestStarWriothesley>(),
+                ModelDb.Card<ProtoFsGuestStarSigewinne>(),
+                ModelDb.Card<ProtoFsGuestStarCharlotte>(),
+                ModelDb.Card<ProtoFsGuestStarLynette>(),
             })
             .Concat(MultiplayerRows());
     }

@@ -1552,6 +1552,16 @@ STAGE_ACT_EFFECTS = {
     "usher": "Furina gains {n} Block",
     "chevalmarin": "{each} to every enemy",
     "crabaletta": "{n} to {who}",
+    # THE GUEST CAST (2026-09-25). A guest's payment and its gifts are their
+    # own lines just above the act (`STAGE_PAY_LINE`, `STAGE_RAISE_LINE`).
+    "neuvillette": "{each} Hydro to every enemy",
+    "clorinde": "{n} Electro to {who}",
+    "navia": "{n} Geo to {who}",
+    "wriothesley": "{n} Cryo to {who}",
+    "chevreuse": "Furina gains 1 Energy next turn",
+    "sigewinne": "her gift is the line above",
+    "charlotte": "each other performer gains 1 Fanfare, as above",
+    "lynette": "a Swirl on {who}",
 }
 
 #: Chevalmarin's act where no single per-enemy figure exists.
@@ -1568,6 +1578,27 @@ STAGE_ACT_SPREAD_STRUCK = "{n} in total across {struck} enemies"
 #: 2026-09-25 evening: A SPEND IS A LOG LINE. Both seats: the log listed the
 #: Raise that built a bar and never the Spend that took it back down.
 STAGE_SPEND_LINE = "  - Spent {n} of **{who}**'s Fanfare: {before} → {after}."
+
+#: THE GUEST CAST (2026-09-25), rule 4: EVERY ACT PAYS, and each payment is a
+#: line -- the payer's own ("Neuvillette paid 3 of his Fanfare"), or a tax or
+#: a Spend off another bar ("Clorinde took 1 of Usher's Fanfare").
+STAGE_PAY_SELF_LINE = ("  - **{who}** paid {n} of {their} Fanfare: {before} "
+                       "→ {after}.")
+STAGE_PAY_LINE = ("  - **{by}** took {n} of **{who}**'s Fanfare: {before} "
+                  "→ {after}.")
+#: ... and an act that could not pay did nothing.
+STAGE_UNPAID_LINE = "  - **{who}** could not pay."
+#: Whose Fanfare, on a payer's own line.
+STAGE_HIS = frozenset({"Usher", "Neuvillette", "Wriothesley"})
+
+#: RULE 7 OF THE GUEST CAST (2026-09-25): THE FORECAST, off the mod's own.
+STAGE_FORECAST_LINE = "- At the end of your turn: {rows}."
+STAGE_FORECAST_LEAVES = " (leaves)"
+STAGE_FORECAST_ARRIVES = "{name} comes back with {after}"
+STAGE_FORECAST_UNKNOWN = (" A Bow will also summon a random performer this "
+                          "forecast cannot name.")
+STAGE_INTENT_LINE = ("- The attacks shown, after the acts' Block of {block}: "
+                     "your front performer takes {front}, you take {you}.")
 
 #: The bows, rule 9. Since draft 3 (2026-09-25) a Bow IS the performer's act
 #: once more, so the bow lines are the act lines, measured the same way.
@@ -1646,6 +1677,30 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         out.append("- " + " · ".join(reserve))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
+    out += _render_stage_forecast(stage.get("forecast"))
+    return out
+
+
+def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
+    """RULE 7 (the Guest Cast, 2026-09-25): the mod's forecast of the end of
+    this turn, as the strip in game prints it. Nothing on a build that sends
+    none, or on an empty stage."""
+    if not forecast or not (forecast["seats"] or forecast["arrivals"]):
+        return []
+    rows = [f"**{row['name']}** {row['now']} → {row['after']}"
+            + (STAGE_FORECAST_LEAVES if row["leaves"] else "")
+            for row in forecast["seats"]]
+    rows += [STAGE_FORECAST_ARRIVES.format(name=f"**{row['name']}**",
+                                           after=row["after"])
+             for row in forecast["arrivals"]]
+    line = STAGE_FORECAST_LINE.format(rows=" · ".join(rows))
+    if forecast.get("unknown"):
+        line += STAGE_FORECAST_UNKNOWN
+    out = [line]
+    if forecast["intent_known"]:
+        out.append(STAGE_INTENT_LINE.format(
+            block=forecast["block"], front=forecast["front_takes"],
+            you=forecast["reaches_furina"]))
     return out
 
 
@@ -1779,6 +1834,19 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(STAGE_SPEND_LINE.format(
                 n=row["moved"], who=row["name"],
                 before=row["fanfare"] + row["moved"], after=row["fanfare"]))
+        elif row["event"] == "pay":
+            before = row["fanfare"] + row["moved"]
+            if not row.get("by") or row["by"] == row["name"]:
+                out.append(STAGE_PAY_SELF_LINE.format(
+                    who=row["name"], n=row["moved"],
+                    their="his" if row["name"] in STAGE_HIS else "her",
+                    before=before, after=row["fanfare"]))
+            else:
+                out.append(STAGE_PAY_LINE.format(
+                    by=row["by"], who=row["name"], n=row["moved"],
+                    before=before, after=row["fanfare"]))
+        elif row["event"] == "unpaid":
+            out.append(STAGE_UNPAID_LINE.format(who=row["name"]))
         elif row["event"] == "hit":
             line, left = _stage_hit_line(row, log, at)
             out.append(line)

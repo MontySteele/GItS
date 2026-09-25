@@ -1877,6 +1877,8 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.stage_resting = []
     player.stage_act_damage_mult = 1
     player.stage_act_block_mult = 1
+    player.stage_lost = {}
+    player.stage_energy_next = 0
     # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
     # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
     # rather than a separate card". The jellyfish is installed HERE, at true

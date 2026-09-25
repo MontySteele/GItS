@@ -944,7 +944,8 @@ def test_the_pool_seam_swaps_its_rows_at_the_same_rarity(arm):
     that flips a module constant cannot reach behind it. What is being asked
     here is a question about two committed files anyway."""
     subs = loader.pool_substitutions("furina")
-    assert len(subs) == 14 + 15          # batch one, and R276's batch two
+    # batch one, R276's batch two, and the Guest Cast (2026-09-25)
+    assert len(subs) == 14 + 15 + 8
     rarity = {r["id"]: r["rarity"] for r in _sheet_rows("furina-cards.yaml")}
     rarity.update({r["id"]: r["rarity"] for r in _proto_rows()})
     for shipped, proto in subs.items():
@@ -964,7 +965,8 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     named = {**FS.POOL_SUBS, **FS.STARTER_SUBS}
     assert set(named.values()) == set(on_sheet)
     assert {p: s for s, p in named.items()} == on_sheet
-    assert len(on_sheet) == 17 + 15      # batch one, and R276's batch two
+    # batch one, R276's batch two, and the Guest Cast (2026-09-25)
+    assert len(on_sheet) == 17 + 15 + 8
     # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
     # outside the pool, replacing no shipped row -- so neither map names
     # them, and the tier's own mirror does.

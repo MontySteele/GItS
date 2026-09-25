@@ -20,6 +20,14 @@
     "proto_fs_gentilhomme_usher",
     "proto_fs_grand_entrance",
     "proto_fs_guest_of_honor",
+    "proto_fs_guest_star_charlotte",
+    "proto_fs_guest_star_chevreuse",
+    "proto_fs_guest_star_clorinde",
+    "proto_fs_guest_star_lynette",
+    "proto_fs_guest_star_navia",
+    "proto_fs_guest_star_neuvillette",
+    "proto_fs_guest_star_sigewinne",
+    "proto_fs_guest_star_wriothesley",
     "proto_fs_hold_your_places",
     "proto_fs_improvised_number",
     "proto_fs_interposition",
@@ -268,6 +276,14 @@
     "proto_fs_gentilhomme_usher": "furina",
     "proto_fs_grand_entrance": "furina",
     "proto_fs_guest_of_honor": "furina",
+    "proto_fs_guest_star_charlotte": "furina",
+    "proto_fs_guest_star_chevreuse": "furina",
+    "proto_fs_guest_star_clorinde": "furina",
+    "proto_fs_guest_star_lynette": "furina",
+    "proto_fs_guest_star_navia": "furina",
+    "proto_fs_guest_star_neuvillette": "furina",
+    "proto_fs_guest_star_sigewinne": "furina",
+    "proto_fs_guest_star_wriothesley": "furina",
     "proto_fs_hold_your_places": "furina",
     "proto_fs_improvised_number": "furina",
     "proto_fs_interposition": "furina",
@@ -585,6 +601,30 @@
     },
     "proto_fs_guest_of_honor": {
       "cost": -1
+    },
+    "proto_fs_guest_star_charlotte": {
+      "stage_guest": 2
+    },
+    "proto_fs_guest_star_chevreuse": {
+      "stage_guest": 2
+    },
+    "proto_fs_guest_star_clorinde": {
+      "stage_guest": 2
+    },
+    "proto_fs_guest_star_lynette": {
+      "stage_guest": 2
+    },
+    "proto_fs_guest_star_navia": {
+      "stage_guest": 2
+    },
+    "proto_fs_guest_star_neuvillette": {
+      "cost": -1
+    },
+    "proto_fs_guest_star_sigewinne": {
+      "stage_guest": 2
+    },
+    "proto_fs_guest_star_wriothesley": {
+      "stage_guest": 2
     },
     "proto_fs_hold_your_places": {
       "block": 2,

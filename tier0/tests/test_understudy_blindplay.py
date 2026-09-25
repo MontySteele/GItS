@@ -6787,6 +6787,29 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # it was `EB-329`'s row with no tooltip to be held in step with.
         "Companion": ["A card titled with a character's name, a dash, then "
                       "its ", "own."],
+        # THE GUEST CAST (2026-09-25): the keyword and the eight guests'
+        # tips. Numerals are interpolated on the mod side, so the anchors are
+        # the prose around them.
+        "Guest Star": ["A performer who joins the stage, one of each. A "
+                       "second copy ", "makes it Bow, then return with the "
+                       "new Fanfare added."],
+        "Neuvillette": ["End of your turn: pay ", " of his Fanfare to deal ",
+                        " damage to ALL enemies."],
+        "Clorinde": ["End of your turn: take ",
+                     " Fanfare from each other performer to deal ",
+                     " damage to a random enemy."],
+        "Navia": ["End of your turn: deal ", " damage equal to her ",
+                  "Fanfare to a random enemy."],
+        "Chevreuse": ["End of your turn: ", " to gain ", " next turn."],
+        "Wriothesley": ["End of your turn: deal ", " damage to a random ",
+                        "enemy equal to twice the Fanfare he lost since his "
+                        "last act."],
+        "Sigewinne": ["End of your turn: give ",
+                      " of her Fanfare to the performer behind her, or to "
+                      "your front ", "performer if she is at the back."],
+        "Charlotte": ["End of your turn: each other performer gains "],
+        "Lynette": ["End of your turn: ", " a random enemy with an ",
+                    "aura."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

@@ -106,7 +106,12 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
         // path is a reference it cannot read at all.
         StagePerformer.Chevalmarin => KleePck.Path("furina/model/chevalmarin.tscn"),
         StagePerformer.Crabaletta => KleePck.Path("furina/model/crabaletta.tscn"),
-        _ => KleePck.Path("furina/model/usher.tscn"),
+        StagePerformer.Usher => KleePck.Path("furina/model/usher.tscn"),
+        // THE GUEST CAST (2026-09-25) has no scenes yet: a guest wears the
+        // base game's Osty rig until the art pass authors one. No literal is
+        // named here for a scene the pack does not carry (the deploy's S12
+        // check refuses one).
+        _ => null,
     };
 
     /// <inheritdoc cref="StagePerformerMonster"/>
@@ -152,6 +157,73 @@ public sealed class ChevalmarinMonster : StagePerformerMonster
 public sealed class CrabalettaMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Crabaletta;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+// ---- THE GUEST CAST (2026-09-25): eight more bodies, one per guest. The
+// name is the ledger's (`FurinaStageLedger.DisplayName`), as the trio's is.
+
+public sealed class NeuvilletteMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Neuvillette;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class ClorindeMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Clorinde;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class NaviaMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Navia;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class ChevreuseMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Chevreuse;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class WriothesleyMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Wriothesley;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class SigewinneMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Sigewinne;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class CharlotteMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Charlotte;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class LynetteMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Lynette;
 
     public override string DisplayName =>
         FurinaStageLedger.DisplayName(Performer);
@@ -284,7 +356,23 @@ public static class FurinaStagePets
                     await PlayerCmd.AddPet<UsherMonster>(player),
                 StagePerformer.Chevalmarin =>
                     await PlayerCmd.AddPet<ChevalmarinMonster>(player),
-                _ => await PlayerCmd.AddPet<CrabalettaMonster>(player),
+                StagePerformer.Crabaletta =>
+                    await PlayerCmd.AddPet<CrabalettaMonster>(player),
+                StagePerformer.Neuvillette =>
+                    await PlayerCmd.AddPet<NeuvilletteMonster>(player),
+                StagePerformer.Clorinde =>
+                    await PlayerCmd.AddPet<ClorindeMonster>(player),
+                StagePerformer.Navia =>
+                    await PlayerCmd.AddPet<NaviaMonster>(player),
+                StagePerformer.Chevreuse =>
+                    await PlayerCmd.AddPet<ChevreuseMonster>(player),
+                StagePerformer.Wriothesley =>
+                    await PlayerCmd.AddPet<WriothesleyMonster>(player),
+                StagePerformer.Sigewinne =>
+                    await PlayerCmd.AddPet<SigewinneMonster>(player),
+                StagePerformer.Charlotte =>
+                    await PlayerCmd.AddPet<CharlotteMonster>(player),
+                _ => await PlayerCmd.AddPet<LynetteMonster>(player),
             };
             // 2026-09-25: the body SAYS WHAT IT DOES. Hovering a creature
             // shows its powers' tips, and the base game gives Osty a quiet
@@ -325,7 +413,15 @@ public static class FurinaStagePets
     {
         StagePerformer.Usher => typeof(UsherMonster),
         StagePerformer.Chevalmarin => typeof(ChevalmarinMonster),
-        _ => typeof(CrabalettaMonster),
+        StagePerformer.Crabaletta => typeof(CrabalettaMonster),
+        StagePerformer.Neuvillette => typeof(NeuvilletteMonster),
+        StagePerformer.Clorinde => typeof(ClorindeMonster),
+        StagePerformer.Navia => typeof(NaviaMonster),
+        StagePerformer.Chevreuse => typeof(ChevreuseMonster),
+        StagePerformer.Wriothesley => typeof(WriothesleyMonster),
+        StagePerformer.Sigewinne => typeof(SigewinneMonster),
+        StagePerformer.Charlotte => typeof(CharlotteMonster),
+        _ => typeof(LynetteMonster),
     };
 
     /// <summary>Teach BaseLib that this performer's scene is an

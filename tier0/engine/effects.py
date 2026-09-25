@@ -6283,6 +6283,13 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
     furina_stage.summon(state, named)
 
 
+def _op_stage_guest(state: CombatState, fx: dict, card: Card) -> None:
+    """THE GUEST CAST (2026-09-25): a Guest Star card, "<Name> joins the stage
+    with N Fanfare." `furina_stage.guest_star` is the whole rule."""
+    furina_stage.guest_star(state, fx["member"],
+                            _amount(state, fx.get("amount", 1)))
+
+
 def _op_stage_raise(state: CombatState, fx: dict, card: Card) -> None:
     """Brief sec.3 rule 5: "Raise N Fanfare on the back performer", which is
     the lead when it is alone. `seat: lead` is the other spelling, for a face
@@ -6405,6 +6412,8 @@ OPS = {
     # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`): the Stage's eight.
     "stage_summon": _op_stage_summon,
     "stage_raise": _op_stage_raise,
+    # THE GUEST CAST (2026-09-25).
+    "stage_guest": _op_stage_guest,
     "stage_scene_change": _op_stage_scene_change,
     "stage_perform_lead": _op_stage_perform_lead,
     "stage_spend": _op_stage_spend,

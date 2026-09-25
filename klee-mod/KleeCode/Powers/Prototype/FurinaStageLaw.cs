@@ -74,6 +74,43 @@ public static class FurinaStageLaw
     // one more time as it leaves (FurinaStage.Bow). The two bow constants
     // (Usher's Fanfare, Crabaletta's 8) went with the separate Bow effects.
 
+    // THE GUEST CAST (2026-09-25, review/active/furina-guest-batch-2026-09-25.md
+    // and the build packet's table). The acts' own numbers; what each guest
+    // ARRIVES with is its card's, on its row. Each mirrors the
+    // `furina_stage.ACT_*` of the same name.
+
+    /// <summary>Neuvillette pays this much of his own Fanfare...</summary>
+    public const int ActNeuvillettePrice = 3;
+
+    /// <summary>...to deal this much Hydro damage to ALL enemies.</summary>
+    public const int ActNeuvilletteDamage = 8;
+
+    /// <summary>Clorinde takes this much from each other performer...
+    /// </summary>
+    public const int ActClorindeTax = 1;
+
+    /// <summary>...to deal this much Electro damage to a random enemy, however
+    /// many paid.</summary>
+    public const int ActClorindeDamage = 8;
+
+    /// <summary>Chevreuse Spends this much from the back performer...
+    /// </summary>
+    public const int ActChevreusePrice = 2;
+
+    /// <summary>...to gain this much Energy next turn.</summary>
+    public const int ActChevreuseEnergy = 1;
+
+    /// <summary>Wriothesley deals Cryo damage this many times the Fanfare he
+    /// lost since his last act.</summary>
+    public const int ActWriothesleyRate = 2;
+
+    /// <summary>Sigewinne gives this much of her Fanfare to the performer
+    /// behind her (what she has, if less).</summary>
+    public const int ActSigewinneGift = 3;
+
+    /// <summary>Charlotte: each other performer gains this much.</summary>
+    public const int ActCharlotteGift = 1;
+
     /// <summary>
     /// RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
     /// Furina's turn, after the acts, each performer BEHIND THE FRONT loses
