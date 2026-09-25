@@ -2022,6 +2022,17 @@ proto_fs_guest_star_charlotte	ImageGen/images/cards/furina/proto_fs_guest_star_c
 proto_fs_guest_star_lynette	ImageGen/images/cards/furina/proto_fs_guest_star_lynette.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Lynette Wish.png		splash	
 proto_fs_guest_star_lynette	ImageGen/images/cards/furina/proto_fs_guest_star_lynette.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Lynette Full Wish.png		splash	
 proto_fs_guest_star_lynette	ImageGen/images/cards/furina/proto_fs_guest_star_lynette.png	500	380	cover	y0.16	shortlist	3	png	Lynette Character Card.png		tcg	
+# The Guest Cast's badges: each guest's power badge wears the guest's own face
+# (the character icon, as standing_ovation wears Furina's) instead of the
+# shared Salon member sigil. KleePowerIcons.cs points each <Name>BadgePower here.
+power_furina_guest_neuvillette	ImageGen/images/furina/powers/guest_neuvillette.png	256	256	contain	center	auto	1	png	Neuvillette Icon.png		icon
+power_furina_guest_clorinde	ImageGen/images/furina/powers/guest_clorinde.png	256	256	contain	center	auto	1	png	Clorinde Icon.png		icon
+power_furina_guest_navia	ImageGen/images/furina/powers/guest_navia.png	256	256	contain	center	auto	1	png	Navia Icon.png		icon
+power_furina_guest_chevreuse	ImageGen/images/furina/powers/guest_chevreuse.png	256	256	contain	center	auto	1	png	Chevreuse Icon.png		icon
+power_furina_guest_wriothesley	ImageGen/images/furina/powers/guest_wriothesley.png	256	256	contain	center	auto	1	png	Wriothesley Icon.png		icon
+power_furina_guest_sigewinne	ImageGen/images/furina/powers/guest_sigewinne.png	256	256	contain	center	auto	1	png	Sigewinne Icon.png		icon
+power_furina_guest_charlotte	ImageGen/images/furina/powers/guest_charlotte.png	256	256	contain	center	auto	1	png	Charlotte Icon.png		icon
+power_furina_guest_lynette	ImageGen/images/furina/powers/guest_lynette.png	256	256	contain	center	auto	1	png	Lynette Icon.png		icon
 # ---------- Co-op set 2026-09-25: the nine multiplayer-only cards ----------
 # Each card reaches another player, so each face shows the character WITH
 # someone: Klee with Jean, Albedo and her friends, Furina with
