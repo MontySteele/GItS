@@ -817,13 +817,12 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForBow(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BowKey,
-            // The text pass (2026-09-25): each performer's own tip carries
-            // its Bow, so this one points there instead of restating three.
-            // Rule 7, 2026-09-25: a hit earns the Bow too, so the old
-            // Spend-against-hit contrast is gone and the trigger is simply
-            // the bar running out.
-            "A performer's parting effect, shown on each performer. It "
-          + "triggers when the performer's Fanfare runs out.");
+            // Draft 3 (2026-09-25, the Stage review's pick 1): the Bow is the
+            // performer's own act once more, so the tip says that and no
+            // performer's tip carries a separate Bow. Rule 7's trigger (any
+            // exit at 0 Fanfare) is unchanged.
+            "A performer that leaves the stage acts one last time on its way "
+          + "out.");
 
     /// <summary>
     /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates
@@ -854,7 +853,10 @@ public static class ArmKeywordTips
             // plainly where hits go, and when they reach the back.
             // The text pass (2026-09-25): the empty-stage summon the
             // retired Raise tip carried is the Fanfare tip's now.
-            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last.");
+            // Draft 3 (2026-09-25): rule 12, the fade, on the seat it hits.
+            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last. At "
+          + "the end of your turn, it loses half its Fanfare above "
+          + FurinaStageLaw.FadeThreshold + ".");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
     /// choice a player makes at the start of each turn.</summary>
@@ -909,35 +911,32 @@ public static class ArmKeywordTips
     }
 
     /// <summary>
-    /// 2026-09-25. GENTILHOMME USHER'S ACT AND BOW, on every card that names
-    /// him and on every random summon. The same two sentences his body's
-    /// badge carries (<c>UsherBadgePower</c>), numbers from
-    /// <see cref="FurinaStageLaw"/> (`EB-89`).
+    /// 2026-09-25. GENTILHOMME USHER'S ACT, on every card that names him and
+    /// on every random summon. The same sentence his body's badge carries
+    /// (<c>UsherBadgePower</c>), numbers from <see cref="FurinaStageLaw"/>
+    /// (`EB-89`). No Bow clause since draft 3 (2026-09-25): a Bow is the act
+    /// once more, which the Bow tip says once for all three.
     /// </summary>
     public static IEnumerable<IHoverTip> ForUsher(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, UsherKey,
             "End of your turn: gain " + FurinaStageLaw.ActUsherBlock
-          + " [gold]Block[/gold]. [gold]Bow[/gold]: your front performer "
-          + "gains " + FurinaStageLaw.BowUsherFanfare
-          + " [gold]Fanfare[/gold].");
+          + " [gold]Block[/gold].");
 
-    /// <summary>2026-09-25. SURINTENDANTE CHEVALMARIN'S ACT AND BOW, the
-    /// same two sentences as <c>ChevalmarinBadgePower</c>.</summary>
+    /// <summary>2026-09-25. SURINTENDANTE CHEVALMARIN'S ACT, the same
+    /// sentence as <c>ChevalmarinBadgePower</c>. Plain damage since draft 3
+    /// (2026-09-25): no act applies Hydro.</summary>
     public static IEnumerable<IHoverTip> ForChevalmarin(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, ChevalmarinKey,
             "End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage
-          + " [gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "
-          + "apply [gold]Hydro[/gold] to ALL enemies.");
+          + " damage to ALL enemies.");
 
-    /// <summary>2026-09-25. MADEMOISELLE CRABALETTA'S ACT AND BOW, the same
-    /// two sentences as <c>CrabalettaBadgePower</c>.</summary>
+    /// <summary>2026-09-25. MADEMOISELLE CRABALETTA'S ACT, the same sentence
+    /// as <c>CrabalettaBadgePower</c>. Plain damage since draft 3.</summary>
     public static IEnumerable<IHoverTip> ForCrabaletta(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CrabalettaKey,
             "End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage
-          + " [gold]Hydro[/gold] damage to a random enemy. [gold]Bow[/gold]: "
-          + "deal " + FurinaStageLaw.BowCrabalettaDamage
-          + " [gold]Hydro[/gold] damage to a random enemy.");
+          + " damage to a random enemy.");
 }

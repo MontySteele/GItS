@@ -307,7 +307,9 @@ public class FurinaStageBatchTwoTests
     [Fact]
     public void An_act_reads_the_arkhe_multipliers()
     {
-        var calls = Il.Calls(Il.Method("FurinaStage", "Perform"));
+        // Draft 3 (2026-09-25): the act lives in `Act`, which Perform and
+        // the Bow both call.
+        var calls = Il.Calls(Il.Method("FurinaStage", "Act"));
         Assert.Contains("FurinaStageLedger.get_ActDamageMultiplier", calls);
         Assert.Contains("FurinaStageLedger.get_ActBlockMultiplier", calls);
     }

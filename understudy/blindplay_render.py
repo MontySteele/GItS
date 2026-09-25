@@ -1534,26 +1534,23 @@ STAGE_EMPTY_LINE = ("- The stage is empty. A Spend rider cannot "
 # measured per-enemy loss, sent only where every enemy lost the same; an
 # uneven sweep (a Vulnerable, a kill) or an older build has none, and the line
 # then says the figure is a total, in `STAGE_ACT_SPREAD`'s words.
+#: Draft 3 (2026-09-25): no act applies Hydro, so no line says it does.
 STAGE_ACT_EFFECTS = {
     "usher": "Furina gains {n} Block",
-    "chevalmarin": "{each} to every enemy, and Hydro on each",
+    "chevalmarin": "{each} to every enemy",
     "crabaletta": "{n} to {who}",
 }
 
 #: Chevalmarin's act where no single per-enemy figure exists.
-STAGE_ACT_SPREAD = "{n} in total, split across the enemies, and Hydro on each"
+STAGE_ACT_SPREAD = "{n} in total, split across the enemies"
 
-#: The bows, rule 9. Chevalmarin's leaves an aura and moves no number at all,
-#: so it is the one row with no `{n}` in it -- the beat files 0 and a line
-#: reading "0 to every enemy" would be describing a hit that did not happen.
-STAGE_BOW_EFFECTS = {
-    # 2026-09-25: his Bow is Fanfare for the front performer, not Block. The
-    # gain is its own line right after this one (a Raise, or an arrival where
-    # his leaving emptied the stage), so this sentence carries no number.
-    "usher": "your front performer gains 4 Fanfare",
-    "chevalmarin": "Hydro on every enemy",
-    "crabaletta": "{n} to {who}",
-}
+#: The bows, rule 9. Since draft 3 (2026-09-25) a Bow IS the performer's act
+#: once more, so the bow lines are the act lines, measured the same way.
+STAGE_BOW_EFFECTS = dict(STAGE_ACT_EFFECTS)
+
+#: Draft 3 (2026-09-25), rule 12: one line per performer the fade took
+#: Fanfare from, after the acts.
+STAGE_FADE_LINE = "  - The applause fades: **{who}** {before} → {after}."
 
 #: What an act says when the board moved nothing -- a Chevalmarin sweep into a
 #: dead board, a Crabaletta hit a Block ate whole. Saying "0" would be a claim
@@ -1762,6 +1759,10 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(f"  - {who} moved from the front seat to the back, "
                        "bar and all. Nobody left and nobody took a "
                        "Bow.")
+        elif row["event"] == "fade":
+            out.append(STAGE_FADE_LINE.format(
+                who=row["name"], before=row["fanfare"] + row["moved"],
+                after=row["fanfare"]))
     return out
 
 

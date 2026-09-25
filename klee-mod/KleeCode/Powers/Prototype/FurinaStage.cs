@@ -759,13 +759,31 @@ public static class FurinaStage
     }
 
     /// <summary>Rule 10: one performer's flat act, from any seat, reading no
-    /// bar. ONE implementation and two callers -- the end-of-turn sweep and
-    /// <i>Bis!</i> -- so an act cannot mean two things. A newcomer's arrival
-    /// was the third until `EB-738` removed it.</summary>
+    /// bar. ONE implementation for every caller -- the end-of-turn sweep,
+    /// <i>Bis!</i>, <i>Tutti!</i> and, since draft 3 (2026-09-25), the
+    /// <see cref="Bow"/> -- so an act cannot mean two things.</summary>
     public static async Task Perform(PlayerChoiceContext choiceContext,
                                      Creature? owner, string member)
     {
         if (!LiveFor(owner)) return;
+        await Act(choiceContext, owner!, Parse(member), "act");
+    }
+
+    /// <summary>
+    /// The act itself, filed as <paramref name="beat"/>: <c>act</c> from
+    /// <see cref="Perform"/>, <c>bow</c> from <see cref="Bow"/>.
+    ///
+    /// NO ACT CARRIES AN ELEMENT (draft 3, 2026-09-25; [USER]: "removing the
+    /// Hydro application from the end-of-turn effects on Chevalmarin and
+    /// Crabaletta"). The two damage acts go out through
+    /// <see cref="ElementalHit.DealUnelemented"/>, unpowered: no aura set,
+    /// none consumed, no reaction, and Furina's Strength and Weak stay out of
+    /// it (`EB-495` D3). Sim twin: <c>furina_stage.perform</c>.
+    /// </summary>
+    private static async Task Act(PlayerChoiceContext choiceContext,
+                                  Creature owner, StagePerformer who,
+                                  string beat)
+    {
         // `EB-735`, and `EB-511`'s lesson: the beat files WHAT THE BOARD LOST,
         // measured across the act, and never the clause's own printed figure.
         // Crabaletta prints 5 and a Vulnerable makes it 7; a receipt quoting
@@ -775,26 +793,26 @@ public static class FurinaStage
         // R276 batch two, ARKHE ALIGNMENT: this turn's doubling of the acts'
         // printed numbers (Ousia the damage, Pneuma the Block). 1 and 1 on
         // every turn nobody chose.
-        var stage = FurinaStageLedger.For(owner!);
+        var stage = FurinaStageLedger.For(owner);
         var dmg = stage.ActDamageMultiplier;
         var blk = stage.ActBlockMultiplier;
         var each = -1;
-        switch (Parse(member))
+        switch (who)
         {
             case StagePerformer.Usher:
                 await CreatureCmd.GainBlock(
-                    owner!, FurinaStageLaw.ActUsherBlock * blk,
+                    owner, FurinaStageLaw.ActUsherBlock * blk,
                     ValueProp.Unpowered, null, fast: true);
                 break;
             case StagePerformer.Chevalmarin:
                 // Round four: what EACH enemy lost, so the page prints "2 to
                 // every enemy" and not the total of four hits as one number.
-                var targets = Enemies(owner!).ToList();
+                var targets = Enemies(owner).ToList();
                 var hpBefore = targets.Select(e => e.CurrentHp).ToList();
                 foreach (var enemy in targets)
                 {
-                    await ElementalHit.Deal(
-                        choiceContext, enemy, Elements.Element.Hydro,
+                    await ElementalHit.DealUnelemented(
+                        choiceContext, enemy,
                         FurinaStageLaw.ActChevalmarinDamage * dmg, owner,
                         powered: false);
                 }
@@ -802,21 +820,21 @@ public static class FurinaStage
                                 targets.Select(e => e.CurrentHp).ToList());
                 break;
             case StagePerformer.Crabaletta:
-                if (RandomEnemy(owner!) is { } target)
+                if (RandomEnemy(owner) is { } target)
                 {
                     // `EB-743`: WHICH body, because Crabaletta picks its own.
                     // Held before the hit lands so a killing act still names
                     // what it killed -- the retired reframe's rule one arm
                     // over, and the reason the mod sends a title at all.
                     hit = target;
-                    await ElementalHit.Deal(
-                        choiceContext, target, Elements.Element.Hydro,
+                    await ElementalHit.DealUnelemented(
+                        choiceContext, target,
                         FurinaStageLaw.ActCrabalettaDamage * dmg, owner,
                         powered: false);
                 }
                 break;
         }
-        NoteBeat(owner!, "act", Parse(member), before, hit, each);
+        NoteBeat(owner, beat, who, before, hit, each);
     }
 
     /// <summary>Round four: the one loss every enemy took, or -1 where there
@@ -871,6 +889,8 @@ public static class FurinaStage
         }
         ledger.EndRest();
         ledger.ResetActMultipliers();
+        // Rule 12 (draft 3, 2026-09-25): THE APPLAUSE FADES, after the acts.
+        if (ledger.Fade() > 0) FurinaStagePets.SyncBars(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
 
@@ -904,47 +924,23 @@ public static class FurinaStage
     /// mistaken for a departure at a call site --
     /// <see cref="StageExit.Bows"/> is the ledger's own read of rule 7, and a
     /// departure that earned no bow returns here without paying.
+    ///
+    /// THE BOW IS THE PERFORMER'S ACT, ONCE MORE (draft 3, 2026-09-25; [USER]
+    /// ruled the Stage review's pick 1, one effect per performer, since
+    /// Chevalmarin's old Bow was "strictly worse than the end-of-turn
+    /// effect"): Usher 3 Block, Chevalmarin 2 to every enemy, Crabaletta 5 to
+    /// a random enemy -- <see cref="Act"/> itself, filed as a <c>bow</c>.
+    /// ONE act: Ousia and Pneuma double it like any act, and Full House does
+    /// not repeat it (only <see cref="EndOfTurnActs"/> loops). A hit's Bow on
+    /// the enemy's turn gives Usher's Block then, which helps only against
+    /// later hits that turn ([USER]: the plain exit is the minimum).
     /// </summary>
     public static async Task Bow(PlayerChoiceContext choiceContext,
                                  Creature owner, StageExit exit,
                                  bool mayReturn = true)
     {
         if (!exit.Bows || !LiveFor(owner)) return;
-        var before = Ledger(owner);
-        Creature? hit = null;
-        switch (exit.Who)
-        {
-            case StagePerformer.Usher:
-                // 2026-09-25: Fanfare to the FRONT performer, not Block to
-                // Furina -- a hit made him bow on the enemy's turn and the
-                // Block expired unused. He has already left, so the front is
-                // whoever stands there now, and on the stage he emptied the
-                // Raise summons a random performer holding it (round four's
-                // rule, the door Thunderous Applause uses). The bow beat is
-                // filed FIRST so the log reads the bow, then the gain it paid.
-                NoteBeat(owner, "bow", exit.Who, before);
-                await RaiseLead(owner, FurinaStageLaw.BowUsherFanfare);
-                await AfterBow(choiceContext, owner, exit.Who, mayReturn);
-                return;
-            case StagePerformer.Chevalmarin:
-                foreach (var enemy in Enemies(owner))
-                {
-                    await ElementalHit.ApplyOnly(
-                        choiceContext, enemy, Elements.Element.Hydro, owner);
-                }
-                break;
-            case StagePerformer.Crabaletta:
-                if (RandomEnemy(owner) is { } target)
-                {
-                    hit = target;                        // `EB-743`
-                    await ElementalHit.Deal(
-                        choiceContext, target, Elements.Element.Hydro,
-                        FurinaStageLaw.BowCrabalettaDamage, owner,
-                        powered: false);
-                }
-                break;
-        }
-        NoteBeat(owner, "bow", exit.Who, before, hit);
+        await Act(choiceContext, owner, exit.Who, "bow");
         await AfterBow(choiceContext, owner, exit.Who, mayReturn);
     }
 

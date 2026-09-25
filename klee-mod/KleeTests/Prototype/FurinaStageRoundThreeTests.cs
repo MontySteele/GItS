@@ -158,7 +158,8 @@ public class FurinaStageRoundThreeTests
           + "enemies\")", source);
         Assert.Contains(
             "(\"description\", \"[gold]Spend[/gold] 2: deal "
-          + "{BranchDamage:diff()} instead\")", source);
+          + "{BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL "
+          + "instead\")", source);
         // AND THE VARS THEY NEED, on the option class rather than only on the
         // parent: a token with no var behind it prints nothing at all.
         Assert.Contains("class ProtoFsTidalFlourishModeA : ModalOptionCard",

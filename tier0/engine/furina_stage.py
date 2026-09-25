@@ -73,18 +73,23 @@ PERFORMERS = ("usher", "chevalmarin", "crabaletta")
 RELIC = "salon_solitaire"
 
 # Rule 10, the ACTS -- flat, from any seat, at the end of Furina's turn, and
-# they do not read the bar.
+# they do not read the bar. NO ACT APPLIES HYDRO (draft 3, 2026-09-25; [USER]:
+# "removing the Hydro application from the end-of-turn effects on Chevalmarin
+# and Crabaletta"): the two damage acts are plain damage, and Hydro comes from
+# cards (Tidal Flourish and Quick Cue's Spend modes, Chevalmarin's card).
 ACT_USHER_BLOCK = 3
-ACT_CHEVALMARIN_DAMAGE = 2   # to EVERY enemy, and applies Hydro.
+ACT_CHEVALMARIN_DAMAGE = 2   # to EVERY enemy.
 ACT_CRABALETTA_DAMAGE = 5    # to a random enemy.
 
-# Rule 9, the BOWS -- performed once by a performer that reached 0 Fanfare,
-# whatever emptied it (rule 7, 2026-09-25). Leaving by rotation earns none.
-# Usher's is Fanfare to the FRONT performer, not Block to Furina (2026-09-25:
-# his Block expired unused when a hit made him bow on the enemy's turn).
-BOW_USHER_FANFARE = 4
-BOW_CRABALETTA_DAMAGE = 8    # to a random enemy. Chevalmarin's bow is Hydro
-                             # on every enemy and carries no number.
+# Rule 9, the BOW, is the performer's own act ONE MORE TIME as it leaves
+# (draft 3, 2026-09-25, the Stage review's pick 1). It has no numbers of its
+# own: `_bow` calls `perform`.
+
+# Rule 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of Furina's
+# turn, after the acts, each performer BEHIND THE FRONT loses half of its
+# Fanfare above this, rounded down (`fade_loss`). The front never fades. The
+# threshold is the knob seat rounds tune.
+FADE_THRESHOLD = 5
 
 #: Where a Raise lands. Rule 5: the BACK-MOST performer, which is the lead when
 #: it is alone. Written out as words so a row and a face say the same thing.
@@ -455,39 +460,22 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
 
 
 def _bow(state, member: str) -> None:
-    """Rule 9, the curtain call, performed ONCE by a performer that reached 0
-    Fanfare, whatever emptied it (rule 7). Usher: the front performer gains
-    4 Fanfare -- a Raise like any other, so on the stage his leaving emptied a
-    random performer arrives holding it (2026-09-25; his 4 Block had expired
-    unused when a hit made him bow on the enemy's turn). Chevalmarin: Hydro on
-    every enemy. Crabaletta: deal 8 Hydro to a random enemy.
+    """Rule 9, the curtain call: THE PERFORMER'S OWN ACT, ONE MORE TIME, as it
+    leaves (draft 3, 2026-09-25; [USER] ruled the Stage review's pick 1, one
+    effect per performer, since Chevalmarin's old Bow was "strictly worse than
+    the end-of-turn effect"). Usher 3 Block, Chevalmarin 2 to every enemy,
+    Crabaletta 5 to a random enemy -- `perform` itself, so the two cannot
+    drift.
 
-    He has already LEFT when this runs, so "the front performer" is whoever
-    stands in front now: the old middle after a hit or a recast, the lead
-    after a Spend from the back. A Five-Century Act's return comes after it
-    (`_after_bow`), so it never lands on him.
-
-    `EB-495` D3/D4: Crabaletta's bow is `powered=False` and Hydro, which is
-    what `FurinaStage.Bow` has always passed (`FurinaStage.cs:542`, `:544`).
-    See `perform` below for the whole argument; the two methods are twins and
-    move together.
+    ONE ACT: Arkhe Alignment's Ousia and Pneuma double it like any act (the
+    multipliers `perform` reads), and Full House does NOT repeat it (only the
+    end-of-turn sweep loops). A hit's Bow lands on the enemy's turn, after the
+    sweep has reset the multipliers, so there it is the printed act. A
+    Five-Century Act's return comes after it (`_after_bow`). C# twin:
+    `FurinaStage.Bow`.
     """
-    from tier0.engine import effects, reactions       # late: avoids the cycle
-    p = state.player
     state.emit("stage_bow", member=member)
-    if member == "usher":
-        raise_fanfare(state, BOW_USHER_FANFARE, SEAT_LEAD)
-    elif member == "chevalmarin":
-        for enemy in list(state.living_enemies):
-            reactions.resolve_hit(state, enemy, "hydro", 0,
-                                  "furina_stage/bow")
-    elif member == "crabaletta":
-        if state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
-            effects.deal_damage_to_enemy(state, enemy, BOW_CRABALETTA_DAMAGE,
-                                         element="hydro",
-                                         powered=False,
-                                         source="furina_stage/bow")
+    perform(state, member, bow=True)
 
 
 # ----------------------------------------------------------------------
@@ -847,12 +835,13 @@ def absorb(state, incoming: int) -> int:
 # ----------------------------------------------------------------------
 # The acts.
 # ----------------------------------------------------------------------
-def perform(state, member: str) -> None:
+def perform(state, member: str, *, bow: bool = False) -> None:
     """Rule 10: one performer's flat act, from any seat, reading no bar.
 
-    ONE implementation, two callers -- the end-of-turn sweep and *Bis!*
-    (sec.12) -- so an act cannot mean two things. A newcomer's arrival was the
-    third until `EB-738` removed it: a summon performs at the END of the turn,
+    ONE implementation for every caller -- the end-of-turn sweep, *Bis!*,
+    *Tutti!* and, since draft 3 (2026-09-25), the Bow -- so an act cannot
+    mean two things. A newcomer's arrival was once another,
+    until `EB-738` removed it: a summon performs at the END of the turn,
     with the others, and reaches this function through the sweep.
 
     `EB-495` D3, REPAIRED HERE. This function called `deal_damage_to_enemy`
@@ -870,24 +859,19 @@ def perform(state, member: str) -> None:
     Stage inherited from the Salon is "a performance is not an Attack and not
     a hit" (`EB-588`).
 
-    `EB-495` D4, the same omission one argument over. `FurinaStage.cs:461`
-    (the act) and `:542` (the bow) both pass `Elements.Element.Hydro`;
-    Crabaletta's two sim legs passed no `element=`, so the hit set no aura and
-    consumed none, and every reaction off a Crabaletta hit existed in the game
-    and nowhere here. THE BRIEF IS SILENT: it names Chevalmarin's Hydro in
-    rules 9 and 10 in as many words and says only "Crabaletta deals 5 to a
-    random enemy", so there is no rule for the C# to contradict and the game
-    is the answer. No second `resolve_hit` pass is added: Chevalmarin's leg
-    has one because rule 10 reads "deals 2 to every enemy AND APPLIES HYDRO"
-    and the clause has to hold against a body the hit loop skips. Crabaletta
-    aims at one living enemy, and the element travels with the hit ahead of
-    Block in both engines, so the single argument is the whole of it.
+    NO ACT CARRIES AN ELEMENT (draft 3, 2026-09-25). `EB-495` D4 had given
+    Crabaletta's hit the game's Hydro; [USER] then ruled the Hydro off both
+    damage acts ("removing the Hydro application from the end-of-turn effects
+    on Chevalmarin and Crabaletta"), so both are plain damage in both engines
+    (`element=None` here, `ElementalHit.DealUnelemented` in the mod): no aura
+    set, none consumed, no reaction.
     """
-    from tier0.engine import effects, reactions       # late: avoids the cycle
+    from tier0.engine import effects                  # late: avoids the cycle
     p = state.player
     if not active(p):
         return
-    state.emit("stage_act", member=member)
+    if not bow:                       # a Bow files its own `stage_bow`
+        state.emit("stage_act", member=member)
     # R276 batch two, ARKHE ALIGNMENT: this turn's doubling of the acts'
     # printed numbers.
     dmg = int(p.stage_act_damage_mult)
@@ -898,26 +882,19 @@ def perform(state, member: str) -> None:
         for enemy in list(state.living_enemies):
             effects.deal_damage_to_enemy(state, enemy,
                                          ACT_CHEVALMARIN_DAMAGE * dmg,
-                                         element="hydro",
+                                         element=None,
                                          powered=False,
-                                         source="furina_stage/act")
-        # The Hydro is the ACT's, not the hit's: sec.3 rule 10 reads "deals 2
-        # to every enemy AND APPLIES HYDRO", so a dead body or a zero that
-        # Block ate still leaves the aura the Guest Cast plan (sec.5.3) reacts
-        # off. `deal_damage_to_enemy` with an element already applies on a
-        # landing hit; this second pass is what makes the clause hold when it
-        # does not land.
-        for enemy in list(state.living_enemies):
-            reactions.resolve_hit(state, enemy, "hydro", 0,
-                                  "furina_stage/act")
+                                         source=("furina_stage/bow" if bow
+                                                 else "furina_stage/act"))
     elif member == "crabaletta":
         if state.living_enemies:
             enemy = state.rng.choice(state.living_enemies)
             effects.deal_damage_to_enemy(state, enemy,
                                          ACT_CRABALETTA_DAMAGE * dmg,
-                                         element="hydro",
+                                         element=None,
                                          powered=False,
-                                         source="furina_stage/act")
+                                         source=("furina_stage/bow" if bow
+                                                 else "furina_stage/act"))
 
 
 def perform_lead(state) -> None:
@@ -960,6 +937,37 @@ def end_of_turn_acts(state) -> None:
     p.stage_resting.clear()
     p.stage_act_damage_mult = 1
     p.stage_act_block_mult = 1
+    fade(state)
+
+
+def fade_loss(fanfare: int) -> int:
+    """Rule 12's arithmetic: half of the Fanfare above `FADE_THRESHOLD`,
+    rounded down. 5 -> 0, 6 -> 0, 7 -> 1, 9 -> 2, 15 -> 5, 25 -> 10. ONE
+    function, so the threshold (and the halving) is tuned in one place. C#
+    twin: `FurinaStageLaw.FadeLoss`."""
+    return max(0, int(fanfare) - FADE_THRESHOLD) // 2
+
+
+def fade(state) -> None:
+    """RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
+    Furina's turn, AFTER the acts, each performer behind the front (the middle
+    and back seats) loses `fade_loss` of its bar. The front never fades, so a
+    lone performer never does. The loss is half of what stands ABOVE the
+    threshold, so it never takes a bar below the threshold, never empties a
+    performer and never causes a Bow. [USER] ruled out a flat halving
+    ("taking away half from the back means it's hard to build up fanfare").
+    C# twin: `FurinaStageLedger.Fade`."""
+    p = state.player
+    if not active(p):
+        return
+    for pair in stage(p)[1:]:
+        loss = fade_loss(pair[1])
+        if loss <= 0:
+            continue
+        before = pair[1]
+        pair[1] = before - loss
+        state.emit("stage_fade", member=pair[0], amount=loss,
+                   before=before, fanfare=pair[1])
 
 
 # ----------------------------------------------------------------------
