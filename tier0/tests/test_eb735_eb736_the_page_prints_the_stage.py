@@ -487,7 +487,7 @@ def test_the_encore_row_is_gone_from_an_arm_page():
 def test_the_companion_row_says_what_a_companion_does_under_the_arm():
     """The round-two Preserve seat played Companion cards for a run believing
     they rotate the stage, which is the SHIPPED Salon's rule. The Stage retires
-    that outright; the one touchpoint the brief names is Chevalmarin's Hydro."""
+    that outright; its Hydro comes from her cards."""
     face = [_card("Deal 4 damage for each Companion you played last turn.")]
     arm = _page({"live": True, "seats": THREE_SEATS, "log": []}, hand=face)
     assert "It does nothing to your stage" in arm
@@ -537,7 +537,7 @@ def test_the_back_performer_row_says_where_hits_go():
     page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                  hand=[_card("Gain Block equal to the back performer's bar.")])
     # The guest round (2026-09-25): rule 6 never runs a hit past the front.
-    assert "Hits never reach it." in page
+    assert "Hits reach it only when it stands alone." in page
     assert "Hits reach it last." not in page
     assert "no single attack reaches it" not in page
     assert "nothing hits it" not in page

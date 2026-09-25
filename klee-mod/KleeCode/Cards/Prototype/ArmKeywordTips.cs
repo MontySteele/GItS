@@ -873,8 +873,10 @@ public static class ArmKeywordTips
             // Draft 3 (2026-09-25): rule 12, the fade, on the seat it hits.
             // THE GUEST ROUND (2026-09-25, 0.2.3794): "Hits reach it last"
             // was false -- rule 6 never runs a hit on past the front -- and
-            // the Opus seat lost Wriothesley's plan to it.
-            "Gains and Spends [gold]Fanfare[/gold]. Hits never reach it. At "
+            // the Opus seat lost Wriothesley's plan to it. A lone performer
+            // is both the front and the back, so it is hit then.
+            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it only when "
+          + "it stands alone. At "
           + "the end of your turn, it loses half its Fanfare above "
           + FurinaStageLaw.FadeThreshold + ".");
 

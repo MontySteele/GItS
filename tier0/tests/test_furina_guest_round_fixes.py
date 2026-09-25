@@ -6,7 +6,7 @@ The mod halves are `klee-mod/KleeTests/Prototype/FurinaGuestCastTests.cs`
 (the damage previews); the sim's are in `test_furina_guest_cast.py`.
 
   1. The back performer tip said "Hits reach it last". Rule 6 never runs a
-     hit on past the front: "Hits never reach it."
+     hit on past the front: "Hits reach it only when it stands alone."
   3. The log said a summoned Usher "stands in the front seat" while the stage
      line showed him at the back -- the page named a beat's seat by NAME, and
      the first Usher stood in front. It names it by the seat's key now.
@@ -109,7 +109,8 @@ WRIOTHESLEY = {
 
 def test_the_back_performer_row_says_hits_never_reach_it():
     assert ARM_KEYWORDS["back performer"].startswith(
-        "Gains and Spends Fanfare. Hits never reach it. At the end of your "
+        "Gains and Spends Fanfare. Hits reach it only when it stands alone. "
+        "At the end of your "
         "turn, it loses half its Fanfare above 5.")
     for row in ARM_KEYWORDS.values():
         assert "reach it last" not in row

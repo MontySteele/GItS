@@ -127,8 +127,10 @@ performers with their own bars, and Fanfare is that bar.**
 What is not in this batch, by decision: Spend as an Energy-free cost,
 Fontaine Companions that summon a character with its own act (held until
 the loop is proven), and co-op, where a partner's bar would sit in the same
-damage order. Companion cards stay the shared action pool; their touchpoint
-is Chevalmarin's Hydro, which the Fontaine bench's Pyro and Cryo react off.
+damage order. Companion cards stay the shared action pool; since draft 3 no
+act applies Hydro, so the Hydro the Fontaine bench's Pyro and Cryo react off
+comes from Furina's cards (Tidal Flourish and Quick Cue in their Spend modes,
+and Chevalmarin's card), and a guest brings its own element (2026-09-25).
 
 ## 4. The contested thing: Spend, and the two decks it makes
 

@@ -6748,7 +6748,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "front performer": ["Takes hits first. Regains "],
         # Draft 3: the fade, whose threshold is interpolated on the mod
         # side. The guest round: hits never reach the back (rule 6).
-        "back performer": ["Gains and Spends ", ". Hits never reach it. At ",
+        "back performer": ["Gains and Spends ",
+                           ". Hits reach it only when ",
+                           "it stands alone. At ",
                            "the end of your turn, it loses half its Fanfare "
                            "above "],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is

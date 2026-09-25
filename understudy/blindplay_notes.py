@@ -1468,9 +1468,11 @@ ARM_KEYWORDS: dict[str, str] = {
                         "your turn. " + STAGE_ACTS),
     # `EB-744` and round four. Draft 3 (2026-09-25): rule 12, the fade.
     # The guest round (2026-09-25): "Hits reach it last" was false. Rule 6:
-    # the front absorbs and the rest reaches Furina, never a seat behind.
-    "back performer": ("Gains and Spends Fanfare. Hits never reach it. At the "
-                       "end of your turn, it loses half its Fanfare above 5. "
+    # the front absorbs and the rest reaches Furina, never a seat behind;
+    # a lone performer is both seats, so it is hit then.
+    "back performer": ("Gains and Spends Fanfare. Hits reach it only when it "
+                       "stands alone. At the end of your turn, it loses half "
+                       "its Fanfare above 5. "
                        + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
@@ -1628,13 +1630,16 @@ COMPANION_STAGE_CLAUSE = (
 # first find: the round-two Preserve seat played Companion cards for a run
 # believing they rotate the cast. They do not. The Stage retires the shipped
 # Salon outright (brief sec.2's table, R269) -- a Companion card is the shared
-# action pool and nothing else -- and the one touchpoint the brief names is
-# Chevalmarin's Hydro, which the Fontaine bench reacts off. So the arm gets its
-# own clause rather than the shipped one, and it says what a reader can use.
+# action pool and nothing else. So the arm gets its own clause rather than the
+# shipped one, and it says what a reader can use. The guest seat round
+# (2026-09-25): since draft 3 no act applies Hydro, so the old "Chevalmarin's
+# Hydro is the touchpoint" was stale; Hydro comes from her cards, and a guest
+# brings its own element.
 COMPANION_STAGE_ARM_CLAUSE = (
     " It does nothing to your stage: no performer acts, moves or leaves for "
-    "one. Chevalmarin's Hydro is the touchpoint -- a Pyro or Cryo Companion "
-    "played into it reacts.")
+    "one. The Hydro it can react with comes from Furina's cards -- Tidal "
+    "Flourish and Quick Cue in their Spend modes, and Chevalmarin's card -- "
+    "and a guest brings its own element.")
 
 #: Whose stage it is. Matched the way `understudy/adapter.py` matches it -- on
 #: the character's printed Title, case-folded -- because that is the field the
