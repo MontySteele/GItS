@@ -6743,8 +6743,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                     "the front performer's, then you. Gained on an empty "
                     "stage, it "],
         # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-        "Bow": ["A performer that leaves the stage acts one last time on "
-                "its way "],
+        # 2026-09-25 evening: a Bow earned on the enemy's turn waits.
+        "Bow": ["A leaving performer acts one last time. On the enemy's "
+                "turn, "],
         "front performer": ["Takes hits first. Regains "],
         # `EB-744` and round four: the back is reached last. Draft 3: the
         # fade, whose threshold is interpolated on the mod side.

@@ -436,8 +436,9 @@ public sealed class GuestOfHonorPower : PowerModel, ILocalizationProvider
             return;
         }
         // The engine skips AfterDamageReceived for a target the hit killed,
-        // so a lead emptied by the hit that killed the ally is flushed, and
-        // bows for a living Furina, here.
+        // so a lead emptied by the hit that killed the ally is flushed here
+        // for a living Furina -- its Bow paid on her turn, or left waiting
+        // for the start of hers on the enemy's (2026-09-25 evening).
         if (ReferenceEquals(creature, Owner) && Applier is { IsDead: false })
         {
             await FurinaStage.Flush(choiceContext, Applier);

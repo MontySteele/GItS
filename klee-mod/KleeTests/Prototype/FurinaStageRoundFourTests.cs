@@ -218,20 +218,19 @@ public class FurinaStageRoundFourTests
     // ---- Chevalmarin's per-enemy figure ------------------------------------
 
     [Fact]
-    public void An_even_sweep_files_what_each_enemy_lost()
+    public void An_even_sweep_files_what_each_enemy_was_dealt()
     {
-        Assert.Equal(2, FurinaStage.EvenLoss(
-            new[] { 20, 15, 30, 9 }, new[] { 18, 13, 28, 7 }));
+        // 2026-09-25 evening: DEALT, before Block -- four Gardeners, one of
+        // whose 2 a Skittish Block ate, were still each dealt 2.
+        Assert.Equal(2, FurinaStage.Even(new[] { 2, 2, 2, 2 }));
     }
 
     [Fact]
     public void An_uneven_sweep_or_no_enemy_files_no_single_figure()
     {
-        // A Vulnerable body took 3 where the others took 2.
-        Assert.Equal(-1, FurinaStage.EvenLoss(
-            new[] { 20, 15 }, new[] { 18, 12 }));
-        Assert.Equal(-1, FurinaStage.EvenLoss(
-            Array.Empty<int>(), Array.Empty<int>()));
+        // A Vulnerable body was dealt 3 where the others were dealt 2.
+        Assert.Equal(-1, FurinaStage.Even(new[] { 2, 3 }));
+        Assert.Equal(-1, FurinaStage.Even(Array.Empty<int>()));
     }
 
     [Fact]

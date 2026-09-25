@@ -58,6 +58,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_ALL_BLOCKED,
                                         RESOLUTION_NO_HITS,
                                         RESOLUTION_NO_HITS_STAGE,
+                                        RESOLUTION_SUMMONED,
                                         RESOLUTION_HIT_KILLED,
                                         RESOLUTION_KILLED,
                                         RESOLUTION_AUTO_CLAUSE,
@@ -1230,6 +1231,10 @@ def _resolution_lines(rows: list[dict[str, Any]],
         if row.get("overflowed"):
             clauses += RESOLUTION_OVERFLOW_CLAUSE
         out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
+        # 2026-09-25 evening: the performer a random summon rolled.
+        if row.get("summoned"):
+            out.append(RESOLUTION_SUMMONED.format(names=_and_list(
+                [f"**{name}**" for name in row["summoned"]])))
         killed = row.get("killed") or []
         if not row["hits"] and not killed:
             # 2026-09-25 (opus-furina-l2b): on a board with a stage, a card
@@ -1531,9 +1536,17 @@ STAGE_EMPTY_LINE = ("- The stage is empty. A Spend rider cannot "
 #
 # ROUND FOUR: CHEVALMARIN PRINTS WHAT EACH ENEMY TOOK. "8 across every enemy"
 # was read as one 8 when it was 2 to each of four. `{each}` is the mod's
-# measured per-enemy loss, sent only where every enemy lost the same; an
-# uneven sweep (a Vulnerable, a kill) or an older build has none, and the line
-# then says the figure is a total, in `STAGE_ACT_SPREAD`'s words.
+# measured per-enemy figure, sent only where every enemy got the same; an
+# uneven sweep (a Vulnerable) or an older build has none, and the line then
+# says the figure is a total, in `STAGE_ACT_SPREAD`'s words.
+#
+# 2026-09-25 EVENING: "2 DAMAGE TO EACH OF N ENEMIES". A seat read "6 in
+# total, split across the enemies" against four Phantasmal Gardeners and
+# could not tell the act from a bug: the act had dealt every Gardener its 2,
+# and one Gardener's Skittish Block (gained on the first hit each turn) ate
+# that one's. So the mod sends what each enemy was DEALT, before Block, and
+# how many it struck (`STAGE_ACT_EACH`); where their HP fell by less, the
+# line says by how much (`STAGE_ACT_EACH_HP`).
 #: Draft 3 (2026-09-25): no act applies Hydro, so no line says it does.
 STAGE_ACT_EFFECTS = {
     "usher": "Furina gains {n} Block",
@@ -1543,6 +1556,22 @@ STAGE_ACT_EFFECTS = {
 
 #: Chevalmarin's act where no single per-enemy figure exists.
 STAGE_ACT_SPREAD = "{n} in total, split across the enemies"
+
+#: Chevalmarin's act where the mod sends the per-enemy figure and the count.
+STAGE_ACT_EACH = "{each} damage to each of {struck} enemies"
+STAGE_ACT_ONE = "{each} damage to its one enemy"
+#: ... and where their HP fell by less than that (their Block, or a kill).
+STAGE_ACT_EACH_HP = " (their HP fell by {n} in all)"
+#: A sweep the mod counted but that was uneven (a Vulnerable on one).
+STAGE_ACT_SPREAD_STRUCK = "{n} in total across {struck} enemies"
+
+#: 2026-09-25 evening: A SPEND IS A LOG LINE. Both seats: the log listed the
+#: Raise that built a bar and never the Spend that took it back down.
+STAGE_SPEND_LINE = "  - Spent {n} of **{who}**'s Fanfare: {before} → {after}."
+
+#: 2026-09-25 evening: a Bow a hit on the enemy's turn left waiting for her
+#: turn (rule 7), on the stage block.
+STAGE_BOW_WAITS_LINE = "- {who}'s Bow waits for your turn."
 
 #: The bows, rule 9. Since draft 3 (2026-09-25) a Bow IS the performer's act
 #: once more, so the bow lines are the act lines, measured the same way.
@@ -1621,6 +1650,8 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         out.append("- " + " · ".join(reserve))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
+    out += [STAGE_BOW_WAITS_LINE.format(who=who)
+            for who in stage.get("owed_bows") or []]
     return out
 
 
@@ -1636,6 +1667,10 @@ def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
     text = table.get(row["member"])
     if not text:
         return ""
+    if "{each}" in text and row.get("struck"):
+        # 2026-09-25 evening: what each enemy was dealt and how many were
+        # struck, with what their HP actually lost where that is less.
+        return _stage_sweep(row)
     if "{each}" in text:
         # Round four: the per-enemy figure where there is one, else the
         # total said as a total.
@@ -1648,6 +1683,22 @@ def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
         return STAGE_NOTHING_LANDED
     return text.format(n=row["moved"], each=row.get("each"),
                        who=row["target"] or STAGE_UNNAMED_TARGET)
+
+
+def _stage_sweep(row: dict[str, Any]) -> str:
+    """Chevalmarin's act on a build that counts what it struck (2026-09-25
+    evening): "2 damage to each of 4 enemies", and, where their HP fell by
+    less than that, by how much. `moved` is still what their HP lost."""
+    each, struck, lost = row.get("each"), row["struck"], row["moved"]
+    if each is None or each <= 0:
+        if not lost:
+            return STAGE_NOTHING_LANDED
+        return STAGE_ACT_SPREAD_STRUCK.format(n=lost, struck=struck)
+    text = (STAGE_ACT_ONE if struck == 1 else STAGE_ACT_EACH).format(
+        each=each, struck=struck)
+    if lost != each * struck:
+        text += STAGE_ACT_EACH_HP.format(n=lost)
+    return text
 
 
 #: 2026-09-25 (opus-furina-l2b, (c) 4). A BAR GOING UP, AND A HIT ON THE LEAD.
@@ -1730,6 +1781,10 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(STAGE_REGAIN_LINE.format(
                 n=row["moved"], who=row["name"],
                 before=row["fanfare"] - row["moved"], after=row["fanfare"]))
+        elif row["event"] == "spend":
+            out.append(STAGE_SPEND_LINE.format(
+                n=row["moved"], who=row["name"],
+                before=row["fanfare"] + row["moved"], after=row["fanfare"]))
         elif row["event"] == "hit":
             line, left = _stage_hit_line(row, log, at)
             out.append(line)

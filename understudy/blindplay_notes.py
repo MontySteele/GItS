@@ -1470,8 +1470,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
     # Bows whatever emptied it -- a Spend, a hit or a full-stage summon.
     # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-    "Bow": ("A performer that leaves the stage acts one last time on its "
-            "way out."),
+    # 2026-09-25 evening: a Bow earned on the enemy's turn waits for hers.
+    "Bow": ("A leaving performer acts one last time. On the enemy's turn, "
+            "that waits for the start of yours."),
     # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
     # because a seat may meet either word alone -- the page's one addendum to
     # the tip, `STAGE_ACTS`, which also carries the seat count (the
@@ -2352,6 +2353,9 @@ _REACTION_WORD_RE: dict[str, "re.Pattern[str]"] = {
     word: re.compile(rf"\b{re.escape(word)}\b")
     for word in REACTION_KEYWORDS if word != "Elemental Reaction"
 }
+#: The umbrella, printed. Asked only where the census above did not already
+#: define it (2026-09-25 evening, `keyword_notes`).
+_UMBRELLA_WORD_RE = re.compile(r"\bElemental Reactions?\b")
 
 # `EB-547`. A SALON MEMBER IS AN ELEMENT SOURCE, and the census could not see
 # one.
@@ -2856,6 +2860,17 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
     rows += [{"name": word, "text": REACTION_KEYWORDS[word]}
              for word, pattern in _REACTION_WORD_RE.items()
              if word not in named and pattern.search(hay)]
+    # 2026-09-25 evening. AND THE UMBRELLA WORD TOO, where a face prints it.
+    # `Courtroom Drama` ("Your first Elemental Reaction each turn ...") was
+    # offered and held with the term never defined on any screen the seat
+    # saw: the umbrella rides only the element census above, and a reward
+    # screen or a hand whose cards bear no element never raises it. Where it
+    # is printed and the census did not define it, it gets the one-line
+    # definition -- `EB-675`'s row, which claims nothing about reach.
+    if ("Elemental Reaction" not in {row["name"] for row in rows}
+            and _UMBRELLA_WORD_RE.search(hay)):
+        rows.append({"name": "Elemental Reaction",
+                     "text": REACTION_UNREACHABLE_ROW})
     seen = {row["name"] for row in rows}
     for row in _wire_keyword_rows(obs):
         if row["name"] in seen:
@@ -2938,6 +2953,10 @@ RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
 #: did to a performer's bar is filed on the stage log, and this says where.
 RESOLUTION_NO_HITS_STAGE = ("  No hit on an enemy landed off it. What it did "
                             "to your stage is on the stage log above.")
+#: 2026-09-25 evening: WHO A RANDOM SUMMON ROLLED, on the card's own row. The
+#: section printed Take the Stage, Understudy and Double Casting with no
+#: performer, and the seat had to find the arrival on the stage log.
+RESOLUTION_SUMMONED = "  It summoned {names}."
 #: A body that DIED inside the play. The game never hands a killing hit to the
 #: damage hook the ledger reads, so a kill arrives with no number, and the
 #: first wording printed it as "Nothing this page can count landed off it"

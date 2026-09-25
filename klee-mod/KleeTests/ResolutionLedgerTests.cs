@@ -305,7 +305,7 @@ public class ResolutionLedgerTests
 
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
-                             "overflowed", "hits" },
+                             "overflowed", "hits", "summoned" },
                      new List<string>(row.Keys).ToArray());
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
@@ -313,6 +313,25 @@ public class ResolutionLedgerTests
                              "killed" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
+    }
+
+    /// <summary>2026-09-25 evening: a random summon inside a card names who it
+    /// rolled on that card's row, and nothing outside a play is filed.
+    /// </summary>
+    [Fact]
+    public void A_summon_inside_a_play_names_who_it_rolled()
+    {
+        Fresh();
+        ResolutionLedger.NoteSummon("usher", "Gentilhomme Usher");  // no play
+        ResolutionLedger.OpenPlay("proto_fs_understudy", "Understudy", false);
+        ResolutionLedger.NoteSummon("crabaletta", "Mademoiselle Crabaletta");
+        ResolutionLedger.ClosePlay();
+
+        var row = ResolutionLedger.Snapshot()[0];
+        var summoned = (List<Dictionary<string, object?>>)row["summoned"]!;
+        var only = Assert.Single(summoned);
+        Assert.Equal("crabaletta", only["member"]);
+        Assert.Equal("Mademoiselle Crabaletta", only["name"]);
     }
 
     /// <summary>PRESENT AND EMPTY ON A TURN NOTHING RESOLVED, which is a fact
