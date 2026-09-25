@@ -82,7 +82,7 @@ Measurement law binds only at Balance; nothing is there today, so
 | `RT` `RUNTEMPLATE_VERSION` | **13** | `tier0/constants.py` | `EB-83`: Wood Carvings joins the act-1 event pool. |
 | `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | `EB-28`: Salon deploy priced through `STATIC_SALON_MEMBER_VALUE = 1.5`. |
 | `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | R207's scorer-literacy window. |
-| `C` `CONSTANTS_VERSION` | **21** | `tier0/constants.py` | `EB-219`: Prune's Spark grant becomes Klee's kit declaration. |
+| `C` `CONSTANTS_VERSION` | **22** | `tier0/constants.py` | Undercurrent costs 1 (2026-09-25). |
 
 The standing twelve-arm baseline (`review/records/sitting-reads-2026-08-26-c20-d18-p11.md`)
 is an `RT12` read and owes a re-baseline (`BACKLOG.md` `EB-195`).
