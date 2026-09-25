@@ -264,6 +264,101 @@ def _seats(player) -> list:
 
 
 # ----------------------------------------------------------------------
+# THE FANFARE LEDGER. INSTRUMENT ONLY, the fence `state.spark_ledger` carries
+# one arm over: nothing reads it back to decide anything, and it is not on the
+# event stream, so no log digest moves. Every writer below that moves a bar
+# books the move HERE, at the source, so the report never has to reconstruct
+# the economy by diffing bars:
+#
+#     start + gained - spent - paid_other - left - faded - hit == end
+#
+# where `end` is `total_fanfare` whenever it is read. `gained` is split by the
+# door it came through (`GAIN_*`). `left` is Fanfare that walks off the stage
+# with its performer -- Final Bow's bar, which becomes Block and is not a
+# Spend. Rotation carries a bar from one performer to another and books
+# nothing. `back_at_turn_end` is the back performer's bar at the end of each
+# of Furina's turns, after the fade (0 on an empty stage).
+# ----------------------------------------------------------------------
+GAIN_OPENING = "opening"        # the relic's Usher at 3
+GAIN_REGEN = "regen"            # rule 4, the lead's 1
+GAIN_CARD = "card"              # a card's Raise (and a named summon's bump)
+GAIN_BOW = "bow"                # what a Bow sets off (Thunderous Applause)
+GAIN_POWER = "power"            # Rapt Audience, Arkhe Alignment's Pneuma
+GAIN_SUMMON = "summon"          # rule 3, a newcomer at 1
+GAIN_EMPTY_SUMMON = "empty_summon"   # a Raise onto an empty stage, at the amount
+GAIN_RETURN = "return"          # A Five-Century Act, the Rare's return at 1
+GAIN_SOURCES = (GAIN_OPENING, GAIN_REGEN, GAIN_CARD, GAIN_BOW, GAIN_POWER,
+                GAIN_SUMMON, GAIN_EMPTY_SUMMON, GAIN_RETURN)
+
+#: The losses that are not a payment.
+LOSS_FADED = "faded"
+LOSS_HIT = "hit"
+LOSS_LEFT = "left"
+
+#: WHO PAID. `PAYER_SPEND` is a Spend card (a Spend mode, Bravura, the Rare);
+#: any other payer -- the guests, when they land -- books under its own name
+#: in `paid_other` through `book_paid`, which is the one hook they need.
+PAYER_SPEND = "spend"
+
+
+def ledger(state) -> dict:
+    """This fight's ledger, created on first use with `start` = the Fanfare on
+    stage at that moment. `open_combat` touches it before the relic fields
+    anybody, so on a real fight `start` is what the stage held at combat start
+    (0 on a fresh fight)."""
+    led = getattr(state, "stage_ledger", None)
+    if led is None:
+        led = {}
+        state.stage_ledger = led
+    if not led:
+        led.update(start=total_fanfare(state.player),
+                   gained={s: 0 for s in GAIN_SOURCES},
+                   spent=0, paid_other={}, left=0, faded=0, hit=0,
+                   back_at_turn_end=[])
+    return led
+
+
+def book_gain(state, source: str, amount: int) -> None:
+    """Fanfare that came onto a bar. Call BEFORE the bar moves, so a ledger
+    first opened here reads the stage it found."""
+    if amount <= 0 or not active(state.player):
+        return
+    if source not in GAIN_SOURCES:
+        raise ValueError(f"unknown Fanfare source {source!r}")
+    ledger(state)["gained"][source] += int(amount)
+
+
+def book_loss(state, kind: str, amount: int) -> None:
+    """Fanfare that left a bar other than by a payment. Call BEFORE the bar
+    moves."""
+    if amount <= 0 or not active(state.player):
+        return
+    if kind not in (LOSS_FADED, LOSS_HIT, LOSS_LEFT):
+        raise ValueError(f"unknown Fanfare loss {kind!r}")
+    ledger(state)[kind] += int(amount)
+
+
+def book_paid(state, amount: int, payer: str = PAYER_SPEND) -> None:
+    """Fanfare a PAYMENT took. A Spend card books under `spent`; any other
+    payer (the guests, later) under `paid_other[payer]`. Call BEFORE the bar
+    moves."""
+    if amount <= 0 or not active(state.player):
+        return
+    led = ledger(state)
+    if payer == PAYER_SPEND:
+        led["spent"] += int(amount)
+    else:
+        led["paid_other"][payer] = led["paid_other"].get(payer, 0) + int(amount)
+
+
+def ledger_expected_end(led: dict) -> int:
+    """What the ledger says the stage should hold now."""
+    return (led["start"] + sum(led["gained"].values()) - led["spent"]
+            - sum(led["paid_other"].values()) - led["left"] - led["faded"]
+            - led["hit"])
+
+
+# ----------------------------------------------------------------------
 # Arrivals and departures.
 # ----------------------------------------------------------------------
 def open_combat(state) -> None:
@@ -282,9 +377,11 @@ def open_combat(state) -> None:
     """
     if not active(state.player) or state.turn != 1:
         return
+    ledger(state)               # `start` is the stage as combat found it
     seats = _seats(state.player)
     if seats:
         return
+    book_gain(state, GAIN_OPENING, OPENING_FANFARE)
     seats.append([OPENING_MEMBER, OPENING_FANFARE])
     state.emit("stage_open", member=OPENING_MEMBER, fanfare=OPENING_FANFARE)
 
@@ -317,6 +414,7 @@ def summon(state, member: str) -> None:
         raise ValueError(f"unknown performer {member!r}")
     seats = _seats(p)
     if len(seats) < SEATS:
+        book_gain(state, GAIN_SUMMON, SUMMON_FANFARE)
         seats.append([member, SUMMON_FANFARE])
         state.emit("stage_summon", member=member, fanfare=SUMMON_FANFARE,
                    seats=len(seats), rotated=False)
@@ -361,6 +459,10 @@ def recast_front(state) -> None:
     _bow(state, member)
     _after_bow(state, member, may_return=False)
     if len(seats) >= SEATS:
+        # No seat to come back to: the bar walks off with the performer.
+        # The ledger booked nothing when it left the front, so it books the
+        # loss here, where the bar is finally gone.
+        book_loss(state, LOSS_LEFT, kept)
         return
     seats.append([member, kept])
     state.emit("stage_summon", member=member, fanfare=kept, seats=len(seats),
@@ -396,6 +498,7 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
     once the hit has been dealt -- `FurinaStage.Flush`'s twin."""
     p = state.player
     seats = _seats(p)
+    book_loss(state, LOSS_LEFT, seats[index][1])   # Final Bow's bar; else 0
     member, remaining = seats.pop(index)
     if member in p.stage_resting:
         p.stage_resting.remove(member)
@@ -451,9 +554,10 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
     raise_total = int(p.powers.get(THUNDEROUS_APPLAUSE, 0))
     if copies > 0:
         state.draw(copies)
-        raise_fanfare(state, raise_total)
+        raise_fanfare(state, raise_total, source=GAIN_BOW)
     if (may_return and p.powers.get(FIVE_CENTURY_ACT, 0)
             and len(_seats(p)) < SEATS):
+        book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         _seats(p).append([member, SUMMON_FANFARE])
         p.stage_resting.append(member)
         state.emit("stage_return", member=member, fanfare=SUMMON_FANFARE)
@@ -491,13 +595,15 @@ def turn_start_regen(state) -> None:
     pair = lead(p)
     if pair is None:
         return
+    book_gain(state, GAIN_REGEN, LEAD_REGEN)
     pair[1] += LEAD_REGEN
     state.emit("stage_regen", member=pair[0], amount=LEAD_REGEN,
                fanfare=pair[1])
 
 
 def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
-                  summon_on_empty: bool = True) -> int:
+                  summon_on_empty: bool = True,
+                  source: str = GAIN_CARD) -> int:
     """Rule 5. "Raise N Fanfare on the back performer" lands on the BACK-MOST
     performer, which is the lead when it is alone. `seat=SEAT_LEAD` is the
     other spelling, for a face that names the lead instead.
@@ -515,12 +621,17 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
 
     Returns what landed -- 0 on an empty stage that does not summon, which the
     caller emits rather than swallowing, for the reason `rotate` gives above.
+
+    `source` is the ledger's door (`GAIN_*`): a card's Raise by default, a
+    Bow's or a power's where those call. An empty-stage summon books as
+    `GAIN_EMPTY_SUMMON` whoever raised.
     """
     p = state.player
     if not active(p) or amount <= 0:
         return 0
     if summon_on_empty and not stage(p):
         member = state.rng.choice(PERFORMERS)
+        book_gain(state, GAIN_EMPTY_SUMMON, int(amount))
         _seats(p).append([member, int(amount)])
         state.emit("stage_summon", member=member, fanfare=int(amount),
                    seats=1, rotated=False, via="raise")
@@ -531,6 +642,7 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
             state.emit("stage_raise_whiffed", amount=amount, seat=seat)
             return 0
         for pair in seats:
+            book_gain(state, source, int(amount))
             pair[1] += int(amount)
             state.emit("stage_raise", member=pair[0], amount=int(amount),
                        seat=seat, fanfare=pair[1])
@@ -539,6 +651,7 @@ def raise_fanfare(state, amount: int, seat: str = SEAT_BACK, *,
     if pair is None:
         state.emit("stage_raise_whiffed", amount=amount, seat=seat)
         return 0
+    book_gain(state, source, int(amount))
     pair[1] += int(amount)
     state.emit("stage_raise", member=pair[0], amount=int(amount), seat=seat,
                fanfare=pair[1])
@@ -696,6 +809,7 @@ def spend(state, amount: int) -> int:
         return 0
     member, bar = pair
     paid = int(amount)
+    book_paid(state, paid)
     pair[1] = bar - paid
     state.emit("stage_spend", member=member, asked=int(amount), paid=paid,
                bar_at_spend=bar, fanfare=pair[1], turn=state.turn,
@@ -732,6 +846,7 @@ def collect_all(state) -> int:
         return 0
     company = [m for m, _f in seats]
     total = sum(f for _m, f in seats)
+    book_paid(state, total)
     seats.clear()
     setattr(state, _PENDING, list(company))
     state.emit("stage_spend_all", total=total, company=list(company))
@@ -769,6 +884,7 @@ def bow_and_return(state) -> None:
             break
         if any(m == member for m, _f in seats):
             continue
+        book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         seats.append([member, SUMMON_FANFARE])
     state.emit("stage_encore_return", company=[m for m, _f in seats],
                fanfare=SUMMON_FANFARE)
@@ -818,6 +934,7 @@ def absorb(state, incoming: int) -> int:
     member, bar = pair
     two_or_more = count(p) >= 2
     eaten = min(int(incoming), bar)
+    book_loss(state, LOSS_HIT, eaten)
     pair[1] = bar - eaten
     state.emit("stage_absorb", member=member, amount=eaten,
                incoming=int(incoming), fanfare=pair[1])
@@ -828,7 +945,7 @@ def absorb(state, incoming: int) -> int:
     # the back performer. Every caller here is an enemy's hit.
     pct = int(p.powers.get(RAPT_AUDIENCE, 0))
     if pct and two_or_more and eaten > 0:
-        raise_fanfare(state, -(-eaten * pct // 100))
+        raise_fanfare(state, -(-eaten * pct // 100), source=GAIN_POWER)
     return eaten
 
 
@@ -965,9 +1082,14 @@ def fade(state) -> None:
         if loss <= 0:
             continue
         before = pair[1]
+        book_loss(state, LOSS_FADED, loss)
         pair[1] = before - loss
         state.emit("stage_fade", member=pair[0], amount=loss,
                    before=before, fanfare=pair[1])
+    # THE LEDGER'S SAMPLE (a): the back performer's bar at the end of her
+    # turn, after the fade, and 0 on an empty stage -- a distribution that
+    # omits its zeros is not a distribution.
+    ledger(state)["back_at_turn_end"].append(back_fanfare(p))
 
 
 # ----------------------------------------------------------------------
@@ -1012,6 +1134,7 @@ def spend_all_of_back(state) -> int:
         state.emit("stage_spend_whiffed", amount="all_of_back")
         return 0
     member, bar = pair
+    book_paid(state, bar)
     pair[1] = 0
     state.emit("stage_spend", member=member, asked=bar, paid=bar,
                bar_at_spend=bar, fanfare=0, turn=state.turn,
@@ -1061,7 +1184,7 @@ def turn_start_powers(state) -> None:
         p.stage_act_block_mult = 1 + copies
         # A REGAIN, not a Raise: no summon on an empty stage (round four).
         raise_fanfare(state, PNEUMA_LEAD_REGAIN * copies, SEAT_LEAD,
-                      summon_on_empty=False)
+                      summon_on_empty=False, source=GAIN_POWER)
     else:
         p.stage_act_damage_mult = 1 + copies
     state.emit("stage_arkhe", choice=choice, copies=copies)

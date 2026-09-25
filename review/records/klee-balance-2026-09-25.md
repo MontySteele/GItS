@@ -89,3 +89,7 @@ The pool has 24 Commons, 36 Uncommons and 18 Rares.
 - **Favonius Escort** was the Codex seat's never-again (it spends a Bomb the deck wants
   for damage). One seat; watched, not changed.
 - **Jumpy Dumpty** opened every Codex fight. It is a starter card; not changed.
+
+## [USER]'s read, 2026-09-25 evening
+
+On the idle-Spark pick: "I actually had massive problems with Spark generation in late act 2 / early act 3, which I solved by just taking more bomb cards and using Set Off effects more liberally. So it was a real but manageable problem, which might be 'design working as intended' rather than an actual issue - probably needs more testing to be sure." Ruled: option 1, watch; no Spark rule changes. The seats found Sparks idle and [USER] found them short, which is the trade the currency is meant to make.

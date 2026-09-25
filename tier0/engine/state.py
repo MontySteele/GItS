@@ -1247,6 +1247,14 @@ class CombatState:
     # every Klee number on record. The C# side draws exactly this line for the
     # same reason -- the ledger is beside the game, not in it.
     spark_ledger: list[dict] = field(default_factory=list)
+    # QUARANTINED (`furina_stage.FURINA_STAGE`), INSTRUMENT ONLY, and the
+    # spark ledger's reason one arm over: the Stage's Fanfare economy for this
+    # fight -- what came onto the bars and by which door, what left and by
+    # which -- counted at each writer in `furina_stage` (`book_gain`,
+    # `book_loss`, `book_paid`) and read by `tools/furina_stage_report.py`.
+    # Nothing reads it back to decide anything, it is not on the event stream
+    # (no log digest moves), and it stays `{}` on every shipped run.
+    stage_ledger: dict = field(default_factory=dict)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy
     # .counts_for_fatal). Separate from kills_this_card so the existing
