@@ -1190,7 +1190,7 @@ def test_the_double_casting_row_is_two_random_summons():
     row = next(r for r in _proto_rows()
                if r["id"] == "proto_fs_double_casting")
     assert row["effects"] == [{"op": "stage_summon", "member": "random"}] * 2
-    assert row["description"] == "Summon two random performers."
+    assert row["description"] == "Summon 2 random performers."
 
 
 def test_a_five_century_act_does_not_return_the_recast_performer_twice(arm):

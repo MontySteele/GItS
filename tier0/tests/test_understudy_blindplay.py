@@ -6750,44 +6750,33 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-746`: the word names a MODE the player chooses, not a rider the
         # engine fires.
         # R276 picks 1 and 2: the back performer pays, in full.
-        "Spend": ["Chosen on play. The ", " pays the full ",
-                  "price or you can't choose it. Emptied exactly, it takes a "],
-        "Fanfare": ["A performer's own bar. Attacks hit your ",
-                    "'s Fanfare, then you. No cap."],
-        # Round four: generic on WHERE, and the empty-stage summon.
-        "Raise": ["Adds ", " where the card says, else to the ",
-                  ". On an empty stage, a random ",
-                  "performer arrives holding it instead."],
-        # `EB-744` rewrote the first clause: a bow is what a Spend earns and
-        # a hit does not, which is the contrast rather than an "only" the
-        # Final Bow face on the same screen contradicts.
-        "Bow": ["A departure effect a ", " earns and a hit does ",
-                "not. Usher: ", "Hydro on all. "],
-        "lead performer": ["The front seat, the shield: attacks reach it, "
-                           "and only it "],
-        # `EB-744`: rule 6 is per ATTACK, so a flurry does reach the reserve
-        # once the front seat empties -- "nothing hits it" was a promise the
-        # rule does not make.
-        # R276: the back seat is the bank.
-        # Round four: plainly where hits go.
-        "back performer": ["The back seat, the bank: Raise fills it, Spend "
-                           "draws from it. ",
-                           "Hits go to the lead first and reach it once "
-                           "every seat ahead is "],
-        "Rotate": ["Seats change order and every bar comes with them. Nobody "
-                   "leaves "],
+        # THE TEXT PASS (2026-09-25): `Raise` and `Rotate` retired, the
+        # lead renamed the FRONT performer, every row in [USER]'s words.
+        "Spend": ["Pay Fanfare from your ", ". Offered only ",
+                  "if it can pay in full. If that empties it exactly, it "],
+        "Fanfare": ["A performer's health. Hits land on your ",
+                    "'s Fanfare, then you. At 0 it "],
+        # `EB-744`: the contrast -- a Spend earns a Bow, a hit does not.
+        "Bow": ["A performer's parting effect, shown on each performer. ",
+                "its last Fanfare triggers it; losing it to a hit doesn't."],
+        "front performer": ["Takes hits first. Regains "],
+        # `EB-744` and round four: the back is reached last, and the
+        # empty-stage summon the retired Raise row carried.
+        "back performer": ["Gains and Spends ", ". Hits reach it last. With ",
+                           "no one on stage, Fanfare it would gain summons a "
+                           "random "],
         # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
         # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
         # anchors are the prose either side of it.
         "Ousia": ["This turn, your performers' acts deal double damage."],
         "Pneuma": ["This turn, your performers' acts give double ",
-                   " regains "],
+                   "and your front performer gains "],
         # 2026-09-25: what a summon does and what each performer does. The
         # numerals are interpolated on the mod side, so the anchors are the
         # prose either side of them.
         "Summon": ["A performer joins at the back with ",
-                   "full stage, the lead takes a ",
-                   " and moves to ", "the back instead."],
+                   "stage is full, your front performer ",
+                   "moves to the back instead."],
         "Gentilhomme Usher": ["End of your turn: gain "],
         "Surintendante Chevalmarin": ["End of your turn: deal ",
                                       " damage to ALL enemies. ",
@@ -6824,12 +6813,15 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     assert (set(anchors) | {"Companion", "Spotlighted", "Encore"}
             == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
-                "PlanKey", "SpendKey", "FanfareKey", "BowKey", "RaiseKey",
-                "RotateKey", "LeadPerformerKey", "BackPerformerKey",
+                "PlanKey", "SpendKey", "FanfareKey", "BowKey",
+                "FrontPerformerKey", "BackPerformerKey",
                 "SwirlKey", "GroundedKey"):
         assert f"public const string {key}" in src
     assert "CompanionKey" not in src
     assert "HexereiKey" not in src
+    # The text pass (2026-09-25) retired these three keys with their words.
+    for key in ("RaiseKey", "RotateKey", "LeadPerformerKey"):
+        assert f"public const string {key}" not in src
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
@@ -7000,16 +6992,15 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
     every row in that table is under.
     """
     page = blindplay.observe(keyword_hand_state([
-        "Choose one: Deal 7 damage | Spend 3: deal 13 instead."], "Furina"))
+        "Deal 7 damage. Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
-    # `EB-746`: and the first clause is the CHOICE, because four of six
-    # round-two seats said the card spent for them. "No stage, no rider" left
-    # the row with the rider: an empty stage does not refuse a Spend now, it
-    # does not offer the mode, and the page says that in its own last sentence.
-    for clause in ("Chosen on play",
-                   "The back performer pays the full price",
-                   "Emptied exactly, it takes a Bow",
-                   "the Spend mode is not offered at all"):
+    # The text pass (2026-09-25): the chooser explains itself (#662), so the
+    # row says who pays, that it is offered only in full, and the exact
+    # emptying's Bow -- the old page-only "not offered at all" sentence is
+    # the tip's own "Offered only if it can pay in full" now.
+    for clause in ("Pay Fanfare from your back performer",
+                   "Offered only if it can pay in full",
+                   "If that empties it exactly, it Bows"):
         assert clause in page, clause
         assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
 
@@ -7017,9 +7008,8 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     # The tip's own [gold] spans split the sentence across concatenated
     # literals, so the anchors are the runs that do not straddle a `+`.
-    for phrase in ("Chosen on play. The ",
-                   " pays the full ",
-                   "price or you can't choose it. Emptied exactly, it takes a "):
+    for phrase in ("Pay Fanfare from your ",
+                   "if it can pay in full. If that empties it exactly, it "):
         assert phrase in src, phrase
 
 
@@ -8933,8 +8923,9 @@ _R12_SMITH = (
     # COST, which the body prints nowhere.
     # `EB-746`: Spend is a CHOICE on play, so the row's face is the modal
     # one -- two modes, both printing their own number, both folded.
+    # The text pass (2026-09-25) dropped "Choose one:" from the face.
     ("KLEEMOD-PROTO_FS_CURTAIN_RISE",
-     "Choose one: Deal 7 damage | Spend 3: deal 13 instead."),
+     "Deal 7 damage. Spend 3: deal 13 instead."),
     ("KLEEMOD-PROTO_FS_SALON_DEBUT",
      "Summon a random performer who is not on stage."),
     ("KLEEMOD-AN_INVITATION",
@@ -8957,7 +8948,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     """Three of the four, and no arithmetic in any of them: the pattern reads
     the UNUPGRADED arm off the printed face and the render writes the other."""
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
-        "Choose one: Deal 10 damage | Spend 3: deal 16 instead.")
+        "Deal 10 damage. Spend 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
         "Add 1 random Common Companion card to your hand, free this turn.")
     # AN EMPTY UNUPGRADED ARM TAKES THE SPACE IN FRONT OF IT WITH IT: the game
@@ -12563,22 +12554,21 @@ def _stage_reader_reward_state() -> dict:
     return {"state_type": "card_reward",
             "player": {"character": "Furina", "hp": 61, "max_hp": 78},
             "card_reward": {"can_skip": True, "cards": [
+                # The text pass (2026-09-25): only the Rare keeps the
+                # rider -- Ousia Surge's face names the seat outright.
                 {"name": "Let the People Rejoice", "cost": "2",
                  "type": "Attack",
-                 "description": "Spend all Fanfare on stage and deal that "
-                                "much damage to ALL enemies. Every performer "
-                                "takes a Bow, then returns at 1. Exhaust.",
+                 "description": "Deal damage to ALL enemies equal to all "
+                                "your performers' Fanfare. They all Bow, "
+                                "then return with 1. Exhaust.",
                  "keywords": [
                      {"name": "What this number is",
                       "description": "The number is every performer's Fanfare "
                                      "added up and spent."}]},
                 {"name": "Ousia Surge", "cost": "1", "type": "Attack",
-                 "description": "Deal damage equal to the back performer's "
+                 "description": "Deal damage equal to your back performer's "
                                 "Fanfare.",
-                 "keywords": [
-                     {"name": "What this number is",
-                      "description": "The number is the back performer's "
-                                     "Fanfare."}]}]}}
+                 "keywords": []}]}}
 
 
 def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
@@ -12598,13 +12588,13 @@ def test_the_page_prints_a_stage_readers_rule_beside_its_zero():
     page = blindplay.observe(_stage_reader_reward_state())
 
     # The face the game prints: the rule, and no 0 (R276).
-    assert "deal that much damage to ALL enemies." in page
+    assert "equal to all your performers' Fanfare." in page
     assert "Deal 0 damage" not in page
-    # And directly under it, on both offers, which bar the number is.
+    # And directly under the Rare, which bar the number is. Ousia Surge's
+    # face says "your back performer's" itself (the text pass).
     assert ("    *What this number is* — The number is every performer's "
             "Fanfare added up and spent.") in page
-    assert ("    *What this number is* — The number is the back performer's "
-            "Fanfare.") in page
+    assert "Deal damage equal to your back performer's Fanfare." in page
 
 
 def test_the_reader_fixture_is_the_mods_own_sentence():
@@ -12621,10 +12611,9 @@ def test_the_reader_fixture_is_the_mods_own_sentence():
     plain = re.sub(r'"\s*\+\s*"', "", src)
     plain = plain.replace("[gold]", "").replace("[/gold]", "")
     for sentence in (
-            "The number is every performer's Fanfare added up and spent.",
-            "The number is the lead performer's Fanfare.",
-            "The number is the back performer's Fanfare.",
-            "The number is the back performer's Fanfare, which this Bow "
-            "spends."):
+            "The number is every performer's Fanfare added up and spent.",):
         assert sentence in plain, sentence
+    # The three the text pass deleted, gone from the mod as from the fixture.
+    assert "The number is the lead performer's Fanfare." not in plain
+    assert "The number is the back performer's Fanfare" not in plain
     assert "no stage outside combat" not in plain

@@ -1878,7 +1878,7 @@
    authored_by: [claude],
    replaces: aria_of_recompense,
    register: salon, cost: 1, type: attack, rarity: basic,
-   description: "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead.",
+   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 7 damage",
                effects: [{op: damage, amount: 7, target: enemy}]},
@@ -1891,7 +1891,7 @@
    authored_by: [claude],
    replaces: an_invitation,
    register: salon, cost: 1, type: skill, rarity: basic,
-   description: "[gold]Raise[/gold] 5 [gold]Fanfare[/gold] on the [gold]back performer[/gold].",
+   description: "Your [gold]back performer[/gold] gains 5 [gold]Fanfare[/gold].",
    effects: [{op: stage_raise, amount: 5}]}
 
 # --- the Commons (eight) ---
@@ -1902,7 +1902,7 @@
    replaces: gentilhomme_usher,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: gentilhomme_usher,
-   description: "Summon Usher. If he is already on stage, [gold]Raise[/gold] 3 on him instead.",
+   description: "Summon Usher. If he's already on stage, he gains 3 [gold]Fanfare[/gold].",
    effects: [{op: stage_summon, member: usher, if_present_raise: 3}]}
 
 - {id: proto_fs_surintendante_chevalmarin, name: "Surintendante Chevalmarin",
@@ -1911,7 +1911,7 @@
    replaces: surintendante_chevalmarin,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: surintendante_chevalmarin,
-   description: "Summon Chevalmarin. If she is already on stage, [gold]Raise[/gold] 3 on her instead.",
+   description: "Summon Chevalmarin. If she's already on stage, she gains 3 [gold]Fanfare[/gold].",
    effects: [{op: stage_summon, member: chevalmarin, if_present_raise: 3}]}
 
 - {id: proto_fs_mademoiselle_crabaletta, name: "Mademoiselle Crabaletta",
@@ -1920,7 +1920,7 @@
    replaces: mademoiselle_crabaletta,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: mademoiselle_crabaletta,
-   description: "Summon Crabaletta. If she is already on stage, [gold]Raise[/gold] 3 on her instead.",
+   description: "Summon Crabaletta. If she's already on stage, she gains 3 [gold]Fanfare[/gold].",
    effects: [{op: stage_summon, member: crabaletta, if_present_raise: 3}]}
 
 - {id: proto_fs_understudy, name: "Understudy", character: furina,
@@ -1936,7 +1936,7 @@
    authored_by: [claude],
    replaces: blocking_notes,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "[gold]Raise[/gold] 3 [gold]Fanfare[/gold] on the [gold]back performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "Your [gold]back performer[/gold] gains 3 [gold]Fanfare[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: stage_raise, amount: 3},
              {op: draw, amount: 1}]}
 
@@ -1945,7 +1945,7 @@
    authored_by: [claude],
    replaces: usher_the_waves,
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Choose one: Deal {PlainDamage:diff()} damage to ALL enemies | [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead.",
+   description: "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 5 damage to ALL enemies",
                effects: [{op: damage, amount: 5, target: all_enemies}]},
@@ -1958,7 +1958,7 @@
    authored_by: [claude],
    replaces: stage_lights,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Choose one: Gain {PlainBlock:diff()} [gold]Block[/gold] | [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead.",
+   description: "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Gain 5 [gold]Block[/gold]",
                effects: [{op: block, amount: 5}]},
@@ -1971,7 +1971,7 @@
    authored_by: [claude],
    replaces: held_breath,
    register: salon, cost: 0, type: skill, rarity: common,
-   description: "[gold]Rotate[/gold] the cast: the front performer moves to the back seat.",
+   description: "Move your [gold]front performer[/gold] to the back.",
    effects: [{op: stage_scene_change}]}
 
 # --- the Uncommons (five) ---
@@ -1981,7 +1981,7 @@
    authored_by: [claude],
    replaces: torrential_turn,
    register: salon, cost: 2, type: attack, rarity: uncommon,
-   description: "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead.",
+   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 10 damage",
                effects: [{op: damage, amount: 10, target: enemy}]},
@@ -1994,7 +1994,7 @@
    authored_by: [claude],
    replaces: crescendo,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal damage equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal damage equal to your [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
               amount_formula: {base: 0, per: 1, count: stage_back_fanfare},
               target: enemy}]}
@@ -2004,7 +2004,7 @@
    authored_by: [claude],
    replaces: many_waters_melody,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain [gold]Block[/gold] equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
               amount_formula: {base: 0, per: 1, count: stage_lead_fanfare}}]}
 
@@ -2013,7 +2013,7 @@
    authored_by: [claude],
    replaces: change_the_bill,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "The [gold]lead performer[/gold] performs its act now.",
+   description: "Your [gold]front performer[/gold] acts now.",
    effects: [{op: stage_perform_lead}]}
 
 - {id: proto_fs_final_bow, name: "Final Bow", character: furina,
@@ -2021,7 +2021,7 @@
    authored_by: [claude],
    replaces: take_your_bow,
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "The [gold]back performer[/gold] takes a [gold]Bow[/gold] and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Your [gold]back performer[/gold] [gold]Bow[/gold]s and leaves. Gain [gold]Block[/gold] equal to its [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: stage_final_bow},
              {op: block,
               amount_formula: {base: 0, per: 1, count: stage_spent}}]}
@@ -2034,7 +2034,7 @@
    replaces: universal_revelry,
    register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
    art_of: let_the_people_rejoice,
-   description: "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage and deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal damage to ALL enemies equal to all your performers' [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},
@@ -2052,7 +2052,7 @@
    authored_by: [claude],
    replaces: breathless,
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal 6 damage. If the stage is empty, summon a random performer.",
+   description: "Deal 6 damage. If no one is on stage, Summon a random performer.",
    effects: [{op: damage, amount: 6, target: enemy},
              {op: conditional, if: stage_empty,
               then: [{op: stage_summon, member: random}]}]}
@@ -2062,7 +2062,7 @@
    authored_by: [claude],
    replaces: graceful_retreat,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. If the stage is empty, draw 2 cards.",
+   description: "Gain 5 [gold]Block[/gold]. If no one is on stage, draw 2 cards.",
    effects: [{op: block, amount: 5},
              {op: conditional, if: stage_empty,
               then: [{op: draw, amount: 2}]}]}
@@ -2082,7 +2082,7 @@
    authored_by: [claude],
    replaces: lasting_impression,
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Raise[/gold] 2 [gold]Fanfare[/gold] on the [gold]lead performer[/gold].",
+   description: "Gain 5 [gold]Block[/gold]. Your [gold]front performer[/gold] gains 2 [gold]Fanfare[/gold].",
    effects: [{op: block, amount: 5},
              {op: stage_raise, amount: 2, seat: lead}]}
 
@@ -2091,7 +2091,7 @@
    authored_by: [claude],
    replaces: applause_line,
    register: salon, cost: 0, type: attack, rarity: common,
-   description: "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead.",
+   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
               {label: "Deal 3 damage",
                effects: [{op: damage, amount: 3, target: enemy}]},
@@ -2104,7 +2104,7 @@
    authored_by: [claude],
    replaces: swelling_overture,
    register: salon, cost: 0, type: skill, rarity: common,
-   description: "The [gold]back performer[/gold] moves to the front seat. Gain 3 [gold]Block[/gold].",
+   description: "Move your [gold]back performer[/gold] to the front. Gain 3 [gold]Block[/gold].",
    effects: [{op: stage_step_forward},
              {op: block, amount: 3}]}
 
@@ -2115,7 +2115,7 @@
    authored_by: [claude],
    replaces: dress_rehearsal,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Raise[/gold] 3 [gold]Fanfare[/gold] on every performer.",
+   description: "Each performer gains 3 [gold]Fanfare[/gold].",
    effects: [{op: stage_raise, amount: 3, seat: all}]}
 
 - {id: proto_fs_double_casting, name: "Double Casting", character: furina,
@@ -2123,7 +2123,7 @@
    authored_by: [claude],
    replaces: matinee_performance,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon two random performers.",
+   description: "Summon 2 random performers.",
    effects: [{op: stage_summon, member: random},
              {op: stage_summon, member: random}]}
 
@@ -2132,7 +2132,7 @@
    authored_by: [claude],
    replaces: full_ensemble,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Every performer performs its act now.",
+   description: "All your performers act now.",
    effects: [{op: stage_perform_all}]}
 
 - {id: proto_fs_bravura, name: "Bravura", character: furina,
@@ -2140,7 +2140,7 @@
    authored_by: [claude],
    replaces: dramatic_entrance,
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all of the [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage for each point spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "[gold]Spend[/gold] all of your [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {ExtraDamage:diff()} damage per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_back_all},
              {op: damage,
               amount_formula: {base: 0, per: 3, count: stage_spent},
@@ -2151,7 +2151,7 @@
    authored_by: [claude],
    replaces: fortissimo_guard,
    register: salon, cost: 2, type: power, rarity: uncommon,
-   description: "At the end of your turn, if all three seats are filled, your performers act twice.",
+   description: "If all three seats are filled at the end of your turn, your performers act twice.",
    effects: [{op: apply_power, power: fs_full_house, amount: 1, target: self}]}
 
 - {id: proto_fs_thunderous_applause, name: "Thunderous Applause", character: furina,
@@ -2159,7 +2159,7 @@
    authored_by: [claude],
    replaces: standing_ovation,
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever a performer takes a [gold]Bow[/gold], draw 1 card and [gold]Raise[/gold] 2 [gold]Fanfare[/gold] on the [gold]back performer[/gold].",
+   description: "Whenever a performer [gold]Bow[/gold]s, draw 1 card and your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold].",
    effects: [{op: apply_power, power: fs_thunderous_applause, amount: 2,
               target: self}]}
 
@@ -2168,7 +2168,7 @@
    authored_by: [claude],
    replaces: crowd_work,
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever an enemy hits the [gold]lead performer[/gold], [gold]Raise[/gold] {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] it lost{IfUpgraded:show:|, rounded up,} on the [gold]back performer[/gold]. Needs 2 or more performers.",
+   description: "Whenever an enemy hits your [gold]front performer[/gold], your [gold]back performer[/gold] gains {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] lost{IfUpgraded:show:|, rounded up}. Needs 2 performers.",
    effects: [{op: apply_power, power: fs_rapt_audience, amount: 50,
               target: self}]}
 
@@ -2179,7 +2179,7 @@
    authored_by: [claude],
    replaces: endless_waltz,
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, choose: [gold]Ousia[/gold] (acts deal double damage) or [gold]Pneuma[/gold] (acts give double [gold]Block[/gold]; the lead regains 2 [gold]Fanfare[/gold]).",
+   description: "At the start of your turn, choose [gold]Ousia[/gold] or [gold]Pneuma[/gold].",
    effects: [{op: apply_power, power: fs_arkhe_alignment, amount: 1,
               target: self}]}
 
@@ -2188,7 +2188,7 @@
    authored_by: [claude],
    replaces: prima_donna,
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "Whenever a performer takes a [gold]Bow[/gold], it returns to the back seat with 1 [gold]Fanfare[/gold].",
+   description: "Whenever a performer [gold]Bow[/gold]s, it returns at the back with 1 [gold]Fanfare[/gold].",
    effects: [{op: apply_power, power: fs_five_century_act, amount: 1,
               target: self}]}
 
@@ -2225,21 +2225,21 @@
 - {id: proto_fs_guest_of_honor, name: "Guest of Honor", character: furina,
    authored_by: [claude], multiplayer: true,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Until your next turn, attacks on another player hit their [gold]Block[/gold], then your [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then them.",
+   description: "Until your next turn, hits on another player land on their [gold]Block[/gold], then your [gold]front performer[/gold]'s [gold]Fanfare[/gold], then them.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: fs_guest_of_honor, amount: 1, target: ally}]}
 
 - {id: proto_fs_share_the_spotlight, name: "Share the Spotlight", character: furina,
    authored_by: [claude], multiplayer: true,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Your [gold]back performer[/gold] gives all its [gold]Fanfare[/gold] to another player as [gold]Block[/gold], then takes a [gold]Bow[/gold].",
+   description: "Your [gold]back performer[/gold] gives all its [gold]Fanfare[/gold] to another player as [gold]Block[/gold], then [gold]Bow[/gold]s.",
    upgrade: {cost: -1},
    effects: [{op: stage_share_spotlight, target: ally}]}
 
 - {id: proto_fs_people_of_fontaine, name: "The People of Fontaine", character: furina,
    authored_by: [claude], multiplayer: true,
    register: salon, cost: 1, type: power, rarity: rare,
-   description: "Whenever another player plays an Attack, [gold]Raise[/gold] 1.",
+   description: "Whenever another player plays an Attack, your [gold]back performer[/gold] gains 1 [gold]Fanfare[/gold].",
    upgrade: {power_amount: 1},
    effects: [{op: apply_power, power: fs_people_of_fontaine, amount: 1, target: self}]}
 

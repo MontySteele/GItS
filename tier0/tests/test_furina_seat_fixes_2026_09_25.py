@@ -59,10 +59,11 @@ def _surface_row(row_id: str) -> dict:
 
 def test_a_rapt_audience_face_says_it_needs_two_performers():
     face = _surface_row("proto_fs_rapt_audience")["description"]
-    assert face.endswith(" Needs 2 or more performers.")
+    # The text pass (2026-09-25) shortened the clause, and kept it.
+    assert face.endswith(" Needs 2 performers.")
     emitted = (GENERATED / "ProtoFsRaptAudience.cs").read_text(
         encoding="utf-8")
-    assert "Needs 2 or more performers." in emitted
+    assert "Needs 2 performers." in emitted
 
 
 # ---------------------------------------------------------------------------
@@ -180,7 +181,7 @@ def test_the_one_press_note_says_everything_else_is_refused():
 def test_the_glossary_says_up_to_three_perform():
     assert STAGE_ACTS.startswith("Up to 3 performers act at the end of your "
                                  "turn")
-    assert ARM_KEYWORDS["lead performer"].endswith(STAGE_ACTS)
+    assert ARM_KEYWORDS["front performer"].endswith(STAGE_ACTS)
     assert ARM_KEYWORDS["back performer"].endswith(STAGE_ACTS)
 
 
@@ -209,12 +210,14 @@ def _log(*rows):
 
 def test_a_raise_prints_what_landed_and_the_bar_either_side():
     lines = _log(_beat("raise", "usher", "Usher", 8, 5))
-    assert lines == ["  - Raise 5 on **Usher**: 3 → 8."]
+    # The text pass: "Raise N on X: a → b" became "X gains N Fanfare".
+    assert lines == ["  - **Usher** gains 5 Fanfare: 3 → 8."]
 
 
 def test_the_leads_regen_prints_as_a_regain():
     lines = _log(_beat("regain", "usher", "Usher", 4, 1))
-    assert lines == ["  - **Usher** regained 1 Fanfare as the lead: 3 → 4."]
+    assert lines == ["  - **Usher** regained 1 Fanfare as the front "
+                     "performer: 3 → 4."]
 
 
 def test_an_enemy_hit_on_the_lead_prints_the_dealer_and_the_bar():
@@ -235,7 +238,7 @@ def test_a_rapt_audience_refund_follows_the_hit_it_answers():
     lines = _log(_beat("hit", "usher", "Usher", 2, 2, target="Living Fog"),
                  _beat("raise", "chevalmarin", "Chevalmarin", 2, 1))
     assert lines == ["  - **Living Fog** hit **Usher** for 2: 4 → 2.",
-                     "  - Raise 1 on **Chevalmarin**: 1 → 2."]
+                     "  - **Chevalmarin** gains 1 Fanfare: 1 → 2."]
 
 
 def test_a_hit_with_no_dealer_is_still_a_line():

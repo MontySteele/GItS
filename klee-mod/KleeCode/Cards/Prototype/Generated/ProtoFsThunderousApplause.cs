@@ -38,14 +38,14 @@ public sealed class ProtoFsThunderousApplause : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this), this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_thunderous_applause");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunderous Applause"),
-        ("description", "Whenever a performer takes a [gold]Bow[/gold], draw 1 card and [gold]Raise[/gold] {PowerAmount:diff()} [gold]Fanfare[/gold] on the [gold]back performer[/gold]."),
+        ("description", "Whenever a performer [gold]Bow[/gold]s, draw 1 card and your [gold]back performer[/gold] gains {PowerAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

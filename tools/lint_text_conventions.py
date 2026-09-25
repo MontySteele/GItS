@@ -73,7 +73,7 @@ CEILING = {
 ADD_CLAUSE_CEILING = 20   # the longest base {IfUpgraded:show:...} clause, 18
 MAX_SENTENCES = 4         # the base's longest card is four sentences
 
-IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|fr)_")
+IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|fr|fs)_")
 
 # --- the exceptions: id -> reason. Rot semantics, see the module doc. ----
 EXCEPTIONS = {
@@ -334,9 +334,18 @@ class Row:
     where: str
 
 
+#: A `{InCombat:A|B}` block, whose `A` may hold one level of var holes.
+IN_COMBAT = re.compile(r"\{InCombat:(?:[^{}|]|\{[^{}]*\})*\|([^{}]*)\}")
+
+
 def render(s: str) -> str:
     """Tags gone, every hole one numeral, the base game's measuring rule."""
     s = s.replace("\\n", " ").replace("\n", " ")
+    # `{InCombat:<live line>|<off-board>}` is the base game's own Body Slam
+    # shape, and the ceilings are STATIC faces: the off-board branch is what
+    # is measured. The Stage's readers print it, and the Furina text pass
+    # (2026-09-25) brought their rows into scope.
+    s = IN_COMBAT.sub(r"\1", s)
     s = TAG.sub("", s)
     s = re.sub(r"\{[^{}]*energyIcons[^{}]*\}", "E", s)
     s = re.sub(r"\{[A-Za-z]+:plural:([^|}]*)\|([^}]*)\}", r"\2", s)
@@ -425,13 +434,10 @@ def tip_rows() -> list[Row]:
     rows.append(Row("tip", "SparkKey", word + "Start each combat with "
                     + csharp_text(arm.group(1)) + shared, where))
     rows.append(Row("tip", "SparkKey.sparks-arm", word + shared, where))
-    # A Stage round-three defect. THE READERS' FOUR RULES. Four rows and not
-    # one, for `SparkKey`'s reason two blocks up: a switch with four arms is
-    # four faces, and a ceiling met by the shortest of them is no ceiling at
-    # all. (The off-board clause each once carried left with R276: the faces
-    # print the rule outside combat now, so no screen reads 0.)
-    for rule in ("ReaderLeadRule", "ReaderBackRule",
-                 "ReaderSpendBackRule", "ReaderSpendAllRule"):
+    # A Stage round-three defect. THE READER'S RULE, parsed by name because
+    # the call carries no literal. Four rules until the text pass
+    # (2026-09-25) deleted the three whose face now names the performer.
+    for rule in ("ReaderSpendAllRule",):
         body = csharp_text(
             re.search(rf"const string {rule} =\s*" + concat + ";",
                       src).group(1))

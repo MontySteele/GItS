@@ -43,14 +43,14 @@ public sealed class ProtoFsPeopleOfFontaine : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRaise(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_people_of_fontaine");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The People of Fontaine"),
-        ("description", "Whenever another player plays an Attack, [gold]Raise[/gold] {PowerAmount:diff()}."),
+        ("description", "Whenever another player plays an Attack, your [gold]back performer[/gold] gains {PowerAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

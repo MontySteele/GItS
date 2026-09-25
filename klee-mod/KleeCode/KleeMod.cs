@@ -569,13 +569,13 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SpendKey + ".title"] = "Spend",
                     [Cards.ArmKeywordTips.FanfareKey + ".title"] =
                         "Fanfare",
-                    [Cards.ArmKeywordTips.RaiseKey + ".title"] = "Raise",
+                    // The text pass (2026-09-25) retired `Raise` and
+                    // `Rotate` and renamed the lead the FRONT performer.
                     [Cards.ArmKeywordTips.BowKey + ".title"] = "Bow",
-                    [Cards.ArmKeywordTips.LeadPerformerKey + ".title"] =
-                        "Lead performer",
+                    [Cards.ArmKeywordTips.FrontPerformerKey + ".title"] =
+                        "Front performer",
                     [Cards.ArmKeywordTips.BackPerformerKey + ".title"] =
                         "Back performer",
-                    [Cards.ArmKeywordTips.RotateKey + ".title"] = "Rotate",
                     // R276 batch two: Arkhe Alignment's two halves.
                     [Cards.ArmKeywordTips.OusiaKey + ".title"] = "Ousia",
                     [Cards.ArmKeywordTips.PneumaKey + ".title"] = "Pneuma",
@@ -594,7 +594,7 @@ public static class KleeMod
                         Powers.FurinaStageLedger.DisplayName(
                             Powers.StagePerformer.Crabaletta),
                     // A Stage round-three defect, and a RIDER rather than a
-                    // keyword: the four readers multiply a live bar, so off a
+                    // keyword: the Rare's reader multiplies a live bar, so off a
                     // board their faces print a literal 0. The title names
                     // what the reader is looking at rather than a word, the
                     // way `PlanTwiceKey`'s does.

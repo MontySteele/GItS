@@ -32,8 +32,8 @@ public sealed class FullHousePower : PowerModel, ILocalizationProvider
     {
         ("title", "Full House"),
         ("description",
-            "At the end of your turn, if all three seats are filled, each "
-          + "performer acts [blue]{Amount}[/blue] more "
+            "If all " + FurinaStageLaw.Seats + " seats are filled at the end "
+          + "of your turn, your performers act [blue]{Amount}[/blue] more "
           + "{Amount:plural:time|times}."),
     };
 
@@ -54,9 +54,9 @@ public sealed class ThunderousApplausePower : PowerModel, ILocalizationProvider
     {
         ("title", "Thunderous Applause"),
         ("description",
-            "Whenever a performer takes a [gold]Bow[/gold], draw 1 card and "
-          + "[gold]Raise[/gold] [blue]{Amount}[/blue] [gold]Fanfare[/gold] "
-          + "on the back performer."),
+            "Whenever a performer [gold]Bow[/gold]s, draw 1 card and your "
+          + "back performer gains [blue]{Amount}[/blue] "
+          + "[gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -88,9 +88,11 @@ public sealed class RaptAudiencePower : PowerModel, ILocalizationProvider
     {
         ("title", "A Rapt Audience"),
         ("description",
-            "Whenever an enemy hits the lead, [gold]Raise[/gold] "
-          + "[blue]{Amount}[/blue]% of the [gold]Fanfare[/gold] it lost, "
-          + "rounded up, on the back one. Needs 2 or more performers."),
+            // Under the 125-character power ceiling at 100%: "of Fanfare
+            // lost" rather than the card's "of the Fanfare lost".
+            "Whenever an enemy hits your front performer, your back "
+          + "performer gains [blue]{Amount}[/blue]% of "
+          + "[gold]Fanfare[/gold] lost, rounded up. Needs 2 performers."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -110,8 +112,8 @@ public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
     {
         ("title", "A Five-Century Act"),
         ("description",
-            "Whenever a performer takes a [gold]Bow[/gold], it returns to the "
-          + "back seat with 1 [gold]Fanfare[/gold]."),
+            "Whenever a performer [gold]Bow[/gold]s, it returns at the back "
+          + "with 1 [gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

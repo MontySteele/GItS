@@ -38,14 +38,14 @@ public sealed class ProtoFsHoldYourPlaces : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_hold_your_places");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hold Your Places"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Raise[/gold] {RaiseAmount:diff()} [gold]Fanfare[/gold] on the [gold]lead performer[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your [gold]front performer[/gold] gains {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

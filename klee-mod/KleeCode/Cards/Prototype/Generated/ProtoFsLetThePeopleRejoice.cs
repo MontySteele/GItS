@@ -41,14 +41,14 @@ public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendAll), this), this), this);
+        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.SpendAll), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("let_the_people_rejoice");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Let the People Rejoice"),
-        ("description", "[gold]Spend[/gold] all [gold]Fanfare[/gold] on stage and deal that much damage to ALL enemies. Every performer takes a [gold]Bow[/gold], then returns at 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal damage to ALL enemies equal to all your performers' [gold]Fanfare[/gold]. They all [gold]Bow[/gold], then return with 1.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

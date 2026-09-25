@@ -94,8 +94,8 @@ public class CoopSetTests
             + "card{Cards:plural:|s}.",
             Face(new ProtoKoPassTheMatch()));
         Assert.Equal(
-            "Until your next turn, attacks on another player hit "
-            + "their [gold]Block[/gold], then your [gold]lead performer[/gold]'s "
+            "Until your next turn, hits on another player land on "
+            + "their [gold]Block[/gold], then your [gold]front performer[/gold]'s "
             + "[gold]Fanfare[/gold], then them.",
             Face(new ProtoFsGuestOfHonor()));
         Assert.Equal(

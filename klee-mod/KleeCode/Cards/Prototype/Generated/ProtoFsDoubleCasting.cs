@@ -45,7 +45,7 @@ public sealed class ProtoFsDoubleCasting : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Double Casting"),
-        ("description", "Summon two random performers."),
+        ("description", "Summon 2 random performers."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -645,9 +645,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
 
 #: The seats, in damage order, under the words the brief and the tips use.
 #: Front first, and the LIST's order is the damage order (rule 6): an attack
-#: reaches `lead`, a Raise lands on the back-most, and the middle seat is
-#: reached by neither.
-STAGE_SEAT_NAMES = ("lead", "middle", "back")
+#: reaches `front`, Fanfare a card gives lands on the back-most, and the
+#: middle seat is reached by neither. The text pass (2026-09-25) renamed the
+#: lead the FRONT performer, here as everywhere.
+STAGE_SEAT_NAMES = ("front", "middle", "back")
 
 #: A performer's SHORT name -- the word the brief, the glossary rows and the
 #: Bow tip all use ("Usher: 4 Block. Chevalmarin: Hydro on all."). The wire

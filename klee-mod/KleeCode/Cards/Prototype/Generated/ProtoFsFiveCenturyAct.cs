@@ -45,7 +45,7 @@ public sealed class ProtoFsFiveCenturyAct : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "A Five-Century Act"),
-        ("description", "Whenever a performer takes a [gold]Bow[/gold], it returns to the back seat with 1 [gold]Fanfare[/gold]."),
+        ("description", "Whenever a performer [gold]Bow[/gold]s, it returns at the back with 1 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

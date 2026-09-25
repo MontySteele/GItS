@@ -38,14 +38,14 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLeadPerformer(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFrontPerformer(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bis");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bis!"),
-        ("description", "The [gold]lead performer[/gold] performs its act now."),
+        ("description", "Your [gold]front performer[/gold] acts now."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

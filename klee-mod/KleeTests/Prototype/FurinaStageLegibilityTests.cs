@@ -221,14 +221,14 @@ public class FurinaStageLegibilityTests
     {
         // A random summon states the full-stage rule; a named one states only
         // the arrival, because the named Commons' face says what a performer
-        // already on stage does ("Raise 3 on him instead").
+        // already on stage does ("he gains 3 Fanfare"). The text pass
+        // (2026-09-25) wording.
         var body = Printed("ForSummon");
         Assert.Contains("A performer joins at the back with ", body);
-        Assert.Contains(" [gold]Fanfare[/gold]. On a full stage, the lead "
-                      + "takes a [gold]Bow[/gold] and moves to the back "
-                      + "instead.", body);
-        Assert.Contains(" [gold]Fanfare[/gold] and acts at the end of your "
-                      + "turn.", body);
+        Assert.Contains(" [gold]Fanfare[/gold]. If the stage is full, your "
+                      + "front performer [gold]Bow[/gold]s and moves to the "
+                      + "back instead.", body);
+        Assert.DoesNotContain("the lead", body);
         var parameters = typeof(ArmKeywordTips).GetMethod("ForSummon")!
             .GetParameters();
         Assert.Equal("random", parameters.Last().Name);
@@ -285,8 +285,8 @@ public class FurinaStageLegibilityTests
     public void The_stage_badge_is_the_ruled_text()
     {
         Assert.Equal(
-            "Up to 3 performers act at the end of your turn. Attacks hit "
-          + "your [gold]Block[/gold], then the lead performer's "
+            "Up to 3 performers act at the end of your turn. Hits land on "
+          + "your [gold]Block[/gold], then your front performer's "
           + "[gold]Fanfare[/gold], then you.",
             Badge<StageSummaryPower>("description"));
     }

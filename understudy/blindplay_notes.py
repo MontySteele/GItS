@@ -1314,15 +1314,14 @@ COMPANION_SLOT_SENTENCE = (
 #: constants and a seat needs the number rather than the name of the constant.
 #: 2026-09-25. A NAMED summon's Summon row -- `ArmKeywordTips.ForSummon`'s
 #: `random: false` variant. Nothing about a full stage: the named Commons' own
-#: face says what a performer already on stage does ("Raise 3 on him
-#: instead"), and the full-stage sentence would contradict it.
-SUMMON_NAMED_ROW = ("A performer joins at the back with 1 Fanfare and acts at "
-                    "the end of your turn.")
+#: face says what a performer already on stage does ("he gains 3
+#: Fanfare"), and the full-stage sentence would contradict it.
+SUMMON_NAMED_ROW = "A performer joins at the back with 1 Fanfare."
 
 #: Which Summon variant a face prints: a random summon (Take the Stage,
 #: Understudy, Double Casting, Improvised Number's lowercase clause) or a named
 #: one (the three Commons).
-_SUMMON_RANDOM_RE = re.compile(r"\b[Ss]ummon (?:a|two) random performer")
+_SUMMON_RANDOM_RE = re.compile(r"\b[Ss]ummon (?:a|2|two) random performer")
 _SUMMON_NAMED_RE = re.compile(r"\b[Ss]ummon (?:Usher|Chevalmarin|Crabaletta)\b")
 
 
@@ -1604,56 +1603,34 @@ ARM_KEYWORDS: dict[str, str] = {
     # Spend the back performer cannot pay is not offered.
     # R276 picks 1 and 2: the BACK performer pays, in full or not at all, and
     # a performer the Spend empties exactly takes its Bow.
-    "Spend": ("Chosen on play. The back performer pays the full price or you "
-              "can't choose it. Emptied exactly, it takes a Bow. If the back "
-              "performer holds less than the price, or the stage is empty, "
-              "the Spend mode is not offered at all."),
-    "Fanfare": ("A performer's own bar. Attacks hit your Block, then the lead "
-                "performer's Fanfare, then you. No cap."),
-    # ROUND FOUR. Generic on WHERE -- the old row said "to the back performer"
-    # beside Hold Your Places (the lead) and Gala Dinner (every performer) --
-    # and it carries the empty-stage rule: a Raise with nobody on stage
-    # summons a random performer holding the amount, and nothing else is
-    # raised. `ArmKeywordTips.ForRaise`'s words.
-    "Raise": ("Adds Fanfare where the card says, else to the back performer. "
-              "On an empty stage, a random performer arrives holding it "
-              "instead."),
-    # `EB-744`. "EARNED BY SPEND ONLY" WAS NOT TRUE ON THE SCREEN PRINTING IT.
-    # The clause was rule 9 read off sec.3 and it sat beside `Final Bow`, whose
-    # whole face is a bow bought with a card and an Exhaust, and beside `Let
-    # the People Rejoice`, which grants three. What the rule actually says is
-    # the CONTRAST that turn one's wager is (sec.7, line B against line C): a
-    # Spend earns one and a hit does not.
-    "Bow": ("A departure effect a Spend earns and a hit does not. Usher: 4 "
-            "Block. Chevalmarin: Hydro on all. Crabaletta: 8 Hydro damage."),
-    # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. Two round-two seats found
-    # that the reserve performs -- "Crabaletta performed from the back seat.
-    # It moved 11" was more damage than any card in the hand -- and a third
-    # wanted no second performer at all; both reads were right, and both were
-    # legibility. The acts go on BOTH seat rows because a seat may meet either
-    # word alone, and a reader who has met one has met the rule.
-    # R276: the front seat is the SHIELD.
-    "lead performer": ("The front seat, the shield: attacks reach it, and "
-                       "only it regains 1 Fanfare each turn. " + STAGE_ACTS),
-    # `EB-744`. "NOTHING HITS IT" WHERE A FLURRY DOES. The lead absorbs one
-    # attack up to its bar and then leaves at 0, so the next attack of the same
-    # turn meets whoever stepped forward -- which is the reserve. The rule is
-    # per ATTACK, and the sentence now says so.
-    # R276: the back seat is the BANK -- Raise fills it and Spend draws from
-    # it.
-    # ROUND FOUR: "no single attack reaches it" was still read as "the back is
-    # safe", and seats lost the back performer to a second attack in one
-    # enemy turn. The row says plainly where hits go.
-    "back performer": ("The back seat, the bank: Raise fills it, Spend draws "
-                       "from it. Hits go to the lead first and reach it once "
-                       "every seat ahead is empty. " + STAGE_ACTS),
-    "Rotate": ("Seats change order and every bar comes with them. Nobody "
-               "leaves and nobody takes a Bow."),
+    # THE TEXT PASS (2026-09-25, review/records/furina-text-pass-2026-09-25.md):
+    # the glossary follows the tooltips word for word. The Spend row's old
+    # page-only sentence ("not offered at all") is the tip's own clause now.
+    "Spend": ("Pay Fanfare from your back performer. Offered only if it can "
+              "pay in full. If that empties it exactly, it Bows."),
+    "Fanfare": ("A performer's health. Hits land on your Block, then your "
+                "front performer's Fanfare, then you. At 0 it leaves."),
+    # `EB-744`. The CONTRAST that turn one's wager is (sec.7, line B against
+    # line C): a Spend earns a Bow and a hit does not. The text pass points at
+    # each performer's own row for what its Bow does.
+    "Bow": ("A performer's parting effect, shown on each performer. Spending "
+            "its last Fanfare triggers it; losing it to a hit doesn't."),
+    # `EB-744`. AND NOTHING SAID WHAT AN ACT IS. The acts go on BOTH seat rows
+    # because a seat may meet either word alone -- the page's one addendum to
+    # the tip, `STAGE_ACTS`, which also carries the seat count (the
+    # opus-furina-l2b seat's (c) 3).
+    "front performer": ("Takes hits first. Regains 1 Fanfare at the start of "
+                        "your turn. " + STAGE_ACTS),
+    # `EB-744` and round four: the back is reached LAST, per attack, and the
+    # text pass carries the empty-stage rule the retired Raise row held.
+    "back performer": ("Gains and Spends Fanfare. Hits reach it last. With no "
+                       "one on stage, Fanfare it would gain summons a random "
+                       "performer instead. " + STAGE_ACTS),
     # R276 batch two: Arkhe Alignment's two halves, in
     # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
     "Ousia": "This turn, your performers' acts deal double damage.",
-    "Pneuma": ("This turn, your performers' acts give double Block, and the "
-               "lead performer regains 2 Fanfare."),
+    "Pneuma": ("This turn, your performers' acts give double Block, and your "
+               "front performer gains 2 Fanfare."),
     # 2026-09-25. WHAT A SUMMON DOES, AND WHAT EACH PERFORMER DOES. A
     # first-time co-op player "found it very hard to understand what was
     # going on from the tooltips, such as what each summoned actor actually
@@ -1664,8 +1641,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # does: this one is a RANDOM summon's (the full-stage rule ruled the same
     # day), and `SUMMON_NAMED_ROW` is a named one's; `_summon_row` picks by
     # what the screen prints.
-    "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
-               "stage, the lead takes a Bow and moves to the back instead."),
+    "Summon": ("A performer joins at the back with 1 Fanfare. If the stage is "
+               "full, your front performer Bows and moves to the back "
+               "instead."),
     "Gentilhomme Usher": ("End of your turn: gain 3 Block. Bow: gain 4 "
                           "Block."),
     "Surintendante Chevalmarin": ("End of your turn: deal 2 Hydro damage to "
@@ -1787,7 +1765,7 @@ COMPANION_STAGE_CLAUSE = (
 # Chevalmarin's Hydro, which the Fontaine bench reacts off. So the arm gets its
 # own clause rather than the shipped one, and it says what a reader can use.
 COMPANION_STAGE_ARM_CLAUSE = (
-    " It does nothing to your stage: no performer acts, rotates or leaves for "
+    " It does nothing to your stage: no performer acts, moves or leaves for "
     "one. Chevalmarin's Hydro is the touchpoint -- a Pyro or Cryo Companion "
     "played into it reacts.")
 
@@ -1917,9 +1895,9 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Bomb": "klee", "Set off": "klee", "Spark": "klee", "Mine": "klee",
     "Plan": "kokomi", "Dusk": "kokomi", "Mend": "kokomi",
     "Tamakushi Casket": "kokomi",
-    "Spend": "furina", "Fanfare": "furina", "Raise": "furina", "Bow": "furina",
-    "lead performer": "furina", "back performer": "furina",
-    "Rotate": "furina", "Encore": "furina", "Spotlighted": "furina",
+    "Spend": "furina", "Fanfare": "furina", "Bow": "furina",
+    "front performer": "furina", "back performer": "furina",
+    "Encore": "furina", "Spotlighted": "furina",
     "Ousia": "furina", "Pneuma": "furina",
     "Summon": "furina", "Gentilhomme Usher": "furina",
     "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
@@ -2020,13 +1998,13 @@ _ARM_KEYWORD_RE = {
     # AND THEY ARE WRITTEN WITH AN EDITOR rather than a shell heredoc, which
     # is how the reframe's three once acquired a literal 0x08 in place of a
     # word boundary and matched nothing at all.
+    # THE TEXT PASS (2026-09-25) retired `Raise` and `Rotate`, renamed the
+    # lead the FRONT performer, and prints `Bow` as a verb ("it Bows").
     "Spend": re.compile(r"\bSpends?\b"),
     "Fanfare": re.compile(r"\bFanfare\b"),
-    "Raise": re.compile(r"\bRaises?\b"),
-    "Bow": re.compile(r"\bBow\b"),
-    "lead performer": re.compile(r"\blead performer\b"),
+    "Bow": re.compile(r"\bBows?\b"),
+    "front performer": re.compile(r"\bfront performer\b"),
     "back performer": re.compile(r"\bback performer\b"),
-    "Rotate": re.compile(r"\bRotates?\b"),
     # R276 batch two: Arkhe Alignment's two halves.
     "Ousia": re.compile(r"\bOusia\b"),
     "Pneuma": re.compile(r"\bPneuma\b"),
@@ -2038,11 +2016,11 @@ _ARM_KEYWORD_RE = {
     # three and so carries all three tips in game.
     "Summon": re.compile(r"\b[Ss]ummon\b"),
     "Gentilhomme Usher": re.compile(
-        r"\bUsher\b|\b[Ss]ummon (?:a|two) random performer"),
+        r"\bUsher\b|\b[Ss]ummon (?:a|2|two) random performer"),
     "Surintendante Chevalmarin": re.compile(
-        r"\bChevalmarin\b|\b[Ss]ummon (?:a|two) random performer"),
+        r"\bChevalmarin\b|\b[Ss]ummon (?:a|2|two) random performer"),
     "Mademoiselle Crabaletta": re.compile(
-        r"\bCrabaletta\b|\b[Ss]ummon (?:a|two) random performer"),
+        r"\bCrabaletta\b|\b[Ss]ummon (?:a|2|two) random performer"),
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
     # faces before the meter exists, and every Furina row the Stage does not

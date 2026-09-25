@@ -41,7 +41,7 @@ public sealed class ProtoFsTutti : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tutti!"),
-        ("description", "Every performer performs its act now."),
+        ("description", "All your performers act now."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

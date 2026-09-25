@@ -55,9 +55,8 @@ public sealed class AllTheWorldsAStage : CustomCardModel, ICharacterCard
     private static string Face =>
 #if PROTOTYPE_CARDS
         FurinaStage.Enabled
-            ? "At the start of your turn, [gold]Raise[/gold] "
-            + "{StageRaise:diff()} [gold]Fanfare[/gold] on the "
-            + "[gold]back performer[/gold]."
+            ? "At the start of your turn, your [gold]back performer[/gold] "
+            + "gains {StageRaise:diff()} [gold]Fanfare[/gold]."
             :
 #endif
             "At the start of your turn, gain {PowerAmount:diff()} "

@@ -38,14 +38,14 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Lead), this), this);
+        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_pneuma_refrain");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pneuma Refrain"),
-        ("description", "Gain [gold]Block[/gold] equal to the [gold]lead performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Gain [gold]Block[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

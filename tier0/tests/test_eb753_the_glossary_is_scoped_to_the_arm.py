@@ -42,13 +42,15 @@ def _fresh_fight():
 #: say by accident -- which is the whole find.
 OWNED = {"klee": ("Spark", "Bomb", "Mine"),
          "kokomi": ("Plan", "Dusk", "Mend"),
-         "furina": ("Spend", "Bow", "Rotate")}
+         # The text pass (2026-09-25) retired `Rotate`; the front seat's
+         # word is the third Stage word here now.
+         "furina": ("Spend", "Bow", "front performer")}
 
 #: The face that says every one of them at once, so one screen answers the
 #: whole acceptance in both directions.
-EVERY_WORD = ("Spend 2 Sparks to place a Bomb and a Mine, then Raise the lead "
-              "performer, Rotate, take a Bow, Mend 3 and write a Plan at "
-              "Dusk.")
+EVERY_WORD = ("Spend 2 Sparks to place a Bomb and a Mine, then give the "
+              "front performer Fanfare, take a Bow, Mend 3 and write a Plan "
+              "at Dusk.")
 
 
 def _reward(character: str, text: str = EVERY_WORD) -> str:
@@ -80,7 +82,7 @@ def _rows(page: str) -> set[str]:
 def test_the_stage_spend_row_does_not_print_on_a_klee_screen():
     page = _reward("Klee", "Spend 2 Sparks: deal 13 damage instead.")
     assert "**Spend**" not in page
-    assert "lead performer" not in page
+    assert "front performer" not in page
     # and the word it is really about is still defined
     assert "**Spark**" in page
 

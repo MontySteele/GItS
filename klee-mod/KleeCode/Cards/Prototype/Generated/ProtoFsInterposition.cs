@@ -45,7 +45,7 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Interposition"),
-        ("description", "Choose one: Gain {PlainBlock:diff()} [gold]Block[/gold] | [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead."),
+        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 2: gain {BranchBlock:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.

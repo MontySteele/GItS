@@ -38,14 +38,14 @@ public sealed class ProtoFsGentilhommeUsher : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRaise(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("gentilhomme_usher");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", "Summon Usher. If he is already on stage, [gold]Raise[/gold] 3 on him instead."),
+        ("description", "Summon Usher. If he's already on stage, he gains 3 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

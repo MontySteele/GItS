@@ -45,7 +45,7 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Curtain Rise"),
-        ("description", "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
