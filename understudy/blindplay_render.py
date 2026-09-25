@@ -1735,7 +1735,7 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(line)
             if left:
                 folded = at + 1
-        elif row["event"] == "hit_furina":
+        elif row["event"] == "hurt":
             if row.get("hp") is None:
                 continue
             out.append(STAGE_HIT_FURINA_LINE.format(
