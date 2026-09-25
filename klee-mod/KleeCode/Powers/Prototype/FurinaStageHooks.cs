@@ -133,4 +133,21 @@ public sealed class FurinaStageHooks : AbstractModel
         Vfx.FurinaStageStrip.Refresh(cardPlay.Card?.Owner?.Creature);
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Rule 7 (2026-09-25): THE HIT THAT KILLS FURINA EARNS NO BOW. A lead
+    /// emptied by a hit queues its Bow for the flush after the hit, and the
+    /// engine skips that flush for a target the hit killed. Dropped here, so a
+    /// revived Furina's next hit cannot pay a Bow left over from this one.
+    /// </summary>
+    public override Task AfterDeath(
+        PlayerChoiceContext choiceContext, Creature creature,
+        bool wasRemovalPrevented, float deathAnimLength)
+    {
+        if (FurinaStage.LiveFor(creature))
+        {
+            FurinaStageLedger.For(creature).TakePendingHitBows();
+        }
+        return Task.CompletedTask;
+    }
 }

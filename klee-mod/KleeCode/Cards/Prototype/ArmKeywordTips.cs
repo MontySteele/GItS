@@ -761,9 +761,10 @@ public static class ArmKeywordTips
     // so a retune cannot leave one of these sentences quoting a retired number.
 
     /// <summary>
-    /// Brief sec.3 rule 8 as R276 ruled it: the BACK performer pays, the
-    /// price is paid in full or the Spend mode is not offered, and a
-    /// performer the Spend empties EXACTLY takes a bow.
+    /// Brief sec.3 rule 8 as R276 ruled it: the BACK performer pays, and the
+    /// price is paid in full or the Spend mode is not offered. A performer
+    /// the Spend empties takes a bow, which the Bow tip now says for every
+    /// way of reaching 0 (rule 7, 2026-09-25).
     /// </summary>
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
@@ -777,10 +778,10 @@ public static class ArmKeywordTips
             // choose-a-card screen rather than in a tip.
             // R276 picks 1 and 2: the bank pays, and only in full.
             // The text pass (2026-09-25): the chooser explains itself (#662),
-            // so the tip says what is paid, by whom, and when it bows.
+            // so the tip says what is paid and by whom. The bow clause left
+            // with rule 7's 2026-09-25 change: the Bow tip covers it.
             "Pay Fanfare from your [gold]back performer[/gold]. Offered only "
-          + "if it can pay in full. If that empties it exactly, it "
-          + "[gold]Bow[/gold]s.");
+          + "if it can pay in full.");
 
     /// <summary>
     /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter
@@ -800,26 +801,21 @@ public static class ArmKeywordTips
           + "summons a performer.");
 
     /// <summary>
-    /// Brief sec.3 rules 7 and 9 together, because the word only means
-    /// anything against its opposite: a performer emptied by a
-    /// <i>Spend</i> bows, and one emptied by a HIT just leaves. That
-    /// difference is the whole of turn one's wager (sec.7, line B against
-    /// line C) and it is stated nowhere else on the screen.
+    /// Brief sec.3 rules 7 and 9 together. Since 2026-09-25 a performer at 0
+    /// Fanfare bows whatever emptied it -- a Spend, a hit or a full-stage
+    /// summon ([USER]: "Stage members bow out when they are destroyed or
+    /// replaced, not just when you deliberately spend them down to 0").
     /// </summary>
     public static IEnumerable<IHoverTip> ForBow(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BowKey,
-            // `EB-744`: "earned by Spend only" was FALSE ON THE FACES
-            // PRINTING IT -- <i>Final Bow</i>'s whole card is a bow bought
-            // with a card and an Exhaust, and the Rare grants three. The rule
-            // is the CONTRAST, which is turn one's wager (brief sec.7, line B
-            // against line C): a Spend earns one and a hit does not.
             // The text pass (2026-09-25): each performer's own tip carries
             // its Bow, so this one points there instead of restating three.
-            // The text lint refuses parentheses, so the spec's "(see each
-            // performer)" is a clause here.
-            "A performer's parting effect, shown on each performer. Spending "
-          + "its last Fanfare triggers it; losing it to a hit doesn't.");
+            // Rule 7, 2026-09-25: a hit earns the Bow too, so the old
+            // Spend-against-hit contrast is gone and the trigger is simply
+            // the bar running out.
+            "A performer's parting effect, shown on each performer. It "
+          + "triggers when the performer's Fanfare runs out.");
 
     /// <summary>
     /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates

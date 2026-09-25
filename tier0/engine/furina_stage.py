@@ -379,10 +379,14 @@ def rotate(state) -> None:
     state.emit("stage_scene_change", company=[m for m, _f in seats])
 
 
-def _leave(state, index: int, *, bowed: bool, reason: str) -> None:
+def _leave(state, index: int, *, bowed: bool, reason: str,
+           pay_now: bool = True) -> None:
     """A performer leaves the stage. ONE implementation, three callers (a hit
-    that empties the bar, a Spend that does, and Final Bow), so "a bow is
-    earned by Spend only" cannot drift between them."""
+    that empties the bar, a Spend that does, and Final Bow), so "a performer
+    at 0 Fanfare bows" (rule 7, 2026-09-25) cannot drift between them.
+
+    `pay_now=False` is the hit's: the bow is owed, and `settle_hit` pays it
+    once the hit has been dealt -- `FurinaStage.Flush`'s twin."""
     p = state.player
     seats = _seats(p)
     member, remaining = seats.pop(index)
@@ -390,7 +394,38 @@ def _leave(state, index: int, *, bowed: bool, reason: str) -> None:
         p.stage_resting.remove(member)
     state.emit("stage_leave", member=member, bowed=bowed, reason=reason,
                fanfare=remaining)
-    if bowed:
+    if bowed and not pay_now:
+        owed = list(getattr(state, _HIT_BOWS, []) or [])
+        owed.append(member)
+        setattr(state, _HIT_BOWS, owed)
+    elif bowed:
+        _bow(state, member)
+        _after_bow(state, member, may_return=True)
+
+
+#: The bows hits have emptied performers into, waiting for `settle_hit`. On
+#: the STATE, as `_PENDING` is: one hit's two halves, and nothing else reads it.
+_HIT_BOWS = "_stage_hit_bows"
+
+
+def settle_hit(state) -> None:
+    """RULE 7 (2026-09-25; [USER]: "Stage members bow out when they are
+    destroyed or replaced, not just when you deliberately spend them down to
+    0"): a performer a hit emptied takes its Bow AFTER that hit is dealt --
+    `FurinaStage.Flush`'s twin, which the mod runs at `AfterDamageReceived`,
+    once per hit and before the next hit of the same attack. So Usher's Block
+    never softens the hit that emptied him, and does meet the next one.
+
+    NO BOW when that hit killed Furina or ended the combat; what is owed is
+    dropped, never kept for a later hit."""
+    owed = list(getattr(state, _HIT_BOWS, []) or [])
+    if not owed:
+        return
+    setattr(state, _HIT_BOWS, [])
+    p = state.player
+    for member in owed:
+        if not active(p) or not p.alive or not state.living_enemies:
+            return
         _bow(state, member)
         _after_bow(state, member, may_return=True)
 
@@ -417,8 +452,8 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
 
 
 def _bow(state, member: str) -> None:
-    """Rule 9, the curtain call, performed ONCE by a performer emptied by a
-    Spend. Usher: Furina gains 4 Block. Chevalmarin: Hydro on every enemy.
+    """Rule 9, the curtain call, performed ONCE by a performer that reached 0
+    Fanfare, whatever emptied it (rule 7). Usher: Furina gains 4 Block. Chevalmarin: Hydro on every enemy.
     Crabaletta: deal 8 Hydro to a random enemy.
 
     `EB-495` D3/D4: Crabaletta's bow is `powered=False` and Hydro, which is
@@ -765,7 +800,8 @@ def absorb(state, incoming: int) -> int:
     lead and lands on her; a flurry can kill the lead and leave her untouched,
     because the call site is per HIT and rule 7 empties the seat between them.
 
-    A performer emptied HERE takes no bow (rule 7): it just leaves.
+    A performer emptied HERE leaves now and BOWS AFTER THE HIT (rule 7,
+    2026-09-25): the caller runs `settle_hit` once the hit is dealt.
     """
     p = state.player
     if not active(p) or incoming <= 0:
@@ -780,7 +816,7 @@ def absorb(state, incoming: int) -> int:
     state.emit("stage_absorb", member=member, amount=eaten,
                incoming=int(incoming), fanfare=pair[1])
     if pair[1] <= 0:
-        _leave(state, 0, bowed=False, reason="hit")
+        _leave(state, 0, bowed=True, reason="hit", pay_now=False)
     # R276 batch two, A RAPT AUDIENCE: the percentage of what the lead lost,
     # rounded up, on the back performer -- and nothing when the lead was also
     # the back performer. Every caller here is an enemy's hit.

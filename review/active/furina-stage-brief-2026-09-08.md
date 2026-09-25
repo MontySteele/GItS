@@ -98,8 +98,7 @@ performers with their own bars, and Fanfare is that bar.**
    the middle seat. A big single hit rips through the lead and lands on
    her; a flurry can kill the lead and leave her untouched; each is
    answered differently and the intent shows which is coming.
-7. **A performer at 0 Fanfare leaves the stage.** By a hit: it just leaves.
-   By Spend: it takes a bow (rule 9).
+7. **A performer at 0 Fanfare takes a Bow and leaves,** whatever emptied it: a Spend, a hit, or a summon on a full stage (2026-09-25; [USER]: "Stage members bow out when they are destroyed or replaced, not just when you deliberately spend them down to 0"). A hit's Bow comes after that hit is dealt, so it never softens the hit that caused it.
 8. **Spend N** is a choice on her cards, made when the card is played:
    "Deal 7" or "Spend 3: deal 13 instead" (round two, `EB-746`: both engines
    had fired the rider whenever a lead stood, and four seats asked for the
@@ -107,11 +106,8 @@ performers with their own bars, and Fanfare is that bar.**
    and 2). If the back performer has less than N, or no performer is on
    stage, the Spend mode cannot be chosen and the card plays its base mode.
    A performer the Spend empties exactly leaves with a bow.
-9. **The curtain call.** A performer emptied by Spend performs its
-   departure effect once. Usher: Furina gains 4 Block. Chevalmarin: Hydro
+9. **The curtain call.** A performer that Bows performs its departure effect once. Usher: Furina gains 4 Block. Chevalmarin: Hydro
    on every enemy. Crabaletta: deal 8 Hydro damage to a random enemy.
-   Death by a hit earns no bow. A random summon on a full stage bows the
-   lead (rule 3, 2026-09-25).
 10. **Each performer performs at the end of Furina's turn**, from any
     seat, a flat act that does not read its bar: Usher gives Furina 3
     Block, Chevalmarin deals 2 to every enemy and applies Hydro, Crabaletta
@@ -150,6 +146,8 @@ that the pool has other claims on it and a short life.
   - **Expend.** Raise a performer to exactly a Spend's price and empty it
     for the rider and the bow, then replace it. Pays in cards and Energy,
     not in Fanfare.
+
+Since 2026-09-25 a hit earns the bow too, so Expend's edge is choosing when the bow lands: on Furina's turn, with the rider paid.
 
 "Two damage per Fanfare" is a nominal rate. The sim's job is to report
 which deck wins and by how much, not to set one rate (§13). Until R276 the
@@ -216,6 +214,8 @@ Rising Applause. Intent Butt 12.
 | A, build | Presence, Rising Applause (Usher 3 to 8), Solicitation; Usher performs Block 3 | 9 | 6 | 38 | Usher 8, takes 3, at 5 | 78 |
 | B, wager | Presence, Curtain Rise with Spend 3 (Usher 3 to 0, bows: Block 4), Solicitation | 10 | 19 | 25 | empty | 76 |
 | C, plain | Presence, Curtain Rise unspent, Solicitation; Usher performs Block 3 | 9 | 13 | 31 | Usher 3, takes 3, dies, no bow | 78 |
+
+Line C now ends in Usher's Bow: Furina gains 4 Block after the hit (rule 7, 2026-09-25). The numbers above predate it.
 
 All three are legitimate. A keeps the show and Furina whole for the least
 damage. B takes 13 more damage than A for 2 HP and an empty stage. C sits
@@ -305,7 +305,7 @@ Expend, on the same seed.
    the acts and the bows at the numbers in §3 (D, the sim's).
 4. A Spend needs its full price from the back performer, and a bow comes
    from an exact emptying (R276 pick 1; it replaced the E default that a
-   short bar still fired the rider in full).
+   short bar still fired the rider in full). A hit also earns the bow since 2026-09-25 (rule 7).
 5. ~~Rotation on a full stage retires the front without a bow (E): a bow
    is earned by Spend only.~~ Reversed 2026-09-25 by [USER] ("treat this
    like a Defect orb summon? the stage members rotate, … bows, and their
@@ -455,7 +455,7 @@ The sim, per run and per fight, under `FURINA_STAGE`:
 
 - Spend fires: how many, split by the paying bar at the moment of Spend
   (1 to 2, 3 to 5, 6 and up) and by whether the target died.
-- Performers lost by a hit, by a bow, and by rotation.
+- Performers lost by a hit, by a Spend, and by a full-stage summon (all three bow).
 - Turns with one, two and three performers on stage, and the winrate of
   decks by their summon count.
 - Fanfare absorbed on the lead against Fanfare Furina would have taken:

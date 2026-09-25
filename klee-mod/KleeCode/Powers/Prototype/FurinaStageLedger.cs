@@ -5,19 +5,24 @@ using MegaCrit.Sts2.Core.Entities.Players;
 
 namespace KleeMod.Powers;
 
-/// <summary>Why a performer left the stage. Only one of the three earns a bow.
+/// <summary>Why a performer left the stage. Since 2026-09-25 every performer
+/// at 0 Fanfare bows (rule 7), so only a rotation leaves without one.
 /// </summary>
 public enum StageDeparture
 {
-    /// <summary>Rotated off the front to make room (rule 3). No bow: a bow is
-    /// earned by Spend alone (sec.10 default 5).</summary>
+    /// <summary>Rotated off the front to make room (rule 3). No bow: the
+    /// performer still holds its Fanfare, so it never reached 0.</summary>
     Rotated,
 
-    /// <summary>Emptied by a hit (rule 7, first clause). No bow.</summary>
+    /// <summary>Emptied by an enemy's hit (rule 7). BOWS since 2026-09-25
+    /// ([USER]: "Stage members bow out when they are destroyed or replaced,
+    /// not just when you deliberately spend them down to 0"). The bow is paid
+    /// after the hit is dealt (<see cref="FurinaStageLedger.TakePendingHitBows"/>),
+    /// so it never softens the hit that caused it.</summary>
     Struck,
 
-    /// <summary>Emptied by Spend (rule 7, second clause). Bows (rule 9).
-    /// </summary>
+    /// <summary>Emptied by Spend, Final Bow, Let the People Rejoice or a
+    /// full-stage summon (rule 7). Bows (rule 9).</summary>
     Spent,
 }
 
@@ -36,7 +41,7 @@ public readonly struct StageExit
 
     public StageDeparture Cause { get; }
 
-    public bool Bows => Cause == StageDeparture.Spent;
+    public bool Bows => Cause != StageDeparture.Rotated;
 }
 
 /// <summary>What a Spend did. <see cref="Fired"/> is the rider's own question
@@ -533,8 +538,13 @@ public sealed class FurinaStageLedger
     /// resolved hit by hit and can kill the lead while leaving her whole.
     /// Nothing in this method loops, and that absence is the rule.
     ///
-    /// A LEAD EMPTIED HERE TAKES NO BOW (rule 7, first clause). The bow is
-    /// bought with a Spend; a performer that merely died did not buy one.
+    /// A LEAD EMPTIED HERE BOWS, AFTER THE HIT (rule 7, 2026-09-25). This
+    /// method runs inside the engine's damage modifier, before the hit has
+    /// been dealt, and a bow is awaited work -- so the exit is QUEUED here and
+    /// paid by <c>FurinaStage.Flush</c> at <c>AfterDamageReceived</c>, which
+    /// the engine fires once per hit, after that hit's HP loss and before the
+    /// next hit of the same attack. Usher's Block therefore never reduces the
+    /// hit that emptied him, and does meet the next one.
     ///
     /// SYNCHRONOUS ON PURPOSE. Its caller is
     /// <c>FurinaResourceHooks.ModifyHpLostBeforeOsty</c>, which the engine
@@ -570,9 +580,24 @@ public sealed class FurinaStageLedger
 
         _seats.RemoveAt(0);
         Note(new StageBeat("leave", lead.Who, -1, 0, absorbed, "hit"));
-        return new StageAbsorb(
-            absorbed, reached,
-            new StageExit(lead.Who, StageDeparture.Struck));
+        var exit = new StageExit(lead.Who, StageDeparture.Struck);
+        _pendingHitBows.Add(exit);
+        return new StageAbsorb(absorbed, reached, exit);
+    }
+
+    private readonly List<StageExit> _pendingHitBows = new();
+
+    /// <summary>The bows owed by hits since the last flush, oldest first, taken
+    /// once (rule 7, 2026-09-25). <c>FurinaStage.Flush</c> pays them after
+    /// the hit is dealt, or drops them when that hit killed Furina or ended
+    /// the combat. Usually one; an attack on Furina and a Guest of Honor ally
+    /// in the same damage call can leave two.</summary>
+    public IReadOnlyList<StageExit> TakePendingHitBows()
+    {
+        if (_pendingHitBows.Count == 0) return System.Array.Empty<StageExit>();
+        var owed = _pendingHitBows.ToList();
+        _pendingHitBows.Clear();
+        return owed;
     }
 
     /// <summary>
@@ -878,6 +903,7 @@ public sealed class FurinaStageLedger
         ResetActMultipliers();
         _seats.Clear();
         _pendingCurtainCall.Clear();
+        _pendingHitBows.Clear();
         _beats.Clear();
         _spendStack.Clear();
         SpentThisPlay = 0;

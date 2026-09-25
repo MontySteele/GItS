@@ -280,11 +280,10 @@ def test_an_act_that_landed_nothing_says_so_and_prints_no_zero():
 
 
 def test_a_departure_says_why_because_that_is_rules_seven_and_nine():
-    """A bow is earned by Spend and by nothing else, so the reason is not
-    decoration: it is the difference between turn one's line B and line C
-    (brief sec.7), which round one asked its seats to name."""
+    """Rules 7 and 9. Since 2026-09-25 every performer at 0 Fanfare Bows,
+    whatever emptied it; only a rotation, which keeps the bar, does not."""
     reasons = {
-        "hit": "emptied by a hit, so no Bow",
+        "hit": "emptied by a hit, so it takes a Bow",
         "spend": "emptied by a Spend, so it takes a Bow",
         "rotated": "rotated off the front to make room, so no Bow",
         "final_bow": "took its Bow and left",

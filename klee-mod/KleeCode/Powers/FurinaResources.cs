@@ -1274,9 +1274,10 @@ public sealed class FurinaResourceHooks : AbstractModel
         // because the engine wanted a number back; this is where the bodies
         // catch up -- a lead emptied by that hit leaves, the survivors re-flow
         // and the strip redraws -- and it fires per damage instance, so the
-        // board is settled before the NEXT hit of the same flurry. Nothing is
-        // paid out: a performer emptied by a hit takes no bow (rule 7).
-        await FurinaStage.Flush(target);
+        // board is settled before the NEXT hit of the same flurry. A lead that
+        // hit emptied takes its Bow here, after the hit is dealt and before
+        // the next one (rule 7, 2026-09-25).
+        await FurinaStage.Flush(choiceContext, target);
         Vfx.FurinaStageStrip.Refresh(target);
 #endif
         await FurinaResources.SyncMeters(

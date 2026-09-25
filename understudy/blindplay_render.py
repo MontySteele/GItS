@@ -1662,7 +1662,8 @@ STAGE_REGAIN_LINE = ("  - **{who}** regained {n} Fanfare as the front "
 STAGE_HIT_LINE = "  - {dealer} hit **{who}** for {n}: {before} → {after}"
 #: The hit that EMPTIED the lead: the departure rides the same line, and the
 #: separate `leave` row the mod files after it is not printed twice.
-STAGE_HIT_LEAVES = ", and it leaves the stage: emptied by a hit, so no Bow"
+STAGE_HIT_LEAVES = (", and it leaves the stage: emptied by a hit, so it "
+                    "takes a Bow")
 #: A hit whose dealer the mod could not name (no enemy behind it).
 STAGE_HIT_UNNAMED_LINE = "  - **{who}** was hit for {n}: {before} → {after}"
 

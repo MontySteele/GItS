@@ -350,9 +350,11 @@ public sealed class KnightsOfFavoniusPower : PowerModel, ILocalizationProvider
 /// ally's Block -- <c>CreatureCmd.Damage</c> spends Block first -- so "their
 /// Block, then the lead's Fanfare, then them" is this one call: the lead
 /// takes what it can and the rest reaches the ally. A lead emptied by such a
-/// hit leaves WITHOUT a Bow and the next performer steps forward, as any hit;
-/// A Rapt Audience fires because an enemy hit the lead. The bodies catch up at
-/// <c>AfterDamageReceived</c>, the flush Furina's own hits take.
+/// hit takes its Bow after the hit and the next performer steps forward, as
+/// any hit (rule 7, 2026-09-25); A Rapt Audience fires because an enemy hit
+/// the lead. The bodies catch up, and the Bow is paid, at
+/// <c>AfterDamageReceived</c>, the flush Furina's own hits take -- or at
+/// the ally's death, when the hit killed them and the engine skips that hook.
 ///
 /// THE MINE STILL FIRES FIRST. A Klee's Mine answers an enemy's attack on
 /// ANY player in <c>BeforeDamageReceived</c>, which runs before Block; a
@@ -413,7 +415,7 @@ public sealed class GuestOfHonorPower : PowerModel, ILocalizationProvider
         CardModel? cardSource)
     {
         if (!ReferenceEquals(target, Owner) || Applier == null) return;
-        await FurinaStage.Flush(Applier);
+        await FurinaStage.Flush(choiceContext, Applier);
     }
 
     public override async Task BeforeSideTurnStart(
@@ -431,6 +433,14 @@ public sealed class GuestOfHonorPower : PowerModel, ILocalizationProvider
         if (!wasRemovalPrevented && ReferenceEquals(creature, Applier))
         {
             await PowerCmd.Remove(this);
+            return;
+        }
+        // The engine skips AfterDamageReceived for a target the hit killed,
+        // so a lead emptied by the hit that killed the ally is flushed, and
+        // bows for a living Furina, here.
+        if (ReferenceEquals(creature, Owner) && Applier is { IsDead: false })
+        {
+            await FurinaStage.Flush(choiceContext, Applier);
         }
     }
 }

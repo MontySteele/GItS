@@ -6738,13 +6738,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # THE TEXT PASS (2026-09-25): `Raise` and `Rotate` retired, the
         # lead renamed the FRONT performer, every row in [USER]'s words.
         "Spend": ["Pay Fanfare from your ", ". Offered only ",
-                  "if it can pay in full. If that empties it exactly, it "],
+                  "if it can pay in full."],
         "Fanfare": ["A performer's health. Hits take your ",
                     "the front performer's, then you. Gained on an empty "
                     "stage, it "],
-        # `EB-744`: the contrast -- a Spend earns a Bow, a hit does not.
-        "Bow": ["A performer's parting effect, shown on each performer. ",
-                "its last Fanfare triggers it; losing it to a hit doesn't."],
+        # Rule 7, 2026-09-25: every performer at 0 Fanfare Bows.
+        "Bow": ["A performer's parting effect, shown on each performer. It ",
+                "triggers when the performer's Fanfare runs out."],
         "front performer": ["Takes hits first. Regains "],
         # `EB-744` and round four: the back is reached last.
         "back performer": ["Gains and Spends ", ". Hits reach it last."],
@@ -6978,21 +6978,22 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
         "Deal 7 damage. Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
     # The text pass (2026-09-25): the chooser explains itself (#662), so the
-    # row says who pays, that it is offered only in full, and the exact
-    # emptying's Bow -- the old page-only "not offered at all" sentence is
-    # the tip's own "Offered only if it can pay in full" now.
+    # row says who pays and that it is offered only in full -- the old
+    # page-only "not offered at all" sentence is the tip's own "Offered only
+    # if it can pay in full" now. The Bow clause left with rule 7's
+    # 2026-09-25 change: the Bow row covers every way of reaching 0.
     for clause in ("Pay Fanfare from your back performer",
-                   "Offered only if it can pay in full",
-                   "If that empties it exactly, it Bows"):
+                   "Offered only if it can pay in full"):
         assert clause in page, clause
         assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
+    assert "If that empties it exactly" not in blindplay.ARM_KEYWORDS["Spend"]
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     # The tip's own [gold] spans split the sentence across concatenated
     # literals, so the anchors are the runs that do not straddle a `+`.
     for phrase in ("Pay Fanfare from your ",
-                   "if it can pay in full. If that empties it exactly, it "):
+                   "if it can pay in full.\");"):
         assert phrase in src, phrase
 
 
