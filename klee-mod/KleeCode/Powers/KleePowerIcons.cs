@@ -290,24 +290,25 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/salon_member.png"),
         CrabalettaBadgePower =>
             KleePck.Path("furina/powers/salon_member.png"),
-        // THE GUEST CAST (2026-09-25): each guest's badge borrows the same
-        // member sigil until the art pass gives a guest its own.
+        // THE GUEST CAST (2026-09-25): each guest's badge wears the guest's
+        // own face (the character icon, art/plan.tsv power_furina_guest_*),
+        // as standing_ovation wears Furina's.
         NeuvilletteBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_neuvillette.png"),
         ClorindeBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_clorinde.png"),
         NaviaBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_navia.png"),
         ChevreuseBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_chevreuse.png"),
         WriothesleyBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_wriothesley.png"),
         SigewinneBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_sigewinne.png"),
         CharlotteBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_charlotte.png"),
         LynetteBadgePower =>
-            KleePck.Path("furina/powers/salon_member.png"),
+            KleePck.Path("furina/powers/guest_lynette.png"),
         StageSummaryPower => KleePck.Path("furina/powers/center_stage.png"),
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md): five powers,
         // each borrowing the shipped sigil nearest its job on the terms every
