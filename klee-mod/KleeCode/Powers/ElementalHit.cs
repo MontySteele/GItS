@@ -170,16 +170,22 @@ internal static class ElementalHit
     /// (<c>CompanionPowers.WitchsFlamePower</c>) is the same arithmetic written
     /// inline.
     ///
-    /// QUARANTINED CALLER, one: the Klee overhaul's Spark Knight (R276). A
-    /// named door rather than <c>Element.None</c> passed to <see cref="Deal"/>,
+    /// QUARANTINED CALLERS, two: the Klee overhaul's Spark Knight (R276), and
+    /// since draft 3 (2026-09-25) the Furina Stage's two damage acts, which
+    /// pass <paramref name="powered"/> false exactly as <see cref="Deal"/>'s
+    /// callers do (a performance carries no Strength, `EB-495` D3). A named
+    /// door rather than <c>Element.None</c> passed to <see cref="Deal"/>,
     /// which would hand <c>None</c> to the reaction table as a trigger, and
-    /// because a call site is what the headless suite can pin.
+    /// because a call site is what the headless suite can pin. Defaulted true,
+    /// so Spark Knight is byte-identical.
     /// </summary>
     public static async Task<int> DealUnelemented(
         PlayerChoiceContext choiceContext, Creature target,
-        decimal baseDamage, Creature? applier)
+        decimal baseDamage, Creature? applier, bool powered = true)
     {
-        var dealt = SimDamagePipeline.DealerMods(applier, baseDamage);
+        var dealt = powered
+            ? SimDamagePipeline.DealerMods(applier, baseDamage)
+            : baseDamage;
         var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
         await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,

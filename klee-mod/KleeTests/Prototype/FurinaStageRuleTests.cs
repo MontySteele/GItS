@@ -678,8 +678,9 @@ public class FurinaStageRuleTests
         Assert.Equal(3, FurinaStageLaw.ActUsherBlock);
         Assert.Equal(2, FurinaStageLaw.ActChevalmarinDamage);
         Assert.Equal(5, FurinaStageLaw.ActCrabalettaDamage);
-        Assert.Equal(4, FurinaStageLaw.BowUsherFanfare);
-        Assert.Equal(8, FurinaStageLaw.BowCrabalettaDamage);
+        // Draft 3 (2026-09-25): the two bow numbers left (a Bow is the act
+        // once more) and the fade's threshold arrived.
+        Assert.Equal(5, FurinaStageLaw.FadeThreshold);
     }
 
     // ==================================================================

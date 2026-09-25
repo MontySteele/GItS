@@ -611,13 +611,16 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "A performer's health. Hits take your [gold]Block[/gold], then ",
             "the front performer's, then you. Gained on an empty stage, it ",
             "summons a performer.",
-            # Rule 7, 2026-09-25: every performer at 0 Fanfare Bows.
-            "A performer's parting effect, shown on each performer. It ",
-            "triggers when the performer's Fanfare runs out.",
+            # Draft 3 (2026-09-25): the Bow is the performer's act once more.
+            "A performer that leaves the stage acts one last time on its way ",
+            "out.\");",
             "Takes hits first. Regains ",
             " [gold]Fanfare[/gold] at the start of your turn.",
             # Round four's empty-stage summon is the Fanfare tip's (above).
-            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last.",
+            # Draft 3: rule 12, the fade, on the back performer.
+            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last. At ",
+            "the end of your turn, it loses half its Fanfare above ",
+            "FurinaStageLaw.FadeThreshold",
     ):
         assert clause in tips, clause
 
@@ -641,14 +644,14 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert "KleeOverhaulLaw.BombGrowth" in tips
     assert "KleeOverhaulLaw.SparkPerExplosion" in tips
-    # THE STAGE's Bow and lead sentences carry three numbers -- the two bows
-    # that have one and the lead's regen -- and all three are prototype SEEDS
-    # (R215 B, the brief's sec.10 default 3), which makes a retune likelier
-    # here than anywhere else on this list. `EB-723` replaced the reframe's
-    # Evoke pair, which left with that arm's rows.
-    assert "FurinaStageLaw.BowUsherFanfare" in tips
-    assert "FurinaStageLaw.BowCrabalettaDamage" in tips
+    # THE STAGE's front and back sentences carry the lead's regen and the
+    # fade's threshold (draft 3, 2026-09-25, which also retired the two bow
+    # numbers: a Bow is the act once more). Both are prototype SEEDS (R215
+    # B), which makes a retune likelier here than anywhere else on this list.
+    assert "FurinaStageLaw.BowUsherFanfare" not in tips
+    assert "FurinaStageLaw.BowCrabalettaDamage" not in tips
     assert "FurinaStageLaw.LeadRegen" in tips
+    assert "FurinaStageLaw.FadeThreshold" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
     # The arm's one number lives on the relic, whose face interpolates it
@@ -1281,8 +1284,14 @@ def test_every_summoning_row_carries_the_summon_and_performer_tips(rid):
         part.capitalize() for part in rid.removeprefix("proto_fs_").split("_"))
     src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
     variant = "false" if rid in NAMED_SUMMONERS else "true"
-    assert (f"ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, {variant})"
-            in src)
+    # The Summon tip wraps the card's own tips: the base list, or (draft 3,
+    # 2026-09-25) Chevalmarin's card's Hydro tip, which attaches where the
+    # keyword prints.
+    import re
+    assert re.search(
+        r"ArmKeywordTips\.ForSummon\((base\.ExtraHoverTips|"
+        r"KleeCardTooltips\.ForCard\(base\.ExtraHoverTips, [^;]*?\)), "
+        rf"this, {variant}\)", src)
     for who in STAGE_SUMMONERS[rid]:
         assert f"ArmKeywordTips.For{who}(" in src
     for who in {"Usher", "Chevalmarin", "Crabaletta"} - set(
@@ -1302,17 +1311,19 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             '"moves to the back instead."',
             '" [gold]Fanfare[/gold].");',
             "if (random)",
+            # Draft 3 (2026-09-25): one sentence each -- no Bow clause (a
+            # Bow is the act once more) and no Hydro (no act applies it).
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
-            '" [gold]Block[/gold]. [gold]Bow[/gold]: your front performer "',
-            '"gains " + FurinaStageLaw.BowUsherFanfare',
-            '" [gold]Fanfare[/gold].");',
+            '          + " [gold]Block[/gold].");',
             '"End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage',
-            '" [gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "',
-            '"apply [gold]Hydro[/gold] to ALL enemies."',
+            '          + " damage to ALL enemies.");',
             '"End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage',
-            '" [gold]Hydro[/gold] damage to a random enemy. [gold]Bow[/gold]: "',
-            "FurinaStageLaw.BowCrabalettaDamage"):
+            '          + " damage to a random enemy.");'):
         assert clause in tips, clause
+    for gone in ("FurinaStageLaw.BowUsherFanfare",
+                 "FurinaStageLaw.BowCrabalettaDamage",
+                 "[gold]Bow[/gold]: "):
+        assert gone not in tips, gone
     mod = MOD_CS.read_text(encoding="utf-8")
     assert 'ArmKeywordTips.SummonKey + ".title"] = "Summon"' in mod
     # The performer titles are the LEDGER'S display names (`EB-735`), the
@@ -1334,15 +1345,14 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     from understudy import blindplay_notes
     assert blindplay_notes.SUMMON_NAMED_ROW == (
         "A performer joins at the back with 1 Fanfare.")
-    assert rows["Gentilhomme Usher"] == (
-        "End of your turn: gain 3 Block. Bow: your front performer gains 4 "
-        "Fanfare.")
+    assert rows["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
     assert rows["Surintendante Chevalmarin"] == (
-        "End of your turn: deal 2 Hydro damage to ALL enemies. Bow: apply "
-        "Hydro to ALL enemies.")
+        "End of your turn: deal 2 damage to ALL enemies.")
     assert rows["Mademoiselle Crabaletta"] == (
-        "End of your turn: deal 5 Hydro damage to a random enemy. Bow: deal 8 "
-        "Hydro damage to a random enemy.")
+        "End of your turn: deal 5 damage to a random enemy.")
+    assert rows["Bow"] == (
+        "A performer that leaves the stage acts one last time on its way "
+        "out.")
 
 
 # ---------------------------------------------------------------------------

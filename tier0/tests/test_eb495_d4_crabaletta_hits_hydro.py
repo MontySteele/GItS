@@ -1,28 +1,13 @@
-"""`EB-495` D4 — Crabaletta's act and bow are Hydro in BOTH engines.
+"""`EB-495` D4 -- Crabaletta's act and bow, FLIPPED by Furina Stage draft 3.
 
-`FurinaStage.cs:461` (the act) and `:542` (the bow) both pass
-`Elements.Element.Hydro` into `ElementalHit.Deal`. The sim's two Crabaletta
-legs passed no `element=`, so the default `None` applied: the hit set no aura
-and consumed none, and every reaction off a Crabaletta hit existed in the game
-and nowhere in tier0.
-
-THE BRIEF IS SILENT, so the game is the answer and this is a one-sided sim
-defect. `review/active/furina-stage-brief-2026-09-08.md` names Chevalmarin's
-Hydro twice in as many words — rule 10 "deals 2 to every enemy and applies
-Hydro", rule 9 "Chevalmarin: Hydro on every enemy" — and says only "Crabaletta
-deals 5 to a random enemy" and "Crabaletta: deal 8 to a random enemy". It
-never says Crabaletta's hit is elementless; it simply does not raise the
-question, so there is no rule for the C# to contradict. Recorded here because
-the reading is the load-bearing part: if the brief is later written to say a
-Crabaletta hit carries no element, this is the file that has to change and the
-C# with it, and that is a rule change rather than a parity repair.
-
-THE REACTION, CORRECTED. `EB-495`'s row text says a Crabaletta hit into an
-Electro aura applies Superconduct's Vulnerable. It does not, in either
-engine: Superconduct is Electro + Cryo (`reactions.py`, and
-`ReactionEffects.cs` with it), and Hydro into Electro is ELECTRO-CHARGED,
-whose rider is a DoT. The observable is the same one either way — a reaction
-that fired in the game and not in the sim — and the DoT is what is pinned.
+D4 was a parity repair: the C# act and bow passed `Elements.Element.Hydro`
+and the sim passed none, so the sim was brought up to the game. On
+2026-09-25 [USER] ruled the element off every act ("removing the Hydro
+application from the end-of-turn effects on Chevalmarin and Crabaletta"), and
+the Bow became the act once more. So both engines now deal PLAIN damage: the
+C# through `ElementalHit.DealUnelemented`, the sim with `element=None`. This
+file keeps D4's shapes and pins the new answer: no aura set, none consumed,
+no reaction -- including the Electro-Charged cell D4 was about.
 
 NOTHING MEASURED ON A PROTOTYPE IS QUOTABLE (R215 B): these are shape
 assertions about an engine, not numbers about a game.
@@ -34,7 +19,6 @@ import random
 
 import pytest
 
-from tier0 import constants as C
 from tier0.engine import furina_stage
 from tier0.engine.state import CombatState, Enemy, Player
 
@@ -56,50 +40,47 @@ def _state(aura=None, enemy_hp=99):
     return st
 
 
-def test_crabalettas_act_leaves_a_hydro_aura(arm):
+def test_crabalettas_act_leaves_no_aura(arm):
     st = _state()
     st.player.stage = [["crabaletta", 4]]
     FS.perform(st, "crabaletta")
-    assert st.enemies[0].aura == "hydro"
+    assert st.enemies[0].aura is None
+    assert st.enemies[0].hp == 99 - FS.ACT_CRABALETTA_DAMAGE
 
 
-def test_crabalettas_bow_leaves_a_hydro_aura(arm):
+def test_crabalettas_bow_leaves_no_aura(arm):
     st = _state()
     st.player.stage = [["crabaletta", 1]]
     FS.spend(st, 1)
     assert st.player.stage == []
-    assert st.enemies[0].aura == "hydro"
+    assert st.enemies[0].aura is None
 
 
-def test_a_crabaletta_act_into_an_electro_aura_reacts(arm):
-    """The cell the repair is actually about. Electro standing, Hydro landing:
-    Electro-Charged fires, its DoT lands, and the aura is consumed."""
+@pytest.mark.parametrize("member", ["crabaletta", "chevalmarin"])
+def test_an_act_into_an_electro_aura_does_not_react(arm, member):
+    """The cell D4 was about, flipped: Electro standing, a plain hit landing.
+    No Electro-Charged, no DoT, and the aura is still there."""
     st = _state(aura="electro")
-    st.player.stage = [["crabaletta", 4]]
-    FS.perform(st, "crabaletta")
+    st.player.stage = [[member, 4]]
+    FS.perform(st, member)
     enemy = st.enemies[0]
-    assert enemy.powers.get("dot", 0) == C.ELECTROCHARGED_DOT
-    assert enemy.aura is None
-    assert [e for e in st.log
-            if e["event"] == "reaction"
-            and e.get("reaction") == "electrocharged"]
+    assert enemy.powers.get("dot", 0) == 0
+    assert enemy.aura == "electro"
+    assert not [e for e in st.log if e["event"] == "reaction"]
 
 
-def test_a_crabaletta_bow_into_an_electro_aura_reacts(arm):
+def test_a_crabaletta_bow_into_an_electro_aura_does_not_react(arm):
     st = _state(aura="electro")
     st.player.stage = [["crabaletta", 1]]
     FS.spend(st, 1)
-    assert st.enemies[0].powers.get("dot", 0) == C.ELECTROCHARGED_DOT
+    assert st.enemies[0].powers.get("dot", 0) == 0
+    assert st.enemies[0].aura == "electro"
 
 
-def test_the_aura_lands_even_when_block_eats_the_hit(arm):
-    """The element is the HIT's, not the damage's, in both engines:
-    `ElementalHit.Deal` resolves the reaction before the number reaches the
-    body, and `deal_damage_to_enemy` applies the aura ahead of Block for the
-    same reason. So a fully blocked Crabaletta act still leaves Hydro."""
+def test_a_blocked_act_leaves_nothing_behind(arm):
     st = _state()
     st.enemies[0].block = 50
     st.player.stage = [["crabaletta", 4]]
     FS.perform(st, "crabaletta")
-    assert st.enemies[0].aura == "hydro"
+    assert st.enemies[0].aura is None
     assert st.enemies[0].hp == 99

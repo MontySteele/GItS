@@ -37,10 +37,10 @@ namespace KleeMod.Powers;
 // ======================================================================
 
 /// <summary>
-/// A PERFORMER'S BADGE: its name, what it does at the end of her turn, and
-/// what its Bow does. The same two sentences
-/// <c>ArmKeywordTips.ForUsher</c> and its two siblings print on the cards
-/// that name the performer.
+/// A PERFORMER'S BADGE: its name and what it does at the end of her turn.
+/// The same sentence <c>ArmKeywordTips.ForUsher</c> and its two siblings
+/// print on the cards that name the performer. No Bow clause since draft 3
+/// (2026-09-25): a Bow is the act once more (<c>ArmKeywordTips.ForBow</c>).
 ///
 /// THE ACT'S NUMBER IS LIVE (<see cref="ActVar"/>): under Arkhe Alignment's
 /// Ousia or Pneuma the act is doubled this turn (<see cref="FurinaStage.Perform"/>
@@ -145,9 +145,8 @@ public abstract class StagePerformerBadge : PowerModel
     }
 }
 
-/// <summary>Gentilhomme Usher's badge: Block at the end of her turn, and
-/// Fanfare for the front performer when he bows (brief sec.3 rules 9 and 10;
-/// the Bow was Block until 2026-09-25).</summary>
+/// <summary>Gentilhomme Usher's badge: Block at the end of her turn (brief
+/// sec.3 rule 10).</summary>
 public sealed class UsherBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Usher;
@@ -159,18 +158,14 @@ public sealed class UsherBadgePower : StagePerformerBadge, ILocalizationProvider
         ("title", FurinaStageLedger.DisplayName(StagePerformer.Usher)),
         ("description",
             "End of your turn: gain " + FurinaStageLaw.ActUsherBlock
-          + " [gold]Block[/gold]. [gold]Bow[/gold]: your front performer "
-          + "gains " + FurinaStageLaw.BowUsherFanfare
-          + " [gold]Fanfare[/gold]."),
+          + " [gold]Block[/gold]."),
         ("smartDescription",
-            "End of your turn: gain {Act} [gold]Block[/gold]. "
-          + "[gold]Bow[/gold]: your front performer gains "
-          + FurinaStageLaw.BowUsherFanfare + " [gold]Fanfare[/gold]."),
+            "End of your turn: gain {Act} [gold]Block[/gold]."),
     };
 }
 
-/// <summary>Surintendante Chevalmarin's badge: 2 Hydro to every enemy at the
-/// end of her turn, Hydro on every enemy when she bows.</summary>
+/// <summary>Surintendante Chevalmarin's badge: 2 damage to every enemy at
+/// the end of her turn. No Hydro since draft 3 (2026-09-25).</summary>
 public sealed class ChevalmarinBadgePower
     : StagePerformerBadge, ILocalizationProvider
 {
@@ -183,17 +178,14 @@ public sealed class ChevalmarinBadgePower
         ("title", FurinaStageLedger.DisplayName(StagePerformer.Chevalmarin)),
         ("description",
             "End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage
-          + " [gold]Hydro[/gold] damage to ALL enemies. [gold]Bow[/gold]: "
-          + "apply [gold]Hydro[/gold] to ALL enemies."),
+          + " damage to ALL enemies."),
         ("smartDescription",
-            "End of your turn: deal {Act} [gold]Hydro[/gold] damage to ALL "
-          + "enemies. [gold]Bow[/gold]: apply [gold]Hydro[/gold] to ALL "
-          + "enemies."),
+            "End of your turn: deal {Act} damage to ALL enemies."),
     };
 }
 
-/// <summary>Mademoiselle Crabaletta's badge: Hydro damage to a random enemy
-/// at the end of her turn, and more when she bows.</summary>
+/// <summary>Mademoiselle Crabaletta's badge: damage to a random enemy at the
+/// end of her turn. No Hydro since draft 3 (2026-09-25).</summary>
 public sealed class CrabalettaBadgePower
     : StagePerformerBadge, ILocalizationProvider
 {
@@ -206,14 +198,9 @@ public sealed class CrabalettaBadgePower
         ("title", FurinaStageLedger.DisplayName(StagePerformer.Crabaletta)),
         ("description",
             "End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage
-          + " [gold]Hydro[/gold] damage to a random enemy. [gold]Bow[/gold]: "
-          + "deal " + FurinaStageLaw.BowCrabalettaDamage
-          + " [gold]Hydro[/gold] damage to a random enemy."),
+          + " damage to a random enemy."),
         ("smartDescription",
-            "End of your turn: deal {Act} [gold]Hydro[/gold] damage to a "
-          + "random enemy. [gold]Bow[/gold]: deal "
-          + FurinaStageLaw.BowCrabalettaDamage
-          + " [gold]Hydro[/gold] damage to a random enemy."),
+            "End of your turn: deal {Act} damage to a random enemy."),
     };
 }
 
@@ -238,10 +225,13 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
         // badge nor the Summon tip's full-stage clause said how many seats
         // there are, and the seat "never dared a third summon". The number is
         // the law's, interpolated.
+        // Draft 3 (2026-09-25): rule 12, the fade, replaces the damage-order
+        // sentence, which the Fanfare tip carries on every card that prints
+        // the word.
         ("description",
-            "Up to " + FurinaStageLaw.Seats + " performers act at the end of "
-          + "your turn. Hits land on your [gold]Block[/gold], then your "
-          + "front performer's [gold]Fanfare[/gold], then you."),
+            "Up to " + FurinaStageLaw.Seats + " performers. At the end of "
+          + "your turn, those behind the front lose half their Fanfare "
+          + "above " + FurinaStageLaw.FadeThreshold + "."),
     };
 
     public override PowerType Type => PowerType.Buff;

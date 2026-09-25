@@ -336,10 +336,11 @@ MIRRORED: dict[str, object] = {
     "KokomiOverhaulLaw.CasketStrike": C.KOKOMI_OVERHAUL_CASKET_STRIKE,
     # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
-    # same reason -- quarantined is not exempt. These TEN numbers ARE the
+    # same reason -- quarantined is not exempt. These NINE numbers ARE the
     # brief's sec.3 rules: the seat count, the relic's opening bar, what a
     # summon arrives at, the lead's regen, the starter Refill, the three acts
-    # and the two bows that carry a number. The sim declared every one of them
+    # and the fade's threshold (draft 3, 2026-09-25, which also retired the
+    # two bow numbers: a Bow is the act once more). The sim declared them
     # first (`EB-724` is the sim engine and `EB-725` the C#), and the C# side
     # reads them for its keyword tips, so a pair that drifted would print a
     # retired number under a card the seat is grading.
@@ -351,8 +352,7 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ActUsherBlock": _stage("ACT_USHER_BLOCK"),
     "FurinaStageLaw.ActChevalmarinDamage": _stage("ACT_CHEVALMARIN_DAMAGE"),
     "FurinaStageLaw.ActCrabalettaDamage": _stage("ACT_CRABALETTA_DAMAGE"),
-    "FurinaStageLaw.BowUsherFanfare": _stage("BOW_USHER_FANFARE"),
-    "FurinaStageLaw.BowCrabalettaDamage": _stage("BOW_CRABALETTA_DAMAGE"),
+    "FurinaStageLaw.FadeThreshold": _stage("FADE_THRESHOLD"),
     # R276 batch two: Arkhe Alignment's Pneuma half.
     "ArkheAlignmentPower.PneumaLeadRegain": _stage("PNEUMA_LEAD_REGAIN"),
     # Rally prints "costs 1 less" but the op carries no amount (it is one

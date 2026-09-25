@@ -37,15 +37,18 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_tidal_flourish");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Flourish"),
-        ("description", "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -55,7 +58,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 2: deal 9 instead" };
+        new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 2: deal 9 and apply [gold]Hydro[/gold] to ALL instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -88,7 +91,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
                                 "needs its full price from the back performer"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 2: deal 9 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 damage to ALL enemies", "[gold]Spend[/gold] 2: deal 9 and apply [gold]Hydro[/gold] to ALL instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             await DamageCmd.Attack((IsUpgraded ? 8m : 5m))
@@ -107,6 +110,10 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
                 .WithHitFx("vfx/vfx_attack_slash")
                 .SpawningHitVfxOnEachCreature()
                 .Execute(choiceContext);
+            foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
+            {
+                await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
+            }
         }
     }
 
@@ -174,7 +181,7 @@ public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spend 2"),
-        ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead"),
+        ("description", "[gold]Spend[/gold] 2: deal {BranchDamage:diff()} and apply [gold]Hydro[/gold] to ALL instead"),
     };
 
     public ProtoFsTidalFlourishModeB()

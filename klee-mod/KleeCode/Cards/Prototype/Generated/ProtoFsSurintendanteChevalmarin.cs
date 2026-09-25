@@ -37,15 +37,18 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, ICharacte
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForSummon(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("surintendante_chevalmarin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surintendante Chevalmarin"),
-        ("description", "Summon Chevalmarin. If she's already on stage, she gains 3 [gold]Fanfare[/gold]."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin. If she's already on stage, she gains 3 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -57,12 +60,16 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, ICharacte
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoFsSurintendanteChevalmarin()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
+        {
+            await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
+        }
         await FurinaStage.Summon(choiceContext, Owner.Creature, "chevalmarin", 3);
     }
 

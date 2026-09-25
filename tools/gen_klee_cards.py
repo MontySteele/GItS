@@ -1905,6 +1905,11 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # R276 batch two: Improvised Number's "If the stage is empty,
               # summon a random performer" -- one awaited call, no locals.
               "stage_summon",
+              # Furina Stage draft 3 (2026-09-25): Tidal Flourish and Quick
+              # Cue's Spend modes "deal N and apply Hydro". Emitted by the
+              # top-level arm's own `_aura_lines`, whose one local sits inside
+              # its own braces; `enemy` and `all_enemies` only.
+              "apply_aura",
               # R213 E1, QUARANTINED. A single awaited call with no locals,
               # which is the whole branch-legality criterion -- and a mode
               # body is the one place a Charge price can go that the
@@ -1992,6 +1997,7 @@ BRANCH_FIELDS = {
     # any face could print.
     "stage_spend": {"op", "amount"},
     "stage_summon": {"op", "member", "if_present_raise"},
+    "apply_aura": {"op", "element", "target"},
 }
 
 # EB-137. The two branch ops whose `amount` is optional; see the note in
@@ -2066,6 +2072,13 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
         amount = eff.get("amount", 1)
         if not isinstance(amount, int) or amount <= 0:
             return f"branch {eff['op']} amount must be a positive literal int"
+        return None
+    if eff["op"] == "apply_aura":
+        # Furina Stage draft 3. No amount: the argument is the element.
+        if eff.get("element") not in ELEMENT_CS:
+            return f"branch apply_aura element {eff.get('element')!r}"
+        if eff.get("target", "enemy") not in ("enemy", "all_enemies"):
+            return f"branch apply_aura target {eff.get('target')!r}"
         return None
     if eff["op"] == "stage_summon":
         # R276 batch two. A summon carries no amount: its argument is the
@@ -7832,6 +7845,12 @@ def conditional_then_damage_upgrade(card: dict) -> int:
 #: branch with two printed numbers has no one number for a var to be.
 BRANCH_PRICE_OPS = frozenset({"stage_spend"})
 
+#: Furina Stage draft 3 (2026-09-25). A clause a branch may carry beside its
+#: number that prints NO number of its own: "Spend 2: deal 9 and apply Hydro
+#: to ALL instead" still prints exactly one damage number, and the Hydro is a
+#: keyword. Ignored by the one-number test exactly as a price is.
+BRANCH_UNNUMBERED_OPS = frozenset({"apply_aura"})
+
 
 def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
                                                               str]]:
@@ -7910,7 +7929,7 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         clause = printed[0]
         if not isinstance(clause.get("amount"), int):
             return None
-        if any(c.get("op") not in BRANCH_PRICE_OPS
+        if any(c.get("op") not in BRANCH_PRICE_OPS | BRANCH_UNNUMBERED_OPS
                for c in branch if c is not clause):
             return None
         return clause
@@ -8799,6 +8818,54 @@ def _branch_amount(card: dict, eff: dict, key: str) -> str:
     return f"(IsUpgraded ? {base + delta}m : {base}m)"
 
 
+def _aura_lines(eff: dict, ctx: dict) -> list[str]:
+    """`apply_aura` / `swirl`, as statements.
+
+    ONE EMITTER FOR THE TOP LEVEL AND FOR A MODE BODY (Furina Stage draft 3,
+    2026-09-25: Tidal Flourish and Quick Cue apply Hydro in their Spend
+    modes), so the two cannot emit an aura two different ways -- the drift
+    `BRANCH_OPS` exists to prevent. Every local it declares sits inside its
+    own braces."""
+    op = eff["op"]
+    # tier0 _op_apply_aura / _op_swirl: resolve_hit with 0 damage --
+    # ElementalHit.ApplyOnly is exactly that (apply / refresh /
+    # consume+react, no damage call). Swirl IS "trigger anemo".
+    element = (ELEMENT_CS[eff["element"]] if op == "apply_aura"
+               else "Element.Anemo")
+    tgt = eff.get("target", "enemy")
+    aura_lines: list[str] = []
+    if tgt == "enemy":
+        _target_guard(aura_lines, ctx)
+        aura_lines.append(
+            f"await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, "
+            f"{element}, Owner.Creature);"
+        )
+    elif tgt == "all_enemies":
+        aura_lines.append(
+            "foreach (var auraTarget in CombatState!.HittableEnemies.ToList())\n"
+            "        {\n"
+            f"            await ElementalHit.ApplyOnly(choiceContext, auraTarget, "
+            f"{element}, Owner.Creature);\n"
+            "        }"
+        )
+    else:  # random_enemy
+        aura_lines.append(
+            "{\n"
+            "            var auraCandidates = CombatState!.HittableEnemies.ToList();\n"
+            "            if (auraCandidates.Count > 0)\n"
+            "            {\n"
+            "                var auraTarget = Owner.RunState.Rng.CombatTargets.NextItem(auraCandidates);\n"
+            "                if (auraTarget != null)\n"
+            "                {\n"
+            f"                    await ElementalHit.ApplyOnly(choiceContext, auraTarget, "
+            f"{element}, Owner.Creature);\n"
+            "                }\n"
+            "            }\n"
+            "        }"
+        )
+    return aura_lines
+
+
 def _emit_branch_op(
     card: dict, eff: dict, lines: list[str], ctx: dict,
     in_then: bool, cb_state: dict, spotlight_capable: bool
@@ -8932,6 +8999,10 @@ def _emit_branch_op(
             f'Owner.Creature, {int(eff["amount"])}, '
             "applier: Owner.Creature, cardSource: this);"
         )
+    elif op == "apply_aura":
+        # Furina Stage draft 3 (2026-09-25): Hydro in a Spend mode. The same
+        # statements the top-level arm emits (`_aura_lines`).
+        lines.extend(_aura_lines(eff, ctx))
     elif op == "apply_power":
         # EB-125. Byte-for-byte the SELF arm of build_body's top-level
         # apply_power, and (the Mondstadt companion overhaul) byte-for-byte
@@ -10491,42 +10562,7 @@ def build_body(
             )
 
         elif op in ("apply_aura", "swirl"):
-            # tier0 _op_apply_aura / _op_swirl: resolve_hit with 0 damage --
-            # ElementalHit.ApplyOnly is exactly that (apply / refresh /
-            # consume+react, no damage call). Swirl IS "trigger anemo".
-            element = (ELEMENT_CS[eff["element"]] if op == "apply_aura"
-                       else "Element.Anemo")
-            tgt = eff.get("target", "enemy")
-            aura_lines: list[str] = []
-            if tgt == "enemy":
-                _target_guard(aura_lines, ctx)
-                aura_lines.append(
-                    f"await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, "
-                    f"{element}, Owner.Creature);"
-                )
-            elif tgt == "all_enemies":
-                aura_lines.append(
-                    "foreach (var auraTarget in CombatState!.HittableEnemies.ToList())\n"
-                    "        {\n"
-                    f"            await ElementalHit.ApplyOnly(choiceContext, auraTarget, "
-                    f"{element}, Owner.Creature);\n"
-                    "        }"
-                )
-            else:  # random_enemy
-                aura_lines.append(
-                    "{\n"
-                    "            var auraCandidates = CombatState!.HittableEnemies.ToList();\n"
-                    "            if (auraCandidates.Count > 0)\n"
-                    "            {\n"
-                    "                var auraTarget = Owner.RunState.Rng.CombatTargets.NextItem(auraCandidates);\n"
-                    "                if (auraTarget != null)\n"
-                    "                {\n"
-                    f"                    await ElementalHit.ApplyOnly(choiceContext, auraTarget, "
-                    f"{element}, Owner.Creature);\n"
-                    "                }\n"
-                    "            }\n"
-                    "        }"
-                )
+            aura_lines = _aura_lines(eff, ctx)
             if salon_deployed:
                 body = "\n".join(
                     "            " + statement.replace("\n", "\n    ")
@@ -13661,7 +13697,10 @@ def emit(
     applies_without_hit = not elemental
     preview_element_cs = element_cs if elemental else None
     if preview_element_cs is None:
-        elemental_effect = next((e for e in card.get("effects", [])
+        # Furina Stage draft 3 (2026-09-25): EVERYWHERE, since an aura may
+        # now sit in a mode body ("Spend 2: deal 8 and apply Hydro"), and the
+        # Hydro tip attaches wherever the keyword prints.
+        elemental_effect = next((e for e in _effects_everywhere(card)
                                  if e.get("op") in ("apply_aura", "swirl")), None)
         if elemental_effect is not None:
             preview_element_cs = (

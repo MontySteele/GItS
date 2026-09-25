@@ -137,8 +137,8 @@ public sealed class UsherMonster : StagePerformerMonster
         FurinaStageLedger.DisplayName(Performer);
 }
 
-/// <summary>Surintendante Chevalmarin. The Guest Cast plan's performer: her
-/// act and her bow both put Hydro on the board (brief sec.5.3).</summary>
+/// <summary>Surintendante Chevalmarin: 2 damage to every enemy. Since draft 3
+/// (2026-09-25) no act applies Hydro; her CARD does, on play.</summary>
 public sealed class ChevalmarinMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Chevalmarin;

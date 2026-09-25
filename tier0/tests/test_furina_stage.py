@@ -325,46 +325,42 @@ def test_a_hit_bows_after_the_hit_is_dealt(arm):
     leave = [e for e in st.log if e["event"] == "stage_leave"]
     assert leave[-1]["bowed"] is True and leave[-1]["reason"] == "hit"
     FS.settle_hit(st)
-    # 2026-09-25: his Bow is 4 Fanfare to the front performer, and on the
-    # stage he emptied that is a random performer arriving holding it.
-    assert st.player.block == 0
+    # Draft 3 (2026-09-25): his Bow is his act once more, 3 Block.
+    assert st.player.block == FS.ACT_USHER_BLOCK
     assert [e for e in st.log if e["event"] == "stage_bow"]
-    assert len(st.player.stage) == 1
-    assert st.player.stage[0][1] == FS.BOW_USHER_FANFARE
+    assert st.player.stage == []
     FS.settle_hit(st)                           # paid once, never twice
-    assert len(st.player.stage) == 1
-    assert st.player.stage[0][1] == FS.BOW_USHER_FANFARE
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_a_hit_that_empties_a_lone_usher_lands_in_full_then_he_bows(arm):
     """The overflow reaches her first, and the Bow comes after it: a 10 into a
-    lone Usher at 3 costs her 7 HP, then -- the stage he left being empty --
-    his 4 Fanfare summons a random performer holding it (2026-09-25)."""
+    lone Usher at 3 costs her 7 HP, then his Bow -- his act once more (draft
+    3, 2026-09-25) -- gives her 3 Block, which helps only against later
+    hits."""
     player = _furina(hp=78, max_hp=78)
     player.stage = [["usher", 3]]
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 10}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.hp == 78 - 7
-    assert player.block == 0
-    assert len(player.stage) == 1
-    assert player.stage[0][1] == FS.BOW_USHER_FANFARE
-    arrived = [e for e in st.log if e["event"] == "stage_summon"]
-    assert arrived and arrived[-1]["via"] == "raise"
+    assert player.block == FS.ACT_USHER_BLOCK
+    assert player.stage == []
 
 
-def test_a_hit_bow_on_the_enemys_turn_feeds_the_new_front(arm):
-    """2026-09-25, the seat's "Usher's Bow never did anything": a hit empties
-    him on the enemy's turn, he leaves, and the performer who is front NOW
-    gains his 4 Fanfare -- which does not expire the way his Block did."""
+def test_a_hit_bow_on_the_enemys_turn_gives_ushers_block_then(arm):
+    """Draft 3 (2026-09-25): a hit empties him on the enemy's turn and his Bow
+    is his act once more -- 3 Block, then, which helps only against later
+    hits that turn ([USER]: the plain exit is the minimum). The front
+    performer's bar is untouched."""
     player = _furina(hp=78, max_hp=78)
     player.stage = [["usher", 2], ["chevalmarin", 3]]
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 2}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.hp == 78
-    assert player.block == 0
-    assert player.stage == [["chevalmarin", 3 + FS.BOW_USHER_FANFARE]]
+    assert player.block == FS.ACT_USHER_BLOCK
+    assert player.stage == [["chevalmarin", 3]]
 
 
 def test_a_hit_that_empties_crabaletta_deals_her_bow(arm):
@@ -374,24 +370,27 @@ def test_a_hit_that_empties_crabaletta_deals_her_bow(arm):
         _enemy(hp=40, intents=[{"kind": "attack", "amount": 5}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.stage == []
-    assert st.enemies[0].hp == 40 - FS.BOW_CRABALETTA_DAMAGE
-    assert st.enemies[0].aura == "hydro"
+    # Draft 3: her act once more -- 5, plain damage, no Hydro.
+    assert st.enemies[0].hp == 40 - FS.ACT_CRABALETTA_DAMAGE
+    assert st.enemies[0].aura is None
 
 
-def test_a_multi_hit_attack_meets_ushers_bow_fanfare_on_the_next_hit(arm):
+def test_a_multi_hit_attack_meets_ushers_bow_block_on_the_next_hit(arm):
     """The Bow fires BETWEEN hits, as the mod's does (`AfterDamageReceived`
     runs once per hit, before the next). 3 hits of 2 into Usher at 2 with
     Crabaletta at 1 behind him and no Block: hit one empties him and his Bow
-    gives her 4 (1 -> 5), hit two takes 2 of it, hit three 2 more. Nothing
-    reaches Furina."""
+    (his act once more, draft 3) gives her 3 Block; hit two takes 2 of it;
+    hit three takes the last 1 and puts 1 through onto Crabaletta, who
+    empties and Bows for her 5. Nothing reaches Furina."""
     player = _furina(hp=78, max_hp=78)
     player.stage = [["usher", 2], ["crabaletta", 1]]
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 2, "times": 3}])])
     combat._enemy_turn(st, st.enemies[0])
-    assert player.stage == [["crabaletta", 1]]
+    assert player.stage == []
     assert player.hp == 78
     assert player.block == 0
+    assert st.enemies[0].hp == 44 - FS.ACT_CRABALETTA_DAMAGE
 
 
 def test_a_hit_killed_performer_returns_with_a_five_century_act(arm):
@@ -401,11 +400,11 @@ def test_a_hit_killed_performer_returns_with_a_five_century_act(arm):
     st = _state(player=player, enemies=[
         _enemy(hp=44, intents=[{"kind": "attack", "amount": 3}])])
     combat._enemy_turn(st, st.enemies[0])
-    # The order inside a Bow is effect, readers, arrival: his 4 lands on
-    # Crabaletta (front once he has left), THEN he returns at the back.
-    assert player.stage == [["crabaletta", 5 + FS.BOW_USHER_FANFARE],
+    # The order inside a Bow is act, readers, arrival: his 3 Block, THEN he
+    # returns at the back.
+    assert player.stage == [["crabaletta", 5],
                             ["usher", FS.SUMMON_FANFARE]]
-    assert player.block == 0
+    assert player.block == FS.ACT_USHER_BLOCK
 
 
 def _applause_state(stage):
@@ -421,20 +420,21 @@ def _applause_state(stage):
 
 def test_thunderous_applause_reads_a_hits_bow(arm):
     """Draws 1, and the Raise lands on the back performer. Usher's own Bow
-    (2026-09-25) comes first -- effect, then readers -- so on a stage he
-    empties his 4 is the summon and the applause's 2 lands on it."""
+    comes first -- act, then readers -- so his 3 Block lands, and on the stage
+    he empties the applause's 2 is a random performer arriving holding it."""
     st = _applause_state([["usher", 3], ["crabaletta", 1]])
     hand = len(st.player.hand)
     combat._enemy_turn(st, st.enemies[0])
     assert len(st.player.hand) == hand + 1
-    assert st.player.stage == [["crabaletta", 1 + FS.BOW_USHER_FANFARE + 2]]
+    assert st.player.stage == [["crabaletta", 1 + 2]]
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
     empty = _applause_state([["usher", 3]])
     hand = len(empty.player.hand)
     combat._enemy_turn(empty, empty.enemies[0])
     assert len(empty.player.hand) == hand + 1
     assert len(empty.player.stage) == 1
-    assert empty.player.stage[0][1] == FS.BOW_USHER_FANFARE + 2
+    assert empty.player.stage[0][1] == 2
 
 
 def test_the_hit_that_kills_furina_earns_no_bow(arm):
@@ -460,11 +460,10 @@ def test_the_hit_loop_spends_block_then_the_lead_then_her(arm):
                                 intents=[{"kind": "attack", "amount": 12}])])
     combat._enemy_turn(st, st.enemies[0])
     assert player.hp == 78          # 9 of the 12 ate the Block, 3 emptied Usher
-    assert player.block == 0        # and nothing reached her
-    # Then his Bow, after the hit (rule 7, 2026-09-25): his 4 Fanfare on the
-    # empty stage he left is a random performer arriving holding it.
-    assert len(player.stage) == 1
-    assert player.stage[0][1] == FS.BOW_USHER_FANFARE
+    # and nothing reached her. Then his Bow, after the hit (rule 7): his act
+    # once more, 3 Block (draft 3, 2026-09-25).
+    assert player.block == FS.ACT_USHER_BLOCK
+    assert player.stage == []
 
 
 # ---------------------------------------------------------------------------
@@ -495,9 +494,9 @@ def test_a_back_performer_emptied_exactly_takes_its_bow(arm):
     st = _state()
     st.player.stage = [["chevalmarin", 5], ["usher", 3]]
     assert FS.spend(st, 3) == 3
-    # A Spend-bow on her turn: his 4 goes to the front performer.
-    assert st.player.stage == [["chevalmarin", 5 + FS.BOW_USHER_FANFARE]]
-    assert st.player.block == 0
+    # A Spend-bow on her turn: his act once more, 3 Block.
+    assert st.player.stage == [["chevalmarin", 5]]
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_with_no_performer_the_rider_cannot_fire(arm):
@@ -506,34 +505,67 @@ def test_with_no_performer_the_rider_cannot_fire(arm):
     assert FS.spend(st, 3) == 0
 
 
-def test_each_bow_is_the_briefs_own(arm):
+def test_each_bow_is_the_performers_act_once_more(arm):
+    """Draft 3 (2026-09-25; the Stage review's pick 1): a Bow is the act, one
+    more time. Usher 3 Block, Chevalmarin 2 to every enemy, Crabaletta 5 to a
+    random enemy -- and no Hydro from any of them."""
     usher = _state()
     usher.player.stage = [["usher", 1]]
     FS.spend(usher, 1)
-    assert usher.player.block == 0
-    assert len(usher.player.stage) == 1      # the empty stage summons
-    assert usher.player.stage[0][1] == FS.BOW_USHER_FANFARE
+    assert usher.player.block == FS.ACT_USHER_BLOCK
+    assert usher.player.stage == []          # no summon: the Bow is Block
 
     crab = _state(enemies=[_enemy(hp=40)])
     crab.player.stage = [["crabaletta", 1]]
     FS.spend(crab, 1)
-    assert crab.enemies[0].hp == 40 - FS.BOW_CRABALETTA_DAMAGE
+    assert crab.enemies[0].hp == 40 - FS.ACT_CRABALETTA_DAMAGE
+    assert crab.enemies[0].aura is None
 
     chev = _state(enemies=[_enemy(hp=40), _enemy(hp=40, name="paper2")])
     chev.player.stage = [["chevalmarin", 1]]
     FS.spend(chev, 1)
-    assert all(e.aura == "hydro" for e in chev.enemies)
-    assert all(e.hp == 40 for e in chev.enemies)   # the bow carries no damage
+    assert all(e.aura is None for e in chev.enemies)
+    assert all(e.hp == 40 - FS.ACT_CHEVALMARIN_DAMAGE for e in chev.enemies)
+
+
+@pytest.mark.parametrize("choice", ["ousia", "pneuma"])
+def test_arkhe_alignment_doubles_a_bow_like_any_act(arm, choice):
+    """ONE act: Ousia doubles its damage, Pneuma its Block."""
+    usher = _state()
+    usher.player.stage = [["usher", 1]]
+    crab = _state(enemies=[_enemy(hp=40)])
+    crab.player.stage = [["crabaletta", 1]]
+    for st in (usher, crab):
+        if choice == "ousia":
+            st.player.stage_act_damage_mult = 2
+        else:
+            st.player.stage_act_block_mult = 2
+        FS.spend(st, 1)
+    if choice == "ousia":
+        assert usher.player.block == FS.ACT_USHER_BLOCK
+        assert crab.enemies[0].hp == 40 - 2 * FS.ACT_CRABALETTA_DAMAGE
+    else:
+        assert usher.player.block == 2 * FS.ACT_USHER_BLOCK
+        assert crab.enemies[0].hp == 40 - FS.ACT_CRABALETTA_DAMAGE
+
+
+def test_full_house_does_not_repeat_a_bow(arm):
+    """Full House repeats the END-OF-TURN acts only; a Bow is one act."""
+    st = _state()
+    st.player.powers[FS.FULL_HOUSE] = 1
+    st.player.stage = [["chevalmarin", 4], ["crabaletta", 4], ["usher", 1]]
+    FS.spend(st, 1)
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_final_bow_takes_the_bar_and_the_bow(arm):
     st = _state()
     st.player.stage = [["usher", 6]]
     assert FS.final_bow(st) == 6
-    # His Bow's 4 Fanfare on the stage he emptied: a random arrival at 4.
-    assert len(st.player.stage) == 1
-    assert st.player.stage[0][1] == FS.BOW_USHER_FANFARE
-    assert st.player.block == 0
+    # His Bow is his act once more: 3 Block (the card's own Block is its
+    # next clause, not this call's).
+    assert st.player.stage == []
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_final_bow_takes_the_back_performer_and_leaves_the_shield(arm):
@@ -541,8 +573,8 @@ def test_final_bow_takes_the_back_performer_and_leaves_the_shield(arm):
     st = _state()
     st.player.stage = [["chevalmarin", 2], ["usher", 6]]
     assert FS.final_bow(st) == 6
-    assert st.player.stage == [["chevalmarin", 2 + FS.BOW_USHER_FANFARE]]
-    assert st.player.block == 0
+    assert st.player.stage == [["chevalmarin", 2]]
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_the_rare_spends_the_whole_stage_bows_and_returns_it_at_one(arm):
@@ -552,14 +584,13 @@ def test_the_rare_spends_the_whole_stage_bows_and_returns_it_at_one(arm):
     assert FS.collect_all(st) == 10
     assert st.player.stage == []
     FS.bow_and_return(st)
-    # The bows land on the stage the card emptied, so Usher's 4 Fanfare is a
-    # random performer arriving holding it -- Crabaletta here, who is then
-    # already back and does not return twice; the other two fill the empty
-    # seats in order (2026-09-25).
-    assert st.player.stage == [["crabaletta", FS.BOW_USHER_FANFARE],
-                               ["usher", 1], ["chevalmarin", 1]]
-    assert st.player.block == 0
-    assert st.enemies[0].hp == 60 - FS.BOW_CRABALETTA_DAMAGE
+    # Every performer Bows -- its act once more (draft 3) -- then all three
+    # return at 1 in seat order.
+    assert st.player.stage == [["usher", 1], ["chevalmarin", 1],
+                               ["crabaletta", 1]]
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.enemies[0].hp == (60 - FS.ACT_CHEVALMARIN_DAMAGE
+                                - FS.ACT_CRABALETTA_DAMAGE)
 
 
 class _Picks(random.Random):
@@ -576,10 +607,12 @@ class _Picks(random.Random):
 @pytest.mark.parametrize("pick", FS.PERFORMERS)
 @pytest.mark.parametrize("applause", [False, True])
 def test_the_rare_never_leaves_two_of_one_performer(arm, pick, applause):
-    """2026-09-25: Usher's Bow summons a random performer onto the stage the
-    card emptied. Whoever it picks is already back, so that member of the
-    company does not return a second time; the others take the empty seats.
-    Every pick, with and without Thunderous Applause."""
+    """2026-09-25: a Thunderous Applause Raise summons a random performer
+    onto the stage the card emptied. Whoever it picks is already back, so
+    that member of the company does not return a second time; the others
+    take the empty seats. Without the applause nothing summons (Usher's Bow
+    is Block since draft 3) and the company returns in seat order. Every
+    pick."""
     st = _state(enemies=[_enemy(hp=200)])
     st.rng = _Picks(pick)
     st.player.draw_pile = [_card(cid=str(i)) for i in range(5)]
@@ -592,6 +625,9 @@ def test_the_rare_never_leaves_two_of_one_performer(arm, pick, applause):
     FS.bow_and_return(st)
     members = [m for m, _f in st.player.stage]
     assert len(members) == len(set(members)) == FS.SEATS
+    if not applause:
+        assert members == ["usher", "chevalmarin", "crabaletta"]
+        return
     assert members[0] == pick
     assert members[1:] == [m for m in ("usher", "chevalmarin", "crabaletta")
                            if m != pick][:2]
@@ -623,7 +659,8 @@ def test_every_performer_acts_at_the_end_of_her_turn_from_any_seat(arm):
     assert st.player.block == FS.ACT_USHER_BLOCK
     assert st.enemies[0].hp == (60 - FS.ACT_CRABALETTA_DAMAGE
                                 - FS.ACT_CHEVALMARIN_DAMAGE)
-    assert st.enemies[0].aura == "hydro"
+    # Draft 3 (2026-09-25): no act applies Hydro.
+    assert st.enemies[0].aura is None
 
 
 def test_an_act_does_not_read_the_bar(arm):
@@ -839,13 +876,13 @@ def test_the_rare_deals_what_it_spent_to_every_enemy(arm):
         {"op": "damage", "target": "all_enemies",
          "amount_formula": {"base": 0, "per": 2, "count": "stage_spent"}},
         {"op": "stage_curtain_call"}]))
-    # Twice the 9 to both (2026-09-25), then Crabaletta's bow-8 to one of them.
+    # Twice the 9 to both (2026-09-25), then Crabaletta's Bow -- her act once
+    # more, 5 -- to one of them (draft 3).
     assert sorted(e.hp for e in st.enemies) == [
-        60 - 18 - FS.BOW_CRABALETTA_DAMAGE, 60 - 18]
-    # Usher's bow lands on the stage the card emptied, so it summons a random
-    # performer at 4, and the two return behind it.
-    assert st.player.stage[0][1] == FS.BOW_USHER_FANFARE
-    assert st.player.stage[1:] == [["usher", 1], ["crabaletta", 1]]
+        60 - 18 - FS.ACT_CRABALETTA_DAMAGE, 60 - 18]
+    # Usher's Bow is 3 Block; both return at 1 in seat order.
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.player.stage == [["usher", 1], ["crabaletta", 1]]
 
 
 # ---------------------------------------------------------------------------
@@ -959,13 +996,11 @@ def test_fight_one_turn_one_line_a_is_the_briefs_row(arm):
 
 def test_fight_one_turn_one_line_b_is_the_wager(arm, monkeypatch):
     """Line B: Presence, Curtain Rise with Spend 3 (Usher 3 to 0, bows),
-    Solicitation. Damage 19, Nibbit at 25, Furina at 76 -- the 2 HP the wager
-    costs.
+    Solicitation. Damage 19, Nibbit at 25.
 
-    2026-09-25: his Bow is no longer 4 Block but 4 Fanfare to the front
-    performer, and the stage he empties summons a random performer holding
-    it. So the Block is 6, not the brief's 10, and the 4 sits on the arrival
-    instead -- which eats 4 of the 6 that pass her Block, leaving the same 2.
+    Draft 3 (2026-09-25): his Bow is his act once more, 3 Block, so the Block
+    is 9 rather than the brief's 10, and the Butt's 12 puts 3 through to her
+    (Furina at 75) where the brief's 4-Block Bow let 2 through.
 
     `EB-746`: THE CARD IS PLAYED AND THE MODE IS THE SCRIPT'S. Spend is a
     choice now, so a replay of the brief's own table has to make the brief's
@@ -979,20 +1014,19 @@ def test_fight_one_turn_one_line_b_is_the_wager(arm, monkeypatch):
     effects.resolve_card(st, _curtain_rise())              # Curtain Rise
     effects.deal_damage_to_enemy(st, st.enemies[0], 6)     # Solicitation
 
-    assert st.player.block == 6
+    assert st.player.block == 6 + FS.ACT_USHER_BLOCK
     assert st.enemies[0].hp == 25
-    assert len(FS.stage(st.player)) == 1
-    assert FS.stage(st.player)[0][1] == FS.BOW_USHER_FANFARE
+    assert FS.stage(st.player) == []
 
     combat._enemy_turn(st, st.enemies[0])                # Butt 12
-    assert st.player.hp == 76
+    assert st.player.hp == 75
 
 
 def test_fight_one_turn_one_line_c_ends_in_ushers_bow(arm):
     """Line C, the line sec.7 says a player takes who has not yet seen that
     Usher dies either way: Curtain Rise UNSPENT for 7, Usher performs, and the
     3 that survives her Block empties him. Since 2026-09-25 (rule 7) he Bows
-    after that hit: she gains his 4 Block.
+    after that hit: his act once more (draft 3), 3 Block.
 
     `EB-746` FIXED A NUMBER HERE, and it is a defect this row exposed rather
     than a rule it moved. While Spend was a rider the engine fired, the card
@@ -1017,10 +1051,8 @@ def test_fight_one_turn_one_line_c_ends_in_ushers_bow(arm):
     combat._enemy_turn(st, st.enemies[0])
     assert st.player.hp == 78
     assert [e for e in st.log if e["event"] == "stage_bow"]
-    # His Bow's 4 Fanfare, on the stage he left empty: a random arrival.
-    assert len(FS.stage(st.player)) == 1
-    assert FS.stage(st.player)[0][1] == FS.BOW_USHER_FANFARE
-    assert st.player.block == 0
+    assert FS.stage(st.player) == []
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_fight_one_runs_to_the_curtain_on_line_a_and_the_refill_line(arm):
@@ -1128,8 +1160,8 @@ def test_bravura_spends_the_whole_back_bar_and_bows(arm):
         {"op": "damage", "target": "enemy",
          "amount_formula": {"base": 0, "per": 3, "count": "stage_spent"}}]))
     assert st.enemies[0].hp == 99 - 18
-    assert st.player.stage == [["chevalmarin", 4 + FS.BOW_USHER_FANFARE]]
-    assert st.player.block == 0
+    assert st.player.stage == [["chevalmarin", 4]]
+    assert st.player.block == FS.ACT_USHER_BLOCK
     empty = _state()
     assert FS.spend_all_of_back(empty) == 0
 
@@ -1177,8 +1209,9 @@ def test_thunderous_applause_draws_and_raises_after_the_bow(arm):
     st.player.stage = [["chevalmarin", 4], ["usher", 3]]
     FS.spend(st, 3)                       # Usher emptied exactly: a Bow
     assert len(st.player.hand) == 1
-    # His own 4 first (the effect), then the applause's 2 (the reader).
-    assert st.player.stage == [["chevalmarin", 4 + FS.BOW_USHER_FANFARE + 2]]
+    # His act first (3 Block), then the applause's 2 (the reader).
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.player.stage == [["chevalmarin", 4 + 2]]
 
 
 def test_thunderous_applause_on_the_stage_a_bow_emptied_summons(arm):
@@ -1190,8 +1223,7 @@ def test_thunderous_applause_on_the_stage_a_bow_emptied_summons(arm):
     effects.resolve_card(st, _card(type="power", effects=[
         {"op": "apply_power", "power": FS.THUNDEROUS_APPLAUSE, "amount": 2,
          "target": "self"}]))
-    # Chevalmarin, whose bow raises nothing: Usher's own bow would summon
-    # first (2026-09-25) and hide the applause's.
+    # No Bow raises anything since draft 3: the summon is the applause's.
     st.player.stage = [["chevalmarin", 3]]
     FS.spend(st, 3)
     assert len(st.player.hand) == 1
@@ -1211,9 +1243,9 @@ def test_the_rares_curtain_call_with_applause_returns_only_to_empty_seats(arm):
     FS.collect_all(st)
     FS.bow_and_return(st)
     assert len(st.player.stage) == FS.SEATS
-    # Usher's bow summons at 4 (2026-09-25), and the performer holds all three
-    # bows' applause on top (2 + 2 + 2).
-    assert st.player.stage[0][1] == FS.BOW_USHER_FANFARE + 6
+    # The first bow's applause summons onto the emptied stage at 2, and the
+    # next two bows' applause lands on it too (2 + 2 + 2).
+    assert st.player.stage[0][1] == 6
     assert [f for _m, f in st.player.stage[1:]] == [1, 1]
 
 
@@ -1222,8 +1254,8 @@ def test_a_five_century_act_returns_the_performer_to_rest(arm):
     st.player.powers[FS.FIVE_CENTURY_ACT] = 1
     st.player.stage = [["chevalmarin", 4], ["usher", 3]]
     FS.spend(st, 3)
-    # Effect, then arrival: his 4 on Chevalmarin, then he returns at the back.
-    assert st.player.stage == [["chevalmarin", 4 + FS.BOW_USHER_FANFARE],
+    # Act, then arrival: his 3 Block, then he returns at the back.
+    assert st.player.stage == [["chevalmarin", 4],
                                ["usher", FS.SUMMON_FANFARE]]
     block = st.player.block
     FS.end_of_turn_acts(st)
@@ -1237,10 +1269,9 @@ def test_a_five_century_act_does_not_double_the_rares_return(arm):
     st.player.stage = [["usher", 5], ["crabaletta", 2]]
     FS.collect_all(st)
     FS.bow_and_return(st)
-    # Usher's bow summons a random performer at 4 on the emptied stage; the
-    # card's own return brings the two back once, and the Act adds nobody.
-    assert st.player.stage[0][1] == FS.BOW_USHER_FANFARE
-    assert st.player.stage[1:] == [["usher", 1], ["crabaletta", 1]]
+    # The card's own return brings the two back once, and the Act adds
+    # nobody.
+    assert st.player.stage == [["usher", 1], ["crabaletta", 1]]
 
 
 def test_a_rapt_audience_banks_half_of_what_the_lead_lost(arm):
@@ -1358,13 +1389,12 @@ def _random_summon(times=1):
 
 def test_a_random_summon_on_a_full_stage_bows_the_lead_to_the_back(arm):
     """The lead's Bow fires, the other two step forward, and the lead comes
-    back to the back seat with the bar it left with. Usher's Bow (2026-09-25)
-    is 4 Fanfare to the NEW front -- the old middle, Chevalmarin -- before he
-    arrives at the back."""
+    back to the back seat with the bar it left with. Usher's Bow is his act
+    once more (draft 3): 3 Block, before he arrives at the back."""
     st = _full_stage()
     effects.resolve_card(st, _random_summon())
-    assert st.player.block == 0
-    assert st.player.stage == [["chevalmarin", 2 + FS.BOW_USHER_FANFARE],
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.player.stage == [["chevalmarin", 2],
                                ["crabaletta", 4], ["usher", 5]]
     leave = [e for e in st.log if e["event"] == "stage_leave"]
     assert leave and leave[0]["bowed"] is True
@@ -1391,10 +1421,11 @@ def test_double_casting_on_a_full_stage_bows_twice(arm):
     effects.resolve_card(st, _random_summon(times=2))
     bows = [e["member"] for e in st.log if e["event"] == "stage_bow"]
     assert bows == ["usher", "chevalmarin"]
-    assert st.player.block == 0
+    assert st.player.block == FS.ACT_USHER_BLOCK
     assert st.player.stage == [["crabaletta", 4], ["usher", 5],
-                               ["chevalmarin", 2 + FS.BOW_USHER_FANFARE]]
-    assert st.enemies[0].hp == hp          # Chevalmarin's bow is Hydro only
+                               ["chevalmarin", 2]]
+    # Chevalmarin's Bow is her act once more: 2 to every enemy.
+    assert st.enemies[0].hp == hp - FS.ACT_CHEVALMARIN_DAMAGE
 
 
 def test_the_double_casting_row_is_two_random_summons():
@@ -1409,7 +1440,7 @@ def test_a_five_century_act_does_not_return_the_recast_performer_twice(arm):
     st = _full_stage()
     st.player.powers[FS.FIVE_CENTURY_ACT] = 1
     effects.resolve_card(st, _random_summon())
-    assert st.player.stage == [["chevalmarin", 2 + FS.BOW_USHER_FANFARE],
+    assert st.player.stage == [["chevalmarin", 2],
                                ["crabaletta", 4], ["usher", 5]]
     assert st.player.stage_resting == []
     assert not [e for e in st.log if e["event"] == "stage_return"]
@@ -1426,8 +1457,9 @@ def test_thunderous_applause_fires_on_the_recast_bow_before_the_arrival(arm):
          "target": "self"}]))
     effects.resolve_card(st, _random_summon())
     assert len(st.player.hand) == 1
-    # Usher's own 4 on the new front first, then the applause's 2 on the back.
-    assert st.player.stage == [["chevalmarin", 2 + FS.BOW_USHER_FANFARE],
+    # Usher's own act first (3 Block), then the applause's 2 on the back.
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.player.stage == [["chevalmarin", 2],
                                ["crabaletta", 6], ["usher", 5]]
 
 
@@ -1440,3 +1472,120 @@ def test_a_named_summon_on_a_full_stage_still_raises_instead(arm):
     assert st.player.stage == [["usher", 8], ["chevalmarin", 2],
                                ["crabaletta", 4]]
     assert st.player.block == 0
+
+
+# ---------------------------------------------------------------------------
+# DRAFT 3 (2026-09-25): NO HYDRO FROM THE ACTS, AND THE APPLAUSE FADES.
+#
+# [USER]: "removing the Hydro application from the end-of-turn effects on
+# Chevalmarin and Crabaletta", and a fade that does not punish building up
+# ("taking away half from the back means it's hard to build up fanfare").
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("member", ["chevalmarin", "crabaletta"])
+def test_no_act_applies_hydro_or_reacts(arm, member):
+    """Plain damage: no aura set, and an aura already there is not consumed."""
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [[member, 3]]
+    FS.perform(st, member)
+    assert st.enemies[0].aura is None
+    primed = _state(enemies=[_enemy(hp=60)])
+    primed.enemies[0].aura = "electro"
+    primed.player.stage = [[member, 3]]
+    FS.perform(primed, member)
+    assert primed.enemies[0].aura == "electro"
+
+
+@pytest.mark.parametrize("before,after", [(1, 1), (5, 5), (6, 6), (7, 6),
+                                          (9, 7), (15, 10), (25, 15)])
+def test_the_fade_table(before, after):
+    assert before - FS.fade_loss(before) == after
+
+
+def test_the_fade_takes_the_middle_and_back_never_the_front(arm):
+    st = _state(enemies=[_enemy(hp=200)])
+    st.player.stage = [["usher", 25], ["chevalmarin", 9], ["crabaletta", 15]]
+    FS.end_of_turn_acts(st)
+    assert st.player.stage == [["usher", 25], ["chevalmarin", 7],
+                               ["crabaletta", 10]]
+    fades = [(e["member"], e["before"], e["fanfare"]) for e in st.log
+             if e["event"] == "stage_fade"]
+    assert fades == [("chevalmarin", 9, 7), ("crabaletta", 15, 10)]
+
+
+def test_a_lone_performer_is_the_front_and_does_not_fade(arm):
+    st = _state()
+    st.player.stage = [["crabaletta", 25]]
+    FS.end_of_turn_acts(st)
+    assert st.player.stage == [["crabaletta", 25]]
+
+
+def test_the_fade_never_empties_never_goes_below_the_threshold_never_bows(arm):
+    st = _state(enemies=[_enemy(hp=200)])
+    st.player.stage = [["usher", 1], ["chevalmarin", 1], ["crabaletta", 6]]
+    for _ in range(5):
+        FS.end_of_turn_acts(st)
+    assert [f for _m, f in st.player.stage] == [1, 1, 6]
+    assert not [e for e in st.log if e["event"] in ("stage_bow", "stage_fade")]
+    for bar in range(0, 40):
+        assert bar - FS.fade_loss(bar) >= min(bar, FS.FADE_THRESHOLD)
+
+
+def test_the_fade_runs_after_the_acts(arm):
+    """Every act fires before any bar fades, so the log's last beats are the
+    fades."""
+    st = _state(enemies=[_enemy(hp=200)])
+    st.player.stage = [["usher", 3], ["crabaletta", 9]]
+    FS.end_of_turn_acts(st)
+    events = [e["event"] for e in st.log
+              if e["event"] in ("stage_act", "stage_fade")]
+    assert events == ["stage_act", "stage_act", "stage_fade"]
+
+
+def _row(cid):
+    return loader.get_card(cid)
+
+
+def _play_mode(st, card, index, monkeypatch):
+    monkeypatch.setattr(FS, "spend_mode_index", lambda state, modes: index)
+    effects.resolve_card(st, card)
+
+
+def test_tidal_flourish_applies_hydro_to_all_in_its_spend_mode(arm,
+                                                               monkeypatch):
+    card = _row("proto_fs_tidal_flourish")
+    base = _state(enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
+    _play_mode(base, card, 0, monkeypatch)
+    assert all(e.aura is None for e in base.enemies)
+    spent = _state(enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
+    spent.player.stage = [["usher", 5]]
+    _play_mode(spent, card, 1, monkeypatch)
+    assert all(e.hp == 60 - 9 for e in spent.enemies)
+    assert all(e.aura == "hydro" for e in spent.enemies)
+
+
+def test_quick_cue_applies_hydro_after_the_damage_in_its_spend_mode(
+        arm, monkeypatch):
+    card = _row("proto_fs_quick_cue")
+    spent = _state(enemies=[_enemy(hp=60)])
+    spent.player.stage = [["usher", 5]]
+    _play_mode(spent, card, 1, monkeypatch)
+    assert spent.enemies[0].hp == 60 - 8
+    assert spent.enemies[0].aura == "hydro"
+    # AFTER the damage: into an Electro aura the 8 lands plain, then the
+    # Hydro reacts with what is there.
+    primed = _state(enemies=[_enemy(hp=60)])
+    primed.enemies[0].aura = "electro"
+    primed.player.stage = [["usher", 5]]
+    _play_mode(primed, card, 1, monkeypatch)
+    assert primed.enemies[0].aura != "electro"
+    base = _state(enemies=[_enemy(hp=60)])
+    _play_mode(base, card, 0, monkeypatch)
+    assert base.enemies[0].aura is None
+
+
+def test_chevalmarins_card_applies_hydro_to_all_on_play(arm):
+    st = _state(enemies=[_enemy(hp=60), _enemy(hp=60, name="paper2")])
+    effects.resolve_card(st, _row("proto_fs_surintendante_chevalmarin"))
+    assert all(e.aura == "hydro" for e in st.enemies)
+    assert [m for m, _f in st.player.stage] == ["chevalmarin"]

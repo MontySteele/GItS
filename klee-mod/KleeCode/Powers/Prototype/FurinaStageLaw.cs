@@ -60,24 +60,37 @@ public static class FurinaStageLaw
     /// <c>furina_stage.ACT_USHER_BLOCK</c>.</summary>
     public const int ActUsherBlock = 3;
 
-    /// <summary>Chevalmarin's act: damage to EVERY enemy, and Hydro with it.
-    /// Mirrors <c>furina_stage.ACT_CHEVALMARIN_DAMAGE</c>.</summary>
+    /// <summary>Chevalmarin's act: plain damage to EVERY enemy. No Hydro
+    /// since draft 3 (2026-09-25): no act applies an element. Mirrors
+    /// <c>furina_stage.ACT_CHEVALMARIN_DAMAGE</c>.</summary>
     public const int ActChevalmarinDamage = 2;
 
-    /// <summary>Crabaletta's act: damage to a random enemy. Mirrors
+    /// <summary>Crabaletta's act: plain damage to a random enemy. Mirrors
     /// <c>furina_stage.ACT_CRABALETTA_DAMAGE</c>.</summary>
     public const int ActCrabalettaDamage = 5;
 
-    /// <summary>Usher's bow: Fanfare to the FRONT performer, once, when his
-    /// bar runs out (sec.3 rule 9) -- a Raise, so on the stage he left empty a
-    /// random performer arrives holding it. It was 4 Block to Furina until
-    /// 2026-09-25, when a hit made him bow on the enemy's turn and the Block
-    /// expired unused. Mirrors <c>furina_stage.BOW_USHER_FANFARE</c>.</summary>
-    public const int BowUsherFanfare = 4;
+    // RULE 9, THE BOW, HAS NO NUMBERS OF ITS OWN since draft 3 (2026-09-25,
+    // the Stage review's pick 1): a performer that Bows performs its own act
+    // one more time as it leaves (FurinaStage.Bow). The two bow constants
+    // (Usher's Fanfare, Crabaletta's 8) went with the separate Bow effects.
 
-    /// <summary>Crabaletta's bow: damage to a random enemy. Chevalmarin's bow
-    /// is Hydro on every enemy and carries no number, which is why there are
-    /// two bow constants and not three. Mirrors
-    /// <c>furina_stage.BOW_CRABALETTA_DAMAGE</c>.</summary>
-    public const int BowCrabalettaDamage = 8;
+    /// <summary>
+    /// RULE 12, THE APPLAUSE FADES (draft 3, 2026-09-25). At the end of
+    /// Furina's turn, after the acts, each performer BEHIND THE FRONT loses
+    /// half of its Fanfare above this, rounded down (<see cref="FadeLoss"/>).
+    /// The front never fades. The knob seat rounds tune. Mirrors
+    /// <c>furina_stage.FADE_THRESHOLD</c>.
+    /// </summary>
+    public const int FadeThreshold = 5;
+
+    /// <summary>
+    /// Rule 12's arithmetic, ONE function so the threshold and the halving
+    /// are tuned in one place: half of the Fanfare above
+    /// <see cref="FadeThreshold"/>, rounded down. 5 -> 0, 6 -> 0, 7 -> 1,
+    /// 9 -> 2, 15 -> 5, 25 -> 10. It never takes a bar below the threshold,
+    /// so it never empties a performer. Mirrors
+    /// <c>furina_stage.fade_loss</c>.
+    /// </summary>
+    public static int FadeLoss(int fanfare) =>
+        fanfare <= FadeThreshold ? 0 : (fanfare - FadeThreshold) / 2;
 }
