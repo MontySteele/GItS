@@ -45,7 +45,7 @@ public sealed class ProtoFsImprovisedNumber : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Improvised Number"),
-        ("description", "Deal {Damage:diff()} damage. If the stage is empty, summon a random performer."),
+        ("description", "Deal {Damage:diff()} damage. If no one is on stage, Summon a random performer."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -407,9 +407,8 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT", "KLEEMOD-ARM_COVEN_SPARK",
                     # (`Encore` was the sixth until R276's hygiene: no card
                     # attached its tip, so the body and its key left.)
                     # A Stage round-three defect: WHICH BAR a reader's number
-                    # is. The four readers multiply a LIVE bar; the faces
-                    # print the rule and, in combat only, the number, and this
-                    # tip names the seat the number is read off.
+                    # is. Since the text pass only the Rare carries it: the
+                    # other readers' faces name the seat outright.
                     "KLEEMOD-ARM_STAGE_READER",
                     # 2026-09-25: what a summon does and what each performer
                     # does. Faces print these words UNGOLDED ("Summon
@@ -698,27 +697,22 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # fires whenever a lead stands. R276 picks 1 and 2: the BACK
             # performer pays, in full or not at all, and an exact emptying
             # bows.
-            "Chosen on play. The [gold]back performer[/gold] pays the full ",
-            "price or you can't choose it. Emptied exactly, it takes a ",
-            "A performer's own bar. Attacks hit your [gold]Block[/gold], then ",
-            "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.",
-            # Round four: generic on WHERE, and the empty-stage summon.
-            "Adds [gold]Fanfare[/gold] where the card says, else to the ",
-            "[gold]back performer[/gold]. On an empty stage, a random ",
-            "performer arrives holding it instead.",
-            # `EB-744`: the "only" was false on the faces printing it --
-            # Final Bow's whole card is a bow bought with a card and an
-            # Exhaust -- so the row states the CONTRAST instead.
-            "A departure effect a [gold]Spend[/gold] earns and a hit does ",
-            # R276: the front seat is the SHIELD, the back seat the BANK.
-            "The front seat, the shield: attacks reach it, and only it ",
-            # `EB-744`: rule 6 is per ATTACK, so a flurry reaches the
-            # reserve once the front seat empties. Round four: the sentence
-            # says plainly where hits go.
-            "The back seat, the bank: Raise fills it, Spend draws from it. ",
-            "Hits go to the lead first and reach it once every seat ahead is ",
-            "Seats change order and every bar comes with them. Nobody leaves ",
-            "and nobody takes a [gold]Bow[/gold].",
+            # THE TEXT PASS (2026-09-25,
+            # review/records/furina-text-pass-2026-09-25.md): `Raise` and
+            # `Rotate` retired, the lead renamed the FRONT performer, and
+            # every Stage tip reworded in [USER]'s words.
+            "Pay Fanfare from your [gold]back performer[/gold]. Offered only ",
+            "if it can pay in full. If that empties it exactly, it ",
+            "A performer's health. Hits take your [gold]Block[/gold], then ",
+            "the front performer's, then you. Gained on an empty stage, it ",
+            "summons a performer.",
+            # `EB-744`: the CONTRAST -- a Spend earns a Bow, a hit does not.
+            "A performer's parting effect, shown on each performer. Spending ",
+            "its last Fanfare triggers it; losing it to a hit doesn't.",
+            "Takes hits first. Regains ",
+            " [gold]Fanfare[/gold] at the start of your turn.",
+            # Round four's empty-stage summon is the Fanfare tip's (above).
+            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last.",
     ):
         assert clause in tips, clause
 
@@ -1372,14 +1366,21 @@ def test_the_card_that_doubles_a_carry_out_says_it_counts_twice():
 # one-line statement of which seat the number is read off, without the
 # off-board disclaimer it carried while the face printed 0.
 
-#: Each reader, the bar its number is, and the sentence it owes.
+#: Each reader, the bar its number is, and the sentence it owes. THE TEXT
+#: PASS (2026-09-25) deleted the tip "wherever the face now names the
+#: performer": Ousia Surge, Pneuma Refrain and Final Bow print "your back
+#: performer's" / "your front performer's", and only the Rare -- "all your
+#: performers' Fanfare" -- keeps its sentence.
 STAGE_READERS = {
-    # R276 pick 2: the bank reader and the shield reader swapped seats.
-    "proto_fs_ousia_surge": ("Back", "ProtoFsOusiaSurge"),
-    "proto_fs_pneuma_refrain": ("Lead", "ProtoFsPneumaRefrain"),
-    "proto_fs_final_bow": ("SpendBack", "ProtoFsFinalBow"),
     "proto_fs_let_the_people_rejoice": ("SpendAll",
                                         "ProtoFsLetThePeopleRejoice"),
+}
+
+#: The three readers whose face names the seat, and so carry no reader tip.
+STAGE_READERS_NAMED_ON_THE_FACE = {
+    "proto_fs_ousia_surge": "ProtoFsOusiaSurge",
+    "proto_fs_pneuma_refrain": "ProtoFsPneumaRefrain",
+    "proto_fs_final_bow": "ProtoFsFinalBow",
 }
 
 
@@ -1408,19 +1409,30 @@ def test_every_reader_carries_the_rule_its_number_obeys(rid):
             f"ArmKeywordTips.StageReader.{source})") in src
 
 
+@pytest.mark.parametrize("rid", sorted(STAGE_READERS_NAMED_ON_THE_FACE))
+def test_a_reader_whose_face_names_the_seat_carries_no_reader_tip(rid):
+    """The text pass: the face says "your back performer's" or "your front
+    performer's", so a tip restating which bar it is would be noise."""
+    cls = STAGE_READERS_NAMED_ON_THE_FACE[rid]
+    src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
+    assert "ForStageReader" not in src
+    row = {r["id"]: r for r in proto._rows()}[rid]
+    assert ("[gold]back performer[/gold]" in row["description"]
+            or "[gold]front performer[/gold]" in row["description"])
+
+
 def test_the_readers_tip_states_each_rule():
     """The rule, on every screen. The off-board disclaimer ("the number above
     reads 0") left with R276: the faces print the rule outside combat now, so
     the sentence would be false everywhere."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert 'const string ReaderKey = "KLEEMOD-ARM_STAGE_READER";' in tips
-    # The four rules, each read off its own reader's code.
-    assert "The number is the [gold]lead performer[/gold]'s " in tips
-    assert "The number is the [gold]back performer[/gold]'s " in tips
-    assert ("[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends."
-            in tips)
+    # The one rule left (the text pass deleted the three whose face names
+    # the seat), and none of the three it deleted.
     assert ("The number is every performer's [gold]Fanfare[/gold] added up and"
             in tips)
+    assert "The number is the [gold]lead performer[/gold]'s " not in tips
+    assert "The number is the [gold]back performer[/gold]'s " not in tips
     assert "no stage outside combat" not in tips
     assert "return With(inherited, ReaderKey, rule);" in tips
     # The title row is registered, or the tip renders with a raw loc key.
@@ -1429,18 +1441,18 @@ def test_the_readers_tip_states_each_rule():
 
 
 def test_the_readers_rules_are_measured():
-    """The census sees all four.
+    """The census sees the one rule left (four before the text pass).
 
-    A `With(...)` call whose body is built by a switch reaches
+    A `With(...)` call whose body is a named const reaches
     `lint_text_conventions.tip_rows` as an empty string -- the silence
-    `EB-343` was filed on -- so the four are parsed out by name.
+    `EB-343` was filed on -- so the rule is parsed out by name.
     """
     sys.path.insert(0, str(REPO / "tools"))
     import lint_text_conventions as lint       # noqa: E402
 
     rows = {row.ident: row.raw for row in lint.tip_rows()
             if row.ident.startswith("ReaderKey.")}
-    assert len(rows) == 4
+    assert len(rows) == 1
     for ident, raw in rows.items():
         assert len(lint.render(raw)) <= lint.CEILING["tip"], ident
 
@@ -1513,11 +1525,10 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
     for clause in (
             '"A performer joins at the back with "',
             "FurinaStageLaw.SummonFanfare",
-            '" [gold]Fanfare[/gold]. On a "',
-            '"full stage, the lead takes a [gold]Bow[/gold] and moves to "',
-            '"the back instead."',
-            '" [gold]Fanfare[/gold] and acts at "',
-            '"the end of your turn."',
+            '" [gold]Fanfare[/gold]. If the "',
+            '"stage is full, your front performer [gold]Bow[/gold]s and "',
+            '"moves to the back instead."',
+            '" [gold]Fanfare[/gold].");',
             "if (random)",
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
             '" [gold]Block[/gold]. [gold]Bow[/gold]: gain "',
@@ -1545,12 +1556,11 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     the numerals written out."""
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
-        "A performer joins at the back with 1 Fanfare. On a full stage, the "
-        "lead takes a Bow and moves to the back instead.")
+        "A performer joins at the back with 1 Fanfare. If the stage is full, "
+        "your front performer Bows and moves to the back instead.")
     from understudy import blindplay_notes
     assert blindplay_notes.SUMMON_NAMED_ROW == (
-        "A performer joins at the back with 1 Fanfare and acts at the end of "
-        "your turn.")
+        "A performer joins at the back with 1 Fanfare.")
     assert rows["Gentilhomme Usher"] == (
         "End of your turn: gain 3 Block. Bow: gain 4 Block.")
     assert rows["Surintendante Chevalmarin"] == (
@@ -1559,3 +1569,24 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     assert rows["Mademoiselle Crabaletta"] == (
         "End of your turn: deal 5 Hydro damage to a random enemy. Bow: deal 8 "
         "Hydro damage to a random enemy.")
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-25, THE FURINA TEXT PASS: a Spend card's face is two sentences.
+# ---------------------------------------------------------------------------
+
+def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
+    """The pass dropped "Choose one:" and the "|" from the five Spend cards,
+    so the chooser's option faces are read off the face's SENTENCES -- one
+    per mode, with the parent's var tokens -- and the chooser and the hand
+    stay one sentence by construction."""
+    rows = {row["id"]: row for row in proto._rows()}
+    row = rows["proto_fs_curtain_rise"]
+    modes = gen.modal_effect(row)["modes"]
+    assert gen.modal_option_faces(row, modes) == [
+        "Deal {PlainDamage:diff()} damage",
+        "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead"]
+    for rid in ("proto_fs_tidal_flourish", "proto_fs_interposition",
+                "proto_fs_grand_entrance", "proto_fs_quick_cue"):
+        assert gen.modal_option_faces(
+            rows[rid], gen.modal_effect(rows[rid])["modes"]) is not None, rid

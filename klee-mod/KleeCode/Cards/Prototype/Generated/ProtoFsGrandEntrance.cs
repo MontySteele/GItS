@@ -45,7 +45,7 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard, IMod
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Entrance"),
-        ("description", "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.

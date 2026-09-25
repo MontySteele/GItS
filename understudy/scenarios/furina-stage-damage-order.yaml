@@ -126,9 +126,11 @@ steps:
 
   # `EB-746`: AND THE FACE OFFERS BOTH MODES. Spend is a CHOICE on play now --
   # four of six round-two seats said the card spent for them, "no verb to
-  # decline" -- so the printed face is the choice and not a rider.
+  # decline" -- so the printed face is the choice and not a rider. The text
+  # pass (2026-09-25) dropped "Choose one:": the face is two sentences, the
+  # second the Spend mode's own ("Spend 3: deal 13 instead").
   - expect:
-      description_contains: {card: "Curtain Rise", text: "Choose one"}
+      description_contains: {card: "Curtain Rise", text: "3: deal"}
 
   # ------------------------------------------------- the reserve, and RULE 5
   # Raise 5 on the back performer. Alone on stage, the Usher IS the back, so
@@ -204,7 +206,7 @@ steps:
   # R276: the Spend emptied the BACK performer, so the Usher is still the
   # lead and Chevalmarin is the back performer now.
   - expect:
-      page_contains: {text: "lead: Usher"}
+      page_contains: {text: "front: Usher"}
   - expect:
       page_contains: {text: "back: Chevalmarin"}
   - expect:
@@ -246,7 +248,7 @@ steps:
   # whole run. The Usher is the act asserted because its effect is the one the
   # sweep adds to a number the page also prints.
   - expect:
-      page_contains: {text: "**Usher** performed: Furina gains"}
+      page_contains: {text: "**Usher** acted: Furina gains"}
   - expect:
       page_contains: {text: "Block."}
 

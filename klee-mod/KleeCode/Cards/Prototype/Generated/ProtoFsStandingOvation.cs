@@ -38,14 +38,14 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_standing_ovation");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Applause"),
-        ("description", "[gold]Raise[/gold] 5 [gold]Fanfare[/gold] on the [gold]back performer[/gold]."),
+        ("description", "Your [gold]back performer[/gold] gains 5 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

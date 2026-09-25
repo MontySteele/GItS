@@ -31,8 +31,8 @@ public sealed class StageRaisePerTurnPower : PowerModel, ILocalizationProvider
     {
         ("title", "All the World's a Stage"),
         ("description",
-            "At the start of your turn, [gold]Raise[/gold] {Amount} "
-          + "[gold]Fanfare[/gold] on the [gold]back performer[/gold]."),
+            "At the start of your turn, your [gold]back performer[/gold] "
+          + "gains {Amount} [gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

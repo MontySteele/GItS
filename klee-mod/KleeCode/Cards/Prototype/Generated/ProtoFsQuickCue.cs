@@ -45,7 +45,7 @@ public sealed class ProtoFsQuickCue : CustomCardModel, ICharacterCard, IModalCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Cue"),
-        ("description", "Choose one: Deal {PlainDamage:diff()} damage | [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.

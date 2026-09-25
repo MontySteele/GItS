@@ -38,14 +38,14 @@ public sealed class ProtoFsArkheAlignment : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPneuma(ArmKeywordTips.ForOusia(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForPneuma(ArmKeywordTips.ForOusia(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_arkhe_alignment");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Arkhe Alignment"),
-        ("description", "At the start of your turn, choose: [gold]Ousia[/gold] (acts deal double damage) or [gold]Pneuma[/gold] (acts give double [gold]Block[/gold]; the lead regains 2 [gold]Fanfare[/gold])."),
+        ("description", "At the start of your turn, choose [gold]Ousia[/gold] or [gold]Pneuma[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

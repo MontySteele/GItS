@@ -81,13 +81,16 @@ public static class ArmKeywordTips
     // spelling and not by meaning -- there it is a meter, here it is a
     // performer's own bar -- so it takes its own key rather than reusing one
     // that would render the retired arm's sentence.
+    //
+    // THE TEXT PASS (2026-09-25) retired `Raise` and `Rotate` and renamed the
+    // lead to the FRONT performer (review/records/furina-text-pass-2026-09-25.md):
+    // their keys left with them, and the front seat took a key of its own so
+    // no stale loc title can survive under the old one.
     public const string SpendKey = "KLEEMOD-ARM_STAGE_SPEND";
     public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
-    public const string RaiseKey = "KLEEMOD-ARM_STAGE_RAISE";
     public const string BowKey = "KLEEMOD-ARM_STAGE_BOW";
-    public const string LeadPerformerKey = "KLEEMOD-ARM_STAGE_LEAD";
+    public const string FrontPerformerKey = "KLEEMOD-ARM_STAGE_FRONT";
     public const string BackPerformerKey = "KLEEMOD-ARM_STAGE_BACK";
-    public const string RotateKey = "KLEEMOD-ARM_STAGE_ROTATE";
     // R276 batch two: Arkhe Alignment's two halves.
     public const string OusiaKey = "KLEEMOD-ARM_STAGE_OUSIA";
     public const string PneumaKey = "KLEEMOD-ARM_STAGE_PNEUMA";
@@ -1163,10 +1166,10 @@ public static class ArmKeywordTips
 
     // ------------------------------------------- Furina, the Stage --------
     //
-    // Her SEVEN, and the Stage brief's sec.12 is what makes it seven: the
-    // faces print `Spend`, `Fanfare`, `Raise`, `Bow`, `lead performer`, `back
-    // performer` and `Rotate`, and every one of them names a rule the SHIPPED
-    // engine does not have. A shipped Fanfare is a METER on the player; here
+    // Her FIVE seat words since the text pass (2026-09-25; the brief's sec.12
+    // once made it seven, with `Raise` and `Rotate`): the faces print
+    // `Spend`, `Fanfare`, `Bow`, `front performer` and `back performer`, and
+    // every one of them names a rule the SHIPPED engine does not have. A shipped Fanfare is a METER on the player; here
     // it is a performer's own bar, and the two sentences contradict each other
     // on every face -- which is exactly why these live here, behind
     // `PrototypeCards`, and not in <see cref="SalonMemberTips"/>.
@@ -1190,9 +1193,11 @@ public static class ArmKeywordTips
             // does not OFFER the mode, which the player meets on the
             // choose-a-card screen rather than in a tip.
             // R276 picks 1 and 2: the bank pays, and only in full.
-            "Chosen on play. The [gold]back performer[/gold] pays the full "
-          + "price or you can't choose it. Emptied exactly, it takes a "
-          + "[gold]Bow[/gold].");
+            // The text pass (2026-09-25): the chooser explains itself (#662),
+            // so the tip says what is paid, by whom, and when it bows.
+            "Pay Fanfare from your [gold]back performer[/gold]. Offered only "
+          + "if it can pay in full. If that empties it exactly, it "
+          + "[gold]Bow[/gold]s.");
 
     /// <summary>
     /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter
@@ -1203,23 +1208,13 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForFanfare(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FanfareKey,
-            "A performer's own bar. Attacks hit your [gold]Block[/gold], then "
-          + "the [gold]lead performer[/gold]'s Fanfare, then you. No cap.");
-
-    /// <summary>
-    /// Brief sec.3 rule 5, and round four's two fixes. GENERIC ON WHERE: the
-    /// old sentence said "to the back performer" on <i>Hold Your Places</i>
-    /// (the lead) and <i>Gala Dinner</i> (every performer), so the card now
-    /// says where and a bare Raise means the back. AND THE EMPTY STAGE: a
-    /// Raise with nobody on stage summons a random performer holding the
-    /// amount, for every Raise and every Raise power.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForRaise(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, RaiseKey,
-            "Adds [gold]Fanfare[/gold] where the card says, else to the "
-          + "[gold]back performer[/gold]. On an empty stage, a random "
-          + "performer arrives holding it instead.");
+            // The text pass's follow-up (2026-09-25): the EMPTY-STAGE
+            // summon lives here, on the word every Fanfare-giving face
+            // prints -- Hold Your Places and Gala Dinner carry no back
+            // performer tip. "At 0 it leaves" is dropped on purpose.
+            "A performer's health. Hits take your [gold]Block[/gold], then "
+          + "the front performer's, then you. Gained on an empty stage, it "
+          + "summons a performer.");
 
     /// <summary>
     /// Brief sec.3 rules 7 and 9 together, because the word only means
@@ -1236,11 +1231,12 @@ public static class ArmKeywordTips
             // with a card and an Exhaust, and the Rare grants three. The rule
             // is the CONTRAST, which is turn one's wager (brief sec.7, line B
             // against line C): a Spend earns one and a hit does not.
-            "A departure effect a [gold]Spend[/gold] earns and a hit does "
-          + "not. Usher: " + FurinaStageLaw.BowUsherBlock
-          + " [gold]Block[/gold]. Chevalmarin: Hydro on all. "
-          + "Crabaletta: " + FurinaStageLaw.BowCrabalettaDamage
-          + " Hydro damage.");
+            // The text pass (2026-09-25): each performer's own tip carries
+            // its Bow, so this one points there instead of restating three.
+            // The text lint refuses parentheses, so the spec's "(see each
+            // performer)" is a clause here.
+            "A performer's parting effect, shown on each performer. Spending "
+          + "its last Fanfare triggers it; losing it to a hit doesn't.");
 
     /// <summary>
     /// Brief sec.3 rules 4 and 6: the front seat is the one that regenerates
@@ -1248,12 +1244,11 @@ public static class ArmKeywordTips
     /// facts are about the same seat, which is why one sentence can carry
     /// them.
     /// </summary>
-    public static IEnumerable<IHoverTip> ForLeadPerformer(
+    public static IEnumerable<IHoverTip> ForFrontPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, LeadPerformerKey,
-            "The front seat, the shield: attacks reach it, and only it "
-          + "regains " + FurinaStageLaw.LeadRegen + " [gold]Fanfare[/gold] "
-          + "each turn.");
+        With(inherited, FrontPerformerKey,
+            "Takes hits first. Regains " + FurinaStageLaw.LeadRegen
+          + " [gold]Fanfare[/gold] at the start of your turn.");
 
     /// <summary>
     /// Brief sec.3 rules 5, 6 and 8, from the other end. The back seat is the
@@ -1270,21 +1265,9 @@ public static class ArmKeywordTips
             // read as "the back is safe", and seats lost the back performer
             // to a second attack in one enemy turn. So the sentence says
             // plainly where hits go, and when they reach the back.
-            "The back seat, the bank: Raise fills it, Spend draws from it. "
-          + "Hits go to the lead first and reach it once every seat ahead is "
-          + "empty.");
-
-    /// <summary>
-    /// Brief sec.3 rule 3 and sec.5.2. THE SECOND SENTENCE IS THE REFUSAL,
-    /// and GPT's read of draft 1 is why it is here: a card called "Take a Bow"
-    /// would have taught a bow that rotation does not grant, so the card was
-    /// renamed and the word has to say what it does not do.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForRotate(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, RotateKey,
-            "Seats change order and every bar comes with them. Nobody leaves "
-          + "and nobody takes a [gold]Bow[/gold].");
+            // The text pass (2026-09-25): the empty-stage summon the
+            // retired Raise tip carried is the Fanfare tip's now.
+            "Gains and Spends [gold]Fanfare[/gold]. Hits reach it last.");
 
     /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
     /// choice a player makes at the start of each turn.</summary>
@@ -1300,7 +1283,7 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PneumaKey,
             "This turn, your performers' acts give double [gold]Block[/gold], "
-          + "and the [gold]lead performer[/gold] regains "
+          + "and your front performer gains "
           + Powers.ArkheAlignmentPower.PneumaLeadRegain
           + " [gold]Fanfare[/gold].");
 
@@ -1312,11 +1295,10 @@ public static class ArmKeywordTips
     ///   * a RANDOM summon states the full-stage rule ruled the same day, the
     ///     Defect-orb shape -- the lead bows and moves to the back
     ///     (<c>FurinaStage.RecastFromFront</c>);
-    ///   * a NAMED summon states the arrival and when it acts (brief sec.3
-    ///     rule 3, `EB-738`), and nothing about a full stage: the named
+    ///   * a NAMED summon states the arrival, and nothing about a full stage: the named
     ///     Commons' own face says what happens when the performer is already
-    ///     there ("Raise 3 on him instead"), and a tip saying the lead bows
-    ///     would contradict it.
+    ///     there ("he gains 3 Fanfare"), and a tip saying the front
+    ///     performer bows would contradict it.
     ///
     /// TWO STATEMENTS AND NOT A TERNARY, because
     /// <c>lint_text_conventions.tip_rows</c> measures each <c>With(...);</c>
@@ -1330,14 +1312,13 @@ public static class ArmKeywordTips
         {
             return With(inherited, SummonKey,
                 "A performer joins at the back with "
-              + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a "
-              + "full stage, the lead takes a [gold]Bow[/gold] and moves to "
-              + "the back instead.");
+              + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. If the "
+              + "stage is full, your front performer [gold]Bow[/gold]s and "
+              + "moves to the back instead.");
         }
         return With(inherited, SummonKey,
             "A performer joins at the back with "
-          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold] and acts at "
-          + "the end of your turn.");
+          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold].");
     }
 
     /// <summary>
@@ -1373,43 +1354,29 @@ public static class ArmKeywordTips
           + " [gold]Hydro[/gold] damage to a random enemy.");
 
     /// <summary>
-    /// WHICH BAR A READER'S NUMBER IS. One value per reader, and the four are
-    /// the four the sheet declares (R276): <i>Pneuma Refrain</i> reads the
-    /// lead's bar, <i>Ousia Surge</i> the back's, <i>Final Bow</i> the back's
-    /// as it bows, and <i>Let the People Rejoice</i> the whole company's.
+    /// WHICH BAR A READER'S NUMBER IS. Once one value per reader; since the
+    /// text pass (2026-09-25) ONE. [USER]'s pass deletes the reader tip
+    /// "wherever the face now names the performer": <i>Ousia Surge</i> and
+    /// <i>Final Bow</i> print "your back performer's", <i>Pneuma Refrain</i>
+    /// "your front performer's", so a tip saying which bar the number is would
+    /// restate the face. <i>Let the People Rejoice</i> names no one seat --
+    /// "all your performers' Fanfare" -- and keeps its sentence.
     ///
     /// DERIVED AND NEVER DECLARED. `gen_klee_cards.stage_reader_source` reads
     /// the value off the multiplier `EB-747` already picked for the row's
-    /// `amount_formula`, so a fifth reader authored tomorrow carries the
-    /// sentence because of what its number IS, not because somebody
-    /// remembered to tag it.
+    /// `amount_formula`.
     /// </summary>
     public enum StageReader
     {
-        /// <summary>`stage_lead_fanfare` -- <i>Pneuma Refrain</i>.</summary>
-        Lead,
-        /// <summary>`stage_back_fanfare` -- <i>Ousia Surge</i>.</summary>
-        Back,
-        /// <summary>`SpentOrBackFanfare` -- <i>Final Bow</i>.</summary>
-        SpendBack,
         /// <summary>`SpentOrTotalFanfare` -- the Rare.</summary>
         SpendAll,
     }
 
-    // The four rules, as `const string` rather than inline literals, because
+    // The rule, as a `const string` rather than an inline literal, because
     // `tools/lint_text_conventions.tip_rows` reads THIS file for its census
     // and a body built by a method reaches it as an empty string -- the
-    // silence `EB-343` was filed on. The lint parses these four by name and
-    // measures each against the ceiling.
-    private const string ReaderLeadRule =
-        "The number is the [gold]lead performer[/gold]'s "
-      + "[gold]Fanfare[/gold].";
-    private const string ReaderBackRule =
-        "The number is the [gold]back performer[/gold]'s "
-      + "[gold]Fanfare[/gold].";
-    private const string ReaderSpendBackRule =
-        "The number is the [gold]back performer[/gold]'s "
-      + "[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends.";
+    // silence `EB-343` was filed on. The lint parses it by name and measures
+    // it against the ceiling.
     private const string ReaderSpendAllRule =
         "The number is every performer's [gold]Fanfare[/gold] added up and "
       + "spent.";
@@ -1417,23 +1384,17 @@ public static class ArmKeywordTips
     /// <summary>
     /// WHICH BAR THIS READER'S NUMBER IS, as a hover tip.
     ///
-    /// Round three found the four readers printing a literal 0 off the board
+    /// Round three found the readers printing a literal 0 off the board
     /// ("Deal 0 damage to ALL enemies" on the Rare at Neow). The FACES now
     /// carry the base game's own answer -- Body Slam's shape: the rule in
     /// words, and the live number on a line of its own only in combat
     /// (`{InCombat:...|}`) -- so no screen prints a misleading 0 any more,
-    /// and this tip stays as the one-line statement of which seat is read.
+    /// and this tip stays as the one-line statement of what is read.
     /// </summary>
     public static IEnumerable<IHoverTip> ForStageReader(
         IEnumerable<IHoverTip> inherited, CardModel card, StageReader source)
     {
-        var rule = source switch
-        {
-            StageReader.Back => ReaderBackRule,
-            StageReader.SpendBack => ReaderSpendBackRule,
-            StageReader.SpendAll => ReaderSpendAllRule,
-            _ => ReaderLeadRule,
-        };
+        var rule = ReaderSpendAllRule;
         return With(inherited, ReaderKey, rule);
     }
 }

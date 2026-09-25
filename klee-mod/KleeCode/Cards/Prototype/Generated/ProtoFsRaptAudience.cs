@@ -38,14 +38,14 @@ public sealed class ProtoFsRaptAudience : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForLeadPerformer(ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this), this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_rapt_audience");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "A Rapt Audience"),
-        ("description", "Whenever an enemy hits the [gold]lead performer[/gold], [gold]Raise[/gold] {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] it lost{IfUpgraded:show:|, rounded up,} on the [gold]back performer[/gold]. Needs 2 or more performers."),
+        ("description", "Whenever an enemy hits your [gold]front performer[/gold], your [gold]back performer[/gold] gains {IfUpgraded:show:the|half the} [gold]Fanfare[/gold] lost. Needs 2 performers."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

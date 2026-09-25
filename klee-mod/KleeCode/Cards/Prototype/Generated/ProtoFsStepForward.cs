@@ -45,7 +45,7 @@ public sealed class ProtoFsStepForward : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Step Forward"),
-        ("description", "The [gold]back performer[/gold] moves to the front seat. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Move your [gold]back performer[/gold] to the front. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

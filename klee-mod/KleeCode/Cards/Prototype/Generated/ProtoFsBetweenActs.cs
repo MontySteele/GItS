@@ -41,7 +41,7 @@ public sealed class ProtoFsBetweenActs : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Between Acts"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If the stage is empty, draw 2 cards."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If no one is on stage, draw 2 cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

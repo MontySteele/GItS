@@ -238,9 +238,8 @@ public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
         // the law's, interpolated.
         ("description",
             "Up to " + FurinaStageLaw.Seats + " performers act at the end of "
-          + "your turn. Attacks hit your "
-          + "[gold]Block[/gold], then the lead performer's "
-          + "[gold]Fanfare[/gold], then you."),
+          + "your turn. Hits land on your [gold]Block[/gold], then your "
+          + "front performer's [gold]Fanfare[/gold], then you."),
     };
 
     public override PowerType Type => PowerType.Buff;

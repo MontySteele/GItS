@@ -45,7 +45,7 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, ICharacterCard, IMod
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Flourish"),
-        ("description", "Choose one: Deal {PlainDamage:diff()} damage to ALL enemies | [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 2: deal {BranchDamage:diff()} instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.

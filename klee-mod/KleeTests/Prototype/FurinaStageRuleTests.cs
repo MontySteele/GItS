@@ -644,9 +644,8 @@ public class FurinaStageRuleTests
         {
             var face = Face();
             Assert.Equal(
-                "At the start of your turn, [gold]Raise[/gold] "
-              + "{StageRaise:diff()} [gold]Fanfare[/gold] on the "
-              + "[gold]back performer[/gold].", face);
+                "At the start of your turn, your [gold]back performer[/gold] "
+              + "gains {StageRaise:diff()} [gold]Fanfare[/gold].", face);
             Assert.DoesNotContain("Encore", face);
         }
         using (new Arm(on: false))

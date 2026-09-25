@@ -543,7 +543,12 @@ public class ArmKeywordTipTests
         // `ForCrabaletta`. A first-time co-op player could not tell what a
         // summon did or what any performer did. The faces print these words
         // ungolded, so they attach off the row's `stage_summon` op.
-        Assert.Equal(30, attaches.Count);
+        //
+        // TWENTY-EIGHT with the Stage text pass (2026-09-25): `ForRaise` and
+        // `ForRotate` retired with their words, and `ForLeadPerformer` is
+        // `ForFrontPerformer` -- "lead performer" became "front performer"
+        // everywhere.
+        Assert.Equal(28, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForSummon");
         Assert.Contains(attaches, m => m.Name == "ForUsher");
         Assert.Contains(attaches, m => m.Name == "ForChevalmarin");
@@ -555,11 +560,12 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForPlanTwice");
         Assert.Contains(attaches, m => m.Name == "ForSpend");
         Assert.Contains(attaches, m => m.Name == "ForFanfare");
-        Assert.Contains(attaches, m => m.Name == "ForRaise");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForRaise");
         Assert.Contains(attaches, m => m.Name == "ForBow");
-        Assert.Contains(attaches, m => m.Name == "ForLeadPerformer");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForLeadPerformer");
+        Assert.Contains(attaches, m => m.Name == "ForFrontPerformer");
         Assert.Contains(attaches, m => m.Name == "ForBackPerformer");
-        Assert.Contains(attaches, m => m.Name == "ForRotate");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForRotate");
         Assert.Contains(attaches, m => m.Name == "ForDusk");
         Assert.Contains(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
@@ -799,19 +805,13 @@ public class ArmKeywordTipTests
         // reachable here is the text each branch would print.
         var body = Printed("ForStageReader");
 
-        // One rule per reader, each read off that reader's own code.
-        Assert.Contains(
-            "The number is the [gold]lead performer[/gold]'s "
-          + "[gold]Fanfare[/gold].", body);
-        Assert.Contains(
-            "The number is the [gold]back performer[/gold]'s "
-          + "[gold]Fanfare[/gold].", body);
-        Assert.Contains(
-            "The number is the [gold]back performer[/gold]'s "
-          + "[gold]Fanfare[/gold], which this [gold]Bow[/gold] spends.", body);
+        // THE TEXT PASS (2026-09-25) deleted the tip wherever the face now
+        // names the performer: only the Rare's rule is left.
         Assert.Contains(
             "The number is every performer's [gold]Fanfare[/gold] added up "
           + "and spent.", body);
+        Assert.DoesNotContain("lead performer", body);
+        Assert.DoesNotContain("back performer", body);
 
         Assert.DoesNotContain("no stage outside combat", body);
     }
@@ -824,13 +824,13 @@ public class ArmKeywordTipTests
         // card's number IS, which is true on every screen -- and the screen
         // it was filed on is the one with no board at all.
         var none = System.Linq.Enumerable.Empty<IHoverTip>();
-        var offTheBoard = new ProtoFsOusiaSurge();
+        var offTheBoard = new ProtoFsLetThePeopleRejoice();
         Assert.NotSame(none, ArmKeywordTips.ForStageReader(
-            none, offTheBoard, ArmKeywordTips.StageReader.Back));
+            none, offTheBoard, ArmKeywordTips.StageReader.SpendAll));
 
         var furina = Seat.Furina();
-        var inPlay = Owned<ProtoFsOusiaSurge>(furina);
+        var inPlay = Owned<ProtoFsLetThePeopleRejoice>(furina);
         Assert.NotSame(none, ArmKeywordTips.ForStageReader(
-            none, inPlay, ArmKeywordTips.StageReader.Back));
+            none, inPlay, ArmKeywordTips.StageReader.SpendAll));
     }
 }

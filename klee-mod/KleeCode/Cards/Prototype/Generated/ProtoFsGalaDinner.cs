@@ -38,14 +38,14 @@ public sealed class ProtoFsGalaDinner : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_gala_dinner");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gala Dinner"),
-        ("description", "[gold]Raise[/gold] {RaiseAmount:diff()} [gold]Fanfare[/gold] on every performer."),
+        ("description", "Each performer gains {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

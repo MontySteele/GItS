@@ -38,14 +38,14 @@ public sealed class ProtoFsSceneChange : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRotate(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFrontPerformer(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_scene_change");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Scene Change"),
-        ("description", "[gold]Rotate[/gold] the cast: the front performer moves to the back seat. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Move your [gold]front performer[/gold] to the back. {IfUpgraded:show:Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

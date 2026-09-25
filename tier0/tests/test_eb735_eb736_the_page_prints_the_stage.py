@@ -154,7 +154,7 @@ def test_the_first_line_is_the_damage_order_and_the_second_is_the_reserve():
     page = _page({"live": True, "seats": THREE_SEATS, "log": []})
     lines = [ln for ln in page.splitlines() if ln.startswith("- ")]
 
-    assert ("- Block 9 · after the acts: Block 12 · lead: Usher 5 · "
+    assert ("- Block 9 · after the acts: Block 12 · front: Usher 5 · "
             "Furina 62/78") in lines
     assert "- middle: Chevalmarin 1 · back: Crabaletta 6" in lines
 
@@ -203,14 +203,14 @@ def test_a_lone_performer_is_the_lead_and_never_a_back_performer():
     exception as a contradiction -- and a Raise, which lands at the back, would
     read as going somewhere else."""
     page = _page({"live": True, "seats": THREE_SEATS[:1], "log": []})
-    assert "lead: Usher 5" in page
+    assert "front: Usher 5" in page
     assert "back:" not in page
     assert "middle:" not in page
 
 
 def test_two_performers_are_lead_and_back_with_no_middle():
     page = _page({"live": True, "seats": THREE_SEATS[:2], "log": []})
-    assert "lead: Usher 5" in page
+    assert "front: Usher 5" in page
     assert "back: Chevalmarin 1" in page
     assert "middle:" not in page
 
@@ -241,7 +241,7 @@ def test_one_line_per_arrival_act_bow_departure_and_rotation():
     assert ("**Chevalmarin** joined the stage at 1 Fanfare, and "
             "stands in the middle seat.") in page
     # And every act NAMES ITS EFFECT, with the measured number in it.
-    assert "**Usher** performed: Furina gains 3 Block." in page
+    assert "**Usher** acted: Furina gains 3 Block." in page
     assert "**Usher** left the stage: emptied by a Spend, so it takes a Bow." \
         in page
     assert "**Usher** took a Bow: Furina gains 4 Block." in page
@@ -259,13 +259,13 @@ def test_each_performers_act_says_what_it_did():
                                     target=target, combat_id="4",
                                     each=each)]})
 
-    assert "performed: Furina gains 3 Block." in line(
+    assert "acted: Furina gains 3 Block." in line(
         "usher", "Gentilhomme Usher", 3)
     # Round four: the PER-ENEMY figure, not the four hits' total.
-    assert ("performed: 2 to every enemy, and Hydro on "
+    assert ("acted: 2 to every enemy, and Hydro on "
             "each.") in line("chevalmarin", "Surintendante Chevalmarin", 8,
                              each=2)
-    assert "performed: 5 to Corpse Slug (2)." in line(
+    assert "acted: 5 to Corpse Slug (2)." in line(
         "crabaletta", "Mademoiselle Crabaletta", 5, "Corpse Slug (2)")
 
 
@@ -275,8 +275,8 @@ def test_an_act_that_landed_nothing_says_so_and_prints_no_zero():
     page = _page({"live": True, "seats": THREE_SEATS,
                   "log": [_beat("act", "crabaletta",
                                 "Mademoiselle Crabaletta", moved=0)]})
-    assert "**Crabaletta** performed: nothing landed." in page
-    assert "performed: 0" not in page
+    assert "**Crabaletta** acted: nothing landed." in page
+    assert "acted: 0" not in page
 
 
 def test_a_departure_says_why_because_that_is_rules_seven_and_nine():
@@ -321,7 +321,7 @@ def test_the_log_names_the_window_it_covers():
 
 def test_a_quiet_turn_prints_the_board_and_no_log_heading():
     page = _page({"live": True, "seats": THREE_SEATS, "log": []})
-    assert "lead: Usher 5" in page
+    assert "front: Usher 5" in page
     assert "Since you ended your last turn" not in page
 
 
@@ -408,7 +408,7 @@ def test_a_scenario_can_assert_the_stage_block_and_the_missing_meters():
     contains = scenario.CHECKS["page_contains"]
     lacks = scenario.CHECKS["page_lacks"]
 
-    assert contains({"text": "lead: Usher 5"}, {}, after) is None
+    assert contains({"text": "front: Usher 5"}, {}, after) is None
     assert contains({"text": "back: Crabaletta 6"}, {}, after) is None
     assert contains({"text": "took a Bow"}, {}, after) is None
     assert contains({"text": "no such line"}, {}, after) is not None
@@ -433,7 +433,7 @@ def test_the_stage_scenario_asserts_the_block_and_parses():
     assert "page_contains" in named
     assert "page_lacks" in named
     body = path.read_text(encoding="utf-8")
-    assert "lead: Usher" in body            # R276: the Spend takes the back
+    assert "front: Usher" in body            # R276: the Spend takes the back
     assert "back: Chevalmarin" in body
     assert "took a Bow" in body
 
@@ -491,7 +491,7 @@ def test_the_seat_rows_say_what_a_performers_act_is():
     """Round two, sec.2: the reserve PERFORMS, and nothing printed said so --
     "the three read as three at the exit and one at the table, because every
     card speaks in seats and the acts are not documented"."""
-    for word in ("lead performer", "back performer"):
+    for word in ("front performer", "back performer"):
         page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                      hand=[_card(f"Deal damage equal to the {word}'s bar.")])
         assert "Up to 3 performers act at the end of your turn" in page
@@ -505,8 +505,8 @@ def test_the_back_performer_row_says_where_hits_go():
     safe", so the row says plainly where hits go."""
     page = _page({"live": True, "seats": THREE_SEATS, "log": []},
                  hand=[_card("Gain Block equal to the back performer's bar.")])
-    assert ("Hits go to the lead first and reach it once every seat ahead "
-            "is empty.") in page
+    # The text pass (2026-09-25): the back performer tip's own words.
+    assert "Hits reach it last." in page
     assert "no single attack reaches it" not in page
     assert "nothing hits it" not in page
 
@@ -520,17 +520,19 @@ def test_chevalmarins_act_prints_the_per_enemy_figure_or_says_total():
                       "log": [_beat("act", "chevalmarin",
                                     "Surintendante Chevalmarin", **kw)]})
 
-    assert "performed: 2 to every enemy, and Hydro on each." in line(
+    assert "acted: 2 to every enemy, and Hydro on each." in line(
         moved=8, each=2)
     uneven = line(moved=9, each=-1)
-    assert ("performed: 9 in total, split across the enemies, and Hydro on "
+    assert ("acted: 9 in total, split across the enemies, and Hydro on "
             "each.") in uneven
     assert "to every enemy" not in uneven
     assert "9 in total" in line(moved=9)                 # an older build
-    assert "performed: nothing landed." in line(moved=0, each=0)
+    assert "acted: nothing landed." in line(moved=0, each=0)
 
 
 def test_the_empty_stage_line_says_a_raise_summons():
     """ROUND FOUR: Raise on an empty stage summons."""
     page = _page({"live": True, "seats": [], "log": []})
-    assert "A Raise summons a random performer holding its amount." in page
+    # The text pass retired `Raise`; the back performer tip's words.
+    assert ("Fanfare a performer would gain summons a random performer "
+            "holding it instead.") in page

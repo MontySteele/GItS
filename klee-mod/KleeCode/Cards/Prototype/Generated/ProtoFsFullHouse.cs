@@ -41,7 +41,7 @@ public sealed class ProtoFsFullHouse : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Full House"),
-        ("description", "At the end of your turn, if all three seats are filled, your performers act twice."),
+        ("description", "If all three seats are filled at the end of your turn, your performers act twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

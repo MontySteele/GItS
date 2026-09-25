@@ -38,14 +38,14 @@ public sealed class ProtoFsWarmReception : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForRaise(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_warm_reception");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Warm Reception"),
-        ("description", "[gold]Raise[/gold] 3 [gold]Fanfare[/gold] on the [gold]back performer[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Your [gold]back performer[/gold] gains 3 [gold]Fanfare[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

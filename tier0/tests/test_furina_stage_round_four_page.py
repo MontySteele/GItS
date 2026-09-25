@@ -7,7 +7,9 @@ each fix; this file pins the blind-play page's half of them:
     meter's row ("Furina's own meter ... this run has no stage"), in combat
     the performer's bar. The Stage's starting relic now answers the arm on
     every screen, so every screen of a Stage run prints the bar.
-  * THE RAISE ROW carries the empty-stage summon and is generic on where.
+  * THE RAISE ROW carried the empty-stage summon and was generic on where.
+    The text pass (2026-09-25) retired `Raise`; the back performer row
+    carries the empty-stage summon now.
   * THE OUSIA AND PNEUMA ROWS rode Ousia Surge and Pneuma Refrain because the
     names match; they now print only beside Arkhe Alignment.
 
@@ -35,7 +37,8 @@ def _reward_state(relics: list[dict]) -> dict:
     combat block, and an empty latch."""
     card = {"index": 0, "id": "KLEEMOD-PROTO_FS_WARM_RECEPTION",
             "name": "Warm Reception",
-            "description": "Raise 3 Fanfare on the back performer. Draw 1.",
+            "description": ("Your back performer gains 3 Fanfare. "
+                            "Draw 1 card."),
             "cost": 1, "card_type": "Skill"}
     return {"state_type": "card_select",
             "player": {"character": "Furina", "potions": [],
@@ -68,12 +71,13 @@ def test_a_run_without_the_relic_keeps_the_shipped_reading():
     assert FANFARE_SHIPPED_ROW in page
 
 
-def test_the_raise_row_carries_the_empty_stage_summon():
+def test_the_fanfare_row_carries_the_empty_stage_summon():
+    """The text pass's follow-up: on the Fanfare row, which every
+    Fanfare-giving face prints (Hold Your Places, Gala Dinner)."""
     page = blindplay.observe(_reward_state([SALON_SOLITAIRE]))
 
-    assert ("Adds Fanfare where the card says, else to the back performer. "
-            "On an empty stage, a random performer arrives holding it "
-            "instead.") in page
+    assert "Gained on an empty stage, it summons a performer." in page
+    assert "**Raise**" not in page
 
 
 # --- Ousia and Pneuma belong to Arkhe Alignment -----------------------------
@@ -90,7 +94,7 @@ def test_ousia_and_pneuma_do_not_ride_cards_that_share_the_word():
                      "text": "Deal damage equal to the back performer's "
                              "Fanfare."},
                     {"title": "Pneuma Refrain",
-                     "text": "Gain Block equal to the lead performer's "
+                     "text": "Gain Block equal to your front performer's "
                              "Fanfare."}],
            "played": ["You played Ousia Surge.",
                       "You played Pneuma Refrain."]}

@@ -56,7 +56,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Seats share the coordinator's scratchpad, so a seat's notes file can hold an earlier seat's notes; give each seat its own notes path.
 - Two lanes embarked at the same moment: the second lane's game never came up (its port refused every call) until a teardown and re-embark (2026-09-25 round).
 - `scenario run` cannot start on a lane whose profile holds a saved run: the relaunched game resumed the old boss fight and the menu never became ready (lane 1, 1336 run-history files, 447 s wait).
-- `tools/lint_text_conventions.py` IN_SCOPE skips `proto_fs_` faces; A Rapt Audience (137), Arkhe Alignment (130) and Let the People Rejoice (145) are over the 120 ceiling unmeasured.
 
 ## Sim and measurement (Balance stage; nothing here runs on a prototype)
 

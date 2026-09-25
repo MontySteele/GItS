@@ -335,9 +335,19 @@ This seems to be the most promising idea thus far."
 
 ## 12. Batch one, the faces
 
+**2026-09-25, the text pass.** [USER], after the overnight tooltip pass: "for
+the Furina work, I also wanted a text cleanup pass. It's not just that some
+text was missing - it's that the existing text is often very verbose and
+unintuitive." The faces below are the pass's words
+(`review/records/furina-text-pass-2026-09-25.md`). No rule and no number
+moved. `Raise` and `Rotate` are retired as keywords (faces say "gains N
+Fanfare" and say what moves), "lead performer" is "front performer"
+everywhere, "act" is the one verb for what performers do, and a Spend card's
+face drops "Choose one:".
+
 Seventeen cards, enough to play Preserve and Expend against each other.
-Every `Spend` pays its full price from the back performer (R276); every
-`Raise` lands on the back-most performer unless the face names another.
+Every `Spend` pays its full price from the back performer (R276); Fanfare a
+card gives lands on the back performer unless the face names another.
 Names are provisional.
 
 **The starter's kit cards (three, beside the seven untouched basics)**
@@ -345,79 +355,80 @@ Names are provisional.
 | card | cost | type | text |
 |---|---|---|---|
 | Take the Stage | 1 | Skill | Summon a random performer. (2026-09-25: the face follows the full-stage ruling, rule 3.) (Was Salon Début; renamed under R179 in round one, `EB-739`, since a shipped card carries that name.) |
-| Curtain Rise | 1 | Attack | Deal 7. Spend 3: deal 13 instead. |
-| Rising Applause | 1 | Skill | Raise 5 Fanfare on the back performer. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
+| Curtain Rise | 1 | Attack | Deal 7 damage. Spend 3: deal 13 instead. |
+| Rising Applause | 1 | Skill | Your back performer gains 5 Fanfare. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
 
 **Commons (eight)**
 
 | card | cost | type | text |
 |---|---|---|---|
-| Gentilhomme Usher | 1 | Skill | Summon Usher. If he is already on stage, Raise 3 on him instead. |
-| Surintendante Chevalmarin | 1 | Skill | Summon Chevalmarin. If she is already on stage, Raise 3 on her instead. |
-| Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. If she is already on stage, Raise 3 on her instead. |
+| Gentilhomme Usher | 1 | Skill | Summon Usher. If he's already on stage, he gains 3 Fanfare. |
+| Surintendante Chevalmarin | 1 | Skill | Summon Chevalmarin. If she's already on stage, she gains 3 Fanfare. |
+| Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. If she's already on stage, she gains 3 Fanfare. |
 | Understudy | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) |
-| Warm Reception | 1 | Skill | Raise 3 Fanfare on the back performer. Draw 1. |
-| Tidal Flourish | 1 | Attack | Deal 5 to every enemy. Spend 2: deal 9 instead. |
+| Warm Reception | 1 | Skill | Your back performer gains 3 Fanfare. Draw 1 card. |
+| Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 instead. |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
-| Scene Change | 0 | Skill | Rotate the cast: the front performer moves to the back seat. |
+| Scene Change | 0 | Skill | Move your front performer to the back. |
 
 **Uncommons (five)**
 
 | card | cost | type | text |
 |---|---|---|---|
-| Grand Entrance | 2 | Attack | Deal 10. Spend 5: deal 20 instead. |
-| Ousia Surge | 1 | Attack | Deal damage equal to the back performer's Fanfare. (R276: was the lead's.) |
-| Pneuma Refrain | 1 | Skill | Gain Block equal to the lead performer's Fanfare. (R276: was the back's.) |
-| Bis! | 1 | Skill | The lead performer performs its act now. |
-| Final Bow | 1 | Skill | The back performer takes a Bow and leaves. Gain Block equal to its Fanfare. Exhaust. (R276: was the lead.) |
+| Grand Entrance | 2 | Attack | Deal 10 damage. Spend 5: deal 20 instead. |
+| Ousia Surge | 1 | Attack | Deal damage equal to your back performer's Fanfare. (R276: was the front's.) |
+| Pneuma Refrain | 1 | Skill | Gain Block equal to your front performer's Fanfare. (R276: was the back's.) |
+| Bis! | 1 | Skill | Your front performer acts now. |
+| Final Bow | 1 | Skill | Your back performer Bows and leaves. Gain Block equal to its Fanfare. Exhaust. (R276: was the front.) |
 
 **Rare (one)**
 
 | card | cost | type | text |
 |---|---|---|---|
-| Let the People Rejoice | 2 | Attack | Spend all Fanfare on stage. Deal that much damage to every enemy. Every performer takes a bow, then returns at 1. Exhaust. |
+| Let the People Rejoice | 2 | Attack | Deal damage to ALL enemies equal to all your performers' Fanfare. They all Bow, then return with 1. Exhaust. |
 
-The relic: **Salon Solitaire**, Furina's starting relic. At the start of
-combat, Usher takes the front seat with 3 Fanfare.
+The relic: **Salon Solitaire**, Furina's starting relic. Start each combat
+with Usher in front with 3 Fanfare.
 
-Tips the faces need: Spend, Fanfare (the bar), Raise, Bow, the lead, the
-back performer, Rotate.
+Tips the faces need: Spend, Fanfare (the bar), Bow, Summon, the front
+performer, the back performer, and the three performers. (Before the text
+pass: Spend, Fanfare, Raise, Bow, the lead, the back performer, Rotate.)
 
 ### Batch two (R276)
 
-Fifteen cards on the rules R276 set: the lead is the shield, the back
-performer the bank, and a Spend pays its full price. Numbers are starting
+Fifteen cards on the rules R276 set: the front performer is the shield,
+the back performer the bank, and a Spend pays its full price. Numbers are starting
 values; names are provisional. Upgrades in brackets.
 
 **Commons (six)**
 
 | card | cost | type | text |
 |---|---|---|---|
-| Improvised Number | 1 | Attack | Deal 6 damage. If the stage is empty, summon a random performer. [Deal 9] |
-| Between Acts | 1 | Skill | Gain 5 Block. If the stage is empty, draw 2 cards. [8 Block] |
+| Improvised Number | 1 | Attack | Deal 6 damage. If no one is on stage, Summon a random performer. [Deal 9] |
+| Between Acts | 1 | Skill | Gain 5 Block. If no one is on stage, draw 2 cards. [8 Block] |
 | Ensemble Piece | 1 | Attack | Deal 4 damage for each performer on stage. [5 each] |
-| Hold Your Places | 1 | Skill | Gain 5 Block. Raise 2 Fanfare on the lead performer. [7 Block, Raise 3] |
-| Quick Cue | 0 | Attack | Choose one: Deal 3 damage, or Spend 2: deal 8 instead. [4 / 10] |
-| Step Forward | 0 | Skill | The back performer moves to the front seat. Gain 3 Block. [5 Block] |
+| Hold Your Places | 1 | Skill | Gain 5 Block. Your front performer gains 2 Fanfare. [7 Block, gains 3] |
+| Quick Cue | 0 | Attack | Deal 3 damage. Spend 2: deal 8 instead. [4 / 10] |
+| Step Forward | 0 | Skill | Move your back performer to the front. Gain 3 Block. [5 Block] |
 
 **Uncommons (seven)**
 
 | card | cost | type | text |
 |---|---|---|---|
-| Gala Dinner | 1 | Skill | Raise 3 Fanfare on every performer. [Raise 4] |
-| Double Casting | 1 | Skill | Summon two random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
-| Tutti! | 1 | Skill | Every performer performs its act now. [cost 0] (Round four: was 2, 1 upgraded.) |
-| Bravura | 1 | Attack | Spend all of the back performer's Fanfare. Deal 3 damage for each point spent. [4 per point] |
-| Full House | 2 | Power | At the end of your turn, if all three seats are filled, your performers act twice. [cost 1] |
-| Thunderous Applause | 1 | Power | Whenever a performer takes a Bow, draw 1 card and Raise 2 Fanfare on the back performer. [Raise 3] |
-| A Rapt Audience | 1 | Power | Whenever an enemy hits the lead performer, Raise half the Fanfare it lost, rounded up, on the back performer. [the full amount] |
+| Gala Dinner | 1 | Skill | Each performer gains 3 Fanfare. [gains 4] |
+| Double Casting | 1 | Skill | Summon 2 random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
+| Tutti! | 1 | Skill | All your performers act now. [cost 0] (Round four: was 2, 1 upgraded.) |
+| Bravura | 1 | Attack | Spend all of your back performer's Fanfare. Deal 3 damage per point. [4 per point] |
+| Full House | 2 | Power | If all three seats are filled at the end of your turn, your performers act twice. [cost 1] |
+| Thunderous Applause | 1 | Power | Whenever a performer Bows, draw 1 card and your back performer gains 2 Fanfare. [gains 3] |
+| A Rapt Audience | 1 | Power | Whenever an enemy hits your front performer, your back performer gains half the Fanfare lost. Needs 2 performers. [gains the Fanfare lost] (The face drops "rounded up"; the rule still rounds up.) |
 
 **Rares (two)**
 
 | card | cost | type | text |
 |---|---|---|---|
-| Arkhe Alignment | 2 | Power | At the start of your turn, choose: Ousia (acts deal double damage) or Pneuma (acts give double Block; the lead regains 2 Fanfare). [cost 1] |
-| A Five-Century Act | 2 | Power | Whenever a performer takes a Bow, it returns to the back seat with 1 Fanfare. [cost 1] |
+| Arkhe Alignment | 2 | Power | At the start of your turn, choose Ousia or Pneuma. (The Ousia and Pneuma tips carry the two modes: acts deal double damage; or acts give double Block and your front performer gains 2 Fanfare.) [cost 1] |
+| A Five-Century Act | 2 | Power | Whenever a performer Bows, it returns at the back with 1 Fanfare. [cost 1] |
 
 How the edges resolve: Improvised Number and Between Acts check the stage
 when played. Step Forward moves the back performer to the front and shifts
@@ -425,14 +436,14 @@ the others back one; with one performer it only gives Block. Bravura empties
 the back performer exactly, so it always bows; on an empty stage it deals 0.
 Double Casting with one open seat summons one. Full House: each performer's
 act resolves twice, and each further copy adds one more act. Thunderous
-Applause raises after the bowing performer has left, so on an empty stage
-its Raise summons a random performer holding the amount (round four), and the
+Applause gives its Fanfare after the bowing performer has left, so on an
+empty stage it summons a random performer holding the amount (round four), and the
 draw still happens. Let the People Rejoice's performers return to empty seats
 only, so one that finds none (an applause summon took it) does not return. A Rapt Audience does nothing while one
-performer is both lead and back. Arkhe Alignment's "double" multiplies the
+performer is both front and back. Arkhe Alignment's "double" multiplies the
 act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
 10). One question a turn however many copies are in play: copies add (two
-copies x3), and Pneuma's lead regain is 2 per copy. A Five-Century Act's returnee takes the back-most empty seat and does not
+copies x3), and Pneuma's front-performer gain is 2 per copy. A Five-Century Act's returnee takes the back-most empty seat and does not
 act that turn; after Let the People Rejoice a performer returns once.
 
 Tips added: Ousia and Pneuma, on Arkhe Alignment and its power only (round

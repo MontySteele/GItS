@@ -58,9 +58,8 @@ public sealed class SalonSolitaire : CustomRelicModel
     {
         ("title", "Salon Solitaire"),
         ("description",
-            "Start each combat with the [gold]Gentilhomme Usher[/gold] in the "
-          + "front seat at [blue]" + FurinaStageLaw.OpeningFanfare
-          + "[/blue] [gold]Fanfare[/gold]."),
+            "Start each combat with Usher in front with [blue]"
+          + FurinaStageLaw.OpeningFanfare + "[/blue] [gold]Fanfare[/gold]."),
     };
 
     /// <summary>

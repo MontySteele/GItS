@@ -38,14 +38,14 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, ICharacte
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRaise(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("surintendante_chevalmarin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surintendante Chevalmarin"),
-        ("description", "Summon Chevalmarin. If she is already on stage, [gold]Raise[/gold] 3 on her instead."),
+        ("description", "Summon Chevalmarin. If she's already on stage, she gains 3 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

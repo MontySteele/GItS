@@ -50,7 +50,7 @@ public sealed class ProtoFsShareTheSpotlight : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Share the Spotlight"),
-        ("description", "Your [gold]back performer[/gold] gives all its [gold]Fanfare[/gold] to another player as [gold]Block[/gold], then takes a [gold]Bow[/gold]."),
+        ("description", "Your [gold]back performer[/gold] gives all its [gold]Fanfare[/gold] to another player as [gold]Block[/gold], then [gold]Bow[/gold]s."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

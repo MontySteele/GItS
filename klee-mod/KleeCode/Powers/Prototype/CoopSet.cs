@@ -371,8 +371,8 @@ public sealed class GuestOfHonorPower : PowerModel, ILocalizationProvider
     {
         ("title", "Guest of Honor"),
         ("description",
-            "Until Furina's next turn, attacks on you hit your "
-          + "[gold]Block[/gold], then her [gold]lead performer[/gold]'s "
+            "Until Furina's next turn, hits on you land on your "
+          + "[gold]Block[/gold], then her [gold]front performer[/gold]'s "
           + "[gold]Fanfare[/gold], then you."),
     };
 
@@ -448,8 +448,8 @@ public sealed class PeopleOfFontainePower : PowerModel, ILocalizationProvider
     {
         ("title", "The People of Fontaine"),
         ("description",
-            "Whenever another player plays an Attack, [gold]Raise[/gold] "
-          + "[blue]{Amount}[/blue]."),
+            "Whenever another player plays an Attack, your back performer "
+          + "gains [blue]{Amount}[/blue] [gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -38,14 +38,14 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForStageReader(base.ExtraHoverTips, this, ArmKeywordTips.StageReader.Back), this), this);
+        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_ousia_surge");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ousia Surge"),
-        ("description", "Deal damage equal to the [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal damage equal to your [gold]back performer[/gold]'s [gold]Fanfare[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

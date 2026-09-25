@@ -825,15 +825,21 @@ ARM_KEYWORDS = (
     # attached to the bare word "lead" would fire on prose that meant something
     # else. NO PLURALS on any of the seven; every face prints them in the
     # singular, because the kit's rules are each about one seat or one act.
+    #
+    # THE TEXT PASS (2026-09-25, review/records/furina-text-pass-2026-09-25.md)
+    # RETIRED TWO AND RENAMED ONE. [USER]: "the existing text is often very
+    # verbose and unintuitive." `Raise` left -- faces say "gains N Fanfare" --
+    # and so did `Rotate` -- Scene Change and Step Forward say what moves.
+    # `lead performer` became `front performer` everywhere. `Bow` is printed
+    # as a verb, `[gold]Bow[/gold]s`, so the golded span is still the bare
+    # word and the one token covers it.
     ArmKeyword("Spend", ("Spend", "Spends"), "ArmKeywordTips.ForSpend"),
     ArmKeyword("Fanfare", ("Fanfare",), "ArmKeywordTips.ForFanfare"),
-    ArmKeyword("Raise", ("Raise", "Raises"), "ArmKeywordTips.ForRaise"),
     ArmKeyword("Bow", ("Bow",), "ArmKeywordTips.ForBow"),
-    ArmKeyword("lead performer", ("lead performer",),
-               "ArmKeywordTips.ForLeadPerformer"),
+    ArmKeyword("front performer", ("front performer",),
+               "ArmKeywordTips.ForFrontPerformer"),
     ArmKeyword("back performer", ("back performer",),
                "ArmKeywordTips.ForBackPerformer"),
-    ArmKeyword("Rotate", ("Rotate", "Rotates"), "ArmKeywordTips.ForRotate"),
     # R276 batch two: Arkhe Alignment's two halves, the Genshin Ousia/Pneuma
     # pair. Each names the half of the choice it is.
     ArmKeyword("Ousia", ("Ousia",), "ArmKeywordTips.ForOusia"),
@@ -2761,17 +2767,18 @@ APPLY_POWERS = {
     # compiled only under `-p:PrototypeCards=true`; the rules they switch on
     # live in `FurinaStage`. Every row states its own face (`EB-215`).
     "fs_full_house": ("FullHousePower", None,
-        "At the end of your turn, if all three seats are filled, your "
+        "If all three seats are filled at the end of your turn, your "
         "performers act {X} more time."),
     "fs_thunderous_applause": ("ThunderousApplausePower", None,
-        "Whenever a performer takes a [gold]Bow[/gold], draw 1 card and "
-        "[gold]Raise[/gold] {X} [gold]Fanfare[/gold] on the back performer."),
+        "Whenever a performer [gold]Bow[/gold]s, draw 1 card and your back "
+        "performer gains {X} [gold]Fanfare[/gold]."),
     "fs_rapt_audience": ("RaptAudiencePower", None,
-        "Whenever an enemy hits the lead performer, [gold]Raise[/gold] {X}% "
-        "of the [gold]Fanfare[/gold] it lost on the back performer."),
+        "Whenever an enemy hits your front performer, your back performer "
+        "gains {X}% of the [gold]Fanfare[/gold] lost, rounded up. Needs 2 "
+        "performers."),
     "fs_five_century_act": ("FiveCenturyActPower", None,
-        "Whenever a performer takes a [gold]Bow[/gold], it returns to the "
-        "back seat with 1 [gold]Fanfare[/gold]."),
+        "Whenever a performer [gold]Bow[/gold]s, it returns at the back with "
+        "1 [gold]Fanfare[/gold]."),
     "fs_arkhe_alignment": ("ArkheAlignmentPower", None,
         "At the start of your turn, choose [gold]Ousia[/gold] or "
         "[gold]Pneuma[/gold]."),
@@ -2787,11 +2794,12 @@ APPLY_POWERS = {
         "Whenever another player plays an Attack, it [gold]Sets off[/gold] "
         "your [gold]Bombs[/gold] on each enemy it hits."),
     "fs_guest_of_honor": ("GuestOfHonorPower", None,
-        "Until Furina's next turn, attacks on you hit your [gold]Block[/gold], "
-        "then her [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then "
-        "you."),
+        "Until Furina's next turn, hits on you land on your "
+        "[gold]Block[/gold], then her [gold]front performer[/gold]'s "
+        "[gold]Fanfare[/gold], then you."),
     "fs_people_of_fontaine": ("PeopleOfFontainePower", None,
-        "Whenever another player plays an Attack, [gold]Raise[/gold] {X}."),
+        "Whenever another player plays an Attack, your back performer gains "
+        "{X} [gold]Fanfare[/gold]."),
     "kk_sangonomiyas_counsel": ("SangonomiyasCounselPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], each other player gains {X} [gold]Block[/gold]."),
@@ -5712,14 +5720,14 @@ def stage_count_block_rider(card: dict,
     return (int(formula.get("base", 0)), int(formula.get("per", 1)), expr)
 
 
-#: The four readers' C# multipliers, and the order matters: the substring
-#: `BackFanfare` is INSIDE `SpentOrBackFanfare`, so the two spend forecasts
-#: are tested first and the live bar reads second.
+#: The readers' C# multipliers that still owe a sentence. THE TEXT PASS
+#: (2026-09-25, review/records/furina-text-pass-2026-09-25.md) deleted the
+#: reader tip "wherever the face now names the performer": Ousia Surge and
+#: Final Bow print "your back performer's", Pneuma Refrain "your front
+#: performer's", so their three sources left this table. Let the People
+#: Rejoice names no single seat and keeps its sentence.
 _STAGE_READER_SOURCE = (
-    ("SpentOrBackFanfare", "SpendBack"),
     ("SpentOrTotalFanfare", "SpendAll"),
-    ("LeadFanfare", "Lead"),
-    ("BackFanfare", "Back"),
 )
 
 
@@ -9034,11 +9042,42 @@ def modal_option_faces(card: dict, modes: list) -> list[str] | None:
     """
     desc = str(card.get("description") or "").strip()
     if not desc.startswith(MODAL_FACE_PREFIX):
-        return None
+        return _sentence_mode_faces(card, desc, modes)
     body = desc[len(MODAL_FACE_PREFIX):].rstrip()
     if body.endswith("."):
         body = body[:-1]
     parts = [p.strip() for p in body.split(MODAL_FACE_SEPARATOR)]
+    if len(parts) != len(modes) or not all(parts):
+        return None
+    return parts
+
+
+#: A sentence end on a face: a full stop and the space before the next one.
+_FACE_SENTENCE_BREAK = re.compile(r"\.\s+")
+
+
+def _sentence_mode_faces(card: dict, desc: str,
+                         modes: list) -> list[str] | None:
+    """THE FURINA TEXT PASS'S SHAPE: one SENTENCE per mode, no "Choose one:".
+
+    [USER], 2026-09-25: "the existing text is often very verbose and
+    unintuitive" -- so the Stage's five Spend cards print "Deal 7 damage.
+    Spend 3: deal 13 instead." and the chooser, which opens only when the
+    Spend can be paid (#662), explains itself. The halves are still the
+    modes' own wording with the parent's var tokens, so the split is the
+    same contract as the prefixed shape: exactly one sentence per mode, or
+    None and the authored labels.
+
+    ONLY FOR A ROW WITH A RULE GATE (the Stage's Spend), which is the row the
+    pass rewrote: every other modal face keeps the prefix, so a sentence that
+    happens to count right on some other row is never read as a mode.
+    """
+    if mode_requirements(card) is None:
+        return None
+    body = desc.rstrip()
+    if body.endswith("."):
+        body = body[:-1]
+    parts = [p.strip() for p in _FACE_SENTENCE_BREAK.split(body)]
     if len(parts) != len(modes) or not all(parts):
         return None
     return parts

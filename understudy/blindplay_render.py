@@ -1492,8 +1492,10 @@ STAGE_LOG_HEADING = ("- Since you ended your last turn, in order (the "
 
 STAGE_EMPTY_LINE = ("- The stage is empty. A Spend rider cannot "
                     "fire at all, so those cards play at their base number. "
-                    # Round four: Raise on an empty stage summons.
-                    "A Raise summons a random performer holding its amount.")
+                    # Round four: Fanfare gained on an empty stage summons
+                    # (the text pass's words: the back performer tip's).
+                    "Fanfare a performer would gain summons a random "
+                    "performer holding it instead.")
 
 
 # `EB-743`. THE ACTS, IN THE PAGE'S OWN WORDS.
@@ -1603,7 +1605,7 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     if after:
         head.append(f"after the acts: Block {you['block'] + after}")
     if lead is not None:
-        head.append(f"lead: {lead['name']} {lead['fanfare']}")
+        head.append(f"front: {lead['name']} {lead['fanfare']}")
     head.append(f"Furina {you['hp']}/{you['max_hp']}")
     out = ["- " + " · ".join(head)]
     # The seats nothing reaches, named the way rule 5 names them -- and with
@@ -1651,8 +1653,11 @@ def _stage_effect(row: dict[str, Any], table: dict[str, str]) -> str:
 #: it emptied it, so the seat reconstructed every Fanfare change by
 #: arithmetic. Each line carries the bar before and after (`a → b`): the mod
 #: files what landed and the bar after it, and the page subtracts.
-STAGE_RAISE_LINE = "  - Raise {n} on **{who}**: {before} → {after}."
-STAGE_REGAIN_LINE = ("  - **{who}** regained {n} Fanfare as the lead: "
+#: The text pass (2026-09-25): "Raise N on X: a → b" became "X gains N
+#: Fanfare: a → b", and "lead" became "front".
+STAGE_RAISE_LINE = "  - **{who}** gains {n} Fanfare: {before} → {after}."
+STAGE_REGAIN_LINE = ("  - **{who}** regained {n} Fanfare as the front "
+                     "performer: "
                      "{before} → {after}.")
 STAGE_HIT_LINE = "  - {dealer} hit **{who}** for {n}: {before} → {after}"
 #: The hit that EMPTIED the lead: the departure rides the same line, and the
@@ -1724,7 +1729,7 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
                        "Fanfare"
                        + (f", and stands in{where}." if where else "."))
         elif row["event"] == "act":
-            out.append(f"  - {who} performed: "
+            out.append(f"  - {who} acted: "
                        f"{_stage_effect(row, STAGE_ACT_EFFECTS)}.")
         elif row["event"] == "bow":
             out.append(f"  - {who} took a Bow: "
