@@ -130,3 +130,56 @@ def test_real_fights_balance_every_time(arm, deck):
 def _pilot():
     from tier0.pilot.policy import make_pilot
     return make_pilot(loader.pilot_weights("salon"))
+
+
+# ---------------------------------------------------------------------------
+# RULE 1: the performers are pets and live one combat. Every fight opens with
+# Usher alone at 3, and every fight's ledger is its own.
+# ---------------------------------------------------------------------------
+
+def _opening(st):
+    """The fight's first Stage event, which must be the relic's Usher."""
+    return next(r for r in st.log if r["event"].startswith("stage_"))
+
+
+def test_a_reused_player_opens_fight_two_with_usher_alone_at_three(arm):
+    """THE WORST CASE: one Player object through two fights. `open_combat`
+    fields Usher only onto an empty stage, so a stage that outlived fight one
+    would open fight two on fight one's cast; `run_fight` clears it."""
+    player = loader.build_player("furina")
+    first = combat.run_fight(player, loader.build_encounter("attrition"),
+                             _pilot(), seed=3)
+    assert first.player.alive and FS.stage(player), \
+        "fight one must end with a cast standing, or this pins nothing"
+    second = combat.run_fight(player, loader.build_encounter("attrition"),
+                              _pilot(), seed=4)
+    opening = _opening(second)
+    assert (opening["event"], opening["member"], opening["fanfare"]) \
+        == ("stage_open", "usher", 3)
+    assert second.stage_ledger is not first.stage_ledger
+    assert second.stage_ledger["start"] == 0
+    assert second.stage_ledger["gained"]["opening"] == 3
+    assert _balances(second)
+
+
+def test_the_run_path_opens_every_fight_with_usher_alone_at_three(arm,
+                                                                  monkeypatch):
+    """The harness's two-fight gauntlet (swarm, then punisher, HP carried)."""
+    from tier0.harness import runner
+
+    states = []
+
+    def recording(*a, **kw):
+        st = combat.run_fight(*a, **kw)
+        states.append(st)
+        return st
+
+    monkeypatch.setattr(runner, "run_fight", recording)
+    runner.run_battery("furina", "starter", "gauntlet", "salon", 3, 11)
+    assert len(states) >= 4, "the gauntlet should reach its second fight"
+    for st in states:
+        opening = _opening(st)
+        assert (opening["event"], opening["member"], opening["fanfare"]) \
+            == ("stage_open", "usher", 3)
+        assert st.stage_ledger["start"] == 0
+        assert _balances(st)
