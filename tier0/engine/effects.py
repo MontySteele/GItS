@@ -6287,7 +6287,8 @@ def _op_stage_guest(state: CombatState, fx: dict, card: Card) -> None:
     """THE GUEST CAST (2026-09-25): a Guest Star card, "<Name> joins the stage
     with N Fanfare." `furina_stage.guest_star` is the whole rule."""
     furina_stage.guest_star(state, fx["member"],
-                            _amount(state, fx.get("amount", 1)))
+                            _amount(state, fx.get("amount", 1)),
+                            front=fx.get("seat") == "front")
 
 
 def _op_stage_raise(state: CombatState, fx: dict, card: Card) -> None:

@@ -1481,6 +1481,10 @@ def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]
         # sentence and never a card.
         for named in o.get("names") or []:
             row = f"    · **{named['name']}**"
+            # The guest seat round (2026-09-25): a named CARD's cost, in the
+            # words a reward row prints it (`cost 2`), where the feed sent one.
+            if named.get("cost"):
+                row += f" — cost {named['cost']}"
             if named.get("text"):
                 row += f" — {named['text']}"
             out.append(row)
@@ -1814,13 +1818,27 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
     where_now: dict[str, str] = {}
     for i, seat_row in enumerate(seats):
         where_now.setdefault(seat_row["name"], stage_seat_name(i, standing))
+    # THE GUEST SEAT ROUND (2026-09-25). THE FIRST-OCCURRENCE ERROR, MET. The
+    # log said a summoned Usher "stands in the front seat" while the stage
+    # line showed him at the back: the first Usher stood in front, and the
+    # name was the only handle. The mod now keys each seat, beats included
+    # (`StageSeat.Key`), so a keyed beat names the seat THIS performer stands
+    # in now -- or none, if it has since left. The name lookup above is what
+    # an older build, which sends no key, still gets.
+    where_key: dict[int, str] = {
+        seat_row["key"]: stage_seat_name(i, standing)
+        for i, seat_row in enumerate(seats)
+        if seat_row.get("key") is not None}
     log = stage["log"]
     folded = -1
     for at, row in enumerate(log):
         if at == folded:
             continue
         who = f"**{row['name']}**"
-        seat = where_now.get(row["name"], "")
+        if row.get("key") is not None and where_key:
+            seat = where_key.get(row["key"], "")
+        else:
+            seat = where_now.get(row["name"], "")
         where = f" the {seat} seat" if seat else ""
         if row["event"] == "raise":
             out.append(STAGE_RAISE_LINE.format(

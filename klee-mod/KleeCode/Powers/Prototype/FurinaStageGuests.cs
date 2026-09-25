@@ -69,12 +69,21 @@ public static partial class FurinaStage
     ///     summon"; the recast adds, 2026-09-25);
     ///   * otherwise: the back-most empty seat, holding <paramref name="fanfare"/>.
     ///
+    /// <para>AT THE FRONT (<paramref name="atFront"/>, the guest seat round,
+    /// 2026-09-25): Wriothesley's card puts him in the FRONT seat and the
+    /// others shift back one -- at the back no hit reaches him (rule 6) and
+    /// his act landed nothing. On a full stage the recast's leaver is then
+    /// the BACK performer (<see cref="RecastFromBack"/>): it Bows and leaves,
+    /// and he arrives at the front holding his Fanfare plus its remaining
+    /// Fanfare. A repeat copy is unchanged: he Bows and returns to his own
+    /// seat.</para>
+    ///
     /// It does not act on arrival (`EB-738`): it acts at the end of the turn
     /// with everyone else.
     /// </summary>
     public static async Task GuestStar(PlayerChoiceContext choiceContext,
                                        Creature? owner, string member,
-                                       int fanfare)
+                                       int fanfare, bool atFront = false)
     {
         if (!LiveFor(owner)) return;
         var who = Parse(member);
@@ -90,13 +99,44 @@ public static partial class FurinaStage
         }
         else if (ledger.IsFull)
         {
-            await RecastFromFront(choiceContext, owner!, who, fanfare);
+            if (atFront)
+            {
+                await RecastFromBack(choiceContext, owner!, who, fanfare);
+            }
+            else
+            {
+                await RecastFromFront(choiceContext, owner!, who, fanfare);
+            }
             return;
         }
         else
         {
-            ledger.GuestArrives(who, fanfare);
+            ledger.GuestArrives(who, fanfare, atFront);
         }
+        await FurinaStagePets.Sync(owner);
+        Vfx.FurinaStageStrip.Refresh(owner);
+    }
+
+    /// <summary>
+    /// A FRONT-SEAT GUEST ON A FULL STAGE (the guest seat round, 2026-09-25):
+    /// the recast rule with the leaver at the other end. The BACK performer
+    /// Bows (a real Bow: its act and every Bow reader, but no Five-Century
+    /// return, <see cref="RecastFromFront"/>'s reason) and leaves, and the
+    /// guest arrives at the front holding <paramref name="arrival"/> plus the
+    /// leaver's remaining Fanfare. Bow, readers, arrival, in that order.
+    /// </summary>
+    private static async Task RecastFromBack(
+        PlayerChoiceContext choiceContext, Creature owner, StagePerformer who,
+        int arrival)
+    {
+        var ledger = FurinaStageLedger.For(owner);
+        if (ledger.BowFromBack() is not { } leaver) return;
+        await Bow(choiceContext, owner,
+                  new StageExit(leaver.Who, StageDeparture.Spent,
+                                leaver.Fanfare, FurinaStageLaw.Seats - 1,
+                                leaver.LostSinceAct),
+                  mayReturn: false);
+        ledger.ArriveAtFront(who, leaver.Fanfare + arrival);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }

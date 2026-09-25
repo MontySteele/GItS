@@ -4192,11 +4192,15 @@ def blocked_reason(
             # THE GUEST CAST (2026-09-25). A closed set, checked here for
             # `FURINA_STAGE_MEMBERS`' reason: a typo must not degrade into
             # Usher.
-            unknown = set(eff) - {"op", "member", "amount"}
+            unknown = set(eff) - {"op", "member", "amount", "seat"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if eff.get("member") not in FURINA_STAGE_GUESTS:
                 return f"stage_guest member {eff.get('member')!r}"
+            # The guest seat round (2026-09-25): `seat: front` is the one
+            # other arrival (Wriothesley); absent is the back-most seat.
+            if eff.get("seat", "back") not in ("back", "front"):
+                return f"stage_guest seat {eff.get('seat')!r}"
             if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
                 return "stage_guest amount must be a positive literal int"
         if op == "stage_share_spotlight":
@@ -5633,8 +5637,10 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         return _stage_summon_stmt(eff)
     if op == "stage_guest":
         n = amount if amount is not None else str(int(eff["amount"]))
+        # The guest seat round (2026-09-25): `seat: front` joins at the front.
+        front = ", atFront: true" if eff.get("seat") == "front" else ""
         return ("await FurinaStage.GuestStar(choiceContext, Owner.Creature, "
-                f'"{eff["member"]}", {n});')
+                f'"{eff["member"]}", {n}{front});')
     if op == "stage_raise":
         verb = STAGE_RAISE_VERBS[str(eff.get("seat", "back"))]
         n = amount if amount is not None else str(int(eff.get("amount", 1)))

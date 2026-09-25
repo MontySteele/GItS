@@ -77,7 +77,13 @@ performers with their own bars, and Fanfare is that bar.**
    cloned; [USER]: "Let's allow for copies and then check the balance."): a
    named summon always summons, even when that performer is already on
    stage, and a random summon picks uniformly from all three, on stage or
-   not. Named and random summons meet a full stage the same way. Pools are
+   not. Named and random summons meet a full stage the same way. **Guest
+   Star: Wriothesley joins at the front** (2026-09-25, the guest seat round:
+   "he joins at the back, where hits never reach him, so his act lands
+   nothing"): the others shift back one, and on a full stage the recast's
+   leaver is the back performer instead, which Bows and leaves while he
+   arrives at the front holding his 8 plus its remaining Fanfare. A second
+   copy still Bows him and returns him to his own seat. Pools are
    never lost. A newcomer performs with
    the others at the end of that turn, never on arrival (round one,
    `EB-738`: both engines had read this sentence as an act on play).
@@ -99,7 +105,7 @@ performers with their own bars, and Fanfare is that bar.**
 6. **Damage order, per attack: Furina's Block, then the lead performer's
    Fanfare, then Furina.** The lead absorbs what one attack puts through
    her Block, up to its bar; the rest reaches Furina. It never runs on to
-   the middle seat. A big single hit rips through the lead and lands on
+   the middle or back seat. A big single hit rips through the lead and lands on
    her; a flurry can kill the lead and leave her untouched; each is
    answered differently and the intent shows which is coming.
 7. **A performer at 0 Fanfare takes a Bow and leaves,** whatever emptied it: a Spend, a hit, or a summon on a full stage (2026-09-25; [USER]: "Stage members bow out when they are destroyed or replaced, not just when you deliberately spend them down to 0"). A hit's Bow comes right after the hit that caused it, on the enemy's turn, between that enemy's hits: it never softens the hit that caused it, and Usher's Bow Block meets the next one. (2026-09-25 evening, [USER], overruling the start-of-turn wait the draft-3 seat round had prompted: "I think it would be better to have the performer bow immediately (during the opponent's turn) instead of at the start of your turn.")
@@ -121,8 +127,10 @@ performers with their own bars, and Fanfare is that bar.**
 What is not in this batch, by decision: Spend as an Energy-free cost,
 Fontaine Companions that summon a character with its own act (held until
 the loop is proven), and co-op, where a partner's bar would sit in the same
-damage order. Companion cards stay the shared action pool; their touchpoint
-is Chevalmarin's Hydro, which the Fontaine bench's Pyro and Cryo react off.
+damage order. Companion cards stay the shared action pool; since draft 3 no
+act applies Hydro, so the Hydro the Fontaine bench's Pyro and Cryo react off
+comes from Furina's cards (Tidal Flourish and Quick Cue in their Spend modes,
+and Chevalmarin's card), and a guest brings its own element (2026-09-25).
 
 ## 4. The contested thing: Spend, and the two decks it makes
 

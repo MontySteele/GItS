@@ -1896,7 +1896,10 @@ public static partial class McpMod
                     optData["relic_name"] = SafeGetText(() => opt.Relic.Title);
                     optData["relic_description"] = SafeGetText(() => opt.Relic.DynamicDescription);
                 }
-                optData["keywords"] = BuildHoverTips(opt.HoverTips);
+                // GItS LOCAL EDIT (the Furina guest seat round): a card the
+                // option names carries its cost (gits/GitsCardTipCost.cs).
+                optData["keywords"] = GitsWithCardTipCosts(
+                    BuildHoverTips(opt.HoverTips), opt.HoverTips);
                 options.Add(optData);
                 index++;
             }
@@ -1956,7 +1959,10 @@ public static partial class McpMod
                     optData["relic_name"] = SafeGetText(() => opt.Relic.Title);
                     optData["relic_description"] = SafeGetText(() => opt.Relic.DynamicDescription);
                 }
-                optData["keywords"] = BuildHoverTips(opt.HoverTips);
+                // GItS LOCAL EDIT (the Furina guest seat round): a card the
+                // option names carries its cost (gits/GitsCardTipCost.cs).
+                optData["keywords"] = GitsWithCardTipCosts(
+                    BuildHoverTips(opt.HoverTips), opt.HoverTips);
                 options.Add(optData);
                 index++;
             }

@@ -135,9 +135,23 @@ public sealed class StageSeat
     {
         Who = who;
         Fanfare = fanfare;
+        Key = System.Threading.Interlocked.Increment(ref _nextKey);
     }
 
+    private static int _nextKey;
+
     public StagePerformer Who { get; }
+
+    /// <summary>
+    /// THE GUEST SEAT ROUND (2026-09-25): which seat, told apart from its
+    /// twin. The log said a summoned Usher "stands in the front seat" while
+    /// the stage line showed him at the back: the page named a beat's seat by
+    /// the performer's NAME, and the first Usher stood in front. A beat
+    /// carries this key (<see cref="StageBeat.SeatKey"/>), and so does each
+    /// seat on the wire, so the page names the seat this very performer
+    /// stands in now. Unique per seat object, never reused.
+    /// </summary>
+    public int Key { get; internal init; }
 
     /// <summary>The bar. No cap (rule 4); zero means the performer is leaving
     /// and the ledger removes it in the same call.</summary>
@@ -179,7 +193,10 @@ public sealed class StageSeat
     /// <summary>A copy for the end-of-turn forecast (rule 7), which runs the
     /// ledger's own moves on a clone and never touches the real seats.</summary>
     internal StageSeat CloneForForecast() =>
-        new(Who, Fanfare) { Resting = Resting, LostSinceAct = LostSinceAct };
+        new(Who, Fanfare)
+        {
+            Resting = Resting, LostSinceAct = LostSinceAct, Key = Key,
+        };
 }
 
 /// <summary>
@@ -247,10 +264,15 @@ public sealed class StageSeat
 /// performer whose act took the Fanfare (its display name) -- the payer
 /// itself for Neuvillette, the taxing Clorinde, the spending Chevreuse.
 /// Empty on every other beat.</param>
+/// <param name="SeatKey">The guest seat round (2026-09-25): the
+/// <see cref="StageSeat.Key"/> of the seat this beat happened in, filled by
+/// <see cref="FurinaStageLedger.Note"/> where the beat's seat index names a
+/// live seat of this performer; -1 otherwise (a departure, her own hit).
+/// </param>
 public readonly record struct StageBeat(
     string Event, StagePerformer Who, int Seat, int Fanfare, int Moved,
     string Reason, string Target = "", string TargetId = "", int Each = -1,
-    int Hp = -1, int Struck = -1, string By = "");
+    int Hp = -1, int Struck = -1, string By = "", int SeatKey = -1);
 
 
 /// <summary>
@@ -342,7 +364,19 @@ public sealed class FurinaStageLedger
     /// are this class's own moves plus <see cref="FurinaStage"/>'s two payout
     /// sites -- the acts and the bows, which are the only beats whose NUMBER
     /// lives on the board rather than in this file.</summary>
-    public void Note(StageBeat beat) => _beats.Add(beat);
+    public void Note(StageBeat beat)
+    {
+        // The guest seat round (2026-09-25): the seat, by key, so the page
+        // tells two Ushers apart. Read here, at the moment the beat is filed,
+        // off the seat index every caller already passes.
+        if (beat.SeatKey < 0 && beat.Seat >= 0 && beat.Seat < _seats.Count
+            && _seats[beat.Seat].Who == beat.Who
+            && beat.Event != HitFurinaEvent)
+        {
+            beat = beat with { SeatKey = _seats[beat.Seat].Key };
+        }
+        _beats.Add(beat);
+    }
 
     /// <summary>The turn boundary, and the only one this log has.</summary>
     public void ClearBeats() => _beats.Clear();
@@ -583,15 +617,47 @@ public sealed class FurinaStageLedger
 
     /// <summary>
     /// A GUEST STAR ARRIVES at the back-most empty seat holding
-    /// <paramref name="fanfare"/> (rule 2). False on a full stage, where the
-    /// caller recasts instead.
+    /// <paramref name="fanfare"/> (rule 2), or -- <paramref name="atFront"/>,
+    /// Wriothesley's card since the guest seat round (2026-09-25) -- in the
+    /// FRONT seat, the others shifting back one. False on a full stage, where
+    /// the caller recasts instead.
     /// </summary>
-    public bool GuestArrives(StagePerformer who, int fanfare)
+    public bool GuestArrives(StagePerformer who, int fanfare,
+                             bool atFront = false)
     {
         if (IsFull || fanfare <= 0) return false;
+        if (atFront) return ArriveAtFront(who, fanfare);
         _seats.Add(new StageSeat(who, fanfare));
         Note(new StageBeat("arrive", who, _seats.Count - 1, fanfare, 0, ""));
         return true;
+    }
+
+    /// <summary>
+    /// A NEWCOMER TAKES THE FRONT SEAT (the guest seat round, 2026-09-25):
+    /// the others shift back one. False (and nothing moves) on a full stage
+    /// or an arrival of nothing. It does not act on arrival.
+    /// </summary>
+    public bool ArriveAtFront(StagePerformer who, int fanfare)
+    {
+        if (IsFull || fanfare <= 0) return false;
+        _seats.Insert(0, new StageSeat(who, fanfare));
+        Note(new StageBeat("arrive", who, 0, fanfare, 0, ""));
+        return true;
+    }
+
+    /// <summary>
+    /// A FRONT-SEAT GUEST ON A FULL STAGE, first half (the guest seat round,
+    /// 2026-09-25): <see cref="BowFromFront"/> at the other end. The BACK
+    /// performer leaves holding its bar -- the newcomer takes it -- and the
+    /// seat comes back for the Bow to read. Null (and nothing moves) on a
+    /// stage that is not full.
+    /// </summary>
+    public StageSeat? BowFromBack()
+    {
+        if (!IsFull || Back is not { } back) return null;
+        _seats.RemoveAt(_seats.Count - 1);
+        Note(new StageBeat("leave", back.Who, -1, 0, back.Fanfare, "recast"));
+        return back;
     }
 
     /// <summary>
@@ -1418,6 +1484,9 @@ public sealed class FurinaStageLedger
                 ["member"] = FurinaStage.Name(seat.Who),
                 ["name"] = DisplayName(seat.Who),
                 ["seat"] = index,
+                // The guest seat round (2026-09-25): which seat this is, so
+                // a log row can name it even beside a twin.
+                ["seat_key"] = seat.Key,
                 ["fanfare"] = seat.Fanfare,
                 // The body's combat id, so the page's block and the `pets`
                 // list on the same wire name one creature rather than two
@@ -1435,6 +1504,9 @@ public sealed class FurinaStageLedger
                 ["name"] = beat.Event == HitFurinaEvent
                     ? "Furina" : DisplayName(beat.Who),
                 ["seat"] = beat.Seat,
+                // The guest seat round (2026-09-25): the seat's key, -1
+                // where the beat stands in no seat.
+                ["seat_key"] = beat.SeatKey,
                 ["fanfare"] = beat.Fanfare,
                 ["moved"] = beat.Moved,
                 ["reason"] = beat.Reason,

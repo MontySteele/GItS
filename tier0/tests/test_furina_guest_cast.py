@@ -68,6 +68,12 @@ def _guest(member, amount):
     return _card([{"op": "stage_guest", "member": member, "amount": amount}])
 
 
+def _guest_front(member, amount):
+    """A Guest Star whose card puts the guest in the FRONT seat."""
+    return _card([{"op": "stage_guest", "member": member, "amount": amount,
+                   "seat": "front"}])
+
+
 def _rows():
     import yaml
     rows = yaml.safe_load(
@@ -94,6 +100,12 @@ TABLE = {
 }
 
 
+#: The guests whose card puts them in the FRONT seat (the guest seat round,
+#: 2026-09-25: "he joins at the back, where hits never reach him, so his act
+#: lands nothing").
+FRONT = {"wriothesley"}
+
+
 def test_the_eight_rows_are_the_build_tables():
     rows = _rows()
     assert sorted(rows) == sorted(f"proto_fs_guest_star_{m}" for m in TABLE)
@@ -103,10 +115,14 @@ def test_the_eight_rows_are_the_build_tables():
         assert (row["rarity"], row["cost"], row["type"]) == (
             rarity, cost, "skill")
         assert row["register"] == "salon"
+        # The guest seat round (2026-09-25): Wriothesley joins at the front.
+        where = " at the front" if member in FRONT else ""
         assert row["description"] == (
-            f"{name} joins the stage with {n} [gold]Fanfare[/gold].")
-        assert row["effects"] == [
-            {"op": "stage_guest", "member": member, "amount": n}]
+            f"{name} joins the stage{where} with {n} [gold]Fanfare[/gold].")
+        effect = {"op": "stage_guest", "member": member, "amount": n}
+        if member in FRONT:
+            effect["seat"] = "front"
+        assert row["effects"] == [effect]
         assert row["upgrade"] == upgrade
 
 
@@ -150,6 +166,59 @@ def test_a_guest_on_a_full_stage_recasts_the_front(arm):
     st = _state([["usher", 1], ["chevalmarin", 2], ["crabaletta", 4]])
     effects.resolve_card(st, _guest("neuvillette", 6))
     assert st.player.stage[-1] == ["neuvillette", 6 + 1]
+
+
+def test_wriothesley_joins_at_the_front_and_takes_the_next_hit(arm):
+    """The guest seat round (2026-09-25): played onto a two-performer stage
+    he stands in FRONT, the others shift back one, and the next hit is his."""
+    st = _state([["usher", 3], ["crabaletta", 4]])
+    effects.resolve_card(st, _guest_front("wriothesley", 8))
+    assert st.player.stage == [["wriothesley", 8], ["usher", 3],
+                               ["crabaletta", 4]]
+    hp = st.player.hp
+    FS.absorb(st, 5)
+    FS.settle_hit(st)
+    assert st.player.stage[0] == ["wriothesley", 3]
+    assert st.player.stage[1:] == [["usher", 3], ["crabaletta", 4]]
+    assert st.player.hp == hp
+    # And his act reads what that hit took: twice 5.
+    st.enemies = [_enemy(hp=100)]
+    FS.perform(st, "wriothesley")
+    assert st.enemies[0].hp == 100 - 2 * 5
+
+
+def test_wriothesley_on_a_full_stage_recasts_the_back(arm):
+    """The recast rule, the leaver at the other end: the BACK performer Bows
+    and leaves, and he arrives at the front holding 8 plus its Fanfare."""
+    st = _state([["usher", 5], ["chevalmarin", 2], ["crabaletta", 4]],
+                enemies=[_enemy(hp=100)])
+    effects.resolve_card(st, _guest_front("wriothesley", 8))
+    assert st.player.stage == [["wriothesley", 8 + 4], ["usher", 5],
+                               ["chevalmarin", 2]]
+    # Crabaletta's Bow is her act.
+    assert st.enemies[0].hp == 100 - FS.ACT_CRABALETTA_DAMAGE
+    leave = [e for e in st.log if e["event"] == "stage_leave"]
+    assert (leave[-1]["member"], leave[-1]["reason"]) == (
+        "crabaletta", "recast")
+
+
+def test_a_repeat_wriothesley_returns_to_his_own_seat(arm):
+    """A second copy is unchanged: he Bows and returns to the seat he had."""
+    st = _state([["usher", 3], ["wriothesley", 2]], enemies=[_enemy(hp=100)])
+    effects.resolve_card(st, _guest_front("wriothesley", 8))
+    assert st.player.stage == [["usher", 3], ["wriothesley", 10]]
+
+
+def test_the_forecast_puts_the_hit_on_a_front_wriothesley(arm):
+    """The forecast reads the stage the card left: past Usher's 3 Block,
+    the hit goes to him and none of it to her."""
+    st = _state([["usher", 3], ["crabaletta", 4]],
+                enemies=[_attack_enemy([9])])
+    effects.resolve_card(st, _guest_front("wriothesley", 8))
+    forecast = FS.forecast(st)
+    assert forecast["after"][0][0] == "wriothesley"
+    assert forecast["front_takes"] == 9 - FS.ACT_USHER_BLOCK
+    assert forecast["reaches_furina"] == 0
 
 
 def test_a_second_copy_bows_the_guest_and_returns_it_with_the_fanfare_added(

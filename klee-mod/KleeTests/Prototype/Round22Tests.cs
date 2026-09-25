@@ -76,7 +76,9 @@ public class Round22Tests
             .GetMethod("UpdateCardPreview", All)!;
         var calls = Il.Calls(folded);
 
-        Assert.Single(calls.Where(c => c == "HitOrder.BodyForPreview"));
+        // The guest seat round: the one body is named through
+        // `FoldedPreview.Body` (`HitOrder.BodyForPreview` off the Stage).
+        Assert.Single(calls.Where(c => c == "FoldedPreview.Body"));
         Assert.DoesNotContain("SimDamagePipeline.TargetMods", calls);
         Assert.Contains(calls,
             c => c.EndsWith("CalculatedDamageVar.UpdateCardPreview",

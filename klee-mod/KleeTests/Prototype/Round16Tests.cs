@@ -473,7 +473,10 @@ public class Round16Tests
             folded.BaseType);
         var calls = Il.Calls(
             folded.GetMethod("UpdateCardPreview", All)!).ToList();
-        Assert.Contains(calls, c => c.Contains("BodyForPreview"));
+        // The guest seat round (2026-09-25): the body is named through
+        // `FoldedPreview.Body`, which is `HitOrder.BodyForPreview` off a
+        // Furina Stage board.
+        Assert.Contains(calls, c => c.Contains("FoldedPreview.Body"));
         Assert.Contains(calls, c => c.Contains("FrontEnemy"));
         Assert.Contains(calls, c => c.Contains("UpdateCardPreview"));
         Assert.DoesNotContain(calls, c => c.Contains("TargetMods"));

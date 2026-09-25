@@ -48,8 +48,11 @@ public class Eb328FaceOrderTests
                  { typeof(FrontFoldedDamageVar), typeof(FoldedDamageVar) })
         {
             var calls = CallsOf(var);
-            // The body is named once ...
-            Assert.Contains("HitOrder.BodyForPreview", calls);
+            // The body is named once (the guest seat round: through
+            // `FoldedPreview.Body`, which is `HitOrder.BodyForPreview` off a
+            // Furina Stage board and the game's own target on one) ...
+            Assert.Contains("FoldedPreview.Body", calls);
+            Assert.Contains("FurinaStage.LiveFor", calls);
             Assert.Contains("KokomiPlan.FrontEnemy", calls);
             // ... and handed to the game's own var, which runs phases 1-4 in
             // the engine's order over it.
