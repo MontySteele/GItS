@@ -2225,7 +2225,7 @@
 - {id: proto_fs_guest_of_honor, name: "Guest of Honor", character: furina,
    authored_by: [claude], multiplayer: true,
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Choose another player. Until your next turn, attacks on them hit their [gold]Block[/gold], then your [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then them.",
+   description: "Until your next turn, attacks on another player hit their [gold]Block[/gold], then your [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then them.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: fs_guest_of_honor, amount: 1, target: ally}]}
 

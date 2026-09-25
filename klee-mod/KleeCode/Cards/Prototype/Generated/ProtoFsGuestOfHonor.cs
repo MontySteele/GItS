@@ -50,7 +50,7 @@ public sealed class ProtoFsGuestOfHonor : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest of Honor"),
-        ("description", "Choose another player. Until your next turn, attacks on them hit their [gold]Block[/gold], then your [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then them."),
+        ("description", "Until your next turn, attacks on another player hit their [gold]Block[/gold], then your [gold]lead performer[/gold]'s [gold]Fanfare[/gold], then them."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
