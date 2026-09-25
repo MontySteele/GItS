@@ -297,19 +297,26 @@ public static class FurinaStage
 
     /// <summary>
     /// Rule 3. Fill the back-most empty seat at
-    /// <see cref="FurinaStageLaw.SummonFanfare"/>; on a FULL stage rotate, the
-    /// front leaving with no bow and the newcomer taking its bar.
+    /// <see cref="FurinaStageLaw.SummonFanfare"/>; on a FULL stage recast
+    /// (<see cref="RecastFromFront"/>): the front Bows and leaves, and the
+    /// newcomer takes the back seat holding its Fanfare. Named and random
+    /// alike since the trio can be cloned (2026-09-25): a named summon used to
+    /// rotate the front off with no Bow, which [USER]'s "Stage members bow
+    /// out when they are destroyed or replaced" had already ruled out.
     ///
-    /// <para><paramref name="ifPresentRaise"/> is the three named Commons'
-    /// second clause -- "Summon Usher. If he is already on stage, Raise 3 on
-    /// him instead" -- and it is the ONE Raise in the kit that does not go to
-    /// the back seat, which is why it is written on the face.</para>
+    /// <para>THE TRIO CAN BE CLONED (2026-09-25; [USER]: "Let's allow for
+    /// copies and then check the balance."). A named summon always summons,
+    /// even when that performer is already on stage -- the old "if he's
+    /// already on stage, he gains 3 Fanfare" clause is gone from the faces and
+    /// from here.</para>
     ///
-    /// <para><paramref name="member"/> of <c>"random"</c> rolls one who is not
-    /// on stage. ON A FULL STAGE the lead takes a Bow and moves to the back
-    /// seat keeping its Fanfare (<see cref="RecastFromFront"/>, 2026-09-25):
-    /// before that rule a random summon with all three seated summoned
-    /// nobody, and a first-time player read the card as doing nothing.</para>
+    /// <para><paramref name="member"/> of <c>"random"</c> rolls uniformly
+    /// from all three of the trio (<see cref="RollAny"/>), on stage or not.
+    /// ON A FULL STAGE the lead takes a Bow and leaves, and the roll arrives
+    /// at the back holding its Fanfare (<see cref="RecastFromFront"/>,
+    /// 2026-09-25): before that rule a random summon with all three seated
+    /// summoned nobody, and a first-time player read the card as doing
+    /// nothing.</para>
     ///
     /// <para>AND THE NEWCOMER DOES NOT ACT ON ARRIVAL (`EB-738`, round one's
     /// one E default). Rule 3 reads "a newcomer performs with the others at
@@ -322,38 +329,20 @@ public static class FurinaStage
     /// standing there once. It stays awaited because the bodies are.</para>
     /// </summary>
     public static async Task Summon(PlayerChoiceContext choiceContext,
-                                    Creature? owner, string member,
-                                    int ifPresentRaise = 0)
+                                    Creature? owner, string member)
     {
         if (!LiveFor(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
 
-        StagePerformer who;
-        if (member == "random")
+        var random = member == "random";
+        if (ledger.IsFull)
         {
-            if (ledger.IsFull)
-            {
-                await RecastFromFront(choiceContext, owner!);
-                return;
-            }
-            if (RollFree(owner!, ledger) is not { } rolled) return;
-            who = rolled;
-            NoteSummoned(rolled);
+            await RecastFromFront(choiceContext, owner!,
+                                  random ? null : Parse(member));
+            return;
         }
-        else
-        {
-            who = Parse(member);
-            if (ledger.SeatOf(who) is { } already)
-            {
-                if (ifPresentRaise > 0)
-                {
-                    ledger.RaiseSeat(already, ifPresentRaise);
-                    FurinaStagePets.SyncBars(owner);
-                    Vfx.FurinaStageStrip.Refresh(owner);
-                }
-                return;
-            }
-        }
+        var who = random ? RollAny(owner!) : Parse(member);
+        if (random) NoteSummoned(who);
 
         ledger.Summon(who);
         await FurinaStagePets.Sync(owner);
@@ -371,12 +360,13 @@ public static class FurinaStage
     ///   2. the Bow is a real one: its departure effect fires, and so does
     ///      every Bow reader -- Thunderous Applause draws and Raises -- but
     ///      A FIVE-CENTURY ACT DOES NOT RETURN IT (<c>mayReturn: false</c>),
-    ///      because the summon is already bringing it back;
-    ///   3. the newcomer enters the back seat holding the lead's remaining
-    ///      Fanfare (<see cref="FurinaStageLedger.RecastToBack"/>). Three
-    ///      performers stand in three seats, so the one free to arrive is the
-    ///      one who just bowed: in play the lead takes its Bow and moves to
-    ///      the back seat, keeping its Fanfare, and keeps its body too.
+    ///      because the summon is filling the seat it would return to;
+    ///   3. the newcomer -- a uniform roll over the trio since the trio can be
+    ///      cloned (2026-09-25) -- enters the back seat holding the lead's
+    ///      remaining Fanfare. Where the roll lands on the performer who just
+    ///      bowed, the same seat goes back (<see cref="FurinaStageLedger.RecastToBack"/>)
+    ///      and keeps its body; otherwise a new body arrives
+    ///      (<see cref="FurinaStageLedger.ArriveAtBack"/>).
     ///
     /// THE ORDER IS BOW, THEN READERS, THEN ARRIVAL -- <see cref="AfterBow"/>'s
     /// own order ("applause then return") -- so Thunderous Applause's Raise
@@ -389,15 +379,24 @@ public static class FurinaStage
     /// runs this twice, so two performers bow.
     /// </summary>
     private static async Task RecastFromFront(
-        PlayerChoiceContext choiceContext, Creature owner)
+        PlayerChoiceContext choiceContext, Creature owner,
+        StagePerformer? named = null)
     {
         var ledger = FurinaStageLedger.For(owner);
         if (ledger.BowFromFront() is not { } leaver) return;
-        NoteSummoned(leaver.Who);
+        var who = named ?? RollAny(owner);
+        if (named == null) NoteSummoned(who);
         await Bow(choiceContext, owner,
                   new StageExit(leaver.Who, StageDeparture.Spent),
                   mayReturn: false);
-        ledger.RecastToBack(leaver);
+        if (who == leaver.Who)
+        {
+            ledger.RecastToBack(leaver);
+        }
+        else
+        {
+            ledger.ArriveAtBack(who, leaver.Fanfare);
+        }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }
@@ -424,18 +423,15 @@ public static class FurinaStage
         ResolutionLedger.NoteSummon(Name(who),
                                     FurinaStageLedger.DisplayName(who));
 
-    /// <summary>A random performer who is not on stage, or null with all
-    /// three seated; on an empty stage, any of the three. One roll for the
-    /// random summons and the empty-stage Raise.</summary>
-    private static StagePerformer? RollFree(Creature owner,
-                                            FurinaStageLedger ledger)
+    /// <summary>A uniform roll over the three of the trio, on stage or not
+    /// (2026-09-25: the trio can be cloned; [USER]: "Let's allow for copies
+    /// and then check the balance."). One roll for the random summons, the
+    /// full-stage recast and the empty-stage Raise.</summary>
+    private static StagePerformer RollAny(Creature owner)
     {
-        var seated = ledger.Company.ToHashSet();
-        var free = Performers.Select(Parse)
-            .Where(p => !seated.Contains(p)).ToList();
-        if (free.Count == 0) return null;
+        var trio = Performers.Select(Parse).ToList();
         var roll = owner.Player?.RunState.Rng.CombatTargets;
-        return roll != null ? roll.NextItem(free) : free[0];
+        return roll != null ? roll.NextItem(trio) : trio[0];
     }
 
     /// <summary>
@@ -451,7 +447,7 @@ public static class FurinaStage
     {
         var ledger = FurinaStageLedger.For(owner);
         if (amount <= 0 || !ledger.IsEmpty) return false;
-        if (RollFree(owner, ledger) is not { } who) return false;
+        var who = RollAny(owner);
         if (ledger.SummonOnEmpty(who, amount) == null) return false;
         NoteSummoned(who);
         await FurinaStagePets.Sync(owner);
@@ -597,7 +593,7 @@ public static class FurinaStage
         {
             if (owner!.IsDead) return;
             if (seat.Resting) continue;
-            await Perform(choiceContext, owner, Name(seat.Who));
+            await Perform(choiceContext, owner, seat);
         }
         Vfx.FurinaStageStrip.Refresh(owner);
     }
@@ -776,11 +772,15 @@ public static class FurinaStage
     /// bar. ONE implementation for every caller -- the end-of-turn sweep,
     /// <i>Bis!</i>, <i>Tutti!</i> and, since draft 3 (2026-09-25), the
     /// <see cref="Bow"/> -- so an act cannot mean two things.</summary>
+    /// <remarks>BY SEAT and not by name since the trio can be cloned
+    /// (2026-09-25): two Ushers are two seats, and the beat files the one
+    /// that acted.</remarks>
     public static async Task Perform(PlayerChoiceContext choiceContext,
-                                     Creature? owner, string member)
+                                     Creature? owner, StageSeat seat)
     {
         if (!LiveFor(owner)) return;
-        await Act(choiceContext, owner!, Parse(member), "act");
+        await Act(choiceContext, owner!, seat.Who,
+                  FurinaStageLedger.ActEvent, seat);
     }
 
     /// <summary>
@@ -796,7 +796,7 @@ public static class FurinaStage
     /// </summary>
     private static async Task Act(PlayerChoiceContext choiceContext,
                                   Creature owner, StagePerformer who,
-                                  string beat)
+                                  string beat, StageSeat? seat = null)
     {
         // `EB-735`, and `EB-511`'s lesson: the beat files WHAT THE BOARD LOST,
         // measured across the act, and never the clause's own printed figure.
@@ -856,7 +856,7 @@ public static class FurinaStage
                 }
                 break;
         }
-        NoteBeat(owner, beat, who, before, hit, each, struck);
+        NoteBeat(owner, beat, who, before, hit, each, struck, seat);
     }
 
     /// <summary>2026-09-25 evening: the one figure every enemy was dealt, or
@@ -881,7 +881,7 @@ public static class FurinaStage
         // A resting returnee does not act this turn (R276 batch two).
         if (Lead(owner) is { Resting: false } lead)
         {
-            await Perform(choiceContext, owner, Name(lead.Who));
+            await Perform(choiceContext, owner, lead);
         }
     }
 
@@ -904,7 +904,7 @@ public static class FurinaStage
             for (var i = 0; i < times; i++)
             {
                 if (owner!.IsDead) return;
-                await Perform(choiceContext, owner, Name(seat.Who));
+                await Perform(choiceContext, owner, seat);
             }
         }
         ledger.EndRest();
@@ -1026,13 +1026,17 @@ public static class FurinaStage
                                  StagePerformer who,
                                  (int Block, int EnemyHp) before,
                                  Creature? hit = null, int each = -1,
-                                 int struck = -1)
+                                 int struck = -1, StageSeat? acting = null)
     {
         var after = Ledger(owner);
         var moved = (after.Block - before.Block)
                     + (before.EnemyHp - after.EnemyHp);
         var ledger = FurinaStageLedger.For(owner);
-        var seat = ledger.SeatIndexOf(who);
+        // The seat that acted, where the caller knows it (two Ushers are two
+        // seats since the trio can be cloned); else the first of that name.
+        var seat = acting != null
+            ? IndexOfSeat(ledger, acting)
+            : ledger.SeatIndexOf(who);
         ledger.Note(new StageBeat(
             what, who, seat,
             seat >= 0 ? ledger.Seats[seat].Fanfare : 0,
@@ -1045,6 +1049,15 @@ public static class FurinaStage
             hit?.Monster?.Title.ToString() ?? "",
             hit?.CombatId.ToString() ?? "",
             each, Struck: struck));
+    }
+
+    private static int IndexOfSeat(FurinaStageLedger ledger, StageSeat seat)
+    {
+        for (var i = 0; i < ledger.Seats.Count; i++)
+        {
+            if (ReferenceEquals(ledger.Seats[i], seat)) return i;
+        }
+        return -1;
     }
 
     /// <summary>

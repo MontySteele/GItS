@@ -60,21 +60,22 @@ performers with their own bars, and Fanfare is that bar.**
    her starting relic. Defect's free Lightning orb, as a body. The first
    hand sees 3: regen (rule 4) begins on her second turn.
 3. **A summon card fills the back-most empty seat** with that performer at
-   1 Fanfare. **A random summon on a full stage works like a Defect orb**
+   1 Fanfare. **A summon on a full stage works like a Defect orb**
    (2026-09-25; [USER]: "treat this like a Defect orb summon? the stage
    members rotate, … bows, and their remaining fanfare transfers to the
    newest member", and the seat that leaves is the lead): the lead
    performer takes a Bow and leaves, the other two step forward, and the
-   newcomer takes the back seat holding the lead's remaining Fanfare. With
-   three performers in three seats the newcomer is always the performer
-   who just bowed, so in play the lead takes its Bow and moves to the back
-   seat, keeping its Fanfare. The Bow is a real one (its effect and every
-   Bow reader fire, Thunderous Applause included), in the order bow,
-   readers, arrival; A Five-Century Act does not also return it. This
-   replaced the rotation that retired the front WITHOUT a bow, which a
-   first-time co-op player met as a summon that did nothing. A named
-   summon whose performer is already on stage still Raises 3 on it
-   instead (§10 default 2). Pools are never lost. A newcomer performs with
+   newcomer takes the back seat holding the lead's remaining Fanfare. The
+   Bow is a real one (its effect and every Bow reader fire, Thunderous
+   Applause included), in the order bow, readers, arrival; A Five-Century
+   Act does not also return it. This replaced the rotation that retired the
+   front WITHOUT a bow, which a first-time co-op player met as a summon that
+   did nothing. **The trio can be cloned** (2026-09-25: the trio can be
+   cloned; [USER]: "Let's allow for copies and then check the balance."): a
+   named summon always summons, even when that performer is already on
+   stage, and a random summon picks uniformly from all three, on stage or
+   not. Named and random summons meet a full stage the same way. Pools are
+   never lost. A newcomer performs with
    the others at the end of that turn, never on arrival (round one,
    `EB-738`: both engines had read this sentence as an act on play).
 4. **The lead performer regains 1 Fanfare at the start of Furina's turn**,
@@ -203,7 +204,7 @@ Nibbit at 44 HP (`tier05/content/act1_pool.yaml`: Butt 12, Hesitant Slice
 6 with 5 Block, Hiss +2 Strength). Furina 78, 3 Energy, five cards a turn.
 The starter: three Soloist's Solicitation (6), three Stage Presence (Block
 6), Regal Bearing (Block 3, Weak 1), all the base game's basics and
-untouched; plus Take the Stage (summon a random performer not on stage),
+untouched; plus Take the Stage (summon a random performer),
 Curtain Rise (Deal 7. Spend 3: deal 13 instead), Rising Applause (Raise 5
 Fanfare on the back performer). Usher is in front at 3 from the relic.
 Nibbit's script here: Butt, Hiss, Slice, Butt.
@@ -300,9 +301,11 @@ Expend, on the same seed.
 
 1. Usher is the fixed opening performer (E). Fixed for legibility; random
    is the alternative if fight one reads as samey.
-2. Take the Stage summons a random performer not on stage (D); the three
-   named summons are Commons, and a named summon whose performer is
-   already on stage Raises 3 on it instead, so it is never a dead draw (E).
+2. Take the Stage summons a random performer, picked uniformly from all
+   three (D); the three named summons are Commons, and a named summon
+   always summons, even when that performer is already on stage (2026-09-25:
+   the trio can be cloned; [USER]: "Let's allow for copies and then check
+   the balance.").
 3. Opening Fanfare 3, regen 1 from turn two, Refill 5, the nominal rate 2,
    the acts and the bows at the numbers in §3 (D, the sim's).
 4. A Spend needs its full price from the back performer, and a bow comes
@@ -364,9 +367,9 @@ Names are provisional.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Gentilhomme Usher | 1 | Skill | Summon Usher. If he's already on stage, he gains 3 Fanfare. |
-| Surintendante Chevalmarin | 1 | Skill | Apply Hydro to ALL enemies. Summon Chevalmarin. If she's already on stage, she gains 3 Fanfare. (2026-09-25, draft 3: Hydro comes from cards.) |
-| Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. If she's already on stage, she gains 3 Fanfare. |
+| Gentilhomme Usher | 1 | Skill | Summon Usher. (2026-09-25: the trio can be cloned; the "already on stage" clause is gone.) |
+| Surintendante Chevalmarin | 1 | Skill | Apply Hydro to ALL enemies. Summon Chevalmarin. (2026-09-25, draft 3: Hydro comes from cards. The same evening: the trio can be cloned.) |
+| Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. (2026-09-25: the trio can be cloned.) |
 | Understudy | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Warm Reception | 1 | Skill | Your back performer gains 3 Fanfare. Draw 1 card. |
 | Tidal Flourish | 1 | Attack | Deal 5 damage to ALL enemies. Spend 2: deal 9 and apply Hydro to ALL instead. (2026-09-25, draft 3.) |
@@ -441,7 +444,7 @@ act resolves twice, and each further copy adds one more act. Thunderous
 Applause gives its Fanfare after the bowing performer has left, so on an
 empty stage it summons a random performer holding the amount (round four), and the
 draw still happens. Let the People Rejoice's performers return to empty seats
-only, so one that finds none (an applause summon or Usher's Bow took it) does not return, and one that summon already brought back does not return a second time: the stage never holds two of the same performer after the card. A Rapt Audience does nothing while one
+only, so one that finds none (an applause summon or Usher's Bow took it) does not return. Since the trio can be cloned (2026-09-25) the no-duplicate rule applies to guests only: a guest that a summon already brought back does not return a second time. A Rapt Audience does nothing while one
 performer is both front and back. Arkhe Alignment's "double" multiplies the
 act's printed number (Usher 6 Block, Chevalmarin 4 to every enemy, Crabaletta
 10). One question a turn however many copies are in play: copies add (two

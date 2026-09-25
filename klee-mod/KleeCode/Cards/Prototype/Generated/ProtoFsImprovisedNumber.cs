@@ -38,7 +38,7 @@ public sealed class ProtoFsImprovisedNumber : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, true), this), this), this);
+        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_improvised_number");
 
@@ -71,7 +71,7 @@ public sealed class ProtoFsImprovisedNumber : CustomCardModel, ICharacterCard
             .Execute(choiceContext);
         if (!FurinaStage.Occupied(Owner.Creature))
         {
-            await FurinaStage.Summon(choiceContext, Owner.Creature, "random", 0);
+            await FurinaStage.Summon(choiceContext, Owner.Creature, "random");
         }
     }
 

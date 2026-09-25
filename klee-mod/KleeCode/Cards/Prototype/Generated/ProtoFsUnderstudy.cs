@@ -41,7 +41,7 @@ public sealed class ProtoFsUnderstudy : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, true), this), this), this);
+        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_understudy");
 
@@ -66,7 +66,7 @@ public sealed class ProtoFsUnderstudy : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "random", 0);
+        await FurinaStage.Summon(choiceContext, Owner.Creature, "random");
     }
 
     protected override void OnUpgrade()

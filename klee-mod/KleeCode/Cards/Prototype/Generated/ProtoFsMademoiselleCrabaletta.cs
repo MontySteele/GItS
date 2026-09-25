@@ -38,14 +38,14 @@ public sealed class ProtoFsMademoiselleCrabaletta : CustomCardModel, ICharacterC
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
+        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("mademoiselle_crabaletta");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mademoiselle Crabaletta"),
-        ("description", "Summon Crabaletta. If she's already on stage, she gains 3 [gold]Fanfare[/gold]."),
+        ("description", "Summon Crabaletta."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoFsMademoiselleCrabaletta : CustomCardModel, ICharacterC
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "crabaletta", 3);
+        await FurinaStage.Summon(choiceContext, Owner.Creature, "crabaletta");
     }
 
     protected override void OnUpgrade()

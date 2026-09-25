@@ -1254,14 +1254,6 @@ STAGE_SUMMONERS = {
 }
 
 
-#: The rows whose summons are all NAMED, and so take the Summon tip's named
-#: variant: no full-stage sentence, because their face says what a performer
-#: already on stage does.
-NAMED_SUMMONERS = {"proto_fs_gentilhomme_usher",
-                   "proto_fs_surintendante_chevalmarin",
-                   "proto_fs_mademoiselle_crabaletta"}
-
-
 def test_every_summoning_row_and_no_other_owes_the_summon_tips():
     """DERIVED FROM THE OP, never a list of ids: a row that gains a summon
     gains the tips the day its row exists."""
@@ -1269,8 +1261,8 @@ def test_every_summoning_row_and_no_other_owes_the_summon_tips():
     found = {rid: gen.stage_summon_tip_calls(row)
              for rid, row in rows.items()
              if gen.stage_summon_tip_calls(row)}
-    expected = {rid: [("ArmKeywordTips.ForSummon",
-                       ", false" if rid in NAMED_SUMMONERS else ", true")]
+    # ONE Summon tip since the trio can be cloned (2026-09-25).
+    expected = {rid: [("ArmKeywordTips.ForSummon", "")]
                 + [(f"ArmKeywordTips.For{who}", "") for who in cast]
                 for rid, cast in STAGE_SUMMONERS.items()}
     assert found == expected
@@ -1283,7 +1275,6 @@ def test_every_summoning_row_carries_the_summon_and_performer_tips(rid):
     cls = "ProtoFs" + "".join(
         part.capitalize() for part in rid.removeprefix("proto_fs_").split("_"))
     src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
-    variant = "false" if rid in NAMED_SUMMONERS else "true"
     # The Summon tip wraps the card's own tips: the base list, or (draft 3,
     # 2026-09-25) Chevalmarin's card's Hydro tip, which attaches where the
     # keyword prints.
@@ -1291,7 +1282,7 @@ def test_every_summoning_row_carries_the_summon_and_performer_tips(rid):
     assert re.search(
         r"ArmKeywordTips\.ForSummon\((base\.ExtraHoverTips|"
         r"KleeCardTooltips\.ForCard\(base\.ExtraHoverTips, [^;]*?\)), "
-        rf"this, {variant}\)", src)
+        r"this\)", src)
     for who in STAGE_SUMMONERS[rid]:
         assert f"ArmKeywordTips.For{who}(" in src
     for who in {"Usher", "Chevalmarin", "Crabaletta"} - set(
@@ -1306,11 +1297,10 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
     for clause in (
             '"A performer joins at the back with "',
             "FurinaStageLaw.SummonFanfare",
-            '" [gold]Fanfare[/gold]. If the "',
-            '"stage is full, your front performer [gold]Bow[/gold]s and "',
-            '"moves to the back instead."',
-            '" [gold]Fanfare[/gold].");',
-            "if (random)",
+            # One sentence since the trio can be cloned (2026-09-25).
+            '" [gold]Fanfare[/gold]. On a full "',
+            '"stage, the front one [gold]Bow[/gold]s and leaves, and the "',
+            '"newcomer takes its Fanfare.");',
             # Draft 3 (2026-09-25): one sentence each -- no Bow clause (a
             # Bow is the act once more) and no Hydro (no act applies it).
             '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
@@ -1340,11 +1330,8 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     the numerals written out."""
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
-        "A performer joins at the back with 1 Fanfare. If the stage is full, "
-        "your front performer Bows and moves to the back instead.")
-    from understudy import blindplay_notes
-    assert blindplay_notes.SUMMON_NAMED_ROW == (
-        "A performer joins at the back with 1 Fanfare.")
+        "A performer joins at the back with 1 Fanfare. On a full stage, the "
+        "front one Bows and leaves, and the newcomer takes its Fanfare.")
     assert rows["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
     assert rows["Surintendante Chevalmarin"] == (
         "End of your turn: deal 2 damage to ALL enemies.")

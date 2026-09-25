@@ -604,15 +604,29 @@ class _Picks(random.Random):
         return self.pick if self.pick in seq else super().choice(seq)
 
 
+class _Seq(random.Random):
+    """An rng whose `choice` over the three performers returns `picks` in
+    order, then falls back to `choice`."""
+
+    def __init__(self, *picks):
+        super().__init__(0)
+        self.picks = list(picks)
+
+    def choice(self, seq):
+        if self.picks and self.picks[0] in seq:
+            return self.picks.pop(0)
+        return super().choice(seq)
+
+
 @pytest.mark.parametrize("pick", FS.PERFORMERS)
 @pytest.mark.parametrize("applause", [False, True])
-def test_the_rare_never_leaves_two_of_one_performer(arm, pick, applause):
+def test_the_rare_returns_the_trio_beside_a_clone(arm, pick, applause):
     """2026-09-25: a Thunderous Applause Raise summons a random performer
-    onto the stage the card emptied. Whoever it picks is already back, so
-    that member of the company does not return a second time; the others
-    take the empty seats. Without the applause nothing summons (Usher's Bow
-    is Block since draft 3) and the company returns in seat order. Every
-    pick."""
+    onto the stage the card emptied. Since the trio can be cloned ([USER]:
+    "Let's allow for copies and then check the balance.") the company
+    returns into the empty seats in seat order whoever it picked, so a clone
+    of the pick can stand beside it. Without the applause nothing summons
+    and the company returns in seat order. Every pick."""
     st = _state(enemies=[_enemy(hp=200)])
     st.rng = _Picks(pick)
     st.player.draw_pile = [_card(cid=str(i)) for i in range(5)]
@@ -624,13 +638,11 @@ def test_the_rare_never_leaves_two_of_one_performer(arm, pick, applause):
     FS.collect_all(st)
     FS.bow_and_return(st)
     members = [m for m, _f in st.player.stage]
-    assert len(members) == len(set(members)) == FS.SEATS
+    assert len(members) == FS.SEATS
     if not applause:
         assert members == ["usher", "chevalmarin", "crabaletta"]
         return
-    assert members[0] == pick
-    assert members[1:] == [m for m in ("usher", "chevalmarin", "crabaletta")
-                           if m != pick][:2]
+    assert members == [pick, "usher", "chevalmarin"]
 
 
 def test_the_rare_without_usher_returns_everyone(arm):
@@ -819,23 +831,38 @@ def test_the_policy_answers_nothing_with_the_arm_off():
     assert FS.spend_mode_index(st, _curtain_rise().effects[0]["modes"]) is None
 
 
-def test_a_named_summon_raises_the_performer_it_finds_already_on_stage(arm):
-    """Sec.10 default 2 (E): "so it is never a dead draw"."""
+def test_a_named_summon_clones_a_performer_already_on_stage(arm):
+    """2026-09-25: the trio can be cloned ([USER]: "Let's allow for copies
+    and then check the balance."). A named summon always summons."""
     st = _state()
     st.player.stage = [["usher", 4]]
-    card = _card(effects=[{"op": "stage_summon", "member": "usher",
-                           "if_present_raise": 3}])
+    card = _card(effects=[{"op": "stage_summon", "member": "usher"}])
     effects.resolve_card(st, card)
-    assert st.player.stage == [["usher", 7]]
+    assert st.player.stage == [["usher", 4], ["usher", FS.SUMMON_FANFARE]]
 
 
-def test_a_random_summon_only_ever_fields_somebody_not_on_stage(arm):
+def test_a_random_summon_rolls_from_all_three(arm):
+    """2026-09-25: uniform over the trio, on stage or not."""
     st = _state()
+    st.rng = _Seq("usher")
     st.player.stage = [["usher", 1], ["chevalmarin", 1]]
     card = _card(effects=[{"op": "stage_summon", "member": "random"}])
     effects.resolve_card(st, card)
     assert [m for m, _f in st.player.stage] == [
-        "usher", "chevalmarin", "crabaletta"]
+        "usher", "chevalmarin", "usher"]
+
+
+def test_two_ushers_act_twice_and_a_resting_clone_sits_out(arm):
+    """Two Ushers are two seats: both act. A Five-Century Act's returnee
+    rests by SEAT, so the Usher who never left still acts."""
+    st = _state(enemies=[_enemy(hp=60)])
+    st.player.stage = [["usher", 3], ["usher", 1]]
+    FS.end_of_turn_acts(st)
+    assert st.player.block == 2 * FS.ACT_USHER_BLOCK
+    st.player.block = 0
+    st.player.stage_resting.append(st.player.stage[1])
+    FS.end_of_turn_acts(st)
+    assert st.player.block == FS.ACT_USHER_BLOCK
 
 
 def test_the_readers_read_the_seat_they_name(arm):
@@ -1377,8 +1404,11 @@ def test_tutti_costs_one_and_zero_upgraded():
 # stage is full, then summoning a new actor doesn't do anything".
 # ---------------------------------------------------------------------------
 
-def _full_stage():
+def _full_stage(*picks):
+    """A full stage whose random rolls land on `picks` in order -- Usher by
+    default, the performer who bows first, so the recast moves him back."""
     st = _state(enemies=[_enemy(hp=60)])
+    st.rng = _Seq(*(picks or ("usher",)))
     st.player.stage = [["usher", 5], ["chevalmarin", 2], ["crabaletta", 4]]
     return st
 
@@ -1402,6 +1432,17 @@ def test_a_random_summon_on_a_full_stage_bows_the_lead_to_the_back(arm):
     assert not [e for e in st.log if e["event"] == "stage_summon_whiffed"]
 
 
+def test_a_random_recast_may_field_a_different_performer(arm):
+    """2026-09-25, the trio can be cloned: the roll is uniform over all
+    three, so the lead may Bow and a DIFFERENT performer arrive at the back
+    holding its Fanfare -- here a second Crabaletta."""
+    st = _full_stage("crabaletta")
+    effects.resolve_card(st, _random_summon())
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.player.stage == [["chevalmarin", 2],
+                               ["crabaletta", 4], ["crabaletta", 5]]
+
+
 def test_the_recast_does_not_act_on_arrival(arm):
     """`EB-738` stands: the returning performer acts once, at the end of the
     turn, with everyone else."""
@@ -1414,9 +1455,10 @@ def test_the_recast_does_not_act_on_arrival(arm):
 
 
 def test_double_casting_on_a_full_stage_bows_twice(arm):
-    """Two random summons on a full stage: the lead bows and moves back, and
-    then the NEW lead does the same. Intended."""
-    st = _full_stage()
+    """Two random summons on a full stage: the lead bows and a roll arrives
+    at the back holding its Fanfare, and then the NEW lead does the same.
+    Intended. Rolls: Usher, then Chevalmarin, so each leaver comes back."""
+    st = _full_stage("usher", "chevalmarin")
     hp = st.enemies[0].hp
     effects.resolve_card(st, _random_summon(times=2))
     bows = [e["member"] for e in st.log if e["event"] == "stage_bow"]
@@ -1463,15 +1505,17 @@ def test_thunderous_applause_fires_on_the_recast_bow_before_the_arrival(arm):
                                ["crabaletta", 6], ["usher", 5]]
 
 
-def test_a_named_summon_on_a_full_stage_still_raises_instead(arm):
-    """Named summons are unchanged: the named performer is on stage, so the
-    printed clause Raises 3 on him where he sits, and nobody bows."""
+def test_a_named_summon_on_a_full_stage_recasts_too(arm):
+    """2026-09-25, the trio can be cloned: a named summon always summons, and
+    on a full stage it meets the front the way a random one does -- the front
+    Bows and leaves, and the named performer arrives at the back holding its
+    Fanfare."""
     st = _full_stage()
     effects.resolve_card(st, _card(effects=[
-        {"op": "stage_summon", "member": "usher", "if_present_raise": 3}]))
-    assert st.player.stage == [["usher", 8], ["chevalmarin", 2],
-                               ["crabaletta", 4]]
-    assert st.player.block == 0
+        {"op": "stage_summon", "member": "crabaletta"}]))
+    assert st.player.block == FS.ACT_USHER_BLOCK
+    assert st.player.stage == [["chevalmarin", 2], ["crabaletta", 4],
+                               ["crabaletta", 5]]
 
 
 # ---------------------------------------------------------------------------

@@ -6261,45 +6261,25 @@ def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
     """Brief sec.3 rule 3 and sec.12's four summons.
 
     `member:` names one of the three; `member: random` (the default, and what
-    *Salon Début* and *Understudy* print) rolls one who is NOT ON STAGE, which
-    is sec.10 default 2. ON A FULL STAGE a random summon runs
-    `furina_stage.recast_front` (2026-09-25): the lead takes a Bow and moves to
-    the back seat keeping its Fanfare, the Defect-orb rule [USER] ruled. Before
-    it, a roll with every performer seated summoned nobody.
+    *Salon Début* and *Understudy* print) rolls uniformly from all three of
+    the trio, on stage or not (2026-09-25: the trio can be cloned; [USER]:
+    "Let's allow for copies and then check the balance."). A named summon
+    always summons, even when that performer is already on stage.
 
-    `if_present_raise: N` is the named summons' second clause: "Summon Usher.
-    If he is already on stage, Raise 3 on him instead" (sec.10 default 2, E:
-    "so it is never a dead draw"). The Raise lands ON HIM, wherever he is
-    sitting -- which is the one place in the kit a Raise does not go to the
-    back seat, and it is written on the face.
+    ON A FULL STAGE every summon runs `furina_stage.recast_front`
+    (2026-09-25): the lead takes a Bow and leaves, and the newcomer takes the
+    back seat holding its Fanfare, the Defect-orb rule [USER] ruled.
     """
     p = state.player
     if not furina_stage.active(p):
         return
     named = fx.get("member", "random")
+    if len(furina_stage.stage(p)) >= furina_stage.SEATS:
+        furina_stage.recast_front(state,
+                                  None if named == "random" else named)
+        return
     if named == "random":
-        if len(furina_stage.stage(p)) >= furina_stage.SEATS:
-            furina_stage.recast_front(state)
-            return
-        seated = {m for m, _f in furina_stage.stage(p)}
-        options = [m for m in furina_stage.PERFORMERS if m not in seated]
-        if not options:
-            state.emit("stage_summon_whiffed", reason="full_cast")
-            return
-        named = state.rng.choice(options)
-    else:
-        bump = int(fx.get("if_present_raise", 0) or 0)
-        for pair in furina_stage.stage(p):
-            if pair[0] == named:
-                if bump:
-                    furina_stage.book_gain(state, furina_stage.GAIN_CARD,
-                                           bump)
-                    pair[1] += bump
-                    state.emit("stage_raise", member=named, amount=bump,
-                               seat="named", fanfare=pair[1])
-                else:
-                    state.emit("stage_summon_whiffed", reason="already_on")
-                return
+        named = state.rng.choice(furina_stage.PERFORMERS)
     furina_stage.summon(state, named)
 
 

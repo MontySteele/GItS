@@ -1903,8 +1903,8 @@
    replaces: gentilhomme_usher,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: gentilhomme_usher,
-   description: "Summon Usher. If he's already on stage, he gains 3 [gold]Fanfare[/gold].",
-   effects: [{op: stage_summon, member: usher, if_present_raise: 3}]}
+   description: "Summon Usher.",
+   effects: [{op: stage_summon, member: usher}]}
 
 - {id: proto_fs_surintendante_chevalmarin, name: "Surintendante Chevalmarin",
    upgrade: {cost: -1},
@@ -1912,9 +1912,9 @@
    replaces: surintendante_chevalmarin,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: surintendante_chevalmarin,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin. If she's already on stage, she gains 3 [gold]Fanfare[/gold].",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin.",
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
-             {op: stage_summon, member: chevalmarin, if_present_raise: 3}]}
+             {op: stage_summon, member: chevalmarin}]}
 
 - {id: proto_fs_mademoiselle_crabaletta, name: "Mademoiselle Crabaletta",
    upgrade: {cost: -1},
@@ -1922,8 +1922,8 @@
    replaces: mademoiselle_crabaletta,
    register: salon, cost: 1, type: skill, rarity: common,
    art_of: mademoiselle_crabaletta,
-   description: "Summon Crabaletta. If she's already on stage, she gains 3 [gold]Fanfare[/gold].",
-   effects: [{op: stage_summon, member: crabaletta, if_present_raise: 3}]}
+   description: "Summon Crabaletta.",
+   effects: [{op: stage_summon, member: crabaletta}]}
 
 - {id: proto_fs_understudy, name: "Understudy", character: furina,
    upgrade: {remove: exhaust},

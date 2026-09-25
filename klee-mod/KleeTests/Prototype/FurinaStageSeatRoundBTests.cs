@@ -85,7 +85,7 @@ public class FurinaStageSeatRoundBTests
     [InlineData(StagePerformer.Usher)]
     [InlineData(StagePerformer.Chevalmarin)]
     [InlineData(StagePerformer.Crabaletta)]
-    public void The_rares_return_never_brings_back_one_already_standing(
+    public void The_rares_return_fills_the_empty_seats_beside_a_clone(
         StagePerformer picked)
     {
         using var _ = new Arm();
@@ -99,12 +99,14 @@ public class FurinaStageSeatRoundBTests
         const int applause = 2;
         stage.SummonOnEmpty(picked, applause);
 
+        // 2026-09-25: the trio can be cloned, so the company returns in seat
+        // order into the two empty seats whoever the applause picked.
         Assert.Equal(2, stage.ReturnCompany(company));
 
         var standing = stage.Seats.Select(s => s.Who).ToList();
-        Assert.Equal(standing.Count, standing.Distinct().Count());
         Assert.Equal(FurinaStageLaw.Seats, standing.Count);
-        Assert.Equal(picked, standing[0]);
+        Assert.Equal(new[] { picked, StagePerformer.Usher,
+                             StagePerformer.Chevalmarin }, standing);
         Assert.Equal(applause, stage.Seats[0].Fanfare);
         Assert.All(stage.Seats.Skip(1),
                    s => Assert.Equal(FurinaStageLaw.SummonFanfare, s.Fanfare));

@@ -19,7 +19,7 @@ import pytest
 
 from understudy import blindplay, blindplay_faces
 from understudy.blindplay_board import STAGE_LEAVE_REASONS
-from understudy.blindplay_notes import ARM_KEYWORDS, SUMMON_NAMED_ROW
+from understudy.blindplay_notes import ARM_KEYWORDS
 
 
 @pytest.fixture(autouse=True)
@@ -56,25 +56,23 @@ def _row(word: str) -> str:
 
 
 def test_a_named_summon_prints_the_summon_row_and_its_performers_row():
-    page = blindplay.observe(_reward(
-        "Summon Chevalmarin. If she is already on stage, Raise 3 on her "
-        "instead.", [SALON_SOLITAIRE]))
-    # The NAMED variant: no full-stage sentence beside "Raise 3 instead".
-    assert f"- **Summon** — {SUMMON_NAMED_ROW}" in page
-    assert "the lead takes a Bow" not in page
+    page = blindplay.observe(_reward("Summon Chevalmarin.",
+                                     [SALON_SOLITAIRE]))
+    # ONE Summon row since the trio can be cloned (2026-09-25): a named
+    # summon meets a full stage the way a random one does.
+    assert _row("Summon") in page
     assert _row("Surintendante Chevalmarin") in page
     assert _row("Mademoiselle Crabaletta") not in page
 
 
-def test_a_screen_with_both_kinds_of_summon_prints_both_variants():
-    state = _reward("Summon Usher. If he is already on stage, Raise 3 on him "
-                    "instead.", [SALON_SOLITAIRE])
+def test_a_screen_with_both_kinds_of_summon_prints_one_row():
+    state = _reward("Summon Usher.", [SALON_SOLITAIRE])
     state["card_select"]["cards"].append(
         dict(state["card_select"]["cards"][0], index=1,
              description="Summon a random performer."))
     page = blindplay.observe(state)
-    assert (f"- **Summon** — Random: {ARM_KEYWORDS['Summon']} Named: "
-            f"{SUMMON_NAMED_ROW}") in page
+    assert _row("Summon") in page
+    assert "Random: " not in page and "Named: " not in page
 
 
 def test_a_random_summon_prints_every_performer_it_can_field():

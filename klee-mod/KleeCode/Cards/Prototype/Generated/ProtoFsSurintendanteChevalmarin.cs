@@ -41,14 +41,14 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, ICharacte
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForSummon(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this, false), this), this);
+        ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForSummon(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("surintendante_chevalmarin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surintendante Chevalmarin"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin. If she's already on stage, she gains 3 [gold]Fanfare[/gold]."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Summon Chevalmarin."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -70,7 +70,7 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, ICharacte
         {
             await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Hydro, Owner.Creature);
         }
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "chevalmarin", 3);
+        await FurinaStage.Summon(choiceContext, Owner.Creature, "chevalmarin");
     }
 
     protected override void OnUpgrade()

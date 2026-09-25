@@ -1317,28 +1317,11 @@ COMPANION_DEFINITION = ("A card titled with a character's name, a dash, then "
 #: acts are not documented". The numerals are `FurinaStageLaw`'s, written out
 #: for `ARM_KEYWORDS`' standing reason: this page has no access to the mod's
 #: constants and a seat needs the number rather than the name of the constant.
-#: 2026-09-25. A NAMED summon's Summon row -- `ArmKeywordTips.ForSummon`'s
-#: `random: false` variant. Nothing about a full stage: the named Commons' own
-#: face says what a performer already on stage does ("he gains 3
-#: Fanfare"), and the full-stage sentence would contradict it.
-SUMMON_NAMED_ROW = "A performer joins at the back with 1 Fanfare."
-
-#: Which Summon variant a face prints: a random summon (Take the Stage,
-#: Understudy, Double Casting, Improvised Number's lowercase clause) or a named
-#: one (the three Commons).
-_SUMMON_RANDOM_RE = re.compile(r"\b[Ss]ummon (?:a|2|two) random performer")
-_SUMMON_NAMED_RE = re.compile(r"\b[Ss]ummon (?:Usher|Chevalmarin|Crabaletta)\b")
-
-
 def _summon_row(hay: str) -> str:
-    """The Summon row for THIS screen: the random variant, the named one, or
-    both labelled where the screen prints both kinds of summon."""
-    random = bool(_SUMMON_RANDOM_RE.search(hay))
-    named = bool(_SUMMON_NAMED_RE.search(hay))
-    if random and named:
-        return ("Random: " + ARM_KEYWORDS["Summon"] + " Named: "
-                + SUMMON_NAMED_ROW)
-    return SUMMON_NAMED_ROW if named else ARM_KEYWORDS["Summon"]
+    """The Summon row. ONE variant since the trio can be cloned (2026-09-25;
+    [USER]: "Let's allow for copies and then check the balance."): named and
+    random summons meet a full stage the same way, as the tip says once."""
+    return ARM_KEYWORDS["Summon"]
 
 
 #: 2026-09-25 (opus-furina-l2b, (c) 3): the SEAT COUNT, in step with The
@@ -1497,13 +1480,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # did". `ArmKeywordTips.ForSummon`, `ForUsher`, `ForChevalmarin` and
     # `ForCrabaletta`'s words, with `FurinaStageLaw`'s numerals written out;
     # the performer rows are also each body's badge in game
-    # (`StagePerformerBadge`). The Summon row has TWO variants, as the tip
-    # does: this one is a RANDOM summon's (the full-stage rule ruled the same
-    # day), and `SUMMON_NAMED_ROW` is a named one's; `_summon_row` picks by
-    # what the screen prints.
-    "Summon": ("A performer joins at the back with 1 Fanfare. If the stage is "
-               "full, your front performer Bows and moves to the back "
-               "instead."),
+    # (`StagePerformerBadge`). One Summon row since the trio can be cloned
+    # (2026-09-25): named and random summons meet a full stage the same way.
+    "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
+               "stage, the front one Bows and leaves, and the newcomer takes "
+               "its Fanfare."),
     # Draft 3 (2026-09-25): no Bow clause (a Bow is the act once more) and
     # no Hydro (no act applies it).
     "Gentilhomme Usher": "End of your turn: gain 3 Block.",

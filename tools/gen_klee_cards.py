@@ -1203,12 +1203,10 @@ def stage_summon_tip_calls(card: dict) -> list[str]:
     one carries all three, because any of them may arrive. A row that gains a
     summon gains the tips the day its row exists.
 
-    ONE SUMMON TIP, IN ONE OF TWO VARIANTS: a row with any RANDOM summon gets
-    the full-stage sentence (the lead bows and moves to the back), and a row
-    whose summons are all NAMED gets the arrival sentence alone, because the
-    named Commons' own face says what a performer already on stage does. The
-    variant rides as the call's third argument, so each entry here is
-    `(call, extra arguments)`.
+    ONE SUMMON TIP since the trio can be cloned (2026-09-25; [USER]: "Let's
+    allow for copies and then check the balance."): a named summon always
+    summons, so named and random summons meet a full stage the same way and
+    the tip says it once. Each entry here is `(call, extra arguments)`.
     """
     members: set[str] = set()
     for fx in iter_effects(card.get("effects") or []):
@@ -1217,8 +1215,7 @@ def stage_summon_tip_calls(card: dict) -> list[str]:
     if not members:
         return []
     random = "random" in members
-    calls = [("ArmKeywordTips.ForSummon",
-              ", true" if random else ", false")]
+    calls = [("ArmKeywordTips.ForSummon", "")]
     for member, call in _STAGE_PERFORMER_TIPS:
         if member in members or random:
             calls.append((call, ""))
@@ -1996,7 +1993,7 @@ BRANCH_FIELDS = {
     # unlike the two salon verbs above: a Spend with no number is not a rider
     # any face could print.
     "stage_spend": {"op", "amount"},
-    "stage_summon": {"op", "member", "if_present_raise"},
+    "stage_summon": {"op", "member"},
     "apply_aura": {"op", "element", "target"},
 }
 
@@ -5562,12 +5559,11 @@ FURINA_STAGE_MEMBERS = ("usher", "chevalmarin", "crabaletta", "random")
 
 def _stage_summon_stmt(eff: dict) -> str:
     """`stage_summon` -> the one awaited call. `member: random` is the printed
-    default (*Salon Début*, *Understudy*); a NAMED member carries the
-    `if_present_raise` clause the three Commons print."""
+    default (*Salon Début*, *Understudy*); a NAMED member always summons,
+    since the trio can be cloned (2026-09-25)."""
     member = eff.get("member", "random")
-    bump = int(eff.get("if_present_raise", 0) or 0)
     return ("await FurinaStage.Summon(choiceContext, Owner.Creature, "
-            f'"{member}", {bump});')
+            f'"{member}");')
 
 
 #: THE STAGE's eight statement ops, each a single call into `FurinaStage` with

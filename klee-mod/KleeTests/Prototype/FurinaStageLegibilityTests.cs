@@ -201,14 +201,19 @@ public class FurinaStageLegibilityTests
     }
 
     [Fact]
-    public void A_named_summon_is_unchanged_and_raises_on_a_performer_it_finds()
+    public void A_named_summon_always_summons_and_recasts_a_full_stage()
     {
+        // 2026-09-25: the trio can be cloned ([USER]: "Let's allow for copies
+        // and then check the balance."). No "already on stage" branch is
+        // left, and a full stage recasts named and random summons alike.
         var source = RepoFile(Path.Combine(
             "klee-mod", "KleeCode", "Powers", "Prototype", "FurinaStage.cs"));
         var summon = Between(source,
                              "public static async Task Summon(",
                              "private static async Task RecastFromFront(");
-        Assert.Contains("ledger.RaiseSeat(already, ifPresentRaise);", summon);
+        Assert.DoesNotContain("RaiseSeat", summon);
+        Assert.DoesNotContain("SeatOf", summon);
+        Assert.Contains("await RecastFromFront(", summon);
     }
 
     // ---- the tips ---------------------------------------------------------
@@ -217,21 +222,19 @@ public class FurinaStageLegibilityTests
         Il.Strings(typeof(ArmKeywordTips).GetMethod(method, HeadlessGame.All)!));
 
     [Fact]
-    public void The_summon_tip_has_a_random_and_a_named_variant()
+    public void The_summon_tip_is_one_sentence_for_every_summon()
     {
-        // A random summon states the full-stage rule; a named one states only
-        // the arrival, because the named Commons' face says what a performer
-        // already on stage does ("he gains 3 Fanfare"). The text pass
-        // (2026-09-25) wording.
+        // 2026-09-25: the trio can be cloned, so a named summon meets a full
+        // stage the way a random one does and the tip says it once.
         var body = Printed("ForSummon");
         Assert.Contains("A performer joins at the back with ", body);
-        Assert.Contains(" [gold]Fanfare[/gold]. If the stage is full, your "
-                      + "front performer [gold]Bow[/gold]s and moves to the "
-                      + "back instead.", body);
+        Assert.Contains(" [gold]Fanfare[/gold]. On a full stage, the front "
+                      + "one [gold]Bow[/gold]s and leaves, and the newcomer "
+                      + "takes its Fanfare.", body);
         Assert.DoesNotContain("the lead", body);
         var parameters = typeof(ArmKeywordTips).GetMethod("ForSummon")!
             .GetParameters();
-        Assert.Equal("random", parameters.Last().Name);
+        Assert.Equal(2, parameters.Length);
     }
 
     [Fact]

@@ -465,6 +465,20 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>
+    /// A RANDOM RECAST WHOSE ROLL IS NOT THE LEAVER (2026-09-25, the trio can
+    /// be cloned): a new performer enters the back seat holding
+    /// <paramref name="fanfare"/>, the Fanfare the bowing lead left with.
+    /// It does not act on arrival. False (and nothing moves) on a full stage.
+    /// </summary>
+    public bool ArriveAtBack(StagePerformer who, int fanfare)
+    {
+        if (IsFull || fanfare <= 0) return false;
+        _seats.Add(new StageSeat(who, fanfare));
+        Note(new StageBeat("arrive", who, _seats.Count - 1, fanfare, 0, ""));
+        return true;
+    }
+
+    /// <summary>
     /// RULE 5. "Raise N Fanfare on the back performer" -- the back-most, which
     /// is the lead when it is alone. Returns what it raised, which is 0 on an
     /// empty stage and N otherwise: bars have no cap (rule 4), so a Raise
@@ -853,6 +867,9 @@ public sealed class FurinaStageLedger
         foreach (var seat in _seats) seat.Resting = false;
     }
 
+    /// <summary>The event name of a performer's act (rule 10).</summary>
+    public const string ActEvent = "act";
+
     /// <summary>The event name of <see cref="Fade"/>'s beat.</summary>
     public const string FadeEvent = "fade";
 
@@ -965,11 +982,9 @@ public sealed class FurinaStageLedger
     /// <i>Let the People Rejoice</i>'s "then return with 1", after the bows:
     /// each member of the company, in seat order, takes the back-most EMPTY
     /// seat at <see cref="FurinaStageLaw.SummonFanfare"/>. A member finds no
-    /// seat when the stage is full, and does not come back a SECOND time when
-    /// it is already standing (2026-09-25: Usher's Bow, or a Thunderous
-    /// Applause Raise, summons a random performer onto the stage the card
-    /// emptied, and the one it picks may be a member of the company). So the
-    /// stage never holds two of the same performer after the card. Returns
+    /// seat when the stage is full. Since the trio can be cloned (2026-09-25)
+    /// a trio member returns even where a Thunderous Applause Raise has
+    /// summoned another of its name onto the stage the card emptied. Returns
     /// how many came back.
     /// </summary>
     public int ReturnCompany(IEnumerable<StagePerformer> company)
@@ -978,7 +993,6 @@ public sealed class FurinaStageLedger
         foreach (var who in company)
         {
             if (IsFull) break;
-            if (SeatOf(who) != null) continue;
             Summon(who);
             back++;
         }

@@ -427,8 +427,8 @@ def summon(state, member: str) -> None:
                    seats=len(seats), rotated=True)
 
 
-def recast_front(state) -> None:
-    """A RANDOM SUMMON ON A FULL STAGE (2026-09-25) -- `FurinaStage.
+def recast_front(state, newcomer: str | None = None) -> None:
+    """A SUMMON ON A FULL STAGE (2026-09-25) -- `FurinaStage.
     RecastFromFront`'s twin. [USER]: "treat this like a Defect orb summon? the
     stage members rotate, ... bows, and their remaining fanfare transfers to
     the newest member", and the seat that leaves is the LEAD.
@@ -436,10 +436,11 @@ def recast_front(state) -> None:
     The lead takes a Bow and leaves and the other two step forward; the Bow is
     a real one (its departure effect, then every Bow reader -- Thunderous
     Applause draws and Raises), but A Five-Century Act does NOT return it,
-    because the summon is already bringing it back. Then the newcomer enters
-    the back seat holding the lead's remaining Fanfare -- and with three
-    performers in three seats the one free to arrive is the one who just
-    bowed, so in play the lead moves to the back keeping its bar.
+    because the summon is filling the seat it would return to. Then the
+    newcomer enters the back seat holding the lead's remaining Fanfare. The
+    newcomer is `newcomer` for a named summon, and for a random one a uniform
+    roll over the trio (2026-09-25: the trio can be cloned), which may be the
+    performer who just bowed.
 
     THE ORDER IS BOW, READERS, ARRIVAL: the applause's Raise lands on the
     stage of two the bow left. The arrival does not act on arrival
@@ -451,13 +452,14 @@ def recast_front(state) -> None:
     seats = _seats(p)
     if len(seats) < SEATS:
         return
-    member, kept = seats.pop(0)
-    if member in p.stage_resting:
-        p.stage_resting.remove(member)
-    state.emit("stage_leave", member=member, bowed=True, reason="recast",
+    member = newcomer or state.rng.choice(PERFORMERS)
+    pair = seats.pop(0)
+    leaver, kept = pair
+    _unrest(p, pair)
+    state.emit("stage_leave", member=leaver, bowed=True, reason="recast",
                fanfare=kept)
-    _bow(state, member)
-    _after_bow(state, member, may_return=False)
+    _bow(state, leaver)
+    _after_bow(state, leaver, may_return=False)
     if len(seats) >= SEATS:
         # No seat to come back to: the bar walks off with the performer.
         # The ledger booked nothing when it left the front, so it books the
@@ -499,9 +501,9 @@ def _leave(state, index: int, *, bowed: bool, reason: str,
     p = state.player
     seats = _seats(p)
     book_loss(state, LOSS_LEFT, seats[index][1])   # Final Bow's bar; else 0
-    member, remaining = seats.pop(index)
-    if member in p.stage_resting:
-        p.stage_resting.remove(member)
+    pair = seats.pop(index)
+    member, remaining = pair
+    _unrest(p, pair)
     state.emit("stage_leave", member=member, bowed=bowed, reason=reason,
                fanfare=remaining)
     if bowed and not pay_now:
@@ -541,6 +543,19 @@ def settle_hit(state) -> None:
         _after_bow(state, member, may_return=True)
 
 
+def is_resting(player, pair) -> bool:
+    """Is THIS seat resting? BY IDENTITY and not by name, since the trio can
+    be cloned (2026-09-25): two Ushers are two seats, and A Five-Century
+    Act's returnee is only one of them. C# twin: `StageSeat.Resting`."""
+    return any(r is pair for r in player.stage_resting)
+
+
+def _unrest(player, pair) -> None:
+    """A seat leaving the stage stops resting."""
+    player.stage_resting[:] = [r for r in player.stage_resting
+                               if r is not pair]
+
+
 def _after_bow(state, member: str, *, may_return: bool) -> None:
     """R276 batch two: what a Bow sets off once the performer has left and
     its departure effect has resolved -- `FurinaStage.AfterBow`'s twin.
@@ -558,8 +573,9 @@ def _after_bow(state, member: str, *, may_return: bool) -> None:
     if (may_return and p.powers.get(FIVE_CENTURY_ACT, 0)
             and len(_seats(p)) < SEATS):
         book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
-        _seats(p).append([member, SUMMON_FANFARE])
-        p.stage_resting.append(member)
+        pair = [member, SUMMON_FANFARE]
+        _seats(p).append(pair)
+        p.stage_resting.append(pair)
         state.emit("stage_return", member=member, fanfare=SUMMON_FANFARE)
 
 
@@ -876,14 +892,12 @@ def bow_and_return(state) -> None:
         _after_bow(state, member, may_return=False)
     seats = _seats(p)
     for member in company:
-        # To an EMPTY seat only, and never a second copy (2026-09-25): Usher's
-        # Bow, or a Thunderous Applause Raise, summons a random performer onto
-        # the stage the card emptied, and the one it picks may be a member of
-        # the company, already back. `FurinaStageLedger.ReturnCompany`'s twin.
+        # To an EMPTY seat only. Since the trio can be cloned (2026-09-25) a
+        # trio member returns even where a Thunderous Applause Raise summoned
+        # another of its name onto the stage the card emptied.
+        # `FurinaStageLedger.ReturnCompany`'s twin.
         if len(seats) >= SEATS:
             break
-        if any(m == member for m, _f in seats):
-            continue
         book_gain(state, GAIN_RETURN, SUMMON_FANFARE)
         seats.append([member, SUMMON_FANFARE])
     state.emit("stage_encore_return", company=[m for m, _f in seats],
@@ -1020,7 +1034,7 @@ def perform_lead(state) -> None:
     if not active(p):
         return
     pair = lead(p)
-    if pair is None or pair[0] in p.stage_resting:
+    if pair is None or is_resting(p, pair):
         state.emit("stage_act_whiffed")
         return
     perform(state, pair[0])
@@ -1037,20 +1051,21 @@ def end_of_turn_acts(state) -> None:
     p = state.player
     if not active(p):
         return
-    company = [m for m, _f in stage(p)]
+    pairs = list(stage(p))
+    company = [m for m, _f in pairs]
     if company:
         # R276 batch two, FULL HOUSE: with all three seats filled each
         # performer acts once more per copy.
         times = 1 + (int(p.powers.get(FULL_HOUSE, 0))
                      if len(company) >= SEATS else 0)
         state.emit("stage_acts", company=list(company), times=times)
-        for member in company:
-            if member in p.stage_resting:
+        for pair in pairs:
+            if is_resting(p, pair):
                 continue        # A Five-Century Act: re-enters without acting
             for _ in range(times):
                 if state.over or not p.alive or not state.living_enemies:
                     break
-                perform(state, member)
+                perform(state, pair[0])
     p.stage_resting.clear()
     p.stage_act_damage_mult = 1
     p.stage_act_block_mult = 1
@@ -1115,12 +1130,12 @@ def perform_all(state) -> None:
     p = state.player
     if not active(p):
         return
-    for member in [m for m, _f in stage(p)]:
+    for pair in list(stage(p)):
         if state.over or not p.alive or not state.living_enemies:
             break
-        if member in p.stage_resting:
+        if is_resting(p, pair):
             continue            # A Five-Century Act's returnee rests
-        perform(state, member)
+        perform(state, pair[0])
 
 
 def spend_all_of_back(state) -> int:

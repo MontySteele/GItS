@@ -6760,9 +6760,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # 2026-09-25: what a summon does and what each performer does. The
         # numerals are interpolated on the mod side, so the anchors are the
         # prose either side of them.
+        # One sentence since the trio can be cloned (2026-09-25).
         "Summon": ["A performer joins at the back with ",
-                   "stage is full, your front performer ",
-                   "moves to the back instead."],
+                   "stage, the front one ",
+                   "newcomer takes its Fanfare."],
         # Draft 3 (2026-09-25): one sentence each, no Hydro, no Bow clause.
         "Gentilhomme Usher": ["End of your turn: gain "],
         "Surintendante Chevalmarin": ["End of your turn: deal ",

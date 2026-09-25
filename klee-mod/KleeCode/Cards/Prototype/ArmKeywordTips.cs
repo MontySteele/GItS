@@ -877,38 +877,22 @@ public static class ArmKeywordTips
           + " [gold]Fanfare[/gold].");
 
     /// <summary>
-    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons, in TWO
-    /// variants chosen by the row (<c>gen_klee_cards.stage_summon_tip_calls</c>
-    /// passes <paramref name="random"/>):
-    ///
-    ///   * a RANDOM summon states the full-stage rule ruled the same day, the
-    ///     Defect-orb shape -- the lead bows and moves to the back
-    ///     (<c>FurinaStage.RecastFromFront</c>);
-    ///   * a NAMED summon states the arrival, and nothing about a full stage: the named
-    ///     Commons' own face says what happens when the performer is already
-    ///     there ("he gains 3 Fanfare"), and a tip saying the front
-    ///     performer bows would contradict it.
-    ///
-    /// TWO STATEMENTS AND NOT A TERNARY, because
-    /// <c>lint_text_conventions.tip_rows</c> measures each <c>With(...);</c>
-    /// call to its own <c>);</c>, and a ternary's two literals would reach it
-    /// as one string.
+    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons. ONE
+    /// sentence since the trio can be cloned (2026-09-25; [USER]: "Let's
+    /// allow for copies and then check the balance."): a named summon always
+    /// summons, so named and random summons meet a full stage the same way --
+    /// the front performer Bows and leaves and the newcomer takes its Fanfare
+    /// (<c>FurinaStage.RecastFromFront</c>). Until then a named Common's face
+    /// said what a performer already on stage did, and this tip came in two
+    /// variants so as not to contradict it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForSummon(
-        IEnumerable<IHoverTip> inherited, CardModel card, bool random)
-    {
-        if (random)
-        {
-            return With(inherited, SummonKey,
-                "A performer joins at the back with "
-              + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. If the "
-              + "stage is full, your front performer [gold]Bow[/gold]s and "
-              + "moves to the back instead.");
-        }
-        return With(inherited, SummonKey,
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, SummonKey,
             "A performer joins at the back with "
-          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold].");
-    }
+          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a full "
+          + "stage, the front one [gold]Bow[/gold]s and leaves, and the "
+          + "newcomer takes its Fanfare.");
 
     /// <summary>
     /// 2026-09-25. GENTILHOMME USHER'S ACT, on every card that names him and
