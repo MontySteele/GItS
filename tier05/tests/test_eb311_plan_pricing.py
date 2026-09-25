@@ -60,16 +60,26 @@ from tier05 import draft
 #: `DRAFTER_VERSION` therefore stayed at 18, on the same argument EB-311's own
 #: no-bump proof makes: content entering the pool is an `RT` fact, and what
 #: this hash guards is the drafter's arithmetic.
-SHIPPED_PRICE_DIGEST =     "c674c433cdc34d52510de771e006e84cf57127df28d38c8e24176347a4ed99c3"
+#:
+#: RE-PINNED A SECOND TIME, at `C22` (2026-09-25, `C21` -> `C22`), and this one
+#: is NOT a population change: [USER] ruled "Undercurrent, pick a", so the
+#: shipped Furina Common `undercurrent` costs 1 where it cost 2, and
+#: `_static_power` divides by cost -- its two faces' prices double. No drafter
+#: CODE moved. The proof is `test_the_c22_rows_are_the_only_reason_the_digest_
+#: moved` below: strike the two Undercurrent faces and the digest over the other
+#: 618 is the one taken at the pre-C22 tree (`06e6eb3c`), digit for digit.
+#: That is the "reason that is not a population change" the pre-`EB-83` pair
+#: named for its own retirement, so it retired here; its proof holds in git.
+SHIPPED_PRICE_DIGEST =     "3dc0679ce3dc4605507d4f92ced6cbc22bf93cb371066d6864f59037f0f4914e"
 #: 620 rows since `EB-83`. Pinned beside the hash because a hash of a shrinking
 #: population also never changes.
 SHIPPED_PRICE_ROWS = 620
 
-#: The pre-`EB-83` pair, kept as what the re-pin is CHECKED against rather than
-#: as history. Retire them only when a bump re-derives the hash for a reason
-#: that is not a population change.
-PRE_EB83_PRICE_DIGEST =     "5c40b256cd69e17cc5d4ac0f105a6b689cfdcab88583d3944e3e231488deca7b"
-EB83_ROWS = ("chinju_ward", "tengu_flurry")
+#: The pre-`C22` survivors' digest, taken at `06e6eb3c` over every committed
+#: face EXCEPT Undercurrent's two, kept as what the re-pin is CHECKED against.
+#: Retire it only when a bump re-derives the hash for another reason.
+PRE_C22_SURVIVOR_DIGEST =     "6276ea1f02bbd29abe1f29e57cbec6757e199752696a2c6459f0c963a441dac3"
+C22_ROWS = ("undercurrent", "undercurrent+")
 
 
 def _shipped_rows() -> list[Card]:
@@ -117,21 +127,22 @@ def test_every_shipped_price_is_byte_identical():
     assert _digest(_shipped_rows()) == SHIPPED_PRICE_DIGEST
 
 
-def test_the_eb83_rows_are_the_only_reason_the_digest_moved():
-    """The re-pin's proof, and the reason the hash above could be rewritten
-    without a `DRAFTER_VERSION` bump.
+def test_the_c22_rows_are_the_only_reason_the_digest_moved():
+    """The `C22` re-pin's proof, and the reason the hash above could be
+    rewritten without a `DRAFTER_VERSION` bump.
 
     A re-pinned fixture is worth exactly as much as the argument for re-pinning
-    it, and "two cards were added" is not an argument -- a sheet edit can move
+    it, and "one card's cost moved" is not an argument -- a sheet edit can move
     a price on rows it never touched, through a shared price table or a rarity
-    term. So the claim is checked rather than asserted: strike the two `EB-83`
-    ids out of the population and the pre-EB-83 hash comes back, digit for
-    digit, across all 618 rows that existed before it.
+    term. So the claim is checked rather than asserted: strike Undercurrent's
+    two faces out of the population and the pre-C22 survivors' hash comes back,
+    digit for digit, across the other 618. (`EB-83`'s own proof, the same shape
+    for a population change, retired with this re-pin and holds in git.)
     """
     rows = _shipped_rows()
-    survivors = [c for c in rows if c.id not in EB83_ROWS]
-    assert len(rows) - len(survivors) == len(EB83_ROWS)
-    assert _digest(survivors) == PRE_EB83_PRICE_DIGEST
+    survivors = [c for c in rows if c.id not in C22_ROWS]
+    assert len(rows) - len(survivors) == len(C22_ROWS)
+    assert _digest(survivors) == PRE_C22_SURVIVOR_DIGEST
 
 
 def test_the_digest_covers_the_whole_committed_pool():

@@ -270,12 +270,29 @@ public static class FurinaStage
     public static async Task OpenCombat(Creature? owner)
     {
         if (!LiveFor(owner)) return;
+        await InstallBadge(owner);
         if (FurinaStageLedger.For(owner!).OpenWith(StagePerformer.Usher) == null)
         {
             return;
         }
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
+    }
+
+    /// <summary>
+    /// THE STAGE BADGE on Furina (<see cref="StageSummaryPower"/>, 2026-09-25):
+    /// the board's rules where a player hovers first. Idempotent, and asked
+    /// from two places -- the relic's combat open and every turn start
+    /// (<c>FurinaStageHooks</c>) -- for <c>KokomiRules.Install</c>'s reason: a
+    /// fight whose setup order ever moves still gets the badge.
+    /// </summary>
+    public static async Task InstallBadge(Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        if (owner!.Powers.OfType<StageSummaryPower>().Any()) return;
+        await PowerCmd.Apply<StageSummaryPower>(
+            new ThrowingPlayerChoiceContext(), owner, 1,
+            applier: owner, cardSource: null, silent: true);
     }
 
     /// <summary>
@@ -289,7 +306,10 @@ public static class FurinaStage
     /// the back seat, which is why it is written on the face.</para>
     ///
     /// <para><paramref name="member"/> of <c>"random"</c> rolls one who is not
-    /// on stage; with all three seated it summons nobody.</para>
+    /// on stage. ON A FULL STAGE the lead takes a Bow and moves to the back
+    /// seat keeping its Fanfare (<see cref="RecastFromFront"/>, 2026-09-25):
+    /// before that rule a random summon with all three seated summoned
+    /// nobody, and a first-time player read the card as doing nothing.</para>
     ///
     /// <para>AND THE NEWCOMER DOES NOT ACT ON ARRIVAL (`EB-738`, round one's
     /// one E default). Rule 3 reads "a newcomer performs with the others at
@@ -311,6 +331,11 @@ public static class FurinaStage
         StagePerformer who;
         if (member == "random")
         {
+            if (ledger.IsFull)
+            {
+                await RecastFromFront(choiceContext, owner!);
+                return;
+            }
             if (RollFree(owner!, ledger) is not { } rolled) return;
             who = rolled;
         }
@@ -330,6 +355,47 @@ public static class FurinaStage
         }
 
         ledger.Summon(who);
+        await FurinaStagePets.Sync(owner);
+        Vfx.FurinaStageStrip.Refresh(owner);
+    }
+
+    /// <summary>
+    /// A RANDOM SUMMON ON A FULL STAGE (2026-09-25). [USER]'s words: "treat
+    /// this like a Defect orb summon? the stage members rotate, ... bows, and
+    /// their remaining fanfare transfers to the newest member" -- and the seat
+    /// that leaves is the LEAD. So:
+    ///
+    ///   1. the lead takes a Bow and leaves, and the other two step forward
+    ///      (<see cref="FurinaStageLedger.BowFromFront"/>);
+    ///   2. the Bow is a real one: its departure effect fires, and so does
+    ///      every Bow reader -- Thunderous Applause draws and Raises -- but
+    ///      A FIVE-CENTURY ACT DOES NOT RETURN IT (<c>mayReturn: false</c>),
+    ///      because the summon is already bringing it back;
+    ///   3. the newcomer enters the back seat holding the lead's remaining
+    ///      Fanfare (<see cref="FurinaStageLedger.RecastToBack"/>). Three
+    ///      performers stand in three seats, so the one free to arrive is the
+    ///      one who just bowed: in play the lead takes its Bow and moves to
+    ///      the back seat, keeping its Fanfare, and keeps its body too.
+    ///
+    /// THE ORDER IS BOW, THEN READERS, THEN ARRIVAL -- <see cref="AfterBow"/>'s
+    /// own order ("applause then return") -- so Thunderous Applause's Raise
+    /// lands on the stage of two the bow left, on the performer who is then
+    /// the back one, and the returning performer arrives after it holding
+    /// exactly the bar it left with.
+    ///
+    /// IT DOES NOT ACT ON ARRIVAL (`EB-738` stands): it acts once at the end
+    /// of the turn with everyone else. <i>Double Casting</i> on a full stage
+    /// runs this twice, so two performers bow.
+    /// </summary>
+    private static async Task RecastFromFront(
+        PlayerChoiceContext choiceContext, Creature owner)
+    {
+        var ledger = FurinaStageLedger.For(owner);
+        if (ledger.BowFromFront() is not { } leaver) return;
+        await Bow(choiceContext, owner,
+                  new StageExit(leaver.Who, StageDeparture.Spent),
+                  mayReturn: false);
+        ledger.RecastToBack(leaver);
         await FurinaStagePets.Sync(owner);
         Vfx.FurinaStageStrip.Refresh(owner);
     }

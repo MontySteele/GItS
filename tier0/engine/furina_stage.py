@@ -322,6 +322,44 @@ def summon(state, member: str) -> None:
                    seats=len(seats), rotated=True)
 
 
+def recast_front(state) -> None:
+    """A RANDOM SUMMON ON A FULL STAGE (2026-09-25) -- `FurinaStage.
+    RecastFromFront`'s twin. [USER]: "treat this like a Defect orb summon? the
+    stage members rotate, ... bows, and their remaining fanfare transfers to
+    the newest member", and the seat that leaves is the LEAD.
+
+    The lead takes a Bow and leaves and the other two step forward; the Bow is
+    a real one (its departure effect, then every Bow reader -- Thunderous
+    Applause draws and Raises), but A Five-Century Act does NOT return it,
+    because the summon is already bringing it back. Then the newcomer enters
+    the back seat holding the lead's remaining Fanfare -- and with three
+    performers in three seats the one free to arrive is the one who just
+    bowed, so in play the lead moves to the back keeping its bar.
+
+    THE ORDER IS BOW, READERS, ARRIVAL: the applause's Raise lands on the
+    stage of two the bow left. The arrival does not act on arrival
+    (`EB-738`); it acts once at the end of the turn with everyone else.
+    """
+    p = state.player
+    if not active(p):
+        return
+    seats = _seats(p)
+    if len(seats) < SEATS:
+        return
+    member, kept = seats.pop(0)
+    if member in p.stage_resting:
+        p.stage_resting.remove(member)
+    state.emit("stage_leave", member=member, bowed=True, reason="recast",
+               fanfare=kept)
+    _bow(state, member)
+    _after_bow(state, member, may_return=False)
+    if len(seats) >= SEATS:
+        return
+    seats.append([member, kept])
+    state.emit("stage_summon", member=member, fanfare=kept, seats=len(seats),
+               rotated=True, via="recast")
+
+
 def rotate(state) -> None:
     """Scene Change (sec.12): the FRONT performer moves to the back seat, bar
     and all. A pure reorder -- no bow, no act, nothing lost (sec.5.2:

@@ -362,6 +362,61 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>
+    /// A RANDOM SUMMON ON A FULL STAGE, first half: the LEAD takes a Bow and
+    /// leaves, and the other two step forward. Returns the leaving seat --
+    /// bar, body and all -- for <see cref="RecastToBack"/> to put back, or
+    /// null (and nothing moves) on a stage that is not full.
+    ///
+    /// THE RULE, 2026-09-25, in [USER]'s words: "treat this like a Defect orb
+    /// summon? the stage members rotate, ... bows, and their remaining
+    /// fanfare transfers to the newest member", and asked which seat leaves,
+    /// the lead. It replaces rule 3's full-stage rotation (the front leaving
+    /// WITHOUT a bow) for the random summons, and it was filed off a
+    /// first-time co-op player's "if the stage is full, then summoning a new
+    /// actor doesn't do anything": a random summon had no one free to roll.
+    ///
+    /// THE BAR IS NOT SPENT. The leave beat files the bar the performer walks
+    /// off with as <see cref="StageBeat.Moved"/>, and the seat object keeps
+    /// it, because the newcomer takes it (<see cref="RecastToBack"/>).
+    /// </summary>
+    public StageSeat? BowFromFront()
+    {
+        if (!IsFull || Lead is not { } lead) return null;
+        _seats.RemoveAt(0);
+        Note(new StageBeat("leave", lead.Who, -1, 0, lead.Fanfare, "recast"));
+        return lead;
+    }
+
+    /// <summary>
+    /// A RANDOM SUMMON ON A FULL STAGE, second half: the newcomer enters the
+    /// BACK seat holding the leaver's remaining Fanfare.
+    ///
+    /// THE NEWCOMER IS THE LEAVER, and the method says so by taking the
+    /// leaving SEAT rather than a performer. Three performers stand in three
+    /// seats, so on a full stage the only one free to arrive is the one who
+    /// just bowed: in play the lead takes its Bow and moves to the back seat,
+    /// keeping its Fanfare. Handing the same seat back keeps the same BODY,
+    /// so <c>FurinaStagePets.Sync</c> moves a performer rather than killing
+    /// one and fielding its twin.
+    ///
+    /// IT DOES NOT ACT ON ARRIVAL (`EB-738` stands) and it is not resting: it
+    /// acts once at the end of the turn like everyone else.
+    ///
+    /// False (and nothing moves) if a seat is no longer free, which nothing
+    /// between the two halves can cause today: the Bow's readers Raise on a
+    /// stage of two and summon nobody.
+    /// </summary>
+    public bool RecastToBack(StageSeat seat)
+    {
+        if (IsFull) return false;
+        seat.Resting = false;
+        _seats.Add(seat);
+        Note(new StageBeat("arrive", seat.Who, _seats.Count - 1, seat.Fanfare,
+                           0, ""));
+        return true;
+    }
+
+    /// <summary>
     /// RULE 5. "Raise N Fanfare on the back performer" -- the back-most, which
     /// is the lead when it is alone. Returns what it raised, which is 0 on an
     /// empty stage and N otherwise: bars have no cap (rule 4), so a Raise

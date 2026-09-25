@@ -78,8 +78,10 @@
    # A small mercy between acts. NOT a heal — R8 keeps true healing at Rare+Exhaust; this is buffer + poise.
 - {id: swelling_overture, name: "Compose Herself", register: private, cost: 1, type: skill, rarity: common, solve: [velocity], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [generic], role: glue,
    effects: [{op: draw, amount: 2}, {op: conditional, if: encore_at_least_8, then: [{op: draw, amount: 1}]}]}
-- {id: undercurrent, name: "Undercurrent", register: salon, cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [salon, generic], role: enabler,
+- {id: undercurrent, name: "Undercurrent", register: salon, cost: 1, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [salon, generic], role: enabler,
    effects: [{op: damage, amount: 2, target: all_enemies, times: 3}]}
+   # Cost 2 -> 1, 2026-09-25 ([USER]: "Furina's Undercurrent is currently underpowered";
+   # ruled "Undercurrent, pick a"). Body and upgrade unchanged. CONSTANTS_VERSION 22. (lint-ok)
 
 - {id: change_the_bill, name: "Change the Bill", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [block, utility], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [salon], role: glue,
    effects: [{op: salon_rotate}, {op: salon_perform}, {op: block, amount: 3}]}

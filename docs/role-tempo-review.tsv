@@ -107,7 +107,7 @@ furina	graceful_retreat	common	generic	glue	block	block		early,mid,late	early,la
 furina	commanding_gaze	common	generic	glue	block,utility	block,utility		early	early	aoe					
 furina	macaron_break	common	generic,fanfare	glue	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	swelling_overture	common	generic	glue	velocity	velocity		early,mid,late	early,late			encore			
-furina	undercurrent	common	salon,generic	enabler	frontload	frontload		mid	early	aoe					
+furina	undercurrent	common	salon,generic	enabler	frontload	frontload		early	early	aoe					
 furina	change_the_bill	uncommon	salon	glue	block,utility	block,utility		early,mid,late	early,late			salon_member			
 furina	take_your_bow	uncommon	salon	enabler	utility	utility		early,mid,late	early,late			salon_member			
 furina	full_ensemble	uncommon	salon	enabler	block,frontload,scaling,sustain,utility,velocity	block,frontload,scaling,sustain,utility,velocity		mid,late	early		salon_member,salon_member_chevalmarin,salon_member_crabaletta,salon_member_usher	salon_member	block,frontload,scaling,velocity	block,frontload,scaling,sustain,utility,velocity	block,frontload,scaling,sustain,utility,velocity

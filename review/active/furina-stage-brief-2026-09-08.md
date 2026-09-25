@@ -60,12 +60,23 @@ performers with their own bars, and Fanfare is that bar.**
    her starting relic. Defect's free Lightning orb, as a body. The first
    hand sees 3: regen (rule 4) begins on her second turn.
 3. **A summon card fills the back-most empty seat** with that performer at
-   1 Fanfare. On a full stage it rotates the cast: the front performer
-   leaves without a bow, the other two step forward, and the newcomer takes
-   the back seat with the leaver's Fanfare. Pools are never lost to
-   rotation. A newcomer performs with the others at the end of that turn,
-   never on arrival (round one, `EB-738`: both engines had read this
-   sentence as an act on play).
+   1 Fanfare. **A random summon on a full stage works like a Defect orb**
+   (2026-09-25; [USER]: "treat this like a Defect orb summon? the stage
+   members rotate, … bows, and their remaining fanfare transfers to the
+   newest member", and the seat that leaves is the lead): the lead
+   performer takes a Bow and leaves, the other two step forward, and the
+   newcomer takes the back seat holding the lead's remaining Fanfare. With
+   three performers in three seats the newcomer is always the performer
+   who just bowed, so in play the lead takes its Bow and moves to the back
+   seat, keeping its Fanfare. The Bow is a real one (its effect and every
+   Bow reader fire, Thunderous Applause included), in the order bow,
+   readers, arrival; A Five-Century Act does not also return it. This
+   replaced the rotation that retired the front WITHOUT a bow, which a
+   first-time co-op player met as a summon that did nothing. A named
+   summon whose performer is already on stage still Raises 3 on it
+   instead (§10 default 2). Pools are never lost. A newcomer performs with
+   the others at the end of that turn, never on arrival (round one,
+   `EB-738`: both engines had read this sentence as an act on play).
 4. **The lead performer regains 1 Fanfare at the start of Furina's turn**,
    from her second turn on. Only the lead. Bars have no cap.
 5. **Refill lands on the back-most performer.** "Raise 5 Fanfare on the
@@ -99,7 +110,8 @@ performers with their own bars, and Fanfare is that bar.**
 9. **The curtain call.** A performer emptied by Spend performs its
    departure effect once. Usher: Furina gains 4 Block. Chevalmarin: Hydro
    on every enemy. Crabaletta: deal 8 Hydro damage to a random enemy.
-   Death by a hit, and leaving by rotation, earn no bow.
+   Death by a hit earns no bow. A random summon on a full stage bows the
+   lead (rule 3, 2026-09-25).
 10. **Each performer performs at the end of Furina's turn**, from any
     seat, a flat act that does not read its bar: Usher gives Furina 3
     Block, Chevalmarin deals 2 to every enemy and applies Hydro, Crabaletta
@@ -294,8 +306,12 @@ Expend, on the same seed.
 4. A Spend needs its full price from the back performer, and a bow comes
    from an exact emptying (R276 pick 1; it replaced the E default that a
    short bar still fired the rider in full).
-5. Rotation on a full stage retires the front without a bow (E): a bow is
-   earned by Spend only.
+5. ~~Rotation on a full stage retires the front without a bow (E): a bow
+   is earned by Spend only.~~ Reversed 2026-09-25 by [USER] ("treat this
+   like a Defect orb summon? the stage members rotate, … bows, and their
+   remaining fanfare transfers to the newest member"; the lead leaves): a
+   random summon on a full stage bows the lead, which returns to the back
+   seat with its Fanfare. See rule 3.
 6. Furina's max HP stays 78 until the sim reads her under the new damage
    order (D).
 7. Names in §12 are provisional and cosmetic (R179).
@@ -328,7 +344,7 @@ Names are provisional.
 
 | card | cost | type | text |
 |---|---|---|---|
-| Take the Stage | 1 | Skill | Summon a random performer who is not on stage. (Was Salon Début; renamed under R179 in round one, `EB-739`, since a shipped card carries that name.) |
+| Take the Stage | 1 | Skill | Summon a random performer. (2026-09-25: the face follows the full-stage ruling, rule 3.) (Was Salon Début; renamed under R179 in round one, `EB-739`, since a shipped card carries that name.) |
 | Curtain Rise | 1 | Attack | Deal 7. Spend 3: deal 13 instead. |
 | Rising Applause | 1 | Skill | Raise 5 Fanfare on the back performer. (Was Standing Ovation; renamed under R179 in round one, `EB-739`, since a shipped Power carries that name.) |
 
@@ -339,7 +355,7 @@ Names are provisional.
 | Gentilhomme Usher | 1 | Skill | Summon Usher. If he is already on stage, Raise 3 on him instead. |
 | Surintendante Chevalmarin | 1 | Skill | Summon Chevalmarin. If she is already on stage, Raise 3 on her instead. |
 | Mademoiselle Crabaletta | 1 | Skill | Summon Crabaletta. If she is already on stage, Raise 3 on her instead. |
-| Understudy | 0 | Skill | Summon a random performer who is not on stage. Exhaust. |
+| Understudy | 0 | Skill | Summon a random performer. Exhaust. (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Warm Reception | 1 | Skill | Raise 3 Fanfare on the back performer. Draw 1. |
 | Tidal Flourish | 1 | Attack | Deal 5 to every enemy. Spend 2: deal 9 instead. |
 | Interposition | 1 | Skill | Gain 5 Block. Spend 2: gain 10 instead. |
@@ -389,7 +405,7 @@ values; names are provisional. Upgrades in brackets.
 | card | cost | type | text |
 |---|---|---|---|
 | Gala Dinner | 1 | Skill | Raise 3 Fanfare on every performer. [Raise 4] |
-| Double Casting | 1 | Skill | Summon two random performers who are not on stage. [cost 0] |
+| Double Casting | 1 | Skill | Summon two random performers. [cost 0] (2026-09-25: the face follows the full-stage ruling, rule 3.) |
 | Tutti! | 1 | Skill | Every performer performs its act now. [cost 0] (Round four: was 2, 1 upgraded.) |
 | Bravura | 1 | Attack | Spend all of the back performer's Fanfare. Deal 3 damage for each point spent. [4 per point] |
 | Full House | 2 | Power | At the end of your turn, if all three seats are filled, your performers act twice. [cost 1] |

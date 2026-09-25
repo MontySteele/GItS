@@ -38,7 +38,7 @@ public sealed class ProtoFsMademoiselleCrabaletta : CustomCardModel, ICharacterC
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRaise(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRaise(ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("mademoiselle_crabaletta");
 

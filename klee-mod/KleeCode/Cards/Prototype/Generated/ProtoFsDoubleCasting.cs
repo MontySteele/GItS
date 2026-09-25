@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,12 +37,15 @@ public sealed class ProtoFsDoubleCasting : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this, true), this), this), this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_double_casting");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Double Casting"),
-        ("description", "Summon two random performers who are not on stage."),
+        ("description", "Summon two random performers."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

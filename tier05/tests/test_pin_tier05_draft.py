@@ -32,12 +32,13 @@ def test_all_enemies_damage_is_priced_at_the_aoe_multiple_of_its_face():
     what the same printed damage would be worth against a single body, so an
     AoE card can outprice a single-target card that prints more damage at the
     same cost."""
-    # Undercurrent prints 2 damage x3 at all_enemies, cost 2.
+    # Undercurrent prints 2 damage x3 at all_enemies, cost 1 (C22,
+    # 2026-09-25: [USER] "Undercurrent, pick a" took it from cost 2).
     undercurrent = loader.get_card("undercurrent")
-    single_target_reading = 2 * 3 / 2
+    single_target_reading = 2 * 3 / 1
     assert draft._static_power(undercurrent) == \
         single_target_reading * draft.STATIC_AOE_MULT
-    assert draft._static_power(undercurrent) == 6.0
+    assert draft._static_power(undercurrent) == 12.0
 
     # The premium is large enough to reorder cards: 8 damage to all enemies
     # at cost 1 prices above 10 damage to one enemy at cost 1.

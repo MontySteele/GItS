@@ -675,6 +675,10 @@ STAGE_LEAVE_REASONS = {
     "spend": "emptied by a Spend, so it takes a Bow",
     "rotated": "rotated off the front to make room, so no Bow",
     "final_bow": "took its Bow and left",
+    # 2026-09-25: a random summon on a full stage. The lead bows and moves to
+    # the back seat keeping its bar; the arrival line that follows says where.
+    "recast": ("took its Bow to make room for a summon, and comes back to "
+               "the back seat with its Fanfare"),
 }
 STAGE_LEFT_UNSAID = "left the stage"
 

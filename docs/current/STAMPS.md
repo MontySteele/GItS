@@ -8,7 +8,7 @@
 > citability and when a standing baseline is owed are in
 > [`EXPERIMENTS.md`](EXPERIMENTS.md).
 
-Live cell **`RT13 / D18 / P11 / C21`**, read live via `tier05/cells.py`, with
+Live cell **`RT13 / D18 / P11 / C22`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **6**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable.
 
@@ -224,7 +224,23 @@ not an unreachable condition). `P6` was `EB-29t`'s Enrage/Intangible reads; `P5`
 was `EB-24p`'s `reaction_triggered_this_turn` read; `P4` was R124's
 both-Spotlight-modes read.
 
-## `C` — `CONSTANTS_VERSION` (`tier0/constants.py`), live **21**
+## `C` — `CONSTANTS_VERSION` (`tier0/constants.py`), live **22**
+
+### `C22` — Undercurrent costs 1
+
+2026-09-25. [USER]: "Furina's Undercurrent is currently underpowered", then
+ruled "Undercurrent, pick a": the shipped Furina Common `undercurrent`
+(`docs/furina-cards.yaml`) goes from cost 2 to cost 1. Its body (2 damage to ALL
+enemies, 3 times) and its ruled upgrade (`times: +2`) are untouched. One row,
+one number; `SHEET_DIGEST` re-pinned in the same commit. No drafter or pilot
+code moved, so `D` and `P` stand; the drafter's static price for the row
+doubles (6.0 → 12.0) because `draft._static_power` divides by cost, and the
+role-tempo classifier now reads its fight tempo as early, so the row's
+`tempo_band` was re-landed `mid` → `early` (`suggest_role_tempo_tags.py
+--land`). The shipped-price digest in `tier05/tests/test_eb311_plan_pricing.py`
+is re-pinned with its proof: strike Undercurrent's two faces and the other 618
+prices are the pre-`C22` tree's, digit for digit. `RT` untouched. Every Furina
+arm's numbers are stale across this bump.
 
 ### `C21` — `EB-219`: Prune's Spark grant becomes Klee's kit declaration
 

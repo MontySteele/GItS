@@ -1298,6 +1298,31 @@ COMPANION_SLOT_SENTENCE = (
 #: acts are not documented". The numerals are `FurinaStageLaw`'s, written out
 #: for `ARM_KEYWORDS`' standing reason: this page has no access to the mod's
 #: constants and a seat needs the number rather than the name of the constant.
+#: 2026-09-25. A NAMED summon's Summon row -- `ArmKeywordTips.ForSummon`'s
+#: `random: false` variant. Nothing about a full stage: the named Commons' own
+#: face says what a performer already on stage does ("Raise 3 on him
+#: instead"), and the full-stage sentence would contradict it.
+SUMMON_NAMED_ROW = ("A performer joins at the back with 1 Fanfare and acts at "
+                    "the end of your turn.")
+
+#: Which Summon variant a face prints: a random summon (Take the Stage,
+#: Understudy, Double Casting, Improvised Number's lowercase clause) or a named
+#: one (the three Commons).
+_SUMMON_RANDOM_RE = re.compile(r"\b[Ss]ummon (?:a|two) random performer")
+_SUMMON_NAMED_RE = re.compile(r"\b[Ss]ummon (?:Usher|Chevalmarin|Crabaletta)\b")
+
+
+def _summon_row(hay: str) -> str:
+    """The Summon row for THIS screen: the random variant, the named one, or
+    both labelled where the screen prints both kinds of summon."""
+    random = bool(_SUMMON_RANDOM_RE.search(hay))
+    named = bool(_SUMMON_NAMED_RE.search(hay))
+    if random and named:
+        return ("Random: " + ARM_KEYWORDS["Summon"] + " Named: "
+                + SUMMON_NAMED_ROW)
+    return SUMMON_NAMED_ROW if named else ARM_KEYWORDS["Summon"]
+
+
 STAGE_ACTS = ("Every performer acts at the end of your turn, from any seat: "
               "Usher gives you 3 Block, Chevalmarin deals 2 to every enemy "
               "and applies Hydro, Crabaletta deals 5 Hydro damage to a random "
@@ -1611,6 +1636,26 @@ ARM_KEYWORDS: dict[str, str] = {
     "Ousia": "This turn, your performers' acts deal double damage.",
     "Pneuma": ("This turn, your performers' acts give double Block, and the "
                "lead performer regains 2 Fanfare."),
+    # 2026-09-25. WHAT A SUMMON DOES, AND WHAT EACH PERFORMER DOES. A
+    # first-time co-op player "found it very hard to understand what was
+    # going on from the tooltips, such as what each summoned actor actually
+    # did". `ArmKeywordTips.ForSummon`, `ForUsher`, `ForChevalmarin` and
+    # `ForCrabaletta`'s words, with `FurinaStageLaw`'s numerals written out;
+    # the performer rows are also each body's badge in game
+    # (`StagePerformerBadge`). The Summon row has TWO variants, as the tip
+    # does: this one is a RANDOM summon's (the full-stage rule ruled the same
+    # day), and `SUMMON_NAMED_ROW` is a named one's; `_summon_row` picks by
+    # what the screen prints.
+    "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
+               "stage, the lead takes a Bow and moves to the back instead."),
+    "Gentilhomme Usher": ("End of your turn: gain 3 Block. Bow: gain 4 "
+                          "Block."),
+    "Surintendante Chevalmarin": ("End of your turn: deal 2 Hydro damage to "
+                                  "ALL enemies. Bow: apply Hydro to ALL "
+                                  "enemies."),
+    "Mademoiselle Crabaletta": ("End of your turn: deal 5 Hydro damage to a "
+                                "random enemy. Bow: deal 8 Hydro damage to a "
+                                "random enemy."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1762,6 +1807,16 @@ _STAGE_CHARACTER = "furina"
 # combat block stays the reading; the latch is only what carries it.
 _STAGE_RETIRED_KEYWORDS = frozenset({"Encore"})
 
+# 2026-09-25. AND THE ROWS ONLY THE ARM HAS. The three performers carry the
+# shipped Salon members' names, and the shipped members' rules are not these
+# (a shipped member deploys and performs on a Companion play). So their rows
+# print on an arm page and on no other: a shipped seat reading "End of your
+# turn: gain 3 Block" beside a Salon Usher would be two rules for one name,
+# `EB-728`'s Fanfare finding one table over.
+_STAGE_ONLY_KEYWORDS = frozenset({
+    "Gentilhomme Usher", "Surintendante Chevalmarin",
+    "Mademoiselle Crabaletta"})
+
 # `EB-728`. AND THE ROW THE SHIPPED KIT STILL OWNS.
 #
 # `Fanfare` is a word BOTH kits print and they do not mean the same thing by
@@ -1848,6 +1903,8 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "lead performer": "furina", "back performer": "furina",
     "Rotate": "furina", "Encore": "furina", "Spotlighted": "furina",
     "Ousia": "furina", "Pneuma": "furina",
+    "Summon": "furina", "Gentilhomme Usher": "furina",
+    "Surintendante Chevalmarin": "furina", "Mademoiselle Crabaletta": "furina",
 }
 
 
@@ -1952,6 +2009,19 @@ _ARM_KEYWORD_RE = {
     # R276 batch two: Arkhe Alignment's two halves.
     "Ousia": re.compile(r"\bOusia\b"),
     "Pneuma": re.compile(r"\bPneuma\b"),
+    # 2026-09-25. `Summon` in either case: Improvised Number prints it
+    # mid-sentence ("summon a random performer"), and the mod attaches the
+    # tip off the op, not the capital. A PERFORMER is matched on its name --
+    # the short one a face prints ("Summon Usher") ends the full one the stage
+    # lines print -- and on a RANDOM summon's face, which may field any of the
+    # three and so carries all three tips in game.
+    "Summon": re.compile(r"\b[Ss]ummon\b"),
+    "Gentilhomme Usher": re.compile(
+        r"\bUsher\b|\b[Ss]ummon (?:a|two) random performer"),
+    "Surintendante Chevalmarin": re.compile(
+        r"\bChevalmarin\b|\b[Ss]ummon (?:a|two) random performer"),
+    "Mademoiselle Crabaletta": re.compile(
+        r"\bCrabaletta\b|\b[Ss]ummon (?:a|two) random performer"),
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
     # faces before the meter exists, and every Furina row the Stage does not
@@ -2846,6 +2916,9 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             # (brief sec.2, R269) and since `EB-745` nothing grants it -- and a
             # rule for a meter that cannot move is the noise round two filed.
             if not (arm and word in _STAGE_RETIRED_KEYWORDS)
+            # 2026-09-25: and a word only the ARM defines prints on an arm
+            # page alone -- the performers share the shipped members' names.
+            and (arm or word not in _STAGE_ONLY_KEYWORDS)
             # `EB-753`: and a word another kit OWNS is not defined at all on
             # this run's screens. The match on a Klee reward screen was the
             # English word `Spend` in a Spark sink's own prose, not the Stage's
@@ -2854,6 +2927,10 @@ def keyword_notes(obs: dict[str, Any]) -> list[dict[str, str]]:
             # Round four: Ousia and Pneuma print only beside Arkhe Alignment.
             and _anchored(word, obs)
             and pattern.search(_bomb_hay(word, hay, obs))]
+    # 2026-09-25: the Summon row is the variant this screen's faces owe.
+    for row in rows:
+        if row["name"] == "Summon" and _arm_owns("Summon", who):
+            row["text"] = _summon_row(hay)
     rows += [{"name": word, "text": GAME_KEYWORDS[word]}
              for word, pattern in _GAME_KEYWORD_RE.items()
              if pattern.search(hay)]
