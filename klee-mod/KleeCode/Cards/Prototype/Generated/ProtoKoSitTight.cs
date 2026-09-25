@@ -45,7 +45,7 @@ public sealed class ProtoKoSitTight : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sit Tight"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the end of this turn, if no [gold]Bomb[/gold] of yours went off this turn, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the end of your turn, gain {PowerAmount:diff()} [gold]Block[/gold] if none of your [gold]Bombs[/gold] went off."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

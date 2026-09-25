@@ -47,7 +47,7 @@ public sealed class PerfectTiming : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Perfect Timing"),
-        ("description", "Deal {Damage:diff()} damage. If it triggered an [gold]Elemental Reaction[/gold]: play this card again."),
+        ("description", "Deal {Damage:diff()} damage. If it triggered an [gold]Elemental Reaction[/gold], play this card again."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

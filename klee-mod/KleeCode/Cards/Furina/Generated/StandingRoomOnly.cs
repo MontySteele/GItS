@@ -41,7 +41,7 @@ public sealed class StandingRoomOnly : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The House Rises"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have at least 5 [gold]Encore[/gold]: gain 3 [gold]Block[/gold]. Otherwise: draw 1 card."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have at least 5 [gold]Encore[/gold], gain 3 [gold]Block[/gold]. Otherwise, draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

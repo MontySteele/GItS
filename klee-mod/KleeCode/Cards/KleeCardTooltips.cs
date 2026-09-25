@@ -168,18 +168,16 @@ public static class KleeCardTooltips
         // not "cannot diverge", and this tip must not be the place a
         // divergence first tells a player something false.
         var perSkillTag = meter?.PerSkillTag ?? BurstConstants.PerSkillTag;
-        var perReaction = meter?.PerReaction ?? BurstConstants.PerReaction;
+        // Text pass 2026-09-25: one number for both incomes, because every
+        // meter fills at the same rate from each (5 and 5, pinned by
+        // `tier0/tests/test_text_pass_2026_09_25.py`). If the two ever part,
+        // this sentence has to name both rates again.
         var rule =
-            $"[gold]Burst Energy[/gold]: your character's meter, empty at the "
-          + $"start of each combat. Playing a card with [gold]Elemental "
-          + $"Skill[/gold] grants {perSkillTag} and every Elemental Reaction "
-          + $"grants {perReaction}; some cards, powers and relics grant more. "
-          + "The moment the meter is FULL your character's Burst card is put "
-          + "into your hand, and casting it spends the WHOLE meter -- energy "
-          + "past full is lost at the cast, not at the gain.";
+            $"Fills {perSkillTag} from each [gold]Elemental Skill[/gold] card "
+          + "and each [gold]Elemental Reaction[/gold]. When full, your Burst "
+          + "card joins your hand, and casting it empties the meter.";
         if (meter == null || card.CombatState == null) return rule;
-        return $"{rule} You hold {meter.Amount} of {meter.Max} "
-             + "[gold]Burst Energy[/gold].";
+        return $"{rule} {meter.Amount}/{meter.Max}.";
     }
 
     /// <summary>One character's Burst meter, or null for an owner that has
@@ -312,6 +310,13 @@ public static class KleeCardTooltips
                 : new HoverTip(
                     new LocString(Table, NoHitTitleKey(reaction) + ".title"),
                     substitute);
+            // Text pass 2026-09-25: the Electro-Charged preview names Poison
+            // and no longer spells out how it ticks, so Poison's own tip
+            // rides beside it. A hover tip cannot nest, so this is the attach.
+            if (reaction == Reaction.ElectroCharged)
+            {
+                yield return HoverTipFactory.FromPower<MegaCrit.Sts2.Core.Models.Powers.PoisonPower>();
+            }
         }
     }
 

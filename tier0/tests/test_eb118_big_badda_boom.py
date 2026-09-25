@@ -226,7 +226,7 @@ def test_the_card_text_reads_the_ruled_sentence():
     the plain "a random enemy", which is why this pin names the whole
     sentence rather than the adjective."""
     cs = gen.emit(_sheet_row(), gen.KLEE_PROFILE)
-    assert ('("description", "Deal {Damage:diff()} damage. If it kills: '
+    assert ('("description", "Deal {Damage:diff()} damage. If it kills, '
             'deal 8 damage to a random other enemy."),') in cs
 
 

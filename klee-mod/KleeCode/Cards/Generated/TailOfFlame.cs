@@ -47,7 +47,7 @@ public sealed class TailOfFlame : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tail of Flame"),
-        ("description", "Deal {Damage:diff()} damage. If this cost 0: deal {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. If this cost 0, deal {ExtraDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

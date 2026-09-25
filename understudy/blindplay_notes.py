@@ -1346,139 +1346,21 @@ STAGE_ACTS = ("Up to 3 performers act at the end of your turn, from any "
               "random enemy.")
 
 ARM_KEYWORDS: dict[str, str] = {
-    # "EACH" IS `EB-340`'s, and it stays: the act-1 seat found growth is
-    # +{growth} PER BOMB (Bomb 5 + Bomb 8 -> 21, not 17) and no wording said
-    # so. In game the badge carries that fact ("Bombs here: N, growing each
-    # turn"); the seat page has no badge, so the glossary says it per Bomb.
-    # `EB-373` REWROTE THE SECOND SENTENCE: the C# folds exactly two things
-    # off the target -- its Vulnerable, and whichever power sets the lowest
-    # damage cap -- so "the enemy's debuffs" was a rule the r9 seat priced
-    # two fights off and lost both reads (a Slow 50 enemy took 48 from a pile
-    # printing 46; a Flutter 5 enemy took a 27 Bomb whole). Both debuffs say
-    # "from Attacks", and a Bomb's hit is not an Attack.
-    # `EB-361` ADDED THE LAST SENTENCE, in step with `ArmKeywordTips.ForBomb`:
-    # a Bomb whose enemy dies moves to a survivor at its size, and three
-    # round-10 seats met that rule for the first time as a stack they could
-    # not account for. The page says it in the tip's own words, "Kills move
-    # it on", because the glossary is pinned to the C# text word for word.
-    # `EB-536` ADDED THE MINE. "Goes off only when Set off" sat directly
-    # above the Mine row, which says a Mine also goes off before its enemy's
-    # hit, so two rows of one glossary contradicted each other and the Klee r19
-    # lane-2 seat said so. Same sentence as `ArmKeywordTips.ForBomb`.
-    # `EB-557` (R261) ADDED THE STARTER LINE, in step with the same tip. Jumpy
-    # Dumpty is Innate under the arm and Ka-pow! is not, so the opening hand
-    # always holds a placer and never necessarily the detonator. The keyword
-    # rail says that about one CARD, on the card; the fact a reader of the WORD
-    # needs is about the deck.
-    # `EB-555` DEFINED THE CAP IN THE CLAUSE THAT ALREADY USED IT, in step
-    # with `ArmKeywordTips.ForBomb`. The word printed on two rows of this
-    # glossary and was defined on neither: "no screen I saw ever explained
-    # what a cap is ... a term with no definition anywhere in the text I was
-    # shown" (Klee r20 lane 1). A phrase and not a sentence, and it names
-    # whose HP it is -- which also rules out the reading that a cap might be
-    # something of Klee's.
-    # `EB-400` NAMED BLOCK, in step with `ArmKeywordTips.ForBomb`. "Not an
-    # Attack: only Vulnerable and a cap move it" reads as a list of the only
-    # two things that touch the hit, with Block outside it -- and the r10 seat
-    # priced a Set off as unblockable and was wrong (12 into 20 HP behind
-    # Block 5 left 13). The `Set off` row two entries down has said "Block
-    # stops them" since `EB-443`, so two rows of one glossary disagreed.
-    # TRIMMED 2026-09-08 ([USER]'s run 2, an E default: "a lot of unnecessary
-    # tooltip text that could be trimmed"). Every rule above is still here --
-    # the growth, when it goes off, what stops it, what moves it, the jump to
-    # a survivor -- and what left is the prose around them: the "Not an
-    # Attack" negative the r10/r12 seats misread anyway, "the enemy's HP loss"
-    # where "the HP cap" says the same thing, and the starter line, which is
-    # about the deck rather than the word. Held in step with
-    # `ArmKeywordTips.ForBomb`.
-    #
-    # `EB-287`, THE GLOSSARY HALF, FOUND FAILING BY THE LIVE LOOK OF
-    # 2026-09-16 (proofs-9 lane 0, A2). The tip and this row print on ONE
-    # page -- the tip on the card rail, this row twenty lines below it -- and
-    # only the tip said that a second placer ADDS to the charge instead of
-    # starting a second one beside it. The row's acceptance names both
-    # surfaces, so a page carrying the clause once is the two-sources defect
-    # with both sources inside one screen.
-    #
-    # THE SAME FIVE WORDS IN THE SAME PLACE, riding the clause about what a
-    # charge IS rather than standing as a sentence of its own -- which is
-    # `ForBomb`'s own reason for the shape: that tip sits at the base game's
-    # four-sentence cap and a fifth sentence would displace a ruled finding.
-    #
-    # A PIN AND NOT A SHARED CONSTANT, because there is nothing for the two to
-    # share: the tip is a C# literal compiled into the mod, and this page is
-    # rendered by a Python process that reads the wire and never loads the
-    # assembly (and is read on builds carrying no klee mod at all). So the
-    # join is asserted instead --
-    # `test_arm_keyword_tips.test_the_merge_clause_is_on_the_tip_and_the_page`
-    # reads the clause out of `ArmKeywordTips.cs` and out of this dict and
-    # refuses a drift in either direction.
-    "Bomb": ("A charge on an enemy: each grows {growth} a turn, and goes off "
-             "when Set off or as a Mine; a second Bomb stacks beside the "
-             "first, and a Mine among them goes off alone. "
-             "Block stops it. Only Vulnerable "
-             "and the HP cap move it. If the enemy dies with it on, it moves "
-             "to a survivor."),
-    # `EB-432`: the order INSIDE the pile, which nothing printed. `SetOff`
-    # walks the charges in placement order and the first one through the
-    # funnel meets the aura, because every reaction consumes it -- the r11
-    # run-2 seat got that rule only by arithmetic ("Bombs go off in placement
-    # order, and the first one is the one that eats the Melt"). "Oldest first"
-    # is "one at a time" plus the order, in the same room.
-    # `EB-443`: the two facts the Bomb tip's "not an Attack" left to
-    # inference. The explosion passes `ignoreBlock: false`, so Block absorbs
-    # it, and it lands as `Unpowered` with no dealer, so nothing keyed on
-    # being hit by an Attack fires -- the r12 run-2 seat read a full-value hit
-    # into Skittish 6 as "Set off ignores enemy Block" when what happened is
-    # that Skittish never fired. "For its size" paid for them: the live number
-    # is the badge's, which is the split `EB-343` already made.
-    # `EB-490` NAMED THE CLASS INSTEAD OF THE TRIGGER. "No Attack trigger
-    # fires" and "Block stops them" point opposite ways to a reader who does
-    # not already know Skittish is an ON-HIT power: the r16 Klee seat planned
-    # two turns around a tax it was not paying and learned the rule by autopsy
-    # from a 26-HP Gardener dying to 30 points of Bomb. "No when-hit power
-    # fires" is the same claim in the same room, said about the thing on the
-    # enemy's status bar. Same sentence as `ArmKeywordTips.ForSetOff`.
-    # `EB-516`: the AIM clause, held in step with `ArmKeywordTips.ForSetOff`.
-    # A random Set off draws from the enemies already carrying one of hers,
-    # and the two rows that do it (Tinder Toss, Rapid Fire) print "a random
-    # enemy" and cannot say where it lands -- so the rule lives on the word,
-    # the one surface both rows carry.
-    # `EB-755` (R276 hygiene): "oldest first" did not say which of two Bombs
-    # placed in one turn goes first; "in the order placed" does.
-    "Set off": ("The target's Bombs go off first, in the order placed, each a "
-                "Pyro hit. Block stops them, no when-hit power fires, the "
-                "first takes the aura. A random one picks a Bombed enemy "
-                "first."),
+    # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and
+    # `ForSetOff`: the tips were rewritten short ("the existing text is often
+    # very verbose and unintuitive", the owner) and these rows follow them
+    # word for word, markup and interpolation folded out. The growth is
+    # `{growth}`, filled from the screen's own tip (`_BOMB_GROWTH_RE`). The
+    # long history of both rows is in git.
+    "Bomb": ("Deals its size in Pyro damage when Set off. Grows {growth} at "
+             "the start of your turn. If its enemy dies, it jumps to "
+             "another."),
+    "Set off": ("Every Bomb on the enemy goes off, oldest first. A random Set "
+                "off picks an enemy with Bombs."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
-    # `EB-373`: a Mine IS a Bomb, so the same fold moves it and the same
-    # sentence has to say so. The badge is still where the live number is.
-    # `EB-436`: the old sentence said WHEN and nothing about the attack, and
-    # the r12 act-1 seat read mitigation into it -- three Mines armed against
-    # an elite, five went off, "every hit landed in full, 36 to 18 HP". The
-    # only thing a Mine does to the hit is stop it happening, by killing the
-    # attacker (`EB-336`). "Read the badge:" paid for the clause.
-    # `EB-574`: rule 3, spelt out, and this is the tip the row was filed on.
-    # "Kills move it on" and the badge's "a kill moves them to a survivor" both
-    # read as a promise about the charge doing the killing -- the r21 lane-1
-    # seat set off Mine 11, killed Toadpole B and saw nothing arrive on A. A
-    # charge that goes off is spent; what travels is one still sitting on a
-    # body that dies to something else. Same words on both tips and the badge.
-    # `EB-400`: the same three words on the same clause, in step with
-    # `ArmKeywordTips.ForMine`. A Mine IS a Bomb.
-    # TRIMMED 2026-09-08 with the Bomb row, same E default and same rules kept:
-    # "just before" carries the order the old clause spent a subordinate on,
-    # "the hit still lands" is `EB-436`'s finding in four words, and the last
-    # two sentences are `ForBomb`'s word for word so no two rows of one screen
-    # can be read against each other. Held in step with `ArmKeywordTips.ForMine`.
-    # RESTORED 2026-09-08: the trim had dropped "unless the Mine kills" and
-    # Klee r25 lane 1 (c) 1 read the flat sentence as a promise the hit comes
-    # even when the Mine kills, and gambled 9 HP on it twice.
-    "Mine": ("A Bomb that also goes off just before its enemy's hit, and the "
-             "hit still lands unless the Mine kills. Block stops it. Only "
-             "Vulnerable and the HP cap move it. If the enemy dies with it "
-             "on, it moves to a survivor."),
+    # Text pass 2026-09-25, in step with `ArmKeywordTips.ForMine`.
+    "Mine": "A Bomb that also goes off just before its enemy attacks.",
     # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
     # step with `ArmKeywordTips.ForPlan` word for word: the old row carried
     # six seats' edge cases (the aim and its Minion exception, Strength
@@ -1930,7 +1812,7 @@ _OFF_ARM_KEYWORD: dict[str, str] = {
 # codegen's second `Set off` token -- and it is the same word.
 _ARM_KEYWORD_RE = {
     "Bomb": re.compile(r"\bBombs?\b"),
-    "Set off": re.compile(r"\bSets? [Oo]ffs?\b"),
+    "Set off": re.compile(r"\bSets? (?:it )?[Oo]ffs?\b"),
     "Spark": re.compile(r"\bSparks?\b"),
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
@@ -2339,8 +2221,8 @@ REACTION_KEYWORDS: dict[str, str] = {
     "Vaporize": ("Pyro on a Hydro aura, or Hydro on a Pyro aura. This hit "
                  "deals 1.5x damage and consumes the aura."),
     "Overloaded": ("Pyro on an Electro aura, or Electro on a Pyro aura. "
-                   "6 damage to ALL enemies and 1 Weak on the reacted "
-                   "enemy."),
+                   "Deals 6 damage to ALL enemies and applies 1 Weak to the "
+                   "reacted enemy."),
     # `EB-472`. THE ORDER, on the one row where the order changes a number the
     # reader is about to plan off. "Whether Superconduct's Vulnerable applies
     # before or after the damage of the card that caused it. From the numbers
@@ -2362,6 +2244,9 @@ REACTION_KEYWORDS: dict[str, str] = {
     # in one commit. The panel row and the preview named two different things
     # -- `Poison 4` on the body, "loses 4 HP" on the preview -- and the r24
     # lane-1 seat could not tell which number was which.
+    # TEXT PASS 2026-09-25: the in-game preview stops at "gains 4 Poison",
+    # because Poison's own tip rides beside it there. This page has no Poison
+    # row to ride, so it keeps the tick clause the preview dropped.
     "Electro-Charged": ("Hydro on an Electro aura, or Electro on a Hydro "
                         "aura. The reacted enemy gains 4 Poison, losing that "
                         "much HP at the start of its turn, 1 less each turn. "
@@ -2373,8 +2258,8 @@ REACTION_KEYWORDS: dict[str, str] = {
     # clauses read as independent riders and are one, because the freeze ticks
     # down at the end of the turn the halved action is taken on.
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
-               "action deals half damage, and until it acts the first Attack "
-               "to hit it Shatters for 6 damage."),
+               "action deals 50% less damage. Until it acts, the next Attack "
+               "on it Shatters for 6 unblockable damage."),
     # `EB-465`'s two, and they are the mod's own preview sentences the way the
     # six above are. `Swirl` is `ARM_KEYWORDS`' row VERBATIM rather than a
     # second copy of it, because ten Universals print the word as a verb and
@@ -2389,8 +2274,7 @@ REACTION_KEYWORDS: dict[str, str] = {
     # in the same commit, so the tooltip and this page cannot say different
     # things about it.
     "Crystallize": ("Geo on any aura: "
-                    f"{CRYSTALLIZE_BLOCK} Block, and the aura is consumed -- "
-                    "nothing is left to react with."),
+                    f"gain {CRYSTALLIZE_BLOCK} Block. The aura is consumed."),
 }
 
 # `EB-428`. THE SIX ROWS FILLED 40% OF A SCREEN THAT COULD FIRE NONE OF THEM.
@@ -2520,24 +2404,23 @@ _AURA_NAME_RE = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Aura$")
 # `RoomType`) -- which is the same fact the mod's predicate reads. The minion
 # half rides with it, because in a boss room it is the half that decides which
 # body in front of you freezes.
-FROZEN_BOSS_CLAUSE = (" Bosses cannot be Frozen: Hydro plus Cryo is consumed "
-                      "and applies 2 Vulnerable instead. A Minion beside the "
-                      "boss still Freezes.")
+FROZEN_BOSS_CLAUSE = (" Bosses can't be Frozen, so a boss gains 2 "
+                      "Vulnerable instead. A Minion beside the boss still "
+                      "Freezes.")
 
 # The room the boss substitution applies in, off the wire's `state_type`.
 BOSS_ROOM = "boss"
 
 # The number the card's own Bomb tip prints, where a screen carries that tip.
-# `ArmKeywordTips.ForBomb` builds it as "A charge on an enemy: grows <n> a
-# turn", so this is an exact read of the game's own sentence and never a guess
-# at what a stray numeral near the word Bomb might have meant.
+# `ArmKeywordTips.ForBomb` builds it as "... when Set off. Grows <n> at the
+# start of your turn" (text pass 2026-09-25), so this is an exact read of
+# the game's own sentence and never a guess at what a stray numeral near the
+# word Bomb might have meant.
 # `EB-340` reads the rate off the SCREEN's own Bomb tip so the page quotes
-# what this build prints rather than what tier0 believes. `EB-343` (R248)
-# rewrote that tip to fit its ceiling, so the pattern follows it: anchored
-# on the tip's own opening, because a bare "grows N a turn" is a phrase a
-# card face could reach one day and a wrong match here is silent.
+# what this build prints rather than what tier0 believes. The pattern follows
+# the tip's wording, capital G and all: a card face says "grows by N".
 _BOMB_GROWTH_RE = re.compile(
-    r"charge on an enemy: grows (\d+) a turn\b")
+    r"\bGrows (\d+) at the start of your turn\b")
 
 
 def _every_string(blob: Any):

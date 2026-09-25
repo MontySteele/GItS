@@ -133,9 +133,9 @@ public class BombBadgeHalvesTests
         var pile = ProtoBombs.Place(bare, klee.Creature,
             new ProtoBombs.Charge(12));
 
-        Assert.EndsWith(".smartDescriptionOne", LocKey(pile));
+        Assert.EndsWith(".smartDescription", LocKey(pile));
 
-        var face = Row(pile, "smartDescriptionOne");
+        var face = Row(pile, "smartDescription");
         Assert.DoesNotContain("Vaporize", face);
         Assert.DoesNotContain("Melt", face);
         Assert.DoesNotContain("Vulnerable", face);
@@ -155,15 +155,15 @@ public class BombBadgeHalvesTests
         var pile = ProtoBombs.Place(wet, klee.Creature,
             new ProtoBombs.Charge(12));
 
-        Assert.EndsWith(".smartDescriptionOneVaporize", LocKey(pile));
+        Assert.EndsWith(".smartDescriptionVaporize", LocKey(pile));
         Assert.Contains("with [gold]Vaporize[/gold]",
-                        Row(pile, "smartDescriptionOneVaporize"));
+                        Row(pile, "smartDescriptionVaporize"));
 
         // And the clause is the ONLY difference from the bare face, which is
         // what makes it a clause about that term and not a second sentence.
         Assert.Equal(
-            Row(pile, "smartDescriptionOne"),
-            Row(pile, "smartDescriptionOneVaporize")
+            Row(pile, "smartDescription"),
+            Row(pile, "smartDescriptionVaporize")
                 .Replace(" with [gold]Vaporize[/gold]", string.Empty));
     }
 
@@ -179,10 +179,58 @@ public class BombBadgeHalvesTests
         var cold = Seat.Klee(30).WithPower<CryoAuraPower>(2).Creature;
         var live = Seat.Klee(30).WithPower<ElectroAuraPower>(2).Creature;
 
-        Assert.EndsWith(".smartDescriptionOneMelt", LocKey(
+        Assert.EndsWith(".smartDescriptionMelt", LocKey(
             ProtoBombs.Place(cold, klee.Creature, new ProtoBombs.Charge(9))));
-        Assert.EndsWith(".smartDescriptionOne", LocKey(
+        Assert.EndsWith(".smartDescription", LocKey(
             ProtoBombs.Place(live, klee.Creature, new ProtoBombs.Charge(9))));
+    }
+
+    // ---- text pass 2026-09-25: the Sparks a Set off here gives -----------
+
+    [Fact]
+    public void The_sparks_clause_prints_only_when_the_placer_is_paid_per_explosion()
+    {
+        // The face says "and gives N Sparks" only when a Set off here really
+        // makes Sparks: one per explosion, from Pounding Surprise (or Dodoco
+        // Tales), and only under the arm. A placer holding neither -- a
+        // Companion card can plant for another character -- reads no Spark
+        // clause at all.
+        var was = KleeOverhaul.Enabled;
+        try
+        {
+            KleeOverhaul.Enabled = true;
+
+            var bare = Seat.Klee();
+            var target = Seat.Klee(60).Creature;
+            var unpaid = ProtoBombs.Place(target, bare.Creature,
+                new ProtoBombs.Charge(5), new ProtoBombs.Charge(4));
+            Assert.Equal(0, unpaid.SparksOnSetOff());
+            Assert.EndsWith(".smartDescription", LocKey(unpaid));
+
+            var klee = Seat.Klee()
+                .WithRelic<global::KleeMod.Relics.PoundingSurprise>();
+            var other = Seat.Klee(60).Creature;
+            var paid = ProtoBombs.Place(other, klee.Creature,
+                new ProtoBombs.Charge(5), new ProtoBombs.Charge(4));
+            Assert.Equal(2 * KleeOverhaulLaw.SparkPerExplosion,
+                         paid.SparksOnSetOff());
+            Assert.EndsWith(".smartDescriptionSparks", LocKey(paid));
+            Assert.Equal(
+                "[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
+              + "[gold]Pyro[/gold] damage and gives [blue]{Sparks}[/blue] "
+              + "[gold]Spark{Sparks:plural:|s}[/gold]. Bombs here, oldest "
+              + "first: [blue]{Charges}[/blue].",
+                Row(paid, "smartDescriptionSparks"));
+
+            // Off the arm the relic pays nothing per explosion, so the face
+            // says nothing about Sparks.
+            KleeOverhaul.Enabled = false;
+            Assert.Equal(0, paid.SparksOnSetOff());
+        }
+        finally
+        {
+            KleeOverhaul.Enabled = was;
+        }
     }
 
     // ---- EB-755: which of two placed this turn goes off first ------------

@@ -47,7 +47,7 @@ public sealed class BoomGoesTheDynamite : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Boom Goes the Dynamite"),
-        ("description", "Deal {Damage:diff()} damage. If it triggered an [gold]Elemental Reaction[/gold]: play this card again."),
+        ("description", "Deal {Damage:diff()} damage. If it triggered an [gold]Elemental Reaction[/gold], play this card again."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

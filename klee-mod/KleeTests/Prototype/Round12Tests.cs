@@ -52,10 +52,11 @@ public class Round12Tests
     public void Rapid_Fires_face_hangs_the_set_off_on_the_enemy_it_rolled()
     {
         var face = Face<ProtoKoRapidFire>();
-        // `EB-612`: the count leads the clause it multiplies.
+        // Text pass 2026-09-25: the count trails, "N times", as every other
+        // repeat-count face in the pool prints it.
         Assert.Equal(
-            "4 times: [gold]Set off[/gold] a random enemy and deal "
-          + "{Damage:diff()} damage to it.", face);
+            "[gold]Set off[/gold] a random enemy and deal "
+          + "{Damage:diff()} damage to it, 4 times.", face);
         // The clause the seat priced two turns off is gone: nothing on the
         // face promises a Set off that reaches a body the roll did not pick.
         Assert.DoesNotContain("each enemy hit", face);
@@ -112,19 +113,8 @@ public class Round12Tests
         // order, and the first one is the one that eats the Melt -- a rule
         // nothing printed." `EB-755` (R276) made the words unambiguous for two
         // Bombs placed in one turn.
-        Assert.Contains("in the order placed", SetOffTip());
-    }
-
-    [Fact]
-    public void The_set_off_tip_says_which_charge_meets_the_aura()
-    {
-        // Every reaction consumes the aura, so the charge that meets it is
-        // the one the walk reaches first. Stated as the aura and not as "only
-        // the first reacts", which a Swirl makes false: that reaction
-        // re-applies what it consumed to every living enemy, the target
-        // included.
-        Assert.Contains("the first takes the aura", SetOffTip());
-        Assert.DoesNotContain("only the first reacts", SetOffTip());
+        // Text pass 2026-09-25: "oldest first", the tip's one order clause.
+        Assert.Contains("oldest first", SetOffTip());
     }
 
     [Fact]
@@ -133,105 +123,8 @@ public class Round12Tests
         // `EB-287`'s claim -- a pile goes off TOGETHER -- was carried by this
         // tip's old "Every Bomb on the target". It is carried by the new
         // subject instead, and the round-four pin reads it there.
-        Assert.Contains("The target's [gold]Bombs[/gold] go off first",
+        Assert.Contains("Every [gold]Bomb[/gold] on the enemy goes off",
                         SetOffTip());
-    }
-
-    // ---- EB-443: what Block and a when-hit Attack effect do to a Bomb -----
-
-    [Fact]
-    public void The_set_off_tip_says_block_absorbs_the_hit()
-    {
-        // `ElementalHit.DealWithoutDealerMods` passes `ignoreBlock: false`,
-        // so the explosion pays Block like anything else. The r12 run-2 seat
-        // concluded the opposite from a true observation: "Set off ignores
-        // enemy Block... Two 11-point bombs both landed at full value into
-        // Skittish 6." There was no Block, because Skittish never fired.
-        Assert.Contains("[gold]Block[/gold] stops them", SetOffTip());
-    }
-
-    [Fact]
-    public void The_set_off_tip_says_no_when_hit_power_fires()
-    {
-        // The hit reaches `CreatureCmd.Damage` as `ValueProp.Unpowered` with
-        // `dealer: null`, so nothing an enemy keys on being hit by an Attack
-        // can answer it. "Not an Attack" on the Bomb tip left that to
-        // inference and the seat's inference went the other way.
-        //
-        // `EB-490` RENAMED THE CLASS AND NOT THE CLAIM: "Attack trigger" reads
-        // as something on the PLAYER's side of the board, and the r16 seat
-        // read it that way beside "Block stops them". Same fact, same call,
-        // said about the thing on the enemy's status bar. `Round16Tests` holds
-        // that row's own pins.
-        Assert.Contains("no when-hit power ", SetOffTip());
-        Assert.Contains("fires", SetOffTip());
-    }
-
-    [Fact]
-    public void The_size_clause_is_what_paid_for_them()
-    {
-        // A keyword tip is read in HAND, where there is no pile to quote, so
-        // the arithmetic stays on the badge -- `EB-343`'s own split between
-        // the two surfaces, and the trade the Mine tip already makes.
-        Assert.DoesNotContain("for its size", SetOffTip());
-        Assert.Contains("each a Pyro hit.", SetOffTip());
-    }
-
-    // ---- EB-436: a Mine does not blunt the hit ---------------------------
-
-    private static string MineTip() =>
-        string.Concat(Il.Strings(typeof(ArmKeywordTips)
-            .GetMethod("ForMine", HeadlessGame.All)!));
-
-    [Fact]
-    public void The_mine_tip_says_the_hit_still_lands()
-    {
-        // THE OLD SENTENCE WAS TRUE AND SAID NOTHING ABOUT THE HIT. "Goes off
-        // when its enemy attacks you, before the hit lands" reads as
-        // mitigation, and the r12 act-1 seat played a turn on that read:
-        // three Mines left armed against an elite, five went off, "every hit
-        // landed in full, 36 to 18 HP".
-        // TRIMMED 2026-09-08 ([USER]'s run 2, an E default): the same
-        // finding in four words, and it is a sentence of its own now rather
-        // than a subordinate clause hanging off the trigger.
-        // AND THE EXCEPTION IS HALF THE FINDING (`EB-719`). The trim left
-        // "the hit still lands" flat, and Klee r25 lane 1 (c) 1 read that as
-        // a promise the attack comes even when the Mine kills -- it does not
-        // (`EB-336`, `Preempted`) -- and gambled 9 HP on it twice.
-        Assert.Contains("the hit still lands unless the Mine kills",
-                        MineTip());
-        Assert.DoesNotContain("before the hit lands", MineTip());
-    }
-
-    [Fact]
-    public void The_mine_tip_still_names_both_folded_terms()
-    {
-        // "Read the badge:" is what paid for the new clause; the clause it
-        // introduced is untouched, so R248's rule survives whole.
-        // `EB-400` renamed the opener to name Block; both terms survive.
-        Assert.Contains("[gold]Block[/gold] stops it. Only ", MineTip());
-        Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
-                        MineTip());
-        Assert.DoesNotContain("Read the badge", MineTip());
-    }
-
-    [Fact]
-    public void The_badge_carries_the_same_sentence()
-    {
-        // ONE CLAUSE, TWO SURFACES -- the arrangement `MineClause` has had
-        // since `EB-260`, and the reason that row was filed: the tooltip
-        // carried rule 6 and the smart face did not.
-        var pile = ProtoBombs.Place(Seat.Klee(30).Creature,
-                                    Seat.Klee().Creature,
-                                    new ProtoBombs.Charge(4, IsMine: true));
-        var rows = pile.Localization!;
-        foreach (var key in new[] { "description", "smartDescriptionMines" })
-        {
-            Assert.Contains(
-                "goes off just before this enemy's hit, and the hit still "
-              + "lands unless the Mine kills.",
-                rows.First(r => r.Item1 == key).Item2);
-        }
     }
 
     // ---- EB-392: three words on one screen, now one (R276) ---------------

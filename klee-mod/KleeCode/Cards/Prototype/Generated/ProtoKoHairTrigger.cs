@@ -42,7 +42,7 @@ public sealed class ProtoKoHairTrigger : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hair Trigger"),
-        ("description", "Your [gold]Bombs[/gold] on this enemy become a [gold]Mine[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Your [gold]Bombs[/gold] on the enemy become [gold]Mines[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

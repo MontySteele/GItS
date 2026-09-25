@@ -45,7 +45,7 @@ public sealed class CurtainCue : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Curtain Cue"),
-        ("description", "If you moved the [gold]Spotlight[/gold] this turn: gain {IfUpgraded:show:4|3} [gold]Encore[/gold] and draw 1 card. Otherwise: gain {IfUpgraded:show:2|1} [gold]Encore[/gold]."),
+        ("description", "If you moved the [gold]Spotlight[/gold] this turn, gain {IfUpgraded:show:4|3} [gold]Encore[/gold] and draw 1 card. Otherwise, gain {IfUpgraded:show:2|1} [gold]Encore[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

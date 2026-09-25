@@ -136,32 +136,17 @@ public class Round16Tests
         Printed(typeof(ArmKeywordTips), "ForSetOff");
 
     [Fact]
-    public void The_set_off_tip_names_the_powers_on_the_enemys_status_bar()
-    {
-        Assert.Contains("no when-hit power fires", SetOffTip());
-        Assert.DoesNotContain("Attack trigger", SetOffTip());
-        // The Block clause is untouched: the pair was the problem, not either
-        // half, and dropping one would put `EB-443`'s finding back.
-        Assert.Contains("[gold]Block[/gold] stops them", SetOffTip());
-    }
-
-    [Fact]
     public void Renaming_the_class_cost_the_ceiling_nothing()
     {
-        // "Attack trigger" and "when-hit power" are the same fourteen
-        // characters, so `EB-443`'s 132-of-135 reading stood as published --
-        // and `EB-516` then took the tip OVER the ceiling by adding the aim,
-        // which is the fact this pin now carries. The clause is worth the
-        // overage because the two rows that roll (Tinder Toss, Rapid Fire)
-        // print only "a random enemy" and cannot say where it lands, and
-        // `tools/lint_text_conventions.py` carries `SetOffKey` as a named
-        // exception with that reason. `EB-755` (R276) paid seven more
-        // characters for "in the order placed" over "oldest first", which did
-        // not say which of two Bombs placed in one turn goes first.
+        // TEXT PASS 2026-09-25: the tip is back under the 135-character tip
+        // ceiling and takes no exception. The when-hit and Block clauses left
+        // as edge cases (the rule this section is about did not move --
+        // `A_set_off_hands_the_hit_no_attacker_so_skittish_cannot_fire`
+        // below still pins it); `EB-516`'s aim stays on the word.
         var rendered = SetOffTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
-        Assert.Equal(180, rendered.Length);
-        Assert.EndsWith("A random one picks a Bombed enemy first.", rendered);
+        Assert.True(rendered.Length <= 135, rendered);
+        Assert.EndsWith("A random Set off picks an enemy with Bombs.", rendered);
     }
 
     [Fact]

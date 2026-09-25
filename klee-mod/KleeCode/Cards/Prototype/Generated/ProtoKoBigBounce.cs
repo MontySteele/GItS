@@ -48,7 +48,7 @@ public sealed class ProtoKoBigBounce : CustomCardModel, IElementalCard, ISetOffC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Big Bounce"),
-        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Explosion damage past the enemy's HP is dealt to a random other enemy."),
+        ("description", "[gold]Set off[/gold]. Deal {Damage:diff()} damage. Explosion damage past the enemy's HP hits a random other enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

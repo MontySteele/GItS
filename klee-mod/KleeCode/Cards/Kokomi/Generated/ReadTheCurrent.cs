@@ -51,7 +51,7 @@ public sealed class ReadTheCurrent : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Current"),
-        ("description", "Deal {Damage:diff()} damage. If you have at least 10 [gold]Charge[/gold]: deal 6 damage."),
+        ("description", "Deal {Damage:diff()} damage. If you have at least 10 [gold]Charge[/gold], deal 6 damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

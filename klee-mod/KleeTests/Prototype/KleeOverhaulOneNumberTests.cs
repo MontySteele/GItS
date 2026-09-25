@@ -83,11 +83,10 @@ public class KleeOverhaulOneNumberTests
         Assert.Equal(25, pile.PredictedSetOffDamage());   // 12 + 13, per charge
         Assert.Equal(25, pile.DisplayAmount);
         Assert.Equal("25", PrintedSize(pile));
-        // ... and the face still says WHY it is 25, which is EB-287's half
-        // widened by R248: one number, and every modifier in it named.
-        Assert.EndsWith(".smartDescriptionVulnerable", LocKey(pile));
-        Assert.Contains("after [gold]Vulnerable[/gold]",
-                        Row(pile, "smartDescriptionVulnerable"));
+        // Text pass 2026-09-25: the number already includes Vulnerable, and
+        // the face no longer names it -- one number, read off the badge.
+        Assert.EndsWith(".smartDescription", LocKey(pile));
+        Assert.DoesNotContain("Vulnerable", Row(pile, "smartDescription"));
     }
 
     [Fact]

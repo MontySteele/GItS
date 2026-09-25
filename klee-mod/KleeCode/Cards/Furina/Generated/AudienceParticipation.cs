@@ -41,7 +41,7 @@ public sealed class AudienceParticipation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Crowd Answers"),
-        ("description", "If an [gold]Elemental Reaction[/gold] triggered this turn: gain {IfUpgraded:show:5|4} [gold]Encore[/gold] and draw 2 cards. Otherwise: gain {IfUpgraded:show:3|2} [gold]Encore[/gold] and draw 1 card."),
+        ("description", "If an [gold]Elemental Reaction[/gold] triggered this turn, gain {IfUpgraded:show:5|4} [gold]Encore[/gold] and draw 2 cards. Otherwise, gain {IfUpgraded:show:3|2} [gold]Encore[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

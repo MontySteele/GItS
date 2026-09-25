@@ -38,8 +38,8 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
     {
         ("title", "Kokomi"),
         ("description",
-            "Divine Priestess of Watatsumi Island, and the strategist who "
-          + "wins by spending everything except lives."),
+            "Divine Priestess of Watatsumi Island, a strategist who plans "
+          + "a turn ahead."),
         ("titleObject", "Kokomi"),
         ("pronounSubject", "she"),
         ("pronounObject", "her"),

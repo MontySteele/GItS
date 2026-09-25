@@ -75,9 +75,9 @@ namespace KleeMod.Powers;
 /// banked stack at the badge without a card saying so. A charge already sitting
 /// on an enemy is not a swing Klee is taking, and pricing it as one made the
 /// character's central number unreadable in exactly the fights that are hard.
-/// The costs of the reading are the two things a player CAN see: the badge and
-/// the tooltip now name every modifier folded into them
-/// (<see cref="Localization"/>), rather than the one that used to be named.
+/// The badge's number folds the target's terms in; since the text pass of
+/// 2026-09-25 the face names only the pending reaction beside it
+/// (<see cref="Localization"/>), and the number is the whole of the rest.
 /// </summary>
 public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 {
@@ -108,65 +108,31 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 // the LIVE choice is a key (<see cref="Title"/>) and both
                 // spellings have to exist before it can be made.
                 (MineTitleKey, "Mine"),
-                // FOUR SENTENCES, which is the ceiling, so `EB-343`'s clause
-                // is paid for by merging the first two rather than added to
-                // them. NO SEMICOLON, and that is not a style note:
-                // `tools/lint_text_conventions.py` reads these literals out of
-                // the SOURCE with a regex that stops at one, so a semicolon
-                // makes a player-facing string invisible to its own ceiling.
-                // TRIMMED 2026-09-08 with the two keyword tips ([USER]'s
-                // run 2, an E default). The third sentence is the WORD's own
-                // two sentences now, so the canonical badge copy and
-                // `ArmKeywordTips.ForBomb` say the modifier rule in the same
-                // words; what left is the "not an Attack" negative, which two
-                // seats misread as Block immunity, and the enumeration behind
-                // it. The live faces still NAME the fold R248 asks for --
-                // that is `FoldedMods.Clause`, one clause per term, and it is
-                // untouched. ONE SENTENCE AND NOT THE WORD'S TWO: this
-                // face already spends two sentences on rules 1 and 2 and a
-                // fourth on the Mine, and `MAX_SENTENCES` is 4 with no
-                // exception, so the word's two are joined on a comma here.
-                // Same words, same rule, one full stop fewer.
+                // TEXT PASS 2026-09-25 (the owner: "the existing text is
+                // often very verbose and unintuitive"). The static face is
+                // what a reward shelf or the compendium shows, with no pile to
+                // quote: what the Bombs are and the two rules a reader needs
+                // first. The Bomb and Mine keyword tips carry the rest.
                 ("description",
-                    "A charge on this enemy that grows at the start of your "
-                  + "turn. Every [gold]Bomb[/gold] here goes off as Pyro "
-                  + "damage when [gold]Set off[/gold], never by itself. "
-                  + "[gold]Block[/gold] stops it, and only "
-                  + "[gold]Vulnerable[/gold] and the HP cap move it."
-                  + MineClause),
+                    "Klee's Bombs. They deal their size in [gold]Pyro[/gold] "
+                  + "damage when [gold]Set off[/gold] and grow at the start of "
+                  + "her turn."),
             };
-            // EB-260, EB-287 and `EB-343`. ROWS, not one row with conditionals
-            // in it, for the reason <see cref="SmartDescriptionLocKey"/> gives:
-            // a headless pin can read a row and cannot run `LocManager`. TWO
-            // axes, and the second one GREW: the live Mine count (EB-260 -- a
-            // player must never read "never goes off by itself" over a pile
-            // that answers the enemy's next attack) and which of the target's
-            // modifiers the printed total has folded in (EB-287 asked for one
-            // of them by name and R248 asks for all of them).
-            //
-            // GENERATED RATHER THAN TYPED, which is what keeps the grid honest
-            // now that it is a grid: every key the selector below can compose
-            // has a row, because both come off <see cref="FoldedMods.All"/>. A
-            // key with no row behind it falls back to the static description
-            // (`PowerModel.HasSmartDescription` is a `LocString.Exists` probe),
-            // so a hole here is a silently blank face rather than a crash.
-            // `EB-536` ADDED THE THIRD AXIS: whether the pile holds ONE
-            // charge or several. The hit clause is a fact about a STACK and
-            // reads as noise on a single Bomb, where the total and the hit are
-            // the same number.
-            // `EB-573` ADDED THE FOURTH AXIS: whether any charge here carries
-            // a rider (`PayloadMineAll`, Jumpy Dumpty's Mine-on-ALL). It
-            // survives a merge and grows in bulk, and no surface said so.
-            foreach (var single in new[] { false, true })
+            // THE LIVE GRID. Rows and a key, not conditionals inside one row,
+            // because loc is registered once at boot and a headless pin can
+            // read a row and cannot run `LocManager`. Every key the selector
+            // can compose has a row, because both walk the same four axes.
+            foreach (var sparks in new[] { false, true })
             {
                 foreach (var mines in new[] { false, true })
                 {
                     foreach (var rider in new[] { false, true })
                     {
-                        foreach (var mods in FoldedMods.All)
+                        foreach (var reaction in new[] { ReactionKind.None,
+                                     ReactionKind.Vaporize, ReactionKind.Melt })
                         {
-                            rows.Add((SmartKey(single, mines, rider, mods),
-                                      Face(single, mines, rider, mods)));
+                            rows.Add((SmartKey(sparks, mines, rider, reaction),
+                                      Face(sparks, mines, rider, reaction)));
                         }
                     }
                 }
@@ -176,391 +142,96 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Rule 6, in the words the static face already used. ONE sentence, two
-    /// surfaces: the tooltip carried it and the smart face did not, which is
-    /// the whole of <c>EB-260</c> -- the Codex tester read the contradiction
-    /// twice and called it the most confusing thing on the screen
-    /// (`klee-overhaul-r1-codex-b`, fights 4 and 5).
-    /// </summary>
-    /// <summary>`EB-436` PUT THE HIT IN THE SENTENCE. The clause said WHEN
-    /// and nothing about the attack, and the r12 act-1 seat read mitigation
-    /// into it: three Mines left armed against an elite, five went off,
-    /// "every hit landed in full, 36 to 18 HP". The only thing a Mine does to
-    /// the attack is stop it happening, by killing the attacker -- `EB-336`'s
-    /// rule, <see cref="Preempted"/> -- so the badge says that and stops.
-    /// Same sentence, same two surfaces the clause has had since
-    /// <c>EB-260</c>.</summary>
-    /// <summary>TRIMMED 2026-09-08 with the two keyword tips ([USER]'s run
-    /// 2, an E default: "a lot of unnecessary tooltip text that could be
-    /// trimmed"). Both of `EB-436`'s facts survive -- when it goes off, and
-    /// that the attack lands anyway -- in one short sentence rather than one
-    /// with a subordinate clause. ONE and not two, because every face this
-    /// clause rides already spends three sentences of the four
-    /// `MAX_SENTENCES` allows and that cap takes no exception. The words are
-    /// <see cref="KleeMod.Cards.ArmKeywordTips.ForMine"/>'s own, so the badge
-    /// and the word cannot be read against each other. "This enemy" is the
-    /// one difference and it is the badge's whole subject.</summary>
-    /// <summary>THE EXCEPTION RESTORED 2026-09-08. The trim had dropped
-    /// `EB-436`'s "unless the Mine kills" (`EB-336`'s <see cref="Preempted"/>)
-    /// and Klee r25 lane 1 (c) 1 read the flat sentence as a promise the hit
-    /// comes even on a kill. Held word for word with
-    /// <see cref="KleeMod.Cards.ArmKeywordTips.ForMine"/>, still one
-    /// sentence.</summary>
-    private const string MineClause =
-        " A [gold]Mine[/gold] also goes off just before this enemy's hit, "
-      + "and the hit still lands unless the Mine kills.";
-
-    // `EB-343`'s sentence is written INTO the static description above rather
-    // than pulled out as a constant beside `MineClause`, and the reason is the
-    // measuring rule: `tools/lint_text_conventions.py` counts a bare
-    // identifier in a concatenation as ONE numeral, so a named constant would
-    // hide 65 characters of player-facing text from its own ceiling.
-    //
-    // `EB-373` REWROTE THAT SENTENCE ON BOTH SURFACES, because it was not the
-    // rule this file implements. `FoldedMods` reads exactly two things off the
-    // target -- its `VulnerablePower`, and whichever power returns the lowest
-    // `ModifyDamageCap` -- and "the enemy's debuffs" claimed the rest. The r9
-    // seat lost two reads to it: a Slow 50 enemy took 48 from a pile printing
-    // 46, and a Flutter 5 enemy took a 27 Bomb whole while a printed 8 Attack
-    // landed 4. Both of those say "from Attacks" on their own faces, and the
-    // reason they miss is the one both surfaces now lead with -- the hit is not
-    // an Attack.
-    //
-    // TRIMMED 2026-09-08 ([USER]'s run 2, an E default), and the sentence is
-    // now `ArmKeywordTips.ForBomb`'s own two: "Block stops it. Only
-    // Vulnerable and the HP cap move it." The negative it led with went with
-    // the same negative on the word -- two seats read "not an Attack" as
-    // Block immunity, which is what `EB-400` had to name Block beside -- and
-    // the enumeration behind it went with the trim. THE FOLD IS STILL NAMED
-    // WHERE R248 ASKS FOR IT: `FoldedMods.Clause` prints one clause per term
-    // on the LIVE face, beside the number the term moved, and it is
-    // untouched. Same rule, same words, two surfaces, the arrangement
-    // `MineClause` already has.
-
-    /// <summary>
     /// The face the wire prints (<c>PowerModel.HoverTips</c> uses the SMART
-    /// description for any mutable power that has one). <c>{Size}</c> is the
-    /// number the Set off will actually deal -- see
-    /// <see cref="PredictedSetOffDamage"/>, <c>EB-265</c> and <c>EB-343</c>.
+    /// description for any mutable power that has one). At most three short
+    /// sentences (text pass 2026-09-25): what a Set off here pays, the pile in
+    /// set-off order, and the rider if one is riding.
     ///
-    /// EB-287: IT IS PROSE NOW. The r3 Opus seat read the old parenthetical
-    /// -- "(2 Bombs, 0 of them Mines)" -- as a debug string, and the r3 Codex
-    /// seat had to REASON OUT that the total was the Weak-adjusted one
-    /// ("I inferred [it] was the Weak-adjusted amount but had to reason
-    /// through"). So the count is a sentence, the Mine clause appears only
-    /// when there is a Mine to talk about, and each modifier term says its own
-    /// name.
+    /// <c>{Size}</c> is the number the Set off will actually deal -- the
+    /// target's Vulnerable, its HP cap and the pending reaction are already
+    /// folded in (<see cref="PredictedSetOffDamage"/>), so the face names the
+    /// reaction and nothing else. The growth, the jump and the Mine's timing
+    /// are the keyword tips' (<c>ArmKeywordTips.ForBomb</c> and
+    /// <c>ForMine</c>), and the old clauses for them left this face.
     ///
-    /// EB-361: FOUR SENTENCES IS THE CEILING AND RULE 3 IS THE FIFTH FACT, so
-    /// the growth sentence is a clause on the count rather than a sentence of
-    /// its own. Rule 3 -- a Bomb whose enemy dies moves to a survivor -- was on
-    /// no card, badge or tip, and three round-10 seats met it as a surprise:
-    /// one read `Bomb 36 / Bombs here: 3` on an enemy it had planted 11 on and
-    /// filed it as the screen contradicting itself. The badge is where a player
-    /// meets the survivor's stack, so it is where the rule is printed.
+    /// EVERY PIECE IS A NAMED CONSTANT, because
+    /// `tools/lint_text_conventions.py` reads the player's text off the
+    /// SOURCE and rebuilds these faces from these names.
     /// </summary>
-    private static string Face(bool single, bool mines, bool rider,
-                              FoldedMods mods) =>
-        "[gold]Set off[/gold] here deals " + PyroTotal + mods.Clause
-      + (single ? string.Empty : HitCount) + "."
-      + (mines ? BombsWithMines : Bombs)
-      + (rider ? RiderClause : string.Empty) + "."
-      + (mines ? MineClause : NoSelfSentence) + JumpSentence;
+    private static string Face(bool sparks, bool mines, bool rider,
+                              ReactionKind reaction) =>
+        "[gold]Set off[/gold] here deals " + PyroTotal
+      + ReactionClause(reaction)
+      + (sparks ? SparksClause : string.Empty) + "."
+      + Bombs + (mines ? MinesClause : string.Empty) + "."
+      + (rider ? RiderSentence : string.Empty);
 
-    /// <summary>
-    /// `EB-514`: THE HIT COUNT, IN THE HEADLINE.
-    ///
-    /// THE DEFECT (Klee r18 lane 2 (c) 4). "`Mine 7 -- Set off here deals 7
-    /// Pyro damage. Bombs here: 4 / 3, including 2 Mines`. Reading only the
-    /// headline I would have budgeted one Spark of refund and one hit; it is
-    /// actually two hits and two Sparks, which matters enormously for whether
-    /// a Set off is free. The information is in the second sentence but the
-    /// number I plan against is in the first."
-    ///
-    /// AND THAT IS EXACTLY RIGHT: <see cref="PyroTotal"/> is a SUM over the
-    /// charges, so a stack prints one number where the board will produce
-    /// several hits -- several reactions, several Sparks, several chances for
-    /// one to land on a corpse. The queue was already on the face
-    /// (<c>EB-450</c>'s <c>{Charges}</c>) and the seat still planned against
-    /// the headline, which is the reading this clause is about: the count goes
-    /// where the total is, not one sentence later.
-    ///
-    /// SPARKS ARE NAMED RATHER THAN LEFT TO RULE 4. One Spark per explosion is
-    /// printed on the Spark tip, and the seat had read it -- the miss was that
-    /// "deals 7" hid how many explosions "7" was. "For as many Sparks" is the
-    /// same rule said where the arithmetic is, which is the whole of the row.
-    ///
-    /// <c>{Count}</c> IS `EB-289`'s VAR, off the charge list rather than off
-    /// the stack, so a Mine that has already self-popped is not counted; it
-    /// left <see cref="Bombs"/> at `EB-450` because the list said the count
-    /// more plainly there, and it comes back HERE because the headline is a
-    /// different sentence with a different job. Both faces are over the power
-    /// ceiling for it and both are excepted by name in
-    /// `tools/lint_text_conventions.py`.
-    /// </summary>
-    ///
-    /// `EB-536` CUT IT OFF THE SINGLE-CHARGE FACE AND SPELLED THE SPARKS OUT.
-    /// "In 1 hit for as many Sparks", printed on every Bomb block, "was never
-    /// comprehensible" (Klee r19 lane 2) -- and on a pile of one it is saying
-    /// nothing: the total IS the hit, and "as many" is a comparison to a
-    /// number the sentence has already spent. So the clause is a property of a
-    /// STACK, it appears only on a stack, and it names the Spark count instead
-    /// of pointing back at the hit count. The plural goes with it: this face
-    /// is only ever chosen for two charges or more.
-    ///
-    /// `EB-666` (Klee r24, both lanes): "FOR N SPARKS" READ AS A PRICE. "For
-    /// N" is how a cost is spelled, so both seats priced a Set off as COSTING
-    /// Sparks off this clause, when the rule is the opposite one
-    /// (`SPARK_PER_EXPLOSION`): each explosion MAKES a Spark. One word carries
-    /// the whole difference, so the clause says "making" and the direction is
-    /// no longer inferred from a preposition. No rule moved.
-    private const string HitCount =
-        ", in [blue]{Count}[/blue] hits, making [blue]{Count}[/blue] "
-      + "[gold]Sparks[/gold]";
+    /// <summary>The total, with no full stop: a reaction clause may follow.</summary>
+    private const string PyroTotal = "[blue]{Size}[/blue] [gold]Pyro[/gold] damage";
 
-    /// <summary>The total, with no full stop: a modifier clause may follow it.
-    ///
-    /// EVERY PIECE OF THE GRID IS A NAMED CONSTANT, this one included, and it
-    /// is not decoration. `tools/lint_text_conventions.py` reads the player's
-    /// whole text off the SOURCE -- it cannot run `LocManager` any more than a
-    /// headless pin can -- and rebuilds these faces from these names. A clause
-    /// spelled inline would be text the ceilings never measured.</summary>
-    private const string PyroTotal = "[blue]{Size}[/blue] Pyro damage";
-
-    /// <summary>`EB-343`'s four clauses, one per term the total can pass
-    /// through. See <see cref="FoldedMods.Clause"/> for how they compose.
-    /// </summary>
-    private const string VulnerableClause = " after [gold]Vulnerable[/gold]";
-
-    /// <summary>
-    /// `EB-721`. THE TERM THAT WAS FOLDED IN AND NEVER NAMED.
-    ///
-    /// THE FIND (Klee r25 lane 2, (c) 2). "`Bomb 18 ... sizes, oldest first:
-    /// 12` is one 12-size Bomb standing against a Hydro aura for a Vaporize.
-    /// Both numbers are honest; they are adjacent and disagree." `EB-559`
-    /// folded the pending amplifier into the total and gave it no clause,
-    /// while every other term the number passes through has had one since
-    /// R248 -- so the one modifier a reader could not check against a badge on
-    /// the enemy was the one that moved the number most.
-    ///
-    /// TWO NAMED REACTIONS AND NO OTHERS, which is not a shortlist but the
-    /// table: <c>ReactionTable.AmplifierMultiplier</c> answers above 1 for
-    /// Pyro over Hydro and Pyro over Cryo, and this face prints Pyro damage.
-    /// An Electro or Anemo body reacts and does not multiply, so naming it
-    /// here would put a clause on a number it did not move.
-    /// </summary>
+    /// <summary>`EB-721`. The one term folded into the total that a reader
+    /// cannot check against a badge on the enemy: the amplifying reaction the
+    /// leading charge will cause. Pyro amplifies over Hydro and over Cryo and
+    /// nothing else, so these are the only two.</summary>
     private const string VaporizeClause = " with [gold]Vaporize[/gold]";
 
-    /// <summary>`EB-721`, the other amplifier. See
-    /// <see cref="VaporizeClause"/>.</summary>
+    /// <summary>`EB-721`, the other amplifier.</summary>
     private const string MeltClause = " with [gold]Melt[/gold]";
 
-    private const string HardToKillClause =
-        " capped by [gold]Hard To Kill[/gold]";
+    private static string ReactionClause(ReactionKind reaction) => reaction switch
+    {
+        ReactionKind.Vaporize => VaporizeClause,
+        ReactionKind.Melt => MeltClause,
+        _ => string.Empty,
+    };
 
-    private const string IntangibleClause =
-        " capped by [gold]Intangible[/gold]";
+    /// <summary>`EB-514` / `EB-666`: what a Set off here MAKES, in Sparks --
+    /// one per explosion, from Klee's starter relic
+    /// (<see cref="SparksOnSetOff"/>). Printed only when it is more than
+    /// none.</summary>
+    private const string SparksClause =
+        " and gives [blue]{Sparks}[/blue] [gold]Spark{Sparks:plural:|s}[/gold]";
 
-    /// <summary>A cap this build does not know the name of. See
-    /// <see cref="CapKind"/> for why it is worth a clause at all.</summary>
-    private const string UnnamedCapClause = " capped by this enemy";
+    /// <summary>`EB-450` / `EB-536` / `EB-755`: the pile, in the order it
+    /// goes off, each charge under its ordinal (<see cref="ChargeListVar"/>).
+    /// </summary>
+    private const string Bombs = " Bombs here, oldest first: [blue]{Charges}[/blue]";
+
+    /// <summary>`EB-260`: how many of the pile are Mines, where any are.</summary>
+    private const string MinesClause =
+        ", including [blue]{Mines}[/blue] [gold]Mine{Mines:plural:|s}[/gold]";
+
+    /// <summary>`EB-573`: the rider a merge keeps (Jumpy Dumpty's
+    /// Mine-on-ALL), named where the pile is.</summary>
+    private const string RiderSentence =
+        " One drops [gold]Mine[/gold] [blue]{Payload}[/blue] on ALL enemies "
+      + "when it goes off.";
 
     /// <summary>The row key <see cref="Face"/> is filed under, and the ONE
-    /// place the two axes are spelled into a key -- <see cref="Localization"/>
+    /// place the axes are spelled into a key -- <see cref="Localization"/>
     /// writes the rows with it and <see cref="SmartDescriptionLocKey"/> reads
     /// one back, so a row and its selector cannot drift apart.</summary>
-    private static string SmartKey(bool single, bool mines, bool rider,
-                                  FoldedMods mods) =>
-        "smartDescription" + (single ? "One" : string.Empty)
+    private static string SmartKey(bool sparks, bool mines, bool rider,
+                                  ReactionKind reaction) =>
+        "smartDescription" + (sparks ? "Sparks" : string.Empty)
       + (mines ? "Mines" : string.Empty)
-      // `EB-573`'s axis, and it is LAST of the three booleans so the
-      // thirty-two keys that existed before this row keep the names they had.
-      + (rider ? "Rider" : string.Empty) + mods.KeySuffix;
+      + (rider ? "Rider" : string.Empty)
+      + reaction switch
+        {
+            ReactionKind.Vaporize => "Vaporize",
+            ReactionKind.Melt => "Melt",
+            _ => string.Empty,
+        };
 
     /// <summary>
-    /// `EB-289`. <c>{Count}</c> AND NOT <c>{Amount}</c>, and the difference is
-    /// the whole defect.
-    ///
-    /// <c>PowerModel</c> binds <c>{Amount}</c> to its own stack amount
-    /// (<c>locString.Add("Amount", Amount)</c>), and this power's stack is
-    /// raised once per <see cref="Place"/> and never lowered: the charge list
-    /// is emptied by <see cref="TakeAll"/>, <see cref="TakeMines"/> and
-    /// <see cref="TakeAt"/>, which are PURE by design -- they run inside a
-    /// damage hook where no command may -- so none of them can move a stack.
-    /// A pile whose Mine had already gone off therefore kept printing the Mine
-    /// in its count.
-    ///
-    /// The r4 Opus seat read exactly that and worked out why unaided: "Bomb 8
-    /// ... Bombs here: 2", a Set off that dealt 8 and paid ONE Spark, and
-    /// "its Mine had already self-popped on the previous enemy turn, so only
-    /// one bomb should have remained". The SPARK was right -- rule 4 pays one
-    /// per explosion and one Bomb went off -- and the COUNT was the lie.
-    ///
-    /// So the count joins <c>{Size}</c> and <c>{Mines}</c> as a var read off
-    /// the charge list itself in <see cref="SyncDisplay"/>. Every number on
-    /// this face now comes from the list the explosions consume, and the stack
-    /// amount is left to be what the engine uses it for.
-    /// </summary>
-    /// `EB-361` FOLDED RULE 1'S GROWTH INTO THIS SENTENCE, and the reason is
-    /// the sentence ceiling rather than taste: rule 3's jump is a fifth fact on
-    /// a face that may print four sentences, so the growth clause rides the
-    /// count it is about. "growing each turn" is the phrasing the Bomb keyword
-    /// tip already uses for the same rule ("grows {BombGrowth} a turn"), which
-    /// is also where the RATE is printed -- the badge has never carried it.
-    /// `EB-450` REPLACED THE COUNT WITH THE LIST, and the count is still in
-    /// it: `Bombs here: 5, 8, 20, 12` says four as plainly as `4` did and adds
-    /// the one fact the badge withheld.
-    ///
-    /// THE DEFECT. The badge printed a SUM and a count -- `Bomb 45 (4 bombs)`
-    /// -- while `EB-432`'s Set off tip says the charges go off oldest first
-    /// and the FIRST one takes the aura. So on a bombed body wearing Cryo,
-    /// which charge Melts was a fact the player had to remember placing rather
-    /// than read, and the r13 seat carried it in its head for a whole fight.
-    /// Two surfaces, one rule, and only one of them could name the charge.
-    ///
-    /// OLDEST FIRST IS THE ORDER `SetOff` WALKS -- `_charges` is placement
-    /// order and every taker walks it front to back -- so the list is printed
-    /// in the list's own order and no second definition of "oldest" exists.
-    ///
-    /// `{Count}` STAYS A VAR (`EB-289` is why it is not `{Amount}`) and leaves
-    /// this text: `5 / 8 / 20 / 12` says four as plainly as `4` did, and
-    /// printing both would put two number groups in one sentence for no fact.
-    ///
-    /// THE WORDS "OLDEST FIRST" ARE NOT HERE AND THAT IS THE CEILING, said out
-    /// loud rather than left to be discovered. This face was 125 of its
-    /// 125-character power ceiling (`tools/lint_text_conventions.py`, and it
-    /// bites) until `EB-514` put the hit count in the headline and took it
-    /// over, so the clause has no room without rewriting `PyroTotal`,
-    /// `NoSelfSentence` or `JumpSentence` -- three ruled sentences, to restate
-    /// a rule the reader already has: `EB-432` put "oldest first" on the
-    /// `Set off` tip, which is printed on the card that will spend this pile.
-    /// The tip says the ORDER and the badge now shows the QUEUE, which is the
-    /// pairing the r13 seat was doing in its head.
-    ///
-    /// `EB-536` (widened, Klee r20) MADE THE LABEL SAY WHAT THE NUMBERS ARE.
-    /// "Bombs here: 3, including 1 Mine" reads as a COUNT and is a list of
-    /// SIZES, and on a pile of one the two readings are indistinguishable: the
-    /// natural-lane seat read `Bombs here: 3` as three Bombs and "was
-    /// genuinely confused for a fight and a half", getting it only when a
-    /// later pile printed `Bomb 21 ... Bombs here: 9 / 12` and the arithmetic
-    /// refused the count reading. `EB-450` had already replaced the count with
-    /// the list and the label was the half it left behind. Six characters, on
-    /// two faces that are excepted from the power ceiling by name, and the
-    /// count is not lost with it -- a list of sizes says how many there are as
-    /// plainly as a number did.
-    ///
-    /// SLASHES AND NOT COMMAS inside the list, for one reason: the sentence
-    /// around it is comma-separated, and `Bombs here: 5, 8, 20, 12, growing
-    /// each turn` hides where the pile stops. It costs nothing at the ceiling
-    /// -- the lint renders a hole as one character however it is filled.
-    ///
-    /// `EB-573` TOOK THE FULL STOP OFF, and it is the only thing that moved
-    /// here: a pile carrying a rider ends the same sentence with
-    /// <see cref="RiderClause"/> instead. A clause and not a fifth sentence,
-    /// because four is the ceiling and every one of the four is a ruled fact.
-    ///
-    /// `EB-450` (the other half, Klee r13 f6) PUT THE ORDER ON THE LIST. The
-    /// badge printed a SUM and a count, `EB-432`'s `Set off` tip said the
-    /// charges go off oldest first and the first one takes the aura, and the
-    /// list that replaced the count still did not say it was IN that order --
-    /// so on a bombed body wearing Cryo which charge Melts was a fact the r13
-    /// seat carried in its head for a whole fight. THREE WORDS AND NOT A
-    /// SENTENCE, in the label rather than after the numbers, because the
-    /// reader needs the order BEFORE reading the list; the face is excepted
-    /// from the power ceiling by name and the exception now says so. The
-    /// order is not a second definition of anything: `_charges` is placement
-    /// order, `TakeAll` copies it, and `SetOff` walks the copy front to back.
-    private const string Bombs =
-        " Bomb sizes here, oldest first: [blue]{Charges}[/blue], growing each "
-      + "turn";
-
-    /// <summary>
-    /// `EB-471`. WHICH SIDE OF THE GROWTH TICK A MINE LANDS ON, and it is on
-    /// THIS face rather than on <see cref="Bombs"/> because this is the face a
-    /// pile with a Mine in it prints and <see cref="Bombs"/> is at 125 of 125.
-    ///
-    /// THE FIND (Klee r15 run 2 (c) 3). "A Mine fires at its base size on the
-    /// enemy's turn, before the growth tick, and nothing printed says which
-    /// side of the tick it lands on: Jumpy Dumpty's Mine 3 paid 3, not 7, and
-    /// I reverse-engineered it from HP." The row offered "Mines do not grow"
-    /// as the sentence to print and that sentence is FALSE here:
-    /// <see cref="GrowBy"/> walks every charge and a Mine is a charge, so a
-    /// Mine that lives to the next turn start is 7. What is true, and what the
-    /// seat actually lacked, is WHEN the growth happens -- and paired with
-    /// <see cref="MineClause"/>'s "goes off before this enemy's hit" it says
-    /// the Mine pays the size it has now.
-    /// </summary>
-    /// `EB-450`'s order clause rides this face too, in the same words and the
-    /// same place, so the two lists cannot be read against each other.
-    private const string BombsWithMines =
-        " Bomb sizes here, oldest first: [blue]{Charges}[/blue], including "
-      + "[blue]{Mines}[/blue] [gold]Mine{Mines:plural:|s}[/gold], growing at "
-      + "your turn's start";
-
-    /// <summary>
-    /// `EB-573`. THE RIDER THE MERGE KEEPS, NAMED WHERE THE PILE IS.
-    ///
-    /// THE FIND (Klee r21 lane 1, (c) 4). "A Bomb 21 that was Jumpy's Bomb 8
-    /// two merges and two turns ago still dropped Mine 3 on ALL when it went
-    /// off. This is a GOOD interaction and a large part of the kit's ceiling,
-    /// and it is completely undiscoverable except by accident." Careful
-    /// Arrangement's face promises the Mine survives the merge and says
-    /// nothing about riders; <see cref="MergeAllTo"/> sums
-    /// <c>PayloadMineAll</c> across every charge it takes, so the rider
-    /// survives, grows in bulk and is printed nowhere.
-    ///
-    /// THE PILE IS WHERE IT BELONGS, for <c>EB-361</c>'s reason one clause up:
-    /// the rider is a fact about THIS pile with THIS number in it, and the
-    /// number is live. The card that placed it is two merges gone.
-    ///
-    /// A CLAUSE ON THE COUNT SENTENCE and not a fifth sentence, which is the
-    /// same bargain rule 3 took: four sentences is this face's ceiling and all
-    /// four are ruled facts. The FULL STOP lives here rather than on
-    /// <see cref="Bombs"/> so exactly one of the two prints it.
-    /// </summary>
-    private const string RiderClause =
-        ", and dropping [gold]Mine[/gold] [blue]{Payload}[/blue] on ALL "
-      + "enemies when they go off";
-
-    /// <summary>Rule 3, `EB-361`. A Bomb whose enemy dies moves to a random
-    /// LIVING enemy at its size -- see <see cref="JumpCharges"/>, which is what
-    /// this sentence describes: every charge travels, Mines included, so the
-    /// word is "a survivor" and not "the next enemy". Printed on both branches,
-    /// because a Mine jumps exactly as a plain Bomb does.
-    ///
-    /// `EB-574` SAID WHICH KILL IT MEANS. "A kill moves them to a survivor" is
-    /// printed on the badge of the body the pile is about to kill, which is
-    /// exactly where it reads as a promise about THESE charges: the r21 lane-1
-    /// seat set off Mine 11, killed Toadpole B, saw nothing arrive on A and
-    /// filed the screen as contradicting itself. A charge that goes off is
-    /// spent; what travels is one still sitting on an enemy that dies to
-    /// something else. Same sentence as `ArmKeywordTips.ForBomb` and
-    /// `ForMine`, so no two of the three can be read against each
-    /// other.</summary>
-    private const string JumpSentence =
-        " If the enemy dies with them on, they move to a survivor.";
-
-    /// <summary>Rule 7 on a pile with no Mine in it. A pile holding a Mine
-    /// prints <see cref="MineClause"/> INSTEAD, because "none goes off by
-    /// itself" over a pile that answers the enemy's next attack is the exact
-    /// contradiction <c>EB-260</c> was filed on.</summary>
-    private const string NoSelfSentence = " None goes off by itself.";
-
-    /// <summary>
-    /// EB-260, EB-287 and `EB-343`, the selector.
-    /// <c>PowerModel.SmartDescription</c> resolves this key on EVERY read of
-    /// <c>HoverTips</c>, so the face follows the pile AND the enemy under it:
-    /// the moment a Mine lands here the printed text gains rule 6's sentence
-    /// and the moment the last one fires it loses it again, and the total
-    /// names each of the enemy's modifiers exactly while that modifier is
-    /// moving it. Rows and a key, rather than conditionals inside one row,
-    /// because a headless pin can read a row and cannot run <c>LocManager</c>
-    /// (KleeTests README, "The headless boundary").
+    /// The selector. <c>PowerModel.SmartDescription</c> resolves this key on
+    /// EVERY read of <c>HoverTips</c>, so the face follows the pile and the
+    /// enemy under it.
     /// </summary>
     protected override string SmartDescriptionLocKey =>
         Id.Entry + "."
-      + SmartKey(_charges.Count == 1, MineCount > 0, PayloadTotal > 0,
-                 LiveMods);
+      + SmartKey(SparksOnSetOff() > 0, MineCount > 0, PayloadTotal > 0,
+                 LiveReaction);
 
     /// <summary>The loc suffix <see cref="Title"/> selects when the pile is all
     /// Mines. `title` is the base game's own suffix and BaseLib registers every
@@ -587,8 +258,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// pile is one badge and one number; naming it `Mine` while a plain Bomb
     /// sits in it would print a timing rule over a charge that does not have
     /// one. A MIXED pile keeps `Bomb` and discloses its Mines where it always
-    /// has -- <see cref="BombsWithMines"/>'s "including {Mines} Mines", the
-    /// fuse mark -- and rule 6's sentence rides beside it either way, because
+    /// has -- <see cref="MinesClause"/>'s "including {Mines} Mines", the
+    /// fuse mark -- and the Mine count rides beside it either way, because
     /// <see cref="SmartDescriptionLocKey"/> switches on <c>MineCount > 0</c>
     /// and not on this.
     ///
@@ -610,175 +281,49 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     public bool TitledAsMine => MineCount > 0 && MineCount == _charges.Count;
 
     /// <summary>
-    /// WHICH OF THE TARGET'S MODIFIERS THE PRINTED TOTAL HAS FOLDED IN, right
-    /// now. EB-287's half, widened by R248 from "Weak, and Vulnerable in
-    /// silence" to every term the number passed through.
-    ///
-    /// The guards are <see cref="PredictedSetOffDamage"/>'s own, in its own
-    /// order and for its own reasons: an empty pile prints 0 and no modifier
-    /// touches it, and a canonical (compendium) copy prints the stored
-    /// <c>TotalSize</c> because <see cref="PowerModel.Owner"/>'s getter
-    /// asserts mutability -- and <c>HasSmartDescription</c> reads this key
-    /// BEFORE the mutability check that gates the smart face, so the read has
-    /// to survive one.
-    ///
-    /// <c>Applier</c> IS NO LONGER CONSULTED, and that is the rule: a Bomb is
-    /// the enemy's burden, so nothing about Klee is in this number to name.
+    /// `EB-721`. The amplifying reaction the FIRST charge will cause, read off
+    /// the target's aura alone -- the term <see cref="PredictedSetOffDamage"/>
+    /// folds into <c>{Size}</c>. An empty pile or a canonical (compendium)
+    /// copy answers none: <see cref="PowerModel.Owner"/>'s getter asserts
+    /// mutability, and <c>HasSmartDescription</c> reads the key before the
+    /// mutability check that gates the smart face.
     /// </summary>
-    private FoldedMods LiveMods
+    private ReactionKind LiveReaction
     {
         get
         {
-            if (_charges.Count == 0 || !IsMutable) return FoldedMods.None;
+            if (_charges.Count == 0 || !IsMutable) return ReactionKind.None;
             var target = Owner;
-            return target == null ? FoldedMods.None : FoldedMods.For(target);
-        }
-    }
-
-    /// <summary>
-    /// The modifiers one Set off here passes through, as a value the face and
-    /// the selector both read. `EB-343`.
-    ///
-    /// TWO AXES AND NOT A LIST, because the printed sentence is a sentence:
-    /// Vulnerable multiplies and a cap clamps, in that order, and the clause
-    /// below reads in that order too.
-    ///
-    /// PRESENCE, NOT EFFECT. A modifier is named while it is ON the enemy and
-    /// applies to this hit -- not only when it happened to change the total.
-    /// "Name what the number went through" is a rule a player can check against
-    /// the enemy's own badges; "name what moved it" would make the sentence
-    /// blink out on the boards where two modifiers happen to cancel, which is
-    /// exactly when a player most wants to know both are there.
-    /// </summary>
-    private readonly record struct FoldedMods(bool Vulnerable, CapKind Cap,
-                                              ReactionKind Reaction)
-    {
-        internal static readonly FoldedMods None =
-            new(false, CapKind.None, ReactionKind.None);
-
-        /// <summary>Every combination the selector can produce, so
-        /// <see cref="Localization"/> can emit a row for each.</summary>
-        internal static IEnumerable<FoldedMods> All =>
-            from vulnerable in new[] { false, true }
-            from cap in new[] { CapKind.None, CapKind.HardToKill,
-                                CapKind.Intangible, CapKind.Other }
-            from reaction in new[] { ReactionKind.None, ReactionKind.Vaporize,
-                                     ReactionKind.Melt }
-            select new FoldedMods(vulnerable, cap, reaction);
-
-        /// <summary>What is standing on <paramref name="target"/> right now.
-        /// The Vulnerable read is <c>SimDamagePipeline.TargetMods</c>' own, and
-        /// the cap is whichever power SET the minimum
-        /// <c>SimDamagePipeline.TargetCap</c> returns -- found by the same scan,
-        /// so the named power is the one whose number the face is printing.
-        /// </summary>
-        internal static FoldedMods For(Creature target)
-        {
-            var vulnerable =
-                (target.Powers.OfType<VulnerablePower>()
-                    .FirstOrDefault()?.Amount ?? 0) > 0;
-
-            var best = decimal.MaxValue;
-            var cap = CapKind.None;
-            foreach (var power in target.Powers)
-            {
-                var one = power.ModifyDamageCap(
-                    target, ValueProp.Unpowered, dealer: null,
-                    cardSource: null, cardPlay: null);
-                if (one >= best) continue;
-                best = one;
-                cap = power switch
-                {
-                    IntangiblePower => CapKind.Intangible,
-                    HardToKillPower => CapKind.HardToKill,
-                    _ => CapKind.Other,
-                };
-            }
-            // `EB-721`: AND THE REACTION THE FIRST CHARGE WILL CAUSE. It is
-            // already folded into the printed total (`EB-559`) and was the one
-            // term with no clause naming it, which is why `Bomb 18` stood next
-            // to `sizes, oldest first: 12` and the two disagreed. Read off the
-            // AURA alone, which is this struct own presence-not-effect rule:
-            // Pyro amplifies over Hydro and over Cryo and nothing else, so an
-            // Electro or Anemo body reacts without multiplying and is not
-            // named here.
-            var aura = AuraCmd.Find(target);
-            var reaction = aura?.Element switch
+            if (target == null) return ReactionKind.None;
+            return AuraCmd.Find(target)?.Element switch
             {
                 Elements.Element.Hydro => ReactionKind.Vaporize,
                 Elements.Element.Cryo => ReactionKind.Melt,
                 _ => ReactionKind.None,
             };
-
-            return new FoldedMods(vulnerable, cap, reaction);
-        }
-
-        internal string KeySuffix =>
-            (Vulnerable ? "Vulnerable" : string.Empty) + Cap switch
-            {
-                CapKind.HardToKill => "HardToKill",
-                CapKind.Intangible => "Intangible",
-                CapKind.Other => "Capped",
-                _ => string.Empty,
-            }
-            // `EB-721`'s axis, LAST so every key that existed before this row
-            // keeps the name it had -- `EB-573`'s discipline one axis over.
-            + Reaction switch
-            {
-                ReactionKind.Vaporize => "Vaporize",
-                ReactionKind.Melt => "Melt",
-                _ => string.Empty,
-            };
-
-        /// <summary>The clause that goes after <see cref="PyroTotal"/>, empty
-        /// on an unmodified enemy, and in PIPELINE ORDER: Vulnerable
-        /// multiplies, then the cap clamps, so the sentence reads that way
-        /// too.</summary>
-        internal string Clause
-        {
-            get
-            {
-                var capped = Cap switch
-                {
-                    CapKind.HardToKill => HardToKillClause,
-                    CapKind.Intangible => IntangibleClause,
-                    CapKind.Other => UnnamedCapClause,
-                    _ => string.Empty,
-                };
-                var rest = !Vulnerable
-                    ? capped
-                    : VulnerableClause
-                      + (capped.Length > 0 ? "," + capped : string.Empty);
-                // `EB-721`: FIRST, because it is first in the pipeline. The
-                // amplifier rides the leading charge
-                // (`PredictedSetOffDamage`), then the target own Vulnerable
-                // multiplies, then a cap clamps -- and this sentence has read
-                // in pipeline order since `EB-343`.
-                var amplified = Reaction switch
-                {
-                    ReactionKind.Vaporize => VaporizeClause,
-                    ReactionKind.Melt => MeltClause,
-                    _ => string.Empty,
-                };
-                if (amplified.Length == 0) return rest;
-                return amplified
-                     + (rest.Length > 0 ? "," + rest : string.Empty);
-            }
         }
     }
 
     /// <summary>
-    /// Which power is doing the capping, because the face has to say its name.
-    ///
-    /// The 0.111.0 decompile carries exactly two <c>ModifyDamageCap</c>
-    /// overrides -- <c>HardToKillPower</c> (Exoskeleton) and
-    /// <c>IntangiblePower</c> (Soul Fysh, Test Subject, Nemesis) -- and
-    /// <see cref="CapKind.Other"/> is for a cap this build does not know about.
-    /// It is not dead weight and it is not a guess: an unrecognised cap would
-    /// otherwise be folded into the printed number in SILENCE, which is the
-    /// exact defect R248 is fixing, so it gets a clause that claims no name.
+    /// What a Set off here gives in Sparks: one per explosion
+    /// (<see cref="KleeOverhaulLaw.SparkPerExplosion"/>) for each relic of the
+    /// placer's that pays per explosion -- Pounding Surprise, or Dodoco Tales
+    /// once Touch of Orobas has upgraded it. PURE, and 0 on a canonical copy,
+    /// an empty pile, or a pile whose placer holds neither relic (a Companion
+    /// card can plant one for another character), which is exactly when the
+    /// face should say nothing about Sparks. `EB-666`: the face says "gives",
+    /// never "for", because "for N" reads as a price.
     /// </summary>
-    private enum CapKind { None, HardToKill, Intangible, Other }
+    public int SparksOnSetOff()
+    {
+        if (_charges.Count == 0 || !IsMutable || !KleeOverhaul.Enabled) return 0;
+        var player = Applier?.Player;
+        if (player == null) return 0;
+        var payers = player.Relics.Count(
+            r => r is global::KleeMod.Relics.PoundingSurprise
+                 or global::KleeMod.Relics.ExplosiveFrags);
+        return _charges.Count * KleeOverhaulLaw.SparkPerExplosion * payers;
+    }
 
     /// <summary>The amplifying reaction the leading charge will cause, or
     /// none. `EB-721`; see <see cref="VaporizeClause"/> for why the list is
@@ -896,7 +441,28 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             new ChargeListVar(),
             // `EB-573`: the rider the merge keeps, summed over the pile.
             new DynamicVar("Payload", 0m),
+            // Text pass 2026-09-25: the Sparks a Set off here gives, read
+            // live like `{Size}` (a relic can change under a pile that has
+            // not moved).
+            new SparksVar(),
         };
+
+    /// <summary><c>{Sparks}</c>, read live off <see cref="SparksOnSetOff"/>
+    /// at format time, the <see cref="SetOffDamageVar"/> construction.</summary>
+    private sealed class SparksVar : DynamicVar
+    {
+        public SparksVar() : base("Sparks", 0m)
+        {
+        }
+
+        private int Live =>
+            (_owner as ProtoBombPower)?.SparksOnSetOff() ?? (int)BaseValue;
+
+        protected override decimal GetBaseValueForIConvertible() => Live;
+
+        public override string ToString() =>
+            Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
 
     /// <summary>
     /// <c>{Charges}</c>, the pile's sizes in the order they will go off

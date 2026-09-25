@@ -269,10 +269,10 @@ public static class KleeMod
                     // the duration clause replaced by the reason there is none.
                     ["KLEEMOD-APPLIES_ANEMO.title"] = "Applies Anemo",
                     ["KLEEMOD-APPLIES_ANEMO.description"] =
-                        "Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. No aura: nothing happens. [gold]Anemo[/gold] never stays on a body.",
+                        "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Anemo[/gold] never stays on an enemy.",
                     ["KLEEMOD-APPLIES_GEO.title"] = "Applies Geo",
                     ["KLEEMOD-APPLIES_GEO.description"] =
-                        "Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. No aura: nothing happens. [gold]Geo[/gold] never stays on a body.",
+                        "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",
                     ["KLEEMOD-BOMB.title"] = "Bomb",
                     // R249 pick 2(a): the SHIPPED Bomb keeps "detonates"
                     // until the overhaul replaces this kit.
@@ -289,7 +289,7 @@ public static class KleeMod
                         "[gold]Pyro[/gold] meets [gold]Cryo[/gold]: this hit deals 1.75x damage and consumes the aura.",
                     ["KLEEMOD-OVERLOAD_PREVIEW.title"] = "Reaction preview: Overloaded",
                     ["KLEEMOD-OVERLOAD_PREVIEW.description"] =
-                        $"[gold]Pyro[/gold] meets [gold]Electro[/gold]: [blue]{Elements.ReactionConstants.OverloadSplash}[/blue] damage to ALL enemies and [blue]{Elements.ReactionConstants.OverloadWeak}[/blue] [gold]Weak[/gold] on the reacted enemy.",
+                        $"[gold]Pyro[/gold] meets [gold]Electro[/gold]: deals [blue]{Elements.ReactionConstants.OverloadSplash}[/blue] damage to ALL enemies and applies [blue]{Elements.ReactionConstants.OverloadWeak}[/blue] [gold]Weak[/gold] to the reacted enemy.",
                     ["KLEEMOD-SUPERCONDUCT_PREVIEW.title"] = "Reaction preview: Superconduct",
                     // `EB-472`. THE ORDER, because this is the one reaction whose debuff
                     // changes the number of the hit that caused it. `ElementalHit.Deal`
@@ -311,18 +311,19 @@ public static class KleeMod
                     // enemy's panel prints `Poison 4` while this sentence said
                     // only "loses 4 HP": the seat read a preview and a body
                     // that named two different things and could not tell which
-                    // number was which. The tick clause stays, because it is
-                    // what the reader is pricing and the glossary keeps it in
-                    // the same words. The comment sits ABOVE the key, for
+                    // number was which. Text pass 2026-09-25: the tick clause
+                    // left, because Poison's own tip (attached beside this one
+                    // by `KleeCardTooltips.ForCard`) says how Poison ticks.
+                    // The comment sits ABOVE the key, for
                     // `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] [gold]Poison[/gold], losing that much HP at the start of its turn, 1 less each turn.",
+                        $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] [gold]Poison[/gold].",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals half damage, and until it acts the first Attack to hit it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] damage.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Until it acts, the next Attack on it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
-                        $"Bosses cannot be Frozen. [gold]Hydro[/gold] plus [gold]Cryo[/gold] is consumed and applies [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: bosses can't be Frozen, so it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
                     ["KLEEMOD-SWIRL_PREVIEW.description"] =
                         "[gold]Anemo[/gold] meets an aura: the aura is consumed and copied onto ALL enemies.",
@@ -336,13 +337,12 @@ public static class KleeMod
                     // run 3, under the heading "element ordering is the
                     // deepest decision this deck has, and it is entirely
                     // undocumented"). The old sentence named the consumption
-                    // in a trailing subclause behind a gain; this one leads
-                    // with the price and says what the price BUYS a reader
-                    // nothing -- there is no aura left to react with. The
-                    // comment sits ABOVE the key, for `gen_keyword_loc.py`'s
-                    // reader.
+                    // in a trailing subclause behind a gain. Text pass
+                    // 2026-09-25: two short sentences, the gain and then the
+                    // price, each with its own verb. The comment sits ABOVE
+                    // the key, for `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-CRYSTALLIZE_PREVIEW.description"] =
-                        $"[gold]Geo[/gold] meets an aura: [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold], and the aura is consumed -- nothing is left to react with.",
+                        $"[gold]Geo[/gold] meets an aura: gain [blue]{Elements.ReactionConstants.CrystallizeBlock}[/blue] [gold]Block[/gold]. The aura is consumed.",
 
                     // `EB-160`. THE ONE PLAYER-FACING STRING BAKED INTO A
                     // SCENE. `shared/turn_end_docket.tscn`'s header node

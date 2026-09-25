@@ -37,7 +37,7 @@ public sealed class EagerToHelp : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Eager to Help"),
-        ("description", "If you have [gold]Spark[/gold]: draw {Cards:diff()} card{Cards:plural:|s}. Otherwise: draw {DrawElse:diff()} card{DrawElse:plural:|s}."),
+        ("description", "If you have [gold]Spark[/gold], draw {Cards:diff()} card{Cards:plural:|s}. Otherwise, draw {DrawElse:diff()} card{DrawElse:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

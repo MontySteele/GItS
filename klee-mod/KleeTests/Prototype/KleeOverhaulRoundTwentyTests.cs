@@ -94,39 +94,6 @@ public class KleeOverhaulRoundTwentyTests
 
     // ---- `EB-555`: the cap is defined where it is used -------------------
 
-    [Fact]
-    public void The_bomb_tip_defines_the_cap_it_names()
-    {
-        // "The Bomb keyword says twice that only Vulnerable and a cap move it,
-        // and no screen I saw ever explained what a cap is. I verified the
-        // Vulnerable half; the other half is a term with no definition
-        // anywhere in the text I was shown" (Klee r20 lane 1, (c) 2).
-        //
-        // A DEFINING PHRASE AND NOT A SENTENCE, and it names whose HP it is:
-        // a cap limits the HP the ENEMY can lose, which is what `FoldedMods`
-        // reads off the target, and saying so also rules out the reading that
-        // a cap might be something of Klee's.
-        //
-        // TRIMMED 2026-09-08: "the HP cap" is the same definition in fewer
-        // words -- it is still the ENEMY's HP the term is about, because the
-        // sentence's whole subject is what moves the charge on that enemy.
-        var bomb = Printed("ForBomb");
-        Assert.Contains("and the HP cap move it.", bomb);
-    }
-
-    [Fact]
-    public void The_mine_tip_keeps_its_own_clause_unchanged()
-    {
-        // ONE DEFINITION PER PAGE, not one per clause. The Mine tip is at 133
-        // of its 135-character ceiling and prints directly under the Bomb tip;
-        // a Mine IS a Bomb, so the term is defined on the screen either way.
-        // `EB-400` added Block to this clause; the cap half is untouched.
-        Assert.Contains("[gold]Vulnerable[/gold] and the HP cap move it.",
-                        Printed("ForMine"));
-        Assert.Contains("[gold]Block[/gold] stops it. Only ",
-                        Printed("ForMine"));
-    }
-
     // ---- `EB-536` (widened): the pile's numbers are sizes -----------------
 
     [Fact]
@@ -143,34 +110,29 @@ public class KleeOverhaulRoundTwentyTests
         {
             Assert.DoesNotContain("Bombs here:", face);
         }
+        // Text pass 2026-09-25: the label is "Bombs here, oldest first:",
+        // and the list prints each charge under its ordinal (`EB-755`)
+        // wherever there are two or more, so it reads as sizes.
         Assert.Contains(faces,
             f => f.Contains(
-                "Bomb sizes here, oldest first: [blue]{Charges}[/blue]"));
+                "Bombs here, oldest first: [blue]{Charges}[/blue]"));
     }
 
     [Fact]
     public void A_single_charge_block_still_prints_no_hit_clause()
     {
-        // `EB-514`'s clause, cut off the one-charge faces by `EB-536` and
-        // pinned here beside the label it shares a row with: on a pile of one
-        // the total IS the hit, so "in 1 hit for 1 Spark" spends a sentence
-        // restating a number the reader already has. The axis is in the KEY --
-        // `SmartKey` writes "One" into it for the single-charge faces -- so
-        // this reads the pair rather than guessing from the body.
+        // `EB-514`'s hit clause ("in N hits, making N Sparks") left every
+        // face in the text pass of 2026-09-25: the headline now says what a
+        // Set off GIVES in Sparks, and only where it gives any.
         var rows = Faces(new ProtoBombPower());
         Assert.NotEmpty(rows);
         foreach (var (key, body) in rows)
         {
-            if (!key.StartsWith("smartDescription", StringComparison.Ordinal))
-            {
-                continue;
-            }
-            var single = key.StartsWith("smartDescriptionOne",
-                                        StringComparison.Ordinal);
-            // `EB-666` reworded the clause to "in N hits, making N Sparks":
-            // "for N" is how a COST is spelled and both r24 seats priced a
-            // Set off off it. The grid split this pin is about is unchanged.
-            Assert.Equal(!single, body.Contains("hits, making"));
+            Assert.DoesNotContain("hits, making", body);
+            Assert.DoesNotContain("{Count}", body);
+            Assert.Equal(key.StartsWith("smartDescriptionSparks",
+                                        StringComparison.Ordinal),
+                         body.Contains(" and gives [blue]{Sparks}[/blue]"));
         }
     }
 

@@ -42,7 +42,7 @@ public sealed class ProtoKoReturnToSender : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Return to Sender"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. This turn, damage this [gold]Block[/gold] absorbs is placed on the attacker as a [gold]Bomb[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. This turn, damage that [gold]Block[/gold] absorbs becomes a [gold]Bomb[/gold] on the attacker."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

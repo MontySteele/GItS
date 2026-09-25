@@ -45,7 +45,7 @@ public sealed class WarmupAct : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stage Combat"),
-        ("description", "Deal {Damage:diff()} damage. If an enemy intends to attack: gain 3 [gold]Block[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If an enemy intends to attack, gain 3 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

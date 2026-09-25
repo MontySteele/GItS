@@ -51,7 +51,7 @@ public sealed class TakeItFromTheTop : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Take It From the Top"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you moved the [gold]Spotlight[/gold] this turn: deal {IfUpgraded:show:14|10} damage."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you moved the [gold]Spotlight[/gold] this turn, deal {IfUpgraded:show:14|10} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

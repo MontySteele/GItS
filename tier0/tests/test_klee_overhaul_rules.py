@@ -1365,7 +1365,7 @@ def test_eb534_the_face_says_the_merged_pile_is_still_a_mine(overhaul):
     sheet = yaml.safe_load((repo / "docs" / "prototype-surface.yaml")
                            .read_text(encoding="utf-8"))
     row = next(r for r in sheet if r["id"] == "proto_ko_careful_arrangement")
-    assert "[gold]Mine[/gold] if any of them was" in row["description"]
+    assert "is a [gold]Mine[/gold] if any of them were" in row["description"]
 
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])

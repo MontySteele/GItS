@@ -409,8 +409,8 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
           + "[blue]{Amount}[/blue] [gold]Block[/gold] and [blue]"
           + KleeOverhaulLaw.GroundedSpark + "[/blue] [gold]Spark[/gold]."),
         ("smartDescriptionUnpaid",
-            "You played a [gold]Set off[/gold] card last turn, so nothing was "
-          + "paid. It pays at the start of the turn after a quiet one."),
+            "You played a [gold]Set off[/gold] card last turn, so no "
+          + "[gold]Block[/gold] or [gold]Spark[/gold] this turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -547,8 +547,8 @@ public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
         ("title", "Vermillion Pact"),
         ("description",
             "Whenever one of your [gold]Bombs[/gold] triggers an "
-          + "[gold]Elemental Reaction[/gold], the Attack that set it off "
-          + "triggers one too."),
+          + "[gold]Elemental Reaction[/gold], the Attack that "
+          + "[gold]Set it off[/gold] triggers one too."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -643,12 +643,15 @@ public sealed class ReturnToSenderPower : PowerModel, ILocalizationProvider
         // finding on Thoma's twin, and this power is that construction:
         // `PowerModel.HoverTips` binds `DynamicVars` on the SMART branch alone,
         // so a token written here would reach the screen as a placeholder.
+        // Text pass 2026-09-25: active voice, one sentence. The smart face
+        // keeps its live `{Left}` ahead of it, the number the rider pays on.
         ("description",
-            "Marks your [gold]Block[/gold]. Damage it absorbs is placed on "
-          + "the attacker as a [gold]Bomb[/gold]."),
+            "This turn, damage your [gold]Block[/gold] absorbs becomes a "
+          + "[gold]Bomb[/gold] on the attacker."),
         ("smartDescription",
-            "[blue]{Left}[/blue] [gold]Block[/gold] left. Damage it absorbs "
-          + "is placed on the attacker as a [gold]Bomb[/gold]."),
+            "[blue]{Left}[/blue] [gold]Block[/gold] left. This turn, damage "
+          + "your [gold]Block[/gold] absorbs becomes a [gold]Bomb[/gold] on "
+          + "the attacker."),
     };
 
     public override PowerType Type => PowerType.Buff;

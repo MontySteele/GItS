@@ -67,11 +67,11 @@ public class Round19Tests
         // the other five seats' edge cases ("the existing text is often very
         // verbose and unintuitive"): the tip was 292 rendered characters
         // against a 135 ceiling. The RULE did not move -- the pin below still
-        // reads it off the carry-out's call -- and Set off keeps its own
-        // sentence, where the word is a Bomb's.
+        // reads it off the carry-out's call. The Set off tip dropped its copy
+        // in the same pass (Klee's half of it).
         Assert.DoesNotContain("when-hit", PlanTip());
-        Assert.Contains("no when-hit power fires",
-                        Printed(typeof(ArmKeywordTips), "ForSetOff"));
+        Assert.DoesNotContain("when-hit",
+                              Printed(typeof(ArmKeywordTips), "ForSetOff"));
         var rendered = PlanTip()
             .Replace("[gold]", string.Empty).Replace("[/gold]", string.Empty);
         Assert.True(rendered.Length <= 135, rendered.Length.ToString());
@@ -148,7 +148,8 @@ public class Round19Tests
         var rows = new GroundedPower().Localization!
             .ToDictionary(r => r.Item1, r => r.Item2);
 
-        Assert.Contains("nothing was paid", rows["smartDescriptionUnpaid"]);
+        Assert.Contains("so no [gold]Block[/gold] or [gold]Spark[/gold] this "
+                        + "turn", rows["smartDescriptionUnpaid"]);
         // `EB-749`: the answer names the CARD the player played, not a board.
         Assert.Contains("[gold]Set off[/gold]",
                         rows["smartDescriptionUnpaid"]);
@@ -240,7 +241,7 @@ public class Round19Tests
             Il.Method("ProtoKoCarefulArrangement", "get_Localization")));
 
         Assert.Contains("as one [gold]Bomb[/gold]", face);
-        Assert.Contains("[gold]Mine[/gold] if any of them was", face);
+        Assert.Contains("[gold]Mine[/gold] if any of them were", face);
     }
 
     [Fact]
@@ -334,40 +335,14 @@ public class Round19Tests
                                     Seat.Klee().Creature,
                                     new ProtoBombs.Charge(7));
         var face = pile.Localization!
-            .First(r => r.Item1 == "smartDescriptionOne").Item2;
+            .First(r => r.Item1 == "smartDescription").Item2;
 
         Assert.DoesNotContain("{Count}", face);
         Assert.DoesNotContain("hit", face);
-        // The rest of the face is untouched: the total, the queue and rule 3.
         Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
-                      + "Pyro damage.", face);
-        // `EB-450` put the ORDER in the label, and the label is what
-        // this pin reads.
-        Assert.Contains("Bomb sizes here, oldest first: [blue]{Charges}[/blue]",
+                      + "[gold]Pyro[/gold] damage.", face);
+        Assert.Contains("Bombs here, oldest first: [blue]{Charges}[/blue]",
                         face);
-    }
-
-    [Fact]
-    public void A_stack_still_names_its_hits_and_names_its_sparks()
-    {
-        var pile = ProtoBombs.Place(Seat.Klee(60).Creature,
-                                    Seat.Klee().Creature,
-                                    new ProtoBombs.Charge(4),
-                                    new ProtoBombs.Charge(3));
-        var face = pile.Localization!
-            .First(r => r.Item1 == "smartDescription").Item2;
-
-        // THE SPARK COUNT IS A NUMBER AGAIN. "For as many Sparks" asked the
-        // reader to carry the hit count across a clause; the number carries
-        // itself, and the plural is fixed because this face is only ever
-        // chosen for two charges or more.
-        // `EB-666` (r24) fixed the DIRECTION on top of that: "for N Sparks"
-        // is how a cost is spelled and both r24 seats priced a Set off off it,
-        // so the clause says "making".
-        Assert.Contains("in [blue]{Count}[/blue] hits, making [blue]{Count}[/blue] "
-                      + "[gold]Sparks[/gold].", face);
-        Assert.DoesNotContain("as many", face);
-        Assert.DoesNotContain("plural", face);
     }
 
     [Fact]
@@ -385,7 +360,7 @@ public class Round19Tests
 
         Assert.EndsWith(".smartDescriptionMines", LocKey(pile));
         pile.TakeMines();
-        Assert.EndsWith(".smartDescriptionOne", LocKey(pile));
+        Assert.EndsWith(".smartDescription", LocKey(pile));
     }
 
     [Fact]
@@ -394,11 +369,11 @@ public class Round19Tests
         var bomb = Printed(typeof(ArmKeywordTips), "ForBomb");
         var mine = Printed(typeof(ArmKeywordTips), "ForMine");
 
-        // The Bomb tip names the second door, so the Mine tip is not a
-        // correction to it any more.
-        Assert.Contains("and goes off when [gold]Set off[/gold] or as a "
-                      + "[gold]Mine[/gold]", bomb);
-        Assert.Contains("also goes off just before its enemy's hit", mine);
+        // The Bomb tip no longer says a Bomb goes off ONLY when Set off, so
+        // the Mine tip's "also" is not a correction to it (text pass
+        // 2026-09-25).
+        Assert.DoesNotContain("only", bomb);
+        Assert.Contains("also goes off just before its enemy attacks", mine);
     }
 
 

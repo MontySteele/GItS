@@ -48,7 +48,7 @@ public sealed class ProtoKoWindblumeFireworks : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Windblume Fireworks"),
-        ("description", "[gold]Set off[/gold] ALL enemies. Deal {Damage:diff()} damage to ALL enemies. Place a [gold]Bomb[/gold] {BombSize:diff()} on ALL enemies."),
+        ("description", "[gold]Set off[/gold] ALL enemies, deal {Damage:diff()} damage to them, and place a [gold]Bomb[/gold] {BombSize:diff()} on each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

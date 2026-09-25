@@ -42,7 +42,7 @@ public sealed class ProtoKoPatienceKlee : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Patience, Klee!"),
-        ("description", "At the end of your turn, if you played no [gold]Set off[/gold] card this turn, your largest [gold]Bomb[/gold] grows by {PowerAmount:diff()}."),
+        ("description", "At the end of your turn, if you played no [gold]Set off[/gold] card, your largest [gold]Bomb[/gold] grows by {PowerAmount:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -219,22 +219,13 @@ public class Round13Tests
 
         // `EB-450` put the ORDER in the label, and the label is what
         // this pin reads.
-        Assert.Contains("Bomb sizes here, oldest first: [blue]{Charges}[/blue]",
+        Assert.Contains("Bombs here, oldest first: [blue]{Charges}[/blue]",
                         plain);
-        Assert.Contains("Bomb sizes here, oldest first: [blue]{Charges}[/blue]",
+        Assert.Contains("Bombs here, oldest first: [blue]{Charges}[/blue]",
                         mined);
-        // `EB-514`: the count is not in THIS sentence -- the list still says
-        // it more plainly here -- and it is in the HEADLINE, where the seat
-        // reads the number it plans against. Two number groups in one
-        // sentence is what this pin was written against; two sentences each
-        // saying their own thing is what it now reads.
-        Assert.DoesNotContain("[blue]{Charges}[/blue], [blue]{Count}[/blue]",
-                              plain);
-        // `EB-536` spelled the Sparks out and dropped the plural: this is
-        // the MANY-charge half of the grid, so the clause is here and it is
-        // never printed for one.
-        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits", plain);
-        Assert.Contains("Pyro damage, in [blue]{Count}[/blue] hits", mined);
+        // The list is the count: no second number group beside it.
+        Assert.DoesNotContain("{Count}", plain);
+        Assert.DoesNotContain("{Count}", mined);
     }
 
     // ==================================================================

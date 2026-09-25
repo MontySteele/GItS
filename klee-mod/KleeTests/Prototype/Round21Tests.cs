@@ -135,10 +135,11 @@ public class Round21Tests
         var card = Source("Cards/Furina/Generated/CourtroomDrama.cs");
         var power = Source("Powers/CurtainCallPowers.cs");
 
+        // Text pass 2026-09-25: the same order in plainer words, the
+        // Superconduct preview's shape.
         foreach (var surface in new[] { card, power })
         {
-            Assert.Contains("[gold]Vulnerable[/gold] moves that hit.",
-                            surface);
+            Assert.Contains("to its target before the hit lands.", surface);
         }
     }
 
@@ -157,8 +158,7 @@ public class Round21Tests
                      "Your first [gold]Elemental Reaction[/gold] each turn ",
                      "[gold]Vulnerable[/gold] and ",
                      "[gold]Weak[/gold] ",
-                     "to its target. The [gold]Vulnerable[/gold] moves that "
-                   + "hit.",
+                     "to its target before the hit lands.",
                  })
         {
             Assert.Contains(clause, card);
