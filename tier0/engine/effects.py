@@ -14,7 +14,7 @@ from typing import Optional, Sequence
 
 from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei,
-                          companion_standins, furina_stage,
+                          companion_standins, coop, furina_stage,
                           klee_overhaul, kokomi_plan, powers, reactions,
                           resources, statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
@@ -1759,6 +1759,11 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
+    if fx.get("target") == coop.ALLY:
+        # THE CO-OP SET (Joint Orders): "Another player gains 6 Block." One
+        # seat, nobody to give it to -- see `engine/coop.py`.
+        coop.no_other_player(state, "block", card)
+        return
     raw = (_calc_amount(state, fx["amount_formula"], card)
            if "amount_formula" in fx else fx["amount"])
     # Same rider grammar damage already carries (F-B1): a defensive card may
@@ -2241,6 +2246,11 @@ def _bank_war_banner_grant(state: CombatState, card: Card) -> None:
 
 
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
+    if fx.get("target") == coop.ALLY:
+        # THE CO-OP SET (Pass the Match, Guest of Honor): a power placed ON
+        # another player. One seat, nobody to place it on -- `engine/coop.py`.
+        coop.no_other_player(state, "apply_power", card)
+        return
     cap = fx.get("max_stacks")
     # `never_reduces` (EB-26 D2, ruled 2026-08-10, option (d)): an opt-in apply
     # mode. The application raises the stack toward ITS OWN cap and never
@@ -5931,6 +5941,11 @@ def _op_block_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
+    if fx.get("target") == coop.ALLY:
+        # THE CO-OP SET (Hide Here!): the same read, paid to ANOTHER player.
+        # One seat, nobody to pay -- `engine/coop.py`.
+        coop.no_other_player(state, "block_largest_bomb", card)
+        return
     klee_overhaul.block_for_largest_bomb(state, int(fx["cap"]))
 
 
@@ -6363,6 +6378,16 @@ def _op_stage_perform_all(state: CombatState, fx: dict, card: Card) -> None:
     furina_stage.perform_all(state)
 
 
+def _op_stage_share_spotlight(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    """*Share the Spotlight* (the co-op set): "Your back performer gives all
+    its Fanfare to another player as Block, then takes a Bow." ANOTHER player
+    is the target, and the base game refuses the play with nobody else alive;
+    one seat, so nothing happens -- `engine/coop.py`. The C# is
+    `FurinaStage.ShareTheSpotlight`."""
+    coop.no_other_player(state, "stage_share_spotlight", card)
+
+
 def _op_stage_spend_back_all(state: CombatState, fx: dict,
                              card: Card) -> None:
     """*Bravura* (R276 batch two): spend all of the back performer's Fanfare;
@@ -6407,6 +6432,8 @@ OPS = {
     "stage_step_forward": _op_stage_step_forward,
     "stage_perform_all": _op_stage_perform_all,
     "stage_spend_back_all": _op_stage_spend_back_all,
+    # THE CO-OP SET (`engine/coop.py`): Share the Spotlight's verb.
+    "stage_share_spotlight": _op_stage_share_spotlight,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,
@@ -6552,6 +6579,9 @@ OPS = {
     "first_card_free": _op_kokomi_plan_only,
     "damage_if_unhurt": _op_kokomi_plan_only,
     "attack_damage_this_turn": _op_kokomi_plan_only,
+    # THE CO-OP SET's two Plan clauses about another player (`engine/coop.py`).
+    coop.ALLY_DRAW: _op_kokomi_plan_only,
+    coop.OTHERS_ATTACK_DAMAGE_THIS_TURN: _op_kokomi_plan_only,
     "block_front_intent": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),

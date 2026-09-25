@@ -2511,6 +2511,44 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
+    /// THE CO-OP SET, <i>Hide Here!</i>: "Another player gains Block equal to
+    /// your largest Bomb, up to 12." Careful Now's read (<see
+    /// cref="LargestBombBlock"/>, board-wide, nothing removed) paid to the
+    /// player the card was aimed at instead of to Klee. The play is attached,
+    /// so it is the CARD's Block and KLEE's Dexterity folds into it -- the
+    /// base game's Lift, which gives an ally Block through the same door.
+    /// </summary>
+    public static async Task<int> BlockAllyForLargestBomb(
+        PlayerChoiceContext choiceContext, Creature applier, int cap,
+        Creature? ally, CardPlay? cardPlay)
+    {
+        if (ally is not { IsAlive: true }) return 0;
+        var amount = LargestBombBlock(applier, cap);
+        if (amount <= 0) return 0;
+        await CreatureCmd.GainBlock(ally, amount, ValueProp.Move, cardPlay);
+        return amount;
+    }
+
+    /// <summary>The Block <see cref="BlockAllyForLargestBomb"/> pays: the
+    /// largest single charge <paramref name="applier"/> has on any living
+    /// enemy, capped at <paramref name="cap"/> -- <see
+    /// cref="BlockForLargestBomb"/>'s own walk, word for word. PURE, so a
+    /// headless pin can ask it.</summary>
+    public static int LargestBombBlock(Creature applier, int cap)
+    {
+        if (applier.CombatState == null || cap <= 0) return 0;
+
+        var largest = 0;
+        foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            var here = LargestPlacedBy(enemy, applier);
+            if (here > largest) largest = here;
+        }
+        return largest < cap ? largest : cap;
+    }
+
+    /// <summary>
     /// Stoke the Fuse (the round-11 pool pass): the SINGLE largest Bomb on the
     /// board grows by <paramref name="perSpark"/> for every Spark this card
     /// spent. Returns the growth applied, 0 if nothing grew.

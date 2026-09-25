@@ -27,6 +27,7 @@ import random
 
 import pytest
 
+from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects, furina_stage
 from tier0.engine.state import Card, CombatState, Enemy, Player
@@ -704,11 +705,18 @@ def test_every_stage_row_is_named_by_one_of_the_two_maps():
     """The sheet's `replaces:` key and the arm's maps, compared in BOTH
     directions, so a row nobody named is a red test rather than a card no
     surface ever deals."""
-    on_sheet = {r["id"]: r.get("replaces") for r in _proto_rows()}
+    on_sheet = {r["id"]: r.get("replaces") for r in _proto_rows()
+                if not r.get("multiplayer")}
     named = {**FS.POOL_SUBS, **FS.STARTER_SUBS}
     assert set(named.values()) == set(on_sheet)
     assert {p: s for s, p in named.items()} == on_sheet
     assert len(on_sheet) == 17 + 15      # batch one, and R276's batch two
+    # THE CO-OP SET's three are the MULTIPLAYER TIER: offered only in co-op,
+    # outside the pool, replacing no shipped row -- so neither map names
+    # them, and the tier's own mirror does.
+    tier = [r for r in _proto_rows() if r.get("multiplayer")]
+    assert [r["id"] for r in tier] == list(C.FURINA_STAGE_MULTIPLAYER_IDS)
+    assert not any(r.get("replaces") for r in tier)
 
 
 # ---------------------------------------------------------------------------

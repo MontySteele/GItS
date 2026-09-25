@@ -362,6 +362,11 @@ public class KokomiOverhaulRuleTests
         // and Tide Wall's `BlockFrontIntent`. `NextAttackDamage` and
         // `BlockPerPlanThisMorning` are KEPT with no row spelling them, the
         // `DrawPerPlanThisTurn` precedent above.
+        //
+        // TWENTY-FIVE SINCE THE CO-OP SET (review/records/coop-set-2026-09-25.md):
+        // Joint Orders' `AllyDraw`, the player captured when the Plan is
+        // written, and Coordinated Strike's `OthersAttackDamageThisTurn`,
+        // Battle Plan's clause mirrored onto every other player.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp", "DamagePerCompanionLastTurn",
@@ -372,7 +377,8 @@ public class KokomiOverhaulRuleTests
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
                     "NextAttackDamage", "FirstAttackTwice", "FirstCardFree",
                     "DamageIfUnhurt", "AttackDamageThisTurn",
-                    "BlockFrontIntent" },
+                    "BlockFrontIntent", "AllyDraw",
+                    "OthersAttackDamageThisTurn" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 

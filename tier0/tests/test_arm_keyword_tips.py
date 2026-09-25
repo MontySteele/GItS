@@ -1047,7 +1047,9 @@ DEFINED_BY_A_CARD_TIP = {
 # `Exhaust` conjugates and the glossary keys do not, so the past participle
 # resolves to the `Exhaust` row. Spelled here rather than guessed at by the
 # assertion, which compares whole names.
-CONJUGATIONS = {"Exhausted": "Exhaust"}
+CONJUGATIONS = {"Exhausted": "Exhaust",
+                # The co-op set: "their next Attack Sets off your Bombs".
+                "Sets off": "Set off"}
 
 
 def _word_owner(word: str) -> str:

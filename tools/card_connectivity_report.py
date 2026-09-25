@@ -483,6 +483,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "stage_step_forward": [_hook("private", "stage", "write")],
     "stage_perform_all": [_hook("private", "stage", "use")],
     "stage_spend_back_all": [_hook("private", "stage", "use")],
+    # THE CO-OP SET: Share the Spotlight takes the back bar away, a use.
+    "stage_share_spotlight": [_hook("private", "stage", "use")],
     "salon_bow": [_hook("private", "salon", "use")],
     # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a
     # write to the private board (which performer the FIFO end offers next)
@@ -627,6 +629,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "attack_damage_this_turn": [_hook("shared", "card_identity", "write")],
     "damage_if_unhurt": [_hook("shared", "hp_ledger", "read")],
     "block_front_intent": [],
+    # THE CO-OP SET: both land on ANOTHER player, whom this vocabulary has no
+    # state for -- EMPTY and disclosed, `remove_debuff`'s argument.
+    "ally_draw": [],
+    "others_attack_damage_this_turn": [],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

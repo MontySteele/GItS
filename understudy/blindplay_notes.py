@@ -1963,9 +1963,12 @@ _OFF_ARM_KEYWORD: dict[str, str] = {
 # capitalises a keyword wherever it prints one, and a case-blind `mine` or
 # `plan` would define a word out of ordinary prose. The plural is the same
 # word (`two Bombs`), and `Set Off` is accepted because a badge title-cases it.
+# `Sets off` is the verb with another subject -- the co-op set's Pass the Match
+# and Knights of Favonius ("their next Attack Sets off your Bombs"), the
+# codegen's second `Set off` token -- and it is the same word.
 _ARM_KEYWORD_RE = {
     "Bomb": re.compile(r"\bBombs?\b"),
-    "Set off": re.compile(r"\bSet [Oo]ffs?\b"),
+    "Set off": re.compile(r"\bSets? [Oo]ffs?\b"),
     "Spark": re.compile(r"\bSparks?\b"),
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),

@@ -3352,3 +3352,63 @@ element (`ElementalHit.DealUnelemented`; the sim's `element=None`) since
 **`proto_ko_alices_detonator`**: two Power twins, `AlicesDetonatorPower` and
 `AlicesDetonatorPlusPower`, installed by the card's upgrade; each adds one
 Ka-pow! (upgraded on the Plus twin) per stack after the turn's draw.
+
+## The co-op set (2026-09-25)
+
+Design: `review/records/coop-set-2026-09-25.md` ([USER], "Co-op interaction,
+pick 3a"). Nine rows, three per overhaul arm, each `multiplayer: true`: the
+codegen emits the base game's `CardMultiplayerConstraint.MultiplayerOnly`
+(Tank, Demonic Shield, Flanking, Sneaky), and `CardPoolModel.GetUnlockedCards`
+and `CardFactory.FilterForPlayerCount` keep them out of every single-player
+reward, shop and transform. Each arm offers them through its own
+multiplayer tier (`KleeOverhaulRoster.MultiplayerSlice`,
+`KokomiOverhaulRoster.MultiplayerSlice`, `FurinaStageRoster.MultiplayerRows`)
+beside its pool and outside its count; the sim mirrors are
+`C.*_MULTIPLAYER_IDS`, and `tools/lint_arm_pool_parity.py` holds sheet, mod
+and mirror together. "Another player" is `target: ally`, the base game's
+`TargetType.AnyAlly` (Lift, Believe In You); "each other player" is
+`CoopSet.OtherPlayers`, Rally's and Huddle Up's own walk. The runtime is
+`klee-mod/KleeCode/Powers/Prototype/CoopSet.cs`. Tier 0 seats one player, so
+the sim loads the rows and never deals them (`tier0/engine/coop.py`).
+
+**`proto_ko_pass_the_match`**: `PassTheMatchPower` goes ON the ally, placed by
+Klee. The ally's next Attack (one stack each) is watched from
+`BeforeCardPlayed` to `AfterCardPlayed`; every enemy it hits (the Attack as
+`cardSource` of `AfterDamageReceived`, fully blocked hits included) has
+Klee's Bombs set off after the play, through `ProtoBombPower.SetOff` with
+Klee as applier and no card source, so it is not a "Set off card". Gone at
+the end of the player turn. The face token for "Draw 1 card" is authored,
+because an authored face's draw number is never auto-tokenised.
+
+**`proto_ko_hide_here`**: Careful Now's read (`LargestBombBlock`) paid to the
+aimed player, `ValueProp.Move` with the play attached (Klee's Dexterity folds
+in, Lift's door).
+
+**`proto_ko_knights_of_favonius`**: `KnightsOfFavoniusPower` on Klee; every play
+of another player's Attack is watched the same way and sets off after it.
+
+**`proto_fs_guest_of_honor`**: `GuestOfHonorPower` goes ON the ally. Its
+`ModifyHpLostBeforeOsty` runs after the ally's Block and hands the rest to
+`FurinaStage.AbsorbHit` for Furina's lead (rule 6: no Bow on a hit-emptied
+lead, Rapt Audience fires); a hit a lethal Mine already answered
+(`ProtoBombPower.Preempted`) takes nothing off the lead. Attacks only. Gone at
+the next player turn start or when Furina dies.
+
+**`proto_fs_share_the_spotlight`**: `FurinaStage.ShareTheSpotlight` empties
+the back bar exactly, gives it to the aimed player as card Block, then Bows.
+
+**`proto_fs_people_of_fontaine`**: `PeopleOfFontainePower`, a bare
+`FurinaStage.Raise` on every play of another player's Attack.
+
+**`proto_kk_joint_orders`**: target `KokomiTargets.PetOrAlly`. On the ally, the
+now-line (Lift). On the Bake-Kurage, the Plan clause `AllyDraw`, whose player
+is captured at writing (`CoopSet.PlanAlly`) as a CombatId on
+`Planned.Targets`; a dead player draws nothing.
+
+**`proto_kk_coordinated_strike`**: the Plan clause
+`OthersAttackDamageThisTurn` puts Battle Plan's `AttackUpThisTurnPower` on
+every other living player at carry-out.
+
+**`proto_kk_sangonomiyas_counsel`**: `SangonomiyasCounselPower` on the Plan bus,
+every Plan, `ValueProp.Unpowered` Block to each other player (SneakyPower's
+shape).

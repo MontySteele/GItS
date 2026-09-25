@@ -180,8 +180,26 @@ public static class FurinaStageRoster
                 // Rares (two).
                 ModelDb.Card<ProtoFsArkheAlignment>(),
                 ModelDb.Card<ProtoFsFiveCenturyAct>(),
-            });
+            })
+            .Concat(MultiplayerRows());
     }
+
+    /// <summary>
+    /// THE MULTIPLAYER TIER (the co-op set, review/records/coop-set-2026-09-25.md):
+    /// three cards offered only in co-op, outside the pool's count, on
+    /// <c>KleeOverhaulRoster.MultiplayerSlice</c>'s terms -- each declares
+    /// <c>CardMultiplayerConstraint.MultiplayerOnly</c>, and
+    /// <c>CardPoolModel.GetUnlockedCards</c> drops it from a one-player run.
+    /// A method of its own so the arm's substitution table above, and every
+    /// pin that reads it, is untouched. They replace no shipped row. Sim
+    /// mirror: <c>C.FURINA_STAGE_MULTIPLAYER_IDS</c>.
+    /// </summary>
+    public static IEnumerable<CardModel> MultiplayerRows() => new CardModel[]
+    {
+        ModelDb.Card<ProtoFsGuestOfHonor>(),
+        ModelDb.Card<ProtoFsShareTheSpotlight>(),
+        ModelDb.Card<ProtoFsPeopleOfFontaine>(),
+    };
 
     /// <summary>
     /// `EB-736`. THE WORDS A SHIPPED ROW PRINTS WHEN IT READS A SYSTEM THE

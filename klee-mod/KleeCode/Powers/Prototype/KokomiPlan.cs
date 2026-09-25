@@ -187,6 +187,22 @@ public static class KokomiPlan
         DamageIfUnhurt,
         AttackDamageThisTurn,
         BlockFrontIntent,
+        // THE CO-OP SET (review/records/coop-set-2026-09-25.md), two clauses
+        // about ANOTHER player, and a one-seat fight has none:
+        //   Joint Orders: "Plan: They draw 2 cards." THEY is the player the
+        //     Plan was written for, captured by <see cref="Schedule"/> onto
+        //     <see cref="Planned.Targets"/> as a CombatId and found again at
+        //     carry-out; a player who is dead by then draws nothing.
+        //   Coordinated Strike: "Plan: Next turn, each other player's Attacks
+        //     deal 3 additional damage." Battle Plan's
+        //     <see cref="AttackDamageThisTurn"/> mirrored onto every OTHER
+        //     living player: the shipped <c>AttackUpThisTurnPower</c> on
+        //     each, removed at the end of the player turn it was carried out
+        //     on -- which in simultaneous co-op is their turn too.
+        // Sim twins: `kokomi_plan`, `ally_draw` and
+        // `others_attack_damage_this_turn`, both inert with one seat.
+        AllyDraw,
+        OthersAttackDamageThisTurn,
     }
 
     /// <summary>
@@ -960,6 +976,26 @@ public static class KokomiPlan
                 }
             }
             label = AimedLabel(source, caught);
+        }
+        // THE CO-OP SET, JOINT ORDERS: "Plan: They draw 2 cards" remembers
+        // the player it is for, and it is fixed HERE, when the Plan is
+        // written -- Flank's discipline one clause over: an id and not a
+        // creature, found again on the live board at carry-out. See
+        // <see cref="CoopSet.PlanAlly"/> for which player that is when the
+        // card was played on the Bake-Kurage.
+        if (body.Any(c => c.Kind == Kind.AllyDraw))
+        {
+            var ally = CoopSet.PlanAlly(kokomi);
+            var ids = ally == null
+                ? new List<string>()
+                : new List<string> { ally.CombatId.ToString() };
+            for (var i = 0; i < body.Count; i++)
+            {
+                if (body[i].Kind == Kind.AllyDraw)
+                {
+                    body[i] = body[i] with { Targets = ids };
+                }
+            }
         }
         var entry = new Entry(source, body, label, dusk);
         int before = queue.Count;
@@ -2203,6 +2239,41 @@ public static class KokomiPlan
                     cardSource: null);
                 return null;
 
+            case Kind.AllyDraw:
+            {
+                // THE CO-OP SET, JOINT ORDERS: the player captured when the
+                // Plan was written, if they are still alive; otherwise
+                // nothing. The base game's own door for a draw on ANOTHER
+                // seat (Huddle Up), so the other player's draw cannot block
+                // this one's turn.
+                if (CoopSet.PlanAllyFor(kokomi, plan) is not { Player: { } them })
+                {
+                    return null;
+                }
+                if (entry?.Source is { } writer)
+                {
+                    await CardPileCmd.DrawWithoutBlockingOnOtherPlayers(
+                        choiceContext, plan.Amount, them, writer);
+                }
+                else
+                {
+                    await CardPileCmd.Draw(choiceContext, plan.Amount, them);
+                }
+                return plan.Amount;
+            }
+
+            case Kind.OthersAttackDamageThisTurn:
+                // THE CO-OP SET, COORDINATED STRIKE: Battle Plan's power on
+                // every OTHER living player, applied by her. No number on the
+                // beat, Battle Plan's own shape.
+                foreach (var other in CoopSet.OtherPlayers(kokomi))
+                {
+                    await PowerCmd.Apply<AttackUpThisTurnPower>(
+                        choiceContext, other, plan.Amount, applier: kokomi,
+                        cardSource: null);
+                }
+                return null;
+
             case Kind.BlockFrontIntent:
                 // R276, TIDE WALL. POWERED, the flat planned Block's funnel.
                 // The front enemy's intent is read NOW, at carry-out, after
@@ -2335,6 +2406,8 @@ public static class KokomiPlan
     private static string? NumberKind(Kind kind) => kind switch
     {
         Kind.Draw => "cards drawn",
+        // THE CO-OP SET: the cards the OTHER player drew.
+        Kind.AllyDraw => "cards drawn",
         Kind.Energy => "Energy",
         Kind.Block or Kind.BlockPerPlanThisMorning
             or Kind.BlockPerPlanHeld => "Block",

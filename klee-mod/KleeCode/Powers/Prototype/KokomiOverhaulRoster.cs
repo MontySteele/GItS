@@ -138,7 +138,22 @@ internal static class KokomiOverhaulRoster
     /// costs the arm's "her only reward pool" nothing.
     /// </summary>
     internal static IEnumerable<CardModel> OfferablePool() =>
-        Slice().Concat(RosterAncientCards.Kokomi);
+        Slice().Concat(RosterAncientCards.Kokomi).Concat(MultiplayerSlice());
+
+    /// <summary>
+    /// THE MULTIPLAYER TIER (the co-op set): three cards offered only in
+    /// co-op, outside the slice's count, on
+    /// <c>KleeOverhaulRoster.MultiplayerSlice</c>'s terms -- each declares
+    /// <c>CardMultiplayerConstraint.MultiplayerOnly</c>, and
+    /// <c>GetUnlockedCards</c> drops it from a one-player run. Sim mirror:
+    /// <c>C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS</c>.
+    /// </summary>
+    private static CardModel[] MultiplayerSlice() => new CardModel[]
+    {
+        ModelDb.Card<ProtoKkJointOrders>(),
+        ModelDb.Card<ProtoKkCoordinatedStrike>(),
+        ModelDb.Card<ProtoKkSangonomiyasCounsel>(),
+    };
 
     /// <summary>The slice's own 34 rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. THIRTY-FOUR since The Moon Overlooks

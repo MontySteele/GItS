@@ -269,8 +269,11 @@ def test_the_arm_carries_exactly_three_rule_numbers():
     assert C.KOKOMI_OVERHAUL_RALLY_DISCOUNT == 1
     assert C.KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS == 4
     named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
+    # `KOKOMI_OVERHAUL_MULTIPLAYER_IDS` is the co-op set's offer list, an id
+    # list like the two beside it and not a rule number.
     assert named == {"KOKOMI_OVERHAUL", "KOKOMI_OVERHAUL_POOL_IDS",
                      "KOKOMI_OVERHAUL_STARTER_IDS",
+                     "KOKOMI_OVERHAUL_MULTIPLAYER_IDS",
                      "KOKOMI_OVERHAUL_CASKET_STRIKE",
                      "KOKOMI_OVERHAUL_RALLY_DISCOUNT",
                      "KOKOMI_OVERHAUL_BATTLE_PLAN_BONUS"}

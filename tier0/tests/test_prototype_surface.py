@@ -977,8 +977,12 @@ def test_every_kokomi_row_declares_the_target_type_the_slice_states():
             return False
 
         aims_at_enemy = _aims(row.get("effects"))
+        # THE CO-OP SET: a now-line aimed at ANOTHER PLAYER (Joint Orders).
+        aims_at_ally = any(fx.get("target") == "ally"
+                           for fx in row.get("effects") or [])
         expected = ("KokomiTargets.PetOnly" if not row.get("effects")
                     else "KokomiTargets.PetOrEnemy" if aims_at_enemy
+                    else "KokomiTargets.PetOrAlly" if aims_at_ally
                     else "KokomiTargets.PetOrSelf")
         assert expected in source, (
             f"{row['id']} should declare {expected}")

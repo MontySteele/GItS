@@ -290,18 +290,43 @@ public static class KokomiTargets
     public static TargetType PetOrSelf => CustomTargetType.PetOrSelf;
 
     /// <summary>
+    /// "Another player or the Bake-Kurage" -- THE CO-OP SET's one new
+    /// spelling (Joint Orders, review/records/coop-set-2026-09-25.md). A
+    /// row whose now-line aims at ANOTHER PLAYER (the base game's
+    /// <c>TargetType.AnyAlly</c>: a living player who is not you) and whose
+    /// Plan line is written on the jellyfish. The ally half is
+    /// <c>NTargetManager</c>'s own <c>AnyAlly</c> clause word for word; the
+    /// pet half is <see cref="PetOrEnemy"/>'s.
+    /// </summary>
+    [CustomEnum(null)]
+    public static TargetType PetOrAlly;
+
+    /// <summary>
     /// The predicate. Deliberately the UNION of the library's two rather than a
     /// re-derivation: an enemy is anything alive on the other side, and the pet
     /// half is <c>CustomTargetType.Pet</c>'s own clause word for word.
     /// </summary>
     public static void Register()
     {
-        if (CustomTargetType.IsCustomSingleTargetType(PetOrEnemy)) return;
-        CustomTargetType.RegisterSingleTargetType(
-            PetOrEnemy,
-            (Creature target, Player player) =>
-                (target.IsAlive && target.IsEnemy)
-                || (target.IsAlive && target.IsPet && target.PetOwner == player));
+        if (!CustomTargetType.IsCustomSingleTargetType(PetOrEnemy))
+        {
+            CustomTargetType.RegisterSingleTargetType(
+                PetOrEnemy,
+                (Creature target, Player player) =>
+                    (target.IsAlive && target.IsEnemy)
+                    || (target.IsAlive && target.IsPet
+                        && target.PetOwner == player));
+        }
+        if (!CustomTargetType.IsCustomSingleTargetType(PetOrAlly))
+        {
+            CustomTargetType.RegisterSingleTargetType(
+                PetOrAlly,
+                (Creature target, Player player) =>
+                    (target.IsAlive && target.IsPlayer
+                     && target.Player != player)
+                    || (target.IsAlive && target.IsPet
+                        && target.PetOwner == player));
+        }
     }
 }
 
@@ -390,6 +415,13 @@ internal static class AutoPlayNeverAimsAtThePetPatch
                 candidates = combat.HittableEnemies
                     .Where(c => c != null && c.IsAlive && !BakeKuragePet.Is(c))
                     .ToList();
+            }
+            else if (card.TargetType == KokomiTargets.PetOrAlly)
+            {
+                // THE CO-OP SET: an auto-played Joint Orders goes to another
+                // player, the base game's own AnyAlly roll
+                // (`CardCmd.AutoPlay`), and never writes a Plan.
+                candidates = CoopSet.OtherPlayers(owner.Creature).ToList();
             }
             else if (card.TargetType == KokomiTargets.PetOrSelf)
             {

@@ -207,7 +207,31 @@ internal static class KleeOverhaulRoster
     /// `tools/lint_ancient_coverage.py` gates both.
     /// </summary>
     internal static IReadOnlyList<CardModel> OfferablePool() =>
-        Slice().Concat(RosterAncientCards.Klee).ToList();
+        Slice().Concat(RosterAncientCards.Klee).Concat(MultiplayerSlice())
+            .ToList();
+
+    /// <summary>
+    /// THE MULTIPLAYER TIER (the co-op set, review/records/coop-set-2026-09-25.md):
+    /// three cards the game offers only in co-op, OUTSIDE the slice's count --
+    /// "78 standard cards plus Ancients plus multiplayer cards".
+    ///
+    /// OFFERED THROUGH THE SAME DOOR, and the base game is what keeps them out
+    /// of a single-player run: each declares
+    /// <c>CardMultiplayerConstraint.MultiplayerOnly</c>, and
+    /// <c>CardPoolModel.GetUnlockedCards</c> removes that constraint from this
+    /// list whenever the run has one player -- the rule that keeps Tank and
+    /// Sneaky out of a solo Ironclad or Silent run. A method of its own so the
+    /// slice's count, its pins and the sim's mirror
+    /// (<c>C.KLEE_OVERHAUL_POOL_IDS</c>) do not move; the tier's own mirror is
+    /// <c>C.KLEE_OVERHAUL_MULTIPLAYER_IDS</c>, and
+    /// <c>tools/lint_arm_pool_parity.py</c> holds all three to the sheet.
+    /// </summary>
+    private static CardModel[] MultiplayerSlice() => new CardModel[]
+    {
+        ModelDb.Card<ProtoKoPassTheMatch>(),
+        ModelDb.Card<ProtoKoHideHere>(),
+        ModelDb.Card<ProtoKoKnightsOfFavonius>(),
+    };
 
     /// <summary>The slice's own rows, without the Ancient tail
     /// <see cref="OfferablePool"/> adds. Separate so the count the sim mirrors
