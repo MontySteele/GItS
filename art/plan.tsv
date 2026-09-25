@@ -1984,6 +1984,35 @@ proto_fs_step_forward	ImageGen/images/cards/furina/proto_fs_step_forward.png	500
 proto_fs_thunderous_applause	ImageGen/images/cards/furina/proto_fs_thunderous_applause.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	FCFH Applause and Cheer.png		sticker	
 # proto_fs_tutti <- salon_debut: all three Salon Members in one frame -- everyone plays at once
 proto_fs_tutti	ImageGen/images/cards/furina/proto_fs_tutti.png	500	380	cover	center	shortlist	1	png	Salon Members Summon.png		tcg	
+# ---------- Co-op set 2026-09-25: the nine multiplayer-only cards ----------
+# Each card reaches another player, so each face shows the character WITH
+# someone: Klee with Jean, Albedo and her friends, Furina with
+# Neuvillette and her Salon, Kokomi with Gorou and the Watatsumi troops. Eight
+# are new fetches worn by no other row; Seville Fair 2024 is also
+# universal_revelry's unpicked rank-3 candidate (whole frame), so guest_of_honor
+# takes a pushed-in crop. Blank source_group keeps strict L1 (Kokomi rows take
+# kokomi_pool like every proto_kk row).
+# -- Klee --
+# proto_ko_pass_the_match <- NEW: Klee sets Dodoco down before Albedo, a campfire lit behind them -- handing a Knight her bomb and the light
+proto_ko_pass_the_match	ImageGen/images/cards/klee/proto_ko_pass_the_match.png	500	380	cover	y0.52	shortlist	1	png	Albedo Birthday 2022 - Shorts.png		splash	
+# proto_ko_hide_here <- NEW: Klee, Razor, the Traveler and Paimon crammed into a hollow log out of the rain -- room for one more
+proto_ko_hide_here	ImageGen/images/cards/klee/proto_ko_hide_here.png	500	380	cover	x0.42,y0.66@1.25	shortlist	1	png	Razor Birthday 2021 - Shorts.png		splash	
+# proto_ko_knights_of_favonius <- NEW: Klee running to keep up with Jean, Acting Grand Master, across a Mondstadt square (Mika and Rosaria in the background) -- Klee among the Knights
+proto_ko_knights_of_favonius	ImageGen/images/cards/klee/proto_ko_knights_of_favonius.png	500	380	cover	y0.54	shortlist	1	png	Jean Birthday 2025 - Shorts.png		splash	
+# -- Furina --
+# proto_fs_guest_of_honor <- NEW: Furina in the fair's parade carriage with the Usher at her shoulder, Neuvillette leading her through the crowd
+proto_fs_guest_of_honor	ImageGen/images/cards/furina/proto_fs_guest_of_honor.png	500	380	cover	x0.40,y0.50@1.15	shortlist	1	png	Seville Fair 2024.png		splash	
+# proto_fs_share_the_spotlight <- NEW: two spotlights, one stage -- Furina below, Neuvillette above her in the 4.2 wallpaper
+proto_fs_share_the_spotlight	ImageGen/images/cards/furina/proto_fs_share_the_spotlight.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 1.jpg		splash	
+# proto_fs_people_of_fontaine <- NEW: Furina leading Fontaine's cast -- Neuvillette, Navia, Lyney and the rest behind her
+proto_fs_people_of_fontaine	ImageGen/images/cards/furina/proto_fs_people_of_fontaine.png	500	380	cover	x0.44	shortlist	1	png	Version 4.0 Wallpaper 1.png		splash	
+# -- Kokomi --
+# proto_kk_joint_orders <- NEW: Gorou and Kokomi side by side on a Watatsumi balcony at sunrise, Gorou turning to wave the others in -- two commanders, one order
+proto_kk_joint_orders	ImageGen/images/cards/kokomi/proto_kk_joint_orders.png	500	380	cover	center	shortlist	1	png	New Year 2025 JP.png		splash	kokomi_pool
+# proto_kk_coordinated_strike <- NEW: Gorou and Kokomi together, her water-fish streaming past them both
+proto_kk_coordinated_strike	ImageGen/images/cards/kokomi/proto_kk_coordinated_strike.png	500	380	cover	center	shortlist	1	png	Bilibili 12M Followers.jpg		splash	kokomi_pool
+# proto_kk_sangonomiyas_counsel <- NEW: Gorou and two Watatsumi soldiers gathered round Kokomi, listening
+proto_kk_sangonomiyas_counsel	ImageGen/images/cards/kokomi/proto_kk_sangonomiyas_counsel.png	500	380	cover	y0.52	shortlist	1	png	Sangonomiya Kokomi Birthday 2023 - Shorts.png		splash	kokomi_pool
 # ---------- EB-776: the Stage arm's opening relic ----------
 # Salon Solitaire draws nothing because nothing was ever planned for
 # res://furina/relics/salon_solitaire.png (EB-776, PR #584: the C# wiring and
